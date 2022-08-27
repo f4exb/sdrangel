@@ -77,6 +77,7 @@ private:
 	void displayTime();
 	void sendSettings();
     void updateSampleRateAndFrequency();
+    void checkLPF();
 	void configureFileName();
 	void updateWithAcquisition();
 	void updateWithStreamData();

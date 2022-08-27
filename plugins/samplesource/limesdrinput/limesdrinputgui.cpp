@@ -189,6 +189,16 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (LimeSDRInput::MsgCalibrationResult::match(message))
+    {
+        LimeSDRInput::MsgCalibrationResult& report = (LimeSDRInput::MsgCalibrationResult&) message;
+
+        if (report.getSuccess()) {
+            ui->calibrationLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        } else {
+            ui->calibrationLabel->setStyleSheet("QLabel { background-color : red; }");
+        }
+    }
     else if (LimeSDRInput::MsgReportStreamInfo::match(message))
     {
         LimeSDRInput::MsgReportStreamInfo& report = (LimeSDRInput::MsgReportStreamInfo&) message;
@@ -322,6 +332,32 @@ void LimeSDRInputGUI::updateSampleRateAndFrequency()
     m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     displaySampleRate();
+    checkLPF();
+}
+
+// Check if LPF BW is set wide enough when up-converting using NCO
+void LimeSDRInputGUI::checkLPF()
+{
+    bool highlightLPFLabel = false;
+    int64_t centerFrequency = m_settings.m_centerFrequency;
+    if (m_settings.m_ncoEnable) {
+        centerFrequency += m_settings.m_ncoFrequency;
+    }
+    if (centerFrequency < 30000000)
+    {
+        int64_t requiredBW = 30000000 - centerFrequency;
+        highlightLPFLabel = m_settings.m_lpfBW < requiredBW;
+    }
+    if (highlightLPFLabel)
+    {
+        ui->lpfLabel->setStyleSheet("QLabel { background-color : red; }");
+        ui->lpfLabel->setToolTip("LPF BW is too low for selected center frequency");
+    }
+    else
+    {
+        ui->lpfLabel->setStyleSheet("QLabel { background-color: rgb(64, 64, 64); }");
+        ui->lpfLabel->setToolTip("");
+    }
 }
 
 void LimeSDRInputGUI::displaySampleRate()
@@ -619,6 +655,7 @@ void LimeSDRInputGUI::on_swDecim_currentIndexChanged(int index)
 void LimeSDRInputGUI::on_lpf_changed(quint64 value)
 {
     m_settings.m_lpfBW = value * 1000;
+    checkLPF();
     sendSettings();
 }
 

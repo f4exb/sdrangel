@@ -184,6 +184,25 @@ public:
         { }
     };
 
+    class MsgCalibrationResult : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getSuccess() const { return m_success; }
+
+        static MsgCalibrationResult* create(bool success) {
+            return new MsgCalibrationResult(success);
+        }
+
+    protected:
+        bool m_success;
+
+        MsgCalibrationResult(bool success) :
+            Message(),
+            m_success(success)
+        { }
+    };
+
     LimeSDRInput(DeviceAPI *deviceAPI);
     virtual ~LimeSDRInput();
     virtual void destroy();

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>209</height>
+    <height>230</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>360</width>
-    <height>209</height>
+    <height>230</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -832,6 +832,19 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="calibrationLabel">
+       <property name="toolTip">
+        <string>Red if calibration failed (check log for error)</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background:rgb(79,79,79);</string>
+       </property>
+       <property name="text">
+        <string>C</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="streamLinkRateText">
        <property name="minimumSize">
         <size>
@@ -935,12 +948,6 @@ QToolTip{background-color: white; color: black;}</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ValueDial</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
@@ -949,6 +956,12 @@ QToolTip{background-color: white; color: black;}</string>
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
