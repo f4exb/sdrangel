@@ -212,5 +212,11 @@ protected:
 
 private:
     void renumerateChannels();
+
+private slots:
+    void engineStateChanged();
+
+signals:
+    void stateChanged(DeviceAPI *deviceAPI);
 };
 #endif // SDRBASE_DEVICE_DEVICEAPI_H_

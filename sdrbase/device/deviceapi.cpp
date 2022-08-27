@@ -51,6 +51,15 @@ DeviceAPI::DeviceAPI(
     m_deviceSinkEngine(deviceSinkEngine),
     m_deviceMIMOEngine(deviceMIMOEngine)
 {
+    if (m_deviceSourceEngine) {
+        QObject::connect(m_deviceSourceEngine, &DSPDeviceSourceEngine::stateChanged, this, &DeviceAPI::engineStateChanged);
+    }
+    if (m_deviceSinkEngine) {
+        QObject::connect(m_deviceSinkEngine, &DSPDeviceSinkEngine::stateChanged, this, &DeviceAPI::engineStateChanged);
+    }
+    if (m_deviceMIMOEngine) {
+        QObject::connect(m_deviceMIMOEngine, &DSPDeviceMIMOEngine::stateChanged, this, &DeviceAPI::engineStateChanged);
+    }
 }
 
 DeviceAPI::~DeviceAPI()
@@ -825,4 +834,9 @@ void DeviceAPI::setDeviceSetIndex(int deviceSetIndex)
 {
     m_deviceTabIndex = deviceSetIndex;
     renumerateChannels();
+}
+
+void DeviceAPI::engineStateChanged()
+{
+    emit stateChanged(this);
 }

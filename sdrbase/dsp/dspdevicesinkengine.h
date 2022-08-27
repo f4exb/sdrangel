@@ -113,6 +113,7 @@ private:
 	State gotoInit();     //!< Go to the acquisition init state from idle
 	State gotoRunning();  //!< Go to the running state from ready state
 	State gotoError(const QString& errorMsg); //!< Go to an error state
+	void setState(State state);
 
 	void handleSetSink(DeviceSampleSink* sink); //!< Manage sink setting
 
@@ -120,6 +121,9 @@ private slots:
 	void handleData(); //!< Handle data when samples have to be written to the sample FIFO
 	void handleInputMessages(); //!< Handle input message queue
 	void handleSynchronousMessages(); //!< Handle synchronous messages with the thread
+
+signals:
+	void stateChanged();
 };
 
 

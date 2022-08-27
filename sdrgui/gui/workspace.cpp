@@ -34,8 +34,10 @@
 #include "channel/channelgui.h"
 #include "feature/featuregui.h"
 #include "device/devicegui.h"
+#include "device/deviceset.h"
 #include "mainspectrum/mainspectrumgui.h"
 #include "workspace.h"
+#include "maincore.h"
 
 Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     QDockWidget(parent, flags),
@@ -79,6 +81,11 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_addMIMODeviceButton->setIcon(addMIMOIcon);
     m_addMIMODeviceButton->setToolTip("Add MIMO device");
     m_addMIMODeviceButton->setFixedSize(20, 20);
+
+    m_startStopButton = new ButtonSwitch();
+    m_startStopButton->setCheckable(true);
+    updateStartStopButton(false);
+    m_startStopButton->setFixedSize(20, 20);
 
     m_vline1 = new QFrame();
     m_vline1->setFrameShape(QFrame::VLine);
@@ -142,6 +149,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_titleBarLayout->addWidget(m_addRxDeviceButton);
     m_titleBarLayout->addWidget(m_addTxDeviceButton);
     m_titleBarLayout->addWidget(m_addMIMODeviceButton);
+    m_titleBarLayout->addWidget(m_startStopButton);
     m_titleBarLayout->addWidget(m_vline1);
     m_titleBarLayout->addWidget(m_addFeatureButton);
     m_titleBarLayout->addWidget(m_featurePresetsButton);
@@ -212,6 +220,13 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     );
 
     QObject::connect(
+        m_startStopButton,
+        &ButtonSwitch::clicked,
+        this,
+        &Workspace::startStopClicked
+    );
+
+    QObject::connect(
         m_autoStackSubWindows,
         &QPushButton::clicked,
         this,
@@ -234,6 +249,13 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         &Workspace::addFeatureEmitted
     );
 
+    QObject::connect(
+        MainCore::instance(),
+        &MainCore::deviceStateChanged,
+        this,
+        &Workspace::deviceStateChanged
+    );
+
 }
 
 Workspace::~Workspace()
@@ -247,6 +269,7 @@ Workspace::~Workspace()
     delete m_cascadeSubWindows;
     delete m_vline2;
     delete m_vline1;
+    delete m_startStopButton;
     delete m_addRxDeviceButton;
     delete m_addTxDeviceButton;
     delete m_addMIMODeviceButton;
@@ -598,9 +621,63 @@ void Workspace::stackSubWindows()
 
 void Workspace::autoStackSubWindows()
 {
-    // FIXME: Need to save whether this is checked as a preference
     if (m_autoStackSubWindows->isChecked()) {
         stackSubWindows();
+    }
+}
+
+// Start/stop all devices in workspace
+void Workspace::startStopClicked(bool checked)
+{
+    if (!checked) {
+        emit stopAllDevices(this);
+    } else {
+        emit startAllDevices(this);
+    }
+    updateStartStopButton(checked);
+}
+
+void Workspace::updateStartStopButton(bool checked)
+{
+    if (!checked)
+    {
+        QIcon startIcon(":/play.png");
+        m_startStopButton->setIcon(startIcon);
+        m_startStopButton->setStyleSheet("QToolButton { background-color : blue; }");
+        m_startStopButton->setToolTip("Start all devices in workspace");
+    }
+    else
+    {
+        QIcon stopIcon(":/stop.png");
+        m_startStopButton->setIcon(stopIcon);
+        m_startStopButton->setStyleSheet("QToolButton { background-color : green; }");
+        m_startStopButton->setToolTip("Stop all devices in workspace");
+    }
+}
+
+void Workspace::deviceStateChanged(int index, DeviceAPI *deviceAPI)
+{
+    if (deviceAPI->getWorkspaceIndex() == m_index)
+    {
+        // Check state of all devices in workspace, to see if any are running or have errors
+        bool running = false;
+        bool error = false;
+        std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
+        for (auto deviceSet : deviceSets)
+        {
+            DeviceAPI::EngineState state = deviceSet->m_deviceAPI->state();
+            if (state == DeviceAPI::StRunning) {
+                running = true;
+            } else if (state == DeviceAPI::StError) {
+                error = true;
+            }
+        }
+        // Update start/stop button to reflect current state of devices
+        updateStartStopButton(running);
+        m_startStopButton->setChecked(running);
+        if (error) {
+            m_startStopButton->setStyleSheet("QToolButton { background-color : red; }");
+        }
     }
 }
 

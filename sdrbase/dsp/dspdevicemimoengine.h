@@ -350,6 +350,8 @@ private:
 	State gotoInit(int subsystemIndex);     //!< Go to the acquisition init state from idle
 	State gotoRunning(int subsystemIndex);  //!< Go to the running state from ready state
 	State gotoError(int subsystemIndex, const QString& errorMsg); //!< Go to an error state
+	void setStateRx(State state);
+	void setStateTx(State state);
 
     void handleSetMIMO(DeviceSampleMIMO* mimo); //!< Manage MIMO device setting
    	void iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, int isource, bool imbalanceCorrection);
@@ -361,6 +363,9 @@ private slots:
 	void handleDataTxAsync(int streamIndex); //!< Handle data when Tx samples have to be processed asynchronously
 	void handleSynchronousMessages();  //!< Handle synchronous messages with the thread
 	void handleInputMessages();        //!< Handle input message queue
+
+signals:
+	void stateChanged();
 };
 
 #endif // SDRBASE_DSP_DSPDEVICEMIMOENGINE_H_

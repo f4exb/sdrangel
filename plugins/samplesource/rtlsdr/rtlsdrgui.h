@@ -58,12 +58,10 @@ private:
 	RTLSDRSettings m_settings;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
 	QTimer m_updateTimer;
-	QTimer m_statusTimer;
 	std::vector<int> m_gains;
 	RTLSDRInput* m_sampleSource;
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
-	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
 
 	void displayGains();
