@@ -73,6 +73,7 @@ private:
     void setCenterFrequencySetting(uint64_t kHzValue);
     void sendSettings();
     void updateSampleRateAndFrequency();
+    void checkLPF();
     void updateDACRate();
     void updateFrequencyLimits();
     void blockApplySettings(bool block);

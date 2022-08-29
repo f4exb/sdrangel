@@ -45,6 +45,7 @@ MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgCalibrationResult, Message)
 
 LimeSDRInput::LimeSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -1227,18 +1228,19 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (doCalibration)
         {
-            double bw = std::min((double)m_settings.m_devSampleRate, 2500000.0); // Min supported calibration bandwidth is 2.5MHz
-            if (LMS_Calibrate(m_deviceShared.m_deviceParams->getDevice(),
+            double bw = std::max((double)m_settings.m_devSampleRate, 2500000.0); // Min supported calibration bandwidth is 2.5MHz
+            bool calibrationOK = LMS_Calibrate(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
                     m_deviceShared.m_channel,
                     bw,
-                    0) != 0)
-            {
+                    0) == 0;
+            if (!calibrationOK) {
                 qCritical("LimeSDRInput::applySettings: calibration failed on Rx channel %d", m_deviceShared.m_channel);
-            }
-            else
-            {
+            } else {
                 qDebug("LimeSDRInput::applySettings: calibration successful on Rx channel %d", m_deviceShared.m_channel);
+            }
+            if (m_guiMessageQueue) {
+                m_guiMessageQueue->push(MsgCalibrationResult::create(calibrationOK));
             }
         }
 

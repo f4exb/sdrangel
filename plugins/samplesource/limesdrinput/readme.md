@@ -195,6 +195,7 @@ This label turns green when status can be obtained from the current stream. Usua
   - **U**: turns red if stream experiences underruns
   - **O**: turns red if stream experiences overruns
   - **P**: turns red if stream experiences packet drop outs
+  - **C**: turns red if calibration fails
 
 <h3>12: Stream global (all Rx) throughput in MB/s</h3>
 

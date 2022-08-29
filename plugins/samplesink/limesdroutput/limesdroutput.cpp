@@ -41,6 +41,7 @@
 
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgConfigureLimeSDR, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgCalibrationResult, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDROutput::MsgReportStreamInfo, Message)
@@ -1066,18 +1067,19 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
 
         if (doCalibration)
         {
-            double bw = std::min((double)m_settings.m_devSampleRate, 2500000.0); // Min supported calibration bandwidth is 2.5MHz
-            if (LMS_Calibrate(m_deviceShared.m_deviceParams->getDevice(),
-                    LMS_CH_TX,
-                    m_deviceShared.m_channel,
-                    bw,
-                    0) != 0)
-            {
+            double bw = std::max((double)m_settings.m_devSampleRate, 2500000.0); // Min supported calibration bandwidth is 2.5MHz
+            bool calibrationOK = LMS_Calibrate(m_deviceShared.m_deviceParams->getDevice(),
+                                                LMS_CH_TX,
+                                                m_deviceShared.m_channel,
+                                                bw,
+                                                0) == 0;
+            if (!calibrationOK) {
                 qCritical("LimeSDROutput::applySettings: calibration failed on Tx channel %d", m_deviceShared.m_channel);
-            }
-            else
-            {
+            } else {
                 qDebug("LimeSDROutput::applySettings: calibration successful on Tx channel %d", m_deviceShared.m_channel);
+            }
+            if (m_guiMessageQueue) {
+                m_guiMessageQueue->push(MsgCalibrationResult::create(calibrationOK));
             }
         }
 
