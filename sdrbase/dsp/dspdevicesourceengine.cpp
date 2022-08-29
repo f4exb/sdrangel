@@ -55,10 +55,19 @@ DSPDeviceSourceEngine::~DSPDeviceSourceEngine()
     wait();
 }
 
+void DSPDeviceSourceEngine::setState(State state)
+{
+    if (m_state != state)
+    {
+        m_state = state;
+        emit stateChanged();
+    }
+}
+
 void DSPDeviceSourceEngine::run()
 {
 	qDebug() << "DSPDeviceSourceEngine::run";
-	m_state = StIdle;
+	setState(StIdle);
     exec();
 }
 
@@ -72,7 +81,7 @@ void DSPDeviceSourceEngine::stop()
 {
 	qDebug() << "DSPDeviceSourceEngine::stop";
     gotoIdle();
-    m_state = StNotStarted;
+    setState(StNotStarted);
 	QThread::exit();
 //	DSPExit cmd;
 //	m_syncMessenger.sendWait(cmd);
@@ -508,7 +517,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoError(const QString& err
 
 	m_errorMessage = errorMessage;
 	m_deviceDescription.clear();
-	m_state = StError;
+	setState(StError);
 	return StError;
 }
 
@@ -549,21 +558,21 @@ void DSPDeviceSourceEngine::handleSynchronousMessages()
 
 	if (DSPAcquisitionInit::match(*message))
 	{
-		m_state = gotoIdle();
+		setState(gotoIdle());
 
 		if(m_state == StIdle) {
-			m_state = gotoInit(); // State goes ready if init is performed
+			setState(gotoInit()); // State goes ready if init is performed
 		}
 	}
 	else if (DSPAcquisitionStart::match(*message))
 	{
 		if(m_state == StReady) {
-			m_state = gotoRunning();
+			setState(gotoRunning());
 		}
 	}
 	else if (DSPAcquisitionStop::match(*message))
 	{
-		m_state = gotoIdle();
+		setState(gotoIdle());
 	}
 	else if (DSPGetSourceDeviceDescription::match(*message))
 	{

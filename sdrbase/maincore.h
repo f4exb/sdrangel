@@ -886,6 +886,7 @@ public:
 signals:
     void deviceSetAdded(int index, DeviceAPI *device);
     void deviceChanged(int index);
+    void deviceStateChanged(int index, DeviceAPI *device);
     void deviceSetRemoved(int index);
     void channelAdded(int deviceSetIndex, ChannelAPI *channel);
     void channelRemoved(int deviceSetIndex, ChannelAPI *oldChannel);

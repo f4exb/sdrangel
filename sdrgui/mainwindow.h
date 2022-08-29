@@ -203,7 +203,10 @@ private slots:
     void channelAddClicked(Workspace *workspace, int deviceSetIndex, int channelPluginIndex);
     void featureAddClicked(Workspace *workspace, int featureIndex);
     void featureMove(FeatureGUI *gui, int wsIndexDestnation);
+    void deviceStateChanged(DeviceAPI *deviceAPI);
     void openFeaturePresetsDialog(QPoint p, Workspace *workspace);
+    void startAllDevices(Workspace *workspace);
+    void stopAllDevices(Workspace *workspace);
     void deviceMove(DeviceGUI *gui, int wsIndexDestnation);
     void mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation);
     void mainSpectrumShow(int deviceSetIndex);

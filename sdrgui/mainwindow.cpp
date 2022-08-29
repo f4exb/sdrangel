@@ -43,6 +43,7 @@
 #include "device/deviceenumerator.h"
 #include "channel/channelapi.h"
 #include "channel/channelgui.h"
+#include "channel/channelwebapiutils.h"
 #include "feature/featureuiset.h"
 #include "feature/featureset.h"
 #include "feature/feature.h"
@@ -326,6 +327,13 @@ void MainWindow::sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrum
         &MainWindow::mainSpectrumRequestDeviceCenterFrequency
     );
 
+    QObject::connect(
+        deviceAPI,
+        &DeviceAPI::stateChanged,
+        this,
+        &MainWindow::deviceStateChanged
+    );
+
     deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
     spectrumWorkspace->addToMdiArea(m_deviceUIs.back()->m_mainSpectrumGUI);
     emit m_mainCore->deviceSetAdded(deviceSetIndex, deviceAPI);
@@ -547,6 +555,13 @@ void MainWindow::sampleSinkAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
         &MainSpectrumGUI::requestCenterFrequency,
         this,
         &MainWindow::mainSpectrumRequestDeviceCenterFrequency
+    );
+
+    QObject::connect(
+        deviceAPI,
+        &DeviceAPI::stateChanged,
+        this,
+        &MainWindow::deviceStateChanged
     );
 
     deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
@@ -771,6 +786,13 @@ void MainWindow::sampleMIMOAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
         &DeviceGUI::addChannelEmitted,
         this,
         [=](int channelPluginIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelPluginIndex); }
+    );
+
+    QObject::connect(
+        deviceAPI,
+        &DeviceAPI::stateChanged,
+        this,
+        &MainWindow::deviceStateChanged
     );
 
     deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
@@ -1897,6 +1919,20 @@ void MainWindow::addWorkspace()
         &MainWindow::openFeaturePresetsDialog
     );
 
+    QObject::connect(
+        m_workspaces.back(),
+        &Workspace::startAllDevices,
+        this,
+        &MainWindow::startAllDevices
+    );
+
+    QObject::connect(
+        m_workspaces.back(),
+        &Workspace::stopAllDevices,
+        this,
+        &MainWindow::stopAllDevices
+    );
+
     if (m_workspaces.size() > 1)
     {
         for (int i = 1; i < m_workspaces.size(); i++) {
@@ -2702,6 +2738,41 @@ void MainWindow::showAllChannels(int deviceSetIndex)
         deviceUISet->getChannelGUIAt(i)->show();
         deviceUISet->getChannelGUIAt(i)->raise();
     }
+}
+
+// Start all devices in the workspace
+void MainWindow::startAllDevices(Workspace *workspace)
+{
+    int workspaceIndex = workspace->getIndex();
+    for (auto deviceUI : m_deviceUIs)
+    {
+        if (deviceUI->m_deviceAPI->getWorkspaceIndex() == workspaceIndex)
+        {
+            // We use WebAPI rather than call deviceUI->m_deviceAPI->startDeviceEngine();
+            // so that the start/stop button in the Device GUI is correctly updated
+            int deviceIndex = deviceUI->m_deviceAPI->getDeviceSetIndex();
+            ChannelWebAPIUtils::run(deviceIndex);
+        }
+    }
+}
+
+// Stop all devices in the workspace
+void MainWindow::stopAllDevices(Workspace *workspace)
+{
+    int workspaceIndex = workspace->getIndex();
+    for (auto deviceUI : m_deviceUIs)
+    {
+        if (deviceUI->m_deviceAPI->getWorkspaceIndex() == workspaceIndex)
+        {
+            int deviceIndex = deviceUI->m_deviceAPI->getDeviceSetIndex();
+            ChannelWebAPIUtils::stop(deviceIndex);
+        }
+    }
+}
+
+void MainWindow::deviceStateChanged(DeviceAPI *deviceAPI)
+{
+    emit m_mainCore->deviceStateChanged(deviceAPI->getDeviceSetIndex(), deviceAPI);
 }
 
 void MainWindow::openFeaturePresetsDialog(QPoint p, Workspace *workspace)

@@ -134,6 +134,7 @@ private:
 	State gotoInit();     //!< Go to the acquisition init state from idle
 	State gotoRunning();  //!< Go to the running state from ready state
 	State gotoError(const QString& errorMsg); //!< Go to an error state
+	void setState(State state);
 
 	void handleSetSource(DeviceSampleSource* source); //!< Manage source setting
 
@@ -141,6 +142,9 @@ private slots:
 	void handleData(); //!< Handle data when samples from source FIFO are ready to be processed
 	void handleInputMessages(); //!< Handle input message queue
 	void handleSynchronousMessages(); //!< Handle synchronous messages with the thread
+
+signals:
+	void stateChanged();
 };
 
 #endif // INCLUDE_DSPDEVICEENGINE_H

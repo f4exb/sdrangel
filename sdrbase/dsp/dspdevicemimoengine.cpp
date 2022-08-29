@@ -61,11 +61,29 @@ DSPDeviceMIMOEngine::~DSPDeviceMIMOEngine()
 	wait();
 }
 
+void DSPDeviceMIMOEngine::setStateRx(State state)
+{
+    if (m_stateRx != state)
+    {
+        m_stateRx = state;
+        emit stateChanged();
+    }
+}
+
+void DSPDeviceMIMOEngine::setStateTx(State state)
+{
+    if (m_stateTx != state)
+    {
+        m_stateTx = state;
+        emit stateChanged();
+    }
+}
+
 void DSPDeviceMIMOEngine::run()
 {
 	qDebug() << "DSPDeviceMIMOEngine::run";
-	m_stateRx = StIdle;
-    m_stateTx = StIdle;
+	setStateRx(StIdle);
+	setStateTx(StIdle);
 	exec();
 }
 
@@ -80,8 +98,8 @@ void DSPDeviceMIMOEngine::stop()
 	qDebug() << "DSPDeviceMIMOEngine::stop";
     gotoIdle(0); // Rx
     gotoIdle(1); // Tx
-    m_stateRx = StNotStarted;
-    m_stateTx = StNotStarted;
+    setStateRx(StNotStarted);
+    setStateTx(StNotStarted);
     QThread::exit();
 }
 
@@ -763,12 +781,12 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoError(int subsystemIndex, co
     if (subsystemIndex == 0)
     {
     	m_errorMessageRx = errorMessage;
-	    m_stateRx = StError;
+	    setStateRx(StError);
     }
     else if (subsystemIndex == 1)
     {
     	m_errorMessageTx = errorMessage;
-	    m_stateTx = StError;
+	    setStateTx(StError);
     }
 
     return StError;
@@ -881,10 +899,10 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 
 	if (DSPAcquisitionInit::match(*message))
 	{
-		m_stateRx = gotoIdle(0);
+		setStateRx(gotoIdle(0));
 
 		if (m_stateRx == StIdle) {
-			m_stateRx = gotoInit(0); // State goes ready if init is performed
+			setStateRx(gotoInit(0)); // State goes ready if init is performed
 		}
 
         returnState = m_stateRx;
@@ -892,22 +910,22 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 	else if (DSPAcquisitionStart::match(*message))
 	{
 		if (m_stateRx == StReady) {
-			m_stateRx = gotoRunning(0);
+			setStateRx(gotoRunning(0));
 		}
 
         returnState = m_stateRx;
 	}
 	else if (DSPAcquisitionStop::match(*message))
 	{
-		m_stateRx = gotoIdle(0);
+		setStateRx(gotoIdle(0));
         returnState = m_stateRx;
 	}
     else if (DSPGenerationInit::match(*message))
 	{
-		m_stateTx = gotoIdle(1);
+		setStateTx(gotoIdle(1));
 
 		if (m_stateTx == StIdle) {
-			m_stateTx = gotoInit(1); // State goes ready if init is performed
+			setStateTx(gotoInit(1)); // State goes ready if init is performed
 		}
 
         returnState = m_stateTx;
@@ -915,14 +933,14 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 	else if (DSPGenerationStart::match(*message))
 	{
 		if (m_stateTx == StReady) {
-			m_stateTx = gotoRunning(1);
+			setStateTx(gotoRunning(1));
 		}
 
         returnState = m_stateTx;
 	}
 	else if (DSPGenerationStop::match(*message))
 	{
-		m_stateTx = gotoIdle(1);
+		setStateTx(gotoIdle(1));
         returnState = m_stateTx;
 	}
 	else if (GetMIMODeviceDescription::match(*message))

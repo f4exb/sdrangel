@@ -23,6 +23,7 @@
 
 #include "export.h"
 #include "featureadddialog.h"
+#include "device/deviceapi.h"
 
 class QHBoxLayout;
 class QLabel;
@@ -61,12 +62,14 @@ public:
     void orderByIndex(QList<DeviceGUI *> &list);
     void orderByIndex(QList<MainSpectrumGUI *> &list);
     void adjustSubWindowsAfterRestore();
+    void updateStartStopButton(bool checked);
 
 private:
     int m_index;
     QPushButton *m_addRxDeviceButton;
     QPushButton *m_addTxDeviceButton;
     QPushButton *m_addMIMODeviceButton;
+    ButtonSwitch *m_startStopButton;
     QFrame *m_vline1;
     QPushButton *m_addFeatureButton;
     QPushButton *m_featurePresetsButton;
@@ -99,8 +102,10 @@ private slots:
     void tileSubWindows();
     void stackSubWindows();
     void autoStackSubWindows();
+    void startStopClicked(bool checked = false);
     void addFeatureEmitted(int featureIndex);
     void toggleFloating();
+    void deviceStateChanged(int index, DeviceAPI *deviceAPI);
 
 signals:
     void addRxDevice(Workspace *inWorkspace, int deviceIndex);
@@ -108,6 +113,8 @@ signals:
     void addMIMODevice(Workspace *inWorkspace, int deviceIndex);
     void addFeature(Workspace*, int);
     void featurePresetsDialogRequested(QPoint, Workspace*);
+    void startAllDevices(Workspace *inWorkspace);
+    void stopAllDevices(Workspace *inWorkspace);
 };
 
 
