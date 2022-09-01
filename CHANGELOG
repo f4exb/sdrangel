@@ -1,3 +1,25 @@
+sdrangel (7.6.3-1) unstable; urgency=medium
+
+  * NFM modulator: try to improve audio input
+  * Simple PTT: fixed status indicator
+  * LimeRFE feature: fixed settings API
+  * ScriptsAPI: fixed dump.py and config.py to match v7 requirements
+  * ScriptsAPI: removed obsolete config.py -I option
+  * ScriptsAPI: new ptt_feature.py based on PTT amd LimeRFE features
+  * LimeSDR: reduced LimeSDR stream FIFO size to 256k to improve latency
+  * LimeSDR: better handle calibration errors. Fix #1389. PR #1391
+  * LimeSDR: Set Lime minimum frequency in GUI to 30MHz+NCO freq. Fix #1389. PR #1391
+  * LimeSDR: Set minimum calibration bandwidth to 2.5MHz. Fix #1389. PR #1391
+  * LimeSDR: Report calibration errors in GUI. Fix #1389. PR #1395
+  * LimeSDR: Check LPF is reasonable for up/downconversion. Fix #1389. PR #1395
+  * ADS-B: Add support for decoding Comm-B replies in Mode-S frames. PR #1393
+  * ADS-B: Check ICAO in sink worker, so CRC can be checked. Fix warnings. PR #1393
+  * Add start/stop all devices of workspace button in workspace toolbar. PR #1394
+  * Add device stateChanged signal. Use in RTL SDR GUI. PR #1394
+  * Remove ? in Window's title bar. Fixes #1312. PR #1399
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 01 Sep 2022 19:46:21 +0200
+
 sdrangel (7.6.2-1) unstable; urgency=medium
 
   * MacOS build fixes. PR #1374
