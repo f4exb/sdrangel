@@ -73,6 +73,10 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 	palette.setColor(QPalette::LinkVisited, QColor(0,0xa0,0xa0).lighter());
 	palette.setColor(QPalette::Highlight, QColor(0xff, 0x8c, 0x00));
 	palette.setColor(QPalette::HighlightedText, Qt::black);
+
+	palette.setColor(QPalette::Disabled, QPalette::WindowText, Qt::gray);
+	palette.setColor(QPalette::Disabled, QPalette::Text, Qt::gray);
+	palette.setColor(QPalette::Disabled, QPalette::ButtonText, Qt::gray);
 	qApp->setPalette(palette);
 
 #if 0
