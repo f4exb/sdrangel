@@ -159,10 +159,10 @@ struct Viterbi
      *
      * @return path metric for estimating BER.
      */
-    template <size_t IN, size_t OUT>
-    size_t decode(const std::array<int8_t, IN>& in, std::array<uint8_t, OUT>& out)
+    template <size_t IN2, size_t OUT2>
+    size_t decode(const std::array<int8_t, IN2>& in, std::array<uint8_t, OUT2>& out)
     {
-        static_assert(sizeof(history_) >= IN / 2, "Invalid size");
+        static_assert(sizeof(history_) >= IN2 / 2, "Invalid size");
 
         constexpr auto MAX_METRIC = std::numeric_limits<typename metrics_t::value_type>::max() / 2;
 
@@ -170,7 +170,7 @@ struct Viterbi
         prevMetrics[0] = 0;     // Starting point.
 
         auto hbegin = history_.begin();
-        auto hend = history_.begin() + IN / 2;
+        auto hend = history_.begin() + IN2 / 2;
 
         constexpr size_t BUTTERFLY_SIZE = NumStates / 2;
 
@@ -178,7 +178,7 @@ struct Viterbi
         std::array<int16_t, BUTTERFLY_SIZE> cost0;
         std::array<int16_t, BUTTERFLY_SIZE> cost1;
 
-        for (size_t i = 0; i != IN; i += 2, hindex += 1)
+        for (size_t i = 0; i != IN2; i += 2, hindex += 1)
         {
             int16_t s0 = in[i];
             int16_t s1 = in[i + 1];
@@ -227,11 +227,11 @@ struct Viterbi
         auto hit = std::make_reverse_iterator(hend);        // rbegin
         auto hrend = std::make_reverse_iterator(hbegin);    // rend
         size_t next_element = min_element;
-        size_t index = IN / 2;
+        size_t index = IN2 / 2;
         while (oit != std::rend(out) && hit != hrend)
         {
             auto v = (*hit++)[next_element];
-            if (index-- <= OUT) *oit++ = next_element & 1;
+            if (index-- <= OUT2) *oit++ = next_element & 1;
             next_element = prevState_[next_element][v];
         }
 
