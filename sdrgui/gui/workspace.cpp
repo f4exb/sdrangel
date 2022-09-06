@@ -467,7 +467,7 @@ void Workspace::stackSubWindows()
     }
 
     // Calculate width & height needed for channels
-    int channelMinWidth = m_userChannelMinWidth;
+    int channelMinWidth = channels.size() > 0 ? m_userChannelMinWidth : 0;
     int channelTotalMinHeight = 0;
     int expandingChannels = 0;
     for (auto window : channels)
