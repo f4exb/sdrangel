@@ -131,17 +131,17 @@ auto llr(float sample)
     return std::get<1>(*it);
 }
 
-template <size_t IN, size_t OUT, size_t P>
-size_t depuncture( // FIXME: MSVC
-    const std::array<int8_t, IN>& in,
-    std::array<int8_t, OUT>& out,
+template <size_t IN1, size_t OUT1, size_t P>
+size_t depuncture( // FIXED: MSVC (MULTIPLE DEFINITIONS SAME TEMPLATE)
+    const std::array<int8_t, IN1>& in,
+    std::array<int8_t, OUT1>& out,
     const std::array<int8_t, P>& p
 )
 {
     size_t index = 0;
     size_t pindex = 0;
     size_t bit_count = 0;
-    for (size_t i = 0; i != OUT && index < IN; ++i)
+    for (size_t i = 0; i != OUT1 && index < IN1; ++i)
     {
         if (!p[pindex++])
         {
@@ -160,17 +160,17 @@ size_t depuncture( // FIXME: MSVC
 }
 
 
-template <size_t IN, size_t OUT, size_t P>
-size_t puncture( // FIXME: MSVC
-    const std::array<uint8_t, IN>& in,
-    std::array<int8_t, OUT>& out,
+template <size_t IN0, size_t OUT0, size_t P>
+size_t puncture( // FIXED::MSVC (MULTIPLE DEFINITIONS OF THE SAME TEMPLATE)
+    const std::array<uint8_t, IN0>& in,
+    std::array<int8_t, OUT0>& out,
     const std::array<int8_t, P>& p
 )
 {
     size_t index = 0;
     size_t pindex = 0;
     size_t bit_count = 0;
-    for (size_t i = 0; i != IN && index != OUT; ++i)
+    for (size_t i = 0; i != IN0 && index != OUT0; ++i)
     {
         if (p[pindex++])
         {
