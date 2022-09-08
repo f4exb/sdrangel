@@ -8,9 +8,6 @@
 typedef unsigned int u32;
 typedef unsigned char u8;
 
-
-using namespace std;
-
 // BB HEADER fileds
 #define TS_GS_TRANSPORT 3
 #define TS_GS_GENERIC_PACKETIZED 0
@@ -151,7 +148,7 @@ private:
     u8  m_crc_tab[256];
     u8  m_dnp; // Deleted null packet
     // Transport packet queue
-    queue <u8> m_tp_q;
+    std::queue <u8> m_tp_q;
 
     // LDPC tables
     const static int ldpc_tab_1_4N[45][13];
