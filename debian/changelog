@@ -1,3 +1,12 @@
+sdrangel (7.6.4-1) unstable; urgency=medium
+
+  * M17: fixed build for Windows so now available in Windows. PR #1404
+  * Use grey text for disabled widgets. PR #1402
+  * Stack workspace: Use full width for spectrum when no channels. PR #1403
+  * Fix c++17 compilation with MSVC. PR #1405
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 10 Sep 2022 19:12:31 +0200
+
 sdrangel (7.6.3-1) unstable; urgency=medium
 
   * NFM modulator: try to improve audio input
