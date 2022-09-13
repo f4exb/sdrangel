@@ -245,6 +245,7 @@ MainWindow::~MainWindow()
 {
 	qDebug() << "MainWindow::~MainWindow";
 
+    m_statusTimer.stop();
     m_mainCore->m_settings.save();
     m_apiServer->stop();
     delete m_apiServer;
