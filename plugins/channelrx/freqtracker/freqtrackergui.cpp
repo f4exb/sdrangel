@@ -525,6 +525,7 @@ void FreqTrackerGUI::tick()
 void FreqTrackerGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &FreqTrackerGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->log2Decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FreqTrackerGUI::on_log2Decim_currentIndexChanged);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &FreqTrackerGUI::on_rfBW_valueChanged);
     QObject::connect(ui->tracking, &QToolButton::toggled, this, &FreqTrackerGUI::on_tracking_toggled);
     QObject::connect(ui->alphaEMA, &QDial::valueChanged, this, &FreqTrackerGUI::on_alphaEMA_valueChanged);
@@ -534,6 +535,7 @@ void FreqTrackerGUI::makeUIConnections()
     QObject::connect(ui->rrcRolloff, &QDial::valueChanged, this, &FreqTrackerGUI::on_rrcRolloff_valueChanged);
     QObject::connect(ui->squelch, &QSlider::valueChanged, this, &FreqTrackerGUI::on_squelch_valueChanged);
     QObject::connect(ui->squelchGate, &QDial::valueChanged, this, &FreqTrackerGUI::on_squelchGate_valueChanged);
+    QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &FreqTrackerGUI::on_spanLog2_valueChanged);
 }
 
 void FreqTrackerGUI::updateAbsoluteCenterFrequency()
