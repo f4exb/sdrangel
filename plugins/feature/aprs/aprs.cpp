@@ -459,8 +459,9 @@ void APRS::scanAvailableChannels()
     for (const auto& deviceSet : deviceSets)
     {
         DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
+        DSPDeviceMIMOEngine *deviceMIMOEngine = deviceSet->m_deviceMIMOEngine;
 
-        if (deviceSourceEngine)
+        if (deviceSourceEngine || deviceMIMOEngine)
         {
             for (int chi = 0; chi < deviceSet->getNumberOfChannels(); chi++)
             {
@@ -512,8 +513,9 @@ void APRS::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
         deviceSetIndex, channel->getIndexInDeviceSet(), qPrintable(channel->getURI()), channel);
     DeviceSet *deviceSet = MainCore::instance()->getDeviceSets()[deviceSetIndex];
     DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
+    DSPDeviceMIMOEngine *deviceMIMOEngine = deviceSet->m_deviceMIMOEngine;
 
-    if (deviceSourceEngine && APRSSettings::m_pipeURIs.contains(channel->getURI()))
+    if ((deviceSourceEngine || deviceMIMOEngine) && APRSSettings::m_pipeURIs.contains(channel->getURI()))
     {
         int chi = channel->getIndexInDeviceSet();
 
