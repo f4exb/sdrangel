@@ -20,7 +20,7 @@
 #define INCLUDE_APTDEMODIMAGEWORKER_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QImage>
 
 #include <apt.h>
@@ -137,7 +137,7 @@ private:
     QList<QImage> m_palettes;
 
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const APTDemodSettings& settings, bool force = false);

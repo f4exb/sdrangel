@@ -20,7 +20,7 @@
 #define INCLUDE_ADSBDEMODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "util/message.h"
@@ -77,7 +77,7 @@ private:
     ADSBDemodSink m_sink;
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     ADSBDemodSettings m_settings;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const ADSBDemodSettings& settings, bool force = false);

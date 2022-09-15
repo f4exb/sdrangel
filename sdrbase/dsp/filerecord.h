@@ -77,7 +77,7 @@ private:
     QString m_curentFileName;
     quint64 m_byteCount;
     qint64 m_msShift;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     void writeHeader();
 };

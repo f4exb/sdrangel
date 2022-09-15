@@ -44,8 +44,7 @@ const char* const UDPSource::m_channelId = "UDPSource";
 UDPSource::UDPSource(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
-    m_spectrumVis(SDR_TX_SCALEF),
-    m_settingsMutex(QMutex::Recursive)
+    m_spectrumVis(SDR_TX_SCALEF)
 {
     setObjectName(m_channelId);
 

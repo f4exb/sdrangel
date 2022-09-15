@@ -44,7 +44,6 @@ MESSAGE_CLASS_DEFINITION(RemoteTCPInput::MsgReportTCPBuffer, Message)
 
 RemoteTCPInput::RemoteTCPInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_mutex(QMutex::Recursive),
     m_settings(),
     m_remoteInputTCPPHandler(nullptr),
     m_deviceDescription("RemoteTCPInput")

@@ -19,7 +19,7 @@
 #define INCLUDE_ATVDEMODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/scopevis.h"
@@ -82,7 +82,7 @@ private:
     ATVDemodSettings m_settings;
     ScopeVis m_scopeSink;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const ATVDemodSettings& settings, bool force = false);

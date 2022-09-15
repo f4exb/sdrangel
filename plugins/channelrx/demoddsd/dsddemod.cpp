@@ -58,7 +58,6 @@ const int DSDDemod::m_udpBlockSize = 512;
 DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
-        m_mutex(QMutex::Recursive),
         m_running(false),
         m_basebandSampleRate(0)
 {

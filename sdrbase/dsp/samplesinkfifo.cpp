@@ -45,8 +45,7 @@ SampleSinkFifo::SampleSinkFifo(QObject* parent) :
 	m_data(),
 	m_total(0),
 	m_writtenSignalCount(0),
-	m_writtenSignalRateDivider(1),
-	m_mutex(QMutex::Recursive)
+	m_writtenSignalRateDivider(1)
 {
 	m_suppressed = -1;
 	m_size = 0;
@@ -60,8 +59,7 @@ SampleSinkFifo::SampleSinkFifo(int size, QObject* parent) :
 	m_data(),
 	m_total(0),
 	m_writtenSignalCount(0),
-	m_writtenSignalRateDivider(1),
-	m_mutex(QMutex::Recursive)
+	m_writtenSignalRateDivider(1)
 {
 	m_suppressed = -1;
 	create(size);
@@ -72,8 +70,7 @@ SampleSinkFifo::SampleSinkFifo(const SampleSinkFifo& other) :
     m_data(other.m_data),
 	m_total(0),
 	m_writtenSignalCount(0),
-	m_writtenSignalRateDivider(1),
-	m_mutex(QMutex::Recursive)
+	m_writtenSignalRateDivider(1)
 {
   	m_suppressed = -1;
 	m_size = m_data.size();

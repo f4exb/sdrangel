@@ -25,8 +25,7 @@
 #include "datvmodbaseband.h"
 #include "datvmod.h"
 
-DATVModBaseband::DATVModBaseband() :
-    m_mutex(QMutex::Recursive)
+DATVModBaseband::DATVModBaseband()
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);

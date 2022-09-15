@@ -19,8 +19,7 @@
 #include "fftfactory.h"
 
 FFTFactory::FFTFactory(const QString& fftwWisdomFileName) :
-    m_fftwWisdomFileName(fftwWisdomFileName),
-    m_mutex(QMutex::Recursive)
+    m_fftwWisdomFileName(fftwWisdomFileName)
 {}
 
 FFTFactory::~FFTFactory()

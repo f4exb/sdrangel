@@ -27,8 +27,7 @@
 
 MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_ModBaseband::MsgConfigureIEEE_802_15_4_ModBaseband, Message)
 
-IEEE_802_15_4_ModBaseband::IEEE_802_15_4_ModBaseband() :
-    m_mutex(QMutex::Recursive)
+IEEE_802_15_4_ModBaseband::IEEE_802_15_4_ModBaseband()
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);

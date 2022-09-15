@@ -82,7 +82,7 @@ private:
     MessageQueue *m_msgQueueToGUI;
     StarTrackerSettings m_settings;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     QTimer m_pollTimer;
     QTcpServer *m_tcpServer;
     QTcpSocket *m_clientConnection;

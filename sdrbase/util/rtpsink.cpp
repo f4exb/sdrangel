@@ -28,8 +28,7 @@ RTPSink::RTPSink(QUdpSocket *udpSocket, int sampleRate, bool stereo) :
     m_bufferSize(0),
     m_sampleBufferIndex(0),
     m_byteBuffer(0),
-    m_destport(9998),
-    m_mutex(QMutex::Recursive)
+    m_destport(9998)
 {
 	m_rtpSessionParams.SetOwnTimestampUnit(1.0 / (double) m_sampleRate);
     m_rtpTransmissionParams.SetRTCPMultiplexing(true); // do not allocate another socket for RTCP

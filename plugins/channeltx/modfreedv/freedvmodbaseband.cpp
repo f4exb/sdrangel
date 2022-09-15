@@ -25,8 +25,7 @@
 
 MESSAGE_CLASS_DEFINITION(FreeDVModBaseband::MsgConfigureFreeDVModBaseband, Message)
 
-FreeDVModBaseband::FreeDVModBaseband() :
-    m_mutex(QMutex::Recursive)
+FreeDVModBaseband::FreeDVModBaseband()
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);

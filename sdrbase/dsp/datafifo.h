@@ -20,7 +20,7 @@
 #define INCLUDE_DATAFIFO_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QElapsedTimer>
 #include <QByteArray>
 
@@ -65,7 +65,7 @@ private:
 	int m_suppressed;
 	QByteArray m_data;
 	DataType m_currentDataType;
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 
 	unsigned int m_size;
 	unsigned int m_fill;

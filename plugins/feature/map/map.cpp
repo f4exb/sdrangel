@@ -46,8 +46,7 @@ const char* const Map::m_featureId = "Map";
 
 Map::Map(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
-    m_multiplier(0.0),
-    m_dateTimeMutex(QMutex::Recursive)
+    m_multiplier(0.0)
 {
     qDebug("Map::Map: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);

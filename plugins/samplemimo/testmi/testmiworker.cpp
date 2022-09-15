@@ -61,8 +61,7 @@ TestMIWorker::TestMIWorker(SampleMIFifo* sampleFifo, int streamIndex, QObject* p
 	m_frequency(435*1000),
 	m_fcPosShift(0),
     m_throttlems(TESTMI_THROTTLE_MS),
-    m_throttleToggle(false),
-    m_mutex(QMutex::Recursive)
+    m_throttleToggle(false)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }

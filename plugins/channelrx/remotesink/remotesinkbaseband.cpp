@@ -25,8 +25,7 @@
 
 MESSAGE_CLASS_DEFINITION(RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband, Message)
 
-RemoteSinkBaseband::RemoteSinkBaseband() :
-    m_mutex(QMutex::Recursive)
+RemoteSinkBaseband::RemoteSinkBaseband()
 {
     qDebug("RemoteSinkBaseband::RemoteSinkBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));

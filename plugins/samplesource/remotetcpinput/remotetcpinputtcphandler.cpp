@@ -43,7 +43,6 @@ RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler(SampleSinkFifo *sampleFifo, D
     m_reconnectTimer(this),
     m_converterBuffer(nullptr),
     m_converterBufferNbSamples(0),
-    m_mutex(QMutex::Recursive),
     m_settings()
 {
     m_tcpBuf = new char[m_sampleFifo->size()*2*4];

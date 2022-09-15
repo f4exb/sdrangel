@@ -29,7 +29,6 @@ MESSAGE_CLASS_DEFINITION(VORDemodMCBaseband::MsgConfigureVORDemodBaseband, Messa
 
 VORDemodMCBaseband::VORDemodMCBaseband() :
     m_running(false),
-    m_mutex(QMutex::Recursive),
     m_messageQueueToGUI(nullptr),
     m_basebandSampleRate(0)
 {

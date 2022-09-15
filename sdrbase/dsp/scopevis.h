@@ -1242,7 +1242,7 @@ private:
     bool m_freeRun;                                //!< True if free running (trigger globally disabled)
     int m_maxTraceDelay;                           //!< Maximum trace delay
     TriggerComparator m_triggerComparator;         //!< Compares sample level to trigger level
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     Real m_projectorCache[(int) Projector::nbProjectionTypes];
     bool m_triggerOneShot;                         //!< True when one shot mode is active
     bool m_triggerWaitForReset;                    //!< In one shot mode suspended until reset by UI

@@ -19,7 +19,7 @@
 #define INCLUDE_DSDDEMODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/downchannelizer.h"
@@ -85,7 +85,7 @@ private:
     DSDDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     DSDDemodSettings m_settings;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const DSDDemodSettings& settings, bool force = false);

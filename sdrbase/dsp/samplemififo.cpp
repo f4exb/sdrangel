@@ -53,14 +53,12 @@ SampleMIFifo::SampleMIFifo(QObject *parent) :
     m_nbStreams(0),
     m_size(0),
     m_fill(0),
-    m_head(0),
-    m_mutex(QMutex::Recursive)
+    m_head(0)
 {
 }
 
 SampleMIFifo::SampleMIFifo(unsigned int nbStreams, unsigned int size, QObject *parent) :
-    QObject(parent),
-    m_mutex(QMutex::Recursive)
+    QObject(parent)
 {
     init(nbStreams, size);
 }

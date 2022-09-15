@@ -28,8 +28,7 @@ MESSAGE_CLASS_DEFINITION(RadiosondeDemodBaseband::MsgConfigureRadiosondeDemodBas
 
 RadiosondeDemodBaseband::RadiosondeDemodBaseband(RadiosondeDemod *radiosondeDemod) :
     m_sink(radiosondeDemod),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("RadiosondeDemodBaseband::RadiosondeDemodBaseband");
 

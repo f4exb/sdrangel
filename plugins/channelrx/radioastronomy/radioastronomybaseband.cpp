@@ -29,8 +29,7 @@ MESSAGE_CLASS_DEFINITION(RadioAstronomyBaseband::MsgConfigureRadioAstronomyBaseb
 
 RadioAstronomyBaseband::RadioAstronomyBaseband(RadioAstronomy *aisDemod) :
     m_sink(aisDemod),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("RadioAstronomyBaseband::RadioAstronomyBaseband");
 

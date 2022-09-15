@@ -55,7 +55,6 @@ const char* const M17Mod::m_channelId = "M17Mod";
 M17Mod::M17Mod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
 	m_deviceAPI(deviceAPI),
-	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000)

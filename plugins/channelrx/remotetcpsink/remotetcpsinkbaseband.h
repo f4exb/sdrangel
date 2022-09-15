@@ -20,7 +20,7 @@
 #define INCLUDE_REMOTETCPSINKBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "util/message.h"
@@ -60,7 +60,7 @@ private:
     RemoteTCPSinkSink m_sink;
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     RemoteTCPSinkSettings m_settings;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const RemoteTCPSinkSettings& settings, bool force = false, bool remoteChange = false);

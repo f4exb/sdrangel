@@ -72,7 +72,7 @@ private:
     MessageQueue *m_msgQueueToGUI;
     PERTesterSettings m_settings;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     QUdpSocket *m_rxUDPSocket;                  //!< UDP socket to receive packets on
     QUdpSocket m_txUDPSocket;
     QTimer m_txTimer;

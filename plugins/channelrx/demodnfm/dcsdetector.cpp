@@ -28,8 +28,7 @@ DCSDetector::DCSDetector() :
     m_low(0.0f),
     m_mid(0.0f),
     m_prevSample(0.0f),
-    m_dcsWord(0),
-    m_mutex(QMutex::Recursive)
+    m_dcsWord(0)
 {
     setBitrate(134.3);
     setEqWindow(23);

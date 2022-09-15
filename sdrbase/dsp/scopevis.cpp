@@ -63,7 +63,6 @@ ScopeVis::ScopeVis() :
     m_traceDiscreteMemory(GLScopeSettings::m_nbTraceMemories),
     m_freeRun(true),
     m_maxTraceDelay(0),
-    m_mutex(QMutex::Recursive),
     m_triggerOneShot(false),
     m_triggerWaitForReset(false),
     m_currentTraceMemoryIndex(0)

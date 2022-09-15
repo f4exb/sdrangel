@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QUdpSocket>
 #include <QHostAddress>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/decimators.h"
 #include "util/messagequeue.h"
@@ -88,7 +88,7 @@ private:
 	MessageQueue *m_messageQueueToGUI;
     MessageQueue m_inputMessageQueue;
     MetisMISOSettings m_settings;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     MetisMISODecimators m_decimators;
 
     unsigned long m_sendSequence;

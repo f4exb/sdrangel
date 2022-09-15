@@ -39,8 +39,7 @@ M17ModSource::M17ModSource() :
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
     m_ifstream(nullptr),
-    m_preemphasisFilter(m_preemphasis*48000),
-    m_mutex(QMutex::Recursive)
+    m_preemphasisFilter(m_preemphasis*48000)
 {
     m_audioFifo.setLabel("M17ModSource.m_audioFifo");
     m_feedbackAudioFifo.setLabel("M17ModSource.m_feedbackAudioFifo");

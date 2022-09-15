@@ -148,7 +148,7 @@ private:
     QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel> *m_availableChannels;
     bool m_running;
 	QTimer m_updateTimer;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     QTimer m_rrTimer;
     std::vector<std::vector<RRTurnPlan>> m_rrPlans; //!< Round robin plans for each device
     std::vector<int> m_rrTurnCounters; //!< Round robin turn count for each device

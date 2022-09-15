@@ -76,7 +76,7 @@ private:
     MessageQueue *m_msgQueueToGUI;
     APRSSettings m_settings;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     QTcpSocket m_socket;
     bool m_loggedIn;
 

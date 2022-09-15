@@ -32,8 +32,7 @@ MESSAGE_CLASS_DEFINITION(ATVModBaseband::MsgConfigureVideoFileSourceStreamTiming
 MESSAGE_CLASS_DEFINITION(ATVModBaseband::MsgConfigureCameraIndex, Message)
 MESSAGE_CLASS_DEFINITION(ATVModBaseband::MsgConfigureCameraData, Message)
 
-ATVModBaseband::ATVModBaseband() :
-    m_mutex(QMutex::Recursive)
+ATVModBaseband::ATVModBaseband()
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);

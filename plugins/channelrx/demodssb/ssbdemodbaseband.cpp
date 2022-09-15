@@ -28,8 +28,7 @@ MESSAGE_CLASS_DEFINITION(SSBDemodBaseband::MsgConfigureSSBDemodBaseband, Message
 SSBDemodBaseband::SSBDemodBaseband() :
     m_channelizer(&m_sink),
     m_messageQueueToGUI(nullptr),
-    m_spectrumVis(nullptr),
-    m_mutex(QMutex::Recursive)
+    m_spectrumVis(nullptr)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
 

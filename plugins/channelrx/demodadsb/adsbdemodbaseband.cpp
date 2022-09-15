@@ -27,8 +27,7 @@
 
 MESSAGE_CLASS_DEFINITION(ADSBDemodBaseband::MsgConfigureADSBDemodBaseband, Message)
 
-ADSBDemodBaseband::ADSBDemodBaseband() :
-    m_mutex(QMutex::Recursive)
+ADSBDemodBaseband::ADSBDemodBaseband()
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(8000000));
     m_channelizer = new DownChannelizer(&m_sink);

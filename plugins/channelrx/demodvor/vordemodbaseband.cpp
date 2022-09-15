@@ -29,8 +29,7 @@ MESSAGE_CLASS_DEFINITION(VORDemodBaseband::MsgConfigureVORDemodBaseband, Message
 
 VORDemodBaseband::VORDemodBaseband() :
     m_messageQueueToGUI(nullptr),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("VORDemodBaseband::VORDemodBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));

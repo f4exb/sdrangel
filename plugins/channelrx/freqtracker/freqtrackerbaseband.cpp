@@ -26,8 +26,7 @@
 
 MESSAGE_CLASS_DEFINITION(FreqTrackerBaseband::MsgConfigureFreqTrackerBaseband, Message)
 
-FreqTrackerBaseband::FreqTrackerBaseband() :
-    m_mutex(QMutex::Recursive)
+FreqTrackerBaseband::FreqTrackerBaseband()
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);

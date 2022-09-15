@@ -23,7 +23,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
@@ -224,7 +224,7 @@ private:
     SpectrumVis m_spectrumVis;
 
     SampleVector m_sampleBuffer;
-    QMutex m_settingsMutex;
+    QRecursiveMutex m_settingsMutex;
 
     int m_sampleRate;
 

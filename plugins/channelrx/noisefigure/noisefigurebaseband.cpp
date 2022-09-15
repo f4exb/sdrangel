@@ -28,8 +28,7 @@ MESSAGE_CLASS_DEFINITION(NoiseFigureBaseband::MsgConfigureNoiseFigureBaseband, M
 
 NoiseFigureBaseband::NoiseFigureBaseband(NoiseFigure *aisDemod) :
     m_sink(aisDemod),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("NoiseFigureBaseband::NoiseFigureBaseband");
 

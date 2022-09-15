@@ -46,8 +46,7 @@ AFCWorker::AFCWorker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_freqTracker(nullptr),
     m_trackerDeviceFrequency(0),
     m_trackerChannelOffset(0),
-    m_updateTimer(this),
-    m_mutex(QMutex::Recursive)
+    m_updateTimer(this)
 {
     qDebug("AFCWorker::AFCWorker");
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateTarget()));

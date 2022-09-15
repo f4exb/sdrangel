@@ -28,8 +28,7 @@ MESSAGE_CLASS_DEFINITION(AISDemodBaseband::MsgConfigureAISDemodBaseband, Message
 
 AISDemodBaseband::AISDemodBaseband(AISDemod *aisDemod) :
     m_sink(aisDemod),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("AISDemodBaseband::AISDemodBaseband");
 

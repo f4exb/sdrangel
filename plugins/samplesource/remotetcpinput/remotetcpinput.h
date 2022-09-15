@@ -177,7 +177,7 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     RemoteTCPInputSettings m_settings;
     RemoteTCPInputTCPHandler* m_remoteInputTCPPHandler;
     QString m_deviceDescription;

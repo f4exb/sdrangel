@@ -150,8 +150,7 @@ FreeDVDemodSink::FreeDVDemodSink() :
         m_iModem(0),
         m_speechOut(nullptr),
         m_modIn(nullptr),
-        m_levelInNbSamples(480), // 10ms @ 48 kS/s
-        m_mutex(QMutex::Recursive)
+        m_levelInNbSamples(480) // 10ms @ 48 kS/s
 {
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;

@@ -22,7 +22,7 @@
 #include <vector>
 
 #include <QNetworkRequest>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
@@ -171,7 +171,7 @@ private:
 	DeviceAPI *m_deviceAPI;
     QThread *m_thread;
     DSDDemodBaseband *m_basebandSink;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     bool m_running;
 	DSDDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink

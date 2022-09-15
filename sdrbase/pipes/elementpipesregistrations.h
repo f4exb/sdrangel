@@ -21,7 +21,7 @@
 #include <QMap>
 #include <QHash>
 #include <QList>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "elementpipescommon.h"
 
@@ -31,7 +31,7 @@ class ElementPipesRegistrations
 public:
     ElementPipesRegistrations() :
         m_typeCount(0),
-        m_mutex(QMutex::Recursive)
+        m_mutex(QRecursiveMutex::Recursive)
     {}
 
     ~ElementPipesRegistrations()
@@ -125,7 +125,7 @@ public:
 
     QMap<ElementPipesCommon::RegistrationKey<Producer>, QList<Element*>> *getElements() { return &m_elements; }
     QMap<ElementPipesCommon::RegistrationKey<Producer>, QList<Consumer*>>  *getConsumers() { return &m_consumers; }
-    QMutex *getMutex() { return &m_mutex; }
+    QRecursiveMutex *getMutex() { return &m_mutex; }
 
 
 private:
@@ -133,7 +133,7 @@ private:
     int m_typeCount;
     QMap<ElementPipesCommon::RegistrationKey<Producer>, QList<Element*>> m_elements;
     QMap<ElementPipesCommon::RegistrationKey<Producer>, QList<Consumer*>> m_consumers;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 };
 
 #endif // SDRBASE_PIPES_ELEMNTPIPESREGISTRATION_H_

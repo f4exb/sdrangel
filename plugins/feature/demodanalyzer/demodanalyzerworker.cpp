@@ -29,8 +29,7 @@ DemodAnalyzerWorker::DemodAnalyzerWorker() :
     m_dataFifo(nullptr),
     m_msgQueueToFeature(nullptr),
     m_sampleBufferSize(0),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("DemodAnalyzerWorker::DemodAnalyzerWorker");
 }

@@ -20,7 +20,7 @@
 #define INCLUDE_VORDEMODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "util/message.h"
@@ -120,7 +120,7 @@ private:
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     VORDemodMCSettings m_settings;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     MessageQueue *m_messageQueueToGUI;
     int m_basebandSampleRate;
     int m_centerFrequency;

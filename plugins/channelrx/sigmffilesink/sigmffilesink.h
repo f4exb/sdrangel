@@ -19,7 +19,7 @@
 #define INCLUDE_SIGMFFILESINK_H_
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
@@ -161,7 +161,7 @@ private:
     DeviceAPI *m_deviceAPI;
     QThread *m_thread;
     SigMFFileSinkBaseband *m_basebandSink;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     bool m_running;
     SigMFFileSinkSettings m_settings;
     SpectrumVis m_spectrumVis;

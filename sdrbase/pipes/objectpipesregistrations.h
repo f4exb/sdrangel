@@ -24,7 +24,7 @@
 #include <QPair>
 #include <QSet>
 #include <QString>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include <tuple>
 
@@ -69,7 +69,7 @@ private:
     QMap<std::tuple<const QObject*, int>, QList<ObjectPipe*>> m_producerAndTypeIdPipes;
     QMap<std::tuple<const QObject*, const QObject*, int>, ObjectPipe*> m_pipeMap;
 
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 };
 
 #endif // SDRBASE_PIPES_OBJECTPIPESREGISTRATION_H_

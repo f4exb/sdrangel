@@ -22,7 +22,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
@@ -251,7 +251,7 @@ private:
     NFMModSettings m_settings;
 
     SampleVector m_sampleBuffer;
-    QMutex m_settingsMutex;
+    QRecursiveMutex m_settingsMutex;
 
     std::ifstream m_ifstream;
     QString m_fileName;

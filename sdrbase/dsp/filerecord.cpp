@@ -35,8 +35,7 @@ FileRecord::FileRecord(quint32 sampleRate, quint64 centerFrequency) :
 	m_recordOn(false),
     m_recordStart(false),
     m_byteCount(0),
-    m_msShift(0),
-    m_mutex(QMutex::Recursive)
+    m_msShift(0)
 {
 	setObjectName("FileRecord");
 }
@@ -48,8 +47,7 @@ FileRecord::FileRecord(const QString& fileBase) :
     m_centerFrequency(0),
     m_recordOn(false),
     m_recordStart(false),
-    m_byteCount(0),
-    m_mutex(QMutex::Recursive)
+    m_byteCount(0)
 {
     setObjectName("FileRecord");
 }

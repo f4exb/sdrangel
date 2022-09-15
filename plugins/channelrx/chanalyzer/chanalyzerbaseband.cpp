@@ -26,8 +26,7 @@
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzerBaseband::MsgConfigureChannelAnalyzerBaseband, Message)
 
 ChannelAnalyzerBaseband::ChannelAnalyzerBaseband() :
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("ChannelAnalyzerBaseband::ChannelAnalyzerBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));

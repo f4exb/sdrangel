@@ -20,7 +20,7 @@
 #define INCLUDE_IEEE_802_15_4_MODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesourcefifo.h"
 #include "dsp/scopevis.h"
@@ -86,7 +86,7 @@ private:
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     IEEE_802_15_4_ModSettings m_settings;
     ScopeVis m_scopeSink;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);

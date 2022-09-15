@@ -56,7 +56,6 @@ SatelliteTrackerWorker::SatelliteTrackerWorker(SatelliteTracker* satelliteTracke
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
     m_running(false),
-    m_mutex(QMutex::Recursive),
     m_pollTimer(this),
     m_recalculatePasses(true),
     m_flipRotation(false),

@@ -18,7 +18,7 @@
 #ifndef SDRBASE_AUDIO_AUDIOINPUTDEVICE_H_
 #define SDRBASE_AUDIO_AUDIOINPUTDEVICE_H_
 
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QIODevice>
 #include <QAudioFormat>
 #include <list>
@@ -47,7 +47,7 @@ public:
 	void setVolume(float volume);
 
 private:
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 	QAudioInput* m_audioInput;
 	uint m_audioUsageCount;
 	bool m_onExit;

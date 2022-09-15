@@ -153,7 +153,7 @@ private:
     int m_trackerChannelOffset;
     QMap<ChannelAPI*, ChannelTracking> m_channelsMap;
 	QTimer m_updateTimer;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const AFCSettings& settings, bool force = false);

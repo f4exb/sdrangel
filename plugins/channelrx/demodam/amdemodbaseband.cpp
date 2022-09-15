@@ -26,8 +26,7 @@
 MESSAGE_CLASS_DEFINITION(AMDemodBaseband::MsgConfigureAMDemodBaseband, Message)
 
 AMDemodBaseband::AMDemodBaseband() :
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("AMDemodBaseband::AMDemodBaseband");
 

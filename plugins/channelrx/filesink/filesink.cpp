@@ -54,7 +54,6 @@ const char* const FileSink::m_channelId = "FileSink";
 FileSink::FileSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
-        m_mutex(QMutex::Recursive),
         m_running(false),
         m_spectrumVis(SDR_RX_SCALEF),
         m_centerFrequency(0),

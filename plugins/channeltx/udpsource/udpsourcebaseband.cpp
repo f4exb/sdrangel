@@ -29,8 +29,7 @@ MESSAGE_CLASS_DEFINITION(UDPSourceBaseband::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(UDPSourceBaseband::MsgUDPSourceSpectrum, Message)
 MESSAGE_CLASS_DEFINITION(UDPSourceBaseband::MsgResetReadIndex, Message)
 
-UDPSourceBaseband::UDPSourceBaseband() :
-    m_mutex(QMutex::Recursive)
+UDPSourceBaseband::UDPSourceBaseband()
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);

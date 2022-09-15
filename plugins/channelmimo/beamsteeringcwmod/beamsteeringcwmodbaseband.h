@@ -19,7 +19,7 @@
 #define INCLUDE_BEAMSTEERINGCWMODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplemofifo.h"
 #include "util/message.h"
@@ -93,7 +93,7 @@ private:
     UpChannelizer *m_channelizers[2];
     BeamSteeringCWModStreamSource m_streamSources[2];
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     unsigned int m_lastStream;
 
 private slots:

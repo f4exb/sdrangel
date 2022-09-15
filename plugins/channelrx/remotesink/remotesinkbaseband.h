@@ -19,7 +19,7 @@
 #define INCLUDE_REMOTESINKBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "util/message.h"
@@ -82,7 +82,7 @@ private:
     RemoteSinkSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     RemoteSinkSettings m_settings;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const RemoteSinkSettings& settings, bool force = false);

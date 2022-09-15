@@ -19,7 +19,7 @@
 #define INCLUDE_BFMDEMODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "util/message.h"
@@ -90,7 +90,7 @@ private:
     BFMDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     BFMDemodSettings m_settings;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     MessageQueue *m_messageQueueToGUI;
     SpectrumVis *m_spectrumVis;
 

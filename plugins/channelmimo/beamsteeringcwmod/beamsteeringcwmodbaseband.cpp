@@ -27,8 +27,7 @@
 MESSAGE_CLASS_DEFINITION(BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband, Message)
 MESSAGE_CLASS_DEFINITION(BeamSteeringCWModBaseband::MsgSignalNotification, Message)
 
-BeamSteeringCWModBaseband::BeamSteeringCWModBaseband() :
-    m_mutex(QMutex::Recursive)
+BeamSteeringCWModBaseband::BeamSteeringCWModBaseband()
 {
     m_sampleMOFifo.init(2, SampleMOFifo::getSizePolicy(48000));
     m_vbegin.resize(2);

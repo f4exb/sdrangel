@@ -21,7 +21,7 @@
 #include <vector>
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QByteArray>
 
 #include "dsp/dsptypes.h"
@@ -123,7 +123,7 @@ private:
 	MovingAverageUtil<double, double, 480> m_channelPowerAvg;
     ScopeVis* m_scopeVis;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void decimate(int countSamples);

@@ -20,7 +20,7 @@
 #define INCLUDE_RADIOASTRONOMYBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/scopevis.h"
@@ -84,7 +84,7 @@ private:
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     RadioAstronomySettings m_settings;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(RadioAstronomySink *sink);

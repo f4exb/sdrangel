@@ -118,7 +118,7 @@ private:
     MessageQueue *m_msgQueueToFeature; //!< Queue to report channel change to main feature object
     RigCtlServerSettings m_settings;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     static const unsigned int m_CmdLength;
     static const unsigned int m_ResponseLength;

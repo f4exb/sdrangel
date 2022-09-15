@@ -20,7 +20,7 @@
 #define INCLUDE_RADIOCLOCKBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/scopevis.h"
@@ -87,7 +87,7 @@ private:
     RadioClockSettings m_settings;
     ScopeVis m_scopeSink;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const RadioClockSettings& settings, bool force = false);

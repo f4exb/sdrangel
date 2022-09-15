@@ -33,8 +33,7 @@ MESSAGE_CLASS_DEFINITION(InterferometerBaseband::MsgConfigureCorrelation, Messag
 InterferometerBaseband::InterferometerBaseband(int fftSize) :
     m_correlator(fftSize),
     m_spectrumSink(nullptr),
-    m_scopeSink(nullptr),
-    m_mutex(QMutex::Recursive)
+    m_scopeSink(nullptr)
 {
     m_sampleMIFifo.init(2, 96000 * 8);
     m_vbegin.resize(2);

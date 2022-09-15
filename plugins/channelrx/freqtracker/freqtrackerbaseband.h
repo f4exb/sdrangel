@@ -19,7 +19,7 @@
 #define INCLUDE_FREQTRACKERBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "util/message.h"
@@ -84,7 +84,7 @@ private:
     FreqTrackerSettings m_settings;
     unsigned int m_basebandSampleRate;
     SpectrumVis *m_spectrumVis;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const FreqTrackerSettings& settings, bool force = false);

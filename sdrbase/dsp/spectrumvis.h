@@ -19,7 +19,7 @@
 #define INCLUDE_SPECTRUMVIS_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/basebandsamplesink.h"
 #include "dsp/fftengine.h"
@@ -246,7 +246,7 @@ private:
     MessageQueue m_inputMessageQueue;
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 
     void processFFT(bool positiveOnly);
     void setRunning(bool running) { m_running = running; }

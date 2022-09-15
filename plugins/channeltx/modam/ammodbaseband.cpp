@@ -25,8 +25,7 @@
 
 MESSAGE_CLASS_DEFINITION(AMModBaseband::MsgConfigureAMModBaseband, Message)
 
-AMModBaseband::AMModBaseband() :
-    m_mutex(QMutex::Recursive)
+AMModBaseband::AMModBaseband()
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);

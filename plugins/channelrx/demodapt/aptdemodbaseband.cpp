@@ -29,8 +29,7 @@ MESSAGE_CLASS_DEFINITION(APTDemodBaseband::MsgConfigureAPTDemodBaseband, Message
 
 APTDemodBaseband::APTDemodBaseband(APTDemod *packetDemod) :
     m_sink(packetDemod),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("APTDemodBaseband::APTDemodBaseband");
 

@@ -38,8 +38,7 @@ SSBModSource::SSBModSource() :
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-    m_ifstream(nullptr),
-    m_mutex(QMutex::Recursive)
+    m_ifstream(nullptr)
 {
     m_audioFifo.setLabel("SSBModSource.m_audioFifo");
     m_feedbackAudioFifo.setLabel("SSBModSource.m_feedbackAudioFifo");

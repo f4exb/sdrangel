@@ -21,7 +21,7 @@
 #include <map>
 #include <vector>
 
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QString>
 
 #include "export.h"
@@ -52,7 +52,7 @@ private:
     QString m_fftwWisdomFileName;
     std::map<unsigned int, std::vector<AllocatedEngine>> m_fftEngineBySize;
     std::map<unsigned int, std::vector<AllocatedEngine>> m_invFFTEngineBySize;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 };
 
 #endif // _SDRBASE_FFTWFACTORY_H

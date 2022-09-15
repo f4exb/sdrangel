@@ -25,8 +25,7 @@
 #include "remotetcpsinkbaseband.h"
 #include "remotetcpsink.h"
 
-RemoteTCPSinkBaseband::RemoteTCPSinkBaseband() :
-    m_mutex(QMutex::Recursive)
+RemoteTCPSinkBaseband::RemoteTCPSinkBaseband()
 {
     qDebug("RemoteTCPSinkBaseband::RemoteTCPSinkBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));

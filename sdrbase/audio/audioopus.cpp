@@ -27,8 +27,7 @@
 
 AudioOpus::AudioOpus() :
     m_encoderState(0),
-    m_encoderOK(false),
-    m_mutex(QMutex::Recursive)
+    m_encoderOK(false)
 {
     qDebug("AudioOpus::AudioOpus: libopus version %s", opus_get_version_string());
 }

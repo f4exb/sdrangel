@@ -19,8 +19,7 @@
 #include "datvideostream.h"
 #include <stdio.h>
 
-DATVideostream::DATVideostream():
-    m_mutex(QMutex::NonRecursive)
+DATVideostream::DATVideostream()
 {
     cleanUp();
     m_totalReceived = 0;

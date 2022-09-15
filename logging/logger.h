@@ -10,7 +10,7 @@
 #include <QThreadStorage>
 #include <QHash>
 #include <QStringList>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QObject>
 #include "logglobal.h"
 #include "logmessage.h"
@@ -139,7 +139,7 @@ protected:
     int bufferSize;
 
     /** Used to synchronize access of concurrent threads */
-    static QMutex mutex;
+    static QRecursiveMutex mutex;
 
     /**
       Decorate and write a log message to stderr. Override this method

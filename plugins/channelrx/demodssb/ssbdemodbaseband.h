@@ -19,7 +19,7 @@
 #define INCLUDE_SSBDEMODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/downchannelizer.h"
@@ -85,7 +85,7 @@ private:
     int m_channelSampleRate;
     MessageQueue *m_messageQueueToGUI;
     SpectrumVis *m_spectrumVis;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const SSBDemodSettings& settings, bool force = false);

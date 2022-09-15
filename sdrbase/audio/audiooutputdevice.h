@@ -19,7 +19,7 @@
 #ifndef INCLUDE_AUDIOOUTPUTDEVICE_H
 #define INCLUDE_AUDIOOUTPUTDEVICE_H
 
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QIODevice>
 #include <QAudioFormat>
 #include <list>
@@ -74,7 +74,7 @@ public:
 	void setVolume(float volume);
 
 private:
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 	QAudioOutput* m_audioOutput;
 	AudioNetSink* m_audioNetSink;
 	bool m_copyAudioToUdp;

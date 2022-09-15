@@ -40,7 +40,7 @@
 #include <QHostAddress>
 #include <QNetworkInterface>
 #include <QQueue>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include <stdint.h>
 #include <list>
@@ -362,7 +362,7 @@ private:
     std::list<RTPAddress> m_acceptList;
     std::list<RTPAddress> m_ignoreList;
     QQueue<RTPRawPacket*> m_rawPacketQueue;
-    QMutex m_rawPacketQueueLock;
+    QRecursiveMutex m_rawPacketQueueLock;
 
     bool ShouldAcceptData(const RTPAddress& address);
 

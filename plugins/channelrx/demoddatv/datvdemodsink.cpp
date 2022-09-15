@@ -46,8 +46,7 @@ DATVDemodSink::DATVDemodSink() :
     m_modcodCodeRate(-1),
     m_enmModulation(DATVDemodSettings::BPSK /*DATV_FM1*/),
     m_channelSampleRate(1024000),
-    m_messageQueueToGUI(nullptr),
-    m_mutex(QMutex::Recursive)
+    m_messageQueueToGUI(nullptr)
 {
     //*************** DATV PARAMETERS  ***************
     m_blnInitialized=false;

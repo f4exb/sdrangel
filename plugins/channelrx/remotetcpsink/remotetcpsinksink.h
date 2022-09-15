@@ -75,7 +75,7 @@ private:
     uint32_t m_channelIndex;
     float m_linearGain;
 
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     QTcpServer *m_server;
     QList<QTcpSocket *> m_clients;
 

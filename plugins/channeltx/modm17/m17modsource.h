@@ -19,7 +19,7 @@
 #define INCLUDE_M17MODSOURCE_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QVector>
 #include <QThread>
 
@@ -128,7 +128,7 @@ private:
     QThread m_processorThread;
     HighPassFilterRC m_preemphasisFilter;
 
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     static const int m_levelNbSamples;
     static const float m_preemphasis;

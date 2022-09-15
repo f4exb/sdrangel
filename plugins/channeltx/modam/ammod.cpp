@@ -56,7 +56,6 @@ const char* const AMMod::m_channelId ="AMMod";
 AMMod::AMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
-	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000)

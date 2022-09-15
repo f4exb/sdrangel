@@ -22,7 +22,7 @@
 #include <QObject>
 #include <QTcpSocket>
 #include <QHostAddress>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QDateTime>
 
 #include "util/messagequeue.h"
@@ -138,7 +138,7 @@ private:
     int32_t *m_converterBuffer;
     uint32_t m_converterBufferNbSamples;
 
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     RemoteTCPInputSettings m_settings;
 
     void applyTCPLink(const QString& address, quint16 port);

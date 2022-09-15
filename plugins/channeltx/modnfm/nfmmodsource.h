@@ -19,7 +19,7 @@
 #define INCLUDE_NFMMODSOURCE_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QVector>
 
 #include <iostream>
@@ -127,7 +127,7 @@ private:
 
     AudioCompressorSnd m_audioCompressor;
 
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     static const int m_levelNbSamples;
     static const float m_preemphasis;

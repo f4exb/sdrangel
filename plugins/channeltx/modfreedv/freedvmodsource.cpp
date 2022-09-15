@@ -46,8 +46,7 @@ FreeDVModSource::FreeDVModSource() :
 	m_iModem(0),
 	m_speechIn(nullptr),
 	m_modOut(nullptr),
-	m_scaleFactor(SDR_TX_SCALEF),
-    m_mutex(QMutex::Recursive)
+	m_scaleFactor(SDR_TX_SCALEF)
 {
     m_audioFifo.setLabel("FreeDVModSource.m_audioFifo");
     m_SSBFilter = new fftfilt(m_lowCutoff / m_audioSampleRate, m_hiCutoff / m_audioSampleRate, m_ssbFftLen);

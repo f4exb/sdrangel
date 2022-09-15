@@ -34,7 +34,6 @@
 // Note: When this object is created, QWidget* is converted to bool
 TVScreen::TVScreen(bool color, QWidget* parent) :
     QOpenGLWidget(parent),
-    m_mutex(QMutex::Recursive),
     m_glShaderArray(color)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);

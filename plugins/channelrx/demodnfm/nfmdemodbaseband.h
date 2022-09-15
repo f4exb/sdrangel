@@ -19,7 +19,7 @@
 #define INCLUDE_NFMDEMODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/downchannelizer.h"
@@ -80,7 +80,7 @@ private:
     NFMDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     NFMDemodSettings m_settings;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const NFMDemodSettings& settings, bool force = false);

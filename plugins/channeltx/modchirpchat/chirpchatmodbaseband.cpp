@@ -26,8 +26,7 @@
 MESSAGE_CLASS_DEFINITION(ChirpChatModBaseband::MsgConfigureChirpChatModBaseband, Message)
 MESSAGE_CLASS_DEFINITION(ChirpChatModBaseband::MsgConfigureChirpChatModPayload, Message)
 
-ChirpChatModBaseband::ChirpChatModBaseband() :
-    m_mutex(QMutex::Recursive)
+ChirpChatModBaseband::ChirpChatModBaseband()
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);

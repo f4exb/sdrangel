@@ -19,7 +19,7 @@
 #define INCLUDE_FREEDVDEMODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "util/message.h"
@@ -107,7 +107,7 @@ private:
     FreeDVDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     FreeDVDemodSettings m_settings;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     MessageQueue *m_messageQueueToGUI;
 
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }

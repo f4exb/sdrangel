@@ -23,7 +23,7 @@
 #include <QHash>
 #include <QNetworkRequest>
 #include <QDateTime>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -187,7 +187,7 @@ private:
     QDateTime m_mapDateTime;
     QDateTime m_systemDateTime;
     double m_multiplier;
-    QMutex m_dateTimeMutex;
+    QRecursiveMutex m_dateTimeMutex;
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

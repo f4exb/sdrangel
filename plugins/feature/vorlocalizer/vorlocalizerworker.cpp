@@ -47,7 +47,6 @@ VorLocalizerWorker::VorLocalizerWorker(WebAPIAdapterInterface *webAPIAdapterInte
     m_availableChannels(nullptr),
     m_running(false),
     m_updateTimer(this),
-    m_mutex(QMutex::Recursive),
     m_rrTimer(this)
 {
     qDebug("VorLocalizerWorker::VorLocalizerWorker");

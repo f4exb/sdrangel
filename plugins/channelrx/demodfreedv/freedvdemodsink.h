@@ -21,7 +21,7 @@
 #include <vector>
 
 #include <QTimer>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/ncof.h"
@@ -200,7 +200,7 @@ private:
 	int m_levelInNbSamples;
     Real m_rmsLevel;
     Real m_peakLevel;
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 
     static const unsigned int m_ssbFftLen;
     static const float m_agcTarget;

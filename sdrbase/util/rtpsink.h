@@ -20,7 +20,7 @@
 #define SDRBASE_UTIL_RTPSINK_H_
 
 #include <QString>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QDebug>
 #include <QHostAddress>
 #include <stdint.h>
@@ -84,7 +84,7 @@ protected:
     qrtplib::RTPUDPTransmissionParams m_rtpTransmissionParams;
     qrtplib::RTPUDPTransmitter m_rtpTransmitter;
     bool m_endianReverse;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 };
 
 
