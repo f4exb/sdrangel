@@ -83,7 +83,7 @@ endif()
 
 if(ENABLE_CHANNELRX_DEMODDSD AND LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)
-endif(LIBDSDCC_FOUND AND LIBMBE_FOUND)
+endif()
 
 if (ENABLE_CHANNELRX_REMOTESINK AND CM256CC_FOUND AND (HAS_SSE3 OR HAS_NEON))
     add_subdirectory(remotesink)
