@@ -52,7 +52,7 @@ VISA::VISA() :
         viFindRsrc = (ViStatus (*) (ViSession vi, ViString expr, ViPFindList li, ViPUInt32 retCnt, ViChar desc[])) libraryFunc(visaLibrary, "viFindRsrc");
         viFindNext = (ViStatus (*) (ViSession vi, ViChar desc[])) libraryFunc(visaLibrary, "viFindNext");
 
-        if (viOpenDefaultRM && viOpen && viClose && viPrintf) {
+        if (viOpenDefaultRM && viOpen && viClose && viPrintf && viFindRsrc && viFindNext) {
             m_available = true;
         }
     }
@@ -111,41 +111,49 @@ void VISA::close(ViSession session)
 
 QStringList VISA::processCommands(ViSession session, const QString& commands, bool *error)
 {
-    QStringList list = commands.split("\n");
     QStringList results;
-    ViStatus status;
 
-    if (error) {
-        *error = false;
-    }
-    for (int i = 0; i < list.size(); i++)
+    if (isAvailable())
     {
-        QString command = list[i].trimmed();
-        if (!command.isEmpty() && !command.startsWith("#"))   // Allow # to comment out lines
+        QStringList list = commands.split("\n");
+        ViStatus status;
+
+        if (error) {
+            *error = false;
+        }
+        for (int i = 0; i < list.size(); i++)
         {
-            if (m_debugIO) {
-                qDebug() << "VISA ->: " << command;
-            }
-            QByteArray bytes = QString("%1\n").arg(command).toLatin1();
-            char *cmd = bytes.data();
-            status = viPrintf(session, cmd);
-            if (error && status) {
-                *error = true;
-            }
-            if (command.contains("?"))
+            QString command = list[i].trimmed();
+            if (!command.isEmpty() && !command.startsWith("#"))   // Allow # to comment out lines
             {
-                char buf[1024] = "";
-                char format[] = "%t";
-                status = viScanf(session, format, buf);
+                if (m_debugIO) {
+                    qDebug() << "VISA ->: " << command;
+                }
+                QByteArray bytes = QString("%1\n").arg(command).toLatin1();
+                char *cmd = bytes.data();
+                status = viPrintf(session, cmd);
                 if (error && status) {
                     *error = true;
                 }
-                results.append(buf);
-                if (m_debugIO) {
-                    qDebug() << "VISA <-: " << QString(buf).trimmed();
+                if (command.contains("?"))
+                {
+                    char buf[1024] = "";
+                    char format[] = "%t";
+                    status = viScanf(session, format, buf);
+                    if (error && status) {
+                        *error = true;
+                    }
+                    results.append(buf);
+                    if (m_debugIO) {
+                        qDebug() << "VISA <-: " << QString(buf).trimmed();
+                    }
                 }
             }
         }
+    }
+    else if (error)
+    {
+        *error = true;
     }
     return results;
 }
@@ -153,20 +161,24 @@ QStringList VISA::processCommands(ViSession session, const QString& commands, bo
 QStringList VISA::findResources()
 {
     QStringList resources;
-    ViChar rsrc[VI_FIND_BUFLEN];
-    ViFindList list;
-    ViRsrc matches = rsrc;
-    ViUInt32 nMatches = 0;
-    ViChar expr[] = "?*INSTR";
 
-    if (VI_SUCCESS == viFindRsrc(m_defaultRM, expr, &list, &nMatches, matches))
+    if (isAvailable())
     {
-        if (nMatches > 0)
+        ViChar rsrc[VI_FIND_BUFLEN];
+        ViFindList list;
+        ViRsrc matches = rsrc;
+        ViUInt32 nMatches = 0;
+        ViChar expr[] = "?*INSTR";
+
+        if (VI_SUCCESS == viFindRsrc(m_defaultRM, expr, &list, &nMatches, matches))
         {
-            resources.append(QString(rsrc));
-            while (VI_SUCCESS == viFindNext(list, matches))
+            if (nMatches > 0)
             {
                 resources.append(QString(rsrc));
+                while (VI_SUCCESS == viFindNext(list, matches))
+                {
+                    resources.append(QString(rsrc));
+                }
             }
         }
     }
@@ -175,30 +187,33 @@ QStringList VISA::findResources()
 
 bool VISA::identification(ViSession session, QString &manufacturer, QString &model, QString &serialNumber, QString &revision)
 {
-    QStringList result = processCommands(session, "*IDN?");
-    if ((result.size() == 1) && (!result[0].isEmpty()))
+    if (isAvailable())
     {
-        QStringList details = result[0].trimmed().split(',');
-        manufacturer = details[0];
-        // Some serial devices (ASRLn) loop back the the command if not connected
-        if (manufacturer == "*IDN?") {
-            return false;
+        QStringList result = processCommands(session, "*IDN?");
+        if ((result.size() == 1) && (!result[0].isEmpty()))
+        {
+            QStringList details = result[0].trimmed().split(',');
+            manufacturer = details[0];
+            // Some serial devices (ASRLn) loop back the the command if not connected
+            if (manufacturer == "*IDN?") {
+                return false;
+            }
+            if (details.size() >= 2) {
+                model = details[1];
+            }
+            if (details.size() >= 3) {
+                serialNumber = details[2];
+            }
+            if (details.size() >= 4) {
+                revision = details[3];
+            }
+            qDebug() << "VISA::identification: "
+                     << "manufacturer: " << manufacturer
+                     << "model: " << model
+                     << "serialNumber: " << serialNumber
+                     << "revision: " << revision;
+            return true;
         }
-        if (details.size() >= 2) {
-            model = details[1];
-        }
-        if (details.size() >= 3) {
-            serialNumber = details[2];
-        }
-        if (details.size() >= 4) {
-            revision = details[3];
-        }
-        qDebug() << "VISA::identification: "
-                 << "manufacturer: " << manufacturer
-                 << "model: " << model
-                 << "serialNumber: " << serialNumber
-                 << "revision: " << revision;
-        return true;
     }
     return false;
 }
@@ -207,27 +222,31 @@ bool VISA::identification(ViSession session, QString &manufacturer, QString &mod
 QList<VISA::Instrument> VISA::instruments(QRegularExpression *filter)
 {
     QList<VISA::Instrument> instruments;
-    QStringList resourceList = findResources();
 
-    for (auto const &resource : resourceList)
+    if (isAvailable())
     {
-        if (filter)
+        QStringList resourceList = findResources();
+
+        for (auto const &resource : resourceList)
         {
-            if (filter->match(resource).hasMatch()) {
-                continue;
-            }
-        }
-        ViSession session = open(resource);
-        if (session)
-        {
-            Instrument instrument;
-            QString manufacturer, model, serialNumber, revision;
-            if (identification(session, instrument.m_manufacturer, instrument.m_model, instrument.m_serial, instrument.m_revision))
+            if (filter)
             {
-                instrument.m_resource = resource;
-                instruments.append(instrument);
+                if (filter->match(resource).hasMatch()) {
+                    continue;
+                }
             }
-            close(session);
+            ViSession session = open(resource);
+            if (session)
+            {
+                Instrument instrument;
+                QString manufacturer, model, serialNumber, revision;
+                if (identification(session, instrument.m_manufacturer, instrument.m_model, instrument.m_serial, instrument.m_revision))
+                {
+                    instrument.m_resource = resource;
+                    instruments.append(instrument);
+                }
+                close(session);
+            }
         }
     }
     return instruments;
