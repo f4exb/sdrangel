@@ -124,6 +124,7 @@ option(ENABLE_FEATURE_STARTRACKER "Enable feature startracker plugin" ON)
 option(ENABLE_FEATURE_RIGCTLSERVER "Enable feature rigctlserver plugin" ON)
 option(ENABLE_FEATURE_PERTESTER "Enable feature pertester plugin" ON)
 option(ENABLE_FEATURE_GS232CONTROLLER "Enable feature gs232controller plugin" ON)
+option(ENABLE_FEATURE_REMOTECONTROL "Enable feature remote control plugin" ON)
 
 # on windows always build external libraries
 if(WIN32)

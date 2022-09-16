@@ -73,3 +73,7 @@ endif()
 if (ENABLE_FEATURE_AMBE AND LIBSERIALDV_FOUND)
     add_subdirectory(ambe)
 endif()
+
+if (ENABLE_FEATURE_REMOTECONTROL)
+    add_subdirectory(remotecontrol)
+endif()
