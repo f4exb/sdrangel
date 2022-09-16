@@ -51,7 +51,7 @@
 #include <QtWidgets>
 
 #include "flowlayout.h"
-//! [1]
+
 FlowLayout::FlowLayout(QWidget *parent, int margin, int hSpacing, int vSpacing)
     : QLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing)
 {
@@ -63,25 +63,19 @@ FlowLayout::FlowLayout(int margin, int hSpacing, int vSpacing)
 {
     setContentsMargins(margin, margin, margin, margin);
 }
-//! [1]
 
-//! [2]
 FlowLayout::~FlowLayout()
 {
     QLayoutItem *item;
     while ((item = takeAt(0)))
         delete item;
 }
-//! [2]
 
-//! [3]
 void FlowLayout::addItem(QLayoutItem *item)
 {
     itemList.append(item);
 }
-//! [3]
 
-//! [4]
 int FlowLayout::horizontalSpacing() const
 {
     if (m_hSpace >= 0) {
@@ -99,9 +93,7 @@ int FlowLayout::verticalSpacing() const
         return smartSpacing(QStyle::PM_LayoutVerticalSpacing);
     }
 }
-//! [4]
 
-//! [5]
 int FlowLayout::count() const
 {
     return itemList.size();
@@ -118,16 +110,12 @@ QLayoutItem *FlowLayout::takeAt(int index)
         return itemList.takeAt(index);
     return nullptr;
 }
-//! [5]
 
-//! [6]
 Qt::Orientations FlowLayout::expandingDirections() const
 {
     return { };
 }
-//! [6]
 
-//! [7]
 bool FlowLayout::hasHeightForWidth() const
 {
     return true;
@@ -138,9 +126,7 @@ int FlowLayout::heightForWidth(int width) const
     int height = doLayout(QRect(0, 0, width, 0), true);
     return height;
 }
-//! [7]
 
-//! [8]
 void FlowLayout::setGeometry(const QRect &rect)
 {
     QLayout::setGeometry(rect);
@@ -162,9 +148,7 @@ QSize FlowLayout::minimumSize() const
     size += QSize(margins.left() + margins.right(), margins.top() + margins.bottom());
     return size;
 }
-//! [8]
 
-//! [9]
 int FlowLayout::doLayout(const QRect &rect, bool testOnly) const
 {
     int left, top, right, bottom;
@@ -173,39 +157,72 @@ int FlowLayout::doLayout(const QRect &rect, bool testOnly) const
     int x = effectiveRect.x();
     int y = effectiveRect.y();
     int lineHeight = 0;
-//! [9]
+    QList<int> maxLineHeights;
+    int maxLineHeight = 0;
 
-//! [10]
+    // In order to support vertical alignment and expanding widgets, we need to first calculate maxLineHeight
+    // for each row of widgets
+    if (!testOnly) {
+        for (QLayoutItem *item : qAsConst(itemList)) {
+            const QWidget *wid = item->widget();
+            int spaceX = horizontalSpacing();
+            if (spaceX == -1)
+                spaceX = wid->style()->layoutSpacing(QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
+
+            int nextX = x + item->sizeHint().width() + spaceX;
+            if (nextX - spaceX > effectiveRect.right() && lineHeight > 0) {
+                x = effectiveRect.x();
+                nextX = x + item->sizeHint().width() + spaceX;
+                maxLineHeights.append(lineHeight);
+                lineHeight = 0;
+            }
+
+            x = nextX;
+            lineHeight = qMax(lineHeight, item->sizeHint().height());
+        }
+        maxLineHeights.append(lineHeight);
+        maxLineHeight = maxLineHeights.takeFirst();
+        x = effectiveRect.x();
+        y = effectiveRect.y();
+    }
+
+    // Now do layout
     for (QLayoutItem *item : qAsConst(itemList)) {
         const QWidget *wid = item->widget();
         int spaceX = horizontalSpacing();
         if (spaceX == -1)
-            spaceX = wid->style()->layoutSpacing(
-                QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
+            spaceX = wid->style()->layoutSpacing(QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
         int spaceY = verticalSpacing();
         if (spaceY == -1)
-            spaceY = wid->style()->layoutSpacing(
-                QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
-//! [10]
-//! [11]
+            spaceY = wid->style()->layoutSpacing(QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
+
         int nextX = x + item->sizeHint().width() + spaceX;
         if (nextX - spaceX > effectiveRect.right() && lineHeight > 0) {
             x = effectiveRect.x();
             y = y + lineHeight + spaceY;
             nextX = x + item->sizeHint().width() + spaceX;
+            if (maxLineHeights.size() > 0) {
+                maxLineHeight = maxLineHeights.takeFirst();
+            }
             lineHeight = 0;
         }
 
         if (!testOnly)
-            item->setGeometry(QRect(QPoint(x, y), item->sizeHint()));
+        {
+            QSize size = item->sizeHint();
+            if (wid && (wid->sizePolicy().verticalPolicy() != QSizePolicy::Fixed)) {
+                size.setHeight(maxLineHeight);
+            }
+            QRect r(QPoint(x, y), size);
+            item->setGeometry(r);
+        }
 
         x = nextX;
         lineHeight = qMax(lineHeight, item->sizeHint().height());
     }
     return y + lineHeight - rect.y() + bottom;
 }
-//! [11]
-//! [12]
+
 int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const
 {
     QObject *parent = this->parent();
@@ -218,4 +235,3 @@ int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const
         return static_cast<QLayout *>(parent)->spacing();
     }
 }
-//! [12]
