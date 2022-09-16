@@ -69,7 +69,7 @@ The order of devices in the list determines the display order of the device's co
 
 The TP-Link fields must be completed in order to discover TP-Link Kasa Smart Plugs using TP-Link's protocol.
 
-Enter the e-mail address and password used for the TPLink Kasa Smart Home app.
+Enter the e-mail address and password used for the TP-Link Kasa Smart Home app.
 
 <h4>Home Assistant Settings</h4>
 
@@ -90,7 +90,7 @@ The Home Assistant fields must be completed in order to discover devices connect
 <h4>Chart Settings</h4>
 
 * Height - Specifies whether charts are a fixed height (Fixed), or can be expanded vertically (Expanding). This setting also determines where the 'Stack sub windows' button will place the GUI.
-* Height (pixels) - When 'Height' is 'Fixed', this specifies the height in pixels.
+* Height (pixels) - When 'Height' is 'Fixed', this specifies the height in pixels of each chart.
 
 <h2>Device Dialog</h2>
 
@@ -106,8 +106,15 @@ The device name is the name assigned by the selected protocol. If you wish to us
 The Controls and Sensors tables allow you to customize which are contols and sensors are visible in the GUI, via the checkbox in the Enable column.
 
 The Left Label and Right Label fields hold the text that will be displayed either side of the control or sensor in the GUI.
-The Left Label is initialised with the device name and the Right Label is initialised withthe units.
+The Left Label is initialised with the device name and the Right Label is initialised with the units.
 These fields can be changed by double clicking in the cell.
+
+The Format column in the sensor table allows custom formatting of sensor values in the GUI. 
+printf format specifiers can be used: 
+* %i for integers, 
+* %e, %f and %g for real numbers (floats) and 
+* %s for strings.
+By default, real numbers are displayed to 1 decimal place. To increase this to 3, you can use %.3f. 
 
 Checking the Plot column will result in a chart being drawn that plots sensor data verses time.
 All enabled sensors for a device will be plotted on the same chart.
@@ -134,8 +141,8 @@ The VISA Control Dialog allows the specification of a control for a VISA device.
    * List - For a list of text strings, selectable from a ComboBox in the GUI.
    * Button - For a button that executes a specific command, but does not have any state to be displayed. E.g. for a Reset button that executes *RST.
 * Units - The units of the control, if applicable. E.g V or Volts for a voltage control. This field is used as the default value for the Right Label in the GUI.
-* Set state - SCPI commands that set the state of the setting in the device. The value of the control in the GUI can be substituted in to the command by using %d for boolean and integer, %f for float and %s for strings.
-* Get state - SCPI commands that get the state of the setting in the device. This is used to update the control in the GUI.
+* Set state - SCPI commands that set the state in the device. The value of the control in the GUI can be substituted in to the command by using %d for boolean and integer, %f for float and %s for strings.
+* Get state - SCPI commands that get the state in the device. This is used to update the control in the GUI. If multiple queries are specified, the value is taken from the last response.
 
 <h3>VISA Sensor Dialog</h3>
 
