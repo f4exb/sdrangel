@@ -65,7 +65,8 @@ void HomeAssistantDevice::getState()
         QNetworkRequest request(url);
         request.setRawHeader("Authorization", "Bearer " + m_apiKey.toLocal8Bit());
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-        m_networkManager->get(request);
+        QNetworkReply *reply = m_networkManager->get(request);
+        recordGetRequest(reply);
     }
 }
 
@@ -84,6 +85,10 @@ void HomeAssistantDevice::setState(const QString &controlId, bool state)
     document.setObject(object);
 
     m_networkManager->post(request, document.toJson());
+
+    // 750ms guard, to try to avoid toggling of widget, while state updates on server
+    // Perhaps should be a setting
+    recordSetRequest(controlId, 750);
 }
 
 void HomeAssistantDevice::handleReply(QNetworkReply* reply)
@@ -92,44 +97,54 @@ void HomeAssistantDevice::handleReply(QNetworkReply* reply)
     {
         if (!reply->error())
         {
-            QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
-            //qDebug() << "Received " << document;
-            if (document.isObject())
+            QByteArray data = reply->readAll();
+            QJsonParseError error;
+            QJsonDocument document = QJsonDocument::fromJson(data, &error);
+            if (!document.isNull())
             {
-                QHash<QString, QVariant> status;
-                QJsonObject obj = document.object();
-
-                if (obj.contains(QStringLiteral("entity_id")) && obj.contains(QStringLiteral("state")))
+                //qDebug() << "Received " << document;
+                // POSTs to /api/services return an array, GETs from /api/states return an object
+                if (document.isObject())
                 {
-                    QString entityId = obj.value(QStringLiteral("entity_id")).toString();
-                    QString state = obj.value(QStringLiteral("state")).toString();
-                    bool dOk;
-                    bool iOk;
-                    int i = state.toInt(&iOk);
-                    double d = state.toDouble(&dOk);
-                    if ((state == "on") || (state == "playing")) {
-                        status.insert(entityId, 1);
-                    } else if ((state == "off") || (state == "paused")) {
-                        status.insert(entityId, 0);
-                    } else if (iOk) {
-                        status.insert(entityId, i);
-                    } else if (dOk) {
-                        status.insert(entityId, d);
-                    } else {
-                        status.insert(entityId, state);
+                    QJsonObject obj = document.object();
+
+                    if (obj.contains(QStringLiteral("entity_id")) && obj.contains(QStringLiteral("state")))
+                    {
+                        QString entityId = obj.value(QStringLiteral("entity_id")).toString();
+                        if (getAfterSet(reply, entityId))
+                        {
+                            QHash<QString, QVariant> status;
+                            QString state = obj.value(QStringLiteral("state")).toString();
+                            bool dOk;
+                            bool iOk;
+                            int i = state.toInt(&iOk);
+                            double d = state.toDouble(&dOk);
+                            if ((state == "on") || (state == "playing")) {
+                                status.insert(entityId, 1);
+                            } else if ((state == "off") || (state == "paused")) {
+                                status.insert(entityId, 0);
+                            } else if (iOk) {
+                                status.insert(entityId, i);
+                            } else if (dOk) {
+                                status.insert(entityId, d);
+                            } else {
+                                status.insert(entityId, state);
+                            }
+                            emit deviceUpdated(status);
+                        }
                     }
-                    emit deviceUpdated(status);
                 }
             }
             else
             {
-                qDebug() << "HomeAssistantDevice::handleReply: Document is not an object: " << document;
+                qDebug() << "HomeAssistantDevice::handleReply: Error parsing JSON: " << error.errorString() << " at offset " << error.offset;
             }
         }
         else
         {
             qDebug() << "HomeAssistantDevice::handleReply: error: " << reply->error();
         }
+        removeGetRequest(reply);
         reply->deleteLater();
     }
     else
@@ -294,7 +309,7 @@ void HomeAssistantDeviceDiscoverer::handleReply(QNetworkReply* reply)
             }
             else
             {
-                qDebug() << "HomeAssistantDeviceDiscoverer::handleReply: Error parson JSON: " << error.errorString() << " at offset " << error.offset;
+                qDebug() << "HomeAssistantDeviceDiscoverer::handleReply: Error parsing JSON: " << error.errorString() << " at offset " << error.offset;
             }
             emit deviceList(devices);
         }

@@ -154,6 +154,35 @@ void Device::setState(const QString &controlId, const QString &state)
     qDebug() << "Device::setState: " << getProtocol() << " doesn't support QString. Can't set " << controlId << " to " << state;
 }
 
+void Device::recordGetRequest(void *ptr)
+{
+    m_getRequests.insert(ptr, QDateTime::currentDateTime());
+}
+
+void Device::removeGetRequest(void *ptr)
+{
+    m_getRequests.remove(ptr);
+}
+
+void Device::recordSetRequest(const QString &id, int guardMS)
+{
+    m_setRequests.insert(id, QDateTime::currentDateTime().addMSecs(guardMS));
+}
+
+bool Device::getAfterSet(void *ptr, const QString &id)
+{
+    if (m_getRequests.contains(ptr) && m_setRequests.contains(id))
+    {
+        QDateTime getTime = m_getRequests.value(ptr);
+        QDateTime setTime = m_setRequests.value(id);
+        return getTime > setTime;
+    }
+    else
+    {
+        return true;
+    }
+}
+
 const QStringList DeviceDiscoverer::m_typeStrings = {
     "Auto",
     "Boolean",

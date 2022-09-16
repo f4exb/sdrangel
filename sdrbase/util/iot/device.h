@@ -139,6 +139,14 @@ signals:
 protected:
     DeviceDiscoverer::DeviceInfo m_info;
 
+    QHash<void *, QDateTime> m_getRequests;         // These data and functions help prevent using stale data from slow getStates
+    QHash<QString, QDateTime> m_setRequests;
+
+    void recordGetRequest(void *ptr);
+    void removeGetRequest(void *ptr);
+    void recordSetRequest(const QString &id, int guardMS=0);
+    bool getAfterSet(void *ptr, const QString &id);
+
 };
 
 #endif /* INCLUDE_DEVICE_H */

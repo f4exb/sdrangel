@@ -196,7 +196,9 @@ void TPLinkDevice::getState()
     QJsonDocument document;
     document.setObject(object);
 
-    m_networkManager->post(request, document.toJson());
+    QNetworkReply *reply = m_networkManager->post(request, document.toJson());
+
+    recordGetRequest(reply);
 }
 
 void TPLinkDevice::setState(const QString &controlId, bool state)
@@ -242,6 +244,8 @@ void TPLinkDevice::setState(const QString &controlId, bool state)
     document.setObject(object);
 
     m_networkManager->post(request, document.toJson());
+
+    recordSetRequest(controlId);
 }
 
 void TPLinkDevice::handleReply(QNetworkReply* reply)
@@ -264,99 +268,115 @@ void TPLinkDevice::handleReply(QNetworkReply* reply)
     {
         if (!reply->error())
         {
-            QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
-            if (document.isObject())
+            QByteArray data = reply->readAll();
+            QJsonParseError error;
+            QJsonDocument document = QJsonDocument::fromJson(data, &error);
+            if (!document.isNull())
             {
-                //qDebug() << "Received " << document;
-                QJsonObject obj = document.object();
-                if (obj.contains(QStringLiteral("result")))
+                if (document.isObject())
                 {
-                    QJsonObject resultObj = obj.value(QStringLiteral("result")).toObject();
-                    QHash<QString, QVariant> status;
-
-                    if (resultObj.contains(QStringLiteral("responseData")))
+                    //qDebug() << "Received " << document;
+                    QJsonObject obj = document.object();
+                    if (obj.contains(QStringLiteral("result")))
                     {
-                        QJsonObject responseDataObj = resultObj.value(QStringLiteral("responseData")).toObject();
-                        if (responseDataObj.contains(QStringLiteral("system")))
+                        QJsonObject resultObj = obj.value(QStringLiteral("result")).toObject();
+                        QHash<QString, QVariant> status;
+
+                        if (resultObj.contains(QStringLiteral("responseData")))
                         {
-                            QJsonObject systemObj = responseDataObj.value(QStringLiteral("system")).toObject();
-                            if (systemObj.contains(QStringLiteral("get_sysinfo")))
+                            QJsonObject responseDataObj = resultObj.value(QStringLiteral("responseData")).toObject();
+                            if (responseDataObj.contains(QStringLiteral("system")))
                             {
-                                QJsonObject sysInfoObj = systemObj.value(QStringLiteral("get_sysinfo")).toObject();
-                                if (sysInfoObj.contains(QStringLiteral("child_num")))
+                                QJsonObject systemObj = responseDataObj.value(QStringLiteral("system")).toObject();
+                                if (systemObj.contains(QStringLiteral("get_sysinfo")))
                                 {
-                                    QJsonArray children = sysInfoObj.value(QStringLiteral("children")).toArray();
-                                    for (auto childRef : children)
+                                    QJsonObject sysInfoObj = systemObj.value(QStringLiteral("get_sysinfo")).toObject();
+                                    if (sysInfoObj.contains(QStringLiteral("child_num")))
                                     {
-                                        QJsonObject childObj = childRef.toObject();
-                                        if (childObj.contains(QStringLiteral("state")) && childObj.contains(QStringLiteral("id")))
+                                        QJsonArray children = sysInfoObj.value(QStringLiteral("children")).toArray();
+                                        for (auto childRef : children)
                                         {
-                                            int state = childObj.value(QStringLiteral("state")).toInt();
-                                            QString id = childObj.value(QStringLiteral("id")).toString();
-                                            status.insert(id, state); // key should match id in discoverer
+                                            QJsonObject childObj = childRef.toObject();
+                                            if (childObj.contains(QStringLiteral("state")) && childObj.contains(QStringLiteral("id")))
+                                            {
+                                                QString id = childObj.value(QStringLiteral("id")).toString();
+                                                if (getAfterSet(reply, id))
+                                                {
+                                                    int state = childObj.value(QStringLiteral("state")).toInt();
+                                                    status.insert(id, state); // key should match id in discoverer
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else if (sysInfoObj.contains(QStringLiteral("relay_state")))
+                                    {
+                                        if (getAfterSet(reply, "switch"))
+                                        {
+                                            int state = sysInfoObj.value(QStringLiteral("relay_state")).toInt();
+                                            status.insert("switch", state); // key should match id in discoverer
                                         }
                                     }
                                 }
-                                else if (sysInfoObj.contains(QStringLiteral("relay_state")))
-                                {
-                                    int state = sysInfoObj.value(QStringLiteral("relay_state")).toInt();
-                                    status.insert("switch", state); // key should match id in discoverer
-                                }
                             }
-                        }
-                        // KP115 has emeter, but KP105 doesn't
-                        if (responseDataObj.contains(QStringLiteral("emeter")))
-                        {
-                            QJsonObject emeterObj = responseDataObj.value(QStringLiteral("emeter")).toObject();
-                            if (emeterObj.contains(QStringLiteral("get_realtime")))
+                            // KP115 has emeter, but KP105 doesn't
+                            if (responseDataObj.contains(QStringLiteral("emeter")))
                             {
-                                QJsonObject realtimeObj = emeterObj.value(QStringLiteral("get_realtime")).toObject();
-                                if (realtimeObj.contains(QStringLiteral("current_ma")))
+                                QJsonObject emeterObj = responseDataObj.value(QStringLiteral("emeter")).toObject();
+                                if (emeterObj.contains(QStringLiteral("get_realtime")))
                                 {
-                                    double current = realtimeObj.value(QStringLiteral("current_ma")).toDouble();
-                                    status.insert("current", current / 1000.0);
-                                }
-                                if (realtimeObj.contains(QStringLiteral("voltage_mv")))
-                                {
-                                    double voltage = realtimeObj.value(QStringLiteral("voltage_mv")).toDouble();
-                                    status.insert("voltage", voltage / 1000.0);
-                                }
-                                if (realtimeObj.contains(QStringLiteral("power_mw")))
-                                {
-                                    double power = realtimeObj.value(QStringLiteral("power_mw")).toDouble();
-                                    status.insert("power", power / 1000.0);
+                                    QJsonObject realtimeObj = emeterObj.value(QStringLiteral("get_realtime")).toObject();
+                                    if (realtimeObj.contains(QStringLiteral("current_ma")))
+                                    {
+                                        double current = realtimeObj.value(QStringLiteral("current_ma")).toDouble();
+                                        status.insert("current", current / 1000.0);
+                                    }
+                                    if (realtimeObj.contains(QStringLiteral("voltage_mv")))
+                                    {
+                                        double voltage = realtimeObj.value(QStringLiteral("voltage_mv")).toDouble();
+                                        status.insert("voltage", voltage / 1000.0);
+                                    }
+                                    if (realtimeObj.contains(QStringLiteral("power_mw")))
+                                    {
+                                        double power = realtimeObj.value(QStringLiteral("power_mw")).toDouble();
+                                        status.insert("power", power / 1000.0);
+                                    }
                                 }
                             }
                         }
+
+                        emit deviceUpdated(status);
                     }
+                    else if (obj.contains(QStringLiteral("error_code")))
+                    {
+                        // If a device isn't available, we can get:
+                        //    {"error_code":-20002,"msg":"Request timeout"}
+                        //    {"error_code":-20571,"msg":"Device is offline"}
+                        int errorCode = obj.value(QStringLiteral("error_code")).toInt();
+                        QString msg = obj.value(QStringLiteral("msg")).toString();
+                        qDebug() << "TPLinkDevice::handleReply: Error code: " << errorCode << " " << msg;
 
-                    emit deviceUpdated(status);
-                }
-                else if (obj.contains(QStringLiteral("error_code")))
-                {
-                    // If a device isn't available, we can get:
-                    //    {"error_code":-20002,"msg":"Request timeout"}
-                    //    {"error_code":-20571,"msg":"Device is offline"}
-                    int errorCode = obj.value(QStringLiteral("error_code")).toInt();
-                    QString msg = obj.value(QStringLiteral("msg")).toString();
-                    qDebug() << "TPLinkDevice::handleReply: Error code: " << errorCode << " " << msg;
-
-                    emit deviceUnavailable();
+                        emit deviceUnavailable();
+                    }
+                    else
+                    {
+                        qDebug() << "TPLinkDevice::handleReply: Object doesn't contain a result or error_code: " << obj;
+                    }
                 }
                 else
                 {
-                    qDebug() << "TPLinkDevice::handleReply: Object doesn't contain a result or error_code: " << obj;
+                    qDebug() << "TPLinkDevice::handleReply: Document is not an object: " << document;
                 }
             }
             else
             {
-                qDebug() << "TPLinkDevice::handleReply: Document is not an object: " << document;
+                qDebug() << "TPLinkDevice::handleReply: Error parsing JSON: " << error.errorString() << " at offset " << error.offset;
             }
         }
         else
         {
             qDebug() << "TPLinkDevice::handleReply: error: " << reply->error();
         }
+        removeGetRequest(reply);
         reply->deleteLater();
     }
     else
@@ -462,161 +482,170 @@ void TPLinkDeviceDiscoverer::handleReply(QNetworkReply* reply)
     {
         if (!reply->error())
         {
-            QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
-            if (document.isObject())
+            QByteArray data = reply->readAll();
+            QJsonParseError error;
+            QJsonDocument document = QJsonDocument::fromJson(data, &error);
+            if (!document.isNull())
             {
-                //qDebug() << "Received " << document;
-                QJsonObject obj = document.object();
-
-                if (m_getStateReplies.contains(reply))
+                if (document.isObject())
                 {
-                    // Reply for getState
-                    m_getStateReplies.remove(reply);
-                    QJsonObject resultObj = obj.value(QStringLiteral("result")).toObject();
-                    if (resultObj.contains(QStringLiteral("responseData")))
+                    //qDebug() << "Received " << document;
+                    QJsonObject obj = document.object();
+
+                    if (m_getStateReplies.contains(reply))
                     {
-                        QJsonObject responseDataObj = resultObj.value(QStringLiteral("responseData")).toObject();
-                        if (responseDataObj.contains(QStringLiteral("system")))
+                        // Reply for getState
+                        m_getStateReplies.remove(reply);
+                        QJsonObject resultObj = obj.value(QStringLiteral("result")).toObject();
+                        if (resultObj.contains(QStringLiteral("responseData")))
                         {
-                            DeviceInfo info;
-                            QJsonObject systemObj = responseDataObj.value(QStringLiteral("system")).toObject();
-                            if (systemObj.contains(QStringLiteral("get_sysinfo")))
+                            QJsonObject responseDataObj = resultObj.value(QStringLiteral("responseData")).toObject();
+                            if (responseDataObj.contains(QStringLiteral("system")))
                             {
-                                QJsonObject sysInfoObj = systemObj.value(QStringLiteral("get_sysinfo")).toObject();
-                                if (sysInfoObj.contains(QStringLiteral("alias"))) {
-                                    info.m_name = sysInfoObj.value(QStringLiteral("alias")).toString();
-                                }
-                                if (sysInfoObj.contains(QStringLiteral("model"))) {
-                                    info.m_model = sysInfoObj.value(QStringLiteral("model")).toString();
-                                }
-                                if (sysInfoObj.contains(QStringLiteral("deviceId"))) {
-                                    info.m_id = sysInfoObj.value(QStringLiteral("deviceId")).toString();
-                                }
-                                if (sysInfoObj.contains(QStringLiteral("child_num")))
+                                DeviceInfo info;
+                                QJsonObject systemObj = responseDataObj.value(QStringLiteral("system")).toObject();
+                                if (systemObj.contains(QStringLiteral("get_sysinfo")))
                                 {
-                                    QJsonArray children = sysInfoObj.value(QStringLiteral("children")).toArray();
-                                    int child = 1;
-                                    for (auto childRef : children)
+                                    QJsonObject sysInfoObj = systemObj.value(QStringLiteral("get_sysinfo")).toObject();
+                                    if (sysInfoObj.contains(QStringLiteral("alias"))) {
+                                        info.m_name = sysInfoObj.value(QStringLiteral("alias")).toString();
+                                    }
+                                    if (sysInfoObj.contains(QStringLiteral("model"))) {
+                                        info.m_model = sysInfoObj.value(QStringLiteral("model")).toString();
+                                    }
+                                    if (sysInfoObj.contains(QStringLiteral("deviceId"))) {
+                                        info.m_id = sysInfoObj.value(QStringLiteral("deviceId")).toString();
+                                    }
+                                    if (sysInfoObj.contains(QStringLiteral("child_num")))
                                     {
-                                        QJsonObject childObj = childRef.toObject();
+                                        QJsonArray children = sysInfoObj.value(QStringLiteral("children")).toArray();
+                                        int child = 1;
+                                        for (auto childRef : children)
+                                        {
+                                            QJsonObject childObj = childRef.toObject();
+                                            ControlInfo *controlInfo = new ControlInfo();
+                                            controlInfo->m_id = childObj.value(QStringLiteral("id")).toString();
+                                            if (childObj.contains(QStringLiteral("alias"))) {
+                                                controlInfo->m_name = childObj.value(QStringLiteral("alias")).toString();
+                                            }
+                                            controlInfo->m_type = DeviceDiscoverer::BOOL;
+                                            info.m_controls.append(controlInfo);
+                                            child++;
+                                        }
+                                    }
+                                    else if (sysInfoObj.contains(QStringLiteral("relay_state")))
+                                    {
                                         ControlInfo *controlInfo = new ControlInfo();
-                                        controlInfo->m_id = childObj.value(QStringLiteral("id")).toString();
-                                        if (childObj.contains(QStringLiteral("alias"))) {
-                                            controlInfo->m_name = childObj.value(QStringLiteral("alias")).toString();
+                                        controlInfo->m_id = "switch";
+                                        if (sysInfoObj.contains(QStringLiteral("alias"))) {
+                                            controlInfo->m_name = sysInfoObj.value(QStringLiteral("alias")).toString();
                                         }
                                         controlInfo->m_type = DeviceDiscoverer::BOOL;
                                         info.m_controls.append(controlInfo);
-                                        child++;
                                     }
-                                }
-                                else if (sysInfoObj.contains(QStringLiteral("relay_state")))
-                                {
-                                    ControlInfo *controlInfo = new ControlInfo();
-                                    controlInfo->m_id = "switch";
-                                    if (sysInfoObj.contains(QStringLiteral("alias"))) {
-                                        controlInfo->m_name = sysInfoObj.value(QStringLiteral("alias")).toString();
-                                    }
-                                    controlInfo->m_type = DeviceDiscoverer::BOOL;
-                                    info.m_controls.append(controlInfo);
-                                }
-                            }
-                            else
-                            {
-                                qDebug() << "TPLinkDeviceDiscoverer::handleReply: get_sysinfo missing";
-                            }
-                            // KP115 has energy meter, but KP105 doesn't. KP105 will have emeter object, but without get_realtime sub-object
-                            if (responseDataObj.contains(QStringLiteral("emeter")))
-                            {
-                                QJsonObject emeterObj = responseDataObj.value(QStringLiteral("emeter")).toObject();
-                                if (emeterObj.contains(QStringLiteral("get_realtime")))
-                                {
-                                    QJsonObject realtimeObj = emeterObj.value(QStringLiteral("get_realtime")).toObject();
-                                    if (realtimeObj.contains(QStringLiteral("current_ma")))
-                                    {
-                                        SensorInfo *currentSensorInfo = new SensorInfo();
-                                        currentSensorInfo->m_name = "Current";
-                                        currentSensorInfo->m_id = "current";
-                                        currentSensorInfo->m_type = DeviceDiscoverer::FLOAT;
-                                        currentSensorInfo->m_units = "A";
-                                        info.m_sensors.append(currentSensorInfo);
-                                    }
-                                    if (realtimeObj.contains(QStringLiteral("voltage_mv")))
-                                    {
-                                        SensorInfo *voltageSensorInfo = new SensorInfo();
-                                        voltageSensorInfo->m_name = "Voltage";
-                                        voltageSensorInfo->m_id = "voltage";
-                                        voltageSensorInfo->m_type = DeviceDiscoverer::FLOAT;
-                                        voltageSensorInfo->m_units = "V";
-                                        info.m_sensors.append(voltageSensorInfo);
-                                    }
-                                    if (realtimeObj.contains(QStringLiteral("power_mw")))
-                                    {
-                                        SensorInfo *powerSensorInfo = new SensorInfo();
-                                        powerSensorInfo->m_name = "Power";
-                                        powerSensorInfo->m_id = "power";
-                                        powerSensorInfo->m_type = DeviceDiscoverer::FLOAT;
-                                        powerSensorInfo->m_units = "W";
-                                        info.m_sensors.append(powerSensorInfo);
-                                    }
-                                }
-                            }
-                            if (info.m_controls.size() > 0) {
-                                m_devices.append(info);
-                            } else {
-                                qDebug() << "TPLinkDeviceDiscoverer::handleReply: No controls in info";
-                            }
-
-                        }
-                    }
-                    else
-                    {
-                        qDebug() << "TPLinkDeviceDiscoverer::handleReply: No responseData";
-                    }
-
-                    if (m_getStateReplies.size() == 0)
-                    {
-                        emit deviceList(m_devices);
-                        m_devices.clear();
-                    }
-
-                }
-                else
-                {
-                    // Reply for getDevice
-                    if (obj.contains(QStringLiteral("result")))
-                    {
-                        QJsonObject resultObj = obj.value(QStringLiteral("result")).toObject();
-                        if (resultObj.contains(QStringLiteral("deviceList")))
-                        {
-                            QJsonArray deviceArray = resultObj.value(QStringLiteral("deviceList")).toArray();
-                            for (auto deviceRef : deviceArray)
-                            {
-                                QJsonObject deviceObj = deviceRef.toObject();
-                                if (deviceObj.contains(QStringLiteral("deviceId")) && deviceObj.contains(QStringLiteral("deviceType")))
-                                {
-                                    // In order to discover what controls and sensors a device has, we need to get sysinfo
-                                    getState(deviceObj.value(QStringLiteral("deviceId")).toString());
                                 }
                                 else
                                 {
-                                    qDebug() << "TPLinkDeviceDiscoverer::handleReply: deviceList element doesn't contain a deviceId: " << deviceObj;
+                                    qDebug() << "TPLinkDeviceDiscoverer::handleReply: get_sysinfo missing";
                                 }
+                                // KP115 has energy meter, but KP105 doesn't. KP105 will have emeter object, but without get_realtime sub-object
+                                if (responseDataObj.contains(QStringLiteral("emeter")))
+                                {
+                                    QJsonObject emeterObj = responseDataObj.value(QStringLiteral("emeter")).toObject();
+                                    if (emeterObj.contains(QStringLiteral("get_realtime")))
+                                    {
+                                        QJsonObject realtimeObj = emeterObj.value(QStringLiteral("get_realtime")).toObject();
+                                        if (realtimeObj.contains(QStringLiteral("current_ma")))
+                                        {
+                                            SensorInfo *currentSensorInfo = new SensorInfo();
+                                            currentSensorInfo->m_name = "Current";
+                                            currentSensorInfo->m_id = "current";
+                                            currentSensorInfo->m_type = DeviceDiscoverer::FLOAT;
+                                            currentSensorInfo->m_units = "A";
+                                            info.m_sensors.append(currentSensorInfo);
+                                        }
+                                        if (realtimeObj.contains(QStringLiteral("voltage_mv")))
+                                        {
+                                            SensorInfo *voltageSensorInfo = new SensorInfo();
+                                            voltageSensorInfo->m_name = "Voltage";
+                                            voltageSensorInfo->m_id = "voltage";
+                                            voltageSensorInfo->m_type = DeviceDiscoverer::FLOAT;
+                                            voltageSensorInfo->m_units = "V";
+                                            info.m_sensors.append(voltageSensorInfo);
+                                        }
+                                        if (realtimeObj.contains(QStringLiteral("power_mw")))
+                                        {
+                                            SensorInfo *powerSensorInfo = new SensorInfo();
+                                            powerSensorInfo->m_name = "Power";
+                                            powerSensorInfo->m_id = "power";
+                                            powerSensorInfo->m_type = DeviceDiscoverer::FLOAT;
+                                            powerSensorInfo->m_units = "W";
+                                            info.m_sensors.append(powerSensorInfo);
+                                        }
+                                    }
+                                }
+                                if (info.m_controls.size() > 0) {
+                                    m_devices.append(info);
+                                } else {
+                                    qDebug() << "TPLinkDeviceDiscoverer::handleReply: No controls in info";
+                                }
+
                             }
                         }
                         else
                         {
-                            qDebug() << "TPLinkDeviceDiscoverer::handleReply: result doesn't contain a deviceList: " << resultObj;
+                            qDebug() << "TPLinkDeviceDiscoverer::handleReply: No responseData";
                         }
+
+                        if (m_getStateReplies.size() == 0)
+                        {
+                            emit deviceList(m_devices);
+                            m_devices.clear();
+                        }
+
                     }
                     else
                     {
-                        qDebug() << "TPLinkDeviceDiscoverer::handleReply: Object doesn't contain a result: " << obj;
+                        // Reply for getDevice
+                        if (obj.contains(QStringLiteral("result")))
+                        {
+                            QJsonObject resultObj = obj.value(QStringLiteral("result")).toObject();
+                            if (resultObj.contains(QStringLiteral("deviceList")))
+                            {
+                                QJsonArray deviceArray = resultObj.value(QStringLiteral("deviceList")).toArray();
+                                for (auto deviceRef : deviceArray)
+                                {
+                                    QJsonObject deviceObj = deviceRef.toObject();
+                                    if (deviceObj.contains(QStringLiteral("deviceId")) && deviceObj.contains(QStringLiteral("deviceType")))
+                                    {
+                                        // In order to discover what controls and sensors a device has, we need to get sysinfo
+                                        getState(deviceObj.value(QStringLiteral("deviceId")).toString());
+                                    }
+                                    else
+                                    {
+                                        qDebug() << "TPLinkDeviceDiscoverer::handleReply: deviceList element doesn't contain a deviceId: " << deviceObj;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                qDebug() << "TPLinkDeviceDiscoverer::handleReply: result doesn't contain a deviceList: " << resultObj;
+                            }
+                        }
+                        else
+                        {
+                            qDebug() << "TPLinkDeviceDiscoverer::handleReply: Object doesn't contain a result: " << obj;
+                        }
                     }
+                }
+                else
+                {
+                    qDebug() << "TPLinkDeviceDiscoverer::handleReply: Document is not an object: " << document;
                 }
             }
             else
             {
-                qDebug() << "TPLinkDeviceDiscoverer::handleReply: Document is not an object: " << document;
+                qDebug() << "TPLinkDeviceDiscoverer::handleReply: Error parsing JSON: " << error.errorString() << " at offset " << error.offset;
             }
         }
         else
