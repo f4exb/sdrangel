@@ -65,6 +65,7 @@ set(sdrgui_SOURCES
     gui/samplingdevicedialog.cpp
     gui/scaleengine.cpp
     gui/scaledimage.cpp
+    gui/scidoublespinbox.cpp
     gui/sdrangelsplash.cpp
     gui/spectrumcalibrationpointsdialog.cpp
     gui/spectrummarkersdialog.cpp
@@ -168,6 +169,7 @@ set(sdrgui_HEADERS
     gui/samplingdevicedialog.h
     gui/scaleengine.h
     gui/scaledimage.h
+    gui/scidoublespinbox.h
     gui/sdrangelsplash.h
     gui/spectrumcalibrationpointsdialog.h
     gui/spectrummarkersdialog.h
