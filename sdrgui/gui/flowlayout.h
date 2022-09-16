@@ -51,11 +51,13 @@
 #ifndef FLOWLAYOUT_H
 #define FLOWLAYOUT_H
 
+#include "export.h"
+
 #include <QLayout>
 #include <QRect>
 #include <QStyle>
 //! [0]
-class FlowLayout : public QLayout
+class SDRGUI_API FlowLayout : public QLayout
 {
 public:
     explicit FlowLayout(QWidget *parent, int margin = -1, int hSpacing = -1, int vSpacing = -1);
