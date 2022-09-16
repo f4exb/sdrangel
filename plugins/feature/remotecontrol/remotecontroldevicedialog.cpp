@@ -162,6 +162,7 @@ void RemoteControlDeviceDialog::enableWidgets()
 
 void RemoteControlDeviceDialog::controlSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
+    (void)deselected;
     bool arrowsEnabled = (selected.indexes().size() > 0);
     bool editEnabled = arrowsEnabled && (ui->protocol->currentText() == "VISA");
 
@@ -173,6 +174,7 @@ void RemoteControlDeviceDialog::controlSelectionChanged(const QItemSelection &se
 
 void RemoteControlDeviceDialog::sensorSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
+    (void)deselected;
     bool arrowsEnabled = (selected.indexes().size() > 0);
     bool editEnabled = arrowsEnabled && (ui->protocol->currentText() == "VISA");
 
@@ -419,8 +421,6 @@ void RemoteControlDeviceDialog::on_controlEdit_clicked()
         RemoteControlVISAControlDialog dialog(m_settings, m_rcDevice, control, false);
         if (dialog.exec() == QDialog::Accepted)
         {
-            DeviceDiscoverer::DeviceInfo *info = &m_deviceInfo[ui->device->currentIndex()];
-
             ui->controls->item(row, COL_NAME)->setText(control->m_name);
             ui->controls->item(row, COL_UNITS)->setText(control->m_units);
             ui->controls->item(row, COL_ID)->setText(control->m_id);
@@ -430,6 +430,7 @@ void RemoteControlDeviceDialog::on_controlEdit_clicked()
 
 void RemoteControlDeviceDialog::on_controls_cellDoubleClicked(int row, int column)
 {
+    (void)row;
     if ((ui->protocol->currentText() == "VISA") && (column <= COL_ID)) {
         on_controlEdit_clicked();
     }
@@ -547,8 +548,6 @@ void RemoteControlDeviceDialog::on_sensorEdit_clicked()
         RemoteControlVISASensorDialog dialog(m_settings, m_rcDevice, sensor, false);
         if (dialog.exec() == QDialog::Accepted)
         {
-            DeviceDiscoverer::DeviceInfo *info = &m_deviceInfo[ui->device->currentIndex()];
-
             ui->sensors->item(row, COL_NAME)->setText(sensor->m_name);
             ui->sensors->item(row, COL_ID)->setText(sensor->m_id);
             ui->sensors->item(row, COL_UNITS)->setText(sensor->m_units);
@@ -558,6 +557,7 @@ void RemoteControlDeviceDialog::on_sensorEdit_clicked()
 
 void RemoteControlDeviceDialog::on_sensors_cellDoubleClicked(int row, int column)
 {
+    (void)row;
     if ((ui->protocol->currentText() == "VISA") && (column <= COL_ID)) {
         on_sensorEdit_clicked();
     }

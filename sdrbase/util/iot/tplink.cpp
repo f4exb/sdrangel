@@ -285,7 +285,6 @@ void TPLinkDevice::handleReply(QNetworkReply* reply)
                                 QJsonObject sysInfoObj = systemObj.value(QStringLiteral("get_sysinfo")).toObject();
                                 if (sysInfoObj.contains(QStringLiteral("child_num")))
                                 {
-                                    int childNum = sysInfoObj.value(QStringLiteral("child_num")).toInt();
                                     QJsonArray children = sysInfoObj.value(QStringLiteral("children")).toArray();
                                     for (auto childRef : children)
                                     {
@@ -495,7 +494,6 @@ void TPLinkDeviceDiscoverer::handleReply(QNetworkReply* reply)
                                 }
                                 if (sysInfoObj.contains(QStringLiteral("child_num")))
                                 {
-                                    int childNum = sysInfoObj.value(QStringLiteral("child_num")).toInt();
                                     QJsonArray children = sysInfoObj.value(QStringLiteral("children")).toArray();
                                     int child = 1;
                                     for (auto childRef : children)

@@ -155,11 +155,13 @@ void RemoteControlVISAControlDialog::on_name_textChanged(const QString &text)
 
 void RemoteControlVISAControlDialog::on_id_textChanged(const QString &text)
 {
+    (void)text;
     validate();
 }
 
 void RemoteControlVISAControlDialog::on_id_textEdited(const QString &text)
 {
+    (void)text;
     m_userHasEditedId = true;
 }
 

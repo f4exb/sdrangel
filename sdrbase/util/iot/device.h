@@ -57,6 +57,7 @@ public:
         QString m_units;
 
         ControlInfo();
+        virtual ~ControlInfo() {}
         operator QString() const;
         virtual ControlInfo *clone() const;
         virtual QByteArray serialize() const;
@@ -69,6 +70,7 @@ public:
         Type m_type;
         QString m_units;        // W/Watts etc
 
+	virtual ~SensorInfo() {}
         operator QString() const;
         virtual SensorInfo *clone() const;
         virtual QByteArray serialize() const;
@@ -122,10 +124,10 @@ public:
     static bool checkSettings(const QHash<QString, QVariant>& settings, const QString& protocol);
 
     virtual void getState() = 0;
-    virtual void setState(const QString &controlId, bool state) {}
-    virtual void setState(const QString &controlId, int state) {}
-    virtual void setState(const QString &controlId, float state) {}
-    virtual void setState(const QString &controlId, const QString &state) {}
+    virtual void setState(const QString &controlId, bool state);
+    virtual void setState(const QString &controlId, int state);
+    virtual void setState(const QString &controlId, float state);
+    virtual void setState(const QString &controlId, const QString &state);
     virtual QString getProtocol() const = 0;
     virtual QString getDeviceId() const = 0;
 

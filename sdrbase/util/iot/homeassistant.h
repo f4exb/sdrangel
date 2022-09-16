@@ -30,6 +30,7 @@ public:
                         DeviceDiscoverer::DeviceInfo *info=nullptr);
     ~HomeAssistantDevice();
     virtual void getState() override;
+    using Device::setState;
     virtual void setState(const QString &controlId, bool state) override;
     virtual QString getProtocol() const override { return "HomeAssistant"; }
     virtual QString getDeviceId() const override { return m_deviceId; }

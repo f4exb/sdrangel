@@ -47,6 +47,7 @@ public:
                DeviceDiscoverer::DeviceInfo *info=nullptr);
     ~VISADevice();
     virtual void getState() override;
+    using Device::setState;
     virtual void setState(const QString &controlId, bool state) override;
     virtual void setState(const QString &controlId, int state) override;
     virtual void setState(const QString &controlId, float state) override;

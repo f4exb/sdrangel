@@ -23,8 +23,8 @@
 
 RemoteControlSettingsDialog::RemoteControlSettingsDialog(RemoteControlSettings *settings, QWidget* parent) :
     QDialog(parent),
-    m_settings(settings),
-    ui(new Ui::RemoteControlSettingsDialog)
+    ui(new Ui::RemoteControlSettingsDialog),
+    m_settings(settings)
 {
     ui->setupUi(this);
     resizeTable();
@@ -121,11 +121,14 @@ void RemoteControlSettingsDialog::accept()
 
 void RemoteControlSettingsDialog::on_devices_cellDoubleClicked(int row, int column)
 {
+    (void)row;
+    (void)column;
     on_edit_clicked();
 }
 
 void RemoteControlSettingsDialog::devicesSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
+    (void)deselected;
     bool enabled = selected.indexes().size() > 0;
     ui->remove->setEnabled(enabled);
     ui->edit->setEnabled(enabled);

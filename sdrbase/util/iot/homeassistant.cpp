@@ -30,9 +30,9 @@ HomeAssistantDevice::HomeAssistantDevice(const QString& apiKey, const QString& u
                                         const QStringList &controls, const QStringList &sensors,
                                         DeviceDiscoverer::DeviceInfo *info) :
     Device(info),
+    m_deviceId(deviceId),
     m_apiKey(apiKey),
-    m_url(url),
-    m_deviceId(deviceId)
+    m_url(url)
 {
     m_entities = controls;
     m_entities.append(sensors);

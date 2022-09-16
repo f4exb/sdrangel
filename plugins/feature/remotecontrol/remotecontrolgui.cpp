@@ -471,6 +471,7 @@ void RemoteControlGUI::createControls(RemoteControlDeviceGUI *gui, QBoxLayout *v
                 connect(button, &QToolButton::clicked,
                     [=] (bool checked)
                     {
+                        (void) checked;
                         RemoteControl::MsgDeviceSetState *message = RemoteControl::MsgDeviceSetState::create(gui->m_rcDevice->m_protocol,
                                                                                                  gui->m_rcDevice->m_info.m_id,
                                                                                                  control.m_id,
@@ -483,6 +484,9 @@ void RemoteControlGUI::createControls(RemoteControlDeviceGUI *gui, QBoxLayout *v
             }
             break;
 
+        default:
+            qDebug() << "RemoteControlGUI::createControls: Unexpected type for control.";
+            break;
 
         }
         gui->m_controls.insert(control.m_id, widgets);
@@ -824,7 +828,7 @@ void RemoteControlGUI::updateControl(QWidget *widget, const DeviceDiscoverer::Co
 {
     if (ButtonSwitch *button = qobject_cast<ButtonSwitch *>(widget))
     {
-        if (value.type() == QMetaType::QString)
+        if ((QMetaType::Type)value.type() == QMetaType::QString)
         {
             if (value.toString() == "unavailable")
             {
@@ -1007,7 +1011,7 @@ void RemoteControlGUI::updateChart(RemoteControlDeviceGUI *deviceGUI, const QStr
     {
         formattedValue = QString::asprintf(format.toUtf8(), value.toInt());
     }
-    else if ((value.type() == QMetaType::Double) || (value.type() == QMetaType::Float))
+    else if (((QMetaType::Type)value.type() == QMetaType::Double) || ((QMetaType::Type)value.type() == QMetaType::Float))
     {
         if (format.isEmpty()) {
             format = "%.1f";

@@ -44,6 +44,7 @@ public:
     TPLinkDevice(const QString& username, const QString &password, const QString &deviceId, DeviceDiscoverer::DeviceInfo *info=nullptr);
     ~TPLinkDevice();
     virtual void getState() override;
+    using Device::setState;
     virtual void setState(const QString &controlId, bool state) override;
     virtual QString getProtocol() const override { return "TPLink"; }
     virtual QString getDeviceId() const override { return m_deviceId; }

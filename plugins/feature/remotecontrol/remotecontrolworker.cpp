@@ -102,22 +102,22 @@ bool RemoteControlWorker::handleMessage(const Message& cmd)
             QString id = msg.getId();
             QVariant variant = msg.getValue();
 
-            if (variant.type() == QMetaType::Bool)
+            if ((QMetaType::Type)variant.type() == QMetaType::Bool)
             {
                 bool b = variant.toBool();
                 device->setState(id, b);
             }
-            else if (variant.type() == QMetaType::Int)
+            else if ((QMetaType::Type)variant.type() == QMetaType::Int)
             {
                 int i = variant.toInt();
                 device->setState(id, i);
             }
-            else if (variant.type() == QMetaType::Float)
+            else if ((QMetaType::Type)variant.type() == QMetaType::Float)
             {
                 float f = variant.toFloat();
                 device->setState(id, f);
             }
-            else if (variant.type() == QMetaType::QString)
+            else if ((QMetaType::Type)variant.type() == QMetaType::QString)
             {
                 QString s = variant.toString();
                 device->setState(id, s);

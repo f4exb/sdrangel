@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QMap>
+#include <QDataStream>
 #include "dsp/dsptypes.h"
 #include "export.h"
 

@@ -52,42 +52,41 @@ Device* Device::create(const QHash<QString, QVariant>& settings, const QString& 
             else
             {
                 qDebug() << "Device::create: A deviceId is required for: " << protocol;
-                return nullptr;
             }
         }
         else if (protocol == "HomeAssistant")
         {
-            if (checkSettings(settings, protocol))
+            if (settings.contains("deviceId"))
             {
-                if (settings.contains("deviceId"))
-                {
-                    return new HomeAssistantDevice(settings.value("apiKey").toString(),
-                                                   settings.value("url").toString(),
-                                                   settings.value("deviceId").toString(),
-                                                   settings.value("controlIds").toStringList(),
-                                                   settings.value("sensorIds").toStringList(),
-                                                   info);
-                }
-                else
-                {
-                    qDebug() << "Device::create: A deviceId is required for: " << protocol;
-                    return nullptr;
-                }
+                return new HomeAssistantDevice(settings.value("apiKey").toString(),
+                                               settings.value("url").toString(),
+                                               settings.value("deviceId").toString(),
+                                               settings.value("controlIds").toStringList(),
+                                               settings.value("sensorIds").toStringList(),
+                                               info);
+            }
+            else
+            {
+                qDebug() << "Device::create: A deviceId is required for: " << protocol;
             }
         }
         else if (protocol == "VISA")
         {
-            return new VISADevice(settings,
-                                  settings.value("deviceId").toString(),
-                                  settings.value("controlIds").toStringList(),
-                                  settings.value("sensorIds").toStringList(),
-                                  info);
+            if (settings.contains("deviceId"))
+            {
+                return new VISADevice(settings,
+                                      settings.value("deviceId").toString(),
+                                      settings.value("controlIds").toStringList(),
+                                      settings.value("sensorIds").toStringList(),
+                                      info);
+            }
+            else
+            {
+                qDebug() << "Device::create: A deviceId is required for: " << protocol;
+            }
         }
     }
-    else
-    {
-        return nullptr;
-    }
+    return nullptr;
 }
 
 bool Device::checkSettings(const QHash<QString, QVariant>& settings, const QString& protocol)
@@ -133,6 +132,26 @@ bool Device::checkSettings(const QHash<QString, QVariant>& settings, const QStri
         qDebug() << "Device::checkSettings: Unsupported protocol: " << protocol;
         return false;
     }
+}
+
+void Device::setState(const QString &controlId, bool state)
+{
+    qDebug() << "Device::setState: " << getProtocol() << " doesn't support bool. Can't set " << controlId << " to " << state;
+}
+
+void Device::setState(const QString &controlId, int state)
+{
+    qDebug() << "Device::setState: " << getProtocol() << " doesn't support int. Can't set " << controlId << " to " << state;
+}
+
+void Device::setState(const QString &controlId, float state)
+{
+    qDebug() << "Device::setState: " << getProtocol() << " doesn't support float. Can't set " << controlId << " to " << state;
+}
+
+void Device::setState(const QString &controlId, const QString &state)
+{
+    qDebug() << "Device::setState: " << getProtocol() << " doesn't support QString. Can't set " << controlId << " to " << state;
 }
 
 const QStringList DeviceDiscoverer::m_typeStrings = {
@@ -446,7 +465,7 @@ void DeviceDiscoverer::DeviceInfo::deleteSensor(const QString &id)
 QDataStream& operator<<(QDataStream& out, const DeviceDiscoverer::ControlInfo* control)
 {
     int typeId;
-    if (const VISADevice::VISAControl* c = dynamic_cast<const VISADevice::VISAControl *>(control)) {
+    if (dynamic_cast<const VISADevice::VISAControl *>(control)) {
         typeId = 1;
     } else {
         typeId = 0;
@@ -474,7 +493,7 @@ QDataStream& operator>>(QDataStream& in, DeviceDiscoverer::ControlInfo*& control
 QDataStream& operator<<(QDataStream& out, const DeviceDiscoverer::SensorInfo* sensor)
 {
     int typeId;
-    if (const VISADevice::VISASensor* s = dynamic_cast<const VISADevice::VISASensor *>(sensor)) {
+    if (dynamic_cast<const VISADevice::VISASensor *>(sensor)) {
         typeId = 1;
     } else {
         typeId = 0;

@@ -65,11 +65,13 @@ void RemoteControlVISASensorDialog::on_name_textChanged(const QString &text)
 
 void RemoteControlVISASensorDialog::on_id_textChanged(const QString &text)
 {
+    (void)text;
     validate();
 }
 
 void RemoteControlVISASensorDialog::on_id_textEdited(const QString &text)
 {
+    (void)text;
     m_userHasEditedId = true;
 }
 
