@@ -114,16 +114,17 @@ printf format specifiers can be used:
 * %i for integers, 
 * %e, %f and %g for real numbers (floats) and 
 * %s for strings.
+
 By default, real numbers are displayed to 1 decimal place. To increase this to 3, you can use %.3f. 
 
-Checking the Plot column will result in a chart being drawn that plots sensor data verses time.
+Checking the Plot column will result in a chart being drawn that plots sensor data versus time.
 All enabled sensors for a device will be plotted on the same chart.
 The Y Axis field below the table determines whether each series will have it's own Y axis (Per-sensor) or whether a single Y axis will be used for all series (Common).
 
 The Layout fields control how the Controls and Sensors will be laid-out in the GUI. This can be set to be either Horizontally or Vertically.
 
 When the Protocol is set to VISA, additional buttons will be displayed under the tables that allow controls and sensors to be added or removed, as unlike when selecting
-TP-Link and Home Assitant devices, these are not automatically defined.
+TP-Link and Home Assitant devices, these are not automatically defined for most instruments. Some basic controls are included for Rigol DP832 and Siglent SSA3032X.
 
 <h3>VISA Control Dialog</h3>
 
