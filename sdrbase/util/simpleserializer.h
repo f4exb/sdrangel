@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QMap>
+#include <QDataStream>
 #include "dsp/dsptypes.h"
 #include "export.h"
 
@@ -26,9 +27,29 @@ public:
 	void writeString(quint32 id, const QString& value);
 	void writeBlob(quint32 id, const QByteArray& value);
 
+	template<typename T>
+	void writeList(quint32 id, const QList<T>& value)
+	{
+		QByteArray data;
+		QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
+		(*stream) << value;
+		delete stream;
+		writeBlob(id, data);
+	}
+	template<typename TK, typename TV>
+	void writeHash(quint32 id, const QHash<TK,TV>& value)
+	{
+		QByteArray data;
+		QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
+		(*stream) << value;
+		delete stream;
+		writeBlob(id, data);
+	}
+
 	const QByteArray& final();
 
 protected:
+    // Lists and hashes are written as TBlob
 	enum Type {
 		TSigned32 = 0,
 		TUnsigned32 = 1,
@@ -62,6 +83,33 @@ public:
 	bool readBool(quint32 id, bool* result, bool def = false) const;
 	bool readString(quint32 id, QString* result, const QString& def = QString()) const;
 	bool readBlob(quint32 id, QByteArray* result, const QByteArray& def = QByteArray()) const;
+
+	template<typename T>
+	bool readList(quint32 id, QList<T>* result)
+	{
+		QByteArray data;
+		bool ok = readBlob(id, &data);
+		if (ok)
+		{
+			QDataStream *stream = new QDataStream(data);
+			(*stream) >> *result;
+			delete stream;
+		}
+		return ok;
+	}
+	template<typename TK, typename TV>
+	bool readHash(quint32 id, QHash<TK,TV>* result)
+	{
+		QByteArray data;
+		bool ok = readBlob(id, &data);
+		if (ok)
+		{
+			QDataStream *stream = new QDataStream(data);
+			(*stream) >> *result;
+			delete stream;
+		}
+		return ok;
+	}
 
 	bool isValid() const { return m_valid; }
 	quint32 getVersion() const { return m_version; }

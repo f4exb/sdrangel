@@ -207,6 +207,10 @@ set(sdrbase_SOURCES
     util/timeutil.cpp
     util/visa.cpp
     util/weather.cpp
+    util/iot/device.cpp
+    util/iot/homeassistant.cpp
+    util/iot/tplink.cpp
+    util/iot/visa.cpp
 
     plugin/plugininterface.cpp
     plugin/pluginapi.cpp
@@ -426,6 +430,10 @@ set(sdrbase_HEADERS
     util/timeutil.h
     util/visa.h
     util/weather.h
+    util/iot/device.h
+    util/iot/homeassistant.h
+    util/iot/tplink.h
+    util/iot/visa.h
 
     webapi/webapiadapter.h
     webapi/webapiadapterbase.h

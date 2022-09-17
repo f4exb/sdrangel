@@ -23,6 +23,10 @@
 
 #include "export.h"
 
+#include <QDebug>
+
+class QRegularExpression;
+
 typedef char ViChar;
 typedef ViChar * ViPChar;
 typedef signed long ViInt32;
@@ -35,16 +39,28 @@ typedef ViObject ViSession;
 typedef ViSession * ViPSession;
 typedef ViString ViRsrc;
 typedef ViUInt32 ViAccessMode;
+typedef ViUInt32 * ViPUInt32;
+typedef ViObject ViFindList;
+typedef ViFindList * ViPFindList;
 
 #define VI_SUCCESS 0
 #define VI_TRUE 1
 #define VI_FALSE 0
 #define VI_NULL 0
+#define VI_FIND_BUFLEN 256
 
 // We dynamically load the visa dll, as most users probably do not have it
 // Note: Can't seem to call viOpenDefaultRM/viClose in constructor / destructor of global instance
 class SDRBASE_API VISA {
 public:
+
+    struct Instrument {
+        QString m_resource;
+        QString m_manufacturer;
+        QString m_model;
+        QString m_serial;
+        QString m_revision;
+    };
 
     // Default session
     ViSession m_defaultRM;
@@ -54,6 +70,8 @@ public:
     ViStatus (*viClose) (ViObject vi);
     ViStatus (*viPrintf) (ViSession vi, ViString writeFmt, ...);
     ViStatus (*viScanf) (ViSession vi, ViString readFmt, ...);
+    ViStatus (*viFindRsrc) (ViSession vi, ViString expr, ViPFindList li, ViPUInt32 retCnt, ViChar desc[]);
+    ViStatus (*viFindNext) (ViSession vi, ViChar desc[]);
 
     VISA();
 
@@ -61,7 +79,11 @@ public:
     void closeDefault();
     ViSession open(const QString& device);
     void close(ViSession session);
-    QStringList processCommands(ViSession session, const QString& commands);
+    QStringList processCommands(ViSession session, const QString& commands, bool *error=nullptr);
+    QStringList findResources();
+    bool identification(ViSession session, QString &manufacturer, QString &model, QString &serialNumber, QString &revision);
+    QList<Instrument> instruments(QRegularExpression *filter);
+    void setDebugIO(bool debugIO) { m_debugIO = debugIO; }
 
     // Is the VISA library available
     bool isAvailable() const
@@ -71,6 +93,7 @@ public:
 
 private:
     bool m_available;
+    bool m_debugIO;
 
 protected:
     void *visaLibrary;

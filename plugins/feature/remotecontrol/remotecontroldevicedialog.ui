@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RemoteControlDeviceDialog</class>
+ <widget class="QDialog" name="RemoteControlDeviceDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Remote Control Device</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="serviceLayout"/>
+      </item>
+      <item>
+       <layout class="QFormLayout" name="formLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="protocolLabel">
+          <property name="toolTip">
+           <string>Protocol to connect to the device</string>
+          </property>
+          <property name="text">
+           <string>Protocol:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="protocol">
+          <item>
+           <property name="text">
+            <string>Select a protocol...</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>TPLink</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>HomeAssistant</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>VISA</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="deviceLabel">
+          <property name="text">
+           <string>Device:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="modelLabel">
+          <property name="text">
+           <string>Model:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="device"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="model">
+          <property name="toolTip">
+           <string>Device model name</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="labelLabel">
+          <property name="text">
+           <string>Label:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLineEdit" name="label">
+          <property name="toolTip">
+           <string>Label to display for this device in the UI</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="controlsGroup">
+        <property name="title">
+         <string>Controls</string>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <layout class="QHBoxLayout" name="controlsHorizontalLayout">
+           <item>
+            <widget class="QTableWidget" name="controls">
+             <property name="selectionMode">
+              <enum>QAbstractItemView::SingleSelection</enum>
+             </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+             <column>
+              <property name="text">
+               <string>Enable</string>
+              </property>
+              <property name="toolTip">
+               <string>Enable display of control in GUI</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Name</string>
+              </property>
+              <property name="toolTip">
+               <string>Name of the control</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Units</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>ID</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Left Label</string>
+              </property>
+              <property name="toolTip">
+               <string>Label to display to the left of this control in the UI</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Right Label</string>
+              </property>
+              <property name="toolTip">
+               <string>Label to display to the right of this control in the UI</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QPushButton" name="controlAdd">
+             <property name="toolTip">
+              <string>Add a new control</string>
+             </property>
+             <property name="text">
+              <string>Add...</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="controlRemove">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Remove selected control</string>
+             </property>
+             <property name="text">
+              <string>Remove</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="controlEdit">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Edit selected control</string>
+             </property>
+             <property name="text">
+              <string>Edit...</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="controlDown">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Move down</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../../../sdrgui/resources/res.qrc">
+               <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="controlUp">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Move up</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../../../sdrgui/resources/res.qrc">
+               <normaloff>:/arrow_up.png</normaloff>:/arrow_up.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QFormLayout" name="controlsForm">
+           <item row="0" column="0">
+            <widget class="QLabel" name="controlsLayoutLabel">
+             <property name="text">
+              <string>Layout:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="controlsLayout">
+             <property name="toolTip">
+              <string>How controls are laid out in the UI</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Horizontal</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Vertical</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="sensorsGroup">
+        <property name="title">
+         <string>Sensors</string>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <layout class="QHBoxLayout" name="sensorsHorizontalLayout">
+           <item>
+            <widget class="QTableWidget" name="sensors">
+             <property name="selectionMode">
+              <enum>QAbstractItemView::SingleSelection</enum>
+             </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+             <column>
+              <property name="text">
+               <string>Enable</string>
+              </property>
+              <property name="toolTip">
+               <string>Enable display of this sensor's value</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Name</string>
+              </property>
+              <property name="toolTip">
+               <string>Sensor name</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Units</string>
+              </property>
+              <property name="toolTip">
+               <string>Units to display for this sensor in the UI</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>ID</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Left Label</string>
+              </property>
+              <property name="toolTip">
+               <string>Label to display to the left of this sensor in the UI</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Right Label</string>
+              </property>
+              <property name="toolTip">
+               <string>Label to display to the right of this sensor in the UI</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Format</string>
+              </property>
+              <property name="toolTip">
+               <string>printf format string for formatting the sensor value as a decimal floating point value (E.g. %f %.1f %.3e) or as a string (%s)</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Plot</string>
+              </property>
+              <property name="toolTip">
+               <string>Plot sensor data on chart</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QPushButton" name="sensorAdd">
+             <property name="text">
+              <string>Add...</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sensorRemove">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Remove</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sensorEdit">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Edit...</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sensorDown">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Move down</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../../../sdrgui/resources/res.qrc">
+               <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="sensorUp">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Move up</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../../../sdrgui/resources/res.qrc">
+               <normaloff>:/arrow_up.png</normaloff>:/arrow_up.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QFormLayout" name="sensorsForm">
+           <item row="1" column="0">
+            <widget class="QLabel" name="sensorsLayoutLabel">
+             <property name="text">
+              <string>Layout</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="sensorsLayout">
+             <property name="toolTip">
+              <string>How sensors are laid out in the UI</string>
+             </property>
+             <property name="currentIndex">
+              <number>1</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>Horizontal</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Vertical</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="yAxisLabel">
+             <property name="text">
+              <string>Y Axis</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QComboBox" name="yAxis">
+             <property name="toolTip">
+              <string>Set whether each series of sensor data is plotted on a common Y axis or with individual axes</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Per-sensor</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Common</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>protocol</tabstop>
+  <tabstop>device</tabstop>
+  <tabstop>label</tabstop>
+  <tabstop>controls</tabstop>
+  <tabstop>controlAdd</tabstop>
+  <tabstop>controlRemove</tabstop>
+  <tabstop>controlEdit</tabstop>
+  <tabstop>controlDown</tabstop>
+  <tabstop>controlUp</tabstop>
+  <tabstop>controlsLayout</tabstop>
+  <tabstop>sensors</tabstop>
+  <tabstop>sensorAdd</tabstop>
+  <tabstop>sensorRemove</tabstop>
+  <tabstop>sensorEdit</tabstop>
+  <tabstop>sensorDown</tabstop>
+  <tabstop>sensorUp</tabstop>
+  <tabstop>sensorsLayout</tabstop>
+  <tabstop>yAxis</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>RemoteControlDeviceDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>295</x>
+     <y>619</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>295</x>
+     <y>319</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>RemoteControlDeviceDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>295</x>
+     <y>619</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>295</x>
+     <y>319</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

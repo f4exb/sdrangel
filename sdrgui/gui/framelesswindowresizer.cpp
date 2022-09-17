@@ -170,14 +170,15 @@ void FramelessWindowResizer::mouseMoveEvent(QMouseEvent* event)
 
         if (m_widget->layout())
         {
-            minSize = m_widget->layout()->minimumSize();
+            //minSize = m_widget->layout()->minimumSize();
             maxSize = m_widget->layout()->maximumSize();
         }
         else
         {
-            minSize = m_widget->minimumSize();
+            //minSize = m_widget->minimumSize();
             maxSize = m_widget->maximumSize();
         }
+        minSize = m_widget->minimumSizeHint(); // Need to use minimumSizeHint for FlowLayout to work
 
         // Limit requested to size to allowed min/max
         QSize size = reqSize;
@@ -186,12 +187,12 @@ void FramelessWindowResizer::mouseMoveEvent(QMouseEvent* event)
 
         // Prevent vertical expansion of vertically fixed widgets
         if (m_widget->sizePolicy().verticalPolicy() == QSizePolicy::Fixed) {
-            size.setHeight(m_widget->height());
+            size.setHeight(m_widget->sizeHint().height());
         }
 
         // Prevent horizontal expansion of horizontal fixed widgets
         if (m_widget->sizePolicy().horizontalPolicy() == QSizePolicy::Fixed) {
-            size.setWidth(m_widget->width());
+            size.setWidth(m_widget->sizeHint().width());
         }
 
         // Move
