@@ -198,6 +198,8 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
         } else {
             ui->calibrationLabel->setStyleSheet("QLabel { background-color : red; }");
         }
+
+        return true;
     }
     else if (LimeSDRInput::MsgReportStreamInfo::match(message))
     {
