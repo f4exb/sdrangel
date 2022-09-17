@@ -443,7 +443,7 @@ void RemoteControlGUI::createControls(RemoteControlDeviceGUI *gui, QBoxLayout *v
 
                 combo->setToolTip("Set value for " + info->m_name);
                 combo->insertItems(0, info->m_values);
-                connect(combo, &QComboBox::textActivated,
+                connect(combo, &QComboBox::currentTextChanged,
                     [=] (const QString &text)
                     {
                         RemoteControl::MsgDeviceSetState *message = RemoteControl::MsgDeviceSetState::create(gui->m_rcDevice->m_protocol,
