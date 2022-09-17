@@ -471,7 +471,11 @@ void RemoteControlDeviceDialog::on_controlUp_clicked()
             {
                 // Swap device info
                 DeviceDiscoverer::DeviceInfo *info = &m_deviceInfo[ui->device->currentIndex()];
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
+                info->m_controls.swap(row, row - 1);
+#else
                 info->m_controls.swapItemsAt(row, row - 1);
+#endif
             }
         }
     }
@@ -499,7 +503,11 @@ void RemoteControlDeviceDialog::on_controlDown_clicked()
             {
                 // Swap device info
                 DeviceDiscoverer::DeviceInfo *info = &m_deviceInfo[ui->device->currentIndex()];
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
+                info->m_controls.swap(row, row + 1);
+#else
                 info->m_controls.swapItemsAt(row, row + 1);
+#endif
             }
         }
     }
@@ -585,7 +593,11 @@ void RemoteControlDeviceDialog::on_sensorUp_clicked()
             {
                 // Swap device info
                 DeviceDiscoverer::DeviceInfo *info = &m_deviceInfo[ui->device->currentIndex()];
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
+                info->m_sensors.swap(row, row - 1);
+#else
                 info->m_sensors.swapItemsAt(row, row - 1);
+#endif
             }
         }
     }
@@ -613,7 +625,11 @@ void RemoteControlDeviceDialog::on_sensorDown_clicked()
             {
                 // Swap device info
                 DeviceDiscoverer::DeviceInfo *info = &m_deviceInfo[ui->device->currentIndex()];
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
+                info->m_sensors.swap(row, row + 1);
+#else
                 info->m_sensors.swapItemsAt(row, row + 1);
+#endif
             }
         }
     }

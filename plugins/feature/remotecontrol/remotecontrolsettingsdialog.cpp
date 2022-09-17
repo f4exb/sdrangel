@@ -204,7 +204,11 @@ void RemoteControlSettingsDialog::on_deviceUp_clicked()
             if (i == items.size() - 1)
             {
                 ui->devices->setCurrentItem(items[i]);
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
+                m_devices.swap(row, row - 1);
+#else
                 m_devices.swapItemsAt(row, row - 1);
+#endif
             }
         }
     }
@@ -226,7 +230,11 @@ void RemoteControlSettingsDialog::on_deviceDown_clicked()
             if (i == items.size() - 1)
             {
                 ui->devices->setCurrentItem(items[i]);
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
+                m_devices.swap(row, row + 1);
+#else
                 m_devices.swapItemsAt(row, row + 1);
+#endif
             }
         }
     }
