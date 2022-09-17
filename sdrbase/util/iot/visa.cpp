@@ -263,7 +263,7 @@ void VISADevice::setState(const QString &controlId, const QString &state)
             VISAControl *control = reinterpret_cast<VISAControl *>(c);
             if (control->m_id == controlId)
             {
-                QString commands = QString::asprintf(control->m_setState.toUtf8(), state);
+                QString commands = QString::asprintf(control->m_setState.toUtf8(), state.toUtf8().data());
                 bool error;
                 m_visa.processCommands(m_session, commands, &error);
                 if (error) {
