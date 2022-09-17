@@ -113,19 +113,22 @@ for:
       - sh: mkdir sdrangel-${APPVEYOR_BUILD_VERSION}
       - sh: cp ../*.deb ../*.build ../*.buildinfo ../*.changes sdrangel-${APPVEYOR_BUILD_VERSION}
       - sh: tar -czf sdrangel-${APPVEYOR_BUILD_VERSION}.tar.gz sdrangel-${APPVEYOR_BUILD_VERSION}
-      - sh: appveyor PushArtifact sdrangel-${APPVEYOR_BUILD_VERSION}.tar.gz -DeploymentName archive
+    #   - sh: appveyor PushArtifact sdrangel-${APPVEYOR_BUILD_VERSION}.tar.gz -DeploymentName archive
+    # deploy:
+    #   release: sdrangel-v$(appveyor_build_version)
+    #   description: 'SDRangel Ubuntu 20.04'
+    #   provider: GitHub
+    #   auth_token:
+    #     secure: kyU5TaXRoily6q/QLRLqal2xCFGWEdnb8AJIu7FknsUQyj1wjRGmqC2My+Wfszod
+    #   artifact: archive
+    #   draft: false
+    #   prerelease: false
+    #   on:
+    #     APPVEYOR_REPO_TAG: true        # deploy on tag push only
+    #     branch: master                 # release from master branch only
     deploy:
-      release: sdrangel-v$(appveyor_build_version)
-      description: 'SDRangel Ubuntu 20.04'
-      provider: GitHub
-      auth_token:
-        secure: kyU5TaXRoily6q/QLRLqal2xCFGWEdnb8AJIu7FknsUQyj1wjRGmqC2My+Wfszod
-      artifact: archive
-      draft: false
-      prerelease: false
-      on:
-        APPVEYOR_REPO_TAG: true        # deploy on tag push only
-        branch: master                 # release from master branch only
+      provider: Environment
+      name: f4exb
   - matrix:
       only:
         - TARGET: ubuntu2204docker
