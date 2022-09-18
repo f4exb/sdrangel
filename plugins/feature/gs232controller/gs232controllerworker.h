@@ -58,8 +58,7 @@ public:
 
     GS232ControllerWorker();
     ~GS232ControllerWorker();
-    void reset();
-    bool startWork();
+    void startWork();
     void stopWork();
     bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
@@ -71,7 +70,6 @@ private:
     MessageQueue *m_msgQueueToFeature; //!< Queue to report channel change to main feature object
     GS232ControllerSettings m_settings;
     bool m_running;
-    QRecursiveMutex m_mutex;
     QIODevice *m_device;
     QSerialPort m_serialPort;
     QTcpSocket m_socket;
@@ -95,8 +93,6 @@ private:
     void setAzimuthElevation(float azimuth, float elevation);
 
 private slots:
-    void started();
-    void finished();
     void handleInputMessages();
     void readData();
     void update();

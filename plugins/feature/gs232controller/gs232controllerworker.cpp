@@ -32,7 +32,6 @@ MESSAGE_CLASS_DEFINITION(GS232ControllerReport::MsgReportAzAl, Message)
 
 GS232ControllerWorker::GS232ControllerWorker() :
     m_msgQueueToFeature(nullptr),
-    m_running(false),
     m_device(nullptr),
     m_serialPort(this),
     m_socket(this),
@@ -48,33 +47,15 @@ GS232ControllerWorker::GS232ControllerWorker() :
 
 GS232ControllerWorker::~GS232ControllerWorker()
 {
+    qDebug() << "GS232ControllerWorker::~GS232ControllerWorker";
     m_inputMessageQueue.clear();
 }
 
-void GS232ControllerWorker::reset()
+void GS232ControllerWorker::startWork()
 {
-    QMutexLocker mutexLocker(&m_mutex);
-    m_inputMessageQueue.clear();
-    m_lastAzimuth = -1.0f;
-    m_lastElevation = -1.0f;
-    m_spidSetOutstanding = false;
-    m_spidSetSent = false;
-    m_spidStatusSent = false;
-}
-
-bool GS232ControllerWorker::startWork()
-{
-    QMutexLocker mutexLocker(&m_mutex);
+    qDebug() << "GS232ControllerWorker::startWork";
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    connect(thread(), SIGNAL(started()), this, SLOT(started()));
-    connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
-    m_running = true;
-    return m_running;
-}
-
-// startWork() is called from main thread. Serial ports on Linux need to be opened/closed on worker thread
-void GS232ControllerWorker::started()
-{
+    connect(thread(), SIGNAL(finished()), this, SLOT(stopWork()));
     connect(&m_serialPort, &QSerialPort::readyRead, this, &GS232ControllerWorker::readData);
     connect(&m_socket, &QTcpSocket::readyRead, this, &GS232ControllerWorker::readData);
     if (m_settings.m_connection == GS232ControllerSettings::TCP) {
@@ -84,18 +65,14 @@ void GS232ControllerWorker::started()
     }
     connect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(update()));
     m_pollTimer.start(1000);
-    disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
+    // Handle any messages already on the queue
+    handleInputMessages();
 }
 
 void GS232ControllerWorker::stopWork()
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    qDebug() << "GS232ControllerWorker::stopWork";
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-}
-
-void GS232ControllerWorker::finished()
-{
-    // Close serial port as USB/controller activity can create RFI
     if (m_device && m_device->isOpen()) {
         m_device->close();
     }
@@ -103,8 +80,6 @@ void GS232ControllerWorker::finished()
     disconnect(&m_socket, &QTcpSocket::readyRead, this, &GS232ControllerWorker::readData);
     m_pollTimer.stop();
     disconnect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(update()));
-    m_running = false;
-    disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
 }
 
 void GS232ControllerWorker::handleInputMessages()
@@ -123,7 +98,6 @@ bool GS232ControllerWorker::handleMessage(const Message& cmd)
 {
     if (MsgConfigureGS232ControllerWorker::match(cmd))
     {
-        QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureGS232ControllerWorker& cfg = (MsgConfigureGS232ControllerWorker&) cmd;
 
         applySettings(cfg.getSettings(), cfg.getForce());
