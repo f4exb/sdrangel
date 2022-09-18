@@ -1,3 +1,14 @@
+sdrangel (7.7.0-1) unstable; urgency=medium
+
+  * Remote control feature plugin. PR #1414
+  * Stop status timer, so updateTimer isn't called on deleted objects. PR #1408
+  * APRS feature: Detect Packet Demods in MIMO device sets. Fixes #1409. PR #1410
+  * Fixed some cmake warnings. PR #1411 #1412
+  * Replace deprecated QMutex(Recursive) in Qt 5.14 with QRecursiveMutex. PR #1413
+  * Upgrade Ubuntu package to 22.04 and therefore Qt 5.15. Issue #1416
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 18 Sep 2022 08:48:24 +0200
+
 sdrangel (7.6.4-1) unstable; urgency=medium
 
   * M17: fixed build for Windows so now available in Windows. PR #1404
