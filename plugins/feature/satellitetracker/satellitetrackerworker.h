@@ -94,9 +94,7 @@ public:
 
     SatelliteTrackerWorker(SatelliteTracker* satelliteTracker, WebAPIAdapterInterface *webAPIAdapterInterface);
     ~SatelliteTrackerWorker();
-    void reset();
     bool startWork();
-    void stopWork();
     bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
@@ -144,8 +142,7 @@ private:
     void calculateRotation(SatWorkerState *satWorkerState);
 
 private slots:
-    void started();
-    void finished();
+    void stopWork();
     void handleInputMessages();
     void update();
     void aos(SatWorkerState *satWorkerState);

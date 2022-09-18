@@ -173,7 +173,7 @@ public:
     bool isUpdatingSatData() { return m_updatingSatData; }
 
 private:
-    QThread m_thread;
+    QThread *m_thread;
     SatelliteTrackerWorker *m_worker;
     SatelliteTrackerSettings m_settings;
 

@@ -66,30 +66,20 @@ SatelliteTrackerWorker::SatelliteTrackerWorker(SatelliteTracker* satelliteTracke
 
 SatelliteTrackerWorker::~SatelliteTrackerWorker()
 {
-    m_inputMessageQueue.clear();
-}
-
-void SatelliteTrackerWorker::reset()
-{
-    QMutexLocker mutexLocker(&m_mutex);
+    qDebug() << "SatelliteTrackerWorker::~SatelliteTrackerWorker";
     m_inputMessageQueue.clear();
 }
 
 bool SatelliteTrackerWorker::startWork()
 {
+    qDebug() << "SatelliteTrackerWorker::startWork";
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    connect(thread(), SIGNAL(started()), this, SLOT(started()));
-    connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
+    connect(thread(), SIGNAL(finished()), this, SLOT(stopWork()));
     m_recalculatePasses = true;
     m_running = true;
-    return m_running;
-}
 
-// startWork() is called from main thread. Timers need to be started on worker thread
-void SatelliteTrackerWorker::started()
-{
-    m_pollTimer.start((int)round(m_settings.m_updatePeriod*1000.0));
+     m_pollTimer.start((int)round(m_settings.m_updatePeriod*1000.0));
     // Resume doppler timers
     QHashIterator<QString, SatWorkerState *> itr(m_workerState);
     while (itr.hasNext())
@@ -99,17 +89,18 @@ void SatelliteTrackerWorker::started()
         if (satWorkerState->m_dopplerTimer.interval() > 0)
             satWorkerState->m_dopplerTimer.start();
     }
-    disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
+
+    // Handle any messages already on the queue
+    handleInputMessages();
+
+    return m_running;
 }
 
 void SatelliteTrackerWorker::stopWork()
 {
+    qDebug() << "SatelliteTrackerWorker::stopWork";
     QMutexLocker mutexLocker(&m_mutex);
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-}
-
-void SatelliteTrackerWorker::finished()
-{
     m_pollTimer.stop();
     // Stop doppler timers
     QHashIterator<QString, SatWorkerState *> itr(m_workerState);
@@ -119,7 +110,6 @@ void SatelliteTrackerWorker::finished()
         itr.value()->m_dopplerTimer.stop();
     }
     m_running = false;
-    disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
 }
 
 void SatelliteTrackerWorker::handleInputMessages()
@@ -334,7 +324,7 @@ void SatelliteTrackerWorker::update()
             {
                 // Calculate position, AOS/LOS and other details for satellite
                 int noOfPasses;
-                bool recalcAsPastLOS = (satWorkerState->m_satState.m_passes.size() > 0) && (satWorkerState->m_satState.m_passes[0]->m_los < qdt);
+                bool recalcAsPastLOS = (satWorkerState->m_satState.m_passes.size() > 0) && (satWorkerState->m_satState.m_passes[0].m_los < qdt);
                 if (m_recalculatePasses || recalcAsPastLOS)
                     noOfPasses = (name == m_settings.m_target) ? 99 : 1;
                 else
@@ -349,13 +339,13 @@ void SatelliteTrackerWorker::update()
                 if ((m_settings.m_dateTime == "") && (satWorkerState->m_satState.m_passes.size() > 0))
                 {
                     // Do we have a new AOS?
-                    if ((satWorkerState->m_aos != satWorkerState->m_satState.m_passes[0]->m_aos) || (satWorkerState->m_los != satWorkerState->m_satState.m_passes[0]->m_los))
+                    if ((satWorkerState->m_aos != satWorkerState->m_satState.m_passes[0].m_aos) || (satWorkerState->m_los != satWorkerState->m_satState.m_passes[0].m_los))
                     {
                         qDebug() << "SatelliteTrackerWorker: Current time: " << qdt.toString(Qt::ISODateWithMs);
-                        qDebug() << "SatelliteTrackerWorker: New AOS: " << name << " new: " << satWorkerState->m_satState.m_passes[0]->m_aos << " old: " << satWorkerState->m_aos;
-                        qDebug() << "SatelliteTrackerWorker: New LOS: " << name << " new: " << satWorkerState->m_satState.m_passes[0]->m_los << " old: " << satWorkerState->m_los;
-                        satWorkerState->m_aos = satWorkerState->m_satState.m_passes[0]->m_aos;
-                        satWorkerState->m_los = satWorkerState->m_satState.m_passes[0]->m_los;
+                        qDebug() << "SatelliteTrackerWorker: New AOS: " << name << " new: " << satWorkerState->m_satState.m_passes[0].m_aos << " old: " << satWorkerState->m_aos;
+                        qDebug() << "SatelliteTrackerWorker: New LOS: " << name << " new: " << satWorkerState->m_satState.m_passes[0].m_los << " old: " << satWorkerState->m_los;
+                        satWorkerState->m_aos = satWorkerState->m_satState.m_passes[0].m_aos;
+                        satWorkerState->m_los = satWorkerState->m_satState.m_passes[0].m_los;
                         if (satWorkerState->m_aos.isValid())
                         {
                             if (satWorkerState->m_aos > qdt)
@@ -469,27 +459,27 @@ void SatelliteTrackerWorker::update()
                                                .arg((int)round(satWorkerState->m_satState.m_period));
                         if (satWorkerState->m_satState.m_passes.size() > 0)
                         {
-                            if ((qdt >= satWorkerState->m_satState.m_passes[0]->m_aos) && (qdt <= satWorkerState->m_satState.m_passes[0]->m_los))
+                            if ((qdt >= satWorkerState->m_satState.m_passes[0].m_aos) && (qdt <= satWorkerState->m_satState.m_passes[0].m_los))
                                 text = text.append("\nSatellite is visible");
                             else
-                                text = text.append("\nAOS in: %1 mins").arg((int)round((satWorkerState->m_satState.m_passes[0]->m_aos.toSecsSinceEpoch() - qdt.toSecsSinceEpoch())/60.0));
+                                text = text.append("\nAOS in: %1 mins").arg((int)round((satWorkerState->m_satState.m_passes[0].m_aos.toSecsSinceEpoch() - qdt.toSecsSinceEpoch())/60.0));
                             QString aosDateTime;
                             QString losDateTime;
                             if (m_settings.m_utc)
                             {
-                                aosDateTime = satWorkerState->m_satState.m_passes[0]->m_aos.toString(m_settings.m_dateFormat + " hh:mm");
-                                losDateTime = satWorkerState->m_satState.m_passes[0]->m_los.toString(m_settings.m_dateFormat + " hh:mm");
+                                aosDateTime = satWorkerState->m_satState.m_passes[0].m_aos.toString(m_settings.m_dateFormat + " hh:mm");
+                                losDateTime = satWorkerState->m_satState.m_passes[0].m_los.toString(m_settings.m_dateFormat + " hh:mm");
                             }
                             else
                             {
-                                aosDateTime = satWorkerState->m_satState.m_passes[0]->m_aos.toLocalTime().toString(m_settings.m_dateFormat + " hh:mm");
-                                losDateTime = satWorkerState->m_satState.m_passes[0]->m_los.toLocalTime().toString(m_settings.m_dateFormat + " hh:mm");
+                                aosDateTime = satWorkerState->m_satState.m_passes[0].m_aos.toLocalTime().toString(m_settings.m_dateFormat + " hh:mm");
+                                losDateTime = satWorkerState->m_satState.m_passes[0].m_los.toLocalTime().toString(m_settings.m_dateFormat + " hh:mm");
                             }
                             text = QString("%1\nAOS: %2\nLOS: %3\nMax El: %4%5")
                                             .arg(text)
                                             .arg(aosDateTime)
                                             .arg(losDateTime)
-                                            .arg((int)round(satWorkerState->m_satState.m_passes[0]->m_maxElevation))
+                                            .arg((int)round(satWorkerState->m_satState.m_passes[0].m_maxElevation))
                                             .arg(QChar(0xb0));
                         }
 
@@ -533,7 +523,7 @@ void SatelliteTrackerWorker::aos(SatWorkerState *satWorkerState)
         int durationMins = (int)round((satWorkerState->m_los.toSecsSinceEpoch() - satWorkerState->m_aos.toSecsSinceEpoch())/60.0);
         int maxElevation = 0;
         if (satWorkerState->m_satState.m_passes.size() > 0)
-            maxElevation = satWorkerState->m_satState.m_passes[0]->m_maxElevation;
+            maxElevation = satWorkerState->m_satState.m_passes[0].m_maxElevation;
         getMessageQueueToGUI()->push(SatelliteTrackerReport::MsgReportAOS::create(satWorkerState->m_name, durationMins, maxElevation));
     }
 
@@ -573,11 +563,11 @@ void SatelliteTrackerWorker::calculateRotation(SatWorkerState *satWorkerState)
         SatNogsSatellite *sat = m_satellites.value(satWorkerState->m_name);
         bool passes0 = getPassesThrough0Deg(sat->m_tle->m_tle0, sat->m_tle->m_tle1, sat->m_tle->m_tle2,
                                             m_settings.m_latitude, m_settings.m_longitude, m_settings.m_heightAboveSeaLevel/1000.0,
-                                            satWorkerState->m_satState.m_passes[0]->m_aos, satWorkerState->m_satState.m_passes[0]->m_los);
+                                            satWorkerState->m_satState.m_passes[0].m_aos, satWorkerState->m_satState.m_passes[0].m_los);
         if (passes0)
         {
-            double aosAz = satWorkerState->m_satState.m_passes[0]->m_aosAzimuth;
-            double losAz = satWorkerState->m_satState.m_passes[0]->m_losAzimuth;
+            double aosAz = satWorkerState->m_satState.m_passes[0].m_aosAzimuth;
+            double losAz = satWorkerState->m_satState.m_passes[0].m_losAzimuth;
             double minAz = std::min(aosAz, losAz);
             if ((m_settings.m_rotatorMaxAzimuth - 360.0) > minAz)
                 m_extendedAzRotation = true;
@@ -698,7 +688,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
             SatNogsSatellite *sat = m_satellites.value(satWorkerState->m_name);
             // APT needs current time, for current position of satellite, not start of pass which may be in the past
             // if the satellite was already visible when Sat Tracker was started
-            ChannelWebAPIUtils::satelliteAOS(name, satWorkerState->m_satState.m_passes[0]->m_northToSouth,
+            ChannelWebAPIUtils::satelliteAOS(name, satWorkerState->m_satState.m_passes[0].m_northToSouth,
                                              sat->m_tle->toString(),
                                              m_satelliteTracker->currentDateTimeUtc());
             FeatureWebAPIUtils::satelliteAOS(name, satWorkerState->m_aos, satWorkerState->m_los);
@@ -761,7 +751,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
         // Send AOS message to channels/features
         SatWorkerState *satWorkerState = m_workerState.value(name);
         SatNogsSatellite *sat = m_satellites.value(satWorkerState->m_name);
-        ChannelWebAPIUtils::satelliteAOS(name, satWorkerState->m_satState.m_passes[0]->m_northToSouth,
+        ChannelWebAPIUtils::satelliteAOS(name, satWorkerState->m_satState.m_passes[0].m_northToSouth,
                                             sat->m_tle->toString(),
                                             m_satelliteTracker->currentDateTimeUtc());
         FeatureWebAPIUtils::satelliteAOS(name, satWorkerState->m_aos, satWorkerState->m_los);

@@ -48,14 +48,14 @@ const char* const SatelliteTracker::m_featureId = "SatelliteTracker";
 
 SatelliteTracker::SatelliteTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
+    m_thread(nullptr),
+    m_worker(nullptr),
     m_updatingSatData(false),
     m_tleIndex(0),
     m_firstUpdateSatData(true)
 {
     qDebug("SatelliteTracker::SatelliteTracker: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_worker = new SatelliteTrackerWorker(this, webAPIAdapterInterface);
-    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "SatelliteTracker error";
     m_networkManager = new QNetworkAccessManager();
@@ -73,11 +73,7 @@ SatelliteTracker::SatelliteTracker(WebAPIAdapterInterface *webAPIAdapterInterfac
 
 SatelliteTracker::~SatelliteTracker()
 {
-    if (m_worker->isRunning()) {
-        stop();
-    }
-
-    delete m_worker;
+    stop();
     qDeleteAll(m_satState);
 }
 
@@ -92,12 +88,18 @@ void SatelliteTracker::start()
         FeatureWebAPIUtils::mapSetDateTime(currentDateTime());
     }
 
-    m_worker->reset();
+    m_thread = new QThread(this);
+    m_worker = new SatelliteTrackerWorker(this, m_webAPIAdapterInterface);
+    m_worker->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::started, m_worker, &SatelliteTrackerWorker::startWork);
+    QObject::connect(m_thread, &QThread::finished, m_worker, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
+
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
-    bool ok = m_worker->startWork();
-    m_state = ok ? StRunning : StError;
-    m_thread.start();
+    m_thread->start();
+    m_state = StRunning;
 
     m_worker->getInputMessageQueue()->push(SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker::create(m_settings, true));
     m_worker->getInputMessageQueue()->push(MsgSatData::create(m_satellites));
@@ -106,10 +108,14 @@ void SatelliteTracker::start()
 void SatelliteTracker::stop()
 {
     qDebug("SatelliteTracker::stop");
-    m_worker->stopWork();
     m_state = StIdle;
-    m_thread.quit();
-    m_thread.wait();
+    if (m_thread)
+    {
+        m_thread->quit();
+        m_thread->wait();
+        m_thread = nullptr;
+        m_worker = nullptr;
+    }
 }
 
 bool SatelliteTracker::handleMessage(const Message& cmd)
@@ -323,7 +329,9 @@ void SatelliteTracker::applySettings(const SatelliteTrackerSettings& settings, b
     SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker *msg = SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker::create(
         settings, force
     );
-    m_worker->getInputMessageQueue()->push(msg);
+    if (m_worker) {
+        m_worker->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -896,12 +904,12 @@ void SatelliteTracker::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& 
         swgSatState->setPeriod(satState->m_period);
         swgSatState->setElevation(satState->m_elevation);
         QList<SWGSDRangel::SWGSatellitePass *> *passesList = new QList<SWGSDRangel::SWGSatellitePass*>();
-        for (auto pass : satState->m_passes)
+        for (auto const &pass : satState->m_passes)
         {
             SWGSDRangel::SWGSatellitePass *swgPass = new SWGSDRangel::SWGSatellitePass();
-            swgPass->setAos(new QString(pass->m_aos.toString(Qt::ISODateWithMs)));
-            swgPass->setLos(new QString(pass->m_los.toString(Qt::ISODateWithMs)));
-            swgPass->setMaxElevation(pass->m_maxElevation);
+            swgPass->setAos(new QString(pass.m_aos.toString(Qt::ISODateWithMs)));
+            swgPass->setLos(new QString(pass.m_los.toString(Qt::ISODateWithMs)));
+            swgPass->setMaxElevation(pass.m_maxElevation);
             passesList->append(swgPass);
         }
         swgSatState->setPasses(passesList);
@@ -1024,7 +1032,8 @@ bool SatelliteTracker::readSatData()
                     if (m_guiMessageQueue)
                         m_guiMessageQueue->push(MsgSatData::create(m_satellites));
                     // Send to worker
-                    m_worker->getInputMessageQueue()->push(MsgSatData::create(m_satellites));
+                    if (m_worker)
+                        m_worker->getInputMessageQueue()->push(MsgSatData::create(m_satellites));
 
                     return true;
                 }

@@ -45,8 +45,8 @@ struct SatelliteState {
     double m_rangeRate;                 // km/s
     double m_speed;
     double m_period;
-    QList<SatellitePass *> m_passes;
-    QList<QGeoCoordinate *> m_groundTrack;
+    QList<SatellitePass> m_passes;              // Used in worker and GUI threads
+    QList<QGeoCoordinate *> m_groundTrack;      // These used only in worker thread
     QList<QDateTime *> m_groundTrackDateTime;
     QList<QGeoCoordinate *> m_predictedGroundTrack;
     QList<QDateTime *> m_predictedGroundTrackDateTime;
@@ -66,7 +66,7 @@ void getSatelliteState(QDateTime dateTime,
 void getPassAzEl(QLineSeries *azimuth, QLineSeries *elevation, QLineSeries *polar,
                         const QString& tle0, const QString& tle1, const QString& tle2,
                         double latitude, double longitude, double altitude,
-                        QDateTime& aos, QDateTime& los);
+                        const QDateTime& aos, const QDateTime& los);
 
 bool getPassesThrough0Deg(const QString& tle0, const QString& tle1, const QString& tle2,
                           double latitude, double longitude, double altitude,
