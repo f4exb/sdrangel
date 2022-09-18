@@ -113,6 +113,10 @@ for:
       - sh: mkdir sdrangel-${APPVEYOR_BUILD_VERSION}
       - sh: cp ../*.deb ../*.build ../*.buildinfo ../*.changes sdrangel-${APPVEYOR_BUILD_VERSION}
       - sh: tar -czf sdrangel-${APPVEYOR_BUILD_VERSION}.tar.gz sdrangel-${APPVEYOR_BUILD_VERSION}
+      - sh: pwd; ls -l
+    artifacts:
+      - path: sdrangel-${APPVEYOR_BUILD_VERSION}.tar.gz
+        name: package2204
     #   - sh: appveyor PushArtifact sdrangel-${APPVEYOR_BUILD_VERSION}.tar.gz -DeploymentName archive
     # deploy:
     #   release: sdrangel-v$(appveyor_build_version)
