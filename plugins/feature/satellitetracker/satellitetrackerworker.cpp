@@ -55,7 +55,6 @@ SatelliteTrackerWorker::SatelliteTrackerWorker(SatelliteTracker* satelliteTracke
     m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
-    m_running(false),
     m_pollTimer(this),
     m_recalculatePasses(true),
     m_flipRotation(false),
@@ -70,14 +69,13 @@ SatelliteTrackerWorker::~SatelliteTrackerWorker()
     m_inputMessageQueue.clear();
 }
 
-bool SatelliteTrackerWorker::startWork()
+void SatelliteTrackerWorker::startWork()
 {
     qDebug() << "SatelliteTrackerWorker::startWork";
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     connect(thread(), SIGNAL(finished()), this, SLOT(stopWork()));
     m_recalculatePasses = true;
-    m_running = true;
 
      m_pollTimer.start((int)round(m_settings.m_updatePeriod*1000.0));
     // Resume doppler timers
@@ -92,8 +90,6 @@ bool SatelliteTrackerWorker::startWork()
 
     // Handle any messages already on the queue
     handleInputMessages();
-
-    return m_running;
 }
 
 void SatelliteTrackerWorker::stopWork()
@@ -109,7 +105,6 @@ void SatelliteTrackerWorker::stopWork()
         itr.next();
         itr.value()->m_dopplerTimer.stop();
     }
-    m_running = false;
 }
 
 void SatelliteTrackerWorker::handleInputMessages()
@@ -642,7 +637,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
         }
 
         // Wait a little bit for presets to load before performing other steps
-        QTimer::singleShot(1000, [this, mainCore, name, m_deviceSettingsList]()
+        QTimer::singleShot(1000, [this, name, m_deviceSettingsList]()
         {
 
             for (int i = 0; i < m_deviceSettingsList->size(); i++)
@@ -730,7 +725,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
             }
 
             // Start file sinks (need a little delay to ensure sample rate message has been handled in filerecord)
-            QTimer::singleShot(1000, [this, m_deviceSettingsList]()
+            QTimer::singleShot(1000, [m_deviceSettingsList]()
             {
                 for (int i = 0; i < m_deviceSettingsList->size(); i++)
                 {
