@@ -30,7 +30,6 @@ RadioAstronomyWorker::RadioAstronomyWorker(RadioAstronomy* radioAstronomy) :
     m_msgQueueToChannel(nullptr),
     m_msgQueueToGUI(nullptr),
     m_running(false),
-    m_mutex(QMutex::Recursive),
     m_sensorTimer(this)
 {
     connect(&m_sensorTimer, SIGNAL(timeout()), this, SLOT(measureSensors()));

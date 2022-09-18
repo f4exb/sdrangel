@@ -28,7 +28,6 @@
 MESSAGE_CLASS_DEFINITION(BFMDemodBaseband::MsgConfigureBFMDemodBaseband, Message)
 
 BFMDemodBaseband::BFMDemodBaseband() :
-    m_mutex(QMutex::Recursive),
     m_messageQueueToGUI(nullptr),
     m_spectrumVis(nullptr)
 {

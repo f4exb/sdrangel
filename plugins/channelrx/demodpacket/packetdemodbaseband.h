@@ -20,7 +20,7 @@
 #define INCLUDE_PACKETDEMODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "util/message.h"
@@ -84,7 +84,7 @@ private:
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     PacketDemodSettings m_settings;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(PacketDemodSink *sink);

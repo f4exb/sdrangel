@@ -71,7 +71,7 @@ private:
     MessageQueue *m_msgQueueToFeature; //!< Queue to report channel change to main feature object
     GS232ControllerSettings m_settings;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     QIODevice *m_device;
     QSerialPort m_serialPort;
     QTcpSocket m_socket;

@@ -20,7 +20,7 @@
 #define SDRBASE_DSP_CWKEYER_H_
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "export.h"
 #include "util/message.h"
@@ -41,7 +41,7 @@ public:
     bool getFadeSample(bool on, float& sample);
 
 private:
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     unsigned int m_fadeInCounter;
     unsigned int m_fadeOutCounter;
     unsigned int m_nbFadeSamples;
@@ -129,7 +129,7 @@ public:
     );
 
 private:
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     CWKeyerSettings m_settings;
     MessageQueue m_inputMessageQueue;
     int m_dotLength;   //!< dot length in samples

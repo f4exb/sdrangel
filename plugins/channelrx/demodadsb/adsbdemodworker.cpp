@@ -80,8 +80,7 @@ void ADSBBeastServer::discardClient()
 }
 
 ADSBDemodWorker::ADSBDemodWorker() :
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     connect(&m_heartbeatTimer, SIGNAL(timeout()), this, SLOT(heartbeat()));
     connect(&m_socket, SIGNAL(readyRead()),this, SLOT(recv()));

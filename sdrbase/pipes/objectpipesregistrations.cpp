@@ -20,8 +20,7 @@
 ObjectPipesRegistrations::ObjectPipesRegistrations(ObjectPipeElementsStore *objectPipeElementsStore) :
     m_typeCount(0),
     m_pipeId(0),
-    m_objectPipeElementsStore(objectPipeElementsStore),
-    m_mutex(QMutex::Recursive)
+    m_objectPipeElementsStore(objectPipeElementsStore)
 {}
 
 ObjectPipesRegistrations::~ObjectPipesRegistrations()

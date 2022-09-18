@@ -51,7 +51,6 @@ MESSAGE_CLASS_DEFINITION(RemoteInput::MsgRequestFixedData, Message)
 RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_sampleRate(48000),
-    m_mutex(QMutex::Recursive),
     m_settings(),
 	m_remoteInputUDPHandler(nullptr),
 	m_deviceDescription("RemoteInput"),

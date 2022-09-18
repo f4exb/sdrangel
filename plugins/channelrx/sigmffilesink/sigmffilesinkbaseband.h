@@ -19,7 +19,7 @@
 #define INCLUDE_SIFMFFILESINKBASEBAND_H_
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/downchannelizer.h"
@@ -113,7 +113,7 @@ private:
     float m_squelchLevel;
     bool m_squelchOpen;
     int64_t m_centerFrequency;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     QTimer *m_timer;
 
     void stopWork();

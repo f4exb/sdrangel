@@ -42,8 +42,7 @@ SimplePTTWorker::SimplePTTWorker(WebAPIAdapterInterface *webAPIAdapterInterface)
     m_voxLevel(1.0),
     m_voxHoldCount(0),
     m_voxState(false),
-    m_updateTimer(this),
-    m_mutex(QMutex::Recursive)
+    m_updateTimer(this)
 {
     m_audioReadBuffer.resize(16384);
     m_audioReadBufferFill = 0;

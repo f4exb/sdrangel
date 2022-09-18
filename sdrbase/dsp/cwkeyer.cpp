@@ -161,7 +161,6 @@ const signed char CWKeyer::m_asciiToMorse[128][7] = {
 };
 
 CWKeyer::CWKeyer() :
-    m_mutex(QMutex::Recursive),
     m_textPointer(0),
 	m_elementPointer(0),
     m_samplePointer(0),

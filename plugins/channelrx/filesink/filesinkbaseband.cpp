@@ -33,8 +33,7 @@ FileSinkBaseband::FileSinkBaseband() :
     m_channelizer(&m_sink),
     m_specMax(0),
     m_squelchLevel(0),
-    m_squelchOpen(false),
-    m_mutex(QMutex::Recursive)
+    m_squelchOpen(false)
 {
     qDebug("FileSinkBaseband::FileSinkBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));

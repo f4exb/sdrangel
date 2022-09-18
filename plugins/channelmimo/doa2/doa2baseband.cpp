@@ -42,8 +42,7 @@ DOA2Baseband::DOA2Baseband(int fftSize) :
     m_magThreshold(0.0f),
     m_fftAvg(1),
     m_fftAvgCount(0),
-    m_scopeSink(nullptr),
-    m_mutex(QMutex::Recursive)
+    m_scopeSink(nullptr)
 {
     m_sampleMIFifo.init(2, 96000 * 8);
     m_vbegin.resize(2);

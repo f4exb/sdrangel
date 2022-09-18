@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <QMutex>
+#include <QRecursiveMutex>
 #include <QDateTime>
 #include <QThread>
 #include <QObject>
@@ -19,7 +20,7 @@ Logger* Logger::defaultLogger=0;
 QThreadStorage<QHash<QString,QString>*> Logger::logVars;
 
 
-QMutex Logger::mutex;
+QRecursiveMutex Logger::mutex;
 
 
 Logger::Logger(QObject* parent)
@@ -43,8 +44,8 @@ Logger::Logger(const QString msgFormat, const QString timestampFormat, const QtM
 
 void Logger::msgHandler(const QtMsgType type, const QString &message, const QString &file, const QString &function, const int line)
 {
-    static QMutex recursiveMutex(QMutex::Recursive);
-    static QMutex nonRecursiveMutex(QMutex::NonRecursive);
+    static QRecursiveMutex recursiveMutex;
+    static QMutex nonRecursiveMutex;
 
     // Prevent multiple threads from calling this method simultaneoulsy.
     // But allow recursive calls, which is required to prevent a deadlock

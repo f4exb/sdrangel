@@ -55,8 +55,7 @@ SpectrumVis::SpectrumVis(Real scalef) :
     m_sampleRate(48000),
 	m_ofs(0),
     m_powFFTDiv(1.0),
-    m_guiMessageQueue(nullptr),
-	m_mutex(QMutex::Recursive)
+    m_guiMessageQueue(nullptr)
 {
 	setObjectName("SpectrumVis");
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));

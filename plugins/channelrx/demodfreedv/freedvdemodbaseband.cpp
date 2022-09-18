@@ -27,7 +27,6 @@ MESSAGE_CLASS_DEFINITION(FreeDVDemodBaseband::MsgConfigureFreeDVDemodBaseband, M
 MESSAGE_CLASS_DEFINITION(FreeDVDemodBaseband::MsgResyncFreeDVDemod, Message)
 
 FreeDVDemodBaseband::FreeDVDemodBaseband() :
-    m_mutex(QMutex::Recursive),
     m_messageQueueToGUI(nullptr)
 {
     qDebug("FreeDVDemodBaseband::FreeDVDemodBaseband");

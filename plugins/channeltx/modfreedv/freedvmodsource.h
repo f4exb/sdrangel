@@ -19,7 +19,7 @@
 #define INCLUDE_FREEDVMODSOURCE_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include <iostream>
 #include <fstream>
@@ -128,7 +128,7 @@ private:
     float m_scaleFactor; //!< divide by this amount to scale from int16 to float in [-1.0, 1.0] interval
     AudioResampler m_audioResampler;
 
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     static const int m_levelNbSamples;
 

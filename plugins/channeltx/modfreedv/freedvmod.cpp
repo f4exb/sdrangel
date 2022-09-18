@@ -56,7 +56,6 @@ FreeDVMod::FreeDVMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
     m_spectrumVis(SDR_TX_SCALEF),
-	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
 	m_fileSampleRate(8000) // all modes take 8000 S/s input

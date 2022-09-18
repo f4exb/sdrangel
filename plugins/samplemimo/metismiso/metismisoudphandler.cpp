@@ -34,7 +34,6 @@ MetisMISOUDPHandler::MetisMISOUDPHandler(SampleMIFifo *sampleMIFifo, SampleMOFif
     m_sampleCount(0),
     m_sampleTxCount(0),
 	m_messageQueueToGUI(nullptr),
-    m_mutex(QMutex::Recursive),
     m_commandBase(0),
     m_receiveSequence(0),
     m_receiveSequenceError(0)

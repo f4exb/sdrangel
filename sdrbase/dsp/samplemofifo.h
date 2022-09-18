@@ -19,7 +19,7 @@
 #define INCLUDE_SAMPLEMOFIFO_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include "dsp/dsptypes.h"
 #include "export.h"
 
@@ -102,7 +102,7 @@ private:
     std::vector<unsigned int> m_vReadCount;
     std::vector<unsigned int> m_vReadHead;
     std::vector<unsigned int> m_vWriteHead;
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 };
 
 #endif // INCLUDE_SAMPLEMOFIFO_H

@@ -19,7 +19,7 @@
 #define INCLUDE_FILESOURCEBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesourcefifo.h"
 #include "util/message.h"
@@ -147,7 +147,7 @@ private:
     double m_avg;
     double m_peak;
     int m_nbSamples;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);

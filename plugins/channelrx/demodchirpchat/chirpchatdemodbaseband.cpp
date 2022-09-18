@@ -25,8 +25,7 @@
 
 MESSAGE_CLASS_DEFINITION(ChirpChatDemodBaseband::MsgConfigureChirpChatDemodBaseband, Message)
 
-ChirpChatDemodBaseband::ChirpChatDemodBaseband() :
-    m_mutex(QMutex::Recursive)
+ChirpChatDemodBaseband::ChirpChatDemodBaseband()
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);

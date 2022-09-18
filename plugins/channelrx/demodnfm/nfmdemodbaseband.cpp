@@ -25,8 +25,7 @@
 MESSAGE_CLASS_DEFINITION(NFMDemodBaseband::MsgConfigureNFMDemodBaseband, Message)
 
 NFMDemodBaseband::NFMDemodBaseband() :
-    m_channelizer(&m_sink),
-    m_mutex(QMutex::Recursive)
+    m_channelizer(&m_sink)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
 

@@ -92,7 +92,7 @@ private:
     MessageQueue m_inputMessageQueue;
     ADSBDemodSettings m_settings;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     QTimer m_heartbeatTimer;
     QTcpSocket m_socket;
     QFile m_logFile;

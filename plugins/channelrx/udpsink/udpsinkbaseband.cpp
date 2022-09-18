@@ -26,8 +26,7 @@
 MESSAGE_CLASS_DEFINITION(UDPSinkBaseband::MsgConfigureUDPSinkBaseband, Message)
 MESSAGE_CLASS_DEFINITION(UDPSinkBaseband::MsgEnableSpectrum, Message)
 
-UDPSinkBaseband::UDPSinkBaseband() :
-    m_mutex(QMutex::Recursive)
+UDPSinkBaseband::UDPSinkBaseband()
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);

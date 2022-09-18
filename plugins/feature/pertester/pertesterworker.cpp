@@ -40,7 +40,6 @@ PERTesterWorker::PERTesterWorker() :
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
     m_running(false),
-    m_mutex(QMutex::Recursive),
     m_rxUDPSocket(nullptr),
     m_txUDPSocket(this),
     m_txTimer(this),

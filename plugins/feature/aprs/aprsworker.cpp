@@ -38,7 +38,6 @@ APRSWorker::APRSWorker(APRS *aprs, WebAPIAdapterInterface *webAPIAdapterInterfac
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
     m_running(false),
-    m_mutex(QMutex::Recursive),
     m_socket(this)
 {
     connect(&m_socket, SIGNAL(readyRead()),this, SLOT(recv()));

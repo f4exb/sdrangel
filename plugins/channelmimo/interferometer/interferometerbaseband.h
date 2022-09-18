@@ -19,7 +19,7 @@
 #define INCLUDE_INTERFEROMETERBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplemififo.h"
 #include "util/messagequeue.h"
@@ -126,7 +126,7 @@ private:
     BasebandSampleSink *m_spectrumSink;
     ScopeVis *m_scopeSink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     unsigned int m_lastStream;
 
 private slots:

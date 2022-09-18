@@ -22,13 +22,11 @@ const unsigned int SampleMOFifo::m_guardDivisor = 10;
 
 SampleMOFifo::SampleMOFifo(QObject *parent) :
     QObject(parent),
-    m_nbStreams(0),
-    m_mutex(QMutex::Recursive)
+    m_nbStreams(0)
 {}
 
 SampleMOFifo::SampleMOFifo(unsigned int nbStreams, unsigned int size, QObject *parent) :
-    QObject(parent),
-    m_mutex(QMutex::Recursive)
+    QObject(parent)
 {
     init(nbStreams, size);
 }

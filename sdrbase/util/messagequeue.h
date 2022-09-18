@@ -21,7 +21,7 @@
 
 #include <QObject>
 #include <QQueue>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include "export.h"
 
 class Message;
@@ -43,7 +43,7 @@ signals:
 	void messageEnqueued();
 
 private:
-	QMutex m_lock;
+	QRecursiveMutex m_lock;
 	QQueue<Message*> m_queue;
 };
 

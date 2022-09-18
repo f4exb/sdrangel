@@ -38,8 +38,7 @@ APTDemodImageWorker::APTDemodImageWorker(APTDemod *aptDemod) :
     m_messageQueueToGUI(nullptr),
     m_aptDemod(aptDemod),
     m_sgp4(nullptr),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     for (int y = 0; y < APT_MAX_HEIGHT; y++)
     {

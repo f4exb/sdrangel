@@ -36,7 +36,6 @@ RemoteTCPSinkSink::RemoteTCPSinkSink() :
         m_channelFrequencyOffset(0),
         m_channelSampleRate(48000),
         m_linearGain(1.0f),
-        m_mutex(QMutex::Recursive),
         m_server(nullptr)
 {
     qDebug("RemoteTCPSinkSink::RemoteTCPSinkSink");

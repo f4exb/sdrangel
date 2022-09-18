@@ -31,8 +31,7 @@ MESSAGE_CLASS_DEFINITION(FileSourceBaseband::MsgConfigureFileSourceSeek, Message
 FileSourceBaseband::FileSourceBaseband() :
     m_avg(0.0),
     m_peak(0.0),
-    m_nbSamples(1),
-    m_mutex(QMutex::Recursive)
+    m_nbSamples(1)
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);

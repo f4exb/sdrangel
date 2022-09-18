@@ -32,7 +32,6 @@ RemoteSourceWorker::RemoteSourceWorker(RemoteDataQueue *dataQueue, QObject* pare
     m_dataQueue(dataQueue),
     m_address(QHostAddress::LocalHost),
     m_socket(this),
-    m_mutex(QMutex::Recursive),
     m_sampleRate(0),
     m_udpReadBytes(0)
 {

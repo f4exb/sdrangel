@@ -28,8 +28,7 @@ MESSAGE_CLASS_DEFINITION(LocalSourceBaseband::MsgConfigureLocalSourceWork, Messa
 MESSAGE_CLASS_DEFINITION(LocalSourceBaseband::MsgConfigureLocalDeviceSampleSink, Message)
 
 LocalSourceBaseband::LocalSourceBaseband() :
-    m_localSampleSink(nullptr),
-    m_mutex(QMutex::Recursive)
+    m_localSampleSink(nullptr)
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);

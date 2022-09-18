@@ -19,7 +19,7 @@
 #define INCLUDE_M17MODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesourcefifo.h"
 #include "util/message.h"
@@ -89,7 +89,7 @@ private:
     M17ModSource m_source;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     M17ModSettings m_settings;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);

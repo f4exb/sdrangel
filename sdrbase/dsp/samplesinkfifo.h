@@ -20,7 +20,7 @@
 #define INCLUDE_SAMPLEFIFO_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QElapsedTimer>
 #include "dsp/dsptypes.h"
 #include "export.h"
@@ -35,7 +35,7 @@ private:
 	int m_total;
 	unsigned int m_writtenSignalCount;
 	unsigned int m_writtenSignalRateDivider;
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 
 	unsigned int m_size;
 	unsigned int m_fill;

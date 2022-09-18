@@ -29,8 +29,7 @@ MESSAGE_CLASS_DEFINITION(RadioClockBaseband::MsgConfigureRadioClockBaseband, Mes
 
 RadioClockBaseband::RadioClockBaseband(RadioClock *radioClock) :
     m_sink(radioClock),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("RadioClockBaseband::RadioClockBaseband");
 

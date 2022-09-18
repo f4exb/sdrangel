@@ -21,7 +21,7 @@
 
 #include <vector>
 
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
@@ -230,7 +230,7 @@ private:
     AISModSettings m_settings;
     SpectrumVis m_spectrumVis;
 
-    QMutex m_settingsMutex;
+    QRecursiveMutex m_settingsMutex;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

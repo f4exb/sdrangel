@@ -51,7 +51,6 @@ StarTrackerWorker::StarTrackerWorker(StarTracker* starTracker, WebAPIAdapterInte
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
     m_running(false),
-    m_mutex(QMutex::Recursive),
     m_pollTimer(this),
     m_tcpServer(nullptr),
     m_clientConnection(nullptr),

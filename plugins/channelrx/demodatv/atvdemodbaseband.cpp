@@ -26,8 +26,7 @@
 MESSAGE_CLASS_DEFINITION(ATVDemodBaseband::MsgConfigureATVDemodBaseband, Message)
 
 ATVDemodBaseband::ATVDemodBaseband() :
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("ATVDemodBaseband::ATVDemodBaseband");
     m_sink.setScopeSink(&m_scopeSink);

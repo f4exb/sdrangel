@@ -26,7 +26,7 @@
 #define CHANNEL_REMOTEDATAQUEUE_H_
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QQueue>
 
 #include "export.h"
@@ -50,7 +50,7 @@ signals:
     void dataBlockEnqueued();
 
 private:
-    QMutex m_lock;
+    QRecursiveMutex m_lock;
     QQueue<RemoteDataFrame*> m_queue;
 };
 

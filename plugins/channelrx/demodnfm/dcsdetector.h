@@ -18,7 +18,7 @@
 #ifndef INCLUDE_DSP_DCSDETECTOR_H_
 #define INCLUDE_DSP_DCSDETECTOR_H_
 
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/dsptypes.h"
 #include "util/golay2312.h"
@@ -49,7 +49,7 @@ private:
     float m_prevSample;
     unsigned int m_dcsWord; //!< 23 bit DCS code word
     Golay2312 m_golay2312;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 };
 
 #endif // INCLUDE_DSP_DCSDETECTOR_H_

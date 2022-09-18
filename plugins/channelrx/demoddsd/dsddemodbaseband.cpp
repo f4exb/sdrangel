@@ -25,8 +25,7 @@
 MESSAGE_CLASS_DEFINITION(DSDDemodBaseband::MsgConfigureDSDDemodBaseband, Message)
 
 DSDDemodBaseband::DSDDemodBaseband() :
-    m_channelizer(&m_sink),
-    m_mutex(QMutex::Recursive)
+    m_channelizer(&m_sink)
 {
     qDebug("DSDDemodBaseband::DSDDemodBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));

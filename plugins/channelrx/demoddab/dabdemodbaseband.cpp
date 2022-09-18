@@ -29,8 +29,7 @@ MESSAGE_CLASS_DEFINITION(DABDemodBaseband::MsgConfigureDABDemodBaseband, Message
 
 DABDemodBaseband::DABDemodBaseband(DABDemod *packetDemod) :
     m_sink(packetDemod),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("DABDemodBaseband::DABDemodBaseband");
 

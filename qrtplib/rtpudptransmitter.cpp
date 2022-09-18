@@ -41,8 +41,7 @@
 namespace qrtplib
 {
 
-RTPUDPTransmitter::RTPUDPTransmitter() :
-    m_rawPacketQueueLock(QMutex::Recursive)
+RTPUDPTransmitter::RTPUDPTransmitter()
 {
     m_created = false;
     m_init = false;

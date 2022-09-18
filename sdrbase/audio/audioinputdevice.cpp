@@ -23,7 +23,6 @@
 #include "audio/audiofifo.h"
 
 AudioInputDevice::AudioInputDevice() :
-	m_mutex(QMutex::Recursive),
 	m_audioInput(0),
 	m_audioUsageCount(0),
 	m_onExit(false),

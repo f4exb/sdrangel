@@ -20,7 +20,7 @@
 #define SDRBASE_AUDIO_AUDIOOPUS_H_
 
 #include <stdint.h>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include "export.h"
 
 struct OpusEncoder;
@@ -40,7 +40,7 @@ public:
 private:
     OpusEncoder *m_encoderState;
     bool m_encoderOK;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 };
 
 #endif /* SDRBASE_AUDIO_AUDIOOPUS_H_ */

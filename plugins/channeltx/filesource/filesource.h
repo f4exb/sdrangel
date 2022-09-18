@@ -228,7 +228,7 @@ private:
     FileSourceSettings m_settings;
 
     SampleVector m_sampleBuffer;
-    QMutex m_settingsMutex;
+    QRecursiveMutex m_settingsMutex;
     uint64_t m_frequencyOffset;
     uint32_t m_basebandSampleRate;
     double m_linearGain;

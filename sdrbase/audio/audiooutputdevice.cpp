@@ -25,7 +25,6 @@
 #include "audionetsink.h"
 
 AudioOutputDevice::AudioOutputDevice() :
-	m_mutex(QMutex::Recursive),
 	m_audioOutput(0),
 	m_audioNetSink(0),
 	m_copyAudioToUdp(false),

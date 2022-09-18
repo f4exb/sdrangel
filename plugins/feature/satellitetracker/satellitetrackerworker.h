@@ -111,7 +111,7 @@ private:
     MessageQueue *m_msgQueueToGUI;
     SatelliteTrackerSettings m_settings;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     QTimer m_pollTimer;
     QHash<QString, SatNogsSatellite *> m_satellites;
     QHash<QString, SatWorkerState *> m_workerState;

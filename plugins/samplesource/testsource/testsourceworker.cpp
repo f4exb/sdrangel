@@ -60,7 +60,6 @@ TestSourceWorker::TestSourceWorker(SampleSinkFifo* sampleFifo, QObject* parent) 
 	m_fcPosShift(0),
     m_throttlems(TESTSOURCE_THROTTLE_MS),
     m_throttleToggle(false),
-    m_mutex(QMutex::Recursive),
     m_histoCounter(0)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);

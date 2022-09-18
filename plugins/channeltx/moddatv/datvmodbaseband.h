@@ -23,7 +23,7 @@
 #include <boost/chrono/chrono.hpp>
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesourcefifo.h"
 #include "util/message.h"
@@ -66,7 +66,7 @@ private:
     DATVModSource m_source;
     MessageQueue m_inputMessageQueue;
     DATVModSettings m_settings;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);

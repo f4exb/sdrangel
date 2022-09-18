@@ -174,7 +174,7 @@ private:
     SpectrumVis m_spectrumVis;
 
     SampleVector m_sampleBuffer;
-    QMutex m_settingsMutex;
+    QRecursiveMutex m_settingsMutex;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

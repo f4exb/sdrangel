@@ -19,7 +19,7 @@
 #define INCLUDE_SAMPLEMIFIFO_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <vector>
 #include "dsp/dsptypes.h"
 #include "export.h"
@@ -95,7 +95,7 @@ private:
     unsigned int m_head;               //!< Number of samples read from beginning of samples vector (sync)
     std::vector<unsigned int> m_vFill; //!< Number of samples written from beginning of samples vector (async)
     std::vector<unsigned int> m_vHead; //!< Number of samples read from beginning of samples vector (async)
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 };
 
 #endif // INCLUDE_SAMPLEMIFIFO_H

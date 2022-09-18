@@ -28,8 +28,7 @@ MESSAGE_CLASS_DEFINITION(PagerDemodBaseband::MsgConfigurePagerDemodBaseband, Mes
 
 PagerDemodBaseband::PagerDemodBaseband(PagerDemod *pagerDemod) :
     m_sink(pagerDemod),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("PagerDemodBaseband::PagerDemodBaseband");
 

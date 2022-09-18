@@ -22,7 +22,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QNetworkRequest>
 #include <QTimer>
 
@@ -255,7 +255,7 @@ private:
     M17ModSettings m_settings;
 
     SampleVector m_sampleBuffer;
-    QMutex m_settingsMutex;
+    QRecursiveMutex m_settingsMutex;
 
     std::ifstream m_ifstream;
     QString m_fileName;

@@ -33,7 +33,6 @@ MESSAGE_CLASS_DEFINITION(GS232ControllerReport::MsgReportAzAl, Message)
 GS232ControllerWorker::GS232ControllerWorker() :
     m_msgQueueToFeature(nullptr),
     m_running(false),
-    m_mutex(QMutex::Recursive),
     m_device(nullptr),
     m_serialPort(this),
     m_socket(this),

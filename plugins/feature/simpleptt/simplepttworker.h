@@ -106,7 +106,7 @@ private:
     int m_voxHoldCount;
     bool m_voxState;
 	QTimer m_updateTimer;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const SimplePTTSettings& settings, bool force = false);

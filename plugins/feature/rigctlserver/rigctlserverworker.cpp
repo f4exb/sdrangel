@@ -55,8 +55,7 @@ RigCtlServerWorker::RigCtlServerWorker(WebAPIAdapterInterface *webAPIAdapterInte
     m_clientConnection(nullptr),
     m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_msgQueueToFeature(nullptr),
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("RigCtlServerWorker::RigCtlServerWorker");
 }

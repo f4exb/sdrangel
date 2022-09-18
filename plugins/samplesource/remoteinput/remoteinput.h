@@ -403,7 +403,7 @@ public:
 private:
 	DeviceAPI *m_deviceAPI;
     int m_sampleRate;
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 	RemoteInputSettings m_settings;
     RemoteChannelSettings m_remoteChannelSettings;
 	RemoteInputUDPHandler* m_remoteInputUDPHandler;

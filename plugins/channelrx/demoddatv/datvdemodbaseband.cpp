@@ -26,8 +26,7 @@
 MESSAGE_CLASS_DEFINITION(DATVDemodBaseband::MsgConfigureDATVDemodBaseband, Message)
 
 DATVDemodBaseband::DATVDemodBaseband() :
-    m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_running(false)
 {
     qDebug("DATVDemodBaseband::DATVDemodBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));

@@ -25,7 +25,7 @@
 #include <QOpenGLWidget>
 #include <QPen>
 #include <QTimer>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QFont>
 #include <QMatrix4x4>
 #include "dsp/dsptypes.h"
@@ -77,7 +77,7 @@ private:
 
 	// state
     QTimer m_timer;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     bool m_dataChanged;
 
     GLShaderTVArray m_glShaderArray;

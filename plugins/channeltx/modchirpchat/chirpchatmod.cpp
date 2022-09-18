@@ -55,7 +55,6 @@ ChirpChatMod::ChirpChatMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
 	m_deviceAPI(deviceAPI),
     m_currentPayloadTime(0.0),
-	m_settingsMutex(QMutex::Recursive),
 	m_sampleRate(48000),
         m_udpSocket(nullptr)
 {

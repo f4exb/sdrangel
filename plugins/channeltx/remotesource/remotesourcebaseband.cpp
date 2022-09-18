@@ -26,8 +26,7 @@
 MESSAGE_CLASS_DEFINITION(RemoteSourceBaseband::MsgConfigureRemoteSourceBaseband, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSourceBaseband::MsgConfigureRemoteSourceWork, Message)
 
-RemoteSourceBaseband::RemoteSourceBaseband() :
-    m_mutex(QMutex::Recursive)
+RemoteSourceBaseband::RemoteSourceBaseband()
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);

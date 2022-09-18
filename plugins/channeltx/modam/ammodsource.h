@@ -19,7 +19,7 @@
 #define INCLUDE_AMMODSOURCE_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QVector>
 
 #include <iostream>
@@ -113,7 +113,7 @@ private:
     std::ifstream *m_ifstream;
     CWKeyer m_cwKeyer;
 
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     static const int m_levelNbSamples;
 

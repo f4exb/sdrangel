@@ -69,7 +69,7 @@ private:
 
     QHostAddress m_address;
     QUdpSocket m_socket;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     static const uint32_t m_nbDataFrames = 4;       //!< number of data frames in the ring buffer
     RemoteDataFrame *m_dataFrames[m_nbDataFrames];  //!< ring buffer of data frames indexed by frame affinity

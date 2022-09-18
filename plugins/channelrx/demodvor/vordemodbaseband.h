@@ -20,7 +20,7 @@
 #define INCLUDE_VORDEMODSCBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "util/message.h"
@@ -82,7 +82,7 @@ private:
     VORDemodSettings m_settings;
     MessageQueue *m_messageQueueToGUI;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const VORDemodSettings& settings, bool force = false);

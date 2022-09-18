@@ -105,7 +105,7 @@ private:
     QTimer m_timer;
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     MessageQueue m_inputMessageQueue;
 

@@ -19,7 +19,7 @@
 #define INCLUDE_M17DEMODBASEBAND_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
 #include "util/message.h"
@@ -129,7 +129,7 @@ private:
     M17DemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     M17DemodSettings m_settings;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const M17DemodSettings& settings, const QList<QString>& settingsKeys, bool force = false);

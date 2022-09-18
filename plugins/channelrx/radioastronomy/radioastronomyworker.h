@@ -75,7 +75,7 @@ private:
     MessageQueue *m_msgQueueToGUI;
     RadioAstronomySettings m_settings;
     bool m_running;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     VISA m_visa;
     ViSession m_session[RADIOASTRONOMY_SENSORS];

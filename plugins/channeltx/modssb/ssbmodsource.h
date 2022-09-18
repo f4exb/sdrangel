@@ -19,7 +19,7 @@
 #define INCLUDE_SSBMODSOURCE_H
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QVector>
 
 #include <iostream>
@@ -135,7 +135,7 @@ private:
     AudioCompressorSnd m_audioCompressor;
     int m_agcStepLength;
 
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
 
     static const int m_levelNbSamples;
 

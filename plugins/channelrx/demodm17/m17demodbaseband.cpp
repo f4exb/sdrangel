@@ -25,8 +25,7 @@
 
 MESSAGE_CLASS_DEFINITION(M17DemodBaseband::MsgConfigureM17DemodBaseband, Message)
 
-M17DemodBaseband::M17DemodBaseband() :
-    m_mutex(QMutex::Recursive)
+M17DemodBaseband::M17DemodBaseband()
 {
     qDebug("M17DemodBaseband::M17DemodBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));

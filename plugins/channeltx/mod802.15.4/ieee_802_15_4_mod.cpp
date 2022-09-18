@@ -57,8 +57,7 @@ const char* const IEEE_802_15_4_Mod::m_channelId = "IEEE_802_15_4_Mod";
 IEEE_802_15_4_Mod::IEEE_802_15_4_Mod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
-    m_spectrumVis(SDR_TX_SCALEF),
-    m_settingsMutex(QMutex::Recursive)
+    m_spectrumVis(SDR_TX_SCALEF)
 {
     setObjectName(m_channelId);
 

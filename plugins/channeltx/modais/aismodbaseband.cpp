@@ -27,8 +27,7 @@
 
 MESSAGE_CLASS_DEFINITION(AISModBaseband::MsgConfigureAISModBaseband, Message)
 
-AISModBaseband::AISModBaseband() :
-    m_mutex(QMutex::Recursive)
+AISModBaseband::AISModBaseband()
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);
