@@ -1005,7 +1005,7 @@ void RemoteControlGUI::updateChart(RemoteControlDeviceGUI *deviceGUI, const QStr
     QString format = sensor->m_format.trimmed();
     if (format.contains("%s"))
     {
-        formattedValue = QString::asprintf(format.toUtf8(), value.toString().toUtf8());
+        formattedValue = QString::asprintf(format.toUtf8(), value.toString().toUtf8().data());
     }
     else if (format.contains("%d") || format.contains("%u") || format.contains("%x") || format.contains("%X"))
     {
