@@ -121,7 +121,7 @@ void getGroundTrack(QDateTime dateTime,
 void getPassAzEl(QLineSeries* azimuth, QLineSeries* elevation, QLineSeries* polar,
                         const QString& tle0, const QString& tle1, const QString& tle2,
                         double latitude, double longitude, double altitude,
-                        QDateTime& aos, QDateTime& los)
+                        const QDateTime& aos, const QDateTime& los)
 {
     try
     {
@@ -366,12 +366,12 @@ bool inPassWindow(DateTime dateTime, QTime passStartTime, QTime passEndTime, boo
 
 // Create a list of satellite passes, between the given start and end times, that exceed the specified minimum elevation
 // We return an uninitalised QDateTime if AOS or LOS is outside of predictionPeriod
-static QList<SatellitePass *> createPassList(Observer& obs, SGP4& sgp4, DateTime& startTime,
+static QList<SatellitePass> createPassList(Observer& obs, SGP4& sgp4, DateTime& startTime,
                                             int predictionPeriod, double minAOSElevation, double minPassElevationDeg,
                                             QTime passStartTime, QTime passEndTime, bool utc,
                                             int noOfPasses)
 {
-    QList<SatellitePass *> passes;
+    QList<SatellitePass> passes;
     bool aos = false;
     bool aosUnknown = true;
     double aosAz;
@@ -418,13 +418,13 @@ static QList<SatellitePass *> createPassList(Observer& obs, SGP4& sgp4, DateTime
                 && inPassWindow(aosTime, passStartTime, passEndTime, utc)
                 && inPassWindow(losTime, passStartTime, passEndTime, utc))
             {
-                SatellitePass *pass = new SatellitePass;
-                pass->m_aos = aosUnknown ? QDateTime() : dateTimeToQDateTime(aosTime);
-                pass->m_los = dateTimeToQDateTime(losTime);
-                pass->m_maxElevation = maxElevationDeg;
-                pass->m_aosAzimuth = aosAz;
-                pass->m_losAzimuth = losAz;
-                pass->m_northToSouth = std::min(360.0-aosAz, aosAz-0.0) < std::min(360.0-losAz, losAz-0.0);
+                SatellitePass pass;
+                pass.m_aos = aosUnknown ? QDateTime() : dateTimeToQDateTime(aosTime);
+                pass.m_los = dateTimeToQDateTime(losTime);
+                pass.m_maxElevation = maxElevationDeg;
+                pass.m_aosAzimuth = aosAz;
+                pass.m_losAzimuth = losAz;
+                pass.m_northToSouth = std::min(360.0-aosAz, aosAz-0.0) < std::min(360.0-losAz, losAz-0.0);
                 passes.append(pass);
                 noOfPasses--;
                 if (noOfPasses <= 0)
@@ -450,13 +450,13 @@ static QList<SatellitePass *> createPassList(Observer& obs, SGP4& sgp4, DateTime
             && inPassWindow(aosTime, passStartTime, passEndTime, utc)
             && inPassWindow(losTime, passStartTime, passEndTime, utc))
         {
-            SatellitePass *pass = new SatellitePass;
-            pass->m_aos = aosUnknown ? QDateTime() : dateTimeToQDateTime(aosTime);
-            pass->m_los = QDateTime();
-            pass->m_aosAzimuth = aosAz;
-            pass->m_losAzimuth = losAz;
-            pass->m_maxElevation = maxElevationDeg;
-            pass->m_northToSouth = std::min(360.0-aosAz, aosAz-0.0) < std::min(360.0-losAz, losAz-0.0);
+            SatellitePass pass;
+            pass.m_aos = aosUnknown ? QDateTime() : dateTimeToQDateTime(aosTime);
+            pass.m_los = QDateTime();
+            pass.m_aosAzimuth = aosAz;
+            pass.m_losAzimuth = losAz;
+            pass.m_maxElevation = maxElevationDeg;
+            pass.m_northToSouth = std::min(360.0-aosAz, aosAz-0.0) < std::min(360.0-losAz, losAz-0.0);
             passes.append(pass);
         }
     }
@@ -499,7 +499,7 @@ void getSatelliteState(QDateTime dateTime,
         satState->m_period = ele.Period();
         if (noOfPasses > 0)
         {
-            qDeleteAll(satState->m_passes);
+            satState->m_passes.clear();
             satState->m_passes = createPassList(obs, sgp4, dt, predictionPeriod,
                                                 Units::degreesToRadians((double)minAOSElevationDeg),
                                                 minPassElevationDeg,

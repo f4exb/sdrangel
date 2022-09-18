@@ -125,12 +125,12 @@ bool SatelliteTrackerGUI::handleMessage(const Message& message)
             ui->elevation->setText(convertDegreesToText(satState->m_elevation));
             if (satState->m_passes.size() > 0)
             {
-                SatellitePass *pass = satState->m_passes[0];
-                bool geostationary = !pass->m_aos.isValid() && !pass->m_los.isValid();
-                if ((m_nextTargetAOS != pass->m_aos) || (m_nextTargetLOS != pass->m_los) || (geostationary != m_geostationarySatVisible))
+                const SatellitePass &pass = satState->m_passes[0];
+                bool geostationary = !pass.m_aos.isValid() && !pass.m_los.isValid();
+                if ((m_nextTargetAOS != pass.m_aos) || (m_nextTargetLOS != pass.m_los) || (geostationary != m_geostationarySatVisible))
                 {
-                    m_nextTargetAOS = pass->m_aos;
-                    m_nextTargetLOS = pass->m_los;
+                    m_nextTargetAOS = pass.m_aos;
+                    m_nextTargetLOS = pass.m_los;
                     m_geostationarySatVisible = geostationary;
                     plotChart();
                     updateTimeToAOS();
@@ -724,7 +724,7 @@ void SatelliteTrackerGUI::plotPolarChart()
         m_plotPass = m_targetSatState->m_passes.size() - 1;
         ui->passLabel->setText(QString("%1").arg(m_plotPass));
     }
-    SatellitePass *pass = m_targetSatState->m_passes[m_plotPass];
+    const SatellitePass &pass = m_targetSatState->m_passes[m_plotPass];
 
     // Always create a new chart, otherwise sometimes they aren't drawn properly
     m_polarChart = new QPolarChart();
@@ -753,13 +753,13 @@ void SatelliteTrackerGUI::plotPolarChart()
 
     SatNogsSatellite *sat = m_satellites.value(m_settings.m_target);
 
-    if (pass->m_aos.isValid() && pass->m_los.isValid())
+    if (pass.m_aos.isValid() && pass.m_los.isValid())
     {
         QString title;
         if (m_settings.m_utc)
-            title = pass->m_aos.date().toString(m_settings.m_dateFormat);
+            title = pass.m_aos.date().toString(m_settings.m_dateFormat);
         else
-            title = pass->m_aos.toLocalTime().date().toString(m_settings.m_dateFormat);
+            title = pass.m_aos.toLocalTime().date().toString(m_settings.m_dateFormat);
         m_polarChart->setTitle(QString("%1").arg(title));
 
         QLineSeries *polarSeries = new QLineSeries();
@@ -767,7 +767,7 @@ void SatelliteTrackerGUI::plotPolarChart()
         getPassAzEl(nullptr, nullptr, polarSeries,
                     sat->m_tle->m_tle0, sat->m_tle->m_tle1, sat->m_tle->m_tle2,
                     m_settings.m_latitude, m_settings.m_longitude, m_settings.m_heightAboveSeaLevel/1000.0,
-                    pass->m_aos, pass->m_los);
+                    pass.m_aos, pass.m_los);
 
         // Polar charts can't handle points that are more than 180 degrees apart, so
         // we need to split passes that cross from 359 -> 0 degrees (or the reverse)
@@ -821,9 +821,9 @@ void SatelliteTrackerGUI::plotPolarChart()
         aosSeries->append(polarSeries->at(0));
         QTime time;
         if (m_settings.m_utc)
-            time = pass->m_aos.time();
+            time = pass.m_aos.time();
         else
-            time = pass->m_aos.toLocalTime().time();
+            time = pass.m_aos.toLocalTime().time();
         if (m_settings.m_utc)
             aosSeries->setPointLabelsFormat(QString("AOS %1").arg(time.toString("hh:mm")));
         else
@@ -837,9 +837,9 @@ void SatelliteTrackerGUI::plotPolarChart()
         QLineSeries *losSeries = new QLineSeries();
         losSeries->append(polarSeries->at(polarSeries->count()-1));
         if (m_settings.m_utc)
-            time = pass->m_los.time();
+            time = pass.m_los.time();
         else
-            time = pass->m_los.toLocalTime().time();
+            time = pass.m_los.toLocalTime().time();
         losSeries->setPointLabelsFormat(QString("LOS %1").arg(time.toString("hh:mm")));
         losSeries->setPointLabelsVisible(true);
         losSeries->setPointLabelsClipping(false);
@@ -854,13 +854,13 @@ void SatelliteTrackerGUI::plotPolarChart()
             currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
         else
             currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs).toUTC();
-        if ((currentTime >= pass->m_aos) && (currentTime <= pass->m_los))
+        if ((currentTime >= pass.m_aos) && (currentTime <= pass.m_los))
         {
             // Create series with single point, so we can plot current time
             QLineSeries *nowSeries = new QLineSeries();
             // Find closest point to current time
-            int idx = std::round(polarSeries->count() * (currentTime.toMSecsSinceEpoch() - pass->m_aos.toMSecsSinceEpoch())
-                                                       / (pass->m_los.toMSecsSinceEpoch() - pass->m_aos.toMSecsSinceEpoch()));
+            int idx = std::round(polarSeries->count() * (currentTime.toMSecsSinceEpoch() - pass.m_aos.toMSecsSinceEpoch())
+                                                       / (pass.m_los.toMSecsSinceEpoch() - pass.m_aos.toMSecsSinceEpoch()));
             nowSeries->append(polarSeries->at(idx));
             nowSeries->setPointLabelsFormat(m_settings.m_target);
             nowSeries->setPointLabelsVisible(true);
@@ -928,7 +928,7 @@ void SatelliteTrackerGUI::plotAzElChart()
         m_plotPass = m_targetSatState->m_passes.size() - 1;
         ui->passLabel->setText(QString("%1").arg(m_plotPass));
     }
-    SatellitePass *pass = m_targetSatState->m_passes[m_plotPass];
+    const SatellitePass &pass = m_targetSatState->m_passes[m_plotPass];
 
     // Always create a new chart, otherwise sometimes they aren't drawn properly
     m_lineChart = new QChart();
@@ -939,9 +939,9 @@ void SatelliteTrackerGUI::plotAzElChart()
 
     QString title;
     if (m_settings.m_utc)
-        title = pass->m_aos.date().toString(m_settings.m_dateFormat);
+        title = pass.m_aos.date().toString(m_settings.m_dateFormat);
     else
-        title = pass->m_aos.toLocalTime().date().toString(m_settings.m_dateFormat);
+        title = pass.m_aos.toLocalTime().date().toString(m_settings.m_dateFormat);
     m_lineChart->setTitle(QString("%1").arg(title));
     m_lineChart->legend()->hide();
     m_lineChart->addAxis(xAxis, Qt::AlignBottom);
@@ -958,7 +958,7 @@ void SatelliteTrackerGUI::plotAzElChart()
     getPassAzEl(azSeries, elSeries, nullptr,
                 sat->m_tle->m_tle0, sat->m_tle->m_tle1, sat->m_tle->m_tle2,
                 m_settings.m_latitude, m_settings.m_longitude, m_settings.m_heightAboveSeaLevel/1000.0,
-                pass->m_aos, pass->m_los);
+                pass.m_aos, pass.m_los);
 
     // Split crossing of 360/0 degrees in to multiple series in the same colour
     QList<QLineSeries *> azSeriesList;
@@ -989,7 +989,7 @@ void SatelliteTrackerGUI::plotAzElChart()
         azSeriesList[i]->attachAxis(xAxis);
         azSeriesList[i]->attachAxis(yRightAxis);
     }
-    xAxis->setRange(pass->m_aos, pass->m_los);
+    xAxis->setRange(pass.m_aos, pass.m_los);
     xAxis->setFormat("hh:mm");
     yLeftAxis->setRange(0.0, 90.0);
     yLeftAxis->setTickCount(7);
@@ -1163,19 +1163,19 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
     {
         // Get number of days to AOS/LOS
         QDateTime currentDateTime = m_satelliteTracker->currentDateTime();
-        int daysToAOS = currentDateTime.daysTo(satState->m_passes[0]->m_aos);
-        int daysToLOS = currentDateTime.daysTo(satState->m_passes[0]->m_los);
-        if( satState->m_passes[ 0 ]->m_aos > currentDateTime )
-            items[SAT_COL_TNE]->setText(formatSecondsHHMM(currentDateTime.secsTo(satState->m_passes[0]->m_aos))+" AOS");
+        int daysToAOS = currentDateTime.daysTo(satState->m_passes[0].m_aos);
+        int daysToLOS = currentDateTime.daysTo(satState->m_passes[0].m_los);
+        if (satState->m_passes[0].m_aos > currentDateTime)
+            items[SAT_COL_TNE]->setText(formatSecondsHHMM(currentDateTime.secsTo(satState->m_passes[0].m_aos))+" AOS");
         else
-            items[SAT_COL_TNE]->setText(formatSecondsHHMM(currentDateTime.secsTo(satState->m_passes[0]->m_los))+" LOS");
-        items[SAT_COL_DUR]->setText(formatSecondsHHMM(satState->m_passes[0]->m_aos.secsTo(satState->m_passes[0]->m_los)));
-        items[SAT_COL_AOS]->setText(formatDaysTime(daysToAOS, satState->m_passes[0]->m_aos));
-        items[SAT_COL_AOS]->setData(Qt::UserRole, satState->m_passes[0]->m_aos);
-        items[SAT_COL_LOS]->setText(formatDaysTime(daysToLOS, satState->m_passes[0]->m_los));
-        items[SAT_COL_LOS]->setData(Qt::UserRole, satState->m_passes[0]->m_los);
-        items[SAT_COL_MAX_EL]->setData(Qt::DisplayRole, (int)round(satState->m_passes[0]->m_maxElevation));
-        if (satState->m_passes[0]->m_northToSouth)
+            items[SAT_COL_TNE]->setText(formatSecondsHHMM(currentDateTime.secsTo(satState->m_passes[0].m_los))+" LOS");
+        items[SAT_COL_DUR]->setText(formatSecondsHHMM(satState->m_passes[0].m_aos.secsTo(satState->m_passes[0].m_los)));
+        items[SAT_COL_AOS]->setText(formatDaysTime(daysToAOS, satState->m_passes[0].m_aos));
+        items[SAT_COL_AOS]->setData(Qt::UserRole, satState->m_passes[0].m_aos);
+        items[SAT_COL_LOS]->setText(formatDaysTime(daysToLOS, satState->m_passes[0].m_los));
+        items[SAT_COL_LOS]->setData(Qt::UserRole, satState->m_passes[0].m_los);
+        items[SAT_COL_MAX_EL]->setData(Qt::DisplayRole, (int)round(satState->m_passes[0].m_maxElevation));
+        if (satState->m_passes[0].m_northToSouth)
             items[SAT_COL_DIR]->setText(QString("%1").arg(QChar(0x2193))); // Down arrow
         else
             items[SAT_COL_DIR]->setText(QString("%1").arg(QChar(0x2191))); // Up arrow

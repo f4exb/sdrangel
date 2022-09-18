@@ -195,7 +195,7 @@ bool SatelliteTrackerSettings::deserialize(const QByteArray& data)
         d.readBool(22, &m_drawOnMap, true);
         d.readBool(23, &m_autoTarget, true);
         d.readString(24, &m_aosSpeech, DEFAULT_AOS_SPEECH);
-        d.readString(25, &m_aosCommand, DEFAULT_LOS_SPEECH);
+        d.readString(25, &m_losSpeech, DEFAULT_LOS_SPEECH);
         d.readString(26, &m_aosCommand, "");
         d.readString(27, &m_losCommand, "");
         d.readBlob(28, &blob);

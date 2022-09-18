@@ -169,7 +169,7 @@ public:
     static const char* const m_featureId;
 
 private:
-    QThread m_thread;
+    QThread *m_thread;
     GS232ControllerWorker *m_worker;
     GS232ControllerSettings m_settings;
     QHash<QObject*, GS232ControllerSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
