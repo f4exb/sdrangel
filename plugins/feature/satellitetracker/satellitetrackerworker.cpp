@@ -656,9 +656,9 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                 {
                     qDebug() << "SatelliteTrackerWorker::aos: executing command: " << devSettings->m_aosCommand;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-                    QStringList allArgs = m_settings.m_aosCommand.split(" ", Qt::SkipEmptyParts);
+                    QStringList allArgs = devSettings->m_aosCommand.split(" ", Qt::SkipEmptyParts);
 #else
-                    QStringList allArgs = m_settings.m_aosCommand.split(" ", QString::SkipEmptyParts);
+                    QStringList allArgs = devSettings->m_aosCommand.split(" ", QString::SkipEmptyParts);
 #endif
                     QString program = allArgs[0];
                     allArgs.pop_front();
