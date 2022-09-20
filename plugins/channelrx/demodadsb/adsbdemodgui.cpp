@@ -4337,6 +4337,10 @@ void ADSBDemodGUI::update3DModels()
 
 void ADSBDemodGUI::updateAirports()
 {
+    if (!m_airportInfo) {
+        return;
+    }
+
     m_airportModel.removeAllAirports();
     QHash<int, AirportInformation *>::iterator i = m_airportInfo->begin();
     AzEl azEl = m_azEl;
@@ -4869,9 +4873,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(&m_airportModel, &AirportModel::requestMetar, this, &ADSBDemodGUI::requestMetar);
 
     // Add airports within range of My Position
-    if (m_airportInfo != nullptr) {
-        updateAirports();
-    }
+    updateAirports();
     updateAirspaces();
     updateNavAids();
     update3DModels();
