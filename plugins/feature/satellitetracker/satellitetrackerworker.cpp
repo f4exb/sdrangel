@@ -66,6 +66,7 @@ SatelliteTrackerWorker::SatelliteTrackerWorker(SatelliteTracker* satelliteTracke
 SatelliteTrackerWorker::~SatelliteTrackerWorker()
 {
     qDebug() << "SatelliteTrackerWorker::~SatelliteTrackerWorker";
+    stopWork();
     m_inputMessageQueue.clear();
 }
 
@@ -74,7 +75,6 @@ void SatelliteTrackerWorker::startWork()
     qDebug() << "SatelliteTrackerWorker::startWork";
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    connect(thread(), SIGNAL(finished()), this, SLOT(stopWork()));
     m_recalculatePasses = true;
 
      m_pollTimer.start((int)round(m_settings.m_updatePeriod*1000.0));

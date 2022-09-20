@@ -88,7 +88,7 @@ void SatelliteTracker::start()
         FeatureWebAPIUtils::mapSetDateTime(currentDateTime());
     }
 
-    m_thread = new QThread(this);
+    m_thread = new QThread();
     m_worker = new SatelliteTrackerWorker(this, m_webAPIAdapterInterface);
     m_worker->moveToThread(m_thread);
 

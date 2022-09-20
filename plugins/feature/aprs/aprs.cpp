@@ -89,7 +89,7 @@ APRS::~APRS()
 void APRS::start()
 {
     qDebug("APRS::start");
-    m_thread = new QThread(this);
+    m_thread = new QThread();
     m_worker = new APRSWorker(this, m_webAPIAdapterInterface);
     m_worker->moveToThread(m_thread);
 
