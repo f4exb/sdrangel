@@ -175,7 +175,7 @@ bool AirspyHFInput::start()
         stop();
     }
 
-    m_airspyHFWorkerThread = new QThread(this);
+    m_airspyHFWorkerThread = new QThread();
     m_airspyHFWorker = new AirspyHFWorker(m_dev, &m_sampleFifo);
     m_airspyHFWorker->moveToThread(m_airspyHFWorkerThread);
 	int sampleRateIndex = m_settings.m_devSampleRateIndex;
