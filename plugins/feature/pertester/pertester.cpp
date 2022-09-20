@@ -48,12 +48,12 @@ const char* const PERTester::m_featureIdURI = "sdrangel.feature.pertester";
 const char* const PERTester::m_featureId = "PERTester";
 
 PERTester::PERTester(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    Feature(m_featureIdURI, webAPIAdapterInterface)
+    Feature(m_featureIdURI, webAPIAdapterInterface),
+    m_thread(nullptr),
+    m_worker(nullptr)
 {
     qDebug("PERTester::PERTester: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_worker = new PERTesterWorker();
-    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "PERTester error";
     m_networkManager = new QNetworkAccessManager();
@@ -74,40 +74,48 @@ PERTester::~PERTester()
         &PERTester::networkManagerFinished
     );
     delete m_networkManager;
-    if (m_worker->isRunning()) {
-        stop();
-    }
-
-    delete m_worker;
+    stop();
 }
 
 void PERTester::start()
 {
     qDebug("PERTester::start");
 
+    m_thread = new QThread(this);
+    m_worker = new PERTesterWorker();
+    m_worker->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::started, m_worker, &PERTesterWorker::startWork);
+    QObject::connect(m_thread, &QThread::finished, m_worker, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
+ 
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_worker->getInputMessageQueue()->push(PERTesterWorker::MsgConfigurePERTesterWorker::create(m_settings, true));
     if (m_settings.m_start == PERTesterSettings::START_IMMEDIATELY)
     {
-        bool ok = m_worker->startWork();
-        m_state = ok ? StRunning : StError;
+        m_thread->start();
+        m_state = StRunning;
     }
     else
     {
         // Wait for AOS
         m_state = StIdle;
     }
-    m_thread.start();
+    m_thread->start();
 }
 
 void PERTester::stop()
 {
     qDebug("PERTester::stop");
-    m_worker->stopWork();
     m_state = StIdle;
-    m_thread.quit();
-    m_thread.wait();
+    if (m_thread)
+    {
+        m_thread->quit();
+        m_thread->wait();
+        m_thread = nullptr;
+        m_worker = nullptr;
+    }
 }
 
 bool PERTester::handleMessage(const Message& cmd)
@@ -135,7 +143,9 @@ bool PERTester::handleMessage(const Message& cmd)
     }
     else if (MsgResetStats::match(cmd))
     {
-        m_worker->getInputMessageQueue()->push(MsgResetStats::create());
+        if (m_worker) {
+            m_worker->getInputMessageQueue()->push(MsgResetStats::create());
+        }
         return true;
     }
     else if (MsgReportWorker::match(cmd))
@@ -249,7 +259,9 @@ void PERTester::applySettings(const PERTesterSettings& settings, bool force)
     PERTesterWorker::MsgConfigurePERTesterWorker *msg = PERTesterWorker::MsgConfigurePERTesterWorker::create(
         settings, force
     );
-    m_worker->getInputMessageQueue()->push(msg);
+    if (m_worker) {
+        m_worker->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -555,8 +567,8 @@ int PERTester::webapiActionsPost(
                 {
                     if (m_settings.m_start == PERTesterSettings::START_ON_AOS)
                     {
-                        bool ok = m_worker->startWork();
-                        m_state = ok ? StRunning : StError;
+                        m_thread->start();
+                        m_state = StRunning;
                     }
                     else if (m_settings.m_start == PERTesterSettings::START_ON_MID_PASS)
                     {
@@ -566,8 +578,8 @@ int PERTester::webapiActionsPost(
                         QDateTime losTime = QDateTime::fromString(losTimeString);
                         qint64 msecs = aosTime.msecsTo(losTime) / 2;
                         QTimer::singleShot(msecs, [this] {
-                            bool ok = m_worker->startWork();
-                            m_state = ok ? StRunning : StError;
+                            m_thread->start();
+                            m_state = StRunning;
                         });
                     }
                 }

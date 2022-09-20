@@ -155,7 +155,7 @@ public:
     static const char* const m_featureId;
 
 private:
-    QThread m_thread;
+    QThread *m_thread;
     StarTrackerWorker *m_worker;
     StarTrackerSettings m_settings;
 

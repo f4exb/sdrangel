@@ -44,12 +44,12 @@ const char* const APRS::m_featureIdURI = "sdrangel.feature.aprs";
 const char* const APRS::m_featureId = "APRS";
 
 APRS::APRS(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    Feature(m_featureIdURI, webAPIAdapterInterface)
+    Feature(m_featureIdURI, webAPIAdapterInterface),
+    m_thread(nullptr),
+    m_worker(nullptr)
 {
     qDebug("APRS::APRS: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_worker = new APRSWorker(this, webAPIAdapterInterface);
-    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "APRS error";
     m_networkManager = new QNetworkAccessManager();
@@ -83,22 +83,24 @@ APRS::~APRS()
         &APRS::networkManagerFinished
     );
     delete m_networkManager;
-    if (m_worker->isRunning()) {
-        stop();
-    }
-
-    delete m_worker;
+    stop();
 }
 
 void APRS::start()
 {
     qDebug("APRS::start");
-    m_worker->reset();
+    m_thread = new QThread(this);
+    m_worker = new APRSWorker(this, m_webAPIAdapterInterface);
+    m_worker->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::started, m_worker, &APRSWorker::startWork);
+    QObject::connect(m_thread, &QThread::finished, m_worker, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
+
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
-    bool ok = m_worker->startWork();
-    m_state = ok ? StIdle : StError;
-    m_thread.start();
+    m_thread->start();
+    m_state = StRunning;
 
     APRSWorker::MsgConfigureAPRSWorker *msg = APRSWorker::MsgConfigureAPRSWorker::create(m_settings, true);
     m_worker->getInputMessageQueue()->push(msg);
@@ -107,10 +109,14 @@ void APRS::start()
 void APRS::stop()
 {
     qDebug("APRS::stop");
-    m_worker->stopWork();
     m_state = StIdle;
-    m_thread.quit();
-    m_thread.wait();
+    if (m_thread)
+    {
+        m_thread->quit();
+        m_thread->wait();
+        m_thread = nullptr;
+        m_worker = nullptr;
+    }
 }
 
 bool APRS::handleMessage(const Message& cmd)
@@ -150,7 +156,7 @@ bool APRS::handleMessage(const Message& cmd)
             MainCore::MsgPacket *copy = new MainCore::MsgPacket(report);
             getMessageQueueToGUI()->push(copy);
         }
-        if (m_state == StRunning)
+        if (m_worker)
         {
             MainCore::MsgPacket *copy = new MainCore::MsgPacket(report);
             m_worker->getInputMessageQueue()->push(copy);
@@ -219,7 +225,9 @@ void APRS::applySettings(const APRSSettings& settings, bool force)
     APRSWorker::MsgConfigureAPRSWorker *msg = APRSWorker::MsgConfigureAPRSWorker::create(
         settings, force
     );
-    m_worker->getInputMessageQueue()->push(msg);
+    if (m_worker) {
+        m_worker->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {

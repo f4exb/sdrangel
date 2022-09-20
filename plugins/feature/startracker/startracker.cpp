@@ -46,12 +46,12 @@ const char* const StarTracker::m_featureIdURI = "sdrangel.feature.startracker";
 const char* const StarTracker::m_featureId = "StarTracker";
 
 StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    Feature(m_featureIdURI, webAPIAdapterInterface)
+    Feature(m_featureIdURI, webAPIAdapterInterface),
+    m_thread(nullptr),
+    m_worker(nullptr)
 {
     qDebug("StarTracker::StarTracker: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_worker = new StarTrackerWorker(this, webAPIAdapterInterface);
-    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "StarTracker error";
     m_networkManager = new QNetworkAccessManager();
@@ -92,11 +92,8 @@ StarTracker::~StarTracker()
         &StarTracker::networkManagerFinished
     );
     delete m_networkManager;
-    if (m_worker->isRunning()) {
-        stop();
-    }
+    stop();
 
-    delete m_worker;
     if (m_weather)
     {
         disconnect(m_weather, &Weather::weatherUpdated, this, &StarTracker::weatherUpdated);
@@ -110,12 +107,19 @@ void StarTracker::start()
 {
     qDebug("StarTracker::start");
 
-    m_worker->reset();
+    m_thread = new QThread(this);
+    m_worker = new StarTrackerWorker(this, m_webAPIAdapterInterface);
+    m_worker->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::started, m_worker, &StarTrackerWorker::startWork);
+    QObject::connect(m_thread, &QThread::finished, m_worker, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
+
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
-    bool ok = m_worker->startWork();
-    m_state = ok ? StRunning : StError;
-    m_thread.start();
+    m_thread->start();
+    m_thread->start();
+    m_state = StRunning;
 
     m_worker->getInputMessageQueue()->push(StarTrackerWorker::MsgConfigureStarTrackerWorker::create(m_settings, true));
     m_worker->getInputMessageQueue()->push(MsgSetSolarFlux::create(m_solarFlux));
@@ -124,10 +128,14 @@ void StarTracker::start()
 void StarTracker::stop()
 {
     qDebug("StarTracker::stop");
-    m_worker->stopWork();
     m_state = StIdle;
-    m_thread.quit();
-    m_thread.wait();
+    if (m_thread)
+    {
+        m_thread->quit();
+        m_thread->wait();
+        m_thread = nullptr;
+        m_worker = nullptr;
+    }
 }
 
 bool StarTracker::handleMessage(const Message& cmd)
@@ -157,7 +165,9 @@ bool StarTracker::handleMessage(const Message& cmd)
     {
         MsgSetSolarFlux& msg = (MsgSetSolarFlux&) cmd;
         m_solarFlux = msg.getFlux();
-        m_worker->getInputMessageQueue()->push(new MsgSetSolarFlux(msg));
+        if (m_worker) {
+            m_worker->getInputMessageQueue()->push(new MsgSetSolarFlux(msg));
+        }
         return true;
     }
     else if (MainCore::MsgStarTrackerDisplaySettings::match(cmd))
@@ -338,7 +348,9 @@ void StarTracker::applySettings(const StarTrackerSettings& settings, bool force)
     StarTrackerWorker::MsgConfigureStarTrackerWorker *msg = StarTrackerWorker::MsgConfigureStarTrackerWorker::create(
         settings, force
     );
-    m_worker->getInputMessageQueue()->push(msg);
+    if (m_worker) {
+        m_worker->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -741,7 +753,9 @@ void StarTracker::weatherUpdated(float temperature, float pressure, float humidi
         m_settings.m_humidity = humidity;
     }
 
-    m_worker->getInputMessageQueue()->push(StarTrackerWorker::MsgConfigureStarTrackerWorker::create(m_settings, false));
+    if (m_worker) {
+        m_worker->getInputMessageQueue()->push(StarTrackerWorker::MsgConfigureStarTrackerWorker::create(m_settings, false));
+    }
     if (m_guiMessageQueue) {
         m_guiMessageQueue->push(MsgConfigureStarTracker::create(m_settings, false));
     }

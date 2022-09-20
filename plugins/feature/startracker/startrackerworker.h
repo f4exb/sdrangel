@@ -65,10 +65,8 @@ public:
 
     StarTrackerWorker(StarTracker* starTracker, WebAPIAdapterInterface *webAPIAdapterInterface);
     ~StarTrackerWorker();
-    void reset();
-    bool startWork();
+    void startWork();
     void stopWork();
-    bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
@@ -81,7 +79,6 @@ private:
     MessageQueue *m_msgQueueToFeature; //!< Queue to report channel change to main feature object
     MessageQueue *m_msgQueueToGUI;
     StarTrackerSettings m_settings;
-    bool m_running;
     QRecursiveMutex m_mutex;
     QTimer m_pollTimer;
     QTcpServer *m_tcpServer;
@@ -106,8 +103,6 @@ private:
     );
 
 private slots:
-    void started();
-    void finished();
     void handleInputMessages();
     void update();
     void acceptConnection();
