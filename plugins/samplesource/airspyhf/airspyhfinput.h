@@ -142,15 +142,13 @@ private:
 	AirspyHFSettings m_settings;
 	airspyhf_device_t* m_dev;
 	AirspyHFWorker* m_airspyHFWorker;
-    QThread m_airspyHFWorkerThread;
+    QThread *m_airspyHFWorkerThread;
 	QString m_deviceDescription;
 	std::vector<uint32_t> m_sampleRates;
 	bool m_running;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-	bool startWorker();
-	void stopWorker();
 	bool openDevice();
 	void closeDevice();
 	bool applySettings(const AirspyHFSettings& settings, bool force);
