@@ -19,7 +19,6 @@
 #ifndef INCLUDE_FEATURE_AIS_H_
 #define INCLUDE_FEATURE_AIS_H_
 
-#include <QThread>
 #include <QNetworkRequest>
 #include <QSet>
 

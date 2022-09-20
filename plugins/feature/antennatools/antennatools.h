@@ -19,7 +19,6 @@
 #ifndef INCLUDE_FEATURE_ANTENNATOOLS_H_
 #define INCLUDE_FEATURE_ANTENNATOOLS_H_
 
-#include <QThread>
 #include <QHash>
 #include <QNetworkRequest>
 #include <QTimer>
@@ -98,7 +97,6 @@ public:
     static const char* const m_featureId;
 
 private:
-    QThread m_thread;
     AntennaToolsSettings m_settings;
 
     QNetworkAccessManager *m_networkManager;

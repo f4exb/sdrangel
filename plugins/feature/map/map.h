@@ -19,7 +19,6 @@
 #ifndef INCLUDE_FEATURE_MAP_H_
 #define INCLUDE_FEATURE_MAP_H_
 
-#include <QThread>
 #include <QHash>
 #include <QNetworkRequest>
 #include <QDateTime>
@@ -171,7 +170,6 @@ public:
     static const char* const m_featureId;
 
 private:
-    QThread m_thread;
     MapSettings m_settings;
     QHash<QObject*, MapSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
 

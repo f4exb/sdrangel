@@ -19,7 +19,6 @@
 #ifndef INCLUDE_FEATURE_RADIOSONDE_H_
 #define INCLUDE_FEATURE_RADIOSONDE_H_
 
-#include <QThread>
 #include <QNetworkRequest>
 #include <QSet>
 
