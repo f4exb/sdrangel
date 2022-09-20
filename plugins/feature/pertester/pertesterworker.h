@@ -57,10 +57,8 @@ public:
 
     PERTesterWorker();
     ~PERTesterWorker();
-    void reset();
-    bool startWork();
+    void startWork();
     void stopWork();
-    bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
@@ -71,7 +69,6 @@ private:
     MessageQueue *m_msgQueueToFeature;
     MessageQueue *m_msgQueueToGUI;
     PERTesterSettings m_settings;
-    bool m_running;
     QRecursiveMutex m_mutex;
     QUdpSocket *m_rxUDPSocket;                  //!< UDP socket to receive packets on
     QUdpSocket m_txUDPSocket;
@@ -89,8 +86,6 @@ private:
     void resetStats();
 
 private slots:
-    void started();
-    void finished();
     void handleInputMessages();
     void rx();
     void tx();

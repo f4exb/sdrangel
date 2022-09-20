@@ -59,10 +59,8 @@ public:
 
     APRSWorker(APRS *m_aprs, WebAPIAdapterInterface *webAPIAdapterInterface);
     ~APRSWorker();
-    void reset();
-    bool startWork();
+    void startWork();
     void stopWork();
-    bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
@@ -75,7 +73,6 @@ private:
     MessageQueue *m_msgQueueToFeature; //!< Queue to report channel change to main feature object
     MessageQueue *m_msgQueueToGUI;
     APRSSettings m_settings;
-    bool m_running;
     QRecursiveMutex m_mutex;
     QTcpSocket m_socket;
     bool m_loggedIn;
@@ -86,8 +83,6 @@ private:
     void send(const char *data, int length);
 
 private slots:
-    void started();
-    void finished();
     void handleInputMessages();
     void connected();
     void disconnected();

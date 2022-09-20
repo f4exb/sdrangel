@@ -153,7 +153,7 @@ public:
     static const char* const m_featureId;
 
 private:
-    QThread m_thread;
+    QThread *m_thread;
     APRSWorker *m_worker;
     APRSSettings m_settings;
     QHash<ChannelAPI*, APRSSettings::AvailableChannel> m_availableChannels;

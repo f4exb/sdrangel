@@ -50,7 +50,6 @@ StarTrackerWorker::StarTrackerWorker(StarTracker* starTracker, WebAPIAdapterInte
     m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
-    m_running(false),
     m_pollTimer(this),
     m_tcpServer(nullptr),
     m_clientConnection(nullptr),
@@ -64,41 +63,22 @@ StarTrackerWorker::~StarTrackerWorker()
     m_inputMessageQueue.clear();
 }
 
-void StarTrackerWorker::reset()
-{
-    QMutexLocker mutexLocker(&m_mutex);
-    m_inputMessageQueue.clear();
-}
-
-bool StarTrackerWorker::startWork()
+void StarTrackerWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    connect(thread(), SIGNAL(started()), this, SLOT(started()));
-    connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
-    m_running = true;
-    return m_running;
-}
-
-// startWork() is called from main thread. Timers/sockets need to be started on worker thread
-void StarTrackerWorker::started()
-{
+    connect(thread(), SIGNAL(finished()), this, SLOT(stopWork()));
     m_pollTimer.start((int)round(m_settings.m_updatePeriod*1000.0));
-    disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
+    // Handle any messages already on the queue
+    handleInputMessages();
 }
 
 void StarTrackerWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-}
-
-void StarTrackerWorker::finished()
-{
     restartServer(false, 0);
     m_pollTimer.stop();
-    disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
-    m_running = false;
 }
 
 void StarTrackerWorker::handleInputMessages()
