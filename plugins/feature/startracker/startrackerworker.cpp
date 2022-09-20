@@ -60,6 +60,7 @@ StarTrackerWorker::StarTrackerWorker(StarTracker* starTracker, WebAPIAdapterInte
 
 StarTrackerWorker::~StarTrackerWorker()
 {
+    stopWork();
     m_inputMessageQueue.clear();
 }
 
@@ -67,7 +68,6 @@ void StarTrackerWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    connect(thread(), SIGNAL(finished()), this, SLOT(stopWork()));
     m_pollTimer.start((int)round(m_settings.m_updatePeriod*1000.0));
     // Handle any messages already on the queue
     handleInputMessages();

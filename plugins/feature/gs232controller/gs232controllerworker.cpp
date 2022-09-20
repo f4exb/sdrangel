@@ -48,6 +48,7 @@ GS232ControllerWorker::GS232ControllerWorker() :
 GS232ControllerWorker::~GS232ControllerWorker()
 {
     qDebug() << "GS232ControllerWorker::~GS232ControllerWorker";
+    stopWork();
     m_inputMessageQueue.clear();
 }
 
@@ -55,7 +56,6 @@ void GS232ControllerWorker::startWork()
 {
     qDebug() << "GS232ControllerWorker::startWork";
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    connect(thread(), SIGNAL(finished()), this, SLOT(stopWork()));
     connect(&m_serialPort, &QSerialPort::readyRead, this, &GS232ControllerWorker::readData);
     connect(&m_socket, &QTcpSocket::readyRead, this, &GS232ControllerWorker::readData);
     if (m_settings.m_connection == GS232ControllerSettings::TCP) {

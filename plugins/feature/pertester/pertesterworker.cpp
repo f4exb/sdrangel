@@ -51,6 +51,7 @@ PERTesterWorker::PERTesterWorker() :
 
 PERTesterWorker::~PERTesterWorker()
 {
+    stopWork();
     closeUDP();
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     m_inputMessageQueue.clear();
@@ -65,7 +66,6 @@ void PERTesterWorker::startWork()
     if (m_tx >= m_settings.m_packetCount)
         resetStats();
     connect(&m_txTimer, SIGNAL(timeout()), this, SLOT(tx()));
-    connect(thread(), SIGNAL(finished()), this, SLOT(stopWork()));
     m_txTimer.start(m_settings.m_interval * 1000.0);
     // Handle any messages already on the queue
     handleInputMessages();

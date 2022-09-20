@@ -81,7 +81,7 @@ void PERTester::start()
 {
     qDebug("PERTester::start");
 
-    m_thread = new QThread(this);
+    m_thread = new QThread();
     m_worker = new PERTesterWorker();
     m_worker->moveToThread(m_thread);
 

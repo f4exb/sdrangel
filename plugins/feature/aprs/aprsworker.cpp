@@ -51,6 +51,7 @@ APRSWorker::APRSWorker(APRS *aprs, WebAPIAdapterInterface *webAPIAdapterInterfac
 
 APRSWorker::~APRSWorker()
 {
+    stopWork();
     m_inputMessageQueue.clear();
 }
 
@@ -59,7 +60,6 @@ void APRSWorker::startWork()
     qDebug("APRSWorker::startWork");
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    connect(thread(), SIGNAL(finished()), this, SLOT(stopWork()));
     // Handle any messages already on the queue
     handleInputMessages();
 }
