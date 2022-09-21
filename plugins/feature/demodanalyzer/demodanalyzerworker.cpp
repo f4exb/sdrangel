@@ -28,8 +28,7 @@ MESSAGE_CLASS_DEFINITION(DemodAnalyzerWorker::MsgConnectFifo, Message)
 DemodAnalyzerWorker::DemodAnalyzerWorker() :
     m_dataFifo(nullptr),
     m_msgQueueToFeature(nullptr),
-    m_sampleBufferSize(0),
-    m_running(false)
+    m_sampleBufferSize(0)
 {
     qDebug("DemodAnalyzerWorker::DemodAnalyzerWorker");
 }
@@ -45,19 +44,16 @@ void DemodAnalyzerWorker::reset()
     m_inputMessageQueue.clear();
 }
 
-bool DemodAnalyzerWorker::startWork()
+void DemodAnalyzerWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_running = true;
-    return m_running;
 }
 
 void DemodAnalyzerWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_running = false;
 }
 
 void DemodAnalyzerWorker::feedPart(

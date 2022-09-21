@@ -86,9 +86,8 @@ public:
     DemodAnalyzerWorker();
 	~DemodAnalyzerWorker();
     void reset();
-    bool startWork();
+    void startWork();
     void stopWork();
-    bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
 
@@ -122,7 +121,6 @@ private:
     int m_sampleBufferSize;
 	MovingAverageUtil<double, double, 480> m_channelPowerAvg;
     ScopeVis* m_scopeVis;
-    bool m_running;
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);

@@ -48,15 +48,15 @@ const char* const DemodAnalyzer::m_featureId = "DemodAnalyzer";
 
 DemodAnalyzer::DemodAnalyzer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
+    m_thread(nullptr),
+    m_running(false),
+    m_worker(nullptr),
     m_spectrumVis(SDR_RX_SCALEF),
     m_selectedChannel(nullptr),
     m_dataPipe(nullptr)
 {
     qDebug("DemodAnalyzer::DemodAnalyzer: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_worker = new DemodAnalyzerWorker();
-    m_worker->moveToThread(&m_thread);
-    m_worker->setScopeVis(&m_scopeVis);
     m_state = StIdle;
     m_errorMessage = "DemodAnalyzer error";
     m_networkManager = new QNetworkAccessManager();
@@ -77,22 +77,46 @@ DemodAnalyzer::~DemodAnalyzer()
         &DemodAnalyzer::networkManagerFinished
     );
     delete m_networkManager;
-    if (m_worker->isRunning()) {
-        stop();
-    }
-
-    delete m_worker;
+    stop();
 }
 
 void DemodAnalyzer::start()
 {
-	qDebug("DemodAnalyzer::start");
+    QMutexLocker m_lock(&m_mutex);
 
+    if (m_running) {
+        return;
+    }
+
+	qDebug("DemodAnalyzer::start");
+    m_thread = new QThread();
+    m_worker = new DemodAnalyzerWorker();
+    m_worker->moveToThread(m_thread);
+
+    QObject::connect(
+        m_thread,
+        &QThread::started,
+        m_worker,
+        &DemodAnalyzerWorker::startWork
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_worker,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_thread,
+        &QThread::deleteLater
+    );
+
+    m_worker->setScopeVis(&m_scopeVis);
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
-    m_worker->reset();
-    bool ok = m_worker->startWork();
-    m_state = ok ? StRunning : StError;
-    m_thread.start();
+    m_worker->startWork();
+    m_state = StRunning;
+    m_thread->start();
 
     DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker *msg
         = DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker::create(m_settings, true);
@@ -108,11 +132,20 @@ void DemodAnalyzer::start()
             m_worker->getInputMessageQueue()->push(msg);
         }
     }
+
+    m_running = true;
 }
 
 void DemodAnalyzer::stop()
 {
+    QMutexLocker m_lock(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
     qDebug("DemodAnalyzer::stop");
+    m_running = false;
 
     if (m_dataPipe)
     {
@@ -127,13 +160,13 @@ void DemodAnalyzer::stop()
 
 	m_worker->stopWork();
     m_state = StIdle;
-	m_thread.quit();
-	m_thread.wait();
+	m_thread->quit();
+	m_thread->wait();
 }
 
 double DemodAnalyzer::getMagSqAvg() const
 {
-    return m_worker->getMagSqAvg();
+    return m_running ? m_worker->getMagSqAvg() : 0.0;
 }
 
 bool DemodAnalyzer::handleMessage(const Message& cmd)
@@ -261,10 +294,14 @@ void DemodAnalyzer::applySettings(const DemodAnalyzerSettings& settings, bool fo
         reverseAPIKeys.append("rgbColor");
     }
 
-    DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker *msg = DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker::create(
-        settings, force
-    );
-    m_worker->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker *msg = DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker::create(
+            settings, force
+        );
+        m_worker->getInputMessageQueue()->push(msg);
+    }
+
 
     if (settings.m_useReverseAPI)
     {
@@ -343,7 +380,7 @@ void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
         ObjectPipe *pipe = mainCore->getDataPipes().unregisterProducerToConsumer(m_selectedChannel, this, "demod");
         DataFifo *fifo = qobject_cast<DataFifo*>(pipe->m_element);
 
-        if ((fifo) && m_worker->isRunning())
+        if ((fifo) && m_running)
         {
             DemodAnalyzerWorker::MsgConnectFifo *msg = DemodAnalyzerWorker::MsgConnectFifo::create(fifo, false);
             m_worker->getInputMessageQueue()->push(msg);
@@ -369,7 +406,7 @@ void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
     {
         fifo->setSize(96000);
 
-        if (m_worker->isRunning())
+        if (m_running)
         {
             DemodAnalyzerWorker::MsgConnectFifo *msg = DemodAnalyzerWorker::MsgConnectFifo::create(fifo, true);
             m_worker->getInputMessageQueue()->push(msg);
@@ -633,7 +670,7 @@ void DemodAnalyzer::handleDataPipeToBeDeleted(int reason, QObject *object)
     {
         DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
 
-        if (fifo && m_worker->isRunning())
+        if ((fifo) && m_running)
         {
             DemodAnalyzerWorker::MsgConnectFifo *msg = DemodAnalyzerWorker::MsgConnectFifo::create(fifo, false);
             m_worker->getInputMessageQueue()->push(msg);

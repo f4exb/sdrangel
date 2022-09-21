@@ -18,9 +18,9 @@
 #ifndef INCLUDE_FEATURE_DEMODANALYZER_H_
 #define INCLUDE_FEATURE_DEMODANALYZER_H_
 
-#include <QThread>
 #include <QHash>
 #include <QNetworkRequest>
+#include <QRecursiveMutex>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -33,6 +33,7 @@ class WebAPIAdapterInterface;
 class DemodAnalyzerWorker;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 class ObjectPipe;
 
 namespace SWGSDRangel {
@@ -195,7 +196,9 @@ public:
     static const char* const m_featureId;
 
 private:
-    QThread m_thread;
+    QThread *m_thread;
+    QRecursiveMutex m_mutex;
+    bool m_running;
     DemodAnalyzerWorker *m_worker;
     DemodAnalyzerSettings m_settings;
     SpectrumVis m_spectrumVis;
