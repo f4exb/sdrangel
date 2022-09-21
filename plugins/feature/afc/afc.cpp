@@ -50,8 +50,8 @@ const char* const AFC::m_featureId = "AFC";
 AFC::AFC(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
     m_thread(nullptr),
-    m_mutex(QMutex::Recursive),
     m_running(false),
+    m_worker(nullptr),
     m_trackerDeviceSet(nullptr),
     m_trackedDeviceSet(nullptr),
     m_trackerIndexInDeviceSet(-1),

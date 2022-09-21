@@ -19,7 +19,7 @@
 #define INCLUDE_FEATURE_AFC_H_
 
 #include <QNetworkRequest>
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -203,7 +203,7 @@ public:
 
 private:
     QThread *m_thread;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     bool m_running;
     AFCWorker *m_worker;
     AFCSettings m_settings;
