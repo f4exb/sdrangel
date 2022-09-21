@@ -152,6 +152,7 @@ public:
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
     void setWorkspaceIndex(int index) { m_workspaceIndex = index; }
     int getWorkspaceIndex() const { return m_workspaceIndex; }
+    WebAPIAdapterInterface *getWebAPIAdapterInterface() { return m_webAPIAdapterInterface; }
 
 protected:
     MessageQueue m_inputMessageQueue;

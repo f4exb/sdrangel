@@ -42,7 +42,6 @@ MESSAGE_CLASS_DEFINITION(AFCWorker::MsgDevicesApply, Message)
 AFCWorker::AFCWorker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_msgQueueToGUI(nullptr),
-    m_running(false),
     m_freqTracker(nullptr),
     m_trackerDeviceFrequency(0),
     m_trackerChannelOffset(0),
@@ -59,6 +58,7 @@ AFCWorker::AFCWorker(WebAPIAdapterInterface *webAPIAdapterInterface) :
 AFCWorker::~AFCWorker()
 {
     m_inputMessageQueue.clear();
+    stopWork();
 }
 
 void AFCWorker::reset()
@@ -67,19 +67,16 @@ void AFCWorker::reset()
     m_inputMessageQueue.clear();
 }
 
-bool AFCWorker::startWork()
+void AFCWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_running = true;
-    return m_running;
 }
 
 void AFCWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_running = false;
 }
 
 void AFCWorker::handleInputMessages()

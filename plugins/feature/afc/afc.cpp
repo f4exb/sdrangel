@@ -19,6 +19,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
@@ -48,14 +49,15 @@ const char* const AFC::m_featureId = "AFC";
 
 AFC::AFC(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
+    m_thread(nullptr),
+    m_mutex(QMutex::Recursive),
+    m_running(false),
     m_trackerDeviceSet(nullptr),
     m_trackedDeviceSet(nullptr),
     m_trackerIndexInDeviceSet(-1),
     m_trackerChannelAPI(nullptr)
 {
     setObjectName(m_featureId);
-    m_worker = new AFCWorker(webAPIAdapterInterface);
-    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "AFC error";
     m_networkManager = new QNetworkAccessManager();
@@ -76,36 +78,66 @@ AFC::~AFC()
         &AFC::networkManagerFinished
     );
     delete m_networkManager;
-    if (m_worker->isRunning()) {
-        stop();
-    }
-
-    delete m_worker;
+    stop();
     removeTrackerFeatureReference();
     removeTrackedFeatureReferences();
 }
 
 void AFC::start()
 {
-	qDebug("AFC::start");
+    QMutexLocker m_lock(&m_mutex);
 
-    m_worker->reset();
+    if (m_running) {
+        return;
+    }
+
+	qDebug("AFC::start");
+    m_thread = new QThread();
+    m_worker = new AFCWorker(getWebAPIAdapterInterface());
+    m_worker->moveToThread(m_thread);
+
+    QObject::connect(
+        m_thread,
+        &QThread::started,
+        m_worker,
+        &AFCWorker::startWork
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_worker,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_thread,
+        &QThread::deleteLater
+    );
+
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
-    bool ok = m_worker->startWork();
-    m_state = ok ? StRunning : StError;
-    m_thread.start();
+    m_thread->start();
 
     AFCWorker::MsgConfigureAFCWorker *msg = AFCWorker::MsgConfigureAFCWorker::create(m_settings, true);
     m_worker->getInputMessageQueue()->push(msg);
+
+    m_state = StRunning;
+    m_running = true;
 }
 
 void AFC::stop()
 {
+    QMutexLocker m_lock(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
     qDebug("AFC::stop");
-	m_worker->stopWork();
+    m_running = false;
     m_state = StIdle;
-	m_thread.quit();
-	m_thread.wait();
+    m_thread->quit();
+    m_thread->wait();
 }
 
 bool AFC::handleMessage(const Message& cmd)
@@ -138,7 +170,7 @@ bool AFC::handleMessage(const Message& cmd)
         QString *channelType  = swgChannelSettings->getChannelType();
         qDebug() << "AFC::handleMessage: MainCore::MsgChannelSettings: " << *channelType;
 
-        if (m_worker->isRunning())
+        if (m_running)
         {
             m_worker->getInputMessageQueue()->push(&cfg);
         }
@@ -150,7 +182,7 @@ bool AFC::handleMessage(const Message& cmd)
     }
     else if (MsgDeviceTrack::match(cmd))
     {
-        if (m_worker->isRunning())
+        if (m_running)
         {
             AFCWorker::MsgDeviceTrack *msg = AFCWorker::MsgDeviceTrack::create();
             m_worker->getInputMessageQueue()->push(msg);
@@ -166,7 +198,7 @@ bool AFC::handleMessage(const Message& cmd)
         removeTrackedFeatureReferences();
         trackedDeviceChange(m_settings.m_trackedDeviceSetIndex);
 
-        if (m_worker->isRunning())
+        if (m_running)
         {
             AFCWorker::MsgDevicesApply *msg = AFCWorker::MsgDevicesApply::create();
             m_worker->getInputMessageQueue()->push(msg);
@@ -262,10 +294,13 @@ void AFC::applySettings(const AFCSettings& settings, bool force)
         trackedDeviceChange(settings.m_trackedDeviceSetIndex);
     }
 
-    AFCWorker::MsgConfigureAFCWorker *msg = AFCWorker::MsgConfigureAFCWorker::create(
-        settings, force
-    );
-    m_worker->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        AFCWorker::MsgConfigureAFCWorker *msg = AFCWorker::MsgConfigureAFCWorker::create(
+            settings, force
+        );
+        m_worker->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -536,9 +571,12 @@ void AFC::webapiUpdateFeatureSettings(
 void AFC::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
 {
     response.getAfcReport()->setTrackerChannelIndex(m_trackerIndexInDeviceSet);
-    response.getAfcReport()->setTrackerDeviceFrequency(m_worker->getTrackerDeviceFrequency());
-    response.getAfcReport()->setTrackerChannelOffset(m_worker->getTrackerChannelOffset());
     response.getAfcReport()->setRunningState(getState());
+
+    if (m_running) {
+        response.getAfcReport()->setTrackerDeviceFrequency(m_worker->getTrackerDeviceFrequency());
+        response.getAfcReport()->setTrackerChannelOffset(m_worker->getTrackerChannelOffset());
+    }
 }
 
 void AFC::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AFCSettings& settings, bool force)

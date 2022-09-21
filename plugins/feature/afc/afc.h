@@ -18,8 +18,8 @@
 #ifndef INCLUDE_FEATURE_AFC_H_
 #define INCLUDE_FEATURE_AFC_H_
 
-#include <QThread>
 #include <QNetworkRequest>
+#include <QMutex>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -31,6 +31,7 @@ class QNetworkReply;
 class WebAPIAdapterInterface;
 class DeviceSet;
 class AFCWorker;
+class QThread;
 
 namespace SWGSDRangel {
     class SWGDeviceState;
@@ -201,7 +202,9 @@ public:
     static const char* const m_featureId;
 
 private:
-    QThread m_thread;
+    QThread *m_thread;
+    QMutex m_mutex;
+    bool m_running;
     AFCWorker *m_worker;
     AFCSettings m_settings;
     DeviceSet *m_trackerDeviceSet;

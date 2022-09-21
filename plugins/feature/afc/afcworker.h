@@ -107,9 +107,8 @@ public:
     AFCWorker(WebAPIAdapterInterface *webAPIAdapterInterface);
     ~AFCWorker();
     void reset();
-    bool startWork();
+    void startWork();
     void stopWork();
-    bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
     uint64_t getTrackerDeviceFrequency() const { return m_trackerDeviceFrequency; }
@@ -145,7 +144,6 @@ private:
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     MessageQueue *m_msgQueueToGUI; //!< Queue to report state to GUI
     AFCSettings m_settings;
-    bool m_running;
     DeviceSet *m_trackerDeviceSet;
     DeviceSet *m_trackedDeviceSet;
     ChannelAPI *m_freqTracker;
