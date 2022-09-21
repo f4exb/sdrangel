@@ -54,7 +54,7 @@ void SWGHttpRequestInput::add_file(QString variable_name, QString local_filename
 SWGHttpRequestWorker::SWGHttpRequestWorker(QObject *parent)
     : QObject(parent), manager(nullptr)
 {
-    QRandomGenerator::global()->seed(QDateTime::currentDateTime().toTime_t());
+    QRandomGenerator::global()->seed(QDateTime::currentDateTime().toSecsSinceEpoch());
 
     manager = new QNetworkAccessManager(this);
     connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(on_manager_finished(QNetworkReply*)));
@@ -163,7 +163,7 @@ void SWGHttpRequestWorker::execute(SWGHttpRequestInput *input) {
         // variable layout is MULTIPART
 
         boundary = "__-----------------------"
-            + QString::number(QDateTime::currentDateTime().toTime_t())
+            + QString::number(QDateTime::currentDateTime().toSecsSinceEpoch())
             + QString::number(QRandomGenerator::global()->generate());
         QString boundary_delimiter = "--";
         QString new_line = "\r\n";

@@ -35,7 +35,7 @@
 uint64_t UidCalculator::getNewObjectId()
 {
     QDateTime currentDateTime = QDateTime::currentDateTime();
-    uint64_t uid = currentDateTime.toTime_t();
+    uint64_t uid = currentDateTime.toSecsSinceEpoch();
     uid *= 1000000UL; // make room for microseconds
 
 // Fallback to milliseconds:
