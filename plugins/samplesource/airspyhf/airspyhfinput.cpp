@@ -50,6 +50,7 @@ AirspyHFInput::AirspyHFInput(DeviceAPI *deviceAPI) :
 	m_settings(),
 	m_dev(nullptr),
 	m_airspyHFWorker(nullptr),
+    m_airspyHFWorkerThread(nullptr),
 	m_deviceDescription("AirspyHF"),
 	m_running(false)
 {
@@ -174,9 +175,14 @@ bool AirspyHFInput::start()
         stop();
     }
 
-	m_airspyHFWorker = new AirspyHFWorker(m_dev, &m_sampleFifo);
-    m_airspyHFWorker->moveToThread(&m_airspyHFWorkerThread);
+    m_airspyHFWorkerThread = new QThread();
+    m_airspyHFWorker = new AirspyHFWorker(m_dev, &m_sampleFifo);
+    m_airspyHFWorker->moveToThread(m_airspyHFWorkerThread);
 	int sampleRateIndex = m_settings.m_devSampleRateIndex;
+
+    QObject::connect(m_airspyHFWorkerThread, &QThread::started, m_airspyHFWorker, &AirspyHFWorker::startWork);
+    QObject::connect(m_airspyHFWorkerThread, &QThread::finished, m_airspyHFWorker, &QObject::deleteLater);
+    QObject::connect(m_airspyHFWorkerThread, &QThread::finished, m_airspyHFWorkerThread, &QThread::deleteLater);
 
     if (m_settings.m_devSampleRateIndex >= m_sampleRates.size()) {
         sampleRateIndex = m_sampleRates.size() - 1;
@@ -190,38 +196,13 @@ bool AirspyHFInput::start()
     m_airspyHFWorker->setIQOrder(m_settings.m_iqOrder);
     mutexLocker.unlock();
 
-    if (startWorker())
-    {
-        qDebug("AirspyHFInput::startInput: started");
-        applySettings(m_settings, true);
-        m_running = true;
-    }
-    else
-    {
-        m_running = false;
-    }
+    m_airspyHFWorkerThread->start();
+
+    qDebug("AirspyHFInput::startInput: started");
+    applySettings(m_settings, true);
+    m_running = true;
 
 	return m_running;
-}
-
-bool AirspyHFInput::startWorker()
-{
-	if (m_airspyHFWorker->startWork())
-    {
-    	m_airspyHFWorkerThread.start();
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void AirspyHFInput::stopWorker()
-{
-	m_airspyHFWorker->stopWork();
-	m_airspyHFWorkerThread.quit();
-	m_airspyHFWorkerThread.wait();
 }
 
 void AirspyHFInput::closeDevice()
@@ -241,12 +222,13 @@ void AirspyHFInput::stop()
 	qDebug("AirspyHFInput::stop");
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_airspyHFWorker)
-	{
-	    stopWorker();
-		delete m_airspyHFWorker;
-		m_airspyHFWorker = nullptr;
-	}
+    if (m_airspyHFWorkerThread)
+    {
+        m_airspyHFWorkerThread->quit();
+        m_airspyHFWorkerThread->wait();
+        m_airspyHFWorkerThread = nullptr;
+        m_airspyHFWorker = nullptr;
+    }
 
 	m_running = false;
 }
