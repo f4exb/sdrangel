@@ -33,14 +33,13 @@ public:
 	AirspyHFWorker(airspyhf_device_t* dev, SampleSinkFifo* sampleFifo, QObject* parent = 0);
 	~AirspyHFWorker();
 
-	bool startWork();
+	void startWork();
 	void stopWork();
 	void setSamplerate(uint32_t samplerate);
 	void setLog2Decimation(unsigned int log2_decim);
     void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
-	bool m_running;
 
 	airspyhf_device_t* m_dev;
 	qint16 m_buf[2*AIRSPYHF_BLOCKSIZE];

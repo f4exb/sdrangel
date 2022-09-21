@@ -25,7 +25,6 @@
 
 AirspyHFWorker::AirspyHFWorker(airspyhf_device_t* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QObject(parent),
-	m_running(false),
 	m_dev(dev),
 	m_convertBuffer(AIRSPYHF_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
@@ -41,22 +40,14 @@ AirspyHFWorker::~AirspyHFWorker()
 	stopWork();
 }
 
-bool AirspyHFWorker::startWork()
+void AirspyHFWorker::startWork()
 {
     qDebug("AirspyHFWorker::startWork");
 	airspyhf_error rc = (airspyhf_error) airspyhf_start(m_dev, rx_callback, this);
 
-	if (rc == AIRSPYHF_SUCCESS)
-	{
-        m_running = (airspyhf_is_streaming(m_dev) != 0);
-	}
-	else
-	{
+	if (rc != AIRSPYHF_SUCCESS) {
 		qCritical("AirspyHFWorker::run: failed to start Airspy HF Rx");
-        m_running = false;
 	}
-
-    return m_running;
 }
 
 void AirspyHFWorker::stopWork()
@@ -69,8 +60,6 @@ void AirspyHFWorker::stopWork()
 	} else {
 		qDebug("AirspyHFWorker::run: failed to stop Airspy HF Rx");
 	}
-
-	m_running = false;
 }
 
 void AirspyHFWorker::setSamplerate(uint32_t samplerate)
