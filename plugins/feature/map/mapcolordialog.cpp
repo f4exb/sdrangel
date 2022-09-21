@@ -25,9 +25,10 @@
 MapColorDialog::MapColorDialog(const QColor &initial, QWidget *parent) :
     QDialog(parent)
 {
-    m_colorDialog = new QColorDialog(initial);
+    m_colorDialog = new QColorDialog();
     m_colorDialog->setWindowFlags(Qt::Widget);
     m_colorDialog->setOptions(QColorDialog::ShowAlphaChannel | QColorDialog::NoButtons | QColorDialog::DontUseNativeDialog);
+    m_colorDialog->setCurrentColor(initial); // Needs to be set after setOptions on Linux, which seems to overwrite QColorDialog(initial)
     QVBoxLayout *v = new QVBoxLayout(this);
     v->addWidget(m_colorDialog);
     QHBoxLayout *h = new QHBoxLayout();
