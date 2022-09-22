@@ -593,7 +593,6 @@ void GLSpectrum::newSpectrum(const Real *spectrum, int nbBins, int fftSize)
     QMutexLocker mutexLocker(&m_mutex);
 
     m_displayChanged = true;
-
     if (m_changesPending)
     {
         m_fftSize = fftSize;
@@ -1651,6 +1650,17 @@ void GLSpectrum::paintGL()
         m_glShaderInfo.drawSurface(m_glInfoBoxMatrix, tex1, vtx1, 4);
     }
 
+    // Find and display peak in info line
+    {
+        if (m_currentSpectrum)
+        {
+            float power, frequency;
+
+            findPeak(power, frequency);
+            drawPeakText(power, (int64_t)frequency);
+        }
+    }
+
     m_mutex.unlock();
 }
 
@@ -2631,6 +2641,18 @@ void GLSpectrum::applyChanges()
     }
 
     m_glShaderInfo.initTexture(m_infoPixmap.toImage());
+
+    // Peak details in top info line
+    QString minFrequencyStr = displayFull(m_centerFrequency - m_sampleRate/2); // This can be wider if negative, while max is positive
+    QString maxFrequencyStr = displayFull(m_centerFrequency + m_sampleRate/2);
+    QString widestFrequencyStr = minFrequencyStr.size() > maxFrequencyStr.size() ? minFrequencyStr : maxFrequencyStr;
+    widestFrequencyStr = widestFrequencyStr.append("Hz");
+    m_peakLabelStr = "Peak:";
+    m_peakSpaceWidth = fm.width(" ");
+    m_peakSpaceMidWidth = ((widestFrequencyStr.size() > 10) ? 3 : 1) * m_peakSpaceWidth; // Extra space when lots of digits
+    m_peakLabelWidth = fm.width(m_peakLabelStr);
+    m_peakPowerMaxWidth = m_linear ? fm.width("8.000e-10") : fm.width("-100.0dB");
+    m_peakFrequencyMaxWidth = fm.width(widestFrequencyStr);
 
     bool fftSizeChanged = true;
 
@@ -3792,6 +3814,46 @@ void GLSpectrum::cleanup()
     //doneCurrent();
 }
 
+// Display number with full precision, group separators and eng. unit suffixes
+// E.g:
+// -1.505,123,304G
+//    456.034,123M
+//        300.345k
+//            789
+QString GLSpectrum::displayFull(int64_t value)
+{
+    if (value == 0) {
+        return "0";
+    }
+    int64_t absValue = std::abs(value);
+
+    QString digits = QString::number(absValue);
+    int cnt = digits.size();
+
+    QString point = QLocale::system().decimalPoint();
+    QString group = QLocale::system().groupSeparator();
+    int i;
+    for (i = cnt - 3; i >= 4; i -= 3)
+    {
+        digits = digits.insert(i, group);
+    }
+    if (absValue >= 1000) {
+        digits = digits.insert(i, point);
+    }
+    if (cnt > 9) {
+        digits = digits.append("G");
+    } else if (cnt > 6) {
+        digits = digits.append("M");
+    } else if (cnt > 3) {
+        digits = digits.append("k");
+    }
+    if (value < 0) {
+        digits = digits.insert(0, "-");
+    }
+
+    return digits;
+}
+
 QString GLSpectrum::displayScaled(int64_t value, char type, int precision, bool showMult)
 {
     int64_t posValue = (value < 0) ? -value : value;
@@ -3865,6 +3927,88 @@ int GLSpectrum::getPrecision(int value)
     } else {
         return 6;
     }
+}
+
+// Find power and frequency of max peak in current spectrum
+void GLSpectrum::findPeak(float &power, float &frequency) const
+{
+    int bin;
+
+    bin = 0;
+    power = m_currentSpectrum[0];
+    for (int i = 1; i < m_nbBins; i++)
+    {
+        if (m_currentSpectrum[i] > power)
+        {
+            power = m_currentSpectrum[i];
+            bin = i;
+        }
+    }
+
+    power = m_linear ?
+                power * (m_useCalibration ? m_calibrationGain : 1.0f):
+                power + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
+
+    float hzPerBin = (float) m_sampleRate / m_fftSize;
+    frequency = m_centerFrequency + (bin - (m_fftSize/2)) * hzPerBin;
+}
+
+// Draws peak power and frequency right justified in top info bar
+void GLSpectrum::drawPeakText(float power, int64_t frequency, bool units)
+{
+    QFontMetrics fm(font());
+
+    m_infoPixmap.fill(Qt::transparent);
+
+    QPainter painter(&m_infoPixmap);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(Qt::black);
+    painter.setBrush(Qt::transparent);
+    painter.drawRect(m_leftMargin, 0, width() - m_leftMargin, m_infoHeight);
+    painter.setPen(QColor(0xf0, 0xf0, 0xff));
+    painter.setFont(font());
+
+    QString powerStr = displayPower(
+        power,
+        m_linear ? 'e' : 'f',
+        m_linear ? 3 : 1
+    );
+    QString frequencyStr = displayFull(frequency);
+    if (units)
+    {
+        if (!m_linear) {
+            powerStr = powerStr.append("dB");
+        }
+        frequencyStr = frequencyStr.append("Hz");
+    }
+
+    int powerWidth = fm.width(powerStr);
+    int frequencyWidth = fm.width(frequencyStr);
+
+    int x = width() - m_rightMargin;
+    int y = fm.height() + fm.ascent() / 2 - 2;
+    painter.drawText(QPointF(x - frequencyWidth, y), frequencyStr);
+    x -= m_peakFrequencyMaxWidth + m_peakSpaceMidWidth;
+    painter.drawText(QPointF(x - powerWidth, y), powerStr);
+    x -=  m_peakPowerMaxWidth + m_peakSpaceWidth;
+    painter.drawText(QPointF(x - m_peakLabelWidth, y), m_peakLabelStr);
+
+    m_glShaderTextOverlay.initTexture(m_infoPixmap.toImage());
+
+    GLfloat vtx1[] = {
+            0, 1,
+            1, 1,
+            1, 0,
+            0, 0
+    };
+    GLfloat tex1[] = {
+            0, 1,
+            1, 1,
+            1, 0,
+            0, 0
+    };
+
+    m_glShaderTextOverlay.drawSurface(m_glInfoBoxMatrix, tex1, vtx1, 4);
 }
 
 void GLSpectrum::drawTextOverlay(
