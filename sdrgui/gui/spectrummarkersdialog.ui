@@ -510,7 +510,7 @@ Max - Marker will move according to the maximum power at the marker frequency</s
       <attribute name="toolTip">
        <string>Waterfall markers</string>
       </attribute>
-      <widget class="QWidget" name="layoutWidget">
+      <widget class="QWidget" name="layoutWidget_1">
        <property name="geometry">
         <rect>
          <x>0</x>
