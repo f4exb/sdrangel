@@ -35,7 +35,6 @@ MESSAGE_CLASS_DEFINITION(SimplePTTWorker::MsgPTT, Message)
 SimplePTTWorker::SimplePTTWorker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_msgQueueToGUI(nullptr),
-    m_running(false),
     m_tx(false),
     m_audioFifo(12000),
     m_audioSampleRate(48000),
@@ -63,19 +62,16 @@ void SimplePTTWorker::reset()
     m_inputMessageQueue.clear();
 }
 
-bool SimplePTTWorker::startWork()
+void SimplePTTWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_running = true;
-    return m_running;
 }
 
 void SimplePTTWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_running = false;
 }
 
 void SimplePTTWorker::handleInputMessages()

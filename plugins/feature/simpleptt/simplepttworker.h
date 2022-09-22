@@ -78,9 +78,8 @@ public:
     SimplePTTWorker(WebAPIAdapterInterface *webAPIAdapterInterface);
     ~SimplePTTWorker();
     void reset();
-    bool startWork();
+    void startWork();
     void stopWork();
-    bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
 
@@ -95,7 +94,6 @@ private:
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     MessageQueue *m_msgQueueToGUI; //!< Queue to report state to GUI
     SimplePTTSettings m_settings;
-    bool m_running;
     bool m_tx;
     AudioFifo m_audioFifo;
     AudioVector m_audioReadBuffer;

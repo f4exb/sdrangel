@@ -18,7 +18,7 @@
 #ifndef INCLUDE_FEATURE_SIMPLEPTT_H_
 #define INCLUDE_FEATURE_SIMPLEPTT_H_
 
-#include <QThread>
+#include <QRecursiveMutex>
 #include <QNetworkRequest>
 
 #include "feature/feature.h"
@@ -30,6 +30,7 @@ class WebAPIAdapterInterface;
 class SimplePTTWorker;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 
 namespace SWGSDRangel {
     class SWGDeviceState;
@@ -149,7 +150,9 @@ public:
     static const char* const m_featureId;
 
 private:
-    QThread m_thread;
+    QThread *m_thread;
+    QRecursiveMutex m_mutex;
+    bool m_running;
     SimplePTTWorker *m_worker;
     SimplePTTSettings m_settings;
     bool m_ptt;

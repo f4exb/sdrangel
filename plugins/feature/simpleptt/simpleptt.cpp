@@ -19,6 +19,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
@@ -41,12 +42,12 @@ const char* const SimplePTT::m_featureId = "SimplePTT";
 
 SimplePTT::SimplePTT(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
+    m_thread(nullptr),
+    m_running(false),
+    m_worker(nullptr),
     m_ptt(false)
 {
     setObjectName(m_featureId);
-    m_worker = new SimplePTTWorker(webAPIAdapterInterface);
-    m_worker->moveToThread(&m_thread);
-    m_state = StIdle;
     m_errorMessage = "SimplePTT error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -66,34 +67,66 @@ SimplePTT::~SimplePTT()
         &SimplePTT::networkManagerFinished
     );
     delete m_networkManager;
-    if (m_worker->isRunning()) {
-        stop();
-    }
-
-    delete m_worker;
+    stop();
 }
 
 void SimplePTT::start()
 {
-	qDebug("SimplePTT::start");
+    QMutexLocker m_lock(&m_mutex);
 
-    m_worker->reset();
+    if (m_running) {
+        return;
+    }
+
+	qDebug("SimplePTT::start");
+    m_thread = new QThread();
+    m_worker = new SimplePTTWorker(getWebAPIAdapterInterface());
+    m_worker->moveToThread(m_thread);
+
+    QObject::connect(
+        m_thread,
+        &QThread::started,
+        m_worker,
+        &SimplePTTWorker::startWork
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_worker,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_thread,
+        &QThread::deleteLater
+    );
+
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
-    bool ok = m_worker->startWork();
-    m_state = ok ? StRunning : StError;
-    m_thread.start();
+    m_worker->startWork();
+    m_state = StRunning;
+    m_thread->start();
 
     SimplePTTWorker::MsgConfigureSimplePTTWorker *msg = SimplePTTWorker::MsgConfigureSimplePTTWorker::create(m_settings, true);
     m_worker->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void SimplePTT::stop()
 {
+    QMutexLocker m_lock(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
     qDebug("SimplePTT::stop");
+    m_running = false;
 	m_worker->stopWork();
     m_state = StIdle;
-	m_thread.quit();
-	m_thread.wait();
+	m_thread->quit();
+	m_thread->wait();
 }
 
 bool SimplePTT::handleMessage(const Message& cmd)
@@ -112,8 +145,11 @@ bool SimplePTT::handleMessage(const Message& cmd)
         m_ptt = cfg.getTx();
         qDebug() << "SimplePTT::handleMessage: MsgPTT: tx:" << m_ptt;
 
-        SimplePTTWorker::MsgPTT *msg = SimplePTTWorker::MsgPTT::create(m_ptt);
-        m_worker->getInputMessageQueue()->push(msg);
+        if (m_running)
+        {
+            SimplePTTWorker::MsgPTT *msg = SimplePTTWorker::MsgPTT::create(m_ptt);
+            m_worker->getInputMessageQueue()->push(msg);
+        }
 
         return true;
     }
@@ -160,7 +196,7 @@ bool SimplePTT::deserialize(const QByteArray& data)
 
 void SimplePTT::getAudioPeak(float& peak)
 {
-    if (m_worker) {
+    if (m_running) {
         m_worker->getAudioPeak(peak);
     }
 }
@@ -214,10 +250,13 @@ void SimplePTT::applySettings(const SimplePTTSettings& settings, bool force)
         reverseAPIKeys.append("voxLevel");
     }
 
-    SimplePTTWorker::MsgConfigureSimplePTTWorker *msg = SimplePTTWorker::MsgConfigureSimplePTTWorker::create(
-        settings, force
-    );
-    m_worker->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        SimplePTTWorker::MsgConfigureSimplePTTWorker *msg = SimplePTTWorker::MsgConfigureSimplePTTWorker::create(
+            settings, force
+        );
+        m_worker->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
