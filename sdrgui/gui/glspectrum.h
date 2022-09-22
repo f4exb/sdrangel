@@ -294,6 +294,13 @@ private:
     QMatrix4x4 m_glLeftScaleBoxMatrix;
     QMatrix4x4 m_glInfoBoxMatrix;
 
+    QString m_peakLabelStr;
+    int m_peakLabelWidth;
+    int m_peakSpaceWidth;
+    int m_peakSpaceMidWidth;
+    int m_peakPowerMaxWidth;
+    int m_peakFrequencyMaxWidth;
+
     QRgb m_waterfallPalette[240];
     QImage* m_waterfallBuffer;
     int m_waterfallBufferPos;
@@ -402,10 +409,13 @@ private:
     void enterEvent(QEvent* event);
     void leaveEvent(QEvent* event);
 
+    static QString displayFull(int64_t value);
     static QString displayScaled(int64_t value, char type, int precision, bool showMult);
     static QString displayScaledF(float value, char type, int precision, bool showMult);
     static QString displayPower(float value, char type, int precision);
     int getPrecision(int value);
+    void findPeak(float &power, float &frequency) const;
+    void drawPeakText(float power, int64_t frequency, bool units=true);
     void drawTextOverlay(      //!< Draws a text overlay
             const QString& text,
             const QColor& color,
