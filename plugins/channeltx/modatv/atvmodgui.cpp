@@ -194,7 +194,7 @@ bool ATVModGUI::handleMessage(const Message& message)
         {
             m_camBusyFPSMessageBox = new QMessageBox();
             m_camBusyFPSMessageBox->setText("Computing camera FPS. Please wait…");
-            m_camBusyFPSMessageBox->setStandardButtons(0);
+            m_camBusyFPSMessageBox->setStandardButtons(QMessageBox::NoButton);
             m_camBusyFPSMessageBox->show();
         }
         else if (status == 2) // camera FPS scan is finished
