@@ -1386,6 +1386,7 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
     for (int i = 0; i < configuration->getNumberOfWorkspaceGeometries(); i++)
     {
         m_workspaces[i]->restoreGeometry(configuration->getWorkspaceGeometries()[i]);
+        m_workspaces[i]->restoreGeometry(configuration->getWorkspaceGeometries()[i]);
         m_workspaces[i]->adjustSubWindowsAfterRestore();
     }
 
