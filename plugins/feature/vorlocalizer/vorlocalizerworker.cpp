@@ -45,7 +45,6 @@ VorLocalizerWorker::VorLocalizerWorker(WebAPIAdapterInterface *webAPIAdapterInte
     m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_msgQueueToFeature(nullptr),
     m_availableChannels(nullptr),
-    m_running(false),
     m_updateTimer(this),
     m_rrTimer(this)
 {
@@ -64,15 +63,13 @@ void VorLocalizerWorker::reset()
     m_inputMessageQueue.clear();
 }
 
-bool VorLocalizerWorker::startWork()
+void VorLocalizerWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     connect(&m_rrTimer, SIGNAL(timeout()), this, SLOT(rrNextTurn()));
     connect(thread(), SIGNAL(started()), this, SLOT(started()));
     connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
-    m_running = true;
-    return m_running;
 }
 
 // startWork() is called from main thread. Timers/sockets need to be started on worker thread
@@ -93,7 +90,6 @@ void VorLocalizerWorker::finished()
     m_rrTimer.stop();
     disconnect(&m_rrTimer, SIGNAL(timeout()), this, SLOT(rrNextTurn()));
     disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
-    m_running = false;
 }
 
 void VorLocalizerWorker::handleInputMessages()

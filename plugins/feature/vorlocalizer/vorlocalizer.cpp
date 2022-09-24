@@ -48,11 +48,12 @@ const char* const VORLocalizer::m_featureIdURI = "sdrangel.feature.vorlocalizer"
 const char* const VORLocalizer::m_featureId = "VORLocalizer";
 
 VORLocalizer::VORLocalizer(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    Feature(m_featureIdURI, webAPIAdapterInterface)
+    Feature(m_featureIdURI, webAPIAdapterInterface),
+    m_thread(nullptr),
+    m_worker(nullptr),
+    m_running(false)
 {
     setObjectName(m_featureId);
-    m_worker = new VorLocalizerWorker(webAPIAdapterInterface);
-    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "VORLocalizer error";
     m_networkManager = new QNetworkAccessManager();
@@ -85,35 +86,67 @@ VORLocalizer::~VORLocalizer()
         &VORLocalizer::networkManagerFinished
     );
     delete m_networkManager;
-    if (m_worker->isRunning()) {
-        stop();
-    }
-
-    delete m_worker;
+    stop();
 }
 
 void VORLocalizer::start()
 {
-	qDebug("VORLocalizer::start");
+    QMutexLocker m_lock(&m_mutex);
 
-    m_worker->reset();
+    if (m_running) {
+        return;
+    }
+
+	qDebug("VORLocalizer::start");
+    m_thread = new QThread();
+    m_worker = new VorLocalizerWorker(getWebAPIAdapterInterface());
+    m_worker->moveToThread(m_thread);
+
+    QObject::connect(
+        m_thread,
+        &QThread::started,
+        m_worker,
+        &VorLocalizerWorker::startWork
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_worker,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_thread,
+        &QThread::deleteLater
+    );
+
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setAvailableChannels(&m_availableChannels);
-    bool ok = m_worker->startWork();
-    m_state = ok ? StRunning : StError;
-    m_thread.start();
+    m_worker->startWork();
+    m_state = StRunning;
+    m_thread->start();
 
     VorLocalizerWorker::MsgConfigureVORLocalizerWorker *msg = VorLocalizerWorker::MsgConfigureVORLocalizerWorker::create(m_settings, true);
     m_worker->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void VORLocalizer::stop()
 {
+    QMutexLocker m_lock(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
     qDebug("VORLocalizer::stop");
+    m_running = false;
 	m_worker->stopWork();
     m_state = StIdle;
-	m_thread.quit();
-	m_thread.wait();
+	m_thread->quit();
+	m_thread->wait();
 }
 
 bool VORLocalizer::handleMessage(const Message& cmd)
@@ -334,10 +367,13 @@ void VORLocalizer::applySettings(const VORLocalizerSettings& settings, bool forc
         reverseAPIKeys.append("centerShift");
     }
 
-    VorLocalizerWorker::MsgConfigureVORLocalizerWorker *msg = VorLocalizerWorker::MsgConfigureVORLocalizerWorker::create(
-        settings, force
-    );
-    m_worker->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        VorLocalizerWorker::MsgConfigureVORLocalizerWorker *msg = VorLocalizerWorker::MsgConfigureVORLocalizerWorker::create(
+            settings, force
+        );
+        m_worker->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -723,6 +759,9 @@ void VORLocalizer::notifyUpdateChannels()
         getMessageQueueToGUI()->push(msgToGUI);
     }
 
-    VorLocalizerWorker::MsgRefreshChannels *msgToWorker = VorLocalizerWorker::MsgRefreshChannels::create();
-    m_worker->getInputMessageQueue()->push(msgToWorker);
+    if (m_running)
+    {
+        VorLocalizerWorker::MsgRefreshChannels *msgToWorker = VorLocalizerWorker::MsgRefreshChannels::create();
+        m_worker->getInputMessageQueue()->push(msgToWorker);
+    }
 }

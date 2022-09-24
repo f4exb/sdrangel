@@ -18,7 +18,7 @@
 #ifndef INCLUDE_FEATURE_VORLOCALIZER_H_
 #define INCLUDE_FEATURE_VORLOCALIZER_H_
 
-#include <QThread>
+#include <QRecursiveMutex>
 #include <QNetworkRequest>
 
 #include "feature/feature.h"
@@ -31,6 +31,7 @@ class WebAPIAdapterInterface;
 class VorLocalizerWorker;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 
 namespace SWGSDRangel {
     class SWGDeviceState;
@@ -199,8 +200,10 @@ private:
         VORChannelReport& operator=(const VORChannelReport&) = default;
     };
 
-    QThread m_thread;
+    QThread *m_thread;
     VorLocalizerWorker *m_worker;
+    bool m_running;
+    QRecursiveMutex m_mutex;
     VORLocalizerSettings m_settings;
     QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel> m_availableChannels;
     QHash<int, VORChannelReport> m_vorChannelReports;

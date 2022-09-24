@@ -74,9 +74,8 @@ public:
     VorLocalizerWorker(WebAPIAdapterInterface *webAPIAdapterInterface);
     ~VorLocalizerWorker();
     void reset();
-    bool startWork();
+    void startWork();
     void stopWork();
-    bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
     void setAvailableChannels(QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel> *avaialbleChannels) {
@@ -146,7 +145,6 @@ private:
     QList<VORLocalizerSettings::VORChannel> m_vorChannels;
     QHash<int, ChannelAllocation> m_channelAllocations;
     QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel> *m_availableChannels;
-    bool m_running;
 	QTimer m_updateTimer;
     QRecursiveMutex m_mutex;
     QTimer m_rrTimer;
