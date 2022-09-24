@@ -367,7 +367,7 @@ void ValueDial::mouseMoveEvent(QMouseEvent *event)
 void ValueDial::wheelEvent(QWheelEvent *event)
 {
     int i;
-    i = (event->x() - 1) / m_digitWidth;
+    i = (event->position().x() - 1) / m_digitWidth;
 
     if (m_text[i] != m_groupSeparator) {
         m_hightlightedDigit = i;
