@@ -37,8 +37,8 @@ void MainBench::testGolay2312()
     if (codeword != expectedCodeword)
     {
         qDebug() << "MainBench::testGolay2312:"
-            << "encoder mismatch: got:" << oct << codeword
-            << "expected:" << oct << expectedCodeword;
+            << "encoder mismatch: got:" << Qt::oct << codeword
+            << "expected:" << Qt::oct << expectedCodeword;
         success = false;
     }
 
@@ -54,8 +54,8 @@ void MainBench::testGolay2312()
     else if (rxCodeword != codeword)
     {
         qDebug() << "MainBench::testGolay2312:"
-            << "decoder mismatch (no error): got:" << oct << rxCodeword
-            << "expected:" << oct << codeword;
+            << "decoder mismatch (no error): got:" << Qt::oct << rxCodeword
+            << "expected:" << Qt::oct << codeword;
         success = false;
     }
 
@@ -72,8 +72,8 @@ void MainBench::testGolay2312()
     else if (rxCodeword != codeword)
     {
         qDebug() << "MainBench::testGolay2312:"
-            << "decoder mismatch (parity[1]): got:" << oct << rxCodeword
-            << "expected:" << oct << codeword;
+            << "decoder mismatch (parity[1]): got:" << Qt::oct << rxCodeword
+            << "expected:" << Qt::oct << codeword;
         success = false;
     }
 
@@ -90,8 +90,8 @@ void MainBench::testGolay2312()
     else if (rxCodeword != codeword)
     {
         qDebug() << "MainBench::testGolay2312:"
-            << "decoder mismatch (parity[1,3]): got:" << oct << rxCodeword
-            << "expected:" << oct << codeword;
+            << "decoder mismatch (parity[1,3]): got:" << Qt::oct << rxCodeword
+            << "expected:" << Qt::oct << codeword;
         success = false;
     }
 
