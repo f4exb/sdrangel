@@ -386,7 +386,7 @@ void ValueDial::wheelEvent(QWheelEvent *event)
 
     if (m_animationState == 0)
     {
-        if (event->delta() < 0)
+        if (event->angleDelta().y() < 0)
         {
             if (event->modifiers() & Qt::ShiftModifier) {
                 e *= 5;

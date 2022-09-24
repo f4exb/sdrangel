@@ -439,7 +439,7 @@ void ValueDialZ::wheelEvent(QWheelEvent* event)
         {
             qint64 e = findExponent(m_hightlightedDigit);
 
-            if(event->delta() < 0)
+            if(event->angleDelta().y() < 0)
             {
                 if (event->modifiers() & Qt::ShiftModifier) {
                     e *= 5;
