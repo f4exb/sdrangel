@@ -367,7 +367,7 @@ void ValueDial::mouseMoveEvent(QMouseEvent *event)
 void ValueDial::wheelEvent(QWheelEvent *event)
 {
     int i;
-    i = (event->x() - 1) / m_digitWidth;
+    i = (event->position().x() - 1) / m_digitWidth;
 
     if (m_text[i] != m_groupSeparator) {
         m_hightlightedDigit = i;
@@ -386,7 +386,7 @@ void ValueDial::wheelEvent(QWheelEvent *event)
 
     if (m_animationState == 0)
     {
-        if (event->delta() < 0)
+        if (event->angleDelta().y() < 0)
         {
             if (event->modifiers() & Qt::ShiftModifier) {
                 e *= 5;

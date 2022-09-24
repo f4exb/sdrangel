@@ -213,7 +213,7 @@ private:
         QMatrix4x4 m_glMatrixDsbFreqScale;
         QMatrix4x4 m_glMatrixHistogram;
         QMatrix4x4 m_glMatrixDsbHistogram;
-        QRect m_rect;
+        QRectF m_rect;
 
         ChannelMarkerState(ChannelMarker* channelMarker) :
             m_channelMarker(channelMarker)

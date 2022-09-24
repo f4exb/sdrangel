@@ -3674,7 +3674,7 @@ void GLSpectrum::channelMarkerMove(QWheelEvent *event, int mul)
             continue;
         }
 
-        if (m_channelMarkerStates[i]->m_rect.contains(event->pos()))
+        if (m_channelMarkerStates[i]->m_rect.contains(event->position()))
         {
             int freq = m_channelMarkerStates[i]->m_channelMarker->getCenterFrequency();
 
