@@ -2188,7 +2188,6 @@ void GLSpectrum::measureSNR()
     // Highlight the signal
     float hzPerBin = m_sampleRate / (float) m_fftSize;
     float sigFreq = binToFrequency(sig);
-    float sigBW = sigBins * hzPerBin;
     if (m_measurementHighlight) {
         drawPeakMarkers(binToFrequency(sigLeft+1), binToFrequency(sigRight-1), m_measurementLightMarkerColor);
     }
@@ -2409,7 +2408,7 @@ float GLSpectrum::calcChannelPower(int64_t centerFrequency, int channelBandwidth
     {
         float shift = m_useCalibration ? m_calibrationShiftdB : 0.0f;
         for (int i = start; i <= end; i++) {
-            power += CalcDb::powerFromdB(m_currentSpectrum[i]) + m_calibrationShiftdB;
+            power += CalcDb::powerFromdB(m_currentSpectrum[i]) + shift;
         }
     }
 
