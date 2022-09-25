@@ -49,8 +49,9 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     ui->setupUi(this);
 
     // Use the custom flow layout for the 3 main horizontal layouts (lines)
-    ui->verticalLayout->removeItem(ui->Line5Layout);
+    ui->verticalLayout->removeItem(ui->Line7Layout);
     ui->verticalLayout->removeItem(ui->Line6Layout);
+    ui->verticalLayout->removeItem(ui->Line5Layout);
     ui->verticalLayout->removeItem(ui->Line4Layout);
     ui->verticalLayout->removeItem(ui->Line3Layout);
     ui->verticalLayout->removeItem(ui->Line2Layout);
@@ -62,9 +63,11 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     flowLayout->addItem(ui->Line4Layout);
     flowLayout->addItem(ui->Line5Layout);
     flowLayout->addItem(ui->Line6Layout);
+    flowLayout->addItem(ui->Line7Layout);
     ui->verticalLayout->addItem(flowLayout);
 
     on_linscale_toggled(false);
+    on_measurement_currentIndexChanged(0);
 
     QString levelStyle = QString(
         "QSpinBox {background-color: rgb(79, 79, 79);}"
@@ -224,6 +227,13 @@ void GLSpectrumGUI::displaySettings()
     ui->calibration->setChecked(m_settings.m_useCalibration);
     displayGotoMarkers();
 
+    ui->measurement->setCurrentIndex((int) m_settings.m_measurement);
+    ui->highlight->setChecked(m_settings.m_measurementHighlight);
+    ui->bandwidth->setValue(m_settings.m_measurementBandwidth);
+    ui->chSpacing->setValue(m_settings.m_measurementChSpacing);
+    ui->adjChBandwidth->setValue(m_settings.m_measurementAdjChBandwidth);
+    ui->harmonics->setValue(m_settings.m_measurementHarmonics);
+
     ui->fftWindow->blockSignals(false);
     ui->averaging->blockSignals(false);
     ui->averagingMode->blockSignals(false);
@@ -330,6 +340,15 @@ void GLSpectrumGUI::applySpectrumSettings()
     m_glSpectrum->setMarkersDisplay(m_settings.m_markersDisplay);
     m_glSpectrum->setCalibrationPoints(m_settings.m_calibrationPoints);
     m_glSpectrum->setCalibrationInterpMode(m_settings.m_calibrationInterpMode);
+
+    m_glSpectrum->setMeasurementParams(
+        m_settings.m_measurement,
+        m_settings.m_measurementBandwidth,
+        m_settings.m_measurementChSpacing,
+        m_settings.m_measurementAdjChBandwidth,
+        m_settings.m_measurementHarmonics,
+        m_settings.m_measurementHighlight
+        );
 }
 
 void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
@@ -964,4 +983,60 @@ void GLSpectrumGUI::updateCalibrationPoints()
     if (m_glSpectrum) {
         m_glSpectrum->updateCalibrationPoints();
     }
+}
+
+void GLSpectrumGUI::on_measurement_currentIndexChanged(int index)
+{
+    m_settings.m_measurement = (SpectrumSettings::Measurement)index;
+
+    bool highlight = (m_settings.m_measurement >= SpectrumSettings::MeasurementChannelPower);
+    ui->highlight->setVisible(highlight);
+
+    bool bw = (m_settings.m_measurement == SpectrumSettings::MeasurementChannelPower)
+               || (m_settings.m_measurement == SpectrumSettings::MeasurementAdjacentChannelPower);
+    ui->bandwidthLabel->setVisible(bw);
+    ui->bandwidth->setVisible(bw);
+
+    bool adj = m_settings.m_measurement == SpectrumSettings::MeasurementAdjacentChannelPower;
+    ui->chSpacingLabel->setVisible(adj);
+    ui->chSpacing->setVisible(adj);
+    ui->adjChBandwidthLabel->setVisible(adj);
+    ui->adjChBandwidth->setVisible(adj);
+
+    bool harmonics = (m_settings.m_measurement >= SpectrumSettings::MeasurementSNR)
+                    && (m_settings.m_measurement <= SpectrumSettings::MeasurementSINAD);
+    ui->harmonicsLabel->setVisible(harmonics);
+    ui->harmonics->setVisible(harmonics);
+
+    applySettings();
+}
+
+void GLSpectrumGUI::on_highlight_toggled(bool checked)
+{
+    m_settings.m_measurementHighlight = checked;
+    applySettings();
+}
+
+void GLSpectrumGUI::on_bandwidth_valueChanged(int value)
+{
+    m_settings.m_measurementBandwidth = value;
+    applySettings();
+}
+
+void GLSpectrumGUI::on_chSpacing_valueChanged(int value)
+{
+    m_settings.m_measurementChSpacing = value;
+    applySettings();
+}
+
+void GLSpectrumGUI::on_adjChBandwidth_valueChanged(int value)
+{
+    m_settings.m_measurementAdjChBandwidth = value;
+    applySettings();
+}
+
+void GLSpectrumGUI::on_harmonics_valueChanged(int value)
+{
+    m_settings.m_measurementHarmonics = value;
+    applySettings();
 }

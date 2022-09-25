@@ -108,7 +108,13 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_calibrationInterpMode(SpectrumSettings::CalibInterpLinear),
     m_messageQueueToGUI(nullptr),
     m_openGLLogger(nullptr),
-    m_isDeviceSpectrum(false)
+    m_isDeviceSpectrum(false),
+    m_measurement(SpectrumSettings::MeasurementNone),
+    m_measurementBandwidth(10000),
+    m_measurementChSpacing(10000),
+    m_measurementAdjChBandwidth(10000),
+    m_measurementHarmonics(5),
+    m_measurementHighlight(true)
 {
     // Enable multisampling anti-aliasing (MSAA)
     int multisamples = MainCore::instance()->getSettings().getMultisampling();
@@ -480,6 +486,22 @@ void GLSpectrum::setUseCalibration(bool useCalibration)
         m_messageQueueToGUI->push(new MsgReportCalibrationShift(m_useCalibration ? m_calibrationShiftdB : 0.0));
     }
 
+    m_changesPending = true;
+    m_mutex.unlock();
+    update();
+}
+
+void GLSpectrum::setMeasurementParams(SpectrumSettings::Measurement measurement,
+                                      int bandwidth, int chSpacing, int adjChBandwidth,
+                                      int harmonics, bool highlight)
+{
+    m_mutex.lock();
+    m_measurement = measurement;
+    m_measurementBandwidth = bandwidth;
+    m_measurementChSpacing = chSpacing;
+    m_measurementAdjChBandwidth = adjChBandwidth;
+    m_measurementHarmonics = harmonics;
+    m_measurementHighlight = highlight;
     m_changesPending = true;
     m_mutex.unlock();
     update();
@@ -1650,18 +1672,91 @@ void GLSpectrum::paintGL()
         m_glShaderInfo.drawSurface(m_glInfoBoxMatrix, tex1, vtx1, 4);
     }
 
-    // Find and display peak in info line
+    if (m_currentSpectrum)
     {
-        if (m_currentSpectrum)
+        switch (m_measurement)
         {
-            float power, frequency;
-
-            findPeak(power, frequency);
-            drawPeakText(power, (int64_t)frequency);
+        case SpectrumSettings::MeasurementPeak:
+            measurePeak();
+            break;
+        case SpectrumSettings::MeasurementChannelPower:
+            measureChannelPower();
+            break;
+        case SpectrumSettings::MeasurementAdjacentChannelPower:
+            measureAdjacentChannelPower();
+            break;
+        case SpectrumSettings::MeasurementSNR:
+        case SpectrumSettings::MeasurementSNFR:
+        case SpectrumSettings::MeasurementTHD:
+        case SpectrumSettings::MeasurementTHDPN:
+        case SpectrumSettings::MeasurementSINAD:
+            measureSNR();
+            break;
+        case SpectrumSettings::MeasurementSFDR:
+            measureSFDR();
+            break;
+        default:
+            break;
         }
     }
 
     m_mutex.unlock();
+}
+
+// Hightlight power band for SFDR
+void GLSpectrum::drawPowerBandMarkers(float max, float min, const QVector4D &color)
+{
+    float p1 = (m_powerScale.getRangeMax() - min) / m_powerScale.getRange();
+    float p2 = (m_powerScale.getRangeMax() - max) / m_powerScale.getRange();
+
+    GLfloat q3[] {
+        1, p2,
+        0, p2,
+        0, p1,
+        1, p1,
+        0, p1,
+        0, p2
+    };
+
+    m_glShaderSimple.drawSurface(m_glHistogramBoxMatrix, color, q3, 4);
+}
+
+// Hightlight bandwidth being measured
+void GLSpectrum::drawBandwidthMarkers(int64_t centerFrequency, int bandwidth, const QVector4D &color)
+{
+    float f1 = (centerFrequency - bandwidth / 2);
+    float f2 = (centerFrequency + bandwidth / 2);
+    float x1 = (f1 - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
+    float x2 = (f2 - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
+
+    GLfloat q3[] {
+        x2, 1,
+        x1, 1,
+        x1, 0,
+        x2, 0,
+        x1, 0,
+        x1, 1
+    };
+
+    m_glShaderSimple.drawSurface(m_glHistogramBoxMatrix, color, q3, 4);
+}
+
+// Hightlight peak being measured. Note that the peak isn't always at the center
+void GLSpectrum::drawPeakMarkers(int64_t startFrequency, int64_t endFrequency, const QVector4D &color)
+{
+    float x1 = (startFrequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
+    float x2 = (endFrequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
+
+    GLfloat q3[] {
+        x2, 1,
+        x1, 1,
+        x1, 0,
+        x2, 0,
+        x1, 0,
+        x1, 1
+    };
+
+    m_glShaderSimple.drawSurface(m_glHistogramBoxMatrix, color, q3, 4);
 }
 
 void GLSpectrum::drawSpectrumMarkers()
@@ -1956,6 +2051,367 @@ void GLSpectrum::drawAnnotationMarkers()
                 m_histogramRect);
         }
     }
+}
+
+// Find and display peak in info line
+void GLSpectrum::measurePeak()
+{
+    float power, frequency;
+
+    findPeak(power, frequency);
+
+    drawTextsRight(
+        {"Peak: ", ""},
+        {
+         displayPower(power, m_linear ? 'e' : 'f', m_linear ? 3 : 1),
+         displayFull(frequency)
+        },
+        {m_peakPowerMaxStr, m_peakFrequencyMaxStr},
+        {m_peakPowerUnits, "Hz"}
+    );
+}
+
+// Calculate and display channel power
+void GLSpectrum::measureChannelPower()
+{
+    float power;
+
+    power = calcChannelPower(m_centerFrequency, m_measurementBandwidth);
+    drawTextRight("Power: ", QString::number(power, 'f', 1), "-120.0", "dB");
+    if (m_measurementHighlight) {
+        drawBandwidthMarkers(m_centerFrequency, m_measurementBandwidth, m_measurementLightMarkerColor);
+    }
+}
+
+// Calculate and display channel power and adjacent channel power
+void GLSpectrum::measureAdjacentChannelPower()
+{
+    float power, powerLeft, powerRight;
+
+    power = calcChannelPower(m_centerFrequency, m_measurementBandwidth);
+    powerLeft = calcChannelPower(m_centerFrequency - m_measurementChSpacing, m_measurementAdjChBandwidth);
+    powerRight = calcChannelPower(m_centerFrequency + m_measurementChSpacing, m_measurementAdjChBandwidth);
+
+    float leftDiff = powerLeft - power;
+    float rightDiff = powerRight - power;
+
+    drawTextsRight(
+        {"L: ", "", "   C: ", "   R: ", ""},
+        {   QString::number(powerLeft, 'f', 1),
+            QString::number(leftDiff, 'f', 1),
+            QString::number(power, 'f', 1),
+            QString::number(powerRight, 'f', 1),
+            QString::number(rightDiff, 'f', 1)
+        },
+        {"-120.0", "-120.0", "-120.0", "-120.0", "-120.0"},
+        {"dB", "dBc", "dB", "dB", "dBc"}
+    );
+
+    if (m_measurementHighlight)
+    {
+        drawBandwidthMarkers(m_centerFrequency, m_measurementBandwidth, m_measurementLightMarkerColor);
+        drawBandwidthMarkers(m_centerFrequency - m_measurementChSpacing, m_measurementAdjChBandwidth, m_measurementDarkMarkerColor);
+        drawBandwidthMarkers(m_centerFrequency + m_measurementChSpacing, m_measurementAdjChBandwidth, m_measurementDarkMarkerColor);
+    }
+}
+
+const QVector4D GLSpectrum::m_measurementLightMarkerColor = QVector4D(0.5f, 0.5f, 0.5f, 0.4f);
+const QVector4D GLSpectrum::m_measurementDarkMarkerColor = QVector4D(0.5f, 0.5f, 0.5f, 0.3f);
+
+// Find the width of a peak, by seaching in either direction until
+// power is no longer falling
+void GLSpectrum::peakWidth(int center, int &left, int &right, int maxLeft, int maxRight) const
+{
+    float prevLeft = m_currentSpectrum[center];
+    float prevRight = m_currentSpectrum[center];
+    left = center - 1;
+    right = center + 1;
+    while ((left > maxLeft) && (m_currentSpectrum[left] < prevLeft) && (right < maxRight) && (m_currentSpectrum[right] < prevRight))
+    {
+        prevLeft = m_currentSpectrum[left];
+        left--;
+        prevRight = m_currentSpectrum[right];
+        right++;
+    }
+}
+
+int GLSpectrum::findPeakBin() const
+{
+    int bin;
+    float power;
+
+    bin = 0;
+    power = m_currentSpectrum[0];
+    for (int i = 1; i < m_nbBins; i++)
+    {
+        if (m_currentSpectrum[i] > power)
+        {
+            power = m_currentSpectrum[i];
+            bin = i;
+        }
+    }
+    return bin;
+}
+
+float GLSpectrum::calPower(float power) const
+{
+    if (m_linear) {
+        return power * (m_useCalibration ? m_calibrationGain : 1.0f);
+    } else {
+        return CalcDb::powerFromdB(power) + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
+    }
+}
+
+int GLSpectrum::frequencyToBin(int64_t frequency) const
+{
+    float rbw = m_sampleRate / (float)m_fftSize;
+    return (frequency - m_frequencyScale.getRangeMin()) / rbw;
+}
+
+int64_t GLSpectrum::binToFrequency(int bin) const
+{
+    float rbw = m_sampleRate / (float)m_fftSize;
+    return m_frequencyScale.getRangeMin() + bin * rbw;
+}
+
+// Find a peak and measure SNR / THD / SINAD
+void GLSpectrum::measureSNR()
+{
+    // Find bin with max peak - that will be our signal
+    int sig = findPeakBin();
+    int sigLeft, sigRight;
+    peakWidth(sig, sigLeft, sigRight, 0, m_nbBins);
+    int sigBins = sigRight - sigLeft - 1;
+    int binsLeft = sig - sigLeft;
+    int binsRight = sigRight - sig;
+
+    // Highlight the signal
+    float sigFreq = binToFrequency(sig);
+    if (m_measurementHighlight) {
+        drawPeakMarkers(binToFrequency(sigLeft+1), binToFrequency(sigRight-1), m_measurementLightMarkerColor);
+    }
+
+    // Find the harmonics and highlight them
+    QList<int> hBinsLeft;
+    QList<int> hBinsRight;
+    QList<int> hBinsBins;
+    for (int h = 2; h < m_measurementHarmonics + 2; h++)
+    {
+        float hFreq = sigFreq * h;
+        if (hFreq < m_frequencyScale.getRangeMax())
+        {
+            int hBin = frequencyToBin(hFreq);
+            // Check if peak is an adjacent bin
+            if (m_currentSpectrum[hBin-1] > m_currentSpectrum[hBin]) {
+                hBin--;
+            } else if (m_currentSpectrum[hBin+1] > m_currentSpectrum[hBin]) {
+                hBin++;
+            }
+            hFreq = binToFrequency(hBin);
+            int hLeft, hRight;
+            peakWidth(hBin, hLeft, hRight, hBin - binsLeft, hBin + binsRight);
+            int hBins = hRight - hLeft - 1;
+            if (m_measurementHighlight) {
+                drawPeakMarkers(binToFrequency(hLeft+1), binToFrequency(hRight-1), m_measurementDarkMarkerColor);
+            }
+            hBinsLeft.append(hLeft);
+            hBinsRight.append(hRight);
+            hBinsBins.append(hBins);
+        }
+    }
+
+    // Integrate signal, harmonic and noise power
+    float sigPower = 0.0f;
+    float noisePower = 0.0f;
+    float harmonicPower = 0.0f;
+    QList<float> noise;
+    float gain = m_useCalibration ? m_calibrationGain : 1.0f;
+    float shift = m_useCalibration ? m_calibrationShiftdB : 0.0f;
+
+    for (int i = 0; i < m_nbBins; i++)
+    {
+        float power;
+        if (m_linear) {
+            power = m_currentSpectrum[i] * gain;
+        } else {
+            power = CalcDb::powerFromdB(m_currentSpectrum[i]) + shift;
+        }
+
+        // Signal power
+        if ((i > sigLeft) && (i < sigRight))
+        {
+            sigPower += power;
+            continue;
+        }
+
+        // Harmonics
+        for (int h = 0; h < hBinsLeft.size(); h++)
+        {
+            if ((i > hBinsLeft[h]) && (i < hBinsRight[h]))
+            {
+                harmonicPower += power;
+                continue;
+            }
+        }
+
+        // Noise
+        noisePower += power;
+        noise.append(power);
+    }
+
+    // Calculate median of noise
+    float noiseMedian = 0.0;
+    if (noise.size() > 0)
+    {
+        auto m = noise.begin() + noise.size()/2;
+        std::nth_element(noise.begin(), m, noise.end());
+        noiseMedian = noise[noise.size()/2];
+    }
+
+    // Assume we have similar noise where the signal and harmonics are
+    float inBandNoise = noiseMedian * sigBins;
+    noisePower += inBandNoise;
+    sigPower -= inBandNoise;
+    for (auto hBins : hBinsBins)
+    {
+        float hNoise = noiseMedian * hBins;
+        noisePower += hNoise;
+        harmonicPower -= hNoise;
+    }
+
+    switch (m_measurement)
+    {
+    case SpectrumSettings::MeasurementSNR:
+        {
+        // Calculate SNR in dB over full bandwidth
+        float snr = CalcDb::dbPower(sigPower / noisePower);
+        drawTextRight("SNR: ", QString::number(snr, 'f', 1), "100.0", "dB");
+        break;
+        }
+    case SpectrumSettings::MeasurementSNFR:
+        {
+        // Calculate SNR, where noise is median of noise summed over signal b/w
+        float snfr = CalcDb::dbPower(sigPower / inBandNoise);
+        drawTextRight("SNFR: ", QString::number(snfr, 'f', 1), "100.0", "dB");
+        break;
+        }
+    case SpectrumSettings::MeasurementTHD:
+        {
+        // Calculate THD - Total harmonic distortion
+        float thd = harmonicPower / sigPower;
+        float thdDB = CalcDb::dbPower(thd);
+        drawTextRight("THD: ", QString::number(thdDB, 'f', 1), "-120.0", "dB");
+        break;
+        }
+    case SpectrumSettings::MeasurementTHDPN:
+        {
+        // Calculate THD+N - Total harmonic distortion plus noise
+        float thdpn = CalcDb::dbPower((harmonicPower + noisePower) / sigPower);
+        drawTextRight("THD+N: ", QString::number(thdpn, 'f', 1), "-120.0", "dB");
+        break;
+        }
+    case SpectrumSettings::MeasurementSINAD:
+        {
+        // Calculate SINAD - Signal to noise and distotion ratio (Should be -THD+N)
+        float sinad = CalcDb::dbPower((sigPower + harmonicPower + noisePower) / (harmonicPower + noisePower));
+        drawTextRight("SINAD: ", QString::number(sinad, 'f', 1), "120.0", "dB");
+        break;
+        }
+    default:
+        break;
+    }
+}
+
+void GLSpectrum::measureSFDR()
+{
+    // Find first peak which is our signal
+    int peakBin = findPeakBin();
+    int peakLeft, peakRight;
+    peakWidth(peakBin, peakLeft, peakRight, 0, m_nbBins);
+
+    // Find next largest peak, which is the spur
+    int nextPeakBin = -1;
+    float nextPeakPower = -std::numeric_limits<float>::max();
+    for (int i = 0; i < m_nbBins; i++)
+    {
+        if ((i < peakLeft) || (i > peakRight))
+        {
+            if (m_currentSpectrum[i] > nextPeakPower)
+            {
+                nextPeakBin = i;
+                nextPeakPower = m_currentSpectrum[i];
+            }
+        }
+    }
+    if (nextPeakBin != -1)
+    {
+        // Calculate SFDR in dB from difference between two peaks
+        float peakPower = calPower(m_currentSpectrum[peakBin]);
+        float nextPeakPower = calPower(m_currentSpectrum[nextPeakBin]);
+        float peakPowerDB = CalcDb::dbPower(peakPower);
+        float nextPeakPowerDB = CalcDb::dbPower(nextPeakPower);
+        float sfdr = peakPowerDB - nextPeakPowerDB;
+
+        // Display
+        drawTextRight("SFDR: ", QString::number(sfdr, 'f', 1), "100.0", "dB");
+        if (m_measurementHighlight)
+        {
+            if (m_linear) {
+                drawPowerBandMarkers(peakPower, nextPeakPower, m_measurementLightMarkerColor);
+            } else {
+                drawPowerBandMarkers(peakPowerDB, nextPeakPowerDB, m_measurementLightMarkerColor);
+            }
+        }
+    }
+}
+
+// Find power and frequency of max peak in current spectrum
+void GLSpectrum::findPeak(float &power, float &frequency) const
+{
+    int bin;
+
+    bin = 0;
+    power = m_currentSpectrum[0];
+    for (int i = 1; i < m_nbBins; i++)
+    {
+        if (m_currentSpectrum[i] > power)
+        {
+            power = m_currentSpectrum[i];
+            bin = i;
+        }
+    }
+
+    power = m_linear ?
+                power * (m_useCalibration ? m_calibrationGain : 1.0f) :
+                power + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
+    frequency = binToFrequency(bin);
+}
+
+// Calculate channel power in dB
+float GLSpectrum::calcChannelPower(int64_t centerFrequency, int channelBandwidth) const
+{
+    float hzPerBin = m_sampleRate / (float) m_fftSize;
+    int bins = channelBandwidth / hzPerBin;
+    int start = frequencyToBin(centerFrequency) - (bins / 2);
+    int end = start + bins;
+    float power = 0.0;
+
+    if (m_linear)
+    {
+        float gain = m_useCalibration ? m_calibrationGain : 1.0f;
+        for (int i = start; i <= end; i++) {
+            power += m_currentSpectrum[i] * gain;
+        }
+    }
+    else
+    {
+        float shift = m_useCalibration ? m_calibrationShiftdB : 0.0f;
+        for (int i = start; i <= end; i++) {
+            power += CalcDb::powerFromdB(m_currentSpectrum[i]) + shift;
+        }
+    }
+
+    return CalcDb::dbPower(power);
 }
 
 void GLSpectrum::stopDrag()
@@ -2645,14 +3101,10 @@ void GLSpectrum::applyChanges()
     // Peak details in top info line
     QString minFrequencyStr = displayFull(m_centerFrequency - m_sampleRate/2); // This can be wider if negative, while max is positive
     QString maxFrequencyStr = displayFull(m_centerFrequency + m_sampleRate/2);
-    QString widestFrequencyStr = minFrequencyStr.size() > maxFrequencyStr.size() ? minFrequencyStr : maxFrequencyStr;
-    widestFrequencyStr = widestFrequencyStr.append("Hz");
-    m_peakLabelStr = "Peak:";
-    m_peakSpaceWidth = fm.width(" ");
-    m_peakSpaceMidWidth = ((widestFrequencyStr.size() > 10) ? 3 : 1) * m_peakSpaceWidth; // Extra space when lots of digits
-    m_peakLabelWidth = fm.width(m_peakLabelStr);
-    m_peakPowerMaxWidth = m_linear ? fm.width("8.000e-10") : fm.width("-100.0dB");
-    m_peakFrequencyMaxWidth = fm.width(widestFrequencyStr);
+    m_peakFrequencyMaxStr = minFrequencyStr.size() > maxFrequencyStr.size() ? minFrequencyStr : maxFrequencyStr;
+    m_peakFrequencyMaxStr = m_peakFrequencyMaxStr.append("Hz");
+    m_peakPowerMaxStr = m_linear ? "8.000e-10" : "-100.0";
+    m_peakPowerUnits = m_linear ? "" : "dB";
 
     bool fftSizeChanged = true;
 
@@ -3929,32 +4381,12 @@ int GLSpectrum::getPrecision(int value)
     }
 }
 
-// Find power and frequency of max peak in current spectrum
-void GLSpectrum::findPeak(float &power, float &frequency) const
+void GLSpectrum::drawTextRight(const QString &text, const QString &value, const QString &max, const QString &units)
 {
-    int bin;
-
-    bin = 0;
-    power = m_currentSpectrum[0];
-    for (int i = 1; i < m_nbBins; i++)
-    {
-        if (m_currentSpectrum[i] > power)
-        {
-            power = m_currentSpectrum[i];
-            bin = i;
-        }
-    }
-
-    power = m_linear ?
-                power * (m_useCalibration ? m_calibrationGain : 1.0f):
-                power + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
-
-    float hzPerBin = (float) m_sampleRate / m_fftSize;
-    frequency = m_centerFrequency + (bin - (m_fftSize/2)) * hzPerBin;
+    drawTextsRight({text}, {value}, {max}, {units});
 }
 
-// Draws peak power and frequency right justified in top info bar
-void GLSpectrum::drawPeakText(float power, int64_t frequency, bool units)
+void GLSpectrum::drawTextsRight(const QStringList &text, const QStringList &value, const QStringList &max, const QStringList &units)
 {
     QFontMetrics fm(font());
 
@@ -3968,30 +4400,24 @@ void GLSpectrum::drawPeakText(float power, int64_t frequency, bool units)
     painter.setPen(QColor(0xf0, 0xf0, 0xff));
     painter.setFont(font());
 
-    QString powerStr = displayPower(
-        power,
-        m_linear ? 'e' : 'f',
-        m_linear ? 3 : 1
-    );
-    QString frequencyStr = displayFull(frequency);
-    if (units)
-    {
-        if (!m_linear) {
-            powerStr = powerStr.append("dB");
-        }
-        frequencyStr = frequencyStr.append("Hz");
-    }
-
-    int powerWidth = fm.width(powerStr);
-    int frequencyWidth = fm.width(frequencyStr);
-
     int x = width() - m_rightMargin;
     int y = fm.height() + fm.ascent() / 2 - 2;
-    painter.drawText(QPointF(x - frequencyWidth, y), frequencyStr);
-    x -= m_peakFrequencyMaxWidth + m_peakSpaceMidWidth;
-    painter.drawText(QPointF(x - powerWidth, y), powerStr);
-    x -=  m_peakPowerMaxWidth + m_peakSpaceWidth;
-    painter.drawText(QPointF(x - m_peakLabelWidth, y), m_peakLabelStr);
+    int textWidth, maxWidth;
+    for (int i = text.length() - 1; i >= 0; i--)
+    {
+        textWidth = fm.horizontalAdvance(units[i]);
+        painter.drawText(QPointF(x - textWidth, y), units[i]);
+        x -= textWidth;
+
+        textWidth = fm.horizontalAdvance(value[i]);
+        maxWidth = fm.horizontalAdvance(max[i]);
+        painter.drawText(QPointF(x - textWidth, y), value[i]);
+        x -= maxWidth;
+
+        textWidth = fm.horizontalAdvance(text[i]);
+        painter.drawText(QPointF(x - textWidth, y), text[i]);
+        x -= textWidth;
+    }
 
     m_glShaderTextOverlay.initTexture(m_infoPixmap.toImage());
 
@@ -4090,6 +4516,9 @@ void GLSpectrum::formatTextInfo(QString& info)
         getFrequencyZoom(centerFrequency, frequencySpan);
         info.append(tr("CF:%1 ").arg(displayScaled(centerFrequency, 'f', getPrecision(centerFrequency/frequencySpan), true)));
         info.append(tr("SP:%1 ").arg(displayScaled(frequencySpan, 'f', 3, true)));
+        if (m_measurement != SpectrumSettings::MeasurementNone) {
+            info.append(tr("RBW:%1 ").arg(displayScaled(m_sampleRate / (float)m_fftSize, 'f', 3, true)));
+        }
     }
 }
 

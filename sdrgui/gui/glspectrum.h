@@ -161,6 +161,9 @@ public:
     void setDisplayTraceIntensity(int intensity);
     void setLinear(bool linear);
     void setUseCalibration(bool useCalibration);
+    void setMeasurementParams(SpectrumSettings::Measurement measurement, int bandwidth,
+                              int chSpacing, int adjChBandwidth,
+                              int harmonics, bool highlight);
     qint32 getSampleRate() const { return m_sampleRate; }
 
     void addChannelMarker(ChannelMarker* channelMarker);
@@ -294,12 +297,9 @@ private:
     QMatrix4x4 m_glLeftScaleBoxMatrix;
     QMatrix4x4 m_glInfoBoxMatrix;
 
-    QString m_peakLabelStr;
-    int m_peakLabelWidth;
-    int m_peakSpaceWidth;
-    int m_peakSpaceMidWidth;
-    int m_peakPowerMaxWidth;
-    int m_peakFrequencyMaxWidth;
+    QString m_peakFrequencyMaxStr;
+    QString m_peakPowerMaxStr;
+    QString m_peakPowerUnits;
 
     QRgb m_waterfallPalette[240];
     QImage* m_waterfallBuffer;
@@ -375,6 +375,15 @@ private:
     QOpenGLDebugLogger *m_openGLLogger;
     bool m_isDeviceSpectrum;
 
+    SpectrumSettings::Measurement m_measurement;
+    int m_measurementBandwidth;
+    int m_measurementChSpacing;
+    int m_measurementAdjChBandwidth;
+    int m_measurementHarmonics;
+    bool m_measurementHighlight;
+    static const QVector4D m_measurementLightMarkerColor;
+    static const QVector4D m_measurementDarkMarkerColor;
+
     void updateWaterfall(const Real *spectrum);
     void update3DSpectrogram(const Real *spectrum);
     void updateHistogram(const Real *spectrum);
@@ -382,8 +391,24 @@ private:
     void initializeGL();
     void resizeGL(int width, int height);
     void paintGL();
+    void drawPowerBandMarkers(float max, float min, const QVector4D &color);
+    void drawBandwidthMarkers(int64_t centerFrequency, int bandwidth, const QVector4D &color);
+    void drawPeakMarkers(int64_t startFrequency, int64_t endFrequency, const QVector4D &color);
     void drawSpectrumMarkers();
     void drawAnnotationMarkers();
+
+    void measurePeak();
+    void measureChannelPower();
+    void measureAdjacentChannelPower();
+    void measureSNR();
+    void measureSFDR();
+    float calcChannelPower(int64_t centerFrequency, int channelBandwidth) const;
+    float calPower(float power) const;
+    int findPeakBin() const;
+    void findPeak(float &power, float &frequency) const;
+    void peakWidth(int center, int &left, int &right, int maxLeft, int maxRight) const;
+    int frequencyToBin(int64_t frequency) const;
+    int64_t binToFrequency(int bin) const;
 
     void stopDrag();
     void applyChanges();
@@ -414,8 +439,8 @@ private:
     static QString displayScaledF(float value, char type, int precision, bool showMult);
     static QString displayPower(float value, char type, int precision);
     int getPrecision(int value);
-    void findPeak(float &power, float &frequency) const;
-    void drawPeakText(float power, int64_t frequency, bool units=true);
+    void drawTextRight(const QString &text, const QString &value, const QString &max, const QString &units);
+    void drawTextsRight(const QStringList &text, const QStringList &value, const QStringList &max, const QStringList &units);
     void drawTextOverlay(      //!< Draws a text overlay
             const QString& text,
             const QColor& color,
