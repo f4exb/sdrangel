@@ -42,10 +42,10 @@ SoapySDROutput::SoapySDROutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_deviceDescription("SoapySDROutput"),
     m_running(false),
-    m_thread(0)
+    m_thread(nullptr)
 {
     m_deviceAPI->setNbSinkStreams(1);
-    openDevice();
+    m_openSuccess = openDevice();
     initGainSettings(m_settings);
     initTunableElementsSettings(m_settings);
     initStreamArgSettings(m_settings);
@@ -94,7 +94,7 @@ bool SoapySDROutput::openDevice()
         DeviceAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
         DeviceSoapySDRShared *deviceSoapySDRShared = (DeviceSoapySDRShared*) sinkBuddy->getBuddySharedPtr();
 
-        if (deviceSoapySDRShared == 0)
+        if (!deviceSoapySDRShared)
         {
             qCritical("SoapySDROutput::openDevice: the sink buddy shared pointer is null");
             return false;
@@ -102,7 +102,7 @@ bool SoapySDROutput::openDevice()
 
         SoapySDR::Device *device = deviceSoapySDRShared->m_device;
 
-        if (device == 0)
+        if (!device)
         {
             qCritical("SoapySDROutput::openDevice: cannot get device pointer from Tx buddy");
             return false;
@@ -119,7 +119,7 @@ bool SoapySDROutput::openDevice()
         DeviceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
         DeviceSoapySDRShared *deviceSoapySDRShared = (DeviceSoapySDRShared*) sourceBuddy->getBuddySharedPtr();
 
-        if (deviceSoapySDRShared == 0)
+        if (!deviceSoapySDRShared)
         {
             qCritical("SoapySDROutput::openDevice: the source buddy shared pointer is null");
             return false;
@@ -127,7 +127,7 @@ bool SoapySDROutput::openDevice()
 
         SoapySDR::Device *device = deviceSoapySDRShared->m_device;
 
-        if (device == 0)
+        if (!device)
         {
             qCritical("SoapySDROutput::openDevice: cannot get device pointer from Rx buddy");
             return false;
@@ -160,7 +160,7 @@ bool SoapySDROutput::openDevice()
 
 void SoapySDROutput::closeDevice()
 {
-    if (m_deviceShared.m_device == 0) { // was never open
+    if (!m_deviceShared.m_device) { // was never open
         return;
     }
 
@@ -173,7 +173,7 @@ void SoapySDROutput::closeDevice()
     }
 
     m_deviceShared.m_channel = -1; // publicly release channel
-    m_deviceShared.m_sink = 0;
+    m_deviceShared.m_sink = nullptr;
 
     // No buddies so effectively close the device
 
@@ -181,7 +181,7 @@ void SoapySDROutput::closeDevice()
     {
         DeviceSoapySDR& deviceSoapySDR = DeviceSoapySDR::instance();
         deviceSoapySDR.closeSoapySdr(m_deviceShared.m_device);
-        m_deviceShared.m_device = 0;
+        m_deviceShared.m_device = nullptr;
     }
 }
 
@@ -371,9 +371,9 @@ void SoapySDROutput::init()
 
 SoapySDROutputThread *SoapySDROutput::findThread()
 {
-    if (m_thread == 0) // this does not own the thread
+    if (!m_thread) // this does not own the thread
     {
-        SoapySDROutputThread *soapySDROutputThread = 0;
+        SoapySDROutputThread *soapySDROutputThread = nullptr;
 
         // find a buddy that has allocated the thread
         const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
@@ -413,7 +413,7 @@ void SoapySDROutput::moveThreadToBuddy()
         if (buddySink)
         {
             buddySink->setThread(m_thread);
-            m_thread = 0;  // zero for others
+            m_thread = nullptr;  // zero for others
         }
     }
 }
@@ -452,6 +452,11 @@ bool SoapySDROutput::start()
     // Note: this is quite similar to the BladeRF2 start handling. The main difference is that the channel allocation (enabling) process is
     // done in the thread object.
 
+    if (!m_openSuccess)
+    {
+        qWarning("SoapySDROutput::start: cannot start device");
+        return false;
+    }
 
     if (!m_deviceShared.m_device)
     {
@@ -559,7 +564,7 @@ void SoapySDROutput::stop()
     int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     SoapySDROutputThread *soapySDROutputThread = findThread();
 
-    if (soapySDROutputThread == 0) { // no thread allocated
+    if (!soapySDROutputThread) { // no thread allocated
         return;
     }
 
@@ -570,7 +575,7 @@ void SoapySDROutput::stop()
         qDebug("SoapySDROutput::stop: SO mode. Just stop and delete the thread");
         soapySDROutputThread->stopWork();
         delete soapySDROutputThread;
-        m_thread = 0;
+        m_thread = nullptr;
 
         // remove old thread address from buddies (reset in all buddies)
         const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
@@ -592,7 +597,7 @@ void SoapySDROutput::stop()
         {
             fifos[i] = soapySDROutputThread->getFifo(i);
 
-            if ((soapySDROutputThread->getFifo(i) != 0) && (i > highestActiveChannelIndex)) {
+            if ((soapySDROutputThread->getFifo(i)) && (i > highestActiveChannelIndex)) {
                 highestActiveChannelIndex = i;
             }
 
@@ -600,7 +605,7 @@ void SoapySDROutput::stop()
         }
 
         delete soapySDROutputThread;
-        m_thread = 0;
+        m_thread = nullptr;
 
         if (highestActiveChannelIndex >= 0)
         {
@@ -638,7 +643,7 @@ void SoapySDROutput::stop()
     else // remove channel from existing thread
     {
         qDebug("SoapySDROutput::stop: MO mode. Not changing MO configuration. Just remove FIFO reference");
-        soapySDROutputThread->setFifo(requestedChannel, 0); // remove FIFO
+        soapySDROutputThread->setFifo(requestedChannel, nullptr); // remove FIFO
     }
 
     applySettings(m_settings, true); // re-apply forcibly to set sample rate with the new number of channels
@@ -727,7 +732,7 @@ bool SoapySDROutput::setDeviceCenterFrequency(SoapySDR::Device *dev, int request
 
 void SoapySDROutput::updateGains(SoapySDR::Device *dev, int requestedChannel, SoapySDROutputSettings& settings)
 {
-    if (dev == 0) {
+    if (!dev) {
         return;
     }
 
@@ -747,7 +752,7 @@ void SoapySDROutput::updateGains(SoapySDR::Device *dev, int requestedChannel, So
 
 void SoapySDROutput::updateTunableElements(SoapySDR::Device *dev, int requestedChannel, SoapySDROutputSettings& settings)
 {
-    if (dev == 0) {
+    if (!dev) {
         return;
     }
 
@@ -886,7 +891,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
         if (soapySDROutputThread)
         {
             fifo = soapySDROutputThread->getFifo(requestedChannel);
-            soapySDROutputThread->setFifo(requestedChannel, 0);
+            soapySDROutputThread->setFifo(requestedChannel, nullptr);
         }
 
         unsigned int fifoRate = std::max(
@@ -905,7 +910,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
         forwardChangeOwnDSP = true;
         forwardChangeToBuddies = true;
 
-        if (dev != 0)
+        if (dev)
         {
             try
             {
@@ -936,7 +941,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
         reverseAPIKeys.append("log2Interp");
         forwardChangeOwnDSP = true;
 
-        if (outputThread != 0)
+        if (outputThread)
         {
             outputThread->setLog2Interpolation(requestedChannel, settings.m_log2Interp);
             qDebug() << "SoapySDROutput::applySettings: set decimation to " << (1<<settings.m_log2Interp);
@@ -966,7 +971,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
         forwardChangeOwnDSP = true;
         forwardChangeToBuddies = true;
 
-        if (dev != 0) {
+        if (dev) {
             setDeviceCenterFrequency(dev, requestedChannel, settings.m_centerFrequency, settings.m_LOppmTenths);
         }
     }
@@ -975,7 +980,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
     {
         reverseAPIKeys.append("antenna");
 
-        if (dev != 0)
+        if (dev)
         {
             try
             {
@@ -995,7 +1000,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
         reverseAPIKeys.append("bandwidth");
         forwardChangeToBuddies = true;
 
-        if (dev != 0)
+        if (dev)
         {
             try
             {
@@ -1016,7 +1021,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
 
         if (nvalue != settings.m_tunableElements.end() && ((m_settings.m_tunableElements[oname] != *nvalue) || force))
         {
-            if (dev != 0)
+            if (dev)
             {
                 try
                 {
@@ -1039,7 +1044,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
     {
         reverseAPIKeys.append("globalGain");
 
-        if (dev != 0)
+        if (dev)
         {
             try
             {
@@ -1061,7 +1066,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
 
         if (nvalue != settings.m_individualGains.end() && ((m_settings.m_individualGains[oname] != *nvalue) || force))
         {
-            if (dev != 0)
+            if (dev)
             {
                 try
                 {
@@ -1085,7 +1090,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
     {
         reverseAPIKeys.append("autoGain");
 
-        if (dev != 0)
+        if (dev)
         {
             try
             {
@@ -1103,7 +1108,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
     {
         reverseAPIKeys.append("autoDCCorrection");
 
-        if ((dev != 0) && hasDCAutoCorrection())
+        if ((dev) && hasDCAutoCorrection())
         {
             try
             {
@@ -1121,7 +1126,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
     {
         reverseAPIKeys.append("dcCorrection");
 
-        if ((dev != 0) && hasDCCorrectionValue())
+        if ((dev) && hasDCCorrectionValue())
         {
             try
             {
@@ -1139,7 +1144,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
     {
         reverseAPIKeys.append("iqCorrection");
 
-        if ((dev != 0) && hasIQCorrectionValue())
+        if ((dev) && hasIQCorrectionValue())
         {
             try
             {
@@ -1159,7 +1164,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
 
         if (nvalue != settings.m_streamArgSettings.end() && ((m_settings.m_streamArgSettings[oname] != *nvalue) || force))
         {
-            if (dev != 0)
+            if (dev)
             {
                 try
                 {
@@ -1184,7 +1189,7 @@ bool SoapySDROutput::applySettings(const SoapySDROutputSettings& settings, bool 
 
         if (nvalue != settings.m_deviceArgSettings.end() && ((m_settings.m_deviceArgSettings[oname] != *nvalue) || force))
         {
-            if (dev != 0)
+            if (dev)
             {
                 try
                 {

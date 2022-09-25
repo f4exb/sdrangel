@@ -193,6 +193,7 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
     QMutex m_mutex;
+    bool m_openSuccess;
     SoapySDROutputSettings m_settings;
     QString m_deviceDescription;
     bool m_running;

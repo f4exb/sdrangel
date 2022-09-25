@@ -30,6 +30,8 @@ Occasionally some devices may require to have the user specifying keyword parame
 
 In such a case you will use the device user arguments (Preferences -> Devices -> User arguments) with the dialog as described [here](../../../sdrgui/deviceuserargs.md)
 
+If you use Soapy Remote make sure you read [this Wiki page](https://github.com/f4exb/sdrangel/wiki/Soapy-Remote) first as user arguments are mandatory.
+
 <h2>SoapySDR API implementation</h2>
 
 Not all parts are implemented. Currently the following have been left out:
