@@ -379,20 +379,20 @@ Several of the measurements highlight the measurement region on the spectrum. Th
 
 The peak measurement displays the power and frequency of the FFT bin with the highest magnitude.
 
-![Peak measurement](../../doc/img/Specturm_Measurement_Peak.png)
+![Peak measurement](../../doc/img/Spectrum_Measurement_Peak.png)
 
 <h5>Channel Power</h5>
 
 Channel power measures the total power within a user-defined bandwidth, at the center of the spectrum:
 
-![Adjacent channel power measurement](../../doc/img/Specturm_Measurement_ChannelPower.png)
+![Adjacent channel power measurement](../../doc/img/Spectrum_Measurement_ChannelPower.png)
 
 <h5>Adjacent Channel Power</h5>
 
 The adjacent channel power measurement measures the power in a channel of user-defined bandwidth at the center of the spectrum and compares it to the power in the left and right adjacent channels.
 Channel separation is specifed in the 'Spacing' field.
 
-![Adjacent channel power measurement](../../doc/img/Specturm_Measurement_AdjChannelPower.png)
+![Adjacent channel power measurement](../../doc/img/Spectrum_Measurement_AdjChannelPower.png)
 
 <h5>Signal to Noise Ratio</h5>
 
@@ -402,7 +402,7 @@ The bandwidth of the signal is assumed to be the width of the largest peak, whic
 Noise is summed over the full bandwidth (i.e all FFT bins), with the fundamental and user-specified number of harmonics being replaced with the noise median from outside of these regions.
 The noise median is also subtracted from the signal, before the SNR is calculated.
 
-![SNR measurement](../../doc/img/Specturm_Measurement_SNR.png)
+![SNR measurement](../../doc/img/Spectrum_Measurement_SNR.png)
 
 <h5>Signal to Noise Floor Ratio</h5>
 
@@ -426,7 +426,7 @@ SINAD is measured as per SNR, but the result is the ratio of the fundamental to 
 
 SFDR is a measurement of the difference in power from the largest peak (the fundamental) to the second largest peak (the strongest spurious signal).
 
-![SFDR measurement](../../doc/img/Specturm_Measurement_SFDR.png)
+![SFDR measurement](../../doc/img/Spectrum_Measurement_SFDR.png)
 
 <h2>3D Spectrogram Controls</h2>
 
