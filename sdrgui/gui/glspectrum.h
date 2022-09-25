@@ -407,8 +407,8 @@ private:
     int findPeakBin() const;
     void findPeak(float &power, float &frequency) const;
     void peakWidth(int center, int &left, int &right, int maxLeft, int maxRight) const;
-    int GLSpectrum::frequencyToBin(int64_t frequency) const;
-    int64_t GLSpectrum::binToFrequency(int bin) const;
+    int frequencyToBin(int64_t frequency) const;
+    int64_t binToFrequency(int bin) const;
 
     void stopDrag();
     void applyChanges();
