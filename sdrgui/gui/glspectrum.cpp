@@ -2186,7 +2186,6 @@ void GLSpectrum::measureSNR()
     int binsRight = sigRight - sig;
 
     // Highlight the signal
-    float hzPerBin = m_sampleRate / (float) m_fftSize;
     float sigFreq = binToFrequency(sig);
     if (m_measurementHighlight) {
         drawPeakMarkers(binToFrequency(sigLeft+1), binToFrequency(sigRight-1), m_measurementLightMarkerColor);
