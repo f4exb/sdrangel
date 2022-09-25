@@ -4407,16 +4407,16 @@ void GLSpectrum::drawTextsRight(const QStringList &text, const QStringList &valu
     int textWidth, maxWidth;
     for (int i = text.length() - 1; i >= 0; i--)
     {
-        textWidth = fm.width(units[i]);
+        textWidth = fm.horizontalAdvance(units[i]);
         painter.drawText(QPointF(x - textWidth, y), units[i]);
         x -= textWidth;
 
-        textWidth = fm.width(value[i]);
-        maxWidth = fm.width(max[i]);
+        textWidth = fm.horizontalAdvance(value[i]);
+        maxWidth = fm.horizontalAdvance(max[i]);
         painter.drawText(QPointF(x - textWidth, y), value[i]);
         x -= maxWidth;
 
-        textWidth = fm.width(text[i]);
+        textWidth = fm.horizontalAdvance(text[i]);
         painter.drawText(QPointF(x - textWidth, y), text[i]);
         x -= textWidth;
     }
