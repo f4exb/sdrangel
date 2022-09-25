@@ -763,6 +763,7 @@ QByteArray Workspace::saveMdiGeometry()
 void Workspace::restoreMdiGeometry(const QByteArray& blob)
 {
     m_mdi->restoreGeometry(qUncompress(blob));
+    m_mdi->restoreGeometry(qUncompress(blob));
 }
 
 bool Workspace::getAutoStackOption() const
