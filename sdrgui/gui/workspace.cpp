@@ -56,7 +56,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
 
     m_titleBar = new QWidget();
     m_titleBarLayout = new QHBoxLayout();
-    m_titleBarLayout->setMargin(0);
+    m_titleBarLayout->setContentsMargins(QMargins());
     m_titleBar->setLayout(m_titleBarLayout);
 
     m_titleLabel = new QLabel();

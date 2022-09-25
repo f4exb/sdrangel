@@ -92,7 +92,7 @@ void ScaleEngine::calcCharSize()
 		float size;
 		float max = 0.0f;
 		for(i = 0; i < str.length(); i++) {
-			size = fontMetrics.width(QString(str[i]));
+			size = fontMetrics.horizontalAdvance(QString(str[i]));
 			if(size > max)
 				max = size;
 		}
