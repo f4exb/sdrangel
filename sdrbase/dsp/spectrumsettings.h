@@ -70,6 +70,20 @@ public:
         Gradient
     };
 
+    enum Measurement
+    {
+        MeasurementNone,
+        MeasurementPeak,
+        MeasurementChannelPower,
+        MeasurementAdjacentChannelPower,
+        MeasurementSNR,
+        MeasurementSNFR,
+        MeasurementTHD,
+        MeasurementTHDPN,
+        MeasurementSINAD,
+        MeasurementSFDR
+    };
+
 	int m_fftSize;
 	int m_fftOverlap;
 	FFTWindow::Function m_fftWindow;
@@ -108,6 +122,12 @@ public:
     SpectrogramStyle m_3DSpectrogramStyle;
     QString m_colorMap;
     SpectrumStyle m_spectrumStyle;
+    Measurement m_measurement;
+    int m_measurementBandwidth;
+    int m_measurementChSpacing;
+    int m_measurementAdjChBandwidth;
+    int m_measurementHarmonics;
+    bool m_measurementHighlight;
 	static const int m_log2FFTSizeMin = 6;   // 64
 	static const int m_log2FFTSizeMax = 15;  // 32k
 

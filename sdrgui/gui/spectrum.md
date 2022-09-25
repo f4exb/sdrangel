@@ -356,6 +356,78 @@ Right click to open the [calibration management dialog](spectrumcalibration.md)
 
 This combo only appears if the spectrum display is the spectrum of a device (i.e. main spectrum) and if there are visible annotation markers. It allows to set the device center frequency to the frequency of the selected annotation marker.
 
+<h4>B.7.1: Measurement</h4>
+
+Selects a measurement to perform on the spectrum:
+
+* None - No measurement is performed.
+* Peak - Displays highest peak power and frequency.
+* Ch Power - Channel power.
+* Adj Ch - Adjacent channel power.
+* SNR - Signal to Noise Ratio.
+* SNFR - Signal to Noise Floor Ratio.
+* THD - Total Harmonic Distortion.
+* THD+N - Total Harmonic Distortion plus Noise.
+* SINAD - Signal to Noise and Distortion ratio.
+* SFDR - Spurious Free Dynamic Range
+
+The measurement result is displayed in the top-right of the spectrum.
+When any measurement is selected, the resolution bandwidth (RBW), which is the sample rate / FFT size, is additionally displayed in the top-left of the spectrum.
+Several of the measurements highlight the measurement region on the spectrum. This can be toggled on and off with the 'Highlight measurement' button. 
+
+<h5>Peak</h5>
+
+The peak measurement displays the power and frequency of the FFT bin with the highest magnitude.
+
+![Peak measurement](../../doc/img/Specturm_Measurement_Peak.png)
+
+<h5>Channel Power</h5>
+
+Channel power measures the total power within a user-defined bandwidth, at the center of the spectrum:
+
+![Adjacent channel power measurement](../../doc/img/Specturm_Measurement_ChannelPower.png)
+
+<h5>Adjacent Channel Power</h5>
+
+The adjacent channel power measurement measures the power in a channel of user-defined bandwidth at the center of the spectrum and compares it to the power in the left and right adjacent channels.
+Channel separation is specifed in the 'Spacing' field.
+
+![Adjacent channel power measurement](../../doc/img/Specturm_Measurement_AdjChannelPower.png)
+
+<h5>Signal to Noise Ratio</h5>
+
+The SNR measurement estimates a signal-to-noise ratio.
+The fundamental signal is the largest peak (i.e. FFT bin with highest magnitude).
+The bandwidth of the signal is assumed to be the width of the largest peak, which includes adjacent bins with a monotonically decreasing magnitude.
+Noise is summed over the full bandwidth (i.e all FFT bins), with the fundamental and user-specified number of harmonics being replaced with the noise median from outside of these regions.
+The noise median is also subtracted from the signal, before the SNR is calculated.
+
+![SNR measurement](../../doc/img/Specturm_Measurement_SNR.png)
+
+<h5>Signal to Noise Floor Ratio</h5>
+
+The SNFR measurement estimates a signal-to-noise-floor ratio.
+This is similar to the SNR, except that the noise used in the ratio, is only the median noise value calculated from the noise outside of the fundamental and harmonics, summed over the bandwidth of the signal.
+One way to think of this, is that it is the SNR if all noise outside of the signal's bandwidth was filtered.
+
+<h5>Total Harmonic Distortion</h5>
+
+THD is measured as per SNR, but the result is the ratio of the total power of the harmonics to the fundamental.
+
+<h5>Total Harmonic Distortion Plus Noise</h5>
+
+THD+N is measured as per SNR, but the result is the ratio of the total power of the harmonics and noise to the fundamental.
+
+<h5>Signal to Noise and Distortion Ratio</h5>
+
+SINAD is measured as per SNR, but the result is the ratio of the fundamental to the total power of the harmonics and noise.
+
+<h5>Spurious Free Dynamic Range</h5>
+
+SFDR is a measurement of the difference in power from the largest peak (the fundamental) to the second largest peak (the strongest spurious signal).
+
+![SFDR measurement](../../doc/img/Specturm_Measurement_SFDR.png)
+
 <h2>3D Spectrogram Controls</h2>
 
 ![3D Spectrogram](../../doc/img/MainWindow_3D_spectrogram.png)
