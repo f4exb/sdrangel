@@ -159,7 +159,7 @@ private:
     bool openDevice();
     void closeDevice();
 	bool applySettings(const HackRFInputSettings& settings, bool force);
-	void setDeviceCenterFrequency(quint64 freq);
+	void setDeviceCenterFrequency(quint64 freq, int loPpmTenths);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const HackRFInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 

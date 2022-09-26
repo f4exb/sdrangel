@@ -316,11 +316,14 @@ bool HackRFOutput::handleMessage(const Message& message)
 	}
 }
 
-void HackRFOutput::setDeviceCenterFrequency(quint64 freq_hz)
+void HackRFOutput::setDeviceCenterFrequency(quint64 freq_hz, int loPpmTenths)
 {
     if (!m_dev) {
         return;
     }
+
+    qint64 df = ((qint64)freq_hz * loPpmTenths) / 10000000LL;
+    freq_hz += df;
 
     hackrf_error rc = (hackrf_error) hackrf_set_freq(m_dev, static_cast<uint64_t>(freq_hz));
 
@@ -422,10 +425,8 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
         reverseAPIKeys.append("centerFrequency");
     }
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
-    {
+    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
         reverseAPIKeys.append("LOppmTenths");
-        DeviceHackRF::setDevicePPMCorrection(m_dev, settings.m_LOppmTenths);
     }
     if ((m_settings.m_fcPos != settings.m_fcPos) || force) {
         reverseAPIKeys.append("fcPos");
@@ -442,7 +443,8 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
         (m_settings.m_log2Interp != settings.m_log2Interp) ||
         (m_settings.m_fcPos != settings.m_fcPos) ||
         (m_settings.m_transverterMode != settings.m_transverterMode) ||
-        (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
+        (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) ||
+        (m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
 	{
         qint64 deviceCenterFrequency = DeviceSampleSink::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
@@ -451,7 +453,7 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
                 (DeviceSampleSink::fcPos_t) settings.m_fcPos,
                 settings.m_devSampleRate,
                 settings.m_transverterMode);
-        setDeviceCenterFrequency(deviceCenterFrequency);
+        setDeviceCenterFrequency(deviceCenterFrequency, settings.m_LOppmTenths);
 
         if (m_deviceAPI->getSourceBuddies().size() > 0)
         {
