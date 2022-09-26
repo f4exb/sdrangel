@@ -496,6 +496,8 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
 // Save spectrum data to a text file
 void GLSpectrumGUI::on_save_clicked(bool checked)
 {
+    (void) checked;
+
     // Get filename to write
     QFileDialog fileDialog(nullptr, "Select file to save data to", "", "*.*");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
