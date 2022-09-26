@@ -21,6 +21,8 @@
 
 #include <QLineEdit>
 #include <QToolTip>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include "gui/glspectrumgui.h"
 #include "dsp/fftwindow.h"
@@ -489,6 +491,39 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
 
     displayGotoMarkers();
     applySettings();
+}
+
+// Save spectrum data to a text file
+void GLSpectrumGUI::on_save_clicked(bool checked)
+{
+    // Get filename to write
+    QFileDialog fileDialog(nullptr, "Select file to save data to", "", "*.*");
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            // Get spectrum data (This vector can be larger than fftSize)
+            std::vector<Real> spectrum;
+            m_spectrumVis->getPowerSpectrumCopy(spectrum);
+
+            // Write to text file
+            QFile file(fileNames[0]);
+            if (file.open(QIODevice::WriteOnly))
+            {
+                QTextStream out(&file);
+                for (int i = 0; i < m_settings.m_fftSize; i++) {
+                    out << spectrum[i] << "\n";
+                }
+                file.close();
+            }
+            else
+            {
+                QMessageBox::critical(this, "Spectrum", QString("Failed to open file %1").arg(fileNames[0]));
+            }
+        }
+    }
 }
 
 void GLSpectrumGUI::on_refLevel_valueChanged(int value)
