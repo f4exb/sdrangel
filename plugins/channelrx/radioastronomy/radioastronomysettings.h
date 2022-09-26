@@ -143,6 +143,8 @@ struct RadioAstronomySettings
     bool m_powerShowTsys0;     //!< Plot total noise temperature
     bool m_powerShowAirTemp;
     bool m_powerShowGaussian;
+    bool m_powerShowFiltered;
+    bool m_powerShowMeasurement;
     float m_powerReference;  //!< In dB
     float m_powerRange;      //!< In dB
     bool m_powerAutoscale;
@@ -161,6 +163,12 @@ struct RadioAstronomySettings
         PY_SFU,
         PY_JANSKY
     } m_powerYUnits;
+    enum PowerFilter {
+        FILT_MEDIAN,
+        FILT_MOVING_AVERAGE,
+        // TODO: FILT_LPF
+    } m_powerFilter;
+    int m_powerFilterN;
 
     enum SweepType {
         SWP_AZEL,

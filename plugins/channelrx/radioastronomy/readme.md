@@ -5,7 +5,7 @@
 The Radio Astronomy plugin provides a number of tools to help make radio astronomy measurements. It supports:
 
 - A spectrometer for displaying time averaged spectra.
-- A radiometer for displaying time averaged continuum measurements (total power).
+- A radiometer for displaying time averaged and optionally filtered continuum measurements (total power).
 - Calibration to enable measurements to be displayed as noise temperatures (K), power (dBm/Watts) and spectral flux density (Jy).
 - Utilities are included for estimation and calculation of noise temperature components (Tsys, Trx, Tgal, Tatm, Tsky, Tsp) and sensitivity (sigma Tsys and sigma Sv).
 - Spectra can be displayed against frequency and velocity (with a configurable reference spectral line), with the velocity adjusted to topocentric, Solar System barycentric or the Local Standard of Rest (LSR) reference frames.
@@ -605,59 +605,67 @@ Plot the surface air temperature data received from Star Tracker on the chart.
 
 Plot Tsys0 on the chart.
 
-<h3>4.8: Display Statistics</h3>
+<h3>4.8: Plot Filtered Measurement</h3>
+
+Plot a filtered version of the measurement. The filter can either be a moving average or a median filter, with a configurable window size.
+
+<h3>4.9: Plot Measurement</h3>
+
+Plot measured data on the chart.
+
+<h3>4.10: Display Statistics</h3>
 
 Displays statistics calculated across all measurements (not just those visible on the chart), including the mean, RMS and standard deviation.
 
-<h3>4.9: Display Gaussian Fitting Tools</h3>
+<h3>4.11: Display Gaussian Fitting Tools</h3>
 
 When checked, the Gaussian fitting tools are displayed. These allow a Gaussian to be fitted to the data, allowing measurement of the HPBW of the antenna.
 
-<h3>4.10: Display Markers</h3>
+<h3>4.12: Display Markers</h3>
 
 When checked, the marker table is displayed and the user may place two markers (M1 and M2) on the chart for accurate display of the corresponding values from the measurement series.
 
-<h3>4.11: Display Peaks</h3>
+<h3>4.13: Display Peaks</h3>
 
 When checked, the marker table is displayed and the peak Max and Min markers are displayed at the maximum and minimum values on the measurement series.
 
-<h3>4.12: Save Chart to an Image File</h3>
+<h3>4.14: Save Chart to an Image File</h3>
 
 Click to save the current chart to an image file.
 
-<h3>4.14: Save Data to a .csv File</h3>
+<h3>4.15: Save Data to a .csv File</h3>
 
 Click to save data from the Radiometer Data table to a .csv file.
 
-<h3>4.15: Autoscale</h3>
+<h3>4.16: Autoscale</h3>
 
 When checked, continuously automatically scales both X and Y axis so all data is visible. When unchecked, the axis scales can be set manually.
 
-<h3>4.16: Autoscale X</h3>
+<h3>4.17: Autoscale X</h3>
 
 When clicked, automatically scales the X axis so all data is visible.
 
-<h3>4.17: Autoscale Y</h3>
+<h3>4.18: Autoscale Y</h3>
 
 When clicked, automatically scales the Y axis so all data is visible.
 
-<h3>4.18: Ref</h3>
+<h3>4.19: Ref</h3>
 
 Sets the reference level (maximum value) of the Y axis.
 
-<h3>4.19: Range</h3>
+<h3>4.20: Range</h3>
 
 Sets the range of the Y axis.
 
-<h3>4.20: Start</h3>
+<h3>4.21: Start</h3>
 
 Sets the start time of the X axis.
 
-<h3>4.21: End</h3>
+<h3>4.22: End</h3>
 
 Sets the end time of the X axis.
 
-<h3>4.22: Sel</h3>
+<h3>4.23: Sel</h3>
 
 Selects what is selected when clicking on the chart:
 
@@ -666,29 +674,37 @@ Selects what is selected when clicking on the chart:
 - M2 sets position of marker 2
 - Gaussian sets peak of Gaussian
 
-<h3>4.23: Center</h3>
+<h3>4.24: Center</h3>
 
 Specifies the date and time of the center of the Gaussian.
 
-<h3>4.24: a</h3>
+<h3>4.25: a</h3>
 
 Specifies the amplitude of the Gaussian. Units correspond to the Y axis units.
 
-<h3>4.25: f</h3>
+<h3>4.26: f</h3>
 
 Specifies the floor (minimum value of the Gaussian). Units correspond to the Y axis units.
 
-<h3>4.26: Delta t FHWM</h3>
+<h3>4.27: Delta t FHWM</h3>
 
 Specifies the full-width at half maximum of the Gaussian in seconds.
 
-<h3>4.27: HPBW</h3>
+<h3>4.28: HPBW</h3>
 
 An estimate of the HPBW in degrees of an antenna whose main lobe corresponds to the Gaussian profile of a drift scan of the Sun, using a linear scale (E.g. Y axis must not be in not dB).
 
 ![Radiometer Gaussian Fit](../../../doc/img/RadioAstronomy_RadiometerGaussian.png)
 
-<h3>4.28: Marker Table</h3>
+<h3>4.29: Filter</h3>
+
+Specifies the type of filter to use for the filtered measurement series. This can either be a moving average or a median filter.
+
+<h3>4.30: Filter Window Size</h3>
+
+Specifies the window size for the filter.
+
+<h3>4.31: Marker Table</h3>
 
 The marker table displays corresponding values for markers that are placed on the chart.
 
@@ -844,6 +860,12 @@ Starts a measurement that will be used as the cold calibration data.
 <h3>7.5: Recalibrate All Measurements</h3>
 
 When checked, results of a new calibration will be applied to all existing measurements. When unchecked, the calibration will only apply to new measurements.
+
+<h2>Frequency Accuracy</h2>
+
+When measuring Doppler shifts in order to estimate velocity, it is important to use an accurate clock source for the SDR.
+For example, a 5ppm XO at 1420MHz could have a frequency error of 7.1kHz, resulting in an velocity error of 1.5km/s.
+A GPSDO can be 1000x more accurate, at less than 1ppb.
 
 <h2>API</h2>
 

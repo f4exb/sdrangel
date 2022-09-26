@@ -104,6 +104,10 @@ void RadioAstronomySettings::resetToDefaults()
     m_powerShowTsys0 = false;
     m_powerShowAirTemp = false;
     m_powerShowGaussian = false;
+    m_powerShowFiltered = false;
+    m_powerFilter = FILT_MEDIAN;
+    m_powerFilterN = 10;
+    m_powerShowMeasurement = true;
 
     m_power2DLinkSweep = true;
     m_power2DSweepType = SWP_OFFSET;
@@ -247,6 +251,10 @@ QByteArray RadioAstronomySettings::serialize() const
     s.writeBool(89, m_powerAutoscale);
     s.writeS32(90, (int)m_powerYData);
     s.writeS32(91, (int)m_powerYUnits);
+    s.writeBool(92, m_powerShowFiltered);
+    s.writeS32(93, (int)m_powerFilter);
+    s.writeS32(94, m_powerFilterN);
+    s.writeBool(95, m_powerShowMeasurement);
 
     s.writeBool(100, m_power2DLinkSweep);
     s.writeS32(102, (int)m_power2DSweepType);
@@ -408,6 +416,10 @@ bool RadioAstronomySettings::deserialize(const QByteArray& data)
         d.readBool(89, &m_powerAutoscale, true);
         d.readS32(90, (int*)&m_powerYData, PY_POWER);
         d.readS32(91, (int*)&m_powerYUnits, PY_DBFS);
+        d.readBool(92, &m_powerShowFiltered, false);
+        d.readS32(93, (int*)&m_powerFilter, FILT_MEDIAN);
+        d.readS32(94, &m_powerFilterN, 10);
+        d.readBool(95, &m_powerShowMeasurement, true);
 
         d.readBool(100, &m_power2DLinkSweep, true);
         d.readS32(102, (int*)&m_power2DSweepType, SWP_OFFSET);
