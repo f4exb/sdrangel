@@ -493,13 +493,13 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
     applySettings();
 }
 
-// Save spectrum data to a text file
+// Save spectrum data to a CSV file
 void GLSpectrumGUI::on_save_clicked(bool checked)
 {
     (void) checked;
 
     // Get filename to write
-    QFileDialog fileDialog(nullptr, "Select file to save data to", "", "*.*");
+    QFileDialog fileDialog(nullptr, "Select file to save data to", "", "*.csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec())
     {
@@ -515,8 +515,13 @@ void GLSpectrumGUI::on_save_clicked(bool checked)
             if (file.open(QIODevice::WriteOnly))
             {
                 QTextStream out(&file);
-                for (int i = 0; i < m_settings.m_fftSize; i++) {
-                    out << spectrum[i] << "\n";
+                float frequency = m_glSpectrum->getCenterFrequency() - (m_glSpectrum->getSampleRate() / 2.0f);
+                float rbw = m_glSpectrum->getSampleRate() / (float)m_settings.m_fftSize;
+                out << "\"Frequency\",\"Power\"\n";
+                for (int i = 0; i < m_settings.m_fftSize; i++)
+                {
+                    out << frequency << "," << spectrum[i] << "\n";
+                    frequency += rbw;
                 }
                 file.close();
             }
