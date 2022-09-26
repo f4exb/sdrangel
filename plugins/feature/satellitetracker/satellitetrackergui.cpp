@@ -289,11 +289,6 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     ui->dateTime->setDateTime(m_satelliteTracker->currentDateTime());
     ui->deviceFeatureSelect->setVisible(false);
 
-    // Use My Position from preferences, if none set
-    if ((m_settings.m_latitude == 0.0) && (m_settings.m_longitude == 0.0)) {
-        on_useMyPosition_clicked();
-    }
-
     resizeTable();
     // Allow user to reorder columns
     ui->satTable->horizontalHeader()->setSectionsMovable(true);
@@ -322,6 +317,11 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
 
     // Get initial list of satellites
     on_updateSatData_clicked();
+
+    // Use My Position from preferences, if none set
+    if ((m_settings.m_latitude == 0.0) && (m_settings.m_longitude == 0.0)) {
+        on_useMyPosition_clicked();
+    }
 }
 
 SatelliteTrackerGUI::~SatelliteTrackerGUI()
@@ -399,6 +399,8 @@ void SatelliteTrackerGUI::onMenuDialogCalled(const QPoint &p)
 
 void SatelliteTrackerGUI::aos(const QString& name, int duration, int maxElevation)
 {
+    // Call plotChart() to start the periodic updates with sat position in polar chart
+    plotChart();
     // Give speech notification of pass
     QString speech = m_settings.m_aosSpeech.trimmed();
     if (!speech.isEmpty())

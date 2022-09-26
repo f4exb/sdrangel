@@ -47,6 +47,7 @@ public:
         m_name(name)
     {
         m_satState.m_name = name;
+        m_hasSignalledAOS = false;
     }
 
     bool hasAOS(const QDateTime& currentTime);
@@ -60,6 +61,7 @@ protected:
     QTimer m_dopplerTimer;
     QList<int> m_initFrequencyOffset;
     SatelliteState m_satState;
+    bool m_hasSignalledAOS;    // For pass specified by m_aos and m_los
 
     friend SatelliteTrackerWorker;
 };
@@ -114,6 +116,7 @@ private:
     bool m_recalculatePasses;           //!< Recalculate passes as something has changed
     bool m_flipRotation;                //!< Use 180 elevation to avoid 360/0 degree discontinutiy
     bool m_extendedAzRotation;          //!< Use 450+ degree azimuth to avoid 360/0 degree discontinuity
+    QDateTime m_lastUpdateDateTime;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const SatelliteTrackerSettings& settings, bool force = false);
