@@ -107,6 +107,7 @@ private slots:
     void on_linscale_toggled(bool checked);
     void on_wsSpectrum_toggled(bool checked);
 	void on_markers_clicked(bool checked);
+    void on_save_clicked(bool checked);
 
 	void on_waterfall_toggled(bool checked);
 	void on_spectrogram_toggled(bool checked);
