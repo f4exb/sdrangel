@@ -49,6 +49,8 @@
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
 #include "gui/crightclickenabler.h"
+#include "gui/timedelegate.h"
+#include "gui/decimaldelegate.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
 #include "feature/featurewebapiutils.h"
@@ -64,30 +66,6 @@
 #include "SWGStarTrackerTarget.h"
 #include "SWGStarTrackerDisplaySettings.h"
 #include "SWGStarTrackerDisplayLoSSettings.h"
-
-// Delegate for table to display time
-class TimeDelegate : public QStyledItemDelegate {
-
-public:
-    TimeDelegate(QString format = "hh:mm:ss") :
-        m_format(format)
-    {
-    }
-
-    virtual QString displayText(const QVariant &value, const QLocale &locale) const override
-    {
-        (void) locale;
-        if (value.toString() == "") {
-            return "";
-        } else {
-            return value.toTime().toString(m_format);
-        }
-    }
-
-private:
-    QString m_format;
-
-};
 
 // Time value is in milliseconds - Displays hh:mm:ss or d hh:mm:ss
 class TimeDeltaDelegate : public QStyledItemDelegate {
@@ -117,32 +95,6 @@ public:
 
 private:
     QString m_format;
-
-};
-
-// Delegate for table to control precision used to display floating point values - also supports strings
-class DecimalDelegate : public QStyledItemDelegate {
-
-public:
-    DecimalDelegate(int precision = 2) :
-        m_precision(precision)
-    {
-    }
-
-    virtual QString displayText(const QVariant &value, const QLocale &locale) const override
-    {
-        (void) locale;
-        bool ok;
-        double d = value.toDouble(&ok);
-        if (ok) {
-            return QString::number(d, 'f', m_precision);
-        } else {
-            return value.toString();
-        }
-    }
-
-private:
-    int m_precision;
 
 };
 
@@ -471,6 +423,7 @@ void RadioAstronomyGUI::addToPowerSeries(FFTMeasurement *fft, bool skipCalcs)
             m_powerMax = std::max(power, m_powerMax);
         }
         m_powerSeries->append(dateTime.toMSecsSinceEpoch(), power);
+        addToPowerFilter(dateTime.toMSecsSinceEpoch(), power);
         if (!skipCalcs)
         {
             if (m_settings.m_powerAutoscale)
@@ -1278,6 +1231,7 @@ void RadioAstronomyGUI::clearData()
     m_powerPeakSeries->clear();
     m_powerMarkerSeries->clear();
     m_powerTsys0Series->clear();
+    m_powerFilteredSeries->clear();
     m_airTemps.clear();
     for (int i = 0; i < RADIOASTRONOMY_SENSORS; i++) {
         m_sensors[i].clear();
@@ -2030,6 +1984,7 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_powerMarkerSeries(nullptr),
     m_powerTsys0Series(nullptr),
     m_powerGaussianSeries(nullptr),
+    m_powerFilteredSeries(nullptr),
     m_powerPeakValid(false),
     m_2DChart(nullptr),
     m_2DXAxis(nullptr),
@@ -2071,7 +2026,11 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_beamWidth(5.6f),
     m_lLAB(0.0f),
     m_bLAB(0.0f),
-    m_downloadingLAB(false)
+    m_downloadingLAB(false),
+    m_window(nullptr),
+    m_windowSorted(nullptr),
+    m_windowIdx(0),
+    m_windowCount(0)
 {
     qDebug("RadioAstronomyGUI::RadioAstronomyGUI");
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -2326,6 +2285,8 @@ RadioAstronomyGUI::~RadioAstronomyGUI()
     qDeleteAll(m_dataLAB);
     m_dataLAB.clear();
     delete[] m_2DMapIntensity;
+    delete[] m_window;
+    delete[] m_windowSorted;
 }
 
 void RadioAstronomyGUI::blockApplySettings(bool block)
@@ -2487,6 +2448,17 @@ void RadioAstronomyGUI::displaySettings()
     ui->powerShowSensor2->setChecked(m_settings.m_sensorVisible[1]);
     m_sensors[1].setName(m_settings.m_sensorName[1]);
     m_sensors[1].clicked(m_settings.m_sensorVisible[1]);
+    ui->powerShowFiltered->setChecked(m_settings.m_powerShowFiltered);
+    if (m_powerFilteredSeries) {
+        m_powerFilteredSeries->setVisible(m_settings.m_powerShowFiltered);
+    }
+    ui->powerFilterWidgets->setVisible(m_settings.m_powerShowFiltered);
+    ui->powerFilter->setCurrentIndex((int)m_settings.m_powerFilter);
+    ui->powerFilterN->setValue(m_settings.m_powerFilterN);
+    ui->powerShowMeasurement->setChecked(m_settings.m_powerShowMeasurement);
+    if (m_powerSeries) {
+        m_powerSeries->setVisible(m_settings.m_powerShowMeasurement);
+    }
 
     ui->power2DLinkSweep->setChecked(m_settings.m_power2DLinkSweep);
     ui->power2DSweepType->setCurrentIndex((int)m_settings.m_power2DSweepType);
@@ -3486,6 +3458,7 @@ void RadioAstronomyGUI::plotPowerVsTimeChart()
 
     // Create measurement data series
     m_powerSeries = new QLineSeries();
+    m_powerSeries->setVisible(m_settings.m_powerShowMeasurement);
     connect(m_powerSeries, &QXYSeries::clicked, this, &RadioAstronomyGUI::powerSeries_clicked);
 
     // Plot peak info
@@ -3516,6 +3489,12 @@ void RadioAstronomyGUI::plotPowerVsTimeChart()
     m_powerGaussianSeries = new QLineSeries();
     m_powerGaussianSeries->setName("Gaussian fit");
     m_powerGaussianSeries->setVisible(m_settings.m_powerShowGaussian);
+
+    // Filtered measurement
+    m_powerFilteredSeries = new QLineSeries();
+    m_powerFilteredSeries->setName("Filtered");
+    m_powerFilteredSeries->setVisible(m_settings.m_powerShowFiltered);
+    plotPowerFiltered();
 
     // Sensors
     for (int i = 0; i < RADIOASTRONOMY_SENSORS; i++) {
@@ -3629,6 +3608,10 @@ void RadioAstronomyGUI::plotPowerVsTimeChart()
     for (int i = 0; i < RADIOASTRONOMY_SENSORS; i++) {
         m_sensors[i].addToChart(m_powerChart, m_powerXAxis);
     }
+
+    m_powerChart->addSeries(m_powerFilteredSeries);
+    m_powerFilteredSeries->attachAxis(m_powerXAxis);
+    m_powerFilteredSeries->attachAxis(m_powerYAxis);
 
     m_powerChart->addSeries(m_powerPeakSeries);
     m_powerPeakSeries->attachAxis(m_powerXAxis);
@@ -5113,6 +5096,7 @@ void RadioAstronomyGUI::on_saveSpectrumChartImages_clicked()
                 for (int i = 0; i < m_fftMeasurements.size(); i++)
                 {
                     plotFFTMeasurement(i);
+                    QApplication::processEvents(); // To get chart title to be updated
                     QImage image(ui->spectrumChart->size(), QImage::Format_ARGB32);
                     image.fill(Qt::transparent);
                     QPainter painter(&image);
@@ -5366,6 +5350,9 @@ void RadioAstronomyGUI::updateDistanceColumns()
     {
         ui->spectrumMarkerTable->showColumn(SPECTRUM_MARKER_COL_R);
         ui->spectrumMarkerTable->showColumn(SPECTRUM_MARKER_COL_D);
+        ui->spectrumMarkerTable->showColumn(SPECTRUM_MARKER_COL_PLOT_MAX);
+        ui->spectrumMarkerTable->showColumn(SPECTRUM_MARKER_COL_R_MIN);
+        ui->spectrumMarkerTable->showColumn(SPECTRUM_MARKER_COL_V);
         showLoSMarker("Max");
         showLoSMarker("M1");
         showLoSMarker("M2");
@@ -5382,6 +5369,9 @@ void RadioAstronomyGUI::updateDistanceColumns()
     {
         ui->spectrumMarkerTable->hideColumn(SPECTRUM_MARKER_COL_R);
         ui->spectrumMarkerTable->hideColumn(SPECTRUM_MARKER_COL_D);
+        ui->spectrumMarkerTable->hideColumn(SPECTRUM_MARKER_COL_PLOT_MAX);
+        ui->spectrumMarkerTable->hideColumn(SPECTRUM_MARKER_COL_R_MIN);
+        ui->spectrumMarkerTable->hideColumn(SPECTRUM_MARKER_COL_V);
         clearLoSMarker("Max");
         clearLoSMarker("M1");
         clearLoSMarker("M2");
@@ -5671,6 +5661,7 @@ void RadioAstronomyGUI::on_powerShowGaussian_clicked(bool checked)
     m_powerGaussianSeries->setVisible(checked);
     updatePowerSelect();
     getRollupContents()->arrangeRollups();
+    update();
 }
 
 void RadioAstronomyGUI::plotPowerGaussian()
@@ -5748,6 +5739,92 @@ void RadioAstronomyGUI::on_powerGaussianHPBW_valueChanged(double value)
     ui->powerGaussianFWHM->blockSignals(false);
 }
 
+void RadioAstronomyGUI::addToPowerFilter(qreal x, qreal y)
+{
+    // Add data to circular buffer
+    m_window[m_windowIdx] = y;
+    m_windowIdx = (m_windowIdx + 1) % m_settings.m_powerFilterN;
+    if (m_windowCount < m_settings.m_powerFilterN) {
+        m_windowCount++;
+    }
+
+    // Filter
+    if (m_settings.m_powerFilter == RadioAstronomySettings::FILT_MOVING_AVERAGE)
+    {
+        // Moving average
+        qreal sum = 0.0;
+        for (int i = 0; i < m_windowCount; i++) {
+            sum += m_window[i];
+        }
+        qreal mean = sum / m_windowCount;
+        y = mean;
+    }
+    else
+    {
+        // Median
+        std::partial_sort_copy(m_window, m_window + m_windowCount, m_windowSorted, m_windowSorted + m_windowCount);
+        qreal median;
+        if ((m_windowCount & 1) == 1) {
+            median = m_windowSorted[m_windowCount / 2];
+        } else {
+            median = (m_windowSorted[m_windowCount / 2 - 1] + m_windowSorted[m_windowCount / 2]) / 2.0;
+        }
+        y = median;
+    }
+
+    // Add to series for chart
+    m_powerFilteredSeries->append(x, y);
+}
+
+void RadioAstronomyGUI::plotPowerFiltered()
+{
+    delete[] m_window;
+    delete[] m_windowSorted;
+    m_window = new qreal[m_settings.m_powerFilterN];
+    m_windowSorted = new qreal[m_settings.m_powerFilterN];
+    m_windowIdx = 0;
+    m_windowCount = 0;
+
+    m_powerFilteredSeries->clear();
+    QVector<QPointF> powerSeries = m_powerSeries->pointsVector();
+    for (int i = 0; i < powerSeries.size(); i++)
+    {
+        QPointF point = powerSeries.at(i);
+        addToPowerFilter(point.x(), point.y());
+    }
+}
+
+void RadioAstronomyGUI::on_powerShowFiltered_clicked(bool checked)
+{
+    m_settings.m_powerShowFiltered = checked;
+    applySettings();
+    ui->powerFilterWidgets->setVisible(checked);
+    m_powerFilteredSeries->setVisible(checked);
+    getRollupContents()->arrangeRollups();
+    update();
+}
+
+void RadioAstronomyGUI::on_powerFilter_currentIndexChanged(int index)
+{
+    m_settings.m_powerFilter = (RadioAstronomySettings::PowerFilter)index;
+    applySettings();
+    plotPowerFiltered();
+}
+
+void RadioAstronomyGUI::on_powerFilterN_valueChanged(int value)
+{
+    m_settings.m_powerFilterN = value;
+    applySettings();
+    plotPowerFiltered();
+}
+
+void RadioAstronomyGUI::on_powerShowMeasurement_clicked(bool checked)
+{
+    m_settings.m_powerShowMeasurement = checked;
+    applySettings();
+    m_powerSeries->setVisible(checked);
+}
+
 RadioAstronomyGUI::LABData* RadioAstronomyGUI::parseLAB(QFile* file, float l, float b)
 {
     LABData *data = new LABData();
@@ -5786,11 +5863,11 @@ void RadioAstronomyGUI::plotLAB(float l, float b, float beamWidth)
     if (!data)
     {
         // Try to open previously downloaded data
-        m_filenameLAB = HttpDownloadManager::downloadDir() + "/" + QString("lab_l_%1_b_%2.txt").arg(l).arg(b);
-        QFile file(m_filenameLAB);
+        QString filenameLAB = HttpDownloadManager::downloadDir() + "/" + QString("lab_l_%1_b_%2.txt").arg(l).arg(b);
+        QFile file(filenameLAB);
         if (file.open(QIODevice::ReadOnly))
         {
-            qDebug() << "RadioAstronomyGUI::plotLAB: Using cached file: " << m_filenameLAB;
+            qDebug() << "RadioAstronomyGUI::plotLAB: Using cached file: " << filenameLAB;
             data = parseLAB(&file, l, b);
         }
         else
@@ -5801,6 +5878,7 @@ void RadioAstronomyGUI::plotLAB(float l, float b, float beamWidth)
                 m_downloadingLAB = true;
                 m_lLAB = l;
                 m_bLAB = b;
+                m_filenameLAB = filenameLAB;
 
                 // Request data be generated via web server
                 QNetworkRequest request(QUrl("https://www.astro.uni-bonn.de/hisurvey/euhou/LABprofile/index.php"));
@@ -5867,6 +5945,7 @@ void RadioAstronomyGUI::downloadFinished(const QString& filename, bool success)
         if (file.open(QIODevice::ReadOnly))
         {
             LABData *data = parseLAB(&file, m_lLAB, m_bLAB);
+            file.close();
             // Check if the data we've downloaded is for the current FFT being displayed
             int index = ui->spectrumIndex->value();
             if (index < m_fftMeasurements.size())
@@ -5876,19 +5955,26 @@ void RadioAstronomyGUI::downloadFinished(const QString& filename, bool success)
                 {
                     data->toSeries(m_fftLABSeries);
                     spectrumAutoscale();
+                    m_downloadingLAB = false;
                 }
                 else
                 {
                     // Try ploting for current FFT (as we only allow one download at a time, so may have been skipped)
                     m_downloadingLAB = false;
                     plotLAB(fft->m_l, fft->m_b, m_beamWidth);
+                    // Don't clear m_downloadingLAB after this point
                 }
             }
         } else {
             qDebug() << "RadioAstronomyGUI::downloadFinished: Failed to open downloaded file: " << filename;
+            m_downloadingLAB = false;
         }
     }
-    m_downloadingLAB = false;
+    else
+    {
+        qDebug() << "RadioAstronomyGUI::downloadFinished: Failed to download: " << filename;
+        m_downloadingLAB = false;
+    }
 }
 
 void RadioAstronomyGUI::displayRunModeSettings()

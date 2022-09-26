@@ -244,6 +244,7 @@ private:
     QScatterSeries *m_powerMarkerSeries;
     QLineSeries *m_powerTsys0Series;
     QLineSeries *m_powerGaussianSeries;
+    QLineSeries *m_powerFilteredSeries;
     double m_powerMin;                          // For axis autoscale
     double m_powerMax;
     bool m_powerPeakValid;
@@ -319,6 +320,12 @@ private:
     QString m_filenameLAB;
     bool m_downloadingLAB;
     QList<LABData *> m_dataLAB;
+
+    // Circular buffer to filtering power series data
+    qreal *m_window;
+    qreal *m_windowSorted;
+    int m_windowIdx;
+    int m_windowCount;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -636,6 +643,13 @@ private slots:
     void on_powerGaussianFloor_valueChanged(double value);
     void on_powerGaussianFWHM_valueChanged(double value);
     void on_powerGaussianHPBW_valueChanged(double value);
+
+    void plotPowerFiltered();
+    void addToPowerFilter(qreal y, qreal x);
+    void on_powerShowFiltered_clicked(bool checked=false);
+    void on_powerFilter_currentIndexChanged(int index);
+    void on_powerFilterN_valueChanged(int value);
+    void on_powerShowMeasurement_clicked(bool checked=false);
 
     void on_runMode_currentIndexChanged(int index);
     void on_sweepType_currentIndexChanged(int index);
