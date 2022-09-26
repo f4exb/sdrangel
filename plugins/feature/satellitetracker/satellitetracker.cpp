@@ -1168,6 +1168,10 @@ QDateTime SatelliteTracker::currentDateTimeUtc()
             return QDateTime::currentDateTimeUtc();
         }
     }
+    else if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::CUSTOM)
+    {
+        return QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
+    }
     else if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::FROM_MAP)
     {
         QString dateTimeStr;

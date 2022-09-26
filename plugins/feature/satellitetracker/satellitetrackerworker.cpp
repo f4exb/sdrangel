@@ -306,6 +306,8 @@ void SatelliteTrackerWorker::update()
     else
         qdt = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs).toUTC();
 
+    bool timeReversed = m_lastUpdateDateTime > qdt;
+
     QHashIterator<QString, SatWorkerState *> itr(m_workerState);
     while (itr.hasNext())
     {
@@ -320,7 +322,7 @@ void SatelliteTrackerWorker::update()
                 // Calculate position, AOS/LOS and other details for satellite
                 int noOfPasses;
                 bool recalcAsPastLOS = (satWorkerState->m_satState.m_passes.size() > 0) && (satWorkerState->m_satState.m_passes[0].m_los < qdt);
-                if (m_recalculatePasses || recalcAsPastLOS)
+                if (m_recalculatePasses || recalcAsPastLOS || timeReversed)
                     noOfPasses = (name == m_settings.m_target) ? 99 : 1;
                 else
                     noOfPasses = 0;
@@ -330,48 +332,73 @@ void SatelliteTrackerWorker::update()
                                     m_settings.m_passStartTime, m_settings.m_passFinishTime, m_settings.m_utc,
                                     noOfPasses, m_settings.m_groundTrackPoints, &satWorkerState->m_satState);
 
-                // Update AOS/LOS (only set timers if using real time)
-                if ((m_settings.m_dateTime == "") && (satWorkerState->m_satState.m_passes.size() > 0))
+                // Update AOS/LOS
+                if (satWorkerState->m_satState.m_passes.size() > 0)
                 {
-                    // Do we have a new AOS?
-                    if ((satWorkerState->m_aos != satWorkerState->m_satState.m_passes[0].m_aos) || (satWorkerState->m_los != satWorkerState->m_satState.m_passes[0].m_los))
+                    // Only use timers if using real time
+                    if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::NOW)
                     {
-                        qDebug() << "SatelliteTrackerWorker: Current time: " << qdt.toString(Qt::ISODateWithMs);
-                        qDebug() << "SatelliteTrackerWorker: New AOS: " << name << " new: " << satWorkerState->m_satState.m_passes[0].m_aos << " old: " << satWorkerState->m_aos;
-                        qDebug() << "SatelliteTrackerWorker: New LOS: " << name << " new: " << satWorkerState->m_satState.m_passes[0].m_los << " old: " << satWorkerState->m_los;
-                        satWorkerState->m_aos = satWorkerState->m_satState.m_passes[0].m_aos;
-                        satWorkerState->m_los = satWorkerState->m_satState.m_passes[0].m_los;
-                        if (satWorkerState->m_aos.isValid())
+                        // Do we have a new pass?
+                        if ((satWorkerState->m_aos != satWorkerState->m_satState.m_passes[0].m_aos) || (satWorkerState->m_los != satWorkerState->m_satState.m_passes[0].m_los))
                         {
-                            if (satWorkerState->m_aos > qdt)
+                            qDebug() << "SatelliteTrackerWorker: Current time: " << qdt.toString(Qt::ISODateWithMs);
+                            qDebug() << "SatelliteTrackerWorker: New AOS: " << name << " new: " << satWorkerState->m_satState.m_passes[0].m_aos << " old: " << satWorkerState->m_aos;
+                            qDebug() << "SatelliteTrackerWorker: New LOS: " << name << " new: " << satWorkerState->m_satState.m_passes[0].m_los << " old: " << satWorkerState->m_los;
+                            satWorkerState->m_aos = satWorkerState->m_satState.m_passes[0].m_aos;
+                            satWorkerState->m_los = satWorkerState->m_satState.m_passes[0].m_los;
+                            satWorkerState->m_hasSignalledAOS = false;
+                            if (satWorkerState->m_aos.isValid())
                             {
-                                satWorkerState->m_aosTimer.setInterval(satWorkerState->m_aos.toMSecsSinceEpoch() - qdt.toMSecsSinceEpoch());
-                                satWorkerState->m_aosTimer.setSingleShot(true);
-                                satWorkerState->m_aosTimer.start();
-                            }
-                            else if (qdt < satWorkerState->m_los)
-                                aos(satWorkerState);
+                                if (satWorkerState->m_aos > qdt)
+                                {
+                                    satWorkerState->m_aosTimer.setInterval(satWorkerState->m_aos.toMSecsSinceEpoch() - qdt.toMSecsSinceEpoch());
+                                    satWorkerState->m_aosTimer.setSingleShot(true);
+                                    satWorkerState->m_aosTimer.start();
+                                }
+                                else if (qdt < satWorkerState->m_los)
+                                    aos(satWorkerState);
 
-                            if (satWorkerState->m_los.isValid() && (m_settings.m_target == satWorkerState->m_name))
-                                calculateRotation(satWorkerState);
-                        }
-                        if (satWorkerState->m_los.isValid() && (satWorkerState->m_los > qdt))
-                        {
-                            if (satWorkerState->m_losTimer.isActive()) {
-                                qDebug() << "SatelliteTrackerWorker::update m_losTimer.remainingTime: " << satWorkerState->m_losTimer.remainingTime();
+                                if (satWorkerState->m_los.isValid() && (m_settings.m_target == satWorkerState->m_name))
+                                    calculateRotation(satWorkerState);
                             }
-                            // We can detect a new AOS for a satellite, a little bit before the LOS has occured
-                            // Allow for 5s here (1s doesn't appear to be enough in some cases)
-                            if (satWorkerState->m_losTimer.isActive() && (satWorkerState->m_losTimer.remainingTime() <= 5000))
+                            if (satWorkerState->m_los.isValid() && (satWorkerState->m_los > qdt))
                             {
-                                satWorkerState->m_losTimer.stop();
-                                // LOS hasn't been called yet - do so, before we reset timer
-                                los(satWorkerState);
+                                if (satWorkerState->m_losTimer.isActive()) {
+                                    qDebug() << "SatelliteTrackerWorker::update m_losTimer.remainingTime: " << satWorkerState->m_losTimer.remainingTime();
+                                }
+                                // We can detect a new AOS for a satellite, a little bit before the LOS has occured
+                                // Allow for 5s here (1s doesn't appear to be enough in some cases)
+                                if (satWorkerState->m_losTimer.isActive() && (satWorkerState->m_losTimer.remainingTime() <= 5000))
+                                {
+                                    satWorkerState->m_losTimer.stop();
+                                    // LOS hasn't been called yet - do so, before we reset timer
+                                    los(satWorkerState);
+                                }
+                                qDebug() << "SatelliteTrackerWorker:: Interval to LOS " << (satWorkerState->m_los.toMSecsSinceEpoch() - qdt.toMSecsSinceEpoch());
+                                satWorkerState->m_losTimer.setInterval(satWorkerState->m_los.toMSecsSinceEpoch() - qdt.toMSecsSinceEpoch());
+                                satWorkerState->m_losTimer.setSingleShot(true);
+                                satWorkerState->m_losTimer.start();
                             }
-                            qDebug() << "SatelliteTrackerWorker:: Interval to LOS " << (satWorkerState->m_los.toMSecsSinceEpoch() - qdt.toMSecsSinceEpoch());
-                            satWorkerState->m_losTimer.setInterval(satWorkerState->m_los.toMSecsSinceEpoch() - qdt.toMSecsSinceEpoch());
-                            satWorkerState->m_losTimer.setSingleShot(true);
-                            satWorkerState->m_losTimer.start();
+                        }
+                    }
+                    else
+                    {
+                        // Do we need to signal LOS?
+                        if (satWorkerState->m_hasSignalledAOS && !satWorkerState->hasAOS(qdt))
+                        {
+                            los(satWorkerState);
+                            satWorkerState->m_hasSignalledAOS = false;
+                        }
+                        // Do we have a new pass?
+                        if ((satWorkerState->m_aos != satWorkerState->m_satState.m_passes[0].m_aos) || (satWorkerState->m_los != satWorkerState->m_satState.m_passes[0].m_los))
+                        {
+                            satWorkerState->m_aos = satWorkerState->m_satState.m_passes[0].m_aos;
+                            satWorkerState->m_los = satWorkerState->m_satState.m_passes[0].m_los;
+                            satWorkerState->m_hasSignalledAOS = false;
+                        }
+                        // Check if we need to signal AOS
+                        if (!satWorkerState->m_hasSignalledAOS && satWorkerState->m_aos.isValid() && satWorkerState->hasAOS(qdt)) {
+                            aos(satWorkerState);
                         }
                     }
                 }
@@ -505,12 +532,15 @@ void SatelliteTrackerWorker::update()
                 qDebug() << "SatelliteTrackerWorker::update: No TLE for " << sat->m_name << ". Can't compute position.";
         }
     }
+    m_lastUpdateDateTime = qdt;
     m_recalculatePasses = false;
 }
 
 void SatelliteTrackerWorker::aos(SatWorkerState *satWorkerState)
 {
     qDebug() << "SatelliteTrackerWorker::aos " << satWorkerState->m_name;
+
+    satWorkerState->m_hasSignalledAOS = true;
 
     // Indicate AOS to GUI
     if (getMessageQueueToGUI())
