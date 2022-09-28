@@ -22,8 +22,7 @@
 
 #include "export.h"
 
-class QMainWindow;
-class QDockWidget;
+class QSplitter;
 class GLSpectrum;
 class SpectrumMeasurements;
 
@@ -38,8 +37,7 @@ public:
     void setMeasurementsVisible(bool visible);
 
 private:
-    QMainWindow *m_mainWindow;
-    QDockWidget *m_dock;
+    QSplitter *m_splitter;
     GLSpectrum *m_spectrum;
     SpectrumMeasurements *m_measurements;
 

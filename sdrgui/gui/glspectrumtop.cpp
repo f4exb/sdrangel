@@ -15,8 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QMainWindow>
-#include <QDockWidget>
 #include <QSplitter>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -28,24 +26,21 @@
 GLSpectrumTop::GLSpectrumTop(QWidget *parent) :
     QWidget(parent)
 {
-    m_mainWindow = new QMainWindow();
-    m_dock = new QDockWidget();
-    m_dock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    //m_dock->setTitleBarWidget(new QLabel("Measurements")); // Could add device or channel R:0 label and dock button?
-    m_dock->setVisible(false);
+    m_splitter = new QSplitter(Qt::Vertical);
     m_spectrum = new GLSpectrum();
     m_measurements = new SpectrumMeasurements();
     m_spectrum->setMeasurements(m_measurements);
-    m_dock->setWidget(m_measurements);
-    m_mainWindow->setCentralWidget(m_spectrum);
-    m_mainWindow->addDockWidget(Qt::BottomDockWidgetArea, m_dock);
+    m_splitter->addWidget(m_spectrum);
+    m_splitter->addWidget(m_measurements);
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(m_mainWindow);
+    layout->addWidget(m_splitter);
     setLayout(layout);
+    m_measurements->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 void GLSpectrumTop::setMeasurementsVisible(bool visible)
 {
-    m_dock->setVisible(visible);
+    m_measurements->setVisible(visible);
 }
