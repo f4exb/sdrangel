@@ -140,7 +140,7 @@ void FileInput::openFileStream()
         }
         else
         {
-            qCritical("FileInput::openFileStream: invalid .wav file");
+            qCritical("FileInput::openFileStream: broken or unsupported format of .wav file");
             m_recordLengthMuSec = 0;
         }
 
