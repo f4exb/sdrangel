@@ -167,6 +167,7 @@ const QStringList SpectrumMeasurements::m_tooltips = {
 
 SpectrumMeasurements::SpectrumMeasurements(QWidget *parent) :
     QWidget(parent),
+    m_measurement(SpectrumSettings::MeasurementPeaks),
     m_table(nullptr),
     m_peakTable(nullptr)
 {
@@ -384,8 +385,6 @@ void SpectrumMeasurements::tableContextMenu(QPoint pos)
     QTableWidgetItem *item = m_table->itemAt(pos);
     if (item)
     {
-        int row = item->row();
-
         QMenu* tableContextMenu = new QMenu(m_table);
         connect(tableContextMenu, &QMenu::aboutToHide, tableContextMenu, &QMenu::deleteLater);
 
@@ -408,8 +407,6 @@ void SpectrumMeasurements::peakTableContextMenu(QPoint pos)
     QTableWidgetItem *item = m_peakTable->itemAt(pos);
     if (item)
     {
-        int row = item->row();
-
         QMenu* tableContextMenu = new QMenu(m_peakTable);
         connect(tableContextMenu, &QMenu::aboutToHide, tableContextMenu, &QMenu::deleteLater);
 
@@ -458,35 +455,40 @@ void SpectrumMeasurements::resizePeakTable()
 
 void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement measurement, int peaks)
 {
-    // Tried using setVisible(), but that would hang, so delete and recreate
-    delete m_peakTable;
-    m_peakTable = nullptr;
-    delete m_table;
-    m_table = nullptr;
-
-    switch (measurement)
+    if ((measurement != m_measurement) || ((m_peakTable == nullptr) && (m_table == nullptr)))
     {
-    case SpectrumSettings::MeasurementPeaks:
-        createPeakTable(peaks);
-        layout()->addWidget(m_peakTable);
-        break;
-    case SpectrumSettings::MeasurementChannelPower:
-        reset();
-        createChannelPowerTable();
-        layout()->addWidget(m_table);
-        break;
-    case SpectrumSettings::MeasurementAdjacentChannelPower:
-        reset();
-        createAdjacentChannelPowerTable();
-        layout()->addWidget(m_table);
-        break;
-    case SpectrumSettings::MeasurementSNR:
-        reset();
-        createSNRTable();
-        layout()->addWidget(m_table);
-        break;
-    default:
-        break;
+        // Tried using setVisible(), but that would hang, so delete and recreate
+        delete m_peakTable;
+        m_peakTable = nullptr;
+        delete m_table;
+        m_table = nullptr;
+
+        m_measurement = measurement;
+
+        switch (measurement)
+        {
+        case SpectrumSettings::MeasurementPeaks:
+            createPeakTable(peaks);
+            layout()->addWidget(m_peakTable);
+            break;
+        case SpectrumSettings::MeasurementChannelPower:
+            reset();
+            createChannelPowerTable();
+            layout()->addWidget(m_table);
+            break;
+        case SpectrumSettings::MeasurementAdjacentChannelPower:
+            reset();
+            createAdjacentChannelPowerTable();
+            layout()->addWidget(m_table);
+            break;
+        case SpectrumSettings::MeasurementSNR:
+            reset();
+            createSNRTable();
+            layout()->addWidget(m_table);
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -605,6 +607,6 @@ void SpectrumMeasurements::setAdjacentChannelPower(float left, float leftACPR, f
 
 void SpectrumMeasurements::setPeak(int peak, int64_t frequency, float power)
 {
-    m_peakTable->item(peak, COL_FREQUENCY)->setData(Qt::DisplayRole, frequency);
+    m_peakTable->item(peak, COL_FREQUENCY)->setData(Qt::DisplayRole, QVariant((qlonglong)frequency));
     m_peakTable->item(peak, COL_POWER)->setData(Qt::DisplayRole, power);
 }

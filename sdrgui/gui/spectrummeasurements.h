@@ -110,6 +110,8 @@ private:
     void updateMeasurement(int row, float value);
     bool checkSpec(const QString &spec, double value) const;
 
+    SpectrumSettings::Measurement m_measurement;
+
     QTableWidget *m_table;
     QMenu *m_rowMenu;
     QMenu *m_columnMenu;
