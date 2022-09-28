@@ -72,16 +72,10 @@ public:
 
     enum Measurement
     {
-        MeasurementNone,
-        MeasurementPeak,
+        MeasurementPeaks,
         MeasurementChannelPower,
         MeasurementAdjacentChannelPower,
-        MeasurementSNR,
-        MeasurementSNFR,
-        MeasurementTHD,
-        MeasurementTHDPN,
-        MeasurementSINAD,
-        MeasurementSFDR
+        MeasurementSNR
     };
 
 	int m_fftSize;
@@ -122,11 +116,13 @@ public:
     SpectrogramStyle m_3DSpectrogramStyle;
     QString m_colorMap;
     SpectrumStyle m_spectrumStyle;
+    bool m_measure;
     Measurement m_measurement;
     int m_measurementBandwidth;
     int m_measurementChSpacing;
     int m_measurementAdjChBandwidth;
     int m_measurementHarmonics;
+    int m_measurementPeaks;
     bool m_measurementHighlight;
 	static const int m_log2FFTSizeMin = 6;   // 64
 	static const int m_log2FFTSizeMax = 15;  // 32k

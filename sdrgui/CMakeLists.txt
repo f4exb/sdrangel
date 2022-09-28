@@ -51,6 +51,7 @@ set(sdrgui_SOURCES
     gui/glshadertvarray.cpp
     gui/glspectrum.cpp
     gui/glspectrumgui.cpp
+    gui/glspectrumtop.cpp
     gui/graphicsdialog.cpp
     gui/graphicsviewzoom.cpp
     gui/httpdownloadmanagergui.cpp
@@ -69,6 +70,7 @@ set(sdrgui_SOURCES
     gui/sdrangelsplash.cpp
     gui/spectrumcalibrationpointsdialog.cpp
     gui/spectrummarkersdialog.cpp
+    gui/spectrummeasurements.cpp
     gui/tickedslider.cpp
     gui/timedelegate.cpp
     gui/transverterbutton.cpp
@@ -154,6 +156,7 @@ set(sdrgui_HEADERS
     gui/glshadertextured.h
     gui/glspectrum.h
     gui/glspectrumgui.h
+    gui/glspectrumtop.h
     gui/graphicsdialog.h
     gui/graphicsviewzoom.h
     gui/httpdownloadmanagergui.h
@@ -173,6 +176,7 @@ set(sdrgui_HEADERS
     gui/sdrangelsplash.h
     gui/spectrumcalibrationpointsdialog.h
     gui/spectrummarkersdialog.h
+    gui/spectrummeasurements.h
     gui/tickedslider.h
     gui/timedelegate.h
     gui/transverterbutton.h

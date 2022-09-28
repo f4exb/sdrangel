@@ -1074,6 +1074,20 @@
       </widget>
      </item>
      <item>
+      <widget class="ButtonSwitch" name="measure">
+       <property name="toolTip">
+        <string>Display measurements</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/ruler.png</normaloff>:/ruler.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="ButtonSwitch" name="calibration">
        <property name="toolTip">
         <string>Left: toggle relative / calibrated power - Right: open calibration dialog</string>
@@ -1139,14 +1153,12 @@
        <property name="toolTip">
         <string>Measurement</string>
        </property>
+       <property name="currentIndex">
+        <number>-1</number>
+       </property>
        <item>
         <property name="text">
-         <string>None</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Peak</string>
+         <string>Peaks</string>
         </property>
        </item>
        <item>
@@ -1162,31 +1174,6 @@
        <item>
         <property name="text">
          <string>SNR</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>SNFR</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>THD</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>THD+N</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>SINAD</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>SFDR</string>
         </property>
        </item>
       </widget>
@@ -1211,6 +1198,20 @@
        </property>
        <property name="checkable">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="resetMeasurements">
+       <property name="toolTip">
+        <string>Reset measurements</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
        </property>
       </widget>
      </item>
@@ -1303,6 +1304,26 @@
       <widget class="QSpinBox" name="harmonics">
        <property name="toolTip">
         <string>Number of harmonics</string>
+       </property>
+       <property name="maximum">
+        <number>20</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="peaksLabel">
+       <property name="text">
+        <string>Peaks</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="peaks">
+       <property name="toolTip">
+        <string>Number of peaks to display</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
        </property>
        <property name="maximum">
         <number>20</number>

@@ -36,6 +36,7 @@ namespace Ui {
 
 class SpectrumVis;
 class GLSpectrum;
+class GLSpectrumTop;
 
 class SDRGUI_API GLSpectrumGUI : public QWidget, public Serializable {
 	Q_OBJECT
@@ -52,7 +53,7 @@ public:
 	explicit GLSpectrumGUI(QWidget* parent = NULL);
 	~GLSpectrumGUI();
 
-	void setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum);
+	void setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum, GLSpectrumTop *glSpectrumTop = nullptr);
     void setFFTSize(int log2FFTSize);
 
 	void resetToDefaults();
@@ -67,6 +68,7 @@ private:
 
 	SpectrumVis* m_spectrumVis;
 	GLSpectrum* m_glSpectrum;
+    GLSpectrumTop* m_glSpectrumTop;
 	MessageQueue m_messageQueue;
     SpectrumSettings m_settings;
     bool m_doApplySettings;
@@ -86,6 +88,7 @@ private:
 	bool handleMessage(const Message& message);
     void displayGotoMarkers();
     QString displayScaled(int64_t value, char type, int precision, bool showMult);
+    void displayMeasurementGUI();
 
 private slots:
 	void on_fftWindow_currentIndexChanged(int index);
@@ -123,12 +126,15 @@ private slots:
 	void on_calibration_toggled(bool checked);
     void on_gotoMarker_currentIndexChanged(int index);
 
+    void on_measure_clicked(bool checked);
     void on_measurement_currentIndexChanged(int index);
     void on_highlight_toggled(bool checked);
+    void on_resetMeasurements_clicked(bool checked);
     void on_bandwidth_valueChanged(int value);
     void on_chSpacing_valueChanged(int value);
     void on_adjChBandwidth_valueChanged(int value);
     void on_harmonics_valueChanged(int value);
+    void on_peaks_valueChanged(int value);
 
 	void handleInputMessages();
     void openWebsocketSpectrumSettingsDialog(const QPoint& p);

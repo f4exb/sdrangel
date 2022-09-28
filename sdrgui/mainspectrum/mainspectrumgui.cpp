@@ -26,13 +26,15 @@
 
 #include "mainwindow.h"
 #include "gui/glspectrum.h"
+#include "gui/glspectrumtop.h"
 #include "gui/glspectrumgui.h"
 #include "gui/workspaceselectiondialog.h"
 #include "dsp/spectrumvis.h"
 #include "mainspectrumgui.h"
 
-MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGUI, QWidget *parent) :
+MainSpectrumGUI::MainSpectrumGUI(GLSpectrumTop *spectrumTop, GLSpectrum *spectrum, GLSpectrumGUI *spectrumGUI, QWidget *parent) :
     QMdiSubWindow(parent),
+    m_spectrumTop(spectrumTop),
     m_spectrum(spectrum),
     m_spectrumGUI(spectrumGUI),
     m_deviceType(DeviceRx),
@@ -113,7 +115,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     m_topLayout->addWidget(m_hideButton);
 
     m_spectrumLayout = new QHBoxLayout();
-    m_spectrumLayout->addWidget(spectrum);
+    m_spectrumLayout->addWidget(spectrumTop);
     spectrum->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     m_spectrumGUILayout = new QHBoxLayout();
     m_spectrumGUILayout->addWidget(spectrumGUI);
@@ -151,7 +153,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
 MainSpectrumGUI::~MainSpectrumGUI()
 {
     qDebug("MainSpectrumGUI::~MainSpectrumGUI");
-    m_spectrumLayout->removeWidget(m_spectrum);
+    m_spectrumLayout->removeWidget(m_spectrumTop);
     m_spectrumGUILayout->removeWidget(m_spectrumGUI);
     delete m_sizeGripBottomRight;
     delete m_bottomLayout;

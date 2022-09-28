@@ -28,10 +28,12 @@
 #include "dsp/fftwindow.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
+#include "gui/glspectrumtop.h"
 #include "gui/crightclickenabler.h"
 #include "gui/wsspectrumsettingsdialog.h"
 #include "gui/spectrummarkersdialog.h"
 #include "gui/spectrumcalibrationpointsdialog.h"
+#include "gui/spectrummeasurements.h"
 #include "gui/flowlayout.h"
 #include "util/colormap.h"
 #include "util/simpleserializer.h"
@@ -45,6 +47,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     ui(new Ui::GLSpectrumGUI),
     m_spectrumVis(nullptr),
     m_glSpectrum(nullptr),
+    m_glSpectrumTop(nullptr),
     m_doApplySettings(true),
     m_calibrationShiftdB(0.0)
 {
@@ -69,7 +72,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     ui->verticalLayout->addItem(flowLayout);
 
     on_linscale_toggled(false);
-    on_measurement_currentIndexChanged(0);
+    displayMeasurementGUI();
 
     QString levelStyle = QString(
         "QSpinBox {background-color: rgb(79, 79, 79);}"
@@ -101,13 +104,14 @@ GLSpectrumGUI::~GLSpectrumGUI()
     delete ui;
 }
 
-void GLSpectrumGUI::setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum)
+void GLSpectrumGUI::setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum, GLSpectrumTop *glSpectrumTop)
 {
     m_spectrumVis = spectrumVis;
     m_glSpectrum = glSpectrum;
     m_glSpectrum->setSpectrumVis(spectrumVis);
     m_glSpectrum->setMessageQueueToGUI(&m_messageQueue);
     m_spectrumVis->setMessageQueueToGUI(&m_messageQueue);
+    m_glSpectrumTop = glSpectrumTop;
 }
 
 void GLSpectrumGUI::resetToDefaults()
@@ -229,12 +233,15 @@ void GLSpectrumGUI::displaySettings()
     ui->calibration->setChecked(m_settings.m_useCalibration);
     displayGotoMarkers();
 
+    ui->measure->setChecked(m_settings.m_measure);
     ui->measurement->setCurrentIndex((int) m_settings.m_measurement);
     ui->highlight->setChecked(m_settings.m_measurementHighlight);
     ui->bandwidth->setValue(m_settings.m_measurementBandwidth);
     ui->chSpacing->setValue(m_settings.m_measurementChSpacing);
     ui->adjChBandwidth->setValue(m_settings.m_measurementAdjChBandwidth);
     ui->harmonics->setValue(m_settings.m_measurementHarmonics);
+    ui->peaks->setValue(m_settings.m_measurementPeaks);
+    displayMeasurementGUI();
 
     ui->fftWindow->blockSignals(false);
     ui->averaging->blockSignals(false);
@@ -344,11 +351,13 @@ void GLSpectrumGUI::applySpectrumSettings()
     m_glSpectrum->setCalibrationInterpMode(m_settings.m_calibrationInterpMode);
 
     m_glSpectrum->setMeasurementParams(
+        m_settings.m_measure,
         m_settings.m_measurement,
         m_settings.m_measurementBandwidth,
         m_settings.m_measurementChSpacing,
         m_settings.m_measurementAdjChBandwidth,
         m_settings.m_measurementHarmonics,
+        m_settings.m_measurementPeaks,
         m_settings.m_measurementHighlight
         );
 }
@@ -1027,29 +1036,51 @@ void GLSpectrumGUI::updateCalibrationPoints()
     }
 }
 
-void GLSpectrumGUI::on_measurement_currentIndexChanged(int index)
+void GLSpectrumGUI::displayMeasurementGUI()
 {
-    m_settings.m_measurement = (SpectrumSettings::Measurement)index;
+    bool show = m_settings.m_measure;
 
-    bool highlight = (m_settings.m_measurement >= SpectrumSettings::MeasurementChannelPower);
-    ui->highlight->setVisible(highlight);
+    if (m_glSpectrumTop) {
+        m_glSpectrumTop->setMeasurementsVisible(show);
+    }
+
+    ui->measurement->setVisible(show);
+    ui->highlight->setVisible(show);
+
+    bool reset = (m_settings.m_measurement >= SpectrumSettings::MeasurementChannelPower);
+    ui->resetMeasurements->setVisible(reset && show);
 
     bool bw = (m_settings.m_measurement == SpectrumSettings::MeasurementChannelPower)
                || (m_settings.m_measurement == SpectrumSettings::MeasurementAdjacentChannelPower);
-    ui->bandwidthLabel->setVisible(bw);
-    ui->bandwidth->setVisible(bw);
+    ui->bandwidthLabel->setVisible(bw && show);
+    ui->bandwidth->setVisible(bw && show);
 
     bool adj = m_settings.m_measurement == SpectrumSettings::MeasurementAdjacentChannelPower;
-    ui->chSpacingLabel->setVisible(adj);
-    ui->chSpacing->setVisible(adj);
-    ui->adjChBandwidthLabel->setVisible(adj);
-    ui->adjChBandwidth->setVisible(adj);
+    ui->chSpacingLabel->setVisible(adj && show);
+    ui->chSpacing->setVisible(adj && show);
+    ui->adjChBandwidthLabel->setVisible(adj && show);
+    ui->adjChBandwidth->setVisible(adj && show);
 
-    bool harmonics = (m_settings.m_measurement >= SpectrumSettings::MeasurementSNR)
-                    && (m_settings.m_measurement <= SpectrumSettings::MeasurementSINAD);
-    ui->harmonicsLabel->setVisible(harmonics);
-    ui->harmonics->setVisible(harmonics);
+    bool harmonics = (m_settings.m_measurement == SpectrumSettings::MeasurementSNR);
+    ui->harmonicsLabel->setVisible(harmonics && show);
+    ui->harmonics->setVisible(harmonics && show);
 
+    bool peaks = (m_settings.m_measurement == SpectrumSettings::MeasurementPeaks);
+    ui->peaksLabel->setVisible(peaks && show);
+    ui->peaks->setVisible(peaks && show);
+}
+
+void GLSpectrumGUI::on_measure_clicked(bool checked)
+{
+    m_settings.m_measure = checked;
+    displayMeasurementGUI();
+    applySettings();
+}
+
+void GLSpectrumGUI::on_measurement_currentIndexChanged(int index)
+{
+    m_settings.m_measurement = (SpectrumSettings::Measurement)index;
+    displayMeasurementGUI();
     applySettings();
 }
 
@@ -1057,6 +1088,15 @@ void GLSpectrumGUI::on_highlight_toggled(bool checked)
 {
     m_settings.m_measurementHighlight = checked;
     applySettings();
+}
+
+void GLSpectrumGUI::on_resetMeasurements_clicked(bool checked)
+{
+    (void) checked;
+
+    if (m_glSpectrumTop) {
+        m_glSpectrumTop->getMeasurements()->reset();
+    }
 }
 
 void GLSpectrumGUI::on_bandwidth_valueChanged(int value)
@@ -1080,5 +1120,11 @@ void GLSpectrumGUI::on_adjChBandwidth_valueChanged(int value)
 void GLSpectrumGUI::on_harmonics_valueChanged(int value)
 {
     m_settings.m_measurementHarmonics = value;
+    applySettings();
+}
+
+void GLSpectrumGUI::on_peaks_valueChanged(int value)
+{
+    m_settings.m_measurementPeaks = value;
     applySettings();
 }
