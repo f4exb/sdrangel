@@ -455,7 +455,10 @@ void SpectrumMeasurements::resizePeakTable()
 
 void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement measurement, int peaks)
 {
-    if ((measurement != m_measurement) || ((m_peakTable == nullptr) && (m_table == nullptr)))
+    if (    (measurement != m_measurement)
+        || ((m_peakTable == nullptr) && (m_table == nullptr))
+        || ((m_peakTable != nullptr) && (peaks != m_peakTable->rowCount()))
+       )
     {
         // Tried using setVisible(), but that would hang, so delete and recreate
         delete m_peakTable;
@@ -607,6 +610,13 @@ void SpectrumMeasurements::setAdjacentChannelPower(float left, float leftACPR, f
 
 void SpectrumMeasurements::setPeak(int peak, int64_t frequency, float power)
 {
-    m_peakTable->item(peak, COL_FREQUENCY)->setData(Qt::DisplayRole, QVariant((qlonglong)frequency));
-    m_peakTable->item(peak, COL_POWER)->setData(Qt::DisplayRole, power);
+    if (peak < m_peakTable->rowCount())
+    {
+        m_peakTable->item(peak, COL_FREQUENCY)->setData(Qt::DisplayRole, QVariant((qlonglong)frequency));
+        m_peakTable->item(peak, COL_POWER)->setData(Qt::DisplayRole, power);
+    }
+    else
+    {
+        qDebug() << "SpectrumMeasurements::setPeak: Attempt to set peak " << peak << " when only " << m_peakTable->rowCount() << " rows in peak table";
+    }
 }
