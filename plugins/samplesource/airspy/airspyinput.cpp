@@ -22,6 +22,7 @@
 #include <QList>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -48,6 +49,7 @@ AirspyInput::AirspyInput(DeviceAPI *deviceAPI) :
 	m_settings(),
 	m_dev(nullptr),
 	m_airspyWorker(nullptr),
+    m_airspyWorkerThread(nullptr),
 	m_deviceDescription("Airspy"),
 	m_running(false)
 {
@@ -180,38 +182,39 @@ bool AirspyInput::start()
     }
 
     if (m_running) {
-        stop();
+        return true;
     }
 
+    m_airspyWorkerThread = new QThread();
 	m_airspyWorker = new AirspyWorker(m_dev, &m_sampleFifo);
-    m_airspyWorker->moveToThread(&m_airspyWorkerThread);
+    m_airspyWorker->moveToThread(m_airspyWorkerThread);
+
+    QObject::connect(m_airspyWorkerThread, &QThread::started, m_airspyWorker, &AirspyWorker::startWork);
+    QObject::connect(m_airspyWorkerThread, &QThread::finished, m_airspyWorker, &QObject::deleteLater);
+    QObject::connect(m_airspyWorkerThread, &QThread::finished, m_airspyWorkerThread, &QThread::deleteLater);
+
 	m_airspyWorker->setSamplerate(m_sampleRates[m_settings.m_devSampleRateIndex]);
 	m_airspyWorker->setLog2Decimation(m_settings.m_log2Decim);
     m_airspyWorker->setIQOrder(m_settings.m_iqOrder);
 	m_airspyWorker->setFcPos((int) m_settings.m_fcPos);
     mutexLocker.unlock();
 
-    if (startWorker())
-    {
-        qDebug("AirspyInput::startInput: started");
-        applySettings(m_settings, true);
-        m_running = true;
-    }
-    else
-    {
-        m_running = false;
-    }
+    m_airspyWorkerThread->start();
 
-	return m_running;
+    qDebug("AirspyInput::startInput: started");
+    applySettings(m_settings, true);
+    m_running = true;
+
+	return true;
 }
 
 void AirspyInput::closeDevice()
 {
-    if (m_dev != 0)
+    if (m_dev)
     {
         airspy_stop_rx(m_dev);
         airspy_close(m_dev);
-        m_dev = 0;
+        m_dev = nullptr;
     }
 
     m_deviceDescription.clear();
@@ -220,37 +223,23 @@ void AirspyInput::closeDevice()
 
 void AirspyInput::stop()
 {
-	qDebug("AirspyInput::stop");
-	QMutexLocker mutexLocker(&m_mutex);
+    QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_airspyWorker)
+    if (!m_running) {
+        return;
+    }
+
+	qDebug("AirspyInput::stop");
+
+	if (m_airspyWorkerThread)
 	{
-		stopWorker();
-		delete m_airspyWorker;
-		m_airspyWorker = nullptr;
+        m_airspyWorkerThread->quit();
+        m_airspyWorkerThread->wait();
+        m_airspyWorkerThread = nullptr;
+        m_airspyWorker = nullptr;
 	}
 
 	m_running = false;
-}
-
-bool AirspyInput::startWorker()
-{
-	if (m_airspyWorker->startWork())
-    {
-    	m_airspyWorkerThread.start();
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void AirspyInput::stopWorker()
-{
-	m_airspyWorker->stopWork();
-	m_airspyWorkerThread.quit();
-	m_airspyWorkerThread.wait();
 }
 
 QByteArray AirspyInput::serialize() const

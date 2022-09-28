@@ -21,7 +21,6 @@
 #include <QString>
 #include <QByteArray>
 #include <QNetworkRequest>
-#include <QThread>
 
 #include <libairspy/airspy.h>
 #include <dsp/devicesamplesource.h>
@@ -29,6 +28,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 class DeviceAPI;
 class AirspyWorker;
 
@@ -139,15 +139,13 @@ private:
 	AirspySettings m_settings;
 	struct airspy_device* m_dev;
 	AirspyWorker* m_airspyWorker;
-    QThread m_airspyWorkerThread;
+    QThread *m_airspyWorkerThread;
 	QString m_deviceDescription;
 	std::vector<uint32_t> m_sampleRates;
 	bool m_running;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-	bool startWorker();
-	void stopWorker();
 	bool openDevice();
 	void closeDevice();
 	bool applySettings(const AirspySettings& settings, bool force);
