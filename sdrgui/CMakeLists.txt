@@ -51,7 +51,7 @@ set(sdrgui_SOURCES
     gui/glshadertvarray.cpp
     gui/glspectrum.cpp
     gui/glspectrumgui.cpp
-    gui/glspectrumtop.cpp
+    gui/glspectrumview.cpp
     gui/graphicsdialog.cpp
     gui/graphicsviewzoom.cpp
     gui/httpdownloadmanagergui.cpp
@@ -157,7 +157,7 @@ set(sdrgui_HEADERS
     gui/glshadertextured.h
     gui/glspectrum.h
     gui/glspectrumgui.h
-    gui/glspectrumtop.h
+    gui/glspectrumview.h
     gui/graphicsdialog.h
     gui/graphicsviewzoom.h
     gui/httpdownloadmanagergui.h

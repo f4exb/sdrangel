@@ -23,7 +23,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "gui/glspectrum.h"
-#include "gui/glspectrumtop.h"
+#include "gui/glspectrumview.h"
 #include "gui/glscope.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "plugin/pluginapi.h"
@@ -193,17 +193,17 @@ void ChannelAnalyzerGUI::setSpectrumDisplay()
     qDebug("ChannelAnalyzerGUI::setSpectrumDisplay: m_sinkSampleRate: %d", sinkSampleRate);
     if (m_settings.m_ssb)
     {
-        ui->glSpectrumTop->getSpectrum()->setCenterFrequency(sinkSampleRate/4);
-        ui->glSpectrumTop->getSpectrum()->setSampleRate(sinkSampleRate/2);
-        ui->glSpectrumTop->getSpectrum()->setSsbSpectrum(true);
-        ui->glSpectrumTop->getSpectrum()->setLsbDisplay(ui->BW->value() < 0);
+        ui->glSpectrum->setCenterFrequency(sinkSampleRate/4);
+        ui->glSpectrum->setSampleRate(sinkSampleRate/2);
+        ui->glSpectrum->setSsbSpectrum(true);
+        ui->glSpectrum->setLsbDisplay(ui->BW->value() < 0);
     }
     else
     {
-        ui->glSpectrumTop->getSpectrum()->setCenterFrequency(0);
-        ui->glSpectrumTop->getSpectrum()->setSampleRate(sinkSampleRate);
-        ui->glSpectrumTop->getSpectrum()->setSsbSpectrum(false);
-        ui->glSpectrumTop->getSpectrum()->setLsbDisplay(false);
+        ui->glSpectrum->setCenterFrequency(0);
+        ui->glSpectrum->setSampleRate(sinkSampleRate);
+        ui->glSpectrum->setSsbSpectrum(false);
+        ui->glSpectrum->setLsbDisplay(false);
     }
 }
 
@@ -543,7 +543,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
     m_basebandSampleRate = m_channelAnalyzer->getChannelSampleRate();
     qDebug("ChannelAnalyzerGUI::ChannelAnalyzerGUI: m_basebandSampleRate: %d", m_basebandSampleRate);
     m_spectrumVis = m_channelAnalyzer->getSpectrumVis();
-	m_spectrumVis->setGLSpectrum(ui->glSpectrumTop->getSpectrum());
+	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_scopeVis = m_channelAnalyzer->getScopeVis();
     m_scopeVis->setGLScope(ui->glScope);
     m_basebandSampleRate = m_channelAnalyzer->getChannelSampleRate();
@@ -557,12 +557,12 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 
 	ui->rationalDownSamplerRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
 
-	ui->glSpectrumTop->getSpectrum()->setCenterFrequency(m_basebandSampleRate/2);
-	ui->glSpectrumTop->getSpectrum()->setSampleRate(m_basebandSampleRate);
-	ui->glSpectrumTop->getSpectrum()->setDisplayWaterfall(true);
-	ui->glSpectrumTop->getSpectrum()->setDisplayMaxHold(true);
-	ui->glSpectrumTop->getSpectrum()->setSsbSpectrum(false);
-    ui->glSpectrumTop->getSpectrum()->setLsbDisplay(false);
+	ui->glSpectrum->setCenterFrequency(m_basebandSampleRate/2);
+	ui->glSpectrum->setSampleRate(m_basebandSampleRate);
+	ui->glSpectrum->setDisplayWaterfall(true);
+	ui->glSpectrum->setDisplayMaxHold(true);
+	ui->glSpectrum->setSsbSpectrum(false);
+    ui->glSpectrum->setLsbDisplay(false);
 
 	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -579,7 +579,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 
-	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrumTop->getSpectrum(), ui->glSpectrumTop);
+	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
 	m_settings.setChannelMarker(&m_channelMarker);
@@ -695,7 +695,7 @@ void ChannelAnalyzerGUI::setFiltersUIBoundaries()
 void ChannelAnalyzerGUI::blockApplySettings(bool block)
 {
     ui->glScope->blockSignals(block);
-    ui->glSpectrumTop->getSpectrum()->blockSignals(block);
+    ui->glSpectrum->blockSignals(block);
     m_doApplySettings = !block;
 }
 

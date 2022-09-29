@@ -27,20 +27,20 @@ namespace Ui {
     class SpectrumMeasurementsDialog;
 }
 
-class GLSpectrumTop;
+class GLSpectrum;
 
 class SDRGUI_API SpectrumMeasurementsDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit SpectrumMeasurementsDialog(GLSpectrumTop *glSpectrumTop, SpectrumSettings *settings, QWidget *parent = nullptr);
+    explicit SpectrumMeasurementsDialog(GLSpectrum *glSpectrum, SpectrumSettings *settings, QWidget *parent = nullptr);
     ~SpectrumMeasurementsDialog();
 
 private:
     void displaySettings();
 
     Ui::SpectrumMeasurementsDialog *ui;
-    GLSpectrumTop *m_glSpectrumTop;
+    GLSpectrum *m_glSpectrum;
     SpectrumSettings *m_settings;
 
 private slots:

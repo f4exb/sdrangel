@@ -54,7 +54,6 @@ class SDRGUI_API DeviceUISet : public QObject
     Q_OBJECT
 public:
     SpectrumVis *m_spectrumVis;
-    GLSpectrumTop *m_spectrumTop;
     GLSpectrum *m_spectrum;
     GLSpectrumGUI *m_spectrumGUI;
     MainSpectrumGUI *m_mainSpectrumGUI;

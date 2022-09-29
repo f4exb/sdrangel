@@ -899,7 +899,7 @@
      <number>2</number>
     </property>
     <item>
-     <widget class="GLSpectrumTop" name="glSpectrumTop" native="true">
+     <widget class="GLSpectrum" name="glSpectrum" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -1018,9 +1018,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>GLSpectrumTop</class>
+   <class>GLSpectrum</class>
    <extends>QWidget</extends>
-   <header>gui/glspectrumtop.h</header>
+   <header>gui/glspectrum.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

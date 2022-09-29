@@ -28,7 +28,7 @@
 #include "dsp/fftwindow.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
-#include "gui/glspectrumtop.h"
+#include "gui/glspectrumview.h"
 #include "gui/crightclickenabler.h"
 #include "gui/wsspectrumsettingsdialog.h"
 #include "gui/spectrummarkersdialog.h"
@@ -48,7 +48,6 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     ui(new Ui::GLSpectrumGUI),
     m_spectrumVis(nullptr),
     m_glSpectrum(nullptr),
-    m_glSpectrumTop(nullptr),
     m_doApplySettings(true),
     m_calibrationShiftdB(0.0)
 {
@@ -103,14 +102,13 @@ GLSpectrumGUI::~GLSpectrumGUI()
     delete ui;
 }
 
-void GLSpectrumGUI::setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum, GLSpectrumTop *glSpectrumTop)
+void GLSpectrumGUI::setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum)
 {
     m_spectrumVis = spectrumVis;
     m_glSpectrum = glSpectrum;
     m_glSpectrum->setSpectrumVis(spectrumVis);
     m_glSpectrum->setMessageQueueToGUI(&m_messageQueue);
     m_spectrumVis->setMessageQueueToGUI(&m_messageQueue);
-    m_glSpectrumTop = glSpectrumTop;
 }
 
 void GLSpectrumGUI::resetToDefaults()
@@ -849,7 +847,7 @@ void GLSpectrumGUI::setMaximumOverlap()
 
 bool GLSpectrumGUI::handleMessage(const Message& message)
 {
-    if (GLSpectrum::MsgReportSampleRate::match(message))
+    if (GLSpectrumView::MsgReportSampleRate::match(message))
     {
         setAveragingToolitp();
         setFFTSizeToolitp();
@@ -875,24 +873,24 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
         ui->wsSpectrum->blockSignals(false);
         return true;
     }
-    else if (GLSpectrum::MsgReportWaterfallShare::match(message))
+    else if (GLSpectrumView::MsgReportWaterfallShare::match(message))
     {
-        const GLSpectrum::MsgReportWaterfallShare& report = (const GLSpectrum::MsgReportWaterfallShare&) message;
+        const GLSpectrumView::MsgReportWaterfallShare& report = (const GLSpectrumView::MsgReportWaterfallShare&) message;
         m_settings.m_waterfallShare = report.getWaterfallShare();
         return true;
     }
-    else if (GLSpectrum::MsgReportFFTOverlap::match(message))
+    else if (GLSpectrumView::MsgReportFFTOverlap::match(message))
     {
-        const GLSpectrum::MsgReportFFTOverlap& report = (const GLSpectrum::MsgReportFFTOverlap&) message;
+        const GLSpectrumView::MsgReportFFTOverlap& report = (const GLSpectrumView::MsgReportFFTOverlap&) message;
         m_settings.m_fftOverlap = report.getOverlap();
         ui->fftOverlap->blockSignals(true);
         ui->fftOverlap->setValue(m_settings.m_fftOverlap);
         ui->fftOverlap->blockSignals(false);
         return true;
     }
-    else if (GLSpectrum::MsgReportPowerScale::match(message))
+    else if (GLSpectrumView::MsgReportPowerScale::match(message))
     {
-        const GLSpectrum::MsgReportPowerScale& report = (const GLSpectrum::MsgReportPowerScale&) message;
+        const GLSpectrumView::MsgReportPowerScale& report = (const GLSpectrumView::MsgReportPowerScale&) message;
         m_settings.m_refLevel = report.getRefLevel();
         m_settings.m_powerRange = report.getRange();
         ui->refLevel->blockSignals(true);
@@ -903,9 +901,9 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
         ui->refLevel->blockSignals(false);
         return true;
     }
-    else if (GLSpectrum::MsgReportCalibrationShift::match(message))
+    else if (GLSpectrumView::MsgReportCalibrationShift::match(message))
     {
-        const GLSpectrum::MsgReportCalibrationShift& report = (GLSpectrum::MsgReportCalibrationShift&) message;
+        const GLSpectrumView::MsgReportCalibrationShift& report = (GLSpectrumView::MsgReportCalibrationShift&) message;
         m_calibrationShiftdB = report.getCalibrationShiftdB();
         ui->refLevel->blockSignals(true);
         ui->refLevel->setValue(m_settings.m_refLevel + m_calibrationShiftdB);
@@ -1019,7 +1017,7 @@ void GLSpectrumGUI::updateCalibrationPoints()
 void GLSpectrumGUI::on_measure_clicked(bool checked)
 {
     SpectrumMeasurementsDialog measurementsDialog(
-        m_glSpectrumTop,
+        m_glSpectrum,
         &m_settings,
         this
     );
@@ -1031,14 +1029,10 @@ void GLSpectrumGUI::on_measure_clicked(bool checked)
 
 void GLSpectrumGUI::updateMeasurements()
 {
-    if (m_glSpectrumTop)
-    {
-        m_glSpectrumTop->setMeasurementsVisible(m_settings.m_measurement != SpectrumSettings::MeasurementNone);
-        m_glSpectrumTop->setMeasurementsPosition(m_settings.m_measurementsPosition);
-    }
-
     if (m_glSpectrum)
     {
+        m_glSpectrum->setMeasurementsVisible(m_settings.m_measurement != SpectrumSettings::MeasurementNone);
+        m_glSpectrum->setMeasurementsPosition(m_settings.m_measurementsPosition);
         m_glSpectrum->setMeasurementParams(
             m_settings.m_measurement,
             m_settings.m_measurementCenterFrequencyOffset,

@@ -26,7 +26,6 @@
 #include "export.h"
 
 class GLSpectrum;
-class GLSpectrumTop;
 class GLSpectrumGUI;
 class QLabel;
 class QPushButton;
@@ -45,7 +44,7 @@ public:
         DeviceMIMO
     };
 
-	MainSpectrumGUI(GLSpectrumTop *spectrumTop, GLSpectrum *spectrum, GLSpectrumGUI *spectrumGUI, QWidget *parent = nullptr);
+	MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGUI, QWidget *parent = nullptr);
 	virtual ~MainSpectrumGUI();
 
     void setDeviceType(DeviceType type);
@@ -61,7 +60,6 @@ public:
     const QByteArray& getGeometryBytes() const { return m_geometryBytes; }
 
 private:
-    GLSpectrumTop *m_spectrumTop;
     GLSpectrum *m_spectrum;
     GLSpectrumGUI *m_spectrumGUI;
     int m_workspaceIndex;

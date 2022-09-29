@@ -23,14 +23,14 @@
 #include "util/csv.h"
 #include "spectrummeasurementsdialog.h"
 #include "spectrummeasurements.h"
-#include "glspectrumtop.h"
+#include "glspectrum.h"
 
 #include "ui_spectrummeasurementsdialog.h"
 
-SpectrumMeasurementsDialog::SpectrumMeasurementsDialog(GLSpectrumTop *glSpectrumTop, SpectrumSettings *settings, QWidget *parent) :
+SpectrumMeasurementsDialog::SpectrumMeasurementsDialog(GLSpectrum *glSpectrum, SpectrumSettings *settings, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SpectrumMeasurementsDialog),
-    m_glSpectrumTop(glSpectrumTop),
+    m_glSpectrum(glSpectrum),
     m_settings(settings)
 {
     ui->setupUi(this);
@@ -131,8 +131,8 @@ void SpectrumMeasurementsDialog::on_resetMeasurements_clicked(bool checked)
 {
     (void) checked;
 
-    if (m_glSpectrumTop) {
-        m_glSpectrumTop->getMeasurements()->reset();
+    if (m_glSpectrum) {
+        m_glSpectrum->getMeasurements()->reset();
     }
 }
 

@@ -36,7 +36,6 @@ namespace Ui {
 
 class SpectrumVis;
 class GLSpectrum;
-class GLSpectrumTop;
 
 class SDRGUI_API GLSpectrumGUI : public QWidget, public Serializable {
 	Q_OBJECT
@@ -53,7 +52,7 @@ public:
 	explicit GLSpectrumGUI(QWidget* parent = NULL);
 	~GLSpectrumGUI();
 
-	void setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum, GLSpectrumTop *glSpectrumTop = nullptr);
+	void setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum);
     void setFFTSize(int log2FFTSize);
 
 	void resetToDefaults();
@@ -68,7 +67,6 @@ private:
 
 	SpectrumVis* m_spectrumVis;
 	GLSpectrum* m_glSpectrum;
-    GLSpectrumTop* m_glSpectrumTop;
 	MessageQueue m_messageQueue;
     SpectrumSettings m_settings;
     bool m_doApplySettings;
