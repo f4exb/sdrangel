@@ -36,6 +36,7 @@ namespace Ui {
 
 class SpectrumVis;
 class GLSpectrum;
+class SpectrumMarkersDialog;
 
 class SDRGUI_API GLSpectrumGUI : public QWidget, public Serializable {
 	Q_OBJECT
@@ -72,6 +73,7 @@ private:
     bool m_doApplySettings;
 	Real m_calibrationShiftdB;
     static const int m_fpsMs[];
+    SpectrumMarkersDialog *m_markersDialog;
 
     void blockApplySettings(bool block);
 	void applySettings();
@@ -135,6 +137,7 @@ private slots:
 	void updateMarkersDisplay();
 	void updateCalibrationPoints();
     void updateMeasurements();
+    void closeMarkersDialog();
 
 signals:
     // Emitted when user selects an annotation marker

@@ -49,7 +49,8 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     m_spectrumVis(nullptr),
     m_glSpectrum(nullptr),
     m_doApplySettings(true),
-    m_calibrationShiftdB(0.0)
+    m_calibrationShiftdB(0.0),
+    m_markersDialog(nullptr)
 {
     ui->setupUi(this);
 
@@ -99,6 +100,10 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 
 GLSpectrumGUI::~GLSpectrumGUI()
 {
+    if (m_markersDialog) {
+        delete m_markersDialog;
+    }
+
     delete ui;
 }
 
@@ -447,11 +452,11 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
 {
     (void) checked;
 
-    if (!m_glSpectrum) {
+    if (!m_glSpectrum || m_markersDialog) {
         return;
     }
 
-    SpectrumMarkersDialog markersDialog(
+    m_markersDialog = new SpectrumMarkersDialog(
         m_glSpectrum->getHistogramMarkers(),
         m_glSpectrum->getWaterfallMarkers(),
         m_glSpectrum->getAnnotationMarkers(),
@@ -460,17 +465,21 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
         this
     );
 
-    markersDialog.setCenterFrequency(m_glSpectrum->getCenterFrequency());
-    markersDialog.setPower(m_glSpectrum->getPowerMax() / 2.0f);
-    markersDialog.setTime(m_glSpectrum->getTimeMax() / 2.0f);
+    m_markersDialog->setCenterFrequency(m_glSpectrum->getCenterFrequency());
+    m_markersDialog->setPower(m_glSpectrum->getPowerMax() / 2.0f);
+    m_markersDialog->setTime(m_glSpectrum->getTimeMax() / 2.0f);
 
-    connect(&markersDialog, SIGNAL(updateHistogram()), this, SLOT(updateHistogramMarkers()));
-    connect(&markersDialog, SIGNAL(updateWaterfall()), this, SLOT(updateWaterfallMarkers()));
-    connect(&markersDialog, SIGNAL(updateAnnotations()), this, SLOT(updateAnnotationMarkers()));
-    connect(&markersDialog, SIGNAL(updateMarkersDisplay()), this, SLOT(updateMarkersDisplay()));
+    connect(m_markersDialog, SIGNAL(updateHistogram()), this, SLOT(updateHistogramMarkers()));
+    connect(m_markersDialog, SIGNAL(updateWaterfall()), this, SLOT(updateWaterfallMarkers()));
+    connect(m_markersDialog, SIGNAL(updateAnnotations()), this, SLOT(updateAnnotationMarkers()));
+    connect(m_markersDialog, SIGNAL(updateMarkersDisplay()), this, SLOT(updateMarkersDisplay()));
+    connect(m_markersDialog, SIGNAL(finished(int)), this, SLOT(closeMarkersDialog()));
 
-    markersDialog.exec();
+    m_markersDialog->show();
+}
 
+void GLSpectrumGUI::closeMarkersDialog()
+{
     m_settings.m_histogramMarkers = m_glSpectrum->getHistogramMarkers();
     m_settings.m_waterfallMarkers = m_glSpectrum->getWaterfallMarkers();
     m_settings.m_annoationMarkers = m_glSpectrum->getAnnotationMarkers();
@@ -478,6 +487,9 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
 
     displayGotoMarkers();
     applySettings();
+
+    delete m_markersDialog;
+    m_markersDialog = nullptr;
 }
 
 // Save spectrum data to a CSV file
