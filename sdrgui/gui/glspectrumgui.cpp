@@ -28,10 +28,13 @@
 #include "dsp/fftwindow.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
+#include "gui/glspectrumview.h"
 #include "gui/crightclickenabler.h"
 #include "gui/wsspectrumsettingsdialog.h"
 #include "gui/spectrummarkersdialog.h"
 #include "gui/spectrumcalibrationpointsdialog.h"
+#include "gui/spectrummeasurementsdialog.h"
+#include "gui/spectrummeasurements.h"
 #include "gui/flowlayout.h"
 #include "util/colormap.h"
 #include "util/simpleserializer.h"
@@ -51,7 +54,6 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     ui->setupUi(this);
 
     // Use the custom flow layout for the 3 main horizontal layouts (lines)
-    ui->verticalLayout->removeItem(ui->Line7Layout);
     ui->verticalLayout->removeItem(ui->Line6Layout);
     ui->verticalLayout->removeItem(ui->Line5Layout);
     ui->verticalLayout->removeItem(ui->Line4Layout);
@@ -65,11 +67,10 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     flowLayout->addItem(ui->Line4Layout);
     flowLayout->addItem(ui->Line5Layout);
     flowLayout->addItem(ui->Line6Layout);
-    flowLayout->addItem(ui->Line7Layout);
     ui->verticalLayout->addItem(flowLayout);
 
     on_linscale_toggled(false);
-    on_measurement_currentIndexChanged(0);
+    //displayMeasurementGUI();
 
     QString levelStyle = QString(
         "QSpinBox {background-color: rgb(79, 79, 79);}"
@@ -229,18 +230,13 @@ void GLSpectrumGUI::displaySettings()
     ui->calibration->setChecked(m_settings.m_useCalibration);
     displayGotoMarkers();
 
-    ui->measurement->setCurrentIndex((int) m_settings.m_measurement);
-    ui->highlight->setChecked(m_settings.m_measurementHighlight);
-    ui->bandwidth->setValue(m_settings.m_measurementBandwidth);
-    ui->chSpacing->setValue(m_settings.m_measurementChSpacing);
-    ui->adjChBandwidth->setValue(m_settings.m_measurementAdjChBandwidth);
-    ui->harmonics->setValue(m_settings.m_measurementHarmonics);
-
     ui->fftWindow->blockSignals(false);
     ui->averaging->blockSignals(false);
     ui->averagingMode->blockSignals(false);
     ui->linscale->blockSignals(false);
     blockApplySettings(false);
+
+    updateMeasurements();
 }
 
 void GLSpectrumGUI::displayGotoMarkers()
@@ -342,15 +338,6 @@ void GLSpectrumGUI::applySpectrumSettings()
     m_glSpectrum->setMarkersDisplay(m_settings.m_markersDisplay);
     m_glSpectrum->setCalibrationPoints(m_settings.m_calibrationPoints);
     m_glSpectrum->setCalibrationInterpMode(m_settings.m_calibrationInterpMode);
-
-    m_glSpectrum->setMeasurementParams(
-        m_settings.m_measurement,
-        m_settings.m_measurementBandwidth,
-        m_settings.m_measurementChSpacing,
-        m_settings.m_measurementAdjChBandwidth,
-        m_settings.m_measurementHarmonics,
-        m_settings.m_measurementHighlight
-        );
 }
 
 void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
@@ -860,7 +847,7 @@ void GLSpectrumGUI::setMaximumOverlap()
 
 bool GLSpectrumGUI::handleMessage(const Message& message)
 {
-    if (GLSpectrum::MsgReportSampleRate::match(message))
+    if (GLSpectrumView::MsgReportSampleRate::match(message))
     {
         setAveragingToolitp();
         setFFTSizeToolitp();
@@ -886,24 +873,24 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
         ui->wsSpectrum->blockSignals(false);
         return true;
     }
-    else if (GLSpectrum::MsgReportWaterfallShare::match(message))
+    else if (GLSpectrumView::MsgReportWaterfallShare::match(message))
     {
-        const GLSpectrum::MsgReportWaterfallShare& report = (const GLSpectrum::MsgReportWaterfallShare&) message;
+        const GLSpectrumView::MsgReportWaterfallShare& report = (const GLSpectrumView::MsgReportWaterfallShare&) message;
         m_settings.m_waterfallShare = report.getWaterfallShare();
         return true;
     }
-    else if (GLSpectrum::MsgReportFFTOverlap::match(message))
+    else if (GLSpectrumView::MsgReportFFTOverlap::match(message))
     {
-        const GLSpectrum::MsgReportFFTOverlap& report = (const GLSpectrum::MsgReportFFTOverlap&) message;
+        const GLSpectrumView::MsgReportFFTOverlap& report = (const GLSpectrumView::MsgReportFFTOverlap&) message;
         m_settings.m_fftOverlap = report.getOverlap();
         ui->fftOverlap->blockSignals(true);
         ui->fftOverlap->setValue(m_settings.m_fftOverlap);
         ui->fftOverlap->blockSignals(false);
         return true;
     }
-    else if (GLSpectrum::MsgReportPowerScale::match(message))
+    else if (GLSpectrumView::MsgReportPowerScale::match(message))
     {
-        const GLSpectrum::MsgReportPowerScale& report = (const GLSpectrum::MsgReportPowerScale&) message;
+        const GLSpectrumView::MsgReportPowerScale& report = (const GLSpectrumView::MsgReportPowerScale&) message;
         m_settings.m_refLevel = report.getRefLevel();
         m_settings.m_powerRange = report.getRange();
         ui->refLevel->blockSignals(true);
@@ -914,9 +901,9 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
         ui->refLevel->blockSignals(false);
         return true;
     }
-    else if (GLSpectrum::MsgReportCalibrationShift::match(message))
+    else if (GLSpectrumView::MsgReportCalibrationShift::match(message))
     {
-        const GLSpectrum::MsgReportCalibrationShift& report = (GLSpectrum::MsgReportCalibrationShift&) message;
+        const GLSpectrumView::MsgReportCalibrationShift& report = (GLSpectrumView::MsgReportCalibrationShift&) message;
         m_calibrationShiftdB = report.getCalibrationShiftdB();
         ui->refLevel->blockSignals(true);
         ui->refLevel->setValue(m_settings.m_refLevel + m_calibrationShiftdB);
@@ -1027,58 +1014,35 @@ void GLSpectrumGUI::updateCalibrationPoints()
     }
 }
 
-void GLSpectrumGUI::on_measurement_currentIndexChanged(int index)
+void GLSpectrumGUI::on_measure_clicked(bool checked)
 {
-    m_settings.m_measurement = (SpectrumSettings::Measurement)index;
+    SpectrumMeasurementsDialog measurementsDialog(
+        m_glSpectrum,
+        &m_settings,
+        this
+    );
 
-    bool highlight = (m_settings.m_measurement >= SpectrumSettings::MeasurementChannelPower);
-    ui->highlight->setVisible(highlight);
+    connect(&measurementsDialog, &SpectrumMeasurementsDialog::updateMeasurements, this, &GLSpectrumGUI::updateMeasurements);
 
-    bool bw = (m_settings.m_measurement == SpectrumSettings::MeasurementChannelPower)
-               || (m_settings.m_measurement == SpectrumSettings::MeasurementAdjacentChannelPower);
-    ui->bandwidthLabel->setVisible(bw);
-    ui->bandwidth->setVisible(bw);
-
-    bool adj = m_settings.m_measurement == SpectrumSettings::MeasurementAdjacentChannelPower;
-    ui->chSpacingLabel->setVisible(adj);
-    ui->chSpacing->setVisible(adj);
-    ui->adjChBandwidthLabel->setVisible(adj);
-    ui->adjChBandwidth->setVisible(adj);
-
-    bool harmonics = (m_settings.m_measurement >= SpectrumSettings::MeasurementSNR)
-                    && (m_settings.m_measurement <= SpectrumSettings::MeasurementSINAD);
-    ui->harmonicsLabel->setVisible(harmonics);
-    ui->harmonics->setVisible(harmonics);
-
-    applySettings();
+    measurementsDialog.exec();
 }
 
-void GLSpectrumGUI::on_highlight_toggled(bool checked)
+void GLSpectrumGUI::updateMeasurements()
 {
-    m_settings.m_measurementHighlight = checked;
-    applySettings();
-}
-
-void GLSpectrumGUI::on_bandwidth_valueChanged(int value)
-{
-    m_settings.m_measurementBandwidth = value;
-    applySettings();
-}
-
-void GLSpectrumGUI::on_chSpacing_valueChanged(int value)
-{
-    m_settings.m_measurementChSpacing = value;
-    applySettings();
-}
-
-void GLSpectrumGUI::on_adjChBandwidth_valueChanged(int value)
-{
-    m_settings.m_measurementAdjChBandwidth = value;
-    applySettings();
-}
-
-void GLSpectrumGUI::on_harmonics_valueChanged(int value)
-{
-    m_settings.m_measurementHarmonics = value;
-    applySettings();
+    if (m_glSpectrum)
+    {
+        m_glSpectrum->setMeasurementsVisible(m_settings.m_measurement != SpectrumSettings::MeasurementNone);
+        m_glSpectrum->setMeasurementsPosition(m_settings.m_measurementsPosition);
+        m_glSpectrum->setMeasurementParams(
+            m_settings.m_measurement,
+            m_settings.m_measurementCenterFrequencyOffset,
+            m_settings.m_measurementBandwidth,
+            m_settings.m_measurementChSpacing,
+            m_settings.m_measurementAdjChBandwidth,
+            m_settings.m_measurementHarmonics,
+            m_settings.m_measurementPeaks,
+            m_settings.m_measurementHighlight,
+            m_settings.m_measurementPrecision
+            );
+    }
 }

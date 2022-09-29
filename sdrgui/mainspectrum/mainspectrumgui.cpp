@@ -141,7 +141,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
 
-    connect(spectrum, &GLSpectrum::requestCenterFrequency, this, &MainSpectrumGUI::onRequestCenterFrequency);
+    connect(spectrum->getSpectrumView(), &GLSpectrumView::requestCenterFrequency, this, &MainSpectrumGUI::onRequestCenterFrequency);
     connect(spectrumGUI, &GLSpectrumGUI::requestCenterFrequency, this, &MainSpectrumGUI::onRequestCenterFrequency);
 
     m_resizer.enableChildMouseTracking();

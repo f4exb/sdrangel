@@ -123,12 +123,7 @@ private slots:
 	void on_calibration_toggled(bool checked);
     void on_gotoMarker_currentIndexChanged(int index);
 
-    void on_measurement_currentIndexChanged(int index);
-    void on_highlight_toggled(bool checked);
-    void on_bandwidth_valueChanged(int value);
-    void on_chSpacing_valueChanged(int value);
-    void on_adjChBandwidth_valueChanged(int value);
-    void on_harmonics_valueChanged(int value);
+    void on_measure_clicked(bool checked);
 
 	void handleInputMessages();
     void openWebsocketSpectrumSettingsDialog(const QPoint& p);
@@ -139,6 +134,7 @@ private slots:
 	void updateAnnotationMarkers();
 	void updateMarkersDisplay();
 	void updateCalibrationPoints();
+    void updateMeasurements();
 
 signals:
     // Emitted when user selects an annotation marker

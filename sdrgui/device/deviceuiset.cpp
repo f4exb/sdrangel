@@ -23,6 +23,7 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "gui/glspectrum.h"
+#include "gui/glspectrumview.h"
 #include "gui/glspectrumgui.h"
 // #include "gui/channelwindow.h"
 #include "gui/workspace.h"
@@ -42,7 +43,7 @@
 
 DeviceUISet::DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet)
 {
-    m_spectrum = new GLSpectrum;
+    m_spectrum = new GLSpectrum();
     m_spectrum->setIsDeviceSpectrum(true);
     m_spectrumVis = deviceSet->m_spectrumVis;
     m_spectrumVis->setGLSpectrum(m_spectrum);
