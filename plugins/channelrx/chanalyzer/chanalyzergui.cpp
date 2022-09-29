@@ -23,7 +23,6 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "gui/glspectrum.h"
-#include "gui/glspectrumview.h"
 #include "gui/glscope.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "plugin/pluginapi.h"

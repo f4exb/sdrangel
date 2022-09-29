@@ -26,7 +26,6 @@
 
 class SpectrumVis;
 class GLSpectrum;
-class GLSpectrumTop;
 class GLSpectrumGUI;
 class MainSpectrumGUI;
 // class ChannelWindow;
