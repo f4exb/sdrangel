@@ -1100,7 +1100,7 @@
        </property>
        <property name="icon">
         <iconset resource="../resources/res.qrc">
-         <normaloff>:/ruler.png</normaloff>:/ruler.png</iconset>
+         <normaloff>:/caliper.png</normaloff>:/caliper.png</iconset>
        </property>
        <property name="checkable">
         <bool>true</bool>
