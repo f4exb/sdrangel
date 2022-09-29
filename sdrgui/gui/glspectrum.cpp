@@ -111,14 +111,15 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_openGLLogger(nullptr),
     m_isDeviceSpectrum(false),
     m_measurements(nullptr),
-    m_measure(false),
-    m_measurement(SpectrumSettings::MeasurementPeaks),
+    m_measurement(SpectrumSettings::MeasurementNone),
+    m_measurementCenterFrequencyOffset(0),
     m_measurementBandwidth(10000),
     m_measurementChSpacing(10000),
     m_measurementAdjChBandwidth(10000),
     m_measurementHarmonics(5),
     m_measurementPeaks(5),
-    m_measurementHighlight(true)
+    m_measurementHighlight(true),
+    m_measurementPrecision(1)
 {
     // Enable multisampling anti-aliasing (MSAA)
     int multisamples = MainCore::instance()->getSettings().getMultisampling();
@@ -495,22 +496,23 @@ void GLSpectrum::setUseCalibration(bool useCalibration)
     update();
 }
 
-void GLSpectrum::setMeasurementParams(bool measure, SpectrumSettings::Measurement measurement,
-                                      int bandwidth, int chSpacing, int adjChBandwidth,
-                                      int harmonics, int peaks, bool highlight)
+void GLSpectrum::setMeasurementParams(SpectrumSettings::Measurement measurement,
+                                      int centerFrequencyOffset, int bandwidth, int chSpacing, int adjChBandwidth,
+                                      int harmonics, int peaks, bool highlight, int precision)
 {
     m_mutex.lock();
-    m_measure = measure;
     m_measurement = measurement;
+    m_measurementCenterFrequencyOffset = centerFrequencyOffset;
     m_measurementBandwidth = bandwidth;
     m_measurementChSpacing = chSpacing;
     m_measurementAdjChBandwidth = adjChBandwidth;
     m_measurementHarmonics = harmonics;
     m_measurementPeaks = peaks;
     m_measurementHighlight = highlight;
+    m_measurementPrecision = precision;
     m_changesPending = true;
     if (m_measurements) {
-        m_measurements->setMeasurementParams(measurement, peaks);
+        m_measurements->setMeasurementParams(measurement, peaks, precision);
     }
     m_mutex.unlock();
     update();
@@ -1681,7 +1683,7 @@ void GLSpectrum::paintGL()
         m_glShaderInfo.drawSurface(m_glInfoBoxMatrix, tex1, vtx1, 4);
     }
 
-    if (m_currentSpectrum && m_measure)
+    if (m_currentSpectrum)
     {
         switch (m_measurement)
         {
@@ -2133,12 +2135,12 @@ void GLSpectrum::measureChannelPower()
 {
     float power;
 
-    power = calcChannelPower(m_centerFrequency, m_measurementBandwidth);
+    power = calcChannelPower(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth);
     if (m_measurements) {
         m_measurements->setChannelPower(power);
     }
     if (m_measurementHighlight) {
-        drawBandwidthMarkers(m_centerFrequency, m_measurementBandwidth, m_measurementLightMarkerColor);
+        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth, m_measurementLightMarkerColor);
     }
 }
 
@@ -2147,9 +2149,9 @@ void GLSpectrum::measureAdjacentChannelPower()
 {
     float power, powerLeft, powerRight;
 
-    power = calcChannelPower(m_centerFrequency, m_measurementBandwidth);
-    powerLeft = calcChannelPower(m_centerFrequency - m_measurementChSpacing, m_measurementAdjChBandwidth);
-    powerRight = calcChannelPower(m_centerFrequency + m_measurementChSpacing, m_measurementAdjChBandwidth);
+    power = calcChannelPower(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth);
+    powerLeft = calcChannelPower(m_centerFrequency + m_measurementCenterFrequencyOffset - m_measurementChSpacing, m_measurementAdjChBandwidth);
+    powerRight = calcChannelPower(m_centerFrequency + m_measurementCenterFrequencyOffset + m_measurementChSpacing, m_measurementAdjChBandwidth);
 
     float leftDiff = powerLeft - power;
     float rightDiff = powerRight - power;
@@ -2160,9 +2162,9 @@ void GLSpectrum::measureAdjacentChannelPower()
 
     if (m_measurementHighlight)
     {
-        drawBandwidthMarkers(m_centerFrequency, m_measurementBandwidth, m_measurementLightMarkerColor);
-        drawBandwidthMarkers(m_centerFrequency - m_measurementChSpacing, m_measurementAdjChBandwidth, m_measurementDarkMarkerColor);
-        drawBandwidthMarkers(m_centerFrequency + m_measurementChSpacing, m_measurementAdjChBandwidth, m_measurementDarkMarkerColor);
+        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth, m_measurementLightMarkerColor);
+        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset - m_measurementChSpacing, m_measurementAdjChBandwidth, m_measurementDarkMarkerColor);
+        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset + m_measurementChSpacing, m_measurementAdjChBandwidth, m_measurementDarkMarkerColor);
     }
 }
 

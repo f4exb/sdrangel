@@ -83,7 +83,7 @@ class SDRGUI_API SpectrumMeasurements : public QWidget {
 
 public:
     SpectrumMeasurements(QWidget *parent = nullptr);
-    void setMeasurementParams(SpectrumSettings::Measurement measurement, int peaks);
+    void setMeasurementParams(SpectrumSettings::Measurement measurement, int peaks, int precision);
     void setSNR(float snr, float snfr, float thd, float thdpn, float sinad);
     void setSFDR(float sfdr);
     void setChannelPower(float power);
@@ -111,6 +111,7 @@ private:
     bool checkSpec(const QString &spec, double value) const;
 
     SpectrumSettings::Measurement m_measurement;
+    int m_precision;
 
     QTableWidget *m_table;
     QMenu *m_rowMenu;

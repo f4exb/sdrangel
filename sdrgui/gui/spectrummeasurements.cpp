@@ -168,6 +168,7 @@ const QStringList SpectrumMeasurements::m_tooltips = {
 SpectrumMeasurements::SpectrumMeasurements(QWidget *parent) :
     QWidget(parent),
     m_measurement(SpectrumSettings::MeasurementPeaks),
+    m_precision(1),
     m_table(nullptr),
     m_peakTable(nullptr)
 {
@@ -218,7 +219,7 @@ void SpectrumMeasurements::createMeasurementsTable(const QStringList &rows, cons
             if (j < COL_COUNT)
             {
                 item->setData(UnitsDelegate::UNITS_ROLE, units[i]);
-                item->setData(UnitsDelegate::PRECISION_ROLE, 1);
+                item->setData(UnitsDelegate::PRECISION_ROLE, m_precision);
             }
             else if (j == COL_SPEC)
             {
@@ -261,7 +262,7 @@ void SpectrumMeasurements::createPeakTable(int peaks)
                 item->setData(UnitsDelegate::UNITS_ROLE, "Hz");
             } else if (j == COL_POWER) {
                 item->setData(UnitsDelegate::UNITS_ROLE, " dB");
-                item->setData(UnitsDelegate::PRECISION_ROLE, 1);
+                item->setData(UnitsDelegate::PRECISION_ROLE, m_precision);
             }
             m_peakTable->setItem(i, j, item);
         }
@@ -453,9 +454,10 @@ void SpectrumMeasurements::resizePeakTable()
     m_peakTable->removeRow(row);
 }
 
-void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement measurement, int peaks)
+void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement measurement, int peaks, int precision)
 {
-    if (    (measurement != m_measurement)
+    if (   (measurement != m_measurement)
+        || (m_precision != precision)
         || ((m_peakTable == nullptr) && (m_table == nullptr))
         || ((m_peakTable != nullptr) && (peaks != m_peakTable->rowCount()))
        )
@@ -467,6 +469,7 @@ void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement me
         m_table = nullptr;
 
         m_measurement = measurement;
+        m_precision = precision;
 
         switch (measurement)
         {

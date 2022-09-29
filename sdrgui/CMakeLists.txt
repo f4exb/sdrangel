@@ -70,6 +70,7 @@ set(sdrgui_SOURCES
     gui/sdrangelsplash.cpp
     gui/spectrumcalibrationpointsdialog.cpp
     gui/spectrummarkersdialog.cpp
+    gui/spectrummeasurementsdialog.cpp
     gui/spectrummeasurements.cpp
     gui/tickedslider.cpp
     gui/timedelegate.cpp
@@ -176,6 +177,7 @@ set(sdrgui_HEADERS
     gui/sdrangelsplash.h
     gui/spectrumcalibrationpointsdialog.h
     gui/spectrummarkersdialog.h
+    gui/spectrummeasurementsdialog.h
     gui/spectrummeasurements.h
     gui/tickedslider.h
     gui/timedelegate.h
@@ -243,6 +245,7 @@ set(sdrgui_FORMS
     gui/samplingdevicecontrol.ui
     gui/samplingdevicedialog.ui
     gui/spectrummarkersdialog.ui
+    gui/spectrummeasurementsdialog.ui
     gui/spectrumcalibrationpointsdialog.ui
     gui/myposdialog.ui
     gui/transverterdialog.ui

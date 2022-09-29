@@ -15,33 +15,49 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_GLSPECTRUMTOP_H_
-#define SDRGUI_GLSPECTRUMTOP_H_
+#ifndef SDRBASE_GUI_SPECTRUMMEASUREMENTSDIALOG_H_
+#define SDRBASE_GUI_SPECTRUMMEASUREMENTSDIALOG_H_
 
-#include <QWidget>
+#include <QDialog>
 
+#include "dsp/spectrumsettings.h"
 #include "export.h"
 
-class QSplitter;
-class GLSpectrum;
-class SpectrumMeasurements;
+namespace Ui {
+    class SpectrumMeasurementsDialog;
+}
 
-// Combines GLSpectrum in a QMainWindow with SpectrumMeasurements in a QDockWidget
-class SDRGUI_API GLSpectrumTop : public QWidget {
+class GLSpectrumTop;
+
+class SDRGUI_API SpectrumMeasurementsDialog : public QDialog {
     Q_OBJECT
 
 public:
-    GLSpectrumTop(QWidget *parent = nullptr);
-    GLSpectrum *getSpectrum() const { return m_spectrum; }
-    SpectrumMeasurements *getMeasurements() const { return m_measurements; }
-    void setMeasurementsVisible(bool visible);
-    void setMeasurementsPosition(SpectrumSettings::MeasurementsPosition position);
+    explicit SpectrumMeasurementsDialog(GLSpectrumTop *glSpectrumTop, SpectrumSettings *settings, QWidget *parent = nullptr);
+    ~SpectrumMeasurementsDialog();
 
 private:
-    QSplitter *m_splitter;
-    GLSpectrum *m_spectrum;
-    SpectrumMeasurements *m_measurements;
+    void displaySettings();
 
+    Ui::SpectrumMeasurementsDialog *ui;
+    GLSpectrumTop *m_glSpectrumTop;
+    SpectrumSettings *m_settings;
+
+private slots:
+    void on_measurement_currentIndexChanged(int index);
+    void on_precision_valueChanged(int value);
+    void on_position_currentIndexChanged(int index);
+    void on_highlight_toggled(bool checked);
+    void on_resetMeasurements_clicked(bool checked);
+    void on_centerFrequencyOffset_changed(qint64 value);
+    void on_bandwidth_changed(qint64 value);
+    void on_chSpacing_changed(qint64 value);
+    void on_adjChBandwidth_changed(qint64 value);
+    void on_harmonics_valueChanged(int value);
+    void on_peaks_valueChanged(int value);
+
+signals:
+    void updateMeasurements();
 };
 
-#endif // SDRGUI_GLSPECTRUMTOP_H_
+#endif // SDRBASE_GUI_SPECTRUMMEASUREMENTSDIALOG_H_

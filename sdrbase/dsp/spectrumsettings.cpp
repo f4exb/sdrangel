@@ -68,14 +68,16 @@ void SpectrumSettings::resetToDefaults()
     m_3DSpectrogramStyle = Outline;
     m_colorMap = "Angel";
     m_spectrumStyle = Line;
-    m_measure = false;
-    m_measurement = MeasurementPeaks;
+    m_measurement = MeasurementNone;
+    m_measurementCenterFrequencyOffset = 0;
     m_measurementBandwidth = 10000;
     m_measurementChSpacing = 10000;
     m_measurementAdjChBandwidth = 10000;
     m_measurementHarmonics = 5;
-    m_measurementHighlight = true;
     m_measurementPeaks = 5;
+    m_measurementHighlight = true;
+    m_measurementsPosition = PositionBelow;
+    m_measurementPrecision = 1;
 }
 
 QByteArray SpectrumSettings::serialize() const
@@ -123,7 +125,9 @@ QByteArray SpectrumSettings::serialize() const
     // 41, 42 used below
     s.writeBool(42, m_measurementHighlight);
     s.writeS32(43, m_measurementPeaks);
-    s.writeBool(44, m_measure);
+    s.writeS32(44, (int)m_measurementsPosition);
+    s.writeS32(45, m_measurementPrecision);
+    s.writeS32(46, m_measurementCenterFrequencyOffset);
     s.writeS32(100, m_histogramMarkers.size());
 
 	for (int i = 0; i < m_histogramMarkers.size(); i++) {
@@ -225,14 +229,16 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
         d.readS32(32, (int*)&m_3DSpectrogramStyle, (int)Outline);
         d.readString(33, &m_colorMap, "Angel");
         d.readS32(34, (int*)&m_spectrumStyle, (int)Line);
-        d.readS32(35, (int*)&m_measurement, (int)MeasurementPeaks);
+        d.readS32(35, (int*)&m_measurement, (int)MeasurementNone);
         d.readS32(36, &m_measurementBandwidth, 10000);
         d.readS32(37, &m_measurementChSpacing, 10000);
         d.readS32(38, &m_measurementAdjChBandwidth, 10000);
         d.readS32(39, &m_measurementHarmonics, 5);
         d.readBool(42, &m_measurementHighlight, true);
         d.readS32(43, &m_measurementPeaks, 5);
-        d.readBool(44, &m_measure, false);
+        d.readS32(44, (int*)&m_measurementsPosition, (int)PositionBelow);
+        d.readS32(45, &m_measurementPrecision, 1);
+        d.readS32(46, &m_measurementCenterFrequencyOffset, 0);
 
 		int histogramMarkersSize;
 		d.readS32(100, &histogramMarkersSize, 0);

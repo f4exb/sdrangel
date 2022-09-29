@@ -163,9 +163,9 @@ public:
     void setLinear(bool linear);
     void setUseCalibration(bool useCalibration);
     void setMeasurements(SpectrumMeasurements *measurements) { m_measurements = measurements; }
-    void setMeasurementParams(bool measure, SpectrumSettings::Measurement measurement,
-                              int bandwidth, int chSpacing, int adjChBandwidth,
-                              int harmonics, int peaks, bool highlight);
+    void setMeasurementParams(SpectrumSettings::Measurement measurement,
+                              int centerFrequencyOffset, int bandwidth, int chSpacing, int adjChBandwidth,
+                              int harmonics, int peaks, bool highlight, int precision);
     qint32 getSampleRate() const { return m_sampleRate; }
 
     void addChannelMarker(ChannelMarker* channelMarker);
@@ -378,14 +378,15 @@ private:
     bool m_isDeviceSpectrum;
 
     SpectrumMeasurements *m_measurements;
-    bool m_measure;
     SpectrumSettings::Measurement m_measurement;
+    int m_measurementCenterFrequencyOffset;
     int m_measurementBandwidth;
     int m_measurementChSpacing;
     int m_measurementAdjChBandwidth;
     int m_measurementHarmonics;
     int m_measurementPeaks;
     bool m_measurementHighlight;
+    int m_measurementPrecision;
     static const QVector4D m_measurementLightMarkerColor;
     static const QVector4D m_measurementDarkMarkerColor;
 

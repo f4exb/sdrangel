@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>630</width>
-    <height>274</height>
+    <height>228</height>
    </rect>
   </property>
   <property name="font">
@@ -1074,16 +1074,22 @@
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="measure">
+      <widget class="QPushButton" name="measure">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="toolTip">
-        <string>Display measurements</string>
+        <string>Open spectrum measurements dialog</string>
        </property>
        <property name="icon">
         <iconset resource="../resources/res.qrc">
          <normaloff>:/ruler.png</normaloff>:/ruler.png</iconset>
        </property>
        <property name="checkable">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -1141,192 +1147,6 @@
        </property>
        <property name="text">
         <string/>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="Line7Layout">
-     <item>
-      <widget class="QComboBox" name="measurement">
-       <property name="toolTip">
-        <string>Measurement</string>
-       </property>
-       <property name="currentIndex">
-        <number>-1</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>Peaks</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Ch Power</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Adj Ch</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>SNR</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="ButtonSwitch" name="highlight">
-       <property name="toolTip">
-        <string>Highlight measurement</string>
-       </property>
-       <property name="text">
-        <string>Max Hold</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/carrier.png</normaloff>:/carrier.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="resetMeasurements">
-       <property name="toolTip">
-        <string>Reset measurements</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="bandwidthLabel">
-       <property name="text">
-        <string>B/W</string>
-       </property>
-       <property name="margin">
-        <number>2</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="bandwidth">
-       <property name="toolTip">
-        <string>Measurement bandwidth (Hz)</string>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>100000000</number>
-       </property>
-       <property name="singleStep">
-        <number>1000</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="chSpacingLabel">
-       <property name="text">
-        <string>Spacing</string>
-       </property>
-       <property name="margin">
-        <number>2</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="chSpacing">
-       <property name="toolTip">
-        <string>Channel spacing (Hz)</string>
-       </property>
-       <property name="maximum">
-        <number>100000000</number>
-       </property>
-       <property name="singleStep">
-        <number>1000</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="adjChBandwidthLabel">
-       <property name="text">
-        <string>Adj. Ch. B/W</string>
-       </property>
-       <property name="margin">
-        <number>2</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="adjChBandwidth">
-       <property name="toolTip">
-        <string>Adjacent channel bandwidth (Hz)</string>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>100000000</number>
-       </property>
-       <property name="singleStep">
-        <number>1000</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="harmonicsLabel">
-       <property name="text">
-        <string>Harmonics</string>
-       </property>
-       <property name="margin">
-        <number>2</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="harmonics">
-       <property name="toolTip">
-        <string>Number of harmonics</string>
-       </property>
-       <property name="maximum">
-        <number>20</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="peaksLabel">
-       <property name="text">
-        <string>Peaks</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="peaks">
-       <property name="toolTip">
-        <string>Number of peaks to display</string>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>20</number>
        </property>
       </widget>
      </item>

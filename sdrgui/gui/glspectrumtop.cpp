@@ -44,3 +44,27 @@ void GLSpectrumTop::setMeasurementsVisible(bool visible)
 {
     m_measurements->setVisible(visible);
 }
+
+void GLSpectrumTop::setMeasurementsPosition(SpectrumSettings::MeasurementsPosition position)
+{
+    switch (position)
+    {
+    case SpectrumSettings::PositionAbove:
+        m_splitter->setOrientation(Qt::Vertical);
+        m_splitter->insertWidget(0, m_measurements);
+        break;
+    case SpectrumSettings::PositionBelow:
+        m_splitter->setOrientation(Qt::Vertical);
+        m_splitter->insertWidget(0, m_spectrum);
+        break;
+    case SpectrumSettings::PositionLeft:
+        m_splitter->setOrientation(Qt::Horizontal);
+        m_splitter->insertWidget(0, m_measurements);
+        break;
+    case SpectrumSettings::PositionRight:
+        m_splitter->setOrientation(Qt::Horizontal);
+        m_splitter->insertWidget(0, m_spectrum);
+        break;
+    }
+}
+

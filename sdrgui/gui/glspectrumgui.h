@@ -88,7 +88,6 @@ private:
 	bool handleMessage(const Message& message);
     void displayGotoMarkers();
     QString displayScaled(int64_t value, char type, int precision, bool showMult);
-    void displayMeasurementGUI();
 
 private slots:
 	void on_fftWindow_currentIndexChanged(int index);
@@ -127,14 +126,6 @@ private slots:
     void on_gotoMarker_currentIndexChanged(int index);
 
     void on_measure_clicked(bool checked);
-    void on_measurement_currentIndexChanged(int index);
-    void on_highlight_toggled(bool checked);
-    void on_resetMeasurements_clicked(bool checked);
-    void on_bandwidth_valueChanged(int value);
-    void on_chSpacing_valueChanged(int value);
-    void on_adjChBandwidth_valueChanged(int value);
-    void on_harmonics_valueChanged(int value);
-    void on_peaks_valueChanged(int value);
 
 	void handleInputMessages();
     void openWebsocketSpectrumSettingsDialog(const QPoint& p);
@@ -145,6 +136,7 @@ private slots:
 	void updateAnnotationMarkers();
 	void updateMarkersDisplay();
 	void updateCalibrationPoints();
+    void updateMeasurements();
 
 signals:
     // Emitted when user selects an annotation marker
