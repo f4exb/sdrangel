@@ -3100,7 +3100,7 @@ void ADSBDemodGUI::speechNotification(Aircraft *aircraft, const QString &speech)
 void ADSBDemodGUI::commandNotification(Aircraft *aircraft, const QString &command)
 {
     QString commandLine = subAircraftString(aircraft, command);
-    QStringList allArgs = commandLine.split(" ");
+    QStringList allArgs = QProcess::splitCommand(commandLine);
 
     if (allArgs.size() > 0)
     {

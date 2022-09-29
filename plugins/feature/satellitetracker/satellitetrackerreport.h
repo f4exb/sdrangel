@@ -56,24 +56,21 @@ public:
 
     public:
         QString getName() const { return m_name; }
-        int getDuration() const { return m_duration; }
-        int getMaxElevation() const { return m_maxElevation; }
+        QString getSpeech() const { return m_speech; }
 
-        static MsgReportAOS* create(const QString& name, int duration, int maxElevation)
+        static MsgReportAOS* create(const QString& name, const QString &speech)
         {
-            return new MsgReportAOS(name, duration, maxElevation);
+            return new MsgReportAOS(name, speech);
         }
 
     private:
         QString m_name;
-        int m_duration;
-        int m_maxElevation;
+        QString m_speech;
 
-        MsgReportAOS(const QString& name, int duration, int maxElevation) :
+        MsgReportAOS(const QString& name, const QString &speech) :
             Message(),
             m_name(name),
-            m_duration(duration),
-            m_maxElevation(maxElevation)
+            m_speech(speech)
         {
         }
     };
@@ -84,18 +81,21 @@ public:
 
     public:
         QString getName() const { return m_name; }
+        QString getSpeech() const { return m_speech; }
 
-        static MsgReportLOS* create(const QString& name)
+        static MsgReportLOS* create(const QString& name, const QString &speech)
         {
-            return new MsgReportLOS(name);
+            return new MsgReportLOS(name, speech);
         }
 
     private:
         QString m_name;
+        QString m_speech;
 
-        MsgReportLOS(const QString& name) :
+        MsgReportLOS(const QString& name, const QString &speech) :
             Message(),
-            m_name(name)
+            m_name(name),
+            m_speech(speech)
         {
         }
     };
