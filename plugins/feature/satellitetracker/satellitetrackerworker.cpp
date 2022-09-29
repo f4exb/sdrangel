@@ -545,11 +545,8 @@ void SatelliteTrackerWorker::aos(SatWorkerState *satWorkerState)
     // Indicate AOS to GUI
     if (getMessageQueueToGUI())
     {
-        int durationMins = (int)round((satWorkerState->m_los.toSecsSinceEpoch() - satWorkerState->m_aos.toSecsSinceEpoch())/60.0);
-        int maxElevation = 0;
-        if (satWorkerState->m_satState.m_passes.size() > 0)
-            maxElevation = satWorkerState->m_satState.m_passes[0].m_maxElevation;
-        getMessageQueueToGUI()->push(SatelliteTrackerReport::MsgReportAOS::create(satWorkerState->m_name, durationMins, maxElevation));
+        QString speech = substituteVariables(m_settings.m_aosSpeech, satWorkerState->m_name);
+        getMessageQueueToGUI()->push(SatelliteTrackerReport::MsgReportAOS::create(satWorkerState->m_name, speech));
     }
 
     // Update target
@@ -602,20 +599,58 @@ void SatelliteTrackerWorker::calculateRotation(SatWorkerState *satWorkerState)
     }
 }
 
-void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
+QString SatelliteTrackerWorker::substituteVariables(const QString &textIn, const QString &satelliteName)
 {
-    // Execute global program/script
-    if (!m_settings.m_aosCommand.isEmpty())
+    SatWorkerState *satWorkerState = m_workerState.value(satelliteName);
+    if (!satWorkerState) {
+        return "";
+    }
+
+    int durationMins = (int)round((satWorkerState->m_los.toSecsSinceEpoch() - satWorkerState->m_aos.toSecsSinceEpoch())/60.0);
+
+    QString text = textIn;
+    text = text.replace("${name}", satelliteName);
+    text = text.replace("${duration}", QString::number(durationMins));
+    if (satWorkerState->m_satState.m_passes.size() > 0)
     {
-        qDebug() << "SatelliteTrackerWorker::aos: executing command: " << m_settings.m_aosCommand;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-        QStringList allArgs = m_settings.m_aosCommand.split(" ", Qt::SkipEmptyParts);
-#else
-        QStringList allArgs = m_settings.m_aosCommand.split(" ", QString::SkipEmptyParts);
-#endif
+        text = text.replace("${aos}", satWorkerState->m_satState.m_passes[0].m_aos.toString());
+        text = text.replace("${los}", satWorkerState->m_satState.m_passes[0].m_los.toString());
+        text = text.replace("${elevation}", QString::number(std::round(satWorkerState->m_satState.m_passes[0].m_maxElevation)));
+        text = text.replace("${aosAzimuth}", QString::number(std::round(satWorkerState->m_satState.m_passes[0].m_aosAzimuth)));
+        text = text.replace("${losAzimuth}", QString::number(std::round(satWorkerState->m_satState.m_passes[0].m_losAzimuth)));
+        text = text.replace("${northToSouth}", QString::number(satWorkerState->m_satState.m_passes[0].m_northToSouth));
+        text = text.replace("${latitude}", QString::number(satWorkerState->m_satState.m_latitude));
+        text = text.replace("${longitude}", QString::number(satWorkerState->m_satState.m_longitude));
+        text = text.replace("${altitude}", QString::number(satWorkerState->m_satState.m_altitude));
+        text = text.replace("${azimuth}", QString::number(std::round(satWorkerState->m_satState.m_azimuth)));
+        text = text.replace("${elevation}", QString::number(std::round(satWorkerState->m_satState.m_elevation)));
+        text = text.replace("${range}", QString::number(std::round(satWorkerState->m_satState.m_range)));
+        text = text.replace("${rangeRate}", QString::number(std::round(satWorkerState->m_satState.m_rangeRate)));
+        text = text.replace("${speed}", QString::number(std::round(satWorkerState->m_satState.m_speed)));
+        text = text.replace("${period}", QString::number(satWorkerState->m_satState.m_period));
+    }
+    return text;
+}
+
+void SatelliteTrackerWorker::executeCommand(const QString &command, const QString &satelliteName)
+{
+    if (!command.isEmpty())
+    {
+        // Replace variables
+        QString cmd = substituteVariables(command, satelliteName);
+        QStringList allArgs = QProcess::splitCommand(cmd);
+        qDebug() << "SatelliteTrackerWorker::executeCommand: Executing: " << allArgs;
         QString program = allArgs[0];
         allArgs.pop_front();
         QProcess::startDetached(program, allArgs);
+    }
+}
+
+void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
+{
+    // Execute global program/script
+    if (!m_settings.m_aosCommand.isEmpty()) {
+        executeCommand(m_settings.m_aosCommand, name);
     }
 
     // Update device set
@@ -682,17 +717,8 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                 }
 
                 // Execute per satellite program/script
-                if (!devSettings->m_aosCommand.isEmpty())
-                {
-                    qDebug() << "SatelliteTrackerWorker::aos: executing command: " << devSettings->m_aosCommand;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-                    QStringList allArgs = devSettings->m_aosCommand.split(" ", Qt::SkipEmptyParts);
-#else
-                    QStringList allArgs = devSettings->m_aosCommand.split(" ", QString::SkipEmptyParts);
-#endif
-                    QString program = allArgs[0];
-                    allArgs.pop_front();
-                    QProcess::startDetached(program, allArgs);
+                if (!devSettings->m_aosCommand.isEmpty()) {
+                    executeCommand(devSettings->m_aosCommand, name);
                 }
 
             }
@@ -827,7 +853,10 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
 
     // Indicate LOS to GUI
     if (getMessageQueueToGUI())
-        getMessageQueueToGUI()->push(SatelliteTrackerReport::MsgReportLOS::create(satWorkerState->m_name));
+    {
+        QString speech = substituteVariables(m_settings.m_losSpeech, satWorkerState->m_name);
+        getMessageQueueToGUI()->push(SatelliteTrackerReport::MsgReportLOS::create(satWorkerState->m_name, speech));
+    }
 
     // Stop Doppler timer, and set interval to 0, so we don't restart it in start()
     satWorkerState->m_dopplerTimer.stop();
@@ -836,17 +865,8 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
     if (m_settings.m_target == satWorkerState->m_name)
     {
         // Execute program/script
-        if (!m_settings.m_losCommand.isEmpty())
-        {
-            qDebug() << "SatelliteTrackerWorker::los: executing command: " << m_settings.m_losCommand;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-            QStringList allArgs = m_settings.m_losCommand.split(" ", Qt::SkipEmptyParts);
-#else
-            QStringList allArgs = m_settings.m_losCommand.split(" ", QString::SkipEmptyParts);
-#endif
-            QString program = allArgs[0];
-            allArgs.pop_front();
-            QProcess::startDetached(program, allArgs);
+        if (!m_settings.m_losCommand.isEmpty()) {
+            executeCommand(m_settings.m_losCommand, satWorkerState->m_name);
         }
 
         // Send LOS message to channels/features
@@ -883,17 +903,8 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
             for (int i = 0; i < m_deviceSettingsList->size(); i++)
             {
                 SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
-                if (!devSettings->m_losCommand.isEmpty())
-                {
-                    qDebug() << "SatelliteTrackerWorker::los: executing command: " << devSettings->m_losCommand;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-                    QStringList allArgs = devSettings->m_losCommand.split(" ", Qt::SkipEmptyParts);
-#else
-                    QStringList allArgs = devSettings->m_losCommand.split(" ", QString::SkipEmptyParts);
-#endif
-                    QString program = allArgs[0];
-                    allArgs.pop_front();
-                    QProcess::startDetached(program, allArgs);
+                if (!devSettings->m_losCommand.isEmpty()) {
+                    executeCommand(devSettings->m_losCommand, satWorkerState->m_name);
                 }
             }
         }

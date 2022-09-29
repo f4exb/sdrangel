@@ -141,6 +141,8 @@ private:
     void applyDeviceAOSSettings(const QString& name);
     void startStopSinks(bool start);
     void calculateRotation(SatWorkerState *satWorkerState);
+    QString substituteVariables(const QString &textIn, const QString &satelliteName);
+    void executeCommand(const QString &command, const QString &satelliteName);
 
 private slots:
     void stopWork();

@@ -111,8 +111,8 @@ private:
     explicit SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~SatelliteTrackerGUI();
 
-    void aos(const QString& name, int duration, int maxElevation);
-    void los(const QString& name);
+    void aos(const QString& name, const QString &speech);
+    void los(const QString& name, const QString &speech);
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
