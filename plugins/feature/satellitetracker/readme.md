@@ -53,8 +53,8 @@ To perform an action on an SDRangel device set on AOS or LOS, press the "Add dev
 * Whether to stop acquisition on LOS.
 * Whether any file sinks in the preset should be started on AOS and stopped on LOS. This allows the baseband signal received from the satellite to be recorded to a file.
 * Whether to override the centre frequency in the preset. This allows a single preset to be used with multiple satellites.
-* A command or script to execute on AOS.
-* A command or script to execute on LOS.
+* A command or script to execute on AOS. See (8) for list of subsitituions.
+* A command or script to execute on LOS. See (8) for list of subsitituions.
 
 Multiple tabs can be added, to allow independent control of multiple device sets. To remove a tab, click the cross next to the device set name in the tab list.
 
@@ -93,11 +93,13 @@ On the Settings tab, you can set:
 * A time window for which passes must start and end between, to be displayed or acted upon. For example, for day time passes, you could set "must start after" to 8:00 and "must end before" to 18:00. For night time passes, set "must start after" to 20:00 and "must end before" to 6:00.
 * The maximum azimuth angle in degrees supported by your rotator. 450 degree support is beneficial for passes that pass through 360/0 degrees, to avoid the rotator having to do a complete rotation mid pass.
 * The maximum elevation angle in degrees supported by your rotator. 180 degree support is beneficial for passes that pass through 360/0 degrees, to avoid the rotator having to do a complete rotation mid pass.
-* A speech warning to be given on AOS. ${name} will be substituted with the name of the satellite, ${duration} the pass duration and ${elevation} the maximum elevation of the pass.
-* A speech warning to be given on LOS. ${name} will be substituted with the name of the satellite.
-* A command/script to be executed on AOS. This applies to all satellites. It is also possible to set a per-satellite command in the SDRangel Control dialog.
+* A speech warning to be given on AOS. See below for a list of variable substitutions.
+* A speech warning to be given on LOS.
+* A command/script to be executed on AOS. This applies to all satellites. It is also possible to set a per-satellite command in the SDRangel Control dialog. See below for a list of variable substitions.
 * A command/script to be executed on LOS. This applies to all satellites. It is also possible to set a per-satellite command in the SDRangel Control dialog.
 * The Doppler correction period in seconds, which controls how frequently Doppler correction is applied. Which channels have Doppler correction applied is set on a per-channel basis in the SDRangel Control dialog.
+
+For commands, scripts and speech, the following variables can be sustituted: ${aos}, ${los}, ${elevation}, ${aosAzimuth}, ${losAzimuth}, ${northToSouth}, ${latitude}, ${longitude}, ${altitude}, ${azimuth}, ${elevation}, ${range}, ${rangeRate}, ${speed} and ${period}.
 
 ![Satellite tracker settings dialog](../../../doc/img/SatelliteTracker_plugin_settingsdialog2.png)
 
