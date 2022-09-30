@@ -92,8 +92,8 @@ void ADSBDemodSettings::resetToDefaults()
     m_logEnabled = false;
     m_airspaces = QStringList({"A", "D", "TMZ"});
     m_airspaceRange = 500.0f;
-#if QT_VERSION == QT_VERSION_CHECK(5, 15, 3) || QT_VERSION == QT_VERSION_CHECK(5, 15, 4)
-    m_mapProvider = "mapboxgl"; // osm maps do not work in Qt 5.15.3 - https://github.com/f4exb/sdrangel/issues/1169
+#ifdef LINUX
+    m_mapProvider = "mapboxgl"; // osm maps do not work in some versions of Linux https://github.com/f4exb/sdrangel/issues/1169 & 1369
 #else
     m_mapProvider = "osm";
 #endif
@@ -315,8 +315,8 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBlob(60, &m_geometryBytes);
         d.readBool(61, &m_hidden, false);
         d.readString(62, &m_checkWXAPIKey, "");
-#if QT_VERSION == QT_VERSION_CHECK(5, 15, 3) || QT_VERSION == QT_VERSION_CHECK(5, 15, 4)
-        d.readString(63, &m_mapProvider, "mapboxgl"); // osm maps do not work in Qt 5.15.3/4 - https://github.com/f4exb/sdrangel/issues/1169
+#ifdef LINUX
+        d.readString(63, &m_mapProvider, "mapboxgl");
 #else
         d.readString(63, &m_mapProvider, "osm");
 #endif

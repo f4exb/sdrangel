@@ -76,6 +76,7 @@ struct VORLocalizerSettings
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    QString m_mapProvider;
 
     static const int VORDEMOD_COLUMNS  = 10;
     static const int VOR_COL_NAME      =  0;

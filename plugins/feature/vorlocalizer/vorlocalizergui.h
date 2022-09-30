@@ -268,6 +268,7 @@ private:
     void updateVORs();
     void readNavAids();
     void updateChannelList();
+    void applyMapSettings();
 
 private slots:
     void on_startStop_toggled(bool checked);

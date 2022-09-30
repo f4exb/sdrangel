@@ -25,6 +25,7 @@
 #include <QGeoLocation>
 #include <QGeoCoordinate>
 #include <QQmlContext>
+#include <QQmlProperty>
 #include <QMessageBox>
 #include <QAction>
 
@@ -844,6 +845,87 @@ void VORLocalizerGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
+void VORLocalizerGUI::applyMapSettings()
+{
+    // Get station position
+    Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
+    Real stationLongitude = MainCore::instance()->getSettings().getLongitude();
+    Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
+    m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
+
+    QQuickItem *item = ui->map->rootObject();
+
+    QObject *object = item->findChild<QObject*>("map");
+    QGeoCoordinate coords;
+    double zoom;
+    if (object != nullptr)
+    {
+        // Save existing position of map
+        coords = object->property("center").value<QGeoCoordinate>();
+        zoom = object->property("zoomLevel").value<double>();
+    }
+    else
+    {
+        // Center on my location when map is first opened
+        coords.setLatitude(stationLatitude);
+        coords.setLongitude(stationLongitude);
+        coords.setAltitude(stationAltitude);
+        zoom = 10.0;
+    }
+
+    // Create the map using the specified provider
+    QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
+    QVariantMap parameters;
+    QString mapType;
+
+    if (m_settings.m_mapProvider == "osm") {
+        mapType = "Street Map";
+    } else if (m_settings.m_mapProvider == "mapboxgl") {
+        mapType = "mapbox://styles/mapbox/streets-v10";
+    }
+
+    QVariant retVal;
+    if (!QMetaObject::invokeMethod(item, "createMap", Qt::DirectConnection,
+                                Q_RETURN_ARG(QVariant, retVal),
+                                Q_ARG(QVariant, QVariant::fromValue(parameters)),
+                                Q_ARG(QVariant, mapType),
+                                Q_ARG(QVariant, QVariant::fromValue(this))))
+    {
+        qCritical() << "VORLocalizerGUI::applyMapSettings - Failed to invoke createMap";
+    }
+    QObject *newMap = retVal.value<QObject *>();
+
+    // Restore position of map
+    if (newMap != nullptr)
+    {
+        if (coords.isValid())
+        {
+            newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
+            newMap->setProperty("center", QVariant::fromValue(coords));
+        }
+    }
+    else
+    {
+        qDebug() << "VORLocalizerGUI::applyMapSettings - createMap returned a nullptr";
+    }
+
+    // Move antenna icon to My Position
+    QObject *stationObject = newMap->findChild<QObject*>("station");
+    if(stationObject != NULL)
+    {
+        QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
+        coords.setLatitude(stationLatitude);
+        coords.setLongitude(stationLongitude);
+        coords.setAltitude(stationAltitude);
+        stationObject->setProperty("coordinate", QVariant::fromValue(coords));
+        stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
+    }
+    else
+    {
+        qDebug() << "VORLocalizerGUI::applyMapSettings - Couldn't find station";
+    }
+}
+
 VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
     FeatureGUI(parent),
     ui(new Ui::VORLocalizerGUI),
@@ -886,36 +968,7 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-    // Get station position
-    Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
-    Real stationLongitude = MainCore::instance()->getSettings().getLongitude();
-    Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
-    m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
-
-    // Centre map at My Position
-    QQuickItem *item = ui->map->rootObject();
-    QObject *object = item->findChild<QObject*>("map");
-
-    if (object)
-    {
-        QGeoCoordinate coords = object->property("center").value<QGeoCoordinate>();
-        coords.setLatitude(stationLatitude);
-        coords.setLongitude(stationLongitude);
-        object->setProperty("center", QVariant::fromValue(coords));
-    }
-
-    // Move antenna icon to My Position to start with
-    QObject *stationObject = item->findChild<QObject*>("station");
-
-    if (stationObject)
-    {
-        QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
-        coords.setLatitude(stationLatitude);
-        coords.setLongitude(stationLongitude);
-        coords.setAltitude(stationAltitude);
-        stationObject->setProperty("coordinate", QVariant::fromValue(coords));
-        stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
-    }
+    applyMapSettings();
 
     // Read in VOR information if it exists
     readNavAids();
