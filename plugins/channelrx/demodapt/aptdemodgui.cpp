@@ -374,6 +374,11 @@ void APTDemodGUI::on_channels_currentIndexChanged(int index)
     {
         m_settings.m_channels = (APTDemodSettings::ChannelSelection)index;
     }
+    else if (index == (int)APTDemodSettings::VISIBLE)
+    {
+        m_settings.m_channels = APTDemodSettings::VISIBLE;
+        m_settings.m_precipitationOverlay = false;
+    }
     else if (index == (int)APTDemodSettings::TEMPERATURE)
     {
         m_settings.m_channels = APTDemodSettings::TEMPERATURE;
@@ -810,6 +815,7 @@ void APTDemodGUI::displayPalettes()
     ui->channels->addItem("A");
     ui->channels->addItem("B");
     ui->channels->addItem("Temperature");
+    ui->channels->addItem("Visible");
     for (auto palette : m_settings.m_palettes)
     {
         QFileInfo fi(palette);
