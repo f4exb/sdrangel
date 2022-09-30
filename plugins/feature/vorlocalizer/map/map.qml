@@ -6,48 +6,84 @@ import QtPositioning 5.12
 Item {
     id: qmlMap
     property int vorZoomLevel: 11
+    property string mapProvider: "osm"
+    property variant mapPtr
+    property string requestedMapType
+    property variant guiPtr
 
-    Plugin {
-        id: mapPlugin
-        name: "osm"
+    function createMap(pluginParameters, requestedMap, gui) {
+        requestedMapType = requestedMap
+        guiPtr = gui
+
+        var paramString = ""
+        for (var prop in pluginParameters) {
+            var parameter = 'PluginParameter { name: "' + prop + '"; value: "' + pluginParameters[prop] + '"}'
+            paramString = paramString + parameter
+        }
+        var pluginString = 'import QtLocation 5.12; Plugin{ name:"' + mapProvider + '"; '  + paramString + '}'
+        var plugin = Qt.createQmlObject (pluginString, qmlMap)
+
+        if (mapPtr) {
+            // Objects aren't destroyed immediately, so don't call findChild("map")
+            mapPtr.destroy()
+            mapPtr = null
+        }
+        mapPtr = actualMapComponent.createObject(page)
+        mapPtr.plugin = plugin
+        mapPtr.forceActiveFocus()
+        return mapPtr
     }
 
-    Map {
-        id: map
-        objectName: "map"
+    Item {
+        id: page
         anchors.fill: parent
-        plugin: mapPlugin
-        center: QtPositioning.coordinate(51.5, 0.125) // London
-        zoomLevel: 10
+    }
 
+    Component {
+        id: actualMapComponent
 
-        MapItemView {
-            model: vorModel
-            delegate: vorRadialComponent
-        }
+        Map {
+            id: map
+            objectName: "map"
+            anchors.fill: parent
+            plugin: mapPlugin
+            center: QtPositioning.coordinate(51.5, 0.125) // London
+            zoomLevel: 10
 
-        MapStation {
-            id: station
-            objectName: "station"
-            stationName: "Home"
-            coordinate:  QtPositioning.coordinate(51.5, 0.125)
-        }
+            MapItemView {
+                model: vorModel
+                delegate: vorRadialComponent
+            }
 
-        MapItemView {
-            model: vorModel
-            delegate: vorComponent
-        }
+            MapStation {
+                id: station
+                objectName: "station"
+                stationName: "Home"
+            }
 
-        onZoomLevelChanged: {
-            if (zoomLevel > 11) {
-                station.zoomLevel = zoomLevel
-                vorZoomLevel = zoomLevel
-            } else {
-                station.zoomLevel = 11
-                vorZoomLevel = 11
+            MapItemView {
+                model: vorModel
+                delegate: vorComponent
+            }
+
+            onZoomLevelChanged: {
+                if (zoomLevel > 11) {
+                    station.zoomLevel = zoomLevel
+                    vorZoomLevel = zoomLevel
+                } else {
+                    station.zoomLevel = 11
+                    vorZoomLevel = 11
+                }
+            }
+
+            onSupportedMapTypesChanged : {
+                for (var i = 0; i < supportedMapTypes.length; i++) {
+                    if (requestedMapType == supportedMapTypes[i].name) {
+                        activeMapType = supportedMapTypes[i]
+                    }
+                }
             }
         }
-
     }
 
     Component {

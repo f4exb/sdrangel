@@ -42,6 +42,11 @@ void VORLocalizerSettings::resetToDefaults()
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
     m_workspaceIndex = 0;
+#ifdef LINUX
+    m_mapProvider = "mapboxgl"; // osm maps do not work in some versions of Linux https://github.com/f4exb/sdrangel/issues/1169 & 1369
+#else
+    m_mapProvider = "osm";
+#endif
 
     for (int i = 0; i < VORDEMOD_COLUMNS; i++)
     {
@@ -71,6 +76,7 @@ QByteArray VORLocalizerSettings::serialize() const
 
     s.writeS32(20, m_workspaceIndex);
     s.writeBlob(21, m_geometryBytes);
+    s.writeString(22, m_mapProvider);
 
     for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -128,6 +134,11 @@ bool VORLocalizerSettings::deserialize(const QByteArray& data)
 
         d.readS32(20, &m_workspaceIndex, 0);
         d.readBlob(21, &m_geometryBytes);
+#ifdef LINUX
+        d.readString(22, &m_mapProvider, "mapboxgl");
+#else
+        d.readString(22, &m_mapProvider, "osm");
+#endif
 
         for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);
