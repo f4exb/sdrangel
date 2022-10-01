@@ -23,6 +23,7 @@
 #include <QToolTip>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QDesktopWidget>
 
 #include "gui/glspectrumgui.h"
 #include "dsp/fftwindow.h"
@@ -474,6 +475,12 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
     connect(m_markersDialog, SIGNAL(updateAnnotations()), this, SLOT(updateAnnotationMarkers()));
     connect(m_markersDialog, SIGNAL(updateMarkersDisplay()), this, SLOT(updateMarkersDisplay()));
     connect(m_markersDialog, SIGNAL(finished(int)), this, SLOT(closeMarkersDialog()));
+
+    QPoint globalCursorPos = QCursor::pos();
+    int mouseScreen = qApp->desktop()->screenNumber(globalCursorPos);
+    QRect mouseScreenGeometry = qApp->desktop()->screen(mouseScreen)->geometry();
+    QPoint localCursorPos = globalCursorPos - mouseScreenGeometry.topLeft();
+    m_markersDialog->move(localCursorPos);
 
     m_markersDialog->show();
 }
