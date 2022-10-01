@@ -24,6 +24,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDesktopWidget>
+#include <QScreen>
 
 #include "gui/glspectrumgui.h"
 #include "dsp/fftwindow.h"
@@ -477,8 +478,8 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
     connect(m_markersDialog, SIGNAL(finished(int)), this, SLOT(closeMarkersDialog()));
 
     QPoint globalCursorPos = QCursor::pos();
-    int mouseScreen = qApp->desktop()->screenNumber(globalCursorPos);
-    QRect mouseScreenGeometry = qApp->desktop()->screen(mouseScreen)->geometry();
+    QScreen *screen = QGuiApplication::screenAt(globalCursorPos);
+    QRect mouseScreenGeometry = screen->geometry();
     QPoint localCursorPos = globalCursorPos - mouseScreenGeometry.topLeft();
     m_markersDialog->move(localCursorPos);
 
@@ -929,6 +930,20 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
         ui->refLevel->blockSignals(false);
         return true;
     }
+    else if (GLSpectrumView::MsgReportHistogramMarkersChange::match(message))
+    {
+        if (m_markersDialog) {
+            m_markersDialog->updateHistogramMarkersDisplay();
+        }
+        return true;
+    }
+    else if (GLSpectrumView::MsgReportWaterfallMarkersChange::match(message))
+    {
+        if (m_markersDialog) {
+            m_markersDialog->updateWaterfallMarkersDisplay();
+        }
+        return true;
+    }
     else if (SpectrumVis::MsgStartStop::match(message))
     {
         const SpectrumVis::MsgStartStop& msg = (SpectrumVis::MsgStartStop&) message;
@@ -1035,6 +1050,8 @@ void GLSpectrumGUI::updateCalibrationPoints()
 
 void GLSpectrumGUI::on_measure_clicked(bool checked)
 {
+    (void) checked;
+
     SpectrumMeasurementsDialog measurementsDialog(
         m_glSpectrum,
         &m_settings,

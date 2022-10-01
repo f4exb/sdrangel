@@ -46,6 +46,8 @@ public:
     void setCenterFrequency(qint64 centerFrequency) { m_centerFrequency = centerFrequency; }
     void setPower(float power) { m_power = power; }
     void setTime(float time) { m_time = time; }
+    void updateHistogramMarkersDisplay(); //!< called from spectrum view
+    void updateWaterfallMarkersDisplay(); //!< called from spectrum view
 
 private:
     Ui::SpectrumMarkersDialog* ui;

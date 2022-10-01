@@ -825,3 +825,17 @@ void SpectrumMarkersDialog::on_showSelect_currentIndexChanged(int index)
     m_markersDisplay = (SpectrumSettings::MarkersDisplay) index;
     emit updateMarkersDisplay();
 }
+
+void SpectrumMarkersDialog::updateHistogramMarkersDisplay()
+{
+    m_histogramMarkerIndex = std::max(m_histogramMarkerIndex, m_histogramMarkers.size() - 1);
+    ui->marker->setMaximum(m_histogramMarkers.size() - 1);
+    displayHistogramMarker();
+}
+
+void SpectrumMarkersDialog::updateWaterfallMarkersDisplay()
+{
+    m_waterfallMarkerIndex = std::max(m_waterfallMarkerIndex, m_waterfallMarkers.size() - 1);
+    ui->wMarker->setMaximum(m_waterfallMarkers.size() - 1);
+    displayWaterfallMarker();
+}

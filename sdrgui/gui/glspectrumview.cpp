@@ -39,6 +39,8 @@ MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportWaterfallShare, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportFFTOverlap, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportPowerScale, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportCalibrationShift, Message)
+MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportHistogramMarkersChange, Message)
+MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportWaterfallMarkersChange, Message)
 
 const float GLSpectrumView::m_maxFrequencyZoom = 10.0f;
 const float GLSpectrumView::m_annotationMarkerHeight = 20.0f;
@@ -340,8 +342,12 @@ void GLSpectrumView::setDisplayWaterfall(bool display)
 {
     m_mutex.lock();
     m_displayWaterfall = display;
-    if (!display) {
+    if (!display)
+    {
         m_waterfallMarkers.clear();
+        if (m_messageQueueToGUI) {
+            m_messageQueueToGUI->push(new MsgReportWaterfallMarkersChange());
+        }
     }
     m_changesPending = true;
     stopDrag();
@@ -406,8 +412,12 @@ void GLSpectrumView::setDisplayMaxHold(bool display)
 {
     m_mutex.lock();
     m_displayMaxHold = display;
-    if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram) {
+    if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram)
+    {
         m_histogramMarkers.clear();
+        if (m_messageQueueToGUI) {
+            m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
+        }
     }
     m_changesPending = true;
     stopDrag();
@@ -419,8 +429,12 @@ void GLSpectrumView::setDisplayCurrent(bool display)
 {
     m_mutex.lock();
     m_displayCurrent = display;
-    if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram) {
+    if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram)
+    {
         m_histogramMarkers.clear();
+        if (m_messageQueueToGUI) {
+            m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
+        }
     }
     m_changesPending = true;
     stopDrag();
@@ -432,8 +446,12 @@ void GLSpectrumView::setDisplayHistogram(bool display)
 {
     m_mutex.lock();
     m_displayHistogram = display;
-    if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram) {
+    if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram)
+    {
         m_histogramMarkers.clear();
+        if (m_messageQueueToGUI) {
+            m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
+        }
     }
     m_changesPending = true;
     stopDrag();
@@ -3663,6 +3681,9 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
             {
                 m_histogramMarkers.clear();
                 doUpdate = true;
+                if (m_messageQueueToGUI) {
+                    m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
+                }
             }
         }
         else
@@ -3671,6 +3692,9 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
             {
                 m_histogramMarkers.pop_back();
                 doUpdate = true;
+                if (m_messageQueueToGUI) {
+                    m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
+                }
             }
         }
 
@@ -3684,6 +3708,9 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
             {
                 m_waterfallMarkers.clear();
                 doUpdate = true;
+                if (m_messageQueueToGUI) {
+                    m_messageQueueToGUI->push(new MsgReportWaterfallMarkersChange());
+                }
             }
         }
         else
@@ -3692,6 +3719,9 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
             {
                 m_waterfallMarkers.pop_back();
                 doUpdate = true;
+                if (m_messageQueueToGUI) {
+                    m_messageQueueToGUI->push(new MsgReportWaterfallMarkersChange());
+                }
             }
         }
 
@@ -3748,6 +3778,9 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
                             m_linear ? 3 : 1);
                     }
 
+                    if (m_messageQueueToGUI) {
+                        m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
+                    }
                     doUpdate = true;
                 }
             }
@@ -3792,6 +3825,9 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
                             true);
                     }
 
+                    if (m_messageQueueToGUI) {
+                        m_messageQueueToGUI->push(new MsgReportWaterfallMarkersChange());
+                    }
                     doUpdate = true;
                 }
             }

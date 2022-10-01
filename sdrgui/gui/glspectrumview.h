@@ -131,6 +131,24 @@ public:
         Real m_calibrationShiftdB;
     };
 
+    class MsgReportHistogramMarkersChange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        MsgReportHistogramMarkersChange() :
+            Message()
+        {}
+    };
+
+    class MsgReportWaterfallMarkersChange : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        MsgReportWaterfallMarkersChange() :
+            Message()
+        {}
+    };
+
     GLSpectrumView(QWidget* parent = nullptr);
     virtual ~GLSpectrumView();
 
