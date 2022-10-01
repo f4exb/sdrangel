@@ -202,9 +202,7 @@ void APTDemodImageWorker::applySettings(const APTDemodSettings& settings, bool f
 void APTDemodImageWorker::resetDecoder()
 {
     m_image.nrow = 0;
-    m_image.zenith = 0;
     m_tempImage.nrow = 0;
-    m_tempImage.zenith = 0;
     m_greyImage = QImage(APT_IMG_WIDTH, APT_MAX_HEIGHT, QImage::Format_Grayscale8);
     m_greyImage.fill(0);
     m_colourImage = QImage(APT_IMG_WIDTH, APT_MAX_HEIGHT, QImage::Format_RGB888);
@@ -462,12 +460,12 @@ QRgb APTDemodImageWorker::findNearest(const QImage &image, double latitude, doub
     int yEndPostCrop;
     if (m_settings.m_northToSouth)
     {
-        yStartPostCrop = abs(m_tempImage.zenith);
+        yStartPostCrop = 0;
         yEndPostCrop = yStartPostCrop + image.height();
     }
     else
     {
-        yStartPostCrop = m_image.nrow - m_tempImage.nrow - abs(m_tempImage.zenith);
+        yStartPostCrop = m_image.nrow - m_tempImage.nrow;
         yEndPostCrop = yStartPostCrop + image.height();
     }
 
@@ -532,9 +530,9 @@ void APTDemodImageWorker::calcBoundingBox(double &east, double &south, double &w
 {
     int start;
     if (m_settings.m_northToSouth) {
-        start = abs(m_tempImage.zenith);
+        start = 0;
     } else {
-        start = m_image.nrow - m_tempImage.nrow - abs(m_tempImage.zenith);
+        start = m_image.nrow - m_tempImage.nrow;
     }
     int stop = start + image.height();
 
@@ -773,7 +771,7 @@ QImage APTDemodImageWorker::processImage(QStringList& imageTypes, APTDemodSettin
 
     // Crop noise due to low elevation at top and bottom of image
     if (m_settings.m_cropNoise) {
-        m_tempImage.zenith -= apt_cropNoise(&m_tempImage);
+        apt_cropNoise(&m_tempImage);
     }
 
     // Denoise filter
@@ -837,7 +835,19 @@ QImage APTDemodImageWorker::processImage(QStringList& imageTypes, APTDemodSettin
         }
         return extractImage(m_colourImage, channels);
     }
-    else if (channels == APTDemodSettings::TEMPERATURE)
+    if (channels == APTDemodSettings::VISIBLE)
+    {
+        // Visible calibration
+        int satnum = 15;
+        if (m_satelliteName == "NOAA 18") {
+            satnum = 18;
+        } else if (m_satelliteName == "NOAA 19") {
+            satnum = 19;
+        }
+        apt_calibrate_visible(satnum, &m_tempImage, APT_CHA_OFFSET, APT_CH_WIDTH);
+    }
+
+    if (channels == APTDemodSettings::TEMPERATURE)
     {
         // Temperature calibration
         int satnum = 15;
@@ -846,7 +856,7 @@ QImage APTDemodImageWorker::processImage(QStringList& imageTypes, APTDemodSettin
         } else if (m_satelliteName == "NOAA 19") {
             satnum = 19;
         }
-        apt_temperature(satnum, &m_tempImage, APT_CHB_OFFSET, APT_CH_WIDTH);
+        apt_calibrate_thermal(satnum, &m_tempImage, APT_CHB_OFFSET, APT_CH_WIDTH);
 
         // Apply colour palette
         for (int r = 0; r < m_tempImage.nrow; r++)
@@ -912,7 +922,7 @@ QImage APTDemodImageWorker::extractImage(QImage image, APTDemodSettings::Channel
 {
     if (channels == APTDemodSettings::BOTH_CHANNELS) {
         return image.copy(0, 0, APT_IMG_WIDTH, m_tempImage.nrow);
-    } else if (channels == APTDemodSettings::CHANNEL_A) {
+    } else if ((channels == APTDemodSettings::CHANNEL_A) || (channels == APTDemodSettings::VISIBLE)) {
         return image.copy(APT_CHA_OFFSET, 0, APT_CH_WIDTH, m_tempImage.nrow);
     } else {
         return image.copy(APT_CHB_OFFSET, 0, APT_CH_WIDTH, m_tempImage.nrow);
@@ -997,7 +1007,6 @@ void APTDemodImageWorker::saveImageToDisk()
 void APTDemodImageWorker::copyImage(apt_image_t *dst, apt_image_t *src)
 {
     dst->nrow = src->nrow;
-    dst->zenith = src->zenith;
     dst->chA = src->chA;
     dst->chB = src->chB;
 

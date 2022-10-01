@@ -36,7 +36,7 @@ struct APTDemodSettings
     bool m_histogramEqualise;
     bool m_precipitationOverlay;
     bool m_flip;
-    enum ChannelSelection {BOTH_CHANNELS, CHANNEL_A, CHANNEL_B, TEMPERATURE, PALETTE} m_channels;
+    enum ChannelSelection {BOTH_CHANNELS, CHANNEL_A, CHANNEL_B, TEMPERATURE, VISIBLE, PALETTE} m_channels;
     bool m_decodeEnabled;
     bool m_satelliteTrackerControl;             //! Whether Sat Tracker can set direction of pass
     QString m_satelliteName;                    //!< All, NOAA 15, NOAA 18 or NOAA 19
