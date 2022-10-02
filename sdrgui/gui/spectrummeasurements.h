@@ -25,6 +25,14 @@
 #include "dsp/spectrumsettings.h"
 #include "export.h"
 
+class SDRGUI_API SpectrumMeasurementsTable : public QTableWidget {
+    Q_OBJECT
+
+public:
+    virtual QSize sizeHint() const override;
+    virtual QSize minimumSizeHint() const override;
+};
+
 // Displays spectrum measurements in a table
 class SDRGUI_API SpectrumMeasurements : public QWidget {
     Q_OBJECT
@@ -113,12 +121,12 @@ private:
     SpectrumSettings::Measurement m_measurement;
     int m_precision;
 
-    QTableWidget *m_table;
+    SpectrumMeasurementsTable *m_table;
     QMenu *m_rowMenu;
     QMenu *m_columnMenu;
     QList<Measurement> m_measurements;
 
-    QTableWidget *m_peakTable;
+    SpectrumMeasurementsTable *m_peakTable;
     QBrush m_textBrush;
     QBrush m_redBrush;
 

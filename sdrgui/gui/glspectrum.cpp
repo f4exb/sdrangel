@@ -32,6 +32,7 @@ GLSpectrum::GLSpectrum(QWidget *parent) :
     m_spectrum->setMeasurements(m_measurements);
     m_splitter->addWidget(m_spectrum);
     m_splitter->addWidget(m_measurements);
+    m_position = SpectrumSettings::PositionBelow;
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_splitter);
@@ -66,4 +67,77 @@ void GLSpectrum::setMeasurementsPosition(SpectrumSettings::MeasurementsPosition 
         m_splitter->insertWidget(0, m_spectrum);
         break;
     }
+    m_position = position;
+}
+
+void GLSpectrum::setMeasurementParams(SpectrumSettings::Measurement measurement,
+                                      int centerFrequencyOffset, int bandwidth, int chSpacing, int adjChBandwidth,
+                                      int harmonics, int peaks, bool highlight, int precision)
+{
+    m_spectrum->setMeasurementParams(measurement, centerFrequencyOffset, bandwidth, chSpacing, adjChBandwidth, harmonics, peaks, highlight, precision);
+    // Resize splitter so there's just enough space for the measurements table
+    // But don't use more than 50%
+    QList<int> sizes = m_splitter->sizes();
+    if ((sizes[0] == 0) && (sizes[1] == 0))
+    {
+        // Initial sizing when first created
+        QSize s = parentWidget()->size();
+        switch (m_position)
+        {
+        case SpectrumSettings::PositionAbove:
+            sizes[0] = m_measurements->sizeHint().height();
+            sizes[1] = s.height() - sizes[0] - m_splitter->handleWidth();
+            sizes[1] = std::max(sizes[1], sizes[0]);
+            break;
+        case SpectrumSettings::PositionLeft:
+            sizes[0] = m_measurements->sizeHint().width();
+            sizes[1] = s.width() - sizes[0] - m_splitter->handleWidth();
+            sizes[1] = std::max(sizes[1], sizes[0]);
+            break;
+        case SpectrumSettings::PositionBelow:
+            sizes[1] = m_measurements->sizeHint().height();
+            sizes[0] = s.height() - sizes[1] - m_splitter->handleWidth();
+            sizes[0] = std::max(sizes[0], sizes[1]);
+            break;
+        case SpectrumSettings::PositionRight:
+            sizes[1] = m_measurements->sizeHint().width();
+            sizes[0] = s.width() - sizes[1] - m_splitter->handleWidth();
+            sizes[0] = std::max(sizes[0], sizes[1]);
+            break;
+        }
+    }
+    else
+    {
+        // When measurement type is changed when already visible
+        int diff = 0;
+        switch (m_position)
+        {
+        case SpectrumSettings::PositionAbove:
+            diff = m_measurements->sizeHint().height() - sizes[0];
+            sizes[0] += diff;
+            sizes[1] -= diff;
+            sizes[1] = std::max(sizes[1], sizes[0]);
+            break;
+        case SpectrumSettings::PositionLeft:
+            diff = m_measurements->sizeHint().width() - sizes[0];
+            sizes[0] += diff;
+            sizes[1] -= diff;
+            sizes[1] = std::max(sizes[1], sizes[0]);
+            break;
+        case SpectrumSettings::PositionBelow:
+            diff = m_measurements->sizeHint().height() - sizes[1];
+            sizes[1] += diff;
+            sizes[0] -= diff;
+            sizes[0] = std::max(sizes[0], sizes[1]);
+            break;
+        case SpectrumSettings::PositionRight:
+            diff = m_measurements->sizeHint().width() - sizes[1];
+            sizes[1] += diff;
+            sizes[0] -= diff;
+            sizes[0] = std::max(sizes[0], sizes[1]);
+            break;
+        }
+    }
+    m_splitter->setSizes(sizes);
+    //resize(size().expandedTo(minimumSizeHint()));
 }

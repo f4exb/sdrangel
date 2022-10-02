@@ -67,10 +67,7 @@ public:
     void setUseCalibration(bool useCalibration) { m_spectrum->setUseCalibration(useCalibration); }
     void setMeasurementParams(SpectrumSettings::Measurement measurement,
                               int centerFrequencyOffset, int bandwidth, int chSpacing, int adjChBandwidth,
-                              int harmonics, int peaks, bool highlight, int precision)
-    {
-        m_spectrum->setMeasurementParams(measurement, centerFrequencyOffset, bandwidth, chSpacing, adjChBandwidth, harmonics, peaks, highlight, precision);
-    }
+                              int harmonics, int peaks, bool highlight, int precision);
     qint32 getSampleRate() const { return m_spectrum->getSampleRate(); }
     void addChannelMarker(ChannelMarker* channelMarker) { m_spectrum->addChannelMarker(channelMarker); }
     void removeChannelMarker(ChannelMarker* channelMarker) { m_spectrum->removeChannelMarker(channelMarker); }
@@ -110,6 +107,7 @@ private:
     QSplitter *m_splitter;
     GLSpectrumView *m_spectrum;
     SpectrumMeasurements *m_measurements;
+    SpectrumSettings::MeasurementsPosition m_position;
 
 };
 
