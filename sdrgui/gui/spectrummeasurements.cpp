@@ -24,10 +24,39 @@
 #include <QGuiApplication>
 #include <QDebug>
 #include <QPainter>
+#include <QStyledItemDelegate>
 
 #include "gui/spectrummeasurements.h"
 
-#include <QStyledItemDelegate>
+QSize SpectrumMeasurementsTable::sizeHint() const
+{
+    // QAbstractScrollArea::sizeHint() always returns 256x192 when sizeAdjustPolicy == AdjustIgnored
+    // If using AdjustToContents policy, the default sizeHint includes the stretched empty column
+    // which we don't want, as that prevents the Auto Stack feature from reducing it
+    // So we need some custom code to set size ignoring this column
+    int width = 0;
+    int height = 0;
+    for (int i = 0; i < columnCount() - 1; i++) {   // -1 to ignore empty column at end of row
+        width += columnWidth(i);
+    }
+    for (int i = 0; i < rowCount(); i++) {
+        height += rowHeight(i);
+    }
+
+    int doubleFrame = 2 * frameWidth();
+
+    width += verticalHeader()->width() + doubleFrame;
+    height += horizontalHeader()->height() + doubleFrame;
+
+    return QSize(width, height);
+}
+
+QSize SpectrumMeasurementsTable::minimumSizeHint() const
+{
+    QSize min1 = QTableWidget::minimumSizeHint(); // This seems to include vertical space for scroll bar, which we don't need
+    int height = horizontalHeader()->height() + 2 * frameWidth() + rowHeight(0);
+    return QSize(min1.width(), height);
+}
 
 class SDRGUI_API UnitsDelegate : public QStyledItemDelegate {
 
@@ -138,7 +167,6 @@ void UnitsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     painter->drawText(option.rect.x() + option.rect.width() - 1 - sWidth, y, s);
 }
 
-
 const QStringList SpectrumMeasurements::m_measurementColumns = {
     "Current",
     "Mean",
@@ -184,7 +212,7 @@ SpectrumMeasurements::SpectrumMeasurements(QWidget *parent) :
 
 void SpectrumMeasurements::createMeasurementsTable(const QStringList &rows, const QStringList &units)
 {
-    m_table = new QTableWidget();
+    m_table = new SpectrumMeasurementsTable();
 
     m_table->horizontalHeader()->setSectionsMovable(true);
     m_table->verticalHeader()->setSectionsMovable(true);
@@ -196,16 +224,7 @@ void SpectrumMeasurements::createMeasurementsTable(const QStringList &rows, cons
         item->setToolTip(m_tooltips[i]);
         m_table->setHorizontalHeaderItem(i, item);
     }
-
-    // Cell context menu
-    m_table->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_table, &QTableWidget::customContextMenuRequested, this, &SpectrumMeasurements::tableContextMenu);
-
-    m_table->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    m_table->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-
-    // Fill up space at end of rows
-    m_table->horizontalHeader()->setSectionResizeMode(COL_EMPTY, QHeaderView::Stretch);
+    m_table->horizontalHeader()->setStretchLastSection(true);
 
     m_table->setRowCount(rows.size());
     for (int i = 0; i < rows.size(); i++)
@@ -232,16 +251,23 @@ void SpectrumMeasurements::createMeasurementsTable(const QStringList &rows, cons
         m_measurements.append(m);
     }
     resizeMeasurementsTable();
+
+    m_table->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    m_table->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
     for (int i = 0; i < COL_COUNT; i++) {
         m_table->setItemDelegateForColumn(i, new UnitsDelegate());
     }
     createTableMenus();
 
+    // Cell context menu
+    m_table->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_table, &QTableWidget::customContextMenuRequested, this, &SpectrumMeasurements::tableContextMenu);
 }
 
 void SpectrumMeasurements::createPeakTable(int peaks)
 {
-    m_peakTable = new QTableWidget();
+    m_peakTable = new SpectrumMeasurementsTable();
     m_peakTable->horizontalHeader()->setSectionsMovable(true);
 
     QStringList columns = QStringList{"Frequency", "Power", ""};
@@ -252,6 +278,8 @@ void SpectrumMeasurements::createPeakTable(int peaks)
     for (int i = 0; i < columns.size(); i++) {
         m_peakTable->setHorizontalHeaderItem(i, new QTableWidgetItem(columns[i]));
     }
+    m_peakTable->horizontalHeader()->setStretchLastSection(true);
+
     for (int i = 0; i < peaks; i++)
     {
         for (int j = 0; j < 3; j++)
@@ -269,14 +297,11 @@ void SpectrumMeasurements::createPeakTable(int peaks)
     }
     resizePeakTable();
 
-    m_peakTable->setItemDelegateForColumn(COL_FREQUENCY, new UnitsDelegate());
-    m_peakTable->setItemDelegateForColumn(COL_POWER, new UnitsDelegate());
-
-    // Fill up space at end of rows
-    m_peakTable->horizontalHeader()->setSectionResizeMode(COL_PEAK_EMPTY, QHeaderView::Stretch);
-
     m_peakTable->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_peakTable->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
+    m_peakTable->setItemDelegateForColumn(COL_FREQUENCY, new UnitsDelegate());
+    m_peakTable->setItemDelegateForColumn(COL_POWER, new UnitsDelegate());
 
     // Cell context menu
     m_peakTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -287,7 +312,7 @@ void SpectrumMeasurements::createTableMenus()
 {
     // Add context menu to allow hiding/showing of columns
     m_rowMenu = new QMenu(m_table);
-    for (int i = 0; i < m_table->verticalHeader()->count(); i++)
+    for (int i = 0; i < m_table->verticalHeader()->count() - 1; i++) // -1 to skip empty column
     {
         QString text = m_table->verticalHeaderItem(i)->text();
         m_rowMenu->addAction(createCheckableItem(text, i, true, true));
@@ -494,6 +519,18 @@ void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement me
             break;
         default:
             break;
+        }
+
+        // Set size to show full table
+        if (m_peakTable)
+        {
+            m_peakTable->show();  // Need to call show() so that sizeHint() is not 0,0
+            resize(sizeHint());
+        }
+        else if (m_table)
+        {
+            m_table->show();
+            resize(sizeHint());
         }
     }
 }
