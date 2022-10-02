@@ -39,6 +39,7 @@ public:
         QList<SpectrumWaterfallMarker>& waterfallMarkers,
         QList<SpectrumAnnotationMarker>& annotationMarkers,
         SpectrumSettings::MarkersDisplay& markersDisplay,
+        bool& findPeaks,
         float calibrationShiftdB,
         QWidget* parent = nullptr
     );
@@ -55,6 +56,7 @@ private:
     QList<SpectrumWaterfallMarker>& m_waterfallMarkers;
     QList<SpectrumAnnotationMarker>& m_annotationMarkers;
     SpectrumSettings::MarkersDisplay& m_markersDisplay;
+    bool &m_findPeaks;
     float m_calibrationShiftdB;
     int m_histogramMarkerIndex;
     int m_waterfallMarkerIndex;
@@ -82,6 +84,7 @@ private slots:
     void on_markerDel_clicked();
     void on_powerMode_currentIndexChanged(int index);
     void on_powerHoldReset_clicked();
+    void on_findPeaks_toggled(bool checked);
 
     void on_wMarkerFrequency_changed(qint64 value);
     void on_timeCoarse_valueChanged(int value);

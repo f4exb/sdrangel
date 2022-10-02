@@ -72,6 +72,11 @@ This combo lets you select the type of marker:
 
 Use this slider to adjust the power position of the marker. The units are in dB irrespective of the linear or log set of the spectrum display.
 
+
+<h3>11. Peak detection</h3>
+
+Activates or de-activates peak detection. With peak detection engaged markers with type "Cur" or "Max" will be automatically set to frequency (bin) of maximum power. The first marker in index order with "Cur" or "Max" will be set to the highest peak in magnitude then next marker to next peak in magnitude order etc,,, Markers of type "Cur" will track current peaks and markers of type "Max" will track peak maxima making it more suitable for transient signals.
+
 <h2>Waterfall markers tab</h2>
 
 ![Spectrum Markers waterfall dialog](../../doc/img/Spectrum_Markers_dialog_wat.png)

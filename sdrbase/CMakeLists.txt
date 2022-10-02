@@ -192,6 +192,7 @@ set(sdrbase_SOURCES
     util/morse.cpp
     util/openaip.cpp
     util/osndb.cpp
+    util/peakfinder.cpp
     util/planespotters.cpp
     util/png.cpp
     util/prettyprint.cpp
@@ -415,6 +416,7 @@ set(sdrbase_HEADERS
     util/movingaverage.h
     util/openaip.h
     util/osndb.h
+    util/peakfinder.h
     util/planespotters.h
     util/png.h
     util/prettyprint.h

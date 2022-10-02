@@ -78,6 +78,7 @@ void SpectrumSettings::resetToDefaults()
     m_measurementHighlight = true;
     m_measurementsPosition = PositionBelow;
     m_measurementPrecision = 1;
+    m_findHistogramPeaks = false;
 }
 
 QByteArray SpectrumSettings::serialize() const
@@ -128,6 +129,7 @@ QByteArray SpectrumSettings::serialize() const
     s.writeS32(44, (int)m_measurementsPosition);
     s.writeS32(45, m_measurementPrecision);
     s.writeS32(46, m_measurementCenterFrequencyOffset);
+    s.writeBool(47, m_findHistogramPeaks);
     s.writeS32(100, m_histogramMarkers.size());
 
 	for (int i = 0; i < m_histogramMarkers.size(); i++) {
@@ -239,6 +241,7 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
         d.readS32(44, (int*)&m_measurementsPosition, (int)PositionBelow);
         d.readS32(45, &m_measurementPrecision, 1);
         d.readS32(46, &m_measurementCenterFrequencyOffset, 0);
+        d.readBool(47, &m_findHistogramPeaks, false);
 
 		int histogramMarkersSize;
 		d.readS32(100, &histogramMarkersSize, 0);

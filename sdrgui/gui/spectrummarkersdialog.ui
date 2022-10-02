@@ -498,6 +498,26 @@ Max - Marker will move according to the maximum power at the marker frequency</s
             </property>
            </spacer>
           </item>
+          <item>
+           <widget class="ButtonSwitch" name="findPeaks">
+            <property name="maximumSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Put markers in find peaks mode</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../resources/res.qrc">
+              <normaloff>:/dsb.png</normaloff>:/dsb.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -1798,6 +1818,11 @@ All  - Show all markers</string>
    <class>ClickableLabel</class>
    <extends>QLabel</extends>
    <header>gui/clickablelabel.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -48,6 +48,7 @@ const float GLSpectrumView::m_annotationMarkerHeight = 20.0f;
 GLSpectrumView::GLSpectrumView(QWidget* parent) :
     QOpenGLWidget(parent),
     m_markersDisplay(SpectrumSettings::MarkersDisplaySpectrum),
+    m_histogramFindPeaks(false),
     m_cursorState(CSNormal),
     m_cursorChannel(0),
     m_spectrumVis(nullptr),
@@ -1369,7 +1370,7 @@ void GLSpectrumView::paintGL()
     }
 
     // paint current spectrum line on top of histogram
-    if ((m_displayCurrent) && m_currentSpectrum)
+    if (m_displayCurrent && m_currentSpectrum)
     {
         Real bottom = -m_powerRange;
         GLfloat *q3;
@@ -1403,6 +1404,10 @@ void GLSpectrumView::paintGL()
         }
 
         {
+            if (m_histogramFindPeaks) {
+                m_peakFinder.init(m_currentSpectrum[0]);
+            }
+
             // Draw line
             q3 = m_q3FFT.m_array;
             for (int i = 0; i < m_nbBins; i++)
@@ -1418,6 +1423,9 @@ void GLSpectrumView::paintGL()
                 q3[2*i] = (Real) i;
                 q3[2*i+1] = v;
 
+                if (m_histogramFindPeaks && (i > 0)) {
+                    m_peakFinder.push(m_currentSpectrum[i], i == m_nbBins - 1);
+                }
             }
 
             QVector4D color;
@@ -1427,12 +1435,22 @@ void GLSpectrumView::paintGL()
                 color = QVector4D(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
             }
             m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_nbBins);
+
+            if (m_histogramFindPeaks) {
+                m_peakFinder.sortPeaks();
+            }
         }
     }
 
-    if (m_markersDisplay & SpectrumSettings::MarkersDisplaySpectrum) {
+    if (m_displayCurrent && m_currentSpectrum && (m_markersDisplay & SpectrumSettings::MarkersDisplaySpectrum))
+    {
+        if (m_histogramFindPeaks) {
+            updateHistogramPeaks();
+        }
+
         drawSpectrumMarkers();
     }
+
     if (m_markersDisplay & SpectrumSettings::MarkersDisplayAnnotations) {
         drawAnnotationMarkers();
     }
@@ -1724,7 +1742,7 @@ void GLSpectrumView::paintGL()
     }
 
     m_mutex.unlock();
-}
+} // paintGL
 
 // Hightlight power band for SFDR
 void GLSpectrumView::drawPowerBandMarkers(float max, float min, const QVector4D &color)
@@ -3289,7 +3307,7 @@ void GLSpectrumView::updateHistogramMarkers()
         if (i > 0)
         {
             int64_t deltaFrequency = m_histogramMarkers.at(i).m_frequency - m_histogramMarkers.at(0).m_frequency;
-            m_histogramMarkers.back().m_deltaFrequencyStr = displayScaled(
+            m_histogramMarkers[i].m_deltaFrequencyStr = displayScaled(
                 deltaFrequency,
                 'f',
                 getPrecision(deltaFrequency/m_sampleRate),
@@ -3297,11 +3315,62 @@ void GLSpectrumView::updateHistogramMarkers()
             float power0 = m_linear ?
                 m_histogramMarkers.at(0).m_power * (m_useCalibration ? m_calibrationGain : 1.0f) :
                 CalcDb::dbPower(m_histogramMarkers.at(0).m_power) + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
-            m_histogramMarkers.back().m_deltaPowerStr = displayPower(
+            m_histogramMarkers[i].m_deltaPowerStr = displayPower(
                 powerI - power0,
                 m_linear ? 'e' : 'f',
                 m_linear ? 3 : 1);
         }
+    }
+}
+
+void GLSpectrumView::updateHistogramPeaks()
+{
+    int j = 0;
+    for (int i = 0; i < m_histogramMarkers.size(); i++)
+    {
+        if (j >= (int) m_peakFinder.getPeaks().size()) {
+            break;
+        }
+
+        int fftBin = m_peakFinder.getPeaks()[j].second;
+        Real power = m_peakFinder.getPeaks()[j].first;
+        // qDebug("GLSpectrumView::updateHistogramPeaks: %d %d %f", j, fftBin, power);
+
+        if ((m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePower) ||
+            ((m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax) &&
+             (m_histogramMarkers.at(i).m_holdReset || (power > m_histogramMarkers.at(i).m_powerMax))))
+        {
+            float binSize = m_frequencyScale.getRange() / m_nbBins;
+            m_histogramMarkers[i].m_fftBin = fftBin;
+            m_histogramMarkers[i].m_frequency = m_frequencyScale.getRangeMin() + binSize*fftBin;
+            m_histogramMarkers[i].m_point.rx() = binSize*fftBin / m_frequencyScale.getRange();
+
+            if (i == 0)
+            {
+                m_histogramMarkers[i].m_frequencyStr = displayScaled(
+                    m_histogramMarkers[i].m_frequency,
+                    'f',
+                    getPrecision((m_centerFrequency*1000)/m_sampleRate),
+                    false
+                );
+            }
+            else
+            {
+                int64_t deltaFrequency = m_histogramMarkers.at(i).m_frequency - m_histogramMarkers.at(0).m_frequency;
+                m_histogramMarkers[i].m_deltaFrequencyStr = displayScaled(
+                    deltaFrequency,
+                    'f',
+                    getPrecision(deltaFrequency/m_sampleRate),
+                    true
+                );
+            }
+        }
+        else
+        {
+            continue;
+        }
+
+        j++;
     }
 }
 

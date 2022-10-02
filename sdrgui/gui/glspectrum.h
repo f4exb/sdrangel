@@ -95,6 +95,8 @@ public:
     void updateMarkersDisplay() { m_spectrum->updateMarkersDisplay(); }
     void updateCalibrationPoints() { m_spectrum->updateCalibrationPoints(); }
     SpectrumSettings::MarkersDisplay& getMarkersDisplay() { return m_spectrum->getMarkersDisplay(); }
+    bool& getHistogramFindPeaks() { return m_spectrum->getHistogramFindPeaks(); }
+    void setHistogramFindPeaks(bool value) { m_spectrum->setHistogramFindPeaks(value); }
 	void setMarkersDisplay(SpectrumSettings::MarkersDisplay markersDisplay) { m_spectrum->setMarkersDisplay(markersDisplay); }
     QList<SpectrumCalibrationPoint>& getCalibrationPoints() { return m_spectrum->getCalibrationPoints(); }
     void setCalibrationPoints(const QList<SpectrumCalibrationPoint>& calibrationPoints) { m_spectrum->setCalibrationPoints(calibrationPoints); }

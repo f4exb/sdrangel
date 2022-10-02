@@ -43,6 +43,7 @@
 #include "util/incrementalarray.h"
 #include "util/message.h"
 #include "util/colormap.h"
+#include "util/peakfinder.h"
 
 class QOpenGLShaderProgram;
 class MessageQueue;
@@ -214,11 +215,14 @@ public:
     QList<SpectrumAnnotationMarker>& getAnnotationMarkers() { return m_annotationMarkers; }
     void setAnnotationMarkers(const QList<SpectrumAnnotationMarker>& annotationMarkers);
     void updateHistogramMarkers();
+    void updateHistogramPeaks();
     void updateWaterfallMarkers();
     void updateAnnotationMarkers();
     void updateMarkersDisplay();
     void updateCalibrationPoints();
-    SpectrumSettings::MarkersDisplay& getMarkersDisplay() {  return m_markersDisplay; }
+    SpectrumSettings::MarkersDisplay& getMarkersDisplay() { return m_markersDisplay; }
+    bool& getHistogramFindPeaks() { return m_histogramFindPeaks; }
+    void setHistogramFindPeaks(bool value) { m_histogramFindPeaks = value; }
 	void setMarkersDisplay(SpectrumSettings::MarkersDisplay markersDisplay);
     QList<SpectrumCalibrationPoint>& getCalibrationPoints() { return m_calibrationPoints; }
     void setCalibrationPoints(const QList<SpectrumCalibrationPoint>& calibrationPoints);
@@ -258,6 +262,8 @@ private:
     QList<SpectrumAnnotationMarker*> m_sortedAnnotationMarkers;
     QList<SpectrumAnnotationMarker*> m_visibleAnnotationMarkers;
     SpectrumSettings::MarkersDisplay m_markersDisplay;
+    bool m_histogramFindPeaks;
+    PeakFinder m_peakFinder;
     QList<SpectrumCalibrationPoint> m_calibrationPoints;
 
     CursorState m_cursorState;

@@ -32,6 +32,7 @@ SpectrumMarkersDialog::SpectrumMarkersDialog(
     QList<SpectrumWaterfallMarker>& waterfallMarkers,
     QList<SpectrumAnnotationMarker>& annotationMarkers,
     SpectrumSettings::MarkersDisplay& markersDisplay,
+    bool& findPeaks,
     float calibrationShiftdB,
     QWidget* parent) :
     QDialog(parent),
@@ -40,6 +41,7 @@ SpectrumMarkersDialog::SpectrumMarkersDialog(
     m_waterfallMarkers(waterfallMarkers),
     m_annotationMarkers(annotationMarkers),
     m_markersDisplay(markersDisplay),
+    m_findPeaks(findPeaks),
     m_calibrationShiftdB(calibrationShiftdB),
     m_histogramMarkerIndex(0),
     m_waterfallMarkerIndex(0),
@@ -63,6 +65,7 @@ SpectrumMarkersDialog::SpectrumMarkersDialog(
     ui->fixedPower->setColorMapper(ColorMapper::GrayYellow);
     ui->fixedPower->setValueRange(false, 4, -2000, 400, 1);
     ui->showSelect->setCurrentIndex((int) m_markersDisplay);
+    ui->findPeaks->setChecked(m_findPeaks);
     displayHistogramMarker();
     displayWaterfallMarker();
     displayAnnotationMarker();
@@ -94,8 +97,12 @@ void SpectrumMarkersDialog::displayHistogramMarker()
     }
     else
     {
+        bool disableFreq = m_findPeaks && (
+            (m_histogramMarkers[m_histogramMarkerIndex].m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePower) ||
+            (m_histogramMarkers[m_histogramMarkerIndex].m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax)
+        );
         ui->marker->setEnabled(true);
-        ui->markerFrequency->setEnabled(true);
+        ui->markerFrequency->setEnabled(!disableFreq);
         ui->powerMode->setEnabled(true);
         ui->fixedPower->setEnabled(true);
         ui->showMarker->setEnabled(true);
@@ -401,6 +408,12 @@ void SpectrumMarkersDialog::on_powerHoldReset_clicked()
     }
 
     m_histogramMarkers[m_histogramMarkerIndex].m_holdReset = true;
+}
+
+void SpectrumMarkersDialog::on_findPeaks_toggled(bool checked)
+{
+    m_findPeaks = checked;
+    displayHistogramMarker();
 }
 
 void SpectrumMarkersDialog::on_wMarkerFrequency_changed(qint64 value)

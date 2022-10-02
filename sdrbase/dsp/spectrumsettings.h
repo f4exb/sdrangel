@@ -117,6 +117,7 @@ public:
 	QList<SpectrumHistogramMarker> m_histogramMarkers;
 	QList<SpectrumWaterfallMarker> m_waterfallMarkers;
 	QList<SpectrumAnnotationMarker> m_annoationMarkers;
+    bool m_findHistogramPeaks;
 	MarkersDisplay m_markersDisplay;
 	QList<SpectrumCalibrationPoint> m_calibrationPoints;
 	bool m_useCalibration;
@@ -149,6 +150,7 @@ public:
 
 	QList<SpectrumHistogramMarker>& getHistogramMarkers() { return m_histogramMarkers; }
 	QList<SpectrumWaterfallMarker>& getWaterfallMarkers() { return m_waterfallMarkers; }
+    bool getHistogramFindPeaks() { return m_findHistogramPeaks; }
 
     static int getAveragingMaxScale(AveragingMode averagingMode); //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
     static int getAveragingValue(int averagingIndex, AveragingMode averagingMode);

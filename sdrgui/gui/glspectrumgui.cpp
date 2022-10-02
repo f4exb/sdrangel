@@ -463,6 +463,7 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
         m_glSpectrum->getWaterfallMarkers(),
         m_glSpectrum->getAnnotationMarkers(),
         m_glSpectrum->getMarkersDisplay(),
+        m_glSpectrum->getHistogramFindPeaks(),
         m_calibrationShiftdB,
         this
     );
