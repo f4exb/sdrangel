@@ -373,6 +373,10 @@ bool RollupContents::event(QEvent* event)
         ((QChildEvent*)event)->child()->removeEventFilter(this);
         arrangeRollups();
     }
+    else if (event->type() == QEvent::LayoutRequest)
+    {
+        arrangeRollups();
+    }
 
     return QWidget::event(event);
 }
