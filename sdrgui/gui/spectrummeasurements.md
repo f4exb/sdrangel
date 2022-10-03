@@ -124,4 +124,4 @@ Each time the specification fails to be met, the value in the Fails column is in
 Values out of specification are highlighted in red.
 The Spec column supports the following operators: <, <=, >, >= and =.
 
-![Spectrum Measurements - specifications](../../doc/img/Spectrum_Measurement_Specifications.png)
+![Spectrum Measurements - specifications](../../doc/img/Spectrum_Measurement_Specification.png)
