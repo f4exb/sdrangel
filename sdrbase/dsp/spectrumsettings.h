@@ -76,6 +76,8 @@ public:
         MeasurementPeaks,
         MeasurementChannelPower,
         MeasurementAdjacentChannelPower,
+        MeasurementOccupiedBandwidth,
+        Measurement3dBBandwidth,
         MeasurementSNR
     };
 

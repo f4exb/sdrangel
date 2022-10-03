@@ -431,6 +431,8 @@ private:
     void measurePeaks();
     void measureChannelPower();
     void measureAdjacentChannelPower();
+    void measureOccupiedBandwidth();
+    void measure3dBBandwidth();
     void measureSNR();
     void measureSFDR();
     float calcChannelPower(int64_t centerFrequency, int channelBandwidth) const;

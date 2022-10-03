@@ -96,6 +96,8 @@ public:
     void setSFDR(float sfdr);
     void setChannelPower(float power);
     void setAdjacentChannelPower(float left, float leftACPR, float center, float right, float rightACPR);
+    void setOccupiedBandwidth(float occupiedBandwidth);
+    void set3dBBandwidth(float bandwidth);
     void setPeak(int peak, int64_t frequency, float power);
     void reset();
 
@@ -105,6 +107,8 @@ private:
     void createTableMenus();
     void createChannelPowerTable();
     void createAdjacentChannelPowerTable();
+    void createOccupiedBandwidthTable();
+    void create3dBBandwidthTable();
     void createSNRTable();
     void tableContextMenu(QPoint pos);
     void peakTableContextMenu(QPoint pos);

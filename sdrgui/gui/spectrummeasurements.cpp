@@ -347,6 +347,22 @@ void SpectrumMeasurements::createAdjacentChannelPowerTable()
     createMeasurementsTable(rows, units);
 }
 
+void SpectrumMeasurements::createOccupiedBandwidthTable()
+{
+    QStringList rows = {"Occupied B/W"};
+    QStringList units = {" Hz"};
+
+    createMeasurementsTable(rows, units);
+}
+
+void SpectrumMeasurements::create3dBBandwidthTable()
+{
+    QStringList rows = {"3dB B/W"};
+    QStringList units = {" Hz"};
+
+    createMeasurementsTable(rows, units);
+}
+
 void SpectrumMeasurements::createSNRTable()
 {
     QStringList rows = {"SNR", "SNFR", "THD", "THD+N", "SINAD", "SFDR",};
@@ -512,6 +528,16 @@ void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement me
             createAdjacentChannelPowerTable();
             layout()->addWidget(m_table);
             break;
+        case SpectrumSettings::MeasurementOccupiedBandwidth:
+            reset();
+            createOccupiedBandwidthTable();
+            layout()->addWidget(m_table);
+            break;
+        case SpectrumSettings::Measurement3dBBandwidth:
+            reset();
+            create3dBBandwidthTable();
+            layout()->addWidget(m_table);
+            break;
         case SpectrumSettings::MeasurementSNR:
             reset();
             createSNRTable();
@@ -646,6 +672,16 @@ void SpectrumMeasurements::setAdjacentChannelPower(float left, float leftACPR, f
     updateMeasurement(2, center);
     updateMeasurement(3, right);
     updateMeasurement(4, rightACPR);
+}
+
+void SpectrumMeasurements::setOccupiedBandwidth(float occupiedBandwidth)
+{
+    updateMeasurement(0, occupiedBandwidth);
+}
+
+void SpectrumMeasurements::set3dBBandwidth(float bandwidth)
+{
+    updateMeasurement(0, bandwidth);
 }
 
 void SpectrumMeasurements::setPeak(int peak, int64_t frequency, float power)
