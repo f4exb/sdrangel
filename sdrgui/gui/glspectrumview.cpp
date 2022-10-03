@@ -1140,19 +1140,6 @@ void GLSpectrumView::paintGL()
                 }
             }
         }
-
-        // draw rect around
-        {
-            GLfloat q3[] {
-                1, 1,
-                0, 1,
-                0, 0,
-                1, 0
-            };
-
-            QVector4D color(1.0f, 1.0f, 1.0f, 0.5f);
-            m_glShaderSimple.drawContour(m_glHistogramBoxMatrix, color, q3, 4);
-        }
     }
 
     // paint left scales (time and power)
@@ -1342,9 +1329,14 @@ void GLSpectrumView::paintGL()
                 q3[4*i+2] = (GLfloat)i;
                 q3[4*i+3] = v;
             }
+            // Replicate Nyquist sample to end of positive side
+            q3[4*m_nbBins] = (GLfloat) m_nbBins;
+            q3[4*m_nbBins+1] = q3[1];
+            q3[4*m_nbBins+2] = (GLfloat) m_nbBins;
+            q3[4*m_nbBins+3] = q3[3];
 
             QVector4D color(0.5f, 0.0f, 0.0f, (float) m_displayTraceIntensity / 100.0f);
-            m_glShaderSimple.drawSurfaceStrip(m_glHistogramSpectrumMatrix, color, q3, 2*m_nbBins);
+            m_glShaderSimple.drawSurfaceStrip(m_glHistogramSpectrumMatrix, color, q3, 2*(m_nbBins+1));
         }
         // Max hold line
         {
@@ -1363,9 +1355,12 @@ void GLSpectrumView::paintGL()
                 q3[2*i] = (Real) i;
                 q3[2*i+1] = v;
             }
+            // Replicate Nyquist sample to end of positive side
+            q3[2*m_nbBins] = (GLfloat) m_nbBins;
+            q3[2*m_nbBins+1] = q3[1];
 
             QVector4D color(1.0f, 0.0f, 0.0f, (float) m_displayTraceIntensity / 100.0f);
-            m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_nbBins);
+            m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_nbBins+1);
         }
     }
 
@@ -1394,12 +1389,17 @@ void GLSpectrumView::paintGL()
                 q3[4*i+2] = (GLfloat)i;
                 q3[4*i+3] = v;
             }
+            // Replicate Nyquist sample to end of positive side
+            q3[4*m_nbBins] = (GLfloat) m_nbBins;
+            q3[4*m_nbBins+1] = q3[1];
+            q3[4*m_nbBins+2] = (GLfloat) m_nbBins;
+            q3[4*m_nbBins+3] = q3[3];
 
             QVector4D color(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
             if (m_spectrumStyle == SpectrumSettings::Gradient) {
-                m_glShaderColorMap.drawSurfaceStrip(m_glHistogramSpectrumMatrix, q3, 2*m_nbBins, bottom, 0.75f);
+                m_glShaderColorMap.drawSurfaceStrip(m_glHistogramSpectrumMatrix, q3, 2*(m_nbBins+1), bottom, 0.75f);
             } else {
-                m_glShaderSimple.drawSurfaceStrip(m_glHistogramSpectrumMatrix, color, q3, 2*m_nbBins);
+                m_glShaderSimple.drawSurfaceStrip(m_glHistogramSpectrumMatrix, color, q3, 2*(m_nbBins+1));
             }
         }
 
@@ -1427,6 +1427,9 @@ void GLSpectrumView::paintGL()
                     m_peakFinder.push(m_currentSpectrum[i], i == m_nbBins - 1);
                 }
             }
+            // Replicate Nyquist sample to end of positive side
+            q3[2*m_nbBins] = (GLfloat) m_nbBins;
+            q3[2*m_nbBins+1] = q3[1];
 
             QVector4D color;
             if (m_spectrumStyle == SpectrumSettings::Gradient) {
@@ -1434,7 +1437,7 @@ void GLSpectrumView::paintGL()
             } else {
                 color = QVector4D(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
             }
-            m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_nbBins);
+            m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_nbBins+1);
 
             if (m_histogramFindPeaks) {
                 m_peakFinder.sortPeaks();
@@ -1698,6 +1701,22 @@ void GLSpectrumView::paintGL()
 
             QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
             m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, color, q3, 2*effectiveTicks);
+        }
+    }
+
+    // paint rect around histogram (do last, so on top of filled spectrum)
+    if (m_displayHistogram || m_displayMaxHold || m_displayCurrent)
+    {
+        {
+            GLfloat q3[] {
+                1, 1,
+                0, 1,
+                0, 0,
+                1, 0
+            };
+
+            QVector4D color(1.0f, 1.0f, 1.0f, 0.5f);
+            m_glShaderSimple.drawContour(m_glHistogramBoxMatrix, color, q3, 4);
         }
     }
 
@@ -2597,7 +2616,7 @@ void GLSpectrumView::applyChanges()
              1.0f - ((float)(2*histogramTop) / (float) height())
         );
         m_glHistogramSpectrumMatrix.scale(
-            ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_nbBins - 1)),
+            ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_nbBins)),
             ((float) 2*m_histogramHeight / height()) / m_powerRange
         );
 
@@ -2726,7 +2745,7 @@ void GLSpectrumView::applyChanges()
              1.0f - ((float)(2*histogramTop) / (float) height())
         );
         m_glHistogramSpectrumMatrix.scale(
-            ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_nbBins - 1)),
+            ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_nbBins)),
             ((float) 2*(height() - m_topMargin - m_frequencyScaleHeight)) / (height()*m_powerRange)
         );
 
@@ -3243,10 +3262,10 @@ void GLSpectrumView::applyChanges()
         m_histogram = new quint8[100 * m_nbBins];
         memset(m_histogram, 0x00, 100 * m_nbBins);
 
-        m_q3FFT.allocate(2*m_nbBins);
+        m_q3FFT.allocate(2*(m_nbBins+1));
 
-        m_q3ColorMap.allocate(4*m_nbBins);
-        std::fill(m_q3ColorMap.m_array, m_q3ColorMap.m_array+4*m_nbBins, 0.0f);
+        m_q3ColorMap.allocate(4*(m_nbBins+1));
+        std::fill(m_q3ColorMap.m_array, m_q3ColorMap.m_array+4*(m_nbBins+1), 0.0f);
     }
 
     if (fftSizeChanged || windowSizeChanged)
