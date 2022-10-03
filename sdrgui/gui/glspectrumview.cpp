@@ -2307,8 +2307,9 @@ void GLSpectrumView::measure3dBBandwidth()
     }
 
     // Calcualte bandwidth
-    float hzPerBin = m_sampleRate / (float) m_fftSize;
     int bins = rightBin - leftBin - 1;
+    bins = std::max(1, bins);
+    float hzPerBin = m_sampleRate / (float) m_fftSize;
     float bandwidth = bins * hzPerBin;
     int centerBin = leftBin + (rightBin - leftBin) / 2;
     float centerFrequency = binToFrequency(centerBin);

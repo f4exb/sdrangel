@@ -350,7 +350,7 @@ void SpectrumMeasurements::createAdjacentChannelPowerTable()
 void SpectrumMeasurements::createOccupiedBandwidthTable()
 {
     QStringList rows = {"Occupied B/W"};
-    QStringList units = {" Hz"};
+    QStringList units = {"Hz"};
 
     createMeasurementsTable(rows, units);
 }
@@ -358,7 +358,7 @@ void SpectrumMeasurements::createOccupiedBandwidthTable()
 void SpectrumMeasurements::create3dBBandwidthTable()
 {
     QStringList rows = {"3dB B/W"};
-    QStringList units = {" Hz"};
+    QStringList units = {"Hz"};
 
     createMeasurementsTable(rows, units);
 }
