@@ -1751,6 +1751,12 @@ void GLSpectrumView::paintGL()
         case SpectrumSettings::MeasurementAdjacentChannelPower:
             measureAdjacentChannelPower();
             break;
+        case SpectrumSettings::MeasurementOccupiedBandwidth:
+            measureOccupiedBandwidth();
+            break;
+        case SpectrumSettings::Measurement3dBBandwidth:
+            measure3dBBandwidth();
+            break;
         case SpectrumSettings::MeasurementSNR:
             measureSNR();
             measureSFDR();
@@ -2223,6 +2229,99 @@ void GLSpectrumView::measureAdjacentChannelPower()
     }
 }
 
+// Measure bandwidth that has 99% of power
+void GLSpectrumView::measureOccupiedBandwidth()
+{
+    float hzPerBin = m_sampleRate / (float) m_fftSize;
+    int bins = m_measurementBandwidth / hzPerBin;
+    int start = frequencyToBin(m_centerFrequency + m_measurementCenterFrequencyOffset);
+    float totalPower, power = 0.0f;
+    int step = 0;
+    int width = 0;
+    int idx = start;
+    float gain = m_useCalibration ? m_calibrationGain : 1.0f;
+    float shift = m_useCalibration ? m_calibrationShiftdB : 0.0f;
+
+    totalPower = CalcDb::powerFromdB(calcChannelPower(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth));
+    do
+    {
+        if ((idx >= 0) && (idx < m_nbBins))
+        {
+            if (m_linear) {
+                power += m_currentSpectrum[idx] * gain;
+            } else {
+                power += CalcDb::powerFromdB(m_currentSpectrum[idx]) + shift;
+            }
+            width++;
+        }
+
+        step++;
+        if ((step & 1) == 1) {
+            idx -= step;
+        } else {
+            idx += step;
+        }
+    }
+    while (((power / totalPower) < 0.99f) && (step < m_nbBins));
+
+    float occupiedBandwidth = width * hzPerBin;
+    if (m_measurements) {
+        m_measurements->setOccupiedBandwidth(occupiedBandwidth);
+    }
+    if (m_measurementHighlight)
+    {
+        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth, m_measurementDarkMarkerColor);
+        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset, occupiedBandwidth, m_measurementLightMarkerColor);
+    }
+}
+
+// Measure bandwidth -3dB from peak
+void GLSpectrumView::measure3dBBandwidth()
+{
+    // Find max peak and it's power in dB
+    int peakBin = findPeakBin(m_currentSpectrum);
+    float peakPower = m_linear ? CalcDb::dbPower(m_currentSpectrum[peakBin]) : m_currentSpectrum[peakBin];
+
+    // Search right until 3dB from peak
+    int rightBin = peakBin;
+    for (int i = peakBin + 1; i < m_nbBins; i++)
+    {
+        float power = m_linear ? CalcDb::dbPower(m_currentSpectrum[i]) : m_currentSpectrum[i];
+        if (peakPower - power > 3.0f)
+        {
+            rightBin = i - 1;
+            break;
+        }
+    }
+
+    // Search left until 3dB from peak
+    int leftBin = peakBin;
+    for (int i = peakBin - 1; i >= 0; i--)
+    {
+        float power = m_linear ? CalcDb::dbPower(m_currentSpectrum[i]) : m_currentSpectrum[i];
+        if (peakPower - power > 3.0f)
+        {
+            leftBin = i + 1;
+            break;
+        }
+    }
+
+    // Calcualte bandwidth
+    int bins = rightBin - leftBin - 1;
+    bins = std::max(1, bins);
+    float hzPerBin = m_sampleRate / (float) m_fftSize;
+    float bandwidth = bins * hzPerBin;
+    int centerBin = leftBin + (rightBin - leftBin) / 2;
+    float centerFrequency = binToFrequency(centerBin);
+
+    if (m_measurements) {
+        m_measurements->set3dBBandwidth(bandwidth);
+    }
+    if (m_measurementHighlight) {
+        drawBandwidthMarkers(centerFrequency, bandwidth, m_measurementLightMarkerColor);
+    }
+}
+
 const QVector4D GLSpectrumView::m_measurementLightMarkerColor = QVector4D(0.6f, 0.6f, 0.6f, 0.2f);
 const QVector4D GLSpectrumView::m_measurementDarkMarkerColor = QVector4D(0.6f, 0.6f, 0.6f, 0.15f);
 
@@ -2485,17 +2584,20 @@ float GLSpectrumView::calcChannelPower(int64_t centerFrequency, int channelBandw
     int end = start + bins;
     float power = 0.0;
 
+    start = std::max(start, 0);
+    end = std::min(end, m_nbBins);
+
     if (m_linear)
     {
         float gain = m_useCalibration ? m_calibrationGain : 1.0f;
-        for (int i = start; i <= end; i++) {
+        for (int i = start; i < end; i++) {
             power += m_currentSpectrum[i] * gain;
         }
     }
     else
     {
         float shift = m_useCalibration ? m_calibrationShiftdB : 0.0f;
-        for (int i = start; i <= end; i++) {
+        for (int i = start; i < end; i++) {
             power += CalcDb::powerFromdB(m_currentSpectrum[i]) + shift;
         }
     }

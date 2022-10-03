@@ -80,7 +80,8 @@ void SpectrumMeasurementsDialog::displaySettings()
     ui->resetMeasurements->setVisible(reset && show);
 
     bool bw = (m_settings->m_measurement == SpectrumSettings::MeasurementChannelPower)
-               || (m_settings->m_measurement == SpectrumSettings::MeasurementAdjacentChannelPower);
+               || (m_settings->m_measurement == SpectrumSettings::MeasurementAdjacentChannelPower)
+               || (m_settings->m_measurement == SpectrumSettings::MeasurementOccupiedBandwidth);
     ui->centerFrequencyOffsetLabel->setVisible(bw && show);
     ui->centerFrequencyOffset->setVisible(bw && show);
     ui->bandwidthLabel->setVisible(bw && show);

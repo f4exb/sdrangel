@@ -157,6 +157,16 @@
        </item>
        <item>
         <property name="text">
+         <string>Occupied bandwidth</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>3dB bandwidth</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>SNR</string>
         </property>
        </item>
