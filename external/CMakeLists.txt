@@ -28,7 +28,7 @@ set(SOAPYSDR_SDRPLAY_TAG "soapy-sdrplay-0.2.0")
 set(SOAPYSDR_AUDIO_TAG "soapy-audio-0.1.1")
 set(SOAPYSDR_REMOTE_TAG "soapy-remote-0.5.1")
 set(AIRSPY_TAG "v1.0.10")
-set(HACKRF_TAG "v2018.01.1")
+set(HACKRF_TAG "v2022.09.1")
 set(LIBXML2_TAG "v2.9.9")
 
 # For some external project macros
@@ -1274,7 +1274,7 @@ if (WIN32 OR APPLE)
             set(HACKRF_LIBUSB_INCLUDE_DIR ${LIBUSB_INCLUDE_DIR})
         endif ()
         ExternalProject_Add(hackrf
-                GIT_REPOSITORY https://github.com/mossmann/hackrf.git
+                GIT_REPOSITORY https://github.com/greatscottgadgets/hackrf.git
                 GIT_TAG ${HACKRF_TAG}
                 GIT_SUBMODULES ""
                 DEPENDS ${PTHREADS4W_DEPENDS} ${LIBUSB_DEPENDS}
