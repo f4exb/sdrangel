@@ -87,6 +87,8 @@ LocalOutputGui::LocalOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 LocalOutputGui::~LocalOutputGui()
 {
+    m_statusTimer.stop();
+    m_updateTimer.stop();
 	delete ui;
 }
 

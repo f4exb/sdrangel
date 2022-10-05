@@ -85,6 +85,7 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 FileInputGUI::~FileInputGUI()
 {
     qDebug("FileInputGUI::~FileInputGUI");
+    m_statusTimer.stop();
 	delete ui;
     qDebug("FileInputGUI::~FileInputGUI: end");
 }

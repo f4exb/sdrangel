@@ -99,6 +99,7 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 
 SigMFFileInputGUI::~SigMFFileInputGUI()
 {
+    m_statusTimer.stop();
 	delete ui;
 }
 

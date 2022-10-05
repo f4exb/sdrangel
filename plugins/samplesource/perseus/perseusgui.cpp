@@ -70,6 +70,8 @@ PerseusGui::PerseusGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 PerseusGui::~PerseusGui()
 {
+    m_statusTimer.stop();
+    m_updateTimer.stop();
 	delete ui;
 }
 

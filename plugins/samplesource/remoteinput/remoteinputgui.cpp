@@ -105,6 +105,9 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 RemoteInputGui::~RemoteInputGui()
 {
+    m_statusTimer.stop();
+    m_updateTimer.stop();
+    m_remoteUpdateTimer.stop();
 	delete ui;
 }
 
