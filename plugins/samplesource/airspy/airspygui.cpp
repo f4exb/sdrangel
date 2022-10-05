@@ -73,7 +73,9 @@ AirspyGui::AirspyGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 AirspyGui::~AirspyGui()
 {
-	delete ui;
+    m_statusTimer.stop();
+    m_updateTimer.stop();
+    delete ui;
 }
 
 void AirspyGui::destroy()

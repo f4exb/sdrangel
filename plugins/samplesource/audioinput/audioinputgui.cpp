@@ -60,6 +60,7 @@ AudioInputGui::AudioInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 AudioInputGui::~AudioInputGui()
 {
+    m_updateTimer.stop();
     delete ui;
 }
 
