@@ -1,3 +1,67 @@
+sdrangel (7.8.0-1) unstable; urgency=medium
+
+  * Upgrade to latest libhackrf and use new Github URL. Fixes #1456
+  * HackRF: use software LO ppm correction since hardware correction does not work. Fixes #1443
+  * Device GUIs: Stop timers in destructors. Possible fix of #1372. PR #1466
+  * Add occupied bandwidth and 3dB bandwidth measurements. PR #1465
+  * Align spectrum with frequency scale. PR #1464
+  * Rollupwidgets: Handle child layout requests. PR #1462
+  * Size spectrum measurements table. PR #1462
+  * Updated calibration button icon and documentation. Following PR #1454
+  * Move GLSpectrum to GLSpectrumView and create new GLSpectrum with SpectrumMeasurements. PR #1454
+  * Use dialog for spectrum measurement settings. PR #1454
+  * Use splitter instead of dock. PR #1454
+  * Update peak table when number of peaks changes. PR #1454
+  * Spectrum: Use widget for measurements. PR #1454
+  * Spectrum: Add Channel Power and SNR measurements. PR #1446
+  * Spectrum: Add peak power and frequency in info bar. PR #1437
+  * Spectrum markers peaks option
+  * communicate from spectrum GUI to markers dialog and fixed some warning issues
+  * Open spectrum markers dialog at current mouse position
+  * Make markers dialog non modal
+  * Save spectrum as CSV file with frequency and header. PR #1451
+  * Spectrum GUI: Add button to save spectrum data to text file. PR #1451
+  * Airspy: Update threading model. Part of #1346
+  * Update threading model in Simple PTT feature. Part of #1346
+  * Update threading model in Demod Analyzer feature. Part of #1346
+  * AirspyHF: Update threading model. PR #1436
+  * Update threading model in AFC feature. Part of #1346
+  * AFC feature corrections
+  * Frequency tracker: fixed GUI callbacks
+  * Update threading model in Simple VOR localizer feature. Part of #1346
+  * Part of #1346 Update threading model in Star Tracker, PER Tester and APRS features. PR #1428
+  * Update threading in Rotator Controller. Part of #1346. PR #1419
+  * Sat tracker: Use new threading model. Part of #1346. Fix memory corruption bug. PR #1419
+  * More descriptive error for broken/unsupported WAV files. PR #1453
+  * Replace depreceted QWidget.setMargin with setContentsMargins. PR #1447
+  * Replace deprecated FontMetrics.width() with horizontalAdvance. PR #1447
+  * Replace deprecated QWheelEvent.pos by position. PR #1444
+  * Replace deprecated QWheelEvent.delta by angleDelta. PR #1444
+  * Replace deprecated QTextStream number conversion functions. PR #1442
+  * Fix name of widget, it must be unique. PR #1439
+  * Replace deprecated setStandardButtons. PR #1438
+  * Replace deprecated QSsl TLS ciphersuite selection. PR #1438
+  * Replace deprecated QDateTime toTime_t by toSecsSinceEpoch. PR #1434
+  * APT Demod: Update to latest aptdec. Remove reference to obsolete zenith variable. PR #1459
+  * APT Demod: Add support for visible calibration. Fix #1422 PR #1459
+  * Maps: Use mapboxgl as default map on Linux, as osm hangs in many cases. PR #1458
+  * ADSB: Handle double quoted arguments in commands. PR #1455
+  * Fix #1287 Fix ADS-B crash when My Position changed. PR #1429
+  * Satellite Tracker: Implement variable substitution for commands and add additional variables. PR #1455
+  * Sat Tracker: Fix restoring LOS speech Fixes #1421. PR #1419
+  * Satellite Tracker: Signal AOS/LOS when non real time. Fix custom time. Fixes #1445. PR #1449
+  * Fix crash when sat specific AOS command specified. Fixes #1425. PR #1426
+  * Fixed GUI vs core plugin load order when loading a preset. Fixes #1427
+  * Radio Astronomy: Add filtered power series. PR #1450
+  * SoapySDR: make sure device open is successful before starting. Fixes #1441
+  * Duplicate MDI restore geometry in an attempt to fix #1432
+  * Duplicate QWidget::restoreGeometry in some places in an attempt to fix #1432
+  * Fix #1452 Workaround Linux bug in color picker in map settings. PR #1433
+  * Call stopWork from destructor. PR #1431
+  * Remote Control: Fix Mac build. PR #1420
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 06 Oct 2022 22:08:43 +0200
+
 sdrangel (7.7.0-1) unstable; urgency=medium
 
   * Remote control feature plugin. PR #1414
