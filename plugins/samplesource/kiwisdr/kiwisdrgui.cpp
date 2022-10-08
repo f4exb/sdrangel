@@ -150,7 +150,15 @@ void KiwiSDRGui::on_serverAddress_returnPressed()
 
 void KiwiSDRGui::on_serverAddressApplyButton_clicked()
 {
-	m_settings.m_serverAddress = ui->serverAddress->text();
+	QString serverAddress = ui->serverAddress->text();
+    QUrl url(serverAddress);
+
+    if (QStringList{"ws", "wss", "http", "https"}.contains(url.scheme())) {
+        m_settings.m_serverAddress = QString("%1:%2").arg(url.host()).arg(url.port());
+    } else {
+        m_settings.m_serverAddress = serverAddress;
+    }
+
 	sendSettings();
 }
 

@@ -139,8 +139,10 @@ void KiwiSDRWorker::onGainChanged(quint32 gain, bool useAGC)
 
 void KiwiSDRWorker::onServerAddressChanged(QString serverAddress)
 {
-	if (m_serverAddress == serverAddress)
+	if (m_serverAddress == serverAddress) {
 		return;
+    }
+
 	m_serverAddress = serverAddress;
 
     m_status = 1;
