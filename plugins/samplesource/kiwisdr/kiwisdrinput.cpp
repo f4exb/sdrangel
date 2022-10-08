@@ -49,8 +49,6 @@ KiwiSDRInput::KiwiSDRInput(DeviceAPI *deviceAPI) :
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_sampleFifo.setLabel(m_deviceDescription);
-	m_kiwiSDRWorkerThread.start();
-
     m_deviceAPI->setNbSourceStreams(1);
 
     if (!m_sampleFifo.setSize(getSampleRate() * 2)) {
@@ -79,9 +77,6 @@ KiwiSDRInput::~KiwiSDRInput()
     if (m_running) {
         stop();
     }
-
-	m_kiwiSDRWorkerThread.quit();
-	m_kiwiSDRWorkerThread.wait();
 }
 
 void KiwiSDRInput::destroy()
@@ -102,6 +97,7 @@ bool KiwiSDRInput::start()
 
 	m_kiwiSDRWorker = new KiwiSDRWorker(&m_sampleFifo);
 	m_kiwiSDRWorker->moveToThread(&m_kiwiSDRWorkerThread);
+	m_kiwiSDRWorkerThread.start();
 
 	connect(this, &KiwiSDRInput::setWorkerCenterFrequency, m_kiwiSDRWorker, &KiwiSDRWorker::onCenterFrequencyChanged);
 	connect(this, &KiwiSDRInput::setWorkerServerAddress, m_kiwiSDRWorker, &KiwiSDRWorker::onServerAddressChanged);
@@ -122,10 +118,12 @@ void KiwiSDRInput::stop()
 
 	setWorkerStatus(0);
 
-	if (m_kiwiSDRWorker != 0)
+	if (m_kiwiSDRWorker)
 	{
+        m_kiwiSDRWorkerThread.quit();
+        m_kiwiSDRWorkerThread.wait();
 		m_kiwiSDRWorker->deleteLater();
-		m_kiwiSDRWorker = 0;
+		m_kiwiSDRWorker = nullptr;
 	}
 
 	m_running = false;
