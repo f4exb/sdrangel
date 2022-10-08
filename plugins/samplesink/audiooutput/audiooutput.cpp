@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -40,6 +41,7 @@ AudioOutput::AudioOutput(DeviceAPI *deviceAPI) :
     m_audioDeviceIndex(-1),
     m_centerFrequency(0),
 	m_worker(nullptr),
+    m_workerThread(nullptr),
 	m_deviceDescription("AudioOutput")
 {
     m_deviceAPI->setNbSinkStreams(1);
@@ -67,18 +69,29 @@ void AudioOutput::init()
 bool AudioOutput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
+
 	qDebug("AudioOutput::start");
 
     AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
     audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), m_audioDeviceIndex);
 
+    m_workerThread = new QThread();
 	m_worker = new AudioOutputWorker(&m_sampleSourceFifo, &m_audioFifo);
-    m_worker->moveToThread(&m_workerThread);
+    m_worker->moveToThread(m_workerThread);
+
+    QObject::connect(m_workerThread, &QThread::started, m_worker, &AudioOutputWorker::startWork);
+    QObject::connect(m_workerThread, &QThread::finished, m_worker, &QObject::deleteLater);
+    QObject::connect(m_workerThread, &QThread::finished, m_workerThread, &QThread::deleteLater);
+
     m_worker->setSamplerate(m_sampleRate);
     m_worker->setIQMapping(m_settings.m_iqMapping);
     m_worker->connectTimer(m_deviceAPI->getMasterTimer());
-    m_worker->startWork();
-    m_workerThread.start();
+    m_workerThread->start();
+    m_running = true;
 
 	mutexLocker.unlock();
 
@@ -89,20 +102,25 @@ bool AudioOutput::start()
 
 void AudioOutput::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug("AudioOutput::stop");
-    if (m_worker)
+    m_running = false;
+
+    if (m_workerThread)
     {
         m_worker->stopWork();
-        m_workerThread.quit();
-        m_workerThread.wait();
-        delete m_worker;
+        m_workerThread->quit();
+        m_workerThread->wait();
         m_worker = nullptr;
+        m_workerThread = nullptr;
     }
 
     AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
     audioDeviceManager->removeAudioSink(&m_audioFifo);
 
-    m_running = false;
     qDebug("AudioOutput::stop: stopped");
 }
 
@@ -214,7 +232,7 @@ void AudioOutput::applySettings(const AudioOutputSettings& settings, bool force)
         reverseAPIKeys.append("iqMapping");
         forwardChange = true;
 
-        if (m_worker) {
+        if (m_running) {
             m_worker->setIQMapping(settings.m_iqMapping);
         }
     }
@@ -232,7 +250,7 @@ void AudioOutput::applySettings(const AudioOutputSettings& settings, bool force)
 
     if (forwardChange)
     {
-        if (m_worker) {
+        if (m_running) {
             m_worker->setSamplerate(m_sampleRate);
         }
 

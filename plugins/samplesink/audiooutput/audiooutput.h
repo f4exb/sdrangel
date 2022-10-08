@@ -18,7 +18,6 @@
 #ifndef _AUDIOOUTPUT_AUDIOOUTPUT_H_
 #define _AUDIOOUTPUT_AUDIOOUTPUT_H_
 
-#include <QThread>
 #include <QNetworkRequest>
 
 #include "dsp/devicesamplesink.h"
@@ -29,6 +28,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 class AudioOutputWorker;
 class DeviceAPI;
 
@@ -133,8 +133,8 @@ private:
     int m_audioDeviceIndex;
     int m_sampleRate;
     qint64 m_centerFrequency;
-    AudioOutputWorker* m_worker;
-    QThread m_workerThread;
+    AudioOutputWorker *m_worker;
+    QThread *m_workerThread;
     QString m_deviceDescription;
     bool m_running;
     QNetworkAccessManager *m_networkManager;
