@@ -23,6 +23,7 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -44,6 +45,7 @@ KiwiSDRInput::KiwiSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_kiwiSDRWorker(nullptr),
+    m_kiwiSDRWorkerThread(nullptr),
 	m_deviceDescription("KiwiSDR"),
 	m_running(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
@@ -93,21 +95,27 @@ bool KiwiSDRInput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-    if (m_running) stop();
+    if (m_running) {
+        return true;
+    }
 
+    m_kiwiSDRWorkerThread = new QThread();
 	m_kiwiSDRWorker = new KiwiSDRWorker(&m_sampleFifo);
-	m_kiwiSDRWorker->moveToThread(&m_kiwiSDRWorkerThread);
-	m_kiwiSDRWorkerThread.start();
+	m_kiwiSDRWorker->moveToThread(m_kiwiSDRWorkerThread);
+
+    QObject::connect(m_kiwiSDRWorkerThread, &QThread::finished, m_kiwiSDRWorker, &QObject::deleteLater);
+    QObject::connect(m_kiwiSDRWorkerThread, &QThread::finished, m_kiwiSDRWorkerThread, &QThread::deleteLater);
 
 	connect(this, &KiwiSDRInput::setWorkerCenterFrequency, m_kiwiSDRWorker, &KiwiSDRWorker::onCenterFrequencyChanged);
 	connect(this, &KiwiSDRInput::setWorkerServerAddress, m_kiwiSDRWorker, &KiwiSDRWorker::onServerAddressChanged);
 	connect(this, &KiwiSDRInput::setWorkerGain, m_kiwiSDRWorker, &KiwiSDRWorker::onGainChanged);
 	connect(m_kiwiSDRWorker, &KiwiSDRWorker::updateStatus, this, &KiwiSDRInput::setWorkerStatus);
 
-	mutexLocker.unlock();
-
-	applySettings(m_settings, true);
+	m_kiwiSDRWorkerThread->start();
 	m_running = true;
+
+	mutexLocker.unlock();
+	applySettings(m_settings, true);
 
 	return true;
 }
@@ -116,14 +124,18 @@ void KiwiSDRInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
+    if (!m_running) {
+        return;
+    }
+
 	setWorkerStatus(0);
 
-	if (m_kiwiSDRWorker)
+	if (m_kiwiSDRWorkerThread)
 	{
-        m_kiwiSDRWorkerThread.quit();
-        m_kiwiSDRWorkerThread.wait();
-		m_kiwiSDRWorker->deleteLater();
+        m_kiwiSDRWorkerThread->quit();
+        m_kiwiSDRWorkerThread->wait();
 		m_kiwiSDRWorker = nullptr;
+        m_kiwiSDRWorkerThread = nullptr;
 	}
 
 	m_running = false;

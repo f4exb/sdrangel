@@ -22,7 +22,6 @@
 #include <QString>
 #include <QByteArray>
 #include <QTimer>
-#include <QThread>
 #include <QNetworkRequest>
 
 #include <dsp/devicesamplesource.h>
@@ -32,6 +31,7 @@ class DeviceAPI;
 class KiwiSDRWorker;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 
 class KiwiSDRInput : public DeviceSampleSource {
     Q_OBJECT
@@ -154,7 +154,7 @@ private:
 	QMutex m_mutex;
 	KiwiSDRSettings m_settings;
 	KiwiSDRWorker* m_kiwiSDRWorker;
-	QThread m_kiwiSDRWorkerThread;
+	QThread *m_kiwiSDRWorkerThread;
 	QString m_deviceDescription;
 	bool m_running;
     const QTimer& m_masterTimer;
