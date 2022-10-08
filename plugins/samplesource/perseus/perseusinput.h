@@ -21,7 +21,7 @@
 #include <vector>
 
 #include <QNetworkRequest>
-#include <QThread>
+#include <QMutex>
 
 #include "perseus-sdr.h"
 #include "dsp/devicesamplesource.h"
@@ -30,6 +30,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 class DeviceAPI;
 class PerseusWorker;
 
@@ -136,16 +137,15 @@ private:
     DeviceAPI *m_deviceAPI;
     QString m_deviceDescription;
     PerseusSettings m_settings;
+    QMutex m_mutex;
     bool m_running;
     PerseusWorker *m_perseusWorker;
-    QThread m_perseusWorkerThread;
+    QThread *m_perseusWorkerThread;
     perseus_descr *m_perseusDescriptor;
     std::vector<uint32_t> m_sampleRates;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-	void startWorker();
-	void stopWorker();
     bool openDevice();
     void closeDevice();
     void setDeviceCenterFrequency(quint64 freq, const PerseusSettings& settings);
