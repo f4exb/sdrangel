@@ -167,6 +167,7 @@ void AudioInput::stop()
     }
 
     qDebug("AudioInput::stop");
+    m_running = false;
 
     if (m_workerThread)
     {
@@ -176,7 +177,6 @@ void AudioInput::stop()
         m_worker = nullptr;
     }
 
-    m_running = false;
 }
 
 QByteArray AudioInput::serialize() const

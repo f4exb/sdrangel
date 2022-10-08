@@ -128,6 +128,7 @@ void KiwiSDRInput::stop()
         return;
     }
 
+	m_running = false;
 	setWorkerStatus(0);
 
 	if (m_kiwiSDRWorkerThread)
@@ -137,8 +138,6 @@ void KiwiSDRInput::stop()
 		m_kiwiSDRWorker = nullptr;
         m_kiwiSDRWorkerThread = nullptr;
 	}
-
-	m_running = false;
 }
 
 QByteArray KiwiSDRInput::serialize() const
