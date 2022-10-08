@@ -24,7 +24,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QNetworkRequest>
-#include <QThread>
+#include <QMutex>
 
 #include "dsp/devicesamplesource.h"
 #include "audio/audioinputdevice.h"
@@ -34,6 +34,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 class DeviceAPI;
 class AudioInputWorker;
 
@@ -137,7 +138,7 @@ private:
     QMutex m_mutex;
     AudioInputSettings m_settings;
     AudioInputWorker* m_worker;
-    QThread m_workerThread;
+    QThread *m_workerThread;
     QString m_deviceDescription;
     bool m_running;
     int m_sampleRate;

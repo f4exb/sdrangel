@@ -22,6 +22,7 @@
 #include <QDebug>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -40,6 +41,7 @@ AudioInput::AudioInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_worker(nullptr),
+    m_workerThread(nullptr),
     m_deviceDescription("AudioInput"),
     m_running(false),
     m_centerFrequency(0)
@@ -116,10 +118,10 @@ void AudioInput::init()
 
 bool AudioInput::start()
 {
-    qDebug() << "AudioInput::start";
+    QMutexLocker mutexLocker(&m_mutex);
 
     if (m_running) {
-        stop();
+        return true;
     }
 
     if(!m_sampleFifo.setSize(96000*4))
@@ -128,14 +130,21 @@ bool AudioInput::start()
         return false;
     }
 
+    qDebug() << "AudioInput::start";
     applySettings(m_settings, true, true);
 
+    m_workerThread = new QThread();
     m_worker = new AudioInputWorker(&m_sampleFifo, &m_fifo);
-    m_worker->moveToThread(&m_workerThread);
+    m_worker->moveToThread(m_workerThread);
+
+    QObject::connect(m_workerThread, &QThread::started, m_worker, &AudioInputWorker::startWork);
+    QObject::connect(m_workerThread, &QThread::finished, m_worker, &QObject::deleteLater);
+    QObject::connect(m_workerThread, &QThread::finished, m_workerThread, &QThread::deleteLater);
+
     m_worker->setLog2Decimation(m_settings.m_log2Decim);
     m_worker->setIQMapping(m_settings.m_iqMapping);
     m_worker->startWork();
-    m_workerThread.start();
+    m_workerThread->start();
 
     qDebug("AudioInput::started");
     m_running = true;
@@ -151,12 +160,19 @@ void AudioInput::closeDevice()
 
 void AudioInput::stop()
 {
-    if (m_worker)
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+    qDebug("AudioInput::stop");
+
+    if (m_workerThread)
     {
-        m_worker->stopWork();
-        m_workerThread.quit();
-        m_workerThread.wait();
-        delete m_worker;
+        m_workerThread->quit();
+        m_workerThread->wait();
+        m_workerThread = nullptr;
         m_worker = nullptr;
     }
 
@@ -286,7 +302,7 @@ void AudioInput::applySettings(const AudioInputSettings& settings, bool force, b
         reverseAPIKeys.append("log2Decim");
         forwardChange = true;
 
-        if (m_worker)
+        if (m_running)
         {
             m_worker->setLog2Decimation(settings.m_log2Decim);
             qDebug() << "AudioInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
@@ -298,7 +314,7 @@ void AudioInput::applySettings(const AudioInputSettings& settings, bool force, b
         reverseAPIKeys.append("iqMapping");
         forwardChange = true;
 
-        if (m_worker) {
+        if (m_running) {
             m_worker->setIQMapping(settings.m_iqMapping);
         }
     }
