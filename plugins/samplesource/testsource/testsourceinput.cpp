@@ -47,13 +47,6 @@ TestSourceInput::TestSourceInput(DeviceAPI *deviceAPI) :
     m_sampleFifo.setLabel(m_deviceDescription);
     m_deviceAPI->setNbSourceStreams(1);
 
-    if (!m_sampleFifo.setSize(96000 * 4)) {
-        qCritical("TestSourceInput::TestSourceInput: Could not allocate SampleFifo");
-    }
-
-    m_testSourceWorker = new TestSourceWorker(&m_sampleFifo);
-    m_testSourceWorker->moveToThread(&m_testSourceWorkerThread);
-
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,
@@ -76,8 +69,6 @@ TestSourceInput::~TestSourceInput()
     if (m_running) {
         stop();
     }
-
-    m_testSourceWorker->deleteLater();
 }
 
 void TestSourceInput::destroy()
@@ -98,13 +89,22 @@ bool TestSourceInput::start()
         stop();
     }
 
+    if (!m_sampleFifo.setSize(96000 * 4))
+    {
+        qCritical("TestSourceInput::TestSourceInput: Could not allocate SampleFifo");
+        return false;
+    }
+
+    m_testSourceWorker = new TestSourceWorker(&m_sampleFifo);
+    m_testSourceWorker->moveToThread(&m_testSourceWorkerThread);
 	m_testSourceWorker->setSamplerate(m_settings.m_sampleRate);
-	startWorker();
+    m_testSourceWorker->startWork();
+    m_testSourceWorkerThread.start();
+	m_running = true;
 
 	mutexLocker.unlock();
 
 	applySettings(m_settings, true);
-	m_running = true;
 
 	return true;
 }
@@ -112,23 +112,17 @@ bool TestSourceInput::start()
 void TestSourceInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
-    stopWorker();
-	m_running = false;
-}
+    m_running = false;
 
-void TestSourceInput::startWorker()
-{
-    m_testSourceWorker->startWork();
-    m_testSourceWorkerThread.start();
+    if (m_testSourceWorker)
+    {
+    	m_testSourceWorker->stopWork();
+        m_testSourceWorkerThread.quit();
+        m_testSourceWorkerThread.wait();
+        delete m_testSourceWorker;
+        m_testSourceWorker = nullptr;
+    }
 }
-
-void TestSourceInput::stopWorker()
-{
-	m_testSourceWorker->stopWork();
-	m_testSourceWorkerThread.quit();
-	m_testSourceWorkerThread.wait();
-}
-
 
 QByteArray TestSourceInput::serialize() const
 {

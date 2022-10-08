@@ -137,8 +137,6 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-	void startWorker();
-	void stopWorker();
 	bool applySettings(const TestSourceSettings& settings, bool force);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const TestSourceSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
