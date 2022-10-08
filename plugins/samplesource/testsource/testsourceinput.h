@@ -22,7 +22,6 @@
 #include <QByteArray>
 #include <QTimer>
 #include <QNetworkRequest>
-#include <QThread>
 
 #include <dsp/devicesamplesource.h>
 #include "testsourcesettings.h"
@@ -31,6 +30,7 @@ class DeviceAPI;
 class TestSourceWorker;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 
 class TestSourceInput : public DeviceSampleSource {
     Q_OBJECT
@@ -129,8 +129,8 @@ private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	TestSourceSettings m_settings;
-	TestSourceWorker* m_testSourceWorker;
-    QThread m_testSourceWorkerThread;
+	TestSourceWorker *m_testSourceWorker;
+    QThread *m_testSourceWorkerThread;
 	QString m_deviceDescription;
 	bool m_running;
     const QTimer& m_masterTimer;

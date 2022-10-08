@@ -22,6 +22,7 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -40,6 +41,7 @@ TestSourceInput::TestSourceInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_testSourceWorker(nullptr),
+    m_testSourceWorkerThread(nullptr),
 	m_deviceDescription("TestSourceInput"),
 	m_running(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
@@ -86,7 +88,7 @@ bool TestSourceInput::start()
 	QMutexLocker mutexLocker(&m_mutex);
 
     if (m_running) {
-        stop();
+        return true;
     }
 
     if (!m_sampleFifo.setSize(96000 * 4))
@@ -95,11 +97,16 @@ bool TestSourceInput::start()
         return false;
     }
 
+    m_testSourceWorkerThread = new QThread();
     m_testSourceWorker = new TestSourceWorker(&m_sampleFifo);
-    m_testSourceWorker->moveToThread(&m_testSourceWorkerThread);
+    m_testSourceWorker->moveToThread(m_testSourceWorkerThread);
+
+    QObject::connect(m_testSourceWorkerThread, &QThread::started, m_testSourceWorker, &TestSourceWorker::startWork);
+    QObject::connect(m_testSourceWorkerThread, &QThread::finished, m_testSourceWorker, &QObject::deleteLater);
+    QObject::connect(m_testSourceWorkerThread, &QThread::finished, m_testSourceWorkerThread, &QThread::deleteLater);
+
 	m_testSourceWorker->setSamplerate(m_settings.m_sampleRate);
-    m_testSourceWorker->startWork();
-    m_testSourceWorkerThread.start();
+    m_testSourceWorkerThread->start();
 	m_running = true;
 
 	mutexLocker.unlock();
@@ -114,13 +121,13 @@ void TestSourceInput::stop()
 	QMutexLocker mutexLocker(&m_mutex);
     m_running = false;
 
-    if (m_testSourceWorker)
+    if (m_testSourceWorkerThread)
     {
     	m_testSourceWorker->stopWork();
-        m_testSourceWorkerThread.quit();
-        m_testSourceWorkerThread.wait();
-        delete m_testSourceWorker;
+        m_testSourceWorkerThread->quit();
+        m_testSourceWorkerThread->wait();
         m_testSourceWorker = nullptr;
+        m_testSourceWorkerThread = nullptr;
     }
 }
 
