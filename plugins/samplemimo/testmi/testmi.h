@@ -22,7 +22,6 @@
 #include <QByteArray>
 #include <QTimer>
 #include <QNetworkRequest>
-#include <QThread>
 
 #include "dsp/devicesamplemimo.h"
 #include "testmisettings.h"
@@ -31,6 +30,7 @@ class DeviceAPI;
 class TestMIWorker;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 
 class TestMI : public DeviceSampleMIMO {
     Q_OBJECT

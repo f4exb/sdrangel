@@ -20,6 +20,7 @@
 
 #include <QDebug>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -42,6 +43,7 @@ TestMOSync::TestMOSync(DeviceAPI *deviceAPI) :
     m_spectrumVis(SDR_TX_SCALEF),
 	m_settings(),
     m_sinkWorker(nullptr),
+    m_sinkWorkerThread(nullptr),
 	m_deviceDescription("TestMOSync"),
     m_runningTx(false),
     m_masterTimer(deviceAPI->getMasterTimer()),
@@ -68,15 +70,20 @@ void TestMOSync::init()
 
 bool TestMOSync::startTx()
 {
-    qDebug("TestMOSync::startTx");
 	QMutexLocker mutexLocker(&m_mutex);
 
     if (m_runningTx) {
-        stopTx();
+        return true;
     }
 
+    qDebug("TestMOSync::startTx");
+    m_sinkWorkerThread = new QThread();
     m_sinkWorker = new TestMOSyncWorker();
-    m_sinkWorker->moveToThread(&m_sinkWorkerThread);
+    m_sinkWorker->moveToThread(m_sinkWorkerThread);
+
+    QObject::connect(m_sinkWorkerThread, &QThread::finished, m_sinkWorker, &QObject::deleteLater);
+    QObject::connect(m_sinkWorkerThread, &QThread::finished, m_sinkWorkerThread, &QThread::deleteLater);
+
     m_sampleMOFifo.reset();
     m_sinkWorker->setFifo(&m_sampleMOFifo);
     m_sinkWorker->setFcPos(m_settings.m_fcPosTx);
@@ -94,31 +101,31 @@ bool TestMOSync::startTx()
 
 void TestMOSync::stopTx()
 {
-    qDebug("TestMOSync::stopTx");
+	QMutexLocker mutexLocker(&m_mutex);
 
-    if (!m_sinkWorker) {
+    if (!m_runningTx) {
         return;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
+    qDebug("TestMOSync::stopTx");
+    m_runningTx = false;
 
     stopWorker();
-    delete m_sinkWorker;
     m_sinkWorker = nullptr;
-    m_runningTx = false;
+    m_sinkWorkerThread = nullptr;
 }
 
 void TestMOSync::startWorker()
 {
     m_sinkWorker->startWork();
-    m_sinkWorkerThread.start();
+    m_sinkWorkerThread->start();
 }
 
 void TestMOSync::stopWorker()
 {
     m_sinkWorker->stopWork();
-    m_sinkWorkerThread.quit();
-    m_sinkWorkerThread.wait();
+    m_sinkWorkerThread->quit();
+    m_sinkWorkerThread->wait();
 }
 
 QByteArray TestMOSync::serialize() const

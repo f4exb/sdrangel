@@ -22,6 +22,7 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
