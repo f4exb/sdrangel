@@ -86,13 +86,13 @@ void TestMI::init()
 
 bool TestMI::startRx()
 {
-    qDebug("TestMI::startRx");
 	QMutexLocker mutexLocker(&m_mutex);
 
     if (m_running) {
-        stopRx();
+        return true;
     }
 
+    qDebug("TestMI::startRx");
     m_testSourceWorkers.push_back(new TestMIWorker(&m_sampleMIFifo, 0));
     m_testSourceWorkerThreads.push_back(new QThread());
     m_testSourceWorkers.back()->moveToThread(m_testSourceWorkerThreads.back());
@@ -104,10 +104,10 @@ bool TestMI::startRx()
 	m_testSourceWorkers.back()->setSamplerate(m_settings.m_streams[1].m_sampleRate);
 
     startWorkers();
+	m_running = true;
 	mutexLocker.unlock();
 
 	applySettings(m_settings, true);
-	m_running = true;
 
 	return true;
 }
@@ -120,22 +120,18 @@ bool TestMI::startTx()
 
 void TestMI::stopRx()
 {
-    qDebug("TestMI::stopRx");
 	QMutexLocker mutexLocker(&m_mutex);
-    stopWorkers();
 
-    std::vector<TestMIWorker*>::iterator itW = m_testSourceWorkers.begin();
-    std::vector<QThread*>::iterator itT = m_testSourceWorkerThreads.begin();
-
-    for (; (itW != m_testSourceWorkers.end()) && (itT != m_testSourceWorkerThreads.end()); ++itW, ++itT)
-    {
-        (*itW)->deleteLater();
-        delete (*itT);
+    if (!m_running) {
+        return;
     }
+
+    qDebug("TestMI::stopRx");
+ 	m_running = false;
+    stopWorkers();
 
     m_testSourceWorkers.clear();
     m_testSourceWorkerThreads.clear();
-	m_running = false;
 }
 
 void TestMI::stopTx()
@@ -150,6 +146,8 @@ void TestMI::startWorkers()
 
     for (; (itW != m_testSourceWorkers.end()) && (itT != m_testSourceWorkerThreads.end()); ++itW, ++itT)
     {
+        QObject::connect(*itT, &QThread::finished, *itW, &QObject::deleteLater);
+        QObject::connect(*itT, &QThread::finished, *itT, &QThread::deleteLater);
         (*itW)->startWork();
         (*itT)->start();
     }
