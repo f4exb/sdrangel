@@ -17,7 +17,9 @@
 
 #include <string.h>
 #include <errno.h>
+
 #include <QDebug>
+#include <QThread>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -40,6 +42,8 @@ TestSinkOutput::TestSinkOutput(DeviceAPI *deviceAPI) :
 	m_settings(),
     m_spectrumVis(SDR_TX_SCALEF),
 	m_testSinkWorker(nullptr),
+    m_testSinkWorkerThread(nullptr),
+    m_running(false),
 	m_deviceDescription("TestSink"),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
@@ -64,16 +68,27 @@ void TestSinkOutput::init()
 bool TestSinkOutput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
+
 	qDebug() << "TestSinkOutput::start";
 
+    m_testSinkWorkerThread = new QThread();
 	m_testSinkWorker = new TestSinkWorker(&m_sampleSourceFifo);
-    m_testSinkWorker->moveToThread(&m_testSinkWorkerThread);
+    m_testSinkWorker->moveToThread(m_testSinkWorkerThread);
+
+    QObject::connect(m_testSinkWorkerThread, &QThread::started, m_testSinkWorker, &TestSinkWorker::startWork);
+    QObject::connect(m_testSinkWorkerThread, &QThread::finished, m_testSinkWorker, &QObject::deleteLater);
+    QObject::connect(m_testSinkWorkerThread, &QThread::finished, m_testSinkWorkerThread, &QThread::deleteLater);
+
     m_testSinkWorker->setSpectrumSink(&m_spectrumVis);
 	m_testSinkWorker->setSamplerate(m_settings.m_sampleRate);
 	m_testSinkWorker->setLog2Interpolation(m_settings.m_log2Interp);
 	m_testSinkWorker->connectTimer(m_masterTimer);
-	startWorker();
-	mutexLocker.unlock();
+    m_testSinkWorkerThread->start();
+    m_running = true;
 
 	qDebug("TestSinkOutput::start: started");
 	return true;
@@ -81,28 +96,23 @@ bool TestSinkOutput::start()
 
 void TestSinkOutput::stop()
 {
-	qDebug() << "TestSinkOutput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_testSinkWorker != 0)
+    if (!m_running) {
+        return;
+    }
+
+	qDebug() << "TestSinkOutput::stop";
+    m_running = false;
+
+	if (m_testSinkWorkerThread)
 	{
-		stopWorker();
-		delete m_testSinkWorker;
+        m_testSinkWorker->stopWork();
+        m_testSinkWorkerThread->quit();
+        m_testSinkWorkerThread->wait();
 		m_testSinkWorker = nullptr;
+        m_testSinkWorkerThread = nullptr;
 	}
-}
-
-void TestSinkOutput::startWorker()
-{
-    m_testSinkWorker->startWork();
-    m_testSinkWorkerThread.start();
-}
-
-void TestSinkOutput::stopWorker()
-{
-	m_testSinkWorker->stopWork();
-	m_testSinkWorkerThread.quit();
-	m_testSinkWorkerThread.wait();
 }
 
 QByteArray TestSinkOutput::serialize() const
@@ -210,7 +220,7 @@ void TestSinkOutput::applySettings(const TestSinkSettings& settings, bool force)
     {
         m_settings.m_sampleRate = settings.m_sampleRate;
 
-        if (m_testSinkWorker) {
+        if (m_running) {
             m_testSinkWorker->setSamplerate(m_settings.m_sampleRate);
         }
 
@@ -221,7 +231,7 @@ void TestSinkOutput::applySettings(const TestSinkSettings& settings, bool force)
     {
         m_settings.m_log2Interp = settings.m_log2Interp;
 
-        if (m_testSinkWorker) {
+        if (m_running) {
             m_testSinkWorker->setLog2Interpolation(m_settings.m_log2Interp);
         }
 
