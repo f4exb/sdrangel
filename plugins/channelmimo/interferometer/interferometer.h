@@ -156,10 +156,12 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    QThread *m_thread;
     SpectrumVis m_spectrumVis;
     ScopeVis m_scopeSink;
+    QThread *m_thread;
     InterferometerBaseband* m_basebandSink;
+    QMutex m_mutex;
+    bool m_running;
     InterferometerSettings m_settings;
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 
