@@ -43,15 +43,15 @@ const char* const BeamSteeringCWMod::m_channelId = "BeamSteeringCWMod";
 BeamSteeringCWMod::BeamSteeringCWMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamMIMO),
     m_deviceAPI(deviceAPI),
+    m_thread(nullptr),
+    m_basebandSource(nullptr),
+    m_running(false),
     m_guiMessageQueue(nullptr),
     m_frequencyOffset(0),
     m_basebandSampleRate(48000)
 {
     setObjectName(m_channelId);
 
-    m_thread = new QThread(this);
-    m_basebandSource = new BeamSteeringCWModBaseband();
-    m_basebandSource->moveToThread(m_thread);
     m_deviceAPI->addMIMOChannel(this);
     m_deviceAPI->addMIMOChannelAPI(this);
 
@@ -62,6 +62,7 @@ BeamSteeringCWMod::BeamSteeringCWMod(DeviceAPI *deviceAPI) :
         this,
         &BeamSteeringCWMod::networkManagerFinished
     );
+    startSources();
 }
 
 BeamSteeringCWMod::~BeamSteeringCWMod()
@@ -76,8 +77,7 @@ BeamSteeringCWMod::~BeamSteeringCWMod()
 
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeMIMOChannel(this);
-    delete m_basebandSource;
-    delete m_thread;
+    stopSources();
 }
 
 void BeamSteeringCWMod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -94,9 +94,24 @@ void BeamSteeringCWMod::setDeviceAPI(DeviceAPI *deviceAPI)
 
 void BeamSteeringCWMod::startSources()
 {
+    QMutexLocker mlock(&m_mutex);
+
+    if (m_running) {
+        return;
+    }
+
     qDebug("BeamSteeringCWMod::startSources");
+    m_thread = new QThread(this);
+    m_basebandSource = new BeamSteeringCWModBaseband();
+    m_basebandSource->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::finished, m_basebandSource, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
+
     m_basebandSource->reset();
     m_thread->start();
+    m_running =  true;
+    mlock.unlock();
 
     BeamSteeringCWModBaseband::MsgSignalNotification *sig = BeamSteeringCWModBaseband::MsgSignalNotification::create(
         m_basebandSampleRate);
@@ -109,14 +124,25 @@ void BeamSteeringCWMod::startSources()
 
 void BeamSteeringCWMod::stopSources()
 {
+    QMutexLocker mlock(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
     qDebug("BeamSteeringCWMod::stopSources");
+    m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSource = nullptr;
+    m_thread = nullptr;
 }
 
 void BeamSteeringCWMod::pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex)
 {
-    m_basebandSource->pull(begin, nbSamples, sourceIndex);
+    if (m_running) {
+        m_basebandSource->pull(begin, nbSamples, sourceIndex);
+    }
 }
 
 void BeamSteeringCWMod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex)
@@ -159,8 +185,11 @@ void BeamSteeringCWMod::applySettings(const BeamSteeringCWModSettings& settings,
         reverseAPIKeys.append("filterChainHash");
     }
 
-    BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband *msg = BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband::create(settings, force);
-    m_basebandSource->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband *msg = BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband::create(settings, force);
+        m_basebandSource->getInputMessageQueue()->push(msg);
+    }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
@@ -210,10 +239,13 @@ bool BeamSteeringCWMod::handleMessage(const Message& cmd)
             calculateFrequencyOffset(); // This is when device sample rate changes
 
             // Notify source of input sample rate change
-            BeamSteeringCWModBaseband::MsgSignalNotification *sig = BeamSteeringCWModBaseband::MsgSignalNotification::create(
-                m_basebandSampleRate);
-            qDebug() << "BeamSteeringCWMod::handleMessage: DSPMIMOSignalNotification: push to source";
-            m_basebandSource->getInputMessageQueue()->push(sig);
+            if (m_running)
+            {
+                BeamSteeringCWModBaseband::MsgSignalNotification *sig = BeamSteeringCWModBaseband::MsgSignalNotification::create(
+                    m_basebandSampleRate);
+                qDebug() << "BeamSteeringCWMod::handleMessage: DSPMIMOSignalNotification: push to source";
+                m_basebandSource->getInputMessageQueue()->push(sig);
+            }
 
             if (m_guiMessageQueue)
             {

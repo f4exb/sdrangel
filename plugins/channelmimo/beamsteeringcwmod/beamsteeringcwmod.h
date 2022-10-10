@@ -154,6 +154,8 @@ private:
     DeviceAPI *m_deviceAPI;
     QThread *m_thread;
     BeamSteeringCWModBaseband* m_basebandSource;
+    QMutex m_mutex;
+    bool m_running;
     BasebandSampleSink* m_spectrumSink;
     BasebandSampleSink* m_scopeSink;
     BeamSteeringCWModSettings m_settings;
