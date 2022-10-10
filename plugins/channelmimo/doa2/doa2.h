@@ -164,6 +164,8 @@ private:
     QThread *m_thread;
     ScopeVis m_scopeSink;
     DOA2Baseband* m_basebandSink;
+    QMutex m_mutex;
+    bool m_running;
     DOA2Settings m_settings;
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 

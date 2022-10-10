@@ -45,6 +45,9 @@ const int DOA2::m_fftSize = 4096;
 DOA2::DOA2(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamMIMO),
     m_deviceAPI(deviceAPI),
+    m_thread(nullptr),
+    m_basebandSink(nullptr),
+    m_running(false),
     m_guiMessageQueue(nullptr),
     m_frequencyOffset(0),
     m_deviceSampleRate(48000),
@@ -52,10 +55,6 @@ DOA2::DOA2(DeviceAPI *deviceAPI) :
 {
     setObjectName(m_channelId);
 
-    m_thread = new QThread(this);
-    m_basebandSink = new DOA2Baseband(m_fftSize);
-    m_basebandSink->setScopeSink(&m_scopeSink);
-    m_basebandSink->moveToThread(m_thread);
     m_deviceAPI->addMIMOChannel(this);
     m_deviceAPI->addMIMOChannelAPI(this);
 
@@ -66,6 +65,7 @@ DOA2::DOA2(DeviceAPI *deviceAPI) :
         this,
         &DOA2::networkManagerFinished
     );
+    startSinks();
 }
 
 DOA2::~DOA2()
@@ -80,8 +80,7 @@ DOA2::~DOA2()
 
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeMIMOChannel(this);
-    delete m_basebandSink;
-    delete m_thread;
+    stopSinks();
 }
 
 void DOA2::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -98,12 +97,29 @@ void DOA2::setDeviceAPI(DeviceAPI *deviceAPI)
 
 void DOA2::startSinks()
 {
+    QMutexLocker mlock(&m_mutex);
+
+    if (m_running) {
+        return;
+    }
+
+    qDebug("DOA2::startSinks");
+    m_thread = new QThread(this);
+    m_basebandSink = new DOA2Baseband(m_fftSize);
+    m_basebandSink->setScopeSink(&m_scopeSink);
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
+
     if (m_deviceSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_deviceSampleRate);
     }
 
     m_basebandSink->reset();
     m_thread->start();
+    m_running = true;
+    mlock.unlock();
 
     DOA2Baseband::MsgConfigureChannelizer *msg = DOA2Baseband::MsgConfigureChannelizer::create(
         m_settings.m_log2Decim, m_settings.m_filterChainHash);
@@ -112,13 +128,25 @@ void DOA2::startSinks()
 
 void DOA2::stopSinks()
 {
+    QMutexLocker mlock(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+    qDebug("DOA2::stopSinks");
+    m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr;
+    m_thread = nullptr;
 }
 
 void DOA2::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex)
 {
-    m_basebandSink->feed(begin, end, sinkIndex);
+    if (m_running) {
+        m_basebandSink->feed(begin, end, sinkIndex);
+    }
 }
 
 void DOA2::pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex)
@@ -173,31 +201,37 @@ void DOA2::applySettings(const DOA2Settings& settings, bool force)
     if ((m_settings.m_squelchdB != settings.m_squelchdB) || force)
     {
         reverseAPIKeys.append("squelchdB");
-        m_basebandSink->setMagThreshold(CalcDb::powerFromdB(settings.m_squelchdB));
+
+        if (m_running) {
+            m_basebandSink->setMagThreshold(CalcDb::powerFromdB(settings.m_squelchdB));
+        }
     }
 
     if ((m_settings.m_fftAveragingIndex != settings.m_fftAveragingIndex) || force)
     {
         reverseAPIKeys.append("m_fftAveragingIndex");
-        m_basebandSink->setFFTAveraging(DOA2Settings::getAveragingValue(settings.m_fftAveragingIndex));
+
+        if (m_running) {
+            m_basebandSink->setFFTAveraging(DOA2Settings::getAveragingValue(settings.m_fftAveragingIndex));
+        }
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim)
-     || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force)
+    if (m_running && ((m_settings.m_log2Decim != settings.m_log2Decim)
+     || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force))
     {
         DOA2Baseband::MsgConfigureChannelizer *msg = DOA2Baseband::MsgConfigureChannelizer::create(
             settings.m_log2Decim, settings.m_filterChainHash);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
-    if ((m_settings.m_correlationType != settings.m_correlationType) || force)
+    if (m_running && ((m_settings.m_correlationType != settings.m_correlationType) || force))
     {
         DOA2Baseband::MsgConfigureCorrelation *msg = DOA2Baseband::MsgConfigureCorrelation::create(
             settings.m_correlationType);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
-    if ((m_settings.m_phase != settings.m_phase) || force) {
+    if (m_running && ((m_settings.m_phase != settings.m_phase) || force)) {
         m_basebandSink->setPhase(settings.m_phase);
     }
 
@@ -250,11 +284,14 @@ bool DOA2::handleMessage(const Message& cmd)
             calculateFrequencyOffset(); // This is when device sample rate changes
 
             // Notify baseband sink of input sample rate change
-            DOA2Baseband::MsgSignalNotification *sig = DOA2Baseband::MsgSignalNotification::create(
-                m_deviceSampleRate, notif.getCenterFrequency(), notif.getIndex()
-            );
-            qDebug() << "DOA2::handleMessage: DSPMIMOSignalNotification: push to sink";
-            m_basebandSink->getInputMessageQueue()->push(sig);
+            if (m_running)
+            {
+                DOA2Baseband::MsgSignalNotification *sig = DOA2Baseband::MsgSignalNotification::create(
+                    m_deviceSampleRate, notif.getCenterFrequency(), notif.getIndex()
+                );
+                qDebug() << "DOA2::handleMessage: DSPMIMOSignalNotification: push to sink";
+                m_basebandSink->getInputMessageQueue()->push(sig);
+            }
 
             if (getMessageQueueToGUI())
             {
@@ -315,6 +352,10 @@ void DOA2::calculateFrequencyOffset()
 
 void DOA2::applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash)
 {
+    if (!m_running) {
+        return;
+    }
+
     DOA2Baseband::MsgConfigureChannelizer *msg = DOA2Baseband::MsgConfigureChannelizer::create(log2Decim, filterChainHash);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
