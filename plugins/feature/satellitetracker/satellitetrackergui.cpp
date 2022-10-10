@@ -1115,6 +1115,7 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
     if (matches.size() == 0)
     {
         // Add a new row
+        ui->satTable->setSortingEnabled(false);
         int row = ui->satTable->rowCount();
         ui->satTable->setRowCount(row + 1);
         for (int i = 0; i < SAT_COL_COLUMNS; i++)
@@ -1128,6 +1129,7 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
             items[i]->setToolTip(ui->satTable->horizontalHeaderItem(i)->toolTip());
             ui->satTable->setItem(row, i, items[i]);
         }
+        ui->satTable->setSortingEnabled(true);
         // Static columns
         items[SAT_COL_NAME]->setText(satState->m_name);
         if (m_satellites.contains(satState->m_name))

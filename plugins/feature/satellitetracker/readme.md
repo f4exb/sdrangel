@@ -99,7 +99,7 @@ On the Settings tab, you can set:
 * A command/script to be executed on LOS. This applies to all satellites. It is also possible to set a per-satellite command in the SDRangel Control dialog.
 * The Doppler correction period in seconds, which controls how frequently Doppler correction is applied. Which channels have Doppler correction applied is set on a per-channel basis in the SDRangel Control dialog.
 
-For commands, scripts and speech, the following variables can be sustituted: ${aos}, ${los}, ${elevation}, ${aosAzimuth}, ${losAzimuth}, ${northToSouth}, ${latitude}, ${longitude}, ${altitude}, ${azimuth}, ${elevation}, ${range}, ${rangeRate}, ${speed} and ${period}.
+For commands, scripts and speech, the following variables can be substituted: `${name}`, `${duration}`, `${aos}`, `${los}`, `${elevation}`, `${aosAzimuth}`, `${losAzimuth}`, `${northToSouth}`, `${latitude}`, `${longitude}`, `${altitude}`, `${azimuth}`, `${elevation}`, `${range}`, `${rangeRate}`, `${speed}` and `${period}`.
 
 ![Satellite tracker settings dialog](../../../doc/img/SatelliteTracker_plugin_settingsdialog2.png)
 

@@ -601,6 +601,7 @@ double RadioAstronomyGUI::beamFillingFactor() const
 
 void RadioAstronomyGUI::powerMeasurementReceived(FFTMeasurement *fft, bool skipCalcs)
 {
+    ui->powerTable->setSortingEnabled(false);
     int row = ui->powerTable->rowCount();
     ui->powerTable->setRowCount(row + 1);
 
@@ -659,6 +660,8 @@ void RadioAstronomyGUI::powerMeasurementReceived(FFTMeasurement *fft, bool skipC
     ui->powerTable->setItem(row, POWER_COL_AIR_TEMP, airTempItem);
     ui->powerTable->setItem(row, POWER_COL_SENSOR_1, sensor1Item);
     ui->powerTable->setItem(row, POWER_COL_SENSOR_2, sensor2Item);
+
+    ui->powerTable->setSortingEnabled(true);
 
     QDateTime dateTime = fft->m_dateTime;
     dateItem->setData(Qt::DisplayRole, dateTime.date());
