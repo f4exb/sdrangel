@@ -51,13 +51,17 @@ const int BFMDemod::m_udpBlockSize = 512;
 BFMDemod::BFMDemod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
     m_deviceAPI(deviceAPI),
-    m_thread(nullptr),
-    m_basebandSink(nullptr),
-    m_running(false),
     m_spectrumVis(SDR_RX_SCALEF),
     m_basebandSampleRate(0)
 {
 	setObjectName(m_channelId);
+
+    m_thread = new QThread(this);
+    m_basebandSink = new BFMDemodBaseband();
+    m_basebandSink->setSpectrumSink(&m_spectrumVis);
+    m_basebandSink->setChannel(this);
+    m_basebandSink->moveToThread(m_thread);
+
 	applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
@@ -76,8 +80,6 @@ BFMDemod::BFMDemod(DeviceAPI *deviceAPI) :
         this,
         &BFMDemod::handleIndexInDeviceSetChanged
     );
-
-    start();
 }
 
 BFMDemod::~BFMDemod()
@@ -92,7 +94,8 @@ BFMDemod::~BFMDemod()
 
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-    stop();
+    delete m_basebandSink;
+    delete m_thread;
 }
 
 void BFMDemod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -120,19 +123,7 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 void BFMDemod::start()
 {
-    if (m_running) {
-        return;
-    }
-
     qDebug() << "BFMDemod::start";
-    m_thread = new QThread(this);
-    m_basebandSink = new BFMDemodBaseband();
-    m_basebandSink->setSpectrumSink(&m_spectrumVis);
-    m_basebandSink->setChannel(this);
-    m_basebandSink->moveToThread(m_thread);
-
-    QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
-    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
 
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
@@ -145,18 +136,11 @@ void BFMDemod::start()
     spectrumSettings.m_ssb = true;
     SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
     m_spectrumVis.getInputMessageQueue()->push(msg);
-
-    m_running = true;
 }
 
 void BFMDemod::stop()
 {
-    if (!m_running) {
-        return;
-    }
-
     qDebug() << "BFMDemod::stop";
-    m_running = false;
 	m_thread->exit();
 	m_thread->wait();
 }
@@ -176,14 +160,10 @@ bool BFMDemod::handleMessage(const Message& cmd)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
-        qDebug() << "BFMDemod::handleMessage: DSPSignalNotification";
-
         // Forward to the sink
-        if (m_running)
-        {
-            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
-            m_basebandSink->getInputMessageQueue()->push(rep);
-        }
+        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+        qDebug() << "BFMDemod::handleMessage: DSPSignalNotification";
+        m_basebandSink->getInputMessageQueue()->push(rep);
 
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
@@ -273,11 +253,8 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    if (m_running)
-    {
-        BFMDemodBaseband::MsgConfigureBFMDemodBaseband *msg = BFMDemodBaseband::MsgConfigureBFMDemodBaseband::create(settings, force);
-        m_basebandSink->getInputMessageQueue()->push(msg);
-    }
+    BFMDemodBaseband::MsgConfigureBFMDemodBaseband *msg = BFMDemodBaseband::MsgConfigureBFMDemodBaseband::create(settings, force);
+    m_basebandSink->getInputMessageQueue()->push(msg);
 
     if (settings.m_useReverseAPI)
     {
@@ -535,15 +512,11 @@ void BFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
     response.getBfmDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getBfmDemodReport()->setSquelch(m_basebandSink->getSquelchState() > 0 ? 1 : 0);
+    response.getBfmDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+    response.getBfmDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
     response.getBfmDemodReport()->setPilotLocked(getPilotLock() ? 1 : 0);
     response.getBfmDemodReport()->setPilotPowerDb(CalcDb::dbPower(getPilotLevel()));
-
-    if (m_running)
-    {
-        response.getBfmDemodReport()->setSquelch(m_basebandSink->getSquelchState() > 0 ? 1 : 0);
-        response.getBfmDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
-        response.getBfmDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
-    }
 
     if (m_settings.m_rdsActive)
     {
@@ -735,7 +708,7 @@ void BFMDemod::networkManagerFinished(QNetworkReply *reply)
 
 void BFMDemod::handleIndexInDeviceSetChanged(int index)
 {
-    if (!m_running && (index < 0)) {
+    if (index < 0) {
         return;
     }
 
