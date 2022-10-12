@@ -22,7 +22,6 @@
 #include <vector>
 
 #include <QNetworkRequest>
-#include <QThread>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
@@ -122,12 +121,17 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    uint32_t getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
-    double getMagSq() const { return m_basebandSink->getMagSq(); }
-    bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
+    uint32_t getAudioSampleRate() const { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
+    double getMagSq() const { return m_running ? m_basebandSink->getMagSq() : 0.0; }
+    bool getSquelchOpen() const { return m_running ? m_basebandSink->getSquelchOpen() : false; }
 
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
-        m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
+    {
+        if (m_running) {
+            m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
+        } else {
+            avg = 0.0; peak = 0.0; nbSamples = 1;
+        }
     }
 
     uint32_t getNumberOfDeviceStreams() const;
@@ -137,8 +141,9 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    QThread m_thread;
-    VORDemodBaseband* m_basebandSink;
+    QThread *m_thread;
+    VORDemodBaseband *m_basebandSink;
+    bool m_running;
     VORDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency;

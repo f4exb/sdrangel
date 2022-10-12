@@ -51,14 +51,12 @@ const char * const VORDemod::m_channelId = "VORDemod";
 VORDemod::VORDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_thread(nullptr),
+        m_basebandSink(nullptr),
+        m_running(false),
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
-
-    m_basebandSink = new VORDemodBaseband();
-    m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
-    m_basebandSink->moveToThread(&m_thread);
-
     applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
@@ -77,6 +75,8 @@ VORDemod::VORDemod(DeviceAPI *deviceAPI) :
         this,
         &VORDemod::handleIndexInDeviceSetChanged
     );
+
+    start();
 }
 
 VORDemod::~VORDemod()
@@ -91,12 +91,7 @@ VORDemod::~VORDemod()
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-
-    if (m_basebandSink->isRunning()) {
-        stop();
-    }
-
-    delete m_basebandSink;
+    stop();
 }
 
 void VORDemod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -119,30 +114,51 @@ uint32_t VORDemod::getNumberOfDeviceStreams() const
 void VORDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;
-    m_basebandSink->feed(begin, end);
+
+    if (m_running) {
+        m_basebandSink->feed(begin, end);
+    }
 }
 
 void VORDemod::start()
 {
+    if (m_running) {
+        return;
+    }
+
     qDebug("VORDemod::start");
+    m_thread = new QThread();
+    m_basebandSink = new VORDemodBaseband();
+    m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
 
     m_basebandSink->reset();
     m_basebandSink->startWork();
-    m_thread.start();
+    m_thread->start();
 
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
     VORDemodBaseband::MsgConfigureVORDemodBaseband *msg = VORDemodBaseband::MsgConfigureVORDemodBaseband::create(m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void VORDemod::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug("VORDemod::stop");
+    m_running = false;
     m_basebandSink->stopWork();
-    m_thread.quit();
-    m_thread.wait();
+    m_thread->quit();
+    m_thread->wait();
 }
 
 bool VORDemod::handleMessage(const Message& cmd)
@@ -160,10 +176,15 @@ bool VORDemod::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
-        // Forward to the sink
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "VORDemod::handleMessage: DSPSignalNotification";
-        m_basebandSink->getInputMessageQueue()->push(rep);
+
+        // Forward to the sink
+        if (m_running)
+        {
+            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            m_basebandSink->getInputMessageQueue()->push(rep);
+        }
+
         // Forward to GUI if any
         if (m_guiMessageQueue) {
             m_guiMessageQueue->push(new DSPSignalNotification(notif));
@@ -297,8 +318,11 @@ void VORDemod::applySettings(const VORDemodSettings& settings, bool force)
         reverseAPIKeys.append("identThreshold");
     }
 
-    VORDemodBaseband::MsgConfigureVORDemodBaseband *msg = VORDemodBaseband::MsgConfigureVORDemodBaseband::create(settings, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        VORDemodBaseband::MsgConfigureVORDemodBaseband *msg = VORDemodBaseband::MsgConfigureVORDemodBaseband::create(settings, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -522,12 +546,16 @@ void VORDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 
 void VORDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
-    double magsqAvg, magsqPeak;
-    int nbMagsqSamples;
-    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
-    response.getVorDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    response.getVorDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
-    response.getVorDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+    if (m_running)
+    {
+        double magsqAvg, magsqPeak;
+        int nbMagsqSamples;
+        getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+        response.getVorDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+        response.getVorDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
+        response.getVorDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+    }
+
     response.getVorDemodReport()->setNavId(m_settings.m_navId);
     response.getVorDemodReport()->setRadial(m_radial);
     response.getVorDemodReport()->setRefMag(m_refMag);
@@ -701,7 +729,7 @@ void VORDemod::networkManagerFinished(QNetworkReply *reply)
 
 void VORDemod::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 
