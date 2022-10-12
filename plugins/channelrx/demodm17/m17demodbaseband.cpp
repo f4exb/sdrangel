@@ -25,11 +25,11 @@
 
 MESSAGE_CLASS_DEFINITION(M17DemodBaseband::MsgConfigureM17DemodBaseband, Message)
 
-M17DemodBaseband::M17DemodBaseband() :
-    m_channelizer(&m_sink)
+M17DemodBaseband::M17DemodBaseband()
 {
     qDebug("M17DemodBaseband::M17DemodBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
+    m_channelizer = new DownChannelizer(&m_sink);
 
     QObject::connect(
         &m_sampleFifo,
@@ -49,6 +49,7 @@ M17DemodBaseband::M17DemodBaseband() :
 M17DemodBaseband::~M17DemodBaseband()
 {
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_sink.getAudioFifo());
+    delete m_channelizer;
 }
 
 void M17DemodBaseband::reset()
@@ -83,12 +84,12 @@ void M17DemodBaseband::handleData()
 
 		// first part of FIFO data
         if (part1begin != part1end) {
-            m_channelizer.feed(part1begin, part1end);
+            m_channelizer->feed(part1begin, part1end);
         }
 
 		// second part of FIFO data (used when block wraps around)
 		if(part2begin != part2end) {
-            m_channelizer.feed(part2begin, part2end);
+            m_channelizer->feed(part2begin, part2end);
         }
 
 		m_sampleFifo.readCommit((unsigned int) count);
@@ -125,13 +126,13 @@ bool M17DemodBaseband::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         qDebug() << "M17DemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
-        m_channelizer.setBasebandSampleRate(notif.getSampleRate());
-        m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
+        m_channelizer->setBasebandSampleRate(notif.getSampleRate());
+        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
-        if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
+        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
         {
             m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changes
-            m_channelSampleRate = m_channelizer.getChannelSampleRate();
+            m_channelSampleRate = m_channelizer->getChannelSampleRate();
         }
 
 		return true;
@@ -146,13 +147,13 @@ void M17DemodBaseband::applySettings(const M17DemodSettings& settings, const QLi
 {
     if (settingsKeys.contains("inputFrequencyOffset") || force)
     {
-        m_channelizer.setChannelization(48000, settings.m_inputFrequencyOffset);
-        m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
+        m_channelizer->setChannelization(48000, settings.m_inputFrequencyOffset);
+        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
-        if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
+        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
         {
             m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changes
-            m_channelSampleRate = m_channelizer.getChannelSampleRate();
+            m_channelSampleRate = m_channelizer->getChannelSampleRate();
         }
     }
 
@@ -181,12 +182,12 @@ void M17DemodBaseband::applySettings(const M17DemodSettings& settings, const QLi
 
 int M17DemodBaseband::getChannelSampleRate() const
 {
-    return m_channelizer.getChannelSampleRate();
+    return m_channelizer->getChannelSampleRate();
 }
 
 
 void M17DemodBaseband::setBasebandSampleRate(int sampleRate)
 {
-    m_channelizer.setBasebandSampleRate(sampleRate);
-    m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
+    m_channelizer->setBasebandSampleRate(sampleRate);
+    m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 }

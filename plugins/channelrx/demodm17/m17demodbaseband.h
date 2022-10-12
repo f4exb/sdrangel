@@ -22,12 +22,12 @@
 #include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
-#include "dsp/downchannelizer.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 
 #include "m17demodsink.h"
 
+class DownChannelizer;
 class ChannelAPI;
 
 class M17DemodBaseband : public QObject
@@ -124,7 +124,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownChannelizer m_channelizer;
+    DownChannelizer *m_channelizer;
     int m_channelSampleRate;
     M17DemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication

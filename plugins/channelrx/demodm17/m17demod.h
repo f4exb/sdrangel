@@ -268,7 +268,6 @@ private:
 	DeviceAPI *m_deviceAPI;
     QThread *m_thread;
     M17DemodBaseband *m_basebandSink;
-    bool m_running;
 	M17DemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
