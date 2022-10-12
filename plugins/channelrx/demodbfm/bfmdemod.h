@@ -152,7 +152,8 @@ public:
 private:
 	DeviceAPI *m_deviceAPI;
     QThread *m_thread;
-    BFMDemodBaseband* m_basebandSink;
+    BFMDemodBaseband *m_basebandSink;
+    bool m_running;
 	BFMDemodSettings m_settings;
     SpectrumVis m_spectrumVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink

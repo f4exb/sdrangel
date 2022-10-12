@@ -28,11 +28,11 @@
 MESSAGE_CLASS_DEFINITION(BFMDemodBaseband::MsgConfigureBFMDemodBaseband, Message)
 
 BFMDemodBaseband::BFMDemodBaseband() :
+    m_channelizer(&m_sink),
     m_messageQueueToGUI(nullptr),
     m_spectrumVis(nullptr)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
-    m_channelizer = new DownChannelizer(&m_sink);
 
     qDebug("BFMDemodBaseband::BFMDemodBaseband");
     QObject::connect(
@@ -53,7 +53,6 @@ BFMDemodBaseband::BFMDemodBaseband() :
 BFMDemodBaseband::~BFMDemodBaseband()
 {
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_sink.getAudioFifo());
-    delete m_channelizer;
 }
 
 void BFMDemodBaseband::reset()
@@ -88,12 +87,12 @@ void BFMDemodBaseband::handleData()
 
 		// first part of FIFO data
         if (part1begin != part1end) {
-            m_channelizer->feed(part1begin, part1end);
+            m_channelizer.feed(part1begin, part1end);
         }
 
 		// second part of FIFO data (used when block wraps around)
 		if(part2begin != part2end) {
-            m_channelizer->feed(part2begin, part2end);
+            m_channelizer.feed(part2begin, part2end);
         }
 
 		m_sampleFifo.readCommit((unsigned int) count);
@@ -130,24 +129,24 @@ bool BFMDemodBaseband::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         qDebug() << "BFMDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
-        m_channelizer->setBasebandSampleRate(notif.getSampleRate());
-        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_channelizer.setBasebandSampleRate(notif.getSampleRate());
+        m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
-        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
+        if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
         {
             m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changes
-            m_channelSampleRate = m_channelizer->getChannelSampleRate();
+            m_channelSampleRate = m_channelizer.getChannelSampleRate();
         }
 
         if (getMessageQueueToGUI())
         {
-            BFMDemodReport::MsgReportChannelSampleRateChanged *msg = BFMDemodReport::MsgReportChannelSampleRateChanged::create(m_channelizer->getChannelSampleRate());
+            BFMDemodReport::MsgReportChannelSampleRateChanged *msg = BFMDemodReport::MsgReportChannelSampleRateChanged::create(m_channelizer.getChannelSampleRate());
             getMessageQueueToGUI()->push(msg);
         }
 
         if (m_spectrumVis)
         {
-            DSPSignalNotification *msg = new DSPSignalNotification(m_channelizer->getChannelSampleRate(), 0);
+            DSPSignalNotification *msg = new DSPSignalNotification(m_channelizer.getChannelSampleRate(), 0);
             m_spectrumVis->getInputMessageQueue()->push(msg);
         }
 
@@ -164,24 +163,24 @@ void BFMDemodBaseband::applySettings(const BFMDemodSettings& settings, bool forc
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth)
      || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer->setChannelization(BFMDemodSettings::requiredBW(settings.m_rfBandwidth), settings.m_inputFrequencyOffset);
-        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_channelizer.setChannelization(BFMDemodSettings::requiredBW(settings.m_rfBandwidth), settings.m_inputFrequencyOffset);
+        m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
-        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
+        if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
         {
             m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changea
-            m_channelSampleRate = m_channelizer->getChannelSampleRate();
+            m_channelSampleRate = m_channelizer.getChannelSampleRate();
         }
 
         if (getMessageQueueToGUI())
         {
-            BFMDemodReport::MsgReportChannelSampleRateChanged *msg = BFMDemodReport::MsgReportChannelSampleRateChanged::create(m_channelizer->getChannelSampleRate());
+            BFMDemodReport::MsgReportChannelSampleRateChanged *msg = BFMDemodReport::MsgReportChannelSampleRateChanged::create(m_channelizer.getChannelSampleRate());
             getMessageQueueToGUI()->push(msg);
         }
 
         if (m_spectrumVis)
         {
-            DSPSignalNotification *msg = new DSPSignalNotification(m_channelizer->getChannelSampleRate(), 0);
+            DSPSignalNotification *msg = new DSPSignalNotification(m_channelizer.getChannelSampleRate(), 0);
             m_spectrumVis->getInputMessageQueue()->push(msg);
         }
     }
@@ -207,24 +206,24 @@ void BFMDemodBaseband::applySettings(const BFMDemodSettings& settings, bool forc
 
 int BFMDemodBaseband::getChannelSampleRate() const
 {
-    return m_channelizer->getChannelSampleRate();
+    return m_channelizer.getChannelSampleRate();
 }
 
 
 void BFMDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
-    m_channelizer->setBasebandSampleRate(sampleRate);
-    m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+    m_channelizer.setBasebandSampleRate(sampleRate);
+    m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
     if (getMessageQueueToGUI())
     {
-        BFMDemodReport::MsgReportChannelSampleRateChanged *msg = BFMDemodReport::MsgReportChannelSampleRateChanged::create(m_channelizer->getChannelSampleRate());
+        BFMDemodReport::MsgReportChannelSampleRateChanged *msg = BFMDemodReport::MsgReportChannelSampleRateChanged::create(m_channelizer.getChannelSampleRate());
         getMessageQueueToGUI()->push(msg);
     }
 
     if (m_spectrumVis)
     {
-        DSPSignalNotification *msg = new DSPSignalNotification(m_channelizer->getChannelSampleRate(), 0);
+        DSPSignalNotification *msg = new DSPSignalNotification(m_channelizer.getChannelSampleRate(), 0);
         m_spectrumVis->getInputMessageQueue()->push(msg);
     }
 }
