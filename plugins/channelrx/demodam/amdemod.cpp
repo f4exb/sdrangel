@@ -546,18 +546,17 @@ void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
 
 void AMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
+    if (!m_running) {
+        return;
+    }
+
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
-
     response.getAmDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-
-    if (m_running)
-    {
-        response.getAmDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
-        response.getAmDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
-        response.getAmDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
-    }
+    response.getAmDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
+    response.getAmDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+    response.getAmDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
 void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force)

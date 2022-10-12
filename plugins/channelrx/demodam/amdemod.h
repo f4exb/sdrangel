@@ -119,14 +119,18 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    uint32_t getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
-	double getMagSq() const { return m_basebandSink->getMagSq(); }
-	bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
-	bool getPllLocked() const { return m_settings.m_pll && m_basebandSink->getPllLocked(); }
-	Real getPllFrequency() const { return m_basebandSink->getPllFrequency(); }
+    uint32_t getAudioSampleRate() const { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
+	double getMagSq() const { return m_running ? m_basebandSink->getMagSq() : 0.0; }
+	bool getSquelchOpen() const { return m_running ? m_basebandSink->getSquelchOpen() : false; }
+	bool getPllLocked() const { return m_settings.m_pll && m_running && m_basebandSink->getPllLocked(); }
+	Real getPllFrequency() const { return m_running ? m_basebandSink->getPllFrequency() : 0.0; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
-        m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
+        if (m_running) {
+            m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
+        } else {
+            avg = 0.0; peak = 0.0; nbSamples = 1;
+        }
     }
 
     uint32_t getNumberOfDeviceStreams() const;
