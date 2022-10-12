@@ -22,12 +22,11 @@
 #include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
+#include "dsp/downchannelizer.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 
 #include "chirpchatdemodsink.h"
-
-class DownChannelizer;
 
 class ChirpChatDemodBaseband : public QObject
 {
@@ -72,7 +71,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownChannelizer *m_channelizer;
+    DownChannelizer m_channelizer;
     ChirpChatDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     ChirpChatDemodSettings m_settings;

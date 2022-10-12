@@ -25,10 +25,10 @@
 
 MESSAGE_CLASS_DEFINITION(ChirpChatDemodBaseband::MsgConfigureChirpChatDemodBaseband, Message)
 
-ChirpChatDemodBaseband::ChirpChatDemodBaseband()
+ChirpChatDemodBaseband::ChirpChatDemodBaseband() :
+    m_channelizer(&m_sink)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
-    m_channelizer = new DownChannelizer(&m_sink);
 
     qDebug("ChirpChatDemodBaseband::ChirpChatDemodBaseband");
     QObject::connect(
@@ -44,7 +44,6 @@ ChirpChatDemodBaseband::ChirpChatDemodBaseband()
 
 ChirpChatDemodBaseband::~ChirpChatDemodBaseband()
 {
-    delete m_channelizer;
 }
 
 void ChirpChatDemodBaseband::reset()
@@ -73,12 +72,12 @@ void ChirpChatDemodBaseband::handleData()
 
 		// first part of FIFO data
         if (part1begin != part1end) {
-            m_channelizer->feed(part1begin, part1end);
+            m_channelizer.feed(part1begin, part1end);
         }
 
 		// second part of FIFO data (used when block wraps around)
 		if(part2begin != part2end) {
-            m_channelizer->feed(part2begin, part2end);
+            m_channelizer.feed(part2begin, part2end);
         }
 
 		m_sampleFifo.readCommit((unsigned int) count);
@@ -115,11 +114,11 @@ bool ChirpChatDemodBaseband::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         qDebug() << "ChirpChatDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
-        m_channelizer->setBasebandSampleRate(notif.getSampleRate());
+        m_channelizer.setBasebandSampleRate(notif.getSampleRate());
         m_sink.applyChannelSettings(
-            m_channelizer->getChannelSampleRate(),
+            m_channelizer.getChannelSampleRate(),
             ChirpChatDemodSettings::bandwidths[m_settings.m_bandwidthIndex],
-            m_channelizer->getChannelFrequencyOffset()
+            m_channelizer.getChannelFrequencyOffset()
         );
 
 		return true;
@@ -135,14 +134,14 @@ void ChirpChatDemodBaseband::applySettings(const ChirpChatDemodSettings& setting
     if ((settings.m_bandwidthIndex != m_settings.m_bandwidthIndex)
      || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer->setChannelization(
+        m_channelizer.setChannelization(
             ChirpChatDemodSettings::bandwidths[settings.m_bandwidthIndex]*ChirpChatDemodSettings::oversampling,
             settings.m_inputFrequencyOffset
         );
         m_sink.applyChannelSettings(
-            m_channelizer->getChannelSampleRate(),
+            m_channelizer.getChannelSampleRate(),
             ChirpChatDemodSettings::bandwidths[settings.m_bandwidthIndex],
-            m_channelizer->getChannelFrequencyOffset()
+            m_channelizer.getChannelFrequencyOffset()
         );
     }
 
@@ -153,16 +152,16 @@ void ChirpChatDemodBaseband::applySettings(const ChirpChatDemodSettings& setting
 
 int ChirpChatDemodBaseband::getChannelSampleRate() const
 {
-    return m_channelizer->getChannelSampleRate();
+    return m_channelizer.getChannelSampleRate();
 }
 
 
 void ChirpChatDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
-    m_channelizer->setBasebandSampleRate(sampleRate);
+    m_channelizer.setBasebandSampleRate(sampleRate);
     m_sink.applyChannelSettings(
-        m_channelizer->getChannelSampleRate(),
+        m_channelizer.getChannelSampleRate(),
         ChirpChatDemodSettings::bandwidths[m_settings.m_bandwidthIndex],
-        m_channelizer->getChannelFrequencyOffset()
+        m_channelizer.getChannelFrequencyOffset()
     );
 }

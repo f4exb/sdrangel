@@ -52,6 +52,9 @@ const char* const ChirpChatDemod::m_channelId = "ChirpChatDemod";
 ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_thread(nullptr),
+        m_basebandSink(nullptr),
+        m_running(false),
         m_spectrumVis(SDR_RX_SCALEF),
         m_basebandSampleRate(0),
         m_lastMsgSignalDb(0.0),
@@ -70,13 +73,6 @@ ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
         m_udpSink(this, 256)
 {
 	setObjectName(m_channelId);
-
-    m_thread = new QThread(this);
-    m_basebandSink = new ChirpChatDemodBaseband();
-    m_basebandSink->setSpectrumSink(&m_spectrumVis);
-    m_basebandSink->setDecoderMessageQueue(getInputMessageQueue()); // Decoder held on the main thread
-    m_basebandSink->moveToThread(m_thread);
-
 	applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
@@ -88,14 +84,15 @@ ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
         this,
         &ChirpChatDemod::handleIndexInDeviceSetChanged
     );
+
+    start();
 }
 
 ChirpChatDemod::~ChirpChatDemod()
 {
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-    delete m_basebandSink;
-    delete m_thread;
+    stop();
 }
 
 void ChirpChatDemod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -118,12 +115,27 @@ uint32_t ChirpChatDemod::getNumberOfDeviceStreams() const
 void ChirpChatDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool pO)
 {
     (void) pO;
-	m_basebandSink->feed(begin, end);
+
+    if (m_running) {
+    	m_basebandSink->feed(begin, end);
+    }
 }
 
 void ChirpChatDemod::start()
 {
+    if (m_running) {
+        return;
+    }
+
     qDebug() << "ChirpChatDemod::start";
+    m_thread = new QThread(this);
+    m_basebandSink = new ChirpChatDemodBaseband();
+    m_basebandSink->setSpectrumSink(&m_spectrumVis);
+    m_basebandSink->setDecoderMessageQueue(getInputMessageQueue()); // Decoder held on the main thread
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
 
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
@@ -135,11 +147,19 @@ void ChirpChatDemod::start()
     SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
     spectrumSettings.m_ssb = true;
     SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
-    m_spectrumVis.getInputMessageQueue()->push(msg);}
+    m_spectrumVis.getInputMessageQueue()->push(msg);
+
+    m_running = true;
+}
 
 void ChirpChatDemod::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug() << "ChirpChatDemod::stop";
+    m_running = false;
 	m_thread->exit();
 	m_thread->wait();
 }
@@ -293,10 +313,14 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
-        // Forward to the sink
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "ChirpChatDemod::handleMessage: DSPSignalNotification: m_basebandSampleRate: " << m_basebandSampleRate;
-        m_basebandSink->getInputMessageQueue()->push(rep);
+
+        // Forward to the sink
+        if (m_running)
+        {
+            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            m_basebandSink->getInputMessageQueue()->push(rep);
+        }
 
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(notif)); // make a copy
@@ -475,9 +499,12 @@ void ChirpChatDemod::applySettings(const ChirpChatDemodSettings& settings, bool 
         reverseAPIKeys.append("streamIndex");
     }
 
-    ChirpChatDemodBaseband::MsgConfigureChirpChatDemodBaseband *msg =
-        ChirpChatDemodBaseband::MsgConfigureChirpChatDemodBaseband::create(settings, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        ChirpChatDemodBaseband::MsgConfigureChirpChatDemodBaseband *msg =
+            ChirpChatDemodBaseband::MsgConfigureChirpChatDemodBaseband::create(settings, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -741,11 +768,14 @@ void ChirpChatDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
 
 void ChirpChatDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
+    if (m_running) {
+        response.getChirpChatDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+    }
+
     response.getChirpChatDemodReport()->setChannelPowerDb(CalcDb::dbPower(getTotalPower()));
     response.getChirpChatDemodReport()->setSignalPowerDb(m_lastMsgSignalDb);
     response.getChirpChatDemodReport()->setNoisePowerDb(CalcDb::dbPower(getCurrentNoiseLevel()));
     response.getChirpChatDemodReport()->setSnrPowerDb(m_lastMsgSignalDb - m_lastMsgNoiseDb);
-    response.getChirpChatDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
     response.getChirpChatDemodReport()->setHasCrc(m_lastMsgHasCRC);
     response.getChirpChatDemodReport()->setNbParityBits(m_lastMsgNbParityBits);
     response.getChirpChatDemodReport()->setPacketLength(m_lastMsgPacketLength);
@@ -938,22 +968,22 @@ void ChirpChatDemod::networkManagerFinished(QNetworkReply *reply)
 
 bool ChirpChatDemod::getDemodActive() const
 {
-    return m_basebandSink->getDemodActive();
+    return m_running ? m_basebandSink->getDemodActive() : false;
 }
 
 double ChirpChatDemod::getCurrentNoiseLevel() const
 {
-    return m_basebandSink->getCurrentNoiseLevel();
+    return m_running ? m_basebandSink->getCurrentNoiseLevel(): 0.0;
 }
 
 double ChirpChatDemod::getTotalPower() const
 {
-    return m_basebandSink->getTotalPower();
+    return m_running ? m_basebandSink->getTotalPower() : 0.0;
 }
 
 void ChirpChatDemod::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 

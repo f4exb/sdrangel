@@ -271,7 +271,8 @@ public:
 private:
 	DeviceAPI *m_deviceAPI;
     QThread *m_thread;
-    ChirpChatDemodBaseband* m_basebandSink;
+    ChirpChatDemodBaseband *m_basebandSink;
+    bool m_running;
     ChirpChatDemodDecoder m_decoder;
     ChirpChatDemodSettings m_settings;
     SpectrumVis m_spectrumVis;
