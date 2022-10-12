@@ -51,15 +51,13 @@ const int AMDemod::m_udpBlockSize = 512;
 AMDemod::AMDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_thread(nullptr),
+        m_basebandSink(nullptr),
+        m_running(false),
         m_basebandSampleRate(0),
         m_lastTs(0)
 {
     setObjectName(m_channelId);
-
-    m_basebandSink = new AMDemodBaseband();
-    m_basebandSink->setChannel(this);
-    m_basebandSink->moveToThread(&m_thread);
-
 	applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
@@ -72,31 +70,18 @@ AMDemod::AMDemod(DeviceAPI *deviceAPI) :
         this,
         &AMDemod::networkManagerFinished
     );
-    // Experimental:
-    // QObject::connect(
-    //     m_deviceAPI->getSampleSource()->getSampleFifo(),
-    //     &SampleSinkFifo::written,
-    //     this,
-    //     &AMDemod::handleWrittenToFifo
-    // );
     QObject::connect(
         this,
         &ChannelAPI::indexInDeviceSetChanged,
         this,
         &AMDemod::handleIndexInDeviceSetChanged
     );
+    start();
 }
 
 AMDemod::~AMDemod()
 {
     qDebug("AMDemod::~AMDemod");
-    // Experimental:
-    // QObject::disconnect(
-    //     m_deviceAPI->getSampleSource()->getSampleFifo(),
-    //     &SampleSinkFifo::written,
-    //     this,
-    //     &AMDemod::handleWrittenToFifo
-    // );
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -106,12 +91,7 @@ AMDemod::~AMDemod()
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-
-    if (m_basebandSink->isRunning()) {
-        stop();
-    }
-
-    delete m_basebandSink;
+    stop();
 }
 
 void AMDemod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -139,25 +119,42 @@ void AMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector
 
 void AMDemod::start()
 {
+    if (m_running) {
+        return;
+    }
+
 	qDebug("AMDemod::start");
+    m_thread = new QThread();
+    m_basebandSink = new AMDemodBaseband();
+    m_basebandSink->setChannel(this);
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
 
     m_basebandSink->reset();
     m_basebandSink->startWork();
-    m_thread.start();
+    m_thread->start();
 
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
     AMDemodBaseband::MsgConfigureAMDemodBaseband *msg = AMDemodBaseband::MsgConfigureAMDemodBaseband::create(m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void AMDemod::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug("AMDemod::stop");
-	m_basebandSink->stopWork();
-	m_thread.quit();
-	m_thread.wait();
+    m_running = false;
+	m_thread->quit();
+	m_thread->wait();
 }
 
 bool AMDemod::handleMessage(const Message& cmd)
@@ -175,10 +172,14 @@ bool AMDemod::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
-        // Forward to the sink
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "AMDemod::handleMessage: DSPSignalNotification";
-        m_basebandSink->getInputMessageQueue()->push(rep);
+
+        // Forward to the sink
+        if (m_running)
+        {
+            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            m_basebandSink->getInputMessageQueue()->push(rep);
+        }
 
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
@@ -284,8 +285,11 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    AMDemodBaseband::MsgConfigureAMDemodBaseband *msg = AMDemodBaseband::MsgConfigureAMDemodBaseband::create(settings, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        AMDemodBaseband::MsgConfigureAMDemodBaseband *msg = AMDemodBaseband::MsgConfigureAMDemodBaseband::create(settings, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -547,9 +551,13 @@ void AMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
     response.getAmDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    response.getAmDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
-    response.getAmDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
-    response.getAmDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+
+    if (m_running)
+    {
+        response.getAmDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
+        response.getAmDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+        response.getAmDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+    }
 }
 
 void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force)
@@ -705,7 +713,7 @@ void AMDemod::handleWrittenToFifo(int nsamples, qint64 timestamp)
 
 void AMDemod::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 
