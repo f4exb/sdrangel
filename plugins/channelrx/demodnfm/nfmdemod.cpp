@@ -133,6 +133,7 @@ void NFMDemod::start()
         .arg(getIndexInDeviceSet())
     );
     m_basebandSink->setChannel(this);
+    m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI());
     m_basebandSink->moveToThread(m_thread);
 
     QObject::connect(

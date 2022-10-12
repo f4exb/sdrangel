@@ -120,14 +120,20 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-	const Real *getCtcssToneSet(int& nbTones) const { return m_basebandSink->getCtcssToneSet(nbTones); }
-	bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
-    void setMessageQueueToGUI(MessageQueue* queue) override {
-        ChannelAPI::setMessageQueueToGUI(queue);
-        m_basebandSink->setMessageQueueToGUI(queue);
+	const Real *getCtcssToneSet(int& nbTones) const { return m_running ? m_basebandSink->getCtcssToneSet(nbTones) : nullptr; }
+	bool getSquelchOpen() const { return m_running && m_basebandSink->getSquelchOpen(); }
+
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
+    {
+        if (m_running) {
+            m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
+        } else {
+            avg = 0.0; peak = 0.0; nbSamples = 1;
+        }
     }
-    int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
+
+    void setMessageQueueToGUI(MessageQueue* queue) override { ChannelAPI::setMessageQueueToGUI(queue); }
+    int getAudioSampleRate() const { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
 
     uint32_t getNumberOfDeviceStreams() const;
 
