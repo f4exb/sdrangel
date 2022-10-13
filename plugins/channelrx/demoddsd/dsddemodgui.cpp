@@ -651,7 +651,7 @@ void DSDDemodGUI::tick()
 
 	// "slow" updates
 
-	if (m_tickCount % 10 == 0)
+	if (m_dsdDemod->isRunning() & (m_tickCount % 10 == 0))
 	{
 	    ui->inLevelText->setText(QString::number(m_dsdDemod->getDecoder().getInLevel()));
         ui->inCarrierPosText->setText(QString::number(m_dsdDemod->getDecoder().getCarrierPos()));

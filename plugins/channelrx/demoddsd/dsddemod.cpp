@@ -718,17 +718,16 @@ void DSDDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 
 void DSDDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
+    if (!m_running) {
+        return;
+    }
+
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
-
-    if (m_running)
-    {
-        response.getDsdDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
-        response.getDsdDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
-        response.getDsdDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
-    }
-
+    response.getDsdDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+    response.getDsdDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+    response.getDsdDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
     response.getDsdDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     response.getDsdDemodReport()->setPllLocked(getDecoder().getSymbolPLLLocked() ? 1 : 0);
     response.getDsdDemodReport()->setSlot1On(getDecoder().getVoice1On() ? 1 : 0);

@@ -155,14 +155,24 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     uint32_t getNumberOfDeviceStreams() const;
-	void setScopeXYSink(BasebandSampleSink* sampleSink) { m_basebandSink->setScopeXYSink(sampleSink); }
-	void configureMyPosition(float myLatitude, float myLongitude) { m_basebandSink->configureMyPosition(myLatitude, myLongitude); }
-	double getMagSq() { return m_basebandSink->getMagSq(); }
-	bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
+	void setScopeXYSink(BasebandSampleSink* sampleSink) { if (m_running) { m_basebandSink->setScopeXYSink(sampleSink); } }
+	void configureMyPosition(float myLatitude, float myLongitude) { if (m_running) { m_basebandSink->configureMyPosition(myLatitude, myLongitude); } }
+	double getMagSq() { return m_running ? m_basebandSink->getMagSq() : 0.0; }
+	bool getSquelchOpen() const { return m_running && m_basebandSink->getSquelchOpen(); }
 	const DSDDecoder& getDecoder() const { return m_basebandSink->getDecoder(); }
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
-    const char *updateAndGetStatusText() { return m_basebandSink->updateAndGetStatusText(); }
-    int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
+
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
+    {
+        if (m_running) {
+            m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
+        } else {
+            avg = 0.0; peak = 0.0; nbSamples = 1;
+        }
+    }
+
+    const char *updateAndGetStatusText() { return m_running ? m_basebandSink->updateAndGetStatusText() : nullptr; }
+    int getAudioSampleRate() const { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
+    bool isRunning() { return m_running; }
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
