@@ -139,6 +139,7 @@ void SSBDemod::start()
     );
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setChannel(this);
+    m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI());
     m_basebandSink->moveToThread(m_thread);
 
     QObject::connect(

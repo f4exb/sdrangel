@@ -96,16 +96,20 @@ public:
         return m_settings.m_inputFrequencyOffset;
     }
 
-    void setMessageQueueToGUI(MessageQueue* queue) override {
-        ChannelAPI::setMessageQueueToGUI(queue);
-        m_basebandSink->setMessageQueueToGUI(queue);
-    }
-    uint32_t getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
-    uint32_t getChannelSampleRate() const { return m_basebandSink->getChannelSampleRate(); }
-    double getMagSq() const { return m_basebandSink->getMagSq(); }
-	bool getAudioActive() const { return m_basebandSink->getAudioActive(); }
+    void setMessageQueueToGUI(MessageQueue* queue) override { ChannelAPI::setMessageQueueToGUI(queue); }
+    uint32_t getAudioSampleRate() const { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
+    uint32_t getChannelSampleRate() const { return m_running ? m_basebandSink->getChannelSampleRate() : 0; }
+    double getMagSq() const { return m_running ? m_basebandSink->getMagSq() : 0.0; }
+	bool getAudioActive() const { return m_running && m_basebandSink->getAudioActive(); }
 
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
+    {
+        if (m_running) {
+            m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
+        } else {
+            avg = 0.0; peak = 0.0; nbSamples = 1;
+        }
+    }
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
