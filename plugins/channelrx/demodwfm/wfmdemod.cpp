@@ -55,15 +55,12 @@ const int WFMDemod::m_udpBlockSize = 512;
 WFMDemod::WFMDemod(DeviceAPI* deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_thread(nullptr),
+        m_basebandSink(nullptr),
+        m_running(false),
         m_basebandSampleRate(0)
 {
 	setObjectName(m_channelId);
-
-    m_thread = new QThread(this);
-    m_basebandSink = new WFMDemodBaseband();
-    m_basebandSink->setChannel(this);
-    m_basebandSink->moveToThread(m_thread);
-
 	applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
@@ -82,6 +79,7 @@ WFMDemod::WFMDemod(DeviceAPI* deviceAPI) :
         this,
         &WFMDemod::handleIndexInDeviceSetChanged
     );
+    start();
 }
 
 WFMDemod::~WFMDemod()
@@ -96,8 +94,7 @@ WFMDemod::~WFMDemod()
 
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-    delete m_basebandSink;
-    delete m_thread;
+    stop();
 }
 
 void WFMDemod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -120,12 +117,27 @@ uint32_t WFMDemod::getNumberOfDeviceStreams() const
 void WFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;
-    m_basebandSink->feed(begin, end);
+
+    if (m_running) {
+        m_basebandSink->feed(begin, end);
+    }
 }
 
 void WFMDemod::start()
 {
+    if (m_running) {
+        return;
+    }
+
     qDebug() << "WFMDemod::start";
+
+    m_thread = new QThread(this);
+    m_basebandSink = new WFMDemodBaseband();
+    m_basebandSink->setChannel(this);
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
 
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
@@ -133,11 +145,21 @@ void WFMDemod::start()
 
     m_basebandSink->reset();
     m_thread->start();
+
+    WFMDemodBaseband::MsgConfigureWFMDemodBaseband *msg = WFMDemodBaseband::MsgConfigureWFMDemodBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void WFMDemod::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug() << "WFMDemod::stop";
+    m_running = false;
 	m_thread->exit();
 	m_thread->wait();
 }
@@ -157,10 +179,15 @@ bool WFMDemod::handleMessage(const Message& cmd)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
-        // Forward to the sink
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "WFMDemod::handleMessage: DSPSignalNotification";
-        m_basebandSink->getInputMessageQueue()->push(rep);
+
+        // Forward to the sink
+        if (m_running)
+        {
+            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            m_basebandSink->getInputMessageQueue()->push(rep);
+        }
+
         // Forwatd to GUI if any
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
@@ -255,8 +282,11 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    WFMDemodBaseband::MsgConfigureWFMDemodBaseband *msg = WFMDemodBaseband::MsgConfigureWFMDemodBaseband::create(settings, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        WFMDemodBaseband::MsgConfigureWFMDemodBaseband *msg = WFMDemodBaseband::MsgConfigureWFMDemodBaseband::create(settings, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -500,6 +530,10 @@ void WFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 
 void WFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
+    if (!m_running) {
+        return;
+    }
+
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
@@ -645,7 +679,7 @@ void WFMDemod::networkManagerFinished(QNetworkReply *reply)
 
 void WFMDemod::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 
