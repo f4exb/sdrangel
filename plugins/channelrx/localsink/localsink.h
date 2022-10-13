@@ -126,6 +126,7 @@ private:
     DeviceAPI *m_deviceAPI;
     QThread *m_thread;
     LocalSinkBaseband *m_basebandSink;
+    bool m_running;
     LocalSinkSettings m_settings;
 
     uint64_t m_centerFrequency;
