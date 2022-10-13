@@ -120,16 +120,20 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
-    uint32_t getSampleRate() const { return m_basebandSink->getSampleRate(); }
-	double getMagSq() const { return m_basebandSink->getMagSq(); }
-	bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
-	bool getPllLocked() const { return m_basebandSink->getPllLocked(); }
-	Real getFrequency() const { return m_basebandSink->getFrequency(); };
-    Real getAvgDeltaFreq() const { return m_basebandSink->getAvgDeltaFreq(); }
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
+    uint32_t getSampleRate() const { return m_running ? m_basebandSink->getSampleRate() : 0; }
+	double getMagSq() const { return m_running ? m_basebandSink->getMagSq() : 0.0; }
+	bool getSquelchOpen() const { return m_running && m_basebandSink->getSquelchOpen(); }
+	bool getPllLocked() const { return m_running && m_basebandSink->getPllLocked(); }
+	Real getFrequency() const { return m_running ? m_basebandSink->getFrequency() : 0.0; };
+    Real getAvgDeltaFreq() const { return m_running ? m_basebandSink->getAvgDeltaFreq() : 0.0; }
 
-    void propagateMessageQueue(MessageQueue *messageQueueToInput) {
-        m_basebandSink->setMessageQueueToInput(messageQueueToInput);
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
+    {
+        if (m_running) {
+            m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
+        } else {
+            avg = 0.0; peak = 0.0; nbSamples = 1;
+        }
     }
 
     uint32_t getNumberOfDeviceStreams() const;
@@ -140,7 +144,8 @@ public:
 private:
     DeviceAPI* m_deviceAPI;
     QThread *m_thread;
-    FreqTrackerBaseband* m_basebandSink;
+    FreqTrackerBaseband *m_basebandSink;
+    bool m_running;
     FreqTrackerSettings m_settings;
     SpectrumVis m_spectrumVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink

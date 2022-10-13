@@ -55,17 +55,13 @@ const int FreqTracker::m_udpBlockSize = 512;
 FreqTracker::FreqTracker(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_thread(nullptr),
+        m_basebandSink(nullptr),
+        m_running(false),
         m_spectrumVis(SDR_RX_SCALEF),
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
-
-    m_thread = new QThread(this);
-    m_basebandSink = new FreqTrackerBaseband();
-    m_basebandSink->setSpectrumSink(&m_spectrumVis);
-    propagateMessageQueue(getInputMessageQueue());
-    m_basebandSink->moveToThread(m_thread);
-
 	applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
@@ -84,6 +80,7 @@ FreqTracker::FreqTracker(DeviceAPI *deviceAPI) :
         this,
         &FreqTracker::handleIndexInDeviceSetChanged
     );
+    start();
 }
 
 FreqTracker::~FreqTracker()
@@ -98,8 +95,7 @@ FreqTracker::~FreqTracker()
 
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-    delete m_basebandSink;
-    delete m_thread;
+    stop();
 }
 
 void FreqTracker::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -122,12 +118,27 @@ uint32_t FreqTracker::getNumberOfDeviceStreams() const
 void FreqTracker::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;
-    m_basebandSink->feed(begin, end);
+
+    if (m_running) {
+        m_basebandSink->feed(begin, end);
+    }
 }
 
 void FreqTracker::start()
 {
+    if (m_running) {
+        return;
+    }
+
 	qDebug("FreqTracker::start");
+    m_thread = new QThread(this);
+    m_basebandSink = new FreqTrackerBaseband();
+    m_basebandSink->setSpectrumSink(&m_spectrumVis);
+    m_basebandSink->setMessageQueueToInput(getInputMessageQueue());
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
 
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
@@ -135,11 +146,21 @@ void FreqTracker::start()
 
     m_basebandSink->reset();
     m_thread->start();
+
+    FreqTrackerBaseband::MsgConfigureFreqTrackerBaseband *msg = FreqTrackerBaseband::MsgConfigureFreqTrackerBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void FreqTracker::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug("FreqTracker::stop");
+    m_running = false;
 	m_thread->exit();
 	m_thread->wait();
 }
@@ -150,10 +171,14 @@ bool FreqTracker::handleMessage(const Message& cmd)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
-        // Forward to the sink
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "FreqTracker::handleMessage: DSPSignalNotification";
-        m_basebandSink->getInputMessageQueue()->push(rep);
+
+        // Forward to the sink
+        if (m_running)
+        {
+            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            m_basebandSink->getInputMessageQueue()->push(rep);
+        }
 
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
@@ -288,8 +313,11 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    FreqTrackerBaseband::MsgConfigureFreqTrackerBaseband *msg = FreqTrackerBaseband::MsgConfigureFreqTrackerBaseband::create(settings, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        FreqTrackerBaseband::MsgConfigureFreqTrackerBaseband *msg = FreqTrackerBaseband::MsgConfigureFreqTrackerBaseband::create(settings, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -551,6 +579,10 @@ void FreqTracker::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
 
 void FreqTracker::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
+    if (!m_running) {
+        return;
+    }
+
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
@@ -718,7 +750,7 @@ void FreqTracker::networkManagerFinished(QNetworkReply *reply)
 
 void FreqTracker::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 
