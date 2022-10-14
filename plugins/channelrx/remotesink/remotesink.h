@@ -26,7 +26,6 @@
 
 #include <QObject>
 #include <QNetworkRequest>
-#include <QThread>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
@@ -34,6 +33,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 class DeviceAPI;
 class ObjectPipe;
 
@@ -125,8 +125,9 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    QThread m_thread;
+    QThread *m_thread;
     RemoteSinkBaseband *m_basebandSink;
+    bool m_running;
     RemoteSinkSettings m_settings;
 
     uint64_t m_centerFrequency;

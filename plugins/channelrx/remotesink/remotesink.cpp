@@ -52,15 +52,14 @@ const char* const RemoteSink::m_channelId = "RemoteSink";
 RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_thread(nullptr),
+        m_basebandSink(nullptr),
+        m_running(false),
         m_frequencyOffset(0),
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
     updateWithDeviceData();
-
-    m_basebandSink = new RemoteSinkBaseband();
-    m_basebandSink->moveToThread(&m_thread);
-
     applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
@@ -79,6 +78,7 @@ RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
         this,
         &RemoteSink::handleIndexInDeviceSetChanged
     );
+    start();
 }
 
 RemoteSink::~RemoteSink()
@@ -92,12 +92,7 @@ RemoteSink::~RemoteSink()
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-
-    if (m_basebandSink->isRunning()) {
-        stop();
-    }
-
-    delete m_basebandSink;
+    stop();
 }
 
 void RemoteSink::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -120,29 +115,53 @@ uint32_t RemoteSink::getNumberOfDeviceStreams() const
 void RemoteSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;
-    m_basebandSink->feed(begin, end);
+
+    if (m_running) {
+        m_basebandSink->feed(begin, end);
+    }
 }
 
 void RemoteSink::start()
 {
+    if (m_running) {
+        return;
+    }
+
     qDebug("RemoteSink::start: m_basebandSampleRate: %d", m_basebandSampleRate);
+    m_thread = new QThread();
+    m_basebandSink = new RemoteSinkBaseband();
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
+
     m_basebandSink->reset();
     m_basebandSink->setDeviceIndex(m_deviceAPI->getDeviceSetIndex());
     m_basebandSink->setChannelIndex(getIndexInDeviceSet());
     m_basebandSink->startWork();
-    m_thread.start();
+    m_thread->start();
 
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
     }
+
+    RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband *msg = RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void RemoteSink::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug("RemoteSink::stop");
+    m_running = false;
     m_basebandSink->stopWork();
-    m_thread.quit();
-    m_thread.wait();
+    m_thread->quit();
+    m_thread->wait();
 }
 
 bool RemoteSink::handleMessage(const Message& cmd)
@@ -164,8 +183,11 @@ bool RemoteSink::handleMessage(const Message& cmd)
         updateWithDeviceData(); // Device center frequency and/or sample rate has changed
 
         // Forward to the sink
-        DSPSignalNotification* msgToBaseband = new DSPSignalNotification(notif); // make a copy
-        m_basebandSink->getInputMessageQueue()->push(msgToBaseband);
+        if (m_running)
+        {
+            DSPSignalNotification* msgToBaseband = new DSPSignalNotification(notif); // make a copy
+            m_basebandSink->getInputMessageQueue()->push(msgToBaseband);
+        }
 
         // Forward to the GUI
         if (getMessageQueueToGUI()) {
@@ -258,8 +280,8 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
     {
         reverseAPIKeys.append("nbTxBytes");
         stop();
-        m_basebandSink->setNbTxBytes(settings.m_nbTxBytes);
         start();
+        m_basebandSink->setNbTxBytes(settings.m_nbTxBytes);
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -275,8 +297,11 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband *msg = RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband::create(settings, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband *msg = RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband::create(settings, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if ((settings.m_useReverseAPI) && (reverseAPIKeys.size() != 0))
     {
@@ -656,7 +681,7 @@ void RemoteSink::networkManagerFinished(QNetworkReply *reply)
 
 void RemoteSink::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 
