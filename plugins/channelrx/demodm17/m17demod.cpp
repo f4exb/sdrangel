@@ -54,17 +54,13 @@ const int M17Demod::m_udpBlockSize = 512;
 M17Demod::M17Demod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_thread(nullptr),
+        m_basebandSink(nullptr),
+        m_running(false),
         m_basebandSampleRate(0)
 {
     qDebug("M17Demod::M17Demod");
 	setObjectName(m_channelId);
-
-    m_thread = new QThread(this);
-    m_basebandSink = new M17DemodBaseband();
-    m_basebandSink->setChannel(this);
-    m_basebandSink->setDemodInputMessageQueue(&m_inputMessageQueue);
-    m_basebandSink->moveToThread(m_thread);
-
     applySettings(m_settings, QList<QString>(), true);
 
     m_deviceAPI->addChannelSink(this);
@@ -83,6 +79,7 @@ M17Demod::M17Demod(DeviceAPI *deviceAPI) :
         this,
         &M17Demod::handleIndexInDeviceSetChanged
     );
+    start();
 }
 
 M17Demod::~M17Demod()
@@ -96,8 +93,7 @@ M17Demod::~M17Demod()
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-    delete m_basebandSink;
-    delete m_thread;
+    stop();
 }
 
 void M17Demod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -120,12 +116,27 @@ uint32_t M17Demod::getNumberOfDeviceStreams() const
 void M17Demod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;
-    m_basebandSink->feed(begin, end);
+
+    if (m_running) {
+        m_basebandSink->feed(begin, end);
+    }
 }
 
 void M17Demod::start()
 {
+    if (m_running) {
+        return;
+    }
+
     qDebug() << "M17Demod::start";
+    m_thread = new QThread(this);
+    m_basebandSink = new M17DemodBaseband();
+    m_basebandSink->setChannel(this);
+    m_basebandSink->setDemodInputMessageQueue(&m_inputMessageQueue);
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
 
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
@@ -133,11 +144,21 @@ void M17Demod::start()
 
     m_basebandSink->reset();
     m_thread->start();
+
+    M17DemodBaseband::MsgConfigureM17DemodBaseband *msg = M17DemodBaseband::MsgConfigureM17DemodBaseband::create(m_settings, QStringList(), true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void M17Demod::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug() << "M17Demod::stop";
+    m_running = false;
 	m_thread->exit();
 	m_thread->wait();
 }
@@ -158,10 +179,15 @@ bool M17Demod::handleMessage(const Message& cmd)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
-        // Forward to the sink
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "M17Demod::handleMessage: DSPSignalNotification";
-        m_basebandSink->getInputMessageQueue()->push(rep);
+
+        // Forward to the sink
+        if (m_running)
+        {
+            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            m_basebandSink->getInputMessageQueue()->push(rep);
+        }
+
         // Forward to GUI if any
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
@@ -258,8 +284,11 @@ void M17Demod::applySettings(const M17DemodSettings& settings, const QList<QStri
         }
     }
 
-    M17DemodBaseband::MsgConfigureM17DemodBaseband *msg = M17DemodBaseband::MsgConfigureM17DemodBaseband::create(settings, settingsKeys, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        M17DemodBaseband::MsgConfigureM17DemodBaseband *msg = M17DemodBaseband::MsgConfigureM17DemodBaseband::create(settings, settingsKeys, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if (settingsKeys.contains("m_useReverseAPI"))
     {
@@ -538,6 +567,10 @@ void M17Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 
 void M17Demod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
+    if (!m_running) {
+        return;
+    }
+
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
@@ -707,7 +740,7 @@ void M17Demod::networkManagerFinished(QNetworkReply *reply)
 
 void M17Demod::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 

@@ -209,12 +209,22 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     uint32_t getNumberOfDeviceStreams() const;
-	void setScopeXYSink(BasebandSampleSink* sampleSink) { m_basebandSink->setScopeXYSink(sampleSink); }
-	void configureMyPosition(float myLatitude, float myLongitude) { m_basebandSink->configureMyPosition(myLatitude, myLongitude); }
-	double getMagSq() { return m_basebandSink->getMagSq(); }
-	bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
-    int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
+	void setScopeXYSink(BasebandSampleSink* sampleSink) { if (m_running) { m_basebandSink->setScopeXYSink(sampleSink); } }
+	void configureMyPosition(float myLatitude, float myLongitude) { if (m_running) { m_basebandSink->configureMyPosition(myLatitude, myLongitude); } }
+	double getMagSq() { return m_running ? m_basebandSink->getMagSq() : 0.0; }
+	bool getSquelchOpen() const { return m_running && m_basebandSink->getSquelchOpen(); }
+
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
+    {
+        if (m_running) {
+            m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
+        } else {
+            avg = 0.0; peak = 0.0; nbSamples = 1;
+        }
+    }
+
+    int getAudioSampleRate() const { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
+    bool isRunning() { return m_running; }
 
     void getDiagnostics(
         bool& dcd,
@@ -251,15 +261,15 @@ public:
 
     void resetPRBS() { m_basebandSink->resetPRBS(); }
 
-    uint32_t getLSFCount() const { return m_basebandSink->getLSFCount(); }
+    uint32_t getLSFCount() const { return m_running ? m_basebandSink->getLSFCount() : 0; }
     const QString& getSrcCall() const { return m_basebandSink->getSrcCall(); }
     const QString& getDestcCall() const { return m_basebandSink->getDestcCall(); }
     const QString& getTypeInfo() const { return m_basebandSink->getTypeInfo(); }
     const std::array<uint8_t, 14>& getMeta() const { return m_basebandSink->getMeta(); }
-    bool getHasGNSS() const { return m_basebandSink->getHasGNSS(); }
-    bool getStreamElsePacket() const { return m_basebandSink->getStreamElsePacket(); }
-    uint16_t getCRC() const { return m_basebandSink->getCRC(); }
-    int getStdPacketProtocol() const { return m_basebandSink->getStdPacketProtocol(); }
+    bool getHasGNSS() const { return m_running && m_basebandSink->getHasGNSS(); }
+    bool getStreamElsePacket() const { return m_running && m_basebandSink->getStreamElsePacket(); }
+    uint16_t getCRC() const { return m_running ? m_basebandSink->getCRC() : 0; }
+    int getStdPacketProtocol() const { return m_running ? m_basebandSink->getStdPacketProtocol() : 0; }
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
@@ -268,6 +278,7 @@ private:
 	DeviceAPI *m_deviceAPI;
     QThread *m_thread;
     M17DemodBaseband *m_basebandSink;
+    bool m_running;
 	M17DemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 

@@ -689,7 +689,7 @@ void M17DemodGUI::tick()
         m_squelchOpen = squelchOpen;
 	}
 
-    if (m_tickCount % 10 == 0)
+    if (m_m17Demod->isRunning() && (m_tickCount % 10 == 0))
     {
         bool dcd;
         float evm;
