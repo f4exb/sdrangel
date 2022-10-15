@@ -52,13 +52,13 @@ SpectrumMarkersDialog::SpectrumMarkersDialog(
 {
     ui->setupUi(this);
     ui->markerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->markerFrequency->setValueRange(false, 10, -9999999999L, 9999999999L);
+    ui->markerFrequency->setValueRange(false, 12, -999999999999L, 999999999999L);
     ui->marker->setMaximum(m_histogramMarkers.size() - 1);
     ui->wMarkerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->wMarkerFrequency->setValueRange(false, 10, -9999999999L, 9999999999L);
+    ui->wMarkerFrequency->setValueRange(false, 12, -999999999999L, 999999999999L);
     ui->wMarker->setMaximum(m_waterfallMarkers.size() - 1);
     ui->aMarkerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->aMarkerFrequency->setValueRange(false, 10, -9999999999L, 9999999999L);
+    ui->aMarkerFrequency->setValueRange(false, 12, -999999999999L, 999999999999L);
     ui->aMarker->setMaximum(m_annotationMarkers.size() - 1);
     ui->aMarkerBandwidth->setColorMapper(ColorMapper::GrayGreenYellow);
     ui->aMarkerBandwidth->setValueRange(true, 9, 0, 999999999L);
