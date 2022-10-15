@@ -78,7 +78,7 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_helpURL = "plugins/samplesource/remoteinput/readme.md";
 
     ui->remoteDeviceFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->remoteDeviceFrequency->setValueRange(8, 0, 99999999);
+    ui->remoteDeviceFrequency->setValueRange(9, 0, 999999999);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
