@@ -59,7 +59,7 @@ RemoteTCPInputGui::RemoteTCPInputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_helpURL = "plugins/samplesource/remotetcpinput/readme.md";
 
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, 0, 9999999); // frequency dial is in kHz
+    ui->centerFrequency->setValueRange(9, 0, 999999999); // frequency dial is in kHz
 
     ui->devSampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->devSampleRate->setValueRange(8, 0, 99999999);

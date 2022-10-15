@@ -159,7 +159,7 @@ void BladeRF2MIMOGui::displaySettings()
         ui->transverter->setDeltaFrequency(m_settings.m_rxTransverterDeltaFrequency);
         ui->transverter->setDeltaFrequencyActive(m_settings.m_rxTransverterMode);
         ui->transverter->setIQOrder(m_settings.m_iqOrder);
-        ui->centerFrequency->setValueRange(7, m_fMinRx / 1000, m_fMaxRx / 1000);
+        ui->centerFrequency->setValueRange(9, m_fMinRx / 1000, m_fMaxRx / 1000);
         ui->centerFrequency->setValue(m_settings.m_rxCenterFrequency / 1000);
         ui->bandwidth->setValueRange(5, m_bwMinRx / 1000, m_bwMaxRx / 1000);
         ui->bandwidth->setValue(m_settings.m_rxBandwidth / 1000);
@@ -187,7 +187,7 @@ void BladeRF2MIMOGui::displaySettings()
         ui->transverter->setDeltaFrequency(m_settings.m_txTransverterDeltaFrequency);
         ui->transverter->setDeltaFrequencyActive(m_settings.m_txTransverterMode);
         ui->transverter->setIQOrder(m_settings.m_iqOrder);
-        ui->centerFrequency->setValueRange(7, m_fMinTx / 1000, m_fMaxTx / 1000);
+        ui->centerFrequency->setValueRange(9, m_fMinTx / 1000, m_fMaxTx / 1000);
         ui->centerFrequency->setValue(m_settings.m_txCenterFrequency / 1000);
         ui->bandwidth->setValueRange(5, m_bwMinTx / 1000, m_bwMaxTx / 1000);
         ui->bandwidth->setValue(m_settings.m_txBandwidth / 1000);
@@ -705,12 +705,12 @@ void BladeRF2MIMOGui::updateFrequencyLimits()
         qint64 minLimit = f_min/1000 + deltaFrequency;
         qint64 maxLimit = f_max/1000 + deltaFrequency;
 
-        minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
-        maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+        minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
 
         qDebug("BladeRF2MIMOGui::updateFrequencyLimits: Rx: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
 
-        ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+        ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
     }
     else
     {
@@ -719,12 +719,12 @@ void BladeRF2MIMOGui::updateFrequencyLimits()
         qint64 minLimit = f_min/1000 + deltaFrequency;
         qint64 maxLimit = f_max/1000 + deltaFrequency;
 
-        minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
-        maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+        minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
 
         qDebug("BladeRF2MIMOGui::updateFrequencyLimits: Rx: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
 
-        ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+        ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
     }
 }
 

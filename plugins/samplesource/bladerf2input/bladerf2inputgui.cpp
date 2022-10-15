@@ -58,7 +58,7 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     m_sampleSource->getFrequencyRange(f_min, f_max, step, scale);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
+    ui->centerFrequency->setValueRange(9, f_min/1000, f_max/1000);
 
     m_sampleSource->getSampleRateRange(min, max, step, scale);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
@@ -156,12 +156,12 @@ void BladeRF2InputGui::updateFrequencyLimits()
     qint64 minLimit = f_min/1000 + deltaFrequency;
     qint64 maxLimit = f_max/1000 + deltaFrequency;
 
-    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
-    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+    minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
 
     qDebug("BladeRF2OutputGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
 
-    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+    ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
 }
 
 void BladeRF2InputGui::setCenterFrequencySetting(uint64_t kHzValue)

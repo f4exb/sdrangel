@@ -70,7 +70,7 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->spectrumSource->addItem("0");
     ui->spectrumSource->addItem("1");
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, 0, 9999999);
+    ui->centerFrequency->setValueRange(9, 0, 999999999);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(7, 48000, 9999999);
     ui->frequencyShift->setColorMapper(ColorMapper(ColorMapper::GrayGold));

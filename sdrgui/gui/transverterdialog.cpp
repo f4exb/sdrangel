@@ -37,7 +37,7 @@ TransverterDialog::TransverterDialog(qint64& deltaFrequency, bool& deltaFrequenc
     ui->setupUi(this);
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->deltaFrequency->setValueRange(false, 10, -9999999999L, 9999999999L);
+    ui->deltaFrequency->setValueRange(false, 12, -999999999999L, 999999999999L);
     ui->deltaFrequency->setValue(m_deltaFrequency);
     ui->deltaFrequencyActive->setChecked(m_deltaFrequencyActive);
     ui->iqOrder->setEnabled(true);

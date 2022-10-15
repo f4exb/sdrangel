@@ -72,7 +72,7 @@ KiwiSDRGui::KiwiSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
     getContents()->setStyleSheet("#KiwiSDRGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/kiwisdr/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, 0, 9999999);
+    ui->centerFrequency->setValueRange(9, 0, 999999999);
 
     displaySettings();
     makeUIConnections();

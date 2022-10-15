@@ -53,7 +53,7 @@ Bladerf1InputGui::Bladerf1InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     getContents()->setStyleSheet("#Bladerf1InputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/bladerf1input/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
+	ui->centerFrequency->setValueRange(9, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
 
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     // BladeRF can go as low as 80 kS/s but because of buffering in practice experience is not good below 330 kS/s
@@ -406,11 +406,11 @@ void Bladerf1InputGui::on_xb200_currentIndexChanged(int index)
 
 	if (m_settings.m_xb200)
 	{
-		ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
+		ui->centerFrequency->setValueRange(9, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
 	}
 	else
 	{
-		ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN/1000, BLADERF_FREQUENCY_MAX/1000);
+		ui->centerFrequency->setValueRange(9, BLADERF_FREQUENCY_MIN/1000, BLADERF_FREQUENCY_MAX/1000);
 	}
 
 	sendSettings();

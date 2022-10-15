@@ -62,7 +62,7 @@ MetisMISOGui::MetisMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     getContents()->setStyleSheet("#MetisMISOGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplemimo/metismiso/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, 0, m_absMaxFreq);
+    ui->centerFrequency->setValueRange(9, 0, m_absMaxFreq);
 
     displaySettings();
 

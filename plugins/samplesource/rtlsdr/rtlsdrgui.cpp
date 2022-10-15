@@ -200,12 +200,12 @@ void RTLSDRGui::updateFrequencyLimits()
     qint64 minLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMin : RTLSDRInput::frequencyHighRangeMin) + deltaFrequency;
     qint64 maxLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMax : RTLSDRInput::frequencyHighRangeMax) + deltaFrequency;
 
-    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
-    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+    minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
 
     qDebug("RTLSDRGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
 
-    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+    ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
 }
 
 void RTLSDRGui::displayGains()

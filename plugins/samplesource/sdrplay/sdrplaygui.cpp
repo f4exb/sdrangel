@@ -48,7 +48,7 @@ SDRPlayGui::SDRPlayGui(DeviceUISet *deviceUISet, QWidget* parent) :
     getContents()->setStyleSheet("#SDRPlayGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/sdrplay/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, 10U, 12000U);
+    ui->centerFrequency->setValueRange(9, 10U, 999999999U);
 
     ui->fBand->clear();
     for (unsigned int i = 0; i < SDRPlayBands::getNbBands(); i++)
@@ -345,7 +345,7 @@ void SDRPlayGui::on_iqImbalance_toggled(bool checked)
 void SDRPlayGui::on_fBand_currentIndexChanged(int index)
 {
     ui->centerFrequency->setValueRange(
-            7,
+            9,
             SDRPlayBands::getBandLow(index),
             SDRPlayBands::getBandHigh(index));
 

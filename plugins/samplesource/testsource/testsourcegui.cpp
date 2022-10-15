@@ -59,7 +59,7 @@ TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     getContents()->setStyleSheet("#TestSourceGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/testsource/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, 0, 9999999);
+    ui->centerFrequency->setValueRange(9, 0, 999999999);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(7, 48000, 9999999);
     ui->frequencyShift->setColorMapper(ColorMapper(ColorMapper::GrayGold));
