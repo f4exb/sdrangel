@@ -16,8 +16,6 @@ For example with the DX Patrol that has a mixer at 120 MHz for HF operation you 
 
 If you use a down converter to receive the 6 cm band narrowband center frequency of 5670 MHz at 432 MHz you would set the translating frequency to 5760 - 432 = 5328 MHz thus dial +5,328,000,000 Hz.
 
-For bands even higher in the frequency spectrum the GHz digits are not really significant so you can have them set at 1 GHz. Thus to receive the 10368 MHz frequency at 432 MHz you would set the translating frequency to 1368 - 432 = 936 MHz. Note that in this case the frequency of the LO used in the mixer of the transverter is set at 9936 MHz.
-
 The Hz precision allows a fine tuning of the transverter LO offset
 
 <h3>2: Translating frequency enable/disable</h3>
