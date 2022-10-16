@@ -195,12 +195,19 @@ void AirspyHFGui::updateFrequencyLimits()
         break;
     }
 
-    minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
-    maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
-
+    if (m_settings.m_transverterMode)
+    {
+        minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
+        ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
+    }
+    else
+    {
+        minLimit = minLimit < 0 ? 0 : minLimit > 999999 ? 999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999 ? 999999 : maxLimit;
+        ui->centerFrequency->setValueRange(6, minLimit, maxLimit);
+    }
     qDebug("AirspyHFGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
-
-    ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
 }
 
 void AirspyHFGui::displaySettings()
