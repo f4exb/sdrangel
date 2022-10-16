@@ -56,9 +56,6 @@ public:
 	float getValueFromPos(double pos);
 	const TickList& getTickList();
 
-	QString getRangeMinStr();
-	QString getRangeMaxStr();
-
 	float getScaleWidth();
 
 private:
@@ -77,6 +74,7 @@ private:
 	bool m_recalc;
 	double m_scale;
 	QString m_unitStr;
+    QString m_multiplierStr;
 	TickList m_tickList;
 	double m_majorTickValueDistance;
 	double m_firstMajorTickValue;
@@ -95,7 +93,7 @@ private:
 	int calcTickTextSize(double distance);
 	void forceTwoTicks();
 	void reCalc();
-    void updateTruncation(int numMajorTicks);
+    void updateTruncation();
 
     inline int order(double value) {
         return floor(log10(value));
@@ -103,6 +101,13 @@ private:
 
 	double majorTickValue(int tick);
 	double minorTickValue(int tick);
+
+    QString getRangeMinStr();
+	QString getRangeMaxStr();
+
+	float getPosFromValueTrunc(double value);
+	float getValueFromPosTrunc(double pos);
+
 };
 
 #endif // INCLUDE_SCALEENGINE_H

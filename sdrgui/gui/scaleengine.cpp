@@ -32,7 +32,7 @@ QString ScaleEngine::formatTick(double value, int decimalPlaces)
 {
     if (m_truncated && (m_physicalUnit != Unit::Scientific))
     {
-        value = ((value * m_scale) - m_truncationValue) / m_scale;
+        // value = ((value * m_scale) - m_truncationValue) / m_scale;
         qDebug("ScaleEngine::formatTick: value: %f decimalPlaces: %d m_scale: %f", value, decimalPlaces, m_scale);
     }
 
@@ -41,7 +41,10 @@ QString ScaleEngine::formatTick(double value, int decimalPlaces)
 	    if (m_physicalUnit == Unit::Scientific) {
             return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'e', m_fixedDecimalPlaces);
 	    } else {
-	        return QString("%1%2").arg(m_truncated ? "'" : "").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
+	        return QString("%1%2%3")
+                .arg(m_truncated ? "'" : "")
+                .arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces)
+                .arg(m_truncated ? m_multiplierStr : "");
 	    }
 	}
 	else
@@ -123,13 +126,14 @@ void ScaleEngine::calcScaleFactor()
 {
 	double median, range, freqBase;
 
-    double rangeMin = m_rangeMin;
-    double rangeMax = m_rangeMax;
+    double rangeMin = m_truncated ? m_rangeMin - m_truncationValue : m_rangeMin;
+    double rangeMax = m_truncated ? m_rangeMax - m_truncationValue : m_rangeMax;
 
 	median = ((rangeMax - rangeMin) / 2.0) + rangeMin;
 	range = (rangeMax - rangeMin);
 	freqBase = (median == 0 ? range : median);
 	m_scale = 1.0;
+    m_multiplierStr.clear();
 
 	switch(m_physicalUnit) {
 		case Unit::None:
@@ -140,17 +144,22 @@ void ScaleEngine::calcScaleFactor()
 		case Unit::Frequency:
 			if(freqBase < 1000.0) {
 				m_unitStr = QObject::tr("Hz");
+                m_multiplierStr = "";
 			} else if(freqBase < 1000000.0) {
 				m_unitStr = QObject::tr("kHz");
+                m_multiplierStr = "k";
 				m_scale = 1000.0;
 			} else if(freqBase < 1000000000.0) {
 				m_unitStr = QObject::tr("MHz");
+                m_multiplierStr = "M";
 				m_scale = 1000000.0;
 			} else if(freqBase < 1000000000000.0){
 				m_unitStr = QObject::tr("GHz");
+                m_multiplierStr = "G";
 				m_scale = 1000000000.0;
 			} else {
 				m_unitStr = QObject::tr("THz");
+                m_multiplierStr = "T";
 				m_scale = 1000000000000.0;
 			}
 			break;
@@ -158,20 +167,26 @@ void ScaleEngine::calcScaleFactor()
 		case Unit::Information:
 			if(median < 1024.0) {
 				m_unitStr = QObject::tr("Bytes");
+                m_multiplierStr = "";
 			} else if(median < 1048576.0) {
 				m_unitStr = QObject::tr("KiBytes");
+                m_multiplierStr = "k";
 				m_scale = 1024.0;
 			} else if(median < 1073741824.0) {
 				m_unitStr = QObject::tr("MiBytes");
+                m_multiplierStr = "M";
 				m_scale = 1048576.0;
 			} else if(median < 1099511627776.0) {
 				m_unitStr = QObject::tr("GiBytes");
+                m_multiplierStr = "G";
 				m_scale = 1073741824.0;
 			} else if(median < 1125899906842624.0) {
 				m_unitStr = QObject::tr("TiBytes");
+                m_multiplierStr = "T";
 				m_scale = 1099511627776.0;
 			} else {
 				m_unitStr = QObject::tr("PiBytes");
+                m_multiplierStr = "P";
 				m_scale = 1125899906842624.0;
 			}
 			break;
@@ -200,14 +215,18 @@ void ScaleEngine::calcScaleFactor()
         case Unit::TimeHMS:
 			if (median < 0.001) {
 				m_unitStr = QString("µs");
+                m_multiplierStr = "µ";
 				m_scale = 0.000001;
 			} else if (median < 1.0) {
 				m_unitStr = QString("ms");
+                m_multiplierStr = "m";
 				m_scale = 0.001;
 			} else if (median < 1000.0) {
 				m_unitStr = QString("s");
+                m_multiplierStr = "";
 			} else {
 			    m_unitStr = QString("ks");
+                m_multiplierStr = "k";
 			    m_scale = 1000.0;
 			}
 			break;
@@ -215,18 +234,23 @@ void ScaleEngine::calcScaleFactor()
 		case Unit::Volt:
 			if (median < 1e-9) {
 				m_unitStr = QString("pV");
+                m_multiplierStr = "p";
 				m_scale = 1e-12;
 			} else if (median < 1e-6) {
 				m_unitStr = QString("nV");
+                m_multiplierStr = "n";
 				m_scale = 1e-9;
 			} else if (median < 1e-3) {
 				m_unitStr = QString("µV");
+                m_multiplierStr = "µ";
 				m_scale = 1e-6;
 			} else if (median < 1.0) {
 				m_unitStr = QString("mV");
+                m_multiplierStr = "m";
 				m_scale = 1e-3;
 			} else {
 				m_unitStr = QString("V");
+                m_multiplierStr = "";
 			}
 			break;
 	}
@@ -324,11 +348,16 @@ int ScaleEngine::calcTickTextSize(double distance)
 	int tickLen;
 	int decimalPlaces;
 
+    double rangeMin = m_truncated ? m_rangeMin - m_truncationValue : m_rangeMin;
+    double rangeMax = m_truncated ? m_rangeMax - m_truncationValue : m_rangeMax;
+
 	tickLen = 1;
-	tmp = formatTick(m_rangeMin / m_scale, 0).length();
+	tmp = formatTick(rangeMin / m_scale, 0).length();
+
 	if(tmp > tickLen)
 		tickLen = tmp;
-	tmp = formatTick(m_rangeMax / m_scale, 0).length();
+	tmp = formatTick(rangeMax / m_scale, 0).length();
+
 	if(tmp > tickLen)
 		tickLen = tmp;
 
@@ -342,19 +371,22 @@ void ScaleEngine::forceTwoTicks()
 	Tick tick;
 	QFontMetricsF fontMetrics(m_font);
 
+    double rangeMin = m_truncated ? m_rangeMin - m_truncationValue : m_rangeMin;
+    double rangeMax = m_truncated ? m_rangeMax - m_truncationValue : m_rangeMax;
+
 	m_tickList.clear();
 	tick.major = true;
 
-	tick.pos = getPosFromValue(m_rangeMin);
-	tick.text = formatTick(m_rangeMin / m_scale, m_decimalPlaces);
+	tick.pos = getPosFromValueTrunc(rangeMin);
+	tick.text = formatTick(rangeMin / m_scale, m_decimalPlaces);
 	tick.textSize = fontMetrics.boundingRect(tick.text).width();
 	if(m_orientation == Qt::Vertical)
 		tick.textPos = tick.pos - fontMetrics.ascent() / 2;
 	else tick.textPos = tick.pos - fontMetrics.boundingRect(tick.text).width() / 2;
 	m_tickList.append(tick);
 
-	tick.pos = getPosFromValue(m_rangeMax);
-	tick.text = formatTick(m_rangeMax / m_scale, m_decimalPlaces);
+	tick.pos = getPosFromValueTrunc(rangeMax);
+	tick.text = formatTick(rangeMax / m_scale, m_decimalPlaces);
 	tick.textSize = fontMetrics.boundingRect(tick.text).width();
 	if(m_orientation == Qt::Vertical)
 		tick.textPos = tick.pos - fontMetrics.ascent() / 2;
@@ -387,13 +419,18 @@ void ScaleEngine::reCalc()
 		return;
     }
 
-	m_recalc = false;
+    updateTruncation();
 
+	m_recalc = false;
 	m_tickList.clear();
 
 	calcScaleFactor();
-	rangeMinScaled = m_rangeMin / m_scale;
-	rangeMaxScaled = m_rangeMax / m_scale;
+
+    double rangeMin = m_truncated ? m_rangeMin - m_truncationValue : m_rangeMin;
+    double rangeMax = m_truncated ? m_rangeMax - m_truncationValue : m_rangeMax;
+
+	rangeMinScaled = rangeMin / m_scale;
+	rangeMaxScaled = rangeMax / m_scale;
 
 	if(m_orientation == Qt::Vertical)
 	{
@@ -414,8 +451,6 @@ void ScaleEngine::reCalc()
 	}
 
 	numMajorTicks = (int)((rangeMaxScaled - rangeMinScaled) / m_majorTickValueDistance);
-
-    updateTruncation(numMajorTicks);
 
 	if(numMajorTicks == 0) {
 		forceTwoTicks();
@@ -442,23 +477,26 @@ void ScaleEngine::reCalc()
 	if(rangeMinScaled == rangeMaxScaled)
 		return;
 
-	while(true) {
+	while (true)
+    {
 		m_tickList.clear();
 
 		step = 0;
 		lastEndPos = -100000000;
 		done = true;
 
-		for(i = 0; true; i++) {
+		for (i = 0; true; i++)
+        {
 			value = majorTickValue(i);
 
-			for(j = 1; j < m_numMinorTicks; j++) {
+			for (j = 1; j < m_numMinorTicks; j++)
+            {
 				value2 = value + minorTickValue(j);
 				if(value2 < rangeMinScaled)
 					continue;
 				if(value2 > rangeMaxScaled)
 					break;
-				pos = getPosFromValue((value + minorTickValue(j)) * m_scale);
+				pos = getPosFromValueTrunc((value + minorTickValue(j)) * m_scale);
 				if((pos >= 0) && (pos < m_size)) {
 					tick.pos = pos;
 					tick.major = false;
@@ -469,7 +507,7 @@ void ScaleEngine::reCalc()
 				m_tickList.append(tick);
 			}
 
-			pos = getPosFromValue(value * m_scale);
+			pos = getPosFromValueTrunc(value * m_scale);
 			if(pos < 0.0)
 				continue;
 			if(pos >= m_size)
@@ -618,6 +656,20 @@ float ScaleEngine::getValueFromPos(double pos)
 	return ((pos * (m_rangeMax - m_rangeMin)) / (m_size - 1.0)) + m_rangeMin;
 }
 
+float ScaleEngine::getPosFromValueTrunc(double value)
+{
+    double rangeMin = m_truncated ? m_rangeMin - m_truncationValue : m_rangeMin;
+    double rangeMax = m_truncated ? m_rangeMax - m_truncationValue : m_rangeMax;
+	return ((value - rangeMin) / (rangeMax - rangeMin)) * (m_size - 1.0);
+}
+
+float ScaleEngine::getValueFromPosTrunc(double pos)
+{
+    double rangeMin = m_truncated ? m_rangeMin - m_truncationValue : m_rangeMin;
+    double rangeMax = m_truncated ? m_rangeMax - m_truncationValue : m_rangeMax;
+	return ((pos * (rangeMax - rangeMin)) / (m_size - 1.0)) + rangeMin;
+}
+
 const ScaleEngine::TickList& ScaleEngine::getTickList()
 {
 	reCalc();
@@ -626,16 +678,24 @@ const ScaleEngine::TickList& ScaleEngine::getTickList()
 
 QString ScaleEngine::getRangeMinStr()
 {
-	if(m_unitStr.length() > 0)
-		return QString("%1 %2").arg(formatTick(m_rangeMin / m_scale, m_decimalPlaces)).arg(m_unitStr);
-		else return QString("%1").arg(formatTick(m_rangeMin / m_scale, m_decimalPlaces));
+    double rangeMin = m_truncated ? m_rangeMin - m_truncationValue : m_rangeMin;
+
+	if (m_unitStr.length() > 0) {
+		return QString("%1 %2").arg(formatTick(rangeMin / m_scale, m_decimalPlaces)).arg(m_unitStr);
+    } else {
+        return QString("%1").arg(formatTick(rangeMin / m_scale, m_decimalPlaces));
+    }
 }
 
 QString ScaleEngine::getRangeMaxStr()
 {
-	if(m_unitStr.length() > 0)
-		return QString("%1 %2").arg(formatTick(m_rangeMax / m_scale, m_decimalPlaces)).arg(m_unitStr);
-		else return QString("%1").arg(formatTick(m_rangeMax / m_scale, m_decimalPlaces));
+    double rangeMax = m_truncated ? m_rangeMax - m_truncationValue : m_rangeMax;
+
+	if (m_unitStr.length() > 0) {
+		return QString("%1 %2").arg(formatTick(rangeMax / m_scale, m_decimalPlaces)).arg(m_unitStr);
+    } else {
+        return QString("%1").arg(formatTick(rangeMax / m_scale, m_decimalPlaces));
+    }
 }
 
 float ScaleEngine::getScaleWidth()
@@ -662,7 +722,7 @@ void ScaleEngine::setTruncateMode(bool mode)
     reCalc();
 }
 
-void ScaleEngine::updateTruncation(int numMajorTicks)
+void ScaleEngine::updateTruncation()
 {
     m_truncated = false;
     m_truncationValue = 0.0;
