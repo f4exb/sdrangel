@@ -119,29 +119,43 @@ Toggles the grid display
 
 Controls the intensity of the grid display
 
-<h4>B.1.3: Reset spectrum histogram</h4>
+<h4>B.1.3: Truncate frequency scale upper digits</h4>
+
+If possible truncate the non significant upper digits on frequency scale. This is useful when the bandwidth is much smaller than the center frequency. For example if center frequency is 1.00001 GHz and bandwidth is 15.625 kHz this results in 3 ticks being displayed with "1.0000" prefixing all values:
+
+![Spectrum GUI A Fscale 1](../../doc/img/MainWindow_spectrum_gui_A_fscale1.png)
+
+When truncation is engaged 1 GHz will be subtracted from all values resulting in a more readable scale with more definition:
+
+![Spectrum GUI A Fscale 2](../../doc/img/MainWindow_spectrum_gui_A_fscale2.png)
+
+A leading tick marks the fact that upper digits have been truncated and values are suffixed with the multiplier character (k, M, G) for better readability.
+
+Note that resolution depends on which boundaries are crossed within the bandwidth and sometimes truncation is not possible (in the example if 1 GHz falls within range) resulting in no change in scale display.
+
+<h4>B.1.4: Reset spectrum histogram</h4>
 
 This resets the maximum spectrum trace and phosphor remanence
 
-<h4>B.1.4: Phosphor display</h4>
+<h4>B.1.5: Phosphor display</h4>
 
 Toggles the phosphor display on the spectrum
 
-<h4>B.1.5: Maximum hold trace</h4>
+<h4>B.1.6: Maximum hold trace</h4>
 
 Toggles the maximum hold trace display (red trace) on the spectrum
 
-<h4>B.1.6: Phosphor display stroke and max hold decay</h4>
+<h4>B.1.7: Phosphor display stroke and max hold decay</h4>
 
-This controls the decay rate of the stroke when phosphor display is engaged (B.1.4). The histogram pixel value is diminished by this value each time a new FFT is produced. A value of zero means no decay and thus phosphor history and max hold (red line) will be kept until the clear button (B.1.3) is pressed.
+This controls the decay rate of the stroke when phosphor display is engaged (B.1.5). The histogram pixel value is diminished by this value each time a new FFT is produced. A value of zero means no decay and thus phosphor history and max hold (red line) will be kept until the clear button (B.1.4) is pressed.
 
-<h4>B.1.7: Phosphor display stroke and max hold decay divisor</h4>
+<h4>B.1.8: Phosphor display stroke and max hold decay divisor</h4>
 
-When phosphor display is engaged (B.1.4) and stroke decay is 1 (B.1.6) this divides the unit decay by this value by diminishing histogram pixel value by one each time a number of FFTs equal to this number have been produced. Thus the actual decay rate is 1 over this value. This allow setting a slower decay rate than one unit for each new FFT.
+When phosphor display is engaged (B.1.5) and stroke decay is 1 (B.1.7) this divides the unit decay by this value by diminishing histogram pixel value by one each time a number of FFTs equal to this number have been produced. Thus the actual decay rate is 1 over this value. This allow setting a slower decay rate than one unit for each new FFT.
 
-<h4>B.1.8: Phosphor display stroke strength</h4>
+<h4>B.1.9: Phosphor display stroke strength</h4>
 
-This controls the stroke strength when phosphor display is engaged (B.1.4). The histogram value is incremented by this value at each new FFT until the maximum (red) is reached.
+This controls the stroke strength when phosphor display is engaged (B.1.5). The histogram value is incremented by this value at each new FFT until the maximum (red) is reached.
 
 <h3>B.2: Spectrum display controls - block #2</h3>
 

@@ -131,7 +131,7 @@ QByteArray SpectrumSettings::serialize() const
     s.writeS32(45, m_measurementPrecision);
     s.writeS32(46, m_measurementCenterFrequencyOffset);
     s.writeBool(47, m_findHistogramPeaks);
-    s.writeBool(58, m_truncateFreqScale);
+    s.writeBool(48, m_truncateFreqScale);
     s.writeS32(100, m_histogramMarkers.size());
 
 	for (int i = 0; i < m_histogramMarkers.size(); i++) {

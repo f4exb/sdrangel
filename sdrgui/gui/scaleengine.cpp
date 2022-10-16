@@ -746,7 +746,7 @@ void ScaleEngine::updateTruncation()
     for (int i = widthOrder+1; i <= maxOrder; i++)
     {
         int irangeMin = floor(m_rangeMin / pow(10, i));
-        int irangeMax = floor(m_rangeMin / pow(10, i));
+        int irangeMax = floor(m_rangeMax / pow(10, i));
 
         if (irangeMin == irangeMax)
         {
