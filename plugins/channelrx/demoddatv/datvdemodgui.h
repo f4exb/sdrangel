@@ -89,6 +89,7 @@ private slots:
     void on_chkHardMetric_clicked();
     void on_resetDefaults_clicked();
     void on_spiSymbolRate_valueChanged(int arg1);
+    void on_datvStdSR_valueChanged(int value);
     void on_spiNotchFilters_valueChanged(int arg1);
     void on_chkAllowDrift_clicked();
     void on_fullScreen_clicked();
@@ -136,6 +137,7 @@ private:
     bool m_cstlnSetByModcod;
 
     MovingAverageUtil<double, double, 4> m_objMagSqAverage;
+    static const QList<int> m_symbolRates;
 
     explicit DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent = 0);
     virtual ~DATVDemodGUI();
@@ -153,6 +155,8 @@ private:
     bool handleMessage(const Message& objMessage);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+    int indexFromSymbolRate(int sampleRate);
+    int symbolRateFromIndex(int index);
 };
 
 #endif // INCLUDE_DATVDEMODGUI_H

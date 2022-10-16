@@ -485,12 +485,12 @@
         <rect>
          <x>100</x>
          <y>40</y>
-         <width>61</width>
+         <width>41</width>
          <height>21</height>
         </rect>
        </property>
        <property name="text">
-        <string>Symbols/s</string>
+        <string>Sym/s</string>
        </property>
       </widget>
       <widget class="QCheckBox" name="chkAllowDrift">
@@ -589,7 +589,7 @@
       <widget class="QSpinBox" name="spiSymbolRate">
        <property name="geometry">
         <rect>
-         <x>170</x>
+         <x>140</x>
          <y>40</y>
          <width>81</width>
          <height>23</height>
@@ -803,6 +803,37 @@
        </property>
        <property name="value">
         <number>0</number>
+       </property>
+      </widget>
+      <widget class="QDial" name="datvStdSR">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>40</y>
+         <width>24</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Select a DATV standard sample rate</string>
+       </property>
+       <property name="maximum">
+        <number>10</number>
+       </property>
+       <property name="singleStep">
+        <number>1</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>5</number>
        </property>
       </widget>
      </widget>

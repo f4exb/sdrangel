@@ -108,6 +108,10 @@ The constellations are as follows:
 
 This controls the expected symbol rate in symbols per second
 
+<h5>B.2a.3a: Set standard DATV symbol rate</h5>
+
+Use this dial to flip through standard DATV symbol rates: 25, 33, 66, 125, 250, 333, 500, 1000, 1500, 2000 kSym/S
+
 <h5>B.2a.4: FEC rate</h5>
 
 Dpends on the standard and modulation

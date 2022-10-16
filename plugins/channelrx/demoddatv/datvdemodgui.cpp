@@ -40,6 +40,18 @@
 #include "datvdemodgui.h"
 
 const char* const DATVDemodGUI::m_strChannelID = "sdrangel.channel.demoddatv";
+const QList<int> DATVDemodGUI::m_symbolRates = {
+    25000,
+    33000,
+    66000,
+    125000,
+    250000,
+    333000,
+    500000,
+    1000000,
+    1500000,
+    2000000
+};
 
 DATVDemodGUI* DATVDemodGUI::create(PluginAPI* objPluginAPI,
         DeviceUISet *deviceUISet,
@@ -343,6 +355,7 @@ void DATVDemodGUI::displaySettings()
     ui->chkViterbi->setChecked(m_settings.m_viterbi);
     ui->softLDPC->setChecked(m_settings.m_softLDPC);
     ui->maxBitflips->setValue(m_settings.m_maxBitflips);
+    ui->datvStdSR->setValue(indexFromSymbolRate(m_settings.m_symbolRate));
 
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
     {
@@ -732,6 +745,18 @@ void DATVDemodGUI::on_resetDefaults_clicked()
 void DATVDemodGUI::on_spiSymbolRate_valueChanged(int value)
 {
     m_settings.m_symbolRate = value;
+    ui->datvStdSR->blockSignals(true);
+    ui->datvStdSR->setValue(indexFromSymbolRate(value));
+    ui->datvStdSR->blockSignals(false);
+    applySettings();
+}
+
+void DATVDemodGUI::on_datvStdSR_valueChanged(int value)
+{
+    m_settings.m_symbolRate = symbolRateFromIndex(value);
+    ui->spiSymbolRate->blockSignals(true);
+    ui->spiSymbolRate->setValue(m_settings.m_symbolRate);
+    ui->spiSymbolRate->blockSignals(false);
     applySettings();
 }
 
@@ -946,6 +971,7 @@ void DATVDemodGUI::makeUIConnections()
     QObject::connect(ui->chkHardMetric, &QCheckBox::clicked, this, &DATVDemodGUI::on_chkHardMetric_clicked);
     QObject::connect(ui->resetDefaults, &QPushButton::clicked, this, &DATVDemodGUI::on_resetDefaults_clicked);
     QObject::connect(ui->spiSymbolRate, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_spiSymbolRate_valueChanged);
+    QObject::connect(ui->datvStdSR, &QDial::valueChanged, this, &DATVDemodGUI::on_datvStdSR_valueChanged);
     QObject::connect(ui->spiNotchFilters, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_spiNotchFilters_valueChanged);
     QObject::connect(ui->chkAllowDrift, &QCheckBox::clicked, this, &DATVDemodGUI::on_chkAllowDrift_clicked);
     QObject::connect(ui->fullScreen, &QPushButton::clicked, this, &DATVDemodGUI::on_fullScreen_clicked);
@@ -967,4 +993,29 @@ void DATVDemodGUI::makeUIConnections()
 void DATVDemodGUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_centerFrequency);
+}
+
+int DATVDemodGUI::indexFromSymbolRate(int sampleRate)
+{
+    int index  = 0;
+
+    if (sampleRate < m_symbolRates[1]) {
+        return index;
+    }
+
+    for (auto definedRate : m_symbolRates)
+    {
+        if (sampleRate <= definedRate) {
+            return index;
+        }
+
+        index++;
+    }
+
+    return index;
+}
+
+int DATVDemodGUI::symbolRateFromIndex(int index)
+{
+    return m_symbolRates.at(index);
 }
