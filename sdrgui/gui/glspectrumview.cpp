@@ -492,6 +492,12 @@ void GLSpectrumView::setDisplayTraceIntensity(int intensity)
     update();
 }
 
+void GLSpectrumView::setFreqScaleTruncationMode(bool mode)
+{
+    m_frequencyScale.setTruncateMode(mode);
+    update();
+}
+
 void GLSpectrumView::setLinear(bool linear)
 {
     m_mutex.lock();

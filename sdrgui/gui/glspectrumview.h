@@ -179,6 +179,7 @@ public:
     void setDisplayGrid(bool display);
     void setDisplayGridIntensity(int intensity);
     void setDisplayTraceIntensity(int intensity);
+    void setFreqScaleTruncationMode(bool mode);
     void setLinear(bool linear);
     void setUseCalibration(bool useCalibration);
     void setMeasurements(SpectrumMeasurements *measurements) { m_measurements = measurements; }

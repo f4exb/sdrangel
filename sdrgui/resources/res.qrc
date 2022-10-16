@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>truncate.png</file>
     <file>caliper.png</file>
     <file>flip_windows.png</file>
     <file>waterfall_3d.png</file>

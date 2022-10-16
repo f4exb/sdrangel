@@ -107,6 +107,7 @@ public:
 	bool m_displayCurrent;
 	bool m_displayHistogram;
 	bool m_displayGrid;
+    bool m_truncateFreqScale;
 	AveragingMode m_averagingMode;
 	int m_averagingIndex;
 	unsigned int m_averagingValue;

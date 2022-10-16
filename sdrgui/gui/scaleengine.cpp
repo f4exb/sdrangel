@@ -30,12 +30,18 @@ static double trunc(double d)
 
 QString ScaleEngine::formatTick(double value, int decimalPlaces)
 {
+    if (m_truncated && (m_physicalUnit != Unit::Scientific))
+    {
+        value = ((value * m_scale) - m_truncationValue) / m_scale;
+        qDebug("ScaleEngine::formatTick: value: %f decimalPlaces: %d m_scale: %f", value, decimalPlaces, m_scale);
+    }
+
 	if (m_physicalUnit != Unit::TimeHMS)
 	{
 	    if (m_physicalUnit == Unit::Scientific) {
             return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'e', m_fixedDecimalPlaces);
 	    } else {
-	        return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
+	        return QString("%1%2").arg(m_truncated ? "'" : "").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
 	    }
 	}
 	else
@@ -49,28 +55,41 @@ QString ScaleEngine::formatTick(double value, int decimalPlaces)
 		double orig = fabs(actual);
 		double tmp;
 
-		if(orig >= 86400.0) {
+        if (m_truncated) {
+            str = "'";
+        }
+
+		if (orig >= 86400.0)
+        {
 			tmp = floor(actual / 86400.0);
-			str = QString("%1.").arg(tmp, 0, 'f', 0);
+			str += QString("%1.").arg(tmp, 0, 'f', 0);
 			actual -= tmp * 86400.0;
-			if(actual < 0.0)
+
+        	if (actual < 0.0) {
 			    actual *= -1.0;
+            }
 		}
 
-		if(orig >= 3600.0) {
+		if (orig >= 3600.0)
+        {
 			tmp = floor(actual / 3600.0);
 			str += QString("%1:").arg(tmp, 2, 'f', 0, QChar('0'));
 			actual -= tmp * 3600.0;
-			if(actual < 0.0)
+
+            if (actual < 0.0) {
 			    actual *= -1.0;
+            }
 		}
 
-		if(orig >= 60.0) {
+		if (orig >= 60.0)
+        {
 			tmp = floor(actual / 60.0);
 			str += QString("%1:").arg(tmp, 2, 'f', 0, QChar('0'));
 			actual -= tmp * 60.0;
-			if(actual < 0.0)
+
+            if (actual < 0.0) {
 			    actual *= -1.0;
+            }
 		}
 
 		tmp = m_makeOpposite ? -actual : actual;
@@ -104,8 +123,11 @@ void ScaleEngine::calcScaleFactor()
 {
 	double median, range, freqBase;
 
-	median = ((m_rangeMax - m_rangeMin) / 2.0) + m_rangeMin;
-	range = (m_rangeMax - m_rangeMin);
+    double rangeMin = m_rangeMin;
+    double rangeMax = m_rangeMax;
+
+	median = ((rangeMax - rangeMin) / 2.0) + rangeMin;
+	range = (rangeMax - rangeMin);
 	freqBase = (median == 0 ? range : median);
 	m_scale = 1.0;
 
@@ -361,8 +383,10 @@ void ScaleEngine::reCalc()
 	float lastEndPos;
 	bool done;
 
-	if(!m_recalc)
+	if (!m_recalc) {
 		return;
+    }
+
 	m_recalc = false;
 
 	m_tickList.clear();
@@ -390,6 +414,8 @@ void ScaleEngine::reCalc()
 	}
 
 	numMajorTicks = (int)((rangeMaxScaled - rangeMinScaled) / m_majorTickValueDistance);
+
+    updateTruncation(numMajorTicks);
 
 	if(numMajorTicks == 0) {
 		forceTwoTicks();
@@ -518,13 +544,16 @@ ScaleEngine::ScaleEngine() :
     m_rangeMin(-1.0),
     m_rangeMax(1.0),
     m_recalc(true),
-    m_scale(1.0f),
+    m_scale(1.0),
 	m_majorTickValueDistance(1.0),
     m_firstMajorTickValue(1.0),
     m_numMinorTicks(1),
     m_decimalPlaces(1),
     m_fixedDecimalPlaces(2),
-    m_makeOpposite(false)
+    m_makeOpposite(false),
+    m_truncateMode(false),
+    m_truncated(false),
+    m_truncationValue(0.0)
 {
 }
 
@@ -570,7 +599,8 @@ void ScaleEngine::setRange(Unit::Physical physicalUnit, float rangeMin, float ra
 	tmpRangeMin = rangeMin;
 	tmpRangeMax = rangeMax;
 
-	if((tmpRangeMin != m_rangeMin) || (tmpRangeMax != m_rangeMax) || (m_physicalUnit != physicalUnit)) {
+	if ((tmpRangeMin != m_rangeMin) || (tmpRangeMax != m_rangeMax) || (m_physicalUnit != physicalUnit))
+    {
 		m_physicalUnit = physicalUnit;
 		m_rangeMin = tmpRangeMin;
 		m_rangeMax = tmpRangeMax;
@@ -622,4 +652,49 @@ float ScaleEngine::getScaleWidth()
 			max = len;
 	}
 	return max;
+}
+
+void ScaleEngine::setTruncateMode(bool mode)
+{
+    qDebug("ScaleEngine::setTruncateMode: %s", (mode ? "on" : "off"));
+    m_truncateMode = mode;
+    m_recalc = true;
+    reCalc();
+}
+
+void ScaleEngine::updateTruncation(int numMajorTicks)
+{
+    m_truncated = false;
+    m_truncationValue = 0.0;
+
+    if (!m_truncateMode) {
+        return;
+    }
+
+    if (order(m_rangeMax) != order(m_rangeMin)) {
+        return;
+    }
+
+    double width = m_rangeMax - m_rangeMin;
+    int widthOrder = order(width);
+    int maxOrder = order(m_rangeMax);
+
+    if ((widthOrder < 0) || (maxOrder < 0) || (widthOrder == maxOrder)) {
+        return;
+    }
+
+    for (int i = widthOrder+1; i <= maxOrder; i++)
+    {
+        int irangeMin = floor(m_rangeMin / pow(10, i));
+        int irangeMax = floor(m_rangeMin / pow(10, i));
+
+        if (irangeMin == irangeMax)
+        {
+            m_truncated = true;
+            m_truncationValue = irangeMin * pow(10, i);
+            break;
+        }
+    }
+
+    qDebug("ScaleEngine::updateTruncation: m_truncationValue: %f", m_truncationValue);
 }

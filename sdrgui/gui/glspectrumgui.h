@@ -103,6 +103,7 @@ private slots:
     void on_spectrogramStyle_currentIndexChanged(int index);
     void on_colorMap_currentIndexChanged(int index);
 	void on_gridIntensity_valueChanged(int index);
+    void on_truncateScale_toggled(bool checked);
 	void on_traceIntensity_valueChanged(int index);
 	void on_averagingMode_currentIndexChanged(int index);
     void on_averaging_currentIndexChanged(int index);

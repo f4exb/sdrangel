@@ -63,6 +63,7 @@ public:
     void setDisplayGrid(bool display) { m_spectrum->setDisplayGrid(display); }
     void setDisplayGridIntensity(int intensity) { m_spectrum->setDisplayGridIntensity(intensity); }
     void setDisplayTraceIntensity(int intensity) { m_spectrum->setDisplayTraceIntensity(intensity); }
+    void setFreqScaleTruncationMode(bool mode) { m_spectrum->setFreqScaleTruncationMode(mode); }
     void setLinear(bool linear) { m_spectrum->setLinear(linear); }
     void setUseCalibration(bool useCalibration) { m_spectrum->setUseCalibration(useCalibration); }
     void setMeasurementParams(SpectrumSettings::Measurement measurement,

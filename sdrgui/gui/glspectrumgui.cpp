@@ -193,6 +193,7 @@ void GLSpectrumGUI::displaySettings()
     ui->invertWaterfall->setChecked(m_settings.m_invertedWaterfall);
     ui->grid->setChecked(m_settings.m_displayGrid);
     ui->gridIntensity->setSliderPosition(m_settings.m_displayGridIntensity);
+    ui->truncateScale->setChecked(m_settings.m_truncateFreqScale);
 
     ui->decay->setToolTip(QString("Decay: %1").arg(m_settings.m_decay));
     ui->decayDivisor->setToolTip(QString("Decay divisor: %1").arg(m_settings.m_decayDivisor));
@@ -336,6 +337,7 @@ void GLSpectrumGUI::applySpectrumSettings()
     m_glSpectrum->setReferenceLevel(refLevel);
     m_glSpectrum->setPowerRange(powerRange);
     m_glSpectrum->setFPSPeriodMs(m_settings.m_fpsPeriodMs);
+    m_glSpectrum->setFreqScaleTruncationMode(m_settings.m_truncateFreqScale);
     m_glSpectrum->setLinear(m_settings.m_linear);
     m_glSpectrum->setUseCalibration(m_settings.m_useCalibration);
 
@@ -686,6 +688,13 @@ void GLSpectrumGUI::on_gridIntensity_valueChanged(int index)
 {
     m_settings.m_displayGridIntensity = index;
     ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_settings.m_displayGridIntensity));
+    applySettings();
+}
+
+void GLSpectrumGUI::on_truncateScale_toggled(bool checked)
+{
+    m_settings.m_truncateFreqScale = checked;
+    qDebug("GLSpectrumGUI::on_truncateScale_toggled: m_truncateFreqScale: %s", (m_settings.m_truncateFreqScale ? "on" : "off"));
     applySettings();
 }
 

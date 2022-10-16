@@ -19,6 +19,8 @@
 #ifndef INCLUDE_SCALEENGINE_H
 #define INCLUDE_SCALEENGINE_H
 
+#include <math.h>
+
 #include <QFont>
 #include <QString>
 #include <QList>
@@ -48,6 +50,7 @@ public:
     float getRangeMax() const { return m_rangeMax; }
 	void setMakeOpposite(bool makeOpposite) { m_makeOpposite = makeOpposite; }
 	void setFixedDecimalPlaces(int decimalPlaces) { m_fixedDecimalPlaces =decimalPlaces; }
+    void setTruncateMode(bool mode);
 
 	float getPosFromValue(double value);
 	float getValueFromPos(double pos);
@@ -65,10 +68,10 @@ private:
 	float m_charSize;
 
 	// graph configuration
-	float m_size;
+	double m_size;
 	Unit::Physical m_physicalUnit;
-	float m_rangeMin;
-	float m_rangeMax;
+	double m_rangeMin;
+	double m_rangeMax;
 
 	// calculated values
 	bool m_recalc;
@@ -81,6 +84,9 @@ private:
 	int m_decimalPlaces;
 	int m_fixedDecimalPlaces;
 	bool m_makeOpposite; // will show -value instead of value
+    bool m_truncateMode; //!< truncate upper digits mode
+    bool m_truncated; //!< true if upper digits are truncated
+    double m_truncationValue; //!< value to subreact from tick display values
 
 	QString formatTick(double value, int decimalPlaces);
 	void calcCharSize();
@@ -89,6 +95,11 @@ private:
 	int calcTickTextSize(double distance);
 	void forceTwoTicks();
 	void reCalc();
+    void updateTruncation(int numMajorTicks);
+
+    inline int order(double value) {
+        return floor(log10(value));
+    }
 
 	double majorTickValue(int tick);
 	double minorTickValue(int tick);

@@ -53,6 +53,7 @@ void SpectrumSettings::resetToDefaults()
 	m_displayMaxHold = false;
 	m_displayHistogram = false;
 	m_displayGrid = false;
+    m_truncateFreqScale = false;
 	m_averagingMode = AvgModeNone;
 	m_averagingIndex = 0;
     m_averagingValue = 1;
@@ -130,6 +131,7 @@ QByteArray SpectrumSettings::serialize() const
     s.writeS32(45, m_measurementPrecision);
     s.writeS32(46, m_measurementCenterFrequencyOffset);
     s.writeBool(47, m_findHistogramPeaks);
+    s.writeBool(58, m_truncateFreqScale);
     s.writeS32(100, m_histogramMarkers.size());
 
 	for (int i = 0; i < m_histogramMarkers.size(); i++) {
@@ -242,6 +244,7 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
         d.readS32(45, &m_measurementPrecision, 1);
         d.readS32(46, &m_measurementCenterFrequencyOffset, 0);
         d.readBool(47, &m_findHistogramPeaks, false);
+        d.readBool(48, &m_truncateFreqScale, false);
 
 		int histogramMarkersSize;
 		d.readS32(100, &histogramMarkersSize, 0);
