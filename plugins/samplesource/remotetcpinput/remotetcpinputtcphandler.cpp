@@ -420,7 +420,7 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
     for (int i = 1; i < 3; i++)
     {
         if ((settings.m_gain[i] != m_settings.m_gain[i]) || force) {
-            setIFGain(i, settings.m_gain[i]);
+            //setIFGain(i, 20 + settings.m_gain[i]);
         }
     }
     if ((settings.m_rfBW != m_settings.m_rfBW) || force) {

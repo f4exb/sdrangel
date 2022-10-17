@@ -538,6 +538,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
 
         if(m_dev != 0)
         {
+            qDebug() << "Set tuner gain " << settings.m_gain;
             if (rtlsdr_set_tuner_gain(m_dev, settings.m_gain) != 0) {
                 qCritical("RTLSDRInput::applySettings: rtlsdr_set_tuner_gain() failed");
             } else {

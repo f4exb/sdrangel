@@ -69,7 +69,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     uint64_t f_min, f_max;
     m_sampleSource->getFrequencyRange(f_min, f_max);
-    ui->centerFrequency->setValueRange(9, f_min/1000, f_max/1000);
+    ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
 
     createCorrectionsControl();
     createAntennasControl(m_sampleSource->getAntennas());
@@ -856,12 +856,19 @@ void SoapySDRInputGui::updateFrequencyLimits()
     qint64 minLimit = f_min/1000 + deltaFrequency;
     qint64 maxLimit = f_max/1000 + deltaFrequency;
 
-    minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
-    maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
-
+    if (m_settings.m_transverterMode)
+    {
+        minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
+        ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
+    }
+    else
+    {
+        minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+        ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+    }
     qDebug("SoapySDRInputGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
-
-    ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
 }
 
 void SoapySDRInputGui::setCenterFrequencySetting(uint64_t kHzValue)

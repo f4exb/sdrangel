@@ -54,7 +54,7 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     m_limeSDROutput->getLORange(minF, maxF);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(9, ((uint32_t) minF)/1000, ((uint32_t) maxF)/1000); // frequency dial is in kHz
+    ui->centerFrequency->setValueRange(7, ((uint32_t) minF)/1000, ((uint32_t) maxF)/1000); // frequency dial is in kHz
 
     m_limeSDROutput->getSRRange(minF, maxF);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
@@ -156,12 +156,19 @@ void LimeSDROutputGUI::updateFrequencyLimits()
     // Min freq is 30MHz - NCO must be used to go below this
     qint64 minFreq = m_settings.m_ncoEnable ? 30000 + m_settings.m_ncoFrequency/1000 : 30000;
 
-    minLimit = minLimit < minFreq ? minFreq : minLimit > 999999999 ? 999999999 : minLimit;
-    maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
-
+    if (m_settings.m_transverterMode)
+    {
+        minLimit = minLimit < minFreq ? minFreq : minLimit > 999999999 ? 999999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
+        ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
+    }
+    else
+    {
+        minLimit = minLimit < minFreq ? minFreq : minLimit > 9999999 ? 9999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+        ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+    }
     qDebug("LimeSDROutputGUI::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
-
-    ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
 }
 
 bool LimeSDROutputGUI::handleMessage(const Message& message)

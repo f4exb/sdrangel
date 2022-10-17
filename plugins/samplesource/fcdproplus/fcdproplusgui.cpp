@@ -190,12 +190,19 @@ void FCDProPlusGui::updateFrequencyLimits()
     qint64 minLimit = fcd_traits<ProPlus>::loLowLimitFreq/1000 + deltaFrequency;
     qint64 maxLimit = fcd_traits<ProPlus>::loHighLimitFreq/1000 + deltaFrequency;
 
-    minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
-    maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
-
+    if (m_settings.m_transverterMode)
+    {
+        minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
+        ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
+    }
+    else
+    {
+        minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+        ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+    }
     qDebug("FCDProPlusGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
-
-    ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
 }
 
 void FCDProPlusGui::displaySettings()

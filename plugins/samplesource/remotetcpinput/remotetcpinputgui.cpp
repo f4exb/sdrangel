@@ -260,6 +260,11 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
         ui->deltaFrequency->setEnabled(sdra);
         ui->channelGain->setEnabled(sdra);
         ui->decimation->setEnabled(sdra);
+        if (sdra) {
+            ui->centerFrequency->setValueRange(9, 0, 999999999); // Should add transverter control to protocol in the future
+        } else {
+            ui->centerFrequency->setValueRange(7, 0, 9999999);
+        }
 
         displayGains();
         return true;
