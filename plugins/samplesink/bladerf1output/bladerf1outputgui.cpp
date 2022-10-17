@@ -348,19 +348,11 @@ void Bladerf1OutputGui::on_xb200_currentIndexChanged(int index)
 
 	if (m_settings.m_xb200)
 	{
-        if (m_settings.m_transverterMode) {
-            ui->centerFrequency->setValueRange(9, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
-        } else {
-            ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
-        }
+        ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
 	}
 	else
 	{
-        if (m_settings.m_transverterMode) {
-            ui->centerFrequency->setValueRange(9, BLADERF_FREQUENCY_MIN/1000, BLADERF_FREQUENCY_MAX/1000);
-        } else {
-            ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN/1000, BLADERF_FREQUENCY_MAX/1000);
-        }
+        ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN/1000, BLADERF_FREQUENCY_MAX/1000);
 	}
 
 	sendSettings();
