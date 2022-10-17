@@ -586,19 +586,26 @@ void LimeSDRMIMOGUI::updateFrequencyLimits()
     {
         minF = m_fMinTx;
         maxF = m_fMaxTx;
-        deltaFrequency = m_settings.m_rxTransverterMode ? m_settings.m_txTransverterDeltaFrequency/1000 : 0;
+        deltaFrequency = m_settings.m_txTransverterMode ? m_settings.m_txTransverterDeltaFrequency/1000 : 0;
     }
 
 
     qint64 minLimit = minF/1000 + deltaFrequency;
     qint64 maxLimit = maxF/1000 + deltaFrequency;
 
-    minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
-    maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
-
+    if (m_settings.m_txTransverterMode || m_settings.m_rxTransverterMode)
+    {
+        minLimit = minLimit < 0 ? 0 : minLimit > 999999999 ? 999999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 999999999 ? 999999999 : maxLimit;
+        ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
+    }
+    else
+    {
+        minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+        ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+    }
     qDebug("LimeSDRMIMOGUI::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
-
-    ui->centerFrequency->setValueRange(9, minLimit, maxLimit);
 }
 
 void LimeSDRMIMOGUI::updateLPFLimits()
