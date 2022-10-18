@@ -28,7 +28,7 @@ environment:
       CMAKE_CUSTOM_OPTIONS: "-DCMAKE_BUILD_TYPE=Release \
                              -DARCH_OPT=nehalem \
                              -DDEBUG_OUTPUT=ON \
-                             -DENABLE_EXTERNAL_LIBRARIES=ON \
+                             -DENABLE_EXTERNAL_LIBRARIES=AUTO \
                              -DBUILD_SERVER=OFF"
     - TARGET: ubuntu2204docker
       APPVEYOR_BUILD_WORKER_CLOUD: nasrock
