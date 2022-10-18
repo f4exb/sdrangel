@@ -70,8 +70,6 @@ install:
   # macOS 10.11 doesn't support newest Qt
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then if [[ "$TRAVIS_OSX_IMAGE" == "xcode7.3" ]]; then sudo port -N -k install qt59-qtmultimedia qt59-qttools; else sudo port -N -k install qt5-qtmultimedia qt5-qttools; fi; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source macports-ci ccache --save; fi
-  # use codec2 from repository
-  #- if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_codec2.sh; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_cm256cc.sh; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_mbelib.sh; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_serialdv.sh; fi
