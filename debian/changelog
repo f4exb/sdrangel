@@ -1,3 +1,16 @@
+sdrangel (7.8.1-1) unstable; urgency=medium
+
+  * Update to latest airspy drivers to fix #1372. PR #1468
+  * Update of threading model on some Rx channels. Part of #1346
+  * Radioastronomy Sat tracker: disable table sorting when adding a new row. Fixes #1472. PR #1473
+  * Center frequency dials up to 9 digits and transverter delta frequency dial up to 12 digits. Fixes #1476
+  * Have full frequency dials digit range only if transverter is engaged. PR #1479, 1481
+  * DATV plugin: added dial to flip through DATV standard symbol rates
+  * Spectrum frequency ticks MSB truncation. Fixes #1477
+  * Have M17 and FreeDV plugins built in the Ubuntu package. Fixes #1480
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 19 Oct 2022 15:25:08 +0200
+
 sdrangel (7.8.0-1) unstable; urgency=medium
 
   * Upgrade to latest libhackrf and use new Github URL. Fixes #1456

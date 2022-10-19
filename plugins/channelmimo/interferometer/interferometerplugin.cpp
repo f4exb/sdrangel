@@ -30,7 +30,7 @@
 const PluginDescriptor InterferometerPlugin::m_pluginDescriptor = {
     Interferometer::m_channelId,
     QStringLiteral("Interferometer"),
-    QStringLiteral("7.3.0"),
+    QStringLiteral("7.8.1"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
