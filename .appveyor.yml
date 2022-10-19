@@ -28,7 +28,7 @@ environment:
       CMAKE_CUSTOM_OPTIONS: "-DCMAKE_BUILD_TYPE=Release \
                              -DARCH_OPT=nehalem \
                              -DDEBUG_OUTPUT=ON \
-                             -DENABLE_EXTERNAL_LIBRARIES=ON \
+                             -DENABLE_EXTERNAL_LIBRARIES=AUTO \
                              -DBUILD_SERVER=OFF"
     - TARGET: ubuntu2204docker
       APPVEYOR_BUILD_WORKER_CLOUD: nasrock
@@ -91,15 +91,15 @@ for:
             libbladerf-dev libsoapysdr-dev libiio-dev libuhd-dev \
             python3-mako python3-cheetah python3-numpy \
             autoconf automake libtool ninja-build libclang1-11
-      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_cm256cc.sh; fi
-      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_mbelib.sh; fi
-      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_serialdv.sh; fi
-      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_dsdcc.sh; fi
-      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_perseus-sdr.sh; fi
-      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_xtrx-sdr.sh; fi
-      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_airspyhf.sh; fi
-      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_rtlsdr.sh; fi
-      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_limesuite.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES" ]]; then bash cmake/ci/build_cm256cc.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES" ]]; then bash cmake/ci/build_mbelib.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES" ]]; then bash cmake/ci/build_serialdv.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES" ]]; then bash cmake/ci/build_dsdcc.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES" ]]; then bash cmake/ci/build_perseus-sdr.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES" ]]; then bash cmake/ci/build_xtrx-sdr.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES" ]]; then bash cmake/ci/build_airspyhf.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES" ]]; then bash cmake/ci/build_rtlsdr.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES" ]]; then bash cmake/ci/build_limesuite.sh; fi
       - sh: bash cmake/ci/build_sdrplay.sh
     before_build:
       - sh: bash -c export
