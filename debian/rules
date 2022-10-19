@@ -3,7 +3,7 @@
 	dh $@ --parallel --buildsystem=cmake+ninja
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DARCH_OPT=nehalem -DENABLE_EXTERNAL_LIBRARIES=AUTO -DDEBUG_OUTPUT=ON -DBUILD_SERVER=OFF
+	dh_auto_configure -- -DARCH_OPT=nehalem -DENABLE_EXTERNAL_LIBRARIES=ON -DDEBUG_OUTPUT=ON -DBUILD_SERVER=OFF
 
 override_dh_auto_test:
 	echo "Skipping test step"
