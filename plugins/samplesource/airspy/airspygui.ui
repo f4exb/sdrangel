@@ -185,10 +185,10 @@
         <string>Local Oscillator frequency correction (ppm)</string>
        </property>
        <property name="minimum">
-        <number>-100</number>
+        <number>-300</number>
        </property>
        <property name="maximum">
-        <number>100</number>
+        <number>300</number>
        </property>
        <property name="pageStep">
         <number>1</number>
