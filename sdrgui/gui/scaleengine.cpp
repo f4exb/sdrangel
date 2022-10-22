@@ -30,12 +30,6 @@ static double trunc(double d)
 
 QString ScaleEngine::formatTick(double value, int decimalPlaces)
 {
-    if (m_truncated && (m_physicalUnit != Unit::Scientific))
-    {
-        // value = ((value * m_scale) - m_truncationValue) / m_scale;
-        qDebug("ScaleEngine::formatTick: value: %f decimalPlaces: %d m_scale: %f", value, decimalPlaces, m_scale);
-    }
-
 	if (m_physicalUnit != Unit::TimeHMS)
 	{
 	    if (m_physicalUnit == Unit::Scientific) {
