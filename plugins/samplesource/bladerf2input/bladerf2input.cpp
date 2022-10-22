@@ -207,7 +207,7 @@ void BladeRF2Input::closeDevice()
 
 void BladeRF2Input::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 BladeRF2InputThread *BladeRF2Input::findThread()
@@ -383,7 +383,7 @@ bool BladeRF2Input::start()
         bladerf2InputThread->startWork();
     }
 
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 
     qDebug("BladeRF2Input::start: started");
     m_running = true;
@@ -519,12 +519,12 @@ bool BladeRF2Input::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureBladeRF2* message = MsgConfigureBladeRF2::create(m_settings, true);
+    MsgConfigureBladeRF2* message = MsgConfigureBladeRF2::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureBladeRF2* messageToGUI = MsgConfigureBladeRF2::create(m_settings, true);
+        MsgConfigureBladeRF2* messageToGUI = MsgConfigureBladeRF2::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -552,12 +552,12 @@ void BladeRF2Input::setCenterFrequency(qint64 centerFrequency)
     BladeRF2InputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureBladeRF2* message = MsgConfigureBladeRF2::create(settings, false);
+    MsgConfigureBladeRF2* message = MsgConfigureBladeRF2::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureBladeRF2* messageToGUI = MsgConfigureBladeRF2::create(settings, false);
+        MsgConfigureBladeRF2* messageToGUI = MsgConfigureBladeRF2::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -616,8 +616,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
         MsgConfigureBladeRF2& conf = (MsgConfigureBladeRF2&) message;
         qDebug() << "BladeRF2Input::handleMessage: MsgConfigureBladeRF2";
 
-        if (!applySettings(conf.getSettings(), conf.getForce()))
-        {
+        if (!applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce())) {
             qDebug("BladeRF2Input::handleMessage: MsgConfigureBladeRF2 config error");
         }
 
@@ -631,6 +630,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
         int status;
         unsigned int tmp_uint;
         bool tmp_bool;
+        QList<QString> settingsKeys;
 
         // evaluate changes that may have been introduced by changes in a buddy
 
@@ -644,6 +644,10 @@ bool BladeRF2Input::handleMessage(const Message& message)
                 settings.m_LOppmTenths = report.getLOppmTenths();
                 settings.m_centerFrequency = report.getCenterFrequency();
                 settings.m_fcPos = (BladeRF2InputSettings::fcPos_t) report.getFcPos();
+                settingsKeys.append("devSampleRate");
+                settingsKeys.append("LOppmTenths");
+                settingsKeys.append("centerFrequency");
+                settingsKeys.append("fcPos");
 
                 BladeRF2InputThread *inputThread = findThread();
 
@@ -653,23 +657,32 @@ bool BladeRF2Input::handleMessage(const Message& message)
 
                 status = bladerf_get_bandwidth(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint);
 
-                if (status < 0) {
+                if (status < 0)
+                {
                     qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_bandwidth error: %s", bladerf_strerror(status));
-                } else {
+                }
+                else
+                {
                     settings.m_bandwidth = tmp_uint;
+                    settingsKeys.append("bandwidth");
                 }
 
                 status = bladerf_get_bias_tee(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_bool);
 
-                if (status < 0) {
+                if (status < 0)
+                {
                     qCritical("BladeRF2Input::handleMessage: MsgReportBuddyChange: bladerf_get_bias_tee error: %s", bladerf_strerror(status));
-                } else {
+                }
+                else
+                {
                     settings.m_biasTee = tmp_bool;
+                    settingsKeys.append("biasTee");
                 }
             }
             else // Tx buddy change: check for sample rate change only
             {
                 settings.m_devSampleRate = report.getDevSampleRate();
+                settingsKeys.append("devSampleRate");
 //                status = bladerf_get_sample_rate(dev, BLADERF_CHANNEL_RX(requestedChannel), &tmp_uint);
 //
 //                if (status < 0) {
@@ -708,12 +721,12 @@ bool BladeRF2Input::handleMessage(const Message& message)
                 m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
             }
 
-            m_settings = settings; // acknowledge the new settings
+            m_settings.applySettings(settingsKeys, settings); // acknowledge the new settings
 
             // propagate settings to GUI if any
             if (getMessageQueueToGUI())
             {
-                MsgConfigureBladeRF2 *reportToGUI = MsgConfigureBladeRF2::create(m_settings, false);
+                MsgConfigureBladeRF2 *reportToGUI = MsgConfigureBladeRF2::create(m_settings, settingsKeys, false);
                 getMessageQueueToGUI()->push(reportToGUI);
             }
         }
@@ -727,8 +740,7 @@ bool BladeRF2Input::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
@@ -749,8 +761,10 @@ bool BladeRF2Input::handleMessage(const Message& message)
     }
 }
 
-bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool force)
+bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
+    qDebug() << "BladeRF2Input::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
+
     bool forwardChangeOwnDSP = false;
     bool forwardChangeRxBuddies  = false;
     bool forwardChangeTxBuddies = false;
@@ -760,24 +774,15 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
     qint64 xlatedDeviceCenterFrequency = settings.m_centerFrequency;
     xlatedDeviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
     xlatedDeviceCenterFrequency = xlatedDeviceCenterFrequency < 0 ? 0 : xlatedDeviceCenterFrequency;
-    QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
-        reverseAPIKeys.append("dcBlock");
-    }
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
-        reverseAPIKeys.append("iqCorrection");
-    }
-
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
-        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    if (settingsKeys.contains("dcBlock") ||
+        settingsKeys.contains("iqCorrection") || force)
     {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+    if (settingsKeys.contains("devSampleRate") || force)
     {
-        reverseAPIKeys.append("devSampleRate");
         forwardChangeOwnDSP = true;
         forwardChangeRxBuddies = true;
         forwardChangeTxBuddies = true;
@@ -799,9 +804,8 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         }
     }
 
-    if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
+    if (settingsKeys.contains("bandwidth") || force)
     {
-        reverseAPIKeys.append("bandwidth");
         forwardChangeRxBuddies = true;
 
         if (dev != 0)
@@ -821,9 +825,8 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         }
     }
 
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+    if (settingsKeys.contains("fcPos") || force)
     {
-        reverseAPIKeys.append("fcPos");
         BladeRF2InputThread *inputThread = findThread();
 
         if (inputThread)
@@ -833,9 +836,8 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         }
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if (settingsKeys.contains("log2Decim") || force)
     {
-        reverseAPIKeys.append("log2Decim");
         forwardChangeOwnDSP = true;
         BladeRF2InputThread *inputThread = findThread();
 
@@ -846,9 +848,8 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         }
     }
 
-    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    if (settingsKeys.contains("iqOrder") || force)
     {
-        reverseAPIKeys.append("iqOrder");
         BladeRF2InputThread *inputThread = findThread();
 
         if (inputThread) {
@@ -856,26 +857,13 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
-        reverseAPIKeys.append("centerFrequency");
-    }
-    if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
-        reverseAPIKeys.append("transverterMode");
-    }
-    if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
-        reverseAPIKeys.append("transverterDeltaFrequency");
-    }
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
-        reverseAPIKeys.append("LOppmTenths");
-    }
-
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
-        || (m_settings.m_transverterMode != settings.m_transverterMode)
-        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
-        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
-        || (m_settings.m_devSampleRate != settings.m_devSampleRate)
-        || (m_settings.m_fcPos != settings.m_fcPos)
-        || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if (settingsKeys.contains("log2Decim")
+        || settingsKeys.contains("fcPos")
+        || settingsKeys.contains("devSampleRate")
+        || settingsKeys.contains("LOppmTenths")
+        || settingsKeys.contains("centerFrequency")
+        || settingsKeys.contains("transverterMode")
+        || settingsKeys.contains("transverterDeltaFrequency") || force)
     {
         qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                 xlatedDeviceCenterFrequency,
@@ -905,16 +893,14 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         }
     }
 
-    if ((m_settings.m_biasTee != settings.m_biasTee) || force)
+    if (settingsKeys.contains("biasTee") || force)
     {
-        reverseAPIKeys.append("biasTee");
         forwardChangeRxBuddies = true;
         m_deviceShared.m_dev->setBiasTeeRx(settings.m_biasTee);
     }
 
-    if ((m_settings.m_gainMode != settings.m_gainMode) || force)
+    if (settingsKeys.contains("gainMode") || force)
     {
-        reverseAPIKeys.append("gainMode");
         forwardChangeRxBuddies = true;
 
         if (dev)
@@ -930,12 +916,8 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         }
     }
 
-    if ((m_settings.m_globalGain != settings.m_globalGain) || force) {
-        reverseAPIKeys.append("globalGain");
-    }
-
-    if ((m_settings.m_globalGain != settings.m_globalGain)
-       || ((m_settings.m_gainMode != settings.m_gainMode) && (settings.m_gainMode == BLADERF_GAIN_MANUAL)) || force)
+    if (settingsKeys.contains("globalGain")
+       || (settingsKeys.contains("gainMode") && (settings.m_gainMode == BLADERF_GAIN_MANUAL)) || force)
     {
         forwardChangeRxBuddies = true;
 
@@ -996,32 +978,20 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         }
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
-
-    qDebug() << "BladeRF2Input::applySettings: "
-            << " m_transverterMode: " << m_settings.m_transverterMode
-            << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
-            << " m_centerFrequency: " << m_settings.m_centerFrequency << " Hz"
-            << " m_LOppmTenths: " << m_settings.m_LOppmTenths
-            << " m_bandwidth: " << m_settings.m_bandwidth
-            << " m_log2Decim: " << m_settings.m_log2Decim
-            << " m_iqOrder: " << m_settings.m_iqOrder
-            << " m_fcPos: " << m_settings.m_fcPos
-            << " m_devSampleRate: " << m_settings.m_devSampleRate
-            << " m_globalGain: " << m_settings.m_globalGain
-            << " m_gainMode: " << m_settings.m_gainMode
-            << " m_dcBlock: " << m_settings.m_dcBlock
-            << " m_iqCorrection: " << m_settings.m_iqCorrection
-            << " m_biasTee: " << m_settings.m_biasTee;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     return true;
 }
@@ -1047,12 +1017,12 @@ int BladeRF2Input::webapiSettingsPutPatch(
     BladeRF2InputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureBladeRF2 *msg = MsgConfigureBladeRF2::create(settings, force);
+    MsgConfigureBladeRF2 *msg = MsgConfigureBladeRF2::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureBladeRF2 *msgToGUI = MsgConfigureBladeRF2::create(settings, force);
+        MsgConfigureBladeRF2 *msgToGUI = MsgConfigureBladeRF2::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -1243,7 +1213,7 @@ int BladeRF2Input::webapiRun(
     return 200;
 }
 
-void BladeRF2Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF2InputSettings& settings, bool force)
+void BladeRF2Input::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const BladeRF2InputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
