@@ -57,6 +57,7 @@ private:
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	AirspySettings m_settings;
+    QList<QString> m_settingsKeys;
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
 	std::vector<uint32_t> m_rates;

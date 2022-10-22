@@ -40,20 +40,23 @@ public:
 
 	public:
 		const AirspySettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureAirspy* create(const AirspySettings& settings, bool force)
+		static MsgConfigureAirspy* create(const AirspySettings& settings, const QList<QString>& settingsKeys, bool force)
 		{
-			return new MsgConfigureAirspy(settings, force);
+			return new MsgConfigureAirspy(settings, settingsKeys, force);
 		}
 
 	private:
 		AirspySettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureAirspy(const AirspySettings& settings, bool force) :
+		MsgConfigureAirspy(const AirspySettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -148,11 +151,11 @@ private:
 
 	bool openDevice();
 	void closeDevice();
-	bool applySettings(const AirspySettings& settings, bool force);
+	bool applySettings(const AirspySettings& settings, const QList<QString>& settingsKeys, bool force);
 	struct airspy_device *open_airspy_from_sequence(int sequence);
 	void setDeviceCenterFrequency(quint64 freq);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const AirspySettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AirspySettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

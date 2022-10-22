@@ -170,7 +170,7 @@ bool AirspyInput::openDevice()
 
 void AirspyInput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool AirspyInput::start()
@@ -202,7 +202,7 @@ bool AirspyInput::start()
     m_airspyWorkerThread->start();
 
     qDebug("AirspyInput::startInput: started");
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
     m_running = true;
 
 	return true;
@@ -257,12 +257,12 @@ bool AirspyInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureAirspy* message = MsgConfigureAirspy::create(m_settings, true);
+    MsgConfigureAirspy* message = MsgConfigureAirspy::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureAirspy* messageToGUI = MsgConfigureAirspy::create(m_settings, true);
+        MsgConfigureAirspy* messageToGUI = MsgConfigureAirspy::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -290,12 +290,12 @@ void AirspyInput::setCenterFrequency(qint64 centerFrequency)
     AirspySettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureAirspy* message = MsgConfigureAirspy::create(settings, false);
+    MsgConfigureAirspy* message = MsgConfigureAirspy::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureAirspy* messageToGUI = MsgConfigureAirspy::create(settings, false);
+        MsgConfigureAirspy* messageToGUI = MsgConfigureAirspy::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -307,10 +307,9 @@ bool AirspyInput::handleMessage(const Message& message)
 		MsgConfigureAirspy& conf = (MsgConfigureAirspy&) message;
 		qDebug() << "AirspyInput::handleMessage: MsgConfigureAirspy";
 
-		bool success = applySettings(conf.getSettings(), conf.getForce());
+		bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
-		if (!success)
-		{
+		if (!success) {
 			qDebug("AirspyInput::handleMessage: Airspy config error");
 		}
 
@@ -323,8 +322,7 @@ bool AirspyInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
@@ -352,42 +350,32 @@ void AirspyInput::setDeviceCenterFrequency(quint64 freq_hz)
 
 	airspy_error rc = (airspy_error) airspy_set_freq(m_dev, static_cast<uint32_t>(freq_hz));
 
-	if (rc != AIRSPY_SUCCESS)
-	{
+	if (rc != AIRSPY_SUCCESS) {
 		qWarning("AirspyInput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz);
-	}
-	else
-	{
+	} else {
 		qDebug("AirspyInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
 	}
 }
 
-bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
+bool AirspyInput::applySettings(const AirspySettings& settings, const QList<QString>& settingsKeys, bool force)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
 	bool forwardChange = false;
 	airspy_error rc = AIRSPY_ERROR_OTHER;
-    QList<QString> reverseAPIKeys;
 
-	qDebug() << "AirspyInput::applySettings";
+	qDebug() << "AirspyInput::applySettings:"
+        << "force:" << force
+        << settings.getDebugString(settingsKeys, force);
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
-        reverseAPIKeys.append("dcBlock");
-    }
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
-        reverseAPIKeys.append("iqCorrection");
-    }
-
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
-        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    if ((settingsKeys.contains("dcBlock")) ||
+        (settingsKeys.contains("iqCorrection")) || force)
     {
 		m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
 	}
 
-	if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
+	if ((settingsKeys.contains("devSampleRateIndex")) || force)
 	{
-        reverseAPIKeys.append("devSampleRateIndex");
 		forwardChange = true;
 
 		if (m_dev != 0)
@@ -406,9 +394,8 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+	if ((settingsKeys.contains("log2Decim")) || force)
 	{
-        reverseAPIKeys.append("log2Decim");
 		forwardChange = true;
 
 		if (m_airspyWorker)
@@ -418,37 +405,19 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+	if ((settingsKeys.contains("iqOrder")) || force)
 	{
-        reverseAPIKeys.append("iqOrder");
-
 		if (m_airspyWorker) {
 			m_airspyWorker->setIQOrder(settings.m_iqOrder);
 		}
 	}
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
-        reverseAPIKeys.append("centerFrequency");
-    }
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
-        reverseAPIKeys.append("LOppmTenths");
-    }
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force) {
-        reverseAPIKeys.append("fcPos");
-    }
-    if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
-        reverseAPIKeys.append("transverterMode");
-    }
-    if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
-        reverseAPIKeys.append("transverterDeltaFrequency");
-    }
-
-	if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
-        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
-        || (m_settings.m_fcPos != settings.m_fcPos)
-        || (m_settings.m_log2Decim != settings.m_log2Decim)
-        || (m_settings.m_transverterMode != settings.m_transverterMode)
-        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
+	if ((settingsKeys.contains("centerFrequency"))
+        || (settingsKeys.contains("transverterDeltaFrequency"))
+        || (settingsKeys.contains("log2Decim"))
+        || (settingsKeys.contains("fcPos"))
+        || (settingsKeys.contains("devSampleRateIndex"))
+        || (settingsKeys.contains("transverterMode")) || force)
 	{
         qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
@@ -466,7 +435,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		forwardChange = true;
 	}
 
-	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+	if ((settingsKeys.contains("fcPos")) || force)
 	{
 		if (m_airspyWorker)
 		{
@@ -475,10 +444,8 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)
+	if (settingsKeys.contains("lnaGain") || force)
 	{
-        reverseAPIKeys.append("lnaGain");
-
 		if (m_dev != 0)
 		{
 			rc = (airspy_error) airspy_set_lna_gain(m_dev, settings.m_lnaGain);
@@ -491,10 +458,8 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_lnaAGC != settings.m_lnaAGC) || force)
+	if (settingsKeys.contains("lnaAGC") || force)
 	{
-        reverseAPIKeys.append("lnaAGC");
-
 		if (m_dev != 0) {
 			rc = (airspy_error) airspy_set_lna_agc(m_dev, (settings.m_lnaAGC ? 1 : 0));
 		}
@@ -506,10 +471,8 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_mixerGain != settings.m_mixerGain) || force)
+	if (settingsKeys.contains("mixerGain") || force)
 	{
-        reverseAPIKeys.append("mixerGain");
-
 		if (m_dev != 0)
 		{
 			rc = (airspy_error) airspy_set_mixer_gain(m_dev, settings.m_mixerGain);
@@ -522,10 +485,8 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_mixerAGC != settings.m_mixerAGC) || force)
+	if (settingsKeys.contains("mixerAGC") || force)
 	{
-        reverseAPIKeys.append("mixerAGC");
-
 		if (m_dev != 0) {
 			rc = (airspy_error) airspy_set_mixer_agc(m_dev, (settings.m_mixerAGC ? 1 : 0));
 		}
@@ -537,10 +498,8 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_vgaGain != settings.m_vgaGain) || force)
+	if (settingsKeys.contains("vgaGain") || force)
 	{
-        reverseAPIKeys.append("vgaGain");
-
 		if (m_dev != 0)
 		{
 			rc = (airspy_error) airspy_set_vga_gain(m_dev, settings.m_vgaGain);
@@ -553,10 +512,8 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_biasT != settings.m_biasT) || force)
+	if (settingsKeys.contains("biasT") || force)
 	{
-        reverseAPIKeys.append("biasT");
-
 		if (m_dev != 0)
 		{
 			rc = (airspy_error) airspy_set_rf_bias(m_dev, (settings.m_biasT ? 1 : 0));
@@ -575,10 +532,14 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
                 (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
                 (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
                 (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
 	if (forwardChange)
 	{
@@ -665,12 +626,12 @@ int AirspyInput::webapiSettingsPutPatch(
     AirspySettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureAirspy *msg = MsgConfigureAirspy::create(settings, force);
+    MsgConfigureAirspy *msg = MsgConfigureAirspy::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAirspy *msgToGUI = MsgConfigureAirspy::create(settings, force);
+        MsgConfigureAirspy *msgToGUI = MsgConfigureAirspy::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -800,7 +761,7 @@ void AirspyInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respons
     }
 }
 
-void AirspyInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const AirspySettings& settings, bool force)
+void AirspyInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AirspySettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
