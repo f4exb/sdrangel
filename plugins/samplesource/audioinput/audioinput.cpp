@@ -113,7 +113,7 @@ bool AudioInput::openAudioDevice(QString deviceName, qint32 sampleRate)
 
 void AudioInput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool AudioInput::start()
@@ -131,7 +131,7 @@ bool AudioInput::start()
     }
 
     qDebug() << "AudioInput::start";
-    applySettings(m_settings, true, true);
+    applySettings(m_settings, QList<QString>(), true, true);
 
     m_workerThread = new QThread();
     m_worker = new AudioInputWorker(&m_sampleFifo, &m_fifo);
@@ -194,12 +194,12 @@ bool AudioInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureAudioInput* message = MsgConfigureAudioInput::create(m_settings, true);
+    MsgConfigureAudioInput* message = MsgConfigureAudioInput::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureAudioInput* messageToGUI = MsgConfigureAudioInput::create(m_settings, true);
+        MsgConfigureAudioInput* messageToGUI = MsgConfigureAudioInput::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -223,11 +223,11 @@ quint64 AudioInput::getCenterFrequency() const
 
 bool AudioInput::handleMessage(const Message& message)
 {
-    if(MsgConfigureAudioInput::match(message))
+    if (MsgConfigureAudioInput::match(message))
     {
         qDebug() << "AudioInput::handleMessage: MsgConfigureAudioInput";
         MsgConfigureAudioInput& conf = (MsgConfigureAudioInput&) message;
-        applySettings(conf.getSettings(), conf.getForce());
+        applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
     else if (MsgStartStop::match(message))
@@ -259,13 +259,16 @@ bool AudioInput::handleMessage(const Message& message)
     }
 }
 
-void AudioInput::applySettings(const AudioInputSettings& settings, bool force, bool starting)
+void AudioInput::applySettings(const AudioInputSettings& settings, QList<QString> settingsKeys, bool force, bool starting)
 {
     bool forwardChange = false;
-    QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_deviceName != settings.m_deviceName)
-        || (m_settings.m_sampleRate != settings.m_sampleRate) || force)
+    qDebug() << "AudioInput::applySettings: "
+        << " force:" << force
+        << settings.getDebugString(settingsKeys, force);
+
+    if (settingsKeys.contains("deviceName")
+        || settingsKeys.contains("sampleRate") || force)
     {
         // Don't call openAudioDevice if called from start(), otherwise ::AudioInput
         // will be created on wrong thread and we'll crash after ::AudioInput::stop calls delete
@@ -279,27 +282,18 @@ void AudioInput::applySettings(const AudioInputSettings& settings, bool force, b
             }
     }
 
-    if ((m_settings.m_deviceName != settings.m_deviceName) || force)
-    {
-        reverseAPIKeys.append("device");
-    }
-
-    if ((m_settings.m_sampleRate != settings.m_sampleRate) || force)
-    {
-        reverseAPIKeys.append("sampleRate");
+    if (settingsKeys.contains("sampleRate") || force) {
         forwardChange = true;
     }
 
-    if ((m_settings.m_volume != settings.m_volume) || force)
+    if (settingsKeys.contains("volume") || force)
     {
-        reverseAPIKeys.append("volume");
         m_audioInput.setVolume(settings.m_volume);
         qDebug() << "AudioInput::applySettings: set volume to " << settings.m_volume;
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if (settingsKeys.contains("log2Decim") || force)
     {
-        reverseAPIKeys.append("log2Decim");
         forwardChange = true;
 
         if (m_running)
@@ -309,9 +303,8 @@ void AudioInput::applySettings(const AudioInputSettings& settings, bool force, b
         }
     }
 
-    if ((m_settings.m_iqMapping != settings.m_iqMapping) || force)
+    if (settingsKeys.contains("iqMapping") || force)
     {
-        reverseAPIKeys.append("iqMapping");
         forwardChange = true;
 
         if (m_running) {
@@ -319,16 +312,20 @@ void AudioInput::applySettings(const AudioInputSettings& settings, bool force, b
         }
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (forwardChange)
     {
@@ -393,12 +390,12 @@ int AudioInput::webapiSettingsPutPatch(
     AudioInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureAudioInput *msg = MsgConfigureAudioInput::create(settings, force);
+    MsgConfigureAudioInput *msg = MsgConfigureAudioInput::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAudioInput *msgToGUI = MsgConfigureAudioInput::create(settings, force);
+        MsgConfigureAudioInput *msgToGUI = MsgConfigureAudioInput::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -460,7 +457,7 @@ void AudioInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& resp
     response.getAudioInputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
-void AudioInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const AudioInputSettings& settings, bool force)
+void AudioInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AudioInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx

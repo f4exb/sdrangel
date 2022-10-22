@@ -46,20 +46,23 @@ public:
 
     public:
         const AudioInputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAudioInput* create(const AudioInputSettings& settings, bool force)
+        static MsgConfigureAudioInput* create(const AudioInputSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigureAudioInput(settings, force);
+            return new MsgConfigureAudioInput(settings, settingsKeys, force);
         }
 
     private:
         AudioInputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAudioInput(const AudioInputSettings& settings, bool force) :
+        MsgConfigureAudioInput(const AudioInputSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -149,9 +152,9 @@ private:
     bool openDevice();
     void closeDevice();
     bool openAudioDevice(QString deviceName, int sampleRate);
-    void applySettings(const AudioInputSettings& settings, bool force, bool starting=false);
+    void applySettings(const AudioInputSettings& settings, QList<QString> settingsKeys, bool force, bool starting=false);
 
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const AudioInputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AudioInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

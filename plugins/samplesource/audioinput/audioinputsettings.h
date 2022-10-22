@@ -58,7 +58,8 @@ struct AudioInputSettings {
             return deviceInfo.deviceName();
 #endif
     }
-
+    void applySettings(const QStringList& settingsKeys, const AudioInputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* _AUDIOINPUT_AUDIOINPUTSETTINGS_H_ */

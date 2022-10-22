@@ -97,3 +97,69 @@ bool AudioInputSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void AudioInputSettings::applySettings(const QStringList& settingsKeys, const AudioInputSettings& settings)
+{
+    if (settingsKeys.contains("deviceName")) {
+        m_deviceName = settings.m_deviceName;
+    }
+    if (settingsKeys.contains("sampleRate")) {
+        m_sampleRate = settings.m_sampleRate;
+    }
+    if (settingsKeys.contains("volume")) {
+        m_volume = settings.m_volume;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("iqMapping")) {
+        m_iqMapping = settings.m_iqMapping;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
+
+QString AudioInputSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("deviceName") || force) {
+        ostr << " m_deviceName: " << m_deviceName.toStdString();
+    }
+    if (settingsKeys.contains("sampleRate") || force) {
+        ostr << " m_sampleRate: " << m_sampleRate;
+    }
+    if (settingsKeys.contains("volume") || force) {
+        ostr << " m_volume: " << m_volume;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("iqMapping") || force) {
+        ostr << " m_iqMapping: " << m_iqMapping;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}

@@ -73,6 +73,7 @@ void AudioInputGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -108,7 +109,13 @@ bool AudioInputGui::handleMessage(const Message& message)
     if (AudioInput::MsgConfigureAudioInput::match(message))
     {
         const AudioInput::MsgConfigureAudioInput& cfg = (AudioInput::MsgConfigureAudioInput&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -203,8 +210,8 @@ void AudioInputGui::refreshSampleRates(QString deviceName)
         if (deviceName == AudioInputSettings::getFullDeviceName(deviceInfo))
         {
             QList<int> sampleRates = deviceInfo.supportedSampleRates();
-            for(int i = 0; i < sampleRates.size(); ++i)
-            {
+
+            for (int i = 0; i < sampleRates.size(); ++i) {
                 ui->sampleRate->addItem(QString("%1").arg(sampleRates[i]));
             }
         }
@@ -212,20 +219,25 @@ void AudioInputGui::refreshSampleRates(QString deviceName)
     ui->sampleRate->blockSignals(false);
 
     int index = ui->sampleRate->findText(QString("%1").arg(m_settings.m_sampleRate));
-    if (index >= 0)
+
+    if (index >= 0) {
         ui->sampleRate->setCurrentIndex(index);
-    else
+    } else {
         ui->sampleRate->setCurrentIndex(0);
+    }
 }
 
 void AudioInputGui::displaySettings()
 {
     refreshDeviceList();
     int index = ui->device->findText(m_settings.m_deviceName);
-    if (index >= 0)
+
+    if (index >= 0) {
         ui->device->setCurrentIndex(index);
-    else
+    } else {
         ui->device->setCurrentIndex(0);
+    }
+
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->volume->setValue((int)(m_settings.m_volume*10.0f));
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 3, 'f', 1));
@@ -238,6 +250,7 @@ void AudioInputGui::on_device_currentIndexChanged(int index)
     (void) index;
     m_settings.m_deviceName = ui->device->currentText();
     refreshSampleRates(m_settings.m_deviceName);
+    m_settingsKeys.append("deviceName");
     sendSettings();
 }
 
@@ -245,6 +258,7 @@ void AudioInputGui::on_sampleRate_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_sampleRate = ui->sampleRate->currentText().toInt();
+    m_settingsKeys.append("sampleRate");
     sendSettings();
 }
 
@@ -255,6 +269,7 @@ void AudioInputGui::on_decim_currentIndexChanged(int index)
     }
 
     m_settings.m_log2Decim = index;
+    m_settingsKeys.append("log2Decim");
     sendSettings();
 }
 
@@ -262,6 +277,7 @@ void AudioInputGui::on_volume_valueChanged(int value)
 {
     m_settings.m_volume = value/10.0f;
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 3, 'f', 1));
+    m_settingsKeys.append("volume");
     sendSettings();
 }
 
@@ -269,6 +285,7 @@ void AudioInputGui::on_channels_currentIndexChanged(int index)
 {
     m_settings.m_iqMapping = (AudioInputSettings::IQMapping)index;
     updateSampleRateAndFrequency();
+    m_settingsKeys.append("iqMapping");
     sendSettings();
 }
 
@@ -291,8 +308,9 @@ void AudioInputGui::updateHardware()
 {
     if (m_doApplySettings)
     {
-        AudioInput::MsgConfigureAudioInput* message = AudioInput::MsgConfigureAudioInput::create(m_settings, m_forceSettings);
+        AudioInput::MsgConfigureAudioInput* message = AudioInput::MsgConfigureAudioInput::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSource->getInputMessageQueue()->push(message);
+        m_settingsKeys.clear();
         m_forceSettings = false;
         m_updateTimer.stop();
     }
@@ -315,6 +333,10 @@ void AudioInputGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }
