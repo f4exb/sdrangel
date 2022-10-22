@@ -86,6 +86,7 @@ void AirspyHFGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
+    m_forceSettings = true;
 	sendSettings();
 }
 
@@ -96,7 +97,7 @@ QByteArray AirspyHFGui::serialize() const
 
 bool AirspyHFGui::deserialize(const QByteArray& data)
 {
-	if(m_settings.deserialize(data)) {
+	if (m_settings.deserialize(data)) {
 		displaySettings();
 		m_forceSettings = true;
 		sendSettings();
@@ -118,7 +119,13 @@ bool AirspyHFGui::handleMessage(const Message& message)
     if (AirspyHFInput::MsgConfigureAirspyHF::match(message))
     {
         const AirspyHFInput::MsgConfigureAirspyHF& cfg = (AirspyHFInput::MsgConfigureAirspyHF&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -288,6 +295,7 @@ void AirspyHFGui::sendSettings()
 void AirspyHFGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
 	sendSettings();
 }
 
@@ -295,6 +303,7 @@ void AirspyHFGui::on_LOppm_valueChanged(int value)
 {
     m_settings.m_LOppmTenths = value;
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+    m_settingsKeys.append("LOppmTenths");
     sendSettings();
 }
 
@@ -305,15 +314,19 @@ void AirspyHFGui::on_resetLOppm_clicked()
 
 void AirspyHFGui::on_sampleRate_currentIndexChanged(int index)
 {
+    m_settingsKeys.append("devSampleRateIndex");
 	m_settings.m_devSampleRateIndex = index;
 	sendSettings();
 }
 
 void AirspyHFGui::on_decim_currentIndexChanged(int index)
 {
-	if ((index < 0) || (index > 8))
+	if ((index < 0) || (index > 8)) {
 		return;
+    }
+
 	m_settings.m_log2Decim = index;
+    m_settingsKeys.append("log2Decim");
 	sendSettings();
 }
 
@@ -334,6 +347,10 @@ void AirspyHFGui::on_transverter_clicked()
     qDebug("AirspyHFGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("iqOrder");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -347,18 +364,22 @@ void AirspyHFGui::on_band_currentIndexChanged(int index)
     updateFrequencyLimits();
     qDebug("AirspyHFGui::on_band_currentIndexChanged: freq: %llu", ui->centerFrequency->getValueNew() * 1000);
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew() * 1000;
+    m_settingsKeys.append("centerFrequency");
+    m_settingsKeys.append("bandIndex");
     sendSettings();
 }
 
 void AirspyHFGui::on_dsp_toggled(bool checked)
 {
     m_settings.m_useDSP = checked;
+    m_settingsKeys.append("useDSP");
     sendSettings();
 }
 
 void AirspyHFGui::on_lna_toggled(bool checked)
 {
     m_settings.m_useLNA = checked;
+    m_settingsKeys.append("useLNA");
     sendSettings();
 }
 
@@ -367,16 +388,23 @@ void AirspyHFGui::on_agc_currentIndexChanged(int index)
     if (index == 0)
     {
         m_settings.m_useAGC = false;
+        m_settingsKeys.append("useAGC");
         sendSettings();
     }
     else if (index <= 2)
     {
         m_settings.m_useAGC = true;
+        m_settingsKeys.append("useAGC");
 
-        if (index == 1) {
+        if (index == 1)
+        {
             m_settings.m_agcHigh = false;
-        } else {
+            m_settingsKeys.append("agcHigh");
+        }
+        else
+        {
             m_settings.m_agcHigh = true;
+            m_settingsKeys.append("agcHigh");
         }
 
         sendSettings();
@@ -388,6 +416,7 @@ void AirspyHFGui::on_att_currentIndexChanged(int index)
     if ((index >= 0) && (index <= 8))
     {
         m_settings.m_attenuatorSteps = index;
+        m_settingsKeys.append("attenuatorSteps");
         sendSettings();
     }
 }
@@ -395,20 +424,23 @@ void AirspyHFGui::on_att_currentIndexChanged(int index)
 void AirspyHFGui::on_dcOffset_toggled(bool checked)
 {
 	m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
 	sendSettings();
 }
 
 void AirspyHFGui::on_iqImbalance_toggled(bool checked)
 {
 	m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
 	sendSettings();
 }
 
 void AirspyHFGui::updateHardware()
 {
 	qDebug() << "AirspyHFGui::updateHardware";
-	AirspyHFInput::MsgConfigureAirspyHF* message = AirspyHFInput::MsgConfigureAirspyHF::create(m_settings, m_forceSettings);
+	AirspyHFInput::MsgConfigureAirspyHF* message = AirspyHFInput::MsgConfigureAirspyHF::create(m_settings, m_settingsKeys, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
+    m_settingsKeys.clear();
 	m_forceSettings = false;
 	m_updateTimer.stop();
 }
@@ -484,6 +516,10 @@ void AirspyHFGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

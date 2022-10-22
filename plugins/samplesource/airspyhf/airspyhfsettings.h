@@ -46,6 +46,8 @@ struct AirspyHFSettings
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const AirspyHFSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* _AIRSPYHFF_AIRSPYHFSETTINGS_H_ */

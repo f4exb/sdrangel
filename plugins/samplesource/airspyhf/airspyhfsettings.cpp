@@ -126,3 +126,129 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
 		return false;
 	}
 }
+
+void AirspyHFSettings::applySettings(const QStringList& settingsKeys, const AirspyHFSettings& settings)
+{
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("LOppmTenths")) {
+        m_LOppmTenths = settings.m_LOppmTenths;
+    }
+    if (settingsKeys.contains("devSampleRateIndex")) {
+        m_devSampleRateIndex = settings.m_devSampleRateIndex;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("transverterMode")) {
+        m_transverterMode = settings.m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency")) {
+        m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder")) {
+        m_iqOrder = settings.m_iqOrder;
+    }
+    if (settingsKeys.contains("bandIndex")) {
+        m_bandIndex = settings.m_bandIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("useDSP")) {
+        m_useDSP = settings.m_useDSP;
+    }
+    if (settingsKeys.contains("useAGC")) {
+        m_useAGC = settings.m_useAGC;
+    }
+    if (settingsKeys.contains("agcHigh")) {
+        m_agcHigh = settings.m_agcHigh;
+    }
+    if (settingsKeys.contains("useLNA")) {
+        m_useLNA = settings.m_useLNA;
+    }
+    if (settingsKeys.contains("attenuatorSteps")) {
+        m_attenuatorSteps = settings.m_attenuatorSteps;
+    }
+    if (settingsKeys.contains("dcBlock")) {
+        m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection")) {
+        m_iqCorrection = settings.m_iqCorrection;
+    }
+}
+
+QString AirspyHFSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("LOppmTenths") || force) {
+        ostr << " m_LOppmTenths: " << m_LOppmTenths;
+    }
+    if (settingsKeys.contains("devSampleRateIndex") || force) {
+        ostr << " m_devSampleRateIndex: " << m_devSampleRateIndex;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("transverterMode") || force) {
+        ostr << " m_transverterMode: " << m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency") || force) {
+        ostr << " m_transverterDeltaFrequency: " << m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder") || force) {
+        ostr << " m_iqOrder: " << m_iqOrder;
+    }
+    if (settingsKeys.contains("bandIndex") || force) {
+        ostr << " m_bandIndex: " << m_bandIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("useDSP") || force) {
+        ostr << " m_useDSP: " << m_useDSP;
+    }
+    if (settingsKeys.contains("useAGC") || force) {
+        ostr << " m_useAGC: " << m_useAGC;
+    }
+    if (settingsKeys.contains("agcHigh") || force) {
+        ostr << " m_agcHigh: " << m_agcHigh;
+    }
+    if (settingsKeys.contains("useLNA") || force) {
+        ostr << " m_useLNA: " << m_useLNA;
+    }
+    if (settingsKeys.contains("attenuatorSteps") || force) {
+        ostr << " m_attenuatorSteps: " << m_attenuatorSteps;
+    }
+    if (settingsKeys.contains("dcBlock") || force) {
+        ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection") || force) {
+        ostr << " m_iqCorrection: " << m_iqCorrection;
+    }
+
+    return QString(ostr.str().c_str());
+}
