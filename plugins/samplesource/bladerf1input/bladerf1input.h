@@ -42,20 +42,23 @@ public:
 
 	public:
 		const BladeRF1InputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureBladerf1* create(const BladeRF1InputSettings& settings, bool force)
+		static MsgConfigureBladerf1* create(const BladeRF1InputSettings& settings, QList<QString> settingsKeys, bool force)
 		{
-			return new MsgConfigureBladerf1(settings, force);
+			return new MsgConfigureBladerf1(settings, settingsKeys, force);
 		}
 
 	private:
 		BladeRF1InputSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureBladerf1(const BladeRF1InputSettings& settings, bool force) :
+		MsgConfigureBladerf1(const BladeRF1InputSettings& settings, QList<QString> settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -141,9 +144,9 @@ private:
 
     bool openDevice();
     void closeDevice();
-	bool applySettings(const BladeRF1InputSettings& settings, bool force);
+	bool applySettings(const BladeRF1InputSettings& settings, const QList<QString>& settingsKeys, bool force);
 	bladerf_lna_gain getLnaGain(int lnaGain);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF1InputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const BladeRF1InputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

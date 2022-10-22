@@ -53,6 +53,8 @@ struct BladeRF1InputSettings {
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const BladeRF1InputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* _BLADERF_BLADERFINPUTSETTINGS_H_ */

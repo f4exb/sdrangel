@@ -51,6 +51,7 @@ private:
 	bool m_forceSettings;
 	bool m_doApplySettings;
 	BladeRF1InputSettings m_settings;
+    QList<QString> m_settingsKeys;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
 	QTimer m_updateTimer;
 	QTimer m_statusTimer;
