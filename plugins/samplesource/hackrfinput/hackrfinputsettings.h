@@ -53,6 +53,8 @@ struct HackRFInputSettings {
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const HackRFInputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* _HACKRF_HACKRFINPUTSETTINGS_H_ */

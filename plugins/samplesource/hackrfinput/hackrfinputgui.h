@@ -62,6 +62,7 @@ private:
 	Ui::HackRFInputGui* ui;
 
 	HackRFInputSettings m_settings;
+    QList<QString> m_settingsKeys;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
 	bool m_forceSettings;
 	bool m_doApplySettings;

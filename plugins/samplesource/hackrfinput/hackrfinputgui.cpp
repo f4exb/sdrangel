@@ -93,6 +93,7 @@ void HackRFInputGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
+    m_forceSettings = true;
 	sendSettings();
 }
 
@@ -128,7 +129,13 @@ bool HackRFInputGui::handleMessage(const Message& message)
     if (HackRFInput::MsgConfigureHackRF::match(message))
     {
         const HackRFInput::MsgConfigureHackRF& cfg = (HackRFInput::MsgConfigureHackRF&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -320,29 +327,35 @@ void HackRFInputGui::on_LOppm_valueChanged(int value)
 {
 	m_settings.m_LOppmTenths = value;
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+    m_settingsKeys.append("LOppmTenths");
 	sendSettings();
 }
 
 void HackRFInputGui::on_dcOffset_toggled(bool checked)
 {
 	m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
 	sendSettings();
 }
 
 void HackRFInputGui::on_iqImbalance_toggled(bool checked)
 {
 	m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
 	sendSettings();
 }
 
 void HackRFInputGui::on_autoBBF_toggled(bool checked)
 {
     m_settings.m_autoBBF = checked;
-    if(checked){
+
+    if (checked)
+    {
         m_settings.m_bandwidth = hackrf_compute_baseband_filter_bw(m_settings.m_devSampleRate);
         ui->bbFilter->blockSignals(true);
         displaySettings();
         ui->bbFilter->blockSignals(false);
+        m_settingsKeys.append("bandwidth");
         sendSettings();
     }
 }
@@ -352,24 +365,28 @@ void HackRFInputGui::on_bbFilter_currentIndexChanged(int index)
     int newBandwidth = HackRFBandwidths::getBandwidth(index);
 	m_settings.m_bandwidth = newBandwidth * 1000;
     ui->autoBBF->setChecked(false);
+    m_settingsKeys.append("bandwidth");
 	sendSettings();
 }
 
 void HackRFInputGui::on_biasT_stateChanged(int state)
 {
 	m_settings.m_biasT = (state == Qt::Checked);
+    m_settingsKeys.append("biasT");
 	sendSettings();
 }
 
 void HackRFInputGui::on_lnaExt_stateChanged(int state)
 {
 	m_settings.m_lnaExt = (state == Qt::Checked);
+    m_settingsKeys.append("lnaExt");
 	sendSettings();
 }
 
 void HackRFInputGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
 	sendSettings();
 }
 
@@ -377,12 +394,15 @@ void HackRFInputGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
 
-    if (!m_sampleRateMode) {
+    if (!m_sampleRateMode)
+    {
         m_settings.m_devSampleRate <<= m_settings.m_log2Decim;
+        m_settingsKeys.append("devSampleRate");
     }
 
     if(m_settings.m_autoBBF){
         m_settings.m_bandwidth = hackrf_compute_baseband_filter_bw(m_settings.m_devSampleRate);
+        m_settingsKeys.append("bandwidth");
         ui->bbFilter->blockSignals(true);
         displaySettings();
         ui->bbFilter->blockSignals(false);
@@ -406,12 +426,15 @@ void HackRFInputGui::on_decim_currentIndexChanged(int index)
         m_settings.m_devSampleRate <<= m_settings.m_log2Decim;
     }
 
+    m_settingsKeys.append("log2Decim");
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
 void HackRFInputGui::on_fcPos_currentIndexChanged(int index)
 {
     m_settings.m_fcPos = (HackRFInputSettings::fcPos_t) (index < 0 ? 0 : index > 2 ? 2 : index);
+    m_settingsKeys.append("fcPos");
     displayFcTooltip();
     sendSettings();
 }
@@ -423,6 +446,7 @@ void HackRFInputGui::on_lna_valueChanged(int value)
 
 	ui->lnaGainText->setText(tr("%1dB").arg(value));
 	m_settings.m_lnaGain = value;
+    m_settingsKeys.append("lnaGain");
 	sendSettings();
 }
 
@@ -433,6 +457,7 @@ void HackRFInputGui::on_vga_valueChanged(int value)
 
 	ui->vgaText->setText(tr("%1dB").arg(value));
 	m_settings.m_vgaGain = value;
+    m_settingsKeys.append("vgaGain");
 	sendSettings();
 }
 
@@ -456,9 +481,10 @@ void HackRFInputGui::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "HackRFGui::updateHardware";
-        HackRFInput::MsgConfigureHackRF* message = HackRFInput::MsgConfigureHackRF::create(m_settings, m_forceSettings);
+        HackRFInput::MsgConfigureHackRF* message = HackRFInput::MsgConfigureHackRF::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSource->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -471,6 +497,10 @@ void HackRFInputGui::on_transverter_clicked()
     qDebug("HackRFInputGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("iqOrder");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 

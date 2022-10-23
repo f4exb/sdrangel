@@ -136,7 +136,7 @@ bool HackRFInput::openDevice()
 
 void HackRFInput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool HackRFInput::start()
@@ -154,7 +154,7 @@ bool HackRFInput::start()
 
 //	mutexLocker.unlock();
 
-	applySettings(m_settings, true);
+	applySettings(m_settings, QList<QString>(), true);
 
 	m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
 	m_hackRFThread->setLog2Decimation(m_settings.m_log2Decim);
@@ -215,12 +215,12 @@ bool HackRFInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureHackRF* message = MsgConfigureHackRF::create(m_settings, true);
+    MsgConfigureHackRF* message = MsgConfigureHackRF::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(m_settings, true);
+        MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -247,12 +247,12 @@ void HackRFInput::setCenterFrequency(qint64 centerFrequency)
     HackRFInputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureHackRF* message = MsgConfigureHackRF::create(settings, false);
+    MsgConfigureHackRF* message = MsgConfigureHackRF::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(settings, false);
+        MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -264,10 +264,9 @@ bool HackRFInput::handleMessage(const Message& message)
 		MsgConfigureHackRF& conf = (MsgConfigureHackRF&) message;
 		qDebug() << "HackRFInput::handleMessage: MsgConfigureHackRF";
 
-		bool success = applySettings(conf.getSettings(), conf.getForce());
+		bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
-		if (!success)
-		{
+		if (!success) {
 			qDebug("HackRFInput::handleMessage: config error");
 		}
 
@@ -280,8 +279,7 @@ bool HackRFInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
@@ -312,7 +310,8 @@ bool HackRFInput::handleMessage(const Message& message)
 
         if (m_guiMessageQueue)
         {
-            MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(settings, false);
+            QList<QString> settingsKeys({"log2Decim", "fcPos", "devSampleRate", "centerFrequency"});
+            MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(settings, settingsKeys, false);
             m_guiMessageQueue->push(messageToGUI);
         }
 
@@ -347,32 +346,21 @@ void HackRFInput::setDeviceCenterFrequency(quint64 freq_hz, int loPpmTenths)
 	}
 }
 
-bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
+bool HackRFInput::applySettings(const HackRFInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
 //	QMutexLocker mutexLocker(&m_mutex);
-
+    qDebug() << "HackRFInput::applySettings: forcE: " << force << settings.getDebugString(settingsKeys, force);
 	bool forwardChange = false;
 	hackrf_error rc;
-    QList<QString> reverseAPIKeys;
 
-	qDebug() << "HackRFInput::applySettings";
-
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
-        reverseAPIKeys.append("dcBlock");
-    }
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
-        reverseAPIKeys.append("iqCorrection");
-    }
-
-	if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
-	    (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+	if (settingsKeys.contains("dcBlock") ||
+	    settingsKeys.contains("iqCorrection") || force)
 	{
 		m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
 	}
 
-	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+	if (settingsKeys.contains("devSampleRate") || force)
 	{
-        reverseAPIKeys.append("devSampleRate");
         forwardChange = true;
 
         if (m_dev != 0)
@@ -400,9 +388,8 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+	if (settingsKeys.contains("log2Decim") || force)
 	{
-        reverseAPIKeys.append("log2Decim");
 		forwardChange = true;
 
 		if (m_hackRFThread)
@@ -412,38 +399,20 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+	if (settingsKeys.contains("iqOrder") || force)
 	{
-        reverseAPIKeys.append("iqOrder");
-
 		if (m_hackRFThread) {
 			m_hackRFThread->setIQOrder(settings.m_iqOrder);
 		}
 	}
 
-	if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) {
-        reverseAPIKeys.append("centerFrequency");
-	}
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
-        reverseAPIKeys.append("LOppmTenths");
-    }
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force) {
-        reverseAPIKeys.append("fcPos");
-    }
-    if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
-        reverseAPIKeys.append("transverterMode");
-    }
-    if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
-        reverseAPIKeys.append("transverterDeltaFrequency");
-    }
-
-	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) ||
-	    (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-        (m_settings.m_log2Decim != settings.m_log2Decim) ||
-        (m_settings.m_fcPos != settings.m_fcPos) ||
-        (m_settings.m_transverterMode != settings.m_transverterMode) ||
-        (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) ||
-        (m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
+	if (settingsKeys.contains("centerFrequency") ||
+	    settingsKeys.contains("devSampleRate") ||
+        settingsKeys.contains("log2Decim") ||
+        settingsKeys.contains("fcPos") ||
+        settingsKeys.contains("transverterMode") ||
+        settingsKeys.contains("transverterDeltaFrequency") ||
+        settingsKeys.contains("LOppmTenths") || force)
 	{
         qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
@@ -465,7 +434,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		forwardChange = true;
 	}
 
-	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+	if (settingsKeys.contains("fcPos") || force)
 	{
 		if (m_hackRFThread)
 		{
@@ -474,10 +443,8 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_lnaGain != settings.m_lnaGain) || force)
+	if (settingsKeys.contains("lnaGain") || force)
 	{
-        reverseAPIKeys.append("lnaGain");
-
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_lna_gain(m_dev, settings.m_lnaGain);
@@ -490,10 +457,8 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_vgaGain != settings.m_vgaGain) || force)
+	if (settingsKeys.contains("vgaGain") || force)
 	{
-        reverseAPIKeys.append("vgaGain");
-
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_vga_gain(m_dev, settings.m_vgaGain);
@@ -506,10 +471,8 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
+	if (settingsKeys.contains("bandwidth") || force)
 	{
-        reverseAPIKeys.append("bandwidth");
-
         if (m_dev != 0)
 		{
 	        uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(settings.m_bandwidth + 1); // +1 so the round down to lower than yields desired bandwidth
@@ -523,10 +486,8 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_biasT != settings.m_biasT) || force)
+	if (settingsKeys.contains("biasT") || force)
 	{
-        reverseAPIKeys.append("biasT");
-
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_antenna_enable(m_dev, (settings.m_biasT ? 1 : 0));
@@ -539,10 +500,8 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 		}
 	}
 
-	if ((m_settings.m_lnaExt != settings.m_lnaExt) || force)
+	if (settingsKeys.contains("lnaExt") || force)
 	{
-        reverseAPIKeys.append("lnaExt");
-
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_amp_enable(m_dev, (settings.m_lnaExt ? 1 : 0));
@@ -562,30 +521,20 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-	m_settings = settings;
-
-    qDebug() << "HackRFInput::applySettings: "
-            << " m_centerFrequency: " << m_settings.m_centerFrequency << " Hz"
-            << " m_LOppmTenths: " << m_settings.m_LOppmTenths
-            << " m_bandwidth: " << m_settings.m_bandwidth
-            << " m_lnaGain: " << m_settings.m_lnaGain
-            << " m_vgaGain: " << m_settings.m_vgaGain
-            << " m_log2Decim: " << m_settings.m_log2Decim
-            << " m_iqOrder: " << m_settings.m_iqOrder
-            << " m_fcPos: " << m_settings.m_fcPos
-            << " m_devSampleRate: " << m_settings.m_devSampleRate
-            << " m_biasT: " << m_settings.m_biasT
-            << " m_lnaExt: " << m_settings.m_lnaExt
-            << " m_dcBlock: " << m_settings.m_dcBlock;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
 	return true;
 }
@@ -611,12 +560,12 @@ int HackRFInput::webapiSettingsPutPatch(
     HackRFInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureHackRF *msg = MsgConfigureHackRF::create(settings, force);
+    MsgConfigureHackRF *msg = MsgConfigureHackRF::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureHackRF *msgToGUI = MsgConfigureHackRF::create(settings, force);
+        MsgConfigureHackRF *msgToGUI = MsgConfigureHackRF::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -749,7 +698,7 @@ int HackRFInput::webapiRun(
     return 200;
 }
 
-void HackRFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const HackRFInputSettings& settings, bool force)
+void HackRFInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const HackRFInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
