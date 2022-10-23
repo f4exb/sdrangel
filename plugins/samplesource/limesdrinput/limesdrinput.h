@@ -42,20 +42,22 @@ public:
 
     public:
         const LimeSDRInputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureLimeSDR* create(const LimeSDRInputSettings& settings, bool force)
-        {
-            return new MsgConfigureLimeSDR(settings, force);
+        static MsgConfigureLimeSDR* create(const LimeSDRInputSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureLimeSDR(settings, settingsKeys, force);
         }
 
     private:
         LimeSDRInputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureLimeSDR(const LimeSDRInputSettings& settings, bool force) :
+        MsgConfigureLimeSDR(const LimeSDRInputSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -283,9 +285,9 @@ private:
     void resumeRxBuddies();
     void suspendTxBuddies();
     void resumeTxBuddies();
-    bool applySettings(const LimeSDRInputSettings& settings, bool force = false, bool forceNCOFrequency = false);
+    bool applySettings(const LimeSDRInputSettings& settings, const QList<QString>& settingsKeys, bool force = false, bool forceNCOFrequency = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const LimeSDRInputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const LimeSDRInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

@@ -121,6 +121,7 @@ void LimeSDRInputGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -156,7 +157,13 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
     if (LimeSDRInput::MsgConfigureLimeSDR::match(message))
     {
         const LimeSDRInput::MsgConfigureLimeSDR& cfg = (LimeSDRInput::MsgConfigureLimeSDR&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -313,7 +320,13 @@ void LimeSDRInputGUI::handleInputMessages()
         else if (LimeSDRInput::MsgConfigureLimeSDR::match(*message))
         {
             const LimeSDRInput::MsgConfigureLimeSDR& cfg = (LimeSDRInput::MsgConfigureLimeSDR&) *message;
-            m_settings = cfg.getSettings();
+
+            if (cfg.getForce()) {
+                m_settings = cfg.getSettings();
+            } else {
+                m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+            }
+
             displaySettings();
 
             delete message;
@@ -512,9 +525,10 @@ void LimeSDRInputGUI::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "LimeSDRInputGUI::updateHardware";
-        LimeSDRInput::MsgConfigureLimeSDR* message = LimeSDRInput::MsgConfigureLimeSDR::create(m_settings, m_forceSettings);
+        LimeSDRInput::MsgConfigureLimeSDR* message = LimeSDRInput::MsgConfigureLimeSDR::create(m_settings, m_settingsKeys, m_forceSettings);
         m_limeSDRInput->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -591,6 +605,7 @@ void LimeSDRInputGUI::on_startStop_toggled(bool checked)
 void LimeSDRInputGUI::on_centerFrequency_changed(quint64 value)
 {
     setCenterFrequencySetting(value);
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -599,6 +614,7 @@ void LimeSDRInputGUI::on_ncoFrequency_changed(qint64 value)
     m_settings.m_ncoFrequency = value;
     updateFrequencyLimits();
     setCenterFrequencyDisplay();
+    m_settingsKeys.append("ncoFrequency");
     sendSettings();
 }
 
@@ -607,18 +623,21 @@ void LimeSDRInputGUI::on_ncoEnable_toggled(bool checked)
     m_settings.m_ncoEnable = checked;
     updateFrequencyLimits();
     setCenterFrequencyDisplay();
+    m_settingsKeys.append("ncoEnable");
     sendSettings();
 }
 
 void LimeSDRInputGUI::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void LimeSDRInputGUI::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
@@ -632,16 +651,20 @@ void LimeSDRInputGUI::on_sampleRate_changed(quint64 value)
 
     updateADCRate();
     setNCODisplay();
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
 void LimeSDRInputGUI::on_hwDecim_currentIndexChanged(int index)
 {
-    if ((index <0) || (index > 5))
+    if ((index <0) || (index > 5)) {
         return;
+    }
+
     m_settings.m_log2HardDecim = index;
     updateADCRate();
     setNCODisplay();
+    m_settingsKeys.append("log2HardDecim");
     sendSettings();
 }
 
@@ -660,6 +683,8 @@ void LimeSDRInputGUI::on_swDecim_currentIndexChanged(int index)
         m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftDecim);
     }
 
+    m_settingsKeys.append("log2SoftDecim");
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
@@ -667,18 +692,21 @@ void LimeSDRInputGUI::on_lpf_changed(quint64 value)
 {
     m_settings.m_lpfBW = value * 1000;
     checkLPF();
+    m_settingsKeys.append("lpfBW");
     sendSettings();
 }
 
 void LimeSDRInputGUI::on_lpFIREnable_toggled(bool checked)
 {
     m_settings.m_lpfFIREnable = checked;
+    m_settingsKeys.append("lpfFIREnable");
     sendSettings();
 }
 
 void LimeSDRInputGUI::on_lpFIR_changed(quint64 value)
 {
     m_settings.m_lpfFIRBW = value * 1000;
+    m_settingsKeys.append("lpfFIRBW");
     sendSettings();
 }
 
@@ -701,6 +729,7 @@ void LimeSDRInputGUI::on_gainMode_currentIndexChanged(int index)
         ui->pgaGain->setEnabled(true);
     }
 
+    m_settingsKeys.append("gainMode");
     sendSettings();
 }
 
@@ -708,6 +737,7 @@ void LimeSDRInputGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gain = value;
     ui->gainText->setText(tr("%1").arg(m_settings.m_gain));
+    m_settingsKeys.append("gain");
     sendSettings();
 }
 
@@ -715,12 +745,14 @@ void LimeSDRInputGUI::on_lnaGain_valueChanged(int value)
 {
     m_settings.m_lnaGain = value;
     ui->lnaGainText->setText(tr("%1").arg(m_settings.m_lnaGain));
+    m_settingsKeys.append("lnaGain");
     sendSettings();
 }
 
 void LimeSDRInputGUI::on_tiaGain_currentIndexChanged(int index)
 {
     m_settings.m_tiaGain = index + 1;
+    m_settingsKeys.append("tiaGain");
     sendSettings();
 }
 
@@ -728,12 +760,14 @@ void LimeSDRInputGUI::on_pgaGain_valueChanged(int value)
 {
     m_settings.m_pgaGain = value;
     ui->pgaGainText->setText(tr("%1").arg(m_settings.m_pgaGain));
+    m_settingsKeys.append("pgaGain");
     sendSettings();
 }
 
 void LimeSDRInputGUI::on_antenna_currentIndexChanged(int index)
 {
     m_settings.m_antennaPath = (LimeSDRInputSettings::PathRFE) index;
+    m_settingsKeys.append("antennaPath");
     sendSettings();
 }
 
@@ -742,6 +776,8 @@ void LimeSDRInputGUI::on_extClock_clicked()
     m_settings.m_extClock = ui->extClock->getExternalClockActive();
     m_settings.m_extClockFreq = ui->extClock->getExternalClockFrequency();
     qDebug("LimeSDRInputGUI::on_extClock_clicked: %u Hz %s", m_settings.m_extClockFreq, m_settings.m_extClock ? "on" : "off");
+    m_settingsKeys.append("extClock");
+    m_settingsKeys.append("extClockFreq");
     sendSettings();
 }
 
@@ -753,6 +789,10 @@ void LimeSDRInputGUI::on_transverter_clicked()
     qDebug("LimeSDRInputGUI::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     setCenterFrequencySetting(ui->centerFrequency->getValueNew());
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("iqOrder");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -779,6 +819,10 @@ void LimeSDRInputGUI::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

@@ -155,4 +155,182 @@ bool LimeSDRInputSettings::deserialize(const QByteArray& data)
 
 }
 
+void LimeSDRInputSettings::applySettings(const QStringList& settingsKeys, const LimeSDRInputSettings& settings)
+{
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("devSampleRate")) {
+        m_devSampleRate = settings.m_devSampleRate;
+    }
+    if (settingsKeys.contains("log2HardDecim")) {
+        m_log2HardDecim = settings.m_log2HardDecim;
+    }
+    if (settingsKeys.contains("dcBlock")) {
+        m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection")) {
+        m_iqCorrection = settings.m_iqCorrection;
+    }
+    if (settingsKeys.contains("log2SoftDecim")) {
+        m_log2SoftDecim = settings.m_log2SoftDecim;
+    }
+    if (settingsKeys.contains("lpfBW")) {
+        m_lpfBW = settings.m_lpfBW;
+    }
+    if (settingsKeys.contains("lpfFIREnable")) {
+        m_lpfFIREnable = settings.m_lpfFIREnable;
+    }
+    if (settingsKeys.contains("lpfFIRBW")) {
+        m_lpfFIRBW = settings.m_lpfFIRBW;
+    }
+    if (settingsKeys.contains("gain")) {
+        m_gain = settings.m_gain;
+    }
+    if (settingsKeys.contains("ncoEnable")) {
+        m_ncoEnable = settings.m_ncoEnable;
+    }
+    if (settingsKeys.contains("ncoFrequency")) {
+        m_ncoFrequency = settings.m_ncoFrequency;
+    }
+    if (settingsKeys.contains("antennaPath")) {
+        m_antennaPath = settings.m_antennaPath;
+    }
+    if (settingsKeys.contains("gainMode")) {
+        m_gainMode = settings.m_gainMode;
+    }
+    if (settingsKeys.contains("lnaGain")) {
+        m_lnaGain = settings.m_lnaGain;
+    }
+    if (settingsKeys.contains("tiaGain")) {
+        m_tiaGain = settings.m_tiaGain;
+    }
+    if (settingsKeys.contains("pgaGain")) {
+        m_pgaGain = settings.m_pgaGain;
+    }
+    if (settingsKeys.contains("extClock")) {
+        m_extClock = settings.m_extClock;
+    }
+    if (settingsKeys.contains("extClockFreq")) {
+        m_extClockFreq = settings.m_extClockFreq;
+    }
+    if (settingsKeys.contains("transverterMode")) {
+        m_transverterMode = settings.m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency")) {
+        m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder")) {
+        m_iqOrder = settings.m_iqOrder;
+    }
+    if (settingsKeys.contains("gpioDir")) {
+        m_gpioDir = settings.m_gpioDir;
+    }
+    if (settingsKeys.contains("gpioPins")) {
+        m_gpioPins = settings.m_gpioPins;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
 
+QString LimeSDRInputSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("devSampleRate") || force) {
+        ostr << " m_devSampleRate: " << m_devSampleRate;
+    }
+    if (settingsKeys.contains("log2HardDecim") || force) {
+        ostr << " m_log2HardDecim: " << m_log2HardDecim;
+    }
+    if (settingsKeys.contains("dcBlock") || force) {
+        ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection") || force) {
+        ostr << " m_iqCorrection: " << m_iqCorrection;
+    }
+    if (settingsKeys.contains("log2SoftDecim") || force) {
+        ostr << " m_log2SoftDecim: " << m_log2SoftDecim;
+    }
+    if (settingsKeys.contains("lpfBW") || force) {
+        ostr << " m_lpfBW: " << m_lpfBW;
+    }
+    if (settingsKeys.contains("lpfFIREnable") || force) {
+        ostr << " m_lpfFIREnable: " << m_lpfFIREnable;
+    }
+    if (settingsKeys.contains("lpfFIRBW") || force) {
+        ostr << " m_lpfFIRBW: " << m_lpfFIRBW;
+    }
+    if (settingsKeys.contains("gain") || force) {
+        ostr << " m_gain: " << m_gain;
+    }
+    if (settingsKeys.contains("ncoEnable") || force) {
+        ostr << " m_ncoEnable: " << m_ncoEnable;
+    }
+    if (settingsKeys.contains("ncoFrequency") || force) {
+        ostr << " m_ncoFrequency: " << m_ncoFrequency;
+    }
+    if (settingsKeys.contains("antennaPath") || force) {
+        ostr << " m_antennaPath: " << m_antennaPath;
+    }
+    if (settingsKeys.contains("gainMode") || force) {
+        ostr << " m_gainMode: " << m_gainMode;
+    }
+    if (settingsKeys.contains("lnaGain") || force) {
+        ostr << " m_lnaGain: " << m_lnaGain;
+    }
+    if (settingsKeys.contains("tiaGain") || force) {
+        ostr << " m_tiaGain: " << m_tiaGain;
+    }
+    if (settingsKeys.contains("pgaGain") || force) {
+        ostr << " m_pgaGain: " << m_pgaGain;
+    }
+    if (settingsKeys.contains("extClock") || force) {
+        ostr << " m_extClock: " << m_extClock;
+    }
+    if (settingsKeys.contains("extClockFreq") || force) {
+        ostr << " m_extClockFreq: " << m_extClockFreq;
+    }
+    if (settingsKeys.contains("transverterMode") || force) {
+        ostr << " m_transverterMode: " << m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency") || force) {
+        ostr << " m_transverterDeltaFrequency: " << m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder") || force) {
+        ostr << " m_iqOrder: " << m_iqOrder;
+    }
+    if (settingsKeys.contains("gpioDir") || force) {
+        ostr << " m_gpioDir: " << m_gpioDir;
+    }
+    if (settingsKeys.contains("gpioPins") || force) {
+        ostr << " m_gpioPins: " << m_gpioPins;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}
