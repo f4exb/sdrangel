@@ -54,6 +54,7 @@ private:
 	Ui::FileInputGUI* ui;
 
 	FileInputSettings m_settings;
+    QList<QString> m_settingsKeys;
 	bool m_doApplySettings;
 	QTimer m_statusTimer;
 	std::vector<int> m_gains;

@@ -143,7 +143,56 @@ int FileInputSettings::getAccelerationValue(int accelerationIndex)
     return x * m;
 }
 
+void FileInputSettings::applySettings(const QStringList& settingsKeys, const FileInputSettings& settings)
+{
+    if (settingsKeys.contains("fileName")) {
+        m_fileName = settings.m_fileName;
+    }
+    if (settingsKeys.contains("accelerationFactor")) {
+        m_accelerationFactor = settings.m_accelerationFactor;
+    }
+    if (settingsKeys.contains("loop")) {
+        m_loop = settings.m_loop;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
 
+QString FileInputSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
 
+    if (settingsKeys.contains("m_fileName") || force) {
+        ostr << " m_fileName: " << m_fileName.toStdString();
+    }
+    if (settingsKeys.contains("accelerationFactor") || force) {
+        ostr << " m_accelerationFactor: " << m_accelerationFactor;
+    }
+    if (settingsKeys.contains("loop") || force) {
+        ostr << " m_loop: " << m_loop;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
 
-
+    return QString(ostr.str().c_str());
+}

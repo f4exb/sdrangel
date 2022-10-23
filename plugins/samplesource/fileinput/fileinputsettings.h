@@ -38,6 +38,8 @@ struct FileInputSettings {
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const FileInputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
     static int getAccelerationIndex(int averaging);
     static int getAccelerationValue(int averagingIndex);
 };

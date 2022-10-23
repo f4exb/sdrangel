@@ -45,20 +45,22 @@ public:
 
 	public:
 		const FileInputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureFileInput* create(const FileInputSettings& settings, bool force)
-		{
-			return new MsgConfigureFileInput(settings, force);
+		static MsgConfigureFileInput* create(const FileInputSettings& settings, const QList<QString>& settingsKeys, bool force) {
+			return new MsgConfigureFileInput(settings, settingsKeys, force);
 		}
 
 	private:
 		FileInputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-		MsgConfigureFileInput(const FileInputSettings& settings, bool force) :
+		MsgConfigureFileInput(const FileInputSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -349,9 +351,9 @@ public:
 	void stopWorker();
 	void openFileStream();
 	void seekFileStream(int seekMillis);
-	bool applySettings(const FileInputSettings& settings, bool force = false);
+	bool applySettings(const FileInputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileInputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const FileInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 	bool handleMessage(const Message& message);
 

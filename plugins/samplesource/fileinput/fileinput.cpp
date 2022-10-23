@@ -325,12 +325,12 @@ bool FileInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureFileInput* message = MsgConfigureFileInput::create(m_settings, true);
+    MsgConfigureFileInput* message = MsgConfigureFileInput::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (getMessageQueueToGUI())
     {
-        MsgConfigureFileInput* messageToGUI = MsgConfigureFileInput::create(m_settings, true);
+        MsgConfigureFileInput* messageToGUI = MsgConfigureFileInput::create(m_settings, QList<QString>(), true);
         getMessageQueueToGUI()->push(messageToGUI);
     }
 
@@ -357,12 +357,12 @@ void FileInput::setCenterFrequency(qint64 centerFrequency)
     FileInputSettings settings = m_settings;
     m_centerFrequency = centerFrequency;
 
-    MsgConfigureFileInput* message = MsgConfigureFileInput::create(m_settings, false);
+    MsgConfigureFileInput* message = MsgConfigureFileInput::create(m_settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (getMessageQueueToGUI())
     {
-        MsgConfigureFileInput* messageToGUI = MsgConfigureFileInput::create(m_settings, false);
+        MsgConfigureFileInput* messageToGUI = MsgConfigureFileInput::create(m_settings, QList<QString>{"centerFrequency"}, false);
         getMessageQueueToGUI()->push(messageToGUI);
     }
 }
@@ -377,8 +377,7 @@ bool FileInput::handleMessage(const Message& message)
     if (MsgConfigureFileInput::match(message))
     {
         MsgConfigureFileInput& conf = (MsgConfigureFileInput&) message;
-        FileInputSettings settings = conf.getSettings();
-        applySettings(settings);
+        applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
     else if (MsgConfigureFileSourceName::match(message))
@@ -482,14 +481,12 @@ bool FileInput::handleMessage(const Message& message)
 	}
 }
 
-bool FileInput::applySettings(const FileInputSettings& settings, bool force)
+bool FileInput::applySettings(const FileInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    QList<QString> reverseAPIKeys;
+    qDebug() << "FileInput::applySettings: force: " << force << settings.getDebugString(settingsKeys, force);
 
-    if ((m_settings.m_accelerationFactor != settings.m_accelerationFactor) || force)
+    if (settingsKeys.contains("accelerationFactor") || force)
     {
-        reverseAPIKeys.append("accelerationFactor");
-
         if (m_fileInputWorker)
         {
             QMutexLocker mutexLocker(&m_mutex);
@@ -501,27 +498,25 @@ bool FileInput::applySettings(const FileInputSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_loop != settings.m_loop)) {
-        reverseAPIKeys.append("loop");
-    }
-    if ((m_settings.m_fileName != settings.m_fileName)) {
-        reverseAPIKeys.append("fileName");
-    }
-
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     // Open the file if there isn't a GUI which will open it
-    if ((m_guiMessageQueue == nullptr) && reverseAPIKeys.contains("fileName") && !m_settings.m_fileName.isEmpty())
+    if ((m_guiMessageQueue == nullptr) && settingsKeys.contains("fileName") && !m_settings.m_fileName.isEmpty()) {
         openFileStream();
+    }
 
     return true;
 }
@@ -547,12 +542,12 @@ int FileInput::webapiSettingsPutPatch(
     FileInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureFileInput *msg = MsgConfigureFileInput::create(settings, force);
+    MsgConfigureFileInput *msg = MsgConfigureFileInput::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFileInput *msgToGUI = MsgConfigureFileInput::create(settings, force);
+        MsgConfigureFileInput *msgToGUI = MsgConfigureFileInput::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -681,7 +676,7 @@ void FileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
     response.getFileInputReport()->setSampleSize(m_sampleSize);
 }
 
-void FileInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileInputSettings& settings, bool force)
+void FileInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const FileInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx

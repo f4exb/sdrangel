@@ -156,7 +156,13 @@ bool FileInputGUI::handleMessage(const Message& message)
     if (FileInput::MsgConfigureFileInput::match(message))
     {
         const FileInput::MsgConfigureFileInput& cfg = (FileInput::MsgConfigureFileInput&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         displaySettings();
         return true;
     }
@@ -249,7 +255,7 @@ void FileInputGUI::on_playLoop_toggled(bool checked)
     if (m_doApplySettings)
     {
         m_settings.m_loop = checked;
-        FileInput::MsgConfigureFileInput *message = FileInput::MsgConfigureFileInput::create(m_settings, false);
+        FileInput::MsgConfigureFileInput *message = FileInput::MsgConfigureFileInput::create(m_settings, QList<QString>{"loop"}, false);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
@@ -330,7 +336,7 @@ void FileInputGUI::on_acceleration_currentIndexChanged(int index)
     if (m_doApplySettings)
     {
         m_settings.m_accelerationFactor = FileInputSettings::getAccelerationValue(index);
-        FileInput::MsgConfigureFileInput *message = FileInput::MsgConfigureFileInput::create(m_settings, false);
+        FileInput::MsgConfigureFileInput *message = FileInput::MsgConfigureFileInput::create(m_settings, QList<QString>{"accelerationFactor"}, false);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
