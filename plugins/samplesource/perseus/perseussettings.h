@@ -52,6 +52,8 @@ struct PerseusSettings
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const PerseusSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 

@@ -42,20 +42,23 @@ public:
 
     public:
         const PerseusSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigurePerseus* create(const PerseusSettings& settings, bool force)
+        static MsgConfigurePerseus* create(const PerseusSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigurePerseus(settings, force);
+            return new MsgConfigurePerseus(settings, settingsKeys, force);
         }
 
     private:
         PerseusSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigurePerseus(const PerseusSettings& settings, bool force) :
+        MsgConfigurePerseus(const PerseusSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -149,9 +152,9 @@ private:
     bool openDevice();
     void closeDevice();
     void setDeviceCenterFrequency(quint64 freq, const PerseusSettings& settings);
-    bool applySettings(const PerseusSettings& settings, bool force = false);
+    bool applySettings(const PerseusSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const PerseusSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const PerseusSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

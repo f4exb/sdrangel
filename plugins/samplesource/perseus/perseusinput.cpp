@@ -74,7 +74,7 @@ void PerseusInput::destroy()
 
 void PerseusInput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool PerseusInput::start()
@@ -100,7 +100,7 @@ bool PerseusInput::start()
     m_perseusWorker->setLog2Decimation(m_settings.m_log2Decim);
     m_perseusWorkerThread->start();
 
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
     m_running = true;
 
     return true;
@@ -141,12 +141,12 @@ bool PerseusInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigurePerseus* message = MsgConfigurePerseus::create(m_settings, true);
+    MsgConfigurePerseus* message = MsgConfigurePerseus::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigurePerseus* messageToGUI = MsgConfigurePerseus::create(m_settings, true);
+        MsgConfigurePerseus* messageToGUI = MsgConfigurePerseus::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -176,12 +176,12 @@ void PerseusInput::setCenterFrequency(qint64 centerFrequency)
     PerseusSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigurePerseus* message = MsgConfigurePerseus::create(settings, false);
+    MsgConfigurePerseus* message = MsgConfigurePerseus::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigurePerseus* messageToGUI = MsgConfigurePerseus::create(settings, false);
+        MsgConfigurePerseus* messageToGUI = MsgConfigurePerseus::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -193,7 +193,7 @@ bool PerseusInput::handleMessage(const Message& message)
         MsgConfigurePerseus& conf = (MsgConfigurePerseus&) message;
         qDebug() << "PerseusInput::handleMessage: MsgConfigurePerseus";
 
-        bool success = applySettings(conf.getSettings(), conf.getForce());
+        bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
         if (!success) {
             qDebug("MsgConfigurePerseus::handleMessage: Perseus config error");
@@ -208,8 +208,7 @@ bool PerseusInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
@@ -296,15 +295,14 @@ void PerseusInput::setDeviceCenterFrequency(quint64 freq_hz, const PerseusSettin
     }
 }
 
-bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
+bool PerseusInput::applySettings(const PerseusSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
+    qDebug() << "PerseusInput::applySettings: force: " << force << settings.getDebugString(settingsKeys, force);
     bool forwardChange = false;
     int sampleRateIndex = settings.m_devSampleRateIndex;
-    QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex) || force)
+    if (settingsKeys.contains("devSampleRateIndex") || force)
     {
-        reverseAPIKeys.append("devSampleRateIndex");
         forwardChange = true;
 
         if (settings.m_devSampleRateIndex >= m_sampleRates.size()) {
@@ -334,9 +332,8 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if (settingsKeys.contains("log2Decim") || force)
     {
-        reverseAPIKeys.append("log2Decim");
         forwardChange = true;
 
         if (m_running)
@@ -346,37 +343,19 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    if (settingsKeys.contains("iqOrder") || force)
     {
-        reverseAPIKeys.append("iqOrder");
-
         if (m_running) {
             m_perseusWorker->setIQOrder(settings.m_iqOrder);
         }
     }
 
-    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)) {
-        reverseAPIKeys.append("centerFrequency");
-    }
-    if (force || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)) {
-        reverseAPIKeys.append("LOppmTenths");
-    }
-    if (force || (m_settings.m_wideBand != settings.m_wideBand)) {
-        reverseAPIKeys.append("wideBand");
-    }
-    if (force || (m_settings.m_transverterMode != settings.m_transverterMode)) {
-        reverseAPIKeys.append("transverterMode");
-    }
-    if (force || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)) {
-        reverseAPIKeys.append("transverterDeltaFrequency");
-    }
-
-    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency)
-            || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
-            || (m_settings.m_wideBand != settings.m_wideBand)
-            || (m_settings.m_transverterMode != settings.m_transverterMode)
-            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
-            || (m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex))
+    if (force || settingsKeys.contains("centerFrequency")
+            || settingsKeys.contains("LOppmTenths")
+            || settingsKeys.contains("wideBand")
+            || settingsKeys.contains("transverterMode")
+            || settingsKeys.contains("transverterDeltaFrequency")
+            || settingsKeys.contains("devSampleRateIndex"))
     {
         qint64 deviceCenterFrequency = settings.m_centerFrequency;
         deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
@@ -391,9 +370,8 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         forwardChange = true;
     }
 
-    if ((m_settings.m_attenuator != settings.m_attenuator) || force)
+    if (settingsKeys.contains("attenuator") || force)
     {
-        reverseAPIKeys.append("attenuator");
         int rc = perseus_set_attenuator_n(m_perseusDescriptor, (int) settings.m_attenuator);
 
         if (rc < 0) {
@@ -403,15 +381,8 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         }
     }
 
-    if (force || (m_settings.m_adcDither != settings.m_adcDither)) {
-        reverseAPIKeys.append("adcDither");
-    }
-    if (force || (m_settings.m_adcPreamp != settings.m_adcPreamp)) {
-        reverseAPIKeys.append("adcPreamp");
-    }
-
-    if ((m_settings.m_adcDither != settings.m_adcDither)
-       || (m_settings.m_adcPreamp != settings.m_adcPreamp) || force)
+    if (settingsKeys.contains("adcDither")
+       || settingsKeys.contains("adcPreamp") || force)
     {
         int rc = perseus_set_adc(m_perseusDescriptor, settings.m_adcDither ? 1 : 0, settings.m_adcPreamp ? 1 : 0);
 
@@ -431,29 +402,22 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
-    m_settings.m_devSampleRateIndex = sampleRateIndex;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
-    qDebug() << "PerseusInput::applySettings: "
-            << " m_LOppmTenths: " << m_settings.m_LOppmTenths
-            << " m_devSampleRateIndex: " << m_settings.m_devSampleRateIndex
-            << " m_log2Decim: " << m_settings.m_log2Decim
-            << " m_iqOrder: " << m_settings.m_iqOrder
-            << " m_transverterMode: " << m_settings.m_transverterMode
-            << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
-            << " m_adcDither: " << m_settings.m_adcDither
-            << " m_adcPreamp: " << m_settings.m_adcPreamp
-            << " m_wideBand: " << m_settings.m_wideBand
-            << " m_attenuator: " << m_settings.m_attenuator;
+    m_settings.m_devSampleRateIndex = sampleRateIndex;
 
     return true;
 }
@@ -507,12 +471,12 @@ int PerseusInput::webapiSettingsPutPatch(
     PerseusSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigurePerseus *msg = MsgConfigurePerseus::create(settings, force);
+    MsgConfigurePerseus *msg = MsgConfigurePerseus::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigurePerseus *msgToGUI = MsgConfigurePerseus::create(settings, force);
+        MsgConfigurePerseus *msgToGUI = MsgConfigurePerseus::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -622,7 +586,7 @@ void PerseusInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
     }
 }
 
-void PerseusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const PerseusSettings& settings, bool force)
+void PerseusInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const PerseusSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx

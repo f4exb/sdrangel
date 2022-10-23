@@ -84,6 +84,7 @@ void PerseusGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
+    m_forceSettings = true;
 	sendSettings();
 }
 
@@ -118,7 +119,13 @@ bool PerseusGui::handleMessage(const Message& message)
     if (PerseusInput::MsgConfigurePerseus::match(message))
     {
         const PerseusInput::MsgConfigurePerseus& cfg = (PerseusInput::MsgConfigurePerseus&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -253,6 +260,7 @@ void PerseusGui::sendSettings()
 void PerseusGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
 	sendSettings();
 }
 
@@ -260,6 +268,7 @@ void PerseusGui::on_LOppm_valueChanged(int value)
 {
     m_settings.m_LOppmTenths = value;
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+    m_settingsKeys.append("LOppmTenths");
     sendSettings();
 }
 
@@ -271,20 +280,25 @@ void PerseusGui::on_resetLOppm_clicked()
 void PerseusGui::on_sampleRate_currentIndexChanged(int index)
 {
 	m_settings.m_devSampleRateIndex = index;
+    m_settingsKeys.append("devSampleRateIndex");
 	sendSettings();
 }
 
 void PerseusGui::on_wideband_toggled(bool checked)
 {
 	m_settings.m_wideBand = checked;
+    m_settingsKeys.append("wideBand");
 	sendSettings();
 }
 
 void PerseusGui::on_decim_currentIndexChanged(int index)
 {
-	if ((index < 0) || (index > 5))
+	if ((index < 0) || (index > 5)) {
 		return;
+    }
+
 	m_settings.m_log2Decim = index;
+    m_settingsKeys.append("log2Decim");
 	sendSettings();
 }
 
@@ -305,6 +319,10 @@ void PerseusGui::on_transverter_clicked()
     qDebug("PerseusGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("iqOrder");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -313,28 +331,33 @@ void PerseusGui::on_attenuator_currentIndexChanged(int index)
 	if ((index < 0) || (index >= (int) PerseusSettings::Attenuator_last)) {
 		return;
 	}
+
 	m_settings.m_attenuator = (PerseusSettings::Attenuator) index;
+    m_settingsKeys.append("attenuator");
 	sendSettings();
 }
 
 void PerseusGui::on_adcDither_toggled(bool checked)
 {
 	m_settings.m_adcDither = checked;
+    m_settingsKeys.append("adcDither");
 	sendSettings();
 }
 
 void PerseusGui::on_adcPreamp_toggled(bool checked)
 {
 	m_settings.m_adcPreamp = checked;
+    m_settingsKeys.append("adcPreamp");
 	sendSettings();
 }
 
 void PerseusGui::updateHardware()
 {
 	qDebug() << "PerseusGui::updateHardware";
-	PerseusInput::MsgConfigurePerseus* message = PerseusInput::MsgConfigurePerseus::create(m_settings, m_forceSettings);
+	PerseusInput::MsgConfigurePerseus* message = PerseusInput::MsgConfigurePerseus::create(m_settings, m_settingsKeys, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_forceSettings = false;
+    m_settingsKeys.clear();
 	m_updateTimer.stop();
 }
 
