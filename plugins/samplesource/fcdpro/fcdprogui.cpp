@@ -555,6 +555,7 @@ void FCDProGui::on_transverter_clicked()
     m_settingsKeys.append("transverterMode");
     m_settingsKeys.append("transverterDeltaFrequency");
     m_settingsKeys.append("iqOrder");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
