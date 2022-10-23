@@ -42,20 +42,22 @@ public:
 
     public:
         const PlutoSDRInputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigurePlutoSDR* create(const PlutoSDRInputSettings& settings, bool force)
-        {
-            return new MsgConfigurePlutoSDR(settings, force);
+        static MsgConfigurePlutoSDR* create(const PlutoSDRInputSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigurePlutoSDR(settings, settingsKeys, force);
         }
 
     private:
         PlutoSDRInputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigurePlutoSDR(const PlutoSDRInputSettings& settings, bool force) :
+        MsgConfigurePlutoSDR(const PlutoSDRInputSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -158,9 +160,9 @@ public:
     void closeDevice();
     void suspendBuddies();
     void resumeBuddies();
-    bool applySettings(const PlutoSDRInputSettings& settings, bool force = false);
+    bool applySettings(const PlutoSDRInputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const PlutoSDRInputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const PlutoSDRInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

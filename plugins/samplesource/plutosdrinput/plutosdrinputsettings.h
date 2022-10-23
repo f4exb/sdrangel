@@ -90,6 +90,8 @@ struct PlutoSDRInputSettings {
 	bool deserialize(const QByteArray& data);
     static void translateRFPath(RFPath path, QString& s);
     static void translateGainMode(GainMode mod, QString& s);
+    void applySettings(const QStringList& settingsKeys, const PlutoSDRInputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* _PLUTOSDR_PLUTOSDRINPUTSETTINGS_H_ */
