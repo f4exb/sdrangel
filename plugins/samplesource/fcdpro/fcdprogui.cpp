@@ -211,7 +211,13 @@ bool FCDProGui::handleMessage(const Message& message)
     if (FCDProInput::MsgConfigureFCDPro::match(message))
     {
         const FCDProInput::MsgConfigureFCDPro& cfg = (FCDProInput::MsgConfigureFCDPro&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -330,6 +336,7 @@ void FCDProGui::sendSettings()
 void FCDProGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
 	sendSettings();
 }
 
@@ -337,114 +344,133 @@ void FCDProGui::on_ppm_valueChanged(int value)
 {
 	m_settings.m_LOppmTenths = value;
 	displaySettings();
+    m_settingsKeys.append("LOppmTenths");
 	sendSettings();
 }
 
 void FCDProGui::on_dcOffset_toggled(bool checked)
 {
 	m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
 	sendSettings();
 }
 
 void FCDProGui::on_iqImbalance_toggled(bool checked)
 {
 	m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
 	sendSettings();
 }
 
 void FCDProGui::on_lnaGain_currentIndexChanged(int index)
 {
 	m_settings.m_lnaGainIndex = index;
+    m_settingsKeys.append("lnaGainIndex");
 	sendSettings();
 }
 
 void FCDProGui::on_rfFilter_currentIndexChanged(int index)
 {
 	m_settings.m_rfFilterIndex = index;
+    m_settingsKeys.append("rfFilterIndex");
 	sendSettings();
 }
 
 void FCDProGui::on_lnaEnhance_currentIndexChanged(int index)
 {
 	m_settings.m_lnaEnhanceIndex = index;
+    m_settingsKeys.append("lnaEnhanceIndex");
 	sendSettings();
 }
 
 void FCDProGui::on_band_currentIndexChanged(int index)
 {
 	m_settings.m_bandIndex = index;
+    m_settingsKeys.append("bandIndex");
 	sendSettings();
 }
 
 void FCDProGui::on_mixGain_currentIndexChanged(int index)
 {
 	m_settings.m_mixerGainIndex = index;
+    m_settingsKeys.append("mixerGainIndex");
 	sendSettings();
 }
 
 void FCDProGui::on_mixFilter_currentIndexChanged(int index)
 {
 	m_settings.m_mixerFilterIndex = index;
+    m_settingsKeys.append("mixerFilterIndex");
 	sendSettings();
 }
 
 void FCDProGui::on_bias_currentIndexChanged(int index)
 {
 	m_settings.m_biasCurrentIndex = index;
+    m_settingsKeys.append("biasCurrentIndex");
 	sendSettings();
 }
 
 void FCDProGui::on_mode_currentIndexChanged(int index)
 {
 	m_settings.m_modeIndex = index;
+    m_settingsKeys.append("modeIndex");
 	sendSettings();
 }
 
 void FCDProGui::on_gain1_currentIndexChanged(int index)
 {
 	m_settings.m_gain1Index = index;
+    m_settingsKeys.append("gain1Index");
 	sendSettings();
 }
 
 void FCDProGui::on_rcFilter_currentIndexChanged(int index)
 {
 	m_settings.m_rcFilterIndex = index;
+    m_settingsKeys.append("rcFilterIndex");
 	sendSettings();
 }
 
 void FCDProGui::on_gain2_currentIndexChanged(int index)
 {
 	m_settings.m_gain2Index = index;
+    m_settingsKeys.append("gain2Index");
 	sendSettings();
 }
 
 void FCDProGui::on_gain3_currentIndexChanged(int index)
 {
 	m_settings.m_gain3Index = index;
+    m_settingsKeys.append("gain3Index");
 	sendSettings();
 }
 
 void FCDProGui::on_gain4_currentIndexChanged(int index)
 {
 	m_settings.m_gain4Index = index;
+    m_settingsKeys.append("gain4Index");
 	sendSettings();
 }
 
 void FCDProGui::on_ifFilter_currentIndexChanged(int index)
 {
 	m_settings.m_ifFilterIndex = index;
+    m_settingsKeys.append("ifFilterIndex");
 	sendSettings();
 }
 
 void FCDProGui::on_gain5_currentIndexChanged(int index)
 {
 	m_settings.m_gain5Index = index;
+    m_settingsKeys.append("gain5Index");
 	sendSettings();
 }
 
 void FCDProGui::on_gain6_currentIndexChanged(int index)
 {
 	m_settings.m_gain6Index = index;
+    m_settingsKeys.append("gain6Index");
 	sendSettings();
 }
 
@@ -455,6 +481,7 @@ void FCDProGui::on_decim_currentIndexChanged(int index)
 	}
 
 	m_settings.m_log2Decim = index;
+    m_settingsKeys.append("log2Decim");
 	sendSettings();
 }
 
@@ -490,6 +517,20 @@ void FCDProGui::on_setDefaults_clicked(bool checked)
 	m_settings.m_lnaEnhanceIndex = 0;     // Off
 	m_settings.m_biasCurrentIndex = 3;    // V/U band
 	m_settings.m_modeIndex = 0;           // Linearity
+    m_settingsKeys.append("lnaGainIndex");
+    m_settingsKeys.append("mixerGainIndex");
+    m_settingsKeys.append("mixerFilterIndex");
+    m_settingsKeys.append("gain1Index");
+    m_settingsKeys.append("rcFilterIndex");
+    m_settingsKeys.append("gain2Index");
+    m_settingsKeys.append("gain3Index");
+    m_settingsKeys.append("gain4Index");
+    m_settingsKeys.append("ifFilterIndex");
+    m_settingsKeys.append("gain5Index");
+    m_settingsKeys.append("gain6Index");
+    m_settingsKeys.append("lnaEnhanceIndex");
+    m_settingsKeys.append("biasCurrentIndex");
+    m_settingsKeys.append("modeIndex");
 	displaySettings();
 	sendSettings();
 }
@@ -511,6 +552,9 @@ void FCDProGui::on_transverter_clicked()
     qDebug("FCDProGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("iqOrder");
     sendSettings();
 }
 
@@ -545,9 +589,10 @@ void FCDProGui::updateStatus()
 
 void FCDProGui::updateHardware()
 {
-	FCDProInput::MsgConfigureFCDPro* message = FCDProInput::MsgConfigureFCDPro::create(m_settings, m_forceSettings);
+	FCDProInput::MsgConfigureFCDPro* message = FCDProInput::MsgConfigureFCDPro::create(m_settings, m_settingsKeys, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_forceSettings = false;
+    m_settingsKeys.clear();
 	m_updateTimer.stop();
 }
 
