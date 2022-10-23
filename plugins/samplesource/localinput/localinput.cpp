@@ -77,7 +77,7 @@ void LocalInput::destroy()
 
 void LocalInput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool LocalInput::start()
@@ -106,12 +106,12 @@ bool LocalInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureLocalInput* message = MsgConfigureLocalInput::create(m_settings, true);
+    MsgConfigureLocalInput* message = MsgConfigureLocalInput::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureLocalInput* messageToGUI = MsgConfigureLocalInput::create(m_settings, true);
+        MsgConfigureLocalInput* messageToGUI = MsgConfigureLocalInput::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -195,7 +195,7 @@ bool LocalInput::handleMessage(const Message& message)
     {
         qDebug() << "LocalInput::handleMessage:" << message.getIdentifier();
         MsgConfigureLocalInput& conf = (MsgConfigureLocalInput&) message;
-        applySettings(conf.getSettings(), conf.getForce());
+        applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
 	else
@@ -204,21 +204,14 @@ bool LocalInput::handleMessage(const Message& message)
 	}
 }
 
-void LocalInput::applySettings(const LocalInputSettings& settings, bool force)
+void LocalInput::applySettings(const LocalInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
+    qDebug() << "LocalInput::applySettings: force: " << force << settings.getDebugString(settingsKeys, force);
     QMutexLocker mutexLocker(&m_mutex);
     std::ostringstream os;
     QString remoteAddress;
-    QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
-        reverseAPIKeys.append("dcBlock");
-    }
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
-        reverseAPIKeys.append("iqCorrection");
-    }
-
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    if (settingsKeys.contains("dcBlock") || settingsKeys.contains("iqCorrection") || force)
     {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
         qDebug("LocalInput::applySettings: corrections: DC block: %s IQ imbalance: %s",
@@ -228,22 +221,22 @@ void LocalInput::applySettings(const LocalInputSettings& settings, bool force)
 
     mutexLocker.unlock();
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
-    m_remoteAddress = remoteAddress;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
-    qDebug() << "LocalInput::applySettings: "
-            << " m_dcBlock: " << m_settings.m_dcBlock
-            << " m_iqCorrection: " << m_settings.m_iqCorrection
-            << " m_remoteAddress: " << m_remoteAddress;
+    m_remoteAddress = remoteAddress;
 }
 
 int LocalInput::webapiRunGet(
@@ -295,12 +288,12 @@ int LocalInput::webapiSettingsPutPatch(
     LocalInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureLocalInput *msg = MsgConfigureLocalInput::create(settings, force);
+    MsgConfigureLocalInput *msg = MsgConfigureLocalInput::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureLocalInput *msgToGUI = MsgConfigureLocalInput::create(settings, force);
+        MsgConfigureLocalInput *msgToGUI = MsgConfigureLocalInput::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -367,7 +360,7 @@ void LocalInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response
     response.getLocalInputReport()->setSampleRate(m_sampleRate);
 }
 
-void LocalInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const LocalInputSettings& settings, bool force)
+void LocalInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const LocalInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx

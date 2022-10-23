@@ -157,7 +157,13 @@ bool LocalInputGui::handleMessage(const Message& message)
     if (LocalInput::MsgConfigureLocalInput::match(message))
     {
         const LocalInput::MsgConfigureLocalInput& cfg = (LocalInput::MsgConfigureLocalInput&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -255,12 +261,14 @@ void LocalInputGui::sendSettings()
 void LocalInputGui::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+     m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void LocalInputGui::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+     m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
@@ -279,9 +287,10 @@ void LocalInputGui::updateHardware()
     {
         qDebug() << "LocalInputGui::updateHardware";
         LocalInput::MsgConfigureLocalInput* message =
-                LocalInput::MsgConfigureLocalInput::create(m_settings, m_forceSettings);
+                LocalInput::MsgConfigureLocalInput::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSource->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -332,6 +341,10 @@ void LocalInputGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

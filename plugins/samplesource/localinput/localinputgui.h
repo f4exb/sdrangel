@@ -54,6 +54,7 @@ private:
 	Ui::LocalInputGui* ui;
 
     LocalInputSettings m_settings;        //!< current settings
+    QList<QString> m_settingsKeys;
 	LocalInput* m_sampleSource;
     bool m_acquisition;
     int m_streamSampleRate;          //!< Sample rate of received stream
