@@ -88,7 +88,7 @@ void KiwiSDRInput::destroy()
 
 void KiwiSDRInput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool KiwiSDRInput::start()
@@ -115,7 +115,7 @@ bool KiwiSDRInput::start()
 	m_running = true;
 
 	mutexLocker.unlock();
-	applySettings(m_settings, true);
+	applySettings(m_settings, QList<QString>(), true);
 
 	return true;
 }
@@ -155,12 +155,12 @@ bool KiwiSDRInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureKiwiSDR* message = MsgConfigureKiwiSDR::create(m_settings, true);
+    MsgConfigureKiwiSDR* message = MsgConfigureKiwiSDR::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureKiwiSDR* messageToGUI = MsgConfigureKiwiSDR::create(m_settings, true);
+        MsgConfigureKiwiSDR* messageToGUI = MsgConfigureKiwiSDR::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -187,12 +187,12 @@ void KiwiSDRInput::setCenterFrequency(qint64 centerFrequency)
 	KiwiSDRSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureKiwiSDR* message = MsgConfigureKiwiSDR::create(settings, false);
+    MsgConfigureKiwiSDR* message = MsgConfigureKiwiSDR::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureKiwiSDR* messageToGUI = MsgConfigureKiwiSDR::create(settings, false);
+        MsgConfigureKiwiSDR* messageToGUI = MsgConfigureKiwiSDR::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -211,10 +211,9 @@ bool KiwiSDRInput::handleMessage(const Message& message)
         MsgConfigureKiwiSDR& conf = (MsgConfigureKiwiSDR&) message;
         qDebug() << "KiwiSDRInput::handleMessage: MsgConfigureKiwiSDR";
 
-        bool success = applySettings(conf.getSettings(), conf.getForce());
+        bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
-        if (!success)
-        {
+        if (!success) {
             qDebug("KiwiSDRInput::handleMessage: config error");
         }
 
@@ -227,8 +226,7 @@ bool KiwiSDRInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
@@ -258,50 +256,27 @@ int KiwiSDRInput::getStatus() const
     }
 }
 
-bool KiwiSDRInput::applySettings(const KiwiSDRSettings& settings, bool force)
+bool KiwiSDRInput::applySettings(const KiwiSDRSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-	qDebug() << "KiwiSDRInput::applySettings: "
-        << " m_serverAddress: " << settings.m_serverAddress
-        << " m_centerFrequency: " << settings.m_centerFrequency
-        << " m_gain: " << settings.m_gain
-        << " m_useAGC: " << settings.m_useAGC
-        << " m_useAGC: " << settings.m_useAGC
-        << " m_useReverseAPI: " << settings.m_useReverseAPI
-        << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-        << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex;
+	qDebug() << "KiwiSDRInput::applySettings: force: "<< force << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-	if (m_settings.m_serverAddress != settings.m_serverAddress || force)
+	if (settingsKeys.contains("serverAddress") || force)
     {
-        reverseAPIKeys.append("serverAddress");
 		emit setWorkerServerAddress(settings.m_serverAddress);
     }
 
-	if (m_settings.m_gain != settings.m_gain || force) {
-        reverseAPIKeys.append("gain");
-    }
-	if (m_settings.m_useAGC != settings.m_useAGC || force) {
-        reverseAPIKeys.append("useAGC");
-    }
-
-	if (m_settings.m_gain != settings.m_gain ||
-		m_settings.m_useAGC != settings.m_useAGC || force)
+	if (settingsKeys.contains("gain") ||
+		settingsKeys.contains("useAGC") || force)
 	{
 		emit setWorkerGain(settings.m_gain, settings.m_useAGC);
 	}
 
-    if (m_settings.m_dcBlock != settings.m_dcBlock)
-    {
-        reverseAPIKeys.append("dcBlock");
+    if (settingsKeys.contains("dcBlock")) {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, false);
     }
 
-    if (m_settings.m_centerFrequency != settings.m_centerFrequency || force)
+    if (settingsKeys.contains("centerFrequency") || force)
     {
-        reverseAPIKeys.append("centerFrequency");
-
         emit setWorkerCenterFrequency(settings.m_centerFrequency);
 
 		DSPSignalNotification *notif = new DSPSignalNotification(
@@ -309,17 +284,21 @@ bool KiwiSDRInput::applySettings(const KiwiSDRSettings& settings, bool force)
 		m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        qDebug("KiwiSDRInput::applySettings: call webapiReverseSendSettings");
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
     return true;
 }
 
@@ -372,12 +351,12 @@ int KiwiSDRInput::webapiSettingsPutPatch(
     KiwiSDRSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureKiwiSDR *msg = MsgConfigureKiwiSDR::create(settings, force);
+    MsgConfigureKiwiSDR *msg = MsgConfigureKiwiSDR::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureKiwiSDR *msgToGUI = MsgConfigureKiwiSDR::create(settings, force);
+        MsgConfigureKiwiSDR *msgToGUI = MsgConfigureKiwiSDR::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -460,7 +439,7 @@ void KiwiSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
     response.getKiwiSdrReport()->setStatus(getStatus());
 }
 
-void KiwiSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const KiwiSDRSettings& settings, bool force)
+void KiwiSDRInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const KiwiSDRSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx

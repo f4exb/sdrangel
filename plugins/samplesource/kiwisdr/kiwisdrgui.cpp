@@ -101,6 +101,7 @@ void KiwiSDRGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -140,6 +141,7 @@ void KiwiSDRGui::on_startStop_toggled(bool checked)
 void KiwiSDRGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -159,18 +161,21 @@ void KiwiSDRGui::on_serverAddressApplyButton_clicked()
         m_settings.m_serverAddress = serverAddress;
     }
 
+    m_settingsKeys.append("serverAddress");
 	sendSettings();
 }
 
 void KiwiSDRGui::on_dcBlock_toggled(bool checked)
 {
 	m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
 	sendSettings();
 }
 
 void KiwiSDRGui::on_agc_toggled(bool checked)
 {
 	m_settings.m_useAGC = checked;
+    m_settingsKeys.append("useAGC");
 	sendSettings();
 }
 
@@ -178,6 +183,7 @@ void KiwiSDRGui::on_gain_valueChanged(int value)
 {
 	m_settings.m_gain = value;
 	ui->gainText->setText(QString::number(m_settings.m_gain) + " dB");
+    m_settingsKeys.append("gain");
 	sendSettings();
 }
 
@@ -206,9 +212,10 @@ void KiwiSDRGui::updateHardware()
 {
     if (m_doApplySettings)
     {
-		KiwiSDRInput::MsgConfigureKiwiSDR* message = KiwiSDRInput::MsgConfigureKiwiSDR::create(m_settings, m_forceSettings);
+		KiwiSDRInput::MsgConfigureKiwiSDR* message = KiwiSDRInput::MsgConfigureKiwiSDR::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSource->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -248,7 +255,13 @@ bool KiwiSDRGui::handleMessage(const Message& message)
     {
         qDebug("KiwiSDRGui::handleMessage: MsgConfigureKiwiSDR");
         const KiwiSDRInput::MsgConfigureKiwiSDR& cfg = (KiwiSDRInput::MsgConfigureKiwiSDR&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         displaySettings();
         return true;
     }
@@ -330,6 +343,10 @@ void KiwiSDRGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

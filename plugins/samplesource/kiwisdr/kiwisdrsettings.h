@@ -39,6 +39,8 @@ struct KiwiSDRSettings {
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const KiwiSDRSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* _KIWISDR_KIWISDRSETTINGS_H_ */

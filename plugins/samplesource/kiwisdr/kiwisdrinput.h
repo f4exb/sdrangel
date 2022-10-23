@@ -41,20 +41,23 @@ public:
 
 	public:
 		const KiwiSDRSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureKiwiSDR* create(const KiwiSDRSettings& settings, bool force)
+		static MsgConfigureKiwiSDR* create(const KiwiSDRSettings& settings, const QList<QString>& settingsKeys, bool force)
 		{
-			return new MsgConfigureKiwiSDR(settings, force);
+			return new MsgConfigureKiwiSDR(settings, settingsKeys, force);
 		}
 
 	private:
 		KiwiSDRSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureKiwiSDR(const KiwiSDRSettings& settings, bool force) :
+		MsgConfigureKiwiSDR(const KiwiSDRSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -162,9 +165,9 @@ private:
     QNetworkRequest m_networkRequest;
 
     int getStatus() const;
-	bool applySettings(const KiwiSDRSettings& settings, bool force);
+	bool applySettings(const KiwiSDRSettings& settings, const QList<QString>& settingsKeys, bool force);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const KiwiSDRSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const KiwiSDRSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 signals:

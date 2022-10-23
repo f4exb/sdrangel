@@ -54,6 +54,7 @@ private:
 	Ui::KiwiSDRGui* ui;
 
 	KiwiSDRSettings m_settings;
+    QList<QString> m_settingsKeys;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
 	bool m_doApplySettings;
