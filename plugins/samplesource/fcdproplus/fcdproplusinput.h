@@ -49,20 +49,23 @@ public:
 
 	public:
 		const FCDProPlusSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureFCDProPlus* create(const FCDProPlusSettings& settings, bool force)
+		static MsgConfigureFCDProPlus* create(const FCDProPlusSettings& settings, const QList<QString>& settingsKeys, bool force)
 		{
-			return new MsgConfigureFCDProPlus(settings, force);
+			return new MsgConfigureFCDProPlus(settings, settingsKeys, force);
 		}
 
 	private:
 		FCDProPlusSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureFCDProPlus(const FCDProPlusSettings& settings, bool force) :
+		MsgConfigureFCDProPlus(const FCDProPlusSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -159,8 +162,8 @@ private:
     void closeDevice();
     bool openFCDAudio(const char *filename);
     void closeFCDAudio();
-	void applySettings(const FCDProPlusSettings& settings, bool force);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FCDProPlusSettings& settings, bool force);
+	void applySettings(const FCDProPlusSettings& settings, const QList<QString>& settingsKeys, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const FCDProPlusSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

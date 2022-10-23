@@ -94,6 +94,7 @@ void FCDProPlusGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
+    m_forceSettings = true;
 	sendSettings();
 }
 
@@ -129,7 +130,13 @@ bool FCDProPlusGui::handleMessage(const Message& message)
     if (FCDProPlusInput::MsgConfigureFCDProPlus::match(message))
     {
         const FCDProPlusInput::MsgConfigureFCDProPlus& cfg = (FCDProPlusInput::MsgConfigureFCDProPlus&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -236,6 +243,7 @@ void FCDProPlusGui::sendSettings()
 void FCDProPlusGui::on_centerFrequency_changed(quint64 value)
 {
 	m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
 	sendSettings();
 }
 
@@ -246,6 +254,7 @@ void FCDProPlusGui::on_decim_currentIndexChanged(int index)
 	}
 
 	m_settings.m_log2Decim = index;
+    m_settingsKeys.append("log2Decim");
 	sendSettings();
 }
 
@@ -253,12 +262,15 @@ void FCDProPlusGui::on_fcPos_currentIndexChanged(int index)
 {
 	if (index == 0) {
 		m_settings.m_fcPos = FCDProPlusSettings::FC_POS_INFRA;
+        m_settingsKeys.append("fcPos");
 		sendSettings();
 	} else if (index == 1) {
 		m_settings.m_fcPos = FCDProPlusSettings::FC_POS_SUPRA;
+        m_settingsKeys.append("fcPos");
 		sendSettings();
 	} else if (index == 2) {
 		m_settings.m_fcPos = FCDProPlusSettings::FC_POS_CENTER;
+        m_settingsKeys.append("fcPos");
 		sendSettings();
 	}
 }
@@ -266,20 +278,23 @@ void FCDProPlusGui::on_fcPos_currentIndexChanged(int index)
 void FCDProPlusGui::on_dcOffset_toggled(bool checked)
 {
 	m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
 	sendSettings();
 }
 
 void FCDProPlusGui::on_iqImbalance_toggled(bool checked)
 {
 	m_settings.m_iqImbalance = checked;
+    m_settingsKeys.append("iqImbalance");
 	sendSettings();
 }
 
 void FCDProPlusGui::updateHardware()
 {
-	FCDProPlusInput::MsgConfigureFCDProPlus* message = FCDProPlusInput::MsgConfigureFCDProPlus::create(m_settings, m_forceSettings);
+	FCDProPlusInput::MsgConfigureFCDProPlus* message = FCDProPlusInput::MsgConfigureFCDProPlus::create(m_settings, m_settingsKeys, m_forceSettings);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	m_forceSettings = false;
+    m_settingsKeys.clear();
 	m_updateTimer.stop();
 }
 
@@ -315,30 +330,35 @@ void FCDProPlusGui::updateStatus()
 void FCDProPlusGui::on_checkBoxG_stateChanged(int state)
 {
 	m_settings.m_lnaGain = (state == Qt::Checked);
+    m_settingsKeys.append("lnaGain");
 	sendSettings();
 }
 
 void FCDProPlusGui::on_checkBoxB_stateChanged(int state)
 {
 	m_settings.m_biasT = (state == Qt::Checked);
+    m_settingsKeys.append("biasT");
 	sendSettings();
 }
 
 void FCDProPlusGui::on_mixGain_stateChanged(int state)
 {
 	m_settings.m_mixGain = (state == Qt::Checked);
+    m_settingsKeys.append("mixGain");
 	sendSettings();
 }
 
 void FCDProPlusGui::on_filterIF_currentIndexChanged(int index)
 {
 	m_settings.m_ifFilterIndex = index;
+    m_settingsKeys.append("ifFilterIndex");
 	sendSettings();
 }
 
 void FCDProPlusGui::on_filterRF_currentIndexChanged(int index)
 {
 	m_settings.m_rfFilterIndex = index;
+    m_settingsKeys.append("rfFilterIndex");
 	sendSettings();
 }
 
@@ -346,6 +366,7 @@ void FCDProPlusGui::on_ifGain_valueChanged(int value)
 {
 	m_settings.m_ifGain = value;
 	displaySettings();
+    m_settingsKeys.append("ifGain");
 	sendSettings();
 }
 
@@ -353,6 +374,7 @@ void FCDProPlusGui::on_ppm_valueChanged(int value)
 {
 	m_settings.m_LOppmTenths = value;
 	displaySettings();
+    m_settingsKeys.append("LOppmTenths");
 	sendSettings();
 }
 
@@ -370,6 +392,10 @@ void FCDProPlusGui::on_transverter_clicked()
     qDebug("FCDProPlusGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("iqOrder");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -390,6 +416,10 @@ void FCDProPlusGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

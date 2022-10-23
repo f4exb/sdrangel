@@ -126,3 +126,137 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
 	}
 }
 
+void FCDProPlusSettings::applySettings(const QStringList& settingsKeys, const FCDProPlusSettings& settings)
+{
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("rangeLow")) {
+        m_rangeLow = settings.m_rangeLow;
+    }
+    if (settingsKeys.contains("lnaGain")) {
+        m_lnaGain = settings.m_lnaGain;
+    }
+    if (settingsKeys.contains("biasT")) {
+        m_biasT = settings.m_biasT;
+    }
+    if (settingsKeys.contains("ifGain")) {
+        m_ifGain = settings.m_ifGain;
+    }
+    if (settingsKeys.contains("mixGain")) {
+        m_mixGain = settings.m_mixGain;
+    }
+    if (settingsKeys.contains("rfFilterIndex")) {
+        m_rfFilterIndex = settings.m_rfFilterIndex;
+    }
+    if (settingsKeys.contains("ifFilterIndex")) {
+        m_ifFilterIndex = settings.m_ifFilterIndex;
+    }
+    if (settingsKeys.contains("LOppmTenths")) {
+        m_LOppmTenths = settings.m_LOppmTenths;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("fcPos")) {
+        m_fcPos = settings.m_fcPos;
+    }
+    if (settingsKeys.contains("dcBlock")) {
+        m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("iqImbalance")) {
+        m_iqImbalance = settings.m_iqImbalance;
+    }
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("transverterMode")) {
+        m_transverterMode = settings.m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency")) {
+        m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder")) {
+        m_iqOrder = settings.m_iqOrder;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
+
+QString FCDProPlusSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("rangeLow") || force) {
+        ostr << " m_rangeLow: " << m_rangeLow;
+    }
+    if (settingsKeys.contains("lnaGain") || force) {
+        ostr << " m_lnaGain: " << m_lnaGain;
+    }
+    if (settingsKeys.contains("biasT") || force) {
+        ostr << " m_biasT: " << m_biasT;
+    }
+    if (settingsKeys.contains("ifGain") || force) {
+        ostr << " m_ifGain: " << m_ifGain;
+    }
+    if (settingsKeys.contains("mixGain") || force) {
+        ostr << " m_mixGain: " << m_mixGain;
+    }
+    if (settingsKeys.contains("rfFilterIndex") || force) {
+        ostr << " m_rfFilterIndex: " << m_rfFilterIndex;
+    }
+    if (settingsKeys.contains("ifFilterIndex") || force) {
+        ostr << " m_ifFilterIndex: " << m_ifFilterIndex;
+    }
+    if (settingsKeys.contains("LOppmTenths") || force) {
+        ostr << " m_LOppmTenths: " << m_LOppmTenths;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("fcPos") || force) {
+        ostr << " m_fcPos: " << m_fcPos;
+    }
+    if (settingsKeys.contains("dcBlock") || force) {
+        ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("iqImbalance") || force) {
+        ostr << " m_iqImbalance: " << m_iqImbalance;
+    }
+    if (settingsKeys.contains("transverterMode") || force) {
+        ostr << " m_transverterMode: " << m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency") || force) {
+        ostr << " m_transverterDeltaFrequency: " << m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder") || force) {
+        ostr << " m_iqOrder: " << m_iqOrder;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}
