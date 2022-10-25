@@ -42,20 +42,23 @@ public:
 
     public:
         const RemoteTCPInputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureTcpHandler* create(const RemoteTCPInputSettings& settings, bool force)
+        static MsgConfigureTcpHandler* create(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigureTcpHandler(settings, force);
+            return new MsgConfigureTcpHandler(settings, settingsKeys, force);
         }
 
     private:
         RemoteTCPInputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureTcpHandler(const RemoteTCPInputSettings& settings, bool force) :
+        MsgConfigureTcpHandler(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -165,7 +168,7 @@ private:
     void setChannelFreqOffset(int offset);
     void setChannelGain(int gain);
     void setSampleBitDepth(int sampleBits);
-    void applySettings(const RemoteTCPInputSettings& settings, bool force = false);
+    void applySettings(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
 
 private slots:
     void started();

@@ -85,7 +85,7 @@ void RemoteTCPInput::destroy()
 
 void RemoteTCPInput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool RemoteTCPInput::start()
@@ -93,7 +93,7 @@ bool RemoteTCPInput::start()
     qDebug() << "RemoteTCPInput::start";
     m_remoteInputTCPPHandler->reset();
     m_remoteInputTCPPHandler->start();
-    m_remoteInputTCPPHandler->getInputMessageQueue()->push(RemoteTCPInputTCPHandler::MsgConfigureTcpHandler::create(m_settings, true));
+    m_remoteInputTCPPHandler->getInputMessageQueue()->push(RemoteTCPInputTCPHandler::MsgConfigureTcpHandler::create(m_settings, QList<QString>(), true));
     m_thread.start();
     return true;
 }
@@ -121,12 +121,12 @@ bool RemoteTCPInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureRemoteTCPInput* message = MsgConfigureRemoteTCPInput::create(m_settings, true);
+    MsgConfigureRemoteTCPInput* message = MsgConfigureRemoteTCPInput::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureRemoteTCPInput* messageToGUI = MsgConfigureRemoteTCPInput::create(m_settings, true);
+        MsgConfigureRemoteTCPInput* messageToGUI = MsgConfigureRemoteTCPInput::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -159,12 +159,12 @@ void RemoteTCPInput::setCenterFrequency(qint64 centerFrequency)
     RemoteTCPInputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureRemoteTCPInput* message = MsgConfigureRemoteTCPInput::create(settings, false);
+    MsgConfigureRemoteTCPInput* message = MsgConfigureRemoteTCPInput::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureRemoteTCPInput* messageToGUI = MsgConfigureRemoteTCPInput::create(settings, false);
+        MsgConfigureRemoteTCPInput* messageToGUI = MsgConfigureRemoteTCPInput::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -178,8 +178,7 @@ bool RemoteTCPInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
@@ -198,7 +197,7 @@ bool RemoteTCPInput::handleMessage(const Message& message)
     {
         qDebug() << "RemoteTCPInput::handleMessage:" << message.getIdentifier();
         MsgConfigureRemoteTCPInput& conf = (MsgConfigureRemoteTCPInput&) message;
-        applySettings(conf.getSettings(), conf.getForce());
+        applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
     else if (RemoteTCPInputTCPHandler::MsgReportConnection::match(message))
@@ -218,89 +217,32 @@ bool RemoteTCPInput::handleMessage(const Message& message)
     }
 }
 
-void RemoteTCPInput::applySettings(const RemoteTCPInputSettings& settings, bool force)
+void RemoteTCPInput::applySettings(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
+    qDebug() << "RemoteTCPInput::applySettings: force: " << force << settings.getDebugString(settingsKeys, force);
     QMutexLocker mutexLocker(&m_mutex);
     std::ostringstream os;
-    QList<QString> reverseAPIKeys;
     bool forwardChange = false;
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
-    {
-        reverseAPIKeys.append("centerFrequency");
+    if (settingsKeys.contains("centerFrequency") || force) {
         forwardChange = true;
     }
-    if ((m_settings.m_loPpmCorrection != settings.m_loPpmCorrection) || force) {
-        reverseAPIKeys.append("loPpmCorrection");
-    }
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
-        reverseAPIKeys.append("dcBlock");
-    }
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
-        reverseAPIKeys.append("iqCorrection");
-    }
-    if ((m_settings.m_biasTee != settings.m_biasTee) || force) {
-        reverseAPIKeys.append("biasTee");
-    }
-    if ((m_settings.m_directSampling != settings.m_directSampling) || force) {
-        reverseAPIKeys.append("noModMode"); // Use same name as rtlsdrinput.cpp
-    }
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
-        reverseAPIKeys.append("devSampleRate");
-    }
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force) {
-        reverseAPIKeys.append("log2Decim");
-    }
-    if ((m_settings.m_gain != settings.m_gain) || force) {
-        reverseAPIKeys.append("gain");
-    }
-    if ((m_settings.m_agc != settings.m_agc) || force) {
-        reverseAPIKeys.append("agc");
-    }
-    if ((m_settings.m_rfBW != settings.m_rfBW) || force) {
-        reverseAPIKeys.append("rfBW");
-    }
-    if ((m_settings.m_rfBW != settings.m_rfBW) || force) {
-        reverseAPIKeys.append("rfBW");
-    }
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force)
-    {
-        reverseAPIKeys.append("inputFrequencyOffset");
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
         forwardChange = true;
     }
-    if ((m_settings.m_channelGain != settings.m_channelGain) || force) {
-        reverseAPIKeys.append("channelGain");
-    }
-    if ((m_settings.m_channelSampleRate != settings.m_channelSampleRate) || force)
-    {
-        reverseAPIKeys.append("channelSampleRate");
+    if (settingsKeys.contains("channelSampleRate") || force) {
         forwardChange = true;
-    }
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((m_settings.m_sampleBits != settings.m_sampleBits) || force) {
-        reverseAPIKeys.append("m_sampleBits");
-    }
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
-        reverseAPIKeys.append("dataAddress");
-    }
-    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
-        reverseAPIKeys.append("dataPort");
-    }
-    if ((m_settings.m_preFill != settings.m_preFill) || force) {
-        reverseAPIKeys.append("preFill");
     }
 
     mutexLocker.unlock();
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     if (forwardChange && (settings.m_channelSampleRate != 0))
@@ -309,28 +251,13 @@ void RemoteTCPInput::applySettings(const RemoteTCPInputSettings& settings, bool 
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
-    m_remoteInputTCPPHandler->getInputMessageQueue()->push(RemoteTCPInputTCPHandler::MsgConfigureTcpHandler::create(m_settings, force));
-
-    qDebug() << "RemoteTCPInput::applySettings: "
-        << " force: " << force
-        << " m_centerFrequency: " << m_settings.m_centerFrequency
-        << " m_loPpmCorrection: " << m_settings.m_loPpmCorrection
-        << " m_biasTee: " << m_settings.m_biasTee
-        << " m_devSampleRate: " << m_settings.m_devSampleRate
-        << " m_log2Decim: " << m_settings.m_log2Decim
-        << " m_gain: " << m_settings.m_gain
-        << " m_agc: " << m_settings.m_agc
-        << " m_rfBW: " << m_settings.m_rfBW
-        << " m_inputFrequencyOffset: " << m_settings.m_inputFrequencyOffset
-        << " m_channelGain: " << m_settings.m_channelGain
-        << " m_channelSampleRate: " << m_settings.m_channelSampleRate
-        << " m_sampleBits: " << m_settings.m_sampleBits
-        << " m_dataAddress: " << m_settings.m_dataAddress
-        << " m_dataPort: " << m_settings.m_dataPort
-        << " m_preFill: " << m_settings.m_preFill
-        ;
+    m_remoteInputTCPPHandler->getInputMessageQueue()->push(RemoteTCPInputTCPHandler::MsgConfigureTcpHandler::create(m_settings, settingsKeys, force));
 }
 
 int RemoteTCPInput::webapiRunGet(
@@ -382,12 +309,12 @@ int RemoteTCPInput::webapiSettingsPutPatch(
     RemoteTCPInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureRemoteTCPInput *msg = MsgConfigureRemoteTCPInput::create(settings, force);
+    MsgConfigureRemoteTCPInput *msg = MsgConfigureRemoteTCPInput::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRemoteTCPInput *msgToGUI = MsgConfigureRemoteTCPInput::create(settings, force);
+        MsgConfigureRemoteTCPInput *msgToGUI = MsgConfigureRemoteTCPInput::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -522,7 +449,7 @@ void RemoteTCPInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
     response.getRemoteTcpInputReport()->setSampleRate(m_settings.m_channelSampleRate);
 }
 
-void RemoteTCPInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteTCPInputSettings& settings, bool force)
+void RemoteTCPInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const RemoteTCPInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx

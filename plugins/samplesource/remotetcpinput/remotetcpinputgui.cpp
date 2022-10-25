@@ -149,7 +149,13 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
     if (RemoteTCPInput::MsgConfigureRemoteTCPInput::match(message))
     {
         const RemoteTCPInput::MsgConfigureRemoteTCPInput& cfg = (RemoteTCPInput::MsgConfigureRemoteTCPInput&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -522,17 +528,22 @@ void RemoteTCPInputGui::on_startStop_toggled(bool checked)
 void RemoteTCPInputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_devSampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
+    m_settingsKeys.append("devSampleRate");
+
     if (!m_settings.m_channelDecimation)
     {
         m_settings.m_channelSampleRate = m_settings.m_devSampleRate >> m_settings.m_log2Decim;
+        m_settingsKeys.append("channelSampleRate");
         ui->channelSampleRate->setValue(m_settings.m_channelSampleRate);
     }
+
     sendSettings();
 }
 
@@ -540,47 +551,57 @@ void RemoteTCPInputGui::on_ppm_valueChanged(int value)
 {
     m_settings.m_loPpmCorrection = value;
     ui->ppmText->setText(tr("%1").arg(value));
+    m_settingsKeys.append("loPpmCorrection");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_biasTee_toggled(bool checked)
 {
     m_settings.m_biasTee = checked;
+    m_settingsKeys.append("biasTee");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_directSampling_toggled(bool checked)
 {
     m_settings.m_directSampling = checked;
+    m_settingsKeys.append("directSampling");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
+    m_settingsKeys.append("agc");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_decim_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index;
+    m_settingsKeys.append("log2Decim");
+
     if (!m_settings.m_channelDecimation)
     {
         m_settings.m_channelSampleRate = m_settings.m_devSampleRate >> m_settings.m_log2Decim;
+        m_settingsKeys.append("channelSampleRate");
         ui->channelSampleRate->setValue(m_settings.m_channelSampleRate);
     }
+
     sendSettings();
 }
 
@@ -591,7 +612,9 @@ void RemoteTCPInputGui::on_gain1_valueChanged(int value)
     } else {
         m_settings.m_gain[0] = value * 10;
     }
+
     ui->gain1Text->setText(gainText(0));
+    m_settingsKeys.append("gain[0]");
     sendSettings();
 }
 
@@ -602,7 +625,9 @@ void RemoteTCPInputGui::on_gain2_valueChanged(int value)
     } else {
         m_settings.m_gain[1] = value * 10;
     }
+
     ui->gain2Text->setText(gainText(1));
+    m_settingsKeys.append("gain[1]");
     sendSettings();
 }
 
@@ -613,19 +638,23 @@ void RemoteTCPInputGui::on_gain3_valueChanged(int value)
     } else {
         m_settings.m_gain[2] = value * 10;
     }
+
     ui->gain3Text->setText(gainText(2));
+    m_settingsKeys.append("gain[2]");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_rfBW_changed(int value)
 {
     m_settings.m_rfBW = value * 1000;
+    m_settingsKeys.append("rfBW");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_deltaFrequency_changed(int value)
 {
     m_settings.m_inputFrequencyOffset = value;
+    m_settingsKeys.append("inputFrequencyOffset");
     sendSettings();
 }
 
@@ -633,21 +662,26 @@ void RemoteTCPInputGui::on_channelGain_valueChanged(int value)
 {
     m_settings.m_channelGain = value;
     ui->channelGainText->setText(tr("%1dB").arg(m_settings.m_channelGain));
+    m_settingsKeys.append("channelGain");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_channelSampleRate_changed(quint64 value)
 {
     m_settings.m_channelSampleRate = value;
+    m_settingsKeys.append("channelSampleRate");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_decimation_toggled(bool checked)
 {
     m_settings.m_channelDecimation = !checked;
+    m_settingsKeys.append("channelDecimation");
+
     if (!m_settings.m_channelDecimation)
     {
         m_settings.m_channelSampleRate = m_settings.m_devSampleRate >> m_settings.m_log2Decim;
+        m_settingsKeys.append("channelSampleRate");
         ui->channelSampleRate->setValue(m_settings.m_channelSampleRate);
     }
     ui->channelSampleRate->setEnabled(!checked);
@@ -657,12 +691,14 @@ void RemoteTCPInputGui::on_decimation_toggled(bool checked)
 void RemoteTCPInputGui::on_sampleBits_currentIndexChanged(int index)
 {
     m_settings.m_sampleBits = 8 * (index + 1);
+    m_settingsKeys.append("sampleBits");
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_dataAddress_editingFinished()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
+    m_settingsKeys.append("dataAddress");
     sendSettings();
 }
 
@@ -677,6 +713,7 @@ void RemoteTCPInputGui::on_dataPort_editingFinished()
 
     m_settings.m_dataPort = udpPort;
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
+    m_settingsKeys.append("dataPort");
 
     sendSettings();
 }
@@ -684,6 +721,7 @@ void RemoteTCPInputGui::on_dataPort_editingFinished()
 void RemoteTCPInputGui::on_overrideRemoteSettings_toggled(bool checked)
 {
     m_settings.m_overrideRemoteSettings = checked;
+    m_settingsKeys.append("overrideRemoteSettings");
     sendSettings();
 }
 
@@ -691,6 +729,7 @@ void RemoteTCPInputGui::on_preFill_valueChanged(int value)
 {
     m_settings.m_preFill = value/10.0f;
     ui->preFillText->setText(QString("%1s").arg(m_settings.m_preFill, 0, 'f', 2));
+    m_settingsKeys.append("preFill");
     sendSettings();
 }
 
@@ -700,9 +739,10 @@ void RemoteTCPInputGui::updateHardware()
     {
         qDebug() << "RemoteTCPInputGui::updateHardware";
         RemoteTCPInput::MsgConfigureRemoteTCPInput* message =
-                RemoteTCPInput::MsgConfigureRemoteTCPInput::create(m_settings, m_forceSettings);
+                RemoteTCPInput::MsgConfigureRemoteTCPInput::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSource->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }

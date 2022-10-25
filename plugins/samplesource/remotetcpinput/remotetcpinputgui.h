@@ -103,6 +103,7 @@ private:
     Ui::RemoteTCPInputGui* ui;
 
     RemoteTCPInputSettings m_settings;        //!< current settings
+    QList<QString> m_settingsKeys;
     RemoteTCPInput* m_sampleSource;
     QTimer m_updateTimer;
     QTimer m_statusTimer;

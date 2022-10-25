@@ -48,20 +48,22 @@ public:
 
     public:
         const RemoteTCPInputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRemoteTCPInput* create(const RemoteTCPInputSettings& settings, bool force = false)
-        {
-            return new MsgConfigureRemoteTCPInput(settings, force);
+        static MsgConfigureRemoteTCPInput* create(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force = false) {
+            return new MsgConfigureRemoteTCPInput(settings, settingsKeys, force);
         }
 
     private:
         RemoteTCPInputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRemoteTCPInput(const RemoteTCPInputSettings& settings, bool force) :
+        MsgConfigureRemoteTCPInput(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -185,9 +187,9 @@ private:
     QNetworkRequest m_networkRequest;
     QThread m_thread;
 
-    void applySettings(const RemoteTCPInputSettings& settings, bool force = false);
+    void applySettings(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteTCPInputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const RemoteTCPInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

@@ -146,3 +146,167 @@ bool RemoteTCPInputSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void RemoteTCPInputSettings::applySettings(const QStringList& settingsKeys, const RemoteTCPInputSettings& settings)
+{
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("loPpmCorrection")) {
+        m_loPpmCorrection = settings.m_loPpmCorrection;
+    }
+    if (settingsKeys.contains("dcBlock")) {
+        m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection")) {
+        m_iqCorrection = settings.m_iqCorrection;
+    }
+    if (settingsKeys.contains("biasTee")) {
+        m_biasTee = settings.m_biasTee;
+    }
+    if (settingsKeys.contains("directSampling")) {
+        m_directSampling = settings.m_directSampling;
+    }
+    if (settingsKeys.contains("devSampleRate")) {
+        m_devSampleRate = settings.m_devSampleRate;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("agc")) {
+        m_agc = settings.m_agc;
+    }
+    if (settingsKeys.contains("rfBW")) {
+        m_rfBW = settings.m_rfBW;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("channelGain")) {
+        m_channelGain = settings.m_channelGain;
+    }
+    if (settingsKeys.contains("channelSampleRate")) {
+        m_channelSampleRate = settings.m_channelSampleRate;
+    }
+    if (settingsKeys.contains("channelDecimation")) {
+        m_channelDecimation = settings.m_channelDecimation;
+    }
+    if (settingsKeys.contains("sampleBits")) {
+        m_sampleBits = settings.m_sampleBits;
+    }
+    if (settingsKeys.contains("dataAddress")) {
+        m_dataAddress = settings.m_dataAddress;
+    }
+    if (settingsKeys.contains("dataPort")) {
+        m_dataPort = settings.m_dataPort;
+    }
+    if (settingsKeys.contains("overrideRemoteSettings")) {
+        m_overrideRemoteSettings = settings.m_overrideRemoteSettings;
+    }
+    if (settingsKeys.contains("preFill")) {
+        m_preFill = settings.m_preFill;
+    }
+    if (settingsKeys.contains("_useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+
+    for (int i = 0; i < m_maxGains; i++)
+    {
+        if (settingsKeys.contains(QString("gain[%1]").arg(i))) {
+            m_gain[i] = settings.m_gain[i];
+        }
+    }
+}
+
+QString RemoteTCPInputSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("loPpmCorrection") || force) {
+        ostr << " m_loPpmCorrection: " << m_loPpmCorrection;
+    }
+    if (settingsKeys.contains("dcBlock") || force) {
+        ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection") || force) {
+        ostr << " m_iqCorrection: " << m_iqCorrection;
+    }
+    if (settingsKeys.contains("biasTee") || force) {
+        ostr << " m_biasTee: " << m_biasTee;
+    }
+    if (settingsKeys.contains("directSampling") || force) {
+        ostr << " m_directSampling: " << m_directSampling;
+    }
+    if (settingsKeys.contains("devSampleRate") || force) {
+        ostr << " m_devSampleRate: " << m_devSampleRate;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("agc") || force) {
+        ostr << " m_agc: " << m_agc;
+    }
+    if (settingsKeys.contains("rfBW") || force) {
+        ostr << " m_rfBW: " << m_rfBW;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("channelGain") || force) {
+        ostr << " m_channelGain: " << m_channelGain;
+    }
+    if (settingsKeys.contains("channelSampleRate") || force) {
+        ostr << " m_channelSampleRate: " << m_channelSampleRate;
+    }
+    if (settingsKeys.contains("channelDecimation") || force) {
+        ostr << " m_channelDecimation: " << m_channelDecimation;
+    }
+    if (settingsKeys.contains("sampleBits") || force) {
+        ostr << " m_sampleBits: " << m_sampleBits;
+    }
+    if (settingsKeys.contains("dataAddress") || force) {
+        ostr << " m_dataAddress: " << m_dataAddress.toStdString();
+    }
+    if (settingsKeys.contains("dataPort") || force) {
+        ostr << " m_dataPort: " << m_dataPort;
+    }
+    if (settingsKeys.contains("overrideRemoteSettings") || force) {
+        ostr << " m_overrideRemoteSettings: " << m_overrideRemoteSettings;
+    }
+    if (settingsKeys.contains("preFill") || force) {
+        ostr << " m_preFill: " << m_preFill;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    for (int i = 0; i < m_maxGains; i++)
+    {
+        if (settingsKeys.contains(QString("gain[%1]").arg(i))) {
+            ostr << QString(" gain[%1]: ").arg(i).toStdString() <<  m_gain[i];
+        }
+    }
+
+    return QString(ostr.str().c_str());
+}

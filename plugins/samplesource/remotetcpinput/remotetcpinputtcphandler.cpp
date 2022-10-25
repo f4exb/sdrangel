@@ -374,69 +374,66 @@ void RemoteTCPInputTCPHandler::setSampleBitDepth(int sampleBits)
     }
 }
 
-void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& settings, bool force)
+void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
     qDebug() << "RemoteTCPInputTCPHandler::applySettings: "
                 << "force: " << force
-                << "m_dataAddress: " << settings.m_dataAddress
-                << "m_dataPort: " << settings.m_dataPort
-                << "m_devSampleRate: " << settings.m_devSampleRate
-                << "m_channelSampleRate: " << settings.m_channelSampleRate;
+                << settings.getDebugString(settingsKeys, force);
     QMutexLocker mutexLocker(&m_mutex);
 
-    if ((settings.m_centerFrequency != m_settings.m_centerFrequency) || force) {
+    if (settingsKeys.contains("centerFrequency") || force) {
         setCenterFrequency(settings.m_centerFrequency);
     }
-    if ((settings.m_loPpmCorrection != m_settings.m_loPpmCorrection) || force) {
+    if (settingsKeys.contains("loPpmCorrection") || force) {
         setFreqCorrection(settings.m_loPpmCorrection);
     }
-    if ((settings.m_dcBlock != m_settings.m_dcBlock) || force) {
+    if (settingsKeys.contains("dcBlock") || force) {
         setDCOffsetRemoval(settings.m_dcBlock);
     }
-    if ((settings.m_iqCorrection != m_settings.m_iqCorrection) || force) {
+    if (settingsKeys.contains("iqCorrection") || force) {
         setIQCorrection(settings.m_iqCorrection);
     }
-    if ((settings.m_biasTee != m_settings.m_biasTee) || force) {
+    if (settingsKeys.contains("biasTee") || force) {
         setBiasTee(settings.m_biasTee);
     }
-    if ((settings.m_directSampling != m_settings.m_directSampling) || force) {
+    if (settingsKeys.contains("directSampling") || force) {
         setDirectSampling(settings.m_directSampling);
     }
-    if ((settings.m_log2Decim != m_settings.m_log2Decim) || force) {
+    if (settingsKeys.contains("log2Decim") || force) {
         setDecimation(settings.m_log2Decim);
     }
-    if ((settings.m_devSampleRate != m_settings.m_devSampleRate) || force) {
+    if (settingsKeys.contains("devSampleRate") || force) {
         setSampleRate(settings.m_devSampleRate);
     }
-    if ((settings.m_agc != m_settings.m_agc) || force) {
+    if (settingsKeys.contains("agc") || force) {
         setAGC(settings.m_agc);
     }
     if (force) {
         setTunerAGC(1); // The SDRangel RTLSDR driver always has tuner gain as manual
     }
-    if ((settings.m_gain[0] != m_settings.m_gain[0]) || force) {
+    if (settingsKeys.contains("gain[0]") || force) {
         setTunerGain(settings.m_gain[0]);
     }
     for (int i = 1; i < 3; i++)
     {
-        if ((settings.m_gain[i] != m_settings.m_gain[i]) || force) {
+        if (settingsKeys.contains(QString("gain[%1]").arg(i)) || force) {
             //setIFGain(i, 20 + settings.m_gain[i]);
         }
     }
-    if ((settings.m_rfBW != m_settings.m_rfBW) || force) {
+    if (settingsKeys.contains("rfBW") || force) {
         setBandwidth(settings.m_rfBW);
     }
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
         setChannelFreqOffset(settings.m_inputFrequencyOffset);
     }
-    if ((settings.m_channelGain != m_settings.m_channelGain) || force) {
+    if (settingsKeys.contains("channelGain") || force) {
         setChannelGain(settings.m_channelGain);
     }
     if ((settings.m_channelSampleRate != m_settings.m_channelSampleRate) || force)
     {
         // Resize FIFO to give us 1 second
         // Can't do this while running
-        if (!m_running && settings.m_channelSampleRate > (qint32)m_sampleFifo->size())
+        if (!m_running && settingsKeys.contains("channelSampleRate") && settings.m_channelSampleRate > (qint32)m_sampleFifo->size())
         {
             qDebug() << "RemoteTCPInputTCPHandler::applySettings: Resizing sample FIFO from " << m_sampleFifo->size() << "to" << settings.m_channelSampleRate;
             m_sampleFifo->setSize(settings.m_channelSampleRate);
@@ -447,20 +444,24 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
         setChannelSampleRate(settings.m_channelSampleRate);
         clearBuffer();
     }
-    if ((settings.m_sampleBits != m_settings.m_sampleBits) || force)
+    if (settingsKeys.contains("sampleBits") || force)
     {
         setSampleBitDepth(settings.m_sampleBits);
         clearBuffer();
     }
 
     // Don't use force, as disconnect can cause rtl_tcp to quit
-    if ((settings.m_dataPort != m_settings.m_dataPort) || (settings.m_dataAddress != m_settings.m_dataAddress) || (m_dataSocket == nullptr))
+    if (settingsKeys.contains("dataAddress") || settingsKeys.contains("dataPort") || (m_dataSocket == nullptr))
     {
         disconnectFromHost();
         connectToHost(settings.m_dataAddress, settings.m_dataPort);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void RemoteTCPInputTCPHandler::connected()
@@ -470,7 +471,7 @@ void RemoteTCPInputTCPHandler::connected()
     if (m_settings.m_overrideRemoteSettings)
     {
         // Force settings to be sent to remote device
-        applySettings(m_settings, true);
+        applySettings(m_settings, QList<QString>(), true);
     }
     if (m_messageQueueToGUI)
     {
@@ -545,11 +546,12 @@ void RemoteTCPInputTCPHandler::dataReadyRead()
                     {
                         RemoteTCPInputSettings& settings = m_settings;
                         settings.m_sampleBits = 8;
+                        QList<QString> settingsKeys{"sampleBits"};
                         if (m_messageQueueToInput) {
-                            m_messageQueueToInput->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings));
+                            m_messageQueueToInput->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
                         }
                         if (m_messageQueueToGUI) {
-                            m_messageQueueToGUI->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings));
+                            m_messageQueueToGUI->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
                         }
                     }
                 }
@@ -565,32 +567,52 @@ void RemoteTCPInputTCPHandler::dataReadyRead()
                     {
                         // Update local settings to match remote
                         RemoteTCPInputSettings& settings = m_settings;
+                        QList<QString> settingsKeys;
                         settings.m_centerFrequency = RemoteTCPProtocol::extractUInt64(&metaData[8]);
+                        settingsKeys.append("centerFrequency");
                         settings.m_loPpmCorrection = RemoteTCPProtocol::extractUInt32(&metaData[16]);
+                        settingsKeys.append("loPpmCorrection");
                         quint32 flags = RemoteTCPProtocol::extractUInt32(&metaData[20]);
                         settings.m_biasTee = flags & 1;
+                        settingsKeys.append("biasTee");
                         settings.m_directSampling = (flags >> 1) & 1;
+                        settingsKeys.append("directSampling");
                         settings.m_agc = (flags >> 2) & 1;
+                        settingsKeys.append("agc");
                         settings.m_dcBlock = (flags >> 3) & 1;
+                        settingsKeys.append("dcBlock");
                         settings.m_iqCorrection = (flags >> 4) & 1;
+                        settingsKeys.append("iqCorrection");
                         settings.m_devSampleRate = RemoteTCPProtocol::extractUInt32(&metaData[24]);
+                        settingsKeys.append("devSampleRate");
                         settings.m_log2Decim = RemoteTCPProtocol::extractUInt32(&metaData[28]);
+                        settingsKeys.append("log2Decim");
                         settings.m_gain[0] = RemoteTCPProtocol::extractInt16(&metaData[32]);
                         settings.m_gain[1] = RemoteTCPProtocol::extractInt16(&metaData[34]);
                         settings.m_gain[2] = RemoteTCPProtocol::extractInt16(&metaData[36]);
+                        settingsKeys.append("gain[0]");
+                        settingsKeys.append("gain[1]");
+                        settingsKeys.append("gain[2]");
                         settings.m_rfBW = RemoteTCPProtocol::extractUInt32(&metaData[40]);
+                        settingsKeys.append("rfBW");
                         settings.m_inputFrequencyOffset = RemoteTCPProtocol::extractUInt32(&metaData[44]);
+                        settingsKeys.append("inputFrequencyOffset");
                         settings.m_channelGain = RemoteTCPProtocol::extractUInt32(&metaData[48]);
+                        settingsKeys.append("channelGain");
                         settings.m_channelSampleRate = RemoteTCPProtocol::extractUInt32(&metaData[52]);
+                        settingsKeys.append("channelSampleRate");
                         settings.m_sampleBits = RemoteTCPProtocol::extractUInt32(&metaData[56]);
-                        if (settings.m_channelSampleRate != (settings.m_devSampleRate >> settings.m_log2Decim)) {
+                        settingsKeys.append("sampleBits");
+                        if (settings.m_channelSampleRate != (settings.m_devSampleRate >> settings.m_log2Decim))
+                        {
                             settings.m_channelDecimation = true;
+                            settingsKeys.append("channelDecimation");
                         }
                         if (m_messageQueueToInput) {
-                            m_messageQueueToInput->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings));
+                            m_messageQueueToInput->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
                         }
                         if (m_messageQueueToGUI) {
-                            m_messageQueueToGUI->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings));
+                            m_messageQueueToGUI->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
                         }
                     }
                 }
@@ -770,7 +792,7 @@ bool RemoteTCPInputTCPHandler::handleMessage(const Message& cmd)
     {
         qDebug() << "RemoteTCPInputTCPHandler::handleMessage: MsgConfigureTcpHandler";
         MsgConfigureTcpHandler& notif = (MsgConfigureTcpHandler&) cmd;
-        applySettings(notif.getSettings(), notif.getForce());
+        applySettings(notif.getSettings(), notif.getSettingsKeys(), notif.getForce());
         return true;
     }
     else
