@@ -92,7 +92,7 @@ void RemoteInput::destroy()
 
 void RemoteInput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool RemoteInput::start()
@@ -122,12 +122,12 @@ bool RemoteInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureRemoteInput* message = MsgConfigureRemoteInput::create(m_settings, true);
+    MsgConfigureRemoteInput* message = MsgConfigureRemoteInput::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureRemoteInput* messageToGUI = MsgConfigureRemoteInput::create(m_settings, true);
+        MsgConfigureRemoteInput* messageToGUI = MsgConfigureRemoteInput::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -211,8 +211,7 @@ bool RemoteInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
@@ -231,7 +230,7 @@ bool RemoteInput::handleMessage(const Message& message)
     {
         qDebug() << "RemoteInput::handleMessage:" << message.getIdentifier();
         MsgConfigureRemoteInput& conf = (MsgConfigureRemoteInput&) message;
-        applySettings(conf.getSettings(), conf.getForce());
+        applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
     else if (MsgConfigureRemoteChannel::match(message))
@@ -261,40 +260,15 @@ bool RemoteInput::handleMessage(const Message& message)
 	}
 }
 
-void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
+void RemoteInput::applySettings(const RemoteInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
+    qDebug() << "RemoteInput::applySettings: force: " << force << settings.getDebugString(settingsKeys, force);
     QMutexLocker mutexLocker(&m_mutex);
     std::ostringstream os;
     QString remoteAddress;
     m_remoteInputUDPHandler->getRemoteAddress(remoteAddress);
-    QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
-        reverseAPIKeys.append("dcBlock");
-    }
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
-        reverseAPIKeys.append("iqCorrection");
-    }
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
-        reverseAPIKeys.append("dataAddress");
-    }
-    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
-        reverseAPIKeys.append("dataPort");
-    }
-    if ((m_settings.m_apiAddress != settings.m_apiAddress) || force) {
-        reverseAPIKeys.append("apiAddress");
-    }
-    if ((m_settings.m_apiPort != settings.m_apiPort) || force) {
-        reverseAPIKeys.append("apiPort");
-    }
-    if ((m_settings.m_multicastAddress != settings.m_multicastAddress) || force) {
-        reverseAPIKeys.append("multicastAddress");
-    }
-    if ((m_settings.m_multicastJoin != settings.m_multicastJoin) || force) {
-        reverseAPIKeys.append("multicastJoin");
-    }
-
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    if (settingsKeys.contains("dcBlock") || settingsKeys.contains("iqCorrection") || force)
     {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
         qDebug("RemoteInput::applySettings: corrections: DC block: %s IQ imbalance: %s",
@@ -302,10 +276,10 @@ void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
                 settings.m_iqCorrection ? "true" : "false");
     }
 
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) ||
-        (m_settings.m_dataPort != settings.m_dataPort) ||
-        (m_settings.m_multicastAddress != settings.m_multicastAddress) ||
-        (m_settings.m_multicastJoin != settings.m_multicastJoin) || force)
+    if (settingsKeys.contains("dataAddress") ||
+        settingsKeys.contains("dataPort") ||
+        settingsKeys.contains("multicastAddress") ||
+        settingsKeys.contains("multicastJoin") || force)
     {
         m_remoteInputUDPHandler->configureUDPLink(settings.m_dataAddress, settings.m_dataPort, settings.m_multicastAddress, settings.m_multicastJoin);
         m_remoteInputUDPHandler->getRemoteAddress(remoteAddress);
@@ -313,26 +287,22 @@ void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
 
     mutexLocker.unlock();
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
-    m_remoteAddress = remoteAddress;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
-    qDebug() << "RemoteInput::applySettings: "
-        << " m_dataAddress: " << m_settings.m_dataAddress
-        << " m_dataPort: " << m_settings.m_dataPort
-        << " m_multicastAddress: " << m_settings.m_multicastAddress
-        << " m_multicastJoin: " << m_settings.m_multicastJoin
-        << " m_apiAddress: " << m_settings.m_apiAddress
-        << " m_apiPort: " << m_settings.m_apiPort
-        << " m_remoteAddress: " << m_remoteAddress;
+    m_remoteAddress = remoteAddress;
 }
 
 void RemoteInput::applyRemoteChannelSettings(const RemoteChannelSettings& settings)
@@ -445,12 +415,12 @@ int RemoteInput::webapiSettingsPutPatch(
     RemoteInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureRemoteInput *msg = MsgConfigureRemoteInput::create(settings, force);
+    MsgConfigureRemoteInput *msg = MsgConfigureRemoteInput::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRemoteInput *msgToGUI = MsgConfigureRemoteInput::create(settings, force);
+        MsgConfigureRemoteInput *msgToGUI = MsgConfigureRemoteInput::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -548,7 +518,7 @@ void RemoteInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respons
     response.getRemoteInputReport()->setMaxNbRecovery(m_remoteInputUDPHandler->getMaxNbRecovery());
 }
 
-void RemoteInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteInputSettings& settings, bool force)
+void RemoteInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const RemoteInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx

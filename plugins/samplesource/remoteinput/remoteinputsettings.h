@@ -39,6 +39,8 @@ struct RemoteInputSettings {
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const RemoteInputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTSETTINGS_H_ */

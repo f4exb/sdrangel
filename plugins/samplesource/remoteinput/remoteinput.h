@@ -60,20 +60,23 @@ public:
 
     public:
         const RemoteInputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRemoteInput* create(const RemoteInputSettings& settings, bool force = false)
+        static MsgConfigureRemoteInput* create(const RemoteInputSettings& settings, const QList<QString>& settingsKeys, bool force = false)
         {
-            return new MsgConfigureRemoteInput(settings, force);
+            return new MsgConfigureRemoteInput(settings, settingsKeys, force);
         }
 
     private:
         RemoteInputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRemoteInput(const RemoteInputSettings& settings, bool force) :
+        MsgConfigureRemoteInput(const RemoteInputSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -414,10 +417,10 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    void applySettings(const RemoteInputSettings& settings, bool force = false);
+    void applySettings(const RemoteInputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void applyRemoteChannelSettings(const RemoteChannelSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteInputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const RemoteInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
     void analyzeRemoteChannelSettingsReply(const QJsonObject& jsonObject);
     void analyzeInstanceSummaryReply(const QJsonObject& jsonObject);

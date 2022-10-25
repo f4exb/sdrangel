@@ -56,6 +56,7 @@ private:
 	Ui::RemoteInputGui* ui;
 
     RemoteInputSettings m_settings;        //!< current settings
+    QList<QString> m_settingsKeys;
 	RemoteInput::RemoteChannelSettings m_remoteChannelSettings;
 	double m_remoteShiftFrequencyFactor;  //!< Remote channel frequency shift factor
 	RemoteInput* m_sampleSource;

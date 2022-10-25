@@ -163,7 +163,13 @@ bool RemoteInputGui::handleMessage(const Message& message)
     if (RemoteInput::MsgConfigureRemoteInput::match(message))
     {
         const RemoteInput::MsgConfigureRemoteInput& cfg = (RemoteInput::MsgConfigureRemoteInput&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -278,8 +284,7 @@ void RemoteInputGui::handleInputMessages()
         }
         else
         {
-            if (handleMessage(*message))
-            {
+            if (handleMessage(*message)) {
                 delete message;
             }
         }
@@ -400,11 +405,14 @@ void RemoteInputGui::on_apiApplyButton_clicked(bool checked)
 {
     (void) checked;
     m_settings.m_apiAddress = ui->apiAddress->text();
+    m_settingsKeys.append("apiAddress");
 
     bool ctlOk;
     int udpApiPort = ui->apiPort->text().toInt(&ctlOk);
 
-    if((ctlOk) && (udpApiPort >= 1024) && (udpApiPort < 65535)) {
+    if((ctlOk) && (udpApiPort >= 1024) && (udpApiPort < 65535))
+    {
+        m_settingsKeys.append("apiPort");
         m_settings.m_apiPort = udpApiPort;
     }
 
@@ -428,6 +436,7 @@ void RemoteInputGui::on_dataApplyButton_clicked(bool checked)
 void RemoteInputGui::on_apiAddress_editingFinished()
 {
     m_settings.m_apiAddress = ui->apiAddress->text();
+    m_settingsKeys.append("apiAddress");
 
     ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
     RemoteInput::MsgRequestFixedData *msg = RemoteInput::MsgRequestFixedData::create();
@@ -439,6 +448,7 @@ void RemoteInputGui::on_apiAddress_editingFinished()
 void RemoteInputGui::on_dataAddress_editingFinished()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
+    m_settingsKeys.append("dataAddress");
     ui->dataApplyButton->setEnabled(true);
     ui->dataApplyButton->setStyleSheet("QPushButton { background-color : green; }");
 }
@@ -453,6 +463,7 @@ void RemoteInputGui::on_dataPort_editingFinished()
     }
 
     m_settings.m_dataPort = udpPort;
+    m_settingsKeys.append("dataPort");
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
 
     ui->dataApplyButton->setEnabled(true);
@@ -462,6 +473,7 @@ void RemoteInputGui::on_dataPort_editingFinished()
 void RemoteInputGui::on_multicastAddress_editingFinished()
 {
     m_settings.m_multicastAddress = ui->multicastAddress->text();
+    m_settingsKeys.append("multicastAddress");
     ui->dataApplyButton->setEnabled(true);
     ui->dataApplyButton->setStyleSheet("QPushButton { background-color : green; }");
 }
@@ -469,6 +481,7 @@ void RemoteInputGui::on_multicastAddress_editingFinished()
 void RemoteInputGui::on_multicastJoin_toggled(bool checked)
 {
     m_settings.m_multicastJoin = checked;
+    m_settingsKeys.append("multicastJoin");
     ui->dataApplyButton->setEnabled(true);
     ui->dataApplyButton->setStyleSheet("QPushButton { background-color : green; }");
 }
@@ -485,7 +498,7 @@ void RemoteInputGui::on_apiPort_editingFinished()
     else
     {
         m_settings.m_apiPort = udpApiPort;
-
+        m_settingsKeys.append("apiPort");
         ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
         RemoteInput::MsgRequestFixedData *msg = RemoteInput::MsgRequestFixedData::create();
         m_sampleSource->getInputMessageQueue()->push(msg);
@@ -497,12 +510,14 @@ void RemoteInputGui::on_apiPort_editingFinished()
 void RemoteInputGui::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void RemoteInputGui::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
@@ -620,9 +635,10 @@ void RemoteInputGui::updateHardware()
     {
         qDebug() << "RemoteInputGui::updateHardware";
         RemoteInput::MsgConfigureRemoteInput* message =
-                RemoteInput::MsgConfigureRemoteInput::create(m_settings, m_forceSettings);
+                RemoteInput::MsgConfigureRemoteInput::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSource->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -696,6 +712,10 @@ void RemoteInputGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }
