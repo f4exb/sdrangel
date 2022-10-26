@@ -196,7 +196,7 @@ bool RTLSDRInput::openDevice()
 
 void RTLSDRInput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool RTLSDRInput::start()
@@ -218,7 +218,7 @@ bool RTLSDRInput::start()
 
 	mutexLocker.unlock();
 
-	applySettings(m_settings, true);
+	applySettings(m_settings, QList<QString>(), true);
 	m_running = true;
 
 	return true;
@@ -264,12 +264,12 @@ bool RTLSDRInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureRTLSDR* message = MsgConfigureRTLSDR::create(m_settings, true);
+    MsgConfigureRTLSDR* message = MsgConfigureRTLSDR::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureRTLSDR* messageToGUI = MsgConfigureRTLSDR::create(m_settings, true);
+        MsgConfigureRTLSDR* messageToGUI = MsgConfigureRTLSDR::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -297,12 +297,12 @@ void RTLSDRInput::setCenterFrequency(qint64 centerFrequency)
     RTLSDRSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureRTLSDR* message = MsgConfigureRTLSDR::create(settings, false);
+    MsgConfigureRTLSDR* message = MsgConfigureRTLSDR::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureRTLSDR* messageToGUI = MsgConfigureRTLSDR::create(settings, false);
+        MsgConfigureRTLSDR* messageToGUI = MsgConfigureRTLSDR::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -314,7 +314,7 @@ bool RTLSDRInput::handleMessage(const Message& message)
         MsgConfigureRTLSDR& conf = (MsgConfigureRTLSDR&) message;
         qDebug() << "RTLSDRInput::handleMessage: MsgConfigureRTLSDR";
 
-        bool success = applySettings(conf.getSettings(), conf.getForce());
+        bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
         if (!success)
         {
@@ -351,15 +351,13 @@ bool RTLSDRInput::handleMessage(const Message& message)
     }
 }
 
-bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
+bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
+    qDebug() << "RTLSDRInput::applySettings: force: " << force << settings.getDebugString(settingsKeys, force);
     bool forwardChange = false;
-    QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_agc != settings.m_agc) || force)
+    if (settingsKeys.contains("agc") || force)
     {
-        reverseAPIKeys.append("agc");
-
         if (rtlsdr_set_agc_mode(m_dev, settings.m_agc ? 1 : 0) < 0) {
             qCritical("RTLSDRInput::applySettings: could not set AGC mode %s", settings.m_agc ? "on" : "off");
         } else {
@@ -367,20 +365,16 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || (m_settings.m_iqImbalance != settings.m_iqImbalance) || force)
+    if (settingsKeys.contains("dcBlock") || settingsKeys.contains("iqImbalance") || force)
     {
-        reverseAPIKeys.append("dcBlock");
-        reverseAPIKeys.append("iqImbalance");
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqImbalance);
         qDebug("RTLSDRInput::applySettings: corrections: DC block: %s IQ imbalance: %s",
                 settings.m_dcBlock ? "true" : "false",
                 settings.m_iqImbalance ? "true" : "false");
     }
 
-    if ((m_settings.m_loPpmCorrection != settings.m_loPpmCorrection) || force)
+    if (settingsKeys.contains("loPpmCorrection") || force)
     {
-        reverseAPIKeys.append("loPpmCorrection");
-
         if (m_dev != 0)
         {
             if (rtlsdr_set_freq_correction(m_dev, settings.m_loPpmCorrection) < 0) {
@@ -391,9 +385,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+    if (settingsKeys.contains("devSampleRate") || force)
     {
-        reverseAPIKeys.append("devSampleRate");
         forwardChange = true;
 
         if(m_dev != 0)
@@ -413,9 +406,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if (settingsKeys.contains("log2Decim") || force)
     {
-        reverseAPIKeys.append("log2Decim");
         forwardChange = true;
 
         if (m_rtlSDRThread) {
@@ -425,10 +417,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         qDebug("RTLSDRInput::applySettings: log2decim set to %d", settings.m_log2Decim);
     }
 
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+    if (settingsKeys.contains("fcPos") || force)
     {
-        reverseAPIKeys.append("fcPos");
-
         if (m_rtlSDRThread) {
             m_rtlSDRThread->setFcPos((int) settings.m_fcPos);
         }
@@ -436,34 +426,19 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         qDebug() << "RTLSDRInput::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
-        reverseAPIKeys.append("centerFrequency");
-    }
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
-        reverseAPIKeys.append("devSampleRate");
-    }
-    if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
-        reverseAPIKeys.append("transverterMode");
-    }
-    if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
-        reverseAPIKeys.append("transverterDeltaFrequency");
-    }
-
-    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    if (settingsKeys.contains("iqOrder") || force)
     {
-        reverseAPIKeys.append("iqOrder");
-
         if (m_rtlSDRThread) {
             m_rtlSDRThread->setIQOrder(settings.m_iqOrder);
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
-        || (m_settings.m_fcPos != settings.m_fcPos)
-        || (m_settings.m_log2Decim != settings.m_log2Decim)
-        || (m_settings.m_devSampleRate != settings.m_devSampleRate)
-        || (m_settings.m_transverterMode != settings.m_transverterMode)
-        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
+    if (settingsKeys.contains("centerFrequency")
+        || settingsKeys.contains("fcPos")
+        || settingsKeys.contains("log2Decim")
+        || settingsKeys.contains("devSampleRate")
+        || settingsKeys.contains("transverterMode")
+        || settingsKeys.contains("transverterDeltaFrequency") || force)
     {
         qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
@@ -486,9 +461,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_noModMode != settings.m_noModMode) || force)
+    if (settingsKeys.contains("noModMode") || force)
     {
-        reverseAPIKeys.append("noModMode");
         qDebug() << "RTLSDRInput::applySettings: set noModMode to " << settings.m_noModMode;
 
         // Direct Modes: 0: off, 1: I, 2: Q, 3: NoMod.
@@ -499,13 +473,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_lowSampleRate != settings.m_lowSampleRate) || force) {
-        reverseAPIKeys.append("lowSampleRate");
-    }
-
-    if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force)
+    if (settingsKeys.contains("rfBandwidth") || force)
     {
-        reverseAPIKeys.append("rfBandwidth");
         m_settings.m_rfBandwidth = settings.m_rfBandwidth;
 
         if (m_dev != 0)
@@ -518,10 +487,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_offsetTuning != settings.m_offsetTuning) || force)
+    if (settingsKeys.contains("offsetTuning") || force)
     {
-        reverseAPIKeys.append("offsetTuning");
-
         if (m_dev != 0)
         {
             if (rtlsdr_set_offset_tuning(m_dev, m_settings.m_offsetTuning ? 0 : 1) != 0) {
@@ -532,10 +499,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_gain != settings.m_gain) || force)
+    if (settingsKeys.contains("gain") || force)
     {
-        reverseAPIKeys.append("gain");
-
         if(m_dev != 0)
         {
             qDebug() << "Set tuner gain " << settings.m_gain;
@@ -547,10 +512,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_biasTee != settings.m_biasTee) || force)
+    if (settingsKeys.contains("biasTee") || force)
     {
-        reverseAPIKeys.append("biasTee");
-
         if(m_dev != 0)
         {
             if (rtlsdr_set_bias_tee(m_dev, settings.m_biasTee ? 1 : 0) != 0) {
@@ -561,16 +524,20 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (forwardChange)
     {
@@ -608,12 +575,12 @@ int RTLSDRInput::webapiSettingsPutPatch(
     RTLSDRSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureRTLSDR *msg = MsgConfigureRTLSDR::create(settings, force);
+    MsgConfigureRTLSDR *msg = MsgConfigureRTLSDR::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRTLSDR *msgToGUI = MsgConfigureRTLSDR::create(settings, force);
+        MsgConfigureRTLSDR *msgToGUI = MsgConfigureRTLSDR::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -773,7 +740,7 @@ void RTLSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respons
     }
 }
 
-void RTLSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RTLSDRSettings& settings, bool force)
+void RTLSDRInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const RTLSDRSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx

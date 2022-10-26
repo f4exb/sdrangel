@@ -40,20 +40,23 @@ public:
 
 	public:
 		const RTLSDRSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureRTLSDR* create(const RTLSDRSettings& settings, bool force)
+		static MsgConfigureRTLSDR* create(const RTLSDRSettings& settings, const QList<QString>& settingsKeys, bool force)
 		{
-			return new MsgConfigureRTLSDR(settings, force);
+			return new MsgConfigureRTLSDR(settings, settingsKeys, force);
 		}
 
 	private:
 		RTLSDRSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureRTLSDR(const RTLSDRSettings& settings, bool force) :
+		MsgConfigureRTLSDR(const RTLSDRSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -155,9 +158,9 @@ private:
 
 	bool openDevice();
 	void closeDevice();
-	bool applySettings(const RTLSDRSettings& settings, bool force);
+	bool applySettings(const RTLSDRSettings& settings, const QList<QString>& settingsKeys, bool force);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RTLSDRSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const RTLSDRSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

@@ -56,6 +56,7 @@ private:
     bool m_doApplySettings;
 	bool m_forceSettings;
 	RTLSDRSettings m_settings;
+    QList<QString> m_settingsKeys;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
 	QTimer m_updateTimer;
 	std::vector<int> m_gains;
