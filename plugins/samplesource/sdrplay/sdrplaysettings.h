@@ -55,26 +55,8 @@ struct SDRPlaySettings {
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-
-	void debug(const char *title) const
-	{
-	    qDebug() << QString(title)
-	            << ": m_centerFrequency: " << m_centerFrequency
-	            << " m_tunerGain: " << m_tunerGain
-	            << " m_LOppmTenths: " << m_LOppmTenths
-	            << " m_frequencyBandIndex: " << m_frequencyBandIndex
-	            << " m_ifFrequencyIndex: " << m_ifFrequencyIndex
-	            << " m_bandwidthIndex: " << m_bandwidthIndex
-	            << " m_devSampleRateIndex: " << m_devSampleRateIndex
-	            << " m_log2Decim: " << m_log2Decim
-	            << " m_fcPos: " << m_fcPos
-	            << " m_dcBlock: " << m_dcBlock
-	            << " m_iqCorrection: " << m_iqCorrection
-	            << " m_tunerGainMode: " << m_tunerGainMode
-	            << " m_lnaOn: " << m_lnaOn
-	            << " m_mixerAmpOn: " << m_mixerAmpOn
-	            << " m_basebandGain: " << m_basebandGain;
-	}
+    void applySettings(const QStringList& settingsKeys, const SDRPlaySettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* _SDRPLAY_SDRPLAYSETTINGS_H_ */

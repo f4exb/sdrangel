@@ -49,20 +49,22 @@ public:
 
     public:
         const SDRPlaySettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSDRPlay* create(const SDRPlaySettings& settings, bool force)
-        {
-            return new MsgConfigureSDRPlay(settings, force);
+        static MsgConfigureSDRPlay* create(const SDRPlaySettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureSDRPlay(settings, settingsKeys, force);
         }
 
     private:
         SDRPlaySettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureSDRPlay(const SDRPlaySettings& settings, bool force) :
+        MsgConfigureSDRPlay(const SDRPlaySettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -184,10 +186,10 @@ private:
 
     bool openDevice();
     void closeDevice();
-    bool applySettings(const SDRPlaySettings& settings, bool forwardChange, bool force);
+    bool applySettings(const SDRPlaySettings& settings, const QList<QString>& settingsKeys, bool forwardChange, bool force);
     bool setDeviceCenterFrequency(quint64 freq);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRPlaySettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const SDRPlaySettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

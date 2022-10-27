@@ -128,3 +128,132 @@ bool SDRPlaySettings::deserialize(const QByteArray& data)
 		return false;
 	}
 }
+
+void SDRPlaySettings::applySettings(const QStringList& settingsKeys, const SDRPlaySettings& settings)
+{
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("tunerGain")) {
+        m_tunerGain = settings.m_tunerGain;
+    }
+    if (settingsKeys.contains("LOppmTenths")) {
+        m_LOppmTenths = settings.m_LOppmTenths;
+    }
+    if (settingsKeys.contains("ifFrequencyIndex")) {
+        m_ifFrequencyIndex = settings.m_ifFrequencyIndex;
+    }
+    if (settingsKeys.contains("bandwidthIndex")) {
+        m_bandwidthIndex = settings.m_bandwidthIndex;
+    }
+    if (settingsKeys.contains("devSampleRateIndex")) {
+        m_devSampleRateIndex = settings.m_devSampleRateIndex;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("fcPos")) {
+        m_fcPos = settings.m_fcPos;
+    }
+    if (settingsKeys.contains("dcBlock")) {
+        m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection")) {
+        m_iqCorrection = settings.m_iqCorrection;
+    }
+    if (settingsKeys.contains("tunerGainMode")) {
+        m_tunerGainMode = settings.m_tunerGainMode;
+    }
+    if (settingsKeys.contains("lnaOn")) {
+        m_lnaOn = settings.m_lnaOn;
+    }
+    if (settingsKeys.contains("mixerAmpOn")) {
+        m_mixerAmpOn = settings.m_mixerAmpOn;
+    }
+    if (settingsKeys.contains("basebandGain")) {
+        m_basebandGain = settings.m_basebandGain;
+    }
+    if (settingsKeys.contains("iqOrder")) {
+        m_iqOrder = settings.m_iqOrder;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
+
+QString SDRPlaySettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("tunerGain") || force) {
+        ostr << " m_tunerGain: " << m_tunerGain;
+    }
+    if (settingsKeys.contains("LOppmTenths") || force) {
+        ostr << " m_LOppmTenths: " << m_LOppmTenths;
+    }
+    if (settingsKeys.contains("frequencyBandIndex") || force) {
+        ostr << " m_frequencyBandIndex: " << m_frequencyBandIndex;
+    }
+    if (settingsKeys.contains("ifFrequencyIndex") || force) {
+        ostr << " m_ifFrequencyIndex: " << m_ifFrequencyIndex;
+    }
+    if (settingsKeys.contains("bandwidthIndex") || force) {
+        ostr << " m_bandwidthIndex: " << m_bandwidthIndex;
+    }
+    if (settingsKeys.contains("devSampleRateIndex") || force) {
+        ostr << " m_devSampleRateIndex: " << m_devSampleRateIndex;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("fcPos") || force) {
+        ostr << " m_fcPos: " << m_fcPos;
+    }
+    if (settingsKeys.contains("dcBlock") || force) {
+        ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection") || force) {
+        ostr << " m_iqCorrection: " << m_iqCorrection;
+    }
+    if (settingsKeys.contains("tunerGainMode") || force) {
+        ostr << " m_tunerGainMode: " << m_tunerGainMode;
+    }
+    if (settingsKeys.contains("lnaOn") || force) {
+        ostr << " m_lnaOn: " << m_lnaOn;
+    }
+    if (settingsKeys.contains("mixerAmpOn") || force) {
+        ostr << " m_mixerAmpOn: " << m_mixerAmpOn;
+    }
+    if (settingsKeys.contains("basebandGain") || force) {
+        ostr << " m_basebandGain: " << m_basebandGain;
+    }
+    if (settingsKeys.contains("iqOrder") || force) {
+        ostr << " m_iqOrder: " << m_iqOrder;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}

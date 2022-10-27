@@ -56,6 +56,7 @@ private:
     bool m_doApplySettings;
     bool m_forceSettings;
     SDRPlaySettings m_settings;
+    QList<QString> m_settingsKeys;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
     DeviceSampleSource* m_sampleSource;

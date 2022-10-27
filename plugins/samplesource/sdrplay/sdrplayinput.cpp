@@ -108,7 +108,7 @@ bool SDRPlayInput::openDevice()
         qCritical("SDRPlayInput::openDevice: could not open SDRPlay #%d: %s", m_devNumber, strerror(errno));
         return false;
     }
-    
+
     if ((res = mirisdr_set_hw_flavour(m_dev, MIRISDR_HW_SDRPLAY)) < 0)
     {
         qCritical("SDRPlayInput::openDevice: failed to set HW flavour: %s", strerror(errno));
@@ -199,7 +199,7 @@ bool SDRPlayInput::start()
 
 //	mutexLocker.unlock();
 
-	applySettings(m_settings, true, true);
+	applySettings(m_settings, QList<QString>(), true, true);
 	m_running = true;
 
 	return true;
@@ -218,7 +218,7 @@ void SDRPlayInput::closeDevice()
 
 void SDRPlayInput::init()
 {
-    applySettings(m_settings, true, true);
+    applySettings(m_settings, QList<QString>(), true, true);
 }
 
 void SDRPlayInput::stop()
@@ -250,12 +250,12 @@ bool SDRPlayInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureSDRPlay* message = MsgConfigureSDRPlay::create(m_settings, true);
+    MsgConfigureSDRPlay* message = MsgConfigureSDRPlay::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureSDRPlay* messageToGUI = MsgConfigureSDRPlay::create(m_settings, true);
+        MsgConfigureSDRPlay* messageToGUI = MsgConfigureSDRPlay::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -283,12 +283,12 @@ void SDRPlayInput::setCenterFrequency(qint64 centerFrequency)
     SDRPlaySettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureSDRPlay* message = MsgConfigureSDRPlay::create(settings, false);
+    MsgConfigureSDRPlay* message = MsgConfigureSDRPlay::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureSDRPlay* messageToGUI = MsgConfigureSDRPlay::create(settings, false);
+        MsgConfigureSDRPlay* messageToGUI = MsgConfigureSDRPlay::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -299,21 +299,24 @@ bool SDRPlayInput::handleMessage(const Message& message)
     {
         MsgConfigureSDRPlay& conf = (MsgConfigureSDRPlay&) message;
         qDebug() << "SDRPlayInput::handleMessage: MsgConfigureSDRPlay";
-        const SDRPlaySettings& settings = conf.getSettings();
 
         // change of sample rate needs full stop / start sequence that includes the standard apply settings
         // only if in started state (iff m_dev != 0)
-        if ((m_dev != 0) && (m_settings.m_devSampleRateIndex != settings.m_devSampleRateIndex))
+        if ((m_dev != 0) && conf.getSettingsKeys().contains("devSampleRateIndex"))
         {
-            m_settings = settings;
+            if (conf.getForce()) {
+                m_settings = conf.getSettings();
+            } else {
+                m_settings.applySettings(conf.getSettingsKeys(), conf.getSettings());
+            }
+
             stop();
             start();
         }
         // standard changes
         else
         {
-            if (!applySettings(settings, false, conf.getForce()))
-            {
+            if (!applySettings(conf.getSettings(), conf.getSettingsKeys(), false, conf.getForce())) {
                 qDebug("SDRPlayInput::handleMessage: config error");
             }
         }
@@ -327,8 +330,7 @@ bool SDRPlayInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
@@ -349,44 +351,34 @@ bool SDRPlayInput::handleMessage(const Message& message)
     }
 }
 
-bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardChange, bool force)
+bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, const QList<QString>& settingsKeys, bool forwardChange, bool force)
 {
+    qDebug() << "SDRPlayInput::applySettings: forwardChange: " << forwardChange << " force: " << force << settings.getDebugString(settingsKeys, force);
     bool forceGainSetting = false;
-    QList<QString> reverseAPIKeys;
     QMutexLocker mutexLocker(&m_mutex);
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
-    {
-        reverseAPIKeys.append("dcBlock");
-        m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
-    }
-
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
-    {
-        reverseAPIKeys.append("iqCorrection");
+    if (settingsKeys.contains("dcBlock") || settingsKeys.contains("iqCorrection") || force) {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
     }
 
     // gains processing
 
-    if ((m_settings.m_tunerGainMode != settings.m_tunerGainMode) || force)
-    {
-        reverseAPIKeys.append("tunerGainMode");
+    if (settingsKeys.contains("tunerGainMode") || force) {
         forceGainSetting = true;
     }
 
-    if ((m_settings.m_tunerGain != settings.m_tunerGain) || force) {
-        reverseAPIKeys.append("tunerGain");
-    }
-    if ((m_settings.m_lnaOn != settings.m_lnaOn) || force) {
-        reverseAPIKeys.append("lnaOn");
-    }
+    bool tunerGainMode = settingsKeys.contains("tunerGainMode") ?
+        settings.m_tunerGainMode :
+        m_settings.m_tunerGainMode;
+    uint32_t frequencyBandIndex = settingsKeys.contains("frequencyBandIndex") ?
+        settings.m_frequencyBandIndex :
+        m_settings.m_frequencyBandIndex;
 
-    if (settings.m_tunerGainMode) // auto
+    if (tunerGainMode) // auto
     {
-        if ((m_settings.m_tunerGain != settings.m_tunerGain) || forceGainSetting)
+        if (settingsKeys.contains("tunerGain") || forceGainSetting)
         {
-            if(m_dev != 0)
+            if (m_dev != 0)
             {
                 int r = mirisdr_set_tuner_gain(m_dev, settings.m_tunerGain);
 
@@ -398,12 +390,9 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
                 {
                     int lnaGain;
 
-                    if (settings.m_frequencyBandIndex < 3) // bands using AM mode
-                    {
+                    if (frequencyBandIndex < 3) { // bands using AM mode
                         lnaGain = mirisdr_get_mixbuffer_gain(m_dev);
-                    }
-                    else
-                    {
+                    } else {
                         lnaGain = mirisdr_get_lna_gain(m_dev);
                     }
 
@@ -425,11 +414,11 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
     {
         bool anyChange = false;
 
-        if ((m_settings.m_lnaOn != settings.m_lnaOn) || forceGainSetting)
+        if (settingsKeys.contains("lnaOn") || forceGainSetting)
         {
             if (m_dev != 0)
             {
-                if (settings.m_frequencyBandIndex < 3) // bands using AM mode
+                if (frequencyBandIndex < 3) // bands using AM mode
                 {
                     int r = mirisdr_set_mixbuffer_gain(m_dev, settings.m_lnaOn ? 0 : 1); // mirisdr_set_mixbuffer_gain takes gain reduction
 
@@ -452,10 +441,8 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
             }
         }
 
-        if ((m_settings.m_mixerAmpOn != settings.m_mixerAmpOn) || forceGainSetting)
+        if (settingsKeys.contains("mixerAmpOn") || forceGainSetting)
         {
-            reverseAPIKeys.append("mixerAmpOn");
-
             if (m_dev != 0)
             {
                 int r = mirisdr_set_mixer_gain(m_dev, settings.m_mixerAmpOn ? 0 : 1); // mirisdr_set_lna_gain takes gain reduction
@@ -468,10 +455,8 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
             }
         }
 
-        if ((m_settings.m_basebandGain != settings.m_basebandGain) || forceGainSetting)
+        if (settingsKeys.contains("basebandGain") || forceGainSetting)
         {
-            reverseAPIKeys.append("basebandGain");
-
             if (m_dev != 0)
             {
                 int r = mirisdr_set_baseband_gain(m_dev, settings.m_basebandGain);
@@ -488,7 +473,7 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         {
             int lnaGain;
 
-            if (settings.m_frequencyBandIndex < 3) { // bands using AM mode
+            if (frequencyBandIndex < 3) { // bands using AM mode
                 lnaGain = mirisdr_get_mixbuffer_gain(m_dev);
             } else {
                 lnaGain = mirisdr_get_lna_gain(m_dev);
@@ -507,10 +492,8 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         }
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if (settingsKeys.contains("log2Decim") || force)
     {
-        reverseAPIKeys.append("log2Decim");
-
         if (m_sdrPlayThread)
         {
             m_sdrPlayThread->setLog2Decimation(settings.m_log2Decim);
@@ -518,10 +501,8 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         }
     }
 
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+    if (settingsKeys.contains("fcPos") || force)
     {
-        reverseAPIKeys.append("fcPos");
-
         if (m_sdrPlayThread)
         {
             m_sdrPlayThread->setFcPos((int) settings.m_fcPos);
@@ -529,10 +510,8 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         }
     }
 
-    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    if (settingsKeys.contains("iqOrder") || force)
     {
-        reverseAPIKeys.append("iqOrder");
-
         if (m_sdrPlayThread)
         {
             m_sdrPlayThread->setIQOrder((int) settings.m_iqOrder);
@@ -540,17 +519,10 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
-        reverseAPIKeys.append("centerFrequency");
-    }
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
-        reverseAPIKeys.append("LOppmTenths");
-    }
-
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
-        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
-        || (m_settings.m_fcPos != settings.m_fcPos)
-        || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if (settingsKeys.contains("centerFrequency")
+        || settingsKeys.contains("LOppmTenths")
+        || settingsKeys.contains("fcPos")
+        || settingsKeys.contains("log2Decim") || force)
     {
         qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
@@ -571,9 +543,8 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         }
     }
 
-    if ((m_settings.m_bandwidthIndex != settings.m_bandwidthIndex) || force)
+    if (settingsKeys.contains("bandwidthIndex") || force)
     {
-        reverseAPIKeys.append("bandwidthIndex");
         int bandwidth = SDRPlayBandwidths::getBandwidth(settings.m_bandwidthIndex);
         int r = mirisdr_set_bandwidth(m_dev, bandwidth);
 
@@ -584,9 +555,8 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         }
     }
 
-    if ((m_settings.m_ifFrequencyIndex != settings.m_ifFrequencyIndex) || force)
+    if (settingsKeys.contains("ifFrequencyIndex") || force)
     {
-        reverseAPIKeys.append("ifFrequencyIndex");
         int iFFrequency = SDRPlayIF::getIF(settings.m_ifFrequencyIndex);
         int r = mirisdr_set_if_freq(m_dev, iFFrequency);
 
@@ -597,16 +567,20 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
         }
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (forwardChange)
     {
@@ -686,12 +660,12 @@ int SDRPlayInput::webapiSettingsPutPatch(
     SDRPlaySettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureSDRPlay *msg = MsgConfigureSDRPlay::create(settings, force);
+    MsgConfigureSDRPlay *msg = MsgConfigureSDRPlay::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSDRPlay *msgToGUI = MsgConfigureSDRPlay::create(settings, force);
+        MsgConfigureSDRPlay *msgToGUI = MsgConfigureSDRPlay::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -848,7 +822,7 @@ void SDRPlayInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
     }
 }
 
-void SDRPlayInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRPlaySettings& settings, bool force)
+void SDRPlayInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const SDRPlaySettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
