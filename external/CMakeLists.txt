@@ -285,7 +285,7 @@ endif (NOT OPUS_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
 if (NOT ZLIB_FOUND AND NOT USE_PRECOMPILED_LIBS)
     ExternalProject_Add(zlib
-            URL https://zlib.net/zlib-1.2.12.tar.gz
+            URL https://zlib.net/zlib-1.2.13.tar.gz
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/zlib"
             CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
             TEST_COMMAND ""
