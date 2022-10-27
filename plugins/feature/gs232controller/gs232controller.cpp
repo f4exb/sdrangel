@@ -44,6 +44,7 @@ MESSAGE_CLASS_DEFINITION(GS232Controller::MsgConfigureGS232Controller, Message)
 MESSAGE_CLASS_DEFINITION(GS232Controller::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(GS232Controller::MsgReportWorker, Message)
 MESSAGE_CLASS_DEFINITION(GS232Controller::MsgReportAvailableChannelOrFeatures, Message)
+MESSAGE_CLASS_DEFINITION(GS232Controller::MsgScanAvailableChannelOrFeatures, Message)
 
 const char* const GS232Controller::m_featureIdURI = "sdrangel.feature.gs232controller";
 const char* const GS232Controller::m_featureId = "GS232Controller";
@@ -195,6 +196,11 @@ bool GS232Controller::handleMessage(const Message& cmd)
             m_state = StError;
             m_errorMessage = report.getMessage();
         }
+        return true;
+    }
+    else if (MsgScanAvailableChannelOrFeatures::match(cmd))
+    {
+        scanAvailableChannelsAndFeatures();
         return true;
     }
     else if (GS232ControllerReport::MsgReportAzAl::match(cmd))

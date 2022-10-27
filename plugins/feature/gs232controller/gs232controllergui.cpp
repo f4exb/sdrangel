@@ -178,6 +178,9 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     displaySettings();
     applySettings(true);
     makeUIConnections();
+
+    // Get pre-existing pipes
+    m_gs232Controller->getInputMessageQueue()->push(GS232Controller::MsgScanAvailableChannelOrFeatures::create());
 }
 
 GS232ControllerGUI::~GS232ControllerGUI()
