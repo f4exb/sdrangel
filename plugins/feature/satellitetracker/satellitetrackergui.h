@@ -129,7 +129,7 @@ private:
     QAction *createCheckableItem(QString& text, int idx, bool checked);
     void updateTimeToAOS();
     QString formatDaysTime(qint64 days, QDateTime dateTime);
-    QString formatSecondsHHMM(qint64 seconds);
+    QString formatSecondsAsHHMMSS(qint64 seconds);
     void updateDeviceFeatureCombo();
     void updateDeviceFeatureCombo(const QStringList &items, const QString &selected);
     void updateFileInputList();
