@@ -119,6 +119,22 @@ public:
         {}
     };
 
+    class MsgScanAvailableChannelOrFeatures : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+
+        static MsgScanAvailableChannelOrFeatures* create() {
+            return new MsgScanAvailableChannelOrFeatures();
+        }
+
+    protected:
+
+        MsgScanAvailableChannelOrFeatures() :
+            Message()
+        { }
+    };
+
     GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~GS232Controller();
     virtual void destroy() { delete this; }
