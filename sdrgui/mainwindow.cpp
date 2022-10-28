@@ -2042,7 +2042,7 @@ void MainWindow::on_action_saveAll_triggered()
 {
     saveConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
     m_mainCore->m_settings.save();
-    QMessageBox::information(this, tr("Done"), tr("All curent settings saved"));
+    QMessageBox::information(this, tr("Done"), tr("All current settings saved"));
 }
 
 void MainWindow::on_action_Quick_Start_triggered()
