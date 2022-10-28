@@ -79,7 +79,8 @@ void SatelliteTrackerSettings::resetToDefaults()
     m_mapFeature = "";
     m_fileInputDevice = "";
     m_workspaceIndex = 0;
-
+    m_columnSort = -1;
+    m_columnSortOrder = Qt::AscendingOrder;
     for (int i = 0; i < SAT_COL_COLUMNS; i++)
     {
         m_columnIndexes[i] = i;
@@ -138,6 +139,8 @@ QByteArray SatelliteTrackerSettings::serialize() const
     s.writeString(44, m_fileInputDevice);
     s.writeS32(45, m_workspaceIndex);
     s.writeBlob(46, m_geometryBytes);
+    s.writeS32(47, m_columnSort);
+    s.writeS32(48, (int)m_columnSortOrder);
 
     for (int i = 0; i < SAT_COL_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -231,6 +234,8 @@ bool SatelliteTrackerSettings::deserialize(const QByteArray& data)
         d.readString(44, &m_fileInputDevice, "");
         d.readS32(45, &m_workspaceIndex, 0);
         d.readBlob(46, &m_geometryBytes);
+        d.readS32(47, &m_columnSort, -1);
+        d.readS32(48, (int *)&m_columnSortOrder, (int)Qt::AscendingOrder);
 
         for (int i = 0; i < SAT_COL_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

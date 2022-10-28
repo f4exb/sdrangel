@@ -76,7 +76,6 @@ bool SatelliteTrackerGUI::deserialize(const QByteArray& data)
         m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         updateSelectedSats();
         displaySettings();
-        qDebug() << " deserialize " << m_settings.m_satellites;
         applySettings(true);
         return true;
     }
@@ -348,18 +347,21 @@ void SatelliteTrackerGUI::displaySettings()
     blockApplySettings(true);
     ui->latitude->setValue(m_settings.m_latitude);
     ui->longitude->setValue(m_settings.m_longitude);
-    ui->target->clear();
 
+    ui->target->blockSignals(true);
+    ui->target->clear();
     for (const QString& s : m_settings.m_satellites) {
         ui->target->addItem(s);
     }
-
+    ui->target->blockSignals(false);
     ui->target->setCurrentIndex(ui->target->findText(m_settings.m_target));
+
     ui->dateTimeSelect->setCurrentIndex((int)m_settings.m_dateTimeSelect);
     ui->dateTime->setVisible(m_settings.m_dateTimeSelect == SatelliteTrackerSettings::CUSTOM);
     ui->dateTime->setDateTime(QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs));
     ui->autoTarget->setChecked(m_settings.m_autoTarget);
     ui->darkTheme->setChecked(m_settings.m_chartsDarkTheme);
+    ui->satTable->horizontalHeader()->setSortIndicator(m_settings.m_columnSort, m_settings.m_columnSortOrder);
     getRollupContents()->restoreState(m_rollupState);
     plotChart();
     blockApplySettings(false);
@@ -1204,7 +1206,13 @@ void SatelliteTrackerGUI::on_satTable_cellDoubleClicked(int row, int column)
 
     QString sat = ui->satTable->item(row, SAT_COL_NAME)->text();
     FeatureWebAPIUtils::mapFind(sat);
+}
 
+void SatelliteTrackerGUI::on_satTableHeader_sortIndicatorChanged(int logicalIndex, Qt::SortOrder order)
+{
+    m_settings.m_columnSort = logicalIndex;
+    m_settings.m_columnSortOrder = order;
+    applySettings();
 }
 
 // Columns in table reordered
@@ -1347,5 +1355,6 @@ void SatelliteTrackerGUI::makeUIConnections()
     QObject::connect(ui->prevPass, &QToolButton::clicked, this, &SatelliteTrackerGUI::on_prevPass_clicked);
     QObject::connect(ui->darkTheme, &QToolButton::clicked, this, &SatelliteTrackerGUI::on_darkTheme_clicked);
     QObject::connect(ui->satTable, &QTableWidget::cellDoubleClicked, this, &SatelliteTrackerGUI::on_satTable_cellDoubleClicked);
+    QObject::connect(ui->satTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &SatelliteTrackerGUI::on_satTableHeader_sortIndicatorChanged);
     QObject::connect(ui->deviceFeatureSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &SatelliteTrackerGUI::on_deviceFeatureSelect_currentIndexChanged);
 }

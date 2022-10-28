@@ -83,6 +83,8 @@ struct SatelliteTrackerSettings
     QString m_mapFeature;               //!< Which feature when FROM_MAP
     QString m_fileInputDevice;          //!< Which device when FROM_FILE
 
+    int m_columnSort;                    //!< Which column is used for sorting (-1 for none)
+    Qt::SortOrder m_columnSortOrder;
     int m_columnIndexes[SAT_COL_COLUMNS];//!< How the columns are ordered in the table
     int m_columnSizes[SAT_COL_COLUMNS];  //!< Size of the coumns in the table
 
