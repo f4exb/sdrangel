@@ -228,7 +228,7 @@ void GS232ControllerWorker::setAzimuth(float azimuth)
     {
         QString cmd = QString("M%1\r\n").arg((int)std::round(azimuth), 3, 10, QLatin1Char('0'));
         QByteArray data = cmd.toLatin1();
-        m_serialPort.write(data);
+        m_device->write(data);
     }
     else
     {
@@ -243,7 +243,7 @@ void GS232ControllerWorker::setAzimuthElevation(float azimuth, float elevation)
     {
         QString cmd = QString("W%1 %2\r\n").arg((int)std::round(azimuth), 3, 10, QLatin1Char('0')).arg((int)std::round(elevation), 3, 10, QLatin1Char('0'));
         QByteArray data = cmd.toLatin1();
-        m_serialPort.write(data);
+        m_device->write(data);
     }
     else if (m_settings.m_protocol == GS232ControllerSettings::SPID)
     {
@@ -267,7 +267,7 @@ void GS232ControllerWorker::setAzimuthElevation(float azimuth, float elevation)
             cmd[11] = 0x2f; // Set cmd
             cmd[12] = 0x20;  // End
 
-            m_serialPort.write(cmd);
+            m_device->write(cmd);
 
             m_spidSetSent = true;
         }
@@ -279,7 +279,7 @@ void GS232ControllerWorker::setAzimuthElevation(float azimuth, float elevation)
     } else {
         QString cmd = QString("P %1 %2\n").arg(azimuth).arg(elevation);
         QByteArray data = cmd.toLatin1();
-        m_socket.write(data);
+        m_device->write(data);
     }
     m_lastAzimuth = azimuth;
     m_lastElevation = elevation;
