@@ -121,7 +121,7 @@ bool FileRecord::startRecording()
         m_sampleFile.open(m_currentFileName.toStdString().c_str(), std::ios::binary);
         if (!m_sampleFile.is_open())
         {
-            qWarning() << "FileRecord::startRecording: failed to open file: " << m_curentFileName;
+            qWarning() << "FileRecord::startRecording: failed to open file: " << m_currentFileName;
             return false;
         }
         m_recordOn = true;
@@ -143,7 +143,7 @@ bool FileRecord::stopRecording()
         m_recordStart = false;
         if (m_sampleFile.bad())
         {
-            qWarning() << "FileRecord::stopRecording: an error occurred while writing to " << m_curentFileName;
+            qWarning() << "FileRecord::stopRecording: an error occurred while writing to " << m_currentFileName;
             return false;
         }
     }
