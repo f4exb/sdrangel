@@ -50,7 +50,7 @@ public:
 
     quint64 getByteCount() const { return m_byteCount; }
     void setMsShift(qint64 shift) { m_msShift = shift; }
-    const QString& getCurrentFileName() { return m_curentFileName; }
+    const QString& getCurrentFileName() { return m_currentFileName; }
 
     void genUniqueFileName(uint deviceUID, int istream = -1);
 
@@ -74,7 +74,7 @@ private:
 	bool m_recordOn;
     bool m_recordStart;
     std::ofstream m_sampleFile;
-    QString m_curentFileName;
+    QString m_currentFileName;
     quint64 m_byteCount;
     qint64 m_msShift;
     QRecursiveMutex m_mutex;

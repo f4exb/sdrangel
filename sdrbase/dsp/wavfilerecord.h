@@ -92,7 +92,7 @@ public:
     quint64 getByteCount() const { return m_byteCount; }
     void setMsShift(qint64 shift) override { m_msShift = shift; }
     virtual int getBytesPerSample() override { return 4; };
-    const QString& getCurrentFileName() override { return m_curentFileName; }
+    const QString& getCurrentFileName() override { return m_currentFileName; }
 
     void genUniqueFileName(uint deviceUID, int istream = -1);
 
@@ -120,7 +120,7 @@ private:
     bool m_recordOn;
     bool m_recordStart;
     std::ofstream m_sampleFile;
-    QString m_curentFileName;
+    QString m_currentFileName;
     quint64 m_byteCount;
     qint64 m_msShift;
 

@@ -129,11 +129,11 @@ bool WavFileRecord::startRecording()
     if (!m_sampleFile.is_open())
     {
         qDebug() << "WavFileRecord::startRecording";
-        m_curentFileName = QString("%1.%2.wav").arg(m_fileBase).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
-        m_sampleFile.open(m_curentFileName.toStdString().c_str(), std::ios::binary);
+        m_currentFileName = QString("%1.%2.wav").arg(m_fileBase).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
+        m_sampleFile.open(m_currentFileName.toStdString().c_str(), std::ios::binary);
         if (!m_sampleFile.is_open())
         {
-            qWarning() << "WavFileRecord::startRecording: failed to open file: " << m_curentFileName;
+            qWarning() << "WavFileRecord::startRecording: failed to open file: " << m_currentFileName;
             return false;
         }
         m_recordOn = true;
@@ -161,7 +161,7 @@ bool WavFileRecord::stopRecording()
         m_recordStart = false;
         if (m_sampleFile.bad())
         {
-            qWarning() << "WavFileRecord::stopRecording: an error occurred while writing to " << m_curentFileName;
+            qWarning() << "WavFileRecord::stopRecording: an error occurred while writing to " << m_currentFileName;
             return false;
         }
     }

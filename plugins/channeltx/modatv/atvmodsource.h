@@ -208,7 +208,7 @@ private:
     bool m_videoOK;
 
     std::vector<ATVCamera> m_cameras; //!< vector of available cameras
-    int m_cameraIndex;           //!< curent camera index in list of available cameras
+    int m_cameraIndex;           //!< current camera index in list of available cameras
 
     std::string m_overlayText;
     QString m_imageFileName;
