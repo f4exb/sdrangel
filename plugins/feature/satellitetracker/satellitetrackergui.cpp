@@ -1080,6 +1080,29 @@ public:
     }
 };
 
+// Handle sorting for next column, which can have times as HH:MM:SS or MM:SS
+class NextEventTableWidgetItem : public QTableWidgetItem
+{
+public:
+    bool operator<(const QTableWidgetItem &other) const override
+    {
+        QString t1 = text();
+        QString t2 = other.text();
+        int t1Colons = t1.count(":");
+        int t2Colons = t2.count(":");
+        if (t1Colons == t2Colons)
+        {
+            QCollator coll;
+            coll.setNumericMode(true);
+            return coll.compare(t1, t2) < 0;
+        }
+        else
+        {
+            return t1Colons < t2Colons;
+        }
+    }
+};
+
 class NaturallySortedTableWidgetItem : public QTableWidgetItem
 {
 public:
@@ -1087,7 +1110,7 @@ public:
     {
         QCollator coll;
         coll.setNumericMode(true);
-        return coll.compare( text() , other.text() ) < 0;
+        return coll.compare(text() , other.text()) < 0;
     }
 };
 
@@ -1127,8 +1150,10 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
         {
             if ((i == SAT_COL_AOS) || (i == SAT_COL_LOS))
                 items[i] = new DateTimeSortedTableWidgetItem();
-            else if((i == SAT_COL_NAME) || (i == SAT_COL_NORAD_ID))
+            else if ((i == SAT_COL_NAME) || (i == SAT_COL_NORAD_ID))
                 items[i] = new QTableWidgetItem();
+            else if (i == SAT_COL_TNE)
+                items[i] = new NextEventTableWidgetItem();
             else
                 items[i] = new NaturallySortedTableWidgetItem();
             items[i]->setToolTip(ui->satTable->horizontalHeaderItem(i)->toolTip());
