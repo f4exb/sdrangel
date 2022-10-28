@@ -56,6 +56,7 @@ private:
     bool m_doApplySettings;
     bool m_forceSettings;
     SDRPlayV3Settings m_settings;
+    QList<QString> m_settingsKeys;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
     SDRPlayV3Input* m_sdrPlayV3Input;

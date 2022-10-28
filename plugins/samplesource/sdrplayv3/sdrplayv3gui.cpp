@@ -139,6 +139,7 @@ void SDRPlayV3Gui::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -174,7 +175,13 @@ bool SDRPlayV3Gui::handleMessage(const Message& message)
     if (SDRPlayV3Input::MsgConfigureSDRPlayV3::match(message))
     {
         const SDRPlayV3Input::MsgConfigureSDRPlayV3& cfg = (SDRPlayV3Input::MsgConfigureSDRPlayV3&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -329,8 +336,9 @@ void SDRPlayV3Gui::updateLNAValues()
 
 void SDRPlayV3Gui::sendSettings()
 {
-    if(!m_updateTimer.isActive())
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
+    }
 }
 
 void SDRPlayV3Gui::updateHardware()
@@ -338,9 +346,10 @@ void SDRPlayV3Gui::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "SDRPlayV3Gui::updateHardware";
-        SDRPlayV3Input::MsgConfigureSDRPlayV3* message = SDRPlayV3Input::MsgConfigureSDRPlayV3::create(m_settings, m_forceSettings);
+        SDRPlayV3Input::MsgConfigureSDRPlayV3* message = SDRPlayV3Input::MsgConfigureSDRPlayV3::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sdrPlayV3Input->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -378,6 +387,7 @@ void SDRPlayV3Gui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
     updateLNAValues();
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -385,12 +395,15 @@ void SDRPlayV3Gui::on_ppm_valueChanged(int value)
 {
     m_settings.m_LOppmTenths = value;
     ui->ppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+    m_settingsKeys.append("LOppmTenths");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_tuner_currentIndexChanged(int index)
 {
     m_settings.m_tuner = index;
+    m_settingsKeys.append("tuner");
+
     if (m_sdrPlayV3Input->getDeviceId() == SDRPLAY_RSPduo_ID)
     {
         ui->antenna->clear();
@@ -400,96 +413,112 @@ void SDRPlayV3Gui::on_tuner_currentIndexChanged(int index)
         ui->amNotch->setVisible(index == 0);
         ui->biasTee->setVisible(index == 1);
     }
+
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_antenna_currentIndexChanged(int index)
 {
     m_settings.m_antenna = index;
+    m_settingsKeys.append("antenna");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_extRef_toggled(bool checked)
 {
     m_settings.m_extRef = checked;
+    m_settingsKeys.append("extRef");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_biasTee_toggled(bool checked)
 {
     m_settings.m_biasTee = checked;
+    m_settingsKeys.append("biasTee");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_amNotch_toggled(bool checked)
 {
     m_settings.m_amNotch = checked;
+    m_settingsKeys.append("amNotch");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_fmNotch_toggled(bool checked)
 {
     m_settings.m_fmNotch = checked;
+    m_settingsKeys.append("fmNotch");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_dabNotch_toggled(bool checked)
 {
     m_settings.m_dabNotch = checked;
+    m_settingsKeys.append("dabNotch");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_bandwidth_currentIndexChanged(int index)
 {
     m_settings.m_bandwidthIndex = index;
+    m_settingsKeys.append("bandwidthIndex");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_samplerate_changed(quint64 value)
 {
-    m_settings.m_devSampleRate = (uint32_t)value;
+    m_settings.m_devSampleRate = (uint32_t) value;
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_ifFrequency_currentIndexChanged(int index)
 {
     m_settings.m_ifFrequencyIndex = index;
+    m_settingsKeys.append("ifFrequencyIndex");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_decim_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index;
+    m_settingsKeys.append("log2Decim");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_fcPos_currentIndexChanged(int index)
 {
     m_settings.m_fcPos = (SDRPlayV3Settings::fcPos_t) index;
+    m_settingsKeys.append("fcPos");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_gainLNA_currentIndexChanged(int index)
 {
     m_settings.m_lnaIndex = index;
+    m_settingsKeys.append("lnaIndex");
     sendSettings();
 }
 
 void SDRPlayV3Gui::on_gainIFAGC_toggled(bool checked)
 {
     m_settings.m_ifAGC = checked;
+    m_settingsKeys.append("ifAGC");
     ui->gainIF->setEnabled(!checked);
     sendSettings();
 }
@@ -497,6 +526,7 @@ void SDRPlayV3Gui::on_gainIFAGC_toggled(bool checked)
 void SDRPlayV3Gui::on_gainIF_valueChanged(int value)
 {
     m_settings.m_ifGain = value;
+    m_settingsKeys.append("ifGain");
 
     QString gainText = QStringLiteral("%1").arg(value, 2, 10, QLatin1Char('0'));
     ui->gainIFText->setText(gainText);
@@ -521,6 +551,10 @@ void SDRPlayV3Gui::on_transverter_clicked()
     qDebug("SDRPlayV3Gui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("iqOrder");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -541,6 +575,10 @@ void SDRPlayV3Gui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

@@ -62,30 +62,8 @@ struct SDRPlayV3Settings {
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
-
-    void debug(const char *title) const
-    {
-        qDebug() << QString(title)
-                << ": m_centerFrequency: " << m_centerFrequency
-                << " m_LOppmTenths: " << m_LOppmTenths
-                << " m_ifFrequencyIndex: " << m_ifFrequencyIndex
-                << " m_bandwidthIndex: " << m_bandwidthIndex
-                << " m_devSampleRate: " << m_devSampleRate
-                << " m_log2Decim: " << m_log2Decim
-                << " m_fcPos: " << m_fcPos
-                << " m_dcBlock: " << m_dcBlock
-                << " m_iqCorrection: " << m_iqCorrection
-                << " m_lnaIndex: " << m_lnaIndex
-                << " m_ifAGC: " << m_ifAGC
-                << " m_ifGain: " << m_ifGain
-                << " m_amNotch: " << m_amNotch
-                << " m_fmNotch: " << m_fmNotch
-                << " m_dabNotch: " << m_dabNotch
-                << " m_biasTee: " << m_biasTee
-                << " m_tuner: " << m_tuner
-                << " m_antenna: " << m_antenna
-                << " m_extRef: " << m_extRef;
-    }
+    void applySettings(const QStringList& settingsKeys, const SDRPlayV3Settings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* _SDRPLAYV3_SDRPLAYV3SETTINGS_H_ */

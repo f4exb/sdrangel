@@ -147,3 +147,168 @@ bool SDRPlayV3Settings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void SDRPlayV3Settings::applySettings(const QStringList& settingsKeys, const SDRPlayV3Settings& settings)
+{
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("LOppmTenths")) {
+        m_LOppmTenths = settings.m_LOppmTenths;
+    }
+    if (settingsKeys.contains("ifFrequencyIndex")) {
+        m_ifFrequencyIndex = settings.m_ifFrequencyIndex;
+    }
+    if (settingsKeys.contains("bandwidthIndex")) {
+        m_bandwidthIndex = settings.m_bandwidthIndex;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("fcPos")) {
+        m_fcPos = settings.m_fcPos;
+    }
+    if (settingsKeys.contains("dcBlock")) {
+        m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection")) {
+        m_iqCorrection = settings.m_iqCorrection;
+    }
+    if (settingsKeys.contains("lnaIndex")) {
+        m_lnaIndex = settings.m_lnaIndex;
+    }
+    if (settingsKeys.contains("ifAGC")) {
+        m_ifAGC = settings.m_ifAGC;
+    }
+    if (settingsKeys.contains("ifGain")) {
+        m_ifGain = settings.m_ifGain;
+    }
+    if (settingsKeys.contains("amNotch")) {
+        m_amNotch = settings.m_amNotch;
+    }
+    if (settingsKeys.contains("fmNotch")) {
+        m_fmNotch = settings.m_fmNotch;
+    }
+    if (settingsKeys.contains("dabNotch")) {
+        m_dabNotch = settings.m_dabNotch;
+    }
+    if (settingsKeys.contains("biasTee")) {
+        m_biasTee = settings.m_biasTee;
+    }
+    if (settingsKeys.contains("tuner")) {
+        m_tuner = settings.m_tuner;
+    }
+    if (settingsKeys.contains("antenna")) {
+        m_antenna = settings.m_antenna;
+    }
+    if (settingsKeys.contains("extRef")) {
+        m_extRef = settings.m_extRef;
+    }
+    if (settingsKeys.contains("transverterMode")) {
+        m_transverterMode = settings.m_transverterMode;
+    }
+    if (settingsKeys.contains("iqOrder")) {
+        m_iqOrder = settings.m_iqOrder;
+    }
+    if (settingsKeys.contains("m_transverterDeltaFrequency")) {
+        m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
+
+QString SDRPlayV3Settings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("LOppmTenths") || force) {
+        ostr << " m_LOppmTenths: " << m_LOppmTenths;
+    }
+    if (settingsKeys.contains("ifFrequencyIndex") || force) {
+        ostr << " m_ifFrequencyIndex: " << m_ifFrequencyIndex;
+    }
+    if (settingsKeys.contains("bandwidthIndex") || force) {
+        ostr << " m_bandwidthIndex: " << m_bandwidthIndex;
+    }
+    if (settingsKeys.contains("devSampleRate") || force) {
+        ostr << " m_devSampleRate: " << m_devSampleRate;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("fcPos") || force) {
+        ostr << " m_fcPos: " << m_fcPos;
+    }
+    if (settingsKeys.contains("dcBlock") || force) {
+        ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection") || force) {
+        ostr << " m_iqCorrection: " << m_iqCorrection;
+    }
+    if (settingsKeys.contains("lnaIndex") || force) {
+        ostr << " m_lnaIndex: " << m_lnaIndex;
+    }
+    if (settingsKeys.contains("ifAGC") || force) {
+        ostr << " m_ifAGC: " << m_ifAGC;
+    }
+    if (settingsKeys.contains("ifGain") || force) {
+        ostr << " m_ifGain: " << m_ifGain;
+    }
+    if (settingsKeys.contains("amNotch") || force) {
+        ostr << " m_amNotch: " << m_amNotch;
+    }
+    if (settingsKeys.contains("fmNotch") || force) {
+        ostr << " m_fmNotch: " << m_fmNotch;
+    }
+    if (settingsKeys.contains("dabNotch") || force) {
+        ostr << " m_dabNotch: " << m_dabNotch;
+    }
+    if (settingsKeys.contains("biasTee") || force) {
+        ostr << " m_biasTee: " << m_biasTee;
+    }
+    if (settingsKeys.contains("tuner") || force) {
+        ostr << " m_tuner: " << m_tuner;
+    }
+    if (settingsKeys.contains("antenna") || force) {
+        ostr << " m_antenna: " << m_antenna;
+    }
+    if (settingsKeys.contains("extRef") || force) {
+        ostr << " m_extRef: " << m_extRef;
+    }
+    if (settingsKeys.contains("transverterMode") || force) {
+        ostr << " m_transverterMode: " << m_transverterMode;
+    }
+    if (settingsKeys.contains("iqOrder") || force) {
+        ostr << " m_iqOrder: " << m_iqOrder;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency") || force) {
+        ostr << " m_transverterDeltaFrequency: " << m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("everseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}

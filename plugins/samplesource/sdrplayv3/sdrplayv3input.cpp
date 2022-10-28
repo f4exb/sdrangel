@@ -158,7 +158,7 @@ bool SDRPlayV3Input::start()
     m_sdrPlayThread->startWork();
 
     m_running = m_sdrPlayThread->isRunning();
-    applySettings(m_settings, true, true);
+    applySettings(m_settings, QList<QString>(), true, true);
 
     return true;
 }
@@ -176,7 +176,7 @@ void SDRPlayV3Input::closeDevice()
 
 void SDRPlayV3Input::init()
 {
-    applySettings(m_settings, true, true);
+    applySettings(m_settings, QList<QString>(), true, true);
 }
 
 void SDRPlayV3Input::stop()
@@ -209,12 +209,12 @@ bool SDRPlayV3Input::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureSDRPlayV3* message = MsgConfigureSDRPlayV3::create(m_settings, true);
+    MsgConfigureSDRPlayV3* message = MsgConfigureSDRPlayV3::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureSDRPlayV3* messageToGUI = MsgConfigureSDRPlayV3::create(m_settings, true);
+        MsgConfigureSDRPlayV3* messageToGUI = MsgConfigureSDRPlayV3::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -257,12 +257,12 @@ void SDRPlayV3Input::setCenterFrequency(qint64 centerFrequency)
     SDRPlayV3Settings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureSDRPlayV3* message = MsgConfigureSDRPlayV3::create(settings, false);
+    MsgConfigureSDRPlayV3* message = MsgConfigureSDRPlayV3::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureSDRPlayV3* messageToGUI = MsgConfigureSDRPlayV3::create(settings, false);
+        MsgConfigureSDRPlayV3* messageToGUI = MsgConfigureSDRPlayV3::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -273,10 +273,10 @@ bool SDRPlayV3Input::handleMessage(const Message& message)
     {
         MsgConfigureSDRPlayV3& conf = (MsgConfigureSDRPlayV3&) message;
         qDebug() << "SDRPlayV3Input::handleMessage: MsgConfigureSDRPlayV3";
-        const SDRPlayV3Settings& settings = conf.getSettings();
 
-        if (!applySettings(settings, false, conf.getForce()))
+        if (!applySettings( conf.getSettings(), conf.getSettingsKeys(), false, conf.getForce())) {
             qDebug("SDRPlayV3Input::handleMessage: config error");
+        }
 
         return true;
     }
@@ -309,14 +309,13 @@ bool SDRPlayV3Input::handleMessage(const Message& message)
     }
 }
 
-bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwardChange, bool force)
+bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QList<QString>& settingsKeys, bool forwardChange, bool force)
 {
-    qDebug() << "SDRPlayV3Input::applySettings";
-    QList<QString> reverseAPIKeys;
+    qDebug() << "SDRPlayV3Input::applySettings: forwardChange: " << forwardChange << " force: " << force << settings.getDebugString(settingsKeys, force);
     QMutexLocker mutexLocker(&m_mutex);
     sdrplay_api_ErrT err;
 
-    if ((m_settings.m_tuner != settings.m_tuner) || force)
+    if (settingsKeys.contains("tuner") || force)
     {
         if (m_running)
         {
@@ -332,10 +331,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
+    if (settingsKeys.contains("dcBlock") || force)
     {
-        reverseAPIKeys.append("dcBlock");
-
         if (m_running)
         {
             if (m_dev->tuner == sdrplay_api_Tuner_A)
@@ -347,10 +344,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
      }
 
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    if (settingsKeys.contains("iqCorrection") || force)
     {
-        reverseAPIKeys.append("iqCorrection");
-
         if (m_running)
         {
             if (m_dev->tuner == sdrplay_api_Tuner_A)
@@ -362,20 +357,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if (m_settings.m_lnaIndex != settings.m_lnaIndex)
+    if (settingsKeys.contains("ifAGC") || force)
     {
-        reverseAPIKeys.append("lnaIndex");
-    }
-
-    if (m_settings.m_ifGain != settings.m_ifGain)
-    {
-        reverseAPIKeys.append("ifGain");
-    }
-
-    if ((m_settings.m_ifAGC != settings.m_ifAGC) || force)
-    {
-        reverseAPIKeys.append("ifAGC");
-
         if (m_running)
         {
             if (m_dev->tuner == sdrplay_api_Tuner_A)
@@ -388,9 +371,9 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     }
 
     // Need to reset IF gain manual setting after AGC is disabled
-    if ((m_settings.m_lnaIndex != settings.m_lnaIndex)
-        || (m_settings.m_ifGain != settings.m_ifGain)
-        || (m_settings.m_ifAGC != settings.m_ifAGC) || force)
+    if (settingsKeys.contains("lnaIndex")
+        || settingsKeys.contains("ifGain")
+        || settingsKeys.contains("ifAGC") || force)
     {
         if (m_running)
         {
@@ -411,10 +394,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+    if (settingsKeys.contains("devSampleRate") || force)
     {
-        reverseAPIKeys.append("devSampleRate");
-
         if (m_running)
         {
             int sampleRate = settings.m_devSampleRate;
@@ -427,10 +408,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if (settingsKeys.contains("log2Decim") || force)
     {
-        reverseAPIKeys.append("log2Decim");
-
         if (m_sdrPlayThread)
         {
             m_sdrPlayThread->setLog2Decimation(settings.m_log2Decim);
@@ -438,10 +417,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+    if (settingsKeys.contains("fcPos") || force)
     {
-        reverseAPIKeys.append("fcPos");
-
         if (m_sdrPlayThread)
         {
             m_sdrPlayThread->setFcPos((int) settings.m_fcPos);
@@ -449,34 +426,19 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
-        reverseAPIKeys.append("centerFrequency");
-    }
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
-        reverseAPIKeys.append("LOppmTenths");
-    }
-    if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
-        reverseAPIKeys.append("transverterMode");
-    }
-    if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
-        reverseAPIKeys.append("transverterDeltaFrequency");
-    }
-
-    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    if (settingsKeys.contains("iqOrder") || force)
     {
-        reverseAPIKeys.append("iqOrder");
-
         if (m_sdrPlayThread) {
             m_sdrPlayThread->setIQOrder(settings.m_iqOrder);
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
-        || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
-        || (m_settings.m_fcPos != settings.m_fcPos)
-        || (m_settings.m_log2Decim != settings.m_log2Decim)
-        || (m_settings.m_transverterMode != settings.m_transverterMode)
-        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
+    if (settingsKeys.contains("centerFrequency")
+        || settingsKeys.contains("LOppmTenths")
+        || settingsKeys.contains("fcPos")
+        || settingsKeys.contains("log2Decim")
+        || settingsKeys.contains("transverterMode")
+        || settingsKeys.contains("transverterDeltaFrequency") || force)
     {
         qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
@@ -497,10 +459,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_bandwidthIndex != settings.m_bandwidthIndex) || force)
+    if (settingsKeys.contains("bandwidthIndex") || force)
     {
-        reverseAPIKeys.append("bandwidthIndex");
-
         if (m_running)
         {
             if (m_dev->tuner == sdrplay_api_Tuner_A)
@@ -515,10 +475,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_ifFrequencyIndex != settings.m_ifFrequencyIndex) || force)
+    if (settingsKeys.contains("ifFrequencyIndex") || force)
     {
-        reverseAPIKeys.append("ifFrequencyIndex");
-
         if (m_running)
         {
             if (m_dev->tuner == sdrplay_api_Tuner_A)
@@ -533,10 +491,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_biasTee != settings.m_biasTee) || force)
+    if (settingsKeys.contains("biasTee") || force)
     {
-        reverseAPIKeys.append("biasTee");
-
         if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
@@ -572,10 +528,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_amNotch != settings.m_amNotch) || force)
+    if (settingsKeys.contains("amNotch") || force)
     {
-        reverseAPIKeys.append("amNotch");
-
         if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
@@ -598,10 +552,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_fmNotch != settings.m_fmNotch) || force)
+    if (settingsKeys.contains("fmNotch") || force)
     {
-        reverseAPIKeys.append("fmNotch");
-
         if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
@@ -636,10 +588,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_dabNotch != settings.m_dabNotch) || force)
+    if (settingsKeys.contains("dabNotch") || force)
     {
-        reverseAPIKeys.append("dabNotch");
-
         if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
@@ -670,10 +620,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_antenna != settings.m_antenna) || force)
+    if (settingsKeys.contains("antenna") || force)
     {
-        reverseAPIKeys.append("antenna");
-
         if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
@@ -705,10 +653,8 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if ((m_settings.m_extRef != settings.m_extRef) || force)
+    if (settingsKeys.contains("extRef") || force)
     {
-        reverseAPIKeys.append("extRef");
-
         if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
@@ -732,16 +678,20 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         }
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (forwardChange)
     {
@@ -830,12 +780,12 @@ int SDRPlayV3Input::webapiSettingsPutPatch(
     SDRPlayV3Settings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureSDRPlayV3 *msg = MsgConfigureSDRPlayV3::create(settings, force);
+    MsgConfigureSDRPlayV3 *msg = MsgConfigureSDRPlayV3::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSDRPlayV3 *msgToGUI = MsgConfigureSDRPlayV3::create(settings, force);
+        MsgConfigureSDRPlayV3 *msgToGUI = MsgConfigureSDRPlayV3::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -1020,7 +970,7 @@ void SDRPlayV3Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
     }
 }
 
-void SDRPlayV3Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRPlayV3Settings& settings, bool force)
+void SDRPlayV3Input::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const SDRPlayV3Settings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
