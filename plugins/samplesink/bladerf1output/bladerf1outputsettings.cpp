@@ -109,3 +109,93 @@ bool BladeRF1OutputSettings::deserialize(const QByteArray& data)
 		return false;
 	}
 }
+
+void BladeRF1OutputSettings::applySettings(const QStringList& settingsKeys, const BladeRF1OutputSettings& settings)
+{
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("devSampleRate")) {
+        m_devSampleRate = settings.m_devSampleRate;
+    }
+    if (settingsKeys.contains("vga1")) {
+        m_vga1 = settings.m_vga1;
+    }
+    if (settingsKeys.contains("vga2")) {
+        m_vga2 = settings.m_vga2;
+    }
+    if (settingsKeys.contains("bandwidth")) {
+        m_bandwidth = settings.m_bandwidth;
+    }
+    if (settingsKeys.contains("log2Interp")) {
+        m_log2Interp = settings.m_log2Interp;
+    }
+    if (settingsKeys.contains("xb200")) {
+        m_xb200 = settings.m_xb200;
+    }
+    if (settingsKeys.contains("xb200Path")) {
+        m_xb200Path = settings.m_xb200Path;
+    }
+    if (settingsKeys.contains("xb200Filter")) {
+        m_xb200Filter = settings.m_xb200Filter;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
+
+QString BladeRF1OutputSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("devSampleRate") || force) {
+        ostr << " m_devSampleRate: " << m_devSampleRate;
+    }
+    if (settingsKeys.contains("vga1") || force) {
+        ostr << " m_vga1: " << m_vga1;
+    }
+    if (settingsKeys.contains("vga2") || force) {
+        ostr << " m_vga2: " << m_vga2;
+    }
+    if (settingsKeys.contains("bandwidth") || force) {
+        ostr << " m_bandwidth: " << m_bandwidth;
+    }
+    if (settingsKeys.contains("log2Interp") || force) {
+        ostr << " m_log2Interp: " << m_log2Interp;
+    }
+    if (settingsKeys.contains("xb200") || force) {
+        ostr << " m_xb200: " << m_xb200;
+    }
+    if (settingsKeys.contains("xb200Path") || force) {
+        ostr << " m_xb200Path: " << m_xb200Path;
+    }
+    if (settingsKeys.contains("xb200Filter") || force) {
+        ostr << " m_xb200Filter: " << m_xb200Filter;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}
