@@ -59,6 +59,7 @@ private:
 
     USRPInput* m_usrpInput; //!< Same object as above but gives easy access to USRPInput methods and attributes that are used intensively
     USRPInputSettings m_settings;
+    QList<QString> m_settingsKeys;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
     QTimer m_updateTimer;
     QTimer m_statusTimer;

@@ -45,20 +45,22 @@ public:
 
     public:
         const USRPInputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureUSRP* create(const USRPInputSettings& settings, bool force)
-        {
-            return new MsgConfigureUSRP(settings, force);
+        static MsgConfigureUSRP* create(const USRPInputSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureUSRP(settings, settingsKeys, force);
         }
 
     private:
         USRPInputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureUSRP(const USRPInputSettings& settings, bool force) :
+        MsgConfigureUSRP(const USRPInputSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -239,9 +241,9 @@ private:
     void resumeRxBuddies();
     void suspendTxBuddies();
     void resumeTxBuddies();
-    bool applySettings(const USRPInputSettings& settings, bool preGetStream, bool force = false);
+    bool applySettings(const USRPInputSettings& settings, const QList<QString>& settingsKeys, bool preGetStream, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const USRPInputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const USRPInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

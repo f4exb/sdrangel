@@ -351,7 +351,7 @@ bool USRPInput::acquireChannel()
 
             // Apply settings before creating stream
             // However, don't set LPF to <10MHz at this stage, otherwise there is massive TX LO leakage
-            applySettings(m_settings, true, true);
+            applySettings(m_settings, QList<QString>(), true, true);
             usrp->set_rx_bandwidth(56000000, m_deviceShared.m_channel);
 
             // set up the stream
@@ -409,7 +409,7 @@ void USRPInput::releaseChannel()
 
 void USRPInput::init()
 {
-    applySettings(m_settings, false, true);
+    applySettings(m_settings, QList<QString>(), false, true);
 }
 
 bool USRPInput::start()
@@ -471,12 +471,12 @@ bool USRPInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureUSRP* message = MsgConfigureUSRP::create(m_settings, true);
+    MsgConfigureUSRP* message = MsgConfigureUSRP::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureUSRP* messageToGUI = MsgConfigureUSRP::create(m_settings, true);
+        MsgConfigureUSRP* messageToGUI = MsgConfigureUSRP::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -504,12 +504,12 @@ void USRPInput::setCenterFrequency(qint64 centerFrequency)
     USRPInputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureUSRP* message = MsgConfigureUSRP::create(settings, false);
+    MsgConfigureUSRP* message = MsgConfigureUSRP::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureUSRP* messageToGUI = MsgConfigureUSRP::create(settings, false);
+        MsgConfigureUSRP* messageToGUI = MsgConfigureUSRP::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -601,7 +601,7 @@ bool USRPInput::handleMessage(const Message& message)
         MsgConfigureUSRP& conf = (MsgConfigureUSRP&) message;
         qDebug() << "USRPInput::handleMessage: MsgConfigureUSRP";
 
-        if (!applySettings(conf.getSettings(), false, conf.getForce()))
+        if (!applySettings(conf.getSettings(), conf.getSettingsKeys(), false, conf.getForce()))
         {
             qDebug("USRPInput::handleMessage config error");
         }
@@ -711,15 +711,15 @@ bool USRPInput::handleMessage(const Message& message)
     }
 }
 
-bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStream, bool force)
+bool USRPInput::applySettings(const USRPInputSettings& settings, const QList<QString>& settingsKeys, bool preGetStream, bool force)
 {
+    qDebug() << "USRPInput::applySettings: preGetStream:" << preGetStream << " force:" << force << settings.getDebugString(settingsKeys, force);
     bool forwardChangeOwnDSP = false;
     bool forwardChangeRxDSP  = false;
     bool forwardChangeAllDSP = false;
     bool forwardClockSource  = false;
     bool reapplySomeSettings = false;
     bool checkRates          = false;
-    QList<QString> reverseAPIKeys;
 
     try
     {
@@ -729,10 +729,8 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
 
         // apply settings
 
-        if ((m_settings.m_clockSource != settings.m_clockSource) || force)
+        if (settingsKeys.contains("clockSource") || force)
         {
-            reverseAPIKeys.append("clockSource");
-
             if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
             {
                 try
@@ -759,9 +757,8 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             }
         }
 
-        if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+        if (settingsKeys.contains("devSampleRate") || force)
         {
-            reverseAPIKeys.append("devSampleRate");
             forwardChangeAllDSP = true;
 
             if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
@@ -773,15 +770,12 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             }
         }
 
-        if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
-            || (m_settings.m_loOffset != settings.m_loOffset)
-            || (m_settings.m_transverterMode != settings.m_transverterMode)
-            || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
+        if (settingsKeys.contains("centerFrequency")
+            || settingsKeys.contains("loOffset")
+            || settingsKeys.contains("transverterMode")
+            || settingsKeys.contains("transverterDeltaFrequency")
             || force)
         {
-            reverseAPIKeys.append("centerFrequency");
-            reverseAPIKeys.append("transverterMode");
-            reverseAPIKeys.append("transverterDeltaFrequency");
             forwardChangeRxDSP = true;
 
             if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
@@ -801,24 +795,20 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             }
         }
 
-        if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
+        if (settingsKeys.contains("dcBlock") || force)
         {
-            reverseAPIKeys.append("dcBlock");
             if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
                 m_deviceShared.m_deviceParams->getDevice()->set_rx_dc_offset(settings.m_dcBlock, m_deviceShared.m_channel);
         }
 
-        if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+        if (settingsKeys.contains("iqCorrection") || force)
         {
-            reverseAPIKeys.append("iqCorrection");
             if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
                 m_deviceShared.m_deviceParams->getDevice()->set_rx_iq_balance(settings.m_iqCorrection, m_deviceShared.m_channel);
         }
 
-        if ((m_settings.m_gainMode != settings.m_gainMode) || force)
+        if (settingsKeys.contains("gainMode") || force)
         {
-            reverseAPIKeys.append("gainMode");
-
             if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
             {
                 if (settings.m_gainMode == USRPInputSettings::GAIN_AUTO)
@@ -846,10 +836,8 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             }
         }
 
-        if ((m_settings.m_gain != settings.m_gain) || force)
+        if (settingsKeys.contains("gain") || force)
         {
-            reverseAPIKeys.append("gain");
-
             if ((settings.m_gainMode != USRPInputSettings::GAIN_AUTO) && m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
             {
                 m_deviceShared.m_deviceParams->getDevice()->set_rx_gain(settings.m_gain, m_deviceShared.m_channel);
@@ -857,10 +845,8 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             }
         }
 
-        if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
+        if (settingsKeys.contains("lpfBW") || force)
         {
-            reverseAPIKeys.append("lpfBW");
-
             // Don't set bandwidth before get_rx_stream (See above)
             if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
             {
@@ -869,9 +855,8 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             }
         }
 
-        if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
+        if (settingsKeys.contains("log2SoftDecim") || force)
         {
-            reverseAPIKeys.append("log2SoftDecim");
             forwardChangeOwnDSP = true;
             m_deviceShared.m_log2Soft = settings.m_log2SoftDecim; // for buddies
 
@@ -882,10 +867,8 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             }
         }
 
-        if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
+        if (settingsKeys.contains("antennaPath") || force)
         {
-            reverseAPIKeys.append("antennaPath");
-
             if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
             {
                 m_deviceShared.m_deviceParams->getDevice()->set_rx_antenna(settings.m_antennaPath.toStdString(), m_deviceShared.m_channel);
@@ -893,13 +876,13 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             }
         }
 
-        if (settings.m_useReverseAPI)
+        if (settingsKeys.contains("useReverseAPI"))
         {
-            bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                    (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                    (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                    (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-            webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+            bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIDeviceIndex");
+            webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
         }
 
         if (reapplySomeSettings)
@@ -925,7 +908,11 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             }
         }
 
-        m_settings = settings;
+        if (force) {
+            m_settings = settings;
+        } else {
+            m_settings.applySettings(settingsKeys, settings);
+        }
 
         if (checkRates)
         {
@@ -1057,21 +1044,6 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             }
         }
 
-        QLocale loc;
-
-        qDebug().noquote() << "USRPInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
-                << " m_transverterMode: " << m_settings.m_transverterMode
-                << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
-                << " deviceCenterFrequency: " << deviceCenterFrequency
-                << " device stream sample rate: " << loc.toString(m_settings.m_devSampleRate) << "S/s"
-                << " sample rate with soft decimation: " << loc.toString( m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim)) << "S/s"
-                << " m_log2SoftDecim: " << m_settings.m_log2SoftDecim
-                << " m_gain: " << m_settings.m_gain
-                << " m_lpfBW: " << loc.toString(static_cast<int>(m_settings.m_lpfBW))
-                << " m_antennaPath: " << m_settings.m_antennaPath
-                << " m_clockSource: " << m_settings.m_clockSource
-                << " force: " << force;
-
         return true;
     }
     catch (std::exception &e)
@@ -1102,12 +1074,12 @@ int USRPInput::webapiSettingsPutPatch(
     USRPInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureUSRP *msg = MsgConfigureUSRP::create(settings, force);
+    MsgConfigureUSRP *msg = MsgConfigureUSRP::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureUSRP *msgToGUI = MsgConfigureUSRP::create(settings, force);
+        MsgConfigureUSRP *msgToGUI = MsgConfigureUSRP::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -1258,7 +1230,7 @@ void USRPInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
     response.getUsrpInputReport()->setTimeoutCount(timeouts);
 }
 
-void USRPInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const USRPInputSettings& settings, bool force)
+void USRPInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const USRPInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx

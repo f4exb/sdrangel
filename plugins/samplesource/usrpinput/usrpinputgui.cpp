@@ -119,6 +119,7 @@ void USRPInputGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -131,6 +132,7 @@ void USRPInputGUI::setCenterFrequency(qint64 centerFrequency)
 {
     m_settings.m_centerFrequency = centerFrequency;
     displaySettings();
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -166,7 +168,13 @@ bool USRPInputGUI::handleMessage(const Message& message)
     if (USRPInput::MsgConfigureUSRP::match(message))
     {
         const USRPInput::MsgConfigureUSRP& cfg = (USRPInput::MsgConfigureUSRP&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -290,7 +298,13 @@ void USRPInputGUI::handleInputMessages()
         else if (USRPInput::MsgConfigureUSRP::match(*message))
         {
             const USRPInput::MsgConfigureUSRP& cfg = (USRPInput::MsgConfigureUSRP&) *message;
-            m_settings = cfg.getSettings();
+
+            if (cfg.getForce()) {
+                m_settings = cfg.getSettings();
+            } else {
+                m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+            }
+
             displaySettings();
 
             delete message;
@@ -393,12 +407,9 @@ void USRPInputGUI::displaySettings()
 
     ui->gainMode->setCurrentIndex((int) m_settings.m_gainMode);
 
-    if (m_settings.m_gainMode == USRPInputSettings::GAIN_AUTO)
-    {
+    if (m_settings.m_gainMode == USRPInputSettings::GAIN_AUTO) {
         ui->gain->setEnabled(false);
-    }
-    else
-    {
+    } else {
         ui->gain->setEnabled(true);
     }
 }
@@ -423,8 +434,9 @@ void USRPInputGUI::setCenterFrequencySetting(uint64_t kHzValue)
 
 void USRPInputGUI::sendSettings()
 {
-    if(!m_updateTimer.isActive())
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
+    }
 }
 
 void USRPInputGUI::updateHardware()
@@ -432,9 +444,10 @@ void USRPInputGUI::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "USRPInputGUI::updateHardware";
-        USRPInput::MsgConfigureUSRP* message = USRPInput::MsgConfigureUSRP::create(m_settings, m_forceSettings);
+        USRPInput::MsgConfigureUSRP* message = USRPInput::MsgConfigureUSRP::create(m_settings, m_settingsKeys, m_forceSettings);
         m_usrpInput->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -511,18 +524,21 @@ void USRPInputGUI::on_startStop_toggled(bool checked)
 void USRPInputGUI::on_centerFrequency_changed(quint64 value)
 {
     setCenterFrequencySetting(value);
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
 void USRPInputGUI::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void USRPInputGUI::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
@@ -535,6 +551,7 @@ void USRPInputGUI::on_sampleRate_changed(quint64 value)
     }
 
     updateSampleRate();
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
@@ -545,6 +562,7 @@ void USRPInputGUI::on_swDecim_currentIndexChanged(int index)
     }
 
     m_settings.m_log2SoftDecim = index;
+    m_settingsKeys.append("log2SoftDecim");
     displaySampleRate();
 
     if (m_sampleRateMode) {
@@ -553,31 +571,32 @@ void USRPInputGUI::on_swDecim_currentIndexChanged(int index)
         m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftDecim);
     }
 
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
 void USRPInputGUI::on_lpf_changed(quint64 value)
 {
     m_settings.m_lpfBW = value * 1000;
+    m_settingsKeys.append("lpfBW");
     sendSettings();
 }
 
 void USRPInputGUI::on_loOffset_changed(qint64 value)
 {
     m_settings.m_loOffset = value * 1000;
+    m_settingsKeys.append("loOffset");
     sendSettings();
 }
 
 void USRPInputGUI::on_gainMode_currentIndexChanged(int index)
 {
     m_settings.m_gainMode = (USRPInputSettings::GainMode) index;
+    m_settingsKeys.append("gainMode");
 
-    if (index == 0)
-    {
+    if (index == 0) {
         ui->gain->setEnabled(false);
-    }
-    else
-    {
+    } else {
         ui->gain->setEnabled(true);
     }
 
@@ -588,6 +607,7 @@ void USRPInputGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gain = value;
     ui->gainText->setText(tr("%1").arg(m_settings.m_gain));
+    m_settingsKeys.append("gain");
     sendSettings();
 }
 
@@ -595,6 +615,7 @@ void USRPInputGUI::on_antenna_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_antennaPath = ui->antenna->currentText();
+    m_settingsKeys.append("antennaPath");
     sendSettings();
 }
 
@@ -602,6 +623,7 @@ void USRPInputGUI::on_clockSource_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_clockSource = ui->clockSource->currentText();
+    m_settingsKeys.append("clockSource");
     sendSettings();
 }
 
@@ -612,6 +634,9 @@ void USRPInputGUI::on_transverter_clicked()
     qDebug("USRPInputGUI::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     setCenterFrequencySetting(ui->centerFrequency->getValueNew());
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -638,6 +663,10 @@ void USRPInputGUI::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }
