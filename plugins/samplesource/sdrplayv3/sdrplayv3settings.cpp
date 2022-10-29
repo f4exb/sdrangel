@@ -162,6 +162,9 @@ void SDRPlayV3Settings::applySettings(const QStringList& settingsKeys, const SDR
     if (settingsKeys.contains("bandwidthIndex")) {
         m_bandwidthIndex = settings.m_bandwidthIndex;
     }
+    if (settingsKeys.contains("devSampleRate")) {
+        m_devSampleRate = settings.m_devSampleRate;
+    }
     if (settingsKeys.contains("log2Decim")) {
         m_log2Decim = settings.m_log2Decim;
     }
