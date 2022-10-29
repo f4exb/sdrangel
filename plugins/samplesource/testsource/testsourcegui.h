@@ -53,6 +53,7 @@ private:
 	Ui::TestSourceGui* ui;
 
 	TestSourceSettings m_settings;
+    QList<QString> m_settingsKeys;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
 	bool m_doApplySettings;

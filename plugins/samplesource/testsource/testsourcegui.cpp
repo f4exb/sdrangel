@@ -95,6 +95,7 @@ void TestSourceGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -105,12 +106,15 @@ QByteArray TestSourceGui::serialize() const
 
 bool TestSourceGui::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if (m_settings.deserialize(data))
+    {
         displaySettings();
         m_forceSettings = true;
         sendSettings();
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }
@@ -134,6 +138,7 @@ void TestSourceGui::on_startStop_toggled(bool checked)
 void TestSourceGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -144,12 +149,14 @@ void TestSourceGui::on_autoCorr_currentIndexChanged(int index)
     }
 
     m_settings.m_autoCorrOptions = (TestSourceSettings::AutoCorrOptions) index;
+    m_settingsKeys.append("autoCorrOptions");
     sendSettings();
 }
 
 void TestSourceGui::on_frequencyShift_changed(qint64 value)
 {
     m_settings.m_frequencyShift = value;
+    m_settingsKeys.append("frequencyShift");
     sendSettings();
 }
 
@@ -160,6 +167,7 @@ void TestSourceGui::on_decimation_currentIndexChanged(int index)
     }
 
     m_settings.m_log2Decim = index;
+    m_settingsKeys.append("log2Decim");
     sendSettings();
 }
 
@@ -170,6 +178,7 @@ void TestSourceGui::on_fcPos_currentIndexChanged(int index)
     }
 
     m_settings.m_fcPos = (TestSourceSettings::fcPos_t) index;
+    m_settingsKeys.append("fcPos");
     sendSettings();
 }
 
@@ -178,6 +187,8 @@ void TestSourceGui::on_sampleRate_changed(quint64 value)
     updateFrequencyShiftLimit();
     m_settings.m_frequencyShift = ui->frequencyShift->getValueNew();
     m_settings.m_sampleRate = value;
+    m_settingsKeys.append("frequencyShift");
+    m_settingsKeys.append("sampleRate");
     sendSettings();
 }
 
@@ -192,6 +203,8 @@ void TestSourceGui::on_sampleSize_currentIndexChanged(int index)
     displayAmplitude();
     m_settings.m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
     m_settings.m_sampleSizeIndex = index;
+    m_settingsKeys.append("amplitudeBits");
+    m_settingsKeys.append("sampleSizeIndex");
     sendSettings();
 }
 
@@ -201,6 +214,7 @@ void TestSourceGui::on_amplitudeCoarse_valueChanged(int value)
     updateAmpFineLimit();
     displayAmplitude();
     m_settings.m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
+    m_settingsKeys.append("amplitudeBits");
     sendSettings();
 }
 
@@ -209,6 +223,7 @@ void TestSourceGui::on_amplitudeFine_valueChanged(int value)
     (void) value;
     displayAmplitude();
     m_settings.m_amplitudeBits = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
+    m_settingsKeys.append("amplitudeBits");
     sendSettings();
 }
 
@@ -219,6 +234,7 @@ void TestSourceGui::on_modulation_currentIndexChanged(int index)
     }
 
     m_settings.m_modulation = (TestSourceSettings::Modulation) index;
+    m_settingsKeys.append("modulation");
     sendSettings();
 }
 
@@ -226,6 +242,7 @@ void TestSourceGui::on_modulationFrequency_valueChanged(int value)
 {
     m_settings.m_modulationTone = value;
     ui->modulationFrequencyText->setText(QString("%1").arg(m_settings.m_modulationTone / 100.0, 0, 'f', 2));
+    m_settingsKeys.append("modulationTone");
     sendSettings();
 }
 
@@ -233,6 +250,7 @@ void TestSourceGui::on_amModulation_valueChanged(int value)
 {
     m_settings.m_amModulation = value;
     ui->amModulationText->setText(QString("%1").arg(m_settings.m_amModulation));
+    m_settingsKeys.append("amModulation");
     sendSettings();
 }
 
@@ -240,6 +258,7 @@ void TestSourceGui::on_fmDeviation_valueChanged(int value)
 {
     m_settings.m_fmDeviation = value;
     ui->fmDeviationText->setText(QString("%1").arg(m_settings.m_fmDeviation / 10.0, 0, 'f', 1));
+    m_settingsKeys.append("fmDeviation");
     sendSettings();
 }
 
@@ -247,6 +266,7 @@ void TestSourceGui::on_dcBias_valueChanged(int value)
 {
     ui->dcBiasText->setText(QString(tr("%1 %").arg(value)));
     m_settings.m_dcFactor = value / 100.0f;
+    m_settingsKeys.append("dcFactor");
     sendSettings();
 }
 
@@ -254,6 +274,7 @@ void TestSourceGui::on_iBias_valueChanged(int value)
 {
     ui->iBiasText->setText(QString(tr("%1 %").arg(value)));
     m_settings.m_iFactor = value / 100.0f;
+    m_settingsKeys.append("iFactor");
     sendSettings();
 }
 
@@ -261,6 +282,7 @@ void TestSourceGui::on_qBias_valueChanged(int value)
 {
     ui->qBiasText->setText(QString(tr("%1 %").arg(value)));
     m_settings.m_qFactor = value / 100.0f;
+    m_settingsKeys.append("qFactor");
     sendSettings();
 }
 
@@ -268,6 +290,7 @@ void TestSourceGui::on_phaseImbalance_valueChanged(int value)
 {
     ui->phaseImbalanceText->setText(QString(tr("%1 %").arg(value)));
     m_settings.m_phaseImbalance = value / 100.0f;
+    m_settingsKeys.append("phaseImbalance");
     sendSettings();
 }
 
@@ -391,7 +414,7 @@ void TestSourceGui::displaySettings()
 
 void TestSourceGui::sendSettings()
 {
-    if(!m_updateTimer.isActive()) {
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
     }
 }
@@ -400,9 +423,10 @@ void TestSourceGui::updateHardware()
 {
     if (m_doApplySettings)
     {
-        TestSourceInput::MsgConfigureTestSource* message = TestSourceInput::MsgConfigureTestSource::create(m_settings, m_forceSettings);
+        TestSourceInput::MsgConfigureTestSource* message = TestSourceInput::MsgConfigureTestSource::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSource->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -442,7 +466,13 @@ bool TestSourceGui::handleMessage(const Message& message)
     {
         qDebug("TestSourceGui::handleMessage: MsgConfigureTestSource");
         const TestSourceInput::MsgConfigureTestSource& cfg = (TestSourceInput::MsgConfigureTestSource&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         displaySettings();
         return true;
     }

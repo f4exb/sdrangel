@@ -40,20 +40,22 @@ public:
 
 	public:
 		const TestSourceSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureTestSource* create(const TestSourceSettings& settings, bool force)
-		{
-			return new MsgConfigureTestSource(settings, force);
+		static MsgConfigureTestSource* create(const TestSourceSettings& settings, const QList<QString>& settingsKeys, bool force) {
+			return new MsgConfigureTestSource(settings, settingsKeys, force);
 		}
 
 	private:
 		TestSourceSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureTestSource(const TestSourceSettings& settings, bool force) :
+		MsgConfigureTestSource(const TestSourceSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -137,8 +139,8 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-	bool applySettings(const TestSourceSettings& settings, bool force);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const TestSourceSettings& settings, bool force);
+	bool applySettings(const TestSourceSettings& settings, const QList<QString>& settingsKeys, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const TestSourceSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

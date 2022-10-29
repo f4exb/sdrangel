@@ -143,8 +143,134 @@ bool TestSourceSettings::deserialize(const QByteArray& data)
     }
 }
 
+void TestSourceSettings::applySettings(const QStringList& settingsKeys, const TestSourceSettings& settings)
+{
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("frequencyShift")) {
+        m_frequencyShift = settings.m_frequencyShift;
+    }
+    if (settingsKeys.contains("sampleRate")) {
+        m_sampleRate = settings.m_sampleRate;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("fcPos")) {
+        m_fcPos = settings.m_fcPos;
+    }
+    if (settingsKeys.contains("sampleSizeIndex")) {
+        m_sampleSizeIndex = settings.m_sampleSizeIndex;
+    }
+    if (settingsKeys.contains("amplitudeBits")) {
+        m_amplitudeBits = settings.m_amplitudeBits;
+    }
+    if (settingsKeys.contains("autoCorrOptions")) {
+        m_autoCorrOptions = settings.m_autoCorrOptions;
+    }
+    if (settingsKeys.contains("modulation")) {
+        m_modulation = settings.m_modulation;
+    }
+    if (settingsKeys.contains("modulationTone")) {
+        m_modulationTone = settings.m_modulationTone;
+    }
+    if (settingsKeys.contains("amModulation")) {
+        m_amModulation = settings.m_amModulation;
+    }
+    if (settingsKeys.contains("fmDeviation")) {
+        m_fmDeviation = settings.m_fmDeviation;
+    }
+    if (settingsKeys.contains("dcFactor")) {
+        m_dcFactor = settings.m_dcFactor;
+    }
+    if (settingsKeys.contains("iFactor")) {
+        m_iFactor = settings.m_iFactor;
+    }
+    if (settingsKeys.contains("qFactor")) {
+        m_qFactor = settings.m_qFactor;
+    }
+    if (settingsKeys.contains("phaseImbalance")) {
+        m_phaseImbalance = settings.m_phaseImbalance;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
 
+QString TestSourceSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
 
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("frequencyShift") || force) {
+        ostr << " m_frequencyShift: " << m_frequencyShift;
+    }
+    if (settingsKeys.contains("sampleRate") || force) {
+        ostr << " m_sampleRate: " << m_sampleRate;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("fcPos") || force) {
+        ostr << " m_fcPos: " << m_fcPos;
+    }
+    if (settingsKeys.contains("sampleSizeIndex") || force) {
+        ostr << " m_sampleSizeIndex: " << m_sampleSizeIndex;
+    }
+    if (settingsKeys.contains("amplitudeBits") || force) {
+        ostr << " m_amplitudeBits: " << m_amplitudeBits;
+    }
+    if (settingsKeys.contains("autoCorrOptions") || force) {
+        ostr << " m_autoCorrOptions: " << m_autoCorrOptions;
+    }
+    if (settingsKeys.contains("modulation") || force) {
+        ostr << " m_modulation: " << m_modulation;
+    }
+    if (settingsKeys.contains("modulationTone") || force) {
+        ostr << " m_modulationTone: " << m_modulationTone;
+    }
+    if (settingsKeys.contains("amModulation") || force) {
+        ostr << " m_amModulation: " << m_amModulation;
+    }
+    if (settingsKeys.contains("fmDeviation") || force) {
+        ostr << " m_fmDeviation: " << m_fmDeviation;
+    }
+    if (settingsKeys.contains("dcFactor") || force) {
+        ostr << " m_dcFactor: " << m_dcFactor;
+    }
+    if (settingsKeys.contains("iFactor") || force) {
+        ostr << " m_iFactor: " << m_iFactor;
+    }
+    if (settingsKeys.contains("qFactor") || force) {
+        ostr << " m_qFactor: " << m_qFactor;
+    }
+    if (settingsKeys.contains("phaseImbalance") || force) {
+        ostr << " m_phaseImbalance: " << m_phaseImbalance;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
 
-
-
+    return QString(ostr.str().c_str());
+}
