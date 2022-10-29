@@ -51,6 +51,8 @@ private:
 	Ui::SigMFFileInputGUI* ui;
 
 	SigMFFileInputSettings m_settings;
+    QList<QString> m_settingsKeys;
+    bool m_forceSettings;
     int m_currentTrackIndex;
 	bool m_doApplySettings;
 	QTimer m_statusTimer;

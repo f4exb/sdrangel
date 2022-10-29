@@ -533,12 +533,12 @@ bool SigMFFileInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureSigMFFileInput* message = MsgConfigureSigMFFileInput::create(m_settings, true);
+    MsgConfigureSigMFFileInput* message = MsgConfigureSigMFFileInput::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (getMessageQueueToGUI())
     {
-        MsgConfigureSigMFFileInput* messageToGUI = MsgConfigureSigMFFileInput::create(m_settings, true);
+        MsgConfigureSigMFFileInput* messageToGUI = MsgConfigureSigMFFileInput::create(m_settings, QList<QString>(), true);
         getMessageQueueToGUI()->push(messageToGUI);
     }
 
@@ -565,12 +565,12 @@ void SigMFFileInput::setCenterFrequency(qint64 centerFrequency)
     SigMFFileInputSettings settings = m_settings;
     m_centerFrequency = centerFrequency;
 
-    MsgConfigureSigMFFileInput* message = MsgConfigureSigMFFileInput::create(m_settings, false);
+    MsgConfigureSigMFFileInput* message = MsgConfigureSigMFFileInput::create(m_settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (getMessageQueueToGUI())
     {
-        MsgConfigureSigMFFileInput* messageToGUI = MsgConfigureSigMFFileInput::create(m_settings, false);
+        MsgConfigureSigMFFileInput* messageToGUI = MsgConfigureSigMFFileInput::create(m_settings, QList<QString>{"centerFrequency"}, false);
         getMessageQueueToGUI()->push(messageToGUI);
     }
 }
@@ -585,8 +585,7 @@ bool SigMFFileInput::handleMessage(const Message& message)
     if (MsgConfigureSigMFFileInput::match(message))
     {
         MsgConfigureSigMFFileInput& conf = (MsgConfigureSigMFFileInput&) message;
-        SigMFFileInputSettings settings = conf.getSettings();
-        applySettings(settings);
+        applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
     else if (MsgConfigureTrackIndex::match(message))
@@ -816,14 +815,12 @@ bool SigMFFileInput::handleMessage(const Message& message)
 	}
 }
 
-bool SigMFFileInput::applySettings(const SigMFFileInputSettings& settings, bool force)
+bool SigMFFileInput::applySettings(const SigMFFileInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    QList<QString> reverseAPIKeys;
+    qDebug() << "SigMFFileInput::applySettings: force: " << force << settings.getDebugString(settingsKeys, force);
 
-    if ((m_settings.m_accelerationFactor != settings.m_accelerationFactor) || force)
+    if (settingsKeys.contains("accelerationFactor") || force)
     {
-        reverseAPIKeys.append("accelerationFactor");
-
         if (m_fileInputWorker)
         {
             QMutexLocker mutexLocker(&m_mutex);
@@ -836,29 +833,25 @@ bool SigMFFileInput::applySettings(const SigMFFileInputSettings& settings, bool 
         }
     }
 
-    if ((m_settings.m_trackLoop != settings.m_trackLoop)) {
-        reverseAPIKeys.append("trackLoop");
-    }
-    if ((m_settings.m_trackLoop != settings.m_fullLoop)) {
-        reverseAPIKeys.append("fullLoop");
-    }
-
-    if ((m_settings.m_fileName != settings.m_fileName))
-    {
-        reverseAPIKeys.append("fileName");
+    if (settingsKeys.contains("fileName")) {
         openFileStreams(settings.m_fileName);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
     return true;
 }
 
@@ -883,12 +876,12 @@ int SigMFFileInput::webapiSettingsPutPatch(
     SigMFFileInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureSigMFFileInput *msg = MsgConfigureSigMFFileInput::create(settings, force);
+    MsgConfigureSigMFFileInput *msg = MsgConfigureSigMFFileInput::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSigMFFileInput *msgToGUI = MsgConfigureSigMFFileInput::create(settings, force);
+        MsgConfigureSigMFFileInput *msgToGUI = MsgConfigureSigMFFileInput::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -1130,7 +1123,7 @@ void SigMFFileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
     }
 }
 
-void SigMFFileInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SigMFFileInputSettings& settings, bool force)
+void SigMFFileInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const SigMFFileInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx

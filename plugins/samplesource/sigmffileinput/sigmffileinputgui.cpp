@@ -44,6 +44,7 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 	DeviceGUI(parent),
 	ui(new Ui::SigMFFileInputGUI),
 	m_settings(),
+    m_forceSettings(false),
     m_currentTrackIndex(0),
 	m_doApplySettings(true),
 	m_sampleSource(0),
@@ -112,6 +113,7 @@ void SigMFFileInputGUI::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
+    m_forceSettings = true;
 	sendSettings();
 }
 
@@ -122,11 +124,14 @@ QByteArray SigMFFileInputGUI::serialize() const
 
 bool SigMFFileInputGUI::deserialize(const QByteArray& data)
 {
-	if(m_settings.deserialize(data)) {
+	if(m_settings.deserialize(data))
+    {
 		displaySettings();
+        m_forceSettings = true;
 		sendSettings();
 		return true;
-	} else {
+	} else
+    {
 		resetToDefaults();
 		return false;
 	}
@@ -163,7 +168,13 @@ bool SigMFFileInputGUI::handleMessage(const Message& message)
     if (SigMFFileInput::MsgConfigureSigMFFileInput::match(message))
     {
         const SigMFFileInput::MsgConfigureSigMFFileInput& cfg = (SigMFFileInput::MsgConfigureSigMFFileInput&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         displaySettings();
         return true;
     }
@@ -377,8 +388,10 @@ void SigMFFileInputGUI::sendSettings()
 {
     if (m_doApplySettings)
     {
-        SigMFFileInput::MsgConfigureSigMFFileInput *message = SigMFFileInput::MsgConfigureSigMFFileInput::create(m_settings, false);
+        SigMFFileInput::MsgConfigureSigMFFileInput *message = SigMFFileInput::MsgConfigureSigMFFileInput::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSource->getInputMessageQueue()->push(message);
+        m_forceSettings = false;
+        m_settingsKeys.clear();
     }
 }
 
@@ -439,6 +452,7 @@ void SigMFFileInputGUI::on_fullNavTimeSlider_valueChanged(int value)
 void SigMFFileInputGUI::on_playTrackLoop_toggled(bool checked)
 {
     m_settings.m_trackLoop = checked;
+    m_settingsKeys.append("trackLoop");
     sendSettings();
 }
 
@@ -459,6 +473,7 @@ void SigMFFileInputGUI::on_playTrack_toggled(bool checked)
 void SigMFFileInputGUI::on_playFullLoop_toggled(bool checked)
 {
     m_settings.m_fullLoop = checked;
+    m_settingsKeys.append("fullLoop");
     sendSettings();
 }
 
@@ -479,6 +494,7 @@ void SigMFFileInputGUI::on_playFull_toggled(bool checked)
 void SigMFFileInputGUI::on_acceleration_currentIndexChanged(int index)
 {
     m_settings.m_accelerationFactor = SigMFFileInputSettings::getAccelerationValue(index);
+    m_settingsKeys.append("accelerationFactor");
     sendSettings();
 }
 
@@ -542,6 +558,7 @@ void SigMFFileInputGUI::configureFileName()
     if (recordType == FileRecordInterface::RecordTypeSigMF)
     {
         m_settings.m_fileName = fileBase;
+        m_settingsKeys.append("fileName");
         sendSettings();
     }
 }
@@ -684,6 +701,10 @@ void SigMFFileInputGUI::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

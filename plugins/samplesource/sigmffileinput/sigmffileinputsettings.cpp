@@ -92,6 +92,66 @@ bool SigMFFileInputSettings::deserialize(const QByteArray& data)
     }
 }
 
+void SigMFFileInputSettings::applySettings(const QStringList& settingsKeys, const SigMFFileInputSettings& settings)
+{
+    if (settingsKeys.contains("fileName")) {
+        m_fileName = settings.m_fileName;
+    }
+    if (settingsKeys.contains("accelerationFactor")) {
+        m_accelerationFactor = settings.m_accelerationFactor;
+    }
+    if (settingsKeys.contains("trackLoop")) {
+        m_trackLoop = settings.m_trackLoop;
+    }
+    if (settingsKeys.contains("fullLoop")) {
+        m_fullLoop = settings.m_fullLoop;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
+
+QString SigMFFileInputSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("m_fileName") || force) {
+        ostr << " m_fileName: " << m_fileName.toStdString();
+    }
+    if (settingsKeys.contains("accelerationFactor") || force) {
+        ostr << " m_accelerationFactor: " << m_accelerationFactor;
+    }
+    if (settingsKeys.contains("trackLoop") || force) {
+        ostr << " m_trackLoop: " << m_trackLoop;
+    }
+    if (settingsKeys.contains("fullLoop") || force) {
+        ostr << " m_fullLoop: " << m_fullLoop;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}
+
 int SigMFFileInputSettings::getAccelerationIndex(int accelerationValue)
 {
     if (accelerationValue <= 1) {

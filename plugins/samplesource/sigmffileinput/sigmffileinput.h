@@ -50,20 +50,22 @@ public:
 
 	public:
 		const SigMFFileInputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureSigMFFileInput* create(const SigMFFileInputSettings& settings, bool force)
-		{
-			return new MsgConfigureSigMFFileInput(settings, force);
+		static MsgConfigureSigMFFileInput* create(const SigMFFileInputSettings& settings, const QList<QString>& settingsKeys, bool force) {
+			return new MsgConfigureSigMFFileInput(settings, settingsKeys, force);
 		}
 
 	private:
 		SigMFFileInputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-		MsgConfigureSigMFFileInput(const SigMFFileInputSettings& settings, bool force) :
+		MsgConfigureSigMFFileInput(const SigMFFileInputSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -489,9 +491,9 @@ private:
 	void seekFileStream(uint64_t sampleIndex);
 	void seekTrackMillis(int seekMillis);
     void seekFileMillis(int seekMillis);
-	bool applySettings(const SigMFFileInputSettings& settings, bool force = false);
+	bool applySettings(const SigMFFileInputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SigMFFileInputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const SigMFFileInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:
