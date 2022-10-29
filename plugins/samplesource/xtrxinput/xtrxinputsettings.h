@@ -66,6 +66,8 @@ struct XTRXInputSettings
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const XTRXInputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTSETTINGS_H_ */

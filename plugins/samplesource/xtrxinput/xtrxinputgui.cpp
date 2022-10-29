@@ -101,6 +101,7 @@ void XTRXInputGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -243,7 +244,13 @@ void XTRXInputGUI::handleInputMessages()
         {
             qDebug("XTRXInputGUI::handleInputMessages: MsgConfigureXTRX");
             const XTRXInput::MsgConfigureXTRX& cfg = (XTRXInput::MsgConfigureXTRX&) *message;
-            m_settings = cfg.getSettings();
+
+            if (cfg.getForce()) {
+                m_settings = cfg.getSettings();
+            } else {
+                m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+            }
+
             displaySettings();
 
             delete message;
@@ -399,8 +406,9 @@ void XTRXInputGUI::setCenterFrequencySetting(uint64_t kHzValue)
 
 void XTRXInputGUI::sendSettings()
 {
-    if(!m_updateTimer.isActive())
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
+    }
 }
 
 void XTRXInputGUI::updateHardware()
@@ -408,9 +416,10 @@ void XTRXInputGUI::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "XTRXInputGUI::updateHardware";
-        XTRXInput::MsgConfigureXTRX* message = XTRXInput::MsgConfigureXTRX::create(m_settings, m_forceSettings);
+        XTRXInput::MsgConfigureXTRX* message = XTRXInput::MsgConfigureXTRX::create(m_settings, m_settingsKeys, m_forceSettings);
         m_XTRXInput->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -487,6 +496,7 @@ void XTRXInputGUI::on_startStop_toggled(bool checked)
 void XTRXInputGUI::on_centerFrequency_changed(quint64 value)
 {
     setCenterFrequencySetting(value);
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -494,6 +504,7 @@ void XTRXInputGUI::on_ncoFrequency_changed(qint64 value)
 {
     m_settings.m_ncoFrequency = value;
     setCenterFrequencyDisplay();
+    m_settingsKeys.append("ncoFrequency");
     sendSettings();
 }
 
@@ -501,18 +512,21 @@ void XTRXInputGUI::on_ncoEnable_toggled(bool checked)
 {
     m_settings.m_ncoEnable = checked;
     setCenterFrequencyDisplay();
+    m_settingsKeys.append("ncoEnable");
     sendSettings();
 }
 
 void XTRXInputGUI::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void XTRXInputGUI::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
@@ -526,6 +540,7 @@ void XTRXInputGUI::on_sampleRate_changed(quint64 value)
 
     updateADCRate();
     setNCODisplay();
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
@@ -536,6 +551,7 @@ void XTRXInputGUI::on_hwDecim_currentIndexChanged(int index)
     }
 
     m_settings.m_log2HardDecim = index;
+    m_settingsKeys.append("log2HardDecim");
 
     updateADCRate();
     setNCODisplay();
@@ -549,6 +565,7 @@ void XTRXInputGUI::on_swDecim_currentIndexChanged(int index)
     }
 
     m_settings.m_log2SoftDecim = index;
+    m_settingsKeys.append("log2SoftDecim");
     displaySampleRate();
 
     if (m_sampleRateMode) {
@@ -557,18 +574,21 @@ void XTRXInputGUI::on_swDecim_currentIndexChanged(int index)
         m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftDecim);
     }
 
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
 void XTRXInputGUI::on_lpf_changed(quint64 value)
 {
     m_settings.m_lpfBW = value * 1000;
+    m_settingsKeys.append("lpfBW");
     sendSettings();
 }
 
 void XTRXInputGUI::on_gainMode_currentIndexChanged(int index)
 {
     m_settings.m_gainMode = (XTRXInputSettings::GainMode) index;
+    m_settingsKeys.append("gainMode");
 
     if (index == 0)
     {
@@ -592,6 +612,7 @@ void XTRXInputGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gain = value;
     ui->gainText->setText(tr("%1").arg(m_settings.m_gain));
+    m_settingsKeys.append("gain");
     sendSettings();
 }
 
@@ -599,18 +620,21 @@ void XTRXInputGUI::on_lnaGain_valueChanged(int value)
 {
     m_settings.m_lnaGain = value;
     ui->lnaGainText->setText(tr("%1").arg(m_settings.m_lnaGain));
+    m_settingsKeys.append("lnaGain");
     sendSettings();
 }
 
 void XTRXInputGUI::on_tiaGain_currentIndexChanged(int index)
 {
     m_settings.m_tiaGain = index + 1;
+    m_settingsKeys.append("tiaGain");
     sendSettings();
 }
 
 void XTRXInputGUI::on_pgaGain_valueChanged(int value)
 {
     m_settings.m_pgaGain = value;
+    m_settingsKeys.append("pgaGain");
     ui->pgaGainText->setText(tr("%1").arg(m_settings.m_pgaGain));
     sendSettings();
 }
@@ -618,6 +642,7 @@ void XTRXInputGUI::on_pgaGain_valueChanged(int value)
 void XTRXInputGUI::on_antenna_currentIndexChanged(int index)
 {
     m_settings.m_antennaPath = (xtrx_antenna_t) index;
+    m_settingsKeys.append("antennaPath");
     sendSettings();
 }
 
@@ -625,6 +650,8 @@ void XTRXInputGUI::on_extClock_clicked()
 {
     m_settings.m_extClock = ui->extClock->getExternalClockActive();
     m_settings.m_extClockFreq = ui->extClock->getExternalClockFrequency();
+    m_settingsKeys.append("extClock");
+    m_settingsKeys.append("extClockFreq");
     qDebug("XTRXInputGUI::on_extClock_clicked: %u Hz %s", m_settings.m_extClockFreq, m_settings.m_extClock ? "on" : "off");
     sendSettings();
 }
@@ -632,6 +659,7 @@ void XTRXInputGUI::on_extClock_clicked()
 void XTRXInputGUI::on_pwrmode_currentIndexChanged(int index)
 {
     m_settings.m_pwrmode = index;
+    m_settingsKeys.append("pwrmode");
     sendSettings();
 }
 
@@ -658,6 +686,10 @@ void XTRXInputGUI::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

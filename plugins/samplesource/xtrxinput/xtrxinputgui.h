@@ -54,6 +54,7 @@ private:
 
     XTRXInput* m_XTRXInput; //!< Same object as above but gives easy access to XTRXInput methods and attributes that are used intensively
     XTRXInputSettings m_settings;
+    QList<QString> m_settingsKeys;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
     QTimer m_updateTimer;
     QTimer m_statusTimer;

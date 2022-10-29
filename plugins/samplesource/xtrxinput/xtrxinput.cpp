@@ -198,7 +198,7 @@ void XTRXInput::closeDevice()
 
 void XTRXInput::init()
 {
-    applySettings(m_settings, true, false);
+    applySettings(m_settings, QList<QString>(), true, false);
 }
 
 XTRXInputThread *XTRXInput::findThread()
@@ -353,7 +353,7 @@ bool XTRXInput::start()
     xtrxInputThread->setFifo(requestedChannel, &m_sampleFifo);
     xtrxInputThread->setLog2Decimation(requestedChannel, m_settings.m_log2SoftDecim);
 
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 
     if (needsStart)
     {
@@ -429,7 +429,7 @@ void XTRXInput::stop()
             ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source->setThread(nullptr);
         }
 
-        applySettings(m_settings, true);
+        applySettings(m_settings, QList<QString>(), true);
         xtrxInputThread->startWork();
     }
 
@@ -491,12 +491,12 @@ bool XTRXInput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureXTRX* message = MsgConfigureXTRX::create(m_settings, true);
+    MsgConfigureXTRX* message = MsgConfigureXTRX::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureXTRX* messageToGUI = MsgConfigureXTRX::create(m_settings, true);
+        MsgConfigureXTRX* messageToGUI = MsgConfigureXTRX::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -556,12 +556,12 @@ void XTRXInput::setCenterFrequency(qint64 centerFrequency)
     XTRXInputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency - (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
 
-    MsgConfigureXTRX* message = MsgConfigureXTRX::create(settings, false);
+    MsgConfigureXTRX* message = MsgConfigureXTRX::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureXTRX* messageToGUI = MsgConfigureXTRX::create(settings, false);
+        MsgConfigureXTRX* messageToGUI = MsgConfigureXTRX::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -605,7 +605,7 @@ bool XTRXInput::handleMessage(const Message& message)
         MsgConfigureXTRX& conf = (MsgConfigureXTRX&) message;
         qDebug() << "XTRXInput::handleMessage: MsgConfigureXTRX";
 
-        if (!applySettings(conf.getSettings(), conf.getForce()))
+        if (!applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce()))
         {
             qDebug("XTRXInput::handleMessage config error");
         }
@@ -634,7 +634,7 @@ bool XTRXInput::handleMessage(const Message& message)
                     << " m_log2HardDecim: " << m_settings.m_log2HardDecim;
 
         if (m_settings.m_ncoEnable) { // need to reset NCO after sample rate change
-            applySettings(m_settings, false, true);
+            applySettings(m_settings, QList<QString>{"ncoEnable"}, false, true);
         }
 
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
@@ -829,11 +829,11 @@ void XTRXInput::apply_gain_pga(double gain)
     }
 }
 
-bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, bool forceNCOFrequency)
+bool XTRXInput::applySettings(const XTRXInputSettings& settings, const QList<QString>& settingsKeys, bool force, bool forceNCOFrequency)
 {
+    qDebug() << "XTRXInput::applySettings: force:" << force << " forceNCOFrequency:" << forceNCOFrequency << settings.getDebugString(settingsKeys, force);
     int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     XTRXInputThread *inputThread = findThread();
-    QList<QString> reverseAPIKeys;
 
     bool forwardChangeOwnDSP = false;
     bool forwardChangeRxDSP  = false;
@@ -848,43 +848,12 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     bool doGainTia = false;
     bool doGainPga = false;
 
-    // apply settings
-
-    qDebug() << "XTRXInput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
-             << " device stream sample rate: " << getDevSampleRate() << "S/s"
-             << " sample rate with soft decimation: " << getSampleRate() << "S/s"
-             << " m_devSampleRate: " << settings.m_devSampleRate
-             << " m_dcBlock: " << settings.m_dcBlock
-             << " m_iqCorrection: " << settings.m_iqCorrection
-             << " m_log2SoftDecim: " << settings.m_log2SoftDecim
-             << " m_gain: " << settings.m_gain
-             << " m_lpfBW: " << settings.m_lpfBW
-             << " m_pwrmode: " << settings.m_pwrmode
-             << " m_ncoEnable: " << settings.m_ncoEnable
-             << " m_ncoFrequency: " << settings.m_ncoFrequency
-             << " m_antennaPath: " << settings.m_antennaPath
-             << " m_extClock: " << settings.m_extClock
-             << " m_extClockFreq: " << settings.m_extClockFreq
-             << " force: " << force
-             << " forceNCOFrequency: " << forceNCOFrequency
-             << " doLPCalibration: " << doLPCalibration;
-
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
-    {
-        reverseAPIKeys.append("dcBlock");
+    if (settingsKeys.contains("dcBlock") || settingsKeys.contains("iqCorrection") || force) {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
     }
 
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    if (settingsKeys.contains("pwrmode") || force)
     {
-        reverseAPIKeys.append("iqCorrection");
-        m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
-    }
-
-    if ((m_settings.m_pwrmode != settings.m_pwrmode))
-    {
-        reverseAPIKeys.append("pwrmode");
-
         if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_val_set(m_deviceShared.m_dev->getDevice(),
@@ -897,15 +866,8 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         }
     }
 
-    if ((m_settings.m_extClock != settings.m_extClock) || force) {
-        reverseAPIKeys.append("extClock");
-    }
-    if ((m_settings.m_extClockFreq != settings.m_extClockFreq) || force) {
-        reverseAPIKeys.append("extClockFreq");
-    }
-
-    if ((m_settings.m_extClock != settings.m_extClock)
-       || (settings.m_extClock && (m_settings.m_extClockFreq != settings.m_extClockFreq)) || force)
+    if (settingsKeys.contains("extClock")
+       || (settings.m_extClock && settingsKeys.contains("extClockFreq")) || force)
     {
         if (m_deviceShared.m_dev->getDevice())
         {
@@ -923,37 +885,14 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         }
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
-        reverseAPIKeys.append("devSampleRate");
-    }
-    if ((m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force) {
-        reverseAPIKeys.append("log2HardDecim");
-    }
-
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
-       || (m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force)
+    if (settingsKeys.contains("devSampleRate")
+       || settingsKeys.contains("log2HardDecim") || force)
     {
         forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
 
         if (m_deviceShared.m_dev->getDevice()) {
             doChangeSampleRate = true;
         }
-    }
-
-    if ((m_settings.m_gainMode != settings.m_gainMode) || force) {
-        reverseAPIKeys.append("gainMode");
-    }
-    if ((m_settings.m_gain != settings.m_gain) || force) {
-        reverseAPIKeys.append("gain");
-    }
-    if ((m_settings.m_lnaGain != settings.m_lnaGain) || force) {
-        reverseAPIKeys.append("lnaGain");
-    }
-    if ((m_settings.m_tiaGain != settings.m_tiaGain) || force) {
-        reverseAPIKeys.append("tiaGain");
-    }
-    if ((m_settings.m_pgaGain != settings.m_pgaGain) || force) {
-        reverseAPIKeys.append("pgaGain");
     }
 
     if (m_deviceShared.m_dev->getDevice())
@@ -973,28 +912,26 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         }
         else if (m_settings.m_gainMode == XTRXInputSettings::GAIN_AUTO)
         {
-            if (m_settings.m_gain != settings.m_gain) {
+            if (settingsKeys.contains("gain")) {
                 doGainAuto = true;
             }
         }
         else if (m_settings.m_gainMode == XTRXInputSettings::GAIN_MANUAL)
         {
-            if (m_settings.m_lnaGain != settings.m_lnaGain) {
+            if (settingsKeys.contains("lnaGain")) {
                 doGainLna = true;
             }
-            if (m_settings.m_tiaGain != settings.m_tiaGain) {
+            if (settingsKeys.contains("tiasGain")) {
                 doGainTia = true;
             }
-            if (m_settings.m_pgaGain != settings.m_pgaGain) {
+            if (settingsKeys.contains("pgaGain")) {
                 doGainPga = true;
             }
         }
     }
 
-    if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
+    if (settingsKeys.contains("lpfBW") || force)
     {
-        reverseAPIKeys.append("lpfBW");
-
         if (m_deviceShared.m_dev->getDevice()) {
             doLPCalibration = true;
         }
@@ -1027,9 +964,8 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     }
 #endif
 
-    if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
+    if (settingsKeys.contains("log2SoftDecim") || force)
     {
-        reverseAPIKeys.append("log2SoftDecim");
         forwardChangeOwnDSP = true;
 
         if (inputThread)
@@ -1039,10 +975,8 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         }
     }
 
-    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    if (settingsKeys.contains("iqOrder") || force)
     {
-        reverseAPIKeys.append("iqOrder");
-
         if (inputThread)
         {
             inputThread->setIQOrder(settings.m_iqOrder);
@@ -1050,10 +984,8 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         }
     }
 
-    if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
+    if (settingsKeys.contains("antennaPath") || force)
     {
-        reverseAPIKeys.append("antennaPath");
-
         if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_set_antenna(m_deviceShared.m_dev->getDevice(), settings.m_antennaPath) < 0) {
@@ -1064,35 +996,31 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    if (settingsKeys.contains("centerFrequency") || force)
     {
-        reverseAPIKeys.append("centerFrequency");
         doChangeFreq = true;
     }
 
-    if ((m_settings.m_ncoFrequency != settings.m_ncoFrequency) || force) {
-        reverseAPIKeys.append("ncoFrequency");
-    }
-    if ((m_settings.m_ncoEnable != settings.m_ncoEnable) || force) {
-        reverseAPIKeys.append("ncoEnable");
-    }
-
-    if ((m_settings.m_ncoFrequency != settings.m_ncoFrequency)
-       || (m_settings.m_ncoEnable != settings.m_ncoEnable) || force)
+    if (settingsKeys.contains("ncoFrequency")
+       || settingsKeys.contains("ncoEnable") || force)
     {
         forceNCOFrequency = true;
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (doChangeSampleRate && (m_settings.m_devSampleRate != 0))
     {
@@ -1144,20 +1072,16 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         }
     }
 
-    if (doGainAuto)
-    {
+    if (doGainAuto) {
         apply_gain_auto(m_settings.m_gain);
     }
-    if (doGainLna)
-    {
+    if (doGainLna) {
         apply_gain_lna(m_settings.m_lnaGain);
     }
-    if (doGainTia)
-    {
+    if (doGainTia) {
         apply_gain_tia(tia_to_db(m_settings.m_tiaGain));
     }
-    if (doGainPga)
-    {
+    if (doGainPga) {
         apply_gain_pga(m_settings.m_pgaGain);
     }
 
@@ -1335,12 +1259,12 @@ int XTRXInput::webapiSettingsPutPatch(
     XTRXInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureXTRX *msg = MsgConfigureXTRX::create(settings, force);
+    MsgConfigureXTRX *msg = MsgConfigureXTRX::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureXTRX *msgToGUI = MsgConfigureXTRX::create(settings, force);
+        MsgConfigureXTRX *msgToGUI = MsgConfigureXTRX::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -1522,7 +1446,7 @@ void XTRXInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
     response.getXtrxInputReport()->setGpsLock(gpsStatus ? 1 : 0);
 }
 
-void XTRXInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXInputSettings& settings, bool force)
+void XTRXInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const XTRXInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
