@@ -63,7 +63,7 @@ void AudioOutput::destroy()
 
 void AudioOutput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool AudioOutput::start()
@@ -139,12 +139,12 @@ bool AudioOutput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureAudioOutput* message = MsgConfigureAudioOutput::create(m_settings, true);
+    MsgConfigureAudioOutput* message = MsgConfigureAudioOutput::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureAudioOutput* messageToGUI = MsgConfigureAudioOutput::create(m_settings, true);
+        MsgConfigureAudioOutput* messageToGUI = MsgConfigureAudioOutput::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -172,7 +172,7 @@ bool AudioOutput::handleMessage(const Message& message)
     {
         qDebug() << "AudioOutput::handleMessage: MsgConfigureAudioOutput";
         MsgConfigureAudioOutput& conf = (MsgConfigureAudioOutput&) message;
-        applySettings(conf.getSettings(), conf.getForce());
+        applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
     else if (MsgStartStop::match(message))
@@ -203,14 +203,13 @@ bool AudioOutput::handleMessage(const Message& message)
     }
 }
 
-void AudioOutput::applySettings(const AudioOutputSettings& settings, bool force)
+void AudioOutput::applySettings(const AudioOutputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
+    qDebug() << "AudioOutput::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
     bool forwardChange = false;
-    QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_deviceName != settings.m_deviceName) || force)
+    if (settingsKeys.contains("deviceName") || force)
     {
-        reverseAPIKeys.append("deviceName");
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         m_audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_deviceName);
         //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
@@ -220,16 +219,14 @@ void AudioOutput::applySettings(const AudioOutputSettings& settings, bool force)
         forwardChange = true;
     }
 
-    if ((m_settings.m_volume != settings.m_volume) || force)
+    if (settingsKeys.contains("volume") || force)
     {
-        reverseAPIKeys.append("volume");
         m_audioOutputDevice.setVolume(settings.m_volume);
         qDebug() << "AudioOutput::applySettings: set volume to " << settings.m_volume;
     }
 
-    if ((m_settings.m_iqMapping != settings.m_iqMapping) || force)
+    if (settingsKeys.contains("iqMapping") || force)
     {
-        reverseAPIKeys.append("iqMapping");
         forwardChange = true;
 
         if (m_running) {
@@ -237,16 +234,20 @@ void AudioOutput::applySettings(const AudioOutputSettings& settings, bool force)
         }
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (forwardChange)
     {
@@ -310,12 +311,12 @@ int AudioOutput::webapiSettingsPutPatch(
     AudioOutputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureAudioOutput *msg = MsgConfigureAudioOutput::create(settings, force);
+    MsgConfigureAudioOutput *msg = MsgConfigureAudioOutput::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAudioOutput *msgToGUI = MsgConfigureAudioOutput::create(settings, force);
+        MsgConfigureAudioOutput *msgToGUI = MsgConfigureAudioOutput::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -369,7 +370,7 @@ void AudioOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getAudioOutputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
-void AudioOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const AudioOutputSettings& settings, bool force)
+void AudioOutput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AudioOutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(1); // single Tx

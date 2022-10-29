@@ -78,6 +78,7 @@ void AudioOutputGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -113,7 +114,13 @@ bool AudioOutputGui::handleMessage(const Message& message)
     if (AudioOutput::MsgConfigureAudioOutput::match(message))
     {
         const AudioOutput::MsgConfigureAudioOutput& cfg = (AudioOutput::MsgConfigureAudioOutput&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -185,6 +192,7 @@ void AudioOutputGui::on_deviceSelect_clicked()
     if (audioSelect.m_selected)
     {
         m_settings.m_deviceName = audioSelect.m_audioDeviceName;
+        m_settingsKeys.append("deviceName");
         ui->deviceLabel->setText(m_settings.m_deviceName);
         sendSettings();
     }
@@ -194,12 +202,14 @@ void AudioOutputGui::on_volume_valueChanged(int value)
 {
     m_settings.m_volume = value/10.0f;
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 3, 'f', 1));
+    m_settingsKeys.append("volume");
     sendSettings();
 }
 
 void AudioOutputGui::on_channels_currentIndexChanged(int index)
 {
     m_settings.m_iqMapping = (AudioOutputSettings::IQMapping) index;
+    m_settingsKeys.append("iqMapping");
     updateSampleRateAndFrequency();
     sendSettings();
 }
@@ -215,17 +225,19 @@ void AudioOutputGui::on_startStop_toggled(bool checked)
 
 void AudioOutputGui::sendSettings()
 {
-    if(!m_updateTimer.isActive())
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
+    }
 }
 
 void AudioOutputGui::updateHardware()
 {
     if (m_doApplySettings)
     {
-        AudioOutput::MsgConfigureAudioOutput* message = AudioOutput::MsgConfigureAudioOutput::create(m_settings, m_forceSettings);
+        AudioOutput::MsgConfigureAudioOutput* message = AudioOutput::MsgConfigureAudioOutput::create(m_settings, m_settingsKeys, m_forceSettings);
         m_audioOutput->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -247,6 +259,10 @@ void AudioOutputGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

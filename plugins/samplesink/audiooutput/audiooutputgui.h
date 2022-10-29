@@ -56,6 +56,7 @@ private:
     bool m_doApplySettings;
     bool m_forceSettings;
     AudioOutputSettings m_settings;
+    QList<QString> m_settingsKeys;
     QTimer m_updateTimer;
     int m_sampleRate;
     qint64 m_centerFrequency;

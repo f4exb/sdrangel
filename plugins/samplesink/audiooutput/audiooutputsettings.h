@@ -39,6 +39,8 @@ struct AudioOutputSettings {
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const AudioOutputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     // Append realm to device names, because there may be multiple devices with the same name on Windows
     static QString getFullDeviceName(const QAudioDeviceInfo &deviceInfo)
