@@ -42,20 +42,22 @@ public:
 
 	public:
 		const FileOutputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureFileOutput* create(const FileOutputSettings& settings, bool force)
-		{
-			return new MsgConfigureFileOutput(settings, force);
+		static MsgConfigureFileOutput* create(const FileOutputSettings& settings, const QList<QString>& settingsKeys, bool force) {
+			return new MsgConfigureFileOutput(settings, settingsKeys, force);
 		}
 
 	private:
 		FileOutputSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureFileOutput(const FileOutputSettings& settings, bool force) :
+		MsgConfigureFileOutput(const FileOutputSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -241,8 +243,8 @@ private:
     void startWorker();
     void stopWorker();
 	void openFileStream();
-	void applySettings(const FileOutputSettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileOutputSettings& settings, bool force);
+	void applySettings(const FileOutputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const FileOutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

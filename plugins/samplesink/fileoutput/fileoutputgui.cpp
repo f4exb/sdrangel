@@ -97,6 +97,7 @@ void FileOutputGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
+    m_forceSettings = true;
 	sendSettings();
 }
 
@@ -130,7 +131,13 @@ bool FileOutputGui::handleMessage(const Message& message)
     {
         qDebug("FileOutputGui::handleMessage: message: MsgConfigureFileOutput");
         const FileOutput::MsgConfigureFileOutput& cfg = (FileOutput::MsgConfigureFileOutput&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -203,21 +210,24 @@ void FileOutputGui::displaySettings()
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
     ui->fileNameText->setText(m_settings.m_fileName);
+    ui->interp->setCurrentIndex(m_settings.m_log2Interp);
 }
 
 void FileOutputGui::sendSettings()
 {
-    if(!m_updateTimer.isActive())
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
+    }
 }
 
 
 void FileOutputGui::updateHardware()
 {
     qDebug() << "FileOutputGui::updateHardware";
-    FileOutput::MsgConfigureFileOutput* message = FileOutput::MsgConfigureFileOutput::create(m_settings, m_forceSettings);
+    FileOutput::MsgConfigureFileOutput* message = FileOutput::MsgConfigureFileOutput::create(m_settings, m_settingsKeys, m_forceSettings);
     m_deviceSampleSink->getInputMessageQueue()->push(message);
     m_forceSettings = false;
+    m_settingsKeys.clear();
     m_updateTimer.stop();
 }
 
@@ -253,12 +263,14 @@ void FileOutputGui::updateStatus()
 void FileOutputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
 void FileOutputGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
+    m_settingsKeys.append("sampleRate");
     sendSettings();
 }
 
@@ -269,6 +281,7 @@ void FileOutputGui::on_interp_currentIndexChanged(int index)
     }
 
     m_settings.m_log2Interp = index;
+    m_settingsKeys.append("log2Interp");
     updateSampleRateAndFrequency();
     sendSettings();
 }
@@ -351,6 +364,10 @@ void FileOutputGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

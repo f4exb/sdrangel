@@ -86,7 +86,7 @@ void FileOutput::openFileStream()
 
 void FileOutput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool FileOutput::start()
@@ -167,12 +167,12 @@ bool FileOutput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureFileOutput* message = MsgConfigureFileOutput::create(m_settings, true);
+    MsgConfigureFileOutput* message = MsgConfigureFileOutput::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureFileOutput* messageToGUI = MsgConfigureFileOutput::create(m_settings, true);
+        MsgConfigureFileOutput* messageToGUI = MsgConfigureFileOutput::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -199,12 +199,12 @@ void FileOutput::setCenterFrequency(qint64 centerFrequency)
     FileOutputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureFileOutput* message = MsgConfigureFileOutput::create(settings, false);
+    MsgConfigureFileOutput* message = MsgConfigureFileOutput::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureFileOutput* messageToGUI = MsgConfigureFileOutput::create(settings, false);
+        MsgConfigureFileOutput* messageToGUI = MsgConfigureFileOutput::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -230,8 +230,7 @@ bool FileOutput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
@@ -250,7 +249,7 @@ bool FileOutput::handleMessage(const Message& message)
     {
 	    qDebug() << "FileOutput::handleMessage: MsgConfigureFileOutput";
 	    MsgConfigureFileOutput& conf = (MsgConfigureFileOutput&) message;
-        applySettings(conf.getSettings(), conf.getForce());
+        applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
 	else if (MsgConfigureFileOutputWork::match(message))
@@ -287,52 +286,49 @@ bool FileOutput::handleMessage(const Message& message)
 	}
 }
 
-void FileOutput::applySettings(const FileOutputSettings& settings, bool force)
+void FileOutput::applySettings(const FileOutputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
+    qDebug() << "FileOutput::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
     QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;
-    QList<QString> reverseAPIKeys;
 
-    if (force || (m_settings.m_fileName != settings.m_fileName)) {
-        reverseAPIKeys.append("fileName");
-    }
-
-    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency))
+    if (force || settingsKeys.contains("centerFrequency"))
     {
-        reverseAPIKeys.append("centerFrequency");
         forwardChange = true;
     }
 
-    if (force || (m_settings.m_sampleRate != settings.m_sampleRate))
+    if (force || settingsKeys.contains("sampleRate"))
     {
         if (m_fileOutputWorker != 0) {
             m_fileOutputWorker->setSamplerate(settings.m_sampleRate);
         }
 
-        reverseAPIKeys.append("sampleRate");
         forwardChange = true;
     }
 
-    if (force || (m_settings.m_log2Interp != settings.m_log2Interp))
+    if (force || settingsKeys.contains("log2Interp"))
     {
         if (m_fileOutputWorker != 0) {
             m_fileOutputWorker->setLog2Interpolation(settings.m_log2Interp);
         }
 
-        reverseAPIKeys.append("log2Interp");
         forwardChange = true;
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (forwardChange)
     {
@@ -366,12 +362,12 @@ int FileOutput::webapiSettingsPutPatch(
     FileOutputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureFileOutput *msg = MsgConfigureFileOutput::create(settings, force);
+    MsgConfigureFileOutput *msg = MsgConfigureFileOutput::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFileOutput *msgToGUI = MsgConfigureFileOutput::create(settings, force);
+        MsgConfigureFileOutput *msgToGUI = MsgConfigureFileOutput::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -457,7 +453,7 @@ void FileOutput::webapiUpdateDeviceSettings(
     }
 }
 
-void FileOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileOutputSettings& settings, bool force)
+void FileOutput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const FileOutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(1); // single Tx

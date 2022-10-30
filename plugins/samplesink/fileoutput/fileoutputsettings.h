@@ -32,6 +32,8 @@ struct FileOutputSettings {
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const FileOutputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* PLUGINS_SAMPLESINK_FILEOUTPUT_FILEOUTPUTSETTINGS_H_ */
