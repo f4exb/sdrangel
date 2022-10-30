@@ -115,6 +115,7 @@ void LimeSDROutputGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -176,7 +177,13 @@ bool LimeSDROutputGUI::handleMessage(const Message& message)
     if (LimeSDROutput::MsgConfigureLimeSDR::match(message))
     {
         const LimeSDROutput::MsgConfigureLimeSDR& cfg = (LimeSDROutput::MsgConfigureLimeSDR&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -291,14 +298,6 @@ void LimeSDROutputGUI::handleInputMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("LimeSDROutputGUI::handleInputMessages: DSPSignalNotification: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
-
-            delete message;
-        }
-        else if (LimeSDROutput::MsgConfigureLimeSDR::match(*message))
-        {
-            const LimeSDROutput::MsgConfigureLimeSDR& cfg = (LimeSDROutput::MsgConfigureLimeSDR&) *message;
-            m_settings = cfg.getSettings();
-            displaySettings();
 
             delete message;
         }
@@ -470,8 +469,9 @@ void LimeSDROutputGUI::setCenterFrequencySetting(uint64_t kHzValue)
 
 void LimeSDROutputGUI::sendSettings()
 {
-    if(!m_updateTimer.isActive())
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
+    }
 }
 
 void LimeSDROutputGUI::updateHardware()
@@ -479,9 +479,10 @@ void LimeSDROutputGUI::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "LimeSDROutputGUI::updateHardware";
-        LimeSDROutput::MsgConfigureLimeSDR* message = LimeSDROutput::MsgConfigureLimeSDR::create(m_settings, m_forceSettings);
+        LimeSDROutput::MsgConfigureLimeSDR* message = LimeSDROutput::MsgConfigureLimeSDR::create(m_settings, m_settingsKeys, m_forceSettings);
         m_limeSDROutput->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -558,6 +559,7 @@ void LimeSDROutputGUI::on_startStop_toggled(bool checked)
 void LimeSDROutputGUI::on_centerFrequency_changed(quint64 value)
 {
     setCenterFrequencySetting(value);
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -566,6 +568,7 @@ void LimeSDROutputGUI::on_ncoFrequency_changed(qint64 value)
     m_settings.m_ncoFrequency = value;
     updateFrequencyLimits();
     setCenterFrequencyDisplay();
+    m_settingsKeys.append("ncoFrequency");
     sendSettings();
 }
 
@@ -574,6 +577,7 @@ void LimeSDROutputGUI::on_ncoEnable_toggled(bool checked)
     m_settings.m_ncoEnable = checked;
     updateFrequencyLimits();
     setCenterFrequencyDisplay();
+    m_settingsKeys.append("ncoEnable");
     sendSettings();
 }
 
@@ -587,15 +591,19 @@ void LimeSDROutputGUI::on_sampleRate_changed(quint64 value)
 
     updateDACRate();
     setNCODisplay();
+    m_settingsKeys.append("devSampleRate");
     sendSettings();}
 
 void LimeSDROutputGUI::on_hwInterp_currentIndexChanged(int index)
 {
-    if ((index <0) || (index > 5))
+    if ((index <0) || (index > 5)) {
         return;
+    }
+
     m_settings.m_log2HardInterp = index;
     updateDACRate();
     setNCODisplay();
+    m_settingsKeys.append("log2HardInterp");
     sendSettings();
 }
 
@@ -614,6 +622,8 @@ void LimeSDROutputGUI::on_swInterp_currentIndexChanged(int index)
         m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftInterp);
     }
 
+    m_settingsKeys.append("log2SoftInterp");
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
@@ -621,18 +631,21 @@ void LimeSDROutputGUI::on_lpf_changed(quint64 value)
 {
     m_settings.m_lpfBW = value * 1000;
     checkLPF();
+    m_settingsKeys.append("lpfBW");
     sendSettings();
 }
 
 void LimeSDROutputGUI::on_lpFIREnable_toggled(bool checked)
 {
     m_settings.m_lpfFIREnable = checked;
+    m_settingsKeys.append("lpfFIREnable");
     sendSettings();
 }
 
 void LimeSDROutputGUI::on_lpFIR_changed(quint64 value)
 {
     m_settings.m_lpfFIRBW = value * 1000;
+    m_settingsKeys.append("lpfFIRBW");
     sendSettings();
 }
 
@@ -640,12 +653,14 @@ void LimeSDROutputGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gain = value;
     ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
+    m_settingsKeys.append("gain");
     sendSettings();
 }
 
 void LimeSDROutputGUI::on_antenna_currentIndexChanged(int index)
 {
     m_settings.m_antennaPath = (LimeSDROutputSettings::PathRFE) index;
+    m_settingsKeys.append("antennaPath");
     sendSettings();
 }
 
@@ -654,6 +669,8 @@ void LimeSDROutputGUI::on_extClock_clicked()
     m_settings.m_extClock = ui->extClock->getExternalClockActive();
     m_settings.m_extClockFreq = ui->extClock->getExternalClockFrequency();
     qDebug("LimeSDROutputGUI::on_extClock_clicked: %u Hz %s", m_settings.m_extClockFreq, m_settings.m_extClock ? "on" : "off");
+    m_settingsKeys.append("extClock");
+    m_settingsKeys.append("extClockFreq");
     sendSettings();
 }
 
@@ -664,6 +681,9 @@ void LimeSDROutputGUI::on_transverter_clicked()
     qDebug("LimeSDRInputGUI::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     setCenterFrequencySetting(ui->centerFrequency->getValueNew());
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -690,6 +710,10 @@ void LimeSDROutputGUI::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }
