@@ -41,20 +41,22 @@ public:
 
 	public:
 		const HackRFOutputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureHackRF* create(const HackRFOutputSettings& settings, bool force)
-		{
-			return new MsgConfigureHackRF(settings, force);
+		static MsgConfigureHackRF* create(const HackRFOutputSettings& settings, const QList<QString>& settingsKeys, bool force) {
+			return new MsgConfigureHackRF(settings, settingsKeys, force);
 		}
 
 	private:
 		HackRFOutputSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureHackRF(const HackRFOutputSettings& settings, bool force) :
+		MsgConfigureHackRF(const HackRFOutputSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -157,10 +159,10 @@ private:
 
     bool openDevice();
     void closeDevice();
-	bool applySettings(const HackRFOutputSettings& settings, bool force);
+	bool applySettings(const HackRFOutputSettings& settings, const QList<QString>& settingsKeys, bool force);
 //	hackrf_device *open_hackrf_from_sequence(int sequence);
 	void setDeviceCenterFrequency(quint64 freq_hz, int loPpmTenths);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const HackRFOutputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const HackRFOutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

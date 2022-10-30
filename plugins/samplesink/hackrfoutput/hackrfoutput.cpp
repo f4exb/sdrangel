@@ -125,7 +125,7 @@ bool HackRFOutput::openDevice()
 
 void HackRFOutput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool HackRFOutput::start()
@@ -142,7 +142,7 @@ bool HackRFOutput::start()
 
 //	mutexLocker.unlock();
 
-	applySettings(m_settings, true);
+	applySettings(m_settings, QList<QString>(), true);
 
     m_hackRFThread->setLog2Interpolation(m_settings.m_log2Interp);
     m_hackRFThread->setFcPos((int) m_settings.m_fcPos);
@@ -202,12 +202,12 @@ bool HackRFOutput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureHackRF* message = MsgConfigureHackRF::create(m_settings, true);
+    MsgConfigureHackRF* message = MsgConfigureHackRF::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(m_settings, true);
+        MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -235,12 +235,12 @@ void HackRFOutput::setCenterFrequency(qint64 centerFrequency)
     HackRFOutputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureHackRF* message = MsgConfigureHackRF::create(settings, false);
+    MsgConfigureHackRF* message = MsgConfigureHackRF::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(settings, false);
+        MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -252,10 +252,9 @@ bool HackRFOutput::handleMessage(const Message& message)
 		MsgConfigureHackRF& conf = (MsgConfigureHackRF&) message;
 		qDebug() << "HackRFOutput::handleMessage: MsgConfigureHackRF";
 
-		bool success = applySettings(conf.getSettings(), conf.getForce());
+		bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
-		if (!success)
-		{
+		if (!success) {
 			qDebug("HackRFOutput::handleMessage: MsgConfigureHackRF: config error");
 		}
 
@@ -268,8 +267,7 @@ bool HackRFOutput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
@@ -299,7 +297,7 @@ bool HackRFOutput::handleMessage(const Message& message)
 
         if (m_guiMessageQueue)
         {
-            MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(settings, false);
+            MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(settings, QList<QString>{"centerFrequency"}, false);
             m_guiMessageQueue->push(messageToGUI);
         }
 
@@ -334,38 +332,20 @@ void HackRFOutput::setDeviceCenterFrequency(quint64 freq_hz, int loPpmTenths)
 	}
 }
 
-bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool force)
+bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
 //	QMutexLocker mutexLocker(&m_mutex);
+	qDebug() << "HackRFOutput::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
 
 	bool forwardChange    = false;
 	bool suspendThread    = false;
 	bool threadWasRunning = false;
 	hackrf_error rc;
-    QList<QString> reverseAPIKeys;
 
-	qDebug() << "HackRFOutput::applySettings"
-        << " m_centerFrequency: " << settings.m_centerFrequency
-        << " m_LOppmTenths: " << settings.m_LOppmTenths
-        << " m_bandwidth: " << settings.m_bandwidth
-        << " m_devSampleRate: " << settings.m_devSampleRate
-        << " m_log2Interp: " << settings.m_log2Interp
-        << " m_fcPos: " << settings.m_fcPos
-        << " m_biasT: " << settings.m_biasT
-        << " m_lnaExt: " << settings.m_lnaExt
-        << " m_vgaGain: " << settings.m_vgaGain
-        << " m_useReverseAPI: " << settings.m_useReverseAPI
-        << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-        << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-        << " force: " << force;
-
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
-        reverseAPIKeys.append("devSampleRate");
-    }
-
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-        (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    // if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
+    //     (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    if (settingsKeys.contains("devSampleRate") ||
+        settingsKeys.contains("log2Interp") || force)
     {
         suspendThread = true;
     }
@@ -382,7 +362,8 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
         }
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    if (settingsKeys.contains("devSampleRate") ||
+        settingsKeys.contains("log2Interp") || force)
     {
         forwardChange = true;
         unsigned int fifoRate = std::max(
@@ -391,7 +372,7 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
         m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
     }
 
-	if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force)
+	if (settingsKeys.contains("devSampleRate") || force)
 	{
 		if (m_dev != 0)
 		{
@@ -411,10 +392,8 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 		}
 	}
 
-	if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
+	if (settingsKeys.contains("log2Interp") || force)
 	{
-        reverseAPIKeys.append("log2Interp");
-
 		if (m_hackRFThread != 0)
 		{
 			m_hackRFThread->setLog2Interpolation(settings.m_log2Interp);
@@ -422,29 +401,13 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 		}
 	}
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
-        reverseAPIKeys.append("centerFrequency");
-    }
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
-        reverseAPIKeys.append("LOppmTenths");
-    }
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force) {
-        reverseAPIKeys.append("fcPos");
-    }
-    if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
-        reverseAPIKeys.append("transverterMode");
-    }
-    if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
-        reverseAPIKeys.append("transverterDeltaFrequency");
-    }
-
-	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) ||
-	    (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-        (m_settings.m_log2Interp != settings.m_log2Interp) ||
-        (m_settings.m_fcPos != settings.m_fcPos) ||
-        (m_settings.m_transverterMode != settings.m_transverterMode) ||
-        (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) ||
-        (m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
+	if (settingsKeys.contains("centerFrequency") ||
+	    settingsKeys.contains("devSampleRate") ||
+        settingsKeys.contains("log2Interp") ||
+        settingsKeys.contains("fcPos") ||
+        settingsKeys.contains("transverterMode") ||
+        settingsKeys.contains("transverterDeltaFrequency") ||
+        settingsKeys.contains("LOppmTenths") || force)
 	{
         qint64 deviceCenterFrequency = DeviceSampleSink::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
@@ -465,17 +428,15 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 		forwardChange = true;
 	}
 
-	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
+	if (settingsKeys.contains("fcPos") || force)
 	{
 		if (m_hackRFThread != 0) {
 			m_hackRFThread->setFcPos((int) settings.m_fcPos);
 		}
 	}
 
-	if ((m_settings.m_vgaGain != settings.m_vgaGain) || force)
+	if (settingsKeys.contains("vgaGain") || force)
 	{
-        reverseAPIKeys.append("vgaGain");
-
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_txvga_gain(m_dev, settings.m_vgaGain);
@@ -488,10 +449,8 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 		}
 	}
 
-	if ((m_settings.m_bandwidth != settings.m_bandwidth) || force)
+	if (settingsKeys.contains("bandwidth") || force)
 	{
-        reverseAPIKeys.append("bandwidth");
-
 		if (m_dev != 0)
 		{
 			uint32_t bw_index = hackrf_compute_baseband_filter_bw_round_down_lt(settings.m_bandwidth + 1); // +1 so the round down to lower than yields desired bandwidth
@@ -505,10 +464,8 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 		}
 	}
 
-	if ((m_settings.m_biasT != settings.m_biasT) || force)
+	if (settingsKeys.contains("biasT") || force)
 	{
-        reverseAPIKeys.append("biasT");
-
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_antenna_enable(m_dev, (settings.m_biasT ? 1 : 0));
@@ -521,10 +478,8 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 		}
 	}
 
-	if ((m_settings.m_lnaExt != settings.m_lnaExt) || force)
+	if (settingsKeys.contains("lnaExt") || force)
 	{
-        reverseAPIKeys.append("lnaExt");
-
 		if (m_dev != 0)
 		{
 			rc = (hackrf_error) hackrf_set_amp_enable(m_dev, (settings.m_lnaExt ? 1 : 0));
@@ -537,21 +492,24 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 		}
 	}
 
-	if (threadWasRunning)
-	{
+	if (threadWasRunning) {
 	    m_hackRFThread->startWork();
 	}
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
 	if (forwardChange)
 	{
@@ -584,12 +542,12 @@ int HackRFOutput::webapiSettingsPutPatch(
     HackRFOutputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureHackRF *msg = MsgConfigureHackRF::create(settings, force);
+    MsgConfigureHackRF *msg = MsgConfigureHackRF::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureHackRF *msgToGUI = MsgConfigureHackRF::create(settings, force);
+        MsgConfigureHackRF *msgToGUI = MsgConfigureHackRF::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -706,7 +664,7 @@ int HackRFOutput::webapiRun(
     return 200;
 }
 
-void HackRFOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const HackRFOutputSettings& settings, bool force)
+void HackRFOutput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const HackRFOutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(1); // single Tx

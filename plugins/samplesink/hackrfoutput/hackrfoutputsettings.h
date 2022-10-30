@@ -48,6 +48,8 @@ struct HackRFOutputSettings {
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const HackRFOutputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* _HACKRF_HACKRFOUTPUTSETTINGS_H_ */

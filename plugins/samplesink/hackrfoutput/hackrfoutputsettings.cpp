@@ -114,3 +114,105 @@ bool HackRFOutputSettings::deserialize(const QByteArray& data)
 		return false;
 	}
 }
+
+void HackRFOutputSettings::applySettings(const QStringList& settingsKeys, const HackRFOutputSettings& settings)
+{
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("LOppmTenths")) {
+        m_LOppmTenths = settings.m_LOppmTenths;
+    }
+    if (settingsKeys.contains("biasT")) {
+        m_biasT = settings.m_biasT;
+    }
+    if (settingsKeys.contains("log2Interp")) {
+        m_log2Interp = settings.m_log2Interp;
+    }
+    if (settingsKeys.contains("fcPos")) {
+        m_fcPos = settings.m_fcPos;
+    }
+    if (settingsKeys.contains("lnaExt")) {
+        m_lnaExt = settings.m_lnaExt;
+    }
+    if (settingsKeys.contains("vgaGain")) {
+        m_vgaGain = settings.m_vgaGain;
+    }
+    if (settingsKeys.contains("bandwidth")) {
+        m_bandwidth = settings.m_bandwidth;
+    }
+    if (settingsKeys.contains("devSampleRate")) {
+        m_devSampleRate = settings.m_devSampleRate;
+    }
+    if (settingsKeys.contains("transverterMode")) {
+        m_transverterMode = settings.m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency")) {
+        m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
+
+QString HackRFOutputSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("LOppmTenths") || force) {
+        ostr << " m_LOppmTenths: " << m_LOppmTenths;
+    }
+    if (settingsKeys.contains("biasT") || force) {
+        ostr << " m_biasT: " << m_biasT;
+    }
+    if (settingsKeys.contains("log2Interp") || force) {
+        ostr << " m_log2Interp: " << m_log2Interp;
+    }
+    if (settingsKeys.contains("fcPos") || force) {
+        ostr << " m_fcPos: " << m_fcPos;
+    }
+    if (settingsKeys.contains("lnaExt") || force) {
+        ostr << " m_lnaExt: " << m_lnaExt;
+    }
+    if (settingsKeys.contains("vgaGain") || force) {
+        ostr << " m_vgaGain: " << m_vgaGain;
+    }
+    if (settingsKeys.contains("bandwidth") || force) {
+        ostr << " m_bandwidth: " << m_bandwidth;
+    }
+    if (settingsKeys.contains("devSampleRate") || force) {
+        ostr << " m_devSampleRate: " << m_devSampleRate;
+    }
+    if (settingsKeys.contains("transverterMode") || force) {
+        ostr << " m_transverterMode: " << m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency") || force) {
+        ostr << " m_transverterDeltaFrequency: " << m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}
