@@ -105,6 +105,7 @@ void BladeRF2OutputGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -171,7 +172,13 @@ bool BladeRF2OutputGui::handleMessage(const Message& message)
     if (BladeRF2Output::MsgConfigureBladeRF2::match(message))
     {
         const BladeRF2Output::MsgConfigureBladeRF2& cfg = (BladeRF2Output::MsgConfigureBladeRF2&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         m_sampleSink->getGlobalGainRange(m_gainMin, m_gainMax, m_gainStep, m_gainScale);
         ui->gain->setMinimum(m_gainMin/m_gainStep);
@@ -306,13 +313,15 @@ void BladeRF2OutputGui::displaySettings()
 
 void BladeRF2OutputGui::sendSettings()
 {
-    if(!m_updateTimer.isActive())
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
+    }
 }
 
 void BladeRF2OutputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -320,6 +329,7 @@ void BladeRF2OutputGui::on_LOppm_valueChanged(int value)
 {
     ui->LOppmText->setText(QString("%1").arg(QString::number(value/10.0, 'f', 1)));
     m_settings.m_LOppmTenths = value;
+    m_settingsKeys.append("LOppmTenths");
     sendSettings();
 }
 
@@ -331,18 +341,21 @@ void BladeRF2OutputGui::on_sampleRate_changed(quint64 value)
         m_settings.m_devSampleRate = value * (1 << m_settings.m_log2Interp);
     }
 
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
 void BladeRF2OutputGui::on_biasTee_toggled(bool checked)
 {
     m_settings.m_biasTee = checked;
+    m_settingsKeys.append("biasTee");
     sendSettings();
 }
 
 void BladeRF2OutputGui::on_bandwidth_changed(quint64 value)
 {
     m_settings.m_bandwidth = value * 1000;
+    m_settingsKeys.append("bandwidth");
     sendSettings();
 }
 
@@ -353,6 +366,7 @@ void BladeRF2OutputGui::on_interp_currentIndexChanged(int index)
     }
 
     m_settings.m_log2Interp = index;
+    m_settingsKeys.append("log2Interp");
     displaySampleRate();
 
     if (m_sampleRateMode) {
@@ -361,6 +375,7 @@ void BladeRF2OutputGui::on_interp_currentIndexChanged(int index)
         m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2Interp);
     }
 
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
@@ -369,6 +384,7 @@ void BladeRF2OutputGui::on_gain_valueChanged(int value)
     float displayableGain = getGainDB(value);
     ui->gainText->setText(tr("%1 dB").arg(QString::number(displayableGain, 'f', 2)));
     m_settings.m_globalGain = (int) displayableGain;
+    m_settingsKeys.append("globalGain");
     sendSettings();
 }
 
@@ -379,6 +395,9 @@ void BladeRF2OutputGui::on_transverter_clicked()
     qDebug("LimeSDRInputGUI::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     setCenterFrequencySetting(ui->centerFrequency->getValueNew());
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -402,9 +421,10 @@ void BladeRF2OutputGui::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "BladeRF2OutputGui::updateHardware";
-        BladeRF2Output::MsgConfigureBladeRF2* message = BladeRF2Output::MsgConfigureBladeRF2::create(m_settings, m_forceSettings);
+        BladeRF2Output::MsgConfigureBladeRF2* message = BladeRF2Output::MsgConfigureBladeRF2::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSink->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -455,6 +475,10 @@ void BladeRF2OutputGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

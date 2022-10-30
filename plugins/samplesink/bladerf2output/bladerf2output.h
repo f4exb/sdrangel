@@ -41,20 +41,22 @@ public:
 
     public:
         const BladeRF2OutputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureBladeRF2* create(const BladeRF2OutputSettings& settings, bool force)
-        {
-            return new MsgConfigureBladeRF2(settings, force);
+        static MsgConfigureBladeRF2* create(const BladeRF2OutputSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureBladeRF2(settings, settingsKeys, force);
         }
 
     private:
         BladeRF2OutputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureBladeRF2(const BladeRF2OutputSettings& settings, bool force) :
+        MsgConfigureBladeRF2(const BladeRF2OutputSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -181,11 +183,11 @@ private:
     void closeDevice();
     BladeRF2OutputThread *findThread();
     void moveThreadToBuddy();
-    bool applySettings(const BladeRF2OutputSettings& settings, bool force);
+    bool applySettings(const BladeRF2OutputSettings& settings, const QList<QString>& settingsKeys, bool force);
     int getNbChannels();
     bool setDeviceCenterFrequency(struct bladerf *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF2OutputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const BladeRF2OutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:
