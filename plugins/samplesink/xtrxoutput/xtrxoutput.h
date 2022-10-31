@@ -40,22 +40,24 @@ public:
     class MsgConfigureXTRX : public Message {
         MESSAGE_CLASS_DECLARATION
 
-        public:
-            const XTRXOutputSettings& getSettings() const { return m_settings; }
+    public:
+        const XTRXOutputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureXTRX* create(const XTRXOutputSettings& settings, bool force)
-        {
-            return new MsgConfigureXTRX(settings, force);
+        static MsgConfigureXTRX* create(const XTRXOutputSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureXTRX(settings, settingsKeys, force);
         }
 
     private:
         XTRXOutputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureXTRX(const XTRXOutputSettings& settings, bool force) :
+        MsgConfigureXTRX(const XTRXOutputSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -249,9 +251,9 @@ private:
 
     void suspendRxThread();
     void resumeRxThread();
-    bool applySettings(const XTRXOutputSettings& settings, bool force = false, bool forceNCOFrequency = false);
+    bool applySettings(const XTRXOutputSettings& settings, const QList<QString>& settingsKeys, bool force = false, bool forceNCOFrequency = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXOutputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const XTRXOutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

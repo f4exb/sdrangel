@@ -188,7 +188,7 @@ void XTRXOutput::closeDevice()
 
 void XTRXOutput::init()
 {
-    applySettings(m_settings, true, false);
+    applySettings(m_settings, QList<QString>(), true, false);
 }
 
 XTRXOutputThread *XTRXOutput::findThread()
@@ -342,7 +342,7 @@ bool XTRXOutput::start()
     xtrxOutputThread->setFifo(requestedChannel, &m_sampleSourceFifo);
     xtrxOutputThread->setLog2Interpolation(requestedChannel, m_settings.m_log2SoftInterp);
 
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 
     if (needsStart)
     {
@@ -417,7 +417,7 @@ void XTRXOutput::stop()
             ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_sink->setThread(nullptr);
         }
 
-        applySettings(m_settings, true);
+        applySettings(m_settings, QList<QString>(), true);
         xtrxOutputThread->startWork();
     }
 
@@ -479,12 +479,12 @@ bool XTRXOutput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureXTRX* message = MsgConfigureXTRX::create(m_settings, true);
+    MsgConfigureXTRX* message = MsgConfigureXTRX::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureXTRX* messageToGUI = MsgConfigureXTRX::create(m_settings, true);
+        MsgConfigureXTRX* messageToGUI = MsgConfigureXTRX::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -544,12 +544,12 @@ void XTRXOutput::setCenterFrequency(qint64 centerFrequency)
     XTRXOutputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency - (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
 
-    MsgConfigureXTRX* message = MsgConfigureXTRX::create(settings, false);
+    MsgConfigureXTRX* message = MsgConfigureXTRX::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureXTRX* messageToGUI = MsgConfigureXTRX::create(settings, false);
+        MsgConfigureXTRX* messageToGUI = MsgConfigureXTRX::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -593,8 +593,7 @@ bool XTRXOutput::handleMessage(const Message& message)
         MsgConfigureXTRX& conf = (MsgConfigureXTRX&) message;
         qDebug() << "XTRXOutput::handleMessage: MsgConfigureXTRX";
 
-        if (!applySettings(conf.getSettings(), conf.getForce()))
-        {
+        if (!applySettings(conf.getSettings(), conf.getSettingsKeys(),  conf.getForce())) {
             qDebug("XTRXOutput::handleMessage config error");
         }
 
@@ -623,7 +622,7 @@ bool XTRXOutput::handleMessage(const Message& message)
 
         if (m_settings.m_ncoEnable) // need to reset NCO after sample rate change
         {
-            applySettings(m_settings, false, true);
+            applySettings(m_settings, QList<QString>{"ncoEnable"}, false, true);
         }
 
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
@@ -756,11 +755,11 @@ bool XTRXOutput::handleMessage(const Message& message)
     }
 }
 
-bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, bool forceNCOFrequency)
+bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, const QList<QString>& settingsKeys, bool force, bool forceNCOFrequency)
 {
+    qDebug() << "XTRXOutput::applySettings: force:" << force << " forceNCOFrequency:" << forceNCOFrequency << settings.getDebugString(settingsKeys, force);
     int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     XTRXOutputThread *outputThread = findThread();
-    QList<QString> reverseAPIKeys;
 
     bool forwardChangeOwnDSP = false;
     bool forwardChangeTxDSP  = false;
@@ -772,23 +771,8 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
 
     // apply settings
 
-    qDebug() << "XTRXOutput::applySettings: m_centerFrequency: " << settings.m_centerFrequency
-             << " m_devSampleRate: " << settings.m_devSampleRate
-             << " m_log2SoftInterp: " << settings.m_log2SoftInterp
-             << " m_gain: " << settings.m_gain
-             << " m_lpfBW: " << settings.m_lpfBW
-             << " m_pwrmode: " << settings.m_pwrmode
-             << " m_ncoEnable: " << settings.m_ncoEnable
-             << " m_ncoFrequency: " << settings.m_ncoFrequency
-             << " m_antennaPath: " << settings.m_antennaPath
-             << " m_extClock: " << settings.m_extClock
-             << " m_extClockFreq: " << settings.m_extClockFreq
-             << " force: " << force;
-
-    if ((m_settings.m_pwrmode != settings.m_pwrmode))
+    if (settingsKeys.contains("pwrmode") || force)
     {
-        reverseAPIKeys.append("pwrmode");
-
         if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_val_set(m_deviceShared.m_dev->getDevice(),
@@ -801,15 +785,8 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
     }
 
-    if ((m_settings.m_extClock != settings.m_extClock) || force) {
-        reverseAPIKeys.append("extClock");
-    }
-    if ((m_settings.m_extClockFreq != settings.m_extClockFreq) || force) {
-        reverseAPIKeys.append("extClockFreq");
-    }
-
-    if ((m_settings.m_extClock != settings.m_extClock)
-       || (settings.m_extClock && (m_settings.m_extClockFreq != settings.m_extClockFreq)) || force)
+    if (settingsKeys.contains("extClock")
+       || (settings.m_extClock && settingsKeys.contains("extClockFreq")) || force)
     {
         if (m_deviceShared.m_dev->getDevice())
         {
@@ -827,15 +804,8 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
-        reverseAPIKeys.append("devSampleRate");
-    }
-    if ((m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force) {
-        reverseAPIKeys.append("log2HardInterp");
-    }
-
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
-       || (m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force)
+    if (settingsKeys.contains("devSampleRate")
+       || settingsKeys.contains("log2HardInterp") || force)
     {
         forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
 
@@ -844,10 +814,8 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
     }
 
-    if ((m_settings.m_gain != settings.m_gain) || force)
+    if (settingsKeys.contains("gain") || force)
     {
-        reverseAPIKeys.append("gain");
-
         if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
@@ -862,10 +830,8 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
     }
 
-    if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
+    if (settingsKeys.contains("lpfBW") || force)
     {
-        reverseAPIKeys.append("lpfBW");
-
         if (m_deviceShared.m_dev->getDevice()) {
             doLPCalibration = true;
         }
@@ -898,9 +864,8 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     }
 #endif
 
-    if ((m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
+    if (settingsKeys.contains("log2SoftInterp") || force)
     {
-        reverseAPIKeys.append("log2SoftInterp");
         forwardChangeOwnDSP = true;
 
         if (outputThread)
@@ -910,8 +875,8 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
-     || (m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
+    if (settingsKeys.contains("devSampleRate")
+     || settingsKeys.contains("log2SoftInterp") || force)
     {
         unsigned int fifoRate = std::max(
             (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2SoftInterp),
@@ -919,10 +884,8 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
     }
 
-    if ((m_settings.m_antennaPath != settings.m_antennaPath) || force)
+    if (settingsKeys.contains("antennaPath") || force)
     {
-        reverseAPIKeys.append("antennaPath");
-
         if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_set_antenna(m_deviceShared.m_dev->getDevice(), settings.m_antennaPath) < 0) {
@@ -933,35 +896,30 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
     }
 
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
-    {
-        reverseAPIKeys.append("centerFrequency");
+    if (settingsKeys.contains("centerFrequency") || force) {
         doChangeFreq = true;
     }
 
-    if ((m_settings.m_ncoFrequency != settings.m_ncoFrequency) || force) {
-        reverseAPIKeys.append("ncoFrequency");
-    }
-    if ((m_settings.m_ncoEnable != settings.m_ncoEnable) || force) {
-        reverseAPIKeys.append("ncoEnable");
-    }
-
-    if ((m_settings.m_ncoFrequency != settings.m_ncoFrequency)
-       || (m_settings.m_ncoEnable != settings.m_ncoEnable) || force)
+    if (settingsKeys.contains("ncoFrequency")
+       || settingsKeys.contains("ncoEnable") || force)
     {
         forceNCOFrequency = true;
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (doChangeSampleRate && (settings.m_devSampleRate != 0))
     {
@@ -1163,14 +1121,6 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         }
     }
 
-    qDebug() << "XTRXOutput::applySettings:"
-             << " device stream sample rate: " << getDevSampleRate() << "S/s"
-             << " sample rate with soft interpolation: " << getSampleRate() << "S/s"
-             << " forceNCOFrequency: " << forceNCOFrequency
-             << " doLPCalibration: " << doLPCalibration
-             << " doChangeFreq: " << doChangeFreq
-             << " doChangeSampleRate: " << doChangeSampleRate;
-
     return true;
 }
 
@@ -1195,12 +1145,12 @@ int XTRXOutput::webapiSettingsPutPatch(
     XTRXOutputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureXTRX *msg = MsgConfigureXTRX::create(settings, force);
+    MsgConfigureXTRX *msg = MsgConfigureXTRX::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureXTRX *msgToGUI = MsgConfigureXTRX::create(settings, force);
+        MsgConfigureXTRX *msgToGUI = MsgConfigureXTRX::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -1353,7 +1303,7 @@ void XTRXOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response
     response.getXtrxOutputReport()->setGpsLock(gpsStatus ? 1 : 0);
 }
 
-void XTRXOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXOutputSettings& settings, bool force)
+void XTRXOutput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const XTRXOutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(1); // Single Tx
