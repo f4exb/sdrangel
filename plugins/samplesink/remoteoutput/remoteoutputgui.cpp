@@ -117,6 +117,7 @@ void RemoteOutputSinkGui::resetToDefaults()
 	m_settings.resetToDefaults();
 	displaySettings();
 	blockApplySettings(false);
+    m_forceSettings = true;
 	sendSettings();
 }
 
@@ -155,7 +156,13 @@ bool RemoteOutputSinkGui::handleMessage(const Message& message)
     if (RemoteOutput::MsgConfigureRemoteOutput::match(message))
     {
         const RemoteOutput::MsgConfigureRemoteOutput& cfg = (RemoteOutput::MsgConfigureRemoteOutput&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -239,17 +246,19 @@ void RemoteOutputSinkGui::displaySettings()
 
 void RemoteOutputSinkGui::sendSettings()
 {
-    if(!m_updateTimer.isActive())
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
+    }
 }
 
 
 void RemoteOutputSinkGui::updateHardware()
 {
     qDebug() << "RemoteOutputSinkGui::updateHardware";
-    RemoteOutput::MsgConfigureRemoteOutput* message = RemoteOutput::MsgConfigureRemoteOutput::create(m_settings, m_forceSettings);
+    RemoteOutput::MsgConfigureRemoteOutput* message = RemoteOutput::MsgConfigureRemoteOutput::create(m_settings, m_settingsKeys, m_forceSettings);
     m_remoteOutput->getInputMessageQueue()->push(message);
     m_forceSettings = false;
+    m_settingsKeys.clear();
     m_updateTimer.stop();
 }
 
@@ -290,6 +299,7 @@ void RemoteOutputSinkGui::on_nbFECBlocks_valueChanged(int value)
     QString s = QString::number(nbOriginalBlocks + nbFECBlocks, 'f', 0);
     QString s1 = QString::number(nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
+    m_settingsKeys.append("nbFECBlocks");
     sendSettings();
 }
 
@@ -304,6 +314,7 @@ void RemoteOutputSinkGui::on_deviceIndex_returnPressed()
         m_settings.m_deviceIndex = deviceIndex;
     }
 
+    m_settingsKeys.append("deviceIndex");
     sendSettings();
 }
 
@@ -318,18 +329,21 @@ void RemoteOutputSinkGui::on_channelIndex_returnPressed()
         m_settings.m_channelIndex = channelIndex;
     }
 
+    m_settingsKeys.append("channelIndex");
     sendSettings();
 }
 
 void RemoteOutputSinkGui::on_nbTxBytes_currentIndexChanged(int index)
 {
     m_settings.m_nbTxBytes = 1 << index;
+    m_settingsKeys.append("nbTxBytes");
     sendSettings();
 }
 
 void RemoteOutputSinkGui::on_apiAddress_returnPressed()
 {
     m_settings.m_apiAddress = ui->apiAddress->text();
+    m_settingsKeys.append("apiAddress");
     sendSettings();
 
     RemoteOutput::MsgRequestFixedData *msg = RemoteOutput::MsgRequestFixedData::create();
@@ -347,6 +361,7 @@ void RemoteOutputSinkGui::on_apiPort_returnPressed()
         m_settings.m_apiPort = apiPort;
     }
 
+    m_settingsKeys.append("apiPort");
     sendSettings();
 
     RemoteOutput::MsgRequestFixedData *msg = RemoteOutput::MsgRequestFixedData::create();
@@ -356,6 +371,7 @@ void RemoteOutputSinkGui::on_apiPort_returnPressed()
 void RemoteOutputSinkGui::on_dataAddress_returnPressed()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
+    m_settingsKeys.append("dataAddress");
     sendSettings();
 }
 
@@ -370,6 +386,7 @@ void RemoteOutputSinkGui::on_dataPort_returnPressed()
         m_settings.m_dataPort = dataPort;
     }
 
+    m_settingsKeys.append("dataPort");
     sendSettings();
 }
 
@@ -377,6 +394,7 @@ void RemoteOutputSinkGui::on_apiApplyButton_clicked(bool checked)
 {
     (void) checked;
     m_settings.m_apiAddress = ui->apiAddress->text();
+    m_settingsKeys.append("apiAddress");
 
     bool apiOk;
     int apiPort = ui->apiPort->text().toInt(&apiOk);
@@ -384,6 +402,7 @@ void RemoteOutputSinkGui::on_apiApplyButton_clicked(bool checked)
     if((apiOk) && (apiPort >= 1024) && (apiPort < 65535))
     {
         m_settings.m_apiPort = apiPort;
+        m_settingsKeys.append("apiPort");
     }
 
     sendSettings();
@@ -396,6 +415,7 @@ void RemoteOutputSinkGui::on_dataApplyButton_clicked(bool checked)
 {
     (void) checked;
     m_settings.m_dataAddress = ui->dataAddress->text();
+    m_settingsKeys.append("dataAddress");
 
     bool dataOk;
     int udpDataPort = ui->dataPort->text().toInt(&dataOk);
@@ -403,6 +423,7 @@ void RemoteOutputSinkGui::on_dataApplyButton_clicked(bool checked)
     if((dataOk) && (udpDataPort >= 1024) && (udpDataPort < 65535))
     {
         m_settings.m_dataPort = udpDataPort;
+        m_settingsKeys.append("dataPort");
     }
 
     sendSettings();
@@ -551,6 +572,10 @@ void RemoteOutputSinkGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

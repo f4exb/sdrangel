@@ -46,20 +46,22 @@ public:
 
 	public:
 		const RemoteOutputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureRemoteOutput* create(const RemoteOutputSettings& settings, bool force = false)
-		{
-			return new MsgConfigureRemoteOutput(settings, force);
+		static MsgConfigureRemoteOutput* create(const RemoteOutputSettings& settings, const QList<QString>& settingsKeys, bool force = false) {
+			return new MsgConfigureRemoteOutput(settings, settingsKeys, force);
 		}
 
 	private:
 		RemoteOutputSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureRemoteOutput(const RemoteOutputSettings& settings, bool force) :
+		MsgConfigureRemoteOutput(const RemoteOutputSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -275,7 +277,7 @@ private:
 
     void startWorker();
     void stopWorker();
-	void applySettings(const RemoteOutputSettings& settings, bool force = false);
+	void applySettings(const RemoteOutputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void applyCenterFrequency();
     void applySampleRate();
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
@@ -286,7 +288,7 @@ private:
         int queueLength,
         int queueSize
     );
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteOutputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const RemoteOutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

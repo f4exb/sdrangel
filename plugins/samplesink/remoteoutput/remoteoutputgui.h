@@ -85,6 +85,7 @@ private:
 	Ui::RemoteOutputGui* ui;
 
 	RemoteOutputSettings m_settings;        //!< current settings
+    QList<QString> m_settingsKeys;
 	RemoteOutputSettings m_controlSettings; //!< settings last sent to device via control port
 	QTimer m_updateTimer;
     QTimer m_statusTimer;

@@ -117,7 +117,7 @@ bool RemoteOutput::start()
 
 void RemoteOutput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 void RemoteOutput::stop()
@@ -161,12 +161,12 @@ bool RemoteOutput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureRemoteOutput* message = MsgConfigureRemoteOutput::create(m_settings, true);
+    MsgConfigureRemoteOutput* message = MsgConfigureRemoteOutput::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureRemoteOutput* messageToGUI = MsgConfigureRemoteOutput::create(m_settings, true);
+        MsgConfigureRemoteOutput* messageToGUI = MsgConfigureRemoteOutput::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -200,7 +200,7 @@ bool RemoteOutput::handleMessage(const Message& message)
     {
         qDebug() << "RemoteOutput::handleMessage:" << message.getIdentifier();
 	    MsgConfigureRemoteOutput& conf = (MsgConfigureRemoteOutput&) message;
-        applySettings(conf.getSettings(), conf.getForce());
+        applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
 	else if (MsgConfigureRemoteOutputWork::match(message))
@@ -270,44 +270,29 @@ bool RemoteOutput::handleMessage(const Message& message)
 	}
 }
 
-void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool force)
+void RemoteOutput::applySettings(const RemoteOutputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
+    qDebug() << "RemoteOutput::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
     QMutexLocker mutexLocker(&m_mutex);
-    QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
-        reverseAPIKeys.append("dataAddress");
-    }
-    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
-        reverseAPIKeys.append("dataPort");
-    }
-    if ((m_settings.m_apiAddress != settings.m_apiAddress) || force) {
-        reverseAPIKeys.append("apiAddress");
-    }
-    if ((m_settings.m_apiPort != settings.m_apiPort) || force) {
-        reverseAPIKeys.append("apiPort");
-    }
-
-    if (force || (m_settings.m_dataAddress != settings.m_dataAddress) || (m_settings.m_dataPort != settings.m_dataPort))
+    if (force ||
+        settingsKeys.contains("dataAddress") ||
+        settingsKeys.contains("dataPort"))
     {
         if (m_remoteOutputWorker) {
             m_remoteOutputWorker->setDataAddress(settings.m_dataAddress, settings.m_dataPort);
         }
     }
 
-    if (force || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks))
+    if (force || settingsKeys.contains("nbFECBlocks"))
     {
-        reverseAPIKeys.append("nbFECBlocks");
-
         if (m_remoteOutputWorker) {
             m_remoteOutputWorker->setNbBlocksFEC(settings.m_nbFECBlocks);
         }
     }
 
-    if (force || (m_settings.m_nbTxBytes != settings.m_nbTxBytes))
+    if (force || settingsKeys.contains("nbTxBytes"))
     {
-        reverseAPIKeys.append("nbTxBytes");
-
         if (m_remoteOutputWorker)
         {
             stopWorker();
@@ -318,24 +303,20 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
 
     mutexLocker.unlock();
 
-    qDebug() << "RemoteOutput::applySettings:"
-            << " m_nbFECBlocks: " << settings.m_nbFECBlocks
-            << " m_nbTxBytes: " << settings.m_nbTxBytes
-            << " m_apiAddress: " << settings.m_apiAddress
-            << " m_apiPort: " << settings.m_apiPort
-            << " m_dataAddress: " << settings.m_dataAddress
-            << " m_dataPort: " << settings.m_dataPort;
-
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void RemoteOutput::applyCenterFrequency()
@@ -407,12 +388,12 @@ int RemoteOutput::webapiSettingsPutPatch(
     RemoteOutputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureRemoteOutput *msg = MsgConfigureRemoteOutput::create(settings, force);
+    MsgConfigureRemoteOutput *msg = MsgConfigureRemoteOutput::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRemoteOutput *msgToGUI = MsgConfigureRemoteOutput::create(settings, force);
+        MsgConfigureRemoteOutput *msgToGUI = MsgConfigureRemoteOutput::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -671,7 +652,7 @@ void RemoteOutput::queueLengthCompensation(
     getInputMessageQueue()->push(message);
 }
 
-void RemoteOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteOutputSettings& settings, bool force)
+void RemoteOutput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const RemoteOutputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(1); // single Tx

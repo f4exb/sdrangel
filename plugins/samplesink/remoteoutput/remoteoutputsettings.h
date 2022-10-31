@@ -39,6 +39,8 @@ struct RemoteOutputSettings {
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const RemoteOutputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* PLUGINS_REMOTEOUTPUT_REMOTEOUTPUTSETTINGS_H_ */
