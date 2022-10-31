@@ -116,6 +116,7 @@ void USRPOutputGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -128,6 +129,7 @@ void USRPOutputGUI::setCenterFrequency(qint64 centerFrequency)
 {
     m_settings.m_centerFrequency = centerFrequency;
     displaySettings();
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -187,7 +189,13 @@ bool USRPOutputGUI::handleMessage(const Message& message)
     if (USRPOutput::MsgConfigureUSRP::match(message))
     {
         const USRPOutput::MsgConfigureUSRP& cfg = (USRPOutput::MsgConfigureUSRP&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -270,14 +278,6 @@ void USRPOutputGUI::handleInputMessages()
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("USRPOutputGUI::handleInputMessages: DSPSignalNotification: SampleRate: %d, CenterFrequency: %llu", notif->getSampleRate(), notif->getCenterFrequency());
             updateSampleRateAndFrequency();
-
-            delete message;
-        }
-        else if (USRPOutput::MsgConfigureUSRP::match(*message))
-        {
-            const USRPOutput::MsgConfigureUSRP& cfg = (USRPOutput::MsgConfigureUSRP&) *message;
-            m_settings = cfg.getSettings();
-            displaySettings();
 
             delete message;
         }
@@ -402,8 +402,9 @@ void USRPOutputGUI::setCenterFrequencySetting(uint64_t kHzValue)
 
 void USRPOutputGUI::sendSettings()
 {
-    if(!m_updateTimer.isActive())
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
+    }
 }
 
 void USRPOutputGUI::updateHardware()
@@ -411,9 +412,10 @@ void USRPOutputGUI::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "USRPOutputGUI::updateHardware";
-        USRPOutput::MsgConfigureUSRP* message = USRPOutput::MsgConfigureUSRP::create(m_settings, m_forceSettings);
+        USRPOutput::MsgConfigureUSRP* message = USRPOutput::MsgConfigureUSRP::create(m_settings, m_settingsKeys, m_forceSettings);
         m_usrpOutput->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -490,6 +492,7 @@ void USRPOutputGUI::on_startStop_toggled(bool checked)
 void USRPOutputGUI::on_centerFrequency_changed(quint64 value)
 {
     setCenterFrequencySetting(value);
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -502,6 +505,7 @@ void USRPOutputGUI::on_sampleRate_changed(quint64 value)
     }
 
     updateSampleRate();
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
@@ -520,18 +524,22 @@ void USRPOutputGUI::on_swInterp_currentIndexChanged(int index)
         m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftInterp);
     }
 
+    m_settingsKeys.append("log2SoftInterp");
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
 void USRPOutputGUI::on_lpf_changed(quint64 value)
 {
     m_settings.m_lpfBW = value * 1000;
+    m_settingsKeys.append("lpfBW");
     sendSettings();
 }
 
 void USRPOutputGUI::on_loOffset_changed(qint64 value)
 {
     m_settings.m_loOffset = value * 1000;
+    m_settingsKeys.append("loOffset");
     sendSettings();
 }
 
@@ -539,6 +547,7 @@ void USRPOutputGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gain = value;
     ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
+    m_settingsKeys.append("gain");
     sendSettings();
 }
 
@@ -546,6 +555,7 @@ void USRPOutputGUI::on_antenna_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_antennaPath = ui->antenna->currentText();
+    m_settingsKeys.append("antennaPath");
     sendSettings();
 }
 
@@ -553,6 +563,7 @@ void USRPOutputGUI::on_clockSource_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_clockSource = ui->clockSource->currentText();
+    m_settingsKeys.append("clockSource");
     sendSettings();
 }
 
@@ -563,6 +574,9 @@ void USRPOutputGUI::on_transverter_clicked()
     qDebug("USRPInputGUI::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     setCenterFrequencySetting(ui->centerFrequency->getValueNew());
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -589,6 +603,10 @@ void USRPOutputGUI::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }
