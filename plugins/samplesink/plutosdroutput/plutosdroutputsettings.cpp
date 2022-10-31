@@ -129,6 +129,120 @@ bool PlutoSDROutputSettings::deserialize(const QByteArray& data)
 	}
 }
 
+void PlutoSDROutputSettings::applySettings(const QStringList& settingsKeys, const PlutoSDROutputSettings& settings)
+{
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("LOppmTenths")) {
+        m_LOppmTenths = settings.m_LOppmTenths;
+    }
+    if (settingsKeys.contains("log2Interp")) {
+        m_log2Interp = settings.m_log2Interp;
+    }
+    if (settingsKeys.contains("devSampleRate")) {
+        m_devSampleRate = settings.m_devSampleRate;
+    }
+    if (settingsKeys.contains("lpfBW")) {
+        m_lpfBW = settings.m_lpfBW;
+    }
+    if (settingsKeys.contains("lpfFIREnable")) {
+        m_lpfFIREnable = settings.m_lpfFIREnable;
+    }
+    if (settingsKeys.contains("lpfFIRBW")) {
+        m_lpfFIRBW = settings.m_lpfFIRBW;
+    }
+    if (settingsKeys.contains("lpfFIRlog2Interp")) {
+        m_lpfFIRlog2Interp = settings.m_lpfFIRlog2Interp;
+    }
+    if (settingsKeys.contains("lpfFIRGain")) {
+        m_lpfFIRGain = settings.m_lpfFIRGain;
+    }
+    if (settingsKeys.contains("att")) {
+        m_att = settings.m_att;
+    }
+    if (settingsKeys.contains("antennaPath")) {
+        m_antennaPath = settings.m_antennaPath;
+    }
+    if (settingsKeys.contains("transverterMode")) {
+        m_transverterMode = settings.m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency")) {
+        m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
+
+QString PlutoSDROutputSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("LOppmTenths") || force) {
+        ostr << " m_LOppmTenths: " << m_LOppmTenths;
+    }
+    if (settingsKeys.contains("log2Interp") || force) {
+        ostr << " m_log2Interp: " << m_log2Interp;
+    }
+    if (settingsKeys.contains("devSampleRate") || force) {
+        ostr << " m_devSampleRate: " << m_devSampleRate;
+    }
+    if (settingsKeys.contains("lpfBW") || force) {
+        ostr << " m_lpfBW: " << m_lpfBW;
+    }
+    if (settingsKeys.contains("lpfFIREnable") || force) {
+        ostr << " m_lpfFIREnable: " << m_lpfFIREnable;
+    }
+    if (settingsKeys.contains("lpfFIRBW") || force) {
+        ostr << " m_lpfFIRBW: " << m_lpfFIRBW;
+    }
+    if (settingsKeys.contains("lpfFIRlog2Interp") || force) {
+        ostr << " m_lpfFIRlog2Interp: " << m_lpfFIRlog2Interp;
+    }
+    if (settingsKeys.contains("lpfFIRGain") || force) {
+        ostr << " m_lpfFIRGain: " << m_lpfFIRGain;
+    }
+    if (settingsKeys.contains("att") || force) {
+        ostr << " m_att: " << m_att;
+    }
+    if (settingsKeys.contains("antennaPath") || force) {
+        ostr << " m_antennaPath: " << m_antennaPath;
+    }
+    if (settingsKeys.contains("transverterMode") || force) {
+        ostr << " m_transverterMode: " << m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency") || force) {
+        ostr << " m_transverterDeltaFrequency: " << m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}
+
 void PlutoSDROutputSettings::translateRFPath(RFPath path, QString& s)
 {
     switch(path)

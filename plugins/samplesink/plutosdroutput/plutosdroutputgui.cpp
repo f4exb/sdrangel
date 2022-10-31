@@ -98,7 +98,9 @@ void PlutoSDROutputGUI::destroy()
 
 void PlutoSDROutputGUI::resetToDefaults()
 {
-
+    m_settings.resetToDefaults();
+    displaySettings();
+    sendSettings(true);
 }
 
 QByteArray PlutoSDROutputGUI::serialize() const
@@ -135,7 +137,13 @@ bool PlutoSDROutputGUI::handleMessage(const Message& message)
     if (PlutoSDROutput::MsgConfigurePlutoSDR::match(message))
     {
         const PlutoSDROutput::MsgConfigurePlutoSDR& cfg = (PlutoSDROutput::MsgConfigurePlutoSDR&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -181,6 +189,7 @@ void PlutoSDROutputGUI::on_startStop_toggled(bool checked)
 void PlutoSDROutputGUI::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -188,6 +197,7 @@ void PlutoSDROutputGUI::on_loPPM_valueChanged(int value)
 {
     ui->loPPMText->setText(QString("%1").arg(QString::number(value/10.0, 'f', 1)));
     m_settings.m_LOppmTenths = value;
+    m_settingsKeys.append("LOppmTenths");
     sendSettings();
 }
 
@@ -201,6 +211,8 @@ void PlutoSDROutputGUI::on_swInterp_currentIndexChanged(int index)
         m_settings.m_devSampleRate <<= m_settings.m_log2Interp;
     }
 
+    m_settingsKeys.append("log2Interp");
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
@@ -212,12 +224,14 @@ void PlutoSDROutputGUI::on_sampleRate_changed(quint64 value)
         m_settings.m_devSampleRate <<= m_settings.m_log2Interp;
     }
 
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
 void PlutoSDROutputGUI::on_lpf_changed(quint64 value)
 {
     m_settings.m_lpfBW = value * 1000;
+    m_settingsKeys.append("lpfBW");
     sendSettings();
 }
 
@@ -226,18 +240,21 @@ void PlutoSDROutputGUI::on_lpFIREnable_toggled(bool checked)
     m_settings.m_lpfFIREnable = checked;
     ui->lpFIRInterpolation->setEnabled(checked);
     ui->lpFIRGain->setEnabled(checked);
+    m_settingsKeys.append("lpfFIREnable");
     sendSettings();
 }
 
 void PlutoSDROutputGUI::on_lpFIR_changed(quint64 value)
 {
     m_settings.m_lpfFIRBW = value * 1000;
+    m_settingsKeys.append("lpfFIRBW");
     sendSettings();
 }
 
 void PlutoSDROutputGUI::on_lpFIRInterpolation_currentIndexChanged(int index)
 {
     m_settings.m_lpfFIRlog2Interp = index > 2 ? 2 : index;
+    m_settingsKeys.append("lpfFIRlog2Interp");
     setSampleRateLimits();
     sendSettings();
 }
@@ -245,6 +262,7 @@ void PlutoSDROutputGUI::on_lpFIRInterpolation_currentIndexChanged(int index)
 void PlutoSDROutputGUI::on_lpFIRGain_currentIndexChanged(int index)
 {
     m_settings.m_lpfFIRGain = 6*(index > 1 ? 1 : index) - 6;
+    m_settingsKeys.append("lpfFIRGain");
     sendSettings();
 }
 
@@ -252,12 +270,14 @@ void PlutoSDROutputGUI::on_att_valueChanged(int value)
 {
     ui->attText->setText(QString("%1 dB").arg(QString::number(value*0.25, 'f', 2)));
     m_settings.m_att = value;
+    m_settingsKeys.append("att");
     sendSettings();
 }
 
 void PlutoSDROutputGUI::on_antenna_currentIndexChanged(int index)
 {
     m_settings.m_antennaPath = (PlutoSDROutputSettings::RFPath) (index < PlutoSDROutputSettings::RFPATH_END ? index : 0);
+    m_settingsKeys.append("antennaPath");
     sendSettings();
 }
 
@@ -268,6 +288,9 @@ void PlutoSDROutputGUI::on_transverter_clicked()
     qDebug("PlutoSDROutputGUI::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    m_settingsKeys.append("transverterMode");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -340,7 +363,10 @@ void PlutoSDROutputGUI::displaySettings()
 void PlutoSDROutputGUI::sendSettings(bool forceSettings)
 {
     m_forceSettings = forceSettings;
-    if(!m_updateTimer.isActive()) { m_updateTimer.start(100); }
+
+    if (!m_updateTimer.isActive()) {
+        m_updateTimer.start(100);
+    }
 }
 
 void PlutoSDROutputGUI::updateHardware()
@@ -348,9 +374,10 @@ void PlutoSDROutputGUI::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "PlutoSDROutputGUI::updateHardware";
-        PlutoSDROutput::MsgConfigurePlutoSDR* message = PlutoSDROutput::MsgConfigurePlutoSDR::create(m_settings, m_forceSettings);
+        PlutoSDROutput::MsgConfigurePlutoSDR* message = PlutoSDROutput::MsgConfigurePlutoSDR::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSink->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -511,6 +538,10 @@ void PlutoSDROutputGUI::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }
