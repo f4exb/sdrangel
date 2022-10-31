@@ -32,6 +32,7 @@ class QThread;
 class TestSinkWorker;
 class DeviceAPI;
 class BasebandSampleSink;
+class Serializable;
 
 class TestSinkOutput : public DeviceSampleSink {
 public:
@@ -40,20 +41,22 @@ public:
 
 	public:
 		const TestSinkSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureTestSink* create(const TestSinkSettings& settings, bool force)
-		{
-			return new MsgConfigureTestSink(settings, force);
+		static MsgConfigureTestSink* create(const TestSinkSettings& settings, const QList<QString>& settingsKeys, bool force) {
+			return new MsgConfigureTestSink(settings, settingsKeys, force);
 		}
 
 	private:
 		TestSinkSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureTestSink(const TestSinkSettings& settings, bool force) :
+		MsgConfigureTestSink(const TestSinkSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -107,6 +110,7 @@ public:
             QString& errorMessage);
 
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
+    void setSpectrumGUI(Serializable *spectrumGUI) { m_settings.setSpectrumGUI(spectrumGUI); }
 
 private:
     DeviceAPI *m_deviceAPI;
@@ -120,7 +124,7 @@ private:
 	QString m_deviceDescription;
 	const QTimer& m_masterTimer;
 
-	void applySettings(const TestSinkSettings& settings, bool force = false);
+	void applySettings(const TestSinkSettings& settings, const QList<QString>& settingsKeys, bool force = false);
 };
 
 #endif // INCLUDE_TESTSINKOUTPUT_H

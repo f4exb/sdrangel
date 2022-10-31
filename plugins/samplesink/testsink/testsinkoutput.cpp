@@ -62,7 +62,7 @@ void TestSinkOutput::destroy()
 
 void TestSinkOutput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool TestSinkOutput::start()
@@ -130,12 +130,12 @@ bool TestSinkOutput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureTestSink* message = MsgConfigureTestSink::create(m_settings, true);
+    MsgConfigureTestSink* message = MsgConfigureTestSink::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureTestSink* messageToGUI = MsgConfigureTestSink::create(m_settings, true);
+        MsgConfigureTestSink* messageToGUI = MsgConfigureTestSink::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -162,12 +162,12 @@ void TestSinkOutput::setCenterFrequency(qint64 centerFrequency)
     TestSinkSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureTestSink* message = MsgConfigureTestSink::create(settings, false);
+    MsgConfigureTestSink* message = MsgConfigureTestSink::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureTestSink* messageToGUI = MsgConfigureTestSink::create(settings, false);
+        MsgConfigureTestSink* messageToGUI = MsgConfigureTestSink::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -196,7 +196,7 @@ bool TestSinkOutput::handleMessage(const Message& message)
     {
 	    qDebug() << "TestSinkOutput::handleMessage: MsgConfigureTestSink";
 	    MsgConfigureTestSink& conf = (MsgConfigureTestSink&) message;
-        applySettings(conf.getSettings(), conf.getForce());
+        applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
 	else
@@ -205,18 +205,19 @@ bool TestSinkOutput::handleMessage(const Message& message)
 	}
 }
 
-void TestSinkOutput::applySettings(const TestSinkSettings& settings, bool force)
+void TestSinkOutput::applySettings(const TestSinkSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
+    qDebug() << "TestSinkOutput::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
     QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;
 
-    if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency))
+    if (force || settingsKeys.contains("centerFrequency"))
     {
         m_settings.m_centerFrequency = settings.m_centerFrequency;
         forwardChange = true;
     }
 
-    if (force || (m_settings.m_sampleRate != settings.m_sampleRate))
+    if (force || settingsKeys.contains("sampleRate"))
     {
         m_settings.m_sampleRate = settings.m_sampleRate;
 
@@ -227,7 +228,7 @@ void TestSinkOutput::applySettings(const TestSinkSettings& settings, bool force)
         forwardChange = true;
     }
 
-    if (force || (m_settings.m_log2Interp != settings.m_log2Interp))
+    if (force || settingsKeys.contains("log2Interp"))
     {
         m_settings.m_log2Interp = settings.m_log2Interp;
 

@@ -37,6 +37,8 @@ struct TestSinkSettings {
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
+    void applySettings(const QStringList& settingsKeys, const TestSinkSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* PLUGINS_SAMPLESINK_TESTSINK_TESTSINKSETTINGS_H_ */

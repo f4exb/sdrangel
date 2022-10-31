@@ -55,6 +55,7 @@ private:
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	TestSinkSettings m_settings;
+    QList<QString> m_settingsKeys;
 	QTimer m_updateTimer;
     QTimer m_statusTimer;
 	TestSinkOutput* m_sampleSink;

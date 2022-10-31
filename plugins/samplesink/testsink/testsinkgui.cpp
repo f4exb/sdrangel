@@ -69,6 +69,7 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->glSpectrum->setCenterFrequency(m_settings.m_centerFrequency);
     ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
     ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+    m_sampleSink->setSpectrumGUI(ui->spectrumGUI);
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -98,6 +99,7 @@ void TestSinkGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
+    m_forceSettings = true;
 	sendSettings();
 }
 
@@ -125,7 +127,13 @@ bool TestSinkGui::handleMessage(const Message& message)
     {
         qDebug("TestSinkGui::handleMessage: message: MsgConfigureTestSink");
         const TestSinkOutput::MsgConfigureTestSink& cfg = (TestSinkOutput::MsgConfigureTestSink&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -165,8 +173,7 @@ void TestSinkGui::handleInputMessages()
         }
         else
         {
-            if (handleMessage(*message))
-            {
+            if (handleMessage(*message)) {
                 delete message;
             }
         }
@@ -196,9 +203,10 @@ void TestSinkGui::sendSettings()
 void TestSinkGui::updateHardware()
 {
     qDebug() << "TestSinkGui::updateHardware";
-    TestSinkOutput::MsgConfigureTestSink* message = TestSinkOutput::MsgConfigureTestSink::create(m_settings, m_forceSettings);
+    TestSinkOutput::MsgConfigureTestSink* message = TestSinkOutput::MsgConfigureTestSink::create(m_settings, m_settingsKeys, m_forceSettings);
     m_sampleSink->getInputMessageQueue()->push(message);
     m_forceSettings = false;
+    m_settingsKeys.clear();
     m_updateTimer.stop();
 }
 
@@ -206,7 +214,7 @@ void TestSinkGui::updateStatus()
 {
     int state = m_deviceUISet->m_deviceAPI->state();
 
-    if(m_lastEngineState != state)
+    if (m_lastEngineState != state)
     {
         switch(state)
         {
@@ -235,6 +243,7 @@ void TestSinkGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
     ui->glSpectrum->setCenterFrequency(m_settings.m_centerFrequency);
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -242,6 +251,7 @@ void TestSinkGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
     ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
+    m_settingsKeys.append("sampleRate");
     sendSettings();
 }
 
@@ -253,6 +263,7 @@ void TestSinkGui::on_interp_currentIndexChanged(int index)
 
     m_settings.m_log2Interp = index;
     ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
+    m_settingsKeys.append("log2Interp");
     sendSettings();
 }
 
@@ -286,6 +297,10 @@ void TestSinkGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }
