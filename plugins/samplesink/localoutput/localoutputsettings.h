@@ -31,6 +31,8 @@ struct LocalOutputSettings {
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const LocalOutputSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* PLUGINS_SAMPLESINK_LOCALOUTPUT_LOCALOUTPUTSETTINGS_H_ */

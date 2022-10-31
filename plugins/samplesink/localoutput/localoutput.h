@@ -43,20 +43,22 @@ public:
 
     public:
         const LocalOutputSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureLocalOutput* create(const LocalOutputSettings& settings, bool force = false)
-        {
-            return new MsgConfigureLocalOutput(settings, force);
+        static MsgConfigureLocalOutput* create(const LocalOutputSettings& settings, const QList<QString>& settingsKeys, bool force = false) {
+            return new MsgConfigureLocalOutput(settings, settingsKeys, force);
         }
 
     private:
         LocalOutputSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureLocalOutput(const LocalOutputSettings& settings, bool force) :
+        MsgConfigureLocalOutput(const LocalOutputSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -166,9 +168,9 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    void applySettings(const LocalOutputSettings& settings, bool force = false);
+    void applySettings(const LocalOutputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const LocalOutputSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const LocalOutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

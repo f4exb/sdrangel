@@ -144,7 +144,13 @@ bool LocalOutputGui::handleMessage(const Message& message)
     if (LocalOutput::MsgConfigureLocalOutput::match(message))
     {
         const LocalOutput::MsgConfigureLocalOutput& cfg = (LocalOutput::MsgConfigureLocalOutput&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -202,8 +208,7 @@ void LocalOutputGui::handleInputMessages()
         }
         else
         {
-            if (handleMessage(*message))
-            {
+            if (handleMessage(*message)) {
                 delete message;
             }
         }
@@ -232,8 +237,9 @@ void LocalOutputGui::displaySettings()
 
 void LocalOutputGui::sendSettings()
 {
-    if(!m_updateTimer.isActive())
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
+    }
 }
 
 void LocalOutputGui::on_startStop_toggled(bool checked)
@@ -251,9 +257,10 @@ void LocalOutputGui::updateHardware()
     {
         qDebug() << "LocalOutputGui::updateHardware";
         LocalOutput::MsgConfigureLocalOutput* message =
-                LocalOutput::MsgConfigureLocalOutput::create(m_settings, m_forceSettings);
+                LocalOutput::MsgConfigureLocalOutput::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSink->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -304,6 +311,10 @@ void LocalOutputGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }
