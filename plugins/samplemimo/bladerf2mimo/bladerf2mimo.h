@@ -46,20 +46,22 @@ public:
 
 	public:
 		const BladeRF2MIMOSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureBladeRF2MIMO* create(const BladeRF2MIMOSettings& settings, bool force)
-		{
-			return new MsgConfigureBladeRF2MIMO(settings, force);
+		static MsgConfigureBladeRF2MIMO* create(const BladeRF2MIMOSettings& settings, const QList<QString>& settingsKeys, bool force) {
+			return new MsgConfigureBladeRF2MIMO(settings, settingsKeys, force);
 		}
 
 	private:
 		BladeRF2MIMOSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureBladeRF2MIMO(const BladeRF2MIMOSettings& settings, bool force) :
+		MsgConfigureBladeRF2MIMO(const BladeRF2MIMOSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -192,10 +194,10 @@ private:
     bool openDevice();
     void closeDevice();
 
-	bool applySettings(const BladeRF2MIMOSettings& settings, bool force);
+	bool applySettings(const BladeRF2MIMOSettings& settings, const QList<QString>& settingsKeys, bool force);
     bool setRxDeviceCenterFrequency(struct bladerf *dev, quint64 freq_hz, int loPpmTenths);
     bool setTxDeviceCenterFrequency(struct bladerf *dev, quint64 freq_hz, int loPpmTenths);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF2MIMOSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const BladeRF2MIMOSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 

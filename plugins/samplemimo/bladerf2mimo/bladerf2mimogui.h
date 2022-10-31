@@ -52,6 +52,7 @@ private:
 	Ui::BladeRF2MIMOGui* ui;
 
 	BladeRF2MIMOSettings m_settings;
+    QList<QString> m_settingsKeys;
     bool m_rxElseTx;   //!< Which side is being dealt with
     int m_streamIndex; //!< Current stream index being dealt with
 	bool m_spectrumRxElseTx;

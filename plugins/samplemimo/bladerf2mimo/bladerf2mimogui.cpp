@@ -120,6 +120,7 @@ void BladeRF2MIMOGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -358,7 +359,13 @@ bool BladeRF2MIMOGui::handleMessage(const Message& message)
     else if (BladeRF2MIMO::MsgConfigureBladeRF2MIMO::match(message))
     {
         const BladeRF2MIMO::MsgConfigureBladeRF2MIMO& notif = (const BladeRF2MIMO::MsgConfigureBladeRF2MIMO&) message;
-        m_settings = notif.getSettings();
+
+        if (notif.getForce()) {
+            m_settings = notif.getSettings();
+        } else {
+            m_settings.applySettings(notif.getSettingsKeys(), notif.getSettings());
+        }
+
         displaySettings();
 
         return true;
@@ -383,7 +390,7 @@ void BladeRF2MIMOGui::handleInputMessages()
 
 void BladeRF2MIMOGui::sendSettings()
 {
-    if(!m_updateTimer.isActive()) {
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
     }
 }
@@ -392,9 +399,10 @@ void BladeRF2MIMOGui::updateHardware()
 {
     if (m_doApplySettings)
     {
-        BladeRF2MIMO::MsgConfigureBladeRF2MIMO* message = BladeRF2MIMO::MsgConfigureBladeRF2MIMO::create(m_settings, m_forceSettings);
+        BladeRF2MIMO::MsgConfigureBladeRF2MIMO* message = BladeRF2MIMO::MsgConfigureBladeRF2MIMO::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleMIMO->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -463,10 +471,15 @@ void BladeRF2MIMOGui::on_startStopTx_toggled(bool checked)
 
 void BladeRF2MIMOGui::on_centerFrequency_changed(quint64 value)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_rxCenterFrequency = value * 1000;
-    } else {
+        m_settingsKeys.append("rxCenterFrequency");
+    }
+    else
+    {
         m_settings.m_txCenterFrequency = value * 1000;
+        m_settingsKeys.append("txCenterFrequency");
     }
 
     sendSettings();
@@ -476,27 +489,35 @@ void BladeRF2MIMOGui::on_LOppm_valueChanged(int value)
 {
     ui->LOppmText->setText(QString("%1").arg(QString::number(value/10.0, 'f', 1)));
     m_settings.m_LOppmTenths = value;
+    m_settingsKeys.append("LOppmTenths");
     sendSettings();
 }
 
 void BladeRF2MIMOGui::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void BladeRF2MIMOGui::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
 void BladeRF2MIMOGui::on_bandwidth_changed(quint64 value)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_rxBandwidth = value * 1000;
-    } else {
+        m_settingsKeys.append("rxBandwidth");
+    }
+    else
+    {
         m_settings.m_txBandwidth = value * 1000;
+        m_settingsKeys.append("txBandwidth");
     }
 
     sendSettings();
@@ -519,15 +540,21 @@ void BladeRF2MIMOGui::on_sampleRate_changed(quint64 value)
 
     displaySampleRate();
     displayFcTooltip();
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
 void BladeRF2MIMOGui::on_fcPos_currentIndexChanged(int index)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_fcPosRx = (BladeRF2MIMOSettings::fcPos_t) (index < 0 ? 0 : index > 2 ? 2 : index);
-    } else {
+        m_settingsKeys.append("fcPosRx");
+    }
+    else
+    {
         m_settings.m_fcPosTx = (BladeRF2MIMOSettings::fcPos_t) (index < 0 ? 0 : index > 2 ? 2 : index);
+        m_settingsKeys.append("fcPosTx");
     }
 
     displayFcTooltip();
@@ -540,10 +567,15 @@ void BladeRF2MIMOGui::on_decim_currentIndexChanged(int index)
         return;
     }
 
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_log2Decim = index;
-    } else {
+        m_settingsKeys.append("log2Decim");
+    }
+    else
+    {
         m_settings.m_log2Interp = index;
+        m_settingsKeys.append("log2Interp");
     }
 
     displaySampleRate();
@@ -554,6 +586,7 @@ void BladeRF2MIMOGui::on_decim_currentIndexChanged(int index)
         m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << (m_rxElseTx ? m_settings.m_log2Decim : m_settings.m_log2Interp));
     }
 
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
@@ -564,6 +597,9 @@ void BladeRF2MIMOGui::on_gainLock_toggled(bool checked)
         m_settings.m_rx1GlobalGain = m_settings.m_rx0GlobalGain;
         m_settings.m_rx1GainMode = m_settings.m_rx0GainMode;
         m_settings.m_tx1GlobalGain = m_settings.m_tx0GlobalGain;
+        m_settingsKeys.append("rx1GlobalGain");
+        m_settingsKeys.append("rx1GainMode");
+        m_settingsKeys.append("tx1GlobalGain");
         sendSettings();
     }
 
@@ -597,6 +633,7 @@ void BladeRF2MIMOGui::on_gainMode_currentIndexChanged(int index)
             }
 
             m_settings.m_rx0GainMode = mode.m_value;
+            m_settingsKeys.append("rx0GainMode");
         }
 
         if (m_streamIndex == 1 || m_gainLock)
@@ -613,6 +650,7 @@ void BladeRF2MIMOGui::on_gainMode_currentIndexChanged(int index)
             }
 
             m_settings.m_rx1GainMode = mode.m_value;
+            m_settingsKeys.append("rx1GainMode");
         }
 
         sendSettings();
@@ -636,11 +674,15 @@ float BladeRF2MIMOGui::setGainFromValue(int value)
         m_sampleMIMO->getRxGlobalGainRange(min, max, step, scale);
         gainDB = getGainDB(value, min, max, step, scale);
 
-        if (m_streamIndex == 0 || m_gainLock) {
+        if (m_streamIndex == 0 || m_gainLock)
+        {
             m_settings.m_rx0GlobalGain = (int) gainDB;
+            m_settingsKeys.append("rx0GlobalGain");
         }
-        if (m_streamIndex == 1 || m_gainLock) {
+        if (m_streamIndex == 1 || m_gainLock)
+        {
             m_settings.m_rx1GlobalGain = (int) gainDB;
+            m_settingsKeys.append("rx1GlobalGain");
         }
     }
     else
@@ -648,11 +690,15 @@ float BladeRF2MIMOGui::setGainFromValue(int value)
         m_sampleMIMO->getTxGlobalGainRange(min, max, step, scale);
         gainDB = getGainDB(value, min, max, step, scale);
 
-        if (m_streamIndex == 0 || m_gainLock) {
+        if (m_streamIndex == 0 || m_gainLock)
+        {
             m_settings.m_tx0GlobalGain = (int) gainDB;
+            m_settingsKeys.append("tx0GlobalGain");
         }
-        if (m_streamIndex == 1 || m_gainLock) {
+        if (m_streamIndex == 1 || m_gainLock)
+        {
             m_settings.m_tx1GlobalGain = (int) gainDB;
+            m_settingsKeys.append("tx1GlobalGain");
         }
     }
 
@@ -661,10 +707,15 @@ float BladeRF2MIMOGui::setGainFromValue(int value)
 
 void BladeRF2MIMOGui::on_biasTee_toggled(bool checked)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_rxBiasTee = checked;
-    } else {
+        m_settingsKeys.append("rxBiasTee");
+    }
+    else
+    {
         m_settings.m_txBiasTee = checked;
+        m_settingsKeys.append("txBiasTee");
     }
 
     sendSettings();
@@ -677,12 +728,19 @@ void BladeRF2MIMOGui::on_transverter_clicked()
         m_settings.m_rxTransverterMode = ui->transverter->getDeltaFrequencyAcive();
         m_settings.m_rxTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
         m_settings.m_iqOrder = ui->transverter->getIQOrder();
+        m_settingsKeys.append("rxTransverterMode");
+        m_settingsKeys.append("rxTransverterDeltaFrequency");
+        m_settingsKeys.append("iqOrder");
+        m_settingsKeys.append("rxCenterFrequency");
         qDebug("BladeRF2InputGui::on_transverter_clicked: Rx: %lld Hz %s", m_settings.m_rxTransverterDeltaFrequency, m_settings.m_rxTransverterMode ? "on" : "off");
     }
     else
     {
         m_settings.m_txTransverterMode = ui->transverter->getDeltaFrequencyAcive();
         m_settings.m_txTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+        m_settingsKeys.append("txTransverterMode");
+        m_settingsKeys.append("txTransverterDeltaFrequency");
+        m_settingsKeys.append("txCenterFrequency");
         qDebug("BladeRF2InputGui::on_transverter_clicked: Tx: %lld Hz %s", m_settings.m_txTransverterDeltaFrequency, m_settings.m_txTransverterMode ? "on" : "off");
     }
 
@@ -746,10 +804,15 @@ void BladeRF2MIMOGui::setCenterFrequencySetting(uint64_t kHzValue)
 {
     int64_t centerFrequency = kHzValue*1000;
 
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_rxCenterFrequency = centerFrequency < 0 ? 0 : (uint64_t) centerFrequency;
-    } else {
+        m_settingsKeys.append("rxCenterFrequency");
+    }
+    else
+    {
         m_settings.m_txCenterFrequency = centerFrequency < 0 ? 0 : (uint64_t) centerFrequency;
+        m_settingsKeys.append("txCenterFrequency");
     }
 
     ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
@@ -828,6 +891,10 @@ void BladeRF2MIMOGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

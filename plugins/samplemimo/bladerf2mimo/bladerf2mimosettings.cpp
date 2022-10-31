@@ -167,4 +167,191 @@ bool BladeRF2MIMOSettings::deserialize(const QByteArray& data)
     }
 }
 
+void BladeRF2MIMOSettings::applySettings(const QStringList& settingsKeys, const BladeRF2MIMOSettings& settings)
+{
+    if (settingsKeys.contains("devSampleRate")) {
+        m_devSampleRate = settings.m_devSampleRate;
+    }
+    if (settingsKeys.contains("LOppmTenths")) {
+        m_LOppmTenths = settings.m_LOppmTenths;
+    }
+    if (settingsKeys.contains("rxCenterFrequency")) {
+        m_rxCenterFrequency = settings.m_rxCenterFrequency;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("fcPosRx")) {
+        m_fcPosRx = settings.m_fcPosRx;
+    }
+    if (settingsKeys.contains("rxBandwidth")) {
+        m_rxBandwidth = settings.m_rxBandwidth;
+    }
+    if (settingsKeys.contains("rx0GainMode")) {
+        m_rx0GainMode = settings.m_rx0GainMode;
+    }
+    if (settingsKeys.contains("rx0GlobalGain")) {
+        m_rx0GlobalGain = settings.m_rx0GlobalGain;
+    }
+    if (settingsKeys.contains("rx1GainMode")) {
+        m_rx1GainMode = settings.m_rx1GainMode;
+    }
+    if (settingsKeys.contains("rx1GlobalGain")) {
+        m_rx1GlobalGain = settings.m_rx1GlobalGain;
+    }
+    if (settingsKeys.contains("rxBiasTee")) {
+        m_rxBiasTee = settings.m_rxBiasTee;
+    }
+    if (settingsKeys.contains("dcBlock")) {
+        m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection")) {
+        m_iqCorrection = settings.m_iqCorrection;
+    }
+    if (settingsKeys.contains("rxTransverterMode")) {
+        m_rxTransverterMode = settings.m_rxTransverterMode;
+    }
+    if (settingsKeys.contains("rxTransverterDeltaFrequency")) {
+        m_rxTransverterDeltaFrequency = settings.m_rxTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder")) {
+        m_iqOrder = settings.m_iqOrder;
+    }
+    if (settingsKeys.contains("txCenterFrequency")) {
+        m_txCenterFrequency = settings.m_txCenterFrequency;
+    }
+    if (settingsKeys.contains("log2Interp")) {
+        m_log2Interp = settings.m_log2Interp;
+    }
+    if (settingsKeys.contains("fcPosTx")) {
+        m_fcPosTx = settings.m_fcPosTx;
+    }
+    if (settingsKeys.contains("txBandwidth")) {
+        m_txBandwidth = settings.m_txBandwidth;
+    }
+    if (settingsKeys.contains("tx0GlobalGain")) {
+        m_tx0GlobalGain = settings.m_tx0GlobalGain;
+    }
+    if (settingsKeys.contains("tx1GlobalGain")) {
+        m_tx1GlobalGain = settings.m_tx1GlobalGain;
+    }
+    if (settingsKeys.contains("txBiasTee")) {
+        m_txBiasTee = settings.m_txBiasTee;
+    }
+    if (settingsKeys.contains("txTransverterMode")) {
+        m_txTransverterMode = settings.m_txTransverterMode;
+    }
+    if (settingsKeys.contains("txTransverterDeltaFrequency")) {
+        m_txTransverterDeltaFrequency = settings.m_txTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
+
+QString BladeRF2MIMOSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("devSampleRate") || force) {
+        ostr << " m_devSampleRate: " << m_devSampleRate;
+    }
+    if (settingsKeys.contains("LOppmTenths") || force) {
+        ostr << " m_LOppmTenths: " << m_LOppmTenths;
+    }
+    if (settingsKeys.contains("rxCenterFrequency") || force) {
+        ostr << " m_rxCenterFrequency: " << m_rxCenterFrequency;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("fcPosRx") || force) {
+        ostr << " m_fcPosRx: " << m_fcPosRx;
+    }
+    if (settingsKeys.contains("rxBandwidth") || force) {
+        ostr << " m_rxBandwidth: " << m_rxBandwidth;
+    }
+    if (settingsKeys.contains("rx0GainMode") || force) {
+        ostr << " m_rx0GainMode: " << m_rx0GainMode;
+    }
+    if (settingsKeys.contains("rx0GlobalGain") || force) {
+        ostr << " m_rx0GlobalGain: " << m_rx0GlobalGain;
+    }
+    if (settingsKeys.contains("rx1GainMode") || force) {
+        ostr << " m_rx1GainMode: " << m_rx1GainMode;
+    }
+    if (settingsKeys.contains("rx1GlobalGain") || force) {
+        ostr << " m_rx1GlobalGain: " << m_rx1GlobalGain;
+    }
+    if (settingsKeys.contains("rxBiasTee") || force) {
+        ostr << " m_rxBiasTee: " << m_rxBiasTee;
+    }
+    if (settingsKeys.contains("dcBlock") || force) {
+        ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection") || force) {
+        ostr << " m_iqCorrection: " << m_iqCorrection;
+    }
+    if (settingsKeys.contains("rxTransverterMode") || force) {
+        ostr << " m_rxTransverterMode: " << m_rxTransverterMode;
+    }
+    if (settingsKeys.contains("rxTransverterDeltaFrequency") || force) {
+        ostr << " m_rxTransverterDeltaFrequency: " << m_rxTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder") || force) {
+        ostr << " m_iqOrder: " << m_iqOrder;
+    }
+    if (settingsKeys.contains("txCenterFrequency") || force) {
+        ostr << " m_txCenterFrequency: " << m_txCenterFrequency;
+    }
+    if (settingsKeys.contains("log2Interp") || force) {
+        ostr << " m_log2Interp: " << m_log2Interp;
+    }
+    if (settingsKeys.contains("fcPosTx") || force) {
+        ostr << " m_fcPosTx: " << m_fcPosTx;
+    }
+    if (settingsKeys.contains("txBandwidth") || force) {
+        ostr << " m_txBandwidth: " << m_txBandwidth;
+    }
+    if (settingsKeys.contains("tx0GlobalGain") || force) {
+        ostr << " m_tx0GlobalGain: " << m_tx0GlobalGain;
+    }
+    if (settingsKeys.contains("tx1GlobalGain") || force) {
+        ostr << " m_tx1GlobalGain: " << m_tx1GlobalGain;
+    }
+    if (settingsKeys.contains("txBiasTee") || force) {
+        ostr << " m_txBiasTee: " << m_txBiasTee;
+    }
+    if (settingsKeys.contains("txTransverterMode") || force) {
+        ostr << " m_txTransverterMode: " << m_txTransverterMode;
+    }
+    if (settingsKeys.contains("txTransverterDeltaFrequency") || force) {
+        ostr << " m_txTransverterDeltaFrequency: " << m_txTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}
+
+
 
