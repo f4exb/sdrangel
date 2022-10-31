@@ -185,6 +185,259 @@ bool MetisMISOSettings::deserialize(const QByteArray& data)
     }
 }
 
+void MetisMISOSettings::applySettings(const QStringList& settingsKeys, const MetisMISOSettings& settings)
+{
+    if (settingsKeys.contains("nbReceivers")) {
+        m_nbReceivers = settings.m_nbReceivers;
+    }
+    if (settingsKeys.contains("txEnable")) {
+        m_txEnable = settings.m_txEnable;
+    }
+    if (settingsKeys.contains("rx1CenterFrequency")) {
+        m_rxCenterFrequencies[0] = settings.m_rxCenterFrequencies[0];
+    }
+    if (settingsKeys.contains("rx2CenterFrequency")) {
+        m_rxCenterFrequencies[1] = settings.m_rxCenterFrequencies[1];
+    }
+    if (settingsKeys.contains("rx3CenterFrequency")) {
+        m_rxCenterFrequencies[2] = settings.m_rxCenterFrequencies[2];
+    }
+    if (settingsKeys.contains("rx4CenterFrequency")) {
+        m_rxCenterFrequencies[3] = settings.m_rxCenterFrequencies[3];
+    }
+    if (settingsKeys.contains("rx5CenterFrequency")) {
+        m_rxCenterFrequencies[4] = settings.m_rxCenterFrequencies[4];
+    }
+    if (settingsKeys.contains("rx6CenterFrequency")) {
+        m_rxCenterFrequencies[5] = settings.m_rxCenterFrequencies[5];
+    }
+    if (settingsKeys.contains("rx7CenterFrequency")) {
+        m_rxCenterFrequencies[6] = settings.m_rxCenterFrequencies[6];
+    }
+    if (settingsKeys.contains("rx8CenterFrequency")) {
+        m_rxCenterFrequencies[7] = settings.m_rxCenterFrequencies[7];
+    }
+    if (settingsKeys.contains("rx1SubsamplingIndex")) {
+        m_rxSubsamplingIndexes[0] = settings.m_rxSubsamplingIndexes[0];
+    }
+    if (settingsKeys.contains("rx2SubsamplingIndex")) {
+        m_rxSubsamplingIndexes[1] = settings.m_rxSubsamplingIndexes[1];
+    }
+    if (settingsKeys.contains("rx3SubsamplingIndex")) {
+        m_rxSubsamplingIndexes[2] = settings.m_rxSubsamplingIndexes[2];
+    }
+    if (settingsKeys.contains("rx4SubsamplingIndex")) {
+        m_rxSubsamplingIndexes[3] = settings.m_rxSubsamplingIndexes[3];
+    }
+    if (settingsKeys.contains("rx5SubsamplingIndex")) {
+        m_rxSubsamplingIndexes[4] = settings.m_rxSubsamplingIndexes[4];
+    }
+    if (settingsKeys.contains("rx6SubsamplingIndex")) {
+        m_rxSubsamplingIndexes[5] = settings.m_rxSubsamplingIndexes[5];
+    }
+    if (settingsKeys.contains("rx7SubsamplingIndex")) {
+        m_rxSubsamplingIndexes[6] = settings.m_rxSubsamplingIndexes[6];
+    }
+    if (settingsKeys.contains("rx8SubsamplingIndex")) {
+        m_rxSubsamplingIndexes[7] = settings.m_rxSubsamplingIndexes[7];
+    }
+    if (settingsKeys.contains("txCenterFrequency")) {
+        m_txCenterFrequency = settings.m_txCenterFrequency;
+    }
+    if (settingsKeys.contains("rxTransverterMode")) {
+        m_rxTransverterMode = settings.m_rxTransverterMode;
+    }
+    if (settingsKeys.contains("rxTransverterDeltaFrequency")) {
+        m_rxTransverterDeltaFrequency = settings.m_rxTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("txTransverterMode")) {
+        m_txTransverterMode = settings.m_txTransverterMode;
+    }
+    if (settingsKeys.contains("txTransverterDeltaFrequency")) {
+        m_txTransverterDeltaFrequency = settings.m_txTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder")) {
+        m_iqOrder = settings.m_iqOrder;
+    }
+    if (settingsKeys.contains("sampleRateIndex")) {
+        m_sampleRateIndex = settings.m_sampleRateIndex;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("LOppmTenths")) {
+        m_LOppmTenths = settings.m_LOppmTenths;
+    }
+    if (settingsKeys.contains("preamp")) {
+        m_preamp = settings.m_preamp;
+    }
+    if (settingsKeys.contains("random")) {
+        m_random = settings.m_random;
+    }
+    if (settingsKeys.contains("dither")) {
+        m_dither = settings.m_dither;
+    }
+    if (settingsKeys.contains("duplex")) {
+        m_duplex = settings.m_duplex;
+    }
+    if (settingsKeys.contains("dcBlock")) {
+        m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection")) {
+        m_iqCorrection = settings.m_iqCorrection;
+    }
+    if (settingsKeys.contains("txDrive")) {
+        m_txDrive = settings.m_txDrive;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("spectrumStreamIndex")) {
+        m_spectrumStreamIndex = settings.m_spectrumStreamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
+
+QString MetisMISOSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("nbReceivers") || force) {
+        ostr << " m_nbReceivers: " << m_nbReceivers;
+    }
+    if (settingsKeys.contains("txEnable") || force) {
+        ostr << " m_txEnable: " << m_txEnable;
+    }
+    if (settingsKeys.contains("rx1CenterFrequency") || force) {
+        ostr << " m_rxCenterFrequencies[0]: " << m_rxCenterFrequencies[0];
+    }
+    if (settingsKeys.contains("rx2CenterFrequency") || force) {
+        ostr << " m_rxCenterFrequencies[1]: " << m_rxCenterFrequencies[1];
+    }
+    if (settingsKeys.contains("rx3CenterFrequency") || force) {
+        ostr << " m_rxCenterFrequencies[2]: " << m_rxCenterFrequencies[2];
+    }
+    if (settingsKeys.contains("rx4CenterFrequency") || force) {
+        ostr << " m_rxCenterFrequencies[3]: " << m_rxCenterFrequencies[3];
+    }
+    if (settingsKeys.contains("rx5CenterFrequency") || force) {
+        ostr << " m_rxCenterFrequencies[4]: " << m_rxCenterFrequencies[4];
+    }
+    if (settingsKeys.contains("rx6CenterFrequency") || force) {
+        ostr << " m_rxCenterFrequencies[5]: " << m_rxCenterFrequencies[5];
+    }
+    if (settingsKeys.contains("rx7CenterFrequency") || force) {
+        ostr << " m_rxCenterFrequencies[6]: " << m_rxCenterFrequencies[6];
+    }
+    if (settingsKeys.contains("rx8CenterFrequency") || force) {
+        ostr << " m_rxCenterFrequencies[7]: " << m_rxCenterFrequencies[7];
+    }
+    if (settingsKeys.contains("rx1SubsamplingIndex") || force) {
+        ostr << " m_rxSubsamplingIndexes[0]: " << m_rxSubsamplingIndexes[0];
+    }
+    if (settingsKeys.contains("rx2SubsamplingIndex") || force) {
+        ostr << " m_rxSubsamplingIndexes[1]: " << m_rxSubsamplingIndexes[1];
+    }
+    if (settingsKeys.contains("rx3SubsamplingIndex") || force) {
+        ostr << " m_rxSubsamplingIndexes[2]: " << m_rxSubsamplingIndexes[2];
+    }
+    if (settingsKeys.contains("rx4SubsamplingIndex") || force) {
+        ostr << " m_rxSubsamplingIndexes[3]: " << m_rxSubsamplingIndexes[3];
+    }
+    if (settingsKeys.contains("rx5SubsamplingIndex") || force) {
+        ostr << " m_rxSubsamplingIndexes[4]: " << m_rxSubsamplingIndexes[4];
+    }
+    if (settingsKeys.contains("rx6SubsamplingIndex") || force) {
+        ostr << " m_rxSubsamplingIndexes[5]: " << m_rxSubsamplingIndexes[5];
+    }
+    if (settingsKeys.contains("rx7SubsamplingIndex") || force) {
+        ostr << " m_rxSubsamplingIndexes[6]: " << m_rxSubsamplingIndexes[6];
+    }
+    if (settingsKeys.contains("rx8SubsamplingIndex") || force) {
+        ostr << " m_rxSubsamplingIndexes[7]: " << m_rxSubsamplingIndexes[7];
+    }
+    if (settingsKeys.contains("txCenterFrequency") || force) {
+        ostr << " m_txCenterFrequency: " << m_txCenterFrequency;
+    }
+    if (settingsKeys.contains("rxTransverterMode") || force) {
+        ostr << " m_rxTransverterMode: " << m_rxTransverterMode;
+    }
+    if (settingsKeys.contains("rxTransverterDeltaFrequency") || force) {
+        ostr << " m_rxTransverterDeltaFrequency: " << m_rxTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("txTransverterMode") || force) {
+        ostr << " m_txTransverterMode: " << m_txTransverterMode;
+    }
+    if (settingsKeys.contains("txTransverterDeltaFrequency") || force) {
+        ostr << " m_txTransverterDeltaFrequency: " << m_txTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder") || force) {
+        ostr << " m_iqOrder: " << m_iqOrder;
+    }
+    if (settingsKeys.contains("sampleRateIndex") || force) {
+        ostr << " m_sampleRateIndex: " << m_sampleRateIndex;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("LOppmTenths") || force) {
+        ostr << " m_LOppmTenths: " << m_LOppmTenths;
+    }
+    if (settingsKeys.contains("preamp") || force) {
+        ostr << " m_preamp: " << m_preamp;
+    }
+    if (settingsKeys.contains("random") || force) {
+        ostr << " m_random: " << m_random;
+    }
+    if (settingsKeys.contains("dither") || force) {
+        ostr << " m_dither: " << m_dither;
+    }
+    if (settingsKeys.contains("duplex") || force) {
+        ostr << " m_duplex: " << m_duplex;
+    }
+    if (settingsKeys.contains("dcBlock") || force) {
+        ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection") || force) {
+        ostr << " m_iqCorrection: " << m_iqCorrection;
+    }
+    if (settingsKeys.contains("txDrive") || force) {
+        ostr << " m_txDrive: " << m_txDrive;
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("spectrumStreamIndex") || force) {
+        ostr << " m_spectrumStreamIndex: " << m_spectrumStreamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}
+
+
 int MetisMISOSettings::getSampleRateFromIndex(unsigned int index)
 {
     if (index < 3) {

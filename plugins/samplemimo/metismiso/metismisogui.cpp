@@ -92,15 +92,21 @@ void MetisMISOGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
 void MetisMISOGui::setCenterFrequency(qint64 centerFrequency)
 {
-    if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers) {
+    if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers)
+    {
         m_settings.m_rxCenterFrequencies[m_settings.m_streamIndex] = centerFrequency;
-    } else if (m_settings.m_streamIndex == MetisMISOSettings::m_maxReceivers) {
+        m_settingsKeys.append(QString("rx%1CenterFrequency").arg(m_settings.m_streamIndex+1));
+    }
+    else if (m_settings.m_streamIndex == MetisMISOSettings::m_maxReceivers)
+    {
         m_settings.m_txCenterFrequency = centerFrequency;
+        m_settingsKeys.append("txCenterFrequency");
     }
 
     displaySettings();
@@ -145,6 +151,7 @@ void MetisMISOGui::on_streamIndex_currentIndexChanged(int index)
     if (ui->streamLock->isChecked())
     {
         m_settings.m_spectrumStreamIndex = index;
+        m_settingsKeys.append("spectrumStreamIndex");
 
         if (m_settings.m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers)
         {
@@ -167,6 +174,7 @@ void MetisMISOGui::on_streamIndex_currentIndexChanged(int index)
     }
 
     m_settings.m_streamIndex = index;
+    m_settingsKeys.append("streamIndex");
     sendSettings();
 
     updateSubsamplingIndex();
@@ -177,6 +185,7 @@ void MetisMISOGui::on_streamIndex_currentIndexChanged(int index)
 void MetisMISOGui::on_spectrumSource_currentIndexChanged(int index)
 {
     m_settings.m_spectrumStreamIndex = index;
+    m_settingsKeys.append("spectrumStreamIndex");
 
     if (m_settings.m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers)
     {
@@ -199,6 +208,7 @@ void MetisMISOGui::on_spectrumSource_currentIndexChanged(int index)
         ui->streamIndex->setCurrentIndex(index);
         ui->streamIndex->blockSignals(false);
         m_settings.m_streamIndex = index;
+        m_settingsKeys.append("streamIndex");
         updateSubsamplingIndex();
         displayFrequency();
         displaySampleRate();
@@ -218,15 +228,21 @@ void MetisMISOGui::on_LOppm_valueChanged(int value)
 {
 	m_settings.m_LOppmTenths = value;
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+    m_settingsKeys.append("LOppmTenths");
 	sendSettings();
 }
 
 void MetisMISOGui::on_centerFrequency_changed(quint64 value)
 {
-    if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers) {
+    if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers)
+    {
         m_settings.m_rxCenterFrequencies[m_settings.m_streamIndex] = value * 1000;
-    } else if (m_settings.m_streamIndex == MetisMISOSettings::m_maxReceivers) {
+        m_settingsKeys.append(QString("rx%1CenterFrequency").arg(m_settings.m_streamIndex+1));
+    }
+    else if (m_settings.m_streamIndex == MetisMISOSettings::m_maxReceivers)
+    {
         m_settings.m_txCenterFrequency = value * 1000;
+        m_settingsKeys.append("txCenterFrequency");
     }
 
     sendSettings();
@@ -235,6 +251,7 @@ void MetisMISOGui::on_centerFrequency_changed(quint64 value)
 void MetisMISOGui::on_samplerateIndex_currentIndexChanged(int index)
 {
     m_settings.m_sampleRateIndex = index < 0 ? 0 : index > 3 ? 3 : index;
+    m_settingsKeys.append("sampleRateIndex");
     sendSettings();
 }
 
@@ -242,6 +259,7 @@ void MetisMISOGui::on_log2Decim_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index < 0 ? 0 : index > 3 ? 3 : index;
     // displaySampleRate();
+    m_settingsKeys.append("log2Decim");
     sendSettings();
 }
 
@@ -250,6 +268,7 @@ void MetisMISOGui::on_subsamplingIndex_currentIndexChanged(int index)
     if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers) // valid for Rx only
     {
         m_settings.m_rxSubsamplingIndexes[m_settings.m_streamIndex] = index;
+        m_settingsKeys.append(QString("rx%1SubsamplingIndex").arg(m_settings.m_streamIndex+1));
         ui->subsamplingIndex->setToolTip(tr("Subsampling band index [%1 - %2 MHz]")
             .arg(index*61.44).arg((index+1)*61.44));
         displayFrequency();
@@ -261,12 +280,14 @@ void MetisMISOGui::on_subsamplingIndex_currentIndexChanged(int index)
 void MetisMISOGui::on_dcBlock_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void MetisMISOGui::on_iqCorrection_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
@@ -277,12 +298,17 @@ void MetisMISOGui::on_transverter_clicked()
         m_settings.m_rxTransverterMode = ui->transverter->getDeltaFrequencyAcive();
         m_settings.m_rxTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
         m_settings.m_iqOrder = ui->transverter->getIQOrder();
+        m_settingsKeys.append("rxTransverterMode");
+        m_settingsKeys.append("rxTransverterDeltaFrequency");
+        m_settingsKeys.append("iqOrder");
         qDebug("MetisMISOGui::on_transverter_clicked: Rx: %lld Hz %s", m_settings.m_rxTransverterDeltaFrequency, m_settings.m_rxTransverterMode ? "on" : "off");
     }
     else
     {
         m_settings.m_txTransverterMode = ui->transverter->getDeltaFrequencyAcive();
         m_settings.m_txTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+        m_settingsKeys.append("txTransverterMode");
+        m_settingsKeys.append("txTransverterDeltaFrequency");
         qDebug("MetisMISOGui::on_transverter_clicked: Tx: %lld Hz %s", m_settings.m_txTransverterDeltaFrequency, m_settings.m_txTransverterMode ? "on" : "off");
     }
 
@@ -294,36 +320,42 @@ void MetisMISOGui::on_transverter_clicked()
 void MetisMISOGui::on_preamp_toggled(bool checked)
 {
 	m_settings.m_preamp = checked;
+    m_settingsKeys.append("preamp");
 	sendSettings();
 }
 
 void MetisMISOGui::on_random_toggled(bool checked)
 {
 	m_settings.m_random = checked;
+    m_settingsKeys.append("random");
 	sendSettings();
 }
 
 void MetisMISOGui::on_dither_toggled(bool checked)
 {
 	m_settings.m_dither = checked;
+    m_settingsKeys.append("dither");
 	sendSettings();
 }
 
 void MetisMISOGui::on_duplex_toggled(bool checked)
 {
 	m_settings.m_duplex = checked;
+    m_settingsKeys.append("duplex");
 	sendSettings();
 }
 
 void MetisMISOGui::on_nbRxIndex_currentIndexChanged(int index)
 {
     m_settings.m_nbReceivers = index + 1;
+    m_settingsKeys.append("nbReceivers");
     sendSettings();
 }
 
 void MetisMISOGui::on_txEnable_toggled(bool checked)
 {
     m_settings.m_txEnable = checked;
+    m_settingsKeys.append("txEnable");
     sendSettings();
 }
 
@@ -331,6 +363,7 @@ void MetisMISOGui::on_txDrive_valueChanged(int value)
 {
     m_settings.m_txDrive = value;
     ui->txDriveText->setText(tr("%1").arg(m_settings.m_txDrive));
+    m_settingsKeys.append("txDrive");
     sendSettings();
 }
 
@@ -365,7 +398,7 @@ void MetisMISOGui::displaySettings()
 
 void MetisMISOGui::sendSettings()
 {
-    if(!m_updateTimer.isActive()) {
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
     }
 }
@@ -374,9 +407,10 @@ void MetisMISOGui::updateHardware()
 {
     if (m_doApplySettings)
     {
-        MetisMISO::MsgConfigureMetisMISO* message = MetisMISO::MsgConfigureMetisMISO::create(m_settings, m_forceSettings);
+        MetisMISO::MsgConfigureMetisMISO* message = MetisMISO::MsgConfigureMetisMISO::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleMIMO->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -385,7 +419,7 @@ void MetisMISOGui::updateStatus()
 {
     int state = m_deviceUISet->m_deviceAPI->state();
 
-    if(m_lastEngineState != state)
+    if (m_lastEngineState != state)
     {
         switch(state)
         {
@@ -416,11 +450,17 @@ bool MetisMISOGui::handleMessage(const Message& message)
     {
         qDebug("MetisMISOGui::handleMessage: MsgConfigureMetisMISO");
         const MetisMISO::MsgConfigureMetisMISO& cfg = (MetisMISO::MsgConfigureMetisMISO&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
 
         if ((m_settings.m_spectrumStreamIndex != m_settings.m_streamIndex) && (ui->streamLock->isChecked()))
         {
             m_settings.m_spectrumStreamIndex = m_settings.m_streamIndex;
+            m_settingsKeys.append("spectrumStreamIndex");
             sendSettings();
         }
 
@@ -584,6 +624,10 @@ void MetisMISOGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

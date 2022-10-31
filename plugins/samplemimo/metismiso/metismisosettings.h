@@ -55,6 +55,8 @@ struct MetisMISOSettings {
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
     MetisMISOSettings& operator=(const MetisMISOSettings&) = default;
+    void applySettings(const QStringList& settingsKeys, const MetisMISOSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static int getSampleRateFromIndex(unsigned int index);
 };

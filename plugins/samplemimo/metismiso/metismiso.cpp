@@ -89,7 +89,7 @@ void MetisMISO::destroy()
 
 void MetisMISO::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool MetisMISO::startRx()
@@ -103,7 +103,7 @@ bool MetisMISO::startRx()
 
 	mutexLocker.unlock();
 
-	applySettings(m_settings, true);
+	applySettings(m_settings, QList<QString>(), true);
 	m_running = true;
 
 	return true;
@@ -120,7 +120,7 @@ bool MetisMISO::startTx()
 
 	mutexLocker.unlock();
 
-	applySettings(m_settings, true);
+	applySettings(m_settings, QList<QString>(), true);
 	m_running = true;
 
 	return true;
@@ -177,12 +177,12 @@ bool MetisMISO::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureMetisMISO* message = MsgConfigureMetisMISO::create(m_settings, true);
+    MsgConfigureMetisMISO* message = MsgConfigureMetisMISO::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureMetisMISO* messageToGUI = MsgConfigureMetisMISO::create(m_settings, true);
+        MsgConfigureMetisMISO* messageToGUI = MsgConfigureMetisMISO::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -219,13 +219,15 @@ void MetisMISO::setSourceCenterFrequency(qint64 centerFrequency, int index)
     if (index < MetisMISOSettings::m_maxReceivers)
     {
         settings.m_rxCenterFrequencies[index] = centerFrequency;
+        QList<QString> settingsKeys;
+        settingsKeys.append(tr("rx%1CenterFrequency").arg(index+1));
 
-        MsgConfigureMetisMISO* message = MsgConfigureMetisMISO::create(settings, false);
+        MsgConfigureMetisMISO* message = MsgConfigureMetisMISO::create(settings, settingsKeys, false);
         m_inputMessageQueue.push(message);
 
         if (m_guiMessageQueue)
         {
-            MsgConfigureMetisMISO* messageToGUI = MsgConfigureMetisMISO::create(settings, false);
+            MsgConfigureMetisMISO* messageToGUI = MsgConfigureMetisMISO::create(settings, settingsKeys, false);
             m_guiMessageQueue->push(messageToGUI);
         }
     }
@@ -238,10 +240,9 @@ bool MetisMISO::handleMessage(const Message& message)
         MsgConfigureMetisMISO& conf = (MsgConfigureMetisMISO&) message;
         qDebug() << "MetisMISO::handleMessage: MsgConfigureMetisMISO";
 
-        bool success = applySettings(conf.getSettings(), conf.getForce());
+        bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
-        if (!success)
-        {
+        if (!success) {
             qDebug("MetisMISO::handleMessage: config error");
         }
 
@@ -282,152 +283,73 @@ bool MetisMISO::handleMessage(const Message& message)
     }
 }
 
-bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
+bool MetisMISO::applySettings(const MetisMISOSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    QList<QString> reverseAPIKeys;
-
-    qDebug() << "MetisMISO::applySettings: "
-        << " m_nbReceivers:" << settings.m_nbReceivers
-        << " m_txEnable:" << settings.m_txEnable
-        << " m_rx1CenterFrequencies: ["
-        << " 1:" << settings.m_rxCenterFrequencies[0]
-        << " 2:" << settings.m_rxCenterFrequencies[1]
-        << " 3:" << settings.m_rxCenterFrequencies[2]
-        << " 4:" << settings.m_rxCenterFrequencies[3]
-        << " 5:" << settings.m_rxCenterFrequencies[4]
-        << " 6:" << settings.m_rxCenterFrequencies[5]
-        << " 7:" << settings.m_rxCenterFrequencies[6]
-        << " 8:" << settings.m_rxCenterFrequencies[7]
-        << " ] m_txCenterFrequency:" << settings.m_txCenterFrequency
-        << " m_rxSubsamplingIndexes: ["
-        << " 1:" << settings.m_rxSubsamplingIndexes[0]
-        << " 2:" << settings.m_rxSubsamplingIndexes[1]
-        << " 3:" << settings.m_rxSubsamplingIndexes[2]
-        << " 4:" << settings.m_rxSubsamplingIndexes[3]
-        << " 5:" << settings.m_rxSubsamplingIndexes[4]
-        << " 6:" << settings.m_rxSubsamplingIndexes[5]
-        << " 7:" << settings.m_rxSubsamplingIndexes[6]
-        << " 8:" << settings.m_rxSubsamplingIndexes[7]
-        << " ] m_rxTransverterMode:" << settings.m_rxTransverterMode
-        << " m_rxTransverterDeltaFrequency:" << settings.m_rxTransverterDeltaFrequency
-        << " m_txTransverterMode:" << settings.m_txTransverterMode
-        << " m_txTransverterDeltaFrequency:" << settings.m_txTransverterDeltaFrequency
-        << " m_iqOrder:" << settings.m_iqOrder
-        << " m_sampleRateIndex:" << settings.m_sampleRateIndex
-        << " m_log2Decim:" << settings.m_log2Decim
-        << " m_preamp:" << settings.m_preamp
-        << " m_random:" << settings.m_random
-        << " m_dither:" << settings.m_dither
-        << " m_duplex:" << settings.m_duplex
-        << " m_dcBlock:" << settings.m_dcBlock
-        << " m_iqCorrection:" << settings.m_iqCorrection
-        << " m_txDrive:" << settings.m_txDrive
-        << " m_streamIndex:" << settings.m_streamIndex
-        << " m_spectrumStreamIndex:" << settings.m_spectrumStreamIndex
-        << " m_useReverseAPI: " << settings.m_useReverseAPI
-        << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-        << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex;
+    qDebug() << "MetisMISO::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
 
     bool propagateSettings = false;
 
-    if ((m_settings.m_nbReceivers != settings.m_nbReceivers) || force)
-    {
-        reverseAPIKeys.append("nbReceivers");
+    if (settingsKeys.contains("nbReceivers") || force) {
         propagateSettings = true;
     }
 
-    if ((m_settings.m_txEnable != settings.m_txEnable) || force)
-    {
-        reverseAPIKeys.append("txEnable");
+    if (settingsKeys.contains("txEnable") || force) {
         propagateSettings = true;
     }
 
     for (int i = 0; i < MetisMISOSettings::m_maxReceivers; i++)
     {
-        if ((m_settings.m_rxCenterFrequencies[i] != settings.m_rxCenterFrequencies[i]) || force)
-        {
-            reverseAPIKeys.append(QString("rx%1CenterFrequency").arg(i+1));
+        if (settingsKeys.contains(QString("rx%1CenterFrequency").arg(i+1)) || force) {
             propagateSettings = true;
         }
 
-        if ((m_settings.m_rxSubsamplingIndexes[i] != settings.m_rxSubsamplingIndexes[i]) || force)
-        {
-            reverseAPIKeys.append(QString("rx%1SubsamplingIndex").arg(i+1));
+        if (settingsKeys.contains(QString("rx%1SubsamplingIndex").arg(i+1)) || force) {
             propagateSettings = true;
         }
     }
 
-    if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) || force)
-    {
-        reverseAPIKeys.append("txCenterFrequency");
+    if (settingsKeys.contains("txCenterFrequency") || force) {
         propagateSettings = true;
     }
 
-    if ((m_settings.m_rxTransverterMode != settings.m_rxTransverterMode) || force)
-    {
-        reverseAPIKeys.append("rxTransverterMode");
+    if (settingsKeys.contains("rxTransverterMode") || force) {
         propagateSettings = true;
     }
 
-    if ((m_settings.m_rxTransverterDeltaFrequency != settings.m_rxTransverterDeltaFrequency) || force)
-    {
-        reverseAPIKeys.append("rxTransverterDeltaFrequency");
+    if (settingsKeys.contains("rxTransverterDeltaFrequency") || force) {
         propagateSettings = true;
     }
 
-    if ((m_settings.m_txTransverterMode != settings.m_txTransverterMode) || force)
-    {
-        reverseAPIKeys.append("txTransverterMode");
+    if (settingsKeys.contains("txTransverterMode") || force) {
         propagateSettings = true;
     }
 
-    if ((m_settings.m_txTransverterDeltaFrequency != settings.m_txTransverterDeltaFrequency) || force)
-    {
-        reverseAPIKeys.append("txTransverterDeltaFrequency");
+    if (settingsKeys.contains("txTransverterDeltaFrequency") || force) {
         propagateSettings = true;
     }
 
-    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
-    {
-        reverseAPIKeys.append("iqOrder");
+    if (settingsKeys.contains("iqOrder") || force) {
         propagateSettings = true;
     }
 
-    if ((m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) || force)
-    {
-        reverseAPIKeys.append("sampleRateIndex");
+    if (settingsKeys.contains("sampleRateIndex") || force) {
         propagateSettings = true;
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
-    {
-        reverseAPIKeys.append("log2Decim");
+    if (settingsKeys.contains("log2Decim") || force) {
         propagateSettings = true;
     }
 
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
-    {
-        reverseAPIKeys.append("LOppmTenths");
+    if (settingsKeys.contains("LOppmTenths") || force) {
         propagateSettings = true;
     }
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
-        reverseAPIKeys.append("dcBlock");
-    }
-
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
-        reverseAPIKeys.append("iqCorrection");
-    }
-
-    if ((m_settings.m_txDrive != settings.m_txDrive) || force)
-    {
-        reverseAPIKeys.append("txDrive");
+    if (settingsKeys.contains("txDrive") || force) {
         propagateSettings = true;
     }
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
-        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    if (settingsKeys.contains("dcBlock") ||
+        settingsKeys.contains("iqCorrection") || force)
     {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection, 0);
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection, 1);
@@ -435,9 +357,9 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
 
     for (int i = 0; i < MetisMISOSettings::m_maxReceivers; i++)
     {
-        if ((m_settings.m_rxCenterFrequencies[i] != settings.m_rxCenterFrequencies[i]) ||
-            (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
-            (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+        if (settingsKeys.contains(QString("rx%1CenterFrequency").arg(i+1)) ||
+            settingsKeys.contains("sampleRateIndex") ||
+            settingsKeys.contains("log2Decim") || force)
         {
             int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
             int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
@@ -447,36 +369,33 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) || force)
+    if (settingsKeys.contains("txCenterFrequency") || force)
     {
         DSPMIMOSignalNotification *engineTxNotif = new DSPMIMOSignalNotification(
             48000, settings.m_txCenterFrequency, false, 0);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineTxNotif);
     }
 
-    if ((m_settings.m_streamIndex != settings.m_streamIndex) || force) {
-        reverseAPIKeys.append("streamIndex");
-    }
-
-    if ((m_settings.m_spectrumStreamIndex != settings.m_spectrumStreamIndex) || force) {
-        reverseAPIKeys.append("spectrumStreamIndex");
-    }
-
     if (propagateSettings) {
         m_udpHandler.applySettings(settings);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
         qDebug("MetisMISO::applySettings: call webapiReverseSendSettings");
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
     return true;
 }
 
@@ -547,12 +466,12 @@ int MetisMISO::webapiSettingsPutPatch(
     MetisMISOSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureMetisMISO *msg = MsgConfigureMetisMISO::create(settings, force);
+    MsgConfigureMetisMISO *msg = MsgConfigureMetisMISO::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureMetisMISO *msgToGUI = MsgConfigureMetisMISO::create(settings, force);
+        MsgConfigureMetisMISO *msgToGUI = MsgConfigureMetisMISO::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 

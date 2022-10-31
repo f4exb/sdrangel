@@ -41,20 +41,22 @@ public:
 
 	public:
 		const MetisMISOSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureMetisMISO* create(const MetisMISOSettings& settings, bool force)
-		{
-			return new MsgConfigureMetisMISO(settings, force);
+		static MsgConfigureMetisMISO* create(const MetisMISOSettings& settings, const QList<QString>& settingsKeys, bool force) {
+			return new MsgConfigureMetisMISO(settings, settingsKeys, force);
 		}
 
 	private:
 		MetisMISOSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureMetisMISO(const MetisMISOSettings& settings, bool force) :
+		MsgConfigureMetisMISO(const MetisMISOSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -158,7 +160,7 @@ private:
 
     void startMetis();
     void stopMetis();
-	bool applySettings(const MetisMISOSettings& settings, bool force);
+	bool applySettings(const MetisMISOSettings& settings, const QList<QString>& settingsKeys, bool force);
     void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const MetisMISOSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 

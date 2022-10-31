@@ -53,6 +53,7 @@ private:
 	Ui::MetisMISOGui* ui;
 
 	MetisMISOSettings m_settings;
+    QList<QString> m_settingsKeys;
     int m_rxSampleRate;
     int m_txSampleRate;
     QTimer m_updateTimer;
