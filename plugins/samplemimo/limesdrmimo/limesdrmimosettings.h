@@ -123,6 +123,8 @@ struct LimeSDRMIMOSettings
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const LimeSDRMIMOSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif // PLUGINS_SAMPLEMIMO_LIMESDRMIMO_LIMESDRMIMOSETTINGS_H_

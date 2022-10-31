@@ -120,6 +120,7 @@ void LimeSDRMIMOGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -196,7 +197,13 @@ bool LimeSDRMIMOGUI::handleMessage(const Message& message)
     else if (LimeSDRMIMO::MsgConfigureLimeSDRMIMO::match(message))
     {
         const LimeSDRMIMO::MsgConfigureLimeSDRMIMO& notif = (const LimeSDRMIMO::MsgConfigureLimeSDRMIMO&) message;
-        m_settings = notif.getSettings();
+
+        if (notif.getForce()) {
+            m_settings = notif.getSettings();
+        } else {
+            m_settings.applySettings(notif.getSettingsKeys(), notif.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -642,9 +649,10 @@ void LimeSDRMIMOGUI::updateHardware()
 {
     if (m_doApplySettings)
     {
-        LimeSDRMIMO::MsgConfigureLimeSDRMIMO* message = LimeSDRMIMO::MsgConfigureLimeSDRMIMO::create(m_settings, m_forceSettings);
+        LimeSDRMIMO::MsgConfigureLimeSDRMIMO* message = LimeSDRMIMO::MsgConfigureLimeSDRMIMO::create(m_settings, m_settingsKeys, m_forceSettings);
         m_limeSDRMIMO->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -778,10 +786,15 @@ void LimeSDRMIMOGUI::on_startStopTx_toggled(bool checked)
 
 void LimeSDRMIMOGUI::on_centerFrequency_changed(quint64 value)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         setRxCenterFrequencySetting(value);
-    } else {
+        m_settingsKeys.append("rxCenterFrequency");
+    }
+    else
+    {
         setTxCenterFrequencySetting(value);
+        m_settingsKeys.append("txCenterFrequency");
     }
 
     sendSettings();
@@ -792,11 +805,13 @@ void LimeSDRMIMOGUI::on_ncoEnable_toggled(bool checked)
     if (m_rxElseTx)
     {
         m_settings.m_ncoEnableRx = checked;
+        m_settingsKeys.append("ncoEnableRx");
         setRxCenterFrequencyDisplay();
     }
     else
     {
         m_settings.m_ncoEnableTx = checked;
+        m_settingsKeys.append("ncoEnableTx");
         setTxCenterFrequencyDisplay();
     }
 
@@ -808,11 +823,13 @@ void LimeSDRMIMOGUI::on_ncoFrequency_changed(qint64 value)
     if (m_rxElseTx)
     {
         m_settings.m_ncoFrequencyRx = value;
+        m_settingsKeys.append("ncoFrequencyRx");
         setRxCenterFrequencyDisplay();
     }
     else
     {
         m_settings.m_ncoFrequencyTx = value;
+        m_settingsKeys.append("ncoFrequencyTx");
         setTxCenterFrequencyDisplay();
     }
 
@@ -822,12 +839,14 @@ void LimeSDRMIMOGUI::on_ncoFrequency_changed(qint64 value)
 void LimeSDRMIMOGUI::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void LimeSDRMIMOGUI::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
@@ -836,6 +855,8 @@ void LimeSDRMIMOGUI::on_extClock_clicked()
     m_settings.m_extClock = ui->extClock->getExternalClockActive();
     m_settings.m_extClockFreq = ui->extClock->getExternalClockFrequency();
     qDebug("LimeSDRMIMOGUI::on_extClock_clicked: %u Hz %s", m_settings.m_extClockFreq, m_settings.m_extClock ? "on" : "off");
+    m_settingsKeys.append("extClock");
+    m_settingsKeys.append("extClockFreq");
     sendSettings();
 }
 
@@ -848,11 +869,13 @@ void LimeSDRMIMOGUI::on_hwDecim_currentIndexChanged(int index)
     if (m_rxElseTx)
     {
         m_settings.m_log2HardDecim = index;
+        m_settingsKeys.append("log2HardDecim");
         updateADCRate();
     }
     else
     {
         m_settings.m_log2HardInterp = index;
+        m_settingsKeys.append("log2HardInterp");
         updateDACRate();
     }
 
@@ -869,6 +892,7 @@ void LimeSDRMIMOGUI::on_swDecim_currentIndexChanged(int index)
     if (m_rxElseTx)
     {
         m_settings.m_log2SoftDecim = index;
+        m_settingsKeys.append("log2SoftDecim");
         displayRxSampleRate();
 
         if (m_sampleRateMode) {
@@ -880,6 +904,7 @@ void LimeSDRMIMOGUI::on_swDecim_currentIndexChanged(int index)
     else
     {
         m_settings.m_log2SoftInterp = index;
+        m_settingsKeys.append("log2SoftInterp");
         displayTxSampleRate();
 
         if (m_sampleRateMode) {
@@ -889,6 +914,7 @@ void LimeSDRMIMOGUI::on_swDecim_currentIndexChanged(int index)
         }
     }
 
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
@@ -927,6 +953,7 @@ void LimeSDRMIMOGUI::on_sampleRate_changed(quint64 value)
     }
 
     setNCODisplay();
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
@@ -934,18 +961,28 @@ void LimeSDRMIMOGUI::on_lpf_changed(quint64 value)
 {
     if (m_rxElseTx)
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_lpfBWRx0 = value * 1000;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("lpfBWRx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_lpfBWRx1 = value * 1000;
+            m_settingsKeys.append("lpfBWRx1");
         }
     }
     else
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_lpfBWTx0 = value * 1000;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("lpfBWTx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_lpfBWTx1 = value * 1000;
+            m_settingsKeys.append("lpfBWTx1");
         }
     }
 
@@ -956,18 +993,28 @@ void LimeSDRMIMOGUI::on_lpFIREnable_toggled(bool checked)
 {
     if (m_rxElseTx)
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_lpfFIREnableRx0 = checked;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("lpfFIREnableRx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_lpfFIREnableRx1 = checked;
+            m_settingsKeys.append("lpfFIREnableRx1");
         }
     }
     else
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_lpfFIREnableTx0 = checked;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("lpfFIREnableTx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_lpfFIREnableTx1 = checked;
+            m_settingsKeys.append("lpfFIREnableTx1");
         }
     }
 
@@ -978,18 +1025,28 @@ void LimeSDRMIMOGUI::on_lpFIR_changed(quint64 value)
 {
     if (m_rxElseTx)
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_lpfFIRBWRx0 = value * 1000;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("lpfFIRBWRx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_lpfFIRBWRx1 = value * 1000;
+            m_settingsKeys.append("lpfFIRBWRx1");
         }
     }
     else
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_lpfFIRBWTx0 = value * 1000;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("lpfFIRBWTx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_lpfFIRBWTx1 = value * 1000;
+            m_settingsKeys.append("lpfFIRBWTx1");
         }
     }
 
@@ -1003,12 +1060,19 @@ void LimeSDRMIMOGUI::on_transverter_clicked()
         m_settings.m_rxTransverterMode = ui->transverter->getDeltaFrequencyAcive();
         m_settings.m_rxTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
         m_settings.m_iqOrder = ui->transverter->getIQOrder();
+        m_settingsKeys.append("rxTransverterMode");
+        m_settingsKeys.append("rxTransverterDeltaFrequency");
+        m_settingsKeys.append("iqOrder");
+        m_settingsKeys.append("rxCenterFrequency");
         qDebug("LimeSDRMIMOGUI::on_transverter_clicked: Rx %lld Hz %s", m_settings.m_rxTransverterDeltaFrequency, m_settings.m_rxTransverterMode ? "on" : "off");
     }
     else
     {
         m_settings.m_txTransverterMode = ui->transverter->getDeltaFrequencyAcive();
         m_settings.m_txTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+        m_settingsKeys.append("txTransverterMode");
+        m_settingsKeys.append("txTransverterDeltaFrequency");
+        m_settingsKeys.append("txCenterFrequency");
         qDebug("LimeSDRMIMOGUI::on_transverter_clicked: Tx %lld Hz %s", m_settings.m_txTransverterDeltaFrequency, m_settings.m_txTransverterMode ? "on" : "off");
     }
 
@@ -1029,10 +1093,15 @@ void LimeSDRMIMOGUI::on_gainMode_currentIndexChanged(int index)
         return;
     }
 
-    if (m_streamIndex == 0) {
+    if (m_streamIndex == 0)
+    {
         m_settings.m_gainModeRx0 = (LimeSDRMIMOSettings::RxGainMode) index;
-    } else if (m_streamIndex == 0) {
+        m_settingsKeys.append("gainModeRx0");
+    }
+    else if (m_streamIndex == 0)
+    {
         m_settings.m_gainModeRx1 = (LimeSDRMIMOSettings::RxGainMode) index;
+        m_settingsKeys.append("gainModeRx1");
     }
 
     if (index == 0)
@@ -1059,18 +1128,28 @@ void LimeSDRMIMOGUI::on_gain_valueChanged(int value)
 
     if (m_rxElseTx)
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_gainRx0 = value;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("gainRx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_gainRx1 = value;
+            m_settingsKeys.append("gainRx1");
         }
     }
     else
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_gainTx0 = value;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("gainTx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_gainTx1 = value;
+            m_settingsKeys.append("gainTx1");
         }
     }
 
@@ -1081,10 +1160,15 @@ void LimeSDRMIMOGUI::on_lnaGain_valueChanged(int value)
 {
     ui->lnaGainText->setText(tr("%1").arg(value));
 
-    if (m_streamIndex == 0) {
+    if (m_streamIndex == 0)
+    {
         m_settings.m_lnaGainRx0 = value;
-    } else if (m_streamIndex == 0) {
+        m_settingsKeys.append("lnaGainRx0");
+    }
+    else if (m_streamIndex == 0)
+    {
         m_settings.m_lnaGainRx1 = value;
+        m_settingsKeys.append("lnaGainRx1");
     }
 
     sendSettings();
@@ -1092,10 +1176,15 @@ void LimeSDRMIMOGUI::on_lnaGain_valueChanged(int value)
 
 void LimeSDRMIMOGUI::on_tiaGain_currentIndexChanged(int index)
 {
-    if (m_streamIndex == 0) {
+    if (m_streamIndex == 0)
+    {
         m_settings.m_tiaGainRx0 = index + 1;
-    } else if (m_streamIndex == 0) {
+        m_settingsKeys.append("tiaGainRx0");
+    }
+    else if (m_streamIndex == 0)
+    {
         m_settings.m_tiaGainRx1 = index + 1;
+        m_settingsKeys.append("tiaGainRx1");
     }
 
     sendSettings();
@@ -1105,10 +1194,15 @@ void LimeSDRMIMOGUI::on_pgaGain_valueChanged(int value)
 {
     ui->pgaGainText->setText(tr("%1").arg(value));
 
-    if (m_streamIndex == 0) {
+    if (m_streamIndex == 0)
+    {
         m_settings.m_pgaGainRx0 = value;
-    } else if (m_streamIndex == 0) {
+        m_settingsKeys.append("pgaGainRx0");
+    }
+    else if (m_streamIndex == 0)
+    {
         m_settings.m_pgaGainRx1 = value;
+        m_settingsKeys.append("pgaGainRx1");
     }
 
     sendSettings();
@@ -1118,18 +1212,28 @@ void LimeSDRMIMOGUI::on_antenna_currentIndexChanged(int index)
 {
     if (m_rxElseTx)
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_antennaPathRx0 = (LimeSDRMIMOSettings::PathRxRFE) index;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("antennaPathRx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_antennaPathRx1 = (LimeSDRMIMOSettings::PathRxRFE) index;
+            m_settingsKeys.append("antennaPathRx1");
         }
     }
     else
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_antennaPathTx0 = (LimeSDRMIMOSettings::PathTxRFE) index;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("antennaPathTx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_antennaPathTx1 = (LimeSDRMIMOSettings::PathTxRFE) index;
+            m_settingsKeys.append("antennaPathTx1");
         }
     }
 
@@ -1153,6 +1257,10 @@ void LimeSDRMIMOGUI::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

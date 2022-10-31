@@ -45,20 +45,22 @@ public:
 
 	public:
 		const LimeSDRMIMOSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureLimeSDRMIMO* create(const LimeSDRMIMOSettings& settings, bool force)
-		{
-			return new MsgConfigureLimeSDRMIMO(settings, force);
+		static MsgConfigureLimeSDRMIMO* create(const LimeSDRMIMOSettings& settings, const QList<QString>& settingsKeys, bool force) {
+			return new MsgConfigureLimeSDRMIMO(settings, settingsKeys, force);
 		}
 
 	private:
 		LimeSDRMIMOSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureLimeSDRMIMO(const LimeSDRMIMOSettings& settings, bool force) :
+		MsgConfigureLimeSDRMIMO(const LimeSDRMIMOSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -304,7 +306,7 @@ private:
     bool setupTxStream(unsigned int channel);
     void destroyTxStream(unsigned int channel);
 
-	bool applySettings(const LimeSDRMIMOSettings& settings, bool force);
+	bool applySettings(const LimeSDRMIMOSettings& settings, const QList<QString>& settingsKeys, bool force);
     void applyRxGainMode(
         unsigned int channel,
         bool& doCalibration,
@@ -332,7 +334,7 @@ private:
     void applyTxCalibration(unsigned int channel, qint32 devSampleRate);
     void applyTxLPCalibration(unsigned int channel, float lpfBW);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const LimeSDRMIMOSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const LimeSDRMIMOSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 private slots:

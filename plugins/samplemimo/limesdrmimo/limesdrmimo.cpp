@@ -257,7 +257,7 @@ void LimeSDRMIMO::destroy()
 
 void LimeSDRMIMO::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool LimeSDRMIMO::startRx()
@@ -424,12 +424,12 @@ bool LimeSDRMIMO::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureLimeSDRMIMO* message = MsgConfigureLimeSDRMIMO::create(m_settings, true);
+    MsgConfigureLimeSDRMIMO* message = MsgConfigureLimeSDRMIMO::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureLimeSDRMIMO* messageToGUI = MsgConfigureLimeSDRMIMO::create(m_settings, true);
+        MsgConfigureLimeSDRMIMO* messageToGUI = MsgConfigureLimeSDRMIMO::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -467,12 +467,12 @@ void LimeSDRMIMO::setSourceCenterFrequency(qint64 centerFrequency, int index)
     LimeSDRMIMOSettings settings = m_settings;
     settings.m_rxCenterFrequency = centerFrequency;
 
-    MsgConfigureLimeSDRMIMO* message = MsgConfigureLimeSDRMIMO::create(settings, false);
+    MsgConfigureLimeSDRMIMO* message = MsgConfigureLimeSDRMIMO::create(settings, QList<QString>{"rxCenterFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureLimeSDRMIMO* messageToGUI = MsgConfigureLimeSDRMIMO::create(settings, false);
+        MsgConfigureLimeSDRMIMO* messageToGUI = MsgConfigureLimeSDRMIMO::create(settings, QList<QString>{"rxCenterFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -489,12 +489,12 @@ void LimeSDRMIMO::setSinkCenterFrequency(qint64 centerFrequency, int index)
     LimeSDRMIMOSettings settings = m_settings;
     settings.m_txCenterFrequency = centerFrequency;
 
-    MsgConfigureLimeSDRMIMO* message = MsgConfigureLimeSDRMIMO::create(settings, false);
+    MsgConfigureLimeSDRMIMO* message = MsgConfigureLimeSDRMIMO::create(settings, QList<QString>{"txCenterFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureLimeSDRMIMO* messageToGUI = MsgConfigureLimeSDRMIMO::create(settings, false);
+        MsgConfigureLimeSDRMIMO* messageToGUI = MsgConfigureLimeSDRMIMO::create(settings, QList<QString>{"txCenterFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -506,7 +506,7 @@ bool LimeSDRMIMO::handleMessage(const Message& message)
         MsgConfigureLimeSDRMIMO& conf = (MsgConfigureLimeSDRMIMO&) message;
         qDebug() << "LimeSDRMIMO::handleMessage: MsgConfigureLimeSDRMIMO";
 
-        bool success = applySettings(conf.getSettings(), conf.getForce());
+        bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
         if (!success) {
             qDebug("LimeSDRMIMO::handleMessage: config error");
@@ -627,9 +627,9 @@ bool LimeSDRMIMO::handleMessage(const Message& message)
     }
 }
 
-bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
+bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    QList<QString> reverseAPIKeys;
+    qDebug() << "LimeSDRMIMO::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
     bool forwardChangeRxDSP  = false;
     bool forwardChangeTxDSP  = false;
     double clockGenFreq      = 0.0;
@@ -643,69 +643,6 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
     bool doLPCalibrationTx1  = false;
     bool forceRxNCOFrequency = false;
     bool forceTxNCOFrequency = false;
-
-    qDebug() << "LimeSDRMIMO::applySettings: common:"
-        << " m_devSampleRate: " << settings.m_devSampleRate
-        << " m_gpioDir: " << settings.m_gpioDir
-        << " m_gpioPins: " << settings.m_gpioPins
-        << " m_extClock: " << settings.m_extClock
-        << " m_extClockFreq: " << settings.m_extClockFreq
-        << " m_useReverseAPI: " << settings.m_useReverseAPI
-        << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-        << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-        << " force: " << force;
-    qDebug() << "LimeSDRMIMO::applySettings: Rx general:"
-        << " m_rxCenterFrequency: " << settings.m_rxCenterFrequency
-        << " m_log2HardDecim: " << settings.m_log2HardDecim
-        << " m_log2SoftDecim: " << settings.m_log2SoftDecim
-        << " m_iqOrder: " << settings.m_iqOrder
-        << " m_dcBlock: " << settings.m_dcBlock
-        << " m_iqCorrection: " << settings.m_iqCorrection
-        << " m_rxTransverterMode: " << settings.m_rxTransverterMode
-        << " m_rxTransverterDeltaFrequency: " << settings.m_rxTransverterDeltaFrequency
-        << " m_ncoEnableRx: " << settings.m_ncoEnableRx
-        << " m_ncoFrequencyRx: " << settings.m_ncoFrequencyRx;
-    qDebug() << "LimeSDRMIMO::applySettings: Rx0:"
-        << " m_lpfBWRx0: " << settings.m_lpfBWRx0
-        << " m_lpfFIREnableRx0: " << settings.m_lpfFIREnableRx0
-        << " m_lpfFIRBWRx0: " << settings.m_lpfFIRBWRx0
-        << " m_gainRx0: " << settings.m_gainRx0
-        << " m_antennaPathRx0: " << settings.m_antennaPathRx0
-        << " m_gainModeRx0: " << settings.m_gainModeRx0
-        << " m_lnaGainRx0: " << settings.m_lnaGainRx0
-        << " m_tiaGainRx0: " << settings.m_tiaGainRx0
-        << " m_pgaGainRx0: " << settings.m_pgaGainRx0;
-    qDebug() << "LimeSDRMIMO::applySettings: Rx1:"
-        << " m_lpfBWRx1: " << settings.m_lpfBWRx1
-        << " m_lpfFIREnableRx1: " << settings.m_lpfFIREnableRx1
-        << " m_lpfFIRBWRx1: " << settings.m_lpfFIRBWRx1
-        << " m_gainRx1: " << settings.m_gainRx1
-        << " m_antennaPathRx1: " << settings.m_antennaPathRx1
-        << " m_gainModeRx1: " << settings.m_gainModeRx1
-        << " m_lnaGainRx1: " << settings.m_lnaGainRx1
-        << " m_tiaGainRx1: " << settings.m_tiaGainRx1
-        << " m_pgaGainRx1: " << settings.m_pgaGainRx1;
-    qDebug() << "LimeSDRMIMO::applySettings: Tx general:"
-        << " m_txCenterFrequency: " << settings.m_txCenterFrequency
-        << " m_log2HardInterp: " << settings.m_log2HardInterp
-        << " m_log2SoftInterp: " << settings.m_log2SoftInterp
-        << " m_txTransverterMode: " << settings.m_txTransverterMode
-        << " m_txTransverterDeltaFrequency: " << settings.m_txTransverterDeltaFrequency
-        << " m_ncoEnableTx: " << settings.m_ncoEnableTx
-        << " m_ncoFrequencyTx: " << settings.m_ncoFrequencyTx;
-    qDebug() << "LimeSDRMIMO::applySettings: Tx0:"
-        << " m_lpfBWTx0: " << settings.m_lpfBWTx0
-        << " m_lpfFIREnableTx0: " << settings.m_lpfFIREnableTx0
-        << " m_lpfFIRBWTx0: " << settings.m_lpfFIRBWTx0
-        << " m_gainTx0: " << settings.m_gainTx0
-        << " m_antennaPathTx0: " << settings.m_antennaPathTx0;
-    qDebug() << "LimeSDRMIMO::applySettings: Tx1:"
-        << " m_lpfBWTx1: " << settings.m_lpfBWTx1
-        << " m_lpfFIREnableTx1: " << settings.m_lpfFIREnableTx1
-        << " m_lpfFIRBWTx1: " << settings.m_lpfFIRBWTx1
-        << " m_gainTx1: " << settings.m_gainTx1
-        << " m_antennaPathTx1: " << settings.m_antennaPathTx1;
 
     qint64 rxDeviceCenterFrequency = settings.m_rxCenterFrequency;
     rxDeviceCenterFrequency -= settings.m_rxTransverterMode ? settings.m_rxTransverterDeltaFrequency : 0;
@@ -723,45 +660,17 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         qDebug() << "LimeSDRMIMO::applySettings: clock gen frequency: " << clockGenFreq;
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
-        reverseAPIKeys.append("devSampleRate");
-    }
-    if ((m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force) {
-        reverseAPIKeys.append("log2HardDecim");
-    }
-    if ((m_settings.m_rxCenterFrequency != settings.m_rxCenterFrequency) || force) {
-        reverseAPIKeys.append("rxCenterFrequency");
-    }
-    if ((m_settings.m_rxTransverterMode != settings.m_rxTransverterMode) || force) {
-        reverseAPIKeys.append("rxTransverterMode");
-    }
-    if ((m_settings.m_rxTransverterDeltaFrequency != settings.m_rxTransverterDeltaFrequency) || force) {
-        reverseAPIKeys.append("rxTransverterDeltaFrequency");
-    }
-    if ((m_settings.m_ncoFrequencyRx != settings.m_ncoFrequencyRx) || force) {
-        reverseAPIKeys.append("ncoFrequencyRx");
-    }
-    if ((m_settings.m_ncoEnableRx != settings.m_ncoEnableRx) || force) {
-        reverseAPIKeys.append("ncoEnableRx");
-    }
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
-        reverseAPIKeys.append("dcBlock");
-    }
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
-        reverseAPIKeys.append("iqCorrection");
-    }
-
     // Rx
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
-        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    if (settingsKeys.contains("dcBlock") ||
+        settingsKeys.contains("iqCorrection") || force)
     {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection, 0);
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection, 1);
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
-       || (m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force)
+    if (settingsKeys.contains("devSampleRate")
+       || settingsKeys.contains("log2HardDecim") || force)
     {
         forwardChangeRxDSP = true;
 
@@ -789,9 +698,9 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_rxCenterFrequency != settings.m_rxCenterFrequency)
-        || (m_settings.m_rxTransverterMode != settings.m_rxTransverterMode)
-        || (m_settings.m_rxTransverterDeltaFrequency != settings.m_rxTransverterDeltaFrequency)
+    if (settingsKeys.contains("rxCenterFrequency")
+        || settingsKeys.contains("rxTransverterMode")
+        || settingsKeys.contains("rxTransverterDeltaFrequency")
         || force)
     {
         forwardChangeRxDSP = true;
@@ -811,8 +720,8 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_ncoFrequencyRx != settings.m_ncoFrequencyRx) ||
-        (m_settings.m_ncoEnableRx != settings.m_ncoEnableRx) || force || forceRxNCOFrequency)
+    if (settingsKeys.contains("ncoFrequencyRx") ||
+        settingsKeys.contains("ncoEnableRx") || force || forceRxNCOFrequency)
     {
         forwardChangeRxDSP = true;
         applyRxNCOFrequency(0, settings.m_ncoEnableRx, settings.m_ncoFrequencyRx);
@@ -821,114 +730,96 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
 
     // Rx0/1
 
-    if ((m_settings.m_gainModeRx0 != settings.m_gainModeRx0) || force)
+    if (settingsKeys.contains("gainModeRx0") || force)
     {
-        reverseAPIKeys.append("gainModeRx0");
         applyRxGainMode(
             0,
             doCalibrationRx0,
             settings.m_gainModeRx0,
-            settings.m_gainRx0,
-            settings.m_lnaGainRx0,
-            settings.m_tiaGainRx0,
-            settings.m_pgaGainRx0
+            m_settings.m_gainRx0,
+            m_settings.m_lnaGainRx0,
+            m_settings.m_tiaGainRx0,
+            m_settings.m_pgaGainRx0
         );
     }
 
-    if ((m_settings.m_gainModeRx1 != settings.m_gainModeRx1) || force)
+    if (settingsKeys.contains("gainModeRx1") || force)
     {
-        reverseAPIKeys.append("gainModeRx1");
         applyRxGainMode(
             1,
             doCalibrationRx1,
             settings.m_gainModeRx1,
-            settings.m_gainRx1,
-            settings.m_lnaGainRx1,
-            settings.m_tiaGainRx1,
-            settings.m_pgaGainRx1
+            m_settings.m_gainRx1,
+            m_settings.m_lnaGainRx1,
+            m_settings.m_tiaGainRx1,
+            m_settings.m_pgaGainRx1
         );
     }
 
-    if ((m_settings.m_gainModeRx0 == LimeSDRMIMOSettings::GAIN_AUTO) && (m_settings.m_gainRx0 != settings.m_gainRx0))
+    if ((m_settings.m_gainModeRx0 == LimeSDRMIMOSettings::GAIN_AUTO) && settingsKeys.contains("gainRx0"))
     {
-        reverseAPIKeys.append("gainRx0");
         applyRxGain(0, doCalibrationRx0, settings.m_gainRx0);
     }
 
-    if ((m_settings.m_gainModeRx1 == LimeSDRMIMOSettings::GAIN_AUTO) && (m_settings.m_gainRx1 != settings.m_gainRx1))
+    if ((m_settings.m_gainModeRx1 == LimeSDRMIMOSettings::GAIN_AUTO) && settingsKeys.contains("gainRx1"))
     {
-        reverseAPIKeys.append("gainRx1");
         applyRxGain(1, doCalibrationRx1, settings.m_gainRx1);
     }
 
-    if ((m_settings.m_gainModeRx0 == LimeSDRMIMOSettings::GAIN_MANUAL) && (m_settings.m_lnaGainRx0 != settings.m_lnaGainRx0))
+    if ((m_settings.m_gainModeRx0 == LimeSDRMIMOSettings::GAIN_MANUAL) && settingsKeys.contains("lnaGainRx0"))
     {
-        reverseAPIKeys.append("lnaGainRx0");
         applyRxLNAGain(0, doCalibrationRx0, settings.m_lnaGainRx0);
     }
 
-    if ((m_settings.m_gainModeRx1 == LimeSDRMIMOSettings::GAIN_MANUAL) && (m_settings.m_lnaGainRx1 != settings.m_lnaGainRx1))
+    if ((m_settings.m_gainModeRx1 == LimeSDRMIMOSettings::GAIN_MANUAL) && settingsKeys.contains("lnaGainRx1"))
     {
-        reverseAPIKeys.append("lnaGainRx1");
         applyRxLNAGain(1, doCalibrationRx1, settings.m_lnaGainRx1);
     }
 
-    if ((m_settings.m_gainModeRx0 == LimeSDRMIMOSettings::GAIN_MANUAL) && (m_settings.m_tiaGainRx0 != settings.m_tiaGainRx0))
+    if ((m_settings.m_gainModeRx0 == LimeSDRMIMOSettings::GAIN_MANUAL) && settingsKeys.contains("tiaGainRx0"))
     {
-        reverseAPIKeys.append("tiaGainRx0");
         applyRxLNAGain(0, doCalibrationRx0, settings.m_tiaGainRx0);
     }
 
-    if ((m_settings.m_gainModeRx1 == LimeSDRMIMOSettings::GAIN_MANUAL) && (m_settings.m_tiaGainRx1 != settings.m_tiaGainRx1))
+    if ((m_settings.m_gainModeRx1 == LimeSDRMIMOSettings::GAIN_MANUAL) && settingsKeys.contains("tiaGainRx1"))
     {
-        reverseAPIKeys.append("tiaGainRx1");
         applyRxLNAGain(1, doCalibrationRx1, settings.m_tiaGainRx1);
     }
 
-    if ((m_settings.m_gainModeRx0 == LimeSDRMIMOSettings::GAIN_MANUAL) && (m_settings.m_pgaGainRx0 != settings.m_pgaGainRx0))
+    if ((m_settings.m_gainModeRx0 == LimeSDRMIMOSettings::GAIN_MANUAL) && settingsKeys.contains("pgaGainRx0"))
     {
-        reverseAPIKeys.append("pgaGainRx0");
         applyRxLNAGain(0, doCalibrationRx0, settings.m_pgaGainRx0);
     }
 
-    if ((m_settings.m_gainModeRx1 == LimeSDRMIMOSettings::GAIN_MANUAL) && (m_settings.m_pgaGainRx1 != settings.m_pgaGainRx1))
+    if ((m_settings.m_gainModeRx1 == LimeSDRMIMOSettings::GAIN_MANUAL) && settingsKeys.contains("pgaGainRx1"))
     {
-        reverseAPIKeys.append("pgaGainRx1");
         applyRxLNAGain(1, doCalibrationRx1, settings.m_pgaGainRx1);
     }
 
-    if ((m_settings.m_lpfBWRx0 != settings.m_lpfBWRx0) || force)
+    if (settingsKeys.contains("lpfBWRx0") || force)
     {
-        reverseAPIKeys.append("lpfBWRx0");
         doLPCalibrationRx0 = true;
     }
 
-    if ((m_settings.m_lpfBWRx1 != settings.m_lpfBWRx1) || force)
+    if (settingsKeys.contains("lpfBWRx1") || force)
     {
-        reverseAPIKeys.append("lpfBWRx1");
         doLPCalibrationRx1 = true;
     }
 
-    if ((m_settings.m_lpfFIRBWRx0 != settings.m_lpfFIRBWRx0) ||
-        (m_settings.m_lpfFIREnableRx0 != settings.m_lpfFIREnableRx0) || force)
+    if (settingsKeys.contains("lpfFIRBWx0") ||
+        settingsKeys.contains("lpfFIREnableRx0") || force)
     {
-        reverseAPIKeys.append("lpfFIRBWx0");
-        reverseAPIKeys.append("lpfFIREnableRx0");
         applyRxLPFIRBW(0, settings.m_lpfFIREnableRx0, settings.m_lpfFIRBWRx0);
     }
 
-    if ((m_settings.m_lpfFIRBWRx1 != settings.m_lpfFIRBWRx1) ||
-        (m_settings.m_lpfFIREnableRx1 != settings.m_lpfFIREnableRx1) || force)
+    if (settingsKeys.contains("lpfFIRBWx1") ||
+        settingsKeys.contains("lpfFIREnableRx1") || force)
     {
-        reverseAPIKeys.append("lpfFIRBWx1");
-        reverseAPIKeys.append("lpfFIREnableRx1");
         applyRxLPFIRBW(1, settings.m_lpfFIREnableRx1, settings.m_lpfFIRBWRx1);
     }
 
-    if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
+    if (settingsKeys.contains("log2SoftDecim") || force)
     {
-        reverseAPIKeys.append("log2SoftDecim");
-
         if (m_sourceThread)
         {
             m_sourceThread->setLog2Decimation(settings.m_log2SoftDecim);
@@ -936,62 +827,37 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    if (settingsKeys.contains("iqOrder") || force)
     {
-        reverseAPIKeys.append("iqOrder");
-
         if (m_sourceThread) {
             m_sourceThread->setIQOrder(settings.m_iqOrder);
         }
     }
 
-    if ((m_settings.m_antennaPathRx0 != settings.m_antennaPathRx0) || force)
+    if (settingsKeys.contains("antennaPathRx0") || force)
     {
-        reverseAPIKeys.append("antennaPathRx0");
         applyRxAntennaPath(0, doCalibrationRx0, settings.m_antennaPathRx0);
     }
 
-    if ((m_settings.m_antennaPathRx1 != settings.m_antennaPathRx1) || force)
+    if (settingsKeys.contains("antennaPathRx1") || force)
     {
-        reverseAPIKeys.append("antennaPathRx1");
         applyRxAntennaPath(1, doCalibrationRx1, settings.m_antennaPathRx1);
     }
 
     // Tx
 
-    if ((m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force) {
-        reverseAPIKeys.append("log2HardInterp");
-    }
-    if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) || force) {
-        reverseAPIKeys.append("txCenterFrequency");
-    }
-    if ((m_settings.m_txTransverterMode != settings.m_txTransverterMode) || force) {
-        reverseAPIKeys.append("txTransverterMode");
-    }
-    if ((m_settings.m_txTransverterDeltaFrequency != settings.m_txTransverterDeltaFrequency) || force) {
-        reverseAPIKeys.append("txTransverterDeltaFrequency");
-    }
-    if ((m_settings.m_ncoFrequencyTx != settings.m_ncoFrequencyTx) || force) {
-        reverseAPIKeys.append("ncoFrequencyTx");
-    }
-    if ((m_settings.m_ncoEnableTx != settings.m_ncoEnableTx) || force) {
-        reverseAPIKeys.append("ncoEnableTx");
-    }
-
-    if ((m_settings.m_gainTx0 != settings.m_gainTx0) || force)
+    if (settingsKeys.contains("gainTx0") || force)
     {
-        reverseAPIKeys.append("gainTx0");
         applyTxGain(0, doCalibrationTx0, settings.m_gainTx0);
     }
 
-    if ((m_settings.m_gainTx1 != settings.m_gainTx1) || force)
+    if (settingsKeys.contains("gainTx1") || force)
     {
-        reverseAPIKeys.append("gainTx1");
         applyTxGain(1, doCalibrationTx1, settings.m_gainTx1);
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
-       || (m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force)
+    if (settingsKeys.contains("devSampleRate")
+       || settingsKeys.contains("log2HardInterp") || force)
     {
         forwardChangeTxDSP = true;
 
@@ -1019,11 +885,9 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
-       || (m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
+    if (settingsKeys.contains("devSampleRate")
+       || settingsKeys.contains("log2SoftInterp") || force)
     {
-        reverseAPIKeys.append("log2SoftInterp");
-
 #if defined(_MSC_VER)
         unsigned int fifoRate = (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2SoftInterp);
         fifoRate = fifoRate < 48000U ? 48000U : fifoRate;
@@ -1036,9 +900,9 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         qDebug("LimeSDRMIMO::applySettings: resize MO FIFO: rate %u", fifoRate);
     }
 
-    if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency)
-        || (m_settings.m_txTransverterMode != settings.m_txTransverterMode)
-        || (m_settings.m_txTransverterDeltaFrequency != settings.m_txTransverterDeltaFrequency)
+    if (settingsKeys.contains("txCenterFrequency")
+        || settingsKeys.contains("txTransverterMode")
+        || settingsKeys.contains("txTransverterDeltaFrequency")
         || force)
     {
         forwardChangeTxDSP = true;
@@ -1058,8 +922,8 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_ncoFrequencyTx != settings.m_ncoFrequencyTx) ||
-        (m_settings.m_ncoEnableTx != settings.m_ncoEnableTx) || force || forceTxNCOFrequency)
+    if (settingsKeys.contains("ncoFrequencyTx") ||
+        settingsKeys.contains("ncoEnableTx") || force || forceTxNCOFrequency)
     {
         forwardChangeTxDSP = true;
         applyTxNCOFrequency(0, settings.m_ncoEnableTx, settings.m_ncoFrequencyTx);
@@ -1068,38 +932,30 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
 
     // Tx 0/1
 
-    if ((m_settings.m_lpfBWTx0 != settings.m_lpfBWTx0) || force)
+    if (settingsKeys.contains("lpfBWTx0") || force)
     {
-        reverseAPIKeys.append("lpfBWTx0");
         doLPCalibrationTx0 = true;
     }
 
-    if ((m_settings.m_lpfBWTx1 != settings.m_lpfBWTx1) || force)
+    if (settingsKeys.contains("lpfBWTx1") || force)
     {
-        reverseAPIKeys.append("lpfBWTx1");
         doLPCalibrationTx1 = true;
     }
 
-    if ((m_settings.m_lpfFIRBWTx0 != settings.m_lpfFIRBWTx0) ||
-        (m_settings.m_lpfFIREnableTx0 != settings.m_lpfFIREnableTx0) || force)
+    if (settingsKeys.contains("lpfFIRBWTx0") ||
+        settingsKeys.contains("lpfFIREnableTx0") || force)
     {
-        reverseAPIKeys.append("lpfFIRBWTx0");
-        reverseAPIKeys.append("lpfFIREnableTx0");
         applyTxLPFIRBW(0, settings.m_lpfFIREnableTx0, settings.m_lpfFIRBWTx0);
     }
 
-    if ((m_settings.m_lpfFIRBWTx1 != settings.m_lpfFIRBWTx1) ||
-        (m_settings.m_lpfFIREnableTx1 != settings.m_lpfFIREnableTx1) || force)
+    if (settingsKeys.contains("lpfFIRBWTx1") ||
+        settingsKeys.contains("lpfFIREnableTx1") || force)
     {
-        reverseAPIKeys.append("lpfFIRBWTx1");
-        reverseAPIKeys.append("lpfFIREnableTx1");
         applyTxLPFIRBW(1, settings.m_lpfFIREnableTx1, settings.m_lpfFIRBWTx1);
     }
 
-    if ((m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
+    if (settingsKeys.contains("log2SoftInterp") || force)
     {
-        reverseAPIKeys.append("log2SoftInterp");
-
         if (m_sinkThread)
         {
             m_sinkThread->setLog2Interpolation(settings.m_log2SoftInterp);
@@ -1107,26 +963,21 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_antennaPathTx0 != settings.m_antennaPathTx0) || force)
+    if (settingsKeys.contains("antennaPathTx0") || force)
     {
-        reverseAPIKeys.append("antennaPathTx0");
         applyTxAntennaPath(0, doCalibrationTx0, settings.m_antennaPathTx0);
     }
 
-    if ((m_settings.m_antennaPathTx1 != settings.m_antennaPathTx1) || force)
+    if (settingsKeys.contains("antennaPathTx1") || force)
     {
-        reverseAPIKeys.append("antennaPathTx1");
         applyTxAntennaPath(1, doCalibrationTx1, settings.m_antennaPathTx1);
     }
 
     // Post common
 
-    if ((m_settings.m_extClock != settings.m_extClock) ||
-        (settings.m_extClock && (m_settings.m_extClockFreq != settings.m_extClockFreq)) || force)
+    if (settingsKeys.contains("extClock") ||
+        (settings.m_extClock && settingsKeys.contains("extClockFreq")) || force)
     {
-        reverseAPIKeys.append("extClock");
-        reverseAPIKeys.append("extClockFreq");
-
         if (DeviceLimeSDR::setClockSource(m_deviceParams->getDevice(),
                 settings.m_extClock,
                 settings.m_extClockFreq))
@@ -1148,10 +999,8 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
     if ((m_deviceParams->m_type != DeviceLimeSDRParams::LimeMini)
         && (m_deviceParams->m_type != DeviceLimeSDRParams::LimeUndefined))
     {
-        if ((m_settings.m_gpioDir != settings.m_gpioDir) || force)
+        if (settingsKeys.contains("gpioDir") || force)
         {
-            reverseAPIKeys.append("gpioDir");
-
             if (LMS_GPIODirWrite(m_deviceParams->getDevice(), &settings.m_gpioDir, 1) != 0) {
                 qCritical("LimeSDRMIMO::applySettings: could not set GPIO directions to %u", settings.m_gpioDir);
             } else {
@@ -1159,10 +1008,8 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
             }
         }
 
-        if ((m_settings.m_gpioPins != settings.m_gpioPins) || force)
+        if (settingsKeys.contains("gpioPins") || force)
         {
-            reverseAPIKeys.append("gpioPins");
-
             if (LMS_GPIOWrite(m_deviceParams->getDevice(), &settings.m_gpioPins, 1) != 0) {
                 qCritical("LimeSDRMIMO::applySettings: could not set GPIO pins to %u", settings.m_gpioPins);
             } else {
@@ -1171,16 +1018,21 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         }
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
     double clockGenFreqAfter = 0.0;
 
     if (LMS_GetClockFreq(m_deviceParams->getDevice(), LMS_CLOCK_CGEN, &clockGenFreqAfter) != 0)
@@ -1734,12 +1586,12 @@ int LimeSDRMIMO::webapiSettingsPutPatch(
     LimeSDRMIMOSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureLimeSDRMIMO *msg = MsgConfigureLimeSDRMIMO::create(settings, force);
+    MsgConfigureLimeSDRMIMO *msg = MsgConfigureLimeSDRMIMO::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (getMessageQueueToGUI()) // forward to GUI if any
     {
-        MsgConfigureLimeSDRMIMO *msgToGUI = MsgConfigureLimeSDRMIMO::create(settings, force);
+        MsgConfigureLimeSDRMIMO *msgToGUI = MsgConfigureLimeSDRMIMO::create(settings, deviceSettingsKeys, force);
         getMessageQueueToGUI()->push(msgToGUI);
     }
 
@@ -2110,7 +1962,7 @@ void LimeSDRMIMO::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respons
     response.getLimeSdrMimoReport()->setLinkRateTx(status.linkRate);
 }
 
-void LimeSDRMIMO::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const LimeSDRMIMOSettings& settings, bool force)
+void LimeSDRMIMO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const LimeSDRMIMOSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(2); // MIMO
