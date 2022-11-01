@@ -31,7 +31,7 @@
 const PluginDescriptor XTRXMIMOPlugin::m_pluginDescriptor = {
     QStringLiteral("XTRX"),
 	QStringLiteral("XTRX MIMO"),
-    QStringLiteral("7.3.1"),
+    QStringLiteral("7.8.2"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

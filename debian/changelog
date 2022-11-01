@@ -1,3 +1,15 @@
+sdrangel (7.8.2-1) unstable; urgency=medium
+
+  * Make settings assigments atomic for most device plugins. Part of #1329
+  * Update zlib to latest version. PR #1487
+  * Fixed format time to next event. PR #1488. Fix #1483
+  * Check for existing pipes after GUI is created. PR #1489. Attempt to fix #1484
+  * Fix support for using Serial or TCP for either protocol. PR #1491
+  * Save column sort as a setting. Fix deserialize of target satellite. PR #1492. Attempt to fix #1474
+  * Fix sorting of next column. PR #1493
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 01 Nov 2022 22:20:21 +0100
+
 sdrangel (7.8.1-1) unstable; urgency=medium
 
   * Update to latest airspy drivers to fix #1372. PR #1468
