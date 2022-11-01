@@ -122,7 +122,7 @@ void XTRXMIMO::destroy()
 
 void XTRXMIMO::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool XTRXMIMO::startRx()
@@ -227,12 +227,12 @@ bool XTRXMIMO::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureXTRXMIMO* message = MsgConfigureXTRXMIMO::create(m_settings, true);
+    MsgConfigureXTRXMIMO* message = MsgConfigureXTRXMIMO::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureXTRXMIMO* messageToGUI = MsgConfigureXTRXMIMO::create(m_settings, true);
+        MsgConfigureXTRXMIMO* messageToGUI = MsgConfigureXTRXMIMO::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -270,12 +270,12 @@ void XTRXMIMO::setSourceCenterFrequency(qint64 centerFrequency, int index)
     XTRXMIMOSettings settings = m_settings;
     settings.m_rxCenterFrequency = centerFrequency;
 
-    MsgConfigureXTRXMIMO* message = MsgConfigureXTRXMIMO::create(settings, false);
+    MsgConfigureXTRXMIMO* message = MsgConfigureXTRXMIMO::create(settings, QList<QString>{"rxCenterFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureXTRXMIMO* messageToGUI = MsgConfigureXTRXMIMO::create(settings, false);
+        MsgConfigureXTRXMIMO* messageToGUI = MsgConfigureXTRXMIMO::create(settings, QList<QString>{"rxCenterFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -292,12 +292,12 @@ void XTRXMIMO::setSinkCenterFrequency(qint64 centerFrequency, int index)
     XTRXMIMOSettings settings = m_settings;
     settings.m_txCenterFrequency = centerFrequency;
 
-    MsgConfigureXTRXMIMO* message = MsgConfigureXTRXMIMO::create(settings, false);
+    MsgConfigureXTRXMIMO* message = MsgConfigureXTRXMIMO::create(settings, QList<QString>{"txCenterFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureXTRXMIMO* messageToGUI = MsgConfigureXTRXMIMO::create(settings, false);
+        MsgConfigureXTRXMIMO* messageToGUI = MsgConfigureXTRXMIMO::create(settings, QList<QString>{"txCenterFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -354,7 +354,7 @@ bool XTRXMIMO::handleMessage(const Message& message)
         MsgConfigureXTRXMIMO& conf = (MsgConfigureXTRXMIMO&) message;
         qDebug() << "XTRXMIMO::handleMessage: MsgConfigureXTRXMIMO";
 
-        bool success = applySettings(conf.getSettings(), conf.getForce());
+        bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
         if (!success) {
             qDebug("XTRXMIMO::handleMessage: config error");
@@ -440,9 +440,9 @@ bool XTRXMIMO::handleMessage(const Message& message)
     }
 }
 
-bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
+bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    QList<QString> reverseAPIKeys;
+    qDebug() << "XTRXMIMO::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
     bool doRxLPCalibration = false;
     bool doRxChangeSampleRate = false;
     bool doRxChangeFreq = false;
@@ -457,56 +457,10 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
     qint64 rxXlatedDeviceCenterFrequency = settings.m_rxCenterFrequency;
     qint64 txXlatedDeviceCenterFrequency = settings.m_txCenterFrequency;
 
-    qDebug() << "XTRXMIMO::applySettings: common:"
-        << " m_extClock: " << settings.m_extClock
-        << " m_extClockFreq: " << settings.m_extClockFreq
-        << " force: " << force;
-    qDebug() << "XTRXMIMO::applySettings: Rx:"
-        << " m_rxDevSampleRate: " << settings.m_rxDevSampleRate
-        << " m_rxCenterFrequency: " << settings.m_rxCenterFrequency
-        << " m_log2HardDecim: " << settings.m_log2HardDecim
-        << " m_log2SoftDecim: " << settings.m_log2SoftDecim
-        << " m_dcBlock: " << settings.m_dcBlock
-        << " m_iqCorrection: " << settings.m_iqCorrection
-        << " m_ncoEnableRx: " << settings.m_ncoEnableRx
-        << " m_ncoFrequencyRx: " << settings.m_ncoFrequencyRx
-        << " m_antennaPathRx: " << settings.m_antennaPathRx;
-    qDebug() << "XTRXMIMO::applySettings: Rx0:"
-        << " m_gainRx0: " << settings.m_gainRx0
-        << " m_lpfBWRx0: " << settings.m_lpfBWRx0
-        << " m_pwrmodeRx0: " << settings.m_pwrmodeRx0;
-    qDebug() << "XTRXMIMO::applySettings: Rx1:"
-        << " m_gainRx1: " << settings.m_gainRx1
-        << " m_lpfBWRx1: " << settings.m_lpfBWRx1
-        << " m_pwrmodeRx1: " << settings.m_pwrmodeRx1;
-    qDebug() << "XTRXMIMO::applySettings: Tx:"
-        << " m_txDevSampleRate: " << settings.m_txDevSampleRate
-        << " m_txCenterFrequency: " << settings.m_txCenterFrequency
-        << " m_log2HardInterp: " << settings.m_log2HardInterp
-        << " m_log2SoftInterp: " << settings.m_log2SoftInterp
-        << " m_ncoEnableTx0: " << settings.m_ncoEnableTx
-        << " m_ncoFrequencyTx: " << settings.m_ncoFrequencyTx
-        << " m_antennaPathTx: " << settings.m_antennaPathTx;
-    qDebug() << "XTRXMIMO::applySettings: Tx0:"
-        << " m_gainTx0: " << settings.m_gainTx0
-        << " m_lpfBWTx0: " << settings.m_lpfBWTx0
-        << " m_pwrmodeTx0: " << settings.m_pwrmodeTx0;
-    qDebug() << "XTRXMIMO::applySettings: Tx0:"
-        << " m_gainTx1: " << settings.m_gainTx1
-        << " m_lpfBWTx1: " << settings.m_lpfBWTx1
-        << " m_pwrmodeTx1: " << settings.m_pwrmodeTx1;
-
     // common
 
-    if ((m_settings.m_extClock != settings.m_extClock) || force) {
-        reverseAPIKeys.append("extClock");
-    }
-    if ((m_settings.m_extClockFreq != settings.m_extClockFreq) || force) {
-        reverseAPIKeys.append("extClockFreq");
-    }
-
-    if ((m_settings.m_extClock != settings.m_extClock)
-     || (settings.m_extClock && (m_settings.m_extClockFreq != settings.m_extClockFreq)) || force)
+    if (settingsKeys.contains("extClock")
+     || (settings.m_extClock && settingsKeys.contains("extClockFreq")) || force)
     {
         if (m_deviceShared.m_dev->getDevice() != 0)
         {
@@ -527,27 +481,16 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
 
     // Rx
 
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
-    {
-        reverseAPIKeys.append("dcBlock");
+    if (settingsKeys.contains("dcBlock") || force) {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
     }
 
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
-    {
-        reverseAPIKeys.append("iqCorrection");
+    if (settingsKeys.contains("iqCorrection") || force) {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
     }
 
-    if ((m_settings.m_rxDevSampleRate != settings.m_rxDevSampleRate) || force) {
-        reverseAPIKeys.append("rxDevSampleRate");
-    }
-    if ((m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force) {
-        reverseAPIKeys.append("log2HardDecim");
-    }
-
-    if ((m_settings.m_rxDevSampleRate != settings.m_rxDevSampleRate)
-     || (m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force)
+    if (settingsKeys.contains("rxDevSampleRate")
+     || settingsKeys.contains("log2HardDecim") || force)
     {
         forwardChangeRxDSP = true;
 
@@ -556,9 +499,8 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
+    if (settingsKeys.contains("log2SoftDecim") || force)
     {
-        reverseAPIKeys.append("log2SoftDecim");
         forwardChangeRxDSP = true;
 
         if (m_sourceThread)
@@ -568,32 +510,21 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    if (settingsKeys.contains("iqOrder") || force)
     {
-        reverseAPIKeys.append("iqOrder");
-
         if (m_sourceThread) {
             m_sourceThread->setIQOrder(settings.m_iqOrder);
         }
     }
 
-    if ((m_settings.m_ncoFrequencyRx != settings.m_ncoFrequencyRx) || force) {
-        reverseAPIKeys.append("ncoFrequencyRx");
-    }
-    if ((m_settings.m_ncoEnableRx != settings.m_ncoEnableRx) || force) {
-        reverseAPIKeys.append("ncoEnableRx");
-    }
-
-    if ((m_settings.m_ncoFrequencyRx != settings.m_ncoFrequencyRx)
-     || (m_settings.m_ncoEnableRx != settings.m_ncoEnableRx) || force)
+    if (settingsKeys.contains("ncoFrequencyRx")
+     || settingsKeys.contains("ncoEnableRx") || force)
     {
         forceNCOFrequencyRx = true;
     }
 
-    if ((m_settings.m_antennaPathRx != settings.m_antennaPathRx) || force)
+    if (settingsKeys.contains("antennaPathRx") || force)
     {
-        reverseAPIKeys.append("antennaPathRx");
-
         if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_set_antenna(m_deviceShared.m_dev->getDevice(), toXTRXAntennaRx(settings.m_antennaPathRx)) < 0) {
@@ -604,18 +535,14 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_rxCenterFrequency != settings.m_rxCenterFrequency) || force)
-    {
-        reverseAPIKeys.append("rxCenterFrequency");
+    if (settingsKeys.contains("rxCenterFrequency") || force) {
         doRxChangeFreq = true;
     }
 
     // Rx0/1
 
-    if ((m_settings.m_pwrmodeRx0 != settings.m_pwrmodeRx0))
+    if (settingsKeys.contains("pwrmodeRx0") || force)
     {
-        reverseAPIKeys.append("pwrmodeRx0");
-
         if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_val_set(m_deviceShared.m_dev->getDevice(),
@@ -628,10 +555,8 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_pwrmodeRx1 != settings.m_pwrmodeRx1))
+    if (settingsKeys.contains("pwrmodeRx1") || force)
     {
-        reverseAPIKeys.append("pwrmodeRx1");
-
         if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_val_set(m_deviceShared.m_dev->getDevice(),
@@ -644,38 +569,6 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_gainModeRx0 != settings.m_gainModeRx0) || force) {
-        reverseAPIKeys.append("gainModeRx0");
-    }
-    if ((m_settings.m_gainRx0 != settings.m_gainRx0) || force) {
-        reverseAPIKeys.append("gainRx0");
-    }
-    if ((m_settings.m_lnaGainRx0 != settings.m_lnaGainRx0) || force) {
-        reverseAPIKeys.append("lnaGainRx0");
-    }
-    if ((m_settings.m_tiaGainRx0 != settings.m_tiaGainRx0) || force) {
-        reverseAPIKeys.append("tiaGainRx0");
-    }
-    if ((m_settings.m_pgaGainRx0 != settings.m_pgaGainRx0) || force) {
-        reverseAPIKeys.append("pgaGainRx0");
-    }
-
-    if ((m_settings.m_gainModeRx1 != settings.m_gainModeRx1) || force) {
-        reverseAPIKeys.append("gainModeRx1");
-    }
-    if ((m_settings.m_gainRx1 != settings.m_gainRx1) || force) {
-        reverseAPIKeys.append("gainRx1");
-    }
-    if ((m_settings.m_lnaGainRx1 != settings.m_lnaGainRx1) || force) {
-        reverseAPIKeys.append("lnaGainRx1");
-    }
-    if ((m_settings.m_tiaGainRx1 != settings.m_tiaGainRx1) || force) {
-        reverseAPIKeys.append("tiaGainRx1");
-    }
-    if ((m_settings.m_pgaGainRx1 != settings.m_pgaGainRx1) || force) {
-        reverseAPIKeys.append("pgaGainRx1");
-    }
-
     if (m_deviceShared.m_dev->getDevice())
     {
         bool doGainAuto = false;
@@ -683,7 +576,7 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         bool doGainTia = false;
         bool doGainPga = false;
 
-        if ((m_settings.m_gainModeRx0 != settings.m_gainModeRx0) || force)
+        if (settingsKeys.contains("gainModeRx0") || force)
         {
             if (settings.m_gainModeRx0 == XTRXMIMOSettings::GAIN_AUTO)
             {
@@ -704,13 +597,13 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
         else if (m_settings.m_gainModeRx0 == XTRXMIMOSettings::GAIN_MANUAL)
         {
-            if (m_settings.m_lnaGainRx0 != settings.m_lnaGainRx0) {
+            if (settingsKeys.contains("lnaGainRx0")) {
                 doGainLna = true;
             }
-            if (m_settings.m_tiaGainRx0 != settings.m_tiaGainRx0) {
+            if (settingsKeys.contains("tiaGainRx0")) {
                 doGainTia = true;
             }
-            if (m_settings.m_pgaGainRx0 != settings.m_pgaGainRx0) {
+            if (settingsKeys.contains("pgaGainRx0")) {
                 doGainPga = true;
             }
         }
@@ -733,7 +626,7 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         doGainTia = false;
         doGainPga = false;
 
-        if ((m_settings.m_gainModeRx1 != settings.m_gainModeRx1) || force)
+        if (settingsKeys.contains("gainModeRx1") || force)
         {
             if (settings.m_gainModeRx1 == XTRXMIMOSettings::GAIN_AUTO)
             {
@@ -754,13 +647,13 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
         else if (m_settings.m_gainModeRx1 == XTRXMIMOSettings::GAIN_MANUAL)
         {
-            if (m_settings.m_lnaGainRx1 != settings.m_lnaGainRx1) {
+            if (settingsKeys.contains("lnaGainRx1")) {
                 doGainLna = true;
             }
-            if (m_settings.m_tiaGainRx1 != settings.m_tiaGainRx1) {
+            if (settingsKeys.contains("tiaGainRx1")) {
                 doGainTia = true;
             }
-            if (m_settings.m_pgaGainRx1 != settings.m_pgaGainRx1) {
+            if (settingsKeys.contains("pgaGainRx1")) {
                 doGainPga = true;
             }
         }
@@ -779,19 +672,15 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_lpfBWRx0 != settings.m_lpfBWRx0) || force)
+    if (settingsKeys.contains("lpfBWRx0") || force)
     {
-        reverseAPIKeys.append("lpfBWRx0");
-
         if (m_deviceShared.m_dev->getDevice()) {
             doRxLPCalibration = true;
         }
     }
 
-    if ((m_settings.m_lpfBWRx1 != settings.m_lpfBWRx1) || force)
+    if (settingsKeys.contains("lpfBWRx1") || force)
     {
-        reverseAPIKeys.append("lpfBWRx1");
-
         if (m_deviceShared.m_dev->getDevice()) {
             doRxLPCalibration = true;
         }
@@ -799,15 +688,8 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
 
     // Tx
 
-    if ((m_settings.m_txDevSampleRate != settings.m_txDevSampleRate) || force) {
-        reverseAPIKeys.append("txDevSampleRate");
-    }
-    if ((m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force) {
-        reverseAPIKeys.append("log2HardInterp");
-    }
-
-    if ((m_settings.m_txDevSampleRate != settings.m_txDevSampleRate)
-     || (m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force)
+    if (settingsKeys.contains("txDevSampleRate")
+     || settingsKeys.contains("log2HardInterp") || force)
     {
         forwardChangeTxDSP = true;
 
@@ -816,9 +698,8 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
+    if (settingsKeys.contains("log2SoftInterp") || force)
     {
-        reverseAPIKeys.append("log2SoftInterp");
         forwardChangeTxDSP = true;
 
         if (m_sinkThread)
@@ -828,23 +709,14 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_ncoFrequencyTx != settings.m_ncoFrequencyTx) || force) {
-        reverseAPIKeys.append("ncoFrequencyTx");
-    }
-    if ((m_settings.m_ncoEnableTx != settings.m_ncoEnableTx) || force) {
-        reverseAPIKeys.append("ncoEnableTx");
-    }
-
-    if ((m_settings.m_ncoFrequencyTx != settings.m_ncoFrequencyTx)
-     || (m_settings.m_ncoEnableTx != settings.m_ncoEnableTx) || force)
+    if (settingsKeys.contains("ncoFrequencyTx")
+     || settingsKeys.contains("ncoEnableTx") || force)
     {
         forceNCOFrequencyTx = true;
     }
 
-    if ((m_settings.m_antennaPathTx != settings.m_antennaPathTx) || force)
+    if (settingsKeys.contains("antennaPathTx") || force)
     {
-        reverseAPIKeys.append("antennaPathTx");
-
         if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_set_antenna(m_deviceShared.m_dev->getDevice(), toXTRXAntennaTx(settings.m_antennaPathTx)) < 0) {
@@ -855,18 +727,15 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) || force)
+    if (settingsKeys.contains("txCenterFrequency") || force)
     {
-        reverseAPIKeys.append("txCenterFrequency");
         doTxChangeFreq = true;
     }
 
     // Tx0
 
-    if ((m_settings.m_pwrmodeTx0 != settings.m_pwrmodeTx0))
+    if (settingsKeys.contains("pwrmodeTx0") || force)
     {
-        reverseAPIKeys.append("pwrmodeTx0");
-
         if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_val_set(m_deviceShared.m_dev->getDevice(),
@@ -879,10 +748,8 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_gainTx0 != settings.m_gainTx0) || force)
+    if (settingsKeys.contains("gainTx0") || force)
     {
-        reverseAPIKeys.append("gainTx0");
-
         if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
@@ -897,10 +764,8 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_lpfBWTx0 != settings.m_lpfBWTx0) || force)
+    if (settingsKeys.contains("lpfBWTx0") || force)
     {
-        reverseAPIKeys.append("lpfBWTx0");
-
         if (m_deviceShared.m_dev->getDevice()) {
             doTxLPCalibration = true;
         }
@@ -908,16 +773,20 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
 
     // Reverse API
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     // Post Rx
 
@@ -1330,12 +1199,12 @@ int XTRXMIMO::webapiSettingsPutPatch(
     XTRXMIMOSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureXTRXMIMO *msg = MsgConfigureXTRXMIMO::create(settings, force);
+    MsgConfigureXTRXMIMO *msg = MsgConfigureXTRXMIMO::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureXTRXMIMO *msgToGUI = MsgConfigureXTRXMIMO::create(settings, force);
+        MsgConfigureXTRXMIMO *msgToGUI = MsgConfigureXTRXMIMO::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -1645,7 +1514,7 @@ void XTRXMIMO::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
     response.getXtrxMimoReport()->setGpsLock(gpsStatus ? 1 : 0);
 }
 
-void XTRXMIMO::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXMIMOSettings& settings, bool force)
+void XTRXMIMO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const XTRXMIMOSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(2); // MIMO

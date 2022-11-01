@@ -98,6 +98,8 @@ struct XTRXMIMOSettings
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const XTRXMIMOSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 

@@ -216,3 +216,273 @@ bool XTRXMIMOSettings::deserialize(const QByteArray& data)
     }
 
 }
+
+void XTRXMIMOSettings::applySettings(const QStringList& settingsKeys, const XTRXMIMOSettings& settings)
+{
+    if (settingsKeys.contains("extClock")) {
+        m_extClock = settings.m_extClock;
+    }
+    if (settingsKeys.contains("extClockFreq")) {
+        m_extClockFreq = settings.m_extClockFreq;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("rxDevSampleRate")) {
+        m_rxDevSampleRate = settings.m_rxDevSampleRate;
+    }
+    if (settingsKeys.contains("rxCenterFrequency")) {
+        m_rxCenterFrequency = settings.m_rxCenterFrequency;
+    }
+    if (settingsKeys.contains("log2HardDecim")) {
+        m_log2HardDecim = settings.m_log2HardDecim;
+    }
+    if (settingsKeys.contains("dcBlock")) {
+        m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection")) {
+        m_iqCorrection = settings.m_iqCorrection;
+    }
+    if (settingsKeys.contains("log2SoftDecim")) {
+        m_log2SoftDecim = settings.m_log2SoftDecim;
+    }
+    if (settingsKeys.contains("ncoEnableRx")) {
+        m_ncoEnableRx = settings.m_ncoEnableRx;
+    }
+    if (settingsKeys.contains("ncoFrequencyRx")) {
+        m_ncoFrequencyRx = settings.m_ncoFrequencyRx;
+    }
+    if (settingsKeys.contains("antennaPathRx")) {
+        m_antennaPathRx = settings.m_antennaPathRx;
+    }
+    if (settingsKeys.contains("iqOrder")) {
+        m_iqOrder = settings.m_iqOrder;
+    }
+    if (settingsKeys.contains("lpfBWRx0")) {
+        m_lpfBWRx0 = settings.m_lpfBWRx0;
+    }
+    if (settingsKeys.contains("gainRx0")) {
+        m_gainRx0 = settings.m_gainRx0;
+    }
+    if (settingsKeys.contains("gainModeRx0")) {
+        m_gainModeRx0 = settings.m_gainModeRx0;
+    }
+    if (settingsKeys.contains("lnaGainRx0")) {
+        m_lnaGainRx0 = settings.m_lnaGainRx0;
+    }
+    if (settingsKeys.contains("tiaGainRx0")) {
+        m_tiaGainRx0 = settings.m_tiaGainRx0;
+    }
+    if (settingsKeys.contains("pgaGainRx0")) {
+        m_pgaGainRx0 = settings.m_pgaGainRx0;
+    }
+    if (settingsKeys.contains("pwrmodeRx0")) {
+        m_pwrmodeRx0 = settings.m_pwrmodeRx0;
+    }
+    if (settingsKeys.contains("lpfBWRx1")) {
+        m_lpfBWRx1 = settings.m_lpfBWRx1;
+    }
+    if (settingsKeys.contains("gainRx1")) {
+        m_gainRx1 = settings.m_gainRx1;
+    }
+    if (settingsKeys.contains("gainModeRx1")) {
+        m_gainModeRx1 = settings.m_gainModeRx1;
+    }
+    if (settingsKeys.contains("lnaGainRx1")) {
+        m_lnaGainRx1 = settings.m_lnaGainRx1;
+    }
+    if (settingsKeys.contains("tiaGainRx1")) {
+        m_tiaGainRx1 = settings.m_tiaGainRx1;
+    }
+    if (settingsKeys.contains("pgaGainRx1")) {
+        m_pgaGainRx1 = settings.m_pgaGainRx1;
+    }
+    if (settingsKeys.contains("pwrmodeRx1")) {
+        m_pwrmodeRx1 = settings.m_pwrmodeRx1;
+    }
+    if (settingsKeys.contains("txDevSampleRate")) {
+        m_txDevSampleRate = settings.m_txDevSampleRate;
+    }
+    if (settingsKeys.contains("txCenterFrequency")) {
+        m_txCenterFrequency = settings.m_txCenterFrequency;
+    }
+    if (settingsKeys.contains("log2HardInterp")) {
+        m_log2HardInterp = settings.m_log2HardInterp;
+    }
+    if (settingsKeys.contains("log2SoftInterp")) {
+        m_log2SoftInterp = settings.m_log2SoftInterp;
+    }
+    if (settingsKeys.contains("ncoEnableTx")) {
+        m_ncoEnableTx = settings.m_ncoEnableTx;
+    }
+    if (settingsKeys.contains("ncoFrequencyTx")) {
+        m_ncoFrequencyTx = settings.m_ncoFrequencyTx;
+    }
+    if (settingsKeys.contains("antennaPathTx")) {
+        m_antennaPathTx = settings.m_antennaPathTx;
+    }
+    if (settingsKeys.contains("lpfBWTx0")) {
+        m_lpfBWTx0 = settings.m_lpfBWTx0;
+    }
+    if (settingsKeys.contains("gainTx0")) {
+        m_gainTx0 = settings.m_gainTx0;
+    }
+    if (settingsKeys.contains("pwrmodeTx0")) {
+        m_pwrmodeTx0 = settings.m_pwrmodeTx0;
+    }
+    if (settingsKeys.contains("lpfBWTx1")) {
+        m_lpfBWTx1 = settings.m_lpfBWTx1;
+    }
+    if (settingsKeys.contains("gainTx1")) {
+        m_gainTx1 = settings.m_gainTx1;
+    }
+    if (settingsKeys.contains("pwrmodeTx1")) {
+        m_pwrmodeTx1 = settings.m_pwrmodeTx1;
+    }
+}
+
+QString XTRXMIMOSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("extClock") || force) {
+        ostr << " m_extClock: " << m_extClock;
+    }
+    if (settingsKeys.contains("extClockFreq") || force) {
+        ostr << " m_extClockFreq: " << m_extClockFreq;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("rxDevSampleRate") || force) {
+        ostr << " m_rxDevSampleRate: " << m_rxDevSampleRate;
+    }
+    if (settingsKeys.contains("rxCenterFrequency") || force) {
+        ostr << " m_rxCenterFrequency: " << m_rxCenterFrequency;
+    }
+    if (settingsKeys.contains("log2HardDecim") || force) {
+        ostr << " m_log2HardDecim: " << m_log2HardDecim;
+    }
+    if (settingsKeys.contains("dcBlock") || force) {
+        ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection") || force) {
+        ostr << " m_iqCorrection: " << m_iqCorrection;
+    }
+    if (settingsKeys.contains("log2SoftDecim") || force) {
+        ostr << " m_log2SoftDecim: " << m_log2SoftDecim;
+    }
+    if (settingsKeys.contains("ncoEnableRx") || force) {
+        ostr << " m_ncoEnableRx: " << m_ncoEnableRx;
+    }
+    if (settingsKeys.contains("ncoFrequencyRx") || force) {
+        ostr << " m_ncoFrequencyRx: " << m_ncoFrequencyRx;
+    }
+    if (settingsKeys.contains("antennaPathRx") || force) {
+        ostr << " m_antennaPathRx: " << m_antennaPathRx;
+    }
+    if (settingsKeys.contains("iqOrder") || force) {
+        ostr << " m_iqOrder: " << m_iqOrder;
+    }
+    if (settingsKeys.contains("lpfBWRx0") || force) {
+        ostr << " m_lpfBWRx0: " << m_lpfBWRx0;
+    }
+    if (settingsKeys.contains("gainRx0") || force) {
+        ostr << " m_gainRx0: " << m_gainRx0;
+    }
+    if (settingsKeys.contains("gainModeRx0") || force) {
+        ostr << " m_gainModeRx0: " << m_gainModeRx0;
+    }
+    if (settingsKeys.contains("lnaGainRx0") || force) {
+        ostr << " m_lnaGainRx0: " << m_lnaGainRx0;
+    }
+    if (settingsKeys.contains("tiaGainRx0") || force) {
+        ostr << " m_tiaGainRx0: " << m_tiaGainRx0;
+    }
+    if (settingsKeys.contains("pgaGainRx0") || force) {
+        ostr << " m_pgaGainRx0: " << m_pgaGainRx0;
+    }
+    if (settingsKeys.contains("pwrmodeRx0") || force) {
+        ostr << " m_pwrmodeRx0: " << m_pwrmodeRx0;
+    }
+    if (settingsKeys.contains("lpfBWRx1") || force) {
+        ostr << " m_lpfBWRx1: " << m_lpfBWRx1;
+    }
+    if (settingsKeys.contains("gainRx1") || force) {
+        ostr << " m_gainRx1: " << m_gainRx1;
+    }
+    if (settingsKeys.contains("gainModeRx1") || force) {
+        ostr << " m_gainModeRx1: " << m_gainModeRx1;
+    }
+    if (settingsKeys.contains("lnaGainRx1") || force) {
+        ostr << " m_lnaGainRx1: " << m_lnaGainRx1;
+    }
+    if (settingsKeys.contains("tiaGainRx1") || force) {
+        ostr << " m_tiaGainRx1: " << m_tiaGainRx1;
+    }
+    if (settingsKeys.contains("pgaGainRx1") || force) {
+        ostr << " m_pgaGainRx1: " << m_pgaGainRx1;
+    }
+    if (settingsKeys.contains("pwrmodeRx1") || force) {
+        ostr << " m_pwrmodeRx1: " << m_pwrmodeRx1;
+    }
+    if (settingsKeys.contains("txDevSampleRate") || force) {
+        ostr << " m_txDevSampleRate: " << m_txDevSampleRate;
+    }
+    if (settingsKeys.contains("txCenterFrequency") || force) {
+        ostr << " m_txCenterFrequency: " << m_txCenterFrequency;
+    }
+    if (settingsKeys.contains("log2HardInterp") || force) {
+        ostr << " m_log2HardInterp: " << m_log2HardInterp;
+    }
+    if (settingsKeys.contains("log2SoftInterp") || force) {
+        ostr << " m_log2SoftInterp: " << m_log2SoftInterp;
+    }
+    if (settingsKeys.contains("ncoEnableTx") || force) {
+        ostr << " m_ncoEnableTx: " << m_ncoEnableTx;
+    }
+    if (settingsKeys.contains("ncoFrequencyTx") || force) {
+        ostr << " m_ncoFrequencyTx: " << m_ncoFrequencyTx;
+    }
+    if (settingsKeys.contains("antennaPathTx") || force) {
+        ostr << " m_antennaPathTx: " << m_antennaPathTx;
+    }
+    if (settingsKeys.contains("lpfBWTx0") || force) {
+        ostr << " m_lpfBWTx0: " << m_lpfBWTx0;
+    }
+    if (settingsKeys.contains("gainTx0") || force) {
+        ostr << " m_gainTx0: " << m_gainTx0;
+    }
+    if (settingsKeys.contains("pwrmodeTx0") || force) {
+        ostr << " m_pwrmodeTx0: " << m_pwrmodeTx0;
+    }
+    if (settingsKeys.contains("lpfBWTx1") || force) {
+        ostr << " m_lpfBWTx1: " << m_lpfBWTx1;
+    }
+    if (settingsKeys.contains("gainTx1") || force) {
+        ostr << " m_gainTx1: " << m_gainTx1;
+    }
+    if (settingsKeys.contains("pwrmodeTx1") || force) {
+        ostr << " m_pwrmodeTx1: " << m_pwrmodeTx1;
+    }
+
+    return QString(ostr.str().c_str());
+}

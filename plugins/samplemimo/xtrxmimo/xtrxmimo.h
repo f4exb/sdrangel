@@ -46,20 +46,22 @@ public:
 
 	public:
 		const XTRXMIMOSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureXTRXMIMO* create(const XTRXMIMOSettings& settings, bool force)
-		{
-			return new MsgConfigureXTRXMIMO(settings, force);
+		static MsgConfigureXTRXMIMO* create(const XTRXMIMOSettings& settings, const QList<QString>& settingsKeys, bool force) {
+			return new MsgConfigureXTRXMIMO(settings, settingsKeys, force);
 		}
 
 	private:
 		XTRXMIMOSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureXTRXMIMO(const XTRXMIMOSettings& settings, bool force) :
+		MsgConfigureXTRXMIMO(const XTRXMIMOSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -281,7 +283,7 @@ private:
     bool openDevice();
     void closeDevice();
 
-	bool applySettings(const XTRXMIMOSettings& settings, bool force);
+	bool applySettings(const XTRXMIMOSettings& settings, const QList<QString>& settingsKeys, bool force);
     void applyGainAuto(unsigned int channel, uint32_t gain);
     void applyGainLNA(unsigned int channel, double gain);
     void applyGainTIA(unsigned int channel, double gain);
@@ -289,7 +291,7 @@ private:
     void setRxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz);
     void setTxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz);
 
-    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXMIMOSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const XTRXMIMOSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
     static xtrx_antenna_t toXTRXAntennaRx(XTRXMIMOSettings::RxAntenna antennaPath);

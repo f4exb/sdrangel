@@ -117,6 +117,7 @@ void XTRXMIMOGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
+    m_forceSettings = true;
     sendSettings();
 }
 
@@ -193,7 +194,13 @@ bool XTRXMIMOGUI::handleMessage(const Message& message)
     else if (XTRXMIMO::MsgConfigureXTRXMIMO::match(message))
     {
         const XTRXMIMO::MsgConfigureXTRXMIMO& notif = (const XTRXMIMO::MsgConfigureXTRXMIMO&) message;
-        m_settings = notif.getSettings();
+
+        if (notif.getForce()) {
+            m_settings = notif.getSettings();
+        } else {
+            m_settings.applySettings(notif.getSettingsKeys(), notif.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -452,6 +459,7 @@ void XTRXMIMOGUI::setRxCenterFrequencySetting(uint64_t kHzValue)
     }
 
     m_settings.m_rxCenterFrequency = centerFrequency < 0 ? 0 : (uint64_t) centerFrequency;
+    m_settingsKeys.append("rxCenterFrequency");
     ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
 }
 
@@ -478,6 +486,7 @@ void XTRXMIMOGUI::setTxCenterFrequencySetting(uint64_t kHzValue)
     }
 
     m_settings.m_txCenterFrequency = centerFrequency < 0 ? 0 : (uint64_t) centerFrequency;
+    m_settingsKeys.append("txCenterFrequency");
     ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
 }
 
@@ -544,9 +553,10 @@ void XTRXMIMOGUI::updateHardware()
 {
     if (m_doApplySettings)
     {
-        XTRXMIMO::MsgConfigureXTRXMIMO* message = XTRXMIMO::MsgConfigureXTRXMIMO::create(m_settings, m_forceSettings);
+        XTRXMIMO::MsgConfigureXTRXMIMO* message = XTRXMIMO::MsgConfigureXTRXMIMO::create(m_settings, m_settingsKeys, m_forceSettings);
         m_xtrxMIMO->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -711,11 +721,13 @@ void XTRXMIMOGUI::on_ncoEnable_toggled(bool checked)
     if (m_rxElseTx)
     {
         m_settings.m_ncoEnableRx = checked;
+        m_settingsKeys.append("ncoEnableRx");
         setRxCenterFrequencyDisplay();
     }
     else
     {
         m_settings.m_ncoEnableTx = checked;
+        m_settingsKeys.append("ncoEnableTx");
         setTxCenterFrequencyDisplay();
     }
 
@@ -727,11 +739,13 @@ void XTRXMIMOGUI::on_ncoFrequency_changed(qint64 value)
     if (m_rxElseTx)
     {
         m_settings.m_ncoFrequencyRx = value;
+        m_settingsKeys.append("ncoFrequencyRx");
         setRxCenterFrequencyDisplay();
     }
     else
     {
         m_settings.m_ncoFrequencyTx = value;
+        m_settingsKeys.append("ncoFrequencyTx");
         setTxCenterFrequencyDisplay();
     }
 
@@ -741,12 +755,14 @@ void XTRXMIMOGUI::on_ncoFrequency_changed(qint64 value)
 void XTRXMIMOGUI::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void XTRXMIMOGUI::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
@@ -755,6 +771,8 @@ void XTRXMIMOGUI::on_extClock_clicked()
     m_settings.m_extClock = ui->extClock->getExternalClockActive();
     m_settings.m_extClockFreq = ui->extClock->getExternalClockFrequency();
     qDebug("XTRXMIMOGUI::on_extClock_clicked: %u Hz %s", m_settings.m_extClockFreq, m_settings.m_extClock ? "on" : "off");
+    m_settingsKeys.append("extClock");
+    m_settingsKeys.append("extClockFreq");
     sendSettings();
 }
 
@@ -764,10 +782,15 @@ void XTRXMIMOGUI::on_hwDecim_currentIndexChanged(int index)
         return;
     }
 
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_log2HardDecim = index;
-    } else {
+        m_settingsKeys.append("log2HardDecim");
+    }
+    else
+    {
         m_settings.m_log2HardInterp = index;
+        m_settingsKeys.append("log2HardInterp");
     }
 
     sendSettings();
@@ -784,6 +807,8 @@ void XTRXMIMOGUI::on_swDecim_currentIndexChanged(int index)
     if (m_rxElseTx)
     {
         m_settings.m_log2SoftDecim = index;
+        m_settingsKeys.append("log2SoftDecim");
+        m_settingsKeys.append("rxDevSampleRate");
 
         if (m_sampleRateMode) {
             m_settings.m_rxDevSampleRate = ui->sampleRate->getValueNew();
@@ -794,6 +819,8 @@ void XTRXMIMOGUI::on_swDecim_currentIndexChanged(int index)
     else
     {
         m_settings.m_log2SoftInterp = index;
+        m_settingsKeys.append("log2SoftInterp");
+        m_settingsKeys.append("txDevSampleRate");
 
         if (m_sampleRateMode) {
             m_settings.m_txDevSampleRate = ui->sampleRate->getValueNew();
@@ -815,6 +842,8 @@ void XTRXMIMOGUI::on_sampleRate_changed(quint64 value)
 {
     if (m_rxElseTx)
     {
+        m_settingsKeys.append("rxDevSampleRate");
+
         if (m_sampleRateMode) {
             m_settings.m_rxDevSampleRate = value;
         } else {
@@ -823,6 +852,8 @@ void XTRXMIMOGUI::on_sampleRate_changed(quint64 value)
     }
     else
     {
+        m_settingsKeys.append("txDevSampleRate");
+
         if (m_sampleRateMode) {
             m_settings.m_txDevSampleRate = value;
         } else {
@@ -837,18 +868,28 @@ void XTRXMIMOGUI::on_lpf_changed(quint64 value)
 {
     if (m_rxElseTx)
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_lpfBWRx0 = value * 1000;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("lpfBWRx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_lpfBWRx1 = value * 1000;
+            m_settingsKeys.append("lpfBWRx1");
         }
     }
     else
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_lpfBWTx0 = value * 1000;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("lpfBWTx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_lpfBWTx1 = value * 1000;
+            m_settingsKeys.append("lpfBWTx1");
         }
     }
 
@@ -859,18 +900,28 @@ void XTRXMIMOGUI::on_pwrmode_currentIndexChanged(int index)
 {
     if (m_rxElseTx)
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_pwrmodeRx0 = index;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("pwrmodeRx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_pwrmodeRx1 = index;
+            m_settingsKeys.append("pwrmodeRx1");
         }
     }
     else
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_pwrmodeTx0 = index;
-        } else if (m_streamIndex == 1) {
+            m_settingsKeys.append("pwrmodeTx0");
+        }
+        else if (m_streamIndex == 1)
+        {
             m_settings.m_pwrmodeTx1 = index;
+            m_settingsKeys.append("pwrmodeTx1");
         }
     }
 
@@ -883,10 +934,15 @@ void XTRXMIMOGUI::on_gainMode_currentIndexChanged(int index)
         return;
     }
 
-    if (m_streamIndex == 0) {
+    if (m_streamIndex == 0)
+    {
         m_settings.m_gainModeRx0 = (XTRXMIMOSettings::GainMode) index;
-    } else if (m_streamIndex == 1) {
+        m_settingsKeys.append("gainModeRx0");
+    }
+    else if (m_streamIndex == 1)
+    {
         m_settings.m_gainModeRx1 = (XTRXMIMOSettings::GainMode) index;
+        m_settingsKeys.append("gainModeRx1");
     }
 
     if (index == 0)
@@ -914,11 +970,13 @@ void XTRXMIMOGUI::on_gain_valueChanged(int value)
         if (m_streamIndex == 0)
         {
             m_settings.m_gainRx0 = value;
+            m_settingsKeys.append("gainRx0");
             ui->gainText->setText(tr("%1").arg(m_settings.m_gainRx0));
         }
         else if (m_streamIndex == 1)
         {
             m_settings.m_gainRx1 = value;
+            m_settingsKeys.append("gainRx1");
             ui->gainText->setText(tr("%1").arg(m_settings.m_gainRx1));
         }
     }
@@ -927,11 +985,13 @@ void XTRXMIMOGUI::on_gain_valueChanged(int value)
         if (m_streamIndex == 0)
         {
             m_settings.m_gainTx0 = value;
+            m_settingsKeys.append("gainTx0");
             ui->gainText->setText(tr("%1").arg(m_settings.m_gainTx0));
         }
         else if (m_streamIndex == 1)
         {
             m_settings.m_gainTx1 = value;
+            m_settingsKeys.append("gainTx1");
             ui->gainText->setText(tr("%1").arg(m_settings.m_gainTx1));
         }
     }
@@ -948,11 +1008,13 @@ void XTRXMIMOGUI::on_lnaGain_valueChanged(int value)
     if (m_streamIndex == 0)
     {
         m_settings.m_lnaGainRx0 = value;
+        m_settingsKeys.append("lnaGainRx0");
         ui->lnaGainText->setText(tr("%1").arg(m_settings.m_lnaGainRx0));
     }
     else if (m_streamIndex == 1)
     {
         m_settings.m_lnaGainRx1 = value;
+        m_settingsKeys.append("lnaGainRx1");
         ui->lnaGainText->setText(tr("%1").arg(m_settings.m_lnaGainRx1));
     }
 
@@ -965,10 +1027,15 @@ void XTRXMIMOGUI::on_tiaGain_currentIndexChanged(int index)
         return;
     }
 
-    if (m_streamIndex == 0) {
+    if (m_streamIndex == 0)
+    {
         m_settings.m_tiaGainRx0 = index + 1;
-    } else {
+        m_settingsKeys.append("tiaGainRx0");
+    }
+    else
+    {
         m_settings.m_tiaGainRx1 = index + 1;
+        m_settingsKeys.append("tiaGainRx1");
     }
 
     sendSettings();
@@ -983,11 +1050,13 @@ void XTRXMIMOGUI::on_pgaGain_valueChanged(int value)
     if (m_streamIndex == 0)
     {
         m_settings.m_pgaGainRx0 = value;
+        m_settingsKeys.append("pgaGainRx0");
         ui->pgaGainText->setText(tr("%1").arg(m_settings.m_pgaGainRx0));
     }
     else
     {
         m_settings.m_pgaGainRx1 = value;
+        m_settingsKeys.append("pgaGainRx1");
         ui->pgaGainText->setText(tr("%1").arg(m_settings.m_pgaGainRx1));
     }
 
@@ -996,10 +1065,15 @@ void XTRXMIMOGUI::on_pgaGain_valueChanged(int value)
 
 void XTRXMIMOGUI::on_antenna_currentIndexChanged(int index)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_antennaPathRx = (XTRXMIMOSettings::RxAntenna) index;
-    } else {
+        m_settingsKeys.append("antennaPathRx");
+    }
+    else
+    {
         m_settings.m_antennaPathTx = (XTRXMIMOSettings::TxAntenna) index;
+        m_settingsKeys.append("antennaPathTx");
     }
 
     sendSettings();
@@ -1022,6 +1096,10 @@ void XTRXMIMOGUI::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }
