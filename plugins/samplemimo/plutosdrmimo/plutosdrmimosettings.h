@@ -128,6 +128,8 @@ struct PlutoSDRMIMOSettings {
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const PlutoSDRMIMOSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
     static void translateRFPathRx(RFPathRx path, QString& s);
     static void translateGainMode(GainMode mod, QString& s);
     static void translateRFPathTx(RFPathTx path, QString& s);

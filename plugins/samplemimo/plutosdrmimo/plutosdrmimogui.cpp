@@ -123,7 +123,7 @@ void PlutoSDRMIMOGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    sendSettings();
+    sendSettings(true);
 }
 
 QByteArray PlutoSDRMIMOGUI::serialize() const
@@ -136,8 +136,7 @@ bool PlutoSDRMIMOGUI::deserialize(const QByteArray& data)
     if (m_settings.deserialize(data))
     {
         displaySettings();
-        m_forceSettings = true;
-        sendSettings();
+        sendSettings(true);
         return true;
     }
     else
@@ -306,7 +305,10 @@ void PlutoSDRMIMOGUI::displayFcTooltip()
 void PlutoSDRMIMOGUI::sendSettings(bool forceSettings)
 {
     m_forceSettings = forceSettings;
-    if(!m_updateTimer.isActive()) { m_updateTimer.start(100); }
+
+    if (!m_updateTimer.isActive()) {
+        m_updateTimer.start(100);
+    }
 }
 
 void PlutoSDRMIMOGUI::updateHardware()
@@ -314,9 +316,10 @@ void PlutoSDRMIMOGUI::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "PlutoSDRMIMOGUI::updateHardware";
-        PlutoSDRMIMO::MsgConfigurePlutoSDRMIMO* message = PlutoSDRMIMO::MsgConfigurePlutoSDRMIMO::create(m_settings, m_forceSettings);
+        PlutoSDRMIMO::MsgConfigurePlutoSDRMIMO* message = PlutoSDRMIMO::MsgConfigurePlutoSDRMIMO::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleMIMO->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -430,7 +433,13 @@ bool PlutoSDRMIMOGUI::handleMessage(const Message& message)
     else if (PlutoSDRMIMO::MsgConfigurePlutoSDRMIMO::match(message))
     {
         const PlutoSDRMIMO::MsgConfigurePlutoSDRMIMO& notif = (const PlutoSDRMIMO::MsgConfigurePlutoSDRMIMO&) message;
-        m_settings = notif.getSettings();
+
+        if (notif.getForce()) {
+            m_settings = notif.getSettings();
+        } else {
+            m_settings.applySettings(notif.getSettingsKeys(), notif.getSettings());
+        }
+
         displaySettings();
 
         return true;
@@ -618,10 +627,15 @@ void PlutoSDRMIMOGUI::on_startStopTx_toggled(bool checked)
 
 void PlutoSDRMIMOGUI::on_centerFrequency_changed(quint64 value)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_rxCenterFrequency = value * 1000;
-    } else {
+        m_settingsKeys.append("rxCenterFrequency");
+    }
+    else
+    {
         m_settings.m_txCenterFrequency = value * 1000;
+        m_settingsKeys.append("txCenterFrequency");
     }
 
     sendSettings();
@@ -631,45 +645,56 @@ void PlutoSDRMIMOGUI::on_loPPM_valueChanged(int value)
 {
     ui->loPPMText->setText(QString("%1").arg(QString::number(value/10.0, 'f', 1)));
     m_settings.m_LOppmTenths = value;
+    m_settingsKeys.append("LOppmTenths");
     sendSettings();
 }
 
 void PlutoSDRMIMOGUI::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
     sendSettings();
 }
 
 void PlutoSDRMIMOGUI::on_iqImbalance_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    m_settingsKeys.append("iqCorrection");
     sendSettings();
 }
 
 void PlutoSDRMIMOGUI::on_rfDCOffset_toggled(bool checked)
 {
     m_settings.m_hwRFDCBlock = checked;
+    m_settingsKeys.append("hwRFDCBlock");
     sendSettings();
 }
 
 void PlutoSDRMIMOGUI::on_bbDCOffset_toggled(bool checked)
 {
     m_settings.m_hwBBDCBlock = checked;
+    m_settingsKeys.append("hwBBDCBlock");
     sendSettings();
 }
 
 void PlutoSDRMIMOGUI::on_hwIQImbalance_toggled(bool checked)
 {
     m_settings.m_hwIQCorrection = checked;
+    m_settingsKeys.append("hwIQCorrection");
     sendSettings();
 }
 
 void PlutoSDRMIMOGUI::on_swDecim_currentIndexChanged(int index)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_log2Decim = index > 6 ? 6 : index;
-    } else {
+        m_settingsKeys.append("log2Decim");
+    }
+    else
+    {
         m_settings.m_log2Interp = index > 6 ? 6 : index;
+        m_settingsKeys.append("log2Interp");
     }
 
     displaySampleRate();
@@ -684,6 +709,7 @@ void PlutoSDRMIMOGUI::on_swDecim_currentIndexChanged(int index)
         }
     }
 
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
@@ -691,10 +717,15 @@ void PlutoSDRMIMOGUI::on_fcPos_currentIndexChanged(int index)
 {
     PlutoSDRMIMOSettings::fcPos_t fcPos = (PlutoSDRMIMOSettings::fcPos_t) (index < (int) PlutoSDRMIMOSettings::FC_POS_END ? index : PlutoSDRMIMOSettings::FC_POS_CENTER);
 
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_fcPosRx = fcPos;
-    } else {
+        m_settingsKeys.append("fcPosRx");
+    }
+    else
+    {
         m_settings.m_fcPosTx = fcPos;
+        m_settingsKeys.append("fcPosTx");
     }
 
     displayFcTooltip();
@@ -715,15 +746,21 @@ void PlutoSDRMIMOGUI::on_sampleRate_changed(quint64 value)
     }
 
     displayFcTooltip();
+    m_settingsKeys.append("devSampleRate");
     sendSettings();
 }
 
 void PlutoSDRMIMOGUI::on_lpf_changed(quint64 value)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_lpfBWRx = value * 1000;
-    } else {
+        m_settingsKeys.append("lpfBWRx");
+    }
+    else
+    {
         m_settings.m_lpfBWTx = value * 1000;
+        m_settingsKeys.append("lpfBWTx");
     }
 
     sendSettings();
@@ -731,10 +768,15 @@ void PlutoSDRMIMOGUI::on_lpf_changed(quint64 value)
 
 void PlutoSDRMIMOGUI::on_lpFIREnable_toggled(bool checked)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_lpfRxFIREnable = checked;
-    } else {
+        m_settingsKeys.append("lpfRxFIREnable");
+    }
+    else
+    {
         m_settings.m_lpfTxFIREnable = checked;
+        m_settingsKeys.append("lpfTxFIREnable");
     }
 
     ui->lpFIRDecimation->setEnabled(checked);
@@ -744,10 +786,16 @@ void PlutoSDRMIMOGUI::on_lpFIREnable_toggled(bool checked)
 
 void PlutoSDRMIMOGUI::on_lpFIR_changed(quint64 value)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_lpfRxFIRBW = value * 1000;
-    } else {
+        m_settingsKeys.append("lpfRxFIRBW");
+    }
+    else
+    {
         m_settings.m_lpfTxFIRBW = value * 1000;
+        m_settingsKeys.append("lpfTxFIRBW");
+
     }
 
     sendSettings();
@@ -755,10 +803,15 @@ void PlutoSDRMIMOGUI::on_lpFIR_changed(quint64 value)
 
 void PlutoSDRMIMOGUI::on_lpFIRDecimation_currentIndexChanged(int index)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_lpfRxFIRlog2Decim = index > 2 ? 2 : index;
-    } else {
+        m_settingsKeys.append("lpfRxFIRlog2Decim");
+    }
+    else
+    {
         m_settings.m_lpfTxFIRlog2Interp = index > 2 ? 2 : index;
+        m_settingsKeys.append("lpfTxFIRlog2Interp");
     }
 
     setSampleRateLimits();
@@ -767,10 +820,15 @@ void PlutoSDRMIMOGUI::on_lpFIRDecimation_currentIndexChanged(int index)
 
 void PlutoSDRMIMOGUI::on_lpFIRGain_currentIndexChanged(int index)
 {
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_lpfRxFIRGain = 6*(index > 3 ? 3 : index) - 12;
-    } else {
+        m_settingsKeys.append("lpfRxFIRGain");
+    }
+    else
+    {
         m_settings.m_lpfTxFIRGain = 6*(index > 3 ? 3 : index) - 12;
+        m_settingsKeys.append("lpfTxFIRGain");
     }
 
     sendSettings();
@@ -783,6 +841,9 @@ void PlutoSDRMIMOGUI::on_gainLock_toggled(bool checked)
         m_settings.m_rx1GainMode = m_settings.m_rx0GainMode;
         m_settings.m_rx1Gain = m_settings.m_rx0Gain;
         m_settings.m_tx1Att = m_settings.m_rx0Gain;
+        m_settingsKeys.append("rx1GainMode");
+        m_settingsKeys.append("rx1Gain");
+        m_settingsKeys.append("tx1Att");
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -798,11 +859,13 @@ void PlutoSDRMIMOGUI::on_gainMode_currentIndexChanged(int index)
     {
         m_settings.m_rx0GainMode = (PlutoSDRMIMOSettings::GainMode) (index < PlutoSDRMIMOSettings::GAIN_END ? index : 0);
         ui->gain->setEnabled(m_settings.m_rx0GainMode == PlutoSDRMIMOSettings::GAIN_MANUAL);
+        m_settingsKeys.append("rx0GainMode");
     }
     else
     {
         m_settings.m_rx1GainMode = (PlutoSDRMIMOSettings::GainMode) (index < PlutoSDRMIMOSettings::GAIN_END ? index : 0);
         ui->gain->setEnabled(m_settings.m_rx1GainMode == PlutoSDRMIMOSettings::GAIN_MANUAL);
+        m_settingsKeys.append("rx1GainMode");
     }
 
     sendSettings();
@@ -812,10 +875,15 @@ void PlutoSDRMIMOGUI::on_gain_valueChanged(int value)
 {
     ui->gainText->setText(tr("%1").arg(value));
 
-    if (m_streamIndex == 0) {
+    if (m_streamIndex == 0)
+    {
         m_settings.m_rx0Gain = value;
-    } else {
+        m_settingsKeys.append("rx0Gain");
+    }
+    else
+    {
         m_settings.m_rx1Gain = value;
+        m_settingsKeys.append("rx1Gain");
     }
 
     sendSettings();
@@ -825,10 +893,15 @@ void PlutoSDRMIMOGUI::on_att_valueChanged(int value)
 {
     ui->attText->setText(QString("%1 dB").arg(QString::number(value*0.25, 'f', 2)));
 
-    if (m_streamIndex == 0) {
+    if (m_streamIndex == 0)
+    {
         m_settings.m_tx0Att = value;
-    } else {
+        m_settingsKeys.append("tx0Att");
+    }
+    else
+    {
         m_settings.m_tx1Att = value;
+        m_settingsKeys.append("tx1Att");
     }
 
     sendSettings();
@@ -838,18 +911,28 @@ void PlutoSDRMIMOGUI::on_antenna_currentIndexChanged(int index)
 {
     if (m_rxElseTx)
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_rx0AntennaPath = (PlutoSDRMIMOSettings::RFPathRx) (index < PlutoSDRMIMOSettings::RFPATHRX_END ? index : 0);
-        } else {
+            m_settingsKeys.append("rx0AntennaPath");
+        }
+        else
+        {
             m_settings.m_rx1AntennaPath = (PlutoSDRMIMOSettings::RFPathRx) (index < PlutoSDRMIMOSettings::RFPATHRX_END ? index : 0);
+            m_settingsKeys.append("rx1AntennaPath");
         }
     }
     else
     {
-        if (m_streamIndex == 0) {
+        if (m_streamIndex == 0)
+        {
             m_settings.m_tx0AntennaPath = (PlutoSDRMIMOSettings::RFPathTx) (index < PlutoSDRMIMOSettings::RFPATHTX_END ? index : 0);
-        } else {
+            m_settingsKeys.append("tx0AntennaPath");
+        }
+        else
+        {
             m_settings.m_tx1AntennaPath = (PlutoSDRMIMOSettings::RFPathTx) (index < PlutoSDRMIMOSettings::RFPATHTX_END ? index : 0);
+            m_settingsKeys.append("tx1AntennaPath");
         }
     }
 
@@ -863,6 +946,9 @@ void PlutoSDRMIMOGUI::on_transverter_clicked()
         m_settings.m_rxTransverterMode = ui->transverter->getDeltaFrequencyAcive();
         m_settings.m_rxTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
         m_settings.m_iqOrder = ui->transverter->getIQOrder();
+        m_settingsKeys.append("rxTransverterMode");
+        m_settingsKeys.append("rxTransverterDeltaFrequency");
+        m_settingsKeys.append("iqOrder");
         qDebug("PlutoSDRInputGui::on_transverter_clicked: %lld Hz %s",
             m_settings.m_rxTransverterDeltaFrequency, m_settings.m_rxTransverterMode ? "on" : "off");
     }
@@ -870,16 +956,23 @@ void PlutoSDRMIMOGUI::on_transverter_clicked()
     {
         m_settings.m_txTransverterMode = ui->transverter->getDeltaFrequencyAcive();
         m_settings.m_txTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+        m_settingsKeys.append("txTransverterMode");
+        m_settingsKeys.append("txTransverterDeltaFrequency");
         qDebug("PlutoSDRInputGui::on_transverter_clicked: %lld Hz %s",
             m_settings.m_rxTransverterDeltaFrequency, m_settings.m_txTransverterMode ? "on" : "off");
     }
 
     updateFrequencyLimits();
 
-    if (m_rxElseTx) {
+    if (m_rxElseTx)
+    {
         m_settings.m_rxCenterFrequency = ui->centerFrequency->getValueNew()*1000;
-    } else {
+        m_settingsKeys.append("rxCenterFrequency");
+    }
+    else
+    {
         m_settings.m_txCenterFrequency = ui->centerFrequency->getValueNew()*1000;
+        m_settingsKeys.append("txCenterFrequency");
     }
 
     sendSettings();
@@ -908,6 +1001,10 @@ void PlutoSDRMIMOGUI::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

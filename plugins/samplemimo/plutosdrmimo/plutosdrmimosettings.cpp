@@ -284,6 +284,270 @@ bool PlutoSDRMIMOSettings::deserialize(const QByteArray& data)
 	}
 }
 
+void PlutoSDRMIMOSettings::applySettings(const QStringList& settingsKeys, const PlutoSDRMIMOSettings& settings)
+{
+    if (settingsKeys.contains("devSampleRate")) {
+        m_devSampleRate = settings.m_devSampleRate;
+    }
+    if (settingsKeys.contains("LOppmTenths")) {
+        m_LOppmTenths = settings.m_LOppmTenths;
+    }
+    if (settingsKeys.contains("rxCenterFrequency")) {
+        m_rxCenterFrequency = settings.m_rxCenterFrequency;
+    }
+    if (settingsKeys.contains("fcPosRx")) {
+        m_fcPosRx = settings.m_fcPosRx;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("dcBlock")) {
+        m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection")) {
+        m_iqCorrection = settings.m_iqCorrection;
+    }
+    if (settingsKeys.contains("hwBBDCBlock")) {
+        m_hwBBDCBlock = settings.m_hwBBDCBlock;
+    }
+    if (settingsKeys.contains("hwRFDCBlock")) {
+        m_hwRFDCBlock = settings.m_hwRFDCBlock;
+    }
+    if (settingsKeys.contains("hwIQCorrection")) {
+        m_hwIQCorrection = settings.m_hwIQCorrection;
+    }
+    if (settingsKeys.contains("lpfBWRx")) {
+        m_lpfBWRx = settings.m_lpfBWRx;
+    }
+    if (settingsKeys.contains("lpfRxFIREnable")) {
+        m_lpfRxFIREnable = settings.m_lpfRxFIREnable;
+    }
+    if (settingsKeys.contains("lpfRxFIRBW")) {
+        m_lpfRxFIRBW = settings.m_lpfRxFIRBW;
+    }
+    if (settingsKeys.contains("lpfRxFIRlog2Decim")) {
+        m_lpfRxFIRlog2Decim = settings.m_lpfRxFIRlog2Decim;
+    }
+    if (settingsKeys.contains("lpfRxFIRGain")) {
+        m_lpfRxFIRGain = settings.m_lpfRxFIRGain;
+    }
+    if (settingsKeys.contains("rxTransverterMode")) {
+        m_rxTransverterMode = settings.m_rxTransverterMode;
+    }
+    if (settingsKeys.contains("rxTransverterDeltaFrequency")) {
+        m_rxTransverterDeltaFrequency = settings.m_rxTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder")) {
+        m_iqOrder = settings.m_iqOrder;
+    }
+    if (settingsKeys.contains("rx0Gain")) {
+        m_rx0Gain = settings.m_rx0Gain;
+    }
+    if (settingsKeys.contains("rx0AntennaPath")) {
+        m_rx0AntennaPath = settings.m_rx0AntennaPath;
+    }
+    if (settingsKeys.contains("rx0GainMode")) {
+        m_rx0GainMode = settings.m_rx0GainMode;
+    }
+    if (settingsKeys.contains("rx1Gain")) {
+        m_rx1Gain = settings.m_rx1Gain;
+    }
+    if (settingsKeys.contains("rx1AntennaPath")) {
+        m_rx1AntennaPath = settings.m_rx1AntennaPath;
+    }
+    if (settingsKeys.contains("rx1GainMode")) {
+        m_rx1GainMode = settings.m_rx1GainMode;
+    }
+    if (settingsKeys.contains("txCenterFrequency")) {
+        m_txCenterFrequency = settings.m_txCenterFrequency;
+    }
+    if (settingsKeys.contains("fcPosTx")) {
+        m_fcPosTx = settings.m_fcPosTx;
+    }
+    if (settingsKeys.contains("log2Interp")) {
+        m_log2Interp = settings.m_log2Interp;
+    }
+    if (settingsKeys.contains("lpfBWTx")) {
+        m_lpfBWTx = settings.m_lpfBWTx;
+    }
+    if (settingsKeys.contains("lpfTxFIREnable")) {
+        m_lpfTxFIREnable = settings.m_lpfTxFIREnable;
+    }
+    if (settingsKeys.contains("lpfTxFIRBW")) {
+        m_lpfTxFIRBW = settings.m_lpfTxFIRBW;
+    }
+    if (settingsKeys.contains("lpfTxFIRlog2Interp")) {
+        m_lpfTxFIRlog2Interp = settings.m_lpfTxFIRlog2Interp;
+    }
+    if (settingsKeys.contains("lpfTxFIRGain")) {
+        m_lpfTxFIRGain = settings.m_lpfTxFIRGain;
+    }
+    if (settingsKeys.contains("txTransverterMode")) {
+        m_txTransverterMode = settings.m_txTransverterMode;
+    }
+    if (settingsKeys.contains("txTransverterDeltaFrequency")) {
+        m_txTransverterDeltaFrequency = settings.m_txTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("tx0Att")) {
+        m_tx0Att = settings.m_tx0Att;
+    }
+    if (settingsKeys.contains("tx0AntennaPath")) {
+        m_tx0AntennaPath = settings.m_tx0AntennaPath;
+    }
+    if (settingsKeys.contains("tx1Att")) {
+        m_tx1Att = settings.m_tx1Att;
+    }
+    if (settingsKeys.contains("tx1AntennaPath")) {
+        m_tx1AntennaPath = settings.m_tx1AntennaPath;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+}
+
+QString PlutoSDRMIMOSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("devSampleRate") || force) {
+        ostr << " m_devSampleRate: " << m_devSampleRate;
+    }
+    if (settingsKeys.contains("LOppmTenths") || force) {
+        ostr << " m_LOppmTenths: " << m_LOppmTenths;
+    }
+    if (settingsKeys.contains("rxCenterFrequency") || force) {
+        ostr << " m_rxCenterFrequency: " << m_rxCenterFrequency;
+    }
+    if (settingsKeys.contains("fcPosRx") || force) {
+        ostr << " m_fcPosRx: " << m_fcPosRx;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("dcBlock") || force) {
+        ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("iqCorrection") || force) {
+        ostr << " m_iqCorrection: " << m_iqCorrection;
+    }
+    if (settingsKeys.contains("hwBBDCBlock") || force) {
+        ostr << " m_hwBBDCBlock: " << m_hwBBDCBlock;
+    }
+    if (settingsKeys.contains("hwRFDCBlock") || force) {
+        ostr << " m_hwRFDCBlock: " << m_hwRFDCBlock;
+    }
+    if (settingsKeys.contains("hwIQCorrection") || force) {
+        ostr << " m_hwIQCorrection: " << m_hwIQCorrection;
+    }
+    if (settingsKeys.contains("lpfBWRx") || force) {
+        ostr << " m_lpfBWRx: " << m_lpfBWRx;
+    }
+    if (settingsKeys.contains("lpfRxFIREnable") || force) {
+        ostr << " m_lpfRxFIREnable: " << m_lpfRxFIREnable;
+    }
+    if (settingsKeys.contains("lpfRxFIRBW") || force) {
+        ostr << " m_lpfRxFIRBW: " << m_lpfRxFIRBW;
+    }
+    if (settingsKeys.contains("lpfRxFIRlog2Decim") || force) {
+        ostr << " m_lpfRxFIRlog2Decim: " << m_lpfRxFIRlog2Decim;
+    }
+    if (settingsKeys.contains("lpfRxFIRGain") || force) {
+        ostr << " m_lpfRxFIRGain: " << m_lpfRxFIRGain;
+    }
+    if (settingsKeys.contains("rxTransverterMode") || force) {
+        ostr << " m_rxTransverterMode: " << m_rxTransverterMode;
+    }
+    if (settingsKeys.contains("rxTransverterDeltaFrequency") || force) {
+        ostr << " m_rxTransverterDeltaFrequency: " << m_rxTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("iqOrder") || force) {
+        ostr << " m_iqOrder: " << m_iqOrder;
+    }
+    if (settingsKeys.contains("rx0Gain") || force) {
+        ostr << " m_rx0Gain: " << m_rx0Gain;
+    }
+    if (settingsKeys.contains("rx0AntennaPath") || force) {
+        ostr << " m_rx0AntennaPath: " << m_rx0AntennaPath;
+    }
+    if (settingsKeys.contains("rx0GainMode") || force) {
+        ostr << " m_rx0GainMode: " << m_rx0GainMode;
+    }
+    if (settingsKeys.contains("rx1Gain") || force) {
+        ostr << " m_rx1Gain: " << m_rx1Gain;
+    }
+    if (settingsKeys.contains("rx1AntennaPath") || force) {
+        ostr << " m_rx1AntennaPath: " << m_rx1AntennaPath;
+    }
+    if (settingsKeys.contains("rx1GainMode") || force) {
+        ostr << " m_rx1GainMode: " << m_rx1GainMode;
+    }
+    if (settingsKeys.contains("txCenterFrequency") || force) {
+        ostr << " m_txCenterFrequency: " << m_txCenterFrequency;
+    }
+    if (settingsKeys.contains("fcPosTx") || force) {
+        ostr << " m_fcPosTx: " << m_fcPosTx;
+    }
+    if (settingsKeys.contains("log2Interp") || force) {
+        ostr << " m_log2Interp: " << m_log2Interp;
+    }
+    if (settingsKeys.contains("lpfBWTx") || force) {
+        ostr << " m_lpfBWTx: " << m_lpfBWTx;
+    }
+    if (settingsKeys.contains("lpfTxFIREnable") || force) {
+        ostr << " m_lpfTxFIREnable: " << m_lpfTxFIREnable;
+    }
+    if (settingsKeys.contains("lpfTxFIRBW") || force) {
+        ostr << " m_lpfTxFIRBW: " << m_lpfTxFIRBW;
+    }
+    if (settingsKeys.contains("lpfTxFIRlog2Interp") || force) {
+        ostr << " m_lpfTxFIRlog2Interp: " << m_lpfTxFIRlog2Interp;
+    }
+    if (settingsKeys.contains("lpfTxFIRGain") || force) {
+        ostr << " m_lpfTxFIRGain: " << m_lpfTxFIRGain;
+    }
+    if (settingsKeys.contains("txTransverterMode") || force) {
+        ostr << " m_txTransverterMode: " << m_txTransverterMode;
+    }
+    if (settingsKeys.contains("txTransverterDeltaFrequency") || force) {
+        ostr << " m_txTransverterDeltaFrequency: " << m_txTransverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("tx0Att") || force) {
+        ostr << " m_tx0Att: " << m_tx0Att;
+    }
+    if (settingsKeys.contains("tx0AntennaPath") || force) {
+        ostr << " m_tx0AntennaPath: " << m_tx0AntennaPath;
+    }
+    if (settingsKeys.contains("tx1Att") || force) {
+        ostr << " m_tx1Att: " << m_tx1Att;
+    }
+    if (settingsKeys.contains("tx1AntennaPath") || force) {
+        ostr << " m_tx1AntennaPath: " << m_tx1AntennaPath;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}
+
 void PlutoSDRMIMOSettings::translateRFPathTx(RFPathTx path, QString& s)
 {
     switch(path)

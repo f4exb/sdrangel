@@ -166,7 +166,7 @@ void PlutoSDRMIMO::closeDevice()
 
 void PlutoSDRMIMO::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool PlutoSDRMIMO::startRx()
@@ -315,12 +315,12 @@ bool PlutoSDRMIMO::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigurePlutoSDRMIMO* message = MsgConfigurePlutoSDRMIMO::create(m_settings, true);
+    MsgConfigurePlutoSDRMIMO* message = MsgConfigurePlutoSDRMIMO::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigurePlutoSDRMIMO* messageToGUI = MsgConfigurePlutoSDRMIMO::create(m_settings, true);
+        MsgConfigurePlutoSDRMIMO* messageToGUI = MsgConfigurePlutoSDRMIMO::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -358,12 +358,12 @@ void PlutoSDRMIMO::setSourceCenterFrequency(qint64 centerFrequency, int index)
     PlutoSDRMIMOSettings settings = m_settings;
     settings.m_rxCenterFrequency = centerFrequency;
 
-    MsgConfigurePlutoSDRMIMO* message = MsgConfigurePlutoSDRMIMO::create(settings, false);
+    MsgConfigurePlutoSDRMIMO* message = MsgConfigurePlutoSDRMIMO::create(settings, QList<QString>{"rxCenterFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigurePlutoSDRMIMO* messageToGUI = MsgConfigurePlutoSDRMIMO::create(settings, false);
+        MsgConfigurePlutoSDRMIMO* messageToGUI = MsgConfigurePlutoSDRMIMO::create(settings, QList<QString>{"rxCenterFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -380,12 +380,12 @@ void PlutoSDRMIMO::setSinkCenterFrequency(qint64 centerFrequency, int index)
     PlutoSDRMIMOSettings settings = m_settings;
     settings.m_txCenterFrequency = centerFrequency;
 
-    MsgConfigurePlutoSDRMIMO* message = MsgConfigurePlutoSDRMIMO::create(settings, false);
+    MsgConfigurePlutoSDRMIMO* message = MsgConfigurePlutoSDRMIMO::create(settings, QList<QString>{"txCenterFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigurePlutoSDRMIMO* messageToGUI = MsgConfigurePlutoSDRMIMO::create(settings, false);
+        MsgConfigurePlutoSDRMIMO* messageToGUI = MsgConfigurePlutoSDRMIMO::create(settings, QList<QString>{"txCenterFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -397,7 +397,7 @@ bool PlutoSDRMIMO::handleMessage(const Message& message)
         MsgConfigurePlutoSDRMIMO& conf = (MsgConfigurePlutoSDRMIMO&) message;
         qDebug() << "PlutoSDRMIMO::handleMessage: MsgConfigurePlutoSDRMIMO";
 
-        bool success = applySettings(conf.getSettings(), conf.getForce());
+        bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
         if (!success) {
             qDebug("PlutoSDRMIMO::handleMessage: config error");
@@ -437,174 +437,28 @@ bool PlutoSDRMIMO::handleMessage(const Message& message)
     }
 }
 
-bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool force)
+bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "PlutoSDRMIMO::applySettings: common: "
-        << " m_devSampleRate: " << settings.m_devSampleRate
-        << " m_LOppmTenths: " << settings.m_LOppmTenths
-        << " m_rxCenterFrequency: " << settings.m_rxCenterFrequency
-        << " m_dcBlock: " << settings.m_dcBlock
-        << " m_iqCorrection: " << settings.m_iqCorrection
-        << " m_hwBBDCBlock: " << settings.m_hwBBDCBlock
-        << " m_hwRFDCBlock: " << settings.m_hwRFDCBlock
-        << " m_hwIQCorrection: " << settings.m_hwIQCorrection
-        << " m_fcPosRx: " << settings.m_fcPosRx
-        << " m_rxTransverterMode: " << settings.m_rxTransverterMode
-        << " m_rxTransverterDeltaFrequency: " << settings.m_rxTransverterDeltaFrequency
-        << " m_iqOrder: " << settings.m_iqOrder
-        << " m_lpfBWRx: " << settings.m_lpfBWRx
-        << " m_lpfRxFIREnable: " << settings.m_lpfRxFIREnable
-        << " m_lpfRxFIRBW: " << settings.m_lpfRxFIRBW
-        << " m_lpfRxFIRlog2Decim: " << settings.m_lpfRxFIRlog2Decim
-        << " m_lpfRxFIRGain: " << settings.m_lpfRxFIRGain
-        << " m_log2Decim: " << settings.m_log2Decim
-        << " m_rx0Gain: " << settings.m_rx0Gain
-        << " m_rx0GainMode: " << settings.m_rx0GainMode
-        << " m_rx0AntennaPath: " << settings.m_rx0AntennaPath
-        << " m_rx0Gain: " << settings.m_rx1Gain
-        << " m_rx0GainMode: " << settings.m_rx1GainMode
-        << " m_rx0AntennaPath: " << settings.m_rx1AntennaPath
-        << " m_txCenterFrequency: " << settings.m_txCenterFrequency
-        << " m_fcPosTx: " << settings.m_fcPosTx
-        << " m_txTransverterMode: " << settings.m_txTransverterMode
-        << " m_txTransverterDeltaFrequency: " << settings.m_txTransverterDeltaFrequency
-        << " m_lpfBWTx: " << settings.m_lpfBWTx
-        << " m_lpfTxFIREnable: " << settings.m_lpfTxFIREnable
-        << " m_lpfTxFIRBW: " << settings.m_lpfTxFIRBW
-        << " m_lpfTxFIRlog2Interp: " << settings.m_lpfTxFIRlog2Interp
-        << " m_lpfTxFIRGain: " << settings.m_lpfTxFIRGain
-        << " m_log2Interp: " << settings.m_log2Interp
-        << " m_tx0Att: " << settings.m_tx0Att
-        << " m_tx0AntennaPath: " << settings.m_tx0AntennaPath
-        << " m_tx1Att: " << settings.m_tx1Att
-        << " m_tx1AntennaPath: " << settings.m_tx1AntennaPath
-        << " m_useReverseAPI: " << settings.m_useReverseAPI
-        << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-        << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-        << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-        << " force: " << force;
+    qDebug() << "PlutoSDRMIMO::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
     bool forwardChangeRxDSP = false;
     bool forwardChangeTxDSP = false;
     DevicePlutoSDRBox *plutoBox = m_plutoParams ? m_plutoParams->getBox() : nullptr;
 
     // Rx
 
-    if ((m_settings.m_rxCenterFrequency != settings.m_rxCenterFrequency) || force) {
-        reverseAPIKeys.append("rxCenterFrequency");
-    }
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
-        reverseAPIKeys.append("devSampleRate");
-    }
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
-        reverseAPIKeys.append("LOppmTenths");
-    }
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
-        reverseAPIKeys.append("dcBlock");
-    }
-    if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
-        reverseAPIKeys.append("iqCorrection");
-    }
-    if ((m_settings.m_hwBBDCBlock != settings.m_hwBBDCBlock) || force) {
-        reverseAPIKeys.append("hwBBDCBlock");
-    }
-    if ((m_settings.m_hwRFDCBlock != settings.m_hwRFDCBlock) || force) {
-        reverseAPIKeys.append("hwRFDCBlock");
-    }
-    if ((m_settings.m_hwIQCorrection != settings.m_hwIQCorrection) || force) {
-        reverseAPIKeys.append("hwIQCorrection");
-    }
-    if ((m_settings.m_lpfRxFIREnable != settings.m_lpfRxFIREnable) || force) {
-        reverseAPIKeys.append("lpfRxFIREnable");
-    }
-    if ((m_settings.m_lpfRxFIRBW != settings.m_lpfRxFIRBW) || force) {
-        reverseAPIKeys.append("lpfRxFIRBW");
-    }
-    if ((m_settings.m_lpfRxFIRlog2Decim != settings.m_lpfRxFIRlog2Decim) || force) {
-        reverseAPIKeys.append("lpfRxFIRlog2Decim");
-    }
-    if ((m_settings.m_lpfRxFIRGain != settings.m_lpfRxFIRGain) || force) {
-        reverseAPIKeys.append("lpfRxFIRGain");
-    }
-    if ((m_settings.m_lpfTxFIREnable != settings.m_lpfTxFIREnable) || force) {
-        reverseAPIKeys.append("lpfTxFIREnable");
-    }
-    if ((m_settings.m_lpfTxFIRBW != settings.m_lpfTxFIRBW) || force) {
-        reverseAPIKeys.append("lpfTxFIRBW");
-    }
-    if ((m_settings.m_lpfTxFIRlog2Interp != settings.m_lpfTxFIRlog2Interp) || force) {
-        reverseAPIKeys.append("lpfRxFIRlog2Decim");
-    }
-    if ((m_settings.m_lpfTxFIRGain != settings.m_lpfTxFIRGain) || force) {
-        reverseAPIKeys.append("lpfTxFIRGain");
-    }
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force) {
-        reverseAPIKeys.append("log2Decim");
-    }
-    if ((m_settings.m_fcPosRx != settings.m_fcPosRx) || force) {
-        reverseAPIKeys.append("fcPosRx");
-    }
-    if ((m_settings.m_fcPosTx != settings.m_fcPosTx) || force) {
-        reverseAPIKeys.append("fcPosTx");
-    }
-    if ((m_settings.m_lpfBWRx != settings.m_lpfBWRx) || force) {
-        reverseAPIKeys.append("lpfBWRx");
-    }
-    if ((m_settings.m_lpfBWTx != settings.m_lpfBWTx) || force) {
-        reverseAPIKeys.append("lpfBWTx");
-    }
-    if ((m_settings.m_rx0Gain != settings.m_rx0Gain) || force) {
-        reverseAPIKeys.append("rx0Gain");
-    }
-    if ((m_settings.m_rx0AntennaPath != settings.m_rx0AntennaPath) || force) {
-        reverseAPIKeys.append("rx0AntennaPath");
-    }
-    if ((m_settings.m_rx0GainMode != settings.m_rx0GainMode) || force) {
-        reverseAPIKeys.append("rx0GainMode");
-    }
-    if ((m_settings.m_rx1Gain != settings.m_rx1Gain) || force) {
-        reverseAPIKeys.append("rx1Gain");
-    }
-    if ((m_settings.m_rx1AntennaPath != settings.m_rx1AntennaPath) || force) {
-        reverseAPIKeys.append("rx1AntennaPath");
-    }
-    if ((m_settings.m_rx1GainMode != settings.m_rx1GainMode) || force) {
-        reverseAPIKeys.append("rx1GainMode");
-    }
-    if ((m_settings.m_rxTransverterMode != settings.m_rxTransverterMode) || force) {
-        reverseAPIKeys.append("rxTransverterMode");
-    }
-    if ((m_settings.m_rxTransverterDeltaFrequency != settings.m_rxTransverterDeltaFrequency) || force) {
-        reverseAPIKeys.append("rxTransverterDeltaFrequency");
-    }
-
-    // Tx
-
-    if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) || force) {
-        reverseAPIKeys.append("txCenterFrequency");
-    }
-    if ((m_settings.m_txTransverterMode != settings.m_txTransverterMode) || force) {
-        reverseAPIKeys.append("txTransverterMode");
-    }
-    if ((m_settings.m_txTransverterDeltaFrequency != settings.m_txTransverterDeltaFrequency) || force) {
-        reverseAPIKeys.append("txTransverterDeltaFrequency");
-    }
-
-    // Rx
-
-    if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
-        (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
+    if (settingsKeys.contains("dcBlock") ||
+        settingsKeys.contains("iqCorrection") || force)
     {
         m_deviceAPI->configureCorrections(settings.m_dcBlock, m_settings.m_iqCorrection);
     }
 
     // Change affecting device sample rate chain and other buddies
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-        (m_settings.m_lpfRxFIREnable != settings.m_lpfRxFIREnable) ||
-        (m_settings.m_lpfRxFIRlog2Decim != settings.m_lpfRxFIRlog2Decim) ||
-        (settings.m_lpfRxFIRBW != m_settings.m_lpfRxFIRBW) ||
-        (settings.m_lpfRxFIRGain != m_settings.m_lpfRxFIRGain) || force)
+    if (settingsKeys.contains("devSampleRate") ||
+        settingsKeys.contains("lpfRxFIREnable") ||
+        settingsKeys.contains("lpfRxFIRlog2Decim") ||
+        settingsKeys.contains("lpfRxFIRBW") ||
+        settingsKeys.contains("m_lpfRxFIRGain") || force)
     {
         if (plutoBox)
         {
@@ -630,7 +484,7 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
         forwardChangeRxDSP = (m_settings.m_devSampleRate != settings.m_devSampleRate) || force;
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if (settingsKeys.contains("log2Decim") || force)
     {
         if (m_sourceThread)
         {
@@ -641,14 +495,14 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
         forwardChangeRxDSP = true;
     }
 
-    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    if (settingsKeys.contains("iqOrder") || force)
     {
         if (m_sourceThread) {
             m_sourceThread->setIQOrder(settings.m_iqOrder);
         }
     }
 
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
+    if (settingsKeys.contains("LOppmTenths") || force)
     {
         if (plutoBox) {
             plutoBox->setLOPPMTenths(settings.m_LOppmTenths);
@@ -658,12 +512,12 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
     std::vector<std::string> params;
     bool paramsToSet = false;
 
-    if ((m_settings.m_rxCenterFrequency != settings.m_rxCenterFrequency)
-        || (m_settings.m_fcPosRx != settings.m_fcPosRx)
-        || (m_settings.m_log2Decim != settings.m_log2Decim)
-        || (m_settings.m_devSampleRate != settings.m_devSampleRate)
-        || (m_settings.m_rxTransverterMode != settings.m_rxTransverterMode)
-        || (m_settings.m_rxTransverterDeltaFrequency != settings.m_rxTransverterDeltaFrequency) || force)
+    if (settingsKeys.contains("rxCenterFrequency")
+        || settingsKeys.contains("fcPosRx")
+        || settingsKeys.contains("log2Decim")
+        || settingsKeys.contains("devSampleRate")
+        || settingsKeys.contains("rxTransverterMode")
+        || settingsKeys.contains("rxTransverterDeltaFrequency") || force)
     {
         qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                 settings.m_rxCenterFrequency,
@@ -678,7 +532,7 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
         paramsToSet = true;
         forwardChangeRxDSP = true;
 
-        if ((m_settings.m_fcPosRx != settings.m_fcPosRx) || force)
+        if (settingsKeys.contains("fcPosRx") || force)
         {
             if (m_sourceThread)
             {
@@ -688,13 +542,13 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
         }
     }
 
-    if ((m_settings.m_lpfBWRx != settings.m_lpfBWRx) || force)
+    if (settingsKeys.contains("lpfBWRx") || force)
     {
         params.push_back(QString(tr("in_voltage_rf_bandwidth=%1").arg(settings.m_lpfBWRx)).toStdString());
         paramsToSet = true;
     }
 
-    if ((m_settings.m_rx0AntennaPath != settings.m_rx0AntennaPath) || force)
+    if (settingsKeys.contains("rx0AntennaPath") || force)
     {
         QString rfPortStr;
         PlutoSDRMIMOSettings::translateRFPathRx(settings.m_rx0AntennaPath, rfPortStr);
@@ -702,7 +556,7 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
         paramsToSet = true;
     }
 
-    if ((m_settings.m_rx1AntennaPath != settings.m_rx1AntennaPath) || force)
+    if (settingsKeys.contains("rx1AntennaPath") || force)
     {
         QString rfPortStr;
         PlutoSDRMIMOSettings::translateRFPathRx(settings.m_rx1AntennaPath, rfPortStr);
@@ -710,7 +564,7 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
         paramsToSet = true;
     }
 
-    if ((m_settings.m_rx0GainMode != settings.m_rx0GainMode) || force)
+    if (settingsKeys.contains("rx0GainMode") || force)
     {
         QString gainModeStr;
         PlutoSDRMIMOSettings::translateGainMode(settings.m_rx0GainMode, gainModeStr);
@@ -718,7 +572,7 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
         paramsToSet = true;
     }
 
-    if ((m_settings.m_rx1GainMode != settings.m_rx1GainMode) || force)
+    if (settingsKeys.contains("rx1GainMode") || force)
     {
         QString gainModeStr;
         PlutoSDRMIMOSettings::translateGainMode(settings.m_rx1GainMode, gainModeStr);
@@ -726,31 +580,31 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
         paramsToSet = true;
     }
 
-    if ((m_settings.m_rx0Gain != settings.m_rx0Gain) || force)
+    if (settingsKeys.contains("rx0Gain") || force)
     {
         params.push_back(QString(tr("in_voltage0_hardwaregain=%1").arg(settings.m_rx0Gain)).toStdString());
         paramsToSet = true;
     }
 
-    if ((m_settings.m_rx1Gain != settings.m_rx1Gain) || force)
+    if (settingsKeys.contains("rx1Gain") || force)
     {
         params.push_back(QString(tr("in_voltage1_hardwaregain=%1").arg(settings.m_rx1Gain)).toStdString());
         paramsToSet = true;
     }
 
-    if ((m_settings.m_hwBBDCBlock != settings.m_hwBBDCBlock) || force)
+    if (settingsKeys.contains("hwBBDCBlock") || force)
     {
         params.push_back(QString(tr("in_voltage_bb_dc_offset_tracking_en=%1").arg(settings.m_hwBBDCBlock ? 1 : 0)).toStdString());
         paramsToSet = true;
     }
 
-    if ((m_settings.m_hwRFDCBlock != settings.m_hwRFDCBlock) || force)
+    if (settingsKeys.contains("hwRFDCBlock") || force)
     {
         params.push_back(QString(tr("in_voltage_rf_dc_offset_tracking_en=%1").arg(settings.m_hwRFDCBlock ? 1 : 0)).toStdString());
         paramsToSet = true;
     }
 
-    if ((m_settings.m_hwIQCorrection != settings.m_hwIQCorrection) || force)
+    if (settingsKeys.contains("hwIQCorrection") || force)
     {
         params.push_back(QString(tr("in_voltage_quadrature_tracking_en=%1").arg(settings.m_hwIQCorrection ? 1 : 0)).toStdString());
         paramsToSet = true;
@@ -759,11 +613,11 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
     // Tx
 
     // Change affecting device sample rate chain and other buddies
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-        (m_settings.m_lpfTxFIREnable != settings.m_lpfTxFIREnable) ||
-        (m_settings.m_lpfTxFIRlog2Interp != settings.m_lpfTxFIRlog2Interp) ||
-        (settings.m_lpfTxFIRBW != m_settings.m_lpfTxFIRBW) ||
-        (settings.m_lpfTxFIRGain != m_settings.m_lpfTxFIRGain) || force)
+    if (settingsKeys.contains("devSampleRate") ||
+        settingsKeys.contains("lpfTxFIREnable") ||
+        settingsKeys.contains("lpfTxFIRlog2Interp") ||
+        settingsKeys.contains("lpfTxFIRBW") ||
+        settingsKeys.contains("lpfTxFIRGain") || force)
     {
         plutoBox->setFIR(
             settings.m_devSampleRate,
@@ -786,10 +640,8 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
         forwardChangeTxDSP = (m_settings.m_devSampleRate != settings.m_devSampleRate) || force;
     }
 
-    if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    if (settingsKeys.contains("log2Interp") || force)
     {
-        reverseAPIKeys.append("log2Interp");
-
         if (m_sinkThread != 0)
         {
             m_sinkThread->setLog2Interpolation(settings.m_log2Interp);
@@ -799,13 +651,12 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
         forwardChangeTxDSP = true;
     }
 
-    if (force || (m_settings.m_txCenterFrequency != settings.m_txCenterFrequency)
-        || (m_settings.m_log2Interp != settings.m_log2Interp)
-        || (m_settings.m_fcPosTx != settings.m_fcPosTx)
-        || (m_settings.m_devSampleRate != settings.m_devSampleRate)
-        || (m_settings.m_txTransverterMode != settings.m_txTransverterMode)
-        || (m_settings.m_txTransverterDeltaFrequency != settings.m_txTransverterDeltaFrequency))
-
+    if (force || settingsKeys.contains("txCenterFrequency")
+        || settingsKeys.contains("log2Interp")
+        || settingsKeys.contains("fcPosTx")
+        || settingsKeys.contains("devSampleRate")
+        || settingsKeys.contains("txTransverterMode")
+        || settingsKeys.contains("txTransverterDeltaFrequency"))
     {
         qint64 deviceCenterFrequency = DeviceSampleSink::calculateDeviceCenterFrequency(
             settings.m_txCenterFrequency,
@@ -825,42 +676,37 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
 
     }
 
-    if ((m_settings.m_lpfBWTx != settings.m_lpfBWTx) || force)
+    if (settingsKeys.contains("lpfBWTx") || force)
     {
-        reverseAPIKeys.append("lpfBWTx");
         params.push_back(QString(tr("out_voltage_rf_bandwidth=%1").arg(settings.m_lpfBWTx)).toStdString());
         paramsToSet = true;
     }
 
-    if ((m_settings.m_tx0AntennaPath != settings.m_tx0AntennaPath) || force)
+    if (settingsKeys.contains("tx0AntennaPath") || force)
     {
-        reverseAPIKeys.append("tx0AntennaPath");
         QString rfPortStr;
         PlutoSDRMIMOSettings::translateRFPathTx(settings.m_tx0AntennaPath, rfPortStr);
         params.push_back(QString(tr("out_voltage0_rf_port_select=%1").arg(rfPortStr)).toStdString());
         paramsToSet = true;
     }
 
-    if ((m_settings.m_tx1AntennaPath != settings.m_tx1AntennaPath) || force)
+    if (settingsKeys.contains("tx1AntennaPath") || force)
     {
-        reverseAPIKeys.append("tx1AntennaPath");
         QString rfPortStr;
         PlutoSDRMIMOSettings::translateRFPathTx(settings.m_tx1AntennaPath, rfPortStr);
         params.push_back(QString(tr("out_voltage1_rf_port_select=%1").arg(rfPortStr)).toStdString());
         paramsToSet = true;
     }
 
-    if ((m_settings.m_tx0Att != settings.m_tx0Att) || force)
+    if (settingsKeys.contains("tx0Att") || force)
     {
-        reverseAPIKeys.append("tx0Att");
         float attF = settings.m_tx0Att * 0.25f;
         params.push_back(QString(tr("out_voltage0_hardwaregain=%1").arg(attF)).toStdString());
         paramsToSet = true;
     }
 
-    if ((m_settings.m_tx1Att != settings.m_tx1Att) || force)
+    if (settingsKeys.contains("tx1Att") || force)
     {
-        reverseAPIKeys.append("tx1Att");
         float attF = settings.m_tx1Att * 0.25f;
         params.push_back(QString(tr("out_voltage1_hardwaregain=%1").arg(attF)).toStdString());
         paramsToSet = true;
@@ -870,16 +716,20 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
         plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (forwardChangeRxDSP)
     {
@@ -923,12 +773,12 @@ int PlutoSDRMIMO::webapiSettingsPutPatch(
     PlutoSDRMIMOSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigurePlutoSDRMIMO *msg = MsgConfigurePlutoSDRMIMO::create(settings, force);
+    MsgConfigurePlutoSDRMIMO *msg = MsgConfigurePlutoSDRMIMO::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigurePlutoSDRMIMO *msgToGUI = MsgConfigurePlutoSDRMIMO::create(settings, force);
+        MsgConfigurePlutoSDRMIMO *msgToGUI = MsgConfigurePlutoSDRMIMO::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -1165,7 +1015,7 @@ int PlutoSDRMIMO::webapiRun(
     }
 }
 
-void PlutoSDRMIMO::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const PlutoSDRMIMOSettings& settings, bool force)
+void PlutoSDRMIMO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const PlutoSDRMIMOSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(2); // MIMO
