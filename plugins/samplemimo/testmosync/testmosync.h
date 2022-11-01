@@ -42,20 +42,22 @@ public:
 
 	public:
 		const TestMOSyncSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureTestMOSync* create(const TestMOSyncSettings& settings, bool force)
-		{
-			return new MsgConfigureTestMOSync(settings, force);
+		static MsgConfigureTestMOSync* create(const TestMOSyncSettings& settings, const QList<QString>& settingsKeys, bool force) {
+			return new MsgConfigureTestMOSync(settings, settingsKeys, force);
 		}
 
 	private:
 		TestMOSyncSettings m_settings;
+        QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureTestMOSync(const TestMOSyncSettings& settings, bool force) :
+		MsgConfigureTestMOSync(const TestMOSyncSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
+            m_settingsKeys(settingsKeys),
 			m_force(force)
 		{ }
 	};
@@ -162,7 +164,7 @@ private:
 
     void startWorker();
     void stopWorker();
-	bool applySettings(const TestMOSyncSettings& settings, bool force);
+	bool applySettings(const TestMOSyncSettings& settings, const QList<QString>& settingsKeys, bool force);
 };
 
 #endif // PLUGINS_SAMPLEMIMO_TESTMOSYNC_TESTMOSYNC_H_

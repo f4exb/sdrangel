@@ -54,6 +54,7 @@ private:
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	TestMOSyncSettings m_settings;
+    QList<QString> m_settingsKeys;
 	QTimer m_updateTimer;
     QTimer m_statusTimer;
 	TestMOSync* m_sampleMIMO;

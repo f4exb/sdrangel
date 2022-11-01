@@ -103,6 +103,7 @@ void TestMOSyncGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
+    m_forceSettings = true;
 	sendSettings();
 }
 
@@ -154,7 +155,13 @@ bool TestMOSyncGui::handleMessage(const Message& message)
     {
         qDebug("TestMOSyncGui::handleMessage: message: MsgConfigureTestMOSync");
         const TestMOSync::MsgConfigureTestMOSync& cfg = (TestMOSync::MsgConfigureTestMOSync&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -212,9 +219,10 @@ void TestMOSyncGui::updateHardware()
     if (m_doApplySettings)
     {
         qDebug() << "TestMOSyncGui::updateHardware";
-        TestMOSync::MsgConfigureTestMOSync* message = TestMOSync::MsgConfigureTestMOSync::create(m_settings, m_forceSettings);
+        TestMOSync::MsgConfigureTestMOSync* message = TestMOSync::MsgConfigureTestMOSync::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleMIMO->getInputMessageQueue()->push(message);
         m_forceSettings = false;
+        m_settingsKeys.clear();
         m_updateTimer.stop();
     }
 }
@@ -252,6 +260,7 @@ void TestMOSyncGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
     ui->glSpectrum->setCenterFrequency(m_settings.m_centerFrequency);
+    m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
@@ -259,6 +268,7 @@ void TestMOSyncGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
     ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
+    m_settingsKeys.append("sampleRate");
     sendSettings();
 }
 
@@ -270,6 +280,7 @@ void TestMOSyncGui::on_interp_currentIndexChanged(int index)
 
     m_settings.m_log2Interp = index;
     ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
+    m_settingsKeys.append("log2Interp");
     sendSettings();
 }
 
@@ -310,6 +321,10 @@ void TestMOSyncGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
 
         sendSettings();
     }

@@ -65,7 +65,7 @@ void TestMOSync::destroy()
 
 void TestMOSync::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 bool TestMOSync::startTx()
@@ -143,12 +143,12 @@ bool TestMOSync::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureTestMOSync* message = MsgConfigureTestMOSync::create(m_settings, true);
+    MsgConfigureTestMOSync* message = MsgConfigureTestMOSync::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureTestMOSync* messageToGUI = MsgConfigureTestMOSync::create(m_settings, true);
+        MsgConfigureTestMOSync* messageToGUI = MsgConfigureTestMOSync::create(m_settings, QList<QString>(), true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
@@ -197,12 +197,12 @@ void TestMOSync::setSinkCenterFrequency(qint64 centerFrequency, int index)
     TestMOSyncSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureTestMOSync* message = MsgConfigureTestMOSync::create(settings, false);
+    MsgConfigureTestMOSync* message = MsgConfigureTestMOSync::create(settings, QList<QString>{"centerFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureTestMOSync* messageToGUI = MsgConfigureTestMOSync::create(settings, false);
+        MsgConfigureTestMOSync* messageToGUI = MsgConfigureTestMOSync::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
@@ -214,7 +214,7 @@ bool TestMOSync::handleMessage(const Message& message)
         MsgConfigureTestMOSync& conf = (MsgConfigureTestMOSync&) message;
         qDebug() << "TestMOSync::handleMessage: MsgConfigureTestMOSync";
 
-        bool success = applySettings(conf.getSettings(), conf.getForce());
+        bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
         if (!success) {
             qDebug("TestMOSync::handleMessage: config error");
@@ -259,30 +259,22 @@ void TestMOSync::setFeedSpectrumIndex(unsigned int feedSpectrumIndex)
     }
 }
 
-bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
+bool TestMOSync::applySettings(const TestMOSyncSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    QList<QString> reverseAPIKeys;
+    qDebug() << "TestMOSync::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
     bool forwardChangeTxDSP = false;
 
-    qDebug() << "TestMOSync::applySettings: common: "
-        << " m_sampleRate: " << settings.m_sampleRate
-        << " m_centerFrequency: " << settings.m_centerFrequency
-        << " m_log2Interp: " << settings.m_log2Interp
-        << " m_fcPosTx: " << settings.m_fcPosTx
-        << " force: " << force;
-
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
-    {
+    if (settingsKeys.contains("centerFrequency") || force) {
         forwardChangeTxDSP = true;
     }
 
-    if ((m_settings.m_sampleRate != settings.m_sampleRate)
-       || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    if (settingsKeys.contains("sampleRate")
+       || settingsKeys.contains("log2Interp") || force)
     {
         m_sampleMOFifo.resize(SampleMOFifo::getSizePolicy(m_settings.m_sampleRate));
     }
 
-    if ((m_settings.m_sampleRate != settings.m_sampleRate) || force)
+    if (settingsKeys.contains("sampleRate") || force)
     {
         if (m_sinkWorker) {
             m_sinkWorker->setSamplerate(settings.m_sampleRate);
@@ -291,7 +283,7 @@ bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
         forwardChangeTxDSP = true;
     }
 
-    if ((m_settings.m_fcPosTx != settings.m_fcPosTx) || force)
+    if (settingsKeys.contains("fcPosTx") || force)
     {
         if (m_sinkWorker) {
             m_sinkWorker->setFcPos((int) settings.m_fcPosTx);
@@ -300,7 +292,7 @@ bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
         forwardChangeTxDSP = true;
     }
 
-    if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    if (settingsKeys.contains("log2Interp") || force)
     {
         if (m_sinkWorker)
         {
@@ -319,7 +311,12 @@ bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif1);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
     return true;
 }
 
@@ -392,12 +389,12 @@ int TestMOSync::webapiSettingsPutPatch(
     TestMOSyncSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureTestMOSync *msg = MsgConfigureTestMOSync::create(settings, force);
+    MsgConfigureTestMOSync *msg = MsgConfigureTestMOSync::create(settings, deviceSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureTestMOSync *msgToGUI = MsgConfigureTestMOSync::create(settings, force);
+        MsgConfigureTestMOSync *msgToGUI = MsgConfigureTestMOSync::create(settings, deviceSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 

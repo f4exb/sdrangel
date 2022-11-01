@@ -40,6 +40,8 @@ struct TestMOSyncSettings {
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const TestMOSyncSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* PLUGINS_SAMPLEMIMO_TESTMOSYNC_TESTMOSYNCSETTINGS_H_ */
