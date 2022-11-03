@@ -224,6 +224,15 @@ void RemoteTCPInput::applySettings(const RemoteTCPInputSettings& settings, const
     std::ostringstream os;
     bool forwardChange = false;
 
+    // Should this only be applied if not applied on remote?
+    if (settingsKeys.contains("dcBlock") || settingsKeys.contains("iqCorrection") || force)
+    {
+        m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
+        qDebug("RemoteTCPInput::applySettings: corrections: DC block: %s IQ imbalance: %s",
+                settings.m_dcBlock ? "true" : "false",
+                settings.m_iqCorrection ? "true" : "false");
+    }
+
     if (settingsKeys.contains("centerFrequency") || force) {
         forwardChange = true;
     }

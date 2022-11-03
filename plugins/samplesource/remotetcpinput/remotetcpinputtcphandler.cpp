@@ -41,6 +41,7 @@ RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler(SampleSinkFifo *sampleFifo, D
     m_fillBuffer(true),
     m_timer(this),
     m_reconnectTimer(this),
+    m_sdra(false),
     m_converterBuffer(nullptr),
     m_converterBufferNbSamples(0),
     m_settings()
@@ -218,6 +219,18 @@ void RemoteTCPInputTCPHandler::setTunerGain(int gain)
     }
 }
 
+void RemoteTCPInputTCPHandler::setGainByIndex(int index)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    quint8 request[5];
+    request[0] = RemoteTCPProtocol::setGainByIndex;
+    RemoteTCPProtocol::encodeUInt32(&request[1], index);
+    if (m_dataSocket) {
+        m_dataSocket->write((char*)request, sizeof(request));
+    }
+}
+
 void RemoteTCPInputTCPHandler::setFreqCorrection(int correction)
 {
     QMutexLocker mutexLocker(&m_mutex);
@@ -260,7 +273,7 @@ void RemoteTCPInputTCPHandler::setDirectSampling(bool enabled)
 
     quint8 request[5];
     request[0] = RemoteTCPProtocol::setDirectSampling;
-    RemoteTCPProtocol::encodeUInt32(&request[1], enabled);
+    RemoteTCPProtocol::encodeUInt32(&request[1], enabled ? 3 : 0);
     if (m_dataSocket) {
         m_dataSocket->write((char*)request, sizeof(request));
     }
@@ -388,10 +401,14 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
         setFreqCorrection(settings.m_loPpmCorrection);
     }
     if (settingsKeys.contains("dcBlock") || force) {
-        setDCOffsetRemoval(settings.m_dcBlock);
+        if (m_sdra) {
+            setDCOffsetRemoval(settings.m_dcBlock);
+        }
     }
     if (settingsKeys.contains("iqCorrection") || force) {
-        setIQCorrection(settings.m_iqCorrection);
+        if (m_sdra) {
+            setIQCorrection(settings.m_iqCorrection);
+        }
     }
     if (settingsKeys.contains("biasTee") || force) {
         setBiasTee(settings.m_biasTee);
@@ -400,7 +417,9 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
         setDirectSampling(settings.m_directSampling);
     }
     if (settingsKeys.contains("log2Decim") || force) {
-        setDecimation(settings.m_log2Decim);
+        if (m_sdra) {
+            setDecimation(settings.m_log2Decim);
+        }
     }
     if (settingsKeys.contains("devSampleRate") || force) {
         setSampleRate(settings.m_devSampleRate);
@@ -417,17 +436,21 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
     for (int i = 1; i < 3; i++)
     {
         if (settingsKeys.contains(QString("gain[%1]").arg(i)) || force) {
-            //setIFGain(i, 20 + settings.m_gain[i]);
+            setIFGain(i, settings.m_gain[i]);
         }
     }
     if (settingsKeys.contains("rfBW") || force) {
         setBandwidth(settings.m_rfBW);
     }
     if (settingsKeys.contains("inputFrequencyOffset") || force) {
-        setChannelFreqOffset(settings.m_inputFrequencyOffset);
+        if (m_sdra) {
+            setChannelFreqOffset(settings.m_inputFrequencyOffset);
+        }
     }
     if (settingsKeys.contains("channelGain") || force) {
-        setChannelGain(settings.m_channelGain);
+        if (m_sdra) {
+            setChannelGain(settings.m_channelGain);
+        }
     }
     if ((settings.m_channelSampleRate != m_settings.m_channelSampleRate) || force)
     {
@@ -441,12 +464,16 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
             m_tcpBuf = new char[m_sampleFifo->size()*2*4];
             m_fillBuffer = true; // So we reprime FIFO
         }
-        setChannelSampleRate(settings.m_channelSampleRate);
+        if (m_sdra) {
+            setChannelSampleRate(settings.m_channelSampleRate);
+        }
         clearBuffer();
     }
     if (settingsKeys.contains("sampleBits") || force)
     {
-        setSampleBitDepth(settings.m_sampleBits);
+        if (m_sdra) {
+            setSampleBitDepth(settings.m_sampleBits);
+        }
         clearBuffer();
     }
 
@@ -536,6 +563,7 @@ void RemoteTCPInputTCPHandler::dataReadyRead()
 
                 if (protocol == "RTL0")
                 {
+                    m_sdra = false;
                     bytesRead = m_dataSocket->read((char *)&metaData[4], RemoteTCPProtocol::m_rtl0MetaDataSize-4);
 
                     RemoteTCPProtocol::Device tuner = (RemoteTCPProtocol::Device)RemoteTCPProtocol::extractUInt32(&metaData[4]);
@@ -557,6 +585,7 @@ void RemoteTCPInputTCPHandler::dataReadyRead()
                 }
                 else if (protocol == "SDRA")
                 {
+                    m_sdra = true;
                     bytesRead = m_dataSocket->read((char *)&metaData[4], RemoteTCPProtocol::m_sdraMetaDataSize-4);
 
                     RemoteTCPProtocol::Device device = (RemoteTCPProtocol::Device)RemoteTCPProtocol::extractUInt32(&metaData[4]);
@@ -704,22 +733,22 @@ void RemoteTCPInputTCPHandler::convert(int nbSamples)
     }
     else if ((m_settings.m_sampleBits == 8) && (SDR_RX_SAMP_SZ == 16))
     {
-        qint8 *in = (qint8 *)m_tcpBuf;
+        quint8 *in = (quint8 *)m_tcpBuf;
         qint16 *out = (qint16 *)m_converterBuffer;
 
         for (int is = 0; is < nbSamples*2; is++) {
-            out[is] = (((qint16)in[is]) - 128);
+            out[is] = (((qint16)in[is]) - 128) << 8;
         }
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(out), nbSamples*sizeof(Sample));
     }
     else if ((m_settings.m_sampleBits == 8) && (SDR_RX_SAMP_SZ == 24))
     {
-        qint8 *in = (qint8 *)m_tcpBuf;
+        quint8 *in = (quint8 *)m_tcpBuf;
         qint32 *out = (qint32 *)m_converterBuffer;
 
         for (int is = 0; is < nbSamples*2; is++) {
-            out[is] = (((qint32)in[is]) - 128) << 8; // Only shift by 8, rather than 16, to match levels of native driver
+            out[is] = (((qint32)in[is]) - 128) << 16;
         }
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(out), nbSamples*sizeof(Sample));

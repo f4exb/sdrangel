@@ -137,6 +137,7 @@ private:
     QTimer m_timer;
     QTimer m_reconnectTimer;
     QDateTime m_prevDateTime;
+    bool m_sdra;
 
     int32_t *m_converterBuffer;
     uint32_t m_converterBufferNbSamples;
@@ -155,6 +156,7 @@ private:
     void setCenterFrequency(quint64 frequency);
     void setTunerAGC(bool agc);
     void setTunerGain(int gain);
+    void setGainByIndex(int gain);
     void setFreqCorrection(int correction);
     void setIFGain(quint16 stage, quint16 gain);
     void setAGC(bool agc);
