@@ -241,8 +241,6 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
                 ui->sampleBits->removeItem(ui->sampleBits->count() - 1);
             }
         }
-        ui->dcOffset->setVisible(sdra);
-        ui->iqImbalance->setVisible(sdra);
         if (sdra && (ui->decim->count() != 7))
         {
             ui->decim->addItem("2");

@@ -30,11 +30,11 @@ This is the correction to be applied to the remote device's local oscillator in 
 
 <h3>5: DC offset correction</h3>
 
-Check this button to enable DC offset correction on the remote device. This is only supported when the remote server is SDRangel.
+Check this button to enable DC offset correction.
 
 <h3>6: IQ imbalance correction</h3>
 
-Check this button to enable IQ imbalance correction on the remote device. This is only supported when the remote server is SDRangel.
+Check this button to enable IQ imbalance correction.
 
 <h3>7: Bias tee</h3>
 
