@@ -27,6 +27,7 @@
 #include "gui/glspectrumgui.h"
 // #include "gui/channelwindow.h"
 #include "gui/workspace.h"
+#include "gui/rollupcontents.h"
 #include "device/devicegui.h"
 #include "device/deviceset.h"
 #include "device/deviceapi.h"
@@ -337,6 +338,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                 }
 
                 rxChannelGUI->restoreGeometry(rxChannelGUI->getGeometryBytes());
+                rxChannelGUI->getRollupContents()->arrangeRollups();
                 rxChannelGUI->setDeviceType(ChannelGUI::DeviceRx);
                 rxChannelGUI->setDeviceSetIndex(m_deviceSetIndex);
                 rxChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
@@ -465,6 +467,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                 }
 
                 txChannelGUI->restoreGeometry(txChannelGUI->getGeometryBytes());
+                txChannelGUI->getRollupContents()->arrangeRollups();
                 txChannelGUI->setDeviceType(ChannelGUI::DeviceTx);
                 txChannelGUI->setDeviceSetIndex(m_deviceSetIndex);
                 txChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
@@ -638,6 +641,7 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
                 }
 
                 channelGUI->restoreGeometry(channelGUI->getGeometryBytes());
+                channelGUI->getRollupContents()->arrangeRollups();
                 channelGUI->setDeviceType(ChannelGUI::DeviceMIMO);
                 channelGUI->setDeviceSetIndex(m_deviceSetIndex);
                 channelGUI->setIndex(channelAPI->getIndexInDeviceSet());

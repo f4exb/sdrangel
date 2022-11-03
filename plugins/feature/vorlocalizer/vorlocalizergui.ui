@@ -327,7 +327,7 @@ QToolTip{background-color: white; color: black;}</string>
    <property name="minimumSize">
     <size>
      <width>0</width>
-     <height>145</height>
+     <height>0</height>
     </size>
    </property>
    <property name="windowTitle">

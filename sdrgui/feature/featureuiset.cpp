@@ -199,12 +199,14 @@ void FeatureUISet::loadFeatureSetSettings(
             {
                 (*workspaces)[originalWorkspaceIndex]->addToMdiArea((QMdiSubWindow*) featureGUI);
                 featureGUI->restoreGeometry(featureGUI->getGeometryBytes());
+                featureGUI->getRollupContents()->arrangeRollups();
             }
             else if (currentWorkspace) // restore in current workspace
             {
                 featureGUI->setWorkspaceIndex(currentWorkspace->getIndex());
                 currentWorkspace->addToMdiArea((QMdiSubWindow*) featureGUI);
                 featureGUI->restoreGeometry(featureGUI->getGeometryBytes());
+                featureGUI->getRollupContents()->arrangeRollups();
             }
         }
     }

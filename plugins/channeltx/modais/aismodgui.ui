@@ -1022,7 +1022,7 @@
    <property name="minimumSize">
     <size>
      <width>0</width>
-     <height>200</height>
+     <height>0</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -1178,21 +1178,20 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>GLSpectrum</class>
+   <class>ValueDialZ</class>
    <extends>QWidget</extends>
-   <header>gui/glspectrum.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLSpectrumGUI</class>
-   <extends>QWidget</extends>
-   <header>gui/glspectrumgui.h</header>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1208,15 +1207,16 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDialZ</class>
+   <class>GLSpectrum</class>
    <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
+   <header>gui/glspectrum.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
+   <class>GLSpectrumGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrumgui.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>LevelMeterVU</class>

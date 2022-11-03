@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>390</width>
-    <height>0</height>
+    <height>643</height>
    </size>
   </property>
   <property name="font">
@@ -730,9 +730,20 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -746,17 +757,6 @@
    <extends>QWidget</extends>
    <header>gui/glspectrumgui.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>LevelMeterVU</class>

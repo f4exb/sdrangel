@@ -629,7 +629,7 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
    <property name="minimumSize">
     <size>
      <width>200</width>
-     <height>200</height>
+     <height>0</height>
     </size>
    </property>
    <property name="windowTitle">

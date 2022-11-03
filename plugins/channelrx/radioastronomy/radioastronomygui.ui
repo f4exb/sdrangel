@@ -1743,7 +1743,7 @@ This should be 2.73K when pointing at the sky</string>
    <property name="minimumSize">
     <size>
      <width>200</width>
-     <height>320</height>
+     <height>0</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -3419,7 +3419,7 @@ This should be close to the expected difference in power between hot and cold ca
    <property name="minimumSize">
     <size>
      <width>200</width>
-     <height>230</height>
+     <height>0</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -5157,12 +5157,6 @@ This should be close to the expected difference in power between hot and cold ca
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>QChartView</class>
    <extends>QGraphicsView</extends>
    <header>QtCharts</header>
@@ -5171,6 +5165,12 @@ This should be close to the expected difference in power between hot and cold ca
    <class>WrappingDateTimeEdit</class>
    <extends>QDateTimeEdit</extends>
    <header>gui/wrappingdatetimeedit.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
