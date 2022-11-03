@@ -393,14 +393,14 @@ void HackRFInputGui::on_centerFrequency_changed(quint64 value)
 void HackRFInputGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
+    m_settingsKeys.append("devSampleRate");
 
-    if (!m_sampleRateMode)
-    {
+    if (!m_sampleRateMode) {
         m_settings.m_devSampleRate <<= m_settings.m_log2Decim;
-        m_settingsKeys.append("devSampleRate");
     }
 
-    if(m_settings.m_autoBBF){
+    if (m_settings.m_autoBBF)
+    {
         m_settings.m_bandwidth = hackrf_compute_baseband_filter_bw(m_settings.m_devSampleRate);
         m_settingsKeys.append("bandwidth");
         ui->bbFilter->blockSignals(true);
