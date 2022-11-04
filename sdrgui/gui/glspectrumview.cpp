@@ -2239,7 +2239,6 @@ void GLSpectrumView::measureAdjacentChannelPower()
 void GLSpectrumView::measureOccupiedBandwidth()
 {
     float hzPerBin = m_sampleRate / (float) m_fftSize;
-    int bins = m_measurementBandwidth / hzPerBin;
     int start = frequencyToBin(m_centerFrequency + m_measurementCenterFrequencyOffset);
     float totalPower, power = 0.0f;
     int step = 0;
@@ -3303,26 +3302,27 @@ void GLSpectrumView::applyChanges()
     m_peakPowerMaxStr = m_linear ? "8.000e-10" : "-100.0";
     m_peakPowerUnits = m_linear ? "" : "dB";
 
-    bool fftSizeChanged = true;
+    bool waterfallFFTSizeChanged = true;
 
     if (m_waterfallBuffer) {
-        fftSizeChanged = m_waterfallBuffer->width() != m_nbBins;
+        waterfallFFTSizeChanged = m_waterfallBuffer->width() != m_nbBins;
     }
 
     bool windowSizeChanged = m_waterfallTextureHeight != m_waterfallHeight;
 
-    if (fftSizeChanged || windowSizeChanged)
+    if (waterfallFFTSizeChanged || windowSizeChanged)
     {
         if (m_waterfallBuffer) {
             delete m_waterfallBuffer;
         }
 
         m_waterfallBuffer = new QImage(m_nbBins, m_waterfallHeight, QImage::Format_ARGB32);
-
         m_waterfallBuffer->fill(qRgb(0x00, 0x00, 0x00));
+
         if (m_waterfallHeight > 0) {
             m_glShaderWaterfall.initTexture(*m_waterfallBuffer);
         }
+
         m_waterfallBufferPos = 0;
 
         if (m_3DSpectrogramBuffer) {
@@ -3330,13 +3330,20 @@ void GLSpectrumView::applyChanges()
         }
 
         m_3DSpectrogramBuffer = new QImage(m_nbBins, m_waterfallHeight, QImage::Format_Grayscale8);
-
         m_3DSpectrogramBuffer->fill(qRgb(0x00, 0x00, 0x00));
+
         if (m_waterfallHeight > 0) {
             m_glShaderSpectrogram.initTexture(*m_3DSpectrogramBuffer);
         }
+
         m_3DSpectrogramBufferPos = 0;
+
+        m_waterfallTextureHeight = m_waterfallHeight;
+        m_waterfallTexturePos = 0;
+        m_3DSpectrogramTextureHeight = m_waterfallHeight;
+        m_3DSpectrogramTexturePos = 0;
     }
+
     m_glShaderSpectrogram.initColorMapTexture(m_colorMapName);
     m_glShaderColorMap.initColorMapTexture(m_colorMapName);
     m_colorMap = ColorMap::getColorMap(m_colorMapName);
@@ -3349,23 +3356,26 @@ void GLSpectrumView::applyChanges()
         ((quint8*)&m_waterfallPalette[i])[3] = 255;
     }
 
-    if (fftSizeChanged)
-    {
-        if (m_histogramBuffer)
-        {
-            delete m_histogramBuffer;
-            m_histogramBuffer = nullptr;
-        }
+    bool histogramFFTSizeChanged = true;
 
-        if (m_histogram) {
-            delete[] m_histogram;
-            m_histogram = nullptr;
+    if (m_histogramBuffer) {
+        histogramFFTSizeChanged = m_histogramBuffer->width() != m_nbBins;
+    }
+
+    if (histogramFFTSizeChanged)
+    {
+        if (m_histogramBuffer) {
+            delete m_histogramBuffer;
         }
 
         m_histogramBuffer = new QImage(m_nbBins, 100, QImage::Format_RGB32);
 
         m_histogramBuffer->fill(qRgb(0x00, 0x00, 0x00));
         m_glShaderHistogram.initTexture(*m_histogramBuffer, QOpenGLTexture::ClampToEdge);
+
+        if (m_histogram) {
+            delete[] m_histogram;
+        }
 
         m_histogram = new quint8[100 * m_nbBins];
         memset(m_histogram, 0x00, 100 * m_nbBins);
@@ -3374,14 +3384,6 @@ void GLSpectrumView::applyChanges()
 
         m_q3ColorMap.allocate(4*(m_nbBins+1));
         std::fill(m_q3ColorMap.m_array, m_q3ColorMap.m_array+4*(m_nbBins+1), 0.0f);
-    }
-
-    if (fftSizeChanged || windowSizeChanged)
-    {
-        m_waterfallTextureHeight = m_waterfallHeight;
-        m_waterfallTexturePos = 0;
-        m_3DSpectrogramTextureHeight = m_waterfallHeight;
-        m_3DSpectrogramTexturePos = 0;
     }
 
     m_q3TickTime.allocate(4*m_timeScale.getTickList().count());
