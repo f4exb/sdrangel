@@ -244,9 +244,9 @@ void PerseusGui::updateFrequencyLimits()
     }
     else
     {
-        minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
-        maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
-        ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+        minLimit = minLimit < 0 ? 0 : minLimit > 99999 ? 99999 : minLimit;
+        maxLimit = maxLimit < 0 ? 0 : maxLimit > 99999 ? 99999 : maxLimit;
+        ui->centerFrequency->setValueRange(5, minLimit, maxLimit);
     }
     qDebug("PerseusGui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
 }
