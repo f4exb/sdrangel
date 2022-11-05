@@ -42,7 +42,7 @@ MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgStartStop, Message)
 const quint64 RTLSDRInput::frequencyLowRangeMin = 0UL;
 const quint64 RTLSDRInput::frequencyLowRangeMax = 275000UL;
 const quint64 RTLSDRInput::frequencyHighRangeMin = 24000UL;
-const quint64 RTLSDRInput::frequencyHighRangeMax = 1900000UL;
+const quint64 RTLSDRInput::frequencyHighRangeMax = 2400000UL;
 const int RTLSDRInput::sampleRateLowRangeMin = 225001;
 const int RTLSDRInput::sampleRateLowRangeMax = 300000;
 const int RTLSDRInput::sampleRateHighRangeMin = 900001;
