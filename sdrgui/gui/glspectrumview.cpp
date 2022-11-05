@@ -2194,7 +2194,7 @@ void GLSpectrumView::measurePeaks()
         }
     }
 
-    delete spectrum;
+    delete[] spectrum;
 }
 
 // Calculate and display channel power
@@ -4893,6 +4893,7 @@ bool GLSpectrumView::eventFilter(QObject *object, QEvent *event)
                 m_glShaderSpectrogram.rotateZ(-5.0f);
             }
             break;
+        case Qt::Key_Equal: // So you don't need to press shift
         case Qt::Key_Plus:
             if (keyEvent->modifiers() & Qt::ControlModifier) {
                 m_glShaderSpectrogram.userScaleZ(1.1f);
