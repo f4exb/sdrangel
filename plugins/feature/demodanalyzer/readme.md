@@ -11,7 +11,7 @@ Rx plugins are:
   - DAB demodulator
   - DSD (FM digital voice) demodulator
   - NFM demodulator
-  - Packer demodulator
+  - Packet demodulator
   - SSB demodulator
   - WFM demodulator
 
