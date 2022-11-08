@@ -369,19 +369,6 @@ void AISDemodGUI::filter()
 
 void AISDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
-    if (widget == ui->scopeContainer)
-    {
-        if (rollDown)
-        {
-            // Make wide enough for scope controls
-            setMinimumWidth(716);
-        }
-        else
-        {
-            setMinimumWidth(352);
-        }
-    }
-
     RollupContents *rollupContents = getRollupContents();
 
     if (rollupContents->hasExpandableWidgets()) {
@@ -391,7 +378,8 @@ void AISDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     }
 
     int h = rollupContents->height() + getAdditionalHeight();
-    resize(width(), h);
+    int w = std::max(width(), rollupContents->minimumWidth() + gripSize() * 2);
+    resize(w, h);
 
     rollupContents->saveState(m_rollupState);
     applySettings();
