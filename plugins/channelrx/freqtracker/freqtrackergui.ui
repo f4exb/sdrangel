@@ -40,6 +40,12 @@
      <height>151</height>
     </rect>
    </property>
+   <property name="minimumSize">
+    <size>
+     <width>300</width>
+     <height>0</height>
+    </size>
+   </property>
    <property name="windowTitle">
     <string>Settings</string>
    </property>
@@ -815,6 +821,17 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>GLSpectrum</class>
    <extends>QWidget</extends>
    <header>gui/glspectrum.h</header>
@@ -831,17 +848,6 @@
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>LevelMeterSignalDB</class>
-   <extends>QWidget</extends>
-   <header>gui/levelmeter.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>

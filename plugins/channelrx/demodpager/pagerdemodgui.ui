@@ -816,9 +816,15 @@
     <rect>
      <x>20</x>
      <y>400</y>
-     <width>351</width>
+     <width>714</width>
      <height>341</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>714</width>
+     <height>0</height>
+    </size>
    </property>
    <property name="windowTitle">
     <string>Waveforms</string>
@@ -1019,10 +1025,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
-   <container>1</container>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>LevelMeterSignalDB</class>
@@ -1031,9 +1036,10 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>GLScope</class>

@@ -97,6 +97,7 @@ protected:
     void updateIndexLabel();
     int getAdditionalHeight() const { return 22 + 22; }  // height of top and bottom bars
     void setHighlighted(bool highlighted);
+    int gripSize() { return m_resizer.m_gripSize; } // size in pixels of resize grip around the window
 
     DeviceType m_deviceType;
     int m_deviceSetIndex;

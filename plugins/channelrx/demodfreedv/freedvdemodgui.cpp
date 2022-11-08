@@ -257,7 +257,8 @@ void FreeDVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     }
 
     int h = rollupContents->height() + getAdditionalHeight();
-    resize(width(), h);
+    int w = std::max(width(), rollupContents->minimumWidth() + gripSize() * 2);
+    resize(w, h);
 
     rollupContents->saveState(m_rollupState);
     applySettings();

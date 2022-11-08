@@ -316,19 +316,15 @@ void SSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 
     RollupContents *rollupContents = getRollupContents();
 
-    if (rollupContents->hasExpandableWidgets())
-    {
-        qDebug("SSBDemodGUI::onWidgetRolled: set vertical policy expanding");
+    if (rollupContents->hasExpandableWidgets()) {
         setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
-    }
-    else
-    {
-        qDebug("SSBDemodGUI::onWidgetRolled: set vertical policy fixed");
+    } else {
         setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
     }
 
     int h = rollupContents->height() + getAdditionalHeight();
-    resize(width(), h);
+    int w = std::max(width(), rollupContents->minimumWidth() + gripSize() * 2);
+    resize(w, h);
 
     rollupContents->saveState(m_rollupState);
     applySettings();
