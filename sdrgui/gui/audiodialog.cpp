@@ -20,6 +20,7 @@
 
 #include <QTreeWidgetItem>
 #include <QMessageBox>
+#include <QFileDialog>
 
 #include "audio/audiodevicemanager.h"
 #include "audiodialog.h"
@@ -259,6 +260,44 @@ void AudioDialogX::on_outputUDPChannelMode_currentIndexChanged(int index)
     check();
 }
 
+void AudioDialogX::on_record_toggled(bool checked)
+{
+    ui->showFileDialog->setEnabled(!checked);
+    m_outputDeviceInfo.recordToFile = checked;
+}
+
+void AudioDialogX::on_showFileDialog_clicked(bool checked)
+{
+    (void) checked;
+    QFileDialog fileDialog(
+        this,
+        tr("Save record file"),
+        m_outputDeviceInfo.fileRecordName,
+        tr("WAV Files (*.wav)")
+    );
+
+    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
+    fileDialog.setFileMode(QFileDialog::AnyFile);
+    QStringList fileNames;
+
+    if (fileDialog.exec())
+    {
+        fileNames = fileDialog.selectedFiles();
+
+        if (fileNames.size() > 0)
+        {
+            m_outputDeviceInfo.fileRecordName = fileNames.at(0);
+		    ui->fileNameText->setText(m_outputDeviceInfo.fileRecordName);
+        }
+    }
+}
+
+void AudioDialogX::on_recordSilenceTime_valueChanged(int value)
+{
+    m_outputDeviceInfo.recordSilenceTime = value;
+    ui->recordSilenceText->setText(tr("%1").arg(value / 10.0, 0, 'f', 1));
+}
+
 void AudioDialogX::updateOutputDisplay()
 {
     ui->outputSampleRate->blockSignals(true);
@@ -274,6 +313,11 @@ void AudioDialogX::updateOutputDisplay()
     ui->outputUDPChannelMode->setCurrentIndex((int) m_outputDeviceInfo.udpChannelMode);
     ui->outputUDPChannelCodec->setCurrentIndex((int) m_outputDeviceInfo.udpChannelCodec);
     ui->decimationFactor->setCurrentIndex(m_outputDeviceInfo.udpDecimationFactor == 0 ? 0 : m_outputDeviceInfo.udpDecimationFactor - 1);
+    ui->record->setChecked(m_outputDeviceInfo.recordToFile);
+    ui->fileNameText->setText(m_outputDeviceInfo.fileRecordName);
+    ui->showFileDialog->setEnabled(!m_outputDeviceInfo.recordToFile);
+    ui->recordSilenceTime->setValue(m_outputDeviceInfo.recordSilenceTime);
+    ui->recordSilenceText->setText(tr("%1").arg(m_outputDeviceInfo.recordSilenceTime / 10.0, 0, 'f', 1));
 
     updateOutputSDPString();
 
@@ -293,6 +337,9 @@ void AudioDialogX::updateOutputDeviceInfo()
     m_outputDeviceInfo.udpChannelMode = (AudioOutputDevice::UDPChannelMode) ui->outputUDPChannelMode->currentIndex();
     m_outputDeviceInfo.udpChannelCodec = (AudioOutputDevice::UDPChannelCodec) ui->outputUDPChannelCodec->currentIndex();
     m_outputDeviceInfo.udpDecimationFactor = ui->decimationFactor->currentIndex() + 1;
+    m_outputDeviceInfo.recordToFile = ui->record->isChecked();
+    m_outputDeviceInfo.fileRecordName = ui->fileNameText->text();
+    m_outputDeviceInfo.recordSilenceTime = ui->recordSilenceTime->value();
 }
 
 void AudioDialogX::updateOutputSDPString()

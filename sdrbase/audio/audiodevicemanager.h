@@ -62,7 +62,9 @@ public:
             udpUseRTP(false),
             udpChannelMode(AudioOutputDevice::UDPChannelLeft),
             udpChannelCodec(AudioOutputDevice::UDPCodecL16),
-            udpDecimationFactor(1)
+            udpDecimationFactor(1),
+            recordToFile(false),
+            recordSilenceTime(0)
         {}
         void resetToDefaults() {
             sampleRate = m_defaultAudioSampleRate;
@@ -73,6 +75,9 @@ public:
             udpChannelMode = AudioOutputDevice::UDPChannelLeft;
             udpChannelCodec = AudioOutputDevice::UDPCodecL16;
             udpDecimationFactor = 1;
+            fileRecordName.clear();
+            recordToFile = false;
+            recordSilenceTime = 0;
         }
         int sampleRate;
         QString udpAddress;
@@ -82,6 +87,9 @@ public:
         AudioOutputDevice::UDPChannelMode udpChannelMode;
         AudioOutputDevice::UDPChannelCodec udpChannelCodec;
         uint32_t udpDecimationFactor;
+        QString fileRecordName;
+        bool recordToFile;
+        int recordSilenceTime; //!< 100's ms
         friend QDataStream& operator<<(QDataStream& ds, const OutputDeviceInfo& info);
         friend QDataStream& operator>>(QDataStream& ds, OutputDeviceInfo& info);
     };

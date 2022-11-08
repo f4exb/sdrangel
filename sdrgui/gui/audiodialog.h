@@ -52,6 +52,9 @@ private slots:
     void on_decimationFactor_currentIndexChanged(int index);
     void on_outputUDPChannelCodec_currentIndexChanged(int index);
     void on_outputUDPChannelMode_currentIndexChanged(int index);
+	void on_record_toggled(bool checked);
+    void on_showFileDialog_clicked(bool checked);
+    void on_recordSilenceTime_valueChanged(int value);
 };
 
 #endif // INCLUDE_AUDIODIALOG_H
