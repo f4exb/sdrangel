@@ -54,7 +54,7 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_helpURL = "plugins/samplemimo/testmosync/readme.md";
     QWidget *contents = getContents();
 	ui->setupUi(contents);
-    setSizePolicy(contents->sizePolicy());
+    sizeToContents();
 
     getContents()->setStyleSheet("#TestMOSyncGui { background-color: rgb(64, 64, 64); }");
     m_sampleMIMO = (TestMOSync*) m_deviceUISet->m_deviceAPI->getSampleMIMO();

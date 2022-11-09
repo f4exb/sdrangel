@@ -60,7 +60,7 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSink = (SoapySDROutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    sizeToContents();
     getContents()->setStyleSheet("#SoapySDROutputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesink/soapysdroutput/readme.md";
 

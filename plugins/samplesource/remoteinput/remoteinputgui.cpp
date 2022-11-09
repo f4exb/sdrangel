@@ -25,7 +25,6 @@
 #include <QTime>
 #include <QDateTime>
 #include <QString>
-#include <QResizeEvent>
 
 #include "ui_remoteinputgui.h"
 #include "gui/colormapper.h"
@@ -73,7 +72,7 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	m_startingTimeStampms = 0;
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#RemoteInputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/remoteinput/readme.md";
 
@@ -150,12 +149,6 @@ bool RemoteInputGui::deserialize(const QByteArray& data)
     {
         return false;
     }
-}
-
-void RemoteInputGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 bool RemoteInputGui::handleMessage(const Message& message)

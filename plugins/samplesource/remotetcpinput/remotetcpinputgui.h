@@ -96,9 +96,6 @@ public:
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
-protected:
-    void resizeEvent(QResizeEvent* size);
-
 private:
     Ui::RemoteTCPInputGui* ui;
 

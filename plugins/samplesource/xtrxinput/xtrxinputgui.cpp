@@ -21,7 +21,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QResizeEvent>
 
 #include <algorithm>
 
@@ -51,7 +50,7 @@ XTRXInputGUI::XTRXInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_XTRXInput = (XTRXInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#XTRXInputGUI { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/xtrxinput/readme.md";
 
@@ -124,12 +123,6 @@ bool XTRXInputGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void XTRXInputGUI::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 bool XTRXInputGUI::handleMessage(const Message& message)

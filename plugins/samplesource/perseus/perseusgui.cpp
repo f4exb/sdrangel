@@ -18,7 +18,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QResizeEvent>
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
@@ -45,7 +44,7 @@ PerseusGui::PerseusGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (PerseusInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#PerseusGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/perseus/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -105,13 +104,6 @@ bool PerseusGui::deserialize(const QByteArray& data)
 		return false;
 	}
 }
-
-void PerseusGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
-}
-
 
 bool PerseusGui::handleMessage(const Message& message)
 {

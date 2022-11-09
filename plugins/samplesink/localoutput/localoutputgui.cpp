@@ -28,7 +28,6 @@
 #include <QNetworkReply>
 #include <QJsonParseError>
 #include <QJsonObject>
-#include <QResizeEvent>
 
 #include "ui_localoutputgui.h"
 #include "gui/colormapper.h"
@@ -63,7 +62,7 @@ LocalOutputGui::LocalOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#LocalOutputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesink/localoutput/readme.md";
 
@@ -131,12 +130,6 @@ bool LocalOutputGui::deserialize(const QByteArray& data)
     {
         return false;
     }
-}
-
-void LocalOutputGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 bool LocalOutputGui::handleMessage(const Message& message)

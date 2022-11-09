@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <QDebug>
 #include <QMessageBox>
-#include <QResizeEvent>
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -49,7 +48,7 @@ PlutoSDROutputGUI::PlutoSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
     m_sampleSink = (PlutoSDROutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#PlutoSDROutputGUI { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesink/plutosdroutput/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -123,12 +122,6 @@ bool PlutoSDROutputGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void PlutoSDROutputGUI::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 bool PlutoSDROutputGUI::handleMessage(const Message& message)

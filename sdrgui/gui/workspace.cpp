@@ -444,6 +444,14 @@ void Workspace::stackSubWindows()
     // Spacing between windows
     const int spacing = 2;
 
+    // Shrink devices to minimum size, in case they have been maximized
+    for (auto window : devices)
+    {
+        QSize size = window->minimumSizeHint();
+        size = size.expandedTo(window->minimumSize());
+        window->resize(size);
+    }
+
     // Calculate width and height needed for devices
     int deviceMinWidth = 0;
     int deviceTotalMinHeight = 0;

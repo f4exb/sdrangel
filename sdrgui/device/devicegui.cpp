@@ -111,6 +111,12 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_shrinkButton->setIcon(shrinkIcon);
     m_shrinkButton->setToolTip("Adjust window to minimum size");
 
+    m_maximizeButton = new QPushButton();
+    m_maximizeButton->setFixedSize(20, 20);
+    QIcon maximizeIcon(":/maximize.png");
+    m_maximizeButton->setIcon(maximizeIcon);
+    m_maximizeButton->setToolTip("Adjust window to maximum size");
+
     m_closeButton = new QPushButton();
     m_closeButton->setFixedSize(20, 20);
     QIcon closeIcon(":/cross.png");
@@ -153,6 +159,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_topLayout->addWidget(m_helpButton);
     m_topLayout->addWidget(m_moveButton);
     m_topLayout->addWidget(m_shrinkButton);
+    m_topLayout->addWidget(m_maximizeButton);
     m_topLayout->addWidget(m_closeButton);
 
     m_centerLayout = new QHBoxLayout();
@@ -186,6 +193,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     connect(m_helpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
     connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
+    connect(m_maximizeButton, SIGNAL(clicked()), this, SLOT(maximizeWindow()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
     connect(m_showSpectrumButton, SIGNAL(clicked()), this, SLOT(showSpectrumHandler()));
@@ -214,6 +222,7 @@ DeviceGUI::~DeviceGUI()
     delete m_statusLabel;
     delete m_closeButton;
     delete m_shrinkButton;
+    delete m_maximizeButton;
     delete m_moveButton;
     delete m_helpButton;
     delete m_titleLabel;
@@ -224,6 +233,37 @@ DeviceGUI::~DeviceGUI()
     delete m_settingsButton;
     delete m_indexLabel;
     qDebug("DeviceGUI::~DeviceGUI: end");
+}
+
+// Size the window according to the size of the m_contents widget
+// This allows the window min/max size and size policy to be set by the .ui file
+void DeviceGUI::sizeToContents()
+{
+    // Set window size policy to the size policy of m_contents widget
+    QSizePolicy policy = getContents()->sizePolicy();
+    setSizePolicy(policy);
+
+    // If size policy is fixed, hide widgets that resize the window 
+    if ((policy.verticalPolicy() == QSizePolicy::Fixed) && (policy.horizontalPolicy() == QSizePolicy::Fixed))
+    {
+        m_shrinkButton->hide();
+        m_maximizeButton->hide();
+        // The resize grip can magically reappear after being maximized, so delete it, to prevent this
+        delete m_sizeGripBottomRight;
+        m_sizeGripBottomRight = nullptr;
+    }
+
+    // Calculate min/max size for window. This is min/max size of contents, plus
+    // extra needed for window frame and title bar
+    QSize size;
+    size = getContents()->maximumSize();
+    size.setHeight(std::min(size.height() + getAdditionalHeight(), QWIDGETSIZE_MAX));
+    size.setWidth(std::min(size.width() + m_resizer.m_gripSize * 2, QWIDGETSIZE_MAX));
+    setMaximumSize(size);
+    size = getContents()->minimumSize();
+    size.setHeight(std::min(size.height() + getAdditionalHeight(), QWIDGETSIZE_MAX));
+    size.setWidth(std::min(size.width() + m_resizer.m_gripSize * 2, QWIDGETSIZE_MAX));
+    setMinimumSize(size);
 }
 
 void DeviceGUI::setWorkspaceIndex(int index)
@@ -352,7 +392,13 @@ void DeviceGUI::showAllChannelsHandler()
 void DeviceGUI::shrinkWindow()
 {
     qDebug("DeviceGUI::shrinkWindow");
+    showNormal(); // In case it had been maximized
     adjustSize();
+}
+
+void DeviceGUI::maximizeWindow()
+{
+    showMaximized();
 }
 
 void DeviceGUI::deviceSetPresetsDialog()

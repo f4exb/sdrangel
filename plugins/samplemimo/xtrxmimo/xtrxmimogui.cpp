@@ -20,7 +20,6 @@
 #include <QString>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QResizeEvent>
 
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
@@ -67,7 +66,7 @@ XTRXMIMOGUI::XTRXMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#XTRXMIMOGUI { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplemimo/xtrxmimo/readme.md";
     m_xtrxMIMO = (XTRXMIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
@@ -140,12 +139,6 @@ bool XTRXMIMOGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void XTRXMIMOGUI::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 void XTRXMIMOGUI::handleInputMessages()

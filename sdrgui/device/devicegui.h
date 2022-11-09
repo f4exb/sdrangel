@@ -68,6 +68,7 @@ public:
 	virtual MessageQueue* getInputMessageQueue() = 0;
 
     QWidget *getContents() { return m_contents; }
+    void sizeToContents();
     void setDeviceType(DeviceType type);
     DeviceType getDeviceType() const { return m_deviceType; }
     void setTitle(const QString& title);
@@ -97,6 +98,7 @@ protected:
 
 protected slots:
     void shrinkWindow();
+    void maximizeWindow();
 
 private:
     bool isOnMovingPad();
@@ -113,6 +115,7 @@ private:
     QPushButton *m_helpButton;
     QPushButton *m_moveButton;
     QPushButton *m_shrinkButton;
+    QPushButton *m_maximizeButton;
     QPushButton *m_closeButton;
     QPushButton *m_showSpectrumButton;
     QPushButton *m_showAllChannelsButton;

@@ -23,7 +23,6 @@
 #include <QString>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QResizeEvent>
 
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
@@ -68,7 +67,7 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#BladeRF2MIMOGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplemimo/bladerf2mimo/readme.md";
     m_sampleMIMO = (BladeRF2MIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
@@ -143,12 +142,6 @@ bool BladeRF2MIMOGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void BladeRF2MIMOGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 void BladeRF2MIMOGui::displaySettings()

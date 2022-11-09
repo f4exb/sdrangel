@@ -22,7 +22,6 @@
 #include <QString>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QResizeEvent>
 
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
@@ -58,7 +57,7 @@ MetisMISOGui::MetisMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_txSampleRate = 48000;
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#MetisMISOGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplemimo/metismiso/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -111,12 +110,6 @@ void MetisMISOGui::setCenterFrequency(qint64 centerFrequency)
 
     displaySettings();
     sendSettings();
-}
-
-void MetisMISOGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 QByteArray MetisMISOGui::serialize() const

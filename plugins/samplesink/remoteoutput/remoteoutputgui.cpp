@@ -20,7 +20,6 @@
 #include <QDateTime>
 #include <QString>
 #include <QMessageBox>
-#include <QResizeEvent>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -68,7 +67,7 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#RemoteOutputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesink/remoteoutput/readme.md";
 
@@ -143,12 +142,6 @@ bool RemoteOutputSinkGui::deserialize(const QByteArray& data)
         blockApplySettings(false);
 		return false;
 	}
-}
-
-void RemoteOutputSinkGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 bool RemoteOutputSinkGui::handleMessage(const Message& message)

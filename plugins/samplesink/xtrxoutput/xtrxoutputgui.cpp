@@ -19,7 +19,6 @@
 
 #include <QDebug>
 #include <QMessageBox>
-#include <QResizeEvent>
 
 #include "ui_xtrxoutputgui.h"
 #include "gui/colormapper.h"
@@ -48,7 +47,7 @@ XTRXOutputGUI::XTRXOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_XTRXOutput = (XTRXOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#XTRXOutputGUI { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesink/xtrxoutput/readme.md";
 
@@ -121,12 +120,6 @@ bool XTRXOutputGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void XTRXOutputGUI::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 bool XTRXOutputGUI::handleMessage(const Message& message)

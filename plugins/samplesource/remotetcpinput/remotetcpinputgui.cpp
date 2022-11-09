@@ -20,7 +20,6 @@
 #include <QMessageBox>
 #include <QDateTime>
 #include <QString>
-#include <QResizeEvent>
 
 #include "ui_remotetcpinputgui.h"
 #include "gui/colormapper.h"
@@ -54,7 +53,7 @@ RemoteTCPInputGui::RemoteTCPInputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#RemoteTCPInputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/remotetcpinput/readme.md";
 
@@ -136,12 +135,6 @@ bool RemoteTCPInputGui::deserialize(const QByteArray& data)
     {
         return false;
     }
-}
-
-void RemoteTCPInputGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 bool RemoteTCPInputGui::handleMessage(const Message& message)
