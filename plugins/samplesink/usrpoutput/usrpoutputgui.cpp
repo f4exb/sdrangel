@@ -18,7 +18,6 @@
 
 #include <QDebug>
 #include <QMessageBox>
-#include <QResizeEvent>
 
 #include "ui_usrpoutputgui.h"
 #include "gui/colormapper.h"
@@ -47,7 +46,7 @@ USRPOutputGUI::USRPOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_usrpOutput = (USRPOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#USRPOutputGUI { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesink/usrpoutput/readme.md";
 
@@ -152,12 +151,6 @@ bool USRPOutputGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void USRPOutputGUI::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 void USRPOutputGUI::updateFrequencyLimits()

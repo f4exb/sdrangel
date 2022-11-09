@@ -23,7 +23,6 @@
 #include <QString>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QResizeEvent>
 
 #include "ui_kiwisdrgui.h"
 #include "plugin/pluginapi.h"
@@ -68,7 +67,7 @@ KiwiSDRGui::KiwiSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusColors.push_back("rgb(232, 85, 232)");  // Disconnected (magenta)
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#KiwiSDRGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/kiwisdr/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -121,12 +120,6 @@ bool KiwiSDRGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void KiwiSDRGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 void KiwiSDRGui::on_startStop_toggled(bool checked)

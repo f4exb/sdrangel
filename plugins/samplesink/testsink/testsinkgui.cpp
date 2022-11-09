@@ -53,7 +53,7 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_helpURL = "plugins/samplesink/testsink/readme.md";
     QWidget *contents = getContents();
 	ui->setupUi(contents);
-    setSizePolicy(contents->sizePolicy());
+    sizeToContents();
     setMinimumSize(m_MinimumWidth, m_MinimumHeight);
     getContents()->setStyleSheet("#TestSinkGui { background-color: rgb(64, 64, 64); }");
     m_sampleSink = (TestSinkOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();

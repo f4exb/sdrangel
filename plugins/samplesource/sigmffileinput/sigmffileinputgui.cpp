@@ -22,7 +22,6 @@
 #include <QString>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QResizeEvent>
 
 #include "ui_sigmffileinputgui.h"
 #include "plugin/pluginapi.h"
@@ -66,7 +65,7 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
     m_helpURL = "plugins/samplesource/sigmffileinput/readme.md";
     QWidget *contents = getContents();
 	ui->setupUi(contents);
-    setSizePolicy(contents->sizePolicy());
+    sizeToContents();
     contents->setStyleSheet("#SigMFFileInputGUI { background-color: rgb(64, 64, 64); }");
 
     ui->fileNameText->setText(m_metaFileName);

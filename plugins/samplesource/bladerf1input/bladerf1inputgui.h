@@ -72,9 +72,6 @@ private:
 	bool handleMessage(const Message& message);
     void makeUIConnections();
 
-protected:
-    void resizeEvent(QResizeEvent* size);
-
 private slots:
     void handleInputMessages();
 	void on_centerFrequency_changed(quint64 value);

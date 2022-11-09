@@ -22,7 +22,6 @@
 #include <QString>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QResizeEvent>
 
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
@@ -57,7 +56,7 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/samplemimo/testmi/readme.md";
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#TestMIGui { background-color: rgb(64, 64, 64); }");
 
     m_sampleMIMO = m_deviceUISet->m_deviceAPI->getSampleMIMO();
@@ -124,12 +123,6 @@ bool TestMIGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void TestMIGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 void TestMIGui::on_startStop_toggled(bool checked)

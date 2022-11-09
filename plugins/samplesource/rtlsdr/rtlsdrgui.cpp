@@ -18,7 +18,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QResizeEvent>
 
 #include "rtlsdrgui.h"
 
@@ -46,7 +45,7 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (RTLSDRInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#RTLSDRGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/rtlsdr/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -126,12 +125,6 @@ bool RTLSDRGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void RTLSDRGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 bool RTLSDRGui::handleMessage(const Message& message)

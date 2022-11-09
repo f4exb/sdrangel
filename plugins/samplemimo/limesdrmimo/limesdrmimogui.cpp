@@ -22,7 +22,6 @@
 #include <QString>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QResizeEvent>
 
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
@@ -70,7 +69,7 @@ LimeSDRMIMOGUI::LimeSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#LimeSDRMIMOGUI { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplemimo/limesdrmimo/readme.md";
     m_limeSDRMIMO = (LimeSDRMIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
@@ -143,12 +142,6 @@ bool LimeSDRMIMOGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void LimeSDRMIMOGUI::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 void LimeSDRMIMOGUI::handleInputMessages()

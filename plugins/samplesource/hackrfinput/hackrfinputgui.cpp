@@ -20,7 +20,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QResizeEvent>
 
 #include <libhackrf/hackrf.h>
 
@@ -50,7 +49,7 @@ HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (HackRFInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#HackRFInputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/hackrfinput/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -116,12 +115,6 @@ bool HackRFInputGui::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
-}
-
-void HackRFInputGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 bool HackRFInputGui::handleMessage(const Message& message)

@@ -18,7 +18,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QResizeEvent>
 
 #include <libairspyhf/airspyhf.h>
 
@@ -47,7 +46,7 @@ AirspyHFGui::AirspyHFGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (AirspyHFInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#AirspyHFGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/airspyhf/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -106,12 +105,6 @@ bool AirspyHFGui::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
-}
-
-void AirspyHFGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 bool AirspyHFGui::handleMessage(const Message& message)

@@ -17,7 +17,6 @@
 
 #include <QDebug>
 #include <QMessageBox>
-#include <QResizeEvent>
 
 #include <libhackrf/hackrf.h>
 
@@ -49,7 +48,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceSampleSink = (HackRFOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sizeToContents();
     getContents()->setStyleSheet("#HackRFOutputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesink/hackrfoutput/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -111,12 +110,6 @@ bool HackRFOutputGui::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
-}
-
-void HackRFOutputGui::resizeEvent(QResizeEvent* size)
-{
-    adjustSize();
-    size->accept();
 }
 
 void HackRFOutputGui::blockApplySettings(bool block)
