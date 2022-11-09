@@ -29,6 +29,8 @@ double SciDoubleSpinBox::valueFromText(const QString &text) const
 
 QValidator::State SciDoubleSpinBox::validate(QString &input, int &pos) const
 {
+    (void) pos;
+
     bool ok;
     input.toDouble(&ok);
     if (ok) {
