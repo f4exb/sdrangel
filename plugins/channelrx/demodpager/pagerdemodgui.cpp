@@ -418,6 +418,9 @@ void PagerDemodGUI::filter()
 
 void PagerDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
+
     RollupContents *rollupContents = getRollupContents();
 
     if (rollupContents->hasExpandableWidgets()) {

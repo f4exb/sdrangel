@@ -475,6 +475,9 @@ void RadiosondeDemodGUI::filter()
 
 void RadiosondeDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
+
     RollupContents *rollupContents = getRollupContents();
 
     if (rollupContents->hasExpandableWidgets()) {

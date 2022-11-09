@@ -209,6 +209,9 @@ void RadioClockGUI::on_timezone_currentIndexChanged(int index)
 
 void RadioClockGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
+    (void) widget;
+    (void) rollDown;
+
     RollupContents *rollupContents = getRollupContents();
 
     if (rollupContents->hasExpandableWidgets()) {
