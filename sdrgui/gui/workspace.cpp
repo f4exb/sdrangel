@@ -448,7 +448,7 @@ void Workspace::stackSubWindows()
     for (auto window : devices)
     {
         QSize size = window->minimumSizeHint();
-        size.expandedTo(window->minimumSize());
+        size = size.expandedTo(window->minimumSize());
         window->resize(size);
     }
 

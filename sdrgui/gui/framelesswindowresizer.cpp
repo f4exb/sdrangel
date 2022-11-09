@@ -44,22 +44,26 @@ void FramelessWindowResizer::enableChildMouseTracking()
 
 bool FramelessWindowResizer::mouseOnTopBorder(QPoint pos) const
 {
-    return (pos.y() >= 0) && (pos.y() < m_gripSize);
+    return ((pos.y() >= 0) && (pos.y() < m_gripSize)
+         && (m_widget->sizePolicy().verticalPolicy() != QSizePolicy::Fixed));
 }
 
 bool FramelessWindowResizer::mouseOnBottomBorder(QPoint pos) const
 {
-    return (pos.y() > m_widget->height() - 1 - m_gripSize) && (pos.y() < m_widget->height());
+    return ((pos.y() > m_widget->height() - 1 - m_gripSize) && (pos.y() < m_widget->height())
+         && (m_widget->sizePolicy().verticalPolicy() != QSizePolicy::Fixed));
 }
 
 bool FramelessWindowResizer::mouseOnLeftBorder(QPoint pos) const
 {
-    return (pos.x() >= 0) && (pos.x() < m_gripSize);
+    return ((pos.x() >= 0) && (pos.x() < m_gripSize)
+         && (m_widget->sizePolicy().horizontalPolicy() != QSizePolicy::Fixed));
 }
 
 bool FramelessWindowResizer::mouseOnRightBorder(QPoint pos) const
 {
-    return (pos.x() > m_widget->width() - 1 - m_gripSize) && (pos.x() < m_widget->width());
+    return ((pos.x() > m_widget->width() - 1 - m_gripSize) && (pos.x() < m_widget->width())
+         && (m_widget->sizePolicy().horizontalPolicy() != QSizePolicy::Fixed));
 }
 
 bool FramelessWindowResizer::mouseOnBorder(QPoint pos) const
