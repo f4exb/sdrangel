@@ -641,6 +641,9 @@ void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const Output
     audioOutput->setUdpChannelMode(deviceInfo.udpChannelMode);
     audioOutput->setUdpChannelFormat(deviceInfo.udpChannelCodec, deviceInfo.udpChannelMode == AudioOutputDevice::UDPChannelStereo, deviceInfo.sampleRate);
     audioOutput->setUdpDecimation(deviceInfo.udpDecimationFactor);
+    audioOutput->setFileRecordName(deviceInfo.fileRecordName);
+    audioOutput->setRecordToFile(deviceInfo.recordToFile);
+    audioOutput->setRecordSilenceTime(deviceInfo.recordSilenceTime);
 
     qDebug("AudioDeviceManager::setOutputDeviceInfo: index: %d device: %s updated",
             outputDeviceIndex, qPrintable(deviceName));

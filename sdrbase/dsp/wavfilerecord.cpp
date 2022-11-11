@@ -111,6 +111,19 @@ void WavFileRecord::feed(const SampleVector::const_iterator& begin, const Sample
     }
 }
 
+void WavFileRecord::write(qint16 lSample, qint16 rSample)
+{
+    if (m_recordStart)
+    {
+        writeHeader();
+        m_recordStart = false;
+    }
+
+    m_sampleFile.write(reinterpret_cast<const char*>(&lSample), 2);
+    m_sampleFile.write(reinterpret_cast<const char*>(&rSample), 2);
+    m_byteCount += 4;
+}
+
 void WavFileRecord::start()
 {
 }

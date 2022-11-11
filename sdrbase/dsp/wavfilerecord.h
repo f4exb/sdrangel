@@ -97,6 +97,7 @@ public:
     void genUniqueFileName(uint deviceUID, int istream = -1);
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly) override;
+    void write(qint16 lSample, qint16 rSample); //!< write a single sample
     virtual void start() override;
     virtual void stop() override;
     virtual bool handleMessage(const Message& message) override;

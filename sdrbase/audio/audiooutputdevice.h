@@ -31,6 +31,7 @@ class QAudioOutput;
 class AudioFifo;
 class AudioOutputPipe;
 class AudioNetSink;
+class WavFileRecord;
 
 class SDRBASE_API AudioOutputDevice : QIODevice {
 public:
@@ -72,17 +73,26 @@ public:
 	void setUdpChannelFormat(UDPChannelCodec udpChannelCodec, bool stereo, int sampleRate);
 	void setUdpDecimation(uint32_t decimation);
 	void setVolume(float volume);
+    void setFileRecordName(const QString& fileRecordName);
+    void setRecordToFile(bool recordToFile);
+    void setRecordSilenceTime(int recordSilenceTime);
 
 private:
 	QRecursiveMutex m_mutex;
 	QAudioOutput* m_audioOutput;
 	AudioNetSink* m_audioNetSink;
+    WavFileRecord* m_wavFileRecord;
 	bool m_copyAudioToUdp;
 	UDPChannelMode m_udpChannelMode;
 	UDPChannelCodec m_udpChannelCodec;
 	uint m_audioUsageCount;
 	bool m_onExit;
 	float m_volume;
+    QString m_fileRecordName;
+    bool m_recordToFile;
+    int m_recordSilenceTime;
+    int m_recordSilenceNbSamples;
+    int m_recordSilenceCount;
 
 	std::list<AudioFifo*> m_audioFifos;
 	std::vector<qint32> m_mixBuffer;

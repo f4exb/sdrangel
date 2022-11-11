@@ -23,16 +23,22 @@
 #include "audiooutputdevice.h"
 #include "audiofifo.h"
 #include "audionetsink.h"
+#include "dsp/wavfilerecord.h"
 
 AudioOutputDevice::AudioOutputDevice() :
-	m_audioOutput(0),
-	m_audioNetSink(0),
-	m_copyAudioToUdp(false),
+	m_audioOutput(nullptr),
+	m_audioNetSink(nullptr),
+    m_wavFileRecord(nullptr),
+    m_copyAudioToUdp(false),
 	m_udpChannelMode(UDPChannelLeft),
 	m_udpChannelCodec(UDPCodecL16),
 	m_audioUsageCount(0),
 	m_onExit(false),
 	m_volume(1.0),
+    m_recordToFile(false),
+    m_recordSilenceTime(0),
+    m_recordSilenceNbSamples(0),
+    m_recordSilenceCount(0),
 	m_audioFifos()
 {
 }
@@ -114,14 +120,15 @@ bool AudioOutputDevice::start(int device, int rate)
 
         m_audioOutput = new QAudioOutput(devInfo, m_audioFormat);
         m_audioNetSink = new AudioNetSink(0, m_audioFormat.sampleRate(), false);
+        m_wavFileRecord = new WavFileRecord(m_audioFormat.sampleRate());
 		m_audioOutput->setVolume(m_volume);
+        m_recordSilenceNbSamples = (m_recordSilenceTime * m_audioFormat.sampleRate()) / 10; // time in 100'ś ms
 
         QIODevice::open(QIODevice::ReadOnly);
 
         m_audioOutput->start(this);
 
-        if (m_audioOutput->state() != QAudio::ActiveState)
-        {
+        if (m_audioOutput->state() != QAudio::ActiveState) {
             qWarning("AudioOutputDevice::start: cannot start");
         }
 //	}
@@ -139,8 +146,11 @@ void AudioOutputDevice::stop()
     m_audioOutput->stop();
     QIODevice::close();
     delete m_audioNetSink;
-    m_audioNetSink = 0;
+    m_audioNetSink = nullptr;
+    delete m_wavFileRecord;
+    m_wavFileRecord = nullptr;
     delete m_audioOutput;
+    m_audioOutput = nullptr;
 
 //    if (m_audioUsageCount > 0)
 //    {
@@ -161,14 +171,12 @@ void AudioOutputDevice::stop()
 void AudioOutputDevice::addFifo(AudioFifo* audioFifo)
 {
 	QMutexLocker mutexLocker(&m_mutex);
-
 	m_audioFifos.push_back(audioFifo);
 }
 
 void AudioOutputDevice::removeFifo(AudioFifo* audioFifo)
 {
 	QMutexLocker mutexLocker(&m_mutex);
-
 	m_audioFifos.remove(audioFifo);
 }
 
@@ -217,6 +225,63 @@ void AudioOutputDevice::setUdpDecimation(uint32_t decimation)
 	if (m_audioNetSink) {
 		m_audioNetSink->setDecimation(decimation);
 	}
+}
+
+void AudioOutputDevice::setFileRecordName(const QString& fileRecordName)
+{
+    if (!m_wavFileRecord) {
+        return;
+    }
+
+    QStringList dotBreakout = fileRecordName.split(QLatin1Char('.'));
+
+    if (dotBreakout.size() > 1) {
+        QString extension = dotBreakout.last();
+
+        if (extension != "wav") {
+            dotBreakout.last() = "wav";
+        }
+    }
+    else
+    {
+        dotBreakout.append("wav");
+    }
+
+    QString newFileRecordName = dotBreakout.join(QLatin1Char('.'));
+    QString fileBase;
+    FileRecordInterface::guessTypeFromFileName(newFileRecordName, fileBase);
+    qDebug("AudioOutputDevice::setFileRecordName: newFileRecordName: %s fileBase: %s", qPrintable(newFileRecordName), qPrintable(fileBase));
+    m_wavFileRecord->setFileName(fileBase);
+}
+
+void AudioOutputDevice::setRecordToFile(bool recordToFile)
+{
+    if (!m_wavFileRecord) {
+        return;
+    }
+
+    if (recordToFile)
+    {
+        if (!m_wavFileRecord->isRecording()) {
+            m_wavFileRecord->startRecording();
+        }
+    }
+    else
+    {
+        if (m_wavFileRecord->isRecording()) {
+            m_wavFileRecord->stopRecording();
+        }
+    }
+
+    m_recordToFile = recordToFile;
+    m_recordSilenceCount = 0;
+}
+
+void AudioOutputDevice::setRecordSilenceTime(int recordSilenceTime)
+{
+    m_recordSilenceNbSamples = (recordSilenceTime * m_audioFormat.sampleRate()) / 10; // time in 100'ś ms
+    m_recordSilenceCount = 0;
+    m_recordSilenceTime = recordSilenceTime;
 }
 
 qint64 AudioOutputDevice::readData(char* data, qint64 maxLen)
@@ -331,6 +396,36 @@ qint64 AudioOutputDevice::readData(char* data, qint64 maxLen)
 	            break;
 	        }
 		}
+
+        if ((m_recordToFile) && (m_wavFileRecord))
+        {
+            if ((sr == 0) && (sl == 0))
+            {
+                if (m_recordSilenceNbSamples <= 0)
+                {
+                    m_wavFileRecord->write(sl, sr);
+                    m_recordSilenceCount = 0;
+                }
+                else if (m_recordSilenceCount < m_recordSilenceNbSamples)
+                {
+                    m_wavFileRecord->write(sl, sr);
+                    m_recordSilenceCount++;
+                }
+                else
+                {
+                    m_wavFileRecord->stopRecording();
+                }
+            }
+            else
+            {
+                if (!m_wavFileRecord->isRecording()) {
+                    m_wavFileRecord->startRecording();
+                }
+
+                m_wavFileRecord->write(sl, sr);
+                m_recordSilenceCount = 0;
+            }
+        }
 	}
 
 	return samplesPerBuffer * 4;
