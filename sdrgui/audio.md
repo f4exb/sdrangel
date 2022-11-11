@@ -144,19 +144,42 @@ a=fmtp:96 cbr=1
 
 &#9758; With PCMA and PCMU and more recently G722 codecs it is possible to listen to the RTP stream directly in the browser using a [Janus WebRTC server](https://janus.conf.meetecho.com/). Please refer to the Wiki page "Networking audio" for detailed instructions.
 
-<h3>1.15 Cleanup registrations not in the list</h3>
+<h3>1.15 Record audio</h3>
+
+Use this button to toggle audio recording. Start or stop recording becomes effective only when the dialog is closed with the "OK" button.
+
+<h3>1.16 Select recording output file</h3>
+
+Click on the open file icon to open a file selection dialog that lets you specify the location and name of the output files.
+
+Each recording is written in a new file with the starting timestamp before the `.wav` extension in `yyyy-MM-ddTHH_mm_ss_zzz` format. It keeps the first dot limited groups of the filename before the `.wav` extension if there are two such groups or before the two last groups if there are more than two groups. Examples:
+
+  - Given file name: `test.wav` then a recording file will be like: `test.2020-08-05T21_39_07_974.wav`
+  - Given file name: `test.2020-08-05T20_36_15_974.wav` then a recording file will be like (with timestamp updated): `test.2020-08-05T21_41_21_173.wav`
+  - Given file name: `test.first.wav` then a recording file will be like: `test.2020-08-05T22_00_07_974.wav`
+  - Given file name: `record.test.first.eav` then a recording file will be like: `reocrd.test.2020-08-05T21_39_52_974.wav`
+
+If a filename is given without `.wav` extension then the `.wav` extension is appended automatically before the above algorithm is applied. If a filename is given with an extension different of `.wav` then the extension is replaced by `.wav` automatically before the above algorithm is applied.
+
+The file path currently being written (or last closed) appears at the right of the button.
+
+<h3>1.17 Record silence time</h3>
+
+This is the time in seconds (between 0.1 and 10.0) of silence (null samples) before recording stops. When non null samples come again this will start a new recording. Set the value to 0 to record continuously.
+
+<h3>1.18 Cleanup registrations not in the list</h3>
 
 Use this button to keep only the visible devices in the devices registrations. The devices registrations with custom parameters are kept in the preferences using the device names. This button makes some tidying up when devices are permanently removed.
 
-<h3>1.16 Unregister device</h3>
+<h3>1.19 Unregister device</h3>
 
 Use this button to remove the device from the devices registrations returning it to the unregistered state. Therefore when associated to an output stream or selected it will initially take default values and appear with the `D` indicator in the list.
 
-<h3>1.17 OK button</h3>
+<h3>1.20 OK button</h3>
 
 Use this button to confirm your changes and close dialog. Note that you can change parameters of only one device at a time.
 
-<h3>1.18 Cancel button</h3>
+<h3>1.21 Cancel button</h3>
 
 Use this button to dismiss your changes and close dialog.
 
