@@ -264,6 +264,9 @@ void DeviceGUI::sizeToContents()
     size.setHeight(std::min(size.height() + getAdditionalHeight(), QWIDGETSIZE_MAX));
     size.setWidth(std::min(size.width() + m_resizer.m_gripSize * 2, QWIDGETSIZE_MAX));
     setMinimumSize(size);
+
+    // Adjust to minimum size needed for widgets
+    adjustSize();
 }
 
 void DeviceGUI::setWorkspaceIndex(int index)

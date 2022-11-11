@@ -82,14 +82,6 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
-void DSDDemodGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
-}
-
 bool DSDDemodGUI::handleMessage(const Message& message)
 {
     if (DSDDemod::MsgConfigureDSDDemod::match(message))

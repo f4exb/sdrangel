@@ -128,16 +128,6 @@ void DemodAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 
     RollupContents *rollupContents = getRollupContents();
 
-    if (rollupContents->hasExpandableWidgets()) {
-        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
-    } else {
-        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
-    }
-
-    int h = rollupContents->height() + getAdditionalHeight();
-    int w = std::max(width(), rollupContents->minimumWidth() + gripSize() * 2);
-    resize(w, h);
-
     rollupContents->saveState(m_rollupState);
     applySettings();
 }
@@ -157,7 +147,6 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
     m_helpURL = "plugins/feature/demodanalyzer/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
-    setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 

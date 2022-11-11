@@ -70,9 +70,6 @@ public slots:
 	void channelMarkerChangedByCursor();
     void channelMarkerHighlightedByCursor();
 
-protected:
-    void resizeEvent(QResizeEvent* size);
-
 private:
     struct BERPoint
     {

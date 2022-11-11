@@ -46,7 +46,6 @@ AMBEGUI::AMBEGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     m_helpURL = "plugins/feature/ambe/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
-    setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
@@ -101,14 +100,6 @@ void AMBEGUI::setWorkspaceIndex(int index)
 {
     m_settings.m_workspaceIndex = index;
     m_feature->setWorkspaceIndex(index);
-}
-
-void AMBEGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 void AMBEGUI::onWidgetRolled(QWidget* widget, bool rollDown)

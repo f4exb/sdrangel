@@ -34,6 +34,7 @@ public:
     void restoreState(const RollupState& state);
     int arrangeRollups();
     bool hasExpandableWidgets();
+    virtual QSize minimumSizeHint() const override { return m_minimumSizeHint; }
 
 signals:
     void widgetRolled(QWidget* widget, bool rollDown);
@@ -59,6 +60,7 @@ private:
     static bool isRollupChild(QWidget *childWidget); //!< chidl is part of rollups (ex: not a dialog)
     // bool m_channelWidget;
     int m_newHeight;
+    QSize m_minimumSizeHint;
 };
 
 #endif // INCLUDE_ROLLUPCONTENTS_H

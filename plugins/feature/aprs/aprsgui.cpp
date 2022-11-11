@@ -436,7 +436,6 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     m_helpURL = "plugins/feature/aprs/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
-    setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
@@ -670,12 +669,13 @@ void APRSGUI::updateChannelList()
     ui->sourcePipes->blockSignals(false);
 }
 
-void APRSGUI::resizeEvent(QResizeEvent*)
+void APRSGUI::resizeEvent(QResizeEvent* event)
 {
     // Replot graphs to ensure Axis are visible
     plotWeather();
     plotTelemetry();
     plotMotion();
+    FeatureGUI::resizeEvent(event);
 }
 
 void APRSGUI::onMenuDialogCalled(const QPoint &p)

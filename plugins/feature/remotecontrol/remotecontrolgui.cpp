@@ -135,7 +135,6 @@ RemoteControlGUI::RemoteControlGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
     m_helpURL = "plugins/feature/remotecontrol/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
-    setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 

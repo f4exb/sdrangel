@@ -86,14 +86,6 @@ bool M17DemodGUI::deserialize(const QByteArray& data)
     }
 }
 
-void M17DemodGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
-}
-
 bool M17DemodGUI::handleMessage(const Message& message)
 {
     if (M17Demod::MsgConfigureM17Demod::match(message))

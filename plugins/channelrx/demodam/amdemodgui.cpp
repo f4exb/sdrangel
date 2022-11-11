@@ -18,7 +18,6 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
-#include <QResizeEvent>
 
 #include "amdemodgui.h"
 #include "amdemodssbdialog.h"
@@ -71,14 +70,6 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void AMDemodGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool AMDemodGUI::handleMessage(const Message& message)

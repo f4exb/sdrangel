@@ -20,7 +20,6 @@
 #include <QFileDialog>
 #include <QTime>
 #include <QDebug>
-#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
@@ -73,14 +72,6 @@ bool ChirpChatModGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void ChirpChatModGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool ChirpChatModGUI::handleMessage(const Message& message)

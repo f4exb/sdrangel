@@ -19,7 +19,6 @@
 #include <cmath>
 #include <QMessageBox>
 #include <QSerialPortInfo>
-#include <QResizeEvent>
 
 #include "SWGTargetAzimuthElevation.h"
 
@@ -70,14 +69,6 @@ bool GS232ControllerGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void GS232ControllerGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool GS232ControllerGUI::handleMessage(const Message& message)
@@ -137,6 +128,7 @@ void GS232ControllerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
     getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
@@ -155,7 +147,6 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     m_helpURL = "plugins/feature/gs232controller/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
-    setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 

@@ -47,9 +47,6 @@ public slots:
 	void channelMarkerChangedByCursor();
 	void channelMarkerHighlightedByCursor();
 
-protected:
-    void resizeEvent(QResizeEvent* size);
-
 private:
 	Ui::AMDemodGUI* ui;
 	PluginAPI* m_pluginAPI;

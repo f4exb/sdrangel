@@ -16,7 +16,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMessageBox>
-#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -69,14 +68,6 @@ bool SimplePTTGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void SimplePTTGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool SimplePTTGUI::handleMessage(const Message& message)
@@ -165,7 +156,6 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     m_helpURL = "plugins/feature/simpleptt/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
-    setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 

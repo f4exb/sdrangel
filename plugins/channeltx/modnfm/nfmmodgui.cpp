@@ -21,7 +21,6 @@
 #include <QTime>
 #include <QDebug>
 #include <QRegExp>
-#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
@@ -73,14 +72,6 @@ bool NFMModGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void NFMModGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool NFMModGUI::handleMessage(const Message& message)

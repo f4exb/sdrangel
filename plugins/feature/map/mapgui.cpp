@@ -163,18 +163,7 @@ void MapGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    RollupContents *rollupContents = getRollupContents();
-
-    if (rollupContents->hasExpandableWidgets()) {
-        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
-    } else {
-        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
-    }
-
-    int h = rollupContents->height() + getAdditionalHeight();
-    resize(width(), h);
-
-    rollupContents->saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -891,6 +880,8 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_webServer->addSubstitution("/map/map/map3d.html", "$CESIUM_ION_API_KEY$", cesiumIonAPIKey());
         //ui->web->page()->profile()->clearHttpCache();
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/map/map/map3d.html").arg(m_webPort)));
+        //ui->web->load(QUrl(QString("http://webglreport.com/")));
+        //ui->web->load(QUrl(QString("https://sandcastle.cesium.com/")));
         //ui->web->load(QUrl("chrome://gpu/"));
         ui->web->show();
     }

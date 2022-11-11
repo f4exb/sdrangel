@@ -348,11 +348,13 @@ void Workspace::featurePresetsDialog()
 
 void Workspace::cascadeSubWindows()
 {
+    m_autoStackSubWindows->setChecked(false);
     m_mdi->cascadeSubWindows();
 }
 
 void Workspace::tileSubWindows()
 {
+    m_autoStackSubWindows->setChecked(false);
     m_mdi->tileSubWindows();
 }
 
@@ -416,7 +418,7 @@ void Workspace::stackSubWindows()
 
     for (auto window : windows)
     {
-        if (window->isVisible())
+        if (window->isVisible() && !window->isMaximized())
         {
             if (window->inherits("DeviceGUI")) {
                 devices.append(qobject_cast<DeviceGUI *>(window));
@@ -470,12 +472,27 @@ void Workspace::stackSubWindows()
     {
         int winMinWidth = std::max(window->minimumSizeHint().width(), window->minimumWidth());
         spectrumMinWidth = std::max(spectrumMinWidth, winMinWidth);
-        spectrumTotalMinHeight += window->minimumSizeHint().height() + spacing;
+        int winMinHeight = std::max(window->minimumSizeHint().height(), window->minimumSize().height());
+        spectrumTotalMinHeight += winMinHeight + spacing;
         expandingSpectrums++;
     }
 
+    // Restrict user defined channel width, to width of largest channel
+    if (channels.size() == 0)
+    {
+        m_userChannelMinWidth = 0;
+    }
+    else
+    {
+        int channelMaxWidth = 0;
+        for (auto window : channels) {
+            channelMaxWidth = std::max(channelMaxWidth, window->maximumWidth());
+        }
+        m_userChannelMinWidth = std::min(m_userChannelMinWidth, channelMaxWidth);
+    }
+
     // Calculate width & height needed for channels
-    int channelMinWidth = channels.size() > 0 ? m_userChannelMinWidth : 0;
+    int channelMinWidth = m_userChannelMinWidth; // channels.size() > 0 ? m_userChannelMinWidth : 0;
     int channelTotalMinHeight = 0;
     int expandingChannels = 0;
     for (auto window : channels)
@@ -521,7 +538,8 @@ void Workspace::stackSubWindows()
     // Will we need scroll bars?
     QSize mdiSize = m_mdi->size();
     int minWidth = devicesFeaturesWidth + spacing1 + spectrumFeaturesMinWidth + spacing2 + channelMinWidth;
-    int minHeight = std::max(std::max(deviceTotalMinHeight + fixedFeaturesTotalMinHeight, channelTotalMinHeight), channelTotalMinHeight + featuresTotalMinHeight);
+    int minHeight = std::max(std::max(deviceTotalMinHeight + fixedFeaturesTotalMinHeight, channelTotalMinHeight), spectrumTotalMinHeight + featuresTotalMinHeight);
+
     bool requiresHScrollBar = minWidth > mdiSize.width();
     bool requiresVScrollBar = minHeight > mdiSize.height();
 
@@ -532,6 +550,11 @@ void Workspace::stackSubWindows()
     }
     if (requiresHScrollBar) {
         mdiSize.setHeight(mdiSize.height() - sbWidth);
+    }
+
+    // If no spectrum/features, expand channels
+    if ((spectrumFeaturesMinWidth == 0) && expandingChannels > 0) {
+        channelMinWidth = mdiSize.width() - devicesFeaturesWidth - spacing1;
     }
 
     // Now position the windows
@@ -609,7 +632,8 @@ void Workspace::stackSubWindows()
     {
         window->move(x, y);
         int w = spectrumFeaturesWidth;
-        int h = window->minimumSizeHint().height() + extraSpacePerWindow + extraSpaceFirstWindow;
+        int minHeight = std::max(window->minimumSizeHint().height(), window->minimumSize().height());
+        int h = minHeight + extraSpacePerWindow + extraSpaceFirstWindow;
         window->resize(w, h);
         extraSpaceFirstWindow = 0;
         y += window->size().height() + spacing;
@@ -734,24 +758,36 @@ bool Workspace::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::Show)
     {
-        autoStackSubWindows();
+        QWidget *widget = qobject_cast<QWidget *>(obj);
+        if (!widget->isMaximized()) {
+            autoStackSubWindows();
+        }
     }
     else if (event->type() == QEvent::Hide)
     {
-        autoStackSubWindows();
+        QWidget *widget = qobject_cast<QWidget *>(obj);
+        if (!widget->isMaximized()) {
+            autoStackSubWindows();
+        }
     }
     else if (event->type() == QEvent::Resize)
     {
         if (!m_stacking && m_autoStackSubWindows->isChecked())
         {
+            QWidget *widget = qobject_cast<QWidget *>(obj);
+            QResizeEvent *resizeEvent = static_cast<QResizeEvent *>(event);
             ChannelGUI *channel = qobject_cast<ChannelGUI *>(obj);
-            if (channel)
+            if (channel && !widget->isMaximized())
             {
-                // Allow width of channels column to be set by user when they
-                // resize a channel window
-                QResizeEvent *resizeEvent = static_cast<QResizeEvent *>(event);
-                m_userChannelMinWidth = resizeEvent->size().width();
-                stackSubWindows();
+                // When maximizing, we can get resize event where isMaximized is false, even though it should be true,
+                // but we can tell as window size matches mdi size
+                if (m_mdi->size() != resizeEvent->size())
+                {
+                    // Allow width of channels column to be set by user when they
+                    // resize a channel window
+                    m_userChannelMinWidth = resizeEvent->size().width();
+                    stackSubWindows();
+                }
             }
         }
     }

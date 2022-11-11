@@ -84,6 +84,12 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     m_shrinkButton->setIcon(shrinkIcon);
     m_shrinkButton->setToolTip("Adjust window to minimum size");
 
+    m_maximizeButton = new QPushButton();
+    m_maximizeButton->setFixedSize(20, 20);
+    QIcon maximizeIcon(":/maximize.png");
+    m_maximizeButton->setIcon(maximizeIcon);
+    m_maximizeButton->setToolTip("Adjust window to maximum size");
+
     m_hideButton = new QPushButton();
     m_hideButton->setFixedSize(20, 20);
     QIcon hideIcon(":/hide.png");
@@ -110,6 +116,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     m_topLayout->addWidget(m_helpButton);
     m_topLayout->addWidget(m_moveButton);
     m_topLayout->addWidget(m_shrinkButton);
+    m_topLayout->addWidget(m_maximizeButton);
     m_topLayout->addWidget(m_hideButton);
 
     m_spectrumLayout = new QHBoxLayout();
@@ -138,6 +145,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     connect(m_helpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
     connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
+    connect(m_maximizeButton, SIGNAL(clicked()), this, SLOT(maximizeWindow()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
 
@@ -162,6 +170,7 @@ MainSpectrumGUI::~MainSpectrumGUI()
     delete m_statusLabel;
     delete m_hideButton;
     delete m_shrinkButton;
+    delete m_maximizeButton;
     delete m_moveButton;
     delete m_helpButton;
     delete m_titleLabel;
@@ -249,11 +258,23 @@ void MainSpectrumGUI::openMoveToWorkspaceDialog()
     }
 }
 
+void MainSpectrumGUI::maximizeWindow()
+{
+    showMaximized();
+}
+
 void MainSpectrumGUI::shrinkWindow()
 {
     qDebug("MainSpectrumGUI::shrinkWindow");
-    adjustSize();
-    resize(width(), m_MinimumHeight);
+    if (isMaximized())
+    {
+        showNormal();
+    }
+    else
+    {
+        adjustSize();
+        resize(width(), m_MinimumHeight);
+    }
 }
 
 void MainSpectrumGUI::setTitle(const QString& title)

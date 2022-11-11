@@ -61,9 +61,6 @@ public:
 public slots:
     void channelMarkerChangedByCursor();
 
-protected:
-    void resizeEvent(QResizeEvent* size);
-
 private:
     Ui::WFMModGUI* ui;
     PluginAPI* m_pluginAPI;

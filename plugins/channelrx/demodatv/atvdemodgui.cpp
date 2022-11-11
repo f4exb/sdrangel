@@ -18,7 +18,6 @@
 
 #include <QDockWidget>
 #include <QMainWindow>
-#include <QResizeEvent>
 
 #include "atvdemodgui.h"
 
@@ -75,14 +74,6 @@ bool ATVDemodGUI::deserialize(const QByteArray& data)
         applySettings(true); // will have true
         return false;
     }
-}
-
-void ATVDemodGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 void ATVDemodGUI::displaySettings()

@@ -50,9 +50,6 @@ public:
     virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; }
     virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; }
 
-protected:
-    void resizeEvent(QResizeEvent* size);
-
 private:
 	Ui::RigCtlServerGUI* ui;
 	PluginAPI* m_pluginAPI;

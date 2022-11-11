@@ -20,7 +20,6 @@
 #include <QFileDialog>
 #include <QTime>
 #include <QDebug>
-#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 
@@ -72,14 +71,6 @@ bool AMModGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void AMModGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool AMModGUI::handleMessage(const Message& message)

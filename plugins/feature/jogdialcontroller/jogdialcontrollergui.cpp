@@ -17,7 +17,6 @@
 
 #include <QMessageBox>
 #include <QMouseEvent>
-#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -66,14 +65,6 @@ bool JogdialControllerGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void JogdialControllerGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool JogdialControllerGUI::handleMessage(const Message& message)
@@ -160,7 +151,6 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
     m_helpURL = "plugins/feature/jogdialcontroller/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
-    setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
