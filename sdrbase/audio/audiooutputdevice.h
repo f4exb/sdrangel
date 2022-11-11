@@ -102,6 +102,7 @@ private:
 	//virtual bool open(OpenMode mode);
 	virtual qint64 readData(char* data, qint64 maxLen);
 	virtual qint64 writeData(const char* data, qint64 len);
+    void writeSampleToFile(qint16 lSample, qint16 rSample);
 
 	friend class AudioOutputPipe;
 };

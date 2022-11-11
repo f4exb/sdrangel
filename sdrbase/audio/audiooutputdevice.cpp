@@ -218,6 +218,15 @@ void AudioOutputDevice::setUdpChannelFormat(UDPChannelCodec udpChannelCodec, boo
     if (m_audioNetSink) {
         m_audioNetSink->setParameters((AudioNetSink::Codec) m_udpChannelCodec, stereo, sampleRate);
     }
+
+    if (m_wavFileRecord)
+    {
+        if (m_wavFileRecord->isRecording()) {
+            m_wavFileRecord->stopRecording();
+        }
+
+        m_wavFileRecord->setMono(!stereo);
+    }
 }
 
 void AudioOutputDevice::setUdpDecimation(uint32_t decimation)
@@ -403,12 +412,12 @@ qint64 AudioOutputDevice::readData(char* data, qint64 maxLen)
             {
                 if (m_recordSilenceNbSamples <= 0)
                 {
-                    m_wavFileRecord->write(sl, sr);
+                    writeSampleToFile(sl, sr);
                     m_recordSilenceCount = 0;
                 }
                 else if (m_recordSilenceCount < m_recordSilenceNbSamples)
                 {
-                    m_wavFileRecord->write(sl, sr);
+                    writeSampleToFile(sl, sr);
                     m_recordSilenceCount++;
                 }
                 else
@@ -422,13 +431,33 @@ qint64 AudioOutputDevice::readData(char* data, qint64 maxLen)
                     m_wavFileRecord->startRecording();
                 }
 
-                m_wavFileRecord->write(sl, sr);
+                writeSampleToFile(sl, sr);
                 m_recordSilenceCount = 0;
             }
         }
 	}
 
 	return samplesPerBuffer * 4;
+}
+
+void AudioOutputDevice::writeSampleToFile(qint16 lSample, qint16 rSample)
+{
+    switch (m_udpChannelMode)
+    {
+    case UDPChannelStereo:
+        m_wavFileRecord->write(lSample, rSample);
+        break;
+    case UDPChannelMixed:
+        m_wavFileRecord->writeMono((lSample+rSample)/2);
+        break;
+    case UDPChannelRight:
+        m_wavFileRecord->writeMono(rSample);
+        break;
+    case UDPChannelLeft:
+    default:
+        m_wavFileRecord->writeMono(lSample);
+        break;
+    }
 }
 
 qint64 AudioOutputDevice::writeData(const char* data, qint64 len)

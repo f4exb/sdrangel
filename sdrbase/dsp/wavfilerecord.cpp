@@ -37,7 +37,8 @@ WavFileRecord::WavFileRecord(quint32 sampleRate, quint64 centerFrequency) :
     m_recordOn(false),
     m_recordStart(false),
     m_byteCount(0),
-    m_msShift(0)
+    m_msShift(0),
+    m_nbChannels(2)
 {
     setObjectName("WavFileRecord");
 }
@@ -49,7 +50,8 @@ WavFileRecord::WavFileRecord(const QString& fileBase) :
     m_centerFrequency(0),
     m_recordOn(false),
     m_recordStart(false),
-    m_byteCount(0)
+    m_byteCount(0),
+    m_nbChannels(2)
 {
     setObjectName("WavFileRecord");
 }
@@ -122,6 +124,18 @@ void WavFileRecord::write(qint16 lSample, qint16 rSample)
     m_sampleFile.write(reinterpret_cast<const char*>(&lSample), 2);
     m_sampleFile.write(reinterpret_cast<const char*>(&rSample), 2);
     m_byteCount += 4;
+}
+
+void WavFileRecord::writeMono(qint16 sample)
+{
+    if (m_recordStart)
+    {
+        writeHeader();
+        m_recordStart = false;
+    }
+
+    m_sampleFile.write(reinterpret_cast<const char*>(&sample), 2);
+    m_byteCount += 2;
 }
 
 void WavFileRecord::start()
@@ -229,11 +243,11 @@ void WavFileRecord::writeHeader()
     header.m_fmtHeader.m_id[3] = ' ';
     header.m_fmtHeader.m_size = 16;
     header.m_audioFormat = 1; // Linear PCM
-    header.m_numChannels = 2; // I/Q
+    header.m_numChannels = m_nbChannels; // 2 for I/Q
     header.m_sampleRate = m_sampleRate;
     // We always use 16-bits regardless of SDR_RX_SAMP_SZ
-    header.m_byteRate = m_sampleRate * 2 * 16 / 8;
-    header.m_blockAlign = 2 * 16 / 8;
+    header.m_byteRate = m_sampleRate * m_nbChannels * 16 / 8;
+    header.m_blockAlign = m_nbChannels * 16 / 8;
     header.m_bitsPerSample = 16;
 
     header.m_auxiHeader.m_id[0] = 'a';

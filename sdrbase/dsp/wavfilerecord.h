@@ -93,11 +93,13 @@ public:
     void setMsShift(qint64 shift) override { m_msShift = shift; }
     virtual int getBytesPerSample() override { return 4; };
     const QString& getCurrentFileName() override { return m_currentFileName; }
+    void setMono(bool mono) { m_nbChannels = mono ? 1 : 2; }
 
     void genUniqueFileName(uint deviceUID, int istream = -1);
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly) override;
     void write(qint16 lSample, qint16 rSample); //!< write a single sample
+    void writeMono(qint16 sample); //!< write a single mono sample
     virtual void start() override;
     virtual void stop() override;
     virtual bool handleMessage(const Message& message) override;
@@ -124,6 +126,7 @@ private:
     QString m_currentFileName;
     quint64 m_byteCount;
     qint64 m_msShift;
+    int m_nbChannels;
 
     void writeHeader();
 };
