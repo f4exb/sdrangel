@@ -50,7 +50,9 @@ QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::OutputDeviceI
         << info.udpUseRTP
         << (int) info.udpChannelMode
         << (int) info.udpChannelCodec
-        << info.udpDecimationFactor;
+        << info.udpDecimationFactor
+        << info.fileRecordName
+        << info.recordSilenceTime;
     return ds;
 }
 
@@ -66,7 +68,9 @@ QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::OutputDeviceInfo& i
         >> info.udpUseRTP
         >> intChannelMode
         >> intChannelCodec
-        >> info.udpDecimationFactor;
+        >> info.udpDecimationFactor
+        >> info.fileRecordName
+        >> info.recordSilenceTime;
     info.udpChannelMode = (AudioOutputDevice::UDPChannelMode) intChannelMode;
     info.udpChannelCodec = (AudioOutputDevice::UDPChannelCodec) intChannelCodec;
     return ds;
