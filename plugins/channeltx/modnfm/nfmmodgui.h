@@ -63,9 +63,6 @@ public:
 public slots:
     void channelMarkerChangedByCursor();
 
-protected:
-    void resizeEvent(QResizeEvent* size);
-
 private:
     Ui::NFMModGUI* ui;
     PluginAPI* m_pluginAPI;

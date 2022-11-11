@@ -60,6 +60,7 @@ public:
 	virtual MessageQueue* getInputMessageQueue() = 0;
 
     RollupContents *getRollupContents() { return &m_rollupContents; }
+    void sizeToContents();
     void setTitleColor(const QColor&) {} // not implemented for a feature
     void setTitle(const QString& title);
     void setIndex(int index);
@@ -85,6 +86,7 @@ protected:
 
 protected slots:
     void shrinkWindow();
+    void maximizeWindow();
 
 private:
     bool isOnMovingPad();
@@ -95,6 +97,7 @@ private:
     QPushButton *m_helpButton;
     QPushButton *m_moveButton;
     QPushButton *m_shrinkButton;
+    QPushButton *m_maximizeButton;
     QPushButton *m_closeButton;
     QLabel *m_statusLabel;
     QVBoxLayout *m_layouts;
@@ -106,6 +109,7 @@ private:
     QPoint m_DragPosition;
     QMap<QWidget*, int> m_heightsMap;
     FramelessWindowResizer m_resizer;
+    bool m_disableResize;
 
 private slots:
     void activateSettingsDialog();

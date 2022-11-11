@@ -76,6 +76,7 @@ private:
     QPushButton *m_helpButton;
     QPushButton *m_moveButton;
     QPushButton *m_shrinkButton;
+    QPushButton *m_maximizeButton;
     QPushButton *m_hideButton;
     QLabel *m_statusLabel;
     QVBoxLayout *m_layouts;
@@ -106,6 +107,7 @@ private slots:
     void showHelp();
     void openMoveToWorkspaceDialog();
     void shrinkWindow();
+    void maximizeWindow();
     void onRequestCenterFrequency(qint64 frequency);
 
 signals:

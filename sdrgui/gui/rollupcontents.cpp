@@ -99,7 +99,7 @@ int RollupContents::arrangeRollups()
 {
     QFontMetrics fm(font());
     int pos;
-    int minWidth = 0;
+    int minWidthHint = 0;
 
     // First calculate minimum height needed, to determine how much extra space
     // we have that can be split between expanding widgets
@@ -123,14 +123,21 @@ int RollupContents::arrangeRollups()
                 } else {
                     h = r->minimumSizeHint().height();
                 }
-                minWidth = std::max(minWidth, r->minimumSize().width());
+                minWidthHint = std::max(minWidthHint, r->minimumSizeHint().width());
                 pos += h + 5;
             }
         }
     }
 
+    // We use minimumSizeHint for auto-calculated width, so
+    // minimumWidth can be set by user in .ui file
+    m_minimumSizeHint.setHeight(pos);
+    m_minimumSizeHint.setWidth(minWidthHint);
+
+    // However, we need to set minimumHeight, as the value in the .ui
+    // files is typically set as the minimum height for when widget is unrolled
+    // but when rolled-up, we want it to be smaller
     setMinimumHeight(pos);
-    setMinimumWidth(minWidth);
 
     // Split extra space equally between widgets
     // If there's a remainder, we give it to the first widget

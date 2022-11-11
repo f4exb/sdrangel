@@ -60,9 +60,6 @@ public:
 public slots:
     void channelMarkerChangedByCursor();
 
-protected:
-    void resizeEvent(QResizeEvent* size);
-
 private:
     Ui::FileSourceGUI* ui;
     PluginAPI* m_pluginAPI;

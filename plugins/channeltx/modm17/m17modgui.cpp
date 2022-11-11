@@ -21,7 +21,6 @@
 #include <QTime>
 #include <QDebug>
 #include <QRegExp>
-#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
@@ -73,14 +72,6 @@ bool M17ModGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void M17ModGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool M17ModGUI::handleMessage(const Message& message)

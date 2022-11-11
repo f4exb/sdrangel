@@ -55,7 +55,6 @@ public:
 protected:
     void focusInEvent(QFocusEvent* e);
     void focusOutEvent(QFocusEvent *e);
-    void resizeEvent(QResizeEvent* size);
 
 private:
 	Ui::JogdialControllerGUI* ui;

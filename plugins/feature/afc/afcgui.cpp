@@ -16,7 +16,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMessageBox>
-#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "device/deviceset.h"
@@ -65,14 +64,6 @@ bool AFCGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void AFCGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool AFCGUI::handleMessage(const Message& message)

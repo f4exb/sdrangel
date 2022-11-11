@@ -19,7 +19,6 @@
 #include <cmath>
 #include <QMessageBox>
 #include <QLineEdit>
-#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -68,14 +67,6 @@ bool PERTesterGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void PERTesterGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool PERTesterGUI::handleMessage(const Message& message)
@@ -141,7 +132,6 @@ PERTesterGUI::PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     m_helpURL = "plugins/feature/pertester/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
-    setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 

@@ -65,9 +65,6 @@ public:
 
     static const char* const m_strChannelID;
 
-protected:
-    void resizeEvent(QResizeEvent* size);
-
 private slots:
     void channelMarkerChangedByCursor();
     void channelMarkerHighlightedByCursor();

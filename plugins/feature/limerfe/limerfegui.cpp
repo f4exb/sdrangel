@@ -74,14 +74,6 @@ void LimeRFEGUI::setWorkspaceIndex(int index)
     m_feature->setWorkspaceIndex(index);
 }
 
-void LimeRFEGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
-}
-
 void LimeRFEGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -141,7 +133,6 @@ LimeRFEGUI::LimeRFEGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature
     m_helpURL = "plugins/feature/limerfe/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
-    setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 

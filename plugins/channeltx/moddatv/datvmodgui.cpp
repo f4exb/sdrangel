@@ -22,7 +22,6 @@
 #include <QTime>
 #include <QDebug>
 #include <QMessageBox>
-#include <QResizeEvent>
 
 #include <cmath>
 
@@ -151,14 +150,6 @@ bool DATVModGUI::deserialize(const QByteArray& data)
         applySettings(true);
         return false;
     }
-}
-
-void DATVModGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool DATVModGUI::handleMessage(const Message& message)

@@ -25,6 +25,7 @@
 #include <QTextEdit>
 #include <QObjectCleanupHandler>
 #include <QDesktopServices>
+#include <QOpenGLWidget>
 
 #include "mainwindow.h"
 #include "gui/workspaceselectiondialog.h"
@@ -40,7 +41,8 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_channelIndex(0),
     m_contextMenuType(ContextMenuNone),
     m_drag(false),
-    m_resizer(this)
+    m_resizer(this),
+    m_disableResize(false)
 {
     qDebug("ChannelGUI::ChannelGUI");
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
@@ -85,6 +87,12 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     QIcon shrinkIcon(":/shrink.png");
     m_shrinkButton->setIcon(shrinkIcon);
     m_shrinkButton->setToolTip("Adjust window to minimum size");
+
+    m_maximizeButton = new QPushButton();
+    m_maximizeButton->setFixedSize(20, 20);
+    QIcon maximizeIcon(":/maximize.png");
+    m_maximizeButton->setIcon(maximizeIcon);
+    m_maximizeButton->setToolTip("Adjust window to maximum size");
 
     m_hideButton = new QPushButton();
     m_hideButton->setFixedSize(20, 20);
@@ -141,6 +149,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_topLayout->addWidget(m_helpButton);
     m_topLayout->addWidget(m_moveButton);
     m_topLayout->addWidget(m_shrinkButton);
+    m_topLayout->addWidget(m_maximizeButton);
     m_topLayout->addWidget(m_hideButton);
     m_topLayout->addWidget(m_closeButton);
 
@@ -172,6 +181,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     connect(m_helpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
     connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
+    connect(m_maximizeButton, SIGNAL(clicked()), this, SLOT(maximizeWindow()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
@@ -203,6 +213,7 @@ ChannelGUI::~ChannelGUI()
     delete m_closeButton;
     delete m_hideButton;
     delete m_shrinkButton;
+    delete m_maximizeButton;
     delete m_moveButton;
     delete m_helpButton;
     delete m_titleLabel;
@@ -293,18 +304,81 @@ void ChannelGUI::openMoveToWorkspaceDialog()
 
 void ChannelGUI::onWidgetRolled(QWidget *widget, bool show)
 {
-    if (show)
+    sizeToContents();  // set min/max constraints before trying to resize
+
+    // When a window is maximized or returns from maximized to normal,
+    // RolledContents gets QEvent::Hide and QEvent::Show events, which results in
+    // onWidgetRolled being called twice.
+    // We need to make sure we don't save widget heights while this occurs. The
+    // window manager will take care of maximizing/restoring the window size.
+    if (!m_disableResize)
     {
-        // qDebug("ChannelGUI::onWidgetRolled: show: %d %d", m_rollupContents.height(), widget->height());
-        int dh = m_heightsMap.contains(widget) ? m_heightsMap[widget] - widget->height() : widget->minimumHeight();
-        resize(width(), 52 + 3 + m_rollupContents->height() + dh);
+        if (show)
+        {
+            // qDebug("ChannelGUI::onWidgetRolled: show: %d %d", m_rollupContents.height(), widget->height());
+            int dh = m_heightsMap.contains(widget) ? m_heightsMap[widget] - widget->height() : widget->minimumHeight();
+            resize(width(), 52 + 3 + m_rollupContents->height() + dh);
+        }
+        else
+        {
+            // qDebug("ChannelGUI::onWidgetRolled: hide: %d %d", m_rollupContents.height(), widget->height());
+            m_heightsMap[widget] = widget->height();
+            resize(width(), 52 + 3 + m_rollupContents->height());
+        }
+    }
+}
+
+// Size the window according to the size of rollup widget
+void ChannelGUI::sizeToContents()
+{
+    // Adjust policy depending on which widgets are currently visible
+    if (getRollupContents()->hasExpandableWidgets()) {
+        setSizePolicy(getRollupContents()->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(getRollupContents()->sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    // If size policy is fixed, hide widgets that resize the window
+    if ((sizePolicy().verticalPolicy() == QSizePolicy::Fixed) && (sizePolicy().horizontalPolicy() == QSizePolicy::Fixed))
+    {
+        m_shrinkButton->hide();
+        m_maximizeButton->hide();
+        m_sizeGripBottomRight->hide();
+    }
+    else if ((sizePolicy().verticalPolicy() == QSizePolicy::Fixed) || (sizePolicy().horizontalPolicy() == QSizePolicy::Fixed))
+    {
+        m_shrinkButton->show();
+        m_maximizeButton->hide();
+        m_sizeGripBottomRight->show();
     }
     else
     {
-        // qDebug("ChannelGUI::onWidgetRolled: hide: %d %d", m_rollupContents.height(), widget->height());
-        m_heightsMap[widget] = widget->height();
-        resize(width(), 52 + 3 + m_rollupContents->height());
+        m_shrinkButton->show();
+        m_maximizeButton->show();
+        m_sizeGripBottomRight->show();
     }
+
+    // Calculate min/max size for window. This is min/max size of contents, plus
+    // extra needed for window frame and title bar
+    QSize size;
+    size = getRollupContents()->maximumSize();
+    size.setHeight(std::min(size.height() + getAdditionalHeight(), QWIDGETSIZE_MAX));
+    size.setWidth(std::min(size.width() + m_resizer.m_gripSize * 2, QWIDGETSIZE_MAX));
+    setMaximumSize(size);
+
+    // m_resizer uses minimumSizeHint(), m_sizeGripBottomRight uses minimumSize()
+    // QWidget docs says: If minimumSize() is set, the minimum size hint will be ignored.
+    // However, we use maximum of both:
+    //  - minimumSize.width() to respect minimumWidth set in .ui file
+    //  - minimumSizeHint.width() to ensure widgets are fully displayed when larger than above
+    //    which may be the case when we have widgets hidden in a rollup, as the width
+    //    set in .ui file may just be for the smallest of widgets
+    size = getRollupContents()->minimumSize();
+    size = size.expandedTo(getRollupContents()->minimumSizeHint());
+    size = size.expandedTo(m_topLayout->minimumSize());
+    size.setHeight(size.height() + getAdditionalHeight());
+    size.setWidth(size.width() + m_resizer.m_gripSize * 2);
+    setMinimumSize(size);
 }
 
 void ChannelGUI::duplicateChannel()
@@ -322,11 +396,32 @@ void ChannelGUI::openMoveToDeviceSetDialog()
     }
 }
 
+void ChannelGUI::maximizeWindow()
+{
+    m_disableResize = true;
+    showMaximized();
+    m_disableResize = false;
+    // QOpenGLWidget widgets don't always paint properly first time after being maximized,
+    // so force an update. Should really fix why they aren't painted properly in the first place
+    QList<QOpenGLWidget *> widgets = findChildren<QOpenGLWidget *>();
+    for (auto widget : widgets) {
+        widget->update();
+    }
+}
+
 void ChannelGUI::shrinkWindow()
 {
     qDebug("ChannelGUI::shrinkWindow");
-    adjustSize();
-    resize(width(), m_rollupContents->height() + getAdditionalHeight());
+    if (isMaximized())
+    {
+        m_disableResize = true;
+        showNormal();
+        m_disableResize = false;
+    }
+    else
+    {
+        adjustSize();
+    }
 }
 
 void ChannelGUI::setTitle(const QString& title)

@@ -19,7 +19,6 @@
 #include <limits>
 
 #include <QDebug>
-#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "dsp/dspengine.h"
@@ -75,14 +74,6 @@ bool VORDemodGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
-}
-
-void VORDemodGUI::resizeEvent(QResizeEvent* size)
-{
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 bool VORDemodGUI::handleMessage(const Message& message)

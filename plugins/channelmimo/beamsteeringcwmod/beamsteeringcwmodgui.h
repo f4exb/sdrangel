@@ -94,9 +94,6 @@ private:
     void applyInterpolation();
     void applyPosition();
 
-protected:
-    void resizeEvent(QResizeEvent* size);
-
 private slots:
     void handleSourceMessages();
     void on_channelOutput_currentIndexChanged(int index);
