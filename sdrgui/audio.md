@@ -49,12 +49,12 @@ This is the device sample rate in samples per second (S/s).
 
 By pushing this button the values are reset to the defaults (see 1.1 for actual default values)
 
-<h3>1.7 UDP copy channel mode</h3>
+<h3>1.7 UDP copy or recording channel mode</h3>
 
-  - `Left`: UDP stream is mono (1 channel) and the left audio channel is copied
-  - `Right`: UDP stream is mono (1 channel) and the right audio channel is copied
-  - `Mixed`: UDP stream is mono (1 channel) and the mix of left and right audio channels is copied
-  - `Stereo`:  UDP stream is stereo (2 channels) and audio channels are copied to their respective targets
+  - `Left`: stream is mono (1 channel) and the left audio channel is used
+  - `Right`: stream is mono (1 channel) and the right audio channel is used
+  - `Mixed`: stream is mono (1 channel) and the mix of left and right audio channels is used
+  - `Stereo`:  stream is stereo (2 channels) and both audio channels are used
 
 <h3>1.8 Decimation factor</h3>
 
@@ -147,6 +147,8 @@ a=fmtp:96 cbr=1
 <h3>1.15 Record audio</h3>
 
 Use this button to toggle audio recording. Start or stop recording becomes effective only when the dialog is closed with the "OK" button.
+
+Format is always 16 bit little-endian and can be mono (1 channel) or stereo (2 channels) depending on the selected channel mode (1.7)
 
 <h3>1.16 Select recording output file</h3>
 
