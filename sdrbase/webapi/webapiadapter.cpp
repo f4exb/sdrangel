@@ -503,6 +503,9 @@ int WebAPIAdapter::instanceAudioGet(
     outputDevices->back()->setUdpDecimationFactor((int) outputDeviceInfo.udpDecimationFactor);
     *outputDevices->back()->getUdpAddress() = outputDeviceInfo.udpAddress;
     outputDevices->back()->setUdpPort(outputDeviceInfo.udpPort);
+    *outputDevices->back()->getFileRecordName() = outputDeviceInfo.fileRecordName;
+    outputDevices->back()->setRecordToFile(outputDeviceInfo.recordToFile ? 1 : 0);
+    outputDevices->back()->setRecordSilenceTime(outputDeviceInfo.recordSilenceTime);
 
     // real output devices
     for (int i = 0; i < nbOutputDevices; i++)
@@ -523,6 +526,9 @@ int WebAPIAdapter::instanceAudioGet(
         outputDevices->back()->setUdpDecimationFactor((int) outputDeviceInfo.udpDecimationFactor);
         *outputDevices->back()->getUdpAddress() = outputDeviceInfo.udpAddress;
         outputDevices->back()->setUdpPort(outputDeviceInfo.udpPort);
+        *outputDevices->back()->getFileRecordName() = outputDeviceInfo.fileRecordName;
+        outputDevices->back()->setRecordToFile(outputDeviceInfo.recordToFile ? 1 : 0);
+        outputDevices->back()->setRecordSilenceTime(outputDeviceInfo.recordSilenceTime);
     }
 
     return 200;
@@ -606,6 +612,15 @@ int WebAPIAdapter::instanceAudioOutputPatch(
     if (audioOutputKeys.contains("udpPort")) {
         outputDeviceInfo.udpPort = response.getUdpPort() % (1<<16);
     }
+    if (audioOutputKeys.contains("fileRecordName")) {
+        outputDeviceInfo.fileRecordName = *response.getFileRecordName();
+    }
+    if (audioOutputKeys.contains("recordToFile")) {
+        outputDeviceInfo.recordToFile = response.getRecordToFile() == 0 ? 0 : 1;
+    }
+    if (audioOutputKeys.contains("recordSilenceTime")) {
+        outputDeviceInfo.recordSilenceTime = response.getRecordSilenceTime();
+    }
 
     dspEngine->getAudioDeviceManager()->setOutputDeviceInfo(deviceIndex, outputDeviceInfo);
     dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
@@ -624,6 +639,15 @@ int WebAPIAdapter::instanceAudioOutputPatch(
     }
 
     response.setUdpPort(outputDeviceInfo.udpPort % (1<<16));
+
+    if (response.getFileRecordName()) {
+        *response.getFileRecordName() = outputDeviceInfo.fileRecordName;
+    } else {
+        response.setFileRecordName(new QString(outputDeviceInfo.fileRecordName));
+    }
+
+    response.setRecordToFile(outputDeviceInfo.recordToFile == 0 ? 0 : 1);
+    response.setRecordSilenceTime(outputDeviceInfo.recordSilenceTime);
 
     return 200;
 }

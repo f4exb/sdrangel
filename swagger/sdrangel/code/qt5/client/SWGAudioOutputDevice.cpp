@@ -52,6 +52,12 @@ SWGAudioOutputDevice::SWGAudioOutputDevice() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    file_record_name = nullptr;
+    m_file_record_name_isSet = false;
+    record_to_file = 0;
+    m_record_to_file_isSet = false;
+    record_silence_time = 0;
+    m_record_silence_time_isSet = false;
 }
 
 SWGAudioOutputDevice::~SWGAudioOutputDevice() {
@@ -84,6 +90,12 @@ SWGAudioOutputDevice::init() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    file_record_name = new QString("");
+    m_file_record_name_isSet = false;
+    record_to_file = 0;
+    m_record_to_file_isSet = false;
+    record_silence_time = 0;
+    m_record_silence_time_isSet = false;
 }
 
 void
@@ -103,6 +115,11 @@ SWGAudioOutputDevice::cleanup() {
     if(udp_address != nullptr) { 
         delete udp_address;
     }
+
+    if(file_record_name != nullptr) { 
+        delete file_record_name;
+    }
+
 
 }
 
@@ -140,6 +157,12 @@ SWGAudioOutputDevice::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&record_to_file, pJson["recordToFile"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&record_silence_time, pJson["recordSilenceTime"], "qint32", "");
     
 }
 
@@ -192,6 +215,15 @@ SWGAudioOutputDevice::asJsonObject() {
     }
     if(m_udp_port_isSet){
         obj->insert("udpPort", QJsonValue(udp_port));
+    }
+    if(file_record_name != nullptr && *file_record_name != QString("")){
+        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
+    }
+    if(m_record_to_file_isSet){
+        obj->insert("recordToFile", QJsonValue(record_to_file));
+    }
+    if(m_record_silence_time_isSet){
+        obj->insert("recordSilenceTime", QJsonValue(record_silence_time));
     }
 
     return obj;
@@ -317,6 +349,36 @@ SWGAudioOutputDevice::setUdpPort(qint32 udp_port) {
     this->m_udp_port_isSet = true;
 }
 
+QString*
+SWGAudioOutputDevice::getFileRecordName() {
+    return file_record_name;
+}
+void
+SWGAudioOutputDevice::setFileRecordName(QString* file_record_name) {
+    this->file_record_name = file_record_name;
+    this->m_file_record_name_isSet = true;
+}
+
+qint32
+SWGAudioOutputDevice::getRecordToFile() {
+    return record_to_file;
+}
+void
+SWGAudioOutputDevice::setRecordToFile(qint32 record_to_file) {
+    this->record_to_file = record_to_file;
+    this->m_record_to_file_isSet = true;
+}
+
+qint32
+SWGAudioOutputDevice::getRecordSilenceTime() {
+    return record_silence_time;
+}
+void
+SWGAudioOutputDevice::setRecordSilenceTime(qint32 record_silence_time) {
+    this->record_silence_time = record_silence_time;
+    this->m_record_silence_time_isSet = true;
+}
+
 
 bool
 SWGAudioOutputDevice::isSet(){
@@ -356,6 +418,15 @@ SWGAudioOutputDevice::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(file_record_name && *file_record_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_record_to_file_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_record_silence_time_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

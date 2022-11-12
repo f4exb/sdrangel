@@ -3937,6 +3937,21 @@ bool WebAPIRequestMapper::validateAudioOutputDevice(
         audioOutputDevice.setUdpPort(jsonObject["udpPort"].toInt());
         audioOutputDeviceKeys.append("udpPort");
     }
+    if (jsonObject.contains("fileRecordName"))
+    {
+        audioOutputDevice.setFileRecordName(new QString(jsonObject["fileRecordName"].toString()));
+        audioOutputDeviceKeys.append("fileRecordName");
+    }
+    if (jsonObject.contains("recordToFile"))
+    {
+        audioOutputDevice.setRecordToFile(jsonObject["recordToFile"].toInt() == 0 ? 0 : 1);
+        audioOutputDeviceKeys.append("recordToFile");
+    }
+    if (jsonObject.contains("recordSilenceTime"))
+    {
+        audioOutputDevice.setRecordSilenceTime(jsonObject["recordSilenceTime"].toInt());
+        audioOutputDeviceKeys.append("recordSilenceTime");
+    }
     return true;
 }
 

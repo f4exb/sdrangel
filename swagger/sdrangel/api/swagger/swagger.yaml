@@ -3201,6 +3201,18 @@ definitions:
       udpPort:
         description: "UDP destination port"
         type: integer
+      fileRecordName:
+        description: "Output record file name"
+        type: string
+      recordToFile:
+        type: integer
+        description: >
+          Record to file active
+            * 0 - not recording
+            * 1 - recording
+      recordSilenceTime:
+        description: "Record silence time before stopping recording in 10ths of seconds"
+        type: integer
 
   LocationInformation:
     description: "Instance geolocation information"

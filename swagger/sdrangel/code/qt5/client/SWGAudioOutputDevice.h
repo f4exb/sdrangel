@@ -78,6 +78,15 @@ public:
     qint32 getUdpPort();
     void setUdpPort(qint32 udp_port);
 
+    QString* getFileRecordName();
+    void setFileRecordName(QString* file_record_name);
+
+    qint32 getRecordToFile();
+    void setRecordToFile(qint32 record_to_file);
+
+    qint32 getRecordSilenceTime();
+    void setRecordSilenceTime(qint32 record_silence_time);
+
 
     virtual bool isSet() override;
 
@@ -117,6 +126,15 @@ private:
 
     qint32 udp_port;
     bool m_udp_port_isSet;
+
+    QString* file_record_name;
+    bool m_file_record_name_isSet;
+
+    qint32 record_to_file;
+    bool m_record_to_file_isSet;
+
+    qint32 record_silence_time;
+    bool m_record_silence_time_isSet;
 
 };
 
