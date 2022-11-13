@@ -93,6 +93,9 @@ private slots:
 	void on_channels_currentIndexChanged(int index);
 	void on_channelApply_clicked();
 	void on_log2Decim_currentIndexChanged(int index);
+	void on_record_toggled(bool checked);
+    void on_showFileDialog_clicked(bool checked);
+    void on_recordSilenceTime_valueChanged(int value);
 	void updateStatus();
 	void tick();
 };

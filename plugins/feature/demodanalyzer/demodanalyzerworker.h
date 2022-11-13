@@ -37,6 +37,8 @@ class BasebandSampleSink;
 class ScopeVis;
 class ChannelAPI;
 class Feature;
+class WavFileRecord;
+
 class DemodAnalyzerWorker : public QObject {
     Q_OBJECT
 public:
@@ -91,12 +93,6 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
 
-    void feedPart(
-        const QByteArray::const_iterator& begin,
-        const QByteArray::const_iterator& end,
-        DataFifo::DataType dataType
-    );
-
     void applySampleRate(int sampleRate);
 	void applySettings(const DemodAnalyzerSettings& settings, bool force = false);
 
@@ -121,10 +117,21 @@ private:
     int m_sampleBufferSize;
 	MovingAverageUtil<double, double, 480> m_channelPowerAvg;
     ScopeVis* m_scopeVis;
+    WavFileRecord* m_wavFileRecord;
+    int m_recordSilenceNbSamples;
+    int m_recordSilenceCount;
+    int m_nbBytes;
     QRecursiveMutex m_mutex;
+
+    void feedPart(
+        const QByteArray::const_iterator& begin,
+        const QByteArray::const_iterator& end,
+        DataFifo::DataType dataType
+    );
 
     bool handleMessage(const Message& cmd);
     void decimate(int countSamples);
+    void writeSampleToFile(const Sample& sample);
 
     inline void processSample(
         DataFifo::DataType dataType,

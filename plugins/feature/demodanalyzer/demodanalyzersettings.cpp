@@ -83,6 +83,9 @@ void DemodAnalyzerSettings::resetToDefaults()
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
     m_workspaceIndex = 0;
+    m_fileRecordName.clear();
+    m_recordToFile = false;
+    m_recordSilenceTime = 0;
 }
 
 QByteArray DemodAnalyzerSettings::serialize() const
@@ -112,6 +115,9 @@ QByteArray DemodAnalyzerSettings::serialize() const
 
     s.writeS32(13, m_workspaceIndex);
     s.writeBlob(14, m_geometryBytes);
+    s.writeString(15, m_fileRecordName);
+    s.writeBool(16, m_recordToFile);
+    s.writeS32(17, m_recordSilenceTime);
 
     return s.final();
 }
@@ -170,6 +176,9 @@ bool DemodAnalyzerSettings::deserialize(const QByteArray& data)
 
         d.readS32(13, &m_workspaceIndex, 0);
         d.readBlob(14, &m_geometryBytes);
+        d.readString(15, &m_fileRecordName);
+        d.readBool(16, &m_recordToFile, false);
+        d.readS32(17, &m_recordSilenceTime, 0);
 
         return true;
     }

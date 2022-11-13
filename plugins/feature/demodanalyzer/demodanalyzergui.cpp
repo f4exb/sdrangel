@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMessageBox>
+#include <QFileDialog>
 
 #include "feature/featureuiset.h"
 #include "dsp/spectrumvis.h"
@@ -206,6 +207,11 @@ void DemodAnalyzerGUI::displaySettings()
     setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->log2Decim->setCurrentIndex(m_settings.m_log2Decim);
+    ui->record->setChecked(m_settings.m_recordToFile);
+    ui->fileNameText->setText(m_settings.m_fileRecordName);
+    ui->showFileDialog->setEnabled(!m_settings.m_recordToFile);
+    ui->recordSilenceTime->setValue(m_settings.m_recordSilenceTime);
+    ui->recordSilenceText->setText(tr("%1").arg(m_settings.m_recordSilenceTime / 10.0, 0, 'f', 1));
     getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
@@ -327,6 +333,47 @@ void DemodAnalyzerGUI::on_log2Decim_currentIndexChanged(int index)
     applySettings();
 }
 
+void DemodAnalyzerGUI::on_record_toggled(bool checked)
+{
+    ui->showFileDialog->setEnabled(!checked);
+    m_settings.m_recordToFile = checked;
+    applySettings();
+}
+
+void DemodAnalyzerGUI::on_showFileDialog_clicked(bool checked)
+{
+    (void) checked;
+    QFileDialog fileDialog(
+        this,
+        tr("Save record file"),
+        m_settings.m_fileRecordName,
+        tr("WAV Files (*.wav)")
+    );
+
+    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
+    fileDialog.setFileMode(QFileDialog::AnyFile);
+    QStringList fileNames;
+
+    if (fileDialog.exec())
+    {
+        fileNames = fileDialog.selectedFiles();
+
+        if (fileNames.size() > 0)
+        {
+            m_settings.m_fileRecordName = fileNames.at(0);
+		    ui->fileNameText->setText(m_settings.m_fileRecordName);
+            applySettings();
+        }
+    }
+}
+
+void DemodAnalyzerGUI::on_recordSilenceTime_valueChanged(int value)
+{
+    m_settings.m_recordSilenceTime = value;
+    ui->recordSilenceText->setText(tr("%1").arg(value / 10.0, 0, 'f', 1));
+    applySettings();
+}
+
 void DemodAnalyzerGUI::tick()
 {
 	m_channelPowerAvg(m_demodAnalyzer->getMagSqAvg());
@@ -379,4 +426,7 @@ void DemodAnalyzerGUI::makeUIConnections()
 	QObject::connect(ui->channels, qOverload<int>(&QComboBox::currentIndexChanged), this, &DemodAnalyzerGUI::on_channels_currentIndexChanged);
 	QObject::connect(ui->channelApply, &QPushButton::clicked, this, &DemodAnalyzerGUI::on_channelApply_clicked);
 	QObject::connect(ui->log2Decim, qOverload<int>(&QComboBox::currentIndexChanged), this, &DemodAnalyzerGUI::on_log2Decim_currentIndexChanged);
+    QObject::connect(ui->record, &ButtonSwitch::toggled, this, &DemodAnalyzerGUI::on_record_toggled);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &DemodAnalyzerGUI::on_showFileDialog_clicked);
+    QObject::connect(ui->recordSilenceTime, &QSlider::valueChanged, this, &DemodAnalyzerGUI::on_recordSilenceTime_valueChanged);
 }

@@ -220,6 +220,10 @@ bool DemodAnalyzer::handleMessage(const Message& cmd)
             m_sampleRate = report.getSampleRate();
             m_scopeVis.setLiveRate(m_sampleRate);
 
+            if (m_running) {
+                m_worker->applySampleRate(m_sampleRate);
+            }
+
             DSPSignalNotification *msg = new DSPSignalNotification(0, m_sampleRate);
             m_spectrumVis.getInputMessageQueue()->push(msg);
 

@@ -19,6 +19,7 @@
 
 #include "dsp/scopevis.h"
 #include "dsp/datafifo.h"
+#include "dsp/wavfilerecord.h"
 
 #include "demodanalyzerworker.h"
 
@@ -28,7 +29,11 @@ MESSAGE_CLASS_DEFINITION(DemodAnalyzerWorker::MsgConnectFifo, Message)
 DemodAnalyzerWorker::DemodAnalyzerWorker() :
     m_dataFifo(nullptr),
     m_msgQueueToFeature(nullptr),
-    m_sampleBufferSize(0)
+    m_sampleBufferSize(0),
+    m_wavFileRecord(nullptr),
+    m_recordSilenceNbSamples(0),
+    m_recordSilenceCount(0),
+    m_nbBytes(0)
 {
     qDebug("DemodAnalyzerWorker::DemodAnalyzerWorker");
 }
@@ -47,12 +52,15 @@ void DemodAnalyzerWorker::reset()
 void DemodAnalyzerWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    m_wavFileRecord = new WavFileRecord(m_sinkSampleRate);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 void DemodAnalyzerWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    delete m_wavFileRecord;
+    m_wavFileRecord = nullptr;
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
@@ -74,6 +82,13 @@ void DemodAnalyzerWorker::feedPart(
         nbBytes = 2;
     }
 
+    if ((nbBytes != m_nbBytes) && m_wavFileRecord)
+    {
+        m_wavFileRecord->stopRecording();
+        m_wavFileRecord->setMono(nbBytes == 2);
+    }
+
+    m_nbBytes = nbBytes;
     int countSamples = (end - begin) / nbBytes;
 
     if (countSamples > m_sampleBufferSize)
@@ -93,6 +108,62 @@ void DemodAnalyzerWorker::feedPart(
         vbegin.push_back(m_sampleBuffer.begin());
         m_scopeVis->feed(vbegin, countSamples/(1<<m_settings.m_log2Decim));
 	}
+
+    if (m_settings.m_recordToFile && m_wavFileRecord)
+    {
+        for (int is = 0; is < countSamples/(1<<m_settings.m_log2Decim); is++)
+        {
+            const Sample& sample = m_sampleBuffer[is];
+
+            if ((sample.m_real == 0) && (sample.m_imag == 0))
+            {
+                if (m_recordSilenceNbSamples <= 0)
+                {
+                    writeSampleToFile(sample);
+                    m_recordSilenceCount = 0;
+                }
+                else if (m_recordSilenceCount < m_recordSilenceNbSamples)
+                {
+                    writeSampleToFile(sample);
+                    m_recordSilenceCount++;
+                }
+                else
+                {
+                    if (m_wavFileRecord->isRecording()) {
+                        m_wavFileRecord->stopRecording();
+                    }
+                }
+            }
+            else
+            {
+                if (!m_wavFileRecord->isRecording()) {
+                    m_wavFileRecord->startRecording();
+                }
+                writeSampleToFile(sample);
+                m_recordSilenceCount = 0;
+            }
+        }
+    }
+}
+
+void DemodAnalyzerWorker::writeSampleToFile(const Sample& sample)
+{
+    if (SDR_RX_SAMP_SZ == 16)
+    {
+        if (m_nbBytes == 2) {
+            m_wavFileRecord->writeMono(sample.m_real);
+        } else {
+            m_wavFileRecord->write(sample.m_real, sample.m_imag);
+        }
+    }
+    else
+    {
+        if (m_nbBytes == 2) {
+            m_wavFileRecord->writeMono(sample.m_real >> 8);
+        } else {
+            m_wavFileRecord->write(sample.m_real >> 8, sample.m_imag >> 8);
+        }
+    }
 }
 
 void DemodAnalyzerWorker::decimate(int countSamples)
@@ -190,9 +261,93 @@ void DemodAnalyzerWorker::applySettings(const DemodAnalyzerSettings& settings, b
             << " m_title: " << settings.m_title
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_log2Decim: " << settings.m_log2Decim
+            << " m_fileRecordName: " << settings.m_fileRecordName
+            << " m_recordToFile: " << settings.m_recordToFile
+            << " m_recordSilenceTime: " << settings.m_recordSilenceTime
             << " force: " << force;
 
+    if ((m_settings.m_fileRecordName != settings.m_fileRecordName) || force)
+    {
+        if (m_wavFileRecord)
+        {
+            QStringList dotBreakout = settings.m_fileRecordName.split(QLatin1Char('.'));
+
+            if (dotBreakout.size() > 1)
+            {
+                QString extension = dotBreakout.last();
+
+                if (extension != "wav") {
+                    dotBreakout.last() = "wav";
+                }
+            }
+            else
+            {
+                dotBreakout.append("wav");
+            }
+
+            QString newFileRecordName = dotBreakout.join(QLatin1Char('.'));
+            QString fileBase;
+            FileRecordInterface::guessTypeFromFileName(newFileRecordName, fileBase);
+            qDebug("DemodAnalyzerWorker::applySettings: newFileRecordName: %s fileBase: %s", qPrintable(newFileRecordName), qPrintable(fileBase));
+            m_wavFileRecord->setFileName(fileBase);
+        }
+    }
+
+    if ((m_settings.m_recordToFile != settings.m_recordToFile) || force)
+    {
+        if (m_wavFileRecord)
+        {
+            if (settings.m_recordToFile)
+            {
+                if (!m_wavFileRecord->isRecording()) {
+                    m_wavFileRecord->startRecording();
+                }
+            }
+            else
+            {
+                if (m_wavFileRecord->isRecording()) {
+                    m_wavFileRecord->stopRecording();
+                }
+            }
+
+            m_recordSilenceCount = 0;
+        }
+    }
+
+    if ((m_settings.m_recordSilenceTime != settings.m_recordSilenceTime)
+     || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    {
+        m_recordSilenceNbSamples = (settings.m_recordSilenceTime * (m_sinkSampleRate / (1<<settings.m_log2Decim))) / 10; // time in 100'ś ms
+        m_recordSilenceCount = 0;
+
+        if (m_wavFileRecord)
+        {
+            if (m_wavFileRecord->isRecording()) {
+                m_wavFileRecord->stopRecording();
+            }
+
+            m_wavFileRecord->setSampleRate(m_sinkSampleRate / (1<<settings.m_log2Decim));
+        }
+    }
+
     m_settings = settings;
+}
+
+void DemodAnalyzerWorker::applySampleRate(int sampleRate)
+{
+    m_sinkSampleRate = sampleRate;
+
+    m_recordSilenceNbSamples = (m_settings.m_recordSilenceTime * (m_sinkSampleRate / (1<<m_settings.m_log2Decim))) / 10; // time in 100'ś ms
+    m_recordSilenceCount = 0;
+
+    if (m_wavFileRecord)
+    {
+        if (m_wavFileRecord->isRecording()) {
+            m_wavFileRecord->stopRecording();
+        }
+
+        m_wavFileRecord->setSampleRate(m_sinkSampleRate / (1<<m_settings.m_log2Decim));
+    }
 }
 
 void DemodAnalyzerWorker::handleData()

@@ -82,8 +82,9 @@ void WavFileRecord::feed(const SampleVector::const_iterator& begin, const Sample
 {
     (void) positiveOnly;
 
-    if(!m_recordOn)
+    if (!m_recordOn) {
         return;
+    }
 
     if (begin < end) // if there is something to put out
     {

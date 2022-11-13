@@ -73,6 +73,35 @@ This is the resulting sample rate after possible decimation that is used by the 
 
 Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
+<h3>A.8. Record as .wav file</h3>
+
+Use this button to toggle recording. Start or stop recording
+
+Format is always 16 bit little-endian and can be mono (1 channel) or stereo (2 channels) depending on data type.
+
+<h3>A.9. Select recording output file</h3>
+
+Click on this icon to open a file selection dialog that lets you specify the location and name of the output files.
+
+Each recording is written in a new file with the starting timestamp before the `.wav` extension in `yyyy-MM-ddTHH_mm_ss_zzz` format. It keeps the first dot limited groups of the filename before the `.wav` extension if there are two such groups or before the two last groups if there are more than two groups. Examples:
+
+  - Given file name: `test.wav` then a recording file will be like: `test.2020-08-05T21_39_07_974.wav`
+  - Given file name: `test.2020-08-05T20_36_15_974.wav` then a recording file will be like (with timestamp updated): `test.2020-08-05T21_41_21_173.wav`
+  - Given file name: `test.first.wav` then a recording file will be like: `test.2020-08-05T22_00_07_974.wav`
+  - Given file name: `record.test.first.eav` then a recording file will be like: `reocrd.test.2020-08-05T21_39_52_974.wav`
+
+If a filename is given without `.wav` extension then the `.wav` extension is appended automatically before the above algorithm is applied. If a filename is given with an extension different of `.wav` then the extension is replaced by `.wav` automatically before the above algorithm is applied.
+
+The file path currently being written (or last closed) appears at the right of the button (A.1.10).
+
+<h3>A.1.10. Recording file path</h3>
+
+This is the file path currently being written (or last closed).
+
+<h3>A.1.11 Record silence time</h3>
+
+This is the time in seconds (between 0.1 and 10.0) of silence (null samples) before recording stops. When non null samples come again this will start a new recording. Set the value to 0 to record continuously.
+
 <h2>B. Spectrum view</h2>
 
 This is the same display as with the channel analyzer spectrum view. This is the spectrum of a real signal so it is symmetrical around zero frequency. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)

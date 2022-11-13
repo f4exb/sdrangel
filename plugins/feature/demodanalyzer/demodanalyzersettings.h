@@ -49,6 +49,9 @@ struct DemodAnalyzerSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
+    QString m_fileRecordName;
+    bool m_recordToFile;
+    int m_recordSilenceTime; //!< 100's ms
     Serializable *m_spectrumGUI;
     Serializable *m_scopeGUI;
     Serializable *m_rollupState;

@@ -94,6 +94,7 @@ public:
     virtual int getBytesPerSample() override { return 4; };
     const QString& getCurrentFileName() override { return m_currentFileName; }
     void setMono(bool mono) { m_nbChannels = mono ? 1 : 2; }
+    void setSampleRate(quint32 sampleRate) { m_sampleRate = sampleRate; }
 
     void genUniqueFileName(uint deviceUID, int istream = -1);
 
