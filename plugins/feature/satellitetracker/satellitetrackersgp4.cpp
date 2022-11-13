@@ -29,6 +29,8 @@
 
 #include "satellitetrackersgp4.h"
 
+using namespace libsgp4;
+
 // Convert QGP4 DateTime to Qt QDataTime
 static QDateTime dateTimeToQDateTime(DateTime dt)
 {

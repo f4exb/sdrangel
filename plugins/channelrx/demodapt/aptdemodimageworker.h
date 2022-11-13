@@ -37,6 +37,8 @@
 
 class APTDemod;
 
+using namespace libsgp4;
+
 class APTDemodImageWorker : public QObject
 {
     Q_OBJECT

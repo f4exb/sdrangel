@@ -26,6 +26,8 @@
 #include "satelliteselectiondialog.h"
 #include "util/units.h"
 
+using namespace libsgp4;
+
 SatelliteSelectionDialog::SatelliteSelectionDialog(SatelliteTrackerSettings *settings,
         const QHash<QString, SatNogsSatellite *>& satellites,
         QWidget* parent) :
