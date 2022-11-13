@@ -5,9 +5,9 @@ IF(NOT SGP4_FOUND)
     FIND_PATH(
         SGP4_INCLUDE_DIR
         NAMES SGP4.h
-        HINTS ${SGP4_DIR}/include/SGP4
-        PATHS /usr/local/include/SGP4
-              /usr/include/SGP4
+        HINTS ${SGP4_DIR}/include/libsgp4
+        PATHS /usr/local/include/libsgp4
+              /usr/include/libsgp4
     )
 
     FIND_LIBRARY(
