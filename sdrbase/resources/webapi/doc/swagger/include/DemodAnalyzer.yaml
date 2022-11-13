@@ -7,6 +7,18 @@ DemodAnalyzerSettings:
       type: string
     rgbColor:
       type: integer
+    fileRecordName:
+      type: string
+      description: Output wave file name
+    recordToFile:
+      type: integer
+      description: >
+        Recording status
+          * 1 - recording
+          * 0 - not recording
+    recordSilenceTime:
+      type: integer
+      description: Record silence time before stopping recording in 10ths of seconds
     useReverseAPI:
       type: integer
       description: >

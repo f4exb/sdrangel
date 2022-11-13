@@ -54,6 +54,15 @@ public:
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
+    QString* getFileRecordName();
+    void setFileRecordName(QString* file_record_name);
+
+    qint32 getRecordToFile();
+    void setRecordToFile(qint32 record_to_file);
+
+    qint32 getRecordSilenceTime();
+    void setRecordSilenceTime(qint32 record_silence_time);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -90,6 +99,15 @@ private:
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
+
+    QString* file_record_name;
+    bool m_file_record_name_isSet;
+
+    qint32 record_to_file;
+    bool m_record_to_file_isSet;
+
+    qint32 record_silence_time;
+    bool m_record_silence_time_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

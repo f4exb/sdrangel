@@ -765,7 +765,7 @@ void FileSink::webapiFormatChannelSettings(
         swgFileSinkSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
     if (channelSettingsKeys.contains("fileRecordName")) {
-        swgFileSinkSettings->setTitle(new QString(settings.m_fileRecordName));
+        swgFileSinkSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFileSinkSettings->setRgbColor(settings.m_rgbColor);
