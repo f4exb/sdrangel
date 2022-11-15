@@ -1,3 +1,21 @@
+sdrangel (7.8.3-1) unstable; urgency=medium
+
+  * DemodAnalyzer: record audio. Part of #1330
+  * APT decoder: use latest libsgp4. PR #1512
+  * Audio output device recording. part of #1330
+  * Add maximize button to MainSpectrum and expandible Channels and Features. PR #1510
+  * Device GUIs: Constain window size via minimumSize/maximumSize. PR #1508
+  * Set window width to account for miniumum width required for visible rollups. PR #1507
+  * 3D spectrum: Allow = to be used for +. Fix array delete. PR #1499
+  * RTL-SDR: set max frequency limit to 2.4 GHz. Fixes #1497
+  * Perseus: set frequency dial to 5 digits when not in transverter mode
+  * GLSpectrum: separate waterfall and histogram resizing conditions. Fixes #1496
+  * HackRF input: fixed sample rate setting from GUI. Following #1329
+  * Arrange rollups after restore geometry to mitigate issue #1474
+  * Remote TCP: 8-bit IQ data is unsigned. Fixes implementing #1467. PR #1495
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 15 Nov 2022 20:45:41 +0100
+
 sdrangel (7.8.2-1) unstable; urgency=medium
 
   * Make settings assigments atomic for most device plugins. Part of #1329
