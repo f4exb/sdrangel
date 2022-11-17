@@ -24,6 +24,7 @@
 
 #include "maincore.h"
 #include "loggerwithfile.h"
+#include "audio/audiodeviceinfo.h"
 #include "device/deviceapi.h"
 #include "device/deviceset.h"
 #include "device/deviceenumerator.h"
@@ -448,8 +449,8 @@ int WebAPIAdapter::instanceAudioGet(
 {
     (void) error;
     DSPEngine *dspEngine = DSPEngine::instance();
-    const QList<QAudioDeviceInfo>& audioInputDevices = dspEngine->getAudioDeviceManager()->getInputDevices();
-    const QList<QAudioDeviceInfo>& audioOutputDevices = dspEngine->getAudioDeviceManager()->getOutputDevices();
+    const QList<AudioDeviceInfo>& audioInputDevices = dspEngine->getAudioDeviceManager()->getInputDevices();
+    const QList<AudioDeviceInfo>& audioOutputDevices = dspEngine->getAudioDeviceManager()->getOutputDevices();
     int nbInputDevices = audioInputDevices.size();
     int nbOutputDevices = audioOutputDevices.size();
 
@@ -482,7 +483,7 @@ int WebAPIAdapter::instanceAudioGet(
         *inputDevices->back()->getName() = audioInputDevices.at(i).deviceName();
         inputDevices->back()->setIndex(i);
         inputDevices->back()->setSampleRate(inputDeviceInfo.sampleRate);
-        inputDevices->back()->setIsSystemDefault(audioInputDevices.at(i).deviceName() == QAudioDeviceInfo::defaultInputDevice().deviceName() ? 1 : 0);
+        inputDevices->back()->setIsSystemDefault(audioInputDevices.at(i).deviceName() == AudioDeviceInfo::defaultInputDevice().deviceName() ? 1 : 0);
         inputDevices->back()->setDefaultUnregistered(found ? 0 : 1);
         inputDevices->back()->setVolume(inputDeviceInfo.volume);
     }
@@ -517,7 +518,7 @@ int WebAPIAdapter::instanceAudioGet(
         *outputDevices->back()->getName() = audioOutputDevices.at(i).deviceName();
         outputDevices->back()->setIndex(i);
         outputDevices->back()->setSampleRate(outputDeviceInfo.sampleRate);
-        outputDevices->back()->setIsSystemDefault(audioOutputDevices.at(i).deviceName() == QAudioDeviceInfo::defaultOutputDevice().deviceName() ? 1 : 0);
+        outputDevices->back()->setIsSystemDefault(audioOutputDevices.at(i).deviceName() == AudioDeviceInfo::defaultOutputDevice().deviceName() ? 1 : 0);
         outputDevices->back()->setDefaultUnregistered(found ? 0 : 1);
         outputDevices->back()->setCopyToUdp(outputDeviceInfo.copyToUDP ? 1 : 0);
         outputDevices->back()->setUdpUsesRtp(outputDeviceInfo.udpUseRTP ? 1 : 0);

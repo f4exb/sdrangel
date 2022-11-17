@@ -33,7 +33,6 @@ AudioSelectDialog::AudioSelectDialog(const AudioDeviceManager* audioDeviceManage
 
     // panel
 
-    QAudioDeviceInfo defaultDeviceInfo = input ? QAudioDeviceInfo::defaultInputDevice() : QAudioDeviceInfo::defaultOutputDevice();
     defaultItem = new QTreeWidgetItem(ui->audioTree);
     defaultItem->setText(1, AudioDeviceManager::m_defaultDeviceName);
     bool deviceFound = getDeviceInfos(input, AudioDeviceManager::m_defaultDeviceName, systemDefault, sampleRate);
@@ -41,9 +40,9 @@ AudioSelectDialog::AudioSelectDialog(const AudioDeviceManager* audioDeviceManage
     defaultItem->setText(2, tr("%1").arg(sampleRate));
     defaultItem->setTextAlignment(2, Qt::AlignRight);
 
-    QList<QAudioDeviceInfo> devices = input ? m_audioDeviceManager->getInputDevices() : m_audioDeviceManager->getOutputDevices();
+    QList<AudioDeviceInfo> devices = input ? m_audioDeviceManager->getInputDevices() : m_audioDeviceManager->getOutputDevices();
 
-    for(QList<QAudioDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+    for(QList<AudioDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
     {
         treeItem = new QTreeWidgetItem(ui->audioTree);
         treeItem->setText(1, it->deviceName());
@@ -113,7 +112,7 @@ bool AudioSelectDialog::getDeviceInfos(bool input, const QString& deviceName, bo
     {
         AudioDeviceManager::InputDeviceInfo inDeviceInfo;
         found = m_audioDeviceManager->getInputDeviceInfo(deviceName, inDeviceInfo);
-        systemDefault = deviceName == QAudioDeviceInfo::defaultInputDevice().deviceName();
+        systemDefault = deviceName == AudioDeviceInfo::defaultInputDevice().deviceName();
 
         if (found) {
             sampleRate = inDeviceInfo.sampleRate;
@@ -125,7 +124,7 @@ bool AudioSelectDialog::getDeviceInfos(bool input, const QString& deviceName, bo
     {
         AudioDeviceManager::OutputDeviceInfo outDeviceInfo;
         found = m_audioDeviceManager->getOutputDeviceInfo(deviceName, outDeviceInfo);
-        systemDefault = deviceName == QAudioDeviceInfo::defaultOutputDevice().deviceName();
+        systemDefault = deviceName == AudioDeviceInfo::defaultOutputDevice().deviceName();
 
         if (found) {
             sampleRate = outDeviceInfo.sampleRate;

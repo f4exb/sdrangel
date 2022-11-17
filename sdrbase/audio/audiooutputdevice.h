@@ -27,7 +27,11 @@
 #include <stdint.h>
 #include "export.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+class QAudioSink;
+#else
 class QAudioOutput;
+#endif
 class AudioFifo;
 class AudioOutputPipe;
 class AudioNetSink;
@@ -79,7 +83,11 @@ public:
 
 private:
 	QRecursiveMutex m_mutex;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+	QAudioSink* m_audioOutput;
+#else
 	QAudioOutput* m_audioOutput;
+#endif
 	AudioNetSink* m_audioNetSink;
     WavFileRecord* m_wavFileRecord;
 	bool m_copyAudioToUdp;
@@ -102,6 +110,7 @@ private:
 	//virtual bool open(OpenMode mode);
 	virtual qint64 readData(char* data, qint64 maxLen);
 	virtual qint64 writeData(const char* data, qint64 len);
+    virtual qint64 bytesAvailable() const override;
     void writeSampleToFile(qint16 lSample, qint16 rSample);
 
 	friend class AudioOutputPipe;

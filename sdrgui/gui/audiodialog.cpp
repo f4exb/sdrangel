@@ -37,16 +37,16 @@ AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* pare
 	// out panel
 
 	AudioDeviceManager::OutputDeviceInfo outDeviceInfo;
-	QAudioDeviceInfo defaultOutputDeviceInfo = QAudioDeviceInfo::defaultOutputDevice();
+	AudioDeviceInfo defaultOutputDeviceInfo = AudioDeviceInfo::defaultOutputDevice();
 	treeItem = new QTreeWidgetItem(ui->audioOutTree);
 	treeItem->setText(1, AudioDeviceManager::m_defaultDeviceName);
 	bool found = m_audioDeviceManager->getOutputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, outDeviceInfo);
 	treeItem->setText(0, found ? "__" : "_D");
 	ui->audioOutTree->setCurrentItem(treeItem);
 
-	const QList<QAudioDeviceInfo>& outputDevices = m_audioDeviceManager->getOutputDevices();
+	const QList<AudioDeviceInfo>& outputDevices = m_audioDeviceManager->getOutputDevices();
 
-    for(QList<QAudioDeviceInfo>::const_iterator it = outputDevices.begin(); it != outputDevices.end(); ++it)
+    for(QList<AudioDeviceInfo>::const_iterator it = outputDevices.begin(); it != outputDevices.end(); ++it)
     {
         treeItem = new QTreeWidgetItem(ui->audioOutTree);
         treeItem->setText(1, it->deviceName());
@@ -65,16 +65,16 @@ AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* pare
     // in panel
 
     AudioDeviceManager::InputDeviceInfo inDeviceInfo;
-    QAudioDeviceInfo defaultInputDeviceInfo = QAudioDeviceInfo::defaultInputDevice();
+    AudioDeviceInfo defaultInputDeviceInfo = AudioDeviceInfo::defaultInputDevice();
     treeItem = new QTreeWidgetItem(ui->audioInTree);
     treeItem->setText(1, AudioDeviceManager::m_defaultDeviceName);
     found = m_audioDeviceManager->getInputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, inDeviceInfo);
     treeItem->setText(0, found ? "__" : "_D");
     ui->audioInTree->setCurrentItem(treeItem);
 
-    const QList<QAudioDeviceInfo>& inputDevices = m_audioDeviceManager->getInputDevices();
+    const QList<AudioDeviceInfo>& inputDevices = m_audioDeviceManager->getInputDevices();
 
-    for(QList<QAudioDeviceInfo>::const_iterator it = inputDevices.begin(); it != inputDevices.end(); ++it)
+    for(QList<AudioDeviceInfo>::const_iterator it = inputDevices.begin(); it != inputDevices.end(); ++it)
     {
         treeItem = new QTreeWidgetItem(ui->audioInTree);
         treeItem->setText(1, it->deviceName());
