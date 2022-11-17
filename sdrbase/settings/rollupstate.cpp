@@ -17,6 +17,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDataStream>
+#include <QIODevice>
+
 #include "SWGRollupState.h"
 
 #include "rollupstate.h"

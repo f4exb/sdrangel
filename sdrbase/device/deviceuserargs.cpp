@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDataStream>
+#include <QIODevice>
 
 #include "util/simpleserializer.h"
 #include "deviceuserargs.h"

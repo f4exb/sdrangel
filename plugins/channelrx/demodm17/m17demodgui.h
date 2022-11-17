@@ -137,7 +137,7 @@ private:
     static float distance(float lat1, float lon1, float lat2, float lon2);
 
 	void leaveEvent(QEvent*);
-	void enterEvent(QEvent*);
+	void enterEvent(EnterEventType*);
 
 private slots:
     void on_deltaFrequency_changed(qint64 value);

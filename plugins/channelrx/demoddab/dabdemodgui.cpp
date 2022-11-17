@@ -595,7 +595,7 @@ void DABDemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void DABDemodGUI::enterEvent(QEvent* event)
+void DABDemodGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

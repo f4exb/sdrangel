@@ -191,9 +191,9 @@ void SatelliteDeviceSettingsGUI::addPresets(const QString& deviceSetType)
     for (int i = 0; i < count; i++)
     {
         const Preset *preset = mainSettings.getPreset(i);
-        if (((preset->isSourcePreset() && (m_currentPresetType == "R")))
-            || ((preset->isSinkPreset() && (m_currentPresetType == "T")))
-            || ((preset->isMIMOPreset() && (m_currentPresetType == "M"))))
+        if (((preset->isSourcePreset() && (m_currentPresetType == 'R')))
+            || ((preset->isSinkPreset() && (m_currentPresetType == 'T')))
+            || ((preset->isMIMOPreset() && (m_currentPresetType == 'M'))))
         {
             m_presetWidget->addItem(QString("%1: %2 - %3")
                                     .arg(preset->getGroup())
@@ -212,9 +212,9 @@ const Preset* SatelliteDeviceSettingsGUI::getSelectedPreset()
     for (int i = 0; i < count; i++)
     {
         const Preset *preset = mainSettings.getPreset(i);
-        if (   ((preset->isSourcePreset() && (m_currentPresetType == "R")))
-            || ((preset->isSinkPreset() && (m_currentPresetType == "T")))
-            || ((preset->isMIMOPreset() && (m_currentPresetType == "M"))))
+        if (   ((preset->isSourcePreset() && (m_currentPresetType == 'R')))
+            || ((preset->isSinkPreset() && (m_currentPresetType == 'T')))
+            || ((preset->isMIMOPreset() && (m_currentPresetType == 'M'))))
         {
             if (listIdx == presetIdx) {
                 return preset;

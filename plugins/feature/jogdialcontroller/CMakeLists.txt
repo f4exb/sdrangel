@@ -30,7 +30,7 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME jogdialcontroller)
-    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB "Qt::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
@@ -45,7 +45,7 @@ add_library(${TARGET_NAME} SHARED
 )
 
 target_link_libraries(${TARGET_NAME}
-    Qt5::Core
+    Qt::Core
     ${TARGET_LIB}
     sdrbase
     ${TARGET_LIB_GUI}

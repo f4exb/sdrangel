@@ -27,8 +27,8 @@ add_library(sdrsrv SHARED
 )
 
 target_link_libraries(sdrsrv
-    Qt5::Core
-    Qt5::Multimedia
+    Qt::Core
+    Qt::Multimedia
     sdrbase
     logging
 )

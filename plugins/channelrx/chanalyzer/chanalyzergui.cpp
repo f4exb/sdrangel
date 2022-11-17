@@ -703,7 +703,7 @@ void ChannelAnalyzerGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void ChannelAnalyzerGUI::enterEvent(QEvent* event)
+void ChannelAnalyzerGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

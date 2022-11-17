@@ -52,7 +52,7 @@ add_library(modemm17 SHARED
 )
 
 target_link_libraries(modemm17
-    Qt5::Core
+    Qt::Core
 )
 
 install(TARGETS modemm17 DESTINATION ${INSTALL_LIB_DIR})

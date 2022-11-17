@@ -353,7 +353,7 @@ void ValueDial::mouseMoveEvent(QMouseEvent *event)
     int i;
     i = (event->x() - 1) / m_digitWidth;
 
-    if (m_text[i] == m_groupSeparator) {
+    if ((i >= m_text.size()) || (m_text[i] == m_groupSeparator)) {
         i = -1;
     }
 

@@ -37,6 +37,8 @@ namespace leansdr
 // Simple blocks
 //////////////////////////////////////////////////////////////////////
 
+/* // Commented out, as not needed, as does compile on Windows
+
 // [file_reader] reads raw data from a file descriptor into a [pipebuf].
 // If the file descriptor is seekable, data can be looped.
 
@@ -150,6 +152,8 @@ struct file_reader : runnable
     int fdin;
     pipewriter<T> out;
 };
+
+*/
 
 // [file_writer] writes raw data from a [pipebuf] to a file descriptor.
 

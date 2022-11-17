@@ -49,7 +49,9 @@ namespace Ui {
 }
 class RadioAstronomyGUI;
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 using namespace QtCharts;
+#endif
 
 class RadioAstronomyGUI : public ChannelGUI {
     Q_OBJECT
@@ -450,7 +452,7 @@ private:
     int powerYUnitsToIndex(RadioAstronomySettings::PowerYUnits units);
 
     void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
+    void enterEvent(EnterEventType*);
 
     void resizePowerTable();
     void resizePowerMarkerTable();

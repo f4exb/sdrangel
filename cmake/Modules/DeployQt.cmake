@@ -1,6 +1,10 @@
-find_package(Qt5Core REQUIRED)
+if (Qt6_FOUND)
+    find_package(Qt6Core REQUIRED)
+else()
+    find_package(Qt5Core REQUIRED)
+endif()
 
-get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
+get_target_property(_qmake_executable Qt::qmake IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 
 find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
@@ -20,7 +24,7 @@ function(windeployqt target bindir qmldir)
     add_custom_command(TARGET ${target} POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E
             env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}"
-                --verbose 1
+                --verbose 2
                 --no-compiler-runtime
                 --dir "${bindir}"
                 --qmldir "${qmldir}"

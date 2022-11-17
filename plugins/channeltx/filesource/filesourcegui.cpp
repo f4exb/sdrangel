@@ -339,7 +339,7 @@ void FileSourceGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void FileSourceGUI::enterEvent(QEvent* event)
+void FileSourceGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

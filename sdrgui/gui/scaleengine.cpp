@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <math.h>
+#include <QObject>
 #include <QFontMetrics>
 #include <QDataStream>
 #include "gui/scaleengine.h"

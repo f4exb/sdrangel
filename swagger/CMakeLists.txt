@@ -22,8 +22,8 @@ if (NOT MSVC)
 endif()
 
 target_link_libraries(swagger
-    Qt5::Core
-    Qt5::Network
+    Qt::Core
+    Qt::Network
 )
 
 install(TARGETS swagger DESTINATION ${INSTALL_LIB_DIR})

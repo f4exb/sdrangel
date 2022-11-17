@@ -148,7 +148,7 @@ private:
     void displayRRCParameters(bool blnVisible);
 
 	void leaveEvent(QEvent*);
-	void enterEvent(QEvent*);
+	void enterEvent(EnterEventType*);
     bool handleMessage(const Message& objMessage);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();

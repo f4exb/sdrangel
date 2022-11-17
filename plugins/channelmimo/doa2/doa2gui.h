@@ -94,7 +94,7 @@ private:
     void updateDOA();
 
 	void leaveEvent(QEvent*);
-	void enterEvent(QEvent*);
+	void enterEvent(EnterEventType*);
 
 private slots:
     void handleSourceMessages();

@@ -66,7 +66,11 @@ public:
         void setColor(QColor color)
         {
             m_traceColor = color;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            float r,g,b,a;
+#else
             qreal r,g,b,a;
+#endif
             m_traceColor.getRgbF(&r, &g, &b, &a);
             m_traceColorR = r;
             m_traceColorG = g;
@@ -119,7 +123,11 @@ public:
         void setColor(QColor color)
         {
             m_triggerColor = color;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            float r,g,b,a;
+#else
             qreal r,g,b,a;
+#endif
             m_triggerColor.getRgbF(&r, &g, &b, &a);
             m_triggerColorR = r;
             m_triggerColorG = g;

@@ -306,7 +306,7 @@ void SigMFFileSinkGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void SigMFFileSinkGUI::enterEvent(QEvent* event)
+void SigMFFileSinkGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

@@ -826,7 +826,7 @@ void ATVModGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void ATVModGUI::enterEvent(QEvent* event)
+void ATVModGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

@@ -1947,7 +1947,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         }
         airlineRegistration[2] = '\0';
         QString airlineRegistrationString = QString(airlineRegistration).trimmed();
-        bool airlineRegistrationInvalid = QString(airlineRegistrationStatus).contains('#') || !QChar::isLetter(c[0]) || !QChar::isLetter(c[1]);
+        bool airlineRegistrationInvalid = QString(airlineRegistrationString).contains('#') || !QChar::isLetter(c[0]) || !QChar::isLetter(c[1]);
         bool airlineRegistrationInconsistent = !airlineRegistrationStatus && (c[0] || c[1]);
 
         bool bds_2_1 = !aircraftRegistrationInvalid && !aircraftRegistrationInconsistent && !airlineRegistrationInvalid && !airlineRegistrationInconsistent;
@@ -4599,6 +4599,11 @@ void ADSBDemodGUI::applyMapSettings()
     Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
 
     QQuickItem *item = ui->map->rootObject();
+    if (!item)
+    {
+        qCritical("ADSBDemodGUI::applyMapSettings: Map not found. Are all required Qt plugins installed?");
+        return;
+    }
 
     QObject *object = item->findChild<QObject*>("map");
     QGeoCoordinate coords;
@@ -5067,7 +5072,7 @@ void ADSBDemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void ADSBDemodGUI::enterEvent(QEvent* event)
+void ADSBDemodGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

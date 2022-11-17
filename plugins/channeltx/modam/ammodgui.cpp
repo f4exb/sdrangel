@@ -488,7 +488,7 @@ void AMModGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void AMModGUI::enterEvent(QEvent* event)
+void AMModGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

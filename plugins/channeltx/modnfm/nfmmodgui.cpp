@@ -20,7 +20,7 @@
 #include <QFileDialog>
 #include <QTime>
 #include <QDebug>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
@@ -440,7 +440,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_feedbackAudioSampleRate(-1),
     m_tickCount(0),
     m_enableNavTime(false),
-    m_dcsCodeValidator(QRegExp("[0-7]{1,3}"))
+    m_dcsCodeValidator(QRegularExpression("[0-7]{1,3}"))
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channeltx/modnfm/readme.md";
@@ -608,7 +608,7 @@ void NFMModGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void NFMModGUI::enterEvent(QEvent* event)
+void NFMModGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

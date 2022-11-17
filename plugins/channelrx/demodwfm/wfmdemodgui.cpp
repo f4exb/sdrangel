@@ -323,7 +323,7 @@ void WFMDemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void WFMDemodGUI::enterEvent(QEvent* event)
+void WFMDemodGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

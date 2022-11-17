@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 F4EXB                                                      //
-// written by Edouard Griffiths                                                  //
+// Copyright (C) 2022 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,39 +15,16 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_GUI_CHANNELADDDIALOG_H_
-#define SDRGUI_GUI_CHANNELADDDIALOG_H_
+#ifndef SDRGUI_GUI_QTCOMPATIBILITY_H
+#define SDRGUI_GUI_QTCOMPATIBILITY_H
 
-#include <QDialog>
-#include <QStringList>
-#include <vector>
+// Widget::enterEvent parameters have different types in QT5 and QT6
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QEnterEvent>
+typedef QEnterEvent EnterEventType;
+#else
+#include <QEvent>
+typedef QEvent EnterEventType;
+#endif
 
-#include "export.h"
-
-class QAbstractButton;
-
-namespace Ui {
-    class ChannelAddDialog;
-}
-
-class SDRGUI_API ChannelAddDialog : public QDialog {
-    Q_OBJECT
-public:
-    explicit ChannelAddDialog(QWidget* parent = nullptr);
-    ~ChannelAddDialog();
-
-    void resetChannelNames();
-    void addChannelNames(const QStringList& channelNames);
-
-private:
-    Ui::ChannelAddDialog* ui;
-    std::vector<int> m_channelIndexes;
-
-private slots:
-    void apply(QAbstractButton*);
-
-signals:
-    void addChannel(int channelPluginIndex);
-};
-
-#endif /* SDRGUI_GUI_CHANNELADDDIALOG_H_ */
+#endif

@@ -17,7 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QCommandLineOption>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 #include <QDebug>
 
 #include "parserbench.h"
@@ -70,8 +70,8 @@ void ParserBench::parse(const QCoreApplication& app)
     QString test = m_parser.value(m_testOption);
 
     QString testStr = "([a-z0-9]+)";
-    QRegExp ipRegex ("^" + testStr + "$");
-    QRegExpValidator ipValidator(ipRegex);
+    QRegularExpression ipRegex ("^" + testStr + "$");
+    QRegularExpressionValidator ipValidator(ipRegex);
 
     if (ipValidator.validate(test, pos) == QValidator::Acceptable) {
         m_testStr = test;

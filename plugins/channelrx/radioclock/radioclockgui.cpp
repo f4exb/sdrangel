@@ -388,7 +388,7 @@ void RadioClockGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void RadioClockGUI::enterEvent(QEvent* event)
+void RadioClockGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

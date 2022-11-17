@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2022 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,64 +15,68 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_AUDIO_AUDIOINPUTDEVICE_H_
-#define SDRBASE_AUDIO_AUDIOINPUTDEVICE_H_
+#ifndef INCLUDE_AUDIODEVICEINFO_H
+#define INCLUDE_AUDIODEVICEINFO_H
 
-#include <QRecursiveMutex>
-#include <QIODevice>
 #include <QAudioFormat>
-#include <list>
-#include <vector>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QMediaDevices>
+#include <QAudioDevice>
+#else
+#include <QAudioDeviceInfo>
+#endif
+
 #include "export.h"
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-class QAudioSource;
-#else
-class QAudioInput;
-#endif
-class AudioFifo;
-class AudioOutputPipe;
+// Wrapper around QT6's QAudioDevice and and QT5's QAudioDeviceInfo
+class SDRBASE_API AudioDeviceInfo {
 
-
-class SDRBASE_API AudioInputDevice : public QIODevice {
 public:
-	AudioInputDevice();
-	virtual ~AudioInputDevice();
 
-	bool start(int device, int rate);
-	void stop();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    AudioDeviceInfo() :
+        m_deviceInfo()
+    {
+    }
 
-    void addFifo(AudioFifo* audioFifo);
-	void removeFifo(AudioFifo* audioFifo);
-    int getNbFifos() const { return m_audioFifos.size(); }
+    AudioDeviceInfo(QAudioDevice deviceInfo) :
+        m_deviceInfo(deviceInfo)
+    {
+    }
 
-	uint getRate() const { return m_audioFormat.sampleRate(); }
-	void setOnExit(bool onExit) { m_onExit = onExit; }
-	void setVolume(float volume);
+    QAudioDevice deviceInfo() { return m_deviceInfo; }
+#else
+    AudioDeviceInfo() :
+        m_deviceInfo()
+    {
+    }
+
+    AudioDeviceInfo(QAudioDeviceInfo deviceInfo) :
+        m_deviceInfo(deviceInfo)
+    {
+    }
+
+    QAudioDeviceInfo deviceInfo() { return m_deviceInfo; }
+#endif
+
+    QString deviceName() const;
+    QString realm() const;
+    bool isFormatSupported(const QAudioFormat &settings) const;
+    QList<int> supportedSampleRates() const;
+
+    static QList<AudioDeviceInfo> availableInputDevices();
+    static QList<AudioDeviceInfo> availableOutputDevices();
+    static AudioDeviceInfo defaultInputDevice();
+    static AudioDeviceInfo defaultOutputDevice();
 
 private:
-	QRecursiveMutex m_mutex;
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-	QAudioSource* m_audioInput;
+    QAudioDevice m_deviceInfo;
 #else
-	QAudioInput* m_audioInput;
+    QAudioDeviceInfo m_deviceInfo;
 #endif
-	uint m_audioUsageCount;
-	bool m_onExit;
-	float m_volume;
 
-	std::list<AudioFifo*> m_audioFifos;
-	std::vector<qint32> m_mixBuffer;
-
-	QAudioFormat m_audioFormat;
-
-	//virtual bool open(OpenMode mode);
-	virtual qint64 readData(char* data, qint64 maxLen);
-	virtual qint64 writeData(const char* data, qint64 len);
-
-	friend class AudioOutputPipe;
 };
 
-
-
-#endif /* SDRBASE_AUDIO_AUDIOINPUTDEVICE_H_ */
+#endif // INCLUDE_AUDIODEVICEINFO_H

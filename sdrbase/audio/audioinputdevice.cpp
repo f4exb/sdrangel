@@ -16,10 +16,15 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <string.h>
+#include <QDebug>
 #include <QAudioFormat>
-#include <QAudioDeviceInfo>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QAudioSource>
+#else
 #include <QAudioInput>
+#endif
 #include "audio/audioinputdevice.h"
+#include "audio/audiodeviceinfo.h"
 #include "audio/audiofifo.h"
 
 AudioInputDevice::AudioInputDevice() :
@@ -50,16 +55,16 @@ bool AudioInputDevice::start(int device, int rate)
 	if (m_audioUsageCount == 0)
 	{
         QMutexLocker mutexLocker(&m_mutex);
-        QAudioDeviceInfo devInfo;
+        AudioDeviceInfo devInfo;
 
         if (device < 0)
         {
-            devInfo = QAudioDeviceInfo::defaultInputDevice();
+            devInfo = AudioDeviceInfo::defaultInputDevice();
             qWarning("AudioInputDevice::start: using default device %s", qPrintable(devInfo.defaultInputDevice().deviceName()));
         }
         else
         {
-            QList<QAudioDeviceInfo> devicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+            QList<AudioDeviceInfo> devicesInfo = AudioDeviceInfo::availableInputDevices();
 
             if (device < devicesInfo.size())
             {
@@ -68,7 +73,7 @@ bool AudioInputDevice::start(int device, int rate)
             }
             else
             {
-                devInfo = QAudioDeviceInfo::defaultInputDevice();
+                devInfo = AudioDeviceInfo::defaultInputDevice();
                 qWarning("AudioInputDevice::start: audio device #%d does not exist. Using default device %s", device, qPrintable(devInfo.deviceName()));
             }
         }
@@ -77,29 +82,49 @@ bool AudioInputDevice::start(int device, int rate)
 
         m_audioFormat.setSampleRate(rate);
         m_audioFormat.setChannelCount(2);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        m_audioFormat.setSampleFormat(QAudioFormat::Int16);
+#else
         m_audioFormat.setSampleSize(16);
         m_audioFormat.setCodec("audio/pcm");
         m_audioFormat.setByteOrder(QAudioFormat::LittleEndian);
         m_audioFormat.setSampleType(QAudioFormat::SignedInt); // Unknown, SignedInt, UnSignedInt, Float
+#endif
 
         if (!devInfo.isFormatSupported(m_audioFormat))
         {
-            m_audioFormat = devInfo.nearestFormat(m_audioFormat);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            qWarning("AudioInputDevice::start: %d Hz S16_LE audio format not supported.");
+#else
+            m_audioFormat = devInfo.deviceInfo().nearestFormat(m_audioFormat);
             qWarning("AudioInputDevice::start: %d Hz S16_LE audio format not supported. Nearest is sampleRate: %d channelCount: %d sampleSize: %d sampleType: %d",
                     rate, m_audioFormat.sampleRate(), m_audioFormat.channelCount(), m_audioFormat.sampleSize(), (int) m_audioFormat.sampleType());
+#endif
         }
         else
         {
             qInfo("AudioInputDevice::start: audio format OK");
         }
 
-        if (m_audioFormat.sampleSize() != 16)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (m_audioFormat.sampleFormat() != QAudioFormat::Int16)
         {
-            qWarning("AudioInputDevice::start: Audio device '%s' failed", qPrintable(devInfo.defaultInputDevice().deviceName()));
+            qWarning("AudioInputDevice::start: Audio device '%s' failed", qPrintable(devInfo.deviceName()));
             return false;
         }
+#else
+        if (m_audioFormat.sampleSize() != 16)
+        {
+            qWarning("AudioInputDevice::start: Audio device '%s' failed", qPrintable(devInfo.deviceName()));
+            return false;
+        }
+#endif
 
-        m_audioInput = new QAudioInput(devInfo, m_audioFormat);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        m_audioInput = new QAudioSource(devInfo.deviceInfo(), m_audioFormat);
+#else
+        m_audioInput = new QAudioInput(devInfo.deviceInfo(), m_audioFormat);
+#endif
         m_audioInput->setVolume(m_volume);
 
         QIODevice::open(QIODevice::ReadWrite);
@@ -167,6 +192,8 @@ qint64 AudioInputDevice::writeData(const char *data, qint64 len)
 //    QMutexLocker mutexLocker(&m_mutex);
 //#endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#else
     if ((m_audioFormat.sampleSize() != 16)
     		|| (m_audioFormat.sampleType() != QAudioFormat::SignedInt)
 			|| (m_audioFormat.byteOrder() != QAudioFormat::LittleEndian))
@@ -174,6 +201,7 @@ qint64 AudioInputDevice::writeData(const char *data, qint64 len)
     	qCritical("AudioInputDevice::writeData: invalid format not S16LE");
     	return 0;
     }
+#endif
 
     if (m_audioFormat.channelCount() != 2) {
     	qCritical("AudioInputDevice::writeData: invalid format not stereo");

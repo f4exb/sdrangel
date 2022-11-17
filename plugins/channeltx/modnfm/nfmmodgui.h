@@ -18,7 +18,7 @@
 #ifndef PLUGINS_CHANNELTX_MODNFM_NFMMODGUI_H_
 #define PLUGINS_CHANNELTX_MODNFM_NFMMODGUI_H_
 
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
@@ -87,7 +87,7 @@ private:
     bool m_enableNavTime;
     NFMModSettings::NFMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
-    QRegExpValidator m_dcsCodeValidator;
+    QRegularExpressionValidator m_dcsCodeValidator;
 
     explicit NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
     virtual ~NFMModGUI();
@@ -102,7 +102,7 @@ private:
     void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
+    void enterEvent(EnterEventType*);
 
 private slots:
     void handleSourceMessages();

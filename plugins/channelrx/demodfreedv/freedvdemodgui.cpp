@@ -422,7 +422,7 @@ void FreeDVDemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void FreeDVDemodGUI::enterEvent(QEvent* event)
+void FreeDVDemodGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

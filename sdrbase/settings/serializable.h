@@ -22,7 +22,8 @@ namespace SWGSDRangel {
     class SWGObject;
 }
 
-class QStringList;
+#include <QStringList>
+
 class Serializable
 {
 public:

@@ -34,8 +34,8 @@ add_library(${TARGET_NAME} SHARED
 )
 
 target_link_libraries(${TARGET_NAME}
-    Qt5::Core
-    Qt5::Widgets
+    Qt::Core
+    Qt::Widgets
 	sdrbase
 	sdrgui
 )

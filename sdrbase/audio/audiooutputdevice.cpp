@@ -18,9 +18,13 @@
 
 #include <string.h>
 #include <QAudioFormat>
-#include <QAudioDeviceInfo>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QAudioSink>
+#else
 #include <QAudioOutput>
+#endif
 #include "audiooutputdevice.h"
+#include "audiodeviceinfo.h"
 #include "audiofifo.h"
 #include "audionetsink.h"
 #include "dsp/wavfilerecord.h"
@@ -59,20 +63,19 @@ AudioOutputDevice::~AudioOutputDevice()
 
 bool AudioOutputDevice::start(int device, int rate)
 {
-
 //	if (m_audioUsageCount == 0)
 //	{
         QMutexLocker mutexLocker(&m_mutex);
-        QAudioDeviceInfo devInfo;
+        AudioDeviceInfo devInfo;
 
         if (device < 0)
         {
-            devInfo = QAudioDeviceInfo::defaultOutputDevice();
+            devInfo = AudioDeviceInfo::defaultOutputDevice();
             qWarning("AudioOutputDevice::start: using system default device %s", qPrintable(devInfo.defaultOutputDevice().deviceName()));
         }
         else
         {
-            QList<QAudioDeviceInfo> devicesInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+            QList<AudioDeviceInfo> devicesInfo = AudioDeviceInfo::availableOutputDevices();
 
             if (device < devicesInfo.size())
             {
@@ -81,23 +84,34 @@ bool AudioOutputDevice::start(int device, int rate)
             }
             else
             {
-                devInfo = QAudioDeviceInfo::defaultOutputDevice();
+                devInfo = AudioDeviceInfo::defaultOutputDevice();
                 qWarning("AudioOutputDevice::start: audio device #%d does not exist. Using system default device %s", device, qPrintable(devInfo.defaultOutputDevice().deviceName()));
             }
         }
 
         //QAudioDeviceInfo devInfo(QAudioDeviceInfo::defaultOutputDevice());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        // Start with a valid format
+        m_audioFormat = devInfo.deviceInfo().preferredFormat();
+#endif
 
         m_audioFormat.setSampleRate(rate);
         m_audioFormat.setChannelCount(2);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        m_audioFormat.setSampleFormat(QAudioFormat::Int16);
+#else
         m_audioFormat.setSampleSize(16);
         m_audioFormat.setCodec("audio/pcm");
         m_audioFormat.setByteOrder(QAudioFormat::LittleEndian);
         m_audioFormat.setSampleType(QAudioFormat::SignedInt);
+#endif
 
         if (!devInfo.isFormatSupported(m_audioFormat))
         {
-            m_audioFormat = devInfo.nearestFormat(m_audioFormat);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            qWarning("AudioOutputDevice::start: format %d Hz 2xS16LE audio/pcm not supported.", rate);
+#else
+            m_audioFormat = devInfo.deviceInfo().nearestFormat(m_audioFormat);
             std::ostringstream os;
             os << " sampleRate: " << m_audioFormat.sampleRate()
                << " channelCount: " << m_audioFormat.channelCount()
@@ -106,19 +120,32 @@ bool AudioOutputDevice::start(int device, int rate)
                << " byteOrder: " <<  (m_audioFormat.byteOrder() == QAudioFormat::BigEndian ? "BE" : "LE")
                << " sampleType: " << (int) m_audioFormat.sampleType();
             qWarning("AudioOutputDevice::start: format %d Hz 2xS16LE audio/pcm not supported. Using: %s", rate, os.str().c_str());
+#endif
         }
         else
         {
             qInfo("AudioOutputDevice::start: audio format OK");
         }
 
-        if (m_audioFormat.sampleSize() != 16)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (m_audioFormat.sampleFormat() != QAudioFormat::Int16)
         {
-            qWarning("AudioOutputDevice::start: Audio device '%s' failed", qPrintable(devInfo.defaultOutputDevice().deviceName()));
+            qWarning("AudioOutputDevice::start: Audio device '%s' failed", qPrintable(devInfo.deviceName()));
             return false;
         }
+#else
+        if (m_audioFormat.sampleSize() != 16)
+        {
+            qWarning("AudioOutputDevice::start: Audio device '%s' failed", qPrintable(devInfo.deviceName()));
+            return false;
+        }
+#endif
 
-        m_audioOutput = new QAudioOutput(devInfo, m_audioFormat);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        m_audioOutput = new QAudioSink(devInfo.deviceInfo(), m_audioFormat);
+#else
+        m_audioOutput = new QAudioOutput(devInfo.deviceInfo(), m_audioFormat);
+#endif
         m_audioNetSink = new AudioNetSink(0, m_audioFormat.sampleRate(), false);
         m_wavFileRecord = new WavFileRecord(m_audioFormat.sampleRate());
 		m_audioOutput->setVolume(m_volume);
@@ -129,7 +156,7 @@ bool AudioOutputDevice::start(int device, int rate)
         m_audioOutput->start(this);
 
         if (m_audioOutput->state() != QAudio::ActiveState) {
-            qWarning("AudioOutputDevice::start: cannot start");
+            qWarning() << "AudioOutputDevice::start: cannot start - " << m_audioOutput->error();
         }
 //	}
 //
@@ -295,8 +322,6 @@ void AudioOutputDevice::setRecordSilenceTime(int recordSilenceTime)
 
 qint64 AudioOutputDevice::readData(char* data, qint64 maxLen)
 {
-    //qDebug("AudioOutputDevice::readData: %lld", maxLen);
-
     // Study this mutex on OSX, for now deadlocks possible
     // Removed as it may indeed cause lockups and is in fact useless.
 //#ifndef __APPLE__
@@ -474,4 +499,26 @@ void AudioOutputDevice::setVolume(float volume)
     if (m_audioOutput) {
         m_audioOutput->setVolume(m_volume);
 	}
+}
+
+// Qt6 requires bytesAvailable to be implemented. Not needed for Qt5.
+qint64 AudioOutputDevice::bytesAvailable() const
+{
+	qint64 available = 0;
+    for (std::list<AudioFifo*>::const_iterator it = m_audioFifos.begin(); it != m_audioFifos.end(); ++it)
+	{
+        qint64 fill = (*it)->fill();
+        if (available == 0) {
+            available = fill;
+        } else {
+            available = std::min(fill, available);
+        }
+    }
+    // If we return 0 from this twice in a row, audio will stop.
+    // So we always return a value, and if we don't have enough data in the FIFOs
+    // when readData is called, that will output silence
+    if (available == 0) {
+        available = 2048; // Is there a better value to use?
+    }
+    return available * 2 * 2; // 2 Channels of 16-bit data
 }

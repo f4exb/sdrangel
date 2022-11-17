@@ -21,6 +21,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QDebug>
+#include <QRegularExpression>
 
 // Redirect OSM maps so we can support Street, Satellite and an Aviation map (CartoDB position)
 class ADSBOSMTemplateServer : public QTcpServer
@@ -56,7 +57,7 @@ private slots:
         if (socket->canReadLine())
         {
             QString line = socket->readLine();
-            QStringList tokens = QString(line).split(QRegExp("[ \r\n][ \r\n]*"));
+            QStringList tokens = QString(line).split(QRegularExpression("[ \r\n][ \r\n]*"));
             if (tokens[0] == "GET")
             {
                 bool hires = tokens[1].contains("hires");

@@ -632,7 +632,7 @@ void AISDemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void AISDemodGUI::enterEvent(QEvent* event)
+void AISDemodGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

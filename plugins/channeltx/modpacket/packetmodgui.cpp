@@ -602,7 +602,7 @@ void PacketModGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void PacketModGUI::enterEvent(QEvent* event)
+void PacketModGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

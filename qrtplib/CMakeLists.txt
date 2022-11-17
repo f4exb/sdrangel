@@ -81,8 +81,8 @@ add_library(qrtplib SHARED
 )
 
 target_link_libraries(qrtplib
-    Qt5::Core
-    Qt5::Network
+    Qt::Core
+    Qt::Network
 )
 
 install(TARGETS qrtplib DESTINATION ${INSTALL_LIB_DIR})

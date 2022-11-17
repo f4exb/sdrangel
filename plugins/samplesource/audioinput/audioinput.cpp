@@ -95,7 +95,7 @@ bool AudioInput::openDevice()
 bool AudioInput::openAudioDevice(QString deviceName, qint32 sampleRate)
 {
     AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-    const QList<QAudioDeviceInfo>& audioList = audioDeviceManager->getInputDevices();
+    const QList<AudioDeviceInfo>& audioList = audioDeviceManager->getInputDevices();
 
     for (const auto &itAudio : audioList)
     {

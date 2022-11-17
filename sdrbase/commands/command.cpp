@@ -150,7 +150,7 @@ QString Command::getKeyLabel() const
     else if (m_keyModifiers != Qt::NoModifier)
     {
         QString altGrStr = m_keyModifiers & Qt::GroupSwitchModifier ? "Gr " : "";
-        int maskedModifiers = (m_keyModifiers & 0x3FFFFFFF) + ((m_keyModifiers & 0x40000000)>>3);
+        int maskedModifiers = ((int) m_keyModifiers & 0x3FFFFFFF) + (((int) m_keyModifiers & 0x40000000)>>3);
         return altGrStr + QKeySequence(maskedModifiers, m_key).toString();
     }
     else

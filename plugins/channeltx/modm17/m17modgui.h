@@ -18,7 +18,7 @@
 #ifndef PLUGINS_CHANNELTX_MODM17_M17MODGUI_H_
 #define PLUGINS_CHANNELTX_MODM17_M17MODGUI_H_
 
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
@@ -88,7 +88,7 @@ private:
     std::size_t m_tickCount;
     bool m_enableNavTime;
     MessageQueue m_inputMessageQueue;
-    QRegExpValidator m_dcsCodeValidator;
+    QRegularExpressionValidator m_dcsCodeValidator;
 
     explicit M17ModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = nullptr);
     virtual ~M17ModGUI();
@@ -106,7 +106,7 @@ private:
     int packetTypeToIndex(M17ModSettings::PacketType type);
 
     void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
+    void enterEvent(EnterEventType*);
 
 private slots:
     void handleSourceMessages();

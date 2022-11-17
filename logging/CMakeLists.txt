@@ -26,8 +26,8 @@ add_library(logging SHARED
 )
 
 target_link_libraries(logging
-    Qt5::Core
-    Qt5::Network
+    Qt::Core
+    Qt::Network
 )
 
 install(TARGETS logging DESTINATION ${INSTALL_LIB_DIR})

@@ -20,7 +20,7 @@
 #include <QFileDialog>
 #include <QTime>
 #include <QDebug>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
@@ -471,7 +471,7 @@ M17ModGUI::M17ModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_feedbackAudioSampleRate(-1),
     m_tickCount(0),
     m_enableNavTime(false),
-    m_dcsCodeValidator(QRegExp("[0-7]{1,3}"))
+    m_dcsCodeValidator(QRegularExpression("[0-7]{1,3}"))
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channeltx/modm17/readme.md";
@@ -702,7 +702,7 @@ void M17ModGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void M17ModGUI::enterEvent(QEvent* event)
+void M17ModGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

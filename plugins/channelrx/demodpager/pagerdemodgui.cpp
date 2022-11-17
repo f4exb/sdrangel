@@ -665,7 +665,7 @@ void PagerDemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void PagerDemodGUI::enterEvent(QEvent* event)
+void PagerDemodGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

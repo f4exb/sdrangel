@@ -18,6 +18,7 @@
 
 #include <QColor>
 #include <QDataStream>
+#include <QIODevice>
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"

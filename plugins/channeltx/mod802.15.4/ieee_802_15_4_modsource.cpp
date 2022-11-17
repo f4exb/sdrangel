@@ -20,6 +20,7 @@
 #include <QDebug>
 #include <QUdpSocket>
 #include <QNetworkDatagram>
+#include <QVariant>
 
 #include "dsp/basebandsamplesink.h"
 #include "dsp/scopevis.h"

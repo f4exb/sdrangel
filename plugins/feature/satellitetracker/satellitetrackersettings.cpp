@@ -18,6 +18,7 @@
 
 #include <QColor>
 #include <QDataStream>
+#include <QIODevice>
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
@@ -270,19 +271,6 @@ void SatelliteTrackerSettings::deserializeStringList(const QByteArray& data, QLi
     delete stream;
 }
 
-QDataStream& operator<<(QDataStream& out, const QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *list)
-{
-    out << *list;
-    return out;
-}
-
-QDataStream& operator>>(QDataStream& in, QList<SatelliteTrackerSettings::SatelliteDeviceSettings *>*& list)
-{
-    list = new QList<SatelliteTrackerSettings::SatelliteDeviceSettings *>();
-    in >> *list;
-    return in;
-}
-
 QDataStream& operator<<(QDataStream& out, const SatelliteTrackerSettings::SatelliteDeviceSettings* settings)
 {
     out << settings->m_deviceSetIndex;
@@ -313,6 +301,19 @@ QDataStream& operator>>(QDataStream& in, SatelliteTrackerSettings::SatelliteDevi
     in >> settings->m_frequency;
     in >> settings->m_aosCommand;
     in >> settings->m_losCommand;
+    return in;
+}
+
+QDataStream& operator<<(QDataStream& out, const QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *list)
+{
+    out << *list;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, QList<SatelliteTrackerSettings::SatelliteDeviceSettings *>*& list)
+{
+    list = new QList<SatelliteTrackerSettings::SatelliteDeviceSettings *>();
+    in >> *list;
     return in;
 }
 

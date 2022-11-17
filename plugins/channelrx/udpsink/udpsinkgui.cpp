@@ -657,7 +657,7 @@ void UDPSinkGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void UDPSinkGUI::enterEvent(QEvent* event)
+void UDPSinkGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

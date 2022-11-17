@@ -612,7 +612,7 @@ void DATVModGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void DATVModGUI::enterEvent(QEvent* event)
+void DATVModGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

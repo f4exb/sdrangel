@@ -23,7 +23,9 @@
 #include "ui_noisefigureenrdialog.h"
 #include "noisefiguresettings.h"
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 using namespace QtCharts;
+#endif
 
 class NoiseFigureENRDialog : public QDialog {
     Q_OBJECT

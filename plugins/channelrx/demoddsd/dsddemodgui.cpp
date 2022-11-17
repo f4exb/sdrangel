@@ -571,7 +571,7 @@ void DSDDemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void DSDDemodGUI::enterEvent(QEvent* event)
+void DSDDemodGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

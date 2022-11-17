@@ -22,8 +22,8 @@ include_directories(
 )
 
 target_link_libraries(sdrbench
-    Qt5::Core
-    Qt5::Gui
+    Qt::Core
+    Qt::Gui
     sdrbase
     logging
 )

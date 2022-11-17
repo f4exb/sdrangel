@@ -530,7 +530,7 @@ void FreeDVModGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void FreeDVModGUI::enterEvent(QEvent* event)
+void FreeDVModGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

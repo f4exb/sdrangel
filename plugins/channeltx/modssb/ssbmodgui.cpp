@@ -744,7 +744,7 @@ void SSBModGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void SSBModGUI::enterEvent(QEvent* event)
+void SSBModGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

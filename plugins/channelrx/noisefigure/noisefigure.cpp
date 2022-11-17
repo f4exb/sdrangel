@@ -264,7 +264,7 @@ void NoiseFigure::nextState()
         if (m_settings.m_sweepSpec == NoiseFigureSettings::LIST)
         {
             // Create list of sweep values from string
-            QRegExp separator("[( |,|\t|)]");
+            QRegularExpression separator("[( |,|\t|)]");
             QStringList valueStrings = m_settings.m_sweepList.trimmed().split(separator);
             m_values.clear();
             for (int i = 0; i < valueStrings.size(); i++)

@@ -17,7 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QCommandLineOption>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 #include <QDebug>
 
 #include "mainparser.h"
@@ -72,11 +72,11 @@ void MainParser::parse(const QCoreApplication& app)
     if (!serverAddress.isEmpty())
     {
         QString ipRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";
-        QRegExp ipRegex ("^" + ipRange
-                         + "\\." + ipRange
-                         + "\\." + ipRange
-                         + "\\." + ipRange + "$");
-        QRegExpValidator ipValidator(ipRegex);
+        QRegularExpression ipRegex ("^" + ipRange
+                                     + "\\." + ipRange
+                                     + "\\." + ipRange
+                                     + "\\." + ipRange + "$");
+        QRegularExpressionValidator ipValidator(ipRegex);
 
         if (ipValidator.validate(serverAddress, pos) == QValidator::Acceptable) {
             m_serverAddress = serverAddress;

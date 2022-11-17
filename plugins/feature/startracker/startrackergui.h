@@ -45,7 +45,9 @@ namespace Ui {
     class StarTrackerGUI;
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 using namespace QtCharts;
+#endif
 
 class StarTrackerGUI : public FeatureGUI {
     Q_OBJECT

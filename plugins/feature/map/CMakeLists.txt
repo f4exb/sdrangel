@@ -24,7 +24,7 @@ set(map_HEADERS
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
+    ${Qt${QT_DEFAULT_MAJOR_VERSION}Gui_PRIVATE_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
@@ -70,7 +70,7 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME map)
-    set(TARGET_LIB "Qt5::Widgets" Qt5::Quick Qt5::QuickWidgets Qt5::Positioning Qt5::Location Qt5::WebEngine Qt5::WebEngineCore Qt5::WebEngineWidgets)
+    set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location Qt::WebEngine Qt::WebEngineCore Qt::WebEngineWidgets)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
@@ -85,7 +85,7 @@ add_library(${TARGET_NAME} SHARED
 )
 
 target_link_libraries(${TARGET_NAME}
-    Qt5::Core
+    Qt::Core
     ${TARGET_LIB}
     sdrbase
     ${TARGET_LIB_GUI}

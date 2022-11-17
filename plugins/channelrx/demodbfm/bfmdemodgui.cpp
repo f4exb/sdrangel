@@ -509,7 +509,7 @@ void BFMDemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void BFMDemodGUI::enterEvent(QEvent* event)
+void BFMDemodGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

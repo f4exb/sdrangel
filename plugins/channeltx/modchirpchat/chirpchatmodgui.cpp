@@ -599,7 +599,7 @@ void ChirpChatModGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void ChirpChatModGUI::enterEvent(QEvent* event)
+void ChirpChatModGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

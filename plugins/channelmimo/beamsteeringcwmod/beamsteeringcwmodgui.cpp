@@ -194,7 +194,7 @@ void BeamSteeringCWModGUI::leaveEvent(QEvent*)
     m_channelMarker.setHighlighted(false);
 }
 
-void BeamSteeringCWModGUI::enterEvent(QEvent*)
+void BeamSteeringCWModGUI::enterEvent(EnterEventType*)
 {
     m_channelMarker.setHighlighted(true);
 }

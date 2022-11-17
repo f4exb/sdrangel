@@ -279,7 +279,7 @@ void RemoteSourceGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void RemoteSourceGUI::enterEvent(QEvent* event)
+void RemoteSourceGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

@@ -20,7 +20,7 @@
 #define _AUDIOINPUT_AUDIOINPUTSETTINGS_H_
 
 #include <QString>
-#include <QAudioDeviceInfo>
+#include "audio/audiodeviceinfo.h"
 
 struct AudioInputSettings {
 
@@ -46,17 +46,13 @@ struct AudioInputSettings {
     bool deserialize(const QByteArray& data);
 
     // Append realm to device names, because there may be multiple devices with the same name on Windows
-    static QString getFullDeviceName(const QAudioDeviceInfo &deviceInfo)
+    static QString getFullDeviceName(const AudioDeviceInfo &deviceInfo)
     {
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-        return deviceInfo.deviceName();
-#else
         QString realm = deviceInfo.realm();
         if (realm != "" && realm != "default" && realm != "alsa")
             return deviceInfo.deviceName() + " " + realm;
         else
             return deviceInfo.deviceName();
-#endif
     }
     void applySettings(const QStringList& settingsKeys, const AudioInputSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;

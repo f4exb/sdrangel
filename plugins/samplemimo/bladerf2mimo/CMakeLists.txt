@@ -35,7 +35,7 @@ if (NOT SERVER_MODE)
         bladerf2mimogui.h
     )
     set(TARGET_NAME mimobladerf2)
-    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB "Qt::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
@@ -54,7 +54,7 @@ if(LIBBLADERF_EXTERNAL)
 endif()
 
 target_link_libraries(${TARGET_NAME}
-    Qt5::Core
+    Qt::Core
     ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}

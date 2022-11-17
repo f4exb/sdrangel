@@ -257,7 +257,7 @@ QList<VISA::Instrument> VISA::instruments(QRegularExpression *filter)
 void *VISA::libraryOpen(const char *filename)
 {
     HMODULE module;
-    module = LoadLibrary ((LPCSTR)filename);
+    module = LoadLibraryA ((LPCSTR)filename);
     return module;
 }
 
