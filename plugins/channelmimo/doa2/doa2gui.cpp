@@ -260,7 +260,7 @@ void DOA2GUI::leaveEvent(QEvent*)
     m_channelMarker.setHighlighted(false);
 }
 
-void DOA2GUI::enterEvent(QEvent*)
+void DOA2GUI::enterEvent(EnterEventType*)
 {
     m_channelMarker.setHighlighted(true);
 }

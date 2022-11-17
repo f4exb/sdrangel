@@ -104,7 +104,7 @@ private:
     void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
+    void enterEvent(EnterEventType*);
 
     void resizeTable();
     QAction *createCheckableItem(QString& text, int idx, bool checked, const char *slot);

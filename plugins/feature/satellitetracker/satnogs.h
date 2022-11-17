@@ -23,6 +23,7 @@
 #include <QHash>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QRegExp>
 
 struct SatNogsTransmitter {
 

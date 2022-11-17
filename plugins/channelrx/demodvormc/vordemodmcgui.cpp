@@ -1353,7 +1353,7 @@ void VORDemodMCGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void VORDemodMCGUI::enterEvent(QEvent* event)
+void VORDemodMCGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

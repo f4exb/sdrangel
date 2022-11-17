@@ -42,7 +42,9 @@ namespace Ui {
     class NoiseFigureGUI;
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 using namespace QtCharts;
+#endif
 
 class NoiseFigureGUI : public ChannelGUI {
     Q_OBJECT
@@ -107,7 +109,7 @@ private:
     void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
+    void enterEvent(EnterEventType*);
 
     void resizeTable();
     QAction *createCheckableItem(QString& text, int idx, bool checked, const char *slot);

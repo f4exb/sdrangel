@@ -200,7 +200,7 @@ void RemoteSinkGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void RemoteSinkGUI::enterEvent(QEvent* event)
+void RemoteSinkGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

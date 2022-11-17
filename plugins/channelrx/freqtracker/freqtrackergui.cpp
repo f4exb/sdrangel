@@ -471,7 +471,7 @@ void FreqTrackerGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void FreqTrackerGUI::enterEvent(QEvent* event)
+void FreqTrackerGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

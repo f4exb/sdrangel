@@ -206,7 +206,7 @@ void LocalSourceGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void LocalSourceGUI::enterEvent(QEvent* event)
+void LocalSourceGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

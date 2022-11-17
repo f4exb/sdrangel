@@ -99,7 +99,7 @@ private:
     void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
+    void enterEvent(EnterEventType*);
     void resetService();
     void clearProgram();
     void resizeTable();

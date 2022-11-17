@@ -229,7 +229,7 @@ void InterferometerGUI::leaveEvent(QEvent*)
     m_channelMarker.setHighlighted(false);
 }
 
-void InterferometerGUI::enterEvent(QEvent*)
+void InterferometerGUI::enterEvent(EnterEventType*)
 {
     m_channelMarker.setHighlighted(true);
 }

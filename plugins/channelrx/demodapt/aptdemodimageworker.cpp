@@ -486,7 +486,7 @@ QRgb APTDemodImageWorker::findNearest(const QImage &image, double latitude, doub
         yMin = std::max(yMin, yStartPostCrop);
         yMax = std::min(yMax, yEndPostCrop);
         xMin = std::max(xMin, 0);
-        xMax = std::min(xMax, m_pixelCoords[0].size());
+        xMax = std::min(xMax, (int)m_pixelCoords[0].size());
     }
 
     const int ySize = yEndPostCrop-1;

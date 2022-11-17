@@ -274,12 +274,12 @@ void PagerDemodSink::decodeBatch()
                 if (getMessageQueueToChannel())
                 {
                     // Convert from 7-bit to UTF-8 using user specified encoding
-                    for (int i = 0; i < m_alphaMessage; i++)
+                    for (int i = 0; i < m_alphaMessage.size(); i++)
                     {
                         QChar c = m_alphaMessage[i];
                         int idx = m_settings.m_sevenbit.indexOf(c.toLatin1());
                         if (idx >= 0) {
-                            c = m_settings.m_unicode[idx];
+                            c = QChar(m_settings.m_unicode[idx]);
                         }
                         m_alphaMessage[i] = c;
                     }

@@ -231,7 +231,7 @@ void LocalSinkGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void LocalSinkGUI::enterEvent(QEvent* event)
+void LocalSinkGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

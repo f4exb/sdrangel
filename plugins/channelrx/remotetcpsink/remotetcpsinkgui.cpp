@@ -260,7 +260,7 @@ void RemoteTCPSinkGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void RemoteTCPSinkGUI::enterEvent(QEvent* event)
+void RemoteTCPSinkGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

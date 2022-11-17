@@ -43,7 +43,9 @@ namespace Ui {
     class RemoteControlGUI;
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 using namespace QtCharts;
+#endif
 
 class RemoteControlGUI : public FeatureGUI {
     Q_OBJECT

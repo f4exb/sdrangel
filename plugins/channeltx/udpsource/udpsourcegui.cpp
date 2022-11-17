@@ -538,7 +538,7 @@ void UDPSourceGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void UDPSourceGUI::enterEvent(QEvent* event)
+void UDPSourceGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

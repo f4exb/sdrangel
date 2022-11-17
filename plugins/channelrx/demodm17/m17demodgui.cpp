@@ -612,7 +612,7 @@ void M17DemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void M17DemodGUI::enterEvent(QEvent* event)
+void M17DemodGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

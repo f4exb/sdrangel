@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include <QThread>
+#include <QVariant>
 
 #include "cm256cc/cm256.h"
 #include "remotesourceworker.h"

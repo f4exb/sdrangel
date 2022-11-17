@@ -168,7 +168,7 @@ bool StarTrackerGUI::handleMessage(const Message& message)
         bool found = false;
         for (int i = 0; i < m_lineOfSightMarkers.size(); i++)
         {
-            if (m_lineOfSightMarkers[i]->m_name == swgSettings->getName())
+            if (m_lineOfSightMarkers[i]->m_name == *swgSettings->getName())
             {
                 if (swgSettings->getD() == 0.0)
                 {

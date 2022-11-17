@@ -765,7 +765,7 @@ void NoiseFigureGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void NoiseFigureGUI::enterEvent(QEvent* event)
+void NoiseFigureGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

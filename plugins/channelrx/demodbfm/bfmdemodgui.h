@@ -97,7 +97,7 @@ private:
     void updateAbsoluteCenterFrequency();
 
 	void leaveEvent(QEvent*);
-	void enterEvent(QEvent*);
+	void enterEvent(EnterEventType*);
 
 	void changeFrequency(qint64 f);
 

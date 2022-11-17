@@ -667,7 +667,7 @@ void SSBDemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void SSBDemodGUI::enterEvent(QEvent* event)
+void SSBDemodGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

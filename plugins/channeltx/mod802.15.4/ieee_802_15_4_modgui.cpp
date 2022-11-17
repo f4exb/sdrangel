@@ -612,7 +612,7 @@ void IEEE_802_15_4_ModGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void IEEE_802_15_4_ModGUI::enterEvent(QEvent* event)
+void IEEE_802_15_4_ModGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

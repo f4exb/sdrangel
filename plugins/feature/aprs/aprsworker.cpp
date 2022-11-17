@@ -192,7 +192,7 @@ void APRSWorker::errorOccurred(QAbstractSocket::SocketError socketError)
 {
     qDebug() << "APRSWorker::errorOccurred: " << socketError;
     if (m_msgQueueToFeature)
-        m_msgQueueToFeature->push(APRS::MsgReportWorker::create(m_socket.errorString() + " " + socketError));
+        m_msgQueueToFeature->push(APRS::MsgReportWorker::create(m_socket.errorString()));
 }
 
 void APRSWorker::recv()

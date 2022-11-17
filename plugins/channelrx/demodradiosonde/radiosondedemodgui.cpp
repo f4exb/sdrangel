@@ -769,7 +769,7 @@ void RadiosondeDemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void RadiosondeDemodGUI::enterEvent(QEvent* event)
+void RadiosondeDemodGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);

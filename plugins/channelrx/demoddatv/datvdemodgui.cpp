@@ -498,7 +498,7 @@ void DATVDemodGUI::leaveEvent(QEvent* event)
     ChannelGUI::leaveEvent(event);
 }
 
-void DATVDemodGUI::enterEvent(QEvent* event)
+void DATVDemodGUI::enterEvent(EnterEventType* event)
 {
     blockApplySettings(true);
     m_channelMarker.setHighlighted(true);
