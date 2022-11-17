@@ -77,10 +77,10 @@ add_library(${TARGET_NAME} SHARED
 )
 
 target_link_libraries(${TARGET_NAME}
-    Qt5::Core
-    Qt5::Widgets
-    Qt5::Multimedia
-    Qt5::MultimediaWidgets
+    Qt::Core
+    Qt::Widgets
+    Qt::Multimedia
+    Qt::MultimediaWidgets
     sdrbase
     sdrgui
     ${AVCODEC_LIBRARIES}

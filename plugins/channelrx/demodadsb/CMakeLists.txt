@@ -29,7 +29,7 @@ set(adsb_HEADERS
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${Boost_INCLUDE_DIRS}
-    ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
+    ${Qt${QT_DEFAULT_MAJOR_VERSION}Gui_PRIVATE_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
@@ -61,7 +61,7 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME demodadsb)
-    set(TARGET_LIB Qt5::Widgets Qt5::Quick Qt5::QuickWidgets Qt5::Positioning Qt5::TextToSpeech)
+    set(TARGET_LIB Qt::Widgets Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::TextToSpeech)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
@@ -81,7 +81,7 @@ endif()
 
 target_link_libraries(${TARGET_NAME}
     Boost::disable_autolinking
-    Qt5::Core
+    Qt::Core
     ${TARGET_LIB}
     sdrbase
     ${TARGET_LIB_GUI}

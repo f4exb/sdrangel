@@ -48,12 +48,12 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME featuresatellitetracker)
-    set(TARGET_LIB Qt5::Widgets Qt5::Positioning Qt5::Charts Qt5::TextToSpeech)
+    set(TARGET_LIB Qt::Widgets Qt::Positioning Qt::Charts Qt::TextToSpeech)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
     set(TARGET_NAME featuresatellitetrackersrv)
-    set(TARGET_LIB Qt5::Positioning Qt5::Charts)
+    set(TARGET_LIB Qt::Positioning Qt::Charts)
     set(TARGET_LIB_GUI "")
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
@@ -67,12 +67,17 @@ if(SGP4_EXTERNAL)
 endif()
 
 target_link_libraries(${TARGET_NAME}
-    Qt5::Core
+    Qt::Core
     ${TARGET_LIB}
     sdrbase
     ${TARGET_LIB_GUI}
     ${SGP4_LIBRARIES}
 )
+if (Qt6_FOUND)
+    target_link_libraries(${TARGET_NAME}
+        Qt::Core5Compat
+    )
+endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 

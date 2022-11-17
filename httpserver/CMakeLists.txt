@@ -40,8 +40,8 @@ add_library(httpserver SHARED
 )
 
 target_link_libraries(httpserver
-    Qt5::Core
-    Qt5::Network
+    Qt::Core
+    Qt::Network
 )
 
 install(TARGETS httpserver DESTINATION ${INSTALL_LIB_DIR})

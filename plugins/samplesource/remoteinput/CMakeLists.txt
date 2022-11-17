@@ -36,7 +36,7 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME inputremote)
-    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB "Qt::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
@@ -55,7 +55,7 @@ if(CM256CC_EXTERNAL)
 endif()
 
 target_link_libraries(${TARGET_NAME}
-    Qt5::Core
+    Qt::Core
     ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}

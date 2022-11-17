@@ -168,6 +168,7 @@ set(sdrgui_HEADERS
     gui/physicalunit.h
     gui/pluginsdialog.h
     gui/presetitem.h
+    gui/qtcompatibility.h
     gui/rollupcontents.h
     gui/rollupwidget.h
     gui/samplingdevicedialog.h
@@ -259,7 +260,7 @@ set(sdrgui_FORMS
     soapygui/arginfogui.ui
 )
 
-qt5_wrap_ui(sdrgui_FORMS_HEADERS ${sdrgui_FORMS})
+qt_wrap_ui(sdrgui_FORMS_HEADERS ${sdrgui_FORMS})
 
 include_directories(
   ${CMAKE_SOURCE_DIR}/exports
@@ -277,17 +278,28 @@ add_library(sdrgui SHARED
   )
 
 target_link_libraries(sdrgui
-  Qt5::Core
-  Qt5::Widgets
-  Qt5::OpenGL
-  Qt5::Multimedia
+  Qt::Core
+  Qt::Widgets
+  Qt::OpenGL
+  Qt::Multimedia
   ${OPENGL_LIBRARIES}
   ${sdrgui_LIMERFE_LIB}
   sdrbase
   logging
   )
+if (Qt6_FOUND)
+  target_link_libraries(sdrbase
+    Qt::OpenGLWidgets
+  )
+endif()
 
 install(TARGETS sdrgui DESTINATION ${INSTALL_LIB_DIR})
+
+if(WIN32 AND Qt6_FOUND)
+    # Run deployqt for OpenGLWidgets
+    include(DeployQt)
+    windeployqt(sdrgui ${SDRANGEL_BINARY_BIN_DIR} "")
+endif()
 
 # Install debug symbols
 if (WIN32)

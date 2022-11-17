@@ -55,6 +55,7 @@ set(sdrbase_SOURCES
 
     audio/audiocompressor.cpp
     audio/audiocompressorsnd.cpp
+    audio/audiodeviceinfo.cpp
     audio/audiodevicemanager.cpp
     audio/audiofifo.cpp
     audio/audiofilter.cpp
@@ -237,6 +238,7 @@ set(sdrbase_HEADERS
 
     audio/audiocompressor.h
     audio/audiocompressorsnd.h
+    audio/audiodeviceinfo.h
     audio/audiodevicemanager.h
     audio/audiofifo.h
     audio/audiofilter.h
@@ -486,16 +488,27 @@ target_link_libraries(sdrbase
     ${sdrbase_SERIALDV_LIB}
     ${sdrbase_LIMERFE_LIB}
     ${sdrbase_LIBSIGMF_LIB}
-    Qt5::Core
-    Qt5::Multimedia
-    Qt5::WebSockets
+    Qt::Core
+    Qt::Multimedia
+    Qt::WebSockets
     httpserver
     logging
     qrtplib
     swagger
 )
+if (Qt6_FOUND)
+    target_link_libraries(sdrbase
+        Qt::Core5Compat
+    )
+endif()
 
 install(TARGETS sdrbase DESTINATION ${INSTALL_LIB_DIR})
+
+if(WIN32 AND Qt6_FOUND)
+    # Run deployqt for Core5Compat
+    include(DeployQt)
+    windeployqt(sdrbase ${SDRANGEL_BINARY_BIN_DIR} "")
+endif()
 
 # Install debug symbols
 if (WIN32)
