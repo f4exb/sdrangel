@@ -256,7 +256,7 @@ QString AISMessage::getString(const QByteArray ba, int byteIdx, int bitsLeft, in
         if (c < 32) {
             c |= 0x40;
         }
-        s.append(c);
+        s.append(QChar(c));
     }
     // Remove leading/trailing spaces
     s = s.trimmed();

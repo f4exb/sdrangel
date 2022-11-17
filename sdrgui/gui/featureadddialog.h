@@ -20,11 +20,11 @@
 #define SDRGUI_GUI_FEATUREADDDIALOG_H_
 
 #include <QDialog>
+#include <QStringList>
 #include <vector>
 
 #include "export.h"
 
-class QStringList;
 class QAbstractButton;
 
 namespace Ui {

@@ -197,7 +197,7 @@ QString Morse::toString(QString &morse)
     {
         int c = Morse::toASCII(groups[i]);
         if ((c != -1) && (groups[i] != ""))
-           string.append(c);
+           string.append(QChar(c));
     }
     return string;
 }

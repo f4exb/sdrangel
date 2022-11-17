@@ -22,8 +22,10 @@
 #include <QStyleFactory>
 #include <QFontDatabase>
 #include <QSysInfo>
+#ifdef __APPLE__
 #include <QGLFormat>
 #include <QSurfaceFormat>
+#endif
 
 #include "loggerwithfile.h"
 #include "mainwindow.h"
@@ -44,7 +46,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps); //HiDPI pixmaps
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts); // Needed for WebGL in QWebEngineView and MainWindow::openGLVersion
 #endif
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)) && (QT_VERSION <= QT_VERSION_CHECK(6, 0, 0))
     QApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
 #endif
 

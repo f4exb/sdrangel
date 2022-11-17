@@ -344,7 +344,7 @@ void CWKeyerGUI::setKeyLabel(QLabel *label, Qt::Key key, Qt::KeyboardModifiers k
     else if (keyModifiers != Qt::NoModifier)
     {
         QString altGrStr = keyModifiers & Qt::GroupSwitchModifier ? "Gr " : "";
-        int maskedModifiers = (keyModifiers & 0x3FFFFFFF) + ((keyModifiers & 0x40000000)>>3);
+        int maskedModifiers = ((int) keyModifiers & 0x3FFFFFFF) + (((int) keyModifiers & 0x40000000)>>3);
         label->setText(altGrStr + QKeySequence(maskedModifiers, key).toString());
     }
     else

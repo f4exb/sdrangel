@@ -30,6 +30,7 @@
 #include <QPoint>
 #include <QOpenGLWidget>
 #include <QOpenGLDebugLogger>
+#include "gui/qtcompatibility.h"
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
@@ -465,7 +466,7 @@ private:
     bool pointInWaterfallOrSpectrogram(const QPointF &point) const;
     bool pointInHistogram(const QPointF &point) const;
 
-    void enterEvent(QEvent* event);
+    void enterEvent(EnterEventType* event);
     void leaveEvent(QEvent* event);
 
     static QString displayFull(int64_t value);

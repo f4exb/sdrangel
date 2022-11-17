@@ -308,7 +308,7 @@ bool APRSPacket::parseTimeMDHM(QString& info, int& idx)
 }
 
 // Position ambigutiy can be specified by using spaces instead of digits in lats and longs
-bool APRSPacket::isLatLongChar(QCharRef c)
+bool APRSPacket::isLatLongChar(const QChar c)
 {
     return (c.isDigit() || c == ' ');
 }

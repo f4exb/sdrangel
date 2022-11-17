@@ -130,7 +130,7 @@ struct SDRBASE_API Airspace {
             {
                 if (xmlReader.readNextStartElement())
                 {
-                    if (xmlReader.name() == "ASP")
+                    if (xmlReader.name() == QLatin1String("ASP"))
                     {
                         Airspace *airspace = new Airspace();
 
@@ -264,9 +264,9 @@ struct SDRBASE_API NavAid {
             {
                 if (xmlReader.readNextStartElement())
                 {
-                    if (xmlReader.name() == "NAVAID")
+                    if (xmlReader.name() == QLatin1String("NAVAID"))
                     {
-                        QStringRef typeRef = xmlReader.attributes().value("TYPE");
+                        QStringView typeRef = xmlReader.attributes().value("TYPE");
                         if ((typeRef == QLatin1String("NDB"))
                             || (typeRef == QLatin1String("DME"))
                             || (typeRef == QLatin1String("VOR"))

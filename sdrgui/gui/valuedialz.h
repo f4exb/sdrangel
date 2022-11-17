@@ -62,8 +62,13 @@ private:
 	int m_animationState;
 	QTimer m_animationTimer;
 	QTimer m_blinkTimer;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+	QString m_groupSeparator;
+	QString m_decSeparator;
+#else
 	QChar m_groupSeparator;
 	QChar m_decSeparator;
+#endif
 
 	ColorMapper m_colorMapper;
 

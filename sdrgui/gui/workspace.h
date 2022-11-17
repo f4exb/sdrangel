@@ -20,6 +20,7 @@
 #define SDRGUI_GUI_WORKSPACE_H_
 
 #include <QDockWidget>
+#include <QStringList>
 
 #include "export.h"
 #include "featureadddialog.h"
@@ -28,7 +29,6 @@
 class QHBoxLayout;
 class QLabel;
 class QPushButton;
-class QStringList;
 class QMdiArea;
 class QMdiSubWindow;
 class QFrame;

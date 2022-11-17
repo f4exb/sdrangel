@@ -144,17 +144,8 @@ QByteArray SpectrumSettings::serialize() const
 		s.writeBlob(111+i, m_waterfallMarkers[i].serialize());
 	}
 
-    QByteArray dataAnnotation;
-    QDataStream *stream = new QDataStream(&dataAnnotation, QIODevice::WriteOnly);
-    (*stream) << m_annoationMarkers;
-    delete stream;
-	s.writeBlob(40, dataAnnotation);
-
-    QByteArray dataCalibration;
-    stream = new QDataStream(&dataCalibration, QIODevice::WriteOnly);
-    (*stream) << m_calibrationPoints;
-    delete stream;
-	s.writeBlob(41, dataCalibration);
+    s.writeList(40, m_annoationMarkers);
+    s.writeList(41, m_calibrationPoints);
 
 	return s.final();
 }
@@ -275,15 +266,8 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 			m_waterfallMarkers.back().deserialize(bytetmp);
 		}
 
-		d.readBlob(40, &bytetmp);
-		QDataStream *stream = new QDataStream(bytetmp);
-		(*stream) >> m_annoationMarkers;
-		delete stream;
-
-		d.readBlob(41, &bytetmp);
-		stream = new QDataStream(bytetmp);
-		(*stream) >> m_calibrationPoints;
-		delete stream;
+        d.readList(40, &m_annoationMarkers);
+        d.readList(41, &m_calibrationPoints);
 
 		return true;
 	}

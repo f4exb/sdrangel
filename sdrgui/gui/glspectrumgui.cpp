@@ -23,7 +23,6 @@
 #include <QToolTip>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QDesktopWidget>
 #include <QScreen>
 
 #include "gui/glspectrumgui.h"
@@ -728,7 +727,7 @@ void GLSpectrumGUI::on_calibration_toggled(bool checked)
 
 void GLSpectrumGUI::on_gotoMarker_currentIndexChanged(int index)
 {
-    if (index == 0) {
+    if (index <= 0) {
         return;
     }
     int i = 1;

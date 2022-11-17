@@ -21,6 +21,7 @@
 #include <QMdiSubWindow>
 #include <QMap>
 
+#include "gui/qtcompatibility.h"
 #include "gui/framelesswindowresizer.h"
 #include "export.h"
 
