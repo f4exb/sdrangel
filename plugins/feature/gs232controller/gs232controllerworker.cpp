@@ -73,8 +73,10 @@ void GS232ControllerWorker::stopWork()
 {
     qDebug() << "GS232ControllerWorker::stopWork";
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    if (m_device && m_device->isOpen()) {
+    if (m_device && m_device->isOpen())
+    {
         m_device->close();
+        m_device = nullptr;
     }
     disconnect(&m_serialPort, &QSerialPort::readyRead, this, &GS232ControllerWorker::readData);
     disconnect(&m_socket, &QTcpSocket::readyRead, this, &GS232ControllerWorker::readData);
@@ -131,8 +133,10 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
 
     if (settings.m_connection != m_settings.m_connection)
     {
-        if (m_device && m_device->isOpen()) {
+        if (m_device && m_device->isOpen())
+        {
             m_device->close();
+            m_device = nullptr;
         }
     }
 
@@ -151,22 +155,25 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
         }
     }
 
-    // Apply offset then clamp
-
-    float azimuth, elevation;
-    settings.calcTargetAzEl(azimuth, elevation);
-
-    // Don't set if within tolerance of last setting
-    float azDiff = std::abs(azimuth - m_lastAzimuth);
-    float elDiff = std::abs(elevation - m_lastElevation);
-
-    if (((elDiff > settings.m_tolerance) || (m_lastElevation == -1) || force) && (settings.m_elevationMax != 0))
+    if (m_device != nullptr)
     {
-        setAzimuthElevation(azimuth, elevation);
-    }
-    else if ((azDiff > settings.m_tolerance) || (m_lastAzimuth == -1) || force)
-    {
-        setAzimuth(azimuth);
+        // Apply offset then clamp
+
+        float azimuth, elevation;
+        settings.calcTargetAzEl(azimuth, elevation);
+
+        // Don't set if within tolerance of last setting
+        float azDiff = std::abs(azimuth - m_lastAzimuth);
+        float elDiff = std::abs(elevation - m_lastElevation);
+
+        if (((elDiff > settings.m_tolerance) || (m_lastElevation == -1) || force) && (settings.m_elevationMax != 0))
+        {
+            setAzimuthElevation(azimuth, elevation);
+        }
+        else if ((azDiff > settings.m_tolerance) || (m_lastAzimuth == -1) || force)
+        {
+            setAzimuth(azimuth);
+        }
     }
 
     m_settings = settings;

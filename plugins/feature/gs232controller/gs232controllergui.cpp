@@ -163,6 +163,9 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     ui->elevationCurrentText->setText("-");
 
     updateSerialPortList();
+    if (ui->serialPort->currentIndex() >= 0) {
+        on_serialPort_currentIndexChanged(ui->serialPort->currentIndex());
+    }
 
     m_settings.setRollupState(&m_rollupState);
 
