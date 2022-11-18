@@ -4,6 +4,7 @@
 #include <QString>
 #include <QMap>
 #include <QDataStream>
+#include <QIODevice>
 #include "dsp/dsptypes.h"
 #include "export.h"
 

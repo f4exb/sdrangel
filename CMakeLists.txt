@@ -448,10 +448,11 @@ if (BUILD_GUI)
                         OpenGLWidgets
                         Quick
                         QuickWidgets
-                        TextToSpeech
+                       OPTIONAL_COMPONENTS
                         WebEngineQuick
                         WebEngineCore
-                        WebEngineWidgets)
+                        WebEngineWidgets
+                        TextToSpeech)
     else()
         find_package(Qt5
                        REQUIRED COMPONENTS
