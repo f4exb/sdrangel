@@ -99,7 +99,7 @@ bool AFCWorker::handleMessage(const Message& cmd)
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureAFCWorker& cfg = (MsgConfigureAFCWorker&) cmd;
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -135,32 +135,23 @@ bool AFCWorker::handleMessage(const Message& cmd)
     }
 }
 
-void AFCWorker::applySettings(const AFCSettings& settings, bool force)
+void AFCWorker::applySettings(const AFCSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "AFCWorker::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_trackerDeviceSetIndex: " << settings.m_trackerDeviceSetIndex
-            << " m_trackedDeviceSetIndex: " << settings.m_trackedDeviceSetIndex
-            << " m_hasTargetFrequency: " << settings.m_hasTargetFrequency
-            << " m_transverterTarget: " << settings.m_transverterTarget
-            << " m_targetFrequency: " << settings.m_targetFrequency
-            << " m_freqTolerance: " << settings.m_freqTolerance
-            << " force: " << force;
+    qDebug() << "AFCWorker::applySettings:" << settings.getDebugString(settingsKeys, force)  << " force: " << force;
 
-    if ((settings.m_trackerDeviceSetIndex != m_settings.m_trackerDeviceSetIndex) || force) {
+    if (settingsKeys.contains("trackerDeviceSetIndex") || force) {
         initTrackerDeviceSet(settings.m_trackerDeviceSetIndex);
     }
 
-    if ((settings.m_trackedDeviceSetIndex != m_settings.m_trackedDeviceSetIndex) || force) {
+    if (settingsKeys.contains("trackedDeviceSetIndex") || force) {
         initTrackedDeviceSet(settings.m_trackedDeviceSetIndex);
     }
 
-    if ((settings.m_trackerAdjustPeriod != m_settings.m_trackerAdjustPeriod) || force) {
+    if (settingsKeys.contains("trackerAdjustPeriod") || force) {
         m_updateTimer.setInterval(settings.m_trackerAdjustPeriod * 1000);
     }
 
-    if ((settings.m_hasTargetFrequency != m_settings.m_hasTargetFrequency) || force)
+    if (settingsKeys.contains("hasTargetFrequency") || force)
     {
         if (settings.m_hasTargetFrequency) {
             m_updateTimer.start(m_settings.m_trackerAdjustPeriod * 1000);

@@ -46,19 +46,22 @@ public:
 
     public:
         const AFCSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAFC* create(const AFCSettings& settings, bool force) {
-            return new MsgConfigureAFC(settings, force);
+        static MsgConfigureAFC* create(const AFCSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureAFC(settings, settingsKeys, force);
         }
 
     private:
         AFCSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAFC(const AFCSettings& settings, bool force) :
+        MsgConfigureAFC(const AFCSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -218,9 +221,9 @@ private:
 
     void start();
     void stop();
-    void applySettings(const AFCSettings& settings, bool force = false);
+    void applySettings(const AFCSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const AFCSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const AFCSettings& settings, bool force);
     void trackerDeviceChange(int deviceIndex);
     void trackedDeviceChange(int deviceIndex);
     void removeTrackerFeatureReference();

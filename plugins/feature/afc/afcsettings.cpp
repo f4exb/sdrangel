@@ -133,3 +133,105 @@ bool AFCSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void AFCSettings::applySettings(const QStringList& settingsKeys, const AFCSettings& settings)
+{
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("trackerDeviceSetIndex")) {
+        m_trackerDeviceSetIndex = settings.m_trackerDeviceSetIndex;
+    }
+    if (settingsKeys.contains("trackedDeviceSetIndex")) {
+        m_trackedDeviceSetIndex = settings.m_trackedDeviceSetIndex;
+    }
+    if (settingsKeys.contains("hasTargetFrequency")) {
+        m_hasTargetFrequency = settings.m_hasTargetFrequency;
+    }
+    if (settingsKeys.contains("transverterTarget")) {
+        m_transverterTarget = settings.m_transverterTarget;
+    }
+    if (settingsKeys.contains("targetFrequency")) {
+        m_targetFrequency = settings.m_targetFrequency;
+    }
+    if (settingsKeys.contains("freqTolerance")) {
+        m_freqTolerance = settings.m_freqTolerance;
+    }
+    if (settingsKeys.contains("trackerAdjustPeriod")) {
+        m_trackerAdjustPeriod = settings.m_trackerAdjustPeriod;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+}
+
+QString AFCSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("trackerDeviceSetIndex") || force) {
+        ostr << " m_trackerDeviceSetIndex: " << m_trackerDeviceSetIndex;
+    }
+    if (settingsKeys.contains("trackedDeviceSetIndex") || force) {
+        ostr << " m_trackedDeviceSetIndex: " << m_trackedDeviceSetIndex;
+    }
+    if (settingsKeys.contains("hasTargetFrequency") || force) {
+        ostr << " m_hasTargetFrequency: " << m_hasTargetFrequency;
+    }
+    if (settingsKeys.contains("transverterTarget") || force) {
+        ostr << " m_transverterTarget: " << m_transverterTarget;
+    }
+    if (settingsKeys.contains("targetFrequency") || force) {
+        ostr << " m_targetFrequency: " << m_targetFrequency;
+    }
+    if (settingsKeys.contains("freqTolerance") || force) {
+        ostr << " m_freqTolerance: " << m_freqTolerance;
+    }
+    if (settingsKeys.contains("trackerAdjustPeriod") || force) {
+        ostr << " m_trackerAdjustPeriod: " << m_trackerAdjustPeriod;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}

@@ -72,7 +72,13 @@ bool AFCGUI::handleMessage(const Message& message)
     {
         qDebug("AFCGUI::handleMessage: AFC::MsgConfigureAFC");
         const AFC::MsgConfigureAFC& cfg = (AFC::MsgConfigureAFC&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -258,6 +264,8 @@ void AFCGUI::updateDeviceSetLists(const AFC::MsgDeviceSetListsReport& report)
         qDebug("AFCGUI::updateDeviceSetLists: device index changed: %d:%d", trackerDeviceIndex, trackedDeviceIndex);
         m_settings.m_trackerDeviceSetIndex = trackerDeviceIndex;
         m_settings.m_trackedDeviceSetIndex = trackedDeviceIndex;
+        m_settingsKeys.append("trackerDeviceSetIndex");
+        m_settingsKeys.append("trackedDeviceSetIndex");
         applySettings();
     }
 
@@ -291,6 +299,12 @@ void AFCGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -309,18 +323,21 @@ void AFCGUI::on_startStop_toggled(bool checked)
 void AFCGUI::on_hasTargetFrequency_toggled(bool checked)
 {
     m_settings.m_hasTargetFrequency = checked;
+    m_settingsKeys.append("hasTargetFrequency");
     applySettings();
 }
 
 void AFCGUI::on_targetFrequency_changed(quint64 value)
 {
     m_settings.m_targetFrequency = value;
+    m_settingsKeys.append("targetFrequency");
     applySettings();
 }
 
 void AFCGUI::on_transverterTarget_toggled(bool checked)
 {
     m_settings.m_transverterTarget = checked;
+    m_settingsKeys.append("transverterTarget");
     applySettings();
 }
 
@@ -328,6 +345,7 @@ void AFCGUI::on_transverterTarget_toggled(bool checked)
 void AFCGUI::on_toleranceFrequency_changed(quint64 value)
 {
     m_settings.m_freqTolerance = value;
+    m_settingsKeys.append("freqTolerance");
     applySettings();
 }
 
@@ -347,6 +365,7 @@ void AFCGUI::on_trackerDevice_currentIndexChanged(int index)
     if (index >= 0)
     {
         m_settings.m_trackerDeviceSetIndex = index;
+        m_settingsKeys.append("trackerDeviceSetIndex");
         applySettings();
     }
 }
@@ -356,6 +375,7 @@ void AFCGUI::on_trackedDevice_currentIndexChanged(int index)
     if (index >= 0)
     {
         m_settings.m_trackedDeviceSetIndex = index;
+        m_settingsKeys.append("trackedDeviceSetIndex");
         applySettings();
     }
 }
@@ -370,6 +390,7 @@ void AFCGUI::on_targetPeriod_valueChanged(int value)
 {
     m_settings.m_trackerAdjustPeriod = value;
     ui->targetPeriodText->setText(tr("%1").arg(m_settings.m_trackerAdjustPeriod));
+    m_settingsKeys.append("trackerAdjustPeriod");
     applySettings();
 }
 
@@ -411,7 +432,7 @@ void AFCGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-	    AFC::MsgConfigureAFC* message = AFC::MsgConfigureAFC::create( m_settings, force);
+	    AFC::MsgConfigureAFC* message = AFC::MsgConfigureAFC::create( m_settings, m_settingsKeys, force);
 	    m_afc->getInputMessageQueue()->push(message);
 	}
 }

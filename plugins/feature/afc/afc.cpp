@@ -118,7 +118,7 @@ void AFC::start()
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_thread->start();
 
-    AFCWorker::MsgConfigureAFCWorker *msg = AFCWorker::MsgConfigureAFCWorker::create(m_settings, true);
+    AFCWorker::MsgConfigureAFCWorker *msg = AFCWorker::MsgConfigureAFCWorker::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
 
     m_state = StRunning;
@@ -146,7 +146,7 @@ bool AFC::handleMessage(const Message& cmd)
 	{
         MsgConfigureAFC& cfg = (MsgConfigureAFC&) cmd;
         qDebug() << "AFC::handleMessage: MsgConfigureAFC";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
 		return true;
 	}
@@ -225,70 +225,32 @@ bool AFC::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureAFC *msg = MsgConfigureAFC::create(m_settings, true);
+        MsgConfigureAFC *msg = MsgConfigureAFC::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureAFC *msg = MsgConfigureAFC::create(m_settings, true);
+        MsgConfigureAFC *msg = MsgConfigureAFC::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void AFC::applySettings(const AFCSettings& settings, bool force)
+void AFC::applySettings(const AFCSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "AFC::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_trackerDeviceSetIndex: " << settings.m_trackerDeviceSetIndex
-            << " m_trackedDeviceSetIndex: " << settings.m_trackedDeviceSetIndex
-            << " m_hasTargetFrequency: " << settings.m_hasTargetFrequency
-            << " m_transverterTarget: " << settings.m_transverterTarget
-            << " m_targetFrequency: " << settings.m_targetFrequency
-            << " m_freqTolerance: " << settings.m_freqTolerance
-            << " m_trackerAdjustPeriod:" << settings.m_trackerAdjustPeriod
-            << " force: " << force;
+    qDebug() << "AFC::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
     QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-    if ((m_settings.m_trackerDeviceSetIndex != settings.m_trackerDeviceSetIndex) || force) {
-        reverseAPIKeys.append("trackerDeviceSetIndex");
-    }
-    if ((m_settings.m_trackedDeviceSetIndex != settings.m_trackedDeviceSetIndex) || force) {
-        reverseAPIKeys.append("trackedDeviceSetIndex");
-    }
-    if ((m_settings.m_hasTargetFrequency != settings.m_hasTargetFrequency) || force) {
-        reverseAPIKeys.append("hasTargetFrequency");
-    }
-    if ((m_settings.m_transverterTarget != settings.m_transverterTarget) || force) {
-        reverseAPIKeys.append("transverterTarget");
-    }
-    if ((m_settings.m_targetFrequency != settings.m_targetFrequency) || force) {
-        reverseAPIKeys.append("targetFrequency");
-    }
-    if ((m_settings.m_freqTolerance != settings.m_freqTolerance) || force) {
-        reverseAPIKeys.append("freqTolerance");
-    }
-    if ((m_settings.m_trackerAdjustPeriod != settings.m_trackerAdjustPeriod) || force) {
-        reverseAPIKeys.append("trackerAdjustPeriod");
-    }
-
-    if ((m_settings.m_trackerDeviceSetIndex != settings.m_trackerDeviceSetIndex) || force)
+    if (settingsKeys.contains("trackerDeviceSetIndex") || force)
     {
         removeTrackerFeatureReference();
         trackerDeviceChange(settings.m_trackerDeviceSetIndex);
     }
 
-    if ((m_settings.m_trackedDeviceSetIndex != settings.m_trackedDeviceSetIndex) || force)
+    if (settingsKeys.contains("trackedDeviceSetIndex") || force)
     {
         removeTrackedFeatureReferences();
         trackedDeviceChange(settings.m_trackedDeviceSetIndex);
@@ -297,22 +259,27 @@ void AFC::applySettings(const AFCSettings& settings, bool force)
     if (m_running)
     {
         AFCWorker::MsgConfigureAFCWorker *msg = AFCWorker::MsgConfigureAFCWorker::create(
-            settings, force
+            settings, settingsKeys, force
         );
         m_worker->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
+
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+   }
 }
 
 void AFC::updateDeviceSetLists()
@@ -384,13 +351,13 @@ int AFC::webapiSettingsPutPatch(
     AFCSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureAFC *msg = MsgConfigureAFC::create(settings, force);
+    MsgConfigureAFC *msg = MsgConfigureAFC::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("AFC::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAFC *msgToGUI = MsgConfigureAFC::create(settings, force);
+        MsgConfigureAFC *msgToGUI = MsgConfigureAFC::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -579,7 +546,7 @@ void AFC::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
     }
 }
 
-void AFC::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AFCSettings& settings, bool force)
+void AFC::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const AFCSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

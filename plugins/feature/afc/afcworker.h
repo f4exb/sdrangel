@@ -40,20 +40,23 @@ public:
 
     public:
         const AFCSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAFCWorker* create(const AFCSettings& settings, bool force)
+        static MsgConfigureAFCWorker* create(const AFCSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigureAFCWorker(settings, force);
+            return new MsgConfigureAFCWorker(settings, settingsKeys, force);
         }
 
     private:
         AFCSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAFCWorker(const AFCSettings& settings, bool force) :
+        MsgConfigureAFCWorker(const AFCSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -154,7 +157,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const AFCSettings& settings, bool force = false);
+    void applySettings(const AFCSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void initTrackerDeviceSet(int deviceSetIndex);
     void initTrackedDeviceSet(int deviceSetIndex);
     void processChannelSettings(
