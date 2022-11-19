@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=line-too-long
 """
 Quick control of configuration for receiving QO-100 DATV
 """
@@ -42,32 +43,42 @@ def get_input_options():
 class Controller:
     """ Controller main class """
     def __init__(self):
-        self.device_hwid = None
+        self.device_hwtype = None
 
 
     # ======================================================================
-    def change_center_frequency(self, content, new_frequency):
-        """ Change center frequency searching recursively """
+    def change_device_center_frequency(self, content, new_frequency):
+        """ Change device center frequency searching recursively """
     # ----------------------------------------------------------------------
         for k in content:
             if isinstance(content[k], dict):
-                self.change_center_frequency(content[k], new_frequency)
-            elif k == "centerFrequency":
+                self.change_device_center_frequency(content[k], new_frequency)
+            elif k == sdrangel.DEVICE_TYPES[self.device_hwtype]["cf_key"]:
                 content[k] = new_frequency
 
     # ======================================================================
     def change_decim(self, content, new_decim):
-        """ Change log2 decimation searching recursively """
+        """ Change device log2 decimation searching recursively """
     # ----------------------------------------------------------------------
         for k in content:
             if isinstance(content[k], dict):
                 self.change_decim(content[k], new_decim)
-            elif k == "log2Decim":
+            elif k == sdrangel.DEVICE_TYPES[self.device_hwtype]["decim_key"]:
                 content[k] = new_decim
 
     # ======================================================================
+    def change_channel_center_frequency(self, content, new_frequency):
+        """ Change DATV channel center frequency searching recursively """
+    # ----------------------------------------------------------------------
+        for k in content:
+            if isinstance(content[k], dict):
+                self.change_channel_center_frequency(content[k], new_frequency)
+            elif k == "centerFrequency":
+                content[k] = new_frequency
+
+    # ======================================================================
     def change_rfbw(self, content, new_rfbw):
-        """ Change RF bandwidth searching recursively """
+        """ Change DATV channel RF bandwidth searching recursively """
     # ----------------------------------------------------------------------
         for k in content:
             if isinstance(content[k], dict):
@@ -77,7 +88,7 @@ class Controller:
 
     # ======================================================================
     def change_symbol_rate(self, content, new_symbol_rate):
-        """ Change symbol rate searching recursively """
+        """ Change DATV channel symbol rate searching recursively """
     # ----------------------------------------------------------------------
         for k in content:
             if isinstance(content[k], dict):
@@ -89,16 +100,17 @@ class Controller:
     def get_device_sr_and_decim(self, hwtype, settings):
         """ Return device sample rate and decimation """
     # ----------------------------------------------------------------------
-        if hwtype == "Airspy" or hwtype == "AirspyHF":
+        decim_key = sdrangel.DEVICE_TYPES[self.device_hwtype]["decim_key"]
+        if hwtype in ("Airspy", "AirspyHF"):
             sr_index = settings.get("devSampleRateIndex", 0)
             if sr_index == 1:
                 sr = 3000000
             else:
                 sr = 6000000
-            log2_decim = settings.get("log2Decim", 0)
+            log2_decim = settings.get(decim_key, 0)
         else:
             sr = settings.get("devSampleRate", 0)
-            log2_decim = settings.get("log2Decim", 0)
+            log2_decim = settings.get(decim_key, 0)
         return sr, 1<<log2_decim
 
     # ======================================================================
@@ -120,14 +132,14 @@ class Controller:
         r = requests.get(url=device_settings_url, timeout=10)
         if r.status_code // 100 == 2: # OK
             rj = r.json()
-            hwtype = rj.get("deviceHwType", None)
-            device_settings = rj.get(sdrangel.DEVICE_TYPES[hwtype]["settings"], None)
-            device_sr, device_decim = self.get_device_sr_and_decim(hwtype, device_settings)
+            self.device_hwtype = rj.get("deviceHwType", None)
+            device_settings = rj.get(sdrangel.DEVICE_TYPES[self.device_hwtype]["settings"], None)
+            device_sr, device_decim = self.get_device_sr_and_decim(self.device_hwtype, device_settings)
             new_decim = self.calc_decim(device_sr, options.symbol_rate)
             print(f"sr: {device_sr} S/s decim: {device_decim} new decim: {1<<new_decim}")
             if not options.no_decim:
                 self.change_decim(rj, new_decim)
-            self.change_center_frequency(rj, options.frequency*1000)
+            self.change_device_center_frequency(rj, options.frequency*1000)
             r = requests.patch(url=device_settings_url, json=rj, timeout=10)
             if r.status_code / 100 == 2:
                 print(f'set_device: changed #{options.device_index}: frequency: {options.frequency} kHz log2Decim: {new_decim} No decim: {options.no_decim}')
@@ -145,7 +157,7 @@ class Controller:
         if r.status_code // 100 == 2: # OK
             rj = r.json()
             rfbw = round(1.5*options.symbol_rate)*1000
-            self.change_center_frequency(rj, 0)
+            self.change_channel_center_frequency(rj, 0)
             self.change_rfbw(rj, rfbw)
             self.change_symbol_rate(rj, options.symbol_rate*1000)
             r = requests.patch(url=channel_settings_url, json=rj, timeout=10)
@@ -179,6 +191,3 @@ def main():
 # ======================================================================
 if __name__ == "__main__":
     main()
-
-
-

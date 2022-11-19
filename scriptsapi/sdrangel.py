@@ -7,15 +7,23 @@ DEVICE_TYPES = {
     "Airspy": {
         "settings": "airspySettings",
         "cf_key": "centerFrequency",
+        "decim_key": "log2Decim",
     },
     "AirspyHF": {
         "settings": "airspyHFSettings",
         "cf_key": "centerFrequency",
+        "decim_key": "log2Decim",
     },
     "RTLSDR": {
         "settings": "rtlSdrSettings",
         "cf_key": "centerFrequency",
+        "decim_key": "log2Decim",
     },
+    "USRP": {
+        "settings": "usrpInputSettings",
+        "cf_key": "centerFrequency",
+        "decim_key": "log2SoftDecim",
+    }
 }
 
 # Channel keys depending on channel type (id)
