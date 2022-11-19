@@ -14,8 +14,38 @@ DEVICE_TYPES = {
         "cf_key": "centerFrequency",
         "decim_key": "log2Decim",
     },
+    "BladeRF2": {
+        "settings": "bladeRF1OutputSettings",
+        "cf_key": "centerFrequency",
+        "decim_key": "log2Decim",
+    },
+    "HackRF": {
+        "settings": "hackRFInputSettings",
+        "cf_key": "centerFrequency",
+        "decim_key": "log2Decim",
+    },
+    "LimeSDR": {
+        "settings": "limeSdrInputSettings",
+        "cf_key": "centerFrequency",
+        "decim_key": "log2SoftDecim",
+    },
+    "PlutoSDR": {
+        "settings": "plutoSdrInputSettings",
+        "cf_key": "centerFrequency",
+        "decim_key": "log2Decim",
+    },
     "RTLSDR": {
         "settings": "rtlSdrSettings",
+        "cf_key": "centerFrequency",
+        "decim_key": "log2Decim",
+    },
+    "SDRplay1": {
+        "settings": "sdrPlayV3Settings",
+        "cf_key": "centerFrequency",
+        "decim_key": "log2Decim",
+    },
+    "SDRplayV3": {
+        "settings": "sdrPlaySettings",
         "cf_key": "centerFrequency",
         "decim_key": "log2Decim",
     },
@@ -23,7 +53,12 @@ DEVICE_TYPES = {
         "settings": "usrpInputSettings",
         "cf_key": "centerFrequency",
         "decim_key": "log2SoftDecim",
-    }
+    },
+    "XTRX": {
+        "settings": "xtrxInputSettings",
+        "cf_key": "centerFrequency",
+        "decim_key": "log2SoftDecim",
+    },
 }
 
 # Channel keys depending on channel type (id)
