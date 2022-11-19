@@ -27,6 +27,17 @@
                 "UHD_DIR": "/opt/install/uhd",
                 "XTRX_DIR": "/opt/install/xtrx-images",
                 "CMAKE_INSTALL_PREFIX": "/opt/install/sdrangel"
+            },
+            "warnings": {
+                "dev": false
+            }
+        },
+        {
+            "name": "default-qt6",
+            "inherits": "default",
+            "binaryDir": "build-qt6",
+            "cacheVariables": {
+                "ENABLE_QT6": "ON"
             }
         }
     ],
@@ -34,6 +45,10 @@
         {
           "name": "default",
           "configurePreset": "default"
+        },
+        {
+            "name": "default-qt6",
+            "configurePreset": "default-qt6"
         }
     ]
 }
