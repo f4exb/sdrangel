@@ -77,7 +77,13 @@ bool AntennaToolsGUI::handleMessage(const Message& message)
     {
         qDebug("AntennaToolsGUI::handleMessage: AntennaTools::MsgConfigureAntennaTools");
         const AntennaTools::MsgConfigureAntennaTools& cfg = (AntennaTools::MsgConfigureAntennaTools&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -229,6 +235,14 @@ void AntennaToolsGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -280,9 +294,11 @@ void AntennaToolsGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        AntennaTools::MsgConfigureAntennaTools* message = AntennaTools::MsgConfigureAntennaTools::create(m_settings, force);
+        AntennaTools::MsgConfigureAntennaTools* message = AntennaTools::MsgConfigureAntennaTools::create(m_settings, m_settingsKeys, force);
         m_antennatools->getInputMessageQueue()->push(message);
     }
+
+    m_settingsKeys.clear();
 }
 
 void AntennaToolsGUI::calcDipoleLength()
@@ -328,14 +344,18 @@ double AntennaToolsGUI::calcDipoleFrequency(double totalLength)
 void AntennaToolsGUI::on_dipoleFrequencySelect_currentIndexChanged(int index)
 {
     m_settings.m_dipoleFrequencySelect = index;
+    m_settingsKeys.append("dipoleFrequencySelect");
     applySettings();
+
     if (index >= 1)
     {
         double frequency = getDeviceSetFrequencyMHz(index - 1);
+
         if (frequency >= 0.0) {
             ui->dipoleFrequency->setValue(frequency);
         }
     }
+
     ui->dipoleFrequency->setReadOnly(index >= 1);
     ui->dipoleLength->setReadOnly(index >= 1);
     ui->dipoleElementLength->setReadOnly(index >= 1);
@@ -344,6 +364,7 @@ void AntennaToolsGUI::on_dipoleFrequencySelect_currentIndexChanged(int index)
 void AntennaToolsGUI::on_dipoleFrequency_valueChanged(double value)
 {
     m_settings.m_dipoleFrequencyMHz = value;
+    m_settingsKeys.append("dipoleFrequencyMHz");
     applySettings();
     calcDipoleLength();
 }
@@ -351,6 +372,7 @@ void AntennaToolsGUI::on_dipoleFrequency_valueChanged(double value)
 void AntennaToolsGUI::on_dipoleEndEffectFactor_valueChanged(double value)
 {
     m_settings.m_dipoleEndEffectFactor = value;
+    m_settingsKeys.append("dipoleEndEffectFactor");
     applySettings();
     calcDipoleLength();
 }
@@ -358,6 +380,7 @@ void AntennaToolsGUI::on_dipoleEndEffectFactor_valueChanged(double value)
 void AntennaToolsGUI::on_dipoleLengthUnits_currentIndexChanged(int index)
 {
     m_settings.m_dipoleLengthUnits = (AntennaToolsSettings::LengthUnits)index;
+    m_settingsKeys.append("dipoleLengthUnits");
     applySettings();
     calcDipoleLength();
 }
@@ -365,6 +388,7 @@ void AntennaToolsGUI::on_dipoleLengthUnits_currentIndexChanged(int index)
 void AntennaToolsGUI::on_dipoleLength_valueChanged(double value)
 {
     m_settings.m_dipoleFrequencyMHz = calcDipoleFrequency(value);
+    m_settingsKeys.append("dipoleFrequencyMHz");
     applySettings();
     ui->dipoleElementLength->blockSignals(true);
     ui->dipoleElementLength->setValue(value/2.0);
@@ -377,6 +401,7 @@ void AntennaToolsGUI::on_dipoleLength_valueChanged(double value)
 void AntennaToolsGUI::on_dipoleElementLength_valueChanged(double value)
 {
     m_settings.m_dipoleFrequencyMHz = calcDipoleFrequency(value*2.0);
+    m_settingsKeys.append("dipoleFrequencyMHz");
     applySettings();
     ui->dipoleLength->blockSignals(true);
     ui->dipoleLength->setValue(value*2.0);
@@ -468,6 +493,7 @@ void AntennaToolsGUI::calcDishEffectiveArea()
 void AntennaToolsGUI::on_dishFrequency_valueChanged(double value)
 {
     m_settings.m_dishFrequencyMHz = value;
+    m_settingsKeys.append("dishFrequencyMHz");
     applySettings();
     calcDishBeamwidth();
     calcDishGain();
@@ -477,6 +503,7 @@ void AntennaToolsGUI::on_dishFrequency_valueChanged(double value)
 void AntennaToolsGUI::on_dishFrequencySelect_currentIndexChanged(int index)
 {
     m_settings.m_dishFrequencySelect = index;
+    m_settingsKeys.append("dishFrequencySelect");
     applySettings();
     if (index >= 1)
     {
@@ -491,6 +518,7 @@ void AntennaToolsGUI::on_dishFrequencySelect_currentIndexChanged(int index)
 void AntennaToolsGUI::on_dishDiameter_valueChanged(double value)
 {
     m_settings.m_dishDiameter = value;
+    m_settingsKeys.append("dishDiameter");
     applySettings();
     calcDishFocalLength();
     calcDishBeamwidth();
@@ -501,6 +529,7 @@ void AntennaToolsGUI::on_dishDiameter_valueChanged(double value)
 void AntennaToolsGUI::on_dishLengthUnits_currentIndexChanged(int index)
 {
     m_settings.m_dishLengthUnits = (AntennaToolsSettings::LengthUnits)index;
+    m_settingsKeys.append("dishLengthUnits");
     applySettings();
     calcDishFocalLength();
     calcDishBeamwidth();
@@ -511,6 +540,7 @@ void AntennaToolsGUI::on_dishLengthUnits_currentIndexChanged(int index)
 void AntennaToolsGUI::on_dishDepth_valueChanged(double value)
 {
     m_settings.m_dishDepth = value;
+    m_settingsKeys.append("dishDepth");
     applySettings();
     calcDishFocalLength();
 }
@@ -518,6 +548,7 @@ void AntennaToolsGUI::on_dishDepth_valueChanged(double value)
 void AntennaToolsGUI::on_dishEfficiency_valueChanged(int value)
 {
     m_settings.m_dishEfficiency = value;
+    m_settingsKeys.append("dishEfficiency");
     applySettings();
     calcDishGain();
     calcDishEffectiveArea();
@@ -526,6 +557,7 @@ void AntennaToolsGUI::on_dishEfficiency_valueChanged(int value)
 void AntennaToolsGUI::on_dishSurfaceError_valueChanged(double value)
 {
     m_settings.m_dishSurfaceError= value;
+    m_settingsKeys.append("dishSurfaceError");
     applySettings();
     calcDishGain();
     calcDishEffectiveArea();

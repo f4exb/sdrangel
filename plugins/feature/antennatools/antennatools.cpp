@@ -71,7 +71,7 @@ bool AntennaTools::handleMessage(const Message& cmd)
     {
         MsgConfigureAntennaTools& cfg = (MsgConfigureAntennaTools&) cmd;
         qDebug() << "AntennaTools::handleMessage: MsgConfigureAntennaTools";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -90,66 +90,31 @@ bool AntennaTools::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureAntennaTools *msg = MsgConfigureAntennaTools::create(m_settings, true);
+        MsgConfigureAntennaTools *msg = MsgConfigureAntennaTools::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureAntennaTools *msg = MsgConfigureAntennaTools::create(m_settings, true);
+        MsgConfigureAntennaTools *msg = MsgConfigureAntennaTools::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void AntennaTools::applySettings(const AntennaToolsSettings& settings, bool force)
+void AntennaTools::applySettings(const AntennaToolsSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "AntennaTools::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIFeatureSetIndex: " << settings.m_reverseAPIFeatureSetIndex
-            << " m_reverseAPIFeatureIndex: " << settings.m_reverseAPIFeatureIndex
-            << " force: " << force;
+    qDebug() << "AntennaTools::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_dipoleFrequencyMHz != settings.m_dipoleFrequencyMHz) || force) {
-        reverseAPIKeys.append("dipoleFrequencyMHz");
-    }
-    if ((m_settings.m_dipoleEndEffectFactor != settings.m_dipoleEndEffectFactor) || force) {
-        reverseAPIKeys.append("dipoleEndEffectFactor");
-    }
-    if ((m_settings.m_dishFrequencyMHz != settings.m_dishFrequencyMHz) || force) {
-        reverseAPIKeys.append("dishFrequencyMHz");
-    }
-    if ((m_settings.m_dishDiameter != settings.m_dishDiameter) || force) {
-        reverseAPIKeys.append("dishDiameter");
-    }
-    if ((m_settings.m_dishDepth != settings.m_dishDepth) || force) {
-        reverseAPIKeys.append("dishDepth");
-    }
-    if ((m_settings.m_dishEfficiency != settings.m_dishEfficiency) || force) {
-        reverseAPIKeys.append("dishEfficiency");
-    }
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
++                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -176,12 +141,12 @@ int AntennaTools::webapiSettingsPutPatch(
     AntennaToolsSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureAntennaTools *msg = MsgConfigureAntennaTools::create(settings, force);
+    MsgConfigureAntennaTools *msg = MsgConfigureAntennaTools::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAntennaTools *msgToGUI = MsgConfigureAntennaTools::create(settings, force);
+        MsgConfigureAntennaTools *msgToGUI = MsgConfigureAntennaTools::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -283,7 +248,7 @@ void AntennaTools::webapiUpdateFeatureSettings(
     }
 }
 
-void AntennaTools::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const AntennaToolsSettings& settings, bool force)
+void AntennaTools::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const AntennaToolsSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

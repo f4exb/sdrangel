@@ -45,19 +45,22 @@ public:
 
     public:
         const AntennaToolsSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAntennaTools* create(const AntennaToolsSettings& settings, bool force) {
-            return new MsgConfigureAntennaTools(settings, force);
+        static MsgConfigureAntennaTools* create(const AntennaToolsSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureAntennaTools(settings, settingsKeys, force);
         }
 
     private:
         AntennaToolsSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAntennaTools(const AntennaToolsSettings& settings, bool force) :
+        MsgConfigureAntennaTools(const AntennaToolsSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -102,8 +105,8 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    void applySettings(const AntennaToolsSettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const AntennaToolsSettings& settings, bool force);
+    void applySettings(const AntennaToolsSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const AntennaToolsSettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

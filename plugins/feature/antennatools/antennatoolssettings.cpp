@@ -146,3 +146,126 @@ bool AntennaToolsSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void AntennaToolsSettings::applySettings(const QStringList& settingsKeys, const AntennaToolsSettings& settings)
+{
+    if (settingsKeys.contains("dipoleFrequencyMHz")) {
+        m_dipoleFrequencyMHz = settings.m_dipoleFrequencyMHz;
+    }
+    if (settingsKeys.contains("dipoleFrequencySelect")) {
+        m_dipoleFrequencySelect = settings.m_dipoleFrequencySelect;
+    }
+    if (settingsKeys.contains("dipoleEndEffectFactor")) {
+        m_dipoleEndEffectFactor = settings.m_dipoleEndEffectFactor;
+    }
+    if (settingsKeys.contains("dipoleLengthUnits")) {
+        m_dipoleLengthUnits = settings.m_dipoleLengthUnits;
+    }
+    if (settingsKeys.contains("dishFrequencyMHz")) {
+        m_dishFrequencyMHz = settings.m_dishFrequencyMHz;
+    }
+    if (settingsKeys.contains("dishDiameter")) {
+        m_dishDiameter = settings.m_dishDiameter;
+    }
+    if (settingsKeys.contains("dishDepth")) {
+        m_dishDepth = settings.m_dishDepth;
+    }
+    if (settingsKeys.contains("dishEfficiency")) {
+        m_dishEfficiency = settings.m_dishEfficiency;
+    }
+    if (settingsKeys.contains("dishLengthUnits")) {
+        m_dishLengthUnits = settings.m_dishLengthUnits;
+    }
+    if (settingsKeys.contains("dishSurfaceError")) {
+        m_dishSurfaceError = settings.m_dishSurfaceError;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+}
+
+QString AntennaToolsSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("dipoleFrequencyMHz") || force) {
+        ostr << " m_dipoleFrequencyMHz: " << m_dipoleFrequencyMHz;
+    }
+    if (settingsKeys.contains("dipoleFrequencySelect") || force) {
+        ostr << " m_dipoleFrequencySelect: " << m_dipoleFrequencySelect;
+    }
+    if (settingsKeys.contains("dipoleEndEffectFactor") || force) {
+        ostr << " m_dipoleEndEffectFactor: " << m_dipoleEndEffectFactor;
+    }
+    if (settingsKeys.contains("dipoleLengthUnits") || force) {
+        ostr << " m_dipoleLengthUnits: " << m_dipoleLengthUnits;
+    }
+    if (settingsKeys.contains("dishFrequencyMHz") || force) {
+        ostr << " m_dishFrequencyMHz: " << m_dishFrequencyMHz;
+    }
+    if (settingsKeys.contains("dishFrequencySelect") || force) {
+        ostr << " m_dishFrequencySelect: " << m_dishFrequencySelect;
+    }
+    if (settingsKeys.contains("dishDiameter") || force) {
+        ostr << " m_dishDiameter: " << m_dishDiameter;
+    }
+    if (settingsKeys.contains("dishDepth") || force) {
+        ostr << " m_dishDepth: " << m_dishDepth;
+    }
+    if (settingsKeys.contains("dishEfficiency") || force) {
+        ostr << " m_dishEfficiency: " << m_dishEfficiency;
+    }
+    if (settingsKeys.contains("dishLengthUnits") || force) {
+        ostr << " m_dishLengthUnits: " << m_dishLengthUnits;
+    }
+    if (settingsKeys.contains("dishSurfaceError") || force) {
+        ostr << " m_dishSurfaceError: " << m_dishSurfaceError;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}
