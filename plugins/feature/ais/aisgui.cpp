@@ -303,6 +303,8 @@ void AISGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
         m_settingsKeys.append("useReverseAPI");
         m_settingsKeys.append("reverseAPIAddress");
         m_settingsKeys.append("reverseAPIPort");

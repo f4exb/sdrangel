@@ -40,19 +40,22 @@ public:
 
     public:
         const AMBESettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAMBE* create(const AMBESettings& settings, bool force) {
-            return new MsgConfigureAMBE(settings, force);
+        static MsgConfigureAMBE* create(const AMBESettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureAMBE(settings, settingsKeys, force);
         }
 
     private:
         AMBESettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAMBE(const AMBESettings& settings, bool force) :
+        MsgConfigureAMBE(const AMBESettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -131,9 +134,9 @@ private:
 
     void start();
     void stop();
-    void applySettings(const AMBESettings& settings, bool force = false);
+    void applySettings(const AMBESettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const AMBESettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const AMBESettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

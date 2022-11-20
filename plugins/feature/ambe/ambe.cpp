@@ -77,10 +77,13 @@ void AMBE::stop()
     m_state = StIdle;
 }
 
-void AMBE::applySettings(const AMBESettings& settings, bool force)
+void AMBE::applySettings(const AMBESettings& settings, const QList<QString>& settingsKeys,  bool force)
 {
-    (void) force;
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 bool AMBE::handleMessage(const Message& cmd)
@@ -89,7 +92,7 @@ bool AMBE::handleMessage(const Message& cmd)
 	{
         MsgConfigureAMBE& cfg = (MsgConfigureAMBE&) cmd;
         qDebug() << "AMBE::handleMessage: MsgConfigureAMBE";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 		return true;
 	}
     else if (DSPPushMbeFrame::match(cmd))
@@ -134,14 +137,14 @@ bool AMBE::deserialize(const QByteArray& data)
 
         if (m_settings.deserialize(bytetmp))
         {
-            MsgConfigureAMBE *msg = MsgConfigureAMBE::create(m_settings, true);
+            MsgConfigureAMBE *msg = MsgConfigureAMBE::create(m_settings, QList<QString>(), true);
             m_inputMessageQueue.push(msg);
             return true;
         }
         else
         {
             m_settings.resetToDefaults();
-            MsgConfigureAMBE *msg = MsgConfigureAMBE::create(m_settings, true);
+            MsgConfigureAMBE *msg = MsgConfigureAMBE::create(m_settings, QList<QString>(), true);
             m_inputMessageQueue.push(msg);
             return false;
         }
@@ -194,12 +197,12 @@ int AMBE::webapiSettingsPutPatch(
     AMBESettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureAMBE *msg = MsgConfigureAMBE::create(settings, force);
+    MsgConfigureAMBE *msg = MsgConfigureAMBE::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAMBE *msgToGUI = MsgConfigureAMBE::create(settings, force);
+        MsgConfigureAMBE *msgToGUI = MsgConfigureAMBE::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -288,7 +291,7 @@ void AMBE::webapiUpdateFeatureSettings(
     }
 }
 
-void AMBE::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const AMBESettings& settings, bool force)
+void AMBE::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const AMBESettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

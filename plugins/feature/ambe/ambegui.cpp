@@ -137,6 +137,14 @@ void AMBEGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -154,9 +162,11 @@ void AMBEGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-	    AMBE::MsgConfigureAMBE* message = AMBE::MsgConfigureAMBE::create( m_settings, force);
+	    AMBE::MsgConfigureAMBE* message = AMBE::MsgConfigureAMBE::create( m_settings, m_settingsKeys, force);
 	    m_ambe->getInputMessageQueue()->push(message);
 	}
+
+    m_settingsKeys.clear();
 }
 
 bool AMBEGUI::handleMessage(const Message& message)
@@ -165,7 +175,13 @@ bool AMBEGUI::handleMessage(const Message& message)
     {
         qDebug("AMBEGUI::handleMessage: AMBE::MsgConfigureAMBE");
         const AMBE::MsgConfigureAMBE& cfg = (AMBE::MsgConfigureAMBE&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         displaySettings();
         return true;
     }
