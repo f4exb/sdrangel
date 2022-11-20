@@ -435,6 +435,8 @@ void AFCGUI::applySettings(bool force)
 	    AFC::MsgConfigureAFC* message = AFC::MsgConfigureAFC::create( m_settings, m_settingsKeys, force);
 	    m_afc->getInputMessageQueue()->push(message);
 	}
+
+    m_settingsKeys.clear();
 }
 
 void AFCGUI::makeUIConnections()

@@ -18,3 +18,11 @@ AISSettings:
       type: integer
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+    vesselColumnIndexes:
+      type: array
+      items:
+        type: integer
+    vesselColumnSizes:
+      type: array
+      items:
+        type: integer

@@ -98,7 +98,7 @@ bool AIS::handleMessage(const Message& cmd)
     {
         MsgConfigureAIS& cfg = (MsgConfigureAIS&) cmd;
         qDebug() << "AIS::handleMessage: MsgConfigureAIS";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -127,51 +127,38 @@ bool AIS::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureAIS *msg = MsgConfigureAIS::create(m_settings, true);
+        MsgConfigureAIS *msg = MsgConfigureAIS::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureAIS *msg = MsgConfigureAIS::create(m_settings, true);
+        MsgConfigureAIS *msg = MsgConfigureAIS::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void AIS::applySettings(const AISSettings& settings, bool force)
+void AIS::applySettings(const AISSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "AIS::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIFeatureSetIndex: " << settings.m_reverseAPIFeatureSetIndex
-            << " m_reverseAPIFeatureIndex: " << settings.m_reverseAPIFeatureIndex
-            << " force: " << force;
-
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
+    qDebug() << "AIS::applySettings:" << settings.getDebugString(settingsKeys, force) << force;
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+   }
 }
 
 int AIS::webapiSettingsGet(
@@ -195,12 +182,12 @@ int AIS::webapiSettingsPutPatch(
     AISSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureAIS *msg = MsgConfigureAIS::create(settings, force);
+    MsgConfigureAIS *msg = MsgConfigureAIS::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAIS *msgToGUI = MsgConfigureAIS::create(settings, force);
+        MsgConfigureAIS *msgToGUI = MsgConfigureAIS::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -245,6 +232,26 @@ void AIS::webapiFormatFeatureSettings(
             response.getAisSettings()->setRollupState(swgRollupState);
         }
     }
+
+    if (!response.getAisSettings()->getVesselColumnIndexes()) {
+        response.getAisSettings()->setVesselColumnIndexes(new QList<int>());
+    }
+
+    response.getAisSettings()->getVesselColumnIndexes()->clear();
+
+    for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
+        response.getAisSettings()->getVesselColumnIndexes()->push_back(settings.m_vesselColumnIndexes[i]);
+    }
+
+    if (!response.getAisSettings()->getVesselColumnSizes()) {
+        response.getAisSettings()->setVesselColumnSizes(new QList<int>());
+    }
+
+    response.getAisSettings()->getVesselColumnSizes()->clear();
+
+    for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
+        response.getAisSettings()->getVesselColumnSizes()->push_back(settings.m_vesselColumnSizes[i]);
+    }
 }
 
 void AIS::webapiUpdateFeatureSettings(
@@ -276,9 +283,27 @@ void AIS::webapiUpdateFeatureSettings(
     if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
         settings.m_rollupState->updateFrom(featureSettingsKeys, response.getAisSettings()->getRollupState());
     }
+
+    if (featureSettingsKeys.contains("vesselColumnIndexes"))
+    {
+        const QList<int> *indexes = response.getAisSettings()->getVesselColumnIndexes();
+
+        for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
+            settings.m_vesselColumnIndexes[i] = (*indexes)[i];
+        }
+    }
+
+    if (featureSettingsKeys.contains("vesselColumnSizes"))
+    {
+        const QList<int> *indexes = response.getAisSettings()->getVesselColumnSizes();
+
+        for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
+            settings.m_vesselColumnSizes[i] = (*indexes)[i];
+        }
+    }
 }
 
-void AIS::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const AISSettings& settings, bool force)
+void AIS::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const AISSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

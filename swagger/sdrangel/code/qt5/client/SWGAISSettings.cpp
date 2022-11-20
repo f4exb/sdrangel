@@ -44,6 +44,10 @@ SWGAISSettings::SWGAISSettings() {
     m_reverse_api_feature_index_isSet = false;
     rollup_state = nullptr;
     m_rollup_state_isSet = false;
+    vessel_column_indexes = new QList<qint32>();
+    m_vessel_column_indexes_isSet = false;
+    vessel_column_sizes = new QList<qint32>();
+    m_vessel_column_sizes_isSet = false;
 }
 
 SWGAISSettings::~SWGAISSettings() {
@@ -68,6 +72,10 @@ SWGAISSettings::init() {
     m_reverse_api_feature_index_isSet = false;
     rollup_state = new SWGRollupState();
     m_rollup_state_isSet = false;
+    vessel_column_indexes = new QList<qint32>();
+    m_vessel_column_indexes_isSet = false;
+    vessel_column_sizes = new QList<qint32>();
+    m_vessel_column_sizes_isSet = false;
 }
 
 void
@@ -86,6 +94,8 @@ SWGAISSettings::cleanup() {
     if(rollup_state != nullptr) { 
         delete rollup_state;
     }
+
+
 }
 
 SWGAISSettings*
@@ -115,6 +125,10 @@ SWGAISSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
+    
+    ::SWGSDRangel::setValue(&vessel_column_indexes, pJson["vesselColumnIndexes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&vessel_column_sizes, pJson["vesselColumnSizes"], "QList", "qint32");
 }
 
 QString
@@ -154,6 +168,12 @@ SWGAISSettings::asJsonObject() {
     }
     if((rollup_state != nullptr) && (rollup_state->isSet())){
         toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
+    }
+    if(vessel_column_indexes && vessel_column_indexes->size() > 0){
+        toJsonArray((QList<void*>*)vessel_column_indexes, obj, "vesselColumnIndexes", "");
+    }
+    if(vessel_column_sizes && vessel_column_sizes->size() > 0){
+        toJsonArray((QList<void*>*)vessel_column_sizes, obj, "vesselColumnSizes", "");
     }
 
     return obj;
@@ -239,6 +259,26 @@ SWGAISSettings::setRollupState(SWGRollupState* rollup_state) {
     this->m_rollup_state_isSet = true;
 }
 
+QList<qint32>*
+SWGAISSettings::getVesselColumnIndexes() {
+    return vessel_column_indexes;
+}
+void
+SWGAISSettings::setVesselColumnIndexes(QList<qint32>* vessel_column_indexes) {
+    this->vessel_column_indexes = vessel_column_indexes;
+    this->m_vessel_column_indexes_isSet = true;
+}
+
+QList<qint32>*
+SWGAISSettings::getVesselColumnSizes() {
+    return vessel_column_sizes;
+}
+void
+SWGAISSettings::setVesselColumnSizes(QList<qint32>* vessel_column_sizes) {
+    this->vessel_column_sizes = vessel_column_sizes;
+    this->m_vessel_column_sizes_isSet = true;
+}
+
 
 bool
 SWGAISSettings::isSet(){
@@ -266,6 +306,18 @@ SWGAISSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(rollup_state && rollup_state->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(m_vessel_column_indexes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(vessel_column_indexes && (vessel_column_indexes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_vessel_column_sizes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(vessel_column_sizes && (vessel_column_sizes->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

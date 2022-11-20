@@ -242,8 +242,6 @@ void AFC::applySettings(const AFCSettings& settings, const QList<QString>& setti
 {
     qDebug() << "AFC::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    QList<QString> reverseAPIKeys;
-
     if (settingsKeys.contains("trackerDeviceSetIndex") || force)
     {
         removeTrackerFeatureReference();
@@ -272,14 +270,14 @@ void AFC::applySettings(const AFCSettings& settings, const QList<QString>& setti
                 settingsKeys.contains("reverseAPIPort") ||
                 settingsKeys.contains("reverseAPIFeatureSetIndex") ||
                 settingsKeys.contains("m_reverseAPIFeatureIndex");
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     if (force) {
         m_settings = settings;
     } else {
         m_settings.applySettings(settingsKeys, settings);
-   }
+    }
 }
 
 void AFC::updateDeviceSetLists()

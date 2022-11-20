@@ -130,7 +130,13 @@ bool AISGUI::handleMessage(const Message& message)
     {
         qDebug("AISGUI::handleMessage: AIS::MsgConfigureAIS");
         const AIS::MsgConfigureAIS& cfg = (AIS::MsgConfigureAIS&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -258,9 +264,11 @@ void AISGUI::displaySettings()
         bool hidden = m_settings.m_vesselColumnSizes[i] == 0;
         header->setSectionHidden(i, hidden);
         vesselsMenu->actions().at(i)->setChecked(!hidden);
+
         if (m_settings.m_vesselColumnSizes[i] > 0) {
             ui->vessels->setColumnWidth(i, m_settings.m_vesselColumnSizes[i]);
         }
+
         header->moveSection(header->visualIndex(i), m_settings.m_vesselColumnIndexes[i]);
     }
 
@@ -294,6 +302,12 @@ void AISGUI::onMenuDialogCalled(const QPoint &p)
 
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
+
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
 
         applySettings();
     }
@@ -333,9 +347,11 @@ void AISGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        AIS::MsgConfigureAIS* message = AIS::MsgConfigureAIS::create(m_settings, force);
+        AIS::MsgConfigureAIS* message = AIS::MsgConfigureAIS::create(m_settings, m_settingsKeys, force);
         m_ais->getInputMessageQueue()->push(message);
     }
+
+    m_settingsKeys.clear();
 }
 
 void AISGUI::resizeTable()
@@ -370,6 +386,8 @@ void AISGUI::vessels_sectionMoved(int logicalIndex, int oldVisualIndex, int newV
     (void) oldVisualIndex;
 
     m_settings.m_vesselColumnIndexes[logicalIndex] = newVisualIndex;
+    m_settingsKeys.append("vesselColumnIndexes");
+    applySettings();
 }
 
 // Column in table resized (when hidden size is 0)
@@ -378,6 +396,8 @@ void AISGUI::vessels_sectionResized(int logicalIndex, int oldSize, int newSize)
     (void) oldSize;
 
     m_settings.m_vesselColumnSizes[logicalIndex] = newSize;
+    m_settingsKeys.append("vesselColumnSizes");
+    applySettings();
 }
 
 // Right click in table header - show column select menu

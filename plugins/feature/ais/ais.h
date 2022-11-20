@@ -44,19 +44,22 @@ public:
 
     public:
         const AISSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAIS* create(const AISSettings& settings, bool force) {
-            return new MsgConfigureAIS(settings, force);
+        static MsgConfigureAIS* create(const AISSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureAIS(settings, settingsKeys, force);
         }
 
     private:
         AISSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAIS(const AISSettings& settings, bool force) :
+        MsgConfigureAIS(const AISSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -104,8 +107,8 @@ private:
 
     void start();
     void stop();
-    void applySettings(const AISSettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const AISSettings& settings, bool force);
+    void applySettings(const AISSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const AISSettings& settings, bool force);
     void scanAvailableChannels();
 
 private slots:
