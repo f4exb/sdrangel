@@ -94,7 +94,7 @@ bool APRSWorker::handleMessage(const Message& cmd)
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureAPRSWorker& cfg = (MsgConfigureAPRSWorker&) cmd;
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
         return true;
     }
     else if (MainCore::MsgPacket::match(cmd))
@@ -126,20 +126,14 @@ bool APRSWorker::handleMessage(const Message& cmd)
     }
 }
 
-void APRSWorker::applySettings(const APRSSettings& settings, bool force)
+void APRSWorker::applySettings(const APRSSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "APRSWorker::applySettings:"
-            << " m_igateEnabled: " << settings.m_igateEnabled
-            << " m_igateServer: " << settings.m_igateServer
-            << " m_igatePort: " << settings.m_igatePort
-            << " m_igateCallsign: " << settings.m_igateCallsign
-            << " m_igateFilter: " << settings.m_igateFilter
-            << " force: " << force;
+    qDebug() << "APRSWorker::applySettings:" << settings.getDebugString(settingsKeys, force) << force;
 
-    if ((settings.m_igateEnabled != m_settings.m_igateEnabled)
-        || (settings.m_igateServer != m_settings.m_igateServer)
-        || (settings.m_igatePort != m_settings.m_igatePort)
-        || (settings.m_igateFilter != m_settings.m_igateFilter)
+    if (settingsKeys.contains("igateEnabled")
+        || settingsKeys.contains("igateServer")
+        || settingsKeys.contains("igatePort")
+        || settingsKeys.contains("igateFilter")
         || force)
     {
         // Close any existing connection
@@ -172,7 +166,11 @@ void APRSWorker::applySettings(const APRSSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void APRSWorker::connected()

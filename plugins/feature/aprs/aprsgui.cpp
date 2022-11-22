@@ -150,7 +150,13 @@ bool APRSGUI::handleMessage(const Message& message)
     {
         qDebug("APRSGUI::handleMessage: APRS::MsgConfigureAPRS");
         const APRS::MsgConfigureAPRS& cfg = (APRS::MsgConfigureAPRS&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         qDebug() << m_settings.m_igateCallsign;
         blockApplySettings(true);
         displaySettings();
@@ -704,6 +710,14 @@ void APRSGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -998,6 +1012,7 @@ void APRSGUI::addPacketToGUI(APRSStation *station, APRSPacket *aprs)
 void APRSGUI::on_stationFilter_currentIndexChanged(int index)
 {
     m_settings.m_stationFilter = static_cast<APRSSettings::StationFilter>(index);
+    m_settingsKeys.append("stationFilter");
     applySettings();
     filterStations();
 }
@@ -1085,6 +1100,7 @@ void APRSGUI::on_filterAddressee_editingFinished()
 {
     m_settings.m_filterAddressee = ui->filterAddressee->text();
     filterMessages();
+    m_settingsKeys.append("filterAddressee");
     applySettings();
 }
 
@@ -1559,9 +1575,11 @@ void APRSGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        APRS::MsgConfigureAPRS* message = APRS::MsgConfigureAPRS::create(m_settings, force);
+        APRS::MsgConfigureAPRS* message = APRS::MsgConfigureAPRS::create(m_settings, m_settingsKeys, force);
         m_aprs->getInputMessageQueue()->push(message);
     }
+
+    m_settingsKeys.clear();
 }
 
 void APRSGUI::resizeTable()
@@ -2000,9 +2018,20 @@ int APRSGUI::convertRainfall(int rainfall)
 void APRSGUI::on_displaySettings_clicked()
 {
     APRSSettingsDialog dialog(&m_settings);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         setUnits();
+
+        m_settingsKeys.append("igateServer");
+        m_settingsKeys.append("igateCallsign");
+        m_settingsKeys.append("igatePasscode");
+        m_settingsKeys.append("igateFilter");
+        m_settingsKeys.append("altitudeUnits");
+        m_settingsKeys.append("speedUnits");
+        m_settingsKeys.append("temperatureUnits");
+        m_settingsKeys.append("rainfallUnits");
+
         applySettings();
     }
 }
@@ -2010,6 +2039,7 @@ void APRSGUI::on_displaySettings_clicked()
 void APRSGUI::on_igate_toggled(bool checked)
 {
     m_settings.m_igateEnabled = checked;
+    m_settingsKeys.append("igateEnabled");
     applySettings();
 }
 

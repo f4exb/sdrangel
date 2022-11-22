@@ -46,19 +46,22 @@ public:
 
     public:
         const APRSSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAPRS* create(const APRSSettings& settings, bool force) {
-            return new MsgConfigureAPRS(settings, force);
+        static MsgConfigureAPRS* create(const APRSSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureAPRS(settings, settingsKeys, force);
         }
 
     private:
         APRSSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAPRS(const APRSSettings& settings, bool force) :
+        MsgConfigureAPRS(const APRSSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -163,8 +166,8 @@ private:
 
     void start();
     void stop();
-    void applySettings(const APRSSettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const APRSSettings& settings, bool force);
+    void applySettings(const APRSSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const APRSSettings& settings, bool force);
     void scanAvailableChannels();
     void notifyUpdateChannels();
 

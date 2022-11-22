@@ -39,20 +39,23 @@ public:
 
     public:
         const APRSSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAPRSWorker* create(const APRSSettings& settings, bool force)
+        static MsgConfigureAPRSWorker* create(const APRSSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigureAPRSWorker(settings, force);
+            return new MsgConfigureAPRSWorker(settings, settingsKeys, force);
         }
 
     private:
         APRSSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAPRSWorker(const APRSSettings& settings, bool force) :
+        MsgConfigureAPRSWorker(const APRSSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -78,7 +81,7 @@ private:
     bool m_loggedIn;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const APRSSettings& settings, bool force = false);
+    void applySettings(const APRSSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     MessageQueue *getMessageQueueToGUI() { return m_msgQueueToGUI; }
     void send(const char *data, int length);
 

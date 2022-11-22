@@ -160,7 +160,11 @@ void AFCWorker::applySettings(const AFCSettings& settings, const QList<QString>&
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 

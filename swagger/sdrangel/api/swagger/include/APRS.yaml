@@ -30,3 +30,51 @@ APRSSettings:
       type: integer
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+    packetsTableColumnIndexes:
+      type: array
+      items:
+        type: integer
+    packetsTableColumnSizes:
+      type: array
+      items:
+        type: integer
+    weatherTableColumnIndexes:
+      type: array
+      items:
+        type: integer
+    weatherTableColumnSizes:
+      type: array
+      items:
+        type: integer
+    statusTableColumnIndexes:
+      type: array
+      items:
+        type: integer
+    statusTableColumnSizes:
+      type: array
+      items:
+        type: integer
+    messagesTableColumnIndexes:
+      type: array
+      items:
+        type: integer
+    messagesTableColumnSizes:
+      type: array
+      items:
+        type: integer
+    telemetryTableColumnIndexes:
+      type: array
+      items:
+        type: integer
+    telemetryTableColumnSizes:
+      type: array
+      items:
+        type: integer
+    motionTableColumnIndexes:
+      type: array
+      items:
+        type: integer
+    motionTableColumnSizes:
+      type: array
+      items:
+        type: integer

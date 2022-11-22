@@ -82,14 +82,19 @@ struct APRSSettings
 
     int m_packetsTableColumnIndexes[APRS_PACKETS_TABLE_COLUMNS];//!< How the columns are ordered in the table
     int m_packetsTableColumnSizes[APRS_PACKETS_TABLE_COLUMNS];  //!< Size of the columns in the table
+
     int m_weatherTableColumnIndexes[APRS_WEATHER_TABLE_COLUMNS];
     int m_weatherTableColumnSizes[APRS_WEATHER_TABLE_COLUMNS];
+
     int m_statusTableColumnIndexes[APRS_STATUS_TABLE_COLUMNS];
     int m_statusTableColumnSizes[APRS_STATUS_TABLE_COLUMNS];
+
     int m_messagesTableColumnIndexes[APRS_MESSAGES_TABLE_COLUMNS];
     int m_messagesTableColumnSizes[APRS_MESSAGES_TABLE_COLUMNS];
+
     int m_telemetryTableColumnIndexes[APRS_TELEMETRY_TABLE_COLUMNS];
     int m_telemetryTableColumnSizes[APRS_TELEMETRY_TABLE_COLUMNS];
+
     int m_motionTableColumnIndexes[APRS_MOTION_TABLE_COLUMNS];
     int m_motionTableColumnSizes[APRS_MOTION_TABLE_COLUMNS];
 
@@ -98,6 +103,8 @@ struct APRSSettings
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
+    void applySettings(const QStringList& settingsKeys, const APRSSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static const QStringList m_pipeTypes;
     static const QStringList m_pipeURIs;

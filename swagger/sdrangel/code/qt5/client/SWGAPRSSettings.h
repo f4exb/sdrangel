@@ -23,6 +23,7 @@
 
 
 #include "SWGRollupState.h"
+#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -85,6 +86,42 @@ public:
     SWGRollupState* getRollupState();
     void setRollupState(SWGRollupState* rollup_state);
 
+    QList<qint32>* getPacketsTableColumnIndexes();
+    void setPacketsTableColumnIndexes(QList<qint32>* packets_table_column_indexes);
+
+    QList<qint32>* getPacketsTableColumnSizes();
+    void setPacketsTableColumnSizes(QList<qint32>* packets_table_column_sizes);
+
+    QList<qint32>* getWeatherTableColumnIndexes();
+    void setWeatherTableColumnIndexes(QList<qint32>* weather_table_column_indexes);
+
+    QList<qint32>* getWeatherTableColumnSizes();
+    void setWeatherTableColumnSizes(QList<qint32>* weather_table_column_sizes);
+
+    QList<qint32>* getStatusTableColumnIndexes();
+    void setStatusTableColumnIndexes(QList<qint32>* status_table_column_indexes);
+
+    QList<qint32>* getStatusTableColumnSizes();
+    void setStatusTableColumnSizes(QList<qint32>* status_table_column_sizes);
+
+    QList<qint32>* getMessagesTableColumnIndexes();
+    void setMessagesTableColumnIndexes(QList<qint32>* messages_table_column_indexes);
+
+    QList<qint32>* getMessagesTableColumnSizes();
+    void setMessagesTableColumnSizes(QList<qint32>* messages_table_column_sizes);
+
+    QList<qint32>* getTelemetryTableColumnIndexes();
+    void setTelemetryTableColumnIndexes(QList<qint32>* telemetry_table_column_indexes);
+
+    QList<qint32>* getTelemetryTableColumnSizes();
+    void setTelemetryTableColumnSizes(QList<qint32>* telemetry_table_column_sizes);
+
+    QList<qint32>* getMotionTableColumnIndexes();
+    void setMotionTableColumnIndexes(QList<qint32>* motion_table_column_indexes);
+
+    QList<qint32>* getMotionTableColumnSizes();
+    void setMotionTableColumnSizes(QList<qint32>* motion_table_column_sizes);
+
 
     virtual bool isSet() override;
 
@@ -130,6 +167,42 @@ private:
 
     SWGRollupState* rollup_state;
     bool m_rollup_state_isSet;
+
+    QList<qint32>* packets_table_column_indexes;
+    bool m_packets_table_column_indexes_isSet;
+
+    QList<qint32>* packets_table_column_sizes;
+    bool m_packets_table_column_sizes_isSet;
+
+    QList<qint32>* weather_table_column_indexes;
+    bool m_weather_table_column_indexes_isSet;
+
+    QList<qint32>* weather_table_column_sizes;
+    bool m_weather_table_column_sizes_isSet;
+
+    QList<qint32>* status_table_column_indexes;
+    bool m_status_table_column_indexes_isSet;
+
+    QList<qint32>* status_table_column_sizes;
+    bool m_status_table_column_sizes_isSet;
+
+    QList<qint32>* messages_table_column_indexes;
+    bool m_messages_table_column_indexes_isSet;
+
+    QList<qint32>* messages_table_column_sizes;
+    bool m_messages_table_column_sizes_isSet;
+
+    QList<qint32>* telemetry_table_column_indexes;
+    bool m_telemetry_table_column_indexes_isSet;
+
+    QList<qint32>* telemetry_table_column_sizes;
+    bool m_telemetry_table_column_sizes_isSet;
+
+    QList<qint32>* motion_table_column_indexes;
+    bool m_motion_table_column_indexes_isSet;
+
+    QList<qint32>* motion_table_column_sizes;
+    bool m_motion_table_column_sizes_isSet;
 
 };
 

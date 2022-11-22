@@ -56,6 +56,30 @@ SWGAPRSSettings::SWGAPRSSettings() {
     m_reverse_api_feature_index_isSet = false;
     rollup_state = nullptr;
     m_rollup_state_isSet = false;
+    packets_table_column_indexes = new QList<qint32>();
+    m_packets_table_column_indexes_isSet = false;
+    packets_table_column_sizes = new QList<qint32>();
+    m_packets_table_column_sizes_isSet = false;
+    weather_table_column_indexes = new QList<qint32>();
+    m_weather_table_column_indexes_isSet = false;
+    weather_table_column_sizes = new QList<qint32>();
+    m_weather_table_column_sizes_isSet = false;
+    status_table_column_indexes = new QList<qint32>();
+    m_status_table_column_indexes_isSet = false;
+    status_table_column_sizes = new QList<qint32>();
+    m_status_table_column_sizes_isSet = false;
+    messages_table_column_indexes = new QList<qint32>();
+    m_messages_table_column_indexes_isSet = false;
+    messages_table_column_sizes = new QList<qint32>();
+    m_messages_table_column_sizes_isSet = false;
+    telemetry_table_column_indexes = new QList<qint32>();
+    m_telemetry_table_column_indexes_isSet = false;
+    telemetry_table_column_sizes = new QList<qint32>();
+    m_telemetry_table_column_sizes_isSet = false;
+    motion_table_column_indexes = new QList<qint32>();
+    m_motion_table_column_indexes_isSet = false;
+    motion_table_column_sizes = new QList<qint32>();
+    m_motion_table_column_sizes_isSet = false;
 }
 
 SWGAPRSSettings::~SWGAPRSSettings() {
@@ -92,6 +116,30 @@ SWGAPRSSettings::init() {
     m_reverse_api_feature_index_isSet = false;
     rollup_state = new SWGRollupState();
     m_rollup_state_isSet = false;
+    packets_table_column_indexes = new QList<qint32>();
+    m_packets_table_column_indexes_isSet = false;
+    packets_table_column_sizes = new QList<qint32>();
+    m_packets_table_column_sizes_isSet = false;
+    weather_table_column_indexes = new QList<qint32>();
+    m_weather_table_column_indexes_isSet = false;
+    weather_table_column_sizes = new QList<qint32>();
+    m_weather_table_column_sizes_isSet = false;
+    status_table_column_indexes = new QList<qint32>();
+    m_status_table_column_indexes_isSet = false;
+    status_table_column_sizes = new QList<qint32>();
+    m_status_table_column_sizes_isSet = false;
+    messages_table_column_indexes = new QList<qint32>();
+    m_messages_table_column_indexes_isSet = false;
+    messages_table_column_sizes = new QList<qint32>();
+    m_messages_table_column_sizes_isSet = false;
+    telemetry_table_column_indexes = new QList<qint32>();
+    m_telemetry_table_column_indexes_isSet = false;
+    telemetry_table_column_sizes = new QList<qint32>();
+    m_telemetry_table_column_sizes_isSet = false;
+    motion_table_column_indexes = new QList<qint32>();
+    m_motion_table_column_indexes_isSet = false;
+    motion_table_column_sizes = new QList<qint32>();
+    m_motion_table_column_sizes_isSet = false;
 }
 
 void
@@ -124,6 +172,18 @@ SWGAPRSSettings::cleanup() {
     if(rollup_state != nullptr) { 
         delete rollup_state;
     }
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 SWGAPRSSettings*
@@ -165,6 +225,30 @@ SWGAPRSSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
+    
+    ::SWGSDRangel::setValue(&packets_table_column_indexes, pJson["packetsTableColumnIndexes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&packets_table_column_sizes, pJson["packetsTableColumnSizes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&weather_table_column_indexes, pJson["weatherTableColumnIndexes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&weather_table_column_sizes, pJson["weatherTableColumnSizes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&status_table_column_indexes, pJson["statusTableColumnIndexes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&status_table_column_sizes, pJson["statusTableColumnSizes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&messages_table_column_indexes, pJson["messagesTableColumnIndexes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&messages_table_column_sizes, pJson["messagesTableColumnSizes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&telemetry_table_column_indexes, pJson["telemetryTableColumnIndexes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&telemetry_table_column_sizes, pJson["telemetryTableColumnSizes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&motion_table_column_indexes, pJson["motionTableColumnIndexes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&motion_table_column_sizes, pJson["motionTableColumnSizes"], "QList", "qint32");
 }
 
 QString
@@ -222,6 +306,42 @@ SWGAPRSSettings::asJsonObject() {
     }
     if((rollup_state != nullptr) && (rollup_state->isSet())){
         toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
+    }
+    if(packets_table_column_indexes && packets_table_column_indexes->size() > 0){
+        toJsonArray((QList<void*>*)packets_table_column_indexes, obj, "packetsTableColumnIndexes", "");
+    }
+    if(packets_table_column_sizes && packets_table_column_sizes->size() > 0){
+        toJsonArray((QList<void*>*)packets_table_column_sizes, obj, "packetsTableColumnSizes", "");
+    }
+    if(weather_table_column_indexes && weather_table_column_indexes->size() > 0){
+        toJsonArray((QList<void*>*)weather_table_column_indexes, obj, "weatherTableColumnIndexes", "");
+    }
+    if(weather_table_column_sizes && weather_table_column_sizes->size() > 0){
+        toJsonArray((QList<void*>*)weather_table_column_sizes, obj, "weatherTableColumnSizes", "");
+    }
+    if(status_table_column_indexes && status_table_column_indexes->size() > 0){
+        toJsonArray((QList<void*>*)status_table_column_indexes, obj, "statusTableColumnIndexes", "");
+    }
+    if(status_table_column_sizes && status_table_column_sizes->size() > 0){
+        toJsonArray((QList<void*>*)status_table_column_sizes, obj, "statusTableColumnSizes", "");
+    }
+    if(messages_table_column_indexes && messages_table_column_indexes->size() > 0){
+        toJsonArray((QList<void*>*)messages_table_column_indexes, obj, "messagesTableColumnIndexes", "");
+    }
+    if(messages_table_column_sizes && messages_table_column_sizes->size() > 0){
+        toJsonArray((QList<void*>*)messages_table_column_sizes, obj, "messagesTableColumnSizes", "");
+    }
+    if(telemetry_table_column_indexes && telemetry_table_column_indexes->size() > 0){
+        toJsonArray((QList<void*>*)telemetry_table_column_indexes, obj, "telemetryTableColumnIndexes", "");
+    }
+    if(telemetry_table_column_sizes && telemetry_table_column_sizes->size() > 0){
+        toJsonArray((QList<void*>*)telemetry_table_column_sizes, obj, "telemetryTableColumnSizes", "");
+    }
+    if(motion_table_column_indexes && motion_table_column_indexes->size() > 0){
+        toJsonArray((QList<void*>*)motion_table_column_indexes, obj, "motionTableColumnIndexes", "");
+    }
+    if(motion_table_column_sizes && motion_table_column_sizes->size() > 0){
+        toJsonArray((QList<void*>*)motion_table_column_sizes, obj, "motionTableColumnSizes", "");
     }
 
     return obj;
@@ -367,6 +487,126 @@ SWGAPRSSettings::setRollupState(SWGRollupState* rollup_state) {
     this->m_rollup_state_isSet = true;
 }
 
+QList<qint32>*
+SWGAPRSSettings::getPacketsTableColumnIndexes() {
+    return packets_table_column_indexes;
+}
+void
+SWGAPRSSettings::setPacketsTableColumnIndexes(QList<qint32>* packets_table_column_indexes) {
+    this->packets_table_column_indexes = packets_table_column_indexes;
+    this->m_packets_table_column_indexes_isSet = true;
+}
+
+QList<qint32>*
+SWGAPRSSettings::getPacketsTableColumnSizes() {
+    return packets_table_column_sizes;
+}
+void
+SWGAPRSSettings::setPacketsTableColumnSizes(QList<qint32>* packets_table_column_sizes) {
+    this->packets_table_column_sizes = packets_table_column_sizes;
+    this->m_packets_table_column_sizes_isSet = true;
+}
+
+QList<qint32>*
+SWGAPRSSettings::getWeatherTableColumnIndexes() {
+    return weather_table_column_indexes;
+}
+void
+SWGAPRSSettings::setWeatherTableColumnIndexes(QList<qint32>* weather_table_column_indexes) {
+    this->weather_table_column_indexes = weather_table_column_indexes;
+    this->m_weather_table_column_indexes_isSet = true;
+}
+
+QList<qint32>*
+SWGAPRSSettings::getWeatherTableColumnSizes() {
+    return weather_table_column_sizes;
+}
+void
+SWGAPRSSettings::setWeatherTableColumnSizes(QList<qint32>* weather_table_column_sizes) {
+    this->weather_table_column_sizes = weather_table_column_sizes;
+    this->m_weather_table_column_sizes_isSet = true;
+}
+
+QList<qint32>*
+SWGAPRSSettings::getStatusTableColumnIndexes() {
+    return status_table_column_indexes;
+}
+void
+SWGAPRSSettings::setStatusTableColumnIndexes(QList<qint32>* status_table_column_indexes) {
+    this->status_table_column_indexes = status_table_column_indexes;
+    this->m_status_table_column_indexes_isSet = true;
+}
+
+QList<qint32>*
+SWGAPRSSettings::getStatusTableColumnSizes() {
+    return status_table_column_sizes;
+}
+void
+SWGAPRSSettings::setStatusTableColumnSizes(QList<qint32>* status_table_column_sizes) {
+    this->status_table_column_sizes = status_table_column_sizes;
+    this->m_status_table_column_sizes_isSet = true;
+}
+
+QList<qint32>*
+SWGAPRSSettings::getMessagesTableColumnIndexes() {
+    return messages_table_column_indexes;
+}
+void
+SWGAPRSSettings::setMessagesTableColumnIndexes(QList<qint32>* messages_table_column_indexes) {
+    this->messages_table_column_indexes = messages_table_column_indexes;
+    this->m_messages_table_column_indexes_isSet = true;
+}
+
+QList<qint32>*
+SWGAPRSSettings::getMessagesTableColumnSizes() {
+    return messages_table_column_sizes;
+}
+void
+SWGAPRSSettings::setMessagesTableColumnSizes(QList<qint32>* messages_table_column_sizes) {
+    this->messages_table_column_sizes = messages_table_column_sizes;
+    this->m_messages_table_column_sizes_isSet = true;
+}
+
+QList<qint32>*
+SWGAPRSSettings::getTelemetryTableColumnIndexes() {
+    return telemetry_table_column_indexes;
+}
+void
+SWGAPRSSettings::setTelemetryTableColumnIndexes(QList<qint32>* telemetry_table_column_indexes) {
+    this->telemetry_table_column_indexes = telemetry_table_column_indexes;
+    this->m_telemetry_table_column_indexes_isSet = true;
+}
+
+QList<qint32>*
+SWGAPRSSettings::getTelemetryTableColumnSizes() {
+    return telemetry_table_column_sizes;
+}
+void
+SWGAPRSSettings::setTelemetryTableColumnSizes(QList<qint32>* telemetry_table_column_sizes) {
+    this->telemetry_table_column_sizes = telemetry_table_column_sizes;
+    this->m_telemetry_table_column_sizes_isSet = true;
+}
+
+QList<qint32>*
+SWGAPRSSettings::getMotionTableColumnIndexes() {
+    return motion_table_column_indexes;
+}
+void
+SWGAPRSSettings::setMotionTableColumnIndexes(QList<qint32>* motion_table_column_indexes) {
+    this->motion_table_column_indexes = motion_table_column_indexes;
+    this->m_motion_table_column_indexes_isSet = true;
+}
+
+QList<qint32>*
+SWGAPRSSettings::getMotionTableColumnSizes() {
+    return motion_table_column_sizes;
+}
+void
+SWGAPRSSettings::setMotionTableColumnSizes(QList<qint32>* motion_table_column_sizes) {
+    this->motion_table_column_sizes = motion_table_column_sizes;
+    this->m_motion_table_column_sizes_isSet = true;
+}
+
 
 bool
 SWGAPRSSettings::isSet(){
@@ -412,6 +652,78 @@ SWGAPRSSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(rollup_state && rollup_state->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(m_packets_table_column_indexes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(packets_table_column_indexes && (packets_table_column_indexes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_packets_table_column_sizes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(packets_table_column_sizes && (packets_table_column_sizes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_weather_table_column_indexes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(weather_table_column_indexes && (weather_table_column_indexes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_weather_table_column_sizes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(weather_table_column_sizes && (weather_table_column_sizes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_status_table_column_indexes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(status_table_column_indexes && (status_table_column_indexes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_status_table_column_sizes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(status_table_column_sizes && (status_table_column_sizes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_messages_table_column_indexes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(messages_table_column_indexes && (messages_table_column_indexes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_messages_table_column_sizes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(messages_table_column_sizes && (messages_table_column_sizes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_telemetry_table_column_indexes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(telemetry_table_column_indexes && (telemetry_table_column_indexes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_telemetry_table_column_sizes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(telemetry_table_column_sizes && (telemetry_table_column_sizes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_motion_table_column_indexes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(motion_table_column_indexes && (motion_table_column_indexes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_motion_table_column_sizes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(motion_table_column_sizes && (motion_table_column_sizes->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

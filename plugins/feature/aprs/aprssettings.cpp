@@ -264,3 +264,255 @@ bool APRSSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void APRSSettings::applySettings(const QStringList& settingsKeys, const APRSSettings& settings)
+{
+    if (settingsKeys.contains("igateServer")) {
+        m_igateServer = settings.m_igateServer;
+    }
+    if (settingsKeys.contains("igatePort")) {
+        m_igatePort = settings.m_igatePort;
+    }
+    if (settingsKeys.contains("igateCallsign")) {
+        m_igateCallsign = settings.m_igateCallsign;
+    }
+    if (settingsKeys.contains("igatePasscode")) {
+        m_igatePasscode = settings.m_igatePasscode;
+    }
+    if (settingsKeys.contains("igateFilter")) {
+        m_igateFilter = settings.m_igateFilter;
+    }
+    if (settingsKeys.contains("igateEnabled")) {
+        m_igateEnabled = settings.m_igateEnabled;
+    }
+    if (settingsKeys.contains("stationFilter")) {
+        m_stationFilter = settings.m_stationFilter;
+    }
+    if (settingsKeys.contains("filterAddressee")) {
+        m_filterAddressee = settings.m_filterAddressee;
+    }
+    if (settingsKeys.contains("altitudeUnits")) {
+        m_altitudeUnits = settings.m_altitudeUnits;
+    }
+    if (settingsKeys.contains("speedUnits")) {
+        m_speedUnits = settings.m_speedUnits;
+    }
+    if (settingsKeys.contains("temperatureUnits")) {
+        m_temperatureUnits = settings.m_temperatureUnits;
+    }
+    if (settingsKeys.contains("rainfallUnits")) {
+        m_rainfallUnits = settings.m_rainfallUnits;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+}
+
+QString APRSSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("igateServer") || force) {
+        ostr << " m_igateServer: " << m_igateServer.toStdString();
+    }
+    if (settingsKeys.contains("igatePort") || force) {
+        ostr << " m_igatePort: " << m_igatePort;
+    }
+    if (settingsKeys.contains("igateCallsign") || force) {
+        ostr << " m_igateCallsign: " << m_igateCallsign.toStdString();
+    }
+    if (settingsKeys.contains("igatePasscode") || force) {
+        ostr << " m_igatePasscode: " << m_igatePasscode.toStdString();
+    }
+    if (settingsKeys.contains("igateFilter") || force) {
+        ostr << " m_igateFilter: " << m_igateFilter.toStdString();
+    }
+    if (settingsKeys.contains("igateEnabled") || force) {
+        ostr << " m_igateEnabled: " << m_igateEnabled;
+    }
+    if (settingsKeys.contains("stationFilter") || force) {
+        ostr << " m_stationFilter: " << m_stationFilter;
+    }
+    if (settingsKeys.contains("filterAddressee") || force) {
+        ostr << " m_filterAddressee: " << m_filterAddressee.toStdString();
+    }
+    if (settingsKeys.contains("altitudeUnits") || force) {
+        ostr << " m_altitudeUnits: " << m_altitudeUnits;
+    }
+    if (settingsKeys.contains("speedUnits") || force) {
+        ostr << " m_speedUnits: " << m_speedUnits;
+    }
+    if (settingsKeys.contains("temperatureUnits") || force) {
+        ostr << " m_temperatureUnits: " << m_temperatureUnits;
+    }
+    if (settingsKeys.contains("rainfallUnits") || force) {
+        ostr << " m_rainfallUnits: " << m_rainfallUnits;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+
+    // 1
+    if (settingsKeys.contains("packetsTableColumnIndexes"))
+    {
+        ostr << "m_packetsTableColumnIndexes:";
+
+        for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++) {
+            ostr << " " << m_packetsTableColumnIndexes[i];
+        }
+    }
+
+    // 2
+    if (settingsKeys.contains("packetsTableColumnSizes"))
+    {
+        ostr << "m_packetsTableColumnSizes:";
+
+        for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++) {
+            ostr << " " << m_packetsTableColumnSizes[i];
+        }
+    }
+
+    // 3
+    if (settingsKeys.contains("weatherTableColumnIndexes"))
+    {
+        ostr << "m_weatherTableColumnIndexes:";
+
+        for (int i = 0; i < APRS_WEATHER_TABLE_COLUMNS; i++) {
+            ostr << " " << m_weatherTableColumnIndexes[i];
+        }
+    }
+
+    // 4
+    if (settingsKeys.contains("weatherTableColumnSizes"))
+    {
+        ostr << "m_weatherTableColumnSizes:";
+
+        for (int i = 0; i < APRS_WEATHER_TABLE_COLUMNS; i++) {
+            ostr << " " << m_weatherTableColumnSizes[i];
+        }
+    }
+
+    // 5
+    if (settingsKeys.contains("statusTableColumnIndexes"))
+    {
+        ostr << "m_statusTableColumnIndexes:";
+
+        for (int i = 0; i < APRS_STATUS_TABLE_COLUMNS; i++) {
+            ostr << " " << m_statusTableColumnIndexes[i];
+        }
+    }
+
+    // 6
+    if (settingsKeys.contains("statusTableColumnSizes"))
+    {
+        ostr << "m_statusTableColumnSizes:";
+
+        for (int i = 0; i < APRS_STATUS_TABLE_COLUMNS; i++) {
+            ostr << " " << m_statusTableColumnSizes[i];
+        }
+    }
+
+    // 7
+    if (settingsKeys.contains("messagesTableColumnIndexes"))
+    {
+        ostr << "m_messagesTableColumnIndexes:";
+
+        for (int i = 0; i < APRS_MESSAGES_TABLE_COLUMNS; i++) {
+            ostr << " " << m_messagesTableColumnIndexes[i];
+        }
+    }
+
+    // 8
+    if (settingsKeys.contains("messagesTableColumnSizes"))
+    {
+        ostr << "m_messagesTableColumnSizes:";
+
+        for (int i = 0; i < APRS_MESSAGES_TABLE_COLUMNS; i++) {
+            ostr << " " << m_messagesTableColumnSizes[i];
+        }
+    }
+
+    // 9
+    if (settingsKeys.contains("telemetryTableColumnIndexes"))
+    {
+        ostr << "m_telemetryTableColumnIndexes:";
+
+        for (int i = 0; i < APRS_TELEMETRY_TABLE_COLUMNS; i++) {
+            ostr << " " << m_telemetryTableColumnIndexes[i];
+        }
+    }
+
+    // 10
+    if (settingsKeys.contains("telemetryTableColumnSizes"))
+    {
+        ostr << "m_telemetryTableColumnSizes:";
+
+        for (int i = 0; i < APRS_TELEMETRY_TABLE_COLUMNS; i++) {
+            ostr << " " << m_telemetryTableColumnSizes[i];
+        }
+    }
+
+    // 11
+    if (settingsKeys.contains("motionTableColumnIndexes"))
+    {
+        ostr << "m_telemetryTableColumnSizes:";
+
+        for (int i = 0; i < APRS_MOTION_TABLE_COLUMNS; i++) {
+            ostr << " " << m_motionTableColumnIndexes[i];
+        }
+    }
+
+    // 12
+    if (settingsKeys.contains("motionTableColumnSizes"))
+    {
+        ostr << "m_motionTableColumnSizes:";
+
+        for (int i = 0; i < APRS_MOTION_TABLE_COLUMNS; i++) {
+            ostr << " " << m_motionTableColumnSizes[i];
+        }
+    }
+
+    return QString(ostr.str().c_str());
+}

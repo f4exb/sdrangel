@@ -102,7 +102,7 @@ void APRS::start()
     m_thread->start();
     m_state = StRunning;
 
-    APRSWorker::MsgConfigureAPRSWorker *msg = APRSWorker::MsgConfigureAPRSWorker::create(m_settings, true);
+    APRSWorker::MsgConfigureAPRSWorker *msg = APRSWorker::MsgConfigureAPRSWorker::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
 }
 
@@ -125,7 +125,7 @@ bool APRS::handleMessage(const Message& cmd)
     {
         MsgConfigureAPRS& cfg = (MsgConfigureAPRS&) cmd;
         qDebug() << "APRS::handleMessage: MsgConfigureAPRS";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -178,65 +178,48 @@ bool APRS::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureAPRS *msg = MsgConfigureAPRS::create(m_settings, true);
+        MsgConfigureAPRS *msg = MsgConfigureAPRS::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureAPRS *msg = MsgConfigureAPRS::create(m_settings, true);
+        MsgConfigureAPRS *msg = MsgConfigureAPRS::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void APRS::applySettings(const APRSSettings& settings, bool force)
+void APRS::applySettings(const APRSSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "APRS::applySettings:"
-            << " m_igateEnabled: " << settings.m_igateEnabled
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIFeatureSetIndex: " << settings.m_reverseAPIFeatureSetIndex
-            << " m_reverseAPIFeatureIndex: " << settings.m_reverseAPIFeatureIndex
-            << " force: " << force;
+    qDebug() << "APRS::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_igateEnabled != settings.m_igateEnabled) || force)
+    if (settingsKeys.contains("igateEnabled") || force)
     {
         if (settings.m_igateEnabled)
             start();
         else
             stop();
-        reverseAPIKeys.append("igateEnabled");
     }
 
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
 
     APRSWorker::MsgConfigureAPRSWorker *msg = APRSWorker::MsgConfigureAPRSWorker::create(
-        settings, force
+        settings, settingsKeys, force
     );
+
     if (m_worker) {
         m_worker->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -276,13 +259,13 @@ int APRS::webapiSettingsPutPatch(
     APRSSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureAPRS *msg = MsgConfigureAPRS::create(settings, force);
+    MsgConfigureAPRS *msg = MsgConfigureAPRS::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("APRS::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAPRS *msgToGUI = MsgConfigureAPRS::create(settings, force);
+        MsgConfigureAPRS *msgToGUI = MsgConfigureAPRS::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -335,6 +318,137 @@ void APRS::webapiFormatFeatureSettings(
         }
     }
 
+    // 1
+    if (!response.getAprsSettings()->getPacketsTableColumnIndexes()) {
+        response.getAprsSettings()->setPacketsTableColumnIndexes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getPacketsTableColumnIndexes()->clear();
+
+    for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getPacketsTableColumnIndexes()->push_back(settings.m_packetsTableColumnIndexes[i]);
+    }
+
+    // 2
+    if (!response.getAprsSettings()->getPacketsTableColumnSizes()) {
+        response.getAprsSettings()->setPacketsTableColumnSizes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getPacketsTableColumnSizes()->clear();
+
+    for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getPacketsTableColumnSizes()->push_back(settings.m_packetsTableColumnSizes[i]);
+    }
+
+    // 3
+    if (!response.getAprsSettings()->getWeatherTableColumnIndexes()) {
+        response.getAprsSettings()->setWeatherTableColumnIndexes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getWeatherTableColumnIndexes()->clear();
+
+    for (int i = 0; i < APRS_WEATHER_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getWeatherTableColumnIndexes()->push_back(settings.m_weatherTableColumnIndexes[i]);
+    }
+
+    // 4
+    if (!response.getAprsSettings()->getWeatherTableColumnSizes()) {
+        response.getAprsSettings()->setWeatherTableColumnSizes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getWeatherTableColumnSizes()->clear();
+
+    for (int i = 0; i < APRS_WEATHER_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getWeatherTableColumnSizes()->push_back(settings.m_weatherTableColumnSizes[i]);
+    }
+
+    // 5
+    if (!response.getAprsSettings()->getStatusTableColumnIndexes()) {
+        response.getAprsSettings()->setStatusTableColumnIndexes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getStatusTableColumnIndexes()->clear();
+
+    for (int i = 0; i < APRS_STATUS_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getStatusTableColumnIndexes()->push_back(settings.m_statusTableColumnIndexes[i]);
+    }
+
+    // 6
+    if (!response.getAprsSettings()->getStatusTableColumnSizes()) {
+        response.getAprsSettings()->setStatusTableColumnSizes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getStatusTableColumnSizes()->clear();
+
+    for (int i = 0; i < APRS_STATUS_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getStatusTableColumnSizes()->push_back(settings.m_statusTableColumnSizes[i]);
+    }
+
+    // 7
+    if (!response.getAprsSettings()->getMessagesTableColumnIndexes()) {
+        response.getAprsSettings()->setMessagesTableColumnIndexes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getMessagesTableColumnIndexes()->clear();
+
+    for (int i = 0; i < APRS_MESSAGES_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getMessagesTableColumnIndexes()->push_back(settings.m_messagesTableColumnIndexes[i]);
+    }
+
+    // 8
+    if (!response.getAprsSettings()->getMessagesTableColumnSizes()) {
+        response.getAprsSettings()->setMessagesTableColumnSizes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getMessagesTableColumnSizes()->clear();
+
+    for (int i = 0; i < APRS_MESSAGES_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getMessagesTableColumnSizes()->push_back(settings.m_messagesTableColumnSizes[i]);
+    }
+
+    // 9
+    if (!response.getAprsSettings()->getTelemetryTableColumnIndexes()) {
+        response.getAprsSettings()->setTelemetryTableColumnIndexes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getTelemetryTableColumnIndexes()->clear();
+
+    for (int i = 0; i < APRS_TELEMETRY_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getTelemetryTableColumnIndexes()->push_back(settings.m_telemetryTableColumnIndexes[i]);
+    }
+
+    // 10
+    if (!response.getAprsSettings()->getTelemetryTableColumnSizes()) {
+        response.getAprsSettings()->setTelemetryTableColumnSizes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getTelemetryTableColumnSizes()->clear();
+
+    for (int i = 0; i < APRS_TELEMETRY_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getTelemetryTableColumnSizes()->push_back(settings.m_telemetryTableColumnSizes[i]);
+    }
+
+    // 11
+    if (!response.getAprsSettings()->getMotionTableColumnIndexes()) {
+        response.getAprsSettings()->setMotionTableColumnIndexes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getMotionTableColumnIndexes()->clear();
+
+    for (int i = 0; i < APRS_MOTION_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getMotionTableColumnIndexes()->push_back(settings.m_motionTableColumnIndexes[i]);
+    }
+
+    // 12
+    if (!response.getAprsSettings()->getMotionTableColumnSizes()) {
+        response.getAprsSettings()->setMotionTableColumnSizes(new QList<int>());
+    }
+
+    response.getAprsSettings()->getMotionTableColumnSizes()->clear();
+
+    for (int i = 0; i < APRS_MOTION_TABLE_COLUMNS; i++) {
+        response.getAprsSettings()->getMotionTableColumnSizes()->push_back(settings.m_motionTableColumnSizes[i]);
+    }
 }
 
 void APRS::webapiUpdateFeatureSettings(
@@ -381,9 +495,129 @@ void APRS::webapiUpdateFeatureSettings(
     if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
         settings.m_rollupState->updateFrom(featureSettingsKeys, response.getAprsSettings()->getRollupState());
     }
+
+    // 1
+    if (featureSettingsKeys.contains("packetsTableColumnIndexes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getPacketsTableColumnIndexes();
+
+        for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++) {
+            settings.m_packetsTableColumnIndexes[i] = (*indexes)[i];
+        }
+    }
+
+    // 2
+    if (featureSettingsKeys.contains("packetsTableColumnSizes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getPacketsTableColumnSizes();
+
+        for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++) {
+            settings.m_packetsTableColumnSizes[i] = (*indexes)[i];
+        }
+    }
+
+    // 3
+    if (featureSettingsKeys.contains("weatherTableColumnIndexes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getWeatherTableColumnIndexes();
+
+        for (int i = 0; i < APRS_WEATHER_TABLE_COLUMNS; i++) {
+            settings.m_weatherTableColumnIndexes[i] = (*indexes)[i];
+        }
+    }
+
+    // 4
+    if (featureSettingsKeys.contains("packetsTableColumnIndexes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getWeatherTableColumnSizes();
+
+        for (int i = 0; i < APRS_WEATHER_TABLE_COLUMNS; i++) {
+            settings.m_weatherTableColumnSizes[i] = (*indexes)[i];
+        }
+    }
+
+    // 5
+    if (featureSettingsKeys.contains("statusTableColumnIndexes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getStatusTableColumnIndexes();
+
+        for (int i = 0; i < APRS_STATUS_TABLE_COLUMNS; i++) {
+            settings.m_statusTableColumnIndexes[i] = (*indexes)[i];
+        }
+    }
+
+    // 6
+    if (featureSettingsKeys.contains("statusTableColumnSizes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getStatusTableColumnSizes();
+
+        for (int i = 0; i < APRS_STATUS_TABLE_COLUMNS; i++) {
+            settings.m_statusTableColumnSizes[i] = (*indexes)[i];
+        }
+    }
+
+    // 7
+    if (featureSettingsKeys.contains("messagesTableColumnIndexes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getMessagesTableColumnIndexes();
+
+        for (int i = 0; i < APRS_MESSAGES_TABLE_COLUMNS; i++) {
+            settings.m_messagesTableColumnIndexes[i] = (*indexes)[i];
+        }
+    }
+
+    // 8
+    if (featureSettingsKeys.contains("messagesTableColumnSizes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getMessagesTableColumnSizes();
+
+        for (int i = 0; i < APRS_MESSAGES_TABLE_COLUMNS; i++) {
+            settings.m_messagesTableColumnSizes[i] = (*indexes)[i];
+        }
+    }
+
+    // 9
+    if (featureSettingsKeys.contains("telemetryTableColumnIndexes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getTelemetryTableColumnIndexes();
+
+        for (int i = 0; i < APRS_TELEMETRY_TABLE_COLUMNS; i++) {
+            settings.m_telemetryTableColumnIndexes[i] = (*indexes)[i];
+        }
+    }
+
+    // 10
+    if (featureSettingsKeys.contains("telemetryTableColumnSizes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getTelemetryTableColumnSizes();
+
+        for (int i = 0; i < APRS_TELEMETRY_TABLE_COLUMNS; i++) {
+            settings.m_telemetryTableColumnSizes[i] = (*indexes)[i];
+        }
+    }
+
+    // 11
+    if (featureSettingsKeys.contains("motionTableColumnIndexes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getMotionTableColumnIndexes();
+
+        for (int i = 0; i < APRS_MOTION_TABLE_COLUMNS; i++) {
+            settings.m_motionTableColumnIndexes[i] = (*indexes)[i];
+        }
+    }
+
+    // 12
+    if (featureSettingsKeys.contains("motionTableColumnSizes"))
+    {
+        const QList<int> *indexes = response.getAprsSettings()->getMotionTableColumnSizes();
+
+        for (int i = 0; i < APRS_MOTION_TABLE_COLUMNS; i++) {
+            settings.m_motionTableColumnSizes[i] = (*indexes)[i];
+        }
+    }
 }
 
-void APRS::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const APRSSettings& settings, bool force)
+void APRS::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const APRSSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());
@@ -414,6 +648,174 @@ void APRS::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const 
     }
     if (featureSettingsKeys.contains("rgbColor") || force) {
         swgAPRSSettings->setRgbColor(settings.m_rgbColor);
+    }
+
+    // 1
+    if (featureSettingsKeys.contains("packetsTableColumnIndexes"))
+    {
+        if (!swgAPRSSettings->getPacketsTableColumnIndexes()) {
+            swgAPRSSettings->setPacketsTableColumnIndexes(new QList<int>());
+        }
+
+        swgAPRSSettings->getPacketsTableColumnIndexes()->clear();
+
+        for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getPacketsTableColumnIndexes()->push_back(settings.m_packetsTableColumnIndexes[i]);
+        }
+    }
+
+    // 2
+    if (featureSettingsKeys.contains("packetsTableColumnSizes"))
+    {
+        if (!swgAPRSSettings->getPacketsTableColumnSizes()) {
+            swgAPRSSettings->setPacketsTableColumnSizes(new QList<int>());
+        }
+
+        swgAPRSSettings->getPacketsTableColumnSizes()->clear();
+
+        for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getPacketsTableColumnSizes()->push_back(settings.m_packetsTableColumnSizes[i]);
+        }
+    }
+
+    // 3
+    if (featureSettingsKeys.contains("weatherTableColumnIndexes"))
+    {
+        if (!swgAPRSSettings->getWeatherTableColumnIndexes()) {
+            swgAPRSSettings->setWeatherTableColumnIndexes(new QList<int>());
+        }
+
+        swgAPRSSettings->getWeatherTableColumnIndexes()->clear();
+
+        for (int i = 0; i < APRS_WEATHER_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getWeatherTableColumnIndexes()->push_back(settings.m_weatherTableColumnIndexes[i]);
+        }
+    }
+
+    // 4
+    if (featureSettingsKeys.contains("weatherTableColumnSizes"))
+    {
+        if (!swgAPRSSettings->getWeatherTableColumnSizes()) {
+            swgAPRSSettings->setWeatherTableColumnSizes(new QList<int>());
+        }
+
+        swgAPRSSettings->getWeatherTableColumnSizes()->clear();
+
+        for (int i = 0; i < APRS_WEATHER_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getWeatherTableColumnSizes()->push_back(settings.m_weatherTableColumnSizes[i]);
+        }
+    }
+
+    // 5
+    if (featureSettingsKeys.contains("statusTableColumnIndexes"))
+    {
+        if (!swgAPRSSettings->getStatusTableColumnIndexes()) {
+            swgAPRSSettings->setStatusTableColumnIndexes(new QList<int>());
+        }
+
+        swgAPRSSettings->getStatusTableColumnIndexes()->clear();
+
+        for (int i = 0; i < APRS_STATUS_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getStatusTableColumnIndexes()->push_back(settings.m_statusTableColumnIndexes[i]);
+        }
+    }
+
+    // 6
+    if (featureSettingsKeys.contains("statusTableColumnSizes"))
+    {
+        if (!swgAPRSSettings->getStatusTableColumnSizes()) {
+            swgAPRSSettings->setStatusTableColumnSizes(new QList<int>());
+        }
+
+        swgAPRSSettings->getStatusTableColumnSizes()->clear();
+
+        for (int i = 0; i < APRS_STATUS_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getStatusTableColumnSizes()->push_back(settings.m_statusTableColumnSizes[i]);
+        }
+    }
+
+    // 7
+    if (featureSettingsKeys.contains("messagesTableColumnIndexes"))
+    {
+        if (!swgAPRSSettings->getMessagesTableColumnIndexes()) {
+            swgAPRSSettings->setMessagesTableColumnIndexes(new QList<int>());
+        }
+
+        swgAPRSSettings->getStatusTableColumnSizes()->clear();
+
+        for (int i = 0; i < APRS_MESSAGES_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getMessagesTableColumnIndexes()->push_back(settings.m_messagesTableColumnIndexes[i]);
+        }
+    }
+
+    // 8
+    if (featureSettingsKeys.contains("messagesTableColumnSizes"))
+    {
+        if (!swgAPRSSettings->getMessagesTableColumnSizes()) {
+            swgAPRSSettings->setMessagesTableColumnSizes(new QList<int>());
+        }
+
+        swgAPRSSettings->getMessagesTableColumnSizes()->clear();
+
+        for (int i = 0; i < APRS_MESSAGES_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getMessagesTableColumnSizes()->push_back(settings.m_messagesTableColumnSizes[i]);
+        }
+    }
+
+    // 9
+    if (featureSettingsKeys.contains("telemetryTableColumnIndexes"))
+    {
+        if (!swgAPRSSettings->getTelemetryTableColumnIndexes()) {
+            swgAPRSSettings->setTelemetryTableColumnIndexes(new QList<int>());
+        }
+
+        swgAPRSSettings->getTelemetryTableColumnIndexes()->clear();
+
+        for (int i = 0; i < APRS_TELEMETRY_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getTelemetryTableColumnIndexes()->push_back(settings.m_telemetryTableColumnIndexes[i]);
+        }
+    }
+
+    // 10
+    if (featureSettingsKeys.contains("telemetryTableColumnSizes"))
+    {
+        if (!swgAPRSSettings->getTelemetryTableColumnSizes()) {
+            swgAPRSSettings->setTelemetryTableColumnSizes(new QList<int>());
+        }
+
+        swgAPRSSettings->getTelemetryTableColumnSizes()->clear();
+
+        for (int i = 0; i < APRS_TELEMETRY_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getTelemetryTableColumnSizes()->push_back(settings.m_telemetryTableColumnSizes[i]);
+        }
+    }
+
+    // 11
+    if (featureSettingsKeys.contains("motionTableColumnIndexes"))
+    {
+        if (!swgAPRSSettings->getMotionTableColumnIndexes()) {
+            swgAPRSSettings->setMotionTableColumnIndexes(new QList<int>());
+        }
+
+        swgAPRSSettings->getMotionTableColumnIndexes()->clear();
+
+        for (int i = 0; i < APRS_MOTION_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getMotionTableColumnIndexes()->push_back(settings.m_motionTableColumnIndexes[i]);
+        }
+    }
+
+    // 12
+    if (featureSettingsKeys.contains("motionTableColumnSizes"))
+    {
+        if (!swgAPRSSettings->getMotionTableColumnSizes()) {
+            swgAPRSSettings->setMotionTableColumnSizes(new QList<int>());
+        }
+
+        swgAPRSSettings->getMotionTableColumnSizes()->clear();
+
+        for (int i = 0; i < APRS_MOTION_TABLE_COLUMNS; i++) {
+            swgAPRSSettings->getMotionTableColumnSizes()->push_back(settings.m_motionTableColumnSizes[i]);
+        }
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/featureset/%3/feature/%4/settings")
