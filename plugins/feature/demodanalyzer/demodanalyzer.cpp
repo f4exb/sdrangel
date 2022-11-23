@@ -119,7 +119,7 @@ void DemodAnalyzer::start()
     m_thread->start();
 
     DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker *msg
-        = DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker::create(m_settings, true);
+        = DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
 
     if (m_dataPipe)
@@ -175,7 +175,7 @@ bool DemodAnalyzer::handleMessage(const Message& cmd)
 	{
         MsgConfigureDemodAnalyzer& cfg = (MsgConfigureDemodAnalyzer&) cmd;
         qDebug() << "DemodAnalyzer::handleMessage: MsgConfigureDemodAnalyzer";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
 		return true;
 	}
@@ -260,64 +260,47 @@ bool DemodAnalyzer::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureDemodAnalyzer *msg = MsgConfigureDemodAnalyzer::create(m_settings, true);
+        MsgConfigureDemodAnalyzer *msg = MsgConfigureDemodAnalyzer::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureDemodAnalyzer *msg = MsgConfigureDemodAnalyzer::create(m_settings, true);
+        MsgConfigureDemodAnalyzer *msg = MsgConfigureDemodAnalyzer::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void DemodAnalyzer::applySettings(const DemodAnalyzerSettings& settings, bool force)
+void DemodAnalyzer::applySettings(const DemodAnalyzerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "DemodAnalyzer::applySettings:"
-            << " m_log2Decim: " << settings.m_log2Decim
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIFeatureSetIndex: " << settings.m_reverseAPIFeatureSetIndex
-            << " m_reverseAPIFeatureIndex: " << settings.m_reverseAPIFeatureIndex
-            << " force: " << force;
-
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force) {
-        reverseAPIKeys.append("log2Decim");
-    }
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
+    qDebug() << "DemodAnalyzer::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
     if (m_running)
     {
         DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker *msg = DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker::create(
-            settings, force
+            settings, settingsKeys, force
         );
         m_worker->getInputMessageQueue()->push(msg);
     }
 
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void DemodAnalyzer::updateChannels()
@@ -470,13 +453,13 @@ int DemodAnalyzer::webapiSettingsPutPatch(
     DemodAnalyzerSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureDemodAnalyzer *msg = MsgConfigureDemodAnalyzer::create(settings, force);
+    MsgConfigureDemodAnalyzer *msg = MsgConfigureDemodAnalyzer::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("DemodAnalyzer::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDemodAnalyzer *msgToGUI = MsgConfigureDemodAnalyzer::create(settings, force);
+        MsgConfigureDemodAnalyzer *msgToGUI = MsgConfigureDemodAnalyzer::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -610,7 +593,7 @@ void DemodAnalyzer::webapiUpdateFeatureSettings(
     }
 }
 
-void DemodAnalyzer::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const DemodAnalyzerSettings& settings, bool force)
+void DemodAnalyzer::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const DemodAnalyzerSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

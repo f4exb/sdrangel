@@ -59,6 +59,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	FeatureUISet* m_featureUISet;
 	DemodAnalyzerSettings m_settings;
+    QList<QString> m_settingsKeys;
 	RollupState m_rollupState;
 	int m_sampleRate;
 	bool m_doApplySettings;

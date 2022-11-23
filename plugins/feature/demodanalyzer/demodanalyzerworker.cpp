@@ -216,7 +216,7 @@ bool DemodAnalyzerWorker::handleMessage(const Message& cmd)
         MsgConfigureDemodAnalyzerWorker& cfg = (MsgConfigureDemodAnalyzerWorker&) cmd;
         qDebug("DemodAnalyzerWorker::handleMessage: MsgConfigureDemodAnalyzerWorker");
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -255,18 +255,11 @@ bool DemodAnalyzerWorker::handleMessage(const Message& cmd)
     }
 }
 
-void DemodAnalyzerWorker::applySettings(const DemodAnalyzerSettings& settings, bool force)
+void DemodAnalyzerWorker::applySettings(const DemodAnalyzerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "DemodAnalyzerWorker::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_log2Decim: " << settings.m_log2Decim
-            << " m_fileRecordName: " << settings.m_fileRecordName
-            << " m_recordToFile: " << settings.m_recordToFile
-            << " m_recordSilenceTime: " << settings.m_recordSilenceTime
-            << " force: " << force;
+    qDebug() << "DemodAnalyzerWorker::applySettings:" << settings.getDebugString(settingsKeys, force) << force;
 
-    if ((m_settings.m_fileRecordName != settings.m_fileRecordName) || force)
+    if (settingsKeys.contains("fileRecordName")  || force)
     {
         if (m_wavFileRecord)
         {
@@ -293,7 +286,7 @@ void DemodAnalyzerWorker::applySettings(const DemodAnalyzerSettings& settings, b
         }
     }
 
-    if ((m_settings.m_recordToFile != settings.m_recordToFile) || force)
+    if (settingsKeys.contains("recordToFile")  || force)
     {
         if (m_wavFileRecord)
         {
@@ -314,8 +307,8 @@ void DemodAnalyzerWorker::applySettings(const DemodAnalyzerSettings& settings, b
         }
     }
 
-    if ((m_settings.m_recordSilenceTime != settings.m_recordSilenceTime)
-     || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if (settingsKeys.contains("recordSilenceTime")
+     || settingsKeys.contains("log2Decim")  || force)
     {
         m_recordSilenceNbSamples = (settings.m_recordSilenceTime * (m_sinkSampleRate / (1<<settings.m_log2Decim))) / 10; // time in 100'ś ms
         m_recordSilenceCount = 0;
@@ -330,7 +323,12 @@ void DemodAnalyzerWorker::applySettings(const DemodAnalyzerSettings& settings, b
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
 }
 
 void DemodAnalyzerWorker::applySampleRate(int sampleRate)

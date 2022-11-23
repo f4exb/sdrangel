@@ -76,7 +76,13 @@ bool DemodAnalyzerGUI::handleMessage(const Message& message)
     {
         qDebug("DemodAnalyzerGUI::handleMessage: DemodAnalyzer::MsgConfigureDemodAnalyzer");
         const DemodAnalyzer::MsgConfigureDemodAnalyzer& cfg = (DemodAnalyzer::MsgConfigureDemodAnalyzer&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         ui->spectrumGUI->updateSettings();
         ui->scopeGUI->updateSettings();
@@ -282,6 +288,14 @@ void DemodAnalyzerGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -330,6 +344,7 @@ void DemodAnalyzerGUI::on_log2Decim_currentIndexChanged(int index)
     ui->glSpectrum->setSampleRate(m_sampleRate/(1<<m_settings.m_log2Decim));
     m_scopeVis->setLiveRate(m_sampleRate/(1<<m_settings.m_log2Decim));
     displaySampleRate(m_sampleRate/(1<<m_settings.m_log2Decim));
+    m_settingsKeys.append("log2Decim");
     applySettings();
 }
 
@@ -337,6 +352,7 @@ void DemodAnalyzerGUI::on_record_toggled(bool checked)
 {
     ui->showFileDialog->setEnabled(!checked);
     m_settings.m_recordToFile = checked;
+    m_settingsKeys.append("recordToFile");
     applySettings();
 }
 
@@ -362,6 +378,7 @@ void DemodAnalyzerGUI::on_showFileDialog_clicked(bool checked)
         {
             m_settings.m_fileRecordName = fileNames.at(0);
 		    ui->fileNameText->setText(m_settings.m_fileRecordName);
+            m_settingsKeys.append("fileRecordName");
             applySettings();
         }
     }
@@ -371,6 +388,7 @@ void DemodAnalyzerGUI::on_recordSilenceTime_valueChanged(int value)
 {
     m_settings.m_recordSilenceTime = value;
     ui->recordSilenceText->setText(tr("%1").arg(value / 10.0, 0, 'f', 1));
+    m_settingsKeys.append("recordSilenceTime");
     applySettings();
 }
 
@@ -414,9 +432,11 @@ void DemodAnalyzerGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-	    DemodAnalyzer::MsgConfigureDemodAnalyzer* message = DemodAnalyzer::MsgConfigureDemodAnalyzer::create( m_settings, force);
+	    DemodAnalyzer::MsgConfigureDemodAnalyzer* message = DemodAnalyzer::MsgConfigureDemodAnalyzer::create( m_settings, m_settingsKeys, force);
 	    m_demodAnalyzer->getInputMessageQueue()->push(message);
 	}
+
+    m_settingsKeys.clear();
 }
 
 void DemodAnalyzerGUI::makeUIConnections()

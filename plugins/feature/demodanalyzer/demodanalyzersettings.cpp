@@ -188,3 +188,87 @@ bool DemodAnalyzerSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void DemodAnalyzerSettings::applySettings(const QStringList& settingsKeys, const DemodAnalyzerSettings& settings)
+{
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("fileRecordName")) {
+        m_fileRecordName = settings.m_fileRecordName;
+    }
+    if (settingsKeys.contains("recordToFile")) {
+        m_recordToFile = settings.m_recordToFile;
+    }
+    if (settingsKeys.contains("recordSilenceTime")) {
+        m_recordSilenceTime = settings.m_recordSilenceTime;
+    }
+}
+
+QString DemodAnalyzerSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("fileRecordName") || force) {
+        ostr << " m_fileRecordName: " << m_fileRecordName.toStdString();
+    }
+    if (settingsKeys.contains("recordToFile") || force) {
+        ostr << " m_recordToFile: " << m_recordToFile;
+    }
+    if (settingsKeys.contains("recordSilenceTime") || force) {
+        ostr << " m_recordSilenceTime: " << m_recordSilenceTime;
+    }
+
+    return QString(ostr.str().c_str());
+}

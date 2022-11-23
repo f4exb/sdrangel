@@ -49,19 +49,22 @@ public:
 
     public:
         const DemodAnalyzerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureDemodAnalyzer* create(const DemodAnalyzerSettings& settings, bool force) {
-            return new MsgConfigureDemodAnalyzer(settings, force);
+        static MsgConfigureDemodAnalyzer* create(const DemodAnalyzerSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureDemodAnalyzer(settings, settingsKeys, force);
         }
 
     private:
         DemodAnalyzerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureDemodAnalyzer(const DemodAnalyzerSettings& settings, bool force) :
+        MsgConfigureDemodAnalyzer(const DemodAnalyzerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -213,10 +216,10 @@ private:
 
     void start();
     void stop();
-    void applySettings(const DemodAnalyzerSettings& settings, bool force = false);
+    void applySettings(const DemodAnalyzerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void updateChannels();
     void setChannel(ChannelAPI *selectedChannel);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const DemodAnalyzerSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const DemodAnalyzerSettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

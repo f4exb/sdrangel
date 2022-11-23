@@ -47,20 +47,23 @@ public:
 
     public:
         const DemodAnalyzerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureDemodAnalyzerWorker* create(const DemodAnalyzerSettings& settings, bool force)
+        static MsgConfigureDemodAnalyzerWorker* create(const DemodAnalyzerSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigureDemodAnalyzerWorker(settings, force);
+            return new MsgConfigureDemodAnalyzerWorker(settings, settingsKeys, force);
         }
 
     private:
         DemodAnalyzerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureDemodAnalyzerWorker(const DemodAnalyzerSettings& settings, bool force) :
+        MsgConfigureDemodAnalyzerWorker(const DemodAnalyzerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -94,7 +97,7 @@ public:
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
 
     void applySampleRate(int sampleRate);
-	void applySettings(const DemodAnalyzerSettings& settings, bool force = false);
+	void applySettings(const DemodAnalyzerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
 
 	double getMagSq() const { return m_magsq; }
 	double getMagSqAvg() const { return (double) m_channelPowerAvg; }

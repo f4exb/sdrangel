@@ -65,6 +65,8 @@ struct DemodAnalyzerSettings
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
+    void applySettings(const QStringList& settingsKeys, const DemodAnalyzerSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static const QStringList m_channelTypes;
     static const QStringList m_channelURIs;
