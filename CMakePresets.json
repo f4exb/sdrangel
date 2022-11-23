@@ -5,6 +5,7 @@
             "name": "default",
             "binaryDir": "build-default",
             "cacheVariables": {
+                "DEBUG_OUTPUT": "ON",
                 "AIRSPYHF_DIR": "/opt/install/libairspyhf",
                 "AIRSPY_DIR": "/opt/install/libairspy",
                 "APT_DIR": "/opt/install/aptdec",
