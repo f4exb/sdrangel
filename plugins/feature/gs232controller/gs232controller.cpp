@@ -142,7 +142,8 @@ void GS232Controller::start()
     m_thread->start();
     m_state = StRunning;
 
-    GS232ControllerWorker::MsgConfigureGS232ControllerWorker *msg = GS232ControllerWorker::MsgConfigureGS232ControllerWorker::create(m_settings, true);
+    GS232ControllerWorker::MsgConfigureGS232ControllerWorker *msg =
+        GS232ControllerWorker::MsgConfigureGS232ControllerWorker::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
 
     scanAvailableChannelsAndFeatures();
@@ -167,7 +168,7 @@ bool GS232Controller::handleMessage(const Message& cmd)
     {
         MsgConfigureGS232Controller& cfg = (MsgConfigureGS232Controller&) cmd;
         qDebug() << "GS232Controller::handleMessage: MsgConfigureGS232Controller";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -235,7 +236,7 @@ bool GS232Controller::handleMessage(const Message& cmd)
                     SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = msg.getSWGTargetAzimuthElevation();
                     m_settings.m_azimuth = swgTarget->getAzimuth();
                     m_settings.m_elevation = swgTarget->getElevation();
-                    applySettings(m_settings);
+                    applySettings(m_settings, QList<QString>{"azimuth", "elevation"});
                 }
             }
             else
@@ -269,71 +270,28 @@ bool GS232Controller::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureGS232Controller *msg = MsgConfigureGS232Controller::create(m_settings, true);
+        MsgConfigureGS232Controller *msg = MsgConfigureGS232Controller::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureGS232Controller *msg = MsgConfigureGS232Controller::create(m_settings, true);
+        MsgConfigureGS232Controller *msg = MsgConfigureGS232Controller::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void GS232Controller::applySettings(const GS232ControllerSettings& settings, bool force)
+void GS232Controller::applySettings(const GS232ControllerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "GS232Controller::applySettings:"
-            << " m_azimuth: " << settings.m_azimuth
-            << " m_elevation: " << settings.m_elevation
-            << " m_azimuthOffset: " << settings.m_azimuthOffset
-            << " m_elevationOffset: " << settings.m_elevationOffset
-            << " m_azimuthMin: " << settings.m_azimuthMin
-            << " m_azimuthMax: " << settings.m_azimuthMax
-            << " m_elevationMin: " << settings.m_elevationMin
-            << " m_elevationMax: " << settings.m_elevationMax
-            << " m_tolerance: " << settings.m_tolerance
-            << " m_protocol: " << settings.m_protocol
-            << " m_serialPort: " << settings.m_serialPort
-            << " m_baudRate: " << settings.m_baudRate
-            << " m_host: " << settings.m_host
-            << " m_port: " << settings.m_port
-            << " m_track: " << settings.m_track
-            << " m_source: " << settings.m_source
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIFeatureSetIndex: " << settings.m_reverseAPIFeatureSetIndex
-            << " m_reverseAPIFeatureIndex: " << settings.m_reverseAPIFeatureIndex
-            << " force: " << force;
+    qDebug() << "GS232Controller::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    QList<QString> reverseAPIKeys;
+    // if ((m_settings.m_source != settings.m_source)
+    //     || (!settings.m_source.isEmpty() && (m_selectedPipe == nullptr)) // Change in available pipes
+    //     || force)
 
-    if ((m_settings.m_azimuth != settings.m_azimuth) || force) {
-        reverseAPIKeys.append("azimuth");
-    }
-    if ((m_settings.m_elevation != settings.m_elevation) || force) {
-        reverseAPIKeys.append("elevation");
-    }
-    if ((m_settings.m_serialPort != settings.m_serialPort) || force) {
-        reverseAPIKeys.append("serialPort");
-    }
-    if ((m_settings.m_baudRate != settings.m_baudRate) || force) {
-        reverseAPIKeys.append("baudRate");
-    }
-    if ((m_settings.m_host != settings.m_host) || force) {
-        reverseAPIKeys.append("host");
-    }
-    if ((m_settings.m_port != settings.m_port) || force) {
-        reverseAPIKeys.append("port");
-    }
-    if ((m_settings.m_track != settings.m_track) || force) {
-        reverseAPIKeys.append("track");
-    }
-    if ((m_settings.m_source != settings.m_source)
+    if (settingsKeys.contains("source")
         || (!settings.m_source.isEmpty() && (m_selectedPipe == nullptr)) // Change in available pipes
         || force)
     {
@@ -380,55 +338,31 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, boo
         {
             m_selectedPipe = nullptr;
         }
-
-        reverseAPIKeys.append("source");
-    }
-    if ((m_settings.m_azimuthOffset != settings.m_azimuthOffset) || force) {
-        reverseAPIKeys.append("azimuthOffset");
-    }
-    if ((m_settings.m_elevationOffset != settings.m_elevationOffset) || force) {
-        reverseAPIKeys.append("elevationOffset");
-    }
-    if ((m_settings.m_azimuthMin != settings.m_azimuthMin) || force) {
-        reverseAPIKeys.append("azimuthMin");
-    }
-    if ((m_settings.m_azimuthMax != settings.m_azimuthMax) || force) {
-        reverseAPIKeys.append("azimuthMax");
-    }
-    if ((m_settings.m_elevationMin != settings.m_elevationMin) || force) {
-        reverseAPIKeys.append("elevationMin");
-    }
-    if ((m_settings.m_tolerance != settings.m_tolerance) || force) {
-        reverseAPIKeys.append("tolerance");
-    }
-    if ((m_settings.m_protocol != settings.m_protocol) || force) {
-        reverseAPIKeys.append("m_protocol");
-    }
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
     }
 
     GS232ControllerWorker::MsgConfigureGS232ControllerWorker *msg = GS232ControllerWorker::MsgConfigureGS232ControllerWorker::create(
-        settings, force
+        settings, settingsKeys, force
     );
+
     if (m_worker) {
         m_worker->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int GS232Controller::webapiRun(bool run,
@@ -463,12 +397,12 @@ int GS232Controller::webapiSettingsPutPatch(
     GS232ControllerSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureGS232Controller *msg = MsgConfigureGS232Controller::create(settings, force);
+    MsgConfigureGS232Controller *msg = MsgConfigureGS232Controller::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureGS232Controller *msgToGUI = MsgConfigureGS232Controller::create(settings, force);
+        MsgConfigureGS232Controller *msgToGUI = MsgConfigureGS232Controller::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -651,7 +585,7 @@ void GS232Controller::webapiUpdateFeatureSettings(
     }
 }
 
-void GS232Controller::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const GS232ControllerSettings& settings, bool force)
+void GS232Controller::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const GS232ControllerSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

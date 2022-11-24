@@ -38,20 +38,23 @@ public:
 
     public:
         const GS232ControllerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureGS232ControllerWorker* create(const GS232ControllerSettings& settings, bool force)
+        static MsgConfigureGS232ControllerWorker* create(const GS232ControllerSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigureGS232ControllerWorker(settings, force);
+            return new MsgConfigureGS232ControllerWorker(settings, settingsKeys, force);
         }
 
     private:
         GS232ControllerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureGS232ControllerWorker(const GS232ControllerSettings& settings, bool force) :
+        MsgConfigureGS232ControllerWorker(const GS232ControllerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -86,7 +89,7 @@ private:
     QString m_rotCtlDAz;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const GS232ControllerSettings& settings, bool force = false);
+    void applySettings(const GS232ControllerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     QIODevice *openSerialPort(const GS232ControllerSettings& settings);
     QIODevice *openSocket(const GS232ControllerSettings& settings);
     void setAzimuth(float azimuth);

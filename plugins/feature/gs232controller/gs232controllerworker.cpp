@@ -102,7 +102,7 @@ bool GS232ControllerWorker::handleMessage(const Message& cmd)
     {
         MsgConfigureGS232ControllerWorker& cfg = (MsgConfigureGS232ControllerWorker&) cmd;
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
         return true;
     }
     else
@@ -111,27 +111,11 @@ bool GS232ControllerWorker::handleMessage(const Message& cmd)
     }
 }
 
-void GS232ControllerWorker::applySettings(const GS232ControllerSettings& settings, bool force)
+void GS232ControllerWorker::applySettings(const GS232ControllerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "GS232ControllerWorker::applySettings:"
-            << " m_azimuth: " << settings.m_azimuth
-            << " m_elevation: " << settings.m_elevation
-            << " m_azimuthOffset: " << settings.m_azimuthOffset
-            << " m_elevationOffset: " << settings.m_elevationOffset
-            << " m_azimuthMin: " << settings.m_azimuthMin
-            << " m_azimuthMax: " << settings.m_azimuthMax
-            << " m_elevationMin: " << settings.m_elevationMin
-            << " m_elevationMax: " << settings.m_elevationMax
-            << " m_tolerance: " << settings.m_tolerance
-            << " m_protocol: " << settings.m_protocol
-            << " m_connection: " << settings.m_connection
-            << " m_serialPort: " << settings.m_serialPort
-            << " m_baudRate: " << settings.m_baudRate
-            << " m_host: " << settings.m_host
-            << " m_port: " << settings.m_port
-            << " force: " << force;
+    qDebug() << "GS232ControllerWorker::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    if (settings.m_connection != m_settings.m_connection)
+    if (settingsKeys.contains("connection") )
     {
         if (m_device && m_device->isOpen())
         {
@@ -142,15 +126,15 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
 
     if (settings.m_connection == GS232ControllerSettings::TCP)
     {
-        if ((settings.m_host != m_settings.m_host) || (settings.m_port != m_settings.m_port) || force) {
+        if (settingsKeys.contains("host") || settingsKeys.contains("port") || force) {
             m_device = openSocket(settings);
         }
     }
     else
     {
-        if ((settings.m_serialPort != m_settings.m_serialPort) || force) {
+        if (settingsKeys.contains("serialPort")  || force) {
             m_device = openSerialPort(settings);
-        } else if ((settings.m_baudRate != m_settings.m_baudRate) || force) {
+        } else if (settingsKeys.contains("baudRate")  || force) {
             m_serialPort.setBaudRate(settings.m_baudRate);
         }
     }
@@ -176,7 +160,11 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QIODevice *GS232ControllerWorker::openSerialPort(const GS232ControllerSettings& settings)

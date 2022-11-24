@@ -193,3 +193,162 @@ void GS232ControllerSettings::calcTargetAzEl(float& targetAz, float& targetEl) c
     targetEl = std::max(targetEl, (float)m_elevationMin);
     targetEl = std::min(targetEl, (float)m_elevationMax);
 }
+
+void GS232ControllerSettings::applySettings(const QStringList& settingsKeys, const GS232ControllerSettings& settings)
+{
+    if (settingsKeys.contains("azimuth")) {
+        m_azimuth = settings.m_azimuth;
+    }
+    if (settingsKeys.contains("elevation")) {
+        m_elevation = settings.m_elevation;
+    }
+    if (settingsKeys.contains("serialPort")) {
+        m_serialPort = settings.m_serialPort;
+    }
+    if (settingsKeys.contains("baudRate")) {
+        m_baudRate = settings.m_baudRate;
+    }
+    if (settingsKeys.contains("source")) {
+        m_source = settings.m_source;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("azimuthOffset")) {
+        m_azimuthOffset = settings.m_azimuthOffset;
+    }
+    if (settingsKeys.contains("elevationOffset")) {
+        m_elevationOffset = settings.m_elevationOffset;
+    }
+    if (settingsKeys.contains("azimuthMin")) {
+        m_azimuthMin = settings.m_azimuthMin;
+    }
+    if (settingsKeys.contains("azimuthMax")) {
+        m_azimuthMax = settings.m_azimuthMax;
+    }
+    if (settingsKeys.contains("elevationMin")) {
+        m_elevationMin = settings.m_elevationMin;
+    }
+    if (settingsKeys.contains("elevationMax")) {
+        m_elevationMax = settings.m_elevationMax;
+    }
+    if (settingsKeys.contains("tolerance")) {
+        m_tolerance = settings.m_tolerance;
+    }
+    if (settingsKeys.contains("protocol")) {
+        m_protocol = settings.m_protocol;
+    }
+    if (settingsKeys.contains("connection")) {
+        m_connection = settings.m_connection;
+    }
+    if (settingsKeys.contains("host")) {
+        m_host = settings.m_host;
+    }
+    if (settingsKeys.contains("port")) {
+        m_port = settings.m_port;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+}
+
+QString GS232ControllerSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("azimuth") || force) {
+        ostr << " m_azimuth: " << m_azimuth;
+    }
+    if (settingsKeys.contains("elevation") || force) {
+        ostr << " m_elevation: " << m_elevation;
+    }
+    if (settingsKeys.contains("serialPort") || force) {
+        ostr << " m_serialPort: " << m_serialPort.toStdString();
+    }
+    if (settingsKeys.contains("baudRate") || force) {
+        ostr << " m_baudRate: " << m_baudRate;
+    }
+    if (settingsKeys.contains("track") || force) {
+        ostr << " m_track: " << m_track;
+    }
+    if (settingsKeys.contains("source") || force) {
+        ostr << " m_source: " << m_source.toStdString();
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("azimuth") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("azimuthOffset") || force) {
+        ostr << " m_azimuthOffset: " << m_azimuthOffset;
+    }
+    if (settingsKeys.contains("elevationOffset") || force) {
+        ostr << " m_elevationOffset: " << m_elevationOffset;
+    }
+    if (settingsKeys.contains("azimuthMin") || force) {
+        ostr << " m_azimuthMin: " << m_azimuthMin;
+    }
+    if (settingsKeys.contains("azimuthMax") || force) {
+        ostr << " m_azimuthMax: " << m_azimuthMax;
+    }
+    if (settingsKeys.contains("elevationMin") || force) {
+        ostr << " m_elevationMin: " << m_elevationMin;
+    }
+    if (settingsKeys.contains("elevationMax") || force) {
+        ostr << " m_elevationMax: " << m_elevationMax;
+    }
+    if (settingsKeys.contains("tolerance") || force) {
+        ostr << " m_tolerance: " << m_tolerance;
+    }
+    if (settingsKeys.contains("protocol") || force) {
+        ostr << " m_protocol: " << m_protocol;
+    }
+    if (settingsKeys.contains("connection") || force) {
+        ostr << " m_connection: " << m_connection;
+    }
+    if (settingsKeys.contains("host") || force) {
+        ostr << " m_host: " << m_host.toStdString();
+    }
+    if (settingsKeys.contains("port") || force) {
+        ostr << " m_port: " << m_port;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}

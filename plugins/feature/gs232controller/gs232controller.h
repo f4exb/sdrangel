@@ -46,19 +46,22 @@ public:
 
     public:
         const GS232ControllerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureGS232Controller* create(const GS232ControllerSettings& settings, bool force) {
-            return new MsgConfigureGS232Controller(settings, force);
+        static MsgConfigureGS232Controller* create(const GS232ControllerSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureGS232Controller(settings, settingsKeys, force);
         }
 
     private:
         GS232ControllerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureGS232Controller(const GS232ControllerSettings& settings, bool force) :
+        MsgConfigureGS232Controller(const GS232ControllerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -199,8 +202,8 @@ private:
 
     void start();
     void stop();
-    void applySettings(const GS232ControllerSettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const GS232ControllerSettings& settings, bool force);
+    void applySettings(const GS232ControllerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const GS232ControllerSettings& settings, bool force);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
     void scanAvailableChannelsAndFeatures();
     void notifyUpdate();
