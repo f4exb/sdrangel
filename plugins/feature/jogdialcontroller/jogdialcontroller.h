@@ -44,19 +44,22 @@ public:
 
     public:
         const JogdialControllerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureJogdialController* create(const JogdialControllerSettings& settings, bool force) {
-            return new MsgConfigureJogdialController(settings, force);
+        static MsgConfigureJogdialController* create(const JogdialControllerSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureJogdialController(settings, settingsKeys, force);
         }
 
     private:
         JogdialControllerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureJogdialController(const JogdialControllerSettings& settings, bool force) :
+        MsgConfigureJogdialController(const JogdialControllerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -209,11 +212,11 @@ private:
 
     void start();
     void stop();
-    void applySettings(const JogdialControllerSettings& settings, bool force = false);
+    void applySettings(const JogdialControllerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void updateChannels();
     void channelUp();
     void channelDown();
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const JogdialControllerSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const JogdialControllerSettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

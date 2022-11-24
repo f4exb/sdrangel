@@ -100,7 +100,7 @@ bool JogdialController::handleMessage(const Message& cmd)
 	{
         MsgConfigureJogdialController& cfg = (MsgConfigureJogdialController&) cmd;
         qDebug() << "JogdialController::handleMessage: MsgConfigureJogdialController";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
 		return true;
 	}
@@ -161,48 +161,31 @@ bool JogdialController::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureJogdialController *msg = MsgConfigureJogdialController::create(m_settings, true);
+        MsgConfigureJogdialController *msg = MsgConfigureJogdialController::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureJogdialController *msg = MsgConfigureJogdialController::create(m_settings, true);
+        MsgConfigureJogdialController *msg = MsgConfigureJogdialController::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void JogdialController::applySettings(const JogdialControllerSettings& settings, bool force)
+void JogdialController::applySettings(const JogdialControllerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "JogdialController::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIFeatureSetIndex: " << settings.m_reverseAPIFeatureSetIndex
-            << " m_reverseAPIFeatureIndex: " << settings.m_reverseAPIFeatureIndex
-            << " force: " << force;
+    qDebug() << "JogdialController::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -329,13 +312,13 @@ int JogdialController::webapiSettingsPutPatch(
     JogdialControllerSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureJogdialController *msg = MsgConfigureJogdialController::create(settings, force);
+    MsgConfigureJogdialController *msg = MsgConfigureJogdialController::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("JogdialController::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureJogdialController *msgToGUI = MsgConfigureJogdialController::create(settings, force);
+        MsgConfigureJogdialController *msgToGUI = MsgConfigureJogdialController::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -413,7 +396,7 @@ void JogdialController::webapiUpdateFeatureSettings(
     }
 }
 
-void JogdialController::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const JogdialControllerSettings& settings, bool force)
+void JogdialController::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const JogdialControllerSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

@@ -73,7 +73,13 @@ bool JogdialControllerGUI::handleMessage(const Message& message)
     {
         qDebug("JogdialControllerGUI::handleMessage: JogdialController::MsgConfigureJogdialController");
         const JogdialController::MsgConfigureJogdialController& cfg = (JogdialController::MsgConfigureJogdialController&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -264,6 +270,14 @@ void JogdialControllerGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -344,9 +358,11 @@ void JogdialControllerGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-	    JogdialController::MsgConfigureJogdialController* message = JogdialController::MsgConfigureJogdialController::create( m_settings, force);
+	    JogdialController::MsgConfigureJogdialController* message = JogdialController::MsgConfigureJogdialController::create( m_settings, m_settingsKeys, force);
 	    m_jogdialController->getInputMessageQueue()->push(message);
 	}
+
+    m_settingsKeys.clear();
 }
 
 void JogdialControllerGUI::focusInEvent(QFocusEvent*)
