@@ -180,3 +180,159 @@ bool LimeRFESettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void LimeRFESettings::applySettings(const QStringList& settingsKeys, const LimeRFESettings& settings)
+{
+    if (settingsKeys.contains("devicePath")) {
+        m_devicePath = settings.m_devicePath;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("rxChannels")) {
+        m_rxChannels = settings.m_rxChannels;
+    }
+    if (settingsKeys.contains("rxWidebandChannel")) {
+        m_rxWidebandChannel = settings.m_rxWidebandChannel;
+    }
+    if (settingsKeys.contains("rxHAMChannel")) {
+        m_rxHAMChannel = settings.m_rxHAMChannel;
+    }
+    if (settingsKeys.contains("rxCellularChannel")) {
+        m_rxCellularChannel = settings.m_rxCellularChannel;
+    }
+    if (settingsKeys.contains("rxPort")) {
+        m_rxPort = settings.m_rxPort;
+    }
+    if (settingsKeys.contains("amfmNotch")) {
+        m_amfmNotch = settings.m_amfmNotch;
+    }
+    if (settingsKeys.contains("attenuationFactor")) {
+        m_attenuationFactor = settings.m_attenuationFactor;
+    }
+    if (settingsKeys.contains("txChannels")) {
+        m_txChannels = settings.m_txChannels;
+    }
+    if (settingsKeys.contains("txWidebandChannel")) {
+        m_txWidebandChannel = settings.m_txWidebandChannel;
+    }
+    if (settingsKeys.contains("txHAMChannel")) {
+        m_txHAMChannel = settings.m_txHAMChannel;
+    }
+    if (settingsKeys.contains("txCellularChannel")) {
+        m_txCellularChannel = settings.m_txCellularChannel;
+    }
+    if (settingsKeys.contains("txPort")) {
+        m_txPort = settings.m_txPort;
+    }
+    if (settingsKeys.contains("swrEnable")) {
+        m_swrEnable = settings.m_swrEnable;
+    }
+    if (settingsKeys.contains("swrSource")) {
+        m_swrSource = settings.m_swrSource;
+    }
+    if (settingsKeys.contains("txRxDriven")) {
+        m_txRxDriven = settings.m_txRxDriven;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+}
+
+QString LimeRFESettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("devicePath") || force) {
+        ostr << " m_devicePath: " << m_devicePath.toStdString();
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("rxChannels") || force) {
+        ostr << " m_rxChannels: " << m_rxChannels;
+    }
+    if (settingsKeys.contains("rxWidebandChannel") || force) {
+        ostr << " m_rxWidebandChannel: " << m_rxWidebandChannel;
+    }
+    if (settingsKeys.contains("rxHAMChannel") || force) {
+        ostr << " m_rxHAMChannel: " << m_rxHAMChannel;
+    }
+    if (settingsKeys.contains("rxCellularChannel") || force) {
+        ostr << " m_rxCellularChannel: " << m_rxCellularChannel;
+    }
+    if (settingsKeys.contains("rxPort") || force) {
+        ostr << " m_rxPort: " << m_rxPort;
+    }
+    if (settingsKeys.contains("amfmNotch") || force) {
+        ostr << " m_amfmNotch: " << m_amfmNotch;
+    }
+    if (settingsKeys.contains("attenuationFactor") || force) {
+        ostr << " m_attenuationFactor: " << m_attenuationFactor;
+    }
+    if (settingsKeys.contains("txChannels") || force) {
+        ostr << " m_txChannels: " << m_txChannels;
+    }
+    if (settingsKeys.contains("txWidebandChannel") || force) {
+        ostr << " m_txWidebandChannel: " << m_txWidebandChannel;
+    }
+    if (settingsKeys.contains("txHAMChannel") || force) {
+        ostr << " m_txHAMChannel: " << m_txHAMChannel;
+    }
+    if (settingsKeys.contains("txCellularChannel") || force) {
+        ostr << " m_txCellularChannel: " << m_txCellularChannel;
+    }
+    if (settingsKeys.contains("txPort") || force) {
+        ostr << " m_txPort: " << m_txPort;
+    }
+    if (settingsKeys.contains("swrEnable") || force) {
+        ostr << " m_swrEnable: " << m_swrEnable;
+    }
+    if (settingsKeys.contains("swrSource") || force) {
+        ostr << " m_swrSource: " << m_swrSource;
+    }
+    if (settingsKeys.contains("txRxDriven") || force) {
+        ostr << " m_txRxDriven: " << m_txRxDriven;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}

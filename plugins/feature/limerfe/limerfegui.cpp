@@ -71,6 +71,7 @@ bool LimeRFEGUI::deserialize(const QByteArray& data)
 void LimeRFEGUI::setWorkspaceIndex(int index)
 {
     m_settings.m_workspaceIndex = index;
+    m_settingsKeys.append("workspaceIndex");
     m_feature->setWorkspaceIndex(index);
 }
 
@@ -108,6 +109,14 @@ void LimeRFEGUI::onMenuDialogCalled(const QPoint &p)
 
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
+
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
 
         applySettings();
     }
@@ -164,9 +173,11 @@ void LimeRFEGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-	    LimeRFE::MsgConfigureLimeRFE* message = LimeRFE::MsgConfigureLimeRFE::create( m_settings, force);
+	    LimeRFE::MsgConfigureLimeRFE* message = LimeRFE::MsgConfigureLimeRFE::create( m_settings, m_settingsKeys, force);
 	    m_limeRFE->getInputMessageQueue()->push(message);
 	}
+
+    m_settingsKeys.clear();
 }
 
 void LimeRFEGUI::displaySettings()
@@ -339,6 +350,7 @@ void LimeRFEGUI::setRxChannels()
                 ui->rxPort->addItem("TX/RX (J3)");
                 ui->rxPort->setEnabled(false);
                 m_settings.m_rxPort = LimeRFESettings::RxPortJ3;
+                m_settingsKeys.append("rxPort");
                 ui->rxPort->setCurrentIndex((int) m_settings.m_rxPort);
                 break;
             default:
@@ -356,8 +368,10 @@ void LimeRFEGUI::setRxChannels()
         ui->rxPort->addItem("TX/RX (J3)");
         ui->rxPort->setEnabled(false);
         m_settings.m_rxPort = LimeRFESettings::RxPortJ3;
+        m_settingsKeys.append("rxPort");
         ui->rxPort->setCurrentIndex((int) m_settings.m_rxPort);
         m_settings.m_txRxDriven = true;
+        m_settingsKeys.append("txRxDriven");
         ui->txFollowsRx->setEnabled(false);
         ui->txFollowsRx->setChecked(m_settings.m_txRxDriven);
     }
@@ -408,6 +422,7 @@ void LimeRFEGUI::setTxChannels()
                 ui->txPort->addItem("TX/RX 30M (J5)");
                 ui->txPort->setEnabled(false);
                 m_settings.m_txPort = LimeRFESettings::TxPortJ5;
+                m_settingsKeys.append("txPort");
                 ui->txPort->setCurrentIndex((int) m_settings.m_txPort);
                 break;
             case LimeRFESettings::HAM_144_146MHz:
@@ -436,6 +451,7 @@ void LimeRFEGUI::setTxChannels()
         ui->txChannel->setCurrentIndex((int) m_settings.m_txCellularChannel);
         ui->txPort->addItem("TX/RX (J3)");
         m_settings.m_txPort = LimeRFESettings::TxPortJ3;
+        m_settingsKeys.append("txPort");
         ui->txPort->setEnabled(false);
         ui->txPort->setCurrentIndex((int) m_settings.m_txPort);
     }
@@ -665,7 +681,7 @@ void LimeRFEGUI::on_deviceToGUI_clicked()
         return;
     }
 
-    m_limeRFE->stateToSettings(m_settings);
+    m_limeRFE->stateToSettings(m_settings, m_settingsKeys);
     m_rxOn = m_limeRFE->getRx();
     m_txOn = m_limeRFE->getTx();
     displaySettings();
@@ -675,11 +691,13 @@ void LimeRFEGUI::on_deviceToGUI_clicked()
 void LimeRFEGUI::on_rxChannelGroup_currentIndexChanged(int index)
 {
     m_settings.m_rxChannels = (LimeRFESettings::ChannelGroups) index;
+    m_settingsKeys.append("rxChannels");
     setRxChannels();
 
     if (m_settings.m_txRxDriven)
     {
         m_settings.m_txChannels = m_settings.m_rxChannels;
+        m_settingsKeys.append("txChannels");
         ui->txChannelGroup->setCurrentIndex((int) m_settings.m_txChannels);
     }
 
@@ -688,12 +706,20 @@ void LimeRFEGUI::on_rxChannelGroup_currentIndexChanged(int index)
 
 void LimeRFEGUI::on_rxChannel_currentIndexChanged(int index)
 {
-    if (m_settings.m_rxChannels == LimeRFESettings::ChannelsWideband) {
+    if (m_settings.m_rxChannels == LimeRFESettings::ChannelsWideband)
+    {
         m_settings.m_rxWidebandChannel = (LimeRFESettings::WidebandChannel) index;
-    } else if (m_settings.m_rxChannels == LimeRFESettings::ChannelsHAM) {
+        m_settingsKeys.append("rxWidebandChannel");
+    }
+    else if (m_settings.m_rxChannels == LimeRFESettings::ChannelsHAM)
+    {
         m_settings.m_rxHAMChannel = (LimeRFESettings::HAMChannel) index;
-    } else if (m_settings.m_rxChannels == LimeRFESettings::ChannelsCellular) {
+        m_settingsKeys.append("rxHAMChannel");
+    }
+    else if (m_settings.m_rxChannels == LimeRFESettings::ChannelsCellular)
+    {
         m_settings.m_rxCellularChannel = (LimeRFESettings::CellularChannel) index;
+        m_settingsKeys.append("rxCellularChannel");
     }
 
     setRxChannels();
@@ -703,6 +729,9 @@ void LimeRFEGUI::on_rxChannel_currentIndexChanged(int index)
         m_settings.m_txWidebandChannel = m_settings.m_rxWidebandChannel;
         m_settings.m_txHAMChannel = m_settings.m_rxHAMChannel;
         m_settings.m_txCellularChannel = m_settings.m_rxCellularChannel;
+        m_settingsKeys.append("txWidebandChannel");
+        m_settingsKeys.append("txHAMChannel");
+        m_settingsKeys.append("txCellularChannel");
         setTxChannels();
     }
 
@@ -712,6 +741,7 @@ void LimeRFEGUI::on_rxChannel_currentIndexChanged(int index)
 void LimeRFEGUI::on_rxPort_currentIndexChanged(int index)
 {
     m_settings.m_rxPort = (LimeRFESettings::RxPort) index;
+    m_settingsKeys.append("rxPort");
     highlightApplyButton(true);
 }
 
@@ -725,6 +755,11 @@ void LimeRFEGUI::on_txFollowsRx_clicked()
     m_settings.m_txWidebandChannel = m_settings.m_rxWidebandChannel;
     m_settings.m_txHAMChannel = m_settings.m_rxHAMChannel;
     m_settings.m_txCellularChannel = m_settings.m_rxCellularChannel;
+    m_settingsKeys.append("txRxDriven");
+    m_settingsKeys.append("txChannels");
+    m_settingsKeys.append("txWidebandChannel");
+    m_settingsKeys.append("txHAMChannel");
+    m_settingsKeys.append("txCellularChannel");
     ui->txChannelGroup->setCurrentIndex((int) m_settings.m_txChannels);
 
     if (checked) {
@@ -735,18 +770,27 @@ void LimeRFEGUI::on_txFollowsRx_clicked()
 void LimeRFEGUI::on_txChannelGroup_currentIndexChanged(int index)
 {
     m_settings.m_txChannels = (LimeRFESettings::ChannelGroups) index;
+    m_settingsKeys.append("txChannels");
     setTxChannels();
     highlightApplyButton(true);
 }
 
 void LimeRFEGUI::on_txChannel_currentIndexChanged(int index)
 {
-    if (m_settings.m_txChannels == LimeRFESettings::ChannelsWideband) {
+    if (m_settings.m_txChannels == LimeRFESettings::ChannelsWideband)
+    {
         m_settings.m_txWidebandChannel = (LimeRFESettings::WidebandChannel) index;
-    } else if (m_settings.m_txChannels == LimeRFESettings::ChannelsHAM) {
+        m_settingsKeys.append("txWidebandChannel");
+    }
+    else if (m_settings.m_txChannels == LimeRFESettings::ChannelsHAM)
+    {
         m_settings.m_txHAMChannel = (LimeRFESettings::HAMChannel) index;
-    } else if (m_settings.m_txChannels == LimeRFESettings::ChannelsCellular) {
+        m_settingsKeys.append("txHAMChannel");
+    }
+    else if (m_settings.m_txChannels == LimeRFESettings::ChannelsCellular)
+    {
         m_settings.m_txCellularChannel = (LimeRFESettings::CellularChannel) index;
+        m_settingsKeys.append("txCellularChannel");
     }
 
     setTxChannels();
@@ -756,18 +800,21 @@ void LimeRFEGUI::on_txChannel_currentIndexChanged(int index)
 void LimeRFEGUI::on_txPort_currentIndexChanged(int index)
 {
     m_settings.m_txPort = (LimeRFESettings::TxPort) index;
+    m_settingsKeys.append("txPort");
     highlightApplyButton(true);
 }
 
 void LimeRFEGUI::on_powerEnable_clicked()
 {
     m_settings.m_swrEnable = ui->powerEnable->isChecked();
+    m_settingsKeys.append("swrEnable");
     highlightApplyButton(true);
 }
 
 void LimeRFEGUI::on_powerSource_currentIndexChanged(int index)
 {
     m_settings.m_swrSource = (LimeRFESettings::SWRSource) index;
+    m_settingsKeys.append("swrSource");
     highlightApplyButton(true);
 }
 
@@ -951,12 +998,14 @@ void LimeRFEGUI::on_rxTxToggle_clicked()
 void LimeRFEGUI::on_attenuation_currentIndexChanged(int index)
 {
     m_settings.m_attenuationFactor = index;
+    m_settingsKeys.append("attenuationFactor");
     highlightApplyButton(true);
 }
 
 void LimeRFEGUI::on_amFmNotchFilter_clicked()
 {
     m_settings.m_amfmNotch = ui->amFmNotchFilter->isChecked();
+    m_settingsKeys.append("amfmNotch");
     highlightApplyButton(true);
 }
 
@@ -980,7 +1029,13 @@ bool LimeRFEGUI::handleMessage(const Message& message)
     {
         qDebug("LimeRFEGUI::handleMessage: LimeRFE::MsgConfigureLimeRFE");
         const LimeRFE::MsgConfigureLimeRFE& cfg = (LimeRFE::MsgConfigureLimeRFE&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         displaySettings();
         highlightApplyButton(cfg.getForce());
         return true;

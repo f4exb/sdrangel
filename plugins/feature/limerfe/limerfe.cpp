@@ -105,10 +105,16 @@ void LimeRFE::listComPorts()
     }
 }
 
-void LimeRFE::applySettings(const LimeRFESettings& settings, bool force)
+void LimeRFE::applySettings(const LimeRFESettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    (void) force;
-    m_settings = settings;
+    qDebug() << "LimeRFE::applySettings:" << settings.getDebugString(settingsKeys, force) << " force:" << force;
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
 }
 
 bool LimeRFE::handleMessage(const Message& cmd)
@@ -117,7 +123,7 @@ bool LimeRFE::handleMessage(const Message& cmd)
 	{
         MsgConfigureLimeRFE& cfg = (MsgConfigureLimeRFE&) cmd;
         qDebug() << "LimeRFE::handleMessage: MsgConfigureLimeRFE";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
 		return true;
 	}
@@ -149,14 +155,14 @@ bool LimeRFE::deserialize(const QByteArray& data)
 
         if (m_settings.deserialize(bytetmp))
         {
-            MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(m_settings, true);
+            MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(m_settings, QList<QString>(), true);
             m_inputMessageQueue.push(msg);
             return true;
         }
         else
         {
             m_settings.resetToDefaults();
-            MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(m_settings, true);
+            MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(m_settings, QList<QString>(), true);
             m_inputMessageQueue.push(msg);
             return false;
         }
@@ -542,87 +548,119 @@ void LimeRFE::settingsToState(const LimeRFESettings& settings)
     }
 }
 
-void LimeRFE::stateToSettings(LimeRFESettings& settings)
+void LimeRFE::stateToSettings(LimeRFESettings& settings, QList<QString>& settingsKeys)
 {
     if (m_rfeBoardState.channelIDRX == RFE_CID_CELL_BAND01)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsCellular;
         settings.m_rxCellularChannel = LimeRFESettings::CellularChannel::CellularBand1;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxCellularChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_CELL_BAND02)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsCellular;
         settings.m_rxCellularChannel = LimeRFESettings::CellularChannel::CellularBand2;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxCellularChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_CELL_BAND03)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsCellular;
         settings.m_rxCellularChannel = LimeRFESettings::CellularChannel::CellularBand3;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxCellularChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_CELL_BAND07)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsCellular;
         settings.m_rxCellularChannel = LimeRFESettings::CellularChannel::CellularBand7;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxCellularChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_CELL_BAND38)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsCellular;
         settings.m_rxCellularChannel = LimeRFESettings::CellularChannel::CellularBand38;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxCellularChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_WB_1000)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsWideband;
         settings.m_rxWidebandChannel = LimeRFESettings::WidebandChannel::WidebandLow;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxWidebandChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_WB_4000)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsWideband;
         settings.m_rxWidebandChannel = LimeRFESettings::WidebandChannel::WidebandHigh;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxWidebandChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_HAM_0030)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_rxHAMChannel = LimeRFESettings::HAMChannel::HAM_30M;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxHAMChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_HAM_0070)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_rxHAMChannel = LimeRFESettings::HAMChannel::HAM_50_70MHz;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxHAMChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_HAM_0145)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_rxHAMChannel = LimeRFESettings::HAMChannel::HAM_144_146MHz;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxHAMChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_HAM_0220)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_rxHAMChannel = LimeRFESettings::HAMChannel::HAM_220_225MHz;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxHAMChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_HAM_0435)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_rxHAMChannel = LimeRFESettings::HAMChannel::HAM_430_440MHz;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxHAMChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_HAM_0920)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_rxHAMChannel = LimeRFESettings::HAMChannel::HAM_902_928MHz;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxHAMChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_HAM_1280)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_rxHAMChannel = LimeRFESettings::HAMChannel::HAM_1240_1325MHz;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxHAMChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_HAM_2400)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_rxHAMChannel = LimeRFESettings::HAMChannel::HAM_2300_2450MHz;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxHAMChannel");
     }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_HAM_3500)
     {
         settings.m_rxChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_rxHAMChannel = LimeRFESettings::HAMChannel::HAM_3300_3500MHz;
+        settingsKeys.append("rxChannels");
+        settingsKeys.append("rxHAMChannel");
     }
 
     if (m_rfeBoardState.selPortRX == RFE_PORT_1) {
@@ -631,85 +669,119 @@ void LimeRFE::stateToSettings(LimeRFESettings& settings)
         settings.m_rxPort = LimeRFESettings::RxPort::RxPortJ5;
     }
 
+    settingsKeys.append("rxPort");
+
     if (m_rfeBoardState.channelIDTX == RFE_CID_CELL_BAND01)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsCellular;
         settings.m_txCellularChannel = LimeRFESettings::CellularChannel::CellularBand1;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txCellularChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_CELL_BAND02)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsCellular;
         settings.m_txCellularChannel = LimeRFESettings::CellularChannel::CellularBand2;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txCellularChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_CELL_BAND03)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsCellular;
         settings.m_txCellularChannel = LimeRFESettings::CellularChannel::CellularBand3;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txCellularChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_CELL_BAND07)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsCellular;
         settings.m_txCellularChannel = LimeRFESettings::CellularChannel::CellularBand7;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txCellularChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_CELL_BAND38)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsCellular;
         settings.m_txCellularChannel = LimeRFESettings::CellularChannel::CellularBand38;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txCellularChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_WB_1000)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsWideband;
         settings.m_txWidebandChannel = LimeRFESettings::WidebandChannel::WidebandLow;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txWidebandChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_WB_4000)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsWideband;
         settings.m_txWidebandChannel = LimeRFESettings::WidebandChannel::WidebandHigh;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txWidebandChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_HAM_0030)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_txHAMChannel = LimeRFESettings::HAMChannel::HAM_30M;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txHAMChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_HAM_0070)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_txHAMChannel = LimeRFESettings::HAMChannel::HAM_50_70MHz;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txHAMChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_HAM_0145)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_txHAMChannel = LimeRFESettings::HAMChannel::HAM_144_146MHz;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txHAMChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_HAM_0220)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_txHAMChannel = LimeRFESettings::HAMChannel::HAM_220_225MHz;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txHAMChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_HAM_0435)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_txHAMChannel = LimeRFESettings::HAMChannel::HAM_430_440MHz;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txHAMChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_HAM_0920)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_txHAMChannel = LimeRFESettings::HAMChannel::HAM_902_928MHz;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txHAMChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_HAM_1280)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txHAMChannel");
         settings.m_txHAMChannel = LimeRFESettings::HAMChannel::HAM_1240_1325MHz;
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_HAM_2400)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_txHAMChannel = LimeRFESettings::HAMChannel::HAM_2300_2450MHz;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txHAMChannel");
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_HAM_3500)
     {
         settings.m_txChannels = LimeRFESettings::ChannelGroups::ChannelsHAM;
         settings.m_txHAMChannel = LimeRFESettings::HAMChannel::HAM_3300_3500MHz;
+        settingsKeys.append("txChannels");
+        settingsKeys.append("txHAMChannel");
     }
 
     if (m_rfeBoardState.selPortTX == RFE_PORT_1) {
@@ -719,6 +791,12 @@ void LimeRFE::stateToSettings(LimeRFESettings& settings)
     } else if (m_rfeBoardState.selPortTX == RFE_PORT_3) {
         settings.m_txPort = LimeRFESettings::TxPort::TxPortJ5;
     }
+
+    settingsKeys.append("txPort");
+    settingsKeys.append("attenuationFactor");
+    settingsKeys.append("amfmNotch");
+    settingsKeys.append("swrEnable");
+    settingsKeys.append("swrSource");
 
     settings.m_attenuationFactor = m_rfeBoardState.attValue;
     settings.m_amfmNotch =  m_rfeBoardState.notchOnOff == RFE_NOTCH_ON;
@@ -770,13 +848,13 @@ int LimeRFE::webapiSettingsPutPatch(
     LimeRFESettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(settings, force);
+    MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("LimeRFE::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureLimeRFE *msgToGUI = MsgConfigureLimeRFE::create(settings, true);
+        MsgConfigureLimeRFE *msgToGUI = MsgConfigureLimeRFE::create(settings, featureSettingsKeys, true);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -895,12 +973,13 @@ int LimeRFE::webapiActionsPost(
 
         if (featureActionsKeys.contains("fromToSettings") && (swgLimeRFEActions->getFromToSettings() == 0))
         {
-            stateToSettings(m_settings);
+            QList<QString> settingsKeys;
+            stateToSettings(m_settings, settingsKeys);
             unknownAction = false;
 
             if (getMessageQueueToGUI())
             {
-                MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(m_settings, false);
+                MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(m_settings, settingsKeys, false);
                 getMessageQueueToGUI()->push(msg);
             }
         }

@@ -59,6 +59,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	FeatureUISet* m_featureUISet;
 	LimeRFESettings m_settings;
+    QList<QString> m_settingsKeys;
 	RollupState m_rollupState;
     bool m_rxOn;
     bool m_txOn;

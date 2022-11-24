@@ -41,19 +41,22 @@ public:
 
     public:
         const LimeRFESettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureLimeRFE* create(const LimeRFESettings& settings, bool force) {
-            return new MsgConfigureLimeRFE(settings, force);
+        static MsgConfigureLimeRFE* create(const LimeRFESettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureLimeRFE(settings, settingsKeys, force);
         }
 
     private:
         LimeRFESettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureLimeRFE(const LimeRFESettings& settings, bool force) :
+        MsgConfigureLimeRFE(const LimeRFESettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -152,7 +155,7 @@ public:
     int getRefPower(int& powerDB);
 
     void settingsToState(const LimeRFESettings& settings);
-    void stateToSettings(LimeRFESettings& settings);
+    void stateToSettings(LimeRFESettings& settings, QList<QString>& settingsKeys);
 
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
@@ -174,7 +177,7 @@ private:
     void start();
     void stop();
     void listComPorts();
-    void applySettings(const LimeRFESettings& settings, bool force = false);
+    void applySettings(const LimeRFESettings& settings, const QList<QString>& settingsKeys, bool force = false);
     int webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response, QString& errorMessage);
 
 private slots:
