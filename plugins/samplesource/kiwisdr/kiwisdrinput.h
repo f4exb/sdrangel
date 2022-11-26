@@ -155,6 +155,7 @@ public:
 private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
+    int m_sampleRate;
 	KiwiSDRSettings m_settings;
 	KiwiSDRWorker* m_kiwiSDRWorker;
 	QThread *m_kiwiSDRWorkerThread;

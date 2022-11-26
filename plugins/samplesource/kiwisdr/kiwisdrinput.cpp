@@ -43,6 +43,7 @@ MESSAGE_CLASS_DEFINITION(KiwiSDRInput::MsgSetStatus, Message)
 
 KiwiSDRInput::KiwiSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_sampleRate(12000),
 	m_settings(),
 	m_kiwiSDRWorker(nullptr),
     m_kiwiSDRWorkerThread(nullptr),
@@ -101,6 +102,7 @@ bool KiwiSDRInput::start()
 
     m_kiwiSDRWorkerThread = new QThread();
 	m_kiwiSDRWorker = new KiwiSDRWorker(&m_sampleFifo);
+    m_kiwiSDRWorker->setInputMessageQueue(getInputMessageQueue());
 	m_kiwiSDRWorker->moveToThread(m_kiwiSDRWorkerThread);
 
     QObject::connect(m_kiwiSDRWorkerThread, &QThread::finished, m_kiwiSDRWorker, &QObject::deleteLater);
@@ -174,7 +176,7 @@ const QString& KiwiSDRInput::getDeviceDescription() const
 
 int KiwiSDRInput::getSampleRate() const
 {
-	return 12000;
+	return m_sampleRate;
 }
 
 quint64 KiwiSDRInput::getCenterFrequency() const
@@ -216,6 +218,22 @@ bool KiwiSDRInput::handleMessage(const Message& message)
         if (!success) {
             qDebug("KiwiSDRInput::handleMessage: config error");
         }
+
+        return true;
+    }
+    else if (KiwiSDRWorker::MsgReportSampleRate::match(message))
+    {
+        KiwiSDRWorker::MsgReportSampleRate& report = (KiwiSDRWorker::MsgReportSampleRate&) message;
+        m_sampleRate = report.getSampleRate();
+        qDebug() << "KiwiSDRInput::handleMessage: KiwiSDRWorker::MsgReportSampleRate: m_sampleRate: " << m_sampleRate;
+
+        if (!m_sampleFifo.setSize(m_sampleRate * 2)) {
+            qCritical("KiwiSDRInput::KiwiSDRInput: Could not allocate SampleFifo");
+        }
+
+		DSPSignalNotification *notif = new DSPSignalNotification(
+			m_sampleRate, m_settings.m_centerFrequency);
+		m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
         return true;
     }

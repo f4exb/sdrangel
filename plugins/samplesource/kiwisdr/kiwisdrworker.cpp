@@ -16,7 +16,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <boost/endian/conversion.hpp>
+#include "util/messagequeue.h"
 #include "kiwisdrworker.h"
+
+MESSAGE_CLASS_DEFINITION(KiwiSDRWorker::MsgReportSampleRate, Message)
 
 KiwiSDRWorker::KiwiSDRWorker(SampleSinkFifo* sampleFifo) :
 	QObject(),
@@ -24,6 +27,8 @@ KiwiSDRWorker::KiwiSDRWorker(SampleSinkFifo* sampleFifo) :
 	m_samplesBuf(),
 	m_sampleFifo(sampleFifo),
 	m_centerFrequency(1450000),
+    m_sampleRate(12000),
+    m_inputMessageQueue(nullptr),
 	m_gain(20),
 	m_useAGC(true),
     m_status(0)
@@ -66,7 +71,8 @@ void KiwiSDRWorker::sendCenterFrequency()
 		return;
 
 	QString freq = QString::number(m_centerFrequency / 1000.0, 'f', 3);
-	QString msg = "SET mod=iq low_cut=-5980 high_cut=5980 freq=" + freq;
+    int bw = (m_sampleRate/2) - 20;
+	QString msg = QString("SET mod=iq low_cut=-%1 high_cut=%2 freq=%3").arg(bw).arg(bw).arg(freq);
 	m_webSocket.sendTextMessage(msg);
 }
 
@@ -87,16 +93,36 @@ void KiwiSDRWorker::onBinaryMessageReceived(const QByteArray &message)
 	if (message[0] == 'M' && message[1] == 'S' && message[2] == 'G')
 	{
 		QStringList al = QString::fromUtf8(message).split(' ');
-		if (al.size() > 2 && al[2] == "audio_rate=12000")
-		{
-			m_webSocket.sendTextMessage("SET AR OK in=12000 out=48000");
-			m_webSocket.sendTextMessage("SERVER DE CLIENT KiwiAngel SND");
-			sendGain();
-			sendCenterFrequency();
-			m_timer.start(5000);
-            m_status = 2;
-			emit updateStatus(2);
-		}
+
+        if ((al.size() > 2) && al[2].startsWith("audio_rate="))
+        {
+            QStringList rateKeyVal = al[2].split('=');
+
+            if (rateKeyVal.size() > 1)
+            {
+                bool ok;
+                int sampleRate = rateKeyVal[1].toInt(&ok);
+
+                if (ok) {
+                    m_sampleRate = sampleRate;
+                }
+
+                qDebug("KiwiSDRWorker::onBinaryMessageReceived: sample rate: %d", m_sampleRate);
+
+                if (m_inputMessageQueue) {
+                    m_inputMessageQueue->push(MsgReportSampleRate::create(m_sampleRate));
+                }
+
+                QString msg = QString("SET AR OK in=%1 out=48000").arg(m_sampleRate);
+                m_webSocket.sendTextMessage(msg);
+                m_webSocket.sendTextMessage("SERVER DE CLIENT KiwiAngel SND");
+                sendGain();
+                sendCenterFrequency();
+                m_timer.start(5000);
+                m_status = 2;
+                emit updateStatus(2);
+            }
+        }
 	}
 	else if (message[0] == 'S' && message[1] == 'N' && message[2] == 'D')
 	{

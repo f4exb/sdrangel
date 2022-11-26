@@ -22,13 +22,36 @@
 #include <QtWebSockets/QtWebSockets>
 
 #include "dsp/samplesinkfifo.h"
+#include "util/message.h"
+
+class MessageQueue;
 
 class KiwiSDRWorker : public QObject {
 	Q_OBJECT
 
 public:
+	class MsgReportSampleRate : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		int getSampleRate() const { return m_sampleRate; }
+
+		static MsgReportSampleRate* create(int sampleRate) {
+			return new MsgReportSampleRate(sampleRate);
+		}
+
+	private:
+		int m_sampleRate;
+
+		MsgReportSampleRate(int sampleRate) :
+			Message(),
+			m_sampleRate(sampleRate)
+		{ }
+	};
+
 	KiwiSDRWorker(SampleSinkFifo* sampleFifo);
     int getStatus() const { return m_status; }
+    void setInputMessageQueue(MessageQueue *messageQueue) { m_inputMessageQueue = messageQueue; }
 
 private:
 	QTimer m_timer;
@@ -39,6 +62,8 @@ private:
 
 	QString m_serverAddress;
 	uint64_t m_centerFrequency;
+    int m_sampleRate;
+    MessageQueue *m_inputMessageQueue;
 
 	uint32_t m_gain;
 	bool m_useAGC;
