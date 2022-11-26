@@ -59,6 +59,9 @@ struct PERTesterSettings
 
     QByteArray serializeStringList(const QList<QString>& strings) const;
     void deserializeStringList(const QByteArray& data, QList<QString>& strings);
+
+    void applySettings(const QStringList& settingsKeys, const PERTesterSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif // INCLUDE_FEATURE_PERTESTERSETTINGS_H_

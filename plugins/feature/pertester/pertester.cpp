@@ -88,10 +88,10 @@ void PERTester::start()
     QObject::connect(m_thread, &QThread::started, m_worker, &PERTesterWorker::startWork);
     QObject::connect(m_thread, &QThread::finished, m_worker, &QObject::deleteLater);
     QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
- 
+
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
-    m_worker->getInputMessageQueue()->push(PERTesterWorker::MsgConfigurePERTesterWorker::create(m_settings, true));
+    m_worker->getInputMessageQueue()->push(PERTesterWorker::MsgConfigurePERTesterWorker::create(m_settings, QList<QString>(), true));
     if (m_settings.m_start == PERTesterSettings::START_IMMEDIATELY)
     {
         m_thread->start();
@@ -124,7 +124,7 @@ bool PERTester::handleMessage(const Message& cmd)
     {
         MsgConfigurePERTester& cfg = (MsgConfigurePERTester&) cmd;
         qDebug() << "PERTester::handleMessage: MsgConfigurePERTester";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -177,100 +177,38 @@ bool PERTester::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigurePERTester *msg = MsgConfigurePERTester::create(m_settings, true);
+        MsgConfigurePERTester *msg = MsgConfigurePERTester::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigurePERTester *msg = MsgConfigurePERTester::create(m_settings, true);
+        MsgConfigurePERTester *msg = MsgConfigurePERTester::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void PERTester::applySettings(const PERTesterSettings& settings, bool force)
+void PERTester::applySettings(const PERTesterSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "PERTester::applySettings:"
-            << " m_packetCount: " << settings.m_packetCount
-            << " m_interval: " << settings.m_interval
-            << " m_start: " << settings.m_start
-            << " m_satellites: " << settings.m_satellites
-            << " m_packet: " << settings.m_packet
-            << " m_ignoreLeadingBytes: " << settings.m_ignoreLeadingBytes
-            << " m_ignoreTrailingBytes: " << settings.m_ignoreTrailingBytes
-            << " m_txUDPAddress: " << settings.m_txUDPAddress
-            << " m_txUDPPort: " << settings.m_txUDPPort
-            << " m_rxUDPAddress: " << settings.m_rxUDPAddress
-            << " m_rxUDPPort: " << settings.m_rxUDPPort
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIFeatureSetIndex: " << settings.m_reverseAPIFeatureSetIndex
-            << " m_reverseAPIFeatureIndex: " << settings.m_reverseAPIFeatureIndex
-            << " force: " << force;
-
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_packetCount != settings.m_packetCount) || force) {
-        reverseAPIKeys.append("packetCount");
-    }
-    if ((m_settings.m_interval != settings.m_interval) || force) {
-        reverseAPIKeys.append("interval");
-    }
-    if ((m_settings.m_start != settings.m_start) || force) {
-        reverseAPIKeys.append("start");
-    }
-    if ((m_settings.m_satellites != settings.m_satellites) || force) {
-        reverseAPIKeys.append("satellites");
-    }
-    if ((m_settings.m_packet != settings.m_packet) || force) {
-        reverseAPIKeys.append("packet");
-    }
-    if ((m_settings.m_ignoreLeadingBytes != settings.m_ignoreLeadingBytes) || force) {
-        reverseAPIKeys.append("ignoreLeadingBytes");
-    }
-    if ((m_settings.m_ignoreTrailingBytes != settings.m_ignoreTrailingBytes) || force) {
-        reverseAPIKeys.append("ignoreTrailingBytes");
-    }
-    if ((m_settings.m_txUDPAddress != settings.m_txUDPAddress) || force) {
-        reverseAPIKeys.append("txUDPAddress");
-    }
-    if ((m_settings.m_txUDPPort != settings.m_txUDPPort) || force) {
-        reverseAPIKeys.append("txUDPPort");
-    }
-    if ((m_settings.m_rxUDPAddress != settings.m_rxUDPAddress) || force) {
-        reverseAPIKeys.append("rxUDPAddress");
-    }
-    if ((m_settings.m_rxUDPPort != settings.m_rxUDPPort) || force) {
-        reverseAPIKeys.append("rxUDPPort");
-    }
-
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
+    qDebug() << "PERTester::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
     PERTesterWorker::MsgConfigurePERTesterWorker *msg = PERTesterWorker::MsgConfigurePERTesterWorker::create(
-        settings, force
+        settings, settingsKeys, force
     );
     if (m_worker) {
         m_worker->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -308,12 +246,12 @@ int PERTester::webapiSettingsPutPatch(
     PERTesterSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigurePERTester *msg = MsgConfigurePERTester::create(settings, force);
+    MsgConfigurePERTester *msg = MsgConfigurePERTester::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigurePERTester *msgToGUI = MsgConfigurePERTester::create(settings, force);
+        MsgConfigurePERTester *msgToGUI = MsgConfigurePERTester::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -448,7 +386,7 @@ void PERTester::webapiUpdateFeatureSettings(
     }
 }
 
-void PERTester::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const PERTesterSettings& settings, bool force)
+void PERTester::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const PERTesterSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

@@ -75,7 +75,13 @@ bool PERTesterGUI::handleMessage(const Message& message)
     {
         qDebug("PERTesterGUI::handleMessage: PERTester::MsgConfigurePERTester");
         const PERTester::MsgConfigurePERTester& cfg = (PERTester::MsgConfigurePERTester&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -159,6 +165,7 @@ PERTesterGUI::~PERTesterGUI()
 void PERTesterGUI::setWorkspaceIndex(int index)
 {
     m_settings.m_workspaceIndex = index;
+    m_settingsKeys.append("workspaceIndex");
     m_feature->setWorkspaceIndex(index);
 }
 
@@ -217,6 +224,14 @@ void PERTesterGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -244,6 +259,7 @@ void PERTesterGUI::on_resetStats_clicked()
 void PERTesterGUI::on_packetCount_valueChanged(int value)
 {
     m_settings.m_packetCount = value;
+    m_settingsKeys.append("packetCount");
     applySettings();
 }
 
@@ -252,6 +268,7 @@ void PERTesterGUI::on_start_currentIndexChanged(int index)
     m_settings.m_start = (PERTesterSettings::Start)index;
     ui->satellites->setVisible(m_settings.m_start != PERTesterSettings::START_IMMEDIATELY);
     ui->satellitesLabel->setVisible(m_settings.m_start != PERTesterSettings::START_IMMEDIATELY);
+    m_settingsKeys.append("start");
     applySettings();
     getRollupContents()->arrangeRollups();
 }
@@ -259,54 +276,63 @@ void PERTesterGUI::on_start_currentIndexChanged(int index)
 void PERTesterGUI::on_satellites_editingFinished()
 {
     m_settings.m_satellites = ui->satellites->text().trimmed().split(" ");
+    m_settingsKeys.append("satellites");
     applySettings();
 }
 
 void PERTesterGUI::on_interval_valueChanged(double value)
 {
     m_settings.m_interval = value;
+    m_settingsKeys.append("interval");
     applySettings();
 }
 
 void PERTesterGUI::on_packet_textChanged()
 {
     m_settings.m_packet = ui->packet->toPlainText();
+    m_settingsKeys.append("packet");
     applySettings();
 }
 
 void PERTesterGUI::on_leading_valueChanged(int value)
 {
     m_settings.m_ignoreLeadingBytes = value;
+    m_settingsKeys.append("ignoreLeadingBytes");
     applySettings();
 }
 
 void PERTesterGUI::on_trailing_valueChanged(int value)
 {
     m_settings.m_ignoreTrailingBytes = value;
+    m_settingsKeys.append("ignoreTrailingBytes");
     applySettings();
 }
 
 void PERTesterGUI::on_txUDPAddress_editingFinished()
 {
     m_settings.m_txUDPAddress = ui->txUDPAddress->text();
+    m_settingsKeys.append("txUDPAddress");
     applySettings();
 }
 
 void PERTesterGUI::on_txUDPPort_editingFinished()
 {
     m_settings.m_txUDPPort = ui->txUDPPort->text().toInt();
+    m_settingsKeys.append("txUDPPort");
     applySettings();
 }
 
 void PERTesterGUI::on_rxUDPAddress_editingFinished()
 {
     m_settings.m_rxUDPAddress = ui->rxUDPAddress->text();
+    m_settingsKeys.append("rxUDPAddress");
     applySettings();
 }
 
 void PERTesterGUI::on_rxUDPPort_editingFinished()
 {
     m_settings.m_rxUDPPort = ui->rxUDPPort->text().toInt();
+    m_settingsKeys.append("rxUDPPort");
     applySettings();
 }
 
@@ -351,9 +377,11 @@ void PERTesterGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        PERTester::MsgConfigurePERTester* message = PERTester::MsgConfigurePERTester::create(m_settings, force);
+        PERTester::MsgConfigurePERTester* message = PERTester::MsgConfigurePERTester::create(m_settings, m_settingsKeys, force);
         m_perTester->getInputMessageQueue()->push(message);
     }
+
+    m_settingsKeys.clear();
 }
 
 void PERTesterGUI::makeUIConnections()

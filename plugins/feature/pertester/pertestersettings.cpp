@@ -177,3 +177,134 @@ void PERTesterSettings::deserializeStringList(const QByteArray& data, QList<QStr
     (*stream) >> strings;
     delete stream;
 }
+
+void PERTesterSettings::applySettings(const QStringList& settingsKeys, const PERTesterSettings& settings)
+{
+    if (settingsKeys.contains("packetCount")) {
+        m_packetCount = settings.m_packetCount;
+    }
+    if (settingsKeys.contains("interval")) {
+        m_interval = settings.m_interval;
+    }
+    if (settingsKeys.contains("packet")) {
+        m_packet = settings.m_packet;
+    }
+    if (settingsKeys.contains("txUDPAddress")) {
+        m_txUDPAddress = settings.m_txUDPAddress;
+    }
+    if (settingsKeys.contains("txUDPPort")) {
+        m_txUDPPort = settings.m_txUDPPort;
+    }
+    if (settingsKeys.contains("rxUDPAddress")) {
+        m_rxUDPAddress = settings.m_rxUDPAddress;
+    }
+    if (settingsKeys.contains("rxUDPPort")) {
+        m_rxUDPPort = settings.m_rxUDPPort;
+    }
+    if (settingsKeys.contains("ignoreLeadingBytes")) {
+        m_ignoreLeadingBytes = settings.m_ignoreLeadingBytes;
+    }
+    if (settingsKeys.contains("ignoreTrailingBytes")) {
+        m_ignoreTrailingBytes = settings.m_ignoreTrailingBytes;
+    }
+    if (settingsKeys.contains("start")) {
+        m_start = settings.m_start;
+    }
+    if (settingsKeys.contains("satellites")) {
+        m_satellites = settings.m_satellites;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+}
+
+QString PERTesterSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("packetCount") || force) {
+        ostr << " m_packetCount: " << m_packetCount;
+    }
+    if (settingsKeys.contains("interval") || force) {
+        ostr << " m_interval: " << m_interval;
+    }
+    if (settingsKeys.contains("packet") || force) {
+        ostr << " m_packet: " << m_packet.toStdString();
+    }
+    if (settingsKeys.contains("txUDPAddress") || force) {
+        ostr << " m_txUDPAddress: " << m_txUDPAddress.toStdString();
+    }
+    if (settingsKeys.contains("txUDPPort") || force) {
+        ostr << " m_txUDPPort: " << m_txUDPPort;
+    }
+    if (settingsKeys.contains("rxUDPAddress") || force) {
+        ostr << " m_rxUDPAddress: " << m_rxUDPAddress.toStdString();
+    }
+    if (settingsKeys.contains("rxUDPPort") || force) {
+        ostr << " m_rxUDPPort: " << m_rxUDPPort;
+    }
+    if (settingsKeys.contains("ignoreLeadingBytes") || force) {
+        ostr << " m_ignoreLeadingBytes: " << m_ignoreLeadingBytes;
+    }
+    if (settingsKeys.contains("ignoreTrailingBytes") || force) {
+        ostr << " m_ignoreTrailingBytes: " << m_ignoreTrailingBytes;
+    }
+    if (settingsKeys.contains("start") || force) {
+        ostr << " m_start: " << m_start;
+    }
+    if (settingsKeys.contains("satellites") || force)
+    {
+        ostr << " m_satellites:";
+
+        for (auto satellite : m_satellites) {
+            ostr << " " << satellite.toStdString();
+        }
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}

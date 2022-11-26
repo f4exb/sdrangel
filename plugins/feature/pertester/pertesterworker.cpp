@@ -107,7 +107,7 @@ bool PERTesterWorker::handleMessage(const Message& cmd)
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigurePERTesterWorker& cfg = (MsgConfigurePERTesterWorker&) cmd;
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
         return true;
     }
     else if (PERTester::MsgResetStats::match(cmd))
@@ -121,22 +121,30 @@ bool PERTesterWorker::handleMessage(const Message& cmd)
     }
 }
 
-void PERTesterWorker::applySettings(const PERTesterSettings& settings, bool force)
+void PERTesterWorker::applySettings(const PERTesterSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "PERTesterWorker::applySettings:"
+    qDebug() << "PERTesterWorker::applySettings:" << settings.getDebugString(settingsKeys, force)
             << " force: " << force;
 
-    if (   (settings.m_rxUDPAddress != m_settings.m_rxUDPAddress)
-        || (settings.m_rxUDPPort != m_settings.m_rxUDPPort)
-        || force)
+    // if (   (settings.m_rxUDPAddress != m_settings.m_rxUDPAddress)
+    //     || (settings.m_rxUDPPort != m_settings.m_rxUDPPort)
+    //     || force)
+    if (settingsKeys.contains("rxUDPAddress")
+     || settingsKeys.contains("rxUDPPort")
+     || force)
     {
         openUDP(settings);
     }
 
-    if ((settings.m_interval != m_settings.m_interval) || force)
+    if (settingsKeys.contains("interval") || force) {
         m_txTimer.setInterval(settings.m_interval * 1000.0);
+    }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void PERTesterWorker::openUDP(const PERTesterSettings& settings)

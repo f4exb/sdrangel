@@ -46,19 +46,22 @@ public:
 
     public:
         const PERTesterSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigurePERTester* create(const PERTesterSettings& settings, bool force) {
-            return new MsgConfigurePERTester(settings, force);
+        static MsgConfigurePERTester* create(const PERTesterSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigurePERTester(settings, settingsKeys, force);
         }
 
     private:
         PERTesterSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigurePERTester(const PERTesterSettings& settings, bool force) :
+        MsgConfigurePERTester(const PERTesterSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -173,8 +176,8 @@ private:
 
     void start();
     void stop();
-    void applySettings(const PERTesterSettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const PERTesterSettings& settings, bool force);
+    void applySettings(const PERTesterSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const PERTesterSettings& settings, bool force);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
 
 private slots:

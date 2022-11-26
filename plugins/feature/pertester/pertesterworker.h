@@ -37,20 +37,23 @@ public:
 
     public:
         const PERTesterSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigurePERTesterWorker* create(const PERTesterSettings& settings, bool force)
+        static MsgConfigurePERTesterWorker* create(const PERTesterSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigurePERTesterWorker(settings, force);
+            return new MsgConfigurePERTesterWorker(settings, settingsKeys, force);
         }
 
     private:
         PERTesterSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigurePERTesterWorker(const PERTesterSettings& settings, bool force) :
+        MsgConfigurePERTesterWorker(const PERTesterSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -79,7 +82,7 @@ private:
     QList<QByteArray> m_txPackets;              //!< Packets we've transmitted, but not yet received
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const PERTesterSettings& settings, bool force = false);
+    void applySettings(const PERTesterSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     MessageQueue *getMessageQueueToGUI() { return m_msgQueueToGUI; }
     void openUDP(const PERTesterSettings& settings);
     void closeUDP();
