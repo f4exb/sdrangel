@@ -46,19 +46,22 @@ public:
 
     public:
         const MapSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureMap* create(const MapSettings& settings, bool force) {
-            return new MsgConfigureMap(settings, force);
+        static MsgConfigureMap* create(const MapSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureMap(settings, settingsKeys, force);
         }
 
     private:
         MapSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureMap(const MapSettings& settings, bool force) :
+        MsgConfigureMap(const MapSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -176,9 +179,9 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    void applySettings(const MapSettings& settings, bool force = false);
+    void applySettings(const MapSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const MapSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const MapSettings& settings, bool force);
     void registerPipe(QObject *object);
     void notifyUpdate();
 

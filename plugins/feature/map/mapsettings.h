@@ -118,6 +118,8 @@ struct MapSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serializeItemSettings(QHash<QString, MapItemSettings *> itemSettings) const;
     void deserializeItemSettings(const QByteArray& data, QHash<QString, MapItemSettings *>& itemSettings);
+    void applySettings(const QStringList& settingsKeys, const MapSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static const QStringList m_pipeTypes;
     static const QStringList m_pipeURIs;

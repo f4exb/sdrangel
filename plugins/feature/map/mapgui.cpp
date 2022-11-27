@@ -90,7 +90,13 @@ bool MapGUI::handleMessage(const Message& message)
     {
         qDebug("MapGUI::handleMessage: Map::MsgConfigureMap");
         const Map::MsgConfigureMap& cfg = (Map::MsgConfigureMap&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -164,7 +170,6 @@ void MapGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
 }
 
 MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -859,9 +864,11 @@ void MapGUI::on_mapTypes_currentIndexChanged(int index)
         QVariant mapType = index;
         QMetaObject::invokeMethod(ui->map->rootObject(), "setMapType", Q_ARG(QVariant, mapType));
         QString currentMap = ui->mapTypes->currentText();
+
         if (!currentMap.isEmpty())
         {
             m_settings.m_mapType = currentMap;
+            m_settingsKeys.append("mapType");
             applySettings();
         }
     }
@@ -982,6 +989,14 @@ void MapGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -992,9 +1007,11 @@ void MapGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        Map::MsgConfigureMap* message = Map::MsgConfigureMap::create(m_settings, force);
+        Map::MsgConfigureMap* message = Map::MsgConfigureMap::create(m_settings, m_settingsKeys, force);
         m_map->getInputMessageQueue()->push(message);
     }
+
+    m_settingsKeys.clear();
 }
 
 void MapGUI::on_maidenhead_clicked()

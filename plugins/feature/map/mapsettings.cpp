@@ -101,7 +101,7 @@ void MapSettings::resetToDefaults()
     m_displaySelectedGroundTracks = true;
     m_displayAllGroundTracks = true;
     m_title = "Map";
-    m_rgbColor = QColor(225, 25, 99).rgb();
+    m_displayAllGroundTracks = QColor(225, 25, 99).rgb();
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -391,4 +391,175 @@ void MapSettings::deserializeItemSettings(const QByteArray& data, QHash<QString,
 
         idx += 2;
     } while(!done);
+}
+
+void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettings& settings)
+{
+    if (settingsKeys.contains("displayNames")) {
+        m_displayNames = settings.m_displayNames;
+    }
+    if (settingsKeys.contains("mapProvider")) {
+        m_mapProvider = settings.m_mapProvider;
+    }
+    if (settingsKeys.contains("thunderforestAPIKey")) {
+        m_thunderforestAPIKey = settings.m_thunderforestAPIKey;
+    }
+    if (settingsKeys.contains("maptilerAPIKey")) {
+        m_maptilerAPIKey = settings.m_maptilerAPIKey;
+    }
+    if (settingsKeys.contains("osmURL")) {
+        m_osmURL = settings.m_osmURL;
+    }
+    if (settingsKeys.contains("mapBoxStyles")) {
+        m_mapBoxStyles = settings.m_mapBoxStyles;
+    }
+    if (settingsKeys.contains("displaySelectedGroundTracks")) {
+        m_displaySelectedGroundTracks = settings.m_displaySelectedGroundTracks;
+    }
+    if (settingsKeys.contains("displayAllGroundTracks")) {
+        m_displayAllGroundTracks = settings.m_displayAllGroundTracks;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("displayAllGroundTracks")) {
+        m_displayAllGroundTracks = settings.m_displayAllGroundTracks;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("map2DEnabled")) {
+        m_map2DEnabled = settings.m_map2DEnabled;
+    }
+    if (settingsKeys.contains("map3DEnabled")) {
+        m_map3DEnabled = settings.m_map3DEnabled;
+    }
+    if (settingsKeys.contains("terrain")) {
+        m_terrain = settings.m_terrain;
+    }
+    if (settingsKeys.contains("buildings")) {
+        m_buildings = settings.m_buildings;
+    }
+    if (settingsKeys.contains("sunLightEnabled")) {
+        m_sunLightEnabled = settings.m_sunLightEnabled;
+    }
+    if (settingsKeys.contains("eciCamera")) {
+        m_eciCamera = settings.m_eciCamera;
+    }
+    if (settingsKeys.contains("modelDir")) {
+        m_modelDir = settings.m_modelDir;
+    }
+    if (settingsKeys.contains("antiAliasing")) {
+        m_antiAliasing = settings.m_antiAliasing;
+    }
+    if (settingsKeys.contains("displayMUF")) {
+        m_displayMUF = settings.m_displayMUF;
+    }
+    if (settingsKeys.contains("misplayfoF2")) {
+        m_displayfoF2 = settings.m_displayfoF2;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+}
+
+QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force=false) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("displayNames") || force) {
+        ostr << " m_displayNames: " << m_displayNames;
+    }
+    if (settingsKeys.contains("mapProvider") || force) {
+        ostr << " m_mapProvider: " << m_mapProvider.toStdString();
+    }
+    if (settingsKeys.contains("thunderforestAPIKey") || force) {
+        ostr << " m_thunderforestAPIKey: " << m_thunderforestAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("maptilerAPIKey") || force) {
+        ostr << " m_maptilerAPIKey: " << m_maptilerAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("mapBoxAPIKey") || force) {
+        ostr << " m_mapBoxAPIKey: " << m_mapBoxAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("osmURL") || force) {
+        ostr << " m_osmURL: " << m_osmURL.toStdString();
+    }
+    if (settingsKeys.contains("mapBoxStyles") || force) {
+        ostr << " m_mapBoxStyles: " << m_mapBoxStyles.toStdString();
+    }
+    if (settingsKeys.contains("displaySelectedGroundTracks") || force) {
+        ostr << " m_displaySelectedGroundTracks: " << m_displaySelectedGroundTracks;
+    }
+    if (settingsKeys.contains("_displayAllGroundTracks") || force) {
+        ostr << " m_displayAllGroundTracks: " << m_displayAllGroundTracks;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("displayAllGroundTracks") || force) {
+        ostr << " m_displayAllGroundTracks: " << m_displayAllGroundTracks;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("map2DEnabled") || force) {
+        ostr << " m_map2DEnabled: " << m_map2DEnabled;
+    }
+    if (settingsKeys.contains("map3DEnabled") || force) {
+        ostr << " m_map3DEnabled: " << m_map3DEnabled;
+    }
+    if (settingsKeys.contains("terrain") || force) {
+        ostr << " m_terrain: " << m_terrain.toStdString();
+    }
+    if (settingsKeys.contains("buildings") || force) {
+        ostr << " m_buildings: " << m_buildings.toStdString();
+    }
+    if (settingsKeys.contains("sunLightEnabled") || force) {
+        ostr << " m_sunLightEnabled: " << m_sunLightEnabled;
+    }
+    if (settingsKeys.contains("eciCamera") || force) {
+        ostr << " m_eciCamera: " << m_eciCamera;
+    }
+    if (settingsKeys.contains("modelDir") || force) {
+        ostr << " m_modelDir: " << m_modelDir.toStdString();
+    }
+    if (settingsKeys.contains("antiAliasing") || force) {
+        ostr << " m_antiAliasing: " << m_antiAliasing.toStdString();
+    }
+    if (settingsKeys.contains("displayMUF") || force) {
+        ostr << " m_displayMUF: " << m_displayMUF;
+    }
+    if (settingsKeys.contains("displayfoF2") || force) {
+        ostr << " m_displayfoF2: " << m_displayfoF2;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+
+    return QString(ostr.str().c_str());
 }
