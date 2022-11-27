@@ -475,7 +475,7 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     }
 }
 
-QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force=false) const
+QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force) const
 {
     std::ostringstream ostr;
 
