@@ -98,7 +98,7 @@ bool Radiosonde::handleMessage(const Message& cmd)
     {
         MsgConfigureRadiosonde& cfg = (MsgConfigureRadiosonde&) cmd;
         qDebug() << "Radiosonde::handleMessage: MsgConfigureRadiosonde";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -127,51 +127,38 @@ bool Radiosonde::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureRadiosonde *msg = MsgConfigureRadiosonde::create(m_settings, true);
+        MsgConfigureRadiosonde *msg = MsgConfigureRadiosonde::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureRadiosonde *msg = MsgConfigureRadiosonde::create(m_settings, true);
+        MsgConfigureRadiosonde *msg = MsgConfigureRadiosonde::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void Radiosonde::applySettings(const RadiosondeSettings& settings, bool force)
+void Radiosonde::applySettings(const RadiosondeSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "Radiosonde::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIFeatureSetIndex: " << settings.m_reverseAPIFeatureSetIndex
-            << " m_reverseAPIFeatureIndex: " << settings.m_reverseAPIFeatureIndex
-            << " force: " << force;
+    qDebug() << "Radiosonde::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int Radiosonde::webapiSettingsGet(
@@ -195,12 +182,12 @@ int Radiosonde::webapiSettingsPutPatch(
     RadiosondeSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureRadiosonde *msg = MsgConfigureRadiosonde::create(settings, force);
+    MsgConfigureRadiosonde *msg = MsgConfigureRadiosonde::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRadiosonde *msgToGUI = MsgConfigureRadiosonde::create(settings, force);
+        MsgConfigureRadiosonde *msgToGUI = MsgConfigureRadiosonde::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -245,6 +232,26 @@ void Radiosonde::webapiFormatFeatureSettings(
             response.getRadiosondeSettings()->setRollupState(swgRollupState);
         }
     }
+
+    if (!response.getRadiosondeSettings()->getRadiosondesColumnIndexes()) {
+        response.getRadiosondeSettings()->setRadiosondesColumnIndexes(new QList<int>());
+    }
+
+    response.getRadiosondeSettings()->getRadiosondesColumnIndexes()->clear();
+
+    for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
+        response.getRadiosondeSettings()->getRadiosondesColumnIndexes()->push_back(settings.m_radiosondesColumnIndexes[i]);
+    }
+
+    if (!response.getRadiosondeSettings()->getRadiosondesColumnSizes()) {
+        response.getRadiosondeSettings()->setRadiosondesColumnSizes(new QList<int>());
+    }
+
+    response.getRadiosondeSettings()->getRadiosondesColumnSizes()->clear();
+
+    for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
+        response.getRadiosondeSettings()->getRadiosondesColumnSizes()->push_back(settings.m_radiosondesColumnSizes[i]);
+    }
 }
 
 void Radiosonde::webapiUpdateFeatureSettings(
@@ -276,9 +283,27 @@ void Radiosonde::webapiUpdateFeatureSettings(
     if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
         settings.m_rollupState->updateFrom(featureSettingsKeys, response.getRadiosondeSettings()->getRollupState());
     }
+
+    if (featureSettingsKeys.contains("radiosondesColumnIndexes"))
+    {
+        const QList<int> *indexes = response.getRadiosondeSettings()->getRadiosondesColumnIndexes();
+
+        for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
+            settings.m_radiosondesColumnIndexes[i] = (*indexes)[i];
+        }
+    }
+
+    if (featureSettingsKeys.contains("vesselColumnSizes"))
+    {
+        const QList<int> *indexes = response.getRadiosondeSettings()->getRadiosondesColumnSizes();
+
+        for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
+            settings.m_radiosondesColumnSizes[i] = (*indexes)[i];
+        }
+    }
 }
 
-void Radiosonde::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const RadiosondeSettings& settings, bool force)
+void Radiosonde::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const RadiosondeSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

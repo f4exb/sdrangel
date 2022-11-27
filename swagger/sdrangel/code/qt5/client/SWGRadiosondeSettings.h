@@ -23,6 +23,7 @@
 
 
 #include "SWGRollupState.h"
+#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -67,6 +68,12 @@ public:
     SWGRollupState* getRollupState();
     void setRollupState(SWGRollupState* rollup_state);
 
+    QList<qint32>* getRadiosondesColumnIndexes();
+    void setRadiosondesColumnIndexes(QList<qint32>* radiosondes_column_indexes);
+
+    QList<qint32>* getRadiosondesColumnSizes();
+    void setRadiosondesColumnSizes(QList<qint32>* radiosondes_column_sizes);
+
 
     virtual bool isSet() override;
 
@@ -94,6 +101,12 @@ private:
 
     SWGRollupState* rollup_state;
     bool m_rollup_state_isSet;
+
+    QList<qint32>* radiosondes_column_indexes;
+    bool m_radiosondes_column_indexes_isSet;
+
+    QList<qint32>* radiosondes_column_sizes;
+    bool m_radiosondes_column_sizes_isSet;
 
 };
 

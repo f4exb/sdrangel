@@ -44,6 +44,10 @@ SWGRadiosondeSettings::SWGRadiosondeSettings() {
     m_reverse_api_feature_index_isSet = false;
     rollup_state = nullptr;
     m_rollup_state_isSet = false;
+    radiosondes_column_indexes = new QList<qint32>();
+    m_radiosondes_column_indexes_isSet = false;
+    radiosondes_column_sizes = new QList<qint32>();
+    m_radiosondes_column_sizes_isSet = false;
 }
 
 SWGRadiosondeSettings::~SWGRadiosondeSettings() {
@@ -68,6 +72,10 @@ SWGRadiosondeSettings::init() {
     m_reverse_api_feature_index_isSet = false;
     rollup_state = new SWGRollupState();
     m_rollup_state_isSet = false;
+    radiosondes_column_indexes = new QList<qint32>();
+    m_radiosondes_column_indexes_isSet = false;
+    radiosondes_column_sizes = new QList<qint32>();
+    m_radiosondes_column_sizes_isSet = false;
 }
 
 void
@@ -86,6 +94,8 @@ SWGRadiosondeSettings::cleanup() {
     if(rollup_state != nullptr) { 
         delete rollup_state;
     }
+
+
 }
 
 SWGRadiosondeSettings*
@@ -115,6 +125,10 @@ SWGRadiosondeSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
+    
+    ::SWGSDRangel::setValue(&radiosondes_column_indexes, pJson["radiosondesColumnIndexes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&radiosondes_column_sizes, pJson["radiosondesColumnSizes"], "QList", "qint32");
 }
 
 QString
@@ -154,6 +168,12 @@ SWGRadiosondeSettings::asJsonObject() {
     }
     if((rollup_state != nullptr) && (rollup_state->isSet())){
         toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
+    }
+    if(radiosondes_column_indexes && radiosondes_column_indexes->size() > 0){
+        toJsonArray((QList<void*>*)radiosondes_column_indexes, obj, "radiosondesColumnIndexes", "");
+    }
+    if(radiosondes_column_sizes && radiosondes_column_sizes->size() > 0){
+        toJsonArray((QList<void*>*)radiosondes_column_sizes, obj, "radiosondesColumnSizes", "");
     }
 
     return obj;
@@ -239,6 +259,26 @@ SWGRadiosondeSettings::setRollupState(SWGRollupState* rollup_state) {
     this->m_rollup_state_isSet = true;
 }
 
+QList<qint32>*
+SWGRadiosondeSettings::getRadiosondesColumnIndexes() {
+    return radiosondes_column_indexes;
+}
+void
+SWGRadiosondeSettings::setRadiosondesColumnIndexes(QList<qint32>* radiosondes_column_indexes) {
+    this->radiosondes_column_indexes = radiosondes_column_indexes;
+    this->m_radiosondes_column_indexes_isSet = true;
+}
+
+QList<qint32>*
+SWGRadiosondeSettings::getRadiosondesColumnSizes() {
+    return radiosondes_column_sizes;
+}
+void
+SWGRadiosondeSettings::setRadiosondesColumnSizes(QList<qint32>* radiosondes_column_sizes) {
+    this->radiosondes_column_sizes = radiosondes_column_sizes;
+    this->m_radiosondes_column_sizes_isSet = true;
+}
+
 
 bool
 SWGRadiosondeSettings::isSet(){
@@ -266,6 +306,18 @@ SWGRadiosondeSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(rollup_state && rollup_state->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(m_radiosondes_column_indexes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(radiosondes_column_indexes && (radiosondes_column_indexes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_radiosondes_column_sizes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(radiosondes_column_sizes && (radiosondes_column_sizes->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

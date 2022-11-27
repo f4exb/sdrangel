@@ -81,7 +81,13 @@ bool RadiosondeGUI::handleMessage(const Message& message)
     {
         qDebug("RadiosondeGUI::handleMessage: Radiosonde::MsgConfigureRadiosonde");
         const Radiosonde::MsgConfigureRadiosonde& cfg = (Radiosonde::MsgConfigureRadiosonde&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -198,6 +204,7 @@ void RadiosondeGUI::setWorkspaceIndex(int index)
 {
     m_settings.m_workspaceIndex = index;
     m_feature->setWorkspaceIndex(index);
+    m_settingsKeys.append("workspaceIndex");
 }
 
 void RadiosondeGUI::blockApplySettings(bool block)
@@ -259,6 +266,14 @@ void RadiosondeGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -269,9 +284,11 @@ void RadiosondeGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        Radiosonde::MsgConfigureRadiosonde* message = Radiosonde::MsgConfigureRadiosonde::create(m_settings, force);
+        Radiosonde::MsgConfigureRadiosonde* message = Radiosonde::MsgConfigureRadiosonde::create(m_settings, m_settingsKeys, force);
         m_radiosonde->getInputMessageQueue()->push(message);
     }
+
+    m_settingsKeys.clear();
 }
 
 void RadiosondeGUI::resizeTable()
@@ -307,6 +324,7 @@ void RadiosondeGUI::radiosondes_sectionMoved(int logicalIndex, int oldVisualInde
     (void) oldVisualIndex;
 
     m_settings.m_radiosondesColumnIndexes[logicalIndex] = newVisualIndex;
+    m_settingsKeys.append("radiosondesColumnIndexes");
 }
 
 // Column in table resized (when hidden size is 0)
@@ -315,6 +333,7 @@ void RadiosondeGUI::radiosondes_sectionResized(int logicalIndex, int oldSize, in
     (void) oldSize;
 
     m_settings.m_radiosondesColumnSizes[logicalIndex] = newSize;
+    m_settingsKeys.append("radiosondesColumnSizes");
 }
 
 // Right click in table header - show column select menu
@@ -682,6 +701,7 @@ void RadiosondeGUI::radiosondes_customContextMenuRequested(QPoint pos)
 void RadiosondeGUI::on_y1_currentIndexChanged(int index)
 {
     m_settings.m_y1 = (RadiosondeSettings::ChartData)index;
+    m_settingsKeys.append("y1");
     applySettings();
     plotChart();
 }
@@ -689,6 +709,7 @@ void RadiosondeGUI::on_y1_currentIndexChanged(int index)
 void RadiosondeGUI::on_y2_currentIndexChanged(int index)
 {
     m_settings.m_y2 = (RadiosondeSettings::ChartData)index;
+    m_settingsKeys.append("y2");
     applySettings();
     plotChart();
 }

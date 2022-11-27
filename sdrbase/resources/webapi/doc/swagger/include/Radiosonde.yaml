@@ -18,3 +18,11 @@ RadiosondeSettings:
       type: integer
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+    radiosondesColumnIndexes:
+      type: array
+      items:
+        type: integer
+    radiosondesColumnSizes:
+      type: array
+      items:
+        type: integer

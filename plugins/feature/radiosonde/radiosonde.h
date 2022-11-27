@@ -44,19 +44,22 @@ public:
 
     public:
         const RadiosondeSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRadiosonde* create(const RadiosondeSettings& settings, bool force) {
-            return new MsgConfigureRadiosonde(settings, force);
+        static MsgConfigureRadiosonde* create(const RadiosondeSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureRadiosonde(settings, settingsKeys, force);
         }
 
     private:
         RadiosondeSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRadiosonde(const RadiosondeSettings& settings, bool force) :
+        MsgConfigureRadiosonde(const RadiosondeSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -104,8 +107,8 @@ private:
 
     void start();
     void stop();
-    void applySettings(const RadiosondeSettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const RadiosondeSettings& settings, bool force);
+    void applySettings(const RadiosondeSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const RadiosondeSettings& settings, bool force);
     void scanAvailableChannels();
 
 private slots:

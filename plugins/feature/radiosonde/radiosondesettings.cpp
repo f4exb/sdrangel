@@ -151,3 +151,107 @@ bool RadiosondeSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void RadiosondeSettings::applySettings(const QStringList& settingsKeys, const RadiosondeSettings& settings)
+{
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("y1")) {
+        m_y1 = settings.m_y1;
+    }
+    if (settingsKeys.contains("y2")) {
+        m_y2 = settings.m_y2;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+
+    if (settingsKeys.contains("radiosondesColumnIndexes"))
+    {
+        for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
+            m_radiosondesColumnIndexes[i] = settings.m_radiosondesColumnIndexes[i];
+        }
+    }
+
+    if (settingsKeys.contains("radiosondesColumnSizes"))
+    {
+        for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
+            m_radiosondesColumnSizes[i] = settings.m_radiosondesColumnSizes[i];
+        }
+    }
+}
+
+QString RadiosondeSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("y1") || force) {
+        ostr << " m_y1: " << m_y1;
+    }
+    if (settingsKeys.contains("y2") || force) {
+        ostr << " m_y2: " << m_y2;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+
+    if (settingsKeys.contains("radiosondesColumnIndexes"))
+    {
+        ostr << "m_radiosondesColumnIndexes:";
+
+        for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
+            ostr << " " << m_radiosondesColumnIndexes[i];
+        }
+    }
+
+    if (settingsKeys.contains("radiosondesColumnSizes"))
+    {
+        ostr << "m_radiosondesColumnSizes:";
+
+        for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
+            ostr << " " << m_radiosondesColumnSizes[i];
+        }
+    }
+
+    return QString(ostr.str().c_str());
+}
