@@ -73,7 +73,13 @@ bool RigCtlServerGUI::handleMessage(const Message& message)
     {
         qDebug("RigCtlServerGUI::handleMessage: RigCtlServer::MsgConfigureRigCtlServer");
         const RigCtlServer::MsgConfigureRigCtlServer& cfg = (RigCtlServer::MsgConfigureRigCtlServer&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -114,7 +120,6 @@ void RigCtlServerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
 }
 
 RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -158,6 +163,7 @@ RigCtlServerGUI::~RigCtlServerGUI()
 void RigCtlServerGUI::setWorkspaceIndex(int index)
 {
     m_settings.m_workspaceIndex = index;
+    m_settingsKeys.append("workspaceIndex");
     m_feature->setWorkspaceIndex(index);
 }
 
@@ -220,6 +226,7 @@ void RigCtlServerGUI::updateDeviceSetList()
     {
         qDebug("RigCtlServerGUI::updateDeviceSetLists: device index changed: %d", newDeviceIndex);
         m_settings.m_deviceIndex = newDeviceIndex;
+        m_settingsKeys.append("deviceIndex");
     }
 
     updateChannelList();
@@ -270,6 +277,7 @@ bool RigCtlServerGUI::updateChannelList()
     {
         qDebug("RigCtlServerGUI::updateChannelList: channel index changed: %d", newChannelIndex);
         m_settings.m_channelIndex = newChannelIndex;
+        m_settingsKeys.append("channelIndex");
         return true;
     }
 
@@ -302,6 +310,14 @@ void RigCtlServerGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -320,6 +336,7 @@ void RigCtlServerGUI::on_startStop_toggled(bool checked)
 void RigCtlServerGUI::on_enable_toggled(bool checked)
 {
     m_settings.m_enabled = checked;
+    m_settingsKeys.append("enabled");
     applySettings();
 }
 
@@ -335,6 +352,7 @@ void RigCtlServerGUI::on_device_currentIndexChanged(int index)
     if (index >= 0)
     {
         m_settings.m_deviceIndex = ui->device->currentData().toInt();
+        m_settingsKeys.append("deviceIndex");
         updateChannelList();
         applySettings();
     }
@@ -345,6 +363,7 @@ void RigCtlServerGUI::on_channel_currentIndexChanged(int index)
     if (index >= 0)
     {
         m_settings.m_channelIndex = index;
+        m_settingsKeys.append("channelIndex");
         applySettings();
     }
 }
@@ -352,12 +371,14 @@ void RigCtlServerGUI::on_channel_currentIndexChanged(int index)
 void RigCtlServerGUI::on_rigCtrlPort_valueChanged(int value)
 {
     m_settings.m_rigCtlPort = value;
+    m_settingsKeys.append("rigCtlPort");
     applySettings();
 }
 
 void RigCtlServerGUI::on_maxFrequencyOffset_valueChanged(int value)
 {
     m_settings.m_maxFrequencyOffset = value;
+    m_settingsKeys.append("maxFrequencyOffset");
     applySettings();
 }
 
@@ -394,9 +415,11 @@ void RigCtlServerGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-	    RigCtlServer::MsgConfigureRigCtlServer* message = RigCtlServer::MsgConfigureRigCtlServer::create( m_settings, force);
+	    RigCtlServer::MsgConfigureRigCtlServer* message = RigCtlServer::MsgConfigureRigCtlServer::create(m_settings, m_settingsKeys, force);
 	    m_rigCtlServer->getInputMessageQueue()->push(message);
 	}
+
+    m_settingsKeys.clear();
 }
 
 void RigCtlServerGUI::makeUIConnections()

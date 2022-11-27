@@ -107,7 +107,7 @@ bool RigCtlServerWorker::handleMessage(const Message& cmd)
         MsgConfigureRigCtlServerWorker& cfg = (MsgConfigureRigCtlServerWorker&) cmd;
         qDebug() << "RigCtlServerWorker::handleMessage: MsgConfigureRigCtlServerWorker";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -117,25 +117,21 @@ bool RigCtlServerWorker::handleMessage(const Message& cmd)
     }
 }
 
-void RigCtlServerWorker::applySettings(const RigCtlServerSettings& settings, bool force)
+void RigCtlServerWorker::applySettings(const RigCtlServerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "RigCtlServerWorker::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_enabled: " << settings.m_enabled
-            << " m_deviceIndex: " << settings.m_deviceIndex
-            << " m_channelIndex: " << settings.m_channelIndex
-            << " m_rigCtlPort: " << settings.m_rigCtlPort
-            << " m_maxFrequencyOffset: " << settings.m_maxFrequencyOffset
-            << " force: " << force;
+    qDebug() << "RigCtlServerWorker::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    if ((settings.m_rigCtlPort != m_settings.m_rigCtlPort) ||
-        (settings.m_enabled != m_settings.m_enabled) ||  force)
+    if (settingsKeys.contains("rigCtlPort") ||
+        settingsKeys.contains("enabled") ||  force)
     {
         restartServer(settings.m_enabled, settings.m_rigCtlPort);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void RigCtlServerWorker::restartServer(bool enabled, uint32_t port)

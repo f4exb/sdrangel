@@ -68,6 +68,8 @@ struct RigCtlServerSettings
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
+    void applySettings(const QStringList& settingsKeys, const RigCtlServerSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif // INCLUDE_FEATURE_RIGCTLSERVERSETTINGS_H_

@@ -39,20 +39,23 @@ public:
 
     public:
         const RigCtlServerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRigCtlServerWorker* create(const RigCtlServerSettings& settings, bool force)
+        static MsgConfigureRigCtlServerWorker* create(const RigCtlServerSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigureRigCtlServerWorker(settings, force);
+            return new MsgConfigureRigCtlServerWorker(settings, settingsKeys, force);
         }
 
     private:
         RigCtlServerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRigCtlServerWorker(const RigCtlServerSettings& settings, bool force) :
+        MsgConfigureRigCtlServerWorker(const RigCtlServerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -125,7 +128,7 @@ private:
     static const ModeDemod m_modeMap[];
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const RigCtlServerSettings& settings, bool force = false);
+    void applySettings(const RigCtlServerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void restartServer(bool enabled, uint32_t port);
     bool setFrequency(double frequency, rig_errcode_e& rigCtlRC);
     bool getFrequency(double& frequency, rig_errcode_e& rigCtlRC);

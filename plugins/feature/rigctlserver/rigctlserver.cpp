@@ -82,7 +82,8 @@ void RigCtlServer::start()
     m_state = ok ? StRunning : StError;
     m_thread.start();
 
-    RigCtlServerWorker::MsgConfigureRigCtlServerWorker *msg = RigCtlServerWorker::MsgConfigureRigCtlServerWorker::create(m_settings, true);
+    RigCtlServerWorker::MsgConfigureRigCtlServerWorker *msg = RigCtlServerWorker::MsgConfigureRigCtlServerWorker::create(
+        m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
 }
 
@@ -101,7 +102,7 @@ bool RigCtlServer::handleMessage(const Message& cmd)
 	{
         MsgConfigureRigCtlServer& cfg = (MsgConfigureRigCtlServer&) cmd;
         qDebug() << "RigCtlServer::handleMessage: MsgConfigureRigCtlServer";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
 		return true;
 	}
@@ -125,7 +126,7 @@ bool RigCtlServer::handleMessage(const Message& cmd)
         qDebug() << "RigCtlServer::handleMessage: MsgChannelIndexChange: " << newChannelIndex;
         RigCtlServerSettings settings = m_settings;
         settings.m_channelIndex = newChannelIndex;
-        applySettings(settings, false);
+        applySettings(settings, QList<QString>{"channelIndex"}, false);
 
         if (getMessageQueueToGUI())
         {
@@ -150,76 +151,43 @@ bool RigCtlServer::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureRigCtlServer *msg = MsgConfigureRigCtlServer::create(m_settings, true);
+        MsgConfigureRigCtlServer *msg = MsgConfigureRigCtlServer::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureRigCtlServer *msg = MsgConfigureRigCtlServer::create(m_settings, true);
+        MsgConfigureRigCtlServer *msg = MsgConfigureRigCtlServer::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void RigCtlServer::applySettings(const RigCtlServerSettings& settings, bool force)
+void RigCtlServer::applySettings(const RigCtlServerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "RigCtlServer::applySettings:"
-            << " m_enabled: " << settings.m_enabled
-            << " m_deviceIndex: " << settings.m_deviceIndex
-            << " m_channelIndex: " << settings.m_channelIndex
-            << " m_rigCtlPort: " << settings.m_rigCtlPort
-            << " m_maxFrequencyOffset: " << settings.m_maxFrequencyOffset
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIFeatureSetIndex: " << settings.m_reverseAPIFeatureSetIndex
-            << " m_reverseAPIFeatureIndex: " << settings.m_reverseAPIFeatureIndex
-            << " force: " << force;
-
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_enabled != settings.m_enabled) || force) {
-        reverseAPIKeys.append("enabled");
-    }
-    if ((m_settings.m_deviceIndex != settings.m_deviceIndex) || force) {
-        reverseAPIKeys.append("deviceIndex");
-    }
-    if ((m_settings.m_channelIndex != settings.m_channelIndex) || force) {
-        reverseAPIKeys.append("channelIndex");
-    }
-    if ((m_settings.m_rigCtlPort != settings.m_rigCtlPort) || force) {
-        reverseAPIKeys.append("rigCtlPort");
-    }
-    if ((m_settings.m_maxFrequencyOffset != settings.m_maxFrequencyOffset) || force) {
-        reverseAPIKeys.append("maxFrequencyOffset");
-    }
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
+    qDebug() << "RigCtlServer::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
     RigCtlServerWorker::MsgConfigureRigCtlServerWorker *msg = RigCtlServerWorker::MsgConfigureRigCtlServerWorker::create(
-        settings, force
+        settings, settingsKeys, force
     );
     m_worker->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int RigCtlServer::webapiRun(bool run,
@@ -254,13 +222,13 @@ int RigCtlServer::webapiSettingsPutPatch(
     RigCtlServerSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureRigCtlServer *msg = MsgConfigureRigCtlServer::create(settings, force);
+    MsgConfigureRigCtlServer *msg = MsgConfigureRigCtlServer::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("RigCtlServer::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRigCtlServer *msgToGUI = MsgConfigureRigCtlServer::create(settings, force);
+        MsgConfigureRigCtlServer *msgToGUI = MsgConfigureRigCtlServer::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -404,7 +372,7 @@ void RigCtlServer::webapiUpdateFeatureSettings(
     }
 }
 
-void RigCtlServer::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const RigCtlServerSettings& settings, bool force)
+void RigCtlServer::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const RigCtlServerSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

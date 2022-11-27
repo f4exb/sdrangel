@@ -45,19 +45,22 @@ public:
 
     public:
         const RigCtlServerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRigCtlServer* create(const RigCtlServerSettings& settings, bool force) {
-            return new MsgConfigureRigCtlServer(settings, force);
+        static MsgConfigureRigCtlServer* create(const RigCtlServerSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureRigCtlServer(settings, settingsKeys, force);
         }
 
     private:
         RigCtlServerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRigCtlServer(const RigCtlServerSettings& settings, bool force) :
+        MsgConfigureRigCtlServer(const RigCtlServerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -138,8 +141,8 @@ private:
 
     void start();
     void stop();
-    void applySettings(const RigCtlServerSettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const RigCtlServerSettings& settings, bool force);
+    void applySettings(const RigCtlServerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const RigCtlServerSettings& settings, bool force);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
 
 private slots:

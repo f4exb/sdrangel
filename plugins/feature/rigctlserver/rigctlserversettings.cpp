@@ -134,3 +134,88 @@ bool RigCtlServerSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void RigCtlServerSettings::applySettings(const QStringList& settingsKeys, const RigCtlServerSettings& settings)
+{
+    if (settingsKeys.contains("rigCtlPort")) {
+        m_rigCtlPort = settings.m_rigCtlPort;
+    }
+    if (settingsKeys.contains("maxFrequencyOffset")) {
+        m_maxFrequencyOffset = settings.m_maxFrequencyOffset;
+    }
+    if (settingsKeys.contains("deviceIndex")) {
+        m_deviceIndex = settings.m_deviceIndex;
+    }
+    if (settingsKeys.contains("channelIndex")) {
+        m_channelIndex = settings.m_channelIndex;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+}
+
+QString RigCtlServerSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("rigCtlPort") || force) {
+        ostr << " m_rigCtlPort: " << m_rigCtlPort;
+    }
+    if (settingsKeys.contains("maxFrequencyOffset") || force) {
+        ostr << " m_maxFrequencyOffset: " << m_maxFrequencyOffset;
+    }
+    if (settingsKeys.contains("deviceIndex") || force) {
+        ostr << " m_deviceIndex: " << m_deviceIndex;
+    }
+    if (settingsKeys.contains("channelIndex") || force) {
+        ostr << " m_channelIndex: " << m_channelIndex;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}
+
