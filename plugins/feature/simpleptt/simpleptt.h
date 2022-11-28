@@ -45,19 +45,22 @@ public:
 
     public:
         const SimplePTTSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSimplePTT* create(const SimplePTTSettings& settings, bool force) {
-            return new MsgConfigureSimplePTT(settings, force);
+        static MsgConfigureSimplePTT* create(const SimplePTTSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureSimplePTT(settings, settingsKeys, force);
         }
 
     private:
         SimplePTTSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureSimplePTT(const SimplePTTSettings& settings, bool force) :
+        MsgConfigureSimplePTT(const SimplePTTSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -162,9 +165,9 @@ private:
 
     void start();
     void stop();
-    void applySettings(const SimplePTTSettings& settings, bool force = false);
+    void applySettings(const SimplePTTSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const SimplePTTSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const SimplePTTSettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

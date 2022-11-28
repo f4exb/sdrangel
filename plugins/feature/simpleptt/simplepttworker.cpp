@@ -94,7 +94,7 @@ bool SimplePTTWorker::handleMessage(const Message& cmd)
         MsgConfigureSimplePTTWorker& cfg = (MsgConfigureSimplePTTWorker&) cmd;
         qDebug() << "SimplePTTWorker::handleMessage: MsgConfigureSimplePTTWorker";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -113,23 +113,11 @@ bool SimplePTTWorker::handleMessage(const Message& cmd)
     }
 }
 
-void SimplePTTWorker::applySettings(const SimplePTTSettings& settings, bool force)
+void SimplePTTWorker::applySettings(const SimplePTTSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "SimplePTTWorker::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_rxDeviceSetIndex: " << settings.m_rxDeviceSetIndex
-            << " m_txDeviceSetIndex: " << settings.m_txDeviceSetIndex
-            << " m_rx2TxDelayMs: " << settings.m_rx2TxDelayMs
-            << " m_tx2RxDelayMs: " << settings.m_tx2RxDelayMs
-            << " m_vox: " << settings.m_vox
-            << " m_voxEnable: " << settings.m_voxEnable
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_voxLevel: " << settings.m_voxLevel
-            << " m_voxHold: " << settings.m_voxHold
-            << " force: " << force;
+    qDebug() << "SimplePTTWorker::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if (settingsKeys.contains("audioDeviceName") || force)
     {
         QMutexLocker mlock(&m_mutex);
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
@@ -141,7 +129,7 @@ void SimplePTTWorker::applySettings(const SimplePTTSettings& settings, bool forc
         m_voxState = false;
     }
 
-    if ((settings.m_vox != m_settings.m_vox) || force)
+    if (settingsKeys.contains("vox") || force)
     {
         QMutexLocker mlock(&m_mutex);
         m_voxHoldCount = 0;
@@ -161,12 +149,16 @@ void SimplePTTWorker::applySettings(const SimplePTTSettings& settings, bool forc
         }
     }
 
-    if ((settings.m_voxLevel != m_settings.m_voxLevel) || force)
-    {
+    if (settingsKeys.contains("voxLevel") || force) {
         m_voxLevel = CalcDb::powerFromdB(settings.m_voxLevel);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
 }
 
 void SimplePTTWorker::sendPTT(bool tx)

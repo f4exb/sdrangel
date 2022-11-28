@@ -76,7 +76,13 @@ bool SimplePTTGUI::handleMessage(const Message& message)
     {
         qDebug("SimplePTTGUI::handleMessage: SimplePTT::MsgConfigureSimplePTT");
         const SimplePTT::MsgConfigureSimplePTT& cfg = (SimplePTT::MsgConfigureSimplePTT&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -194,6 +200,7 @@ SimplePTTGUI::~SimplePTTGUI()
 void SimplePTTGUI::setWorkspaceIndex(int index)
 {
     m_settings.m_workspaceIndex = index;
+    m_settingsKeys.append("workspaceIndex");
     m_feature->setWorkspaceIndex(index);
 }
 
@@ -291,6 +298,8 @@ void SimplePTTGUI::updateDeviceSetLists()
         qDebug("SimplePTTGUI::updateDeviceSetLists: device index changed: %d:%d", rxDeviceIndex, txDeviceIndex);
         m_settings.m_rxDeviceSetIndex = rxDeviceIndex;
         m_settings.m_txDeviceSetIndex = txDeviceIndex;
+        m_settingsKeys.append("rxDeviceSetIndex");
+        m_settingsKeys.append("txDeviceSetIndex");
         applySettings();
     }
 
@@ -323,6 +332,14 @@ void SimplePTTGUI::onMenuDialogCalled(const QPoint &p)
 
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
+
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
 
         applySettings();
     }
@@ -357,6 +374,7 @@ void SimplePTTGUI::on_rxDevice_currentIndexChanged(int index)
     if (index >= 0)
     {
         m_settings.m_rxDeviceSetIndex = index;
+        m_settingsKeys.append("rxDeviceSetIndex");
         applySettings();
     }
 }
@@ -366,6 +384,7 @@ void SimplePTTGUI::on_txDevice_currentIndexChanged(int index)
     if (index >= 0)
     {
         m_settings.m_txDeviceSetIndex = index;
+        m_settingsKeys.append("txDeviceSetIndex");
         applySettings();
     }
 
@@ -374,12 +393,14 @@ void SimplePTTGUI::on_txDevice_currentIndexChanged(int index)
 void SimplePTTGUI::on_rxtxDelay_valueChanged(int value)
 {
     m_settings.m_rx2TxDelayMs = value;
+    m_settingsKeys.append("rx2TxDelayMs");
     applySettings();
 }
 
 void SimplePTTGUI::on_txrxDelay_valueChanged(int value)
 {
     m_settings.m_tx2RxDelayMs = value;
+    m_settingsKeys.append("tx2RxDelayMs");
     applySettings();
 }
 
@@ -391,12 +412,14 @@ void SimplePTTGUI::on_ptt_toggled(bool checked)
 void SimplePTTGUI::on_vox_toggled(bool checked)
 {
     m_settings.m_vox = checked;
+    m_settingsKeys.append("vox");
     applySettings();
 }
 
 void SimplePTTGUI::on_voxEnable_clicked(bool checked)
 {
     m_settings.m_voxEnable = checked;
+    m_settingsKeys.append("voxEnable");
     applySettings();
 }
 
@@ -404,12 +427,14 @@ void SimplePTTGUI::on_voxLevel_valueChanged(int value)
 {
     m_settings.m_voxLevel = value;
     ui->voxLevelText->setText(tr("%1").arg(m_settings.m_voxLevel));
+    m_settingsKeys.append("voxLevel");
     applySettings();
 }
 
 void SimplePTTGUI::on_voxHold_valueChanged(int value)
 {
     m_settings.m_voxHold = value;
+    m_settingsKeys.append("voxHold");
     applySettings();
 }
 
@@ -454,9 +479,11 @@ void SimplePTTGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-	    SimplePTT::MsgConfigureSimplePTT* message = SimplePTT::MsgConfigureSimplePTT::create( m_settings, force);
+	    SimplePTT::MsgConfigureSimplePTT* message = SimplePTT::MsgConfigureSimplePTT::create( m_settings, m_settingsKeys, force);
 	    m_simplePTT->getInputMessageQueue()->push(message);
 	}
+
+    m_settingsKeys.clear();
 }
 
 void SimplePTTGUI::applyPTT(bool tx)
@@ -478,6 +505,7 @@ void SimplePTTGUI::audioSelect()
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        m_settingsKeys.append("audioDeviceName");
         applySettings();
     }
 }

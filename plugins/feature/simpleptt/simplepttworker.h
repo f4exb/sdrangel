@@ -38,20 +38,23 @@ public:
 
     public:
         const SimplePTTSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSimplePTTWorker* create(const SimplePTTSettings& settings, bool force)
+        static MsgConfigureSimplePTTWorker* create(const SimplePTTSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigureSimplePTTWorker(settings, force);
+            return new MsgConfigureSimplePTTWorker(settings, settingsKeys, force);
         }
 
     private:
         SimplePTTSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureSimplePTTWorker(const SimplePTTSettings& settings, bool force) :
+        MsgConfigureSimplePTTWorker(const SimplePTTSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -107,7 +110,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const SimplePTTSettings& settings, bool force = false);
+    void applySettings(const SimplePTTSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void sendPTT(bool tx);
     bool turnDevice(bool on);
 

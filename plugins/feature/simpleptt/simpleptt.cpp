@@ -107,7 +107,7 @@ void SimplePTT::start()
     m_state = StRunning;
     m_thread->start();
 
-    SimplePTTWorker::MsgConfigureSimplePTTWorker *msg = SimplePTTWorker::MsgConfigureSimplePTTWorker::create(m_settings, true);
+    SimplePTTWorker::MsgConfigureSimplePTTWorker *msg = SimplePTTWorker::MsgConfigureSimplePTTWorker::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
 
     m_running = true;
@@ -135,7 +135,7 @@ bool SimplePTT::handleMessage(const Message& cmd)
 	{
         MsgConfigureSimplePTT& cfg = (MsgConfigureSimplePTT&) cmd;
         qDebug() << "SimplePTT::handleMessage: MsgConfigureSimplePTT";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
 		return true;
 	}
@@ -181,14 +181,14 @@ bool SimplePTT::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureSimplePTT *msg = MsgConfigureSimplePTT::create(m_settings, true);
+        MsgConfigureSimplePTT *msg = MsgConfigureSimplePTT::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureSimplePTT *msg = MsgConfigureSimplePTT::create(m_settings, true);
+        MsgConfigureSimplePTT *msg = MsgConfigureSimplePTT::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -201,74 +201,33 @@ void SimplePTT::getAudioPeak(float& peak)
     }
 }
 
-void SimplePTT::applySettings(const SimplePTTSettings& settings, bool force)
+void SimplePTT::applySettings(const SimplePTTSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "SimplePTT::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_rxDeviceSetIndex: " << settings.m_rxDeviceSetIndex
-            << " m_txDeviceSetIndex: " << settings.m_txDeviceSetIndex
-            << " m_rx2TxDelayMs: " << settings.m_rx2TxDelayMs
-            << " m_tx2RxDelayMs: " << settings.m_tx2RxDelayMs
-            << " m_vox: " << settings.m_vox
-            << " m_voxEnable: " << settings.m_voxEnable
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_voxLevel: " << settings.m_voxLevel
-            << " m_voxHold: " << settings.m_voxHold
-            << " force: " << force;
-
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-    if ((m_settings.m_rxDeviceSetIndex != settings.m_rxDeviceSetIndex) || force) {
-        reverseAPIKeys.append("rxDeviceSetIndex");
-    }
-    if ((m_settings.m_txDeviceSetIndex != settings.m_txDeviceSetIndex) || force) {
-        reverseAPIKeys.append("txDeviceSetIndex");
-    }
-    if ((m_settings.m_rx2TxDelayMs != settings.m_rx2TxDelayMs) || force) {
-        reverseAPIKeys.append("rx2TxDelayMs");
-    }
-    if ((m_settings.m_tx2RxDelayMs != settings.m_tx2RxDelayMs) || force) {
-        reverseAPIKeys.append("tx2RxDelayMs");
-    }
-    if ((m_settings.m_vox != settings.m_vox) || force) {
-        reverseAPIKeys.append("vox");
-    }
-    if ((m_settings.m_voxEnable != settings.m_voxEnable) || force) {
-        reverseAPIKeys.append("voxEnable");
-    }
-    if ((m_settings.m_voxHold != settings.m_voxHold) || force) {
-        reverseAPIKeys.append("voxHold");
-    }
-    if ((m_settings.m_voxLevel != settings.m_voxLevel) || force) {
-        reverseAPIKeys.append("voxLevel");
-    }
+    qDebug() << "SimplePTT::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
     if (m_running)
     {
         SimplePTTWorker::MsgConfigureSimplePTTWorker *msg = SimplePTTWorker::MsgConfigureSimplePTTWorker::create(
-            settings, force
+            settings, settingsKeys, force
         );
         m_worker->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int SimplePTT::webapiRun(bool run,
@@ -303,13 +262,13 @@ int SimplePTT::webapiSettingsPutPatch(
     SimplePTTSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureSimplePTT *msg = MsgConfigureSimplePTT::create(settings, force);
+    MsgConfigureSimplePTT *msg = MsgConfigureSimplePTT::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("SimplePTT::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSimplePTT *msgToGUI = MsgConfigureSimplePTT::create(settings, force);
+        MsgConfigureSimplePTT *msgToGUI = MsgConfigureSimplePTT::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -488,7 +447,7 @@ void SimplePTT::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& respons
     response.getSimplePttReport()->setRunningState(getState());
 }
 
-void SimplePTT::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SimplePTTSettings& settings, bool force)
+void SimplePTT::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const SimplePTTSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

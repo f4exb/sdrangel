@@ -140,3 +140,108 @@ bool SimplePTTSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void SimplePTTSettings::applySettings(const QStringList& settingsKeys, const SimplePTTSettings& settings)
+{
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("rxDeviceSetIndex")) {
+        m_rxDeviceSetIndex = settings.m_rxDeviceSetIndex;
+    }
+    if (settingsKeys.contains("txDeviceSetIndex")) {
+        m_txDeviceSetIndex = settings.m_txDeviceSetIndex;
+    }
+    if (settingsKeys.contains("rx2TxDelayMs")) {
+        m_rx2TxDelayMs = settings.m_rx2TxDelayMs;
+    }
+    if (settingsKeys.contains("tx2RxDelayMs")) {
+        m_tx2RxDelayMs = settings.m_tx2RxDelayMs;
+    }
+    if (settingsKeys.contains("audioDeviceName")) {
+        m_audioDeviceName = settings.m_audioDeviceName;
+    }
+    if (settingsKeys.contains("voxLevel")) {
+        m_voxLevel = settings.m_voxLevel;
+    }
+    if (settingsKeys.contains("voxHold")) {
+        m_voxHold = settings.m_voxHold;
+    }
+    if (settingsKeys.contains("vox")) {
+        m_vox = settings.m_vox;
+    }
+    if (settingsKeys.contains("voxEnable")) {
+        m_voxEnable = settings.m_voxEnable;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+}
+
+QString SimplePTTSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("rxDeviceSetIndex") || force) {
+        ostr << " m_rxDeviceSetIndex: " << m_rxDeviceSetIndex;
+    }
+    if (settingsKeys.contains("txDeviceSetIndex") || force) {
+        ostr << " m_txDeviceSetIndex: " << m_txDeviceSetIndex;
+    }
+    if (settingsKeys.contains("rx2TxDelayMs") || force) {
+        ostr << " m_rx2TxDelayMs: " << m_rx2TxDelayMs;
+    }
+    if (settingsKeys.contains("tx2RxDelayMs") || force) {
+        ostr << " m_tx2RxDelayMs: " << m_tx2RxDelayMs;
+    }
+    if (settingsKeys.contains("audioDeviceName") || force) {
+        ostr << " m_audioDeviceName: " << m_audioDeviceName.toStdString();
+    }
+    if (settingsKeys.contains("voxLevel") || force) {
+        ostr << " m_voxLevel: " << m_voxLevel;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}

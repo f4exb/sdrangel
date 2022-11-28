@@ -54,6 +54,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	FeatureUISet* m_featureUISet;
 	SimplePTTSettings m_settings;
+    QList<QString> m_settingsKeys;
 	RollupState m_rollupState;
 	bool m_doApplySettings;
 
