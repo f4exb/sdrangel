@@ -76,8 +76,11 @@ SatelliteSelectionDialog::~SatelliteSelectionDialog()
 void SatelliteSelectionDialog::accept()
 {
     m_settings->m_satellites.clear();
-    for (int i = 0; i < ui->selectedSats->count(); i++)
+
+    for (int i = 0; i < ui->selectedSats->count(); i++) {
         m_settings->m_satellites.append(ui->selectedSats->item(i)->text());
+    }
+
     QDialog::accept();
 }
 

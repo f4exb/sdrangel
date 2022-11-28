@@ -56,6 +56,7 @@ void SatelliteRadioControlDialog::accept()
     for (int i = 0; i < m_devSettingsGUIs.size(); i++) {
         m_devSettingsGUIs[i]->accept();
     }
+
     QDialog::accept();
     m_settings->m_deviceSettings = m_deviceSettings;
 }

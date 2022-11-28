@@ -126,7 +126,7 @@ bool SatelliteTrackerWorker::handleMessage(const Message& message)
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureSatelliteTrackerWorker& cfg = (MsgConfigureSatelliteTrackerWorker&) message;
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
         return true;
     }
     else if (SatelliteTracker::MsgSatData::match(message))
@@ -142,28 +142,22 @@ bool SatelliteTrackerWorker::handleMessage(const Message& message)
     }
 }
 
-void SatelliteTrackerWorker::applySettings(const SatelliteTrackerSettings& settings, bool force)
+void SatelliteTrackerWorker::applySettings(const SatelliteTrackerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "SatelliteTrackerWorker::applySettings:"
-            << " m_target: " << settings.m_target
-            << " m_satellites: " << settings.m_satellites
-            << " m_dateTime: " << settings.m_dateTime
-            << " m_utc: " << settings.m_utc
-            << " m_updatePeriod: " << settings.m_updatePeriod
-            << " force: " << force;
+    qDebug() << "SatelliteTrackerWorker::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    if ((m_settings.m_target != settings.m_target)
-        || (m_settings.m_latitude != settings.m_latitude)
-        || (m_settings.m_longitude != settings.m_longitude)
-        || (m_settings.m_heightAboveSeaLevel != settings.m_heightAboveSeaLevel)
-        || (m_settings.m_dateTime != settings.m_dateTime)
-        || (m_settings.m_utc != settings.m_utc)
-        || (m_settings.m_groundTrackPoints != settings.m_groundTrackPoints)
-        || (m_settings.m_minAOSElevation != settings.m_minAOSElevation)
-        || (m_settings.m_minPassElevation != settings.m_minPassElevation)
-        || (m_settings.m_predictionPeriod != settings.m_predictionPeriod)
-        || (m_settings.m_passStartTime != settings.m_passStartTime)
-        || (m_settings.m_passFinishTime != settings.m_passFinishTime)
+    if (settingsKeys.contains("target")
+        || settingsKeys.contains("latitude")
+        || settingsKeys.contains("longitude")
+        || settingsKeys.contains("heightAboveSeaLevel")
+        || settingsKeys.contains("dateTime")
+        || settingsKeys.contains("utc")
+        || settingsKeys.contains("groundTrackPoints")
+        || settingsKeys.contains("minAOSElevation")
+        || settingsKeys.contains("minPassElevation")
+        || settingsKeys.contains("predictionPeriod")
+        || settingsKeys.contains("passStartTime")
+        || settingsKeys.contains("passFinishTime")
         || (!m_settings.m_drawOnMap && settings.m_drawOnMap)
         || force)
     {
@@ -172,7 +166,7 @@ void SatelliteTrackerWorker::applySettings(const SatelliteTrackerSettings& setti
         QTimer::singleShot(1, this, &SatelliteTrackerWorker::update);
         m_pollTimer.start((int)round(settings.m_updatePeriod*1000.0));
     }
-    else if ((m_settings.m_updatePeriod != settings.m_updatePeriod) || force)
+    else if (settingsKeys.contains("updatePeriod") || force)
     {
         m_pollTimer.start((int)round(settings.m_updatePeriod*1000.0));
     }
@@ -213,7 +207,11 @@ void SatelliteTrackerWorker::applySettings(const SatelliteTrackerSettings& setti
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void SatelliteTrackerWorker::removeFromMap(QString id)

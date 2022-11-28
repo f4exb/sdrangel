@@ -344,3 +344,346 @@ SatelliteTrackerSettings::SatelliteDeviceSettings::SatelliteDeviceSettings()
     m_aosCommand = "";
     m_losCommand = "";
 }
+
+void SatelliteTrackerSettings::applySettings(const QStringList& settingsKeys, const SatelliteTrackerSettings& settings)
+{
+    if (settingsKeys.contains("latitude")) {
+        m_latitude = settings.m_latitude;
+    }
+    if (settingsKeys.contains("longitude")) {
+        m_longitude = settings.m_longitude;
+    }
+    if (settingsKeys.contains("heightAboveSeaLevel")) {
+        m_heightAboveSeaLevel = settings.m_heightAboveSeaLevel;
+    }
+    if (settingsKeys.contains("target")) {
+        m_target = settings.m_target;
+    }
+    if (settingsKeys.contains("satellites")) {
+        m_satellites = settings.m_satellites;
+    }
+    if (settingsKeys.contains("tles")) {
+        m_tles = settings.m_tles;
+    }
+    if (settingsKeys.contains("dateTime")) {
+        m_dateTime = settings.m_dateTime;
+    }
+    if (settingsKeys.contains("minAOSElevation")) {
+        m_minAOSElevation = settings.m_minAOSElevation;
+    }
+    if (settingsKeys.contains("minPassElevation")) {
+        m_minPassElevation = settings.m_minPassElevation;
+    }
+    if (settingsKeys.contains("rotatorMaxAzimuth")) {
+        m_rotatorMaxAzimuth = settings.m_rotatorMaxAzimuth;
+    }
+    if (settingsKeys.contains("rotatorMaxElevation")) {
+        m_rotatorMaxElevation = settings.m_rotatorMaxElevation;
+    }
+    if (settingsKeys.contains("azElUnits")) {
+        m_azElUnits = settings.m_azElUnits;
+    }
+    if (settingsKeys.contains("groundTrackPoints")) {
+        m_groundTrackPoints = settings.m_groundTrackPoints;
+    }
+    if (settingsKeys.contains("dateFormat")) {
+        m_dateFormat = settings.m_dateFormat;
+    }
+    if (settingsKeys.contains("utc")) {
+        m_utc = settings.m_utc;
+    }
+    if (settingsKeys.contains("updatePeriod")) {
+        m_updatePeriod = settings.m_updatePeriod;
+    }
+    if (settingsKeys.contains("dopplerPeriod")) {
+        m_dopplerPeriod = settings.m_dopplerPeriod;
+    }
+    if (settingsKeys.contains("defaultFrequency")) {
+        m_defaultFrequency = settings.m_defaultFrequency;
+    }
+    if (settingsKeys.contains("drawOnMap")) {
+        m_drawOnMap = settings.m_drawOnMap;
+    }
+    if (settingsKeys.contains("autoTarget")) {
+        m_autoTarget = settings.m_autoTarget;
+    }
+    if (settingsKeys.contains("aosSpeech")) {
+        m_aosSpeech = settings.m_aosSpeech;
+    }
+    if (settingsKeys.contains("aosCommand")) {
+        m_aosCommand = settings.m_aosCommand;
+    }
+    if (settingsKeys.contains("losCommand")) {
+        m_losCommand = settings.m_losCommand;
+    }
+    if (settingsKeys.contains("predictionPeriod")) {
+        m_predictionPeriod = settings.m_predictionPeriod;
+    }
+    if (settingsKeys.contains("passStartTime")) {
+        m_passStartTime = settings.m_passStartTime;
+    }
+    if (settingsKeys.contains("passFinishTime")) {
+        m_passFinishTime = settings.m_passFinishTime;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("chartsDarkTheme")) {
+        m_chartsDarkTheme = settings.m_chartsDarkTheme;
+    }
+    if (settingsKeys.contains("replayEnabled")) {
+        m_replayEnabled = settings.m_replayEnabled;
+    }
+    if (settingsKeys.contains("sendTimeToMap")) {
+        m_sendTimeToMap = settings.m_sendTimeToMap;
+    }
+    if (settingsKeys.contains("dateTimeSelect")) {
+        m_dateTimeSelect = settings.m_dateTimeSelect;
+    }
+    if (settingsKeys.contains("columnSort")) {
+        m_columnSort = settings.m_columnSort;
+    }
+    if (settingsKeys.contains("columnSortOrder")) {
+        m_columnSortOrder = settings.m_columnSortOrder;
+    }
+
+    if (settingsKeys.contains("columnIndexes"))
+    {
+        for (int i = 0; i < SAT_COL_COLUMNS; i++) {
+            m_columnIndexes[i] = settings.m_columnIndexes[i];
+        }
+    }
+
+    if (settingsKeys.contains("columnSizes"))
+    {
+        for (int i = 0; i < SAT_COL_COLUMNS; i++) {
+            m_columnSizes[i] = settings.m_columnSizes[i];
+        }
+    }
+
+    if (settingsKeys.contains("deviceSettings")) {
+        m_deviceSettings = settings.m_deviceSettings;
+    }
+}
+
+QString SatelliteTrackerSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("latitude") || force) {
+        ostr << " m_latitude: " << m_latitude;
+    }
+    if (settingsKeys.contains("longitude") || force) {
+        ostr << " m_longitude: " << m_longitude;
+    }
+    if (settingsKeys.contains("heightAboveSeaLevel") || force) {
+        ostr << " m_heightAboveSeaLevel: " << m_heightAboveSeaLevel;
+    }
+
+    if (settingsKeys.contains("satellites") || force)
+    {
+        ostr << "m_satellites:";
+
+        for (auto satellite : m_satellites) {
+            ostr << " " << satellite.toStdString();
+        }
+    }
+
+    if (settingsKeys.contains("tles") || force)
+    {
+        ostr << " m_tles:";
+
+        for (auto tle : m_tles) {
+            ostr << " " << tle.toStdString();
+        }
+    }
+
+    if (settingsKeys.contains("dateTime") || force) {
+        ostr << " m_dateTime: " << m_dateTime.toStdString();
+    }
+    if (settingsKeys.contains("minAOSElevation") || force) {
+        ostr << " m_minAOSElevation: " << m_minAOSElevation;
+    }
+    if (settingsKeys.contains("minPassElevation") || force) {
+        ostr << " m_minPassElevation: " << m_minPassElevation;
+    }
+    if (settingsKeys.contains("rotatorMaxAzimuth") || force) {
+        ostr << " m_rotatorMaxAzimuth: " << m_rotatorMaxAzimuth;
+    }
+    if (settingsKeys.contains("rotatorMaxElevation") || force) {
+        ostr << " m_rotatorMaxElevation: " << m_rotatorMaxElevation;
+    }
+    if (settingsKeys.contains("azElUnits") || force) {
+        ostr << " m_azElUnits: " << m_azElUnits;
+    }
+    if (settingsKeys.contains("groundTrackPoints") || force) {
+        ostr << " m_groundTrackPoints: " << m_groundTrackPoints;
+    }
+    if (settingsKeys.contains("dateFormat") || force) {
+        ostr << " m_dateFormat: " << m_dateFormat.toStdString();
+    }
+    if (settingsKeys.contains("utc") || force) {
+        ostr << " m_utc: " << m_utc;
+    }
+    if (settingsKeys.contains("updatePeriod") || force) {
+        ostr << " m_updatePeriod: " << m_updatePeriod;
+    }
+    if (settingsKeys.contains("dopplerPeriod") || force) {
+        ostr << " m_dopplerPeriod: " << m_dopplerPeriod;
+    }
+    if (settingsKeys.contains("defaultFrequency") || force) {
+        ostr << " m_defaultFrequency: " << m_defaultFrequency;
+    }
+    if (settingsKeys.contains("drawOnMap") || force) {
+        ostr << " m_drawOnMap: " << m_drawOnMap;
+    }
+    if (settingsKeys.contains("autoTarget") || force) {
+        ostr << " m_autoTarget: " << m_autoTarget;
+    }
+    if (settingsKeys.contains("aosSpeech") || force) {
+        ostr << " m_aosSpeech: " << m_aosSpeech.toStdString();
+    }
+    if (settingsKeys.contains("losSpeech") || force) {
+        ostr << " m_losSpeech: " << m_losSpeech.toStdString();
+    }
+    if (settingsKeys.contains("aosCommand") || force) {
+        ostr << " m_aosCommand: " << m_aosCommand.toStdString();
+    }
+    if (settingsKeys.contains("losCommand") || force) {
+        ostr << " m_losCommand: " << m_losCommand.toStdString();
+    }
+    if (settingsKeys.contains("predictionPeriod") || force) {
+        ostr << " m_predictionPeriod: " << m_predictionPeriod;
+    }
+    if (settingsKeys.contains("passStartTime") || force) {
+        ostr << " m_passStartTime: " << m_passStartTime.toString().toStdString();
+    }
+    if (settingsKeys.contains("passFinishTime") || force) {
+        ostr << " m_passFinishTime: " << m_passFinishTime.toString().toStdString();
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("chartsDarkTheme") || force) {
+        ostr << " m_chartsDarkTheme: " << m_chartsDarkTheme;
+    }
+    if (settingsKeys.contains("replayEnabled") || force) {
+        ostr << " m_replayEnabled: " << m_replayEnabled;
+    }
+    if (settingsKeys.contains("sendTimeToMap") || force) {
+        ostr << " m_sendTimeToMap: " << m_sendTimeToMap;
+    }
+    if (settingsKeys.contains("dateTimeSelect") || force) {
+        ostr << " m_dateTimeSelect: " << m_dateTimeSelect;
+    }
+    if (settingsKeys.contains("mapFeature") || force) {
+        ostr << " m_mapFeature: " << m_mapFeature.toStdString();
+    }
+    if (settingsKeys.contains("fileInputDevice") || force) {
+        ostr << " m_fileInputDevice: " << m_fileInputDevice.toStdString();
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("columnSort") || force) {
+        ostr << " m_columnSort: " << m_columnSort;
+    }
+    if (settingsKeys.contains("columnSortOrder") || force) {
+        ostr << " m_columnSortOrder: " << m_columnSortOrder;
+    }
+
+    if (settingsKeys.contains("columnIndexes"))
+    {
+        ostr << "m_columnIndexes:";
+
+        for (int i = 0; i < SAT_COL_COLUMNS; i++) {
+            ostr << " " << m_columnIndexes[i];
+        }
+    }
+
+    if (settingsKeys.contains("columnSizes"))
+    {
+        ostr << "m_columnSizes:";
+
+        for (int i = 0; i < SAT_COL_COLUMNS; i++) {
+            ostr << " " << m_columnSizes[i];
+        }
+    }
+
+    if (settingsKeys.contains("deviceSettings"))
+    {
+        ostr << "m_deviceSettings: [";
+
+        for (auto deviceSettingList : m_deviceSettings)
+        {
+            ostr << "[";
+
+            for (auto deviceSettings : *deviceSettingList) {
+                deviceSettings->getDebugString(ostr);
+            }
+
+            ostr << "]";
+        }
+
+        ostr << "]";
+    }
+
+    return QString(ostr.str().c_str());
+}
+
+
+void SatelliteTrackerSettings::SatelliteDeviceSettings::getDebugString(std::ostringstream& ostr)
+{
+    ostr << " m_deviceSetIndex: " << m_deviceSetIndex
+        << " m_presetGroup: " << m_presetGroup.toStdString()
+        << " m_presetFrequency: " << m_presetFrequency
+        << " m_presetDescription" <<  m_presetDescription.toStdString()
+        << " m_doppler: [";
+
+    for (auto doppler : m_doppler) {
+        ostr << " " << doppler;
+    }
+
+    ostr << "] m_startOnAOS: " << m_startOnAOS
+        << " m_stopOnLOS: " << m_stopOnLOS
+        << " m_startStopFileSink: " << m_startStopFileSink
+        << " m_frequency: " << m_frequency
+        << " m_aosCommand: " << m_aosCommand.toStdString()
+        << " m_losCommand: " << m_losCommand.toStdString();
+}

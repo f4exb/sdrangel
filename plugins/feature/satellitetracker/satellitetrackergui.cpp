@@ -104,7 +104,13 @@ bool SatelliteTrackerGUI::handleMessage(const Message& message)
     {
         qDebug("SatelliteTrackerGUI::handleMessage: SatelliteTracker::MsgConfigureSatelliteTracker");
         const SatelliteTracker::MsgConfigureSatelliteTracker& cfg = (SatelliteTracker::MsgConfigureSatelliteTracker&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -115,6 +121,7 @@ bool SatelliteTrackerGUI::handleMessage(const Message& message)
     {
         SatelliteTrackerReport::MsgReportSat& satReport = (SatelliteTrackerReport::MsgReportSat&) message;
         SatelliteState *satState = satReport.getSatelliteState();
+
         if (satState->m_name == m_settings.m_target)
         {
             delete m_targetSatState;
@@ -122,10 +129,12 @@ bool SatelliteTrackerGUI::handleMessage(const Message& message)
 
             ui->azimuth->setText(convertDegreesToText(satState->m_azimuth));
             ui->elevation->setText(convertDegreesToText(satState->m_elevation));
+
             if (satState->m_passes.size() > 0)
             {
                 const SatellitePass &pass = satState->m_passes[0];
                 bool geostationary = !pass.m_aos.isValid() && !pass.m_los.isValid();
+
                 if ((m_nextTargetAOS != pass.m_aos) || (m_nextTargetLOS != pass.m_los) || (geostationary != m_geostationarySatVisible))
                 {
                     m_nextTargetAOS = pass.m_aos;
@@ -136,9 +145,13 @@ bool SatelliteTrackerGUI::handleMessage(const Message& message)
                 }
             }
         }
+
         updateTable(satState);
-        if (satState->m_name != m_settings.m_target)
+
+        if (satState->m_name != m_settings.m_target) {
             delete satState;
+        }
+
         return true;
     }
     else if (SatelliteTrackerReport::MsgReportAOS::match(message))
@@ -165,16 +178,21 @@ bool SatelliteTrackerGUI::handleMessage(const Message& message)
         m_satellites = satData.getSatellites();
         // Remove satellites that no longer exist
         QMutableListIterator<QString> itr(m_settings.m_satellites);
+
         while (itr.hasNext())
         {
             QString satellite = itr.next();
             if (!m_satellites.contains(satellite))
                 itr.remove();
         }
-        if (!m_satellites.contains(m_settings.m_target))
+
+        if (!m_satellites.contains(m_settings.m_target)) {
             setTarget("");
+        }
+
         // Update GUI
         updateSelectedSats();
+
         return true;
     }
 
@@ -189,28 +207,37 @@ void SatelliteTrackerGUI::updateSelectedSats()
     {
         QString name = ui->target->itemText(i);
         int idx = m_settings.m_satellites.indexOf(name);
+
         if (idx == -1)
         {
             ui->target->removeItem(i);
             QList<QTableWidgetItem *> matches = ui->satTable->findItems(name, Qt::MatchExactly);
-            for (int j = 0; j < matches.length(); j++)
+
+            for (int j = 0; j < matches.length(); j++) {
                 ui->satTable->removeRow(ui->satTable->row(matches[j]));
+            }
         }
         else
+        {
             i++;
+        }
     }
+
     // Add new satellites to target combo
     for (int i = 0; i < m_settings.m_satellites.size(); i++)
     {
-        if (ui->target->findText(m_settings.m_satellites[i], Qt::MatchExactly) == -1)
+        if (ui->target->findText(m_settings.m_satellites[i], Qt::MatchExactly) == -1) {
             ui->target->addItem(m_settings.m_satellites[i]);
+        }
     }
     // Select current target, if it still exists
     int idx = ui->target->findText(m_settings.m_target);
-    if (idx != -1)
+
+    if (idx != -1) {
         ui->target->setCurrentIndex(idx);
-    else
+    } else {
         setTarget("");
+    }
 }
 
 void SatelliteTrackerGUI::handleInputMessages()
@@ -232,7 +259,6 @@ void SatelliteTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 
     RollupContents *rollupContents = getRollupContents();
     rollupContents->saveState(m_rollupState);
-    applySettings();
 }
 
 SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -320,6 +346,7 @@ SatelliteTrackerGUI::~SatelliteTrackerGUI()
 void SatelliteTrackerGUI::setWorkspaceIndex(int index)
 {
     m_settings.m_workspaceIndex = index;
+    m_settingsKeys.append("workspaceIndex");
     m_feature->setWorkspaceIndex(index);
 }
 
@@ -382,6 +409,14 @@ void SatelliteTrackerGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -418,6 +453,7 @@ void SatelliteTrackerGUI::on_startStop_toggled(bool checked)
 void SatelliteTrackerGUI::on_latitude_valueChanged(double value)
 {
     m_settings.m_latitude = value;
+    m_settingsKeys.append("latitude");
     applySettings();
     plotChart();
 }
@@ -425,6 +461,7 @@ void SatelliteTrackerGUI::on_latitude_valueChanged(double value)
 void SatelliteTrackerGUI::on_longitude_valueChanged(double value)
 {
     m_settings.m_longitude = value;
+    m_settingsKeys.append("longitude");
     applySettings();
     plotChart();
 }
@@ -434,6 +471,7 @@ void SatelliteTrackerGUI::setTarget(const QString& target)
     if (target != m_settings.m_target)
     {
         m_settings.m_target = target;
+        m_settingsKeys.append("target");
         ui->azimuth->setText("");
         ui->elevation->setText("");
         ui->aos->setText("");
@@ -465,6 +503,7 @@ void SatelliteTrackerGUI::on_useMyPosition_clicked(bool checked)
     ui->latitude->setValue(stationLatitude);
     ui->longitude->setValue(stationLongitude);
     m_settings.m_heightAboveSeaLevel = stationAltitude;
+    m_settingsKeys.append("heightAboveSeaLevel");
     applySettings();
     plotChart();
 }
@@ -473,8 +512,10 @@ void SatelliteTrackerGUI::on_useMyPosition_clicked(bool checked)
 void SatelliteTrackerGUI::on_displaySettings_clicked()
 {
     SatelliteTrackerSettingsDialog dialog(&m_settings);
+
     if (dialog.exec() == QDialog::Accepted)
     {
+        m_settingsKeys.append("deviceSettings");
         applySettings();
         plotChart();
     }
@@ -483,6 +524,7 @@ void SatelliteTrackerGUI::on_displaySettings_clicked()
 void SatelliteTrackerGUI::on_dateTimeSelect_currentIndexChanged(int index)
 {
     m_settings.m_dateTimeSelect = (SatelliteTrackerSettings::DateTimeSelect)index;
+
     if (m_settings.m_dateTimeSelect != SatelliteTrackerSettings::CUSTOM)
     {
         m_settings.m_dateTime = "";
@@ -493,8 +535,12 @@ void SatelliteTrackerGUI::on_dateTimeSelect_currentIndexChanged(int index)
         m_settings.m_dateTime = ui->dateTime->dateTime().toString(Qt::ISODateWithMs);
         ui->dateTime->setVisible(true);
     }
+
     ui->deviceFeatureSelect->setVisible(m_settings.m_dateTimeSelect >= SatelliteTrackerSettings::FROM_MAP);
     updateDeviceFeatureCombo();
+
+    m_settingsKeys.append("dateTimeSelect");
+    m_settingsKeys.append("dateTime");
 
     applySettings();
     plotChart();
@@ -503,9 +549,11 @@ void SatelliteTrackerGUI::on_dateTimeSelect_currentIndexChanged(int index)
 void SatelliteTrackerGUI::on_dateTime_dateTimeChanged(const QDateTime &datetime)
 {
     (void) datetime;
+
     if (ui->dateTimeSelect->currentIndex() == 1)
     {
         m_settings.m_dateTime = ui->dateTime->dateTime().toString(Qt::ISODateWithMs);
+        m_settingsKeys.append("dateTime");
         applySettings();
         plotChart();
     }
@@ -514,8 +562,9 @@ void SatelliteTrackerGUI::on_dateTime_dateTimeChanged(const QDateTime &datetime)
 // Find target on the Map
 void SatelliteTrackerGUI::on_viewOnMap_clicked()
 {
-    if (!m_settings.m_target.isEmpty())
+    if (!m_settings.m_target.isEmpty()) {
         FeatureWebAPIUtils::mapFind(m_settings.m_target);
+    }
 }
 
 void SatelliteTrackerGUI::on_updateSatData_clicked()
@@ -526,9 +575,11 @@ void SatelliteTrackerGUI::on_updateSatData_clicked()
 void SatelliteTrackerGUI::on_selectSats_clicked()
 {
     SatelliteSelectionDialog dialog(&m_settings, m_satellites);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         updateSelectedSats();
+        m_settingsKeys.append("satellites");
         applySettings();
     }
 }
@@ -536,13 +587,18 @@ void SatelliteTrackerGUI::on_selectSats_clicked()
 void SatelliteTrackerGUI::on_radioControl_clicked()
 {
     SatelliteRadioControlDialog dialog(&m_settings, m_satellites);
+
     if (dialog.exec() == QDialog::Accepted)
+    {
+        m_settingsKeys.append("deviceSettings");
         applySettings();
+    }
 }
 
 void SatelliteTrackerGUI::on_autoTarget_clicked(bool checked)
 {
     m_settings.m_autoTarget = checked;
+    m_settingsKeys.append("autoTarget");
     applySettings();
 }
 
@@ -584,17 +640,19 @@ void SatelliteTrackerGUI::updateStatus()
 
     // Indicate if satellite data is being updated
     bool updatingSatData = m_satelliteTracker->isUpdatingSatData();
+
     if (updatingSatData != m_lastUpdatingSatData)
     {
-        if (updatingSatData)
+        if (updatingSatData) {
             ui->updateSatData->setStyleSheet("QToolButton { background-color : green; }");
-        else
+        } else {
             ui->updateSatData->setStyleSheet("QToolButton { background: none; }");
+        }
+
         m_lastUpdatingSatData = updatingSatData;
     }
 
     updateTimeToAOS();
-
     updateDeviceFeatureCombo();
 }
 
@@ -602,33 +660,45 @@ void SatelliteTrackerGUI::updateStatus()
 void SatelliteTrackerGUI::updateTimeToAOS()
 {
     if (m_geostationarySatVisible)
+    {
         ui->aos->setText("Now");
+    }
     else if (m_nextTargetAOS.isValid())
     {
         QDateTime currentTime = m_satelliteTracker->currentDateTime();            // FIXME: UTC
         int secondsToAOS = m_nextTargetAOS.toSecsSinceEpoch() - currentTime.toSecsSinceEpoch();
+
         if (secondsToAOS > 0)
         {
             int seconds = secondsToAOS % 60;
             int minutes = (secondsToAOS / 60) % 60;
             int hours = (secondsToAOS / (60 * 60)) % 24;
             int days = secondsToAOS / (60 * 60 * 24);
+
             if (days == 1)
+            {
                 ui->aos->setText(QString("1 day"));
+            }
             else if (days > 0)
+            {
                 ui->aos->setText(QString("%1 days").arg(days));
+            }
             else
             {
                 ui->aos->setText(QString("%1:%2:%3")
-                                        .arg(hours, 2, 10, QLatin1Char('0'))
-                                        .arg(minutes, 2, 10, QLatin1Char('0'))
-                                        .arg(seconds, 2, 10, QLatin1Char('0')));
+                    .arg(hours, 2, 10, QLatin1Char('0'))
+                    .arg(minutes, 2, 10, QLatin1Char('0'))
+                    .arg(seconds, 2, 10, QLatin1Char('0')));
             }
         }
         else if (m_nextTargetLOS < currentTime)
+        {
             ui->aos->setText("");
+        }
         else
+        {
             ui->aos->setText("Now");
+        }
     }
     else
         ui->aos->setText("");
@@ -638,9 +708,12 @@ void SatelliteTrackerGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        SatelliteTracker::MsgConfigureSatelliteTracker* message = SatelliteTracker::MsgConfigureSatelliteTracker::create(m_settings, force);
+        SatelliteTracker::MsgConfigureSatelliteTracker* message = SatelliteTracker::MsgConfigureSatelliteTracker::create(
+            m_settings, m_settingsKeys, force);
         m_satelliteTracker->getInputMessageQueue()->push(message);
     }
+
+    m_settingsKeys.clear();
 }
 
 void SatelliteTrackerGUI::on_nextPass_clicked()
@@ -670,6 +743,7 @@ void SatelliteTrackerGUI::on_darkTheme_clicked(bool checked)
 {
     m_settings.m_chartsDarkTheme = checked;
     plotChart();
+    m_settingsKeys.append("chartsDarkTheme");
     applySettings();
 }
 
@@ -681,10 +755,11 @@ void SatelliteTrackerGUI::on_chartSelect_currentIndexChanged(int index)
 
 void SatelliteTrackerGUI::plotChart()
 {
-    if (ui->chartSelect->currentIndex() == 0)
+    if (ui->chartSelect->currentIndex() == 0) {
         plotPolarChart();
-    else
+    } else {
         plotAzElChart();
+    }
 }
 
 // Linear interpolation
@@ -709,6 +784,7 @@ void SatelliteTrackerGUI::plotPolarChart()
         m_plotPass = m_targetSatState->m_passes.size() - 1;
         ui->passLabel->setText(QString("%1").arg(m_plotPass));
     }
+
     const SatellitePass &pass = m_targetSatState->m_passes[m_plotPass];
 
     // Always create a new chart, otherwise sometimes they aren't drawn properly
@@ -741,18 +817,28 @@ void SatelliteTrackerGUI::plotPolarChart()
     if (pass.m_aos.isValid() && pass.m_los.isValid())
     {
         QString title;
-        if (m_settings.m_utc)
-            title = pass.m_aos.date().toString(m_settings.m_dateFormat);
-        else
-            title = pass.m_aos.toLocalTime().date().toString(m_settings.m_dateFormat);
-        m_polarChart->setTitle(QString("%1").arg(title));
 
+        if (m_settings.m_utc) {
+            title = pass.m_aos.date().toString(m_settings.m_dateFormat);
+        } else {
+            title = pass.m_aos.toLocalTime().date().toString(m_settings.m_dateFormat);
+        }
+
+        m_polarChart->setTitle(QString("%1").arg(title));
         QLineSeries *polarSeries = new QLineSeries();
 
-        getPassAzEl(nullptr, nullptr, polarSeries,
-                    sat->m_tle->m_tle0, sat->m_tle->m_tle1, sat->m_tle->m_tle2,
-                    m_settings.m_latitude, m_settings.m_longitude, m_settings.m_heightAboveSeaLevel/1000.0,
-                    pass.m_aos, pass.m_los);
+        getPassAzEl(
+            nullptr,
+            nullptr,
+            polarSeries,
+            sat->m_tle->m_tle0,
+            sat->m_tle->m_tle1,
+            sat->m_tle->m_tle2,
+            m_settings.m_latitude,
+            m_settings.m_longitude,
+            m_settings.m_heightAboveSeaLevel/1000.0,
+            pass.m_aos, pass.m_los
+        );
 
         // Polar charts can't handle points that are more than 180 degrees apart, so
         // we need to split passes that cross from 359 -> 0 degrees (or the reverse)
@@ -764,10 +850,12 @@ void SatelliteTrackerGUI::plotPolarChart()
 
         qreal prevAz = polarSeries->at(0).x();
         qreal prevEl = polarSeries->at(0).y();
+
         for (int i = 1; i < polarSeries->count(); i++)
         {
             qreal az = polarSeries->at(i).x();
             qreal el = polarSeries->at(i).y();
+
             if ((prevAz > 270.0) && (az <= 90.0))
             {
                 double elMid = interpolate(prevAz, prevEl, az+360.0, el, 360.0);
@@ -789,7 +877,10 @@ void SatelliteTrackerGUI::plotPolarChart()
                 s->append(az, el);
             }
             else
+            {
                 s->append(polarSeries->at(i));
+            }
+
             prevAz = az;
             prevEl = el;
         }
@@ -805,14 +896,19 @@ void SatelliteTrackerGUI::plotPolarChart()
         QLineSeries *aosSeries = new QLineSeries();
         aosSeries->append(polarSeries->at(0));
         QTime time;
-        if (m_settings.m_utc)
+
+        if (m_settings.m_utc) {
             time = pass.m_aos.time();
-        else
+        } else {
             time = pass.m_aos.toLocalTime().time();
-        if (m_settings.m_utc)
+        }
+
+        if (m_settings.m_utc) {
             aosSeries->setPointLabelsFormat(QString("AOS %1").arg(time.toString("hh:mm")));
-        else
+        } else {
             aosSeries->setPointLabelsFormat(QString("AOS %1").arg(time.toString("hh:mm")));
+        }
+
         aosSeries->setPointLabelsVisible(true);
         aosSeries->setPointLabelsClipping(false);
         m_polarChart->addSeries(aosSeries);
@@ -821,24 +917,29 @@ void SatelliteTrackerGUI::plotPolarChart()
         // Create series with single point, so we can plot time of LOS
         QLineSeries *losSeries = new QLineSeries();
         losSeries->append(polarSeries->at(polarSeries->count()-1));
-        if (m_settings.m_utc)
+
+        if (m_settings.m_utc) {
             time = pass.m_los.time();
-        else
+        } else {
             time = pass.m_los.toLocalTime().time();
+        }
+
         losSeries->setPointLabelsFormat(QString("LOS %1").arg(time.toString("hh:mm")));
         losSeries->setPointLabelsVisible(true);
         losSeries->setPointLabelsClipping(false);
         m_polarChart->addSeries(losSeries);
         losSeries->attachAxis(angularAxis);
         losSeries->attachAxis(radialAxis);
-
         QDateTime currentTime;
-        if (m_settings.m_dateTime == "")
+
+        if (m_settings.m_dateTime == "") {
             currentTime = m_satelliteTracker->currentDateTimeUtc();
-        else if (m_settings.m_utc)
+        } else if (m_settings.m_utc) {
             currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
-        else
+        } else {
             currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs).toUTC();
+        }
+
         if ((currentTime >= pass.m_aos) && (currentTime <= pass.m_los))
         {
             // Create series with single point, so we can plot current time
@@ -863,26 +964,39 @@ void SatelliteTrackerGUI::plotPolarChart()
     {
         // Possibly geostationary, just plot current position
         QDateTime currentTime;
-        if (m_settings.m_dateTime == "")
+
+        if (m_settings.m_dateTime == "") {
             currentTime = m_satelliteTracker->currentDateTimeUtc();
-        else if (m_settings.m_utc)
+        } else if (m_settings.m_utc) {
             currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
-        else
+        } else {
             currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs).toUTC();
+        }
+
         QString title;
-        if (m_settings.m_utc)
+
+        if (m_settings.m_utc) {
             title = currentTime.date().toString(m_settings.m_dateFormat);
-        else
+        } else {
             title = currentTime.toLocalTime().date().toString(m_settings.m_dateFormat);
+        }
+
         m_polarChart->setTitle(QString("%1").arg(title));
-
         QLineSeries *nowSeries = new QLineSeries();
-
         QDateTime endTime = currentTime.addSecs(1);
-        getPassAzEl(nullptr, nullptr, nowSeries,
-                    sat->m_tle->m_tle0, sat->m_tle->m_tle1, sat->m_tle->m_tle2,
-                    m_settings.m_latitude, m_settings.m_longitude, m_settings.m_heightAboveSeaLevel/1000.0,
-                    currentTime, endTime);
+
+        getPassAzEl(
+            nullptr,
+            nullptr,
+            nowSeries,
+            sat->m_tle->m_tle0,
+            sat->m_tle->m_tle1,
+            sat->m_tle->m_tle2,
+            m_settings.m_latitude,
+            m_settings.m_longitude,
+            m_settings.m_heightAboveSeaLevel/1000.0,
+            currentTime, endTime
+        );
 
         nowSeries->setPointLabelsFormat(m_settings.m_target);
         nowSeries->setPointLabelsVisible(true);
@@ -893,7 +1007,6 @@ void SatelliteTrackerGUI::plotPolarChart()
     }
 
     ui->passChart->setChart(m_polarChart);
-
     delete oldChart;
 }
 
@@ -913,20 +1026,22 @@ void SatelliteTrackerGUI::plotAzElChart()
         m_plotPass = m_targetSatState->m_passes.size() - 1;
         ui->passLabel->setText(QString("%1").arg(m_plotPass));
     }
-    const SatellitePass &pass = m_targetSatState->m_passes[m_plotPass];
 
+    const SatellitePass &pass = m_targetSatState->m_passes[m_plotPass];
     // Always create a new chart, otherwise sometimes they aren't drawn properly
     m_lineChart = new QChart();
     m_lineChart->setTheme(m_settings.m_chartsDarkTheme ? QChart::ChartThemeDark : QChart::ChartThemeLight);
     QDateTimeAxis *xAxis = new QDateTimeAxis();
     QValueAxis *yLeftAxis = new QValueAxis();
     QValueAxis *yRightAxis = new QValueAxis();
-
     QString title;
-    if (m_settings.m_utc)
+
+    if (m_settings.m_utc) {
         title = pass.m_aos.date().toString(m_settings.m_dateFormat);
-    else
+    } else {
         title = pass.m_aos.toLocalTime().date().toString(m_settings.m_dateFormat);
+    }
+
     m_lineChart->setTitle(QString("%1").arg(title));
     m_lineChart->legend()->hide();
     m_lineChart->addAxis(xAxis, Qt::AlignBottom);
@@ -934,16 +1049,23 @@ void SatelliteTrackerGUI::plotAzElChart()
     m_lineChart->addAxis(yRightAxis, Qt::AlignRight);
     m_lineChart->layout()->setContentsMargins(0, 0, 0, 0);
     m_lineChart->setMargins(QMargins(1, 1, 1, 1));
-
     SatNogsSatellite *sat = m_satellites.value(m_settings.m_target);
-
     QLineSeries *azSeries = new QLineSeries();
     QLineSeries *elSeries = new QLineSeries();
 
-    getPassAzEl(azSeries, elSeries, nullptr,
-                sat->m_tle->m_tle0, sat->m_tle->m_tle1, sat->m_tle->m_tle2,
-                m_settings.m_latitude, m_settings.m_longitude, m_settings.m_heightAboveSeaLevel/1000.0,
-                pass.m_aos, pass.m_los);
+    getPassAzEl(
+        azSeries,
+        elSeries,
+        nullptr,
+        sat->m_tle->m_tle0,
+        sat->m_tle->m_tle1,
+        sat->m_tle->m_tle2,
+        m_settings.m_latitude,
+        m_settings.m_longitude,
+        m_settings.m_heightAboveSeaLevel/1000.0,
+        pass.m_aos,
+        pass.m_los
+    );
 
     // Split crossing of 360/0 degrees in to multiple series in the same colour
     QList<QLineSeries *> azSeriesList;
@@ -952,15 +1074,18 @@ void SatelliteTrackerGUI::plotAzElChart()
     azSeriesList.append(s);
     s->setPen(pen);
     qreal prevAz = azSeries->at(0).y();
+
     for (int i = 0; i < azSeries->count(); i++)
     {
         qreal az = azSeries->at(i).y();
+
         if (((prevAz >= 270) && (az < 90)) || ((prevAz < 90) && (az >= 270)))
         {
             s = new QLineSeries();
             azSeriesList.append(s);
             s->setPen(pen);
         }
+
         s->append(azSeries->at(i).x(), az);
         prevAz = az;
     }
@@ -968,12 +1093,14 @@ void SatelliteTrackerGUI::plotAzElChart()
     m_lineChart->addSeries(elSeries);
     elSeries->attachAxis(xAxis);
     elSeries->attachAxis(yLeftAxis);
+
     for (int i = 0; i < azSeriesList.size(); i++)
     {
         m_lineChart->addSeries(azSeriesList[i]);
         azSeriesList[i]->attachAxis(xAxis);
         azSeriesList[i]->attachAxis(yRightAxis);
     }
+
     xAxis->setRange(pass.m_aos, pass.m_los);
     xAxis->setFormat("hh:mm");
     yLeftAxis->setRange(0.0, 90.0);
@@ -1022,32 +1149,39 @@ void SatelliteTrackerGUI::resizeTable()
 QString SatelliteTrackerGUI::formatDaysTime(qint64 days, QDateTime dateTime)
 {
     QDateTime dt;
-    if (m_settings.m_utc)
+
+    if (m_settings.m_utc) {
         dt = dateTime.toUTC();
-    else
+    } else {
         dt = dateTime.toLocalTime();
-    if (abs(days) > 10)
+    }
+
+    if (abs(days) > 10) {
         return dt.date().toString(m_settings.m_dateFormat);
-    else if (days == 0)
+    } else if (days == 0) {
         return dt.time().toString("hh:mm");
-    else if (days > 0)
+    } else if (days > 0) {
         return dt.time().toString(QString("hh:mm +%1").arg(days));
-    else
+    } else {
         return dt.time().toString(QString("hh:mm %1").arg(days));
+    }
 }
 
 QString SatelliteTrackerGUI::formatSecondsAsHHMMSS(qint64 seconds)
 {
     char const* sign = "";
-    if(seconds < 0)
+
+    if (seconds < 0)
     {
         sign    = "-";
         seconds = -seconds;
     }
+
     int minutes = seconds / 60;
     seconds = seconds % 60;
     int hours = minutes / 60;
     minutes = minutes % 60;
+
     if (hours > 0) {
         return QString("%1%2:%3:%4").arg(sign).arg(hours).arg(minutes, 2, 10, QChar('0')).arg(seconds, 2, 10, QChar('0'));
     } else {
@@ -1062,10 +1196,12 @@ public:
     {
         QVariant v1 = data(Qt::UserRole);
         QVariant v2 = other.data(Qt::UserRole);
-        if (v1.isValid() && v2.isValid())
+
+        if (v1.isValid() && v2.isValid()) {
             return v1.toDateTime() < v2.toDateTime();
-        else
+        } else {
             return false;
+        }
     }
 };
 
@@ -1079,6 +1215,7 @@ public:
         QString t2 = other.text();
         int t1Colons = t1.count(":");
         int t2Colons = t2.count(":");
+
         if (t1Colons == t2Colons)
         {
             QCollator coll;
@@ -1129,28 +1266,34 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
     // Does the table already contain this satellite?
     QList<QTableWidgetItem *> matches = ui->satTable->findItems(satState->m_name, Qt::MatchExactly);
     QTableWidgetItem *items[SAT_COL_COLUMNS];
+
     if (matches.size() == 0)
     {
         // Add a new row
         ui->satTable->setSortingEnabled(false);
         int row = ui->satTable->rowCount();
         ui->satTable->setRowCount(row + 1);
+
         for (int i = 0; i < SAT_COL_COLUMNS; i++)
         {
-            if ((i == SAT_COL_AOS) || (i == SAT_COL_LOS))
+            if ((i == SAT_COL_AOS) || (i == SAT_COL_LOS)) {
                 items[i] = new DateTimeSortedTableWidgetItem();
-            else if ((i == SAT_COL_NAME) || (i == SAT_COL_NORAD_ID))
+            } else if ((i == SAT_COL_NAME) || (i == SAT_COL_NORAD_ID)) {
                 items[i] = new QTableWidgetItem();
-            else if (i == SAT_COL_TNE)
+            } else if (i == SAT_COL_TNE) {
                 items[i] = new NextEventTableWidgetItem();
-            else
+            } else {
                 items[i] = new NaturallySortedTableWidgetItem();
+            }
+
             items[i]->setToolTip(ui->satTable->horizontalHeaderItem(i)->toolTip());
             ui->satTable->setItem(row, i, items[i]);
         }
+
         ui->satTable->setSortingEnabled(true);
         // Static columns
         items[SAT_COL_NAME]->setText(satState->m_name);
+
         if (m_satellites.contains(satState->m_name))
         {
             SatNogsSatellite *sat = m_satellites.value(satState->m_name);
@@ -1159,41 +1302,51 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
 
         // Text alignment
         for (int col : {SAT_COL_AZ, SAT_COL_EL, SAT_COL_TNE, SAT_COL_DUR, SAT_COL_MAX_EL,
-                        SAT_COL_LATITUDE, SAT_COL_LONGITUDE,
-                        SAT_COL_ALT, SAT_COL_RANGE, SAT_COL_RANGE_RATE, SAT_COL_DOPPLER,
-                        SAT_COL_PATH_LOSS, SAT_COL_DELAY})
+            SAT_COL_LATITUDE, SAT_COL_LONGITUDE,
+            SAT_COL_ALT, SAT_COL_RANGE, SAT_COL_RANGE_RATE, SAT_COL_DOPPLER,
+            SAT_COL_PATH_LOSS, SAT_COL_DELAY})
+        {
             items[col]->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+        }
     }
     else
     {
         // Update existing row
         int row = ui->satTable->row(matches[0]);
-        for (int i = 0; i < SAT_COL_COLUMNS; i++)
+
+        for (int i = 0; i < SAT_COL_COLUMNS; i++) {
             items[i] = ui->satTable->item(row, i);
+        }
     }
 
     items[SAT_COL_AZ]->setData(Qt::DisplayRole, (int)round(satState->m_azimuth));
     items[SAT_COL_EL]->setData(Qt::DisplayRole, (int)round(satState->m_elevation));
+
     if (satState->m_passes.size() > 0)
     {
         // Get number of days to AOS/LOS
         QDateTime currentDateTime = m_satelliteTracker->currentDateTime();
         int daysToAOS = currentDateTime.daysTo(satState->m_passes[0].m_aos);
         int daysToLOS = currentDateTime.daysTo(satState->m_passes[0].m_los);
-        if (satState->m_passes[0].m_aos > currentDateTime)
+
+        if (satState->m_passes[0].m_aos > currentDateTime) {
             items[SAT_COL_TNE]->setText(formatSecondsAsHHMMSS(currentDateTime.secsTo(satState->m_passes[0].m_aos))+" AOS");
-        else
+        } else {
             items[SAT_COL_TNE]->setText(formatSecondsAsHHMMSS(currentDateTime.secsTo(satState->m_passes[0].m_los))+" LOS");
+        }
+
         items[SAT_COL_DUR]->setText(formatSecondsAsHHMMSS(satState->m_passes[0].m_aos.secsTo(satState->m_passes[0].m_los)));
         items[SAT_COL_AOS]->setText(formatDaysTime(daysToAOS, satState->m_passes[0].m_aos));
         items[SAT_COL_AOS]->setData(Qt::UserRole, satState->m_passes[0].m_aos);
         items[SAT_COL_LOS]->setText(formatDaysTime(daysToLOS, satState->m_passes[0].m_los));
         items[SAT_COL_LOS]->setData(Qt::UserRole, satState->m_passes[0].m_los);
         items[SAT_COL_MAX_EL]->setData(Qt::DisplayRole, (int)round(satState->m_passes[0].m_maxElevation));
-        if (satState->m_passes[0].m_northToSouth)
+
+        if (satState->m_passes[0].m_northToSouth) {
             items[SAT_COL_DIR]->setText(QString("%1").arg(QChar(0x2193))); // Down arrow
-        else
+        } else {
             items[SAT_COL_DIR]->setText(QString("%1").arg(QChar(0x2191))); // Up arrow
+        }
     }
     else
     {
@@ -1204,6 +1357,7 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
         items[SAT_COL_MAX_EL]->setData(Qt::DisplayRole, QVariant());
         items[SAT_COL_DIR]->setText("");
     }
+
     items[SAT_COL_LATITUDE]->setData(Qt::DisplayRole, satState->m_latitude);
     items[SAT_COL_LONGITUDE]->setData(Qt::DisplayRole, satState->m_longitude);
     items[SAT_COL_ALT]->setData(Qt::DisplayRole, (int)round(satState->m_altitude));
@@ -1226,6 +1380,9 @@ void SatelliteTrackerGUI::on_satTableHeader_sortIndicatorChanged(int logicalInde
 {
     m_settings.m_columnSort = logicalIndex;
     m_settings.m_columnSortOrder = order;
+    m_settingsKeys.append("columnSort");
+    m_settingsKeys.append("columnSortOrder");
+
     applySettings();
 }
 
@@ -1254,6 +1411,7 @@ void SatelliteTrackerGUI::columnSelectMenuChecked(bool checked)
 {
     (void) checked;
     QAction* action = qobject_cast<QAction*>(sender());
+
     if (action != nullptr)
     {
         int idx = action->data().toInt(nullptr);
@@ -1297,10 +1455,12 @@ void SatelliteTrackerGUI::updateDeviceFeatureCombo(const QStringList &items, con
     for (auto item : items)
     {
         int idx = ui->deviceFeatureSelect->findText(item);
+
         if (idx == -1) {
             ui->deviceFeatureSelect->addItem(item);
         }
     }
+
     ui->deviceFeatureSelect->setCurrentIndex(ui->deviceFeatureSelect->findText(selected));
 }
 
@@ -1310,12 +1470,14 @@ void SatelliteTrackerGUI::updateFileInputList()
     std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
     int deviceIndex = 0;
     QStringList items;
+
     for (std::vector<DeviceSet*>::const_iterator it = deviceSets.begin(); it != deviceSets.end(); ++it, deviceIndex++)
     {
         if ((*it)->m_deviceAPI && (*it)->m_deviceAPI->getHardwareId() == "FileInput") {
            items.append(QString("R%1").arg(deviceIndex));
         }
     }
+
     updateDeviceFeatureCombo(items, m_settings.m_fileInputDevice);
 }
 
@@ -1325,27 +1487,36 @@ void SatelliteTrackerGUI::updateMapList()
     std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
     int featureIndex = 0;
     QStringList items;
+
     for (std::vector<FeatureSet*>::const_iterator it = featureSets.begin(); it != featureSets.end(); ++it, featureIndex++)
     {
         for (int fi = 0; fi < (*it)->getNumberOfFeatures(); fi++)
         {
             Feature *feature = (*it)->getFeatureAt(fi);
+
             if (feature->getURI() == "sdrangel.feature.map") {
                 items.append(QString("F%1:%2").arg(featureIndex).arg(fi));
             }
         }
     }
+
     updateDeviceFeatureCombo(items, m_settings.m_mapFeature);
 }
 
 void SatelliteTrackerGUI::on_deviceFeatureSelect_currentIndexChanged(int index)
 {
     (void) index;
-    if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::FROM_MAP) {
+
+    if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::FROM_MAP)
+    {
         m_settings.m_mapFeature = ui->deviceFeatureSelect->currentText();
-    } else {
+        m_settingsKeys.append("mapFeature");
+    } else
+    {
         m_settings.m_fileInputDevice = ui->deviceFeatureSelect->currentText();
+        m_settingsKeys.append("fileInputDevice");
     }
+
     applySettings();
 }
 

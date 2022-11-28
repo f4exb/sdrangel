@@ -101,7 +101,7 @@ void SatelliteTracker::start()
     m_thread->start();
     m_state = StRunning;
 
-    m_worker->getInputMessageQueue()->push(SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker::create(m_settings, true));
+    m_worker->getInputMessageQueue()->push(SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker::create(m_settings, QList<QString>(), true));
     m_worker->getInputMessageQueue()->push(MsgSatData::create(m_satellites));
 }
 
@@ -124,7 +124,7 @@ bool SatelliteTracker::handleMessage(const Message& cmd)
     {
         MsgConfigureSatelliteTracker& cfg = (MsgConfigureSatelliteTracker&) cmd;
         qDebug() << "SatelliteTracker::handleMessage: MsgConfigureSatelliteTracker";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -185,170 +185,58 @@ bool SatelliteTracker::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureSatelliteTracker *msg = MsgConfigureSatelliteTracker::create(m_settings, true);
+        MsgConfigureSatelliteTracker *msg = MsgConfigureSatelliteTracker::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureSatelliteTracker *msg = MsgConfigureSatelliteTracker::create(m_settings, true);
+        MsgConfigureSatelliteTracker *msg = MsgConfigureSatelliteTracker::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void SatelliteTracker::applySettings(const SatelliteTrackerSettings& settings, bool force)
+void SatelliteTracker::applySettings(const SatelliteTrackerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
     bool tlesChanged = false;
 
-    qDebug() << "SatelliteTracker::applySettings:"
-            << " m_latitude: " << settings.m_latitude
-            << " m_longitude: " << settings.m_longitude
-            << " m_heightAboveSeaLevel: " << settings.m_heightAboveSeaLevel
-            << " m_target: " << settings.m_target
-            << " m_satellites: " << settings.m_satellites
-            << " m_tles: " << settings.m_tles
-            << " m_dateTime: " << settings.m_dateTime
-            << " m_minAOSElevation: " << settings.m_minAOSElevation
-            << " m_minPassElevation: " << settings.m_minPassElevation
-            << " m_azElUnits: " << settings.m_azElUnits
-            << " m_groundTrackPoints: " << settings.m_groundTrackPoints
-            << " m_dateFormat: " << settings.m_dateFormat
-            << " m_utc: " << settings.m_utc
-            << " m_updatePeriod: " << settings.m_updatePeriod
-            << " m_dopplerPeriod: " << settings.m_dopplerPeriod
-            << " m_defaultFrequency: " << settings.m_defaultFrequency
-            << " m_drawOnMap: " << settings.m_drawOnMap
-            << " m_autoTarget: " << settings.m_autoTarget
-            << " m_aosSpeech: " << settings.m_aosSpeech
-            << " m_losSpeech: " << settings.m_losSpeech
-            << " m_aosCommand: " << settings.m_aosCommand
-            << " m_losCommand: " << settings.m_losCommand
-            << " m_predictionPeriod: " << settings.m_predictionPeriod
-            << " m_passStartTime: " << settings.m_passStartTime
-            << " m_passFinishTime: " << settings.m_passFinishTime
-            << " m_deviceSettings: " << settings.m_deviceSettings
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIFeatureSetIndex: " << settings.m_reverseAPIFeatureSetIndex
-            << " m_reverseAPIFeatureIndex: " << settings.m_reverseAPIFeatureIndex
-            << " force: " << force;
+    qDebug() << "SatelliteTracker::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_latitude != settings.m_latitude) || force) {
-        reverseAPIKeys.append("latitude");
-    }
-    if ((m_settings.m_longitude != settings.m_longitude) || force) {
-        reverseAPIKeys.append("longitude");
-    }
-    if ((m_settings.m_heightAboveSeaLevel != settings.m_heightAboveSeaLevel) || force) {
-        reverseAPIKeys.append("heightAboveSeaLevel");
-    }
-    if ((m_settings.m_target != settings.m_target) || force) {
-        reverseAPIKeys.append("target");
-    }
-    if ((m_settings.m_satellites != settings.m_satellites) || force) {
-        reverseAPIKeys.append("satellites");
-    }
-    if ((m_settings.m_tles != settings.m_tles) || force) {
+    if (settingsKeys.contains("tles") || force) {
         tlesChanged = true;
-        reverseAPIKeys.append("tles");
-    }
-    if ((m_settings.m_dateTime != settings.m_dateTime) || force) {
-        reverseAPIKeys.append("dateTime");
-    }
-    if ((m_settings.m_minAOSElevation != settings.m_minAOSElevation) || force) {
-        reverseAPIKeys.append("minAOSElevation");
-    }
-    if ((m_settings.m_minPassElevation != settings.m_minPassElevation) || force) {
-        reverseAPIKeys.append("minPassElevation");
-    }
-    if ((m_settings.m_azElUnits != settings.m_azElUnits) || force) {
-        reverseAPIKeys.append("azElUnits");
-    }
-    if ((m_settings.m_groundTrackPoints != settings.m_groundTrackPoints) || force) {
-        reverseAPIKeys.append("groundTrackPoints");
-    }
-    if ((m_settings.m_dateFormat != settings.m_dateFormat) || force) {
-        reverseAPIKeys.append("dateFormat");
-    }
-    if ((m_settings.m_utc != settings.m_utc) || force) {
-        reverseAPIKeys.append("utc");
-    }
-    if ((m_settings.m_updatePeriod != settings.m_updatePeriod) || force) {
-        reverseAPIKeys.append("updatePeriod");
-    }
-    if ((m_settings.m_dopplerPeriod != settings.m_dopplerPeriod) || force) {
-        reverseAPIKeys.append("dopplerPeriod");
-    }
-    if ((m_settings.m_defaultFrequency != settings.m_defaultFrequency) || force) {
-        reverseAPIKeys.append("defaultFrequency");
-    }
-    if ((m_settings.m_drawOnMap != settings.m_drawOnMap) || force) {
-        reverseAPIKeys.append("drawOnMap");
-    }
-    if ((m_settings.m_autoTarget != settings.m_autoTarget) || force) {
-        reverseAPIKeys.append("autoTarget");
-    }
-    if ((m_settings.m_aosSpeech != settings.m_aosSpeech) || force) {
-        reverseAPIKeys.append("aosSpeech");
-    }
-    if ((m_settings.m_losSpeech != settings.m_losSpeech) || force) {
-        reverseAPIKeys.append("losSpeech");
-    }
-    if ((m_settings.m_aosCommand != settings.m_aosCommand) || force) {
-        reverseAPIKeys.append("aosCommand");
-    }
-    if ((m_settings.m_losCommand != settings.m_losCommand) || force) {
-        reverseAPIKeys.append("losCommand");
-    }
-    if ((m_settings.m_predictionPeriod != settings.m_predictionPeriod) || force) {
-        reverseAPIKeys.append("predictionPeriod");
-    }
-    if ((m_settings.m_passStartTime != settings.m_passStartTime) || force) {
-        reverseAPIKeys.append("passStartTime");
-    }
-    if ((m_settings.m_passFinishTime != settings.m_passFinishTime) || force) {
-        reverseAPIKeys.append("passFinishTime");
-    }
-    if ((m_settings.m_deviceSettings != settings.m_deviceSettings) || force) {
-        reverseAPIKeys.append("deviceSettings");
-    }
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
     }
 
     SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker *msg = SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker::create(
-        settings, force
+        settings, settingsKeys, force
     );
+
     if (m_worker) {
         m_worker->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (tlesChanged)
     {
         // Do we already have the TLE files, or do we need to download them?
         bool existing = true;
+
         for (int i = 0; i < m_settings.m_tles.size(); i++)
         {
             QFile tlesFile(tleURLToFilename(m_settings.m_tles[i]));
@@ -358,10 +246,12 @@ void SatelliteTracker::applySettings(const SatelliteTrackerSettings& settings, b
                 break;
             }
         }
-        if (existing)
+
+        if (existing) {
             readSatData();
-        else
+        } else {
             updateSatData();
+        }
     }
 
     // Remove unneeded satellite state
@@ -410,13 +300,13 @@ int SatelliteTracker::webapiSettingsPutPatch(
     SatelliteTrackerSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureSatelliteTracker *msg = MsgConfigureSatelliteTracker::create(settings, force);
+    MsgConfigureSatelliteTracker *msg = MsgConfigureSatelliteTracker::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("SatelliteTracker::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSatelliteTracker *msgToGUI = MsgConfigureSatelliteTracker::create(settings, force);
+        MsgConfigureSatelliteTracker *msgToGUI = MsgConfigureSatelliteTracker::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -769,7 +659,7 @@ void SatelliteTracker::webapiUpdateFeatureSettings(
     }
 }
 
-void SatelliteTracker::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const SatelliteTrackerSettings& settings, bool force)
+void SatelliteTracker::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const SatelliteTrackerSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

@@ -45,6 +45,8 @@ struct SatelliteTrackerSettings
         QString m_aosCommand;           //!< Command/script to execute on AOS
         QString m_losCommand;           //!< Command/script to execute on LOS
         SatelliteDeviceSettings();
+
+        void getDebugString(std::ostringstream& ostr);
     };
 
     double m_latitude;                  //!< Antenna location, degrees
@@ -108,6 +110,8 @@ struct SatelliteTrackerSettings
     void deserializeStringList(const QByteArray& data, QList<QString>& strings);
     QByteArray serializeDeviceSettings(QHash<QString, QList<SatelliteDeviceSettings *> *> deviceSettings) const;
     void deserializeDeviceSettings(const QByteArray& data, QHash<QString, QList<SatelliteDeviceSettings *> *>& deviceSettings);
+    void applySettings(const QStringList& settingsKeys, const SatelliteTrackerSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif // INCLUDE_FEATURE_SATELLITETRACKERSETTINGS_H_

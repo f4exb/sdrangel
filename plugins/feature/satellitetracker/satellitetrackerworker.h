@@ -76,20 +76,22 @@ public:
 
     public:
         const SatelliteTrackerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSatelliteTrackerWorker* create(const SatelliteTrackerSettings& settings, bool force)
-        {
-            return new MsgConfigureSatelliteTrackerWorker(settings, force);
+        static MsgConfigureSatelliteTrackerWorker* create(const SatelliteTrackerSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureSatelliteTrackerWorker(settings, settingsKeys, force);
         }
 
     private:
         SatelliteTrackerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureSatelliteTrackerWorker(const SatelliteTrackerSettings& settings, bool force) :
+        MsgConfigureSatelliteTrackerWorker(const SatelliteTrackerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -119,7 +121,7 @@ private:
     QDateTime m_lastUpdateDateTime;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const SatelliteTrackerSettings& settings, bool force = false);
+    void applySettings(const SatelliteTrackerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     MessageQueue *getMessageQueueToGUI() { return m_msgQueueToGUI; }
     void removeFromMap(QString id);
     void sendToMap(
