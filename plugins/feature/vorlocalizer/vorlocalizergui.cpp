@@ -375,6 +375,8 @@ void VORLocalizerGUI::vorData_sectionMoved(int logicalIndex, int oldVisualIndex,
 {
     (void) oldVisualIndex;
     m_settings.m_columnIndexes[logicalIndex] = newVisualIndex;
+    m_settingsKeys.append("columnIndexes");
+    applySettings();
 }
 
 // Column in table resized (when hidden size is 0)
@@ -382,6 +384,8 @@ void VORLocalizerGUI::vorData_sectionResized(int logicalIndex, int oldSize, int 
 {
     (void) oldSize;
     m_settings.m_columnSizes[logicalIndex] = newSize;
+    m_settingsKeys.append("columnSizes");
+    applySettings();
 }
 
 // Right click in table header - show column select menu
@@ -534,7 +538,13 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
     {
         qDebug("VORLocalizerGUI::handleMessage: VORLocalizer::MsgConfigureVORLocalizer");
         const VORLocalizer::MsgConfigureVORLocalizer& cfg = (VORLocalizer::MsgConfigureVORLocalizer&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -598,8 +608,8 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
     {
         VORLocalizerReport::MsgReportIdent& report = (VORLocalizerReport::MsgReportIdent&) message;
         int subChannelId = report.getSubChannelId();
-
         VORGUI *vorGUI = m_selectedVORs.value(subChannelId);
+
         if (vorGUI)
         {
 
@@ -608,6 +618,7 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
             QString identString = Morse::toString(ident);
             // Idents should only be two or three characters, so filter anything else
             // other than TEST which indicates a VOR is under maintainance (may also be TST)
+
             if (((identString.size() >= 2) && (identString.size() <= 3)) || (identString == "TEST"))
             {
                 vorGUI->m_rxIdentItem->setText(identString);
@@ -741,6 +752,7 @@ void VORLocalizerGUI::downloadingURL(const QString& url)
 void VORLocalizerGUI::downloadError(const QString& error)
 {
     QMessageBox::critical(this, "VOR Localizer", error);
+
     if (m_progressDialog)
     {
         m_progressDialog->close();
@@ -754,7 +766,9 @@ void VORLocalizerGUI::downloadNavAidsFinished()
     if (m_progressDialog) {
         m_progressDialog->setLabelText("Reading NAVAIDs.");
     }
+
     readNavAids();
+
     if (m_progressDialog)
     {
         m_progressDialog->close();
@@ -767,6 +781,7 @@ void VORLocalizerGUI::on_magDecAdjust_toggled(bool checked)
 {
     m_settings.m_magDecAdjust = checked;
     m_vorModel.allVORUpdated();
+    m_settingsKeys.append("magDecAdjust");
     applySettings();
 }
 
@@ -774,6 +789,7 @@ void VORLocalizerGUI::on_rrTime_valueChanged(int value)
 {
     m_settings.m_rrTime = value;
     ui->rrTimeText->setText(tr("%1s").arg(m_settings.m_rrTime));
+    m_settingsKeys.append("rrTime");
     applySettings();
 }
 
@@ -781,6 +797,7 @@ void VORLocalizerGUI::on_centerShift_valueChanged(int value)
 {
     m_settings.m_centerShift = value * 1000;
     ui->centerShiftText->setText(tr("%1k").arg(value));
+    m_settingsKeys.append("centerShift");
     applySettings();
 }
 
@@ -799,9 +816,7 @@ void VORLocalizerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     RollupContents *rollupContents = getRollupContents();
-
     rollupContents->saveState(m_rollupState);
-    applySettings();
 }
 
 void VORLocalizerGUI::onMenuDialogCalled(const QPoint &p)
@@ -830,6 +845,14 @@ void VORLocalizerGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -849,6 +872,7 @@ void VORLocalizerGUI::applyMapSettings()
     QObject *object = item->findChild<QObject*>("map");
     QGeoCoordinate coords;
     double zoom;
+
     if (object != nullptr)
     {
         // Save existing position of map
@@ -876,14 +900,21 @@ void VORLocalizerGUI::applyMapSettings()
     }
 
     QVariant retVal;
-    if (!QMetaObject::invokeMethod(item, "createMap", Qt::DirectConnection,
-                                Q_RETURN_ARG(QVariant, retVal),
-                                Q_ARG(QVariant, QVariant::fromValue(parameters)),
-                                Q_ARG(QVariant, mapType),
-                                Q_ARG(QVariant, QVariant::fromValue(this))))
+
+    if (!QMetaObject::invokeMethod(
+            item,
+            "createMap",
+            Qt::DirectConnection,
+            Q_RETURN_ARG(QVariant, retVal),
+            Q_ARG(QVariant, QVariant::fromValue(parameters)),
+            Q_ARG(QVariant, mapType),
+            Q_ARG(QVariant, QVariant::fromValue(this))
+        )
+    )
     {
         qCritical() << "VORLocalizerGUI::applyMapSettings - Failed to invoke createMap";
     }
+
     QObject *newMap = retVal.value<QObject *>();
 
     // Restore position of map
@@ -902,6 +933,7 @@ void VORLocalizerGUI::applyMapSettings()
 
     // Move antenna icon to My Position
     QObject *stationObject = newMap->findChild<QObject*>("station");
+
     if(stationObject != NULL)
     {
         QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
@@ -1035,9 +1067,11 @@ void VORLocalizerGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        VORLocalizer::MsgConfigureVORLocalizer* message = VORLocalizer::MsgConfigureVORLocalizer::create( m_settings, force);
+        VORLocalizer::MsgConfigureVORLocalizer* message = VORLocalizer::MsgConfigureVORLocalizer::create( m_settings, m_settingsKeys, force);
         m_vorLocalizer->getInputMessageQueue()->push(message);
     }
+
+    m_settingsKeys.clear();
 }
 
 void VORLocalizerGUI::displaySettings()
@@ -1116,7 +1150,7 @@ void VORLocalizerGUI::tick()
             QQuickItem *item = ui->map->rootObject();
             QObject *stationObject = item->findChild<QObject*>("station");
 
-            if(stationObject != NULL)
+            if (stationObject != NULL)
             {
                 QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
                 coords.setLatitude(lat);
@@ -1155,9 +1189,11 @@ void VORLocalizerGUI::preferenceChanged(int elementType)
             // Update icon position on Map
             QQuickItem *item = ui->map->rootObject();
             QObject *map = item->findChild<QObject*>("map");
+
             if (map != nullptr)
             {
                 QObject *stationObject = map->findChild<QObject*>("station");
+
                 if(stationObject != NULL)
                 {
                     QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
@@ -1169,14 +1205,17 @@ void VORLocalizerGUI::preferenceChanged(int elementType)
             }
         }
     }
+
     if (pref == Preferences::StationName)
     {
         // Update icon label on Map
         QQuickItem *item = ui->map->rootObject();
         QObject *map = item->findChild<QObject*>("map");
+
         if (map != nullptr)
         {
             QObject *stationObject = map->findChild<QObject*>("station");
+
             if(stationObject != NULL) {
                 stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
             }
@@ -1189,9 +1228,11 @@ void VORLocalizerGUI::redrawMap()
     // An awful workaround for https://bugreports.qt.io/browse/QTBUG-100333
     // Also used in ADS-B demod
     QQuickItem *item = ui->map->rootObject();
+
     if (item)
     {
         QObject *object = item->findChild<QObject*>("map");
+
         if (object)
         {
             double zoom = object->property("zoomLevel").value<double>();
@@ -1222,11 +1263,13 @@ bool VORLocalizerGUI::eventFilter(QObject *obj, QEvent *event)
             QResizeEvent *resizeEvent = static_cast<QResizeEvent *>(event);
             QSize oldSize = resizeEvent->oldSize();
             QSize size = resizeEvent->size();
+
             if (oldSize.height() != size.height()) {
                 redrawMap();
             }
         }
     }
+
     return false;
 }
 

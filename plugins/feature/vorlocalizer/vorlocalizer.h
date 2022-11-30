@@ -46,19 +46,22 @@ public:
 
     public:
         const VORLocalizerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureVORLocalizer* create(const VORLocalizerSettings& settings, bool force) {
-            return new MsgConfigureVORLocalizer(settings, force);
+        static MsgConfigureVORLocalizer* create(const VORLocalizerSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureVORLocalizer(settings, settingsKeys, force);
         }
 
     private:
         VORLocalizerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureVORLocalizer(const VORLocalizerSettings& settings, bool force) :
+        MsgConfigureVORLocalizer(const VORLocalizerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -214,10 +217,10 @@ private:
 
     void start();
     void stop();
-    void applySettings(const VORLocalizerSettings& settings, bool force = false);
+    void applySettings(const VORLocalizerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void updateChannels();
     void notifyUpdateChannels();
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const VORLocalizerSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const VORLocalizerSettings& settings, bool force);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
 
 private slots:

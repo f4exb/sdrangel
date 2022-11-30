@@ -112,7 +112,7 @@ bool VorLocalizerWorker::handleMessage(const Message& cmd)
         MsgConfigureVORLocalizerWorker& cfg = (MsgConfigureVORLocalizerWorker&) cmd;
         qDebug() << "VorLocalizerWorker::handleMessage: MsgConfigureVORLocalizerWorker";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -129,12 +129,9 @@ bool VorLocalizerWorker::handleMessage(const Message& cmd)
     }
 }
 
-void VorLocalizerWorker::applySettings(const VORLocalizerSettings& settings, bool force)
+void VorLocalizerWorker::applySettings(const VORLocalizerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "VorLocalizerWorker::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " force: " << force;
+    qDebug() << "VorLocalizerWorker::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
     // Remove sub-channels no longer needed
     for (int i = 0; i < m_vorChannels.size(); i++)
@@ -190,11 +187,15 @@ void VorLocalizerWorker::applySettings(const VORLocalizerSettings& settings, boo
         }
     }
 
-    if ((settings.m_rrTime != m_settings.m_rrTime) || force) {
+    if (settingsKeys.contains("rrTime") || force) {
         m_rrTimer.start(settings.m_rrTime * 1000);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void VorLocalizerWorker::updateHardware()

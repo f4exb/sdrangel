@@ -23,6 +23,7 @@
 
 
 #include "SWGRollupState.h"
+#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -79,6 +80,12 @@ public:
     SWGRollupState* getRollupState();
     void setRollupState(SWGRollupState* rollup_state);
 
+    QList<qint32>* getColumnIndexes();
+    void setColumnIndexes(QList<qint32>* column_indexes);
+
+    QList<qint32>* getColumnSizes();
+    void setColumnSizes(QList<qint32>* column_sizes);
+
 
     virtual bool isSet() override;
 
@@ -118,6 +125,12 @@ private:
 
     SWGRollupState* rollup_state;
     bool m_rollup_state_isSet;
+
+    QList<qint32>* column_indexes;
+    bool m_column_indexes_isSet;
+
+    QList<qint32>* column_sizes;
+    bool m_column_sizes_isSet;
 
 };
 

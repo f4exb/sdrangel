@@ -100,6 +100,8 @@ struct VORLocalizerSettings
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
+    void applySettings(const QStringList& settingsKeys, const VORLocalizerSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* INCLUDE_VORLOCALIZERSETTINGS_H */

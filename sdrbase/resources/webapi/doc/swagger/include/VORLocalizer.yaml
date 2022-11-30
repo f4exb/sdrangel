@@ -33,6 +33,14 @@ VORLocalizerSettings:
       type: integer
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+    columnIndexes:
+      type: array
+      items:
+        type: integer
+    columnSizes:
+      type: array
+      items:
+        type: integer
 
 VORLocalizerReport:
   description: VORLocalizers

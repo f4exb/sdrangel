@@ -168,3 +168,119 @@ bool VORLocalizerSettings::VORChannel::operator<(const VORChannel& other) const
 
     return false;
 }
+
+void VORLocalizerSettings::applySettings(const QStringList& settingsKeys, const VORLocalizerSettings& settings)
+{
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("magDecAdjust")) {
+        m_magDecAdjust = settings.m_magDecAdjust;
+    }
+    if (settingsKeys.contains("rrTime")) {
+        m_rrTime = settings.m_rrTime;
+    }
+    if (settingsKeys.contains("centerShift")) {
+        m_centerShift = settings.m_centerShift;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("mapProvider")) {
+        m_mapProvider = settings.m_mapProvider;
+    }
+
+    if (settingsKeys.contains("columnIndexes"))
+    {
+        for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
+            m_columnIndexes[i] = settings.m_columnIndexes[i];
+        }
+    }
+
+    if (settingsKeys.contains("columnSizes"))
+    {
+        for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
+            m_columnSizes[i] = settings.m_columnSizes[i];
+        }
+    }
+}
+
+QString VORLocalizerSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("magDecAdjust") || force) {
+        ostr << " m_magDecAdjust: " << m_magDecAdjust;
+    }
+    if (settingsKeys.contains("rrTime") || force) {
+        ostr << " m_rrTime: " << m_rrTime;
+    }
+    if (settingsKeys.contains("centerShift") || force) {
+        ostr << " m_centerShift: " << m_centerShift;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("mapProvider") || force) {
+        ostr << " m_mapProvider: " << m_mapProvider.toStdString();
+    }
+
+    if (settingsKeys.contains("columnIndexes"))
+    {
+        ostr << "m_columnIndexes:";
+
+        for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
+            ostr << " " << m_columnIndexes[i];
+        }
+    }
+
+    if (settingsKeys.contains("columnSizes"))
+    {
+        ostr << "m_columnSizes:";
+
+        for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
+            ostr << " " << m_columnSizes[i];
+        }
+    }
+
+    return QString(ostr.str().c_str());
+}

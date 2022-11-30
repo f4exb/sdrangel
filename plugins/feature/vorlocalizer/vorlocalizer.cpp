@@ -127,7 +127,7 @@ void VORLocalizer::start()
     m_state = StRunning;
     m_thread->start();
 
-    VorLocalizerWorker::MsgConfigureVORLocalizerWorker *msg = VorLocalizerWorker::MsgConfigureVORLocalizerWorker::create(m_settings, true);
+    VorLocalizerWorker::MsgConfigureVORLocalizerWorker *msg = VorLocalizerWorker::MsgConfigureVORLocalizerWorker::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
 
     m_running = true;
@@ -155,7 +155,7 @@ bool VORLocalizer::handleMessage(const Message& cmd)
 	{
         MsgConfigureVORLocalizer& cfg = (MsgConfigureVORLocalizer&) cmd;
         qDebug() << "VORLocalizer::handleMessage: MsgConfigureVORLocalizer";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
 		return true;
 	}
@@ -323,66 +323,39 @@ bool VORLocalizer::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureVORLocalizer *msg = MsgConfigureVORLocalizer::create(m_settings, true);
+        MsgConfigureVORLocalizer *msg = MsgConfigureVORLocalizer::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureVORLocalizer *msg = MsgConfigureVORLocalizer::create(m_settings, true);
+        MsgConfigureVORLocalizer *msg = MsgConfigureVORLocalizer::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void VORLocalizer::applySettings(const VORLocalizerSettings& settings, bool force)
+void VORLocalizer::applySettings(const VORLocalizerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "VORLocalizer::applySettings:"
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_magDecAdjust: " << settings.m_magDecAdjust
-            << " m_rrTime: " << settings.m_rrTime
-            << " m_centerShift: " << settings.m_centerShift
-            << " force: " << force;
-
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-    if ((m_settings.m_magDecAdjust != settings.m_magDecAdjust) || force) {
-        reverseAPIKeys.append("magDecAdjust");
-    }
-    if ((m_settings.m_rrTime != settings.m_rrTime) || force) {
-        reverseAPIKeys.append("rrTime");
-    }
-    if ((m_settings.m_forceRRAveraging != settings.m_forceRRAveraging) || force) {
-        reverseAPIKeys.append("forceRRAveraging");
-    }
-    if ((m_settings.m_centerShift != settings.m_centerShift) || force) {
-        reverseAPIKeys.append("centerShift");
-    }
+    qDebug() << "VORLocalizer::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
     if (m_running)
     {
         VorLocalizerWorker::MsgConfigureVORLocalizerWorker *msg = VorLocalizerWorker::MsgConfigureVORLocalizerWorker::create(
-            settings, force
+            settings, settingsKeys, force
         );
         m_worker->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -468,13 +441,13 @@ int VORLocalizer::webapiSettingsPutPatch(
     VORLocalizerSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureVORLocalizer *msg = MsgConfigureVORLocalizer::create(settings, force);
+    MsgConfigureVORLocalizer *msg = MsgConfigureVORLocalizer::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("VORLocalizer::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureVORLocalizer *msgToGUI = MsgConfigureVORLocalizer::create(settings, force);
+        MsgConfigureVORLocalizer *msgToGUI = MsgConfigureVORLocalizer::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -569,6 +542,26 @@ void VORLocalizer::webapiFormatFeatureSettings(
             response.getVorLocalizerSettings()->setRollupState(swgRollupState);
         }
     }
+
+    if (!response.getVorLocalizerSettings()->getColumnIndexes()) {
+        response.getVorLocalizerSettings()->setColumnIndexes(new QList<int>());
+    }
+
+    response.getVorLocalizerSettings()->getColumnIndexes()->clear();
+
+    for (int i = 0; i < VORLocalizerSettings::VORDEMOD_COLUMNS; i++) {
+        response.getVorLocalizerSettings()->getColumnIndexes()->push_back(settings.m_columnIndexes[i]);
+    }
+
+    if (!response.getVorLocalizerSettings()->getColumnSizes()) {
+        response.getVorLocalizerSettings()->setColumnSizes(new QList<int>());
+    }
+
+    response.getVorLocalizerSettings()->getColumnSizes()->clear();
+
+    for (int i = 0; i < VORLocalizerSettings::VORDEMOD_COLUMNS; i++) {
+        response.getVorLocalizerSettings()->getColumnSizes()->push_back(settings.m_columnSizes[i]);
+    }
 }
 
 void VORLocalizer::webapiUpdateFeatureSettings(
@@ -612,9 +605,27 @@ void VORLocalizer::webapiUpdateFeatureSettings(
     if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
         settings.m_rollupState->updateFrom(featureSettingsKeys, response.getVorLocalizerSettings()->getRollupState());
     }
+
+    if (featureSettingsKeys.contains("columnIndexes"))
+    {
+        const QList<int> *indexes = response.getVorLocalizerSettings()->getColumnIndexes();
+
+        for (int i = 0; i < VORLocalizerSettings::VORDEMOD_COLUMNS; i++) {
+            settings.m_columnIndexes[i] = (*indexes)[i];
+        }
+    }
+
+    if (featureSettingsKeys.contains("columnSizes"))
+    {
+        const QList<int> *indexes = response.getVorLocalizerSettings()->getColumnSizes();
+
+        for (int i = 0; i < VORLocalizerSettings::VORDEMOD_COLUMNS; i++) {
+            settings.m_columnSizes[i] = (*indexes)[i];
+        }
+    }
 }
 
-void VORLocalizer::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const VORLocalizerSettings& settings, bool force)
+void VORLocalizer::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const VORLocalizerSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());

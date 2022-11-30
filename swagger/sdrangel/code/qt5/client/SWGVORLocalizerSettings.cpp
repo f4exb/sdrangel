@@ -52,6 +52,10 @@ SWGVORLocalizerSettings::SWGVORLocalizerSettings() {
     m_center_shift_isSet = false;
     rollup_state = nullptr;
     m_rollup_state_isSet = false;
+    column_indexes = new QList<qint32>();
+    m_column_indexes_isSet = false;
+    column_sizes = new QList<qint32>();
+    m_column_sizes_isSet = false;
 }
 
 SWGVORLocalizerSettings::~SWGVORLocalizerSettings() {
@@ -84,6 +88,10 @@ SWGVORLocalizerSettings::init() {
     m_center_shift_isSet = false;
     rollup_state = new SWGRollupState();
     m_rollup_state_isSet = false;
+    column_indexes = new QList<qint32>();
+    m_column_indexes_isSet = false;
+    column_sizes = new QList<qint32>();
+    m_column_sizes_isSet = false;
 }
 
 void
@@ -106,6 +114,8 @@ SWGVORLocalizerSettings::cleanup() {
     if(rollup_state != nullptr) { 
         delete rollup_state;
     }
+
+
 }
 
 SWGVORLocalizerSettings*
@@ -143,6 +153,10 @@ SWGVORLocalizerSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
+    
+    ::SWGSDRangel::setValue(&column_indexes, pJson["columnIndexes"], "QList", "qint32");
+    
+    ::SWGSDRangel::setValue(&column_sizes, pJson["columnSizes"], "QList", "qint32");
 }
 
 QString
@@ -194,6 +208,12 @@ SWGVORLocalizerSettings::asJsonObject() {
     }
     if((rollup_state != nullptr) && (rollup_state->isSet())){
         toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
+    }
+    if(column_indexes && column_indexes->size() > 0){
+        toJsonArray((QList<void*>*)column_indexes, obj, "columnIndexes", "");
+    }
+    if(column_sizes && column_sizes->size() > 0){
+        toJsonArray((QList<void*>*)column_sizes, obj, "columnSizes", "");
     }
 
     return obj;
@@ -319,6 +339,26 @@ SWGVORLocalizerSettings::setRollupState(SWGRollupState* rollup_state) {
     this->m_rollup_state_isSet = true;
 }
 
+QList<qint32>*
+SWGVORLocalizerSettings::getColumnIndexes() {
+    return column_indexes;
+}
+void
+SWGVORLocalizerSettings::setColumnIndexes(QList<qint32>* column_indexes) {
+    this->column_indexes = column_indexes;
+    this->m_column_indexes_isSet = true;
+}
+
+QList<qint32>*
+SWGVORLocalizerSettings::getColumnSizes() {
+    return column_sizes;
+}
+void
+SWGVORLocalizerSettings::setColumnSizes(QList<qint32>* column_sizes) {
+    this->column_sizes = column_sizes;
+    this->m_column_sizes_isSet = true;
+}
+
 
 bool
 SWGVORLocalizerSettings::isSet(){
@@ -358,6 +398,18 @@ SWGVORLocalizerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(rollup_state && rollup_state->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(m_column_indexes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(column_indexes && (column_indexes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_column_sizes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(column_sizes && (column_sizes->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

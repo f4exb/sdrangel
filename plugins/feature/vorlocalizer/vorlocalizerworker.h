@@ -39,20 +39,23 @@ public:
 
     public:
         const VORLocalizerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureVORLocalizerWorker* create(const VORLocalizerSettings& settings, bool force)
+        static MsgConfigureVORLocalizerWorker* create(const VORLocalizerSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigureVORLocalizerWorker(settings, force);
+            return new MsgConfigureVORLocalizerWorker(settings, settingsKeys, force);
         }
 
     private:
         VORLocalizerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureVORLocalizerWorker(const VORLocalizerSettings& settings, bool force) :
+        MsgConfigureVORLocalizerWorker(const VORLocalizerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -152,7 +155,7 @@ private:
     std::vector<int> m_rrTurnCounters; //!< Round robin turn count for each device
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const VORLocalizerSettings& settings, bool force = false);
+    void applySettings(const VORLocalizerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void removeVORChannel(int navId);
     void addVORChannel(const VORLocalizerSubChannelSettings& subChannelSettings);
     void updateChannels(); //!< (re)allocate channels to service VORs
