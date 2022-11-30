@@ -80,6 +80,8 @@ struct StarTrackerSettings
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
+    void applySettings(const QStringList& settingsKeys, const StarTrackerSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static const QStringList m_pipeTypes;
     static const QStringList m_pipeURIs;

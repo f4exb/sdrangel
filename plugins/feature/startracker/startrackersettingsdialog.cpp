@@ -18,10 +18,14 @@
 #include "startrackersettingsdialog.h"
 #include <QDebug>
 
-StarTrackerSettingsDialog::StarTrackerSettingsDialog(StarTrackerSettings *settings,
-        QWidget* parent) :
+StarTrackerSettingsDialog::StarTrackerSettingsDialog(
+    StarTrackerSettings *settings,
+    QList<QString>& settingsKeys,
+    QWidget* parent
+) :
     QDialog(parent),
     m_settings(settings),
+    m_settingsKeys(settingsKeys),
     ui(new Ui::StarTrackerSettingsDialog)
 {
     ui->setupUi(this);
@@ -69,5 +73,25 @@ void StarTrackerSettingsDialog::accept()
     m_settings->m_drawSunOnMap = ui->drawSunOnMap->isChecked();
     m_settings->m_drawMoonOnMap = ui->drawMoonOnMap->isChecked();
     m_settings->m_drawStarOnMap = ui->drawStarOnMap->isChecked();
+
+    m_settingsKeys.append("jnow");
+    m_settingsKeys.append("azElUnits");
+    m_settingsKeys.append("updatePeriod");
+    m_settingsKeys.append("serverPort");
+    m_settingsKeys.append("enableServer");
+    m_settingsKeys.append("refraction");
+    m_settingsKeys.append("owmAPIKey");
+    m_settingsKeys.append("weatherUpdatePeriod");
+    m_settingsKeys.append("pressure");
+    m_settingsKeys.append("temperature");
+    m_settingsKeys.append("humidity");
+    m_settingsKeys.append("heightAboveSeaLevel");
+    m_settingsKeys.append("temperatureLapseRate");
+    m_settingsKeys.append("solarFluxData");
+    m_settingsKeys.append("solarFluxUnits");
+    m_settingsKeys.append("drawSunOnMap");
+    m_settingsKeys.append("drawMoonOnMap");
+    m_settingsKeys.append("drawStarOnMap");
+
     QDialog::accept();
 }

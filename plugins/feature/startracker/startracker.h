@@ -48,19 +48,22 @@ public:
 
     public:
         const StarTrackerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureStarTracker* create(const StarTrackerSettings& settings, bool force) {
-            return new MsgConfigureStarTracker(settings, force);
+        static MsgConfigureStarTracker* create(const StarTrackerSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureStarTracker(settings, settingsKeys, force);
         }
 
     private:
         StarTrackerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureStarTracker(const StarTrackerSettings& settings, bool force) :
+        MsgConfigureStarTracker(const StarTrackerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -170,8 +173,8 @@ private:
 
     void start();
     void stop();
-    void applySettings(const StarTrackerSettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const StarTrackerSettings& settings, bool force);
+    void applySettings(const StarTrackerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const StarTrackerSettings& settings, bool force);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
     double applyBeam(const FITS *fits, double beamwidth, double ra, double dec, int& imgX, int& imgY) const;
     void scanAvailableChannels();

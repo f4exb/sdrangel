@@ -100,7 +100,7 @@ bool StarTrackerWorker::handleMessage(const Message& cmd)
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureStarTrackerWorker& cfg = (MsgConfigureStarTrackerWorker&) cmd;
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
         return true;
     }
     else if (StarTracker::MsgSetSolarFlux::match(cmd))
@@ -115,65 +115,68 @@ bool StarTrackerWorker::handleMessage(const Message& cmd)
     }
 }
 
-void StarTrackerWorker::applySettings(const StarTrackerSettings& settings, bool force)
+void StarTrackerWorker::applySettings(const StarTrackerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "StarTrackerWorker::applySettings:"
-            << " m_target: " << settings.m_target
-            << " m_ra: " << settings.m_ra
-            << " m_dec: " << settings.m_dec
-            << " m_time: " << settings.m_dateTime
-            << " m_enableServer: " << settings.m_enableServer
-            << " m_serverPort: " << settings.m_serverPort
-            << " m_updatePeriod: " << settings.m_updatePeriod
-            << " force: " << force;
+    qDebug() << "StarTrackerWorker::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    if (   (m_settings.m_ra != settings.m_ra)
-        || (m_settings.m_dec != settings.m_dec)
-        || (m_settings.m_latitude != settings.m_latitude)
-        || (m_settings.m_longitude != settings.m_longitude)
-        || (m_settings.m_target != settings.m_target)
-        || (m_settings.m_dateTime != settings.m_dateTime)
-        || (m_settings.m_refraction != settings.m_refraction)
-        || (m_settings.m_pressure != settings.m_pressure)
-        || (m_settings.m_temperature != settings.m_temperature)
-        || (m_settings.m_humidity != settings.m_humidity)
-        || (m_settings.m_heightAboveSeaLevel != settings.m_heightAboveSeaLevel)
-        || (m_settings.m_temperatureLapseRate != settings.m_temperatureLapseRate)
-        || (m_settings.m_frequency != settings.m_frequency)
-        || (m_settings.m_beamwidth != settings.m_beamwidth)
-        || (m_settings.m_az != settings.m_az)
-        || (m_settings.m_el != settings.m_el)
-        || (m_settings.m_l != settings.m_l)
-        || (m_settings.m_b != settings.m_b)
-        || (m_settings.m_azOffset != settings.m_azOffset)
-        || (m_settings.m_elOffset != settings.m_elOffset)
+    if (settingsKeys.contains("ra")
+        || settingsKeys.contains("dec")
+        || settingsKeys.contains("latitude")
+        || settingsKeys.contains("longitude")
+        || settingsKeys.contains("target")
+        || settingsKeys.contains("dateTime")
+        || settingsKeys.contains("refraction")
+        || settingsKeys.contains("pressure")
+        || settingsKeys.contains("temperature")
+        || settingsKeys.contains("humidity")
+        || settingsKeys.contains("heightAboveSeaLevel")
+        || settingsKeys.contains("temperatureLapseRate")
+        || settingsKeys.contains("frequency")
+        || settingsKeys.contains("beamwidth")
+        || settingsKeys.contains("az")
+        || settingsKeys.contains("el")
+        || settingsKeys.contains("l")
+        || settingsKeys.contains("b")
+        || settingsKeys.contains("azOffset")
+        || settingsKeys.contains("elOffset")
         || force)
     {
         // Recalculate immediately
         QTimer::singleShot(1, this, &StarTrackerWorker::update);
         m_pollTimer.start((int)round(settings.m_updatePeriod*1000.0));
     }
-    else if ((m_settings.m_updatePeriod != settings.m_updatePeriod) || force)
+    else if (settingsKeys.contains("updatePeriod") || force)
     {
         m_pollTimer.start((int)round(settings.m_updatePeriod*1000.0));
     }
 
-    if (!settings.m_drawSunOnMap && m_settings.m_drawSunOnMap)
-        removeFromMap("Sun");
-    if (!settings.m_drawMoonOnMap && m_settings.m_drawMoonOnMap)
-        removeFromMap("Moon");
-    if ((!settings.m_drawStarOnMap && m_settings.m_drawStarOnMap)
-        || (((settings.m_target == "Sun") || (settings.m_target == "Moon"))
-            && ((m_settings.m_target != "Sun") && (m_settings.m_target != "Moon"))))
-        removeFromMap("Star");
+    if (settingsKeys.contains("drawSunOnMap")
+     || settingsKeys.contains("drawMoonOnMap")
+     || settingsKeys.contains("drawStarOnMap")
+     || settingsKeys.contains("m_target"))
+    {
+        if (!settings.m_drawSunOnMap && m_settings.m_drawSunOnMap)
+            removeFromMap("Sun");
+        if (!settings.m_drawMoonOnMap && m_settings.m_drawMoonOnMap)
+            removeFromMap("Moon");
+        if ((!settings.m_drawStarOnMap && m_settings.m_drawStarOnMap)
+            || (((settings.m_target == "Sun") || (settings.m_target == "Moon"))
+                && ((m_settings.m_target != "Sun") && (m_settings.m_target != "Moon"))))
+            removeFromMap("Star");
+    }
 
-    if ((settings.m_serverPort != m_settings.m_serverPort) ||
-        (settings.m_enableServer != m_settings.m_enableServer) || force)
+
+    if (settingsKeys.contains("serverPort") ||
+        settingsKeys.contains("enableServer") || force)
     {
         restartServer(settings.m_enableServer, settings.m_serverPort);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void StarTrackerWorker::restartServer(bool enabled, uint32_t port)

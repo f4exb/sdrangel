@@ -121,7 +121,7 @@ void StarTracker::start()
     m_thread->start();
     m_state = StRunning;
 
-    m_worker->getInputMessageQueue()->push(StarTrackerWorker::MsgConfigureStarTrackerWorker::create(m_settings, true));
+    m_worker->getInputMessageQueue()->push(StarTrackerWorker::MsgConfigureStarTrackerWorker::create(m_settings, QList<QString>(), true));
     m_worker->getInputMessageQueue()->push(MsgSetSolarFlux::create(m_solarFlux));
 }
 
@@ -144,7 +144,7 @@ bool StarTracker::handleMessage(const Message& cmd)
     {
         MsgConfigureStarTracker& cfg = (MsgConfigureStarTracker&) cmd;
         qDebug() << "StarTracker::handleMessage: MsgConfigureStarTracker";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -201,123 +201,24 @@ bool StarTracker::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureStarTracker *msg = MsgConfigureStarTracker::create(m_settings, true);
+        MsgConfigureStarTracker *msg = MsgConfigureStarTracker::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureStarTracker *msg = MsgConfigureStarTracker::create(m_settings, true);
+        MsgConfigureStarTracker *msg = MsgConfigureStarTracker::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void StarTracker::applySettings(const StarTrackerSettings& settings, bool force)
+void StarTracker::applySettings(const StarTrackerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "StarTracker::applySettings:"
-            << " m_target: " << settings.m_target
-            << " m_ra: " << settings.m_ra
-            << " m_dec: " << settings.m_dec
-            << " m_az: " << settings.m_az
-            << " m_el: " << settings.m_el
-            << " m_l: " << settings.m_l
-            << " m_b: " << settings.m_b
-            << " m_azOffset: " << settings.m_azOffset
-            << " m_elOffset: " << settings.m_elOffset
-            << " m_latitude: " << settings.m_latitude
-            << " m_longitude: " << settings.m_longitude
-            << " m_serverPort: " << settings.m_serverPort
-            << " m_enableServer: " << settings.m_enableServer
-            << " m_title: " << settings.m_title
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIFeatureSetIndex: " << settings.m_reverseAPIFeatureSetIndex
-            << " m_reverseAPIFeatureIndex: " << settings.m_reverseAPIFeatureIndex
-            << " force: " << force;
+    qDebug() << "StarTracker::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_target != settings.m_target) || force) {
-        reverseAPIKeys.append("target");
-    }
-    if ((m_settings.m_ra != settings.m_ra) || force) {
-        reverseAPIKeys.append("ra");
-    }
-    if ((m_settings.m_dec != settings.m_dec) || force) {
-        reverseAPIKeys.append("dec");
-    }
-    if ((m_settings.m_latitude != settings.m_latitude) || force) {
-        reverseAPIKeys.append("latitude");
-    }
-    if ((m_settings.m_longitude != settings.m_longitude) || force) {
-        reverseAPIKeys.append("longitude");
-    }
-    if ((m_settings.m_dateTime != settings.m_dateTime) || force) {
-        reverseAPIKeys.append("dateTime");
-    }
-    if ((m_settings.m_refraction != settings.m_refraction) || force) {
-        reverseAPIKeys.append("refraction");
-    }
-    if ((m_settings.m_pressure != settings.m_pressure) || force) {
-        reverseAPIKeys.append("pressure");
-    }
-    if ((m_settings.m_temperature != settings.m_temperature) || force) {
-        reverseAPIKeys.append("temperature");
-    }
-    if ((m_settings.m_humidity != settings.m_humidity) || force) {
-        reverseAPIKeys.append("humidity");
-    }
-    if ((m_settings.m_heightAboveSeaLevel != settings.m_heightAboveSeaLevel) || force) {
-        reverseAPIKeys.append("heightAboveSeaLevel");
-    }
-    if ((m_settings.m_temperatureLapseRate != settings.m_temperatureLapseRate) || force) {
-        reverseAPIKeys.append("temperatureLapseRate");
-    }
-    if ((m_settings.m_frequency != settings.m_frequency) || force) {
-        reverseAPIKeys.append("frequency");
-    }
-    if ((m_settings.m_serverPort != settings.m_serverPort) || force) {
-        reverseAPIKeys.append("stellariumPort");
-    }
-    if ((m_settings.m_enableServer != settings.m_enableServer) || force) {
-        reverseAPIKeys.append("stellariumServerEnabled");
-    }
-    if ((m_settings.m_updatePeriod != settings.m_updatePeriod) || force) {
-        reverseAPIKeys.append("updatePeriod");
-    }
-    if ((m_settings.m_jnow != settings.m_jnow) || force) {
-        reverseAPIKeys.append("epoch");
-    }
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-    if ((m_settings.m_az != settings.m_az) || force) {
-        reverseAPIKeys.append("azimuth");
-    }
-    if ((m_settings.m_el != settings.m_el) || force) {
-        reverseAPIKeys.append("elevation");
-    }
-    if ((m_settings.m_l != settings.m_l) || force) {
-        reverseAPIKeys.append("l");
-    }
-    if ((m_settings.m_b != settings.m_b) || force) {
-        reverseAPIKeys.append("b");
-    }
-    if ((m_settings.m_azOffset != settings.m_azOffset) || force) {
-        reverseAPIKeys.append("azimuthOffset");
-    }
-    if ((m_settings.m_elOffset != settings.m_elOffset) || force) {
-        reverseAPIKeys.append("elevationOffset");
-    }
-
-    if ((m_settings.m_owmAPIKey != settings.m_owmAPIKey) || force)
+    if (settingsKeys.contains("owmAPIKey") || force)
     {
         if (m_weather)
         {
@@ -334,10 +235,10 @@ void StarTracker::applySettings(const StarTrackerSettings& settings, bool force)
         }
     }
 
-    if (   (m_settings.m_owmAPIKey != settings.m_owmAPIKey)
-        || (m_settings.m_latitude != settings.m_latitude)
-        || (m_settings.m_longitude != settings.m_longitude)
-        || (m_settings.m_weatherUpdatePeriod != settings.m_weatherUpdatePeriod)
+    if (settingsKeys.contains("owmAPIKey")
+        || settingsKeys.contains("latitude")
+        || settingsKeys.contains("longitude")
+        || settingsKeys.contains("weatherUpdatePeriod")
         || force)
     {
         if (m_weather) {
@@ -346,20 +247,20 @@ void StarTracker::applySettings(const StarTrackerSettings& settings, bool force)
     }
 
     StarTrackerWorker::MsgConfigureStarTrackerWorker *msg = StarTrackerWorker::MsgConfigureStarTrackerWorker::create(
-        settings, force
+        settings, settingsKeys, force
     );
     if (m_worker) {
         m_worker->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
-                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIFeatureSetIndex") ||
+                settingsKeys.contains("m_reverseAPIFeatureIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -397,13 +298,13 @@ int StarTracker::webapiSettingsPutPatch(
     StarTrackerSettings settings = m_settings;
     webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
 
-    MsgConfigureStarTracker *msg = MsgConfigureStarTracker::create(settings, force);
+    MsgConfigureStarTracker *msg = MsgConfigureStarTracker::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("StarTracker::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureStarTracker *msgToGUI = MsgConfigureStarTracker::create(settings, force);
+        MsgConfigureStarTracker *msgToGUI = MsgConfigureStarTracker::create(settings, featureSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -616,7 +517,7 @@ void StarTracker::webapiUpdateFeatureSettings(
     }
 }
 
-void StarTracker::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const StarTrackerSettings& settings, bool force)
+void StarTracker::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const StarTrackerSettings& settings, bool force)
 {
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());
@@ -743,21 +644,32 @@ void StarTracker::networkManagerFinished(QNetworkReply *reply)
 
 void StarTracker::weatherUpdated(float temperature, float pressure, float humidity)
 {
-    if (!std::isnan(temperature)) {
+    QList<QString> settingsKeys;
+
+    if (!std::isnan(temperature))
+    {
         m_settings.m_temperature = temperature;
+        settingsKeys.append("temperature");
     }
-    if (!std::isnan(pressure)) {
+
+    if (!std::isnan(pressure))
+    {
         m_settings.m_pressure = pressure;
+        settingsKeys.append("pressure");
     }
-    if (!std::isnan(humidity)) {
+
+    if (!std::isnan(humidity))
+    {
         m_settings.m_humidity = humidity;
+        settingsKeys.append("humidity");
     }
 
     if (m_worker) {
-        m_worker->getInputMessageQueue()->push(StarTrackerWorker::MsgConfigureStarTrackerWorker::create(m_settings, false));
+        m_worker->getInputMessageQueue()->push(StarTrackerWorker::MsgConfigureStarTrackerWorker::create(m_settings, settingsKeys, false));
     }
+
     if (m_guiMessageQueue) {
-        m_guiMessageQueue->push(MsgConfigureStarTracker::create(m_settings, false));
+        m_guiMessageQueue->push(MsgConfigureStarTracker::create(m_settings, settingsKeys, false));
     }
 }
 

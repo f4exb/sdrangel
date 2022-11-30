@@ -236,3 +236,282 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void StarTrackerSettings::applySettings(const QStringList& settingsKeys, const StarTrackerSettings& settings)
+{
+    if (settingsKeys.contains("ra")) {
+        m_ra = settings.m_ra;
+    }
+    if (settingsKeys.contains("dec")) {
+        m_dec = settings.m_dec;
+    }
+    if (settingsKeys.contains("latitude")) {
+        m_latitude = settings.m_latitude;
+    }
+    if (settingsKeys.contains("longitude")) {
+        m_longitude = settings.m_longitude;
+    }
+    if (settingsKeys.contains("target")) {
+        m_target = settings.m_target;
+    }
+    if (settingsKeys.contains("dateTime")) {
+        m_dateTime = settings.m_dateTime;
+    }
+    if (settingsKeys.contains("refraction")) {
+        m_refraction = settings.m_refraction;
+    }
+    if (settingsKeys.contains("pressure")) {
+        m_pressure = settings.m_pressure;
+    }
+    if (settingsKeys.contains("temperature")) {
+        m_temperature = settings.m_temperature;
+    }
+    if (settingsKeys.contains("humidity")) {
+        m_humidity = settings.m_humidity;
+    }
+    if (settingsKeys.contains("heightAboveSeaLevel")) {
+        m_heightAboveSeaLevel = settings.m_heightAboveSeaLevel;
+    }
+    if (settingsKeys.contains("temperatureLapseRate")) {
+        m_temperatureLapseRate = settings.m_temperatureLapseRate;
+    }
+    if (settingsKeys.contains("frequency")) {
+        m_frequency = settings.m_frequency;
+    }
+    if (settingsKeys.contains("beamwidth")) {
+        m_beamwidth = settings.m_beamwidth;
+    }
+    if (settingsKeys.contains("enableServer")) {
+        m_enableServer = settings.m_enableServer;
+    }
+    if (settingsKeys.contains("serverPort")) {
+        m_serverPort = settings.m_serverPort;
+    }
+    if (settingsKeys.contains("azElUnits")) {
+        m_azElUnits = settings.m_azElUnits;
+    }
+    if (settingsKeys.contains("solarFluxData")) {
+        m_solarFluxData = settings.m_solarFluxData;
+    }
+    if (settingsKeys.contains("solarFluxUnits")) {
+        m_solarFluxUnits = settings.m_solarFluxUnits;
+    }
+    if (settingsKeys.contains("updatePeriod")) {
+        m_updatePeriod = settings.m_updatePeriod;
+    }
+    if (settingsKeys.contains("jnow")) {
+        m_jnow = settings.m_jnow;
+    }
+    if (settingsKeys.contains("drawSunOnMap")) {
+        m_drawSunOnMap = settings.m_drawSunOnMap;
+    }
+    if (settingsKeys.contains("drawMoonOnMap")) {
+        m_drawMoonOnMap = settings.m_drawMoonOnMap;
+    }
+    if (settingsKeys.contains("drawStarOnMap")) {
+        m_drawStarOnMap = settings.m_drawStarOnMap;
+    }
+    if (settingsKeys.contains("chartsDarkTheme")) {
+        m_chartsDarkTheme = settings.m_chartsDarkTheme;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("az")) {
+        m_az = settings.m_az;
+    }
+    if (settingsKeys.contains("el")) {
+        m_el = settings.m_el;
+    }
+    if (settingsKeys.contains("l")) {
+        m_l = settings.m_l;
+    }
+    if (settingsKeys.contains("b")) {
+        m_b = settings.m_b;
+    }
+    if (settingsKeys.contains("azOffset")) {
+        m_azOffset = settings.m_azOffset;
+    }
+    if (settingsKeys.contains("elOffset")) {
+        m_elOffset = settings.m_elOffset;
+    }
+    if (settingsKeys.contains("link")) {
+        m_link = settings.m_link;
+    }
+    if (settingsKeys.contains("owmAPIKey")) {
+        m_owmAPIKey = settings.m_owmAPIKey;
+    }
+    if (settingsKeys.contains("weatherUpdatePeriod")) {
+        m_weatherUpdatePeriod = settings.m_weatherUpdatePeriod;
+    }
+    if (settingsKeys.contains("drawSunOnSkyTempChart")) {
+        m_drawSunOnSkyTempChart = settings.m_drawSunOnSkyTempChart;
+    }
+    if (settingsKeys.contains("drawMoonOnSkyTempChart")) {
+        m_drawMoonOnSkyTempChart = settings.m_drawMoonOnSkyTempChart;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+}
+
+QString StarTrackerSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("ra") || force) {
+        ostr << " m_ra: " << m_ra.toStdString();
+    }
+    if (settingsKeys.contains("dec") || force) {
+        ostr << " m_dec: " << m_dec.toStdString();
+    }
+    if (settingsKeys.contains("latitude") || force) {
+        ostr << " m_latitude: " << m_latitude;
+    }
+    if (settingsKeys.contains("longitude") || force) {
+        ostr << " m_longitude: " << m_longitude;
+    }
+    if (settingsKeys.contains("target") || force) {
+        ostr << " m_target: " << m_target.toStdString();
+    }
+    if (settingsKeys.contains("dateTime") || force) {
+        ostr << " m_dateTime: " << m_dateTime.toStdString();
+    }
+    if (settingsKeys.contains("refraction") || force) {
+        ostr << " m_refraction: " << m_refraction.toStdString();
+    }
+    if (settingsKeys.contains("pressure") || force) {
+        ostr << " m_pressure: " << m_pressure;
+    }
+    if (settingsKeys.contains("temperature") || force) {
+        ostr << " m_temperature: " << m_temperature;
+    }
+    if (settingsKeys.contains("humidity") || force) {
+        ostr << " m_humidity: " << m_humidity;
+    }
+    if (settingsKeys.contains("heightAboveSeaLevel") || force) {
+        ostr << " m_heightAboveSeaLevel: " << m_heightAboveSeaLevel;
+    }
+    if (settingsKeys.contains("temperatureLapseRate") || force) {
+        ostr << " m_temperatureLapseRate: " << m_temperatureLapseRate;
+    }
+    if (settingsKeys.contains("frequency") || force) {
+        ostr << " m_frequency: " << m_frequency;
+    }
+    if (settingsKeys.contains("beamwidth") || force) {
+        ostr << " m_beamwidth: " << m_beamwidth;
+    }
+    if (settingsKeys.contains("enableServer") || force) {
+        ostr << " m_enableServer: " << m_enableServer;
+    }
+    if (settingsKeys.contains("serverPort") || force) {
+        ostr << " m_serverPort: " << m_serverPort;
+    }
+    if (settingsKeys.contains("azElUnits") || force) {
+        ostr << " m_azElUnits: " << m_azElUnits;
+    }
+    if (settingsKeys.contains("solarFluxData") || force) {
+        ostr << " m_solarFluxData: " << m_solarFluxData;
+    }
+    if (settingsKeys.contains("solarFluxUnits") || force) {
+        ostr << " m_solarFluxUnits: " << m_solarFluxUnits;
+    }
+    if (settingsKeys.contains("updatePeriod") || force) {
+        ostr << " m_updatePeriod: " << m_updatePeriod;
+    }
+    if (settingsKeys.contains("jnow") || force) {
+        ostr << " m_jnow: " << m_jnow;
+    }
+    if (settingsKeys.contains("drawSunOnMap") || force) {
+        ostr << " m_drawSunOnMap: " << m_drawSunOnMap;
+    }
+    if (settingsKeys.contains("drawMoonOnMap") || force) {
+        ostr << " m_drawMoonOnMap: " << m_drawMoonOnMap;
+    }
+    if (settingsKeys.contains("drawStarOnMap") || force) {
+        ostr << " m_drawStarOnMap: " << m_drawStarOnMap;
+    }
+    if (settingsKeys.contains("chartsDarkTheme") || force) {
+        ostr << " m_chartsDarkTheme: " << m_chartsDarkTheme;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("az") || force) {
+        ostr << " m_az: " << m_az;
+    }
+    if (settingsKeys.contains("el") || force) {
+        ostr << " m_el: " << m_el;
+    }
+    if (settingsKeys.contains("l") || force) {
+        ostr << " m_l: " << m_l;
+    }
+    if (settingsKeys.contains("b") || force) {
+        ostr << " m_b: " << m_b;
+    }
+    if (settingsKeys.contains("azOffset") || force) {
+        ostr << " m_azOffset: " << m_azOffset;
+    }
+    if (settingsKeys.contains("elOffset") || force) {
+        ostr << " m_elOffset: " << m_elOffset;
+    }
+    if (settingsKeys.contains("link") || force) {
+        ostr << " m_link: " << m_link;
+    }
+    if (settingsKeys.contains("owmAPIKey") || force) {
+        ostr << " m_owmAPIKey: " << m_owmAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("weatherUpdatePeriod") || force) {
+        ostr << " m_weatherUpdatePeriod: " << m_weatherUpdatePeriod;
+    }
+    if (settingsKeys.contains("drawSunOnSkyTempChart") || force) {
+        ostr << " m_drawSunOnSkyTempChart: " << m_drawSunOnSkyTempChart;
+    }
+    if (settingsKeys.contains("drawMoonOnSkyTempChart") || force) {
+        ostr << " m_drawMoonOnSkyTempChart: " << m_drawMoonOnSkyTempChart;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}

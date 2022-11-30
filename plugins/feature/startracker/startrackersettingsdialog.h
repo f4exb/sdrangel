@@ -25,10 +25,11 @@ class StarTrackerSettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit StarTrackerSettingsDialog(StarTrackerSettings* settings, QWidget* parent = 0);
+    explicit StarTrackerSettingsDialog(StarTrackerSettings* settings, QList<QString>& settingsKeys, QWidget* parent = 0);
     ~StarTrackerSettingsDialog();
 
    StarTrackerSettings *m_settings;
+   QList<QString>& m_settingsKeys;
 
 private slots:
     void accept();

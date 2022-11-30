@@ -45,20 +45,23 @@ public:
 
     public:
         const StarTrackerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureStarTrackerWorker* create(const StarTrackerSettings& settings, bool force)
+        static MsgConfigureStarTrackerWorker* create(const StarTrackerSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigureStarTrackerWorker(settings, force);
+            return new MsgConfigureStarTrackerWorker(settings, settingsKeys, force);
         }
 
     private:
         StarTrackerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureStarTrackerWorker(const StarTrackerSettings& settings, bool force) :
+        MsgConfigureStarTrackerWorker(const StarTrackerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -86,7 +89,7 @@ private:
     float m_solarFlux;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const StarTrackerSettings& settings, bool force = false);
+    void applySettings(const StarTrackerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void restartServer(bool enabled, uint32_t port);
     MessageQueue *getMessageQueueToGUI() { return m_msgQueueToGUI; }
     void updateRaDec(RADec rd, QDateTime dt, bool lbTarget);
