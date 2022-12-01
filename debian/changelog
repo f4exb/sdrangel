@@ -1,3 +1,13 @@
+sdrangel (7.8.4-1) unstable; urgency=medium
+
+  * Adapt code to Qt6. PR #1518
+  * Rotator controller: Fix initialisation of serial port. PR #1520
+  * qo100_datv.py: device dependent log2 decimation
+  * Feature plugins: Make settings assignments atomic. Part of #1329
+  * KiwiSDR: implement variable sample rate. Fixes #1523
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 01 Dec 2022 20:50:29 +0100
+
 sdrangel (7.8.3-1) unstable; urgency=medium
 
   * DemodAnalyzer: record audio. Part of #1330

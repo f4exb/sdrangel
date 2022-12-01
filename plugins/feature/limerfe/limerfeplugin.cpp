@@ -29,7 +29,7 @@
 const PluginDescriptor LimeRFEPlugin::m_pluginDescriptor = {
     LimeRFE::m_featureId,
 	QStringLiteral("LimeRFE USB Controller"),
-    QStringLiteral("7.6.3"),
+    QStringLiteral("7.8.4"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

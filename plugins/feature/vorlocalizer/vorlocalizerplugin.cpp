@@ -29,7 +29,7 @@
 const PluginDescriptor VORLocalizerPlugin::m_pluginDescriptor = {
     VORLocalizer::m_featureId,
 	QStringLiteral("VOR Localizer"),
-    QStringLiteral("7.8.0"),
+    QStringLiteral("7.8.4"),
 	QStringLiteral("(c) Jon Beniston, M7RCE"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

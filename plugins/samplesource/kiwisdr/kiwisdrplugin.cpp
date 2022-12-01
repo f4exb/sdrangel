@@ -32,7 +32,7 @@
 const PluginDescriptor KiwiSDRPlugin::m_pluginDescriptor = {
     QStringLiteral("KiwiSDR"),
 	QStringLiteral("KiwiSDR input"),
-    QStringLiteral("7.8.2"),
+    QStringLiteral("7.8.4"),
 	QStringLiteral("(c) Vort (c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

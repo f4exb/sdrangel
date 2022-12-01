@@ -29,7 +29,7 @@
 const PluginDescriptor AMBEPlugin::m_pluginDescriptor = {
     AMBE::m_featureId,
 	QStringLiteral("AMBE Controller"),
-    QStringLiteral("7.3.1"),
+    QStringLiteral("7.8.4"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

@@ -29,7 +29,7 @@
 const PluginDescriptor AFCPlugin::m_pluginDescriptor = {
     AFC::m_featureId,
 	QStringLiteral("AFC"),
-    QStringLiteral("7.8.0"),
+    QStringLiteral("7.8.4"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

@@ -29,7 +29,7 @@
 const PluginDescriptor SimplePTTPlugin::m_pluginDescriptor = {
     SimplePTT::m_featureId,
 	QStringLiteral("Simple PTT"),
-    QStringLiteral("7.8.0"),
+    QStringLiteral("7.8.4"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
