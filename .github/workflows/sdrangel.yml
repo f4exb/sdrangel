@@ -83,7 +83,7 @@ jobs:
           cmd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           choco install patch
           mkdir build && cd build
-          cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=SSE4_2 -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DCMAKE_PREFIX_PATH="C:\Qt\5.15.2\msvc2019_64;C:\Libraries\boost_1_73_0"
+          cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=SSE4_2 -DDEBUG_OUTPUT=ON -DENABLE_LIMESUITE=OFF -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DCMAKE_PREFIX_PATH="C:\Qt\5.15.2\msvc2019_64;C:\Libraries\boost_1_73_0"
           cmake --build . --config Release --target package
       - name: Upload artifact
         uses: actions/upload-artifact@v2
@@ -95,4 +95,3 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
-
