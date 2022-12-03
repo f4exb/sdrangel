@@ -30,7 +30,7 @@ LocalSinkSettings::LocalSinkSettings()
 
 void LocalSinkSettings::resetToDefaults()
 {
-    m_localDeviceIndex = 0;
+    m_localDeviceIndex = -1;
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "Local sink";
     m_log2Decim = 0;
@@ -51,7 +51,7 @@ void LocalSinkSettings::resetToDefaults()
 QByteArray LocalSinkSettings::serialize() const
 {
     SimpleSerializer s(1);
-    s.writeU32(1, m_localDeviceIndex);
+    s.writeS32(1, m_localDeviceIndex);
 
     if (m_channelMarker) {
         s.writeBlob(2, m_channelMarker->serialize());
@@ -95,7 +95,7 @@ bool LocalSinkSettings::deserialize(const QByteArray& data)
         QString strtmp;
         QByteArray bytetmp;
 
-        d.readU32(1, &m_localDeviceIndex, 0);
+        d.readS32(1, &m_localDeviceIndex, -1);
 
         if (m_channelMarker)
         {

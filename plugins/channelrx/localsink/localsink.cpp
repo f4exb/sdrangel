@@ -34,6 +34,7 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
+#include "device/deviceset.h"
 #include "feature/feature.h"
 #include "settings/serializable.h"
 #include "maincore.h"
@@ -42,6 +43,7 @@
 #include "localsink.h"
 
 MESSAGE_CLASS_DEFINITION(LocalSink::MsgConfigureLocalSink, Message)
+MESSAGE_CLASS_DEFINITION(LocalSink::MsgReportDevices, Message)
 
 const char* const LocalSink::m_channelIdURI = "sdrangel.channel.localsink";
 const char* const LocalSink::m_channelId = "LocalSink";
@@ -75,7 +77,19 @@ LocalSink::LocalSink(DeviceAPI *deviceAPI) :
         this,
         &LocalSink::handleIndexInDeviceSetChanged
     );
-    start();
+    // Update device list when devices are added or removed
+    QObject::connect(
+        MainCore::instance(),
+        &MainCore::deviceSetAdded,
+        this,
+        &LocalSink::updateDeviceSetList
+    );
+    QObject::connect(
+        MainCore::instance(),
+        &MainCore::deviceSetRemoved,
+        this,
+        &LocalSink::updateDeviceSetList
+    );
 }
 
 LocalSink::~LocalSink()
@@ -89,7 +103,7 @@ LocalSink::~LocalSink()
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-    stop();
+    stopProcessing();
 }
 
 void LocalSink::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -119,12 +133,18 @@ void LocalSink::feed(const SampleVector::const_iterator& begin, const SampleVect
 }
 
 void LocalSink::start()
+{ }
+
+void LocalSink::stop()
+{ }
+
+void LocalSink::startProcessing()
 {
     if (m_running) {
         return;
     }
 
-	qDebug("LocalSink::start");
+	qDebug("LocalSink::startProcessing");
     m_thread = new QThread(this);
     m_basebandSink = new LocalSinkBaseband();
     m_basebandSink->moveToThread(m_thread);
@@ -135,19 +155,24 @@ void LocalSink::start()
     m_basebandSink->reset();
     m_thread->start();
 
-    LocalSinkBaseband::MsgConfigureLocalSinkBaseband *msg = LocalSinkBaseband::MsgConfigureLocalSinkBaseband::create(m_settings, true);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    DeviceSampleSource *deviceSource = getLocalDevice(m_settings.m_localDeviceIndex);
+    LocalSinkBaseband::MsgConfigureLocalDeviceSampleSource *msgDevice =
+        LocalSinkBaseband::MsgConfigureLocalDeviceSampleSource::create(deviceSource);
+    m_basebandSink->getInputMessageQueue()->push(msgDevice);
+
+    LocalSinkBaseband::MsgConfigureLocalSinkBaseband *msgConfig = LocalSinkBaseband::MsgConfigureLocalSinkBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msgConfig);
 
     m_running = true;
 }
 
-void LocalSink::stop()
+void LocalSink::stopProcessing()
 {
     if (!m_running) {
         return;
     }
 
-    qDebug("LocalSink::stop");
+    qDebug("LocalSink::stopProcessing");
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
@@ -218,27 +243,15 @@ bool LocalSink::deserialize(const QByteArray& data)
     }
 }
 
-void LocalSink::getLocalDevices(std::vector<uint32_t>& indexes)
+DeviceSampleSource *LocalSink::getLocalDevice(int index)
 {
-    indexes.clear();
-    DSPEngine *dspEngine = DSPEngine::instance();
-
-    for (uint32_t i = 0; i < dspEngine->getDeviceSourceEnginesNumber(); i++)
-    {
-        DSPDeviceSourceEngine *deviceSourceEngine = dspEngine->getDeviceSourceEngineByIndex(i);
-        DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
-
-        if (deviceSource->getDeviceDescription() == "LocalInput") {
-            indexes.push_back(i);
-        }
+    if (index < 0) {
+        return nullptr;
     }
-}
 
-DeviceSampleSource *LocalSink::getLocalDevice(uint32_t index)
-{
     DSPEngine *dspEngine = DSPEngine::instance();
 
-    if (index < dspEngine->getDeviceSourceEnginesNumber())
+    if (index < (int) dspEngine->getDeviceSourceEnginesNumber())
     {
         DSPDeviceSourceEngine *deviceSourceEngine = dspEngine->getDeviceSourceEngineByIndex(index);
         DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
@@ -266,7 +279,7 @@ DeviceSampleSource *LocalSink::getLocalDevice(uint32_t index)
     return nullptr;
 }
 
-void LocalSink::propagateSampleRateAndFrequency(uint32_t index, uint32_t log2Decim)
+void LocalSink::propagateSampleRateAndFrequency(int index, uint32_t log2Decim)
 {
     qDebug() << "LocalSink::propagateSampleRateAndFrequency:"
         << " index: " << index
@@ -329,10 +342,10 @@ void LocalSink::applySettings(const LocalSinkSettings& settings, bool force)
     {
         reverseAPIKeys.append("play");
 
-        if (m_running)
-        {
-            LocalSinkBaseband::MsgConfigureLocalSinkWork *msg = LocalSinkBaseband::MsgConfigureLocalSinkWork::create(settings.m_play);
-            m_basebandSink->getInputMessageQueue()->push(msg);
+        if (settings.m_play) {
+            startProcessing();
+        } else {
+            stopProcessing();
         }
     }
 
@@ -681,4 +694,68 @@ void LocalSink::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+void LocalSink::updateDeviceSetList()
+{
+    MainCore *mainCore = MainCore::instance();
+    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+    std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
+
+    m_localInputDeviceIndexes.clear();
+    unsigned int deviceIndex = 0;
+
+    for (; it != deviceSets.end(); ++it, deviceIndex++)
+    {
+        DSPDeviceSourceEngine *deviceSourceEngine = (*it)->m_deviceSourceEngine;
+
+        if (deviceSourceEngine)
+        {
+            DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
+
+            if (deviceSource->getDeviceDescription() == "LocalInput") {
+                m_localInputDeviceIndexes.append(deviceIndex);
+            }
+        }
+    }
+
+    if (m_guiMessageQueue)
+    {
+        MsgReportDevices *msg = MsgReportDevices::create();
+        msg->getDeviceSetIndexes() = m_localInputDeviceIndexes;
+        m_guiMessageQueue->push(msg);
+    }
+
+    LocalSinkSettings settings = m_settings;
+    int newIndexInList;
+
+    if (it != deviceSets.begin())
+    {
+        if (m_settings.m_localDeviceIndex < 0) {
+            newIndexInList = 0;
+        } else if (m_settings.m_localDeviceIndex >= m_localInputDeviceIndexes.size()) {
+            newIndexInList = m_localInputDeviceIndexes.size() - 1;
+        } else {
+            newIndexInList = m_settings.m_localDeviceIndex;
+        }
+    }
+    else
+    {
+        newIndexInList = -1;
+    }
+
+    if (newIndexInList < 0) {
+        settings.m_localDeviceIndex = -1; // means no device
+    } else {
+        settings.m_localDeviceIndex = m_localInputDeviceIndexes[newIndexInList];
+    }
+
+    qDebug("LocalSink::updateDeviceSetLists: new device index: %d device: %d", newIndexInList, settings.m_localDeviceIndex);
+    applySettings(settings);
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureLocalSink *msg = MsgConfigureLocalSink::create(m_settings, false);
+        m_guiMessageQueue->push(msg);
+    }
 }

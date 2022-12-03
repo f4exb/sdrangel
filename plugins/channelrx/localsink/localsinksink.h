@@ -43,6 +43,7 @@ public:
     void setSampleRate(int sampleRate);
 
 private:
+    DeviceSampleSource *m_deviceSource;
     SampleSinkFifo m_sampleFifo;
     LocalSinkSettings m_settings;
     LocalSinkWorker *m_sinkWorker;

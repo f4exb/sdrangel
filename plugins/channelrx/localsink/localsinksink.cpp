@@ -26,12 +26,13 @@
 #include "localsinksink.h"
 
 LocalSinkSink::LocalSinkSink() :
-        m_sinkWorker(nullptr),
-        m_running(false),
-        m_centerFrequency(0),
-        m_frequencyOffset(0),
-        m_sampleRate(48000),
-        m_deviceSampleRate(48000)
+    m_deviceSource(nullptr),
+    m_sinkWorker(nullptr),
+    m_running(false),
+    m_centerFrequency(0),
+    m_frequencyOffset(0),
+    m_sampleRate(48000),
+    m_deviceSampleRate(48000)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(4000000));
     applySettings(m_settings, true);
@@ -43,34 +44,39 @@ LocalSinkSink::~LocalSinkSink()
 
 void LocalSinkSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-    m_sampleFifo.write(begin, end);
+    if (m_running && m_deviceSource) {
+        m_deviceSource->getSampleFifo()->write(begin, end);
+    }
+    // m_sampleFifo.write(begin, end);
 }
 
 void LocalSinkSink::start(DeviceSampleSource *deviceSource)
 {
-    qDebug("LocalSinkSink::start");
+    qDebug("LocalSinkSink::start: deviceSource: %p", deviceSource);
 
     if (m_running) {
         stop();
     }
 
-    m_sinkWorker = new LocalSinkWorker();
-    m_sinkWorker->moveToThread(&m_sinkWorkerThread);
-    m_sinkWorker->setSampleFifo(&m_sampleFifo);
+    m_deviceSource = deviceSource;
+    // TODO: We'll see later if a worker is really needed
+    // m_sinkWorker = new LocalSinkWorker();
+    // m_sinkWorker->moveToThread(&m_sinkWorkerThread);
+    // m_sinkWorker->setSampleFifo(&m_sampleFifo);
 
-    if (deviceSource) {
-        m_sinkWorker->setDeviceSampleFifo(deviceSource->getSampleFifo());
-    }
+    // if (deviceSource) {
+    //     m_sinkWorker->setDeviceSampleFifo(deviceSource->getSampleFifo());
+    // }
 
-    QObject::connect(
-        &m_sampleFifo,
-        &SampleSinkFifo::dataReady,
-        m_sinkWorker,
-        &LocalSinkWorker::handleData,
-        Qt::QueuedConnection
-    );
+    // QObject::connect(
+    //     &m_sampleFifo,
+    //     &SampleSinkFifo::dataReady,
+    //     m_sinkWorker,
+    //     &LocalSinkWorker::handleData,
+    //     Qt::QueuedConnection
+    // );
 
-    startWorker();
+    // startWorker();
     m_running = true;
 }
 
@@ -78,21 +84,23 @@ void LocalSinkSink::stop()
 {
     qDebug("LocalSinkSink::stop");
 
-    QObject::disconnect(
-        &m_sampleFifo,
-        &SampleSinkFifo::dataReady,
-        m_sinkWorker,
-        &LocalSinkWorker::handleData
-    );
+    // TODO: We'll see later if a worker is really needed
+    // QObject::disconnect(
+    //     &m_sampleFifo,
+    //     &SampleSinkFifo::dataReady,
+    //     m_sinkWorker,
+    //     &LocalSinkWorker::handleData
+    // );
 
-    if (m_sinkWorker != 0)
-    {
-        stopWorker();
-        m_sinkWorker->deleteLater();
-        m_sinkWorker = nullptr;
-    }
+    // if (m_sinkWorker != 0)
+    // {
+    //     stopWorker();
+    //     m_sinkWorker->deleteLater();
+    //     m_sinkWorker = nullptr;
+    // }
 
     m_running = false;
+    m_deviceSource = nullptr;
 }
 
 void LocalSinkSink::startWorker()

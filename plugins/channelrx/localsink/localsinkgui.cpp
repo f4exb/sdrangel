@@ -22,7 +22,6 @@
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
-#include "mainwindow.h"
 
 #include "localsinkgui.h"
 #include "localsink.h"
@@ -53,7 +52,6 @@ QByteArray LocalSinkGUI::serialize() const
 
 bool LocalSinkGUI::deserialize(const QByteArray& data)
 {
-    updateLocalDevices();
 
     if (m_settings.deserialize(data))
     {
@@ -88,6 +86,12 @@ bool LocalSinkGUI::handleMessage(const Message& message)
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
+        return true;
+    }
+    else if (LocalSink::MsgReportDevices::match(message))
+    {
+        LocalSink::MsgReportDevices& report = (LocalSink::MsgReportDevices&) message;
+        updateDeviceSetList(report.getDeviceSetIndexes());
         return true;
     }
     else
@@ -131,7 +135,7 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
-    updateLocalDevices();
+    updateDeviceSetList(m_localSink->getDeviceSetList());
     displaySettings();
     makeUIConnections();
     applySettings(true);
@@ -199,18 +203,6 @@ void LocalSinkGUI::displayRateAndShift()
     m_channelMarker.setBandwidth(channelSampleRate);
 }
 
-void LocalSinkGUI::updateLocalDevices()
-{
-    std::vector<uint32_t> localDevicesIndexes;
-    m_localSink->getLocalDevices(localDevicesIndexes);
-    ui->localDevice->clear();
-    std::vector<uint32_t>::const_iterator it = localDevicesIndexes.begin();
-
-    for (; it != localDevicesIndexes.end(); ++it) {
-        ui->localDevice->addItem(tr("%1").arg(*it), QVariant(*it));
-    }
-}
-
 int LocalSinkGUI::getLocalDeviceIndexInCombo(int localDeviceIndex)
 {
     int index = 0;
@@ -224,7 +216,6 @@ int LocalSinkGUI::getLocalDeviceIndexInCombo(int localDeviceIndex)
 
     return -1;
 }
-
 void LocalSinkGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
@@ -243,8 +234,7 @@ void LocalSinkGUI::handleSourceMessages()
 
     while ((message = getInputMessageQueue()->pop()) != 0)
     {
-        if (handleMessage(*message))
-        {
+        if (handleMessage(*message)) {
             delete message;
         }
     }
@@ -306,6 +296,21 @@ void LocalSinkGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
+void LocalSinkGUI::updateDeviceSetList(const QList<int>& deviceSetIndexes)
+{
+    QList<int>::const_iterator it = deviceSetIndexes.begin();
+
+    ui->localDevice->blockSignals(true);
+
+    ui->localDevice->clear();
+
+    for (; it != deviceSetIndexes.end(); ++it) {
+        ui->localDevice->addItem(QString("R%1").arg(*it), *it);
+    }
+
+    ui->localDevice->blockSignals(false);
+}
+
 void LocalSinkGUI::on_decimationFactor_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index;
@@ -320,18 +325,10 @@ void LocalSinkGUI::on_position_valueChanged(int value)
 
 void LocalSinkGUI::on_localDevice_currentIndexChanged(int index)
 {
-    m_settings.m_localDeviceIndex = ui->localDevice->itemData(index).toInt();
-    applySettings();
-}
-
-void LocalSinkGUI::on_localDevicesRefresh_clicked(bool checked)
-{
-    (void) checked;
-    updateLocalDevices();
-    int index = getLocalDeviceIndexInCombo(m_settings.m_localDeviceIndex);
-
-    if (index >= 0) {
-        ui->localDevice->setCurrentIndex(index);
+    if (index >= 0)
+    {
+        m_settings.m_localDeviceIndex = ui->localDevice->currentData().toInt();
+        applySettings();
     }
 }
 
@@ -379,7 +376,6 @@ void LocalSinkGUI::makeUIConnections()
     QObject::connect(ui->decimationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_decimationFactor_currentIndexChanged);
     QObject::connect(ui->position, &QSlider::valueChanged, this, &LocalSinkGUI::on_position_valueChanged);
     QObject::connect(ui->localDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_localDevice_currentIndexChanged);
-    QObject::connect(ui->localDevicesRefresh, &QPushButton::clicked, this, &LocalSinkGUI::on_localDevicesRefresh_clicked);
     QObject::connect(ui->localDevicePlay, &ButtonSwitch::toggled, this, &LocalSinkGUI::on_localDevicePlay_toggled);
 }
 

@@ -84,11 +84,11 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     void displayRateAndShift();
-    void updateLocalDevices();
-    int getLocalDeviceIndexInCombo(int localDeviceIndex);
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+    void updateDeviceSetList(const QList<int>& deviceSetIndexes);
+    int getLocalDeviceIndexInCombo(int localDeviceIndex);
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
@@ -101,7 +101,6 @@ private slots:
     void on_decimationFactor_currentIndexChanged(int index);
     void on_position_valueChanged(int value);
     void on_localDevice_currentIndexChanged(int index);
-    void on_localDevicesRefresh_clicked(bool checked);
     void on_localDevicePlay_toggled(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);

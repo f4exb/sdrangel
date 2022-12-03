@@ -45,8 +45,7 @@ public:
         const LocalSinkSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureLocalSink* create(const LocalSinkSettings& settings, bool force)
-        {
+        static MsgConfigureLocalSink* create(const LocalSinkSettings& settings, bool force) {
             return new MsgConfigureLocalSink(settings, force);
         }
 
@@ -58,6 +57,24 @@ public:
             Message(),
             m_settings(settings),
             m_force(force)
+        { }
+    };
+
+    class MsgReportDevices : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<int>& getDeviceSetIndexes() { return m_deviceSetIndexes; }
+
+        static MsgReportDevices* create() {
+            return new MsgReportDevices();
+        }
+
+    private:
+        QList<int> m_deviceSetIndexes;
+
+        MsgReportDevices() :
+            Message()
         { }
     };
 
@@ -116,8 +133,8 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    void getLocalDevices(std::vector<uint32_t>& indexes);
     uint32_t getNumberOfDeviceStreams() const;
+    const QList<int>& getDeviceSetList() { return m_localInputDeviceIndexes; }
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
@@ -128,6 +145,7 @@ private:
     LocalSinkBaseband *m_basebandSink;
     bool m_running;
     LocalSinkSettings m_settings;
+    QList<int> m_localInputDeviceIndexes;
 
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;
@@ -138,10 +156,13 @@ private:
 
     virtual bool handleMessage(const Message& cmd);
     void applySettings(const LocalSinkSettings& settings, bool force = false);
-    void propagateSampleRateAndFrequency(uint32_t index, uint32_t log2Decim);
+    void propagateSampleRateAndFrequency(int index, uint32_t log2Decim);
     static void validateFilterChainHash(LocalSinkSettings& settings);
     void calculateFrequencyOffset(uint32_t log2Decim, uint32_t filterChainHash);
-    DeviceSampleSource *getLocalDevice(uint32_t index);
+    void updateDeviceSetList();
+    DeviceSampleSource *getLocalDevice(int index);
+    void startProcessing();
+    void stopProcessing();
 
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LocalSinkSettings& settings, bool force);
     void sendChannelSettings(

@@ -25,7 +25,7 @@ class Serializable;
 
 struct LocalSinkSettings
 {
-    uint32_t m_localDeviceIndex;
+    int m_localDeviceIndex;
     quint32 m_rgbColor;
     QString m_title;
     uint32_t m_log2Decim;

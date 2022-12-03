@@ -57,26 +57,6 @@ public:
         { }
     };
 
-	class MsgConfigureLocalSinkWork : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		bool isWorking() const { return m_working; }
-
-		static MsgConfigureLocalSinkWork* create(bool working)
-		{
-			return new MsgConfigureLocalSinkWork(working);
-		}
-
-	private:
-		bool m_working;
-
-		MsgConfigureLocalSinkWork(bool working) :
-			Message(),
-			m_working(working)
-		{ }
-	};
-
     class MsgConfigureLocalDeviceSampleSource : public Message {
         MESSAGE_CLASS_DECLARATION
 

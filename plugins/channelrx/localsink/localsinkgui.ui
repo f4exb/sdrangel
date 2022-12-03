@@ -282,29 +282,9 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="localDevicesRefresh">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Refresh indexes of available local devices</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="ButtonSwitch" name="localDevicePlay">
         <property name="toolTip">
-         <string>Start/Stop sink</string>
+         <string>Start/Stop processing</string>
         </property>
         <property name="text">
          <string/>
@@ -336,15 +316,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>

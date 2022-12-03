@@ -24,7 +24,6 @@
 #include "localsinkbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(LocalSinkBaseband::MsgConfigureLocalSinkBaseband, Message)
-MESSAGE_CLASS_DEFINITION(LocalSinkBaseband::MsgConfigureLocalSinkWork, Message)
 MESSAGE_CLASS_DEFINITION(LocalSinkBaseband::MsgConfigureLocalDeviceSampleSource, Message)
 
 LocalSinkBaseband::LocalSinkBaseband() :
@@ -43,10 +42,12 @@ LocalSinkBaseband::LocalSinkBaseband() :
     );
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    m_sink.start(m_localSampleSource);
 }
 
 LocalSinkBaseband::~LocalSinkBaseband()
 {
+    m_sink.stop();
     delete m_channelizer;
 }
 
@@ -120,20 +121,6 @@ bool LocalSinkBaseband::handleMessage(const Message& cmd)
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
         m_channelizer->setBasebandSampleRate(notif.getSampleRate(), true); // apply decimation
         m_sink.setSampleRate(getChannelSampleRate());
-
-		return true;
-    }
-    else if (MsgConfigureLocalSinkWork::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-		MsgConfigureLocalSinkWork& conf = (MsgConfigureLocalSinkWork&) cmd;
-        qDebug() << "LocalSinkBaseband::handleMessage: MsgConfigureLocalSinkWork: " << conf.isWorking();
-
-        if (conf.isWorking()) {
-            m_sink.start(m_localSampleSource);
-        } else {
-            m_sink.stop();
-        }
 
 		return true;
     }
