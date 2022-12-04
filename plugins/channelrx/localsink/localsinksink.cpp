@@ -21,6 +21,7 @@
 #include <boost/cstdint.hpp>
 #include "dsp/devicesamplesource.h"
 #include "dsp/hbfilterchainconverter.h"
+#include "dsp/spectrumvis.h"
 
 #include "localsinkworker.h"
 #include "localsinksink.h"
@@ -28,6 +29,7 @@
 LocalSinkSink::LocalSinkSink() :
     m_deviceSource(nullptr),
     m_sinkWorker(nullptr),
+    m_spectrumSink(nullptr),
     m_running(false),
     m_centerFrequency(0),
     m_frequencyOffset(0),
@@ -46,6 +48,10 @@ void LocalSinkSink::feed(const SampleVector::const_iterator& begin, const Sample
 {
     if (m_running && m_deviceSource) {
         m_deviceSource->getSampleFifo()->write(begin, end);
+    }
+
+    if (m_spectrumSink) {
+        m_spectrumSink->feed(begin, end, false);
     }
     // m_sampleFifo.write(begin, end);
 }

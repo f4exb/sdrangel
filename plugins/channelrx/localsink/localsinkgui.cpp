@@ -83,6 +83,7 @@ bool LocalSinkGUI::handleMessage(const Message& message)
         const LocalSink::MsgConfigureLocalSink& cfg = (LocalSink::MsgConfigureLocalSink&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        ui->spectrumGUI->updateSettings();
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
@@ -119,7 +120,12 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_localSink = (LocalSink*) channelrx;
+    m_spectrumVis = m_localSink->getSpectrumVis();
+	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_localSink->setMessageQueueToGUI(getInputMessageQueue());
+
+    ui->glSpectrum->setCenterFrequency(m_deviceCenterFrequency);
+    ui->glSpectrum->setSampleRate(m_basebandSampleRate);
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);
@@ -129,11 +135,13 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setSpectrumGUI(ui->spectrumGUI);
     m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
     updateDeviceSetList(m_localSink->getDeviceSetList());
     displaySettings();
@@ -199,6 +207,8 @@ void LocalSinkGUI::displayRateAndShift()
     QLocale loc;
     ui->offsetFrequencyText->setText(tr("%1 Hz").arg(loc.toString(shift)));
     ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));
+    ui->glSpectrum->setSampleRate(channelSampleRate);
+    ui->glSpectrum->setCenterFrequency(m_deviceCenterFrequency + shift);
     m_channelMarker.setCenterFrequency(shift);
     m_channelMarker.setBandwidth(channelSampleRate);
 }

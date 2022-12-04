@@ -20,14 +20,17 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/spectrumvis.h"
 
 #include "localsinkbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(LocalSinkBaseband::MsgConfigureLocalSinkBaseband, Message)
 MESSAGE_CLASS_DEFINITION(LocalSinkBaseband::MsgConfigureLocalDeviceSampleSource, Message)
+MESSAGE_CLASS_DEFINITION(LocalSinkBaseband::MsgSetSpectrumSampleRateAndFrequency, Message)
 
 LocalSinkBaseband::LocalSinkBaseband() :
-    m_localSampleSource(nullptr)
+    m_localSampleSource(nullptr),
+    m_spectrumVis(nullptr)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
@@ -136,6 +139,18 @@ bool LocalSinkBaseband::handleMessage(const Message& cmd)
         }
 
         return  true;
+    }
+    else if (MsgSetSpectrumSampleRateAndFrequency::match(cmd))
+    {
+        MsgSetSpectrumSampleRateAndFrequency& notif = (MsgSetSpectrumSampleRateAndFrequency&) cmd;
+
+        if (m_spectrumVis)
+        {
+            DSPSignalNotification *msg = new DSPSignalNotification(notif.getSampleRate(), notif.getCenterFrequency());
+            m_spectrumVis->getInputMessageQueue()->push(msg);
+        }
+
+        return true;
     }
     else
     {

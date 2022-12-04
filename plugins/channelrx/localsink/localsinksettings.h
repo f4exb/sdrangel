@@ -41,11 +41,13 @@ struct LocalSinkSettings
     QByteArray m_geometryBytes;
     bool m_hidden;
 
+    Serializable *m_spectrumGUI;
     Serializable *m_channelMarker;
     Serializable *m_rollupState;
 
     LocalSinkSettings();
     void resetToDefaults();
+    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;

@@ -22,6 +22,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 
@@ -83,6 +84,7 @@ public:
     virtual void destroy() { delete this; }
     virtual void setDeviceAPI(DeviceAPI *deviceAPI);
     virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
 
     using BasebandSampleSink::feed;
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
@@ -146,6 +148,7 @@ private:
     bool m_running;
     LocalSinkSettings m_settings;
     QList<int> m_localInputDeviceIndexes;
+    SpectrumVis m_spectrumVis;
 
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;

@@ -77,6 +77,28 @@ public:
         DeviceSampleSource *m_deviceSampleSource;
     };
 
+    class MsgSetSpectrumSampleRateAndFrequency : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgSetSpectrumSampleRateAndFrequency* create(int sampleRate, qint64 centerFrequency) {
+            return new MsgSetSpectrumSampleRateAndFrequency(sampleRate, centerFrequency);
+        }
+
+        int getSampleRate() const { return m_sampleRate; }
+        qint64 getCenterFrequency() const { return m_centerFrequency; }
+
+    private:
+        MsgSetSpectrumSampleRateAndFrequency(int sampleRate, qint64 centerFrequency) :
+            Message(),
+            m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
+        { }
+
+        int m_sampleRate;
+        qint64 m_centerFrequency;
+    };
+
     LocalSinkBaseband();
     ~LocalSinkBaseband();
     void reset();
@@ -86,6 +108,7 @@ public:
     void startSource() { m_sink.start(m_localSampleSource); }
     void stopSource() { m_sink.stop(); }
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
+    void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumVis = spectrumSink; m_sink.setSpectrumSink(spectrumSink); }
 
 private:
     SampleSinkFifo m_sampleFifo;
@@ -94,6 +117,7 @@ private:
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     LocalSinkSettings m_settings;
     DeviceSampleSource *m_localSampleSource;
+    SpectrumVis *m_spectrumVis;
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);

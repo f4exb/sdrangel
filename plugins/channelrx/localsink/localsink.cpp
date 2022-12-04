@@ -54,6 +54,7 @@ LocalSink::LocalSink(DeviceAPI *deviceAPI) :
         m_thread(nullptr),
         m_basebandSink(nullptr),
         m_running(false),
+        m_spectrumVis(SDR_RX_SCALEF),
         m_centerFrequency(0),
         m_frequencyOffset(0),
         m_basebandSampleRate(48000)
@@ -147,6 +148,7 @@ void LocalSink::startProcessing()
 	qDebug("LocalSink::startProcessing");
     m_thread = new QThread(this);
     m_basebandSink = new LocalSinkBaseband();
+    m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);
 
     QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
@@ -162,6 +164,12 @@ void LocalSink::startProcessing()
 
     LocalSinkBaseband::MsgConfigureLocalSinkBaseband *msgConfig = LocalSinkBaseband::MsgConfigureLocalSinkBaseband::create(m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msgConfig);
+
+    LocalSinkBaseband::MsgSetSpectrumSampleRateAndFrequency *msgSpectrum = LocalSinkBaseband::MsgSetSpectrumSampleRateAndFrequency::create(
+        m_basebandSampleRate / (1 << m_settings.m_log2Decim),
+        m_centerFrequency + m_frequencyOffset
+    );
+    m_basebandSink->getInputMessageQueue()->push(msgSpectrum);
 
     m_running = true;
 }
@@ -198,6 +206,12 @@ bool LocalSink::handleMessage(const Message& cmd)
         {
             DSPSignalNotification *msg = new DSPSignalNotification(notif.getSampleRate(), notif.getCenterFrequency());
             m_basebandSink->getInputMessageQueue()->push(msg);
+            LocalSinkBaseband::MsgSetSpectrumSampleRateAndFrequency *msgSpectrum =
+                LocalSinkBaseband::MsgSetSpectrumSampleRateAndFrequency::create(
+                    m_basebandSampleRate / (1 << m_settings.m_log2Decim),
+                    m_centerFrequency + m_frequencyOffset
+                );
+            m_basebandSink->getInputMessageQueue()->push(msgSpectrum);
         }
 
         if (getMessageQueueToGUI()) {
@@ -336,6 +350,16 @@ void LocalSink::applySettings(const LocalSinkSettings& settings, bool force)
     {
         calculateFrequencyOffset(settings.m_log2Decim, settings.m_filterChainHash);
         propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, settings.m_log2Decim);
+
+        if (m_running)
+        {
+            LocalSinkBaseband::MsgSetSpectrumSampleRateAndFrequency *msgSpectrum =
+                LocalSinkBaseband::MsgSetSpectrumSampleRateAndFrequency::create(
+                    m_basebandSampleRate / (1 << m_settings.m_log2Decim),
+                    m_centerFrequency + m_frequencyOffset
+                );
+            m_basebandSink->getInputMessageQueue()->push(msgSpectrum);
+        }
     }
 
     if ((settings.m_play != m_settings.m_play) || force)

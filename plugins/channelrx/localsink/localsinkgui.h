@@ -33,6 +33,7 @@ class PluginAPI;
 class DeviceUISet;
 class LocalSink;
 class BasebandSampleSink;
+class SpectrumVis;
 
 namespace Ui {
     class LocalSinkGUI;
@@ -73,6 +74,7 @@ private:
     bool m_doApplySettings;
 
     LocalSink* m_localSink;
+    SpectrumVis* m_spectrumVis;
     MessageQueue m_inputMessageQueue;
 
     uint32_t m_tickCount;
