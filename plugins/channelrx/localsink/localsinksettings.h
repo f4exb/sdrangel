@@ -31,6 +31,8 @@ struct LocalSinkSettings
     uint32_t m_log2Decim;
     uint32_t m_filterChainHash;
     bool m_play;
+    bool m_dsp;
+    int m_gaindB;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

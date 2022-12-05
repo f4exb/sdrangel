@@ -320,6 +320,8 @@ void LocalSink::applySettings(const LocalSinkSettings& settings, bool force)
             << "m_localDeviceIndex: " << settings.m_localDeviceIndex
             << "m_streamIndex: " << settings.m_streamIndex
             << "m_play:" << settings.m_play
+            << "m_dsp:" << settings.m_dsp
+            << "m_gaindB:" << settings.m_gaindB
             << "force: " << force;
 
     QList<QString> reverseAPIKeys;

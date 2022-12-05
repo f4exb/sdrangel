@@ -173,7 +173,7 @@ void LocalSinkBaseband::applySettings(const LocalSinkSettings& settings, bool fo
         m_sink.setSampleRate(getChannelSampleRate());
     }
 
-    //m_source.applySettings(settings, force);
+    m_sink.applySettings(settings, force);
     m_settings = settings;
 }
 

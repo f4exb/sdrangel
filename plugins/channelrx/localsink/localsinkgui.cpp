@@ -193,6 +193,8 @@ void LocalSinkGUI::displaySettings()
 
     ui->localDevicePlay->setChecked(m_settings.m_play);
     ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
+    ui->dsp->setChecked(m_settings.m_dsp);
+    ui->gainText->setText(tr("%1").arg(m_settings.m_gaindB));
     applyDecimation();
     updateIndexLabel();
 
@@ -348,6 +350,19 @@ void LocalSinkGUI::on_localDevicePlay_toggled(bool checked)
     applySettings();
 }
 
+void LocalSinkGUI::on_dsp_toggled(bool checked)
+{
+    m_settings.m_dsp = checked;
+    applySettings();
+}
+
+void LocalSinkGUI::on_gain_valueChanged(int value)
+{
+    m_settings.m_gaindB = value;
+    ui->gainText->setText(tr("%1").arg(value));
+    applySettings();
+}
+
 void LocalSinkGUI::applyDecimation()
 {
     uint32_t maxHash = 1;
@@ -387,6 +402,8 @@ void LocalSinkGUI::makeUIConnections()
     QObject::connect(ui->position, &QSlider::valueChanged, this, &LocalSinkGUI::on_position_valueChanged);
     QObject::connect(ui->localDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_localDevice_currentIndexChanged);
     QObject::connect(ui->localDevicePlay, &ButtonSwitch::toggled, this, &LocalSinkGUI::on_localDevicePlay_toggled);
+    QObject::connect(ui->dsp, &ButtonSwitch::toggled, this, &LocalSinkGUI::on_dsp_toggled);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &LocalSinkGUI::on_gain_valueChanged);
 }
 
 void LocalSinkGUI::updateAbsoluteCenterFrequency()

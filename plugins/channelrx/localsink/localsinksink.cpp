@@ -22,6 +22,7 @@
 #include "dsp/devicesamplesource.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/spectrumvis.h"
+#include "util/db.h"
 
 #include "localsinkworker.h"
 #include "localsinksink.h"
@@ -31,6 +32,7 @@ LocalSinkSink::LocalSinkSink() :
     m_sinkWorker(nullptr),
     m_spectrumSink(nullptr),
     m_running(false),
+    m_gain(1.0),
     m_centerFrequency(0),
     m_frequencyOffset(0),
     m_sampleRate(48000),
@@ -46,8 +48,32 @@ LocalSinkSink::~LocalSinkSink()
 
 void LocalSinkSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-    if (m_running && m_deviceSource) {
-        m_deviceSource->getSampleFifo()->write(begin, end);
+    if (m_settings.m_dsp && (m_settings.m_gaindB != 0))
+    {
+        m_spectrumBuffer.resize(end - begin);
+        std::transform(
+            begin,
+            end,
+            m_spectrumBuffer.begin(),
+            [this](const Sample& s) -> Sample {
+                Complex c(s.real(), s.imag());
+                c *= m_gain;
+                return Sample(c.real(), c.imag());
+            }
+        );
+        if (m_running && m_deviceSource) {
+            m_deviceSource->getSampleFifo()->write(m_spectrumBuffer.begin(), m_spectrumBuffer.end());
+        }
+        if (m_spectrumSink) {
+            m_spectrumSink->feed(m_spectrumBuffer.begin(), m_spectrumBuffer.end(), false);
+        }
+        m_spectrumBuffer.clear();
+    }
+    else
+    {
+        if (m_running && m_deviceSource) {
+            m_deviceSource->getSampleFifo()->write(begin, end);
+        }
     }
 
     if (m_spectrumSink) {
@@ -128,6 +154,10 @@ void LocalSinkSink::applySettings(const LocalSinkSettings& settings, bool force)
             << " m_localDeviceIndex: " << settings.m_localDeviceIndex
             << " m_streamIndex: " << settings.m_streamIndex
             << " force: " << force;
+
+    if ((settings.m_gaindB != m_settings.m_gaindB) || force) {
+        m_gain = CalcDb::powerFromdB(settings.m_gaindB/2.0); // Amplitude gain
+    }
 
     m_settings = settings;
 }

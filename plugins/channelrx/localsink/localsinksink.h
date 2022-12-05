@@ -53,6 +53,7 @@ private:
     SpectrumVis* m_spectrumSink;
     SampleVector m_spectrumBuffer;
     bool m_running;
+    float m_gain; //!< Amplitude gain
 
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;

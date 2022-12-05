@@ -104,6 +104,8 @@ private slots:
     void on_position_valueChanged(int value);
     void on_localDevice_currentIndexChanged(int index);
     void on_localDevicePlay_toggled(bool checked);
+    void on_dsp_toggled(bool checked);
+    void on_gain_valueChanged(int value);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();

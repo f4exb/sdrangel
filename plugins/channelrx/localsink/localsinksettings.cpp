@@ -38,6 +38,8 @@ void LocalSinkSettings::resetToDefaults()
     m_channelMarker = nullptr;
     m_rollupState = nullptr;
     m_play = false;
+    m_dsp = false;
+    m_gaindB = 0;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -75,6 +77,12 @@ QByteArray LocalSinkSettings::serialize() const
     s.writeS32(16, m_workspaceIndex);
     s.writeBlob(17, m_geometryBytes);
     s.writeBool(18, m_hidden);
+    s.writeBool(19, m_dsp);
+    s.writeS32(20, m_gaindB);
+
+    if (m_spectrumGUI) {
+        s.writeBlob(21, m_spectrumGUI->serialize());
+    }
 
     return s.final();
 }
@@ -133,6 +141,14 @@ bool LocalSinkSettings::deserialize(const QByteArray& data)
         d.readS32(16, &m_workspaceIndex, 0);
         d.readBlob(17, &m_geometryBytes);
         d.readBool(18, &m_hidden, false);
+        d.readBool(19, &m_dsp, false);
+        d.readS32(20, &m_gaindB, 0);
+
+        if (m_spectrumGUI)
+        {
+            d.readBlob(21, &bytetmp);
+            m_spectrumGUI->deserialize(bytetmp);
+        }
 
         return true;
     }
