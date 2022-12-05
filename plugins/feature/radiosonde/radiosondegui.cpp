@@ -738,7 +738,7 @@ float RadiosondeGUI::getData(RadiosondeSettings::ChartData dataType, RadiosondeD
         data = message->m_verticalRate;
         break;
     case RadiosondeSettings::HEADING:
-        data = message->m_speed;
+        data = message->m_heading;
         break;
     case RadiosondeSettings::BATTERY_VOLTAGE:
         data = message->m_batteryVoltage;
