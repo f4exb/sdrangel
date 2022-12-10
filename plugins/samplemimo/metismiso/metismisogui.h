@@ -63,7 +63,7 @@ private:
     std::vector<quint64> m_deviceCenterFrequencies; //!< Center frequency in device
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
-    static const int m_absMaxFreq = 500000; // kHz
+    static const int m_absMaxFreq = 61440; // kHz
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
