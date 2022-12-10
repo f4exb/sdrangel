@@ -21,6 +21,8 @@
 #include <QByteArray>
 #include <QString>
 
+#include "dsp/fftwindow.h"
+
 class Serializable;
 
 struct LocalSinkSettings
@@ -33,6 +35,11 @@ struct LocalSinkSettings
     bool m_play;
     bool m_dsp;
     int m_gaindB;
+    bool m_fftOn;
+    uint32_t m_log2FFT;
+    FFTWindow::Function m_fftWindow;
+    static const uint32_t m_maxFFTBands = 20;
+    std::vector<std::pair<float, float>> m_fftBands;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

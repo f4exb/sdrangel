@@ -22,6 +22,7 @@
 #include "dsp/devicesamplesource.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/spectrumvis.h"
+#include "dsp/fftfilt.h"
 #include "util/db.h"
 
 #include "localsinkworker.h"
@@ -39,16 +40,49 @@ LocalSinkSink::LocalSinkSink() :
     m_deviceSampleRate(48000)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(4000000));
+    // m_fftFilter = new fftfilt(0.1f, 0.4f, 1<<m_settings.m_log2FFT);
+    m_fftFilter = new fftfilt(1<<m_settings.m_log2FFT);
     applySettings(m_settings, true);
 }
 
 LocalSinkSink::~LocalSinkSink()
 {
+    delete m_fftFilter;
 }
 
 void LocalSinkSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-    if (m_settings.m_dsp && (m_settings.m_gaindB != 0))
+    if (m_settings.m_dsp && m_settings.m_fftOn)
+    {
+        fftfilt::cmplx *rf;
+        int rf_out;
+
+        for (SampleVector::const_iterator it = begin; it != end; ++it)
+        {
+            Complex c(it->real(), it->imag());
+            rf_out = m_fftFilter->runFilt(c, &rf); // filter RF
+
+            if (rf_out > 0)
+            {
+                m_spectrumBuffer.resize(rf_out);
+                std::transform(
+                    rf,
+                    rf + rf_out,
+                    m_spectrumBuffer.begin(),
+                    [this](const fftfilt::cmplx& c) -> Sample {
+                        return Sample(c.real()*m_gain, c.imag()*m_gain);
+                    }
+                );
+                if (m_running && m_deviceSource) {
+                    m_deviceSource->getSampleFifo()->write(m_spectrumBuffer.begin(), m_spectrumBuffer.begin() + rf_out);
+                }
+                if (m_spectrumSink) {
+                    m_spectrumSink->feed(m_spectrumBuffer.begin(), m_spectrumBuffer.begin() + rf_out, false);
+                }
+            }
+        }
+    }
+    else if (m_settings.m_dsp && (m_settings.m_gaindB != 0))
     {
         m_spectrumBuffer.resize(end - begin);
         std::transform(
@@ -74,11 +108,11 @@ void LocalSinkSink::feed(const SampleVector::const_iterator& begin, const Sample
         if (m_running && m_deviceSource) {
             m_deviceSource->getSampleFifo()->write(begin, end);
         }
+        if (m_spectrumSink) {
+            m_spectrumSink->feed(begin, end, false);
+        }
     }
 
-    if (m_spectrumSink) {
-        m_spectrumSink->feed(begin, end, false);
-    }
     // m_sampleFifo.write(begin, end);
 }
 
@@ -153,10 +187,20 @@ void LocalSinkSink::applySettings(const LocalSinkSettings& settings, bool force)
     qDebug() << "LocalSinkSink::applySettings:"
             << " m_localDeviceIndex: " << settings.m_localDeviceIndex
             << " m_streamIndex: " << settings.m_streamIndex
+            << " m_dsp: " << settings.m_dsp
+            << " m_gaindB: " << settings.m_gaindB
+            << " m_fftOn: " << settings.m_fftOn
             << " force: " << force;
 
     if ((settings.m_gaindB != m_settings.m_gaindB) || force) {
         m_gain = CalcDb::powerFromdB(settings.m_gaindB/2.0); // Amplitude gain
+    }
+
+    if ((settings.m_fftOn != m_settings.m_fftOn) || force)
+    {
+        if (settings.m_fftOn) {
+            m_fftFilter->create_filter(m_settings.m_fftBands, true, FFTWindow::Function::Rectangle);
+        }
     }
 
     m_settings = settings;

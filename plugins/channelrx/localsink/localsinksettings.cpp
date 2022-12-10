@@ -40,6 +40,9 @@ void LocalSinkSettings::resetToDefaults()
     m_play = false;
     m_dsp = false;
     m_gaindB = 0;
+    m_fftOn = false;
+    m_log2FFT = 10;
+    m_fftWindow = FFTWindow::Function::Bartlett;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -84,6 +87,23 @@ QByteArray LocalSinkSettings::serialize() const
         s.writeBlob(21, m_spectrumGUI->serialize());
     }
 
+    s.writeBool(22, m_fftOn);
+    s.writeU32(23, (int) m_fftWindow);
+
+    s.writeU32(99, m_fftBands.size());
+    int i = 0;
+
+    for (auto fftBand : m_fftBands)
+    {
+        s.writeFloat(100 + 2*i, fftBand.first);
+        s.writeFloat(101 + 2*i, fftBand.second);
+        i++;
+
+        if (i == m_maxFFTBands) {
+            break;
+        }
+    }
+
     return s.final();
 }
 
@@ -99,7 +119,7 @@ bool LocalSinkSettings::deserialize(const QByteArray& data)
 
     if(d.getVersion() == 1)
     {
-        uint32_t tmp;
+        uint32_t utmp;
         QString strtmp;
         QByteArray bytetmp;
 
@@ -115,20 +135,20 @@ bool LocalSinkSettings::deserialize(const QByteArray& data)
         d.readString(6, &m_title, "Local sink");
         d.readBool(7, &m_useReverseAPI, false);
         d.readString(8, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(9, &tmp, 0);
+        d.readU32(9, &utmp, 0);
 
-        if ((tmp > 1023) && (tmp < 65535)) {
-            m_reverseAPIPort = tmp;
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
         }
 
-        d.readU32(10, &tmp, 0);
-        m_reverseAPIDeviceIndex = tmp > 99 ? 99 : tmp;
-        d.readU32(11, &tmp, 0);
-        m_reverseAPIChannelIndex = tmp > 99 ? 99 : tmp;
-        d.readU32(12, &tmp, 0);
-        m_log2Decim = tmp > 6 ? 6 : tmp;
+        d.readU32(10, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(11, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(12, &utmp, 0);
+        m_log2Decim = utmp > 6 ? 6 : utmp;
         d.readU32(13, &m_filterChainHash, 0);
         d.readS32(14, &m_streamIndex, 0);
 
@@ -148,6 +168,24 @@ bool LocalSinkSettings::deserialize(const QByteArray& data)
         {
             d.readBlob(21, &bytetmp);
             m_spectrumGUI->deserialize(bytetmp);
+        }
+
+        d.readBool(22, &m_fftOn, false);
+        d.readU32(23, &utmp, 0);
+        m_fftWindow = (utmp > (uint32_t) FFTWindow::Function::BlackmanHarris7) ?
+            FFTWindow::Function::BlackmanHarris7 :
+            (FFTWindow::Function) utmp;
+
+        uint32_t nbBands;
+        d.readU32(99, &nbBands, 0);
+        m_fftBands.clear();
+
+        for (uint32_t i = 0; i < std::min(nbBands, m_maxFFTBands); i++)
+        {
+            float f1, w;
+            d.readFloat(100 + 2*i, &f1, 0);
+            d.readFloat(101 + 2*i, &w, 0);
+            m_fftBands.push_back(std::pair<float, float>{f1, w});
         }
 
         return true;

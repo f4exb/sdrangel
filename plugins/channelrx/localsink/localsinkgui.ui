@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>452</width>
+    <width>480</width>
     <height>467</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>414</width>
+    <width>480</width>
     <height>0</height>
    </size>
   </property>
@@ -36,7 +36,7 @@
     <rect>
      <x>1</x>
      <y>1</y>
-     <width>451</width>
+     <width>481</width>
      <height>141</height>
     </rect>
    </property>
@@ -277,6 +277,12 @@
       </item>
       <item>
        <widget class="ButtonSwitch" name="localDevicePlay">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Start/Stop processing</string>
         </property>
@@ -292,6 +298,15 @@
       </item>
       <item>
        <widget class="ButtonSwitch" name="dsp">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Toggle DSP processing</string>
+        </property>
         <property name="text">
          <string>DSP</string>
         </property>
@@ -353,6 +368,15 @@
       </item>
       <item>
        <widget class="ButtonSwitch" name="fft">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Toggle FFT filter</string>
+        </property>
         <property name="text">
          <string>FFT</string>
         </property>
@@ -370,12 +394,6 @@
          <size>
           <width>50</width>
           <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>16777215</height>
          </size>
         </property>
         <property name="toolTip">
@@ -440,14 +458,8 @@
           <height>0</height>
          </size>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>60</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="toolTip">
-         <string>FFT filter window function</string>
+         <string>FFT filter bands window function</string>
         </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToContents</enum>
@@ -500,6 +512,22 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="fftFilterReverse">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Reverse filter bands (pass &lt;-&gt; cut)</string>
+        </property>
+        <property name="text">
+         <string>R</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -517,9 +545,12 @@
     <item>
      <layout class="QHBoxLayout" name="fftLayout">
       <item>
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="fftBandLabel">
+        <property name="toolTip">
+         <string>FFT filter bands</string>
+        </property>
         <property name="text">
-         <string>Band</string>
+         <string>FFT</string>
         </property>
        </widget>
       </item>
@@ -552,6 +583,131 @@
        </widget>
       </item>
       <item>
+       <layout class="QVBoxLayout" name="fftBandAddDel">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QPushButton" name="fftBandAdd">
+          <property name="maximumSize">
+           <size>
+            <width>18</width>
+            <height>18</height>
+           </size>
+          </property>
+          <property name="palette">
+           <palette>
+            <active>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </active>
+            <inactive>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </inactive>
+            <disabled>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>190</red>
+                <green>190</green>
+                <blue>190</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </disabled>
+           </palette>
+          </property>
+          <property name="font">
+           <font>
+            <family>Liberation Sans</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Add a new FFT band</string>
+          </property>
+          <property name="text">
+           <string>+</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="fftBandDel">
+          <property name="maximumSize">
+           <size>
+            <width>18</width>
+            <height>18</height>
+           </size>
+          </property>
+          <property name="palette">
+           <palette>
+            <active>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </active>
+            <inactive>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </inactive>
+            <disabled>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>190</red>
+                <green>190</green>
+                <blue>190</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </disabled>
+           </palette>
+          </property>
+          <property name="font">
+           <font>
+            <family>Liberation Sans</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Remove current FFT band</string>
+          </property>
+          <property name="text">
+           <string>-</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <widget class="Line" name="line">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -572,17 +728,20 @@
         <property name="text">
          <string>00</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="f1Label">
         <property name="text">
-         <string>f1</string>
+         <string>F1</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QDial" name="f1Bin">
+       <widget class="QDial" name="f1">
         <property name="minimumSize">
          <size>
           <width>24</width>
@@ -596,13 +755,13 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Frequency limit #1 bin</string>
+         <string>Filter low cut frequency</string>
         </property>
         <property name="minimum">
-         <number>0</number>
+         <number>-500</number>
         </property>
         <property name="maximum">
-         <number>1023</number>
+         <number>500</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -618,7 +777,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Frequency limit #1 frequency</string>
+         <string>Filter low cut frequency</string>
         </property>
         <property name="text">
          <string>100.00k</string>
@@ -636,14 +795,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="f2Label">
+       <widget class="QLabel" name="widthLabel">
         <property name="text">
-         <string>f2</string>
+         <string>W</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QDial" name="f2Bin">
+       <widget class="QDial" name="bandWidth">
         <property name="minimumSize">
          <size>
           <width>24</width>
@@ -657,13 +816,13 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Frequency limit #2 bin</string>
+         <string>FFT band width</string>
         </property>
         <property name="minimum">
          <number>0</number>
         </property>
         <property name="maximum">
-         <number>1023</number>
+         <number>1000</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -671,7 +830,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="f2Text">
+       <widget class="QLabel" name="bandwidthText">
         <property name="minimumSize">
          <size>
           <width>50</width>
@@ -679,13 +838,37 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Frequency limit #2 frequency</string>
+         <string>Filter width</string>
         </property>
         <property name="text">
          <string>100.00k</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="filterF2orW">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Filter width / high cut display toggle</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/arrow_2head_h.png</normaloff>
+          <normalon>:/arrow_down.png</normalon>:/arrow_2head_h.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

@@ -28,6 +28,7 @@
 class DeviceSampleSource;
 class LocalSinkWorker;
 class SpectrumVis;
+class fftfilt;
 
 class LocalSinkSink : public QObject, public ChannelSampleSink {
     Q_OBJECT
@@ -54,6 +55,7 @@ private:
     SampleVector m_spectrumBuffer;
     bool m_running;
     float m_gain; //!< Amplitude gain
+    fftfilt* m_fftFilter;
 
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;

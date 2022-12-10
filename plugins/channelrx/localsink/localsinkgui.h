@@ -68,6 +68,8 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     LocalSinkSettings m_settings;
+    int m_currentBandIndex;
+    bool m_showFilterHighCut;
     qint64 m_deviceCenterFrequency;
     int m_basebandSampleRate;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
@@ -86,11 +88,13 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     void displayRateAndShift();
+    void displayFFTBand(bool blockApplySettings = true);
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
     void updateDeviceSetList(const QList<int>& deviceSetIndexes);
     int getLocalDeviceIndexInCombo(int localDeviceIndex);
+    QString displayScaled(int64_t value, int precision);
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
@@ -106,6 +110,13 @@ private slots:
     void on_localDevicePlay_toggled(bool checked);
     void on_dsp_toggled(bool checked);
     void on_gain_valueChanged(int value);
+    void on_fft_toggled(bool checked);
+    void on_fftBandAdd_clicked();
+    void on_fftBandDel_clicked();
+    void on_bandIndex_valueChanged(int value);
+    void on_f1_valueChanged(int value);
+    void on_bandWidth_valueChanged(int value);
+    void on_filterF2orW_toggled(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();

@@ -34,6 +34,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <typeinfo>
+#include <array>
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -154,6 +155,87 @@ void fftfilt::create_filter(float f1, float f2, FFTWindow::Function wf)
 		for (int i = 0; i < flen; i++)
 			filter[i] /= scale;
 	}
+}
+
+void fftfilt::create_filter(const std::vector<std::pair<float, float>>& limits, bool pass, FFTWindow::Function wf)
+{
+	// initialize the filter canvas
+    std::vector<int> canvas(flen, pass ? 0 : 1);
+    fftfilt::cmplx* xfilter = new fftfilt::cmplx[flen];
+
+    for (const auto& fs : limits)
+    {
+        const float& f1 = fs.first + 0.5;
+        const float& w = fs.second > 0.0 ? fs.second : 0.0;
+        const float& f2 = f1 + w;
+
+        for (int i = 0; i < flen; i++)
+        {
+            if (pass) // pass
+            {
+                if ((i >= f1*flen) && (i <= f2*flen)) {
+                    canvas[i] = 1;
+                }
+            }
+            else // reject
+            {
+                if ((i >= f1*flen) && (i <= f2*flen)) {
+                    canvas[i] = 0;
+                }
+            }
+        }
+    }
+
+    std::vector<std::pair<int,int>> indexes;
+    int c = 0;
+
+    for (int i = 0; i < flen; i++)
+    {
+        if ((canvas[i] == 1) && (c == 0)) {
+            indexes.push_back(std::pair<int,int>{i, 0});
+        }
+
+        if ((canvas[i] == 0) && (c == 1)) {
+            indexes.back().second = i;
+        }
+
+        xfilter[i] = cmplx(canvas[i], 0);
+        c = canvas[i];
+    }
+
+    // Apply window
+    for (const auto& wband : indexes)
+    {
+        FFTWindow fwin;
+        fwin.create(wf, wband.second - wband.first);
+        fwin.apply(&xfilter[wband.first]);
+    }
+
+    // Rearrange
+    std::copy(&xfilter[flen2], &xfilter[flen-1], filter);
+    std::copy(&xfilter[0], &xfilter[flen2-1], &filter[flen2]);
+
+
+	// // normalize the output filter for unity gain
+	// float scale = 0, mag;
+
+    // for (int i = 0; i < flen2; i++)
+    // {
+	// 	mag = abs(filter[i]);
+
+	// 	if (mag > scale) {
+    //         scale = mag;
+    //     }
+	// }
+
+    // if (scale != 0)
+    // {
+	// 	for (int i = 0; i < flen; i++) {
+	// 		filter[i] /= scale;
+    //     }
+	// }
+
+    delete[] xfilter;
 }
 
 // Double the size of FFT used for equivalent SSB filter or assume FFT is half the size of the one used for SSB
