@@ -39,7 +39,7 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; }
-    void applySettings(const LocalSinkSettings& settings, bool force = false);
+    void applySettings(const LocalSinkSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void start(DeviceSampleSource *deviceSource);
     void stop();
     bool isRunning() const { return m_running; }

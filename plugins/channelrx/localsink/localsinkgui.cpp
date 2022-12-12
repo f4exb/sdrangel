@@ -82,7 +82,13 @@ bool LocalSinkGUI::handleMessage(const Message& message)
     else if (LocalSink::MsgConfigureLocalSink::match(message))
     {
         const LocalSink::MsgConfigureLocalSink& cfg = (LocalSink::MsgConfigureLocalSink&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         ui->spectrumGUI->updateSettings();
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
@@ -168,9 +174,11 @@ void LocalSinkGUI::applySettings(bool force)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        LocalSink::MsgConfigureLocalSink* message = LocalSink::MsgConfigureLocalSink::create(m_settings, force);
+        LocalSink::MsgConfigureLocalSink* message = LocalSink::MsgConfigureLocalSink::create(m_settings, m_settingsKeys, force);
         m_localSink->getInputMessageQueue()->push(message);
     }
+
+    m_settingsKeys.clear();
 }
 
 void LocalSinkGUI::displaySettings()
@@ -312,7 +320,6 @@ void LocalSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
 }
 
 void LocalSinkGUI::onMenuDialogCalled(const QPoint &p)
@@ -356,6 +363,14 @@ void LocalSinkGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
@@ -387,6 +402,8 @@ void LocalSinkGUI::on_position_valueChanged(int value)
 {
     m_settings.m_filterChainHash = value;
     applyPosition();
+    m_settingsKeys.append("filterChainHash");
+    applySettings();
 }
 
 void LocalSinkGUI::on_localDevice_currentIndexChanged(int index)
@@ -394,6 +411,7 @@ void LocalSinkGUI::on_localDevice_currentIndexChanged(int index)
     if (index >= 0)
     {
         m_settings.m_localDeviceIndex = ui->localDevice->currentData().toInt();
+        m_settingsKeys.append("localDeviceIndex");
         applySettings();
     }
 }
@@ -401,12 +419,14 @@ void LocalSinkGUI::on_localDevice_currentIndexChanged(int index)
 void LocalSinkGUI::on_localDevicePlay_toggled(bool checked)
 {
     m_settings.m_play = checked;
+    m_settingsKeys.append("play");
     applySettings();
 }
 
 void LocalSinkGUI::on_dsp_toggled(bool checked)
 {
     m_settings.m_dsp = checked;
+    m_settingsKeys.append("dsp");
     applySettings();
 }
 
@@ -414,12 +434,28 @@ void LocalSinkGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gaindB = value;
     ui->gainText->setText(tr("%1").arg(value));
+    m_settingsKeys.append("gaindB");
     applySettings();
 }
 
 void LocalSinkGUI::on_fft_toggled(bool checked)
 {
     m_settings.m_fftOn = checked;
+    m_settingsKeys.append("fftOn");
+    applySettings();
+}
+
+void LocalSinkGUI::on_fftSize_currentIndexChanged(int index)
+{
+    m_settings.m_log2FFT = index + 6;
+    m_settingsKeys.append("log2FFT");
+    applySettings();
+}
+
+void LocalSinkGUI::on_fftWindow_currentIndexChanged(int index)
+{
+    m_settings.m_fftWindow = (FFTWindow::Function) index;
+    m_settingsKeys.append("fftWindow");
     applySettings();
 }
 
@@ -432,6 +468,7 @@ void LocalSinkGUI::on_fftBandAdd_clicked()
     m_settings.m_fftBands.push_back(std::pair<float,float>{-0.1f, 0.2f});
     m_currentBandIndex = m_settings.m_fftBands.size()-1;
     displayFFTBand();
+    m_settingsKeys.append("fftBands");
     applySettings();
 }
 
@@ -440,6 +477,7 @@ void LocalSinkGUI::on_fftBandDel_clicked()
     m_settings.m_fftBands.erase(m_settings.m_fftBands.begin() + m_currentBandIndex);
     m_currentBandIndex--;
     displayFFTBand();
+    m_settingsKeys.append("fftBands");
     applySettings();
 }
 
@@ -461,6 +499,7 @@ void LocalSinkGUI::on_f1_valueChanged(int value)
     }
 
     displayFFTBand();
+    m_settingsKeys.append("fftBands");
     applySettings();
 }
 
@@ -477,6 +516,7 @@ void LocalSinkGUI::on_bandWidth_valueChanged(int value)
     }
 
     displayFFTBand();
+    m_settingsKeys.append("fftBands");
     applySettings();
 }
 
@@ -498,6 +538,8 @@ void LocalSinkGUI::applyDecimation()
     ui->position->setValue(m_settings.m_filterChainHash);
     m_settings.m_filterChainHash = ui->position->value();
     applyPosition();
+    m_settingsKeys.append("filterChainHash");
+    applySettings();
 }
 
 void LocalSinkGUI::applyPosition()
@@ -510,7 +552,6 @@ void LocalSinkGUI::applyPosition()
     updateAbsoluteCenterFrequency();
     displayRateAndShift();
     displayFFTBand();
-    applySettings();
 }
 
 void LocalSinkGUI::tick()
@@ -529,6 +570,8 @@ void LocalSinkGUI::makeUIConnections()
     QObject::connect(ui->dsp, &ButtonSwitch::toggled, this, &LocalSinkGUI::on_dsp_toggled);
     QObject::connect(ui->gain, &QDial::valueChanged, this, &LocalSinkGUI::on_gain_valueChanged);
     QObject::connect(ui->fft, &ButtonSwitch::toggled, this, &LocalSinkGUI::on_fft_toggled);
+    QObject::connect(ui->fftSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_fftSize_currentIndexChanged);
+    QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_fftWindow_currentIndexChanged);
     QObject::connect(ui->fftBandAdd, &QPushButton::clicked, this, &LocalSinkGUI::on_fftBandAdd_clicked);
     QObject::connect(ui->fftBandDel, &QPushButton::clicked, this, &LocalSinkGUI::on_fftBandDel_clicked);
     QObject::connect(ui->bandIndex, &QSlider::valueChanged, this, &LocalSinkGUI::on_bandIndex_valueChanged);

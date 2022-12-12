@@ -44,19 +44,22 @@ public:
 
     public:
         const LocalSinkSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureLocalSink* create(const LocalSinkSettings& settings, bool force) {
-            return new MsgConfigureLocalSink(settings, force);
+        static MsgConfigureLocalSink* create(const LocalSinkSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureLocalSink(settings, settingsKeys, force);
         }
 
     private:
         LocalSinkSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureLocalSink(const LocalSinkSettings& settings, bool force) :
+        MsgConfigureLocalSink(const LocalSinkSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -158,7 +161,7 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const LocalSinkSettings& settings, bool force = false);
+    void applySettings(const LocalSinkSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void propagateSampleRateAndFrequency(int index, uint32_t log2Decim);
     static void validateFilterChainHash(LocalSinkSettings& settings);
     void calculateFrequencyOffset(uint32_t log2Decim, uint32_t filterChainHash);
@@ -167,15 +170,15 @@ private:
     void startProcessing();
     void stopProcessing();
 
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LocalSinkSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const LocalSinkSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const LocalSinkSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const LocalSinkSettings& settings,
         bool force

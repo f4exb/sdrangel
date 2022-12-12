@@ -42,7 +42,7 @@ LocalSinkSink::LocalSinkSink() :
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(4000000));
     // m_fftFilter = new fftfilt(0.1f, 0.4f, 1<<m_settings.m_log2FFT);
     m_fftFilter = new fftfilt(1<<m_settings.m_log2FFT);
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
 LocalSinkSink::~LocalSinkSink()
@@ -60,7 +60,7 @@ void LocalSinkSink::feed(const SampleVector::const_iterator& begin, const Sample
         for (SampleVector::const_iterator it = begin; it != end; ++it)
         {
             Complex c(it->real(), it->imag());
-            rf_out = m_fftFilter->runFilt(c, &rf); // filter RF
+            rf_out = m_fftFilter->runAsym(c, &rf, true); // filter RF
 
             if (rf_out > 0)
             {
@@ -182,28 +182,33 @@ void LocalSinkSink::stopWorker()
 	m_sinkWorkerThread.wait();
 }
 
-void LocalSinkSink::applySettings(const LocalSinkSettings& settings, bool force)
+void LocalSinkSink::applySettings(const LocalSinkSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "LocalSinkSink::applySettings:"
-            << " m_localDeviceIndex: " << settings.m_localDeviceIndex
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_dsp: " << settings.m_dsp
-            << " m_gaindB: " << settings.m_gaindB
-            << " m_fftOn: " << settings.m_fftOn
-            << " force: " << force;
+    qDebug() << "LocalSinkSink::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    if ((settings.m_gaindB != m_settings.m_gaindB) || force) {
+    if (settingsKeys.contains("gaindB") || force) {
         m_gain = CalcDb::powerFromdB(settings.m_gaindB/2.0); // Amplitude gain
     }
 
-    if ((settings.m_fftOn != m_settings.m_fftOn) || force)
+    if (settingsKeys.contains("log2FFT") || force)
     {
-        if (settings.m_fftOn) {
-            m_fftFilter->create_filter(m_settings.m_fftBands, true, FFTWindow::Function::Rectangle);
-        }
+        delete m_fftFilter;
+        m_fftFilter = new fftfilt(1<<settings.m_log2FFT);
+        m_fftFilter->create_filter(m_settings.m_fftBands, true, m_settings.m_fftWindow);
     }
 
-    m_settings = settings;
+    if (settingsKeys.contains("fftWindow")
+     || settingsKeys.contains("fftBands")
+     || force)
+    {
+        m_fftFilter->create_filter(settings.m_fftBands, true, settings.m_fftWindow);
+    }
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void LocalSinkSink::setSampleRate(int sampleRate)

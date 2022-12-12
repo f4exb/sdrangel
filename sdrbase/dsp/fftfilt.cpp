@@ -25,6 +25,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with fldigi.  If not, see <http://www.gnu.org/licenses/>.
+//
+// Augmented with more filter types
+// Copyright (C) 2015-2022 Edouard Griffiths, F4EXB
 // ----------------------------------------------------------------------------
 
 #include <memory.h>
@@ -38,7 +41,6 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-#include <memory.h>
 
 #include <dsp/misc.h>
 #include <dsp/fftfilt.h>
@@ -157,7 +159,7 @@ void fftfilt::create_filter(float f1, float f2, FFTWindow::Function wf)
 	}
 }
 
-void fftfilt::create_filter(const std::vector<std::pair<float, float>>& limits, bool pass, FFTWindow::Function wf)
+void fftfilt::create_filter(const std::vector<std::pair<float, float>>& limits, bool pass)
 {
 	// initialize the filter canvas
     std::vector<int> canvas(flen, pass ? 0 : 1);
@@ -186,56 +188,157 @@ void fftfilt::create_filter(const std::vector<std::pair<float, float>>& limits, 
         }
     }
 
-    std::vector<std::pair<int,int>> indexes;
-    int c = 0;
-
-    for (int i = 0; i < flen; i++)
-    {
-        if ((canvas[i] == 1) && (c == 0)) {
-            indexes.push_back(std::pair<int,int>{i, 0});
-        }
-
-        if ((canvas[i] == 0) && (c == 1)) {
-            indexes.back().second = i;
-        }
-
+    for (int i = 0; i < flen; i++) {
         xfilter[i] = cmplx(canvas[i], 0);
-        c = canvas[i];
-    }
-
-    // Apply window
-    for (const auto& wband : indexes)
-    {
-        FFTWindow fwin;
-        fwin.create(wf, wband.second - wband.first);
-        fwin.apply(&xfilter[wband.first]);
     }
 
     // Rearrange
     std::copy(&xfilter[flen2], &xfilter[flen-1], filter);
     std::copy(&xfilter[0], &xfilter[flen2-1], &filter[flen2]);
 
-
-	// // normalize the output filter for unity gain
-	// float scale = 0, mag;
-
-    // for (int i = 0; i < flen2; i++)
-    // {
-	// 	mag = abs(filter[i]);
-
-	// 	if (mag > scale) {
-    //         scale = mag;
-    //     }
-	// }
-
-    // if (scale != 0)
-    // {
-	// 	for (int i = 0; i < flen; i++) {
-	// 		filter[i] /= scale;
-    //     }
-	// }
-
     delete[] xfilter;
+}
+
+void fftfilt::create_filter(const std::vector<std::pair<float, float>>& limits, bool pass, FFTWindow::Function wf)
+{
+    std::vector<int> canvasNeg(flen2, pass ? 0 : 1); // initialize the negative frequencies filter canvas
+    std::vector<int> canvasPos(flen2, pass ? 0 : 1); // initialize the positive frequencies filter canvas
+	std::fill(filter, filter + flen, cmplx{0, 0}); // initialize the positive filter to zero
+    std::fill(filterOpp, filterOpp + flen, cmplx{0, 0}); // initialize the negative filter to zero
+
+    for (const auto& fs : limits)
+    {
+        const float& f1 = fs.first + 0.5;
+        const float& w = fs.second > 0.0 ? fs.second : 0.0;
+        const float& f2 = f1 + w;
+
+        for (int i = 0; i < flen; i++)
+        {
+            if (pass) // pass
+            {
+                if ((i >= f1*flen) && (i <= f2*flen))
+                {
+                    if (i < flen2) {
+                        canvasNeg[flen2-1-i] = 1;
+                    } else {
+                        canvasPos[i-flen2] = 1;
+                    }
+                }
+            }
+            else // reject
+            {
+                if ((i >= f1*flen) && (i <= f2*flen)) {
+                    if (i < flen2) {
+                        canvasNeg[flen2-1-i] = 0;
+                    } else {
+                        canvasPos[i-flen2] = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    std::vector<std::pair<int,int>> indexesNegList;
+    std::vector<std::pair<int,int>> indexesPosList;
+    int cn = 0;
+    int cp = 0;
+
+    for (int i = 0; i < flen2; i++)
+    {
+        if ((canvasNeg[i] == 1) && (cn == 0)) {
+            indexesNegList.push_back(std::pair<int,int>{i, 0});
+        }
+
+        if ((canvasNeg[i] == 0) && (cn == 1)) {
+            indexesNegList.back().second = i;
+        }
+
+        if ((canvasPos[i] == 1) && (cp == 0)) {
+            indexesPosList.push_back(std::pair<int,int>{i, 0});
+        }
+
+        if ((canvasPos[i] == 0) && (cp == 1)) {
+            indexesPosList.back().second = i;
+        }
+
+        cn = canvasNeg[i];
+        cp = canvasPos[i];
+    }
+
+    for (const auto& indexes : indexesPosList)
+    {
+        const float f1 = indexes.first / (float) flen;
+        const float f2 = indexes.second / (float) flen;
+
+        for (int i = 0; i < flen2; i++)
+        {
+            if (f2 != 0) {
+                filter[i] += fsinc(f2, i, flen2);
+            }
+            if (f1 != 0) {
+                filter[i] -= fsinc(f1, i, flen2);
+            }
+        }
+    }
+
+    for (const auto& indexes : indexesNegList)
+    {
+        const float f1 = indexes.first / (float) flen;
+        const float f2 = indexes.second / (float) flen;
+
+        for (int i = 0; i < flen2; i++)
+        {
+            if (f2 != 0) {
+                filterOpp[i] += fsinc(f2, i, flen2);
+            }
+            if (f1 != 0) {
+                filterOpp[i] -= fsinc(f1, i, flen2);
+            }
+        }
+    }
+
+    FFTWindow fwin;
+    fwin.create(wf, flen2);
+    fwin.apply(filter);
+    fwin.apply(filterOpp);
+
+	fft->ComplexFFT(filter); // filter was expressed in the time domain (impulse response)
+    fft->ComplexFFT(filterOpp); // filter was expressed in the time domain (impulse response)
+
+    float scalen = 0, scalep = 0, magn, magp; // normalize the output filter for unity gain
+
+	for (int i = 0; i < flen2; i++)
+    {
+		magp = abs(filter[i]);
+
+        if (magp > scalep) {
+            scalep = magp;
+        }
+
+        magn = abs(filterOpp[i]);
+
+        if (magn > scalen) {
+            scalen = magn;
+        }
+	}
+
+    if (scalep != 0)
+    {
+        std::for_each(
+            filter,
+            filter + flen,
+            [scalep](fftfilt::cmplx& s) { s /= scalep; }
+        );
+	}
+
+    if (scalen != 0)
+    {
+        std::for_each(
+            filterOpp,
+            filterOpp + flen,
+            [scalen](fftfilt::cmplx& s) { s /= scalen; }
+        );
+	}
 }
 
 // Double the size of FFT used for equivalent SSB filter or assume FFT is half the size of the one used for SSB

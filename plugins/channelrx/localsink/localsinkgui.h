@@ -68,6 +68,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     LocalSinkSettings m_settings;
+    QList<QString> m_settingsKeys;
     int m_currentBandIndex;
     bool m_showFilterHighCut;
     qint64 m_deviceCenterFrequency;
@@ -111,6 +112,8 @@ private slots:
     void on_dsp_toggled(bool checked);
     void on_gain_valueChanged(int value);
     void on_fft_toggled(bool checked);
+    void on_fftSize_currentIndexChanged(int index);
+    void on_fftWindow_currentIndexChanged(int index);
     void on_fftBandAdd_clicked();
     void on_fftBandDel_clicked();
     void on_bandIndex_valueChanged(int value);

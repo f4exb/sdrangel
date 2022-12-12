@@ -39,20 +39,22 @@ public:
 
     public:
         const LocalSinkSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureLocalSinkBaseband* create(const LocalSinkSettings& settings, bool force)
-        {
-            return new MsgConfigureLocalSinkBaseband(settings, force);
+        static MsgConfigureLocalSinkBaseband* create(const LocalSinkSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureLocalSinkBaseband(settings, settingsKeys, force);
         }
 
     private:
         LocalSinkSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureLocalSinkBaseband(const LocalSinkSettings& settings, bool force) :
+        MsgConfigureLocalSinkBaseband(const LocalSinkSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -121,7 +123,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const LocalSinkSettings& settings, bool force = false);
+    void applySettings(const LocalSinkSettings& settings, const QList<QString>& settingsKeys, bool force = false);
 
 private slots:
     void handleInputMessages();

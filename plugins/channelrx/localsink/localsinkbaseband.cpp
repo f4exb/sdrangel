@@ -112,7 +112,7 @@ bool LocalSinkBaseband::handleMessage(const Message& cmd)
         MsgConfigureLocalSinkBaseband& cfg = (MsgConfigureLocalSinkBaseband&) cmd;
         qDebug() << "LocalSinkBaseband::handleMessage: MsgConfigureLocalSinkBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -158,22 +158,18 @@ bool LocalSinkBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void LocalSinkBaseband::applySettings(const LocalSinkSettings& settings, bool force)
+void LocalSinkBaseband::applySettings(const LocalSinkSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "LocalSinkBaseband::applySettings:"
-        << "m_localDeviceIndex:" << settings.m_localDeviceIndex
-        << "m_log2Decim:" << settings.m_log2Decim
-        << "m_filterChainHash:" << settings.m_filterChainHash
-        << " force: " << force;
+    qDebug() << "LocalSinkBaseband::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    if ((settings.m_log2Decim != m_settings.m_log2Decim)
-     || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+    if (settingsKeys.contains("log2Decim")
+     || settingsKeys.contains("filterChainHash") || force)
     {
         m_channelizer->setDecimation(settings.m_log2Decim, settings.m_filterChainHash);
         m_sink.setSampleRate(getChannelSampleRate());
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settings, settingsKeys, force);
     m_settings = settings;
 }
 
