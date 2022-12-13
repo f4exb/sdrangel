@@ -43,6 +43,7 @@ void LocalSinkSettings::resetToDefaults()
     m_fftOn = false;
     m_log2FFT = 10;
     m_fftWindow = FFTWindow::Function::Rectangle;
+    m_reverseFilter = false;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -89,6 +90,7 @@ QByteArray LocalSinkSettings::serialize() const
 
     s.writeBool(22, m_fftOn);
     s.writeU32(23, (int) m_fftWindow);
+    s.writeBool(24, m_reverseFilter);
 
     s.writeU32(99, m_fftBands.size());
     int i = 0;
@@ -175,6 +177,7 @@ bool LocalSinkSettings::deserialize(const QByteArray& data)
         m_fftWindow = (utmp > (uint32_t) FFTWindow::Function::BlackmanHarris7) ?
             FFTWindow::Function::BlackmanHarris7 :
             (FFTWindow::Function) utmp;
+        d.readBool(24, &m_reverseFilter, false);
 
         uint32_t nbBands;
         d.readU32(99, &nbBands, 0);
@@ -231,6 +234,9 @@ void LocalSinkSettings::applySettings(const QStringList& settingsKeys, const Loc
     }
     if (settingsKeys.contains("fftWindow")) {
         m_fftWindow = settings.m_fftWindow;
+    }
+    if (settingsKeys.contains("reverseFilter")) {
+        m_reverseFilter = settings.m_reverseFilter;
     }
     if (settingsKeys.contains("streamIndex")) {
         m_streamIndex = settings.m_streamIndex;
@@ -294,6 +300,9 @@ QString LocalSinkSettings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("fftWindow") || force) {
         ostr << " m_fftWindow: " << m_fftWindow;
+    }
+    if (settingsKeys.contains("reverseFilter") || force) {
+        ostr << " m_reverseFilter: " << m_reverseFilter;
     }
     if (settingsKeys.contains("streamIndex") || force) {
         ostr << " m_streamIndex: " << m_streamIndex;

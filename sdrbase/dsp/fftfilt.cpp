@@ -227,7 +227,8 @@ void fftfilt::create_filter(const std::vector<std::pair<float, float>>& limits, 
             }
             else // reject
             {
-                if ((i >= f1*flen) && (i <= f2*flen)) {
+                if ((i >= f1*flen) && (i <= f2*flen))
+                {
                     if (i < flen2) {
                         canvasNeg[flen2-1-i] = 0;
                     } else {
@@ -242,11 +243,12 @@ void fftfilt::create_filter(const std::vector<std::pair<float, float>>& limits, 
     std::vector<std::pair<int,int>> indexesPosList;
     int cn = 0;
     int cp = 0;
+    int defaultSecond = pass ? 0 : flen2 - 1;
 
     for (int i = 0; i < flen2; i++)
     {
         if ((canvasNeg[i] == 1) && (cn == 0)) {
-            indexesNegList.push_back(std::pair<int,int>{i, 0});
+            indexesNegList.push_back(std::pair<int,int>{i, defaultSecond});
         }
 
         if ((canvasNeg[i] == 0) && (cn == 1)) {
@@ -254,7 +256,7 @@ void fftfilt::create_filter(const std::vector<std::pair<float, float>>& limits, 
         }
 
         if ((canvasPos[i] == 1) && (cp == 0)) {
-            indexesPosList.push_back(std::pair<int,int>{i, 0});
+            indexesPosList.push_back(std::pair<int,int>{i, defaultSecond});
         }
 
         if ((canvasPos[i] == 0) && (cp == 1)) {

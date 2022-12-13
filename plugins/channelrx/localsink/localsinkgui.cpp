@@ -210,6 +210,7 @@ void LocalSinkGUI::displaySettings()
     ui->fft->setChecked(m_settings.m_fftOn);
     ui->fftSize->setCurrentIndex(m_settings.m_log2FFT-6);
     ui->fftWindow->setCurrentIndex((int) m_settings.m_fftWindow);
+    ui->fftFilterReverse->setChecked(m_settings.m_reverseFilter);
     ui->filterF2orW->setChecked(m_showFilterHighCut);
     applyDecimation();
     updateIndexLabel();
@@ -459,6 +460,13 @@ void LocalSinkGUI::on_fftWindow_currentIndexChanged(int index)
     applySettings();
 }
 
+void LocalSinkGUI::on_fftFilterReverse_toggled(bool checked)
+{
+    m_settings.m_reverseFilter = checked;
+    m_settingsKeys.append("reverseFilter");
+    applySettings();
+}
+
 void LocalSinkGUI::on_fftBandAdd_clicked()
 {
     if (m_settings.m_fftBands.size() == m_settings.m_maxFFTBands) {
@@ -572,6 +580,7 @@ void LocalSinkGUI::makeUIConnections()
     QObject::connect(ui->fft, &ButtonSwitch::toggled, this, &LocalSinkGUI::on_fft_toggled);
     QObject::connect(ui->fftSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_fftSize_currentIndexChanged);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_fftWindow_currentIndexChanged);
+    QObject::connect(ui->fftFilterReverse, &ButtonSwitch::toggled, this, &LocalSinkGUI::on_fftFilterReverse_toggled);
     QObject::connect(ui->fftBandAdd, &QPushButton::clicked, this, &LocalSinkGUI::on_fftBandAdd_clicked);
     QObject::connect(ui->fftBandDel, &QPushButton::clicked, this, &LocalSinkGUI::on_fftBandDel_clicked);
     QObject::connect(ui->bandIndex, &QSlider::valueChanged, this, &LocalSinkGUI::on_bandIndex_valueChanged);

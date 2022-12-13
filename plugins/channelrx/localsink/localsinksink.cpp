@@ -199,9 +199,10 @@ void LocalSinkSink::applySettings(const LocalSinkSettings& settings, const QList
 
     if (settingsKeys.contains("fftWindow")
      || settingsKeys.contains("fftBands")
+     || settingsKeys.contains("reverseFilter")
      || force)
     {
-        m_fftFilter->create_filter(settings.m_fftBands, true, settings.m_fftWindow);
+        m_fftFilter->create_filter(settings.m_fftBands, !settings.m_reverseFilter, settings.m_fftWindow);
     }
 
     if (force) {

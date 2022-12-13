@@ -114,6 +114,7 @@ private slots:
     void on_fft_toggled(bool checked);
     void on_fftSize_currentIndexChanged(int index);
     void on_fftWindow_currentIndexChanged(int index);
+    void on_fftFilterReverse_toggled(bool checked);
     void on_fftBandAdd_clicked();
     void on_fftBandDel_clicked();
     void on_bandIndex_valueChanged(int value);
