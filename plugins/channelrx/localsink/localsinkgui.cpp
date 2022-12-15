@@ -228,7 +228,13 @@ void LocalSinkGUI::displayRateAndShift()
     ui->offsetFrequencyText->setText(tr("%1 Hz").arg(loc.toString(shift)));
     ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));
     ui->glSpectrum->setSampleRate(channelSampleRate);
-    ui->glSpectrum->setCenterFrequency(m_deviceCenterFrequency + shift);
+
+    if (ui->relativeSpectrum->isChecked()) {
+        ui->glSpectrum->setCenterFrequency(0);
+    } else {
+        ui->glSpectrum->setCenterFrequency(m_deviceCenterFrequency + shift);
+    }
+
     m_channelMarker.setCenterFrequency(shift);
     m_channelMarker.setBandwidth(channelSampleRate);
 }
@@ -397,6 +403,19 @@ void LocalSinkGUI::on_decimationFactor_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index;
     applyDecimation();
+}
+
+void LocalSinkGUI::on_relativeSpectrum_toggled(bool checked)
+{
+    if (checked)
+    {
+        ui->glSpectrum->setCenterFrequency(0);
+    }
+    else
+    {
+        int shift = m_shiftFrequencyFactor * m_basebandSampleRate;
+        ui->glSpectrum->setCenterFrequency(m_deviceCenterFrequency + shift);
+    }
 }
 
 void LocalSinkGUI::on_position_valueChanged(int value)
@@ -572,6 +591,7 @@ void LocalSinkGUI::tick()
 void LocalSinkGUI::makeUIConnections()
 {
     QObject::connect(ui->decimationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_decimationFactor_currentIndexChanged);
+    QObject::connect(ui->relativeSpectrum, &ButtonSwitch::toggled, this, &LocalSinkGUI::on_relativeSpectrum_toggled);
     QObject::connect(ui->position, &QSlider::valueChanged, this, &LocalSinkGUI::on_position_valueChanged);
     QObject::connect(ui->localDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_localDevice_currentIndexChanged);
     QObject::connect(ui->localDevicePlay, &ButtonSwitch::toggled, this, &LocalSinkGUI::on_localDevicePlay_toggled);

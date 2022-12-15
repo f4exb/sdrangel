@@ -106,6 +106,7 @@ private:
 private slots:
     void handleSourceMessages();
     void on_decimationFactor_currentIndexChanged(int index);
+    void on_relativeSpectrum_toggled(bool checked);
     void on_position_valueChanged(int value);
     void on_localDevice_currentIndexChanged(int index);
     void on_localDevicePlay_toggled(bool checked);
