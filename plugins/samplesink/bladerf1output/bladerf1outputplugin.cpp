@@ -32,7 +32,7 @@
 const PluginDescriptor Bladerf1OutputPlugin::m_pluginDescriptor = {
     QStringLiteral("BladeRF1"),
 	QStringLiteral("BladeRF1 Output"),
-    QStringLiteral("7.8.2"),
+    QStringLiteral("7.8.5"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

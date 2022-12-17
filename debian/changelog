@@ -1,3 +1,12 @@
+sdrangel (7.8.5-1) unstable; urgency=medium
+
+  * Local Sink: enhanced functionnality. Implements #871
+  * BladeRF v1: fixed XB-200 support in GUI. Fixes #1535
+  * RadioSonde: Fix plotting of heading. Fixes #1527. PR #1528
+  * Metis MISO GUI: fixed frequency limits
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 17 Dec 2022 09:27:34 +0100
+
 sdrangel (7.8.4-1) unstable; urgency=medium
 
   * Adapt code to Qt6. PR #1518

@@ -29,7 +29,7 @@
 const PluginDescriptor RadiosondePlugin::m_pluginDescriptor = {
     Radiosonde::m_featureId,
     QStringLiteral("Radiosonde"),
-    QStringLiteral("7.8.4"),
+    QStringLiteral("7.8.5"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
