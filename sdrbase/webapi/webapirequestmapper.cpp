@@ -4403,7 +4403,9 @@ bool WebAPIRequestMapper::getChannelSettings(
     {
         QJsonObject settingsJsonObject = channelSettingsJson[channelSettingsKey].toObject();
         extractKeys(settingsJsonObject, channelSettingsKeys);
-        qDebug() << "WebAPIRequestMapper::getChannelSettings: channelSettingsKeys: " << channelSettingsKeys;
+        qDebug() << "WebAPIRequestMapper::getChannelSettings:"
+            << " channelSettingsKey: " << channelSettingsKey
+            << " channelSettingsKeys: " << channelSettingsKeys;
 
         if (channelSettingsKey == "ADSBDemodSettings")
         {
@@ -4559,6 +4561,7 @@ bool WebAPIRequestMapper::getChannelSettings(
         else if (channelSettingsKey == "LocalSinkSettings")
         {
             channelSettings->setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
+            channelSettings->getLocalSinkSettings()->init(); // contains a QList
             channelSettings->getLocalSinkSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "LocalSourceSettings")

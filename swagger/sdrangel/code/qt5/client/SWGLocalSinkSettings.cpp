@@ -40,6 +40,20 @@ SWGLocalSinkSettings::SWGLocalSinkSettings() {
     m_filter_chain_hash_isSet = false;
     play = 0;
     m_play_isSet = false;
+    dsp = 0;
+    m_dsp_isSet = false;
+    gaind_b = 0;
+    m_gaind_b_isSet = false;
+    fft_on = 0;
+    m_fft_on_isSet = false;
+    log2_fft = 0;
+    m_log2_fft_isSet = false;
+    fft_window = 0;
+    m_fft_window_isSet = false;
+    fft_bands = nullptr;
+    m_fft_bands_isSet = false;
+    reverse_filter = 0;
+    m_reverse_filter_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -76,6 +90,20 @@ SWGLocalSinkSettings::init() {
     m_filter_chain_hash_isSet = false;
     play = 0;
     m_play_isSet = false;
+    dsp = 0;
+    m_dsp_isSet = false;
+    gaind_b = 0;
+    m_gaind_b_isSet = false;
+    fft_on = 0;
+    m_fft_on_isSet = false;
+    log2_fft = 0;
+    m_log2_fft_isSet = false;
+    fft_window = 0;
+    m_fft_window_isSet = false;
+    fft_bands = new QList<SWGFFTBand*>();
+    m_fft_bands_isSet = false;
+    reverse_filter = 0;
+    m_reverse_filter_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -103,6 +131,19 @@ SWGLocalSinkSettings::cleanup() {
     }
 
 
+
+
+
+
+
+
+    if(fft_bands != nullptr) { 
+        auto arr = fft_bands;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete fft_bands;
+    }
 
 
 
@@ -142,6 +183,20 @@ SWGLocalSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&filter_chain_hash, pJson["filterChainHash"], "qint32", "");
     
     ::SWGSDRangel::setValue(&play, pJson["play"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dsp, pJson["dsp"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&gaind_b, pJson["gaindB"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fft_on, pJson["fftOn"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&log2_fft, pJson["log2FFT"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fft_window, pJson["fftWindow"], "qint32", "");
+    
+    
+    ::SWGSDRangel::setValue(&fft_bands, pJson["fftBands"], "QList", "SWGFFTBand");
+    ::SWGSDRangel::setValue(&reverse_filter, pJson["reverseFilter"], "qint32", "");
     
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
@@ -192,6 +247,27 @@ SWGLocalSinkSettings::asJsonObject() {
     }
     if(m_play_isSet){
         obj->insert("play", QJsonValue(play));
+    }
+    if(m_dsp_isSet){
+        obj->insert("dsp", QJsonValue(dsp));
+    }
+    if(m_gaind_b_isSet){
+        obj->insert("gaindB", QJsonValue(gaind_b));
+    }
+    if(m_fft_on_isSet){
+        obj->insert("fftOn", QJsonValue(fft_on));
+    }
+    if(m_log2_fft_isSet){
+        obj->insert("log2FFT", QJsonValue(log2_fft));
+    }
+    if(m_fft_window_isSet){
+        obj->insert("fftWindow", QJsonValue(fft_window));
+    }
+    if(fft_bands && fft_bands->size() > 0){
+        toJsonArray((QList<void*>*)fft_bands, obj, "fftBands", "SWGFFTBand");
+    }
+    if(m_reverse_filter_isSet){
+        obj->insert("reverseFilter", QJsonValue(reverse_filter));
     }
     if(m_stream_index_isSet){
         obj->insert("streamIndex", QJsonValue(stream_index));
@@ -279,6 +355,76 @@ void
 SWGLocalSinkSettings::setPlay(qint32 play) {
     this->play = play;
     this->m_play_isSet = true;
+}
+
+qint32
+SWGLocalSinkSettings::getDsp() {
+    return dsp;
+}
+void
+SWGLocalSinkSettings::setDsp(qint32 dsp) {
+    this->dsp = dsp;
+    this->m_dsp_isSet = true;
+}
+
+qint32
+SWGLocalSinkSettings::getGaindB() {
+    return gaind_b;
+}
+void
+SWGLocalSinkSettings::setGaindB(qint32 gaind_b) {
+    this->gaind_b = gaind_b;
+    this->m_gaind_b_isSet = true;
+}
+
+qint32
+SWGLocalSinkSettings::getFftOn() {
+    return fft_on;
+}
+void
+SWGLocalSinkSettings::setFftOn(qint32 fft_on) {
+    this->fft_on = fft_on;
+    this->m_fft_on_isSet = true;
+}
+
+qint32
+SWGLocalSinkSettings::getLog2Fft() {
+    return log2_fft;
+}
+void
+SWGLocalSinkSettings::setLog2Fft(qint32 log2_fft) {
+    this->log2_fft = log2_fft;
+    this->m_log2_fft_isSet = true;
+}
+
+qint32
+SWGLocalSinkSettings::getFftWindow() {
+    return fft_window;
+}
+void
+SWGLocalSinkSettings::setFftWindow(qint32 fft_window) {
+    this->fft_window = fft_window;
+    this->m_fft_window_isSet = true;
+}
+
+QList<SWGFFTBand*>*
+SWGLocalSinkSettings::getFftBands() {
+    return fft_bands;
+}
+void
+SWGLocalSinkSettings::setFftBands(QList<SWGFFTBand*>* fft_bands) {
+    this->fft_bands = fft_bands;
+    this->m_fft_bands_isSet = true;
+}
+
+qint32
+SWGLocalSinkSettings::getReverseFilter() {
+    return reverse_filter;
+}
+void
+SWGLocalSinkSettings::setReverseFilter(qint32 reverse_filter) {
+    this->reverse_filter = reverse_filter;
+    this->m_reverse_filter_isSet = true;
 }
 
 qint32
@@ -382,6 +528,27 @@ SWGLocalSinkSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_play_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dsp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_gaind_b_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fft_on_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_fft_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fft_window_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(fft_bands && (fft_bands->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_filter_isSet){
             isObjectUpdated = true; break;
         }
         if(m_stream_index_isSet){

@@ -13,8 +13,51 @@ LocalSinkSettings:
     filterChainHash:
       type: integer
     play:
-      description: boolean (1 to play, 0 to stop)
       type: integer
+      description: >
+        Run samples transfer
+          * 0 - stop
+          * 1 - run
+    dsp:
+      type: integer
+      description: >
+        Activate DSP
+          * 0 - Skip DSP functions
+          * 1 - Run DSP functions
+    gaindB:
+      description: Gain in dB.
+      type: integer
+    fftOn:
+      type: integer
+      description: >
+        Activate FFT multiband filter
+          * 0 - do not run flter
+          * 1 - run filter
+    log2FFT:
+      description: log2 of FFT size.
+      type: integer
+    fftWindow:
+      type: integer
+      description: >
+        FFT window type
+          * 0 - Bartlett
+          * 1 - Blackman-Harris
+          * 2 - Flat top
+          * 3 - Hamming
+          * 4 - Hanning
+          * 5 - Rectangle
+          * 6 - Kaiser
+          * 7 - Blackman
+          * 8 - Blackman-Harris (7th order)
+    fftBands:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/LocalSink.yaml#/FFTBand"
+    reverseFilter:
+      type: integer
+      descrption: >
+        * 0 - band definitions are bandpass
+        * 1 - band definitions are band reject
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
@@ -33,3 +76,16 @@ LocalSinkSettings:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+
+FFTBand:
+  description: FFT filter band definition
+  properties:
+    fstart:
+      type: number
+      format: float
+      description: start frequency ratio [-0.5, 0.5]
+    bandwidth:
+      type: number
+      format: float
+      desctiption: bandwidth ratio [0.0, 1.0]

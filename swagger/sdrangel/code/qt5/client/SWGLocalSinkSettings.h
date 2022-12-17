@@ -23,7 +23,9 @@
 
 
 #include "SWGChannelMarker.h"
+#include "SWGFFTBand.h"
 #include "SWGRollupState.h"
+#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -61,6 +63,27 @@ public:
 
     qint32 getPlay();
     void setPlay(qint32 play);
+
+    qint32 getDsp();
+    void setDsp(qint32 dsp);
+
+    qint32 getGaindB();
+    void setGaindB(qint32 gaind_b);
+
+    qint32 getFftOn();
+    void setFftOn(qint32 fft_on);
+
+    qint32 getLog2Fft();
+    void setLog2Fft(qint32 log2_fft);
+
+    qint32 getFftWindow();
+    void setFftWindow(qint32 fft_window);
+
+    QList<SWGFFTBand*>* getFftBands();
+    void setFftBands(QList<SWGFFTBand*>* fft_bands);
+
+    qint32 getReverseFilter();
+    void setReverseFilter(qint32 reverse_filter);
 
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
@@ -107,6 +130,27 @@ private:
 
     qint32 play;
     bool m_play_isSet;
+
+    qint32 dsp;
+    bool m_dsp_isSet;
+
+    qint32 gaind_b;
+    bool m_gaind_b_isSet;
+
+    qint32 fft_on;
+    bool m_fft_on_isSet;
+
+    qint32 log2_fft;
+    bool m_log2_fft_isSet;
+
+    qint32 fft_window;
+    bool m_fft_window_isSet;
+
+    QList<SWGFFTBand*>* fft_bands;
+    bool m_fft_bands_isSet;
+
+    qint32 reverse_filter;
+    bool m_reverse_filter_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;

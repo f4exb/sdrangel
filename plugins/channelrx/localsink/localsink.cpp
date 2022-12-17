@@ -483,6 +483,35 @@ void LocalSink::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("play")) {
         settings.m_play = response.getLocalSinkSettings()->getPlay() != 0;
     }
+    if (channelSettingsKeys.contains("dsp")) {
+        settings.m_dsp = response.getLocalSinkSettings()->getDsp() != 0;
+    }
+    if (channelSettingsKeys.contains("gaindB")) {
+        settings.m_gaindB = response.getLocalSinkSettings()->getGaindB();
+    }
+    if (channelSettingsKeys.contains("fftOn")) {
+        settings.m_fftOn = response.getLocalSinkSettings()->getFftOn() != 0;
+    }
+    if (channelSettingsKeys.contains("log2FFT")) {
+        settings.m_log2FFT = response.getLocalSinkSettings()->getLog2Fft();
+    }
+    if (channelSettingsKeys.contains("fftWindow")) {
+        settings.m_fftWindow = (FFTWindow::Function) response.getLocalSinkSettings()->getFftWindow();
+    }
+    if (channelSettingsKeys.contains("reverseFilter")) {
+        settings.m_reverseFilter = response.getLocalSinkSettings()->getReverseFilter() != 0;
+    }
+
+    if (channelSettingsKeys.contains("fftBands"))
+    {
+        QList<SWGSDRangel::SWGFFTBand *> *fftBands = response.getLocalSinkSettings()->getFftBands();
+        settings.m_fftBands.clear();
+
+        for (const auto& fftBand : *fftBands) {
+            settings.m_fftBands.push_back(std::pair<float, float>{fftBand->getFstart(), fftBand->getBandwidth()});
+        }
+    }
+
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getLocalSinkSettings()->getStreamIndex();
     }
@@ -523,6 +552,26 @@ void LocalSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getLocalSinkSettings()->setLog2Decim(settings.m_log2Decim);
     response.getLocalSinkSettings()->setFilterChainHash(settings.m_filterChainHash);
     response.getLocalSinkSettings()->setPlay(settings.m_play ? 1 : 0);
+    response.getLocalSinkSettings()->setDsp(settings.m_dsp ? 1 : 0);
+    response.getLocalSinkSettings()->setGaindB(settings.m_gaindB);
+    response.getLocalSinkSettings()->setFftOn(settings.m_fftOn ? 1 : 0);
+    response.getLocalSinkSettings()->setLog2Fft(settings.m_log2FFT);
+    response.getLocalSinkSettings()->setFftWindow((int) settings.m_fftWindow);
+    response.getLocalSinkSettings()->setReverseFilter(settings.m_reverseFilter ? 1 : 0);
+
+    if (!response.getLocalSinkSettings()->getFftBands()) {
+        response.getLocalSinkSettings()->setFftBands(new QList<SWGSDRangel::SWGFFTBand *>());
+    }
+
+    response.getLocalSinkSettings()->getFftBands()->clear();
+
+    for (const auto& fftBand : settings.m_fftBands)
+    {
+        response.getLocalSinkSettings()->getFftBands()->push_back(new SWGSDRangel::SWGFFTBand);
+        response.getLocalSinkSettings()->getFftBands()->back()->setFstart(fftBand.first);
+        response.getLocalSinkSettings()->getFftBands()->back()->setBandwidth(fftBand.second);
+    }
+
     response.getLocalSinkSettings()->setStreamIndex(settings.m_streamIndex);
     response.getLocalSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -649,6 +698,37 @@ void LocalSink::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("play") || force) {
         swgLocalSinkSettings->setPlay(settings.m_play ? 1 : 0);
     }
+    if (channelSettingsKeys.contains("dsp") || force) {
+        swgLocalSinkSettings->setDsp(settings.m_dsp ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("gaindB") || force) {
+        swgLocalSinkSettings->setGaindB(settings.m_gaindB);
+    }
+    if (channelSettingsKeys.contains("log2FFT") || force) {
+        swgLocalSinkSettings->setLog2Fft(settings.m_log2FFT);
+    }
+    if (channelSettingsKeys.contains("fftWindow") || force) {
+        swgLocalSinkSettings->setFftWindow((int) settings.m_fftWindow);
+    }
+    if (channelSettingsKeys.contains("fftOn") || force) {
+        swgLocalSinkSettings->setFftOn(settings.m_fftOn ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("reverseFilter") || force) {
+        swgLocalSinkSettings->setReverseFilter(settings.m_reverseFilter ? 1 : 0);
+    }
+
+    if (channelSettingsKeys.contains("fftBands") || force)
+    {
+        swgLocalSinkSettings->setFftBands(new QList<SWGSDRangel::SWGFFTBand *>());
+
+        for (const auto& fftBand : settings.m_fftBands)
+        {
+            swgLocalSinkSettings->getFftBands()->push_back(new SWGSDRangel::SWGFFTBand);
+            swgLocalSinkSettings->getFftBands()->back()->setFstart(fftBand.first);
+            swgLocalSinkSettings->getFftBands()->back()->setBandwidth(fftBand.second);
+        }
+    }
+
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgLocalSinkSettings->setStreamIndex(settings.m_streamIndex);
     }

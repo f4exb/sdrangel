@@ -5542,6 +5542,20 @@ margin-bottom: 20px;
   },
   "description" : "FCDPro"
 };
+            defs.FFTBand = {
+  "properties" : {
+    "fstart" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "start frequency ratio [-0.5, 0.5]"
+    },
+    "bandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "FFT filter band definition"
+};
             defs.Feature = {
   "required" : [ "id", "index", "title", "uid" ],
   "properties" : {
@@ -8229,7 +8243,36 @@ margin-bottom: 20px;
     },
     "play" : {
       "type" : "integer",
-      "description" : "boolean (1 to play, 0 to stop)"
+      "description" : "Run samples transfer\n  * 0 - stop\n  * 1 - run\n"
+    },
+    "dsp" : {
+      "type" : "integer",
+      "description" : "Activate DSP\n  * 0 - Skip DSP functions\n  * 1 - Run DSP functions\n"
+    },
+    "gaindB" : {
+      "type" : "integer",
+      "description" : "Gain in dB."
+    },
+    "fftOn" : {
+      "type" : "integer",
+      "description" : "Activate FFT multiband filter\n  * 0 - do not run flter\n  * 1 - run filter\n"
+    },
+    "log2FFT" : {
+      "type" : "integer",
+      "description" : "log2 of FFT size."
+    },
+    "fftWindow" : {
+      "type" : "integer",
+      "description" : "FFT window type\n  * 0 - Bartlett\n  * 1 - Blackman-Harris\n  * 2 - Flat top\n  * 3 - Hamming\n  * 4 - Hanning\n  * 5 - Rectangle\n  * 6 - Kaiser\n  * 7 - Blackman\n  * 8 - Blackman-Harris (7th order)\n"
+    },
+    "fftBands" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/FFTBand"
+      }
+    },
+    "reverseFilter" : {
+      "type" : "integer"
     },
     "streamIndex" : {
       "type" : "integer",
@@ -56737,7 +56780,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-11-30T21:42:22.227+01:00
+              Generated 2022-12-16T06:50:35.932+01:00
             </div>
           </div>
       </div>

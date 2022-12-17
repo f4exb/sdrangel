@@ -113,6 +113,7 @@
 #include "SWGErrorResponse.h"
 #include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
+#include "SWGFFTBand.h"
 #include "SWGFeature.h"
 #include "SWGFeatureActions.h"
 #include "SWGFeatureConfig.h"
@@ -834,6 +835,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFCDProSettings").compare(type) == 0) {
       SWGFCDProSettings *obj = new SWGFCDProSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGFFTBand").compare(type) == 0) {
+      SWGFFTBand *obj = new SWGFFTBand();
       obj->init();
       return obj;
     }

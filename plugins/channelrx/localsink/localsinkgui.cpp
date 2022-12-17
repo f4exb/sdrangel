@@ -501,6 +501,10 @@ void LocalSinkGUI::on_fftBandAdd_clicked()
 
 void LocalSinkGUI::on_fftBandDel_clicked()
 {
+    if (m_settings.m_fftBands.size() == 0) {
+        return;
+    }
+
     m_settings.m_fftBands.erase(m_settings.m_fftBands.begin() + m_currentBandIndex);
     m_currentBandIndex--;
     displayFFTBand();
