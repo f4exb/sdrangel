@@ -464,7 +464,7 @@ void Bladerf1InputGui::updateHardware()
 {
     if (m_doApplySettings)
     {
-        qDebug() << "BladerfGui::updateHardware";
+        qDebug() << "BladerfGui::updateHardware:";
         Bladerf1Input::MsgConfigureBladerf1* message = Bladerf1Input::MsgConfigureBladerf1::create(m_settings, m_settingsKeys, m_forceSettings);
         m_sampleSource->getInputMessageQueue()->push(message);
         m_settingsKeys.clear();
@@ -589,4 +589,5 @@ void Bladerf1InputGui::makeUIConnections()
     QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1InputGui::on_fcPos_currentIndexChanged);
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &Bladerf1InputGui::on_startStop_toggled);
     QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &Bladerf1InputGui::on_sampleRateMode_toggled);
+    QObject::connect(ui->xb200, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1InputGui::on_xb200_currentIndexChanged);
 }

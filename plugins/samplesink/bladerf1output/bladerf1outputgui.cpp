@@ -503,4 +503,5 @@ void Bladerf1OutputGui::makeUIConnections()
     QObject::connect(ui->interp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1OutputGui::on_interp_currentIndexChanged);
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &Bladerf1OutputGui::on_startStop_toggled);
     QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &Bladerf1OutputGui::on_sampleRateMode_toggled);
+    QObject::connect(ui->xb200, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1OutputGui::on_xb200_currentIndexChanged);
 }
