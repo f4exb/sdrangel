@@ -42,7 +42,7 @@ jobs:
           echo github.workspace: ${{ github.workspace }}
       - name: Get version
         id: get_version
-        run: echo "version=$(git describe --tags | cut -c2-)" >> $GITHUB_OUTPUT
+        run: echo "version=$(git describe --tags | cut -c2-)" >> $env:GITHUB_OUTPUT
       - name: Install basic dependencies on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
