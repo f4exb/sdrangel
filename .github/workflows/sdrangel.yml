@@ -30,7 +30,7 @@ jobs:
             generators: Ninja
           }
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
           fetch-depth: 0
@@ -71,7 +71,7 @@ jobs:
           rm -rf boost_*/* download.tar.bz2 download.tar
         shell: bash
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2.14.0
+        uses: jurplel/install-qt-action@v3
         with:
           dir: ${{matrix.config.QT_INST_DIR}}
           arch: ${{matrix.config.QT_ARCH}}
@@ -86,7 +86,7 @@ jobs:
           cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=SSE4_2 -DDEBUG_OUTPUT=ON -DENABLE_LIMESUITE=OFF -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DCMAKE_PREFIX_PATH="C:\Qt\5.15.2\msvc2019_64;C:\Libraries\boost_1_73_0"
           cmake --build . --config Release --target package
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
           path: ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
