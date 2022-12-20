@@ -79,6 +79,7 @@ private:
 	void applySettings();
     void applySpectrumSettings();
     void displaySettings();
+    void displayControls();
 	void setAveragingCombo();
 	void setNumberStr(int n, QString& s);
 	void setNumberStr(float v, int decimalPlaces, QString& s);
@@ -125,6 +126,7 @@ private slots:
     void on_freeze_toggled(bool checked);
 	void on_calibration_toggled(bool checked);
     void on_gotoMarker_currentIndexChanged(int index);
+    void on_showAllControls_toggled(bool checked);
 
     void on_measure_clicked(bool checked);
 

@@ -1131,6 +1131,29 @@
       </widget>
      </item>
      <item>
+      <widget class="ButtonSwitch" name="showAllControls">
+       <property name="toolTip">
+        <string>Toggle all controls</string>
+       </property>
+       <property name="text">
+        <string>Grid</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/listing.png</normaloff>:/listing.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QComboBox" name="gotoMarker">
        <property name="minimumSize">
         <size>

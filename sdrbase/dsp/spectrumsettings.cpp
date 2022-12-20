@@ -80,6 +80,11 @@ void SpectrumSettings::resetToDefaults()
     m_measurementsPosition = PositionBelow;
     m_measurementPrecision = 1;
     m_findHistogramPeaks = false;
+#ifdef ANDROID
+    m_showAllControls = false;
+#else
+    m_showAllControls = true;
+#endif
 }
 
 QByteArray SpectrumSettings::serialize() const
@@ -132,6 +137,7 @@ QByteArray SpectrumSettings::serialize() const
     s.writeS32(46, m_measurementCenterFrequencyOffset);
     s.writeBool(47, m_findHistogramPeaks);
     s.writeBool(48, m_truncateFreqScale);
+    s.writeBool(49, m_showAllControls);
     s.writeS32(100, m_histogramMarkers.size());
 
 	for (int i = 0; i < m_histogramMarkers.size(); i++) {
@@ -236,6 +242,11 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
         d.readS32(46, &m_measurementCenterFrequencyOffset, 0);
         d.readBool(47, &m_findHistogramPeaks, false);
         d.readBool(48, &m_truncateFreqScale, false);
+#ifdef ANDROID
+        d.readBool(49, &m_showAllControls, false);
+#else
+        d.readBool(49, &m_showAllControls, true);
+#endif
 
 		int histogramMarkersSize;
 		d.readS32(100, &histogramMarkersSize, 0);
