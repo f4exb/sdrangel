@@ -358,6 +358,14 @@ private:
 
     bool m_scrollFrequency;
     qint64 m_scrollStartCenterFreq;
+    bool m_pinching;
+    bool m_pinching3D;
+    QPointF m_pinchStart;
+
+    bool m_frequencyRequested;      //!< Set when we have emitted requestCenterFrequency
+    qint64 m_requestedFrequency;
+    qint64 m_nextFrequency;         //!< Next frequency to request when previous request completes
+    qint64 m_nextFrequencyValid;
 
     QRgb m_histogramPalette[240];
     QImage* m_histogramBuffer;
@@ -448,12 +456,14 @@ private:
     void stopDrag();
     void applyChanges();
 
+    bool event(QEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
     void wheelEvent(QWheelEvent*);
     void channelMarkerMove(QWheelEvent*, int mul);
-    void zoom(QWheelEvent*);
+    void zoomFactor(const QPointF& p, float factor);
+    void zoom(const QPointF& p, int y);
     void frequencyZoom(float pw);
     void frequencyPan(QMouseEvent*);
     void timeZoom(bool zoomInElseOut);
@@ -494,6 +504,7 @@ private:
             const QRectF& glRect);
     void formatTextInfo(QString& info);
     void updateSortedAnnotationMarkers();
+    void queueRequestCenterFrequency(qint64 frequency);
 
     static bool annotationDisplayLessThan(const SpectrumAnnotationMarker *m1, const SpectrumAnnotationMarker *m2)
     {

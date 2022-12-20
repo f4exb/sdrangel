@@ -26,6 +26,10 @@
 #include <QVector4D>
 #include <QDebug>
 
+#ifdef ANDROID
+#include <GLES3/gl3.h>
+#endif
+
 #include "gui/glshaderspectrogram.h"
 #include "util/colormap.h"
 
@@ -314,7 +318,7 @@ void GLShaderSpectrogram::initTextureMutable(const QImage& image)
 
     glGenTextures(1, &m_textureId);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8,
         image.width(), image.height(), 0, GL_RED, GL_UNSIGNED_BYTE, image.constScanLine(0));
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

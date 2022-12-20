@@ -24,6 +24,10 @@
 #include <QVector4D>
 #include <QDebug>
 
+#ifdef ANDROID
+#include <GLES3/gl3.h>
+#endif
+
 #include "gui/glshadercolormap.h"
 #include "util/colormap.h"
 

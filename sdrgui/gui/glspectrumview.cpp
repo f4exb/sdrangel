@@ -24,6 +24,9 @@
 #include <QPainter>
 #include <QFontDatabase>
 #include <QWindow>
+#include <QGestureEvent>
+#include <QPanGesture>
+#include <QPinchGesture>
 #include "maincore.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrumview.h"
@@ -98,6 +101,10 @@ GLSpectrumView::GLSpectrumView(QWidget* parent) :
     m_colorMapName("Angel"),
     m_scrollFrequency(false),
     m_scrollStartCenterFreq(0),
+    m_pinching(false),
+    m_pinching3D(false),
+    m_frequencyRequested(false),
+    m_nextFrequencyValid(false),
     m_histogramBuffer(nullptr),
     m_histogram(nullptr),
     m_displayHistogram(true),
@@ -223,6 +230,8 @@ GLSpectrumView::GLSpectrumView(QWidget* parent) :
     // Handle KeyEvents
     setFocusPolicy(Qt::StrongFocus);
     installEventFilter(this);
+
+    grabGesture(Qt::PinchGesture);
 }
 
 GLSpectrumView::~GLSpectrumView()
@@ -260,10 +269,36 @@ GLSpectrumView::~GLSpectrumView()
     }
 }
 
+void GLSpectrumView::queueRequestCenterFrequency(qint64 frequency)
+{
+    if (!m_frequencyRequested)
+    {
+        m_frequencyRequested = true;
+        m_requestedFrequency = frequency;
+        emit requestCenterFrequency(frequency);
+    }
+    else
+    {
+        m_nextFrequencyValid = true;
+        m_nextFrequency = frequency;
+    }
+}
+
 void GLSpectrumView::setCenterFrequency(qint64 frequency)
 {
     m_mutex.lock();
     m_centerFrequency = frequency;
+
+    // Handle queued frequency requests
+    if (m_frequencyRequested && (frequency == m_requestedFrequency))
+    {
+        m_frequencyRequested = false;
+        if (m_nextFrequencyValid)
+        {
+            m_nextFrequencyValid = false;
+            queueRequestCenterFrequency(m_nextFrequency);
+        }
+    }
 
     if (m_useCalibration) {
         updateCalibrationPoints();
@@ -944,7 +979,7 @@ void GLSpectrumView::paintGL()
     glFunctions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     QMatrix4x4 spectrogramGridMatrix;
-    int devicePixelRatio;
+    float devicePixelRatio;
 
     if (m_display3DSpectrogram)
     {
@@ -972,7 +1007,7 @@ void GLSpectrumView::paintGL()
         if (window()->windowHandle()) {
             devicePixelRatio = window()->windowHandle()->devicePixelRatio();
         } else {
-            devicePixelRatio = 1;
+            devicePixelRatio = 1.0f;
         }
         glFunctions->glViewport(0, m_3DSpectrogramBottom*devicePixelRatio, width()*devicePixelRatio, m_waterfallHeight*devicePixelRatio);
         m_glShaderSpectrogram.drawSurface(m_3DSpectrogramStyle, spectrogramGridMatrix, prop_y, m_invertedWaterfall);
@@ -3676,9 +3711,81 @@ void GLSpectrumView::updateCalibrationPoints()
     m_changesPending = true;
 }
 
+bool GLSpectrumView::event(QEvent* event)
+{
+    if (event->type() == QEvent::Gesture)
+    {
+        QGestureEvent *gestureEvent = static_cast<QGestureEvent *>(event);
+
+        if (QPanGesture *pan = static_cast<QPanGesture *>(gestureEvent->gesture(Qt::PanGesture)))
+        {
+            if (pan->state() == Qt::GestureStarted)
+            {
+                m_scrollStartCenterFreq = m_centerFrequency;
+            }
+            else if (pan->state() == Qt::GestureUpdated)
+            {
+                QPointF offset = pan->offset();
+                float histogramWidth = width() - m_leftMargin - m_rightMargin;
+                qint64 frequency = (qint64)(m_scrollStartCenterFreq + -offset.x()/histogramWidth * m_frequencyScale.getRange());
+                queueRequestCenterFrequency(frequency);
+            }
+            return true;
+        }
+        else if (QPinchGesture *pinch = static_cast<QPinchGesture *>(gestureEvent->gesture(Qt::PinchGesture)))
+        {
+            // Don't get GestureStarted and startCenterPoint is always 0,0
+            // https://bugreports.qt.io/browse/QTBUG-109205
+            if (!m_pinching)
+            {
+                m_scrollStartCenterFreq = m_centerFrequency;
+                m_pinchStart = pinch->centerPoint();
+                m_pinching = true;
+                m_pinching3D = m_display3DSpectrogram && pointInWaterfallOrSpectrogram(mapFromGlobal(m_pinchStart.toPoint()));
+            }
+            else
+            {
+                if (pinch->changeFlags() & QPinchGesture::CenterPointChanged)
+                {
+                    if (!m_pinching3D)
+                    {
+                        // Scroll frequency up or down
+                        QPointF offset = pinch->centerPoint() - m_pinchStart;
+                        float histogramWidth = width() - m_leftMargin - m_rightMargin;
+                        qint64 frequency = (qint64)(m_scrollStartCenterFreq + -offset.x()/histogramWidth * m_frequencyScale.getRange());
+                        queueRequestCenterFrequency(frequency);
+                    }
+                }
+                if (pinch->changeFlags() & QPinchGesture::ScaleFactorChanged)
+                {
+                    if (!m_pinching3D)
+                    {
+                        // Zoom in/out of spectrum
+                        QPoint p = mapFromGlobal(pinch->centerPoint().toPoint());
+                        zoomFactor(p, pinch->scaleFactor());
+                    }
+                    else
+                    {
+                        // Scale Z axis of 3D spectragram
+                        m_glShaderSpectrogram.userScaleZ(pinch->scaleFactor());
+                    }
+                }
+                if (pinch->state() == Qt::GestureFinished)
+                {
+                    m_pinching = false;
+                    m_pinching3D = false;
+                }
+            }
+            return true;
+        }
+    }
+
+    return QOpenGLWidget::event(event);
+}
+
 void GLSpectrumView::mouseMoveEvent(QMouseEvent* event)
 {
-    if (m_rotate3DSpectrogram)
+    if (m_rotate3DSpectrogram && !m_pinching3D)
     {
         // Rotate 3D Spectrogram
         QPointF delta = m_mousePrevLocalPos - event->localPos();
@@ -3718,7 +3825,7 @@ void GLSpectrumView::mouseMoveEvent(QMouseEvent* event)
         QPointF delta = m_mousePrevLocalPos - event->localPos();
         float histogramWidth = width() - m_leftMargin - m_rightMargin;
         qint64 frequency = (qint64)(m_scrollStartCenterFreq + delta.x()/histogramWidth * m_frequencyScale.getRange());
-        emit requestCenterFrequency(frequency);
+        queueRequestCenterFrequency(frequency);
         return;
     }
 
@@ -3775,13 +3882,14 @@ void GLSpectrumView::mouseMoveEvent(QMouseEvent* event)
     {
         // Determine if user is trying to move the channel outside of the current frequency range
         // and if so, request an adjustment to the center frequency
+        // FIXME: This doesn't take zoom into account, so only works when zoomed out
         Real freqAbs = m_frequencyScale.getValueFromPos(event->x() - m_leftMarginPixmap.width() - 1);
         Real freqMin = m_centerFrequency - m_sampleRate / 2.0f;
         Real freqMax = m_centerFrequency + m_sampleRate / 2.0f;
         if (freqAbs < freqMin) {
-            emit requestCenterFrequency(m_centerFrequency - (freqMin - freqAbs));
+            queueRequestCenterFrequency(m_centerFrequency - (freqMin - freqAbs));
         } else if (freqAbs > freqMax) {
-            emit requestCenterFrequency(m_centerFrequency + (freqAbs - freqMax));
+            queueRequestCenterFrequency(m_centerFrequency + (freqAbs - freqMax));
         }
 
         Real freq = freqAbs - m_centerFrequency;
@@ -4174,14 +4282,8 @@ void GLSpectrumView::wheelEvent(QWheelEvent *event)
     }
 }
 
-void GLSpectrumView::zoom(QWheelEvent *event)
+void GLSpectrumView::zoomFactor(const QPointF& p, float factor)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    const QPointF& p = event->position();
-#else
-    const QPointF& p = event->pos();
-#endif
-
     float pwx = (p.x() - m_leftMargin) / (width() - m_leftMargin - m_rightMargin); // x position in window
 
     if ((pwx >= 0.0f) && (pwx <= 1.0f))
@@ -4200,7 +4302,45 @@ void GLSpectrumView::zoom(QWheelEvent *event)
         // Calculate what that difference would be if there was no zoom
         float freqDiffZoom1 = freqDiff * m_frequencyZoomFactor;
 
-        if (event->angleDelta().y() > 0) // zoom in
+        m_frequencyZoomFactor *= factor;
+        m_frequencyZoomFactor = std::min(m_frequencyZoomFactor, m_maxFrequencyZoom);
+        m_frequencyZoomFactor = std::max(m_frequencyZoomFactor, 1.0f);
+
+        // Calculate what frequency difference should be at new zoom
+        float zoomedFreqDiff = freqDiffZoom1 / m_frequencyZoomFactor;
+        // Then calculate what the center frequency should be
+        float zoomedCF = zoomFreq + zoomedFreqDiff;
+
+        // Calculate zoom position which will set the desired center frequency
+        float zoomPos = (zoomedCF - m_centerFrequency) / m_sampleRate + 0.5;
+        zoomPos = std::max(0.0f, zoomPos);
+        zoomPos = std::min(1.0f, zoomPos);
+
+        frequencyZoom(zoomPos);
+    }
+ }
+
+void GLSpectrumView::zoom(const QPointF& p, int y)
+{
+    float pwx = (p.x() - m_leftMargin) / (width() - m_leftMargin - m_rightMargin); // x position in window
+
+    if ((pwx >= 0.0f) && (pwx <= 1.0f))
+    {
+        // When we zoom, we want the frequency under the cursor to remain the same
+
+        // Determine frequency at cursor position
+        float zoomFreq = m_frequencyScale.getRangeMin() + pwx*m_frequencyScale.getRange();
+
+        // Calculate current centre frequency
+        float currentCF = (m_frequencyZoomFactor == 1) ? m_centerFrequency : ((m_frequencyZoomPos - 0.5) * m_sampleRate + m_centerFrequency);
+
+        // Calculate difference from frequency under cursor to centre frequency
+        float freqDiff = (currentCF - zoomFreq);
+
+        // Calculate what that difference would be if there was no zoom
+        float freqDiffZoom1 = freqDiff * m_frequencyZoomFactor;
+
+        if (y > 0) // zoom in
         {
             if (m_frequencyZoomFactor < m_maxFrequencyZoom) {
                 m_frequencyZoomFactor += 0.5f;
@@ -4247,11 +4387,11 @@ void GLSpectrumView::zoom(QWheelEvent *event)
         //qDebug("GLSpectrumView::zoom: pwyh: %f pwyw: %f", pwyh, pwyw);
 
         if ((pwyw >= 0.0f) && (pwyw <= 1.0f)) {
-            timeZoom(event->angleDelta().y() > 0);
+            timeZoom(y > 0);
         }
 
         if ((pwyh >= 0.0f) && (pwyh <= 1.0f) && !m_linear) {
-            powerZoom(pwyh, event->angleDelta().y() > 0);
+            powerZoom(pwyh, y > 0);
         }
     }
 }
@@ -4427,7 +4567,7 @@ void GLSpectrumView::channelMarkerMove(QWheelEvent *event, int mul)
         }
     }
 
-    zoom(event);
+    zoom(event->position(), event->angleDelta().y());
 }
 
 // Return if specified point is within the bounds of the waterfall / 3D spectrogram screen area

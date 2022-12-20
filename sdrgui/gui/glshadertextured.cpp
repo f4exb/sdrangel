@@ -24,6 +24,10 @@
 #include <QVector4D>
 #include <QDebug>
 
+#ifdef ANDROID
+#include <GLES3/gl3.h>
+#endif
+
 #include "gui/glshadertextured.h"
 
 GLShaderTextured::GLShaderTextured() :
@@ -296,7 +300,11 @@ bool GLShaderTextured::useImmutableStorage()
         GLuint textureId;
         glGenTextures(1, &textureId);
         glBindTexture(GL_TEXTURE_2D, textureId);
+#ifdef ANDROID
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA, 1, 1);
+#else
         glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 1, 1);
+#endif
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, &data);
         GLenum err = glGetError();
         glDeleteTextures(1, &textureId);

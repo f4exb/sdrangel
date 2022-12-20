@@ -18,6 +18,9 @@
 #include <QMouseEvent>
 #include <QApplication>
 #include <QScrollBar>
+#include <QGestureEvent>
+#include <QPinchGesture>
+
 #include <qmath.h>
 
 #include "graphicsviewzoom.h"
@@ -30,6 +33,7 @@ GraphicsViewZoom::GraphicsViewZoom(QGraphicsView* view) :
 {
     m_view->viewport()->installEventFilter(this);
     m_view->setMouseTracking(true);
+    m_view->viewport()->grabGesture(Qt::PinchGesture);
 }
 
 void GraphicsViewZoom::gentleZoom(double factor)
@@ -77,6 +81,19 @@ bool GraphicsViewZoom::eventFilter(QObject *object, QEvent *event)
                 gentleZoom(factor);
                 return true;
             }
+        }
+    }
+    else if (event->type() == QEvent::Gesture)
+    {
+        QGestureEvent *gestureEvent = static_cast<QGestureEvent *>(event);
+        if (QPinchGesture *pinchGesture = static_cast<QPinchGesture *>(gestureEvent->gesture(Qt::PinchGesture)))
+        {
+            if (pinchGesture->changeFlags() & QPinchGesture::ScaleFactorChanged)
+            {
+                m_view->scale(pinchGesture->scaleFactor(), pinchGesture->scaleFactor());
+                emit zoomed();
+            }
+            return true;
         }
     }
 

@@ -37,6 +37,8 @@
 #include "gui/spectrummeasurementsdialog.h"
 #include "gui/spectrummeasurements.h"
 #include "gui/flowlayout.h"
+#include "gui/dialogpositioner.h"
+#include "gui/dialpopup.h"
 #include "util/colormap.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
@@ -93,6 +95,8 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 
     CRightClickEnabler *calibrationPointsRightClickEnabler = new CRightClickEnabler(ui->calibration);
     connect(calibrationPointsRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openCalibrationPointsDialog(const QPoint &)));
+
+    DialPopup::addPopupsToChildDials(this);
 
     displaySettings();
     setAveragingCombo();
@@ -168,6 +172,7 @@ void GLSpectrumGUI::updateSettings()
 void GLSpectrumGUI::displaySettings()
 {
     blockApplySettings(true);
+    ui->showAllControls->setChecked(m_settings.m_showAllControls);
     ui->refLevel->setValue(m_settings.m_refLevel + m_calibrationShiftdB);
     ui->levelRange->setValue(m_settings.m_powerRange);
     ui->decay->setSliderPosition(m_settings.m_decay);
@@ -176,7 +181,7 @@ void GLSpectrumGUI::displaySettings()
     ui->waterfall->setChecked(m_settings.m_displayWaterfall);
     ui->spectrogram->setChecked(m_settings.m_display3DSpectrogram);
     ui->spectrogramStyle->setCurrentIndex((int) m_settings.m_3DSpectrogramStyle);
-    ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram);
+    ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram && m_settings.m_showAllControls);
     ui->colorMap->setCurrentText(m_settings.m_colorMap);
     ui->currentLine->blockSignals(true);
     ui->currentFill->blockSignals(true);
@@ -236,6 +241,7 @@ void GLSpectrumGUI::displaySettings()
     setAveragingToolitp();
     ui->calibration->setChecked(m_settings.m_useCalibration);
     displayGotoMarkers();
+    displayControls();
 
     ui->fftWindow->blockSignals(false);
     ui->averaging->blockSignals(false);
@@ -244,6 +250,37 @@ void GLSpectrumGUI::displaySettings()
     blockApplySettings(false);
 
     updateMeasurements();
+}
+
+void GLSpectrumGUI::displayControls()
+{
+    ui->grid->setVisible(m_settings.m_showAllControls);
+    ui->gridIntensity->setVisible(m_settings.m_showAllControls);
+    ui->truncateScale->setVisible(m_settings.m_showAllControls);
+    ui->clearSpectrum->setVisible(m_settings.m_showAllControls);
+    ui->histogram->setVisible(m_settings.m_showAllControls);
+    ui->maxHold->setVisible(m_settings.m_showAllControls);
+    ui->decay->setVisible(m_settings.m_showAllControls);
+    ui->decayDivisor->setVisible(m_settings.m_showAllControls);
+    ui->stroke->setVisible(m_settings.m_showAllControls);
+    ui->currentLine->setVisible(m_settings.m_showAllControls);
+    ui->currentFill->setVisible(m_settings.m_showAllControls);
+    ui->currentGradient->setVisible(m_settings.m_showAllControls);
+    ui->traceIntensity->setVisible(m_settings.m_showAllControls);
+    ui->colorMap->setVisible(m_settings.m_showAllControls);
+    ui->invertWaterfall->setVisible(m_settings.m_showAllControls);
+    ui->waterfall->setVisible(m_settings.m_showAllControls);
+    ui->spectrogram->setVisible(m_settings.m_showAllControls);
+    ui->spectrogramStyle->setVisible(m_settings.m_showAllControls);
+    ui->fftWindow->setVisible(m_settings.m_showAllControls);
+    ui->fftSize->setVisible(m_settings.m_showAllControls);
+    ui->fftOverlap->setVisible(m_settings.m_showAllControls);
+    ui->fps->setVisible(m_settings.m_showAllControls);
+    ui->linscale->setVisible(m_settings.m_showAllControls);
+    ui->save->setVisible(m_settings.m_showAllControls);
+    ui->wsSpectrum->setVisible(m_settings.m_showAllControls);
+    ui->calibration->setVisible(m_settings.m_showAllControls);
+    ui->markers->setVisible(m_settings.m_showAllControls);
 }
 
 void GLSpectrumGUI::displayGotoMarkers()
@@ -484,6 +521,7 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
     QRect mouseScreenGeometry = screen->geometry();
     QPoint localCursorPos = globalCursorPos - mouseScreenGeometry.topLeft();
     m_markersDialog->move(localCursorPos);
+    new DialogPositioner(m_markersDialog, false);
 
     m_markersDialog->show();
 }
@@ -616,7 +654,7 @@ void GLSpectrumGUI::on_spectrogram_toggled(bool checked)
         ui->waterfall->setChecked(false);
         blockApplySettings(false);
     }
-    ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram);
+    ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram && m_settings.m_showAllControls);
     applySettings();
 }
 
@@ -674,6 +712,13 @@ void GLSpectrumGUI::on_currentGradient_toggled(bool checked)
 void GLSpectrumGUI::on_invertWaterfall_toggled(bool checked)
 {
     m_settings.m_invertedWaterfall = checked;
+    applySettings();
+}
+
+void GLSpectrumGUI::on_showAllControls_toggled(bool checked)
+{
+    m_settings.m_showAllControls = checked;
+    displayControls();
     applySettings();
 }
 
@@ -987,6 +1032,7 @@ void GLSpectrumGUI::openWebsocketSpectrumSettingsDialog(const QPoint& p)
     dialog.setPort(m_settings.m_wsSpectrumPort);
 
     dialog.move(p);
+    new DialogPositioner(&dialog, false);
     dialog.exec();
 
     if (dialog.hasChanged())
@@ -1010,6 +1056,7 @@ void GLSpectrumGUI::openCalibrationPointsDialog(const QPoint& p)
     dialog.setCenterFrequency(m_glSpectrum->getCenterFrequency());
     connect(&dialog, SIGNAL(updateCalibrationPoints()), this, SLOT(updateCalibrationPoints()));
     dialog.move(p);
+    new DialogPositioner(&dialog, false);
     dialog.exec();
 
     m_settings.m_histogramMarkers = m_glSpectrum->getHistogramMarkers();

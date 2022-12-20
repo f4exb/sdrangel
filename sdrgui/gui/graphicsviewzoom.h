@@ -23,7 +23,7 @@
 
 #include "export.h"
 
-// GraphicsView that allows scroll wheel to be used for zoom
+// GraphicsView that allows scroll wheel and pinch gesture to be used for zoom
 // https://stackoverflow.com/questions/19113532/qgraphicsview-zooming-in-and-out-under-mouse-position-using-mouse-wheel
 class SDRGUI_API GraphicsViewZoom : public QObject {
     Q_OBJECT
@@ -39,7 +39,7 @@ private:
     Qt::KeyboardModifiers m_modifiers;
     double m_zoomFactorBase;
     QPointF m_targetScenePos, m_targetViewportPos;
-    bool eventFilter(QObject* object, QEvent* event);
+    bool eventFilter(QObject* object, QEvent* event) override;
 
 signals:
     void zoomed();
