@@ -88,6 +88,7 @@ private:
     bool m_drag;
     QPoint m_DragPosition;
     FramelessWindowResizer m_resizer;
+    QMdiArea *m_mdi;                    // Saved pointer to MDI when in full screen mode
     static const int m_MinimumWidth = 380;
     static const int m_MinimumHeight = 200 + 20 + 10 + 6*22 + 5;
 

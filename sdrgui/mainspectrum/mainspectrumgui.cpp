@@ -23,6 +23,7 @@
 #include <QSizeGrip>
 #include <QObjectCleanupHandler>
 #include <QDesktopServices>
+#include <QMdiArea>
 
 #include "mainwindow.h"
 #include "gui/glspectrum.h"
@@ -38,7 +39,8 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     m_deviceType(DeviceRx),
     m_deviceSetIndex(0),
     m_drag(false),
-    m_resizer(this)
+    m_resizer(this),
+    m_mdi(nullptr)
 {
     qDebug("MainSpectrumGUI::MainSpectrumGUI: %p", parent);
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
@@ -88,7 +90,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     m_maximizeButton->setFixedSize(20, 20);
     QIcon maximizeIcon(":/maximize.png");
     m_maximizeButton->setIcon(maximizeIcon);
-    m_maximizeButton->setToolTip("Adjust window to maximum size");
+    m_maximizeButton->setToolTip("Adjust window to maximum size in workspace");
 
     m_hideButton = new QPushButton();
     m_hideButton->setFixedSize(20, 20);
@@ -260,15 +262,42 @@ void MainSpectrumGUI::openMoveToWorkspaceDialog()
 
 void MainSpectrumGUI::maximizeWindow()
 {
-    showMaximized();
+    // If maximize is pressed when maximized, go full screen
+    if (isMaximized())
+    {
+        m_mdi = mdiArea();
+        if (m_mdi) {
+            m_mdi->removeSubWindow(this);
+        }
+        showNormal(); // If we don't go back to normal first, window doesn't get bigger
+        showFullScreen();
+        m_shrinkButton->setToolTip("Adjust window to maximum size in workspace");
+    }
+    else
+    {
+        showMaximized();
+        m_shrinkButton->setToolTip("Restore window to normal");
+        m_maximizeButton->setToolTip("Make window full screen");
+    }
 }
 
 void MainSpectrumGUI::shrinkWindow()
 {
     qDebug("MainSpectrumGUI::shrinkWindow");
-    if (isMaximized())
+    if (m_mdi)
     {
         showNormal();
+        m_mdi->addSubWindow(this);
+        show();
+        showMaximized();
+        m_shrinkButton->setToolTip("Restore window to normal");
+        m_mdi = nullptr;
+    }
+    else if (isMaximized())
+    {
+        showNormal();
+        m_shrinkButton->setToolTip("Adjust window to minimum size");
+        m_maximizeButton->setToolTip("Adjust window to maximum size in workspace");
     }
     else
     {
@@ -279,6 +308,7 @@ void MainSpectrumGUI::shrinkWindow()
 
 void MainSpectrumGUI::setTitle(const QString& title)
 {
+    setWindowTitle(title + " Spectrum");
     m_titleLabel->setText(title);
 }
 
