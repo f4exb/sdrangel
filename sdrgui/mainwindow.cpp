@@ -18,7 +18,9 @@
 
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QProgressDialog>
 #include <QLabel>
+#include <QToolButton>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
@@ -31,10 +33,11 @@
 #include <QStandardPaths>
 #include <QDesktopServices>
 #include <QProcess>
-
+#include <QDirIterator>
 #include <QAction>
 #include <QMenuBar>
 #include <QStatusBar>
+#include <QScreen>
 
 #include "device/devicegui.h"
 #include "device/deviceapi.h"
@@ -68,6 +71,8 @@
 #include "gui/devicesetpresetsdialog.h"
 #include "gui/commandsdialog.h"
 #include "gui/configurationsdialog.h"
+#include "gui/dialogpositioner.h"
+#include "gui/welcomedialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspcommands.h"
@@ -85,6 +90,9 @@
 #include "webapi/webapiserver.h"
 #include "webapi/webapiadapter.h"
 #include "commands/command.h"
+#ifdef ANDROID
+#include "util/android.h"
+#endif
 
 #include "mainwindow.h"
 
@@ -107,9 +115,13 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_mainCore(MainCore::instance()),
 	m_dspEngine(DSPEngine::instance()),
 	m_lastEngineState(DeviceAPI::StNotStarted),
+    m_dateTimeWidget(nullptr),
+    m_showSystemWidget(nullptr),
     m_commandKeyReceiver(nullptr),
     m_fftWisdomProcess(nullptr)
 {
+    bool showWelcome = ANDROID;
+
 	qDebug() << "MainWindow::MainWindow: start";
     setWindowTitle("SDRangel");
 
@@ -134,10 +146,21 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     splash->showStatusMessage("starting...", Qt::white);
 
     setWindowIcon(QIcon(":/sdrangel_icon.png"));
-    createMenuBar();
-	createStatusBar();
+#ifndef ANDROID
+    // To save screen space on Android, don't have menu bar. Instead menus are accessed via toolbar button
+    createMenuBar(nullptr);
+    createStatusBar();
+#endif
 
+#ifdef ANDROID
+    if (screen()->isLandscape(screen()->primaryOrientation())) {
+        setTabPosition(Qt::LeftDockWidgetArea, QTabWidget::West);
+    } else {
+        setTabPosition(Qt::LeftDockWidgetArea, QTabWidget::South);
+    }
+#else
     setTabPosition(Qt::LeftDockWidgetArea, QTabWidget::West);
+#endif
     setTabPosition(Qt::RightDockWidgetArea, QTabWidget::East);
 	setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
 	setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
@@ -145,6 +168,12 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
+
+    connect(screen(), &QScreen::orientationChanged, this, &MainWindow::orientationChanged);
+    screen()->setOrientationUpdateMask(Qt::PortraitOrientation
+                                      | Qt::LandscapeOrientation
+                                      | Qt::InvertedPortraitOrientation
+                                      | Qt::InvertedLandscapeOrientation);
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(1000);
@@ -209,6 +238,16 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
         {
             qDebug() << "MainWindow::MainWindow: no or empty current configuration, creating empty workspace...";
             addWorkspace();
+
+            // If no configurations, load some basic examples
+            if (m_mainCore->m_settings.getConfigurations().size() == 0) {
+                loadDefaultConfigurations();
+            }
+        }
+        else
+        {
+            // Only show welcome dialog first time program is run
+            showWelcome = false;
         }
     }
 
@@ -239,6 +278,16 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     QSettings s;
     restoreGeometry(qUncompress(QByteArray::fromBase64(s.value("mainWindowGeometry").toByteArray())));
     restoreState(qUncompress(QByteArray::fromBase64(s.value("mainWindowState").toByteArray())));
+
+    if (showWelcome)
+    {
+        // Show welcome dialog
+        WelcomeDialog welcomeDialog(this);
+        new DialogPositioner(&welcomeDialog, true);
+        welcomeDialog.exec();
+        // Show configurations
+        openConfigurationDialog(true);
+    }
 
     qDebug() << "MainWindow::MainWindow: end";
 }
@@ -340,6 +389,11 @@ void MainWindow::sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrum
     deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
     spectrumWorkspace->addToMdiArea(m_deviceUIs.back()->m_mainSpectrumGUI);
     emit m_mainCore->deviceSetAdded(deviceSetIndex, deviceAPI);
+
+#ifdef ANDROID
+    // Seemingly needed on some versions of Android, otherwise the new windows aren't always displayed??
+    deviceWorkspace->repaint();
+#endif
 }
 
 void MainWindow::sampleSourceCreate(
@@ -1165,7 +1219,9 @@ void MainWindow::loadSettings()
     m_mainCore->m_settings.load();
     m_mainCore->m_settings.sortPresets();
     m_mainCore->m_settings.sortCommands();
-    m_mainCore->setLoggingOptions();
+    if (m_mainCore->m_logger) {
+        m_mainCore->setLoggingOptions();
+    }
 }
 
 void MainWindow::loadDeviceSetPresetSettings(const Preset* preset, int deviceSetIndex)
@@ -1230,6 +1286,59 @@ void MainWindow::saveFeatureSetPresetSettings(FeatureSetPreset* preset, int feat
     featureUI->saveFeatureSetSettings(preset);
 }
 
+void MainWindow::loadDefaultConfigurations()
+{
+    QDirIterator configurationsIt(":configurations", QDirIterator::Subdirectories);
+    while (configurationsIt.hasNext())
+    {
+        QString group = configurationsIt.next();
+        QDirIterator groupIt(group, {"*.cfgx"}, QDir::Files);
+        while (groupIt.hasNext())
+        {
+            QFile file(groupIt.next());
+			if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+			{
+				QByteArray base64Str;
+				QTextStream instream(&file);
+				instream >> base64Str;
+				file.close();
+
+				Configuration* configuration = MainCore::instance()->m_settings.newConfiguration("", "");
+				configuration->deserialize(QByteArray::fromBase64(base64Str));
+			}
+            else
+            {
+                qDebug() << "MainWindow::loadDefaultConfigurations: Failed to open configuration " << file.fileName();
+            }
+        }
+    }
+
+    QDirIterator presetIt(":presets", QDirIterator::Subdirectories);
+    while (presetIt.hasNext())
+    {
+        QString group = presetIt.next();
+        QDirIterator groupIt(group, {"*.prex"}, QDir::Files);
+        while (groupIt.hasNext())
+        {
+            QFile file(groupIt.next());
+			if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+			{
+				QByteArray base64Str;
+				QTextStream instream(&file);
+				instream >> base64Str;
+				file.close();
+
+				Preset* preset = MainCore::instance()->m_settings.newPreset("", "");
+				preset->deserialize(QByteArray::fromBase64(base64Str));
+			}
+            else
+            {
+                qDebug() << "MainWindow::loadDefaultConfigurations: Failed to open preset " << file.fileName();
+            }
+        }
+    }
+}
+
 void MainWindow::loadConfiguration(const Configuration *configuration, bool fromDialog)
 {
 	qDebug("MainWindow::loadConfiguration: configuration [%s | %s] %d workspace(s) - %d device set(s) - %d feature(s)",
@@ -1240,23 +1349,24 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
         configuration->getFeatureSetPreset().getFeatureCount()
     );
 
-    QMessageBox *waitBox = nullptr;
+    QProgressDialog *waitBox = nullptr;
 
     if (fromDialog)
     {
-        waitBox = new QMessageBox(this);
-        waitBox->setStandardButtons(QMessageBox::NoButton);
-        waitBox->setWindowModality(Qt::NonModal);
-        waitBox->setIcon(QMessageBox::Information);
-        waitBox->setText("Loading configuration                  ");
-        waitBox->setInformativeText("Deleting existing...");
-        waitBox->setWindowTitle("Please wait");
-        waitBox->show();
-        waitBox->raise();
+        waitBox = new QProgressDialog("Loading configuration...", "", 0, 100, this);
+        waitBox->setWindowModality(Qt::WindowModal);
+        waitBox->setAttribute(Qt::WA_DeleteOnClose, true);
+        waitBox->setMinimumDuration(0);
+        waitBox->setCancelButton(nullptr);
+        waitBox->setValue(1);
     }
 
     // Wipe out everything first
-
+    if (waitBox)
+    {
+        waitBox->setLabelText("Deleting existing...");
+        waitBox->setValue(5);
+    }
     // Device sets
     while (m_deviceUIs.size() > 0) {
         removeLastDeviceSet();
@@ -1276,6 +1386,7 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
     {
         addWorkspace();
         m_workspaces[i]->setAutoStackOption(configuration->getWorkspaceAutoStackOptions()[i]);
+        m_workspaces[i]->setTabSubWindowsOption(configuration->getWorkspaceTabSubWindowsOptions()[i]);
     }
 
     if (m_workspaces.size() <= 0) { // cannot go further if there are no workspaces
@@ -1283,8 +1394,10 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
     }
 
     // Device sets
-    if (waitBox) {
-        waitBox->setInformativeText("Loading device sets...");
+    if (waitBox)
+    {
+        waitBox->setLabelText("Loading device sets...");
+        waitBox->setValue(25);
     }
 
     const QList<Preset>& deviceSetPresets = configuration->getDeviceSetPresets();
@@ -1354,11 +1467,17 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
         m_deviceUIs.back()->m_deviceGUI->restoreGeometry(deviceSetPreset.getDeviceGeometry());
         m_deviceUIs.back()->m_mainSpectrumGUI->restoreGeometry(deviceSetPreset.getSpectrumGeometry());
         m_deviceUIs.back()->loadDeviceSetSettings(&deviceSetPreset, m_pluginManager->getPluginAPI(), &m_workspaces, nullptr);
+
+        if (waitBox) {
+            waitBox->setValue(waitBox->value() + 50/deviceSetPresets.size());
+        }
     }
 
     // Features
-    if (waitBox) {
-        waitBox->setInformativeText("Loading device sets...");
+    if (waitBox)
+    {
+        waitBox->setLabelText("Loading feature sets...");
+        waitBox->setValue(75);
     }
 
     m_featureUIs[0]->loadFeatureSetSettings(
@@ -1381,8 +1500,10 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
     }
 
     // Lastly restore workspaces geometry
-    if (waitBox) {
-        waitBox->setInformativeText("Finalizing...");
+    if (waitBox)
+    {
+        waitBox->setValue(90);
+        waitBox->setLabelText("Finalizing...");
     }
 
     for (int i = 0; i < configuration->getNumberOfWorkspaceGeometries(); i++)
@@ -1390,12 +1511,16 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
         m_workspaces[i]->restoreGeometry(configuration->getWorkspaceGeometries()[i]);
         m_workspaces[i]->restoreGeometry(configuration->getWorkspaceGeometries()[i]);
         m_workspaces[i]->adjustSubWindowsAfterRestore();
+#ifdef ANDROID
+        // On Android, workspaces seem to be restored to 0,20, rather than 0,0
+        m_workspaces[i]->move(m_workspaces[i]->pos().x(), 0);
+        // Need to call updateGeometry, otherwise sometimes the layout is corrupted
+        m_workspaces[i]->updateGeometry();
+#endif
     }
 
-    if (waitBox)
-    {
-        waitBox->close();
-        delete waitBox;
+    if (waitBox) {
+        waitBox->setValue(100);
     }
 }
 
@@ -1430,6 +1555,7 @@ void MainWindow::saveConfiguration(Configuration *configuration)
     {
         configuration->getWorkspaceGeometries().push_back(workspace->saveGeometry());
         configuration->getWorkspaceAutoStackOptions().push_back(workspace->getAutoStackOption());
+        configuration->getWorkspaceTabSubWindowsOptions().push_back(workspace->getTabSubWindowsOption());
     }
 }
 
@@ -1461,24 +1587,46 @@ QString MainWindow::openGLVersion()
     }
 }
 
-void MainWindow::createMenuBar()
+void MainWindow::createMenuBar(QToolButton *button)
 {
-    QMenuBar *menuBar = this->menuBar();
+    QMenu *fileMenu, *viewMenu, *workspacesMenu, *preferencesMenu, *helpMenu;
 
-    QMenu *fileMenu = menuBar->addMenu("&File");
+    if (button == nullptr)
+    {
+        QMenuBar *menuBar = this->menuBar();
+        fileMenu = menuBar->addMenu("&File");
+        viewMenu = menuBar->addMenu("&View");
+        workspacesMenu = menuBar->addMenu("&Workspaces");
+        preferencesMenu = menuBar->addMenu("&Preferences");
+        helpMenu = menuBar->addMenu("&Help");
+    }
+    else
+    {
+        QMenu *menu = new QMenu();
+        fileMenu = new QMenu("&File");
+        menu->addMenu(fileMenu);
+        viewMenu = new QMenu("&View");
+        menu->addMenu(viewMenu);
+        workspacesMenu = new QMenu("&Workspaces");
+        menu->addMenu(workspacesMenu);
+        preferencesMenu = new QMenu("&Preferences");
+        menu->addMenu(preferencesMenu);
+        helpMenu = new QMenu("&Help");
+        menu->addMenu(helpMenu);
+        button->setMenu(menu);
+    }
+
     QAction *exitAction = fileMenu->addAction("E&xit");
     exitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     exitAction->setToolTip("Exit");
     QObject::connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
 
-    QMenu *viewMenu = menuBar->addMenu("&View");
     QAction *fullscreenAction = viewMenu->addAction("&Fullscreen");
     fullscreenAction->setShortcut(QKeySequence(Qt::Key_F11));
     fullscreenAction->setToolTip("Toggle fullscreen view");
     fullscreenAction->setCheckable(true);
     QObject::connect(fullscreenAction, &QAction::triggered, this, &MainWindow::on_action_View_Fullscreen_toggled);
 
-    QMenu *workspacesMenu = menuBar->addMenu("&Workspaces");
     QAction *newWorkspaceAction = workspacesMenu->addAction("&New");
     newWorkspaceAction->setToolTip("Add a new workspace");
     QObject::connect(newWorkspaceAction, &QAction::triggered, this, &MainWindow::addWorkspace);
@@ -1489,7 +1637,6 @@ void MainWindow::createMenuBar()
     removeEmptyWorkspacesAction->setToolTip("Remove empty workspaces");
     QObject::connect(removeEmptyWorkspacesAction, &QAction::triggered, this, &MainWindow::removeEmptyWorkspaces);
 
-    QMenu *preferencesMenu = menuBar->addMenu("&Preferences");
     QAction *configurationsAction = preferencesMenu->addAction("&Configurations...");
     configurationsAction->setToolTip("Manage configurations");
     QObject::connect(configurationsAction, &QAction::triggered, this, &MainWindow::on_action_Configurations_triggered);
@@ -1519,7 +1666,6 @@ void MainWindow::createMenuBar()
     saveAllAction->setToolTip("Save all current settings");
     QObject::connect(saveAllAction, &QAction::triggered, this, &MainWindow::on_action_saveAll_triggered);
 
-    QMenu *helpMenu = menuBar->addMenu("&Help");
     QAction *quickStartAction = helpMenu->addAction("&Quick start...");
     quickStartAction->setToolTip("Instructions for quick start");
     QObject::connect(quickStartAction, &QAction::triggered, this, &MainWindow::on_action_Quick_Start_triggered);
@@ -1882,7 +2028,11 @@ void MainWindow::handleWorkspaceVisibility(Workspace *workspace, bool visibility
 void MainWindow::addWorkspace()
 {
     int workspaceIndex = m_workspaces.size();
-    m_workspaces.push_back(new Workspace(workspaceIndex));
+    Workspace *workspace = new Workspace(workspaceIndex);
+    m_workspaces.push_back(workspace);
+    if (workspace->getMenuButton()) {
+        createMenuBar(workspace->getMenuButton());
+    }
     QStringList featureNames;
     m_pluginManager->listFeatures(featureNames);
     m_workspaces.back()->addAvailableFeatures(featureNames);
@@ -1925,6 +2075,13 @@ void MainWindow::addWorkspace()
 
     QObject::connect(
         m_workspaces.back(),
+        &Workspace::configurationPresetsDialogRequested,
+        this,
+        &MainWindow::on_action_Configurations_triggered
+    );
+
+    QObject::connect(
+        m_workspaces.back(),
         &Workspace::startAllDevices,
         this,
         &MainWindow::startAllDevices
@@ -1951,7 +2108,7 @@ void MainWindow::addWorkspace()
         //     tabBars.back()->setStyleSheet("QTabBar::tab:selected { background: rgb(128,70,0); }"); // change text color so it is visible
         // }
     }
-}
+ }
 
 void MainWindow::viewAllWorkspaces()
 {
@@ -2006,6 +2163,13 @@ void MainWindow::removeEmptyWorkspaces()
             }
         }
     }
+
+#ifdef ANDROID
+    // Need at least one workspace on Android, as no menus without
+    if (m_workspaces.size() == 0) {
+        addWorkspace();
+    }
+#endif
 }
 
 void MainWindow::on_action_View_Fullscreen_toggled(bool checked)
@@ -2063,7 +2227,12 @@ void MainWindow::on_action_Loaded_Plugins_triggered()
 
 void MainWindow::on_action_Configurations_triggered()
 {
-    ConfigurationsDialog dialog(this);
+    openConfigurationDialog(false);
+}
+
+void MainWindow::openConfigurationDialog(bool openOnly)
+{
+    ConfigurationsDialog dialog(openOnly, this);
     dialog.setConfigurations(m_mainCore->m_settings.getConfigurations());
     dialog.populateTree();
     QObject::connect(
@@ -2078,24 +2247,28 @@ void MainWindow::on_action_Configurations_triggered()
         this,
         [=](const Configuration* configuration) { this->loadConfiguration(configuration, true); }
     );
+    new DialogPositioner(&dialog, true);
     dialog.exec();
 }
 
 void MainWindow::on_action_Audio_triggered()
 {
 	AudioDialogX audioDialog(m_dspEngine->getAudioDeviceManager(), this);
+    new DialogPositioner(&audioDialog, true);
 	audioDialog.exec();
 }
 
 void MainWindow::on_action_Graphics_triggered()
 {
     GraphicsDialog graphicsDialog(m_mainCore->m_settings, this);
+    new DialogPositioner(&graphicsDialog, true);
     graphicsDialog.exec();
 }
 
 void MainWindow::on_action_Logging_triggered()
 {
     LoggingDialog loggingDialog(m_mainCore->m_settings, this);
+    new DialogPositioner(&loggingDialog, true);
     loggingDialog.exec();
     m_mainCore->setLoggingOptions();
 }
@@ -2103,6 +2276,7 @@ void MainWindow::on_action_Logging_triggered()
 void MainWindow::on_action_My_Position_triggered()
 {
 	MyPositionDialog myPositionDialog(m_mainCore->m_settings, this);
+    new DialogPositioner(&myPositionDialog, true);
 	myPositionDialog.exec();
 }
 
@@ -2110,6 +2284,7 @@ void MainWindow::on_action_DeviceUserArguments_triggered()
 {
     qDebug("MainWindow::on_action_DeviceUserArguments_triggered");
     DeviceUserArgsDialog deviceUserArgsDialog(DeviceEnumerator::instance(), m_mainCore->m_settings.getDeviceUserArgs(), this);
+    new DialogPositioner(&deviceUserArgsDialog, true);
     deviceUserArgsDialog.exec();
 }
 
@@ -2121,6 +2296,7 @@ void MainWindow::on_action_commands_triggered()
     commandsDialog.setApiPort(m_apiServer->getPort());
     commandsDialog.setCommandKeyReceiver(m_commandKeyReceiver);
     commandsDialog.populateTree();
+    new DialogPositioner(&commandsDialog, true);
     commandsDialog.exec();
 }
 
@@ -2140,6 +2316,7 @@ void MainWindow::on_action_FFT_triggered()
         this,
         SLOT(fftWisdomProcessFinished(int, QProcess::ExitStatus)));
     FFTWisdomDialog fftWisdomDialog(m_fftWisdomProcess, this);
+    new DialogPositioner(&fftWisdomDialog, true);
 
     if (fftWisdomDialog.exec() == QDialog::Rejected)
     {
@@ -2790,6 +2967,7 @@ void MainWindow::openFeaturePresetsDialog(QPoint p, Workspace *workspace)
     dialog.setWorkspaces(&m_workspaces);
     dialog.populateTree();
     dialog.move(p);
+    new DialogPositioner(&dialog, true);
     dialog.exec();
 
     if (dialog.wasPresetLoaded())
@@ -2820,6 +2998,7 @@ void MainWindow::openDeviceSetPresetsDialog(QPoint p, DeviceGUI *deviceGUI)
     dialog.setWorkspaces(&m_workspaces);
     dialog.populateTree((int) deviceGUI->getDeviceType());
     dialog.move(p);
+    new DialogPositioner(&dialog, true);
     dialog.exec();
 }
 
@@ -2840,7 +3019,9 @@ void MainWindow::on_action_About_triggered()
 
 void MainWindow::updateStatus()
 {
-    m_dateTimeWidget->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss t"));
+    if (m_dateTimeWidget) {
+        m_dateTimeWidget->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss t"));
+    }
 }
 
 void MainWindow::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release)
@@ -2861,4 +3042,31 @@ void MainWindow::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifie
             command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
         }
     }
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* event)
+{
+#ifdef ANDROID
+    if (event->key() == Qt::Key_Back)
+    {
+        // On Android, we don't want to exit when back key is pressed, just run in the background
+        Android::moveTaskToBack();
+    }
+    else
+#endif
+    {
+        QMainWindow::keyPressEvent(event);
+    }
+}
+
+void MainWindow::orientationChanged(Qt::ScreenOrientation orientation)
+{
+#ifdef ANDROID
+    // Adjust workspace tab position, to leave max space for MDI windows
+    if ((orientation == Qt::LandscapeOrientation) || (orientation == Qt::InvertedLandscapeOrientation)) {
+        setTabPosition(Qt::LeftDockWidgetArea, QTabWidget::West);
+    } else {
+        setTabPosition(Qt::LeftDockWidgetArea, QTabWidget::South);
+    }
+#endif
 }

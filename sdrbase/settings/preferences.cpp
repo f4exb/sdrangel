@@ -17,6 +17,7 @@ void Preferences::resetToDefaults()
 	m_latitude = 49.012423; // Set an interesting location so map doesn't open up in the middle of the ocean
 	m_longitude = 8.418125;
     m_altitude = 0.0f;
+    m_autoUpdatePosition = true;
 	m_useLogFile = false;
 	m_logFileName = "sdrangel.log";
 	m_consoleMinLogLevel = QtDebugMsg;
@@ -41,6 +42,7 @@ QByteArray Preferences::serialize() const
     s.writeFloat((int) Altitude, m_altitude);
 	s.writeS32((int) SourceItemIndex, m_sourceItemIndex);
     s.writeS32((int) Multisampling, m_multisampling);
+    s.writeBool((int) AutoUpdatePosition, m_autoUpdatePosition);
 	return s.final();
 }
 
@@ -95,9 +97,11 @@ bool Preferences::deserialize(const QByteArray& data)
         }
 
         d.readS32((int) Multisampling, &m_multisampling, 0);
+        d.readBool((int) AutoUpdatePosition, &m_autoUpdatePosition, true);
 
 		return true;
-	} else
+	}
+    else
 	{
 		resetToDefaults();
 		return false;

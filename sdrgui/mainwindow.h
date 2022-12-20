@@ -34,6 +34,7 @@
 class QLabel;
 class QTreeWidgetItem;
 class QDir;
+class QToolButton;
 
 class DSPEngine;
 class DSPDeviceSourceEngine;
@@ -136,7 +137,7 @@ private:
 	void saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex);
 
 	QString openGLVersion();
-    void createMenuBar();
+    void createMenuBar(QToolButton *button);
 	void createStatusBar();
 	void closeEvent(QCloseEvent*);
 	void applySettings();
@@ -171,6 +172,9 @@ private:
 
     bool handleMessage(const Message& cmd);
 
+protected:
+    virtual void keyPressEvent(QKeyEvent* event) override;
+
 private slots:
 	void handleMessages();
     void handleWorkspaceVisibility(Workspace *workspace, bool visibility);
@@ -194,6 +198,8 @@ private slots:
     void addWorkspace();
     void viewAllWorkspaces();
     void removeEmptyWorkspaces();
+    void openConfigurationDialog(bool openOnly);
+    void loadDefaultConfigurations();
 	void loadConfiguration(const Configuration *configuration, bool fromDialog = false);
     void saveConfiguration(Configuration *configuration);
 	void sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex);
@@ -215,6 +221,7 @@ private slots:
     void openDeviceSetPresetsDialog(QPoint p, DeviceGUI *deviceGUI);
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 	void fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void orientationChanged(Qt::ScreenOrientation orientation);
 };
 
 #endif // INCLUDE_MAINWINDOW_H

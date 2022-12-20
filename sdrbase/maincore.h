@@ -25,6 +25,7 @@
 #include <QElapsedTimer>
 #include <QDateTime>
 #include <QObject>
+#include <QGeoPositionInfo>
 
 #include "export.h"
 #include "settings/mainsettings.h"
@@ -38,6 +39,7 @@ class FeatureSet;
 class Feature;
 class PluginManager;
 class MessageQueue;
+class QGeoPositionInfoSource;
 
 namespace qtwebapp {
     class LoggerWithFile;
@@ -846,7 +848,7 @@ public:
     qint64 getStartMsecsSinceEpoch() const { return m_startMsecsSinceEpoch; } //!< Epoch timestamp in millisecodns close to elapsed timer start
     const MainSettings& getSettings() const { return m_settings; }
     MessageQueue *getMainMessageQueue() { return m_mainMessageQueue; }
-    const PluginManager *getPluginManager() const { return m_pluginManager; }
+    PluginManager *getPluginManager() const { return m_pluginManager; }
     std::vector<DeviceSet*>& getDeviceSets() { return m_deviceSets; }
     std::vector<FeatureSet*>& getFeatureeSets() { return m_featureSets; }
     void setLoggingOptions();
@@ -875,6 +877,8 @@ public:
     // pipes
     MessagePipes& getMessagePipes() { return m_messagePipes; }
     DataPipes& getDataPipes() { return m_dataPipes; }
+    // Position
+    const QGeoPositionInfo& getPosition() const;
 
     friend class MainServer;
     friend class MainWindow;
@@ -882,6 +886,9 @@ public:
     friend class CommandsDialog;
     friend class DeviceSetPresetsDialog;
     friend class ConfigurationsDialog;
+
+public slots:
+    void positionUpdated(const QGeoPositionInfo &info);
 
 signals:
     void deviceSetAdded(int index, DeviceAPI *device);
@@ -912,7 +919,10 @@ private:
     PluginManager* m_pluginManager;
     MessagePipes m_messagePipes;
     DataPipes m_dataPipes;
+    QGeoPositionInfoSource *m_positionSource;
+    QGeoPositionInfo m_position;
 
+    void initPosition();
     void debugMaps();
 };
 

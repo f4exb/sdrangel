@@ -22,7 +22,8 @@ public:
         StationName,
         Altitude,
         SourceItemIndex,
-        Multisampling
+        Multisampling,
+        AutoUpdatePosition
     };
 
     Preferences();
@@ -60,6 +61,9 @@ public:
 	float getAltitude() const { return m_altitude; }
 	void setAltitude(float altitude) { m_altitude = altitude; }
 
+	bool getAutoUpdatePosition() const { return m_autoUpdatePosition; }
+	void setAutoUpdatePosition(bool autoUpdatePosition) { m_autoUpdatePosition = autoUpdatePosition; }
+
 	QtMsgType getConsoleMinLogLevel() const { return m_consoleMinLogLevel; }
 	void setConsoleMinLogLevel(const QtMsgType& minLogLevel) { m_consoleMinLogLevel = minLogLevel; }
 
@@ -87,6 +91,7 @@ protected:
     float m_latitude;       //!< Position of the station
 	float m_longitude;
     float m_altitude;       //!< Altitude in metres
+    bool m_autoUpdatePosition; //!< Automatically update position from GPS
 
 	QtMsgType m_consoleMinLogLevel;
     QtMsgType m_fileMinLogLevel;

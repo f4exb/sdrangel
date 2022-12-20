@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>392</width>
-    <height>414</height>
+    <width>410</width>
+    <height>424</height>
    </rect>
   </property>
   <property name="font">
@@ -19,218 +19,207 @@
   <property name="windowTitle">
    <string>Configurations</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>380</y>
-     <width>341</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Close</set>
-   </property>
-  </widget>
-  <widget class="QWidget" name="widget" native="true">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>10</y>
-     <width>392</width>
-     <height>310</height>
-    </rect>
-   </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QTreeWidget" name="configurationsTree">
-      <property name="toolTip">
-       <string>List of configurations</string>
-      </property>
-      <property name="indentation">
-       <number>5</number>
-      </property>
-      <property name="allColumnsShowFocus">
-       <bool>true</bool>
-      </property>
-      <property name="columnCount">
-       <number>1</number>
-      </property>
-      <attribute name="headerMinimumSectionSize">
-       <number>5</number>
-      </attribute>
-      <column>
-       <property name="text">
-        <string>Description</string>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <widget class="QWidget" name="widget" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="description">
+        <property name="text">
+         <string>Select configuration to load:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTreeWidget" name="configurationsTree">
+        <property name="toolTip">
+         <string>List of configurations</string>
+        </property>
+        <property name="indentation">
+         <number>5</number>
+        </property>
+        <property name="allColumnsShowFocus">
+         <bool>true</bool>
+        </property>
+        <property name="columnCount">
+         <number>1</number>
+        </property>
+        <attribute name="headerMinimumSectionSize">
+         <number>5</number>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Description</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="configurationsControl">
+     <item>
+      <widget class="QToolButton" name="configurationSave">
+       <property name="toolTip">
+        <string>Save current workspaces configuration as new configuration</string>
        </property>
-      </column>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="layoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>330</y>
-     <width>392</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" name="configurationsControl">
-    <item>
-     <widget class="QToolButton" name="configurationSave">
-      <property name="toolTip">
-       <string>Save current workspaces configuration as new configuration</string>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../resources/res.qrc">
-        <normaloff>:/create.png</normaloff>:/create.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>16</width>
-        <height>16</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QToolButton" name="configurationUpdate">
-      <property name="toolTip">
-       <string>Update selected configuration with current workspaces configuration</string>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../resources/res.qrc">
-        <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>16</width>
-        <height>16</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QToolButton" name="configurationEdit">
-      <property name="toolTip">
-       <string>Edit configuration details</string>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset resource="../resources/res.qrc">
-        <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QToolButton" name="configurationExport">
-      <property name="toolTip">
-       <string>Export current configuration to file</string>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset resource="../resources/res.qrc">
-        <normaloff>:/export.png</normaloff>:/export.png</iconset>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QToolButton" name="configurationImport">
-      <property name="toolTip">
-       <string>Import configuration from file into current group</string>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset resource="../resources/res.qrc">
-        <normaloff>:/import.png</normaloff>:/import.png</iconset>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
-     <widget class="QToolButton" name="configurationDelete">
-      <property name="toolTip">
-       <string>Delete selected configuration</string>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../resources/res.qrc">
-        <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>16</width>
-        <height>16</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <spacer name="horizontalSpacer_2">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
-     <widget class="QToolButton" name="configurationLoad">
-      <property name="toolTip">
-       <string>Load selected configuration</string>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset resource="../resources/res.qrc">
-        <normaloff>:/load.png</normaloff>:/load.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>16</width>
-        <height>16</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/create.png</normaloff>:/create.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="configurationUpdate">
+       <property name="toolTip">
+        <string>Update selected configuration with current workspaces configuration</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="configurationEdit">
+       <property name="toolTip">
+        <string>Edit configuration details</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="configurationExport">
+       <property name="toolTip">
+        <string>Export current configuration to file</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/export.png</normaloff>:/export.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="configurationImport">
+       <property name="toolTip">
+        <string>Import configuration from file into current group</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/import.png</normaloff>:/import.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="configurationDelete">
+       <property name="toolTip">
+        <string>Delete selected configuration</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="configurationLoad">
+       <property name="toolTip">
+        <string>Load selected configuration</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/load.png</normaloff>:/load.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources>
   <include location="../resources/res.qrc"/>

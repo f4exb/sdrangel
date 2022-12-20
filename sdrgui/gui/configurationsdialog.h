@@ -38,7 +38,7 @@ namespace Ui {
 class SDRGUI_API ConfigurationsDialog : public QDialog {
     Q_OBJECT
 public:
-    explicit ConfigurationsDialog(QWidget* parent = nullptr);
+    explicit ConfigurationsDialog(bool openOnly, QWidget* parent = nullptr);
     ~ConfigurationsDialog();
     void setConfigurations(QList<Configuration*>* configurations) { m_configurations = configurations; }
     void populateTree();
@@ -71,6 +71,7 @@ private slots:
 	void on_configurationLoad_clicked();
 	void on_configurationTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void on_configurationTree_itemActivated(QTreeWidgetItem *item, int column);
+    void accept() override;
 
 signals:
     void saveConfiguration(Configuration*);

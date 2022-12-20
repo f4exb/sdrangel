@@ -26,6 +26,9 @@
 #include <QGLFormat>
 #include <QSurfaceFormat>
 #endif
+#ifdef ANDROID
+#include "util/android.h"
+#endif
 
 #include "loggerwithfile.h"
 #include "mainwindow.h"
@@ -48,6 +51,9 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 #endif
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)) && (QT_VERSION <= QT_VERSION_CHECK(6, 0, 0))
     QApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
+#endif
+#ifndef ANDROID
+     QApplication::setAttribute(Qt::AA_DontUseNativeDialogs); // Don't use on Android, otherwise we can't access files on internal storage
 #endif
 
 	QApplication a(argc, argv);
@@ -111,6 +117,20 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 #endif
 
 #endif
+
+#ifdef ANDROID
+    // Default sized sliders can be hard to move using touch GUIs, so increase szie
+    // FIXME: How can we do a double border around the handle, as Fusion style seems to use?
+    // Dialog borders are hard to see as is (perhaps as Android doesn't have a title bar), so use same color as for MDI
+    qApp->setStyleSheet("QSlider {min-height: 20px; } "
+                        "QSlider::groove:horizontal { border: 1px solid #2e2e2e; height: 1px; background: #444444; margin: 1px 0;}"
+                        "QSlider::handle:horizontal { background: #585858; border: 1px double  #676767; width: 16px; margin: -8px 0px; border-radius: 3px;}"
+                        "QSlider::sub-page {background: #ff8c00; border: 1px solid #2e2e2e;border-top-right-radius: 0px;border-bottom-right-radius: 0px;border-top-left-radius: 5px;border-bottom-left-radius: 5px;}"
+                        "QSlider::add-page {background: #444444; border: 1px solid #2e2e2e;border-top-right-radius: 5px;border-bottom-right-radius: 5px;border-top-left-radius: 0px;border-bottom-left-radius: 0px;}"
+                        "QDialog { border: 1px solid #ff8c00;}"
+                        );
+#endif
+
 	MainParser parser;
 	parser.parse(*qApp);
 
@@ -160,10 +180,18 @@ int main(int argc, char* argv[])
     QSurfaceFormat::setDefaultFormat(sfc);
 #endif
 
-	qtwebapp::LoggerWithFile *logger = new qtwebapp::LoggerWithFile(qApp);
+#ifdef ANDROID
+    qtwebapp::LoggerWithFile *logger = nullptr;
+    qInstallMessageHandler(Android::messageHandler);
+#else
+    qtwebapp::LoggerWithFile *logger = new qtwebapp::LoggerWithFile(qApp);
     logger->installMsgHandler();
+#endif
+
 	int res = runQtApplication(argc, argv, logger);
+
 	delete logger;
+
 	qWarning("SDRangel quit.");
 	return res;
 }

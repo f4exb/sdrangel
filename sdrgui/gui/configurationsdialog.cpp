@@ -27,11 +27,26 @@
 
 #include "settings/configuration.h"
 
-ConfigurationsDialog::ConfigurationsDialog(QWidget* parent) :
+ConfigurationsDialog::ConfigurationsDialog(bool openOnly, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::ConfigurationsDialog)
 {
     ui->setupUi(this);
+    if (openOnly)
+    {
+        ui->buttonBox->setStandardButtons(QDialogButtonBox::Close | QDialogButtonBox::Open);
+        ui->configurationDelete->setVisible(false);
+        ui->configurationEdit->setVisible(false);
+        ui->configurationExport->setVisible(false);
+        ui->configurationImport->setVisible(false);
+        ui->configurationLoad->setVisible(false);
+        ui->configurationSave->setVisible(false);
+        ui->configurationUpdate->setVisible(false);
+    }
+    else
+    {
+        ui->description->setVisible(false);
+    }
 }
 
 ConfigurationsDialog::~ConfigurationsDialog()
@@ -354,9 +369,7 @@ void ConfigurationsDialog::on_configurationExport_clicked()
 			    tr("Open preset export file"),
                 ".",
                 tr("Configuration export files (*.cfgx)"),
-                0,
-                QFileDialog::DontUseNativeDialog
-            );
+                0);
 
 			if (fileName != "")
 			{
@@ -404,8 +417,7 @@ void ConfigurationsDialog::on_configurationImport_clicked()
 		    tr("Open preset export file"),
             ".",
             tr("Preset export files (*.cfgx)"),
-            0,
-            QFileDialog::DontUseNativeDialog
+            0
         );
 
 		if (fileName != "")
@@ -496,4 +508,10 @@ void ConfigurationsDialog::deleteConfigurationGroup(const QString& groupName)
             ++it;
         }
     }
+}
+
+void ConfigurationsDialog::accept()
+{
+    on_configurationLoad_clicked();
+    QDialog::accept();
 }

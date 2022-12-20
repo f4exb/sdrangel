@@ -292,8 +292,7 @@ void DeviceSetPresetsDialog::on_presetExport_clicked()
 			    tr("Open preset export file"),
                 ".",
                 tr("Preset export files (*.prex)"),
-                0,
-                QFileDialog::DontUseNativeDialog
+                0
             );
 
 			if (fileName != "")
@@ -342,8 +341,7 @@ void DeviceSetPresetsDialog::on_presetImport_clicked()
 		    tr("Open preset export file"),
             ".",
             tr("Preset export files (*.prex)"),
-            0,
-            QFileDialog::DontUseNativeDialog
+            0
         );
 
 		if (fileName != "")

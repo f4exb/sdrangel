@@ -22,7 +22,7 @@
 #include "samplingdevicedialog.h"
 #include "ui_samplingdevicedialog.h"
 #include "device/deviceenumerator.h"
-
+#include "maincore.h"
 
 SamplingDeviceDialog::SamplingDeviceDialog(int deviceType, QWidget* parent) :
     QDialog(parent),
@@ -32,19 +32,7 @@ SamplingDeviceDialog::SamplingDeviceDialog(int deviceType, QWidget* parent) :
     m_hasChanged(false)
 {
     ui->setupUi(this);
-
-    QList<QString> deviceDisplayNames;
-
-    if (m_deviceType == 0) { // Single Rx
-        DeviceEnumerator::instance()->listRxDeviceNames(deviceDisplayNames, m_deviceIndexes);
-    } else if (m_deviceType == 1) { // Single Tx
-        DeviceEnumerator::instance()->listTxDeviceNames(deviceDisplayNames, m_deviceIndexes);
-    } else if (m_deviceType == 2) { // MIMO
-        DeviceEnumerator::instance()->listMIMODeviceNames(deviceDisplayNames, m_deviceIndexes);
-    }
-
-    QStringList devicesNamesList(deviceDisplayNames);
-    ui->deviceSelect->addItems(devicesNamesList);
+    on_refreshDevices_clicked();
 }
 
 SamplingDeviceDialog::~SamplingDeviceDialog()
@@ -56,6 +44,23 @@ int SamplingDeviceDialog::exec()
 {
     m_hasChanged = false;
     return QDialog::exec();
+}
+
+void SamplingDeviceDialog::displayDevices()
+{
+    QList<QString> deviceDisplayNames;
+
+    m_deviceIndexes.clear();
+    if (m_deviceType == 0) { // Single Rx
+        DeviceEnumerator::instance()->listRxDeviceNames(deviceDisplayNames, m_deviceIndexes);
+    } else if (m_deviceType == 1) { // Single Tx
+        DeviceEnumerator::instance()->listTxDeviceNames(deviceDisplayNames, m_deviceIndexes);
+    } else if (m_deviceType == 2) { // MIMO
+        DeviceEnumerator::instance()->listMIMODeviceNames(deviceDisplayNames, m_deviceIndexes);
+    }
+
+    ui->deviceSelect->clear();
+    ui->deviceSelect->addItems(deviceDisplayNames);
 }
 
 void SamplingDeviceDialog::setSelectedDeviceIndex(int deviceIndex)
@@ -75,6 +80,21 @@ void SamplingDeviceDialog::on_deviceSelect_currentIndexChanged(int index)
 {
     (void) index;
     m_hasChanged = true;
+}
+
+void SamplingDeviceDialog::on_refreshDevices_clicked()
+{
+    PluginManager *pluginManager = MainCore::instance()->getPluginManager();
+
+    if (m_deviceType == 0) {
+        DeviceEnumerator::instance()->enumerateRxDevices(pluginManager);
+    } else if (m_deviceType == 1) {
+        DeviceEnumerator::instance()->enumerateTxDevices(pluginManager);
+    } else if (m_deviceType == 2) {
+        DeviceEnumerator::instance()->enumerateMIMODevices(pluginManager);
+    }
+
+    displayDevices();
 }
 
 void SamplingDeviceDialog::accept()

@@ -1,0 +1,13 @@
+<RCC>
+  <qresource prefix="/">
+    <file>configurations/rtlsdr/adsb.cfgx</file>
+    <file>configurations/rtlsdr/ais.cfgx</file>
+    <file>configurations/rtlsdr/apt.cfgx</file>
+    <file>configurations/rtlsdr/dab.cfgx</file>
+    <file>configurations/rtlsdr/isspacket.cfgx</file>
+    <file>configurations/rtlsdr/radiosonde.cfgx</file>
+    <file>configurations/airspyhf/radioclockeu.cfgx</file>
+    <file>presets/rtlsdr/noaa18.prex</file>
+    <file>presets/rtlsdr/noaa19.prex</file>
+  </qresource>
+</RCC>
