@@ -30,6 +30,8 @@ set(sdrgui_SOURCES
     gui/devicesetpresetsdialog.cpp
     gui/devicestreamselectiondialog.cpp
     gui/deviceuserargsdialog.cpp
+    gui/dialogpositioner.cpp
+    gui/dialpopup.cpp
     gui/dmsspinbox.cpp
     gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
@@ -72,6 +74,7 @@ set(sdrgui_SOURCES
     gui/spectrummarkersdialog.cpp
     gui/spectrummeasurementsdialog.cpp
     gui/spectrummeasurements.cpp
+    gui/tabletapandhold.cpp
     gui/tickedslider.cpp
     gui/timedelegate.cpp
     gui/transverterbutton.cpp
@@ -80,6 +83,7 @@ set(sdrgui_SOURCES
     gui/tvscreenanalog.cpp
     gui/valuedial.cpp
     gui/valuedialz.cpp
+    gui/welcomedialog.cpp
     gui/workspace.cpp
     gui/workspaceselectiondialog.cpp
     gui/wsspectrumsettingsdialog.cpp
@@ -135,6 +139,8 @@ set(sdrgui_HEADERS
     gui/devicesetpresetsdialog.h
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h
+    gui/dialogpositioner.h
+    gui/dialpopup.h
     gui/dmsspinbox.h
     gui/doublevalidator.h
     gui/editcommanddialog.h
@@ -180,6 +186,7 @@ set(sdrgui_HEADERS
     gui/spectrummarkersdialog.h
     gui/spectrummeasurementsdialog.h
     gui/spectrummeasurements.h
+    gui/tabletapandhold.h
     gui/tickedslider.h
     gui/timedelegate.h
     gui/transverterbutton.h
@@ -188,6 +195,7 @@ set(sdrgui_HEADERS
     gui/tvscreenanalog.h
     gui/valuedial.h
     gui/valuedialz.h
+    gui/welcomedialog.h
     gui/workspace.h
     gui/workspaceselectiondialog.h
     gui/wsspectrumsettingsdialog.h
@@ -251,6 +259,7 @@ set(sdrgui_FORMS
     gui/myposdialog.ui
     gui/transverterdialog.ui
     gui/loggingdialog.ui
+    gui/welcomedialog.ui
     gui/workspaceselectiondialog.ui
     gui/wsspectrumsettingsdialog.ui
     soapygui/discreterangegui.ui
@@ -268,9 +277,11 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/logging
   ${CMAKE_SOURCE_DIR}/httpserver
   ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-  ${OPENGL_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
 )
+if(NOT ANDROID)
+  include_directories(${OPENGL_INCLUDE_DIR})
+endif()
 
 add_library(sdrgui SHARED
   ${sdrgui_SOURCES}
@@ -282,6 +293,7 @@ target_link_libraries(sdrgui
   Qt::Widgets
   Qt::OpenGL
   Qt::Multimedia
+  Qt::Positioning
   ${OPENGL_LIBRARIES}
   ${sdrgui_LIMERFE_LIB}
   sdrbase
@@ -291,6 +303,10 @@ if (Qt6_FOUND)
   target_link_libraries(sdrbase
     Qt::OpenGLWidgets
   )
+endif()
+
+if(ANDROID)
+  target_link_libraries(sdrgui GLESv3)
 endif()
 
 install(TARGETS sdrgui DESTINATION ${INSTALL_LIB_DIR})
