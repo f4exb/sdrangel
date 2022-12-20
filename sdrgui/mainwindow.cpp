@@ -120,7 +120,11 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_commandKeyReceiver(nullptr),
     m_fftWisdomProcess(nullptr)
 {
-    bool showWelcome = ANDROID;
+#ifdef ANDROID
+    bool showWelcome = true;
+#else
+    bool showWelcome = false;
+#endif
 
 	qDebug() << "MainWindow::MainWindow: start";
     setWindowTitle("SDRangel");
@@ -240,7 +244,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
             addWorkspace();
 
             // If no configurations, load some basic examples
-            if (m_mainCore->m_settings.getConfigurations().size() == 0) {
+            if (m_mainCore->m_settings.getConfigurations()->size() == 0) {
                 loadDefaultConfigurations();
             }
         }
