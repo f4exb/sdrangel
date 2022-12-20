@@ -1363,6 +1363,7 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
         waitBox->setMinimumDuration(0);
         waitBox->setCancelButton(nullptr);
         waitBox->setValue(1);
+        QApplication::processEvents();
     }
 
     // Wipe out everything first
@@ -1370,6 +1371,7 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
     {
         waitBox->setLabelText("Deleting existing...");
         waitBox->setValue(5);
+        QApplication::processEvents();
     }
     // Device sets
     while (m_deviceUIs.size() > 0) {
@@ -1402,6 +1404,7 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
     {
         waitBox->setLabelText("Loading device sets...");
         waitBox->setValue(25);
+        QApplication::processEvents();
     }
 
     const QList<Preset>& deviceSetPresets = configuration->getDeviceSetPresets();
@@ -1472,8 +1475,10 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
         m_deviceUIs.back()->m_mainSpectrumGUI->restoreGeometry(deviceSetPreset.getSpectrumGeometry());
         m_deviceUIs.back()->loadDeviceSetSettings(&deviceSetPreset, m_pluginManager->getPluginAPI(), &m_workspaces, nullptr);
 
-        if (waitBox) {
+        if (waitBox)
+        {
             waitBox->setValue(waitBox->value() + 50/deviceSetPresets.size());
+            QApplication::processEvents();
         }
     }
 
@@ -1482,6 +1487,7 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
     {
         waitBox->setLabelText("Loading feature sets...");
         waitBox->setValue(75);
+        QApplication::processEvents();
     }
 
     m_featureUIs[0]->loadFeatureSetSettings(
@@ -1508,6 +1514,7 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
     {
         waitBox->setValue(90);
         waitBox->setLabelText("Finalizing...");
+        QApplication::processEvents();
     }
 
     for (int i = 0; i < configuration->getNumberOfWorkspaceGeometries(); i++)
