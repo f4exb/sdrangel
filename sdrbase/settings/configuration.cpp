@@ -65,6 +65,13 @@ QByteArray Configuration::serialize() const
         s.writeBool(301 + i, m_workspaceAutoStackOptions[i]);
     }
 
+    nitems = m_workspaceTabSubWindowsOptions.size() < 99 ? m_workspaceTabSubWindowsOptions.size() : 99;
+    s.writeS32(400, nitems);
+
+    for (int i = 0; i < nitems; i++) {
+        s.writeBool(401 + i, m_workspaceTabSubWindowsOptions[i]);
+    }
+
 	return s.final();
 }
 
@@ -113,6 +120,14 @@ bool Configuration::deserialize(const QByteArray& data)
             d.readBool(301 + i, &m_workspaceAutoStackOptions.back());
         }
 
+        d.readS32(400, &nitems, 0);
+
+        for (int i = 0; i < nitems; i++)
+        {
+            m_workspaceTabSubWindowsOptions.push_back(true);
+            d.readBool(401 + i, &m_workspaceTabSubWindowsOptions.back());
+        }
+
 		return true;
 	}
 	else
@@ -128,4 +143,5 @@ void Configuration::clearData()
     m_featureSetPreset.clearFeatures();
     m_workspaceGeometries.clear();
     m_workspaceAutoStackOptions.clear();
+    m_workspaceTabSubWindowsOptions.clear();
 }

@@ -26,6 +26,7 @@
 #include <QObjectCleanupHandler>
 #include <QDesktopServices>
 #include <QOpenGLWidget>
+#include <QMdiArea>
 
 #include "mainwindow.h"
 #include "gui/workspaceselectiondialog.h"
@@ -37,7 +38,8 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_contextMenuType(ContextMenuNone),
     m_drag(false),
     m_resizer(this),
-    m_disableResize(false)
+    m_disableResize(false),
+    m_mdi(nullptr)
 {
     qDebug("FeatureGUI::FeatureGUI");
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
@@ -87,7 +89,7 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_maximizeButton->setFixedSize(20, 20);
     QIcon maximizeIcon(":/maximize.png");
     m_maximizeButton->setIcon(maximizeIcon);
-    m_maximizeButton->setToolTip("Adjust window to maximum size");
+    m_maximizeButton->setToolTip("Adjust window to maximum size in workspace");
 
     m_closeButton = new QPushButton();
     m_closeButton->setFixedSize(20, 20);
@@ -264,7 +266,9 @@ void FeatureGUI::onWidgetRolled(QWidget *widget, bool show)
     // onWidgetRolled being called twice.
     // We need to make sure we don't save widget heights while this occurs. The
     // window manager will take care of maximizing/restoring the window size.
-    if (!m_disableResize)
+    // We do need to resize when a widget is rolled up, but we also need to avoid
+    // resizing when a window is maximized when first shown in tabbed layout
+    if (!m_disableResize && !isMaximized())
     {
         if (show)
         {
@@ -336,24 +340,53 @@ void FeatureGUI::sizeToContents()
 
 void FeatureGUI::maximizeWindow()
 {
-    m_disableResize = true;
-    showMaximized();
-    m_disableResize = false;
-    // QOpenGLWidget widgets don't always paint properly first time after being maximized,
-    // so force an update. Should really fix why they aren't painted properly in the first place
-    QList<QOpenGLWidget *> widgets = findChildren<QOpenGLWidget *>();
-    for (auto widget : widgets) {
-        widget->update();
+    // If maximize is pressed when maximized, go full screen
+    if (isMaximized())
+    {
+        m_mdi = mdiArea();
+        if (m_mdi) {
+            m_mdi->removeSubWindow(this);
+        }
+        showNormal(); // If we don't go back to normal first, window doesn't get bigger
+        showFullScreen();
+        m_shrinkButton->setToolTip("Adjust window to maximum size in workspace");
+    }
+    else
+    {
+        m_disableResize = true;
+        showMaximized();
+        m_shrinkButton->setToolTip("Restore window to normal");
+        m_maximizeButton->setToolTip("Make window full screen");
+        m_disableResize = false;
+        // QOpenGLWidget widgets don't always paint properly first time after being maximized,
+        // so force an update. Should really fix why they aren't painted properly in the first place
+        QList<QOpenGLWidget *> widgets = findChildren<QOpenGLWidget *>();
+        for (auto widget : widgets) {
+            widget->update();
+        }
     }
 }
 
 void FeatureGUI::shrinkWindow()
 {
     qDebug("FeatureGUI::shrinkWindow");
-    if (isMaximized())
+    if (m_mdi)
     {
         m_disableResize = true;
         showNormal();
+        m_mdi->addSubWindow(this);
+        show();
+        showMaximized();
+        m_shrinkButton->setToolTip("Restore window to normal");
+        m_disableResize = false;
+        m_mdi = nullptr;
+    }
+    else if (isMaximized())
+    {
+        m_disableResize = true;
+        showNormal();
+        m_shrinkButton->setToolTip("Adjust window to minimum size");
+        m_maximizeButton->setToolTip("Adjust window to maximum size in workspace");
         m_disableResize = false;
     }
     else

@@ -28,6 +28,7 @@
 
 class QHBoxLayout;
 class QLabel;
+class QToolButton;
 class QPushButton;
 class QMdiArea;
 class QMdiSubWindow;
@@ -37,7 +38,6 @@ class ChannelGUI;
 class FeatureGUI;
 class DeviceGUI;
 class MainSpectrumGUI;
-
 class SDRGUI_API Workspace : public QDockWidget
 {
     Q_OBJECT
@@ -56,6 +56,8 @@ public:
     void restoreMdiGeometry(const QByteArray& blob);
     bool getAutoStackOption() const;
     void setAutoStackOption(bool autoStack);
+    bool getTabSubWindowsOption() const;
+    void setTabSubWindowsOption(bool tab);
     QList<QMdiSubWindow *> getSubWindowList() const;
     void orderByIndex(QList<ChannelGUI *> &list);
     void orderByIndex(QList<FeatureGUI *> &list);
@@ -63,21 +65,26 @@ public:
     void orderByIndex(QList<MainSpectrumGUI *> &list);
     void adjustSubWindowsAfterRestore();
     void updateStartStopButton(bool checked);
+    QToolButton *getMenuButton() const { return m_menuButton; }
 
 private:
     int m_index;
+    QToolButton *m_menuButton;
+    QPushButton *m_configurationPresetsButton;
+    ButtonSwitch *m_startStopButton;
+    QFrame *m_vline1;
     QPushButton *m_addRxDeviceButton;
     QPushButton *m_addTxDeviceButton;
     QPushButton *m_addMIMODeviceButton;
-    ButtonSwitch *m_startStopButton;
-    QFrame *m_vline1;
+    QFrame *m_vline2;
     QPushButton *m_addFeatureButton;
     QPushButton *m_featurePresetsButton;
-    QFrame *m_vline2;
+    QFrame *m_vline3;
     QPushButton *m_cascadeSubWindows;
     QPushButton *m_tileSubWindows;
+    QPushButton *m_stackVerticalSubWindows;
     QPushButton *m_stackSubWindows;
-    ButtonSwitch *m_autoStackSubWindows;
+    ButtonSwitch *m_tabSubWindows;
     QWidget *m_titleBar;
     QHBoxLayout *m_titleBarLayout;
     QLabel *m_titleLabel;
@@ -86,7 +93,10 @@ private:
     FeatureAddDialog m_featureAddDialog;
     QMdiArea *m_mdi;
     bool m_stacking;                // Set when stackSubWindows() is running
+    bool m_autoStack;               // Automatically stack
     int m_userChannelMinWidth;      // Minimum width of channels column for stackSubWindows(), set by user resizing a channel window
+
+    void unmaximizeSubWindows();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -98,14 +108,19 @@ private slots:
     void addMIMODeviceClicked();
     void addFeatureDialog();
     void featurePresetsDialog();
+    void configurationPresetsDialog();
     void cascadeSubWindows();
     void tileSubWindows();
+    void stackVerticalSubWindows();
     void stackSubWindows();
     void autoStackSubWindows();
+    void tabSubWindows();
+    void layoutSubWindows();
     void startStopClicked(bool checked = false);
     void addFeatureEmitted(int featureIndex);
     void toggleFloating();
     void deviceStateChanged(int index, DeviceAPI *deviceAPI);
+    void subWindowActivated(QMdiSubWindow *window);
 
 signals:
     void addRxDevice(Workspace *inWorkspace, int deviceIndex);
@@ -113,6 +128,7 @@ signals:
     void addMIMODevice(Workspace *inWorkspace, int deviceIndex);
     void addFeature(Workspace*, int);
     void featurePresetsDialogRequested(QPoint, Workspace*);
+    void configurationPresetsDialogRequested();
     void startAllDevices(Workspace *inWorkspace);
     void stopAllDevices(Workspace *inWorkspace);
 };
