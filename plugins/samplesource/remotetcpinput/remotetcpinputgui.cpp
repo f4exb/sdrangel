@@ -25,6 +25,8 @@
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/hbfilterchainconverter.h"
@@ -87,6 +89,7 @@ RemoteTCPInputGui::RemoteTCPInputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_forceSettings = true;
     sendSettings();
     makeUIConnections();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 RemoteTCPInputGui::~RemoteTCPInputGui()
@@ -778,6 +781,7 @@ void RemoteTCPInputGui::openDeviceSettingsDialog(const QPoint& p)
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_useReverseAPI = dialog.useReverseAPI();

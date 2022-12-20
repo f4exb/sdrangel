@@ -23,6 +23,7 @@
 #include "util/db.h"
 #include "util/csv.h"
 #include "dsp/spectrummarkers.h"
+#include "gui/dialpopup.h"
 
 #include "spectrumcalibrationpointsdialog.h"
 
@@ -60,6 +61,7 @@ SpectrumCalibrationPointsDialog::SpectrumCalibrationPointsDialog(
     ui->calibrationGlobalCorr->setValue(m_globalCorrection * 100.0);
     ui->corrOrSet->setText("Cor");
     displayCalibrationPoint();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 SpectrumCalibrationPointsDialog::~SpectrumCalibrationPointsDialog()

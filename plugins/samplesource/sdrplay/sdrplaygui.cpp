@@ -28,6 +28,8 @@
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
@@ -84,6 +86,7 @@ SDRPlayGui::SDRPlayGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 SDRPlayGui::~SDRPlayGui()
@@ -480,6 +483,7 @@ void SDRPlayGui::openDeviceSettingsDialog(const QPoint& p)
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_useReverseAPI = dialog.useReverseAPI();

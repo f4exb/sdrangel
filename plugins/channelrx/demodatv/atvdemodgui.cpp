@@ -25,6 +25,8 @@
 #include "dsp/scopevis.h"
 #include "dsp/glscopesettings.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "ui_atvdemodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -220,6 +222,7 @@ void ATVDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -329,6 +332,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     ui->fmDeviationLabel->setText(delta);
 
     makeUIConnections();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 ATVDemodGUI::~ATVDemodGUI()

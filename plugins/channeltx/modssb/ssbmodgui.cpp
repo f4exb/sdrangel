@@ -36,6 +36,8 @@
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "maincore.h"
 
 SSBModGUI* SSBModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
@@ -382,6 +384,7 @@ void SSBModGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -497,6 +500,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     displaySettings();
     makeUIConnections();
     applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
+    DialPopup::addPopupsToChildDials(this);
 }
 
 SSBModGUI::~SSBModGUI()

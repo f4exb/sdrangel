@@ -20,6 +20,7 @@
 #include <QColorDialog>
 #include <QFileDialog>
 
+#include "gui/dialpopup.h"
 #include "util/db.h"
 #include "util/csv.h"
 #include "spectrummarkersdialog.h"
@@ -69,6 +70,7 @@ SpectrumMarkersDialog::SpectrumMarkersDialog(
     displayHistogramMarker();
     displayWaterfallMarker();
     displayAnnotationMarker();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 SpectrumMarkersDialog::~SpectrumMarkersDialog()

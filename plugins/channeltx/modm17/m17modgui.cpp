@@ -33,6 +33,8 @@
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "maincore.h"
 
 #include "ui_m17modgui.h"
@@ -415,6 +417,7 @@ void M17ModGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -524,6 +527,7 @@ M17ModGUI::M17ModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     displaySettings();
     makeUIConnections();
     applySettings(QList<QString>{"channelMarker", "rollupState"});
+    DialPopup::addPopupsToChildDials(this);
 }
 
 M17ModGUI::~M17ModGUI()

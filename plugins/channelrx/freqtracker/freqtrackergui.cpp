@@ -33,6 +33,8 @@
 #include "dsp/dspengine.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "maincore.h"
 
 #include "freqtracker.h"
@@ -279,6 +281,7 @@ void FreqTrackerGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -373,6 +376,7 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	displaySettings();
     makeUIConnections();
 	applySettings(true);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 FreqTrackerGUI::~FreqTrackerGUI()

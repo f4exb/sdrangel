@@ -21,6 +21,8 @@
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "device/deviceset.h"
 #include "util/db.h"
@@ -190,6 +192,7 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     displaySettings();
 	applySettings(true);
     makeUIConnections();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 SimplePTTGUI::~SimplePTTGUI()
@@ -321,6 +324,7 @@ void SimplePTTGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();

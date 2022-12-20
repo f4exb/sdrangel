@@ -43,6 +43,8 @@
 #include "dsp/dspengine.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
 
@@ -1130,6 +1132,7 @@ void VORDemodMCGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -1282,6 +1285,7 @@ VORDemodMCGUI::VORDemodMCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 VORDemodMCGUI::~VORDemodMCGUI()

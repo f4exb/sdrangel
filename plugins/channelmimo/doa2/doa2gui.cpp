@@ -19,6 +19,8 @@
 
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/scopevis.h"
 #include "dsp/spectrumvis.h"
@@ -158,6 +160,7 @@ DOA2GUI::DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *ch
 
     ui->halfWLLabel->setText(QString("%1/2").arg(QChar(0xBB, 0x03)));
     ui->azUnits->setText(QString("%1").arg(QChar(0260)));
+    DialPopup::addPopupsToChildDials(this);
 }
 
 DOA2GUI::~DOA2GUI()
@@ -300,6 +303,7 @@ void DOA2GUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();

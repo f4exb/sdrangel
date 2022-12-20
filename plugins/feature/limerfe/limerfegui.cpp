@@ -18,6 +18,7 @@
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/crightclickenabler.h"
+#include "gui/dialogpositioner.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicesourceengine.h"
@@ -98,6 +99,7 @@ void LimeRFEGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();

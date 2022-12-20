@@ -33,6 +33,7 @@
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
+#include "gui/dialogpositioner.h"
 #include "mainwindow.h"
 #include "maincore.h"
 #include "device/deviceuiset.h"
@@ -698,6 +699,7 @@ void APRSGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();

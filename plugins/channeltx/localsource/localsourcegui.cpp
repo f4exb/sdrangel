@@ -20,6 +20,7 @@
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
 #include "mainwindow.h"
@@ -253,6 +254,7 @@ void LocalSourceGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();

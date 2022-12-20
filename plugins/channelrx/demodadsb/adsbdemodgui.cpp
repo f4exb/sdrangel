@@ -51,6 +51,9 @@
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/crightclickenabler.h"
 #include "gui/clickablelabel.h"
+#include "gui/tabletapandhold.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "mainwindow.h"
@@ -3371,7 +3374,7 @@ void ADSBDemodGUI::findOnChannelMap(Aircraft *aircraft)
 
 void ADSBDemodGUI::adsbData_customContextMenuRequested(QPoint pos)
 {
-    QTableWidgetItem *item =  ui->adsbData->itemAt(pos);
+    QTableWidgetItem *item = ui->adsbData->itemAt(pos);
     if (item)
     {
         int row = item->row();
@@ -3806,6 +3809,7 @@ void ADSBDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -4752,6 +4756,8 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_osmPort = 0; // Pick a free port
     m_templateServer = new ADSBOSMTemplateServer("q2RVNAe3eFKCH4XsrE3r", m_osmPort);
 
+    ui->map->setAttribute(Qt::WA_AcceptTouchEvents, true);
+
     ui->map->rootContext()->setContextProperty("aircraftModel", &m_aircraftModel);
     ui->map->rootContext()->setContextProperty("airportModel", &m_airportModel);
     ui->map->rootContext()->setContextProperty("airspaceModel", &m_airspaceModel);
@@ -4819,6 +4825,8 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     // Context menu
     ui->adsbData->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->adsbData, SIGNAL(customContextMenuRequested(QPoint)), SLOT(adsbData_customContextMenuRequested(QPoint)));
+    TableTapAndHold *tableTapAndHold = new TableTapAndHold(ui->adsbData);
+    connect(tableTapAndHold, &TableTapAndHold::tapAndHold, this, &ADSBDemodGUI::adsbData_customContextMenuRequested);
 
     ui->photoHeader->setVisible(false);
     ui->photoFlag->setVisible(false);
@@ -4903,6 +4911,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(&m_redrawMapTimer, &QTimer::timeout, this, &ADSBDemodGUI::redrawMap);
     m_redrawMapTimer.setSingleShot(true);
     ui->map->installEventFilter(this);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 ADSBDemodGUI::~ADSBDemodGUI()
@@ -5552,6 +5561,7 @@ void ADSBDemodGUI::showEvent(QShowEvent *event)
         // MapQuickItems can be in wrong position when window is first displayed
         m_redrawMapTimer.start(500);
     }
+    ChannelGUI::showEvent(event);
 }
 
 bool ADSBDemodGUI::eventFilter(QObject *obj, QEvent *event)
@@ -5570,7 +5580,7 @@ bool ADSBDemodGUI::eventFilter(QObject *obj, QEvent *event)
             }
         }
     }
-    return false;
+    return ChannelGUI::eventFilter(obj, event);
 }
 
 void ADSBDemodGUI::applyImportSettings()

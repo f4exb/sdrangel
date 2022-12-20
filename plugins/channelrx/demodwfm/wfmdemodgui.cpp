@@ -15,6 +15,7 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/crightclickenabler.h"
+#include "gui/dialogpositioner.h"
 #include "gui/audioselectdialog.h"
 #include "maincore.h"
 
@@ -178,6 +179,7 @@ void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();

@@ -28,6 +28,8 @@
 #include "gui/glspectrumgui.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
@@ -352,6 +354,7 @@ void ChirpChatDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -438,6 +441,7 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     makeUIConnections();
     resetLoRaStatus();
 	applySettings(true);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 ChirpChatDemodGUI::~ChirpChatDemodGUI()

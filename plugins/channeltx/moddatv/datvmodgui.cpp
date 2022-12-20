@@ -33,6 +33,7 @@
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialogpositioner.h"
 #include "maincore.h"
 
 #include "ui_datvmodgui.h"
@@ -514,6 +515,7 @@ void DATVModGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();

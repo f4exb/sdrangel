@@ -20,6 +20,7 @@
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/flowlayout.h"
 #include "gui/scidoublespinbox.h"
+#include "gui/dialogpositioner.h"
 
 #include "ui_remotecontrolgui.h"
 #include "remotecontrol.h"
@@ -202,6 +203,7 @@ void RemoteControlGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();

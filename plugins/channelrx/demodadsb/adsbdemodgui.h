@@ -1060,8 +1060,8 @@ private slots:
     void downloadAirspaceFinished();
     void downloadNavAidsFinished();
     void photoClicked();
-    virtual void showEvent(QShowEvent *event);
-    virtual bool eventFilter(QObject *obj, QEvent *event);
+    virtual void showEvent(QShowEvent *event) override;
+    virtual bool eventFilter(QObject *obj, QEvent *event) override;
     void import();
     void handleImportReply(QNetworkReply* reply);
     void preferenceChanged(int elementType);

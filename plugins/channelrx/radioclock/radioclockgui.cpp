@@ -32,6 +32,8 @@
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "dsp/glscopesettings.h"
 #include "gui/crightclickenabler.h"
@@ -235,6 +237,7 @@ void RadioClockGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -328,6 +331,7 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 RadioClockGUI::~RadioClockGUI()

@@ -35,6 +35,8 @@
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "maincore.h"
 #include "ui_freedvmodgui.h"
 
@@ -318,6 +320,7 @@ void FreeDVModGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -415,6 +418,7 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     displaySettings();
     makeUIConnections();
     applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
+    DialPopup::addPopupsToChildDials(this);
 }
 
 FreeDVModGUI::~FreeDVModGUI()

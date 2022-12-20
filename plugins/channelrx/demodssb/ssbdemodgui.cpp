@@ -16,6 +16,8 @@
 #include "util/db.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "maincore.h"
 #include "ssbdemod.h"
 
@@ -281,6 +283,7 @@ void SSBDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -398,6 +401,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     makeUIConnections();
 
 	applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
+    DialPopup::addPopupsToChildDials(this);
 }
 
 SSBDemodGUI::~SSBDemodGUI()
