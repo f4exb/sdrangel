@@ -52,6 +52,8 @@ Item {
             anchors.fill: parent
             center: QtPositioning.coordinate(51.5, 0.125) // London
             zoomLevel: 10
+            gesture.enabled: true
+            gesture.acceptedGestures: MapGestureArea.PinchGesture | MapGestureArea.PanGesture
 
             // Needs to come first, otherwise MouseAreas in the MapItemViews don't get clicked event first
             // Setting z doesn't seem to work
