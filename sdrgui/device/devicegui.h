@@ -24,6 +24,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QWidget>
+#include <QLabel>
 
 #include "gui/channeladddialog.h"
 #include "gui/framelesswindowresizer.h"
@@ -32,7 +33,6 @@
 class QCloseEvent;
 class Message;
 class MessageQueue;
-class QLabel;
 class QPushButton;
 class QVBoxLayout;
 class QHBoxLayout;
@@ -87,6 +87,7 @@ protected:
     void mouseMoveEvent(QMouseEvent* event) override;
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
     int getAdditionalHeight() const { return 22 + 22; }
+    void setStatus(const QString &status) { m_statusLabel->setText(status); }
 
     DeviceUISet* m_deviceUISet;
     DeviceType m_deviceType;
@@ -122,7 +123,7 @@ private:
     QLabel *m_statusLabel;
     QVBoxLayout *m_layouts;
     QHBoxLayout *m_topLayout;
-    QHBoxLayout *m_centerLayout;
+    QVBoxLayout *m_centerLayout;
     QHBoxLayout *m_bottomLayout;
     QSizeGrip *m_sizeGripBottomRight;
     bool m_drag;

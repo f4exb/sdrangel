@@ -27,10 +27,13 @@
 #include <QFrame>
 #include <QDebug>
 #include <QApplication>
+#include <QMenu>
+#include <QAction>
 
 #include "gui/samplingdevicedialog.h"
 #include "gui/rollupcontents.h"
 #include "gui/buttonswitch.h"
+#include "gui/crightclickenabler.h"
 #include "channel/channelgui.h"
 #include "feature/featuregui.h"
 #include "device/devicegui.h"
@@ -42,8 +45,10 @@
 Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     QDockWidget(parent, flags),
     m_index(index),
+    m_menuButton(nullptr),
     m_featureAddDialog(this),
     m_stacking(false),
+    m_autoStack(false),
     m_userChannelMinWidth(0)
 {
     m_mdi = new QMdiArea(this);
@@ -64,6 +69,29 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_titleLabel->setStyleSheet("QLabel { background-color: rgb(128, 128, 128); qproperty-alignment: AlignCenter; }");
     m_titleLabel->setText(windowTitle());
 
+#ifdef ANDROID
+    m_menuButton = new QToolButton();
+    QIcon menuIcon(":/listing.png");
+    m_menuButton->setIcon(menuIcon);
+    m_menuButton->setFixedSize(20, 20);
+    m_menuButton->setPopupMode(QToolButton::InstantPopup);
+#endif
+
+    m_configurationPresetsButton = new QPushButton();
+    QIcon configurationPresetsIcon(":/star.png");
+    m_configurationPresetsButton->setIcon(configurationPresetsIcon);
+    m_configurationPresetsButton->setToolTip("Configuration presets");
+    m_configurationPresetsButton->setFixedSize(20, 20);
+
+    m_startStopButton = new ButtonSwitch();
+    m_startStopButton->setCheckable(true);
+    updateStartStopButton(false);
+    m_startStopButton->setFixedSize(20, 20);
+
+    m_vline1 = new QFrame();
+    m_vline1->setFrameShape(QFrame::VLine);
+    m_vline1->setFrameShadow(QFrame::Sunken);
+
     m_addRxDeviceButton = new QPushButton();
     QIcon addRxIcon(":/rx.png");
     m_addRxDeviceButton->setIcon(addRxIcon);
@@ -82,14 +110,9 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_addMIMODeviceButton->setToolTip("Add MIMO device");
     m_addMIMODeviceButton->setFixedSize(20, 20);
 
-    m_startStopButton = new ButtonSwitch();
-    m_startStopButton->setCheckable(true);
-    updateStartStopButton(false);
-    m_startStopButton->setFixedSize(20, 20);
-
-    m_vline1 = new QFrame();
-    m_vline1->setFrameShape(QFrame::VLine);
-    m_vline1->setFrameShadow(QFrame::Sunken);
+    m_vline2 = new QFrame();
+    m_vline2->setFrameShape(QFrame::VLine);
+    m_vline2->setFrameShadow(QFrame::Sunken);
 
     m_addFeatureButton = new QPushButton();
     QIcon addFeatureIcon(":/tool_add.png");
@@ -103,9 +126,9 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_featurePresetsButton->setToolTip("Feature presets");
     m_featurePresetsButton->setFixedSize(20, 20);
 
-    m_vline2 = new QFrame();
-    m_vline2->setFrameShape(QFrame::VLine);
-    m_vline2->setFrameShadow(QFrame::Sunken);
+    m_vline3 = new QFrame();
+    m_vline3->setFrameShape(QFrame::VLine);
+    m_vline3->setFrameShadow(QFrame::Sunken);
 
     m_cascadeSubWindows = new QPushButton();
     QIcon cascadeSubWindowsIcon(":/cascade.png");
@@ -119,19 +142,26 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_tileSubWindows->setToolTip("Tile sub windows");
     m_tileSubWindows->setFixedSize(20, 20);
 
-    m_stackSubWindows = new QPushButton("S");
-    //QIcon stackSubWindowsIcon(":/stack.png");     // FIXME
-    //m_stackSubWindows->setIcon(stackSubWindowsIcon);
-    m_stackSubWindows->setToolTip("Stack sub windows");
-    m_stackSubWindows->setFixedSize(20, 20);
+    m_stackVerticalSubWindows = new QPushButton();
+    QIcon stackVerticalSubWindowsIcon(":/stackvertical.png");
+    m_stackVerticalSubWindows->setIcon(stackVerticalSubWindowsIcon);
+    m_stackVerticalSubWindows->setToolTip("Stack sub windows vertically");
+    m_stackVerticalSubWindows->setFixedSize(20, 20);
 
-    m_autoStackSubWindows = new ButtonSwitch();
-    m_autoStackSubWindows->setText("AS");
-    m_autoStackSubWindows->setCheckable(true);
-    //QIcon autoStackSubWindowsIcon(":/autostack.png"); // FIXME
-    //m_autoStackSubWindows->setIcon(autoStackSubWindowsIcon);
-    m_autoStackSubWindows->setToolTip("Automatically stack sub windows");
-    m_autoStackSubWindows->setFixedSize(20, 20);
+    m_stackSubWindows = new QPushButton();
+    QIcon stackSubWindowsIcon(":/stackcolumns.png");
+    m_stackSubWindows->setIcon(stackSubWindowsIcon);
+    m_stackSubWindows->setToolTip("Stack sub windows in columns. Right click to stack automatically.");
+    m_stackSubWindows->setFixedSize(20, 20);
+    CRightClickEnabler *stackSubWindowsRightClickEnabler = new CRightClickEnabler(m_stackSubWindows);
+    connect(stackSubWindowsRightClickEnabler, &CRightClickEnabler::rightClick, this, &Workspace::autoStackSubWindows);
+
+    m_tabSubWindows = new ButtonSwitch();
+    QIcon tabSubWindowsIcon(":/tab.png");
+    m_tabSubWindows->setIcon(tabSubWindowsIcon);
+    m_tabSubWindows->setCheckable(true);
+    m_tabSubWindows->setToolTip("Display sub windows in tabs");
+    m_tabSubWindows->setFixedSize(20, 20);
 
     m_normalButton = new QPushButton();
     QIcon normalIcon(":/dock.png");
@@ -146,21 +176,34 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_closeButton->setFixedSize(20, 20);
 
     m_titleBarLayout->addWidget(m_titleLabel);
+    if (m_menuButton) {
+        m_titleBarLayout->addWidget(m_menuButton);
+    }
+    m_titleBarLayout->addWidget(m_configurationPresetsButton);
+    m_titleBarLayout->addWidget(m_startStopButton);
+    m_titleBarLayout->addWidget(m_vline1);
     m_titleBarLayout->addWidget(m_addRxDeviceButton);
     m_titleBarLayout->addWidget(m_addTxDeviceButton);
     m_titleBarLayout->addWidget(m_addMIMODeviceButton);
-    m_titleBarLayout->addWidget(m_startStopButton);
-    m_titleBarLayout->addWidget(m_vline1);
+    m_titleBarLayout->addWidget(m_vline2);
     m_titleBarLayout->addWidget(m_addFeatureButton);
     m_titleBarLayout->addWidget(m_featurePresetsButton);
-    m_titleBarLayout->addWidget(m_vline2);
+    m_titleBarLayout->addWidget(m_vline3);
     m_titleBarLayout->addWidget(m_cascadeSubWindows);
     m_titleBarLayout->addWidget(m_tileSubWindows);
+    m_titleBarLayout->addWidget(m_stackVerticalSubWindows);
     m_titleBarLayout->addWidget(m_stackSubWindows);
-    m_titleBarLayout->addWidget(m_autoStackSubWindows);
+    m_titleBarLayout->addWidget(m_tabSubWindows);
     m_titleBarLayout->addStretch(1);
+#ifndef ANDROID
+    // Can't undock on Android, as windows don't have title bars to allow them to be moved
     m_titleBarLayout->addWidget(m_normalButton);
+    // Don't allow workspaces to be hidden on Android, as if all are hidden, they'll
+    // be no way to redisplay them, as we currently don't have a main menu bar
     m_titleBarLayout->addWidget(m_closeButton);
+#else
+    setFeatures(QDockWidget::NoDockWidgetFeatures);
+#endif
     setTitleBarWidget(m_titleBar);
 
     QObject::connect(
@@ -199,6 +242,13 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     );
 
     QObject::connect(
+        m_configurationPresetsButton,
+        &QPushButton::clicked,
+        this,
+        &Workspace::configurationPresetsDialog
+    );
+
+    QObject::connect(
         m_cascadeSubWindows,
         &QPushButton::clicked,
         this,
@@ -210,6 +260,13 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         &QPushButton::clicked,
         this,
         &Workspace::tileSubWindows
+    );
+
+    QObject::connect(
+        m_stackVerticalSubWindows,
+        &QPushButton::clicked,
+        this,
+        &Workspace::stackVerticalSubWindows
     );
 
     QObject::connect(
@@ -227,10 +284,10 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     );
 
     QObject::connect(
-        m_autoStackSubWindows,
+        m_tabSubWindows,
         &QPushButton::clicked,
         this,
-        &Workspace::autoStackSubWindows
+        &Workspace::tabSubWindows
     );
 
     QObject::connect(
@@ -256,6 +313,17 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         &Workspace::deviceStateChanged
     );
 
+    QObject::connect(
+        m_mdi,
+        &QMdiArea::subWindowActivated,
+        this,
+        &Workspace::subWindowActivated
+    );
+
+#ifdef ANDROID
+    m_tabSubWindows->setChecked(true);
+    tabSubWindows();
+#endif
 }
 
 Workspace::~Workspace()
@@ -263,13 +331,17 @@ Workspace::~Workspace()
     qDebug("Workspace::~Workspace");
     delete m_closeButton;
     delete m_normalButton;
-    delete m_autoStackSubWindows;
+    delete m_tabSubWindows;
     delete m_stackSubWindows;
+    delete m_stackVerticalSubWindows;
     delete m_tileSubWindows;
     delete m_cascadeSubWindows;
+    delete m_vline3;
     delete m_vline2;
     delete m_vline1;
     delete m_startStopButton;
+    delete m_configurationPresetsButton;
+    delete m_menuButton;
     delete m_addRxDeviceButton;
     delete m_addTxDeviceButton;
     delete m_addMIMODeviceButton;
@@ -346,16 +418,124 @@ void Workspace::featurePresetsDialog()
     emit featurePresetsDialogRequested(p, this);
 }
 
+void Workspace::configurationPresetsDialog()
+{
+    emit configurationPresetsDialogRequested();
+}
+
 void Workspace::cascadeSubWindows()
 {
-    m_autoStackSubWindows->setChecked(false);
+    setAutoStackOption(false);
+    m_tabSubWindows->setChecked(false);
+    m_mdi->setViewMode(QMdiArea::SubWindowView);
     m_mdi->cascadeSubWindows();
 }
 
 void Workspace::tileSubWindows()
 {
-    m_autoStackSubWindows->setChecked(false);
+    setAutoStackOption(false);
+    m_tabSubWindows->setChecked(false);
+    m_mdi->setViewMode(QMdiArea::SubWindowView);
     m_mdi->tileSubWindows();
+}
+
+void Workspace::stackVerticalSubWindows()
+{
+    setAutoStackOption(false);
+    unmaximizeSubWindows();
+    m_mdi->setViewMode(QMdiArea::SubWindowView);
+
+    // Spacing between windows
+    const int spacing = 2;
+
+    // Categorise windows according to type and calculate min size needed
+    QList<QMdiSubWindow *> windows = m_mdi->subWindowList(QMdiArea::CreationOrder);
+    QList<DeviceGUI *> devices;
+    QList<MainSpectrumGUI *> spectrums;
+    QList<ChannelGUI *> channels;
+    QList<FeatureGUI *> features;
+    int minHeight = 0;
+    int minWidth = 0;
+    int nonFixedWindows = 0;
+
+    for (auto window : windows)
+    {
+        if (window->isVisible() && !window->isMaximized())
+        {
+            if (window->inherits("DeviceGUI")) {
+                devices.append(qobject_cast<DeviceGUI *>(window));
+            } else if (window->inherits("MainSpectrumGUI")) {
+                spectrums.append(qobject_cast<MainSpectrumGUI *>(window));
+            } else if (window->inherits("ChannelGUI")) {
+                channels.append(qobject_cast<ChannelGUI *>(window));
+            } else if (window->inherits("FeatureGUI")) {
+                features.append(qobject_cast<FeatureGUI *>(window));
+            }
+            minHeight += window->minimumSizeHint().height() + spacing;
+            minWidth = std::max(minWidth, window->minimumSizeHint().width());
+            if (window->sizePolicy().verticalPolicy() != QSizePolicy::Fixed) {
+                nonFixedWindows++;
+            }
+        }
+    }
+
+    // Order windows by device/feature/channel index
+    orderByIndex(devices);
+    orderByIndex(spectrums);
+    orderByIndex(channels);
+    orderByIndex(features);
+
+    // Will we need scroll bars?
+    QSize mdiSize = m_mdi->size();
+    bool requiresHScrollBar = minWidth > mdiSize.width();
+    bool requiresVScrollBar = minHeight > mdiSize.height();
+
+    // Reduce available size if scroll bars needed
+    int sbWidth = qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+    if (requiresVScrollBar) {
+        mdiSize.setWidth(mdiSize.width() - sbWidth);
+    }
+    if (requiresHScrollBar) {
+        mdiSize.setHeight(mdiSize.height() - sbWidth);
+    }
+
+    // Calculate spare vertical space, to be shared between non-fixed windows
+    int spareSpacePerWindow;
+    if (requiresVScrollBar) {
+        spareSpacePerWindow = 0;
+    } else {
+        spareSpacePerWindow = (mdiSize.height() - minHeight) / nonFixedWindows;
+    }
+
+    // Now position the windows
+    int x = 0;
+    int y = 0;
+
+    for (auto window : devices)
+    {
+        window->move(x, y);
+        y += window->size().height() + spacing;
+    }
+    for (auto window : spectrums)
+    {
+        window->move(x, y);
+        window->resize(mdiSize.width(), window->minimumSizeHint().height() + spareSpacePerWindow);
+        y += window->size().height() + spacing;
+    }
+    for (auto window : channels)
+    {
+        window->move(x, y);
+        int extra = (window->sizePolicy().verticalPolicy() == QSizePolicy::Fixed) ? 0 : spareSpacePerWindow;
+        window->resize(mdiSize.width(), window->minimumSizeHint().height() + extra);
+        y += window->size().height() + spacing;
+    }
+    for (auto window : features)
+    {
+        window->move(x, y);
+        int extra = (window->sizePolicy().verticalPolicy() == QSizePolicy::Fixed) ? 0 : spareSpacePerWindow;
+        window->resize(mdiSize.width(), window->minimumSizeHint().height() + extra);
+        y += window->size().height() + spacing;
+    }
 }
 
 void Workspace::orderByIndex(QList<ChannelGUI *> &list)
@@ -398,15 +578,35 @@ void Workspace::orderByIndex(QList<MainSpectrumGUI *> &list)
         });
 }
 
+void Workspace::unmaximizeSubWindows()
+{
+    if (m_tabSubWindows->isChecked())
+    {
+        m_tabSubWindows->setChecked(false);
+        // Unmaximize any maximized windows
+        QList<QMdiSubWindow *> windows = m_mdi->subWindowList(QMdiArea::CreationOrder);
+        for (auto window : windows)
+        {
+            if (window->isMaximized()) {
+                window->showNormal();
+            }
+        }
+    }
+}
+
 // Try to arrange windows somewhat like in earlier versions of SDRangel
 // Devices and fixed size features stacked on left
 // Spectrum and expandable features stacked in centre
 // Channels stacked on right
 void Workspace::stackSubWindows()
 {
+    unmaximizeSubWindows();
+
     // Set a flag so event handler knows if it's this code or the user that
     // resizes a window
     m_stacking = true;
+
+    m_mdi->setViewMode(QMdiArea::SubWindowView);
 
     // Categorise windows according to type
     QList<QMdiSubWindow *> windows = m_mdi->subWindowList(QMdiArea::CreationOrder);
@@ -653,7 +853,54 @@ void Workspace::stackSubWindows()
 
 void Workspace::autoStackSubWindows()
 {
-    if (m_autoStackSubWindows->isChecked()) {
+    setAutoStackOption(!m_autoStack);
+}
+
+void Workspace::tabSubWindows()
+{
+    if (m_tabSubWindows->isChecked())
+    {
+        // Disable autostack
+        setAutoStackOption(false);
+
+        // Move sub windows out of view, so they can't be seen next to a non-expandible window
+        // Perhaps there's a better way to do this - showMinimized didn't work
+        QList<QMdiSubWindow *> windows = m_mdi->subWindowList(QMdiArea::CreationOrder);
+        for (auto window : windows)
+        {
+            if ((window != m_mdi->activeSubWindow()) && ((window->x() != 5000) || (window->y() != 0))) {
+                window->move(5000, 0);
+            }
+        }
+
+        m_mdi->setViewMode(QMdiArea::TabbedView);
+    }
+    else
+    {
+        m_mdi->setViewMode(QMdiArea::SubWindowView);
+    }
+}
+
+void Workspace::subWindowActivated(QMdiSubWindow *activatedWindow)
+{
+    if (activatedWindow && m_tabSubWindows->isChecked())
+    {
+        // Move other windows out of the way
+        QList<QMdiSubWindow *> windows = m_mdi->subWindowList(QMdiArea::CreationOrder);
+        for (auto window : windows)
+        {
+            if ((window != activatedWindow) && ((window->x() != 5000) || (window->y() != 0))) {
+                window->move(5000, 0);
+            } else if ((window == activatedWindow) && ((window->x() != 0) || (window->y() != 0))) {
+                window->move(0, 0);
+            }
+        }
+    }
+}
+
+void Workspace::layoutSubWindows()
+{
+    if (m_autoStack) {
         stackSubWindows();
     }
 }
@@ -716,7 +963,7 @@ void Workspace::deviceStateChanged(int index, DeviceAPI *deviceAPI)
 void Workspace::resizeEvent(QResizeEvent *event)
 {
     QDockWidget::resizeEvent(event);
-    autoStackSubWindows();
+    layoutSubWindows();
 }
 
 void Workspace::addToMdiArea(QMdiSubWindow *sub)
@@ -725,17 +972,20 @@ void Workspace::addToMdiArea(QMdiSubWindow *sub)
     sub->installEventFilter(this);
     // Can't use Close event, as it's before window is closed, so
     // catch sub-window destroyed signal instead
-    connect(sub, &QObject::destroyed, this, &Workspace::autoStackSubWindows);
+    connect(sub, &QObject::destroyed, this, &Workspace::layoutSubWindows);
     m_mdi->addSubWindow(sub);
     sub->show();
-    // Auto-stack when sub-window's  widgets are rolled up
+    // Auto-stack when sub-window's widgets are rolled up
     ChannelGUI *channel = qobject_cast<ChannelGUI *>(sub);
     if (channel) {
-        connect(channel->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::autoStackSubWindows);
+        connect(channel->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::layoutSubWindows);
     }
     FeatureGUI *feature = qobject_cast<FeatureGUI *>(sub);
     if (feature) {
-        connect(feature->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::autoStackSubWindows);
+        connect(feature->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::layoutSubWindows);
+    }
+    if (m_tabSubWindows->isChecked()) {
+        sub->showMaximized();
     }
 }
 
@@ -743,14 +993,14 @@ void Workspace::removeFromMdiArea(QMdiSubWindow *sub)
 {
     m_mdi->removeSubWindow(sub);
     sub->removeEventFilter(this);
-    disconnect(sub, &QObject::destroyed, this, &Workspace::autoStackSubWindows);
+    disconnect(sub, &QObject::destroyed, this, &Workspace::layoutSubWindows);
     ChannelGUI *channel = qobject_cast<ChannelGUI *>(sub);
     if (channel) {
-        disconnect(channel->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::autoStackSubWindows);
+        disconnect(channel->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::layoutSubWindows);
     }
     FeatureGUI *feature = qobject_cast<FeatureGUI *>(sub);
     if (feature) {
-        disconnect(feature->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::autoStackSubWindows);
+        disconnect(feature->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::layoutSubWindows);
     }
 }
 
@@ -760,19 +1010,19 @@ bool Workspace::eventFilter(QObject *obj, QEvent *event)
     {
         QWidget *widget = qobject_cast<QWidget *>(obj);
         if (!widget->isMaximized()) {
-            autoStackSubWindows();
+            layoutSubWindows();
         }
     }
     else if (event->type() == QEvent::Hide)
     {
         QWidget *widget = qobject_cast<QWidget *>(obj);
         if (!widget->isMaximized()) {
-            autoStackSubWindows();
+            layoutSubWindows();
         }
     }
     else if (event->type() == QEvent::Resize)
     {
-        if (!m_stacking && m_autoStackSubWindows->isChecked())
+        if (!m_stacking && m_autoStack)
         {
             QWidget *widget = qobject_cast<QWidget *>(obj);
             QResizeEvent *resizeEvent = static_cast<QResizeEvent *>(event);
@@ -812,12 +1062,38 @@ void Workspace::restoreMdiGeometry(const QByteArray& blob)
 
 bool Workspace::getAutoStackOption() const
 {
-    return m_autoStackSubWindows->isChecked();
+    return m_autoStack;
 }
 
 void Workspace::setAutoStackOption(bool autoStack)
 {
-    m_autoStackSubWindows->doToggle(autoStack);
+    m_autoStack = autoStack;
+    if (!m_autoStack)
+    {
+        m_stackSubWindows->setStyleSheet(QString("QPushButton{ background-color: %1; }")
+            .arg(palette().button().color().name()));
+    }
+    else
+    {
+        m_stackSubWindows->setStyleSheet(QString("QPushButton{ background-color: %1;  }")
+            .arg(palette().highlight().color().darker(150).name()));
+        stackSubWindows();
+    }
+}
+
+bool Workspace::getTabSubWindowsOption() const
+{
+    return m_tabSubWindows->isChecked();
+}
+
+void Workspace::setTabSubWindowsOption(bool tab)
+{
+    m_tabSubWindows->doToggle(tab);
+    if (tab) {
+        tabSubWindows();
+    } else {
+        m_mdi->setViewMode(QMdiArea::SubWindowView);
+    }
 }
 
 void Workspace::adjustSubWindowsAfterRestore()

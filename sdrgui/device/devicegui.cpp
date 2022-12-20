@@ -162,7 +162,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_topLayout->addWidget(m_maximizeButton);
     m_topLayout->addWidget(m_closeButton);
 
-    m_centerLayout = new QHBoxLayout();
+    m_centerLayout = new QVBoxLayout();
     m_centerLayout->setContentsMargins(0, 0, 0, 0);
     m_contents = new QWidget(); // Do not delete! Done in child's destructor with "delete ui"
     m_centerLayout->addWidget(m_contents);
@@ -412,6 +412,7 @@ void DeviceGUI::deviceSetPresetsDialog()
 
 void DeviceGUI::setTitle(const QString& title)
 {
+    setWindowTitle(title + " Device");
     m_titleLabel->setText(title);
 }
 

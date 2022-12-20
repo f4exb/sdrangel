@@ -110,6 +110,7 @@ private:
     QMap<QWidget*, int> m_heightsMap;
     FramelessWindowResizer m_resizer;
     bool m_disableResize;
+    QMdiArea *m_mdi;                    // Saved pointer to MDI when in full screen mode
 
 private slots:
     void activateSettingsDialog();
