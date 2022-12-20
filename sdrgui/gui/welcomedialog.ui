@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>WelcomeDialog</class>
+ <widget class="QDialog" name="WelcomeDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>360</width>
+    <height>390</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Welcome to SDRangel</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetFixedSize</enum>
+   </property>
+   <item>
+    <widget class="QLabel" name="logo">
+     <property name="maximumSize">
+      <size>
+       <width>48</width>
+       <height>48</height>
+      </size>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="../resources/res.qrc">:/sdrangel_icon.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="info">
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SDRangel is the software frontend of a SDR (Software Defined Radio). When combined with any of the following SDR hardware via USB OTG, it can be used to visualise and demodulate received radio signals as well as transmit (depending on the SDR hardware).&lt;/p&gt;&lt;p&gt;- RTL SDR&lt;br/&gt;- Airspy&lt;br/&gt;- Airspy HF&lt;br/&gt;- LimeSDR (not the mini)&lt;br/&gt;- SDRplay (via &lt;a href=&quot;https://play.google.com/store/apps/details?id=com.sdrplay.driver&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;SDRplay Driver&lt;/span&gt;&lt;/a&gt;)&lt;br/&gt;- HackRF (via &lt;a href=&quot;https://play.google.com/store/apps/details?id=marto.rtl_tcp_andro&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;SDR Driver&lt;/span&gt;&lt;/a&gt;)&lt;/p&gt;&lt;p&gt;SDRangel can also receive and transmit IQ data from/to a remote PC via TCP or UDP.&lt;/p&gt;&lt;p&gt;SDRangel was designed as a desktop application, and so will work best on tablets with large screens and a mouse or stylus. Touch gestures can be used in the spectrum window: Use two fingers swiping right or left to change frequency up or down and pinch to zoom. Tap and hold dials to use a popup slider.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+  <include location="../resources/res.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>WelcomeDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>WelcomeDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
