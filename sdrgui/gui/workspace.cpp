@@ -501,7 +501,7 @@ void Workspace::stackVerticalSubWindows()
 
     // Calculate spare vertical space, to be shared between non-fixed windows
     int spareSpacePerWindow;
-    if (requiresVScrollBar) {
+    if (requiresVScrollBar || (nonFixedWindows == 0)) {
         spareSpacePerWindow = 0;
     } else {
         spareSpacePerWindow = (mdiSize.height() - minHeight) / nonFixedWindows;
