@@ -41,9 +41,12 @@
 #include "gui/datetimedelegate.h"
 #include "gui/decimaldelegate.h"
 #include "gui/timedelegate.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "dsp/glscopesettings.h"
 #include "gui/crightclickenabler.h"
+#include "gui/tabletapandhold.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
 #include "feature/featurewebapiutils.h"
@@ -501,6 +504,7 @@ void RadiosondeDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -627,6 +631,8 @@ RadiosondeDemodGUI::RadiosondeDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     connect(ui->frames->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(frames_sectionResized(int, int, int)));
     ui->frames->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->frames, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customContextMenuRequested(QPoint)));
+    TableTapAndHold *tableTapAndHold = new TableTapAndHold(ui->frames);
+    connect(tableTapAndHold, &TableTapAndHold::tapAndHold, this, &RadiosondeDemodGUI::customContextMenuRequested);
 
     ui->frames->setItemDelegateForColumn(FRAME_COL_DATE, new DateTimeDelegate("yyyy/MM/dd"));
     ui->frames->setItemDelegateForColumn(FRAME_COL_TIME, new TimeDelegate());
@@ -643,6 +649,7 @@ RadiosondeDemodGUI::RadiosondeDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 void RadiosondeDemodGUI::customContextMenuRequested(QPoint pos)

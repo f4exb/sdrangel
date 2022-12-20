@@ -32,6 +32,7 @@
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
+#include "gui/dialogpositioner.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
 #include "util/units.h"
@@ -397,6 +398,7 @@ void SatelliteTrackerGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();
@@ -512,7 +514,7 @@ void SatelliteTrackerGUI::on_useMyPosition_clicked(bool checked)
 void SatelliteTrackerGUI::on_displaySettings_clicked()
 {
     SatelliteTrackerSettingsDialog dialog(&m_settings);
-
+    new DialogPositioner(&dialog, true);
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settingsKeys.append("deviceSettings");
@@ -575,7 +577,7 @@ void SatelliteTrackerGUI::on_updateSatData_clicked()
 void SatelliteTrackerGUI::on_selectSats_clicked()
 {
     SatelliteSelectionDialog dialog(&m_settings, m_satellites);
-
+    new DialogPositioner(&dialog, true);
     if (dialog.exec() == QDialog::Accepted)
     {
         updateSelectedSats();
@@ -587,7 +589,7 @@ void SatelliteTrackerGUI::on_selectSats_clicked()
 void SatelliteTrackerGUI::on_radioControl_clicked()
 {
     SatelliteRadioControlDialog dialog(&m_settings, m_satellites);
-
+    new DialogPositioner(&dialog, true);
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settingsKeys.append("deviceSettings");

@@ -19,6 +19,7 @@
 
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "maincore.h"
 
@@ -234,6 +235,7 @@ void BeamSteeringCWModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();

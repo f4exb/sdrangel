@@ -34,6 +34,8 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/fmpreemphasisdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "maincore.h"
 
 #include "ui_packetmodgui.h"
@@ -403,6 +405,7 @@ void PacketModGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -510,6 +513,7 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     displaySettings();
     makeUIConnections();
     applySettings();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 PacketModGUI::~PacketModGUI()

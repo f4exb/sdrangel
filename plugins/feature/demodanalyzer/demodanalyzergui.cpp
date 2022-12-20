@@ -23,6 +23,8 @@
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/glspectrum.h"
 #include "gui/glscope.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "device/deviceset.h"
 #include "util/db.h"
 #include "maincore.h"
@@ -188,6 +190,7 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
     displaySettings();
 	applySettings(true);
     makeUIConnections();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 DemodAnalyzerGUI::~DemodAnalyzerGUI()
@@ -276,6 +279,7 @@ void DemodAnalyzerGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();

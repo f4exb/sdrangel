@@ -42,9 +42,12 @@
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "dsp/glscopesettings.h"
 #include "gui/crightclickenabler.h"
+#include "gui/tabletapandhold.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
 #include "feature/featurewebapiutils.h"
@@ -395,6 +398,7 @@ void AISDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, true);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -521,12 +525,15 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(ui->messages->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(messages_sectionResized(int, int, int)));
     ui->messages->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->messages, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customContextMenuRequested(QPoint)));
+    TableTapAndHold *tableTapAndHold = new TableTapAndHold(ui->messages);
+    connect(tableTapAndHold, &TableTapAndHold::tapAndHold, this, &AISDemodGUI::customContextMenuRequested);
 
     ui->scopeContainer->setVisible(false);
 
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 void AISDemodGUI::customContextMenuRequested(QPoint pos)

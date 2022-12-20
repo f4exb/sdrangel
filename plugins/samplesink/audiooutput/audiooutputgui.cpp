@@ -23,6 +23,8 @@
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/audioselectdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "audiooutputgui.h"
@@ -60,6 +62,7 @@ AudioOutputGui::AudioOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_audioOutput->setMessageQueueToGUI(&m_inputMessageQueue);
 
     makeUIConnections();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 AudioOutputGui::~AudioOutputGui()
@@ -246,6 +249,7 @@ void AudioOutputGui::openDeviceSettingsDialog(const QPoint& p)
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_useReverseAPI = dialog.useReverseAPI();

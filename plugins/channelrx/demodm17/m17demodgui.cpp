@@ -37,6 +37,8 @@
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "maincore.h"
 
@@ -363,6 +365,7 @@ void M17DemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -510,6 +513,7 @@ M17DemodGUI::M17DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	displaySettings();
     makeUIConnections();
 	applySettings(QList<QString>(), true);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 M17DemodGUI::~M17DemodGUI()

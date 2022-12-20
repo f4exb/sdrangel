@@ -25,6 +25,8 @@
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "ui_udpsinkgui.h"
 #include "maincore.h"
 
@@ -214,6 +216,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     makeUIConnections();
 	applySettingsImmediate(true);
 	applySettings(true);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 UDPSinkGUI::~UDPSinkGUI()
@@ -623,6 +626,7 @@ void UDPSinkGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();

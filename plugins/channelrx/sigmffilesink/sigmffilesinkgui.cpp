@@ -23,6 +23,8 @@
 #include "device/deviceapi.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
 #include "mainwindow.h"
@@ -217,6 +219,7 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 SigMFFileSinkGUI::~SigMFFileSinkGUI()
@@ -370,6 +373,7 @@ void SigMFFileSinkGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();

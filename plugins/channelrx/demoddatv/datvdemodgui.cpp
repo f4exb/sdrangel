@@ -31,6 +31,8 @@
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "mainwindow.h"
 
 #include "ui_datvdemodgui.h"
@@ -183,6 +185,7 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -310,6 +313,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     ui->udpIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     resetToDefaults(); // does applySettings()
     makeUIConnections();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 DATVDemodGUI::~DATVDemodGUI()

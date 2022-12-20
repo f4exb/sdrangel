@@ -11,6 +11,8 @@
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "dsp/dcscodes.h"
 #include "dsp/dspcommands.h"
@@ -315,6 +317,7 @@ void NFMDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -439,6 +442,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	displaySettings();
     makeUIConnections();
 	applySettings(true);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 NFMDemodGUI::~NFMDemodGUI()

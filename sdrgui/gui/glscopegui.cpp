@@ -23,6 +23,7 @@
 #include "glscopegui.h"
 #include "glscope.h"
 #include "ui_glscopegui.h"
+#include "gui/dialpopup.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 
@@ -48,6 +49,7 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
     m_focusedTriggerColor.setRgb(0,255,0);
     ui->traceText->setText("X");
     ui->mem->setMaximum(GLScopeSettings::m_nbTraceMemories - 1);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 GLScopeGUI::~GLScopeGUI()

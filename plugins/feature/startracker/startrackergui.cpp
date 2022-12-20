@@ -38,6 +38,7 @@
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dmsspinbox.h"
 #include "gui/graphicsviewzoom.h"
+#include "gui/dialogpositioner.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
 #include "util/units.h"
@@ -491,6 +492,7 @@ void StarTrackerGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();
@@ -1122,6 +1124,8 @@ void StarTrackerGUI::createGalacticLineOfSightScene()
 
     ui->image->setScene(scene);
     ui->image->show();
+
+    ui->image->setDragMode(QGraphicsView::ScrollHandDrag);
 }
 
 void StarTrackerGUI::plotGalacticLineOfSight()

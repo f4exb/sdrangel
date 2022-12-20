@@ -27,6 +27,8 @@
 #include "gui/glspectrum.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
@@ -215,6 +217,7 @@ void FreeDVDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -326,6 +329,7 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	displaySettings();
     makeUIConnections();
 	applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
+    DialPopup::addPopupsToChildDials(this);
 }
 
 FreeDVDemodGUI::~FreeDVDemodGUI()

@@ -17,11 +17,20 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QScreen>
+
 #include "sdrangelsplash.h"
 
 SDRangelSplash::SDRangelSplash(const QPixmap& pixmap)
 {
-   QSplashScreen::setPixmap(pixmap);
+    int screenWidth = screen()->availableGeometry().width();
+    QPixmap pm;
+    if (pixmap.width() > screenWidth) {
+        pm = pixmap.scaledToWidth(screenWidth, Qt::SmoothTransformation);
+    } else {
+        pm = pixmap;
+    }
+    QSplashScreen::setPixmap(pm);
 };
 
 SDRangelSplash::~SDRangelSplash()

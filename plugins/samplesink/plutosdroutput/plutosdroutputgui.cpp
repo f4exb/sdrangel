@@ -23,6 +23,8 @@
 #include "dsp/dspcommands.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "plutosdr/deviceplutosdr.h"
@@ -81,6 +83,7 @@ PlutoSDROutputGUI::PlutoSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
     m_statusTimer.start(500);
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 PlutoSDROutputGUI::~PlutoSDROutputGUI()
@@ -525,6 +528,7 @@ void PlutoSDROutputGUI::openDeviceSettingsDialog(const QPoint& p)
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_useReverseAPI = dialog.useReverseAPI();

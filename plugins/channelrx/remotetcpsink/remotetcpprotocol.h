@@ -67,6 +67,7 @@ public:
 
     enum Command {
         // These are compatbile with osmocom rtl_tcp: https://github.com/osmocom/rtl-sdr/blob/master/src/rtl_tcp.c
+        // and Android https://github.com/signalwareltd/rtl_tcp_andro-/blob/master/rtlsdr/src/main/cpp/src/tcp_commands.h
         setCenterFrequency = 0x1,           // rtlsdr_set_center_freq
         setSampleRate = 0x2,                // rtlsdr_set_sample_rate
         setTunerGainMode = 0x3,             // rtlsdr_set_tuner_gain_mode
@@ -80,9 +81,22 @@ public:
         setXtalFrequency = 0xb,             // Not supported by SDRangel
         setXtalFrequency2 = 0xc,            // Not supported by SDRangel
         setGainByIndex = 0xd,               // Not supported by SDRangel
-        setBiasTee = 0xe,                   // rtlsdr_set_bias_tee
-        // These extensions are from librtlsdr rtl_tcp: https://github.com/librtlsdr/librtlsdr/blob/development/include/rtl_tcp.h
+        setBiasTee = 0xe,                   // rtlsdr_set_bias_tee (Not supported on Android)
+        // These extensions are from rsp_tcp: https://github.com/SDRplay/RSPTCPServer/blob/master/rsp_tcp_api.h
+        rspSetAntenna = 0x1f,
+        rspSetLNAState = 0x20,
+        rspSetIfGainR = 0x21,
+        rspSetAGC = 0x22,
+        rspSetAGCSetPoint = 0x23,
+        rspSetNotch = 0x24,
+        rspSetBiasT = 0x25,
+        rspSetRefOut = 0x26,
+         // These extensions are from librtlsdr rtl_tcp: https://github.com/librtlsdr/librtlsdr/blob/development/include/rtl_tcp.h
         setTunerBandwidth = 0x40,
+        // Android extensions https://github.com/signalwareltd/rtl_tcp_andro-/blob/master/rtlsdr/src/main/cpp/src/tcp_commands.h
+        androidExit = 0x7e,
+        androidGainByPercentage = 0x7f,
+        androidEnable16BitSigned = 0x80,    // SDRplay, not RTL SDR
         // These are SDRangel extensions
         setDCOffsetRemoval = 0xc0,
         setIQCorrection = 0xc1,
@@ -96,6 +110,7 @@ public:
     };
 
     static const int m_rtl0MetaDataSize = 12;
+    static const int m_rsp0MetaDataSize = 45;
     static const int m_sdraMetaDataSize = 64;
 
     static void encodeInt16(quint8 *p, qint16 data)

@@ -24,6 +24,7 @@
 
 #include "audio/audiodevicemanager.h"
 #include "audiodialog.h"
+#include "gui/dialpopup.h"
 #include "ui_audiodialog.h"
 
 AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* parent) :
@@ -95,6 +96,7 @@ AudioDialogX::AudioDialogX(AudioDeviceManager* audioDeviceManager, QWidget* pare
     m_inIndex = -1;
 
 	ui->tabWidget->setCurrentIndex(0);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 AudioDialogX::~AudioDialogX()

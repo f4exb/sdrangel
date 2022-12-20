@@ -20,6 +20,7 @@
 #include <QDebug>
 
 #include "gui/cwkeyergui.h"
+#include "gui/dialpopup.h"
 #include "ui_cwkeyergui.h"
 #include "dsp/cwkeyer.h"
 #include "util/simpleserializer.h"
@@ -38,6 +39,7 @@ CWKeyerGUI::CWKeyerGUI(QWidget* parent) :
     m_commandKeyReceiver = new CommandKeyReceiver();
     m_commandKeyReceiver->setRelease(true);
     this->installEventFilter(m_commandKeyReceiver);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 CWKeyerGUI::~CWKeyerGUI()

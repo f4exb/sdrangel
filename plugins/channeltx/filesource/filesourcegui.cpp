@@ -25,6 +25,7 @@
 #include "dsp/dspcommands.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialogpositioner.h"
 #include "util/db.h"
 
 #include "mainwindow.h"
@@ -386,6 +387,7 @@ void FileSourceGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();

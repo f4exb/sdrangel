@@ -43,6 +43,8 @@
 #include "util/units.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "gui/crightclickenabler.h"
 #include "gui/graphicsviewzoom.h"
@@ -570,6 +572,7 @@ void APTDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -669,12 +672,14 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_scene->addItem(m_tempText);
     ui->image->setScene(m_scene);
     ui->image->show();
+    ui->image->setDragMode(QGraphicsView::ScrollHandDrag);
 
     m_scene->installEventFilter(this);
 
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    DialPopup::addPopupsToChildDials(this);
 }
 
 APTDemodGUI::~APTDemodGUI()

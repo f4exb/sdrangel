@@ -29,6 +29,7 @@
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "util/db.h"
@@ -330,6 +331,7 @@ void KiwiSDRGui::openDeviceSettingsDialog(const QPoint& p)
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_useReverseAPI = dialog.useReverseAPI();

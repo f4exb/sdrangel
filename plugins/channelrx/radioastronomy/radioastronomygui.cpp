@@ -51,6 +51,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/timedelegate.h"
 #include "gui/decimaldelegate.h"
+#include "gui/dialogpositioner.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
 #include "feature/featurewebapiutils.h"
@@ -1929,6 +1930,7 @@ void RadioAstronomyGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();

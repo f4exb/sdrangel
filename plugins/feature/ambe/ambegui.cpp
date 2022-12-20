@@ -18,6 +18,7 @@
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/crightclickenabler.h"
+#include "gui/dialogpositioner.h"
 
 #include "ui_ambegui.h"
 #include "ambegui.h"
@@ -125,6 +126,7 @@ void AMBEGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();

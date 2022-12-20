@@ -27,6 +27,8 @@
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/datetimedelegate.h"
 #include "gui/decimaldelegate.h"
+#include "gui/tabletapandhold.h"
+#include "gui/dialogpositioner.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
 
@@ -175,6 +177,8 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
     // Context menu
     ui->radiosondes->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->radiosondes, SIGNAL(customContextMenuRequested(QPoint)), SLOT(radiosondes_customContextMenuRequested(QPoint)));
+    TableTapAndHold *tableTapAndHold = new TableTapAndHold(ui->radiosondes);
+    connect(tableTapAndHold, &TableTapAndHold::tapAndHold, this, &RadiosondeGUI::customContextMenuRequested);
 
     ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_LATITUDE, new DecimalDelegate(5));
     ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_LONGITUDE, new DecimalDelegate(5));
@@ -254,6 +258,7 @@ void RadiosondeGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();

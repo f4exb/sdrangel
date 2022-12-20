@@ -29,6 +29,8 @@
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicemimoengine.h"
 #include "dsp/dspcommands.h"
@@ -88,6 +90,7 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     makeUIConnections();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 TestMIGui::~TestMIGui()
@@ -559,6 +562,7 @@ void TestMIGui::openDeviceSettingsDialog(const QPoint& p)
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_useReverseAPI = dialog.useReverseAPI();

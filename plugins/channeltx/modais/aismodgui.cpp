@@ -35,6 +35,8 @@
 #include "gui/crightclickenabler.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "maincore.h"
 
 #include "ui_aismodgui.h"
@@ -366,6 +368,7 @@ void AISModGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
@@ -497,6 +500,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     displaySettings();
     makeUIConnections();
     applySettings();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 AISModGUI::~AISModGUI()

@@ -83,6 +83,7 @@ private:
 	void wheelEvent(QWheelEvent*);
 	void leaveEvent(QEvent*);
 	void keyPressEvent(QKeyEvent*);
+    void inputMethodEvent(QInputMethodEvent*);
 	void focusInEvent(QFocusEvent*);
 	void focusOutEvent(QFocusEvent*);
 

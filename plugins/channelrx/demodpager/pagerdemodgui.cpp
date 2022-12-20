@@ -42,6 +42,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/glscopesettings.h"
 #include "gui/crightclickenabler.h"
+#include "gui/dialogpositioner.h"
 #include "maincore.h"
 
 #include "pagerdemod.h"
@@ -444,6 +445,7 @@ void PagerDemodGUI::onMenuDialogCalled(const QPoint &p)
         }
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();

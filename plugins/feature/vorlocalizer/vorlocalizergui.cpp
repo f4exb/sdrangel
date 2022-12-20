@@ -41,6 +41,8 @@
 #include "util/units.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/crightclickenabler.h"
+#include "gui/dialpopup.h"
+#include "gui/dialogpositioner.h"
 #include "maincore.h"
 
 #include "vorlocalizer.h"
@@ -833,6 +835,7 @@ void VORLocalizerGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();
@@ -970,6 +973,8 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
+    ui->map->setAttribute(Qt::WA_AcceptTouchEvents, true);
+
     ui->map->rootContext()->setContextProperty("vorModel", &m_vorModel);
     ui->map->setSource(QUrl(QStringLiteral("qrc:/demodvor/map/map.qml")));
 
@@ -1042,6 +1047,7 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     connect(MainCore::instance(), &MainCore::deviceChanged, this, &VORLocalizerGUI::channelsRefresh);
     // List already opened channels
     channelsRefresh();
+    DialPopup::addPopupsToChildDials(this);
 }
 
 VORLocalizerGUI::~VORLocalizerGUI()
@@ -1269,8 +1275,7 @@ bool VORLocalizerGUI::eventFilter(QObject *obj, QEvent *event)
             }
         }
     }
-
-    return false;
+    return FeatureGUI::eventFilter(obj, event);
 }
 
 void VORLocalizerGUI::makeUIConnections()

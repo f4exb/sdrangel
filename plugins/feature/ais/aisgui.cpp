@@ -27,6 +27,8 @@
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
+#include "gui/tabletapandhold.h"
+#include "gui/dialogpositioner.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
 
@@ -226,6 +228,8 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     // Context menu
     ui->vessels->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->vessels, SIGNAL(customContextMenuRequested(QPoint)), SLOT(vessels_customContextMenuRequested(QPoint)));
+    TableTapAndHold *tableTapAndHold = new TableTapAndHold(ui->vessels);
+    connect(tableTapAndHold, &TableTapAndHold::tapAndHold, this, &AISGUI::vessels_customContextMenuRequested);
 
     m_settings.setRollupState(&m_rollupState);
 
@@ -291,6 +295,7 @@ void AISGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();

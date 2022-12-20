@@ -20,6 +20,7 @@
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
+#include "gui/dialogpositioner.h"
 #include "device/deviceset.h"
 #include "maincore.h"
 
@@ -298,6 +299,7 @@ void RigCtlServerGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();

@@ -49,6 +49,8 @@ Item {
             plugin: mapPlugin
             center: QtPositioning.coordinate(51.5, 0.125) // London
             zoomLevel: 10
+            gesture.enabled: true
+            gesture.acceptedGestures: MapGestureArea.PinchGesture | MapGestureArea.PanGesture
 
             MapItemView {
                 model: vorModel
