@@ -19,38 +19,24 @@
 #ifndef SDRGUI_GUI_CRIGHTCLICKENABLER_H_
 #define SDRGUI_GUI_CRIGHTCLICKENABLER_H_
 
-#include <QAbstractButton>
-#include <QMouseEvent>
+#include <QWidget>
 
 #include "export.h"
 
 class SDRGUI_API CRightClickEnabler : public QObject {
     Q_OBJECT
 public:
-    CRightClickEnabler(QAbstractButton *button);
+    CRightClickEnabler(QWidget *widget);
 
 signals:
-    void rightClick(const QPoint&);
+    void rightClick(const QPoint&);  // Emitted for right mouse click and touch tap and hold
 
 protected:
-    inline bool eventFilter(QObject *watched, QEvent *event) override
-    {
-        (void) watched;
-
-        if (event->type() == QEvent::MouseButtonPress)
-        {
-            auto mouseEvent = (QMouseEvent*) event;
-
-            if (mouseEvent->button() == Qt::RightButton) {
-                emit rightClick(mouseEvent->globalPos());
-            }
-        }
-
-        return false;
-    }
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
-    QAbstractButton* _button;
+    QWidget* m_widget;
+    bool m_mousePressed;
 };
 
 #endif /* SDRGUI_GUI_CRIGHTCLICKENABLER_H_ */
