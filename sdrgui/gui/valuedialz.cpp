@@ -474,6 +474,17 @@ void ValueDialZ::leaveEvent(QEvent*)
     }
 }
 
+void ValueDialZ::inputMethodEvent(QInputMethodEvent* event)
+{
+    // Android numeric virtual keyboard sends inputMethodEvents rather than keyPressEvent for . and -.
+    // No + on keyboard, so use either to flip sign
+    if ((event->commitString() == ".") || (event->commitString() == "-"))
+    {
+        setValue(-m_value);
+        update();
+    }
+}
+
 void ValueDialZ::keyPressEvent(QKeyEvent* value)
 {
     if(m_cursor >= 0)
