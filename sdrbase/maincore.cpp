@@ -18,6 +18,8 @@
 #include <QGlobalStatic>
 #include <QCoreApplication>
 #include <QString>
+#include <QDebug>
+#include <QGeoPositionInfoSource>
 
 #include "loggerwithfile.h"
 #include "dsp/dsptypes.h"
@@ -71,6 +73,8 @@ MainCore::MainCore()
 	m_masterTimer.start(50);
     m_startMsecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
     m_masterElapsedTimer.start();
+    // Position can take a while to determine, so we start updates at program startup
+    initPosition();
 }
 
 MainCore::~MainCore()
@@ -333,5 +337,38 @@ void MainCore::debugMaps()
     for (; feIt != m_featuresMap.end(); ++feIt) {
         qDebug("MainCore::debugMaps: feature fs: %d - %d: %s %s",
             feIt.value()->getIndex(), feIt.key()->getIndexInFeatureSet(), qPrintable(feIt.key()->getURI()), qPrintable(feIt.key()->getName()));
+    }
+}
+
+void MainCore::initPosition()
+{
+    m_positionSource = QGeoPositionInfoSource::createDefaultSource(this);
+    if (m_positionSource)
+    {
+        connect(m_positionSource, &QGeoPositionInfoSource::positionUpdated, this, &MainCore::positionUpdated);
+        m_positionSource->startUpdates();
+    }
+    else
+    {
+        qDebug() << "MainCore::initPosition: No position source.";
+    }
+}
+
+const QGeoPositionInfo& MainCore::getPosition() const
+{
+    return m_position;
+}
+
+void MainCore::positionUpdated(const QGeoPositionInfo &info)
+{
+    if (info.isValid())
+    {
+        m_position = info;
+        if (m_settings.getAutoUpdatePosition())
+        {
+            m_settings.setLatitude(m_position.coordinate().latitude());
+            m_settings.setLongitude(m_position.coordinate().longitude());
+            m_settings.setAltitude(m_position.coordinate().altitude());
+        }
     }
 }

@@ -1,6 +1,7 @@
 project (sdrbase)
 
 if(WIN32)
+    # This should probably be in ../CMakeLists.txt with the other variables like it
     set(OPUS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/external/windows/libopus/include")
     set(OPUS_LIBRARIES "${CMAKE_SOURCE_DIR}/external/windows/libopus/lib/x64/libopus.lib")
 endif()
@@ -45,10 +46,11 @@ if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(sdrbase_LIBSIGMF_LIB ${LIBSIGMF_LIBRARIES})
 endif()
 
-# serialdv now required
-add_definitions(-DDSD_USE_SERIALDV)
-include_directories(${LIBSERIALDV_INCLUDE_DIR})
-set(sdrbase_SERIALDV_LIB ${LIBSERIALDV_LIBRARY})
+if (LIBSERIALDV_FOUND)
+    add_definitions(-DDSD_USE_SERIALDV)
+    include_directories(${LIBSERIALDV_INCLUDE_DIR})
+    set(sdrbase_SERIALDV_LIB ${LIBSERIALDV_LIBRARY})
+endif()
 
 set(sdrbase_SOURCES
     ${sdrbase_SOURCES}
@@ -168,6 +170,7 @@ set(sdrbase_SOURCES
     settings/rollupstate.cpp
 
     util/ais.cpp
+    util/android.cpp
     util/aviationweather.cpp
     util/ax25.cpp
     util/aprs.cpp
@@ -388,6 +391,7 @@ set(sdrbase_HEADERS
     settings/rollupstate.h
 
     util/ais.h
+    util/android.h
     util/aviationweather.h
     util/ax25.h
     util/aprs.h
@@ -491,6 +495,7 @@ target_link_libraries(sdrbase
     Qt::Core
     Qt::Multimedia
     Qt::WebSockets
+    Qt::Positioning
     httpserver
     logging
     qrtplib
@@ -499,7 +504,14 @@ target_link_libraries(sdrbase
 if (Qt6_FOUND)
     target_link_libraries(sdrbase
         Qt::Core5Compat
+        Qt::CorePrivate
     )
+endif()
+if(ANDROID AND NOT ENABLE_QT6)
+    target_link_libraries(sdrbase Qt::AndroidExtras)
+endif()
+if(ANDROID)
+    target_link_libraries(sdrbase log)
 endif()
 
 install(TARGETS sdrbase DESTINATION ${INSTALL_LIB_DIR})

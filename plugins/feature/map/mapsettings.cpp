@@ -183,10 +183,11 @@ bool MapSettings::deserialize(const QByteArray& data)
         QByteArray blob;
 
         d.readBool(1, &m_displayNames, true);
-#ifdef LINUX
-        d.readString(2, &m_mapProvider, "mapboxgl");
-#else
         d.readString(2, &m_mapProvider, "osm");
+#ifdef LINUX
+        if (m_mapProvider == "osm") {
+            m_mapProvider = "mapboxgl";
+        }
 #endif
         d.readString(3, &m_mapBoxAPIKey, "");
         d.readString(4, &m_mapBoxStyles, "");

@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 F4EXB                                                      //
-// written by Edouard Griffiths                                                  //
+// Copyright (C) 2022 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,31 +15,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_GUI_MYPOSITIONDIALOG_H_
-#define SDRBASE_GUI_MYPOSITIONDIALOG_H_
+#ifndef SDRBASE_ANDROID_H_
+#define SDRBASE_ANDROID_H_
 
-#include <QDialog>
-#include "settings/mainsettings.h"
+#ifdef ANDROID
+
+#include <QtGlobal>
+#include <QString>
+
 #include "export.h"
 
-namespace Ui {
-	class MyPositionDialog;
-}
-
-class SDRGUI_API MyPositionDialog : public QDialog {
-	Q_OBJECT
-
+// Android specific functions
+class SDRBASE_API Android
+{
 public:
-	explicit MyPositionDialog(MainSettings& mainSettings, QWidget* parent = 0);
-	~MyPositionDialog();
 
-private:
-	Ui::MyPositionDialog* ui;
-	MainSettings& m_mainSettings;
+    static void sendIntent();
+    static QStringList listUSBDeviceSerials(int vid, int pid);
+    static int openUSBDevice(const QString &serial);
+    static void closeUSBDevice(int fd);
+    static void moveTaskToBack();
+    static void messageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
 
-private slots:
-	void accept();
-	void on_gps_clicked();
 };
 
-#endif /* SDRBASE_GUI_MYPOSITIONDIALOG_H_ */
+#endif // ANDROID
+
+#endif // SDRBASE_ANDROID_H_

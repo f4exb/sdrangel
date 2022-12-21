@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "plugin/plugininterface.h"
+#include "plugin/pluginmanager.h"
 #include "device/deviceuserargs.h"
 #include "export.h"
 
@@ -85,9 +86,8 @@ private:
     DevicesEnumeration m_rxEnumeration;
     DevicesEnumeration m_txEnumeration;
     DevicesEnumeration m_mimoEnumeration;
-    PluginInterface::OriginDevices m_originDevices;
-    QStringList m_originDevicesHwIds;
 
+    void enumerateDevices(PluginAPI::SamplingDeviceRegistrations& deviceRegistrations, DevicesEnumeration& enumeration, PluginInterface::SamplingDevice::StreamType type);
     PluginInterface *getRxRegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId);
     PluginInterface *getTxRegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId);
     PluginInterface *getMIMORegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId);

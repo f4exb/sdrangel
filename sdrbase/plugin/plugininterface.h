@@ -66,6 +66,7 @@ public:
 		int deviceNbItems;        //!< Number of items (or streams) in the device. >1 for composite devices.
 		int deviceItemIndex;      //!< For composite devices this is the Rx or Tx stream index. -1 if not initialized
 		int claimed;              //!< This is the device set index if claimed else -1
+        bool removed;             //!< Set if device has been removed
 
 		SamplingDevice(const QString& _displayedName,
                 const QString& _hardwareId,
@@ -85,8 +86,17 @@ public:
 			streamType(_streamType),
 			deviceNbItems(_deviceNbItems),
 			deviceItemIndex(_deviceItemIndex),
-			claimed(-1)
+			claimed(-1),
+            removed(false)
 		{ }
+
+        bool operator==(const SamplingDevice& rhs) const
+        {
+            return displayedName == rhs.displayedName
+                && hardwareId == rhs.hardwareId
+                && id == rhs.id
+                && serial == rhs.serial;
+        }
 	};
 	typedef QList<SamplingDevice> SamplingDevices;
 

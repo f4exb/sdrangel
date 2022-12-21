@@ -315,10 +315,11 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBlob(60, &m_geometryBytes);
         d.readBool(61, &m_hidden, false);
         d.readString(62, &m_checkWXAPIKey, "");
-#ifdef LINUX
-        d.readString(63, &m_mapProvider, "mapboxgl");
-#else
         d.readString(63, &m_mapProvider, "osm");
+#ifdef LINUX
+        if (m_mapProvider == "osm") {
+            m_mapProvider = "mapboxgl";
+        }
 #endif
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {

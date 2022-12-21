@@ -151,6 +151,12 @@ public:
 		emit preferenceChanged(Preferences::Altitude);
 	}
 
+    bool getAutoUpdatePosition() const { return m_preferences.getAutoUpdatePosition(); }
+    void setAutoUpdatePosition(bool autoUpdatePosition)
+    {
+        m_preferences.setAutoUpdatePosition(autoUpdatePosition);
+    }
+
     QtMsgType getConsoleMinLogLevel() const { return m_preferences.getConsoleMinLogLevel(); }
 	void setConsoleMinLogLevel(const QtMsgType& minLogLevel)
 	{

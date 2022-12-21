@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>324</width>
-    <height>229</height>
+    <height>201</height>
    </rect>
   </property>
   <property name="font">
@@ -19,44 +19,24 @@
   <property name="windowTitle">
    <string>My Position</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>My Station Position</string>
      </property>
-     <layout class="QFormLayout" name="formLayout">
-      <item row="2" column="0">
-       <widget class="QLabel" name="latitudeLabel">
-        <property name="text">
-         <string>Latitude</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="longitudeLabel">
-        <property name="text">
-         <string>Longitude</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QDoubleSpinBox" name="longitudeSpinBox">
-        <property name="toolTip">
-         <string>Longitude in decimal degrees</string>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="minimum">
-         <double>-180.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>180.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="latitudeSpinBox">
         <property name="toolTip">
          <string>Latitude in decimal degrees</string>
@@ -72,30 +52,34 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QSpinBox" name="altitudeSpinBox">
-        <property name="toolTip">
-         <string>Altitude in metres</string>
-        </property>
-        <property name="maximum">
-         <number>50000</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="altitudeLabel">
+      <item row="1" column="0">
+       <widget class="QLabel" name="latitudeLabel">
         <property name="text">
-         <string>Altitude (m)</string>
+         <string>Latitude</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="0" column="1" colspan="2">
        <widget class="QLineEdit" name="name">
         <property name="toolTip">
          <string>Enter the name of your station</string>
         </property>
         <property name="text">
          <string>Home</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="altitudeLabel">
+        <property name="text">
+         <string>Altitude (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="longitudeLabel">
+        <property name="text">
+         <string>Longitude</string>
         </property>
        </widget>
       </item>
@@ -106,17 +90,64 @@
         </property>
        </widget>
       </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="autoUpdatePosition">
+        <property name="toolTip">
+         <string>Automatically update position using GPS (when available)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="longitudeSpinBox">
+        <property name="toolTip">
+         <string>Longitude in decimal degrees</string>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="autoUpdatePositionLabel">
+        <property name="text">
+         <string>Auto-update from GPS</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QToolButton" name="gps">
+        <property name="toolTip">
+         <string>Set position using GPS (if available)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources/res.qrc">
+          <normaloff>:/gps.png</normaloff>:/gps.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="altitudeSpinBox">
+        <property name="toolTip">
+         <string>Altitude in metres</string>
+        </property>
+        <property name="maximum">
+         <number>50000</number>
+        </property>
+       </widget>
+      </item>
      </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
     </widget>
    </item>
   </layout>
@@ -127,7 +158,9 @@
   <tabstop>longitudeSpinBox</tabstop>
   <tabstop>altitudeSpinBox</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../resources/res.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

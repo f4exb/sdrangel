@@ -2,9 +2,6 @@
 // Copyright (C) 2016 F4EXB                                                      //
 // written by Edouard Griffiths                                                  //
 //                                                                               //
-// OpenGL interface modernization.                                               //
-// See: http://doc.qt.io/qt-5/qopenglshaderprogram.html                          //
-//                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
@@ -21,7 +18,9 @@
 
 #include "gui/mypositiondialog.h"
 #include "ui_myposdialog.h"
+#include "maincore.h"
 
+#include <QGeoCoordinate>
 
 MyPositionDialog::MyPositionDialog(MainSettings& mainSettings, QWidget* parent) :
     QDialog(parent),
@@ -33,6 +32,7 @@ MyPositionDialog::MyPositionDialog(MainSettings& mainSettings, QWidget* parent) 
     ui->latitudeSpinBox->setValue(m_mainSettings.getLatitude());
     ui->longitudeSpinBox->setValue(m_mainSettings.getLongitude());
     ui->altitudeSpinBox->setValue(m_mainSettings.getAltitude());
+    ui->autoUpdatePosition->setChecked(m_mainSettings.getAutoUpdatePosition());
 }
 
 MyPositionDialog::~MyPositionDialog()
@@ -46,5 +46,22 @@ void MyPositionDialog::accept()
     m_mainSettings.setLatitude(ui->latitudeSpinBox->value());
     m_mainSettings.setLongitude(ui->longitudeSpinBox->value());
     m_mainSettings.setAltitude(ui->altitudeSpinBox->value());
+    m_mainSettings.setAutoUpdatePosition(ui->autoUpdatePosition->isChecked());
 	QDialog::accept();
+}
+
+void MyPositionDialog::on_gps_clicked()
+{
+    const QGeoPositionInfo& position = MainCore::instance()->getPosition();
+    if (position.isValid())
+    {
+        QGeoCoordinate coord = position.coordinate();
+        ui->latitudeSpinBox->setValue(coord.latitude());
+        ui->longitudeSpinBox->setValue(coord.longitude());
+        ui->altitudeSpinBox->setValue(coord.altitude());
+    }
+    else
+    {
+        qDebug() << "MyPositionDialog::on_gps_clicked: Position is not valid.";
+    }
 }

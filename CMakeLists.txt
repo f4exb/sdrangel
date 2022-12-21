@@ -368,6 +368,106 @@ elseif (WIN32)
     "${EXTERNAL_LIBRARY_FOLDER}/libusb/MS64/dll"
     "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/bin"
   )
+elseif(ANDROID)
+  set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/android")
+
+  set(FFTW3F_FOUND ON CACHE INTERNAL "")
+  set(FFTW3F_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/fftw-3/include" CACHE INTERNAL "")
+  set(FFTW3F_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/fftw-3/lib/libfftw3f.a" CACHE INTERNAL "")
+
+  set(OPUS_FOUND ON CACHE INTERNAL "")
+  set(OPUS_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/libopus/include" CACHE INTERNAL "")
+  set(OPUS_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/libopus/lib/libopus.a" CACHE INTERNAL "")
+
+  set(CODEC2_FOUND ON CACHE INTERNAL "")
+  set(CODEC2_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/codec2/include" CACHE INTERNAL "")
+  set(CODEC2_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/codec2/lib/libcodec2.a" CACHE INTERNAL "")
+
+  set(APT_FOUND ON CACHE INTERNAL "")
+  set(APT_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/aptdec/include/apt" CACHE INTERNAL "")
+  set(APT_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/aptdec/lib/libaptstatic.a" CACHE INTERNAL "")
+
+  set(SGP4_FOUND ON CACHE INTERNAL "")
+  set(SGP4_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/sgp4/include/libsgp4" CACHE INTERNAL "")
+  set(SGP4_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/sgp4/lib/libsgp4.a" CACHE INTERNAL "")
+
+  set(ZLIB_FOUND ON CACHE INTERNAL "")
+  set(ZLIB_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/zlib/include" CACHE INTERNAL "")
+  set(ZLIB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/zlib/lib/libz.a" CACHE INTERNAL "")
+
+  set(FAAD_FOUND ON CACHE INTERNAL "")
+  set(FAAD_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/faad2/include" CACHE INTERNAL "")
+  set(FAAD_LIBRARY "${EXTERNAL_LIBRARY_FOLDER}/faad2/lib/liblibfaadstatic.a" CACHE INTERNAL "")
+
+  set(DAB_FOUND ON CACHE INTERNAL "")
+  set(DAB_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/libdab/include/dab_lib" CACHE INTERNAL "")
+  set(DAB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/libdab/lib/libdab_lib.so" CACHE INTERNAL "")
+
+  set(LIBMBE_FOUND ON CACHE INTERNAL "")
+  set(LIBMBE_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/mbelib/include/" CACHE INTERNAL "")
+  set(LIBMBE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/mbelib/lib/libmbe.a" CACHE INTERNAL "")
+
+  set(LIBDSDCC_FOUND ON CACHE INTERNAL "")
+  set(LIBDSDCC_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/dsdcc/include/" CACHE INTERNAL "")
+  set(LIBDSDCC_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/dsdcc/lib/libdsdcc.so" CACHE INTERNAL "")
+
+  set(FFMPEG_FOUND ON CACHE INTERNAL "")
+  set(FFMEG_SKIP_CHECK ON CACHE INTERNAL "")
+  set(FFMPEG_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(FFMPEG_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/bin" CACHE INTERNAL "")
+  set(AVCODEC_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(AVCODEC_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libavcodec.so" CACHE INTERNAL "")
+  set(AVFORMAT_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(AVFORMAT_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libavformat.so" CACHE INTERNAL "")
+  set(AVUTIL_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(AVUTIL_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libavutil.so" CACHE INTERNAL "")
+  set(SWRESAMPLE_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(SWRESAMPLE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libswresample.so" CACHE INTERNAL "")
+  set(SWSCALE_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
+  set(SWSCALE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libswscale.so" CACHE INTERNAL "")
+
+  set(LIBUSB_FOUND ON CACHE INTERNAL "")
+  set(LIBUSB_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/libusb/include/" CACHE INTERNAL "")
+  set(LIBUSB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/libusb/lib/libusb1.0.so" CACHE INTERNAL "")
+
+  set(LIBAIRSPYHF_FOUND ON CACHE INTERNAL "")
+  set(LIBAIRSPYHF_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/airspyhf/include/" CACHE INTERNAL "")
+  set(LIBAIRSPYHF_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/airspyhf/lib/libairspyhf.a" CACHE INTERNAL "")
+
+  set(LIBAIRSPY_FOUND ON CACHE INTERNAL "")
+  set(LIBAIRSPY_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/airspy/include/" CACHE INTERNAL "")
+  set(LIBAIRSPY_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/airspy/lib/libairspy.a" CACHE INTERNAL "")
+
+  set(LIBRTLSDR_FOUND ON CACHE INTERNAL "")
+  set(LIBRTLSDR_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/librtlsdr/include/" CACHE INTERNAL "")
+  set(LIBRTLSDR_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/librtlsdr/lib/librtlsdr.a" CACHE INTERNAL "")
+
+  set(LIMESUITE_FOUND ON CACHE INTERNAL "")
+  set(LIMESUITE_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/limesuite/include/" CACHE INTERNAL "")
+  set(LIMESUITE_LIBRARY "${EXTERNAL_LIBRARY_FOLDER}/limesuite/lib/libLimeSuite.a" CACHE INTERNAL "")
+
+  set(ANDROID_EXTRA_LIBS
+    ${Qt6_DIR}/../../../android_arm64_v8a/lib/libQt6Charts_arm64-v8a.so
+    ${Qt6_DIR}/../../../android_arm64_v8a/lib/libQt6Concurrent_arm64-v8a.so
+    ${Qt6_DIR}/../../../android_arm64_v8a/lib/libQt6MultimediaWidgets_arm64-v8a.so
+    ${Qt6_DIR}/../../../android_arm64_v8a/lib/libQt6SerialPort_arm64-v8a.so
+    ${Qt6_DIR}/../../../android_arm64_v8a/lib/libQt6TextToSpeech_arm64-v8a.so
+    ${EXTERNAL_LIBRARY_FOLDER}/android_openssl/latest/arm64/libssl_1_1.so
+    ${EXTERNAL_LIBRARY_FOLDER}/android_openssl/latest/arm64/libcrypto_1_1.so
+    ${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libavcodec.so
+    ${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libavdevice.so
+    ${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libavfilter.so
+    ${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libavformat.so
+    ${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libavutil.so
+    ${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libswresample.so
+    ${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libswscale.so
+    ${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/lib/libc++_shared.so
+    ${EXTERNAL_LIBRARY_FOLDER}/libdab/lib/libdab_lib.so
+    ${EXTERNAL_LIBRARY_FOLDER}/dsdcc/lib/libdsdcc.so
+    ${EXTERNAL_LIBRARY_FOLDER}/libusb/lib/libunrooted_android.so
+    ${EXTERNAL_LIBRARY_FOLDER}/libusb/lib/libusb1.0.so
+    CACHE INTERNAL ""
+  )
 endif()
 
 # When building a bundle on MacOS, we want to keep build paths in the library
@@ -440,35 +540,62 @@ endif()
 
 # for the server we don't need OpenGL/Qt Quick components
 if (BUILD_GUI)
-    find_package(OpenGL REQUIRED)
-    if (ENABLE_QT6)
-        find_package(Qt6
-                       REQUIRED COMPONENTS
-                        OpenGL
-                        OpenGLWidgets
-                        Quick
-                        QuickWidgets
-                       OPTIONAL_COMPONENTS
-                        WebEngineQuick
-                        WebEngineCore
-                        WebEngineWidgets
-                        TextToSpeech)
+    if(ANDROID)
+        # WebEngine not supported on Android
+        if (ENABLE_QT6)
+            find_package(Qt6
+                           REQUIRED COMPONENTS
+                            OpenGL
+                            OpenGLWidgets
+                            Quick
+                            QuickWidgets
+                            TextToSpeech
+                            Svg)
+        else()
+            find_package(Qt5
+                           REQUIRED COMPONENTS
+                            OpenGL
+                            Quick
+                            QuickWidgets
+                            Location
+                            TextToSpeech
+                            Svg
+                            AndroidExtras)
+        endif()
     else()
-        find_package(Qt5
-                       REQUIRED COMPONENTS
-                        OpenGL
-                        Quick
-                        QuickWidgets
-                        Location
-                        TextToSpeech
-                        WebEngine
-                        WebEngineCore
-                        WebEngineWidgets)
+        find_package(OpenGL REQUIRED)
+        if (ENABLE_QT6)
+            find_package(Qt6
+                           REQUIRED COMPONENTS
+                            OpenGL
+                            OpenGLWidgets
+                            Quick
+                            QuickWidgets
+                           OPTIONAL_COMPONENTS
+                            WebEngineQuick
+                            WebEngineCore
+                            WebEngineWidgets
+                            TextToSpeech)
+        else()
+            find_package(Qt5
+                           REQUIRED COMPONENTS
+                            OpenGL
+                            Quick
+                            QuickWidgets
+                            Location
+                            TextToSpeech
+                           OPTIONAL_COMPONENTS
+                            WebEngine
+                            WebEngineCore
+                            WebEngineWidgets)
+        endif()
     endif()
 endif()
 
 # other requirements
-find_package(PkgConfig REQUIRED)
+if(NOT ANDROID)
+  find_package(PkgConfig REQUIRED)
+endif()
 
 if(APPLE)
   find_package(ICONV)
@@ -506,7 +633,9 @@ if(ENABLE_EXTERNAL_LIBRARIES)
 else()
     find_package(Boost REQUIRED)
     find_package(FFTW3F REQUIRED)
-    find_package(LibUSB REQUIRED)  # used by so many packages
+    if(NOT ANDROID)
+        find_package(LibUSB REQUIRED)  # used by so many packages
+    endif()
     find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
     find_package(LibSigMF) # SigMF recording files support
     find_package(ZLIB) # For DAB
@@ -514,7 +643,7 @@ else()
     find_package(Codec2)
     find_package(CM256cc)
     find_package(LibMbe)
-    find_package(SerialDV REQUIRED)
+    find_package(SerialDV)
     find_package(LibDSDcc)
     find_package(Sgp4)
     find_package(AptDec)
@@ -608,8 +737,12 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/sdrsrv
     ${CMAKE_SOURCE_DIR}/sdrbench
     ${CMAKE_SOURCE_DIR}/logging
-    ${OPENGL_INCLUDE_DIR}
 )
+if(NOT ANDROID)
+    include_directories(
+        ${OPENGL_INCLUDE_DIR}
+    )
+endif()
 
 # Set up optional make target for developer doc
 find_package(Doxygen)
@@ -669,20 +802,61 @@ if (BUILD_GUI)
     set(sdrangel_SOURCES
         app/main.cpp
         sdrgui/resources/sdrangel.rc
+        settings/settings.qrc
     )
 
-  add_executable(${CMAKE_PROJECT_NAME}
-    ${sdrangel_SOURCES}
-    )
+    if(ANDROID AND NOT ENABLE_QT6)
+        add_library(${CMAKE_PROJECT_NAME} SHARED ${sdrangel_SOURCES})
+    elseif(ANDROID)
+        qt_add_executable(${CMAKE_PROJECT_NAME} ${sdrangel_SOURCES})
+        set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/android/qt6)
+        set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY QT_ANDROID_EXTRA_PLUGINS ${CMAKE_BINARY_DIR}/lib/plugins)
+        set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY QT_ANDROID_EXTRA_LIBS ${ANDROID_EXTRA_LIBS})
+    else()
+        add_executable(${CMAKE_PROJECT_NAME} ${sdrangel_SOURCES})
+    endif()
 
-  target_link_libraries(${CMAKE_PROJECT_NAME}
-    ${OPENGL_LIBRARIES}
-    Qt::Widgets
-    Qt::Multimedia
-    sdrbase
-    sdrgui
-    logging
-    )
+  if(ANDROID)
+      if(ENABLE_QT6)
+          target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC
+              ${OPENGL_LIBRARIES}
+              Qt::Widgets
+              Qt::Multimedia
+              Qt::Svg
+              Qt::QmlModels
+              Qt::Quick
+              sdrbase
+              sdrgui
+              logging
+              android
+              log
+        )
+      else()
+          target_link_libraries(${CMAKE_PROJECT_NAME}
+              ${OPENGL_LIBRARIES}
+              Qt::Widgets
+              Qt::Multimedia
+              Qt::Svg
+              Qt::QmlModels
+              Qt::Quick
+              Qt::AndroidExtras
+              sdrbase
+              sdrgui
+              logging
+              android
+              log
+          )
+      endif()
+  else()
+      target_link_libraries(${CMAKE_PROJECT_NAME}
+          ${OPENGL_LIBRARIES}
+          Qt::Widgets
+          Qt::Multimedia
+          sdrbase
+          sdrgui
+          logging
+      )
+  endif()
 
   if(WIN32)
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES

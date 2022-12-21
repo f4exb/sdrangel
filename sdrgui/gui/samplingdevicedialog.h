@@ -50,8 +50,11 @@ private:
     std::vector<int> m_deviceIndexes;
     bool m_hasChanged;
 
+    void displayDevices();
+
 private slots:
     void on_deviceSelect_currentIndexChanged(int index);
+    void on_refreshDevices_clicked();
     void accept();
     void reject();
 };
