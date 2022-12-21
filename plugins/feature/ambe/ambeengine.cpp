@@ -78,10 +78,27 @@ void AMBEEngine::getComList()
     }
 }
 
-// Do not activate serial support at all for windows
 void AMBEEngine::scan(QList<QString>& ambeDevices)
 {
-    (void) ambeDevices;
+    qDebug("AMBEEngine::scan");
+    AMBEEngine::getComList();
+    std::vector<std::string>::const_iterator it = m_comList.begin();
+    ambeDevices.clear();
+
+    while (it != m_comList.end())
+    {
+        AMBEWorker *worker = new AMBEWorker();
+        qDebug("AMBEEngine::scan: com: %s", it->c_str());
+
+        if (worker->open(*it))
+        {
+            ambeDevices.push_back(QString(it->c_str()));
+            worker->close();
+        }
+
+        delete worker;
+        ++it;
+    }
 }
 #elif defined(__APPLE__)
 void AMBEEngine::getComList()
