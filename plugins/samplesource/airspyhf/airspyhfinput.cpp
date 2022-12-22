@@ -36,6 +36,9 @@
 #include "airspyhfplugin.h"
 #include "airspyhfsettings.h"
 #include "airspyhfworker.h"
+#ifdef ANDROID
+#include "util/android.h"
+#endif
 
 MESSAGE_CLASS_DEFINITION(AirspyHFInput::MsgConfigureAirspyHF, Message)
 MESSAGE_CLASS_DEFINITION(AirspyHFInput::MsgStartStop, Message)
@@ -581,7 +584,13 @@ airspyhf_device_t *AirspyHFInput::open_airspyhf_from_serial(const QString& seria
     }
     else
     {
+#ifdef ANDROID
+        QString serialString = QString("AIRSPYHF SN:%1").arg(serial, 0, 16).toUpper();
+        int fd = Android::openUSBDevice(serialString);
+        rc = (airspyhf_error) airspyhf_open_fd(&devinfo, fd);
+#else
         rc = (airspyhf_error) airspyhf_open_sn(&devinfo, serial);
+#endif
 
         if (rc == AIRSPYHF_SUCCESS) {
             return devinfo;

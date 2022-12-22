@@ -28,6 +28,9 @@
 
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#ifdef ANDROID
+#include "util/android.h"
+#endif
 
 const int AirspyPlugin::m_maxDevices = 32;
 
@@ -64,6 +67,29 @@ void AirspyPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& or
     if (listedHwIds.contains(m_hardwareID)) { // check if it was done
         return;
     }
+
+#ifdef ANDROID
+
+    QStringList serialStrings = Android::listUSBDeviceSerials(0x1d50, 0x60a1);
+    int deviceNo = 0;
+    for (const auto serialString : serialStrings)
+    {
+        QString displayableName(QString("Airspy[%1] %2").arg(deviceNo).arg(serialString));
+
+        originDevices.append(OriginDevice(
+            displayableName,
+            m_hardwareID,
+            serialString,
+            deviceNo,
+            1,
+            0
+        ));
+        deviceNo++;
+    }
+
+    listedHwIds.append(m_hardwareID);
+
+#else
 
 	airspy_read_partid_serialno_t read_partid_serialno;
 	struct airspy_device *devinfo;
@@ -130,6 +156,8 @@ void AirspyPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& or
 	qDebug("AirspyPlugin::enumOriginDevices: airspy_exit: %s", airspy_error_name(rc));
 
     listedHwIds.append(m_hardwareID);
+
+#endif
 }
 
 PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources(const OriginDevices& originDevices)

@@ -37,6 +37,9 @@
 #include "dsp/dspengine.h"
 #include "airspysettings.h"
 #include "airspyworker.h"
+#ifdef ANDROID
+#include "util/android.h"
+#endif
 
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgConfigureAirspy, Message)
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgStartStop, Message)
@@ -110,6 +113,20 @@ bool AirspyInput::openDevice()
         return false;
     }
 
+#ifdef ANDROID
+    int fd;
+    QString serial = m_deviceAPI->getSamplingDeviceSerial();
+    if ((fd = Android::openUSBDevice(serial)) < 0)
+    {
+        qCritical("AirspyInput::openDevice: could not open USB device %s", qPrintable(serial));
+        return false;
+    }
+    if (airspy_open_fd(&m_dev, fd) != AIRSPY_SUCCESS)
+    {
+        qCritical("AirspyInput::openDevice: could not open Airspy: %s", qPrintable(serial));
+        return false;
+    }
+#else
     int device = m_deviceAPI->getSamplingDeviceSequence();
 
     if ((m_dev = open_airspy_from_sequence(device)) == 0)
@@ -117,6 +134,7 @@ bool AirspyInput::openDevice()
         qCritical("AirspyInput::start: could not open Airspy #%d", device);
         return false;
     }
+#endif
 
 #ifdef LIBAIRSPY_DEFAULT_RATES
     qDebug("AirspyInput::start: detault rates");

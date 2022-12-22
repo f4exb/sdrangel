@@ -73,6 +73,7 @@ void AudioInputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices
         1, // nb Rx
         0  // nb Tx
     ));
+    listedHwIds.append(m_hardwareID);
 }
 
 PluginInterface::SamplingDevices AudioInputPlugin::enumSampleSources(const OriginDevices& originDevices)

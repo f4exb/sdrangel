@@ -54,6 +54,7 @@ target_link_libraries(${TARGET_NAME}
 	${TARGET_LIB_GUI}
         swagger
         ${LIBRTLSDR_LIBRARIES}
+        ${LIBUSB_LIBRARIES}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
