@@ -35,6 +35,9 @@
 #include "rtlsdrthread.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+#ifdef ANDROID
+#include "util/android.h"
+#endif
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgStartStop, Message)
@@ -115,6 +118,19 @@ bool RTLSDRInput::openDevice()
 
     int device;
 
+#ifdef ANDROID
+    int fd;
+    if ((fd = Android::openUSBDevice(m_deviceAPI->getSamplingDeviceSerial())) < 0)
+    {
+        qCritical("RTLSDRInput::openDevice: could not open USB device %s", qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
+        return false;
+    }
+    if ((res = rtlsdr_open_fd(&m_dev, fd)) < 0)
+    {
+        qCritical("RTLSDRInput::openDevice: could not open RTLSDR: %s", strerror(errno));
+        return false;
+    }
+#else
     if ((device = rtlsdr_get_index_by_serial(qPrintable(m_deviceAPI->getSamplingDeviceSerial()))) < 0)
     {
         qCritical("RTLSDRInput::openDevice: could not get RTLSDR serial number");
@@ -126,6 +142,7 @@ bool RTLSDRInput::openDevice()
         qCritical("RTLSDRInput::openDevice: could not open RTLSDR #%d: %s", device, strerror(errno));
         return false;
     }
+#endif
 
     vendor[0] = '\0';
     product[0] = '\0';

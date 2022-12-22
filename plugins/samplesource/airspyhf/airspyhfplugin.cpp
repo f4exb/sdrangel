@@ -27,7 +27,9 @@
 #else
 #include "airspyhfgui.h"
 #endif
-
+#ifdef ANDROID
+#include "util/android.h"
+#endif
 
 const PluginDescriptor AirspyHFPlugin::m_pluginDescriptor = {
     QStringLiteral("AirspyHF"),
@@ -67,7 +69,35 @@ void AirspyHFPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& 
 	int nbDevices;
 	uint64_t deviceSerials[m_maxDevices];
 
+#ifdef ANDROID
+    QStringList serialStrings = Android::listUSBDeviceSerials(0x03EB, 0x800C);
+    nbDevices = 0;
+    for (const auto serialString : serialStrings)
+    {
+        // Serials are of the form: "AIRSPYHF SN:12345678ABCDEF00"
+        int idx = serialString.indexOf(':');
+        if (idx != -1)
+        {
+            bool ok;
+            uint64_t serialInt = serialString.mid(idx+1).toULongLong(&ok, 16);
+            if (ok)
+            {
+                deviceSerials[nbDevices] = serialInt;
+                nbDevices++;
+            }
+            else
+            {
+                qDebug() << "AirspyHFPlugin::enumOriginDevices: Couldn't convert " << serialString.mid(idx+1) << " to integer";
+            }
+        }
+        else
+        {
+            qDebug() << "AirspyHFPlugin::enumOriginDevices: No : in serial " << serialString;
+        }
+    }
+#else
 	nbDevices = airspyhf_list_devices(deviceSerials, m_maxDevices);
+#endif
 
     if (nbDevices < 0)
     {
