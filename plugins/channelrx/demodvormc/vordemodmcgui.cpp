@@ -1198,7 +1198,7 @@ VORDemodMCGUI::VORDemodMCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
-    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
 
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
@@ -1363,10 +1363,11 @@ void VORDemodMCGUI::enterEvent(EnterEventType* event)
     ChannelGUI::enterEvent(event);
 }
 
-void VORDemodMCGUI::audioSelect()
+void VORDemodMCGUI::audioSelect(const QPoint& p)
 {
     qDebug("VORDemodMCGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.move(p);
     audioSelect.exec();
 
     if (audioSelect.m_selected)

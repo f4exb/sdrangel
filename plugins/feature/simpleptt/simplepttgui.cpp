@@ -175,7 +175,7 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 	CRightClickEnabler *voxRightClickEnabler = new CRightClickEnabler(ui->vox);
-	connect(voxRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
+	connect(voxRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
@@ -500,10 +500,11 @@ void SimplePTTGUI::applyPTT(bool tx)
 	}
 }
 
-void SimplePTTGUI::audioSelect()
+void SimplePTTGUI::audioSelect(const QPoint& p)
 {
     qDebug("SimplePTTGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, true);
+    audioSelect.move(p);
     audioSelect.exec();
 
     if (audioSelect.m_selected)

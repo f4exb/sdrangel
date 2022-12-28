@@ -471,10 +471,10 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->mic);
-    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
 
     CRightClickEnabler *feedbackRightClickEnabler = new CRightClickEnabler(ui->feedbackEnable);
-    connect(feedbackRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioFeedbackSelect()));
+    connect(feedbackRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioFeedbackSelect(const QPoint &)));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -618,10 +618,11 @@ void NFMModGUI::enterEvent(EnterEventType* event)
     ChannelGUI::enterEvent(event);
 }
 
-void NFMModGUI::audioSelect()
+void NFMModGUI::audioSelect(const QPoint& p)
 {
     qDebug("NFMModGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, true); // true for input
+    audioSelect.move(p);
     audioSelect.exec();
 
     if (audioSelect.m_selected)
@@ -631,10 +632,11 @@ void NFMModGUI::audioSelect()
     }
 }
 
-void NFMModGUI::audioFeedbackSelect()
+void NFMModGUI::audioFeedbackSelect(const QPoint& p)
 {
     qDebug("NFMModGUI::audioFeedbackSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, false); // false for output
+    audioSelect.move(p);
     audioSelect.exec();
 
     if (audioSelect.m_selected)

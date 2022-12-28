@@ -276,10 +276,10 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
-	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
+	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
 
 	CRightClickEnabler *samSidebandRightClickEnabler = new CRightClickEnabler(ui->ssb);
-    connect(samSidebandRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(samSSBSelect()));
+    connect(samSidebandRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(samSSBSelect(const QPoint &)));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -412,10 +412,11 @@ void AMDemodGUI::enterEvent(EnterEventType* event)
     ChannelGUI::enterEvent(event);
 }
 
-void AMDemodGUI::audioSelect()
+void AMDemodGUI::audioSelect(const QPoint& p)
 {
     qDebug("AMDemodGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.move(p);
     audioSelect.exec();
 
     if (audioSelect.m_selected)
@@ -425,9 +426,10 @@ void AMDemodGUI::audioSelect()
     }
 }
 
-void AMDemodGUI::samSSBSelect()
+void AMDemodGUI::samSSBSelect(const QPoint& p)
 {
     AMDemodSSBDialog ssbSelect(m_samUSB);
+    ssbSelect.move(p);
     ssbSelect.exec();
 
     ui->ssb->setIcon(ssbSelect.isUsb() ? m_iconDSBUSB : m_iconDSBLSB);

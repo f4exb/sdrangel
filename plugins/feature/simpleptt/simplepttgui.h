@@ -92,7 +92,7 @@ private slots:
 	void on_voxLevel_valueChanged(int value);
 	void on_voxHold_valueChanged(int value);
 	void updateStatus();
-	void audioSelect();
+	void audioSelect(const QPoint& p);
 };
 
 

@@ -117,8 +117,8 @@ private slots:
     void on_frame_editingFinished();
     void on_frame_returnPressed();
     void on_repeat_toggled(bool checked);
-    void repeatSelect();
-    void txSettingsSelect();
+    void repeatSelect(const QPoint& p);
+    void txSettingsSelect(const QPoint& p);
     void on_udpEnabled_clicked(bool checked);
     void on_udpAddress_editingFinished();
     void on_udpPort_editingFinished();

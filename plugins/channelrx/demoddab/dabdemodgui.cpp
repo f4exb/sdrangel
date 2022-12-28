@@ -469,7 +469,7 @@ DABDemodGUI::DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_dabDemod->setMessageQueueToGUI(getInputMessageQueue());
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
-    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
@@ -642,9 +642,10 @@ void DABDemodGUI::on_channel_currentIndexChanged(int index)
     }
 }
 
-void DABDemodGUI::audioSelect()
+void DABDemodGUI::audioSelect(const QPoint& p)
 {
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.move(p);
     audioSelect.exec();
 
     if (audioSelect.m_selected)

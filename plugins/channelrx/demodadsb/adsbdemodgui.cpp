@@ -4570,9 +4570,11 @@ void ADSBDemodGUI::highlightAircraft(Aircraft *aircraft)
 }
 
 // Show feed dialog
-void ADSBDemodGUI::feedSelect()
+void ADSBDemodGUI::feedSelect(const QPoint& p)
 {
     ADSBDemodFeedDialog dialog(&m_settings);
+    dialog.move(p);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         applySettings();
@@ -4773,7 +4775,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     CRightClickEnabler *feedRightClickEnabler = new CRightClickEnabler(ui->feed);
-    connect(feedRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(feedSelect()));
+    connect(feedRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(feedSelect(const QPoint &)));
 
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 

@@ -106,7 +106,7 @@ private:
     QAction *createCheckableItem(QString& text, int idx, bool checked);
 
 private slots:
-    void audioSelect();
+    void audioSelect(const QPoint& p);
     void on_deltaFrequency_changed(qint64 value);
     void on_audioMute_toggled(bool checked);
     void on_volume_valueChanged(int value);

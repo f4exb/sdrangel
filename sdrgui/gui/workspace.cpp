@@ -851,7 +851,7 @@ void Workspace::stackSubWindows()
     m_stacking = false;
 }
 
-void Workspace::autoStackSubWindows()
+void Workspace::autoStackSubWindows(const QPoint&)
 {
     setAutoStackOption(!m_autoStack);
 }
@@ -934,7 +934,7 @@ void Workspace::updateStartStopButton(bool checked)
     }
 }
 
-void Workspace::deviceStateChanged(int index, DeviceAPI *deviceAPI)
+void Workspace::deviceStateChanged(int, DeviceAPI *deviceAPI)
 {
     if (deviceAPI->getWorkspaceIndex() == m_index)
     {

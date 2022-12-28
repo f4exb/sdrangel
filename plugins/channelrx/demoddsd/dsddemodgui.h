@@ -150,7 +150,7 @@ private slots:
     void onMenuDialogCalled(const QPoint& p);
     void on_viewStatusLog_clicked();
     void handleInputMessages();
-    void audioSelect();
+    void audioSelect(const QPoint& p);
     void tick();
 };
 

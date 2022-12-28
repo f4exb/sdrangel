@@ -113,10 +113,10 @@ private slots:
     void on_repeat_toggled(bool checked);
     void on_preEmphasis_toggled(bool checked);
     void on_bpf_toggled(bool checked);
-    void preEmphasisSelect();
-    void bpfSelect();
-    void repeatSelect();
-    void txSettingsSelect();
+    void preEmphasisSelect(const QPoint& p);
+    void bpfSelect(const QPoint& p);
+    void repeatSelect(const QPoint& p);
+    void txSettingsSelect(const QPoint& p);
     void on_udpEnabled_clicked(bool checked);
     void on_udpAddress_editingFinished();
     void on_udpPort_editingFinished();

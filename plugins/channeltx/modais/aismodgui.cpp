@@ -289,9 +289,11 @@ void AISModGUI::on_repeat_toggled(bool checked)
     applySettings();
 }
 
-void AISModGUI::repeatSelect()
+void AISModGUI::repeatSelect(const QPoint& p)
 {
     AISModRepeatDialog dialog(m_settings.m_repeatDelay, m_settings.m_repeatCount);
+    dialog.move(p);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_repeatDelay = dialog.m_repeatDelay;
@@ -300,7 +302,7 @@ void AISModGUI::repeatSelect()
     }
 }
 
-void AISModGUI::txSettingsSelect()
+void AISModGUI::txSettingsSelect(const QPoint& p)
 {
     AISModTXSettingsDialog dialog(m_settings.m_rampUpBits, m_settings.m_rampDownBits,
         m_settings.m_rampRange,
@@ -308,6 +310,9 @@ void AISModGUI::txSettingsSelect()
         m_settings.m_symbolSpan,
         m_settings.m_rfNoise,
         m_settings.m_writeToFile);
+
+    dialog.move(p);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_rampUpBits = dialog.m_rampUpBits;
@@ -464,10 +469,10 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->glSpectrum->setDisplayHistogram(false);
 
     CRightClickEnabler *repeatRightClickEnabler = new CRightClickEnabler(ui->repeat);
-    connect(repeatRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(repeatSelect()));
+    connect(repeatRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(repeatSelect(const QPoint &)));
 
     CRightClickEnabler *txRightClickEnabler = new CRightClickEnabler(ui->txButton);
-    connect(txRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(txSettingsSelect()));
+    connect(txRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(txSettingsSelect(const QPoint &)));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

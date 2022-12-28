@@ -129,7 +129,7 @@ private slots:
     void onMenuDialogCalled(const QPoint& p);
 
     void configureFileName();
-    void audioSelect();
+    void audioSelect(const QPoint& p);
     void tick();
 };
 

@@ -1050,7 +1050,7 @@ private slots:
     void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
     void downloadFinished(const QString& filename, bool success);
     void on_device_currentIndexChanged(int index);
-    void feedSelect();
+    void feedSelect(const QPoint& p);
     void on_displaySettings_clicked();
     void on_logEnable_clicked(bool checked=false);
     void on_logFilename_clicked();

@@ -249,9 +249,11 @@ void IEEE_802_15_4_ModGUI::on_repeat_toggled(bool checked)
     applySettings();
 }
 
-void IEEE_802_15_4_ModGUI::repeatSelect()
+void IEEE_802_15_4_ModGUI::repeatSelect(const QPoint& p)
 {
     IEEE_802_15_4_ModRepeatDialog dialog(m_settings.m_repeatDelay, m_settings.m_repeatCount);
+    dialog.move(p);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_repeatDelay = dialog.m_repeatDelay;
@@ -260,7 +262,7 @@ void IEEE_802_15_4_ModGUI::repeatSelect()
     }
 }
 
-void IEEE_802_15_4_ModGUI::txSettingsSelect()
+void IEEE_802_15_4_ModGUI::txSettingsSelect(const QPoint& p)
 {
     IEEE_802_15_4_ModTXSettingsDialog dialog(
         m_settings.m_rampUpBits,
@@ -278,6 +280,9 @@ void IEEE_802_15_4_ModGUI::txSettingsSelect()
         m_settings.m_bbNoise,
         m_settings.m_writeToFile
     );
+
+    dialog.move(p);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_rampUpBits = dialog.m_rampUpBits;
@@ -441,10 +446,10 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     ui->glSpectrum->setDisplayHistogram(false);
 
     CRightClickEnabler *repeatRightClickEnabler = new CRightClickEnabler(ui->repeat);
-    connect(repeatRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(repeatSelect()));
+    connect(repeatRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(repeatSelect(const QPoint &)));
 
     CRightClickEnabler *txRightClickEnabler = new CRightClickEnabler(ui->txButton);
-    connect(txRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(txSettingsSelect()));
+    connect(txRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(txSettingsSelect(const QPoint &)));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

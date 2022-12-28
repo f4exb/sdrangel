@@ -377,7 +377,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
-    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
+    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
 
 	m_scopeVisXY = new ScopeVisXY(ui->screenTV);
 	m_scopeVisXY->setScale(2.0);
@@ -596,10 +596,11 @@ void DSDDemodGUI::channelMarkerHighlightedByCursor()
     setHighlighted(m_channelMarker.getHighlighted());
 }
 
-void DSDDemodGUI::audioSelect()
+void DSDDemodGUI::audioSelect(const QPoint& p)
 {
     qDebug("DSDDemodGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.move(p);
     audioSelect.exec();
 
     if (audioSelect.m_selected)

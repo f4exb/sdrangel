@@ -284,9 +284,11 @@ void PacketModGUI::on_bpf_toggled(bool checked)
     applySettings();
 }
 
-void PacketModGUI::preEmphasisSelect()
+void PacketModGUI::preEmphasisSelect(const QPoint& p)
 {
     FMPreemphasisDialog dialog(m_settings.m_preEmphasisTau, m_settings.m_preEmphasisHighFreq);
+    dialog.move(p);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_preEmphasisTau = dialog.m_tau;
@@ -295,9 +297,11 @@ void PacketModGUI::preEmphasisSelect()
     }
 }
 
-void PacketModGUI::bpfSelect()
+void PacketModGUI::bpfSelect(const QPoint& p)
 {
     PacketModBPFDialog dialog(m_settings.m_bpfLowCutoff, m_settings.m_bpfHighCutoff, m_settings.m_bpfTaps);
+    dialog.move(p);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_bpfLowCutoff = dialog.m_lowFreq;
@@ -307,9 +311,11 @@ void PacketModGUI::bpfSelect()
     }
 }
 
-void PacketModGUI::repeatSelect()
+void PacketModGUI::repeatSelect(const QPoint& p)
 {
     PacketModRepeatDialog dialog(m_settings.m_repeatDelay, m_settings.m_repeatCount);
+    dialog.move(p);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_repeatDelay = dialog.m_repeatDelay;
@@ -318,7 +324,7 @@ void PacketModGUI::repeatSelect()
     }
 }
 
-void PacketModGUI::txSettingsSelect()
+void PacketModGUI::txSettingsSelect(const QPoint& p)
 {
     PacketModTXSettingsDialog dialog(m_settings.m_rampUpBits, m_settings.m_rampDownBits,
                                         m_settings.m_rampRange, m_settings.m_modulateWhileRamping,
@@ -331,6 +337,9 @@ void PacketModGUI::txSettingsSelect()
                                         m_settings.m_lpfTaps,
                                         m_settings.m_bbNoise, m_settings.m_rfNoise,
                                         m_settings.m_writeToFile);
+
+    dialog.move(p);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_rampUpBits = dialog.m_rampUpBits;
@@ -472,16 +481,16 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->glSpectrum->setDisplayHistogram(false);
 
     CRightClickEnabler *repeatRightClickEnabler = new CRightClickEnabler(ui->repeat);
-    connect(repeatRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(repeatSelect()));
+    connect(repeatRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(repeatSelect(const QPoint &)));
 
     CRightClickEnabler *txRightClickEnabler = new CRightClickEnabler(ui->txButton);
-    connect(txRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(txSettingsSelect()));
+    connect(txRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(txSettingsSelect(const QPoint &)));
 
     CRightClickEnabler *preempRightClickEnabler = new CRightClickEnabler(ui->preEmphasis);
-    connect(preempRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(preEmphasisSelect()));
+    connect(preempRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(preEmphasisSelect(const QPoint &)));
 
     CRightClickEnabler *bpfRightClickEnabler = new CRightClickEnabler(ui->bpf);
-    connect(bpfRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(bpfSelect()));
+    connect(bpfRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(bpfSelect(const QPoint &)));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

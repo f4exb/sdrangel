@@ -113,13 +113,13 @@ private slots:
     void tileSubWindows();
     void stackVerticalSubWindows();
     void stackSubWindows();
-    void autoStackSubWindows();
+    void autoStackSubWindows(const QPoint&);
     void tabSubWindows();
     void layoutSubWindows();
     void startStopClicked(bool checked = false);
     void addFeatureEmitted(int featureIndex);
     void toggleFloating();
-    void deviceStateChanged(int index, DeviceAPI *deviceAPI);
+    void deviceStateChanged(int, DeviceAPI *deviceAPI);
     void subWindowActivated(QMdiSubWindow *window);
 
 signals:

@@ -100,7 +100,7 @@ private slots:
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
-    void audioSelect();
+    void audioSelect(const QPoint& p);
 	void tick();
 };
 

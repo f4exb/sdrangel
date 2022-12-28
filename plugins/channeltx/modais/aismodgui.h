@@ -120,8 +120,8 @@ private slots:
     void on_message_editingFinished();
     void on_message_returnPressed();
     void on_repeat_toggled(bool checked);
-    void repeatSelect();
-    void txSettingsSelect();
+    void repeatSelect(const QPoint &);
+    void txSettingsSelect(const QPoint &);
     void on_udpEnabled_clicked(bool checked);
     void on_udpAddress_editingFinished();
     void on_udpPort_editingFinished();

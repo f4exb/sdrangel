@@ -303,7 +303,7 @@ private slots:
     void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
     void downloadFinished(const QString& filename, bool success);
     void handleInputMessages();
-    void audioSelect();
+    void audioSelect(const QPoint& p);
     void tick();
 };
 

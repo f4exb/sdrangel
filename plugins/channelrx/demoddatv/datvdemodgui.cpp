@@ -304,10 +304,10 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     // ui->videoPlay->setPixmap(pixmapTarget);
 
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
-	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
+	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
 
     CRightClickEnabler *ldpcToolRightClickEnabler = new CRightClickEnabler(ui->softLDPC);
-    connect(ldpcToolRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(ldpcToolSelect()));
+    connect(ldpcToolRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(ldpcToolSelect(const QPoint &)));
 
     ui->playerIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     ui->udpIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
@@ -510,10 +510,11 @@ void DATVDemodGUI::enterEvent(EnterEventType* event)
     ChannelGUI::enterEvent(event);
 }
 
-void DATVDemodGUI::audioSelect()
+void DATVDemodGUI::audioSelect(const QPoint& p)
 {
     qDebug("DATVDemodGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.move(p);
     audioSelect.exec();
 
     if (audioSelect.m_selected)
@@ -523,12 +524,13 @@ void DATVDemodGUI::audioSelect()
     }
 }
 
-void DATVDemodGUI::ldpcToolSelect()
+void DATVDemodGUI::ldpcToolSelect(const QPoint& p)
 {
     qDebug("DATVDemodGUI::ldpcToolSelect");
     DatvDvbS2LdpcDialog ldpcDialog;
     ldpcDialog.setFileName(m_settings.m_softLDPCToolPath);
     ldpcDialog.setMaxTrials(m_settings.m_softLDPCMaxTrials);
+    ldpcDialog.move(p);
 
     if (ldpcDialog.exec() == QDialog::Accepted)
     {
