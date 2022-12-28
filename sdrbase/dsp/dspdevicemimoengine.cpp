@@ -1186,69 +1186,72 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                 (*it)->pushMessage(message);
             }
 
-            if (sourceElseSink)
+            if (m_deviceSampleMIMO)
             {
-                if ((istream < m_deviceSampleMIMO->getNbSourceStreams()))
+                if (sourceElseSink)
                 {
-
-                    // forward source changes to ancillary sinks
-                    if (istream < m_basebandSampleSinks.size())
+                    if ((istream < m_deviceSampleMIMO->getNbSourceStreams()))
                     {
-                        for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[istream].begin(); it != m_basebandSampleSinks[istream].end(); ++it)
+
+                        // forward source changes to ancillary sinks
+                        if (istream < m_basebandSampleSinks.size())
                         {
-                            DSPSignalNotification *message = new DSPSignalNotification(sampleRate, centerFrequency);
-                            qDebug() << "DSPDeviceMIMOEngine::handleInputMessages: starting " << (*it)->getSinkName().toStdString().c_str();
-                            (*it)->pushMessage(message);
+                            for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[istream].begin(); it != m_basebandSampleSinks[istream].end(); ++it)
+                            {
+                                DSPSignalNotification *message = new DSPSignalNotification(sampleRate, centerFrequency);
+                                qDebug() << "DSPDeviceMIMOEngine::handleInputMessages: starting " << (*it)->getSinkName().toStdString().c_str();
+                                (*it)->pushMessage(message);
+                            }
                         }
-                    }
 
-                    // forward changes to MIMO GUI input queue
-                    MessageQueue *guiMessageQueue = m_deviceSampleMIMO->getMessageQueueToGUI();
-                    qDebug("DeviceMIMOEngine::handleInputMessages: DSPMIMOSignalNotification: guiMessageQueue: %p", guiMessageQueue);
+                        // forward changes to MIMO GUI input queue
+                        MessageQueue *guiMessageQueue = m_deviceSampleMIMO->getMessageQueueToGUI();
+                        qDebug("DeviceMIMOEngine::handleInputMessages: DSPMIMOSignalNotification: guiMessageQueue: %p", guiMessageQueue);
 
-                    if (guiMessageQueue) {
-                        DSPMIMOSignalNotification* rep = new DSPMIMOSignalNotification(*notif); // make a copy for the MIMO GUI
-                        guiMessageQueue->push(rep);
-                    }
+                        if (guiMessageQueue) {
+                            DSPMIMOSignalNotification* rep = new DSPMIMOSignalNotification(*notif); // make a copy for the MIMO GUI
+                            guiMessageQueue->push(rep);
+                        }
 
-                    // forward changes to spectrum sink if currently active
-                    if (m_spectrumSink && m_spectrumInputSourceElseSink && (m_spectrumInputIndex == istream))
-                    {
-                        DSPSignalNotification *spectrumNotif = new DSPSignalNotification(sampleRate, centerFrequency);
-                        m_spectrumSink->pushMessage(spectrumNotif);
+                        // forward changes to spectrum sink if currently active
+                        if (m_spectrumSink && m_spectrumInputSourceElseSink && (m_spectrumInputIndex == istream))
+                        {
+                            DSPSignalNotification *spectrumNotif = new DSPSignalNotification(sampleRate, centerFrequency);
+                            m_spectrumSink->pushMessage(spectrumNotif);
+                        }
                     }
                 }
-            }
-            else
-            {
-                if ((istream < m_deviceSampleMIMO->getNbSinkStreams()))
+                else
                 {
-
-                    // forward source changes to channel sources with immediate execution (no queuing)
-                    if (istream < m_basebandSampleSources.size())
+                    if ((istream < m_deviceSampleMIMO->getNbSinkStreams()))
                     {
-                        for (BasebandSampleSources::const_iterator it = m_basebandSampleSources[istream].begin(); it != m_basebandSampleSources[istream].end(); ++it)
+
+                        // forward source changes to channel sources with immediate execution (no queuing)
+                        if (istream < m_basebandSampleSources.size())
                         {
-                            DSPSignalNotification *message = new DSPSignalNotification(sampleRate, centerFrequency);
-                            qDebug() << "DSPDeviceMIMOEngine::handleSinkMessages: forward message to BasebandSampleSource(" << (*it)->getSourceName().toStdString().c_str() << ")";
-                            (*it)->pushMessage(message);
+                            for (BasebandSampleSources::const_iterator it = m_basebandSampleSources[istream].begin(); it != m_basebandSampleSources[istream].end(); ++it)
+                            {
+                                DSPSignalNotification *message = new DSPSignalNotification(sampleRate, centerFrequency);
+                                qDebug() << "DSPDeviceMIMOEngine::handleSinkMessages: forward message to BasebandSampleSource(" << (*it)->getSourceName().toStdString().c_str() << ")";
+                                (*it)->pushMessage(message);
+                            }
                         }
-                    }
 
-                    // forward changes to MIMO GUI input queue
-                    MessageQueue *guiMessageQueue = m_deviceSampleMIMO->getMessageQueueToGUI();
-                    qDebug("DSPDeviceMIMOEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
+                        // forward changes to MIMO GUI input queue
+                        MessageQueue *guiMessageQueue = m_deviceSampleMIMO->getMessageQueueToGUI();
+                        qDebug("DSPDeviceMIMOEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
 
-                    if (guiMessageQueue) {
-                        DSPMIMOSignalNotification* rep = new DSPMIMOSignalNotification(*notif); // make a copy for the source GUI
-                        guiMessageQueue->push(rep);
-                    }
+                        if (guiMessageQueue) {
+                            DSPMIMOSignalNotification* rep = new DSPMIMOSignalNotification(*notif); // make a copy for the source GUI
+                            guiMessageQueue->push(rep);
+                        }
 
-                    // forward changes to spectrum sink if currently active
-                    if (m_spectrumSink && !m_spectrumInputSourceElseSink && (m_spectrumInputIndex == istream))
-                    {
-                        DSPSignalNotification *spectrumNotif = new DSPSignalNotification(sampleRate, centerFrequency);
-                        m_spectrumSink->pushMessage(spectrumNotif);
+                        // forward changes to spectrum sink if currently active
+                        if (m_spectrumSink && !m_spectrumInputSourceElseSink && (m_spectrumInputIndex == istream))
+                        {
+                            DSPSignalNotification *spectrumNotif = new DSPSignalNotification(sampleRate, centerFrequency);
+                            m_spectrumSink->pushMessage(spectrumNotif);
+                        }
                     }
                 }
             }

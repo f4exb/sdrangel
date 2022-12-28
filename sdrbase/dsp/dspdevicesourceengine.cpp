@@ -392,8 +392,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoIdle()
 			break;
 	}
 
-	if(m_deviceSampleSource == 0)
-	{
+	if (!m_deviceSampleSource) {
 		return StIdle;
 	}
 
@@ -428,8 +427,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
 			break;
 	}
 
-	if (m_deviceSampleSource == 0)
-	{
+	if (!m_deviceSampleSource) {
 		return gotoError("No sample source configured");
 	}
 
@@ -487,7 +485,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoRunning()
 			break;
 	}
 
-	if(m_deviceSampleSource == NULL) {
+	if (!m_deviceSampleSource) {
 		return gotoError("DSPDeviceSourceEngine::gotoRunning: No sample source configured");
 	}
 
@@ -495,8 +493,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoRunning()
 
 	// Start everything
 
-	if(!m_deviceSampleSource->start())
-	{
+	if (!m_deviceSampleSource->start()) {
 		return gotoError("Could not start sample source");
 	}
 
@@ -532,7 +529,7 @@ void DSPDeviceSourceEngine::handleSetSource(DeviceSampleSource* source)
 
 	m_deviceSampleSource = source;
 
-	if(m_deviceSampleSource != 0)
+	if (m_deviceSampleSource)
 	{
 		qDebug("DSPDeviceSourceEngine::handleSetSource: set %s", qPrintable(source->getDeviceDescription()));
 		connect(m_deviceSampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
@@ -673,17 +670,17 @@ void DSPDeviceSourceEngine::handleInputMessages()
 			}
 
 			// forward changes to source GUI input queue
+            if (m_deviceSampleSource)
+            {
+                MessageQueue *guiMessageQueue = m_deviceSampleSource->getMessageQueueToGUI();
+                qDebug("DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
 
-			MessageQueue *guiMessageQueue = m_deviceSampleSource->getMessageQueueToGUI();
-			qDebug("DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
-
-			if (guiMessageQueue)
-			{
-			    DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the source GUI
-                guiMessageQueue->push(rep);
-			}
-
-			//m_outputMessageQueue.push(rep);
+                if (guiMessageQueue)
+                {
+                    DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the source GUI
+                    guiMessageQueue->push(rep);
+                }
+            }
 
 			delete message;
 		}

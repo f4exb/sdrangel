@@ -267,8 +267,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
 			break;
 	}
 
-	if(m_deviceSampleSink == 0)
-	{
+	if (!m_deviceSampleSink) {
 		return StIdle;
 	}
 
@@ -304,8 +303,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 			break;
 	}
 
-	if (m_deviceSampleSink == 0)
-	{
+	if (!m_deviceSampleSink) {
 		return gotoError("DSPDeviceSinkEngine::gotoInit: No sample source configured");
 	}
 
@@ -362,7 +360,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 			break;
 	}
 
-	if(m_deviceSampleSink == 0) {
+	if (!m_deviceSampleSink) {
 		return gotoError("DSPDeviceSinkEngine::gotoRunning: No sample source configured");
 	}
 
@@ -370,8 +368,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 
 	// Start everything
 
-	if(!m_deviceSampleSink->start())
-	{
+	if (!m_deviceSampleSink->start()) {
 		return gotoError("DSPDeviceSinkEngine::gotoRunning: Could not start sample sink");
 	}
 
@@ -533,15 +530,17 @@ void DSPDeviceSinkEngine::handleInputMessages()
 			}
 
 			// forward changes to listeners on DSP output queue
+            if (m_deviceSampleSink)
+            {
+                MessageQueue *guiMessageQueue = m_deviceSampleSink->getMessageQueueToGUI();
+                qDebug("DSPDeviceSinkEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
 
-			MessageQueue *guiMessageQueue = m_deviceSampleSink->getMessageQueueToGUI();
-			qDebug("DSPDeviceSinkEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
-
-			if (guiMessageQueue)
-			{
-                DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the output queue
-                guiMessageQueue->push(rep);
-			}
+                if (guiMessageQueue)
+                {
+                    DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the output queue
+                    guiMessageQueue->push(rep);
+                }
+            }
 
 			delete message;
 		}
