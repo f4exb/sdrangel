@@ -25,7 +25,7 @@ An .sdriq file starts with a 32 byte header of all unsigned integer of various s
   <tr>
     <td>12</td>
     <td>8</td>
-    <td>Unix epoch (timestamp) of start</td>
+    <td>Unix epoch (timestamp) of start (in ms)</td>
   </tr>
   <tr>
     <td>20</td>
