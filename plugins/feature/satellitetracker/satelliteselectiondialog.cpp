@@ -253,9 +253,17 @@ void SatelliteSelectionDialog::displaySatInfo(const QString& name)
 
     ui->satInfo->setText(info.join("\n"));
     if (!sat->m_image.isEmpty())
-        m_networkManager->get(QNetworkRequest(QUrl(sat->m_image)));
+    {
+        if (sat->m_image.startsWith("http")) {
+            m_networkManager->get(QNetworkRequest(QUrl(sat->m_image)));
+        } else {
+            m_networkManager->get(QNetworkRequest(QUrl("https://db-satnogs.freetls.fastly.net/media/" + sat->m_image)));
+        }
+    }
     else
+    {
         ui->satImage->setPixmap(QPixmap());
+    }
 }
 
 // Open the Satellite's webpage
