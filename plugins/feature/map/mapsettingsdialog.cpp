@@ -172,6 +172,16 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     on_map3DEnabled_clicked(m_settings->m_map3DEnabled);
 
     connect(&m_dlm, &HttpDownloadManagerGUI::downloadComplete, this, &MapSettingsDialog::downloadComplete);
+#ifndef QT_WEBENGINE_FOUND
+    ui->map3DSettings->setVisible(false);
+    ui->downloadModels->setVisible(false);
+    ui->mapItemSettings->hideColumn(COL_3D_MODEL);
+    ui->mapItemSettings->hideColumn(COL_3D_MIN_PIXELS);
+    ui->mapItemSettings->hideColumn(COL_3D_LABEL);
+    ui->mapItemSettings->hideColumn(COL_3D_POINT);
+    ui->mapItemSettings->hideColumn(COL_3D_TRACK);
+    ui->mapItemSettings->hideColumn(COL_3D_LABEL_SCALE);
+#endif
 }
 
 MapSettingsDialog::~MapSettingsDialog()
