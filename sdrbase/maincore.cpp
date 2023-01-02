@@ -88,6 +88,12 @@ MainCore *MainCore::instance()
 
 void MainCore::setLoggingOptions()
 {
+    if (!m_logger)
+    {
+        qDebug() << "MainCore::setLoggingOptions: No logger.";
+        return;
+    }
+
     m_logger->setConsoleMinMessageLevel(m_settings.getConsoleMinLogLevel());
 
     if (m_settings.getUseLogFile())
@@ -346,11 +352,15 @@ void MainCore::initPosition()
     if (m_positionSource)
     {
         connect(m_positionSource, &QGeoPositionInfoSource::positionUpdated, this, &MainCore::positionUpdated);
+        connect(m_positionSource, &QGeoPositionInfoSource::updateTimeout, this, &MainCore::positionUpdateTimeout);
+        connect(m_positionSource, qOverload<QGeoPositionInfoSource::Error>(&QGeoPositionInfoSource::error), this, &MainCore::positionError);
+        m_position = m_positionSource->lastKnownPosition();
+        m_positionSource->setUpdateInterval(1000);
         m_positionSource->startUpdates();
     }
     else
     {
-        qDebug() << "MainCore::initPosition: No position source.";
+        qWarning() << "MainCore::initPosition: No position source.";
     }
 }
 
@@ -371,4 +381,14 @@ void MainCore::positionUpdated(const QGeoPositionInfo &info)
             m_settings.setAltitude(m_position.coordinate().altitude());
         }
     }
+}
+
+void MainCore::positionUpdateTimeout()
+{
+    qWarning() << "MainCore::positionUpdateTimeout: GPS signal lost";
+}
+
+void MainCore::positionError(QGeoPositionInfoSource::Error positioningError)
+{
+    qWarning() << "MainCore::positionError: " << positioningError;
 }
