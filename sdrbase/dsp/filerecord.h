@@ -18,6 +18,8 @@
 #ifndef INCLUDE_FILERECORD_H
 #define INCLUDE_FILERECORD_H
 
+#include <QFile>
+
 #include <dsp/basebandsamplesink.h>
 #include <string>
 #include <iostream>
@@ -65,7 +67,9 @@ public:
     virtual bool isRecording() const { return m_recordOn; }
 
     static bool readHeader(std::ifstream& samplefile, Header& header); //!< returns true if CRC checksum is correct else false
+    static bool readHeader(QFile& samplefile, Header& header); //!< returns true if CRC checksum is correct else false
     static void writeHeader(std::ofstream& samplefile, Header& header);
+    static void writeHeader(QFile& samplefile, Header& header);
 
 private:
 	QString m_fileBase;
@@ -73,7 +77,11 @@ private:
 	quint64 m_centerFrequency;
 	bool m_recordOn;
     bool m_recordStart;
+#ifdef ANDROID
+    QFile m_sampleFile;
+#else
     std::ofstream m_sampleFile;
+#endif
     QString m_currentFileName;
     quint64 m_byteCount;
     qint64 m_msShift;

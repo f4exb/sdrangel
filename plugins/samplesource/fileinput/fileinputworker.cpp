@@ -26,7 +26,12 @@
 
 MESSAGE_CLASS_DEFINITION(FileInputWorker::MsgReportEOF, Message)
 
-FileInputWorker::FileInputWorker(std::ifstream *samplesStream,
+FileInputWorker::FileInputWorker(
+#ifdef ANDROID
+        QFile *samplesStream,
+#else
+        std::ifstream *samplesStream,
+#endif
         SampleSinkFifo* sampleFifo,
         const QTimer& timer,
         MessageQueue *fileInputMessageQueue,
@@ -69,7 +74,11 @@ void FileInputWorker::startWork()
 {
 	qDebug() << "FileInputThread::startWork: ";
 
+#ifdef ANDROID
+    if (m_ifstream->isOpen())
+#else
     if (m_ifstream->is_open())
+#endif
     {
         qDebug() << "FileInputThread::startWork: file stream open, starting...";
         m_elapsedTimer.start();
@@ -172,6 +181,23 @@ void FileInputWorker::tick()
             setBuffers(m_chunksize);
         }
 
+
+#ifdef ANDROID
+		// read samples directly feeding the SampleFifo (no callback)
+		qint64 bytesRead = m_ifstream->read(reinterpret_cast<char*>(m_fileBuf), m_chunksize);
+
+        if (m_ifstream->atEnd())
+        {
+            writeToSampleFifo(m_fileBuf, (qint32) bytesRead);
+            MsgReportEOF *message = MsgReportEOF::create();
+            m_fileInputMessageQueue->push(message);
+        }
+        else
+        {
+            writeToSampleFifo(m_fileBuf, (qint32) m_chunksize);
+            m_samplesCount += m_chunksize / (2 * m_samplebytes);
+        }
+#else
 		// read samples directly feeding the SampleFifo (no callback)
 		m_ifstream->read(reinterpret_cast<char*>(m_fileBuf), m_chunksize);
 
@@ -186,6 +212,7 @@ void FileInputWorker::tick()
         	writeToSampleFifo(m_fileBuf, (qint32) m_chunksize);
     		m_samplesCount += m_chunksize / (2 * m_samplebytes);
         }
+#endif
 	}
 }
 

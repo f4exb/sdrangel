@@ -105,8 +105,8 @@ void WavFileRecord::feed(const SampleVector::const_iterator& begin, const Sample
             {
                 // Convert from 24-bit to 16-bit
                 int16_t samples[2];
-                samples[0] = it->real() >> 8;
-                samples[1] = it->imag() >> 8;
+                samples[0] = std::min(32767, std::max(it->real() >> 8, -32768));
+                samples[1] = std::min(32767, std::max(it->imag() >> 8, -32768));
                 m_sampleFile.write(reinterpret_cast<const char*>(&samples), 4);
                 m_byteCount += 4;
             }
@@ -154,16 +154,31 @@ bool WavFileRecord::startRecording()
         stopRecording();
     }
 
+#ifdef ANDROID
+    if (!m_sampleFile.isOpen())
+#else
     if (!m_sampleFile.is_open())
+#endif
     {
         qDebug() << "WavFileRecord::startRecording";
-        m_currentFileName = QString("%1.%2.wav").arg(m_fileBase).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
+#ifdef ANDROID
+        // FIXME: No idea how to write to a file where the filename doesn't come from the file picker
+        m_currentFileName = m_fileBase + ".wav";
+        m_sampleFile.setFileName(m_currentFileName);
+        if (!m_sampleFile.open(QIODevice::ReadWrite))
+        {
+            qWarning() << "WavFileRecord::startRecording: failed to open file: " << m_currentFileName << " error " << m_sampleFile.error();
+            return false;
+        }
+#else
+        m_currentFileName = m_fileBase + "_" + QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz") + ".wav"; // Don't use QString::arg on Android, as filename can contain %2
         m_sampleFile.open(m_currentFileName.toStdString().c_str(), std::ios::binary);
         if (!m_sampleFile.is_open())
         {
             qWarning() << "WavFileRecord::startRecording: failed to open file: " << m_currentFileName;
             return false;
         }
+#endif
         m_recordOn = true;
         m_recordStart = true;
         m_byteCount = 0;
@@ -173,25 +188,41 @@ bool WavFileRecord::startRecording()
 
 bool WavFileRecord::stopRecording()
 {
+#ifdef ANDROID
+    if (m_sampleFile.isOpen())
+#else
     if (m_sampleFile.is_open())
+#endif
     {
         qDebug() << "WavFileRecord::stopRecording";
         // Fix up chunk sizes
+#ifdef ANDROID
+        long fileSize = (long)m_sampleFile.size();
+        m_sampleFile.seek(offsetof(Header, m_riffHeader.m_size));
+#else
         long fileSize = m_sampleFile.tellp();
         m_sampleFile.seekp(offsetof(Header, m_riffHeader.m_size));
+#endif
         qint32 size = (fileSize - 8);
         m_sampleFile.write((char *)&size, 4);
+#ifdef ANDROID
+        m_sampleFile.seek(offsetof(Header, m_dataHeader.m_size));
+#else
         m_sampleFile.seekp(offsetof(Header, m_dataHeader.m_size));
+#endif
         size = fileSize - sizeof(Header);
         m_sampleFile.write((char *)&size, 4);
         m_sampleFile.close();
         m_recordOn = false;
         m_recordStart = false;
+#ifdef ANDROID
+#else
         if (m_sampleFile.bad())
         {
             qWarning() << "WavFileRecord::stopRecording: an error occurred while writing to " << m_currentFileName;
             return false;
         }
+#endif
     }
     return true;
 }
@@ -305,35 +336,7 @@ bool WavFileRecord::readHeader(std::ifstream& sampleFile, Header& header)
         return false;
     }
 
-    if (strncmp(header.m_riffHeader.m_id, "RIFF", 4))
-    {
-        qDebug() << "WavFileRecord::readHeader: No RIFF header";
-        return false;
-    }
-    if (strncmp(header.m_type, "WAVE", 4))
-    {
-        qDebug() << "WavFileRecord::readHeader: No WAVE header";
-        return false;
-    }
-    if (strncmp(header.m_fmtHeader.m_id, "fmt ", 4))
-    {
-        qDebug() << "WavFileRecord::readHeader: No fmt header";
-        return false;
-    }
-    if (header.m_audioFormat != 1)
-    {
-        qDebug() << "WavFileRecord::readHeader: Audio format is not PCM";
-        return false;
-    }
-    if (header.m_numChannels != 2)
-    {
-        qDebug() << "WavFileRecord::readHeader: Number of channels is not 2";
-        return false;
-    }
-    // FileInputWorker can't handle other bits sizes
-    if (header.m_bitsPerSample != 16)
-    {
-        qDebug() << "WavFileRecord::readHeader: Number of bits per sample is not 16";
+    if (!checkHeader(header)) {
         return false;
     }
 
@@ -365,7 +368,85 @@ bool WavFileRecord::readHeader(std::ifstream& sampleFile, Header& header)
     return true;
 }
 
+bool WavFileRecord::readHeader(QFile& sampleFile, Header& header)
+{
+    memset(&header, 0, sizeof(Header));
+
+    sampleFile.read((char *) &header, 8+4+8+16);
+
+    if (!checkHeader(header)) {
+        return false;
+    }
+
+    Chunk chunkHeader;
+    bool gotData = false;
+    while (!gotData)
+    {
+        if (sampleFile.read((char *) &chunkHeader, 8) != 8)
+        {
+            qDebug() << "WavFileRecord::readHeader: End of file without reading data header";
+            return false;
+        }
+
+        if (!strncmp(chunkHeader.m_id, "auxi", 4))
+        {
+            memcpy(&header.m_auxiHeader, &chunkHeader, sizeof(Chunk));
+            if (sampleFile.read((char *) &header.m_auxi, sizeof(Auxi)) != sizeof(Auxi)) {
+                return false;
+            }
+        }
+        else if (!strncmp(chunkHeader.m_id, "data", 4))
+        {
+            memcpy(&header.m_dataHeader, &chunkHeader, sizeof(Chunk));
+            gotData = true;
+        }
+    }
+
+    return true;
+}
+
+bool WavFileRecord::checkHeader(Header& header)
+{
+    if (strncmp(header.m_riffHeader.m_id, "RIFF", 4))
+    {
+        qDebug() << "WavFileRecord::readHeader: No RIFF header";
+        return false;
+    }
+    if (strncmp(header.m_type, "WAVE", 4))
+    {
+        qDebug() << "WavFileRecord::readHeader: No WAVE header";
+        return false;
+    }
+    if (strncmp(header.m_fmtHeader.m_id, "fmt ", 4))
+    {
+        qDebug() << "WavFileRecord::readHeader: No fmt header";
+        return false;
+    }
+    if (header.m_audioFormat != 1)
+    {
+        qDebug() << "WavFileRecord::readHeader: Audio format is not PCM";
+        return false;
+    }
+    if (header.m_numChannels != 2)
+    {
+        qDebug() << "WavFileRecord::readHeader: Number of channels is not 2";
+        return false;
+    }
+    // FileInputWorker can't handle other bits sizes
+    if (header.m_bitsPerSample != 16)
+    {
+        qDebug() << "WavFileRecord::readHeader: Number of bits per sample is not 16";
+        return false;
+    }
+    return true;
+}
+
 void WavFileRecord::writeHeader(std::ofstream& sampleFile, Header& header)
+{
+    sampleFile.write((const char *) &header, sizeof(Header));
+}
+
+void WavFileRecord::writeHeader(QFile& sampleFile, Header& header)
 {
     sampleFile.write((const char *) &header, sizeof(Header));
 }

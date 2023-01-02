@@ -28,6 +28,7 @@
 #include <QThread>
 #include <QMutex>
 #include <QNetworkRequest>
+#include <QFile>
 
 #include "dsp/devicesamplesource.h"
 #include "fileinputsettings.h"
@@ -334,7 +335,11 @@ public:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	FileInputSettings m_settings;
+#ifdef ANDROID
+    QFile m_inputFile;
+#else
 	std::ifstream m_ifstream;
+#endif
 	FileInputWorker* m_fileInputWorker;
 	QThread m_fileInputWorkerThread;
 	QString m_deviceDescription;

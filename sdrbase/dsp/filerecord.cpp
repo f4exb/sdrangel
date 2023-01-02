@@ -114,16 +114,31 @@ bool FileRecord::startRecording()
         stopRecording();
     }
 
+#ifdef ANDROID
+    if (!m_sampleFile.isOpen())
+#else
     if (!m_sampleFile.is_open())
+#endif
     {
     	qDebug() << "FileRecord::startRecording";
-        m_currentFileName = QString("%1.%2.sdriq").arg(m_fileBase).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
+#ifdef ANDROID
+        // FIXME: No idea how to write to a file where the filename doesn't come from the file picker
+        m_currentFileName = m_fileBase + ".sdriq";
+        m_sampleFile.setFileName(m_currentFileName);
+        if (!m_sampleFile.open(QIODevice::ReadWrite))
+        {
+            qWarning() << "FileRecord::startRecording: failed to open file: " << m_currentFileName << " error " << m_sampleFile.error();
+            return false;
+        }
+#else
+        m_currentFileName = m_fileBase + "." + QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz") + ".sdriq"; // Don't use QString::arg on Android, as filename can contain %2
         m_sampleFile.open(m_currentFileName.toStdString().c_str(), std::ios::binary);
         if (!m_sampleFile.is_open())
         {
             qWarning() << "FileRecord::startRecording: failed to open file: " << m_currentFileName;
             return false;
         }
+#endif
         m_recordOn = true;
         m_recordStart = true;
         m_byteCount = 0;
@@ -135,17 +150,24 @@ bool FileRecord::stopRecording()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
+#ifdef ANDROID
+    if (m_sampleFile.isOpen())
+#else
     if (m_sampleFile.is_open())
+#endif
     {
     	qDebug() << "FileRecord::stopRecording";
         m_sampleFile.close();
         m_recordOn = false;
         m_recordStart = false;
+#ifdef ANDROID
+#else
         if (m_sampleFile.bad())
         {
             qWarning() << "FileRecord::stopRecording: an error occurred while writing to " << m_currentFileName;
             return false;
         }
+#endif
     }
     return true;
 }
@@ -197,7 +219,23 @@ bool FileRecord::readHeader(std::ifstream& sampleFile, Header& header)
     return header.crc32 == crc32.checksum();
 }
 
+bool FileRecord::readHeader(QFile& sampleFile, Header& header)
+{
+    sampleFile.read((char *) &header, sizeof(Header));
+    boost::crc_32_type crc32;
+    crc32.process_bytes(&header, 28);
+    return header.crc32 == crc32.checksum();
+}
+
 void FileRecord::writeHeader(std::ofstream& sampleFile, Header& header)
+{
+    boost::crc_32_type crc32;
+    crc32.process_bytes(&header, 28);
+    header.crc32 = crc32.checksum();
+    sampleFile.write((const char *) &header, sizeof(Header));
+}
+
+void FileRecord::writeHeader(QFile& sampleFile, Header& header)
 {
     boost::crc_32_type crc32;
     crc32.process_bytes(&header, 28);
