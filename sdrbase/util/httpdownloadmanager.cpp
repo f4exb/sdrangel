@@ -73,7 +73,20 @@ QString HttpDownloadManager::downloadDir()
 void HttpDownloadManager::sslErrors(const QList<QSslError> &sslErrors)
 {
     for (const QSslError &error : sslErrors)
-        qCritical() << "HttpDownloadManager: SSL error: " << error.errorString();
+    {
+        qCritical() << "HttpDownloadManager: SSL error" << (int)error.error() << ": " << error.errorString();
+#ifdef ANDROID
+        // On Android 6 (but not on 12), we always seem to get: "The issuer certificate of a locally looked up certificate could not be found"
+        // which causes downloads to fail, so ignore
+        if (error.error() == QSslError::UnableToGetLocalIssuerCertificate)
+        {
+            QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+            QList<QSslError> errorsThatCanBeIgnored;
+            errorsThatCanBeIgnored << QSslError(QSslError::UnableToGetLocalIssuerCertificate, error.certificate());
+            reply->ignoreSslErrors(errorsThatCanBeIgnored);
+        }
+#endif
+    }
 }
 
 bool HttpDownloadManager::isHttpRedirect(QNetworkReply *reply)
