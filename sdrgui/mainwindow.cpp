@@ -3078,6 +3078,7 @@ void MainWindow::orientationChanged(Qt::ScreenOrientation orientation)
         setTabPosition(Qt::LeftDockWidgetArea, QTabWidget::West);
     } else {
         setTabPosition(Qt::LeftDockWidgetArea, QTabWidget::South);
+    }
 #else
     (void) orientation;
 #endif
