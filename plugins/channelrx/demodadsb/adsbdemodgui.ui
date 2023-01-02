@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>506</width>
     <height>1046</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>600</width>
+    <width>400</width>
     <height>0</height>
    </size>
   </property>
@@ -35,13 +35,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>598</width>
+     <width>500</width>
      <height>141</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>598</width>
+     <width>400</width>
      <height>0</height>
     </size>
    </property>
@@ -758,7 +758,7 @@
     <rect>
      <x>0</x>
      <y>140</y>
-     <width>598</width>
+     <width>500</width>
      <height>600</height>
     </rect>
    </property>
@@ -770,7 +770,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>598</width>
+     <width>400</width>
      <height>0</height>
     </size>
    </property>
@@ -810,7 +810,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>600</width>
+         <width>400</width>
          <height>150</height>
         </size>
        </property>
@@ -840,6 +840,9 @@
           </property>
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
           </property>
           <column>
            <property name="text">
