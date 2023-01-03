@@ -22,6 +22,15 @@ set(map_HEADERS
     webserver.h
 )
 
+set(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND FALSE)
+if(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND)
+    add_compile_definitions(QT_WEBENGINE_FOUND)
+    configure_file(mapguiwebengine.ui mapgui.ui)
+else()
+    configure_file(mapguinowebengine.ui mapgui.ui)
+endif()
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_BINARY_DIR})
+
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${Qt${QT_DEFAULT_MAJOR_VERSION}Gui_PRIVATE_INCLUDE_DIRS}
@@ -31,7 +40,7 @@ if(NOT SERVER_MODE)
     set(map_SOURCES
         ${map_SOURCES}
         mapgui.cpp
-        mapgui.ui
+        ${CMAKE_CURRENT_BINARY_DIR}/mapgui.ui
         maplocationdialog.cpp
         maplocationdialog.ui
         mapmaidenheaddialog.cpp
@@ -70,9 +79,14 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME map)
-    set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location Qt::WebEngine Qt::WebEngineCore Qt::WebEngineWidgets)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+
+    if(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND)
+        set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location Qt::WebEngine Qt::WebEngineCore Qt::WebEngineWidgets)
+    else()
+        set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location)
+    endif()
 else()
     set(TARGET_NAME mapsrv)
     set(TARGET_LIB "")

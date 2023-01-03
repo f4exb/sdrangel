@@ -18,8 +18,9 @@ namespace ldpctool {
 class LDPCUtil
 {
 public:
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(ANDROID)
     // Recent versions of MacOS support aligned_alloc, but Mojave doesn't
+    // Likewise, API level 28 needed for aligned_alloc on Android, but we want to support 23
     static void *aligned_malloc(size_t alignment, size_t size)
     {
         void *p = nullptr;

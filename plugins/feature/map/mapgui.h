@@ -22,7 +22,9 @@
 #include <QTimer>
 #include <QQuickItem>
 #include <QJsonObject>
+#ifdef QT_WEBENGINE_FOUND
 #include <QWebEngineFullScreenRequest>
+#endif
 
 #include <math.h>
 #include <limits>
@@ -227,9 +229,11 @@ private slots:
     void on_ibpBeacons_clicked();
     void on_radiotime_clicked();
     void receivedCesiumEvent(const QJsonObject &obj);
-    virtual void showEvent(QShowEvent *event);
-    virtual bool eventFilter(QObject *obj, QEvent *event);
+    virtual void showEvent(QShowEvent *event) override;
+    virtual bool eventFilter(QObject *obj, QEvent *event) override;
+#ifdef QT_WEBENGINE_FOUND
     void fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest);
+#endif
     void preferenceChanged(int elementType);
     void giroDataUpdated(const GIRO::GIROStationData& data);
     void mufUpdated(const QJsonDocument& document);

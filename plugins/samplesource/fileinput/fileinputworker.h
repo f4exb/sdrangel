@@ -50,7 +50,12 @@ public:
         { }
     };
 
-	FileInputWorker(std::ifstream *samplesStream,
+	FileInputWorker(
+#ifdef ANDROID
+            QFile *samplesStream,
+#else
+            std::ifstream *samplesStream,
+#endif
 	        SampleSinkFifo* sampleFifo,
 	        const QTimer& timer,
 	        MessageQueue *fileInputMessageQueue,
@@ -68,7 +73,11 @@ public:
 private:
 	volatile bool m_running;
 
+#ifdef ANDROID
+    QFile *m_ifstream;
+#else
 	std::ifstream* m_ifstream;
+#endif
 	quint8  *m_fileBuf;
 	quint8  *m_convertBuf;
 	std::size_t m_bufsize;

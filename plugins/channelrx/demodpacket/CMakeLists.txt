@@ -34,7 +34,7 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME demodpacket)
-    set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning)
+    set(TARGET_LIB "Qt::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()

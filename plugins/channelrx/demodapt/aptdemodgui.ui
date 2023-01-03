@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
+    <width>434</width>
     <height>569</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>440</width>
+    <width>360</width>
     <height>0</height>
    </size>
   </property>
@@ -792,8 +792,8 @@
      <widget class="QGraphicsView" name="image">
       <property name="minimumSize">
        <size>
-        <width>300</width>
-        <height>350</height>
+        <width>200</width>
+        <height>200</height>
        </size>
       </property>
      </widget>
@@ -802,6 +802,11 @@
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
   <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
@@ -819,11 +824,6 @@
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

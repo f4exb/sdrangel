@@ -189,24 +189,28 @@ void Android::messageHandler(QtMsgType type, const QMessageLogContext& context, 
     }
     const char * const local = report.toLocal8Bit().constData();
     const char * const applicationName = "sdrangel";
+    int ret;
     switch (type)
     {
     case QtDebugMsg:
-        __android_log_write(ANDROID_LOG_DEBUG, applicationName, local);
+        ret = __android_log_write(ANDROID_LOG_DEBUG, applicationName, local);
         break;
     case QtInfoMsg:
-        __android_log_write(ANDROID_LOG_INFO, applicationName, local);
+        ret = __android_log_write(ANDROID_LOG_INFO, applicationName, local);
         break;
     case QtWarningMsg:
-        __android_log_write(ANDROID_LOG_WARN, applicationName, local);
+        ret = __android_log_write(ANDROID_LOG_WARN, applicationName, local);
         break;
     case QtCriticalMsg:
-        __android_log_write(ANDROID_LOG_ERROR, applicationName, local);
+        ret = __android_log_write(ANDROID_LOG_ERROR, applicationName, local);
         break;
     case QtFatalMsg:
     default:
-        __android_log_write(ANDROID_LOG_FATAL, applicationName, local);
+        ret = __android_log_write(ANDROID_LOG_FATAL, applicationName, local);
         abort();
+    }
+    if (ret < 0) {
+        __android_log_write(ANDROID_LOG_ERROR, applicationName, "Error writing to log");
     }
 }
 

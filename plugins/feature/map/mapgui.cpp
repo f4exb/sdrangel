@@ -24,12 +24,15 @@
 #include <QGeoCodingManager>
 #include <QGeoServiceProvider>
 
+#ifdef QT_WEBENGINE_FOUND
 #include <QtWebEngineWidgets/QWebEngineView>
 #include <QtWebEngineWidgets/QWebEngineSettings>
 #include <QtWebEngineWidgets/QWebEngineProfile>
+#endif
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
+#include "gui/dialogpositioner.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
 #include "util/units.h"
@@ -201,6 +204,8 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_webPort = 0;
     m_webServer = new WebServer(m_webPort);
 
+    ui->map->setAttribute(Qt::WA_AcceptTouchEvents, true);
+
     ui->map->rootContext()->setContextProperty("mapModel", &m_mapModel);
     // 5.12 doesn't display map items when fully zoomed out
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
@@ -220,9 +225,11 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
+#ifdef QT_WEBENGINE_FOUND
     QWebEngineSettings *settings = ui->web->settings();
     settings->setAttribute(QWebEngineSettings::FullScreenSupportEnabled, true);
     connect(ui->web->page(), &QWebEnginePage::fullScreenRequested, this, &MapGUI::fullScreenRequested);
+#endif
 
     // Get station position
     float stationLatitude = MainCore::instance()->getSettings().getLatitude();
@@ -279,6 +286,9 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     ui->map->installEventFilter(this);
 
     makeUIConnections();
+    new DialogPositioner(&m_beaconDialog, true);
+    new DialogPositioner(&m_ibpBeaconDialog, true);
+    new DialogPositioner(&m_radioTimeDialog, true);
 }
 
 MapGUI::~MapGUI()
@@ -505,13 +515,17 @@ void MapGUI::mufUpdated(const QJsonDocument& document)
     //#include <QtLocation/private/qgeojson_p.h>
     //QVariantList list = QGeoJson::importGeoJson(document);
     m_webServer->addFile("/map/map/muf.geojson", document.toJson());
-    m_cesium->showMUF(m_settings.m_displayMUF);
+    if (m_cesium) {
+        m_cesium->showMUF(m_settings.m_displayMUF);
+    }
 }
 
 void MapGUI::foF2Updated(const QJsonDocument& document)
 {
     m_webServer->addFile("/map/map/fof2.geojson", document.toJson());
-    m_cesium->showfoF2(m_settings.m_displayfoF2);
+    if (m_cesium) {
+        m_cesium->showfoF2(m_settings.m_displayfoF2);
+    }
 }
 
 static QString arrayToString(QJsonArray array)
@@ -817,7 +831,7 @@ bool MapGUI::eventFilter(QObject *obj, QEvent *event)
             }
         }
     }
-    return false;
+    return FeatureGUI::eventFilter(obj, event);
 }
 
 void MapGUI::supportedMapsChanged()
@@ -876,6 +890,7 @@ void MapGUI::on_mapTypes_currentIndexChanged(int index)
 
 void MapGUI::applyMap3DSettings(bool reloadMap)
 {
+#ifdef QT_WEBENGINE_FOUND
     if (m_settings.m_map3DEnabled && ((m_cesium == nullptr) || reloadMap))
     {
         if (m_cesium == nullptr) {
@@ -916,10 +931,18 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
     }
     m_giro->getMUFPeriodically(m_settings.m_displayMUF ? 15 : 0);
     m_giro->getfoF2Periodically(m_settings.m_displayfoF2 ? 15 : 0);
+#else
+    ui->displayMUF->setVisible(false);
+    ui->displayfoF2->setVisible(false);
+    m_mapModel.allUpdated();
+    float stationLatitude = MainCore::instance()->getSettings().getLatitude();
+    float stationLongitude = MainCore::instance()->getSettings().getLongitude();
+#endif
 }
 
 void MapGUI::init3DMap()
 {
+#ifdef QT_WEBENGINE_FOUND
     qDebug() << "MapGUI::init3DMap";
 
     m_cesium->initCZML();
@@ -940,6 +963,7 @@ void MapGUI::init3DMap()
 
     m_cesium->showMUF(m_settings.m_displayMUF);
     m_cesium->showfoF2(m_settings.m_displayfoF2);
+#endif
 }
 
 void MapGUI::displaySettings()
@@ -977,6 +1001,7 @@ void MapGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
+        new DialogPositioner(&dialog, false);
         dialog.exec();
 
         m_settings.m_title = dialog.getTitle();
@@ -1017,6 +1042,7 @@ void MapGUI::applySettings(bool force)
 void MapGUI::on_maidenhead_clicked()
 {
     MapMaidenheadDialog dialog;
+    new DialogPositioner(&dialog, true);
     dialog.exec();
 }
 
@@ -1090,6 +1116,7 @@ void MapGUI::geoReply()
         {
             // Show dialog allowing user to select from the results
             MapLocationDialog dialog(qGeoLocs);
+            new DialogPositioner(&dialog, true);
             if (dialog.exec() == QDialog::Accepted)
             {
                 QGeoCoordinate coord = dialog.m_selectedLocation.coordinate();
@@ -1208,6 +1235,7 @@ void MapGUI::on_deleteAll_clicked()
 void MapGUI::on_displaySettings_clicked()
 {
     MapSettingsDialog dialog(&m_settings);
+    new DialogPositioner(&dialog, true);
     if (dialog.exec() == QDialog::Accepted)
     {
         if (dialog.m_osmURLChanged) {
@@ -1293,6 +1321,7 @@ void MapGUI::receivedCesiumEvent(const QJsonObject &obj)
     }
 }
 
+#ifdef QT_WEBENGINE_FOUND
 void MapGUI::fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest)
 {
     fullScreenRequest.accept();
@@ -1306,6 +1335,7 @@ void MapGUI::fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest)
         ui->splitter->addWidget(ui->web);
     }
 }
+#endif
 
 void MapGUI::preferenceChanged(int elementType)
 {

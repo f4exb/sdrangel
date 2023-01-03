@@ -26,6 +26,7 @@
 #include <QDateTime>
 #include <QObject>
 #include <QGeoPositionInfo>
+#include <QGeoPositionInfoSource>
 
 #include "export.h"
 #include "settings/mainsettings.h"
@@ -889,6 +890,8 @@ public:
 
 public slots:
     void positionUpdated(const QGeoPositionInfo &info);
+    void positionUpdateTimeout();
+    void positionError(QGeoPositionInfoSource::Error positioningError);
 
 signals:
     void deviceSetAdded(int index, DeviceAPI *device);

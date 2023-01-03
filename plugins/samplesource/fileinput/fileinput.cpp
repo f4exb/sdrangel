@@ -100,7 +100,17 @@ void FileInput::openFileStream()
 {
 	//stopInput();
 
-	if (m_ifstream.is_open()) {
+#ifdef ANDROID
+	if (m_inputFile.isOpen()) {
+        m_inputFile.close();
+    }
+
+    m_inputFile.setFileName(m_settings.m_fileName);
+    m_inputFile.open(QIODevice::ReadOnly | QIODevice::ExistingOnly);
+    quint64 fileSize = (quint64) m_inputFile.size();
+
+#else
+    if (m_ifstream.is_open()) {
 		m_ifstream.close();
 	}
 
@@ -110,12 +120,18 @@ void FileInput::openFileStream()
 	m_ifstream.open(m_settings.m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
 #endif
 	quint64 fileSize = m_ifstream.tellg();
+#endif
 
 	if (m_settings.m_fileName.endsWith(".wav"))
     {
         WavFileRecord::Header header;
+#ifdef ANDROID
+        m_inputFile.seek(0);
+        bool headerOK = WavFileRecord::readHeader(m_inputFile, header);
+#else
         m_ifstream.seekg(0, std::ios_base::beg);
         bool headerOK = WavFileRecord::readHeader(m_ifstream, header);
+#endif
         m_sampleRate = header.m_sampleRate;
         if (header.m_auxiHeader.m_size > 0)
         {
@@ -136,7 +152,12 @@ void FileInput::openFileStream()
 
         if (headerOK && (m_sampleRate > 0) && (m_sampleSize > 0))
         {
-            m_recordLengthMuSec = ((fileSize - m_ifstream.tellg()) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
+#ifdef ANDROID
+            qint64 pos = m_inputFile.pos();
+#else
+            qint64 pos = m_ifstream.tellg();
+#endif
+            m_recordLengthMuSec = ((fileSize - pos) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
         }
         else
         {
@@ -153,8 +174,13 @@ void FileInput::openFileStream()
     else if (fileSize > sizeof(FileRecord::Header))
 	{
 	    FileRecord::Header header;
+#ifdef ANDROID
+        m_inputFile.seek(0);
+		bool crcOK = FileRecord::readHeader(m_inputFile, header);
+#else
 	    m_ifstream.seekg(0,std::ios_base::beg);
 		bool crcOK = FileRecord::readHeader(m_ifstream, header);
+#endif
 		m_sampleRate = header.sampleRate;
 		m_centerFrequency = header.centerFrequency;
 		m_startingTimeStamp = header.startTimeStamp;
@@ -208,7 +234,11 @@ void FileInput::openFileStream()
 	}
 
 	if (m_recordLengthMuSec == 0) {
+#ifdef ANDROID
+        m_inputFile.close();
+#else
 	    m_ifstream.close();
+#endif
 	}
 }
 
@@ -216,14 +246,24 @@ void FileInput::seekFileStream(int seekMillis)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if ((m_ifstream.is_open()) && m_fileInputWorker && !m_fileInputWorker->isRunning())
+	if (
+#ifdef ANDROID
+        m_inputFile.isOpen()
+#else
+        m_ifstream.is_open()
+#endif
+        && m_fileInputWorker && !m_fileInputWorker->isRunning())
 	{
         quint64 seekPoint = ((m_recordLengthMuSec * seekMillis) / 1000) * m_sampleRate;
         seekPoint /= 1000000UL;
 		m_fileInputWorker->setSamplesCount(seekPoint);
         seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileRecord::Header)
+#ifdef ANDROID
+        m_inputFile.seek(seekPoint + sizeof(FileRecord::Header));
+#else
 		m_ifstream.clear();
 		m_ifstream.seekg(seekPoint + sizeof(FileRecord::Header), std::ios::beg);
+#endif
 	}
 }
 
@@ -235,7 +275,11 @@ void FileInput::init()
 
 bool FileInput::start()
 {
+#ifdef ANDROID
+    if (!m_inputFile.isOpen())
+#else
     if (!m_ifstream.is_open())
+#endif
     {
         qWarning("FileInput::start: file not open. not starting");
         return false;
@@ -244,11 +288,15 @@ bool FileInput::start()
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "FileInput::start";
 
+#ifdef ANDROID
+    m_inputFile.seek(0);
+#else
 	if (m_ifstream.tellg() != (std::streampos)0)
     {
 		m_ifstream.clear();
 		m_ifstream.seekg(sizeof(FileRecord::Header), std::ios::beg);
 	}
+#endif
 
 	if (!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample)))
     {
@@ -256,7 +304,11 @@ bool FileInput::start()
 		return false;
 	}
 
+#ifdef ANDROID
+	m_fileInputWorker = new FileInputWorker(&m_inputFile, &m_sampleFifo, m_masterTimer, &m_inputMessageQueue);
+#else
 	m_fileInputWorker = new FileInputWorker(&m_ifstream, &m_sampleFifo, m_masterTimer, &m_inputMessageQueue);
+#endif
 	m_fileInputWorker->moveToThread(&m_fileInputWorkerThread);
 	m_fileInputWorker->setSampleRateAndSize(m_settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
 	startWorker();

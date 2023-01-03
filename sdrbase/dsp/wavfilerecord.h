@@ -27,6 +27,7 @@
 #include <ctime>
 
 #include <QDateTime>
+#include <QFile>
 
 #include "dsp/filerecordinterface.h"
 #include "export.h"
@@ -111,7 +112,9 @@ public:
     virtual bool isRecording() const override { return m_recordOn; }
 
     static bool readHeader(std::ifstream& samplefile, Header& header);
+    static bool readHeader(QFile& samplefile, Header& header);
     static void writeHeader(std::ofstream& samplefile, Header& header);
+    static void writeHeader(QFile& samplefile, Header& header);
 
     // These functions guess from the filename, not contents
     static bool getCenterFrequency(QString fileName, quint64& centerFrequency);
@@ -123,13 +126,19 @@ private:
     quint64 m_centerFrequency;
     bool m_recordOn;
     bool m_recordStart;
+#ifdef ANDROID
+    QFile m_sampleFile;
+#else
     std::ofstream m_sampleFile;
+#endif
     QString m_currentFileName;
     quint64 m_byteCount;
     qint64 m_msShift;
     int m_nbChannels;
 
     void writeHeader();
+
+    static bool checkHeader(Header& header);
 };
 
 #endif // INCLUDE_WAV_FILERECORD_H
