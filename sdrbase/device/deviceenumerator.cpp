@@ -253,6 +253,7 @@ void DeviceEnumerator::enumerateDevices(PluginAPI::SamplingDeviceRegistrations& 
     for (int i = 0; i < deviceRegistrations.count(); i++)
     {
         qDebug("DeviceEnumerator::enumerateDevices: %s", qPrintable(deviceRegistrations[i].m_deviceId));
+        emit enumeratingDevices(deviceRegistrations[i].m_deviceId);
         deviceRegistrations[i].m_plugin->enumOriginDevices(originDevicesHwIds, originDevices);
         PluginInterface::SamplingDevices samplingDevices;
         if (type == PluginInterface::SamplingDevice::StreamSingleRx) {

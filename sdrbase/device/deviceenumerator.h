@@ -27,8 +27,10 @@
 
 class PluginManager;
 
-class SDRBASE_API DeviceEnumerator
+class SDRBASE_API DeviceEnumerator : public QObject
 {
+	Q_OBJECT
+
 public:
     DeviceEnumerator();
     ~DeviceEnumerator();
@@ -66,6 +68,9 @@ public:
     int getBestRxSamplingDeviceIndex(const QString& deviceId, const QString& serial, int sequence, int deviceItemIndex);
     int getBestTxSamplingDeviceIndex(const QString& deviceId, const QString& serial, int sequence, int deviceItemIndex);
     int getBestMIMOSamplingDeviceIndex(const QString& deviceId, const QString& serial, int sequence);
+
+signals:
+    void enumeratingDevices(const QString &deviceId);
 
 private:
     struct DeviceEnumeration

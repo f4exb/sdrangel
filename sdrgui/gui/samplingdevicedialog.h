@@ -23,6 +23,8 @@
 #define SDRGUI_GUI_SAMPLINGDEVICEDIALOG_H_
 
 #include <QDialog>
+#include <QProgressDialog>
+
 #include <vector>
 
 #include "export.h"
@@ -30,6 +32,28 @@
 namespace Ui {
     class SamplingDeviceDialog;
 }
+
+class SDRGUI_API SamplingDeviceDialogWorker : public QObject {
+    Q_OBJECT
+
+public:
+    SamplingDeviceDialogWorker(int deviceType, QProgressDialog *progressDialog) :
+        m_deviceType(deviceType),
+        m_progressDialog(progressDialog)
+    {
+    }
+    void enumerateDevices();
+
+signals:
+    void finishedWork();
+
+private slots:
+    void enumeratingDevices(const QString &deviceId);
+
+private:
+    int m_deviceType;
+    QProgressDialog *m_progressDialog;
+};
 
 class SDRGUI_API SamplingDeviceDialog : public QDialog {
     Q_OBJECT
@@ -60,3 +84,4 @@ private slots:
 };
 
 #endif /* SDRGUI_GUI_SAMPLINGDEVICEDIALOG_H_ */
+
