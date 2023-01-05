@@ -22,7 +22,6 @@ set(map_HEADERS
     webserver.h
 )
 
-set(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND FALSE)
 if(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND)
     add_compile_definitions(QT_WEBENGINE_FOUND)
     configure_file(mapguiwebengine.ui mapgui.ui)
