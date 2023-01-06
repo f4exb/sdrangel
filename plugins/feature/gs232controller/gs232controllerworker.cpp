@@ -139,6 +139,13 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
         }
     }
 
+    // Must update m_settings before calling setAzimuthElevation, so m_settings.m_protocol is correct
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
     if (m_device != nullptr)
     {
         // Apply offset then clamp
@@ -158,12 +165,6 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
         {
             setAzimuth(azimuth);
         }
-    }
-
-    if (force) {
-        m_settings = settings;
-    } else {
-        m_settings.applySettings(settingsKeys, settings);
     }
 }
 
@@ -271,7 +272,9 @@ void GS232ControllerWorker::setAzimuthElevation(float azimuth, float elevation)
             qDebug() << "GS232ControllerWorker::setAzimuthElevation: Not sent, waiting for status reply";
             m_spidSetOutstanding = true;
         }
-    } else {
+    }
+    else
+    {
         QString cmd = QString("P %1 %2\n").arg(azimuth).arg(elevation);
         QByteArray data = cmd.toLatin1();
         m_device->write(data);
