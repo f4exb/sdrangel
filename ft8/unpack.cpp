@@ -248,24 +248,25 @@ void remember_call(std::string call)
 // 1 bit: swap
 // 2 bits: 1 RRR, 2 RR73, 3 73
 // 1 bit: 1 means CQ
-std::string unpack_4(int a77[])
+std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
 {
+    (void) locstr;
     // 38 possible characters:
     const char *chars = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ/";
-
     long long n58 = un(a77, 12, 58);
     char call[16];
+
     for (int i = 0; i < 11; i++)
     {
         call[10 - i] = chars[n58 % 38];
         n58 = n58 / 38;
     }
+
     call[11] = '\0';
 
     remember_call(call);
 
-    if (un(a77, 73, 1) == 1)
-    {
+    if (un(a77, 73, 1) == 1) {
         return std::string("CQ ") + call;
     }
 
@@ -273,38 +274,38 @@ std::string unpack_4(int a77[])
     // 12-bit hash
     hashes_mu.lock();
     std::string ocall;
-    if (hashes12.count(x12) > 0)
-    {
+
+    if (hashes12.count(x12) > 0) {
         ocall = hashes12[x12];
-    }
-    else
-    {
+    } else {
         ocall = "<...12>";
     }
+
     hashes_mu.unlock();
 
     int swap = un(a77, 70, 1);
     std::string msg;
+
     if (swap)
     {
         msg = std::string(call) + " " + ocall;
+        call1str = call;
+        call2str = ocall;
     }
     else
     {
         msg = std::string(ocall) + " " + call;
+        call1str = ocall;
+        call2str = call;
     }
 
     int suffix = un(a77, 71, 2);
-    if (suffix == 1)
-    {
+
+    if (suffix == 1) {
         msg += " RRR";
-    }
-    else if (suffix == 2)
-    {
+    } else if (suffix == 2) {
         msg += " RR73";
-    }
-    else if (suffix == 3)
-    {
+    } else if (suffix == 3) {
         msg += " 73";
     }
 
@@ -314,7 +315,7 @@ std::string unpack_4(int a77[])
 //
 // i3=1
 //
-std::string unpack_1(int a77[])
+std::string unpack_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
 {
     // type 1:
     // 28 call1
@@ -342,24 +343,26 @@ std::string unpack_1(int a77[])
     i += 3;
     assert((i3 == 1 || i3 == 2) && i == 77);
 
-    std::string call1text = trim(unpackcall(call1));
-    std::string call2text = trim(unpackcall(call2));
-    std::string gridtext = unpackgrid(grid, ir, i3);
+    call1str = trim(unpackcall(call1));
+    call2str = trim(unpackcall(call2));
+    locstr = unpackgrid(grid, ir, i3);
 
-    remember_call(call1text);
-    remember_call(call2text);
+    remember_call(call1str);
+    remember_call(call2str);
 
     const char *pr = (i3 == 1 ? "/R" : "/P");
 
-    return call1text + (rover1 ? pr : "") + " " + call2text + (rover2 ? pr : "") + " " + gridtext;
+    return call1str + (rover1 ? pr : "") + " " + call2str + (rover2 ? pr : "") + " " + locstr;
 }
 
 // free text
 // 71 bits, 13 characters, each one of 42 choices.
 // reversed.
 // details from wsjt-x's packjt77.f90
-std::string unpack_0_0(int a77[])
+std::string unpack_0_0(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
 {
+    (void) call2str;
+    (void) locstr;
     // the 42 possible characters.
     const char *cc = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ+-./?";
     __int128 x = un(a77, 0, 71);
@@ -369,6 +372,7 @@ std::string unpack_0_0(int a77[])
         msg[13 - 1 - i] = cc[x % 42];
         x = x / 42;
     }
+    call1str = msg;
     return msg;
 }
 
@@ -390,8 +394,9 @@ const char *ru_states[] = {
 //  1 R
 //  3 RST 529 to 599
 // 13 state/province/serialnumber
-std::string unpack_3(int a77[])
+std::string unpack_3(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
 {
+    (void) locstr;
     int i = 0;
     int tu = a77[i];
     i += 1;
@@ -406,8 +411,8 @@ std::string unpack_3(int a77[])
     int serial = un(a77, i, 13);
     i += 13;
 
-    std::string call1text = unpackcall(call1);
-    std::string call2text = unpackcall(call2);
+    call1str = trim(unpackcall(call1));
+    call2str = trim(unpackcall(call2));
 
     rst = 529 + 10 * rst;
 
@@ -431,7 +436,7 @@ std::string unpack_3(int a77[])
     {
         msg += "TU; ";
     }
-    msg += call1text + " " + call2text + " ";
+    msg += call1str + " " + call2str + " ";
     if (r)
     {
         msg += "R ";
@@ -443,8 +448,8 @@ std::string unpack_3(int a77[])
     }
     msg += serialstr;
 
-    remember_call(call1text);
-    remember_call(call2text);
+    remember_call(call1str);
+    remember_call(call2str);
 
     return msg;
 }
@@ -464,8 +469,9 @@ const char *sections[] = {
 // i3 = 0, n3 = 3 or 4: ARRL Field Day
 // 0.3   WA9XYZ KA1ABC R 16A EMA            28 28 1 4 3 7    71   ARRL Field Day
 // 0.4   WA9XYZ KA1ABC R 32A EMA            28 28 1 4 3 7    71   ARRL Field Day
-std::string unpack_0_3(int a77[], int n3)
+std::string unpack_0_3(int a77[], int n3, std::string& call1str, std::string& call2str, std::string& locstr)
 {
+    (void) locstr;
     int i = 0;
     int call1 = un(a77, i, 28);
     i += 28;
@@ -474,8 +480,11 @@ std::string unpack_0_3(int a77[], int n3)
     int R = un(a77, i, 1);
     i += 1;
     int n_transmitters = un(a77, i, 4);
-    if (n3 == 4)
+
+    if (n3 == 4) {
         n_transmitters += 16;
+    }
+
     i += 4;
     int clss = un(a77, i, 3); // class
     i += 3;
@@ -483,19 +492,24 @@ std::string unpack_0_3(int a77[], int n3)
     i += 7;
 
     std::string msg;
-    msg += unpackcall(call1);
+    call1str = trim(unpackcall(call1));
+    msg += call1str;
     msg += " ";
-    msg += unpackcall(call2);
+    call2str = trim(unpackcall(call2));
+    msg += call2str;
     msg += " ";
-    if (R)
+
+    if (R) {
         msg += "R ";
+    }
+
     {
         char tmp[16];
         sprintf(tmp, "%d%c ", n_transmitters + 1, clss + 'A');
         msg += tmp;
     }
-    if (section - 1 >= 0 && section - 1 < (int)(sizeof(sections) / sizeof(sections[0])))
-    {
+
+    if (section - 1 >= 0 && section - 1 < (int)(sizeof(sections) / sizeof(sections[0]))) {
         msg += sections[section - 1];
     }
 
@@ -508,7 +522,7 @@ std::string unpack_0_3(int a77[], int n3)
 // CRC and LDPC have already been checked.
 // details from wsjt-x's packjt77.f90 and 77bit.txt.
 //
-std::string unpack(int a77[])
+std::string unpack(int a77[], std::string& call1, std::string& call2, std::string& loc)
 {
     int i3 = un(a77, 74, 3);
     int n3 = un(a77, 71, 3);
@@ -516,31 +530,31 @@ std::string unpack(int a77[])
     if (i3 == 0 && n3 == 0)
     {
         // free text
-        return unpack_0_0(a77);
+        return unpack_0_0(a77, call1, call2, loc);
     }
 
     if (i3 == 0 && (n3 == 3 || n3 == 4))
     {
         // ARRL Field Day
-        return unpack_0_3(a77, n3);
+        return unpack_0_3(a77, n3, call1, call2, loc);
     }
 
     if (i3 == 1 || i3 == 2)
     {
         // ordinary message
-        return unpack_1(a77);
+        return unpack_1(a77, call1, call2, loc);
     }
 
     if (i3 == 3)
     {
         // RTTY Round-Up
-        return unpack_3(a77);
+        return unpack_3(a77, call1, call2, loc);
     }
 
     if (i3 == 4)
     {
         // call that doesn't fit in 28 bits
-        return unpack_4(a77);
+        return unpack_4(a77, call1, call2, loc);
     }
 
     char tmp[64];

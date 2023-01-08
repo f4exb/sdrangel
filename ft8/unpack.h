@@ -23,7 +23,7 @@
 
 namespace FT8 {
 
-std::string unpack(int a91[]);
+std::string unpack(int a91[], std::string& call1str, std::string& call2str, std::string& locstr);
 
 } // namespace FT8
 

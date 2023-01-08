@@ -41,9 +41,13 @@ int hcb(
     const char *comment,
     float snr,
     int pass,
-    int correct_bits)
+    int correct_bits
+)
 {
-    std::string msg = FT8::unpack(a91);
+    std::string call1;
+    std::string call2;
+    std::string loc;
+    std::string msg = FT8::unpack(a91, call1, call2, loc);
 
     cycle_mu.lock();
 
@@ -58,14 +62,18 @@ int hcb(
 
     cycle_mu.unlock();
 
-    printf("%d %3d %3d %5.2f %6.1f %s, %s\n",
-           pass,
-           (int)snr,
-           correct_bits,
-           off - 0.5,
-           hz0,
-           msg.c_str(),
-           comment);
+    printf("%d %3d %3d %5.2f %6.1f %s [%s:%s:%s] (%s)\n",
+        pass,
+        (int)snr,
+        correct_bits,
+        off - 0.5,
+        hz0,
+        msg.c_str(),
+        call1.c_str(),
+        call2.c_str(),
+        loc.c_str(),
+        comment
+    );
     fflush(stdout);
 
     return 2; // 2 => new decode, do subtract.
