@@ -46,7 +46,8 @@ void MainBench::run()
         << " testType: " << (int) m_parser.getTestType()
         << " nsamples: " << m_parser.getNbSamples()
         << " repet: " << m_parser.getRepetition()
-        << " log2f: " << m_parser.getLog2Factor();
+        << " log2f: " << m_parser.getLog2Factor()
+        << " file: " << m_parser.getFileName();
 
     if (m_parser.getTestType() == ParserBench::TestDecimatorsII) {
         testDecimateII();
@@ -63,7 +64,7 @@ void MainBench::run()
     } else if (m_parser.getTestType() == ParserBench::TestGolay2312) {
         testGolay2312();
     } else if (m_parser.getTestType() == ParserBench::TestFT8) {
-        testFT8();
+        testFT8(m_parser.getFileName());
     } else {
         qDebug() << "MainBench::run: unknown test type: " << m_parser.getTestType();
     }

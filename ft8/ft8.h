@@ -22,16 +22,21 @@
 #define ft8_h
 
 namespace FT8 {
-// Callback function to get the results
-typedef int (*cb_t)(
-    int *a91,
-    float hz0,
-    float off,
-    const char *,
-    float snr,
-    int pass,
-    int correct_bits
-);
+// Callback interface to get the results
+class CallbackInterface
+{
+public:
+    virtual int hcb(
+        int *a91,
+        float hz0,
+        float off,
+        const char *,
+        float snr,
+        int pass,
+        int correct_bits
+    ) = 0; //!< virtual nathod called each time there is a result
+};
+
 // same as Python class CDECODE
 //
 struct cdecode
@@ -53,7 +58,7 @@ void entry(
     int hints2[],
     double time_left,
     double total_time_left,
-    cb_t cb,
+    CallbackInterface *cb,
     int,
     struct cdecode *
 );

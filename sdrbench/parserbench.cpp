@@ -38,7 +38,11 @@ ParserBench::ParserBench() :
     m_log2FactorOption(QStringList() << "l" << "log2-factor",
         "Log2 factor for rate conversion.",
         "log2",
-        "2")
+        "2"),
+    m_fileOption(QStringList() << "f" << "file",
+        "File to be used for the test.",
+        "file",
+        "")
 {
     m_testStr = "decimateii";
     m_nbSamples = 1048576;
@@ -53,6 +57,7 @@ ParserBench::ParserBench() :
     m_parser.addOption(m_nbSamplesOption);
     m_parser.addOption(m_repetitionOption);
     m_parser.addOption(m_log2FactorOption);
+    m_parser.addOption(m_fileOption);
 }
 
 ParserBench::~ParserBench()
@@ -111,6 +116,10 @@ void ParserBench::parse(const QCoreApplication& app)
     } else {
         qWarning() << "ParserBench::parse: repetilog2 factortion invalid. Defaulting to " << m_log2Factor;
     }
+
+    // file
+
+    m_fileName = m_parser.value(m_fileOption);
 }
 
 ParserBench::TestType ParserBench::getTestType() const

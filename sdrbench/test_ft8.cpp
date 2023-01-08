@@ -31,10 +31,28 @@ void MainBench::testFT8()
 }
 #else
 
-QMutex cycle_mu;
-std::map<std::string, bool> cycle_already;
+class TestFT8Callback : public FT8::CallbackInterface
+{
+public:
+    virtual int hcb(
+        int *a91,
+        float hz0,
+        float off,
+        const char *comment,
+        float snr,
+        int pass,
+        int correct_bits
+    );
+    const std::map<std::string, bool>& getMsgMap() {
+        return cycle_already;
+    }
+private:
+    QMutex cycle_mu;
+    std::map<std::string, bool> cycle_already;
+};
 
-int hcb(
+
+int TestFT8Callback::hcb(
     int *a91,
     float hz0,
     float off,
@@ -62,7 +80,7 @@ int hcb(
 
     cycle_mu.unlock();
 
-    printf("%d %3d %3d %5.2f %6.1f %s [%s:%s:%s] (%s)\n",
+    qDebug("TestFT8Callback::hcb: %d %3d %3d %5.2f %6.1f %s [%s:%s:%s] (%s)",
         pass,
         (int)snr,
         correct_bits,
@@ -79,14 +97,15 @@ int hcb(
     return 2; // 2 => new decode, do subtract.
 }
 
-void MainBench::testFT8()
+void MainBench::testFT8(const QString& wavFile)
 {
     qDebug("MainBench::testFT8: start");
     int hints[2] = { 2, 0 }; // CQ
     double budget = 2.5; // compute for this many seconds per cycle
+    TestFT8Callback testft8Callback;
 
     int rate;
-    std::vector<float> s = FT8::readwav("/home/f4exb/.local/share/WSJT-X/save/230105_091630.wav", rate); // FIXME: download file
+    std::vector<float> s = FT8::readwav(wavFile.toStdString().c_str(), rate);
     FT8::entry(
         s.data(),
         s.size(),
@@ -98,10 +117,46 @@ void MainBench::testFT8()
         hints,
         budget,
         budget,
-        hcb,
+        &testft8Callback,
         0,
         (struct FT8::cdecode *) 0
     );
-    qDebug("MainBench::testFT8: end");
+    qDebug("MainBench::testFT8: done");
+    const std::map<std::string, bool>& msgMap = testft8Callback.getMsgMap();
+
+    if (msgMap.size() != 15)
+    {
+        qDebug("MainBench::testFT8: failed: invlid size: %lu expected 15", msgMap.size());
+        return;
+    }
+
+    QStringList messages = {
+        "CQ DF5SF JN39",
+        "CQ DL1SVA JO64",
+        "CQ DL7CO JO42",
+        "CQ F4BAL JO10",
+        "CQ LA1XJA JO49",
+        "CQ ON7VG JO21",
+        "CQ OZ1BJF JO55",
+        "CQ S51TA JN75",
+        "HA3PT SQ8AA -18",
+        "JA2KFQ EI4KF -17",
+        "LY3PW DF2FE R-13",
+        "N9GQA DG9NAY JN58",
+        "OK1HEH OH8NW 73  ",
+        "UN6T EA1FQ IN53",
+        "W5SUM G8OO -18"
+    };
+
+    for (const auto &msg : messages)
+    {
+        if (msgMap.count(msg.toStdString()) != 1)
+        {
+            qDebug("MainBench::testFT8: failed: key: %s", qPrintable(msg));
+            return;
+        }
+    }
+
+    qDebug("MainBench::testFT8: success");
 }
 #endif

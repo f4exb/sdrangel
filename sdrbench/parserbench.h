@@ -49,18 +49,21 @@ public:
     uint32_t getNbSamples() const { return m_nbSamples; }
     uint32_t getRepetition() const { return m_repetition; }
     uint32_t getLog2Factor() const { return m_log2Factor; }
+    const QString& getFileName() const { return m_fileName; }
 
 private:
     QString  m_testStr;
     uint32_t m_nbSamples;
     uint32_t m_repetition;
     uint32_t m_log2Factor;
+    QString m_fileName;
 
     QCommandLineParser m_parser;
     QCommandLineOption m_testOption;
     QCommandLineOption m_nbSamplesOption;
     QCommandLineOption m_repetitionOption;
     QCommandLineOption m_log2FactorOption;
+    QCommandLineOption m_fileOption;
 };
 
 

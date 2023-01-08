@@ -445,7 +445,7 @@ public:
     float down_hz_;
 
     static std::mutex cb_mu_;
-    cb_t cb_; // call-back into Python
+    CallbackInterface *cb_; // call-back interface
 
     std::mutex hack_mu_;
     int hack_size_;
@@ -469,7 +469,7 @@ public:
         int hints2[],
         double deadline,
         double final_deadline,
-        cb_t cb,
+        CallbackInterface *cb,
         std::vector<cdecode> prevdecs
     )
     {
@@ -3513,10 +3513,10 @@ public:
 
             float snr = guess_snr(m79);
 
-            if (cb_ != 0)
+            if (cb_)
             {
                 cb_mu_.lock();
-                int ret = cb_(
+                int ret = cb_->hcb(
                     a174,
                     best_hz + down_hz_,
                     best_off,
@@ -3603,7 +3603,7 @@ void entry(
     int hints2[],
     double time_left,
     double total_time_left,
-    cb_t cb,
+    CallbackInterface *cb,
     int nprevdecs,
     struct cdecode *xprevdecs
 )
