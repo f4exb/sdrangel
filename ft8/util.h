@@ -26,7 +26,7 @@
 
 namespace FT8
 {
-float now();
+double now();
 void writewav(const std::vector<float> &samples, const char *filename, int rate);
 std::vector<float> readwav(const char *filename, int &rate_out);
 void writetxt(std::vector<float> v, const char *filename);

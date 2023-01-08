@@ -595,8 +595,8 @@ public:
 
     int start_;             // sample number of 0.5 seconds into samples[]
     int rate_;              // samples/second
-    float deadline_;       // start time + budget
-    float final_deadline_; // keep going this long if no decodes
+    double deadline_;       // start time + budget
+    double final_deadline_; // keep going this long if no decodes
     std::vector<int> hints1_;
     std::vector<int> hints2_;
     int pass_;
@@ -617,13 +617,19 @@ public:
 
     Plan *plan32_;
 
-    FT8(const std::vector<float> &samples,
+    FT8(
+        const std::vector<float> &samples,
         float min_hz,
         float max_hz,
-        int start, int rate,
-        int hints1[], int hints2[], float deadline,
-        float final_deadline, cb_t cb,
-        std::vector<cdecode> prevdecs)
+        int start,
+        int rate,
+        int hints1[],
+        int hints2[],
+        double deadline,
+        double final_deadline,
+        cb_t cb,
+        std::vector<cdecode> prevdecs
+    )
     {
         samples_ = samples;
         min_hz_ = min_hz;
@@ -636,12 +642,11 @@ public:
         cb_ = cb;
         down_hz_ = 0;
 
-        for (int i = 0; hints1[i]; i++)
-        {
+        for (int i = 0; hints1[i]; i++) {
             hints1_.push_back(hints1[i]);
         }
-        for (int i = 0; hints2[i]; i++)
-        {
+
+        for (int i = 0; hints2[i]; i++) {
             hints2_.push_back(hints2[i]);
         }
 
@@ -676,6 +681,7 @@ public:
                 float mx;
                 int mxi = -1;
                 float sum = 0;
+
                 for (int i = 0; i < 8; i++)
                 {
                     float x = std::abs(bins[si0 + si][bi0 + i]);
@@ -686,6 +692,7 @@ public:
                         mx = x;
                     }
                 }
+
                 if (si >= 0 && si < 7)
                 {
                     float x = std::abs(bins[si0 + si][bi0 + costas[si - 0]]);
@@ -723,12 +730,10 @@ public:
                     x += std::abs(bins[si0 + si][bi0 + bi]);
                     x += std::abs(bins[si0 + 36 + si][bi0 + bi]);
                     x += std::abs(bins[si0 + 72 + si][bi0 + bi]);
-                    if (bi == costas[si])
-                    {
+
+                    if (bi == costas[si]) {
                         sig += x;
-                    }
-                    else
-                    {
+                    } else {
                         noise += x;
                     }
                 }
@@ -952,17 +957,19 @@ public:
                             144000, 145800, 216000, 218700,
                             0};
         int nice = -1;
+
         for (int i = 0; nice_sizes[i]; i++)
         {
             int sz = nice_sizes[i];
+
             if (fabs(samples_.size() - sz) < 0.05 * samples_.size())
             {
                 nice = sz;
                 break;
             }
         }
-        if (nice != -1)
-        {
+
+        if (nice != -1) {
             samples_.resize(nice);
         }
 
@@ -986,16 +993,21 @@ public:
         {
             // filter and reduce the sample rate from rate_ to nrate.
 
-            float t0 = now();
+            double t0 = now();
             int osize = samples_.size();
 
             float delta_hz; // how much it moved down
-            samples_ = reduce_rate(samples_,
-                                   min_hz_ - 3.1 - go_extra,
-                                   max_hz_ + 50 - 3.1 + go_extra,
-                                   rate_, nrate, delta_hz);
+            samples_ = reduce_rate(
+                samples_,
+                min_hz_ - 3.1 - go_extra,
+                max_hz_ + 50 - 3.1 + go_extra,
+                rate_,
+                nrate,
+                delta_hz
+            );
 
-            float t1 = now();
+            double t1 = now();
+
             if (t1 - t0 > 0.1)
             {
                 fprintf(stderr, "reduce oops, size %d -> %d, rate %d -> %d, took %.2f\n",
@@ -1005,6 +1017,7 @@ public:
                         nrate,
                         t1 - t0);
             }
+
             if (0)
             {
                 fprintf(stderr, "%.0f..%.0f, range %.0f, rate %d -> %d, delta hz %.0f, %.6f sec\n",
@@ -1024,6 +1037,7 @@ public:
                     prevdecs_[i].hz1 -= delta_hz;
                 }
             }
+
             assert(max_hz_ + 50 < nrate / 2);
             assert(min_hz_ >= 0);
 
@@ -1055,21 +1069,26 @@ public:
                 // v[i] = 0;
                 v[i] = samples_[rnd()];
             }
+
             samples_.insert(samples_.end(), v.begin(), v.end());
         }
 
         int si0 = (start_ - tminus * rate_) / block;
-        if (si0 < 0)
+
+        if (si0 < 0) {
             si0 = 0;
+        }
+
         int si1 = (start_ + tplus * rate_) / block;
 
         // a copy from which to subtract.
         nsamples_ = samples_;
-
         int any = 0;
+
         for (int i = 0; i < (int)prevdecs_.size(); i++)
         {
             auto d = prevdecs_[i];
+
             if (d.hz0 >= min_hz_ && d.hz0 <= max_hz_)
             {
                 // reconstruct correct 79 symbols from LDPC output.
@@ -1088,21 +1107,21 @@ public:
                 any += 1;
             }
         }
-        if (any)
-        {
+
+        if (any) {
             samples_ = nsamples_;
         }
 
         for (pass_ = 0; pass_ < npasses; pass_++)
         {
-            float total_remaining = deadline_ - now();
-            float remaining = total_remaining / (npasses - pass_);
-            if (pass_ == 0)
-            {
+            double total_remaining = deadline_ - now();
+            double remaining = total_remaining / (npasses - pass_);
+
+            if (pass_ == 0) {
                 remaining *= pass0_frac;
             }
-            float deadline = now() + remaining;
 
+            double deadline = now() + remaining;
             int new_decodes = 0;
             samples_ = nsamples_;
 
@@ -1154,35 +1173,42 @@ public:
                       { return a.strength_ > b.strength_; });
 
             char already[2000]; // XXX
-            for (int i = 0; i < (int)(sizeof(already) / sizeof(already[0])); i++)
+
+            for (int i = 0; i < (int)(sizeof(already) / sizeof(already[0])); i++) {
                 already[i] = 0;
+            }
 
             for (int ii = 0; ii < (int)order.size(); ii++)
             {
-                float tt = now();
+                double tt = now();
+
                 if (ii > 0 &&
                     tt > deadline &&
                     (tt > deadline_ || new_decodes >= pass_threshold) &&
-                    (pass_ < npasses - 1 || tt > final_deadline_))
-                {
+                    (pass_ < npasses - 1 || tt > final_deadline_)
+                ) {
                     break;
                 }
 
                 float hz = order[ii].hz_;
-                if (already[(int)round(hz / already_hz)])
+
+                if (already[(int)round(hz / already_hz)]) {
                     continue;
+                }
+
                 int off = order[ii].off_;
                 int ret = one(bins, samples_.size(), hz, off);
+
                 if (ret)
                 {
-                    if (ret == 2)
-                    {
+                    if (ret == 2) {
                         new_decodes++;
                     }
+
                     already[(int)round(hz / already_hz)] = 1;
                 }
             }
-        }
+        } // pass
     }
 
     //
@@ -3598,12 +3624,9 @@ public:
             int correct_bits = 0;
             for (int i = 0; i < 174; i++)
             {
-                if (ll174[i] < 0 && a174[i] == 1)
-                {
+                if (ll174[i] < 0 && a174[i] == 1) {
                     correct_bits += 1;
-                }
-                else if (ll174[i] > 0 && a174[i] == 0)
-                {
+                } else if (ll174[i] > 0 && a174[i] == 0) {
                     correct_bits += 1;
                 }
             }
@@ -3615,9 +3638,15 @@ public:
             {
                 // fine-tune offset and hz for better subtraction.
                 float best_off = best_off_samples / 200.0;
-                search_both_known(samples200, 200, re79,
-                                  best_hz, best_off,
-                                  best_hz, best_off);
+                search_both_known(
+                    samples200,
+                    200,
+                    re79,
+                    best_hz,
+                    best_off,
+                    best_hz,
+                    best_off
+                );
                 best_off_samples = round(best_off * 200.0);
             }
 
@@ -3629,9 +3658,15 @@ public:
             if (do_third == 2)
             {
                 // fine-tune offset and hz for better subtraction.
-                search_both_known(samples_, rate_, re79,
-                                  best_hz, best_off,
-                                  best_hz, best_off);
+                search_both_known(
+                    samples_,
+                    rate_,
+                    re79,
+                    best_hz,
+                    best_off,
+                    best_hz,
+                    best_off
+                );
             }
 
             float snr = guess_snr(m79);
@@ -3639,9 +3674,18 @@ public:
             if (cb_ != 0)
             {
                 cb_mu_.lock();
-                int ret = cb_(a174, best_hz + down_hz_, best_hz + down_hz_,
-                              best_off, comment.c_str(), snr, pass_, correct_bits);
+                int ret = cb_(
+                    a174,
+                    best_hz + down_hz_,
+                    best_off,
+                    comment.c_str(),
+                    snr,
+                    pass_,
+                    correct_bits
+                );
+
                 cb_mu_.unlock();
+
                 if (ret == 2)
                 {
                     // a new decode. subtract it from nsamples_.
@@ -3650,6 +3694,7 @@ public:
 
                 return ret;
             }
+
             return 1;
         }
         else
@@ -3714,16 +3759,16 @@ void entry(
     float max_hz,
     int hints1[],
     int hints2[],
-    float time_left,
-    float total_time_left,
+    double time_left,
+    double total_time_left,
     cb_t cb,
     int nprevdecs,
     struct cdecode *xprevdecs
 )
 {
-    float t0 = now();
-    float deadline = t0 + time_left;
-    float final_deadline = t0 + total_time_left;
+    double t0 = now();
+    double deadline = t0 + time_left;
+    double final_deadline = t0 + total_time_left;
 
     // decodes from previous runs, for subtraction.
     std::vector<cdecode> prevdecs;
@@ -3778,7 +3823,6 @@ void entry(
         );
 
         int npasses = nprevdecs > 0 ? npasses_two : npasses_one;
-        printf("FT8::entry: npasses: %d\n", npasses);
 
         ft8->th_ = new std::thread([ft8, npasses] () { ft8->go(npasses); });
 

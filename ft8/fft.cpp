@@ -62,7 +62,7 @@ public:
 
     // how much CPU time spent in FFTs that use this plan.
 #if TIMING
-    float time_;
+    double time_;
 #endif
     const char *why_;
     int uses_;
@@ -100,7 +100,7 @@ Plan *get_plan(int n, const char *why)
         }
     }
 
-    float t0 = now();
+    double t0 = now();
 
     // fftw_make_planner_thread_safe();
 
@@ -172,7 +172,7 @@ Plan *get_plan(int n, const char *why)
 
     if (0 && getpid() == plan_master_pid)
     {
-        float t1 = now();
+        double t1 = now();
         fprintf(stderr, "miss pid=%d master=%d n=%d t=%.3f total=%d type=%d, %s\n",
                 getpid(), plan_master_pid, n, t1 - t0, nplans, type, why);
     }
@@ -213,7 +213,7 @@ std::vector<std::complex<float>> one_fft(
     fftwf_plan m_plan = p->fwd_;
 
 #if TIMING
-    float t0 = now();
+    double t0 = now();
 #endif
 
     assert((int)samples.size() - i0 >= block);
@@ -287,7 +287,7 @@ ffts_t ffts(const std::vector<float> &samples, int i0, int block, const char *wh
     fftwf_plan m_plan = p->fwd_;
 
 #if TIMING
-    float t0 = now();
+    double t0 = now();
 #endif
 
     // allocate our own b/c using p->m_in and p->m_out isn't thread-safe.
@@ -356,7 +356,7 @@ std::vector<std::complex<float>> one_fft_c(
     fftwf_plan m_plan = p->cfwd_;
 
 #if TIMING
-    float t0 = now();
+    double t0 = now();
 #endif
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -416,7 +416,7 @@ std::vector<std::complex<float>> one_fft_cc(
     fftwf_plan m_plan = p->cfwd_;
 
 #if TIMING
-    float t0 = now();
+    double t0 = now();
 #endif
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -472,7 +472,7 @@ std::vector<std::complex<float>> one_ifft_cc(
     fftwf_plan m_plan = p->crev_;
 
 #if TIMING
-    float t0 = now();
+    double t0 = now();
 #endif
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -519,7 +519,7 @@ std::vector<float> one_ifft(const std::vector<std::complex<float>> &bins, const 
     fftwf_plan m_plan = p->rev_;
 
 #if TIMING
-    float t0 = now();
+    double t0 = now();
 #endif
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * ((p->n_ / 2) + 1));

@@ -26,7 +26,6 @@ namespace FT8 {
 typedef int (*cb_t)(
     int *a91,
     float hz0,
-    float hz1,
     float off,
     const char *,
     float snr,
@@ -52,8 +51,8 @@ void entry(
     float max_hz,
     int hints1[],
     int hints2[],
-    float time_left,
-    float total_time_left,
+    double time_left,
+    double total_time_left,
     cb_t cb,
     int,
     struct cdecode *

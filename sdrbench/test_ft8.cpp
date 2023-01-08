@@ -32,24 +32,17 @@ void MainBench::testFT8()
 #else
 
 QMutex cycle_mu;
-volatile int cycle_count;
-time_t saved_cycle_start;
 std::map<std::string, bool> cycle_already;
 
 int hcb(
     int *a91,
     float hz0,
-    float hz1,
     float off,
     const char *comment,
     float snr,
     int pass,
     int correct_bits)
 {
-    (void) hz1;
-    (void) comment;
-    (void) pass;
-
     std::string msg = FT8::unpack(a91);
 
     cycle_mu.lock();
@@ -62,22 +55,17 @@ int hcb(
     }
 
     cycle_already[msg] = true;
-    cycle_count += 1;
 
     cycle_mu.unlock();
 
-    struct tm result;
-    gmtime_r(&saved_cycle_start, &result);
-
-    printf("%02d%02d%02d %3d %3d %5.2f %6.1f %s\n",
-           result.tm_hour,
-           result.tm_min,
-           result.tm_sec,
+    printf("%d %3d %3d %5.2f %6.1f %s, %s\n",
+           pass,
            (int)snr,
            correct_bits,
            off - 0.5,
            hz0,
-           msg.c_str());
+           msg.c_str(),
+           comment);
     fflush(stdout);
 
     return 2; // 2 => new decode, do subtract.
@@ -87,7 +75,7 @@ void MainBench::testFT8()
 {
     qDebug("MainBench::testFT8: start");
     int hints[2] = { 2, 0 }; // CQ
-    double budget = 5; // compute for this many seconds per cycle
+    double budget = 2.5; // compute for this many seconds per cycle
 
     int rate;
     std::vector<float> s = FT8::readwav("/home/f4exb/.local/share/WSJT-X/save/230105_091630.wav", rate); // FIXME: download file

@@ -30,7 +30,7 @@
 
 namespace FT8 {
 
-float now()
+double now()
 {
     struct timeval tv;
     gettimeofday(&tv, 0);
