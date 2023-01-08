@@ -62,6 +62,8 @@ void MainBench::run()
         testDecimateFF();
     } else if (m_parser.getTestType() == ParserBench::TestGolay2312) {
         testGolay2312();
+    } else if (m_parser.getTestType() == ParserBench::TestFT8) {
+        testFT8();
     } else {
         qDebug() << "MainBench::run: unknown test type: " << m_parser.getTestType();
     }

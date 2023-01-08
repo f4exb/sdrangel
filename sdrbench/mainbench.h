@@ -54,6 +54,7 @@ private:
     void testDecimateFI();
     void testDecimateFF();
     void testGolay2312();
+    void testFT8();
     void decimateII(const qint16 *buf, int len);
     void decimateInfII(const qint16 *buf, int len);
     void decimateSupII(const qint16 *buf, int len);
@@ -61,6 +62,7 @@ private:
     void decimateFI(const float *buf, int len);
     void decimateFF(const float *buf, int len);
     void printResults(const QString& prefix, qint64 nsecs);
+
 
     static MainBench *m_instance;
     qtwebapp::LoggerWithFile *m_logger;

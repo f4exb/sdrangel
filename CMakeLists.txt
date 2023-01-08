@@ -781,6 +781,10 @@ add_subdirectory(sdrbench)
 
 add_subdirectory(modemm17)
 
+if (LINUX)
+    add_subdirectory(ft8)
+endif()
+
 if (BUILD_GUI)
     add_subdirectory(sdrgui)
     add_subdirectory(plugins plugins)

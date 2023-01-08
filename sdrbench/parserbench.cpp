@@ -24,7 +24,7 @@
 
 ParserBench::ParserBench() :
     m_testOption(QStringList() << "t" << "test",
-        "Test type: decimateii, decimatefi, decimateff, decimateif, decimateinfii, decimatesupii, ambe, golay2312",
+        "Test type: decimateii, decimatefi, decimateff, decimateif, decimateinfii, decimatesupii, ambe, golay2312, ft8"
         "test",
         "decimateii"),
     m_nbSamplesOption(QStringList() << "n" << "nb-samples",
@@ -127,6 +127,8 @@ ParserBench::TestType ParserBench::getTestType() const
         return TestDecimatorsSupII;
     } else if (m_testStr == "golay2312") {
         return TestGolay2312;
+    } else if (m_testStr == "ft8") {
+        return TestFT8;
     } else {
         return TestDecimatorsII;
     }
