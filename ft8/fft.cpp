@@ -21,11 +21,11 @@
 
 #include "fft.h"
 #include <mutex>
-#include <unistd.h>
+// #include <unistd.h>
 #include <assert.h>
-#include <sys/file.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+// #include <sys/file.h>
+// #include <sys/types.h>
+// #include <sys/stat.h>
 #include "util.h"
 
 #define TIMING 0
@@ -36,9 +36,10 @@ namespace FT8 {
 int fftw_type = FFTW_ESTIMATE;
 
 static std::mutex plansmu;
+static std::mutex plansmu2;
 static Plan *plans[1000];
 static int nplans;
-static int plan_master_pid = 0;
+// static int plan_master_pid = 0;
 
 Plan *get_plan(int n, const char *why)
 {
@@ -47,10 +48,10 @@ Plan *get_plan(int n, const char *why)
 
     plansmu.lock();
 
-    if (plan_master_pid == 0)
-    {
-        plan_master_pid = getpid();
-    }
+    // if (plan_master_pid == 0)
+    // {
+    //     plan_master_pid = getpid();
+    // }
 
     for (int i = 0; i < nplans; i++)
     {
@@ -67,7 +68,9 @@ Plan *get_plan(int n, const char *why)
         }
     }
 
+#if TIMING
     double t0 = now();
+#endif
 
     // fftw_make_planner_thread_safe();
 
@@ -75,12 +78,12 @@ Plan *get_plan(int n, const char *why)
     // can't rely on plansmu because both ft8.so
     // and snd.so may be using separate copies of fft.cc.
     // the lock file really should be per process.
-    // FIXME: Qt-fy this
-    int lockfd = creat("/tmp/fft-plan-lock", 0666);
-    assert(lockfd >= 0);
-    fchmod(lockfd, 0666);
-    int lockret = flock(lockfd, LOCK_EX);
-    assert(lockret == 0);
+    // int lockfd = creat("/tmp/fft-plan-lock", 0666);
+    // assert(lockfd >= 0);
+    // fchmod(lockfd, 0666);
+    // int lockret = flock(lockfd, LOCK_EX);
+    // assert(lockret == 0);
+    plansmu2.lock();
 
     fftwf_set_timelimit(5);
 
@@ -106,10 +109,10 @@ Plan *get_plan(int n, const char *why)
     // FFTW_PATIENT
     // FFTW_EXHAUSTIVE
     int type = fftw_type;
-    if (getpid() != plan_master_pid)
-    {
-        type = FFTW_ESTIMATE;
-    }
+    // if (getpid() != plan_master_pid)
+    // {
+    //     type = FFTW_ESTIMATE;
+    // }
     p->type_ = type;
     p->fwd_ = fftwf_plan_dft_r2c_1d(n, p->r_, p->c_, type);
     assert(p->fwd_);
@@ -128,21 +131,24 @@ Plan *get_plan(int n, const char *why)
     p->crev_ = fftwf_plan_dft_1d(n, p->cc2_, p->cc1_, FFTW_BACKWARD, type);
     assert(p->crev_);
 
-    flock(lockfd, LOCK_UN);
-    close(lockfd);
+    // flock(lockfd, LOCK_UN);
+    // close(lockfd);
+    plansmu2.unlock();
 
     assert(nplans + 1 < 1000);
 
     plans[nplans] = p;
-    __sync_synchronize();
+    // __sync_synchronize();
     nplans += 1;
 
+#if TIMING
     if (0 && getpid() == plan_master_pid)
     {
         double t1 = now();
         fprintf(stderr, "miss pid=%d master=%d n=%d t=%.3f total=%d type=%d, %s\n",
                 getpid(), plan_master_pid, n, t1 - t0, nplans, type, why);
     }
+#endif
 
     plansmu.unlock();
 
