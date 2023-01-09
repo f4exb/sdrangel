@@ -167,7 +167,9 @@ void MainBench::testFT8(const QString& wavFile)
 
     wfile.close();
 
-    FT8::entry(
+    FT8::FT8Decoder decoder;
+
+    decoder.entry(
         samples.data(),
         samples.size(),
         0.5 * header.m_sampleRate,
@@ -180,7 +182,7 @@ void MainBench::testFT8(const QString& wavFile)
         budget,
         &testft8Callback,
         0,
-        (struct FT8::cdecode *) 0
+        (struct FT8::cdecode *) nullptr
     );
     qDebug("MainBench::testFT8: done");
     const std::map<std::string, bool>& msgMap = testft8Callback.getMsgMap();

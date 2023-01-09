@@ -35,39 +35,6 @@ namespace FT8 {
 // MEASURE=0, ESTIMATE=64, PATIENT=32
 int fftw_type = FFTW_ESTIMATE;
 
-// a cached fftw plan, for both of:
-// fftwf_plan_dft_r2c_1d(n, m_in, m_out, FFTW_ESTIMATE);
-// fftwf_plan_dft_c2r_1d(n, m_in, m_out, FFTW_ESTIMATE);
-class Plan
-{
-public:
-    int n_;
-    int type_;
-
-    //
-    // real -> complex
-    //
-    fftwf_complex *c_; // (n_ / 2) + 1 of these
-    float *r_;         // n_ of these
-    fftwf_plan fwd_;   // forward plan
-    fftwf_plan rev_;   // reverse plan
-
-    //
-    // complex -> complex
-    //
-    fftwf_complex *cc1_; // n
-    fftwf_complex *cc2_; // n
-    fftwf_plan cfwd_;    // forward plan
-    fftwf_plan crev_;    // reverse plan
-
-    // how much CPU time spent in FFTs that use this plan.
-#if TIMING
-    double time_;
-#endif
-    const char *why_;
-    int uses_;
-};
-
 static std::mutex plansmu;
 static Plan *plans[1000];
 static int nplans;
@@ -622,8 +589,7 @@ std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float h
     return ret;
 }
 
-void
-fft_stats()
+void fft_stats()
 {
     for (int i = 0; i < nplans; i++)
     {
