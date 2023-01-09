@@ -18,7 +18,6 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
-#include <sndfile.h>
 #include <sys/time.h>
 #include <assert.h>
 #include <math.h>
@@ -35,61 +34,6 @@ double now()
     struct timeval tv;
     gettimeofday(&tv, 0);
     return tv.tv_sec + tv.tv_usec / 1000000.0;
-}
-
-void writewav(const std::vector<float> &samples, const char *filename, int rate)
-{
-    float mx = 0;
-    for (ulong i = 0; i < samples.size(); i++)
-    {
-        mx = std::max(mx, std::abs(samples[i]));
-    }
-    std::vector<float> v(samples.size());
-    for (ulong i = 0; i < samples.size(); i++)
-    {
-        v[i] = (samples[i] / mx) * 0.95;
-    }
-
-    SF_INFO sf;
-    sf.channels = 1;
-    sf.samplerate = rate;
-    sf.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
-    SNDFILE *f = sf_open(filename, SFM_WRITE, &sf);
-    assert(f);
-    sf_write_float(f, v.data(), v.size());
-    sf_write_sync(f);
-    sf_close(f);
-}
-
-std::vector<float> readwav(const char *filename, int &rate_out)
-{
-    SF_INFO info;
-    memset(&info, 0, sizeof(info));
-    SNDFILE *sf = sf_open(filename, SFM_READ, &info);
-    if (sf == 0)
-    {
-        fprintf(stderr, "cannot open %s\n", filename);
-        exit(1); // XXX
-    }
-    rate_out = info.samplerate;
-
-    std::vector<float> out;
-
-    while (1)
-    {
-        float buf[512];
-        int n = sf_read_float(sf, buf, 512);
-        if (n <= 0)
-            break;
-        for (int i = 0; i < n; i++)
-        {
-            out.push_back(buf[i]);
-        }
-    }
-
-    sf_close(sf);
-
-    return out;
 }
 
 void writetxt(std::vector<float> v, const char *filename)

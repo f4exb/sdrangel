@@ -111,7 +111,7 @@ public:
     virtual bool stopRecording() override;
     virtual bool isRecording() const override { return m_recordOn; }
 
-    static bool readHeader(std::ifstream& samplefile, Header& header);
+    static bool readHeader(std::ifstream& samplefile, Header& header, bool check=true);
     static bool readHeader(QFile& samplefile, Header& header);
     static void writeHeader(std::ofstream& samplefile, Header& header);
     static void writeHeader(QFile& samplefile, Header& header);

@@ -325,7 +325,7 @@ void WavFileRecord::writeHeader()
     writeHeader(m_sampleFile, header);
 }
 
-bool WavFileRecord::readHeader(std::ifstream& sampleFile, Header& header)
+bool WavFileRecord::readHeader(std::ifstream& sampleFile, Header& header, bool check)
 {
     memset(&header, 0, sizeof(Header));
 
@@ -336,7 +336,7 @@ bool WavFileRecord::readHeader(std::ifstream& sampleFile, Header& header)
         return false;
     }
 
-    if (!checkHeader(header)) {
+    if (check && !checkHeader(header)) {
         return false;
     }
 

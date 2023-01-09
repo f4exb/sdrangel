@@ -15,10 +15,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
+#include <fstream>
+
 #include "mainbench.h"
+#include "dsp/wavfilerecord.h"
+
 #ifdef LINUX
 #include "ft8/ft8.h"
-#include "ft8/util.h"
 #include "ft8/unpack.h"
 
 #include <QMutex>
@@ -104,13 +108,70 @@ void MainBench::testFT8(const QString& wavFile)
     double budget = 2.5; // compute for this many seconds per cycle
     TestFT8Callback testft8Callback;
 
-    int rate;
-    std::vector<float> s = FT8::readwav(wavFile.toStdString().c_str(), rate);
+    std::ifstream wfile;
+
+#ifdef Q_OS_WIN
+	wfile.open(m_settings.m_fileName.toStdWString().c_str(), std::ios::binary | std::ios::ate);
+#else
+	wfile.open(wavFile.toStdString().c_str(), std::ios::binary | std::ios::ate);
+#endif
+    WavFileRecord::Header header;
+    wfile.seekg(0, std::ios_base::beg);
+    bool headerOK = WavFileRecord::readHeader(wfile, header, false);
+
+    if (!headerOK)
+    {
+        qDebug("MainBench::testFT8: test file is not a wave file");
+        return;
+    }
+
+    if (header.m_sampleRate != 12000)
+    {
+        qDebug("MainBench::testFT8: wave file sample rate is not 12000 S/s");
+        return;
+    }
+
+    if (header.m_bitsPerSample != 16)
+    {
+        qDebug("MainBench::testFT8: sample size is not 16 bits");
+        return;
+    }
+
+    if (header.m_audioFormat != 1)
+    {
+        qDebug("MainBench::testFT8: wav file format is not PCM");
+        return;
+    }
+
+    if (header.m_dataHeader.m_size != 360000)
+    {
+        qDebug("MainBench::testFT8: wave file size is not 15s at 12000 S/s");
+        return;
+    }
+
+    const int bufsize = 1000;
+    int16_t buffer[bufsize];
+    std::vector<float> samples;
+    uint32_t remainder = header.m_dataHeader.m_size;
+
+    while (remainder != 0)
+    {
+        wfile.read((char *) buffer, bufsize*2);
+
+        for (int i = 0; i < bufsize; i++) {
+            samples.push_back(buffer[i] / 32768.0f);
+        }
+
+        remainder -= bufsize*2;
+    }
+
+    wfile.close();
+
     FT8::entry(
-        s.data(),
-        s.size(),
-        0.5 * rate,
-        rate,
+        samples.data(),
+        samples.size(),
+        0.5 * header.m_sampleRate,
+        header.m_sampleRate,
         150,
         3600, // 2900,
         hints,

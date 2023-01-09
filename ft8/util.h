@@ -27,8 +27,6 @@
 namespace FT8
 {
 double now();
-void writewav(const std::vector<float> &samples, const char *filename, int rate);
-std::vector<float> readwav(const char *filename, int &rate_out);
 void writetxt(std::vector<float> v, const char *filename);
 std::complex<float> goertzel(std::vector<float> v, int rate, int i0, int n, float hz);
 float vmax(const std::vector<float> &v);
