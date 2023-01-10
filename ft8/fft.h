@@ -27,9 +27,11 @@
 #include <complex>
 #include <fftw3.h>
 
+#include "export.h"
+
 namespace FT8
 {
-class FFTEngine
+class FT8_API FFTEngine
 {
 public:
     // a cached fftw plan, for both of:

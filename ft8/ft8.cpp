@@ -43,6 +43,8 @@
 #include <random>
 #include <functional>
 #include <map>
+// #include <QDebug>
+
 #include "util.h"
 #include "ft8.h"
 #include "libldpc.h"
@@ -490,7 +492,7 @@ int FT8::blocksize(int rate)
 
 
 //
-// look for potential signals by searching FFT bins for Costas symbol
+// look for potential psignals by searching FFT bins for Costas symbol
 // blocks. returns a vector of candidate positions.
 //
 std::vector<Strength> FT8::coarse(const FFTEngine::ffts_t &bins, int si0, int si1)
@@ -2737,17 +2739,17 @@ int FT8::one_iter(const std::vector<float> &samples200, int best_off, float hz_f
 float FT8::guess_snr(const FFTEngine::ffts_t &m79)
 {
     int costas[] = {3, 1, 4, 0, 6, 5, 2};
-    float noises = 0;
-    float signals = 0;
+    float pnoises = 0;
+    float psignals = 0;
 
     for (int i = 0; i < 7; i++)
     {
-        signals += std::abs(m79[i][costas[i]]);
-        signals += std::abs(m79[36 + i][costas[i]]);
-        signals += std::abs(m79[72 + i][costas[i]]);
-        noises += std::abs(m79[i][(costas[i] + 4) % 8]);
-        noises += std::abs(m79[36 + i][(costas[i] + 4) % 8]);
-        noises += std::abs(m79[72 + i][(costas[i] + 4) % 8]);
+        psignals += std::abs(m79[i][costas[i]]);
+        psignals += std::abs(m79[36 + i][costas[i]]);
+        psignals += std::abs(m79[72 + i][costas[i]]);
+        pnoises += std::abs(m79[i][(costas[i] + 4) % 8]);
+        pnoises += std::abs(m79[36 + i][(costas[i] + 4) % 8]);
+        pnoises += std::abs(m79[72 + i][(costas[i] + 4) % 8]);
     }
 
     for (int i = 0; i < 79; i++)
@@ -2760,17 +2762,17 @@ float FT8::guess_snr(const FFTEngine::ffts_t &m79)
             v[j] = std::abs(m79[i][j]);
         }
         std::sort(v.begin(), v.end());
-        signals += v[7]; // strongest tone, probably the signal
-        noises += (v[2] + v[3] + v[4]) / 3;
+        psignals += v[7]; // strongest tone, probably the signal
+        pnoises += (v[2] + v[3] + v[4]) / 3;
     }
 
-    noises /= 79;
-    signals /= 79;
+    pnoises /= 79;
+    psignals /= 79;
 
-    noises *= noises; // square yields power
-    signals *= signals;
+    pnoises *= pnoises; // square yields power
+    psignals *= psignals;
 
-    float raw = signals / noises;
+    float raw = psignals / pnoises;
     raw -= 1; // turn (s+n)/n into s/n
     if (raw < 0.1)
         raw = 0.1;
@@ -2956,7 +2958,7 @@ void FT8::fine(const FFTEngine::ffts_t &m79, int, float &adj_hz, float &adj_off)
     if (nlate > 0)
         late /= nlate;
 
-    // printf("early %d %.1f, late %d %.1f\n", nearly, early, nlate, late);
+    // qDebug("early %d %.1f, late %d %.1f", nearly, early, nlate, late);
 
     // assumes 32 samples/symbol.
     if (nearly > 2 * nlate)

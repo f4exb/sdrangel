@@ -24,8 +24,8 @@
 #include <vector>
 #include <complex>
 
-namespace FT8
-{
+namespace FT8 {
+
 double now();
 void writetxt(std::vector<float> v, const char *filename);
 std::complex<float> goertzel(std::vector<float> v, int rate, int i0, int n, float hz);
@@ -51,6 +51,7 @@ std::string trim(const std::string &s);
 
 typedef unsigned long ulong;
 typedef unsigned int uint;
+
 } // namespace FT8
 
 #endif

@@ -25,9 +25,11 @@
 #include <mutex>
 #include "fft.h"
 
+#include "export.h"
+
 namespace FT8 {
 // Callback interface to get the results
-class CallbackInterface
+class FT8_API CallbackInterface
 {
 public:
     virtual int hcb(
@@ -54,7 +56,7 @@ public:
 // 4: similar to 3.
 // 5: laplace
 //
-class Stats
+class FT8_API Stats
 {
 public:
     std::vector<float> a_;
@@ -89,7 +91,7 @@ private:
     float log_rate_;
 };
 
-class Strength
+class FT8_API Strength
 {
 public:
     float hz_;
@@ -99,7 +101,7 @@ public:
 
 // same as Python class CDECODE
 //
-struct cdecode
+struct FT8_API cdecode
 {
     float hz0;
     float hz1;
@@ -121,7 +123,7 @@ struct cdecode
 // total transmission time is 12.64 seconds
 
 // tunable parameters
-struct FT8Params
+struct FT8_API FT8Params
 {
     int nthreads;            // number of parallel threads, for multi-core
     int npasses_one;         // number of spectral subtraction passes
@@ -260,7 +262,7 @@ struct FT8Params
 }; // class FT8Params
 
 // The FT8 worker
-class FT8
+class FT8_API FT8
 {
 public:
     std::thread *th_;
@@ -649,7 +651,7 @@ private:
     static const double apriori174[];
 }; // class FT8
 
-class FT8Decoder {
+class FT8_API FT8Decoder {
 public:
     void entry(
         float xsamples[],
@@ -669,7 +671,7 @@ public:
     FT8Params& getParams() { return params; }
 private:
     FT8Params params;
-};
+}; // FT8Decoder
 
 } // namespace FT8
 

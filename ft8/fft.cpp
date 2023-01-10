@@ -19,8 +19,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "fft.h"
 #include <assert.h>
+#include <QDebug>
+#include "fft.h"
 #include "util.h"
 
 #define TIMING 0
@@ -564,7 +565,7 @@ void FFTEngine::fft_stats()
     for (int i = 0; i < nplans; i++)
     {
         Plan *p = plans[i];
-        printf("%-13s %6d %9d %6.3f\n",
+        qDebug("FT8::FFTEngine::fft_stats: %-13s %6d %9d %6.3fn",
                 p->why_,
                 p->n_,
                 p->uses_,

@@ -8,7 +8,7 @@ set(logging_SOURCES
    logmessage.cpp
 )
 
-set(httpserver_HEADERS
+set(logging_HEADERS
    dualfilelogger.h
    loggerwithfile.h
    filelogger.h

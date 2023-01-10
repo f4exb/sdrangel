@@ -151,4 +151,16 @@
 #  define MODEMM17_API
 #endif
 
+/* the 'FT8_API' controls the import/export of 'ft8' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef ft8_EXPORTS
+#    define FT8_API __SDR_EXPORT
+#  else
+#    define FT8_API __SDR_IMPORT
+#  endif
+#else
+#  define FT8_API
+#endif
+
 #endif /* __SDRANGEL_EXPORT_H */

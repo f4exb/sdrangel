@@ -18,12 +18,17 @@ set(ft8_HEADERS
     util.h
 )
 
+include_directories(
+    ${CMAKE_SOURCE_DIR}/exports
+)
+
 add_library(ft8 SHARED
     ${ft8_SOURCES}
 )
 
 target_link_libraries(ft8
     ${FFTW3F_LIBRARIES}
+    Qt::Core
 )
 
 install(TARGETS ft8 DESTINATION ${INSTALL_LIB_DIR})
