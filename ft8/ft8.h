@@ -292,7 +292,7 @@ public:
     std::vector<std::complex<float>> hack_bins_;
     std::vector<cdecode> prevdecs_;
 
-    Plan *plan32_;
+    FFTEngine::Plan *plan32_;
 
     FT8(
         const std::vector<float> &samples,
@@ -305,12 +305,13 @@ public:
         double deadline,
         double final_deadline,
         CallbackInterface *cb,
-        std::vector<cdecode> prevdecs
+        std::vector<cdecode> prevdecs,
+        FFTEngine *fftEngine
     );
     ~FT8();
     // strength of costas block of signal with tone 0 at bi0,
     // and symbol zero at si0.
-    float one_coarse_strength(const ffts_t &bins, int bi0, int si0);
+    float one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0);
     // return symbol length in samples at the given rate.
     // insist on integer symbol lengths so that we can
     // use whole FFT bins.
@@ -319,7 +320,7 @@ public:
     // look for potential signals by searching FFT bins for Costas symbol
     // blocks. returns a vector of candidate positions.
     //
-    std::vector<Strength> coarse(const ffts_t &bins, int si0, int si1);
+    std::vector<Strength> coarse(const FFTEngine::ffts_t &bins, int si0, int si1);
     //
     // reduce the sample rate from arate to brate.
     // center hz0..hz1 in the new nyquist range.
@@ -425,11 +426,11 @@ public:
         float hz
     );
     // returns a mini-FFT of 79 8-tone symbols.
-    ffts_t extract(const std::vector<float> &samples200, float, int off);
+    FFTEngine::ffts_t extract(const std::vector<float> &samples200, float, int off);
     //
     // m79 is a 79x8 array of complex.
     //
-    ffts_t un_gray_code_c(const ffts_t &m79);
+    FFTEngine::ffts_t un_gray_code_c(const FFTEngine::ffts_t &m79);
     //
     // m79 is a 79x8 array of float.
     //
@@ -468,7 +469,7 @@ public:
     // number of cycles and thus preserves phase from one symbol to the
     // next.
     //
-    std::vector<std::vector<float>> soft_c2m(const ffts_t &c79);
+    std::vector<std::vector<float>> soft_c2m(const FFTEngine::ffts_t &c79);
     //
     // guess the probability that a bit is zero vs one,
     // based on strengths of strongest tones that would
@@ -486,11 +487,11 @@ public:
     //
     // c79 is 79x8 complex tones, before un-gray-coding.
     //
-    void soft_decode(const ffts_t &c79, float ll174[]);
+    void soft_decode(const FFTEngine::ffts_t &c79, float ll174[]);
     //
     // c79 is 79x8 complex tones, before un-gray-coding.
     //
-    void c_soft_decode(const ffts_t &c79x, float ll174[]);
+    void c_soft_decode(const FFTEngine::ffts_t &c79x, float ll174[]);
     //
     // turn 79 symbol numbers into 174 bits.
     // strip out the three Costas sync blocks,
@@ -506,11 +507,11 @@ public:
     // that they have the same phase, by summing the complex
     // correlations for each possible pair and using the max.
     void soft_decode_pairs(
-        const ffts_t &m79x,
+        const FFTEngine::ffts_t &m79x,
         float ll174[]
     );
     void soft_decode_triples(
-        const ffts_t &m79x,
+        const FFTEngine::ffts_t &m79x,
         float ll174[]
     );
     //
@@ -563,7 +564,7 @@ public:
     // estimate SNR, yielding numbers vaguely similar to WSJT-X.
     // m79 is a 79x8 complex FFT output.
     //
-    float guess_snr(const ffts_t &m79);
+    float guess_snr(const FFTEngine::ffts_t &m79);
     //
     // compare phases of successive symbols to guess whether
     // the starting offset is a little too high or low.
@@ -584,7 +585,7 @@ public:
     // adj_off is the amount to change the offset, in samples.
     // should be subtracted from offset.
     //
-    void fine(const ffts_t &m79, int, float &adj_hz, float &adj_off);
+    void fine(const FFTEngine::ffts_t &m79, int, float &adj_hz, float &adj_off);
     //
     // subtract a corrected decoded signal from nsamples_,
     // perhaps revealing a weaker signal underneath,
@@ -615,7 +616,7 @@ public:
         float,
         int use_osd,
         const char *comment1,
-        const ffts_t &m79
+        const FFTEngine::ffts_t &m79
     );
     //
     // given 174 bits corrected by LDPC, work
@@ -644,6 +645,7 @@ public:
     FT8Params& getParams() { return params; }
 private:
     FT8Params params;
+    FFTEngine *fftEngine_;
     static const double apriori174[];
 }; // class FT8
 

@@ -326,7 +326,8 @@ FT8::FT8(
     double deadline,
     double final_deadline,
     CallbackInterface *cb,
-    std::vector<cdecode> prevdecs
+    std::vector<cdecode> prevdecs,
+    FFTEngine *fftEngine
 )
 {
     samples_ = samples;
@@ -349,11 +350,12 @@ FT8::FT8(
     }
 
     hack_size_ = -1;
-    hack_data_ = 0;
+    hack_data_ = nullptr;
     hack_off_ = -1;
     hack_len_ = -1;
 
-    plan32_ = 0;
+    plan32_ = nullptr;
+    fftEngine_ = fftEngine;
 }
 
 FT8::~FT8()
@@ -362,7 +364,7 @@ FT8::~FT8()
 
     // strength of costas block of signal with tone 0 at bi0,
     // and symbol zero at si0.
-float FT8::one_coarse_strength(const ffts_t &bins, int bi0, int si0)
+float FT8::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0)
 {
     int costas[] = {3, 1, 4, 0, 6, 5, 2};
 
@@ -491,7 +493,7 @@ int FT8::blocksize(int rate)
 // look for potential signals by searching FFT bins for Costas symbol
 // blocks. returns a vector of candidate positions.
 //
-std::vector<Strength> FT8::coarse(const ffts_t &bins, int si0, int si1)
+std::vector<Strength> FT8::coarse(const FFTEngine::ffts_t &bins, int si0, int si1)
 {
     int block = blocksize(rate_);
     int nbins = bins[0].size();
@@ -579,8 +581,8 @@ std::vector<float> FT8::reduce_rate(
     }
 
     int alen = a.size();
-    std::vector<std::complex<float>> bins1 = one_fft(a, 0, alen,
-                                                        "reduce_rate1", 0);
+    std::vector<std::complex<float>> bins1 = fftEngine_->one_fft(
+        a, 0, alen, "reduce_rate1", 0);
     int nbins1 = bins1.size();
     float bin_hz = arate / (float)alen;
 
@@ -630,7 +632,7 @@ std::vector<float> FT8::reduce_rate(
     }
 
     // use ifft to reduce the rate.
-    std::vector<float> vvv = one_ifft(bbins, "reduce_rate2");
+    std::vector<float> vvv = fftEngine_->one_ifft(bbins, "reduce_rate2");
 
     delta_hz = delta * bin_hz;
 
@@ -640,7 +642,7 @@ std::vector<float> FT8::reduce_rate(
 void FT8::go(int npasses)
 {
     // cache to avoid cost of fftw planner mutex.
-    plan32_ = get_plan(32, "cache32");
+    plan32_ = fftEngine_->get_plan(32, "cache32");
 
     if (0)
     {
@@ -831,8 +833,8 @@ void FT8::go(int npasses)
 
         // just do this once, re-use for every fractional fft_shift
         // and down_v7_f() to 200 sps.
-        std::vector<std::complex<float>> bins = one_fft(samples_, 0, samples_.size(),
-                                                            "go1", 0);
+        std::vector<std::complex<float>> bins = fftEngine_->one_fft(
+            samples_, 0, samples_.size(), "go1", 0);
 
         for (int hz_frac_i = 0; hz_frac_i < params.coarse_hz_n; hz_frac_i++)
         {
@@ -851,7 +853,7 @@ void FT8::go(int npasses)
             for (int off_frac_i = 0; off_frac_i < params.coarse_off_n; off_frac_i++)
             {
                 int off_frac = off_frac_i * (block / params.coarse_off_n);
-                ffts_t bins = ffts(samples1, off_frac, block, "go2");
+                FFTEngine::ffts_t bins = fftEngine_->ffts(samples1, off_frac, block, "go2");
                 std::vector<Strength> oo = coarse(bins, si0, si1);
                 for (int i = 0; i < (int)oo.size(); i++)
                 {
@@ -927,7 +929,7 @@ float FT8::one_strength(const std::vector<float> &samples200, float hz, int off)
         int start = starts[which];
         for (int si = 0; si < 7; si++)
         {
-            auto fft = one_fft(samples200, off + (si + start) * 32, 32, "one_strength", plan32_);
+            auto fft = fftEngine_->one_fft(samples200, off + (si + start) * 32, 32, "one_strength", plan32_);
             for (int bi = 0; bi < 8; bi++)
             {
                 float x = std::abs(fft[bin0 + bi]);
@@ -1004,7 +1006,8 @@ float FT8::one_strength_known(
 
     for (int si = 0; si < 79; si += params.known_sparse)
     {
-        auto fft = one_fft(samples, off + si * block, block, "one_strength_known", 0);
+        auto fft = fftEngine_->one_fft(samples, off + si * block, block, "one_strength_known", 0);
+
         if (params.known_strength_how == 7)
         {
             std::complex<float> c = fft[bin0 + syms[si]];
@@ -1226,7 +1229,7 @@ void FT8::search_both_known(
     int best_off = 0;
     float best_strength = 0;
 
-    std::vector<std::complex<float>> bins = one_fft(samples, 0, samples.size(), "stfk", 0);
+    std::vector<std::complex<float>> bins = fftEngine_->one_fft(samples, 0, samples.size(), "stfk", 0);
 
     float hz_start, hz_inc, hz_end;
     if (params.third_hz_n > 1)
@@ -1290,7 +1293,7 @@ std::vector<float> FT8::fft_shift(
     }
     else
     {
-        bins = one_fft(samples, off, len, "fft_shift", 0);
+        bins = fftEngine_->one_fft(samples, off, len, "fft_shift", 0);
         hack_bins_ = bins;
         hack_size_ = samples.size();
         hack_off_ = off;
@@ -1331,7 +1334,7 @@ std::vector<float> FT8::fft_shift_f(
             bins1[i] = 0;
         }
     }
-    std::vector<float> out = one_ifft(bins1, "fft_shift");
+    std::vector<float> out = fftEngine_->one_ifft(bins1, "fft_shift");
     return out;
 }
 
@@ -1356,12 +1359,12 @@ std::vector<float> FT8::shift200(
 }
 
 // returns a mini-FFT of 79 8-tone symbols.
-ffts_t FT8::extract(const std::vector<float> &samples200, float, int off)
+FFTEngine::ffts_t FT8::extract(const std::vector<float> &samples200, float, int off)
 {
 
-    ffts_t bins3 = ffts(samples200, off, 32, "extract");
+    FFTEngine::ffts_t bins3 = fftEngine_->ffts(samples200, off, 32, "extract");
+    FFTEngine::ffts_t m79(79);
 
-    ffts_t m79(79);
     for (int si = 0; si < 79; si++)
     {
         m79[si].resize(8);
@@ -1388,9 +1391,9 @@ ffts_t FT8::extract(const std::vector<float> &samples200, float, int off)
 //
 // m79 is a 79x8 array of complex.
 //
-ffts_t FT8::un_gray_code_c(const ffts_t &m79)
+FFTEngine::ffts_t FT8::un_gray_code_c(const FFTEngine::ffts_t &m79)
 {
-    ffts_t m79a(79);
+    FFTEngine::ffts_t m79a(79);
 
     int map[] = {0, 1, 3, 2, 6, 4, 5, 7};
     for (int si = 0; si < 79; si++)
@@ -1687,7 +1690,7 @@ void FT8::make_stats(
 // number of cycles and thus preserves phase from one symbol to the
 // next.
 //
-std::vector<std::vector<float>> FT8::soft_c2m(const ffts_t &c79)
+std::vector<std::vector<float>> FT8::soft_c2m(const FFTEngine::ffts_t &c79)
 {
     std::vector<std::vector<float>> m79(79);
     std::vector<float> raw_phases(79); // of strongest tone in each symbol time
@@ -1859,7 +1862,7 @@ float FT8::bayes(
 //
 // c79 is 79x8 complex tones, before un-gray-coding.
 //
-void FT8::soft_decode(const ffts_t &c79, float ll174[])
+void FT8::soft_decode(const FFTEngine::ffts_t &c79, float ll174[])
 {
     std::vector<std::vector<float>> m79(79);
 
@@ -1974,9 +1977,9 @@ void FT8::soft_decode(const ffts_t &c79, float ll174[])
 //
 // c79 is 79x8 complex tones, before un-gray-coding.
 //
-void FT8::c_soft_decode(const ffts_t &c79x, float ll174[])
+void FT8::c_soft_decode(const FFTEngine::ffts_t &c79x, float ll174[])
 {
-    ffts_t c79 = c_convert_to_snr(c79x);
+    FFTEngine::ffts_t c79 = c_convert_to_snr(c79x);
 
     int costas[] = {3, 1, 4, 0, 6, 5, 2};
     std::complex<float> maxes[79];
@@ -2185,11 +2188,11 @@ std::vector<float> FT8::extract_bits(const std::vector<int> &syms, const std::ve
 // that they have the same phase, by summing the complex
 // correlations for each possible pair and using the max.
 void FT8::soft_decode_pairs(
-    const ffts_t &m79x,
+    const FFTEngine::ffts_t &m79x,
     float ll174[]
 )
 {
-    ffts_t m79 = c_convert_to_snr(m79x);
+    FFTEngine::ffts_t m79 = c_convert_to_snr(m79x);
 
     struct BitInfo
     {
@@ -2319,11 +2322,11 @@ void FT8::soft_decode_pairs(
 }
 
 void FT8::soft_decode_triples(
-    const ffts_t &m79x,
+    const FFTEngine::ffts_t &m79x,
     float ll174[]
 )
 {
-    ffts_t m79 = c_convert_to_snr(m79x);
+    FFTEngine::ffts_t m79 = c_convert_to_snr(m79x);
 
     struct BitInfo
     {
@@ -2610,7 +2613,7 @@ std::vector<std::complex<float>> FT8::fbandpass(
 std::vector<float> FT8::down_v7(const std::vector<float> &samples, float hz)
 {
     int len = samples.size();
-    std::vector<std::complex<float>> bins = one_fft(samples, 0, len, "down_v7a", 0);
+    std::vector<std::complex<float>> bins = fftEngine_->one_fft(samples, 0, len, "down_v7a", 0);
 
     return down_v7_f(bins, len, hz);
 }
@@ -2655,7 +2658,7 @@ std::vector<float> FT8::down_v7_f(const std::vector<std::complex<float>> &bins, 
     std::vector<std::complex<float>> bbins(blen / 2 + 1);
     for (int i = 0; i < (int)bbins.size(); i++)
         bbins[i] = bins1[i];
-    std::vector<float> out = one_ifft(bbins, "down_v7b");
+    std::vector<float> out = fftEngine_->one_ifft(bbins, "down_v7b");
 
     return out;
 }
@@ -2731,7 +2734,7 @@ int FT8::one_iter(const std::vector<float> &samples200, int best_off, float hz_f
 // estimate SNR, yielding numbers vaguely similar to WSJT-X.
 // m79 is a 79x8 complex FFT output.
 //
-float FT8::guess_snr(const ffts_t &m79)
+float FT8::guess_snr(const FFTEngine::ffts_t &m79)
 {
     int costas[] = {3, 1, 4, 0, 6, 5, 2};
     float noises = 0;
@@ -2798,7 +2801,7 @@ float FT8::guess_snr(const ffts_t &m79)
 // adj_off is the amount to change the offset, in samples.
 // should be subtracted from offset.
 //
-void FT8::fine(const ffts_t &m79, int, float &adj_hz, float &adj_off)
+void FT8::fine(const FFTEngine::ffts_t &m79, int, float &adj_hz, float &adj_off)
 {
     adj_hz = 0.0;
     adj_off = 0.0;
@@ -2991,7 +2994,7 @@ int FT8::one_iter1(
                                                 best_hz);
 
     // mini 79x8 FFT.
-    ffts_t m79 = extract(samples200, 25, best_off);
+    FFTEngine::ffts_t m79 = extract(samples200, 25, best_off);
 
     // look at symbol-to-symbol phase change to try
     // to improve best_hz and best_off.
@@ -3157,9 +3160,9 @@ void FT8::subtract(
     // move nsamples so that signal is centered in bin0.
     float diff0 = (bin0 * bin_hz) - hz0;
     float diff1 = (bin0 * bin_hz) - hz1;
-    std::vector<float> moved = hilbert_shift(nsamples_, diff0, diff1, rate_);
+    std::vector<float> moved = fftEngine_->hilbert_shift(nsamples_, diff0, diff1, rate_);
 
-    ffts_t bins = ffts(moved, off0, block, "subtract");
+    FFTEngine::ffts_t bins = fftEngine_->ffts(moved, off0, block, "subtract");
 
     if (bin0 + 8 > (int)bins[0].size())
         return;
@@ -3291,7 +3294,7 @@ void FT8::subtract(
         }
     }
 
-    nsamples_ = hilbert_shift(moved, -diff0, -diff1, rate_);
+    nsamples_ = fftEngine_->hilbert_shift(moved, -diff0, -diff1, rate_);
 }
 
 //
@@ -3311,7 +3314,7 @@ int FT8::try_decode(
     float,
     int use_osd,
     const char *comment1,
-    const ffts_t &m79
+    const FFTEngine::ffts_t &m79
 )
 {
     int a174[174];
@@ -3467,6 +3470,7 @@ void FT8Decoder::entry(
     double t0 = now();
     double deadline = t0 + time_left;
     double final_deadline = t0 + total_time_left;
+    FFTEngine fftEngine;
 
     // decodes from previous runs, for subtraction.
     std::vector<cdecode> prevdecs;
@@ -3520,7 +3524,8 @@ void FT8Decoder::entry(
             deadline,
             final_deadline,
             cb,
-            prevdecs
+            prevdecs,
+            &fftEngine
         );
         ft8->getParams() = getParams(); // transfer parameters
 

@@ -20,38 +20,19 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "fft.h"
-#include <mutex>
-// #include <unistd.h>
 #include <assert.h>
-// #include <sys/file.h>
-// #include <sys/types.h>
-// #include <sys/stat.h>
 #include "util.h"
 
 #define TIMING 0
 
 namespace FT8 {
 
-// MEASURE=0, ESTIMATE=64, PATIENT=32
-int fftw_type = FFTW_ESTIMATE;
-
-static std::mutex plansmu;
-static std::mutex plansmu2;
-static Plan *plans[1000];
-static int nplans;
-// static int plan_master_pid = 0;
-
-Plan *get_plan(int n, const char *why)
+FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
 {
     // cache fftw plans in the parent process,
     // so they will already be there for fork()ed children.
 
     plansmu.lock();
-
-    // if (plan_master_pid == 0)
-    // {
-    //     plan_master_pid = getpid();
-    // }
 
     for (int i = 0; i < nplans; i++)
     {
@@ -73,16 +54,6 @@ Plan *get_plan(int n, const char *why)
 #endif
 
     // fftw_make_planner_thread_safe();
-
-    // the fftw planner is not thread-safe.
-    // can't rely on plansmu because both ft8.so
-    // and snd.so may be using separate copies of fft.cc.
-    // the lock file really should be per process.
-    // int lockfd = creat("/tmp/fft-plan-lock", 0666);
-    // assert(lockfd >= 0);
-    // fchmod(lockfd, 0666);
-    // int lockret = flock(lockfd, LOCK_EX);
-    // assert(lockret == 0);
     plansmu2.lock();
 
     fftwf_set_timelimit(5);
@@ -109,10 +80,6 @@ Plan *get_plan(int n, const char *why)
     // FFTW_PATIENT
     // FFTW_EXHAUSTIVE
     int type = fftw_type;
-    // if (getpid() != plan_master_pid)
-    // {
-    //     type = FFTW_ESTIMATE;
-    // }
     p->type_ = type;
     p->fwd_ = fftwf_plan_dft_r2c_1d(n, p->r_, p->c_, type);
     assert(p->fwd_);
@@ -131,14 +98,11 @@ Plan *get_plan(int n, const char *why)
     p->crev_ = fftwf_plan_dft_1d(n, p->cc2_, p->cc1_, FFTW_BACKWARD, type);
     assert(p->crev_);
 
-    // flock(lockfd, LOCK_UN);
-    // close(lockfd);
     plansmu2.unlock();
 
     assert(nplans + 1 < 1000);
 
     plans[nplans] = p;
-    // __sync_synchronize();
     nplans += 1;
 
 #if TIMING
@@ -160,12 +124,12 @@ Plan *get_plan(int n, const char *why)
 // real inputs, complex outputs.
 // output has (block / 2) + 1 points.
 //
-std::vector<std::complex<float>> one_fft(
+std::vector<std::complex<float>> FFTEngine::one_fft(
     const std::vector<float> &samples,
     int i0,
     int block,
     const char *why,
-    Plan *p
+    FFTEngine::Plan *p
 )
 {
     assert(i0 >= 0);
@@ -242,7 +206,7 @@ std::vector<std::complex<float>> one_fft(
 // do a full set of FFTs, one per symbol-time.
 // bins[time][frequency]
 //
-ffts_t ffts(const std::vector<float> &samples, int i0, int block, const char *why)
+FFTEngine::ffts_t FFTEngine::ffts(const std::vector<float> &samples, int i0, int block, const char *why)
 {
     assert(i0 >= 0);
     assert(block > 1 && (block % 2) == 0);
@@ -313,7 +277,7 @@ ffts_t ffts(const std::vector<float> &samples, int i0, int block, const char *wh
 // real inputs, complex outputs.
 // output has block points.
 //
-std::vector<std::complex<float>> one_fft_c(
+std::vector<std::complex<float>> FFTEngine::one_fft_c(
     const std::vector<float> &samples,
     int i0,
     int block,
@@ -373,7 +337,7 @@ std::vector<std::complex<float>> one_fft_c(
     return out;
 }
 
-std::vector<std::complex<float>> one_fft_cc(
+std::vector<std::complex<float>> FFTEngine::one_fft_cc(
     const std::vector<std::complex<float>> &samples,
     int i0,
     int block,
@@ -434,7 +398,7 @@ std::vector<std::complex<float>> one_fft_cc(
     return out;
 }
 
-std::vector<std::complex<float>> one_ifft_cc(
+std::vector<std::complex<float>> FFTEngine::one_ifft_cc(
     const std::vector<std::complex<float>> &bins,
     const char *why
 )
@@ -483,7 +447,7 @@ std::vector<std::complex<float>> one_ifft_cc(
     return out;
 }
 
-std::vector<float> one_ifft(const std::vector<std::complex<float>> &bins, const char *why)
+std::vector<float> FFTEngine::one_ifft(const std::vector<std::complex<float>> &bins, const char *why)
 {
     int nbins = bins.size();
     int block = (nbins - 1) * 2;
@@ -531,7 +495,7 @@ std::vector<float> one_ifft(const std::vector<std::complex<float>> &bins, const 
 //
 // the return value is x + iy, where y is the hilbert transform of x.
 //
-std::vector<std::complex<float>> analytic(const std::vector<float> &x, const char *why)
+std::vector<std::complex<float>> FFTEngine::analytic(const std::vector<float> &x, const char *why)
 {
     ulong n = x.size();
 
@@ -573,7 +537,7 @@ std::vector<std::complex<float>> analytic(const std::vector<float> &x, const cha
 //
 // like weakutil.py's freq_shift().
 //
-std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate)
+std::vector<float> FFTEngine::hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate)
 {
     // y = scipy.signal.hilbert(x)
     std::vector<std::complex<float>> y = analytic(x, "hilbert_shift");
@@ -595,7 +559,7 @@ std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float h
     return ret;
 }
 
-void fft_stats()
+void FFTEngine::fft_stats()
 {
     for (int i = 0; i < nplans; i++)
     {

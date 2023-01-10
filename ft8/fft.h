@@ -22,56 +22,73 @@
 #ifndef FFT_H
 #define FFT_H
 
+#include <mutex>
 #include <vector>
 #include <complex>
 #include <fftw3.h>
 
 namespace FT8
 {
-// a cached fftw plan, for both of:
-// fftwf_plan_dft_r2c_1d(n, m_in, m_out, FFTW_ESTIMATE);
-// fftwf_plan_dft_c2r_1d(n, m_in, m_out, FFTW_ESTIMATE);
-class Plan
+class FFTEngine
 {
 public:
-    int n_;
-    int type_;
+    // a cached fftw plan, for both of:
+    // fftwf_plan_dft_r2c_1d(n, m_in, m_out, FFTW_ESTIMATE);
+    // fftwf_plan_dft_c2r_1d(n, m_in, m_out, FFTW_ESTIMATE);
+    class Plan
+    {
+    public:
+        int n_;
+        int type_;
 
-    //
-    // real -> complex
-    //
-    fftwf_complex *c_; // (n_ / 2) + 1 of these
-    float *r_;         // n_ of these
-    fftwf_plan fwd_;   // forward plan
-    fftwf_plan rev_;   // reverse plan
+        //
+        // real -> complex
+        //
+        fftwf_complex *c_; // (n_ / 2) + 1 of these
+        float *r_;         // n_ of these
+        fftwf_plan fwd_;   // forward plan
+        fftwf_plan rev_;   // reverse plan
 
-    //
-    // complex -> complex
-    //
-    fftwf_complex *cc1_; // n
-    fftwf_complex *cc2_; // n
-    fftwf_plan cfwd_;    // forward plan
-    fftwf_plan crev_;    // reverse plan
+        //
+        // complex -> complex
+        //
+        fftwf_complex *cc1_; // n
+        fftwf_complex *cc2_; // n
+        fftwf_plan cfwd_;    // forward plan
+        fftwf_plan crev_;    // reverse plan
 
-    // how much CPU time spent in FFTs that use this plan.
-#if TIMING
-    double time_;
-#endif
-    const char *why_;
-    int uses_;
-};
+        // how much CPU time spent in FFTs that use this plan.
+    #if TIMING
+        double time_;
+    #endif
+        const char *why_;
+        int uses_;
+    }; // Plan
 
-Plan *get_plan(int n, const char *why);
+    FFTEngine() : nplans(0)
+    {}
 
-std::vector<std::complex<float>> one_fft(const std::vector<float> &samples, int i0, int block, const char *why, Plan *p);
-std::vector<float> one_ifft(const std::vector<std::complex<float>> &bins, const char *why);
-typedef std::vector<std::vector<std::complex<float>>> ffts_t;
-ffts_t ffts(const std::vector<float> &samples, int i0, int block, const char *why);
-std::vector<std::complex<float>> one_fft_c(const std::vector<float> &samples, int i0, int block, const char *why);
-std::vector<std::complex<float>> one_fft_cc(const std::vector<std::complex<float>> &samples, int i0, int block, const char *why);
-std::vector<std::complex<float>> one_ifft_cc(const std::vector<std::complex<float>> &bins, const char *why);
-std::vector<std::complex<float>> analytic(const std::vector<float> &x, const char *why);
-std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate);
+    Plan *get_plan(int n, const char *why);
+
+    std::vector<std::complex<float>> one_fft(const std::vector<float> &samples, int i0, int block, const char *why, Plan *p);
+    std::vector<float> one_ifft(const std::vector<std::complex<float>> &bins, const char *why);
+    typedef std::vector<std::vector<std::complex<float>>> ffts_t;
+    ffts_t ffts(const std::vector<float> &samples, int i0, int block, const char *why);
+    std::vector<std::complex<float>> one_fft_c(const std::vector<float> &samples, int i0, int block, const char *why);
+    std::vector<std::complex<float>> one_fft_cc(const std::vector<std::complex<float>> &samples, int i0, int block, const char *why);
+    std::vector<std::complex<float>> one_ifft_cc(const std::vector<std::complex<float>> &bins, const char *why);
+    std::vector<std::complex<float>> analytic(const std::vector<float> &x, const char *why);
+    std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate);
+
+private:
+    void fft_stats();
+    std::mutex plansmu;
+    std::mutex plansmu2;
+    Plan *plans[1000];
+    int nplans;
+    // MEASURE=0, ESTIMATE=64, PATIENT=32
+    static const int fftw_type = FFTW_ESTIMATE;
+}; // FFTEngine
 
 } // namespace FT8
 
