@@ -21,34 +21,20 @@
 #include <sys/time.h>
 #include <assert.h>
 #include <math.h>
-#include <string.h>
 #include <complex>
 #include <string>
 #include <algorithm>
+#include "util/timeutil.h"
 #include "util.h"
 
 namespace FT8 {
 
 double now()
 {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    return tv.tv_sec + tv.tv_usec / 1000000.0;
-}
-
-void writetxt(std::vector<float> v, const char *filename)
-{
-    FILE *fp = fopen(filename, "w");
-    if (fp == 0)
-    {
-        fprintf(stderr, "could not write %s\n", filename);
-        exit(1);
-    }
-    for (ulong i = 0; i < v.size(); i++)
-    {
-        fprintf(fp, "%f\n", v[i]);
-    }
-    fclose(fp);
+    return TimeUtil::nowus() / 1000000.0;
+    // struct timeval tv;
+    // gettimeofday(&tv, 0);
+    // return tv.tv_sec + tv.tv_usec / 1000000.0;
 }
 
 //

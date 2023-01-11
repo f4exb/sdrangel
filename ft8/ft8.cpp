@@ -36,10 +36,7 @@
 #include <vector>
 #include <algorithm>
 #include <complex>
-#include <sys/time.h>
 #include <string.h>
-#include <unistd.h>
-#include <atomic>
 #include <random>
 #include <functional>
 #include <map>
