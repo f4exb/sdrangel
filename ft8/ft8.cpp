@@ -36,7 +36,6 @@
 #include <vector>
 #include <algorithm>
 #include <complex>
-#include <string.h>
 #include <random>
 #include <functional>
 #include <map>
@@ -3046,7 +3045,7 @@ int FT8::one_iter1(
         if (ret)
             return ret;
         if (params.soft_ones == 0)
-            memcpy(ll174, p174, sizeof(ll174));
+            std::copy(p174, p174 + 174, ll174);
     }
 
     if (params.soft_triples)

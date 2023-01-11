@@ -27,7 +27,6 @@
 #include <vector>
 #include <algorithm>
 #include <stdio.h>
-#include <string.h>
 #include "libldpc.h"
 #include "osd.h"
 
@@ -262,14 +261,14 @@ int osd_decode(float codeword[174], int depth, int out[91], int *out_depth)
             if (1)
             {
                 // just accept this, since no bits had to be flipped.
-                memcpy(out, xplain, sizeof(xplain));
+                std::copy(xplain, xplain + 91, out);
                 *out_depth = 0;
                 return 1;
             }
             else
             {
                 got_a_best = 1;
-                memcpy(best_plain, xplain, sizeof(best_plain));
+                std::copy(xplain, xplain + 91, best_plain);
                 best_score = xscore;
                 best_depth = 0;
             }
@@ -290,7 +289,7 @@ int osd_decode(float codeword[174], int depth, int out[91], int *out_depth)
             if (got_a_best == 0 || xscore < best_score)
             {
                 got_a_best = 1;
-                memcpy(best_plain, xplain, sizeof(best_plain));
+                std::copy(xplain, xplain + 91, best_plain);
                 best_score = xscore;
                 best_depth = ii;
             }
@@ -299,7 +298,7 @@ int osd_decode(float codeword[174], int depth, int out[91], int *out_depth)
 
     if (got_a_best)
     {
-        memcpy(out, best_plain, sizeof(best_plain));
+        std::copy(best_plain, best_plain + 91, out);
         *out_depth = best_depth;
         return 1;
     }
