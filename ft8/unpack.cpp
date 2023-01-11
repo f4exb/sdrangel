@@ -19,10 +19,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 #include <string>
-#include <mutex>
-#include <map>
 #include <string.h>
 #include <assert.h>
+
 #include "unpack.h"
 #include "util.h"
 
@@ -32,9 +31,9 @@ namespace FT8 {
 // turn bits into a 128-bit integer.
 // most significant bit first.
 //
-__int128 un(int a77[], int start, int len)
+boost::multiprecision::int128_t Packing::un128(int a77[], int start, int len)
 {
-    __int128 x = 0;
+    boost::multiprecision::int128_t x = 0;
 
     assert(len < (int)sizeof(x) * 8 && start >= 0 && start + len <= 77);
     for (int i = 0; i < len; i++)
@@ -46,11 +45,25 @@ __int128 un(int a77[], int start, int len)
     return x;
 }
 
-std::mutex hashes_mu;
-std::map<int, std::string> hashes12;
-std::map<int, std::string> hashes22;
+//
+// turn bits into a 64-bit integer.
+// most significant bit first.
+//
+uint64_t Packing::un64(int a77[], int start, int len)
+{
+    uint64_t x = 0;
 
-int ihashcall(std::string call, int m)
+    assert(len < (int)sizeof(x) * 8 && start >= 0 && start + len <= 63);
+    for (int i = 0; i < len; i++)
+    {
+        x <<= 1;
+        x |= a77[start + i];
+    }
+
+    return x;
+}
+
+int Packing::ihashcall(std::string call, int m)
 {
     while (call.size() > 0 && call[0] == ' ')
         call.erase(0, 1);
@@ -77,14 +90,10 @@ int ihashcall(std::string call, int m)
     return x;
 }
 
-#define NGBASE (180 * 180)
-#define NTOKENS 2063592
-#define MAX22 4194304
-
 //
 // turn 28 bits of packed call into the call
 //
-std::string unpackcall(int x)
+std::string Packing::unpackcall(int x)
 {
     char tmp[64];
 
@@ -167,7 +176,7 @@ std::string unpackcall(int x)
 // 77-bit version, from inspection of packjt77.f90.
 // ir is the bit after the two 28+1-bit callee/caller.
 // i3 is the message type, usually 1.
-std::string unpackgrid(int ng, int ir, int i3)
+std::string Packing::unpackgrid(int ng, int ir, int i3)
 {
     (void) i3;
 
@@ -229,7 +238,7 @@ std::string unpackgrid(int ng, int ir, int i3)
     return tmp;
 }
 
-void remember_call(std::string call)
+void Packing::remember_call(std::string call)
 {
     hashes_mu.lock();
     if (call.size() >= 3 && call[0] != '<')
@@ -248,12 +257,12 @@ void remember_call(std::string call)
 // 1 bit: swap
 // 2 bits: 1 RRR, 2 RR73, 3 73
 // 1 bit: 1 means CQ
-std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
+std::string Packing::unpack_4(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
 {
     (void) locstr;
     // 38 possible characters:
     const char *chars = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ/";
-    long long n58 = un(a77, 12, 58);
+    long long n58 = un64(a77, 12, 58);
     char call[16];
 
     for (int i = 0; i < 11; i++)
@@ -266,11 +275,11 @@ std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, st
 
     remember_call(call);
 
-    if (un(a77, 73, 1) == 1) {
+    if (un64(a77, 73, 1) == 1) {
         return std::string("CQ ") + call;
     }
 
-    int x12 = un(a77, 0, 12);
+    int x12 = un64(a77, 0, 12);
     // 12-bit hash
     hashes_mu.lock();
     std::string ocall;
@@ -283,7 +292,7 @@ std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, st
 
     hashes_mu.unlock();
 
-    int swap = un(a77, 70, 1);
+    int swap = un64(a77, 70, 1);
     std::string msg;
 
     if (swap)
@@ -299,7 +308,7 @@ std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, st
         call2str = call;
     }
 
-    int suffix = un(a77, 71, 2);
+    int suffix = un64(a77, 71, 2);
 
     if (suffix == 1) {
         msg += " RRR";
@@ -315,7 +324,7 @@ std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, st
 //
 // i3=1
 //
-std::string unpack_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
+std::string Packing::unpack_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
 {
     // type 1:
     // 28 call1
@@ -327,19 +336,19 @@ std::string unpack_1(int a77[], std::string& call1str, std::string& call2str, st
     // 3 type
 
     int i = 0;
-    int call1 = un(a77, i, 28);
+    int call1 = un64(a77, i, 28);
     i += 28;
     int rover1 = a77[i];
     i += 1;
-    int call2 = un(a77, i, 28);
+    int call2 = un64(a77, i, 28);
     i += 28;
     int rover2 = a77[i];
     i += 1;
     int ir = a77[i];
     i += 1;
-    int grid = un(a77, i, 15);
+    int grid = un64(a77, i, 15);
     i += 15;
-    int i3 = un(a77, i, 3);
+    int i3 = un64(a77, i, 3);
     i += 3;
     assert((i3 == 1 || i3 == 2) && i == 77);
 
@@ -359,17 +368,17 @@ std::string unpack_1(int a77[], std::string& call1str, std::string& call2str, st
 // 71 bits, 13 characters, each one of 42 choices.
 // reversed.
 // details from wsjt-x's packjt77.f90
-std::string unpack_0_0(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
+std::string Packing::unpack_0_0(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
 {
     (void) call2str;
     (void) locstr;
     // the 42 possible characters.
     const char *cc = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ+-./?";
-    __int128 x = un(a77, 0, 71);
+    boost::multiprecision::int128_t x = un128(a77, 0, 71);
     std::string msg = "0123456789123";
     for (int i = 0; i < 13; i++)
     {
-        msg[13 - 1 - i] = cc[x % 42];
+        msg[13 - 1 - i] = cc[(int) (x % 42)];
         x = x / 42;
     }
     call1str = msg;
@@ -377,7 +386,7 @@ std::string unpack_0_0(int a77[], std::string& call1str, std::string& call2str, 
 }
 
 // ARRL RTTY Round-Up states/provinces
-const char *ru_states[] = {
+const char *Packing::ru_states[] = {
     "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
     "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
     "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
@@ -394,21 +403,21 @@ const char *ru_states[] = {
 //  1 R
 //  3 RST 529 to 599
 // 13 state/province/serialnumber
-std::string unpack_3(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
+std::string Packing::unpack_3(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
 {
     (void) locstr;
     int i = 0;
     int tu = a77[i];
     i += 1;
-    int call1 = un(a77, i, 28);
+    int call1 = un64(a77, i, 28);
     i += 28;
-    int call2 = un(a77, i, 28);
+    int call2 = un64(a77, i, 28);
     i += 28;
     int r = a77[i];
     i += 1;
-    int rst = un(a77, i, 3);
+    int rst = un64(a77, i, 3);
     i += 3;
-    int serial = un(a77, i, 13);
+    int serial = un64(a77, i, 13);
     i += 13;
 
     call1str = trim(unpackcall(call1));
@@ -455,7 +464,7 @@ std::string unpack_3(int a77[], std::string& call1str, std::string& call2str, st
 }
 
 // ARRL Field Day sections
-const char *sections[] = {
+const char *Packing::sections[] = {
     "AB ", "AK ", "AL ", "AR ", "AZ ", "BC ", "CO ", "CT ", "DE ", "EB ",
     "EMA", "ENY", "EPA", "EWA", "GA ", "GTA", "IA ", "ID ", "IL ", "IN ",
     "KS ", "KY ", "LA ", "LAX", "MAR", "MB ", "MDC", "ME ", "MI ", "MN ",
@@ -469,26 +478,26 @@ const char *sections[] = {
 // i3 = 0, n3 = 3 or 4: ARRL Field Day
 // 0.3   WA9XYZ KA1ABC R 16A EMA            28 28 1 4 3 7    71   ARRL Field Day
 // 0.4   WA9XYZ KA1ABC R 32A EMA            28 28 1 4 3 7    71   ARRL Field Day
-std::string unpack_0_3(int a77[], int n3, std::string& call1str, std::string& call2str, std::string& locstr)
+std::string Packing::unpack_0_3(int a77[], int n3, std::string& call1str, std::string& call2str, std::string& locstr)
 {
     (void) locstr;
     int i = 0;
-    int call1 = un(a77, i, 28);
+    int call1 = un64(a77, i, 28);
     i += 28;
-    int call2 = un(a77, i, 28);
+    int call2 = un64(a77, i, 28);
     i += 28;
-    int R = un(a77, i, 1);
+    int R = un64(a77, i, 1);
     i += 1;
-    int n_transmitters = un(a77, i, 4);
+    int n_transmitters = un64(a77, i, 4);
 
     if (n3 == 4) {
         n_transmitters += 16;
     }
 
     i += 4;
-    int clss = un(a77, i, 3); // class
+    int clss = un64(a77, i, 3); // class
     i += 3;
-    int section = un(a77, i, 7); // ARRL section
+    int section = un64(a77, i, 7); // ARRL section
     i += 7;
 
     std::string msg;
@@ -522,10 +531,10 @@ std::string unpack_0_3(int a77[], int n3, std::string& call1str, std::string& ca
 // CRC and LDPC have already been checked.
 // details from wsjt-x's packjt77.f90 and 77bit.txt.
 //
-std::string unpack(int a77[], std::string& call1, std::string& call2, std::string& loc)
+std::string Packing::unpack(int a77[], std::string& call1, std::string& call2, std::string& loc)
 {
-    int i3 = un(a77, 74, 3);
-    int n3 = un(a77, 71, 3);
+    int i3 = un64(a77, 74, 3);
+    int n3 = un64(a77, 71, 3);
 
     if (i3 == 0 && n3 == 0)
     {

@@ -28,6 +28,7 @@ add_library(ft8 SHARED
 )
 
 target_link_libraries(ft8
+    Boost::disable_autolinking
     ${FFTW3F_LIBRARIES}
     Qt::Core
     sdrbase

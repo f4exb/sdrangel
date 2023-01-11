@@ -18,12 +18,12 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
-#include <sys/time.h>
 #include <assert.h>
 #include <math.h>
 #include <complex>
 #include <string>
 #include <algorithm>
+
 #include "util/timeutil.h"
 #include "util.h"
 
@@ -32,9 +32,6 @@ namespace FT8 {
 double now()
 {
     return TimeUtil::nowus() / 1000000.0;
-    // struct timeval tv;
-    // gettimeofday(&tv, 0);
-    // return tv.tv_sec + tv.tv_usec / 1000000.0;
 }
 
 //

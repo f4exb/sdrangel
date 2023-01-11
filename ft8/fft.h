@@ -22,7 +22,7 @@
 #ifndef FFT_H
 #define FFT_H
 
-#include <mutex>
+#include <QMutex>
 #include <vector>
 #include <complex>
 #include <fftw3.h>
@@ -84,8 +84,8 @@ public:
 
 private:
     void fft_stats();
-    std::mutex plansmu;
-    std::mutex plansmu2;
+    QMutex plansmu;
+    QMutex plansmu2;
     Plan *plans[1000];
     int nplans;
     // MEASURE=0, ESTIMATE=64, PATIENT=32

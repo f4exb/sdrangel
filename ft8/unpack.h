@@ -22,10 +22,42 @@
 #define unpack_h
 
 #include <string>
+#include <map>
+#include <boost/multiprecision/cpp_int.hpp>
+
+#include <QMutex>
 
 namespace FT8 {
 
-std::string unpack(int a91[], std::string& call1str, std::string& call2str, std::string& locstr);
+class Packing
+{
+public:
+    std::string unpack(int a91[], std::string& call1str, std::string& call2str, std::string& locstr);
+
+private:
+    boost::multiprecision::int128_t un128(int a77[], int start, int len);
+    uint64_t un64(int a77[], int start, int len);
+    int ihashcall(std::string call, int m);
+    std::string unpackcall(int x);
+    std::string unpackgrid(int ng, int ir, int i3);
+    void remember_call(std::string call);
+    std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
+    std::string unpack_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
+    std::string unpack_0_0(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
+    std::string unpack_3(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
+    std::string unpack_0_3(int a77[], int n3, std::string& call1str, std::string& call2str, std::string& locstr);
+
+    QMutex hashes_mu;
+    std::map<int, std::string> hashes12;
+    std::map<int, std::string> hashes22;
+
+    static const int NGBASE = (180 * 180);
+    static const int NTOKENS = 2063592;
+    static const int MAX22 = 4194304;
+    static const char *ru_states[];
+    static const char *sections[];
+};
+
 
 } // namespace FT8
 

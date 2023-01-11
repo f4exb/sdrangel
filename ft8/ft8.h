@@ -22,7 +22,7 @@
 #define ft8_h
 
 #include <thread>
-#include <mutex>
+#include <QMutex>
 #include "fft.h"
 
 #include "export.h"
@@ -281,10 +281,10 @@ public:
     int pass_;
     float down_hz_;
 
-    std::mutex cb_mu_;
+    QMutex cb_mu_;
     CallbackInterface *cb_; // call-back interface
 
-    std::mutex hack_mu_;
+    QMutex hack_mu_;
     int hack_size_;
     int hack_off_;
     int hack_len_;

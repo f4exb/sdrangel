@@ -53,6 +53,7 @@ public:
 private:
     QMutex cycle_mu;
     std::map<std::string, bool> cycle_already;
+    FT8::Packing packing;
 };
 
 
@@ -69,7 +70,7 @@ int TestFT8Callback::hcb(
     std::string call1;
     std::string call2;
     std::string loc;
-    std::string msg = FT8::unpack(a91, call1, call2, loc);
+    std::string msg = packing.unpack(a91, call1, call2, loc);
 
     cycle_mu.lock();
 
