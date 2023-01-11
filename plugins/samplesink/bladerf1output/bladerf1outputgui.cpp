@@ -506,4 +506,6 @@ void Bladerf1OutputGui::makeUIConnections()
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &Bladerf1OutputGui::on_startStop_toggled);
     QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &Bladerf1OutputGui::on_sampleRateMode_toggled);
     QObject::connect(ui->xb200, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1OutputGui::on_xb200_currentIndexChanged);
+    QObject::connect(ui->vga1, &QSlider::valueChanged, this, &Bladerf1OutputGui::on_vga1_valueChanged);
+    QObject::connect(ui->vga2, &QSlider::valueChanged, this, &Bladerf1OutputGui::on_vga2_valueChanged);
 }

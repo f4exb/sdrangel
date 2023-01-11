@@ -588,6 +588,8 @@ void Bladerf1InputGui::makeUIConnections()
     QObject::connect(ui->bandwidth, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1InputGui::on_bandwidth_currentIndexChanged);
     QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1InputGui::on_decim_currentIndexChanged);
     QObject::connect(ui->lna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1InputGui::on_lna_currentIndexChanged);
+    QObject::connect(ui->vga1, &QSlider::valueChanged, this, &Bladerf1InputGui::on_vga1_valueChanged);
+    QObject::connect(ui->vga2, &QSlider::valueChanged, this, &Bladerf1InputGui::on_vga2_valueChanged);
     QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1InputGui::on_fcPos_currentIndexChanged);
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &Bladerf1InputGui::on_startStop_toggled);
     QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &Bladerf1InputGui::on_sampleRateMode_toggled);
