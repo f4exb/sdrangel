@@ -40,6 +40,8 @@
 #include <random>
 #include <functional>
 #include <map>
+#include <utility>
+#include <thread>
 // #include <QDebug>
 
 #include "util.h"
@@ -3493,7 +3495,7 @@ void FT8Decoder::entry(
     }
 
     float per = (max_hz - min_hz) / params.nthreads;
-    std::vector<FT8 *> thv;
+    std::vector<std::pair<FT8*, std::thread*>> thv;
 
     for (int i = 0; i < params.nthreads; i++)
     {
@@ -3529,15 +3531,15 @@ void FT8Decoder::entry(
         ft8->getParams() = getParams(); // transfer parameters
 
         int npasses = nprevdecs > 0 ? params.npasses_two : params.npasses_one;
-        ft8->th_ = new std::thread([ft8, npasses] () { ft8->go(npasses); });
-        thv.push_back(ft8);
+        std::thread *th = new std::thread([ft8, npasses] () { ft8->go(npasses); });
+        thv.push_back(std::pair<FT8*, std::thread*>(ft8, th));
     }
 
     for (int i = 0; i < (int)thv.size(); i++)
     {
-        thv[i]->th_->join();
-        delete thv[i]->th_;
-        delete thv[i];
+        thv[i].second->join();
+        delete thv[i].second;
+        delete thv[i].first;
     }
 }
 

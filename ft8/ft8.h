@@ -21,7 +21,6 @@
 #ifndef ft8_h
 #define ft8_h
 
-#include <thread>
 #include <QMutex>
 #include "fft.h"
 
@@ -265,8 +264,6 @@ struct FT8_API FT8Params
 class FT8_API FT8
 {
 public:
-    std::thread *th_;
-
     float min_hz_;
     float max_hz_;
     std::vector<float> samples_;  // input to each pass
