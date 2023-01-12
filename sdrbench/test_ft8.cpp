@@ -21,19 +21,19 @@
 #include "mainbench.h"
 #include "dsp/wavfilerecord.h"
 
-#ifdef LINUX
-#include "ft8/ft8.h"
-#include "ft8/unpack.h"
-
 #include <QMutex>
-#endif
 
-#ifndef LINUX
-void MainBench::testFT8()
+#ifndef HAS_FT8
+void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
 {
-    qDebug("Implemented in Linux only");
+    (void) wavFile;
+    (void) argStr;
+    qWarning("MainBench::testFT8: this version has no FT8 support");
 }
 #else
+
+#include "ft8/ft8.h"
+#include "ft8/unpack.h"
 
 class TestFT8Callback : public FT8::CallbackInterface
 {
