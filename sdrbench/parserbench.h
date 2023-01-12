@@ -50,6 +50,7 @@ public:
     uint32_t getRepetition() const { return m_repetition; }
     uint32_t getLog2Factor() const { return m_log2Factor; }
     const QString& getFileName() const { return m_fileName; }
+    const QString& getArgsStr() const { return m_argsStr; }
 
 private:
     QString  m_testStr;
@@ -57,6 +58,7 @@ private:
     uint32_t m_repetition;
     uint32_t m_log2Factor;
     QString m_fileName;
+    QString m_argsStr;
 
     QCommandLineParser m_parser;
     QCommandLineOption m_testOption;
@@ -64,6 +66,7 @@ private:
     QCommandLineOption m_repetitionOption;
     QCommandLineOption m_log2FactorOption;
     QCommandLineOption m_fileOption;
+    QCommandLineOption m_argsOption;
 };
 
 

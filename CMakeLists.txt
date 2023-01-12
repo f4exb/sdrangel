@@ -780,10 +780,7 @@ add_subdirectory(devices)
 add_subdirectory(sdrbench)
 
 add_subdirectory(modemm17)
-
-if (LINUX)
-    add_subdirectory(ft8)
-endif()
+add_subdirectory(ft8)
 
 if (BUILD_GUI)
     add_subdirectory(sdrgui)

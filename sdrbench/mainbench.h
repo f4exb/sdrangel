@@ -54,7 +54,7 @@ private:
     void testDecimateFI();
     void testDecimateFF();
     void testGolay2312();
-    void testFT8(const QString& wavFile); //!< use with sdrbench/samples/ft8/230105_091630.wav in -f option
+    void testFT8(const QString& wavFile, const QString& argsStr); //!< use with sdrbench/samples/ft8/230105_091630.wav in -f option
     void decimateII(const qint16 *buf, int len);
     void decimateInfII(const qint16 *buf, int len);
     void decimateSupII(const qint16 *buf, int len);

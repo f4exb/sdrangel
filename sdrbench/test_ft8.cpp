@@ -102,11 +102,40 @@ int TestFT8Callback::hcb(
     return 2; // 2 => new decode, do subtract.
 }
 
-void MainBench::testFT8(const QString& wavFile)
+void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
 {
-    qDebug("MainBench::testFT8: start");
+    int nthreads = 8;    // number of threads (default)
+    double budget = 2.5; // compute for this many seconds per cycle (default)
+    // 3,0.5 combinaion may be enough
+
+    QStringList argElements = argsStr.split(','); // comma separated list of arguments
+
+    for (int i = 0; i < argElements.size(); i++)
+    {
+        const QString& argStr = argElements.at(i);
+        bool ok;
+
+        if (i == 0) // first is the number of threads (integer)
+        {
+            int nthreads_x = argStr.toInt(&ok);
+
+            if (ok) {
+                nthreads = nthreads_x;
+            }
+        }
+
+        if (i == 1) // second is the time budget in seconds (double)
+        {
+            double budget_x = argStr.toDouble(&ok);
+
+            if (ok) {
+                budget = budget_x;
+            }
+        }
+    }
+
+    qDebug("MainBench::testFT8: start nthreads: %d budget: %fs", nthreads, budget);
     int hints[2] = { 2, 0 }; // CQ
-    double budget = 2.5; // compute for this many seconds per cycle
     TestFT8Callback testft8Callback;
 
     std::ifstream wfile;
@@ -169,6 +198,7 @@ void MainBench::testFT8(const QString& wavFile)
     wfile.close();
 
     FT8::FT8Decoder decoder;
+    decoder.getParams().nthreads = nthreads;
 
     decoder.entry(
         samples.data(),
@@ -185,8 +215,10 @@ void MainBench::testFT8(const QString& wavFile)
         0,
         (struct FT8::cdecode *) nullptr
     );
-    qDebug("MainBench::testFT8: done");
+
+    decoder.wait(budget + 1.0); // add one second to budget to force quit threads
     const std::map<std::string, bool>& msgMap = testft8Callback.getMsgMap();
+    qDebug("MainBench::testFT8: done %lu decodes", msgMap.size());
 
     if (msgMap.size() != 15)
     {

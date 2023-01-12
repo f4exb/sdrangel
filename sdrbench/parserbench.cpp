@@ -42,6 +42,10 @@ ParserBench::ParserBench() :
     m_fileOption(QStringList() << "f" << "file",
         "File to be used for the test.",
         "file",
+        ""),
+    m_argsOption(QStringList() << "a" << "args",
+        "Custom arguments string to be used for the test.",
+        "args",
         "")
 {
     m_testStr = "decimateii";
@@ -58,6 +62,7 @@ ParserBench::ParserBench() :
     m_parser.addOption(m_repetitionOption);
     m_parser.addOption(m_log2FactorOption);
     m_parser.addOption(m_fileOption);
+    m_parser.addOption(m_argsOption);
 }
 
 ParserBench::~ParserBench()
@@ -120,6 +125,10 @@ void ParserBench::parse(const QCoreApplication& app)
     // file
 
     m_fileName = m_parser.value(m_fileOption);
+
+    // custom args
+
+    m_argsStr = m_parser.value(m_argsOption);
 }
 
 ParserBench::TestType ParserBench::getTestType() const

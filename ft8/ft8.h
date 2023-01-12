@@ -21,10 +21,15 @@
 #ifndef ft8_h
 #define ft8_h
 
-#include <QMutex>
-#include "fft.h"
+#include <vector>
 
+#include <QObject>
+#include <QMutex>
+
+#include "fft.h"
 #include "export.h"
+
+class QThread;
 
 namespace FT8 {
 // Callback interface to get the results
@@ -261,8 +266,9 @@ struct FT8_API FT8Params
 }; // class FT8Params
 
 // The FT8 worker
-class FT8_API FT8
+class FT8_API FT8 : public QObject
 {
+    Q_OBJECT
 public:
     float min_hz_;
     float max_hz_;
@@ -308,6 +314,10 @@ public:
         FFTEngine *fftEngine
     );
     ~FT8();
+    // Number of passes
+    void set_npasses(int npasses) { npasses_ = npasses; }
+    // Start the worker
+    void start_work();
     // strength of costas block of signal with tone 0 at bi0,
     // and symbol zero at si0.
     float one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0);
@@ -642,14 +652,19 @@ public:
     );
 
     FT8Params& getParams() { return params; }
+signals:
+    void finished();
 private:
     FT8Params params;
     FFTEngine *fftEngine_;
+    int npasses_;
     static const double apriori174[];
 }; // class FT8
 
-class FT8_API FT8Decoder {
+class FT8_API FT8Decoder : public QObject {
+    Q_OBJECT
 public:
+    ~FT8Decoder();
     void entry(
         float xsamples[],
         int nsamples,
@@ -665,9 +680,13 @@ public:
         int,
         struct cdecode *
     );
+    void wait(double time_left); //!< wait for all threads to finish
+    void forceQuit(); //!< force quit all threads
     FT8Params& getParams() { return params; }
 private:
+    FFTEngine fftEngine;
     FT8Params params;
+    std::vector<QThread*> threads;
 }; // FT8Decoder
 
 } // namespace FT8

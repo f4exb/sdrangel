@@ -33,15 +33,13 @@
 #include <math.h>
 #include <complex>
 #include <fftw3.h>
-#include <vector>
 #include <algorithm>
 #include <complex>
 #include <random>
 #include <functional>
 #include <map>
-#include <utility>
-#include <thread>
-// #include <QDebug>
+
+#include <QThread>
 
 #include "util.h"
 #include "ft8.h"
@@ -356,14 +354,21 @@ FT8::FT8(
 
     plan32_ = nullptr;
     fftEngine_ = fftEngine;
+    npasses_ = 1;
 }
 
 FT8::~FT8()
 {
 }
 
-    // strength of costas block of signal with tone 0 at bi0,
-    // and symbol zero at si0.
+void FT8::start_work()
+{
+    go(npasses_);
+    emit finished();
+}
+
+// strength of costas block of signal with tone 0 at bi0,
+// and symbol zero at si0.
 float FT8::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0)
 {
     int costas[] = {3, 1, 4, 0, 6, 5, 2};
@@ -3448,8 +3453,13 @@ std::vector<int> FT8::recode(int a174[])
     return out79;
 }
 
+FT8Decoder::~FT8Decoder()
+{
+    forceQuit(); // stop all remaining running threads if any
+}
+
 //
-// Python calls these.
+// Launch decoding
 //
 void FT8Decoder::entry(
     float xsamples[],
@@ -3470,7 +3480,6 @@ void FT8Decoder::entry(
     double t0 = now();
     double deadline = t0 + time_left;
     double final_deadline = t0 + total_time_left;
-    FFTEngine fftEngine;
 
     // decodes from previous runs, for subtraction.
     std::vector<cdecode> prevdecs;
@@ -3494,7 +3503,6 @@ void FT8Decoder::entry(
     }
 
     float per = (max_hz - min_hz) / params.nthreads;
-    std::vector<std::pair<FT8*, std::thread*>> thv;
 
     for (int i = 0; i < params.nthreads; i++)
     {
@@ -3530,15 +3538,45 @@ void FT8Decoder::entry(
         ft8->getParams() = getParams(); // transfer parameters
 
         int npasses = nprevdecs > 0 ? params.npasses_two : params.npasses_one;
-        std::thread *th = new std::thread([ft8, npasses] () { ft8->go(npasses); });
-        thv.push_back(std::pair<FT8*, std::thread*>(ft8, th));
+        ft8->set_npasses(npasses);
+        QThread *th = new QThread();
+        threads.push_back(th);
+        // std::thread *th = new std::thread([ft8, npasses] () { ft8->go(npasses); });
+        // thv.push_back(std::pair<FT8*, std::thread*>(ft8, th));
+        ft8->moveToThread(th);
+        QObject::connect(th, &QThread::started, ft8, &FT8::start_work);
+        QObject::connect(ft8, &FT8::finished, th, &QThread::quit, Qt::DirectConnection);
+        QObject::connect(th, &QThread::finished, ft8, &QObject::deleteLater);
+        QObject::connect(th, &QThread::finished, th, &QThread::deleteLater);
+        th->start();
     }
+}
 
-    for (int i = 0; i < (int)thv.size(); i++)
+void FT8Decoder::wait(double time_left)
+{
+    unsigned long thread_timeout = time_left * 1000;
+
+    while (threads.size() != 0)
     {
-        thv[i].second->join();
-        delete thv[i].second;
-        delete thv[i].first;
+        bool success = threads.front()->wait(thread_timeout);
+
+        if (!success)
+        {
+            qDebug("FT8::FT8Decoder::wait: thread timed out");
+            thread_timeout = 50; // only 50ms for the rest
+        }
+
+        threads.erase(threads.begin());
+    }
+}
+
+void FT8Decoder::forceQuit()
+{
+    while (threads.size() != 0)
+    {
+        threads.front()->quit();
+        threads.front()->wait();
+        threads.erase(threads.begin());
     }
 }
 
