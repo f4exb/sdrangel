@@ -260,6 +260,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   endif()
   configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/${CMAKE_PROJECT_NAME}.desktop.in"
     "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.desktop" @ONLY)
+  set(FFTW3F_FOUND ON CACHE INTERNAL "")
 elseif(APPLE)
   if("${CMAKE_OSX_DEPLOYMENT_TARGET}" STREQUAL "")
     message(STATUS "Build for macOS target: local version")
@@ -777,14 +778,16 @@ add_subdirectory(logging)
 add_subdirectory(qrtplib)
 add_subdirectory(swagger)
 add_subdirectory(devices)
-add_subdirectory(sdrbench)
 
 add_subdirectory(modemm17)
 
 if (FFTW3F_FOUND)
     add_subdirectory(ft8)
     add_definitions(-DHAS_FT8)
+    set(FT8_SUPPORT ON CACHE INTERNAL "")
 endif()
+
+add_subdirectory(sdrbench)
 
 if (BUILD_GUI)
     add_subdirectory(sdrgui)

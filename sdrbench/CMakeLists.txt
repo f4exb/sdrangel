@@ -1,5 +1,9 @@
 project (sdrbench)
 
+if (FT8_SUPPORT)
+    set(sdrbench_FT8_LIB ft8)
+endif()
+
 set(sdrbench_SOURCES
     mainbench.cpp
     parserbench.cpp
@@ -30,7 +34,7 @@ target_link_libraries(sdrbench
     Qt::Gui
     sdrbase
     logging
-    ft8
+    ${sdrbench_FT8_LIB}
 )
 
 install(TARGETS sdrbench DESTINATION ${INSTALL_LIB_DIR})
