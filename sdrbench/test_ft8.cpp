@@ -141,7 +141,7 @@ void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
     std::ifstream wfile;
 
 #ifdef Q_OS_WIN
-	wfile.open(m_settings.m_fileName.toStdWString().c_str(), std::ios::binary | std::ios::ate);
+	wfile.open(wavFile.toStdWString().c_str(), std::ios::binary | std::ios::ate);
 #else
 	wfile.open(wavFile.toStdString().c_str(), std::ios::binary | std::ios::ate);
 #endif
