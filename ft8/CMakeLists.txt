@@ -6,6 +6,7 @@ set(ft8_SOURCES
     libldpc.cpp
     osd.cpp
     unpack.cpp
+    unpack0.cpp
     util.cpp
 )
 

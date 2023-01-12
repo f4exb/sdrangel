@@ -22,45 +22,10 @@
 #include <assert.h>
 
 #include "unpack.h"
+#include "unpack0.h"
 #include "util.h"
 
 namespace FT8 {
-
-//
-// turn bits into a 128-bit integer.
-// most significant bit first.
-//
-boost::multiprecision::int128_t Packing::un128(int a77[], int start, int len)
-{
-    boost::multiprecision::int128_t x = 0;
-
-    assert(len < (int)sizeof(x) * 8 && start >= 0 && start + len <= 77);
-    for (int i = 0; i < len; i++)
-    {
-        x <<= 1;
-        x |= a77[start + i];
-    }
-
-    return x;
-}
-
-//
-// turn bits into a 64-bit integer.
-// most significant bit first.
-//
-uint64_t Packing::un64(int a77[], int start, int len)
-{
-    uint64_t x = 0;
-
-    assert(len < (int)sizeof(x) * 8 && start >= 0 && start + len <= 63);
-    for (int i = 0; i < len; i++)
-    {
-        x <<= 1;
-        x |= a77[start + i];
-    }
-
-    return x;
-}
 
 int Packing::ihashcall(std::string call, int m)
 {
