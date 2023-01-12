@@ -20,6 +20,7 @@ set(ft8_HEADERS
 
 include_directories(
     ${FFTW3F_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/sdrbase
 )
