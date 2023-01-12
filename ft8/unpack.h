@@ -26,9 +26,11 @@
 
 #include <QMutex>
 
+#include "export.h"
+
 namespace FT8 {
 
-class Packing
+class FT8_API Packing
 {
 public:
     std::string unpack(int a91[], std::string& call1str, std::string& call2str, std::string& locstr);
