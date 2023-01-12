@@ -27,7 +27,7 @@
 void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
 {
     (void) wavFile;
-    (void) argStr;
+    (void) argsStr;
     qWarning("MainBench::testFT8: this version has no FT8 support");
 }
 #else
