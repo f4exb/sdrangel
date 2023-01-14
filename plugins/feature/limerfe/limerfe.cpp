@@ -313,6 +313,7 @@ int LimeRFE::setRx(bool rxOn)
     if (rc == 0)
     {
         m_rxOn = rxOn;
+        m_rfeBoardState.mode = mode;
         qDebug("LimeRFE::setRx: switch %s mode: %d", rxOn ? "on" : "off", mode);
     }
     else
@@ -351,6 +352,7 @@ int LimeRFE::setTx(bool txOn)
     if (rc == 0)
     {
         m_txOn = txOn;
+        m_rfeBoardState.mode = mode;
         qDebug("LimeRFE::setTx: switch %s mode: %d", txOn ? "on" : "off", mode);
     }
     else
