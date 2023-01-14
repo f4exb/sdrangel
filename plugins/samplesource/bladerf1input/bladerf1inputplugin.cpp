@@ -32,7 +32,7 @@
 const PluginDescriptor Blderf1InputPlugin::m_pluginDescriptor = {
     QStringLiteral("BladeRF1"),
 	QStringLiteral("BladeRF1 Input"),
-    QStringLiteral("7.8.5"),
+    QStringLiteral("7.8.6"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

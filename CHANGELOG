@@ -1,3 +1,53 @@
+sdrangel (7.8.6-1) unstable; urgency=medium
+
+  - SSB demod: corrected DSB filter
+  - Fixed CI/CD issues and warnings (1)
+  - Add icons for arranging windows PR #1539
+  - Allow Android virtual keyboard to change sign in ValueDialZ widget PR #1539
+  - Scale splash screen to size of screen PR #1539
+  - Support touchscreen tap and hold to be used instead of right mouse PR #1539
+  - Add DialogPositioner to ensure dialogs are fully on screen and remain on PR #1539
+  - Add welcome dialog for Android PR #1539
+  - Add new sdrgui files to CMakeLists.txt PR #1539
+  - Add RSP and Android remote TCP protocol commands PR #1539
+  - Add gesture support to maps PR #1539
+  - Set plugins path for Android PR #1539
+  - Add popups for dials PR #1539
+  - Add pinch gesture to GraphicsViewZoom PR #1539
+  - GLSpectrum touchscreen updates PR #1540
+  - Add buttons to stack MDI windows vertically and put in tabs. PR #1541
+  - Allow maximize button to make window full screen, if already maximized. PR #1541
+  - Allow sampling devices to be refreshed while SDRangel is running. PR #1542
+  - Add Android support and settings resources PR #1542
+  - Change map provider from osm to mapboxgl on Linux, to avoid crash PR #1542
+  - Call processEvents to try to avoid not responding warning on Linux PR #1542
+  - Avoid divide by zero when no fixed windows PR #1542
+  - Scan for serial AMBE devices on Windows PR #1543
+  - On Android, list USB devices by VID/PID and open using file descriptor.PR #1544
+  - Fixed possible sample device pointer not set yet when DSPMIMOSignalNo...Fixes #1529
+  - Fixed passing QPoint reference from right click enabler to connected... Fixes #1549
+  - Support relative satellite image URLs PR #1550
+  - Ignore SSL certifcate errors on Android PR #1554
+  - Check for errors when writing to log PR #1554
+  - Reduce UI minimum size for small Android screens PR #1554
+  - Add Android support. Convert line endings PR #1554
+  - Add support for multiple ABIs on Android PR #1554
+  - Fix crash when no logger implemented. Add additional error reporting... PR #1554
+  - Update aligned_malloc implementation on Android, so it works with API... PR #1554
+  - Add flag to skip FFMPEG version check on Android PR #1554
+  - Support FileInput plugin on Android, by using QFile rather istream PR #1554
+  - Make WebEngine support in Map optional for Android PR #1554
+  - Make WebEngine support in Map optional for Android PR #1554
+  - Add libusb for Android PR #1554
+  - Add progress dialog for device enumeration, as some drivers are slow PR #1555
+  - Reenable 3D Map PR #1555
+  - Fix #1559. Update protocol before calling setAzimuthElevation PR #1560
+  - BladeRF v1: fixed VGA controls in GUI. Fixes #1535
+  - Re-enable LimeSuite in Windows with latest commit
+  - FT8 demod library support
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Fri, 13 Jan 2023 22:17:50 +0100
+
 sdrangel (7.8.5-1) unstable; urgency=medium
 
   * Local Sink: enhanced functionnality. Implements #871
