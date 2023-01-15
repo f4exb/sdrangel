@@ -51,6 +51,8 @@ AudioInputGui::AudioInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    connect(deviceUISet->m_deviceAPI, &DeviceAPI::stateChanged, this, &AudioInputGui::updateStatus);
+    updateStatus();
 
     displaySettings();
     makeUIConnections();
@@ -233,6 +235,8 @@ void AudioInputGui::displaySettings()
     } else {
         ui->device->setCurrentIndex(0);
     }
+    // Make sure on_device_currentIndexChanged is called. Index may be the same for a different device
+    on_device_currentIndexChanged(ui->device->currentIndex());
 
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->volume->setValue((int)(m_settings.m_volume*10.0f));
@@ -309,6 +313,30 @@ void AudioInputGui::updateHardware()
         m_settingsKeys.clear();
         m_forceSettings = false;
         m_updateTimer.stop();
+    }
+}
+
+void AudioInputGui::updateStatus()
+{
+    int state = m_deviceUISet->m_deviceAPI->state();
+
+    switch (state)
+    {
+        case DeviceAPI::StNotStarted:
+            ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+            break;
+        case DeviceAPI::StIdle:
+            ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
+            break;
+        case DeviceAPI::StRunning:
+            ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+            break;
+        case DeviceAPI::StError:
+            ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+            QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+            break;
+        default:
+            break;
     }
 }
 
