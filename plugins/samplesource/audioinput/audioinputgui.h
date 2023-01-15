@@ -80,6 +80,7 @@ private slots:
     void on_startStop_toggled(bool checked);
     void updateHardware();
     void openDeviceSettingsDialog(const QPoint& p);
+    void updateStatus();
 };
 
 #endif // INCLUDE_AUDIOINPUTGUI_H
