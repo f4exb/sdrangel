@@ -92,7 +92,6 @@ private:
 	int m_channelSampleRate;
 	int m_channelFrequencyOffset;
 	bool m_usb;
-	bool m_dsb;
 	double m_magsq;
 	double m_magsqSum;
 	double m_magsqPeak;
@@ -112,7 +111,6 @@ private:
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
 	fftfilt* SSBFilter;
-	fftfilt* DSBFilter;
 
 	SpectrumVis* m_spectrumSink;
 	SampleVector m_sampleBuffer;

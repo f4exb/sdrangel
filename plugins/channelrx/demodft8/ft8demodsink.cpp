@@ -37,7 +37,6 @@ const int FT8DemodSink::m_ssbFftLen = 1024;
 const int FT8DemodSink::m_agcTarget = 3276; // 32768/10 -10 dB amplitude => -20 dB power: center of normal signal
 
 FT8DemodSink::FT8DemodSink() :
-        m_dsb(false),
         m_agc(12000, m_agcTarget, 1e-2),
         m_agcActive(false),
         m_agcClamping(false),
@@ -75,7 +74,6 @@ FT8DemodSink::FT8DemodSink() :
 	m_agc.setClamping(m_agcClamping);
 
 	SSBFilter = new fftfilt(m_LowCutoff / m_ft8SampleRate, m_Bandwidth / m_ft8SampleRate, m_ssbFftLen);
-	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_ft8SampleRate, 2 * m_ssbFftLen);
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -84,7 +82,6 @@ FT8DemodSink::FT8DemodSink() :
 FT8DemodSink::~FT8DemodSink()
 {
     delete SSBFilter;
-    delete DSBFilter;
 }
 
 void FT8DemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -126,11 +123,7 @@ void FT8DemodSink::processOneSample(Complex &ci)
 	int decim = 1<<(m_spanLog2 - 1);
 	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
-    if (m_dsb) {
-        n_out = DSBFilter->runDSB(ci, &sideband);
-    } else {
-        n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
-    }
+    n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
 
     for (int i = 0; i < n_out; i++)
     {
@@ -153,16 +146,7 @@ void FT8DemodSink::processOneSample(Complex &ci)
             }
 
             m_magsqCount++;
-
-            if (!m_dsb & !m_usb)
-            { // invert spectrum for LSB
-                m_sampleBuffer.push_back(Sample(avgi, avgr));
-            }
-            else
-            {
-                m_sampleBuffer.push_back(Sample(avgr, avgi));
-            }
-
+            m_sampleBuffer.push_back(Sample(avgr, avgi));
             m_sum.real(0.0);
             m_sum.imag(0.0);
         }
@@ -223,7 +207,7 @@ void FT8DemodSink::processOneSample(Complex &ci)
 
 	if (m_spectrumSink && (m_sampleBuffer.size() != 0))
     {
-		m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), !m_dsb);
+		m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
     	m_sampleBuffer.clear();
 	}
 }
@@ -262,7 +246,6 @@ void FT8DemodSink::applyFT8SampleRate(int sampleRate)
     m_interpolatorDistance = (Real) m_channelSampleRate / (Real) sampleRate;
 
     SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
-    DSBFilter->create_dsb_filter(m_Bandwidth / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
 
     int agcNbSamples = (sampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
     int agcThresholdGate = (sampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
@@ -312,7 +295,6 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
             << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
             << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
-            << " m_dsb: " << settings.m_dsb
             << " m_agcActive: " << settings.m_agc
             << " m_agcClamping: " << settings.m_agcClamping
             << " m_agcTimeLog2: " << settings.m_agcTimeLog2
@@ -358,7 +340,6 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_ft8SampleRate;
         SSBFilter->create_filter(m_LowCutoff / (float) m_ft8SampleRate, m_Bandwidth / (float) m_ft8SampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
-        DSBFilter->create_dsb_filter(m_Bandwidth / (float) m_ft8SampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
     }
 
     if ((m_settings.m_volume != settings.m_volume) || force)
@@ -411,7 +392,6 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
     }
 
     m_spanLog2 = settings.m_filterBank[settings.m_filterIndex].m_spanLog2;
-    m_dsb = settings.m_dsb;
     m_agcActive = settings.m_agc;
     m_settings = settings;
 }

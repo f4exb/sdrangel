@@ -33,9 +33,9 @@ struct FT8DemodFilterSettings
     FFTWindow::Function m_fftWindow;
 
     FT8DemodFilterSettings() :
-        m_spanLog2(3),
+        m_spanLog2(2),
         m_rfBandwidth(3000),
-        m_lowCutoff(300),
+        m_lowCutoff(200),
         m_fftWindow(FFTWindow::Blackman)
     {}
 };
@@ -47,7 +47,6 @@ struct FT8DemodSettings
     // Real m_lowCutoff;
     Real m_volume;
     // int  m_spanLog2;
-    bool m_dsb;
     bool m_agc;
     bool m_agcClamping;
     int  m_agcTimeLog2;

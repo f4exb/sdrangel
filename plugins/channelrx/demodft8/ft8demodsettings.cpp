@@ -41,7 +41,6 @@ FT8DemodSettings::FT8DemodSettings() :
 
 void FT8DemodSettings::resetToDefaults()
 {
-    m_dsb = false;
     m_agc = false;
     m_agcClamping = false;
     m_agcPowerThreshold = -100;
@@ -74,7 +73,6 @@ QByteArray FT8DemodSettings::serialize() const
     }
 
     s.writeU32(5, m_rgbColor);
-    s.writeBool(10, m_dsb);
     s.writeBool(11, m_agc);
     s.writeS32(12, m_agcTimeLog2);
     s.writeS32(13, m_agcPowerThreshold);
@@ -137,7 +135,6 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         }
 
         d.readU32(5, &m_rgbColor);
-        d.readBool(10, &m_dsb, false);
         d.readBool(11, &m_agc, false);
         d.readS32(12, &m_agcTimeLog2, 7);
         d.readS32(13, &m_agcPowerThreshold, -40);

@@ -66,9 +66,6 @@ public:
     float getVolume();
     void setVolume(float volume);
 
-    qint32 getDsb();
-    void setDsb(qint32 dsb);
-
     qint32 getAgc();
     void setAgc(qint32 agc);
 
@@ -144,9 +141,6 @@ private:
 
     float volume;
     bool m_volume_isSet;
-
-    qint32 dsb;
-    bool m_dsb_isSet;
 
     qint32 agc;
     bool m_agc_isSet;

@@ -42,8 +42,6 @@ SWGFT8DemodSettings::SWGFT8DemodSettings() {
     m_fft_window_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
-    dsb = 0;
-    m_dsb_isSet = false;
     agc = 0;
     m_agc_isSet = false;
     agc_clamping = 0;
@@ -100,8 +98,6 @@ SWGFT8DemodSettings::init() {
     m_fft_window_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
-    dsb = 0;
-    m_dsb_isSet = false;
     agc = 0;
     m_agc_isSet = false;
     agc_clamping = 0;
@@ -140,7 +136,6 @@ SWGFT8DemodSettings::init() {
 
 void
 SWGFT8DemodSettings::cleanup() {
-
 
 
 
@@ -201,8 +196,6 @@ SWGFT8DemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&fft_window, pJson["fftWindow"], "qint32", "");
     
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
-    
-    ::SWGSDRangel::setValue(&dsb, pJson["dsb"], "qint32", "");
     
     ::SWGSDRangel::setValue(&agc, pJson["agc"], "qint32", "");
     
@@ -274,9 +267,6 @@ SWGFT8DemodSettings::asJsonObject() {
     }
     if(m_volume_isSet){
         obj->insert("volume", QJsonValue(volume));
-    }
-    if(m_dsb_isSet){
-        obj->insert("dsb", QJsonValue(dsb));
     }
     if(m_agc_isSet){
         obj->insert("agc", QJsonValue(agc));
@@ -401,16 +391,6 @@ void
 SWGFT8DemodSettings::setVolume(float volume) {
     this->volume = volume;
     this->m_volume_isSet = true;
-}
-
-qint32
-SWGFT8DemodSettings::getDsb() {
-    return dsb;
-}
-void
-SWGFT8DemodSettings::setDsb(qint32 dsb) {
-    this->dsb = dsb;
-    this->m_dsb_isSet = true;
 }
 
 qint32
@@ -607,9 +587,6 @@ SWGFT8DemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_volume_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_dsb_isSet){
             isObjectUpdated = true; break;
         }
         if(m_agc_isSet){

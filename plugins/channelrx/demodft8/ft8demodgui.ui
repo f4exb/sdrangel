@@ -176,38 +176,6 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QPushButton" name="flipSidebands">
-          <property name="toolTip">
-           <string>Flip sideband in SSB mode (LSB-&gt;USB or USB-&gt;LSB)</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../../../sdrgui/resources/res.qrc">
-            <normaloff>:/flip_sidebands.png</normaloff>:/flip_sidebands.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="dsb">
-          <property name="toolTip">
-           <string>DSB/SSB toggle</string>
-          </property>
-          <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../../../sdrgui/resources/res.qrc">
-            <normaloff>:/usb.png</normaloff>
-            <normalon>:/dsb.png</normalon>:/usb.png</iconset>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
      </layout>
@@ -275,16 +243,16 @@
          <number>0</number>
         </property>
         <property name="maximum">
-         <number>4</number>
+         <number>2</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>2</number>
+         <number>1</number>
         </property>
         <property name="sliderPosition">
-         <number>2</number>
+         <number>1</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -468,7 +436,7 @@
          <string>Highpass filter cutoff frequency (SSB)</string>
         </property>
         <property name="minimum">
-         <number>-60</number>
+         <number>0</number>
         </property>
         <property name="maximum">
          <number>60</number>
@@ -550,7 +518,7 @@
          <string>Lowpass filter cutoff frequency</string>
         </property>
         <property name="minimum">
-         <number>-60</number>
+         <number>0</number>
         </property>
         <property name="maximum">
          <number>60</number>
@@ -591,152 +559,6 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="scaleLayout">
-      <item>
-       <widget class="QLabel" name="scalePadLeft">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>10</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Liberation Sans</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>f: </string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="scaleMinus">
-        <property name="maximumSize">
-         <size>
-          <width>10</width>
-          <height>10</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Liberation Sans</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>-</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="lsbLabel">
-        <property name="font">
-         <font>
-          <family>Liberation Sans</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>LSB</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="scaleCenter">
-        <property name="maximumSize">
-         <size>
-          <width>12</width>
-          <height>10</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Liberation Sans</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="usbLabel">
-        <property name="font">
-         <font>
-          <family>Liberation Sans</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>USB</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="scalePlus">
-        <property name="maximumSize">
-         <size>
-          <width>10</width>
-          <height>10</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Liberation Sans</family>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>+</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="scalePadRight">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>10</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
         </property>
        </widget>
       </item>

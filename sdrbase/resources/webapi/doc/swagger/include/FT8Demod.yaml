@@ -30,9 +30,6 @@ FT8DemodSettings:
     volume:
       type: number
       format: float
-    dsb:
-      description: Double sidebands mode (1 if DSB else 0)
-      type: integer
     agc:
       description: AGC (1 if AGC active else 0)
       type: integer

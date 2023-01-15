@@ -241,7 +241,6 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
             << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
             << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
-            << " m_dsb: " << settings.m_dsb
             << " m_agcActive: " << settings.m_agc
             << " m_agcClamping: " << settings.m_agcClamping
             << " m_agcTimeLog2: " << settings.m_agcTimeLog2
@@ -294,9 +293,6 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
     if ((settings.m_ft8SampleRate != m_settings.m_ft8SampleRate) || force) {
         reverseAPIKeys.append("ft8SampleRate");
     }
-    if ((m_settings.m_dsb != settings.m_dsb) || force) {
-        reverseAPIKeys.append("dsb");
-    }
     if ((m_settings.m_agc != settings.m_agc) || force) {
         reverseAPIKeys.append("agc");
     }
@@ -314,12 +310,10 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    if ((settings.m_dsb != m_settings.m_dsb)
-     || (settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth != m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth)
+    if ((settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth != m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth)
      || (settings.m_filterBank[settings.m_filterIndex].m_lowCutoff != m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff) || force)
     {
         SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
-        spectrumSettings.m_ssb = !settings.m_dsb;
         spectrumSettings.m_usb = (settings.m_filterBank[settings.m_filterIndex].m_lowCutoff < settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth);
         SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
         m_spectrumVis.getInputMessageQueue()->push(msg);
@@ -467,9 +461,6 @@ void FT8Demod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getFt8DemodSettings()->getVolume();
     }
-    if (channelSettingsKeys.contains("dsb")) {
-        settings.m_dsb = response.getFt8DemodSettings()->getDsb() != 0;
-    }
     if (channelSettingsKeys.contains("agc")) {
         settings.m_agc = response.getFt8DemodSettings()->getAgc() != 0;
     }
@@ -543,7 +534,6 @@ void FT8Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getFt8DemodSettings()->setLowCutoff(settings.m_filterBank[settings.m_filterIndex].m_lowCutoff);
     response.getFt8DemodSettings()->setFftWindow((int) settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
     response.getFt8DemodSettings()->setVolume(settings.m_volume);
-    response.getFt8DemodSettings()->setDsb(settings.m_dsb ? 1 : 0);
     response.getFt8DemodSettings()->setAgc(settings.m_agc ? 1 : 0);
     response.getFt8DemodSettings()->setAgcClamping(settings.m_agcClamping ? 1 : 0);
     response.getFt8DemodSettings()->setAgcTimeLog2(settings.m_agcTimeLog2);
@@ -717,9 +707,6 @@ void FT8Demod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgFT8DemodSettings->setVolume(settings.m_volume);
-    }
-    if (channelSettingsKeys.contains("dsb") || force) {
-        swgFT8DemodSettings->setDsb(settings.m_dsb ? 1 : 0);
     }
     if (channelSettingsKeys.contains("agc") || force) {
         swgFT8DemodSettings->setAgc(settings.m_agc ? 1 : 0);

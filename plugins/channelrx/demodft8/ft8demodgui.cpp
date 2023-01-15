@@ -137,12 +137,6 @@ void FT8DemodGUI::channelMarkerHighlightedByCursor()
     setHighlighted(m_channelMarker.getHighlighted());
 }
 
-void FT8DemodGUI::on_dsb_toggled(bool dsb)
-{
-    ui->flipSidebands->setEnabled(!dsb);
-    applyBandwidths(1 + ui->spanLog2->maximum() - ui->spanLog2->value());
-}
-
 void FT8DemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
@@ -216,15 +210,6 @@ void FT8DemodGUI::on_spanLog2_valueChanged(int value)
     }
 
     applyBandwidths(s2max - ui->spanLog2->value());
-}
-
-void FT8DemodGUI::on_flipSidebands_clicked(bool checked)
-{
-    (void) checked;
-    int bwValue = ui->BW->value();
-    int lcValue = ui->lowCut->value();
-    ui->BW->setValue(-bwValue);
-    ui->lowCut->setValue(-lcValue);
 }
 
 void FT8DemodGUI::on_fftWindow_currentIndexChanged(int index)
@@ -370,15 +355,10 @@ FT8DemodGUI::FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
-	m_iconDSBUSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
-    m_iconDSBUSB.addPixmap(QPixmap("://usb.png"), QIcon::Normal, QIcon::Off);
-	m_iconDSBLSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
-    m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::Off);
-
-    ui->BW->setMaximum(480);
-    ui->BW->setMinimum(-480);
-    ui->lowCut->setMaximum(480);
-    ui->lowCut->setMinimum(-480);
+    ui->BW->setMaximum(60);
+    ui->BW->setMinimum(10);
+    ui->lowCut->setMaximum(50);
+    ui->lowCut->setMinimum(0);
 	displaySettings();
     makeUIConnections();
 
@@ -420,18 +400,16 @@ void FT8DemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     spanLog2 = spanLog2 > s2max ? s2max : spanLog2;
     unsigned int limit = s2max < 1 ? 0 : s2max - 1;
     ui->spanLog2->setMaximum(limit);
-    bool dsb = ui->dsb->isChecked();
     //int spanLog2 = ui->spanLog2->value();
     m_spectrumRate = m_settings.m_ft8SampleRate / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
     int bwMax = m_settings.m_ft8SampleRate / (100*(1<<spanLog2));
-    int tickInterval = m_spectrumRate / 1200;
+    int tickInterval = m_spectrumRate / 2400;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
     qDebug() << "FT8DemodGUI::applyBandwidths:"
             << " s2max:" << s2max
-            << " dsb: " << dsb
             << " spanLog2: " << spanLog2
             << " m_spectrumRate: " << m_spectrumRate
             << " bw: " << bw
@@ -442,19 +420,10 @@ void FT8DemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     ui->BW->setTickInterval(tickInterval);
     ui->lowCut->setTickInterval(tickInterval);
 
-    bw = bw < -bwMax ? -bwMax : bw > bwMax ? bwMax : bw;
+    bw = bw < 0 ? 0 : bw > bwMax ? bwMax : bw;
+    lw = lw > bw-1 ? bw-1 : lw < 0 ? 0 : lw;
 
-    if (bw < 0) {
-        lw = lw < bw+1 ? bw+1 : lw < 0 ? lw : 0;
-    } else if (bw > 0) {
-        lw = lw > bw-1 ? bw-1 : lw < 0 ? 0 : lw;
-    } else {
-        lw = 0;
-    }
-
-    if (dsb)
-    {
-        bw = bw < 0 ? -bw : bw;
+    if (bw == 0) {
         lw = 0;
     }
 
@@ -462,34 +431,12 @@ void FT8DemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     QString bwStr   = QString::number(bw/10.0, 'f', 1);
     QString lwStr   = QString::number(lw/10.0, 'f', 1);
 
-    if (dsb)
-    {
-        ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(bwStr));
-        ui->spanText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(spanStr));
-        ui->scaleMinus->setText("0");
-        ui->scaleCenter->setText("");
-        ui->scalePlus->setText(tr("%1").arg(QChar(0xB1, 0x00)));
-        ui->lsbLabel->setText("");
-        ui->usbLabel->setText("");
-        ui->glSpectrum->setCenterFrequency(0);
-        ui->glSpectrum->setSampleRate(2*m_spectrumRate);
-        ui->glSpectrum->setSsbSpectrum(false);
-        ui->glSpectrum->setLsbDisplay(false);
-    }
-    else
-    {
-        ui->BWText->setText(tr("%1k").arg(bwStr));
-        ui->spanText->setText(tr("%1k").arg(spanStr));
-        ui->scaleMinus->setText("-");
-        ui->scaleCenter->setText("0");
-        ui->scalePlus->setText("+");
-        ui->lsbLabel->setText("LSB");
-        ui->usbLabel->setText("USB");
-        ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
-        ui->glSpectrum->setSampleRate(m_spectrumRate);
-        ui->glSpectrum->setSsbSpectrum(true);
-        ui->glSpectrum->setLsbDisplay(bw < 0);
-    }
+    ui->BWText->setText(tr("%1k").arg(bwStr));
+    ui->spanText->setText(tr("%1k").arg(spanStr));
+    ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
+    ui->glSpectrum->setSampleRate(m_spectrumRate);
+    ui->glSpectrum->setSsbSpectrum(true);
+    ui->glSpectrum->setLsbDisplay(bw < 0);
 
     ui->lowCutText->setText(tr("%1k").arg(lwStr));
 
@@ -497,11 +444,11 @@ void FT8DemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     ui->lowCut->blockSignals(true);
 
     ui->BW->setMaximum(bwMax);
-    ui->BW->setMinimum(dsb ? 0 : -bwMax);
+    ui->BW->setMinimum(0);
     ui->BW->setValue(bw);
 
-    ui->lowCut->setMaximum(dsb ? 0 :  bwMax);
-    ui->lowCut->setMinimum(dsb ? 0 : -bwMax);
+    ui->lowCut->setMaximum(bwMax);
+    ui->lowCut->setMinimum(0);
     ui->lowCut->setValue(lw);
 
     ui->lowCut->blockSignals(false);
@@ -509,7 +456,6 @@ void FT8DemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
 
     ui->channelPowerMeter->setRange(FT8DemodSettings::m_minPowerThresholdDB, 0);
 
-    m_settings.m_dsb = dsb;
     m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2 = spanLog2;
     m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth = bw * 100;
     m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff = lw * 100;
@@ -518,9 +464,8 @@ void FT8DemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
 
     bool wasBlocked = blockApplySettings(true);
     m_channelMarker.setBandwidth(bw * 200);
-    m_channelMarker.setSidebands(dsb ? ChannelMarker::dsb : bw < 0 ? ChannelMarker::lsb : ChannelMarker::usb);
-    ui->dsb->setIcon(bw < 0 ? m_iconDSBLSB: m_iconDSBUSB);
-    if (!dsb) { m_channelMarker.setLowCutoff(lw * 100); }
+    m_channelMarker.setSidebands(bw < 0 ? ChannelMarker::lsb : ChannelMarker::usb);
+    m_channelMarker.setLowCutoff(lw * 100);
     blockApplySettings(wasBlocked);
 }
 
@@ -532,24 +477,13 @@ void FT8DemodGUI::displaySettings()
     m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setLowCutoff(m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff);
 
-    ui->flipSidebands->setEnabled(!m_settings.m_dsb);
-
-    if (m_settings.m_dsb)
+    if (m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth < 0)
     {
-        m_channelMarker.setSidebands(ChannelMarker::dsb);
+        m_channelMarker.setSidebands(ChannelMarker::lsb);
     }
     else
     {
-        if (m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth < 0)
-        {
-            m_channelMarker.setSidebands(ChannelMarker::lsb);
-            ui->dsb->setIcon(m_iconDSBLSB);
-        }
-        else
-        {
-            m_channelMarker.setSidebands(ChannelMarker::usb);
-            ui->dsb->setIcon(m_iconDSBUSB);
-        }
+        m_channelMarker.setSidebands(ChannelMarker::usb);
     }
 
     m_channelMarker.blockSignals(false);
@@ -570,27 +504,20 @@ void FT8DemodGUI::displaySettings()
 
     // Prevent uncontrolled triggering of applyBandwidths
     ui->spanLog2->blockSignals(true);
-    ui->dsb->blockSignals(true);
     ui->BW->blockSignals(true);
     ui->filterIndex->blockSignals(true);
 
     ui->filterIndex->setValue(m_settings.m_filterIndex);
     ui->filterIndexText->setText(tr("%1").arg(m_settings.m_filterIndex));
 
-    ui->dsb->setChecked(m_settings.m_dsb);
     ui->spanLog2->setValue(1 + ui->spanLog2->maximum() - m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2);
 
     ui->BW->setValue(m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth / 100.0);
     QString s = QString::number(m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth/1000.0, 'f', 1);
 
-    if (m_settings.m_dsb) {
-        ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(s));
-    } else {
-        ui->BWText->setText(tr("%1k").arg(s));
-    }
+    ui->BWText->setText(tr("%1k").arg(s));
 
     ui->spanLog2->blockSignals(false);
-    ui->dsb->blockSignals(false);
     ui->BW->blockSignals(false);
     ui->filterIndex->blockSignals(false);
 
@@ -679,7 +606,6 @@ void FT8DemodGUI::tick()
 void FT8DemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &FT8DemodGUI::on_deltaFrequency_changed);
-    QObject::connect(ui->dsb, &QToolButton::toggled, this, &FT8DemodGUI::on_dsb_toggled);
     QObject::connect(ui->BW, &TickedSlider::valueChanged, this, &FT8DemodGUI::on_BW_valueChanged);
     QObject::connect(ui->lowCut, &TickedSlider::valueChanged, this, &FT8DemodGUI::on_lowCut_valueChanged);
     QObject::connect(ui->volume, &QDial::valueChanged, this, &FT8DemodGUI::on_volume_valueChanged);
@@ -689,7 +615,6 @@ void FT8DemodGUI::makeUIConnections()
     QObject::connect(ui->agcPowerThreshold, &QDial::valueChanged, this, &FT8DemodGUI::on_agcPowerThreshold_valueChanged);
     QObject::connect(ui->agcThresholdGate, &QDial::valueChanged, this, &FT8DemodGUI::on_agcThresholdGate_valueChanged);
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &FT8DemodGUI::on_spanLog2_valueChanged);
-    QObject::connect(ui->flipSidebands, &QPushButton::clicked, this, &FT8DemodGUI::on_flipSidebands_clicked);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FT8DemodGUI::on_fftWindow_currentIndexChanged);
     QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &FT8DemodGUI::on_filterIndex_valueChanged);
 }
