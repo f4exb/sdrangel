@@ -109,8 +109,6 @@ private:
 
 private slots:
 	void on_deltaFrequency_changed(qint64 value);
-	void on_audioBinaural_toggled(bool binaural);
-	void on_audioFlipChannels_toggled(bool flip);
 	void on_dsb_toggled(bool dsb);
 	void on_BW_valueChanged(int value);
 	void on_lowCut_valueChanged(int value);
@@ -120,7 +118,6 @@ private slots:
 	void on_agcTimeLog2_valueChanged(int value);
     void on_agcPowerThreshold_valueChanged(int value);
     void on_agcThresholdGate_valueChanged(int value);
-	void on_audioMute_toggled(bool checked);
 	void on_spanLog2_valueChanged(int value);
 	void on_flipSidebands_clicked(bool checked);
     void on_fftWindow_currentIndexChanged(int index);
@@ -128,7 +125,6 @@ private slots:
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
-    void audioSelect(const QPoint& p);
 	void tick();
 };
 

@@ -42,14 +42,8 @@ SWGFT8DemodSettings::SWGFT8DemodSettings() {
     m_fft_window_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
-    audio_binaural = 0;
-    m_audio_binaural_isSet = false;
-    audio_flip_channels = 0;
-    m_audio_flip_channels_isSet = false;
     dsb = 0;
     m_dsb_isSet = false;
-    audio_mute = 0;
-    m_audio_mute_isSet = false;
     agc = 0;
     m_agc_isSet = false;
     agc_clamping = 0;
@@ -64,8 +58,8 @@ SWGFT8DemodSettings::SWGFT8DemodSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
-    audio_device_name = nullptr;
-    m_audio_device_name_isSet = false;
+    ft8_sample_rate = 0;
+    m_ft8_sample_rate_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -106,14 +100,8 @@ SWGFT8DemodSettings::init() {
     m_fft_window_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
-    audio_binaural = 0;
-    m_audio_binaural_isSet = false;
-    audio_flip_channels = 0;
-    m_audio_flip_channels_isSet = false;
     dsb = 0;
     m_dsb_isSet = false;
-    audio_mute = 0;
-    m_audio_mute_isSet = false;
     agc = 0;
     m_agc_isSet = false;
     agc_clamping = 0;
@@ -128,8 +116,8 @@ SWGFT8DemodSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
-    audio_device_name = new QString("");
-    m_audio_device_name_isSet = false;
+    ft8_sample_rate = 0;
+    m_ft8_sample_rate_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -166,15 +154,10 @@ SWGFT8DemodSettings::cleanup() {
 
 
 
-
-
-
     if(title != nullptr) { 
         delete title;
     }
-    if(audio_device_name != nullptr) { 
-        delete audio_device_name;
-    }
+
 
 
     if(reverse_api_address != nullptr) { 
@@ -219,13 +202,7 @@ SWGFT8DemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
     
-    ::SWGSDRangel::setValue(&audio_binaural, pJson["audioBinaural"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&audio_flip_channels, pJson["audioFlipChannels"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&dsb, pJson["dsb"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
     
     ::SWGSDRangel::setValue(&agc, pJson["agc"], "qint32", "");
     
@@ -241,7 +218,7 @@ SWGFT8DemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
+    ::SWGSDRangel::setValue(&ft8_sample_rate, pJson["ft8SampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
@@ -298,17 +275,8 @@ SWGFT8DemodSettings::asJsonObject() {
     if(m_volume_isSet){
         obj->insert("volume", QJsonValue(volume));
     }
-    if(m_audio_binaural_isSet){
-        obj->insert("audioBinaural", QJsonValue(audio_binaural));
-    }
-    if(m_audio_flip_channels_isSet){
-        obj->insert("audioFlipChannels", QJsonValue(audio_flip_channels));
-    }
     if(m_dsb_isSet){
         obj->insert("dsb", QJsonValue(dsb));
-    }
-    if(m_audio_mute_isSet){
-        obj->insert("audioMute", QJsonValue(audio_mute));
     }
     if(m_agc_isSet){
         obj->insert("agc", QJsonValue(agc));
@@ -331,8 +299,8 @@ SWGFT8DemodSettings::asJsonObject() {
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
     }
-    if(audio_device_name != nullptr && *audio_device_name != QString("")){
-        toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
+    if(m_ft8_sample_rate_isSet){
+        obj->insert("ft8SampleRate", QJsonValue(ft8_sample_rate));
     }
     if(m_stream_index_isSet){
         obj->insert("streamIndex", QJsonValue(stream_index));
@@ -436,26 +404,6 @@ SWGFT8DemodSettings::setVolume(float volume) {
 }
 
 qint32
-SWGFT8DemodSettings::getAudioBinaural() {
-    return audio_binaural;
-}
-void
-SWGFT8DemodSettings::setAudioBinaural(qint32 audio_binaural) {
-    this->audio_binaural = audio_binaural;
-    this->m_audio_binaural_isSet = true;
-}
-
-qint32
-SWGFT8DemodSettings::getAudioFlipChannels() {
-    return audio_flip_channels;
-}
-void
-SWGFT8DemodSettings::setAudioFlipChannels(qint32 audio_flip_channels) {
-    this->audio_flip_channels = audio_flip_channels;
-    this->m_audio_flip_channels_isSet = true;
-}
-
-qint32
 SWGFT8DemodSettings::getDsb() {
     return dsb;
 }
@@ -463,16 +411,6 @@ void
 SWGFT8DemodSettings::setDsb(qint32 dsb) {
     this->dsb = dsb;
     this->m_dsb_isSet = true;
-}
-
-qint32
-SWGFT8DemodSettings::getAudioMute() {
-    return audio_mute;
-}
-void
-SWGFT8DemodSettings::setAudioMute(qint32 audio_mute) {
-    this->audio_mute = audio_mute;
-    this->m_audio_mute_isSet = true;
 }
 
 qint32
@@ -545,14 +483,14 @@ SWGFT8DemodSettings::setTitle(QString* title) {
     this->m_title_isSet = true;
 }
 
-QString*
-SWGFT8DemodSettings::getAudioDeviceName() {
-    return audio_device_name;
+qint32
+SWGFT8DemodSettings::getFt8SampleRate() {
+    return ft8_sample_rate;
 }
 void
-SWGFT8DemodSettings::setAudioDeviceName(QString* audio_device_name) {
-    this->audio_device_name = audio_device_name;
-    this->m_audio_device_name_isSet = true;
+SWGFT8DemodSettings::setFt8SampleRate(qint32 ft8_sample_rate) {
+    this->ft8_sample_rate = ft8_sample_rate;
+    this->m_ft8_sample_rate_isSet = true;
 }
 
 qint32
@@ -671,16 +609,7 @@ SWGFT8DemodSettings::isSet(){
         if(m_volume_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_audio_binaural_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_audio_flip_channels_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_dsb_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_audio_mute_isSet){
             isObjectUpdated = true; break;
         }
         if(m_agc_isSet){
@@ -704,7 +633,7 @@ SWGFT8DemodSettings::isSet(){
         if(title && *title != QString("")){
             isObjectUpdated = true; break;
         }
-        if(audio_device_name && *audio_device_name != QString("")){
+        if(m_ft8_sample_rate_isSet){
             isObjectUpdated = true; break;
         }
         if(m_stream_index_isSet){

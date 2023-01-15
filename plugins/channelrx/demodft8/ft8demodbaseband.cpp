@@ -42,8 +42,6 @@ FT8DemodBaseband::FT8DemodBaseband() :
     );
 
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue());
-    m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
-    m_sink.applyAudioSampleRate(m_audioSampleRate);
     m_channelSampleRate = 0;
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -57,7 +55,6 @@ FT8DemodBaseband::~FT8DemodBaseband()
 void FT8DemodBaseband::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);
-    m_sink.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
     m_sampleFifo.reset();
     m_channelSampleRate = 0;
 }
@@ -134,7 +131,7 @@ bool FT8DemodBaseband::handleMessage(const Message& cmd)
 
         if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
         {
-            m_sink.applyAudioSampleRate(m_audioSampleRate); // reapply when channel sample rate changes
+            m_sink.applyFT8SampleRate(m_settings.m_ft8SampleRate); // reapply when channel sample rate changes
             m_channelSampleRate = m_channelizer.getChannelSampleRate();
         }
 
@@ -150,12 +147,12 @@ void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool forc
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer.setChannelization(m_audioSampleRate, settings.m_inputFrequencyOffset);
+        m_channelizer.setChannelization(m_settings.m_ft8SampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
         if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
         {
-            m_sink.applyAudioSampleRate(m_audioSampleRate); // reapply when channel sample rate changes
+            m_sink.applyFT8SampleRate(m_settings.m_ft8SampleRate); // reapply when channel sample rate changes
             m_channelSampleRate = m_channelizer.getChannelSampleRate();
         }
     }
@@ -164,36 +161,27 @@ void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool forc
     {
         if (m_spectrumVis)
         {
-            DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
+            DSPSignalNotification *msg = new DSPSignalNotification(m_settings.m_ft8SampleRate/(1<<settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
             m_spectrumVis->getInputMessageQueue()->push(msg);
         }
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settings.m_ft8SampleRate != m_settings.m_ft8SampleRate) || force)
     {
-        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
-        audioDeviceManager->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        unsigned int audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+        m_sink.applyFT8SampleRate(settings.m_ft8SampleRate);
+        m_channelizer.setChannelization(settings.m_ft8SampleRate, settings.m_inputFrequencyOffset);
+        m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
-        if (m_audioSampleRate != audioSampleRate)
+        if (getMessageQueueToGUI())
         {
-            m_sink.applyAudioSampleRate(audioSampleRate);
-            m_channelizer.setChannelization(audioSampleRate, settings.m_inputFrequencyOffset);
-            m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
-            m_audioSampleRate = audioSampleRate;
+            DSPConfigureAudio *msg = new DSPConfigureAudio((int) settings.m_ft8SampleRate, DSPConfigureAudio::AudioOutput);
+            getMessageQueueToGUI()->push(msg);
+        }
 
-            if (getMessageQueueToGUI())
-            {
-                DSPConfigureAudio *msg = new DSPConfigureAudio((int) audioSampleRate, DSPConfigureAudio::AudioOutput);
-                getMessageQueueToGUI()->push(msg);
-            }
-
-            if (m_spectrumVis)
-            {
-                DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<m_settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
-                m_spectrumVis->getInputMessageQueue()->push(msg);
-            }
+        if (m_spectrumVis)
+        {
+            DSPSignalNotification *msg = new DSPSignalNotification(settings.m_ft8SampleRate/(1<<m_settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
+            m_spectrumVis->getInputMessageQueue()->push(msg);
         }
     }
 

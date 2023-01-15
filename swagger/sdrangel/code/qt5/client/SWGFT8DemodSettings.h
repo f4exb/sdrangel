@@ -66,17 +66,8 @@ public:
     float getVolume();
     void setVolume(float volume);
 
-    qint32 getAudioBinaural();
-    void setAudioBinaural(qint32 audio_binaural);
-
-    qint32 getAudioFlipChannels();
-    void setAudioFlipChannels(qint32 audio_flip_channels);
-
     qint32 getDsb();
     void setDsb(qint32 dsb);
-
-    qint32 getAudioMute();
-    void setAudioMute(qint32 audio_mute);
 
     qint32 getAgc();
     void setAgc(qint32 agc);
@@ -99,8 +90,8 @@ public:
     QString* getTitle();
     void setTitle(QString* title);
 
-    QString* getAudioDeviceName();
-    void setAudioDeviceName(QString* audio_device_name);
+    qint32 getFt8SampleRate();
+    void setFt8SampleRate(qint32 ft8_sample_rate);
 
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
@@ -154,17 +145,8 @@ private:
     float volume;
     bool m_volume_isSet;
 
-    qint32 audio_binaural;
-    bool m_audio_binaural_isSet;
-
-    qint32 audio_flip_channels;
-    bool m_audio_flip_channels_isSet;
-
     qint32 dsb;
     bool m_dsb_isSet;
-
-    qint32 audio_mute;
-    bool m_audio_mute_isSet;
 
     qint32 agc;
     bool m_agc_isSet;
@@ -187,8 +169,8 @@ private:
     QString* title;
     bool m_title_isSet;
 
-    QString* audio_device_name;
-    bool m_audio_device_name_isSet;
+    qint32 ft8_sample_rate;
+    bool m_ft8_sample_rate_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;

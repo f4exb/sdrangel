@@ -68,7 +68,6 @@ public:
 	void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumVis = spectrumSink; m_sink.setSpectrumSink(spectrumSink); }
     double getMagSq() const { return m_sink.getMagSq(); }
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
-    unsigned int getAudioSampleRate() const { return m_audioSampleRate; }
     bool getAudioActive() const { return m_sink.getAudioActive(); }
     void setBasebandSampleRate(int sampleRate);
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
@@ -82,7 +81,6 @@ private:
     FT8DemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     FT8DemodSettings m_settings;
-    unsigned int m_audioSampleRate;
     int m_channelSampleRate;
     MessageQueue *m_messageQueueToGUI;
     SpectrumVis *m_spectrumVis;

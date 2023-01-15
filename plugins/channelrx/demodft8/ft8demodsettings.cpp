@@ -41,10 +41,7 @@ FT8DemodSettings::FT8DemodSettings() :
 
 void FT8DemodSettings::resetToDefaults()
 {
-    m_audioBinaural = false;
-    m_audioFlipChannels = false;
     m_dsb = false;
-    m_audioMute = false;
     m_agc = false;
     m_agcClamping = false;
     m_agcPowerThreshold = -100;
@@ -52,9 +49,9 @@ void FT8DemodSettings::resetToDefaults()
     m_agcTimeLog2 = 7;
     m_volume = 1.0;
     m_inputFrequencyOffset = 0;
-    m_rgbColor = QColor(0, 255, 0).rgb();
+    m_rgbColor = QColor(0, 192, 255).rgb();
     m_title = "FT8 Demodulator";
-    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_ft8SampleRate = 12000;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -77,8 +74,6 @@ QByteArray FT8DemodSettings::serialize() const
     }
 
     s.writeU32(5, m_rgbColor);
-    s.writeBool(8, m_audioBinaural);
-    s.writeBool(9, m_audioFlipChannels);
     s.writeBool(10, m_dsb);
     s.writeBool(11, m_agc);
     s.writeS32(12, m_agcTimeLog2);
@@ -86,7 +81,7 @@ QByteArray FT8DemodSettings::serialize() const
     s.writeS32(14, m_agcThresholdGate);
     s.writeBool(15, m_agcClamping);
     s.writeString(16, m_title);
-    s.writeString(17, m_audioDeviceName);
+    s.writeS32(17, m_ft8SampleRate);
     s.writeBool(18, m_useReverseAPI);
     s.writeString(19, m_reverseAPIAddress);
     s.writeU32(20, m_reverseAPIPort);
@@ -142,8 +137,6 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         }
 
         d.readU32(5, &m_rgbColor);
-        d.readBool(8, &m_audioBinaural, false);
-        d.readBool(9, &m_audioFlipChannels, false);
         d.readBool(10, &m_dsb, false);
         d.readBool(11, &m_agc, false);
         d.readS32(12, &m_agcTimeLog2, 7);
@@ -151,7 +144,7 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         d.readS32(14, &m_agcThresholdGate, 4);
         d.readBool(15, &m_agcClamping, false);
         d.readString(16, &m_title, "SSB Demodulator");
-        d.readString(17, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
+        d.readS32(17, &m_ft8SampleRate, 12000);
         d.readBool(18, &m_useReverseAPI, false);
         d.readString(19, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(20, &utmp, 0);

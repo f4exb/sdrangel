@@ -96,15 +96,6 @@ bool FT8DemodGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
-    else if (DSPConfigureAudio::match(message))
-    {
-        qDebug("FT8DemodGUI::handleMessage: DSPConfigureAudio: %d", m_ft8Demod->getAudioSampleRate());
-        applyBandwidths(1 + ui->spanLog2->maximum() - ui->spanLog2->value()); // will update spectrum details with new sample rate
-        blockApplySettings(true);
-        displaySettings();
-        blockApplySettings(false);
-        return true;
-    }
     else if (DSPSignalNotification::match(message))
     {
         const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
@@ -144,20 +135,6 @@ void FT8DemodGUI::channelMarkerChangedByCursor()
 void FT8DemodGUI::channelMarkerHighlightedByCursor()
 {
     setHighlighted(m_channelMarker.getHighlighted());
-}
-
-void FT8DemodGUI::on_audioBinaural_toggled(bool binaural)
-{
-	m_audioBinaural = binaural;
-	m_settings.m_audioBinaural = binaural;
-	applySettings();
-}
-
-void FT8DemodGUI::on_audioFlipChannels_toggled(bool flip)
-{
-	m_audioFlipChannels = flip;
-	m_settings.m_audioFlipChannels = flip;
-	applySettings();
 }
 
 void FT8DemodGUI::on_dsb_toggled(bool dsb)
@@ -228,13 +205,6 @@ void FT8DemodGUI::on_agcThresholdGate_valueChanged(int value)
     ui->agcThresholdGateText->setText(s);
     m_settings.m_agcThresholdGate = agcThresholdGate;
     applySettings();
-}
-
-void FT8DemodGUI::on_audioMute_toggled(bool checked)
-{
-	m_audioMute = checked;
-	m_settings.m_audioMute = checked;
-	applySettings();
 }
 
 void FT8DemodGUI::on_spanLog2_valueChanged(int value)
@@ -366,9 +336,6 @@ FT8DemodGUI::FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 	m_ft8Demod->setMessageQueueToGUI(getInputMessageQueue());
 
-    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
-    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
-
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
@@ -443,7 +410,7 @@ void FT8DemodGUI::applySettings(bool force)
 unsigned int FT8DemodGUI::spanLog2Max()
 {
     unsigned int spanLog2 = 0;
-    for (; m_ft8Demod->getAudioSampleRate() / (1<<spanLog2) >= 1000; spanLog2++);
+    for (; m_settings.m_ft8SampleRate / (1<<spanLog2) >= 1000; spanLog2++);
     return spanLog2 == 0 ? 0 : spanLog2-1;
 }
 
@@ -455,10 +422,10 @@ void FT8DemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     ui->spanLog2->setMaximum(limit);
     bool dsb = ui->dsb->isChecked();
     //int spanLog2 = ui->spanLog2->value();
-    m_spectrumRate = m_ft8Demod->getAudioSampleRate() / (1<<spanLog2);
+    m_spectrumRate = m_settings.m_ft8SampleRate / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
-    int bwMax = m_ft8Demod->getAudioSampleRate() / (100*(1<<spanLog2));
+    int bwMax = m_settings.m_ft8SampleRate / (100*(1<<spanLog2));
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
@@ -598,9 +565,6 @@ void FT8DemodGUI::displaySettings()
 
     ui->agc->setChecked(m_settings.m_agc);
     ui->agcClamping->setChecked(m_settings.m_agcClamping);
-    ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
-    ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
-    ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     ui->fftWindow->setCurrentIndex((int) m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
 
@@ -692,20 +656,6 @@ void FT8DemodGUI::enterEvent(EnterEventType* event)
     ChannelGUI::enterEvent(event);
 }
 
-void FT8DemodGUI::audioSelect(const QPoint& p)
-{
-    qDebug("FT8DemodGUI::audioSelect");
-    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
-    audioSelect.move(p);
-    audioSelect.exec();
-
-    if (audioSelect.m_selected)
-    {
-        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
-    }
-}
-
 void FT8DemodGUI::tick()
 {
     double magsqAvg, magsqPeak;
@@ -723,31 +673,12 @@ void FT8DemodGUI::tick()
         ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
     }
 
-    int audioSampleRate = m_ft8Demod->getAudioSampleRate();
-    bool squelchOpen = m_ft8Demod->getAudioActive();
-
-    if ((audioSampleRate != m_audioSampleRate) || (squelchOpen != m_squelchOpen))
-    {
-        if (audioSampleRate < 0) {
-            ui->audioMute->setStyleSheet("QToolButton { background-color : red; }");
-        } else if (squelchOpen) {
-            ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
-        } else {
-            ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        }
-
-        m_audioSampleRate = audioSampleRate;
-		m_squelchOpen = squelchOpen;
-    }
-
     m_tickCount++;
 }
 
 void FT8DemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &FT8DemodGUI::on_deltaFrequency_changed);
-    QObject::connect(ui->audioBinaural, &QToolButton::toggled, this, &FT8DemodGUI::on_audioBinaural_toggled);
-    QObject::connect(ui->audioFlipChannels, &QToolButton::toggled, this, &FT8DemodGUI::on_audioFlipChannels_toggled);
     QObject::connect(ui->dsb, &QToolButton::toggled, this, &FT8DemodGUI::on_dsb_toggled);
     QObject::connect(ui->BW, &TickedSlider::valueChanged, this, &FT8DemodGUI::on_BW_valueChanged);
     QObject::connect(ui->lowCut, &TickedSlider::valueChanged, this, &FT8DemodGUI::on_lowCut_valueChanged);
@@ -757,7 +688,6 @@ void FT8DemodGUI::makeUIConnections()
     QObject::connect(ui->agcTimeLog2, &QDial::valueChanged, this, &FT8DemodGUI::on_agcTimeLog2_valueChanged);
     QObject::connect(ui->agcPowerThreshold, &QDial::valueChanged, this, &FT8DemodGUI::on_agcPowerThreshold_valueChanged);
     QObject::connect(ui->agcThresholdGate, &QDial::valueChanged, this, &FT8DemodGUI::on_agcThresholdGate_valueChanged);
-    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &FT8DemodGUI::on_audioMute_toggled);
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &FT8DemodGUI::on_spanLog2_valueChanged);
     QObject::connect(ui->flipSidebands, &QPushButton::clicked, this, &FT8DemodGUI::on_flipSidebands_clicked);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FT8DemodGUI::on_fftWindow_currentIndexChanged);

@@ -43,7 +43,7 @@ public:
 	void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; }
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const FT8DemodSettings& settings, bool force = false);
-    void applyAudioSampleRate(int sampleRate);
+    void applyFT8SampleRate(int sampleRate);
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
     double getMagSq() const { return m_magsq; }
@@ -91,11 +91,8 @@ private:
 	int m_undersampleCount;
 	int m_channelSampleRate;
 	int m_channelFrequencyOffset;
-	bool m_audioBinaual;
-	bool m_audioFlipChannels;
 	bool m_usb;
 	bool m_dsb;
-	bool m_audioMute;
 	double m_magsq;
 	double m_magsqSum;
 	double m_magsqPeak;
@@ -123,7 +120,7 @@ private:
 	AudioVector m_audioBuffer;
 	uint m_audioBufferFill;
 	AudioFifo m_audioFifo;
-	quint32 m_audioSampleRate;
+	quint32 m_ft8SampleRate;
 
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;

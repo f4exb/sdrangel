@@ -37,10 +37,7 @@ const int FT8DemodSink::m_ssbFftLen = 1024;
 const int FT8DemodSink::m_agcTarget = 3276; // 32768/10 -10 dB amplitude => -20 dB power: center of normal signal
 
 FT8DemodSink::FT8DemodSink() :
-        m_audioBinaual(false),
-        m_audioFlipChannels(false),
         m_dsb(false),
-        m_audioMute(false),
         m_agc(12000, m_agcTarget, 1e-2),
         m_agcActive(false),
         m_agcClamping(false),
@@ -51,7 +48,7 @@ FT8DemodSink::FT8DemodSink() :
         m_audioActive(false),
         m_spectrumSink(nullptr),
         m_audioFifo(24000),
-        m_audioSampleRate(48000)
+        m_ft8SampleRate(12000)
 {
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;
@@ -77,8 +74,8 @@ FT8DemodSink::FT8DemodSink() :
 	m_agc.setClampMax(SDR_RX_SCALED/100.0);
 	m_agc.setClamping(m_agcClamping);
 
-	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, m_ssbFftLen);
-	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
+	SSBFilter = new fftfilt(m_LowCutoff / m_ft8SampleRate, m_Bandwidth / m_ft8SampleRate, m_ssbFftLen);
+	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_ft8SampleRate, 2 * m_ssbFftLen);
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -175,66 +172,39 @@ void FT8DemodSink::processOneSample(Complex &ci)
         m_audioActive = delayedSample.real() != 0.0;
         m_squelchDelayLine.write(sideband[i]*agcVal);
 
-        if (m_audioMute)
+        fftfilt::cmplx z = m_agcActive ? delayedSample * m_agc.getStepValue() : delayedSample;
+
+        Real demod = (z.real() + z.imag()) * 0.7;
+        qint16 sample = (qint16)(demod * m_volume);
+        m_audioBuffer[m_audioBufferFill].l = sample;
+        m_audioBuffer[m_audioBufferFill].r = sample;
+        m_demodBuffer[m_demodBufferFill++] = (z.real() + z.imag()) * 0.7;
+
+        if (m_demodBufferFill >= m_demodBuffer.size())
         {
-            m_audioBuffer[m_audioBufferFill].r = 0;
-            m_audioBuffer[m_audioBufferFill].l = 0;
-        }
-        else
-        {
-            fftfilt::cmplx z = m_agcActive ? delayedSample * m_agc.getStepValue() : delayedSample;
+            QList<ObjectPipe*> dataPipes;
+            MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
 
-            if (m_audioBinaual)
+            if (dataPipes.size() > 0)
             {
-                if (m_audioFlipChannels)
+                QList<ObjectPipe*>::iterator it = dataPipes.begin();
+
+                for (; it != dataPipes.end(); ++it)
                 {
-                    m_audioBuffer[m_audioBufferFill].r = (qint16)(z.imag() * m_volume);
-                    m_audioBuffer[m_audioBufferFill].l = (qint16)(z.real() * m_volume);
-                }
-                else
-                {
-                    m_audioBuffer[m_audioBufferFill].r = (qint16)(z.real() * m_volume);
-                    m_audioBuffer[m_audioBufferFill].l = (qint16)(z.imag() * m_volume);
-                }
+                    DataFifo *fifo = qobject_cast<DataFifo*>((*it)->m_element);
 
-                m_demodBuffer[m_demodBufferFill++] = z.real();
-                m_demodBuffer[m_demodBufferFill++] = z.imag();
-            }
-            else
-            {
-                Real demod = (z.real() + z.imag()) * 0.7;
-                qint16 sample = (qint16)(demod * m_volume);
-                m_audioBuffer[m_audioBufferFill].l = sample;
-                m_audioBuffer[m_audioBufferFill].r = sample;
-                m_demodBuffer[m_demodBufferFill++] = (z.real() + z.imag()) * 0.7;
-            }
-
-            if (m_demodBufferFill >= m_demodBuffer.size())
-            {
-                QList<ObjectPipe*> dataPipes;
-                MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
-
-                if (dataPipes.size() > 0)
-                {
-                    QList<ObjectPipe*>::iterator it = dataPipes.begin();
-
-                    for (; it != dataPipes.end(); ++it)
+                    if (fifo)
                     {
-                        DataFifo *fifo = qobject_cast<DataFifo*>((*it)->m_element);
-
-                        if (fifo)
-                        {
-                            fifo->write(
-                                (quint8*) &m_demodBuffer[0],
-                                m_demodBuffer.size() * sizeof(qint16),
-                                m_audioBinaual ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
-                            );
-                        }
+                        fifo->write(
+                            (quint8*) &m_demodBuffer[0],
+                            m_demodBuffer.size() * sizeof(qint16),
+                            DataFifo::DataTypeI16
+                        );
                     }
                 }
-
-                m_demodBufferFill = 0;
             }
+
+            m_demodBufferFill = 0;
         }
 
         ++m_audioBufferFill;
@@ -275,16 +245,16 @@ void FT8DemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
         Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > channelSampleRate ? channelSampleRate : (m_Bandwidth * 1.5f);
         m_interpolator.create(16, channelSampleRate, interpolatorBandwidth, 2.0f);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) channelSampleRate / (Real) m_audioSampleRate;
+        m_interpolatorDistance = (Real) channelSampleRate / (Real) m_ft8SampleRate;
     }
 
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void FT8DemodSink::applyAudioSampleRate(int sampleRate)
+void FT8DemodSink::applyFT8SampleRate(int sampleRate)
 {
-    qDebug("FT8DemodSink::applyAudioSampleRate: %d", sampleRate);
+    qDebug("FT8DemodSink::applyFT8SampleRate: %d", sampleRate);
 
     Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > m_channelSampleRate ? m_channelSampleRate : (m_Bandwidth * 1.5f);
     m_interpolator.create(16, m_channelSampleRate, interpolatorBandwidth, 2.0f);
@@ -311,7 +281,7 @@ void FT8DemodSink::applyAudioSampleRate(int sampleRate)
     }
 
     m_audioFifo.setSize(sampleRate);
-    m_audioSampleRate = sampleRate;
+    m_ft8SampleRate = sampleRate;
 
 
     QList<ObjectPipe*> pipes;
@@ -342,16 +312,13 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
             << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
             << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
-            << " m_audioBinaual: " << settings.m_audioBinaural
-            << " m_audioFlipChannels: " << settings.m_audioFlipChannels
             << " m_dsb: " << settings.m_dsb
-            << " m_audioMute: " << settings.m_audioMute
             << " m_agcActive: " << settings.m_agc
             << " m_agcClamping: " << settings.m_agcClamping
             << " m_agcTimeLog2: " << settings.m_agcTimeLog2
             << " agcPowerThreshold: " << settings.m_agcPowerThreshold
             << " agcThresholdGate: " << settings.m_agcThresholdGate
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_ft8SampleRate: " << settings.m_ft8SampleRate
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -389,9 +356,9 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
         Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > m_channelSampleRate ? m_channelSampleRate : (m_Bandwidth * 1.5f);
         m_interpolator.create(16, m_channelSampleRate, interpolatorBandwidth, 2.0f);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_audioSampleRate;
-        SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
-        DSBFilter->create_dsb_filter(m_Bandwidth / (float) m_audioSampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
+        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_ft8SampleRate;
+        SSBFilter->create_filter(m_LowCutoff / (float) m_ft8SampleRate, m_Bandwidth / (float) m_ft8SampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
+        DSBFilter->create_dsb_filter(m_Bandwidth / (float) m_ft8SampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
     }
 
     if ((m_settings.m_volume != settings.m_volume) || force)
@@ -405,10 +372,10 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
         (m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) ||
         (m_settings.m_agcClamping != settings.m_agcClamping) || force)
     {
-        int agcNbSamples = (m_audioSampleRate / 1000) * (1<<settings.m_agcTimeLog2);
+        int agcNbSamples = (m_ft8SampleRate / 1000) * (1<<settings.m_agcTimeLog2);
         m_agc.setThresholdEnable(settings.m_agcPowerThreshold != -FT8DemodSettings::m_minPowerThresholdDB);
         double agcPowerThreshold = CalcDb::powerFromdB(settings.m_agcPowerThreshold) * (SDR_RX_SCALED*SDR_RX_SCALED);
-        int agcThresholdGate = (m_audioSampleRate / 1000) * settings.m_agcThresholdGate; // ms
+        int agcThresholdGate = (m_ft8SampleRate / 1000) * settings.m_agcThresholdGate; // ms
         bool agcClamping = settings.m_agcClamping;
 
         if (m_agcNbSamples != agcNbSamples)
@@ -444,10 +411,7 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
     }
 
     m_spanLog2 = settings.m_filterBank[settings.m_filterIndex].m_spanLog2;
-    m_audioBinaual = settings.m_audioBinaural;
-    m_audioFlipChannels = settings.m_audioFlipChannels;
     m_dsb = settings.m_dsb;
-    m_audioMute = settings.m_audioMute;
     m_agcActive = settings.m_agc;
     m_settings = settings;
 }

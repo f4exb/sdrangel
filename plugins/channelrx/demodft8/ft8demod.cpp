@@ -241,16 +241,13 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
             << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
             << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
-            << " m_audioBinaual: " << settings.m_audioBinaural
-            << " m_audioFlipChannels: " << settings.m_audioFlipChannels
             << " m_dsb: " << settings.m_dsb
-            << " m_audioMute: " << settings.m_audioMute
             << " m_agcActive: " << settings.m_agc
             << " m_agcClamping: " << settings.m_agcClamping
             << " m_agcTimeLog2: " << settings.m_agcTimeLog2
             << " agcPowerThreshold: " << settings.m_agcPowerThreshold
             << " agcThresholdGate: " << settings.m_agcThresholdGate
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_ft8SampleRate: " << settings.m_ft8SampleRate
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -294,20 +291,11 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
     if ((m_settings.m_agcClamping != settings.m_agcClamping) || force) {
         reverseAPIKeys.append("agcClamping");
     }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-    if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
-        reverseAPIKeys.append("audioBinaural");
-    }
-    if ((m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force) {
-        reverseAPIKeys.append("audioFlipChannels");
+    if ((settings.m_ft8SampleRate != m_settings.m_ft8SampleRate) || force) {
+        reverseAPIKeys.append("ft8SampleRate");
     }
     if ((m_settings.m_dsb != settings.m_dsb) || force) {
         reverseAPIKeys.append("dsb");
-    }
-    if ((m_settings.m_audioMute != settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
     }
     if ((m_settings.m_agc != settings.m_agc) || force) {
         reverseAPIKeys.append("agc");
@@ -400,7 +388,7 @@ void FT8Demod::sendSampleRateToDemodAnalyzer()
             {
                 MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
                     this,
-                    getAudioSampleRate()
+                    m_settings.m_ft8SampleRate
                 );
                 messageQueue->push(msg);
             }
@@ -479,17 +467,8 @@ void FT8Demod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getFt8DemodSettings()->getVolume();
     }
-    if (channelSettingsKeys.contains("audioBinaural")) {
-        settings.m_audioBinaural = response.getFt8DemodSettings()->getAudioBinaural() != 0;
-    }
-    if (channelSettingsKeys.contains("audioFlipChannels")) {
-        settings.m_audioFlipChannels = response.getFt8DemodSettings()->getAudioFlipChannels() != 0;
-    }
     if (channelSettingsKeys.contains("dsb")) {
         settings.m_dsb = response.getFt8DemodSettings()->getDsb() != 0;
-    }
-    if (channelSettingsKeys.contains("audioMute")) {
-        settings.m_audioMute = response.getFt8DemodSettings()->getAudioMute() != 0;
     }
     if (channelSettingsKeys.contains("agc")) {
         settings.m_agc = response.getFt8DemodSettings()->getAgc() != 0;
@@ -513,7 +492,7 @@ void FT8Demod::webapiUpdateChannelSettings(
         settings.m_title = *response.getFt8DemodSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("audioDeviceName")) {
-        settings.m_audioDeviceName = *response.getFt8DemodSettings()->getAudioDeviceName();
+        settings.m_ft8SampleRate = response.getFt8DemodSettings()->getFt8SampleRate();
     }
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getFt8DemodSettings()->getStreamIndex();
@@ -557,7 +536,6 @@ int FT8Demod::webapiReportGet(
 
 void FT8Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FT8DemodSettings& settings)
 {
-    response.getFt8DemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getFt8DemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getFt8DemodSettings()->setFilterIndex(settings.m_filterIndex);
     response.getFt8DemodSettings()->setSpanLog2(settings.m_filterBank[settings.m_filterIndex].m_spanLog2);
@@ -565,27 +543,19 @@ void FT8Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getFt8DemodSettings()->setLowCutoff(settings.m_filterBank[settings.m_filterIndex].m_lowCutoff);
     response.getFt8DemodSettings()->setFftWindow((int) settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
     response.getFt8DemodSettings()->setVolume(settings.m_volume);
-    response.getFt8DemodSettings()->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);
-    response.getFt8DemodSettings()->setAudioFlipChannels(settings.m_audioFlipChannels ? 1 : 0);
     response.getFt8DemodSettings()->setDsb(settings.m_dsb ? 1 : 0);
-    response.getFt8DemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getFt8DemodSettings()->setAgc(settings.m_agc ? 1 : 0);
     response.getFt8DemodSettings()->setAgcClamping(settings.m_agcClamping ? 1 : 0);
     response.getFt8DemodSettings()->setAgcTimeLog2(settings.m_agcTimeLog2);
     response.getFt8DemodSettings()->setAgcPowerThreshold(settings.m_agcPowerThreshold);
     response.getFt8DemodSettings()->setAgcThresholdGate(settings.m_agcThresholdGate);
     response.getFt8DemodSettings()->setRgbColor(settings.m_rgbColor);
+    response.getFt8DemodSettings()->setFt8SampleRate(settings.m_ft8SampleRate);
 
     if (response.getFt8DemodSettings()->getTitle()) {
         *response.getFt8DemodSettings()->getTitle() = settings.m_title;
     } else {
         response.getFt8DemodSettings()->setTitle(new QString(settings.m_title));
-    }
-
-    if (response.getFt8DemodSettings()->getAudioDeviceName()) {
-        *response.getFt8DemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
-    } else {
-        response.getFt8DemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
 
     response.getFt8DemodSettings()->setStreamIndex(settings.m_streamIndex);
@@ -655,7 +625,6 @@ void FT8Demod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     if (m_running)
     {
         response.getFt8DemodReport()->setSquelch(m_basebandSink->getAudioActive() ? 1 : 0);
-        response.getFt8DemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
         response.getFt8DemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
     }
 }
@@ -749,17 +718,8 @@ void FT8Demod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("volume") || force) {
         swgFT8DemodSettings->setVolume(settings.m_volume);
     }
-    if (channelSettingsKeys.contains("audioBinaural") || force) {
-        swgFT8DemodSettings->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("audioFlipChannels") || force) {
-        swgFT8DemodSettings->setAudioFlipChannels(settings.m_audioFlipChannels ? 1 : 0);
-    }
     if (channelSettingsKeys.contains("dsb") || force) {
         swgFT8DemodSettings->setDsb(settings.m_dsb ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("audioMute") || force) {
-        swgFT8DemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
     }
     if (channelSettingsKeys.contains("agc") || force) {
         swgFT8DemodSettings->setAgc(settings.m_agc ? 1 : 0);
@@ -783,7 +743,7 @@ void FT8Demod::webapiFormatChannelSettings(
         swgFT8DemodSettings->setTitle(new QString(settings.m_title));
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgFT8DemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        swgFT8DemodSettings->setFt8SampleRate(settings.m_ft8SampleRate);
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFT8DemodSettings->setStreamIndex(settings.m_streamIndex);

@@ -170,42 +170,6 @@
       <item>
        <layout class="QHBoxLayout" name="audioOptionsLayout">
         <item>
-         <widget class="QToolButton" name="audioBinaural">
-          <property name="toolTip">
-           <string>Toggle btw Mono and Binaural I/Q audio</string>
-          </property>
-          <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../../../sdrgui/resources/res.qrc">
-            <normaloff>:/mono.png</normaloff>
-            <normalon>:/stereo.png</normalon>:/mono.png</iconset>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="audioFlipChannels">
-          <property name="toolTip">
-           <string>Flip left/right audio channels</string>
-          </property>
-          <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../../../sdrgui/resources/res.qrc">
-            <normaloff>:/flip_lr.png</normaloff>
-            <normalon>:/flip_rl.png</normalon>:/flip_lr.png</iconset>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="Line" name="line_4">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -1009,24 +973,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item>
-       <widget class="QToolButton" name="audioMute">
-        <property name="toolTip">
-         <string>Mute/Unmute audio</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/sound_on.png</normaloff>
-          <normalon>:/sound_off.png</normalon>:/sound_on.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
       </item>
      </layout>
     </item>

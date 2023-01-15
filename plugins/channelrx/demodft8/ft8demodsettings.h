@@ -47,10 +47,7 @@ struct FT8DemodSettings
     // Real m_lowCutoff;
     Real m_volume;
     // int  m_spanLog2;
-    bool m_audioBinaural;
-    bool m_audioFlipChannels;
     bool m_dsb;
-    bool m_audioMute;
     bool m_agc;
     bool m_agcClamping;
     int  m_agcTimeLog2;
@@ -58,7 +55,7 @@ struct FT8DemodSettings
     int  m_agcThresholdGate;
     quint32 m_rgbColor;
     QString m_title;
-    QString m_audioDeviceName;
+    int m_ft8SampleRate;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

@@ -32,8 +32,6 @@ SWGFT8DemodReport::SWGFT8DemodReport() {
     m_channel_power_db_isSet = false;
     squelch = 0;
     m_squelch_isSet = false;
-    audio_sample_rate = 0;
-    m_audio_sample_rate_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
 }
@@ -48,15 +46,12 @@ SWGFT8DemodReport::init() {
     m_channel_power_db_isSet = false;
     squelch = 0;
     m_squelch_isSet = false;
-    audio_sample_rate = 0;
-    m_audio_sample_rate_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
 }
 
 void
 SWGFT8DemodReport::cleanup() {
-
 
 
 
@@ -76,8 +71,6 @@ SWGFT8DemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_power_db, pJson["channelPowerDB"], "float", "");
     
     ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&audio_sample_rate, pJson["audioSampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&channel_sample_rate, pJson["channelSampleRate"], "qint32", "");
     
@@ -102,9 +95,6 @@ SWGFT8DemodReport::asJsonObject() {
     }
     if(m_squelch_isSet){
         obj->insert("squelch", QJsonValue(squelch));
-    }
-    if(m_audio_sample_rate_isSet){
-        obj->insert("audioSampleRate", QJsonValue(audio_sample_rate));
     }
     if(m_channel_sample_rate_isSet){
         obj->insert("channelSampleRate", QJsonValue(channel_sample_rate));
@@ -134,16 +124,6 @@ SWGFT8DemodReport::setSquelch(qint32 squelch) {
 }
 
 qint32
-SWGFT8DemodReport::getAudioSampleRate() {
-    return audio_sample_rate;
-}
-void
-SWGFT8DemodReport::setAudioSampleRate(qint32 audio_sample_rate) {
-    this->audio_sample_rate = audio_sample_rate;
-    this->m_audio_sample_rate_isSet = true;
-}
-
-qint32
 SWGFT8DemodReport::getChannelSampleRate() {
     return channel_sample_rate;
 }
@@ -162,9 +142,6 @@ SWGFT8DemodReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_squelch_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_audio_sample_rate_isSet){
             isObjectUpdated = true; break;
         }
         if(m_channel_sample_rate_isSet){

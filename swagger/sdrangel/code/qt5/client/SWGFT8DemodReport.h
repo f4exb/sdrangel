@@ -47,9 +47,6 @@ public:
     qint32 getSquelch();
     void setSquelch(qint32 squelch);
 
-    qint32 getAudioSampleRate();
-    void setAudioSampleRate(qint32 audio_sample_rate);
-
     qint32 getChannelSampleRate();
     void setChannelSampleRate(qint32 channel_sample_rate);
 
@@ -62,9 +59,6 @@ private:
 
     qint32 squelch;
     bool m_squelch_isSet;
-
-    qint32 audio_sample_rate;
-    bool m_audio_sample_rate_isSet;
 
     qint32 channel_sample_rate;
     bool m_channel_sample_rate_isSet;
