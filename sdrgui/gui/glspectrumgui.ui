@@ -1117,6 +1117,20 @@
       </widget>
      </item>
      <item>
+      <widget class="QToolButton" name="resetMeasurements">
+       <property name="toolTip">
+        <string>Reset measurements</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="ButtonSwitch" name="calibration">
        <property name="toolTip">
         <string>Left: toggle relative / calibrated power - Right: open calibration dialog</string>

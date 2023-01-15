@@ -129,6 +129,7 @@ private slots:
     void on_showAllControls_toggled(bool checked);
 
     void on_measure_clicked(bool checked);
+    void on_resetMeasurements_clicked(bool checked);
 
 	void handleInputMessages();
     void openWebsocketSpectrumSettingsDialog(const QPoint& p);
