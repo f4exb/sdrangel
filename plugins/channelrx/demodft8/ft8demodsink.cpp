@@ -39,11 +39,6 @@ const int FT8DemodSink::m_agcTarget = 3276; // 32768/10 -10 dB amplitude => -20 
 FT8DemodSink::FT8DemodSink() :
         m_agc(12000, m_agcTarget, 1e-2),
         m_agcActive(false),
-        m_agcClamping(false),
-        m_agcNbSamples(12000),
-        m_agcPowerThreshold(1e-2),
-        m_agcThresholdGate(0),
-        m_squelchDelayLine(2*48000),
         m_audioActive(false),
         m_spectrumSink(nullptr),
         m_audioFifo(24000),
@@ -70,8 +65,8 @@ FT8DemodSink::FT8DemodSink() :
 	m_magsqPeak = 0.0f;
 	m_magsqCount = 0;
 
-	m_agc.setClampMax(SDR_RX_SCALED/100.0);
-	m_agc.setClamping(m_agcClamping);
+    m_agc.setThresholdEnable(false); // no squelch
+	m_agc.setClamping(false); // no clamping
 
 	SSBFilter = new fftfilt(m_LowCutoff / m_ft8SampleRate, m_Bandwidth / m_ft8SampleRate, m_ssbFftLen);
 
@@ -152,17 +147,14 @@ void FT8DemodSink::processOneSample(Complex &ci)
         }
 
         float agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 0.1;
-        fftfilt::cmplx& delayedSample = m_squelchDelayLine.readBack(m_agc.getStepDownDelay());
-        m_audioActive = delayedSample.real() != 0.0;
-        m_squelchDelayLine.write(sideband[i]*agcVal);
-
-        fftfilt::cmplx z = m_agcActive ? delayedSample * m_agc.getStepValue() : delayedSample;
+        fftfilt::cmplx z = sideband[i]*agcVal;
+        m_audioActive = z.real() != 0.0;
 
         Real demod = (z.real() + z.imag()) * 0.7;
         qint16 sample = (qint16)(demod * m_volume);
         m_audioBuffer[m_audioBufferFill].l = sample;
         m_audioBuffer[m_audioBufferFill].r = sample;
-        m_demodBuffer[m_demodBufferFill++] = (z.real() + z.imag()) * 0.7;
+        m_demodBuffer[m_demodBufferFill++] = sample;
 
         if (m_demodBufferFill >= m_demodBuffer.size())
         {
@@ -195,11 +187,11 @@ void FT8DemodSink::processOneSample(Complex &ci)
 
         if (m_audioBufferFill >= m_audioBuffer.size())
         {
-            uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+            // uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
-            if (res != m_audioBufferFill) {
-                qDebug("FT8DemodSink::processOneSample: %u/%u samples written", res, m_audioBufferFill);
-            }
+            // if (res != m_audioBufferFill) {
+            //     qDebug("FT8DemodSink::processOneSample: %u/%u samples written", res, m_audioBufferFill);
+            // }
 
             m_audioBufferFill = 0;
         }
@@ -247,25 +239,8 @@ void FT8DemodSink::applyFT8SampleRate(int sampleRate)
 
     SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
 
-    int agcNbSamples = (sampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
-    int agcThresholdGate = (sampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
-
-    if (m_agcNbSamples != agcNbSamples)
-    {
-        m_agc.resize(agcNbSamples, agcNbSamples/2, m_agcTarget);
-        m_agc.setStepDownDelay(agcNbSamples);
-        m_agcNbSamples = agcNbSamples;
-    }
-
-    if (m_agcThresholdGate != agcThresholdGate)
-    {
-        m_agc.setGate(agcThresholdGate);
-        m_agcThresholdGate = agcThresholdGate;
-    }
-
     m_audioFifo.setSize(sampleRate);
     m_ft8SampleRate = sampleRate;
-
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);
@@ -296,10 +271,6 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
             << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
             << " m_agcActive: " << settings.m_agc
-            << " m_agcClamping: " << settings.m_agcClamping
-            << " m_agcTimeLog2: " << settings.m_agcTimeLog2
-            << " agcPowerThreshold: " << settings.m_agcPowerThreshold
-            << " agcThresholdGate: " << settings.m_agcThresholdGate
             << " m_ft8SampleRate: " << settings.m_ft8SampleRate
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
@@ -346,49 +317,6 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
     {
         m_volume = settings.m_volume;
         m_volume /= 4.0; // for 3276.8
-    }
-
-    if ((m_settings.m_agcTimeLog2 != settings.m_agcTimeLog2) ||
-        (m_settings.m_agcPowerThreshold != settings.m_agcPowerThreshold) ||
-        (m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) ||
-        (m_settings.m_agcClamping != settings.m_agcClamping) || force)
-    {
-        int agcNbSamples = (m_ft8SampleRate / 1000) * (1<<settings.m_agcTimeLog2);
-        m_agc.setThresholdEnable(settings.m_agcPowerThreshold != -FT8DemodSettings::m_minPowerThresholdDB);
-        double agcPowerThreshold = CalcDb::powerFromdB(settings.m_agcPowerThreshold) * (SDR_RX_SCALED*SDR_RX_SCALED);
-        int agcThresholdGate = (m_ft8SampleRate / 1000) * settings.m_agcThresholdGate; // ms
-        bool agcClamping = settings.m_agcClamping;
-
-        if (m_agcNbSamples != agcNbSamples)
-        {
-            m_agc.resize(agcNbSamples, agcNbSamples/2, m_agcTarget);
-            m_agc.setStepDownDelay(agcNbSamples);
-            m_agcNbSamples = agcNbSamples;
-        }
-
-        if (m_agcPowerThreshold != agcPowerThreshold)
-        {
-            m_agc.setThreshold(agcPowerThreshold);
-            m_agcPowerThreshold = agcPowerThreshold;
-        }
-
-        if (m_agcThresholdGate != agcThresholdGate)
-        {
-            m_agc.setGate(agcThresholdGate);
-            m_agcThresholdGate = agcThresholdGate;
-        }
-
-        if (m_agcClamping != agcClamping)
-        {
-            m_agc.setClamping(agcClamping);
-            m_agcClamping = agcClamping;
-        }
-
-        qDebug() << "FT8DemodSink::applySettings: AGC:"
-            << " agcNbSamples: " << agcNbSamples
-            << " agcPowerThreshold: " << agcPowerThreshold
-            << " agcThresholdGate: " << agcThresholdGate
-            << " agcClamping: " << agcClamping;
     }
 
     m_spanLog2 = settings.m_filterBank[settings.m_filterIndex].m_spanLog2;

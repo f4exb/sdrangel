@@ -242,10 +242,6 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
             << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
             << " m_agcActive: " << settings.m_agc
-            << " m_agcClamping: " << settings.m_agcClamping
-            << " m_agcTimeLog2: " << settings.m_agcTimeLog2
-            << " agcPowerThreshold: " << settings.m_agcPowerThreshold
-            << " agcThresholdGate: " << settings.m_agcThresholdGate
             << " m_ft8SampleRate: " << settings.m_ft8SampleRate
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
@@ -277,18 +273,6 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
     }
     if ((m_settings.m_volume != settings.m_volume) || force) {
         reverseAPIKeys.append("volume");
-    }
-    if ((m_settings.m_agcTimeLog2 != settings.m_agcTimeLog2) || force) {
-        reverseAPIKeys.append("agcTimeLog2");
-    }
-    if ((m_settings.m_agcPowerThreshold != settings.m_agcPowerThreshold) || force) {
-        reverseAPIKeys.append("agcPowerThreshold");
-    }
-    if ((m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) || force) {
-        reverseAPIKeys.append("agcThresholdGate");
-    }
-    if ((m_settings.m_agcClamping != settings.m_agcClamping) || force) {
-        reverseAPIKeys.append("agcClamping");
     }
     if ((settings.m_ft8SampleRate != m_settings.m_ft8SampleRate) || force) {
         reverseAPIKeys.append("ft8SampleRate");
@@ -464,18 +448,6 @@ void FT8Demod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("agc")) {
         settings.m_agc = response.getFt8DemodSettings()->getAgc() != 0;
     }
-    if (channelSettingsKeys.contains("agcClamping")) {
-        settings.m_agcClamping = response.getFt8DemodSettings()->getAgcClamping() != 0;
-    }
-    if (channelSettingsKeys.contains("agcTimeLog2")) {
-        settings.m_agcTimeLog2 = response.getFt8DemodSettings()->getAgcTimeLog2();
-    }
-    if (channelSettingsKeys.contains("agcPowerThreshold")) {
-        settings.m_agcPowerThreshold = response.getFt8DemodSettings()->getAgcPowerThreshold();
-    }
-    if (channelSettingsKeys.contains("agcThresholdGate")) {
-        settings.m_agcThresholdGate = response.getFt8DemodSettings()->getAgcThresholdGate();
-    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getFt8DemodSettings()->getRgbColor();
     }
@@ -535,10 +507,6 @@ void FT8Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getFt8DemodSettings()->setFftWindow((int) settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
     response.getFt8DemodSettings()->setVolume(settings.m_volume);
     response.getFt8DemodSettings()->setAgc(settings.m_agc ? 1 : 0);
-    response.getFt8DemodSettings()->setAgcClamping(settings.m_agcClamping ? 1 : 0);
-    response.getFt8DemodSettings()->setAgcTimeLog2(settings.m_agcTimeLog2);
-    response.getFt8DemodSettings()->setAgcPowerThreshold(settings.m_agcPowerThreshold);
-    response.getFt8DemodSettings()->setAgcThresholdGate(settings.m_agcThresholdGate);
     response.getFt8DemodSettings()->setRgbColor(settings.m_rgbColor);
     response.getFt8DemodSettings()->setFt8SampleRate(settings.m_ft8SampleRate);
 
@@ -710,18 +678,6 @@ void FT8Demod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("agc") || force) {
         swgFT8DemodSettings->setAgc(settings.m_agc ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("agcClamping") || force) {
-        swgFT8DemodSettings->setAgcClamping(settings.m_agcClamping ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("agcTimeLog2") || force) {
-        swgFT8DemodSettings->setAgcTimeLog2(settings.m_agcTimeLog2);
-    }
-    if (channelSettingsKeys.contains("agcPowerThreshold") || force) {
-        swgFT8DemodSettings->setAgcPowerThreshold(settings.m_agcPowerThreshold);
-    }
-    if (channelSettingsKeys.contains("agcThresholdGate") || force) {
-        swgFT8DemodSettings->setAgcThresholdGate(settings.m_agcThresholdGate);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFT8DemodSettings->setRgbColor(settings.m_rgbColor);

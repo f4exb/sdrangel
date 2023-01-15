@@ -33,18 +33,6 @@ FT8DemodSettings:
     agc:
       description: AGC (1 if AGC active else 0)
       type: integer
-    agcClamping:
-      description: AGC clamping (1 if AGC clampingactive else 0)
-      type: integer
-    agcTimeLog2:
-      description: AGC averaging time log2 in milliseconds
-      type: integer
-    agcPowerThreshold:
-      description: Audio open RF threshold (dB)
-      type: integer
-    agcThresholdGate:
-      description: Audio squelch gate in ms
-      type: integer
     rgbColor:
       type: integer
     title:

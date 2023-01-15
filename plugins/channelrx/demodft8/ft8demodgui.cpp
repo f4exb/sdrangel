@@ -171,36 +171,6 @@ void FT8DemodGUI::on_agc_toggled(bool checked)
     applySettings();
 }
 
-void FT8DemodGUI::on_agcClamping_toggled(bool checked)
-{
-    m_settings.m_agcClamping = checked;
-    applySettings();
-}
-
-void FT8DemodGUI::on_agcTimeLog2_valueChanged(int value)
-{
-    QString s = QString::number((1<<value), 'f', 0);
-    ui->agcTimeText->setText(s);
-    m_settings.m_agcTimeLog2 = value;
-    applySettings();
-}
-
-void FT8DemodGUI::on_agcPowerThreshold_valueChanged(int value)
-{
-    displayAGCPowerThreshold(value);
-    m_settings.m_agcPowerThreshold = value;
-    applySettings();
-}
-
-void FT8DemodGUI::on_agcThresholdGate_valueChanged(int value)
-{
-    int agcThresholdGate = value < 20 ? value : ((value - 20) * 10) + 20;
-    QString s = QString::number(agcThresholdGate, 'f', 0);
-    ui->agcThresholdGateText->setText(s);
-    m_settings.m_agcThresholdGate = agcThresholdGate;
-    applySettings();
-}
-
 void FT8DemodGUI::on_spanLog2_valueChanged(int value)
 {
     int s2max = spanLog2Max();
@@ -498,7 +468,6 @@ void FT8DemodGUI::displaySettings()
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
     ui->agc->setChecked(m_settings.m_agc);
-    ui->agcClamping->setChecked(m_settings.m_agcClamping);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     ui->fftWindow->setCurrentIndex((int) m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
 
@@ -530,45 +499,11 @@ void FT8DemodGUI::displaySettings()
     ui->volume->setValue(volume);
     ui->volumeText->setText(QString("%1").arg(volume));
 
-    ui->agcTimeLog2->setValue(m_settings.m_agcTimeLog2);
-    s = QString::number((1<<ui->agcTimeLog2->value()), 'f', 0);
-    ui->agcTimeText->setText(s);
-
-    ui->agcPowerThreshold->setValue(m_settings.m_agcPowerThreshold);
-    displayAGCPowerThreshold(ui->agcPowerThreshold->value());
-    displayAGCThresholdGate(m_settings.m_agcThresholdGate);
-
     updateIndexLabel();
 
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
-}
-
-void FT8DemodGUI::displayAGCPowerThreshold(int value)
-{
-    if (value == FT8DemodSettings::m_minPowerThresholdDB)
-    {
-        ui->agcPowerThresholdText->setText("---");
-    }
-    else
-    {
-        QString s = QString::number(value, 'f', 0);
-        ui->agcPowerThresholdText->setText(s);
-    }
-}
-
-void FT8DemodGUI::displayAGCThresholdGate(int value)
-{
-    QString s = QString::number(value, 'f', 0);
-    ui->agcThresholdGateText->setText(s);
-    int dialValue = value;
-
-    if (value > 20) {
-        dialValue = ((value - 20) / 10) + 20;
-    }
-
-    ui->agcThresholdGate->setValue(dialValue);
 }
 
 void FT8DemodGUI::leaveEvent(QEvent* event)
@@ -610,10 +545,6 @@ void FT8DemodGUI::makeUIConnections()
     QObject::connect(ui->lowCut, &TickedSlider::valueChanged, this, &FT8DemodGUI::on_lowCut_valueChanged);
     QObject::connect(ui->volume, &QDial::valueChanged, this, &FT8DemodGUI::on_volume_valueChanged);
     QObject::connect(ui->agc, &ButtonSwitch::toggled, this, &FT8DemodGUI::on_agc_toggled);
-    QObject::connect(ui->agcClamping, &ButtonSwitch::toggled, this, &FT8DemodGUI::on_agcClamping_toggled);
-    QObject::connect(ui->agcTimeLog2, &QDial::valueChanged, this, &FT8DemodGUI::on_agcTimeLog2_valueChanged);
-    QObject::connect(ui->agcPowerThreshold, &QDial::valueChanged, this, &FT8DemodGUI::on_agcPowerThreshold_valueChanged);
-    QObject::connect(ui->agcThresholdGate, &QDial::valueChanged, this, &FT8DemodGUI::on_agcThresholdGate_valueChanged);
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &FT8DemodGUI::on_spanLog2_valueChanged);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FT8DemodGUI::on_fftWindow_currentIndexChanged);
     QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &FT8DemodGUI::on_filterIndex_valueChanged);

@@ -42,10 +42,6 @@ FT8DemodSettings::FT8DemodSettings() :
 void FT8DemodSettings::resetToDefaults()
 {
     m_agc = false;
-    m_agcClamping = false;
-    m_agcPowerThreshold = -100;
-    m_agcThresholdGate = 4;
-    m_agcTimeLog2 = 7;
     m_volume = 1.0;
     m_inputFrequencyOffset = 0;
     m_rgbColor = QColor(0, 192, 255).rgb();
@@ -74,10 +70,6 @@ QByteArray FT8DemodSettings::serialize() const
 
     s.writeU32(5, m_rgbColor);
     s.writeBool(11, m_agc);
-    s.writeS32(12, m_agcTimeLog2);
-    s.writeS32(13, m_agcPowerThreshold);
-    s.writeS32(14, m_agcThresholdGate);
-    s.writeBool(15, m_agcClamping);
     s.writeString(16, m_title);
     s.writeS32(17, m_ft8SampleRate);
     s.writeBool(18, m_useReverseAPI);
@@ -136,10 +128,6 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
 
         d.readU32(5, &m_rgbColor);
         d.readBool(11, &m_agc, false);
-        d.readS32(12, &m_agcTimeLog2, 7);
-        d.readS32(13, &m_agcPowerThreshold, -40);
-        d.readS32(14, &m_agcThresholdGate, 4);
-        d.readBool(15, &m_agcClamping, false);
         d.readString(16, &m_title, "SSB Demodulator");
         d.readS32(17, &m_ft8SampleRate, 12000);
         d.readBool(18, &m_useReverseAPI, false);

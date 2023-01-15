@@ -44,14 +44,6 @@ SWGFT8DemodSettings::SWGFT8DemodSettings() {
     m_volume_isSet = false;
     agc = 0;
     m_agc_isSet = false;
-    agc_clamping = 0;
-    m_agc_clamping_isSet = false;
-    agc_time_log2 = 0;
-    m_agc_time_log2_isSet = false;
-    agc_power_threshold = 0;
-    m_agc_power_threshold_isSet = false;
-    agc_threshold_gate = 0;
-    m_agc_threshold_gate_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -100,14 +92,6 @@ SWGFT8DemodSettings::init() {
     m_volume_isSet = false;
     agc = 0;
     m_agc_isSet = false;
-    agc_clamping = 0;
-    m_agc_clamping_isSet = false;
-    agc_time_log2 = 0;
-    m_agc_time_log2_isSet = false;
-    agc_power_threshold = 0;
-    m_agc_power_threshold_isSet = false;
-    agc_threshold_gate = 0;
-    m_agc_threshold_gate_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -136,10 +120,6 @@ SWGFT8DemodSettings::init() {
 
 void
 SWGFT8DemodSettings::cleanup() {
-
-
-
-
 
 
 
@@ -198,14 +178,6 @@ SWGFT8DemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
     
     ::SWGSDRangel::setValue(&agc, pJson["agc"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_clamping, pJson["agcClamping"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_time_log2, pJson["agcTimeLog2"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_power_threshold, pJson["agcPowerThreshold"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&agc_threshold_gate, pJson["agcThresholdGate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -270,18 +242,6 @@ SWGFT8DemodSettings::asJsonObject() {
     }
     if(m_agc_isSet){
         obj->insert("agc", QJsonValue(agc));
-    }
-    if(m_agc_clamping_isSet){
-        obj->insert("agcClamping", QJsonValue(agc_clamping));
-    }
-    if(m_agc_time_log2_isSet){
-        obj->insert("agcTimeLog2", QJsonValue(agc_time_log2));
-    }
-    if(m_agc_power_threshold_isSet){
-        obj->insert("agcPowerThreshold", QJsonValue(agc_power_threshold));
-    }
-    if(m_agc_threshold_gate_isSet){
-        obj->insert("agcThresholdGate", QJsonValue(agc_threshold_gate));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -401,46 +361,6 @@ void
 SWGFT8DemodSettings::setAgc(qint32 agc) {
     this->agc = agc;
     this->m_agc_isSet = true;
-}
-
-qint32
-SWGFT8DemodSettings::getAgcClamping() {
-    return agc_clamping;
-}
-void
-SWGFT8DemodSettings::setAgcClamping(qint32 agc_clamping) {
-    this->agc_clamping = agc_clamping;
-    this->m_agc_clamping_isSet = true;
-}
-
-qint32
-SWGFT8DemodSettings::getAgcTimeLog2() {
-    return agc_time_log2;
-}
-void
-SWGFT8DemodSettings::setAgcTimeLog2(qint32 agc_time_log2) {
-    this->agc_time_log2 = agc_time_log2;
-    this->m_agc_time_log2_isSet = true;
-}
-
-qint32
-SWGFT8DemodSettings::getAgcPowerThreshold() {
-    return agc_power_threshold;
-}
-void
-SWGFT8DemodSettings::setAgcPowerThreshold(qint32 agc_power_threshold) {
-    this->agc_power_threshold = agc_power_threshold;
-    this->m_agc_power_threshold_isSet = true;
-}
-
-qint32
-SWGFT8DemodSettings::getAgcThresholdGate() {
-    return agc_threshold_gate;
-}
-void
-SWGFT8DemodSettings::setAgcThresholdGate(qint32 agc_threshold_gate) {
-    this->agc_threshold_gate = agc_threshold_gate;
-    this->m_agc_threshold_gate_isSet = true;
 }
 
 qint32
@@ -590,18 +510,6 @@ SWGFT8DemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_agc_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_agc_clamping_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_agc_time_log2_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_agc_power_threshold_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_agc_threshold_gate_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){
