@@ -109,6 +109,10 @@ if (ENABLE_CHANNELRX_NOISEFIGURE AND Boost_FOUND AND Boost_VERSION_STRING VERSIO
     add_subdirectory(noisefigure)
 endif()
 
+if (ENABLE_CHANNELRX_DEMODFT8 AND FT8_SUPPORT)
+    add_subdirectory(demodft8)
+endif()
+
 if(NOT SERVER_MODE)
     if (ENABLE_CHANNELRX_CHANALYZER)
         add_subdirectory(chanalyzer)

@@ -114,6 +114,8 @@
 #include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
 #include "SWGFFTBand.h"
+#include "SWGFT8DemodReport.h"
+#include "SWGFT8DemodSettings.h"
 #include "SWGFeature.h"
 #include "SWGFeatureActions.h"
 #include "SWGFeatureConfig.h"
@@ -840,6 +842,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFFTBand").compare(type) == 0) {
       SWGFFTBand *obj = new SWGFFTBand();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGFT8DemodReport").compare(type) == 0) {
+      SWGFT8DemodReport *obj = new SWGFT8DemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGFT8DemodSettings").compare(type) == 0) {
+      SWGFT8DemodSettings *obj = new SWGFT8DemodSettings();
       obj->init();
       return obj;
     }

@@ -70,6 +70,8 @@ SWGChannelReport::SWGChannelReport() {
     m_free_dv_mod_report_isSet = false;
     freq_tracker_report = nullptr;
     m_freq_tracker_report_isSet = false;
+    ft8_demod_report = nullptr;
+    m_ft8_demod_report_isSet = false;
     m17_demod_report = nullptr;
     m_m17_demod_report_isSet = false;
     m17_mod_report = nullptr;
@@ -160,6 +162,8 @@ SWGChannelReport::init() {
     m_free_dv_mod_report_isSet = false;
     freq_tracker_report = new SWGFreqTrackerReport();
     m_freq_tracker_report_isSet = false;
+    ft8_demod_report = new SWGFT8DemodReport();
+    m_ft8_demod_report_isSet = false;
     m17_demod_report = new SWGM17DemodReport();
     m_m17_demod_report_isSet = false;
     m17_mod_report = new SWGM17ModReport();
@@ -264,6 +268,9 @@ SWGChannelReport::cleanup() {
     }
     if(freq_tracker_report != nullptr) { 
         delete freq_tracker_report;
+    }
+    if(ft8_demod_report != nullptr) { 
+        delete ft8_demod_report;
     }
     if(m17_demod_report != nullptr) { 
         delete m17_demod_report;
@@ -379,6 +386,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&free_dv_mod_report, pJson["FreeDVModReport"], "SWGFreeDVModReport", "SWGFreeDVModReport");
     
     ::SWGSDRangel::setValue(&freq_tracker_report, pJson["FreqTrackerReport"], "SWGFreqTrackerReport", "SWGFreqTrackerReport");
+    
+    ::SWGSDRangel::setValue(&ft8_demod_report, pJson["FT8DemodReport"], "SWGFT8DemodReport", "SWGFT8DemodReport");
     
     ::SWGSDRangel::setValue(&m17_demod_report, pJson["M17DemodReport"], "SWGM17DemodReport", "SWGM17DemodReport");
     
@@ -498,6 +507,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((freq_tracker_report != nullptr) && (freq_tracker_report->isSet())){
         toJsonValue(QString("FreqTrackerReport"), freq_tracker_report, obj, QString("SWGFreqTrackerReport"));
+    }
+    if((ft8_demod_report != nullptr) && (ft8_demod_report->isSet())){
+        toJsonValue(QString("FT8DemodReport"), ft8_demod_report, obj, QString("SWGFT8DemodReport"));
     }
     if((m17_demod_report != nullptr) && (m17_demod_report->isSet())){
         toJsonValue(QString("M17DemodReport"), m17_demod_report, obj, QString("SWGM17DemodReport"));
@@ -773,6 +785,16 @@ SWGChannelReport::setFreqTrackerReport(SWGFreqTrackerReport* freq_tracker_report
     this->m_freq_tracker_report_isSet = true;
 }
 
+SWGFT8DemodReport*
+SWGChannelReport::getFt8DemodReport() {
+    return ft8_demod_report;
+}
+void
+SWGChannelReport::setFt8DemodReport(SWGFT8DemodReport* ft8_demod_report) {
+    this->ft8_demod_report = ft8_demod_report;
+    this->m_ft8_demod_report_isSet = true;
+}
+
 SWGM17DemodReport*
 SWGChannelReport::getM17DemodReport() {
     return m17_demod_report;
@@ -1039,6 +1061,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(freq_tracker_report && freq_tracker_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ft8_demod_report && ft8_demod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(m17_demod_report && m17_demod_report->isSet()){

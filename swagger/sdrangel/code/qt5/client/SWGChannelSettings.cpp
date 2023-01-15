@@ -82,6 +82,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_free_dv_mod_settings_isSet = false;
     freq_tracker_settings = nullptr;
     m_freq_tracker_settings_isSet = false;
+    ft8_demod_settings = nullptr;
+    m_ft8_demod_settings_isSet = false;
     interferometer_settings = nullptr;
     m_interferometer_settings_isSet = false;
     ieee_802_15_4_mod_settings = nullptr;
@@ -196,6 +198,8 @@ SWGChannelSettings::init() {
     m_free_dv_mod_settings_isSet = false;
     freq_tracker_settings = new SWGFreqTrackerSettings();
     m_freq_tracker_settings_isSet = false;
+    ft8_demod_settings = new SWGFT8DemodSettings();
+    m_ft8_demod_settings_isSet = false;
     interferometer_settings = new SWGInterferometerSettings();
     m_interferometer_settings_isSet = false;
     ieee_802_15_4_mod_settings = new SWGIEEE_802_15_4_ModSettings();
@@ -326,6 +330,9 @@ SWGChannelSettings::cleanup() {
     }
     if(freq_tracker_settings != nullptr) { 
         delete freq_tracker_settings;
+    }
+    if(ft8_demod_settings != nullptr) { 
+        delete ft8_demod_settings;
     }
     if(interferometer_settings != nullptr) { 
         delete interferometer_settings;
@@ -471,6 +478,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&free_dv_mod_settings, pJson["FreeDVModSettings"], "SWGFreeDVModSettings", "SWGFreeDVModSettings");
     
     ::SWGSDRangel::setValue(&freq_tracker_settings, pJson["FreqTrackerSettings"], "SWGFreqTrackerSettings", "SWGFreqTrackerSettings");
+    
+    ::SWGSDRangel::setValue(&ft8_demod_settings, pJson["FT8DemodSettings"], "SWGFT8DemodSettings", "SWGFT8DemodSettings");
     
     ::SWGSDRangel::setValue(&interferometer_settings, pJson["InterferometerSettings"], "SWGInterferometerSettings", "SWGInterferometerSettings");
     
@@ -620,6 +629,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((freq_tracker_settings != nullptr) && (freq_tracker_settings->isSet())){
         toJsonValue(QString("FreqTrackerSettings"), freq_tracker_settings, obj, QString("SWGFreqTrackerSettings"));
+    }
+    if((ft8_demod_settings != nullptr) && (ft8_demod_settings->isSet())){
+        toJsonValue(QString("FT8DemodSettings"), ft8_demod_settings, obj, QString("SWGFT8DemodSettings"));
     }
     if((interferometer_settings != nullptr) && (interferometer_settings->isSet())){
         toJsonValue(QString("InterferometerSettings"), interferometer_settings, obj, QString("SWGInterferometerSettings"));
@@ -973,6 +985,16 @@ SWGChannelSettings::setFreqTrackerSettings(SWGFreqTrackerSettings* freq_tracker_
     this->m_freq_tracker_settings_isSet = true;
 }
 
+SWGFT8DemodSettings*
+SWGChannelSettings::getFt8DemodSettings() {
+    return ft8_demod_settings;
+}
+void
+SWGChannelSettings::setFt8DemodSettings(SWGFT8DemodSettings* ft8_demod_settings) {
+    this->ft8_demod_settings = ft8_demod_settings;
+    this->m_ft8_demod_settings_isSet = true;
+}
+
 SWGInterferometerSettings*
 SWGChannelSettings::getInterferometerSettings() {
     return interferometer_settings;
@@ -1317,6 +1339,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(freq_tracker_settings && freq_tracker_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ft8_demod_settings && ft8_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(interferometer_settings && interferometer_settings->isSet()){

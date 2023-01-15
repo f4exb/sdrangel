@@ -40,6 +40,7 @@
 #include "SWGDATVModSettings.h"
 #include "SWGDOA2Settings.h"
 #include "SWGDSDDemodSettings.h"
+#include "SWGFT8DemodSettings.h"
 #include "SWGFileSinkSettings.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGFreeDVDemodSettings.h"
@@ -171,6 +172,9 @@ public:
 
     SWGFreqTrackerSettings* getFreqTrackerSettings();
     void setFreqTrackerSettings(SWGFreqTrackerSettings* freq_tracker_settings);
+
+    SWGFT8DemodSettings* getFt8DemodSettings();
+    void setFt8DemodSettings(SWGFT8DemodSettings* ft8_demod_settings);
 
     SWGInterferometerSettings* getInterferometerSettings();
     void setInterferometerSettings(SWGInterferometerSettings* interferometer_settings);
@@ -334,6 +338,9 @@ private:
 
     SWGFreqTrackerSettings* freq_tracker_settings;
     bool m_freq_tracker_settings_isSet;
+
+    SWGFT8DemodSettings* ft8_demod_settings;
+    bool m_ft8_demod_settings_isSet;
 
     SWGInterferometerSettings* interferometer_settings;
     bool m_interferometer_settings_isSet;

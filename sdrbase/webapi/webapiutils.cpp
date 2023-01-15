@@ -67,6 +67,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channeltx.remotesource", "RemoteSourceSettings"},
     {"sdrangel.channeltx.modssb", "SSBModSettings"},
     {"sdrangel.channel.ssbdemod", "SSBDemodSettings"},
+    {"sdrangel.channel.ft8demod", "FT8DemodSettings"},
     {"de.maintech.sdrangelove.channel.ssb", "SSBDemodSettings"}, // remap
     {"sdrangel.channel.radioastronomy", "RadioAstronomySettings"},
     {"sdrangel.channeltx.udpsource", "UDPSourceSettings"},
@@ -175,6 +176,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"RemoteTCPSink", "RemoteTCPSinkSettings"},
     {"SSBMod", "SSBModSettings"},
     {"SSBDemod", "SSBDemodSettings"},
+    {"FT8Demod", "FT8DemodSettings"},
     {"UDPSink", "UDPSinkSettings"},
     {"UDPSource", "UDPSourceSettings"},
     {"VORDemodMC", "VORDemodMCSettings"},
@@ -530,7 +532,7 @@ bool WebAPIUtils::getSubObjectIntList(const QJsonObject &json, const QString &ke
             {
                 QJsonValue value = subObject[key];
                 if (value.isArray())
-                { 
+                {
                     QJsonArray array = value.toArray();
                     for (int i = 0; i < array.size(); i++)
                     {
@@ -538,7 +540,7 @@ bool WebAPIUtils::getSubObjectIntList(const QJsonObject &json, const QString &ke
                         if (element.contains(subKey)) {
                             values.append(element[subKey].toInt());
                         }
-                    } 
+                    }
                     return true;
                 }
             }

@@ -4523,6 +4523,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setFreqTrackerSettings(new SWGSDRangel::SWGFreqTrackerSettings());
             channelSettings->getFreqTrackerSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "FT8DemodSettings")
+        {
+            channelSettings->setFt8DemodSettings(new SWGSDRangel::SWGFT8DemodSettings());
+            channelSettings->getFt8DemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "IEEE_802_15_4_ModSettings")
         {
             channelSettings->setIeee802154ModSettings(new SWGSDRangel::SWGIEEE_802_15_4_ModSettings());

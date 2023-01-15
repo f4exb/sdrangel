@@ -1,0 +1,100 @@
+FT8DemodSettings:
+  description: FT8Demod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    filterIndex:
+      type: integer
+    spanLog2:
+      type: integer
+    rfBandwidth:
+      type: number
+      format: float
+    lowCutoff:
+      type: number
+      format: float
+    fftWindow:
+      type: integer
+      description: >
+        FFT Window index (FFTWindow::Function):
+          * 0 - Bartlett
+          * 1 - Blackman-Harris 4 term
+          * 2 - Flattop
+          * 3 - Hamming
+          * 4 - Hanning
+          * 5 - Rectangle
+          * 6 - Kaiser
+          * 7 - Blackman 3 term
+          * 8 - Blackman-Harris 7 term
+    volume:
+      type: number
+      format: float
+    audioBinaural:
+      description: Audio binaural mode (1 if active else 0)
+      type: integer
+    audioFlipChannels:
+      description: Flip audio channels (1 if flipped else 0)
+      type: integer
+    dsb:
+      description: Double sidebands mode (1 if DSB else 0)
+      type: integer
+    audioMute:
+      description: Mute audio (1 if muted else 0)
+      type: integer
+    agc:
+      description: AGC (1 if AGC active else 0)
+      type: integer
+    agcClamping:
+      description: AGC clamping (1 if AGC clampingactive else 0)
+      type: integer
+    agcTimeLog2:
+      description: AGC averaging time log2 in milliseconds
+      type: integer
+    agcPowerThreshold:
+      description: Audio open RF threshold (dB)
+      type: integer
+    agcThresholdGate:
+      description: Audio squelch gate in ms
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    spectrumConfig:
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+FT8DemodReport:
+  description: FT8Demod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    squelch:
+      description: Audio squelch status (1 if open else 0)
+      type: integer
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer

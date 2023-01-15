@@ -3517,6 +3517,9 @@ margin-bottom: 20px;
     "FreqTrackerReport" : {
       "$ref" : "#/definitions/FreqTrackerReport"
     },
+    "FT8DemodReport" : {
+      "$ref" : "#/definitions/FT8DemodReport"
+    },
     "M17DemodReport" : {
       "$ref" : "#/definitions/M17DemodReport"
     },
@@ -3668,6 +3671,9 @@ margin-bottom: 20px;
     },
     "FreqTrackerSettings" : {
       "$ref" : "#/definitions/FreqTrackerSettings"
+    },
+    "FT8DemodSettings" : {
+      "$ref" : "#/definitions/FT8DemodSettings"
     },
     "InterferometerSettings" : {
       "$ref" : "#/definitions/InterferometerSettings"
@@ -5555,6 +5561,131 @@ margin-bottom: 20px;
     }
   },
   "description" : "FFT filter band definition"
+};
+            defs.FT8DemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "Audio squelch status (1 if open else 0)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "FT8Demod"
+};
+            defs.FT8DemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "filterIndex" : {
+      "type" : "integer"
+    },
+    "spanLog2" : {
+      "type" : "integer"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "lowCutoff" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fftWindow" : {
+      "type" : "integer",
+      "description" : "FFT Window index (FFTWindow::Function):\n  * 0 - Bartlett\n  * 1 - Blackman-Harris 4 term\n  * 2 - Flattop\n  * 3 - Hamming\n  * 4 - Hanning\n  * 5 - Rectangle\n  * 6 - Kaiser\n  * 7 - Blackman 3 term\n  * 8 - Blackman-Harris 7 term\n"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "audioBinaural" : {
+      "type" : "integer",
+      "description" : "Audio binaural mode (1 if active else 0)"
+    },
+    "audioFlipChannels" : {
+      "type" : "integer",
+      "description" : "Flip audio channels (1 if flipped else 0)"
+    },
+    "dsb" : {
+      "type" : "integer",
+      "description" : "Double sidebands mode (1 if DSB else 0)"
+    },
+    "audioMute" : {
+      "type" : "integer",
+      "description" : "Mute audio (1 if muted else 0)"
+    },
+    "agc" : {
+      "type" : "integer",
+      "description" : "AGC (1 if AGC active else 0)"
+    },
+    "agcClamping" : {
+      "type" : "integer",
+      "description" : "AGC clamping (1 if AGC clampingactive else 0)"
+    },
+    "agcTimeLog2" : {
+      "type" : "integer",
+      "description" : "AGC averaging time log2 in milliseconds"
+    },
+    "agcPowerThreshold" : {
+      "type" : "integer",
+      "description" : "Audio open RF threshold (dB)"
+    },
+    "agcThresholdGate" : {
+      "type" : "integer",
+      "description" : "Audio squelch gate in ms"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "FT8Demod"
 };
             defs.Feature = {
   "required" : [ "id", "index", "title", "uid" ],
@@ -56780,7 +56911,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-12-16T06:50:35.932+01:00
+              Generated 2023-01-14T23:57:54.939+01:00
             </div>
           </div>
       </div>

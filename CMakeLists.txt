@@ -80,6 +80,7 @@ option(ENABLE_CHANNELRX_LOCALSINK "Enable channelrx localsink plugin" ON)
 option(ENABLE_CHANNELRX_DEMODPACKET "Enable channelrx demodpacket plugin" ON)
 option(ENABLE_CHANNELRX_DEMODAPT "Enable channelrx demodapt plugin" ON)
 option(ENABLE_CHANNELRX_DEMODDSD "Enable channelrx demoddsd plugin" ON)
+option(ENABLE_CHANNELRX_DEMODFT8 "Enable channelrx demodft8 plugin" ON)
 
 # Channel Tx enablers
 option(ENABLE_CHANNELTX "Enable channeltx plugins" ON)
