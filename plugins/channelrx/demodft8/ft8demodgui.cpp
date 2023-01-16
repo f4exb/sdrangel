@@ -324,6 +324,7 @@ FT8DemodGUI::FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+    m_ft8Demod->setLevelMeter(ui->volumeMeter);
 
     ui->BW->setMaximum(60);
     ui->BW->setMinimum(10);

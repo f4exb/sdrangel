@@ -69,6 +69,19 @@ public:
         m_magsqCount = 0;
     }
 
+	/**
+	 * Level changed
+	 * \param rmsLevel RMS level in range 0.0 - 1.0
+	 * \param peakLevel Peak level in range 0.0 - 1.0
+	 * \param numSamples Number of samples analyzed
+	 */
+	void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples)
+    {
+        rmsLevel = m_rmsLevel;
+        peakLevel = m_peakLevel;
+        numSamples = m_levelInNbSamples;
+    }
+
 private:
     struct MagSqLevelsStore
     {
@@ -79,6 +92,17 @@ private:
         double m_magsq;
         double m_magsqPeak;
     };
+
+	struct LevelRMS
+	{
+		LevelRMS();
+		void accumulate(float fsample);
+
+		double m_sum;
+		float m_peak;
+		int m_n;
+		bool m_reset;
+	};
 
     FT8DemodSettings m_settings;
     ChannelAPI *m_channel;
@@ -118,10 +142,16 @@ private:
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;
 
+    LevelRMS m_levelIn;
+	int m_levelInNbSamples;
+    Real m_rmsLevel;
+    Real m_peakLevel;
+
 	static const int m_ssbFftLen;
 	static const int m_agcTarget;
 
     void processOneSample(Complex &ci);
+    void calculateLevel(int16_t& sample);
 };
 
 #endif // INCLUDE_FT8DEMODSINK_H

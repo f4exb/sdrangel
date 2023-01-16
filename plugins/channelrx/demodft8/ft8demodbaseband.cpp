@@ -94,6 +94,11 @@ void FT8DemodBaseband::handleData()
 
 		m_sampleFifo.readCommit((unsigned int) count);
     }
+
+    qreal rmsLevel, peakLevel;
+    int numSamples;
+    m_sink.getLevels(rmsLevel, peakLevel, numSamples);
+    emit levelChanged(rmsLevel, peakLevel, numSamples);
 }
 
 void FT8DemodBaseband::handleInputMessages()

@@ -75,6 +75,15 @@ public:
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
     void setAudioFifoLabel(const QString& label) { m_sink.setAudioFifoLabel(label); }
 
+signals:
+	/**
+	 * Level changed
+	 * \param rmsLevel RMS level in range 0.0 - 1.0
+	 * \param peakLevel Peak level in range 0.0 - 1.0
+	 * \param numSamples Number of samples analyzed
+	 */
+	void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
+
 private:
     SampleSinkFifo m_sampleFifo;
     DownChannelizer m_channelizer;

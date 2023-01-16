@@ -36,13 +36,39 @@
 const int FT8DemodSink::m_ssbFftLen = 1024;
 const int FT8DemodSink::m_agcTarget = 3276; // 32768/10 -10 dB amplitude => -20 dB power: center of normal signal
 
+FT8DemodSink::LevelRMS::LevelRMS()
+{
+    m_sum = 0.0f;
+    m_peak = 0.0f;
+    m_n = 0;
+    m_reset = true;
+}
+
+void FT8DemodSink::LevelRMS::accumulate(float level)
+{
+    if (m_reset)
+    {
+        m_sum = level * level;
+        m_peak = std::fabs(level);
+        m_n = 1;
+        m_reset = false;
+    }
+    else
+    {
+        m_sum += level * level;
+        m_peak = std::max(m_peak, std::fabs(level));
+        m_n++;
+    }
+}
+
 FT8DemodSink::FT8DemodSink() :
         m_agc(12000, m_agcTarget, 1e-2),
         m_agcActive(false),
         m_audioActive(false),
         m_spectrumSink(nullptr),
         m_audioFifo(24000),
-        m_ft8SampleRate(12000)
+        m_ft8SampleRate(12000),
+        m_levelInNbSamples(1200) // 100 ms
 {
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;
@@ -155,6 +181,7 @@ void FT8DemodSink::processOneSample(Complex &ci)
         m_audioBuffer[m_audioBufferFill].l = sample;
         m_audioBuffer[m_audioBufferFill].r = sample;
         m_demodBuffer[m_demodBufferFill++] = sample;
+        calculateLevel(sample);
 
         if (m_demodBufferFill >= m_demodBuffer.size())
         {
@@ -241,6 +268,7 @@ void FT8DemodSink::applyFT8SampleRate(int sampleRate)
 
     m_audioFifo.setSize(sampleRate);
     m_ft8SampleRate = sampleRate;
+    m_levelInNbSamples = m_ft8SampleRate / 10; // 100 ms
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);
@@ -324,3 +352,14 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
     m_settings = settings;
 }
 
+void FT8DemodSink::calculateLevel(int16_t& sample)
+{
+    if (m_levelIn.m_n >= m_levelInNbSamples)
+    {
+        m_rmsLevel = sqrt(m_levelIn.m_sum / m_levelInNbSamples);
+        m_peakLevel = m_levelIn.m_peak;
+        m_levelIn.m_reset = true;
+    }
+
+    m_levelIn.accumulate(sample/29491.2f); // scale on 90% (0.9 * 32768.0)
+}

@@ -136,6 +136,9 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     uint32_t getNumberOfDeviceStreams() const;
+    void setLevelMeter(QObject *levelMeter) {
+        connect(m_basebandSink, SIGNAL(levelChanged(qreal, qreal, int)), levelMeter, SLOT(levelChanged(qreal, qreal, int)));
+    }
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;

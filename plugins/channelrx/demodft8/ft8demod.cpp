@@ -746,5 +746,5 @@ void FT8Demod::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
-    m_basebandSink->setAudioFifoLabel(fifoLabel);
+        m_basebandSink->setAudioFifoLabel(fifoLabel);
 }
