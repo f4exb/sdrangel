@@ -47,22 +47,40 @@ void DeviceUSRP::enumOriginDevices(const QString& hardwareId, PluginInterface::O
             QString id = QString::fromStdString(dev_addrs[i].to_string());
             QString name = QString::fromStdString(dev_addrs[i].get("name", "N/A"));
             QString serial = QString::fromStdString(dev_addrs[i].get("serial", "N/A"));
+            QString product = QString::fromStdString(dev_addrs[i].get("product", "N/A"));
             QString displayedName(QString("%1[%2:$1] %3").arg(name).arg(i).arg(serial));
 
             qDebug() << "DeviceUSRP::enumOriginDevices: found USRP device " << displayedName;
 
-            DeviceUSRPParams usrpParams;
-            usrpParams.open(id, true);
-            usrpParams.close();
+            // Opening some devices can be a little slow, so use hardcoded number of channels,
+            // for known devices
+            static const QMap<QString, int> channelMap{{"B200", 1}, {"B205", 1}, {"B210", 2}};
+            if (channelMap.contains(product))
+            {
+                originDevices.append(PluginInterface::OriginDevice(
+                        displayedName,
+                        hardwareId,
+                        id,
+                        (int)i,
+                        channelMap[product],
+                        channelMap[product]
+                    ));
+            }
+            else
+            {
+                DeviceUSRPParams usrpParams;
+                usrpParams.open(id, true);
+                usrpParams.close();
 
-            originDevices.append(PluginInterface::OriginDevice(
-                    displayedName,
-                    hardwareId,
-                    id,
-                    (int)i,
-                    usrpParams.m_nbRxChannels,
-                    usrpParams.m_nbTxChannels
-                ));
+                originDevices.append(PluginInterface::OriginDevice(
+                        displayedName,
+                        hardwareId,
+                        id,
+                        (int)i,
+                        usrpParams.m_nbRxChannels,
+                        usrpParams.m_nbTxChannels
+                    ));
+            }
         }
     }
     catch (const std::exception& e)
