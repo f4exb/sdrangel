@@ -240,6 +240,7 @@ void GLSpectrumGUI::displaySettings()
     ui->linscale->setChecked(m_settings.m_linear);
     setAveragingToolitp();
     ui->calibration->setChecked(m_settings.m_useCalibration);
+    ui->resetMeasurements->setVisible(m_settings.m_measurement >= SpectrumSettings::MeasurementChannelPower);
     displayGotoMarkers();
     displayControls();
 
@@ -1119,8 +1120,18 @@ void GLSpectrumGUI::on_measure_clicked(bool checked)
     measurementsDialog.exec();
 }
 
+void GLSpectrumGUI::on_resetMeasurements_clicked(bool checked)
+{
+    (void) checked;
+
+    if (m_glSpectrum) {
+        m_glSpectrum->getMeasurements()->reset();
+    }
+}
+
 void GLSpectrumGUI::updateMeasurements()
 {
+    ui->resetMeasurements->setVisible(m_settings.m_measurement >= SpectrumSettings::MeasurementChannelPower);
     if (m_glSpectrum)
     {
         m_glSpectrum->setMeasurementsVisible(m_settings.m_measurement != SpectrumSettings::MeasurementNone);
