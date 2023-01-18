@@ -75,9 +75,6 @@ public:
     QString* getTitle();
     void setTitle(QString* title);
 
-    qint32 getFt8SampleRate();
-    void setFt8SampleRate(qint32 ft8_sample_rate);
-
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
 
@@ -138,9 +135,6 @@ private:
 
     QString* title;
     bool m_title_isSet;
-
-    qint32 ft8_sample_rate;
-    bool m_ft8_sample_rate_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;

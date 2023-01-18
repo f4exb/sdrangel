@@ -50,7 +50,6 @@ struct FT8DemodSettings
     bool m_agc;
     quint32 m_rgbColor;
     QString m_title;
-    int m_ft8SampleRate;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
@@ -76,6 +75,7 @@ struct FT8DemodSettings
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 
+    static const int m_ft8SampleRate;
     static const int m_minPowerThresholdDB;
     static const float m_mminPowerThresholdDBf;
 };

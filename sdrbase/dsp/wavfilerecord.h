@@ -102,11 +102,13 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly) override;
     void write(qint16 lSample, qint16 rSample); //!< write a single sample
     void writeMono(qint16 sample); //!< write a single mono sample
+    void writeMono(qint16 *samples, int nbSamples); //!< write a buffer of mono samples
     virtual void start() override;
     virtual void stop() override;
     virtual bool handleMessage(const Message& message) override;
 
     virtual void setFileName(const QString& fileBase) override;
+    void setFileBaseIsFileName(bool fileBaseIsFileName) { m_fileBaseIsFileName = fileBaseIsFileName; }
     virtual bool startRecording() override;
     virtual bool stopRecording() override;
     virtual bool isRecording() const override { return m_recordOn; }
@@ -122,6 +124,7 @@ public:
 
 private:
     QString m_fileBase;
+    bool m_fileBaseIsFileName;
     quint32 m_sampleRate;
     quint64 m_centerFrequency;
     bool m_recordOn;

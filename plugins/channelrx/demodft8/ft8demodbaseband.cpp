@@ -16,11 +16,14 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QThread>
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/spectrumvis.h"
+#include "maincore.h"
 
+#include "ft8demodworker.h"
 #include "ft8demodbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(FT8DemodBaseband::MsgConfigureFT8DemodBaseband, Message)
@@ -30,9 +33,36 @@ FT8DemodBaseband::FT8DemodBaseband() :
     m_messageQueueToGUI(nullptr),
     m_spectrumVis(nullptr)
 {
-    m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
-
     qDebug("FT8DemodBaseband::FT8DemodBaseband");
+    m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
+    m_ft8WorkerBuffer = new int16_t[FT8DemodSettings::m_ft8SampleRate*15];
+
+    m_workerThread = new QThread();
+    m_ft8DemodWorker = new FT8DemodWorker();
+
+    m_ft8DemodWorker->moveToThread(m_workerThread);
+
+    QObject::connect(
+        m_workerThread,
+        &QThread::finished,
+        m_ft8DemodWorker,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_workerThread,
+        &QThread::finished,
+        m_ft8DemodWorker,
+        &QThread::deleteLater
+    );
+    QObject::connect(
+        this,
+        &FT8DemodBaseband::bufferReady,
+        m_ft8DemodWorker,
+        &FT8DemodWorker::processBuffer
+    );
+
+    m_workerThread->start();
+
     QObject::connect(
         &m_sampleFifo,
         &SampleSinkFifo::dataReady,
@@ -41,15 +71,18 @@ FT8DemodBaseband::FT8DemodBaseband() :
         Qt::QueuedConnection
     );
 
-    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue());
     m_channelSampleRate = 0;
+    m_sink.setFT8Buffer(&m_ft8Buffer);
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 FT8DemodBaseband::~FT8DemodBaseband()
 {
-    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_sink.getAudioFifo());
+    m_workerThread->exit();
+	m_workerThread->wait();
+    delete[] m_ft8WorkerBuffer;
 }
 
 void FT8DemodBaseband::reset()
@@ -136,7 +169,7 @@ bool FT8DemodBaseband::handleMessage(const Message& cmd)
 
         if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
         {
-            m_sink.applyFT8SampleRate(m_settings.m_ft8SampleRate); // reapply when channel sample rate changes
+            m_sink.applyFT8SampleRate(); // reapply when channel sample rate changes
             m_channelSampleRate = m_channelizer.getChannelSampleRate();
         }
 
@@ -152,12 +185,12 @@ void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool forc
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer.setChannelization(m_settings.m_ft8SampleRate, settings.m_inputFrequencyOffset);
+        m_channelizer.setChannelization(FT8DemodSettings::m_ft8SampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
         if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
         {
-            m_sink.applyFT8SampleRate(m_settings.m_ft8SampleRate); // reapply when channel sample rate changes
+            m_sink.applyFT8SampleRate(); // reapply when channel sample rate changes
             m_channelSampleRate = m_channelizer.getChannelSampleRate();
         }
     }
@@ -166,32 +199,12 @@ void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool forc
     {
         if (m_spectrumVis)
         {
-            DSPSignalNotification *msg = new DSPSignalNotification(m_settings.m_ft8SampleRate/(1<<settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
-            m_spectrumVis->getInputMessageQueue()->push(msg);
-        }
-    }
-
-    if ((settings.m_ft8SampleRate != m_settings.m_ft8SampleRate) || force)
-    {
-        m_sink.applyFT8SampleRate(settings.m_ft8SampleRate);
-        m_channelizer.setChannelization(settings.m_ft8SampleRate, settings.m_inputFrequencyOffset);
-        m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
-
-        if (getMessageQueueToGUI())
-        {
-            DSPConfigureAudio *msg = new DSPConfigureAudio((int) settings.m_ft8SampleRate, DSPConfigureAudio::AudioOutput);
-            getMessageQueueToGUI()->push(msg);
-        }
-
-        if (m_spectrumVis)
-        {
-            DSPSignalNotification *msg = new DSPSignalNotification(settings.m_ft8SampleRate/(1<<m_settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
+            DSPSignalNotification *msg = new DSPSignalNotification(FT8DemodSettings::m_ft8SampleRate/(1<<settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
             m_spectrumVis->getInputMessageQueue()->push(msg);
         }
     }
 
     m_sink.applySettings(settings, force);
-
     m_settings = settings;
 }
 
@@ -205,4 +218,25 @@ void FT8DemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer.setBasebandSampleRate(sampleRate);
     m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
+}
+
+void FT8DemodBaseband::tick()
+{
+    QDateTime nowUTC = QDateTime::currentDateTimeUtc();
+
+    if (nowUTC.time().second() % 15 < 14)
+    {
+        if (m_tickCount++ == 0)
+        {
+            QDateTime periodTs = nowUTC.addSecs(-15);
+            qDebug("FT8DemodBaseband::tick: %s", qPrintable(nowUTC.toString("yyyy-MM-dd HH:mm:ss")));
+            m_ft8Buffer.getCurrentBuffer(m_ft8WorkerBuffer);
+            emit bufferReady(m_ft8WorkerBuffer, periodTs);
+            periodTs = nowUTC;
+        }
+    }
+    else
+    {
+        m_tickCount = 0;
+    }
 }

@@ -37,8 +37,6 @@ FT8DemodSettings:
       type: integer
     title:
       type: string
-    ft8SampleRate:
-      type: integer
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer

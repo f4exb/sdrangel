@@ -32,6 +32,7 @@
 WavFileRecord::WavFileRecord(quint32 sampleRate, quint64 centerFrequency) :
     FileRecordInterface(),
     m_fileBase("test"),
+    m_fileBaseIsFileName(false),
     m_sampleRate(sampleRate),
     m_centerFrequency(centerFrequency),
     m_recordOn(false),
@@ -46,6 +47,7 @@ WavFileRecord::WavFileRecord(quint32 sampleRate, quint64 centerFrequency) :
 WavFileRecord::WavFileRecord(const QString& fileBase) :
     FileRecordInterface(),
     m_fileBase(fileBase),
+    m_fileBaseIsFileName(false),
     m_sampleRate(0),
     m_centerFrequency(0),
     m_recordOn(false),
@@ -139,6 +141,18 @@ void WavFileRecord::writeMono(qint16 sample)
     m_byteCount += 2;
 }
 
+void WavFileRecord::writeMono(qint16 *samples, int nbSamples)
+{
+    if (m_recordStart)
+    {
+        writeHeader();
+        m_recordStart = false;
+    }
+
+    m_sampleFile.write(reinterpret_cast<const char*>(samples), 2*nbSamples);
+    m_byteCount += 2*nbSamples;
+}
+
 void WavFileRecord::start()
 {
 }
@@ -171,7 +185,11 @@ bool WavFileRecord::startRecording()
             return false;
         }
 #else
-        m_currentFileName = m_fileBase + "_" + QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz") + ".wav"; // Don't use QString::arg on Android, as filename can contain %2
+        if (m_fileBaseIsFileName) {
+            m_currentFileName = m_fileBase + ".wav";
+        } else {
+            m_currentFileName = m_fileBase + "_" + QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz") + ".wav"; // Don't use QString::arg on Android, as filename can contain %2
+        }
         m_sampleFile.open(m_currentFileName.toStdString().c_str(), std::ios::binary);
         if (!m_sampleFile.is_open())
         {

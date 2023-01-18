@@ -31,6 +31,7 @@
 #include "util/messagequeue.h"
 #include "maincore.h"
 
+#include "ft8buffer.h"
 #include "ft8demodsink.h"
 
 const int FT8DemodSink::m_ssbFftLen = 1024;
@@ -66,8 +67,7 @@ FT8DemodSink::FT8DemodSink() :
         m_agcActive(false),
         m_audioActive(false),
         m_spectrumSink(nullptr),
-        m_audioFifo(24000),
-        m_ft8SampleRate(12000),
+        m_ft8Buffer(nullptr),
         m_levelInNbSamples(1200) // 100 ms
 {
 	m_Bandwidth = 5000;
@@ -77,8 +77,6 @@ FT8DemodSink::FT8DemodSink() :
 	m_channelSampleRate = 48000;
 	m_channelFrequencyOffset = 0;
 
-	m_audioBuffer.resize(1<<14);
-	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
 	m_sum = 0;
 
@@ -94,7 +92,7 @@ FT8DemodSink::FT8DemodSink() :
     m_agc.setThresholdEnable(false); // no squelch
 	m_agc.setClamping(false); // no clamping
 
-	SSBFilter = new fftfilt(m_LowCutoff / m_ft8SampleRate, m_Bandwidth / m_ft8SampleRate, m_ssbFftLen);
+	SSBFilter = new fftfilt(m_LowCutoff / FT8DemodSettings::m_ft8SampleRate, m_Bandwidth / FT8DemodSettings::m_ft8SampleRate, m_ssbFftLen);
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -178,8 +176,11 @@ void FT8DemodSink::processOneSample(Complex &ci)
 
         Real demod = (z.real() + z.imag()) * 0.7;
         qint16 sample = (qint16)(demod * m_volume);
-        m_audioBuffer[m_audioBufferFill].l = sample;
-        m_audioBuffer[m_audioBufferFill].r = sample;
+
+        if (m_ft8Buffer) {
+            m_ft8Buffer->feed(sample);
+        }
+
         m_demodBuffer[m_demodBufferFill++] = sample;
         calculateLevel(sample);
 
@@ -209,19 +210,6 @@ void FT8DemodSink::processOneSample(Complex &ci)
 
             m_demodBufferFill = 0;
         }
-
-        ++m_audioBufferFill;
-
-        if (m_audioBufferFill >= m_audioBuffer.size())
-        {
-            // uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-
-            // if (res != m_audioBufferFill) {
-            //     qDebug("FT8DemodSink::processOneSample: %u/%u samples written", res, m_audioBufferFill);
-            // }
-
-            m_audioBufferFill = 0;
-        }
     }
 
 	if (m_spectrumSink && (m_sampleBuffer.size() != 0))
@@ -248,27 +236,23 @@ void FT8DemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
         Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > channelSampleRate ? channelSampleRate : (m_Bandwidth * 1.5f);
         m_interpolator.create(16, channelSampleRate, interpolatorBandwidth, 2.0f);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) channelSampleRate / (Real) m_ft8SampleRate;
+        m_interpolatorDistance = (Real) channelSampleRate / (Real) FT8DemodSettings::m_ft8SampleRate;
     }
 
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void FT8DemodSink::applyFT8SampleRate(int sampleRate)
+void FT8DemodSink::applyFT8SampleRate()
 {
-    qDebug("FT8DemodSink::applyFT8SampleRate: %d", sampleRate);
+    qDebug("FT8DemodSink::applyFT8SampleRate: %d", FT8DemodSettings::m_ft8SampleRate);
 
     Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > m_channelSampleRate ? m_channelSampleRate : (m_Bandwidth * 1.5f);
     m_interpolator.create(16, m_channelSampleRate, interpolatorBandwidth, 2.0f);
     m_interpolatorDistanceRemain = 0;
-    m_interpolatorDistance = (Real) m_channelSampleRate / (Real) sampleRate;
-
-    SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
-
-    m_audioFifo.setSize(sampleRate);
-    m_ft8SampleRate = sampleRate;
-    m_levelInNbSamples = m_ft8SampleRate / 10; // 100 ms
+    m_interpolatorDistance = (Real) m_channelSampleRate / (Real) FT8DemodSettings::m_ft8SampleRate;
+    SSBFilter->create_filter(m_LowCutoff / (float) FT8DemodSettings::m_ft8SampleRate, m_Bandwidth / (float) FT8DemodSettings::m_ft8SampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
+    m_levelInNbSamples = FT8DemodSettings::m_ft8SampleRate / 10; // 100 ms
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);
@@ -281,7 +265,7 @@ void FT8DemodSink::applyFT8SampleRate(int sampleRate)
 
             if (messageQueue)
             {
-                MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+                MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, FT8DemodSettings::m_ft8SampleRate);
                 messageQueue->push(msg);
             }
         }
@@ -299,7 +283,6 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
             << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
             << " m_agcActive: " << settings.m_agc
-            << " m_ft8SampleRate: " << settings.m_ft8SampleRate
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -337,8 +320,8 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
         Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > m_channelSampleRate ? m_channelSampleRate : (m_Bandwidth * 1.5f);
         m_interpolator.create(16, m_channelSampleRate, interpolatorBandwidth, 2.0f);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_ft8SampleRate;
-        SSBFilter->create_filter(m_LowCutoff / (float) m_ft8SampleRate, m_Bandwidth / (float) m_ft8SampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
+        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) FT8DemodSettings::m_ft8SampleRate;
+        SSBFilter->create_filter(m_LowCutoff / (float) FT8DemodSettings::m_ft8SampleRate, m_Bandwidth / (float) FT8DemodSettings::m_ft8SampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
     }
 
     if ((m_settings.m_volume != settings.m_volume) || force)

@@ -22,6 +22,7 @@
 #include "settings/serializable.h"
 #include "ft8demodsettings.h"
 
+const int FT8DemodSettings::m_ft8SampleRate = 12000;
 #ifdef SDR_RX_SAMPLE_24BIT
 const int FT8DemodSettings::m_minPowerThresholdDB = -120;
 const float FT8DemodSettings::m_mminPowerThresholdDBf = 120.0f;
@@ -46,7 +47,6 @@ void FT8DemodSettings::resetToDefaults()
     m_inputFrequencyOffset = 0;
     m_rgbColor = QColor(0, 192, 255).rgb();
     m_title = "FT8 Demodulator";
-    m_ft8SampleRate = 12000;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -71,7 +71,6 @@ QByteArray FT8DemodSettings::serialize() const
     s.writeU32(5, m_rgbColor);
     s.writeBool(11, m_agc);
     s.writeString(16, m_title);
-    s.writeS32(17, m_ft8SampleRate);
     s.writeBool(18, m_useReverseAPI);
     s.writeString(19, m_reverseAPIAddress);
     s.writeU32(20, m_reverseAPIPort);
@@ -129,7 +128,6 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         d.readU32(5, &m_rgbColor);
         d.readBool(11, &m_agc, false);
         d.readString(16, &m_title, "SSB Demodulator");
-        d.readS32(17, &m_ft8SampleRate, 12000);
         d.readBool(18, &m_useReverseAPI, false);
         d.readString(19, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(20, &utmp, 0);

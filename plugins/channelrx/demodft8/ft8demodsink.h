@@ -25,13 +25,13 @@
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
 #include "dsp/agc.h"
-#include "audio/audiofifo.h"
 #include "util/doublebufferfifo.h"
 
 #include "ft8demodsettings.h"
 
 class SpectrumVis;
 class ChannelAPI;
+class FT8Buffer;
 
 class FT8DemodSink : public ChannelSampleSink {
 public:
@@ -41,15 +41,14 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
 	void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; }
+    void setFT8Buffer(FT8Buffer *buffer) { m_ft8Buffer = buffer; }
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const FT8DemodSettings& settings, bool force = false);
-    void applyFT8SampleRate(int sampleRate);
+    void applyFT8SampleRate();
 
-    AudioFifo *getAudioFifo() { return &m_audioFifo; }
     double getMagSq() const { return m_magsq; }
 	bool getAudioActive() const { return m_audioActive; }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
-    void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
@@ -134,10 +133,7 @@ private:
 	SpectrumVis* m_spectrumSink;
 	SampleVector m_sampleBuffer;
 
-	AudioVector m_audioBuffer;
-	uint m_audioBufferFill;
-	AudioFifo m_audioFifo;
-	quint32 m_ft8SampleRate;
+    FT8Buffer *m_ft8Buffer;
 
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;

@@ -7,6 +7,8 @@ set(demodft8_SOURCES
     ft8demodbaseband.cpp
     ft8demodwebapiadapter.cpp
 	ft8plugin.cpp
+    ft8buffer.cpp
+    ft8demodworker.cpp
 )
 
 set(demodft8_HEADERS
@@ -16,6 +18,8 @@ set(demodft8_HEADERS
     ft8demodbaseband.h
     ft8demodwebapiadapter.h
 	ft8plugin.h
+    ft8buffer.h
+    ft8demodworker.h;
 )
 
 include_directories(

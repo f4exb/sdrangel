@@ -361,7 +361,7 @@ void FT8DemodGUI::applySettings(bool force)
 unsigned int FT8DemodGUI::spanLog2Max()
 {
     unsigned int spanLog2 = 0;
-    for (; m_settings.m_ft8SampleRate / (1<<spanLog2) >= 1000; spanLog2++);
+    for (; FT8DemodSettings::m_ft8SampleRate / (1<<spanLog2) >= 1000; spanLog2++);
     return spanLog2 == 0 ? 0 : spanLog2-1;
 }
 
@@ -372,10 +372,10 @@ void FT8DemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     unsigned int limit = s2max < 1 ? 0 : s2max - 1;
     ui->spanLog2->setMaximum(limit);
     //int spanLog2 = ui->spanLog2->value();
-    m_spectrumRate = m_settings.m_ft8SampleRate / (1<<spanLog2);
+    m_spectrumRate = FT8DemodSettings::m_ft8SampleRate / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
-    int bwMax = m_settings.m_ft8SampleRate / (100*(1<<spanLog2));
+    int bwMax = FT8DemodSettings::m_ft8SampleRate / (100*(1<<spanLog2));
     int tickInterval = m_spectrumRate / 2400;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 

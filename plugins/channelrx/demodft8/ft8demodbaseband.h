@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include <QRecursiveMutex>
+#include <QDateTime>
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/downchannelizer.h"
@@ -28,9 +29,12 @@
 
 #include "ft8demodsettings.h"
 #include "ft8demodsink.h"
+#include "ft8buffer.h"
 
 class ChannelAPI;
 class SpectrumVis;
+class QThread;
+class FT8DemodWorker;
 
 class FT8DemodBaseband : public QObject
 {
@@ -73,7 +77,6 @@ public:
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
     void setChannel(ChannelAPI *channel);
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
-    void setAudioFifoLabel(const QString& label) { m_sink.setAudioFifoLabel(label); }
 
 signals:
 	/**
@@ -83,6 +86,7 @@ signals:
 	 * \param numSamples Number of samples analyzed
 	 */
 	void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
+    void bufferReady(int16_t *buffer, QDateTime periodTS);
 
 private:
     SampleSinkFifo m_sampleFifo;
@@ -93,6 +97,11 @@ private:
     int m_channelSampleRate;
     MessageQueue *m_messageQueueToGUI;
     SpectrumVis *m_spectrumVis;
+    FT8Buffer m_ft8Buffer;
+    int m_tickCount;
+    QThread *m_workerThread;
+    FT8DemodWorker *m_ft8DemodWorker;
+    int16_t *m_ft8WorkerBuffer;
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
@@ -102,6 +111,7 @@ private:
 private slots:
     void handleInputMessages();
     void handleData(); //!< Handle data when samples have to be processed
+    void tick();
 };
 
 #endif // INCLUDE_SSBDEMODBASEBAND_H

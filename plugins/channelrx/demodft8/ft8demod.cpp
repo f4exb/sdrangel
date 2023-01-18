@@ -242,7 +242,6 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
             << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
             << " m_agcActive: " << settings.m_agc
-            << " m_ft8SampleRate: " << settings.m_ft8SampleRate
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -273,9 +272,6 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
     }
     if ((m_settings.m_volume != settings.m_volume) || force) {
         reverseAPIKeys.append("volume");
-    }
-    if ((settings.m_ft8SampleRate != m_settings.m_ft8SampleRate) || force) {
-        reverseAPIKeys.append("ft8SampleRate");
     }
     if ((m_settings.m_agc != settings.m_agc) || force) {
         reverseAPIKeys.append("agc");
@@ -366,7 +362,7 @@ void FT8Demod::sendSampleRateToDemodAnalyzer()
             {
                 MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
                     this,
-                    m_settings.m_ft8SampleRate
+                    FT8DemodSettings::m_ft8SampleRate
                 );
                 messageQueue->push(msg);
             }
@@ -454,9 +450,6 @@ void FT8Demod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getFt8DemodSettings()->getTitle();
     }
-    if (channelSettingsKeys.contains("audioDeviceName")) {
-        settings.m_ft8SampleRate = response.getFt8DemodSettings()->getFt8SampleRate();
-    }
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getFt8DemodSettings()->getStreamIndex();
     }
@@ -508,7 +501,6 @@ void FT8Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getFt8DemodSettings()->setVolume(settings.m_volume);
     response.getFt8DemodSettings()->setAgc(settings.m_agc ? 1 : 0);
     response.getFt8DemodSettings()->setRgbColor(settings.m_rgbColor);
-    response.getFt8DemodSettings()->setFt8SampleRate(settings.m_ft8SampleRate);
 
     if (response.getFt8DemodSettings()->getTitle()) {
         *response.getFt8DemodSettings()->getTitle() = settings.m_title;
@@ -685,9 +677,6 @@ void FT8Demod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("title") || force) {
         swgFT8DemodSettings->setTitle(new QString(settings.m_title));
     }
-    if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgFT8DemodSettings->setFt8SampleRate(settings.m_ft8SampleRate);
-    }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFT8DemodSettings->setStreamIndex(settings.m_streamIndex);
     }
@@ -746,5 +735,4 @@ void FT8Demod::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
-        m_basebandSink->setAudioFifoLabel(fifoLabel);
 }

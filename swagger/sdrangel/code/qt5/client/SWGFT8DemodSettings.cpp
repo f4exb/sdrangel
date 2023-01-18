@@ -48,8 +48,6 @@ SWGFT8DemodSettings::SWGFT8DemodSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
-    ft8_sample_rate = 0;
-    m_ft8_sample_rate_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -96,8 +94,6 @@ SWGFT8DemodSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
-    ft8_sample_rate = 0;
-    m_ft8_sample_rate_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -132,7 +128,6 @@ SWGFT8DemodSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
-
 
 
     if(reverse_api_address != nullptr) { 
@@ -182,8 +177,6 @@ SWGFT8DemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&ft8_sample_rate, pJson["ft8SampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
@@ -248,9 +241,6 @@ SWGFT8DemodSettings::asJsonObject() {
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
-    }
-    if(m_ft8_sample_rate_isSet){
-        obj->insert("ft8SampleRate", QJsonValue(ft8_sample_rate));
     }
     if(m_stream_index_isSet){
         obj->insert("streamIndex", QJsonValue(stream_index));
@@ -384,16 +374,6 @@ SWGFT8DemodSettings::setTitle(QString* title) {
 }
 
 qint32
-SWGFT8DemodSettings::getFt8SampleRate() {
-    return ft8_sample_rate;
-}
-void
-SWGFT8DemodSettings::setFt8SampleRate(qint32 ft8_sample_rate) {
-    this->ft8_sample_rate = ft8_sample_rate;
-    this->m_ft8_sample_rate_isSet = true;
-}
-
-qint32
 SWGFT8DemodSettings::getStreamIndex() {
     return stream_index;
 }
@@ -516,9 +496,6 @@ SWGFT8DemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(m_ft8_sample_rate_isSet){
             isObjectUpdated = true; break;
         }
         if(m_stream_index_isSet){
