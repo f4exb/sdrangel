@@ -24,6 +24,7 @@ set(demodft8_HEADERS
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/ft8
 )
 
 if(NOT SERVER_MODE)
@@ -57,6 +58,7 @@ target_link_libraries(${TARGET_NAME}
 	sdrbase
 	${TARGET_LIB_GUI}
     swagger
+    ft8
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

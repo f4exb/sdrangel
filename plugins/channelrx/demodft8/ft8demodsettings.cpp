@@ -43,6 +43,10 @@ FT8DemodSettings::FT8DemodSettings() :
 void FT8DemodSettings::resetToDefaults()
 {
     m_agc = false;
+    m_recordWav = false;
+    m_logMessages = false;
+    m_nbDecoderThreads = 6;
+    m_decoderTimeBudget = 0.5;
     m_volume = 1.0;
     m_inputFrequencyOffset = 0;
     m_rgbColor = QColor(0, 192, 255).rgb();
@@ -69,6 +73,10 @@ QByteArray FT8DemodSettings::serialize() const
     }
 
     s.writeU32(5, m_rgbColor);
+    s.writeBool(6, m_recordWav);
+    s.writeBool(7, m_logMessages);
+    s.writeS32(8, m_nbDecoderThreads);
+    s.writeFloat(9, m_decoderTimeBudget);
     s.writeBool(11, m_agc);
     s.writeString(16, m_title);
     s.writeBool(18, m_useReverseAPI);
@@ -126,6 +134,10 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         }
 
         d.readU32(5, &m_rgbColor);
+        d.readBool(6, &m_recordWav, false);
+        d.readBool(7, &m_logMessages, false);
+        d.readS32(8, &m_nbDecoderThreads, 6);
+        d.readFloat(9, &m_decoderTimeBudget, 0.5);
         d.readBool(11, &m_agc, false);
         d.readString(16, &m_title, "SSB Demodulator");
         d.readBool(18, &m_useReverseAPI, false);

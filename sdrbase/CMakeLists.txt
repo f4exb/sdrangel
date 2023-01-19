@@ -185,6 +185,7 @@ set(sdrbase_SOURCES
     util/fixedtraits.cpp
     util/fits.cpp
     util/flightinformation.cpp
+    util/ft8message.cpp
     util/giro.cpp
     util/golay2312.cpp
     util/httpdownloadmanager.cpp
@@ -408,6 +409,7 @@ set(sdrbase_HEADERS
     util/fixedtraits.h
     util/fits.h
     util/flightinformation.h
+    util/ft8message.h
     util/giro.h
     util/golay2312.h
     util/httpdownloadmanager.h

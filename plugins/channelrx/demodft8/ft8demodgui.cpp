@@ -204,6 +204,32 @@ void FT8DemodGUI::on_filterIndex_valueChanged(int value)
     applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
 }
 
+void FT8DemodGUI::on_recordWav_toggled(bool checked)
+{
+    m_settings.m_recordWav = checked;
+    applySettings();
+}
+
+void FT8DemodGUI::on_logMessages_toggled(bool checked)
+{
+    m_settings.m_logMessages = checked;
+    applySettings();
+}
+
+void FT8DemodGUI::on_nbThreads_valueChanged(int value)
+{
+    ui->nbThreadsText->setText(tr("%1").arg(value));
+    m_settings.m_nbDecoderThreads = value;
+    applySettings();
+}
+
+void FT8DemodGUI::on_timeBudget_valueChanged(int value)
+{
+    m_settings.m_decoderTimeBudget = value / 10.0f;
+    ui->timeBudgetText->setText(tr("%1").arg(m_settings.m_decoderTimeBudget, 0, 'f', 1));
+    applySettings();
+}
+
 void FT8DemodGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
@@ -335,6 +361,9 @@ FT8DemodGUI::FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
     DialPopup::addPopupsToChildDials(this);
+
+    // Resize the table using dummy data
+    resizeMessageTable();
 }
 
 FT8DemodGUI::~FT8DemodGUI()
@@ -500,6 +529,13 @@ void FT8DemodGUI::displaySettings()
     ui->volume->setValue(volume);
     ui->volumeText->setText(QString("%1").arg(volume));
 
+    ui->recordWav->setChecked(m_settings.m_recordWav);
+    ui->logMessages->setChecked(m_settings.m_logMessages);
+    ui->nbThreads->setValue(m_settings.m_nbDecoderThreads);
+    ui->nbThreadsText->setText(tr("%1").arg(m_settings.m_nbDecoderThreads));
+    ui->timeBudget->setValue(m_settings.m_decoderTimeBudget*10);
+    ui->timeBudgetText->setText(tr("%1").arg(m_settings.m_decoderTimeBudget, 0, 'f', 1));
+
     updateIndexLabel();
 
     getRollupContents()->restoreState(m_rollupState);
@@ -549,9 +585,33 @@ void FT8DemodGUI::makeUIConnections()
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &FT8DemodGUI::on_spanLog2_valueChanged);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FT8DemodGUI::on_fftWindow_currentIndexChanged);
     QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &FT8DemodGUI::on_filterIndex_valueChanged);
+    QObject::connect(ui->recordWav, &ButtonSwitch::toggled, this, &FT8DemodGUI::on_recordWav_toggled);
+    QObject::connect(ui->logMessages, &ButtonSwitch::toggled, this, &FT8DemodGUI::on_logMessages_toggled);
+    QObject::connect(ui->nbThreads, &QDial::valueChanged, this, &FT8DemodGUI::on_nbThreads_valueChanged);
+    QObject::connect(ui->timeBudget, &QDial::valueChanged, this, &FT8DemodGUI::on_timeBudget_valueChanged);
 }
 
 void FT8DemodGUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+}
+
+void FT8DemodGUI::resizeMessageTable()
+{
+    // Fill table with a row of dummy data that will size the columns nicely
+    // Trailing spaces are for sort arrow
+    int row = ui->messages->rowCount();
+    ui->messages->setRowCount(row + 1);
+    ui->messages->setItem(row, MESSAGE_COL_UTC, new QTableWidgetItem("000000"));
+    ui->messages->setItem(row, MESSAGE_COL_N, new QTableWidgetItem("0"));
+    ui->messages->setItem(row, MESSAGE_COL_SNR, new QTableWidgetItem("-24"));
+    ui->messages->setItem(row, MESSAGE_COL_DEC, new QTableWidgetItem("174"));
+    ui->messages->setItem(row, MESSAGE_COL_DT, new QTableWidgetItem("0.0"));
+    ui->messages->setItem(row, MESSAGE_COL_DF, new QTableWidgetItem("0000"));
+    ui->messages->setItem(row, MESSAGE_COL_CALL1, new QTableWidgetItem("123456789ABCD"));
+    ui->messages->setItem(row, MESSAGE_COL_CALL2, new QTableWidgetItem("HF7SIEMA"));
+    ui->messages->setItem(row, MESSAGE_COL_LOC, new QTableWidgetItem("JN00"));
+    ui->messages->setItem(row, MESSAGE_COL_INFO, new QTableWidgetItem("hint1"));
+    ui->messages->resizeColumnsToContents();
+    ui->messages->removeRow(row);
 }

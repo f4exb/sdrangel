@@ -44,6 +44,14 @@ SWGFT8DemodSettings::SWGFT8DemodSettings() {
     m_volume_isSet = false;
     agc = 0;
     m_agc_isSet = false;
+    record_wav = 0;
+    m_record_wav_isSet = false;
+    log_messages = 0;
+    m_log_messages_isSet = false;
+    nb_decoder_threads = 0;
+    m_nb_decoder_threads_isSet = false;
+    decoder_time_budget = 0.0f;
+    m_decoder_time_budget_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -90,6 +98,14 @@ SWGFT8DemodSettings::init() {
     m_volume_isSet = false;
     agc = 0;
     m_agc_isSet = false;
+    record_wav = 0;
+    m_record_wav_isSet = false;
+    log_messages = 0;
+    m_log_messages_isSet = false;
+    nb_decoder_threads = 0;
+    m_nb_decoder_threads_isSet = false;
+    decoder_time_budget = 0.0f;
+    m_decoder_time_budget_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -116,6 +132,10 @@ SWGFT8DemodSettings::init() {
 
 void
 SWGFT8DemodSettings::cleanup() {
+
+
+
+
 
 
 
@@ -173,6 +193,14 @@ SWGFT8DemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
     
     ::SWGSDRangel::setValue(&agc, pJson["agc"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&record_wav, pJson["recordWav"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&log_messages, pJson["logMessages"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&nb_decoder_threads, pJson["nbDecoderThreads"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&decoder_time_budget, pJson["decoderTimeBudget"], "float", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -235,6 +263,18 @@ SWGFT8DemodSettings::asJsonObject() {
     }
     if(m_agc_isSet){
         obj->insert("agc", QJsonValue(agc));
+    }
+    if(m_record_wav_isSet){
+        obj->insert("recordWav", QJsonValue(record_wav));
+    }
+    if(m_log_messages_isSet){
+        obj->insert("logMessages", QJsonValue(log_messages));
+    }
+    if(m_nb_decoder_threads_isSet){
+        obj->insert("nbDecoderThreads", QJsonValue(nb_decoder_threads));
+    }
+    if(m_decoder_time_budget_isSet){
+        obj->insert("decoderTimeBudget", QJsonValue(decoder_time_budget));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -351,6 +391,46 @@ void
 SWGFT8DemodSettings::setAgc(qint32 agc) {
     this->agc = agc;
     this->m_agc_isSet = true;
+}
+
+qint32
+SWGFT8DemodSettings::getRecordWav() {
+    return record_wav;
+}
+void
+SWGFT8DemodSettings::setRecordWav(qint32 record_wav) {
+    this->record_wav = record_wav;
+    this->m_record_wav_isSet = true;
+}
+
+qint32
+SWGFT8DemodSettings::getLogMessages() {
+    return log_messages;
+}
+void
+SWGFT8DemodSettings::setLogMessages(qint32 log_messages) {
+    this->log_messages = log_messages;
+    this->m_log_messages_isSet = true;
+}
+
+qint32
+SWGFT8DemodSettings::getNbDecoderThreads() {
+    return nb_decoder_threads;
+}
+void
+SWGFT8DemodSettings::setNbDecoderThreads(qint32 nb_decoder_threads) {
+    this->nb_decoder_threads = nb_decoder_threads;
+    this->m_nb_decoder_threads_isSet = true;
+}
+
+float
+SWGFT8DemodSettings::getDecoderTimeBudget() {
+    return decoder_time_budget;
+}
+void
+SWGFT8DemodSettings::setDecoderTimeBudget(float decoder_time_budget) {
+    this->decoder_time_budget = decoder_time_budget;
+    this->m_decoder_time_budget_isSet = true;
 }
 
 qint32
@@ -490,6 +570,18 @@ SWGFT8DemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_agc_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_record_wav_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log_messages_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nb_decoder_threads_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_decoder_time_budget_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

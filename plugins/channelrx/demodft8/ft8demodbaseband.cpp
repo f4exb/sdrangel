@@ -58,7 +58,8 @@ FT8DemodBaseband::FT8DemodBaseband() :
         this,
         &FT8DemodBaseband::bufferReady,
         m_ft8DemodWorker,
-        &FT8DemodWorker::processBuffer
+        &FT8DemodWorker::processBuffer,
+        Qt::QueuedConnection
     );
 
     m_workerThread->start();
@@ -202,6 +203,30 @@ void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool forc
             DSPSignalNotification *msg = new DSPSignalNotification(FT8DemodSettings::m_ft8SampleRate/(1<<settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
             m_spectrumVis->getInputMessageQueue()->push(msg);
         }
+    }
+
+    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff != settings.m_filterBank[settings.m_filterIndex].m_lowCutoff) || force) {
+        m_ft8DemodWorker->setLowFrequency(settings.m_filterBank[settings.m_filterIndex].m_lowCutoff);
+    }
+
+    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth != settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth) || force) {
+        m_ft8DemodWorker->setHighFrequency(settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth);
+    }
+
+    if ((settings.m_recordWav != m_settings.m_recordWav) || force) {
+        m_ft8DemodWorker->setRecordSamples(settings.m_recordWav);
+    }
+
+    if ((settings.m_logMessages != m_settings.m_logMessages) || force) {
+        m_ft8DemodWorker->setLogMessages(settings.m_logMessages);
+    }
+
+    if ((settings.m_nbDecoderThreads != m_settings.m_nbDecoderThreads) || force) {
+        m_ft8DemodWorker->setNbDecoderThreads(settings.m_nbDecoderThreads);
+    }
+
+    if ((settings.m_decoderTimeBudget != m_settings.m_decoderTimeBudget) || force) {
+        m_ft8DemodWorker->setDecoderTimeBudget(settings.m_decoderTimeBudget);
     }
 
     m_sink.applySettings(settings, force);

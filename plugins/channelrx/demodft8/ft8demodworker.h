@@ -20,7 +20,12 @@
 
 #include <QObject>
 
+#include "ft8.h"
+#include "unpack.h"
+
 class QDateTime;
+class MessageQueue;
+class MsgReportFT8Messages;
 
 class FT8DemodWorker : public QObject
 {
@@ -30,9 +35,52 @@ public:
     ~FT8DemodWorker();
 
     void processBuffer(int16_t *buffer, QDateTime periodTS);
+    void setRecordSamples(bool recordSamples) { m_recordSamples = recordSamples; }
+    void setLogMessages(bool logMessages) { m_logMessages = logMessages; }
+    void setNbDecoderThreads(int nbDecoderThreads) { m_nbDecoderThreads = nbDecoderThreads; }
+    void setDecoderTimeBudget(float decoderTimeBudget) { m_decoderTimeBudget = decoderTimeBudget; }
+    void setLowFrequency(int lowFreq) { m_lowFreq = lowFreq; }
+    void setHighFrequency(int highFreq) { m_highFreq = highFreq; }
+    void setReportingMessageQueue(MessageQueue *messageQueue) { m_reportingMessageQueue = messageQueue; }
 
 private:
+    class FT8Callback : public FT8::CallbackInterface
+    {
+    public:
+        FT8Callback(const QDateTime& periodTS, FT8::Packing& packing);
+        virtual int hcb(
+            int *a91,
+            float hz0,
+            float off,
+            const char *comment,
+            float snr,
+            int pass,
+            int correct_bits
+        );
+        const std::map<std::string, bool>& getMsgMap() {
+            return cycle_already;
+        }
+        MsgReportFT8Messages *getReportMessage() {
+            return m_msgReportFT8Messages;
+        }
+    private:
+        QMutex cycle_mu;
+        std::map<std::string, bool> cycle_already;
+        FT8::Packing& m_packing;
+        MsgReportFT8Messages *m_msgReportFT8Messages;
+        const QDateTime& m_periodTS;
+    };
+
     QString m_samplesPath;
+    bool m_recordSamples;
+    bool m_logMessages;
+    int m_nbDecoderThreads;
+    float m_decoderTimeBudget;
+    int m_lowFreq;
+    int m_highFreq;
+    FT8::FT8Decoder m_ft8Decoder;
+    FT8::Packing m_packing;
+    MessageQueue *m_reportingMessageQueue;
 };
 
 #endif // INCLUDE_FT8DEMODWORKER_H

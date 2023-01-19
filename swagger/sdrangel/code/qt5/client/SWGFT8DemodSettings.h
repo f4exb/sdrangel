@@ -69,6 +69,18 @@ public:
     qint32 getAgc();
     void setAgc(qint32 agc);
 
+    qint32 getRecordWav();
+    void setRecordWav(qint32 record_wav);
+
+    qint32 getLogMessages();
+    void setLogMessages(qint32 log_messages);
+
+    qint32 getNbDecoderThreads();
+    void setNbDecoderThreads(qint32 nb_decoder_threads);
+
+    float getDecoderTimeBudget();
+    void setDecoderTimeBudget(float decoder_time_budget);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -129,6 +141,18 @@ private:
 
     qint32 agc;
     bool m_agc_isSet;
+
+    qint32 record_wav;
+    bool m_record_wav_isSet;
+
+    qint32 log_messages;
+    bool m_log_messages_isSet;
+
+    qint32 nb_decoder_threads;
+    bool m_nb_decoder_threads_isSet;
+
+    float decoder_time_budget;
+    bool m_decoder_time_budget_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

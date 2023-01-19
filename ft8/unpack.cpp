@@ -27,19 +27,17 @@
 
 namespace FT8 {
 
-int Packing::ihashcall(std::string call, int m)
+int Packing::ihashcall(std::string rawcall, int m)
 {
-    while (call.size() > 0 && call[0] == ' ')
-        call.erase(0, 1);
-    while (call.size() > 0 && call[call.size() - 1] == ' ')
-        call.erase(call.end() - 1);
-
+    std::string call = trim(rawcall);
     const char *chars = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ/";
 
-    while (call.size() < 11)
+    while (call.size() < 11) {
         call += " ";
+    }
 
     unsigned long long x = 0;
+
     for (int i = 0; i < 11; i++)
     {
         int c = call[i];
@@ -48,6 +46,7 @@ int Packing::ihashcall(std::string call, int m)
         int j = p - chars;
         x = 38 * x + j;
     }
+
     x = x * 47055833459LL;
     x = x >> (64 - m);
 
@@ -66,17 +65,24 @@ std::string Packing::unpackcall(int x)
     const char *c3 = "0123456789";
     const char *c4 = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    if (x == 0)
+    if (x == 0) {
         return "DE";
-    if (x == 1)
+    }
+
+    if (x == 1) {
         return "QRZ";
-    if (x == 2)
+    }
+
+    if (x == 2) {
         return "CQ";
+    }
+
     if (x <= 1002)
     {
         sprintf(tmp, "CQ %d", x - 3);
-        return tmp;
+        return std::string(tmp);
     }
+
     if (x <= 532443)
     {
         x -= 1003;
@@ -88,11 +94,10 @@ std::string Packing::unpackcall(int x)
         x %= 27;
         int ci4 = x;
         sprintf(tmp, "CQ %c%c%c%c", c4[ci1], c4[ci2], c4[ci3], c4[ci4]);
-        return tmp;
+        return std::string(tmp);
     }
 
-    if (x < NTOKENS)
-    {
+    if (x < NTOKENS) {
         return "<TOKEN>";
     }
 
@@ -103,14 +108,13 @@ std::string Packing::unpackcall(int x)
         // 22-bit hash...
         std::string s;
         hashes_mu.lock();
-        if (hashes22.count(x) > 0)
-        {
+
+        if (hashes22.count(x) > 0) {
             s = hashes22[x];
-        }
-        else
-        {
+        } else {
             s = "<...22>";
         }
+
         hashes_mu.unlock();
         return s;
     }
@@ -133,7 +137,7 @@ std::string Packing::unpackcall(int x)
 
     a[6] = '\0';
 
-    return a;
+    return std::string(a);
 }
 
 // unpack a 15-bit grid square &c.
@@ -172,44 +176,41 @@ std::string Packing::unpackgrid(int ng, int ir, int i3)
 
     ng -= NGBASE;
 
-    if (ng == 1)
-    {
+    if (ng == 1) {
         return "   "; // ???
     }
-    if (ng == 2)
-    {
+    if (ng == 2) {
         return "RRR ";
     }
-    if (ng == 3)
-    {
+    if (ng == 3) {
         return "RR73";
     }
-    if (ng == 4)
-    {
+    if (ng == 4) {
         return "73  ";
     }
 
     int db = ng - 35;
     char tmp[16];
-    if (db >= 0)
-    {
+
+    if (db >= 0) {
         sprintf(tmp, "%s+%02d", ir ? "R" : "", db);
-    }
-    else
-    {
+    } else {
         sprintf(tmp, "%s-%02d", ir ? "R" : "", 0 - db);
     }
-    return tmp;
+
+    return std::string(tmp);
 }
 
 void Packing::remember_call(std::string call)
 {
     hashes_mu.lock();
+
     if (call.size() >= 3 && call[0] != '<')
     {
         hashes22[ihashcall(call, 22)] = call;
         hashes12[ihashcall(call, 12)] = call;
     }
+
     hashes_mu.unlock();
 }
 
@@ -236,11 +237,14 @@ std::string Packing::unpack_4(int a77[], std::string& call1str, std::string& cal
     }
 
     call[11] = '\0';
+    std::string callstr(call);
 
-    remember_call(call);
+    remember_call(callstr);
 
-    if (un64(a77, 73, 1) == 1) {
-        return std::string("CQ ") + call;
+    if (un64(a77, 73, 1) == 1)
+    {
+        call1str = std::string("CQ ") + callstr;
+        return call1str;
     }
 
     int x12 = un64(a77, 0, 12);
@@ -255,7 +259,6 @@ std::string Packing::unpack_4(int a77[], std::string& call1str, std::string& cal
     }
 
     hashes_mu.unlock();
-
     int swap = un64(a77, 70, 1);
     std::string msg;
 
@@ -274,14 +277,16 @@ std::string Packing::unpack_4(int a77[], std::string& call1str, std::string& cal
 
     int suffix = un64(a77, 71, 2);
 
-    if (suffix == 1) {
-        msg += " RRR";
+    if (suffix == 1)
+    {
+        locstr = " RRR";
     } else if (suffix == 2) {
-        msg += " RR73";
+        locstr = " RR73";
     } else if (suffix == 3) {
-        msg += " 73";
+        locstr = " 73";
     }
 
+    msg += locstr;
     return msg;
 }
 
@@ -323,7 +328,7 @@ std::string Packing::unpack_1(int a77[], std::string& call1str, std::string& cal
     remember_call(call1str);
     remember_call(call2str);
 
-    const char *pr = (i3 == 1 ? "/R" : "/P");
+    const std::string pr = (i3 == 1 ? "/R" : "/P");
 
     return call1str + (rover1 ? pr : "") + " " + call2str + (rover2 ? pr : "") + " " + locstr;
 }
@@ -340,11 +345,13 @@ std::string Packing::unpack_0_0(int a77[], std::string& call1str, std::string& c
     const char *cc = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ+-./?";
     boost::multiprecision::int128_t x = un128(a77, 0, 71);
     std::string msg = "0123456789123";
+
     for (int i = 0; i < 13; i++)
     {
         msg[13 - 1 - i] = cc[(int) (x % 42)];
         x = x / 42;
     }
+
     call1str = msg;
     return msg;
 }
@@ -392,6 +399,7 @@ std::string Packing::unpack_3(int a77[], std::string& call1str, std::string& cal
     int statei = serial - 8001;
     std::string serialstr;
     int nstates = sizeof(ru_states) / sizeof(ru_states[0]);
+
     if (serial > 8000 && statei < nstates)
     {
         serialstr = ru_states[statei];
@@ -400,16 +408,17 @@ std::string Packing::unpack_3(int a77[], std::string& call1str, std::string& cal
     {
         char tmp[32];
         sprintf(tmp, "%04d", serial);
-        serialstr = tmp;
+        serialstr = std::string(tmp);
     }
 
     std::string msg;
 
-    if (tu)
-    {
+    if (tu) {
         msg += "TU; ";
     }
+
     msg += call1str + " " + call2str + " ";
+
     if (r)
     {
         msg += "R ";
@@ -417,8 +426,9 @@ std::string Packing::unpack_3(int a77[], std::string& call1str, std::string& cal
     {
         char tmp[16];
         sprintf(tmp, "%d ", rst);
-        msg += tmp;
+        msg += std::string(tmp);
     }
+
     msg += serialstr;
 
     remember_call(call1str);
@@ -479,7 +489,7 @@ std::string Packing::unpack_0_3(int a77[], int n3, std::string& call1str, std::s
     {
         char tmp[16];
         sprintf(tmp, "%d%c ", n_transmitters + 1, clss + 'A');
-        msg += tmp;
+        msg += std::string(tmp);
     }
 
     if (section - 1 >= 0 && section - 1 < (int)(sizeof(sections) / sizeof(sections[0]))) {
@@ -531,8 +541,9 @@ std::string Packing::unpack(int a77[], std::string& call1, std::string& call2, s
     }
 
     char tmp[64];
+    call1 = "UNK";
     sprintf(tmp, "UNK i3=%d n3=%d", i3, n3);
-    return tmp;
+    return std::string(tmp);
 }
 
 } // namespace FT8

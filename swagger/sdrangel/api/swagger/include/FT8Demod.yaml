@@ -33,6 +33,25 @@ FT8DemodSettings:
     agc:
       description: AGC (1 if AGC active else 0)
       type: integer
+    recordWav:
+      type: integer
+      description: >
+        Record received audio as 12000S/s 16 bit .wav file
+          * 0 - Do not record
+          * 1 - Record as sdrangel/ft8/save/YYYYMMDD_HHMMSS.wav in writable location
+    logMessages:
+      type: integer
+      description: >
+        Log decoded messages in WSJT CALL.TXT format
+          * 0 - Do not log messages
+          * 1 - Log messages as sdrangel/ft8/logs/YYYYMMDD_call.txt in writable location (daily files)
+    nbDecoderThreads:
+      type: integer
+      description: Number of threads in the FT8 decoder
+    decoderTimeBudget:
+      type: number
+      format: float
+      desctiption: Decoder time budget in seconds (will stop after running this time)
     rgbColor:
       type: integer
     title:

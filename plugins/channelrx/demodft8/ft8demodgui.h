@@ -100,6 +100,21 @@ private:
 	void leaveEvent(QEvent*);
 	void enterEvent(EnterEventType*);
 
+    void resizeMessageTable();
+
+    enum MessageCol {
+        MESSAGE_COL_UTC,
+        MESSAGE_COL_N,
+        MESSAGE_COL_SNR,
+        MESSAGE_COL_DEC,
+        MESSAGE_COL_DT,
+        MESSAGE_COL_DF,
+        MESSAGE_COL_CALL1,
+        MESSAGE_COL_CALL2,
+        MESSAGE_COL_LOC,
+        MESSAGE_COL_INFO,
+    };
+
 private slots:
 	void on_deltaFrequency_changed(qint64 value);
 	void on_BW_valueChanged(int value);
@@ -109,6 +124,10 @@ private slots:
 	void on_spanLog2_valueChanged(int value);
     void on_fftWindow_currentIndexChanged(int index);
     void on_filterIndex_valueChanged(int value);
+    void on_recordWav_toggled(bool checked);
+    void on_logMessages_toggled(bool checked);
+    void on_nbThreads_valueChanged(int value);
+    void on_timeBudget_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

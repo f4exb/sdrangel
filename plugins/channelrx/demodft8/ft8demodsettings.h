@@ -46,8 +46,11 @@ struct FT8DemodSettings
     // Real m_rfBandwidth;
     // Real m_lowCutoff;
     Real m_volume;
-    // int  m_spanLog2;
     bool m_agc;
+    bool m_recordWav;
+    bool m_logMessages;
+    int m_nbDecoderThreads;
+    float m_decoderTimeBudget;
     quint32 m_rgbColor;
     QString m_title;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).

@@ -24,7 +24,7 @@
 #include <string>
 #include <map>
 
-#include <QMutex>
+#include <QRecursiveMutex>
 
 #include "export.h"
 
@@ -36,7 +36,7 @@ public:
     std::string unpack(int a91[], std::string& call1str, std::string& call2str, std::string& locstr);
 
 private:
-    int ihashcall(std::string call, int m);
+    static int ihashcall(std::string call, int m);
     std::string unpackcall(int x);
     std::string unpackgrid(int ng, int ir, int i3);
     void remember_call(std::string call);
@@ -46,7 +46,7 @@ private:
     std::string unpack_3(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_0_3(int a77[], int n3, std::string& call1str, std::string& call2str, std::string& locstr);
 
-    QMutex hashes_mu;
+    QRecursiveMutex hashes_mu;
     std::map<int, std::string> hashes12;
     std::map<int, std::string> hashes22;
 

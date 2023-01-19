@@ -276,6 +276,18 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
     if ((m_settings.m_agc != settings.m_agc) || force) {
         reverseAPIKeys.append("agc");
     }
+    if ((m_settings.m_recordWav != settings.m_recordWav) || force) {
+        reverseAPIKeys.append("recordWav");
+    }
+    if ((m_settings.m_logMessages != settings.m_logMessages) || force) {
+        reverseAPIKeys.append("logMessages");
+    }
+    if ((m_settings.m_nbDecoderThreads != settings.m_nbDecoderThreads) || force) {
+        reverseAPIKeys.append("nbDecoderThreads");
+    }
+    if ((m_settings.m_decoderTimeBudget != settings.m_decoderTimeBudget) || force) {
+        reverseAPIKeys.append("decoderTimeBudget");
+    }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
@@ -444,6 +456,18 @@ void FT8Demod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("agc")) {
         settings.m_agc = response.getFt8DemodSettings()->getAgc() != 0;
     }
+    if (channelSettingsKeys.contains("recordWav")) {
+        settings.m_recordWav = response.getFt8DemodSettings()->getRecordWav() != 0;
+    }
+    if (channelSettingsKeys.contains("m_logMessages")) {
+        settings.m_logMessages = response.getFt8DemodSettings()->getLogMessages() != 0;
+    }
+    if (channelSettingsKeys.contains("nbDecoderThreads")) {
+        settings.m_nbDecoderThreads = response.getFt8DemodSettings()->getNbDecoderThreads();
+    }
+    if (channelSettingsKeys.contains("decoderTimeBudget")) {
+        settings.m_decoderTimeBudget = response.getFt8DemodSettings()->getDecoderTimeBudget();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getFt8DemodSettings()->getRgbColor();
     }
@@ -500,6 +524,10 @@ void FT8Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getFt8DemodSettings()->setFftWindow((int) settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
     response.getFt8DemodSettings()->setVolume(settings.m_volume);
     response.getFt8DemodSettings()->setAgc(settings.m_agc ? 1 : 0);
+    response.getFt8DemodSettings()->setRecordWav(settings.m_recordWav ? 1 : 0);
+    response.getFt8DemodSettings()->setLogMessages(settings.m_logMessages ? 1 : 0);
+    response.getFt8DemodSettings()->setNbDecoderThreads(settings.m_nbDecoderThreads);
+    response.getFt8DemodSettings()->setDecoderTimeBudget(settings.m_decoderTimeBudget);
     response.getFt8DemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getFt8DemodSettings()->getTitle()) {
@@ -670,6 +698,18 @@ void FT8Demod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("agc") || force) {
         swgFT8DemodSettings->setAgc(settings.m_agc ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("recordWav") || force) {
+        swgFT8DemodSettings->setRecordWav(settings.m_recordWav ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("logMessages") || force) {
+        swgFT8DemodSettings->setRecordWav(settings.m_logMessages ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("nbDecoderThreads") || force) {
+        swgFT8DemodSettings->setNbDecoderThreads(settings.m_nbDecoderThreads);
+    }
+    if (channelSettingsKeys.contains("decoderTimeBudget") || force) {
+        swgFT8DemodSettings->setDecoderTimeBudget(settings.m_decoderTimeBudget);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFT8DemodSettings->setRgbColor(settings.m_rgbColor);

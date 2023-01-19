@@ -37,4 +37,7 @@ target_link_libraries(ft8
     sdrbase
 )
 
+# remove or comment when debugging is done
+# set_property(TARGET ft8 PROPERTY COMPILE_OPTIONS "$<$<CONFIG:Debug>:-Og>")
+
 install(TARGETS ft8 DESTINATION ${INSTALL_LIB_DIR})

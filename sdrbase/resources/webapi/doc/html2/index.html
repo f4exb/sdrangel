@@ -5611,6 +5611,22 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "AGC (1 if AGC active else 0)"
     },
+    "recordWav" : {
+      "type" : "integer",
+      "description" : "Record received audio as 12000S/s 16 bit .wav file\n  * 0 - Do not record\n  * 1 - Record as sdrangel/ft8/save/YYYYMMDD_HHMMSS.wav in writable location\n"
+    },
+    "logMessages" : {
+      "type" : "integer",
+      "description" : "Log decoded messages in WSJT CALL.TXT format\n  * 0 - Do not log messages\n  * 1 - Log messages as sdrangel/ft8/logs/YYYYMMDD_call.txt in writable location (daily files)\n"
+    },
+    "nbDecoderThreads" : {
+      "type" : "integer",
+      "description" : "Number of threads in the FT8 decoder"
+    },
+    "decoderTimeBudget" : {
+      "type" : "number",
+      "format" : "float"
+    },
     "rgbColor" : {
       "type" : "integer"
     },
@@ -56873,7 +56889,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-01-17T00:44:14.657+01:00
+              Generated 2023-01-19T23:18:51.935+01:00
             </div>
           </div>
       </div>
