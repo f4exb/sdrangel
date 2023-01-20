@@ -26,6 +26,7 @@
 class QDateTime;
 class MessageQueue;
 class MsgReportFT8Messages;
+class ChannelAPI;
 
 class FT8DemodWorker : public QObject
 {
@@ -43,12 +44,14 @@ public:
     void setHighFrequency(int highFreq) { m_highFreq = highFreq; }
     void setReportingMessageQueue(MessageQueue *messageQueue) { m_reportingMessageQueue = messageQueue; }
     void invalidateSequence() { m_invalidSequence = true; }
+    void setBaseFrequency(qint64 baseFrequency) { m_baseFrequency = baseFrequency; }
+    void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
 private:
     class FT8Callback : public FT8::CallbackInterface
     {
     public:
-        FT8Callback(const QDateTime& periodTS, FT8::Packing& packing);
+        FT8Callback(const QDateTime& periodTS, qint64 baseFrequency, FT8::Packing& packing);
         virtual int hcb(
             int *a91,
             float hz0,
@@ -58,21 +61,20 @@ private:
             int pass,
             int correct_bits
         );
-        const std::map<std::string, bool>& getMsgMap() {
-            return cycle_already;
-        }
-        MsgReportFT8Messages *getReportMessage() {
-            return m_msgReportFT8Messages;
-        }
+        const std::map<std::string, bool>& getMsgMap() { return cycle_already; }
+        MsgReportFT8Messages *getReportMessage() { return m_msgReportFT8Messages; }
+
     private:
         QMutex cycle_mu;
         std::map<std::string, bool> cycle_already;
         FT8::Packing& m_packing;
         MsgReportFT8Messages *m_msgReportFT8Messages;
         const QDateTime& m_periodTS;
+        qint64 m_baseFrequency;
     };
 
     QString m_samplesPath;
+    QString m_logsPath;
     bool m_recordSamples;
     bool m_logMessages;
     int m_nbDecoderThreads;
@@ -80,9 +82,11 @@ private:
     int m_lowFreq;
     int m_highFreq;
     bool m_invalidSequence;
+    qint64 m_baseFrequency;
     FT8::FT8Decoder m_ft8Decoder;
     FT8::Packing m_packing;
     MessageQueue *m_reportingMessageQueue;
+    ChannelAPI *m_channel;
 };
 
 #endif // INCLUDE_FT8DEMODWORKER_H

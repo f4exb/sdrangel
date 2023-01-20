@@ -107,10 +107,10 @@ private:
     enum MessageCol {
         MESSAGE_COL_UTC,
         MESSAGE_COL_N,
-        MESSAGE_COL_SNR,
         MESSAGE_COL_DEC,
         MESSAGE_COL_DT,
         MESSAGE_COL_DF,
+        MESSAGE_COL_SNR,
         MESSAGE_COL_CALL1,
         MESSAGE_COL_CALL2,
         MESSAGE_COL_LOC,

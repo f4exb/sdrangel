@@ -42,6 +42,7 @@ class FT8_API MsgReportFT8Messages : public Message {
     MESSAGE_CLASS_DECLARATION
 public:
     QList<FT8Message>& getFT8Messages() { return m_ft8Messages; }
+    void setBaseFrequency(qint64 baseFrequency) { m_baseFrequency = baseFrequency; }
 
     static MsgReportFT8Messages* create() {
         return new MsgReportFT8Messages();
@@ -49,9 +50,11 @@ public:
 
 private:
     QList<FT8Message> m_ft8Messages;
+    qint64 m_baseFrequency;
 
     MsgReportFT8Messages() :
-        Message()
+        Message(),
+        m_baseFrequency(0)
     { }
 };
 

@@ -33,19 +33,19 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
     // cache fftw plans in the parent process,
     // so they will already be there for fork()ed children.
 
-    plansmu.lock();
+    m_plansmu.lock();
 
-    for (int i = 0; i < nplans; i++)
+    for (int i = 0; i < m_nplans; i++)
     {
-        if (plans[i]->n_ == n && plans[i]->type_ == fftw_type
+        if (m_plans[i]->n_ == n && m_plans[i]->type_ == M_FFTW_TYPE
 #if TIMING
             && strcmp(plans[i]->why_, why) == 0
 #endif
         )
         {
-            Plan *p = plans[i];
+            Plan *p = m_plans[i];
             p->uses_ += 1;
-            plansmu.unlock();
+            m_plansmu.unlock();
             return p;
         }
     }
@@ -55,7 +55,7 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
 #endif
 
     // fftw_make_planner_thread_safe();
-    plansmu2.lock();
+    m_plansmu2.lock();
 
     fftwf_set_timelimit(5);
 
@@ -80,7 +80,7 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
     // FFTW_MEASURE
     // FFTW_PATIENT
     // FFTW_EXHAUSTIVE
-    int type = fftw_type;
+    int type = M_FFTW_TYPE;
     p->type_ = type;
     p->fwd_ = fftwf_plan_dft_r2c_1d(n, p->r_, p->c_, type);
     assert(p->fwd_);
@@ -99,12 +99,12 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
     p->crev_ = fftwf_plan_dft_1d(n, p->cc2_, p->cc1_, FFTW_BACKWARD, type);
     assert(p->crev_);
 
-    plansmu2.unlock();
+    m_plansmu2.unlock();
 
-    assert(nplans + 1 < 1000);
+    assert(m_nplans + 1 < 1000);
 
-    plans[nplans] = p;
-    nplans += 1;
+    m_plans[m_nplans] = p;
+    m_nplans += 1;
 
 #if TIMING
     if (0 && getpid() == plan_master_pid)
@@ -115,7 +115,7 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
     }
 #endif
 
-    plansmu.unlock();
+    m_plansmu.unlock();
 
     return p;
 }
@@ -562,9 +562,9 @@ std::vector<float> FFTEngine::hilbert_shift(const std::vector<float> &x, float h
 
 void FFTEngine::fft_stats()
 {
-    for (int i = 0; i < nplans; i++)
+    for (int i = 0; i < m_nplans; i++)
     {
-        Plan *p = plans[i];
+        Plan *p = m_plans[i];
         qDebug("FT8::FFTEngine::fft_stats: %-13s %6d %9d %6.3fn",
                 p->why_,
                 p->n_,

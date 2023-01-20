@@ -102,6 +102,7 @@ void FT8DemodBaseband::setMessageQueueToGUI(MessageQueue *messageQueue)
 void FT8DemodBaseband::setChannel(ChannelAPI *channel)
 {
     m_sink.setChannel(channel);
+    m_ft8DemodWorker->setChannel(channel);
 }
 
 void FT8DemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -184,6 +185,7 @@ bool FT8DemodBaseband::handleMessage(const Message& cmd)
         {
             m_ft8DemodWorker->invalidateSequence();
             m_deviceCenterFrequency = notif.getCenterFrequency();
+            m_ft8DemodWorker->setBaseFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
         }
 
 		return true;
@@ -199,6 +201,7 @@ void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool forc
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
         m_ft8DemodWorker->invalidateSequence();
+        m_ft8DemodWorker->setBaseFrequency(m_deviceCenterFrequency + settings.m_inputFrequencyOffset);
         m_channelizer.setChannelization(FT8DemodSettings::m_ft8SampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 

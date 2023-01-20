@@ -67,7 +67,7 @@ public:
         int uses_;
     }; // Plan
 
-    FFTEngine() : nplans(0)
+    FFTEngine() : m_nplans(0)
     {}
 
     Plan *get_plan(int n, const char *why);
@@ -84,12 +84,12 @@ public:
 
 private:
     void fft_stats();
-    QMutex plansmu;
-    QMutex plansmu2;
-    Plan *plans[1000];
-    int nplans;
+    QMutex m_plansmu;
+    QMutex m_plansmu2;
+    Plan *m_plans[1000];
+    int m_nplans;
     // MEASURE=0, ESTIMATE=64, PATIENT=32
-    static const int fftw_type = FFTW_ESTIMATE;
+    static const int M_FFTW_TYPE = FFTW_ESTIMATE;
 }; // FFTEngine
 
 } // namespace FT8

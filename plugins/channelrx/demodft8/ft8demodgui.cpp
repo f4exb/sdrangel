@@ -622,7 +622,7 @@ void FT8DemodGUI::resizeMessageTable()
     ui->messages->setItem(row, MESSAGE_COL_DT, new QTableWidgetItem("-0.0"));
     ui->messages->setItem(row, MESSAGE_COL_DF, new QTableWidgetItem("0000"));
     ui->messages->setItem(row, MESSAGE_COL_CALL1, new QTableWidgetItem("123456789ABCD"));
-    ui->messages->setItem(row, MESSAGE_COL_CALL2, new QTableWidgetItem("HF7SIEMA"));
+    ui->messages->setItem(row, MESSAGE_COL_CALL2, new QTableWidgetItem("PA900RAALTE"));
     ui->messages->setItem(row, MESSAGE_COL_LOC, new QTableWidgetItem("JN000"));
     ui->messages->setItem(row, MESSAGE_COL_INFO, new QTableWidgetItem("OSD-0-73"));
     ui->messages->resizeColumnsToContents();
@@ -668,10 +668,10 @@ void FT8DemodGUI::messagesReceived(const QList<FT8Message>& messages)
 
         utcItem->setText(message.ts.toString("HHmmss"));
         passItem->setText(tr("%1").arg(message.pass));
-        snrItem->setText(tr("%1").arg(message.snr));
         correctItem->setText(tr("%1").arg(message.nbCorrectBits));
-        dtItem->setText(tr("%1").arg(message.dt, 0, 'f', 1));
-        dfItem->setText(tr("%1").arg((int) message.df));
+        dtItem->setText(tr("%1").arg(message.dt, 4, 'f', 1));
+        dfItem->setText(tr("%1").arg((int) message.df, 4));
+        snrItem->setText(tr("%1").arg(message.snr, 3));
         call1Item->setText(message.call1);
         call2Item->setText(message.call2);
         locItem->setText(message.loc);

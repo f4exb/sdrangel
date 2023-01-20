@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
+    <width>520</width>
     <height>731</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>500</width>
+    <width>520</width>
     <height>0</height>
    </size>
   </property>
@@ -36,7 +36,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>481</width>
+     <width>501</width>
      <height>181</height>
     </rect>
    </property>
@@ -742,7 +742,7 @@
     <rect>
      <x>0</x>
      <y>460</y>
-     <width>481</width>
+     <width>501</width>
      <height>251</height>
     </rect>
    </property>
@@ -965,12 +965,24 @@
     </item>
     <item>
      <widget class="QTableWidget" name="messages">
+      <property name="font">
+       <font>
+        <family>Liberation Mono</family>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
       <property name="toolTip">
        <string>Decoded messages</string>
       </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
       </property>
+      <attribute name="verticalHeaderMinimumSectionSize">
+       <number>15</number>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>15</number>
+      </attribute>
       <column>
        <property name="text">
         <string>UTC</string>
@@ -985,14 +997,6 @@
        </property>
        <property name="toolTip">
         <string>Successful decoder pass index</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>SNR</string>
-       </property>
-       <property name="toolTip">
-        <string>Signal to noise ratio (dB) in 2.5 kHz bandwidth</string>
        </property>
       </column>
       <column>
@@ -1017,6 +1021,14 @@
        </property>
        <property name="toolTip">
         <string>Frequency shift</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>SNR</string>
+       </property>
+       <property name="toolTip">
+        <string>Signal to noise ratio (dB) in 2.5 kHz bandwidth</string>
        </property>
       </column>
       <column>
