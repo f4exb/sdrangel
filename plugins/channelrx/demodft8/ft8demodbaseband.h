@@ -74,7 +74,7 @@ public:
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
     bool getAudioActive() const { return m_sink.getAudioActive(); }
     void setBasebandSampleRate(int sampleRate);
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
+    void setMessageQueueToGUI(MessageQueue *messageQueue);
     void setChannel(ChannelAPI *channel);
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
@@ -102,6 +102,7 @@ private:
     QThread *m_workerThread;
     FT8DemodWorker *m_ft8DemodWorker;
     int16_t *m_ft8WorkerBuffer;
+    qint64 m_deviceCenterFrequency;
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);

@@ -42,6 +42,7 @@ public:
     void setLowFrequency(int lowFreq) { m_lowFreq = lowFreq; }
     void setHighFrequency(int highFreq) { m_highFreq = highFreq; }
     void setReportingMessageQueue(MessageQueue *messageQueue) { m_reportingMessageQueue = messageQueue; }
+    void invalidateSequence() { m_invalidSequence = true; }
 
 private:
     class FT8Callback : public FT8::CallbackInterface
@@ -78,6 +79,7 @@ private:
     float m_decoderTimeBudget;
     int m_lowFreq;
     int m_highFreq;
+    bool m_invalidSequence;
     FT8::FT8Decoder m_ft8Decoder;
     FT8::Packing m_packing;
     MessageQueue *m_reportingMessageQueue;

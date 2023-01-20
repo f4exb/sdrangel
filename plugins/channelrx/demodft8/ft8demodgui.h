@@ -21,6 +21,7 @@
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
+#include "util/ft8message.h"
 #include "settings/rollupstate.h"
 #include "ft8demodsettings.h"
 
@@ -101,6 +102,7 @@ private:
 	void enterEvent(EnterEventType*);
 
     void resizeMessageTable();
+    void messagesReceived(const QList<FT8Message>& messages);
 
     enum MessageCol {
         MESSAGE_COL_UTC,
@@ -124,6 +126,7 @@ private slots:
 	void on_spanLog2_valueChanged(int value);
     void on_fftWindow_currentIndexChanged(int index);
     void on_filterIndex_valueChanged(int value);
+    void on_clearMessages_clicked();
     void on_recordWav_toggled(bool checked);
     void on_logMessages_toggled(bool checked);
     void on_nbThreads_valueChanged(int value);

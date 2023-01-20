@@ -104,6 +104,15 @@ void FT8Demod::setDeviceAPI(DeviceAPI *deviceAPI)
     }
 }
 
+void FT8Demod::setMessageQueueToGUI(MessageQueue *queue)
+{
+    ChannelAPI::setMessageQueueToGUI(queue);
+
+    if (m_basebandSink) {
+        m_basebandSink->setMessageQueueToGUI(queue);
+    }
+}
+
 uint32_t FT8Demod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSourceStreams();
@@ -136,6 +145,7 @@ void FT8Demod::start()
     );
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setChannel(this);
+    qDebug("FT8Demod::start: setMessageQueueToGUI: %p", getMessageQueueToGUI());
     m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI());
     m_basebandSink->moveToThread(m_thread);
 

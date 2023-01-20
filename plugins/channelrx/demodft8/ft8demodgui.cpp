@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 #include <QPixmap>
+#include <QScrollBar>
 
 #include "plugin/pluginapi.h"
 #include "device/deviceuiset.h"
@@ -104,6 +105,12 @@ bool FT8DemodGUI::handleMessage(const Message& message)
         ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
         ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
         updateAbsoluteCenterFrequency();
+        return true;
+    }
+    else if (MsgReportFT8Messages::match(message))
+    {
+        MsgReportFT8Messages& notif = (MsgReportFT8Messages&) message;
+        messagesReceived(notif.getFT8Messages());
         return true;
     }
     else
@@ -202,6 +209,11 @@ void FT8DemodGUI::on_filterIndex_valueChanged(int value)
     ui->lowCut->setMinimum(-480);
     displaySettings();
     applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
+}
+
+void FT8DemodGUI::on_clearMessages_clicked()
+{
+    ui->messages->setRowCount(0);
 }
 
 void FT8DemodGUI::on_recordWav_toggled(bool checked)
@@ -585,6 +597,7 @@ void FT8DemodGUI::makeUIConnections()
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &FT8DemodGUI::on_spanLog2_valueChanged);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FT8DemodGUI::on_fftWindow_currentIndexChanged);
     QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &FT8DemodGUI::on_filterIndex_valueChanged);
+    QObject::connect(ui->clearMessages, &QPushButton::clicked, this, &FT8DemodGUI::on_clearMessages_clicked);
     QObject::connect(ui->recordWav, &ButtonSwitch::toggled, this, &FT8DemodGUI::on_recordWav_toggled);
     QObject::connect(ui->logMessages, &ButtonSwitch::toggled, this, &FT8DemodGUI::on_logMessages_toggled);
     QObject::connect(ui->nbThreads, &QDial::valueChanged, this, &FT8DemodGUI::on_nbThreads_valueChanged);
@@ -606,12 +619,68 @@ void FT8DemodGUI::resizeMessageTable()
     ui->messages->setItem(row, MESSAGE_COL_N, new QTableWidgetItem("0"));
     ui->messages->setItem(row, MESSAGE_COL_SNR, new QTableWidgetItem("-24"));
     ui->messages->setItem(row, MESSAGE_COL_DEC, new QTableWidgetItem("174"));
-    ui->messages->setItem(row, MESSAGE_COL_DT, new QTableWidgetItem("0.0"));
+    ui->messages->setItem(row, MESSAGE_COL_DT, new QTableWidgetItem("-0.0"));
     ui->messages->setItem(row, MESSAGE_COL_DF, new QTableWidgetItem("0000"));
     ui->messages->setItem(row, MESSAGE_COL_CALL1, new QTableWidgetItem("123456789ABCD"));
     ui->messages->setItem(row, MESSAGE_COL_CALL2, new QTableWidgetItem("HF7SIEMA"));
-    ui->messages->setItem(row, MESSAGE_COL_LOC, new QTableWidgetItem("JN00"));
-    ui->messages->setItem(row, MESSAGE_COL_INFO, new QTableWidgetItem("hint1"));
+    ui->messages->setItem(row, MESSAGE_COL_LOC, new QTableWidgetItem("JN000"));
+    ui->messages->setItem(row, MESSAGE_COL_INFO, new QTableWidgetItem("OSD-0-73"));
     ui->messages->resizeColumnsToContents();
     ui->messages->removeRow(row);
+}
+
+void FT8DemodGUI::messagesReceived(const QList<FT8Message>& messages)
+{
+    ui->nbDecodesText->setText(tr("%1").arg(messages.size()));
+
+    // Is scroll bar at bottom
+    QScrollBar *sb = ui->messages->verticalScrollBar();
+    bool scrollToBottom = sb->value() == sb->maximum();
+
+    // Add to messages table
+    int row = ui->messages->rowCount();
+
+    for (const auto& message : messages)
+    {
+        ui->messages->setRowCount(row + 1);
+
+        QTableWidgetItem *utcItem = new QTableWidgetItem();
+        QTableWidgetItem *passItem = new QTableWidgetItem();
+        QTableWidgetItem *snrItem = new QTableWidgetItem();
+        QTableWidgetItem *correctItem = new QTableWidgetItem();
+        QTableWidgetItem *dtItem = new QTableWidgetItem();
+        QTableWidgetItem *dfItem = new QTableWidgetItem();
+        QTableWidgetItem *call1Item = new QTableWidgetItem();
+        QTableWidgetItem *call2Item = new QTableWidgetItem();
+        QTableWidgetItem *locItem = new QTableWidgetItem();
+        QTableWidgetItem *infoItem = new QTableWidgetItem();
+
+        ui->messages->setItem(row, MESSAGE_COL_UTC, utcItem);
+        ui->messages->setItem(row, MESSAGE_COL_N, passItem);
+        ui->messages->setItem(row, MESSAGE_COL_SNR, snrItem);
+        ui->messages->setItem(row, MESSAGE_COL_DEC, correctItem);
+        ui->messages->setItem(row, MESSAGE_COL_DT, dtItem);
+        ui->messages->setItem(row, MESSAGE_COL_DF, dfItem);
+        ui->messages->setItem(row, MESSAGE_COL_CALL1, call1Item);
+        ui->messages->setItem(row, MESSAGE_COL_CALL2, call2Item);
+        ui->messages->setItem(row, MESSAGE_COL_LOC, locItem);
+        ui->messages->setItem(row, MESSAGE_COL_INFO, infoItem);
+
+        utcItem->setText(message.ts.toString("HHmmss"));
+        passItem->setText(tr("%1").arg(message.pass));
+        snrItem->setText(tr("%1").arg(message.snr));
+        correctItem->setText(tr("%1").arg(message.nbCorrectBits));
+        dtItem->setText(tr("%1").arg(message.dt, 0, 'f', 1));
+        dfItem->setText(tr("%1").arg((int) message.df));
+        call1Item->setText(message.call1);
+        call2Item->setText(message.call2);
+        locItem->setText(message.loc);
+        infoItem->setText(message.decoderInfo);
+
+        row++;
+    }
+
+    if (scrollToBottom) {
+        ui->messages->scrollToBottom();
+    }
 }

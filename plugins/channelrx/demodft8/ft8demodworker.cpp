@@ -58,7 +58,6 @@ int FT8DemodWorker::FT8Callback::hcb(
     }
 
     cycle_already[msg] = true;
-    cycle_mu.unlock();
 
     QList<FT8Message>& ft8Messages = m_msgReportFT8Messages->getFT8Messages();
     ft8Messages.push_back(FT8Message());
@@ -74,6 +73,7 @@ int FT8DemodWorker::FT8Callback::hcb(
     ft8Message.call2 = QString(call2.c_str());
     ft8Message.loc = QString(loc.c_str());
     ft8Message.decoderInfo = QString(comment);
+    cycle_mu.unlock();
 
     qDebug("FT8DemodWorker::FT8Callback::hcb: %d %3d %3d %5.2f %6.1f %s [%s:%s:%s] (%s)",
         pass,
@@ -113,6 +113,13 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
 {
     qDebug("FT8DemodWorker::processBuffer: %s %d:%f [%d:%d]", qPrintable(periodTS.toString("yyyy-MM-dd HH:mm:ss")),
         m_nbDecoderThreads, m_decoderTimeBudget, m_lowFreq, m_highFreq);
+
+    if (m_invalidSequence)
+    {
+        qDebug("FT8DemodWorker::processBuffer: invalid sequence");
+        m_invalidSequence = false;
+        return;
+    }
 
     if (m_recordSamples)
     {

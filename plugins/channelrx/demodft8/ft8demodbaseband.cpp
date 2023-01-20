@@ -31,7 +31,8 @@ MESSAGE_CLASS_DEFINITION(FT8DemodBaseband::MsgConfigureFT8DemodBaseband, Message
 FT8DemodBaseband::FT8DemodBaseband() :
     m_channelizer(&m_sink),
     m_messageQueueToGUI(nullptr),
-    m_spectrumVis(nullptr)
+    m_spectrumVis(nullptr),
+    m_deviceCenterFrequency(0)
 {
     qDebug("FT8DemodBaseband::FT8DemodBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
@@ -39,7 +40,6 @@ FT8DemodBaseband::FT8DemodBaseband() :
 
     m_workerThread = new QThread();
     m_ft8DemodWorker = new FT8DemodWorker();
-
     m_ft8DemodWorker->moveToThread(m_workerThread);
 
     QObject::connect(
@@ -91,6 +91,12 @@ void FT8DemodBaseband::reset()
     QMutexLocker mutexLocker(&m_mutex);
     m_sampleFifo.reset();
     m_channelSampleRate = 0;
+}
+
+void FT8DemodBaseband::setMessageQueueToGUI(MessageQueue *messageQueue)
+{
+    m_messageQueueToGUI = messageQueue;
+    m_ft8DemodWorker->setReportingMessageQueue(m_messageQueueToGUI);
 }
 
 void FT8DemodBaseband::setChannel(ChannelAPI *channel)
@@ -174,6 +180,12 @@ bool FT8DemodBaseband::handleMessage(const Message& cmd)
             m_channelSampleRate = m_channelizer.getChannelSampleRate();
         }
 
+        if (notif.getCenterFrequency() != m_deviceCenterFrequency)
+        {
+            m_ft8DemodWorker->invalidateSequence();
+            m_deviceCenterFrequency = notif.getCenterFrequency();
+        }
+
 		return true;
     }
     else
@@ -186,6 +198,7 @@ void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool forc
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
+        m_ft8DemodWorker->invalidateSequence();
         m_channelizer.setChannelization(FT8DemodSettings::m_ft8SampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
