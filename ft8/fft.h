@@ -67,8 +67,9 @@ public:
         int uses_;
     }; // Plan
 
-    FFTEngine() : m_nplans(0)
-    {}
+    FFTEngine(FFTEngine& other) = delete;
+    void operator=(const FFTEngine &) = delete;
+    static FFTEngine *GetInstance();
 
     Plan *get_plan(int n, const char *why);
 
@@ -81,6 +82,12 @@ public:
     std::vector<std::complex<float>> one_ifft_cc(const std::vector<std::complex<float>> &bins, const char *why);
     std::vector<std::complex<float>> analytic(const std::vector<float> &x, const char *why);
     std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate);
+
+protected:
+    FFTEngine() :
+        m_nplans(0)
+    {}
+    static FFTEngine *m_instance;
 
 private:
     void fft_stats();

@@ -25,6 +25,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QString>
 
 #include "fft.h"
 #include "export.h"
@@ -45,6 +46,7 @@ public:
         int pass,
         int correct_bits
     ) = 0; //!< virtual nathod called each time there is a result
+    virtual QString get_name() = 0;
 };
 
 //
@@ -684,7 +686,6 @@ public:
     void forceQuit(); //!< force quit all threads
     FT8Params& getParams() { return params; }
 private:
-    FFTEngine fftEngine;
     FT8Params params;
     std::vector<QThread*> threads;
 }; // FT8Decoder

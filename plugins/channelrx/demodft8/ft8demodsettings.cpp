@@ -45,7 +45,7 @@ void FT8DemodSettings::resetToDefaults()
     m_agc = false;
     m_recordWav = false;
     m_logMessages = false;
-    m_nbDecoderThreads = 6;
+    m_nbDecoderThreads = 3;
     m_decoderTimeBudget = 0.5;
     m_volume = 1.0;
     m_inputFrequencyOffset = 0;
@@ -136,7 +136,7 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         d.readU32(5, &m_rgbColor);
         d.readBool(6, &m_recordWav, false);
         d.readBool(7, &m_logMessages, false);
-        d.readS32(8, &m_nbDecoderThreads, 6);
+        d.readS32(8, &m_nbDecoderThreads, 3);
         d.readFloat(9, &m_decoderTimeBudget, 0.5);
         d.readBool(11, &m_agc, false);
         d.readString(16, &m_title, "SSB Demodulator");

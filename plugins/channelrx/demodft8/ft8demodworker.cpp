@@ -27,10 +27,16 @@
 #include "ft8demodsettings.h"
 #include "ft8demodworker.h"
 
-FT8DemodWorker::FT8Callback::FT8Callback(const QDateTime& periodTS, qint64 baseFrequency, FT8::Packing& packing) :
+FT8DemodWorker::FT8Callback::FT8Callback(
+    const QDateTime& periodTS,
+    qint64 baseFrequency,
+    FT8::Packing& packing,
+    const QString& name
+) :
     m_packing(packing),
     m_periodTS(periodTS),
-    m_baseFrequency(baseFrequency)
+    m_baseFrequency(baseFrequency),
+    m_name(name)
 {
     m_msgReportFT8Messages = MsgReportFT8Messages::create();
     m_msgReportFT8Messages->setBaseFrequency(baseFrequency);
@@ -92,6 +98,11 @@ int FT8DemodWorker::FT8Callback::hcb(
     return 2; // 2 => new decode, do subtract.
 }
 
+QString FT8DemodWorker::FT8Callback::get_name()
+{
+    return m_name;
+}
+
 FT8DemodWorker::FT8DemodWorker() :
     m_recordSamples(false),
     m_nbDecoderThreads(6),
@@ -108,7 +119,7 @@ FT8DemodWorker::FT8DemodWorker() :
     dir.mkpath(relPath);
     m_samplesPath = dir.absolutePath() + "/" + relPath;
     qDebug("FT8DemodWorker::FT8DemodWorker: samples path: %s", qPrintable(m_samplesPath));
-    relPath = "sdrangel/ft8";
+    relPath = "sdrangel/ft8/logs";
     m_logsPath = dir.absolutePath() + "/" + relPath;
     qDebug("FT8DemodWorker::FT8DemodWorker: logs path: %s", qPrintable(m_logsPath));
 }
@@ -134,8 +145,14 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
         return;
     }
 
+    QString channelReference = "d0c0"; // default
+
+    if (m_channel) {
+        channelReference = tr("d%1c%2").arg(m_channel->getDeviceSetIndex()).arg(m_channel->getIndexInDeviceSet());
+    }
+
     int hints[2] = { 2, 0 }; // CQ
-    FT8Callback ft8Callback(periodTS, m_baseFrequency, m_packing);
+    FT8Callback ft8Callback(periodTS, m_baseFrequency, m_packing, channelReference);
     m_ft8Decoder.getParams().nthreads = m_nbDecoderThreads;
     std::vector<float> samples(15*FT8DemodSettings::m_ft8SampleRate);
 
@@ -180,12 +197,6 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
         {
             if (!logFile.is_open())
             {
-                QString channelReference = "d0c0"; // default
-
-                if (m_channel) {
-                    channelReference = tr("d%1c%2").arg(m_channel->getDeviceSetIndex()).arg(m_channel->getIndexInDeviceSet());
-                }
-
                 QString logFileName(tr("%1_%2.txt").arg(periodTS.toString("yyyyMMdd")).arg(channelReference));
                 QFileInfo lfi(QDir(m_logsPath), logFileName);
                 QString logFilePath = lfi.absoluteFilePath();

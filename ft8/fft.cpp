@@ -28,6 +28,17 @@
 
 namespace FT8 {
 
+FFTEngine* FFTEngine::m_instance= nullptr;;
+
+FFTEngine *FFTEngine::GetInstance()
+{
+    if (!m_instance) {
+        m_instance = new FFTEngine();
+    }
+
+    return m_instance;
+}
+
 FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
 {
     // cache fftw plans in the parent process,

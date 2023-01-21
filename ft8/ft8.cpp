@@ -3533,13 +3533,14 @@ void FT8Decoder::entry(
             final_deadline,
             cb,
             prevdecs,
-            &fftEngine
+            FFTEngine::GetInstance()
         );
         ft8->getParams() = getParams(); // transfer parameters
 
         int npasses = nprevdecs > 0 ? params.npasses_two : params.npasses_one;
         ft8->set_npasses(npasses);
         QThread *th = new QThread();
+        th->setObjectName(tr("ft8:%1:%2").arg(cb->get_name()).arg(i));
         threads.push_back(th);
         // std::thread *th = new std::thread([ft8, npasses] () { ft8->go(npasses); });
         // thv.push_back(std::pair<FT8*, std::thread*>(ft8, th));

@@ -47,6 +47,7 @@ public:
         int pass,
         int correct_bits
     );
+    virtual QString get_name();
     const std::map<std::string, bool>& getMsgMap() {
         return cycle_already;
     }
@@ -100,6 +101,11 @@ int TestFT8Callback::hcb(
     fflush(stdout);
 
     return 2; // 2 => new decode, do subtract.
+}
+
+QString TestFT8Callback::get_name()
+{
+    return "test";
 }
 
 void MainBench::testFT8(const QString& wavFile, const QString& argsStr)

@@ -214,6 +214,7 @@ void FT8DemodGUI::on_filterIndex_valueChanged(int value)
 void FT8DemodGUI::on_clearMessages_clicked()
 {
     ui->messages->setRowCount(0);
+    ui->nbDecodesInTable->setText("0");
 }
 
 void FT8DemodGUI::on_recordWav_toggled(bool checked)
@@ -621,7 +622,7 @@ void FT8DemodGUI::resizeMessageTable()
     ui->messages->setItem(row, MESSAGE_COL_DEC, new QTableWidgetItem("174"));
     ui->messages->setItem(row, MESSAGE_COL_DT, new QTableWidgetItem("-0.0"));
     ui->messages->setItem(row, MESSAGE_COL_DF, new QTableWidgetItem("0000"));
-    ui->messages->setItem(row, MESSAGE_COL_CALL1, new QTableWidgetItem("123456789ABCD"));
+    ui->messages->setItem(row, MESSAGE_COL_CALL1, new QTableWidgetItem("CQ PA900RAALTE"));
     ui->messages->setItem(row, MESSAGE_COL_CALL2, new QTableWidgetItem("PA900RAALTE"));
     ui->messages->setItem(row, MESSAGE_COL_LOC, new QTableWidgetItem("JN000"));
     ui->messages->setItem(row, MESSAGE_COL_INFO, new QTableWidgetItem("OSD-0-73"));
@@ -679,6 +680,8 @@ void FT8DemodGUI::messagesReceived(const QList<FT8Message>& messages)
 
         row++;
     }
+
+    ui->nbDecodesInTable->setText(tr("%1").arg(row));
 
     if (scrollToBottom) {
         ui->messages->scrollToBottom();

@@ -51,7 +51,12 @@ private:
     class FT8Callback : public FT8::CallbackInterface
     {
     public:
-        FT8Callback(const QDateTime& periodTS, qint64 baseFrequency, FT8::Packing& packing);
+        FT8Callback
+            (const QDateTime& periodTS,
+            qint64 baseFrequency,
+            FT8::Packing& packing,
+            const QString& name
+        );
         virtual int hcb(
             int *a91,
             float hz0,
@@ -61,6 +66,7 @@ private:
             int pass,
             int correct_bits
         );
+        virtual QString get_name();
         const std::map<std::string, bool>& getMsgMap() { return cycle_already; }
         MsgReportFT8Messages *getReportMessage() { return m_msgReportFT8Messages; }
 
@@ -71,6 +77,7 @@ private:
         MsgReportFT8Messages *m_msgReportFT8Messages;
         const QDateTime& m_periodTS;
         qint64 m_baseFrequency;
+        QString m_name;
     };
 
     QString m_samplesPath;
