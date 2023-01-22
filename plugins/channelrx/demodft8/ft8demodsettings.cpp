@@ -60,11 +60,54 @@ void FT8DemodSettings::resetToDefaults()
     m_workspaceIndex = 0;
     m_hidden = false;
     m_filterIndex = 0;
+    m_bandPresets.push_back(FT8DemodBandPreset{"160m",   1840, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "80m",   3573, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "60m",   5357, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "40m",   7074, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "30m",  10136, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "20m",  14074, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "17m",  18100, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "15m",  21074, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "12m",  24915, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "10m",  28074, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{  "6m",  50313, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{  "4m",  70100, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{  "2m", 144120, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{"1.2m", 222065, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{"70cm", 432065, 0});
+}
+
+void FT8DemodSettings::resetBandPresets()
+{
+    m_bandPresets.clear();
+    m_bandPresets.push_back(FT8DemodBandPreset{"160m",   1840, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "80m",   3573, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "60m",   5357, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "40m",   7074, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "30m",  10136, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "20m",  14074, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "17m",  18100, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "15m",  21074, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "12m",  24915, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{ "10m",  28074, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{  "6m",  50313, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{  "4m",  70100, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{  "2m", 144120, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{"1.2m", 222065, 0});
+    m_bandPresets.push_back(FT8DemodBandPreset{"70cm", 432065, 0});
 }
 
 QByteArray FT8DemodSettings::serialize() const
 {
     SimpleSerializer s(1);
+    QByteArray bytetmp;
+
+    QDataStream *stream = new QDataStream(&bytetmp, QIODevice::WriteOnly);
+    *stream << m_bandPresets;
+    delete stream;
+    s.writeBlob(2, bytetmp);
+
+
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(3, m_volume * 10.0);
 
@@ -122,6 +165,10 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         qint32 tmp;
         uint32_t utmp;
         QString strtmp;
+
+        d.readBlob(2, &bytetmp);
+        QDataStream readStream(&bytetmp, QIODevice::ReadOnly);
+        readStream >> m_bandPresets;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(3, &tmp, 30);
@@ -187,4 +234,20 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+QDataStream& operator<<(QDataStream& out, const FT8DemodBandPreset& bandPreset)
+{
+    out << bandPreset.m_name;
+    out << bandPreset.m_baseFrequency;
+    out << bandPreset.m_channelOffset;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, FT8DemodBandPreset& bandPreset)
+{
+    in >> bandPreset.m_name;
+    in >> bandPreset.m_baseFrequency;
+    in >> bandPreset.m_channelOffset;
+    return in;
 }

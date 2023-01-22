@@ -3269,10 +3269,11 @@ void FT8::subtract(
         // ???
         while (fabs(target - actual) > M_PI)
         {
-            if (target < actual)
-                target += 2 * M_PI;
-            else
-                target -= 2 * M_PI;
+            if (target < actual) {
+                target += (2 * M_PI) - 1e-3; // plus epsilonn to break possible infinite loop
+            } else {
+                target -= (2 * M_PI) + 1e-3; // plus epsilonn to break possible infinite loop
+            }
         }
 
         // adj is to be spread evenly over the off-ramp and on-ramp samples.

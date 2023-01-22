@@ -103,6 +103,7 @@ private:
 
     void resizeMessageTable();
     void messagesReceived(const QList<FT8Message>& messages);
+    void populateBandPresets();
 
     enum MessageCol {
         MESSAGE_COL_UTC,
@@ -126,11 +127,11 @@ private slots:
 	void on_spanLog2_valueChanged(int value);
     void on_fftWindow_currentIndexChanged(int index);
     void on_filterIndex_valueChanged(int value);
+    void on_applyBandPreset_clicked();
     void on_clearMessages_clicked();
     void on_recordWav_toggled(bool checked);
     void on_logMessages_toggled(bool checked);
-    void on_nbThreads_valueChanged(int value);
-    void on_timeBudget_valueChanged(int value);
+    void on_settings_clicked();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

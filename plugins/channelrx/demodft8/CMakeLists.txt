@@ -32,10 +32,13 @@ if(NOT SERVER_MODE)
         ${demodft8_SOURCES}
         ft8demodgui.cpp
         ft8demodgui.ui
+        ft8demodsettingsdialog.cpp
+        ft8demodsettingsdialog.ui
     )
     set(demodft8_HEADERS
         ${demodft8_HEADERS}
         ft8demodgui.h
+        ft8demodsettingsdialog.h
     )
     set(TARGET_NAME demodft8)
     set(TARGET_LIB "Qt::Widgets")

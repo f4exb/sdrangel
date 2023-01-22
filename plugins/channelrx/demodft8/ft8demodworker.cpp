@@ -213,7 +213,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
             }
 
             QString logMessage = QString("%1 %2 Rx FT8 %3 %4 %5 %6 %7 %8")
-                .arg(ft8Message.ts.toString("yyyyMMdd_HHmmss"))
+                .arg(periodTS.toString("yyyyMMdd_HHmmss"))
                 .arg(baseFrequencyMHz, 9, 'f', 3)
                 .arg(ft8Message.snr, 6)
                 .arg(ft8Message.dt, 4, 'f', 1)

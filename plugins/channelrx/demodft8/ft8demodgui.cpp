@@ -36,6 +36,7 @@
 #include "ui_ft8demodgui.h"
 #include "ft8demodgui.h"
 #include "ft8demod.h"
+#include "ft8demodsettingsdialog.h"
 
 FT8DemodGUI* FT8DemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -68,6 +69,7 @@ bool FT8DemodGUI::deserialize(const QByteArray& data)
         ui->lowCut->setMinimum(-480);
         displaySettings();
         applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
+        populateBandPresets();
         return true;
     }
     else
@@ -79,6 +81,7 @@ bool FT8DemodGUI::deserialize(const QByteArray& data)
         ui->lowCut->setMinimum(-480);
         displaySettings();
         applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
+        populateBandPresets();
         return false;
     }
 }
@@ -211,6 +214,22 @@ void FT8DemodGUI::on_filterIndex_valueChanged(int value)
     applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
 }
 
+void FT8DemodGUI::on_applyBandPreset_clicked()
+{
+    int bandPresetIndex = ui->bandPreset->currentIndex();
+    int channelShift = m_settings.m_bandPresets[bandPresetIndex].m_channelOffset; // kHz
+    int baseFrequency = m_settings.m_bandPresets[bandPresetIndex].m_baseFrequency; // kHz
+    quint64 deviceFrequency = (baseFrequency - channelShift)*1000; // Hz
+    m_ft8Demod->setDeviceCenterFrequency(deviceFrequency, m_settings.m_streamIndex);
+
+    if (channelShift * 1000 != m_settings.m_inputFrequencyOffset)
+    {
+        m_settings.m_inputFrequencyOffset = channelShift * 1000; // Hz
+        displaySettings();
+        applySettings();
+    }
+}
+
 void FT8DemodGUI::on_clearMessages_clicked()
 {
     ui->messages->setRowCount(0);
@@ -229,18 +248,38 @@ void FT8DemodGUI::on_logMessages_toggled(bool checked)
     applySettings();
 }
 
-void FT8DemodGUI::on_nbThreads_valueChanged(int value)
+void FT8DemodGUI::on_settings_clicked()
 {
-    ui->nbThreadsText->setText(tr("%1").arg(value));
-    m_settings.m_nbDecoderThreads = value;
-    applySettings();
-}
+    FT8DemodSettings settings = m_settings;
+    QStringList settingsKeys;
+    FT8DemodSettingsDialog dialog(settings, settingsKeys);
 
-void FT8DemodGUI::on_timeBudget_valueChanged(int value)
-{
-    m_settings.m_decoderTimeBudget = value / 10.0f;
-    ui->timeBudgetText->setText(tr("%1").arg(m_settings.m_decoderTimeBudget, 0, 'f', 1));
-    applySettings();
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        bool changed = false;
+
+        if (settingsKeys.contains("nbDecoderThreads"))
+        {
+            m_settings.m_nbDecoderThreads = settings.m_nbDecoderThreads;
+            changed = true;
+        }
+
+        if (settingsKeys.contains("decoderTimeBudget"))
+        {
+            m_settings.m_decoderTimeBudget = settings.m_decoderTimeBudget;
+            changed = true;
+        }
+
+        if (settingsKeys.contains("bandPresets"))
+        {
+            m_settings.m_bandPresets = settings.m_bandPresets;
+            populateBandPresets();
+        }
+
+        if (changed) {
+            applySettings();
+        }
+    }
 }
 
 void FT8DemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -377,6 +416,7 @@ FT8DemodGUI::FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     // Resize the table using dummy data
     resizeMessageTable();
+    populateBandPresets();
 }
 
 FT8DemodGUI::~FT8DemodGUI()
@@ -544,10 +584,6 @@ void FT8DemodGUI::displaySettings()
 
     ui->recordWav->setChecked(m_settings.m_recordWav);
     ui->logMessages->setChecked(m_settings.m_logMessages);
-    ui->nbThreads->setValue(m_settings.m_nbDecoderThreads);
-    ui->nbThreadsText->setText(tr("%1").arg(m_settings.m_nbDecoderThreads));
-    ui->timeBudget->setValue(m_settings.m_decoderTimeBudget*10);
-    ui->timeBudgetText->setText(tr("%1").arg(m_settings.m_decoderTimeBudget, 0, 'f', 1));
 
     updateIndexLabel();
 
@@ -598,11 +634,11 @@ void FT8DemodGUI::makeUIConnections()
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &FT8DemodGUI::on_spanLog2_valueChanged);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FT8DemodGUI::on_fftWindow_currentIndexChanged);
     QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &FT8DemodGUI::on_filterIndex_valueChanged);
+    QObject::connect(ui->applyBandPreset, &QPushButton::clicked, this, &FT8DemodGUI::on_applyBandPreset_clicked);
     QObject::connect(ui->clearMessages, &QPushButton::clicked, this, &FT8DemodGUI::on_clearMessages_clicked);
     QObject::connect(ui->recordWav, &ButtonSwitch::toggled, this, &FT8DemodGUI::on_recordWav_toggled);
     QObject::connect(ui->logMessages, &ButtonSwitch::toggled, this, &FT8DemodGUI::on_logMessages_toggled);
-    QObject::connect(ui->nbThreads, &QDial::valueChanged, this, &FT8DemodGUI::on_nbThreads_valueChanged);
-    QObject::connect(ui->timeBudget, &QDial::valueChanged, this, &FT8DemodGUI::on_timeBudget_valueChanged);
+    QObject::connect(ui->settings, &QPushButton::clicked, this, &FT8DemodGUI::on_settings_clicked);
 }
 
 void FT8DemodGUI::updateAbsoluteCenterFrequency()
@@ -686,4 +722,16 @@ void FT8DemodGUI::messagesReceived(const QList<FT8Message>& messages)
     if (scrollToBottom) {
         ui->messages->scrollToBottom();
     }
+}
+
+void FT8DemodGUI::populateBandPresets()
+{
+    ui->bandPreset->blockSignals(true);
+    ui->bandPreset->clear();
+
+    for (const auto& bandPreset : m_settings.m_bandPresets) {
+        ui->bandPreset->addItem(bandPreset.m_name);
+    }
+
+    ui->bandPreset->blockSignals(false);
 }

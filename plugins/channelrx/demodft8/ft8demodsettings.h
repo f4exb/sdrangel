@@ -20,6 +20,7 @@
 
 #include <QByteArray>
 #include <QString>
+#include <QList>
 
 #include "dsp/fftwindow.h"
 
@@ -38,6 +39,13 @@ struct FT8DemodFilterSettings
         m_lowCutoff(200),
         m_fftWindow(FFTWindow::Blackman)
     {}
+};
+
+struct FT8DemodBandPreset
+{
+    QString m_name;
+    int m_baseFrequency;
+    int m_channelOffset;
 };
 
 struct FT8DemodSettings
@@ -65,6 +73,7 @@ struct FT8DemodSettings
     // FFTWindow::Function m_fftWindow;
     std::vector<FT8DemodFilterSettings> m_filterBank;
     unsigned int m_filterIndex;
+    QList<FT8DemodBandPreset> m_bandPresets;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
@@ -77,11 +86,14 @@ struct FT8DemodSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void resetBandPresets();
 
     static const int m_ft8SampleRate;
     static const int m_minPowerThresholdDB;
     static const float m_mminPowerThresholdDBf;
 };
 
+QDataStream& operator<<(QDataStream& out, const FT8DemodBandPreset& bandPreset);
+QDataStream& operator>>(QDataStream& in, FT8DemodBandPreset& bandPreset);
 
 #endif /* PLUGINS_CHANNELRX_DEMODFT8_FT8DEMODSETTINGS_H_ */

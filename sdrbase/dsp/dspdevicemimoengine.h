@@ -31,6 +31,7 @@
 
 class DeviceSampleMIMO;
 class BasebandSampleSink;
+class BasebandSampleSource;
 class MIMOChannel;
 
 class SDRBASE_API DSPDeviceMIMOEngine : public QThread {

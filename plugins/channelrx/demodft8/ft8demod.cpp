@@ -32,6 +32,10 @@
 #include "SWGFT8DemodReport.h"
 
 #include "dsp/dspengine.h"
+#include "dsp/dspdevicesourceengine.h"
+#include "dsp/dspdevicemimoengine.h"
+#include "dsp/devicesamplesource.h"
+#include "dsp/devicesamplemimo.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
@@ -101,6 +105,18 @@ void FT8Demod::setDeviceAPI(DeviceAPI *deviceAPI)
         m_deviceAPI = deviceAPI;
         m_deviceAPI->addChannelSink(this);
         m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
+void FT8Demod::setDeviceCenterFrequency(qint64 centerFrequency, int index)
+{
+    DSPDeviceSourceEngine *deviceSourceEngine = m_deviceAPI->getDeviceSourceEngine();
+    DSPDeviceMIMOEngine *deviceMIMOEngine = m_deviceAPI->getDeviceMIMOEngine();
+
+    if (deviceSourceEngine) {
+        deviceSourceEngine->getSource()->setCenterFrequency(centerFrequency);
+    } else if (deviceMIMOEngine) {
+        deviceMIMOEngine->getMIMO()->setSourceCenterFrequency(centerFrequency, index);
     }
 }
 
