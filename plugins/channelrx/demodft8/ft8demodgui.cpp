@@ -214,6 +214,11 @@ void FT8DemodGUI::on_filterIndex_valueChanged(int value)
     applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
 }
 
+void FT8DemodGUI::on_moveToBottom_clicked()
+{
+    ui->messages->scrollToBottom();
+}
+
 void FT8DemodGUI::on_applyBandPreset_clicked()
 {
     int bandPresetIndex = ui->bandPreset->currentIndex();
@@ -634,6 +639,7 @@ void FT8DemodGUI::makeUIConnections()
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &FT8DemodGUI::on_spanLog2_valueChanged);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FT8DemodGUI::on_fftWindow_currentIndexChanged);
     QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &FT8DemodGUI::on_filterIndex_valueChanged);
+    QObject::connect(ui->moveToBottom, &QPushButton::clicked, this, &FT8DemodGUI::on_moveToBottom_clicked);
     QObject::connect(ui->applyBandPreset, &QPushButton::clicked, this, &FT8DemodGUI::on_applyBandPreset_clicked);
     QObject::connect(ui->clearMessages, &QPushButton::clicked, this, &FT8DemodGUI::on_clearMessages_clicked);
     QObject::connect(ui->recordWav, &ButtonSwitch::toggled, this, &FT8DemodGUI::on_recordWav_toggled);

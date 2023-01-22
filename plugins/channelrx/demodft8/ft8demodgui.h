@@ -127,6 +127,7 @@ private slots:
 	void on_spanLog2_valueChanged(int value);
     void on_fftWindow_currentIndexChanged(int index);
     void on_filterIndex_valueChanged(int value);
+    void on_moveToBottom_clicked();
     void on_applyBandPreset_clicked();
     void on_clearMessages_clicked();
     void on_recordWav_toggled(bool checked);

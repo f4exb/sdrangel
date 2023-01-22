@@ -859,6 +859,26 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="moveToBottom">
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Move message list to bottom</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="bandPresetLabel">
         <property name="text">
          <string>Band</string>
