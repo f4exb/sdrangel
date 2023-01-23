@@ -38,7 +38,7 @@ struct SDRBASE_API FT8Message
     QString decoderInfo;
 };
 
-class FT8_API MsgReportFT8Messages : public Message {
+class SDRBASE_API MsgReportFT8Messages : public Message {
     MESSAGE_CLASS_DECLARATION
 public:
     QList<FT8Message>& getFT8Messages() { return m_ft8Messages; }
