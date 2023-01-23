@@ -462,8 +462,9 @@ void Map::scanAvailableChannelsAndFeatures()
     for (const auto& deviceSet : deviceSets)
     {
         DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
+        DSPDeviceMIMOEngine *deviceMimoEngine =  deviceSet->m_deviceMIMOEngine;
 
-        if (deviceSourceEngine)
+        if ((deviceSourceEngine) || (deviceMimoEngine))
         {
             for (int chi = 0; chi < deviceSet->getNumberOfChannels(); chi++)
             {
