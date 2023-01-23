@@ -31,7 +31,9 @@
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
 #include "util/db.h"
+#include "util/maidenhead.h"
 #include "maincore.h"
+#include "SWGMapItem.h"
 
 #include "ui_ft8demodgui.h"
 #include "ft8demodgui.h"
@@ -733,6 +735,19 @@ void FT8DemodGUI::messagesReceived(const QList<FT8Message>& messages)
         locItem->setText(message.loc);
         infoItem->setText(message.decoderInfo);
 
+        // If message contains a Maidenhead locator, display caller on Map feature
+        float latitude, longitude;
+        if ((message.loc.size() == 4) && Maidenhead::fromMaidenhead(message.loc, latitude, longitude))
+        {
+            QString text = QString("%1\nMode: FT8\nFrequency: %2 Hz\nLocator: %3\nSNR: %4\nLast heard: %5")
+                                .arg(message.call2)
+                                .arg(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset)
+                                .arg(message.loc)
+                                .arg(message.snr)
+                                .arg(QDateTime::currentDateTime().toString("dd MMM yyyy HH:mm:ss"));
+            sendToMap(message.call2, text, latitude, longitude);
+        }
+
         filterMessageRow(row);
 
         row++;
@@ -742,6 +757,36 @@ void FT8DemodGUI::messagesReceived(const QList<FT8Message>& messages)
 
     if (scrollToBottom) {
         ui->messages->scrollToBottom();
+    }
+}
+
+void FT8DemodGUI::sendToMap(const QString& caller, const QString& text, float latitude, float longitude)
+{
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_ft8Demod, "mapitems", mapPipes);
+
+    for (const auto& pipe : mapPipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+        swgMapItem->setName(new QString(caller));
+        swgMapItem->setLatitude(latitude);
+        swgMapItem->setLongitude(longitude);
+        swgMapItem->setAltitude(0);
+        swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
+        swgMapItem->setPositionDateTime(new QString(QDateTime::currentDateTime().toString(Qt::ISODateWithMs)));
+        swgMapItem->setImageRotation(0);
+        swgMapItem->setText(new QString(text));
+        swgMapItem->setImage(new QString("antenna.png"));
+        swgMapItem->setModel(new QString("antenna.glb"));
+        swgMapItem->setModelAltitudeOffset(0.0);
+        swgMapItem->setLabel(new QString(caller));
+        swgMapItem->setLabelAltitudeOffset(4.5);
+        swgMapItem->setFixedPosition(false);
+        swgMapItem->setOrientation(0);
+        swgMapItem->setHeading(0);
+        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_ft8Demod, swgMapItem);
+        messageQueue->push(msg);
     }
 }
 
