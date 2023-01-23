@@ -30,6 +30,7 @@ const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("AIS"),
     QStringLiteral("APRS"),
     QStringLiteral("APTDemod"),
+    QStringLiteral("FT8Demod"),
     QStringLiteral("Radiosonde"),
     QStringLiteral("StarTracker"),
     QStringLiteral("SatelliteTracker")
@@ -40,6 +41,7 @@ const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.feature.ais"),
     QStringLiteral("sdrangel.feature.aprs"),
     QStringLiteral("sdrangel.channel.aptdemod"),
+    QStringLiteral("sdrangel.channel.ft8demod"),
     QStringLiteral("sdrangel.feature.radiosonde"),
     QStringLiteral("sdrangel.feature.startracker"),
     QStringLiteral("sdrangel.feature.satellitetracker")
@@ -69,6 +71,7 @@ MapSettings::MapSettings() :
     m_itemSettings.insert("Radiosonde", new MapItemSettings("Radiosonde", QColor(102, 0, 102), false, 11, modelMinPixelSize));
     m_itemSettings.insert("Radio Time Transmitters", new MapItemSettings("Radio Time Transmitters", QColor(255, 0, 0), true, 8));
     m_itemSettings.insert("Radar", new MapItemSettings("Radar", QColor(255, 0, 0), true, 8));
+    m_itemSettings.insert("FT8Demod", new MapItemSettings("FT8Demod", QColor(0, 192, 255), true, 8));
 
     MapItemSettings *ionosondeItemSettings = new MapItemSettings("Ionosonde Stations", QColor(255, 255, 0), true, 4);
     ionosondeItemSettings->m_display2DIcon = false;
