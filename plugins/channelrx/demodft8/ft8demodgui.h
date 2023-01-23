@@ -81,6 +81,9 @@ private:
 	bool m_squelchOpen;
     int m_audioSampleRate;
 	uint32_t m_tickCount;
+    bool m_filterMessages;
+    int m_selectedColumn;
+    QString m_selectedValue;
 
 	FT8Demod* m_ft8Demod;
 	SpectrumVis* m_spectrumVis;
@@ -104,6 +107,7 @@ private:
     void resizeMessageTable();
     void messagesReceived(const QList<FT8Message>& messages);
     void populateBandPresets();
+    void filterMessageRow(int row);
 
     enum MessageCol {
         MESSAGE_COL_UTC,
@@ -128,6 +132,7 @@ private slots:
     void on_fftWindow_currentIndexChanged(int index);
     void on_filterIndex_valueChanged(int value);
     void on_moveToBottom_clicked();
+    void on_filterMessages_toggled(bool checked);
     void on_applyBandPreset_clicked();
     void on_clearMessages_clicked();
     void on_recordWav_toggled(bool checked);
@@ -137,6 +142,7 @@ private slots:
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
 	void tick();
+    void messageCellClicked(int row, int col);
 };
 
 #endif // INCLUDE_SSBDEMODGUI_H

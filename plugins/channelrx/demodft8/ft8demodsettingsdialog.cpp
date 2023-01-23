@@ -144,6 +144,7 @@ void FT8DemodSettingsDialog::on_addBand_clicked()
     ui->bands->blockSignals(true);
     ui->bands->setRowCount(0);
     populateBandsTable();
+    ui->bands->scrollToBottom();
     ui->bands->blockSignals(false);
 
     if (!m_settingsKeys.contains("bandPresets")) {

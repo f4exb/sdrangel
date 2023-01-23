@@ -219,6 +219,15 @@ void FT8DemodGUI::on_moveToBottom_clicked()
     ui->messages->scrollToBottom();
 }
 
+void FT8DemodGUI::on_filterMessages_toggled(bool checked)
+{
+    m_filterMessages = checked;
+
+    for (int row = 0; row < ui->messages->rowCount(); row++) {
+        filterMessageRow(row);
+    }
+}
+
 void FT8DemodGUI::on_applyBandPreset_clicked()
 {
     int bandPresetIndex = ui->bandPreset->currentIndex();
@@ -358,7 +367,8 @@ FT8DemodGUI::FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_audioFlipChannels(false),
     m_audioMute(false),
 	m_squelchOpen(false),
-    m_audioSampleRate(-1)
+    m_audioSampleRate(-1),
+    m_filterMessages(false)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodssb/readme.md";
@@ -422,6 +432,8 @@ FT8DemodGUI::FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     // Resize the table using dummy data
     resizeMessageTable();
     populateBandPresets();
+
+    connect(ui->messages, &QTableWidget::cellClicked, this, &FT8DemodGUI::messageCellClicked);
 }
 
 FT8DemodGUI::~FT8DemodGUI()
@@ -640,6 +652,7 @@ void FT8DemodGUI::makeUIConnections()
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FT8DemodGUI::on_fftWindow_currentIndexChanged);
     QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &FT8DemodGUI::on_filterIndex_valueChanged);
     QObject::connect(ui->moveToBottom, &QPushButton::clicked, this, &FT8DemodGUI::on_moveToBottom_clicked);
+    QObject::connect(ui->filterMessages, &ButtonSwitch::toggled, this, &FT8DemodGUI::on_filterMessages_toggled);
     QObject::connect(ui->applyBandPreset, &QPushButton::clicked, this, &FT8DemodGUI::on_applyBandPreset_clicked);
     QObject::connect(ui->clearMessages, &QPushButton::clicked, this, &FT8DemodGUI::on_clearMessages_clicked);
     QObject::connect(ui->recordWav, &ButtonSwitch::toggled, this, &FT8DemodGUI::on_recordWav_toggled);
@@ -720,6 +733,8 @@ void FT8DemodGUI::messagesReceived(const QList<FT8Message>& messages)
         locItem->setText(message.loc);
         infoItem->setText(message.decoderInfo);
 
+        filterMessageRow(row);
+
         row++;
     }
 
@@ -740,4 +755,47 @@ void FT8DemodGUI::populateBandPresets()
     }
 
     ui->bandPreset->blockSignals(false);
+}
+
+void FT8DemodGUI::messageCellClicked(int row, int col)
+{
+    m_selectedColumn = col;
+    m_selectedValue =  ui->messages->item(row, col)->text();
+    qDebug("FT8DemodGUI::messageCellChanged: %d %s", m_selectedColumn, qPrintable(m_selectedValue));
+}
+
+void FT8DemodGUI::filterMessageRow(int row)
+{
+    if (!m_filterMessages)
+    {
+        ui->messages->setRowHidden(row, false);
+        return;
+    }
+
+    if ((m_selectedColumn == MESSAGE_COL_CALL1) || (m_selectedColumn == MESSAGE_COL_CALL2))
+    {
+        const QString& call1 = ui->messages->item(row, MESSAGE_COL_CALL1)->text();
+        const QString& call2 = ui->messages->item(row, MESSAGE_COL_CALL2)->text();
+        bool visible = ((call1 == m_selectedValue) || (call2 == m_selectedValue));
+        ui->messages->setRowHidden(row, !visible);
+        return;
+    }
+
+    if (m_selectedColumn == MESSAGE_COL_LOC)
+    {
+        const QString& loc = ui->messages->item(row, MESSAGE_COL_LOC)->text();
+        bool visible = (loc == m_selectedValue);
+        ui->messages->setRowHidden(row, !visible);
+        return;
+    }
+
+    if (m_selectedColumn == MESSAGE_COL_UTC)
+    {
+        const QString& utc = ui->messages->item(row, MESSAGE_COL_UTC)->text();
+        bool visible = (utc == m_selectedValue);
+        ui->messages->setRowHidden(row, !visible);
+        return;
+    }
+
+    ui->messages->setRowHidden(row, false);
 }

@@ -879,6 +879,23 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="filterMessages">
+        <property name="toolTip">
+         <string>Filter messages</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/funnel.png</normaloff>:/funnel.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="bandPresetLabel">
         <property name="text">
          <string>Band</string>
@@ -892,6 +909,9 @@
           <width>80</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Band frequency presets</string>
         </property>
        </widget>
       </item>
