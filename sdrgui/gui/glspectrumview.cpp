@@ -3931,8 +3931,13 @@ void GLSpectrumView::mouseMoveEvent(QMouseEvent* event)
             }
             else if (m_channelMarkerStates[i]->m_channelMarker->getHighlighted())
             {
-                m_channelMarkerStates[i]->m_channelMarker->setHighlightedByCursor(false);
-                channelMarkerChanged();
+                // Don't clear highlight while dragging a channel, as we want the
+                // frequency of the channel to be continuously displayed
+                if (m_cursorState != CSChannelMoving)
+                {
+                    m_channelMarkerStates[i]->m_channelMarker->setHighlightedByCursor(false);
+                    channelMarkerChanged();
+                }
             }
         }
     }
