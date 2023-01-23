@@ -25,6 +25,7 @@ set(demodft8_HEADERS
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${CMAKE_SOURCE_DIR}/ft8
+    ${FFTW3F_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
