@@ -24,8 +24,6 @@
 #include "fft.h"
 #include "util.h"
 
-#define TIMING 0
-
 namespace FT8 {
 
 FFTEngine* FFTEngine::m_instance= nullptr;;
@@ -48,11 +46,7 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
 
     for (int i = 0; i < m_nplans; i++)
     {
-        if (m_plans[i]->n_ == n && m_plans[i]->type_ == M_FFTW_TYPE
-#if TIMING
-            && strcmp(plans[i]->why_, why) == 0
-#endif
-        )
+        if (m_plans[i]->n_ == n && m_plans[i]->type_ == M_FFTW_TYPE)
         {
             Plan *p = m_plans[i];
             p->uses_ += 1;
@@ -60,10 +54,6 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
             return p;
         }
     }
-
-#if TIMING
-    double t0 = now();
-#endif
 
     // fftw_make_planner_thread_safe();
     m_plansmu2.lock();
@@ -77,9 +67,6 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
     Plan *p = new Plan;
 
     p->n_ = n;
-#if TIMING
-    p->time_ = 0;
-#endif
     p->uses_ = 1;
     p->why_ = why;
     p->r_ = (float *)fftwf_malloc(n * sizeof(float));
@@ -117,15 +104,6 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
     m_plans[m_nplans] = p;
     m_nplans += 1;
 
-#if TIMING
-    if (0 && getpid() == plan_master_pid)
-    {
-        double t1 = now();
-        fprintf(stderr, "miss pid=%d master=%d n=%d t=%.3f total=%d type=%d, %s\n",
-                getpid(), plan_master_pid, n, t1 - t0, nplans, type, why);
-    }
-#endif
-
     m_plansmu.unlock();
 
     return p;
@@ -160,10 +138,6 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
         p = get_plan(block, why);
     }
     fftwf_plan m_plan = p->fwd_;
-
-#if TIMING
-    double t0 = now();
-#endif
 
     // assert((int)samples.size() - i0 >= block);
 
@@ -207,10 +181,6 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
         fftwf_free(m_in);
     fftwf_free(m_out);
 
-#if TIMING
-    p->time_ += now() - t0;
-#endif
-
     return out;
 }
 
@@ -234,10 +204,6 @@ FFTEngine::ffts_t FFTEngine::ffts(const std::vector<float> &samples, int i0, int
 
     Plan *p = get_plan(block, why);
     fftwf_plan m_plan = p->fwd_;
-
-#if TIMING
-    double t0 = now();
-#endif
 
     // allocate our own b/c using p->m_in and p->m_out isn't thread-safe.
     float *m_in = (float *)fftwf_malloc(sizeof(float) * p->n_);
@@ -277,10 +243,6 @@ FFTEngine::ffts_t FFTEngine::ffts(const std::vector<float> &samples, int i0, int
     fftwf_free(m_in);
     fftwf_free(m_out);
 
-#if TIMING
-    p->time_ += now() - t0;
-#endif
-
     return bins;
 }
 
@@ -303,10 +265,6 @@ std::vector<std::complex<float>> FFTEngine::one_fft_c(
 
     Plan *p = get_plan(block, why);
     fftwf_plan m_plan = p->cfwd_;
-
-#if TIMING
-    double t0 = now();
-#endif
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -342,10 +300,6 @@ std::vector<std::complex<float>> FFTEngine::one_fft_c(
     fftwf_free(m_in);
     fftwf_free(m_out);
 
-#if TIMING
-    p->time_ += now() - t0;
-#endif
-
     return out;
 }
 
@@ -363,10 +317,6 @@ std::vector<std::complex<float>> FFTEngine::one_fft_cc(
 
     Plan *p = get_plan(block, why);
     fftwf_plan m_plan = p->cfwd_;
-
-#if TIMING
-    double t0 = now();
-#endif
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -403,10 +353,6 @@ std::vector<std::complex<float>> FFTEngine::one_fft_cc(
     fftwf_free(m_in);
     fftwf_free(m_out);
 
-#if TIMING
-    p->time_ += now() - t0;
-#endif
-
     return out;
 }
 
@@ -419,10 +365,6 @@ std::vector<std::complex<float>> FFTEngine::one_ifft_cc(
 
     Plan *p = get_plan(block, why);
     fftwf_plan m_plan = p->crev_;
-
-#if TIMING
-    double t0 = now();
-#endif
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -452,10 +394,6 @@ std::vector<std::complex<float>> FFTEngine::one_ifft_cc(
     fftwf_free(m_in);
     fftwf_free(m_out);
 
-#if TIMING
-    p->time_ += now() - t0;
-#endif
-
     return out;
 }
 
@@ -466,10 +404,6 @@ std::vector<float> FFTEngine::one_ifft(const std::vector<std::complex<float>> &b
 
     Plan *p = get_plan(block, why);
     fftwf_plan m_plan = p->rev_;
-
-#if TIMING
-    double t0 = now();
-#endif
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * ((p->n_ / 2) + 1));
     float *m_out = (float *)fftwf_malloc(sizeof(float) * p->n_);
@@ -492,10 +426,6 @@ std::vector<float> FFTEngine::one_ifft(const std::vector<std::complex<float>> &b
 
     fftwf_free(m_in);
     fftwf_free(m_out);
-
-#if TIMING
-    p->time_ += now() - t0;
-#endif
 
     return out;
 }
@@ -580,11 +510,7 @@ void FFTEngine::fft_stats()
                 p->why_,
                 p->n_,
                 p->uses_,
-#if TIMING
-                p->time_
-#else
                 0.0
-#endif
         );
     }
 }

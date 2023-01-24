@@ -60,9 +60,6 @@ public:
         fftwf_plan crev_;    // reverse plan
 
         // how much CPU time spent in FFTs that use this plan.
-    #if TIMING
-        double time_;
-    #endif
         const char *why_;
         int uses_;
     }; // Plan
