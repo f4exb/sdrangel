@@ -19,7 +19,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 #include <string>
-#include <assert.h>
 
 #include "unpack.h"
 #include "unpack0.h"
@@ -42,9 +41,12 @@ int Packing::ihashcall(std::string rawcall, int m)
     {
         int c = call[i];
         const char *p = strchr(chars, c);
-        assert(p);
-        int j = p - chars;
-        x = 38 * x + j;
+
+        if (p)
+        {
+            int j = p - chars;
+            x = 38 * x + j;
+        }
     }
 
     x = x * 47055833459LL;
@@ -319,7 +321,10 @@ std::string Packing::unpack_1(int a77[], std::string& call1str, std::string& cal
     i += 15;
     int i3 = un64(a77, i, 3);
     i += 3;
-    assert((i3 == 1 || i3 == 2) && i == 77);
+
+    if (!((i3 == 1 || i3 == 2) && i == 77)) {
+        return std::string("");
+    }
 
     call1str = trim(unpackcall(call1));
     call2str = trim(unpackcall(call2));

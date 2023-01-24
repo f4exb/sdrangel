@@ -37,7 +37,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <assert.h>
 #include "arrays.h"
 
 // float, long float, __float128
@@ -414,8 +413,9 @@ void gauss_jordan(int rows, int cols, int m[174][2 * 91], int which[91], int *ok
 {
     *ok = 0;
 
-    assert(rows == 91);
-    assert(cols == 174);
+    if ((rows != 91) || (cols != 174)) {
+        return;
+    }
 
     for (int row = 0; row < rows; row++)
     {

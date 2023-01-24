@@ -18,7 +18,6 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
-#include <assert.h>
 #include <math.h>
 #include <complex>
 #include <string>
@@ -175,7 +174,11 @@ std::vector<std::complex<float>> gfsk_c(
     const std::vector<float> &gwin
 )
 {
-    assert((gwin.size() % 2) == 0);
+    if (!((gwin.size() % 2) == 0))
+    {
+        std::vector<std::complex<float>> v(symsamples * symbols.size());
+        return v;
+    }
 
     // compute frequency for each symbol.
     // generate a spike in the middle of each symbol time;
@@ -251,7 +254,11 @@ std::vector<float> gfsk_r(
     const std::vector<float> &gwin
 )
 {
-    assert((gwin.size() % 2) == 0);
+    if (!((gwin.size() % 2) == 0))
+    {
+        std::vector<float> v(symsamples * symbols.size());
+        return v;
+    }
 
     // compute frequency for each symbol.
     // generate a spike in the middle of each symbol time;

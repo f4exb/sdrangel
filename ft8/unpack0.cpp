@@ -32,7 +32,7 @@ boost::multiprecision::int128_t un128(int a77[], int start, int len)
 {
     boost::multiprecision::int128_t x = 0;
 
-    assert(len < (int)sizeof(x) * 8 && start >= 0 && start + len <= 77);
+    // assert(len < (int)sizeof(x) * 8 && start >= 0 && start + len <= 77);
     for (int i = 0; i < len; i++)
     {
         x <<= 1;
@@ -50,7 +50,7 @@ uint64_t un64(int a77[], int start, int len)
 {
     uint64_t x = 0;
 
-    assert(len < (int)sizeof(x) * 8 && start >= 0 && start + len <= 63);
+    // assert(len < (int)sizeof(x) * 8 && start >= 0 && start + len <= 63);
     for (int i = 0; i < len; i++)
     {
         x <<= 1;

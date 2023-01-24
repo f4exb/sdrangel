@@ -19,7 +19,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <assert.h>
+// #include <assert.h>
 #include <QDebug>
 #include "fft.h"
 #include "util.h"
@@ -83,9 +83,9 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
     p->uses_ = 1;
     p->why_ = why;
     p->r_ = (float *)fftwf_malloc(n * sizeof(float));
-    assert(p->r_);
+    // assert(p->r_);
     p->c_ = (fftwf_complex *)fftwf_malloc(((n / 2) + 1) * sizeof(fftwf_complex));
-    assert(p->c_);
+    // assert(p->c_);
 
     // FFTW_ESTIMATE
     // FFTW_MEASURE
@@ -94,25 +94,25 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
     int type = M_FFTW_TYPE;
     p->type_ = type;
     p->fwd_ = fftwf_plan_dft_r2c_1d(n, p->r_, p->c_, type);
-    assert(p->fwd_);
+    // assert(p->fwd_);
     p->rev_ = fftwf_plan_dft_c2r_1d(n, p->c_, p->r_, type);
-    assert(p->rev_);
+    // assert(p->rev_);
 
     //
     // complex -> complex
     //
     p->cc1_ = (fftwf_complex *)fftwf_malloc(n * sizeof(fftwf_complex));
-    assert(p->cc1_);
+    // assert(p->cc1_);
     p->cc2_ = (fftwf_complex *)fftwf_malloc(n * sizeof(fftwf_complex));
-    assert(p->cc2_);
+    // assert(p->cc2_);
     p->cfwd_ = fftwf_plan_dft_1d(n, p->cc1_, p->cc2_, FFTW_FORWARD, type);
-    assert(p->cfwd_);
+    // assert(p->cfwd_);
     p->crev_ = fftwf_plan_dft_1d(n, p->cc2_, p->cc1_, FFTW_BACKWARD, type);
-    assert(p->crev_);
+    // assert(p->crev_);
 
     m_plansmu2.unlock();
 
-    assert(m_nplans + 1 < 1000);
+    // assert(m_nplans + 1 < 1000);
 
     m_plans[m_nplans] = p;
     m_nplans += 1;
@@ -144,15 +144,15 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
     FFTEngine::Plan *p
 )
 {
-    assert(i0 >= 0);
-    assert(block > 1);
+    // assert(i0 >= 0);
+    // assert(block > 1);
 
     int nsamples = samples.size();
     int nbins = (block / 2) + 1;
 
     if (p)
     {
-        assert(p->n_ == block);
+        // assert(p->n_ == block);
         p->uses_ += 1;
     }
     else
@@ -165,7 +165,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
     double t0 = now();
 #endif
 
-    assert((int)samples.size() - i0 >= block);
+    // assert((int)samples.size() - i0 >= block);
 
     int m_in_allocated = 0;
     float *m_in = (float *)samples.data() + i0;
@@ -174,7 +174,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
     {
         // m_in must be on a 16-byte boundary for FFTW.
         m_in = (float *)fftwf_malloc(sizeof(float) * p->n_);
-        assert(m_in);
+        // assert(m_in);
         m_in_allocated = 1;
         for (int i = 0; i < block; i++)
         {
@@ -190,7 +190,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
     }
 
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * ((p->n_ / 2) + 1));
-    assert(m_out);
+    // assert(m_out);
 
     fftwf_execute_dft_r2c(m_plan, m_in, m_out);
 
@@ -220,8 +220,8 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
 //
 FFTEngine::ffts_t FFTEngine::ffts(const std::vector<float> &samples, int i0, int block, const char *why)
 {
-    assert(i0 >= 0);
-    assert(block > 1 && (block % 2) == 0);
+    // assert(i0 >= 0);
+    // assert(block > 1 && (block % 2) == 0);
 
     int nsamples = samples.size();
     int nbins = (block / 2) + 1;
@@ -242,7 +242,7 @@ FFTEngine::ffts_t FFTEngine::ffts(const std::vector<float> &samples, int i0, int
     // allocate our own b/c using p->m_in and p->m_out isn't thread-safe.
     float *m_in = (float *)fftwf_malloc(sizeof(float) * p->n_);
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * ((p->n_ / 2) + 1));
-    assert(m_in && m_out);
+    // assert(m_in && m_out);
 
     // float *m_in = p->r_;
     // fftw_complex *m_out = p->c_;
@@ -296,8 +296,8 @@ std::vector<std::complex<float>> FFTEngine::one_fft_c(
     const char *why
 )
 {
-    assert(i0 >= 0);
-    assert(block > 1);
+    // assert(i0 >= 0);
+    // assert(block > 1);
 
     int nsamples = samples.size();
 
@@ -310,7 +310,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft_c(
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
-    assert(m_in && m_out);
+    // assert(m_in && m_out);
 
     for (int i = 0; i < block; i++)
     {
@@ -356,8 +356,8 @@ std::vector<std::complex<float>> FFTEngine::one_fft_cc(
     const char *why
 )
 {
-    assert(i0 >= 0);
-    assert(block > 1);
+    // assert(i0 >= 0);
+    // assert(block > 1);
 
     int nsamples = samples.size();
 
@@ -370,7 +370,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft_cc(
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
-    assert(m_in && m_out);
+    // assert(m_in && m_out);
 
     for (int i = 0; i < block; i++)
     {
@@ -426,7 +426,7 @@ std::vector<std::complex<float>> FFTEngine::one_ifft_cc(
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
-    assert(m_in && m_out);
+    // assert(m_in && m_out);
 
     for (int bi = 0; bi < block; bi++)
     {
@@ -512,7 +512,7 @@ std::vector<std::complex<float>> FFTEngine::analytic(const std::vector<float> &x
     ulong n = x.size();
 
     std::vector<std::complex<float>> y = one_fft_c(x, 0, n, why);
-    assert(y.size() == n);
+    // assert(y.size() == n);
 
     // leave y[0] alone.
     // float the first (positive) half of the spectrum.
@@ -553,7 +553,7 @@ std::vector<float> FFTEngine::hilbert_shift(const std::vector<float> &x, float h
 {
     // y = scipy.signal.hilbert(x)
     std::vector<std::complex<float>> y = analytic(x, "hilbert_shift");
-    assert(y.size() == x.size());
+    // assert(y.size() == x.size());
 
     float dt = 1.0 / rate;
     int n = x.size();
