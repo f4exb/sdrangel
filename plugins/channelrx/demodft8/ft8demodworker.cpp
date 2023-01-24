@@ -23,6 +23,9 @@
 #include "dsp/wavfilerecord.h"
 #include "util/messagequeue.h"
 #include "util/ft8message.h"
+#include "util/maidenhead.h"
+#include "maincore.h"
+#include "SWGMapItem.h"
 
 #include "ft8demodsettings.h"
 #include "ft8demodworker.h"
@@ -84,16 +87,16 @@ int FT8DemodWorker::FT8Callback::hcb(
     ft8Message.decoderInfo = QString(comment);
     cycle_mu.unlock();
 
-    qDebug("FT8DemodWorker::FT8Callback::hcb: %6.3f %d %3d %3d %5.2f %6.1f %s (%s)",
-        m_baseFrequency / 1000000.0,
-        pass,
-        (int)snr,
-        correct_bits,
-        off - 0.5,
-        hz0,
-        msg.c_str(),
-        comment
-    );
+    // qDebug("FT8DemodWorker::FT8Callback::hcb: %6.3f %d %3d %3d %5.2f %6.1f %s (%s)",
+    //     m_baseFrequency / 1000000.0,
+    //     pass,
+    //     (int)snr,
+    //     correct_bits,
+    //     off - 0.5,
+    //     hz0,
+    //     msg.c_str(),
+    //     comment
+    // );
 
     return 2; // 2 => new decode, do subtract.
 }
@@ -187,13 +190,15 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
         m_reportingMessageQueue->push(ft8Callback.getReportMessage());
     }
 
-    if (m_logMessages)
-    {
-        const QList<FT8Message>& ft8Messages = ft8Callback.getReportMessage()->getFT8Messages();
-        std::ofstream logFile;
-        double baseFrequencyMHz = m_baseFrequency/1000000.0;
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes((const QObject*) m_channel, "mapitems", mapPipes);
+    const QList<FT8Message>& ft8Messages = ft8Callback.getReportMessage()->getFT8Messages();
+    std::ofstream logFile;
+    double baseFrequencyMHz = m_baseFrequency/1000000.0;
 
-        for (const auto& ft8Message : ft8Messages)
+    for (const auto& ft8Message : ft8Messages)
+    {
+        if (m_logMessages)
         {
             if (!logFile.is_open())
             {
@@ -225,8 +230,44 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
             logFile << logMessage.toStdString() << std::endl;
         }
 
-        if (logFile.is_open()) {
-            logFile.close();
+        if (mapPipes.size() > 0)
+        {
+            // If message contains a Maidenhead locator, display caller on Map feature
+            float latitude, longitude;
+
+            if ((ft8Message.loc.size() == 4) && (ft8Message.loc != "RR73") && Maidenhead::fromMaidenhead(ft8Message.loc, latitude, longitude))
+            {
+                QString text = QString("%1\nMode: FT8\nFrequency: %2 Hz\nLocator: %3\nSNR: %4\nLast heard: %5")
+                                    .arg(ft8Message.call2)
+                                    .arg(baseFrequencyMHz*1000000 + ft8Message.df)
+                                    .arg(ft8Message.loc)
+                                    .arg(ft8Message.snr)
+                                    .arg(periodTS.toString("dd MMM yyyy HH:mm:ss"));
+
+                for (const auto& pipe : mapPipes)
+                {
+                    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                    SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+                    swgMapItem->setName(new QString(ft8Message.call2));
+                    swgMapItem->setLatitude(latitude);
+                    swgMapItem->setLongitude(longitude);
+                    swgMapItem->setAltitude(0);
+                    swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
+                    swgMapItem->setPositionDateTime(new QString(QDateTime::currentDateTime().toString(Qt::ISODateWithMs)));
+                    swgMapItem->setImageRotation(0);
+                    swgMapItem->setText(new QString(text));
+                    swgMapItem->setImage(new QString("antenna.png"));
+                    swgMapItem->setModel(new QString("antenna.glb"));
+                    swgMapItem->setModelAltitudeOffset(0.0);
+                    swgMapItem->setLabel(new QString(ft8Message.call2));
+                    swgMapItem->setLabelAltitudeOffset(4.5);
+                    swgMapItem->setFixedPosition(false);
+                    swgMapItem->setOrientation(0);
+                    swgMapItem->setHeading(0);
+                    MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create((const QObject*) m_channel, swgMapItem);
+                    messageQueue->push(msg);
+                }
+            }
         }
     }
 

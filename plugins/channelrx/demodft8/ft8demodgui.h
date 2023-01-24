@@ -108,7 +108,6 @@ private:
     void messagesReceived(const QList<FT8Message>& messages);
     void populateBandPresets();
     void filterMessageRow(int row);
-    void sendToMap(const QString& call2, const QString& text, float latitude, float longitude);
 
     enum MessageCol {
         MESSAGE_COL_UTC,

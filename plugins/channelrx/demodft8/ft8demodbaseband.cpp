@@ -270,7 +270,7 @@ void FT8DemodBaseband::tick()
         if (m_tickCount++ == 0)
         {
             QDateTime periodTs = nowUTC.addSecs(-15);
-            qDebug("FT8DemodBaseband::tick: %s", qPrintable(nowUTC.toString("yyyy-MM-dd HH:mm:ss")));
+            // qDebug("FT8DemodBaseband::tick: %s", qPrintable(nowUTC.toString("yyyy-MM-dd HH:mm:ss")));
             m_ft8Buffer.getCurrentBuffer(m_ft8WorkerBuffer);
             emit bufferReady(m_ft8WorkerBuffer, periodTs);
             periodTs = nowUTC;
