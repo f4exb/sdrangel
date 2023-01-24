@@ -80,7 +80,6 @@ public:
     std::vector<std::complex<float>> one_fft_c(const std::vector<float> &samples, int i0, int block, const char *why);
     std::vector<std::complex<float>> one_fft_cc(const std::vector<std::complex<float>> &samples, int i0, int block, const char *why);
     std::vector<std::complex<float>> one_ifft_cc(const std::vector<std::complex<float>> &bins, const char *why);
-    std::vector<std::complex<float>> analytic(const std::vector<float> &x, const char *why);
     std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate);
 
 protected:
@@ -90,6 +89,7 @@ protected:
     static FFTEngine *m_instance;
 
 private:
+    std::vector<std::complex<float>> analytic(const std::vector<float> &x, const char *why);
     void fft_stats();
     QMutex m_plansmu;
     QMutex m_plansmu2;
