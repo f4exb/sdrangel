@@ -37,7 +37,7 @@ FFTEngine *FFTEngine::GetInstance()
     return m_instance;
 }
 
-FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
+FFTEngine::Plan *FFTEngine::get_plan(int n)
 {
     // cache fftw plans in the parent process,
     // so they will already be there for fork()ed children.
@@ -49,7 +49,6 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
         if (m_plans[i]->n_ == n && m_plans[i]->type_ == M_FFTW_TYPE)
         {
             Plan *p = m_plans[i];
-            p->uses_ += 1;
             m_plansmu.unlock();
             return p;
         }
@@ -67,8 +66,6 @@ FFTEngine::Plan *FFTEngine::get_plan(int n, const char *why)
     Plan *p = new Plan;
 
     p->n_ = n;
-    p->uses_ = 1;
-    p->why_ = why;
     p->r_ = (float *)fftwf_malloc(n * sizeof(float));
     // assert(p->r_);
     p->c_ = (fftwf_complex *)fftwf_malloc(((n / 2) + 1) * sizeof(fftwf_complex));
@@ -118,7 +115,6 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
     const std::vector<float> &samples,
     int i0,
     int block,
-    const char *why,
     FFTEngine::Plan *p
 )
 {
@@ -128,15 +124,10 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
     int nsamples = samples.size();
     int nbins = (block / 2) + 1;
 
-    if (p)
-    {
-        // assert(p->n_ == block);
-        p->uses_ += 1;
+    if (!p) {
+        p = get_plan(block);
     }
-    else
-    {
-        p = get_plan(block, why);
-    }
+
     fftwf_plan m_plan = p->fwd_;
 
     // assert((int)samples.size() - i0 >= block);
@@ -188,7 +179,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
 // do a full set of FFTs, one per symbol-time.
 // bins[time][frequency]
 //
-FFTEngine::ffts_t FFTEngine::ffts(const std::vector<float> &samples, int i0, int block, const char *why)
+FFTEngine::ffts_t FFTEngine::ffts(const std::vector<float> &samples, int i0, int block)
 {
     // assert(i0 >= 0);
     // assert(block > 1 && (block % 2) == 0);
@@ -197,12 +188,12 @@ FFTEngine::ffts_t FFTEngine::ffts(const std::vector<float> &samples, int i0, int
     int nbins = (block / 2) + 1;
     int nblocks = (nsamples - i0) / block;
     ffts_t bins(nblocks);
-    for (int si = 0; si < nblocks; si++)
-    {
+
+    for (int si = 0; si < nblocks; si++) {
         bins[si].resize(nbins);
     }
 
-    Plan *p = get_plan(block, why);
+    Plan *p = get_plan(block);
     fftwf_plan m_plan = p->fwd_;
 
     // allocate our own b/c using p->m_in and p->m_out isn't thread-safe.
@@ -254,8 +245,7 @@ FFTEngine::ffts_t FFTEngine::ffts(const std::vector<float> &samples, int i0, int
 std::vector<std::complex<float>> FFTEngine::one_fft_c(
     const std::vector<float> &samples,
     int i0,
-    int block,
-    const char *why
+    int block
 )
 {
     // assert(i0 >= 0);
@@ -263,7 +253,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft_c(
 
     int nsamples = samples.size();
 
-    Plan *p = get_plan(block, why);
+    Plan *p = get_plan(block);
     fftwf_plan m_plan = p->cfwd_;
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -286,8 +276,8 @@ std::vector<std::complex<float>> FFTEngine::one_fft_c(
     fftwf_execute_dft(m_plan, m_in, m_out);
 
     std::vector<std::complex<float>> out(block);
-
     float norm = 1.0 / sqrt(block);
+
     for (int bi = 0; bi < block; bi++)
     {
         float re = m_out[bi][0];
@@ -306,8 +296,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft_c(
 std::vector<std::complex<float>> FFTEngine::one_fft_cc(
     const std::vector<std::complex<float>> &samples,
     int i0,
-    int block,
-    const char *why
+    int block
 )
 {
     // assert(i0 >= 0);
@@ -315,7 +304,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft_cc(
 
     int nsamples = samples.size();
 
-    Plan *p = get_plan(block, why);
+    Plan *p = get_plan(block);
     fftwf_plan m_plan = p->cfwd_;
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -357,13 +346,12 @@ std::vector<std::complex<float>> FFTEngine::one_fft_cc(
 }
 
 std::vector<std::complex<float>> FFTEngine::one_ifft_cc(
-    const std::vector<std::complex<float>> &bins,
-    const char *why
+    const std::vector<std::complex<float>> &bins
 )
 {
     int block = bins.size();
 
-    Plan *p = get_plan(block, why);
+    Plan *p = get_plan(block);
     fftwf_plan m_plan = p->crev_;
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -397,12 +385,12 @@ std::vector<std::complex<float>> FFTEngine::one_ifft_cc(
     return out;
 }
 
-std::vector<float> FFTEngine::one_ifft(const std::vector<std::complex<float>> &bins, const char *why)
+std::vector<float> FFTEngine::one_ifft(const std::vector<std::complex<float>> &bins)
 {
     int nbins = bins.size();
     int block = (nbins - 1) * 2;
 
-    Plan *p = get_plan(block, why);
+    Plan *p = get_plan(block);
     fftwf_plan m_plan = p->rev_;
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * ((p->n_ / 2) + 1));
@@ -437,11 +425,11 @@ std::vector<float> FFTEngine::one_ifft(const std::vector<std::complex<float>> &b
 //
 // the return value is x + iy, where y is the hilbert transform of x.
 //
-std::vector<std::complex<float>> FFTEngine::analytic(const std::vector<float> &x, const char *why)
+std::vector<std::complex<float>> FFTEngine::analytic(const std::vector<float> &x)
 {
     ulong n = x.size();
 
-    std::vector<std::complex<float>> y = one_fft_c(x, 0, n, why);
+    std::vector<std::complex<float>> y = one_fft_c(x, 0, n);
     // assert(y.size() == n);
 
     // leave y[0] alone.
@@ -463,7 +451,7 @@ std::vector<std::complex<float>> FFTEngine::analytic(const std::vector<float> &x
             y[i] = 0;
     }
 
-    std::vector<std::complex<float>> z = one_ifft_cc(y, why);
+    std::vector<std::complex<float>> z = one_ifft_cc(y);
 
     return z;
 }
@@ -482,7 +470,7 @@ std::vector<std::complex<float>> FFTEngine::analytic(const std::vector<float> &x
 std::vector<float> FFTEngine::hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate)
 {
     // y = scipy.signal.hilbert(x)
-    std::vector<std::complex<float>> y = analytic(x, "hilbert_shift");
+    std::vector<std::complex<float>> y = analytic(x);
     // assert(y.size() == x.size());
 
     float dt = 1.0 / rate;
@@ -499,20 +487,6 @@ std::vector<float> FFTEngine::hilbert_shift(const std::vector<float> &x, float h
     }
 
     return ret;
-}
-
-void FFTEngine::fft_stats()
-{
-    for (int i = 0; i < m_nplans; i++)
-    {
-        Plan *p = m_plans[i];
-        qDebug("FT8::FFTEngine::fft_stats: %-13s %6d %9d %6.3fn",
-                p->why_,
-                p->n_,
-                p->uses_,
-                0.0
-        );
-    }
 }
 
 } // namespace FT8

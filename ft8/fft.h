@@ -58,25 +58,21 @@ public:
         fftwf_complex *cc2_; // n
         fftwf_plan cfwd_;    // forward plan
         fftwf_plan crev_;    // reverse plan
-
-        // how much CPU time spent in FFTs that use this plan.
-        const char *why_;
-        int uses_;
     }; // Plan
 
     FFTEngine(FFTEngine& other) = delete;
     void operator=(const FFTEngine &) = delete;
     static FFTEngine *GetInstance();
 
-    Plan *get_plan(int n, const char *why);
+    Plan *get_plan(int n);
 
-    std::vector<std::complex<float>> one_fft(const std::vector<float> &samples, int i0, int block, const char *why, Plan *p);
-    std::vector<float> one_ifft(const std::vector<std::complex<float>> &bins, const char *why);
+    std::vector<std::complex<float>> one_fft(const std::vector<float> &samples, int i0, int block, Plan *p);
+    std::vector<float> one_ifft(const std::vector<std::complex<float>> &bins);
     typedef std::vector<std::vector<std::complex<float>>> ffts_t;
-    ffts_t ffts(const std::vector<float> &samples, int i0, int block, const char *why);
-    std::vector<std::complex<float>> one_fft_c(const std::vector<float> &samples, int i0, int block, const char *why);
-    std::vector<std::complex<float>> one_fft_cc(const std::vector<std::complex<float>> &samples, int i0, int block, const char *why);
-    std::vector<std::complex<float>> one_ifft_cc(const std::vector<std::complex<float>> &bins, const char *why);
+    ffts_t ffts(const std::vector<float> &samples, int i0, int block);
+    std::vector<std::complex<float>> one_fft_c(const std::vector<float> &samples, int i0, int block);
+    std::vector<std::complex<float>> one_fft_cc(const std::vector<std::complex<float>> &samples, int i0, int block);
+    std::vector<std::complex<float>> one_ifft_cc(const std::vector<std::complex<float>> &bins);
     std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate);
 
 protected:
@@ -86,8 +82,7 @@ protected:
     static FFTEngine *m_instance;
 
 private:
-    std::vector<std::complex<float>> analytic(const std::vector<float> &x, const char *why);
-    void fft_stats();
+    std::vector<std::complex<float>> analytic(const std::vector<float> &x);
     QMutex m_plansmu;
     QMutex m_plansmu2;
     Plan *m_plans[1000];
