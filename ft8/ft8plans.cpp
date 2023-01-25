@@ -19,36 +19,46 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef FFT_H
-#define FFT_H
+#include <QMutexLocker>
 
-#include <QMutex>
-#include <vector>
-#include <complex>
-
-#include "export.h"
+#include "ft8plan.h"
+#include "ft8plans.h"
 
 namespace FT8
 {
-class FT8_API FFTEngine
+
+FT8Plans* FT8Plans::m_instance= nullptr;
+QMutex FT8Plans::m_globalPlanMutex;
+
+FT8Plans::FT8Plans()
+{}
+
+FT8Plans *FT8Plans::GetInstance()
 {
-public:
-    std::vector<std::complex<float>> one_fft(const std::vector<float> &samples, int i0, int block);
-    std::vector<float> one_ifft(const std::vector<std::complex<float>> &bins);
-    typedef std::vector<std::vector<std::complex<float>>> ffts_t;
-    ffts_t ffts(const std::vector<float> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_fft_c(const std::vector<float> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_fft_cc(const std::vector<std::complex<float>> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_ifft_cc(const std::vector<std::complex<float>> &bins);
-    std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate);
+    if (!m_instance) {
+        m_instance = new FT8Plans();
+    }
 
-    FFTEngine();
-    ~FFTEngine();
+    return m_instance;
+}
 
-private:
-    std::vector<std::complex<float>> analytic(const std::vector<float> &x);
-}; // FFTEngine
+Plan *FT8Plans::getPlan(int n)
+{
+    QMutexLocker mlock(&m_globalPlanMutex);
 
-} // namespace FT8
+    for (auto& plan : m_plans)
+    {
+        if ((plan->n_ == n) && (plan->type_ == Plan::M_FFTW_TYPE)) {
+            return plan;
+        }
+    }
 
-#endif
+    fftwf_set_timelimit(5);
+
+    Plan *p = new Plan(n);
+    m_plans.push_back(p);
+
+    return p;
+}
+
+}

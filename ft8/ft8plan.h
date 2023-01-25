@@ -18,37 +18,43 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+#ifndef ft8plan_h
+#define ft8plan_h
 
-#ifndef FFT_H
-#define FFT_H
-
+#include <fftw3.h>
 #include <QMutex>
-#include <vector>
-#include <complex>
-
-#include "export.h"
 
 namespace FT8
 {
-class FT8_API FFTEngine
+
+class Plan
 {
 public:
-    std::vector<std::complex<float>> one_fft(const std::vector<float> &samples, int i0, int block);
-    std::vector<float> one_ifft(const std::vector<std::complex<float>> &bins);
-    typedef std::vector<std::vector<std::complex<float>>> ffts_t;
-    ffts_t ffts(const std::vector<float> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_fft_c(const std::vector<float> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_fft_cc(const std::vector<std::complex<float>> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_ifft_cc(const std::vector<std::complex<float>> &bins);
-    std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate);
+    Plan(int n);
+    ~Plan();
 
-    FFTEngine();
-    ~FFTEngine();
+    int n_;
+    int type_;
 
-private:
-    std::vector<std::complex<float>> analytic(const std::vector<float> &x);
-}; // FFTEngine
+    //
+    // real -> complex
+    //
+    fftwf_complex *c_; // (n_ / 2) + 1 of these
+    float *r_;         // n_ of these
+    fftwf_plan fwd_;   // forward plan
+    fftwf_plan rev_;   // reverse plan
 
-} // namespace FT8
+    //
+    // complex -> complex
+    //
+    fftwf_complex *cc1_; // n
+    fftwf_complex *cc2_; // n
+    fftwf_plan cfwd_;    // forward plan
+    fftwf_plan crev_;    // reverse plan
+    // MEASURE=0, ESTIMATE=64, PATIENT=32
+    static const int M_FFTW_TYPE = FFTW_ESTIMATE;
+}; // Plan
+
+}
 
 #endif

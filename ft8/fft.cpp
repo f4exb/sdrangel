@@ -20,91 +20,20 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 // #include <assert.h>
+#include <fftw3.h>
 #include <QDebug>
 #include "fft.h"
 #include "util.h"
+#include "ft8plan.h"
+#include "ft8plans.h"
 
 namespace FT8 {
 
-FFTEngine* FFTEngine::m_instance= nullptr;;
+FFTEngine::FFTEngine()
+{}
 
-FFTEngine *FFTEngine::GetInstance()
-{
-    if (!m_instance) {
-        m_instance = new FFTEngine();
-    }
-
-    return m_instance;
-}
-
-FFTEngine::Plan *FFTEngine::get_plan(int n)
-{
-    // cache fftw plans in the parent process,
-    // so they will already be there for fork()ed children.
-
-    m_plansmu.lock();
-
-    for (int i = 0; i < m_nplans; i++)
-    {
-        if (m_plans[i]->n_ == n && m_plans[i]->type_ == M_FFTW_TYPE)
-        {
-            Plan *p = m_plans[i];
-            m_plansmu.unlock();
-            return p;
-        }
-    }
-
-    // fftw_make_planner_thread_safe();
-    m_plansmu2.lock();
-
-    fftwf_set_timelimit(5);
-
-    //
-    // real -> complex
-    //
-
-    Plan *p = new Plan;
-
-    p->n_ = n;
-    p->r_ = (float *)fftwf_malloc(n * sizeof(float));
-    // assert(p->r_);
-    p->c_ = (fftwf_complex *)fftwf_malloc(((n / 2) + 1) * sizeof(fftwf_complex));
-    // assert(p->c_);
-
-    // FFTW_ESTIMATE
-    // FFTW_MEASURE
-    // FFTW_PATIENT
-    // FFTW_EXHAUSTIVE
-    int type = M_FFTW_TYPE;
-    p->type_ = type;
-    p->fwd_ = fftwf_plan_dft_r2c_1d(n, p->r_, p->c_, type);
-    // assert(p->fwd_);
-    p->rev_ = fftwf_plan_dft_c2r_1d(n, p->c_, p->r_, type);
-    // assert(p->rev_);
-
-    //
-    // complex -> complex
-    //
-    p->cc1_ = (fftwf_complex *)fftwf_malloc(n * sizeof(fftwf_complex));
-    // assert(p->cc1_);
-    p->cc2_ = (fftwf_complex *)fftwf_malloc(n * sizeof(fftwf_complex));
-    // assert(p->cc2_);
-    p->cfwd_ = fftwf_plan_dft_1d(n, p->cc1_, p->cc2_, FFTW_FORWARD, type);
-    // assert(p->cfwd_);
-    p->crev_ = fftwf_plan_dft_1d(n, p->cc2_, p->cc1_, FFTW_BACKWARD, type);
-    // assert(p->crev_);
-
-    m_plansmu2.unlock();
-
-    // assert(m_nplans + 1 < 1000);
-
-    m_plans[m_nplans] = p;
-    m_nplans += 1;
-
-    m_plansmu.unlock();
-
-    return p;
-}
+FFTEngine::~FFTEngine()
+{}
 
 //
 // do just one FFT on samples[i0..i0+block]
@@ -114,8 +43,7 @@ FFTEngine::Plan *FFTEngine::get_plan(int n)
 std::vector<std::complex<float>> FFTEngine::one_fft(
     const std::vector<float> &samples,
     int i0,
-    int block,
-    FFTEngine::Plan *p
+    int block
 )
 {
     // assert(i0 >= 0);
@@ -123,12 +51,9 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
 
     int nsamples = samples.size();
     int nbins = (block / 2) + 1;
+    Plan *p = FT8Plans::GetInstance()->getPlan(block);
 
-    if (!p) {
-        p = get_plan(block);
-    }
-
-    fftwf_plan m_plan = p->fwd_;
+    fftwf_plan plan = p->fwd_;
 
     // assert((int)samples.size() - i0 >= block);
 
@@ -157,7 +82,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * ((p->n_ / 2) + 1));
     // assert(m_out);
 
-    fftwf_execute_dft_r2c(m_plan, m_in, m_out);
+    fftwf_execute_dft_r2c(plan, m_in, m_out);
 
     std::vector<std::complex<float>> out(nbins);
 
@@ -168,8 +93,10 @@ std::vector<std::complex<float>> FFTEngine::one_fft(
         out[bi] = std::complex<float>(re, im);
     }
 
-    if (m_in_allocated)
+    if (m_in_allocated) {
         fftwf_free(m_in);
+    }
+
     fftwf_free(m_out);
 
     return out;
@@ -193,8 +120,8 @@ FFTEngine::ffts_t FFTEngine::ffts(const std::vector<float> &samples, int i0, int
         bins[si].resize(nbins);
     }
 
-    Plan *p = get_plan(block);
-    fftwf_plan m_plan = p->fwd_;
+    Plan *p =  FT8Plans::GetInstance()->getPlan(block);
+    fftwf_plan plan = p->fwd_;
 
     // allocate our own b/c using p->m_in and p->m_out isn't thread-safe.
     float *m_in = (float *)fftwf_malloc(sizeof(float) * p->n_);
@@ -220,7 +147,7 @@ FFTEngine::ffts_t FFTEngine::ffts(const std::vector<float> &samples, int i0, int
             }
         }
 
-        fftwf_execute_dft_r2c(m_plan, m_in, m_out);
+        fftwf_execute_dft_r2c(plan, m_in, m_out);
 
         for (int bi = 0; bi < nbins; bi++)
         {
@@ -253,8 +180,8 @@ std::vector<std::complex<float>> FFTEngine::one_fft_c(
 
     int nsamples = samples.size();
 
-    Plan *p = get_plan(block);
-    fftwf_plan m_plan = p->cfwd_;
+    Plan *p = FT8Plans::GetInstance()->getPlan(block);
+    fftwf_plan plan = p->cfwd_;
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -273,7 +200,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft_c(
         m_in[i][1] = 0; // imaginary
     }
 
-    fftwf_execute_dft(m_plan, m_in, m_out);
+    fftwf_execute_dft(plan, m_in, m_out);
 
     std::vector<std::complex<float>> out(block);
     float norm = 1.0 / sqrt(block);
@@ -304,8 +231,8 @@ std::vector<std::complex<float>> FFTEngine::one_fft_cc(
 
     int nsamples = samples.size();
 
-    Plan *p = get_plan(block);
-    fftwf_plan m_plan = p->cfwd_;
+    Plan *p = FT8Plans::GetInstance()->getPlan(block);
+    fftwf_plan plan = p->cfwd_;
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -325,7 +252,7 @@ std::vector<std::complex<float>> FFTEngine::one_fft_cc(
         }
     }
 
-    fftwf_execute_dft(m_plan, m_in, m_out);
+    fftwf_execute_dft(plan, m_in, m_out);
 
     std::vector<std::complex<float>> out(block);
 
@@ -351,8 +278,8 @@ std::vector<std::complex<float>> FFTEngine::one_ifft_cc(
 {
     int block = bins.size();
 
-    Plan *p = get_plan(block);
-    fftwf_plan m_plan = p->crev_;
+    Plan *p = FT8Plans::GetInstance()->getPlan(block);
+    fftwf_plan plan = p->crev_;
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
     fftwf_complex *m_out = (fftwf_complex *)fftwf_malloc(block * sizeof(fftwf_complex));
@@ -366,7 +293,7 @@ std::vector<std::complex<float>> FFTEngine::one_ifft_cc(
         m_in[bi][1] = im;
     }
 
-    fftwf_execute_dft(m_plan, m_in, m_out);
+    fftwf_execute_dft(plan, m_in, m_out);
 
     std::vector<std::complex<float>> out(block);
     float norm = 1.0 / sqrt(block);
@@ -390,8 +317,8 @@ std::vector<float> FFTEngine::one_ifft(const std::vector<std::complex<float>> &b
     int nbins = bins.size();
     int block = (nbins - 1) * 2;
 
-    Plan *p = get_plan(block);
-    fftwf_plan m_plan = p->rev_;
+    Plan *p = FT8Plans::GetInstance()->getPlan(block);
+    fftwf_plan plan = p->rev_;
 
     fftwf_complex *m_in = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * ((p->n_ / 2) + 1));
     float *m_out = (float *)fftwf_malloc(sizeof(float) * p->n_);
@@ -404,7 +331,7 @@ std::vector<float> FFTEngine::one_ifft(const std::vector<std::complex<float>> &b
         m_in[bi][1] = im;
     }
 
-    fftwf_execute_dft_c2r(m_plan, m_in, m_out);
+    fftwf_execute_dft_c2r(plan, m_in, m_out);
 
     std::vector<float> out(block);
     for (int i = 0; i < block; i++)

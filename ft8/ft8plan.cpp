@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2023 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This is the code from ft8mon: https://github.com/rtmrtmrtmrtm/ft8mon          //
@@ -18,37 +18,48 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
-
-#ifndef FFT_H
-#define FFT_H
-
-#include <QMutex>
-#include <vector>
-#include <complex>
-
-#include "export.h"
+#include "ft8plan.h"
 
 namespace FT8
 {
-class FT8_API FFTEngine
+
+Plan::Plan(int n)
 {
-public:
-    std::vector<std::complex<float>> one_fft(const std::vector<float> &samples, int i0, int block);
-    std::vector<float> one_ifft(const std::vector<std::complex<float>> &bins);
-    typedef std::vector<std::vector<std::complex<float>>> ffts_t;
-    ffts_t ffts(const std::vector<float> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_fft_c(const std::vector<float> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_fft_cc(const std::vector<std::complex<float>> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_ifft_cc(const std::vector<std::complex<float>> &bins);
-    std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate);
+    n_ = n;
 
-    FFTEngine();
-    ~FFTEngine();
+    r_ = (float *) fftwf_malloc(n * sizeof(float));
+    c_ = (fftwf_complex *) fftwf_malloc(((n / 2) + 1) * sizeof(fftwf_complex));
+    cc1_ = (fftwf_complex *)fftwf_malloc(n * sizeof(fftwf_complex));
+    cc2_ = (fftwf_complex *)fftwf_malloc(n * sizeof(fftwf_complex));
+    //
+    // real -> complex
+    //
+    // FFTW_ESTIMATE
+    // FFTW_MEASURE
+    // FFTW_PATIENT
+    // FFTW_EXHAUSTIVE
+    int type = M_FFTW_TYPE;
+    type_ = type;
+    fwd_ = fftwf_plan_dft_r2c_1d(n, r_, c_, type);
+    rev_ = fftwf_plan_dft_c2r_1d(n, c_, r_, type);
 
-private:
-    std::vector<std::complex<float>> analytic(const std::vector<float> &x);
-}; // FFTEngine
+    //
+    // complex -> complex
+    //
+    cfwd_ = fftwf_plan_dft_1d(n, cc1_, cc2_, FFTW_FORWARD, type);
+    crev_ = fftwf_plan_dft_1d(n, cc2_, cc1_, FFTW_BACKWARD, type);
+}
 
-} // namespace FT8
+Plan::~Plan()
+{
+    fftwf_destroy_plan(fwd_);
+    fftwf_destroy_plan(rev_);
+    fftwf_destroy_plan(cfwd_);
+    fftwf_destroy_plan(crev_);
+    fftwf_free(r_);
+    fftwf_free(c_);
+    fftwf_free(cc1_);
+    fftwf_free(cc2_);
+}
 
-#endif
+} // namesoace FT8

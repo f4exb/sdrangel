@@ -18,37 +18,37 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+#ifndef ft8plans_h
+#define ft8plans_h
 
-#ifndef FFT_H
-#define FFT_H
-
-#include <QMutex>
 #include <vector>
-#include <complex>
+#include <QMutex>
 
 #include "export.h"
 
 namespace FT8
 {
-class FT8_API FFTEngine
+
+class Plan;
+
+class FT8_API FT8Plans
 {
 public:
-    std::vector<std::complex<float>> one_fft(const std::vector<float> &samples, int i0, int block);
-    std::vector<float> one_ifft(const std::vector<std::complex<float>> &bins);
-    typedef std::vector<std::vector<std::complex<float>>> ffts_t;
-    ffts_t ffts(const std::vector<float> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_fft_c(const std::vector<float> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_fft_cc(const std::vector<std::complex<float>> &samples, int i0, int block);
-    std::vector<std::complex<float>> one_ifft_cc(const std::vector<std::complex<float>> &bins);
-    std::vector<float> hilbert_shift(const std::vector<float> &x, float hz0, float hz1, int rate);
+    FT8Plans(FT8Plans& other) = delete;
+    void operator=(const FT8Plans &) = delete;
+    static FT8Plans *GetInstance();
+    Plan *getPlan(int n);
 
-    FFTEngine();
-    ~FFTEngine();
+protected:
+    FT8Plans();
+    static FT8Plans *m_instance;
 
 private:
-    std::vector<std::complex<float>> analytic(const std::vector<float> &x);
-}; // FFTEngine
+    std::vector<Plan*> m_plans;
+    static QMutex m_globalPlanMutex;
+
+};
 
 } // namespace FT8
 
-#endif
+#endif // ft8plans_h

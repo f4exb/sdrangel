@@ -299,8 +299,6 @@ public:
     std::vector<std::complex<float>> hack_bins_;
     std::vector<cdecode> prevdecs_;
 
-    FFTEngine::Plan *plan32_;
-
     FT8(
         const std::vector<float> &samples,
         float min_hz,
@@ -688,6 +686,7 @@ public:
 private:
     FT8Params params;
     std::vector<QThread*> threads;
+    std::vector<FFTEngine*> fftEngines;
 }; // FT8Decoder
 
 } // namespace FT8
