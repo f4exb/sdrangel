@@ -5,6 +5,10 @@
 // written by Robert Morris, AB1HL                                               //
 // reformatted and adapted to Qt and SDRangel context                            //
 //                                                                               //
+// Caution: this is intentionally not thread safe and one such engine should     //
+// be allocated by thread. Due to optimization of FFT buffers these buffers are  //
+// not shared among threads.                                                     //
+//                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
@@ -30,6 +34,8 @@
 
 namespace FT8
 {
+    class FFTBuffers;
+
 class FT8_API FFTEngine
 {
 public:
@@ -47,6 +53,7 @@ public:
 
 private:
     std::vector<std::complex<float>> analytic(const std::vector<float> &x);
+    FFTBuffers *m_fftBuffers;
 }; // FFTEngine
 
 } // namespace FT8

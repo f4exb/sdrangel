@@ -21,7 +21,7 @@
 #ifndef ft8plans_h
 #define ft8plans_h
 
-#include <vector>
+#include <map>
 #include <QMutex>
 
 #include "export.h"
@@ -45,7 +45,7 @@ protected:
     static FT8Plans *m_instance;
 
 private:
-    std::vector<Plan*> m_plans;
+    std::map<int, Plan*> m_plans;
     static QMutex m_globalPlanMutex;
 
 };

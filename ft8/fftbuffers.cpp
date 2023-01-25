@@ -18,51 +18,61 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
-
-#include <QMutexLocker>
-
-#include "ft8plan.h"
-#include "ft8plans.h"
+#include "fftbuffers.h"
 
 namespace FT8
 {
 
-FT8Plans* FT8Plans::m_instance= nullptr;
-QMutex FT8Plans::m_globalPlanMutex;
-
-FT8Plans::FT8Plans()
-{}
-
-FT8Plans::~FT8Plans()
+FFTBuffers::~FFTBuffers()
 {
-    qDebug("FT8::FT8Plans::~FT8Plans: %lu plans to delete", m_plans.size());
-
-    for (auto& plan : m_plans) {
-        delete plan.second;
+    for (auto& mapitem : m_rs) {
+        fftwf_free(mapitem.second);
+    }
+    for (auto& mapitem : m_cs) {
+        fftwf_free(mapitem.second);
+    }
+    for (auto& mapitem : m_ccis) {
+        fftwf_free(mapitem.second);
+    }
+    for (auto& mapitem : m_ccos) {
+        fftwf_free(mapitem.second);
     }
 }
 
-FT8Plans *FT8Plans::GetInstance()
+float* FFTBuffers::getR(int n)
 {
-    if (!m_instance) {
-        m_instance = new FT8Plans();
+    if (m_rs.find(n) == m_rs.end()) {
+        m_rs[n] = (float *) fftwf_malloc(sizeof(float) * n);
     }
 
-    return m_instance;
+    return  m_rs[n];
 }
 
-Plan *FT8Plans::getPlan(int n)
+fftwf_complex *FFTBuffers::getC(int n)
 {
-    QMutexLocker mlock(&m_globalPlanMutex);
-
-    if (m_plans.find(n) != m_plans.end()) {
-        return m_plans[n];
+    if (m_cs.find(n) == m_cs.end()) {
+        m_cs[n] = (fftwf_complex *) fftwf_malloc(sizeof(fftwf_complex) * ((n / 2) + 1));
     }
 
-    fftwf_set_timelimit(5);
-
-    m_plans[n] = new Plan(n);
-    return m_plans[n];
+    return m_cs[n];
 }
 
+fftwf_complex *FFTBuffers::getCCI(int n)
+{
+    if (m_ccis.find(n) == m_ccis.end()) {
+        m_ccis[n] = (fftwf_complex *) fftwf_malloc(n * sizeof(fftwf_complex));
+    }
+
+    return m_ccis[n];
 }
+
+fftwf_complex *FFTBuffers::getCCO(int n)
+{
+    if (m_ccos.find(n) == m_ccos.end()) {
+        m_ccos[n] = (fftwf_complex *) fftwf_malloc(n * sizeof(fftwf_complex));
+    }
+
+    return m_ccos[n];
+}
+
+} // nemespace FT8

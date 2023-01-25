@@ -19,50 +19,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QMutexLocker>
+#ifndef FFTBUFFERS_H
+#define FFTBUFFERS_H
 
-#include "ft8plan.h"
-#include "ft8plans.h"
+#include <map>
+#include <fftw3.h>
+
+#include "export.h"
 
 namespace FT8
 {
 
-FT8Plans* FT8Plans::m_instance= nullptr;
-QMutex FT8Plans::m_globalPlanMutex;
-
-FT8Plans::FT8Plans()
-{}
-
-FT8Plans::~FT8Plans()
+class FT8_API FFTBuffers
 {
-    qDebug("FT8::FT8Plans::~FT8Plans: %lu plans to delete", m_plans.size());
+public:
+    ~FFTBuffers();
 
-    for (auto& plan : m_plans) {
-        delete plan.second;
-    }
-}
+    float* getR(int n);
+    fftwf_complex *getC(int n);
+    fftwf_complex *getCCI(int n);
+    fftwf_complex *getCCO(int n);
 
-FT8Plans *FT8Plans::GetInstance()
-{
-    if (!m_instance) {
-        m_instance = new FT8Plans();
-    }
+private:
+    std::map<int, float*> m_rs; //!< R2C inputs or C2R inputs by size
+    std::map<int, fftwf_complex*> m_cs; //!< R2C outputs or C2R inputs by size
+    std::map<int, fftwf_complex*> m_ccis; //!< C2C inputs/outputs by size
+    std::map<int, fftwf_complex*> m_ccos; //!< C2C outputs/inputs by size
+};
 
-    return m_instance;
-}
+} // FFTBuffers
 
-Plan *FT8Plans::getPlan(int n)
-{
-    QMutexLocker mlock(&m_globalPlanMutex);
-
-    if (m_plans.find(n) != m_plans.end()) {
-        return m_plans[n];
-    }
-
-    fftwf_set_timelimit(5);
-
-    m_plans[n] = new Plan(n);
-    return m_plans[n];
-}
-
-}
+#endif // FFTBUFFERS_H

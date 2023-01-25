@@ -2,6 +2,7 @@ project(ft8)
 
 set(ft8_SOURCES
     fft.cpp
+    fftbuffers.cpp
     ft8.cpp
     ft8plan.cpp
     ft8plans.cpp
@@ -14,6 +15,7 @@ set(ft8_SOURCES
 
 set(ft8_HEADERS
     fft.h
+    fftbuffers.h
     ft8.h
     ft8plan.h
     ft8plans.h
