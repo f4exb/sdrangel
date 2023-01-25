@@ -33,6 +33,15 @@ QMutex FT8Plans::m_globalPlanMutex;
 FT8Plans::FT8Plans()
 {}
 
+FT8Plans::~FT8Plans()
+{
+    qDebug("FT8::FT8Plans::~FT8Plans: %lu plans to delete", m_plans.size());
+
+    for (auto& plan : m_plans) {
+        delete plan;
+    }
+}
+
 FT8Plans *FT8Plans::GetInstance()
 {
     if (!m_instance) {

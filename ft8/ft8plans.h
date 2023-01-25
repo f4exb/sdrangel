@@ -41,6 +41,7 @@ public:
 
 protected:
     FT8Plans();
+    ~FT8Plans();
     static FT8Plans *m_instance;
 
 private:
