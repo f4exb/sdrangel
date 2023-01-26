@@ -38,6 +38,200 @@
 #include "ft8demod.h"
 #include "ft8demodsettingsdialog.h"
 
+FT8MessagesTableModel::FT8MessagesTableModel(QObject *parent)
+    : QAbstractTableModel(parent)
+{}
+
+int FT8MessagesTableModel::rowCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : m_ft8Messages.size();
+}
+
+int FT8MessagesTableModel::columnCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : m_columnCount;
+}
+
+QVariant FT8MessagesTableModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid()) {
+        return QVariant();
+    }
+
+    if (index.row() >= m_ft8Messages.size() || index.row() < 0) {
+        return QVariant();
+    }
+
+    if (role == Qt::DisplayRole)
+    {
+        const auto &ft8Message = m_ft8Messages.at(index.row());
+
+        switch (index.column()) {
+            case FT8DemodSettings::MESSAGE_COL_UTC:
+                return ft8Message.m_utc;
+            case FT8DemodSettings::MESSAGE_COL_PASS:
+                return ft8Message.m_pass;
+            case FT8DemodSettings::MESSAGE_COL_OKBITS:
+                return ft8Message.m_okBits;
+            case FT8DemodSettings::MESSAGE_COL_DT:
+                return tr("%1").arg(ft8Message.m_dt, 4, 'f', 1);
+            case FT8DemodSettings::MESSAGE_COL_DF:
+                return ft8Message.m_df;
+            case FT8DemodSettings::MESSAGE_COL_SNR:
+                return ft8Message.m_snr;
+            case FT8DemodSettings::MESSAGE_COL_CALL1:
+                return ft8Message.m_call1;
+            case FT8DemodSettings::MESSAGE_COL_CALL2:
+                return ft8Message.m_call2;
+            case FT8DemodSettings::MESSAGE_COL_LOC:
+                return ft8Message.m_loc;
+            case FT8DemodSettings::MESSAGE_COL_INFO:
+                return ft8Message.m_info;
+            default:
+                break;
+        }
+    }
+
+    if (role == Qt::TextAlignmentRole)
+    {
+        switch (index.column()) {
+            case FT8DemodSettings::MESSAGE_COL_DT:
+            case FT8DemodSettings::MESSAGE_COL_DF:
+            case FT8DemodSettings::MESSAGE_COL_SNR:
+                return Qt::AlignRight;
+            default:
+                break;
+        }
+    }
+
+    return QVariant();
+}
+
+QVariant FT8MessagesTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if ((role == Qt::DisplayRole) && (orientation == Qt::Horizontal))
+    {
+        switch (section) {
+            case FT8DemodSettings::MESSAGE_COL_UTC:
+                return tr("UTC");
+            case FT8DemodSettings::MESSAGE_COL_PASS:
+                return tr("P");
+            case FT8DemodSettings::MESSAGE_COL_OKBITS:
+                return tr("OKb");
+            case FT8DemodSettings::MESSAGE_COL_DT:
+                return tr("dt");
+            case FT8DemodSettings::MESSAGE_COL_DF:
+                return tr("df");
+            case FT8DemodSettings::MESSAGE_COL_SNR:
+                return tr("SNR");
+            case FT8DemodSettings::MESSAGE_COL_CALL1:
+                return tr("Call1");
+            case FT8DemodSettings::MESSAGE_COL_CALL2:
+                return tr("Call2");
+            case FT8DemodSettings::MESSAGE_COL_LOC:
+                return tr("Loc");
+            case FT8DemodSettings::MESSAGE_COL_INFO:
+                return tr("Info");
+            default:
+                break;
+        }
+    }
+
+    if (role == Qt::ToolTipRole)
+    {
+        switch (section) {
+            case FT8DemodSettings::MESSAGE_COL_UTC:
+                return tr("Sequence UTC time HHMMSS");
+            case FT8DemodSettings::MESSAGE_COL_PASS:
+                return tr("Successful decoder pass index");
+            case FT8DemodSettings::MESSAGE_COL_OKBITS:
+                return tr("Number of correct bits before correction");
+            case FT8DemodSettings::MESSAGE_COL_DT:
+                return tr("Message start time delay in sequence (s)");
+            case FT8DemodSettings::MESSAGE_COL_DF:
+                return tr("Carrier frequency shift (Hz)");
+            case FT8DemodSettings::MESSAGE_COL_SNR:
+                return tr("Signal to noise ratio (dB) in 2.5 kHz bandwidth");
+            case FT8DemodSettings::MESSAGE_COL_CALL1:
+                return tr("Fist call area");
+            case FT8DemodSettings::MESSAGE_COL_CALL2:
+                return tr("Second call area");
+            case FT8DemodSettings::MESSAGE_COL_LOC:
+                return tr("Locator area");
+            case FT8DemodSettings::MESSAGE_COL_INFO:
+                return tr("Decoder information");
+            default:
+                break;
+        }
+    }
+
+    return QVariant();
+}
+
+const QVector<FT8MesssageData> &FT8MessagesTableModel::getMessages() const
+{
+    return m_ft8Messages;
+}
+
+void FT8MessagesTableModel::messagesReceived(const QList<FT8Message>& messages)
+{
+    int position = m_ft8Messages.size();
+    int rows = messages.size();
+    beginInsertRows(QModelIndex(), position, position + rows - 1);
+
+    for (const auto& message : messages)
+    {
+        m_ft8Messages.push_back(FT8MesssageData{
+            message.ts.toString("HHmmss"),
+            message.pass,
+            message.nbCorrectBits,
+            message.dt,
+            (int) message.df,
+            message.snr,
+            message.call1,
+            message.call2,
+            message.loc,
+            message.decoderInfo
+        });
+    }
+
+    endInsertRows();
+}
+
+void FT8MessagesTableModel::setDefaultMessage()
+{
+    if (m_ft8Messages.size() != 0) {
+        return;
+    }
+
+    beginInsertRows(QModelIndex(), 0, 0);
+    m_ft8Messages.push_back(FT8MesssageData{
+        "000000",
+        0,
+        174,
+        -8.0,
+        8000,
+        -24,
+        "CQ PA900RAALTE",
+        "PA900RAALTE",
+        "JN000",
+        "OSD-0-73"
+    });
+    endInsertRows();
+}
+
+void FT8MessagesTableModel::clearMessages()
+{
+    if (m_ft8Messages.size() == 0) {
+        return;
+    }
+
+    beginRemoveRows(QModelIndex(), 0, m_ft8Messages.size()-1);
+    m_ft8Messages.clear();
+    endRemoveRows();
+}
+
+
 FT8DemodGUI* FT8DemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
 	FT8DemodGUI* gui = new FT8DemodGUI(pluginAPI, deviceUISet, rxChannel);
@@ -216,16 +410,13 @@ void FT8DemodGUI::on_filterIndex_valueChanged(int value)
 
 void FT8DemodGUI::on_moveToBottom_clicked()
 {
-    ui->messages->scrollToBottom();
+    ui->messagesView->scrollToBottom();
 }
 
 void FT8DemodGUI::on_filterMessages_toggled(bool checked)
 {
     m_filterMessages = checked;
-
-    for (int row = 0; row < ui->messages->rowCount(); row++) {
-        filterMessageRow(row);
-    }
+    filterMessages();
 }
 
 void FT8DemodGUI::on_applyBandPreset_clicked()
@@ -246,8 +437,8 @@ void FT8DemodGUI::on_applyBandPreset_clicked()
 
 void FT8DemodGUI::on_clearMessages_clicked()
 {
-    ui->messages->setRowCount(0);
     ui->nbDecodesInTable->setText("0");
+    m_messagesModel.clearMessages();
 }
 
 void FT8DemodGUI::on_recordWav_toggled(bool checked)
@@ -429,11 +620,8 @@ FT8DemodGUI::FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
     DialPopup::addPopupsToChildDials(this);
 
-    // Resize the table using dummy data
-    resizeMessageTable();
     populateBandPresets();
-
-    connect(ui->messages, &QTableWidget::cellClicked, this, &FT8DemodGUI::messageCellClicked);
+    setupMessagesView();
 }
 
 FT8DemodGUI::~FT8DemodGUI()
@@ -665,83 +853,19 @@ void FT8DemodGUI::updateAbsoluteCenterFrequency()
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }
 
-void FT8DemodGUI::resizeMessageTable()
-{
-    // Fill table with a row of dummy data that will size the columns nicely
-    // Trailing spaces are for sort arrow
-    int row = ui->messages->rowCount();
-    ui->messages->setRowCount(row + 1);
-    ui->messages->setItem(row, MESSAGE_COL_UTC, new QTableWidgetItem("000000"));
-    ui->messages->setItem(row, MESSAGE_COL_N, new QTableWidgetItem("0"));
-    ui->messages->setItem(row, MESSAGE_COL_SNR, new QTableWidgetItem("-24"));
-    ui->messages->setItem(row, MESSAGE_COL_DEC, new QTableWidgetItem("174"));
-    ui->messages->setItem(row, MESSAGE_COL_DT, new QTableWidgetItem("-0.0"));
-    ui->messages->setItem(row, MESSAGE_COL_DF, new QTableWidgetItem("0000"));
-    ui->messages->setItem(row, MESSAGE_COL_CALL1, new QTableWidgetItem("CQ PA900RAALTE"));
-    ui->messages->setItem(row, MESSAGE_COL_CALL2, new QTableWidgetItem("PA900RAALTE"));
-    ui->messages->setItem(row, MESSAGE_COL_LOC, new QTableWidgetItem("JN000"));
-    ui->messages->setItem(row, MESSAGE_COL_INFO, new QTableWidgetItem("OSD-0-73"));
-    ui->messages->resizeColumnsToContents();
-    ui->messages->removeRow(row);
-}
-
 void FT8DemodGUI::messagesReceived(const QList<FT8Message>& messages)
 {
     ui->nbDecodesText->setText(tr("%1").arg(messages.size()));
 
     // Is scroll bar at bottom
-    QScrollBar *sb = ui->messages->verticalScrollBar();
+    QScrollBar *sb = ui->messagesView->verticalScrollBar();
     bool scrollToBottom = sb->value() == sb->maximum();
 
-    // Add to messages table
-    int row = ui->messages->rowCount();
-
-    for (const auto& message : messages)
-    {
-        ui->messages->setRowCount(row + 1);
-
-        QTableWidgetItem *utcItem = new QTableWidgetItem();
-        QTableWidgetItem *passItem = new QTableWidgetItem();
-        QTableWidgetItem *snrItem = new QTableWidgetItem();
-        QTableWidgetItem *correctItem = new QTableWidgetItem();
-        QTableWidgetItem *dtItem = new QTableWidgetItem();
-        QTableWidgetItem *dfItem = new QTableWidgetItem();
-        QTableWidgetItem *call1Item = new QTableWidgetItem();
-        QTableWidgetItem *call2Item = new QTableWidgetItem();
-        QTableWidgetItem *locItem = new QTableWidgetItem();
-        QTableWidgetItem *infoItem = new QTableWidgetItem();
-
-        ui->messages->setItem(row, MESSAGE_COL_UTC, utcItem);
-        ui->messages->setItem(row, MESSAGE_COL_N, passItem);
-        ui->messages->setItem(row, MESSAGE_COL_SNR, snrItem);
-        ui->messages->setItem(row, MESSAGE_COL_DEC, correctItem);
-        ui->messages->setItem(row, MESSAGE_COL_DT, dtItem);
-        ui->messages->setItem(row, MESSAGE_COL_DF, dfItem);
-        ui->messages->setItem(row, MESSAGE_COL_CALL1, call1Item);
-        ui->messages->setItem(row, MESSAGE_COL_CALL2, call2Item);
-        ui->messages->setItem(row, MESSAGE_COL_LOC, locItem);
-        ui->messages->setItem(row, MESSAGE_COL_INFO, infoItem);
-
-        utcItem->setText(message.ts.toString("HHmmss"));
-        passItem->setText(tr("%1").arg(message.pass));
-        correctItem->setText(tr("%1").arg(message.nbCorrectBits));
-        dtItem->setText(tr("%1").arg(message.dt, 4, 'f', 1));
-        dfItem->setText(tr("%1").arg((int) message.df, 4));
-        snrItem->setText(tr("%1").arg(message.snr, 3));
-        call1Item->setText(message.call1);
-        call2Item->setText(message.call2);
-        locItem->setText(message.loc);
-        infoItem->setText(message.decoderInfo);
-
-        filterMessageRow(row);
-
-        row++;
-    }
-
-    ui->nbDecodesInTable->setText(tr("%1").arg(row));
+    m_messagesModel.messagesReceived(messages);
+    ui->nbDecodesInTable->setText(tr("%1").arg(m_messagesModel.countAllMessages()));
 
     if (scrollToBottom) {
-        ui->messages->scrollToBottom();
+        ui->messagesView->scrollToBottom();
     }
 }
 
@@ -757,45 +881,43 @@ void FT8DemodGUI::populateBandPresets()
     ui->bandPreset->blockSignals(false);
 }
 
-void FT8DemodGUI::messageCellClicked(int row, int col)
+void FT8DemodGUI::messageViewClicked(const QModelIndex &index)
 {
-    m_selectedColumn = col;
-    m_selectedValue =  ui->messages->item(row, col)->text();
-    qDebug("FT8DemodGUI::messageCellChanged: %d %s", m_selectedColumn, qPrintable(m_selectedValue));
+    if (index.isValid())
+    {
+        m_selectedColumn = index.column();
+        m_selectedData = index.data();
+        filterMessages();
+    }
 }
 
-void FT8DemodGUI::filterMessageRow(int row)
+void FT8DemodGUI::filterMessages()
 {
     if (!m_filterMessages)
     {
-        ui->messages->setRowHidden(row, false);
+        m_messagesFilterProxy.resetFilter();
         return;
     }
 
-    if ((m_selectedColumn == MESSAGE_COL_CALL1) || (m_selectedColumn == MESSAGE_COL_CALL2))
-    {
-        const QString& call1 = ui->messages->item(row, MESSAGE_COL_CALL1)->text();
-        const QString& call2 = ui->messages->item(row, MESSAGE_COL_CALL2)->text();
-        bool visible = ((call1 == m_selectedValue) || (call2 == m_selectedValue));
-        ui->messages->setRowHidden(row, !visible);
-        return;
+    if ((m_selectedColumn == FT8DemodSettings::MESSAGE_COL_CALL1) || (m_selectedColumn == FT8DemodSettings::MESSAGE_COL_CALL2)) {
+        m_messagesFilterProxy.setFilterCall(m_selectedData.toString());
+    } else if (m_selectedColumn == FT8DemodSettings::MESSAGE_COL_LOC) {
+        m_messagesFilterProxy.setFilterLoc(m_selectedData.toString());
+    } else if (m_selectedColumn == FT8DemodSettings::MESSAGE_COL_UTC) {
+        m_messagesFilterProxy.setFilterUTC(m_selectedData.toString());
+    } else if (m_selectedColumn == FT8DemodSettings::MESSAGE_COL_DF) {
+        m_messagesFilterProxy.setFilterDf(m_selectedData.toInt());
     }
+}
 
-    if (m_selectedColumn == MESSAGE_COL_LOC)
-    {
-        const QString& loc = ui->messages->item(row, MESSAGE_COL_LOC)->text();
-        bool visible = (loc == m_selectedValue);
-        ui->messages->setRowHidden(row, !visible);
-        return;
-    }
+void FT8DemodGUI::setupMessagesView()
+{
+    m_messagesFilterProxy.setSourceModel(&m_messagesModel);
+    ui->messagesView->setModel(&m_messagesFilterProxy);
+    // resize columns
+    m_messagesModel.setDefaultMessage();
+    ui->messagesView->resizeColumnsToContents();
+    m_messagesModel.clearMessages();
 
-    if (m_selectedColumn == MESSAGE_COL_UTC)
-    {
-        const QString& utc = ui->messages->item(row, MESSAGE_COL_UTC)->text();
-        bool visible = (utc == m_selectedValue);
-        ui->messages->setRowHidden(row, !visible);
-        return;
-    }
-
-    ui->messages->setRowHidden(row, false);
+    connect(ui->messagesView, &QTableView::clicked, this, &FT8DemodGUI::messageViewClicked);
 }

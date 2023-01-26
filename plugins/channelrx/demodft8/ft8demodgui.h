@@ -17,6 +17,8 @@
 #ifndef INCLUDE_SSBDEMODGUI_H
 #define INCLUDE_SSBDEMODGUI_H
 
+#include <QAbstractTableModel>
+
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
@@ -24,10 +26,12 @@
 #include "util/ft8message.h"
 #include "settings/rollupstate.h"
 #include "ft8demodsettings.h"
+#include "ft8demodfilterproxy.h"
+
+class QModelIndex;
 
 class PluginAPI;
 class DeviceUISet;
-
 class AudioFifo;
 class FT8Demod;
 class SpectrumVis;
@@ -36,6 +40,41 @@ class BasebandSampleSink;
 namespace Ui {
 	class FT8DemodGUI;
 }
+
+struct FT8MesssageData
+{
+    QString m_utc;
+    int m_pass;
+    int m_okBits;
+    float m_dt;
+    int m_df;
+    int m_snr;
+    QString m_call1;
+    QString m_call2;
+    QString m_loc;
+    QString m_info;
+};
+
+class FT8MessagesTableModel : public QAbstractTableModel
+{
+    Q_OBJECT
+public:
+    FT8MessagesTableModel(QObject *parent = nullptr);
+
+    virtual int rowCount(const QModelIndex &parent) const;
+    virtual int columnCount(const QModelIndex &parent) const;
+    virtual QVariant data(const QModelIndex &index, int role) const;
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    const QVector<FT8MesssageData> &getMessages() const;
+    void messagesReceived(const QList<FT8Message>& messages);
+    void setDefaultMessage();
+    void clearMessages();
+    int countAllMessages() const { return m_ft8Messages.size(); }
+
+private:
+    QVector<FT8MesssageData> m_ft8Messages;
+    static const int m_columnCount = 10;
+};
 
 class FT8DemodGUI : public ChannelGUI {
 	Q_OBJECT
@@ -84,10 +123,14 @@ private:
     bool m_filterMessages;
     int m_selectedColumn;
     QString m_selectedValue;
+    QVariant m_selectedData;
 
 	FT8Demod* m_ft8Demod;
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
+
+    FT8MessagesTableModel m_messagesModel;
+    FT8DemodFilterProxy m_messagesFilterProxy;
 
 	explicit FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet* deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~FT8DemodGUI();
@@ -104,23 +147,10 @@ private:
 	void leaveEvent(QEvent*);
 	void enterEvent(EnterEventType*);
 
-    void resizeMessageTable();
     void messagesReceived(const QList<FT8Message>& messages);
     void populateBandPresets();
-    void filterMessageRow(int row);
-
-    enum MessageCol {
-        MESSAGE_COL_UTC,
-        MESSAGE_COL_N,
-        MESSAGE_COL_DEC,
-        MESSAGE_COL_DT,
-        MESSAGE_COL_DF,
-        MESSAGE_COL_SNR,
-        MESSAGE_COL_CALL1,
-        MESSAGE_COL_CALL2,
-        MESSAGE_COL_LOC,
-        MESSAGE_COL_INFO,
-    };
+    void filterMessages();
+    void setupMessagesView();
 
 private slots:
 	void on_deltaFrequency_changed(qint64 value);
@@ -142,7 +172,7 @@ private slots:
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
 	void tick();
-    void messageCellClicked(int row, int col);
+    void messageViewClicked(const QModelIndex &index);
 };
 
 #endif // INCLUDE_SSBDEMODGUI_H

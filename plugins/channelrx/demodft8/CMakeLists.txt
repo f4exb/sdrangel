@@ -32,6 +32,7 @@ if(NOT SERVER_MODE)
     set(demodft8_SOURCES
         ${demodft8_SOURCES}
         ft8demodgui.cpp
+        ft8demodfilterproxy.cpp
         ft8demodgui.ui
         ft8demodsettingsdialog.cpp
         ft8demodsettingsdialog.ui
@@ -39,6 +40,7 @@ if(NOT SERVER_MODE)
     set(demodft8_HEADERS
         ${demodft8_HEADERS}
         ft8demodgui.h
+        ft8demodfilterproxy.h
         ft8demodsettingsdialog.h
     )
     set(TARGET_NAME demodft8)

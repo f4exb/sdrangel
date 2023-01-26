@@ -1005,18 +1005,12 @@
      </layout>
     </item>
     <item>
-     <widget class="QTableWidget" name="messages">
+     <widget class="QTableView" name="messagesView">
       <property name="font">
        <font>
         <family>Liberation Mono</family>
         <pointsize>9</pointsize>
        </font>
-      </property>
-      <property name="toolTip">
-       <string>Decoded messages</string>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
       </property>
       <attribute name="verticalHeaderVisible">
        <bool>false</bool>
@@ -1027,86 +1021,6 @@
       <attribute name="verticalHeaderDefaultSectionSize">
        <number>15</number>
       </attribute>
-      <column>
-       <property name="text">
-        <string>UTC</string>
-       </property>
-       <property name="toolTip">
-        <string>Sequence UTC time HHMMSS</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>P</string>
-       </property>
-       <property name="toolTip">
-        <string>Successful decoder pass index</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>OKb</string>
-       </property>
-       <property name="toolTip">
-        <string>Number of correct bits before correction</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>dt</string>
-       </property>
-       <property name="toolTip">
-        <string>Time delay</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>df</string>
-       </property>
-       <property name="toolTip">
-        <string>Frequency shift</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>SNR</string>
-       </property>
-       <property name="toolTip">
-        <string>Signal to noise ratio (dB) in 2.5 kHz bandwidth</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Call1</string>
-       </property>
-       <property name="toolTip">
-        <string>Fist call area</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Call2</string>
-       </property>
-       <property name="toolTip">
-        <string>Second call area</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Loc</string>
-       </property>
-       <property name="toolTip">
-        <string>Locator area</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Info</string>
-       </property>
-       <property name="toolTip">
-        <string>Extra decoder information</string>
-       </property>
-      </column>
      </widget>
     </item>
    </layout>

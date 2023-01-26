@@ -50,6 +50,19 @@ struct FT8DemodBandPreset
 
 struct FT8DemodSettings
 {
+    enum MessageCol {
+        MESSAGE_COL_UTC,
+        MESSAGE_COL_PASS,
+        MESSAGE_COL_OKBITS,
+        MESSAGE_COL_DT,
+        MESSAGE_COL_DF,
+        MESSAGE_COL_SNR,
+        MESSAGE_COL_CALL1,
+        MESSAGE_COL_CALL2,
+        MESSAGE_COL_LOC,
+        MESSAGE_COL_INFO,
+    };
+
     qint32 m_inputFrequencyOffset;
     // Real m_rfBandwidth;
     // Real m_lowCutoff;
