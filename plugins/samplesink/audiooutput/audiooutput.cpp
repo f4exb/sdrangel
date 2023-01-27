@@ -42,7 +42,8 @@ AudioOutput::AudioOutput(DeviceAPI *deviceAPI) :
     m_centerFrequency(0),
 	m_worker(nullptr),
     m_workerThread(nullptr),
-	m_deviceDescription("AudioOutput")
+    m_deviceDescription("AudioOutput"),
+    m_running(false)
 {
     m_deviceAPI->setNbSinkStreams(1);
     AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
