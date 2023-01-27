@@ -187,7 +187,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
         m_baseFrequency / 1000000.0, ft8Callback.getReportMessage()->getFT8Messages().size());
 
     if (m_reportingMessageQueue) {
-        m_reportingMessageQueue->push(ft8Callback.getReportMessage());
+        m_reportingMessageQueue->push(new MsgReportFT8Messages(*ft8Callback.getReportMessage()));
     }
 
     QList<ObjectPipe*> mapPipes;
@@ -271,9 +271,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
         }
     }
 
-    if (!m_reportingMessageQueue) {
-        delete m_reportingMessageQueue;
-    }
+    delete ft8Callback.getReportMessage();
 
     if (m_recordSamples)
     {
