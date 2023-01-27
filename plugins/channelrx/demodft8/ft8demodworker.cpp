@@ -117,12 +117,12 @@ FT8DemodWorker::FT8DemodWorker() :
     m_reportingMessageQueue(nullptr),
     m_channel(nullptr)
 {
-    QString relPath = "sdrangel/ft8/save";
-    QDir dir(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation));
+    QString relPath = "ft8/save";
+    QDir dir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     dir.mkpath(relPath);
     m_samplesPath = dir.absolutePath() + "/" + relPath;
     qDebug("FT8DemodWorker::FT8DemodWorker: samples path: %s", qPrintable(m_samplesPath));
-    relPath = "sdrangel/ft8/logs";
+    relPath = "ft8/logs";
     m_logsPath = dir.absolutePath() + "/" + relPath;
     qDebug("FT8DemodWorker::FT8DemodWorker: logs path: %s", qPrintable(m_logsPath));
 }

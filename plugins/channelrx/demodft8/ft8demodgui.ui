@@ -160,24 +160,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="audioOptionsLayout">
-        <item>
-         <widget class="Line" name="line_4">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
      </layout>
     </item>
     <item>
@@ -796,13 +778,6 @@
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/tool.png</normaloff>:/tool.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_5">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>

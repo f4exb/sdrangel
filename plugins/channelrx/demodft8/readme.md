@@ -1,96 +1,56 @@
-<h1>SSB/DSB demodulator plugin</h1>
+<h1>FT8 demodulator plugin</h1>
 
 <h2>Introduction</h2>
 
-This plugin can be used to listen to a single sideband or double sidebands modulated signal. This includes CW (Morse code) signals.
+This plugin can be used to demodulate and decode FT8 signals. FT8 is used by amateur radio to perform contacts (QSOs) with very weak signals. It is used mostly but not limited to HF bands. The protocol and modulation details are described [here](http://www.rtmrtm.org/basicft8/)
+
+The decoder code is based on [ft8mon](https://github.com/rtmrtmrtmrtm/ft8mon) code written by Robert Morris, AB1HL. The core of the decoder is stored in a separate `libft8` library in the `ft8` folder of this repository and is placed under the `FT8` namespace.
+
+The excellent work of Robert Morris makes the decoder on par or even slightly better than the original [WSJT-X](https://wsjt.sourceforge.io/wsjtx.html) code.
 
 <h2>Interface</h2>
 
 The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
 
-![SSB Demodulator plugin GUI](../../../doc/img/SSBDemod_plugin.png)
+![FT8 Demodulator plugin GUI](../../../doc/img/FT8Demod_plugin.png)
 
-&#9758; In order to toggle USB or LSB mode in SSB mode you have to set the "BW" in channel filter cutoff control (9) to a positive (USB) or negative (LSB) value. The above screenshot shows a LSB setup. See the (8) to (10) paragraphs below for details.
+This interface is divided in 3 collapsible sections:
 
-&#9758; The channel marker in the main spectrum display shows the actual band received taking in channel filtering into account.
+  - A: RF and AF settings
+  - B: Demodulator baseband spectrum
+  - C: FT8 settings
 
-<h3>1: Frequency shift from center frequency of reception</h3>
+<h2>A: RF and AF settings</h2>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
+![FT8 Demodulator plugin A GUI](../../../doc/img/FT8Demod_plugin_A.png)
 
-<h3>2: Channel power</h3>
+<h3>A.1: Frequency shift from center frequency of reception</h3>
+
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mouse wheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
+
+<h3>A.2: Channel power</h3>
 
 Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>3: Monaural/binaural toggle</h3>
-
-  - Monaural: the scalar signal is routed to both left and right audio channels
-  - Binaural: the complex signal is fed with the real part on the left audio channel and the imaginary part to the right audio channel
-
-<h3>4: Invert left and right channels</h3>
-
-Inverts left and right audio channels. Useful in binaural mode only.
-
-<h3>5: Sideband flip</h3>
-
-Flip LSB/USB. Mirror filter bandwidth around zero frequency and change from LSB to USB or vice versa. Works in SSB mode only.
-
-<h3>6: SSB/DSB demodulation</h3>
-
-Toggles between SSB (icon with one sideband signal) and DSB (icon with double sidebands signal). In SSB mode the shape of the icon represents LSB or USB operation.
-
-<h3>7: Level meter in dB</h3>
+<h3>A.3: Level meter in dB</h3>
 
   - top bar (green): average value
   - bottom bar (blue green): instantaneous peak value
   - tip vertical bar (bright green): peak hold value
 
-<h3>8: Spectrum display frequency span</h3>
+&#9758; The channel marker in the main spectrum display shows the actual band received taking in channel filtering into account.
 
-The audio sample rate SR is further decimated by powers of two for the spectrum display and in channel filter limits. This effectively sets the total available bandwidth depending on the decimation:
+<h3>A.4: Spectrum display frequency span</h3>
 
-  - 1 (no decimation): SR/2 (SSB) or SR (DSB)
-  - 2: SR/4 (SSB) or SR/2 (DSB)
-  - 4: SR/8 (SSB) or SR/4 (DSB)
-  - 8: SR/16 (SSB) or SR/8 (DSB)
-  - 16: SR/32 (SSB) or SR/16 (DSB)
+The FT8 decoding sample rate of 12 kS/s is further decimated by powers of two for the spectrum display (B) and in RF filter limits. This effectively sets the total available bandwidth depending on the decimation:
 
-The span value display is set as follows depending on the SSB or DSB mode:
+  - 1: 6 kHz
+  - 2: 3 kHz. This shows the full range of a standard FT8 baseband and is the default position
+  - 4: 1.5 kHz
 
-  - In SSB mode: the span goes from zero to the upper (USB: positive frequencies) or lower (LSB: negative frequencies) limit and the absolute value of the limit is displayed.
-  - In DSB mode: the span goes from the lower to the upper limit of same absolute value and &#177; the absolute value of the limit is displayed.
+<h3>A.5: FFT filter window</h3>
 
-This is how the Span (8) and bandpass (9, 10) filter controls look like in the 3 possible modes:
-
-**DSB**:
-
-![SSB Demodulator band controls DSB](../../../doc/img/SSBDemod_plugin_dsb.png)
-
-  - Decimation factor is 4 hence span is 6 kHz from -3 to +3 kHz and &#177;3.0k is displayed
-  - In channel filter bandwidth is 5.2 kHz from -2.6 to +2.6 kHz and &#177;2.6k is displayed
-  - In channel filter "low cut" is disabled and set to 0
-
-**USB**:
-
-![SSB Demodulator band controls USB](../../../doc/img/SSBDemod_plugin_usb.png)
-
-  - Decimation factor is 4 hence span is 3 kHz from 0 to 3 kHz and 3.0k is displayed
-  - In channel filter upper cutoff is 2.6 kHz and 2.6k is displayed
-  - In channel filter lower cutoff is 0.3 kHz and 0.3k is displayed
-  - Hence in channel filter bandwidth is 2.3 kHz
-
-**LSB**:
-
-![SSB Demodulator band controls LSB](../../../doc/img/SSBDemod_plugin_lsb.png)
-
-  - Decimation factor is 4 hence span is 3 kHz from 0 to -3 kHz and 3.0k is displayed
-  - In channel filter lower cutoff is -2.6 kHz and -2.6k is displayed
-  - In channel filter upper cutoff is -0.3 kHz and -0.3k is displayed
-  - Hence in channel filter bandwidth is 2.3 kHz
-
-<h3>9: FFT filter window</h3>
-
-The bandpass filter is a FFT filter. This controls the FFT window type:
+The band pass filter is a FFT filter. This controls the FFT window type:
 
   - **Bart**: Bartlett
   - **B-H**: 4 term Blackman-Harris
@@ -102,7 +62,7 @@ The bandpass filter is a FFT filter. This controls the FFT window type:
   - **Blackman**: Blackman (3 term - default)
   - **B-H7**: 7 term Blackman-Harris
 
-<h3>10: Select filter in filter bank</h3>
+<h3>A.6: Select filter in filter bank</h3>
 
 There are 10 filters in the filter bank with indexes 0 to 9. This selects the current filter in the bank the filter index is displayed at the right of the button. The following controls are covered by the filter settings:
 
@@ -111,70 +71,174 @@ There are 10 filters in the filter bank with indexes 0 to 9. This selects the cu
   - BW (11)
   - Low cut (12)
 
-<h3>11: "BW": In channel bandpass filter cutoff frequency farthest from zero</h3>
-
-Values are expressed in kHz and step is 100 Hz.
-
-  - In SSB mode this is the upper (USB: positive frequencies) or lower (LSB: negative frequencies) cutoff of the in channel single side band bandpass filter. The value triggers LSB mode when negative and USB when positive
-  - In DSB mode this is half the bandwidth of the double side band in channel bandpass filter therefore the value is prefixed with the &#177; sign.
-
-<h3>12: "Low cut": In channel bandpass filter cutoff frequency closest to zero</h3>
-
-Values are expressed in kHz and step is 100 Hz.
-
-  - In SSB mode this is the lower cutoff (USB: positive frequencies) or higher cutoff (LSB: negative frequencies) of the in channel single side band bandpass filter.
-  - In DSB mode it is inactive and set to zero (double side band filter).
-
-<h3>13: Volume and AGC</h3>
-
-![SSB volume and AGC controls](../../../doc/img/SSBDemod_plugin_vol.png)
-
-<h4>13.1: Volume</h4>
-
-This is the volume of the audio signal in dB from 0 (no gain) to 40 (10000). It can be varied continuously in 1 dB steps using the dial button. When AGC is engaged it is recommended to set a low value in dB not exceeding 3 db (gain 2). When AGC is not engaged the volume entirely depends on the RF power and can vary in large proportions. Hence setting the value in dB is more convenient to accommodate large differences.
-
-<h4>13.2: AGC toggle</h4>
+<h3>A.7: AGC toggle</h3>
 
 Use this checkbox to toggle AGC on and off.
 
-If you are into digging weak signals out of the noise you probably will not turn the AGC on. AGC is intended for medium and large signals and help accommodate the signal power variations from a station to another or due to QSB.
-
 This AGC is based on the calculated magnitude (square root of power of the filtered signal as I² + Q²) and will try to adjust audio volume as if a -20dB power signal was received.
 
-<h4>13.2A: AGC clamping</h4>
+As AGC compresses the signals you have to experiment whether AGC or no AGC give the best result in decoding signals. With AGC on it is easier to adjust the volume (A.10) as the audio signal will be more stable.
 
-When on this clamps signal at the maximum amplitude. Normally this is not needed for most signals as the AGC amplitude order is quite conservative at 10% of the maximum. You may switch it on if you notice a loud click when a transmission starts.
+<h3>A.8: RF filter low cutoff</h3>
 
-<h4>13.3: AGC time constant</h4>
+Values are expressed in kHz and step is 100 Hz.
 
-This is the time window in milliseconds of the moving average used to calculate the signal power average. It can be varied in powers of two from 16 to 2048 ms that is: 16, 32, 64, 128, 256, 512, 1024 and 2048 ms. The most practical values are between 128 and 512 ms.
+<h3>A.9: RF filter high cutoff</h3>
 
-<h4>13.4: Signal power threshold (squelch)</h4>
+Values are expressed in kHz and step is 100 Hz.
 
-Active only in AGC mode.
+<h3>A.10: Volume</h3>
 
-This threshold acts as a squelch and will mute the sound below this average signal power. To prevent short transient drop outs the squelch gets active only if the power has been below the threshold for a period equal to the AGC time constant (11.3)
+This is the volume of the audio signal in dB from -10 (0.1) to 40 (10000). It can be varied continuously in 1 dB steps using the dial button. When AGC is engaged it is recommended to set a low value in dB not exceeding 3 db (gain 2). When AGC is not engaged the volume entirely depends on the RF power and can vary in large proportions. Hence setting the value in dB is more convenient to accommodate large differences.
 
-This feature is mostly useful when more than one SSB channel is active. When there is no transmission the level of noise rises at the level of a normal signal due to the AGC and adds to the noise of other channels. Therefore it is desirable to shut down the audio when there is no signal in the channel.
+<h3>A.11: Volume meter</h3>
 
-To turn off the squelch completely move the knob all the way down (left). Then "---" will display as the value and the squelch will be disabled.
+This shows the level of the signal entering the FT8 demodulator and decoder and peaks (shown by the tiny red vertical bar) should never exceed 100&percnt;. In fact there is a 10&percnt; guard so 100&percnt; is actually 90&percnt; of the signal volume. Note that the decoder will work well even with a few &percnt; volume however you should try to set the volume (A.10) so that big signals reach at least ~20&percnt; to have the best dynamic range.
 
-The signal power is calculated as the moving average over the AGC time constant (11.3) of the power  of the filtered signal as I² + Q².
+Because this volume is based on he RF signal strength it can vary in large proportions and will be more stable if AGC (A.7) is engaged.
 
-<h4>13.5: Signal power threshold (squelch) gate</h4>
-
-Active only in AGC mode with squelch enabled.
-
-To avoid unwanted squelch opening on short transient bursts only signals with power above threshold during this period in milliseconds will open the squelch.It can be varied from 0 to 20 ms in 1 ms steps then from 30 to 500 ms in 10 ms steps.
-
-When the power threshold is close to the noise floor a few milliseconds help in preventing noise power wiggle to open the squelch.
-
-<h3>14: Audio mute and audio output select</h3>
-
-Left click on this button to toggle audio mute for this channel.
-
-If you right click on it a dialog will open to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
-
-<h3>15: Spectrum display</h3>
+<h2>B: Demodulator baseband spectrum</h2>
 
 This is the spectrum display of the demodulated signal (SSB) or translated signal (DSB). Controls on the bottom of the panel are identical to the ones of the main spectrum display. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
+
+<h2>C: FT8 settings</h2>
+
+![FT8 Demodulator plugin C GUI](../../../doc/img/FT8Demod_plugin_C.png)
+
+The wrench (tool) button (C.1) is detailed at the bottom of the section.
+
+<h3>C.2: Number of decodes</h3>
+
+Shows the number of decodes for the last 15s sequence (left of slash) and the total since the decoder was started (right of slash)
+
+<h3>C.3: Move to bottom of messages table</h3>
+
+Use this button to scroll down to the bottom of the message table. In this position newer messages will automatically trigger moving to the bottom.
+
+<h3>C.4: Filter messages</h3>
+
+Toggles the filtering of messages. Messages are filtered based on the selected cell in the table. Only certain cells will be taken into consideration
+
+  - **UTC**: will filter messages based on the message time slot
+  - **df**: will filter messages based on the carrier frequency shift. A &plusmn;4 Hz tolerance is supplied which just exceeds a FT8 symbol width
+  - **Call1**: will filter messages matching the call1 area value either in the call1 or call2 areas
+  - **Call2**: same as above but taking the call2 value
+  - **Loc**: will filter messages matching the value in the locator (loc) area
+
+<h3>C.5: Band preset selection</h3>
+
+Selects which band preset can be applied with the (C.6) button
+
+<h3>C.6: Apply band preset</h3>
+
+Applies the band preset selected in (C.5)
+
+<h3>C.7: Clear messages table</h3>
+
+Empties the message table (C.10)
+
+<h3>C.8: Log messages</h3>
+
+Toggles the logging of messages. Messages will be logged in the same format as the original WSJT-X format. The splitting and naming of files is different however.
+
+The file name is constructed as follows where date is the day date in YYYYMMDD format:
+
+&lt;date&gt;_d&lt;device index&gt;c&lt;channel index&gt;.txt
+
+Files will be stored in the system application data location in the `ft8/logs` folder. The application dat location depends on the O/S:
+
+  - Linux: ~/.local/share/f4exb/SDRangel
+  - Windows: C:&bsol;Users&bsol;&lt;your user&gt;&bsol;AppData&bsol;Local&bsol;f4exb&bsol;SDRangel
+
+<h3>C.9: Record baseband</h3>
+
+The baseband (audio) may be recorded as a 12 kHz mono PCM .wav file similarly to what can be done with the original WSJT-X program. Each record is the 15s FT8 period (180000 16 bit signed samples or 360000 data bytes). Files are stored in the system application data location (see above for details) in the `ft8/save` folder and have the following file name format:
+
+&lt;date&gt;_&lt;time&gt;.wav
+
+Where date is the slot date in YYYYMMDD format (in WSJT-X this is YYMMDD) and time is the slot time in HHmmss format.
+
+<h3>C.10: Messages table</h3>
+
+Displays the received messages in a table which columns are the following:
+
+  - **UTC**: UTC time in HHmmss format of the FT8 slot
+  - **P**: LDPC decoder pass index that was successful (0 to 2) as there are 3 passes
+  - **OKb**: Number of correct bits in the message before FEC correction. Maximum is 174 in which case no FEC would be needed.
+  - **dt**: Message start time shift in seconds from standard FT8 time slot
+  - **df**: Message frequency shift in Hz from base frequency. This is the shift of the lowest frequency symbol
+  - **SNR**: Signal to noise ratio in dB transposed in a 2.5 kHz bandwidth (WSJT-X standard). The actual SNR is this value plus 26 dB.
+  - **Call1**: This is the first call area and may contain the caller callsign, a CQ or a custom 13 character message in which case the second call and locator areas are empty
+  - **Call2**: This is the second call area and will contain the callsign of the responding station
+  - **Loc**: Locator area which contains the 4 character Maidenhead locator, a report, an acknowledgement (RRR) or a greetings (73 or RR73)
+  - **Info**: FT8 decoder information if any. This comes from he original `ft8mon` code
+
+<h3>C.1: More FT8 decoder settings</h2>
+
+This button will open a dialog for more settings
+
+![FT8 Demodulator plugin C1 GUI](../../../doc/img/FT8Demod_plugin_C1.png)
+
+<h4>C.1.1: Number of decoder threads</h4>
+
+When processing the audio baseband several instances of the core decoder will be spawned in separate threads. This adjusts the number of threads. You have to experiment with it to find which is the best number for you. The default of 3 will normally yield good results comparable if no better to what is obtained with the original WSJT-X software.
+
+<h4>C.1.2: Decoder time budget</h4>
+
+This is the time in seconds after which the decoder threads will be prompted to stop. It can be varied from 0.1 to 5 seconds. You can imagine that the longer the decoder runs the more messages it will harvest however the default of 0.5s will be enough in most cases. You can still experiment with it to find what value is the best in your own case.
+
+<h4>C.1.3: Band presets table</h4>
+
+This table shows the band presets values that will appear in (C.5)
+
+  - **Name**: name of the preset (by default the band wavelength denomination) that will be shown in (C.5)
+  - **F (kHz)**: Base frequency in kHz. This is the RF zero frequency of the FT8 baseband
+  - **df (kHz)**: Channel offset in kHz from device center frequency.
+
+You can edit these values by clicking on the cell in the table.
+
+<h4>C.1.4: Add preset</h4>
+
+Use this button to create a new preset. It will take the values from the row of the selected cell in the table (if selected) and put the new preset at the bottom of the table
+
+<h4>C.1.5: Delete preset</h4>
+
+Delete the preset designated by the selected cell in the table.
+
+<h4>C.1.6: Move up preset</h4>
+
+Move up the preset designated by the selected cell in the table.
+
+<h4>C.1.7: Move down preset</h4>
+
+Move down the preset designated by the selected cell in the table.
+
+<h4>C.1.8: Restore defaults</h4>
+
+This restores the default band preset values:
+
+  - **160m**: 1840 kHz
+  - **80m**: 3573 kHz
+  - **60m**: 5357 kHz
+  - **40m**: 7074 kHz
+  - **30m**: 10136 kHz
+  - **20m**: 14074 kHz
+  - **17m**: 18100 kHz
+  - **15m**: 21074 kHz
+  - **12m**: 24915 kHz
+  - **10m**: 28074 kHZ
+  - **6m**: 50313 kHz
+  - **4m**: 70100 kHz
+  - **2m**: 144120 kHz
+  - **1.25m**: 222065 kHz
+  - **70cm**: 432065 kHz
+
+Channel offsets are all set to 0 kHz.
+
+<h4>C.1.9 Commit changes</h4>
+
+Click on the "OK" button to commit changes and close dialog.
+
+<h4>C.1.9 Cancel changes</h4>
+
+Click on the "Cancel" button to close dialog without making changes.

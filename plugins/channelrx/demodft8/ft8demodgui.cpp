@@ -562,7 +562,7 @@ FT8DemodGUI::FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_filterMessages(false)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
-    m_helpURL = "plugins/channelrx/demodssb/readme.md";
+    m_helpURL = "plugins/channelrx/demodft8/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
     setSizePolicy(rollupContents->sizePolicy());
