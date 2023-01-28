@@ -154,9 +154,9 @@ Example:
   - **3**: SNR in 2.5 kHz bandwidth
   - **4**: Message start delay in seconds from standard sequence start
   - **5**: Message carrier shift from base frequency in Hz
-  - **6**: First callsign area. May contain spaces (ex: "CQ DX")
-  - **7**: Second callsign area
-  - **8**: Locator area
+  - **6**: First callsign area. May contain spaces (ex: "CQ DX"). Note that for messages types 0.1 and 5 it is slighlty different from the standard (See C.10)
+  - **7**: Second callsign area and is always a callsign. This might be slighlty different from the standard (see above)
+  - **8**: Locator area maybe a 4 or 6 digit locator, a report, acknowledgement (RRR) or a greetings (RR73, 73)
   - **9**: Decoder information if any
 
 The splitting and naming of files is different from WSJT-X scheme.
@@ -184,23 +184,23 @@ Displays the received messages in a table which columns are the following:
 
   - **UTC**: UTC time in HHmmss format of the FT8 slot
   - **Typ**: Message type according to the i3.n3 format described in the protocol (see reference at the top):
-    - **0.0**: Free text
-    - **0.1**: DXpedition. Message carries two compacted messages (one for RR73 and one for report to two different callees). They will be de-compacted for dispplay.
+    - **0.0**: Free text. The first call area is populated with the free text. second call and locator areas are left blank.
+    - **0.1**: DXpedition. Message carries two compacted messages (one for RR73 and one for report to two different callees). They will be de-compacted in two separate messages for display. This is different from the standard that yields a single message.
     - **0.3**: ARRL field day
     - **0.4**: ARRL field day
     - **0.5**: Telemetry
     - **1**: Standard message (the most common)
-    - **2**: European VHF (4 char locator) minor change to standard message
+    - **2**: European VHF (4 char locator) minor change to standard message above
     - **3**: Russian RTTY
     - **4**: Non standard call
-    - **5**: European VHF (6 char locator)
+    - **5**: European VHF (6 char locator). The report + QSO number is appended to first call area not to pollute the second call area which contains only a callsign, This is slightly diffrent from the standard.
   - **P**: LDPC decoder pass index that was successful (0 to 2) as there are 3 passes
   - **OKb**: Number of correct bits in the message before FEC correction. Maximum is 174 in which case no FEC would be needed.
   - **dt**: Message start time shift in seconds from standard FT8 time slot
   - **df**: Message frequency shift in Hz from base frequency. This is the shift of the lowest frequency symbol
   - **SNR**: Signal to noise ratio in dB transposed in a 2.5 kHz bandwidth (WSJT-X standard). The actual SNR is this value plus 26 dB.
-  - **Call1**: This is the first call area and may contain the caller callsign, a CQ or a custom 13 character message in which case the second call and locator areas are empty
-  - **Call2**: This is the second call area and will contain the callsign of the responding station
+  - **Call1**: This is the first call area and may contain the caller callsign, a CQ or a custom 13 character message in which case the second call and locator areas are empty. It may be slightly different from the standard for message type 5 (see above).
+  - **Call2**: This is the second call area and will contain the callsign of the responding station. This is always a callsign and this may differ slightly from the standard for messages type 5 (see above).
   - **Loc**: Locator area which contains the 4 character Maidenhead locator, a report, an acknowledgement (RRR) or a greetings (73 or RR73)
   - **Info**: FT8 decoder information if any. If OSD is active (see C.1.3) and OSD was activated it reports the OSD decoder status as `OSD-N-MM` where N is the OSD depth reached and MM is the number of correct LDPC bits.
 
