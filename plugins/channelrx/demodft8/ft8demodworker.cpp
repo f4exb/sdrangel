@@ -58,7 +58,8 @@ int FT8DemodWorker::FT8Callback::hcb(
     std::string call1;
     std::string call2;
     std::string loc;
-    std::string msg = m_packing.unpack(a91, call1, call2, loc);
+    std::string type;
+    std::string msg = m_packing.unpack(a91, call1, call2, loc, type);
 
     cycle_mu.lock();
 
@@ -70,21 +71,42 @@ int FT8DemodWorker::FT8Callback::hcb(
     }
 
     cycle_already[msg] = true;
-
     QList<FT8Message>& ft8Messages = m_msgReportFT8Messages->getFT8Messages();
-    ft8Messages.push_back(FT8Message());
-    FT8Message& ft8Message = ft8Messages.back();
+    FT8Message baseMessage{
+        m_periodTS,
+        QString(type.c_str()),
+        pass,
+        (int) snr,
+        correct_bits,
+        off - 0.5,
+        hz0,
+        QString(call1.c_str()).simplified(),
+        QString(call2.c_str()).simplified(),
+        QString(loc.c_str()).simplified(),
+        QString(comment)
+    };
 
-    ft8Message.ts = m_periodTS;
-    ft8Message.pass = pass;
-    ft8Message.snr = (int) snr;
-    ft8Message.nbCorrectBits = correct_bits;
-    ft8Message.dt = off - 0.5;
-    ft8Message.df = hz0;
-    ft8Message.call1 = QString(call1.c_str()).simplified();
-    ft8Message.call2 = QString(call2.c_str()).simplified();
-    ft8Message.loc = QString(loc.c_str()).simplified();
-    ft8Message.decoderInfo = QString(comment);
+    // DXpedition packs two messages in one with the two callees in the first call area separated by a semicolon
+    if (type == "0.1")
+    {
+        QStringList callees = QString(call1.c_str()).simplified().split(";");
+
+        for (int i = 0; i < 2; i++)
+        {
+            baseMessage.call1 = callees[i];
+
+            if (i == 0) { // first is with RR73 greetings in locator area
+                baseMessage.loc = "RR73";
+            }
+
+            ft8Messages.push_back(baseMessage);
+        }
+    }
+    else
+    {
+        ft8Messages.push_back(baseMessage);
+    }
+
     cycle_mu.unlock();
 
     // qDebug("FT8DemodWorker::FT8Callback::hcb: %6.3f %d %3d %3d %5.2f %6.1f %s (%s)",

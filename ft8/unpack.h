@@ -33,7 +33,7 @@ namespace FT8 {
 class FT8_API Packing
 {
 public:
-    std::string unpack(int a91[], std::string& call1str, std::string& call2str, std::string& locstr);
+    std::string unpack(int a91[], std::string& call1str, std::string& call2str, std::string& locstr, std::string& type);
 
 private:
     static int ihashcall(std::string call, int m);
@@ -43,10 +43,12 @@ private:
     std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_0_0(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
+    std::string unpack_0_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_3(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_0_3(int a77[], int n3, std::string& call1str, std::string& call2str, std::string& locstr);
 
     QRecursiveMutex hashes_mu;
+    std::map<int, std::string> hashes10;
     std::map<int, std::string> hashes12;
     std::map<int, std::string> hashes22;
 

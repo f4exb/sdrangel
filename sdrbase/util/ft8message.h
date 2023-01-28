@@ -27,6 +27,7 @@
 struct SDRBASE_API FT8Message
 {
     QDateTime ts;
+    QString type;
     int pass;
     int snr;
     int nbCorrectBits;

@@ -211,6 +211,7 @@ void Packing::remember_call(std::string call)
     {
         hashes22[ihashcall(call, 22)] = call;
         hashes12[ihashcall(call, 12)] = call;
+        hashes10[ihashcall(call, 10)] = call;
     }
 
     hashes_mu.unlock();
@@ -344,6 +345,7 @@ std::string Packing::unpack_1(int a77[], std::string& call1str, std::string& cal
 // details from wsjt-x's packjt77.f90
 std::string Packing::unpack_0_0(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
 {
+    // bit fields: f71
     (void) call2str;
     (void) locstr;
     // the 42 possible characters.
@@ -358,6 +360,53 @@ std::string Packing::unpack_0_0(int a77[], std::string& call1str, std::string& c
     }
 
     call1str = msg;
+    return msg;
+}
+
+std::string Packing::unpack_0_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr)
+{
+    // bit fields: c28 c28 h10 r5
+    int i = 0;
+    int tu = a77[i];
+    i += 1;
+    int call1 = un64(a77, i, 28); // c28
+    i += 28;
+    int call2 = un64(a77, i, 28); // c28
+
+    call1str = trim(unpackcall(call1)) + ";" + trim(unpackcall(call2));
+
+    i += 28;
+    int x10 = un64(a77, i, 10);
+    // 10-bit hash
+    hashes_mu.lock();
+    std::string ocall;
+
+    if (hashes10.count(x10) > 0)
+    {
+        call2str = hashes10[x10];
+        ocall = "<" + call2str + ">";
+    }
+    else
+    {
+        call2str = "<...10>";
+        ocall = call2str;
+    }
+
+    hashes_mu.unlock();
+    i += 10;
+    int i5 = un64(a77, i, 5); // decode r5
+    int r = 2*i5 - 30;
+    char tmp[32];
+
+    if (r >= 0) {
+        sprintf(tmp, "+%02d", r);
+    } else {
+        sprintf(tmp, "-%02d", -r);
+    }
+
+    locstr = std::string(tmp);
+    std::string msg;
+    msg = trim(unpackcall(call1)) + " RR73;" + trim(unpackcall(call2)) + " " + ocall;
     return msg;
 }
 
@@ -510,15 +559,30 @@ std::string Packing::unpack_0_3(int a77[], int n3, std::string& call1str, std::s
 // CRC and LDPC have already been checked.
 // details from wsjt-x's packjt77.f90 and 77bit.txt.
 //
-std::string Packing::unpack(int a77[], std::string& call1, std::string& call2, std::string& loc)
+std::string Packing::unpack(int a77[], std::string& call1, std::string& call2, std::string& loc, std::string& type)
 {
     int i3 = un64(a77, 74, 3);
     int n3 = un64(a77, 71, 3);
+    char tmp[64];
+
+    if (i3 == 0) {
+        sprintf(tmp, "%d.%d", i3, n3);
+    } else {
+        sprintf(tmp, "%d", i3);
+    }
+
+    type = std::string(tmp);
 
     if (i3 == 0 && n3 == 0)
     {
         // free text
         return unpack_0_0(a77, call1, call2, loc);
+    }
+
+    if (i3 == 0 && n3 == 1)
+    {
+        // DXpedition
+        return unpack_0_1(a77, call1, call2, loc);
     }
 
     if (i3 == 0 && (n3 == 3 || n3 == 4))
@@ -529,7 +593,7 @@ std::string Packing::unpack(int a77[], std::string& call1, std::string& call2, s
 
     if (i3 == 1 || i3 == 2)
     {
-        // ordinary message
+        // ordinary message or EU VHF
         return unpack_1(a77, call1, call2, loc);
     }
 
@@ -541,11 +605,12 @@ std::string Packing::unpack(int a77[], std::string& call1, std::string& call2, s
 
     if (i3 == 4)
     {
-        // call that doesn't fit in 28 bits
+        // call that doesn't fit in 28 bits (non standard call)
         return unpack_4(a77, call1, call2, loc);
     }
 
-    char tmp[64];
+    // TODO: i3 == 5 EU VHF missing
+
     call1 = "UNK";
     sprintf(tmp, "UNK i3=%d n3=%d", i3, n3);
     return std::string(tmp);
