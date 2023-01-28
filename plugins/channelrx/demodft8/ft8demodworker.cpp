@@ -110,6 +110,9 @@ FT8DemodWorker::FT8DemodWorker() :
     m_recordSamples(false),
     m_nbDecoderThreads(6),
     m_decoderTimeBudget(0.5),
+    m_useOSD(false),
+    m_osdDepth(0),
+    m_osdLDPCThreshold(70),
     m_lowFreq(200),
     m_highFreq(3000),
     m_invalidSequence(true),
@@ -157,6 +160,9 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
     int hints[2] = { 2, 0 }; // CQ
     FT8Callback ft8Callback(periodTS, m_baseFrequency, m_packing, channelReference);
     m_ft8Decoder.getParams().nthreads = m_nbDecoderThreads;
+    m_ft8Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
+    m_ft8Decoder.getParams().osd_depth = m_osdDepth;
+    m_ft8Decoder.getParams().osd_ldpc_thresh = m_osdLDPCThreshold;
     std::vector<float> samples(15*FT8DemodSettings::m_ft8SampleRate);
 
     std::transform(
@@ -217,7 +223,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
                 continue;
             }
 
-            QString logMessage = QString("%1 %2 Rx FT8 %3 %4 %5 %6 %7 %8")
+            QString logMessage = QString("%1 %2 Rx FT8 %3 %4 %5 %6 %7 %8 %9")
                 .arg(periodTS.toString("yyyyMMdd_HHmmss"))
                 .arg(baseFrequencyMHz, 9, 'f', 3)
                 .arg(ft8Message.snr, 6)
@@ -225,7 +231,8 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
                 .arg(ft8Message.df, 4, 'f', 0)
                 .arg(ft8Message.call1)
                 .arg(ft8Message.call2)
-                .arg(ft8Message.loc);
+                .arg(ft8Message.loc)
+                .arg(ft8Message.decoderInfo);
             logMessage.remove(0, 2);
             logFile << logMessage.toStdString() << std::endl;
         }

@@ -475,6 +475,24 @@ void FT8DemodGUI::on_settings_clicked()
             changed = true;
         }
 
+        if (settingsKeys.contains("useOSD"))
+        {
+            m_settings.m_useOSD = settings.m_useOSD;
+            changed = true;
+        }
+
+        if (settingsKeys.contains("osdDepth"))
+        {
+            m_settings.m_osdDepth = settings.m_osdDepth;
+            changed = true;
+        }
+
+        if (settingsKeys.contains("osdLDPCThreshold"))
+        {
+            m_settings.m_osdLDPCThreshold = settings.m_osdLDPCThreshold;
+            changed = true;
+        }
+
         if (settingsKeys.contains("bandPresets"))
         {
             m_settings.m_bandPresets = settings.m_bandPresets;
@@ -907,6 +925,8 @@ void FT8DemodGUI::filterMessages()
         m_messagesFilterProxy.setFilterUTC(m_selectedData.toString());
     } else if (m_selectedColumn == FT8DemodSettings::MESSAGE_COL_DF) {
         m_messagesFilterProxy.setFilterDf(m_selectedData.toInt());
+    } else if (m_selectedColumn == FT8DemodSettings::MESSAGE_COL_INFO) {
+        m_messagesFilterProxy.setFilterInfo(m_selectedData.toString());
     }
 }
 

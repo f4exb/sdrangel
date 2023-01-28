@@ -51,6 +51,9 @@ private slots:
     void reject();
     void on_decoderNbThreads_valueChanged(int value);
     void on_decoderTimeBudget_valueChanged(double value);
+    void on_osdEnable_toggled(bool checked);
+    void on_osdDepth_valueChanged(int value);
+    void on_osdLDPCThreshold_valueChanged(int value);
     void on_addBand_clicked();
     void on_deleteBand_clicked();
     void on_moveBandUp_clicked();

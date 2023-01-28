@@ -894,7 +894,7 @@ void FT8::go(int npasses)
             }
 
             int off = order[ii].off_;
-            int ret = one(bins, samples_.size(), hz, off);
+            int ret = one_merge(bins, samples_.size(), hz, off);
 
             if (ret)
             {
@@ -2499,12 +2499,11 @@ int FT8::decode(const float ll174[], int a174[], int use_osd, std::string &comme
     if (ldpc_ok >= ok_thresh)
     {
         // plain[] is 91 systematic data bits, 83 parity bits.
-        for (int i = 0; i < 174; i++)
-        {
+        for (int i = 0; i < 174; i++) {
             a174[i] = plain[i];
         }
-        if (check_crc(a174))
-        {
+
+        if (OSD::check_crc(a174)) {
             // success!
             return 1;
         }
@@ -2512,17 +2511,15 @@ int FT8::decode(const float ll174[], int a174[], int use_osd, std::string &comme
 
     if (use_osd && params.osd_depth >= 0 && ldpc_ok >= params.osd_ldpc_thresh)
     {
-        extern int osd_decode(float codeword[174], int depth, int out[91], int *);
-        extern void ldpc_encode(int plain[91], int codeword[174]);
-
         int oplain[91];
         int got_depth = -1;
-        int osd_ok = osd_decode((float *)ll174, params.osd_depth, oplain, &got_depth);
+        int osd_ok = OSD::osd_decode((float *)ll174, params.osd_depth, oplain, &got_depth);
+
         if (osd_ok)
         {
             // reconstruct all 174.
             comment += "OSD-" + std::to_string(got_depth) + "-" + std::to_string(ldpc_ok);
-            ldpc_encode(oplain, a174);
+            OSD::ldpc_encode(oplain, a174);
             return 1;
         }
     }
@@ -2669,7 +2666,7 @@ std::vector<float> FT8::down_v7_f(const std::vector<std::complex<float>> &bins, 
 //
 // XXX merge with one_iter().
 //
-int FT8::one(const std::vector<std::complex<float>> &bins, int len, float hz, int off)
+int FT8::one_merge(const std::vector<std::complex<float>> &bins, int len, float hz, int off)
 {
     //
     // set up to search for best frequency and time offset.
@@ -3018,38 +3015,69 @@ int FT8::one_iter1(
 
     if (params.soft_ones)
     {
-        if (params.soft_ones == 1)
-        {
+        if (params.soft_ones == 1) {
             soft_decode(m79, ll174);
-        }
-        else
-        {
+        } else {
             c_soft_decode(m79, ll174);
         }
-        int ret = try_decode(samples200, ll174, best_hz, best_off,
-                                hz0_for_cb, hz1_for_cb, 1, "", m79);
-        if (ret)
+
+        int ret = try_decode(
+            samples200,
+            ll174,
+            best_hz,
+            best_off,
+            hz0_for_cb,
+            hz1_for_cb,
+            params.use_osd,
+            "",
+             m79
+        );
+
+        if (ret) {
             return ret;
+        }
     }
 
     if (params.soft_pairs)
     {
         float p174[174];
         soft_decode_pairs(m79, p174);
-        int ret = try_decode(samples200, p174, best_hz, best_off,
-                                hz0_for_cb, hz1_for_cb, 1, "", m79);
-        if (ret)
+        int ret = try_decode(
+            samples200,
+            p174,
+            best_hz,
+            best_off,
+            hz0_for_cb,
+            hz1_for_cb,
+            params.use_osd,
+            "",
+            m79
+        );
+
+        if (ret) {
             return ret;
-        if (params.soft_ones == 0)
+        }
+
+        if (params.soft_ones == 0) {
             std::copy(p174, p174 + 174, ll174);
+        }
     }
 
     if (params.soft_triples)
     {
         float p174[174];
         soft_decode_triples(m79, p174);
-        int ret = try_decode(samples200, p174, best_hz, best_off,
-                                hz0_for_cb, hz1_for_cb, 1, "", m79);
+        int ret = try_decode(
+            samples200,
+            p174,
+            best_hz,
+            best_off,
+            hz0_for_cb,
+            hz1_for_cb,
+            params.use_osd,
+            "",
+            m79
+        );
         if (ret)
             return ret;
     }
@@ -3085,10 +3113,20 @@ int FT8::one_iter1(
                     n174[i] = ll174[i];
                 }
             }
-            int ret = try_decode(samples200, n174, best_hz, best_off,
-                                    hz0_for_cb, hz1_for_cb, 0, "hint1", m79);
-            if (ret)
-            {
+
+            int ret = try_decode(
+                samples200,
+                n174,
+                best_hz,
+                best_off,
+                hz0_for_cb,
+                hz1_for_cb,
+                0,
+                "hint1",
+                m79
+            );
+
+            if (ret) {
                 return ret;
             }
         }
@@ -3120,10 +3158,20 @@ int FT8::one_iter1(
                     n174[i] = ll174[i];
                 }
             }
-            int ret = try_decode(samples200, n174, best_hz, best_off,
-                                    hz0_for_cb, hz1_for_cb, 0, "hint2", m79);
-            if (ret)
-            {
+
+            int ret = try_decode(
+                samples200,
+                n174,
+                best_hz,
+                best_off,
+                hz0_for_cb,
+                hz1_for_cb,
+                0,
+                "hint2",
+                m79
+            );
+
+            if (ret) {
                 return ret;
             }
         }

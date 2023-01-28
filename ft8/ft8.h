@@ -154,6 +154,7 @@ struct FT8_API FT8Params
     int use_apriori;
     int use_hints;           // 1 means use all hints, 2 means just CQ hints
     int win_type;
+    int use_osd;
     int osd_depth;           // 6; // don't increase beyond 6, produces too much garbage
     int osd_ldpc_thresh;     // demand this many correct LDPC parity bits before OSD
     int ncoarse;             // number of offsets per hz produced by coarse()
@@ -222,6 +223,7 @@ struct FT8_API FT8Params
         use_apriori = 1;
         use_hints = 2;           // 1 means use all hints, 2 means just CQ hints
         win_type = 1;
+        use_osd = 1;
         osd_depth = 0;           // 6; // don't increase beyond 6, produces too much garbage
         osd_ldpc_thresh = 70;    // demand this many correct LDPC parity bits before OSD
         ncoarse = 1;             // number of offsets per hz produced by coarse()
@@ -563,7 +565,7 @@ public:
     //
     // XXX merge with one_iter().
     //
-    int one(const std::vector<std::complex<float>> &bins, int len, float hz, int off);
+    int one_merge(const std::vector<std::complex<float>> &bins, int len, float hz, int off);
     // return 2 if it decodes to a brand-new message.
     // return 1 if it decodes but we've already seen it,
     //   perhaps in a different pass.

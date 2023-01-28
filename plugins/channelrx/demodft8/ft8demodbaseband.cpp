@@ -245,6 +245,18 @@ void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool forc
         m_ft8DemodWorker->setDecoderTimeBudget(settings.m_decoderTimeBudget);
     }
 
+    if ((settings.m_useOSD != m_settings.m_useOSD) || force) {
+        m_ft8DemodWorker->setUseOSD(settings.m_useOSD);
+    }
+
+    if ((settings.m_osdDepth != m_settings.m_osdDepth) || force) {
+        m_ft8DemodWorker->setOSDDepth(settings.m_osdDepth);
+    }
+
+    if ((settings.m_osdLDPCThreshold != m_settings.m_osdLDPCThreshold) || force) {
+        m_ft8DemodWorker->setOSDLDPCThreshold(settings.m_osdLDPCThreshold);
+    }
+
     m_sink.applySettings(settings, force);
     m_settings = settings;
 }

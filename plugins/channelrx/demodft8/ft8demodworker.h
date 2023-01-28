@@ -40,6 +40,9 @@ public:
     void setLogMessages(bool logMessages) { m_logMessages = logMessages; }
     void setNbDecoderThreads(int nbDecoderThreads) { m_nbDecoderThreads = nbDecoderThreads; }
     void setDecoderTimeBudget(float decoderTimeBudget) { m_decoderTimeBudget = decoderTimeBudget; }
+    void setUseOSD(bool useOSD) { m_useOSD = useOSD; }
+    void setOSDDepth(int osdDepth) { m_osdDepth = osdDepth; }
+    void setOSDLDPCThreshold(int osdLDPCThreshold) { m_osdLDPCThreshold = osdLDPCThreshold; }
     void setLowFrequency(int lowFreq) { m_lowFreq = lowFreq; }
     void setHighFrequency(int highFreq) { m_highFreq = highFreq; }
     void setReportingMessageQueue(MessageQueue *messageQueue) { m_reportingMessageQueue = messageQueue; }
@@ -86,6 +89,9 @@ private:
     bool m_logMessages;
     int m_nbDecoderThreads;
     float m_decoderTimeBudget;
+    bool m_useOSD;
+    int m_osdDepth;
+    int m_osdLDPCThreshold;
     int m_lowFreq;
     int m_highFreq;
     bool m_invalidSequence;

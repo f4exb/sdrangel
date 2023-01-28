@@ -29,6 +29,11 @@ FT8DemodSettingsDialog::FT8DemodSettingsDialog(FT8DemodSettings& settings, QStri
     ui->setupUi(this);
     ui->decoderNbThreads->setValue(m_settings.m_nbDecoderThreads);
     ui->decoderTimeBudget->setValue(m_settings.m_decoderTimeBudget);
+    ui->osdEnable->setChecked(m_settings.m_useOSD);
+    ui->osdDepth->setValue(m_settings.m_osdDepth);
+    ui->osdDepthText->setText(tr("%1").arg(m_settings.m_osdDepth));
+    ui->osdLDPCThreshold->setValue(m_settings.m_osdLDPCThreshold);
+    ui->osdLDPCThresholdText->setText(tr("%1").arg(m_settings.m_osdLDPCThreshold));
     resizeBandsTable();
     populateBandsTable();
     connect(ui->bands, &QTableWidget::cellChanged, this, &FT8DemodSettingsDialog::textCellChanged);
@@ -115,6 +120,35 @@ void FT8DemodSettingsDialog::on_decoderTimeBudget_valueChanged(double value)
 
     if (!m_settingsKeys.contains("decoderTimeBudget")) {
         m_settingsKeys.append("decoderTimeBudget");
+    }
+}
+
+void FT8DemodSettingsDialog::on_osdEnable_toggled(bool checked)
+{
+    m_settings.m_useOSD = checked;
+
+    if (!m_settingsKeys.contains("useOSD")) {
+        m_settingsKeys.append("useOSD");
+    }
+}
+
+void FT8DemodSettingsDialog::on_osdDepth_valueChanged(int value)
+{
+    m_settings.m_osdDepth = value;
+    ui->osdDepthText->setText(tr("%1").arg(m_settings.m_osdDepth));
+
+    if (!m_settingsKeys.contains("osdDepth")) {
+        m_settingsKeys.append("osdDepth");
+    }
+}
+
+void FT8DemodSettingsDialog::on_osdLDPCThreshold_valueChanged(int value)
+{
+    m_settings.m_osdLDPCThreshold = value;
+    ui->osdLDPCThresholdText->setText(tr("%1").arg(m_settings.m_osdLDPCThreshold));
+
+    if (!m_settingsKeys.contains("osdLDPCThreshold")) {
+        m_settingsKeys.append("osdLDPCThreshold");
     }
 }
 

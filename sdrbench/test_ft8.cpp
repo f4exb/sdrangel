@@ -205,6 +205,7 @@ void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
 
     FT8::FT8Decoder decoder;
     decoder.getParams().nthreads = nthreads;
+    decoder.getParams().use_osd = 0;
 
     decoder.entry(
         samples.data(),

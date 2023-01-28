@@ -823,7 +823,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Total number of decodes displayed</string>
+         <string>Total number of decodes since start</string>
         </property>
         <property name="text">
          <string>0</string>

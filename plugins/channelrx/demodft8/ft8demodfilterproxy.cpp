@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+#include "ft8demodsettings.h"
 #include "ft8demodfilterproxy.h"
 
 FT8DemodFilterProxy::FT8DemodFilterProxy(QObject *parent) :
@@ -56,6 +57,13 @@ void FT8DemodFilterProxy::setFilterLoc(const QString& locString)
     invalidateFilter();
 }
 
+void FT8DemodFilterProxy::setFilterInfo(const QString& infoString)
+{
+    m_filterActive = FILTER_INFO;
+    m_info= infoString;
+    invalidateFilter();
+}
+
 bool FT8DemodFilterProxy::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     if (m_filterActive == FILTER_NONE) {
@@ -64,29 +72,41 @@ bool FT8DemodFilterProxy::filterAcceptsRow(int sourceRow, const QModelIndex &sou
 
     if (m_filterActive == FILTER_UTC)
     {
-        QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+        QModelIndex index = sourceModel()->index(sourceRow, FT8DemodSettings::MESSAGE_COL_UTC, sourceParent);
         return sourceModel()->data(index).toString() == m_utc;
     }
 
     if (m_filterActive == FILTER_DF)
     {
-        QModelIndex index = sourceModel()->index(sourceRow, 4, sourceParent);
+        QModelIndex index = sourceModel()->index(sourceRow, FT8DemodSettings::MESSAGE_COL_DF, sourceParent);
         int df = sourceModel()->data(index).toInt();
         return (df >= m_df - 4) && (df <= m_df + 4); // +/- 4 Hz tolerance which is about one symbol width
     }
 
     if (m_filterActive == FILTER_CALL)
     {
-        QModelIndex indexCall1 = sourceModel()->index(sourceRow, 6, sourceParent);
-        QModelIndex indexCall2 = sourceModel()->index(sourceRow, 7, sourceParent);
+        QModelIndex indexCall1 = sourceModel()->index(sourceRow, FT8DemodSettings::MESSAGE_COL_CALL1, sourceParent);
+        QModelIndex indexCall2 = sourceModel()->index(sourceRow, FT8DemodSettings::MESSAGE_COL_CALL2, sourceParent);
         return (sourceModel()->data(indexCall1).toString() == m_call) ||
             (sourceModel()->data(indexCall2).toString() == m_call);
     }
 
     if (m_filterActive == FILTER_LOC)
     {
-        QModelIndex index = sourceModel()->index(sourceRow, 8, sourceParent);
+        QModelIndex index = sourceModel()->index(sourceRow, FT8DemodSettings::MESSAGE_COL_LOC, sourceParent);
         return sourceModel()->data(index).toString() == m_loc;
+    }
+
+    if (m_filterActive == FILTER_INFO)
+    {
+        QModelIndex index = sourceModel()->index(sourceRow, FT8DemodSettings::MESSAGE_COL_INFO, sourceParent);
+        const QString& content = sourceModel()->data(index).toString();
+
+        if (m_info.startsWith("OSD")) {
+            return content.startsWith("OSD");
+        } else {
+            return !content.startsWith("OSD");
+        }
     }
 
     return true;

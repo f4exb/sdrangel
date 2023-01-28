@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>349</width>
-    <height>316</height>
+    <height>333</height>
    </rect>
   </property>
   <property name="font">
@@ -25,11 +25,8 @@
      <property name="title">
       <string>Decoder</string>
      </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <property name="verticalSpacing">
-       <number>2</number>
-      </property>
-      <item row="0" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
        <layout class="QHBoxLayout" name="threadsGroup">
         <item>
          <widget class="QLabel" name="decoderNbThreadsLabel">
@@ -95,6 +92,124 @@
            <double>0.500000000000000</double>
           </property>
          </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="osdLayout">
+        <property name="spacing">
+         <number>2</number>
+        </property>
+        <item>
+         <widget class="ButtonSwitch" name="osdEnable">
+          <property name="toolTip">
+           <string>Toggle Ordered Statistics Decoding</string>
+          </property>
+          <property name="text">
+           <string>OSD</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="osdDepthlLabel">
+          <property name="text">
+           <string>Depth</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDial" name="osdDepth">
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Order Statistics Decoding depth</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>6</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="osdDepthText">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="osdLDPCThresholdLabel">
+          <property name="text">
+           <string>LDPC Thr</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDial" name="osdLDPCThreshold">
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Number of correct LDPC bits required to activate OSD </string>
+          </property>
+          <property name="minimum">
+           <number>60</number>
+          </property>
+          <property name="maximum">
+           <number>83</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>70</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="osdLDPCThresholdText">
+          <property name="text">
+           <string>60</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
@@ -282,6 +397,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>

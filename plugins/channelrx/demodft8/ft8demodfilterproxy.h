@@ -30,6 +30,7 @@ public:
     void setFilterDf(int df);
     void setFilterCall(const QString& utcString);
     void setFilterLoc(const QString& utcString);
+    void setFilterInfo(const QString& infoString);
 
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
@@ -41,7 +42,8 @@ private:
         FILTER_UTC,
         FILTER_DF,
         FILTER_CALL,
-        FILTER_LOC
+        FILTER_LOC,
+        FILTER_INFO
     };
 
     bool dfInRange(int df) const;
@@ -50,6 +52,7 @@ private:
     int m_df;
     QString m_call;
     QString m_loc;
+    QString m_info;
 };
 
 #endif // INCLUDE_FT8DEMODFILTERPROXY_H

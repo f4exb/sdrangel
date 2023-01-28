@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to demodulate and decode FT8 signals. FT8 is used by amateur radio to perform contacts (QSOs) with very weak signals. It is used mostly but not limited to HF bands. The protocol and modulation details are described [here](http://www.rtmrtm.org/basicft8/)
+This plugin can be used to demodulate and decode FT8 signals. FT8 is used by amateur radio to perform contacts (QSOs) with very weak signals. It is used mostly but not limited to HF bands. The protocol and modulation details are described in [QEX July/August 2020 article](https://www.iz3mez.it/wp-content/library/appunti/Protocols%20FT4%20FT8%20QEX.pdf)
 
 The decoder code is based on [ft8mon](https://github.com/rtmrtmrtmrtm/ft8mon) code written by Robert Morris, AB1HL. The core of the decoder is stored in a separate `libft8` library in the `ft8` folder of this repository and is placed under the `FT8` namespace.
 
@@ -124,6 +124,7 @@ Toggles the filtering of messages. Messages are filtered based on the selected c
   - **Call1**: will filter messages matching the call1 area value either in the call1 or call2 areas
   - **Call2**: same as above but taking the call2 value
   - **Loc**: will filter messages matching the value in the locator (loc) area
+  - **Info**: will filter values starting with "OSD" or not starting with "OSD" thus filter messages decoded via OSD or not
 
 <h3>C.5: Band preset selection</h3>
 
@@ -139,7 +140,26 @@ Empties the message table (C.10)
 
 <h3>C.8: Log messages</h3>
 
-Toggles the logging of messages. Messages will be logged in the same format as the original WSJT-X format. The splitting and naming of files is different however.
+Toggles the logging of messages. Messages will be logged in the same format as the original WSJT-X format except if the message has decoder information in which case this information is appended at the end of the line.
+
+Example:
+
+<code><pre>
+230128_003030    10.136 Rx FT8    -22  0.1 2049 KE0DKZ W2ZI EL99 OSD-0-71
+---- 1 ------    --2---           -3-  -4- --5- --6--- --7- --8- ---9----
+</pre></code>
+
+  - **1**: Date and time of decoder slot in YYMMDD_HHmmss fomat
+  - **2**: Base frequency in MHz
+  - **3**: SNR in 2.5 kHz bandwidth
+  - **4**: Message start delay in seconds from standard sequence start
+  - **5**: Message carrier shift from base frequency in Hz
+  - **6**: First callsign area. May contain spaces (ex: "CQ DX")
+  - **7**: Second callsign area
+  - **8**: Locator area
+  - **9**: Decoder information if any
+
+The splitting and naming of files is different from WSJT-X scheme.
 
 The file name is constructed as follows where date is the day date in YYYYMMDD format:
 
@@ -171,7 +191,7 @@ Displays the received messages in a table which columns are the following:
   - **Call1**: This is the first call area and may contain the caller callsign, a CQ or a custom 13 character message in which case the second call and locator areas are empty
   - **Call2**: This is the second call area and will contain the callsign of the responding station
   - **Loc**: Locator area which contains the 4 character Maidenhead locator, a report, an acknowledgement (RRR) or a greetings (73 or RR73)
-  - **Info**: FT8 decoder information if any. This comes from he original `ft8mon` code
+  - **Info**: FT8 decoder information if any. If OSD is active (see C.1.3) and OSD was activated it reports the OSD decoder status as `OSD-N-MM` where N is the OSD depth reached and MM is the number of correct LDPC bits.
 
 <h3>C.1: More FT8 decoder settings</h2>
 
@@ -187,7 +207,21 @@ When processing the audio baseband several instances of the core decoder will be
 
 This is the time in seconds after which the decoder threads will be prompted to stop. It can be varied from 0.1 to 5 seconds. You can imagine that the longer the decoder runs the more messages it will harvest however the default of 0.5s will be enough in most cases. You can still experiment with it to find what value is the best in your own case.
 
-<h4>C.1.3: Band presets table</h4>
+<h4>C.1.3: Toggle Ordered Statistics Decoding</h4>
+
+This toggles the Ordered Statistics Decoding (OSD). OSD is used if the CRC check fails after LDPC processing. Be careful with OSD as it will try to find solutions that validate the CRC but these solutions can be wrong and thus yield false messages. When post processing the results it is recommended to check against a database of valid callsigns. At least you should use a list of valid country prefixes and test the locator against the country prefix.
+
+With reasonable depth (C.1.4) and minimum correct LDPC bits (C.1.5) values the amount of false messages should be low so OSD may still be interesting. However if you require best accuracy you should filter messages in a post processing step as suggested above.
+
+<h4>C.1.4: Ordered Statistics Decoding depth</h4>
+
+Sets the maximum depth of OSD search.
+
+<h4>C.1.5: LDPC correct bits threshold</h4>
+
+Sets the minimum number of correct LDPC bits (out of 83) necessary to trigger OSD.
+
+<h4>C.1.6: Band presets table</h4>
 
 This table shows the band presets values that will appear in (C.5)
 
@@ -197,23 +231,23 @@ This table shows the band presets values that will appear in (C.5)
 
 You can edit these values by clicking on the cell in the table.
 
-<h4>C.1.4: Add preset</h4>
+<h4>C.1.7: Add preset</h4>
 
 Use this button to create a new preset. It will take the values from the row of the selected cell in the table (if selected) and put the new preset at the bottom of the table
 
-<h4>C.1.5: Delete preset</h4>
+<h4>C.1.8: Delete preset</h4>
 
 Delete the preset designated by the selected cell in the table.
 
-<h4>C.1.6: Move up preset</h4>
+<h4>C.1.9: Move up preset</h4>
 
 Move up the preset designated by the selected cell in the table.
 
-<h4>C.1.7: Move down preset</h4>
+<h4>C.1.10: Move down preset</h4>
 
 Move down the preset designated by the selected cell in the table.
 
-<h4>C.1.8: Restore defaults</h4>
+<h4>C.1.11: Restore defaults</h4>
 
 This restores the default band preset values:
 
@@ -235,10 +269,10 @@ This restores the default band preset values:
 
 Channel offsets are all set to 0 kHz.
 
-<h4>C.1.9 Commit changes</h4>
+<h4>C.1.12 Commit changes</h4>
 
 Click on the "OK" button to commit changes and close dialog.
 
-<h4>C.1.9 Cancel changes</h4>
+<h4>C.1.13 Cancel changes</h4>
 
 Click on the "Cancel" button to close dialog without making changes.

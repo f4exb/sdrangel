@@ -34,7 +34,7 @@ namespace FT8 {
 //
 // check the FT8 CRC-14
 //
-int check_crc(const int a91[91])
+int OSD::check_crc(const int a91[91])
 {
     int aa[91];
     int non_zero = 0;
@@ -73,7 +73,7 @@ int check_crc(const int a91[91])
 // plain is 91 bits of plain-text.
 // returns a 174-bit codeword.
 // mimics wsjt-x's encode174_91.f90.
-void ldpc_encode(int plain[91], int codeword[174])
+void OSD::ldpc_encode(int plain[91], int codeword[174])
 {
     // the systematic 91 bits.
     for (int i = 0; i < 91; i++)
@@ -97,7 +97,7 @@ void ldpc_encode(int plain[91], int codeword[174])
 // ll174 is what was received.
 // ldpc-encode xplain; how close is the
 // result to what we received?
-float osd_score(int xplain[91], float ll174[174])
+float OSD::osd_score(int xplain[91], float ll174[174])
 {
     int xcode[174];
     ldpc_encode(xplain, xcode);
@@ -121,7 +121,7 @@ float osd_score(int xplain[91], float ll174[174])
 }
 
 // does a decode look plausible?
-int osd_check(const int plain[91])
+int OSD::osd_check(const int plain[91])
 {
     int allzero = 1;
     for (int i = 0; i < 91; i++)
@@ -144,7 +144,7 @@ int osd_check(const int plain[91])
     return 1;
 }
 
-void matmul(int a[91][91], int b[91], int c[91])
+void OSD::matmul(int a[91][91], int b[91], int c[91])
 {
     for (int i = 0; i < 91; i++)
     {
@@ -164,10 +164,11 @@ void matmul(int a[91][91], int b[91], int c[91])
 // first 91 bits are plaintext, remaining 83 are parity.
 // returns 0 or 1, with decoded plain bits in out91[].
 // and actual depth used in *out_depth.
-int osd_decode(float codeword[174], int depth, int out[91], int *out_depth)
+int OSD::osd_decode(float codeword[174], int depth, int out[91], int *out_depth)
 {
     // strength = abs(codeword)
     float strength[174];
+
     for (int i = 0; i < 174; i++)
     {
         float x = codeword[i];
@@ -176,58 +177,62 @@ int osd_decode(float codeword[174], int depth, int out[91], int *out_depth)
 
     // sort, strongest first; we'll use strongest 91.
     std::vector<int> which(174);
-    for (int i = 0; i < 174; i++)
+
+    for (int i = 0; i < 174; i++) {
         which[i] = i;
-    std::sort(which.begin(),
-              which.end(),
-              [=](int a, int b)
-              {
-                  return strength[a] > strength[b];
-              });
+    }
+
+    std::sort(
+        which.begin(),
+        which.end(),
+        [=](int a, int b) {
+            return strength[a] > strength[b];
+        }
+    );
 
     // gen_sys[174 rows][91 cols] has a row per each of the 174 codeword bits,
     // indicating how to generate it by xor with each of the 91 plain bits.
 
     // generator matrix, reordered strongest codeword bit first.
     int b[174][91 * 2];
+
     for (int i = 0; i < 174; i++)
     {
         int ii = which[i];
+
         for (int j = 0; j < 91 * 2; j++)
         {
-            if (j < 91)
-            {
+            if (j < 91) {
                 b[i][j] = gen_sys[ii][j];
-            }
-            else
-            {
+            } else {
                 b[i][j] = 0;
             }
         }
     }
 
     int xwhich[174];
-    for (int i = 0; i < 174; i++)
+
+    for (int i = 0; i < 174; i++) {
         xwhich[i] = which[i];
+    }
 
     int ok = 0;
     gauss_jordan(91, 174, b, xwhich, &ok);
-    if (ok == 0)
-    {
+
+    if (ok == 0) {
         fprintf(stderr, "gauss_jordan failed\n");
     }
 
     int gen1_inv[91][91];
+
     for (int i = 0; i < 91; i++)
     {
-        for (int j = 0; j < 91; j++)
-        {
+        for (int j = 0; j < 91; j++) {
             gen1_inv[i][j] = b[i][91 + j];
         }
     }
 
-    for (int i = 0; i < 174; i++)
-    {
+    for (int i = 0; i < 174; i++) {
         which[i] = xwhich[i];
     }
 
@@ -235,6 +240,7 @@ int osd_decode(float codeword[174], int depth, int out[91], int *out_depth)
     // more or less strongest-first, converted from
     // log-likihood to 0/1.
     int y1[91];
+
     for (int i = 0; i < 91; i++)
     {
         int j = which[i];
@@ -251,9 +257,9 @@ int osd_decode(float codeword[174], int depth, int out[91], int *out_depth)
     matmul(gen1_inv, y1, xplain); // also does mod 2
 
     int osd_thresh = -500;
-
     float xscore = osd_score(xplain, codeword);
     int ch = osd_check(xplain);
+
     if (xscore < osd_thresh && ch)
     {
         if (got_a_best == 0 || xscore < best_score)
@@ -284,6 +290,7 @@ int osd_decode(float codeword[174], int depth, int out[91], int *out_depth)
         y1[i] ^= 1;
         float xscore = osd_score(xplain, codeword);
         int ch = osd_check(xplain);
+
         if (xscore < osd_thresh && ch)
         {
             if (got_a_best == 0 || xscore < best_score)
@@ -308,7 +315,7 @@ int osd_decode(float codeword[174], int depth, int out[91], int *out_depth)
     }
 }
 
-int gen_sys[174][91] = {
+const int OSD::gen_sys[174][91] = {
   { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
   { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
   { 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
