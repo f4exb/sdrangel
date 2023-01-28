@@ -367,8 +367,6 @@ std::string Packing::unpack_0_1(int a77[], std::string& call1str, std::string& c
 {
     // bit fields: c28 c28 h10 r5
     int i = 0;
-    int tu = a77[i];
-    i += 1;
     int call1 = un64(a77, i, 28); // c28
     i += 28;
     int call2 = un64(a77, i, 28); // c28

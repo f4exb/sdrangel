@@ -40,12 +40,14 @@ private:
     std::string unpackcall(int x);
     std::string unpackgrid(int ng, int ir, int i3);
     void remember_call(std::string call);
-    std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
-    std::string unpack_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_0_0(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_0_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
-    std::string unpack_3(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
+    // 0.3 and 0.4
     std::string unpack_0_3(int a77[], int n3, std::string& call1str, std::string& call2str, std::string& locstr);
+    // 1 and 2
+    std::string unpack_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
+    std::string unpack_3(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
+    std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
 
     QRecursiveMutex hashes_mu;
     std::map<int, std::string> hashes10;

@@ -44,6 +44,7 @@ namespace Ui {
 struct FT8MesssageData
 {
     QString m_utc;
+    QString m_type;
     int m_pass;
     int m_okBits;
     float m_dt;
@@ -73,7 +74,7 @@ public:
 
 private:
     QVector<FT8MesssageData> m_ft8Messages;
-    static const int m_columnCount = 10;
+    static const int m_columnCount = 11;
 };
 
 class FT8DemodGUI : public ChannelGUI {

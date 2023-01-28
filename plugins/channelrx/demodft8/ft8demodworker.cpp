@@ -78,7 +78,7 @@ int FT8DemodWorker::FT8Callback::hcb(
         pass,
         (int) snr,
         correct_bits,
-        off - 0.5,
+        off - 0.5f,
         hz0,
         QString(call1.c_str()).simplified(),
         QString(call2.c_str()).simplified(),

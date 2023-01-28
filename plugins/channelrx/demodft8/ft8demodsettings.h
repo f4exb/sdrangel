@@ -52,6 +52,7 @@ struct FT8DemodSettings
 {
     enum MessageCol {
         MESSAGE_COL_UTC,
+        MESSAGE_COL_TYPE,
         MESSAGE_COL_PASS,
         MESSAGE_COL_OKBITS,
         MESSAGE_COL_DT,

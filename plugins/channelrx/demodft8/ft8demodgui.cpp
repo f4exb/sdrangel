@@ -69,6 +69,8 @@ QVariant FT8MessagesTableModel::data(const QModelIndex &index, int role) const
         switch (index.column()) {
             case FT8DemodSettings::MESSAGE_COL_UTC:
                 return ft8Message.m_utc;
+            case FT8DemodSettings::MESSAGE_COL_TYPE:
+                return ft8Message.m_type;
             case FT8DemodSettings::MESSAGE_COL_PASS:
                 return ft8Message.m_pass;
             case FT8DemodSettings::MESSAGE_COL_OKBITS:
@@ -95,6 +97,7 @@ QVariant FT8MessagesTableModel::data(const QModelIndex &index, int role) const
     if (role == Qt::TextAlignmentRole)
     {
         switch (index.column()) {
+            case FT8DemodSettings::MESSAGE_COL_TYPE:
             case FT8DemodSettings::MESSAGE_COL_DT:
             case FT8DemodSettings::MESSAGE_COL_DF:
             case FT8DemodSettings::MESSAGE_COL_SNR:
@@ -114,6 +117,8 @@ QVariant FT8MessagesTableModel::headerData(int section, Qt::Orientation orientat
         switch (section) {
             case FT8DemodSettings::MESSAGE_COL_UTC:
                 return tr("UTC");
+            case FT8DemodSettings::MESSAGE_COL_TYPE:
+                return tr("Typ");
             case FT8DemodSettings::MESSAGE_COL_PASS:
                 return tr("P");
             case FT8DemodSettings::MESSAGE_COL_OKBITS:
@@ -142,6 +147,8 @@ QVariant FT8MessagesTableModel::headerData(int section, Qt::Orientation orientat
         switch (section) {
             case FT8DemodSettings::MESSAGE_COL_UTC:
                 return tr("Sequence UTC time HHMMSS");
+            case FT8DemodSettings::MESSAGE_COL_TYPE:
+                return tr("Message type (see documentation)");
             case FT8DemodSettings::MESSAGE_COL_PASS:
                 return tr("Successful decoder pass index");
             case FT8DemodSettings::MESSAGE_COL_OKBITS:
@@ -183,6 +190,7 @@ void FT8MessagesTableModel::messagesReceived(const QList<FT8Message>& messages)
     {
         m_ft8Messages.push_back(FT8MesssageData{
             message.ts.toString("HHmmss"),
+            message.type,
             message.pass,
             message.nbCorrectBits,
             message.dt,
@@ -207,6 +215,7 @@ void FT8MessagesTableModel::setDefaultMessage()
     beginInsertRows(QModelIndex(), 0, 0);
     m_ft8Messages.push_back(FT8MesssageData{
         "000000",
+        "0.0",
         0,
         174,
         -8.0,

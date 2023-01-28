@@ -183,6 +183,17 @@ Where date is the slot date in YYYYMMDD format (in WSJT-X this is YYMMDD) and ti
 Displays the received messages in a table which columns are the following:
 
   - **UTC**: UTC time in HHmmss format of the FT8 slot
+  - **Typ**: Message type according to the i3.n3 format described in the protocol (see reference at the top):
+    - **0.0**: Free text
+    - **0.1**: DXpedition. Message carries two compacted messages (one for RR73 and one for report to two different callees). They will be de-compacted for dispplay.
+    - **0.3**: ARRL field day
+    - **0.4**: ARRL field day
+    - **0.5**: Telemetry
+    - **1**: Standard message (the most common)
+    - **2**: European VHF (4 char locator) minor change to standard message
+    - **3**: Russian RTTY
+    - **4**: Non standard call
+    - **5**: European VHF (6 char locator)
   - **P**: LDPC decoder pass index that was successful (0 to 2) as there are 3 passes
   - **OKb**: Number of correct bits in the message before FEC correction. Maximum is 174 in which case no FEC would be needed.
   - **dt**: Message start time shift in seconds from standard FT8 time slot
