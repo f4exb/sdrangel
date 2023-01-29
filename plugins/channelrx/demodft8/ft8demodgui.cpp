@@ -502,6 +502,12 @@ void FT8DemodGUI::on_settings_clicked()
             changed = true;
         }
 
+        if (settingsKeys.contains("verifyOSD"))
+        {
+            m_settings.m_verifyOSD = settings.m_verifyOSD;
+            changed = true;
+        }
+
         if (settingsKeys.contains("bandPresets"))
         {
             m_settings.m_bandPresets = settings.m_bandPresets;

@@ -24,7 +24,7 @@
 #include <string>
 #include <map>
 
-#include <QRecursiveMutex>
+#include <QMutex>
 
 #include "export.h"
 
@@ -52,7 +52,7 @@ private:
     std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_5(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
 
-    QRecursiveMutex hashes_mu;
+    QMutex hashes_mu;
     std::map<int, std::string> hashes10;
     std::map<int, std::string> hashes12;
     std::map<int, std::string> hashes22;

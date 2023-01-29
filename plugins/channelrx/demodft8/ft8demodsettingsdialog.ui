@@ -199,6 +199,19 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="verifyOSD">
+          <property name="toolTip">
+           <string>Verify OSD decoded message against valid callsigns</string>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>Vfy</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer_3">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>

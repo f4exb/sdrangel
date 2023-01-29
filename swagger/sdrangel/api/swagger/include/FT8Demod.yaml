@@ -52,6 +52,24 @@ FT8DemodSettings:
       type: number
       format: float
       desctiption: Decoder time budget in seconds (will stop after running this time)
+    useOSD:
+      type: integer
+      description: >
+        Use Ordered Statistics Decoding (OSD) to decode messages if some LDPC bits are invalid
+          * 0 - Disable
+          * 1 - Enable
+    osdDepth:
+      type: integer
+      description: OSD depth (recommended between 0 and 6)
+    osdLDPCThreshold:
+      type: integer
+      description: minimum of valid LDPC bits (out of 83) necessary to activate OSD
+    verifyOSD:
+      type: integer
+      description: >
+        Verify OSD decoded message against a list of validated callsigns
+          * 0 - Disable
+          * 1 - Enable
     rgbColor:
       type: integer
     title:

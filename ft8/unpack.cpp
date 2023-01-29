@@ -384,6 +384,7 @@ std::string Packing::unpack_5(int a77[], std::string& call1str, std::string& cal
         ocall = "<...22>";
     }
 
+    hashes_mu.unlock();
     call2str = std::string(ocall);
 
     // mext bit is alway for R

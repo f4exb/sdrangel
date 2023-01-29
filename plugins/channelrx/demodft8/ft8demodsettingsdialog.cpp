@@ -34,6 +34,7 @@ FT8DemodSettingsDialog::FT8DemodSettingsDialog(FT8DemodSettings& settings, QStri
     ui->osdDepthText->setText(tr("%1").arg(m_settings.m_osdDepth));
     ui->osdLDPCThreshold->setValue(m_settings.m_osdLDPCThreshold);
     ui->osdLDPCThresholdText->setText(tr("%1").arg(m_settings.m_osdLDPCThreshold));
+    ui->verifyOSD->setChecked(m_settings.m_verifyOSD);
     resizeBandsTable();
     populateBandsTable();
     connect(ui->bands, &QTableWidget::cellChanged, this, &FT8DemodSettingsDialog::textCellChanged);
@@ -149,6 +150,15 @@ void FT8DemodSettingsDialog::on_osdLDPCThreshold_valueChanged(int value)
 
     if (!m_settingsKeys.contains("osdLDPCThreshold")) {
         m_settingsKeys.append("osdLDPCThreshold");
+    }
+}
+
+void FT8DemodSettingsDialog::on_verifyOSD_stateChanged(int state)
+{
+    m_settings.m_verifyOSD = state == Qt::Checked;
+
+    if (!m_settingsKeys.contains("verifyOSD")) {
+        m_settingsKeys.append("verifyOSD");
     }
 }
 

@@ -76,6 +76,7 @@ struct FT8DemodSettings
     bool m_useOSD;
     int m_osdDepth;
     int m_osdLDPCThreshold;
+    bool m_verifyOSD;
     quint32 m_rgbColor;
     QString m_title;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).

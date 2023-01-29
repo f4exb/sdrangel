@@ -50,6 +50,7 @@ void FT8DemodSettings::resetToDefaults()
     m_useOSD = false;
     m_osdDepth = 0;
     m_osdLDPCThreshold = 70;
+    m_verifyOSD = false;
     m_volume = 1.0;
     m_inputFrequencyOffset = 0;
     m_rgbColor = QColor(0, 192, 255).rgb();
@@ -113,6 +114,7 @@ QByteArray FT8DemodSettings::serialize() const
     s.writeBool(12, m_useOSD);
     s.writeS32(13, m_osdDepth);
     s.writeS32(14, m_osdLDPCThreshold);
+    s.writeBool(15, m_verifyOSD);
     s.writeString(16, m_title);
     s.writeBool(18, m_useReverseAPI);
     s.writeString(19, m_reverseAPIAddress);
@@ -181,6 +183,7 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         d.readBool(12, &m_useOSD, false);
         d.readS32(13, &m_osdDepth, 0);
         d.readS32(14, &m_osdLDPCThreshold, 70);
+        d.readBool(15, &m_verifyOSD, false);
         d.readString(16, &m_title, "SSB Demodulator");
         d.readBool(18, &m_useReverseAPI, false);
         d.readString(19, &m_reverseAPIAddress, "127.0.0.1");

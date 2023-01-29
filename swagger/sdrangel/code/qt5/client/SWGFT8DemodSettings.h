@@ -81,6 +81,18 @@ public:
     float getDecoderTimeBudget();
     void setDecoderTimeBudget(float decoder_time_budget);
 
+    qint32 getUseOsd();
+    void setUseOsd(qint32 use_osd);
+
+    qint32 getOsdDepth();
+    void setOsdDepth(qint32 osd_depth);
+
+    qint32 getOsdLdpcThreshold();
+    void setOsdLdpcThreshold(qint32 osd_ldpc_threshold);
+
+    qint32 getVerifyOsd();
+    void setVerifyOsd(qint32 verify_osd);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -153,6 +165,18 @@ private:
 
     float decoder_time_budget;
     bool m_decoder_time_budget_isSet;
+
+    qint32 use_osd;
+    bool m_use_osd_isSet;
+
+    qint32 osd_depth;
+    bool m_osd_depth_isSet;
+
+    qint32 osd_ldpc_threshold;
+    bool m_osd_ldpc_threshold_isSet;
+
+    qint32 verify_osd;
+    bool m_verify_osd_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

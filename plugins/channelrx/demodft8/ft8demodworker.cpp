@@ -18,6 +18,7 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QDateTime>
+#include <QMutableListIterator>
 
 #include "channel/channelapi.h"
 #include "dsp/wavfilerecord.h"
@@ -39,7 +40,8 @@ FT8DemodWorker::FT8Callback::FT8Callback(
     m_packing(packing),
     m_periodTS(periodTS),
     m_baseFrequency(baseFrequency),
-    m_name(name)
+    m_name(name),
+    m_validCallsigns(nullptr)
 {
     m_msgReportFT8Messages = MsgReportFT8Messages::create();
     m_msgReportFT8Messages->setBaseFrequency(baseFrequency);
@@ -71,6 +73,9 @@ int FT8DemodWorker::FT8Callback::hcb(
     }
 
     cycle_already[msg] = true;
+    QString info(comment);
+    QString call2QStr(call2.c_str());
+
     QList<FT8Message>& ft8Messages = m_msgReportFT8Messages->getFT8Messages();
     FT8Message baseMessage{
         m_periodTS,
@@ -81,9 +86,9 @@ int FT8DemodWorker::FT8Callback::hcb(
         off - 0.5f,
         hz0,
         QString(call1.c_str()).simplified(),
-        QString(call2.c_str()).simplified(),
+        call2QStr,
         QString(loc.c_str()).simplified(),
-        QString(comment)
+        info
     };
 
     // DXpedition packs two messages in one with the two callees in the first call area separated by a semicolon
@@ -135,6 +140,7 @@ FT8DemodWorker::FT8DemodWorker() :
     m_useOSD(false),
     m_osdDepth(0),
     m_osdLDPCThreshold(70),
+    m_verifyOSD(false),
     m_lowFreq(200),
     m_highFreq(3000),
     m_invalidSequence(true),
@@ -181,6 +187,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
 
     int hints[2] = { 2, 0 }; // CQ
     FT8Callback ft8Callback(periodTS, m_baseFrequency, m_packing, channelReference);
+    ft8Callback.setValidCallsigns((m_useOSD && m_verifyOSD) ? &m_validCallsigns : nullptr);
     m_ft8Decoder.getParams().nthreads = m_nbDecoderThreads;
     m_ft8Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
     m_ft8Decoder.getParams().osd_depth = m_osdDepth;
@@ -213,6 +220,20 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
     m_ft8Decoder.wait(m_decoderTimeBudget + 1.0); // add one second to budget to force quit threads
     qDebug("FT8DemodWorker::processBuffer: done: at %6.3f %d messages",
         m_baseFrequency / 1000000.0, ft8Callback.getReportMessage()->getFT8Messages().size());
+
+    if (m_useOSD && m_verifyOSD)
+    {
+        QMutableListIterator<FT8Message> i(ft8Callback.getReportMessage()->getFT8Messages());
+
+        while (i.hasNext())
+        {
+            const auto& ft8Message = i.next();
+
+            if (ft8Message.decoderInfo.startsWith("OSD") && !m_validCallsigns.contains(ft8Message.call2)) {
+                i.remove();
+            }
+        }
+    }
 
     if (m_reportingMessageQueue) {
         m_reportingMessageQueue->push(new MsgReportFT8Messages(*ft8Callback.getReportMessage()));
@@ -295,6 +316,20 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
                     swgMapItem->setHeading(0);
                     MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create((const QObject*) m_channel, swgMapItem);
                     messageQueue->push(msg);
+                }
+            }
+        }
+
+        if (m_verifyOSD && !ft8Message.decoderInfo.startsWith("OSD"))
+        {
+            if ((ft8Message.type == "1") || (ft8Message.type == "2"))
+            {
+                if (!ft8Message.call2.startsWith("<")) {
+                    m_validCallsigns.insert(ft8Message.call2);
+                }
+
+                if (!ft8Message.call1.startsWith("CQ") && !ft8Message.call1.startsWith("<")) {
+                    m_validCallsigns.insert(ft8Message.call1);
                 }
             }
         }

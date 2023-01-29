@@ -52,6 +52,14 @@ SWGFT8DemodSettings::SWGFT8DemodSettings() {
     m_nb_decoder_threads_isSet = false;
     decoder_time_budget = 0.0f;
     m_decoder_time_budget_isSet = false;
+    use_osd = 0;
+    m_use_osd_isSet = false;
+    osd_depth = 0;
+    m_osd_depth_isSet = false;
+    osd_ldpc_threshold = 0;
+    m_osd_ldpc_threshold_isSet = false;
+    verify_osd = 0;
+    m_verify_osd_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -106,6 +114,14 @@ SWGFT8DemodSettings::init() {
     m_nb_decoder_threads_isSet = false;
     decoder_time_budget = 0.0f;
     m_decoder_time_budget_isSet = false;
+    use_osd = 0;
+    m_use_osd_isSet = false;
+    osd_depth = 0;
+    m_osd_depth_isSet = false;
+    osd_ldpc_threshold = 0;
+    m_osd_ldpc_threshold_isSet = false;
+    verify_osd = 0;
+    m_verify_osd_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -132,6 +148,10 @@ SWGFT8DemodSettings::init() {
 
 void
 SWGFT8DemodSettings::cleanup() {
+
+
+
+
 
 
 
@@ -201,6 +221,14 @@ SWGFT8DemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nb_decoder_threads, pJson["nbDecoderThreads"], "qint32", "");
     
     ::SWGSDRangel::setValue(&decoder_time_budget, pJson["decoderTimeBudget"], "float", "");
+    
+    ::SWGSDRangel::setValue(&use_osd, pJson["useOSD"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&osd_depth, pJson["osdDepth"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&osd_ldpc_threshold, pJson["osdLDPCThreshold"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&verify_osd, pJson["verifyOSD"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -275,6 +303,18 @@ SWGFT8DemodSettings::asJsonObject() {
     }
     if(m_decoder_time_budget_isSet){
         obj->insert("decoderTimeBudget", QJsonValue(decoder_time_budget));
+    }
+    if(m_use_osd_isSet){
+        obj->insert("useOSD", QJsonValue(use_osd));
+    }
+    if(m_osd_depth_isSet){
+        obj->insert("osdDepth", QJsonValue(osd_depth));
+    }
+    if(m_osd_ldpc_threshold_isSet){
+        obj->insert("osdLDPCThreshold", QJsonValue(osd_ldpc_threshold));
+    }
+    if(m_verify_osd_isSet){
+        obj->insert("verifyOSD", QJsonValue(verify_osd));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -434,6 +474,46 @@ SWGFT8DemodSettings::setDecoderTimeBudget(float decoder_time_budget) {
 }
 
 qint32
+SWGFT8DemodSettings::getUseOsd() {
+    return use_osd;
+}
+void
+SWGFT8DemodSettings::setUseOsd(qint32 use_osd) {
+    this->use_osd = use_osd;
+    this->m_use_osd_isSet = true;
+}
+
+qint32
+SWGFT8DemodSettings::getOsdDepth() {
+    return osd_depth;
+}
+void
+SWGFT8DemodSettings::setOsdDepth(qint32 osd_depth) {
+    this->osd_depth = osd_depth;
+    this->m_osd_depth_isSet = true;
+}
+
+qint32
+SWGFT8DemodSettings::getOsdLdpcThreshold() {
+    return osd_ldpc_threshold;
+}
+void
+SWGFT8DemodSettings::setOsdLdpcThreshold(qint32 osd_ldpc_threshold) {
+    this->osd_ldpc_threshold = osd_ldpc_threshold;
+    this->m_osd_ldpc_threshold_isSet = true;
+}
+
+qint32
+SWGFT8DemodSettings::getVerifyOsd() {
+    return verify_osd;
+}
+void
+SWGFT8DemodSettings::setVerifyOsd(qint32 verify_osd) {
+    this->verify_osd = verify_osd;
+    this->m_verify_osd_isSet = true;
+}
+
+qint32
 SWGFT8DemodSettings::getRgbColor() {
     return rgb_color;
 }
@@ -582,6 +662,18 @@ SWGFT8DemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_decoder_time_budget_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_osd_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_osd_depth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_osd_ldpc_threshold_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_verify_osd_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

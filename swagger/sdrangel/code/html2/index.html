@@ -5627,6 +5627,22 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float"
     },
+    "useOSD" : {
+      "type" : "integer",
+      "description" : "Use Ordered Statistics Decoding (OSD) to decode messages if some LDPC bits are invalid\n  * 0 - Disable\n  * 1 - Enable\n"
+    },
+    "osdDepth" : {
+      "type" : "integer",
+      "description" : "OSD depth (recommended between 0 and 6)"
+    },
+    "osdLDPCThreshold" : {
+      "type" : "integer",
+      "description" : "minimum of valid LDPC bits (out of 83) necessary to activate OSD"
+    },
+    "verifyOSD" : {
+      "type" : "integer",
+      "description" : "Verify OSD decoded message against a list of validated callsigns\n  * 0 - Disable\n  * 1 - Enable\n"
+    },
     "rgbColor" : {
       "type" : "integer"
     },
@@ -56889,7 +56905,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-01-19T23:18:51.935+01:00
+              Generated 2023-01-28T23:27:13.480+01:00
             </div>
           </div>
       </div>

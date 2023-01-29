@@ -19,6 +19,7 @@
 #define INCLUDE_FT8DEMODWORKER_H
 
 #include <QObject>
+#include <QSet>
 
 #include "ft8.h"
 #include "unpack.h"
@@ -43,6 +44,7 @@ public:
     void setUseOSD(bool useOSD) { m_useOSD = useOSD; }
     void setOSDDepth(int osdDepth) { m_osdDepth = osdDepth; }
     void setOSDLDPCThreshold(int osdLDPCThreshold) { m_osdLDPCThreshold = osdLDPCThreshold; }
+    void setVerifyOSD(bool verifyOSD) { m_verifyOSD = verifyOSD; }
     void setLowFrequency(int lowFreq) { m_lowFreq = lowFreq; }
     void setHighFrequency(int highFreq) { m_highFreq = highFreq; }
     void setReportingMessageQueue(MessageQueue *messageQueue) { m_reportingMessageQueue = messageQueue; }
@@ -72,6 +74,7 @@ private:
         virtual QString get_name();
         const std::map<std::string, bool>& getMsgMap() { return cycle_already; }
         MsgReportFT8Messages *getReportMessage() { return m_msgReportFT8Messages; }
+        void setValidCallsigns(const QSet<QString> *validCallsigns) { m_validCallsigns = validCallsigns; }
 
     private:
         QMutex cycle_mu;
@@ -81,6 +84,7 @@ private:
         const QDateTime& m_periodTS;
         qint64 m_baseFrequency;
         QString m_name;
+        const QSet<QString> *m_validCallsigns;
     };
 
     QString m_samplesPath;
@@ -92,6 +96,7 @@ private:
     bool m_useOSD;
     int m_osdDepth;
     int m_osdLDPCThreshold;
+    bool m_verifyOSD;
     int m_lowFreq;
     int m_highFreq;
     bool m_invalidSequence;
@@ -100,6 +105,7 @@ private:
     FT8::Packing m_packing;
     MessageQueue *m_reportingMessageQueue;
     ChannelAPI *m_channel;
+    QSet<QString> m_validCallsigns;
 };
 
 #endif // INCLUDE_FT8DEMODWORKER_H

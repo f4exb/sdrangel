@@ -257,6 +257,10 @@ void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool forc
         m_ft8DemodWorker->setOSDLDPCThreshold(settings.m_osdLDPCThreshold);
     }
 
+    if ((settings.m_verifyOSD != m_settings.m_verifyOSD) || force) {
+        m_ft8DemodWorker->setVerifyOSD(settings.m_verifyOSD);
+    }
+
     m_sink.applySettings(settings, force);
     m_settings = settings;
 }

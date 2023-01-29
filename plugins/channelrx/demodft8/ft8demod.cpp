@@ -314,6 +314,18 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
     if ((m_settings.m_decoderTimeBudget != settings.m_decoderTimeBudget) || force) {
         reverseAPIKeys.append("decoderTimeBudget");
     }
+    if ((m_settings.m_useOSD != settings.m_useOSD) || force) {
+        reverseAPIKeys.append("useOSD");
+    }
+    if ((m_settings.m_osdDepth != settings.m_osdDepth) || force) {
+        reverseAPIKeys.append("osdDepth");
+    }
+    if ((m_settings.m_osdLDPCThreshold != settings.m_osdLDPCThreshold) || force) {
+        reverseAPIKeys.append("osdLDPCThreshold");
+    }
+    if ((m_settings.m_verifyOSD != settings.m_verifyOSD) || force) {
+        reverseAPIKeys.append("verifyOSD");
+    }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
@@ -494,6 +506,18 @@ void FT8Demod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("decoderTimeBudget")) {
         settings.m_decoderTimeBudget = response.getFt8DemodSettings()->getDecoderTimeBudget();
     }
+    if (channelSettingsKeys.contains("useOSD")) {
+        settings.m_useOSD = response.getFt8DemodSettings()->getUseOsd() != 0;
+    }
+    if (channelSettingsKeys.contains("osdDepth")) {
+        settings.m_osdDepth = response.getFt8DemodSettings()->getOsdDepth();
+    }
+    if (channelSettingsKeys.contains("osdLDPCThreshold")) {
+        settings.m_osdLDPCThreshold = response.getFt8DemodSettings()->getOsdLdpcThreshold();
+    }
+    if (channelSettingsKeys.contains("verifyOSD")) {
+        settings.m_verifyOSD = response.getFt8DemodSettings()->getVerifyOsd() != 0;
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getFt8DemodSettings()->getRgbColor();
     }
@@ -554,6 +578,10 @@ void FT8Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getFt8DemodSettings()->setLogMessages(settings.m_logMessages ? 1 : 0);
     response.getFt8DemodSettings()->setNbDecoderThreads(settings.m_nbDecoderThreads);
     response.getFt8DemodSettings()->setDecoderTimeBudget(settings.m_decoderTimeBudget);
+    response.getFt8DemodSettings()->setUseOsd(settings.m_useOSD ? 1 : 0);
+    response.getFt8DemodSettings()->setOsdDepth(settings.m_osdDepth);
+    response.getFt8DemodSettings()->setOsdLdpcThreshold(settings.m_osdLDPCThreshold);
+    response.getFt8DemodSettings()->setUseOsd(settings.m_verifyOSD ? 1 : 0);
     response.getFt8DemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getFt8DemodSettings()->getTitle()) {
@@ -736,6 +764,18 @@ void FT8Demod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("decoderTimeBudget") || force) {
         swgFT8DemodSettings->setDecoderTimeBudget(settings.m_decoderTimeBudget);
+    }
+    if (channelSettingsKeys.contains("useOSD") || force) {
+        swgFT8DemodSettings->setUseOsd(settings.m_useOSD ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("osdDepth") || force) {
+        swgFT8DemodSettings->setOsdDepth(settings.m_osdDepth);
+    }
+    if (channelSettingsKeys.contains("osdLDPCThreshold") || force) {
+        swgFT8DemodSettings->setOsdLdpcThreshold(settings.m_osdLDPCThreshold);
+    }
+    if (channelSettingsKeys.contains("verifyOSD") || force) {
+        swgFT8DemodSettings->setVerifyOsd(settings.m_verifyOSD ? 1 : 0);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFT8DemodSettings->setRgbColor(settings.m_rgbColor);
