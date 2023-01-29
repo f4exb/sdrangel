@@ -140,13 +140,13 @@ Empties the message table (C.10)
 
 <h3>C.8: Log messages</h3>
 
-Toggles the logging of messages. Messages will be logged in the same format as the original WSJT-X format except if the message has decoder information in which case this information is appended at the end of the line.
+Toggles the logging of messages. Messages will be logged in the same format as the original WSJT-X format.
 
 Example:
 
 <code><pre>
-230128_003030    10.136 Rx FT8    -22  0.1 2049 KE0DKZ W2ZI EL99 OSD-0-71
----- 1 ------    --2---           -3-  -4- --5- --6--- --7- --8- ---9----
+230128_003030    10.136 Rx FT8    -22  0.1 2049 KE0DKZ W2ZI EL99
+---- 1 ------    --2---           -3-  -4- --5- --6--- --7- --8-
 </pre></code>
 
   - **1**: Date and time of decoder slot in YYMMDD_HHmmss fomat
@@ -157,7 +157,6 @@ Example:
   - **6**: First callsign area. May contain spaces (ex: "CQ DX"). Note that for messages types 0.1 and 5 it is slighlty different from the standard (See C.10)
   - **7**: Second callsign area and is always a callsign. This might be slighlty different from the standard (see above)
   - **8**: Locator area maybe a 4 or 6 digit locator, a report, acknowledgement (RRR) or a greetings (RR73, 73)
-  - **9**: Decoder information if any
 
 The splitting and naming of files is different from WSJT-X scheme.
 
@@ -220,9 +219,7 @@ This is the time in seconds after which the decoder threads will be prompted to 
 
 <h4>C.1.3: Toggle Ordered Statistics Decoding</h4>
 
-This toggles the Ordered Statistics Decoding (OSD). OSD is used if the CRC check fails after LDPC processing. Be careful with OSD as it will try to find solutions that validate the CRC but these solutions can be wrong and thus yield false messages. When post processing the results it is recommended to check against a database of valid callsigns. At least you should use a list of valid country prefixes and test the locator against the country prefix.
-
-With reasonable depth (C.1.4) and minimum correct LDPC bits (C.1.5) values the amount of false messages should be low so OSD may still be interesting. However if you require best accuracy you should filter messages in a post processing step as suggested above.
+This toggles the Ordered Statistics Decoding (OSD). OSD is used if the CRC check fails after LDPC processing. Be careful with OSD as it will try to find solutions that validate the CRC but these solutions can be wrong and thus yield false messages. To mitigate this you may engage the callsign verification function (C.1.6). Ultimately you may post process the results (logs) through a list of valid country prefixes and correlate country and locator.
 
 <h4>C.1.4: Ordered Statistics Decoding depth</h4>
 
@@ -232,7 +229,11 @@ Sets the maximum depth of OSD search.
 
 Sets the minimum number of correct LDPC bits (out of 83) necessary to trigger OSD.
 
-<h4>C.1.6: Band presets table</h4>
+<h4>C.1.6. Verify callsigns</h4>
+
+OSD search may find invalid solutions as mentioned above. When checking this option the callsigns in messages not passed through OSD (thus very certainly valid) are stored for the life of the plugin. When OSD is engaged the second callsign field which is always a callsign is checked against this list and if the callsign is not found the message is rejected. This is quite efficient in removing false messages when OSD is engaged although some valid messages may be removed.
+
+<h4>C.1.7: Band presets table</h4>
 
 This table shows the band presets values that will appear in (C.5)
 
@@ -242,23 +243,23 @@ This table shows the band presets values that will appear in (C.5)
 
 You can edit these values by clicking on the cell in the table.
 
-<h4>C.1.7: Add preset</h4>
+<h4>C.1.8: Add preset</h4>
 
 Use this button to create a new preset. It will take the values from the row of the selected cell in the table (if selected) and put the new preset at the bottom of the table
 
-<h4>C.1.8: Delete preset</h4>
+<h4>C.1.9: Delete preset</h4>
 
 Delete the preset designated by the selected cell in the table.
 
-<h4>C.1.9: Move up preset</h4>
+<h4>C.1.10: Move up preset</h4>
 
 Move up the preset designated by the selected cell in the table.
 
-<h4>C.1.10: Move down preset</h4>
+<h4>C.1.11: Move down preset</h4>
 
 Move down the preset designated by the selected cell in the table.
 
-<h4>C.1.11: Restore defaults</h4>
+<h4>C.1.12: Restore defaults</h4>
 
 This restores the default band preset values:
 
@@ -280,10 +281,10 @@ This restores the default band preset values:
 
 Channel offsets are all set to 0 kHz.
 
-<h4>C.1.12 Commit changes</h4>
+<h4>C.1.13 Commit changes</h4>
 
 Click on the "OK" button to commit changes and close dialog.
 
-<h4>C.1.13 Cancel changes</h4>
+<h4>C.1.14 Cancel changes</h4>
 
 Click on the "Cancel" button to close dialog without making changes.

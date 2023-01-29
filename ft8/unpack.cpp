@@ -289,15 +289,15 @@ std::string Packing::unpack_4(int a77[], std::string& call1str, std::string& cal
 
     if (swap)
     {
-        msg = std::string(call) + " " + ocall;
-        call1str = call;
-        call2str = ocall;
+        msg = call1str + " " + ocall;
+        call1str = trim(call);
+        call2str = trim(ocall);
     }
     else
     {
         msg = std::string(ocall) + " " + call;
-        call1str = ocall;
-        call2str = call;
+        call1str = trim(ocall);
+        call2str = trim(call);
     }
 
     int suffix = un64(a77, 71, 2);

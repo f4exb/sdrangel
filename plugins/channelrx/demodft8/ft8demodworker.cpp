@@ -18,7 +18,6 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QDateTime>
-#include <QMutableListIterator>
 
 #include "channel/channelapi.h"
 #include "dsp/wavfilerecord.h"
@@ -73,8 +72,14 @@ int FT8DemodWorker::FT8Callback::hcb(
     }
 
     cycle_already[msg] = true;
+    QString call2Str(call2.c_str());
     QString info(comment);
-    QString call2QStr(call2.c_str());
+
+    if (m_validCallsigns && info.startsWith("OSD") && !m_validCallsigns->contains(call2Str))
+    {
+        cycle_mu.unlock();
+        return 2; // leave without reporting. Set as new decode.
+    }
 
     QList<FT8Message>& ft8Messages = m_msgReportFT8Messages->getFT8Messages();
     FT8Message baseMessage{
@@ -86,7 +91,7 @@ int FT8DemodWorker::FT8Callback::hcb(
         off - 0.5f,
         hz0,
         QString(call1.c_str()).simplified(),
-        call2QStr,
+        call2Str,
         QString(loc.c_str()).simplified(),
         info
     };
@@ -221,20 +226,6 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
     qDebug("FT8DemodWorker::processBuffer: done: at %6.3f %d messages",
         m_baseFrequency / 1000000.0, ft8Callback.getReportMessage()->getFT8Messages().size());
 
-    if (m_useOSD && m_verifyOSD)
-    {
-        QMutableListIterator<FT8Message> i(ft8Callback.getReportMessage()->getFT8Messages());
-
-        while (i.hasNext())
-        {
-            const auto& ft8Message = i.next();
-
-            if (ft8Message.decoderInfo.startsWith("OSD") && !m_validCallsigns.contains(ft8Message.call2)) {
-                i.remove();
-            }
-        }
-    }
-
     if (m_reportingMessageQueue) {
         m_reportingMessageQueue->push(new MsgReportFT8Messages(*ft8Callback.getReportMessage()));
     }
@@ -266,7 +257,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
                 continue;
             }
 
-            QString logMessage = QString("%1 %2 Rx FT8 %3 %4 %5 %6 %7 %8 %9")
+            QString logMessage = QString("%1 %2 Rx FT8 %3 %4 %5 %6 %7 %8")
                 .arg(periodTS.toString("yyyyMMdd_HHmmss"))
                 .arg(baseFrequencyMHz, 9, 'f', 3)
                 .arg(ft8Message.snr, 6)
@@ -274,8 +265,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
                 .arg(ft8Message.df, 4, 'f', 0)
                 .arg(ft8Message.call1)
                 .arg(ft8Message.call2)
-                .arg(ft8Message.loc)
-                .arg(ft8Message.decoderInfo);
+                .arg(ft8Message.loc);
             logMessage.remove(0, 2);
             logFile << logMessage.toStdString() << std::endl;
         }
