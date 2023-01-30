@@ -768,12 +768,15 @@ void FT8DemodGUI::displaySettings()
     m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setLowCutoff(m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff);
 
-    if (m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth < 0)
+    if (m_deviceUISet->m_deviceMIMOEngine)
     {
-        m_channelMarker.setSidebands(ChannelMarker::lsb);
+        m_channelMarker.clearStreamIndexes();
+        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
     }
-    else
-    {
+
+    if (m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth < 0) {
+        m_channelMarker.setSidebands(ChannelMarker::lsb);
+    } else {
         m_channelMarker.setSidebands(ChannelMarker::usb);
     }
 
