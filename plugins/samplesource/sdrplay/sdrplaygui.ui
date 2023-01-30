@@ -182,10 +182,10 @@
         <string>Local Oscillator ppm correction</string>
        </property>
        <property name="minimum">
-        <number>-200</number>
+        <number>-1000</number>
        </property>
        <property name="maximum">
-        <number>200</number>
+        <number>1000</number>
        </property>
        <property name="pageStep">
         <number>1</number>
@@ -652,15 +652,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>

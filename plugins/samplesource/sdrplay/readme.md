@@ -24,7 +24,7 @@ Controls common to all source plugins. See [main interface description](../../..
 
 <h3>2. Local oscillator frequency correction</h3>
 
-This is the correction in tenths of ppm steps. This is hardly useful with SDRplay as it has been found on spot. The MSi001 chip probably uses some sort of internal compensation. However this control is kept just in case.
+This is the correction in tenths of ppm steps.
 
 <h3>3. DC and IQ imbalance correction</h3>
 
