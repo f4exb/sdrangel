@@ -332,6 +332,10 @@ public:
     // blocks. returns a vector of candidate positions.
     //
     std::vector<Strength> coarse(const FFTEngine::ffts_t &bins, int si0, int si1);
+
+    FT8Params& getParams() { return params; }
+
+private:
     //
     // reduce the sample rate from arate to brate.
     // center hz0..hz1 in the new nyquist range.
@@ -653,7 +657,6 @@ public:
         float hz1_for_cb
     );
 
-    FT8Params& getParams() { return params; }
 signals:
     void finished();
 private:
