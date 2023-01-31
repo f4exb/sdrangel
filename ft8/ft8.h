@@ -274,33 +274,6 @@ class FT8_API FT8 : public QObject
 {
     Q_OBJECT
 public:
-    float min_hz_;
-    float max_hz_;
-    std::vector<float> samples_;  // input to each pass
-    std::vector<float> nsamples_; // subtract from here
-
-    int start_;             // sample number of 0.5 seconds into samples[]
-    int rate_;              // samples/second
-    double deadline_;       // start time + budget
-    double final_deadline_; // keep going this long if no decodes
-    std::vector<int> hints1_;
-    std::vector<int> hints2_;
-    int pass_;
-    float down_hz_;
-
-    QMutex cb_mu_;
-    CallbackInterface *cb_; // call-back interface
-
-    QMutex hack_mu_;
-    int hack_size_;
-    int hack_off_;
-    int hack_len_;
-    float hack_0_;
-    float hack_1_;
-    const float *hack_data_;
-    std::vector<std::complex<float>> hack_bins_;
-    std::vector<cdecode> prevdecs_;
-
     FT8(
         const std::vector<float> &samples,
         float min_hz,
@@ -664,6 +637,33 @@ private:
     FFTEngine *fftEngine_;
     int npasses_;
     static const double apriori174[];
+
+    float min_hz_;
+    float max_hz_;
+    std::vector<float> samples_;  // input to each pass
+    std::vector<float> nsamples_; // subtract from here
+
+    int start_;             // sample number of 0.5 seconds into samples[]
+    int rate_;              // samples/second
+    double deadline_;       // start time + budget
+    double final_deadline_; // keep going this long if no decodes
+    std::vector<int> hints1_;
+    std::vector<int> hints2_;
+    int pass_;
+    float down_hz_;
+
+    QMutex cb_mu_;
+    CallbackInterface *cb_; // call-back interface
+
+    QMutex hack_mu_;
+    int hack_size_;
+    int hack_off_;
+    int hack_len_;
+    float hack_0_;
+    float hack_1_;
+    const float *hack_data_;
+    std::vector<std::complex<float>> hack_bins_;
+    std::vector<cdecode> prevdecs_;
 }; // class FT8
 
 class FT8_API FT8Decoder : public QObject {
