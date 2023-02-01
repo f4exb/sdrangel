@@ -179,7 +179,7 @@ elseif(WIN32 OR MINGW)
   file(GLOB LIBUSB_DLLS "${LIBUSB_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
   foreach(libusb_dll ${LIBUSB_DLLS})
     get_filename_component(libusb_dll_name "${libusb_dll}"  NAME)
-    add_custom_target(copy_fftw3f_${libusb_dll_name} ALL
+    add_custom_target(copy_libusb_${libusb_dll_name} ALL
       COMMAND ${CMAKE_COMMAND} -E copy_if_different "${libusb_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
     )
   endforeach(libusb_dll)
