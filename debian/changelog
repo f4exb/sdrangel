@@ -1,3 +1,18 @@
+sdrangel (7.9.0-1) unstable; urgency=medium
+
+  - FT8 demodulator. Implements #1561
+  - SDRPlay: increase LO ppm range. Fixes #1576
+  - Initialize m_running to fix crash #1574. PR #1575
+  - Map feature: added MIMO devices when scanning for channels
+  - Spectrum: Keep frequency displayed while channel is being dragged. PR #1570
+  - LimeRFE: save Rx/Tx mode in m_rfeBoardState. Fixes #1557
+  - Audio Input: Make sure audio device name corresponds to GUI setting. PR #1565
+  - Audio Input: Set start/stop button background colour according to device status. PR #1565
+  - Add reset measurements button to Spectrum GUI, PR #1565
+  - Speed up enumeration / opening USRP B210 by using hardcoded values. PR #1566
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 01 Feb 2023 08:14:50 +0100
+
 sdrangel (7.8.6-1) unstable; urgency=medium
 
   - SSB demod: corrected DSB filter
