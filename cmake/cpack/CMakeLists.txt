@@ -168,6 +168,22 @@ elseif(WIN32 OR MINGW)
     endforeach(soapysupport_dll)
   endif()
 
+  file(GLOB FFTW3F_DLLS "${FFTW3F_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  foreach(fftw3f_dll ${FFTW3F_DLLS})
+    get_filename_component(fftw3f_dll_name "${fftw3f_dll}"  NAME)
+    add_custom_target(copy_fftw3f_${fftw3f_dll_name} ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${fftw3f_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+    )
+  endforeach(fftw3f_dll)
+  
+  file(GLOB LIBUSB_DLLS "${LIBUSB_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  foreach(libusb_dll ${LIBUSB_DLLS})
+    get_filename_component(libusb_dll_name "${libusb_dll}"  NAME)
+    add_custom_target(copy_libusb_${libusb_dll_name} ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${libusb_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+    )
+  endforeach(libusb_dll)
+
   file(GLOB CODEC2_DLLS "${CODEC2_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
   foreach(codec2_dll ${CODEC2_DLLS})
     get_filename_component(codec2_dll_name "${codec2_dll}"  NAME)
