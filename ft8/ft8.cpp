@@ -2998,7 +2998,7 @@ void FT8::fine(const FFTEngine::ffts_t &m79, int, float &adj_hz, float &adj_off)
         adj_off = 0 - round(32 * late / params.fine_thresh);
 
         if (fabs(adj_off) > params.fine_max_off) {
-            adj_off =- params.fine_max_off;
+            adj_off -= params.fine_max_off;
         }
     }
 }
