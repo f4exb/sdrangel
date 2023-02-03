@@ -690,7 +690,20 @@ void DemodAnalyzer::handleDataPipeToBeDeleted(int reason, QObject *object)
             m_worker->getInputMessageQueue()->push(msg);
         }
 
-        updateChannels();
+        m_availableChannels.remove((ChannelAPI*) object);
         m_selectedChannel = nullptr;
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportChannels *msgToGUI = MsgReportChannels::create();
+            QList<DemodAnalyzerSettings::AvailableChannel>& msgAvailableChannels = msgToGUI->getAvailableChannels();
+            QHash<ChannelAPI*, DemodAnalyzerSettings::AvailableChannel>::iterator it = m_availableChannels.begin();
+
+            for (; it != m_availableChannels.end(); ++it) {
+                msgAvailableChannels.push_back(*it);
+            }
+
+            getMessageQueueToGUI()->push(msgToGUI);
+        }
     }
 }
