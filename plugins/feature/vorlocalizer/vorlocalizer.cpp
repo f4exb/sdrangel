@@ -310,7 +310,6 @@ void VORLocalizer::handleMessagePipeToBeDeleted(int reason, QObject* object)
     if ((reason == 0) && m_availableChannels.contains((ChannelAPI*) object)) // producer (channel)
     {
         m_availableChannels.remove((ChannelAPI*) object);
-        updateChannels();
     }
 }
 

@@ -102,7 +102,7 @@ bool TestSourceInput::start()
     m_testSourceWorker->moveToThread(m_testSourceWorkerThread);
 
     QObject::connect(m_testSourceWorkerThread, &QThread::started, m_testSourceWorker, &TestSourceWorker::startWork);
-    QObject::connect(m_testSourceWorkerThread, &QThread::finished, m_testSourceWorker, &QObject::deleteLater);
+    QObject::connect(m_testSourceWorkerThread, &QThread::finished, m_testSourceWorker, &QObject::deleteLater, Qt::QueuedConnection);
     QObject::connect(m_testSourceWorkerThread, &QThread::finished, m_testSourceWorkerThread, &QThread::deleteLater);
 
 	m_testSourceWorker->setSamplerate(m_settings.m_sampleRate);
