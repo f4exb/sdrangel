@@ -158,6 +158,7 @@ private:
     PhaseDiscriminators m_phaseDiscri;
 
     void formatStatusText();
+    bool isNotYSFWide();
 };
 
 #endif // INCLUDE_DSDDEMODSINK_H

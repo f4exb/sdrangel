@@ -232,8 +232,7 @@ void DSDDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
                 m_scopeSampleBuffer.push_back(s);
             }
 
-            // if (DSPEngine::instance()->hasDVSerialSupport())
-            if (m_ambeFeature)
+            if (m_ambeFeature && isNotYSFWide())
             {
                 if ((m_settings.m_slot1On) && m_dsdDecoder.mbeDVReady1())
                 {
@@ -469,6 +468,15 @@ const char *DSDDemodSink::updateAndGetStatusText()
 {
     formatStatusText();
     return m_formatStatusText;
+}
+
+bool DSDDemodSink::isNotYSFWide()
+{
+    if (getDecoder().getSyncType() == DSDcc::DSDDecoder::DSDSyncYSF) {
+        return getDecoder().getYSFDecoder().getFICH().isNarrowMode();
+    }
+
+    return true;
 }
 
 void DSDDemodSink::formatStatusText()
