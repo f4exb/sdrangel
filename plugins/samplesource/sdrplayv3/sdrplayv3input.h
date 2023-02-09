@@ -196,7 +196,7 @@ private:
     static const int rsp1AAttenuation[4][11];
     static const int rsp2Attenuation[3][10];
     static const int rspDuoAttenuation[5][11];
-    static const int rspDxAttenuation[6][28];
+    static const int rspDxAttenuation[7][29];
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_SDRPLAYV3_SDRPLAYV3INPUT_H_ */
