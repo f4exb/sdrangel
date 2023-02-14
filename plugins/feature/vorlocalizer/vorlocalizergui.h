@@ -191,6 +191,7 @@ public:
     }
 
     bool findIntersection(float &lat, float &lon);
+    QString getRadials() const;
 
 private:
     VORLocalizerGUI *m_gui;
@@ -242,7 +243,7 @@ private:
     OpenAIP m_openAIP;
     int m_countryIndex;
     VORModel m_vorModel;
-    QList<NavAid *> m_vors;
+    QSharedPointer<const QList<NavAid *>> m_vors;
     QHash<int, VORGUI *> m_selectedVORs;
     AzEl m_azEl;                        // Position of station
     QIcon m_muteIcon;
@@ -250,6 +251,8 @@ private:
 	int m_lastFeatureState;
     int m_rrSecondsCount;
     QTimer m_redrawMapTimer;
+    QString m_mapFeaturePositionName;
+    QStringList m_mapFeatureRadialNames;
 
     explicit VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~VORLocalizerGUI();
@@ -270,6 +273,9 @@ private:
     void readNavAids();
     void updateChannelList();
     void applyMapSettings();
+    void clearFromMapFeature(const QString& name, int type);
+    void sendPositionToMapFeature(float lat, float lon);
+    void sendRadialToMapFeature(VORGUI *vorGUI, Real radial);
 
 private slots:
     void on_startStop_toggled(bool checked);
@@ -296,3 +302,4 @@ private slots:
 };
 
 #endif // INCLUDE_VORLOCALIZERGUI_H
+
