@@ -21,8 +21,11 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QMessageBox>
+#include <QProgressDialog>
 
 #include "gui/httpdownloadmanagergui.h"
+#include "util/openaip.h"
+#include "util/ourairportsdb.h"
 
 #include "ui_mapsettingsdialog.h"
 #include "mapsettings.h"
@@ -78,7 +81,9 @@ public:
         COL_3D_LABEL,
         COL_3D_POINT,
         COL_3D_TRACK,
-        COL_3D_LABEL_SCALE
+        COL_3D_LABEL_SCALE,
+        COL_FILTER_NAME,
+        COL_FILTER_DISTANCE
     };
 
 public:
@@ -92,6 +97,9 @@ private:
     HttpDownloadManagerGUI m_dlm;
     int m_fileIdx;
     QMessageBox m_downloadDialog;
+    QProgressDialog *m_progressDialog;
+    OpenAIP m_openAIP;
+    OurAirportsDB m_ourAirportsDB;
 
     void unzip(const QString &filename);
 
@@ -100,7 +108,20 @@ private slots:
     void on_map2DEnabled_clicked(bool checked=false);
     void on_map3DEnabled_clicked(bool checked=false);
     void on_downloadModels_clicked();
+    void on_getAirportDB_clicked();
+    void on_getAirspacesDB_clicked();
     void downloadComplete(const QString &filename, bool success, const QString &url, const QString &errorMessage);
+    void downloadingURL(const QString& url);
+    void downloadProgress(qint64 bytesRead, qint64 totalBytes);
+    void downloadError(const QString& error);
+    void downloadAirspaceFinished();
+    void downloadNavAidsFinished();
+    void downloadAirportInformationFinished();
+
+signals:
+    void navAidsUpdated();
+    void airspacesUpdated();
+    void airportsUpdated();
 
 private:
     Ui::MapSettingsDialog* ui;

@@ -17,6 +17,251 @@
 
 #include "openaip.h"
 
+QList<Airspace *> Airspace::readXML(const QString &filename)
+{
+    QList<Airspace *> airspaces;
+    QFile file(filename);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QXmlStreamReader xmlReader(&file);
+
+        while(!xmlReader.atEnd() && !xmlReader.hasError())
+        {
+            if (xmlReader.readNextStartElement())
+            {
+                if (xmlReader.name() == QLatin1String("ASP"))
+                {
+                    Airspace *airspace = new Airspace();
+
+                    airspace->m_category = xmlReader.attributes().value("CATEGORY").toString();
+
+                    while(xmlReader.readNextStartElement())
+                    {
+                        if (xmlReader.name() == QLatin1String("COUNTRY"))
+                        {
+                            airspace->m_country = xmlReader.readElementText();
+                        }
+                        else if (xmlReader.name() == QLatin1String("NAME"))
+                        {
+                            airspace->m_name = xmlReader.readElementText();
+                        }
+                        else if (xmlReader.name() == QLatin1String("ALTLIMIT_TOP"))
+                        {
+                            while(xmlReader.readNextStartElement())
+                            {
+                                airspace->m_top.m_reference = xmlReader.attributes().value("REFERENCE").toString();
+                                airspace->m_top.m_altUnit = xmlReader.attributes().value("UNIT").toString();
+                                if (xmlReader.name() == QLatin1String("ALT"))
+                                {
+                                    airspace->m_top.m_alt = xmlReader.readElementText().toInt();
+                                }
+                                else
+                                {
+                                    xmlReader.skipCurrentElement();
+                                }
+                            }
+                        }
+                        else if (xmlReader.name() == QLatin1String("ALTLIMIT_BOTTOM"))
+                        {
+                            while(xmlReader.readNextStartElement())
+                            {
+                                airspace->m_bottom.m_reference = xmlReader.attributes().value("REFERENCE").toString();
+                                airspace->m_bottom.m_altUnit = xmlReader.attributes().value("UNIT").toString();
+                                if (xmlReader.name() == QLatin1String("ALT"))
+                                {
+                                    airspace->m_bottom.m_alt = xmlReader.readElementText().toInt();
+                                }
+                                else
+                                {
+                                    xmlReader.skipCurrentElement();
+                                }
+                            }
+                        }
+                        else if (xmlReader.name() == QLatin1String("GEOMETRY"))
+                        {
+                            while(xmlReader.readNextStartElement())
+                            {
+                                if (xmlReader.name() == QLatin1String("POLYGON"))
+                                {
+                                    QString pointsString = xmlReader.readElementText();
+                                    QStringList points = pointsString.split(",");
+                                    for (const auto& ps : points)
+                                    {
+                                        QStringList split = ps.trimmed().split(" ");
+                                        if (split.size() == 2)
+                                        {
+                                            QPointF pf(split[0].toDouble(), split[1].toDouble());
+                                            airspace->m_polygon.append(pf);
+                                        }
+                                        else
+                                        {
+                                            qDebug() << "Airspace::readXML - Unexpected polygon point format: " << ps;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    xmlReader.skipCurrentElement();
+                                }
+                            }
+                        }
+                        else
+                        {
+                           xmlReader.skipCurrentElement();
+                        }
+                    }
+
+                    airspace->calculatePosition();
+                    //qDebug() << "Adding airspace: " << airspace->m_name << " " << airspace->m_category;
+                    airspaces.append(airspace);
+                }
+            }
+        }
+
+        file.close();
+    }
+    else
+    {
+        // Don't warn, as many countries don't have files
+        //qDebug() << "Airspace::readXML: Could not open " << filename << " for reading.";
+    }
+    return airspaces;
+}
+
+QList<NavAid *> NavAid::readXML(const QString &filename)
+{
+    int uniqueId = 1;
+    QList<NavAid *> navAidInfo;
+    QFile file(filename);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QXmlStreamReader xmlReader(&file);
+
+        while(!xmlReader.atEnd() && !xmlReader.hasError())
+        {
+            if (xmlReader.readNextStartElement())
+            {
+                if (xmlReader.name() == QLatin1String("NAVAID"))
+                {
+                    QStringView typeRef = xmlReader.attributes().value("TYPE");
+                    if ((typeRef == QLatin1String("NDB"))
+                        || (typeRef == QLatin1String("DME"))
+                        || (typeRef == QLatin1String("VOR"))
+                        || (typeRef == QLatin1String("VOR-DME"))
+                        || (typeRef == QLatin1String("VORTAC"))
+                        || (typeRef == QLatin1String("DVOR"))
+                        || (typeRef == QLatin1String("DVOR-DME"))
+                        || (typeRef == QLatin1String("DVORTAC")))
+                    {
+                        QString type = typeRef.toString();
+                        QString name;
+                        QString id;
+                        float lat = 0.0f;
+                        float lon = 0.0f;
+                        float elevation = 0.0f;
+                        float frequency = 0.0f;
+                        QString channel;
+                        int range = 25;
+                        float declination = 0.0f;
+                        bool alignedTrueNorth = false;
+                        while(xmlReader.readNextStartElement())
+                        {
+                            if (xmlReader.name() == QLatin1String("NAME"))
+                            {
+                                name = xmlReader.readElementText();
+                            }
+                            else if (xmlReader.name() == QLatin1String("ID"))
+                            {
+                                id = xmlReader.readElementText();
+                            }
+                            else if (xmlReader.name() == QLatin1String("GEOLOCATION"))
+                            {
+                                while(xmlReader.readNextStartElement())
+                                {
+                                    if (xmlReader.name() == QLatin1String("LAT")) {
+                                        lat = xmlReader.readElementText().toFloat();
+                                    } else if (xmlReader.name() == QLatin1String("LON")) {
+                                        lon = xmlReader.readElementText().toFloat();
+                                    } else if (xmlReader.name() == QLatin1String("ELEV")) {
+                                        elevation = xmlReader.readElementText().toFloat();
+                                    } else {
+                                        xmlReader.skipCurrentElement();
+                                    }
+                                }
+                            }
+                            else if (xmlReader.name() == QLatin1String("RADIO"))
+                            {
+                                while(xmlReader.readNextStartElement())
+                                {
+                                    if (xmlReader.name() == QLatin1String("FREQUENCY"))
+                                    {
+                                        if (type == "NDB") {
+                                            frequency = xmlReader.readElementText().toFloat();
+                                        } else {
+                                            frequency = xmlReader.readElementText().toFloat() * 1000.0;
+                                        }
+                                    } else if (xmlReader.name() == QLatin1String("CHANNEL")) {
+                                        channel = xmlReader.readElementText();
+                                    } else {
+                                        xmlReader.skipCurrentElement();
+                                    }
+                                }
+                            }
+                            else if (xmlReader.name() == QLatin1String("PARAMS"))
+                            {
+                                while(xmlReader.readNextStartElement())
+                                {
+                                    if (xmlReader.name() == QLatin1String("RANGE")) {
+                                        range = xmlReader.readElementText().toInt();
+                                    } else if (xmlReader.name() == QLatin1String("DECLINATION")) {
+                                        declination = xmlReader.readElementText().toFloat();
+                                    } else if (xmlReader.name() == QLatin1String("ALIGNEDTOTRUENORTH")) {
+                                        alignedTrueNorth = xmlReader.readElementText() == "TRUE";
+                                    } else {
+                                        xmlReader.skipCurrentElement();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                               xmlReader.skipCurrentElement();
+                            }
+                        }
+                        NavAid *navAid = new NavAid();
+                        navAid->m_id = uniqueId++;
+                        navAid->m_ident = id;
+                        // Check idents conform to our filtering rules
+                        if (navAid->m_ident.size() < 2) {
+                            qDebug() << "NavAid::readXML: Ident less than 2 characters: " << navAid->m_ident;
+                        } else if (navAid->m_ident.size() > 3) {
+                            qDebug() << "NavAid::readXML: Ident greater than 3 characters: " << navAid->m_ident;
+                        }
+                        navAid->m_type = type;
+                        navAid->m_name = name;
+                        navAid->m_frequencykHz = frequency;
+                        navAid->m_channel = channel;
+                        navAid->m_latitude = lat;
+                        navAid->m_longitude = lon;
+                        navAid->m_elevation = elevation;
+                        navAid->m_range = range;
+                        navAid->m_magneticDeclination = declination;
+                        navAid->m_alignedTrueNorth = alignedTrueNorth;
+                        navAidInfo.append(navAid);
+                    }
+                }
+            }
+        }
+
+        file.close();
+    }
+    else
+    {
+        // Don't warn, as many countries don't have files
+        //qDebug() << "NavAid::readNavAidsXML: Could not open " << filename << " for reading.";
+    }
+    return navAidInfo;
+}
+
 const QStringList OpenAIP::m_countryCodes = {
     "ad",
     "ae",
@@ -268,6 +513,12 @@ const QStringList OpenAIP::m_countryCodes = {
     "zw"
 };
 
+QSharedPointer<QList<Airspace *>> OpenAIP::m_airspaces;
+QSharedPointer<QList<NavAid *>> OpenAIP::m_navAids;
+
+QDateTime OpenAIP::m_airspacesModifiedDateTime;
+QDateTime OpenAIP::m_navAidsModifiedDateTime;
+
 OpenAIP::OpenAIP(QObject *parent) :
     QObject(parent)
 {
@@ -390,11 +641,11 @@ void OpenAIP::downloadFinished(const QString& filename, bool success)
 }
 
 // Read airspaces for all countries
-QList<Airspace *> OpenAIP::readAirspaces()
+QList<Airspace *> *OpenAIP::readAirspaces()
 {
-    QList<Airspace *> airspaces;
+    QList<Airspace *> *airspaces = new QList<Airspace *>();
     for (const auto& countryCode : m_countryCodes) {
-        airspaces.append(readAirspaces(countryCode));
+        airspaces->append(readAirspaces(countryCode));
     }
     return airspaces;
 }
@@ -406,11 +657,11 @@ QList<Airspace *> OpenAIP::readAirspaces(const QString& countryCode)
 }
 
 // Read NavAids for all countries
-QList<NavAid *> OpenAIP::readNavAids()
+QList<NavAid *> *OpenAIP::readNavAids()
 {
-    QList<NavAid *> navAids;
+    QList<NavAid *> *navAids = new QList<NavAid *>();
     for (const auto& countryCode : m_countryCodes) {
-        navAids.append(readNavAids(countryCode));
+        navAids->append(readNavAids(countryCode));
     }
     return navAids;
 }
@@ -420,3 +671,60 @@ QList<NavAid *> OpenAIP::readNavAids(const QString& countryCode)
 {
     return NavAid::readXML(getNavAidsFilename(countryCode));
 }
+
+QSharedPointer<const QList<Airspace *>> OpenAIP::getAirspaces()
+{
+    QDateTime filesDateTime = getAirspacesModifiedDateTime();
+
+    if (!m_airspaces || (filesDateTime > m_airspacesModifiedDateTime))
+    {
+        // Using shared pointer, so old object, if it exists, will be deleted, when no longer user
+        m_airspaces = QSharedPointer<QList<Airspace *>>(readAirspaces());
+        m_airspacesModifiedDateTime = filesDateTime;
+    }
+    return m_airspaces;
+}
+
+QSharedPointer<const QList<NavAid *>> OpenAIP::getNavAids()
+{
+    QDateTime filesDateTime = getNavAidsModifiedDateTime();
+
+    if (!m_navAids || (filesDateTime > m_navAidsModifiedDateTime))
+    {
+        // Using shared pointer, so old object, if it exists, will be deleted, when no longer user
+        m_navAids = QSharedPointer<QList<NavAid *>>(readNavAids());
+        m_navAidsModifiedDateTime = filesDateTime;
+    }
+    return m_navAids;
+}
+
+// Gets the date and time the airspaces files were most recently modified
+QDateTime OpenAIP::getAirspacesModifiedDateTime()
+{
+    QDateTime dateTime;
+    for (const auto& countryCode : m_countryCodes)
+    {
+        QFileInfo fileInfo(getAirspaceFilename(countryCode));
+        QDateTime fileModifiedDateTime = fileInfo.lastModified();
+        if (fileModifiedDateTime > dateTime) {
+            dateTime = fileModifiedDateTime;
+        }
+    }
+    return dateTime;
+}
+
+// Gets the date and time the navaid files were most recently modified
+QDateTime OpenAIP::getNavAidsModifiedDateTime()
+{
+    QDateTime dateTime;
+    for (const auto& countryCode : m_countryCodes)
+    {
+        QFileInfo fileInfo(getNavAidsFilename(countryCode));
+        QDateTime fileModifiedDateTime = fileInfo.lastModified();
+        if (fileModifiedDateTime > dateTime) {
+            dateTime = fileModifiedDateTime;
+        }
+    }
+    return dateTime;
+}
+

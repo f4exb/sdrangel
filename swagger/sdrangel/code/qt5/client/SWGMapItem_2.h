@@ -126,6 +126,18 @@ public:
     float getImageTileNorth();
     void setImageTileNorth(float image_tile_north);
 
+    float getImageZoomLevel();
+    void setImageZoomLevel(float image_zoom_level);
+
+    QList<SWGMapCoordinate*>* getCoordinates();
+    void setCoordinates(QList<SWGMapCoordinate*>* coordinates);
+
+    float getExtrudedHeight();
+    void setExtrudedHeight(float extruded_height);
+
+    QString* getAvailableUntil();
+    void setAvailableUntil(QString* available_until);
+
 
     virtual bool isSet() override;
 
@@ -210,6 +222,18 @@ private:
 
     float image_tile_north;
     bool m_image_tile_north_isSet;
+
+    float image_zoom_level;
+    bool m_image_zoom_level_isSet;
+
+    QList<SWGMapCoordinate*>* coordinates;
+    bool m_coordinates_isSet;
+
+    float extruded_height;
+    bool m_extruded_height_isSet;
+
+    QString* available_until;
+    bool m_available_until_isSet;
 
 };
 

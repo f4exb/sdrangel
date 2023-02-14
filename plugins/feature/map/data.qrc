@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/map/">
+    <file>data/transmitters.csv</file>
+  </qresource>
+</RCC>

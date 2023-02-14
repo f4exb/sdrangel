@@ -231,8 +231,25 @@ void CesiumInterface::czml(QJsonObject &obj)
     send(obj);
 }
 
-void CesiumInterface::update(MapItem *mapItem, bool isTarget, bool isSelected)
+void CesiumInterface::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
 {
     QJsonObject obj = m_czml.update(mapItem, isTarget, isSelected);
     czml(obj);
+}
+
+void CesiumInterface::update(PolygonMapItem *mapItem)
+{
+    QJsonObject obj = m_czml.update(mapItem);
+    czml(obj);
+}
+
+void CesiumInterface::update(PolylineMapItem *mapItem)
+{
+    QJsonObject obj = m_czml.update(mapItem);
+    czml(obj);
+}
+
+void CesiumInterface::setPosition(const QGeoCoordinate& position)
+{
+    m_czml.setPosition(position);
 }

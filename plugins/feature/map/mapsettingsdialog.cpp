@@ -109,6 +109,7 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     QDialog(parent),
     m_settings(settings),
     m_downloadDialog(this),
+    m_progressDialog(nullptr),
     ui(new Ui::MapSettingsDialog)
 {
     ui->setupUi(this);
@@ -117,6 +118,7 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui->maptilerAPIKey->setText(settings->m_maptilerAPIKey);
     ui->mapBoxAPIKey->setText(settings->m_mapBoxAPIKey);
     ui->cesiumIonAPIKey->setText(settings->m_cesiumIonAPIKey);
+    ui->checkWXAPIKey->setText(settings->m_checkWXAPIKey);
     ui->osmURL->setText(settings->m_osmURL);
     ui->mapBoxStyles->setText(settings->m_mapBoxStyles);
     ui->map2DEnabled->setChecked(m_settings->m_map2DEnabled);
@@ -129,10 +131,10 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
 
     // Sort groups in table alphabetically
     QList<MapSettings::MapItemSettings *> itemSettings = m_settings->m_itemSettings.values();
-    std::sort(itemSettings.begin(), itemSettings.end(), 
-        [](const MapSettings::MapItemSettings* a, const MapSettings::MapItemSettings* b) -> bool { 
-            return a->m_group < b->m_group; 
-        });    
+    std::sort(itemSettings.begin(), itemSettings.end(),
+        [](const MapSettings::MapItemSettings* a, const MapSettings::MapItemSettings* b) -> bool {
+            return a->m_group < b->m_group;
+        });
     QListIterator<MapSettings::MapItemSettings *> itr(itemSettings);
     while (itr.hasNext())
     {
@@ -163,6 +165,14 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
         item->setCheckState(itemSettings->m_display3DLabel ? Qt::Checked : Qt::Unchecked);
         ui->mapItemSettings->setItem(row, COL_3D_LABEL, item);
 
+        item = new QTableWidgetItem(itemSettings->m_filterName);
+        ui->mapItemSettings->setItem(row, COL_FILTER_NAME, item);
+        item = new QTableWidgetItem();
+        if (itemSettings->m_filterDistance > 0) {
+            item->setText(QString::number(itemSettings->m_filterDistance / 1000));
+        }
+        ui->mapItemSettings->setItem(row, COL_FILTER_DISTANCE, item);
+
         MapItemSettingsGUI *gui = new MapItemSettingsGUI(ui->mapItemSettings, row, itemSettings);
         m_mapItemSettingsGUIs.append(gui);
     }
@@ -172,6 +182,15 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     on_map3DEnabled_clicked(m_settings->m_map3DEnabled);
 
     connect(&m_dlm, &HttpDownloadManagerGUI::downloadComplete, this, &MapSettingsDialog::downloadComplete);
+    connect(&m_openAIP, &OpenAIP::downloadingURL, this, &MapSettingsDialog::downloadingURL);
+    connect(&m_openAIP, &OpenAIP::downloadError, this, &MapSettingsDialog::downloadError);
+    connect(&m_openAIP, &OpenAIP::downloadAirspaceFinished, this, &MapSettingsDialog::downloadAirspaceFinished);
+    connect(&m_openAIP, &OpenAIP::downloadNavAidsFinished, this, &MapSettingsDialog::downloadNavAidsFinished);
+    connect(&m_ourAirportsDB, &OurAirportsDB::downloadingURL, this, &MapSettingsDialog::downloadingURL);
+    connect(&m_ourAirportsDB, &OurAirportsDB::downloadProgress, this, &MapSettingsDialog::downloadProgress);
+    connect(&m_ourAirportsDB, &OurAirportsDB::downloadError, this, &MapSettingsDialog::downloadError);
+    connect(&m_ourAirportsDB, &OurAirportsDB::downloadAirportInformationFinished, this, &MapSettingsDialog::downloadAirportInformationFinished);
+
 #ifndef QT_WEBENGINE_FOUND
     ui->map3DSettings->setVisible(false);
     ui->downloadModels->setVisible(false);
@@ -257,6 +276,16 @@ void MapSettingsDialog::accept()
         itemSettings->m_3DTrackColor = gui->m_track3D.m_color;
         itemSettings->m_3DModelMinPixelSize = gui->m_minPixels->value();
         itemSettings->m_3DLabelScale = gui->m_labelScale->value();
+        itemSettings->m_filterName = ui->mapItemSettings->item(row, COL_FILTER_NAME)->text();
+        itemSettings->m_filterNameRE.setPattern(itemSettings->m_filterName);
+        itemSettings->m_filterNameRE.optimize();
+        bool ok;
+        int filterDistance = ui->mapItemSettings->item(row, COL_FILTER_DISTANCE)->text().toInt(&ok);
+        if (ok && filterDistance > 0) {
+            itemSettings->m_filterDistance = filterDistance * 1000;
+        } else {
+            itemSettings->m_filterDistance = 0;
+        }
     }
 
     QDialog::accept();
@@ -307,6 +336,7 @@ void MapSettingsDialog::on_map3DEnabled_clicked(bool checked)
     ui->buildings->setEnabled(checked);
     ui->sunLightEnabled->setEnabled(checked);
     ui->eciCamera->setEnabled(checked);
+    ui->antiAliasing->setEnabled(checked);
 }
 
 // Models have individual licensing. See LICENSE on github
@@ -423,3 +453,95 @@ void MapSettingsDialog::downloadComplete(const QString &filename, bool success, 
         QMessageBox::warning(this, "Download failed", QString("Failed to download %1 to %2\n%3").arg(url).arg(filename).arg(errorMessage));
     }
 }
+
+void MapSettingsDialog::on_getAirportDB_clicked()
+{
+    // Don't try to download while already in progress
+    if (m_progressDialog == nullptr)
+    {
+        m_progressDialog = new QProgressDialog(this);
+        m_progressDialog->setCancelButton(nullptr);
+        m_progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
+        m_ourAirportsDB.downloadAirportInformation();
+    }
+}
+
+void MapSettingsDialog::on_getAirspacesDB_clicked()
+{
+    // Don't try to download while already in progress
+    if (m_progressDialog == nullptr)
+    {
+        m_progressDialog = new QProgressDialog(this);
+        m_progressDialog->setMaximum(OpenAIP::m_countryCodes.size());
+        m_progressDialog->setCancelButton(nullptr);
+        m_progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
+        m_openAIP.downloadAirspaces();
+    }
+}
+
+void MapSettingsDialog::downloadingURL(const QString& url)
+{
+    if (m_progressDialog)
+    {
+        m_progressDialog->setLabelText(QString("Downloading %1.").arg(url));
+        m_progressDialog->setValue(m_progressDialog->value() + 1);
+    }
+}
+
+void MapSettingsDialog::downloadProgress(qint64 bytesRead, qint64 totalBytes)
+{
+    if (m_progressDialog)
+    {
+        m_progressDialog->setMaximum(totalBytes);
+        m_progressDialog->setValue(bytesRead);
+    }
+}
+
+void MapSettingsDialog::downloadError(const QString& error)
+{
+    QMessageBox::critical(this, "Map", error);
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
+    }
+}
+
+void MapSettingsDialog::downloadAirspaceFinished()
+{
+    if (m_progressDialog) {
+        m_progressDialog->setLabelText("Reading airspaces.");
+    }
+    emit airspacesUpdated();
+    m_openAIP.downloadNavAids();
+}
+
+void MapSettingsDialog::downloadNavAidsFinished()
+{
+    if (m_progressDialog) {
+        m_progressDialog->setLabelText("Reading NAVAIDs.");
+    }
+    emit navAidsUpdated();
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
+    }
+}
+
+void MapSettingsDialog::downloadAirportInformationFinished()
+{
+    if (m_progressDialog) {
+        m_progressDialog->setLabelText("Reading airports.");
+    }
+    emit airportsUpdated();
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
+    }
+}
+

@@ -33,6 +33,8 @@
 #include "util/messagequeue.h"
 #include "util/giro.h"
 #include "util/azel.h"
+#include "util/openaip.h"
+#include "util/ourairportsdb.h"
 #include "settings/rollupstate.h"
 
 #include "SWGMapItem.h"
@@ -152,11 +154,16 @@ public:
     void addRadioTimeTransmitters();
     void addRadar();
     void addIonosonde();
+    void addBroadcast();
     void addDAB();
+    void addNavAids();
+    void addAirspace(const Airspace *airspace, const QString& group, int cnt);
+    void addAirspace();
+    void addAirports();
     void find(const QString& target);
     void track3D(const QString& target);
     Q_INVOKABLE void supportedMapsChanged();
-    MapSettings::MapItemSettings *getItemSettings(const QString &group) { return m_settings.m_itemSettings[group]; }
+    MapSettings::MapItemSettings *getItemSettings(const QString &group);
     CesiumInterface *cesium() { return m_cesium; }
 
 private:
@@ -171,7 +178,14 @@ private:
 
     Map* m_map;
     MessageQueue m_inputMessageQueue;
-    MapModel m_mapModel;
+    ObjectMapModel m_objectMapModel;
+    ObjectMapFilter m_objectMapFilter;
+    ImageMapModel m_imageMapModel;
+    ImageFilter m_imageMapFilter;
+    PolygonMapModel m_polygonMapModel;
+    PolygonFilter m_polygonMapFilter;
+    PolylineMapModel m_polylineMapModel;
+    PolylineFilter m_polylineMapFilter;
     AzEl m_azEl;                        // Position of station
     SWGSDRangel::SWGMapItem m_antennaMapItem;
     QList<Beacon *> *m_beacons;
@@ -183,6 +197,10 @@ private:
     QTimer m_redrawMapTimer;
     GIRO *m_giro;
     QHash<QString, IonosondeStation *> m_ionosondeStations;
+    QSharedPointer<const QList<NavAid *>> m_navAids;
+    QSharedPointer<const QList<Airspace *>> m_airspaces;
+    QSharedPointer<const QHash<int, AirportInformation *>> m_airportInfo;
+    QGeoCoordinate m_lastFullUpdatePosition;
 
     CesiumInterface *m_cesium;
     WebServer *m_webServer;
@@ -238,6 +256,9 @@ private slots:
     void giroDataUpdated(const GIRO::GIROStationData& data);
     void mufUpdated(const QJsonDocument& document);
     void foF2Updated(const QJsonDocument& document);
+    void navAidsUpdated();
+    void airspacesUpdated();
+    void airportsUpdated();
 
 };
 

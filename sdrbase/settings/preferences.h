@@ -23,7 +23,8 @@ public:
         Altitude,
         SourceItemIndex,
         Multisampling,
-        AutoUpdatePosition
+        AutoUpdatePosition,
+        MapMultisampling
     };
 
     Preferences();
@@ -79,6 +80,9 @@ public:
     int getMultisampling() const { return m_multisampling; }
     void setMultisampling(int samples) { m_multisampling = samples; }
 
+    int getMapMultisampling() const { return m_mapMultisampling; }
+    void setMapMultisampling(int samples) { m_mapMultisampling = samples; }
+
 protected:
 	QString m_sourceDevice; //!< Identification of the source used in R0 tab (GUI flavor) at startup
 	int m_sourceIndex;      //!< Index of the source used in R0 tab (GUI flavor) at startup
@@ -98,7 +102,8 @@ protected:
 	bool m_useLogFile;
 	QString m_logFileName;
 
-    int m_multisampling;    //!< Number of samples to use for multisampling anti-aliasing (typically 0 or 4)
+    int m_multisampling;    //!< Number of samples to use for multisampling anti-aliasing for spectrums (typically 0 or 4)
+    int m_mapMultisampling; //!< Number of samples to use for multisampling anti-aliasing for 2D maps (16 gives best text)
 };
 
 #endif // INCLUDE_PREFERENCES_H

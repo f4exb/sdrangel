@@ -54,12 +54,14 @@ if(NOT SERVER_MODE)
         mapradiotimedialog.ui
         mapcolordialog.cpp
         mapmodel.cpp
+        mapitem.cpp
         mapwebsocketserver.cpp
         cesiuminterface.cpp
         czml.cpp
         map.qrc
         icons.qrc
         cesium.qrc
+        data.qrc
     )
     set(map_HEADERS
         ${map_HEADERS}
@@ -72,6 +74,7 @@ if(NOT SERVER_MODE)
         mapradiotimedialog.h
         mapcolordialog.h
         mapmodel.h
+        mapitem.h
         mapwebsocketserver.h
         cesiuminterface.h
         czml.h

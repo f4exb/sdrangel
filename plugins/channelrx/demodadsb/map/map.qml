@@ -140,8 +140,8 @@ Item {
                 Grid {
                     horizontalItemAlignment: Grid.AlignHCenter
                     columnSpacing: 5
-                    layer.enabled: true
-                    layer.smooth: true
+                    //layer.enabled: true
+                    //layer.smooth: true
                     Image {
                         id: image
                         source: navAidImage
@@ -206,8 +206,8 @@ Item {
             sourceItem: Grid {
                 columns: 1
                 Grid {
-                    layer.enabled: true
-                    layer.smooth: true
+                    //layer.enabled: true
+                    //layer.smooth: true
                     horizontalItemAlignment: Grid.AlignHCenter
                     Text {
                         id: airspaceText
@@ -239,8 +239,8 @@ Item {
             sourceItem: Grid {
                 columns: 1
                 Grid {
-                    layer.enabled: true
-                    layer.smooth: true
+                    //layer.enabled: true
+                    //layer.smooth: true
                     horizontalItemAlignment: Grid.AlignHCenter
                     Image {
                         id: image
@@ -334,8 +334,8 @@ Item {
                 columns: 1
                 Grid {
                     horizontalItemAlignment: Grid.AlignHCenter
-                    layer.enabled: true
-                    layer.smooth: true
+                    //layer.enabled: true
+                    //layer.smooth: true
                     Image {
                         id: image
                         source: airportImage

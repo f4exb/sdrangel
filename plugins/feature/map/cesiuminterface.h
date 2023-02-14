@@ -22,7 +22,9 @@
 #include "czml.h"
 #include "SWGMapAnimation.h"
 
-class MapItem;
+class ObjectMapItem;
+class PolygonMapItem;
+class PolylineMapItem;
 
 class CesiumInterface : public MapWebSocketServer
 {
@@ -72,7 +74,10 @@ public:
     void removeAllCZMLEntities();
     void initCZML();
     void czml(QJsonObject &obj);
-    void update(MapItem *mapItem, bool isTarget, bool isSelected);
+    void update(ObjectMapItem *mapItem, bool isTarget, bool isSelected);
+    void update(PolygonMapItem *mapItem);
+    void update(PolylineMapItem *mapItem);
+    void setPosition(const QGeoCoordinate& position);
 
 protected:
 

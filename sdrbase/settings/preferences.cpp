@@ -23,6 +23,7 @@ void Preferences::resetToDefaults()
 	m_consoleMinLogLevel = QtDebugMsg;
     m_fileMinLogLevel = QtDebugMsg;
     m_multisampling = 0;
+    m_mapMultisampling = 16;
 }
 
 QByteArray Preferences::serialize() const
@@ -43,6 +44,7 @@ QByteArray Preferences::serialize() const
 	s.writeS32((int) SourceItemIndex, m_sourceItemIndex);
     s.writeS32((int) Multisampling, m_multisampling);
     s.writeBool((int) AutoUpdatePosition, m_autoUpdatePosition);
+    s.writeS32((int) MapMultisampling, m_mapMultisampling);
 	return s.final();
 }
 
@@ -98,6 +100,7 @@ bool Preferences::deserialize(const QByteArray& data)
 
         d.readS32((int) Multisampling, &m_multisampling, 0);
         d.readBool((int) AutoUpdatePosition, &m_autoUpdatePosition, true);
+        d.readS32((int) MapMultisampling, &m_mapMultisampling, 16);
 
 		return true;
 	}

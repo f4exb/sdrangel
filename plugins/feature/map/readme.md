@@ -11,10 +11,13 @@ On top of this, it can plot data from other plugins, such as:
 * Satellites from the Satellite Tracker,
 * Weather imagery from APT Demodulator,
 * The Sun, Moon and Stars from the Star Tracker,
-* Weather ballons from the RadioSonde feature.
+* Weather ballons from the RadioSonde feature,
+* Radials and estimated position from the VOR localizer feature.
 
-As well as other other data sources:
+As well as other data sources:
 
+* AM, FM and DAB transmitters in the UK,
+* Airports, NavAids and airspaces,
 * Beacons based on the IARU Region 1 beacon database and International Beacon Project,
 * Radio time transmitters,
 * GRAVES radar,

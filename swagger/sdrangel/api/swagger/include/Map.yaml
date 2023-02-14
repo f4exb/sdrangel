@@ -118,7 +118,7 @@ MapItem:
       type: number
       format: float
     altitudeReference:
-      description: "0 - NONE (Absolule), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
+      description: "0 - NONE (Absolute), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
       type: integer
     animations:
       description: "Animations to play"
@@ -126,7 +126,7 @@ MapItem:
       items:
         $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapAnimation"
     type:
-      description: "(0 - Map Item, 1 - Image Tile)"
+      description: "(0 - Map Item, 1 - Image Tile, 2 - Polygon, 3 - Polyline)"
       type: integer
     imageTileWest:
       type: number
@@ -140,6 +140,22 @@ MapItem:
     imageTileNorth:
       type: number
       format: float
+    imageZoomLevel:
+      description: "For 2D map"
+      type: number
+      format: float
+    coordinates:
+      description: "Polygon/polyline coordinates"
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapCoordinate"
+    extrudedHeight:
+      description: "Extruded height (from surface) for polygons"
+      type: number
+      format: float
+    availableUntil:
+      description: "Date and time until after which this item should no longer appear on 3D map"
+      type: string
 
 MapAnimation:
   description: "Animation to play in the model on the 3D map"

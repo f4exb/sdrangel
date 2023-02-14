@@ -196,6 +196,13 @@ public:
         emit preferenceChanged(Preferences::Multisampling);
     }
 
+    int getMapMultisampling() const { return m_preferences.getMapMultisampling(); }
+    void setMapMultisampling(int samples)
+    {
+        m_preferences.setMapMultisampling(samples);
+        emit preferenceChanged(Preferences::MapMultisampling);
+    }
+
 signals:
 	void preferenceChanged(int);
 

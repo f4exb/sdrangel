@@ -22,6 +22,7 @@
 #include <QByteArray>
 #include <QString>
 #include <QHash>
+#include <QRegularExpression>
 
 class Serializable;
 
@@ -32,7 +33,7 @@ struct MapSettings
         bool m_enabled;           // Whether enabled at all on 2D or 3D map
         bool m_display2DIcon;     // Display image 2D map
         bool m_display2DLabel;    // Display label on 2D map
-        bool m_display2DTrack;    // Display tracks on 2D map
+        bool m_display2DTrack;    // Display tracks (or polygon) on 2D map
         quint32 m_2DTrackColor;
         int m_2DMinZoom;
         bool m_display3DModel;    // Draw 3D model for item
@@ -43,12 +44,24 @@ struct MapSettings
         quint32 m_3DTrackColor;
         int m_3DModelMinPixelSize;
         float m_3DLabelScale;
+        QString m_filterName;
+        QRegularExpression m_filterNameRE;
+        int m_filterDistance;     // Filter items > this distance in metres away from My Position. <= 0 don't filter
+        int m_extrapolate;        // Extrapolate duration in seconds on 3D map
 
-        MapItemSettings(const QString& group, const QColor color, bool display3DPoint=true, int minZoom=11, int modelMinPixelSize=0);
+        MapItemSettings(const QString& group, bool enabled, const QColor color, bool display2DTrack=true, bool display3DPoint=true, int minZoom=11, int modelMinPixelSize=0);
         MapItemSettings(const QByteArray& data);
         void resetToDefaults();
         QByteArray serialize() const;
         bool deserialize(const QByteArray& data);
+    };
+
+    struct MapPolygonSettings {
+        QString m_group;
+        bool m_enabled;
+        quint32 m_2DColor;
+        int m_2DMinZoom;
+        quint32 m_3DColor;
     };
 
     struct AvailableChannelOrFeature
@@ -107,6 +120,8 @@ struct MapSettings
     bool m_displayMUF;          // Plot MUF contours
     bool m_displayfoF2;         // Plot foF2 contours
 
+    QString m_checkWXAPIKey;    //!< checkwxapi.com API key
+
     // Per source settings
     QHash<QString, MapItemSettings *> m_itemSettings;
 
@@ -127,4 +142,7 @@ struct MapSettings
     static const QStringList m_mapProviders;
 };
 
+Q_DECLARE_METATYPE(MapSettings::MapItemSettings *);
+
 #endif // INCLUDE_FEATURE_MAPSETTINGS_H_
+

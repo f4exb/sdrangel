@@ -8,6 +8,18 @@
     <file>map/antennafm.png</file>
     <file>map/antennaam.png</file>
     <file>map/ionosonde.png</file>
+    <file>map/VOR.png</file>
+    <file>map/VOR-DME.png</file>
+    <file>map/VORTAC.png</file>
+    <file>map/DVOR.png</file>
+    <file>map/DVOR-DME.png</file>
+    <file>map/DVORTAC.png</file>
+    <file>map/NDB.png</file>
+    <file>map/DME.png</file>
+    <file>map/airport_large.png</file>
+    <file>map/airport_medium.png</file>
+    <file>map/airport_small.png</file>
+    <file>map/heliport.png</file>
     <file>map/map3d.html</file>
   </qresource>
   <qresource prefix="/">

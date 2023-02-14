@@ -32,6 +32,12 @@ GraphicsDialog::GraphicsDialog(MainSettings& mainSettings, QWidget* parent) :
     } else {
         ui->multisampling->setCurrentText(QString::number(samples));
     }
+    samples = m_mainSettings.getMapMultisampling();
+    if (samples == 0) {
+        ui->mapMultisampling->setCurrentText("Off");
+    } else {
+        ui->mapMultisampling->setCurrentText(QString::number(samples));
+    }
 }
 
 GraphicsDialog::~GraphicsDialog()
@@ -42,5 +48,6 @@ GraphicsDialog::~GraphicsDialog()
 void GraphicsDialog::accept()
 {
     m_mainSettings.setMultisampling(ui->multisampling->currentText().toInt());
+    m_mainSettings.setMapMultisampling(ui->mapMultisampling->currentText().toInt());
     QDialog::accept();
 }
