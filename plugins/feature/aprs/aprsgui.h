@@ -151,9 +151,12 @@ private:
     QDateTimeAxis m_motionChartXAxis;
     QValueAxis m_motionChartYAxis;
 
+    QHash<QString, bool> m_mapItems;
+
     explicit APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~APRSGUI();
 
+    void removeFromMap(const QString& name);
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displayTableSettings(QTableWidget *table, QMenu *menu, int *columnIndexes, int *columnSizes, int columns);
