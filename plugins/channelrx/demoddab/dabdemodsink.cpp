@@ -279,6 +279,14 @@ void motDataHandler(uint8_t *data, int len, const char *filename, int contentsub
     sink->motData(data, len, QString::fromUtf8(filename), contentsubType);
 }
 
+// Missing ctx for tiiDataHandler - https://github.com/JvanKatwijk/dab-cmdline/issues/89
+DABDemodSink *tiiSink;
+
+void tiiDataHandler(int tii)
+{
+    tiiSink->tii(tii);
+}
+
 void DABDemodSink::systemData(bool sync, int16_t snr, int32_t freqOffset)
 {
     if (getMessageQueueToChannel())
@@ -287,6 +295,7 @@ void DABDemodSink::systemData(bool sync, int16_t snr, int32_t freqOffset)
         getMessageQueueToChannel()->push(msg);
     }
 }
+
 void DABDemodSink::ensembleName(const QString& name, int id)
 {
     if (getMessageQueueToChannel())
@@ -347,6 +356,15 @@ void DABDemodSink::motData(const uint8_t *data, int len, const QString& filename
     {
         QByteArray byteArray((const char *)data, len);
         DABDemod::MsgDABMOTData *msg = DABDemod::MsgDABMOTData::create(byteArray, filename, contentSubType);
+        getMessageQueueToChannel()->push(msg);
+    }
+}
+
+void DABDemodSink::tii(int tii)
+{
+    if (getMessageQueueToChannel())
+    {
+        DABDemod::MsgDABTII *msg = DABDemod::MsgDABTII::create(tii);
         getMessageQueueToChannel()->push(msg);
     }
 }
@@ -473,6 +491,7 @@ DABDemodSink::DABDemodSink(DABDemod *packetDemod) :
         m_dabAudioSampleRate(10000), // Unused value to begin with
         m_channelSampleRate(DABDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
+        m_programSet(false),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
@@ -502,8 +521,9 @@ DABDemodSink::DABDemodSink(DABDemod *packetDemod) :
     m_api.programdata_Handler = programDataHandler;
     m_api.program_quality_Handler = programQualityHandler;
     m_api.motdata_Handler = motDataHandler;
-    m_api.tii_data_Handler = nullptr;
+    m_api.tii_data_Handler = tiiDataHandler;
     m_api.timeHandler = nullptr;
+    tiiSink = this;
     m_dab = dabInit(&m_device,
                 &m_api,
                 nullptr,
@@ -607,27 +627,47 @@ void DABDemodSink::applySettings(const DABDemodSettings& settings, bool force)
 
     if ((settings.m_program != m_settings.m_program) || force)
     {
-        if (!settings.m_program.isEmpty())
-        {
-            QByteArray ba = settings.m_program.toUtf8();
-            const char *program = ba.data();
-            if (!is_audioService (m_dab, program))
-                qWarning() << settings.m_program << " is not an audio service";
-            else
-            {
-                dataforAudioService(m_dab, program, &m_ad, 0);
-                if (!m_ad.defined)
-                    qWarning() << settings.m_program << " audio data is not defined";
-                else
-                {
-                    dabReset_msc(m_dab);
-                    set_audioChannel(m_dab, &m_ad);
-                }
-            }
+        if (!settings.m_program.isEmpty()) {
+            setProgram(settings.m_program);
+        } else {
+            m_programSet = true;
         }
     }
 
     m_settings = settings;
+}
+
+// Can't call setProgram directly from callback, so we get here via a message
+void DABDemodSink::programAvailable(const QString& programName)
+{
+    if (!m_programSet && (programName == m_settings.m_program)) {
+        setProgram(m_settings.m_program);
+    }
+}
+
+void DABDemodSink::setProgram(const QString& name)
+{
+    m_programSet = false;
+    QByteArray ba = name.toUtf8();
+    const char *program = ba.data();
+    if (!is_audioService (m_dab, program))
+    {
+        qWarning() << name << " is not an audio service";
+    }
+    else
+    {
+        dataforAudioService(m_dab, program, &m_ad, 0);
+        if (!m_ad.defined)
+        {
+            qWarning() << name << " audio data is not defined";
+        }
+        else
+        {
+            dabReset_msc(m_dab);
+            set_audioChannel(m_dab, &m_ad);
+            m_programSet = true;
+        }
+    }
 }
 
 // Called when audio device sample rate changes

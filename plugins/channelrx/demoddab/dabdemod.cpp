@@ -51,6 +51,7 @@ MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABFIBQuality, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABData, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABMOTData, Message)
+MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABTII, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABReset, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABResetService, Message)
 
@@ -238,6 +239,7 @@ bool DABDemod::handleMessage(const Message& cmd)
         {
             getMessageQueueToGUI()->push(new MsgDABProgramName(report));
         }
+        m_basebandSink->getInputMessageQueue()->push(new MsgDABProgramName(report));
 
         return true;
     }
@@ -267,6 +269,16 @@ bool DABDemod::handleMessage(const Message& cmd)
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABMOTData(report));
+        }
+
+        return true;
+    }
+    else if (MsgDABTII::match(cmd))
+    {
+        MsgDABTII& report = (MsgDABTII&)cmd;
+        if (getMessageQueueToGUI())
+        {
+            getMessageQueueToGUI()->push(new MsgDABTII(report));
         }
 
         return true;
