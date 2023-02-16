@@ -549,17 +549,6 @@ void MapGUI::foF2Updated(const QJsonDocument& document)
     }
 }
 
-static QString arrayToString(QJsonArray array)
-{
-    QString s;
-    for (int i = 0; i < array.size(); i++)
-    {
-        s = s.append(array[i].toString());
-        s = s.append(" ");
-    }
-    return s;
-}
-
 void MapGUI::addBroadcast()
 {
     QFile file(":/map/data/transmitters.csv");
@@ -663,8 +652,20 @@ void MapGUI::addBroadcast()
     }
 }
 
-// Coming soon
-/* Code for FM list / DAB list, should they allow access
+/*
+
+static QString arrayToString(QJsonArray array)
+{
+    QString s;
+    for (int i = 0; i < array.size(); i++)
+    {
+        s = s.append(array[i].toString());
+        s = s.append(" ");
+    }
+    return s;
+}
+
+// Code for FM list / DAB list, should they allow access
 void MapGUI::addDAB()
 {
     QFile file("stationlist_SI.json");
