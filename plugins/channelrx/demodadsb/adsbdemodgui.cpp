@@ -609,7 +609,9 @@ QVariant AirspaceModel::data(const QModelIndex &index, int role) const
     }
     else if (role == AirspaceModel::airspaceBorderColorRole)
     {
-        if (m_airspaces[row]->m_category == "D") {
+        if ((m_airspaces[row]->m_category == "D")
+            || (m_airspaces[row]->m_category == "G")
+            || (m_airspaces[row]->m_category == "CTR")) {
             return QVariant::fromValue(QColor(0x00, 0x00, 0xff, 0x00));
         } else {
             return QVariant::fromValue(QColor(0xff, 0x00, 0x00, 0x00));
@@ -617,7 +619,9 @@ QVariant AirspaceModel::data(const QModelIndex &index, int role) const
     }
     else if (role == AirspaceModel::airspaceFillColorRole)
     {
-        if (m_airspaces[row]->m_category == "D") {
+        if ((m_airspaces[row]->m_category == "D")
+            || (m_airspaces[row]->m_category == "G")
+            || (m_airspaces[row]->m_category == "CTR")) {
             return QVariant::fromValue(QColor(0x00, 0x00, 0xff, 0x10));
         } else {
             return QVariant::fromValue(QColor(0xff, 0x00, 0x00, 0x10));
@@ -4215,7 +4219,7 @@ void ADSBDemodGUI::updateAirports()
             if (airportInfo->m_type >= m_settings.m_airportMinimumSize)
             {
                 // Only display heliports if enabled
-                if (m_settings.m_displayHeliports || (airportInfo->m_type != ADSBDemodSettings::AirportType::Heliport))
+                if (m_settings.m_displayHeliports || (airportInfo->m_type != AirportInformation::AirportType::Heliport))
                 {
                     m_airportModel.addAirport(airportInfo, azEl.getAzimuth(), azEl.getElevation(), azEl.getDistance());
                 }
@@ -4493,6 +4497,7 @@ void ADSBDemodGUI::applyMapSettings()
 
     // Create the map using the specified provider
     QQmlProperty::write(item, "smoothing", MainCore::instance()->getSettings().getMapSmoothing());
+    QQmlProperty::write(item, "aircraftMinZoomLevel", m_settings.m_aircraftMinZoom);
     QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
     QVariantMap parameters;
     QString mapType;

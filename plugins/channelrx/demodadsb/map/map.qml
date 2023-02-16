@@ -8,6 +8,7 @@ import QtGraphicalEffects 1.12
 Item {
     id: qmlMap
     property int aircraftZoomLevel: 11
+    property int aircraftMinZoomLevel: 11
     property int airportZoomLevel: 11
     property string mapProvider: "osm"
     property variant mapPtr
@@ -104,13 +105,16 @@ Item {
             }
 
             onZoomLevelChanged: {
+                if (zoomLevel > aircraftMinZoomLevel) {
+                    aircraftZoomLevel = zoomLevel
+                } else {
+                    aircraftZoomLevel = aircraftMinZoomLevel
+                }
                 if (zoomLevel > 11) {
                     station.zoomLevel = zoomLevel
-                    aircraftZoomLevel = zoomLevel
                     airportZoomLevel = zoomLevel
                 } else {
                     station.zoomLevel = 11
-                    aircraftZoomLevel = 11
                     airportZoomLevel = 11
                 }
             }

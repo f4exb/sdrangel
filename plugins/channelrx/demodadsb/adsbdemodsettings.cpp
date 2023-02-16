@@ -90,7 +90,7 @@ void ADSBDemodSettings::resetToDefaults()
     }
     m_logFilename = "adsb_log.csv";
     m_logEnabled = false;
-    m_airspaces = QStringList({"A", "D", "TMZ"});
+    m_airspaces = QStringList({"CTR"});
     m_airspaceRange = 500.0f;
 #ifdef LINUX
     m_mapProvider = "mapboxgl"; // osm maps do not work in some versions of Linux https://github.com/f4exb/sdrangel/issues/1169 & 1369
@@ -102,6 +102,7 @@ void ADSBDemodSettings::resetToDefaults()
     m_displayPhotos = true;
     m_verboseModelMatching = false;
     m_airfieldElevation = 0;
+    m_aircraftMinZoom = 11;
     m_workspaceIndex = 0;
     m_hidden = false;
 }
@@ -185,6 +186,7 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeBool(61, m_hidden);
     s.writeString(62, m_checkWXAPIKey);
     s.writeString(63, m_mapProvider);
+    s.writeS32(64, m_aircraftMinZoom);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -277,7 +279,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readString(36, &m_logFilename, "adsb_log.csv");
         d.readBool(37, &m_logEnabled, false);
 
-        d.readString(38, &string, "A D TMZ");
+        d.readString(38, &string, "CTR");
         m_airspaces = string.split(" ");
         d.readFloat(39, &m_airspaceRange, 500.0f);
         d.readS32(40, (int *)&m_mapType, (int)AVIATION_LIGHT);
@@ -316,6 +318,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBool(61, &m_hidden, false);
         d.readString(62, &m_checkWXAPIKey, "");
         d.readString(63, &m_mapProvider, "osm");
+        d.readS32(64, &m_aircraftMinZoom, 11);
 #ifdef LINUX
         if (m_mapProvider == "osm") {
             m_mapProvider = "mapboxgl";
