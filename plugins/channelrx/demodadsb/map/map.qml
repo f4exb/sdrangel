@@ -14,6 +14,7 @@ Item {
     property string requestedMapType
     property bool lightIcons
     property variant guiPtr
+    property bool smoothing
 
     function createMap(pluginParameters, requestedMap, gui) {
         requestedMapType = requestedMap
@@ -140,8 +141,8 @@ Item {
                 Grid {
                     horizontalItemAlignment: Grid.AlignHCenter
                     columnSpacing: 5
-                    //layer.enabled: true
-                    //layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     Image {
                         id: image
                         source: navAidImage
@@ -206,8 +207,8 @@ Item {
             sourceItem: Grid {
                 columns: 1
                 Grid {
-                    //layer.enabled: true
-                    //layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     horizontalItemAlignment: Grid.AlignHCenter
                     Text {
                         id: airspaceText
@@ -239,8 +240,8 @@ Item {
             sourceItem: Grid {
                 columns: 1
                 Grid {
-                    //layer.enabled: true
-                    //layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     horizontalItemAlignment: Grid.AlignHCenter
                     Image {
                         id: image
@@ -334,8 +335,8 @@ Item {
                 columns: 1
                 Grid {
                     horizontalItemAlignment: Grid.AlignHCenter
-                    //layer.enabled: true
-                    //layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     Image {
                         id: image
                         source: airportImage

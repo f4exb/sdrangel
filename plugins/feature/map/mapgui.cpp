@@ -201,8 +201,9 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
-    // Enable MSAA antialiasing on 2D map, otherwise text is not clear
-    // This is much faster than using layer.smooth in the QML, when there are many items
+    // Enable MSAA antialiasing on 2D map
+    // This can be much faster than using layer.smooth in the QML, when there are many items
+    // However, only seems to work when set to 16, and doesn't seem to be supported on all graphics cards
     int multisamples = MainCore::instance()->getSettings().getMapMultisampling();
     if (multisamples > 0)
     {
@@ -1041,6 +1042,7 @@ void MapGUI::applyMap2DSettings(bool reloadMap)
         }
 
         // Create the map using the specified provider
+        QQmlProperty::write(item, "smoothing", MainCore::instance()->getSettings().getMapSmoothing());
         QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
         QVariantMap parameters;
         if (!m_settings.m_mapBoxAPIKey.isEmpty() && m_settings.m_mapProvider == "mapbox")
@@ -1731,12 +1733,17 @@ void MapGUI::preferenceChanged(int elementType)
             }
         }
     }
-    if (pref == Preferences::StationName)
+    else if (pref == Preferences::StationName)
     {
         // Update station name
         m_antennaMapItem.setLabel(new QString(MainCore::instance()->getSettings().getStationName()));
         m_antennaMapItem.setText(new QString(MainCore::instance()->getSettings().getStationName()));
         update(m_map, &m_antennaMapItem, "Station");
+    }
+    else if (pref == Preferences::MapSmoothing)
+    {
+        QQuickItem *item = ui->map->rootObject();
+        QQmlProperty::write(item, "smoothing", MainCore::instance()->getSettings().getMapSmoothing());
     }
 }
 

@@ -10,6 +10,7 @@ Item {
     property string mapProvider: "osm"
     property variant mapPtr
     property variant guiPtr
+    property bool smoothing
 
     function createMap(pluginParameters, gui) {
         guiPtr = gui
@@ -187,8 +188,8 @@ Item {
             sourceItem: Grid {
                 columns: 1
                 Grid {
-                    //layer.enabled: true
-                    //layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     horizontalItemAlignment: Grid.AlignHCenter
                     Text {
                         id: polygonText
@@ -219,8 +220,8 @@ Item {
             sourceItem: Grid {
                 columns: 1
                 Grid {
-                    //layer.enabled: true
-                    //layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     horizontalItemAlignment: Grid.AlignHCenter
                     Text {
                         id: polylineText
@@ -247,9 +248,8 @@ Item {
                 Grid {
                     horizontalItemAlignment: Grid.AlignHCenter
                     columnSpacing: 5
-                    // This is very slow with lots of items, so we use MSAA for the whole map instead
-                    //layer.enabled: true
-                    //layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     Image {
                         id: image
                         rotation: mapImageRotation

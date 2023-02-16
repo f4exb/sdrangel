@@ -38,6 +38,7 @@ GraphicsDialog::GraphicsDialog(MainSettings& mainSettings, QWidget* parent) :
     } else {
         ui->mapMultisampling->setCurrentText(QString::number(samples));
     }
+    ui->mapSmoothing->setChecked(m_mainSettings.getMapSmoothing());
 }
 
 GraphicsDialog::~GraphicsDialog()
@@ -49,5 +50,6 @@ void GraphicsDialog::accept()
 {
     m_mainSettings.setMultisampling(ui->multisampling->currentText().toInt());
     m_mainSettings.setMapMultisampling(ui->mapMultisampling->currentText().toInt());
+    m_mainSettings.setMapSmoothing(ui->mapSmoothing->isChecked());
     QDialog::accept();
 }

@@ -24,7 +24,8 @@ public:
         SourceItemIndex,
         Multisampling,
         AutoUpdatePosition,
-        MapMultisampling
+        MapMultisampling,
+        MapSmoothing
     };
 
     Preferences();
@@ -83,6 +84,9 @@ public:
     int getMapMultisampling() const { return m_mapMultisampling; }
     void setMapMultisampling(int samples) { m_mapMultisampling = samples; }
 
+    bool getMapSmoothing() const { return m_mapSmoothing; }
+    void setMapSmoothing(bool smoothing) { m_mapSmoothing = smoothing; }
+
 protected:
 	QString m_sourceDevice; //!< Identification of the source used in R0 tab (GUI flavor) at startup
 	int m_sourceIndex;      //!< Index of the source used in R0 tab (GUI flavor) at startup
@@ -103,7 +107,8 @@ protected:
 	QString m_logFileName;
 
     int m_multisampling;    //!< Number of samples to use for multisampling anti-aliasing for spectrums (typically 0 or 4)
-    int m_mapMultisampling; //!< Number of samples to use for multisampling anti-aliasing for 2D maps (16 gives best text)
+    int m_mapMultisampling; //!< Number of samples to use for multisampling anti-aliasing for 2D maps (16 gives best text, if not using mapSmoothing)
+    bool m_mapSmoothing;    //!< Whether to use smoothing for text boxes on 2D maps
 };
 
 #endif // INCLUDE_PREFERENCES_H

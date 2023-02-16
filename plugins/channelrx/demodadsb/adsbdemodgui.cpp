@@ -4492,6 +4492,7 @@ void ADSBDemodGUI::applyMapSettings()
     }
 
     // Create the map using the specified provider
+    QQmlProperty::write(item, "smoothing", MainCore::instance()->getSettings().getMapSmoothing());
     QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
     QVariantMap parameters;
     QString mapType;
@@ -4619,7 +4620,8 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     // Enable MSAA antialiasing on 2D map
-    // This is much faster than using layer.smooth in the QML, when there are many items
+    // This can be much faster than using layer.smooth in the QML, when there are many items
+    // However, only seems to work when set to 16, and doesn't seem to be supported on all graphics cards
     int multisamples = MainCore::instance()->getSettings().getMapMultisampling();
     if (multisamples > 0)
     {
@@ -4628,7 +4630,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
         ui->map->setFormat(format);
     }
 
-     m_osmPort = 0; // Pick a free port
+    m_osmPort = 0; // Pick a free port
     m_templateServer = new ADSBOSMTemplateServer("q2RVNAe3eFKCH4XsrE3r", m_osmPort);
 
     ui->map->setAttribute(Qt::WA_AcceptTouchEvents, true);
@@ -5726,7 +5728,7 @@ void ADSBDemodGUI::preferenceChanged(int elementType)
             }
         }
     }
-    if (pref == Preferences::StationName)
+    else if (pref == Preferences::StationName)
     {
         // Update icon label on Map
         QQuickItem *item = ui->map->rootObject();
@@ -5738,6 +5740,11 @@ void ADSBDemodGUI::preferenceChanged(int elementType)
                 stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
             }
         }
+    }
+    else if (pref == Preferences::MapSmoothing)
+    {
+        QQuickItem *item = ui->map->rootObject();
+        QQmlProperty::write(item, "smoothing", MainCore::instance()->getSettings().getMapSmoothing());
     }
 }
 

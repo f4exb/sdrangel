@@ -203,6 +203,13 @@ public:
         emit preferenceChanged(Preferences::MapMultisampling);
     }
 
+    bool getMapSmoothing() const { return m_preferences.getMapSmoothing(); }
+    void setMapSmoothing(bool smoothing)
+    {
+        m_preferences.setMapSmoothing(smoothing);
+        emit preferenceChanged(Preferences::MapSmoothing);
+    }
+
 signals:
 	void preferenceChanged(int);
 

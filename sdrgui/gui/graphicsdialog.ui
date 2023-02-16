@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>282</width>
-    <height>131</height>
+    <height>155</height>
    </rect>
   </property>
   <property name="font">
@@ -95,6 +95,11 @@ Requires windows to be reopened to take effect</string>
         </item>
         <item row="1" column="1">
          <widget class="QComboBox" name="mapMultisampling">
+          <property name="toolTip">
+           <string>Number of samples to use for mulitsampling anti-aliasing (MSAA) for 2D Map
+
+Requires windows to be reopened to take effect</string>
+          </property>
           <item>
            <property name="text">
             <string>Off</string>
@@ -120,6 +125,23 @@ Requires windows to be reopened to take effect</string>
             <string>16</string>
            </property>
           </item>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QCheckBox" name="mapSmoothing">
+          <property name="toolTip">
+           <string>Whether smoothing should be enabled for text on 2D maps</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="mapSmoothingLabel">
+          <property name="text">
+           <string>2D Map Text Smoothing</string>
+          </property>
          </widget>
         </item>
        </layout>
