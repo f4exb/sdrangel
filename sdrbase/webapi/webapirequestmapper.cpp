@@ -4528,6 +4528,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setFt8DemodSettings(new SWGSDRangel::SWGFT8DemodSettings());
             channelSettings->getFt8DemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "HeatMapSettings")
+        {
+            channelSettings->setHeatMapSettings(new SWGSDRangel::SWGHeatMapSettings());
+            channelSettings->getHeatMapSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "IEEE_802_15_4_ModSettings")
         {
             channelSettings->setIeee802154ModSettings(new SWGSDRangel::SWGIEEE_802_15_4_ModSettings());
@@ -5375,6 +5380,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDatvModSettings(nullptr);
     channelSettings.setDabDemodSettings(nullptr);
     channelSettings.setDsdDemodSettings(nullptr);
+    channelSettings.setHeatMapSettings(nullptr);
     channelSettings.setIeee802154ModSettings(nullptr);
     channelSettings.setNfmDemodSettings(nullptr);
     channelSettings.setNfmModSettings(nullptr);
@@ -5411,6 +5417,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setBfmDemodReport(nullptr);
     channelReport.setDatvModReport(nullptr);
     channelReport.setDsdDemodReport(nullptr);
+    channelReport.setHeatMapReport(nullptr);
     channelReport.setNfmDemodReport(nullptr);
     channelReport.setNfmModReport(nullptr);
     channelReport.setNoiseFigureReport(nullptr);

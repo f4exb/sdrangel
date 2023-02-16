@@ -65,6 +65,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
     FT8DemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FT8Demod.yaml#/FT8DemodSettings"
+    HeatMapSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/HeatMap.yaml#/HeatMapSettings"
     InterferometerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Interferometer.yaml#/InterferometerSettings"
     IEEE_802_15_4_ModSettings:

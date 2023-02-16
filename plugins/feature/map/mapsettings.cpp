@@ -84,7 +84,7 @@ MapSettings::MapSettings() :
     m_itemSettings.insert("Radio Time Transmitters", new MapItemSettings("Radio Time Transmitters", true, QColor(255, 0, 0), false, true, 8));
     m_itemSettings.insert("Radar", new MapItemSettings("Radar", true, QColor(255, 0, 0), false, true, 8));
     m_itemSettings.insert("FT8Demod", new MapItemSettings("FT8Demod", true, QColor(0, 192, 255), true, true, 8));
-    m_itemSettings.insert("HeatMap", new MapItemSettings("HeatMap", true, QColor(102, 40, 220), true, false, 11));
+    m_itemSettings.insert("HeatMap", new MapItemSettings("HeatMap", true, QColor(102, 40, 220), true, true, 11));
 
     m_itemSettings.insert("AM", new MapItemSettings("AM", false, QColor(255, 0, 0), false, true, 10));
     MapItemSettings *fmSettings = new MapItemSettings("FM", false, QColor(255, 0, 0), false, true, 12);

@@ -46,6 +46,7 @@
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModSettings.h"
 #include "SWGFreqTrackerSettings.h"
+#include "SWGHeatMapSettings.h"
 #include "SWGIEEE_802_15_4_ModSettings.h"
 #include "SWGInterferometerSettings.h"
 #include "SWGLocalSinkSettings.h"
@@ -175,6 +176,9 @@ public:
 
     SWGFT8DemodSettings* getFt8DemodSettings();
     void setFt8DemodSettings(SWGFT8DemodSettings* ft8_demod_settings);
+
+    SWGHeatMapSettings* getHeatMapSettings();
+    void setHeatMapSettings(SWGHeatMapSettings* heat_map_settings);
 
     SWGInterferometerSettings* getInterferometerSettings();
     void setInterferometerSettings(SWGInterferometerSettings* interferometer_settings);
@@ -341,6 +345,9 @@ private:
 
     SWGFT8DemodSettings* ft8_demod_settings;
     bool m_ft8_demod_settings_isSet;
+
+    SWGHeatMapSettings* heat_map_settings;
+    bool m_heat_map_settings_isSet;
 
     SWGInterferometerSettings* interferometer_settings;
     bool m_interferometer_settings_isSet;

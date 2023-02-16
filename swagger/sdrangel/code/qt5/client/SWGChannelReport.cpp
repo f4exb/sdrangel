@@ -72,6 +72,8 @@ SWGChannelReport::SWGChannelReport() {
     m_freq_tracker_report_isSet = false;
     ft8_demod_report = nullptr;
     m_ft8_demod_report_isSet = false;
+    heat_map_report = nullptr;
+    m_heat_map_report_isSet = false;
     m17_demod_report = nullptr;
     m_m17_demod_report_isSet = false;
     m17_mod_report = nullptr;
@@ -164,6 +166,8 @@ SWGChannelReport::init() {
     m_freq_tracker_report_isSet = false;
     ft8_demod_report = new SWGFT8DemodReport();
     m_ft8_demod_report_isSet = false;
+    heat_map_report = new SWGHeatMapReport();
+    m_heat_map_report_isSet = false;
     m17_demod_report = new SWGM17DemodReport();
     m_m17_demod_report_isSet = false;
     m17_mod_report = new SWGM17ModReport();
@@ -271,6 +275,9 @@ SWGChannelReport::cleanup() {
     }
     if(ft8_demod_report != nullptr) { 
         delete ft8_demod_report;
+    }
+    if(heat_map_report != nullptr) { 
+        delete heat_map_report;
     }
     if(m17_demod_report != nullptr) { 
         delete m17_demod_report;
@@ -388,6 +395,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&freq_tracker_report, pJson["FreqTrackerReport"], "SWGFreqTrackerReport", "SWGFreqTrackerReport");
     
     ::SWGSDRangel::setValue(&ft8_demod_report, pJson["FT8DemodReport"], "SWGFT8DemodReport", "SWGFT8DemodReport");
+    
+    ::SWGSDRangel::setValue(&heat_map_report, pJson["HeatMapReport"], "SWGHeatMapReport", "SWGHeatMapReport");
     
     ::SWGSDRangel::setValue(&m17_demod_report, pJson["M17DemodReport"], "SWGM17DemodReport", "SWGM17DemodReport");
     
@@ -510,6 +519,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((ft8_demod_report != nullptr) && (ft8_demod_report->isSet())){
         toJsonValue(QString("FT8DemodReport"), ft8_demod_report, obj, QString("SWGFT8DemodReport"));
+    }
+    if((heat_map_report != nullptr) && (heat_map_report->isSet())){
+        toJsonValue(QString("HeatMapReport"), heat_map_report, obj, QString("SWGHeatMapReport"));
     }
     if((m17_demod_report != nullptr) && (m17_demod_report->isSet())){
         toJsonValue(QString("M17DemodReport"), m17_demod_report, obj, QString("SWGM17DemodReport"));
@@ -795,6 +807,16 @@ SWGChannelReport::setFt8DemodReport(SWGFT8DemodReport* ft8_demod_report) {
     this->m_ft8_demod_report_isSet = true;
 }
 
+SWGHeatMapReport*
+SWGChannelReport::getHeatMapReport() {
+    return heat_map_report;
+}
+void
+SWGChannelReport::setHeatMapReport(SWGHeatMapReport* heat_map_report) {
+    this->heat_map_report = heat_map_report;
+    this->m_heat_map_report_isSet = true;
+}
+
 SWGM17DemodReport*
 SWGChannelReport::getM17DemodReport() {
     return m17_demod_report;
@@ -1064,6 +1086,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(ft8_demod_report && ft8_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(heat_map_report && heat_map_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(m17_demod_report && m17_demod_report->isSet()){

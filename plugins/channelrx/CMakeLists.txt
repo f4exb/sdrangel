@@ -114,6 +114,8 @@ if (ENABLE_CHANNELRX_DEMODFT8 AND FT8_SUPPORT)
 endif()
 
 if(NOT SERVER_MODE)
+    add_subdirectory(heatmap)
+
     if (ENABLE_CHANNELRX_CHANALYZER)
         add_subdirectory(chanalyzer)
     endif()
