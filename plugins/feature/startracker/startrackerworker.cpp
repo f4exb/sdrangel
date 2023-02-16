@@ -76,9 +76,17 @@ void StarTrackerWorker::startWork()
 void StarTrackerWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
-    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    restartServer(false, 0);
     m_pollTimer.stop();
+    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
+    if (m_settings.m_drawSunOnMap)
+        removeFromMap("Sun");
+    if (m_settings.m_drawMoonOnMap)
+        removeFromMap("Moon");
+    if (m_settings.m_drawStarOnMap && (m_settings.m_target != "Sun") && (m_settings.m_target != "Moon"))
+        removeFromMap("Star");
+
+    restartServer(false, 0);
 }
 
 void StarTrackerWorker::handleInputMessages()
