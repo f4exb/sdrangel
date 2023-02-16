@@ -3104,9 +3104,32 @@ void ADSBDemodGUI::checkDynamicNotification(Aircraft *aircraft)
     }
 }
 
+// Initialise text to speech engine
+// This takes 10 seconds on some versions of Linux, so only do it, if user actually
+// has speech notifications configured
+void ADSBDemodGUI::enableSpeechIfNeeded()
+{
+    if (m_speech) {
+        return;
+    }
+    for (const auto& notification : m_settings.m_notificationSettings)
+    {
+        if (!notification->m_speech.isEmpty())
+        {
+            qDebug() << "ADSBDemodGUI: Enabling text to speech";
+            m_speech = new QTextToSpeech(this);
+            return;
+        }
+    }
+}
+
 void ADSBDemodGUI::speechNotification(Aircraft *aircraft, const QString &speech)
 {
-    m_speech->say(subAircraftString(aircraft, speech));
+    if (m_speech) {
+        m_speech->say(subAircraftString(aircraft, speech));
+    } else {
+        qDebug() << "ADSBDemodGUI::speechNotification: Unable to say " << speech;
+    }
 }
 
 void ADSBDemodGUI::commandNotification(Aircraft *aircraft, const QString &command)
@@ -3308,7 +3331,9 @@ void ADSBDemodGUI::on_feed_clicked(bool checked)
 void ADSBDemodGUI::on_notifications_clicked()
 {
     ADSBDemodNotificationDialog dialog(&m_settings);
-    if (dialog.exec() == QDialog::Accepted) {
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        enableSpeechIfNeeded();
         applySettings();
     }
 }
@@ -4216,7 +4241,7 @@ void ADSBDemodGUI::updateAirports()
         if (azEl.getDistance() <= m_settings.m_airportRange*1000.0f)
         {
             // Only display the airport if it's large enough
-            if (airportInfo->m_type >= m_settings.m_airportMinimumSize)
+            if (airportInfo->m_type >= (AirportInformation::AirportType)m_settings.m_airportMinimumSize)
             {
                 // Only display heliports if enabled
                 if (m_settings.m_displayHeliports || (airportInfo->m_type != AirportInformation::AirportType::Heliport))
@@ -4613,6 +4638,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_airspaceModel(this),
     m_trackAircraft(nullptr),
     m_highlightAircraft(nullptr),
+    m_speech(nullptr),
     m_progressDialog(nullptr),
     m_loadingData(false)
 {
@@ -4760,9 +4786,6 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     updateAirspaces();
     updateNavAids();
     update3DModels();
-
-    // Initialise text to speech engine
-    m_speech = new QTextToSpeech(this);
 
     m_flightInformation = nullptr;
     m_aviationWeather = nullptr;
@@ -4952,6 +4975,7 @@ void ADSBDemodGUI::displaySettings()
 
     getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
+    enableSpeechIfNeeded();
 }
 
 void ADSBDemodGUI::leaveEvent(QEvent* event)

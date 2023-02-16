@@ -994,6 +994,7 @@ private:
     SWGSDRangel::SWGMapAnimation *engineAnimation(QDateTime startDateTime, int engine, bool stop);
     void checkStaticNotification(Aircraft *aircraft);
     void checkDynamicNotification(Aircraft *aircraft);
+    void enableSpeechIfNeeded();
     void speechNotification(Aircraft *aircraft, const QString &speech);
     void commandNotification(Aircraft *aircraft, const QString &command);
     QString subAircraftString(Aircraft *aircraft, const QString &string);
