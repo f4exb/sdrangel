@@ -11,7 +11,7 @@ To record data for a heat map, a GPS is required, and Preferences > My Position 
 On Android, GPS setup should be automatic. On Windows/Linux/Mac, a GPS supporting NMEA via a serial port at 4800 baud is required.
 The COM port / serial device should be specfied via the QT_NMEA_SERIAL_PORT environment variable before SDRangel is started.
 
-![Heat Map plugin GUI](../../../doc/img/HeatMap_plugin.png)
+![A Heat Map](../../../doc/img/HeatMap_plugin_map.png)
 
 <h2>Interface</h2>
 
@@ -39,7 +39,7 @@ Bandwidth in Hz of the channel for which power is to be measured.
 
 <h3>5: Res - Resolution</h3>
 
-Displays the heat map resolution in metres per pixel. Currently this is fixed at ~3m.
+Displays the heat map resolution in metres per pixel. Currently this is fixed at ~3m per pixel.
 
 <h3>6: SR - Sample Rate</h3>
 
@@ -79,7 +79,7 @@ The colour map minimum power field, specifies the power in dB, below which, powe
 
 <h3>15: Max - Colour Map Maximum Power</h3>
 
-The colour map maximum power field, specifies the power in dB, above which, all power measurements are mapped to the highest entry in the colour map.
+The colour map maximum power field, specifies the power in dB, above which, all power measurements are mapped to the highest entry in the colour map (16).
 
 <h3>16: Colour Map</h3>
 
@@ -99,7 +99,7 @@ Displays the range from the current position to the transmitter position in metr
 
 <h3>20: Loss</h3>
 
-Displays the free space path loss from the current position to the transmitter, based on the channel centre frequency, in dB
+Displays the free space path loss from the current position to the transmitter, based on the channel centre frequency, in dB.
 
 <h3>21: Avg - Average Power</h3>
 
@@ -115,7 +115,7 @@ Displays the current minimum peak power measurement in dB.
 
 <h3>24: Pulse - Pulse Average Power</h3>
 
-Displays the most recent pulse average power in dB.
+Displays the most recent pulse average power measurement in dB.
 
 <h3>25: Data</h3>
 
@@ -147,7 +147,7 @@ The chart displays the most recent average, max peak, min peak and pulse average
 received signal level from the transmitter (9), taking in to account free space path loss.
 
 Each series can be individually enabled or disabled.
-The last number of minutes worth of data displayed can be specified from 1 to 60 minutes.
+The last number of minutes worth of data displayed can be specified from 1 to 10 minutes.
 
 <h2>Power Measurements</h2>
 

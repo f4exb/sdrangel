@@ -205,7 +205,7 @@ const QStringList HeatMapGUI::m_averagePeriodTexts = {
 
 void HeatMapGUI::on_averagePeriod_valueChanged(int value)
 {
-    m_settings.m_averagePeriodUS = (int)std::powf(10.0f, (float)value);
+    m_settings.m_averagePeriodUS = (int)std::pow(10.0f, (float)value);
     ui->averagePeriodText->setText(m_averagePeriodTexts[value-1]);
     applySettings();
 }
@@ -216,7 +216,7 @@ const QStringList HeatMapGUI::m_sampleRateTexts = {
 
 void HeatMapGUI::on_sampleRate_valueChanged(int value)
 {
-    m_settings.m_sampleRate = (int)std::powf(10.0f, (float)value);
+    m_settings.m_sampleRate = (int)std::pow(10.0f, (float)value);
     ui->sampleRateText->setText(m_sampleRateTexts[value-1]);
     ui->averagePeriod->setMinimum(std::max(1, m_averagePeriodTexts.size() - value));
     m_scopeVis->setLiveRate(m_settings.m_sampleRate);
@@ -296,8 +296,8 @@ void HeatMapGUI::coordsToPixel(double latitude, double longitude, int& x, int& y
 
 void HeatMapGUI::pixelToCoords(int x, int y, double& latitude, double& longitude) const
 {
-    latitude = m_north - (y /*+ 0.5*/) * m_degreesLatPerPixel;
-    longitude = m_west + (x /*+ 0.5*/) * m_degreesLonPerPixel;
+    latitude = m_north - y * m_degreesLatPerPixel;
+    longitude = m_west + x * m_degreesLonPerPixel;
 }
 
 void HeatMapGUI::on_writeCSV_clicked()
@@ -460,6 +460,8 @@ void HeatMapGUI::on_txPower_valueChanged(double value)
 
 void HeatMapGUI::on_txPositionSet_clicked(bool checked)
 {
+    (void) checked;
+
     ui->txLatitude->setText(QString::number(m_latitude));
     ui->txLongitude->setText(QString::number(m_longitude));
     m_settings.m_txLatitude = m_latitude;
@@ -536,7 +538,6 @@ HeatMapGUI::HeatMapGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_basebandSampleRate(1),
     m_doApplySettings(true),
     m_tickCount(0),
-    m_brush(Qt::SolidPattern),
     m_powerChart(nullptr),
     m_powerAverageSeries(nullptr),
     m_powerMaxPeakSeries(nullptr),
@@ -613,14 +614,13 @@ HeatMapGUI::HeatMapGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     ui->longitude->setText(QString::number(m_longitude));
 
     QStringList colorMapNames = ColorMap::getColorMapNames();
-    for (const auto color : colorMapNames) {
+    for (const auto& color : colorMapNames) {
         ui->colorMap->addItem(color);
     }
     m_colorMap = ColorMap::getColorMap(m_settings.m_colorMapName);
 
     m_pen.setColor(Qt::black);
     m_painter.setPen(m_pen);
-    //m_painter.setBrush(m_brush);
 
     createMap();
 
@@ -946,7 +946,6 @@ void HeatMapGUI::plotPixel(int x, int y, double power)
     QColor color = QColor::fromRgbF(m_colorMap[index*3], m_colorMap[index*3+1], m_colorMap[index*3+2]);
     m_pen.setColor(color);
     m_painter.setPen(m_pen);
-    //m_painter.setBrush(m_brush);
 
     m_painter.drawPoint(QPoint(x, y));
 }

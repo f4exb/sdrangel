@@ -116,7 +116,6 @@ private:
     double m_altitude;
     QPainter m_painter;
     QPen m_pen;
-    QBrush m_brush;
     const float *m_colorMap;
     int m_x;                                        // Current position
     int m_y;
