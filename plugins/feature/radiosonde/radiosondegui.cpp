@@ -200,7 +200,8 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
 
 RadiosondeGUI::~RadiosondeGUI()
 {
-    qDeleteAll(m_radiosondes);
+    // Remove from map and free memory
+    on_deleteAll_clicked();
     delete ui;
 }
 
@@ -392,8 +393,11 @@ void RadiosondeGUI::sendToMap(const QString &name, const QString &label,
         swgMapItem->setAltitude(altitude);
         swgMapItem->setAltitudeReference(0); // ABSOLUTE
 
-        if (positionDateTime.isValid()) {
+        if (positionDateTime.isValid())
+        {
             swgMapItem->setPositionDateTime(new QString(positionDateTime.toString(Qt::ISODateWithMs)));
+            swgMapItem->setOrientationDateTime(new QString(positionDateTime.toString(Qt::ISODateWithMs)));
+            swgMapItem->setAvailableUntil(new QString(positionDateTime.addSecs(1*60*60).toString(Qt::ISODateWithMs)));
         }
 
         swgMapItem->setImageRotation(heading);
@@ -877,8 +881,8 @@ void RadiosondeGUI::on_deleteAll_clicked()
             0.0f);
         // Remove from table
         ui->radiosondes->removeRow(row);
-        // Remove from hash
-        m_radiosondes.remove(serial);
+        // Remove from hash and free memory
+        delete m_radiosondes.take(serial);
     }
 }
 
