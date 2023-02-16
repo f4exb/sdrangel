@@ -239,7 +239,8 @@ Item {
             anchorPoint.x: image.width/2
             anchorPoint.y: image.height/2
             coordinate: position
-            zoomLevel: mapZoomLevel > mapImageMinZoom ? mapZoomLevel : mapImageMinZoom
+            // when zooming, mapImageMinZoom can be temporarily undefined. Not sure why
+            zoomLevel: (typeof mapImageMinZoom !== 'undefined') ? (mapZoomLevel > mapImageMinZoom ? mapZoomLevel : mapImageMinZoom) : zoomLevel
             autoFadeIn: false               // not in 5.12
 
             sourceItem: Grid {
