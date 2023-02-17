@@ -8,8 +8,10 @@ To view the Heat Map visually, the [Map Feature](../../feature/map/readme.md) sh
 
 To record data for a heat map, a GPS is required, and Preferences > My Position should have "Auto-update from GPS" enabled.
 
-On Android, GPS setup should be automatic. On Windows/Linux/Mac, a GPS supporting NMEA via a serial port at 4800 baud is required.
+On Windows/Linux/Mac, a GPS supporting NMEA via a serial port at 4800 baud is required.
 The COM port / serial device should be specfied via the QT_NMEA_SERIAL_PORT environment variable before SDRangel is started.
+
+On Android, GPS setup should be automatic. GPS position updates may stop on Android when the screen is off. To keep the screen on, press the View > Keep Screen On menu.
 
 ![A Heat Map](../../../doc/img/HeatMap_plugin_map.png)
 

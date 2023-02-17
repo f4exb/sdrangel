@@ -892,6 +892,9 @@ public slots:
     void positionUpdated(const QGeoPositionInfo &info);
     void positionUpdateTimeout();
     void positionError(QGeoPositionInfoSource::Error positioningError);
+#ifdef ANDROID
+    void updateWakeLock();
+#endif
 
 signals:
     void deviceSetAdded(int index, DeviceAPI *device);

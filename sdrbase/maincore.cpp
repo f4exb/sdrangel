@@ -28,6 +28,9 @@
 #include "device/deviceset.h"
 #include "device/deviceapi.h"
 #include "channel/channelapi.h"
+#ifdef ANDROID
+#include "util/android.h"
+#endif
 
 #include "maincore.h"
 
@@ -75,6 +78,9 @@ MainCore::MainCore()
     m_masterElapsedTimer.start();
     // Position can take a while to determine, so we start updates at program startup
     initPosition();
+#ifdef ANDROID
+    QObject::connect(this, &MainCore::deviceStateChanged, this, &MainCore::updateWakeLock);
+#endif
 }
 
 MainCore::~MainCore()
@@ -394,3 +400,26 @@ void MainCore::positionError(QGeoPositionInfoSource::Error positioningError)
 {
     qWarning() << "MainCore::positionError: " << positioningError;
 }
+
+#ifdef ANDROID
+// On Android, we want to prevent the app from being put to sleep, when any
+// device is running
+void MainCore::updateWakeLock()
+{
+    bool running = false;
+    for (int i = 0; i < m_deviceSets.size(); i++)
+    {
+        if (m_deviceSets[i]->m_deviceAPI->state() == DeviceAPI::StRunning)
+        {
+            running = true;
+            break;
+        }
+    }
+    if (running) {
+        Android::acquireWakeLock();
+    } else {
+        Android::releaseWakeLock();
+    }
+}
+#endif
+
