@@ -155,6 +155,8 @@
 #include "SWGGain.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
+#include "SWGHeatMapReport.h"
+#include "SWGHeatMapSettings.h"
 #include "SWGIEEE_802_15_4_ModActions.h"
 #include "SWGIEEE_802_15_4_ModReport.h"
 #include "SWGIEEE_802_15_4_ModSettings.h"
@@ -1047,6 +1049,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGHackRFOutputSettings").compare(type) == 0) {
       SWGHackRFOutputSettings *obj = new SWGHackRFOutputSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGHeatMapReport").compare(type) == 0) {
+      SWGHeatMapReport *obj = new SWGHeatMapReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGHeatMapSettings").compare(type) == 0) {
+      SWGHeatMapSettings *obj = new SWGHeatMapSettings();
       obj->init();
       return obj;
     }

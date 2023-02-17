@@ -373,9 +373,9 @@ void SatelliteTrackerGUI::displaySettings()
     ui->target->blockSignals(false);
     ui->target->setCurrentIndex(ui->target->findText(m_settings.m_target));
 
+    ui->dateTime->setDateTime(QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs));
     ui->dateTimeSelect->setCurrentIndex((int)m_settings.m_dateTimeSelect);
     ui->dateTime->setVisible(m_settings.m_dateTimeSelect == SatelliteTrackerSettings::CUSTOM);
-    ui->dateTime->setDateTime(QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs));
     ui->autoTarget->setChecked(m_settings.m_autoTarget);
     ui->darkTheme->setChecked(m_settings.m_chartsDarkTheme);
     ui->satTable->horizontalHeader()->setSortIndicator(m_settings.m_columnSort, m_settings.m_columnSortOrder);

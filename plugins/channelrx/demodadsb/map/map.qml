@@ -8,12 +8,14 @@ import QtGraphicalEffects 1.12
 Item {
     id: qmlMap
     property int aircraftZoomLevel: 11
+    property int aircraftMinZoomLevel: 11
     property int airportZoomLevel: 11
     property string mapProvider: "osm"
     property variant mapPtr
     property string requestedMapType
     property bool lightIcons
     property variant guiPtr
+    property bool smoothing
 
     function createMap(pluginParameters, requestedMap, gui) {
         requestedMapType = requestedMap
@@ -103,13 +105,16 @@ Item {
             }
 
             onZoomLevelChanged: {
+                if (zoomLevel > aircraftMinZoomLevel) {
+                    aircraftZoomLevel = zoomLevel
+                } else {
+                    aircraftZoomLevel = aircraftMinZoomLevel
+                }
                 if (zoomLevel > 11) {
                     station.zoomLevel = zoomLevel
-                    aircraftZoomLevel = zoomLevel
                     airportZoomLevel = zoomLevel
                 } else {
                     station.zoomLevel = 11
-                    aircraftZoomLevel = 11
                     airportZoomLevel = 11
                 }
             }
@@ -140,8 +145,8 @@ Item {
                 Grid {
                     horizontalItemAlignment: Grid.AlignHCenter
                     columnSpacing: 5
-                    layer.enabled: true
-                    layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     Image {
                         id: image
                         source: navAidImage
@@ -206,8 +211,8 @@ Item {
             sourceItem: Grid {
                 columns: 1
                 Grid {
-                    layer.enabled: true
-                    layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     horizontalItemAlignment: Grid.AlignHCenter
                     Text {
                         id: airspaceText
@@ -239,8 +244,8 @@ Item {
             sourceItem: Grid {
                 columns: 1
                 Grid {
-                    layer.enabled: true
-                    layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     horizontalItemAlignment: Grid.AlignHCenter
                     Image {
                         id: image
@@ -334,8 +339,8 @@ Item {
                 columns: 1
                 Grid {
                     horizontalItemAlignment: Grid.AlignHCenter
-                    layer.enabled: true
-                    layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     Image {
                         id: image
                         source: airportImage

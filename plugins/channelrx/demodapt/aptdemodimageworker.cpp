@@ -706,6 +706,13 @@ void APTDemodImageWorker::sendImageToMap(QImage image)
             swgMapItem->setImageTileNorth(m_tileNorth);
             swgMapItem->setImageTileSouth(m_tileSouth);
 
+            // FIXME: This isn't correct. Possibly need to use different projection
+            double earthCircumference = 40075016.686;
+            double latitude = m_tileSouth + (m_tileNorth - m_tileSouth) / 2.0;
+            double scale = std::cos(Units::degreesToRadians(latitude));
+            double zoom = std::log2(earthCircumference * scale * selectedChannel.width() / 2926600) - 8;
+            swgMapItem->setImageZoomLevel(zoom);
+
             MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aptDemod, swgMapItem);
             messageQueue->push(msg);
         }

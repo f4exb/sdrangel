@@ -524,6 +524,23 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="aircraftMinZoomLabel">
+        <property name="text">
+         <string>Zoom level for aircraft scaling</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="aircraftMinZoom">
+        <property name="toolTip">
+         <string>When map zoom (0 min zoom - 15 max zoom) is higher than this value, aircraft icon size will be scaled</string>
+        </property>
+        <property name="maximum">
+         <number>15</number>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

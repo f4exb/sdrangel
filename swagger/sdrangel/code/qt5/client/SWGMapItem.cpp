@@ -82,6 +82,14 @@ SWGMapItem::SWGMapItem() {
     m_image_tile_east_isSet = false;
     image_tile_north = 0.0f;
     m_image_tile_north_isSet = false;
+    image_zoom_level = 0.0f;
+    m_image_zoom_level_isSet = false;
+    coordinates = nullptr;
+    m_coordinates_isSet = false;
+    extruded_height = 0.0f;
+    m_extruded_height_isSet = false;
+    available_until = nullptr;
+    m_available_until_isSet = false;
 }
 
 SWGMapItem::~SWGMapItem() {
@@ -144,6 +152,14 @@ SWGMapItem::init() {
     m_image_tile_east_isSet = false;
     image_tile_north = 0.0f;
     m_image_tile_north_isSet = false;
+    image_zoom_level = 0.0f;
+    m_image_zoom_level_isSet = false;
+    coordinates = new QList<SWGMapCoordinate*>();
+    m_coordinates_isSet = false;
+    extruded_height = 0.0f;
+    m_extruded_height_isSet = false;
+    available_until = new QString("");
+    m_available_until_isSet = false;
 }
 
 void
@@ -207,6 +223,18 @@ SWGMapItem::cleanup() {
 
 
 
+
+    if(coordinates != nullptr) { 
+        auto arr = coordinates;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete coordinates;
+    }
+
+    if(available_until != nullptr) { 
+        delete available_until;
+    }
 }
 
 SWGMapItem*
@@ -273,6 +301,14 @@ SWGMapItem::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&image_tile_east, pJson["imageTileEast"], "float", "");
     
     ::SWGSDRangel::setValue(&image_tile_north, pJson["imageTileNorth"], "float", "");
+    
+    ::SWGSDRangel::setValue(&image_zoom_level, pJson["imageZoomLevel"], "float", "");
+    
+    
+    ::SWGSDRangel::setValue(&coordinates, pJson["coordinates"], "QList", "SWGMapCoordinate");
+    ::SWGSDRangel::setValue(&extruded_height, pJson["extrudedHeight"], "float", "");
+    
+    ::SWGSDRangel::setValue(&available_until, pJson["availableUntil"], "QString", "QString");
     
 }
 
@@ -370,6 +406,18 @@ SWGMapItem::asJsonObject() {
     }
     if(m_image_tile_north_isSet){
         obj->insert("imageTileNorth", QJsonValue(image_tile_north));
+    }
+    if(m_image_zoom_level_isSet){
+        obj->insert("imageZoomLevel", QJsonValue(image_zoom_level));
+    }
+    if(coordinates && coordinates->size() > 0){
+        toJsonArray((QList<void*>*)coordinates, obj, "coordinates", "SWGMapCoordinate");
+    }
+    if(m_extruded_height_isSet){
+        obj->insert("extrudedHeight", QJsonValue(extruded_height));
+    }
+    if(available_until != nullptr && *available_until != QString("")){
+        toJsonValue(QString("availableUntil"), available_until, obj, QString("QString"));
     }
 
     return obj;
@@ -645,6 +693,46 @@ SWGMapItem::setImageTileNorth(float image_tile_north) {
     this->m_image_tile_north_isSet = true;
 }
 
+float
+SWGMapItem::getImageZoomLevel() {
+    return image_zoom_level;
+}
+void
+SWGMapItem::setImageZoomLevel(float image_zoom_level) {
+    this->image_zoom_level = image_zoom_level;
+    this->m_image_zoom_level_isSet = true;
+}
+
+QList<SWGMapCoordinate*>*
+SWGMapItem::getCoordinates() {
+    return coordinates;
+}
+void
+SWGMapItem::setCoordinates(QList<SWGMapCoordinate*>* coordinates) {
+    this->coordinates = coordinates;
+    this->m_coordinates_isSet = true;
+}
+
+float
+SWGMapItem::getExtrudedHeight() {
+    return extruded_height;
+}
+void
+SWGMapItem::setExtrudedHeight(float extruded_height) {
+    this->extruded_height = extruded_height;
+    this->m_extruded_height_isSet = true;
+}
+
+QString*
+SWGMapItem::getAvailableUntil() {
+    return available_until;
+}
+void
+SWGMapItem::setAvailableUntil(QString* available_until) {
+    this->available_until = available_until;
+    this->m_available_until_isSet = true;
+}
+
 
 bool
 SWGMapItem::isSet(){
@@ -729,6 +817,18 @@ SWGMapItem::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_image_tile_north_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_image_zoom_level_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(coordinates && (coordinates->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_extruded_height_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(available_until && *available_until != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

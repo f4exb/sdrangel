@@ -378,7 +378,9 @@ void MainCore::positionUpdated(const QGeoPositionInfo &info)
         {
             m_settings.setLatitude(m_position.coordinate().latitude());
             m_settings.setLongitude(m_position.coordinate().longitude());
-            m_settings.setAltitude(m_position.coordinate().altitude());
+            if (!std::isnan(m_position.coordinate().altitude())) {
+                m_settings.setAltitude(m_position.coordinate().altitude());
+            }
         }
     }
 }

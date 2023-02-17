@@ -5,5 +5,7 @@
     <file>icons/ibp.png</file>
     <file>icons/muf.png</file>
     <file>icons/fof2.png</file>
+    <file>icons/controltower.png</file>
+    <file>icons/vor.png</file>
   </qresource>
 </RCC>

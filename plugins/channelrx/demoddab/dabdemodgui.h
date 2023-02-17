@@ -93,6 +93,8 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void updateEnsembleName(const QString& ensemble);
+    int findProgramRowById(int id);
     void addProgramName(const DABDemod::MsgDABProgramName& program);
     bool handleMessage(const Message& message);
     void makeUIConnections();
@@ -115,6 +117,7 @@ private slots:
     void on_clearTable_clicked();
     void on_programs_cellDoubleClicked(int row, int column);
     void on_channel_currentIndexChanged(int index);
+    void on_findOnMap_clicked();
     void filterRow(int row);
     void filter();
     void programs_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);

@@ -147,6 +147,30 @@
         }
     }
 
+    // Polygons (such as for airspaces) should be prioritized behind other entities
+    function pickEntityPrioritized(e)
+    {
+        var picked = viewer.scene.drillPick(e.position);
+        if (Cesium.defined(picked)) {
+            var firstPolygon = null;
+            for (let i = 0; i < picked.length; i++) {
+                var id = Cesium.defaultValue(picked[i].id, picked[i].primitive.id);
+                if (id instanceof Cesium.Entity) {
+                    if (!Cesium.defined(id.polygon)) {
+                        return id;
+                    } else if (firstPolygon == null) {
+                        firstPolygon = id;
+                    }
+                }
+            }
+            return firstPolygon;
+        }
+    }
+
+    function pickEntity(e) {
+        viewer.selectedEntity = pickEntityPrioritized(e);
+    }
+
     Cesium.Ion.defaultAccessToken = '$CESIUM_ION_API_KEY$';
 
     const viewer = new Cesium.Viewer('cesiumContainer', {
@@ -161,6 +185,7 @@
         terrainProviderViewModels: [] // User should adjust terrain via dialog, so depthTestAgainstTerrain doesn't get set
     });
     viewer.scene.globe.depthTestAgainstTerrain = false; // So labels/points aren't clipped by terrain
+    viewer.screenSpaceEventHandler.setInputAction(pickEntity, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     var buildings = undefined;
     const images = new Map();
 
@@ -351,7 +376,7 @@
                             fabric: {
                                 type: 'Image',
                                 uniforms: {
-                                    image: 'data:image/png;base64,' + command.data,
+                                    image: command.data,
                                 }
                             },
                             translucent: true

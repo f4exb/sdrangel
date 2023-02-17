@@ -68,6 +68,16 @@ SatelliteTrackerWorker::~SatelliteTrackerWorker()
     qDebug() << "SatelliteTrackerWorker::~SatelliteTrackerWorker";
     stopWork();
     m_inputMessageQueue.clear();
+    // Remove satellites from Map
+    QHashIterator<QString, SatWorkerState *> itr(m_workerState);
+    while (itr.hasNext())
+    {
+        itr.next();
+        if (m_settings.m_drawOnMap) {
+            removeFromMap(itr.key());
+        }
+    }
+    qDeleteAll(m_workerState);
 }
 
 void SatelliteTrackerWorker::startWork()
@@ -187,7 +197,13 @@ void SatelliteTrackerWorker::applySettings(const SatelliteTrackerSettings& setti
     {
         itr.next();
         if (settings.m_satellites.indexOf(itr.key()) == -1)
+        {
+            if (m_settings.m_drawOnMap) {
+                removeFromMap(itr.key());
+            }
+            delete itr.value();
             itr.remove();
+        }
     }
 
     // Add new satellites

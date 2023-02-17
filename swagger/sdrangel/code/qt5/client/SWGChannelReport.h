@@ -41,6 +41,7 @@
 #include "SWGFreeDVDemodReport.h"
 #include "SWGFreeDVModReport.h"
 #include "SWGFreqTrackerReport.h"
+#include "SWGHeatMapReport.h"
 #include "SWGIEEE_802_15_4_ModReport.h"
 #include "SWGM17DemodReport.h"
 #include "SWGM17ModReport.h"
@@ -147,6 +148,9 @@ public:
 
     SWGFT8DemodReport* getFt8DemodReport();
     void setFt8DemodReport(SWGFT8DemodReport* ft8_demod_report);
+
+    SWGHeatMapReport* getHeatMapReport();
+    void setHeatMapReport(SWGHeatMapReport* heat_map_report);
 
     SWGM17DemodReport* getM17DemodReport();
     void setM17DemodReport(SWGM17DemodReport* m17_demod_report);
@@ -277,6 +281,9 @@ private:
 
     SWGFT8DemodReport* ft8_demod_report;
     bool m_ft8_demod_report_isSet;
+
+    SWGHeatMapReport* heat_map_report;
+    bool m_heat_map_report_isSet;
 
     SWGM17DemodReport* m17_demod_report;
     bool m_m17_demod_report_isSet;

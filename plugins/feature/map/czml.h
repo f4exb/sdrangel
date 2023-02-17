@@ -21,9 +21,13 @@
 #include <QHash>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QGeoCoordinate>
 
 struct MapSettings;
 class MapItem;
+class ObjectMapItem;
+class PolygonMapItem;
+class PolylineMapItem;
 
 class CZML
 {
@@ -32,11 +36,16 @@ private:
     QHash<QString, QString> m_ids;
     QHash<QString, QJsonArray> m_lastPosition;
     QHash<QString, bool> m_hasMoved;
+    QGeoCoordinate m_position;
 
 public:
     CZML(const MapSettings *settings);
     QJsonObject init();
-    QJsonObject update(MapItem *mapItem, bool isTarget, bool isSelected);
+    QJsonObject update(ObjectMapItem *mapItem, bool isTarget, bool isSelected);
+    QJsonObject update(PolygonMapItem *mapItem);
+    QJsonObject update(PolylineMapItem *mapItem);
+    bool filter(const MapItem *mapItem) const;
+    void setPosition(const QGeoCoordinate& position);
 
 signals:
     void connected();

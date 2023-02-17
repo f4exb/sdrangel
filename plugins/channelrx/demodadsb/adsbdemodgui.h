@@ -37,7 +37,6 @@
 #include "util/messagequeue.h"
 #include "util/azel.h"
 #include "util/movingaverage.h"
-#include "util/httpdownloadmanager.h"
 #include "util/flightinformation.h"
 #include "util/openaip.h"
 #include "util/planespotters.h"
@@ -47,7 +46,7 @@
 #include "SWGMapItem.h"
 
 #include "adsbdemodsettings.h"
-#include "ourairportsdb.h"
+#include "util/ourairportsdb.h"
 #include "util/osndb.h"
 
 class PluginAPI;
@@ -464,7 +463,19 @@ public:
         allAircraftUpdated();
     }
 
-   Q_INVOKABLE void findOnMap(int index);
+    Q_INVOKABLE void findOnMap(int index);
+
+    void updateAircraftInformation(QSharedPointer<const QHash<int, AircraftInformation *>> aircraftInfo)
+    {
+        for (auto aircraft : m_aircrafts)
+        {
+            if (aircraftInfo->contains(aircraft->m_icao)) {
+                aircraft->m_aircraftInfo = aircraftInfo->value(aircraft->m_icao);
+            } else {
+                aircraft->m_aircraftInfo = nullptr;
+            }
+        }
+    }
 
 private:
     QList<Aircraft *> m_aircrafts;
@@ -493,7 +504,7 @@ public:
     {
     }
 
-    Q_INVOKABLE void addAirport(AirportInformation *airport, float az, float el, float distance) {
+    Q_INVOKABLE void addAirport(const AirportInformation *airport, float az, float el, float distance) {
         QString text;
         int rows;
 
@@ -558,7 +569,7 @@ public:
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     }
 
-    void airportFreq(AirportInformation *airport, float az, float el, float distance, QString& text, int& rows) {
+    void airportFreq(const AirportInformation *airport, float az, float el, float distance, QString& text, int& rows) {
         // Create the text to go in the bubble next to the airport
         // Display name and frequencies
         QStringList list;
@@ -567,7 +578,7 @@ public:
         rows = 1;
         for (int i = 0; i < airport->m_frequencies.size(); i++)
         {
-            AirportInformation::FrequencyInformation *frequencyInfo = airport->m_frequencies[i];
+            const AirportInformation::FrequencyInformation *frequencyInfo = airport->m_frequencies[i];
             list.append(QString("%1: %2 MHz").arg(frequencyInfo->m_type).arg(frequencyInfo->m_frequency));
             rows++;
         }
@@ -577,7 +588,7 @@ public:
         text = list.join("\n");
     }
 
-    void airportUpdated(AirportInformation *airport) {
+    void airportUpdated(const AirportInformation *airport) {
         int row = m_airports.indexOf(airport);
         if (row >= 0)
         {
@@ -614,7 +625,7 @@ public:
 
 private:
     ADSBDemodGUI *m_gui;
-    QList<AirportInformation *> m_airports;
+    QList<const AirportInformation *> m_airports;
     QList<QString> m_airportDataFreq;
     QList<int> m_airportDataFreqRows;
     QList<bool> m_showFreq;
@@ -894,14 +905,15 @@ private:
     MessageQueue m_inputMessageQueue;
 
     QHash<int, Aircraft *> m_aircraft;  // Hashed on ICAO
-    QHash<int, AircraftInformation *> *m_aircraftInfo;
-    QHash<int, AirportInformation *> *m_airportInfo; // Hashed on id
+    QSharedPointer<const QHash<int, AircraftInformation *>> m_aircraftInfo;
+    QSharedPointer<const QHash<int, AirportInformation *>> m_airportInfo; // Hashed on id
     AircraftModel m_aircraftModel;
     AirportModel m_airportModel;
     AirspaceModel m_airspaceModel;
     NavAidModel m_navAidModel;
-    QList<Airspace *> m_airspaces;
-    QList<NavAid *> m_navAids;
+    QSharedPointer<const QList<Airspace *>> m_airspaces;
+    QSharedPointer<const QList<NavAid *>> m_navAids;
+    QGeoCoordinate m_lastFullUpdatePosition;
 
     AzEl m_azEl;                        // Position of station
     Aircraft *m_trackAircraft;          // Aircraft we want to track in Channel Report
@@ -920,10 +932,11 @@ private:
     AviationWeather *m_aviationWeather;
     QString m_photoLink;
     WebAPIAdapterInterface *m_webAPIAdapterInterface;
-    HttpDownloadManager m_dlm;
     QProgressDialog *m_progressDialog;
     quint16 m_osmPort;
     OpenAIP m_openAIP;
+    OsnDB m_osnDB;
+    OurAirportsDB m_ourAirportsDB;
     ADSBOSMTemplateServer *m_templateServer;
     QRandomGenerator m_random;
     QHash<QString, QString> m_3DModels; // Hashed aircraft_icao or just aircraft
@@ -935,6 +948,7 @@ private:
     QTimer m_importTimer;
     QTimer m_redrawMapTimer;
     QNetworkAccessManager *m_networkManager;
+    bool m_loadingData;
 
     static const char m_idMap[];
     static const QString m_categorySetA[];
@@ -957,6 +971,7 @@ private:
 
     void updatePosition(Aircraft *aircraft);
     bool updateLocalPosition(Aircraft *aircraft, double latitude, double longitude, bool surfacePosition);
+    void clearFromMap(const QString& name);
     void sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimation *> *animations);
     Aircraft *getAircraft(int icao, bool &newAircraft);
     void callsignToFlight(Aircraft *aircraft);
@@ -979,22 +994,14 @@ private:
     SWGSDRangel::SWGMapAnimation *engineAnimation(QDateTime startDateTime, int engine, bool stop);
     void checkStaticNotification(Aircraft *aircraft);
     void checkDynamicNotification(Aircraft *aircraft);
+    void enableSpeechIfNeeded();
     void speechNotification(Aircraft *aircraft, const QString &speech);
     void commandNotification(Aircraft *aircraft, const QString &command);
     QString subAircraftString(Aircraft *aircraft, const QString &string);
     void resizeTable();
     QString getDataDir();
-    QString getAirportDBFilename();
-    QString getAirportFrequenciesDBFilename();
-    QString getOSNDBZipFilename();
-    QString getOSNDBFilename();
-    QString getFastDBFilename();
-    qint64 fileAgeInDays(QString filename);
-    bool confirmDownload(QString filename);
     void readAirportDB(const QString& filename);
     void readAirportFrequenciesDB(const QString& filename);
-    bool readOSNDB(const QString& filename);
-    bool readFastDB(const QString& filename);
     void update3DModels();
     void updateAirports();
     void updateAirspaces();
@@ -1047,8 +1054,6 @@ private slots:
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
     void tick();
-    void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
-    void downloadFinished(const QString& filename, bool success);
     void on_device_currentIndexChanged(int index);
     void feedSelect(const QPoint& p);
     void on_displaySettings_clicked();
@@ -1057,8 +1062,11 @@ private slots:
     void on_logOpen_clicked();
     void downloadingURL(const QString& url);
     void downloadError(const QString& error);
+    void downloadProgress(qint64 bytesRead, qint64 totalBytes);
     void downloadAirspaceFinished();
     void downloadNavAidsFinished();
+    void downloadAircraftInformationFinished();
+    void downloadAirportInformationFinished();
     void photoClicked();
     virtual void showEvent(QShowEvent *event) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
@@ -1073,3 +1081,4 @@ signals:
 };
 
 #endif // INCLUDE_ADSBDEMODGUI_H
+

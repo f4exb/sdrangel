@@ -29,6 +29,7 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
 {
     ui->setupUi(this);
     ui->timeout->setValue(settings->m_removeTimeout);
+    ui->aircraftMinZoom->setValue(settings->m_aircraftMinZoom);
     ui->airportRange->setValue(settings->m_airportRange);
     ui->airportSize->setCurrentIndex((int)settings->m_airportMinimumSize);
     ui->heliports->setChecked(settings->m_displayHeliports);
@@ -61,6 +62,7 @@ ADSBDemodDisplayDialog::~ADSBDemodDisplayDialog()
 void ADSBDemodDisplayDialog::accept()
 {
     m_settings->m_removeTimeout = ui->timeout->value();
+    m_settings->m_aircraftMinZoom = ui->aircraftMinZoom->value();
     m_settings->m_airportRange = ui->airportRange->value();
     m_settings->m_airportMinimumSize = (ADSBDemodSettings::AirportType)ui->airportSize->currentIndex();
     m_settings->m_displayHeliports = ui->heliports->isChecked();

@@ -80,6 +80,7 @@ public:
 
     void reset();
     void resetService();
+    void programAvailable(const QString& programName);
 
     // Callbacks
     void systemData(bool sync, int16_t snr, int32_t freqOffset);
@@ -91,6 +92,7 @@ public:
     void fibQuality(int16_t percent);
     void data(const QString& data);
     void motData(const uint8_t *data, int len, const QString& filename, int contentSubType);
+    void tii(int tii);
 
 private:
     struct MagSqLevelsStore
@@ -116,6 +118,7 @@ private:
     DABDemodDevice m_device;
     audiodata m_ad;
     API_struct m_api;
+    bool m_programSet;
 
     NCO m_nco;
     Interpolator m_interpolator;
@@ -145,6 +148,7 @@ private:
     void processOneSample(Complex &ci);
     void processOneAudioSample(Complex &ci);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
+    void setProgram(const QString& name);
 };
 
 #endif // INCLUDE_DABDEMODSINK_H

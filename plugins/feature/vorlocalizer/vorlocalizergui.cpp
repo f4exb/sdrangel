@@ -50,6 +50,8 @@
 #include "vorlocalizersettings.h"
 #include "vorlocalizergui.h"
 
+#include "SWGMapItem.h"
+
 // Lats and longs in decimal degrees. Distance in metres. Bearing in degrees.
 // https://www.movable-type.co.uk/scripts/latlong.html
 static void calcRadialEndPoint(float startLatitude, float startLongitude, float distance, float bearing, float &endLatitude, float &endLongitude)
@@ -351,6 +353,18 @@ bool VORModel::findIntersection(float &lat, float &lon)
     return false;
 }
 
+QString VORModel::getRadials() const
+{
+    QStringList text;
+    for (int i = 0; i < m_vors.size(); i++)
+    {
+        if (m_radials[i] >= 0) {
+            text.append(QString("%1: %2%3").arg(m_vors[i]->m_name).arg(std::round(m_radials[i])).arg(QChar(0xb0)));
+        }
+    }
+    return text.join("\n");
+}
+
 void VORLocalizerGUI::resizeTable()
 {
     // Fill table with a row of dummy data that will size the columns nicely
@@ -462,6 +476,8 @@ void VORLocalizerGUI::selectVOR(VORGUI *vorGUI, bool selected)
     }
     else
     {
+        QString radialName = QString("VOR Radial %1").arg(vorGUI->m_navAid->m_name);
+
         VORLocalizer::MsgRemoveVORChannel *msg = VORLocalizer::MsgRemoveVORChannel::create(navId);
         m_vorLocalizer->getInputMessageQueue()->push(msg);
 
@@ -469,6 +485,10 @@ void VORLocalizerGUI::selectVOR(VORGUI *vorGUI, bool selected)
         ui->vorData->removeRow(vorGUI->m_nameItem->row());
         // Remove from settings to remove corresponding demodulator
         m_settings.m_subChannelSettings.remove(navId);
+
+        // Remove radial from Map feature
+        m_mapFeatureRadialNames.removeOne(radialName);
+        clearFromMapFeature(radialName, 3);
 
         applySettings();
     }
@@ -479,7 +499,7 @@ void VORLocalizerGUI::updateVORs()
     m_vorModel.removeAllVORs();
     AzEl azEl = m_azEl;
 
-    for (auto vor : m_vors)
+    for (const auto vor : *m_vors)
     {
         if (vor->m_type.contains("VOR")) // Exclude DMEs
         {
@@ -531,6 +551,130 @@ bool VORLocalizerGUI::deserialize(const QByteArray& data)
     {
         resetToDefaults();
         return false;
+    }
+}
+
+void VORLocalizerGUI::clearFromMapFeature(const QString& name, int type)
+{
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_vorLocalizer, "mapitems", mapPipes);
+    for (const auto& pipe : mapPipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+        swgMapItem->setName(new QString(name));
+        swgMapItem->setImage(new QString(""));
+        swgMapItem->setType(type);
+        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_vorLocalizer, swgMapItem);
+        messageQueue->push(msg);
+    }
+}
+
+void VORLocalizerGUI::sendPositionToMapFeature(float lat, float lon)
+{
+    // Send to Map feature
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_vorLocalizer, "mapitems", mapPipes);
+
+    if (mapPipes.size() > 0)
+    {
+        QString name = MainCore::instance()->getSettings().getStationName();
+        if (name != m_mapFeaturePositionName)
+        {
+            clearFromMapFeature(m_mapFeaturePositionName, 0);
+            m_mapFeaturePositionName = name;
+        }
+
+        QString details = QString("%1\nEstimated position based on VORs\n").arg(name);
+        details.append(m_vorModel.getRadials());
+
+        for (const auto& pipe : mapPipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+
+            swgMapItem->setName(new QString(name));
+            swgMapItem->setLatitude(lat);
+            swgMapItem->setLongitude(lon);
+            swgMapItem->setAltitude(0);
+            swgMapItem->setImage(new QString("antenna.png"));
+            swgMapItem->setImageRotation(0);
+            swgMapItem->setText(new QString(details));
+            swgMapItem->setModel(new QString("antenna.glb"));
+            swgMapItem->setFixedPosition(false);
+            swgMapItem->setLabel(new QString(name));
+            swgMapItem->setLabelAltitudeOffset(4.5);
+            swgMapItem->setAltitudeReference(1);
+            swgMapItem->setType(0);
+
+            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_vorLocalizer, swgMapItem);
+            messageQueue->push(msg);
+        }
+    }
+}
+
+void VORLocalizerGUI::sendRadialToMapFeature(VORGUI *vorGUI, Real radial)
+{
+    // Send to Map feature
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_vorLocalizer, "mapitems", mapPipes);
+
+    if (mapPipes.size() > 0)
+    {
+        float endLat, endLong;
+        float bearing;
+
+        if (m_settings.m_magDecAdjust && !vorGUI->m_navAid->m_alignedTrueNorth) {
+            bearing = radial - vorGUI->m_navAid->m_magneticDeclination;
+        } else {
+            bearing = radial;
+        }
+
+        calcRadialEndPoint(vorGUI->m_navAid->m_latitude, vorGUI->m_navAid->m_longitude, vorGUI->m_navAid->getRangeMetres(), bearing, endLat, endLong);
+
+        QString name = QString("VOR Radial %1").arg(vorGUI->m_navAid->m_name);
+        QString details = QString("%1%2").arg(std::round(bearing)).arg(QChar(0x00b0));
+
+        if (!m_mapFeatureRadialNames.contains(name)) {
+            m_mapFeatureRadialNames.append(name);
+        }
+
+        for (const auto& pipe : mapPipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+
+            swgMapItem->setName(new QString(name));
+            swgMapItem->setLatitude(vorGUI->m_navAid->m_latitude);
+            swgMapItem->setLongitude(vorGUI->m_navAid->m_longitude);
+            swgMapItem->setAltitude(Units::feetToMetres(vorGUI->m_navAid->m_elevation));
+            QString image = QString("none");
+            swgMapItem->setImage(new QString(image));
+            swgMapItem->setImageRotation(0);
+            swgMapItem->setText(new QString(details));   // Not used - label is used instead for now
+            //swgMapItem->setFixedPosition(true);
+            swgMapItem->setLabel(new QString(details));
+            swgMapItem->setAltitudeReference(0);
+            QList<SWGSDRangel::SWGMapCoordinate *> *coords = new QList<SWGSDRangel::SWGMapCoordinate *>();
+
+            SWGSDRangel::SWGMapCoordinate* c = new SWGSDRangel::SWGMapCoordinate();
+            c->setLatitude(vorGUI->m_navAid->m_latitude);
+            c->setLongitude(vorGUI->m_navAid->m_longitude);       // Centre of VOR
+            c->setAltitude(Units::feetToMetres(vorGUI->m_navAid->m_elevation));
+            coords->append(c);
+
+            c = new SWGSDRangel::SWGMapCoordinate();
+            c->setLatitude(endLat);
+            c->setLongitude(endLong);
+            c->setAltitude(Units::feetToMetres(vorGUI->m_navAid->m_elevation));
+            coords->append(c);
+
+            swgMapItem->setCoordinates(coords);
+            swgMapItem->setType(3);
+
+            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_vorLocalizer, swgMapItem);
+            messageQueue->push(msg);
+        }
     }
 }
 
@@ -598,6 +742,31 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
 
             // Update radial on map
             m_vorModel.setRadial(subChannelId, validRadial, report.getRadial());
+
+            // Send to map feature as well
+            sendRadialToMapFeature(vorGUI, report.getRadial());
+
+            // Try to determine position, based on intersection of two radials
+            float lat, lon;
+
+            if (m_vorModel.findIntersection(lat, lon))
+            {
+                // Move antenna icon to estimated position
+                QQuickItem *item = ui->map->rootObject();
+                QObject *stationObject = item->findChild<QObject*>("station");
+
+                if (stationObject != NULL)
+                {
+                    QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
+                    coords.setLatitude(lat);
+                    coords.setLongitude(lon);
+                    stationObject->setProperty("coordinate", QVariant::fromValue(coords));
+                    stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
+                }
+
+                // Send estimated position to Map Feature as well
+                sendPositionToMapFeature(lat, lon);
+            }
         }
         else
         {
@@ -738,7 +907,7 @@ void VORLocalizerGUI::on_getOpenAIPVORDB_clicked()
 
 void VORLocalizerGUI::readNavAids()
 {
-    m_vors = OpenAIP::readNavAids();
+    m_vors = OpenAIP::getNavAids();
     updateVORs();
 }
 
@@ -1052,10 +1221,13 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
 VORLocalizerGUI::~VORLocalizerGUI()
 {
+    clearFromMapFeature(m_mapFeaturePositionName, 0);
+    for (auto const &radialName : m_mapFeatureRadialNames) {
+        clearFromMapFeature(radialName, 3);
+    }
     disconnect(&m_redrawMapTimer, &QTimer::timeout, this, &VORLocalizerGUI::redrawMap);
     m_redrawMapTimer.stop();
     delete ui;
-    qDeleteAll(m_vors);
 }
 
 void VORLocalizerGUI::setWorkspaceIndex(int index)
@@ -1145,27 +1317,8 @@ void VORLocalizerGUI::updateStatus()
 
 void VORLocalizerGUI::tick()
 {
-    // Try to determine position, based on intersection of two radials - every second
     if (++m_tickCount == 20)
     {
-        float lat, lon;
-
-        if (m_vorModel.findIntersection(lat, lon))
-        {
-            // Move antenna icon to estimated position
-            QQuickItem *item = ui->map->rootObject();
-            QObject *stationObject = item->findChild<QObject*>("station");
-
-            if (stationObject != NULL)
-            {
-                QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
-                coords.setLatitude(lat);
-                coords.setLongitude(lon);
-                stationObject->setProperty("coordinate", QVariant::fromValue(coords));
-                stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
-            }
-        }
-
         m_rrSecondsCount++;
         ui->rrTurnTimeProgress->setMaximum(m_settings.m_rrTime);
         ui->rrTurnTimeProgress->setValue(m_rrSecondsCount <= m_settings.m_rrTime ? m_rrSecondsCount : m_settings.m_rrTime);
@@ -1286,3 +1439,4 @@ void VORLocalizerGUI::makeUIConnections()
     QObject::connect(ui->rrTime, &QDial::valueChanged, this, &VORLocalizerGUI::on_rrTime_valueChanged);
     QObject::connect(ui->centerShift, &QDial::valueChanged, this, &VORLocalizerGUI::on_centerShift_valueChanged);
 }
+

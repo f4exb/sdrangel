@@ -94,6 +94,25 @@ private slots:
                         \"DataCopyRight\" : \"<a href='http://maptiler.com'>Maptiler</a>\"\
                     }").arg(hiresURL).arg(m_maptilerAPIKey);
                 }
+                else if (tokens[1].contains("transit"))
+                {
+                    QStringList map({"/night-transit", "/night-transit-hires", "/transit", "/transit-hires"});
+                    QStringList mapId({"thf-nighttransit", "thf-nighttransit-hires", "thf-transit", "thf-transit-hires"});
+                    QStringList mapUrl({"dark_nolabels", "dark_nolabels", "light_nolabels", "light_nolabels"});
+
+                    // Use CartoDB maps without labels for aviation maps
+                    int idx = map.indexOf(tokens[1]);
+                    xml = QString("\
+                    {\
+                        \"UrlTemplate\" : \"http://1.basemaps.cartocdn.com/%2/%z/%x/%y.png%1\",\
+                        \"ImageFormat\" : \"png\",\
+                        \"QImageFormat\" : \"Indexed8\",\
+                        \"ID\" : \"%3\",\
+                        \"MaximumZoomLevel\" : 20,\
+                        \"MapCopyRight\" : \"<a href='https://carto.com'>CartoDB</a>\",\
+                        \"DataCopyRight\" : \"<a href='https://carto.com'>CartoDB</a>\"\
+                    }").arg(hiresURL).arg(mapUrl[idx]).arg(mapId[idx]);
+                }
                 else
                 {
                     int idx = map.indexOf(tokens[1]);

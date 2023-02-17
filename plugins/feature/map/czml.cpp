@@ -28,6 +28,22 @@ CZML::CZML(const MapSettings *settings) :
 {
 }
 
+// Set position from which distance filter is calculated
+void CZML::setPosition(const QGeoCoordinate& position)
+{
+    m_position = position;
+}
+
+bool CZML::filter(const MapItem *mapItem) const
+{
+    return (   !mapItem->m_itemSettings->m_filterName.isEmpty()
+            && !mapItem->m_itemSettings->m_filterNameRE.match(mapItem->m_name).hasMatch()
+           )
+        || (   (mapItem->m_itemSettings->m_filterDistance > 0)
+            && (m_position.distanceTo(QGeoCoordinate(mapItem->m_latitude, mapItem->m_longitude, mapItem->m_altitude)) > mapItem->m_itemSettings->m_filterDistance)
+           );
+}
+
 QJsonObject CZML::init()
 {
     QString start = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
@@ -48,10 +64,149 @@ QJsonObject CZML::init()
     return doc;
 }
 
+QJsonObject CZML::update(PolygonMapItem *mapItem)
+{
+    QString id = mapItem->m_name;
 
-QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
+    QJsonObject obj {
+        {"id", id}         // id must be unique
+    };
+
+    if (   !mapItem->m_itemSettings->m_enabled
+        || !mapItem->m_itemSettings->m_display3DTrack
+        || filter(mapItem)
+       )
+    {
+        // Delete obj completely (including any history)
+        obj.insert("delete", true);
+        return obj;
+    }
+
+    QJsonArray positions;
+    for (const auto c : mapItem->m_points)
+    {
+        positions.append(c->longitude());
+        positions.append(c->latitude());
+        positions.append(c->altitude());
+    }
+
+    QJsonObject positionList {
+        {"cartographicDegrees", positions},
+    };
+
+    QColor color = QColor::fromRgba(mapItem->m_itemSettings->m_3DTrackColor);
+    QJsonArray colorRGBA {
+        color.red(), color.green(), color.blue(), color.alpha()
+    };
+    QJsonObject colorObj {
+        {"rgba", colorRGBA}
+    };
+
+    QJsonObject solidColor {
+        {"color", colorObj},
+    };
+
+    QJsonObject material {
+        {"solidColor", solidColor}
+    };
+
+    QJsonArray outlineColorRGBA {
+        0, 0, 0, 255
+    };
+    QJsonObject outlineColor {
+        {"rgba", outlineColorRGBA}
+    };
+
+    QJsonObject polygon {
+        {"positions", positionList},
+        {"height", mapItem->m_altitude},
+        {"extrudedHeight", mapItem->m_extrudedHeight},
+        {"material", material},
+        {"outline", true},
+        {"outlineColor", outlineColor}
+    };
+
+    obj.insert("polygon", polygon);
+    obj.insert("description", mapItem->m_label);
+
+    //qDebug() << "Polygon " << obj;
+    return obj;
+}
+
+QJsonObject CZML::update(PolylineMapItem *mapItem)
+{
+    QString id = mapItem->m_name;
+
+    QJsonObject obj {
+        {"id", id}         // id must be unique
+    };
+
+    if (   !mapItem->m_itemSettings->m_enabled
+        || !mapItem->m_itemSettings->m_display3DTrack
+        || filter(mapItem)
+       )
+    {
+        // Delete obj completely (including any history)
+        obj.insert("delete", true);
+        return obj;
+    }
+
+    QJsonArray positions;
+    for (const auto c : mapItem->m_points)
+    {
+        positions.append(c->longitude());
+        positions.append(c->latitude());
+        positions.append(c->altitude());
+    }
+
+    QJsonObject positionList {
+        {"cartographicDegrees", positions},
+    };
+
+    QColor color = QColor::fromRgba(mapItem->m_itemSettings->m_3DTrackColor);
+    QJsonArray colorRGBA {
+        color.red(), color.green(), color.blue(), color.alpha()
+    };
+    QJsonObject colorObj {
+        {"rgba", colorRGBA}
+    };
+
+    QJsonObject solidColor {
+        {"color", colorObj},
+    };
+
+    QJsonObject material {
+        {"solidColor", solidColor}
+    };
+
+    QJsonObject polyline {
+        {"positions", positionList},
+        {"material", material}
+    };
+
+    obj.insert("polyline", polyline);
+    obj.insert("description", mapItem->m_label);
+
+    //qDebug() << "Polyline " << obj;
+    return obj;
+}
+
+QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
 {
     (void) isTarget;
+
+    QString id = mapItem->m_name;
+
+    QJsonObject obj {
+        {"id", id}         // id must be unique
+    };
+
+    if (!mapItem->m_itemSettings->m_enabled || filter(mapItem))
+    {
+        // Delete obj completely (including any history)
+        obj.insert("delete", true);
+        return obj;
+    }
 
     // Don't currently use CLIP_TO_GROUND in Cesium due to Jitter bug
     // https://github.com/CesiumGS/cesium/issues/4049
@@ -65,8 +220,6 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
         dt = QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs);
     }
 
-    QString id = mapItem->m_name;
-
     // Keep a hash of the time we first saw each item
     bool existingId = m_ids.contains(id);
     if (!existingId) {
@@ -77,7 +230,7 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
     bool fixedPosition = mapItem->m_fixedPosition;
     if (mapItem->m_image == "")
     {
-        // Need to remove this from the map
+        // Need to remove this from the map (but history is retained)
         removeObj = true;
     }
 
@@ -143,10 +296,10 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
                 hasMoved = true;
                 m_hasMoved.insert(id, true);
             }
-            if (hasMoved)
+            if (hasMoved && (mapItem->m_itemSettings->m_extrapolate > 0))
             {
                 position.insert("forwardExtrapolationType", "EXTRAPOLATE");
-                position.insert("forwardExtrapolationDuration", 60);
+                position.insert("forwardExtrapolationDuration", mapItem->m_itemSettings->m_extrapolate);
                 // Use linear interpolation for now - other two can go crazy with aircraft on the ground
                 //position.insert("interpolationAlgorithm", "HERMITE");
                 //position.insert("interpolationDegree", "2");
@@ -182,7 +335,7 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
     QJsonObject orientation {
         {"unitQuaternion", quaternion},
         {"forwardExtrapolationType", "HOLD"}, // If we extrapolate, aircraft tend to spin around
-        {"forwardExtrapolationDuration", 60},
+        {"forwardExtrapolationDuration", mapItem->m_itemSettings->m_extrapolate},
        // {"interpolationAlgorithm", "LAGRANGE"}
     };
     QJsonObject orientationPosition {
@@ -269,7 +422,10 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
     // Prevent labels from being too cluttered when zoomed out
     // FIXME: These values should come from mapItem or mapItemSettings
     float displayDistanceMax = std::numeric_limits<float>::max();
-    if ((mapItem->m_group == "Beacons") || (mapItem->m_group == "AM") || (mapItem->m_group == "FM") || (mapItem->m_group == "DAB")) {
+    if ((mapItem->m_group == "Beacons")
+        || (mapItem->m_group == "AM") || (mapItem->m_group == "FM") || (mapItem->m_group == "DAB")
+        || (mapItem->m_group == "NavAid")
+       ) {
         displayDistanceMax = 1000000;
     } else if ((mapItem->m_group == "Station") || (mapItem->m_group == "Radar") || (mapItem->m_group == "Radio Time Transmitters")) {
         displayDistanceMax = 10000000;
@@ -330,10 +486,6 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
         {"verticalOrigin", "BOTTOM"} // To stop it being cut in half when zoomed out
     };
 
-    QJsonObject obj {
-        {"id", id}         // id must be unique
-    };
-
     if (!removeObj)
     {
         obj.insert("position", position);
@@ -368,9 +520,11 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
             }
             else
             {
-                QString oneMin = QDateTime::currentDateTimeUtc().addSecs(60).toString(Qt::ISODateWithMs);
-                QString createdToNow = QString("%1/%2").arg(m_ids[id]).arg(oneMin); // From when object was created to now
-                obj.insert("availability", createdToNow);
+                if (mapItem->m_availableUntil.isValid())
+                {
+                    QString period = QString("%1/%2").arg(m_ids[id]).arg(mapItem->m_availableUntil.toString(Qt::ISODateWithMs));
+                    obj.insert("availability", period);
+                }
             }
         }
         m_lastPosition.insert(id, coords);
@@ -391,3 +545,4 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
 
     return obj;
 }
+

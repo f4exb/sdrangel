@@ -26,193 +26,54 @@
 
 #include "SWGTargetAzimuthElevation.h"
 
-MapItem::MapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem) :
-    m_altitude(0.0)
+QVariant MapModel::data(const QModelIndex &index, int role) const
 {
-    m_sourcePipe = sourcePipe;
-    m_group = group;
-    m_itemSettings = itemSettings;
-    m_name = *mapItem->getName();
-    update(mapItem);
-}
-
-void MapItem::update(SWGSDRangel::SWGMapItem *mapItem)
-{
-    if (mapItem->getLabel()) {
-        m_label = *mapItem->getLabel();
-    } else {
-        m_label = "";
+    int row = index.row();
+    if ((row < 0) || (row >= m_items.count())) {
+        return QVariant();
     }
-    m_latitude = mapItem->getLatitude();
-    m_longitude = mapItem->getLongitude();
-    m_altitude = mapItem->getAltitude();
-    if (mapItem->getPositionDateTime()) {
-        m_positionDateTime = QDateTime::fromString(*mapItem->getPositionDateTime(), Qt::ISODateWithMs);
-    } else {
-        m_positionDateTime = QDateTime();
-    }
-    m_useHeadingPitchRoll = mapItem->getOrientation() == 1;
-    m_heading = mapItem->getHeading();
-    m_pitch = mapItem->getPitch();
-    m_roll = mapItem->getRoll();
-    if (mapItem->getOrientationDateTime()) {
-        m_orientationDateTime = QDateTime::fromString(*mapItem->getOrientationDateTime(), Qt::ISODateWithMs);
-    } else {
-        m_orientationDateTime = QDateTime();
-    }
-    m_image = *mapItem->getImage();
-    m_imageRotation = mapItem->getImageRotation();
-    QString *text = mapItem->getText();
-    if (text != nullptr) {
-        m_text = text->replace("\n", "<br>");  // Convert to HTML
-    } else {
-        m_text = "";
-    }
-    if (mapItem->getModel()) {
-        m_model = *mapItem->getModel();
-    } else {
-        m_model = "";
-    }
-    m_labelAltitudeOffset = mapItem->getLabelAltitudeOffset();
-    m_modelAltitudeOffset = mapItem->getModelAltitudeOffset();
-    m_altitudeReference = mapItem->getAltitudeReference();
-    m_fixedPosition = mapItem->getFixedPosition();
-    QList<SWGSDRangel::SWGMapAnimation *> *animations = mapItem->getAnimations();
-    if (animations)
+    switch (role)
     {
-        for (auto animation : *animations) {
-            m_animations.append(new CesiumInterface::Animation(animation));
-        }
-    }
-    findFrequency();
-    updateTrack(mapItem->getTrack());
-    updatePredictedTrack(mapItem->getPredictedTrack());
-}
-
-QGeoCoordinate MapItem::getCoordinates()
-{
-    QGeoCoordinate coords;
-    coords.setLatitude(m_latitude);
-    coords.setLongitude(m_longitude);
-    return coords;
-}
-
-void MapItem::findFrequency()
-{
-    // Look for a frequency in the text for this object
-    QRegExp re("(([0-9]+(\\.[0-9]+)?) *([kMG])?Hz)");
-    if (re.indexIn(m_text) != -1)
+    case itemSettingsRole:
+        return QVariant::fromValue(m_items[row]->m_itemSettings);
+    case nameRole:
+        return QVariant::fromValue(m_items[row]->m_name);
+    case labelRole:
+        return QVariant::fromValue(m_items[row]->m_label);
+    case positionRole:
     {
-        QStringList capture = re.capturedTexts();
-        m_frequency = capture[2].toDouble();
-        if (capture.length() == 5)
-        {
-            QChar unit = capture[4][0];
-            if (unit == 'k')
-                m_frequency *= 1000.0;
-            else if (unit == 'M')
-                m_frequency *= 1000000.0;
-            else if (unit == 'G')
-                m_frequency *= 1000000000.0;
-        }
-        m_frequencyString = capture[0];
+        // Coordinates to display the label at
+        QGeoCoordinate coords;
+        coords.setLatitude(m_items[row]->m_latitude);
+        coords.setLongitude(m_items[row]->m_longitude);
+        coords.setAltitude(m_items[row]->m_altitude);
+        return QVariant::fromValue(coords);
     }
-    else
-    {
-        m_frequency = 0.0;
+    case mapImageMinZoomRole:
+        // Minimum zoom level at which this is visible
+        return QVariant::fromValue(m_items[row]->m_itemSettings->m_2DMinZoom);
+    default:
+        return QVariant();
     }
 }
 
-void MapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track)
+bool MapModel::setData(const QModelIndex &index, const QVariant& value, int role)
 {
-    if (track != nullptr)
-    {
-        qDeleteAll(m_takenTrackCoords);
-        m_takenTrackCoords.clear();
-        qDeleteAll(m_takenTrackDateTimes);
-        m_takenTrackDateTimes.clear();
-        m_takenTrack.clear();
-        m_takenTrack1.clear();
-        m_takenTrack2.clear();
-        for (int i = 0; i < track->size(); i++)
-        {
-            SWGSDRangel::SWGMapCoordinate* p = track->at(i);
-            QGeoCoordinate *c = new QGeoCoordinate(p->getLatitude(), p->getLongitude(), p->getAltitude());
-            QDateTime *d = new QDateTime(QDateTime::fromString(*p->getDateTime(), Qt::ISODate));
-            m_takenTrackCoords.push_back(c);
-            m_takenTrackDateTimes.push_back(d);
-            m_takenTrack.push_back(QVariant::fromValue(*c));
-        }
+    (void) value;
+    (void) role;
+
+    int row = index.row();
+    if ((row < 0) || (row >= m_items.count())) {
+        return false;
     }
-    else
-    {
-        // Automatically create a track
-        if (m_takenTrackCoords.size() == 0)
-        {
-            QGeoCoordinate *c = new QGeoCoordinate(m_latitude, m_longitude, m_altitude);
-            m_takenTrackCoords.push_back(c);
-            if (m_positionDateTime.isValid()) {
-                m_takenTrackDateTimes.push_back(new QDateTime(m_positionDateTime));
-            } else {
-                m_takenTrackDateTimes.push_back(new QDateTime(QDateTime::currentDateTime()));
-            }
-            m_takenTrack.push_back(QVariant::fromValue(*c));
-        }
-        else
-        {
-            QGeoCoordinate *prev = m_takenTrackCoords.last();
-            QDateTime *prevDateTime = m_takenTrackDateTimes.last();
-            if ((prev->latitude() != m_latitude) || (prev->longitude() != m_longitude)
-                || (prev->altitude() != m_altitude) || (*prevDateTime != m_positionDateTime))
-            {
-                QGeoCoordinate *c = new QGeoCoordinate(m_latitude, m_longitude, m_altitude);
-                m_takenTrackCoords.push_back(c);
-                if (m_positionDateTime.isValid()) {
-                    m_takenTrackDateTimes.push_back(new QDateTime(m_positionDateTime));
-                } else {
-                    m_takenTrackDateTimes.push_back(new QDateTime(QDateTime::currentDateTime()));
-                }
-                m_takenTrack.push_back(QVariant::fromValue(*c));
-            }
-        }
-    }
+    return true;
 }
 
-void MapItem::updatePredictedTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track)
-{
-    if (track != nullptr)
-    {
-        qDeleteAll(m_predictedTrackCoords);
-        m_predictedTrackCoords.clear();
-        qDeleteAll(m_predictedTrackDateTimes);
-        m_predictedTrackDateTimes.clear();
-        m_predictedTrack.clear();
-        m_predictedTrack1.clear();
-        m_predictedTrack2.clear();
-        for (int i = 0; i < track->size(); i++)
-        {
-            SWGSDRangel::SWGMapCoordinate* p = track->at(i);
-            QGeoCoordinate *c = new QGeoCoordinate(p->getLatitude(), p->getLongitude(), p->getAltitude());
-            QDateTime *d = new QDateTime(QDateTime::fromString(*p->getDateTime(), Qt::ISODate));
-            m_predictedTrackCoords.push_back(c);
-            m_predictedTrackDateTimes.push_back(d);
-            m_predictedTrack.push_back(QVariant::fromValue(*c));
-        }
-    }
-}
-
-MapModel::MapModel(MapGUI *gui) :
-    m_gui(gui),
-    m_target(-1)
-{
-    connect(this, &MapModel::dataChanged, this, &MapModel::update3DMap);
-}
-
-Q_INVOKABLE void MapModel::add(MapItem *item)
+void MapModel::add(MapItem *item)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_items.append(item);
-    m_selected.append(false);
+    m_itemsHash.insert(item->m_hashKey, item);
     endInsertRows();
 }
 
@@ -237,7 +98,6 @@ void MapModel::update(const QObject *sourcePipe, SWGSDRangel::SWGMapItem *swgMap
         {
             // Update the item
             item->update(swgMapItem);
-            splitTracks(item);
             update(item);
         }
     }
@@ -248,20 +108,295 @@ void MapModel::update(const QObject *sourcePipe, SWGSDRangel::SWGMapItem *swgMap
         if (!image.isEmpty())
         {
             // Add new item
-            item = new MapItem(sourcePipe, group, m_gui->getItemSettings(group), swgMapItem);
+            item = newMapItem(sourcePipe, group, m_gui->getItemSettings(group), swgMapItem);
             add(item);
             // Add to 3D Map (we don't appear to get a dataChanged signal when adding)
-            CesiumInterface *cesium = m_gui->cesium();
-            if (cesium) {
-                cesium->update(item, isTarget(item), isSelected3D(item));
-            }
-            playAnimations(item);
+            update3D(item);
         }
     }
 }
 
+void MapModel::update(MapItem *item)
+{
+    int row = m_items.indexOf(item);
+    if (row >= 0)
+    {
+        QModelIndex idx = index(row);
+        emit dataChanged(idx, idx);
+    }
+}
+
+void MapModel::remove(MapItem *item)
+{
+    int row = m_items.indexOf(item);
+    if (row >= 0)
+    {
+        QString key = m_items[row]->m_hashKey;
+        beginRemoveRows(QModelIndex(), row, row);
+        m_items.removeAt(row);
+        m_itemsHash.remove(key);
+        endRemoveRows();
+    }
+}
+
+void MapModel::removeAll()
+{
+    if (m_items.count() > 0)
+    {
+        beginRemoveRows(QModelIndex(), 0, m_items.count() - 1);
+        m_items.clear();
+        m_itemsHash.clear();
+        endRemoveRows();
+    }
+}
+
+// After new settings are deserialised, we need to update
+// pointers to item settings for all existing items
+void MapModel::updateItemSettings(QHash<QString, MapSettings::MapItemSettings *> m_itemSettings)
+{
+    for (auto item : m_items)
+    {
+        if (m_itemSettings.contains(item->m_group)) {
+            item->m_itemSettings = m_itemSettings[item->m_group];
+        }
+    }
+}
+
+void MapModel::allUpdated()
+{
+    if (m_items.count() > 0) {
+        emit dataChanged(index(0), index(m_items.count()-1));
+    }
+}
+
+MapItem *MapModel::findMapItem(const QObject *source, const QString& name)
+{
+    QString key = source->objectName() + name;
+    if (m_itemsHash.contains(key)) {
+        return m_itemsHash.value(key);
+    }
+    return nullptr;
+}
+
+QHash<int, QByteArray> MapModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[itemSettingsRole] = "itemSettings";
+    roles[nameRole] = "name";
+    roles[labelRole] = "label";
+    roles[positionRole] = "position";
+    roles[mapImageMinZoomRole] = "mapImageMinZoom";
+    return roles;
+}
+
 // Slot called on dataChanged signal, to update 3D map
 void MapModel::update3DMap(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
+{
+    (void) roles;
+
+    for (int row = topLeft.row(); row <= bottomRight.row(); row++) {
+        update3D(m_items[row]);
+    }
+}
+
+MapItem *ImageMapModel::newMapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem)
+{
+    return new ImageMapItem(sourcePipe, group, itemSettings, mapItem);
+}
+
+QVariant ImageMapModel::data(const QModelIndex &index, int role) const
+{
+    int row = index.row();
+    if ((row < 0) || (row >= m_items.count())) {
+        return QVariant();
+    }
+    ImageMapItem *mapItem = (ImageMapItem*)m_items[row];
+    switch (role)
+    {
+    case imageRole:
+         return QVariant::fromValue(mapItem->m_image);
+    case imageZoomLevelRole:
+         return QVariant::fromValue(mapItem->m_imageZoomLevel);
+    case boundsRole:
+        return QVariant::fromValue(mapItem->m_bounds);
+    default:
+        return MapModel::data(index, role);
+    }
+}
+
+void ImageMapModel::update3D(MapItem *item)
+{
+    CesiumInterface *cesium = m_gui->cesium();
+    if (cesium)
+    {
+        ImageMapItem *imageItem = (ImageMapItem *)item;
+        if (!imageItem->m_image.isEmpty())
+        {
+            /*qDebug() << "ImageMapModel::update3D - " << imageItem->m_name
+                                                     << imageItem->m_bounds.right()
+                                                     << imageItem->m_bounds.left()
+                                                     << imageItem->m_bounds.top()
+                                                     << imageItem->m_bounds.bottom()
+                                                     ;  */
+            cesium->updateImage(imageItem->m_name,
+                                imageItem->m_bounds.topRight().longitude(),
+                                imageItem->m_bounds.bottomLeft().longitude(),
+                                imageItem->m_bounds.topRight().latitude(),
+                                imageItem->m_bounds.bottomLeft().latitude(),
+                                imageItem->m_altitude,
+                                imageItem->m_image);
+        }
+        else
+        {
+            qDebug() << "ImageMapModel::update3D - removeImage " << imageItem->m_name;
+            cesium->removeImage(imageItem->m_name);
+        }
+    }
+}
+
+MapItem *PolygonMapModel::newMapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem)
+{
+    return new PolygonMapItem(sourcePipe, group, itemSettings, mapItem);
+}
+
+QVariant PolygonMapModel::data(const QModelIndex &index, int role) const
+{
+    int row = index.row();
+    if ((row < 0) || (row >= m_items.count())) {
+        return QVariant();
+    }
+    PolygonMapItem *polygonItem = ((PolygonMapItem *)m_items[row]);
+    switch (role)
+    {
+    case borderColorRole:
+         return QVariant::fromValue(QColor(0x00, 0x00, 0x00, 0x00)); // Transparent
+    case fillColorRole:
+        if (m_items[row]->m_itemSettings->m_display2DTrack) {
+            return QVariant::fromValue(QColor::fromRgba(m_items[row]->m_itemSettings->m_2DTrackColor));
+        } else {
+            return QVariant::fromValue(QColor(0x00, 0x00, 0x00, 0x00)); // Transparent
+        }
+    case polygonRole:
+        return polygonItem->m_polygon;
+    case boundsRole:
+        return QVariant::fromValue(polygonItem->m_bounds);
+    default:
+        return MapModel::data(index, role);
+    }
+}
+
+void PolygonMapModel::update3D(MapItem *item)
+{
+    CesiumInterface *cesium = m_gui->cesium();
+    if (cesium) {
+        cesium->update((PolygonMapItem *)item);
+    }
+}
+
+MapItem *PolylineMapModel::newMapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem)
+{
+    return new PolylineMapItem(sourcePipe, group, itemSettings, mapItem);
+}
+
+QVariant PolylineMapModel::data(const QModelIndex &index, int role) const
+{
+    int row = index.row();
+    if ((row < 0) || (row >= m_items.count())) {
+        return QVariant();
+    }
+    PolylineMapItem *polylineItem = (PolylineMapItem *)m_items[row];
+    switch (role)
+    {
+    case lineColorRole:
+        return QVariant::fromValue(QColor::fromRgba(m_items[row]->m_itemSettings->m_2DTrackColor));
+    case coordinatesRole:
+        return QVariant::fromValue(polylineItem->m_polyline);
+    case boundsRole:
+        return QVariant::fromValue(polylineItem->m_bounds);
+    default:
+        return MapModel::data(index, role);
+    }
+}
+
+void PolylineMapModel::update3D(MapItem *item)
+{
+    CesiumInterface *cesium = m_gui->cesium();
+    if (cesium) {
+        cesium->update((PolylineMapItem *)item);
+    }
+}
+
+ObjectMapModel::ObjectMapModel(MapGUI *gui) :
+    MapModel(gui),
+    m_target(-1)
+{
+    //connect(this, &ObjectMapModel::dataChanged, this, &ObjectMapModel::update3DMap);
+}
+
+Q_INVOKABLE void ObjectMapModel::add(MapItem *item)
+{
+    m_selected.append(false);
+    MapModel::add(item);
+}
+
+/*void ObjectMapModel::update(const QObject *sourcePipe, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group)
+{
+    QString name = *swgMapItem->getName();
+    // Add, update or delete and item
+    ObjectMapItem *item = (ObjectMapItem *)MapModel::findMapItem(sourcePipe, name);
+    if (item != nullptr)
+    {
+        QString image = *swgMapItem->getImage();
+        if (image.isEmpty())
+        {
+            // Delete the item
+            remove(item);
+            // Need to call update, for it to be removed in 3D map
+            // Item is set to not be available from this point in time
+            // It will still be available if time is set in the past
+            item->update(swgMapItem);
+        }
+        else
+        {
+            // Update the item
+            item->update(swgMapItem);
+            splitTracks(item);            // ******** diff from base   FIXME
+            update(item);
+        }
+    }
+    else
+    {
+        // Make sure not a duplicate request to delete
+        QString image = *swgMapItem->getImage();
+        if (!image.isEmpty())
+        {
+            // Add new item
+            item = (ObjectMapItem *)newMapItem(sourcePipe, group, m_gui->getItemSettings(group), swgMapItem);
+            add(item);
+            // Add to 3D Map (we don't appear to get a dataChanged signal when adding)
+            update3D(item);
+        }
+    }
+}*/
+
+MapItem *ObjectMapModel::newMapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem)
+{
+    return new ObjectMapItem(sourcePipe, group, itemSettings, mapItem);
+}
+
+void ObjectMapModel::update3D(MapItem *item)
+{
+    CesiumInterface *cesium = m_gui->cesium();
+    if (cesium)
+    {
+        ObjectMapItem *objectMapItem = (ObjectMapItem *)item;
+        cesium->update(objectMapItem, isTarget(objectMapItem), isSelected3D(objectMapItem));
+        playAnimations(objectMapItem);
+    }
+}
+
+// Slot called on dataChanged signal, to update 3D map
+/*void ObjectMapModel::update3DMap(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
 {
     (void) roles;
 
@@ -270,13 +405,14 @@ void MapModel::update3DMap(const QModelIndex &topLeft, const QModelIndex &bottom
     {
         for (int row = topLeft.row(); row <= bottomRight.row(); row++)
         {
-            cesium->update(m_items[row], isTarget(m_items[row]), isSelected3D(m_items[row]));
-            playAnimations(m_items[row]);
+            ObjectMapItem *item = (ObjectMapItem *)m_items[row];
+            cesium->update(item, isTarget(item), isSelected3D(item));
+            playAnimations(item);
         }
     }
-}
+} */
 
-void MapModel::playAnimations(MapItem *item)
+void ObjectMapModel::playAnimations(ObjectMapItem *item)
 {
     CesiumInterface *cesium = m_gui->cesium();
     if (cesium)
@@ -289,67 +425,69 @@ void MapModel::playAnimations(MapItem *item)
     item->m_animations.clear();
 }
 
-void MapModel::update(MapItem *item)
+void ObjectMapModel::update(MapItem *item)
 {
+    splitTracks((ObjectMapItem *)item);
+    MapModel::update(item);
     int row = m_items.indexOf(item);
     if (row >= 0)
     {
-        QModelIndex idx = index(row);
-        emit dataChanged(idx, idx);
         if (row == m_target) {
             updateTarget();
         }
     }
 }
 
-void MapModel::remove(MapItem *item)
+void ObjectMapModel::remove(MapItem *item)
 {
     int row = m_items.indexOf(item);
     if (row >= 0)
     {
-        beginRemoveRows(QModelIndex(), row, row);
-        m_items.removeAt(row);
         m_selected.removeAt(row);
         if (row == m_target) {
             m_target = -1;
         } else if (row < m_target) {
             m_target--;
         }
-        endRemoveRows();
+        MapModel::remove(item);
     }
 }
 
-void MapModel::allUpdated()
+void ObjectMapModel::removeAll()
 {
-    for (int i = 0; i < m_items.count(); i++)
-    {
-        // Updates both 2D and 3D Map
-        QModelIndex idx = index(i);
-        emit dataChanged(idx, idx);
-    }
+    MapModel::removeAll();
+    m_selected.clear();
 }
 
-void MapModel::removeAll()
+QHash<int, QByteArray> ObjectMapModel::roleNames() const
 {
-    if (m_items.count() > 0)
-    {
-        beginRemoveRows(QModelIndex(), 0, m_items.count());
-        m_items.clear();
-        m_selected.clear();
-        endRemoveRows();
-    }
+    QHash<int, QByteArray> roles = MapModel::roleNames();
+    //roles[itemSettingsRole] = "itemSettings";
+    //roles[nameRole] = "name";
+    //roles[positionRole] = "position";
+    //roles[mapTextRole] = "mapText";
+    roles[MapModel::labelRole] = "mapText";
+    roles[mapTextVisibleRole] = "mapTextVisible";
+    roles[mapImageVisibleRole] = "mapImageVisible";
+    roles[mapImageRole] = "mapImage";
+    roles[mapImageRotationRole] = "mapImageRotation";
+    //roles[mapImageMinZoomRole] = "mapImageMinZoom";
+    roles[bubbleColourRole] = "bubbleColour";
+    roles[selectedRole] = "selected";
+    roles[targetRole] = "target";
+    roles[frequencyRole] = "frequency";
+    roles[frequencyStringRole] = "frequencyString";
+    roles[predictedGroundTrack1Role] = "predictedGroundTrack1";
+    roles[predictedGroundTrack2Role] = "predictedGroundTrack2";
+    roles[groundTrack1Role] = "groundTrack1";
+    roles[groundTrack2Role] = "groundTrack2";
+    roles[groundTrackColorRole] = "groundTrackColor";
+    roles[predictedGroundTrackColorRole] = "predictedGroundTrackColor";
+    roles[hasTracksRole] = "hasTracks";
+    return roles;
 }
 
-// After new settings are deserialised, we need to update
-// pointers to item settings for all existing items
-void MapModel::updateItemSettings(QHash<QString, MapSettings::MapItemSettings *> m_itemSettings)
-{
-    for (auto item : m_items) {
-        item->m_itemSettings = m_itemSettings[item->m_group];
-    }
-}
-
-void MapModel::updateTarget()
+void ObjectMapModel::updateTarget()
 {
     // Calculate range, azimuth and elevation to object from station
     AzEl *azEl = m_gui->getAzEl();
@@ -371,21 +509,21 @@ void MapModel::updateTarget()
     }
 }
 
-void MapModel::setTarget(const QString& name)
+void ObjectMapModel::setTarget(const QString& name)
 {
     if (name.isEmpty())
     {
         QModelIndex idx = index(-1);
-        setData(idx, QVariant(-1), MapModel::targetRole);
+        setData(idx, QVariant(-1), ObjectMapModel::targetRole);
     }
     else
     {
         QModelIndex idx = findMapItemIndex(name);
-        setData(idx, QVariant(idx.row()), MapModel::targetRole);
+        setData(idx, QVariant(idx.row()), ObjectMapModel::targetRole);
     }
 }
 
-bool MapModel::isTarget(const MapItem *mapItem) const
+bool ObjectMapModel::isTarget(const ObjectMapItem *mapItem) const
 {
     if (m_target < 0) {
         return false;
@@ -396,13 +534,13 @@ bool MapModel::isTarget(const MapItem *mapItem) const
 
 // FIXME: This should use Z order - rather than adding/removing
 // but I couldn't quite get it to work
-Q_INVOKABLE void MapModel::moveToFront(int oldRow)
+Q_INVOKABLE void ObjectMapModel::moveToFront(int oldRow)
 {
     // Last item in list is drawn on top, so remove than add to end of list
     if (oldRow < m_items.size() - 1)
     {
         bool wasTarget = m_target == oldRow;
-        MapItem *item = m_items[oldRow];
+        ObjectMapItem *item = (ObjectMapItem *)m_items[oldRow];
         bool wasSelected = m_selected[oldRow];
         remove(item);
         add(item);
@@ -416,7 +554,7 @@ Q_INVOKABLE void MapModel::moveToFront(int oldRow)
     }
 }
 
-Q_INVOKABLE void MapModel::moveToBack(int oldRow)
+Q_INVOKABLE void ObjectMapModel::moveToBack(int oldRow)
 {
     // First item in list is drawn first, so remove item then add to front of list
     if ((oldRow < m_items.size()) && (oldRow > 0))
@@ -440,32 +578,22 @@ Q_INVOKABLE void MapModel::moveToBack(int oldRow)
     }
 }
 
-MapItem *MapModel::findMapItem(const QObject *source, const QString& name)
-{
-    // FIXME: Should consider adding a QHash for this
-    QListIterator<MapItem *> i(m_items);
-    while (i.hasNext())
-    {
-        MapItem *item = i.next();
-        if ((item->m_name == name) && (item->m_sourcePipe == source))
-            return item;
-    }
-    return nullptr;
-}
-
-MapItem *MapModel::findMapItem(const QString& name)
+// FIXME: This should potentially return a list, as we have have multiple items with the same name
+// from different sources
+ObjectMapItem *ObjectMapModel::findMapItem(const QString& name)
 {
     QListIterator<MapItem *> i(m_items);
     while (i.hasNext())
     {
         MapItem *item = i.next();
-        if (item->m_name == name)
-            return item;
+        if (item->m_name == name) {
+            return (ObjectMapItem *)item;
+        }
     }
     return nullptr;
 }
 
-QModelIndex MapModel::findMapItemIndex(const QString& name)
+QModelIndex ObjectMapModel::findMapItemIndex(const QString& name)
 {
     int idx = 0;
     QListIterator<MapItem *> i(m_items);
@@ -480,76 +608,50 @@ QModelIndex MapModel::findMapItemIndex(const QString& name)
     return index(-1);
 }
 
-int MapModel::rowCount(const QModelIndex &parent) const
-{
-    Q_UNUSED(parent)
-    return m_items.count();
-}
-
-QVariant MapModel::data(const QModelIndex &index, int role) const
+QVariant ObjectMapModel::data(const QModelIndex &index, int role) const
 {
     int row = index.row();
-
     if ((row < 0) || (row >= m_items.count())) {
         return QVariant();
     }
-    if (role == MapModel::positionRole)
+    ObjectMapItem *mapItem = (ObjectMapItem*)m_items[row];
+    switch (role)
     {
-        // Coordinates to display the item at
-        QGeoCoordinate coords;
-        coords.setLatitude(m_items[row]->m_latitude);
-        coords.setLongitude(m_items[row]->m_longitude);
-        return QVariant::fromValue(coords);
-    }
-    else if (role == MapModel::mapTextRole)
+    case labelRole: // mapTextRole)
     {
         // Create the text to go in the bubble next to the image
-        QString name = m_items[row]->m_label.isEmpty() ? m_items[row]->m_name : m_items[row]->m_label;
+        QString name = mapItem->m_label.isEmpty() ? mapItem->m_name :mapItem->m_label;
         if (row == m_target)
         {
             AzEl *azEl = m_gui->getAzEl();
-            QString text = QString("%1<br>Az: %2%5 El: %3%5 Dist: %4 km")
-                                .arg(m_selected[row] ? m_items[row]->m_text : name)
+            QString text = QString("%1<br>Az: %2%5 El: %3%5 Dist: %4 km<br>Coords: %6, %7")
+                                .arg(m_selected[row] ? mapItem->m_text : name)
                                 .arg(std::round(azEl->getAzimuth()))
                                 .arg(std::round(azEl->getElevation()))
                                 .arg(std::round(azEl->getDistance() / 1000.0))
-                                .arg(QChar(0xb0));
+                                .arg(QChar(0xb0))
+                                .arg(mapItem->m_latitude)
+                                .arg(mapItem->m_longitude);
             return QVariant::fromValue(text);
         }
         else if (m_selected[row])
         {
-            return QVariant::fromValue(m_items[row]->m_text);
+            return QVariant::fromValue(mapItem->m_text);
         }
         else
         {
             return QVariant::fromValue(name);
         }
     }
-    else if (role == MapModel::mapTextVisibleRole)
-    {
-        return QVariant::fromValue((m_selected[row] || m_displayNames) && m_items[row]->m_itemSettings->m_enabled && m_items[row]->m_itemSettings->m_display2DLabel);
-    }
-    else if (role == MapModel::mapImageVisibleRole)
-    {
-        return QVariant::fromValue(m_items[row]->m_itemSettings->m_enabled && m_items[row]->m_itemSettings->m_display2DIcon);
-    }
-    else if (role == MapModel::mapImageRole)
-    {
-        // Set an image to use
-        return QVariant::fromValue(m_items[row]->m_image);
-    }
-    else if (role == MapModel::mapImageRotationRole)
-    {
-        // Angle to rotate image by
-        return QVariant::fromValue(m_items[row]->m_imageRotation);
-    }
-    else if (role == MapModel::mapImageMinZoomRole)
-    {
-        // Minimum zoom level
-        //return QVariant::fromValue(m_items[row]->m_imageMinZoom);
-        return QVariant::fromValue(m_items[row]->m_itemSettings->m_2DMinZoom);
-    }
-    else if (role == MapModel::bubbleColourRole)
+    case mapTextVisibleRole:
+        return QVariant::fromValue((m_selected[row] || m_displayNames) && mapItem->m_itemSettings->m_display2DLabel);
+    case mapImageVisibleRole:
+        return QVariant::fromValue(mapItem->m_itemSettings->m_display2DIcon);
+    case mapImageRole:
+        return QVariant::fromValue(mapItem->m_image); // Set an image to use
+    case mapImageRotationRole:
+        return QVariant::fromValue(mapItem->m_imageRotation);  // Angle to rotate image by
+    case bubbleColourRole:
     {
         // Select a background colour for the text bubble next to the item
         if (m_selected[row]) {
@@ -558,81 +660,81 @@ QVariant MapModel::data(const QModelIndex &index, int role) const
             return QVariant::fromValue(QColor("lightblue"));
         }
     }
-    else if (role == MapModel::selectedRole)
-    {
+    case selectedRole:
         return QVariant::fromValue(m_selected[row]);
-    }
-    else if (role == MapModel::targetRole)
-    {
+    case targetRole:
         return QVariant::fromValue(m_target == row);
-    }
-    else if (role == MapModel::frequencyRole)
-    {
-        return QVariant::fromValue(m_items[row]->m_frequency);
-    }
-    else if (role == MapModel::frequencyStringRole)
-    {
-        return QVariant::fromValue(m_items[row]->m_frequencyString);
-    }
-    else if (role == MapModel::predictedGroundTrack1Role)
+    case frequencyRole:
+        return QVariant::fromValue(mapItem->m_frequency);
+    case frequencyStringRole:
+        return QVariant::fromValue(mapItem->m_frequencyString);
+    case predictedGroundTrack1Role:
     {
         if (   (m_displayAllGroundTracks || (m_displaySelectedGroundTracks && m_selected[row]))
-            && m_items[row]->m_itemSettings->m_enabled && m_items[row]->m_itemSettings->m_display2DTrack) {
-            return m_items[row]->m_predictedTrack1;
+            && mapItem->m_itemSettings->m_display2DTrack) {
+            return mapItem->m_predictedTrack1;
         } else {
             return QVariantList();
         }
     }
-    else if (role == MapModel::predictedGroundTrack2Role)
+    case predictedGroundTrack2Role:
     {
         if (   (m_displayAllGroundTracks || (m_displaySelectedGroundTracks && m_selected[row]))
-            && m_items[row]->m_itemSettings->m_enabled && m_items[row]->m_itemSettings->m_display2DTrack) {
-            return m_items[row]->m_predictedTrack2;
+            && mapItem->m_itemSettings->m_display2DTrack) {
+            return mapItem->m_predictedTrack2;
         } else {
             return QVariantList();
         }
     }
-    else if (role == MapModel::groundTrack1Role)
+    case groundTrack1Role:
     {
         if (   (m_displayAllGroundTracks || (m_displaySelectedGroundTracks && m_selected[row]))
-            && m_items[row]->m_itemSettings->m_enabled && m_items[row]->m_itemSettings->m_display2DTrack) {
-            return m_items[row]->m_takenTrack1;
+            && mapItem->m_itemSettings->m_display2DTrack) {
+            return mapItem->m_takenTrack1;
         } else {
             return QVariantList();
         }
     }
-    else if (role == MapModel::groundTrack2Role)
+    case groundTrack2Role:
     {
         if (   (m_displayAllGroundTracks || (m_displaySelectedGroundTracks && m_selected[row]))
-            && m_items[row]->m_itemSettings->m_enabled && m_items[row]->m_itemSettings->m_display2DTrack) {
-            return m_items[row]->m_takenTrack2;
+            && mapItem->m_itemSettings->m_display2DTrack) {
+            return mapItem->m_takenTrack2;
         } else {
             return QVariantList();
         }
     }
-    else if (role == groundTrackColorRole)
+    case groundTrackColorRole:
+        return QVariant::fromValue(QColor::fromRgb(mapItem->m_itemSettings->m_2DTrackColor));
+    case predictedGroundTrackColorRole:
+        return QVariant::fromValue(QColor::fromRgb(mapItem->m_itemSettings->m_2DTrackColor).lighter());
+    case hasTracksRole:
     {
-        return QVariant::fromValue(QColor::fromRgb(m_items[row]->m_itemSettings->m_2DTrackColor));
+        bool hasTracks =    (m_displayAllGroundTracks || (m_displaySelectedGroundTracks && m_selected[row]))
+                         && (   (mapItem->m_predictedTrack1.size() > 1)
+                             || (mapItem->m_predictedTrack2.size() > 1)
+                             || (mapItem->m_takenTrack1.size() > 1)
+                             || (mapItem->m_takenTrack2.size() > 1)
+                            );
+        return QVariant::fromValue(hasTracks);
     }
-    else if (role == predictedGroundTrackColorRole)
-    {
-        return QVariant::fromValue(QColor::fromRgb(m_items[row]->m_itemSettings->m_2DTrackColor).lighter());
+    default:
+        return MapModel::data(index, role);
     }
-    return QVariant();
 }
 
-bool MapModel::setData(const QModelIndex &idx, const QVariant& value, int role)
+bool ObjectMapModel::setData(const QModelIndex &idx, const QVariant& value, int role)
 {
     int row = idx.row();
     if ((row < 0) || (row >= m_items.count()))
         return false;
-    if (role == MapModel::selectedRole)
+    if (role == selectedRole)
     {
         m_selected[row] = value.toBool();
         emit dataChanged(idx, idx);
         return true;
     }
-    else if (role == MapModel::targetRole)
+    else if (role == targetRole)
     {
         if (m_target >= 0)
         {
@@ -649,37 +751,31 @@ bool MapModel::setData(const QModelIndex &idx, const QVariant& value, int role)
     return true;
 }
 
-Qt::ItemFlags MapModel::flags(const QModelIndex &index) const
-{
-    (void) index;
-    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
-}
-
-void MapModel::setDisplayNames(bool displayNames)
+void ObjectMapModel::setDisplayNames(bool displayNames)
 {
     m_displayNames = displayNames;
     allUpdated();
 }
 
-void MapModel::setDisplaySelectedGroundTracks(bool displayGroundTracks)
+void ObjectMapModel::setDisplaySelectedGroundTracks(bool displayGroundTracks)
 {
     m_displaySelectedGroundTracks = displayGroundTracks;
     allUpdated();
 }
 
-void MapModel::setDisplayAllGroundTracks(bool displayGroundTracks)
+void ObjectMapModel::setDisplayAllGroundTracks(bool displayGroundTracks)
 {
     m_displayAllGroundTracks = displayGroundTracks;
     allUpdated();
 }
 
-void MapModel::setFrequency(double frequency)
+void ObjectMapModel::setFrequency(double frequency)
 {
     // Set as centre frequency
     ChannelWebAPIUtils::setCenterFrequency(0, frequency);
 }
 
-void MapModel::track3D(int index)
+void ObjectMapModel::track3D(int index)
 {
     if (index < m_items.count())
     {
@@ -688,17 +784,21 @@ void MapModel::track3D(int index)
     }
 }
 
-void MapModel::splitTracks(MapItem *item)
+void ObjectMapModel::splitTracks(ObjectMapItem *item)
 {
     if (item->m_takenTrackCoords.size() > 1)
+    {
         splitTrack(item->m_takenTrackCoords, item->m_takenTrack, item->m_takenTrack1, item->m_takenTrack2,
                         item->m_takenStart1, item->m_takenStart2, item->m_takenEnd1, item->m_takenEnd2);
+    }
     if (item->m_predictedTrackCoords.size() > 1)
+    {
         splitTrack(item->m_predictedTrackCoords, item->m_predictedTrack, item->m_predictedTrack1, item->m_predictedTrack2,
                         item->m_predictedStart1, item->m_predictedStart2, item->m_predictedEnd1, item->m_predictedEnd2);
+    }
 }
 
-void MapModel::interpolateEast(QGeoCoordinate *c1, QGeoCoordinate *c2, double x, QGeoCoordinate *ci, bool offScreen)
+void ObjectMapModel::interpolateEast(QGeoCoordinate *c1, QGeoCoordinate *c2, double x, QGeoCoordinate *ci, bool offScreen)
 {
     double x1 = c1->longitude();
     double y1 = c1->latitude();
@@ -721,7 +821,7 @@ void MapModel::interpolateEast(QGeoCoordinate *c1, QGeoCoordinate *c2, double x,
     ci->setAltitude(c1->altitude());
 }
 
-void MapModel::interpolateWest(QGeoCoordinate *c1, QGeoCoordinate *c2, double x, QGeoCoordinate *ci, bool offScreen)
+void ObjectMapModel::interpolateWest(QGeoCoordinate *c1, QGeoCoordinate *c2, double x, QGeoCoordinate *ci, bool offScreen)
 {
     double x1 = c1->longitude();
     double y1 = c1->latitude();
@@ -827,7 +927,7 @@ static bool crossesEdge(double lon, double prevLon, double bottomLeftLongitude, 
     }
 }
 
-void MapModel::interpolate(QGeoCoordinate *c1, QGeoCoordinate *c2, double bottomLeftLongitude, double bottomRightLongitude, QGeoCoordinate* ci, bool offScreen)
+void ObjectMapModel::interpolate(QGeoCoordinate *c1, QGeoCoordinate *c2, double bottomLeftLongitude, double bottomRightLongitude, QGeoCoordinate* ci, bool offScreen)
 {
     double x1 = c1->longitude();
     double x2 = c2->longitude();
@@ -849,7 +949,7 @@ void MapModel::interpolate(QGeoCoordinate *c1, QGeoCoordinate *c2, double bottom
     }
 }
 
-void MapModel::splitTrack(const QList<QGeoCoordinate *>& coords, const QVariantList& track,
+void ObjectMapModel::splitTrack(const QList<QGeoCoordinate *>& coords, const QVariantList& track,
                         QVariantList& track1, QVariantList& track2,
                         QGeoCoordinate& start1, QGeoCoordinate& start2,
                         QGeoCoordinate& end1, QGeoCoordinate& end2)
@@ -968,29 +1068,297 @@ void MapModel::splitTrack(const QList<QGeoCoordinate *>& coords, const QVariantL
     */
 }
 
-void MapModel::viewChanged(double bottomLeftLongitude, double bottomRightLongitude)
+void ObjectMapModel::viewChanged(double bottomLeftLongitude, double bottomRightLongitude)
 {
     (void) bottomRightLongitude;
+
     if (!std::isnan(bottomLeftLongitude))
     {
         for (int row = 0; row < m_items.size(); row++)
         {
-            MapItem *item = m_items[row];
-            if (item->m_takenTrackCoords.size() > 1)
+            ObjectMapItem *item = (ObjectMapItem *)m_items[row];
+            if (m_items[row]->m_itemSettings->m_enabled)
             {
-                splitTrack(item->m_takenTrackCoords, item->m_takenTrack, item->m_takenTrack1, item->m_takenTrack2,
-                                item->m_takenStart1, item->m_takenStart2, item->m_takenEnd1, item->m_takenEnd2);
-                QModelIndex idx = index(row);
-                emit dataChanged(idx, idx);
-            }
-            if (item->m_predictedTrackCoords.size() > 1)
-            {
-                splitTrack(item->m_predictedTrackCoords, item->m_predictedTrack, item->m_predictedTrack1, item->m_predictedTrack2,
-                                item->m_predictedStart1, item->m_predictedStart2, item->m_predictedEnd1, item->m_predictedEnd2);
-                QModelIndex idx = index(row);
-                emit dataChanged(idx, idx);
+                if (item->m_takenTrackCoords.size() > 1)
+                {
+                    splitTrack(item->m_takenTrackCoords, item->m_takenTrack, item->m_takenTrack1, item->m_takenTrack2,
+                                    item->m_takenStart1, item->m_takenStart2, item->m_takenEnd1, item->m_takenEnd2);
+                    QModelIndex idx = index(row);
+                    QVector<int> roles = {groundTrack1Role, groundTrack2Role};
+                    emit dataChanged(idx, idx, roles);
+                }
+                if (item->m_predictedTrackCoords.size() > 1)
+                {
+                    splitTrack(item->m_predictedTrackCoords, item->m_predictedTrack, item->m_predictedTrack1, item->m_predictedTrack2,
+                                    item->m_predictedStart1, item->m_predictedStart2, item->m_predictedEnd1, item->m_predictedEnd2);
+                    QModelIndex idx = index(row);
+                    QVector<int> roles = {predictedGroundTrack1Role, predictedGroundTrack2Role};
+                    emit dataChanged(idx, idx, roles);
+                }
             }
         }
     }
+}
+
+bool ObjectMapFilter::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
+
+    MapSettings::MapItemSettings *itemSettings = sourceModel()->data(index0, ObjectMapModel::itemSettingsRole).value<MapSettings::MapItemSettings *>();
+    if (!itemSettings->m_enabled) {
+        return false;
+    }
+
+    // Don't show tiny items when we're zoomed out
+    int minZoom = sourceModel()->data(index0, ObjectMapModel::mapImageMinZoomRole).toInt();
+    if (minZoom - 3 >= m_zoomLevel) {
+        return false;
+    }
+
+    // Don't show off-screen items, unless they have tracks, as these may be on screen
+    // In the future, we could calculate a bounding box for tracks, if helpful for performance
+    QGeoCoordinate coord = sourceModel()->data(index0, ObjectMapModel::positionRole).value<QGeoCoordinate>();
+    float lat = coord.latitude();
+    float lon = coord.longitude();
+    bool onScreen = (lat >= m_bottomRightLatitude) && (lat <= m_topLeftLatitude) && (lon >= m_topLeftLongitude) && (lon <= m_bottomRightLongitude);
+    if (!onScreen)
+    {
+        bool hasTracks = sourceModel()->data(index0, ObjectMapModel::hasTracksRole).toBool();
+        if (!hasTracks) {
+            return false;
+        }
+    }
+
+    // Apply user filter
+    if (!itemSettings->m_filterName.isEmpty())
+    {
+        QString name = sourceModel()->data(index0, ObjectMapModel::nameRole).toString();
+        QRegularExpressionMatch match = itemSettings->m_filterNameRE.match(name);
+        if (!match.hasMatch()) {
+            return false;
+        }
+    }
+    if (itemSettings->m_filterDistance > 0)
+    {
+        QGeoCoordinate position = sourceModel()->data(index0, ObjectMapModel::positionRole).value<QGeoCoordinate>();
+        if (m_position.distanceTo(position) > itemSettings->m_filterDistance) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+void ObjectMapFilter::viewChanged(double topLeftLongitude, double topLeftLatitude, double bottomRightLongitude, double bottomRightLatitude, double zoomLevel)
+{
+    m_zoomLevel = zoomLevel;
+    if (!std::isnan(topLeftLongitude))
+    {
+        m_topLeftLongitude = topLeftLongitude;
+        m_topLeftLatitude = topLeftLatitude;
+        m_bottomRightLongitude = bottomRightLongitude;
+        m_bottomRightLatitude = bottomRightLatitude;
+    }
+    invalidateFilter();
+}
+
+Q_INVOKABLE int ObjectMapFilter::mapRowToSource(int row)
+{
+    QModelIndex sourceIndex = mapToSource(index(row, 0));
+    return sourceIndex.row();
+}
+
+
+bool PolygonFilter::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
+
+    MapSettings::MapItemSettings *itemSettings = sourceModel()->data(index0, PolygonMapModel::itemSettingsRole).value<MapSettings::MapItemSettings *>();
+    if (!itemSettings->m_enabled) {
+        return false;
+    }
+
+    // Don't show tiny items when we're zoomed out
+    int minZoom = sourceModel()->data(index0, PolygonMapModel::mapImageMinZoomRole).toInt();
+    if (minZoom - 3 >= m_zoomLevel) {
+        return false;
+    }
+
+    // Filter off-screen items
+    QGeoRectangle bounds = sourceModel()->data(index0, PolygonMapModel::boundsRole).value<QGeoRectangle>();
+    if (!m_view.intersects(bounds)) {
+        return false;
+    }
+
+    // Apply user filter
+    if (!itemSettings->m_filterName.isEmpty())
+    {
+        QString name = sourceModel()->data(index0, PolygonMapModel::nameRole).toString();
+        QRegularExpressionMatch match = itemSettings->m_filterNameRE.match(name);
+        if (!match.hasMatch()) {
+            return false;
+        }
+    }
+    if (itemSettings->m_filterDistance > 0)
+    {
+        QGeoCoordinate position = sourceModel()->data(index0, PolygonMapModel::positionRole).value<QGeoCoordinate>();
+        if (m_position.distanceTo(position) > itemSettings->m_filterDistance) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void PolygonFilter::viewChanged(double topLeftLongitude, double topLeftLatitude, double bottomRightLongitude, double bottomRightLatitude, double zoomLevel)
+{
+    m_zoomLevel = zoomLevel;
+    if (!std::isnan(topLeftLongitude)) {
+        m_view = QGeoRectangle(QGeoCoordinate(topLeftLatitude, topLeftLongitude), QGeoCoordinate(bottomRightLatitude, bottomRightLongitude));
+    }
+    invalidateFilter();
+}
+
+Q_INVOKABLE int PolygonFilter::mapRowToSource(int row)
+{
+    QModelIndex sourceIndex = mapToSource(index(row, 0));
+    return sourceIndex.row();
+}
+
+bool PolylineFilter::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
+
+    MapSettings::MapItemSettings *itemSettings = sourceModel()->data(index0, PolylineMapModel::itemSettingsRole).value<MapSettings::MapItemSettings *>();
+    if (!itemSettings->m_enabled) {
+        return false;
+    }
+
+    // Don't show tiny items when we're zoomed out
+    int minZoom = sourceModel()->data(index0, PolylineMapModel::mapImageMinZoomRole).toInt();
+    if (minZoom - 3 >= m_zoomLevel) {
+        return false;
+    }
+
+    // Filter off-screen items
+    QGeoRectangle bounds = sourceModel()->data(index0, PolylineMapModel::boundsRole).value<QGeoRectangle>();
+    if (!m_view.intersects(bounds)) {
+        return false;
+    }
+
+    // Apply user filter
+    if (!itemSettings->m_filterName.isEmpty())
+    {
+        QString name = sourceModel()->data(index0, PolylineMapModel::nameRole).toString();
+        QRegularExpressionMatch match = itemSettings->m_filterNameRE.match(name);
+        if (!match.hasMatch()) {
+            return false;
+        }
+    }
+    if (itemSettings->m_filterDistance > 0)
+    {
+        QGeoCoordinate position = sourceModel()->data(index0, PolylineMapModel::positionRole).value<QGeoCoordinate>();
+        if (m_position.distanceTo(position) > itemSettings->m_filterDistance) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void PolylineFilter::viewChanged(double topLeftLongitude, double topLeftLatitude, double bottomRightLongitude, double bottomRightLatitude, double zoomLevel)
+{
+    m_zoomLevel = zoomLevel;
+    if (!std::isnan(topLeftLongitude)) {
+        m_view = QGeoRectangle(QGeoCoordinate(topLeftLatitude, topLeftLongitude), QGeoCoordinate(bottomRightLatitude, bottomRightLongitude));
+    }
+    invalidateFilter();
+}
+
+Q_INVOKABLE int PolylineFilter::mapRowToSource(int row)
+{
+    QModelIndex sourceIndex = mapToSource(index(row, 0));
+    return sourceIndex.row();
+}
+
+bool ImageFilter::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
+
+    MapSettings::MapItemSettings *itemSettings = sourceModel()->data(index0, ImageMapModel::itemSettingsRole).value<MapSettings::MapItemSettings *>();
+    if (!itemSettings->m_enabled || !itemSettings->m_display2DIcon) {
+        return false;
+    }
+
+    // Don't show tiny items when we're zoomed out
+    int minZoom = sourceModel()->data(index0, ImageMapModel::mapImageMinZoomRole).toInt();
+    if (minZoom - 3 >= m_zoomLevel) {
+        return false;
+    }
+
+    // Filter off-screen items
+    QGeoRectangle bounds = sourceModel()->data(index0, ImageMapModel::boundsRole).value<QGeoRectangle>();
+    if (!m_view.intersects(bounds)) {
+        return false;
+    }
+
+    // Apply user filter
+    if (!itemSettings->m_filterName.isEmpty())
+    {
+        QString name = sourceModel()->data(index0, ImageMapModel::nameRole).toString();
+        QRegularExpressionMatch match = itemSettings->m_filterNameRE.match(name);
+        if (!match.hasMatch()) {
+            return false;
+        }
+    }
+    if (itemSettings->m_filterDistance > 0)
+    {
+        QGeoCoordinate position = sourceModel()->data(index0, ImageMapModel::positionRole).value<QGeoCoordinate>();
+        if (m_position.distanceTo(position) > itemSettings->m_filterDistance) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void ImageFilter::viewChanged(double topLeftLongitude, double topLeftLatitude, double bottomRightLongitude, double bottomRightLatitude, double zoomLevel)
+{
+    m_zoomLevel = zoomLevel;
+    if (!std::isnan(topLeftLongitude)) {
+        m_view = QGeoRectangle(QGeoCoordinate(topLeftLatitude, topLeftLongitude), QGeoCoordinate(bottomRightLatitude, bottomRightLongitude));
+    }
+    invalidateFilter();
+}
+
+Q_INVOKABLE int ImageFilter::mapRowToSource(int row)
+{
+    QModelIndex sourceIndex = mapToSource(index(row, 0));
+    return sourceIndex.row();
+}
+
+void PolygonFilter::setPosition(const QGeoCoordinate& position)
+{
+    m_position = position;
+    invalidateFilter();
+}
+
+void PolylineFilter::setPosition(const QGeoCoordinate& position)
+{
+    m_position = position;
+    invalidateFilter();
+}
+
+void ObjectMapFilter::setPosition(const QGeoCoordinate& position)
+{
+    m_position = position;
+    invalidateFilter();
+}
+
+void ImageFilter::setPosition(const QGeoCoordinate& position)
+{
+    m_position = position;
+    invalidateFilter();
 }
 

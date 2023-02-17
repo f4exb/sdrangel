@@ -84,6 +84,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_freq_tracker_settings_isSet = false;
     ft8_demod_settings = nullptr;
     m_ft8_demod_settings_isSet = false;
+    heat_map_settings = nullptr;
+    m_heat_map_settings_isSet = false;
     interferometer_settings = nullptr;
     m_interferometer_settings_isSet = false;
     ieee_802_15_4_mod_settings = nullptr;
@@ -200,6 +202,8 @@ SWGChannelSettings::init() {
     m_freq_tracker_settings_isSet = false;
     ft8_demod_settings = new SWGFT8DemodSettings();
     m_ft8_demod_settings_isSet = false;
+    heat_map_settings = new SWGHeatMapSettings();
+    m_heat_map_settings_isSet = false;
     interferometer_settings = new SWGInterferometerSettings();
     m_interferometer_settings_isSet = false;
     ieee_802_15_4_mod_settings = new SWGIEEE_802_15_4_ModSettings();
@@ -333,6 +337,9 @@ SWGChannelSettings::cleanup() {
     }
     if(ft8_demod_settings != nullptr) { 
         delete ft8_demod_settings;
+    }
+    if(heat_map_settings != nullptr) { 
+        delete heat_map_settings;
     }
     if(interferometer_settings != nullptr) { 
         delete interferometer_settings;
@@ -480,6 +487,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&freq_tracker_settings, pJson["FreqTrackerSettings"], "SWGFreqTrackerSettings", "SWGFreqTrackerSettings");
     
     ::SWGSDRangel::setValue(&ft8_demod_settings, pJson["FT8DemodSettings"], "SWGFT8DemodSettings", "SWGFT8DemodSettings");
+    
+    ::SWGSDRangel::setValue(&heat_map_settings, pJson["HeatMapSettings"], "SWGHeatMapSettings", "SWGHeatMapSettings");
     
     ::SWGSDRangel::setValue(&interferometer_settings, pJson["InterferometerSettings"], "SWGInterferometerSettings", "SWGInterferometerSettings");
     
@@ -632,6 +641,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((ft8_demod_settings != nullptr) && (ft8_demod_settings->isSet())){
         toJsonValue(QString("FT8DemodSettings"), ft8_demod_settings, obj, QString("SWGFT8DemodSettings"));
+    }
+    if((heat_map_settings != nullptr) && (heat_map_settings->isSet())){
+        toJsonValue(QString("HeatMapSettings"), heat_map_settings, obj, QString("SWGHeatMapSettings"));
     }
     if((interferometer_settings != nullptr) && (interferometer_settings->isSet())){
         toJsonValue(QString("InterferometerSettings"), interferometer_settings, obj, QString("SWGInterferometerSettings"));
@@ -995,6 +1007,16 @@ SWGChannelSettings::setFt8DemodSettings(SWGFT8DemodSettings* ft8_demod_settings)
     this->m_ft8_demod_settings_isSet = true;
 }
 
+SWGHeatMapSettings*
+SWGChannelSettings::getHeatMapSettings() {
+    return heat_map_settings;
+}
+void
+SWGChannelSettings::setHeatMapSettings(SWGHeatMapSettings* heat_map_settings) {
+    this->heat_map_settings = heat_map_settings;
+    this->m_heat_map_settings_isSet = true;
+}
+
 SWGInterferometerSettings*
 SWGChannelSettings::getInterferometerSettings() {
     return interferometer_settings;
@@ -1342,6 +1364,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(ft8_demod_settings && ft8_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(heat_map_settings && heat_map_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(interferometer_settings && interferometer_settings->isSet()){

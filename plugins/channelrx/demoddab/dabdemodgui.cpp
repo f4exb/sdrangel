@@ -38,6 +38,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/dialogpositioner.h"
 #include "channel/channelwebapiutils.h"
+#include "feature/featurewebapiutils.h"
 #include "maincore.h"
 
 #include "dabdemod.h"
@@ -47,6 +48,7 @@
 #define PROGRAMS_COL_NAME            0
 #define PROGRAMS_COL_ID              1
 #define PROGRAMS_COL_FREQUENCY       2
+#define PROGRAMS_COL_ENSEMBLE        3
 
 void DABDemodGUI::resizeTable()
 {
@@ -57,6 +59,7 @@ void DABDemodGUI::resizeTable()
     ui->programs->setItem(row, PROGRAMS_COL_NAME, new QTableWidgetItem("Some Random Radio Station"));
     ui->programs->setItem(row, PROGRAMS_COL_ID, new QTableWidgetItem("123456"));
     ui->programs->setItem(row, PROGRAMS_COL_FREQUENCY, new QTableWidgetItem("200.000"));
+    ui->programs->setItem(row, PROGRAMS_COL_ENSEMBLE, new QTableWidgetItem("Some random ensemble"));
     ui->programs->resizeColumnsToContents();
     ui->programs->removeRow(row);
 }
@@ -142,9 +145,26 @@ bool DABDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
+int DABDemodGUI::findProgramRowById(int id)
+{
+    QString idText = QString::number(id);
+    for (int i = 0; i < ui->programs->rowCount(); i++)
+    {
+        if (ui->programs->item(i, PROGRAMS_COL_ID)->text() == idText) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 // Add row to table
 void DABDemodGUI::addProgramName(const DABDemod::MsgDABProgramName& program)
 {
+    // Don't add duplicate
+    if (findProgramRowById(program.getId()) != -1) {
+        return;
+    }
+
     ui->programs->setSortingEnabled(false);
     int row = ui->programs->rowCount();
     ui->programs->setRowCount(row + 1);
@@ -152,9 +172,11 @@ void DABDemodGUI::addProgramName(const DABDemod::MsgDABProgramName& program)
     QTableWidgetItem *nameItem = new QTableWidgetItem();
     QTableWidgetItem *idItem = new QTableWidgetItem();
     QTableWidgetItem *frequencyItem = new QTableWidgetItem();
+    QTableWidgetItem *ensembleItem = new QTableWidgetItem();
     ui->programs->setItem(row, PROGRAMS_COL_NAME, nameItem);
     ui->programs->setItem(row, PROGRAMS_COL_ID, idItem);
     ui->programs->setItem(row, PROGRAMS_COL_FREQUENCY, frequencyItem);
+    ui->programs->setItem(row, PROGRAMS_COL_ENSEMBLE, ensembleItem);
     nameItem->setText(program.getName());
     idItem->setText(QString::number(program.getId()));
     double frequencyInHz;
@@ -165,7 +187,10 @@ void DABDemodGUI::addProgramName(const DABDemod::MsgDABProgramName& program)
         frequencyItem->setData(Qt::UserRole, frequencyInHz+m_settings.m_inputFrequencyOffset);
     }
     else
+    {
         frequencyItem->setData(Qt::UserRole, 0.0);
+    }
+    ensembleItem->setText(ui->ensemble->text());
     ui->programs->setSortingEnabled(true);
     filterRow(row);
 }
@@ -178,11 +203,27 @@ void DABDemodGUI::on_programs_cellDoubleClicked(int row, int column)
     m_settings.m_program = ui->programs->item(row, PROGRAMS_COL_NAME)->text();
 
     double frequencyInHz = ui->programs->item(row, PROGRAMS_COL_FREQUENCY)->data(Qt::UserRole).toDouble();
-    ChannelWebAPIUtils::setCenterFrequency(m_dabDemod->getDeviceSetIndex(), frequencyInHz-m_settings.m_inputFrequencyOffset);
-
+    double centreFreq = frequencyInHz-m_settings.m_inputFrequencyOffset;
+    ChannelWebAPIUtils::setCenterFrequency(m_dabDemod->getDeviceSetIndex(), centreFreq);
     clearProgram();
-
     applySettings();
+}
+
+// Ensemble name can sometimes be decoded after program name, so we
+// need to update entries in the table where ensemble name is "-"
+void DABDemodGUI::updateEnsembleName(const QString& ensemble)
+{
+    double frequencyInHz = m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset;
+    for (int i = 0; i < ui->programs->rowCount(); i++)
+    {
+        if (ui->programs->item(i, PROGRAMS_COL_ENSEMBLE)->text() == "-")
+        {
+            if (ui->programs->item(i, PROGRAMS_COL_FREQUENCY)->data(Qt::UserRole).toDouble() == frequencyInHz)
+            {
+                ui->programs->item(i, PROGRAMS_COL_ENSEMBLE)->setText(ensemble);
+            }
+        }
+    }
 }
 
 bool DABDemodGUI::handleMessage(const Message& message)
@@ -201,6 +242,11 @@ bool DABDemodGUI::handleMessage(const Message& message)
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        if (m_deviceCenterFrequency != notif.getCenterFrequency())
+        {
+            // Reset on frequency change, to get new ensemble name
+            resetService();
+        }
         m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
         ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
@@ -223,6 +269,7 @@ bool DABDemodGUI::handleMessage(const Message& message)
     {
         DABDemod::MsgDABEnsembleName& report = (DABDemod::MsgDABEnsembleName&) message;
         ui->ensemble->setText(report.getName());
+        updateEnsembleName(report.getName());
         return true;
     }
     else if (DABDemod::MsgDABProgramName::match(message))
@@ -293,7 +340,14 @@ bool DABDemodGUI::handleMessage(const Message& message)
         }
         return true;
     }
-
+    else if (DABDemod::MsgDABTII::match(message))
+    {
+        DABDemod::MsgDABTII& report = (DABDemod::MsgDABTII&) message;
+        int tii = report.getTII();
+        ui->tiiMainId->setText(QStringLiteral("%1").arg((tii >> 8) & 0xff, 2, 16, QLatin1Char('0')).toUpper());
+        ui->tiiSubId->setText(QStringLiteral("%1").arg(tii & 0xff, 2, 16, QLatin1Char('0')).toUpper());
+        return true;
+    }
     return false;
 }
 
@@ -607,7 +661,6 @@ void DABDemodGUI::clearProgram()
 {
     // Clear current program
     ui->program->setText("-");
-    ui->ensemble->setText("-");
     ui->programType->setText("-");
     ui->language->setText("-");
     ui->audio->setText("-");
@@ -621,10 +674,13 @@ void DABDemodGUI::clearProgram()
 
 void DABDemodGUI::resetService()
 {
-    // Reset DAB audio service, to avoid unpleasent noise when changing frequency
-    DABDemod::MsgDABResetService* message = DABDemod::MsgDABResetService::create();
-    m_dabDemod->getInputMessageQueue()->push(message);
+    ui->ensemble->setText("-");
+    ui->tiiMainId->setText("-");
+    ui->tiiSubId->setText("-");
     clearProgram();
+    // Reset DAB audio service, so we get new ensemble name
+    DABDemod::MsgDABReset* message = DABDemod::MsgDABReset::create();
+    m_dabDemod->getInputMessageQueue()->push(message);
 }
 
 void DABDemodGUI::on_channel_currentIndexChanged(int index)
@@ -634,7 +690,6 @@ void DABDemodGUI::on_channel_currentIndexChanged(int index)
     QString text = ui->channel->currentText();
     if (!text.isEmpty())
     {
-        resetService();
         // Tune to requested channel
         QString freq = text.split(" ")[2];
         m_channelFreq = freq.toDouble() * 1e6;
@@ -715,9 +770,30 @@ void DABDemodGUI::makeUIConnections()
     QObject::connect(ui->clearTable, &QPushButton::clicked, this, &DABDemodGUI::on_clearTable_clicked);
     QObject::connect(ui->programs, &QTableWidget::cellDoubleClicked, this, &DABDemodGUI::on_programs_cellDoubleClicked);
     QObject::connect(ui->channel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DABDemodGUI::on_channel_currentIndexChanged);
+    QObject::connect(ui->findOnMap, &QToolButton::clicked, this, &DABDemodGUI::on_findOnMap_clicked);
 }
 
 void DABDemodGUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }
+
+void DABDemodGUI::on_findOnMap_clicked()
+{
+    QString mainID = ui->tiiMainId->text();
+    if (mainID.isEmpty() || (mainID == "-")) {
+        return;
+    }
+    QString subID = ui->tiiSubId->text();
+    if (subID.isEmpty() || (subID == "-")) {
+        return;
+    }
+    QString ensemble = ui->ensemble->text().trimmed();
+    if (ensemble.isEmpty() || (ensemble == "-")) {
+        return;
+    }
+    QString id = ensemble + " " + mainID + subID;
+    qDebug() << "Finding " << id;
+    FeatureWebAPIUtils::mapFind(id);
+}
+

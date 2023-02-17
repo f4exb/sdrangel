@@ -73,6 +73,7 @@ Clicking the Display Settings button will open the Display Settings dialog, whic
 * The units for altitude, speed and vertical climb rate. These can be either ft (feet), kn (knots) and ft/min (feet per minute), or m (metres), kph (kilometers per hour) and m/s (metres per second).
 * The map provider. This can be osm for OpenStreetMaps or mapboxgl for Mapbox. mapboxgl is not supported on Windows. mapboxgl should be used on Linux with Qt 5.15.3, as osm maps will cause SDRangel to hang, due to a bug in Qt.
 * The type of map that will be displayed. This can either be a light or dark aviation map (with no place names to reduce clutter), a street map or satellite imagery.
+* The minimum zoom level (0 min zoom - 15 max zoom) at which aircraft icons will be scaled.
 * The minimum size airport that will be displayed on the map: small, medium or large. Use small to display GA airfields, medium for regional airports and large for international airports.
 * Whether or not to display heliports.
 * The distance (in kilometres), from the location set under Preferences > My Position, at which airports will be displayed on the map. Displaying too many airports will slow down drawing of the map.

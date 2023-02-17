@@ -162,6 +162,12 @@ bool DABDemodBaseband::handleMessage(const Message& cmd)
         m_sink.resetService();
         return true;
     }
+    else if (DABDemod::MsgDABProgramName::match(cmd))
+    {
+        DABDemod::MsgDABProgramName& report = (DABDemod::MsgDABProgramName&) cmd;
+        m_sink.programAvailable(report.getName());
+        return true;
+    }
     else
     {
         return false;

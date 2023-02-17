@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1016</width>
-    <height>720</height>
+    <width>1267</width>
+    <height>648</height>
    </rect>
   </property>
   <property name="font">
@@ -35,68 +35,6 @@
           <string>Maps</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QTableWidget" name="mapItemSettings">
-            <property name="selectionMode">
-             <enum>QAbstractItemView::NoSelection</enum>
-            </property>
-            <column>
-             <property name="text">
-              <string>Enabled</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>2D Icon</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>2D Label</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>2D Min Zoom</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>2D Track</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>3D Model</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>3D Min Pixels</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>3D Label</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>3D Point</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>3D Track</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>3D Label Scale</string>
-             </property>
-            </column>
-           </widget>
-          </item>
           <item>
            <widget class="QGroupBox" name="map2DSettings">
             <property name="title">
@@ -347,6 +285,19 @@
            </widget>
           </item>
           <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QPushButton" name="downloadModels">
@@ -355,6 +306,34 @@
               </property>
               <property name="text">
                <string>Download 3D Models (1.6GB)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="getAirportDB">
+              <property name="toolTip">
+               <string>Download the latest OurAirports airport databases (10MB)</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="icons.qrc">
+                <normaloff>:/map/icons/controltower.png</normaloff>:/map/icons/controltower.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="getAirspacesDB">
+              <property name="toolTip">
+               <string>Download airspaces and NAVAIDs from OpenAIP (40MB)</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="icons.qrc">
+                <normaloff>:/map/icons/vor.png</normaloff>:/map/icons/vor.png</iconset>
               </property>
              </widget>
             </item>
@@ -372,6 +351,115 @@
              </spacer>
             </item>
            </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="mapItemsTab">
+         <attribute name="title">
+          <string>Map Items</string>
+         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QTableWidget" name="mapItemSettings">
+            <property name="selectionMode">
+             <enum>QAbstractItemView::NoSelection</enum>
+            </property>
+            <column>
+             <property name="text">
+              <string>Enabled</string>
+             </property>
+             <property name="toolTip">
+              <string>Whether items of this type will be displayed on the maps</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>2D Icon</string>
+             </property>
+             <property name="toolTip">
+              <string>Whether to display icon on 2D map</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>2D Label</string>
+             </property>
+             <property name="toolTip">
+              <string>Whether to display label on 2D map</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>2D Min Zoom</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>2D Colour</string>
+             </property>
+             <property name="toolTip">
+              <string>Track colour or 2D map</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>3D Model</string>
+             </property>
+             <property name="toolTip">
+              <string>Whether to display model on 3D map</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>3D Min Pixels</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>3D Label</string>
+             </property>
+             <property name="toolTip">
+              <string>Whether to display label on 3D map</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>3D Point</string>
+             </property>
+             <property name="toolTip">
+              <string>Whether to display a point on 3D map</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>3D Colour</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>3D Label Scale</string>
+             </property>
+             <property name="toolTip">
+              <string>Scale factor for label on 3D map</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Filter Name</string>
+             </property>
+             <property name="toolTip">
+              <string>Regular expression to filter by name (Only items with names matching the pattern will be displayed)</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Filter Distance (km)</string>
+             </property>
+             <property name="toolTip">
+              <string>Filter objects further than this distance in km away from My Position</string>
+             </property>
+            </column>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -466,6 +554,20 @@
                </property>
               </widget>
              </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="checkWXAPIKeyLabel">
+               <property name="text">
+                <string>CheckWX API key</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QLineEdit" name="checkWXAPIKey">
+               <property name="toolTip">
+                <string>checkwxapi.com API key for accessing airport weather (METARs)</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -489,8 +591,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>mapItemSettings</tabstop>
   <tabstop>map2DEnabled</tabstop>
   <tabstop>mapProvider</tabstop>
   <tabstop>osmURL</tabstop>
@@ -507,7 +607,10 @@
   <tabstop>mapBoxAPIKey</tabstop>
   <tabstop>cesiumIonAPIKey</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

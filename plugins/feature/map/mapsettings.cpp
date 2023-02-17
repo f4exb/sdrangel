@@ -26,25 +26,31 @@
 #include "mapsettings.h"
 
 const QStringList MapSettings::m_pipeTypes = {
+    QStringLiteral("ACARSDemod"),
     QStringLiteral("ADSBDemod"),
     QStringLiteral("AIS"),
     QStringLiteral("APRS"),
     QStringLiteral("APTDemod"),
     QStringLiteral("FT8Demod"),
+    QStringLiteral("HeatMap"),
     QStringLiteral("Radiosonde"),
     QStringLiteral("StarTracker"),
-    QStringLiteral("SatelliteTracker")
+    QStringLiteral("SatelliteTracker"),
+    QStringLiteral("VORLocalizer")
 };
 
 const QStringList MapSettings::m_pipeURIs = {
+    QStringLiteral("sdrangel.channel.acarsdemod"),
     QStringLiteral("sdrangel.channel.adsbdemod"),
     QStringLiteral("sdrangel.feature.ais"),
     QStringLiteral("sdrangel.feature.aprs"),
     QStringLiteral("sdrangel.channel.aptdemod"),
     QStringLiteral("sdrangel.channel.ft8demod"),
+    QStringLiteral("sdrangel.channel.heatmap"),
     QStringLiteral("sdrangel.feature.radiosonde"),
     QStringLiteral("sdrangel.feature.startracker"),
-    QStringLiteral("sdrangel.feature.satellitetracker")
+    QStringLiteral("sdrangel.feature.satellitetracker"),
+    QStringLiteral("sdrangel.feature.vorlocalizer")
 };
 
 // GUI combo box should match ordering in this list
@@ -62,24 +68,70 @@ MapSettings::MapSettings() :
     // Source names should match m_pipeTypes
     // Colors currently match color of rollup widget for that plugin
     int modelMinPixelSize = 50;
-    m_itemSettings.insert("ADSBDemod", new MapItemSettings("ADSBDemod", QColor(244, 151, 57), false, 11, modelMinPixelSize));
-    m_itemSettings.insert("AIS", new MapItemSettings("AIS", QColor(102, 0, 0), false, 11, modelMinPixelSize));
-    m_itemSettings.insert("APRS", new MapItemSettings("APRS", QColor(255, 255, 0), false, 11));
-    m_itemSettings.insert("StarTracker", new MapItemSettings("StarTracker", QColor(230, 230, 230), true, 3));
-    m_itemSettings.insert("SatelliteTracker", new MapItemSettings("SatelliteTracker", QColor(0, 0, 255), false, 0, modelMinPixelSize));
-    m_itemSettings.insert("Beacons", new MapItemSettings("Beacons", QColor(255, 0, 0), true, 8));
-    m_itemSettings.insert("Radiosonde", new MapItemSettings("Radiosonde", QColor(102, 0, 102), false, 11, modelMinPixelSize));
-    m_itemSettings.insert("Radio Time Transmitters", new MapItemSettings("Radio Time Transmitters", QColor(255, 0, 0), true, 8));
-    m_itemSettings.insert("Radar", new MapItemSettings("Radar", QColor(255, 0, 0), true, 8));
-    m_itemSettings.insert("FT8Demod", new MapItemSettings("FT8Demod", QColor(0, 192, 255), true, 8));
+    MapItemSettings *aptSettings = new MapItemSettings("APTDemod", true, QColor(216, 112, 169), true, false, 11);
+    aptSettings->m_display2DIcon = false; // Disabled as 2D projection is wrong
+    m_itemSettings.insert("APTDemod", aptSettings);
+    m_itemSettings.insert("ACARSDemod", new MapItemSettings("ACARSDemod", true, QColor(244, 151, 57), true, false, 11, modelMinPixelSize));
+    m_itemSettings.insert("ADSBDemod", new MapItemSettings("ADSBDemod", true, QColor(244, 151, 57), true, false, 11, modelMinPixelSize));
+    m_itemSettings.insert("AIS", new MapItemSettings("AIS", true, QColor(102, 0, 0), true, false, 11, modelMinPixelSize));
+    MapItemSettings *aprsSettings = new MapItemSettings("APRS", true, QColor(255, 255, 0), true, false, 11);
+    aprsSettings->m_extrapolate = 0;
+    m_itemSettings.insert("APRS", aprsSettings);
+    m_itemSettings.insert("StarTracker", new MapItemSettings("StarTracker", true,  QColor(230, 230, 230), true, true, 3));
+    m_itemSettings.insert("SatelliteTracker", new MapItemSettings("SatelliteTracker", true, QColor(0, 0, 255), true, false, 0, modelMinPixelSize));
+    m_itemSettings.insert("Beacons", new MapItemSettings("Beacons", true, QColor(255, 0, 0), false, true, 8));
+    m_itemSettings.insert("Radiosonde", new MapItemSettings("Radiosonde", true, QColor(102, 0, 102), true, false, 11, modelMinPixelSize));
+    m_itemSettings.insert("Radio Time Transmitters", new MapItemSettings("Radio Time Transmitters", true, QColor(255, 0, 0), false, true, 8));
+    m_itemSettings.insert("Radar", new MapItemSettings("Radar", true, QColor(255, 0, 0), false, true, 8));
+    m_itemSettings.insert("FT8Demod", new MapItemSettings("FT8Demod", true, QColor(0, 192, 255), true, true, 8));
+    m_itemSettings.insert("HeatMap", new MapItemSettings("HeatMap", true, QColor(102, 40, 220), true, true, 11));
 
-    MapItemSettings *ionosondeItemSettings = new MapItemSettings("Ionosonde Stations", QColor(255, 255, 0), true, 4);
+    m_itemSettings.insert("AM", new MapItemSettings("AM", false, QColor(255, 0, 0), false, true, 10));
+    MapItemSettings *fmSettings = new MapItemSettings("FM", false, QColor(255, 0, 0), false, true, 12);
+    fmSettings->m_filterDistance = 150000;
+    m_itemSettings.insert("FM", fmSettings);
+    MapItemSettings *dabSettings = new MapItemSettings("DAB", false, QColor(255, 0, 0), false, true, 12);
+    dabSettings->m_filterDistance = 75000;
+    m_itemSettings.insert("DAB", dabSettings);
+
+    MapItemSettings *navAidSettings = new MapItemSettings("NavAid", false, QColor(255, 0, 255), false, true, 11);
+    navAidSettings->m_filterDistance = 500000;
+    m_itemSettings.insert("NavAid", navAidSettings);
+
+    m_itemSettings.insert("Airport (Large)", new MapItemSettings("Airport (Large)", false, QColor(255, 0, 255), false, true, 11));
+    m_itemSettings.insert("Airport (Medium)", new MapItemSettings("Airport (Medium)", false, QColor(255, 0, 255), false, true, 11));
+    m_itemSettings.insert("Airport (Small)", new MapItemSettings("Airport (Small)", false, QColor(255, 0, 255), false, true, 13));
+    m_itemSettings.insert("Heliport", new MapItemSettings("Heliport", false, QColor(255, 0, 255), false, true, 12));
+    MapItemSettings *stationSettings = new MapItemSettings("Station", true, QColor(255, 0, 0), false, true, 11);
+    stationSettings->m_extrapolate = 0;
+    stationSettings->m_display3DTrack = false;
+    m_itemSettings.insert("Station", stationSettings);
+    m_itemSettings.insert("VORLocalizer", new MapItemSettings("VORLocalizer", true, QColor(255, 255, 0), false, true, 11));
+
+    MapItemSettings *ionosondeItemSettings = new MapItemSettings("Ionosonde Stations", true, QColor(255, 255, 0), false, true, 4);
     ionosondeItemSettings->m_display2DIcon = false;
     m_itemSettings.insert("Ionosonde Stations", ionosondeItemSettings);
 
-    MapItemSettings *stationItemSettings = new MapItemSettings("Station", QColor(255, 0, 0), true, 11);
-    stationItemSettings->m_display2DTrack = false;
-    m_itemSettings.insert("Station", stationItemSettings);
+    m_itemSettings.insert("Airspace (A)", new MapItemSettings("Airspace (A)", false, QColor(255, 0, 0, 0x20), false, false, 7));
+    m_itemSettings.insert("Airspace (B)", new MapItemSettings("Airspace (B)", false, QColor(255, 0, 0, 0x20), false, false, 7));
+    m_itemSettings.insert("Airspace (C)", new MapItemSettings("Airspace (C)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (D)", new MapItemSettings("Airspace (D)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (E)", new MapItemSettings("Airspace (E)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (F)", new MapItemSettings("Airspace (F)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (G)", new MapItemSettings("Airspace (G)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (FIR)", new MapItemSettings("Airspace (FIR)", false, QColor(255, 0, 0, 0x20), false, false, 7));
+    m_itemSettings.insert("Airspace (CTR)", new MapItemSettings("Airspace (CTR)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (RMZ)", new MapItemSettings("Airspace (RMZ)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (TMA)", new MapItemSettings("Airspace (TMA)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (TMZ)", new MapItemSettings("Airspace (TMZ)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (OTH)", new MapItemSettings("Airspace (OTH)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (Restricted)", new MapItemSettings("Airspace (Restricted)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (Gliding)", new MapItemSettings("Airspace (Gliding)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (Danger)", new MapItemSettings("Airspace (Danger)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (Prohibited)", new MapItemSettings("Airspace (Prohibited)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (Wave)", new MapItemSettings("Airspace (Wave)", false, QColor(255, 0, 0, 0x20), false, false, 11));
+    m_itemSettings.insert("Airspace (Airports)", new MapItemSettings("Airspace (Airports)", false, QColor(0, 0, 255, 0x20), false, false, 11));
+
     resetToDefaults();
 }
 
@@ -104,7 +156,7 @@ void MapSettings::resetToDefaults()
     m_displaySelectedGroundTracks = true;
     m_displayAllGroundTracks = true;
     m_title = "Map";
-    m_displayAllGroundTracks = QColor(225, 25, 99).rgb();
+    m_displayAllGroundTracks = QColor(225, 25, 99).rgba();
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -121,6 +173,7 @@ void MapSettings::resetToDefaults()
     m_displayMUF = false;
     m_displayfoF2 = false;
     m_workspaceIndex = 0;
+    m_checkWXAPIKey = "";
 }
 
 QByteArray MapSettings::serialize() const
@@ -165,6 +218,8 @@ QByteArray MapSettings::serialize() const
     s.writeBool(35, m_displayMUF);
     s.writeBool(36, m_displayfoF2);
 
+    s.writeString(46, m_checkWXAPIKey);
+
     return s.final();
 }
 
@@ -184,6 +239,7 @@ bool MapSettings::deserialize(const QByteArray& data)
         uint32_t utmp;
         QString strtmp;
         QByteArray blob;
+        QString string;
 
         d.readBool(1, &m_displayNames, true);
         d.readString(2, &m_mapProvider, "osm");
@@ -195,7 +251,7 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readString(3, &m_mapBoxAPIKey, "");
         d.readString(4, &m_mapBoxStyles, "");
         d.readString(8, &m_title, "Map");
-        d.readU32(9, &m_rgbColor, QColor(225, 25, 99).rgb());
+        d.readU32(9, &m_rgbColor, QColor(225, 25, 99).rgba());
         d.readBool(10, &m_useReverseAPI, false);
         d.readString(11, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(12, &utmp, 0);
@@ -241,6 +297,8 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(35, &m_displayMUF, false);
         d.readBool(36, &m_displayfoF2, false);
 
+        d.readString(46, &m_checkWXAPIKey, "");
+
         return true;
     }
     else
@@ -251,16 +309,20 @@ bool MapSettings::deserialize(const QByteArray& data)
 }
 
 MapSettings::MapItemSettings::MapItemSettings(const QString& group,
+                                              bool enabled,
                                               const QColor color,
+                                              bool display2DTrack,
                                               bool display3DPoint,
                                               int minZoom,
                                               int modelMinPixelSize)
 {
     m_group = group;
     resetToDefaults();
-    m_3DPointColor = color.rgb();
-    m_2DTrackColor = color.darker().rgb();
-    m_3DTrackColor = color.darker().rgb();
+    m_enabled = enabled,
+    m_3DPointColor = color.rgba();
+    m_2DTrackColor = color.darker().rgba();
+    m_3DTrackColor = color.darker().rgba();
+    m_display2DTrack = display2DTrack;
     m_display3DPoint = display3DPoint;
     m_2DMinZoom = minZoom;
     m_3DModelMinPixelSize = modelMinPixelSize;
@@ -277,16 +339,19 @@ void MapSettings::MapItemSettings::resetToDefaults()
     m_display2DIcon = true;
     m_display2DLabel = true;
     m_display2DTrack = true;
-    m_2DTrackColor = QColor(150, 0, 20).rgb();
+    m_2DTrackColor = QColor(150, 0, 20).rgba();
     m_2DMinZoom = 1;
     m_display3DModel = true;
     m_display3DPoint = false;
-    m_3DPointColor = QColor(225, 0, 0).rgb();
+    m_3DPointColor = QColor(225, 0, 0).rgba();
     m_display3DLabel = true;
     m_display3DTrack = true;
-    m_3DTrackColor = QColor(150, 0, 20).rgb();
+    m_3DTrackColor = QColor(150, 0, 20).rgba();
     m_3DModelMinPixelSize = 0;
     m_3DLabelScale = 0.5f;
+    m_filterName = "";
+    m_filterDistance = 0;
+    m_extrapolate = 60;
 }
 
 QByteArray MapSettings::MapItemSettings::serialize() const
@@ -308,6 +373,9 @@ QByteArray MapSettings::MapItemSettings::serialize() const
     s.writeU32(13, m_3DTrackColor);
     s.writeS32(14, m_3DModelMinPixelSize);
     s.writeFloat(15, m_3DLabelScale);
+    s.writeString(16, m_filterName);
+    s.writeS32(17, m_filterDistance);
+    s.writeS32(18, m_extrapolate);
 
     return s.final();
 }
@@ -329,16 +397,21 @@ bool MapSettings::MapItemSettings::deserialize(const QByteArray& data)
         d.readBool(3, &m_display2DIcon, true);
         d.readBool(4, &m_display2DLabel, true);
         d.readBool(5, &m_display2DTrack, true);
-        d.readU32(6, &m_2DTrackColor, QColor(150, 0, 0).rgb());
+        d.readU32(6, &m_2DTrackColor, QColor(150, 0, 0).rgba());
         d.readS32(7, &m_2DMinZoom, 1);
         d.readBool(8, &m_display3DModel, true);
         d.readBool(9, &m_display3DLabel, true);
         d.readBool(10, &m_display3DPoint, true);
-        d.readU32(11, &m_3DPointColor, QColor(255, 0, 0).rgb());
+        d.readU32(11, &m_3DPointColor, QColor(255, 0, 0).rgba());
         d.readBool(12, &m_display3DTrack, true);
-        d.readU32(13, &m_3DTrackColor, QColor(150, 0, 20).rgb());
+        d.readU32(13, &m_3DTrackColor, QColor(150, 0, 20).rgba());
         d.readS32(14, &m_3DModelMinPixelSize, 0);
         d.readFloat(15, &m_3DLabelScale, 0.5f);
+        d.readString(16, &m_filterName, "");
+        d.readS32(17, &m_filterDistance, 0);
+        d.readS32(18, &m_extrapolate, 60);
+        m_filterNameRE.setPattern(m_filterName);
+        m_filterNameRE.optimize();
         return true;
     }
     else
@@ -567,3 +640,4 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
 
     return QString(ostr.str().c_str());
 }
+

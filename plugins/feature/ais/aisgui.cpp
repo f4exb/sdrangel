@@ -239,6 +239,16 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 
 AISGUI::~AISGUI()
 {
+    // Remove all ships from map
+    for (int row = ui->vessels->rowCount() - 1; row >= 0; row--)
+    {
+        QString mmsi = ui->vessels->item(row, VESSEL_COL_MMSI)->text();
+        sendToMap(mmsi, "",
+            "", "",
+            "", 0.0f, 0.0f,
+            0.0f, 0.0f, QDateTime(),
+            0.0f);
+    }
     qDeleteAll(m_vessels);
     delete ui;
 }
@@ -343,8 +353,8 @@ void AISGUI::removeOldVessels()
                     0.0f);
                 // Remove from table
                 ui->vessels->removeRow(row);
-                // Remove from hash
-                m_vessels.remove(mmsi);
+                // Remove from hash and free memory
+                delete m_vessels.take(mmsi);
             }
         }
     }
@@ -458,8 +468,11 @@ void AISGUI::sendToMap(const QString &name, const QString &label,
         swgMapItem->setAltitude(0);
         swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
 
-        if (positionDateTime.isValid()) {
+        if (positionDateTime.isValid())
+        {
             swgMapItem->setPositionDateTime(new QString(positionDateTime.toString(Qt::ISODateWithMs)));
+            swgMapItem->setOrientationDateTime(new QString(positionDateTime.toString(Qt::ISODateWithMs)));
+            swgMapItem->setAvailableUntil(new QString(positionDateTime.addSecs(10*60).toString(Qt::ISODateWithMs)));
         }
 
         swgMapItem->setImageRotation(heading);

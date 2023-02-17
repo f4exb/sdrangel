@@ -275,6 +275,26 @@ public:
         { }
     };
 
+    class MsgDABTII : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getTII() const { return m_tii; }
+
+        static MsgDABTII* create(int tii)
+        {
+            return new MsgDABTII(tii);
+        }
+
+    private:
+        int m_tii;
+
+        MsgDABTII(int tii) :
+            Message(),
+            m_tii(tii)
+        { }
+    };
+
     class MsgDABReset : public Message {
         MESSAGE_CLASS_DECLARATION
 

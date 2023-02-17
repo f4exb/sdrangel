@@ -355,21 +355,31 @@ bool APRSGUI::handleMessage(const Message& message)
                         MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
                         SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
 
+                        QString name;
                         if (!aprs->m_objectName.isEmpty()) {
-                            swgMapItem->setName(new QString(aprs->m_objectName));
+                            name = aprs->m_objectName;
                         } else {
-                            swgMapItem->setName(new QString(aprs->m_from));
+                            name = aprs->m_from;
                         }
+                        swgMapItem->setName(new QString(name));
 
                         swgMapItem->setLatitude(aprs->m_latitude);
                         swgMapItem->setLongitude(aprs->m_longitude);
                         swgMapItem->setAltitude(aprs->m_hasAltitude ? Units::feetToMetres(aprs->m_altitudeFt) : 0);
                         swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
-
+                        swgMapItem->setFixedPosition(false);
+                        if (aprs->m_hasTimestamp) {
+                            swgMapItem->setPositionDateTime(new QString(aprs->m_timestamp.toString(Qt::ISODateWithMs)));
+                        } else {
+                            swgMapItem->setPositionDateTime(new QString(QDateTime::currentDateTime().toString(Qt::ISODateWithMs)));
+                        }
+                        // Need to set availableUntil for 3D track to be displayed
+                        swgMapItem->setAvailableUntil(new QString(QDateTime::currentDateTime().addDays(1).toString(Qt::ISODateWithMs)));
                         if (aprs->m_objectKilled)
                         {
                             swgMapItem->setImage(new QString(""));
                             swgMapItem->setText(new QString(""));
+                            m_mapItems.remove(name);
                         }
                         else
                         {
@@ -385,6 +395,9 @@ bool APRSGUI::handleMessage(const Message& message)
                                     m_settings.m_rainfallUnits == APRSSettings::MILLIMETRE
                                 )
                             ));
+                            if (!m_mapItems.contains(name)) {
+                                m_mapItems.insert(name, true);
+                            }
                         }
 
                         MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aprs, swgMapItem);
@@ -577,7 +590,31 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
 
 APRSGUI::~APRSGUI()
 {
+    QHashIterator<QString, bool> itr(m_mapItems);
+    while (itr.hasNext())
+    {
+        itr.next();
+        removeFromMap(itr.key());
+    }
     delete ui;
+}
+
+void APRSGUI::removeFromMap(const QString& name)
+{
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_aprs, "mapitems", mapPipes);
+
+    for (const auto& pipe : mapPipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+
+        swgMapItem->setName(new QString(name));
+        swgMapItem->setImage(new QString(""));
+
+        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aprs, swgMapItem);
+        messageQueue->push(msg);
+    }
 }
 
 void APRSGUI::setWorkspaceIndex(int index)

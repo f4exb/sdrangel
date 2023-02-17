@@ -197,6 +197,7 @@ set(sdrbase_SOURCES
     util/morse.cpp
     util/openaip.cpp
     util/osndb.cpp
+    util/ourairportsdb.cpp
     util/peakfinder.cpp
     util/planespotters.cpp
     util/png.cpp
@@ -424,6 +425,7 @@ set(sdrbase_HEADERS
     util/movingaverage.h
     util/openaip.h
     util/osndb.h
+    util/outairportsdb.h
     util/peakfinder.h
     util/planespotters.h
     util/png.h
@@ -466,6 +468,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${Boost_INCLUDE_DIRS}
     ${OPUS_INCLUDE_DIRS}
+    ${Qt${QT_DEFAULT_MAJOR_VERSION}Gui_PRIVATE_INCLUDE_DIRS}
 )
 
 add_library(sdrbase SHARED

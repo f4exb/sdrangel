@@ -10,6 +10,7 @@ Item {
     property string mapProvider: "osm"
     property variant mapPtr
     property variant guiPtr
+    property bool smoothing
 
     function createMap(pluginParameters, gui) {
         guiPtr = gui
@@ -67,40 +68,73 @@ Item {
             gesture.enabled: true
             gesture.acceptedGestures: MapGestureArea.PinchGesture | MapGestureArea.PanGesture
 
+            MapItemView {
+                model: imageModelFiltered
+                delegate: imageComponent
+            }
+
+            MapItemView {
+                model: polygonModelFiltered
+                delegate: polygonComponent
+            }
+
+            MapItemView {
+                model: polygonModelFiltered
+                delegate: polygonNameComponent
+            }
+
+            MapItemView {
+                model: polylineModelFiltered
+                delegate: polylineComponent
+            }
+
+            MapItemView {
+                model: polylineModelFiltered
+                delegate: polylineNameComponent
+            }
+
             // Tracks first, so drawn under other items
             MapItemView {
-                model: mapModel
+                model: mapModelFiltered
                 delegate: groundTrack1Component
             }
 
             MapItemView {
-                model: mapModel
+                model: mapModelFiltered
                 delegate: groundTrack2Component
             }
 
             MapItemView {
-                model: mapModel
+                model: mapModelFiltered
                 delegate: predictedGroundTrack1Component
             }
 
             MapItemView {
-                model: mapModel
+                model: mapModelFiltered
                 delegate: predictedGroundTrack2Component
             }
 
             MapItemView {
-                model: mapModel
+                model: mapModelFiltered
                 delegate: mapComponent
             }
 
             onZoomLevelChanged: {
                 mapZoomLevel = zoomLevel
+                mapModelFiltered.viewChanged(visibleRegion.boundingGeoRectangle().topLeft.longitude, visibleRegion.boundingGeoRectangle().topLeft.latitude, visibleRegion.boundingGeoRectangle().bottomRight.longitude, visibleRegion.boundingGeoRectangle().bottomRight.latitude, zoomLevel);
+                imageModelFiltered.viewChanged(visibleRegion.boundingGeoRectangle().topLeft.longitude, visibleRegion.boundingGeoRectangle().topLeft.latitude, visibleRegion.boundingGeoRectangle().bottomRight.longitude, visibleRegion.boundingGeoRectangle().bottomRight.latitude, zoomLevel);
+                polygonModelFiltered.viewChanged(visibleRegion.boundingGeoRectangle().topLeft.longitude, visibleRegion.boundingGeoRectangle().topLeft.latitude, visibleRegion.boundingGeoRectangle().bottomRight.longitude, visibleRegion.boundingGeoRectangle().bottomRight.latitude, zoomLevel);
+                polylineModelFiltered.viewChanged(visibleRegion.boundingGeoRectangle().topLeft.longitude, visibleRegion.boundingGeoRectangle().topLeft.latitude, visibleRegion.boundingGeoRectangle().bottomRight.longitude, visibleRegion.boundingGeoRectangle().bottomRight.latitude, zoomLevel);
             }
 
             // The map displays MapPolyLines in the wrong place (+360 degrees) if
             // they start to the left of the visible region, so we need to
             // split them so they don't, each time the visible region is changed. meh.
             onCenterChanged: {
+                polylineModelFiltered.viewChanged(visibleRegion.boundingGeoRectangle().topLeft.longitude, visibleRegion.boundingGeoRectangle().topLeft.latitude, visibleRegion.boundingGeoRectangle().bottomRight.longitude, visibleRegion.boundingGeoRectangle().bottomRight.latitude, zoomLevel);
+                polygonModelFiltered.viewChanged(visibleRegion.boundingGeoRectangle().topLeft.longitude, visibleRegion.boundingGeoRectangle().topLeft.latitude, visibleRegion.boundingGeoRectangle().bottomRight.longitude, visibleRegion.boundingGeoRectangle().bottomRight.latitude, zoomLevel);
+                imageModelFiltered.viewChanged(visibleRegion.boundingGeoRectangle().topLeft.longitude, visibleRegion.boundingGeoRectangle().topLeft.latitude, visibleRegion.boundingGeoRectangle().bottomRight.longitude, visibleRegion.boundingGeoRectangle().bottomRight.latitude, zoomLevel);
+                mapModelFiltered.viewChanged(visibleRegion.boundingGeoRectangle().topLeft.longitude, visibleRegion.boundingGeoRectangle().topLeft.latitude, visibleRegion.boundingGeoRectangle().bottomRight.longitude, visibleRegion.boundingGeoRectangle().bottomRight.latitude, zoomLevel);
                 mapModel.viewChanged(visibleRegion.boundingGeoRectangle().bottomLeft.longitude, visibleRegion.boundingGeoRectangle().bottomRight.longitude);
             }
 
@@ -119,13 +153,94 @@ Item {
     }
 
     Component {
+        id: imageComponent
+        MapQuickItem {
+            coordinate: position
+            anchorPoint.x: imageId.width/2
+            anchorPoint.y: imageId.height/2
+            zoomLevel: imageZoomLevel
+            sourceItem: Image {
+                id: imageId
+                source: imageData
+            }
+            autoFadeIn: false
+        }
+    }
+
+    Component {
+        id: polygonComponent
+        MapPolygon {
+            border.width: 1
+            border.color: borderColor
+            color: fillColor
+            path: polygon
+            autoFadeIn: false
+        }
+    }
+
+    Component {
+        id: polygonNameComponent
+        MapQuickItem {
+            coordinate: position
+            anchorPoint.x: polygonText.width/2
+            anchorPoint.y: polygonText.height/2
+            zoomLevel: mapZoomLevel > 11 ? mapZoomLevel : 11
+            sourceItem: Grid {
+                columns: 1
+                Grid {
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
+                    horizontalItemAlignment: Grid.AlignHCenter
+                    Text {
+                        id: polygonText
+                        text: label
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: polylineComponent
+        MapPolyline {
+            line.width: 1
+            line.color: lineColor
+            path: coordinates
+            autoFadeIn: false
+        }
+    }
+
+    Component {
+        id: polylineNameComponent
+        MapQuickItem {
+            coordinate: position
+            anchorPoint.x: polylineText.width/2
+            anchorPoint.y: polylineText.height/2
+            zoomLevel: mapZoomLevel > 11 ? mapZoomLevel : 11
+            sourceItem: Grid {
+                columns: 1
+                Grid {
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
+                    horizontalItemAlignment: Grid.AlignHCenter
+                    Text {
+                        id: polylineText
+                        text: label
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
         id: mapComponent
         MapQuickItem {
             id: mapElement
             anchorPoint.x: image.width/2
             anchorPoint.y: image.height/2
             coordinate: position
-            zoomLevel: mapZoomLevel > mapImageMinZoom ? mapZoomLevel : mapImageMinZoom
+            // when zooming, mapImageMinZoom can be temporarily undefined. Not sure why
+            zoomLevel: (typeof mapImageMinZoom !== 'undefined') ? (mapZoomLevel > mapImageMinZoom ? mapZoomLevel : mapImageMinZoom) : zoomLevel
             autoFadeIn: false               // not in 5.12
 
             sourceItem: Grid {
@@ -134,8 +249,8 @@ Item {
                 Grid {
                     horizontalItemAlignment: Grid.AlignHCenter
                     columnSpacing: 5
-                    layer.enabled: true
-                    layer.smooth: true
+                    layer.enabled: smoothing
+                    layer.smooth: smoothing
                     Image {
                         id: image
                         rotation: mapImageRotation
@@ -149,7 +264,7 @@ Item {
                                 if (mouse.button === Qt.LeftButton) {
                                     selected = !selected
                                     if (selected) {
-                                        mapModel.moveToFront(index)
+                                        mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
                                     }
                                 } else if (mouse.button === Qt.RightButton) {
                                     if (frequency > 0) {
@@ -159,6 +274,8 @@ Item {
                                         freqMenuItem.text = "No frequency available"
                                         freqMenuItem.enabled = false
                                     }
+                                    var c = mapPtr.toCoordinate(Qt.point(mouse.x, mouse.y))
+                                    coordsMenuItem.text = "Coords: " + c.latitude.toFixed(6) + ", " + c.longitude.toFixed(6)
                                     contextMenu.popup()
                                 }
                             }
@@ -186,7 +303,7 @@ Item {
                                 if (mouse.button === Qt.LeftButton) {
                                     selected = !selected
                                     if (selected) {
-                                        mapModel.moveToFront(index)
+                                        mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
                                     }
                                 } else if (mouse.button === Qt.RightButton) {
                                     if (frequency > 0) {
@@ -196,6 +313,8 @@ Item {
                                         freqMenuItem.text = "No frequency available"
                                         freqMenuItem.enabled = false
                                     }
+                                    var c = mapPtr.toCoordinate(Qt.point(mouse.x, mouse.y))
+                                    coordsMenuItem.text = "Coords: " + c.latitude.toFixed(6) + ", " + c.longitude.toFixed(6)
                                     contextMenu.popup()
                                 }
                             }
@@ -212,15 +331,19 @@ Item {
                                 }
                                 MenuItem {
                                     text: "Move to front"
-                                    onTriggered: mapModel.moveToFront(index)
+                                    onTriggered: mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
                                 }
                                 MenuItem {
                                     text: "Move to back"
-                                    onTriggered: mapModel.moveToBack(index)
+                                    onTriggered: mapModel.moveToBack(mapModelFiltered.mapRowToSource(index))
                                 }
                                 MenuItem {
                                     text: "Track on 3D map"
-                                    onTriggered: mapModel.track3D(index)
+                                    onTriggered: mapModel.track3D(mapModelFiltered.mapRowToSource(index))
+                                }
+                                MenuItem {
+                                    id: coordsMenuItem
+                                    text: ""
                                 }
                             }
                         }
