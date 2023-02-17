@@ -95,6 +95,7 @@ private:
     bool m_stacking;                // Set when stackSubWindows() is running
     bool m_autoStack;               // Automatically stack
     int m_userChannelMinWidth;      // Minimum width of channels column for stackSubWindows(), set by user resizing a channel window
+    int m_autoStackChannelMinWidth; // Width of channel requested by stackSubWindows()
 
     void unmaximizeSubWindows();
 

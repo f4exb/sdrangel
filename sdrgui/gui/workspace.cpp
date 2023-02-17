@@ -49,7 +49,8 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_featureAddDialog(this),
     m_stacking(false),
     m_autoStack(false),
-    m_userChannelMinWidth(0)
+    m_userChannelMinWidth(0),
+    m_autoStackChannelMinWidth(0)
 {
     m_mdi = new QMdiArea(this);
     m_mdi->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -692,7 +693,7 @@ void Workspace::stackSubWindows()
     }
 
     // Calculate width & height needed for channels
-    int channelMinWidth = m_userChannelMinWidth; // channels.size() > 0 ? m_userChannelMinWidth : 0;
+    int channelMinWidth = m_userChannelMinWidth;
     int channelTotalMinHeight = 0;
     int expandingChannels = 0;
     for (auto window : channels)
@@ -756,6 +757,8 @@ void Workspace::stackSubWindows()
     if ((spectrumFeaturesMinWidth == 0) && expandingChannels > 0) {
         channelMinWidth = mdiSize.width() - devicesFeaturesWidth - spacing1;
     }
+    // Save min width, for use in resize event handling
+    m_autoStackChannelMinWidth = channelMinWidth;
 
     // Now position the windows
     int x = 0;
@@ -1022,6 +1025,9 @@ bool Workspace::eventFilter(QObject *obj, QEvent *event)
     }
     else if (event->type() == QEvent::Resize)
     {
+        // We try to use m_stacking to ignore resize event as the result of a resize called in stackSubWindows
+        // However, this isn't reliable, as sometimes the resize event arrives after stackSubWindows has finished, and so m_stacking has been cleared
+        // What is a better way of doing this?
         if (!m_stacking && m_autoStack)
         {
             QWidget *widget = qobject_cast<QWidget *>(obj);
@@ -1033,10 +1039,14 @@ bool Workspace::eventFilter(QObject *obj, QEvent *event)
                 // but we can tell as window size matches mdi size
                 if (m_mdi->size() != resizeEvent->size())
                 {
-                    // Allow width of channels column to be set by user when they
-                    // resize a channel window
-                    m_userChannelMinWidth = resizeEvent->size().width();
-                    stackSubWindows();
+                    // Allow width of channels column to be set by user when they resize a channel window
+                    // We use m_autoStackChannelMinWidth to indicate the width was set by stackSubWindows, rather than the user
+                    int width = resizeEvent->size().width();
+                    if (width != m_autoStackChannelMinWidth)
+                    {
+                        m_userChannelMinWidth = width;
+                        stackSubWindows();
+                    }
                 }
             }
         }
@@ -1115,3 +1125,4 @@ void Workspace::adjustSubWindowsAfterRestore()
         }
     }
 }
+
