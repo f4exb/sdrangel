@@ -179,6 +179,9 @@ private slots:
 	void handleMessages();
     void handleWorkspaceVisibility(Workspace *workspace, bool visibility);
 
+#ifdef ANDROID
+	void on_action_View_KeepScreenOn_toggled(bool checked);
+#endif
 	void on_action_View_Fullscreen_toggled(bool checked);
 	void on_action_saveAll_triggered();
     void on_action_Configurations_triggered();

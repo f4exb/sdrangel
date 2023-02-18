@@ -36,6 +36,10 @@ public:
     static void closeUSBDevice(int fd);
     static void moveTaskToBack();
     static void messageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
+    static void acquireWakeLock();
+    static void releaseWakeLock();
+    static void acquireScreenLock();
+    static void releaseScreenLock();
 
 };
 

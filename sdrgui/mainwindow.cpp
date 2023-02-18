@@ -1637,6 +1637,12 @@ void MainWindow::createMenuBar(QToolButton *button)
     fullscreenAction->setToolTip("Toggle fullscreen view");
     fullscreenAction->setCheckable(true);
     QObject::connect(fullscreenAction, &QAction::triggered, this, &MainWindow::on_action_View_Fullscreen_toggled);
+#ifdef ANDROID
+    QAction *keepscreenonAction = viewMenu->addAction("&Keep screen on");
+    keepscreenonAction->setToolTip("Prevent screen from switching off");
+    keepscreenonAction->setCheckable(true);
+    QObject::connect(keepscreenonAction, &QAction::triggered, this, &MainWindow::on_action_View_KeepScreenOn_toggled);
+#endif
 
     QAction *newWorkspaceAction = workspacesMenu->addAction("&New");
     newWorkspaceAction->setToolTip("Add a new workspace");
@@ -2182,6 +2188,17 @@ void MainWindow::removeEmptyWorkspaces()
     }
 #endif
 }
+
+#ifdef ANDROID
+void MainWindow::on_action_View_KeepScreenOn_toggled(bool checked)
+{
+    if (checked) {
+        Android::acquireScreenLock();
+    } else {
+        Android::releaseScreenLock();
+    }
+}
+#endif
 
 void MainWindow::on_action_View_Fullscreen_toggled(bool checked)
 {
