@@ -550,6 +550,12 @@ void SSBDemodGUI::displaySettings()
     m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setLowCutoff(m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff);
 
+    if (m_deviceUISet->m_deviceMIMOEngine)
+    {
+        m_channelMarker.clearStreamIndexes();
+        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+    }
+
     ui->flipSidebands->setEnabled(!m_settings.m_dsb);
 
     if (m_settings.m_dsb)
