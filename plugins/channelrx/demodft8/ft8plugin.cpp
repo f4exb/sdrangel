@@ -12,7 +12,7 @@
 const PluginDescriptor FT8Plugin::m_pluginDescriptor = {
     FT8Demod::m_channelId,
 	QStringLiteral("FT8 Demodulator"),
-    QStringLiteral("7.9.0"),
+    QStringLiteral("7.10.0"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

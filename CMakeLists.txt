@@ -15,7 +15,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # configure version
 set(sdrangel_VERSION_MAJOR "7")
-set(sdrangel_VERSION_MINOR "9")
+set(sdrangel_VERSION_MINOR "10")
 set(sdrangel_VERSION_PATCH "0")
 set(sdrangel_VERSION_SUFFIX "")
 

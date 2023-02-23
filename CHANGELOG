@@ -1,3 +1,18 @@
+sdrangel (7.10.0-1) unstable; urgency=medium
+
+  - Copy fftw3f and libusb dlls to bin directory. PR #1503
+  - Removed unncecessary call to updateChannels in VORLocalizer and DemodAnalyzer. Fixes #1572
+  - TestSource: use queued connection for connecting worker's deleteLater. Fixes possible crash on exit
+  - FT8 support: corrected possible code glitch
+  - DSD demod: disable audio for YSF wide mode if AMBE feature is active. Fixes #1587
+  - Fix SDRplay RSPdx LNA table, to have correct number of entries, for #1532. PR #1591
+  - Heat Map Rx channel plugin. Changes to Map. PR #1600
+  - Autostack: Fix channel windows being made to wide when SDRangel starts. PR #1601
+  - Android: Prevent app from being put to sleep when running. Add menu to keep screen on. PR #1602
+  - SSB demod GUI: display channel marker in correct stream if connected to a MIMO device
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 23 Feb 2023 23:59:54 +0100
+
 sdrangel (7.9.0-1) unstable; urgency=medium
 
   - FT8 demodulator. Implements #1561
