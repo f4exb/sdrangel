@@ -411,7 +411,11 @@ void NoiseFigure::powerOn()
 #endif
         QString program = allArgs[0];
         allArgs.pop_front();
-        QProcess::execute(program, allArgs);
+        qDebug() << "NoiseFigure::powerOn(): Executing" << program << allArgs;
+        int exitCode = QProcess::execute(program, allArgs);
+        if (exitCode) {
+            qWarning() << "NoiseFigure::powerOn():" << program << "exited with code" << exitCode;
+        }
     }
 
     QStringList commands = m_settings.m_powerOnSCPI.split("\n");
@@ -434,7 +438,11 @@ void NoiseFigure::powerOff()
 #endif
         QString program = allArgs[0];
         allArgs.pop_front();
-        QProcess::execute(program, allArgs);
+        qDebug() << "NoiseFigure::powerOff(): Executing" << program << allArgs;
+        int exitCode = QProcess::execute(program, allArgs);
+        if (exitCode) {
+            qWarning() << "NoiseFigure::powerOff():" << program << "exited with code" << exitCode;
+        }
     }
 }
 
