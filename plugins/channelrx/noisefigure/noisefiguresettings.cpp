@@ -93,7 +93,7 @@ QByteArray NoiseFigureSettings::serialize() const
     s.writeString(10, m_visaDevice);
     s.writeString(11, m_powerOnSCPI);
     s.writeString(12, m_powerOffSCPI);
-    s.writeString(13, m_powerOffCommand);
+    s.writeString(13, m_powerOnCommand);
     s.writeString(14, m_powerOffCommand);
     s.writeDouble(15, m_powerDelay);
 
