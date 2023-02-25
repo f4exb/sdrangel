@@ -1383,7 +1383,7 @@ void HeatMapGUI::addToPowerSeries(QDateTime dateTime, double average, double pul
 
 void HeatMapGUI::updateAxis()
 {
-    if (!m_powerPathLossSeries || (m_powerPathLossSeries->count() <= 1)) {
+    if (!m_powerAverageSeries || !m_powerPathLossSeries || (m_powerPathLossSeries->count() <= 1)) {
         return;
     }
     QDateTime current = QDateTime::currentDateTime();
