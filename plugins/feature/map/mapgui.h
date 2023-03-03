@@ -160,6 +160,7 @@ public:
     void addAirspace(const Airspace *airspace, const QString& group, int cnt);
     void addAirspace();
     void addAirports();
+    void addNavtex();
     void find(const QString& target);
     void track3D(const QString& target);
     Q_INVOKABLE void supportedMapsChanged();

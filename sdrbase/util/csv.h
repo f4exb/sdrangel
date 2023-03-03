@@ -46,8 +46,8 @@ struct SDRBASE_API CSV {
 
     static QHash<QString, QString> *hash(const QString& filename, int reserve=0);
 
-    static bool readRow(QTextStream &in, QStringList *row);
-    static QHash<QString, int> readHeader(QTextStream &in, QStringList requiredColumns, QString &error);
+    static bool readRow(QTextStream &in, QStringList *row, char seperator=',');
+    static QHash<QString, int> readHeader(QTextStream &in, QStringList requiredColumns, QString &error, char seperator=',');
 
 };
 
