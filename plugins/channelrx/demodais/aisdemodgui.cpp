@@ -783,6 +783,8 @@ void AISDemodGUI::makeUIConnections()
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &AISDemodGUI::on_logEnable_clicked);
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &AISDemodGUI::on_logFilename_clicked);
     QObject::connect(ui->logOpen, &QToolButton::clicked, this, &AISDemodGUI::on_logOpen_clicked);
+    QObject::connect(ui->channel1, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AISDemodGUI::on_channel1_currentIndexChanged);
+    QObject::connect(ui->channel2, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AISDemodGUI::on_channel2_currentIndexChanged);
 }
 
 void AISDemodGUI::updateAbsoluteCenterFrequency()
