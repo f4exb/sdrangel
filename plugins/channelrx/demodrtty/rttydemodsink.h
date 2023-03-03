@@ -139,7 +139,7 @@ private:
     BaudotDecoder m_rttyDecoder;
 
     // For baud rate estimation
-    int m_cycleCount;
+    unsigned int m_cycleCount;
     std::vector<int> m_clockHistogram;
     int m_edgeCount;
     MovingAverageUtil<Real, Real, 5> m_baudRateAverage;

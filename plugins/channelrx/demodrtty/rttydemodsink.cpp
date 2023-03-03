@@ -41,12 +41,12 @@ RttyDemodSink::RttyDemodSink(RttyDemod *packetDemod) :
         m_prods1(nullptr),
         m_prods2(nullptr),
         m_exp(nullptr),
+        m_sampleIdx(0),
         m_clockHistogram(100),
         m_shiftEstMag(m_fftSize),
         m_fftSequence(-1),
         m_fft(nullptr),
         m_fftCounter(0),
-        m_sampleIdx(0),
         m_sampleBufferIndex(0)
 {
     m_magsq = 0.0;
