@@ -84,6 +84,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_freq_tracker_settings_isSet = false;
     ft8_demod_settings = nullptr;
     m_ft8_demod_settings_isSet = false;
+    rtty_demod_settings = nullptr;
+    m_rtty_demod_settings_isSet = false;
     heat_map_settings = nullptr;
     m_heat_map_settings_isSet = false;
     interferometer_settings = nullptr;
@@ -94,6 +96,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_m17_demod_settings_isSet = false;
     m17_mod_settings = nullptr;
     m_m17_mod_settings_isSet = false;
+    navtex_demod_settings = nullptr;
+    m_navtex_demod_settings_isSet = false;
     nfm_demod_settings = nullptr;
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = nullptr;
@@ -202,6 +206,8 @@ SWGChannelSettings::init() {
     m_freq_tracker_settings_isSet = false;
     ft8_demod_settings = new SWGFT8DemodSettings();
     m_ft8_demod_settings_isSet = false;
+    rtty_demod_settings = new SWGRTTYDemodSettings();
+    m_rtty_demod_settings_isSet = false;
     heat_map_settings = new SWGHeatMapSettings();
     m_heat_map_settings_isSet = false;
     interferometer_settings = new SWGInterferometerSettings();
@@ -212,6 +218,8 @@ SWGChannelSettings::init() {
     m_m17_demod_settings_isSet = false;
     m17_mod_settings = new SWGM17ModSettings();
     m_m17_mod_settings_isSet = false;
+    navtex_demod_settings = new SWGNavtexDemodSettings();
+    m_navtex_demod_settings_isSet = false;
     nfm_demod_settings = new SWGNFMDemodSettings();
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = new SWGNFMModSettings();
@@ -338,6 +346,9 @@ SWGChannelSettings::cleanup() {
     if(ft8_demod_settings != nullptr) { 
         delete ft8_demod_settings;
     }
+    if(rtty_demod_settings != nullptr) { 
+        delete rtty_demod_settings;
+    }
     if(heat_map_settings != nullptr) { 
         delete heat_map_settings;
     }
@@ -352,6 +363,9 @@ SWGChannelSettings::cleanup() {
     }
     if(m17_mod_settings != nullptr) { 
         delete m17_mod_settings;
+    }
+    if(navtex_demod_settings != nullptr) { 
+        delete navtex_demod_settings;
     }
     if(nfm_demod_settings != nullptr) { 
         delete nfm_demod_settings;
@@ -488,6 +502,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&ft8_demod_settings, pJson["FT8DemodSettings"], "SWGFT8DemodSettings", "SWGFT8DemodSettings");
     
+    ::SWGSDRangel::setValue(&rtty_demod_settings, pJson["RTTYDemodSettings"], "SWGRTTYDemodSettings", "SWGRTTYDemodSettings");
+    
     ::SWGSDRangel::setValue(&heat_map_settings, pJson["HeatMapSettings"], "SWGHeatMapSettings", "SWGHeatMapSettings");
     
     ::SWGSDRangel::setValue(&interferometer_settings, pJson["InterferometerSettings"], "SWGInterferometerSettings", "SWGInterferometerSettings");
@@ -497,6 +513,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&m17_demod_settings, pJson["M17DemodSettings"], "SWGM17DemodSettings", "SWGM17DemodSettings");
     
     ::SWGSDRangel::setValue(&m17_mod_settings, pJson["M17ModSettings"], "SWGM17ModSettings", "SWGM17ModSettings");
+    
+    ::SWGSDRangel::setValue(&navtex_demod_settings, pJson["NavtexDemodSettings"], "SWGNavtexDemodSettings", "SWGNavtexDemodSettings");
     
     ::SWGSDRangel::setValue(&nfm_demod_settings, pJson["NFMDemodSettings"], "SWGNFMDemodSettings", "SWGNFMDemodSettings");
     
@@ -642,6 +660,9 @@ SWGChannelSettings::asJsonObject() {
     if((ft8_demod_settings != nullptr) && (ft8_demod_settings->isSet())){
         toJsonValue(QString("FT8DemodSettings"), ft8_demod_settings, obj, QString("SWGFT8DemodSettings"));
     }
+    if((rtty_demod_settings != nullptr) && (rtty_demod_settings->isSet())){
+        toJsonValue(QString("RTTYDemodSettings"), rtty_demod_settings, obj, QString("SWGRTTYDemodSettings"));
+    }
     if((heat_map_settings != nullptr) && (heat_map_settings->isSet())){
         toJsonValue(QString("HeatMapSettings"), heat_map_settings, obj, QString("SWGHeatMapSettings"));
     }
@@ -656,6 +677,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((m17_mod_settings != nullptr) && (m17_mod_settings->isSet())){
         toJsonValue(QString("M17ModSettings"), m17_mod_settings, obj, QString("SWGM17ModSettings"));
+    }
+    if((navtex_demod_settings != nullptr) && (navtex_demod_settings->isSet())){
+        toJsonValue(QString("NavtexDemodSettings"), navtex_demod_settings, obj, QString("SWGNavtexDemodSettings"));
     }
     if((nfm_demod_settings != nullptr) && (nfm_demod_settings->isSet())){
         toJsonValue(QString("NFMDemodSettings"), nfm_demod_settings, obj, QString("SWGNFMDemodSettings"));
@@ -1007,6 +1031,16 @@ SWGChannelSettings::setFt8DemodSettings(SWGFT8DemodSettings* ft8_demod_settings)
     this->m_ft8_demod_settings_isSet = true;
 }
 
+SWGRTTYDemodSettings*
+SWGChannelSettings::getRttyDemodSettings() {
+    return rtty_demod_settings;
+}
+void
+SWGChannelSettings::setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settings) {
+    this->rtty_demod_settings = rtty_demod_settings;
+    this->m_rtty_demod_settings_isSet = true;
+}
+
 SWGHeatMapSettings*
 SWGChannelSettings::getHeatMapSettings() {
     return heat_map_settings;
@@ -1055,6 +1089,16 @@ void
 SWGChannelSettings::setM17ModSettings(SWGM17ModSettings* m17_mod_settings) {
     this->m17_mod_settings = m17_mod_settings;
     this->m_m17_mod_settings_isSet = true;
+}
+
+SWGNavtexDemodSettings*
+SWGChannelSettings::getNavtexDemodSettings() {
+    return navtex_demod_settings;
+}
+void
+SWGChannelSettings::setNavtexDemodSettings(SWGNavtexDemodSettings* navtex_demod_settings) {
+    this->navtex_demod_settings = navtex_demod_settings;
+    this->m_navtex_demod_settings_isSet = true;
 }
 
 SWGNFMDemodSettings*
@@ -1366,6 +1410,9 @@ SWGChannelSettings::isSet(){
         if(ft8_demod_settings && ft8_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
+        if(rtty_demod_settings && rtty_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(heat_map_settings && heat_map_settings->isSet()){
             isObjectUpdated = true; break;
         }
@@ -1379,6 +1426,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m17_mod_settings && m17_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(navtex_demod_settings && navtex_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(nfm_demod_settings && nfm_demod_settings->isSet()){

@@ -51,12 +51,16 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
     FT8DemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/FT8Demod.yaml#/FT8DemodReport"
+    RTTYDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/RTTYDemod.yaml#/RTTYDemodReport"
     HeatMapReport:
       $ref: "http://swgserver:8081/api/swagger/include/HeatMap.yaml#/HeatMapReport"
     M17DemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/M17Demod.yaml#/M17DemodReport"
     M17ModReport:
       $ref: "http://swgserver:8081/api/swagger/include/M17Mod.yaml#/M17ModReport"
+    NavtexDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/NavtexDemod.yaml#/NavtexDemodReport"
     NFMDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodReport"
     NFMModReport:
