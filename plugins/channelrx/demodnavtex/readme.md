@@ -1,4 +1,4 @@
-<h1>Navtex demodulator plugin</h1>
+<h1>Navtex Demodulator Plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -29,7 +29,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 <h3>4: Navarea</h3>
 
-Specifies the geographical area in which the receiver is in. This enables the plugin to decode transmitter station identifiers, and display which transmitter the current transmission timeslot is assigned to.
+Specifies the geographical area in which the receiver is in. This enables the plugin to decode transmitter station identifiers, and display which transmitter the current transmission timeslot is assigned to (5).
 Note that with good propagation conditions, it is possible to receive messages from another area, so the station indicated in the message table (17) should be checked against the location given in the recevied message text.
 
 <h3>5: TX</h3>
@@ -46,15 +46,15 @@ This specifies the bandwidth of a filter that is applied to the input signal to 
 
 <h3>8: UDP</h3>
 
-When checked, received packets are forwarded to the specified UDP address (9) and port (10).
+When checked, received messages are forwarded to the specified UDP address (9) and port (10).
 
 <h3>9: UDP address</h3>
 
-IP address of the host to forward received packets to via UDP.
+IP address of the host to forward received messages to via UDP.
 
 <h3>10: UDP port</h3>
 
-UDP port number to forward received packets to.
+UDP port number to forward received messages to.
 
 <h3>11: Station Filter</h3>
 
@@ -66,7 +66,7 @@ This drop down displays a list of all message types that have been received. Whe
 
 <h3>13: Start/stop Logging Messages to .csv File</h3>
 
-When checked, writes all received messages to a .csv file.
+When checked, writes all received messages to a .csv file, specified by (14).
 
 <h3>14: .csv Log Filename</h3>
 
@@ -87,7 +87,7 @@ The received messages table displays the contents of the messages that have been
 * Date - Date the message was received.
 * Time - Time the message was received.
 * SID - Station identifer of the transmitting station.
-* Station - SID decoded according to the currently selected navarea.
+* Station - SID decoded according to the currently selected navarea (4).
 * TID - Message type identifier.
 * MID - Message identifier.
 * Message - The message text.

@@ -1,9 +1,9 @@
-<h1>RTTY demodulator plugin</h1>
+<h1>RTTY Demodulator Plugin</h1>
 
 <h2>Introduction</h2>
 
 This plugin can be used to demodulate RTTY (Radioteletype) transmissions.
-RTTY using BFSK (Binary Frequency Shift Keying), where transmission of data alternates between two frequencies,
+RTTY uses BFSK (Binary Frequency Shift Keying), where transmission of data alternates between two frequencies,
 the mark frequency and the space frequency. The RTTY Demodulor should be centered in between these frequencies.
 The baud rate, frequency shift (difference between mark and space frequencies), bandwidth and baudot character set are configurable.
 
@@ -60,7 +60,7 @@ UDP port number to forward received characters to.
 
 <h3>11: Squelch</h3>
 
-Sets the squelch power. Characters received with average power lower than this setting will be discarded.
+Sets the squelch power level in dB. Characters received with average power lower than this setting will be discarded.
 
 <h3>12: Baudot Character Set</h3>
 
@@ -79,11 +79,11 @@ Specifies whether bits are transmitted least-significant-bit first (LSB) or most
 
 <h3>14: Mark/Space Frequency</h3>
 
-When unchecked, the mark frequency is the higher frequency, when checked space frequency is higher.
+When unchecked, the mark frequency is the higher frequency, when checked the space frequency is higher.
 
 <h3>15: Suppress CR LF</h3>
 
-When checked the CR CR LF sequence is just displayed as CR.
+When checked the CR CR LF sequence is just displayed as CR. This can help make more received text visible in (19). 
 
 <h3>16: Unshift on Space</h3>
 
