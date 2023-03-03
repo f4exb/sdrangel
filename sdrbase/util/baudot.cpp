@@ -164,7 +164,7 @@ void BaudotDecoder::init()
 
 QString BaudotDecoder::decode(char bits)
 {
-    QString c = m_figure ? m_figures[bits] : m_letters[bits];
+    QString c = m_figure ? m_figures[(int)bits] : m_letters[(int)bits];
 
     if ((c == '>') || (m_unshiftOnSpace && (c == " ")))
     {

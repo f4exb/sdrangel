@@ -270,15 +270,14 @@ const NavtexTransmitter* NavtexTransmitter::getTransmitter(QTime time, int area,
 }
 
 NavtexMessage::NavtexMessage(QDateTime dateTime, const QString& stationId, const QString& typeId, const QString& id, const QString& message) :
-    m_dateTime(dateTime),
     m_stationId(stationId),
     m_typeId(typeId),
     m_id(id),
     m_message(message),
+    m_dateTime(dateTime),
     m_valid(true)
 {
 }
-
 
 NavtexMessage::NavtexMessage(const QString& text)
 {
@@ -448,7 +447,7 @@ QString SitorBDecoder::printable(char c)
     } else if (c == 0x7) {
         return "Bell";
     } else {
-        return c;
+        return QString("%1").arg(c);
     }
 }
 
@@ -721,9 +720,9 @@ const char SitorBDecoder::m_ccir476FigureSetDecode[128] = {
 char SitorBDecoder::ccir476Decode(char c)
 {
     if (m_figureSet) {
-        return m_ccir476FigureSetDecode[c];
+        return m_ccir476FigureSetDecode[(int)c];
     } else {
-        return m_ccir476LetterSetDecode[c];
+        return m_ccir476LetterSetDecode[(int)c];
     }
 }
 
