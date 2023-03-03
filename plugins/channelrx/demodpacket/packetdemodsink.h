@@ -105,7 +105,6 @@ private:
 
     MovingAverageUtil<Real, double, 16> m_movingAverage;
 
-    Lowpass<Complex> m_lowpass;
     PhaseDiscriminators m_phaseDiscri;
 
     int m_correlationLength;
