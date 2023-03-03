@@ -1,0 +1,1323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RttyDemodGUI</class>
+ <widget class="RollupContents" name="RttyDemodGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>411</width>
+    <height>814</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>352</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::StrongFocus</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Packet Demodulator</string>
+  </property>
+  <widget class="QWidget" name="settingsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>390</width>
+     <height>181</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>350</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="powLayout">
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="deltaFrequencyLabel">
+        <property name="minimumSize">
+         <size>
+          <width>16</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Df</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ValueDialZ" name="deltaFrequency" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Demod shift frequency from center in Hz</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="deltaUnits">
+        <property name="text">
+         <string>Hz </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="channelPowerLayout">
+        <item>
+         <widget class="QLabel" name="channelPower">
+          <property name="toolTip">
+           <string>Channel power</string>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>0.0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="channelPowerUnits">
+          <property name="text">
+           <string> dB</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="powerLayout">
+      <item>
+       <widget class="QLabel" name="channelPowerMeterUnits">
+        <property name="text">
+         <string>dB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="LevelMeterSignalDB" name="channelPowerMeter" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Level meter (dB) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_5">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="phySettingsLayout">
+      <item>
+       <widget class="QComboBox" name="mode">
+        <property name="minimumSize">
+         <size>
+          <width>86</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>RTTY baud rate and frequency shift</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>45.45/170</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>50/170</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>50/450</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>75/170</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>75/850</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Custom</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="baudRateLine">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="baudRateLabel">
+        <property name="text">
+         <string>Baud</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="baudRate">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Baud rate in symbols per second</string>
+        </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>45</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>45.45</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>50</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>75</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>100</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>110</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>150</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>200</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="frequencyShiftLine">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="frequencyShiftLabel">
+        <property name="text">
+         <string>Shift</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="frequencyShift">
+        <property name="toolTip">
+         <string>Frequency shift in Hz (Difference between mark and space frequency)</string>
+        </property>
+        <property name="minimum">
+         <number>10</number>
+        </property>
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="frequencyShiftText">
+        <property name="text">
+         <string>850Hz</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="rfBWLine">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rfBWLabel">
+        <property name="text">
+         <string>BW</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="rfBW">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>RF bandwidth</string>
+        </property>
+        <property name="minimum">
+         <number>100</number>
+        </property>
+        <property name="maximum">
+         <number>2000</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>250</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rfBWText">
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>500Hz</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="filterLine">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="filterSettingsWidget" native="true">
+      <layout class="QHBoxLayout" name="filterSettings">
+       <item>
+        <widget class="QLabel" name="filterLabel">
+         <property name="text">
+          <string>Filter</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="filter">
+         <item>
+          <property name="text">
+           <string>LPF</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Raised Cosine b=1</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Raised Cosine b=0.75</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Raised Cosine b=0.5</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Rasied Cosine b=1 BW=0.75</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Raised Cosine b=1 BW=1.25</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>MAV</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Filtered MAV</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="ButtonSwitch" name="atc">
+         <property name="maximumSize">
+          <size>
+           <width>24</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Automatic threshold correction</string>
+         </property>
+         <property name="text">
+          <string>ATC</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="modeEstLabel">
+         <property name="text">
+          <string>Est.</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="modeEst">
+         <property name="toolTip">
+          <string>Estimated baud rate and frequency shift</string>
+         </property>
+         <property name="text">
+          <string>50/170</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="Line" name="line_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="udpLayout">
+      <item>
+       <widget class="QCheckBox" name="udpEnabled">
+        <property name="toolTip">
+         <string>Send messages via UDP</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="text">
+         <string>UDP</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="udpAddress">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Destination UDP address</string>
+        </property>
+        <property name="inputMask">
+         <string>000.000.000.000</string>
+        </property>
+        <property name="text">
+         <string>127.0.0.1</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="udpSeparator">
+        <property name="text">
+         <string>:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="udpPort">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Destination UDP port</string>
+        </property>
+        <property name="inputMask">
+         <string>00000</string>
+        </property>
+        <property name="text">
+         <string>9998</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="udpSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="Line" name="squelchLine">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="squelchLabel">
+        <property name="text">
+         <string>Squelch</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="squelch">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Squelch. Characters received with average power below this setting will be discarded.</string>
+        </property>
+        <property name="minimum">
+         <number>-120</number>
+        </property>
+        <property name="maximum">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="squelchText">
+        <property name="minimumSize">
+         <size>
+          <width>46</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>-100 dB</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_3">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="toolbarLayout">
+      <item>
+       <widget class="QLabel" name="characterSetLabel">
+        <property name="text">
+         <string>Baudot</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="characterSet">
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Baudot character set</string>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>ITA 2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>UK</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>European</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>US</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Russian</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Murray</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="endian">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Whether LSB (Least significant bit) or MSB (Most significant bit) is transmitted first</string>
+        </property>
+        <property name="text">
+         <string>LSB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="spaceHigh">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Whether mark is high frequency (unchecked) or low frequency (checked)</string>
+        </property>
+        <property name="text">
+         <string>S-M</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="suppressCRLF">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>When checked the CR CR LF sequence is just displayed as CR</string>
+        </property>
+        <property name="text">
+         <string>CR</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="unshiftOnSpace">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Unshift on space - Set character set to letter when a space character is received</string>
+        </property>
+        <property name="text">
+         <string>US</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="toolbarSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="logEnable">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Start/stop logging of received characters to .txt file</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/record_off.png</normaloff>:/record_off.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="logFilename">
+        <property name="toolTip">
+         <string>Set log .csv filename</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/save.png</normaloff>:/save.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clearTable">
+        <property name="toolTip">
+         <string>Clear messages</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="dataContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>190</y>
+     <width>391</width>
+     <height>251</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Received Messages</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QPlainTextEdit" name="text">
+      <property name="toolTip">
+       <string>Received text</string>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="scopeContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>440</y>
+     <width>716</width>
+     <height>341</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>714</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Waveforms</string>
+   </property>
+   <layout class="QVBoxLayout" name="transmittedLayout_2">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="scopelLayout">
+      <item>
+       <widget class="QLabel" name="channel1Label">
+        <property name="text">
+         <string>Real</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="channel1">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <item>
+         <property name="text">
+          <string>I</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Q</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Mag Sq</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Sample Idx</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(Sum1)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(Sum2)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bit</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bit Cnt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Got SOP</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Real(exp)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Imag(exp)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(sum1)Filt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(sum2)Filt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Diff</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DiffFilt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>data</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>clock</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Env1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Env2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bias1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bias2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Unbiased data</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Biased data</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="channel2Label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Imag</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="channel2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <item>
+         <property name="text">
+          <string>I</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Q</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Mag Sq</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Sample Idx</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(Sum1)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(Sum2)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bit</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bit Cnt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Got SOP</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Real(exp)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>imag(exp)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(sum1)Filt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(sum2)Filt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Diff</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DiffFilt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>data</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>clock</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Env1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Env2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bias1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bias2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Unbiased data</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Biased data</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="GLScope" name="glScope" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>250</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Liberation Mono</family>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="GLScopeGUI" name="scopeGUI" native="true"/>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLScope</class>
+   <extends>QWidget</extends>
+   <header>gui/glscope.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLScopeGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/glscopegui.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>deltaFrequency</tabstop>
+  <tabstop>mode</tabstop>
+  <tabstop>baudRate</tabstop>
+  <tabstop>frequencyShift</tabstop>
+  <tabstop>rfBW</tabstop>
+  <tabstop>filter</tabstop>
+  <tabstop>atc</tabstop>
+  <tabstop>udpEnabled</tabstop>
+  <tabstop>squelch</tabstop>
+  <tabstop>characterSet</tabstop>
+  <tabstop>endian</tabstop>
+  <tabstop>spaceHigh</tabstop>
+  <tabstop>suppressCRLF</tabstop>
+  <tabstop>unshiftOnSpace</tabstop>
+  <tabstop>logEnable</tabstop>
+  <tabstop>logFilename</tabstop>
+  <tabstop>clearTable</tabstop>
+  <tabstop>text</tabstop>
+  <tabstop>channel1</tabstop>
+  <tabstop>channel2</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

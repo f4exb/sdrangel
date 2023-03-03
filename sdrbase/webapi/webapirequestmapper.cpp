@@ -4543,6 +4543,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
             channelSettings->getInterferometerSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "NavtexDemodSettings")
+        {
+            channelSettings->setNavtexDemodSettings(new SWGSDRangel::SWGNavtexDemodSettings());
+            channelSettings->getNavtexDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "M17DemodSettings")
         {
             channelSettings->setM17DemodSettings(new SWGSDRangel::SWGM17DemodSettings());
@@ -4623,6 +4628,11 @@ bool WebAPIRequestMapper::getChannelSettings(
         {
             channelSettings->setRemoteTcpSinkSettings(new SWGSDRangel::SWGRemoteTCPSinkSettings());
             channelSettings->getRemoteTcpSinkSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "RTTYDemodSettings")
+        {
+            channelSettings->setRttyDemodSettings(new SWGSDRangel::SWGRTTYDemodSettings());
+            channelSettings->getRttyDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "SigMFFileSinkSettings")
         {
@@ -5382,6 +5392,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDsdDemodSettings(nullptr);
     channelSettings.setHeatMapSettings(nullptr);
     channelSettings.setIeee802154ModSettings(nullptr);
+    channelSettings.setNavtexDemodSettings(nullptr);
     channelSettings.setNfmDemodSettings(nullptr);
     channelSettings.setNfmModSettings(nullptr);
     channelSettings.setNoiseFigureSettings(nullptr);
@@ -5394,6 +5405,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setRemoteSinkSettings(nullptr);
     channelSettings.setRemoteSourceSettings(nullptr);
     channelSettings.setRemoteTcpSinkSettings(nullptr);
+    channelSettings.setRttyDemodSettings(nullptr);
     channelSettings.setSsbDemodSettings(nullptr);
     channelSettings.setSsbModSettings(nullptr);
     channelSettings.setUdpSourceSettings(nullptr);
@@ -5418,6 +5430,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setDatvModReport(nullptr);
     channelReport.setDsdDemodReport(nullptr);
     channelReport.setHeatMapReport(nullptr);
+    channelReport.setNavtexDemodReport(nullptr);
     channelReport.setNfmDemodReport(nullptr);
     channelReport.setNfmModReport(nullptr);
     channelReport.setNoiseFigureReport(nullptr);
@@ -5427,6 +5440,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setRadioClockReport(nullptr);
     channelReport.setRadiosondeDemodReport(nullptr);
     channelReport.setRemoteSourceReport(nullptr);
+    channelReport.setRttyDemodReport(nullptr);
     channelReport.setSsbDemodReport(nullptr);
     channelReport.setSsbModReport(nullptr);
     channelReport.setUdpSourceReport(nullptr);
