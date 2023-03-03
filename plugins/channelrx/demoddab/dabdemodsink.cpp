@@ -279,12 +279,10 @@ void motDataHandler(uint8_t *data, int len, const char *filename, int contentsub
     sink->motData(data, len, QString::fromUtf8(filename), contentsubType);
 }
 
-// Missing ctx for tiiDataHandler - https://github.com/JvanKatwijk/dab-cmdline/issues/89
-DABDemodSink *tiiSink;
-
-void tiiDataHandler(int tii)
+void tiiDataHandler(int tii, void *ctx)
 {
-    tiiSink->tii(tii);
+    DABDemodSink *sink = (DABDemodSink *)ctx;
+    sink->tii(tii);
 }
 
 void DABDemodSink::systemData(bool sync, int16_t snr, int32_t freqOffset)
@@ -523,7 +521,6 @@ DABDemodSink::DABDemodSink(DABDemod *packetDemod) :
     m_api.motdata_Handler = motDataHandler;
     m_api.tii_data_Handler = tiiDataHandler;
     m_api.timeHandler = nullptr;
-    tiiSink = this;
     m_dab = dabInit(&m_device,
                 &m_api,
                 nullptr,
