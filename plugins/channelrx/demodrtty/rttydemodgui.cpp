@@ -248,6 +248,8 @@ void RttyDemodGUI::on_suppressCRLF_clicked(bool checked)
 
 void RttyDemodGUI::on_mode_currentIndexChanged(int index)
 {
+    (void) index;
+
     QString mode = ui->mode->currentText();
 
     bool custom = mode == "Custom";

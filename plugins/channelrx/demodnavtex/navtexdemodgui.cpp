@@ -360,6 +360,8 @@ void NavtexDemodGUI::on_rfBW_valueChanged(int value)
 
 void NavtexDemodGUI::on_filterStation_currentIndexChanged(int index)
 {
+    (void) index;
+
     m_settings.m_filterStation = ui->filterStation->currentText();
     filter();
     applySettings();
@@ -367,6 +369,8 @@ void NavtexDemodGUI::on_filterStation_currentIndexChanged(int index)
 
 void NavtexDemodGUI::on_filterType_currentIndexChanged(int index)
 {
+    (void) index;
+
     m_settings.m_filterType = ui->filterType->currentText();
     filter();
     applySettings();
