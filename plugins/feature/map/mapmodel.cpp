@@ -586,7 +586,7 @@ ObjectMapItem *ObjectMapModel::findMapItem(const QString& name)
     while (i.hasNext())
     {
         MapItem *item = i.next();
-        if (item->m_name == name) {
+        if (!item->m_name.compare(name, Qt::CaseInsensitive)) {
             return (ObjectMapItem *)item;
         }
     }
