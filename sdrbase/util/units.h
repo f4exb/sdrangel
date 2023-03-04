@@ -294,6 +294,25 @@ public:
                  longitude = -longitude;
              return true;
         }
+        QRegExp dms2(QString("([0-9]+)([NS])([0-9]{2})([0-9]{2}) *,?([0-9]+)([EW])([0-9]{2})([0-9]{2})"));
+        if (dms2.exactMatch(string))
+        {
+             float latD = dms2.capturedTexts()[1].toFloat();
+             bool north = dms2.capturedTexts()[2] == "N";
+             float latM = dms2.capturedTexts()[3].toFloat();
+             float latS = dms2.capturedTexts()[4].toFloat();
+             float lonD = dms2.capturedTexts()[5].toFloat();
+             bool east = dms2.capturedTexts()[6] == "E";
+             float lonM = dms2.capturedTexts()[7].toFloat();
+             float lonS = dms2.capturedTexts()[8].toFloat();
+             latitude = latD + latM/60.0 + latS/(60.0*60.0);
+             if (!north)
+                 latitude = -latitude;
+             longitude = lonD + lonM/60.0 + lonS/(60.0*60.0);
+             if (!east)
+                 longitude = -longitude;
+             return true;
+        }
         return false;
     }
 

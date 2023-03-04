@@ -70,7 +70,7 @@ QHash<QString, QString> *CSV::hash(const QString& filename, int reserve)
 
 // Read a row from a CSV file (handling quotes)
 // https://stackoverflow.com/questions/27318631/parsing-through-a-csv-file-in-qt
-bool CSV::readRow(QTextStream &in, QStringList *row)
+bool CSV::readRow(QTextStream &in, QStringList *row, char separator)
 {
     static const int delta[][5] = {
         //  ,    "   \n    ?  eof
@@ -101,7 +101,7 @@ bool CSV::readRow(QTextStream &in, QStringList *row)
         else
         {
             in >> ch;
-            if (ch == ',') {
+            if (ch == separator) {
                 t = 0;
             } else if (ch == '\"') {
                 t = 1;
@@ -137,13 +137,13 @@ bool CSV::readRow(QTextStream &in, QStringList *row)
 
 // Read header row from CSV file and return a hash mapping names to column numbers
 // Returns error if header row can't be read, or if all of requiredColumns aren't found
-QHash<QString, int> CSV::readHeader(QTextStream &in, QStringList requiredColumns, QString &error)
+QHash<QString, int> CSV::readHeader(QTextStream &in, QStringList requiredColumns, QString &error, char separator)
 {
     QHash<QString, int> colNumbers;
     QStringList row;
 
     // Read column names
-    if (CSV::readRow(in, &row))
+    if (CSV::readRow(in, &row, separator))
     {
         // Create hash mapping column names to indices
         for (int i = 0; i < row.size(); i++) {

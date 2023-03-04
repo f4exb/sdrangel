@@ -1,0 +1,62 @@
+NavtexDemodSettings:
+  description: ACARSDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    navArea:
+      type: integer
+    filterStation:
+      type: string
+    filterType:
+      type: string
+    udpEnabled:
+      description: "Whether to forward received messages to specified UDP port"
+      type: integer
+    udpAddress:
+      description: "UDP address to forward received messages to"
+      type: string
+    udpPort:
+      description: "UDP port to forward received messages to"
+      type: integer
+    logFilename:
+      type: string
+    logEnabled:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    scopeConfig:
+      $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+NavtexDemodReport:
+  description: ACARSDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer

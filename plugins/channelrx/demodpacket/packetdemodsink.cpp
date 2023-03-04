@@ -302,7 +302,6 @@ void PacketDemodSink::applySettings(const PacketDemodSettings& settings, bool fo
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
-        m_lowpass.create(301, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_rfBandwidth / 2.0f);
     }
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
     {

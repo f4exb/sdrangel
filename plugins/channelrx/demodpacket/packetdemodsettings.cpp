@@ -170,7 +170,7 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
             m_udpPort = 9999;
         }
 
-        d.readString(25, &m_logFilename, "pager_log.csv");
+        d.readString(25, &m_logFilename, "packet_log.csv");
         d.readBool(26, &m_logEnabled, false);
 
         if (m_rollupState)

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdio>
 #include "dsp/dsptypes.h"
 #include "dsp/misc.h"
 #include "export.h"
@@ -55,6 +56,19 @@ public:
         m_ptr = (m_ptr == n_samples - 1) ? 0 : m_ptr + 1;
 
         return acc;
+    }
+
+    // Print taps as a Matlab vector
+    void printTaps(const char *name)
+    {
+        printf("%s = [", name);
+        for (int i = 0; i <= m_taps.size() - 1; ++i) {
+            printf("%g ", m_taps[i]);
+        }
+        for (int i = m_taps.size() - 2; i >= 0; --i) {
+            printf("%g ", m_taps[i]);
+        }
+        printf("];\n");
     }
 
 protected:

@@ -12,16 +12,18 @@ On top of this, it can plot data from other plugins, such as:
 * Weather imagery from APT Demodulator,
 * The Sun, Moon and Stars from the Star Tracker,
 * Weather ballons from the RadioSonde feature,
+* RF Heat Maps from the Heap Map channel,
 * Radials and estimated position from the VOR localizer feature.
 
-As well as other data sources:
+As well as internet data sources:
 
-* AM, FM and DAB transmitters in the UK,
+* AM, FM and DAB transmitters in the UK and DAB transmitters in France,
 * Airports, NavAids and airspaces,
 * Beacons based on the IARU Region 1 beacon database and International Beacon Project,
 * Radio time transmitters,
 * GRAVES radar,
-* Ionosonde station data.
+* Ionosonde station data,
+* Navtex transmitters.
 
 It can also create tracks showing the path aircraft, ships and APRS objects have taken, as well as predicted paths for satellites.
 

@@ -94,6 +94,8 @@ MapSettings::MapSettings() :
     dabSettings->m_filterDistance = 75000;
     m_itemSettings.insert("DAB", dabSettings);
 
+    m_itemSettings.insert("Navtex", new MapItemSettings("Navtex", false, QColor(255, 0, 255), false, true, 8));
+
     MapItemSettings *navAidSettings = new MapItemSettings("NavAid", false, QColor(255, 0, 255), false, true, 11);
     navAidSettings->m_filterDistance = 500000;
     m_itemSettings.insert("NavAid", navAidSettings);

@@ -65,6 +65,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
     FT8DemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FT8Demod.yaml#/FT8DemodSettings"
+    RTTYDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/RTTYDemod.yaml#/RTTYDemodSettings"
     HeatMapSettings:
       $ref: "http://swgserver:8081/api/swagger/include/HeatMap.yaml#/HeatMapSettings"
     InterferometerSettings:
@@ -75,6 +77,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/M17Demod.yaml#/M17DemodSettings"
     M17ModSettings:
       $ref: "http://swgserver:8081/api/swagger/include/M17Mod.yaml#/M17ModSettings"
+    NavtexDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/NavtexDemod.yaml#/NavtexDemodSettings"
     NFMDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
     NFMModSettings:
