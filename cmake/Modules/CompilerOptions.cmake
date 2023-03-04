@@ -20,6 +20,12 @@ endif()
 
 if(NOT MSVC)
   add_compile_options(-Wall -Wextra -Wvla -Woverloaded-virtual -Wno-inconsistent-missing-override -ffast-math -fno-finite-math-only -ftree-vectorize)
+else()
+  # Disable some warnings, so more useful warnings aren't hidden in the noise
+  # 4996 'fopen': This function or variable may be unsafe. Consider using fopen_s instead.
+  # C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  # C4305: 'initializing': truncation from 'double' to 'Real'
+  add_compile_options(/wd4996 /wd4267 /wd4305)
 endif()
 
 if (SANITIZE_ADDRESS)
