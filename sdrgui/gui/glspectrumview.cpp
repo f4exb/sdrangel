@@ -4285,6 +4285,7 @@ void GLSpectrumView::wheelEvent(QWheelEvent *event)
             channelMarkerMove(event, 1);
         }
     }
+    event->accept();
 }
 
 void GLSpectrumView::zoomFactor(const QPointF& p, float factor)
