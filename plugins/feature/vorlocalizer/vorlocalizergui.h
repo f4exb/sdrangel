@@ -101,12 +101,15 @@ public:
     }
 
     Q_INVOKABLE void addVOR(NavAid *vor) {
-        beginInsertRows(QModelIndex(), rowCount(), rowCount());
-        m_vors.append(vor);
-        m_selected.append(false);
-        m_radials.append(-1.0f);
-        m_vorGUIs.append(nullptr);
-        endInsertRows();
+        if (!m_vors.contains(vor))
+        {
+            beginInsertRows(QModelIndex(), rowCount(), rowCount());
+            m_vors.append(vor);
+            m_selected.append(false);
+            m_radials.append(-1.0f);
+            m_vorGUIs.append(nullptr);
+            endInsertRows();
+        }
     }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override {
@@ -123,7 +126,8 @@ public:
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     }
 
-    void allVORUpdated() {
+    void allVORUpdated()
+    {
         for (int i = 0; i < m_vors.count(); i++)
         {
             QModelIndex idx = index(i);
@@ -131,7 +135,8 @@ public:
         }
     }
 
-    void removeVOR(NavAid *vor) {
+    void removeVOR(NavAid *vor)
+    {
         int row = m_vors.indexOf(vor);
         if (row >= 0)
         {
@@ -144,7 +149,8 @@ public:
         }
     }
 
-    void removeAllVORs() {
+    void removeAllVORs()
+    {
         if (m_vors.count() > 0)
         {
             beginRemoveRows(QModelIndex(), 0, m_vors.count() - 1);
@@ -153,6 +159,18 @@ public:
             m_radials.clear();
             m_vorGUIs.clear();
             endRemoveRows();
+        }
+    }
+
+    void removeAllExceptSelected()
+    {
+        for (int i = 0; i < m_vors.count(); i++)
+        {
+            if (!m_selected[i])
+            {
+                removeVOR(m_vors[i]);
+                i--;
+            }
         }
     }
 
