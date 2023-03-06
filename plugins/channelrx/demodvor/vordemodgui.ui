@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>VORDemodGUI</class>
- <widget class="RollupContents" name="VORDemodSCGUI">
+ <widget class="RollupContents" name="VORDemodGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -326,6 +326,28 @@
        </spacer>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="identBandpassEnable">
+        <property name="toolTip">
+         <string>Toggle Morse identifier bandpass filter to filter voice</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/filter_bandpass.png</normaloff>
+          <normalon>:/filter_bandpass.png</normalon>:/filter_bandpass.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="label_4">
         <property name="text">
          <string>Sq</string>
@@ -619,6 +641,11 @@
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
   <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>

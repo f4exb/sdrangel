@@ -225,6 +225,12 @@ void VORDemodGUI::on_audioMute_toggled(bool checked)
     applySettings();
 }
 
+void VORDemodGUI::on_identBandpassEnable_toggled(bool checked)
+{
+    m_settings.m_identBandpassEnable = checked;
+    applySettings();
+}
+
 void VORDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -385,6 +391,7 @@ void VORDemodGUI::displaySettings()
     ui->squelchText->setText(QString("%1 dB").arg(m_settings.m_squelch));
 
     ui->audioMute->setChecked(m_settings.m_audioMute);
+    ui->identBandpassEnable->setChecked(m_settings.m_identBandpassEnable);
 
     updateIndexLabel();
 
@@ -462,6 +469,7 @@ void VORDemodGUI::makeUIConnections()
     QObject::connect(ui->volume, &QDial::valueChanged, this, &VORDemodGUI::on_volume_valueChanged);
     QObject::connect(ui->squelch, &QDial::valueChanged, this, &VORDemodGUI::on_squelch_valueChanged);
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &VORDemodGUI::on_audioMute_toggled);
+    QObject::connect(ui->identBandpassEnable, &QToolButton::toggled, this, &VORDemodGUI::on_identBandpassEnable_toggled);
 }
 
 void VORDemodGUI::updateAbsoluteCenterFrequency()

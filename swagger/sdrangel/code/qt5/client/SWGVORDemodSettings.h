@@ -59,6 +59,9 @@ public:
     qint32 getAudioMute();
     void setAudioMute(qint32 audio_mute);
 
+    qint32 getIdentBandpassEnable();
+    void setIdentBandpassEnable(qint32 ident_bandpass_enable);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -113,6 +116,9 @@ private:
 
     qint32 audio_mute;
     bool m_audio_mute_isSet;
+
+    qint32 ident_bandpass_enable;
+    bool m_ident_bandpass_enable_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

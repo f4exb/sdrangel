@@ -38,6 +38,8 @@ SWGVORDemodSettings::SWGVORDemodSettings() {
     m_volume_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
+    ident_bandpass_enable = 0;
+    m_ident_bandpass_enable_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -80,6 +82,8 @@ SWGVORDemodSettings::init() {
     m_volume_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
+    ident_bandpass_enable = 0;
+    m_ident_bandpass_enable_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -108,6 +112,7 @@ SWGVORDemodSettings::init() {
 
 void
 SWGVORDemodSettings::cleanup() {
+
 
 
 
@@ -157,6 +162,8 @@ SWGVORDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
     
     ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&ident_bandpass_enable, pJson["identBandpassEnable"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -212,6 +219,9 @@ SWGVORDemodSettings::asJsonObject() {
     }
     if(m_audio_mute_isSet){
         obj->insert("audioMute", QJsonValue(audio_mute));
+    }
+    if(m_ident_bandpass_enable_isSet){
+        obj->insert("identBandpassEnable", QJsonValue(ident_bandpass_enable));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -301,6 +311,16 @@ void
 SWGVORDemodSettings::setAudioMute(qint32 audio_mute) {
     this->audio_mute = audio_mute;
     this->m_audio_mute_isSet = true;
+}
+
+qint32
+SWGVORDemodSettings::getIdentBandpassEnable() {
+    return ident_bandpass_enable;
+}
+void
+SWGVORDemodSettings::setIdentBandpassEnable(qint32 ident_bandpass_enable) {
+    this->ident_bandpass_enable = ident_bandpass_enable;
+    this->m_ident_bandpass_enable_isSet = true;
 }
 
 qint32
@@ -441,6 +461,9 @@ SWGVORDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_audio_mute_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ident_bandpass_enable_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

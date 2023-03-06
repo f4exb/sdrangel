@@ -31,6 +31,7 @@ struct VORDemodSettings
     Real m_squelch;
     Real m_volume;
     bool m_audioMute;
+    bool m_identBandpassEnable;
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;

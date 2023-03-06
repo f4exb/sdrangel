@@ -250,8 +250,9 @@ void VORDemodSCSink::processOneSample(Complex &ci)
         m_refGoertzel.filter(phi);
 
     // Ident demod
+    // Filter to remove voice
+    Complex c1 = m_bandpassIdent.filter(magc);
     // Remove ident sub-carrier offset
-    Complex c1 = magc;
     c1 *= m_ncoIdent.nextIQ();
     // Filter other signals
     Complex c2 = std::abs(m_lowpassIdent.filter(c1));
@@ -264,7 +265,7 @@ void VORDemodSCSink::processOneSample(Complex &ci)
     if (mav > m_identMaxs[m_binCnt])
         m_identMaxs[m_binCnt] = mav;
     m_binSampleCnt++;
-    if (m_binSampleCnt >= m_samplesPerDot10wpm/2)
+    if (m_binSampleCnt >= m_samplesPerDot10wpm/4)
     {
         // Calc minimum of maximums
         m_identNoise = 1.0f;
@@ -285,11 +286,12 @@ void VORDemodSCSink::processOneSample(Complex &ci)
 
     // CW demod
     int bit = (mav / m_identNoise) >= m_settings.m_identThreshold;
+    //m_stream << mav << "," << m_identNoise << "," << bit << "," << (mav / m_identNoise) << "\n";
     if ((m_prevBit == 0) && (bit == 1))
     {
         if (m_bitTime > 7*m_samplesPerDot10wpm)
         {
-            if (m_ident != "")
+            if (m_ident.trimmed().size() > 2) // Filter out noise that may appear as one or two characters
             {
                 qDebug() << "VORDemodSCSink::processOneSample:" << m_ident << " " << Morse::toString(m_ident);
 
@@ -298,9 +300,8 @@ void VORDemodSCSink::processOneSample(Complex &ci)
                     VORDemodReport::MsgReportIdent *msg = VORDemodReport::MsgReportIdent::create(m_ident);
                     getMessageQueueToChannel()->push(msg);
                 }
-
-                m_ident = "";
             }
+            m_ident = "";
         }
         else if (m_bitTime > 2.5*m_samplesPerDot10wpm)
         {
@@ -330,8 +331,8 @@ void VORDemodSCSink::processOneSample(Complex &ci)
         if (m_bitTime > 10*m_samplesPerDot7wpm)
         {
             m_ident = m_ident.simplified();
-            if (m_ident != "")
-            {
+            if (m_ident.trimmed().size() > 2) // Filter out noise that may appear as one or two characters
+                {
                 qDebug() << "VORDemodSCSink::processOneSample:" << m_ident << " " << Morse::toString(m_ident);
 
                 if (getMessageQueueToChannel())
@@ -340,8 +341,8 @@ void VORDemodSCSink::processOneSample(Complex &ci)
                     getMessageQueueToChannel()->push(msg);
                 }
 
-                m_ident = "";
             }
+            m_ident = "";
             m_bitTime = 0;
         }
     }
@@ -371,6 +372,14 @@ void VORDemodSCSink::applyChannelSettings(int channelSampleRate, int channelFreq
 
         m_ncoIdent.setFreq(-1020, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE);  // +-50Hz source offset allowed
         m_ncoRef.setFreq(-9960, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE);
+        m_bandpassIdent.create(1001, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE, 970.0f, 1070.0f); // Ident at 1020
+        //m_bandpassIdent.printTaps("bpf");
+        m_highpassIdent.create(1001, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE, 900.0f);
+        //m_highpassIdent.printTaps("hpf");
+        //m_file.setFileName("morse.txt");
+        //m_file.open(QIODevice::WriteOnly);
+        //m_stream.setDevice(&m_file);
+
         m_lowpassIdent.create(301, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE, 100.0f);
         m_lowpassRef.create(301, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE, 600.0f); // Max deviation is 480Hz
         m_movingAverageIdent.resize(m_samplesPerDot10wpm/5);  // Needs to be short enough for noise floor calculation
@@ -395,6 +404,7 @@ void VORDemodSCSink::applySettings(const VORDemodSettings& settings, bool force)
             << " m_squelch: " << settings.m_squelch
             << " m_audioMute: " << settings.m_audioMute
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_identBandpassEnable: " << settings.m_identBandpassEnable
             << " force: " << force;
 
     if ((m_settings.m_squelch != settings.m_squelch) || force) {
@@ -416,6 +426,16 @@ void VORDemodSCSink::applySettings(const VORDemodSettings& settings, bool force)
         m_varGoertzel.reset();
     }
 
+    if ((m_settings.m_identBandpassEnable != settings.m_identBandpassEnable) || force)
+    {
+        if (settings.m_identBandpassEnable) {
+            m_bandpass.create(1001, m_audioSampleRate, 970.0f, 1070.0f);
+        } else {
+            m_bandpass.create(301, m_audioSampleRate, 300.0f, 3000.0f);
+        }
+        //m_bandpass.printTaps("audio_bpf");
+    }
+
     m_settings = settings;
 }
 
@@ -433,7 +453,12 @@ void VORDemodSCSink::applyAudioSampleRate(int sampleRate)
     m_audioInterpolator.create(16, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE, 3000.0f);
     m_audioInterpolatorDistanceRemain = 0;
     m_audioInterpolatorDistance = (Real) VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE / (Real) sampleRate;
-    m_bandpass.create(301, sampleRate, 300.0f, 3000.0f);
+    if (m_settings.m_identBandpassEnable) {
+        m_bandpass.create(1001, sampleRate, 970.0f, 1070.0f);
+    } else {
+        m_bandpass.create(301, sampleRate, 300.0f, 3000.0f);
+    }
+    //m_bandpass.printTaps("audio_bpf");
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/5);
 
