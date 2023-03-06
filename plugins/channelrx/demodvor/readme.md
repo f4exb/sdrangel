@@ -8,13 +8,13 @@ VORs transmit two 30Hz signals, one AM at the VOR center frequency and one FM on
 
 VORs also transmit a Morse code ident signal at a 1020Hz offset. This is a 2 or 3 character identifier used to identify the VOR, as multiple VORs can be transmitted on the same frequency. For example, the VOR at London Heathrow transmits .-.. --- -. for LON. The Morse code ident is typically transmitted at 10 seconds intervals at between 7 and 10 wpm. VORs that are under maintenance may transmit TST.
 
-Some VORs also transmit an AM voice identification or information signal between 300-3kHz.
+Some VORs also transmit an AM voice identification or information signal (ATIS) between 300-3kHz.
 
 Note that for aircraft, there is typically a direct line-of-sight to the VOR. This is unlikely to be the case when using an SDR on the ground. To get good results, ideally you want to be on a nice high hill or close to the VOR.
 
 <h2>Using it for localization</h2>
 
-Several instances of this plugin can be created to monitor multiple VORs and collate information in the VOR Localizer feature plugin. The VOR Localizer can also perform a round robin on multiple VORs with just one VOR demodulator. Please refer to [VOR Localizer](../../feature/vorlocalizer/readme.md) for more information about this feature plugin
+Several instances of this plugin can be created to monitor multiple VORs and collate information in the VOR Localizer feature plugin. The VOR Localizer can also perform a round robin on multiple VORs with just one VOR demodulator. Please refer to [VOR Localizer](../../feature/vorlocalizer/readme.md) for more information about this feature plugin.
 
 <h2>Interface</h2>
 
@@ -46,6 +46,10 @@ If you right click on it it will open a dialog to select the audio output device
 
 This is the Morse code ident threshold, expressed as a linear signal to noise (SNR) ratio. This is effectively the signal level required for the Morse demodulator to detect a dot or dash. Setting this to low values will allow the Morse demodulator to detect weak signals, but it also increases the likelihood that noise will incorrectly be interpreted as a signal, resulting in invalid idents being reported.
 
+<h3>Ident bandpass filter</h3>
+
+Click to toggle a narrow bandpass filter around the Morse ident signal. This can be used to filter out the voice signal from the audio output, to make the Morse ident signal clearer.
+
 <h3>6: Squelch threshold</h3>
 
 This is the squelch threshold in dB. The average total power received in the signal bandwidth before demodulation is compared to this value and the squelch input is open above this value. It can be varied continuously in 0.1 dB steps from 0.0 to -100.0 dB using the dial button.
@@ -54,17 +58,17 @@ This is the squelch threshold in dB. The average total power received in the sig
 
 This is the volume of the audio signal from 0.0 (mute) to 10.0 (maximum). It can be varied continuously in 0.1 steps using the dial button.
 
-<h3>8: Radial dircetion</h3>
+<h3>8: Radial direction</h3>
 
 Demodulated radial direction in degrees (unadjusted for magnetic declination). If there is a low confidence the value is correct (due to a weak signal), it will be displayed in red.
 
 <h3>9: Reference signal power in dB</h3>
 
-Magnitude of the received 30Hz FM reference signal in dB
+Magnitude of the received 30Hz FM reference signal in dB.
 
 <h3>10. Variable signal power in dB</h3>
 
-Mangitude of the received 30Hz AM variable signal in dB
+Mangitude of the received 30Hz AM variable signal in dB.
 
 <h3>11. VOR identifier code (decoded)</h3>
 

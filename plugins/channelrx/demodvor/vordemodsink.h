@@ -29,10 +29,10 @@
 #include "util/movingaverage.h"
 #include "util/doublebufferfifo.h"
 #include "util/messagequeue.h"
+#include <QFile>
+#include <QTextStream>
 
 #include "vordemodsettings.h"
-
-#include <vector>
 
 class VORDemodSCSink : public ChannelSampleSink {
 public:
@@ -119,12 +119,12 @@ private:
     NCO m_ncoIdent;
     NCO m_ncoRef;
     Lowpass<Complex> m_lowpassRef;
+    Bandpass<Complex> m_bandpassIdent;
     Lowpass<Complex> m_lowpassIdent;
+    Highpass<Real> m_highpassIdent;
     Complex m_refPrev;
     MovingAverageUtilVar<Real, double> m_movingAverageIdent;
-    static const int m_identBins = 10;
-    Real m_identMins[m_identBins];
-    Real m_identMin;
+    static const int m_identBins = 20;
     Real m_identMaxs[m_identBins];
     Real m_identNoise;
     int m_binSampleCnt;
@@ -136,6 +136,8 @@ private:
     QString m_ident;
     Goertzel m_varGoertzel;
     Goertzel m_refGoertzel;
+    //QFile m_file;
+    //QTextStream m_stream;
 
     void processOneSample(Complex &ci);
     void processOneAudioSample(Complex &ci);
