@@ -76,6 +76,39 @@ public:
     QString* getAudioDeviceName();
     void setAudioDeviceName(QString* audio_device_name);
 
+    qint32 getGpioControl();
+    void setGpioControl(qint32 gpio_control);
+
+    qint32 getRx2txGpioEnable();
+    void setRx2txGpioEnable(qint32 rx2tx_gpio_enable);
+
+    qint32 getRx2txGpioMask();
+    void setRx2txGpioMask(qint32 rx2tx_gpio_mask);
+
+    qint32 getRx2txGpioValues();
+    void setRx2txGpioValues(qint32 rx2tx_gpio_values);
+
+    qint32 getRx2txCommandEnable();
+    void setRx2txCommandEnable(qint32 rx2tx_command_enable);
+
+    QString* getRx2txCommand();
+    void setRx2txCommand(QString* rx2tx_command);
+
+    qint32 getTx2rxGpioEnable();
+    void setTx2rxGpioEnable(qint32 tx2rx_gpio_enable);
+
+    qint32 getTx2rxGpioMask();
+    void setTx2rxGpioMask(qint32 tx2rx_gpio_mask);
+
+    qint32 getTx2rxGpioValues();
+    void setTx2rxGpioValues(qint32 tx2rx_gpio_values);
+
+    qint32 getTx2rxCommandEnable();
+    void setTx2rxCommandEnable(qint32 tx2rx_command_enable);
+
+    QString* getTx2rxCommand();
+    void setTx2rxCommand(QString* tx2rx_command);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -130,6 +163,39 @@ private:
 
     QString* audio_device_name;
     bool m_audio_device_name_isSet;
+
+    qint32 gpio_control;
+    bool m_gpio_control_isSet;
+
+    qint32 rx2tx_gpio_enable;
+    bool m_rx2tx_gpio_enable_isSet;
+
+    qint32 rx2tx_gpio_mask;
+    bool m_rx2tx_gpio_mask_isSet;
+
+    qint32 rx2tx_gpio_values;
+    bool m_rx2tx_gpio_values_isSet;
+
+    qint32 rx2tx_command_enable;
+    bool m_rx2tx_command_enable_isSet;
+
+    QString* rx2tx_command;
+    bool m_rx2tx_command_isSet;
+
+    qint32 tx2rx_gpio_enable;
+    bool m_tx2rx_gpio_enable_isSet;
+
+    qint32 tx2rx_gpio_mask;
+    bool m_tx2rx_gpio_mask_isSet;
+
+    qint32 tx2rx_gpio_values;
+    bool m_tx2rx_gpio_values_isSet;
+
+    qint32 tx2rx_command_enable;
+    bool m_tx2rx_command_enable_isSet;
+
+    QString* tx2rx_command;
+    bool m_tx2rx_command_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

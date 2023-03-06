@@ -2449,18 +2449,6 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Audio channel to IQ mapping\n  * 0 - I=L, Q=0\n  * 1 - I=R, Q=0\n  * 2 - I=L, Q=R\n  * 3 - I=R, Q=L\n"
     },
-    "dcBlock" : {
-      "type" : "integer",
-      "description" : "Auto DC blocking\n  * 0 - Off\n  * 1 - On\n"
-    },
-    "iqImbalance" : {
-      "type" : "integer",
-      "description" : "Auto IQ balance (you need auto DC blocking active)\n  * 0 - Off\n  * 1 - On\n"
-    },
-    "fcPos" : {
-      "type" : "integer",
-      "description" : "Decimated bandpass center frequency position\n  * 0 - Infradyne\n  * 1 - Supradyne\n  * 2 - Centered\n"
-    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
@@ -3532,9 +3520,6 @@ margin-bottom: 20px;
     "FT8DemodReport" : {
       "$ref" : "#/definitions/FT8DemodReport"
     },
-    "RTTYDemodReport" : {
-      "$ref" : "#/definitions/RTTYDemodReport"
-    },
     "HeatMapReport" : {
       "$ref" : "#/definitions/HeatMapReport"
     },
@@ -3543,9 +3528,6 @@ margin-bottom: 20px;
     },
     "M17ModReport" : {
       "$ref" : "#/definitions/M17ModReport"
-    },
-    "NavtexDemodReport" : {
-      "$ref" : "#/definitions/NavtexDemodReport"
     },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
@@ -3696,9 +3678,6 @@ margin-bottom: 20px;
     "FT8DemodSettings" : {
       "$ref" : "#/definitions/FT8DemodSettings"
     },
-    "RTTYDemodSettings" : {
-      "$ref" : "#/definitions/RTTYDemodSettings"
-    },
     "HeatMapSettings" : {
       "$ref" : "#/definitions/HeatMapSettings"
     },
@@ -3713,9 +3692,6 @@ margin-bottom: 20px;
     },
     "M17ModSettings" : {
       "$ref" : "#/definitions/M17ModSettings"
-    },
-    "NavtexDemodSettings" : {
-      "$ref" : "#/definitions/NavtexDemodSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -9721,94 +9697,6 @@ margin-bottom: 20px;
   },
   "description" : "Enumeration with name for values"
 };
-            defs.NavtexDemodReport = {
-  "properties" : {
-    "channelPowerDB" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "power received in channel (dB)"
-    },
-    "channelSampleRate" : {
-      "type" : "integer"
-    }
-  },
-  "description" : "ACARSDemod"
-};
-            defs.NavtexDemodSettings = {
-  "properties" : {
-    "inputFrequencyOffset" : {
-      "type" : "integer",
-      "format" : "int64"
-    },
-    "rfBandwidth" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "navArea" : {
-      "type" : "integer"
-    },
-    "filterStation" : {
-      "type" : "string"
-    },
-    "filterType" : {
-      "type" : "string"
-    },
-    "udpEnabled" : {
-      "type" : "integer",
-      "description" : "Whether to forward received messages to specified UDP port"
-    },
-    "udpAddress" : {
-      "type" : "string",
-      "description" : "UDP address to forward received messages to"
-    },
-    "udpPort" : {
-      "type" : "integer",
-      "description" : "UDP port to forward received messages to"
-    },
-    "logFilename" : {
-      "type" : "string"
-    },
-    "logEnabled" : {
-      "type" : "integer"
-    },
-    "rgbColor" : {
-      "type" : "integer"
-    },
-    "title" : {
-      "type" : "string"
-    },
-    "streamIndex" : {
-      "type" : "integer",
-      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "reverseAPIChannelIndex" : {
-      "type" : "integer"
-    },
-    "scopeConfig" : {
-      "$ref" : "#/definitions/GLScope"
-    },
-    "channelMarker" : {
-      "$ref" : "#/definitions/ChannelMarker"
-    },
-    "rollupState" : {
-      "$ref" : "#/definitions/RollupState"
-    }
-  },
-  "description" : "ACARSDemod"
-};
             defs.NoiseFigureReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -11161,110 +11049,6 @@ margin-bottom: 20px;
       "format" : "float"
     }
   }
-};
-            defs.RTTYDemodReport = {
-  "properties" : {
-    "channelPowerDB" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "power received in channel (dB)"
-    },
-    "channelSampleRate" : {
-      "type" : "integer"
-    }
-  },
-  "description" : "ACARSDemod"
-};
-            defs.RTTYDemodSettings = {
-  "properties" : {
-    "inputFrequencyOffset" : {
-      "type" : "integer",
-      "format" : "int64"
-    },
-    "rfBandwidth" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "baudRate" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "frequencyShift" : {
-      "type" : "integer"
-    },
-    "udpEnabled" : {
-      "type" : "integer",
-      "description" : "Whether to forward received messages to specified UDP port"
-    },
-    "udpAddress" : {
-      "type" : "string",
-      "description" : "UDP address to forward received messages to"
-    },
-    "udpPort" : {
-      "type" : "integer",
-      "description" : "UDP port to forward received messages to"
-    },
-    "characterSet" : {
-      "type" : "integer"
-    },
-    "suppressCRLF" : {
-      "type" : "integer"
-    },
-    "unshiftOnSpace" : {
-      "type" : "integer"
-    },
-    "msbFirst" : {
-      "type" : "integer"
-    },
-    "spaceHigh" : {
-      "type" : "integer"
-    },
-    "squelch" : {
-      "type" : "integer"
-    },
-    "logFilename" : {
-      "type" : "string"
-    },
-    "logEnabled" : {
-      "type" : "integer"
-    },
-    "rgbColor" : {
-      "type" : "integer"
-    },
-    "title" : {
-      "type" : "string"
-    },
-    "streamIndex" : {
-      "type" : "integer",
-      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "reverseAPIChannelIndex" : {
-      "type" : "integer"
-    },
-    "scopeConfig" : {
-      "$ref" : "#/definitions/GLScope"
-    },
-    "channelMarker" : {
-      "$ref" : "#/definitions/ChannelMarker"
-    },
-    "rollupState" : {
-      "$ref" : "#/definitions/RollupState"
-    }
-  },
-  "description" : "ACARSDemod"
 };
             defs.RadioAstronomyActions = {
   "properties" : {
@@ -13452,6 +13236,54 @@ margin-bottom: 20px;
     "audioDeviceName" : {
       "type" : "string"
     },
+    "gpioControl" : {
+      "type" : "integer",
+      "description" : "GPIO control\n  * 0 - No GPIO control\n  * 1 - Rx side controls GPIO\n  * 2 - Tx side controls GPIO\n"
+    },
+    "rx2txGPIOEnable" : {
+      "type" : "integer",
+      "description" : "Enable Rx to Tx GPIO control\n  * 0 - disable\n  * 1 - enable\n"
+    },
+    "rx2txGPIOMask" : {
+      "type" : "integer",
+      "format" : "int8",
+      "description" : "Rx to Tx change GPIO mask"
+    },
+    "rx2txGPIOValues" : {
+      "type" : "integer",
+      "format" : "int8",
+      "description" : "Rx to Tx change GPIO values"
+    },
+    "rx2txCommandEnable" : {
+      "type" : "integer",
+      "description" : "Enable Rx to Tx command\n  * 0 - disable\n  * 1 - enable\n"
+    },
+    "rx2txCommand" : {
+      "type" : "string",
+      "description" : "Command to be executed when Rx switches to Tx"
+    },
+    "tx2rxGPIOEnable" : {
+      "type" : "integer",
+      "description" : "Enable Tx to Rx GPIO control\n  * 0 - disable\n  * 1 - enable\n"
+    },
+    "tx2rxGPIOMask" : {
+      "type" : "integer",
+      "format" : "int8",
+      "description" : "Tx to Rx change GPIO mask"
+    },
+    "tx2rxGPIOValues" : {
+      "type" : "integer",
+      "format" : "int8",
+      "description" : "Tx to Rx change GPIO values"
+    },
+    "tx2rxCommandEnable" : {
+      "type" : "integer",
+      "description" : "Enable Tx to Rx command\n  * 0 - disable\n  * 1 - enable\n"
+    },
+    "tx2rxCommand" : {
+      "type" : "string",
+      "description" : "Command to be executed when Tx switches to Rx"
+    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
@@ -15107,9 +14939,6 @@ margin-bottom: 20px;
       "format" : "float"
     },
     "audioMute" : {
-      "type" : "integer"
-    },
-    "identBandpassEnable" : {
       "type" : "integer"
     },
     "rgbColor" : {
@@ -57260,7 +57089,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-03-11T09:38:49.252+01:00
+              Generated 2023-03-01T20:50:44.079+01:00
             </div>
           </div>
       </div>

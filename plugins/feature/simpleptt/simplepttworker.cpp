@@ -25,6 +25,7 @@
 #include "audio/audiodevicemanager.h"
 #include "dsp/dspengine.h"
 #include "util/db.h"
+#include "channel/channelwebapiutils.h"
 
 #include "simplepttreport.h"
 #include "simplepttworker.h"
@@ -174,6 +175,7 @@ void SimplePTTWorker::sendPTT(bool tx)
             if (m_settings.m_rxDeviceSetIndex >= 0)
             {
                 m_tx = false;
+                preSwitch(true);
                 switchedOff = turnDevice(false);
             }
 
@@ -188,6 +190,7 @@ void SimplePTTWorker::sendPTT(bool tx)
             if (m_settings.m_txDeviceSetIndex >= 0)
             {
                 m_tx = true;
+                preSwitch(false);
                 switchedOff = turnDevice(false);
             }
 
@@ -246,6 +249,59 @@ bool SimplePTTWorker::turnDevice(bool on)
     {
         qWarning("SimplePTTWorker::turnDevice: error: %s", qPrintable(*error.getMessage()));
         return false;
+    }
+}
+
+void SimplePTTWorker::preSwitch(bool tx)
+{
+    double rxFrequency = 0;
+    double txFrequency = 0;
+    ChannelWebAPIUtils::getCenterFrequency(m_settings.m_rxDeviceSetIndex, rxFrequency);
+    ChannelWebAPIUtils::getCenterFrequency(m_settings.m_txDeviceSetIndex, txFrequency);
+
+    m_command.run(
+        tx ? m_settings.m_rx2txCommand : m_settings.m_tx2rxCommand,
+        m_settings.m_rxDeviceSetIndex,
+        rxFrequency,
+        m_settings.m_txDeviceSetIndex,
+        txFrequency
+    );
+
+    if (m_settings.m_gpioControl == SimplePTTSettings::GPIONone) {
+        return;
+    }
+
+    int gpioMask;
+    int gpioPins;
+    int gpioDir;
+    int deviceSetIndex = m_settings.m_gpioControl == SimplePTTSettings::GPIOTx ? m_settings.m_txDeviceSetIndex : m_settings.m_rxDeviceSetIndex;
+
+    if (!ChannelWebAPIUtils::getDeviceSetting(deviceSetIndex, "gpioDir", gpioDir))
+    {
+        qDebug() << "SimplePTTWorker::preSwitch - Failed to read gpioDir setting. Does this SDR support it?";
+        return;
+    }
+
+    gpioMask = tx ? m_settings.m_rx2txGPIOMask : m_settings.m_tx2rxGPIOMask;
+    gpioDir |= gpioMask; // set masked pins as outputs
+
+    if (!ChannelWebAPIUtils::patchDeviceSetting(deviceSetIndex, "gpioDir", gpioDir))
+    {
+        qDebug() << "SimplePTTWorker::preSwitch - Failed to write gpioDir setting. Does this SDR support it?";
+        return;
+    }
+
+    if (!ChannelWebAPIUtils::getDeviceSetting(deviceSetIndex, "gpioPins", gpioPins))
+    {
+        qDebug() << "SimplePTTWorker::preSwitch - Failed to read gpioPins setting. Does this SDR support it?";
+        return;
+    }
+
+    gpioPins != gpioMask & (tx ? m_settings.m_rx2txGPIOValues : m_settings.m_tx2rxGPIOValues);
+    gpioPins &= ~gpioMask | (tx ? m_settings.m_rx2txGPIOValues : m_settings.m_tx2rxGPIOValues);
+
+    if (!ChannelWebAPIUtils::patchDeviceSetting(deviceSetIndex, "gpioPins", gpioPins)) {
+        qDebug() << "SimplePTTWorker::preSwitch - Failed to write gpioPins setting. Does this SDR support it?";
     }
 }
 

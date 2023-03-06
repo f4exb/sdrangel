@@ -50,6 +50,28 @@ SWGSimplePTTSettings::SWGSimplePTTSettings() {
     m_vox_hold_isSet = false;
     audio_device_name = nullptr;
     m_audio_device_name_isSet = false;
+    gpio_control = 0;
+    m_gpio_control_isSet = false;
+    rx2tx_gpio_enable = 0;
+    m_rx2tx_gpio_enable_isSet = false;
+    rx2tx_gpio_mask = 0;
+    m_rx2tx_gpio_mask_isSet = false;
+    rx2tx_gpio_values = 0;
+    m_rx2tx_gpio_values_isSet = false;
+    rx2tx_command_enable = 0;
+    m_rx2tx_command_enable_isSet = false;
+    rx2tx_command = nullptr;
+    m_rx2tx_command_isSet = false;
+    tx2rx_gpio_enable = 0;
+    m_tx2rx_gpio_enable_isSet = false;
+    tx2rx_gpio_mask = 0;
+    m_tx2rx_gpio_mask_isSet = false;
+    tx2rx_gpio_values = 0;
+    m_tx2rx_gpio_values_isSet = false;
+    tx2rx_command_enable = 0;
+    m_tx2rx_command_enable_isSet = false;
+    tx2rx_command = nullptr;
+    m_tx2rx_command_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -92,6 +114,28 @@ SWGSimplePTTSettings::init() {
     m_vox_hold_isSet = false;
     audio_device_name = new QString("");
     m_audio_device_name_isSet = false;
+    gpio_control = 0;
+    m_gpio_control_isSet = false;
+    rx2tx_gpio_enable = 0;
+    m_rx2tx_gpio_enable_isSet = false;
+    rx2tx_gpio_mask = 0;
+    m_rx2tx_gpio_mask_isSet = false;
+    rx2tx_gpio_values = 0;
+    m_rx2tx_gpio_values_isSet = false;
+    rx2tx_command_enable = 0;
+    m_rx2tx_command_enable_isSet = false;
+    rx2tx_command = new QString("");
+    m_rx2tx_command_isSet = false;
+    tx2rx_gpio_enable = 0;
+    m_tx2rx_gpio_enable_isSet = false;
+    tx2rx_gpio_mask = 0;
+    m_tx2rx_gpio_mask_isSet = false;
+    tx2rx_gpio_values = 0;
+    m_tx2rx_gpio_values_isSet = false;
+    tx2rx_command_enable = 0;
+    m_tx2rx_command_enable_isSet = false;
+    tx2rx_command = new QString("");
+    m_tx2rx_command_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -122,6 +166,21 @@ SWGSimplePTTSettings::cleanup() {
 
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
+    }
+
+
+
+
+
+    if(rx2tx_command != nullptr) { 
+        delete rx2tx_command;
+    }
+
+
+
+
+    if(tx2rx_command != nullptr) { 
+        delete tx2rx_command;
     }
 
     if(reverse_api_address != nullptr) { 
@@ -167,6 +226,28 @@ SWGSimplePTTSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&vox_hold, pJson["voxHold"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&gpio_control, pJson["gpioControl"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rx2tx_gpio_enable, pJson["rx2txGPIOEnable"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rx2tx_gpio_mask, pJson["rx2txGPIOMask"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rx2tx_gpio_values, pJson["rx2txGPIOValues"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rx2tx_command_enable, pJson["rx2txCommandEnable"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rx2tx_command, pJson["rx2txCommand"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&tx2rx_gpio_enable, pJson["tx2rxGPIOEnable"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tx2rx_gpio_mask, pJson["tx2rxGPIOMask"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tx2rx_gpio_values, pJson["tx2rxGPIOValues"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tx2rx_command_enable, pJson["tx2rxCommandEnable"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tx2rx_command, pJson["tx2rxCommand"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -228,6 +309,39 @@ SWGSimplePTTSettings::asJsonObject() {
     }
     if(audio_device_name != nullptr && *audio_device_name != QString("")){
         toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
+    }
+    if(m_gpio_control_isSet){
+        obj->insert("gpioControl", QJsonValue(gpio_control));
+    }
+    if(m_rx2tx_gpio_enable_isSet){
+        obj->insert("rx2txGPIOEnable", QJsonValue(rx2tx_gpio_enable));
+    }
+    if(m_rx2tx_gpio_mask_isSet){
+        obj->insert("rx2txGPIOMask", QJsonValue(rx2tx_gpio_mask));
+    }
+    if(m_rx2tx_gpio_values_isSet){
+        obj->insert("rx2txGPIOValues", QJsonValue(rx2tx_gpio_values));
+    }
+    if(m_rx2tx_command_enable_isSet){
+        obj->insert("rx2txCommandEnable", QJsonValue(rx2tx_command_enable));
+    }
+    if(rx2tx_command != nullptr && *rx2tx_command != QString("")){
+        toJsonValue(QString("rx2txCommand"), rx2tx_command, obj, QString("QString"));
+    }
+    if(m_tx2rx_gpio_enable_isSet){
+        obj->insert("tx2rxGPIOEnable", QJsonValue(tx2rx_gpio_enable));
+    }
+    if(m_tx2rx_gpio_mask_isSet){
+        obj->insert("tx2rxGPIOMask", QJsonValue(tx2rx_gpio_mask));
+    }
+    if(m_tx2rx_gpio_values_isSet){
+        obj->insert("tx2rxGPIOValues", QJsonValue(tx2rx_gpio_values));
+    }
+    if(m_tx2rx_command_enable_isSet){
+        obj->insert("tx2rxCommandEnable", QJsonValue(tx2rx_command_enable));
+    }
+    if(tx2rx_command != nullptr && *tx2rx_command != QString("")){
+        toJsonValue(QString("tx2rxCommand"), tx2rx_command, obj, QString("QString"));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -362,6 +476,116 @@ SWGSimplePTTSettings::setAudioDeviceName(QString* audio_device_name) {
 }
 
 qint32
+SWGSimplePTTSettings::getGpioControl() {
+    return gpio_control;
+}
+void
+SWGSimplePTTSettings::setGpioControl(qint32 gpio_control) {
+    this->gpio_control = gpio_control;
+    this->m_gpio_control_isSet = true;
+}
+
+qint32
+SWGSimplePTTSettings::getRx2txGpioEnable() {
+    return rx2tx_gpio_enable;
+}
+void
+SWGSimplePTTSettings::setRx2txGpioEnable(qint32 rx2tx_gpio_enable) {
+    this->rx2tx_gpio_enable = rx2tx_gpio_enable;
+    this->m_rx2tx_gpio_enable_isSet = true;
+}
+
+qint32
+SWGSimplePTTSettings::getRx2txGpioMask() {
+    return rx2tx_gpio_mask;
+}
+void
+SWGSimplePTTSettings::setRx2txGpioMask(qint32 rx2tx_gpio_mask) {
+    this->rx2tx_gpio_mask = rx2tx_gpio_mask;
+    this->m_rx2tx_gpio_mask_isSet = true;
+}
+
+qint32
+SWGSimplePTTSettings::getRx2txGpioValues() {
+    return rx2tx_gpio_values;
+}
+void
+SWGSimplePTTSettings::setRx2txGpioValues(qint32 rx2tx_gpio_values) {
+    this->rx2tx_gpio_values = rx2tx_gpio_values;
+    this->m_rx2tx_gpio_values_isSet = true;
+}
+
+qint32
+SWGSimplePTTSettings::getRx2txCommandEnable() {
+    return rx2tx_command_enable;
+}
+void
+SWGSimplePTTSettings::setRx2txCommandEnable(qint32 rx2tx_command_enable) {
+    this->rx2tx_command_enable = rx2tx_command_enable;
+    this->m_rx2tx_command_enable_isSet = true;
+}
+
+QString*
+SWGSimplePTTSettings::getRx2txCommand() {
+    return rx2tx_command;
+}
+void
+SWGSimplePTTSettings::setRx2txCommand(QString* rx2tx_command) {
+    this->rx2tx_command = rx2tx_command;
+    this->m_rx2tx_command_isSet = true;
+}
+
+qint32
+SWGSimplePTTSettings::getTx2rxGpioEnable() {
+    return tx2rx_gpio_enable;
+}
+void
+SWGSimplePTTSettings::setTx2rxGpioEnable(qint32 tx2rx_gpio_enable) {
+    this->tx2rx_gpio_enable = tx2rx_gpio_enable;
+    this->m_tx2rx_gpio_enable_isSet = true;
+}
+
+qint32
+SWGSimplePTTSettings::getTx2rxGpioMask() {
+    return tx2rx_gpio_mask;
+}
+void
+SWGSimplePTTSettings::setTx2rxGpioMask(qint32 tx2rx_gpio_mask) {
+    this->tx2rx_gpio_mask = tx2rx_gpio_mask;
+    this->m_tx2rx_gpio_mask_isSet = true;
+}
+
+qint32
+SWGSimplePTTSettings::getTx2rxGpioValues() {
+    return tx2rx_gpio_values;
+}
+void
+SWGSimplePTTSettings::setTx2rxGpioValues(qint32 tx2rx_gpio_values) {
+    this->tx2rx_gpio_values = tx2rx_gpio_values;
+    this->m_tx2rx_gpio_values_isSet = true;
+}
+
+qint32
+SWGSimplePTTSettings::getTx2rxCommandEnable() {
+    return tx2rx_command_enable;
+}
+void
+SWGSimplePTTSettings::setTx2rxCommandEnable(qint32 tx2rx_command_enable) {
+    this->tx2rx_command_enable = tx2rx_command_enable;
+    this->m_tx2rx_command_enable_isSet = true;
+}
+
+QString*
+SWGSimplePTTSettings::getTx2rxCommand() {
+    return tx2rx_command;
+}
+void
+SWGSimplePTTSettings::setTx2rxCommand(QString* tx2rx_command) {
+    this->tx2rx_command = tx2rx_command;
+    this->m_tx2rx_command_isSet = true;
+}
+
+qint32
 SWGSimplePTTSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -457,6 +681,39 @@ SWGSimplePTTSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(audio_device_name && *audio_device_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_gpio_control_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rx2tx_gpio_enable_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rx2tx_gpio_mask_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rx2tx_gpio_values_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rx2tx_command_enable_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(rx2tx_command && *rx2tx_command != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_tx2rx_gpio_enable_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tx2rx_gpio_mask_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tx2rx_gpio_values_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tx2rx_command_enable_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(tx2rx_command && *tx2rx_command != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

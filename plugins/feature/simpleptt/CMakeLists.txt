@@ -7,6 +7,8 @@ set(simpleptt_SOURCES
     simplepttworker.cpp
     simplepttreport.cpp
     simplepttwebapiadapter.cpp
+    simplepttcommand.cpp
+    simplepttmessages.cpp
 )
 
 set(simpleptt_HEADERS
@@ -16,6 +18,8 @@ set(simpleptt_HEADERS
     simplepttworker.h
     simplepttreport.h
     simplepttwebapiadapter.h
+    simplepttcommand.h
+    simplepttmessages.h
 )
 
 include_directories(

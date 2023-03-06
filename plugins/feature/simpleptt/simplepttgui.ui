@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>320</width>
-    <height>155</height>
+    <height>305</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -25,7 +25,7 @@
   <property name="maximumSize">
    <size>
     <width>560</width>
-    <height>155</height>
+    <height>305</height>
    </size>
   </property>
   <property name="font">
@@ -43,7 +43,7 @@
      <x>2</x>
      <y>2</y>
      <width>300</width>
-     <height>151</height>
+     <height>291</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -439,6 +439,263 @@
        <widget class="QLabel" name="txrxDelayUnits">
         <property name="text">
          <string>ms</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="commandRxTxLayout">
+      <item>
+       <widget class="ButtonSwitch" name="commandRxTxEnable">
+        <property name="text">
+         <string>Rx-Tx Cmd</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="commandRxTxFileDialog">
+        <property name="minimumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Choose Rx to Tx command</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/load.png</normaloff>:/load.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="commandRxTx">
+        <property name="toolTip">
+         <string>Rx to Tx command</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="commandTxRxLayout">
+      <item>
+       <widget class="ButtonSwitch" name="commandTxRxEnable">
+        <property name="text">
+         <string>Tx-Rx Cmd</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="commandTxRxFileDialog">
+        <property name="minimumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Choose Tx to Rx command</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/load.png</normaloff>:/load.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="commandTxRx">
+        <property name="toolTip">
+         <string>Tx to Rx command</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="gpioRxTxLayout">
+      <item>
+       <widget class="ButtonSwitch" name="gpioRxControlEnable">
+        <property name="text">
+         <string>Rx-Tx GPIO</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gpioRxTxMaskLabel">
+        <property name="toolTip">
+         <string>Rx to Tx GPIO mask (1 byte hex)</string>
+        </property>
+        <property name="text">
+         <string>Mask</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="gpioRxTxMask">
+        <property name="maximumSize">
+         <size>
+          <width>35</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="inputMask">
+         <string>HH</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gpioRxTxValueLabel">
+        <property name="toolTip">
+         <string>Rx to Tx GPIO value (1 byte hex)</string>
+        </property>
+        <property name="text">
+         <string>Val</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="gpioRxTxValue">
+        <property name="maximumSize">
+         <size>
+          <width>35</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="inputMask">
+         <string>HH</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="gpioRxControl">
+        <property name="toolTip">
+         <string>Rx has GPIO controls</string>
+        </property>
+        <property name="text">
+         <string>Rx</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="gpioTxRxLayout">
+      <item>
+       <widget class="ButtonSwitch" name="gpioTxRxControlEnable">
+        <property name="text">
+         <string>Tx-Rx GPIO</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gpioTxRxMaskLabel">
+        <property name="text">
+         <string>Mask</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="gpioTxRxMask">
+        <property name="maximumSize">
+         <size>
+          <width>35</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tx to Rx GPIO mask (1 byte hex)</string>
+        </property>
+        <property name="inputMask">
+         <string>HH</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gpioTxRxValueLabel">
+        <property name="toolTip">
+         <string/>
+        </property>
+        <property name="text">
+         <string>Val</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="gpioTxRxValue">
+        <property name="maximumSize">
+         <size>
+          <width>35</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tx to Rx GPIO value (1 byte hex)</string>
+        </property>
+        <property name="inputMask">
+         <string>HH</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="gpioTxControl">
+        <property name="toolTip">
+         <string>Tx has GPIO controls</string>
+        </property>
+        <property name="text">
+         <string>Tx</string>
         </property>
        </widget>
       </item>

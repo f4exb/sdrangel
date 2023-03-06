@@ -26,6 +26,7 @@
 #include "audio/audiofifo.h"
 
 #include "simplepttsettings.h"
+#include "simplepttcommand.h"
 
 class WebAPIAdapterInterface;
 
@@ -84,7 +85,11 @@ public:
     void startWork();
     void stopWork();
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
+
+    void setMessageQueueToGUI(MessageQueue *messageQueue) {
+        m_msgQueueToGUI = messageQueue;
+        m_command.setMessageQueueToGUI(messageQueue);
+    }
 
     void getAudioPeak(float& peak)
     {
@@ -106,6 +111,7 @@ private:
     float m_voxLevel;
     int m_voxHoldCount;
     bool m_voxState;
+    SimplePTTCommand m_command;
 	QTimer m_updateTimer;
     QRecursiveMutex m_mutex;
 
@@ -113,6 +119,7 @@ private:
     void applySettings(const SimplePTTSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void sendPTT(bool tx);
     bool turnDevice(bool on);
+    void preSwitch(bool tx);
 
 private slots:
     void handleInputMessages();

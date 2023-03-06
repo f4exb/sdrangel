@@ -25,6 +25,13 @@ class Serializable;
 
 struct SimplePTTSettings
 {
+    enum GPIOControl
+    {
+        GPIONone,
+        GPIORx,
+        GPIOTx
+    };
+
     QString m_title;
     quint32 m_rgbColor;
     int m_rxDeviceSetIndex;
@@ -36,6 +43,18 @@ struct SimplePTTSettings
     int m_voxHold;  //!< Vox hold in milliseconds
     bool m_vox;
     bool m_voxEnable;
+    GPIOControl m_gpioControl;
+
+    bool m_rx2txGPIOEnable;
+    int m_rx2txGPIOMask;
+    int m_rx2txGPIOValues;
+    bool m_rx2txCommandEnable;
+    QString m_rx2txCommand;
+    bool m_tx2rxGPIOEnable;
+    int m_tx2rxGPIOMask;
+    int m_tx2rxGPIOValues;
+    bool m_tx2rxCommandEnable;
+    QString m_tx2rxCommand;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

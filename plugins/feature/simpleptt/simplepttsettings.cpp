@@ -42,6 +42,17 @@ void SimplePTTSettings::resetToDefaults()
     m_voxHold = 500;
     m_vox = false;
     m_voxEnable = false;
+    m_gpioControl = GPIONone;
+    m_rx2txCommandEnable = false;
+    m_rx2txGPIOMask = 0;
+    m_rx2txGPIOValues = 0;
+    m_rx2txCommandEnable = false;
+    m_rx2txCommand = "";
+    m_tx2rxGPIOEnable = false;
+    m_tx2rxGPIOMask = 0;
+    m_tx2rxGPIOValues = 0;
+    m_tx2rxCommandEnable = false;
+    m_tx2rxCommand = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -77,6 +88,17 @@ QByteArray SimplePTTSettings::serialize() const
     s.writeS32(17, m_voxHold);
     s.writeS32(18, m_workspaceIndex);
     s.writeBlob(19, m_geometryBytes);
+    s.writeS32(20, (int) m_gpioControl);
+    s.writeBool(21, m_rx2txGPIOEnable);
+    s.writeS32(22, m_rx2txGPIOMask);
+    s.writeS32(23, m_rx2txGPIOValues);
+    s.writeBool(24, m_rx2txCommandEnable);
+    s.writeString(25, m_rx2txCommand);
+    s.writeBool(26, m_tx2rxGPIOEnable);
+    s.writeS32(27, m_tx2rxGPIOMask);
+    s.writeS32(28, m_tx2rxGPIOValues);
+    s.writeBool(29, m_tx2rxCommandEnable);
+    s.writeString(30, m_tx2rxCommand);
 
     return s.final();
 }
@@ -96,6 +118,7 @@ bool SimplePTTSettings::deserialize(const QByteArray& data)
         QByteArray bytetmp;
         uint32_t utmp;
         QString strtmp;
+        int32_t tmp;
 
         d.readString(1, &m_title, "Simple PTT");
         d.readU32(2, &m_rgbColor, QColor(255, 0, 0).rgb());
@@ -131,6 +154,18 @@ bool SimplePTTSettings::deserialize(const QByteArray& data)
         d.readS32(17, &m_voxHold, 500);
         d.readS32(18, &m_workspaceIndex, 0);
         d.readBlob(19, &m_geometryBytes);
+        d.readS32(20, &tmp, 0);
+        m_gpioControl = (GPIOControl) tmp;
+        d.readBool(21, &m_rx2txGPIOEnable, false);
+        d.readS32(22, &m_rx2txGPIOMask, 0);
+        d.readS32(23, &m_rx2txGPIOValues, 0);
+        d.readBool(24, &m_rx2txCommandEnable, false);
+        d.readString(25, &m_rx2txCommand, "");
+        d.readBool(26, &m_tx2rxGPIOEnable, false);
+        d.readS32(27, &m_tx2rxGPIOMask, 0);
+        d.readS32(28, &m_tx2rxGPIOValues, 0);
+        d.readBool(29, &m_tx2rxCommandEnable, false);
+        d.readString(30, &m_tx2rxCommand, "");
 
         return true;
     }
@@ -175,6 +210,27 @@ void SimplePTTSettings::applySettings(const QStringList& settingsKeys, const Sim
     }
     if (settingsKeys.contains("voxEnable")) {
         m_voxEnable = settings.m_voxEnable;
+    }
+    if (settingsKeys.contains("gpioControl")) {
+        m_gpioControl = settings.m_gpioControl;
+    }
+    if (settingsKeys.contains("rx2txGPIOMask")) {
+        m_rx2txGPIOMask = settings.m_rx2txGPIOMask;
+    }
+    if (settingsKeys.contains("rx2txGPIOValues")) {
+        m_rx2txGPIOValues = settings.m_rx2txGPIOValues;
+    }
+    if (settingsKeys.contains("rx2txCommand")) {
+        m_rx2txCommand = settings.m_rx2txCommand;
+    }
+    if (settingsKeys.contains("tx2rxGPIOMask")) {
+        m_tx2rxGPIOMask = settings.m_tx2rxGPIOMask;
+    }
+    if (settingsKeys.contains("tx2rxGPIOValues")) {
+        m_tx2rxGPIOValues = settings.m_tx2rxGPIOValues;
+    }
+    if (settingsKeys.contains("tx2rxCommand")) {
+        m_tx2rxCommand = settings.m_tx2rxCommand;
     }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
@@ -223,6 +279,27 @@ QString SimplePTTSettings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("voxLevel") || force) {
         ostr << " m_voxLevel: " << m_voxLevel;
+    }
+    if (settingsKeys.contains("gpioControl") || force) {
+        ostr << " m_gpioControl: " << m_gpioControl;
+    }
+    if (settingsKeys.contains("rx2txGPIOMask") || force) {
+        ostr << " m_rx2txGPIOMask: " << m_rx2txGPIOMask;
+    }
+    if (settingsKeys.contains("rx2txGPIOValues") || force) {
+        ostr << " m_rx2txGPIOValues: " << m_rx2txGPIOValues;
+    }
+    if (settingsKeys.contains("rx2txCommand") || force) {
+        ostr << " m_rx2txCommand: " << m_rx2txCommand.toStdString();
+    }
+    if (settingsKeys.contains("tx2rxGPIOMask") || force) {
+        ostr << " m_tx2rxGPIOMask: " << m_tx2rxGPIOMask;
+    }
+    if (settingsKeys.contains("tx2rxGPIOValues") || force) {
+        ostr << " m_tx2rxGPIOValues: " << m_tx2rxGPIOValues;
+    }
+    if (settingsKeys.contains("tx2rxCommand") || force) {
+        ostr << " m_tx2rxCommand: " << m_tx2rxCommand.toStdString();
     }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;

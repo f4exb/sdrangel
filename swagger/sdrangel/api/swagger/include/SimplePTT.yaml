@@ -37,6 +37,59 @@ SimplePTTSettings:
       description: Vox hold timeout in milliseconds
     audioDeviceName:
       type: string
+    gpioControl:
+      type: integer
+      description: >
+        GPIO control
+          * 0 - No GPIO control
+          * 1 - Rx side controls GPIO
+          * 2 - Tx side controls GPIO
+    rx2txGPIOEnable:
+      type: integer
+      description: >
+        Enable Rx to Tx GPIO control
+          * 0 - disable
+          * 1 - enable
+    rx2txGPIOMask:
+      type: integer
+      format: int8
+      description: Rx to Tx change GPIO mask
+    rx2txGPIOValues:
+      type: integer
+      format: int8
+      description: Rx to Tx change GPIO values
+    rx2txCommandEnable:
+      type: integer
+      description: >
+        Enable Rx to Tx command
+          * 0 - disable
+          * 1 - enable
+    rx2txCommand:
+      type: string
+      description: Command to be executed when Rx switches to Tx
+    tx2rxGPIOEnable:
+      type: integer
+      description: >
+        Enable Tx to Rx GPIO control
+          * 0 - disable
+          * 1 - enable
+    tx2rxGPIOMask:
+      type: integer
+      format: int8
+      description: Tx to Rx change GPIO mask
+    tx2rxGPIOValues:
+      type: integer
+      format: int8
+      description: Tx to Rx change GPIO values
+    tx2rxCommandEnable:
+      type: integer
+      description: >
+        Enable Tx to Rx command
+          * 0 - disable
+          * 1 - enable
+    tx2rxCommand:
+      type: string
+      description: Command to be executed when Tx switches to Rx
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
