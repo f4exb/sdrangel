@@ -496,7 +496,7 @@ void VORLocalizerGUI::selectVOR(VORGUI *vorGUI, bool selected)
 
 void VORLocalizerGUI::updateVORs()
 {
-    m_vorModel.removeAllVORs();
+    m_vorModel.removeAllExceptSelected();
     AzEl azEl = m_azEl;
 
     for (const auto vor : *m_vors)
@@ -509,7 +509,7 @@ void VORLocalizerGUI::updateVORs()
 
             // Only display VOR if in range
             if (azEl.getDistance() <= 200000) {
-                m_vorModel.addVOR(vor);
+                m_vorModel.addVOR(vor);  // addVOR checks for duplicates
             }
         }
     }
