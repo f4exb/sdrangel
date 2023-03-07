@@ -7,6 +7,10 @@ These are broadcast worldwide on 518kHz (in English for international messages),
 Navtex messages are transmitted using FSK with 170Hz separation at 100 baud, using [SITOR-B](https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.625-4-201203-I!!PDF-E.pdf]) encoding.
 The [Map](../../feature/map/readme.md) feature can display the location of Navtex transmitters, along with their transmission times and frequencies.
 
+The Navtex demodulator will only attempt to start demodulating data after it detects the phasing signal, that is broadcast before each message.
+Therefore, if you enable the demodulator part way through a message, it may take a while before you see any output, even if the signal appears strong,
+as the data rate is so low.
+
 <h2>Interface</h2>
 
 The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)

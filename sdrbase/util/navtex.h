@@ -80,15 +80,15 @@ class SDRBASE_API SitorBDecoder {
 public:
 
     void init();
-    char decode(char c);
+    signed char decode(signed char c);
     int getErrors() const { return m_errors; }
-    static QString printable(char c);
+    static QString printable(signed char c);
 
 private:
-    static const char PHASING_1 = 0x78;
-    static const char PHASING_2 = 0x33;
+    static const signed char PHASING_1 = 0x78;
+    static const signed char PHASING_2 = 0x33;
     static const int BUFFER_SIZE = 3;
-    char m_buf[3];
+    signed char m_buf[3];
     bool m_figureSet;
     enum State {
         PHASING,
@@ -100,10 +100,10 @@ private:
     int m_idx;
     int m_errors;
 
-    static const char m_ccir476LetterSetDecode[128];
-    static const char m_ccir476FigureSetDecode[128];
+    static const signed char m_ccir476LetterSetDecode[128];
+    static const signed char m_ccir476FigureSetDecode[128];
 
-    char ccir476Decode(char c);
+    signed char ccir476Decode(signed char c);
 
 };
 
