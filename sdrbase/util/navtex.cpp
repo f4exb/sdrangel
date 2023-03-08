@@ -137,7 +137,7 @@ const QList<NavtexTransmitter> NavtexTransmitter::m_navtexTransmitters = {
     {6, "Ushuaia", -54.8, -68.3, {NavtexTransmitter::Schedule('M', 518000, {QTime(2, 0), QTime(6, 0), QTime(10, 0), QTime(14, 0), QTime(18, 0), QTime(22, 0)})}},
     {6, "Rio Gallegos", -51.616667, -69.216667, {NavtexTransmitter::Schedule('N', 518000, {QTime(2, 10), QTime(6, 10), QTime(10, 10), QTime(14, 10), QTime(18, 10), QTime(22, 10)})}},
     {6, "Comodoro Rivadavia", -45.85, -67.416667, {NavtexTransmitter::Schedule('O', 518000, {QTime(2, 20), QTime(6, 20), QTime(10, 20), QTime(14, 20), QTime(18, 20), QTime(22, 20)})}},
-    {6, "Bahía Blanca", -38.716667, -62.1, {NavtexTransmitter::Schedule('P', 518000, {QTime(2, 30), QTime(6, 30), QTime(10, 30), QTime(14, 30), QTime(18, 30), QTime(22, 30)})}},
+    {6, "BahÃ­a Blanca", -38.716667, -62.1, {NavtexTransmitter::Schedule('P', 518000, {QTime(2, 30), QTime(6, 30), QTime(10, 30), QTime(14, 30), QTime(18, 30), QTime(22, 30)})}},
     {6, "Mar del Plata", -38.05, -57.533333, {NavtexTransmitter::Schedule('Q', 518000, {QTime(2, 40), QTime(6, 40), QTime(10, 40), QTime(14, 40), QTime(18, 40), QTime(22, 40)})}},
     {6, "Buenos Aires", -34.6, -58.366667, {NavtexTransmitter::Schedule('R', 518000, {QTime(2, 50), QTime(6, 50), QTime(10, 50), QTime(14, 50), QTime(18, 50), QTime(22, 50)})}},
 
@@ -214,7 +214,7 @@ const QList<NavtexTransmitter> NavtexTransmitter::m_navtexTransmitters = {
     {13, "Astrakhan", 46.296694, 47.997778, {NavtexTransmitter::Schedule('W', 518000, {QTime(3, 40), QTime(7, 40), QTime(12, 40), QTime(15, 40), QTime(19, 40), QTime(23, 40)})}},
 
     {15, "Antofagasta", -23.491333, -70.424778, {NavtexTransmitter::Schedule('A', 518000, {QTime(4, 0), QTime(12, 0), QTime(20, 0)})}},
-    {15, "Valparaíso", -32.802222, -71.485, {NavtexTransmitter::Schedule('B', 518000, {QTime(4, 10), QTime(12, 10), QTime(20, 10)})}},
+    {15, "ValparaÃ­so", -32.802222, -71.485, {NavtexTransmitter::Schedule('B', 518000, {QTime(4, 10), QTime(12, 10), QTime(20, 10)})}},
     {15, "Talcahuano", -36.715056, -73.108, {NavtexTransmitter::Schedule('C', 518000, {QTime(4, 20), QTime(12, 20), QTime(20, 20)})}},
     {15, "Puerto Montt", -41.489983, -72.957744, {NavtexTransmitter::Schedule('D', 518000, {QTime(4, 30), QTime(12, 30), QTime(20, 30)})}},
     {15, "Punta Arenas", -52.948111, -71.056944, {NavtexTransmitter::Schedule('E', 518000, {QTime(4, 40), QTime(12, 40), QTime(20, 40)})}},
@@ -341,9 +341,9 @@ void SitorBDecoder::init()
 //   ETX end of text
 //   '*' both chars invalid
 //   -1 no character available yet
-char SitorBDecoder::decode(char c)
+signed char SitorBDecoder::decode(signed char c)
 {
-    char ret = -1;
+    signed char ret = -1;
 
     //qDebug() << "In: " << printable(ccir476Decode(c));
 
@@ -380,13 +380,12 @@ char SitorBDecoder::decode(char c)
         m_state = FILL_DX;
         break;
 
-
     case RX:
         {
             // Try to decode a character
-            char dx = ccir476Decode(m_buf[m_idx]);
-            char rx = ccir476Decode(c);
-            char a;
+            signed char dx = ccir476Decode(m_buf[m_idx]);
+            signed char rx = ccir476Decode(c);
+            signed char a;
 
             // Idle alpha (phasing 1) in both dx and rx means end of signal
             if ((dx == '<') && (rx == '<'))
@@ -432,7 +431,7 @@ char SitorBDecoder::decode(char c)
     return ret;
 }
 
-QString SitorBDecoder::printable(char c)
+QString SitorBDecoder::printable(signed char c)
 {
     if (c == -1) {
         return "Unknown";
@@ -447,7 +446,7 @@ QString SitorBDecoder::printable(char c)
     } else if (c == 0x7) {
         return "Bell";
     } else {
-        return QString("%1").arg(c);
+        return QString("%1").arg((char)c);
     }
 }
 
@@ -455,7 +454,7 @@ QString SitorBDecoder::printable(char c)
 
 // https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.625-4-201203-I!!PDF-E.pdf
 
-const char SitorBDecoder::m_ccir476LetterSetDecode[128] = {
+const signed char SitorBDecoder::m_ccir476LetterSetDecode[128] = {
     -1,
     -1,
     -1,
@@ -586,7 +585,7 @@ const char SitorBDecoder::m_ccir476LetterSetDecode[128] = {
     -1,
 };
 
-const char SitorBDecoder::m_ccir476FigureSetDecode[128] = {
+const signed char SitorBDecoder::m_ccir476FigureSetDecode[128] = {
     -1,
     -1,
     -1,
@@ -717,7 +716,7 @@ const char SitorBDecoder::m_ccir476FigureSetDecode[128] = {
     -1,
 };
 
-char SitorBDecoder::ccir476Decode(char c)
+signed char SitorBDecoder::ccir476Decode(signed char c)
 {
     if (m_figureSet) {
         return m_ccir476FigureSetDecode[(int)c];

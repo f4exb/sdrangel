@@ -340,7 +340,7 @@ void NavtexDemodSink::receiveBit(bool bit)
     {
         if (m_bitCount == 7)
         {
-            char c = m_sitorBDecoder.decode(m_bits & 0x7f);
+            signed char c = m_sitorBDecoder.decode(m_bits & 0x7f);
             if (c != -1)
             {
                 //qDebug() << "Out: " << SitorBDecoder::printable(c);
