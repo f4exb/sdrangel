@@ -64,6 +64,7 @@ TestSourceWorker::TestSourceWorker(SampleSinkFifo* sampleFifo, QObject* parent) 
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+    m_timer.setTimerType(Qt::PreciseTimer);
     m_timer.start(50);
 }
 
@@ -76,7 +77,6 @@ TestSourceWorker::~TestSourceWorker()
 void TestSourceWorker::startWork()
 {
     qDebug("TestSourceWorker::startWork");
-    m_timer.setTimerType(Qt::PreciseTimer);
     m_running = true;
 }
 
