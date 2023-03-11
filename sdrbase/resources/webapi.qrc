@@ -58,6 +58,7 @@
         <file>webapi/doc/swagger/include/GLSpectrum.yaml</file>
         <file>webapi/doc/swagger/include/GS232Controller.yaml</file>
         <file>webapi/doc/swagger/include/HackRF.yaml</file>
+        <file>webapi/doc/swagger/include/HeatMap.yaml</file>
         <file>webapi/doc/swagger/include/IEEE_802_15_4_Mod.yaml</file>
         <file>webapi/doc/swagger/include/Interferometer.yaml</file>
         <file>webapi/doc/swagger/include/JogdialController.yaml</file>
@@ -71,6 +72,7 @@
         <file>webapi/doc/swagger/include/Map.yaml</file>
         <file>webapi/doc/swagger/include/MetisMISO.yaml</file>
         <file>webapi/doc/swagger/include/M17Demod.yaml</file>
+        <file>webapi/doc/swagger/include/NavtexDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
         <file>webapi/doc/swagger/include/NoiseFigure.yaml</file>
@@ -95,6 +97,7 @@
         <file>webapi/doc/swagger/include/RemoteTCPSink.yaml</file>
         <file>webapi/doc/swagger/include/RigCtlServer.yaml</file>
         <file>webapi/doc/swagger/include/RollupState.yaml</file>
+        <file>webapi/doc/swagger/include/RTTYDemod.yaml</file>
         <file>webapi/doc/swagger/include/SatelliteTracker.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlayV3.yaml</file>

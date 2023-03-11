@@ -1,0 +1,63 @@
+HeatMapSettings:
+  description: HeatMap
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      description: channel RF bandwidth in Hz
+      type: number
+      format: float
+    minPower:
+      type: number
+      format: float
+    maxPower:
+      type: number
+      format: float
+    colorMapName:
+      type: string
+    mode:
+      description: "(0 - None, 1 - Average, 2 - Max, 3 - Min, 4 - Pulse Average)"
+      type: integer
+    pulseThreshold:
+      type: number
+      format: float
+    averagePeriodUS:
+      description: "Averaging period in microseconds"
+      type: integer
+    sampleRate:
+      type: integer 
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    scopeConfig:
+      $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+HeatMapReport:
+  description: HeatMap
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer

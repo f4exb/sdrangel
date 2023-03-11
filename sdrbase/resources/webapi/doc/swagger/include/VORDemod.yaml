@@ -16,6 +16,8 @@ VORDemodSettings:
       format: float
     audioMute:
       type: integer
+    identBandpassEnable:
+      type: integer
     rgbColor:
       type: integer
     title:

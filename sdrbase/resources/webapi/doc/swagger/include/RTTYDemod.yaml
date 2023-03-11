@@ -1,0 +1,73 @@
+RTTYDemodSettings:
+  description: ACARSDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    baudRate:
+      type: number
+      format: float
+    frequencyShift:
+      type: integer
+    udpEnabled:
+      description: "Whether to forward received messages to specified UDP port"
+      type: integer
+    udpAddress:
+      description: "UDP address to forward received messages to"
+      type: string
+    udpPort:
+      description: "UDP port to forward received messages to"
+      type: integer
+    characterSet:
+      type: integer
+    suppressCRLF:
+      type: integer
+    unshiftOnSpace:
+      type: integer
+    msbFirst:
+      type: integer
+    spaceHigh:
+      type: integer
+    squelch:
+      type: integer
+    logFilename:
+      type: string
+    logEnabled:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    scopeConfig:
+      $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+RTTYDemodReport:
+  description: ACARSDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
