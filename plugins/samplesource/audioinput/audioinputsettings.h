@@ -34,6 +34,8 @@ struct AudioInputSettings {
         LR,
         RL
     } m_iqMapping;
+	bool m_dcBlock;
+	bool m_iqImbalance;
 
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;

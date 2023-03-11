@@ -32,6 +32,8 @@ void AudioInputSettings::resetToDefaults()
     m_volume = 1.0f;
     m_log2Decim = 0;
     m_iqMapping = L;
+    m_dcBlock = false;
+    m_iqImbalance = false;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -47,6 +49,8 @@ QByteArray AudioInputSettings::serialize() const
     s.writeFloat(3, m_volume);
     s.writeU32(4, m_log2Decim);
     s.writeS32(5, (int)m_iqMapping);
+    s.writeBool(6, m_dcBlock);
+    s.writeBool(7, m_iqImbalance);
 
     s.writeBool(24, m_useReverseAPI);
     s.writeString(25, m_reverseAPIAddress);
@@ -75,6 +79,8 @@ bool AudioInputSettings::deserialize(const QByteArray& data)
         d.readFloat(3, &m_volume, 1.0f);
         d.readU32(4, &m_log2Decim, 0);
         d.readS32(5, (int *)&m_iqMapping, IQMapping::L);
+        d.readBool(6, &m_dcBlock, false);
+        d.readBool(7, &m_iqImbalance, false);
 
         d.readBool(24, &m_useReverseAPI, false);
         d.readString(25, &m_reverseAPIAddress, "127.0.0.1");
@@ -115,6 +121,12 @@ void AudioInputSettings::applySettings(const QStringList& settingsKeys, const Au
     if (settingsKeys.contains("iqMapping")) {
         m_iqMapping = settings.m_iqMapping;
     }
+    if (settingsKeys.contains("dcBlock")) {
+        m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("iqImbalance")) {
+        m_iqImbalance = settings.m_iqImbalance;
+    }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
     }
@@ -147,6 +159,12 @@ QString AudioInputSettings::getDebugString(const QStringList& settingsKeys, bool
     }
     if (settingsKeys.contains("iqMapping") || force) {
         ostr << " m_iqMapping: " << m_iqMapping;
+    }
+    if (settingsKeys.contains("dcBlock") || force) {
+        ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("iqImbalance") || force) {
+        ostr << " m_iqImbalance: " << m_iqImbalance;
     }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;

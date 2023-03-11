@@ -57,6 +57,12 @@ public:
     qint32 getIqMapping();
     void setIqMapping(qint32 iq_mapping);
 
+    qint32 getDcBlock();
+    void setDcBlock(qint32 dc_block);
+
+    qint32 getIqImbalance();
+    void setIqImbalance(qint32 iq_imbalance);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -87,6 +93,12 @@ private:
 
     qint32 iq_mapping;
     bool m_iq_mapping_isSet;
+
+    qint32 dc_block;
+    bool m_dc_block_isSet;
+
+    qint32 iq_imbalance;
+    bool m_iq_imbalance_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

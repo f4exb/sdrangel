@@ -242,6 +242,8 @@ void AudioInputGui::displaySettings()
     ui->volume->setValue((int)(m_settings.m_volume*10.0f));
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 3, 'f', 1));
     ui->channels->setCurrentIndex((int)m_settings.m_iqMapping);
+	ui->dcOffset->setChecked(m_settings.m_dcBlock);
+	ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
     refreshSampleRates(ui->device->currentText());
 }
 
@@ -287,6 +289,20 @@ void AudioInputGui::on_channels_currentIndexChanged(int index)
     updateSampleRateAndFrequency();
     m_settingsKeys.append("iqMapping");
     sendSettings();
+}
+
+void AudioInputGui::on_dcOffset_toggled(bool checked)
+{
+	m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
+	sendSettings();
+}
+
+void AudioInputGui::on_iqImbalance_toggled(bool checked)
+{
+	m_settings.m_iqImbalance = checked;
+    m_settingsKeys.append("iqImbalance");
+	sendSettings();
 }
 
 void AudioInputGui::on_startStop_toggled(bool checked)
@@ -376,5 +392,7 @@ void AudioInputGui::makeUIConnections()
     QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioInputGui::on_decim_currentIndexChanged);
     QObject::connect(ui->volume, &QDial::valueChanged, this, &AudioInputGui::on_volume_valueChanged);
     QObject::connect(ui->channels, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioInputGui::on_channels_currentIndexChanged);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &AudioInputGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &AudioInputGui::on_iqImbalance_toggled);
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AudioInputGui::on_startStop_toggled);
 }

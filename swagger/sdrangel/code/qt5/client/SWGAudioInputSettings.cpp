@@ -38,6 +38,10 @@ SWGAudioInputSettings::SWGAudioInputSettings() {
     m_log2_decim_isSet = false;
     iq_mapping = 0;
     m_iq_mapping_isSet = false;
+    dc_block = 0;
+    m_dc_block_isSet = false;
+    iq_imbalance = 0;
+    m_iq_imbalance_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -64,6 +68,10 @@ SWGAudioInputSettings::init() {
     m_log2_decim_isSet = false;
     iq_mapping = 0;
     m_iq_mapping_isSet = false;
+    dc_block = 0;
+    m_dc_block_isSet = false;
+    iq_imbalance = 0;
+    m_iq_imbalance_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -79,6 +87,8 @@ SWGAudioInputSettings::cleanup() {
     if(device != nullptr) { 
         delete device;
     }
+
+
 
 
 
@@ -111,6 +121,10 @@ SWGAudioInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_mapping, pJson["iqMapping"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&iq_imbalance, pJson["iqImbalance"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -150,6 +164,12 @@ SWGAudioInputSettings::asJsonObject() {
     }
     if(m_iq_mapping_isSet){
         obj->insert("iqMapping", QJsonValue(iq_mapping));
+    }
+    if(m_dc_block_isSet){
+        obj->insert("dcBlock", QJsonValue(dc_block));
+    }
+    if(m_iq_imbalance_isSet){
+        obj->insert("iqImbalance", QJsonValue(iq_imbalance));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -218,6 +238,26 @@ SWGAudioInputSettings::setIqMapping(qint32 iq_mapping) {
 }
 
 qint32
+SWGAudioInputSettings::getDcBlock() {
+    return dc_block;
+}
+void
+SWGAudioInputSettings::setDcBlock(qint32 dc_block) {
+    this->dc_block = dc_block;
+    this->m_dc_block_isSet = true;
+}
+
+qint32
+SWGAudioInputSettings::getIqImbalance() {
+    return iq_imbalance;
+}
+void
+SWGAudioInputSettings::setIqImbalance(qint32 iq_imbalance) {
+    this->iq_imbalance = iq_imbalance;
+    this->m_iq_imbalance_isSet = true;
+}
+
+qint32
 SWGAudioInputSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -275,6 +315,12 @@ SWGAudioInputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_iq_mapping_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dc_block_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_imbalance_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

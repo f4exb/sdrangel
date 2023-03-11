@@ -2449,6 +2449,14 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Audio channel to IQ mapping\n  * 0 - I=L, Q=0\n  * 1 - I=R, Q=0\n  * 2 - I=L, Q=R\n  * 3 - I=R, Q=L\n"
     },
+    "dcBlock" : {
+      "type" : "integer",
+      "description" : "Auto DC blocking\n  * 0 - Off\n  * 1 - On\n"
+    },
+    "iqImbalance" : {
+      "type" : "integer",
+      "description" : "Auto IQ balance (you need auto DC blocking active)\n  * 0 - Off\n  * 1 - On\n"
+    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
@@ -3520,11 +3528,20 @@ margin-bottom: 20px;
     "FT8DemodReport" : {
       "$ref" : "#/definitions/FT8DemodReport"
     },
+    "RTTYDemodReport" : {
+      "$ref" : "#/definitions/RTTYDemodReport"
+    },
+    "HeatMapReport" : {
+      "$ref" : "#/definitions/HeatMapReport"
+    },
     "M17DemodReport" : {
       "$ref" : "#/definitions/M17DemodReport"
     },
     "M17ModReport" : {
       "$ref" : "#/definitions/M17ModReport"
+    },
+    "NavtexDemodReport" : {
+      "$ref" : "#/definitions/NavtexDemodReport"
     },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
@@ -3675,6 +3692,12 @@ margin-bottom: 20px;
     "FT8DemodSettings" : {
       "$ref" : "#/definitions/FT8DemodSettings"
     },
+    "RTTYDemodSettings" : {
+      "$ref" : "#/definitions/RTTYDemodSettings"
+    },
+    "HeatMapSettings" : {
+      "$ref" : "#/definitions/HeatMapSettings"
+    },
     "InterferometerSettings" : {
       "$ref" : "#/definitions/InterferometerSettings"
     },
@@ -3686,6 +3709,9 @@ margin-bottom: 20px;
     },
     "M17ModSettings" : {
       "$ref" : "#/definitions/M17ModSettings"
+    },
+    "NavtexDemodSettings" : {
+      "$ref" : "#/definitions/NavtexDemodSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -7120,6 +7146,94 @@ margin-bottom: 20px;
   },
   "description" : "HackRF"
 };
+            defs.HeatMapReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "HeatMap"
+};
+            defs.HeatMapSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "channel RF bandwidth in Hz"
+    },
+    "minPower" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "maxPower" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "colorMapName" : {
+      "type" : "string"
+    },
+    "mode" : {
+      "type" : "integer",
+      "description" : "(0 - None, 1 - Average, 2 - Max, 3 - Min, 4 - Pulse Average)"
+    },
+    "pulseThreshold" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "averagePeriodUS" : {
+      "type" : "integer",
+      "description" : "Averaging period in microseconds"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "HeatMap"
+};
             defs.IEEE_802_15_4_ModActions = {
   "properties" : {
     "tx" : {
@@ -8948,7 +9062,7 @@ margin-bottom: 20px;
     },
     "altitudeReference" : {
       "type" : "integer",
-      "description" : "0 - NONE (Absolule), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
+      "description" : "0 - NONE (Absolute), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
     },
     "animations" : {
       "type" : "array",
@@ -8959,7 +9073,7 @@ margin-bottom: 20px;
     },
     "type" : {
       "type" : "integer",
-      "description" : "(0 - Map Item, 1 - Image Tile)"
+      "description" : "(0 - Map Item, 1 - Image Tile, 2 - Polygon, 3 - Polyline)"
     },
     "imageTileWest" : {
       "type" : "number",
@@ -8976,6 +9090,27 @@ margin-bottom: 20px;
     "imageTileNorth" : {
       "type" : "number",
       "format" : "float"
+    },
+    "imageZoomLevel" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "For 2D map"
+    },
+    "coordinates" : {
+      "type" : "array",
+      "description" : "Polygon/polyline coordinates",
+      "items" : {
+        "$ref" : "#/definitions/MapCoordinate"
+      }
+    },
+    "extrudedHeight" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Extruded height (from surface) for polygons"
+    },
+    "availableUntil" : {
+      "type" : "string",
+      "description" : "Date and time until after which this item should no longer appear on 3D map"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -9078,7 +9213,7 @@ margin-bottom: 20px;
     },
     "altitudeReference" : {
       "type" : "integer",
-      "description" : "0 - NONE (Absolule), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
+      "description" : "0 - NONE (Absolute), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
     },
     "animations" : {
       "type" : "array",
@@ -9089,7 +9224,7 @@ margin-bottom: 20px;
     },
     "type" : {
       "type" : "integer",
-      "description" : "(0 - Map Item, 1 - Image Tile)"
+      "description" : "(0 - Map Item, 1 - Image Tile, 2 - Polygon, 3 - Polyline)"
     },
     "imageTileWest" : {
       "type" : "number",
@@ -9106,6 +9241,27 @@ margin-bottom: 20px;
     "imageTileNorth" : {
       "type" : "number",
       "format" : "float"
+    },
+    "imageZoomLevel" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "For 2D map"
+    },
+    "coordinates" : {
+      "type" : "array",
+      "description" : "Polygon/polyline coordinates",
+      "items" : {
+        "$ref" : "#/definitions/MapCoordinate"
+      }
+    },
+    "extrudedHeight" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Extruded height (from surface) for polygons"
+    },
+    "availableUntil" : {
+      "type" : "string",
+      "description" : "Date and time until after which this item should no longer appear on 3D map"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -9560,6 +9716,94 @@ margin-bottom: 20px;
     }
   },
   "description" : "Enumeration with name for values"
+};
+            defs.NavtexDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "ACARSDemod"
+};
+            defs.NavtexDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "navArea" : {
+      "type" : "integer"
+    },
+    "filterStation" : {
+      "type" : "string"
+    },
+    "filterType" : {
+      "type" : "string"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to forward received messages to specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to forward received messages to"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to forward received messages to"
+    },
+    "logFilename" : {
+      "type" : "string"
+    },
+    "logEnabled" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "ACARSDemod"
 };
             defs.NoiseFigureReport = {
   "properties" : {
@@ -10913,6 +11157,110 @@ margin-bottom: 20px;
       "format" : "float"
     }
   }
+};
+            defs.RTTYDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "ACARSDemod"
+};
+            defs.RTTYDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "baudRate" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "frequencyShift" : {
+      "type" : "integer"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to forward received messages to specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to forward received messages to"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to forward received messages to"
+    },
+    "characterSet" : {
+      "type" : "integer"
+    },
+    "suppressCRLF" : {
+      "type" : "integer"
+    },
+    "unshiftOnSpace" : {
+      "type" : "integer"
+    },
+    "msbFirst" : {
+      "type" : "integer"
+    },
+    "spaceHigh" : {
+      "type" : "integer"
+    },
+    "squelch" : {
+      "type" : "integer"
+    },
+    "logFilename" : {
+      "type" : "string"
+    },
+    "logEnabled" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "ACARSDemod"
 };
             defs.RadioAstronomyActions = {
   "properties" : {
@@ -14755,6 +15103,9 @@ margin-bottom: 20px;
       "format" : "float"
     },
     "audioMute" : {
+      "type" : "integer"
+    },
+    "identBandpassEnable" : {
       "type" : "integer"
     },
     "rgbColor" : {
@@ -56905,7 +57256,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-01-28T23:27:13.480+01:00
+              Generated 2023-03-11T04:40:02.823+01:00
             </div>
           </div>
       </div>

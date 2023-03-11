@@ -312,6 +312,14 @@ void AudioInput::applySettings(const AudioInputSettings& settings, QList<QString
         }
     }
 
+    if (settingsKeys.contains("dcBlock") || settingsKeys.contains("iqImbalance") || force)
+    {
+        m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqImbalance);
+        qDebug("AudioInput::applySettings: corrections: DC block: %s IQ imbalance: %s",
+                settings.m_dcBlock ? "true" : "false",
+                settings.m_iqImbalance ? "true" : "false");
+    }
+
     if (settingsKeys.contains("useReverseAPI"))
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
@@ -423,6 +431,12 @@ void AudioInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("iqMapping")) {
         settings.m_iqMapping = (AudioInputSettings::IQMapping)response.getAudioInputSettings()->getIqMapping();
     }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getAudioInputSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqImbalance")) {
+        settings.m_iqImbalance = response.getAudioInputSettings()->getIqImbalance() != 0;
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getAudioInputSettings()->getUseReverseApi() != 0;
     }
@@ -444,6 +458,8 @@ void AudioInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& resp
     response.getAudioInputSettings()->setVolume(settings.m_volume);
     response.getAudioInputSettings()->setLog2Decim(settings.m_log2Decim);
     response.getAudioInputSettings()->setIqMapping((int)settings.m_iqMapping);
+    response.getAudioInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getAudioInputSettings()->setIqImbalance(settings.m_iqImbalance ? 1 : 0);
 
     response.getAudioInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -482,6 +498,12 @@ void AudioInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsK
     }
     if (deviceSettingsKeys.contains("iqMapping") || force) {
         swgAudioInputSettings->setIqMapping(settings.m_iqMapping);
+    }
+    if (deviceSettingsKeys.contains("dcBlock") || force) {
+        swgAudioInputSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("iqImbalance") || force) {
+        swgAudioInputSettings->setIqImbalance(settings.m_iqImbalance ? 1 : 0);
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

@@ -115,6 +115,26 @@
       </spacer>
      </item>
      <item>
+      <widget class="ButtonSwitch" name="dcOffset">
+       <property name="toolTip">
+        <string>Automatic DC offset removal</string>
+       </property>
+       <property name="text">
+        <string>DC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="iqImbalance">
+       <property name="toolTip">
+        <string>Automatic IQ imbalance correction</string>
+       </property>
+       <property name="text">
+        <string>IQ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="label_2">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">

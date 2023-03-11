@@ -21,6 +21,18 @@ AudioInputSettings:
           * 1 - I=R, Q=0
           * 2 - I=L, Q=R
           * 3 - I=R, Q=L
+    dcBlock:
+      type: integer
+      description: >
+        Auto DC blocking
+          * 0 - Off
+          * 1 - On
+    iqImbalance:
+      type: integer
+      description: >
+        Auto IQ balance (you need auto DC blocking active)
+          * 0 - Off
+          * 1 - On
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

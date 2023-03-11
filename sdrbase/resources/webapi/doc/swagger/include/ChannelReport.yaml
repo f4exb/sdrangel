@@ -51,10 +51,16 @@ ChannelReport:
       $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
     FT8DemodReport:
       $ref: "/doc/swagger/include/FT8Demod.yaml#/FT8DemodReport"
+    RTTYDemodReport:
+      $ref: "/doc/swagger/include/RTTYDemod.yaml#/RTTYDemodReport"
+    HeatMapReport:
+      $ref: "/doc/swagger/include/HeatMap.yaml#/HeatMapReport"
     M17DemodReport:
       $ref: "/doc/swagger/include/M17Demod.yaml#/M17DemodReport"
     M17ModReport:
       $ref: "/doc/swagger/include/M17Mod.yaml#/M17ModReport"
+    NavtexDemodReport:
+      $ref: "/doc/swagger/include/NavtexDemod.yaml#/NavtexDemodReport"
     NFMDemodReport:
       $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
     NFMModReport:

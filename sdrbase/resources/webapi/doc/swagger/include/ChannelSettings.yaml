@@ -65,6 +65,10 @@ ChannelSettings:
       $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
     FT8DemodSettings:
       $ref: "/doc/swagger/include/FT8Demod.yaml#/FT8DemodSettings"
+    RTTYDemodSettings:
+      $ref: "/doc/swagger/include/RTTYDemod.yaml#/RTTYDemodSettings"
+    HeatMapSettings:
+      $ref: "/doc/swagger/include/HeatMap.yaml#/HeatMapSettings"
     InterferometerSettings:
       $ref: "/doc/swagger/include/Interferometer.yaml#/InterferometerSettings"
     IEEE_802_15_4_ModSettings:
@@ -73,6 +77,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/M17Demod.yaml#/M17DemodSettings"
     M17ModSettings:
       $ref: "/doc/swagger/include/M17Mod.yaml#/M17ModSettings"
+    NavtexDemodSettings:
+      $ref: "/doc/swagger/include/NavtexDemod.yaml#/NavtexDemodSettings"
     NFMDemodSettings:
       $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
     NFMModSettings:

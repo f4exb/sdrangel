@@ -46,3 +46,11 @@ This controls how the left and right audio channels map on to the IQ channels.
 * Mono R - Same as above but takes the right audio channel for the real signal.
 * I=L, Q=R - The left audio channel is driven to the I channel. The right audio channel is driven to the Q channel for a complex (analytic signal)input.
 * I=R, Q=L - The right audio channel is driven to the I channel. The left audio channel is driven to the Q channel for a complex (analytic signal)input.
+
+<h3>8: Auto remove DC component</h3>
+
+Software DSP auto remove DC correction.
+
+<h3>9: Auto make I/Q balance</h3>
+
+Software DSP auto I/Q imbalance correction. The DC correction (8) must be enabled for this to be effective.
