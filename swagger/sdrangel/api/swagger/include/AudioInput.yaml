@@ -33,6 +33,13 @@ AudioInputSettings:
         Auto IQ balance (you need auto DC blocking active)
           * 0 - Off
           * 1 - On
+    fcPos:
+      type: integer
+      description: >
+        Decimated bandpass center frequency position
+          * 0 - Infradyne
+          * 1 - Supradyne
+          * 2 - Centered
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

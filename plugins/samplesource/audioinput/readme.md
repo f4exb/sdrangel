@@ -18,27 +18,43 @@ Device start / stop button.
   - Green square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
 
-<h3>2: Device</h3>
+<h3>2: Auto remove DC component</h3>
+
+Software DSP auto remove DC correction. This will work in I/Q mode (stereo I/Q) only.
+
+<h3>3: Auto make I/Q balance</h3>
+
+Software DSP auto I/Q imbalance correction. The DC correction (8) must be enabled for this to be effective. This will work in I/Q mode (stereo I/Q) only.
+
+<h3>4: Device</h3>
 
 The audio device to use.
 
-<h3>3: Refresh devices</h3>
+<h3>5: Refresh devices</h3>
 
 Refresh the list of audio devices.
 
-<h3>4: Audio sample rate</h3>
+<h3>6: Audio sample rate</h3>
 
 Audio sample rate in Hz (Sa/s).
 
-<h3>5: Decimation</h3>
+<h3>7: Decimation</h3>
 
 A decimation factor to apply to the audio data. The baseband sample rate will be the audio sample, divided by this decimation factor.
 
-<h3>6: Volume</h3>
+<h3>8: Decimated bandpass center frequency position relative the device center frequency</h3>
+
+This will work in I/Q mode (stereo I/Q) only.
+
+  - **Cen**: the decimation operation takes place around the device center frequency Fs
+  - **Inf**: the decimation operation takes place around Fs - Fc.
+  - **Sup**: the decimation operation takes place around Fs + Fc.
+
+<h3>9: Volume</h3>
 
 A control to set the input volume. This is not supported by all input audio devices.
 
-<h3>7: Channel Map</h3>
+<h3>10: Channel Map</h3>
 
 This controls how the left and right audio channels map on to the IQ channels.
 
@@ -47,10 +63,3 @@ This controls how the left and right audio channels map on to the IQ channels.
 * I=L, Q=R - The left audio channel is driven to the I channel. The right audio channel is driven to the Q channel for a complex (analytic signal)input.
 * I=R, Q=L - The right audio channel is driven to the I channel. The left audio channel is driven to the Q channel for a complex (analytic signal)input.
 
-<h3>8: Auto remove DC component</h3>
-
-Software DSP auto remove DC correction.
-
-<h3>9: Auto make I/Q balance</h3>
-
-Software DSP auto I/Q imbalance correction. The DC correction (8) must be enabled for this to be effective.

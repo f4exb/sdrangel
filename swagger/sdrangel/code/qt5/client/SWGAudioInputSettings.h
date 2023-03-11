@@ -63,6 +63,9 @@ public:
     qint32 getIqImbalance();
     void setIqImbalance(qint32 iq_imbalance);
 
+    qint32 getFcPos();
+    void setFcPos(qint32 fc_pos);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -99,6 +102,9 @@ private:
 
     qint32 iq_imbalance;
     bool m_iq_imbalance_isSet;
+
+    qint32 fc_pos;
+    bool m_fc_pos_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

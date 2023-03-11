@@ -37,6 +37,7 @@ public:
     void startWork();
     void stopWork();
     void setLog2Decimation(unsigned int log2_decim) {m_log2Decim = log2_decim;}
+    void setFcPos(int fcPos) { m_fcPos = fcPos; }
     void setIQMapping(AudioInputSettings::IQMapping iqMapping) {m_iqMapping = iqMapping;}
 
     static const int m_convBufSamples = 4096;
@@ -45,6 +46,7 @@ private:
 
     bool m_running;
     unsigned int m_log2Decim;
+    int m_fcPos;
     AudioInputSettings::IQMapping m_iqMapping;
 
     qint16 m_buf[m_convBufSamples*2]; // stereo (I, Q)

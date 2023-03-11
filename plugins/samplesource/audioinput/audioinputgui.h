@@ -65,6 +65,7 @@ private:
     void refreshDeviceList();
     void refreshSampleRates(QString deviceName);
     void displaySettings();
+    void displayFcTooltip();
     void sendSettings();
     void updateSampleRateAndFrequency();
     bool handleMessage(const Message& message);
@@ -79,6 +80,7 @@ private slots:
     void on_channels_currentIndexChanged(int index);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
+    void on_fcPos_currentIndexChanged(int index);
     void on_startStop_toggled(bool checked);
     void updateHardware();
     void openDeviceSettingsDialog(const QPoint& p);

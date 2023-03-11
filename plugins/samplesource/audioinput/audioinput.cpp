@@ -303,6 +303,15 @@ void AudioInput::applySettings(const AudioInputSettings& settings, QList<QString
         }
     }
 
+    if (settingsKeys.contains("fcPos") || force)
+    {
+        if (m_worker) {
+            m_worker->setFcPos((int) settings.m_fcPos);
+        }
+
+        qDebug() << "AudioInput::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
+    }
+
     if (settingsKeys.contains("iqMapping") || force)
     {
         forwardChange = true;
@@ -437,6 +446,9 @@ void AudioInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("iqImbalance")) {
         settings.m_iqImbalance = response.getAudioInputSettings()->getIqImbalance() != 0;
     }
+    if (deviceSettingsKeys.contains("fcPos")) {
+        settings.m_fcPos = (AudioInputSettings::fcPos_t) response.getAudioInputSettings()->getFcPos();
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getAudioInputSettings()->getUseReverseApi() != 0;
     }
@@ -460,6 +472,7 @@ void AudioInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& resp
     response.getAudioInputSettings()->setIqMapping((int)settings.m_iqMapping);
     response.getAudioInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getAudioInputSettings()->setIqImbalance(settings.m_iqImbalance ? 1 : 0);
+    response.getAudioInputSettings()->setFcPos((int) settings.m_fcPos);
 
     response.getAudioInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -504,6 +517,9 @@ void AudioInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsK
     }
     if (deviceSettingsKeys.contains("iqImbalance") || force) {
         swgAudioInputSettings->setIqImbalance(settings.m_iqImbalance ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("fcPos") || force) {
+        swgAudioInputSettings->setFcPos(settings.m_fcPos);
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

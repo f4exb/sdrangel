@@ -107,31 +107,90 @@ void AudioInputWorker::decimate(qint16 *buf, unsigned int nbRead)
 {
     SampleVector::iterator it = m_convertBuffer.begin();
 
-    switch (m_log2Decim)
-    {
-    case 0:
-        m_decimatorsIQ.decimate1(&it, buf, 2*nbRead);
-        break;
-    case 1:
-        m_decimatorsIQ.decimate2_cen(&it, buf, 2*nbRead);
-        break;
-    case 2:
-        m_decimatorsIQ.decimate4_cen(&it, buf, 2*nbRead);
-        break;
-    case 3:
-        m_decimatorsIQ.decimate8_cen(&it, buf, 2*nbRead);
-        break;
-    case 4:
-        m_decimatorsIQ.decimate16_cen(&it, buf, 2*nbRead);
-        break;
-    case 5:
-        m_decimatorsIQ.decimate32_cen(&it, buf, 2*nbRead);
-        break;
-    case 6:
-        m_decimatorsIQ.decimate64_cen(&it, buf, 2*nbRead);
-        break;
-    default:
-        break;
+	if (m_log2Decim == 0)
+	{
+		m_decimatorsIQ.decimate1(&it, buf, 2*nbRead);
+	}
+	else
+	{
+        if (m_fcPos == 0) // Infradyne
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsIQ.decimate2_inf(&it, buf, 2*nbRead);
+                break;
+            case 2:
+                m_decimatorsIQ.decimate4_inf(&it, buf, 2*nbRead);
+                break;
+            case 3:
+                m_decimatorsIQ.decimate8_inf(&it, buf, 2*nbRead);
+                break;
+            case 4:
+                m_decimatorsIQ.decimate16_inf(&it, buf, 2*nbRead);
+                break;
+            case 5:
+                m_decimatorsIQ.decimate32_inf(&it, buf, 2*nbRead);
+                break;
+            case 6:
+                m_decimatorsIQ.decimate64_inf(&it, buf, 2*nbRead);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_fcPos == 1) // Supradyne
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsIQ.decimate2_sup(&it, buf, 2*nbRead);
+                break;
+            case 2:
+                m_decimatorsIQ.decimate4_sup(&it, buf, 2*nbRead);
+                break;
+            case 3:
+                m_decimatorsIQ.decimate8_sup(&it, buf, 2*nbRead);
+                break;
+            case 4:
+                m_decimatorsIQ.decimate16_sup(&it, buf, 2*nbRead);
+                break;
+            case 5:
+                m_decimatorsIQ.decimate32_sup(&it, buf, 2*nbRead);
+                break;
+            case 6:
+                m_decimatorsIQ.decimate64_sup(&it, buf, 2*nbRead);
+                break;
+            default:
+                break;
+            }
+        }
+        else // centered
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsIQ.decimate2_cen(&it, buf, 2*nbRead);
+                break;
+            case 2:
+                m_decimatorsIQ.decimate4_cen(&it, buf, 2*nbRead);
+                break;
+            case 3:
+                m_decimatorsIQ.decimate8_cen(&it, buf, 2*nbRead);
+                break;
+            case 4:
+                m_decimatorsIQ.decimate16_cen(&it, buf, 2*nbRead);
+                break;
+            case 5:
+                m_decimatorsIQ.decimate32_cen(&it, buf, 2*nbRead);
+                break;
+            case 6:
+                m_decimatorsIQ.decimate64_cen(&it, buf, 2*nbRead);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     m_sampleFifo->write(m_convertBuffer.begin(), it);

@@ -245,6 +245,18 @@ void AudioInputGui::displaySettings()
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
     refreshSampleRates(ui->device->currentText());
+    displayFcTooltip();
+}
+
+void AudioInputGui::displayFcTooltip()
+{
+    int32_t fShift = DeviceSampleSource::calculateFrequencyShift(
+        m_settings.m_log2Decim,
+        (DeviceSampleSource::fcPos_t) m_settings.m_fcPos,
+        m_settings.m_sampleRate,
+        DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD
+    );
+    ui->fcPos->setToolTip(tr("Relative position of device center frequency: %1 kHz").arg(QString::number(fShift / 1000.0f, 'g', 5)));
 }
 
 void AudioInputGui::on_device_currentIndexChanged(int index)
@@ -260,6 +272,7 @@ void AudioInputGui::on_sampleRate_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_sampleRate = ui->sampleRate->currentText().toInt();
+    displayFcTooltip();
     m_settingsKeys.append("sampleRate");
     sendSettings();
 }
@@ -271,6 +284,7 @@ void AudioInputGui::on_decim_currentIndexChanged(int index)
     }
 
     m_settings.m_log2Decim = index;
+    displayFcTooltip();
     m_settingsKeys.append("log2Decim");
     sendSettings();
 }
@@ -303,6 +317,14 @@ void AudioInputGui::on_iqImbalance_toggled(bool checked)
 	m_settings.m_iqImbalance = checked;
     m_settingsKeys.append("iqImbalance");
 	sendSettings();
+}
+
+void AudioInputGui::on_fcPos_currentIndexChanged(int index)
+{
+    m_settings.m_fcPos = (AudioInputSettings::fcPos_t) (index < 0 ? 0 : index > 2 ? 2 : index);
+    displayFcTooltip();
+    m_settingsKeys.append("fcPos");
+    sendSettings();
 }
 
 void AudioInputGui::on_startStop_toggled(bool checked)
@@ -394,5 +416,6 @@ void AudioInputGui::makeUIConnections()
     QObject::connect(ui->channels, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioInputGui::on_channels_currentIndexChanged);
     QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &AudioInputGui::on_dcOffset_toggled);
     QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &AudioInputGui::on_iqImbalance_toggled);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioInputGui::on_fcPos_currentIndexChanged);
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AudioInputGui::on_startStop_toggled);
 }

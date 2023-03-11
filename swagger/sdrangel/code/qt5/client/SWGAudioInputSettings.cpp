@@ -42,6 +42,8 @@ SWGAudioInputSettings::SWGAudioInputSettings() {
     m_dc_block_isSet = false;
     iq_imbalance = 0;
     m_iq_imbalance_isSet = false;
+    fc_pos = 0;
+    m_fc_pos_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -72,6 +74,8 @@ SWGAudioInputSettings::init() {
     m_dc_block_isSet = false;
     iq_imbalance = 0;
     m_iq_imbalance_isSet = false;
+    fc_pos = 0;
+    m_fc_pos_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -87,6 +91,7 @@ SWGAudioInputSettings::cleanup() {
     if(device != nullptr) { 
         delete device;
     }
+
 
 
 
@@ -125,6 +130,8 @@ SWGAudioInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_imbalance, pJson["iqImbalance"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fc_pos, pJson["fcPos"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -170,6 +177,9 @@ SWGAudioInputSettings::asJsonObject() {
     }
     if(m_iq_imbalance_isSet){
         obj->insert("iqImbalance", QJsonValue(iq_imbalance));
+    }
+    if(m_fc_pos_isSet){
+        obj->insert("fcPos", QJsonValue(fc_pos));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -258,6 +268,16 @@ SWGAudioInputSettings::setIqImbalance(qint32 iq_imbalance) {
 }
 
 qint32
+SWGAudioInputSettings::getFcPos() {
+    return fc_pos;
+}
+void
+SWGAudioInputSettings::setFcPos(qint32 fc_pos) {
+    this->fc_pos = fc_pos;
+    this->m_fc_pos_isSet = true;
+}
+
+qint32
 SWGAudioInputSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -321,6 +341,9 @@ SWGAudioInputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_iq_imbalance_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fc_pos_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

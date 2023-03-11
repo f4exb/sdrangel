@@ -24,6 +24,12 @@
 
 struct AudioInputSettings {
 
+	typedef enum {
+		FC_POS_INFRA = 0,
+		FC_POS_SUPRA,
+		FC_POS_CENTER
+	} fcPos_t;
+
     QString m_deviceName;       // Including realm, as from getFullDeviceName below
     int m_sampleRate;
     float m_volume;
@@ -36,6 +42,7 @@ struct AudioInputSettings {
     } m_iqMapping;
 	bool m_dcBlock;
 	bool m_iqImbalance;
+    fcPos_t m_fcPos;
 
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
