@@ -1081,6 +1081,12 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
         DeviceGUI *deviceGUI = m_deviceUIs[i]->m_deviceGUI;
         Workspace *deviceWorkspace = m_workspaces[deviceGUI->getWorkspaceIndex()];
 
+        QObject::disconnect(
+            deviceGUI,
+            &DeviceGUI::addChannelEmitted,
+            this,
+            nullptr
+        );
         QObject::connect(
             deviceGUI,
             &DeviceGUI::addChannelEmitted,
