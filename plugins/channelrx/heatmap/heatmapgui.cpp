@@ -218,7 +218,7 @@ void HeatMapGUI::on_sampleRate_valueChanged(int value)
 {
     m_settings.m_sampleRate = (int)std::pow(10.0f, (float)value);
     ui->sampleRateText->setText(m_sampleRateTexts[value-1]);
-    ui->averagePeriod->setMinimum(std::max(1, m_averagePeriodTexts.size() - value));
+    ui->averagePeriod->setMinimum(std::max(1, static_cast<int> ( m_averagePeriodTexts.size()) - value));
     m_scopeVis->setLiveRate(m_settings.m_sampleRate);
     applySettings();
 }
@@ -696,7 +696,7 @@ void HeatMapGUI::displaySettings()
     value = (int)std::log10(m_settings.m_sampleRate);
     ui->sampleRate->setValue(value);
     ui->sampleRateText->setText(m_sampleRateTexts[value-1]);
-    ui->averagePeriod->setMinimum(std::max(1, m_averagePeriodTexts.size() - value));
+    ui->averagePeriod->setMinimum(std::max(1, static_cast<int> (m_averagePeriodTexts.size()) - value));
 
     ui->txPosition->setChecked(m_settings.m_txPosValid);
     displayTXPosition(m_settings.m_txPosValid);
