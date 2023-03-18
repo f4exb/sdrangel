@@ -100,3 +100,5 @@ DeviceSettings:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputSettings"
     xtrxMIMOSettings:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxMIMOSettings"
+    aaroniaRTSASettings:
+      $ref: "/doc/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSASettings"

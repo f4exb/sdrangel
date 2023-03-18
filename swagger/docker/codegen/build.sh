@@ -18,7 +18,7 @@ EOF
 branch_name="sdrangel"
 clone_label=$(date)
 image_tag="latest"
-uid=$(id -u)
+uid=1000
 docker_file="."
 
 while getopts "h?b:c:t:j:f:" opt; do

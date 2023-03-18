@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGAaroniaRTSAReport.h"
 #include "SWGAirspyHFReport.h"
 #include "SWGAirspyReport.h"
 #include "SWGBladeRF2InputReport.h"
@@ -167,6 +168,9 @@ public:
     SWGXtrxMIMOReport* getXtrxMimoReport();
     void setXtrxMimoReport(SWGXtrxMIMOReport* xtrx_mimo_report);
 
+    SWGAaroniaRTSAReport* getAaroniaSdrReport();
+    void setAaroniaSdrReport(SWGAaroniaRTSAReport* aaronia_sdr_report);
+
 
     virtual bool isSet() override;
 
@@ -266,6 +270,9 @@ private:
 
     SWGXtrxMIMOReport* xtrx_mimo_report;
     bool m_xtrx_mimo_report_isSet;
+
+    SWGAaroniaRTSAReport* aaronia_sdr_report;
+    bool m_aaronia_sdr_report_isSet;
 
 };
 

@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGAaroniaRTSASettings.h"
 #include "SWGAirspyHFSettings.h"
 #include "SWGAirspySettings.h"
 #include "SWGAudioInputSettings.h"
@@ -223,6 +224,9 @@ public:
     SWGXtrxMIMOSettings* getXtrxMimoSettings();
     void setXtrxMimoSettings(SWGXtrxMIMOSettings* xtrx_mimo_settings);
 
+    SWGAaroniaRTSASettings* getAaroniaRtsaSettings();
+    void setAaroniaRtsaSettings(SWGAaroniaRTSASettings* aaronia_rtsa_settings);
+
 
     virtual bool isSet() override;
 
@@ -364,6 +368,9 @@ private:
 
     SWGXtrxMIMOSettings* xtrx_mimo_settings;
     bool m_xtrx_mimo_settings_isSet;
+
+    SWGAaroniaRTSASettings* aaronia_rtsa_settings;
+    bool m_aaronia_rtsa_settings_isSet;
 
 };
 

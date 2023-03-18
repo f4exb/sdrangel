@@ -15,7 +15,7 @@ EOF
 
 image_name="sdrangel/swagger/server"
 image_tag="latest"
-uid=$(id -u)
+uid=1000
 docker_file="."
 
 while getopts "h?t:f:" opt; do

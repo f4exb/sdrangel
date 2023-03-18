@@ -2,6 +2,7 @@ version: '3'
 services:
   swgcodegen:
     image: "sdrangel/swagger/codegen:${IMAGE_CODEGEN_VERSION}"
+    user: "1000:1000"
     container_name: "sdrangel_swgcodegen"
     volumes:
       - "${SDRANGEL_BASE}:/opt/build/sdrangel:rw"
@@ -12,6 +13,7 @@ services:
     tty: true
   swgserver:
     image: "sdrangel/swagger/server:${IMAGE_SERVER_VERSION}"
+    user: "1000:1000"
     container_name: "sdrangel_swgserver"
     volumes:
       - "${SDRANGEL_BASE}:/opt/build/sdrangel:rw"

@@ -1,0 +1,32 @@
+AaroniaRTSASettings:
+  description: AaroniaRTSA
+  properties:
+    gain:
+      type: integer
+    useAGC:
+      description: AGC active (1 for yes, 0 for no)
+      type: integer
+    dcBlock:
+      type: integer
+    centerFrequency:
+      type: integer
+      format: int64
+    serverAddress:
+      description: Distant AaroniaRTSA instance URL or IPv4 address with port
+      type: string
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
+AaroniaRTSAReport:
+  description: AaroniaRTSA
+  properties:
+    status:
+      description: 0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected
+      type: integer

@@ -92,6 +92,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_xtrx_output_report_isSet = false;
     xtrx_mimo_report = nullptr;
     m_xtrx_mimo_report_isSet = false;
+    aaronia_sdr_report = nullptr;
+    m_aaronia_sdr_report_isSet = false;
 }
 
 SWGDeviceReport::~SWGDeviceReport() {
@@ -164,6 +166,8 @@ SWGDeviceReport::init() {
     m_xtrx_output_report_isSet = false;
     xtrx_mimo_report = new SWGXtrxMIMOReport();
     m_xtrx_mimo_report_isSet = false;
+    aaronia_sdr_report = new SWGAaroniaRTSAReport();
+    m_aaronia_sdr_report_isSet = false;
 }
 
 void
@@ -262,6 +266,9 @@ SWGDeviceReport::cleanup() {
     if(xtrx_mimo_report != nullptr) { 
         delete xtrx_mimo_report;
     }
+    if(aaronia_sdr_report != nullptr) { 
+        delete aaronia_sdr_report;
+    }
 }
 
 SWGDeviceReport*
@@ -338,6 +345,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&xtrx_output_report, pJson["xtrxOutputReport"], "SWGXtrxOutputReport", "SWGXtrxOutputReport");
     
     ::SWGSDRangel::setValue(&xtrx_mimo_report, pJson["xtrxMIMOReport"], "SWGXtrxMIMOReport", "SWGXtrxMIMOReport");
+    
+    ::SWGSDRangel::setValue(&aaronia_sdr_report, pJson["aaroniaSDRReport"], "SWGAaroniaRTSAReport", "SWGAaroniaRTSAReport");
     
 }
 
@@ -450,6 +459,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((xtrx_mimo_report != nullptr) && (xtrx_mimo_report->isSet())){
         toJsonValue(QString("xtrxMIMOReport"), xtrx_mimo_report, obj, QString("SWGXtrxMIMOReport"));
+    }
+    if((aaronia_sdr_report != nullptr) && (aaronia_sdr_report->isSet())){
+        toJsonValue(QString("aaroniaSDRReport"), aaronia_sdr_report, obj, QString("SWGAaroniaRTSAReport"));
     }
 
     return obj;
@@ -775,6 +787,16 @@ SWGDeviceReport::setXtrxMimoReport(SWGXtrxMIMOReport* xtrx_mimo_report) {
     this->m_xtrx_mimo_report_isSet = true;
 }
 
+SWGAaroniaRTSAReport*
+SWGDeviceReport::getAaroniaSdrReport() {
+    return aaronia_sdr_report;
+}
+void
+SWGDeviceReport::setAaroniaSdrReport(SWGAaroniaRTSAReport* aaronia_sdr_report) {
+    this->aaronia_sdr_report = aaronia_sdr_report;
+    this->m_aaronia_sdr_report_isSet = true;
+}
+
 
 bool
 SWGDeviceReport::isSet(){
@@ -874,6 +896,9 @@ SWGDeviceReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(xtrx_mimo_report && xtrx_mimo_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(aaronia_sdr_report && aaronia_sdr_report->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

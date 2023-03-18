@@ -1,0 +1,361 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2019 Vort                                                       //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#include <QDebug>
+
+#include <QTime>
+#include <QDateTime>
+#include <QString>
+#include <QMessageBox>
+#include <QFileDialog>
+
+#include "ui_aaroniartsagui.h"
+#include "plugin/pluginapi.h"
+#include "gui/colormapper.h"
+#include "gui/glspectrum.h"
+#include "gui/basicdevicesettingsdialog.h"
+#include "gui/dialogpositioner.h"
+#include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
+#include "util/db.h"
+
+#include "mainwindow.h"
+
+#include "aaroniartsagui.h"
+#include "device/deviceapi.h"
+#include "device/deviceuiset.h"
+
+AaroniaRTSAGui::AaroniaRTSAGui(DeviceUISet *deviceUISet, QWidget* parent) :
+    DeviceGUI(parent),
+    ui(new Ui::AaroniaRTSAGui),
+    m_settings(),
+    m_doApplySettings(true),
+    m_forceSettings(true),
+    m_sampleSource(0),
+    m_tickCount(0),
+    m_lastEngineState(DeviceAPI::StNotStarted)
+{
+    qDebug("AaroniaRTSAGui::AaroniaRTSAGui");
+    m_deviceUISet = deviceUISet;
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    m_sampleSource = m_deviceUISet->m_deviceAPI->getSampleSource();
+
+	m_statusTooltips.push_back("Idle");          // 0
+	m_statusTooltips.push_back("Connecting..."); // 1
+	m_statusTooltips.push_back("Connected");     // 2
+	m_statusTooltips.push_back("Error");         // 3
+	m_statusTooltips.push_back("Disconnected");  // 4
+
+	m_statusColors.push_back("gray");               // Idle
+	m_statusColors.push_back("rgb(232, 212, 35)");  // Connecting (yellow)
+	m_statusColors.push_back("rgb(35, 138, 35)");   // Connected (green)
+	m_statusColors.push_back("rgb(232, 85, 85)");   // Error (red)
+	m_statusColors.push_back("rgb(232, 85, 232)");  // Disconnected (magenta)
+
+    ui->setupUi(getContents());
+    sizeToContents();
+    getContents()->setStyleSheet("#AaroniaRTSAGui { background-color: rgb(64, 64, 64); }");
+    m_helpURL = "plugins/samplesource/aaroniartsa/readme.md";
+    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->centerFrequency->setValueRange(9, 0, 999999999);
+
+    displaySettings();
+    makeUIConnections();
+
+    connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+    connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+    m_statusTimer.start(500);
+
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
+
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+}
+
+AaroniaRTSAGui::~AaroniaRTSAGui()
+{
+    delete ui;
+}
+
+void AaroniaRTSAGui::destroy()
+{
+    delete this;
+}
+
+void AaroniaRTSAGui::resetToDefaults()
+{
+    m_settings.resetToDefaults();
+    displaySettings();
+    m_forceSettings = true;
+    sendSettings();
+}
+
+QByteArray AaroniaRTSAGui::serialize() const
+{
+    return m_settings.serialize();
+}
+
+bool AaroniaRTSAGui::deserialize(const QByteArray& data)
+{
+    if(m_settings.deserialize(data)) {
+        displaySettings();
+        m_forceSettings = true;
+        sendSettings();
+        return true;
+    } else {
+        resetToDefaults();
+        return false;
+    }
+}
+
+void AaroniaRTSAGui::on_startStop_toggled(bool checked)
+{
+    if (m_doApplySettings)
+    {
+		AaroniaRTSAInput::MsgStartStop *message = AaroniaRTSAInput::MsgStartStop::create(checked);
+        m_sampleSource->getInputMessageQueue()->push(message);
+    }
+}
+
+void AaroniaRTSAGui::on_centerFrequency_changed(quint64 value)
+{
+    m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
+    sendSettings();
+}
+
+void AaroniaRTSAGui::on_serverAddress_returnPressed()
+{
+	on_serverAddressApplyButton_clicked();
+}
+
+void AaroniaRTSAGui::on_serverAddressApplyButton_clicked()
+{
+	QString serverAddress = ui->serverAddress->text();
+    QUrl url(serverAddress);
+
+    if (QStringList{"ws", "wss", "http", "https"}.contains(url.scheme())) {
+        m_settings.m_serverAddress = QString("%1:%2").arg(url.host()).arg(url.port());
+    } else {
+        m_settings.m_serverAddress = serverAddress;
+    }
+
+    m_settingsKeys.append("serverAddress");
+	sendSettings();
+}
+
+void AaroniaRTSAGui::on_dcBlock_toggled(bool checked)
+{
+	m_settings.m_dcBlock = checked;
+    m_settingsKeys.append("dcBlock");
+	sendSettings();
+}
+
+void AaroniaRTSAGui::on_agc_toggled(bool checked)
+{
+	m_settings.m_useAGC = checked;
+    m_settingsKeys.append("useAGC");
+	sendSettings();
+}
+
+void AaroniaRTSAGui::on_gain_valueChanged(int value)
+{
+	m_settings.m_gain = value;
+	ui->gainText->setText(QString::number(m_settings.m_gain) + " dB");
+    m_settingsKeys.append("gain");
+	sendSettings();
+}
+
+void AaroniaRTSAGui::displaySettings()
+{
+    blockApplySettings(true);
+
+    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+	ui->serverAddress->setText(m_settings.m_serverAddress);
+	ui->gain->setValue(m_settings.m_gain);
+	ui->gainText->setText(QString::number(m_settings.m_gain) + " dB");
+	ui->agc->setChecked(m_settings.m_useAGC);
+    ui->dcBlock->setChecked(m_settings.m_dcBlock);
+
+    blockApplySettings(false);
+}
+
+void AaroniaRTSAGui::sendSettings()
+{
+    if (!m_updateTimer.isActive()) {
+        m_updateTimer.start(100);
+    }
+}
+
+void AaroniaRTSAGui::updateHardware()
+{
+    if (m_doApplySettings)
+    {
+		AaroniaRTSAInput::MsgConfigureAaroniaRTSA* message = AaroniaRTSAInput::MsgConfigureAaroniaRTSA::create(m_settings, m_settingsKeys, m_forceSettings);
+        m_sampleSource->getInputMessageQueue()->push(message);
+        m_forceSettings = false;
+        m_settingsKeys.clear();
+        m_updateTimer.stop();
+    }
+}
+
+void AaroniaRTSAGui::updateStatus()
+{
+    int state = m_deviceUISet->m_deviceAPI->state();
+
+    if (m_lastEngineState != state)
+    {
+        switch (state)
+        {
+            case DeviceAPI::StNotStarted:
+                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                break;
+            case DeviceAPI::StIdle:
+                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
+                break;
+            case DeviceAPI::StRunning:
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                break;
+            case DeviceAPI::StError:
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                break;
+            default:
+                break;
+        }
+
+        m_lastEngineState = state;
+    }
+}
+
+bool AaroniaRTSAGui::handleMessage(const Message& message)
+{
+    if (AaroniaRTSAInput::MsgConfigureAaroniaRTSA::match(message))
+    {
+        qDebug("AaroniaRTSAGui::handleMessage: MsgConfigureAaroniaRTSA");
+        const AaroniaRTSAInput::MsgConfigureAaroniaRTSA& cfg = (AaroniaRTSAInput::MsgConfigureAaroniaRTSA&) message;
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
+        displaySettings();
+        return true;
+    }
+    else if (AaroniaRTSAInput::MsgStartStop::match(message))
+    {
+        qDebug("AaroniaRTSAGui::handleMessage: MsgStartStop");
+		AaroniaRTSAInput::MsgStartStop& notif = (AaroniaRTSAInput::MsgStartStop&) message;
+        blockApplySettings(true);
+        ui->startStop->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
+	else if (AaroniaRTSAInput::MsgSetStatus::match(message))
+	{
+		qDebug("AaroniaRTSAGui::handleMessage: MsgSetStatus");
+		AaroniaRTSAInput::MsgSetStatus& notif = (AaroniaRTSAInput::MsgSetStatus&) message;
+		int status = notif.getStatus();
+		ui->statusIndicator->setToolTip(m_statusTooltips[status]);
+		ui->statusIndicator->setStyleSheet("QLabel { background-color: " +
+			m_statusColors[status] + "; border-radius: 7px; }");
+		return true;
+	}
+    else
+    {
+        return false;
+    }
+}
+
+void AaroniaRTSAGui::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        if (DSPSignalNotification::match(*message))
+        {
+            DSPSignalNotification* notif = (DSPSignalNotification*) message;
+            m_deviceSampleRate = notif->getSampleRate();
+            m_deviceCenterFrequency = notif->getCenterFrequency();
+            qDebug("AaroniaRTSAGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu",
+                    notif->getSampleRate(),
+                    notif->getCenterFrequency());
+            updateSampleRateAndFrequency();
+
+            delete message;
+        }
+        else
+        {
+            if (handleMessage(*message))
+            {
+                delete message;
+            }
+        }
+    }
+}
+
+void AaroniaRTSAGui::updateSampleRateAndFrequency()
+{
+    m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+	ui->deviceRateText->setText(tr("%1M").arg((float)m_deviceSampleRate / 1000 / 1000));
+}
+
+void AaroniaRTSAGui::openDeviceSettingsDialog(const QPoint& p)
+{
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+
+        dialog.move(p);
+        new DialogPositioner(&dialog, false);
+        dialog.exec();
+
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIDeviceIndex");
+
+        sendSettings();
+    }
+
+    resetContextMenuType();
+}
+
+void AaroniaRTSAGui::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AaroniaRTSAGui::on_startStop_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &AaroniaRTSAGui::on_centerFrequency_changed);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &AaroniaRTSAGui::on_gain_valueChanged);
+    QObject::connect(ui->agc, &QToolButton::toggled, this, &AaroniaRTSAGui::on_agc_toggled);
+    QObject::connect(ui->serverAddress, &QLineEdit::returnPressed, this, &AaroniaRTSAGui::on_serverAddress_returnPressed);
+    QObject::connect(ui->serverAddressApplyButton, &QPushButton::clicked, this, &AaroniaRTSAGui::on_serverAddressApplyButton_clicked);
+    QObject::connect(ui->dcBlock, &ButtonSwitch::toggled, this, &AaroniaRTSAGui::on_dcBlock_toggled);
+}
