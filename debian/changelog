@@ -1,3 +1,21 @@
+sdrangel (7.11.0-1) unstable; urgency=medium
+
+  - New RTTY and Navtex demods. PR #1610
+  - Noise figure: Fix saving of power on command. PR #1604
+  - Disable MSAA for 2D maps by default. PR #1604
+  - Fix Heat Map Display Chart Seg Fault. Fixes #1606. PR #1607
+  - Prevent MDI scrolling when trying to zoom in on spectrum PR #1611
+  - VOR Demod: Improve filtering for voice over ident. Issue #1590. PR #1615
+  - Fix DSD Demod crash on exit Fixes #1617. PR #1618
+  - Fix updateVORs so it doesn't delete selected VORs. Issue #1590. PR #1619
+  - Set timer to be precise before calling start, otherwise it is ignored on Windows. PR #1626
+  - Audio inout: added DC block and IQ imbalance
+  - Audio input: Added Fc control
+  - MainWindow: disconnect prior to connect in device re-numeration. Fixes #1620
+  - Fixing errors when compiling using qt6. Fixes #1625. PR #1629
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 18 Mar 2023 12:41:20 +0100
+
 sdrangel (7.10.0-1) unstable; urgency=medium
 
   - Copy fftw3f and libusb dlls to bin directory. PR #1503
