@@ -19,9 +19,12 @@
 #define PLUGINS_CHANNELRX_DEMODFT8_FT8DEMODSETTINGSDIALOG_H_
 
 #include "ui_ft8demodsettingsdialog.h"
-
-class FT8DemodSettings;
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+#include <QStringList>
+#else
 class QStringList;
+#endif
+class FT8DemodSettings;
 class QTableWidgetItem;
 
 class FT8DemodSettingsDialog : public QDialog {

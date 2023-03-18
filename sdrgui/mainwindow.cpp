@@ -174,10 +174,12 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
     connect(screen(), &QScreen::orientationChanged, this, &MainWindow::orientationChanged);
+    #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     screen()->setOrientationUpdateMask(Qt::PortraitOrientation
                                       | Qt::LandscapeOrientation
                                       | Qt::InvertedPortraitOrientation
                                       | Qt::InvertedLandscapeOrientation);
+    #endif
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(1000);

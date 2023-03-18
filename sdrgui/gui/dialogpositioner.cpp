@@ -29,10 +29,12 @@ DialogPositioner::DialogPositioner(QWidget *dialog, bool center) :
     m_center(center)
 {
     connect(dialog->screen(), &QScreen::orientationChanged, this, &DialogPositioner::orientationChanged);
+    #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     dialog->screen()->setOrientationUpdateMask(Qt::PortraitOrientation
                                                 | Qt::LandscapeOrientation
                                                 | Qt::InvertedPortraitOrientation
                                                 | Qt::InvertedLandscapeOrientation);
+    #endif
     if (m_center) {
         DialogPositioner::centerDialog(m_dialog);
     } else {

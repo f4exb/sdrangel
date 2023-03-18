@@ -358,7 +358,9 @@ void MainCore::initPosition()
     if (m_positionSource)
     {
         connect(m_positionSource, &QGeoPositionInfoSource::positionUpdated, this, &MainCore::positionUpdated);
+        #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
         connect(m_positionSource, &QGeoPositionInfoSource::updateTimeout, this, &MainCore::positionUpdateTimeout);
+        #endif
         connect(m_positionSource, qOverload<QGeoPositionInfoSource::Error>(&QGeoPositionInfoSource::error), this, &MainCore::positionError);
         m_position = m_positionSource->lastKnownPosition();
         m_positionSource->setUpdateInterval(1000);
@@ -398,6 +400,12 @@ void MainCore::positionUpdateTimeout()
 
 void MainCore::positionError(QGeoPositionInfoSource::Error positioningError)
 {
+    #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+    if (positioningError == 4){
+        positionUpdateTimeout();
+        return;
+    }
+    #endif
     qWarning() << "MainCore::positionError: " << positioningError;
 }
 
