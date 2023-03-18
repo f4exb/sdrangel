@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/stale@v4
       with:
-          days-before-stale: 60
+          days-before-stale: 40
           days-before-close: 5       
           stale-issue-message: 'This issue is going to be closed due to inactivity'
           stale-pr-message: 'This PR is going to be closed due to inactivity'
