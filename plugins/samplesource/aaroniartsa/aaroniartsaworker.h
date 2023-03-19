@@ -40,22 +40,25 @@ class AaroniaRTSAWorker : public QObject {
 	Q_OBJECT
 
 public:
-	class MsgReportSampleRate : public Message {
+	class MsgReportSampleRateAndFrequency : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
 		int getSampleRate() const { return m_sampleRate; }
+        quint64 getCenterFrequency() const { return m_centerFrequency; }
 
-		static MsgReportSampleRate* create(int sampleRate) {
-			return new MsgReportSampleRate(sampleRate);
+		static MsgReportSampleRateAndFrequency* create(int sampleRate, quint64 centerFrequency) {
+			return new MsgReportSampleRateAndFrequency(sampleRate, centerFrequency);
 		}
 
 	private:
 		int m_sampleRate;
+        quint64 m_centerFrequency;
 
-		MsgReportSampleRate(int sampleRate) :
+		MsgReportSampleRateAndFrequency(int sampleRate, qint64 centerFrequency) :
 			Message(),
-			m_sampleRate(sampleRate)
+			m_sampleRate(sampleRate),
+            m_centerFrequency(centerFrequency)
 		{ }
 	};
 
@@ -70,12 +73,9 @@ private:
 	SampleSinkFifo* m_sampleFifo;
 
 	QString m_serverAddress;
-	uint64_t m_centerFrequency;
+	quint64 m_centerFrequency;
     int m_sampleRate;
     MessageQueue *m_inputMessageQueue;
-
-	uint32_t m_gain;
-	bool m_useAGC;
 
     int m_status; //!< See GUI for status number detail
 

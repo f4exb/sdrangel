@@ -16,10 +16,13 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <boost/endian/conversion.hpp>
+
 #include "util/messagequeue.h"
+#include "dsp/dspcommands.h"
+
 #include "aaroniartsaworker.h"
 
-MESSAGE_CLASS_DEFINITION(AaroniaRTSAWorker::MsgReportSampleRate, Message)
+MESSAGE_CLASS_DEFINITION(AaroniaRTSAWorker::MsgReportSampleRateAndFrequency, Message)
 
 AaroniaRTSAWorker::AaroniaRTSAWorker(SampleSinkFifo* sampleFifo) :
 	QObject(),
@@ -27,28 +30,11 @@ AaroniaRTSAWorker::AaroniaRTSAWorker(SampleSinkFifo* sampleFifo) :
 	m_samplesBuf(),
 	m_sampleFifo(sampleFifo),
 	m_centerFrequency(1450000),
-	m_sampleRate(10.0e6),
+	m_sampleRate(10000000),
     m_inputMessageQueue(nullptr),
-	m_gain(20),
-	m_useAGC(true),
 	m_status(0),
 	m_convertBuffer(64e6)
 {
-	/*connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
-
-	m_webSocket.setParent(this);
-	connect(&m_webSocket, &QWebSocket::connected,
-		this, &AaroniaRTSAWorker::onConnected);
-	connect(&m_webSocket, &QWebSocket::binaryMessageReceived,
-		this, &AaroniaRTSAWorker::onBinaryMessageReceived);
-	connect(&m_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
-		this, &AaroniaRTSAWorker::onSocketError);
-    connect(&m_webSocket, &QWebSocket::disconnected,
-        this, &AaroniaRTSAWorker::onDisconnected);
-
-*/
-
-
 	// Initialize network manager
 	mNetworkAccessManager = new QNetworkAccessManager(this);
 
@@ -65,8 +51,6 @@ AaroniaRTSAWorker::AaroniaRTSAWorker(SampleSinkFifo* sampleFifo) :
 
 	mPrevTime = 0;
 	mPacketSamples = 0;
-
-
 }
 
 void AaroniaRTSAWorker::onSocketError(QAbstractSocket::SocketError error)
@@ -146,10 +130,10 @@ void AaroniaRTSAWorker::onReadyRead()
 	QTextStream	qout(stdout);
 
 	// read as many bytes as possible into input buffer
-	qint64		n = mReply->bytesAvailable();
-	qint64		bs = mBuffer.size();
+	qint64 n = mReply->bytesAvailable();
+	qint64 bs = mBuffer.size();
 	mBuffer.resize(bs + n);
-	qint64		done = mReply->read(mBuffer.data() + bs, n);
+	qint64 done = mReply->read(mBuffer.data() + bs, n);
 	mBuffer.resize(bs + done);
 
 	// intialize parsing
@@ -163,10 +147,10 @@ void AaroniaRTSAWorker::onReadyRead()
 		if (mPacketSamples)
 		{
 			// enough samples
-			if (offset + mPacketSamples * 2 * sizeof(float) <= avail)
+			if (offset + mPacketSamples * 2 * sizeof(float) <= (unsigned long) avail)
 			{
 				// do something with the IQ data
-				const float	*	sp = (const float * )(mBuffer.constData() + offset);
+				const float	*sp = (const float *)(mBuffer.constData() + offset);
 
 				 SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -193,28 +177,31 @@ void AaroniaRTSAWorker::onReadyRead()
 				mPacketSamples = 0;
 			}
 			else
+            {
 				break;
+            }
 		}
 		else
 		{
 			// is there a complete JSON metadata object in the buffer
 			int	split = mBuffer.indexOf('\x1e', offset);
-			if (split != -1)
+
+            if (split != -1)
 			{
 				// Extract it
-				QByteArray			data	=	mBuffer.mid(offset, split - offset);
+				QByteArray data	= mBuffer.mid(offset, split - offset);
 				offset = split + 1;
 
 				// Parse the JSON data
 
 				QJsonParseError	error;
-				QJsonDocument	jdoc = QJsonDocument::fromJson(data, &error);
+				QJsonDocument jdoc = QJsonDocument::fromJson(data, &error);
 
 				if (error.error == QJsonParseError::NoError)
 				{
 					// Extract fields of interest
 					//double	startTime = jdoc["startTime"].toDouble(), endTime = jdoc["endTime"].toDouble();
-					int		samples = jdoc["samples"].toInt();
+					int	samples = jdoc["samples"].toInt();
 
 					// Dump packet loss
 					//if (startTime != mPrevTime)
@@ -223,6 +210,23 @@ void AaroniaRTSAWorker::onReadyRead()
 					// Switch to data phase
 					//mPrevTime = endTime;
 					mPacketSamples = samples;
+                    // qDebug() << jdoc.toJson();
+                    quint64 endFreq = jdoc["endFrequency"].toDouble();
+                    quint64 startFreq = jdoc["startFrequency"].toDouble();
+                    int bw = endFreq - startFreq;
+                    quint64 midFreq = (endFreq + startFreq) / 2;
+
+                    if ((bw != m_sampleRate) || (midFreq != m_centerFrequency))
+                    {
+                        if (m_inputMessageQueue)
+                        {
+                            MsgReportSampleRateAndFrequency *msg = MsgReportSampleRateAndFrequency::create(bw, midFreq);
+                            m_inputMessageQueue->push(msg);
+                        }
+
+                        m_sampleRate = bw;
+                        m_centerFrequency = midFreq;
+                    }
 				}
 				else
 				{
@@ -231,7 +235,9 @@ void AaroniaRTSAWorker::onReadyRead()
 				}
 			}
 			else
+            {
 				break;
+            }
 		}
 	}
 

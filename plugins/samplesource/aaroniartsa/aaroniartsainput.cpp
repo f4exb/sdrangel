@@ -43,7 +43,8 @@ MESSAGE_CLASS_DEFINITION(AaroniaRTSAInput::MsgSetStatus, Message)
 
 AaroniaRTSAInput::AaroniaRTSAInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-	m_sampleRate(2.0e5),
+	m_sampleRate(10000000),
+    m_centerFrequency(1450000),
 	m_settings(),
 	m_aaroniaRTSAWorker(nullptr),
     m_aaroniaRTSAWorkerThread(nullptr),
@@ -220,18 +221,21 @@ bool AaroniaRTSAInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (AaroniaRTSAWorker::MsgReportSampleRate::match(message))
+    else if (AaroniaRTSAWorker::MsgReportSampleRateAndFrequency::match(message))
     {
-        AaroniaRTSAWorker::MsgReportSampleRate& report = (AaroniaRTSAWorker::MsgReportSampleRate&) message;
+        AaroniaRTSAWorker::MsgReportSampleRateAndFrequency& report = (AaroniaRTSAWorker::MsgReportSampleRateAndFrequency&) message;
         m_sampleRate = report.getSampleRate();
-        qDebug() << "AaroniaRTSAInput::handleMessage: AaroniaRTSAWorker::MsgReportSampleRate: m_sampleRate: " << m_sampleRate;
+        m_centerFrequency = report.getCenterFrequency();
+        qDebug() << "AaroniaRTSAInput::handleMessage: AaroniaRTSAWorker::MsgReportSampleRateAndFrequency:"
+            << " m_sampleRate: " << m_sampleRate
+            << " m-centerFrequency" << m_centerFrequency;
 
         if (!m_sampleFifo.setSize(m_sampleRate * 2)) {
             qCritical("AaroniaRTSAInput::AaroniaRTSAInput: Could not allocate SampleFifo");
         }
 
 		DSPSignalNotification *notif = new DSPSignalNotification(
-			m_sampleRate, m_settings.m_centerFrequency);
+			m_sampleRate, m_centerFrequency);
 		m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
         return true;

@@ -156,6 +156,7 @@ private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
     int m_sampleRate;
+    quint64 m_centerFrequency;
 	AaroniaRTSASettings m_settings;
 	AaroniaRTSAWorker* m_aaroniaRTSAWorker;
 	QThread *m_aaroniaRTSAWorkerThread;
