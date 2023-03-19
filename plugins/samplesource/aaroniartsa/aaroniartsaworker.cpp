@@ -69,18 +69,6 @@ AaroniaRTSAWorker::AaroniaRTSAWorker(SampleSinkFifo* sampleFifo) :
 
 }
 
-void AaroniaRTSAWorker::onConnected()
-{
-	m_webSocket.sendTextMessage("SET auth t=rtsa p=#");
-}
-
-void AaroniaRTSAWorker::onDisconnected()
-{
-    qDebug("AaroniaRTSAWorker::onDisconnected");
-    m_status = 4;
-	emit updateStatus(4);
-}
-
 void AaroniaRTSAWorker::onSocketError(QAbstractSocket::SocketError error)
 {
 	(void) error;
@@ -101,73 +89,6 @@ void AaroniaRTSAWorker::sendCenterFrequency()
 
 }
 
-void AaroniaRTSAWorker::sendGain()
-{
-	if (!m_webSocket.isValid())
-		return;
-
-	QString msg("SET agc=");
-	msg.append(m_useAGC ? "1" : "0");
-	msg.append(" hang=0 thresh=-130 slope=6 decay=1000 manGain=");
-	msg.append(QString::number(m_gain));
-	m_webSocket.sendTextMessage(msg);
-}
-
-void AaroniaRTSAWorker::onBinaryMessageReceived(const QByteArray &message)
-{
-	if (message[0] == 'M' && message[1] == 'S' && message[2] == 'G')
-	{
-		QStringList al = QString::fromUtf8(message).split(' ');
-
-        if ((al.size() > 2) && al[2].startsWith("audio_rate="))
-        {
-            QStringList rateKeyVal = al[2].split('=');
-
-            if (rateKeyVal.size() > 1)
-            {
-                bool ok;
-                int sampleRate = rateKeyVal[1].toInt(&ok);
-
-                if (ok) {
-                    m_sampleRate = sampleRate;
-                }
-
-                qDebug("AaroniaRTSAWorker::onBinaryMessageReceived: sample rate: %d", m_sampleRate);
-
-                if (m_inputMessageQueue) {
-                    m_inputMessageQueue->push(MsgReportSampleRate::create(m_sampleRate));
-                }
-
-                QString msg = QString("SET AR OK in=%1 out=48000").arg(m_sampleRate);
-                m_webSocket.sendTextMessage(msg);
-                m_webSocket.sendTextMessage("SERVER DE CLIENT RtsaAngel SND");
-                sendGain();
-                sendCenterFrequency();
-                m_timer.start(5000);
-                m_status = 2;
-                emit updateStatus(2);
-            }
-        }
-	}
-	else if (message[0] == 'S' && message[1] == 'N' && message[2] == 'D')
-	{
-		int dataOffset = 20;
-		int sampleCount = 512;
-		const int16_t* messageSamples = (const int16_t*)(message.constData() + dataOffset);
-
-		m_samplesBuf.clear();
-		for (int i = 0; i < sampleCount; i++)
-		{
-			m_samplesBuf.push_back(Sample(
-				boost::endian::endian_reverse(messageSamples[i * 2]) << (SDR_RX_SAMP_SZ - 16),
-				boost::endian::endian_reverse(messageSamples[i * 2 + 1]) << (SDR_RX_SAMP_SZ - 16)
-			));
-		}
-
-		m_sampleFifo->write(m_samplesBuf.begin(), m_samplesBuf.end());
-	}
-}
-
 void AaroniaRTSAWorker::onCenterFrequencyChanged(quint64 centerFrequency)
 {
 	if (m_centerFrequency == centerFrequency)
@@ -175,17 +96,6 @@ void AaroniaRTSAWorker::onCenterFrequencyChanged(quint64 centerFrequency)
 
 	m_centerFrequency = centerFrequency;
 	sendCenterFrequency();
-}
-
-void AaroniaRTSAWorker::onGainChanged(quint32 gain, bool useAGC)
-{
-	if (m_gain == gain && m_useAGC == useAGC)
-		return;
-
-	m_gain = gain;
-	m_useAGC = useAGC;
-
-	sendGain();
 }
 
 void AaroniaRTSAWorker::onServerAddressChanged(QString serverAddress)
@@ -209,11 +119,7 @@ void AaroniaRTSAWorker::onServerAddressChanged(QString serverAddress)
 
 void AaroniaRTSAWorker::tick()
 {
-	//m_webSocket.sendTextMessage("SET keepalive");
 }
-
-
-
 
 /**************************CPY ********************************* */
 
@@ -250,7 +156,7 @@ void AaroniaRTSAWorker::onReadyRead()
 	int	offset = 0;
 	int	avail = mBuffer.size();
 
-	// cosume all input data if possible
+	// consume all input data if possible
 	while (offset < avail)
 	{
 		// any samples so far (not looking for meta data)

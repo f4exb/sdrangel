@@ -1,13 +1,6 @@
 AaroniaRTSASettings:
   description: AaroniaRTSA
   properties:
-    gain:
-      type: integer
-    useAGC:
-      description: AGC active (1 for yes, 0 for no)
-      type: integer
-    dcBlock:
-      type: integer
     centerFrequency:
       type: integer
       format: int64

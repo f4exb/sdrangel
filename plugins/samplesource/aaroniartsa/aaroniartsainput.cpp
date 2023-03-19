@@ -110,7 +110,6 @@ bool AaroniaRTSAInput::start()
 
 	connect(this, &AaroniaRTSAInput::setWorkerCenterFrequency, m_aaroniaRTSAWorker, &AaroniaRTSAWorker::onCenterFrequencyChanged);
 	connect(this, &AaroniaRTSAInput::setWorkerServerAddress, m_aaroniaRTSAWorker, &AaroniaRTSAWorker::onServerAddressChanged);
-	connect(this, &AaroniaRTSAInput::setWorkerGain, m_aaroniaRTSAWorker, &AaroniaRTSAWorker::onGainChanged);
 	connect(m_aaroniaRTSAWorker, &AaroniaRTSAWorker::updateStatus, this, &AaroniaRTSAInput::setWorkerStatus);
 
 	m_aaroniaRTSAWorkerThread->start();
@@ -283,16 +282,6 @@ bool AaroniaRTSAInput::applySettings(const AaroniaRTSASettings& settings, const 
 		emit setWorkerServerAddress(settings.m_serverAddress);
     }
 
-	if (settingsKeys.contains("gain") ||
-		settingsKeys.contains("useAGC") || force)
-	{
-		emit setWorkerGain(settings.m_gain, settings.m_useAGC);
-	}
-
-    if (settingsKeys.contains("dcBlock")) {
-        m_deviceAPI->configureCorrections(settings.m_dcBlock, false);
-    }
-
     if (settingsKeys.contains("centerFrequency") || force)
     {
         emit setWorkerCenterFrequency(settings.m_centerFrequency);
@@ -387,15 +376,6 @@ void AaroniaRTSAInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
-    if (deviceSettingsKeys.contains("gain")) {
-		settings.m_gain = response.getAaroniaRtsaSettings()->getGain();
-    }
-    if (deviceSettingsKeys.contains("useAGC")) {
-		settings.m_useAGC = response.getAaroniaRtsaSettings()->getUseAgc();
-    }
-    if (deviceSettingsKeys.contains("dcBlock")) {
-		settings.m_dcBlock = response.getAaroniaRtsaSettings()->getDcBlock() != 0;
-    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
 		settings.m_centerFrequency = response.getAaroniaRtsaSettings()->getCenterFrequency();
     }
@@ -429,9 +409,6 @@ int AaroniaRTSAInput::webapiReportGet(
 
 void AaroniaRTSAInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AaroniaRTSASettings& settings)
 {
-	response.getAaroniaRtsaSettings()->setGain(settings.m_gain);
-	response.getAaroniaRtsaSettings()->setUseAgc(settings.m_useAGC ? 1 : 0);
-	response.getAaroniaRtsaSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
 	response.getAaroniaRtsaSettings()->setCenterFrequency(settings.m_centerFrequency);
 
 	if (response.getAaroniaRtsaSettings()->getServerAddress()) {
@@ -468,15 +445,6 @@ void AaroniaRTSAInput::webapiReverseSendSettings(const QList<QString>& deviceSet
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
-    if (deviceSettingsKeys.contains("gain")) {
-        swgAaroniaRTSASettings->setGain(settings.m_gain);
-    }
-    if (deviceSettingsKeys.contains("useAGC")) {
-        swgAaroniaRTSASettings->setUseAgc(settings.m_useAGC ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("dcBlock") || force) {
-        swgAaroniaRTSASettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
-    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgAaroniaRTSASettings->setCenterFrequency(settings.m_centerFrequency);
     }

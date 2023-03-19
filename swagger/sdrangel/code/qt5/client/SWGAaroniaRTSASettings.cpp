@@ -28,12 +28,6 @@ SWGAaroniaRTSASettings::SWGAaroniaRTSASettings(QString* json) {
 }
 
 SWGAaroniaRTSASettings::SWGAaroniaRTSASettings() {
-    gain = 0;
-    m_gain_isSet = false;
-    use_agc = 0;
-    m_use_agc_isSet = false;
-    dc_block = 0;
-    m_dc_block_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     server_address = nullptr;
@@ -54,12 +48,6 @@ SWGAaroniaRTSASettings::~SWGAaroniaRTSASettings() {
 
 void
 SWGAaroniaRTSASettings::init() {
-    gain = 0;
-    m_gain_isSet = false;
-    use_agc = 0;
-    m_use_agc_isSet = false;
-    dc_block = 0;
-    m_dc_block_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     server_address = new QString("");
@@ -76,9 +64,6 @@ SWGAaroniaRTSASettings::init() {
 
 void
 SWGAaroniaRTSASettings::cleanup() {
-
-
-
 
     if(server_address != nullptr) { 
         delete server_address;
@@ -102,12 +87,6 @@ SWGAaroniaRTSASettings::fromJson(QString &json) {
 
 void
 SWGAaroniaRTSASettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&gain, pJson["gain"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&use_agc, pJson["useAGC"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&server_address, pJson["serverAddress"], "QString", "QString");
@@ -136,15 +115,6 @@ SWGAaroniaRTSASettings::asJson ()
 QJsonObject*
 SWGAaroniaRTSASettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_gain_isSet){
-        obj->insert("gain", QJsonValue(gain));
-    }
-    if(m_use_agc_isSet){
-        obj->insert("useAGC", QJsonValue(use_agc));
-    }
-    if(m_dc_block_isSet){
-        obj->insert("dcBlock", QJsonValue(dc_block));
-    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -165,36 +135,6 @@ SWGAaroniaRTSASettings::asJsonObject() {
     }
 
     return obj;
-}
-
-qint32
-SWGAaroniaRTSASettings::getGain() {
-    return gain;
-}
-void
-SWGAaroniaRTSASettings::setGain(qint32 gain) {
-    this->gain = gain;
-    this->m_gain_isSet = true;
-}
-
-qint32
-SWGAaroniaRTSASettings::getUseAgc() {
-    return use_agc;
-}
-void
-SWGAaroniaRTSASettings::setUseAgc(qint32 use_agc) {
-    this->use_agc = use_agc;
-    this->m_use_agc_isSet = true;
-}
-
-qint32
-SWGAaroniaRTSASettings::getDcBlock() {
-    return dc_block;
-}
-void
-SWGAaroniaRTSASettings::setDcBlock(qint32 dc_block) {
-    this->dc_block = dc_block;
-    this->m_dc_block_isSet = true;
 }
 
 qint64
@@ -262,15 +202,6 @@ bool
 SWGAaroniaRTSASettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_gain_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_use_agc_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_dc_block_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

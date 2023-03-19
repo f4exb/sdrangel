@@ -19,7 +19,6 @@
 #define _AARONIARTSA_AARONIARTSAWORKER_H_
 
 #include <QTimer>
-#include <QtWebSockets/QtWebSockets>
 
 #include "dsp/samplesinkfifo.h"
 #include "util/message.h"
@@ -66,7 +65,6 @@ public:
 
 private:
 	QTimer m_timer;
-	QWebSocket m_webSocket;
 
 	SampleVector m_samplesBuf;
 	SampleSinkFifo* m_sampleFifo;
@@ -82,7 +80,6 @@ private:
     int m_status; //!< See GUI for status number detail
 
 	void sendCenterFrequency();
-	void sendGain();
 
 
 	// QT htttp client
@@ -113,20 +110,13 @@ signals:
 public slots:
 	void onCenterFrequencyChanged(quint64 centerFrequency);
 	void onServerAddressChanged(QString serverAddress);
-	void onGainChanged(quint32 gain, bool useAGC);
 
 private slots:
-	void onConnected();
-    void onDisconnected();
-	void onBinaryMessageReceived(const QByteArray &message);
 	void onSocketError(QAbstractSocket::SocketError error);
 
 	void onError(QNetworkReply::NetworkError code);
 	void onFinished(void);
 	void onReadyRead(void);
-
-
-
     void tick();
 };
 

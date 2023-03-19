@@ -176,7 +176,6 @@ signals:
 	void stopWorker();
 	void setWorkerCenterFrequency(quint64 centerFrequency);
 	void setWorkerServerAddress(QString serverAddress);
-	void setWorkerGain(quint32 gain, bool useAGC);
 
 private slots:
 	void setWorkerStatus(int status);

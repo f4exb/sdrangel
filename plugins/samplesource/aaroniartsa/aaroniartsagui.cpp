@@ -159,38 +159,12 @@ void AaroniaRTSAGui::on_serverAddressApplyButton_clicked()
 	sendSettings();
 }
 
-void AaroniaRTSAGui::on_dcBlock_toggled(bool checked)
-{
-	m_settings.m_dcBlock = checked;
-    m_settingsKeys.append("dcBlock");
-	sendSettings();
-}
-
-void AaroniaRTSAGui::on_agc_toggled(bool checked)
-{
-	m_settings.m_useAGC = checked;
-    m_settingsKeys.append("useAGC");
-	sendSettings();
-}
-
-void AaroniaRTSAGui::on_gain_valueChanged(int value)
-{
-	m_settings.m_gain = value;
-	ui->gainText->setText(QString::number(m_settings.m_gain) + " dB");
-    m_settingsKeys.append("gain");
-	sendSettings();
-}
-
 void AaroniaRTSAGui::displaySettings()
 {
     blockApplySettings(true);
 
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->serverAddress->setText(m_settings.m_serverAddress);
-	ui->gain->setValue(m_settings.m_gain);
-	ui->gainText->setText(QString::number(m_settings.m_gain) + " dB");
-	ui->agc->setChecked(m_settings.m_useAGC);
-    ui->dcBlock->setChecked(m_settings.m_dcBlock);
 
     blockApplySettings(false);
 }
@@ -353,9 +327,6 @@ void AaroniaRTSAGui::makeUIConnections()
 {
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AaroniaRTSAGui::on_startStop_toggled);
     QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &AaroniaRTSAGui::on_centerFrequency_changed);
-    QObject::connect(ui->gain, &QSlider::valueChanged, this, &AaroniaRTSAGui::on_gain_valueChanged);
-    QObject::connect(ui->agc, &QToolButton::toggled, this, &AaroniaRTSAGui::on_agc_toggled);
     QObject::connect(ui->serverAddress, &QLineEdit::returnPressed, this, &AaroniaRTSAGui::on_serverAddress_returnPressed);
     QObject::connect(ui->serverAddressApplyButton, &QPushButton::clicked, this, &AaroniaRTSAGui::on_serverAddressApplyButton_clicked);
-    QObject::connect(ui->dcBlock, &ButtonSwitch::toggled, this, &AaroniaRTSAGui::on_dcBlock_toggled);
 }

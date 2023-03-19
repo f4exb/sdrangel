@@ -42,15 +42,6 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAaroniaRTSASettings* fromJson(QString &jsonString) override;
 
-    qint32 getGain();
-    void setGain(qint32 gain);
-
-    qint32 getUseAgc();
-    void setUseAgc(qint32 use_agc);
-
-    qint32 getDcBlock();
-    void setDcBlock(qint32 dc_block);
-
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);
 
@@ -73,15 +64,6 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 gain;
-    bool m_gain_isSet;
-
-    qint32 use_agc;
-    bool m_use_agc_isSet;
-
-    qint32 dc_block;
-    bool m_dc_block_isSet;
-
     qint64 center_frequency;
     bool m_center_frequency_isSet;
 
