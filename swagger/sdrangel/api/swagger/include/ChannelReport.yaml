@@ -55,6 +55,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/RTTYDemod.yaml#/RTTYDemodReport"
     HeatMapReport:
       $ref: "http://swgserver:8081/api/swagger/include/HeatMap.yaml#/HeatMapReport"
+    ILSDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/ILSDemod.yaml#/ILSDemodReport"
     M17DemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/M17Demod.yaml#/M17DemodReport"
     M17ModReport:

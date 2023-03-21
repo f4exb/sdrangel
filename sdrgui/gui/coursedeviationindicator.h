@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,23 +15,45 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
-#define SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
+#ifndef SDRGUI_GUI_COURSEDEVIATIONINDICATOR_H
+#define SDRGUI_GUI_COURSEDEVIATIONINDICATOR_H
 
-#include <QDateTime>
+#include <QWidget>
 
 #include "export.h"
 
-class Feature;
+// Aircraft Course Deviation Indicator (CDI)
+class SDRGUI_API CourseDeviationIndicator : public QWidget {
+    Q_OBJECT
 
-class SDRBASE_API FeatureWebAPIUtils
-{
 public:
-    static bool mapFind(const QString& target, int featureSetIndex=-1, int featureIndex=-1);
-    static bool mapSetDateTime(const QDateTime& dateTime, int featureSetIndex=-1, int featureIndex=-1);
-    static Feature *getFeature(int& featureSetIndex, int& featureIndex, const QString& uri);
-    static bool satelliteAOS(const QString name, const QDateTime aos, const QDateTime los);
-    static bool satelliteLOS(const QString name);
+
+    enum Mode {
+        LOC,
+        GS,
+        // TODO: BOTH
+    };
+
+    explicit CourseDeviationIndicator(QWidget *parent = nullptr);
+    void setLocalizerDDM(float ddm);
+    float getLocazlierDDM() const { return m_localizerDDM; }
+    void setGlideSlopeDDM(float ddm);
+    float getGlideSlopeDDM() const { return m_glideSlopeDDM; }
+    void setMode(Mode mode);
+    Mode getMode() const { return m_mode; }
+
+    void paintEvent(QPaintEvent *event);
+protected:
+
+private:
+    float m_localizerDDM;
+    float m_glideSlopeDDM;
+    Mode m_mode;
+
+private slots:
+
+
 };
 
-#endif // SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
+#endif // SDRGUI_GUI_COURSEDEVIATIONINDICATOR_H
+

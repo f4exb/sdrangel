@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,23 +16,37 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
-#define SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
+#include "SWGChannelSettings.h"
+#include "ilsdemod.h"
+#include "ilsdemodwebapiadapter.h"
 
-#include <QDateTime>
+ILSDemodWebAPIAdapter::ILSDemodWebAPIAdapter()
+{}
 
-#include "export.h"
+ILSDemodWebAPIAdapter::~ILSDemodWebAPIAdapter()
+{}
 
-class Feature;
-
-class SDRBASE_API FeatureWebAPIUtils
+int ILSDemodWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
 {
-public:
-    static bool mapFind(const QString& target, int featureSetIndex=-1, int featureIndex=-1);
-    static bool mapSetDateTime(const QDateTime& dateTime, int featureSetIndex=-1, int featureIndex=-1);
-    static Feature *getFeature(int& featureSetIndex, int& featureIndex, const QString& uri);
-    static bool satelliteAOS(const QString name, const QDateTime aos, const QDateTime los);
-    static bool satelliteLOS(const QString name);
-};
+    (void) errorMessage;
+    response.setIlsDemodSettings(new SWGSDRangel::SWGILSDemodSettings());
+    response.getIlsDemodSettings()->init();
+    ILSDemod::webapiFormatChannelSettings(response, m_settings);
 
-#endif // SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
+    return 200;
+}
+
+int ILSDemodWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) force;
+    (void) errorMessage;
+    ILSDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
+
+    return 200;
+}

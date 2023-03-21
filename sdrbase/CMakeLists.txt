@@ -118,6 +118,7 @@ set(sdrbase_SOURCES
     dsp/hbfilterchainconverter.cpp
     dsp/hbfiltertraits.cpp
     dsp/mimochannel.cpp
+    dsp/morsedemod.cpp
     dsp/nco.cpp
     dsp/ncof.cpp
     dsp/phaselock.cpp
@@ -336,6 +337,7 @@ set(sdrbase_HEADERS
     dsp/mimochannel.h
     dsp/misc.h
     dsp/movingaverage.h
+    dsp/morsedemod.h
     dsp/nco.h
     dsp/ncof.h
     dsp/phasediscri.h

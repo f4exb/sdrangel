@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,23 +16,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
-#define SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
+#ifndef INCLUDE_ILSDEMOD_WEBAPIADAPTER_H
+#define INCLUDE_ILSDEMOD_WEBAPIADAPTER_H
 
-#include <QDateTime>
+#include "channel/channelwebapiadapter.h"
+#include "ilsdemodsettings.h"
 
-#include "export.h"
-
-class Feature;
-
-class SDRBASE_API FeatureWebAPIUtils
-{
+/**
+ * Standalone API adapter only for the settings
+ */
+class ILSDemodWebAPIAdapter : public ChannelWebAPIAdapter {
 public:
-    static bool mapFind(const QString& target, int featureSetIndex=-1, int featureIndex=-1);
-    static bool mapSetDateTime(const QDateTime& dateTime, int featureSetIndex=-1, int featureIndex=-1);
-    static Feature *getFeature(int& featureSetIndex, int& featureIndex, const QString& uri);
-    static bool satelliteAOS(const QString name, const QDateTime aos, const QDateTime los);
-    static bool satelliteLOS(const QString name);
+    ILSDemodWebAPIAdapter();
+    virtual ~ILSDemodWebAPIAdapter();
+
+    virtual QByteArray serialize() const { return m_settings.serialize(); }
+    virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
+
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+private:
+    ILSDemodSettings m_settings;
 };
 
-#endif // SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
+#endif // INCLUDE_ILSDEMOD_WEBAPIADAPTER_H

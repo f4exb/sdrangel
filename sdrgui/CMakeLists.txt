@@ -21,6 +21,7 @@ set(sdrgui_SOURCES
     gui/commandsdialog.cpp
     gui/commandoutputdialog.cpp
     gui/configurationsdialog.cpp
+    gui/coursedeviationindicator.cpp
     gui/crightclickenabler.cpp
     gui/customtextedit.cpp
     gui/cwkeyergui.cpp
@@ -130,6 +131,7 @@ set(sdrgui_HEADERS
     gui/commandsdialog.h
     gui/commandoutputdialog.h
     gui/configurationsdialog.h
+    gui/coursedeviationindicator.h
     gui/crightclickenabler.h
     gui/customtextedit.h
     gui/cwkeyergui.h

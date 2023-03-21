@@ -160,6 +160,8 @@
 #include "SWGIEEE_802_15_4_ModActions.h"
 #include "SWGIEEE_802_15_4_ModReport.h"
 #include "SWGIEEE_802_15_4_ModSettings.h"
+#include "SWGILSDemodReport.h"
+#include "SWGILSDemodSettings.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
@@ -1078,6 +1080,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGIEEE_802_15_4_ModSettings").compare(type) == 0) {
       SWGIEEE_802_15_4_ModSettings *obj = new SWGIEEE_802_15_4_ModSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGILSDemodReport").compare(type) == 0) {
+      SWGILSDemodReport *obj = new SWGILSDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGILSDemodSettings").compare(type) == 0) {
+      SWGILSDemodSettings *obj = new SWGILSDemodSettings();
       obj->init();
       return obj;
     }

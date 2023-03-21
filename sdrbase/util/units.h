@@ -268,11 +268,11 @@ public:
     // We support both decimal and DMS formats
     static bool stringToLatitudeAndLongitude(const QString& string, float& latitude, float& longitude)
     {
-        QRegExp decimal("(-?[0-9]+\\.[0-9]+) *,? *(-?[0-9]+\\.[0-9]+)");
+        QRegExp decimal("(-?[0-9]+(\\.[0-9]+)?) *,? *(-?[0-9]+(\\.[0-9]+)?)");
         if (decimal.exactMatch(string))
         {
              latitude = decimal.capturedTexts()[1].toFloat();
-             longitude = decimal.capturedTexts()[2].toFloat();
+             longitude = decimal.capturedTexts()[3].toFloat();
              return true;
         }
         QRegExp dms(QString("([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([NS]) *,? *([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([EW])").arg(QChar(0xb0)));
@@ -305,6 +305,26 @@ public:
              bool east = dms2.capturedTexts()[6] == "E";
              float lonM = dms2.capturedTexts()[7].toFloat();
              float lonS = dms2.capturedTexts()[8].toFloat();
+             latitude = latD + latM/60.0 + latS/(60.0*60.0);
+             if (!north)
+                 latitude = -latitude;
+             longitude = lonD + lonM/60.0 + lonS/(60.0*60.0);
+             if (!east)
+                 longitude = -longitude;
+             return true;
+        }
+        // 512255.5900N 0024400.6105W as used on aviation charts
+        QRegExp dms3(QString("(\\d{2})(\\d{2})((\\d{2})(\\.\\d+)?)([NS]) *,?(\\d{3})(\\d{2})((\\d{2})(\\.\\d+)?)([EW])"));
+        if (dms3.exactMatch(string))
+        {
+             float latD = dms3.capturedTexts()[1].toFloat();
+             float latM = dms3.capturedTexts()[2].toFloat();
+             float latS = dms3.capturedTexts()[3].toFloat();
+             bool north = dms3.capturedTexts()[6] == "N";
+             float lonD = dms3.capturedTexts()[7].toFloat();
+             float lonM = dms3.capturedTexts()[8].toFloat();
+             float lonS = dms3.capturedTexts()[9].toFloat();
+             bool east = dms3.capturedTexts()[12] == "E";
              latitude = latD + latM/60.0 + latS/(60.0*60.0);
              if (!north)
                  latitude = -latitude;

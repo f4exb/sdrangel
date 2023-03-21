@@ -48,6 +48,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channeltx.freedvmod", "FreeDVModSettings"},
     {"sdrangel.channel.freqtracker", "FreqTrackerSettings"},
     {"sdrangel.channel.heatmap", "HeatMapSettings"},
+    {"sdrangel.channel.ilsdemod", "ILSDemodSettings"},
     {"sdrangel.channel.navtexemod", "NavtexDemodSettings"},
     {"sdrangel.channel.m17demod", "M17DemodSettings"},
     {"sdrangel.channeltx.modm17", "M17ModSettings"},

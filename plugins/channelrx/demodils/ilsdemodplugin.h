@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,23 +16,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
-#define SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
+#ifndef INCLUDE_ILSDEMODPLUGIN_H
+#define INCLUDE_ILSDEMODPLUGIN_H
 
-#include <QDateTime>
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-#include "export.h"
+class DeviceUISet;
+class BasebandSampleSink;
 
-class Feature;
+class ILSDemodPlugin : public QObject, PluginInterface {
+    Q_OBJECT
+    Q_INTERFACES(PluginInterface)
+    Q_PLUGIN_METADATA(IID "sdrangel.channel.ilsdemod")
 
-class SDRBASE_API FeatureWebAPIUtils
-{
 public:
-    static bool mapFind(const QString& target, int featureSetIndex=-1, int featureIndex=-1);
-    static bool mapSetDateTime(const QDateTime& dateTime, int featureSetIndex=-1, int featureIndex=-1);
-    static Feature *getFeature(int& featureSetIndex, int& featureIndex, const QString& uri);
-    static bool satelliteAOS(const QString name, const QDateTime aos, const QDateTime los);
-    static bool satelliteLOS(const QString name);
+    explicit ILSDemodPlugin(QObject* parent = NULL);
+
+    const PluginDescriptor& getPluginDescriptor() const;
+    void initPlugin(PluginAPI* pluginAPI);
+
+    virtual void createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const;
+    virtual ChannelGUI* createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const;
+    virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const;
+
+private:
+    static const PluginDescriptor m_pluginDescriptor;
+
+    PluginAPI* m_pluginAPI;
 };
 
-#endif // SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
+#endif // INCLUDE_ILSDEMODPLUGIN_H
+
