@@ -53,27 +53,6 @@ public:
         }
     };
 
-    class MsgReportIdent : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        QString getIdent() const { return m_ident; }
-
-        static MsgReportIdent* create(QString ident)
-        {
-            return new MsgReportIdent(ident);
-        }
-
-    private:
-        QString m_ident;
-
-        MsgReportIdent(QString ident) :
-            Message(),
-            m_ident(ident)
-        {
-        }
-    };
-
 public:
     VORDemodReport() {}
     ~VORDemodReport() {}

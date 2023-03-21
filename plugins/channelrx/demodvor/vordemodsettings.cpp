@@ -62,6 +62,7 @@ QByteArray VORDemodSettings::serialize() const
     s.writeS32(3, m_streamIndex);
     s.writeS32(4, m_volume*10);
     s.writeS32(5, m_squelch);
+    s.writeBool(10, m_audioMute);
 
     if (m_channelMarker) {
         s.writeBlob(6, m_channelMarker->serialize());
@@ -114,6 +115,7 @@ bool VORDemodSettings::deserialize(const QByteArray& data)
         m_volume = tmp * 0.1;
         d.readS32(5, &tmp, -40);
         m_squelch = tmp;
+        d.readBool(10, &m_audioMute, false);
 
         if (m_channelMarker)
         {

@@ -34,6 +34,7 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/morsedemod.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
 #include "settings/serializable.h"
@@ -215,14 +216,14 @@ bool VORDemod::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (VORDemodReport::MsgReportIdent::match(cmd))
+    else if (MorseDemod::MsgReportIdent::match(cmd))
     {
-        VORDemodReport::MsgReportIdent& report = (VORDemodReport::MsgReportIdent&) cmd;
+        MorseDemod::MsgReportIdent& report = (MorseDemod::MsgReportIdent&) cmd;
         m_morseIdent = report.getIdent();
 
         if (m_guiMessageQueue)
         {
-            VORDemodReport::MsgReportIdent *msg = new VORDemodReport::MsgReportIdent(report);
+            MorseDemod::MsgReportIdent *msg = new MorseDemod::MsgReportIdent(report);
             m_guiMessageQueue->push(msg);
         }
 
