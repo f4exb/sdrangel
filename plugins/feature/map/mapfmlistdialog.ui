@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MapBeaconDialog</class>
+ <widget class="QDialog" name="MapBeaconDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1027</width>
+    <height>349</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Beacons</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="downloadList">
+          <property name="toolTip">
+           <string>Download FM/DAB list</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>2</number>
+        </property>
+        <widget class="QWidget" name="fmTab">
+         <attribute name="title">
+          <string>FM</string>
+         </attribute>
+         <widget class="QTableWidget" name="fm">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>20</y>
+            <width>989</width>
+            <height>192</height>
+           </rect>
+          </property>
+          <property name="toolTip">
+           <string/>
+          </property>
+          <column>
+           <property name="text">
+            <string>Station</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Frequency</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Location</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Power</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Azimuth</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Elevation</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Distance (km)</string>
+           </property>
+          </column>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="dabTab">
+         <attribute name="title">
+          <string>DAB</string>
+         </attribute>
+         <widget class="QTableWidget" name="dab">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>20</y>
+            <width>989</width>
+            <height>192</height>
+           </rect>
+          </property>
+          <property name="toolTip">
+           <string/>
+          </property>
+          <column>
+           <property name="text">
+            <string>Station</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Frequency</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Location</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Power</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Azimuth</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Elevation</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Distance (km)</string>
+           </property>
+          </column>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="settingsTab">
+         <attribute name="title">
+          <string>Settings</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0" colspan="4">
+           <widget class="QGroupBox" name="groupBox_2">
+            <property name="title">
+             <string>Countries</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_2">
+             <item row="0" column="4">
+              <widget class="QCheckBox" name="checkBox_16">
+               <property name="text">
+                <string>ETH</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QCheckBox" name="checkBox_15">
+               <property name="text">
+                <string>CRO</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="7">
+              <widget class="QCheckBox" name="checkBox_19">
+               <property name="text">
+                <string>LCA</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="9">
+              <widget class="QCheckBox" name="checkBox_21">
+               <property name="text">
+                <string>NIU</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="checkBox_13">
+               <property name="text">
+                <string>AZE</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="12">
+              <widget class="QCheckBox" name="checkBox_24">
+               <property name="text">
+                <string>TKM</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="5">
+              <widget class="QCheckBox" name="checkBox_17">
+               <property name="text">
+                <string>GTB</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QCheckBox" name="checkBox_14">
+               <property name="text">
+                <string>BRB</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="8">
+              <widget class="QCheckBox" name="checkBox_20">
+               <property name="text">
+                <string>MLD</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="6">
+              <widget class="QCheckBox" name="checkBox_18">
+               <property name="text">
+                <string>IRQ</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="10">
+              <widget class="QCheckBox" name="checkBox_22">
+               <property name="text">
+                <string>PTC</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="checkBox">
+               <property name="text">
+                <string>ABW</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="11">
+              <widget class="QCheckBox" name="checkBox_23">
+               <property name="text">
+                <string>SNG</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="13">
+              <widget class="QCheckBox" name="checkBox_25">
+               <property name="text">
+                <string>VIR</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="checkBox_4">
+               <property name="text">
+                <string>AFG</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QCheckBox" name="checkBox_5">
+               <property name="text">
+                <string>AZR</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QCheckBox" name="checkBox_6">
+               <property name="text">
+                <string>BRU</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QCheckBox" name="checkBox_11">
+               <property name="text">
+                <string>CTI</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4">
+              <widget class="QCheckBox" name="checkBox_9">
+               <property name="text">
+                <string>F</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="5">
+              <widget class="QCheckBox" name="checkBox_12">
+               <property name="text">
+                <string>GTM</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="6">
+              <widget class="QCheckBox" name="checkBox_10">
+               <property name="text">
+                <string>ISL</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="7">
+              <widget class="QCheckBox" name="checkBox_8">
+               <property name="text">
+                <string>LHW</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="8">
+              <widget class="QCheckBox" name="checkBox_7">
+               <property name="text">
+                <string>MLI</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="9">
+              <widget class="QCheckBox" name="checkBox_3">
+               <property name="text">
+                <string>NMB</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="10">
+              <widget class="QCheckBox" name="checkBox_2">
+               <property name="text">
+                <string>PTR</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="11">
+              <widget class="QCheckBox" name="checkBox_26">
+               <property name="text">
+                <string>SOM</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="12">
+              <widget class="QCheckBox" name="checkBox_27">
+               <property name="text">
+                <string>TMP</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="13">
+              <widget class="QCheckBox" name="checkBox_28">
+               <property name="text">
+                <string>VRG</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>MapBeaconDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>MapBeaconDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

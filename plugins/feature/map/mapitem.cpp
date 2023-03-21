@@ -113,6 +113,9 @@ void PolygonMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
 {
     MapItem::update(mapItem);
     m_extrudedHeight = mapItem->getExtrudedHeight();
+    m_colorValid = mapItem->getColorValid();
+    m_color = mapItem->getColor();
+    m_altitudeReference = mapItem->getAltitudeReference();
 
     qDeleteAll(m_points);
     m_points.clear();
@@ -145,6 +148,9 @@ void PolygonMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
 void PolylineMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
 {
     MapItem::update(mapItem);
+    m_colorValid = mapItem->getColorValid();
+    m_color = mapItem->getColor();
+    m_altitudeReference = mapItem->getAltitudeReference();
 
     qDeleteAll(m_points);
     m_points.clear();

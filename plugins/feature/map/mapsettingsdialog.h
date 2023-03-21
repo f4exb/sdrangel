@@ -90,6 +90,7 @@ public:
     bool m_map2DSettingsChanged;    // 2D map needs to be reloaded
     bool m_map3DSettingsChanged;    // 3D map needs to be reloaded
     bool m_osmURLChanged;
+    QStringList m_settingsKeysChanged; // List of setting keys that have been changed
 
 private:
     MapSettings *m_settings;

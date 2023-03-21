@@ -21,6 +21,7 @@
 #include <QDateTime>
 #include <QGeoCoordinate>
 #include <QGeoRectangle>
+#include <QColor>
 
 #include "mapsettings.h"
 #include "cesiuminterface.h"
@@ -139,6 +140,9 @@ protected:
     float m_extrudedHeight;             // In metres
     QVariantList m_polygon;
     QGeoRectangle m_bounds;             // Bounding boxes for the polygons, for view clipping
+    bool m_colorValid;
+    QRgb m_color;
+    int m_altitudeReference;
 };
 
 class PolylineMapItem : public MapItem {
@@ -158,6 +162,9 @@ protected:
     QList<QGeoCoordinate *> m_points;   // FIXME: Remove?
     QVariantList m_polyline;
     QGeoRectangle m_bounds;             // Bounding boxes for the polyline, for view clipping
+    bool m_colorValid;
+    QRgb m_color;
+    int m_altitudeReference;
 };
 
 class ImageMapItem : public MapItem {

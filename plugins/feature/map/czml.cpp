@@ -23,6 +23,8 @@
 
 #include "util/coordinates.h"
 
+const QStringList CZML::m_heightReferences = {"NONE", "CLAMP_TO_GROUND", "RELATIVE_TO_GROUND", "CLIP_TO_GROUND"};
+
 CZML::CZML(const MapSettings *settings) :
     m_settings(settings)
 {
@@ -82,6 +84,9 @@ QJsonObject CZML::update(PolygonMapItem *mapItem)
         return obj;
     }
 
+    // Need to use perPositionHeight for vertical polygons
+    bool perPosition = mapItem->m_extrudedHeight == 0;
+
     QJsonArray positions;
     for (const auto c : mapItem->m_points)
     {
@@ -94,7 +99,12 @@ QJsonObject CZML::update(PolygonMapItem *mapItem)
         {"cartographicDegrees", positions},
     };
 
-    QColor color = QColor::fromRgba(mapItem->m_itemSettings->m_3DTrackColor);
+    QColor color;
+    if (mapItem->m_colorValid) {
+        color = QColor::fromRgba(mapItem->m_color);
+    } else {
+        color = QColor::fromRgba(mapItem->m_itemSettings->m_3DTrackColor);
+    }
     QJsonArray colorRGBA {
         color.red(), color.green(), color.blue(), color.alpha()
     };
@@ -119,12 +129,23 @@ QJsonObject CZML::update(PolygonMapItem *mapItem)
 
     QJsonObject polygon {
         {"positions", positionList},
-        {"height", mapItem->m_altitude},
-        {"extrudedHeight", mapItem->m_extrudedHeight},
         {"material", material},
         {"outline", true},
-        {"outlineColor", outlineColor}
+        {"outlineColor", outlineColor},
     };
+    if (perPosition)
+    {
+        polygon.insert("perPositionHeight", true);
+        if (mapItem->m_altitudeReference != 0) {
+            polygon.insert("altitudeReference", m_heightReferences[mapItem->m_altitudeReference]); // Custom code in map3d.html
+        }
+    }
+    else
+    {
+        polygon.insert("height", mapItem->m_altitude);
+        polygon.insert("heightReference", m_heightReferences[mapItem->m_altitudeReference]);
+        polygon.insert("extrudedHeight", mapItem->m_extrudedHeight);
+    }
 
     obj.insert("polygon", polygon);
     obj.insert("description", mapItem->m_label);
@@ -163,7 +184,12 @@ QJsonObject CZML::update(PolylineMapItem *mapItem)
         {"cartographicDegrees", positions},
     };
 
-    QColor color = QColor::fromRgba(mapItem->m_itemSettings->m_3DTrackColor);
+    QColor color;
+    if (mapItem->m_colorValid) {
+        color = QColor::fromRgba(mapItem->m_color);
+    } else {
+        color = QColor::fromRgba(mapItem->m_itemSettings->m_3DTrackColor);
+    }
     QJsonArray colorRGBA {
         color.red(), color.green(), color.blue(), color.alpha()
     };
@@ -183,6 +209,10 @@ QJsonObject CZML::update(PolylineMapItem *mapItem)
         {"positions", positionList},
         {"material", material}
     };
+    polyline.insert("clampToGround", mapItem->m_altitudeReference == 1);
+    if (mapItem->m_altitudeReference == 3) {
+        polyline.insert("altitudeReference", m_heightReferences[mapItem->m_altitudeReference]); // Custom code in map3d.html
+    }
 
     obj.insert("polyline", polyline);
     obj.insert("description", mapItem->m_label);

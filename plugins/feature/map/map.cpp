@@ -260,6 +260,7 @@ void Map::webapiFormatFeatureSettings(
     const MapSettings& settings)
 {
     response.getMapSettings()->setDisplayNames(settings.m_displayNames ? 1 : 0);
+    response.getMapSettings()->setTerrain(new QString(settings.m_terrain));
 
     if (response.getMapSettings()->getTitle()) {
         *response.getMapSettings()->getTitle() = settings.m_title;
@@ -303,6 +304,9 @@ void Map::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("displayNames")) {
         settings.m_displayNames = response.getMapSettings()->getDisplayNames();
     }
+    if (featureSettingsKeys.contains("terrain")) {
+        settings.m_terrain = *response.getMapSettings()->getTerrain();
+    }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getMapSettings()->getTitle();
     }
@@ -342,6 +346,9 @@ void Map::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, c
 
     if (featureSettingsKeys.contains("displayNames") || force) {
         swgMapSettings->setDisplayNames(settings.m_displayNames);
+    }
+    if (featureSettingsKeys.contains("terrain") || force) {
+        swgMapSettings->setTerrain(new QString(settings.m_terrain));
     }
     if (featureSettingsKeys.contains("title") || force) {
         swgMapSettings->setTitle(new QString(settings.m_title));
