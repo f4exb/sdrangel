@@ -148,7 +148,6 @@ bool ILSDemodSettings::deserialize(const QByteArray& data)
     if(d.getVersion() == 1)
     {
         QByteArray bytetmp;
-        int tmp;
         uint32_t utmp;
         QString strtmp;
 

@@ -706,7 +706,6 @@ void ILSDemodGUI::drawILSOnMap()
     int featureSetIndex = -1;
     int featureIndex = -1;
     QString terrain;
-    bool ellipsoid = false;
     Feature *feature = FeatureWebAPIUtils::getFeature(featureSetIndex, featureIndex, "sdrangel.feature.map");
     if (feature && ChannelWebAPIUtils::getFeatureSetting(featureSetIndex, featureIndex, "terrain", terrain))
     {
