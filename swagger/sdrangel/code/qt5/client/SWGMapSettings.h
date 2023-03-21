@@ -46,6 +46,9 @@ public:
     qint32 getDisplayNames();
     void setDisplayNames(qint32 display_names);
 
+    QString* getTerrain();
+    void setTerrain(QString* terrain);
+
     QString* getTitle();
     void setTitle(QString* title);
 
@@ -76,6 +79,9 @@ public:
 private:
     qint32 display_names;
     bool m_display_names_isSet;
+
+    QString* terrain;
+    bool m_terrain_isSet;
 
     QString* title;
     bool m_title_isSet;

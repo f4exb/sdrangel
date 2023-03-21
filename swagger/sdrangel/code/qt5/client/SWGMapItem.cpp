@@ -90,6 +90,10 @@ SWGMapItem::SWGMapItem() {
     m_extruded_height_isSet = false;
     available_until = nullptr;
     m_available_until_isSet = false;
+    color_valid = 0;
+    m_color_valid_isSet = false;
+    color = 0;
+    m_color_isSet = false;
 }
 
 SWGMapItem::~SWGMapItem() {
@@ -160,6 +164,10 @@ SWGMapItem::init() {
     m_extruded_height_isSet = false;
     available_until = new QString("");
     m_available_until_isSet = false;
+    color_valid = 0;
+    m_color_valid_isSet = false;
+    color = 0;
+    m_color_isSet = false;
 }
 
 void
@@ -235,6 +243,8 @@ SWGMapItem::cleanup() {
     if(available_until != nullptr) { 
         delete available_until;
     }
+
+
 }
 
 SWGMapItem*
@@ -309,6 +319,10 @@ SWGMapItem::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&extruded_height, pJson["extrudedHeight"], "float", "");
     
     ::SWGSDRangel::setValue(&available_until, pJson["availableUntil"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&color_valid, pJson["colorValid"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&color, pJson["color"], "qint32", "");
     
 }
 
@@ -418,6 +432,12 @@ SWGMapItem::asJsonObject() {
     }
     if(available_until != nullptr && *available_until != QString("")){
         toJsonValue(QString("availableUntil"), available_until, obj, QString("QString"));
+    }
+    if(m_color_valid_isSet){
+        obj->insert("colorValid", QJsonValue(color_valid));
+    }
+    if(m_color_isSet){
+        obj->insert("color", QJsonValue(color));
     }
 
     return obj;
@@ -733,6 +753,26 @@ SWGMapItem::setAvailableUntil(QString* available_until) {
     this->m_available_until_isSet = true;
 }
 
+qint32
+SWGMapItem::getColorValid() {
+    return color_valid;
+}
+void
+SWGMapItem::setColorValid(qint32 color_valid) {
+    this->color_valid = color_valid;
+    this->m_color_valid_isSet = true;
+}
+
+qint32
+SWGMapItem::getColor() {
+    return color;
+}
+void
+SWGMapItem::setColor(qint32 color) {
+    this->color = color;
+    this->m_color_isSet = true;
+}
+
 
 bool
 SWGMapItem::isSet(){
@@ -829,6 +869,12 @@ SWGMapItem::isSet(){
             isObjectUpdated = true; break;
         }
         if(available_until && *available_until != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_color_valid_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_color_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

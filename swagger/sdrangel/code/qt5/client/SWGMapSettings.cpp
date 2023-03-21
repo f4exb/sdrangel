@@ -30,6 +30,8 @@ SWGMapSettings::SWGMapSettings(QString* json) {
 SWGMapSettings::SWGMapSettings() {
     display_names = 0;
     m_display_names_isSet = false;
+    terrain = nullptr;
+    m_terrain_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -56,6 +58,8 @@ void
 SWGMapSettings::init() {
     display_names = 0;
     m_display_names_isSet = false;
+    terrain = new QString("");
+    m_terrain_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -77,6 +81,9 @@ SWGMapSettings::init() {
 void
 SWGMapSettings::cleanup() {
 
+    if(terrain != nullptr) { 
+        delete terrain;
+    }
     if(title != nullptr) { 
         delete title;
     }
@@ -105,6 +112,8 @@ SWGMapSettings::fromJson(QString &json) {
 void
 SWGMapSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&display_names, pJson["displayNames"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&terrain, pJson["terrain"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -140,6 +149,9 @@ SWGMapSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_display_names_isSet){
         obj->insert("displayNames", QJsonValue(display_names));
+    }
+    if(terrain != nullptr && *terrain != QString("")){
+        toJsonValue(QString("terrain"), terrain, obj, QString("QString"));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -177,6 +189,16 @@ void
 SWGMapSettings::setDisplayNames(qint32 display_names) {
     this->display_names = display_names;
     this->m_display_names_isSet = true;
+}
+
+QString*
+SWGMapSettings::getTerrain() {
+    return terrain;
+}
+void
+SWGMapSettings::setTerrain(QString* terrain) {
+    this->terrain = terrain;
+    this->m_terrain_isSet = true;
 }
 
 QString*
@@ -265,6 +287,9 @@ SWGMapSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_display_names_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(terrain && *terrain != QString("")){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

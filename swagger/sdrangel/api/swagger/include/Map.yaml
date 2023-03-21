@@ -4,6 +4,9 @@ MapSettings:
     displayNames:
       description: Display object names on the map (1 for yes, 0 for no)
       type: integer
+    terrain:
+      description: "Terrain used for 3D map (E.g: 'Ellipsoid' or 'Cesium World Terrain')"
+      type: string
     title:
       type: string
     rgbColor:
@@ -118,7 +121,7 @@ MapItem:
       type: number
       format: float
     altitudeReference:
-      description: "0 - NONE (Absolute), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
+      description: "0 - NONE (Absolute), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND."
       type: integer
     animations:
       description: "Animations to play"
@@ -156,6 +159,12 @@ MapItem:
     availableUntil:
       description: "Date and time until after which this item should no longer appear on 3D map"
       type: string
+    colorValid:
+      description: "0 - Use default color, 1 - Use specified color"
+      type: integer
+    color:
+      description: "RGBA for polygon and polyline"
+      type: integer
 
 MapAnimation:
   description: "Animation to play in the model on the 3D map"
