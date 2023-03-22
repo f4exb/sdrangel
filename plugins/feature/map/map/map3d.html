@@ -227,7 +227,7 @@
     });
     viewer.scene.globe.depthTestAgainstTerrain = false; // So labels/points aren't clipped by terrain (this prevents pickPosition from working)
     viewer.screenSpaceEventHandler.setInputAction(pickEntity, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-    viewer.screenSpaceEventHandler.setInputAction(showCoords, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+    viewer.screenSpaceEventHandler.setInputAction(showCoords, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK, Cesium.KeyboardEventModifier.SHIFT);
     viewer.screenSpaceEventHandler.setInputAction(hideCoords, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
     var buildings = undefined;
     const images = new Map();

@@ -207,7 +207,7 @@ The airport ICAO (purple box) and runway (yellow box) can be entered in (11).
 ![ILS approach chart](../../../doc/img/ILSDemod_plugin_chart.png)
 
 Next, we need to enter the latitude (8), longitude (9) and elevation (10) of the runway threshold. This is available on some charts (orange box), but not usually accurately enough to line up perfectly on the 3D map.
-For this, it's best to use the 3D map, and double click at the start of the threshold to set a marker, which will display the coordinates.
+For this, it's best to use the 3D map, and double click while holding shift at the start of the threshold to set a marker, which will display the coordinates.
 
 ![Runway threshold coordinates](../../../doc/img/ILSDemod_plugin_threshold.png)
 
