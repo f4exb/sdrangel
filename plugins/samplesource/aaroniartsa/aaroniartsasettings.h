@@ -24,6 +24,15 @@
 
 struct AaroniaRTSASettings {
 
+    enum ConnectionStatus
+    {
+        ConnectionIdle,        // 0 - gray
+        ConnectionUnstable,    // 1 - yellow
+        ConnectionOK,          // 2 - green
+        ConnectionError,       // 3 - red
+        ConnectionDisconnected // 4 - magenta
+    };
+
     quint64 m_centerFrequency;
 	QString m_serverAddress;
 

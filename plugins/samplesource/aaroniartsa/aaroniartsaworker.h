@@ -63,6 +63,7 @@ public:
 	};
 
 	AaroniaRTSAWorker(SampleSinkFifo* sampleFifo);
+    ~AaroniaRTSAWorker();
     int getStatus() const { return m_status; }
     void setInputMessageQueue(MessageQueue *messageQueue) { m_inputMessageQueue = messageQueue; }
 
@@ -83,20 +84,15 @@ private:
 
 
 	// QT htttp client
-	QNetworkAccessManager	*	mNetworkAccessManager;
-
+	QNetworkAccessManager *mNetworkAccessManager;
 	// Reply from the HTTP server
-	QNetworkReply			*	mReply;
-
+	QNetworkReply *mReply;
 	// Input buffer
-	QByteArray					mBuffer;
-
+	QByteArray mBuffer;
 	// Number of IQ sample pairs in the current packet
-	int							mPacketSamples;
-
+	int mPacketSamples;
 	// Previous sample end time to check for packet loss
-	double						mPrevTime;
-
+	double mPrevTime;
 
 	//Decimators<qint32, float, SDR_RX_SAMP_SZ, 32, true> m_decimatorsIQ;
 	DecimatorsFI<true> m_decimatorsFloatIQ;
@@ -113,7 +109,6 @@ public slots:
 
 private slots:
 	void onSocketError(QAbstractSocket::SocketError error);
-
 	void onError(QNetworkReply::NetworkError code);
 	void onFinished(void);
 	void onReadyRead(void);

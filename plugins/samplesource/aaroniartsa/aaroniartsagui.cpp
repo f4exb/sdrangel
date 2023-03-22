@@ -56,13 +56,13 @@ AaroniaRTSAGui::AaroniaRTSAGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = m_deviceUISet->m_deviceAPI->getSampleSource();
 
 	m_statusTooltips.push_back("Idle");          // 0
-	m_statusTooltips.push_back("Connecting..."); // 1
+	m_statusTooltips.push_back("Unstable");      // 1
 	m_statusTooltips.push_back("Connected");     // 2
 	m_statusTooltips.push_back("Error");         // 3
 	m_statusTooltips.push_back("Disconnected");  // 4
 
 	m_statusColors.push_back("gray");               // Idle
-	m_statusColors.push_back("rgb(232, 212, 35)");  // Connecting (yellow)
+	m_statusColors.push_back("rgb(232, 212, 35)");  // Unstable (yellow)
 	m_statusColors.push_back("rgb(35, 138, 35)");   // Connected (green)
 	m_statusColors.push_back("rgb(232, 85, 85)");   // Error (red)
 	m_statusColors.push_back("rgb(232, 85, 232)");  // Disconnected (magenta)
@@ -292,9 +292,9 @@ void AaroniaRTSAGui::updateSampleRateAndFrequency()
     m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
 	ui->deviceRateText->setText(tr("%1M").arg((float)m_deviceSampleRate / 1000 / 1000));
-    ui->centerFrequency->blockSignals(true);
+    blockApplySettings(true);
     ui->centerFrequency->setValue(m_deviceCenterFrequency / 1000);
-    ui->centerFrequency->blockSignals(true);
+    blockApplySettings(false);
 }
 
 void AaroniaRTSAGui::openDeviceSettingsDialog(const QPoint& p)

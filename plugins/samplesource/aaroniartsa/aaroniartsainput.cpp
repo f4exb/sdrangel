@@ -290,9 +290,9 @@ bool AaroniaRTSAInput::applySettings(const AaroniaRTSASettings& settings, const 
     {
         emit setWorkerCenterFrequency(settings.m_centerFrequency);
 
-		DSPSignalNotification *notif = new DSPSignalNotification(
-			getSampleRate(), settings.m_centerFrequency);
-		m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+		// DSPSignalNotification *notif = new DSPSignalNotification(
+		// 	getSampleRate(), settings.m_centerFrequency);
+		// m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
     if (settingsKeys.contains("useReverseAPI"))

@@ -20,6 +20,7 @@
 #include "util/messagequeue.h"
 #include "dsp/dspcommands.h"
 
+#include "aaroniartsasettings.h"
 #include "aaroniartsaworker.h"
 
 MESSAGE_CLASS_DEFINITION(AaroniaRTSAWorker::MsgReportSampleRateAndFrequency, Message)
@@ -29,39 +30,58 @@ AaroniaRTSAWorker::AaroniaRTSAWorker(SampleSinkFifo* sampleFifo) :
 	m_timer(this),
 	m_samplesBuf(),
 	m_sampleFifo(sampleFifo),
-	m_centerFrequency(1450000),
-	m_sampleRate(10000000),
+	m_centerFrequency(0),
+	m_sampleRate(1),
     m_inputMessageQueue(nullptr),
-	m_status(0),
+	m_status(AaroniaRTSASettings::ConnectionIdle),
+    mReply(nullptr),
 	m_convertBuffer(64e6)
 {
-	// Initialize network manager
+	// Initialize network managers
 	mNetworkAccessManager = new QNetworkAccessManager(this);
 
 	// Request 16bit raw samples
-	QUrl	url("http://localhost:55123/stream?format=float32");
+    // m_serverAddress = "localhost:55123";
+	// QUrl url(tr("http://%1/stream?format=float32").arg(m_serverAddress));
 
-	QNetworkRequest	req(url);
-	mReply = mNetworkAccessManager->get(req);
+	// QNetworkRequest	req(url);
+	// mReply = mNetworkAccessManager->get(req);
 
-	// Connect Qt slots to network events
-	connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onError(QNetworkReply::NetworkError)));
-	connect(mReply, SIGNAL(finished()), this, SLOT(onFinished()));
-	connect(mReply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+	// // Connect Qt slots to network events
+	// connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onError(QNetworkReply::NetworkError)));
+	// connect(mReply, SIGNAL(finished()), this, SLOT(onFinished()));
+	// connect(mReply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
 
 	mPrevTime = 0;
 	mPacketSamples = 0;
 }
 
+AaroniaRTSAWorker::~AaroniaRTSAWorker()
+{
+    if (mReply)
+    {
+        // disconnect previous sugnals
+        disconnect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onError(QNetworkReply::NetworkError)));
+        disconnect(mReply, SIGNAL(finished()), this, SLOT(onFinished()));
+        disconnect(mReply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+
+        mReply->abort();
+        mReply->deleteLater();
+    }
+
+    mNetworkAccessManager->deleteLater();
+}
+
 void AaroniaRTSAWorker::onSocketError(QAbstractSocket::SocketError error)
 {
 	(void) error;
-    m_status = 3;
-	emit updateStatus(3);
+    m_status = AaroniaRTSASettings::ConnectionError;
+	emit updateStatus(m_status);
 }
 
 void AaroniaRTSAWorker::sendCenterFrequency()
 {
+    qDebug("AaroniaRTSAWorker::sendCenterFrequency: %llu", m_centerFrequency);
 	//if (!m_webSocket.isValid())
 	//	return;
 
@@ -84,21 +104,34 @@ void AaroniaRTSAWorker::onCenterFrequencyChanged(quint64 centerFrequency)
 
 void AaroniaRTSAWorker::onServerAddressChanged(QString serverAddress)
 {
-	/*if (m_serverAddress == serverAddress) {
-		return;
+    m_status = AaroniaRTSASettings::ConnectionDisconnected;
+    updateStatus(m_status);
+
+    if (mReply)
+    {
+        // disconnect previous sugnals
+        disconnect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onError(QNetworkReply::NetworkError)));
+        disconnect(mReply, SIGNAL(finished()), this, SLOT(onFinished()));
+        disconnect(mReply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+
+        mReply->abort();
+        mReply->deleteLater();
     }
 
-	m_serverAddress = serverAddress;
+    QUrl url(tr("http://%1/stream?format=float32").arg(serverAddress));
+	QNetworkRequest	req(url);
+	mReply = mNetworkAccessManager->get(req);
 
-    m_status = 1;
-	emit updateStatus(1);
+	// Connect Qt slots to network events
+	connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onError(QNetworkReply::NetworkError)));
+	connect(mReply, SIGNAL(finished()), this, SLOT(onFinished()));
+	connect(mReply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
 
-	QString url("ws://");
-	url.append(m_serverAddress);
-	url.append("/rtsa/");
-	url.append(QString::number(QDateTime::currentMSecsSinceEpoch()));
-	url.append("/SND");
-	m_webSocket.open(QUrl(url));*/
+	mPrevTime = 0;
+	mPacketSamples = 0;
+    m_sampleRate = 1;
+    m_centerFrequency = 0;
+    m_serverAddress = serverAddress;
 }
 
 void AaroniaRTSAWorker::tick()
@@ -109,8 +142,11 @@ void AaroniaRTSAWorker::tick()
 
 void AaroniaRTSAWorker::onError(QNetworkReply::NetworkError code)
 {
+    (void) code;
 	QTextStream	qerr(stderr);
 	qerr << "Network Error: " + mReply->errorString();
+    m_status = 3;
+	emit updateStatus(3);
 }
 
 void AaroniaRTSAWorker::onFinished()
@@ -127,6 +163,12 @@ void AaroniaRTSAWorker::onFinished()
 // bytes received from the socket
 void AaroniaRTSAWorker::onReadyRead()
 {
+    if (m_status != AaroniaRTSASettings::ConnectionOK)
+    {
+        m_status = AaroniaRTSASettings::ConnectionOK;
+        emit updateStatus(m_status);
+    }
+
 	QTextStream	qout(stdout);
 
 	// read as many bytes as possible into input buffer
