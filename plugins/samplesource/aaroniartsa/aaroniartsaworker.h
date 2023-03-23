@@ -80,11 +80,13 @@ private:
 
     int m_status; //!< See GUI for status number detail
 
-	void sendCenterFrequency();
+	void sendCenterFrequencyAndSampleRate();
+    void getConfig();
+    void parseConfig(QByteArray bytes);
 
-
-	// QT htttp client
-	QNetworkAccessManager *mNetworkAccessManager;
+	// QT htttp clients
+	QNetworkAccessManager *m_networkAccessManager;
+	QNetworkAccessManager *m_networkAccessManagerConfig;
 	// Reply from the HTTP server
 	QNetworkReply *mReply;
 	// Input buffer
@@ -93,7 +95,8 @@ private:
 	int mPacketSamples;
 	// Previous sample end time to check for packet loss
 	double mPrevTime;
-
+    // Current iQ demodulator name
+    QString m_iqDemodName;
 	//Decimators<qint32, float, SDR_RX_SAMP_SZ, 32, true> m_decimatorsIQ;
 	DecimatorsFI<true> m_decimatorsFloatIQ;
 	SampleVector m_convertBuffer;
@@ -112,6 +115,7 @@ private slots:
 	void onError(QNetworkReply::NetworkError code);
 	void onFinished(void);
 	void onReadyRead(void);
+    void handleConfigReply(QNetworkReply* reply);
     void tick();
 };
 

@@ -291,7 +291,8 @@ void AaroniaRTSAGui::updateSampleRateAndFrequency()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-	ui->deviceRateText->setText(tr("%1M").arg((float)m_deviceSampleRate / 1000 / 1000));
+	// ui->deviceRateText->setText(tr("%1M").arg((float)m_deviceSampleRate / 1000 / 1000));
+    ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_deviceSampleRate / 1000.0f, 'g', 5)));
     blockApplySettings(true);
     ui->centerFrequency->setValue(m_deviceCenterFrequency / 1000);
     blockApplySettings(false);
