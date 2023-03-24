@@ -22,6 +22,8 @@ will be stronger above the glide path, with the 150Hz being stronger below.
 As the LOC and G/S signals are so far apart in frequency, in order to receive both simultaneously, two SDRs, each with their own ILS Demodulator, are required.
 If you only have one SDR, you can demodulate either signal independently.
 
+Note: The G/S could do with additional testing. If you are able to capture a G/S signal as a IQ .wav/sdriq file, please get in touch.
+
 <h2>Interface</h2>
 
 The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
@@ -44,13 +46,13 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 <h3>4: Mode</h3>
 
-Specifies whether the ILS Localizer or Glideslope signal is to be demodulated. The localizer provides horizontal guidance and the glideslope vertical.
+Specifies whether the ILS Localizer (LOC) or Glide Slope (G/S) signal is to be demodulated. The localizer provides horizontal guidance and the glide slope vertical.
 
 <h3>5: Frequency</h3>
 
 Specifies the ILS frequency. This will be in the range 108-112 MHz. When a frequency is selected, the device will be tuned to the corresponding frequency.
 Localizers use the same frequency as listed on aviation charts for the ILS.
-Glideslopes using a paired frequency in the range 329-335MHz range, which is typically not displayed on charts.
+Glide slopes using a paired frequency in the range 329-335MHz range, which is typically not displayed on charts.
 
 <h3>6: RF Bandwidth</h3>
 
@@ -162,7 +164,7 @@ Displays the depth of modulation of the 150Hz tone as percentage of the carrier.
 
 <h3>31: SDM</h3>
 
-Displays the Sun of the Depth of Modulation of the 90 and 150Hz tones. For LOC, this should be 40%. For G/S it should be 80%.
+Displays the Sum of the Depth of Modulation of the 90 and 150Hz tones. For LOC, this should be 40%. For G/S it should be 80%.
 
 <h3>32: DDM</h3>
 
@@ -172,7 +174,7 @@ is to the left of the course line, or for G/S, above the glide path.
 
 <h3>33: Deviation ILS</h3>
 
-Displays an estimate of the deviation angle based on the calculated DDM. Note that this angle may be very inaccurate for |ddm|>0.155, as outside of this value DDM is not linear with angle.
+Displays an estimate of the deviation angle based on the calculated DDM. Note that this angle may be very inaccurate for |DDM|>0.155, as outside of this value DDM is not linear with angle.
 
 <h3>34: Deviation GPS</h3>
 
@@ -184,6 +186,8 @@ The Course Deviation Indicator plots course / glide path deviation in a way simi
 Full scale deviation is 2.5 degrees (centre to edge) for LOC and 0.35 degrees for G/S.
 "LOC" will be displayed in green above the CDI when the localizer is captured (|DDM| < 0.175).
 "G/S" will be displayed in green above the CDI when the glide slope is capture (|DDM| < 0.175).
+
+Pilots would fly towards the diamond. So if the diamond is left-of-center, then the aircraft should turn to the left.
 
 The decoded Morse code identifier will be displayed underneath the CDI in both Morse and letters.
 If will be displayed in white if it matches the specified identifer (7) or red if not.
@@ -207,7 +211,7 @@ The airport ICAO (purple box) and runway (yellow box) can be entered in (11).
 ![ILS approach chart](../../../doc/img/ILSDemod_plugin_chart.png)
 
 Next, we need to enter the latitude (8), longitude (9) and elevation (10) of the runway threshold. This is available on some charts (orange box), but not usually accurately enough to line up perfectly on the 3D map.
-For this, it's best to use the 3D map, and double click while holding shift at the start of the threshold to set a marker, which will display the coordinates.
+For this, it's best to use the 3D map, and git statu click while holding shift at the start of the threshold to set a marker, which will display the coordinates.
 
 ![Runway threshold coordinates](../../../doc/img/ILSDemod_plugin_threshold.png)
 

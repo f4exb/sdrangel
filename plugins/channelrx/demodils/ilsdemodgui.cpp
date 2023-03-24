@@ -852,7 +852,6 @@ void ILSDemodGUI::updateGPSAngle()
         qreal d = tdPos.distanceTo(gpsPos);
         float h = gpsAltitude - m_altitude;
         float angle = Units::radiansToDegrees(atan(h/d)) - m_settings.m_glidePath;
-        qDebug() << Units::radiansToDegrees(atan(h/d));
         ui->gpsAngle->setText(QString::number(std::abs(angle), 'f', 1));
         ui->gpsAngleDirection->setText(formatAngleDirection(angle));
     }
