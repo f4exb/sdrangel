@@ -76,6 +76,7 @@ private slots:
     void handleInputMessages();
 	void on_startStop_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
+    void on_sampleRate_changed(quint64 value);
 	void on_serverAddress_returnPressed();
 	void on_serverAddressApplyButton_clicked();
 	void openDeviceSettingsDialog(const QPoint& p);

@@ -45,6 +45,9 @@ public:
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);
 
+    qint32 getSampleRate();
+    void setSampleRate(qint32 sample_rate);
+
     QString* getServerAddress();
     void setServerAddress(QString* server_address);
 
@@ -66,6 +69,9 @@ public:
 private:
     qint64 center_frequency;
     bool m_center_frequency_isSet;
+
+    qint32 sample_rate;
+    bool m_sample_rate_isSet;
 
     QString* server_address;
     bool m_server_address_isSet;

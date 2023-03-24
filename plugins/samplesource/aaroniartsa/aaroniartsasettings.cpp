@@ -27,6 +27,7 @@ AaroniaRTSASettings::AaroniaRTSASettings()
 void AaroniaRTSASettings::resetToDefaults()
 {
     m_centerFrequency = 1450000;
+    m_sampleRate = 200000;
 	m_serverAddress = "127.0.0.1:8073";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -39,6 +40,7 @@ QByteArray AaroniaRTSASettings::serialize() const
     SimpleSerializer s(2);
 
 	s.writeString(2, m_serverAddress);
+    s.writeS32(3, m_sampleRate);
     s.writeBool(100, m_useReverseAPI);
     s.writeString(101, m_reverseAPIAddress);
     s.writeU32(102, m_reverseAPIPort);
@@ -62,6 +64,7 @@ bool AaroniaRTSASettings::deserialize(const QByteArray& data)
 		uint32_t utmp;
 
 		d.readString(2, &m_serverAddress, "127.0.0.1:8073");
+        d.readS32(3, &m_sampleRate, 200000);
 		d.readBool(100, &m_useReverseAPI, false);
 		d.readString(101, &m_reverseAPIAddress, "127.0.0.1");
 		d.readU32(102, &utmp, 0);
@@ -90,6 +93,9 @@ void AaroniaRTSASettings::applySettings(const QStringList& settingsKeys, const A
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
+    if (settingsKeys.contains("sampleRate")) {
+        m_sampleRate = settings.m_sampleRate;
+    }
     if (settingsKeys.contains("serverAddress")) {
         m_serverAddress = settings.m_serverAddress;
     }
@@ -113,6 +119,9 @@ QString AaroniaRTSASettings::getDebugString(const QStringList& settingsKeys, boo
 
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("sampleRate") || force) {
+        ostr << " m_sampleRate: " << m_sampleRate;
     }
     if (settingsKeys.contains("serverAddress") || force) {
         ostr << " m_serverAddress: " << m_serverAddress.toStdString();

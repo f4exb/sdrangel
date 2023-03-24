@@ -108,6 +108,7 @@ signals:
 
 public slots:
 	void onCenterFrequencyChanged(quint64 centerFrequency);
+    void onSampleRateChanged(int sampleRate);
 	void onServerAddressChanged(QString serverAddress);
 
 private slots:

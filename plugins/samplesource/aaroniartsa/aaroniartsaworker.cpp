@@ -134,10 +134,21 @@ void AaroniaRTSAWorker::getConfig()
 
 void AaroniaRTSAWorker::onCenterFrequencyChanged(quint64 centerFrequency)
 {
-	if (m_centerFrequency == centerFrequency)
+	if (m_centerFrequency == centerFrequency) {
 		return;
+    }
 
 	m_centerFrequency = centerFrequency;
+	sendCenterFrequencyAndSampleRate();
+}
+
+void AaroniaRTSAWorker::onSampleRateChanged(int sampleRate)
+{
+	if (m_sampleRate == sampleRate) {
+		return;
+    }
+
+	m_sampleRate = sampleRate;
 	sendCenterFrequencyAndSampleRate();
 }
 
@@ -274,28 +285,28 @@ void AaroniaRTSAWorker::onReadyRead()
 				if (error.error == QJsonParseError::NoError)
 				{
 					// Extract fields of interest
-					double	startTime = jdoc["startTime"].toDouble(), endTime = jdoc["endTime"].toDouble();
+					// double	startTime = jdoc["startTime"].toDouble(), endTime = jdoc["endTime"].toDouble();
 					int	samples = jdoc["samples"].toInt();
 
 					// Dump packet loss
-					if (startTime != mPrevTime)
-                    {
-						qDebug() << "AaroniaRTSAWorker::onReadyRead: packet loss: "
-                            << QDateTime::fromMSecsSinceEpoch(startTime * 1000).toString()
-                            << " D " << endTime - startTime
-                            << " O " << startTime - mPrevTime
-                            << " S " << samples
-                            << " L " << QDateTime::currentMSecsSinceEpoch() / 1000.0 - startTime;
+					// if (startTime != mPrevTime)
+                    // {
+					// 	qDebug() << "AaroniaRTSAWorker::onReadyRead: packet loss: "
+                    //         << QDateTime::fromMSecsSinceEpoch(startTime * 1000).toString()
+                    //         << " D " << endTime - startTime
+                    //         << " O " << startTime - mPrevTime
+                    //         << " S " << samples
+                    //         << " L " << QDateTime::currentMSecsSinceEpoch() / 1000.0 - startTime;
 
-                        if (m_status != AaroniaRTSASettings::ConnectionUnstable)
-                        {
-                            m_status = AaroniaRTSASettings::ConnectionUnstable;
-                            emit updateStatus(m_status);
-                        }
-                    }
+                    //     if (m_status != AaroniaRTSASettings::ConnectionUnstable)
+                    //     {
+                    //         m_status = AaroniaRTSASettings::ConnectionUnstable;
+                    //         emit updateStatus(m_status);
+                    //     }
+                    // }
 
 					// Switch to data phase
-					mPrevTime = endTime;
+					// mPrevTime = endTime;
 					mPacketSamples = samples;
                     // qDebug() << jdoc.toJson();
                     quint64 endFreq = jdoc["endFrequency"].toDouble();

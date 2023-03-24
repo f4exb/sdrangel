@@ -30,6 +30,8 @@ SWGAaroniaRTSASettings::SWGAaroniaRTSASettings(QString* json) {
 SWGAaroniaRTSASettings::SWGAaroniaRTSASettings() {
     center_frequency = 0L;
     m_center_frequency_isSet = false;
+    sample_rate = 0;
+    m_sample_rate_isSet = false;
     server_address = nullptr;
     m_server_address_isSet = false;
     use_reverse_api = 0;
@@ -50,6 +52,8 @@ void
 SWGAaroniaRTSASettings::init() {
     center_frequency = 0L;
     m_center_frequency_isSet = false;
+    sample_rate = 0;
+    m_sample_rate_isSet = false;
     server_address = new QString("");
     m_server_address_isSet = false;
     use_reverse_api = 0;
@@ -64,6 +68,7 @@ SWGAaroniaRTSASettings::init() {
 
 void
 SWGAaroniaRTSASettings::cleanup() {
+
 
     if(server_address != nullptr) { 
         delete server_address;
@@ -88,6 +93,8 @@ SWGAaroniaRTSASettings::fromJson(QString &json) {
 void
 SWGAaroniaRTSASettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&server_address, pJson["serverAddress"], "QString", "QString");
     
@@ -118,6 +125,9 @@ SWGAaroniaRTSASettings::asJsonObject() {
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
+    if(m_sample_rate_isSet){
+        obj->insert("sampleRate", QJsonValue(sample_rate));
+    }
     if(server_address != nullptr && *server_address != QString("")){
         toJsonValue(QString("serverAddress"), server_address, obj, QString("QString"));
     }
@@ -145,6 +155,16 @@ void
 SWGAaroniaRTSASettings::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
     this->m_center_frequency_isSet = true;
+}
+
+qint32
+SWGAaroniaRTSASettings::getSampleRate() {
+    return sample_rate;
+}
+void
+SWGAaroniaRTSASettings::setSampleRate(qint32 sample_rate) {
+    this->sample_rate = sample_rate;
+    this->m_sample_rate_isSet = true;
 }
 
 QString*
@@ -203,6 +223,9 @@ SWGAaroniaRTSASettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_rate_isSet){
             isObjectUpdated = true; break;
         }
         if(server_address && *server_address != QString("")){

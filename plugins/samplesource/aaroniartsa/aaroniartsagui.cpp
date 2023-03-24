@@ -74,6 +74,9 @@ AaroniaRTSAGui::AaroniaRTSAGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(9, 0, 999999999);
 
+    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
+    ui->sampleRate->setValueRange(8, 2000U, 20000000U);
+
     displaySettings();
     makeUIConnections();
 
@@ -136,6 +139,13 @@ void AaroniaRTSAGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
     m_settingsKeys.append("centerFrequency");
+    sendSettings();
+}
+
+void AaroniaRTSAGui::on_sampleRate_changed(quint64 value)
+{
+    m_settings.m_sampleRate = value;
+    m_settingsKeys.append("sampleRate");
     sendSettings();
 }
 
@@ -295,6 +305,7 @@ void AaroniaRTSAGui::updateSampleRateAndFrequency()
     ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_deviceSampleRate / 1000.0f, 'g', 5)));
     blockApplySettings(true);
     ui->centerFrequency->setValue(m_deviceCenterFrequency / 1000);
+    ui->sampleRate->setValue(m_deviceSampleRate);
     blockApplySettings(false);
 }
 
@@ -331,6 +342,7 @@ void AaroniaRTSAGui::makeUIConnections()
 {
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AaroniaRTSAGui::on_startStop_toggled);
     QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &AaroniaRTSAGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &AaroniaRTSAGui::on_sampleRate_changed);
     QObject::connect(ui->serverAddress, &QLineEdit::returnPressed, this, &AaroniaRTSAGui::on_serverAddress_returnPressed);
     QObject::connect(ui->serverAddressApplyButton, &QPushButton::clicked, this, &AaroniaRTSAGui::on_serverAddressApplyButton_clicked);
 }

@@ -34,6 +34,7 @@ struct AaroniaRTSASettings {
     };
 
     quint64 m_centerFrequency;
+    int m_sampleRate;
 	QString m_serverAddress;
 
 	bool m_useReverseAPI;

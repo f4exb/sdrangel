@@ -110,6 +110,7 @@ bool AaroniaRTSAInput::start()
     QObject::connect(m_aaroniaRTSAWorkerThread, &QThread::finished, m_aaroniaRTSAWorkerThread, &QThread::deleteLater);
 
 	connect(this, &AaroniaRTSAInput::setWorkerCenterFrequency, m_aaroniaRTSAWorker, &AaroniaRTSAWorker::onCenterFrequencyChanged);
+    connect(this, &AaroniaRTSAInput::setWorkerSampleRate, m_aaroniaRTSAWorker, &AaroniaRTSAWorker::onSampleRateChanged);
 	connect(this, &AaroniaRTSAInput::setWorkerServerAddress, m_aaroniaRTSAWorker, &AaroniaRTSAWorker::onServerAddressChanged);
 	connect(m_aaroniaRTSAWorker, &AaroniaRTSAWorker::updateStatus, this, &AaroniaRTSAInput::setWorkerStatus);
 
@@ -295,6 +296,10 @@ bool AaroniaRTSAInput::applySettings(const AaroniaRTSASettings& settings, const 
 		// m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
+    if (settingsKeys.contains("sampleRate")) {
+        emit setWorkerSampleRate(settings.m_sampleRate);
+    }
+
     if (settingsKeys.contains("useReverseAPI"))
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
@@ -383,6 +388,9 @@ void AaroniaRTSAInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("centerFrequency")) {
 		settings.m_centerFrequency = response.getAaroniaRtsaSettings()->getCenterFrequency();
     }
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+		settings.m_sampleRate = response.getAaroniaRtsaSettings()->getSampleRate();
+    }
     if (deviceSettingsKeys.contains("serverAddress")) {
 		settings.m_serverAddress = *response.getAaroniaRtsaSettings()->getServerAddress();
     }
@@ -414,6 +422,7 @@ int AaroniaRTSAInput::webapiReportGet(
 void AaroniaRTSAInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AaroniaRTSASettings& settings)
 {
 	response.getAaroniaRtsaSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getAaroniaRtsaSettings()->setSampleRate(settings.m_sampleRate);
 
 	if (response.getAaroniaRtsaSettings()->getServerAddress()) {
 		*response.getAaroniaRtsaSettings()->getServerAddress() = settings.m_serverAddress;

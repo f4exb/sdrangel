@@ -176,6 +176,7 @@ signals:
 	void startWorker();
 	void stopWorker();
 	void setWorkerCenterFrequency(quint64 centerFrequency);
+    void setWorkerSampleRate(int sampleRate);
 	void setWorkerServerAddress(QString serverAddress);
 
 private slots:
