@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Vort                                                       //
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -32,7 +31,7 @@
 
 #include "aaroniartsainput.h"
 #include "device/deviceapi.h"
-#include "aaroniartsaworker.h"
+#include "aaroniartsainputworker.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 
@@ -102,17 +101,17 @@ bool AaroniaRTSAInput::start()
     }
 
     m_aaroniaRTSAWorkerThread = new QThread();
-	m_aaroniaRTSAWorker = new AaroniaRTSAWorker(&m_sampleFifo);
+	m_aaroniaRTSAWorker = new AaroniaRTSAInputWorker(&m_sampleFifo);
     m_aaroniaRTSAWorker->setInputMessageQueue(getInputMessageQueue());
 	m_aaroniaRTSAWorker->moveToThread(m_aaroniaRTSAWorkerThread);
 
     QObject::connect(m_aaroniaRTSAWorkerThread, &QThread::finished, m_aaroniaRTSAWorker, &QObject::deleteLater);
     QObject::connect(m_aaroniaRTSAWorkerThread, &QThread::finished, m_aaroniaRTSAWorkerThread, &QThread::deleteLater);
 
-	connect(this, &AaroniaRTSAInput::setWorkerCenterFrequency, m_aaroniaRTSAWorker, &AaroniaRTSAWorker::onCenterFrequencyChanged);
-    connect(this, &AaroniaRTSAInput::setWorkerSampleRate, m_aaroniaRTSAWorker, &AaroniaRTSAWorker::onSampleRateChanged);
-	connect(this, &AaroniaRTSAInput::setWorkerServerAddress, m_aaroniaRTSAWorker, &AaroniaRTSAWorker::onServerAddressChanged);
-	connect(m_aaroniaRTSAWorker, &AaroniaRTSAWorker::updateStatus, this, &AaroniaRTSAInput::setWorkerStatus);
+	connect(this, &AaroniaRTSAInput::setWorkerCenterFrequency, m_aaroniaRTSAWorker, &AaroniaRTSAInputWorker::onCenterFrequencyChanged);
+    connect(this, &AaroniaRTSAInput::setWorkerSampleRate, m_aaroniaRTSAWorker, &AaroniaRTSAInputWorker::onSampleRateChanged);
+	connect(this, &AaroniaRTSAInput::setWorkerServerAddress, m_aaroniaRTSAWorker, &AaroniaRTSAInputWorker::onServerAddressChanged);
+	connect(m_aaroniaRTSAWorker, &AaroniaRTSAInputWorker::updateStatus, this, &AaroniaRTSAInput::setWorkerStatus);
 
 	m_aaroniaRTSAWorkerThread->start();
 	m_running = true;
@@ -187,7 +186,7 @@ quint64 AaroniaRTSAInput::getCenterFrequency() const
 
 void AaroniaRTSAInput::setCenterFrequency(qint64 centerFrequency)
 {
-	AaroniaRTSASettings settings = m_settings;
+	AaroniaRTSAInputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
     MsgConfigureAaroniaRTSA* message = MsgConfigureAaroniaRTSA::create(settings, QList<QString>{"centerFrequency"}, false);
@@ -222,12 +221,12 @@ bool AaroniaRTSAInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (AaroniaRTSAWorker::MsgReportSampleRateAndFrequency::match(message))
+    else if (AaroniaRTSAInputWorker::MsgReportSampleRateAndFrequency::match(message))
     {
-        AaroniaRTSAWorker::MsgReportSampleRateAndFrequency& report = (AaroniaRTSAWorker::MsgReportSampleRateAndFrequency&) message;
+        AaroniaRTSAInputWorker::MsgReportSampleRateAndFrequency& report = (AaroniaRTSAInputWorker::MsgReportSampleRateAndFrequency&) message;
         m_sampleRate = report.getSampleRate();
         m_centerFrequency = report.getCenterFrequency();
-        qDebug() << "AaroniaRTSAInput::handleMessage: AaroniaRTSAWorker::MsgReportSampleRateAndFrequency:"
+        qDebug() << "AaroniaRTSAInput::handleMessage: AaroniaRTSAInputWorker::MsgReportSampleRateAndFrequency:"
             << " m_sampleRate: " << m_sampleRate
             << " m-centerFrequency" << m_centerFrequency;
 
@@ -278,7 +277,7 @@ int AaroniaRTSAInput::getStatus() const
     }
 }
 
-bool AaroniaRTSAInput::applySettings(const AaroniaRTSASettings& settings, const QList<QString>& settingsKeys, bool force)
+bool AaroniaRTSAInput::applySettings(const AaroniaRTSAInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
 	qDebug() << "AaroniaRTSAInput::applySettings: force: "<< force << settings.getDebugString(settingsKeys, force);
 
@@ -364,7 +363,7 @@ int AaroniaRTSAInput::webapiSettingsPutPatch(
                 QString& errorMessage)
 {
     (void) errorMessage;
-    AaroniaRTSASettings settings = m_settings;
+    AaroniaRTSAInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
     MsgConfigureAaroniaRTSA *msg = MsgConfigureAaroniaRTSA::create(settings, deviceSettingsKeys, force);
@@ -381,7 +380,7 @@ int AaroniaRTSAInput::webapiSettingsPutPatch(
 }
 
 void AaroniaRTSAInput::webapiUpdateDeviceSettings(
-        AaroniaRTSASettings& settings,
+        AaroniaRTSAInputSettings& settings,
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
@@ -419,7 +418,7 @@ int AaroniaRTSAInput::webapiReportGet(
     return 200;
 }
 
-void AaroniaRTSAInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AaroniaRTSASettings& settings)
+void AaroniaRTSAInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AaroniaRTSAInputSettings& settings)
 {
 	response.getAaroniaRtsaSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getAaroniaRtsaSettings()->setSampleRate(settings.m_sampleRate);
@@ -447,7 +446,7 @@ void AaroniaRTSAInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& re
 	response.getAaroniaSdrReport()->setStatus(getStatus());
 }
 
-void AaroniaRTSAInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AaroniaRTSASettings& settings, bool force)
+void AaroniaRTSAInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AaroniaRTSAInputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx

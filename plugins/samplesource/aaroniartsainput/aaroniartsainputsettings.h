@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Vort                                                       //
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -22,7 +21,7 @@
 #include <QString>
 #include <QByteArray>
 
-struct AaroniaRTSASettings {
+struct AaroniaRTSAInputSettings {
 
     enum ConnectionStatus
     {
@@ -42,11 +41,11 @@ struct AaroniaRTSASettings {
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
 
-	AaroniaRTSASettings();
+	AaroniaRTSAInputSettings();
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
-    void applySettings(const QStringList& settingsKeys, const AaroniaRTSASettings& settings);
+    void applySettings(const QStringList& settingsKeys, const AaroniaRTSAInputSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 

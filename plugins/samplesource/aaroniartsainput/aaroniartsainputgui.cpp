@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Vort                                                       //
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -24,7 +23,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
-#include "ui_aaroniartsagui.h"
+#include "ui_aaroniartsainputgui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -36,13 +35,13 @@
 
 #include "mainwindow.h"
 
-#include "aaroniartsagui.h"
+#include "aaroniartsainputgui.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 
-AaroniaRTSAGui::AaroniaRTSAGui(DeviceUISet *deviceUISet, QWidget* parent) :
+AaroniaRTSAInputGui::AaroniaRTSAInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
-    ui(new Ui::AaroniaRTSAGui),
+    ui(new Ui::AaroniaRTSAInputGui),
     m_settings(),
     m_doApplySettings(true),
     m_forceSettings(true),
@@ -50,7 +49,7 @@ AaroniaRTSAGui::AaroniaRTSAGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_tickCount(0),
     m_lastEngineState(DeviceAPI::StNotStarted)
 {
-    qDebug("AaroniaRTSAGui::AaroniaRTSAGui");
+    qDebug("AaroniaRTSAInputGui::AaroniaRTSAInputGui");
     m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = m_deviceUISet->m_deviceAPI->getSampleSource();
@@ -69,7 +68,7 @@ AaroniaRTSAGui::AaroniaRTSAGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->setupUi(getContents());
     sizeToContents();
-    getContents()->setStyleSheet("#AaroniaRTSAGui { background-color: rgb(64, 64, 64); }");
+    getContents()->setStyleSheet("#AaroniaRTSAInputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/aaroniartsa/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(9, 0, 999999999);
@@ -90,17 +89,17 @@ AaroniaRTSAGui::AaroniaRTSAGui(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 }
 
-AaroniaRTSAGui::~AaroniaRTSAGui()
+AaroniaRTSAInputGui::~AaroniaRTSAInputGui()
 {
     delete ui;
 }
 
-void AaroniaRTSAGui::destroy()
+void AaroniaRTSAInputGui::destroy()
 {
     delete this;
 }
 
-void AaroniaRTSAGui::resetToDefaults()
+void AaroniaRTSAInputGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
@@ -108,12 +107,12 @@ void AaroniaRTSAGui::resetToDefaults()
     sendSettings();
 }
 
-QByteArray AaroniaRTSAGui::serialize() const
+QByteArray AaroniaRTSAInputGui::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool AaroniaRTSAGui::deserialize(const QByteArray& data)
+bool AaroniaRTSAInputGui::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
@@ -126,7 +125,7 @@ bool AaroniaRTSAGui::deserialize(const QByteArray& data)
     }
 }
 
-void AaroniaRTSAGui::on_startStop_toggled(bool checked)
+void AaroniaRTSAInputGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
@@ -135,26 +134,26 @@ void AaroniaRTSAGui::on_startStop_toggled(bool checked)
     }
 }
 
-void AaroniaRTSAGui::on_centerFrequency_changed(quint64 value)
+void AaroniaRTSAInputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
     m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
 
-void AaroniaRTSAGui::on_sampleRate_changed(quint64 value)
+void AaroniaRTSAInputGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
     m_settingsKeys.append("sampleRate");
     sendSettings();
 }
 
-void AaroniaRTSAGui::on_serverAddress_returnPressed()
+void AaroniaRTSAInputGui::on_serverAddress_returnPressed()
 {
 	on_serverAddressApplyButton_clicked();
 }
 
-void AaroniaRTSAGui::on_serverAddressApplyButton_clicked()
+void AaroniaRTSAInputGui::on_serverAddressApplyButton_clicked()
 {
 	QString serverAddress = ui->serverAddress->text();
     QUrl url(serverAddress);
@@ -169,7 +168,7 @@ void AaroniaRTSAGui::on_serverAddressApplyButton_clicked()
 	sendSettings();
 }
 
-void AaroniaRTSAGui::displaySettings()
+void AaroniaRTSAInputGui::displaySettings()
 {
     blockApplySettings(true);
 
@@ -179,14 +178,14 @@ void AaroniaRTSAGui::displaySettings()
     blockApplySettings(false);
 }
 
-void AaroniaRTSAGui::sendSettings()
+void AaroniaRTSAInputGui::sendSettings()
 {
     if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
     }
 }
 
-void AaroniaRTSAGui::updateHardware()
+void AaroniaRTSAInputGui::updateHardware()
 {
     if (m_doApplySettings)
     {
@@ -198,7 +197,7 @@ void AaroniaRTSAGui::updateHardware()
     }
 }
 
-void AaroniaRTSAGui::updateStatus()
+void AaroniaRTSAInputGui::updateStatus()
 {
     int state = m_deviceUISet->m_deviceAPI->state();
 
@@ -227,11 +226,11 @@ void AaroniaRTSAGui::updateStatus()
     }
 }
 
-bool AaroniaRTSAGui::handleMessage(const Message& message)
+bool AaroniaRTSAInputGui::handleMessage(const Message& message)
 {
     if (AaroniaRTSAInput::MsgConfigureAaroniaRTSA::match(message))
     {
-        qDebug("AaroniaRTSAGui::handleMessage: MsgConfigureAaroniaRTSA");
+        qDebug("AaroniaRTSAInputGui::handleMessage: MsgConfigureAaroniaRTSA");
         const AaroniaRTSAInput::MsgConfigureAaroniaRTSA& cfg = (AaroniaRTSAInput::MsgConfigureAaroniaRTSA&) message;
 
         if (cfg.getForce()) {
@@ -245,7 +244,7 @@ bool AaroniaRTSAGui::handleMessage(const Message& message)
     }
     else if (AaroniaRTSAInput::MsgStartStop::match(message))
     {
-        qDebug("AaroniaRTSAGui::handleMessage: MsgStartStop");
+        qDebug("AaroniaRTSAInputGui::handleMessage: MsgStartStop");
 		AaroniaRTSAInput::MsgStartStop& notif = (AaroniaRTSAInput::MsgStartStop&) message;
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
@@ -255,7 +254,7 @@ bool AaroniaRTSAGui::handleMessage(const Message& message)
     }
 	else if (AaroniaRTSAInput::MsgSetStatus::match(message))
 	{
-		qDebug("AaroniaRTSAGui::handleMessage: MsgSetStatus");
+		qDebug("AaroniaRTSAInputGui::handleMessage: MsgSetStatus");
 		AaroniaRTSAInput::MsgSetStatus& notif = (AaroniaRTSAInput::MsgSetStatus&) message;
 		int status = notif.getStatus();
 		ui->statusIndicator->setToolTip(m_statusTooltips[status]);
@@ -269,7 +268,7 @@ bool AaroniaRTSAGui::handleMessage(const Message& message)
     }
 }
 
-void AaroniaRTSAGui::handleInputMessages()
+void AaroniaRTSAInputGui::handleInputMessages()
 {
     Message* message;
 
@@ -280,7 +279,7 @@ void AaroniaRTSAGui::handleInputMessages()
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_deviceSampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
-            qDebug("AaroniaRTSAGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu",
+            qDebug("AaroniaRTSAInputGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu",
                     notif->getSampleRate(),
                     notif->getCenterFrequency());
             updateSampleRateAndFrequency();
@@ -297,7 +296,7 @@ void AaroniaRTSAGui::handleInputMessages()
     }
 }
 
-void AaroniaRTSAGui::updateSampleRateAndFrequency()
+void AaroniaRTSAInputGui::updateSampleRateAndFrequency()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
@@ -309,7 +308,7 @@ void AaroniaRTSAGui::updateSampleRateAndFrequency()
     blockApplySettings(false);
 }
 
-void AaroniaRTSAGui::openDeviceSettingsDialog(const QPoint& p)
+void AaroniaRTSAInputGui::openDeviceSettingsDialog(const QPoint& p)
 {
     if (m_contextMenuType == ContextMenuDeviceSettings)
     {
@@ -338,11 +337,11 @@ void AaroniaRTSAGui::openDeviceSettingsDialog(const QPoint& p)
     resetContextMenuType();
 }
 
-void AaroniaRTSAGui::makeUIConnections()
+void AaroniaRTSAInputGui::makeUIConnections()
 {
-    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AaroniaRTSAGui::on_startStop_toggled);
-    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &AaroniaRTSAGui::on_centerFrequency_changed);
-    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &AaroniaRTSAGui::on_sampleRate_changed);
-    QObject::connect(ui->serverAddress, &QLineEdit::returnPressed, this, &AaroniaRTSAGui::on_serverAddress_returnPressed);
-    QObject::connect(ui->serverAddressApplyButton, &QPushButton::clicked, this, &AaroniaRTSAGui::on_serverAddressApplyButton_clicked);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AaroniaRTSAInputGui::on_startStop_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &AaroniaRTSAInputGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &AaroniaRTSAInputGui::on_sampleRate_changed);
+    QObject::connect(ui->serverAddress, &QLineEdit::returnPressed, this, &AaroniaRTSAInputGui::on_serverAddress_returnPressed);
+    QObject::connect(ui->serverAddressApplyButton, &QPushButton::clicked, this, &AaroniaRTSAInputGui::on_serverAddressApplyButton_clicked);
 }

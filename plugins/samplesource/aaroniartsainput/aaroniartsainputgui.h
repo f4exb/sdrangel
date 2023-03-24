@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Vort                                                       //
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -19,27 +18,27 @@
 #ifndef _AARONIARTSA_AARONIARTSAGUI_H_
 #define _AARONIARTSA_AARONIARTSAGUI_H_
 
-#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
+#include "device/devicegui.h"
 #include "util/messagequeue.h"
 
-#include "aaroniartsasettings.h"
+#include "aaroniartsainputsettings.h"
 #include "aaroniartsainput.h"
 
 class DeviceUISet;
 
 namespace Ui {
-	class AaroniaRTSAGui;
+	class AaroniaRTSAInputGui;
 }
 
-class AaroniaRTSAGui : public DeviceGUI {
+class AaroniaRTSAInputGui : public DeviceGUI {
 	Q_OBJECT
 
 public:
-	explicit AaroniaRTSAGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
-	virtual ~AaroniaRTSAGui();
+	explicit AaroniaRTSAInputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
+	virtual ~AaroniaRTSAInputGui();
 	virtual void destroy();
 
 	void resetToDefaults();
@@ -48,9 +47,9 @@ public:
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
 private:
-	Ui::AaroniaRTSAGui* ui;
+	Ui::AaroniaRTSAInputGui* ui;
 
-	AaroniaRTSASettings m_settings;
+	AaroniaRTSAInputSettings m_settings;
     QList<QString> m_settingsKeys;
     QTimer m_updateTimer;
     QTimer m_statusTimer;

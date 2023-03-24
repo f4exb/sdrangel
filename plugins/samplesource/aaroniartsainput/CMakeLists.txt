@@ -1,19 +1,19 @@
-project(aaroniartsa)
+project(aaroniartsainput)
 
-set(aaroniartsa_SOURCES
+set(aaroniartsainput_SOURCES
 	aaroniartsainput.cpp
-	aaroniartsaplugin.cpp
-	aaroniartsaworker.cpp
-    aaroniartsasettings.cpp
-    aaroniartsawebapiadapter.cpp
+	aaroniartsainputplugin.cpp
+	aaroniartsainputworker.cpp
+    aaroniartsainputsettings.cpp
+    aaroniartsainputwebapiadapter.cpp
 )
 
-set(aaroniartsa_HEADERS
+set(aaroniartsainput_HEADERS
 	aaroniartsainput.h
-	aaroniartsaplugin.h
-	aaroniartsaworker.h
-    aaroniartsasettings.h
-    aaroniartsawebapiadapter.h
+	aaroniartsainputplugin.h
+	aaroniartsainputworker.h
+    aaroniartsainputsettings.h
+    aaroniartsainputwebapiadapter.h
 )
 
 include_directories(
@@ -22,14 +22,14 @@ include_directories(
 )
 
 if(NOT SERVER_MODE)
-    set(aaroniartsa_SOURCES
-        ${aaroniartsa_SOURCES}
-        aaroniartsagui.cpp
-        aaroniartsagui.ui
+    set(aaroniartsainput_SOURCES
+        ${aaroniartsainput_SOURCES}
+        aaroniartsainputgui.cpp
+        aaroniartsainputgui.ui
     )
-    set(aaroniartsa_HEADERS
-        ${aaroniartsa_HEADERS}
-        aaroniartsagui.h
+    set(aaroniartsainput_HEADERS
+        ${aaroniartsainput_HEADERS}
+        aaroniartsainputgui.h
     )
 
 	set(TARGET_NAME inputaaroniartsa)
@@ -44,7 +44,7 @@ else()
 endif()
 
 add_library(${TARGET_NAME} SHARED
-	${aaroniartsa_SOURCES}
+	${aaroniartsainput_SOURCES}
 )
 
 target_link_libraries(${TARGET_NAME}

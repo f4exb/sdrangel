@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AaroniaRTSAGui</class>
- <widget class="QWidget" name="AaroniaRTSAGui">
+ <class>AaroniaRTSAInputGui</class>
+ <widget class="QWidget" name="AaroniaRTSAInputGui">
   <property name="geometry">
    <rect>
     <x>0</x>

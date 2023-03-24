@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Vort                                                       //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -24,12 +24,12 @@
 #include "util/messagequeue.h"
 #include "dsp/dspcommands.h"
 
-#include "aaroniartsasettings.h"
-#include "aaroniartsaworker.h"
+#include "aaroniartsainputsettings.h"
+#include "aaroniartsainputworker.h"
 
-MESSAGE_CLASS_DEFINITION(AaroniaRTSAWorker::MsgReportSampleRateAndFrequency, Message)
+MESSAGE_CLASS_DEFINITION(AaroniaRTSAInputWorker::MsgReportSampleRateAndFrequency, Message)
 
-AaroniaRTSAWorker::AaroniaRTSAWorker(SampleSinkFifo* sampleFifo) :
+AaroniaRTSAInputWorker::AaroniaRTSAInputWorker(SampleSinkFifo* sampleFifo) :
 	QObject(),
 	m_timer(this),
 	m_samplesBuf(),
@@ -37,7 +37,7 @@ AaroniaRTSAWorker::AaroniaRTSAWorker(SampleSinkFifo* sampleFifo) :
 	m_centerFrequency(0),
 	m_sampleRate(1),
     m_inputMessageQueue(nullptr),
-	m_status(AaroniaRTSASettings::ConnectionIdle),
+	m_status(AaroniaRTSAInputSettings::ConnectionIdle),
     mReply(nullptr),
 	m_convertBuffer(64e6)
 {
@@ -48,7 +48,7 @@ AaroniaRTSAWorker::AaroniaRTSAWorker(SampleSinkFifo* sampleFifo) :
         m_networkAccessManagerConfig,
         &QNetworkAccessManager::finished,
         this,
-        &AaroniaRTSAWorker::handleConfigReply
+        &AaroniaRTSAInputWorker::handleConfigReply
     );
 
 	// Request 16bit raw samples
@@ -67,7 +67,7 @@ AaroniaRTSAWorker::AaroniaRTSAWorker(SampleSinkFifo* sampleFifo) :
 	mPacketSamples = 0;
 }
 
-AaroniaRTSAWorker::~AaroniaRTSAWorker()
+AaroniaRTSAInputWorker::~AaroniaRTSAInputWorker()
 {
     if (mReply)
     {
@@ -86,25 +86,25 @@ AaroniaRTSAWorker::~AaroniaRTSAWorker()
         m_networkAccessManagerConfig,
         &QNetworkAccessManager::finished,
         this,
-        &AaroniaRTSAWorker::handleConfigReply
+        &AaroniaRTSAInputWorker::handleConfigReply
     );
     m_networkAccessManagerConfig->deleteLater();
 }
 
-void AaroniaRTSAWorker::onSocketError(QAbstractSocket::SocketError error)
+void AaroniaRTSAInputWorker::onSocketError(QAbstractSocket::SocketError error)
 {
 	(void) error;
-    m_status = AaroniaRTSASettings::ConnectionError;
+    m_status = AaroniaRTSAInputSettings::ConnectionError;
 	emit updateStatus(m_status);
 }
 
-void AaroniaRTSAWorker::sendCenterFrequencyAndSampleRate()
+void AaroniaRTSAInputWorker::sendCenterFrequencyAndSampleRate()
 {
     if (m_iqDemodName.size() == 0) {
         return;
     }
 
-    qDebug("AaroniaRTSAWorker::sendCenterFrequencyAndSampleRate: %llu samplerate: %d", m_centerFrequency, m_sampleRate);
+    qDebug("AaroniaRTSAInputWorker::sendCenterFrequencyAndSampleRate: %llu samplerate: %d", m_centerFrequency, m_sampleRate);
 
     QJsonObject object {
         {"receiverName", m_iqDemodName},
@@ -125,14 +125,14 @@ void AaroniaRTSAWorker::sendCenterFrequencyAndSampleRate()
     m_networkAccessManagerConfig->put(request, document.toJson());
 }
 
-void AaroniaRTSAWorker::getConfig()
+void AaroniaRTSAInputWorker::getConfig()
 {
     QUrl url(tr("http://%1/remoteconfig").arg(m_serverAddress));
     QNetworkRequest request(url);
     m_networkAccessManagerConfig->get(request);
 }
 
-void AaroniaRTSAWorker::onCenterFrequencyChanged(quint64 centerFrequency)
+void AaroniaRTSAInputWorker::onCenterFrequencyChanged(quint64 centerFrequency)
 {
 	if (m_centerFrequency == centerFrequency) {
 		return;
@@ -142,7 +142,7 @@ void AaroniaRTSAWorker::onCenterFrequencyChanged(quint64 centerFrequency)
 	sendCenterFrequencyAndSampleRate();
 }
 
-void AaroniaRTSAWorker::onSampleRateChanged(int sampleRate)
+void AaroniaRTSAInputWorker::onSampleRateChanged(int sampleRate)
 {
 	if (m_sampleRate == sampleRate) {
 		return;
@@ -152,9 +152,9 @@ void AaroniaRTSAWorker::onSampleRateChanged(int sampleRate)
 	sendCenterFrequencyAndSampleRate();
 }
 
-void AaroniaRTSAWorker::onServerAddressChanged(QString serverAddress)
+void AaroniaRTSAInputWorker::onServerAddressChanged(QString serverAddress)
 {
-    m_status = AaroniaRTSASettings::ConnectionDisconnected;
+    m_status = AaroniaRTSAInputSettings::ConnectionDisconnected;
     updateStatus(m_status);
 
     if (mReply)
@@ -184,34 +184,34 @@ void AaroniaRTSAWorker::onServerAddressChanged(QString serverAddress)
     getConfig();
 }
 
-void AaroniaRTSAWorker::tick()
+void AaroniaRTSAInputWorker::tick()
 {
 }
 
 /**************************CPY ********************************* */
 
-void AaroniaRTSAWorker::onError(QNetworkReply::NetworkError code)
+void AaroniaRTSAInputWorker::onError(QNetworkReply::NetworkError code)
 {
     (void) code;
-	qWarning() << "AaroniaRTSAWorker::onError: network Error: " << mReply->errorString();
+	qWarning() << "AaroniaRTSAInputWorker::onError: network Error: " << mReply->errorString();
     m_status = 3;
 	emit updateStatus(3);
 }
 
-void AaroniaRTSAWorker::onFinished()
+void AaroniaRTSAInputWorker::onFinished()
 {
-	qDebug() << "AaroniaRTSAWorker::onFinished(: finished: " << mReply->errorString();
+	qDebug() << "AaroniaRTSAInputWorker::onFinished(: finished: " << mReply->errorString();
 	mBuffer.append(mReply->readAll());
 	mReply->deleteLater();
 	mReply = nullptr;
 }
 
 // bytes received from the socket
-void AaroniaRTSAWorker::onReadyRead()
+void AaroniaRTSAInputWorker::onReadyRead()
 {
-    if (m_status != AaroniaRTSASettings::ConnectionOK)
+    if (m_status != AaroniaRTSAInputSettings::ConnectionOK)
     {
-        m_status = AaroniaRTSASettings::ConnectionOK;
+        m_status = AaroniaRTSAInputSettings::ConnectionOK;
         emit updateStatus(m_status);
     }
 
@@ -291,16 +291,16 @@ void AaroniaRTSAWorker::onReadyRead()
 					// Dump packet loss
 					// if (startTime != mPrevTime)
                     // {
-					// 	qDebug() << "AaroniaRTSAWorker::onReadyRead: packet loss: "
+					// 	qDebug() << "AaroniaRTSAInputWorker::onReadyRead: packet loss: "
                     //         << QDateTime::fromMSecsSinceEpoch(startTime * 1000).toString()
                     //         << " D " << endTime - startTime
                     //         << " O " << startTime - mPrevTime
                     //         << " S " << samples
                     //         << " L " << QDateTime::currentMSecsSinceEpoch() / 1000.0 - startTime;
 
-                    //     if (m_status != AaroniaRTSASettings::ConnectionUnstable)
+                    //     if (m_status != AaroniaRTSAInputSettings::ConnectionUnstable)
                     //     {
-                    //         m_status = AaroniaRTSASettings::ConnectionUnstable;
+                    //         m_status = AaroniaRTSAInputSettings::ConnectionUnstable;
                     //         emit updateStatus(m_status);
                     //     }
                     // }
@@ -344,7 +344,7 @@ void AaroniaRTSAWorker::onReadyRead()
 	mBuffer.remove(0, offset);
 }
 
-void AaroniaRTSAWorker::handleConfigReply(QNetworkReply* reply)
+void AaroniaRTSAInputWorker::handleConfigReply(QNetworkReply* reply)
 {
     if (reply->operation() == QNetworkAccessManager::GetOperation) // return from GET to /remoteconfig
     {
@@ -355,16 +355,16 @@ void AaroniaRTSAWorker::handleConfigReply(QNetworkReply* reply)
         int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
         if ((httpStatusCode / 100) == 2) {
-            qDebug("AaroniaRTSAWorker::handleConfigReply: remoteconfig OK (%d)", httpStatusCode);
+            qDebug("AaroniaRTSAInputWorker::handleConfigReply: remoteconfig OK (%d)", httpStatusCode);
         } else {
-            qWarning("AaroniaRTSAWorker::handleConfigReply: remoteconfig ended with error (%d)", httpStatusCode);
+            qWarning("AaroniaRTSAInputWorker::handleConfigReply: remoteconfig ended with error (%d)", httpStatusCode);
         }
     }
 
     reply->deleteLater();
 }
 
-void AaroniaRTSAWorker::parseConfig(QByteArray bytes)
+void AaroniaRTSAInputWorker::parseConfig(QByteArray bytes)
 {
     QJsonDocument document = QJsonDocument::fromJson(bytes);
     m_iqDemodName = "";
@@ -399,25 +399,24 @@ void AaroniaRTSAWorker::parseConfig(QByteArray bytes)
             }
             else
             {
-                qDebug() << "AaroniaRTSAWorker::parseConfig: config has no items: " << config;
+                qDebug() << "AaroniaRTSAInputWorker::parseConfig: config has no items: " << config;
             }
 
         }
         else
         {
-            qDebug() << "AaroniaRTSAWorker::parseConfig: document has no config obhect: " << documentObject;
+            qDebug() << "AaroniaRTSAInputWorker::parseConfig: document has no config obhect: " << documentObject;
         }
 
     }
     else
     {
-        qDebug() << "AaroniaRTSAWorker::parseConfig: Document is not an object: " << document;
+        qDebug() << "AaroniaRTSAInputWorker::parseConfig: Document is not an object: " << document;
     }
 
     if (m_iqDemodName == "") {
-        qWarning("AaroniaRTSAWorker.parseConfig: could not find IQ demdulator");
+        qWarning("AaroniaRTSAInputWorker.parseConfig: could not find IQ demdulator");
     } else {
-        qDebug("AaroniaRTSAWorker::parseConfig: IQ demdulator name: %s", qPrintable(m_iqDemodName));
+        qDebug("AaroniaRTSAInputWorker::parseConfig: IQ demdulator name: %s", qPrintable(m_iqDemodName));
     }
 }
-

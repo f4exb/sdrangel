@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // Implementation of static web API adapters used for preset serialization and   //
 // deserialization                                                               //
@@ -20,15 +20,15 @@
 
 #include "SWGDeviceSettings.h"
 #include "aaroniartsainput.h"
-#include "aaroniartsawebapiadapter.h"
+#include "aaroniartsainputwebapiadapter.h"
 
-AaroniaRTSAWebAPIAdapter::AaroniaRTSAWebAPIAdapter()
+AaroniaRTSAInputWebAPIAdapter::AaroniaRTSAInputWebAPIAdapter()
 {}
 
-AaroniaRTSAWebAPIAdapter::~AaroniaRTSAWebAPIAdapter()
+AaroniaRTSAInputWebAPIAdapter::~AaroniaRTSAInputWebAPIAdapter()
 {}
 
-int AaroniaRTSAWebAPIAdapter::webapiSettingsGet(
+int AaroniaRTSAInputWebAPIAdapter::webapiSettingsGet(
         SWGSDRangel::SWGDeviceSettings& response,
         QString& errorMessage)
 {
@@ -39,7 +39,7 @@ int AaroniaRTSAWebAPIAdapter::webapiSettingsGet(
     return 200;
 }
 
-int AaroniaRTSAWebAPIAdapter::webapiSettingsPutPatch(
+int AaroniaRTSAInputWebAPIAdapter::webapiSettingsPutPatch(
         bool force,
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response, // query + response

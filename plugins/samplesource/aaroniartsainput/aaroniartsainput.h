@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Vort                                                       //
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -25,10 +24,10 @@
 #include <QNetworkRequest>
 
 #include <dsp/devicesamplesource.h>
-#include "aaroniartsasettings.h"
+#include "aaroniartsainputsettings.h"
 
 class DeviceAPI;
-class AaroniaRTSAWorker;
+class AaroniaRTSAInputWorker;
 class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
@@ -40,21 +39,21 @@ public:
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		const AaroniaRTSASettings& getSettings() const { return m_settings; }
+		const AaroniaRTSAInputSettings& getSettings() const { return m_settings; }
         const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
 		bool getForce() const { return m_force; }
 
-		static MsgConfigureAaroniaRTSA* create(const AaroniaRTSASettings& settings, const QList<QString>& settingsKeys, bool force)
+		static MsgConfigureAaroniaRTSA* create(const AaroniaRTSAInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 		{
 			return new MsgConfigureAaroniaRTSA(settings, settingsKeys, force);
 		}
 
 	private:
-		AaroniaRTSASettings m_settings;
+		AaroniaRTSAInputSettings m_settings;
         QList<QString> m_settingsKeys;
 		bool m_force;
 
-		MsgConfigureAaroniaRTSA(const AaroniaRTSASettings& settings, const QList<QString>& settingsKeys, bool force) :
+		MsgConfigureAaroniaRTSA(const AaroniaRTSAInputSettings& settings, const QList<QString>& settingsKeys, bool force) :
 			Message(),
 			m_settings(settings),
             m_settingsKeys(settingsKeys),
@@ -145,10 +144,10 @@ public:
 
     static void webapiFormatDeviceSettings(
             SWGSDRangel::SWGDeviceSettings& response,
-            const AaroniaRTSASettings& settings);
+            const AaroniaRTSAInputSettings& settings);
 
     static void webapiUpdateDeviceSettings(
-            AaroniaRTSASettings& settings,
+            AaroniaRTSAInputSettings& settings,
             const QStringList& deviceSettingsKeys,
             SWGSDRangel::SWGDeviceSettings& response);
 
@@ -157,8 +156,8 @@ private:
 	QMutex m_mutex;
     int m_sampleRate;
     quint64 m_centerFrequency;
-	AaroniaRTSASettings m_settings;
-	AaroniaRTSAWorker* m_aaroniaRTSAWorker;
+	AaroniaRTSAInputSettings m_settings;
+	AaroniaRTSAInputWorker* m_aaroniaRTSAWorker;
 	QThread *m_aaroniaRTSAWorkerThread;
 	QString m_deviceDescription;
 	bool m_running;
@@ -167,9 +166,9 @@ private:
     QNetworkRequest m_networkRequest;
 
     int getStatus() const;
-	bool applySettings(const AaroniaRTSASettings& settings, const QList<QString>& settingsKeys, bool force);
+	bool applySettings(const AaroniaRTSAInputSettings& settings, const QList<QString>& settingsKeys, bool force);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AaroniaRTSASettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AaroniaRTSAInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 
 signals:

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Vort                                                       //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -36,7 +36,7 @@
 
 class MessageQueue;
 
-class AaroniaRTSAWorker : public QObject {
+class AaroniaRTSAInputWorker : public QObject {
 	Q_OBJECT
 
 public:
@@ -62,8 +62,8 @@ public:
 		{ }
 	};
 
-	AaroniaRTSAWorker(SampleSinkFifo* sampleFifo);
-    ~AaroniaRTSAWorker();
+	AaroniaRTSAInputWorker(SampleSinkFifo* sampleFifo);
+    ~AaroniaRTSAInputWorker();
     int getStatus() const { return m_status; }
     void setInputMessageQueue(MessageQueue *messageQueue) { m_inputMessageQueue = messageQueue; }
 

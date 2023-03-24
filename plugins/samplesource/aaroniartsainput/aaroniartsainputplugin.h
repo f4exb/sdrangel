@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Vort                                                       //
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -26,13 +25,13 @@ class PluginAPI;
 
 #define AARONIARTSA_DEVICE_TYPE_ID "sdrangel.samplesource.aaroniartsasource"
 
-class AaroniaRTSAPlugin : public QObject, public PluginInterface {
+class AaroniaRTSAInputPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
 	Q_PLUGIN_METADATA(IID AARONIARTSA_DEVICE_TYPE_ID)
 
 public:
-	explicit AaroniaRTSAPlugin(QObject* parent = NULL);
+	explicit AaroniaRTSAInputPlugin(QObject* parent = NULL);
 
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);

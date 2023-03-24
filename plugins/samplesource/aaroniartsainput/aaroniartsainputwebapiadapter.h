@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // Implementation of static web API adapters used for preset serialization and   //
 // deserialization                                                               //
@@ -19,13 +19,13 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "device/devicewebapiadapter.h"
-#include "aaroniartsasettings.h"
+#include "aaroniartsainputsettings.h"
 
-class AaroniaRTSAWebAPIAdapter : public DeviceWebAPIAdapter
+class AaroniaRTSAInputWebAPIAdapter : public DeviceWebAPIAdapter
 {
 public:
-    AaroniaRTSAWebAPIAdapter();
-    virtual ~AaroniaRTSAWebAPIAdapter();
+    AaroniaRTSAInputWebAPIAdapter();
+    virtual ~AaroniaRTSAInputWebAPIAdapter();
     virtual QByteArray serialize() { return m_settings.serialize(); }
     virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
 
@@ -40,5 +40,5 @@ public:
             QString& errorMessage);
 
 private:
-    AaroniaRTSASettings m_settings;
+    AaroniaRTSAInputSettings m_settings;
 };

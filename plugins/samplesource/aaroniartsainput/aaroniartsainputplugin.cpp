@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Vort                                   //
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -24,16 +23,16 @@
 #ifdef SERVER_MODE
 #include "aaroniartsainput.h"
 #else
-#include "aaroniartsagui.h"
+#include "aaroniartsainputgui.h"
 #endif
-#include "aaroniartsaplugin.h"
-#include "aaroniartsawebapiadapter.h"
+#include "aaroniartsainputplugin.h"
+#include "aaroniartsainputwebapiadapter.h"
 
-const PluginDescriptor AaroniaRTSAPlugin::m_pluginDescriptor = {
+const PluginDescriptor AaroniaRTSAInputPlugin::m_pluginDescriptor = {
     QStringLiteral("AaroniaRTSA"),
 	QStringLiteral("AaroniaRTSA input"),
-    QStringLiteral("7.8.4"),
-	QStringLiteral("(c) Vort (c) Edouard Griffiths, F4EXB"),
+    QStringLiteral("7.12.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
 	QStringLiteral("https://github.com/f4exb/sdrangel")
@@ -42,22 +41,22 @@ const PluginDescriptor AaroniaRTSAPlugin::m_pluginDescriptor = {
 static constexpr const char* const m_hardwareID = "AaroniaRTSA";
 static constexpr const char* const m_deviceTypeID = AARONIARTSA_DEVICE_TYPE_ID;
 
-AaroniaRTSAPlugin::AaroniaRTSAPlugin(QObject* parent) :
+AaroniaRTSAInputPlugin::AaroniaRTSAInputPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& AaroniaRTSAPlugin::getPluginDescriptor() const
+const PluginDescriptor& AaroniaRTSAInputPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void AaroniaRTSAPlugin::initPlugin(PluginAPI* pluginAPI)
+void AaroniaRTSAInputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleSource(m_deviceTypeID, this);
 }
 
-void AaroniaRTSAPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
+void AaroniaRTSAInputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
     if (listedHwIds.contains(m_hardwareID)) { // check if it was done
         return;
@@ -75,7 +74,7 @@ void AaroniaRTSAPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevice
     listedHwIds.append(m_hardwareID);
 }
 
-PluginInterface::SamplingDevices AaroniaRTSAPlugin::enumSampleSources(const OriginDevices& originDevices)
+PluginInterface::SamplingDevices AaroniaRTSAInputPlugin::enumSampleSources(const OriginDevices& originDevices)
 {
 	SamplingDevices result;
 
@@ -101,7 +100,7 @@ PluginInterface::SamplingDevices AaroniaRTSAPlugin::enumSampleSources(const Orig
 }
 
 #ifdef SERVER_MODE
-DeviceGUI* AaroniaRTSAPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* AaroniaRTSAInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -112,13 +111,13 @@ DeviceGUI* AaroniaRTSAPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-DeviceGUI* AaroniaRTSAPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* AaroniaRTSAInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
 	if(sourceId == m_deviceTypeID) {
-		AaroniaRTSAGui* gui = new AaroniaRTSAGui(deviceUISet);
+		AaroniaRTSAInputGui* gui = new AaroniaRTSAInputGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	} else {
@@ -127,7 +126,7 @@ DeviceGUI* AaroniaRTSAPlugin::createSampleSourcePluginInstanceGUI(
 }
 #endif
 
-DeviceSampleSource *AaroniaRTSAPlugin::createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI)
+DeviceSampleSource *AaroniaRTSAInputPlugin::createSampleSourcePluginInstance(const QString& sourceId, DeviceAPI *deviceAPI)
 {
     if (sourceId == m_deviceTypeID)
     {
@@ -140,7 +139,7 @@ DeviceSampleSource *AaroniaRTSAPlugin::createSampleSourcePluginInstance(const QS
     }
 }
 
-DeviceWebAPIAdapter *AaroniaRTSAPlugin::createDeviceWebAPIAdapter() const
+DeviceWebAPIAdapter *AaroniaRTSAInputPlugin::createDeviceWebAPIAdapter() const
 {
-    return new AaroniaRTSAWebAPIAdapter();
+    return new AaroniaRTSAInputWebAPIAdapter();
 }

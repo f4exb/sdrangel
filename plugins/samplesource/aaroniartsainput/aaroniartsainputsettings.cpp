@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Vort                                                       //
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -17,14 +16,14 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "util/simpleserializer.h"
-#include "aaroniartsasettings.h"
+#include "aaroniartsainputsettings.h"
 
-AaroniaRTSASettings::AaroniaRTSASettings()
+AaroniaRTSAInputSettings::AaroniaRTSAInputSettings()
 {
     resetToDefaults();
 }
 
-void AaroniaRTSASettings::resetToDefaults()
+void AaroniaRTSAInputSettings::resetToDefaults()
 {
     m_centerFrequency = 1450000;
     m_sampleRate = 200000;
@@ -35,7 +34,7 @@ void AaroniaRTSASettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
 }
 
-QByteArray AaroniaRTSASettings::serialize() const
+QByteArray AaroniaRTSAInputSettings::serialize() const
 {
     SimpleSerializer s(2);
 
@@ -49,7 +48,7 @@ QByteArray AaroniaRTSASettings::serialize() const
 	return s.final();
 }
 
-bool AaroniaRTSASettings::deserialize(const QByteArray& data)
+bool AaroniaRTSAInputSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
@@ -88,7 +87,7 @@ bool AaroniaRTSASettings::deserialize(const QByteArray& data)
     }
 }
 
-void AaroniaRTSASettings::applySettings(const QStringList& settingsKeys, const AaroniaRTSASettings& settings)
+void AaroniaRTSAInputSettings::applySettings(const QStringList& settingsKeys, const AaroniaRTSAInputSettings& settings)
 {
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
@@ -113,7 +112,7 @@ void AaroniaRTSASettings::applySettings(const QStringList& settingsKeys, const A
     }
 }
 
-QString AaroniaRTSASettings::getDebugString(const QStringList& settingsKeys, bool force) const
+QString AaroniaRTSAInputSettings::getDebugString(const QStringList& settingsKeys, bool force) const
 {
     std::ostringstream ostr;
 
