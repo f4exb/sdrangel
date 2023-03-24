@@ -37,6 +37,7 @@ private:
     QHash<QString, QJsonArray> m_lastPosition;
     QHash<QString, bool> m_hasMoved;
     QGeoCoordinate m_position;
+    static const QStringList m_heightReferences;
 
 public:
     CZML(const MapSettings *settings);

@@ -249,13 +249,41 @@ void MapSettingsDialog::accept()
         m_map3DSettingsChanged = false;
     }
 
-    m_settings->m_map2DEnabled = ui->map2DEnabled->isChecked();
-    m_settings->m_map3DEnabled = ui->map3DEnabled->isChecked();
-    m_settings->m_terrain = ui->terrain->currentText();
-    m_settings->m_buildings = ui->buildings->currentText();
-    m_settings->m_sunLightEnabled = ui->sunLightEnabled->currentIndex() == 1;
-    m_settings->m_eciCamera = ui->eciCamera->currentIndex() == 1;
-    m_settings->m_antiAliasing = ui->antiAliasing->currentText();
+    if (m_settings->m_map2DEnabled != ui->map2DEnabled->isChecked())
+    {
+        m_settings->m_map2DEnabled = ui->map2DEnabled->isChecked();
+        m_settingsKeysChanged.append("map2DEnabled");
+    }
+    if (m_settings->m_map3DEnabled != ui->map3DEnabled->isChecked())
+    {
+        m_settings->m_map3DEnabled = ui->map3DEnabled->isChecked();
+        m_settingsKeysChanged.append("map3DEnabled");
+    }
+    if (m_settings->m_terrain != ui->terrain->currentText())
+    {
+        m_settings->m_terrain = ui->terrain->currentText();
+        m_settingsKeysChanged.append("terrain");
+    }
+    if (m_settings->m_buildings != ui->buildings->currentText())
+    {
+        m_settings->m_buildings = ui->buildings->currentText();
+        m_settingsKeysChanged.append("buildings");
+    }
+    if (m_settings->m_sunLightEnabled != (ui->sunLightEnabled->currentIndex() == 1))
+    {
+        m_settings->m_sunLightEnabled = ui->sunLightEnabled->currentIndex() == 1;
+        m_settingsKeysChanged.append("sunLightEnabled");
+    }
+    if (m_settings->m_eciCamera != (ui->eciCamera->currentIndex() == 1))
+    {
+        m_settings->m_eciCamera = ui->eciCamera->currentIndex() == 1;
+        m_settingsKeysChanged.append("eciCamera");
+    }
+    if (m_settings->m_antiAliasing != ui->antiAliasing->currentText())
+    {
+        m_settings->m_antiAliasing = ui->antiAliasing->currentText();
+        m_settingsKeysChanged.append("antiAliasing");
+    }
 
     for (int row = 0; row < ui->mapItemSettings->rowCount(); row++)
     {

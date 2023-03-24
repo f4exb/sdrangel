@@ -171,6 +171,47 @@
         viewer.selectedEntity = pickEntityPrioritized(e);
     }
 
+    function showCoords(e) {
+        if (viewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
+            var cartesian = viewer.camera.pickEllipsoid(e.position);
+            var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+            longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
+            latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
+            positionMarker.position = Cesium.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, 1);
+            positionMarker.point.show = true;
+            positionMarker.label.show = true;
+            positionMarker.label.text =
+                `Lon: ${`   ${longitudeString}`}\u00B0` +
+                `\nLat: ${`   ${latitudeString}`}\u00B0`;
+        } else {
+            // https://github.com/CesiumGS/cesium/issues/4368
+            // viewer.scene.pickPosition doesn't work because we have viewer.scene.globe.depthTestAgainstTerrain = false
+            const ray = viewer.camera.getPickRay(e.position);
+            const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+            var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+            var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [cartographic]);
+            Cesium.when(promise, function(updatedPositions) {
+                longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
+                latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
+                heightString = updatedPositions[0].height.toFixed(1);
+                positionMarker.position = Cesium.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, 1); // Height relative to ground
+                positionMarker.point.show = true;
+                positionMarker.label.show = true;
+                positionMarker.label.text =
+                    `Lon: ${`   ${longitudeString}`}\u00B0` +
+                    `\nLat: ${`   ${latitudeString}`}\u00B0` +
+                    `\nAlt: ${`   ${heightString}`}m`;
+            }, function() {
+                console.log(`Terrain doesn't support sampleTerrainMostDetailed`);
+            });
+        }
+    }
+
+    function hideCoords() {
+        positionMarker.point.show = false;
+        positionMarker.label.show = false;
+    }
+
     Cesium.Ion.defaultAccessToken = '$CESIUM_ION_API_KEY$';
 
     const viewer = new Cesium.Viewer('cesiumContainer', {
@@ -184,13 +225,36 @@
         navigationInstructionsInitiallyVisible: false,
         terrainProviderViewModels: [] // User should adjust terrain via dialog, so depthTestAgainstTerrain doesn't get set
     });
-    viewer.scene.globe.depthTestAgainstTerrain = false; // So labels/points aren't clipped by terrain
+    viewer.scene.globe.depthTestAgainstTerrain = false; // So labels/points aren't clipped by terrain (this prevents pickPosition from working)
     viewer.screenSpaceEventHandler.setInputAction(pickEntity, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    viewer.screenSpaceEventHandler.setInputAction(showCoords, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK, Cesium.KeyboardEventModifier.SHIFT);
+    viewer.screenSpaceEventHandler.setInputAction(hideCoords, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
     var buildings = undefined;
     const images = new Map();
 
     var mufGeoJSONStream = null;
     var foF2GeoJSONStream = null;
+
+    const positionMarker = viewer.entities.add({
+        id: 'Position marker',
+        point : {
+            show: false,
+            pixelSize : 8,
+            color : Cesium.Color.RED,
+            heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND
+            },
+        label: {
+            show: false,
+            showBackground: true,
+            font: "12px monospace",
+            fillColor: Cesium.Color.WHITE,
+            outlineColor: Cesium.Color.RED,
+            horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
+            verticalOrigin: Cesium.VerticalOrigin.TOP,
+            pixelOffset: new Cesium.Cartesian2(0, 9),
+            heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND
+        },
+    });
 
     // Generate HTML for MUF contour info box from properties in GeoJSON
     function describeMUF(properties, nameProperty) {
@@ -446,6 +510,51 @@
                         console.log(`Can't currently use altitudeReference when more than one position`);
                         czmlStream.process(command);
                     }
+                } else if (   (command.hasOwnProperty('polygon') && command.polygon.hasOwnProperty('altitudeReference'))
+                           || (command.hasOwnProperty('polyline') && command.polyline.hasOwnProperty('altitudeReference'))) {
+                    // Support per vertex height reference in polygons and CLIP_TO_GROUND in polylines
+                    var prim = command.hasOwnProperty('polygon') ? command.polygon : command.polyline;
+                    var clipToGround = prim.altitudeReference == "CLIP_TO_GROUND";
+                    var clampToGround = prim.altitudeReference == "CLAMP_TO_GROUND";
+                    var size = prim.positions.cartographicDegrees.length;
+                    var positionCount = size/3;
+                    var positions = new Array(positionCount);
+                    if (viewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
+                        if (clampToGround) {
+                            for (let i = 0; i < positionCount; i++) {
+                                prim.positions.cartographicDegrees[i*3+2] = 0;
+                            }
+                        } else if (clipToGround) {
+                            for (let i = 0; i < positionCount; i++) {
+                                if (prim.positions.cartographicDegrees[i*3+2] < 0) {
+                                    prim.positions.cartographicDegrees[i*3+2] = 0;
+                                }
+                            }
+                        }
+                        czmlStream.process(command);
+                    } else {
+                        for (let i = 0; i < positionCount; i++) {
+                            positions[i] = Cesium.Cartographic.fromDegrees(prim.positions.cartographicDegrees[i*3+0], prim.positions.cartographicDegrees[i*3+1]);
+                        }
+                        var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, positions);
+                        Cesium.when(promise, function(updatedPositions) {
+                            if (clampToGround) {
+                                for (let i = 0; i < positionCount; i++) {
+                                    prim.positions.cartographicDegrees[i*3+2] = updatedPositions[i].height;
+                                }
+                            } else if (clipToGround) {
+                                for (let i = 0; i < positionCount; i++) {
+                                    if (prim.positions.cartographicDegrees[i*3+2] < updatedPositions[i].height) {
+                                        prim.positions.cartographicDegrees[i*3+2] = updatedPositions[i].height;
+                                    }
+                                }
+                            }
+                            czmlStream.process(command);
+                        }, function() {
+                            console.log(`Terrain doesn't support sampleTerrainMostDetailed`);
+                            czmlStream.process(command);
+                        });
+                    }
                 } else {
                     czmlStream.process(command);
                 }
@@ -511,3 +620,4 @@
  </div>
 </body>
 </html>
+

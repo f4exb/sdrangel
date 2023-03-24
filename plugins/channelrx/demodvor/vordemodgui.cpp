@@ -136,9 +136,9 @@ bool VORDemodGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (VORDemodReport::MsgReportIdent::match(message))
+    else if (MorseDemod::MsgReportIdent::match(message))
     {
-        VORDemodReport::MsgReportIdent& report = (VORDemodReport::MsgReportIdent&) message;
+        MorseDemod::MsgReportIdent& report = (MorseDemod::MsgReportIdent&) message;
 
         QString ident = report.getIdent();
         QString identString = Morse::toString(ident); // Convert Morse to a string

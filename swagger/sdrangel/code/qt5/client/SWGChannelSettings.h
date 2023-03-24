@@ -48,6 +48,7 @@
 #include "SWGFreqTrackerSettings.h"
 #include "SWGHeatMapSettings.h"
 #include "SWGIEEE_802_15_4_ModSettings.h"
+#include "SWGILSDemodSettings.h"
 #include "SWGInterferometerSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
@@ -184,6 +185,9 @@ public:
 
     SWGHeatMapSettings* getHeatMapSettings();
     void setHeatMapSettings(SWGHeatMapSettings* heat_map_settings);
+
+    SWGILSDemodSettings* getIlsDemodSettings();
+    void setIlsDemodSettings(SWGILSDemodSettings* ils_demod_settings);
 
     SWGInterferometerSettings* getInterferometerSettings();
     void setInterferometerSettings(SWGInterferometerSettings* interferometer_settings);
@@ -359,6 +363,9 @@ private:
 
     SWGHeatMapSettings* heat_map_settings;
     bool m_heat_map_settings_isSet;
+
+    SWGILSDemodSettings* ils_demod_settings;
+    bool m_ils_demod_settings_isSet;
 
     SWGInterferometerSettings* interferometer_settings;
     bool m_interferometer_settings_isSet;

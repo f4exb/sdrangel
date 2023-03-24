@@ -43,6 +43,7 @@
 #include "SWGFreqTrackerReport.h"
 #include "SWGHeatMapReport.h"
 #include "SWGIEEE_802_15_4_ModReport.h"
+#include "SWGILSDemodReport.h"
 #include "SWGM17DemodReport.h"
 #include "SWGM17ModReport.h"
 #include "SWGNFMDemodReport.h"
@@ -156,6 +157,9 @@ public:
 
     SWGHeatMapReport* getHeatMapReport();
     void setHeatMapReport(SWGHeatMapReport* heat_map_report);
+
+    SWGILSDemodReport* getIlsDemodReport();
+    void setIlsDemodReport(SWGILSDemodReport* ils_demod_report);
 
     SWGM17DemodReport* getM17DemodReport();
     void setM17DemodReport(SWGM17DemodReport* m17_demod_report);
@@ -295,6 +299,9 @@ private:
 
     SWGHeatMapReport* heat_map_report;
     bool m_heat_map_report_isSet;
+
+    SWGILSDemodReport* ils_demod_report;
+    bool m_ils_demod_report_isSet;
 
     SWGM17DemodReport* m17_demod_report;
     bool m_m17_demod_report_isSet;

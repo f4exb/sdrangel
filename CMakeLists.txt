@@ -83,6 +83,7 @@ option(ENABLE_CHANNELRX_DEMODDSD "Enable channelrx demoddsd plugin" ON)
 option(ENABLE_CHANNELRX_DEMODFT8 "Enable channelrx demodft8 plugin" ON)
 option(ENABLE_CHANNELRX_DEMODNAVTEX "Enable channelrx demodnavtex plugin" ON)
 option(ENABLE_CHANNELRX_DEMODRTTY "Enable channelrx demodrtty plugin" ON)
+option(ENABLE_CHANNELRX_DEMODILS "Enable channelrx demodils plugin" ON)
 
 # Channel Tx enablers
 option(ENABLE_CHANNELTX "Enable channeltx plugins" ON)

@@ -87,7 +87,7 @@ bool FeatureWebAPIUtils::mapSetDateTime(const QDateTime& dateTime, int featureSe
 }
 
 // Get first feature with the given URI
-Feature* FeatureWebAPIUtils::getFeature(int featureSetIndex, int featureIndex, const QString& uri)
+Feature* FeatureWebAPIUtils::getFeature(int& featureSetIndex, int& featureIndex, const QString& uri)
 {
     FeatureSet *featureSet;
     Feature *feature;
@@ -116,13 +116,16 @@ Feature* FeatureWebAPIUtils::getFeature(int featureSetIndex, int featureIndex, c
     else
     {
         // Find first feature matching URI
-        for (std::vector<FeatureSet*>::const_iterator it = featureSets.begin(); it != featureSets.end(); ++it, featureIndex++)
+        int fsi = 0;
+        for (std::vector<FeatureSet*>::const_iterator it = featureSets.begin(); it != featureSets.end(); ++it, ++fsi)
         {
             for (int fi = 0; fi < (*it)->getNumberOfFeatures(); fi++)
             {
                 feature = (*it)->getFeatureAt(fi);
                 if (feature->getURI() == uri)
                 {
+                    featureSetIndex = fsi;
+                    featureIndex = fi;
                     return feature;
                 }
             }

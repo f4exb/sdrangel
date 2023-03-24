@@ -1177,6 +1177,38 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
     }
 }
 
+bool ChannelWebAPIUtils::getFeatureSetting(unsigned int featureSetIndex,  unsigned int featureIndex, const QString &setting, int &value)
+{
+    SWGSDRangel::SWGFeatureSettings featureSettingsResponse;
+    Feature *feature;
+
+    if (getFeatureSettings(featureSetIndex, featureIndex, featureSettingsResponse, feature))
+    {
+        QJsonObject *jsonObj = featureSettingsResponse.asJsonObject();
+        return WebAPIUtils::getSubObjectInt(*jsonObj, setting, value);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool ChannelWebAPIUtils::getFeatureSetting(unsigned int featureSetIndex,  unsigned int featureIndex, const QString &setting, QString &value)
+{
+    SWGSDRangel::SWGFeatureSettings featureSettingsResponse;
+    Feature *feature;
+
+    if (getFeatureSettings(featureSetIndex, featureIndex, featureSettingsResponse, feature))
+    {
+        QJsonObject *jsonObj = featureSettingsResponse.asJsonObject();
+        return WebAPIUtils::getSubObjectString(*jsonObj, setting, value);
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, unsigned int featureIndex, const QString &key, int &value)
 {
     SWGSDRangel::SWGFeatureReport featureReport;

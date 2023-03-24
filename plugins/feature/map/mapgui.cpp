@@ -1643,6 +1643,7 @@ void MapGUI::on_displaySettings_clicked()
         }
         applyMap2DSettings(dialog.m_map2DSettingsChanged);
         applyMap3DSettings(dialog.m_map3DSettingsChanged);
+        m_settingsKeys.append(dialog.m_settingsKeysChanged);
         applySettings();
         m_objectMapModel.allUpdated();
         m_imageMapModel.allUpdated();

@@ -33,6 +33,7 @@ const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("APTDemod"),
     QStringLiteral("FT8Demod"),
     QStringLiteral("HeatMap"),
+    QStringLiteral("ILSDemod"),
     QStringLiteral("Radiosonde"),
     QStringLiteral("StarTracker"),
     QStringLiteral("SatelliteTracker"),
@@ -47,6 +48,7 @@ const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.aptdemod"),
     QStringLiteral("sdrangel.channel.ft8demod"),
     QStringLiteral("sdrangel.channel.heatmap"),
+    QStringLiteral("sdrangel.channel.ilsdemod"),
     QStringLiteral("sdrangel.feature.radiosonde"),
     QStringLiteral("sdrangel.feature.startracker"),
     QStringLiteral("sdrangel.feature.satellitetracker"),
@@ -95,6 +97,7 @@ MapSettings::MapSettings() :
     m_itemSettings.insert("DAB", dabSettings);
 
     m_itemSettings.insert("Navtex", new MapItemSettings("Navtex", false, QColor(255, 0, 255), false, true, 8));
+    m_itemSettings.insert("ILSDemod", new MapItemSettings("ILSDemod", true, QColor(0, 205, 200), true, true, 10));
 
     MapItemSettings *navAidSettings = new MapItemSettings("NavAid", false, QColor(255, 0, 255), false, true, 11);
     navAidSettings->m_filterDistance = 500000;

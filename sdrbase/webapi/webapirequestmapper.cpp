@@ -4538,6 +4538,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setIeee802154ModSettings(new SWGSDRangel::SWGIEEE_802_15_4_ModSettings());
             channelSettings->getIeee802154ModSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "ILSDemodSettings")
+        {
+            channelSettings->setIlsDemodSettings(new SWGSDRangel::SWGILSDemodSettings());
+            channelSettings->getIlsDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "InterferometerSettings")
         {
             channelSettings->setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
@@ -5392,6 +5397,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDsdDemodSettings(nullptr);
     channelSettings.setHeatMapSettings(nullptr);
     channelSettings.setIeee802154ModSettings(nullptr);
+    channelSettings.setIlsDemodSettings(nullptr);
     channelSettings.setNavtexDemodSettings(nullptr);
     channelSettings.setNfmDemodSettings(nullptr);
     channelSettings.setNfmModSettings(nullptr);
@@ -5430,6 +5436,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setDatvModReport(nullptr);
     channelReport.setDsdDemodReport(nullptr);
     channelReport.setHeatMapReport(nullptr);
+    channelReport.setIlsDemodReport(nullptr);
     channelReport.setNavtexDemodReport(nullptr);
     channelReport.setNfmDemodReport(nullptr);
     channelReport.setNfmModReport(nullptr);

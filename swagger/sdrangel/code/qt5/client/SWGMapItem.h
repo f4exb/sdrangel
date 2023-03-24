@@ -138,6 +138,12 @@ public:
     QString* getAvailableUntil();
     void setAvailableUntil(QString* available_until);
 
+    qint32 getColorValid();
+    void setColorValid(qint32 color_valid);
+
+    qint32 getColor();
+    void setColor(qint32 color);
+
 
     virtual bool isSet() override;
 
@@ -234,6 +240,12 @@ private:
 
     QString* available_until;
     bool m_available_until_isSet;
+
+    qint32 color_valid;
+    bool m_color_valid_isSet;
+
+    qint32 color;
+    bool m_color_isSet;
 
 };
 
