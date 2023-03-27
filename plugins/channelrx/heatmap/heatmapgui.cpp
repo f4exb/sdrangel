@@ -109,7 +109,6 @@ bool HeatMapGUI::handleMessage(const Message& message)
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
-        ui->rfBW->setMaximum(m_basebandSampleRate/100);
         ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
         ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
         updateAbsoluteCenterFrequency();
@@ -211,14 +210,15 @@ void HeatMapGUI::on_averagePeriod_valueChanged(int value)
 }
 
 const QStringList HeatMapGUI::m_sampleRateTexts = {
-     "10", "100", "1k", "10k", "100k", "1M"
+     "100", "1k", "10k", "100k", "1M", "10M"
 };
 
 void HeatMapGUI::on_sampleRate_valueChanged(int value)
 {
     m_settings.m_sampleRate = (int)std::pow(10.0f, (float)value);
-    ui->sampleRateText->setText(m_sampleRateTexts[value-1]);
-    ui->averagePeriod->setMinimum(std::max(1, static_cast<int> ( m_averagePeriodTexts.size()) - value));
+    ui->sampleRateText->setText(m_sampleRateTexts[value-2]); // value range is [2,7]
+    ui->averagePeriod->setMinimum(std::max(1, static_cast<int> (m_averagePeriodTexts.size()) - value));
+    ui->rfBW->setMaximum(m_settings.m_sampleRate/100);
     m_scopeVis->setLiveRate(m_settings.m_sampleRate);
     applySettings();
 }
@@ -695,7 +695,8 @@ void HeatMapGUI::displaySettings()
 
     value = (int)std::log10(m_settings.m_sampleRate);
     ui->sampleRate->setValue(value);
-    ui->sampleRateText->setText(m_sampleRateTexts[value-1]);
+    int idx = std::min(std::max(0, value-2), m_sampleRateTexts.size() - 1);
+    ui->sampleRateText->setText(m_sampleRateTexts[idx]);
     ui->averagePeriod->setMinimum(std::max(1, static_cast<int> (m_averagePeriodTexts.size()) - value));
 
     ui->txPosition->setChecked(m_settings.m_txPosValid);
