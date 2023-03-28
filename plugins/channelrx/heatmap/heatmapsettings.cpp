@@ -40,7 +40,7 @@ void HeatMapSettings::resetToDefaults()
     m_mode = Average;
     m_pulseThreshold= -50.0f;
     m_averagePeriodUS = 100000;
-    m_sampleRate = 100;
+    m_sampleRate = 100000;
     m_txPosValid = false;
     m_txLatitude = 0.0f;
     m_txLongitude = 0.0f;
@@ -138,7 +138,7 @@ bool HeatMapSettings::deserialize(const QByteArray& data)
         d.readS32(6, (int*)&m_mode, (int)Average);
         d.readFloat(7, &m_pulseThreshold, 50.0f);
         d.readS32(8, &m_averagePeriodUS, 100000);
-        d.readS32(9, &m_sampleRate, 100);
+        d.readS32(9, &m_sampleRate, 100000);
         d.readBool(10, &m_txPosValid, false);
         d.readFloat(11, &m_txLatitude);
         d.readFloat(12, &m_txLongitude);

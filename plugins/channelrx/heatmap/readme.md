@@ -49,7 +49,7 @@ Displays the heat map resolution in metres per pixel. Currently this is fixed at
 
 <h3>6: SR - Sample Rate</h3>
 
-Sets the sample rate at which channel power is sampled and measured. Values range from 1MS/s to 100S/s in powers of 10.
+Sets the sample rate at which channel power is sampled and measured. Values range from 100S/s to 10MS/s in powers of 10.
 
 <h3>7: Tavg - Average Time</h3>
 

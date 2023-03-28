@@ -334,13 +334,16 @@
          <string>Sample rate</string>
         </property>
         <property name="minimum">
-         <number>1</number>
+         <number>2</number>
         </property>
         <property name="maximum">
-         <number>6</number>
+         <number>7</number>
         </property>
         <property name="pageStep">
          <number>1</number>
+        </property>
+        <property name="value">
+         <number>5</number>
         </property>
        </widget>
       </item>
@@ -1543,21 +1546,31 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>LevelMeterSignalDB</class>
-   <extends>QWidget</extends>
-   <header>gui/levelmeter.h</header>
-   <container>1</container>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
   </customwidget>
   <customwidget>
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1571,16 +1584,6 @@
    <extends>QWidget</extends>
    <header>gui/glscopegui.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QChartView</class>
-   <extends>QGraphicsView</extends>
-   <header>QtCharts</header>
   </customwidget>
  </customwidgets>
  <tabstops>
