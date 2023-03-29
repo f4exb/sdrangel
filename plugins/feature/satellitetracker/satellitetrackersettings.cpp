@@ -413,6 +413,9 @@ void SatelliteTrackerSettings::applySettings(const QStringList& settingsKeys, co
     if (settingsKeys.contains("aosCommand")) {
         m_aosCommand = settings.m_aosCommand;
     }
+    if (settingsKeys.contains("losSpeech")) {
+        m_losSpeech = settings.m_losSpeech;
+    }
     if (settingsKeys.contains("losCommand")) {
         m_losCommand = settings.m_losCommand;
     }
@@ -451,6 +454,9 @@ void SatelliteTrackerSettings::applySettings(const QStringList& settingsKeys, co
     }
     if (settingsKeys.contains("replayEnabled")) {
         m_replayEnabled = settings.m_replayEnabled;
+    }
+    if (settingsKeys.contains("replayStartDateTime")) {
+        m_replayStartDateTime = settings.m_replayStartDateTime;
     }
     if (settingsKeys.contains("sendTimeToMap")) {
         m_sendTimeToMap = settings.m_sendTimeToMap;
@@ -605,6 +611,9 @@ QString SatelliteTrackerSettings::getDebugString(const QStringList& settingsKeys
     }
     if (settingsKeys.contains("replayEnabled") || force) {
         ostr << " m_replayEnabled: " << m_replayEnabled;
+    }
+    if (settingsKeys.contains("replayStartDateTime") || force) {
+        ostr << " m_replayStartDateTime: " << m_replayStartDateTime.toString().toStdString();
     }
     if (settingsKeys.contains("sendTimeToMap") || force) {
         ostr << " m_sendTimeToMap: " << m_sendTimeToMap;
