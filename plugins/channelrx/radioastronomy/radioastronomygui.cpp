@@ -286,6 +286,7 @@ void RadioAstronomyGUI::resizePowerTable()
     ui->powerTable->setItem(row, POWER_COL_AIR_TEMP, new QTableWidgetItem("20.0"));
     ui->powerTable->setItem(row, POWER_COL_SENSOR_1, new QTableWidgetItem("1.0000000"));
     ui->powerTable->setItem(row, POWER_COL_SENSOR_2, new QTableWidgetItem("1.0000000"));
+    ui->powerTable->setItem(row, POWER_COL_UTC, new QTableWidgetItem("15/04/2016 10:17:00"));
     ui->powerTable->resizeColumnsToContents();
     ui->powerTable->removeRow(row);
 }
@@ -633,6 +634,7 @@ void RadioAstronomyGUI::powerMeasurementReceived(FFTMeasurement *fft, bool skipC
     QTableWidgetItem* airTempItem = new QTableWidgetItem();
     QTableWidgetItem* sensor1Item = new QTableWidgetItem();
     QTableWidgetItem* sensor2Item = new QTableWidgetItem();
+    QTableWidgetItem* utcItem = new QTableWidgetItem();
 
     ui->powerTable->setItem(row, POWER_COL_DATE, dateItem);
     ui->powerTable->setItem(row, POWER_COL_TIME, timeItem);
@@ -661,12 +663,14 @@ void RadioAstronomyGUI::powerMeasurementReceived(FFTMeasurement *fft, bool skipC
     ui->powerTable->setItem(row, POWER_COL_AIR_TEMP, airTempItem);
     ui->powerTable->setItem(row, POWER_COL_SENSOR_1, sensor1Item);
     ui->powerTable->setItem(row, POWER_COL_SENSOR_2, sensor2Item);
+    ui->powerTable->setItem(row, POWER_COL_UTC, utcItem);
 
     ui->powerTable->setSortingEnabled(true);
 
     QDateTime dateTime = fft->m_dateTime;
     dateItem->setData(Qt::DisplayRole, dateTime.date());
     timeItem->setData(Qt::DisplayRole, dateTime.time());
+    utcItem->setData(Qt::DisplayRole, dateTime.toUTC());
 
     powerItem->setData(Qt::DisplayRole, fft->m_totalPower);
     powerDBItem->setData(Qt::DisplayRole, fft->m_totalPowerdBFS);
@@ -1155,7 +1159,7 @@ void RadioAstronomyGUI::updateBWLimits()
 {
     qint64 sr = (qint64) m_settings.m_sampleRate;
     int digits = ceil(log10(sr+1));
-    ui->rfBW->setValueRange(true, digits, 1000, sr);
+    ui->rfBW->setValueRange(true, digits, 100, sr);
 }
 
 void RadioAstronomyGUI::on_deltaFrequency_changed(qint64 value)
@@ -1965,7 +1969,6 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
-    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_basebandSampleRate(0),
     m_centerFrequency(0),
@@ -2059,10 +2062,10 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     // Also, set bandwidth before sampleRate
     ui->rfBW->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->rfBW->setValue(m_settings.m_rfBandwidth);
-    ui->rfBW->setValueRange(true, 8, 1000, 99999999);
+    ui->rfBW->setValueRange(true, 8, 100, 99999999);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->sampleRate->setValue(m_settings.m_sampleRate);
-    ui->sampleRate->setValueRange(true, 8, 100000, 99999999);
+    ui->sampleRate->setValueRange(true, 8, 1000, 99999999);
     ui->integration->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->integration->setValue(m_settings.m_integration);
     ui->integration->setValueRange(true, 7, 1, 99999999);
@@ -6244,5 +6247,5 @@ void RadioAstronomyGUI::makeUIConnections()
 
 void RadioAstronomyGUI::updateAbsoluteCenterFrequency()
 {
-    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+    setStatusFrequency(m_centerFrequency + m_settings.m_inputFrequencyOffset);
 }
