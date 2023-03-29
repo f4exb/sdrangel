@@ -30,7 +30,7 @@
 
 #include "datvdemodreport.h"
 
-const unsigned int DATVDemodSink::m_rfFilterFftLength = 1024;
+const unsigned int DATVDemodSink::m_rfFilterFftLength = 512;
 
 DATVDemodSink::DATVDemodSink() :
     m_blnNeedConfigUpdate(false),
@@ -1199,10 +1199,8 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
 {
     float fltI;
     float fltQ;
-    leansdr::cf32 objIQ;
     fftfilt::cmplx *objRF;
     int intRFOut;
-    double magSq;
     int lngWritable=0;
     leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> *objDemodulatorDVBS2 =
         (leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> *) m_objDemodulatorDVBS2;
@@ -1305,20 +1303,16 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
         objC *= m_objNCO.nextIQ();
         intRFOut = m_objRFFilter->runFilt(objC, &objRF); // filter RF before demod
 
-        for (int intI = 0 ; intI < intRFOut; intI++)
+        for (int intI = 0 ; intI < intRFOut; intI++, objRF++)
         {
-            objIQ.real(objRF->real());
-            objIQ.imag(objRF->imag());
-            magSq = objIQ.real() * objIQ.real() + objIQ.imag() * objIQ.imag();
-            m_objMagSqAverage(magSq);
-
-            objRF ++;
+            m_objMagSqAverage(norm(*objRF));
 
             if (m_blnDVBInitialized
                 && (p_rawiq_writer != nullptr)
                 && (m_objScheduler != nullptr))
             {
-                p_rawiq_writer->write(objIQ);
+
+                p_rawiq_writer->write(*objRF);
                 m_lngReadIQ++;
 
                 lngWritable = p_rawiq_writer->writable();
@@ -1330,8 +1324,7 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
                     m_objScheduler->step();
 
                     m_lngReadIQ = 0;
-                    delete p_rawiq_writer;
-                    p_rawiq_writer = new leansdr::pipewriter<leansdr::cf32>(*p_rawiq);
+                    p_rawiq_writer->reset();
                 }
             }
         }

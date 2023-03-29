@@ -370,6 +370,13 @@ struct pipewriter
         *wr() = e;
         written(1);
     }
+
+    void reset(unsigned long min_write = 1)
+    {
+        if (min_write > buf.min_write) {
+            buf.min_write = min_write;
+        }
+    }
 };
 
 // Convenience functions for working with optional pipes
