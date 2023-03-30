@@ -44,6 +44,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
+#include "dsp/interpolator.h"
 #include "audio/audiofifo.h"
 #include "util/messagequeue.h"
 #include "util/movingaverage.h"
@@ -175,6 +176,7 @@ private:
     };
 
     inline int decimation(float Fin, float Fout) { int d = Fin / Fout; return std::max(d, 1); }
+    void processOneSample(Complex &ci);
 
     void CleanUpDATVFramework();
     void ResetDATVFrameworkPointers();
@@ -328,8 +330,12 @@ private:
     // Audio
 	AudioFifo m_audioFifo;
 
-    fftfilt * m_objRFFilter;
-    NCO m_objNCO;
+    NCO m_nco;
+    Interpolator m_interpolator;
+    Real m_interpolatorDistance;
+    Real m_interpolatorDistanceRemain;
+    static const int m_interpolatorPhaseSteps = 4;      // Higher than these two values will struggle to run in real-time
+    static const int m_interpolatorTapsPerPhase = 3.5f; // without gaining much improvement in PER
 
     bool m_blnInitialized;
     bool m_blnRenderingVideo;

@@ -51,7 +51,6 @@ DATVDemodSink::DATVDemodSink() :
     //*************** DATV PARAMETERS  ***************
     m_blnInitialized=false;
     ResetDATVFrameworkPointers();
-    m_objRFFilter = new fftfilt(-256000.0 / 1024000.0, 256000.0 / 1024000.0, m_rfFilterFftLength);
 }
 
 DATVDemodSink::~DATVDemodSink()
@@ -68,8 +67,6 @@ DATVDemodSink::~DATVDemodSink()
     if (m_videoThread) {
         delete m_videoThread;
     }
-
-    delete m_objRFFilter;
 }
 
 void DATVDemodSink::stopVideo()
@@ -539,12 +536,13 @@ void DATVDemodSink::InitDATVFramework()
         <<  " RollOff: " << m_settings.m_rollOff
         <<  " Viterbi: " << m_settings.m_viterbi
         <<  " Excursion: " << m_settings.m_excursion
-        <<  " Sample rate: " << m_channelSampleRate;
+        <<  " channel Sample rate: " << m_channelSampleRate
+        <<  " Input sample rate: " << 2 * m_settings.m_symbolRate;
 
     m_objCfg.standard = m_settings.m_standard;
 
     m_objCfg.fec = (leansdr::code_rate) getLeanDVBCodeRateFromDATV(m_settings.m_fec);
-    m_objCfg.Fs = (float) m_channelSampleRate;
+    m_objCfg.Fs = (float) 2 * m_settings.m_symbolRate; // maintained at twice the symbol rate
     m_objCfg.Fm = (float) m_settings.m_symbolRate;
     m_objCfg.fastlock = m_settings.m_fastLock;
 
@@ -875,14 +873,15 @@ void DATVDemodSink::InitDATVS2Framework()
         <<  " RollOff: " << m_settings.m_rollOff
         <<  " Viterbi: " << m_settings.m_viterbi
         <<  " Excursion: " << m_settings.m_excursion
-        <<  " Sample rate: " << m_channelSampleRate
+        <<  " Channel sample rate: " << m_channelSampleRate
+        <<  " Input sample rate: " << 2 * m_settings.m_symbolRate
         <<  " m_softLDPCMaxTrials: " << m_settings.m_softLDPCMaxTrials
         <<  " m_softLDPCToolPath: " << m_settings.m_softLDPCToolPath;
 
     m_objCfg.standard = m_settings.m_standard;
 
     m_objCfg.fec = (leansdr::code_rate) getLeanDVBCodeRateFromDATV(m_settings.m_fec);
-    m_objCfg.Fs = (float) m_channelSampleRate;
+    m_objCfg.Fs = (float) 2 * m_settings.m_symbolRate; // maintained at twice the symbol rate
     m_objCfg.Fm = (float) m_settings.m_symbolRate;
     m_objCfg.fastlock = m_settings.m_fastLock;
 
@@ -1271,65 +1270,59 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
     }
 
     //********** Bis repetita : Let's rock and roll buddy ! **********
-#ifdef EXTENDED_DIRECT_SAMPLE
-
-    qint16 * ptrBuffer;
-    qint32 intLen;
-
-    //********** Reading direct samples **********
-
-    SampleVector::const_iterator it = begin;
-    intLen = it->intLen;
-    ptrBuffer = it->ptrBuffer;
-    ptrBufferToRelease = ptrBuffer;
-    ++it;
-
-    for(qint32 intInd=0; intInd<intLen-1; intInd +=2)
-    {
-
-        fltI= ((qint32) (*ptrBuffer)) << 4;
-        ptrBuffer ++;
-        fltQ= ((qint32) (*ptrBuffer)) << 4;
-        ptrBuffer ++;
-
-#else
-
     for (SampleVector::const_iterator it = begin; it != end; ++it /* ++it **/)
     {
-        fltI = it->real();
-        fltQ = it->imag();
-#endif
-        //********** iq stream ****************
-        Complex objC(fltI,fltQ);
-        objC *= m_objNCO.nextIQ();
-        intRFOut = m_objRFFilter->runFilt(objC, &objRF); // filter RF before demod
+        Complex c(it->real(), it->imag());
 
-        for (int intI = 0 ; intI < intRFOut; intI++, objRF++)
+        if (m_interpolatorDistance < 1.0f) // interpolate - should never get there...
         {
-            m_objMagSqAverage(norm(*objRF));
+            Complex ci;
+            c *= m_nco.nextIQ();
 
-            if (m_blnDVBInitialized
-                && (p_rawiq_writer != nullptr)
-                && (m_objScheduler != nullptr))
+            while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
             {
+                processOneSample(ci);
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
+            }
+        }
+        else // decimate
+        {
+            Complex ci;
+            c *= m_nco.nextIQ();
 
-                p_rawiq_writer->write(*objRF);
-                m_lngReadIQ++;
-
-                lngWritable = p_rawiq_writer->writable();
-
-                //Leave +1 by safety
-                //if(((m_lngReadIQ+1)>=lngWritable) || (m_lngReadIQ>=768))
-                if ((m_lngReadIQ + 1) >= lngWritable)
-                {
-                    m_objScheduler->step();
-
-                    m_lngReadIQ = 0;
-                    p_rawiq_writer->reset(m_RawIQMinWrite);
-                }
+            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+            {
+                processOneSample(ci);
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
             }
         }
     } // Samples for loop
+}
+
+void DATVDemodSink::processOneSample(Complex &ci)
+{
+    m_objMagSqAverage(norm(ci));
+
+    if (m_blnDVBInitialized
+        && (p_rawiq_writer != nullptr)
+        && (m_objScheduler != nullptr))
+    {
+
+        p_rawiq_writer->write(ci);
+        m_lngReadIQ++;
+
+        int writable = p_rawiq_writer->writable();
+
+        //Leave +1 by safety
+        //if(((m_lngReadIQ+1)>=lngWritable) || (m_lngReadIQ>=768))
+        if ((m_lngReadIQ + 1) >= writable)
+        {
+            m_objScheduler->step();
+
+            m_lngReadIQ = 0;
+            p_rawiq_writer->reset(m_RawIQMinWrite);
+        }
+    }
 }
 
 void DATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -1343,7 +1336,7 @@ void DATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequ
     if ((m_settings.m_centerFrequency != channelFrequencyOffset) ||
         (m_channelSampleRate != channelSampleRate) || force)
     {
-        m_objNCO.setFreq(-(float) channelFrequencyOffset, (float) channelSampleRate);
+        m_nco.setFreq(-(float) channelFrequencyOffset, (float) channelSampleRate);
         qDebug("DATVDemodSink::applyChannelSettings: NCO: IF: %d <> TF: %d ISR: %d",
             channelFrequencyOffset, m_settings.m_centerFrequency, channelSampleRate);
         callApplySettings = true;
@@ -1351,10 +1344,10 @@ void DATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequ
 
     if ((m_channelSampleRate != channelSampleRate) || force)
     {
-        //Bandpass filter shaping
-        Real fltLowCut = -((float) m_settings.m_rfBandwidth / 2.0) / (float) channelSampleRate;
-        Real fltHiCut  = ((float) m_settings.m_rfBandwidth / 2.0) / (float) channelSampleRate;
-        m_objRFFilter->create_filter(fltLowCut, fltHiCut);
+        m_interpolator.create(m_interpolatorPhaseSteps, channelSampleRate, m_settings.m_rfBandwidth / 2.2,  m_interpolatorTapsPerPhase);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance = (Real) channelSampleRate / (Real) (2 * m_settings.m_symbolRate);
+        qDebug("DATVDemodSink::applyChannelSettings: m_interpolatorDistance: %f", m_interpolatorDistance);
     }
 
     m_channelSampleRate = channelSampleRate;
@@ -1400,17 +1393,15 @@ void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
     if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth)
         || force)
     {
-
-        //Bandpass filter shaping
-        Real fltLowCut = -((float) settings.m_rfBandwidth / 2.0) / (float) m_channelSampleRate;
-        Real fltHiCut  = ((float) settings.m_rfBandwidth / 2.0) / (float) m_channelSampleRate;
-        m_objRFFilter->create_filter(fltLowCut, fltHiCut);
+        m_interpolator.create(m_interpolatorPhaseSteps, m_channelSampleRate, m_settings.m_rfBandwidth / 2.2,  m_interpolatorTapsPerPhase);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) (2 * m_settings.m_symbolRate);
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
         || force)
     {
-        m_objNCO.setFreq(-(float) settings.m_centerFrequency, (float) m_channelSampleRate);
+        m_nco.setFreq(-(float) settings.m_centerFrequency, (float) m_channelSampleRate);
     }
 
     if ((m_settings.m_udpTS != settings.m_udpTS) || force) {
@@ -1489,4 +1480,3 @@ int DATVDemodSink::getLeanDVBModulationFromDATV(DATVDemodSettings::DATVModulatio
         return -1;
     }
 }
-
