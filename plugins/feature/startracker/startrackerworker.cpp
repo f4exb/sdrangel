@@ -145,8 +145,8 @@ void StarTrackerWorker::applySettings(const StarTrackerSettings& settings, const
         || settingsKeys.contains("el")
         || settingsKeys.contains("l")
         || settingsKeys.contains("b")
-        || settingsKeys.contains("azOffset")
-        || settingsKeys.contains("elOffset")
+        || settingsKeys.contains("azimuthOffset")
+        || settingsKeys.contains("elevationOffset")
         || force)
     {
         // Recalculate immediately
@@ -563,8 +563,8 @@ void StarTrackerWorker::update()
     }
 
     // Add user-adjustment
-    aa.alt += m_settings.m_elOffset;
-    aa.az += m_settings.m_azOffset;
+    aa.alt += m_settings.m_elevationOffset;
+    aa.az += m_settings.m_azimuthOffset;
 
     // Send to GUI
     if (getMessageQueueToGUI())

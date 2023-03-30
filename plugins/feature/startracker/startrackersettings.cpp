@@ -75,11 +75,11 @@ void StarTrackerSettings::resetToDefaults()
     m_el = 0.0;
     m_l = 0.0;
     m_b = 0.0;
-    m_azOffset = 0.0;
-    m_elOffset = 0.0;
     m_link = false;
     m_owmAPIKey = "";
     m_weatherUpdatePeriod = 60;
+    m_azimuthOffset = 0.0;
+    m_elevationOffset = 0.0;
     m_drawSunOnSkyTempChart = true;
     m_drawMoonOnSkyTempChart = true;
     m_workspaceIndex = 0;
@@ -128,8 +128,8 @@ QByteArray StarTrackerSettings::serialize() const
     s.writeBool(37, m_link);
     s.writeString(38, m_owmAPIKey);
     s.writeS32(39, m_weatherUpdatePeriod);
-    s.writeDouble(40, m_azOffset);
-    s.writeDouble(41, m_elOffset);
+    s.writeDouble(40, m_azimuthOffset);
+    s.writeDouble(41, m_elevationOffset);
     s.writeBool(42, m_drawSunOnSkyTempChart);
     s.writeBool(43, m_drawMoonOnSkyTempChart);
 
@@ -214,8 +214,8 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         d.readBool(37, &m_link, false);
         d.readString(38, &m_owmAPIKey, "");
         d.readS32(39, &m_weatherUpdatePeriod, 60);
-        d.readDouble(40, &m_azOffset, 0.0);
-        d.readDouble(41, &m_elOffset, 0.0);
+        d.readDouble(40, &m_azimuthOffset, 0.0);
+        d.readDouble(41, &m_elevationOffset, 0.0);
         d.readBool(42, &m_drawSunOnSkyTempChart, true);
         d.readBool(43, &m_drawMoonOnSkyTempChart, true);
 
@@ -281,11 +281,11 @@ void StarTrackerSettings::applySettings(const QStringList& settingsKeys, const S
     if (settingsKeys.contains("beamwidth")) {
         m_beamwidth = settings.m_beamwidth;
     }
-    if (settingsKeys.contains("enableServer")) {
-        m_enableServer = settings.m_enableServer;
-    }
     if (settingsKeys.contains("serverPort")) {
         m_serverPort = settings.m_serverPort;
+    }
+    if (settingsKeys.contains("enableServer")) {
+        m_enableServer = settings.m_enableServer;
     }
     if (settingsKeys.contains("azElUnits")) {
         m_azElUnits = settings.m_azElUnits;
@@ -350,12 +350,6 @@ void StarTrackerSettings::applySettings(const QStringList& settingsKeys, const S
     if (settingsKeys.contains("b")) {
         m_b = settings.m_b;
     }
-    if (settingsKeys.contains("azOffset")) {
-        m_azOffset = settings.m_azOffset;
-    }
-    if (settingsKeys.contains("elOffset")) {
-        m_elOffset = settings.m_elOffset;
-    }
     if (settingsKeys.contains("link")) {
         m_link = settings.m_link;
     }
@@ -364,6 +358,12 @@ void StarTrackerSettings::applySettings(const QStringList& settingsKeys, const S
     }
     if (settingsKeys.contains("weatherUpdatePeriod")) {
         m_weatherUpdatePeriod = settings.m_weatherUpdatePeriod;
+    }
+    if (settingsKeys.contains("azimuthOffset")) {
+        m_azimuthOffset = settings.m_azimuthOffset;
+    }
+    if (settingsKeys.contains("elevationOffset")) {
+        m_elevationOffset = settings.m_elevationOffset;
     }
     if (settingsKeys.contains("drawSunOnSkyTempChart")) {
         m_drawSunOnSkyTempChart = settings.m_drawSunOnSkyTempChart;
@@ -422,11 +422,11 @@ QString StarTrackerSettings::getDebugString(const QStringList& settingsKeys, boo
     if (settingsKeys.contains("beamwidth") || force) {
         ostr << " m_beamwidth: " << m_beamwidth;
     }
-    if (settingsKeys.contains("enableServer") || force) {
-        ostr << " m_enableServer: " << m_enableServer;
-    }
     if (settingsKeys.contains("serverPort") || force) {
         ostr << " m_serverPort: " << m_serverPort;
+    }
+    if (settingsKeys.contains("enableServer") || force) {
+        ostr << " m_enableServer: " << m_enableServer;
     }
     if (settingsKeys.contains("azElUnits") || force) {
         ostr << " m_azElUnits: " << m_azElUnits;
@@ -488,12 +488,6 @@ QString StarTrackerSettings::getDebugString(const QStringList& settingsKeys, boo
     if (settingsKeys.contains("b") || force) {
         ostr << " m_b: " << m_b;
     }
-    if (settingsKeys.contains("azOffset") || force) {
-        ostr << " m_azOffset: " << m_azOffset;
-    }
-    if (settingsKeys.contains("elOffset") || force) {
-        ostr << " m_elOffset: " << m_elOffset;
-    }
     if (settingsKeys.contains("link") || force) {
         ostr << " m_link: " << m_link;
     }
@@ -502,6 +496,12 @@ QString StarTrackerSettings::getDebugString(const QStringList& settingsKeys, boo
     }
     if (settingsKeys.contains("weatherUpdatePeriod") || force) {
         ostr << " m_weatherUpdatePeriod: " << m_weatherUpdatePeriod;
+    }
+    if (settingsKeys.contains("azimuthOffset") || force) {
+        ostr << " m_azimuthOffset: " << m_azimuthOffset;
+    }
+    if (settingsKeys.contains("elevationOffset") || force) {
+        ostr << " m_elevationOffset: " << m_elevationOffset;
     }
     if (settingsKeys.contains("drawSunOnSkyTempChart") || force) {
         ostr << " m_drawSunOnSkyTempChart: " << m_drawSunOnSkyTempChart;
@@ -515,3 +515,4 @@ QString StarTrackerSettings::getDebugString(const QStringList& settingsKeys, boo
 
     return QString(ostr.str().c_str());
 }
+

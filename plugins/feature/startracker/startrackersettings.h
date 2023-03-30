@@ -67,8 +67,8 @@ struct StarTrackerSettings
     bool m_link;                // Link settings to Radio Astronomy plugin
     QString m_owmAPIKey;        // API key for openweathermap.org
     int m_weatherUpdatePeriod;  // Time in minutes between weather updates
-    double m_azOffset;
-    double m_elOffset;
+    double m_azimuthOffset;
+    double m_elevationOffset;
     bool m_drawSunOnSkyTempChart;
     bool m_drawMoonOnSkyTempChart;
     Serializable *m_rollupState;

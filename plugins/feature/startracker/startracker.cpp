@@ -402,8 +402,8 @@ void StarTracker::webapiFormatFeatureSettings(
     response.getStarTrackerSettings()->setElevation(settings.m_el);
     response.getStarTrackerSettings()->setL(settings.m_l);
     response.getStarTrackerSettings()->setB(settings.m_b);
-    response.getStarTrackerSettings()->setAzimuthOffset(settings.m_azOffset);
-    response.getStarTrackerSettings()->setElevationOffset(settings.m_elOffset);
+    response.getStarTrackerSettings()->setAzimuthOffset(settings.m_azimuthOffset);
+    response.getStarTrackerSettings()->setElevationOffset(settings.m_elevationOffset);
 
     if (settings.m_rollupState)
     {
@@ -507,10 +507,10 @@ void StarTracker::webapiUpdateFeatureSettings(
         settings.m_b = response.getStarTrackerSettings()->getB();
     }
     if (featureSettingsKeys.contains("azimuthOffset")) {
-        settings.m_azOffset = response.getStarTrackerSettings()->getAzimuthOffset();
+        settings.m_azimuthOffset = response.getStarTrackerSettings()->getAzimuthOffset();
     }
     if (featureSettingsKeys.contains("elevationOffset")) {
-        settings.m_elOffset = response.getStarTrackerSettings()->getElevationOffset();
+        settings.m_elevationOffset = response.getStarTrackerSettings()->getElevationOffset();
     }
     if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
         settings.m_rollupState->updateFrom(featureSettingsKeys, response.getStarTrackerSettings()->getRollupState());
@@ -595,10 +595,10 @@ void StarTracker::webapiReverseSendSettings(const QList<QString>& featureSetting
         swgStarTrackerSettings->setB(settings.m_b);
     }
     if (featureSettingsKeys.contains("azimuthOffset") || force) {
-        swgStarTrackerSettings->setAzimuthOffset(settings.m_azOffset);
+        swgStarTrackerSettings->setAzimuthOffset(settings.m_azimuthOffset);
     }
     if (featureSettingsKeys.contains("elevationOffset") || force) {
-        swgStarTrackerSettings->setElevationOffset(settings.m_elOffset);
+        swgStarTrackerSettings->setElevationOffset(settings.m_elevationOffset);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/featureset/%3/feature/%4/settings")
