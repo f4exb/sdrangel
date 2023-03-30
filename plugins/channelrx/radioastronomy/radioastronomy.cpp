@@ -60,6 +60,7 @@ MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgStartSweep, Message)
 MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgStopSweep, Message)
 MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgSweepComplete, Message)
 MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgSweepStatus, Message)
+MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgScanAvailableFeatures, Message)
 MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgReportAvailableFeatures, Message)
 MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgReportAvailableRotators, Message)
 
@@ -326,6 +327,11 @@ bool RadioAstronomy::handleMessage(const Message& cmd)
         {
             m_basebandSink->getInputMessageQueue()->push(MsgStopMeasurements::create());
         }
+        return true;
+    }
+    else if (MsgScanAvailableFeatures::match(cmd))
+    {
+        scanAvailableFeatures();
         return true;
     }
     else

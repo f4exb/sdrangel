@@ -307,6 +307,24 @@ public:
         }
     };
 
+    class MsgScanAvailableFeatures : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+
+        static MsgScanAvailableFeatures* create()
+        {
+            return new MsgScanAvailableFeatures();
+        }
+
+    private:
+
+        MsgScanAvailableFeatures() :
+            Message()
+        {
+        }
+    };
+
     class MsgReportAvailableFeatures : public Message {
         MESSAGE_CLASS_DECLARATION
 

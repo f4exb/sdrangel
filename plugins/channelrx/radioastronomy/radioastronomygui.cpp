@@ -2205,6 +2205,8 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     plotCalSpectrum();
     plotSpectrum();
     plotPowerChart();
+
+    m_radioAstronomy->getInputMessageQueue()->push(RadioAstronomy::MsgScanAvailableFeatures::create());
 }
 
 void RadioAstronomyGUI::customContextMenuRequested(QPoint pos)
@@ -6235,9 +6237,32 @@ void RadioAstronomyGUI::makeUIConnections()
     QObject::connect(ui->powerGaussianHPBW, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerGaussianHPBW_valueChanged);
     QObject::connect(ui->runMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_runMode_currentIndexChanged);
     QObject::connect(ui->sweepType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_sweepType_currentIndexChanged);
-    QObject::connect(ui->startStop, &ButtonSwitch::clicked, this, &RadioAstronomyGUI::on_startStop_clicked);
+    QObject::connect(ui->sweep1Start, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_sweep1Start_valueChanged);
+    QObject::connect(ui->sweep1Stop, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_sweep1Stop_valueChanged);
+    QObject::connect(ui->sweep1Step, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_sweep1Step_valueChanged);
+    QObject::connect(ui->sweep1Delay, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_sweep1Delay_valueChanged);
+    QObject::connect(ui->sweep2Start, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_sweep2Start_valueChanged);
+    QObject::connect(ui->sweep2Stop, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_sweep2Stop_valueChanged);
+    QObject::connect(ui->sweep2Step, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_sweep2Step_valueChanged);
+    QObject::connect(ui->sweep2Delay, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_sweep2Delay_valueChanged);
     QObject::connect(ui->sweepStartAtTime, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_sweepStartAtTime_currentIndexChanged);
     QObject::connect(ui->sweepStartDateTime, &QDateTimeEdit::dateTimeChanged, this, &RadioAstronomyGUI::on_sweepStartDateTime_dateTimeChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::clicked, this, &RadioAstronomyGUI::on_startStop_clicked);
+    QObject::connect(ui->power2DAutoscale, &QToolButton::clicked, this, &RadioAstronomyGUI::on_power2DAutoscale_clicked);
+    QObject::connect(ui->power2DLinkSweep, &ButtonSwitch::clicked, this, &RadioAstronomyGUI::on_power2DLinkSweep_toggled);
+    QObject::connect(ui->power2DSweepType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_power2DSweepType_currentIndexChanged);
+    QObject::connect(ui->power2DWidth, QOverload<int>::of(&QSpinBox::valueChanged), this, &RadioAstronomyGUI::on_power2DWidth_valueChanged);
+    QObject::connect(ui->power2DHeight, QOverload<int>::of(&QSpinBox::valueChanged), this, &RadioAstronomyGUI::on_power2DHeight_valueChanged);
+    QObject::connect(ui->power2DXMin, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_power2DXMin_valueChanged);
+    QObject::connect(ui->power2DXMax, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_power2DXMax_valueChanged);
+    QObject::connect(ui->power2DYMin, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_power2DYMin_valueChanged);
+    QObject::connect(ui->power2DYMax, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_power2DYMax_valueChanged);
+    QObject::connect(ui->powerShowSensor1, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_powerShowSensor1_toggled);
+    QObject::connect(ui->powerShowSensor2, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_powerShowSensor1_toggled);
+    QObject::connect(ui->powerShowFiltered, &ButtonSwitch::clicked, this, &RadioAstronomyGUI::on_powerShowFiltered_clicked);
+    QObject::connect(ui->powerFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_powerFilter_currentIndexChanged);
+    QObject::connect(ui->powerFilterN, QOverload<int>::of(&QSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerFilterN_valueChanged);
+    QObject::connect(ui->powerShowMeasurement, &ButtonSwitch::clicked, this, &RadioAstronomyGUI::on_powerShowMeasurement_clicked);
     QObject::connect(ui->powerColourAutoscale, &QToolButton::toggled, this, &RadioAstronomyGUI::on_powerColourAutoscale_toggled);
     QObject::connect(ui->powerColourScaleMin, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerColourScaleMin_valueChanged);
     QObject::connect(ui->powerColourScaleMax, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerColourScaleMax_valueChanged);
