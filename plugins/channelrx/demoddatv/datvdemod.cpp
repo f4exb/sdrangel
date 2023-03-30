@@ -46,6 +46,7 @@ DATVDemod::DATVDemod(DeviceAPI *deviceAPI) :
 {
     qDebug("DATVDemod::DATVDemod");
     setObjectName(m_channelId);
+    m_thread.setObjectName("bbDATVDemod");
     m_basebandSink = new DATVDemodBaseband();
     m_basebandSink->moveToThread(&m_thread);
 

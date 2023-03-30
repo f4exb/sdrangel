@@ -95,6 +95,7 @@ void DATVDemodSink::SetVideoRender(DATVideoRender *screen)
     m_videoRender = screen;
     m_videoRender->setAudioFIFO(&m_audioFifo);
     m_videoThread = new DATVideoRenderThread(m_videoRender, m_videoStream);
+    m_videoThread->setObjectName("vtDATVDemodSink");
 }
 
 bool DATVDemodSink::audioActive()
@@ -630,7 +631,7 @@ void DATVDemodSink::InitDATVFramework()
 
     //***************
     p_rawiq = new leansdr::pipebuf<leansdr::cf32>(m_objScheduler, "rawiq", BUF_BASEBAND);
-    p_rawiq_writer = new leansdr::pipewriter<leansdr::cf32>(*p_rawiq);
+    p_rawiq_writer = new leansdr::pipewriter<leansdr::cf32>(*p_rawiq, m_RawIQMinWrite);
     p_preprocessed = p_rawiq;
 
     // NOTCH FILTER
@@ -961,7 +962,7 @@ void DATVDemodSink::InitDATVS2Framework()
 
     //***************
     p_rawiq = new leansdr::pipebuf<leansdr::cf32>(m_objScheduler, "rawiq", BUF_BASEBAND);
-    p_rawiq_writer = new leansdr::pipewriter<leansdr::cf32>(*p_rawiq);
+    p_rawiq_writer = new leansdr::pipewriter<leansdr::cf32>(*p_rawiq, m_RawIQMinWrite);
     p_preprocessed = p_rawiq;
 
     // NOTCH FILTER
@@ -1148,7 +1149,7 @@ void DATVDemodSink::InitDATVS2Framework()
             p_verrcount)
         ;
         leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *fecdec = (leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *) r_fecdechelper;
-        const int nhelpers = 6;
+        const int nhelpers = 2;
         fecdec->nhelpers = nhelpers;
         fecdec->must_buffer = false;
         fecdec->max_trials = m_settings.m_softLDPCMaxTrials;
@@ -1324,7 +1325,7 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
                     m_objScheduler->step();
 
                     m_lngReadIQ = 0;
-                    p_rawiq_writer->reset();
+                    p_rawiq_writer->reset(m_RawIQMinWrite);
                 }
             }
         }

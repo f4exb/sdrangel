@@ -3397,7 +3397,7 @@ struct s2_fecdec_helper : runnable
             p->procs = new helper_instance[nhelpers];
 
             for (int i = 0; i < nhelpers; ++i) {
-                spawn_helper(&p->procs[i], pls);
+                spawn_helper(&p->procs[i], pls, i);
             }
 
             p->nprocs = nhelpers;
@@ -3449,7 +3449,7 @@ struct s2_fecdec_helper : runnable
     }
 
     // Spawn a helper process.
-    void spawn_helper(helper_instance *h, const s2_pls *pls)
+    void spawn_helper(helper_instance *h, const s2_pls *pls, imt)
     {
         if (sch->debug) {
             fprintf(stderr, "Spawning LDPC helper: modcod=%d sf=%d\n", pls->modcod, pls->sf);
@@ -3639,7 +3639,7 @@ struct s2_fecdec_helper : runnable
         pipebuf<int> *_errcount = nullptr
     ) :
         runnable(sch, "S2 fecdec io"),
-        batch_size(16),
+        batch_size(32),
         nhelpers(1),
         must_buffer(false),
         max_trials(8),
@@ -3771,7 +3771,7 @@ struct s2_fecdec_helper : runnable
             p->procs = new helper_instance[nhelpers];
 
             for (int i = 0; i < nhelpers; ++i) {
-                spawn_helper(&p->procs[i], pls);
+                spawn_helper(&p->procs[i], pls, i);
             }
 
             p->nprocs = nhelpers;
@@ -3813,10 +3813,11 @@ struct s2_fecdec_helper : runnable
     }
 
     // Spawn a helper thread.
-    void spawn_helper(helper_instance *h, const s2_pls *pls)
+    void spawn_helper(helper_instance *h, const s2_pls *pls, int helper_index)
     {
         qDebug() << "s2_fecdec_helper: Spawning LDPC thread: modcod=" << pls->modcod << " sf=" << pls->sf;
         h->m_thread = new QThread();
+        h->m_thread->setObjectName(QString("ldpcDVBS2_%1").arg(helper_index));
         h->m_worker = new LDPCWorker(pls->modcod, max_trials, batch_size, pls->sf);
         h->m_worker->moveToThread(h->m_thread);
         h->batch_size = batch_size;

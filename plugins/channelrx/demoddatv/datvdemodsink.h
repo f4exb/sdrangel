@@ -219,6 +219,7 @@ private:
     leansdr::pipebuf<leansdr::cf32> *p_rawiq;
     leansdr::pipewriter<leansdr::cf32> *p_rawiq_writer;
     leansdr::pipebuf<leansdr::cf32> *p_preprocessed;
+    static const int m_RawIQMinWrite = 1;
 
     // NOTCH FILTER
     leansdr::auto_notch<leansdr::f32> *r_auto_notch;
