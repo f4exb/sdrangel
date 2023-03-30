@@ -764,8 +764,8 @@ The Radiometer Data table shows measurement results and settings at the time of 
 
 The columns in the table include:
 
-- Date - Date at the end of the measurement.
-- Time - Time at the end of the measurement.
+- Date - Local date at the end of the measurement.
+- Time - Local time at the end of the measurement.
 - Power (FFT) - Power relative to fullscale (sum of FFT absolute magnitude).
 - Power (dBFS) - Power in dBFS.
 - Power (dBm) - Power in dBm.
@@ -791,6 +791,7 @@ The columns in the table include:
 - Air Temp (C) - Surface air temperature at observation point in Celsius from Star Tracker.
 - Sensor 1 - Data recorded for Sensor 1.
 - Sensor 2 - Data recorded for Sensor 2.
+- UTC - UTC date and time at the end of the measurement.
 
 Right clicking on the table shows a popup menu that supports:
 

@@ -4936,7 +4936,7 @@ This should be close to the expected difference in power between hot and cold ca
         <string>Time</string>
        </property>
        <property name="toolTip">
-        <string>Time measurement finished</string>
+        <string>Local time measurement finished</string>
        </property>
       </column>
       <column>
@@ -5137,6 +5137,14 @@ This should be close to the expected difference in power between hot and cold ca
        </property>
        <property name="toolTip">
         <string>Sensor 2 data</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>UTC</string>
+       </property>
+       <property name="toolTip">
+        <string>UTC date and time measurement finished</string>
        </property>
       </column>
      </widget>

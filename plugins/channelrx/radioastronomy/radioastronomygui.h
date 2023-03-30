@@ -223,7 +223,6 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     RadioAstronomySettings m_settings;
-    qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
     QList<RadioAstronomySettings::AvailableFeature> m_availableFeatures;
 
@@ -486,7 +485,8 @@ private:
         POWER_COL_SOLAR_FLUX,
         POWER_COL_AIR_TEMP,
         POWER_COL_SENSOR_1,
-        POWER_COL_SENSOR_2
+        POWER_COL_SENSOR_2,
+        POWER_COL_UTC
     };
 
     enum PowerMarkerTable {
