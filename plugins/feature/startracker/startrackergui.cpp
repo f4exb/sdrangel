@@ -432,8 +432,8 @@ void StarTrackerGUI::displaySettings()
     ui->elevation->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
     ui->galacticLatitude->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
     ui->galacticLongitude->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
-    ui->azimuthOffset->setValue(m_settings.m_azOffset);
-    ui->elevationOffset->setValue(m_settings.m_elOffset);
+    ui->azimuthOffset->setValue(m_settings.m_azimuthOffset);
+    ui->elevationOffset->setValue(m_settings.m_elevationOffset);
 
     if (m_settings.m_target == "Custom RA/Dec")
     {
@@ -578,16 +578,16 @@ void StarTrackerGUI::on_elevation_valueChanged(double value)
 
 void StarTrackerGUI::on_azimuthOffset_valueChanged(double value)
 {
-    m_settings.m_azOffset = value;
-    m_settingsKeys.append("azOffset");
+    m_settings.m_azimuthOffset = value;
+    m_settingsKeys.append("azimuthOffset");
     applySettings();
     plotChart();
 }
 
 void StarTrackerGUI::on_elevationOffset_valueChanged(double value)
 {
-    m_settings.m_elOffset = value;
-    m_settingsKeys.append("elOffset");
+    m_settings.m_elevationOffset = value;
+    m_settingsKeys.append("elevationOffset");
     applySettings();
     plotChart();
 }
