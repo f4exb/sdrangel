@@ -517,7 +517,29 @@ void SatelliteTrackerGUI::on_displaySettings_clicked()
     new DialogPositioner(&dialog, true);
     if (dialog.exec() == QDialog::Accepted)
     {
-        m_settingsKeys.append("deviceSettings");
+        m_settingsKeys.append("heightAboveSeaLevel");
+        m_settingsKeys.append("predictionPeriod");
+        m_settingsKeys.append("passStartTime");
+        m_settingsKeys.append("passFinishTime");
+        m_settingsKeys.append("minAOSElevation");
+        m_settingsKeys.append("minPassElevation");
+        m_settingsKeys.append("rotatorMaxAzimuth");
+        m_settingsKeys.append("rotatorMaxElevation");
+        m_settingsKeys.append("aosSpeech");
+        m_settingsKeys.append("losSpeech");
+        m_settingsKeys.append("aosCommand");
+        m_settingsKeys.append("losCommand");
+        m_settingsKeys.append("updatePeriod");
+        m_settingsKeys.append("dopplerPeriod");
+        m_settingsKeys.append("defaultFrequency");
+        m_settingsKeys.append("azElUnits");
+        m_settingsKeys.append("groundTrackPoints");
+        m_settingsKeys.append("dateFormat");
+        m_settingsKeys.append("utc");
+        m_settingsKeys.append("tles");
+        m_settingsKeys.append("replayEnabled");
+        m_settingsKeys.append("replayStartDateTime");
+        m_settingsKeys.append("sendTimeToMap");
         applySettings();
         plotChart();
     }
