@@ -208,6 +208,9 @@ void GS232ControllerSettings::applySettings(const QStringList& settingsKeys, con
     if (settingsKeys.contains("baudRate")) {
         m_baudRate = settings.m_baudRate;
     }
+    if (settingsKeys.contains("track")) {
+        m_track = settings.m_track;
+    }
     if (settingsKeys.contains("source")) {
         m_source = settings.m_source;
     }
