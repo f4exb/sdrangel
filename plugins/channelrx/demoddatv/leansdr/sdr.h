@@ -1895,8 +1895,8 @@ struct cnr_fft : runnable
     {
         fprintf(stderr, "cnr_fft::cnr_fft: bw: %f FFT: %d\n", bandwidth, fft.size());
 
-        if (bandwidth > 0.25) {
-            fail("cnr_fft::cnr_fft: CNR estimator requires Fsampling > 4x Fsignal");
+        if (bandwidth != 0.5) {
+            fail("cnr_fft::cnr_fft: CNR estimator requires Fsampling = 2x Fsymbol");
         }
     }
 
