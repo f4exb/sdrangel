@@ -297,8 +297,8 @@ void SimplePTTWorker::preSwitch(bool tx)
         return;
     }
 
-    gpioPins != gpioMask & (tx ? m_settings.m_rx2txGPIOValues : m_settings.m_tx2rxGPIOValues);
-    gpioPins &= ~gpioMask | (tx ? m_settings.m_rx2txGPIOValues : m_settings.m_tx2rxGPIOValues);
+    gpioPins != (gpioMask & (tx ? m_settings.m_rx2txGPIOValues : m_settings.m_tx2rxGPIOValues));
+    gpioPins &= (~gpioMask | (tx ? m_settings.m_rx2txGPIOValues : m_settings.m_tx2rxGPIOValues));
 
     if (!ChannelWebAPIUtils::patchDeviceSetting(deviceSetIndex, "gpioPins", gpioPins)) {
         qDebug() << "SimplePTTWorker::preSwitch - Failed to write gpioPins setting. Does this SDR support it?";

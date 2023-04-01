@@ -22,13 +22,13 @@
 
 SimplePTTCommand::SimplePTTCommand() :
     m_currentProcess(nullptr),
+    m_currentProcessPid(0),
     m_currentProcessState(QProcess::NotRunning),
     m_isInError(false),
     m_currentProcessError(QProcess::UnknownError),
-    m_hasExited(false),
     m_currentProcessExitCode(0),
     m_currentProcessExitStatus(QProcess::NormalExit),
-    m_currentProcessPid(0),
+    m_hasExited(false),
     m_msgQueueToGUI(nullptr)
 {
     m_currentProcessStartTimeStampms = 0;
