@@ -1,3 +1,16 @@
+sdrangel (7.12.0-1) unstable; urgency=medium
+
+  - New ILS demod plugin. PR #1635
+  - Heatmap: added 10 MS/s and fixed bandwidth limit. PR #1638
+  - Correct settings keys for Satellite Tracker settings dialog. Fixes #1642. PR #1643
+  - Add UTC data time in radiometerand more. Fix #1640. PR #1644
+  - DATV demod: processing optimizations
+  - Add missing setting ket in Rotator Controller. Fix #1642. PR #1645
+  - Fix missing GUI connections in Radio Astronomy plugin. Scan for features on startup. PR #1646
+  - Fix settings keys in Star Tracker (Rename to settings to match). PR #1646
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 01 Apr 2023 11:39:53 +0200
+
 sdrangel (7.11.0-1) unstable; urgency=medium
 
   - New RTTY and Navtex demods. PR #1610
