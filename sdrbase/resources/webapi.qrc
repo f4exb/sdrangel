@@ -61,6 +61,7 @@
         <file>webapi/doc/swagger/include/HeatMap.yaml</file>
         <file>webapi/doc/swagger/include/IEEE_802_15_4_Mod.yaml</file>
         <file>webapi/doc/swagger/include/Interferometer.yaml</file>
+        <file>webapi/doc/swagger/include/ILSDemod.yaml</file>
         <file>webapi/doc/swagger/include/JogdialController.yaml</file>
         <file>webapi/doc/swagger/include/LimeRFE.yaml</file>
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>

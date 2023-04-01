@@ -1,0 +1,98 @@
+ILSDemodSettings:
+  description: ILSDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    mode:
+      description: "(0 for LOC, 1 for G/S)"
+      type: integer
+    frequencyIndex:
+      type: integer
+    squelch:
+      type: integer
+    volume:
+      type: number
+      format: float
+    audioMute:
+      type: integer
+    average:
+      type: integer
+    ddmUnits:
+      type: integer
+    identThreshold:
+      type: number
+      format: float
+    ident:
+      type: string
+    runway:
+      type: string
+    trueBearing:
+      type: number
+      format: float
+    latitude:
+      type: string
+    longitude:
+      type: string
+    elevation:
+      type: integer
+    glidePath:
+      type: number
+      format: float
+    refHeight:
+      type: number
+      format: float
+    courseWidth:
+      type: number
+      format: float
+    udpEnabled:
+      description: "Whether to forward DDM to specified UDP port"
+      type: integer
+    udpAddress:
+      description: "UDP address to forward DDM to"
+      type: string
+    udpPort:
+      description: "UDP port to forward DDM to"
+      type: integer
+    logFilename:
+      type: string
+    logEnabled:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    scopeConfig:
+      $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+ILSDemodReport:
+  description: ILSDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+
