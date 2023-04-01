@@ -297,7 +297,7 @@ void SimplePTTWorker::preSwitch(bool tx)
         return;
     }
 
-    gpioPins != (gpioMask & (tx ? m_settings.m_rx2txGPIOValues : m_settings.m_tx2rxGPIOValues));
+    gpioPins |= (gpioMask & (tx ? m_settings.m_rx2txGPIOValues : m_settings.m_tx2rxGPIOValues));
     gpioPins &= (~gpioMask | (tx ? m_settings.m_rx2txGPIOValues : m_settings.m_tx2rxGPIOValues));
 
     if (!ChannelWebAPIUtils::patchDeviceSetting(deviceSetIndex, "gpioPins", gpioPins)) {
