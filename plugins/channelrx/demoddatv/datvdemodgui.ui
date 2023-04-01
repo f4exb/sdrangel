@@ -1056,6 +1056,9 @@
           <height>0</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>MER estimation value (dB)</string>
+        </property>
         <property name="text">
          <string>00.0</string>
         </property>
@@ -1115,6 +1118,9 @@
           <width>28</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>CNR estimation value (dB)</string>
         </property>
         <property name="text">
          <string>00.0</string>

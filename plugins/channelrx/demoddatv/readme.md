@@ -48,7 +48,7 @@ This gauge gives the MER estimation. The averaged value appears on the right.
 
 <h4>B.4: CNR estimation</h4>
 
-This gauge gives the CNR estimation. The averaged value appears on the right.
+This gauge gives the CNR estimation. The averaged value appears on the right. Estimation is made comparing spectrum power in the center of the passband compared to the sides. The passband is the one presented to the demodulator and is always twice the symbol rate. the "center" is estimated at 60% of the full passband. Note that the RF filter comes before that and may change the aspect of the spectrum thus the best estimation is obtained when the RF filter width is close to twice the symbol rate and the surroundings are quiet.
 
 <h4>B.5: Output transport stream to UDP</h4>
 
