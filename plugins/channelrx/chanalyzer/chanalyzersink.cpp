@@ -66,7 +66,20 @@ void ChannelAnalyzerSink::feed(const SampleVector::const_iterator& begin, const 
 
 		if (m_decimator.getDecim() == 1)
 		{
-	        processOneSample(c, sideband);
+            if (m_settings.m_rationalDownSample)
+            {
+                Complex cj;
+
+                if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &cj))
+                {
+                    processOneSample(cj, sideband);
+                    m_interpolatorDistanceRemain += m_interpolatorDistance;
+                }
+            }
+            else
+            {
+    	        processOneSample(c, sideband);
+            }
 		}
 		else
 		{
@@ -310,6 +323,9 @@ void ChannelAnalyzerSink::applySettings(const ChannelAnalyzerSettings& settings,
     }
 
     m_settings = settings;
+
+    qDebug() << "ChannelAnalyzerSink::applySettings:"
+        << " m_rationalDownSample: " << settings.m_rationalDownSample;
 
     if (doApplySampleRate) {
         applySampleRate();
