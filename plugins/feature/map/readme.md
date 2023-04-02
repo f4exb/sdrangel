@@ -121,7 +121,7 @@ When clicked, opens the Map Display Settings dialog:
 ![Map Display Settings Dialog](../../../doc/img/Map_plugin_display_settings.png)
 
 The top half of the dialog allows customization of how objects from different SDRangel
-plugins are dispayed on the 2D and 3D maps. This includes:
+plugins are displayed on the 2D and 3D maps. This includes:
 
 * Whether images are displayed on the 2D map and whether 3D models are displayed on the 2D map.
 * Whether labels are displayed giving the name of the object.

@@ -127,7 +127,7 @@ Gain in dB before compression
 
 <h4>13.3: Audio compressor threshold</h4>
 
-Threshold in dB above which compression applies a.k.a. "knee" point. The lower the value the harder is the compression and consequently higher the distorsion.
+Threshold in dB above which compression applies a.k.a. "knee" point. The lower the value the harder is the compression and consequently higher the distortion.
 
 <h4>13.4: Tone input select</h4>
 

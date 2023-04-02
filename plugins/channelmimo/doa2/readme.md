@@ -130,7 +130,7 @@ The compass needle shows the antennas direction with the white arrow towards ant
 
 <h4>C.1.4 Blind sector</h4>
 
-The darker area on the compass background shows the sector where no readings can be made when the distance between the two antennas (baseline distance set in C.6) is larger than the half of the wavelength displayed in (C.5). Check the principle of operation section at the ned of the document for details.
+The darker area on the compass background shows the sector where no readings can be made when the distance between the two antennas (baseline distance set in C.6) is larger than the half of the wavelength displayed in (C.5). Check the principle of operation section at the end of the document for details.
 
 <h3>C.2 Positive DOA angle (Port side)</h3>
 
@@ -158,7 +158,7 @@ This is the threshold of squared magnitude in dB above which DOA processing take
 
 ![DOA2 XY display](../../../doc/img/DOA2_plugin_xy.png)
 
-In this exaple setting a squelch value of -55~-50 dB will select the narrow peak corresponding to samples giving the most accurate DOA measurements.
+In this example setting a squelch value of -55~-50 dB will select the narrow peak corresponding to samples giving the most accurate DOA measurements.
 
 This threshold can also be used with transient signals to activate DOA processing only when the signal is present effectively acting like a squelch in FM modes.
 
@@ -168,7 +168,7 @@ This is the number of FFT series used for DOA calculation thus the weighting ave
 
 <h2>Principle of operation</h2>
 
-DOA estimation is based on the "FFT" correlation funtion and active only when selected with (A.2). FFT analysis helps in removing non essential contributions and is more efficient than simple product wutn conjugate (A.B*).
+DOA estimation is based on the "FFT" correlation function and active only when selected with (A.2). FFT analysis helps in removing non essential contributions and is more efficient than simple product wutn conjugate (A.B*).
 
 It assumes that channel A is connected to antenna 1 or antenna of reference (device stream 0) and channel B is connected antenna 2 the second antenna (device stream 1) in the following configuration:
 
@@ -204,7 +204,7 @@ In general the angle can be calculated from the baseline distance D (distance be
 &phi; = &pi; D cos(&theta;) / (&lambda;/2) &rArr;
 cos(&theta;) = (&phi; / &pi;) . ((&lambda;/2) / D)
 
-If D is larger than &lambda;/2 the possible values of cos(&theta;) do not cover the whole [-1:1] interval and thus there is a blind sector at the front of antenna 2 and the back of antenna 1 which is shown onthe compass as a darker area (C.1.4). However signals coming from this blind sector will fold into the valid sector. Putting antennas further apart than &lambda;/2 can give more accurate measurements inside the valid sector at the condition you already validated the assunption that the incoming wave angle is insde the valid sector and that no significant signal from the blind sector can influence the masurement. One can imagine having a pair of directive antennas placed at a distance for which the valid sector matches the antenna system lobe for final accurate measurement.
+If D is larger than &lambda;/2 the possible values of cos(&theta;) do not cover the whole [-1:1] interval and thus there is a blind sector at the front of antenna 2 and the back of antenna 1 which is shown on the compass as a darker area (C.1.4). However signals coming from this blind sector will fold into the valid sector. Putting antennas further apart than &lambda;/2 can give more accurate measurements inside the valid sector at the condition you already validated the assunption that the incoming wave angle is inside the valid sector and that no significant signal from the blind sector can influence the masurement. One can imagine having a pair of directive antennas placed at a distance for which the valid sector matches the antenna system lobe for final accurate measurement.
 
 If D is smaller than &lambda;/2 extreme incoming angles (0 or &pi;) yield smaller &phi; which will be compensated by the (&lambda;/2) / D factor however with less accuracy.
 

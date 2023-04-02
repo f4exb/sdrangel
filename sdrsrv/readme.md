@@ -73,7 +73,7 @@ You can control the SDRangel application (server or GUI) by the means of the RES
 
 The API documentation is accessible online when the SDRangel application (GUI or server) is running at the address and port specified in the program options. The default is [http://127.0.0.1:8091](http://127.0.0.1:8091).
 
-The documentation home page dispays two links on the left:
+The documentation home page displays two links on the left:
 
 ![API documentation home](../doc/img/APIdocHome.png)
 

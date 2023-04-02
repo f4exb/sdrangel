@@ -16,7 +16,7 @@ Use the wheels to adjust the frequency shift in Hz from the center frequency of 
 
 <h3>2: PLL and synchronous AM</h2>
 
-Use this toggle button to turn on or off the PLL locking and synchronous AM detection. When on the input signal is mixed with the NCO of the PLL that locks to the carrier of the AM transmission. Then the signal is processed as a DSB or SSB (see control 3) modulated signal. The main advantage compared to enveloppe detection is a better resilience to carrier selective fading. This does not prevents all selective fading distorsion but addresses the most annoying.
+Use this toggle button to turn on or off the PLL locking and synchronous AM detection. When on the input signal is mixed with the NCO of the PLL that locks to the carrier of the AM transmission. Then the signal is processed as a DSB or SSB (see control 3) modulated signal. The main advantage compared to envelope detection is a better resilience to carrier selective fading. This does not prevents all selective fading distortion but addresses the most annoying.
 
 When the PLL is locked the icon lights up in green. The frequency shift from carrier appears in the tooltip. Locking indicator is pretty sharp with about +/- 100 Hz range.
 

@@ -4,7 +4,7 @@
 
 This plugin sends I/Q samples from the baseband via TCP/IP across a network to a client application.
 The client application could be SDRangel using the [Remote TCP Input](../../samplesource/remotetcpinput/readme.md) plugin or a rtl_tcp compatible application.
-This means that applications using rtl_tcp protcol can connect to the wide variety of SDRs supported by SDRangel.
+This means that applications using rtl_tcp protocol can connect to the wide variety of SDRs supported by SDRangel.
 
 <h2>Interface</h2>
 

@@ -168,7 +168,7 @@ The "EWS" indicator lights up if a EWS message is received. Next is the emergenc
 
 <h3>C.20: Current text line</h3>
 
-The "TXT" indicator ligths up if a text element is received. Next the current radio text line is displayed.
+The "TXT" indicator lights up if a text element is received. Next the current radio text line is displayed.
 
 <h3>C.21: Clear previous text line</h3>
 
@@ -194,7 +194,7 @@ Station data: program PI and service names list.
 
 Station frequencies list.
 
-<h3>C.27: EON alernate frequencies</h3>
+<h3>C.27: EON alternate frequencies</h3>
 
 Station alternate frequencies list.
 

@@ -134,7 +134,7 @@ This label turns green when data is being received from the device.
   - **O**: turns red if stream experiences overruns
   - **T**: turns red if stream experiences timeouts
 
-The stream warning indicators are reset when the acqusition is started.
+The stream warning indicators are reset when the acquisition is started.
 
 <h2>Dependendices</h2>
 

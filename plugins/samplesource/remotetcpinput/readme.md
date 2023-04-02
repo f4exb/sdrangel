@@ -14,7 +14,7 @@ Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
-  - Red square icon: an error has occured with the connection to the remote device. The plugin will continually try to reconnect.
+  - Red square icon: an error has occurred with the connection to the remote device. The plugin will continually try to reconnect.
 
 <h3>2: Center frequency</h3>
 
@@ -47,7 +47,7 @@ Use this button to activate RTL-SDR's direct sampling mode. This can be used to 
 <h3>9: Sample rate</h3>
 
 Specify the remote device's sample rate in samples per second (S/s). This is the sample rate between the remote device and remote server.
-This field allows an arbitry rate to be entered. However, some devices are limited in the rates they support, so you should be careful
+This field allows an arbitrary rate to be entered. However, some devices are limited in the rates they support, so you should be careful
 only to enter a supported value, otherwise there may be a mismatch between the displayed rate and the actual rate.
 
 <h3>10: Decimation</h3>
@@ -115,14 +115,14 @@ If the remote server is using the RTL0 protocol, the GUI will not be updated, wh
 Determines how many seconds of I/Q samples are buffered locally from the remote device, before being processed in SDRangel.
 More buffering can handle more network congestion and other network problems, without gaps in the output, but increases the latency in changes to remote device settings.
 
-<h3>23: Input buffer guage</h3>
+<h3>23: Input buffer gauge</h3>
 
 Shows how much data is in the input buffer. Typically this will be just under the pre-fill setting.
 If it becomes empty, the plugin will pause outputting of data until the buffer is refilled to the pre-fill level.
 If the buffer repeatedly runs empty, this suggests you do not have enough network bandwidth for the current combination
-of channel sample rate and sample bit depth. Reducing these to lower values may be required for uninterupted data.
+of channel sample rate and sample bit depth. Reducing these to lower values may be required for uninterrupted data.
 
-<h3>24: Output buffer guage</h3>
+<h3>24: Output buffer gauge</h3>
 
 Shows how much data is in the output buffer. This should typically be empty. If not empty, this suggests your CPU can't keep up with the amount of data being received.
 

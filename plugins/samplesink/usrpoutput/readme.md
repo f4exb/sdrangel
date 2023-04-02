@@ -122,4 +122,4 @@ This label turns green when data has been transmitted to the device.
   - **U**: turns red if stream experiences underruns
   - **D**: turns red if stream experiences packet drop outs
 
-The stream warning indicators are reset when the acqusition is started.
+The stream warning indicators are reset when the acquisition is started.
