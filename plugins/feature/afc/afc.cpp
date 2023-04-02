@@ -732,7 +732,7 @@ void AFC::removeTrackerFeatureReference()
             MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
 
             if (messageQueue) {
-                disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
+                disconnect(messageQueue, &MessageQueue::messageEnqueued, this, nullptr);  // Have to use nullptr, as slot is a lambda.
             }
         }
 
@@ -751,7 +751,7 @@ void AFC::removeTrackedFeatureReferences()
             MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
 
             if (messageQueue) {
-                disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
+                disconnect(messageQueue, &MessageQueue::messageEnqueued, this, nullptr);  // Have to use nullptr, as slot is a lambda.
             }
         }
 

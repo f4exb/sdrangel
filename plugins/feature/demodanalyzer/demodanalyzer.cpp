@@ -380,7 +380,7 @@ void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
             MessageQueue *messageQueue = qobject_cast<MessageQueue*>(messagePipe->m_element);
 
             if (messageQueue) {
-                disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
+                disconnect(messageQueue, &MessageQueue::messageEnqueued, this, nullptr);  // Have to use nullptr, as slot is a lambda.
             }
         }
     }
