@@ -172,7 +172,7 @@ This is the "TO" of APRS message. There is a choice between "APRS¨, "APZ¨, "CQ
 
 <h4>C.6.2.4: Via identifier</h4>
 
-This is the "VIA" of APRS mesage. There is a choice between "WIDE2-2", "ARISS" or custom.
+This is the "VIA" of APRS message. There is a choice between "WIDE2-2", "ARISS" or custom.
 
 <h4>C.6.2.5: Data payload</h4>
 

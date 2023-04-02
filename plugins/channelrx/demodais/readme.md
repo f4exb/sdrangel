@@ -4,7 +4,7 @@
 
 This plugin can be used to demodulate AIS (Automatic Identification System) messages. AIS can be used to track ships and other marine vessels at sea, that are equipped with AIS transponders. It is also used by shore-side infrastructure known as base stations, aids-to-navigation such as buoys and some search and rescue aircraft.
 
-AIS is broadcast globally on 25kHz channels at 161.975MHz and 162.025MHz, with other frequencies being used regionally or for special purposes. This demodulator is single channel, so if you wish to decode multiple channels simulatenously, you will need to add one AIS demodulator per frequency. As most AIS messages are on 161.975MHz and 162.025MHz, you can set the center frequency as 162MHz, with a sample rate of 100k+Sa/s, with one AIS demod with an input offset -25kHz and another at +25kHz.
+AIS is broadcast globally on 25kHz channels at 161.975MHz and 162.025MHz, with other frequencies being used regionally or for special purposes. This demodulator is single channel, so if you wish to decode multiple channels simultaneously, you will need to add one AIS demodulator per frequency. As most AIS messages are on 161.975MHz and 162.025MHz, you can set the center frequency as 162MHz, with a sample rate of 100k+Sa/s, with one AIS demod with an input offset -25kHz and another at +25kHz.
 
 The AIS demodulators can send received messages to the [AIS feature](../../feature/ais/readme.md), which displays a table combining the latest data for vessels amalgamated from multiple demodulators and sends their positiosn to the [Map Feature](../../feature/map/readme.ais) for display in 2D or 3D.
 

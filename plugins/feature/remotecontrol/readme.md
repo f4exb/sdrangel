@@ -103,7 +103,7 @@ available via the selected protocol. The available devices will be added to the 
 
 The device name is the name assigned by the selected protocol. If you wish to use a different label for the device in the GUI, this can be entered in the Label field.
 
-The Controls and Sensors tables allow you to customize which are contols and sensors are visible in the GUI, via the checkbox in the Enable column.
+The Controls and Sensors tables allow you to customize which are controls and sensors are visible in the GUI, via the checkbox in the Enable column.
 
 The Left Label and Right Label fields hold the text that will be displayed either side of the control or sensor in the GUI.
 The Left Label is initialised with the device name and the Right Label is initialised with the units.
@@ -124,7 +124,7 @@ The Y Axis field below the table determines whether each series will have it's o
 The Layout fields control how the Controls and Sensors will be laid-out in the GUI. This can be set to be either Horizontally or Vertically.
 
 When the Protocol is set to VISA, additional buttons will be displayed under the tables that allow controls and sensors to be added or removed, as unlike when selecting
-TP-Link and Home Assitant devices, these are not automatically defined for most instruments. Some basic controls are included for Rigol DP832 and Siglent SSA3032X.
+TP-Link and Home Assistant devices, these are not automatically defined for most instruments. Some basic controls are included for Rigol DP832 and Siglent SSA3032X.
 
 <h3>VISA Control Dialog</h3>
 

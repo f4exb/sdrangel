@@ -32,7 +32,7 @@ Note that on first start the list in (4) is empty therefore you must press this 
 
 Use this combo box to select which channel to control. The list item is formatted this way:
 
-  - R ot T for a source (Rx) or sink (Tx) device set
+  - R or T for a source (Rx) or sink (Tx) device set
   - The sequence number of the device set
   - The sequence number of the channel after the semicolon separator
   - The type of channel

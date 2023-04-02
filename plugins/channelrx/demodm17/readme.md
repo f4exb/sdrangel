@@ -106,7 +106,7 @@ Callsign of the recipient. When an empty callsign is used it means the transmiss
 
 <h3>B.3: Type information</h3>
 
-Displays the transmision type information contained in the LSF (Link Setup Frame).
+Displays the transmission type information contained in the LSF (Link Setup Frame).
 
   - First word first part (before colon):
     - **PKT**: Packet
