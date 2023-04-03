@@ -50,7 +50,13 @@ GS232ControllerSettings:
       type: number
       format: float
     protocol:
-      description: (0 GS-232, 1 SPID rot2prog)
+      description: (0 GS-232, 1 SPID rot2prog, 2 rotcltd, 3 DFM)
+      type: integer
+    precision:
+      description: Precision of azimuth and elevation values
+      type: integer
+    coordinates:
+      description: (0 Az/El, 1 X/Y 85, 2 X/Y 30)
       type: integer
     title:
       type: string

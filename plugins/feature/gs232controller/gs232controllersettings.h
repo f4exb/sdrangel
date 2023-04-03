@@ -58,8 +58,16 @@ struct GS232ControllerSettings
     int m_elevationMin;
     int m_elevationMax;
     float m_tolerance;
-    enum Protocol { GS232, SPID, ROTCTLD } m_protocol;
+    enum Protocol { GS232, SPID, ROTCTLD, DFM } m_protocol;
     enum Connection { SERIAL, TCP } m_connection;
+    int m_precision;
+    enum Coordinates { AZ_EL, X_Y_85, X_Y_30 } m_coordinates;
+
+    bool m_dfmTrackOn;
+    bool m_dfmLubePumpsOn;
+    bool m_dfmBrakesOn;
+    bool m_dfmDrivesOn;
+
     Serializable *m_rollupState;
     QString m_title;
     quint32 m_rgbColor;

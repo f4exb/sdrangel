@@ -60,6 +60,10 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_tolerance_isSet = false;
     protocol = 0;
     m_protocol_isSet = false;
+    precision = 0;
+    m_precision_isSet = false;
+    coordinates = 0;
+    m_coordinates_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -116,6 +120,10 @@ SWGGS232ControllerSettings::init() {
     m_tolerance_isSet = false;
     protocol = 0;
     m_protocol_isSet = false;
+    precision = 0;
+    m_precision_isSet = false;
+    coordinates = 0;
+    m_coordinates_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -150,6 +158,8 @@ SWGGS232ControllerSettings::cleanup() {
     if(source != nullptr) { 
         delete source;
     }
+
+
 
 
 
@@ -216,6 +226,10 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&tolerance, pJson["tolerance"], "float", "");
     
     ::SWGSDRangel::setValue(&protocol, pJson["protocol"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&precision, pJson["precision"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&coordinates, pJson["coordinates"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -296,6 +310,12 @@ SWGGS232ControllerSettings::asJsonObject() {
     }
     if(m_protocol_isSet){
         obj->insert("protocol", QJsonValue(protocol));
+    }
+    if(m_precision_isSet){
+        obj->insert("precision", QJsonValue(precision));
+    }
+    if(m_coordinates_isSet){
+        obj->insert("coordinates", QJsonValue(coordinates));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -485,6 +505,26 @@ SWGGS232ControllerSettings::setProtocol(qint32 protocol) {
     this->m_protocol_isSet = true;
 }
 
+qint32
+SWGGS232ControllerSettings::getPrecision() {
+    return precision;
+}
+void
+SWGGS232ControllerSettings::setPrecision(qint32 precision) {
+    this->precision = precision;
+    this->m_precision_isSet = true;
+}
+
+qint32
+SWGGS232ControllerSettings::getCoordinates() {
+    return coordinates;
+}
+void
+SWGGS232ControllerSettings::setCoordinates(qint32 coordinates) {
+    this->coordinates = coordinates;
+    this->m_coordinates_isSet = true;
+}
+
 QString*
 SWGGS232ControllerSettings::getTitle() {
     return title;
@@ -616,6 +656,12 @@ SWGGS232ControllerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_protocol_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_precision_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_coordinates_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

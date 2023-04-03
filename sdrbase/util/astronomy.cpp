@@ -286,6 +286,183 @@ RADec Astronomy::azAltToRaDec(AzAlt aa, double latitude, double longitude, QDate
     return rd;
 }
 
+// https://ntrs.nasa.gov/api/citations/19670030005/downloads/19670030005.pdf
+// X85 is positive Southward
+// Y85 is positive Eastward
+// X30 is positive Eastward
+// Y30 is positive Northward
+// atan2 range is (-pi,pi], we want az (0,360], so need to add pi
+void Astronomy::azAltToXY85(AzAlt aa, double& x, double& y)
+{
+    if (aa.alt == 90.0)
+    {
+        x = 0.0;
+        y = 0.0;
+        //qDebug() << "azAltToXY85" << aa.az << aa.alt << x << y;
+        return;
+    }
+    double az = aa.az;
+    double el = aa.alt;
+    if (az >= 360.0) {
+        az -= 360.0;
+    }
+    if (el > 90.0)
+    {
+        el = 180.0 - el;
+        if (az >= 180.0) {
+            az = az - 180.0;
+        } else {
+            az = az + 180.0;
+        }
+    }
+    double azr = Units::degreesToRadians(az);
+    double elr = Units::degreesToRadians(el);
+    y = Units::radiansToDegrees(asin(cos(elr) * sin(azr)));
+    if (az == 0.0)
+    {
+        // cot(0) == Inf
+        if ((az == 90.0) || (az == 270.0)) {
+            x = 0.0;
+        } else if ((az > 90.0f) && (az < 270.0)) {
+            x = 90.0;
+        } else {
+            x = -90.0;
+        }
+    }
+    else
+    {
+        // cot(x)=1/tan(x)=cos(x)/sin(x)
+        x = Units::radiansToDegrees(atan(-(cos(elr)/sin(elr)) * cos(azr)));
+    }
+
+    //qDebug() << "azAltToXY85" << aa.az << aa.alt << x << y;
+}
+
+void Astronomy::azAltToXY30(AzAlt aa, double& x, double& y)
+{
+    if (aa.alt == 90.0)
+    {
+        x = 0.0;
+        y = 0.0;
+        //qDebug() << "azAltToXY30" << aa.az << aa.alt << x << y;
+        return;
+    }
+    double az = aa.az;
+    double el = aa.alt;
+    if (az >= 360.0) {
+        az -= 360.0;
+    }
+    if (el > 90.0)
+    {
+        el = 180.0 - el;
+        if (az >= 180.0) {
+            az = az - 180.0;
+        } else {
+            az = az + 180.0;
+        }
+    }
+    double azr = Units::degreesToRadians(az);
+    double elr = Units::degreesToRadians(el);
+    y = Units::radiansToDegrees(asin(cos(elr) * cos(azr)));
+    if (el == 0.0)
+    {
+        if ((az == 0.0) || (az == 180.0)) {
+            x = 0.0;
+        } else if ((az >= 0.0f) && (az <= 180.0)) {
+            x = 90.0;
+        } else {
+            x = -90.0;
+        }
+    }
+    else
+    {
+        x = Units::radiansToDegrees(atan((cos(elr)/sin(elr)) * sin(azr)));
+    }
+    //qDebug() << "azAltToXY30" << aa.az << aa.alt << x << y;
+}
+
+AzAlt Astronomy::xy85ToAzAlt(double x, double y)
+{
+    AzAlt aa;
+    if ((x == 0.0) && (y == 0.0))
+    {
+        aa.az = 0.0;
+        aa.alt = 90.0;
+        //qDebug() << "xy85ToAzAlt" << x << y << aa.az << aa.alt;
+        return aa;
+    }
+    double xr = Units::degreesToRadians(x);
+    double yr = Units::degreesToRadians(y);
+    double elr = asin(cos(yr) * cos(xr));
+    double azr;
+    if (x == 0.0)
+    {
+        // 1/sin(x) == Inf
+        azr = y >= 0.0 ? M_PI/2.0 : 2.0*M_PI*3.0/4.0;
+    }
+    else if (y == 90.0)
+    {
+        // tan(90) == Inf
+        azr = M_PI/2.0;
+    }
+    else if (y == -90.0)
+    {
+        // tan(-90) == Inf
+        azr = 2.0*M_PI*3.0/4.0;
+    }
+    else
+    {
+         // atan2(y,x) = atan(y/x)
+         azr = atan2(-tan(yr), sin(xr)) + M_PI;
+    }
+    aa.az = Units::radiansToDegrees(azr);
+    aa.alt = Units::radiansToDegrees(elr);
+    //qDebug() << "xy85ToAzAlt" << x << y << aa.az << aa.alt;
+    return aa;
+}
+
+AzAlt Astronomy::xy30ToAzAlt(double x, double y)
+{
+    AzAlt aa;
+    if ((x == 0.0) && (y == 0.0))
+    {
+        aa.az = 0.0;
+        aa.alt = 90.0;
+        //qDebug() << "xy30ToAzAlt" << x << y << aa.az << aa.alt;
+        return aa;
+    }
+    double xr = Units::degreesToRadians(x);
+    double yr = Units::degreesToRadians(y);
+    double elr = asin(cos(yr) * cos(xr));
+    double azr;
+    if (y == 0.0)
+    {
+        // cot(0) == Inf
+        azr = x >= 0.0 ? M_PI/2.0 : 2.0*M_PI*3.0/4.0;
+    }
+    else if (y == 90.0)
+    {
+        // tan(90) == Inf
+        azr = 0.0;
+    }
+    else if (y == -90.0)
+    {
+        // tan(-90) == Inf
+        azr = M_PI;
+    }
+    else
+    {
+        azr = atan2(sin(xr), tan(yr));
+        if (azr < 0.0) {
+            azr += 2.0*M_PI;
+        }
+    }
+    aa.az = Units::radiansToDegrees(azr);
+    aa.alt = Units::radiansToDegrees(elr);
+    //qDebug() << "xy30ToAzAlt" << x << y << aa.az << aa.alt;
+    return aa;
+}
+
 // Needs to work for negative a
 double Astronomy::modulo(double a, double b)
 {
@@ -3707,3 +3884,4 @@ static int eraEpv00(double date1, double date2,
 /* Finished. */
 
 }
+

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>281</height>
+    <height>378</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -43,7 +43,7 @@
      <x>10</x>
      <y>10</y>
      <width>341</width>
-     <height>81</height>
+     <height>101</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -96,19 +96,28 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="azimuthtLabel">
+       <widget class="QLabel" name="coord1Label">
+        <property name="minimumSize">
+         <size>
+          <width>54</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Azimuth</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QDoubleSpinBox" name="azimuth">
+       <widget class="QDoubleSpinBox" name="coord1">
         <property name="toolTip">
          <string>Target azimuth in degrees</string>
         </property>
         <property name="decimals">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="maximum">
          <double>450.000000000000000</double>
@@ -119,10 +128,10 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="azimuthCurrentText">
+       <widget class="QLabel" name="coord1CurrentText">
         <property name="minimumSize">
          <size>
-          <width>32</width>
+          <width>40</width>
           <height>0</height>
          </size>
         </property>
@@ -130,7 +139,7 @@
          <string>Current azimuth in degrees</string>
         </property>
         <property name="text">
-         <string>360.0</string>
+         <string>360.00</string>
         </property>
        </widget>
       </item>
@@ -142,19 +151,28 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="elevationLabel">
+       <widget class="QLabel" name="coord2Label">
+        <property name="minimumSize">
+         <size>
+          <width>54</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Elevation</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QDoubleSpinBox" name="elevation">
+       <widget class="QDoubleSpinBox" name="coord2">
         <property name="toolTip">
          <string>Target elevation in degrees</string>
         </property>
         <property name="decimals">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="maximum">
          <double>180.000000000000000</double>
@@ -165,10 +183,10 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="elevationCurrentText">
+       <widget class="QLabel" name="coord2CurrentText">
         <property name="minimumSize">
          <size>
-          <width>32</width>
+          <width>40</width>
           <height>0</height>
          </size>
         </property>
@@ -176,7 +194,7 @@
          <string>Current elevation in degrees</string>
         </property>
         <property name="text">
-         <string>180.0</string>
+         <string>180.00</string>
         </property>
        </widget>
       </item>
@@ -219,15 +237,76 @@
       </item>
      </layout>
     </item>
+    <item>
+     <widget class="Line" name="dfmLine">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="dfmLayout">
+      <item>
+       <widget class="QToolButton" name="dfmTrack">
+        <property name="text">
+         <string>Track</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="dfmLubePumps">
+        <property name="text">
+         <string>Pumps</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="dfmBrakes">
+        <property name="text">
+         <string>Brakes</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="dfmDrives">
+        <property name="text">
+         <string>Drives</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="dfmShowStatus">
+        <property name="toolTip">
+         <string>Show the DFM status dialog</string>
+        </property>
+        <property name="text">
+         <string>Status</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>110</y>
+     <y>140</y>
      <width>341</width>
-     <height>161</height>
+     <height>191</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -258,31 +337,26 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="azimuthMinLabel">
-        <property name="text">
-         <string>Azimuth min</string>
+      <item row="6" column="3">
+       <widget class="QSpinBox" name="precision">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QSpinBox" name="azimuthMin">
+        <property name="toolTip">
+         <string>Precision (number of decimal places) of azimuth, elevation and tolerance values</string>
+        </property>
+        <property name="statusTip">
+         <string/>
+        </property>
         <property name="maximum">
-         <number>450</number>
+         <number>5</number>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="protocolLabel">
-        <property name="text">
-         <string>Protocol</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2">
-       <widget class="QLabel" name="elevationMaxLabel">
-        <property name="text">
-         <string>Elevation max</string>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="host">
+        <property name="toolTip">
+         <string>Hostname / IP address of computer to connect to</string>
         </property>
        </widget>
       </item>
@@ -293,6 +367,43 @@
         </property>
        </widget>
       </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="toleranceLabel">
+        <property name="text">
+         <string>Tolerance</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="serialPort">
+        <property name="toolTip">
+         <string>Name of serial port to use to connect to the rotator</string>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="azimuthOffset">
+        <property name="toolTip">
+         <string>Specify an offset angel in degrees that will be added to the target azimuth to correct for misalignment</string>
+        </property>
+        <property name="minimum">
+         <number>-360</number>
+        </property>
+        <property name="maximum">
+         <number>360</number>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLabel" name="azimuthMaxLabel">
+        <property name="text">
+         <string>Azimuth max</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="2">
        <widget class="QLabel" name="connectionLabel">
         <property name="text">
@@ -300,34 +411,20 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
-       <widget class="QSpinBox" name="elevationMin">
-        <property name="maximum">
-         <number>180</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="portLabel">
-        <property name="text">
-         <string>Port</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QDoubleSpinBox" name="tolerance">
+      <item row="2" column="3">
+       <widget class="QSpinBox" name="port">
         <property name="toolTip">
-         <string>Tolerance in degrees</string>
+         <string>TCP port number to connect to</string>
         </property>
-        <property name="decimals">
-         <number>1</number>
+        <property name="maximum">
+         <number>65535</number>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="serialPortLabel">
+      <item row="1" column="2">
+       <widget class="QLabel" name="baudRateLabel">
         <property name="text">
-         <string>Serial Port</string>
+         <string>Baud rate</string>
         </property>
        </widget>
       </item>
@@ -348,17 +445,48 @@
         </item>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="toleranceLabel">
+      <item row="1" column="0">
+       <widget class="QLabel" name="serialPortLabel">
         <property name="text">
-         <string>Tolerance</string>
+         <string>Serial Port</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="elevationOffsetLabel">
+      <item row="6" column="1">
+       <widget class="QDoubleSpinBox" name="tolerance">
+        <property name="toolTip">
+         <string>Tolerance in degrees</string>
+        </property>
+        <property name="decimals">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QSpinBox" name="azimuthMin">
+        <property name="maximum">
+         <number>450</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="hostLabel">
         <property name="text">
-         <string>Elevation offset</string>
+         <string>Host</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="portLabel">
+        <property name="text">
+         <string>Port</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLabel" name="elevationMaxLabel">
+        <property name="text">
+         <string>Elevation max</string>
         </property>
        </widget>
       </item>
@@ -369,70 +497,29 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="3">
-       <widget class="QSpinBox" name="elevationOffset">
-        <property name="toolTip">
-         <string>Specify an offset angle in degrees that will be added to the target elevation to correct for misalignment</string>
-        </property>
-        <property name="minimum">
-         <number>-180</number>
-        </property>
+      <item row="5" column="3">
+       <widget class="QSpinBox" name="elevationMax">
         <property name="maximum">
          <number>180</number>
         </property>
-        <property name="singleStep">
-         <number>1</number>
-        </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="host">
-        <property name="toolTip">
-         <string>Hostname / IP address of computer to connect to</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="serialPort">
-        <property name="toolTip">
-         <string>Name of serial port to use to connect to the rotator</string>
-        </property>
-        <property name="editable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="protocol">
-        <property name="toolTip">
-         <string>Command protocol</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>GS-232</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>SPID</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>rotctld</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="hostLabel">
+      <item row="4" column="0">
+       <widget class="QLabel" name="azimuthMinLabel">
         <property name="text">
-         <string>Host</string>
+         <string>Azimuth min</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="3">
-       <widget class="QSpinBox" name="elevationMax">
+      <item row="3" column="2">
+       <widget class="QLabel" name="elevationOffsetLabel">
+        <property name="text">
+         <string>Elevation offset</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QSpinBox" name="elevationMin">
         <property name="maximum">
          <number>180</number>
         </property>
@@ -498,40 +585,92 @@
         </item>
        </widget>
       </item>
-      <item row="4" column="2">
-       <widget class="QLabel" name="azimuthMaxLabel">
+      <item row="6" column="2">
+       <widget class="QLabel" name="precisionLabel">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
-         <string>Azimuth max</string>
+         <string>Precision</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="azimuthOffset">
+      <item row="0" column="1">
+       <widget class="QComboBox" name="protocol">
         <property name="toolTip">
-         <string>Specify an offset angel in degrees that will be added to the target azimuth to correct for misalignment</string>
+         <string>Command protocol</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>GS-232</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>SPID</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>rotctld</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DFM</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QSpinBox" name="elevationOffset">
+        <property name="toolTip">
+         <string>Specify an offset angle in degrees that will be added to the target elevation to correct for misalignment</string>
         </property>
         <property name="minimum">
-         <number>-360</number>
+         <number>-180</number>
         </property>
         <property name="maximum">
-         <number>360</number>
+         <number>180</number>
+        </property>
+        <property name="singleStep">
+         <number>1</number>
         </property>
        </widget>
       </item>
-      <item row="2" column="3">
-       <widget class="QSpinBox" name="port">
-        <property name="toolTip">
-         <string>TCP port number to connect to</string>
-        </property>
-        <property name="maximum">
-         <number>65535</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="baudRateLabel">
+      <item row="0" column="0">
+       <widget class="QLabel" name="protocolLabel">
         <property name="text">
-         <string>Baud rate</string>
+         <string>Protocol</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QComboBox" name="coordinates">
+        <property name="toolTip">
+         <string>Coordinate system</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Az/El</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>X/Y 85'</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>X/Y 30'</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Coordinates</string>
         </property>
        </widget>
       </item>
@@ -542,23 +681,37 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>startStop</tabstop>
-  <tabstop>azimuth</tabstop>
-  <tabstop>elevation</tabstop>
+  <tabstop>coord1</tabstop>
+  <tabstop>coord2</tabstop>
   <tabstop>track</tabstop>
   <tabstop>sources</tabstop>
+  <tabstop>targetName</tabstop>
+  <tabstop>protocol</tabstop>
+  <tabstop>connection</tabstop>
+  <tabstop>serialPort</tabstop>
+  <tabstop>baudRate</tabstop>
+  <tabstop>host</tabstop>
+  <tabstop>port</tabstop>
+  <tabstop>azimuthOffset</tabstop>
+  <tabstop>elevationOffset</tabstop>
+  <tabstop>azimuthMin</tabstop>
+  <tabstop>azimuthMax</tabstop>
+  <tabstop>elevationMin</tabstop>
+  <tabstop>elevationMax</tabstop>
+  <tabstop>tolerance</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>

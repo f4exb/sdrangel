@@ -49,15 +49,10 @@ void GS232ControllerSettings::resetToDefaults()
     m_elevation = 0.0f;
     m_serialPort = "";
     m_baudRate = 9600;
+    m_host = "127.0.0.1";
+    m_port = 4533;
     m_track = false;
     m_source = "";
-    m_title = "Rotator Controller";
-    m_rgbColor = QColor(225, 25, 99).rgb();
-    m_useReverseAPI = false;
-    m_reverseAPIAddress = "127.0.0.1";
-    m_reverseAPIPort = 8888;
-    m_reverseAPIFeatureSetIndex = 0;
-    m_reverseAPIFeatureIndex = 0;
     m_azimuthOffset = 0;
     m_elevationOffset = 0;
     m_azimuthMin = 0;
@@ -67,8 +62,19 @@ void GS232ControllerSettings::resetToDefaults()
     m_tolerance = 1.0f;
     m_protocol = GS232;
     m_connection = SERIAL;
-    m_host = "127.0.0.1";
-    m_port = 4533;
+    m_precision = 0;
+    m_coordinates = AZ_EL;
+    m_dfmTrackOn = false;
+    m_dfmLubePumpsOn = false;
+    m_dfmBrakesOn = false;
+    m_dfmDrivesOn = false;
+    m_title = "Rotator Controller";
+    m_rgbColor = QColor(225, 25, 99).rgb();
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIFeatureSetIndex = 0;
+    m_reverseAPIFeatureIndex = 0;
     m_workspaceIndex = 0;
 }
 
@@ -107,6 +113,12 @@ QByteArray GS232ControllerSettings::serialize() const
 
     s.writeS32(27, m_workspaceIndex);
     s.writeBlob(28, m_geometryBytes);
+    s.writeS32(29, m_precision);
+    s.writeS32(30, (int)m_coordinates);
+    s.writeBool(31, m_dfmTrackOn);
+    s.writeBool(32, m_dfmLubePumpsOn);
+    s.writeBool(33, m_dfmBrakesOn);
+    s.writeBool(34, m_dfmDrivesOn);
 
     return s.final();
 }
@@ -169,6 +181,12 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
 
         d.readS32(27, &m_workspaceIndex, 0);
         d.readBlob(28, &m_geometryBytes);
+        d.readS32(29, &m_precision, 0);
+        d.readS32(30, (int *)&m_coordinates, (int)AZ_EL);
+        d.readBool(31, &m_dfmTrackOn);
+        d.readBool(32, &m_dfmLubePumpsOn);
+        d.readBool(33, &m_dfmBrakesOn);
+        d.readBool(34, &m_dfmDrivesOn);
 
         return true;
     }
@@ -208,32 +226,17 @@ void GS232ControllerSettings::applySettings(const QStringList& settingsKeys, con
     if (settingsKeys.contains("baudRate")) {
         m_baudRate = settings.m_baudRate;
     }
+    if (settingsKeys.contains("host")) {
+        m_host = settings.m_host;
+    }
+    if (settingsKeys.contains("port")) {
+        m_port = settings.m_port;
+    }
     if (settingsKeys.contains("track")) {
         m_track = settings.m_track;
     }
     if (settingsKeys.contains("source")) {
         m_source = settings.m_source;
-    }
-    if (settingsKeys.contains("title")) {
-        m_title = settings.m_title;
-    }
-    if (settingsKeys.contains("rgbColor")) {
-        m_rgbColor = settings.m_rgbColor;
-    }
-    if (settingsKeys.contains("useReverseAPI")) {
-        m_useReverseAPI = settings.m_useReverseAPI;
-    }
-    if (settingsKeys.contains("reverseAPIAddress")) {
-        m_reverseAPIAddress = settings.m_reverseAPIAddress;
-    }
-    if (settingsKeys.contains("reverseAPIPort")) {
-        m_reverseAPIPort = settings.m_reverseAPIPort;
-    }
-    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
-        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
-    }
-    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
-        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
     }
     if (settingsKeys.contains("azimuthOffset")) {
         m_azimuthOffset = settings.m_azimuthOffset;
@@ -262,11 +265,44 @@ void GS232ControllerSettings::applySettings(const QStringList& settingsKeys, con
     if (settingsKeys.contains("connection")) {
         m_connection = settings.m_connection;
     }
-    if (settingsKeys.contains("host")) {
-        m_host = settings.m_host;
+    if (settingsKeys.contains("precision")) {
+        m_precision = settings.m_precision;
     }
-    if (settingsKeys.contains("port")) {
-        m_port = settings.m_port;
+    if (settingsKeys.contains("coordinates")) {
+        m_coordinates = settings.m_coordinates;
+    }
+    if (settingsKeys.contains("dfmTrackOn")) {
+        m_dfmTrackOn = settings.m_dfmTrackOn;
+    }
+    if (settingsKeys.contains("dfmLubePumpsOn")) {
+        m_dfmLubePumpsOn = settings.m_dfmLubePumpsOn;
+    }
+    if (settingsKeys.contains("dfmBrakesOn")) {
+        m_dfmBrakesOn = settings.m_dfmBrakesOn;
+    }
+    if (settingsKeys.contains("dfmDrivesOn")) {
+        m_dfmDrivesOn = settings.m_dfmDrivesOn;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        m_reverseAPIFeatureSetIndex = settings.m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex")) {
+        m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
     }
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
@@ -289,32 +325,17 @@ QString GS232ControllerSettings::getDebugString(const QStringList& settingsKeys,
     if (settingsKeys.contains("baudRate") || force) {
         ostr << " m_baudRate: " << m_baudRate;
     }
+    if (settingsKeys.contains("host") || force) {
+        ostr << " m_host: " << m_host.toStdString();
+    }
+    if (settingsKeys.contains("port") || force) {
+        ostr << " m_port: " << m_port;
+    }
     if (settingsKeys.contains("track") || force) {
         ostr << " m_track: " << m_track;
     }
     if (settingsKeys.contains("source") || force) {
         ostr << " m_source: " << m_source.toStdString();
-    }
-    if (settingsKeys.contains("title") || force) {
-        ostr << " m_title: " << m_title.toStdString();
-    }
-    if (settingsKeys.contains("rgbColor") || force) {
-        ostr << " m_rgbColor: " << m_rgbColor;
-    }
-    if (settingsKeys.contains("useReverseAPI") || force) {
-        ostr << " m_useReverseAPI: " << m_useReverseAPI;
-    }
-    if (settingsKeys.contains("azimuth") || force) {
-        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
-    }
-    if (settingsKeys.contains("reverseAPIPort") || force) {
-        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
-    }
-    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
-        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
-    }
-    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
-        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
     }
     if (settingsKeys.contains("azimuthOffset") || force) {
         ostr << " m_azimuthOffset: " << m_azimuthOffset;
@@ -343,11 +364,32 @@ QString GS232ControllerSettings::getDebugString(const QStringList& settingsKeys,
     if (settingsKeys.contains("connection") || force) {
         ostr << " m_connection: " << m_connection;
     }
-    if (settingsKeys.contains("host") || force) {
-        ostr << " m_host: " << m_host.toStdString();
+    if (settingsKeys.contains("precision") || force) {
+        ostr << " m_precision: " << m_precision;
     }
-    if (settingsKeys.contains("port") || force) {
-        ostr << " m_port: " << m_port;
+    if (settingsKeys.contains("coordinates") || force) {
+        ostr << " m_coordinates: " << m_precision;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("azimuth") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        ostr << " m_reverseAPIFeatureSetIndex: " << m_reverseAPIFeatureSetIndex;
+    }
+    if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
     }
     if (settingsKeys.contains("workspaceIndex") || force) {
         ostr << " m_workspaceIndex: " << m_workspaceIndex;
@@ -355,3 +397,4 @@ QString GS232ControllerSettings::getDebugString(const QStringList& settingsKeys,
 
     return QString(ostr.str().c_str());
 }
+

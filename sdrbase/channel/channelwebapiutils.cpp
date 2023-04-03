@@ -34,6 +34,7 @@
 #include "maincore.h"
 #include "device/deviceset.h"
 #include "device/deviceapi.h"
+#include "channel/channelapi.h"
 #include "channel/channelutils.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
@@ -219,7 +220,83 @@ bool ChannelWebAPIUtils::getFeatureReport(unsigned int featureSetIndex, unsigned
 
     if (httpRC/100 != 2)
     {
-        qWarning("ChannelWebAPIUtils::getFeatureReport: get feature settings error %d: %s",
+        qWarning("ChannelWebAPIUtils::getFeatureReport: get feature report error %d: %s",
+            httpRC, qPrintable(errorResponse));
+        return false;
+    }
+
+    return true;
+}
+
+bool ChannelWebAPIUtils::getChannelSettings(unsigned int deviceIndex, unsigned int channelIndex, SWGSDRangel::SWGChannelSettings &channelSettingsResponse, ChannelAPI *&channel)
+{
+    QString errorResponse;
+    int httpRC;
+    DeviceSet *deviceSet;
+
+    // Get current channel settings
+    std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
+    if (deviceIndex < deviceSets.size())
+    {
+        deviceSet = deviceSets[deviceIndex];
+        if (channelIndex < (unsigned int) deviceSet->getNumberOfChannels())
+        {
+            channel = deviceSet->getChannelAt(channelIndex);
+            httpRC = channel->webapiSettingsGet(channelSettingsResponse, errorResponse);
+        }
+        else
+        {
+            qDebug() << "ChannelWebAPIUtils::getChannelSettings: no channel " << deviceIndex << ":" << channelIndex;
+            return false;
+        }
+    }
+    else
+    {
+        qDebug() << "ChannelWebAPIUtils::getChannelSettings: no device " << deviceIndex;
+        return false;
+    }
+
+    if (httpRC/100 != 2)
+    {
+        qWarning("ChannelWebAPIUtils::getChannelSettings: get channel settings error %d: %s",
+            httpRC, qPrintable(errorResponse));
+        return false;
+    }
+
+    return true;
+}
+
+bool ChannelWebAPIUtils::getChannelReport(unsigned int deviceIndex, unsigned int channelIndex, SWGSDRangel::SWGChannelReport &channelReport)
+{
+    QString errorResponse;
+    int httpRC;
+    DeviceSet *deviceSet;
+
+    // Get channel report
+    std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
+    if (deviceIndex < deviceSets.size())
+    {
+        deviceSet = deviceSets[deviceIndex];
+        if (channelIndex < (unsigned int) deviceSet->getNumberOfChannels())
+        {
+            ChannelAPI *channel = deviceSet->getChannelAt(channelIndex);
+            httpRC = channel->webapiReportGet(channelReport, errorResponse);
+        }
+        else
+        {
+            qDebug() << "ChannelWebAPIUtils::getChannelReport: no channel " << deviceIndex << ":" << channelIndex;
+            return false;
+        }
+    }
+    else
+    {
+        qDebug() << "ChannelWebAPIUtils::getChannelReport: no device set " << deviceIndex;
+        return false;
+    }
+
+    if (httpRC/100 != 2)
+    {
+        qWarning("ChannelWebAPIUtils::getChannelReport: get channel report error %d: %s",
             httpRC, qPrintable(errorResponse));
         return false;
     }
@@ -1193,6 +1270,22 @@ bool ChannelWebAPIUtils::getFeatureSetting(unsigned int featureSetIndex,  unsign
     }
 }
 
+bool ChannelWebAPIUtils::getFeatureSetting(unsigned int featureSetIndex,  unsigned int featureIndex, const QString &setting, double &value)
+{
+    SWGSDRangel::SWGFeatureSettings featureSettingsResponse;
+    Feature *feature;
+
+    if (getFeatureSettings(featureSetIndex, featureIndex, featureSettingsResponse, feature))
+    {
+        QJsonObject *jsonObj = featureSettingsResponse.asJsonObject();
+        return WebAPIUtils::getSubObjectDouble(*jsonObj, setting, value);
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool ChannelWebAPIUtils::getFeatureSetting(unsigned int featureSetIndex,  unsigned int featureIndex, const QString &setting, QString &value)
 {
     SWGSDRangel::SWGFeatureSettings featureSettingsResponse;
@@ -1201,6 +1294,54 @@ bool ChannelWebAPIUtils::getFeatureSetting(unsigned int featureSetIndex,  unsign
     if (getFeatureSettings(featureSetIndex, featureIndex, featureSettingsResponse, feature))
     {
         QJsonObject *jsonObj = featureSettingsResponse.asJsonObject();
+        return WebAPIUtils::getSubObjectString(*jsonObj, setting, value);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool ChannelWebAPIUtils::getChannelSetting(unsigned int deviceSetIndex,  unsigned int channelIndex, const QString &setting, int &value)
+{
+    SWGSDRangel::SWGChannelSettings channelSettingsResponse;
+    ChannelAPI *channel;
+
+    if (getChannelSettings(deviceSetIndex, channelIndex, channelSettingsResponse, channel))
+    {
+        QJsonObject *jsonObj = channelSettingsResponse.asJsonObject();
+        return WebAPIUtils::getSubObjectInt(*jsonObj, setting, value);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool ChannelWebAPIUtils::getChannelSetting(unsigned int deviceSetIndex,  unsigned int channelIndex, const QString &setting, double &value)
+{
+    SWGSDRangel::SWGChannelSettings channelSettingsResponse;
+    ChannelAPI *channel;
+
+    if (getChannelSettings(deviceSetIndex, channelIndex, channelSettingsResponse, channel))
+    {
+        QJsonObject *jsonObj = channelSettingsResponse.asJsonObject();
+        return WebAPIUtils::getSubObjectDouble(*jsonObj, setting, value);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool ChannelWebAPIUtils::getChannelSetting(unsigned int deviceSetIndex,  unsigned int channelIndex, const QString &setting, QString &value)
+{
+    SWGSDRangel::SWGChannelSettings channelSettingsResponse;
+    ChannelAPI *channel;
+
+    if (getChannelSettings(deviceSetIndex, channelIndex, channelSettingsResponse, channel))
+    {
+        QJsonObject *jsonObj = channelSettingsResponse.asJsonObject();
         return WebAPIUtils::getSubObjectString(*jsonObj, setting, value);
     }
     else
@@ -1218,6 +1359,28 @@ bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, uns
         // Get value of requested key
         QJsonObject *jsonObj = featureReport.asJsonObject();
         if (WebAPIUtils::getSubObjectInt(*jsonObj, key, value))
+        {
+            // Done
+            return true;
+        }
+        else
+        {
+            qWarning("ChannelWebAPIUtils::getFeatureReportValue: no key %s in feature report", qPrintable(key));
+            return false;
+        }
+    }
+    return false;
+}
+
+bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, unsigned int featureIndex, const QString &key, double &value)
+{
+    SWGSDRangel::SWGFeatureReport featureReport;
+
+    if (getFeatureReport(featureSetIndex, featureIndex, featureReport))
+    {
+        // Get value of requested key
+        QJsonObject *jsonObj = featureReport.asJsonObject();
+        if (WebAPIUtils::getSubObjectDouble(*jsonObj, key, value))
         {
             // Done
             return true;
@@ -1252,3 +1415,71 @@ bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, uns
     }
     return false;
 }
+
+
+bool ChannelWebAPIUtils::getChannelReportValue(unsigned int deviceIndex, unsigned int channelIndex, const QString &key, int &value)
+{
+    SWGSDRangel::SWGChannelReport channelReport;
+
+    if (getChannelReport(deviceIndex, channelIndex, channelReport))
+    {
+        // Get value of requested key
+        QJsonObject *jsonObj = channelReport.asJsonObject();
+        if (WebAPIUtils::getSubObjectInt(*jsonObj, key, value))
+        {
+            // Done
+            return true;
+        }
+        else
+        {
+            qWarning("ChannelWebAPIUtils::getChannelReportValue: no key %s in channel report", qPrintable(key));
+            return false;
+        }
+    }
+    return false;
+}
+
+bool ChannelWebAPIUtils::getChannelReportValue(unsigned int deviceIndex, unsigned int channelIndex, const QString &key, double &value)
+{
+    SWGSDRangel::SWGChannelReport channelReport;
+
+    if (getChannelReport(deviceIndex, channelIndex, channelReport))
+    {
+        // Get value of requested key
+        QJsonObject *jsonObj = channelReport.asJsonObject();
+        if (WebAPIUtils::getSubObjectDouble(*jsonObj, key, value))
+        {
+            // Done
+            return true;
+        }
+        else
+        {
+            qWarning("ChannelWebAPIUtils::getChannelReportValue: no key %s in channel report", qPrintable(key));
+            return false;
+        }
+    }
+    return false;
+}
+
+bool ChannelWebAPIUtils::getChannelReportValue(unsigned int deviceIndex, unsigned int channelIndex, const QString &key, QString &value)
+{
+    SWGSDRangel::SWGChannelReport channelReport;
+
+    if (getChannelReport(deviceIndex, channelIndex, channelReport))
+    {
+        // Get value of requested key
+        QJsonObject *jsonObj = channelReport.asJsonObject();
+        if (WebAPIUtils::getSubObjectString(*jsonObj, key, value))
+        {
+            // Done
+            return true;
+        }
+        else
+        {
+            qWarning("ChannelWebAPIUtils::getChannelReportValue: no key %s in channel report", qPrintable(key));
+            return false;
+        }
+    }
+    return false;
+}
+

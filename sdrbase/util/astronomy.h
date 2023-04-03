@@ -49,6 +49,11 @@ public:
     static AzAlt raDecToAzAlt(RADec rd, double latitude, double longitude, QDateTime dt, bool j2000=true);
     static RADec azAltToRaDec(AzAlt aa, double latitude, double longitude, QDateTime dt);
 
+    static void azAltToXY85(AzAlt aa, double& x, double& y);
+    static void azAltToXY30(AzAlt aa, double& x, double& y);
+    static AzAlt xy85ToAzAlt(double x, double y);
+    static AzAlt xy30ToAzAlt(double x, double y);
+
     static double localSiderealTime(QDateTime dateTime, double longitude);
 
     static void sunPosition(AzAlt& aa, RADec& rd, double latitude, double longitude, QDateTime dt);

@@ -28,6 +28,7 @@
 #include "util/messagequeue.h"
 
 #include "gs232controllersettings.h"
+#include "controllerprotocol.h"
 
 class GS232ControllerWorker : public QObject
 {
@@ -81,12 +82,7 @@ private:
     float m_lastAzimuth;
     float m_lastElevation;
 
-    bool m_spidSetOutstanding;
-    bool m_spidSetSent;
-    bool m_spidStatusSent;
-
-    bool m_rotCtlDReadAz;               //!< rotctrld returns 'p' responses over two lines
-    QString m_rotCtlDAz;
+    ControllerProtocol *m_controllerProtocol;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const GS232ControllerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
@@ -102,3 +98,4 @@ private slots:
 };
 
 #endif // INCLUDE_FEATURE_GS232CONTROLLERWORKER_H_
+

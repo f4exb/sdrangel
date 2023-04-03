@@ -22,6 +22,7 @@
 #include <QThread>
 #include <QNetworkRequest>
 #include <QHash>
+#include <QTimer>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -138,6 +139,25 @@ public:
         { }
     };
 
+    class MsgReportSerialPorts : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QStringList& getSerialPorts() const { return m_serialPorts; }
+
+        static MsgReportSerialPorts* create(QStringList serialPorts) {
+            return new MsgReportSerialPorts(serialPorts);
+        }
+
+    private:
+        QStringList m_serialPorts;
+
+        MsgReportSerialPorts(QStringList serialPorts) :
+            Message(),
+            m_serialPorts(serialPorts)
+        {}
+    };
+
     GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~GS232Controller();
     virtual void destroy() { delete this; }
@@ -194,6 +214,9 @@ private:
     QHash<QObject*, GS232ControllerSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
     QObject *m_selectedPipe;
 
+    QTimer m_timer;
+    QStringList m_serialPorts;
+
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
@@ -217,6 +240,7 @@ private slots:
     void handleChannelRemoved(int deviceSetIndex, ChannelAPI *feature);
     void handleMessagePipeToBeDeleted(int reason, QObject* object);
     void handlePipeMessageQueue(MessageQueue* messageQueue);
+    void scanSerialPorts();
 };
 
 #endif // INCLUDE_FEATURE_GS232CONTROLLER_H_
