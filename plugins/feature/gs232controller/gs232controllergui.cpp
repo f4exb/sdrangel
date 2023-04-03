@@ -461,7 +461,7 @@ void GS232ControllerGUI::setProtocol(GS232ControllerSettings::Protocol protocol)
         ui->precisionLabel->setEnabled(false);
     }
     else if (protocol == GS232ControllerSettings::SPID)
-ÿ   
+    {
         ui->precision->setValue(1);
         ui->precision->setEnabled(false);
         ui->precisionLabel->setEnabled(false);
