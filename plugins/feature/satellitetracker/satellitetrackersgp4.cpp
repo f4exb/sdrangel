@@ -134,7 +134,7 @@ void getPassAzEl(QLineSeries* azimuth, QLineSeries* elevation, QLineSeries* pola
         DateTime aosTime = qDateTimeToDateTime(aos);
         DateTime losTime = qDateTimeToDateTime(los);
         DateTime currentTime(aosTime);
-        int steps = 20;
+        int steps = 150; // Needs to be high enough, so rotator intersect with satellite position
 
         double timeStep = (losTime - aosTime).TotalSeconds() / steps;
         if (timeStep <= 0.0)

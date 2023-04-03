@@ -339,75 +339,20 @@
           <string>Display</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="defaultFrequency">
-            <property name="toolTip">
-             <string>Frequency used for Doppler and free space path loss calculations in the satellite table</string>
-            </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="minimum">
-             <double>1.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>50000.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>100.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>100.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QLineEdit" name="dateFormat">
-            <property name="toolTip">
-             <string>Format for dates displayed in the GUI</string>
-            </property>
-           </widget>
-          </item>
           <item row="11" column="0">
-           <widget class="QCheckBox" name="drawOnMap">
+           <widget class="QCheckBox" name="utc">
             <property name="toolTip">
-             <string>When checked satellite positions are sent to the map</string>
+             <string>When checked times are dispayed using UTC rather than the local time zone</string>
             </property>
             <property name="text">
-             <string>Draw satellites on map</string>
+             <string>Display times in UTC</string>
             </property>
            </widget>
           </item>
-          <item row="12" column="0">
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="updatePeriodLabel">
+          <item row="4" column="0">
+           <widget class="QLabel" name="groundTrackPointsLabel">
             <property name="text">
-             <string>Update period (s)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="updatePeriod">
-            <property name="toolTip">
-             <string>Enter the time in seconds between each calculation of the target's position</string>
-            </property>
-            <property name="maximum">
-             <double>3600.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>1.000000000000000</double>
+             <string>Ground track points</string>
             </property>
            </widget>
           </item>
@@ -415,6 +360,20 @@
            <widget class="QLabel" name="defaultFrequencyLabel">
             <property name="text">
              <string>Default frequency (MHz)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="dateFormatLabel">
+            <property name="text">
+             <string>Date format</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QLineEdit" name="dateFormat">
+            <property name="toolTip">
+             <string>Format for dates displayed in the GUI</string>
             </property>
            </widget>
           </item>
@@ -448,6 +407,48 @@
             </item>
            </widget>
           </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="defaultFrequency">
+            <property name="toolTip">
+             <string>Frequency used for Doppler and free space path loss calculations in the satellite table</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>50000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>100.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="0">
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="updatePeriodLabel">
+            <property name="text">
+             <string>Update period (s)</string>
+            </property>
+           </widget>
+          </item>
           <item row="3" column="0">
            <widget class="QLabel" name="azElUnitsLabel">
             <property name="text">
@@ -455,27 +456,16 @@
             </property>
            </widget>
           </item>
-          <item row="10" column="0">
-           <widget class="QCheckBox" name="utc">
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="updatePeriod">
             <property name="toolTip">
-             <string>When checked times are dispayed using UTC rather than the local time zone</string>
+             <string>Enter the time in seconds between each calculation of the target's position</string>
             </property>
-            <property name="text">
-             <string>Display times in UTC</string>
+            <property name="maximum">
+             <double>3600.000000000000000</double>
             </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="dateFormatLabel">
-            <property name="text">
-             <string>Date format</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="groundTrackPointsLabel">
-            <property name="text">
-             <string>Ground track points</string>
+            <property name="value">
+             <double>1.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -489,6 +479,45 @@
             </property>
             <property name="maximum">
              <number>360</number>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="0">
+           <widget class="QCheckBox" name="drawOnMap">
+            <property name="toolTip">
+             <string>When checked satellite positions are sent to the map</string>
+            </property>
+            <property name="text">
+             <string>Draw satellites on map</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QComboBox" name="drawRotators">
+            <property name="toolTip">
+             <string>Select which rotators are displayed on the polar chart</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>All</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Matching target</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="drawRotatorsLabel">
+            <property name="text">
+             <string>Rotators in polar chart</string>
             </property>
            </widget>
           </item>
@@ -614,8 +643,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>533</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -630,8 +659,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>533</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

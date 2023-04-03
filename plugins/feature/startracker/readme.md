@@ -49,6 +49,8 @@ Pressing this button displays a settings dialog, that allows you to set:
 * The units to display the solar flux in, either Solar Flux Units, Jansky or Wm^-2Hz-1. 1 sfu equals 10,000 Jansky or 10^-22 Wm^-2Hz-1.
 * The update period in seconds, which controls how frequently azimuth and elevation are re-calculated.
 * The IP port number the Stellarium server listens on.
+* Which rotators are displayed on the polar chart. This can be All, None or Matching target. When Matching target is selected, the rotator will
+only be displayed if the source in the Rotator Controller is set to this Star Tracker and Track is enabled.
 * Whether to start a Stellarium telescope server.
 * Whether to draw the Sun in the map.
 * Whether to draw the Moon on the map.

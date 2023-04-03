@@ -44,8 +44,10 @@ StarTrackerSettingsDialog::StarTrackerSettingsDialog(
     ui->temperatureLapseRate->setValue(settings->m_temperatureLapseRate);
     ui->solarFluxData->setCurrentIndex((int)settings->m_solarFluxData);
     ui->solarFluxUnits->setCurrentIndex((int)settings->m_solarFluxUnits);
+    ui->drawRotators->setCurrentIndex((int)settings->m_drawRotators);
     ui->drawSunOnMap->setChecked(settings->m_drawSunOnMap);
     ui->drawMoonOnMap->setChecked(settings->m_drawMoonOnMap);
+    ui->drawStarOnMap->setChecked(settings->m_drawStarOnMap);
 }
 
 StarTrackerSettingsDialog::~StarTrackerSettingsDialog()
@@ -70,6 +72,7 @@ void StarTrackerSettingsDialog::accept()
     m_settings->m_temperatureLapseRate = ui->temperatureLapseRate->value();
     m_settings->m_solarFluxData = (StarTrackerSettings::SolarFluxData)ui->solarFluxData->currentIndex();
     m_settings->m_solarFluxUnits = (StarTrackerSettings::SolarFluxUnits)ui->solarFluxUnits->currentIndex();
+    m_settings->m_drawRotators = (StarTrackerSettings::Rotators)ui->drawRotators->currentIndex();
     m_settings->m_drawSunOnMap = ui->drawSunOnMap->isChecked();
     m_settings->m_drawMoonOnMap = ui->drawMoonOnMap->isChecked();
     m_settings->m_drawStarOnMap = ui->drawStarOnMap->isChecked();
@@ -89,6 +92,7 @@ void StarTrackerSettingsDialog::accept()
     m_settingsKeys.append("temperatureLapseRate");
     m_settingsKeys.append("solarFluxData");
     m_settingsKeys.append("solarFluxUnits");
+    m_settingsKeys.append("drawRotators");
     m_settingsKeys.append("drawSunOnMap");
     m_settingsKeys.append("drawMoonOnMap");
     m_settingsKeys.append("drawStarOnMap");

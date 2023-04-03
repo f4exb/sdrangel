@@ -116,7 +116,10 @@ On the display tab, you can set:
 * The default frequency in MHz that is used for calculating Doppler and free space path loss in the Satellite Data table.
 * The units used to display azimuth and elevation to the target satellite. This can be in degrees, minutes and seconds or decimal degrees.
 * The number of points used for ground tracks on the map. More points result in smoother tracks, but require more processing.
-* Whether times are displayrf in the local time zone or UTC.
+* Which rotators are displayed on the polar chart. This can be All, None or Matching target. When Matching target is selected, the rotator will
+only be displayed if the source in the Rotator Controller is set to this Satellite Tracker and Track is enabled.
+* The format used for displaying dates. E.g. yyyy/MM/dd
+* Whether times are displayed in the local time zone or UTC.
 * Whether to draw the satellites on the map.
 
 <h3>9: Latitude</h3>

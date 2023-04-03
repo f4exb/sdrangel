@@ -74,6 +74,7 @@ struct StarTrackerSettings
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    enum Rotators {ALL_ROTATORS, NO_ROTATORS, MATCHING_TARGET} m_drawRotators; //!< Which rotators to draw on polar chart
 
     StarTrackerSettings();
     void resetToDefaults();
