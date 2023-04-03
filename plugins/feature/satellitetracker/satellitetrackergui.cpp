@@ -28,8 +28,10 @@
 
 #include "device/deviceapi.h"
 #include "device/deviceset.h"
+#include "channel/channelwebapiutils.h"
 #include "feature/featureset.h"
 #include "feature/featureuiset.h"
+#include "feature/featureutils.h"
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
@@ -295,6 +297,8 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(1000);
 
+    connect(&m_redrawTimer, &QTimer::timeout, this, &SatelliteTrackerGUI::plotChart);
+
     // Intialise charts
     m_emptyChart.layout()->setContentsMargins(0, 0, 0, 0);
     m_emptyChart.setMargins(QMargins(1, 1, 1, 1));
@@ -534,6 +538,7 @@ void SatelliteTrackerGUI::on_displaySettings_clicked()
         m_settingsKeys.append("defaultFrequency");
         m_settingsKeys.append("azElUnits");
         m_settingsKeys.append("groundTrackPoints");
+        m_settingsKeys.append("drawRotators");
         m_settingsKeys.append("dateFormat");
         m_settingsKeys.append("utc");
         m_settingsKeys.append("tles");
@@ -792,6 +797,26 @@ static double interpolate(double x0, double y0, double x1, double y1, double x)
     return (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
 }
 
+// Reduce az/el range from 450,180 to 360,90
+void SatelliteTrackerGUI::limitAzElRange(double& azimuth, double& elevation) const
+{
+    if (elevation > 90.0)
+    {
+        elevation = 180.0 - elevation;
+        if (azimuth < 180.0) {
+            azimuth += 180.0;
+        } else {
+            azimuth -= 180.0;
+        }
+    }
+    if (azimuth > 360.0) {
+        azimuth -= 360.0f;
+    }
+    if (azimuth == 0) {
+        azimuth = 360.0;
+    }
+}
+
 // Plot pass in polar coords
 void SatelliteTrackerGUI::plotPolarChart()
 {
@@ -916,6 +941,86 @@ void SatelliteTrackerGUI::plotPolarChart()
             series[i]->attachAxis(radialAxis);
         }
 
+        int redrawTime = 0;
+
+        if (m_settings.m_drawRotators != SatelliteTrackerSettings::NO_ROTATORS)
+        {
+            // Plot rotator position
+            QString ourSourceName = QString("F0:%1 %2").arg(m_satelliteTracker->getIndexInFeatureSet()).arg(m_satelliteTracker->getIdentifier());  // Only one feature set in practice?
+            std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
+            for (int featureSetIndex = 0; featureSetIndex < featureSets.size(); featureSetIndex++)
+            {
+                FeatureSet *featureSet = featureSets[featureSetIndex];
+                for (int featureIndex = 0; featureIndex < featureSet->getNumberOfFeatures(); featureIndex++)
+                {
+                    Feature *feature = featureSet->getFeatureAt(featureIndex);
+                    if (FeatureUtils::compareFeatureURIs(feature->getURI(), "sdrangel.feature.gs232controller"))
+                    {
+                        QString source;
+                        ChannelWebAPIUtils::getFeatureSetting(featureSetIndex, featureIndex, "source", source); // Will return false if source isn't set in Controller
+                        int track = 0;
+                        ChannelWebAPIUtils::getFeatureSetting(featureSetIndex, featureIndex, "track", track);
+                        if ((m_settings.m_drawRotators == SatelliteTrackerSettings::ALL_ROTATORS) || ((source == ourSourceName) && track))
+                        {
+                            int onTarget = 0;
+                            ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "onTarget", onTarget);
+
+                            if (!onTarget)
+                            {
+                                // Target azimuth red dotted line
+                                double targetAzimuth, targetElevation;
+                                bool targetAzimuthOk = ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "targetAzimuth", targetAzimuth);
+                                bool targetElevationOk = ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "targetElevation", targetElevation);
+                                if (targetAzimuthOk && targetElevationOk)
+                                {
+                                    limitAzElRange(targetAzimuth, targetElevation);
+
+                                    QScatterSeries *rotatorSeries = new QScatterSeries();
+                                    QColor color(255, 0, 0, 150);
+                                    QPen pen(color);
+                                    rotatorSeries->setPen(pen);
+                                    rotatorSeries->setColor(color.darker());
+                                    rotatorSeries->setMarkerSize(20);
+                                    rotatorSeries->append(targetAzimuth, 90-targetElevation);
+                                    m_polarChart->addSeries(rotatorSeries);
+                                    rotatorSeries->attachAxis(angularAxis);
+                                    rotatorSeries->attachAxis(radialAxis);
+
+                                    redrawTime = 333;
+                                }
+                            }
+
+                            // Current azimuth line. Yellow while off target, green on target.
+                            double currentAzimuth, currentElevation;
+                            bool currentAzimuthOk = ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "currentAzimuth", currentAzimuth);
+                            bool currentElevationOk = ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "currentElevation", currentElevation);
+                            if (currentAzimuthOk && currentElevationOk)
+                            {
+                                limitAzElRange(currentAzimuth, currentElevation);
+
+                                QScatterSeries *rotatorSeries = new QScatterSeries();
+                                QColor color;
+                                if (onTarget) {
+                                    color = QColor(0, 255, 0, 150);
+                                } else {
+                                    color = QColor(255, 255, 0, 150);
+                                }
+                                rotatorSeries->setPen(QPen(color));
+                                rotatorSeries->setColor(color.darker());
+                                rotatorSeries->setMarkerSize(20);
+                                rotatorSeries->append(currentAzimuth, 90-currentElevation);
+                                m_polarChart->addSeries(rotatorSeries);
+                                rotatorSeries->attachAxis(angularAxis);
+                                rotatorSeries->attachAxis(radialAxis);
+
+                                redrawTime = 333;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Create series with single point, so we can plot time of AOS
         QLineSeries *aosSeries = new QLineSeries();
         aosSeries->append(polarSeries->at(0));
@@ -967,7 +1072,8 @@ void SatelliteTrackerGUI::plotPolarChart()
         if ((currentTime >= pass.m_aos) && (currentTime <= pass.m_los))
         {
             // Create series with single point, so we can plot current time
-            QLineSeries *nowSeries = new QLineSeries();
+            QScatterSeries *nowSeries = new QScatterSeries();
+            nowSeries->setMarkerSize(3);
             // Find closest point to current time
             int idx = std::round(polarSeries->count() * (currentTime.toMSecsSinceEpoch() - pass.m_aos.toMSecsSinceEpoch())
                                                        / (pass.m_los.toMSecsSinceEpoch() - pass.m_aos.toMSecsSinceEpoch()));
@@ -978,8 +1084,16 @@ void SatelliteTrackerGUI::plotPolarChart()
             m_polarChart->addSeries(nowSeries);
             nowSeries->attachAxis(angularAxis);
             nowSeries->attachAxis(radialAxis);
-            // Redraw in 5 seconds (call plotChart, incase user selects a different chart)
-            QTimer::singleShot(5000, this, &SatelliteTrackerGUI::plotChart);
+            if (!redrawTime) {
+                redrawTime = 5000;
+            }
+        }
+
+        if (redrawTime > 0)
+        {
+            // Redraw to show updated satellite position or rotator position
+            m_redrawTimer.setSingleShot(true);
+            m_redrawTimer.start(redrawTime);
         }
 
         delete polarSeries;
@@ -1567,3 +1681,4 @@ void SatelliteTrackerGUI::makeUIConnections()
     QObject::connect(ui->satTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &SatelliteTrackerGUI::on_satTableHeader_sortIndicatorChanged);
     QObject::connect(ui->deviceFeatureSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &SatelliteTrackerGUI::on_deviceFeatureSelect_currentIndexChanged);
 }
+

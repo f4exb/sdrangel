@@ -90,6 +90,7 @@ private:
 
     QChart *m_azElLineChart;
     QPolarChart *m_azElPolarChart;
+    QTimer m_redrawTimer;
 
     QChart m_chart;
     QDateTimeAxis m_chartXAxis;
@@ -161,6 +162,7 @@ private:
     void updateChartSubSelect();
     void updateSolarFlux(bool all);
     void makeUIConnections();
+    void limitAzElRange(double& azimuth, double& elevation) const;
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);

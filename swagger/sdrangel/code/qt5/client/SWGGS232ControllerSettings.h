@@ -91,6 +91,12 @@ public:
     qint32 getProtocol();
     void setProtocol(qint32 protocol);
 
+    qint32 getPrecision();
+    void setPrecision(qint32 precision);
+
+    qint32 getCoordinates();
+    void setCoordinates(qint32 coordinates);
+
     QString* getTitle();
     void setTitle(QString* title);
 
@@ -166,6 +172,12 @@ private:
 
     qint32 protocol;
     bool m_protocol_isSet;
+
+    qint32 precision;
+    bool m_precision_isSet;
+
+    qint32 coordinates;
+    bool m_coordinates_isSet;
 
     QString* title;
     bool m_title_isSet;

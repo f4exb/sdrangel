@@ -26,6 +26,7 @@
 #include "settings/rollupstate.h"
 
 #include "gs232controllersettings.h"
+#include "dfmstatusdialog.h"
 
 class PluginAPI;
 class FeatureUISet;
@@ -65,18 +66,24 @@ private:
     int m_lastFeatureState;
     bool m_lastOnTarget;
 
+    DFMStatusDialog m_dfmStatusDialog;
+
     explicit GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~GS232ControllerGUI();
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void setProtocol(GS232ControllerSettings::Protocol protocol);
+    void setPrecision();
     void updateConnectionWidgets();
-    void updateDecimals(GS232ControllerSettings::Protocol protocol);
     void updatePipeList(const QList<GS232ControllerSettings::AvailableChannelOrFeature>& sources);
     void updateSerialPortList();
+    void updateSerialPortList(const QStringList& serialPorts);
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void azElToDisplay(float az, float el, float& coord1, float& coord2) const;
+    void displayToAzEl(float coord1, float coord2);
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);
@@ -90,8 +97,8 @@ private slots:
     void on_port_valueChanged(int value);
     void on_baudRate_currentIndexChanged(int index);
     void on_track_stateChanged(int state);
-    void on_azimuth_valueChanged(double value);
-    void on_elevation_valueChanged(double value);
+    void on_coord1_valueChanged(double value);
+    void on_coord2_valueChanged(double value);
     void on_sources_currentTextChanged(const QString& text);
     void on_azimuthOffset_valueChanged(int value);
     void on_elevationOffset_valueChanged(int value);
@@ -100,7 +107,15 @@ private slots:
     void on_elevationMin_valueChanged(int value);
     void on_elevationMax_valueChanged(int value);
     void on_tolerance_valueChanged(double value);
+    void on_precision_valueChanged(int value);
+    void on_coordinates_currentIndexChanged(int index);
+    void on_dfmTrack_clicked(bool checked=false);
+    void on_dfmLubePumps_clicked(bool checked=false);
+    void on_dfmBrakes_clicked(bool checked=false);
+    void on_dfmDrives_clicked(bool checked=false);
+    void on_dfmShowStatus_clicked();
     void updateStatus();
 };
 
 #endif // INCLUDE_FEATURE_GS232CONTROLLERGUI_H_
+

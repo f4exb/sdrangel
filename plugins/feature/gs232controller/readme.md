@@ -92,6 +92,21 @@ This can prevent some rotators that have a limited accuracy from making unbenefi
 If this set to 0, every target azimuth and elevation received by the controller will be send to the rotator.
 If it is set to 2, then a change in azimuth of +-1 degree from the previous azimuth, would not be sent to the rotator.
 
+<h3>20: Precision</h3>
+
+Specifies the number of decimal places used for coordinates and the tolerance setting.
+For GS-232 this is fixed to 0. For SPID it is fixed to 1.
+
+<h3>21: Coordinates</h3>
+
+Specifies the coordinate system used by the GUI for entry and display of the position of the rotator. This can be:
+
+* Az/El - For azimuth and elevation in degrees.
+* X/Y 85' - For X/Y coordinates in degrees. 0,0 is zenith. X is positive Southward. Y is positive Eastward.
+* X/Y 30' - For X/Y coordinates in degrees. 0,0 is zenith. X is positivie Eastward. Y is positive Northward.
+
+Equations for translating between these coordinate systems can be found [here](https://ntrs.nasa.gov/citations/19670030005).
+
 <h2>Protocol Implementations</h2>
 
 <h3>GS-232 Protocol Implementation Notes</h3>

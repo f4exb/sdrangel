@@ -82,6 +82,7 @@ private:
     QChart m_emptyChart;
     QChart *m_lineChart;
     QPolarChart *m_polarChart;
+    QTimer m_redrawTimer;
 
     QDateTime m_nextTargetAOS;
     QDateTime m_nextTargetLOS;
@@ -138,6 +139,7 @@ private:
     void updateFileInputList();
     void updateMapList();
     void makeUIConnections();
+    void limitAzElRange(double& azimuth, double& elevation) const;
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);

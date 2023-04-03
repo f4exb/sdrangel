@@ -33,8 +33,11 @@
 #include "SWGStarTrackerDisplaySettings.h"
 #include "SWGStarTrackerDisplayLoSSettings.h"
 
+#include "feature/featureset.h"
 #include "feature/featureuiset.h"
+#include "feature/featureutils.h"
 #include "feature/featurewebapiutils.h"
+#include "channel/channelwebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dmsspinbox.h"
 #include "gui/graphicsviewzoom.h"
@@ -284,6 +287,8 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
 
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(1000);
+
+    connect(&m_redrawTimer, &QTimer::timeout, this, &StarTrackerGUI::plotChart);
 
     connect(ui->azimuth, SIGNAL(valueChanged(double)), this, SLOT(on_azimuth_valueChanged(double)));
     ui->azimuth->setRange(0, 360.0);
@@ -812,7 +817,7 @@ void StarTrackerGUI::on_displaySettings_clicked()
         ui->galacticLongitude->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
         displaySolarFlux();
 
-        if (ui->chartSelect->currentIndex() == 1) {
+        if (ui->chartSelect->currentIndex() <= 1) {
             plotChart();
         }
     }
@@ -1651,6 +1656,26 @@ void StarTrackerGUI::plotElevationLineChart()
     delete oldChart;
 }
 
+// Reduce az/el range from 450,180 to 360,90
+void StarTrackerGUI::limitAzElRange(double& azimuth, double& elevation) const
+{
+    if (elevation > 90.0)
+    {
+        elevation = 180.0 - elevation;
+        if (azimuth < 180.0) {
+            azimuth += 180.0;
+        } else {
+            azimuth -= 180.0;
+        }
+    }
+    if (azimuth > 360.0) {
+        azimuth -= 360.0f;
+    }
+    if (azimuth == 0) {
+        azimuth = 360.0;
+    }
+}
+
 // Plot target elevation angle over the day
 void StarTrackerGUI::plotElevationPolarChart()
 {
@@ -1839,6 +1864,92 @@ void StarTrackerGUI::plotElevationPolarChart()
         m_azElPolarChart->addSeries(series[i]);
         series[i]->attachAxis(angularAxis);
         series[i]->attachAxis(radialAxis);
+    }
+
+    if (m_settings.m_drawRotators != StarTrackerSettings::NO_ROTATORS)
+    {
+        int redrawTime = 0;
+        // Plot rotator position
+        QString ourSourceName = QString("F0:%1 %2").arg(m_starTracker->getIndexInFeatureSet()).arg(m_starTracker->getIdentifier());  // Only one feature set in practice?
+        std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
+        for (int featureSetIndex = 0; featureSetIndex < featureSets.size(); featureSetIndex++)
+        {
+            FeatureSet *featureSet = featureSets[featureSetIndex];
+            for (int featureIndex = 0; featureIndex < featureSet->getNumberOfFeatures(); featureIndex++)
+            {
+                Feature *feature = featureSet->getFeatureAt(featureIndex);
+                if (FeatureUtils::compareFeatureURIs(feature->getURI(), "sdrangel.feature.gs232controller"))
+                {
+                    QString source;
+                    ChannelWebAPIUtils::getFeatureSetting(featureSetIndex, featureIndex, "source", source); // Will return false if source isn't set in Controller
+                    int track = 0;
+                    ChannelWebAPIUtils::getFeatureSetting(featureSetIndex, featureIndex, "track", track);
+                    if ((m_settings.m_drawRotators == StarTrackerSettings::ALL_ROTATORS) || ((source == ourSourceName) && track))
+                    {
+                        int onTarget = 0;
+                        ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "onTarget", onTarget);
+
+                        if (!onTarget)
+                        {
+                            // Target azimuth red dotted line
+                            double targetAzimuth, targetElevation;
+                            bool targetAzimuthOk = ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "targetAzimuth", targetAzimuth);
+                            bool targetElevationOk = ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "targetElevation", targetElevation);
+                            if (targetAzimuthOk && targetElevationOk)
+                            {
+                                limitAzElRange(targetAzimuth, targetElevation);
+
+                                QScatterSeries *rotatorSeries = new QScatterSeries();
+                                QColor color(255, 0, 0, 150);
+                                QPen pen(color);
+                                rotatorSeries->setPen(pen);
+                                rotatorSeries->setColor(color.darker());
+                                rotatorSeries->setMarkerSize(20);
+                                rotatorSeries->append(targetAzimuth, 90-targetElevation);
+                                m_azElPolarChart->addSeries(rotatorSeries);
+                                rotatorSeries->attachAxis(angularAxis);
+                                rotatorSeries->attachAxis(radialAxis);
+
+                                redrawTime = 333;
+                            }
+                        }
+
+                        // Current azimuth line. Yellow while off target, green on target.
+                        double currentAzimuth, currentElevation;
+                        bool currentAzimuthOk = ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "currentAzimuth", currentAzimuth);
+                        bool currentElevationOk = ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "currentElevation", currentElevation);
+                        if (currentAzimuthOk && currentElevationOk)
+                        {
+                            limitAzElRange(currentAzimuth, currentElevation);
+
+                            QScatterSeries *rotatorSeries = new QScatterSeries();
+                            QColor color;
+                            if (onTarget) {
+                                color = QColor(0, 255, 0, 150);
+                            } else {
+                                color = QColor(255, 255, 0, 150);
+                            }
+                            rotatorSeries->setPen(QPen(color));
+                            rotatorSeries->setColor(color.darker());
+                            rotatorSeries->setMarkerSize(20);
+                            rotatorSeries->append(currentAzimuth, 90-currentElevation);
+                            m_azElPolarChart->addSeries(rotatorSeries);
+                            rotatorSeries->attachAxis(angularAxis);
+                            rotatorSeries->attachAxis(radialAxis);
+
+                            redrawTime = 333;
+                        }
+                    }
+                }
+            }
+        }
+        if (redrawTime > 0)
+        {
+            // Redraw to show updated rotator position
+            // Update period may be long or custom time might be fixed
+            m_redrawTimer.setSingleShot(true);
+            m_redrawTimer.start(redrawTime);
+        }
     }
 
     // Create series with single point, so we can plot time of rising
@@ -2242,3 +2353,4 @@ void StarTrackerGUI::makeUIConnections()
     QObject::connect(ui->drawSun, &QToolButton::clicked, this, &StarTrackerGUI::on_drawSun_clicked);
     QObject::connect(ui->drawMoon, &QToolButton::clicked, this, &StarTrackerGUI::on_drawMoon_clicked);
 }
+

@@ -42,6 +42,7 @@ SatelliteTrackerSettingsDialog::SatelliteTrackerSettingsDialog(SatelliteTrackerS
     ui->defaultFrequency->setValue(settings->m_defaultFrequency / 1000000.0);
     ui->azElUnits->setCurrentIndex((int)settings->m_azElUnits);
     ui->groundTrackPoints->setValue(settings->m_groundTrackPoints);
+    ui->drawRotators->setCurrentIndex((int)settings->m_drawRotators);
     ui->dateFormat->setText(settings->m_dateFormat);
     ui->utc->setChecked(settings->m_utc);
     ui->drawOnMap->setChecked(settings->m_drawOnMap);
@@ -94,6 +95,7 @@ void SatelliteTrackerSettingsDialog::accept()
     m_settings->m_defaultFrequency = (float)(ui->defaultFrequency->value() * 1000000.0);
     m_settings->m_azElUnits = (SatelliteTrackerSettings::AzElUnits)ui->azElUnits->currentIndex();
     m_settings->m_groundTrackPoints = ui->groundTrackPoints->value();
+    m_settings->m_drawRotators = (SatelliteTrackerSettings::Rotators)ui->drawRotators->currentIndex();
     m_settings->m_dateFormat = ui->dateFormat->text();
     m_settings->m_utc = ui->utc->isChecked();
     m_settings->m_drawOnMap = ui->drawOnMap->isChecked();

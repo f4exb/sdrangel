@@ -203,12 +203,11 @@ void APRS::applySettings(const APRSSettings& settings, const QList<QString>& set
             stop();
     }
 
-
-    APRSWorker::MsgConfigureAPRSWorker *msg = APRSWorker::MsgConfigureAPRSWorker::create(
-        settings, settingsKeys, force
-    );
-
-    if (m_worker) {
+    if (m_worker)
+    {
+        APRSWorker::MsgConfigureAPRSWorker *msg = APRSWorker::MsgConfigureAPRSWorker::create(
+            settings, settingsKeys, force
+        );
         m_worker->getInputMessageQueue()->push(msg);
     }
 

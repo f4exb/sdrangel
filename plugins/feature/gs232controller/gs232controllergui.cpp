@@ -27,11 +27,13 @@
 #include "gui/dialogpositioner.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
+#include "util/astronomy.h"
 
 #include "ui_gs232controllergui.h"
 #include "gs232controller.h"
 #include "gs232controllergui.h"
 #include "gs232controllerreport.h"
+#include "dfmprotocol.h"
 
 GS232ControllerGUI* GS232ControllerGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
 {
@@ -72,6 +74,57 @@ bool GS232ControllerGUI::deserialize(const QByteArray& data)
     }
 }
 
+void GS232ControllerGUI::azElToDisplay(float az, float el, float& coord1, float& coord2) const
+{
+    AzAlt aa;
+    double c1, c2;
+    if (m_settings.m_coordinates == GS232ControllerSettings::X_Y_85)
+    {
+        aa.az = az;
+        aa.alt = el;
+        Astronomy::azAltToXY85(aa, c1, c2);
+        coord1 = (float)c1;
+        coord2 = (float)c2;
+    }
+    else if (m_settings.m_coordinates == GS232ControllerSettings::X_Y_30)
+    {
+        aa.az = az;
+        aa.alt = el;
+        Astronomy::azAltToXY30(aa, c1, c2);
+        coord1 = (float)c1;
+        coord2 = (float)c2;
+    }
+    else
+    {
+        coord1 = az;
+        coord2 = el;
+    }
+}
+
+void GS232ControllerGUI::displayToAzEl(float coord1, float coord2)
+{
+    if (m_settings.m_coordinates == GS232ControllerSettings::X_Y_85)
+    {
+        AzAlt aa = Astronomy::xy85ToAzAlt(coord1, coord2);
+        m_settings.m_azimuth = aa.az;
+        m_settings.m_elevation = aa.alt;
+    }
+    else if (m_settings.m_coordinates == GS232ControllerSettings::X_Y_30)
+    {
+        AzAlt aa = Astronomy::xy30ToAzAlt(coord1, coord2);
+        m_settings.m_azimuth = aa.az;
+        m_settings.m_elevation = aa.alt;
+    }
+    else
+    {
+        m_settings.m_azimuth = coord1;
+        m_settings.m_elevation = coord2;
+    }
+    m_settingsKeys.append("azimuth");
+    m_settingsKeys.append("elevation");
+    applySettings();
+}
+
 bool GS232ControllerGUI::handleMessage(const Message& message)
 {
     if (GS232Controller::MsgConfigureGS232Controller::match(message))
@@ -101,18 +154,33 @@ bool GS232ControllerGUI::handleMessage(const Message& message)
     else if (GS232ControllerReport::MsgReportAzAl::match(message))
     {
         GS232ControllerReport::MsgReportAzAl& azAl = (GS232ControllerReport::MsgReportAzAl&) message;
-        ui->azimuthCurrentText->setText(QString("%1").arg(azAl.getAzimuth()));
-        ui->elevationCurrentText->setText(QString("%1").arg(azAl.getElevation()));
+        float coord1, coord2;
+        azElToDisplay(azAl.getAzimuth(), azAl.getElevation(), coord1, coord2);
+        ui->coord1CurrentText->setText(QString::number(coord1, 'f', m_settings.m_precision));
+        ui->coord2CurrentText->setText(QString::number(coord2, 'f', m_settings.m_precision));
         return true;
     }
     else if (MainCore::MsgTargetAzimuthElevation::match(message))
     {
         MainCore::MsgTargetAzimuthElevation& msg = (MainCore::MsgTargetAzimuthElevation&) message;
         SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = msg.getSWGTargetAzimuthElevation();
-
-        ui->azimuth->setValue(swgTarget->getAzimuth());
-        ui->elevation->setValue(swgTarget->getElevation());
+        float coord1, coord2;
+        azElToDisplay(swgTarget->getAzimuth(), swgTarget->getElevation(), coord1, coord2);
+        ui->coord1->setValue(coord1);
+        ui->coord2->setValue(coord2);
         ui->targetName->setText(*swgTarget->getName());
+        return true;
+    }
+    else if (GS232Controller::MsgReportSerialPorts::match(message))
+    {
+        GS232Controller::MsgReportSerialPorts& msg = (GS232Controller::MsgReportSerialPorts&) message;
+        updateSerialPortList(msg.getSerialPorts());
+        return true;
+    }
+    else if (DFMProtocol::MsgReportDFMStatus::match(message))
+    {
+        DFMProtocol::MsgReportDFMStatus& report = (DFMProtocol::MsgReportDFMStatus&) message;
+        m_dfmStatusDialog.displayStatus(report.getDFMStatus());
         return true;
     }
 
@@ -147,7 +215,8 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
     m_lastFeatureState(0),
-    m_lastOnTarget(false)
+    m_lastOnTarget(false),
+    m_dfmStatusDialog()
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -166,8 +235,9 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(250);
 
-    ui->azimuthCurrentText->setText("-");
-    ui->elevationCurrentText->setText("-");
+    ui->coord1CurrentText->setText("-");
+    ui->coord2CurrentText->setText("-");
+    setProtocol(m_settings.m_protocol); // Hide DFM buttons
 
     updateSerialPortList();
     if (ui->serialPort->currentIndex() >= 0) {
@@ -182,10 +252,13 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
 
     // Get pre-existing pipes
     m_gs232Controller->getInputMessageQueue()->push(GS232Controller::MsgScanAvailableChannelOrFeatures::create());
+
+    new DialogPositioner(&m_dfmStatusDialog, true);
 }
 
 GS232ControllerGUI::~GS232ControllerGUI()
 {
+    m_dfmStatusDialog.close();
     delete ui;
 }
 
@@ -206,11 +279,14 @@ void GS232ControllerGUI::displaySettings()
     setWindowTitle(m_settings.m_title);
     setTitle(m_settings.m_title);
     blockApplySettings(true);
-    ui->azimuth->setValue(m_settings.m_azimuth);
-    ui->elevation->setValue(m_settings.m_elevation);
+    ui->precision->setValue(m_settings.m_precision); // Must set before protocol and az/el
     ui->protocol->setCurrentIndex((int)m_settings.m_protocol);
+    ui->coordinates->setCurrentIndex((int)m_settings.m_coordinates);
+    float coord1, coord2;
+    azElToDisplay(m_settings.m_azimuth, m_settings.m_elevation, coord1, coord2);
+    ui->coord1->setValue(coord1);
+    ui->coord2->setValue(coord2);
     ui->connection->setCurrentIndex((int)m_settings.m_connection);
-    updateDecimals(m_settings.m_protocol);
     if (m_settings.m_serialPort.length() > 0) {
         ui->serialPort->lineEdit()->setText(m_settings.m_serialPort);
     }
@@ -226,6 +302,10 @@ void GS232ControllerGUI::displaySettings()
     ui->elevationMin->setValue(m_settings.m_elevationMin);
     ui->elevationMax->setValue(m_settings.m_elevationMax);
     ui->tolerance->setValue(m_settings.m_tolerance);
+    ui->dfmTrack->setChecked(m_settings.m_dfmTrackOn);
+    ui->dfmLubePumps->setChecked(m_settings.m_dfmLubePumpsOn);
+    ui->dfmBrakes->setChecked(m_settings.m_dfmBrakesOn);
+    ui->dfmDrives->setChecked(m_settings.m_dfmDrivesOn);
     getRollupContents()->restoreState(m_rollupState);
     updateConnectionWidgets();
     blockApplySettings(false);
@@ -254,6 +334,19 @@ void GS232ControllerGUI::updateSerialPortList()
         QSerialPortInfo info = i.next();
         ui->serialPort->addItem(info.portName());
     }
+}
+
+void GS232ControllerGUI::updateSerialPortList(const QStringList& serialPorts)
+{
+    ui->serialPort->blockSignals(true);
+    ui->serialPort->clear();
+    for (const auto& serialPort : serialPorts) {
+        ui->serialPort->addItem(serialPort);
+    }
+    if (!m_settings.m_serialPort.isEmpty()) {
+        ui->serialPort->setCurrentText(m_settings.m_serialPort);
+    }
+    ui->serialPort->blockSignals(false);
 }
 
 void GS232ControllerGUI::updatePipeList(const QList<GS232ControllerSettings::AvailableChannelOrFeature>& sources)
@@ -359,24 +452,53 @@ void GS232ControllerGUI::on_startStop_toggled(bool checked)
     }
 }
 
-void GS232ControllerGUI::updateDecimals(GS232ControllerSettings::Protocol protocol)
+void GS232ControllerGUI::setProtocol(GS232ControllerSettings::Protocol protocol)
 {
     if (protocol == GS232ControllerSettings::GS232)
     {
-        ui->azimuth->setDecimals(0);
-        ui->elevation->setDecimals(0);
+        ui->precision->setValue(0);
+        ui->precision->setEnabled(false);
+        ui->precisionLabel->setEnabled(false);
+    }
+    else if (protocol == GS232ControllerSettings::SPID)
+    {
+        ui->precision->setValue(1);
+        ui->precision->setEnabled(false);
+        ui->precisionLabel->setEnabled(false);
     }
     else
     {
-        ui->azimuth->setDecimals(1);
-        ui->elevation->setDecimals(1);
+        ui->precision->setEnabled(true);
+        ui->precisionLabel->setEnabled(true);
     }
+    bool dfm = protocol == GS232ControllerSettings::DFM;
+    ui->dfmLine->setVisible(dfm);
+    ui->dfmTrack->setVisible(dfm);
+    ui->dfmLubePumps->setVisible(dfm);
+    ui->dfmBrakes->setVisible(dfm);
+    ui->dfmDrives->setVisible(dfm);
+    ui->dfmShowStatus->setVisible(dfm);
+
+    // See RemoteControlGUI::createGUI() for additional weirdness in trying
+    // to resize a window after widgets are changed
+    getRollupContents()->arrangeRollups();
+    layout()->activate(); // Recalculate sizeHint
+    setMinimumSize(sizeHint());
+    setMaximumSize(sizeHint());
+    resize(sizeHint());
+}
+
+void GS232ControllerGUI::setPrecision()
+{
+    ui->coord1->setDecimals(m_settings.m_precision);
+    ui->coord2->setDecimals(m_settings.m_precision);
+    ui->tolerance->setDecimals(m_settings.m_precision);
 }
 
 void GS232ControllerGUI::on_protocol_currentIndexChanged(int index)
 {
     m_settings.m_protocol = (GS232ControllerSettings::Protocol)index;
-    updateDecimals(m_settings.m_protocol);
+    setProtocol(m_settings.m_protocol);
     m_settingsKeys.append("protocol");
     applySettings();
 }
@@ -419,20 +541,16 @@ void GS232ControllerGUI::on_port_valueChanged(int value)
     applySettings();
 }
 
-void GS232ControllerGUI::on_azimuth_valueChanged(double value)
+void GS232ControllerGUI::on_coord1_valueChanged(double value)
 {
-    m_settings.m_azimuth = (float)value;
+    displayToAzEl(value, ui->coord2->value());
     ui->targetName->setText("");
-    m_settingsKeys.append("azimuth");
-    applySettings();
 }
 
-void GS232ControllerGUI::on_elevation_valueChanged(double value)
+void GS232ControllerGUI::on_coord2_valueChanged(double value)
 {
-    m_settings.m_elevation = (float)value;
+    displayToAzEl(ui->coord1->value(), value);
     ui->targetName->setText("");
-    m_settingsKeys.append("elevation");
-    applySettings();
 }
 
 void GS232ControllerGUI::on_azimuthOffset_valueChanged(int value)
@@ -484,6 +602,63 @@ void GS232ControllerGUI::on_tolerance_valueChanged(double value)
     applySettings();
 }
 
+void GS232ControllerGUI::on_precision_valueChanged(int value)
+{
+    m_settings.m_precision = value;
+    setPrecision();
+    m_settingsKeys.append("precision");
+    applySettings();
+}
+
+void GS232ControllerGUI::on_coordinates_currentIndexChanged(int index)
+{
+    m_settings.m_coordinates = (GS232ControllerSettings::Coordinates)index;
+    m_settingsKeys.append("coordinates");
+    applySettings();
+
+    float coord1, coord2;
+    azElToDisplay(m_settings.m_azimuth, m_settings.m_elevation, coord1, coord2);
+
+    ui->coord1->blockSignals(true);
+    if (m_settings.m_coordinates == GS232ControllerSettings::AZ_EL)
+    {
+        ui->coord1->setMinimum(0.0);
+        ui->coord1->setMaximum(450.0);
+        ui->coord1->setToolTip("Target azimuth in degrees");
+        ui->coord1Label->setText("Azimuth");
+        ui->coord1CurrentText->setToolTip("Current azimuth in degrees");
+    }
+    else
+    {
+        ui->coord1->setMinimum(-90.0);
+        ui->coord1->setMaximum(90.0);
+        ui->coord1->setToolTip("Target X in degrees");
+        ui->coord1Label->setText("X");
+        ui->coord1CurrentText->setToolTip("Current X coordinate in degrees");
+    }
+    ui->coord1->setValue(coord1);
+    ui->coord1->blockSignals(false);
+    ui->coord2->blockSignals(true);
+    if (m_settings.m_coordinates == GS232ControllerSettings::AZ_EL)
+    {
+        ui->coord2->setMinimum(0.0);
+        ui->coord2->setMaximum(180.0);
+        ui->coord2->setToolTip("Target elevation in degrees");
+        ui->coord2Label->setText("Elevation");
+        ui->coord2CurrentText->setToolTip("Current elevation in degrees");
+    }
+    else
+    {
+        ui->coord2->setMinimum(-90.0);
+        ui->coord2->setMaximum(90.0);
+        ui->coord2->setToolTip("Target Y in degrees");
+        ui->coord2Label->setText("Y");
+        ui->coord2CurrentText->setToolTip("Current Y coordinate in degrees");
+    }
+    ui->coord2->setValue(coord2);
+    ui->coord2->blockSignals(false);
+}
+
 void GS232ControllerGUI::on_track_stateChanged(int state)
 {
     m_settings.m_track = state == Qt::Checked;
@@ -505,6 +680,41 @@ void GS232ControllerGUI::on_sources_currentTextChanged(const QString& text)
     ui->targetName->setText("");
     m_settingsKeys.append("source");
     applySettings();
+}
+
+void GS232ControllerGUI::on_dfmTrack_clicked(bool checked)
+{
+    m_settings.m_dfmTrackOn = checked;
+    m_settingsKeys.append("dfmTrackOn");
+    applySettings();
+}
+
+void GS232ControllerGUI::on_dfmLubePumps_clicked(bool checked)
+{
+    m_settings.m_dfmLubePumpsOn = checked;
+    m_settingsKeys.append("dfmLubePumpsOn");
+    applySettings();
+}
+
+void GS232ControllerGUI::on_dfmBrakes_clicked(bool checked)
+{
+    m_settings.m_dfmBrakesOn = checked;
+    m_settingsKeys.append("dfmBrakesOn");
+    applySettings();
+}
+
+void GS232ControllerGUI::on_dfmDrives_clicked(bool checked)
+{
+    m_settings.m_dfmDrivesOn = checked;
+    m_settingsKeys.append("dfmDrivesOn");
+    applySettings();
+}
+
+void GS232ControllerGUI::on_dfmShowStatus_clicked()
+{
+    m_dfmStatusDialog.show();
+    m_dfmStatusDialog.raise();
+    m_dfmStatusDialog.activateWindow();
 }
 
 void GS232ControllerGUI::updateStatus()
@@ -583,8 +793,8 @@ void GS232ControllerGUI::makeUIConnections()
     QObject::connect(ui->port, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_port_valueChanged);
     QObject::connect(ui->baudRate, qOverload<int>(&QComboBox::currentIndexChanged), this, &GS232ControllerGUI::on_baudRate_currentIndexChanged);
     QObject::connect(ui->track, &QCheckBox::stateChanged, this, &GS232ControllerGUI::on_track_stateChanged);
-    QObject::connect(ui->azimuth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_azimuth_valueChanged);
-    QObject::connect(ui->elevation, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_elevation_valueChanged);
+    QObject::connect(ui->coord1, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_coord1_valueChanged);
+    QObject::connect(ui->coord2, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_coord2_valueChanged);
     QObject::connect(ui->sources, &QComboBox::currentTextChanged, this, &GS232ControllerGUI::on_sources_currentTextChanged);
     QObject::connect(ui->azimuthOffset, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_azimuthOffset_valueChanged);
     QObject::connect(ui->elevationOffset, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_elevationOffset_valueChanged);
@@ -593,4 +803,12 @@ void GS232ControllerGUI::makeUIConnections()
     QObject::connect(ui->elevationMin, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_elevationMin_valueChanged);
     QObject::connect(ui->elevationMax, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_elevationMax_valueChanged);
     QObject::connect(ui->tolerance, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_tolerance_valueChanged);
+    QObject::connect(ui->precision, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_precision_valueChanged);
+    QObject::connect(ui->coordinates, qOverload<int>(&QComboBox::currentIndexChanged), this, &GS232ControllerGUI::on_coordinates_currentIndexChanged);
+    QObject::connect(ui->dfmTrack, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmTrack_clicked);
+    QObject::connect(ui->dfmLubePumps, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmLubePumps_clicked);
+    QObject::connect(ui->dfmBrakes, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmBrakes_clicked);
+    QObject::connect(ui->dfmDrives, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmDrives_clicked);
+    QObject::connect(ui->dfmShowStatus, &QToolButton::clicked, this, &GS232ControllerGUI::on_dfmShowStatus_clicked);
 }
+

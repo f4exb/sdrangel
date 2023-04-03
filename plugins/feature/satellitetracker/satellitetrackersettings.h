@@ -84,6 +84,7 @@ struct SatelliteTrackerSettings
     enum DateTimeSelect {NOW, CUSTOM, FROM_MAP, FROM_FILE} m_dateTimeSelect;
     QString m_mapFeature;               //!< Which feature when FROM_MAP
     QString m_fileInputDevice;          //!< Which device when FROM_FILE
+    enum Rotators {ALL_ROTATORS, NO_ROTATORS, MATCHING_TARGET} m_drawRotators; //!< Which rotators to draw on polar chart
 
     int m_columnSort;                    //!< Which column is used for sorting (-1 for none)
     Qt::SortOrder m_columnSortOrder;

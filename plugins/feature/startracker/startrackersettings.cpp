@@ -83,6 +83,7 @@ void StarTrackerSettings::resetToDefaults()
     m_drawSunOnSkyTempChart = true;
     m_drawMoonOnSkyTempChart = true;
     m_workspaceIndex = 0;
+    m_drawRotators = MATCHING_TARGET;
 }
 
 QByteArray StarTrackerSettings::serialize() const
@@ -139,6 +140,7 @@ QByteArray StarTrackerSettings::serialize() const
 
     s.writeS32(45, m_workspaceIndex);
     s.writeBlob(46, m_geometryBytes);
+    s.writeS32(47, (int)m_drawRotators);
 
     return s.final();
 }
@@ -227,6 +229,7 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
 
         d.readS32(45, &m_workspaceIndex, 0);
         d.readBlob(46, &m_geometryBytes);
+        d.readS32(47, (int *)&m_drawRotators, MATCHING_TARGET);
 
         return true;
     }
@@ -374,6 +377,9 @@ void StarTrackerSettings::applySettings(const QStringList& settingsKeys, const S
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
     }
+    if (settingsKeys.contains("drawRotators")) {
+        m_drawRotators = settings.m_drawRotators;
+    }
 }
 
 QString StarTrackerSettings::getDebugString(const QStringList& settingsKeys, bool force) const
@@ -511,6 +517,9 @@ QString StarTrackerSettings::getDebugString(const QStringList& settingsKeys, boo
     }
     if (settingsKeys.contains("workspaceIndex") || force) {
         ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("drawRotators") || force) {
+        ostr << " m_drawRotators: " << m_drawRotators;
     }
 
     return QString(ostr.str().c_str());

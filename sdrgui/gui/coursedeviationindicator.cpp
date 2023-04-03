@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
+
 #include <QPainter>
 
 #include "coursedeviationindicator.h"
@@ -46,6 +48,8 @@ void CourseDeviationIndicator::setGlideSlopeDDM(float ddm)
 
 void CourseDeviationIndicator::paintEvent(QPaintEvent *event)
 {
+    (void) event;
+
     QPainter painter(this);
 
     QRect r = rect();
@@ -168,7 +172,6 @@ void CourseDeviationIndicator::paintEvent(QPaintEvent *event)
         {
             QFontMetrics fm(painter.font());
             QString text = "G/S";
-            int tw = fm.horizontalAdvance(text);
             int th = fm.ascent() / 2;
             painter.setPen(QColor(0, 255, 0));
             painter.drawText(midW + bgw + 2, midH + th, text);

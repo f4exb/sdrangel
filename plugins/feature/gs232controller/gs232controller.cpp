@@ -39,12 +39,14 @@
 #include "gs232controller.h"
 #include "gs232controllerworker.h"
 #include "gs232controllerreport.h"
+#include "dfmprotocol.h"
 
 MESSAGE_CLASS_DEFINITION(GS232Controller::MsgConfigureGS232Controller, Message)
 MESSAGE_CLASS_DEFINITION(GS232Controller::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(GS232Controller::MsgReportWorker, Message)
 MESSAGE_CLASS_DEFINITION(GS232Controller::MsgReportAvailableChannelOrFeatures, Message)
 MESSAGE_CLASS_DEFINITION(GS232Controller::MsgScanAvailableChannelOrFeatures, Message)
+MESSAGE_CLASS_DEFINITION(GS232Controller::MsgReportSerialPorts, Message)
 
 const char* const GS232Controller::m_featureIdURI = "sdrangel.feature.gs232controller";
 const char* const GS232Controller::m_featureId = "GS232Controller";
@@ -52,7 +54,9 @@ const char* const GS232Controller::m_featureId = "GS232Controller";
 GS232Controller::GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
     m_thread(nullptr),
-    m_worker(nullptr)
+    m_worker(nullptr),
+    m_currentAzimuth(0.0f),
+    m_currentElevation(0.0f)
 {
     qDebug("GS232Controller::GS232Controller: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
@@ -90,10 +94,14 @@ GS232Controller::GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface)
         this,
         &GS232Controller::handleChannelRemoved
     );
+    connect(&m_timer, &QTimer::timeout, this, &GS232Controller::scanSerialPorts);
+    m_timer.start(5000);
 }
 
 GS232Controller::~GS232Controller()
 {
+    m_timer.stop();
+    disconnect(&m_timer, &QTimer::timeout, this, &GS232Controller::scanSerialPorts);
     QObject::disconnect(
         MainCore::instance(),
         &MainCore::channelRemoved,
@@ -244,6 +252,16 @@ bool GS232Controller::handleMessage(const Message& cmd)
         }
         return true;
     }
+    else if (DFMProtocol::MsgReportDFMStatus::match(cmd))
+    {
+        // Forward to GUI
+        if (getMessageQueueToGUI())
+        {
+            DFMProtocol::MsgReportDFMStatus& report = (DFMProtocol::MsgReportDFMStatus&) cmd;
+            getMessageQueueToGUI()->push(new DFMProtocol::MsgReportDFMStatus(report));
+        }
+        return true;
+    }
     else
     {
         return false;
@@ -256,8 +274,8 @@ bool GS232Controller::getOnTarget() const
     float targetAziumth, targetElevation;
     m_settings.calcTargetAzEl(targetAziumth, targetElevation);
     float readTolerance = m_settings.m_tolerance + 0.0f;
-    bool onTarget =   (std::fabs(m_currentAzimuth - targetAziumth) < readTolerance)
-                   && (std::fabs(m_currentElevation - targetElevation) < readTolerance);
+    bool onTarget =   (std::fabs(m_currentAzimuth - targetAziumth) <= readTolerance)
+                   && (std::fabs(m_currentElevation - targetElevation) <= readTolerance);
     return onTarget;
 }
 
@@ -471,6 +489,8 @@ void GS232Controller::webapiFormatFeatureSettings(
     response.getGs232ControllerSettings()->setElevationMax(settings.m_elevationMax);
     response.getGs232ControllerSettings()->setTolerance(settings.m_tolerance);
     response.getGs232ControllerSettings()->setProtocol(settings.m_protocol);
+    response.getGs232ControllerSettings()->setPrecision(settings.m_precision);
+    response.getGs232ControllerSettings()->setCoordinates((int)settings.m_coordinates);
 
     if (response.getGs232ControllerSettings()->getTitle()) {
         *response.getGs232ControllerSettings()->getTitle() = settings.m_title;
@@ -559,6 +579,12 @@ void GS232Controller::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("protocol")) {
         settings.m_protocol = (GS232ControllerSettings::Protocol)response.getGs232ControllerSettings()->getProtocol();
     }
+    if (featureSettingsKeys.contains("precision")) {
+        settings.m_precision = response.getGs232ControllerSettings()->getPrecision();
+    }
+    if (featureSettingsKeys.contains("coordinates")) {
+        settings.m_coordinates = (GS232ControllerSettings::Coordinates)response.getGs232ControllerSettings()->getCoordinates();
+    }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getGs232ControllerSettings()->getTitle();
     }
@@ -644,6 +670,12 @@ void GS232Controller::webapiReverseSendSettings(const QList<QString>& featureSet
     if (featureSettingsKeys.contains("protocol") || force) {
         swgGS232ControllerSettings->setProtocol((int)settings.m_protocol);
     }
+    if (featureSettingsKeys.contains("precision") || force) {
+        swgGS232ControllerSettings->setPrecision(settings.m_precision);
+    }
+    if (featureSettingsKeys.contains("coordinates") || force) {
+        swgGS232ControllerSettings->setCoordinates(settings.m_coordinates);
+    }
     if (featureSettingsKeys.contains("title") || force) {
         swgGS232ControllerSettings->setTitle(new QString(settings.m_title));
     }
@@ -686,14 +718,9 @@ void GS232Controller::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& r
         response.getGs232ControllerReport()->getSources()->append(new QString(itemText));
     }
 
-    QList<QSerialPortInfo> serialPorts = QSerialPortInfo::availablePorts();
-    QListIterator<QSerialPortInfo> i(serialPorts);
     response.getGs232ControllerReport()->setSerialPorts(new QList<QString*>());
-
-    while (i.hasNext())
-    {
-        QSerialPortInfo info = i.next();
-        response.getGs232ControllerReport()->getSerialPorts()->append(new QString(info.portName()));
+    for (const auto& serialPort : m_serialPorts) {
+        response.getGs232ControllerReport()->getSerialPorts()->append(new QString(serialPort));
     }
 
     float azimuth, elevation;
@@ -895,3 +922,27 @@ void GS232Controller::handlePipeMessageQueue(MessageQueue* messageQueue)
         }
     }
 }
+
+void GS232Controller::scanSerialPorts()
+{
+    // This can take 4ms on Windows, so we don't want to have it in webapiFormatFeatureReport
+    // as polling of target az/el by other plugins will be slowed down
+    QList<QSerialPortInfo> serialPortInfos = QSerialPortInfo::availablePorts();
+    QListIterator<QSerialPortInfo> i(serialPortInfos);
+    QStringList serialPorts;
+    while (i.hasNext())
+    {
+        QSerialPortInfo info = i.next();
+        serialPorts.append(info.portName());
+    }
+    if (m_serialPorts != serialPorts)
+    {
+        if (getMessageQueueToGUI())
+        {
+            MsgReportSerialPorts *msg = MsgReportSerialPorts::create(serialPorts);
+            getMessageQueueToGUI()->push(msg);
+        }
+        m_serialPorts = serialPorts;
+    }
+}
+

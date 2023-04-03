@@ -6,6 +6,11 @@ set(gs232controller_SOURCES
     gs232controllerplugin.cpp
     gs232controllerworker.cpp
     gs232controllerwebapiadapter.cpp
+    controllerprotocol.cpp
+    gs232protocol.cpp
+    spidprotocol.cpp
+    rotctrldprotocol.cpp
+    dfmprotocol.cpp
 )
 
 set(gs232controller_HEADERS
@@ -15,6 +20,11 @@ set(gs232controller_HEADERS
     gs232controllerreport.h
     gs232controllerworker.h
     gs232controllerwebapiadapter.h
+    controllerprotocol.h
+    gs232protocol.h
+    spidprotocol.h
+    rotctrldprotocol.h
+    dfmprotocol.h
 )
 
 include_directories(
@@ -26,10 +36,13 @@ if(NOT SERVER_MODE)
         ${gs232controller_SOURCES}
         gs232controllergui.cpp
         gs232controllergui.ui
+        dfmstatusdialog.cpp
+        dfmstatusdialog.ui
     )
     set(gs232controller_HEADERS
         ${gs232controller_HEADERS}
         gs232controllergui.h
+        dfmstatusdialog.h
     )
 
     set(TARGET_NAME featuregs232controller)
