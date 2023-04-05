@@ -69,7 +69,7 @@ AaroniaRTSAInputGui::AaroniaRTSAInputGui(DeviceUISet *deviceUISet, QWidget* pare
     ui->setupUi(getContents());
     sizeToContents();
     getContents()->setStyleSheet("#AaroniaRTSAInputGui { background-color: rgb(64, 64, 64); }");
-    m_helpURL = "plugins/samplesource/aaroniartsa/readme.md";
+    m_helpURL = "plugins/samplesource/aaroniartsainput/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(9, 0, 999999999);
 
