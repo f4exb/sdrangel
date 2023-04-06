@@ -108,6 +108,7 @@ void ValueDial::setColorMapper(ColorMapper colorMapper)
 void ValueDial::setValue(quint64 value)
 {
     m_valueNew = value;
+    m_textNew = formatText(m_valueNew);
 
     if (m_valueNew < m_valueMin) {
         m_valueNew = m_valueMin;
@@ -115,16 +116,21 @@ void ValueDial::setValue(quint64 value)
         m_valueNew = m_valueMax;
     }
 
-    if (m_valueNew < m_value) {
+    if (m_valueNew < m_value)
+    {
         m_animationState = 1;
-    } else if (m_valueNew > m_value) {
+    }
+    else if (m_valueNew > m_value)
+    {
         m_animationState = -1;
-    } else {
+    }
+    else
+    {
+        m_text = m_textNew;
         return;
     }
 
     m_animationTimer.start(20);
-    m_textNew = formatText(m_valueNew);
 }
 
 void ValueDial::setValueRange(uint numDigits, quint64 min, quint64 max)

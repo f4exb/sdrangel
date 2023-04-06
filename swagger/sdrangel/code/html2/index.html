@@ -2098,6 +2098,46 @@ margin-bottom: 20px;
   },
   "description" : "ATVMod"
 };
+            defs.AaroniaRTSAReport = {
+  "properties" : {
+    "status" : {
+      "type" : "integer",
+      "description" : "0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected"
+    }
+  },
+  "description" : "AaroniaRTSA"
+};
+            defs.AaroniaRTSASettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Sets the center frequency (Hz) of the distant IQ demodulator"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Sets the sample rate (S/s) and span (Hz) of the distant IQ demodulator"
+    },
+    "serverAddress" : {
+      "type" : "string",
+      "description" : "Distant AaroniaRTSA instance URL or IPv4 address with port"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AaroniaRTSA"
+};
             defs.AirspyHFReport = {
   "properties" : {
     "sampleRates" : {
@@ -3538,9 +3578,6 @@ margin-bottom: 20px;
     "HeatMapReport" : {
       "$ref" : "#/definitions/HeatMapReport"
     },
-    "ILSDemodReport" : {
-      "$ref" : "#/definitions/ILSDemodReport"
-    },
     "M17DemodReport" : {
       "$ref" : "#/definitions/M17DemodReport"
     },
@@ -3704,9 +3741,6 @@ margin-bottom: 20px;
     },
     "HeatMapSettings" : {
       "$ref" : "#/definitions/HeatMapSettings"
-    },
-    "ILSDemodSettings" : {
-      "$ref" : "#/definitions/ILSDemodSettings"
     },
     "InterferometerSettings" : {
       "$ref" : "#/definitions/InterferometerSettings"
@@ -5205,6 +5239,9 @@ margin-bottom: 20px;
     },
     "xtrxMIMOReport" : {
       "$ref" : "#/definitions/XtrxMIMOReport"
+    },
+    "aaroniaSDRReport" : {
+      "$ref" : "#/definitions/AaroniaRTSAReport"
     }
   },
   "description" : "Base device report. Only the device report corresponding to the device specified in the deviceHwType is or should be present."
@@ -5393,6 +5430,9 @@ margin-bottom: 20px;
     },
     "xtrxMIMOSettings" : {
       "$ref" : "#/definitions/XtrxMIMOSettings"
+    },
+    "aaroniaRTSASettings" : {
+      "$ref" : "#/definitions/AaroniaRTSASettings"
     }
   },
   "description" : "Base device settings. Only the device settings corresponding to the device specified in the deviceHwType field is or should be present."
@@ -7414,143 +7454,6 @@ margin-bottom: 20px;
   },
   "description" : "IEEE_802_15_4_Mod"
 };
-            defs.ILSDemodReport = {
-  "properties" : {
-    "channelPowerDB" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "power received in channel (dB)"
-    },
-    "channelSampleRate" : {
-      "type" : "integer"
-    }
-  },
-  "description" : "ILSDemod"
-};
-            defs.ILSDemodSettings = {
-  "properties" : {
-    "inputFrequencyOffset" : {
-      "type" : "integer",
-      "format" : "int64"
-    },
-    "rfBandwidth" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "mode" : {
-      "type" : "integer",
-      "description" : "(0 for LOC, 1 for G/S)"
-    },
-    "frequencyIndex" : {
-      "type" : "integer"
-    },
-    "squelch" : {
-      "type" : "integer"
-    },
-    "volume" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "audioMute" : {
-      "type" : "integer"
-    },
-    "average" : {
-      "type" : "integer"
-    },
-    "ddmUnits" : {
-      "type" : "integer"
-    },
-    "identThreshold" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "ident" : {
-      "type" : "string"
-    },
-    "runway" : {
-      "type" : "string"
-    },
-    "trueBearing" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "latitude" : {
-      "type" : "string"
-    },
-    "longitude" : {
-      "type" : "string"
-    },
-    "elevation" : {
-      "type" : "integer"
-    },
-    "glidePath" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "refHeight" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "courseWidth" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "udpEnabled" : {
-      "type" : "integer",
-      "description" : "Whether to forward DDM to specified UDP port"
-    },
-    "udpAddress" : {
-      "type" : "string",
-      "description" : "UDP address to forward DDM to"
-    },
-    "udpPort" : {
-      "type" : "integer",
-      "description" : "UDP port to forward DDM to"
-    },
-    "logFilename" : {
-      "type" : "string"
-    },
-    "logEnabled" : {
-      "type" : "integer"
-    },
-    "rgbColor" : {
-      "type" : "integer"
-    },
-    "title" : {
-      "type" : "string"
-    },
-    "streamIndex" : {
-      "type" : "integer",
-      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "reverseAPIChannelIndex" : {
-      "type" : "integer"
-    },
-    "scopeConfig" : {
-      "$ref" : "#/definitions/GLScope"
-    },
-    "channelMarker" : {
-      "$ref" : "#/definitions/ChannelMarker"
-    },
-    "rollupState" : {
-      "$ref" : "#/definitions/RollupState"
-    }
-  },
-  "description" : "ILSDemod"
-};
             defs.InstanceChannelsResponse = {
   "required" : [ "channelcount" ],
   "properties" : {
@@ -9209,7 +9112,7 @@ margin-bottom: 20px;
     },
     "altitudeReference" : {
       "type" : "integer",
-      "description" : "0 - NONE (Absolute), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND."
+      "description" : "0 - NONE (Absolute), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
     },
     "animations" : {
       "type" : "array",
@@ -9258,14 +9161,6 @@ margin-bottom: 20px;
     "availableUntil" : {
       "type" : "string",
       "description" : "Date and time until after which this item should no longer appear on 3D map"
-    },
-    "colorValid" : {
-      "type" : "integer",
-      "description" : "0 - Use default color, 1 - Use specified color"
-    },
-    "color" : {
-      "type" : "integer",
-      "description" : "RGBA for polygon and polyline"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -9368,7 +9263,7 @@ margin-bottom: 20px;
     },
     "altitudeReference" : {
       "type" : "integer",
-      "description" : "0 - NONE (Absolute), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND."
+      "description" : "0 - NONE (Absolute), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
     },
     "animations" : {
       "type" : "array",
@@ -9417,14 +9312,6 @@ margin-bottom: 20px;
     "availableUntil" : {
       "type" : "string",
       "description" : "Date and time until after which this item should no longer appear on 3D map"
-    },
-    "colorValid" : {
-      "type" : "integer",
-      "description" : "0 - Use default color, 1 - Use specified color"
-    },
-    "color" : {
-      "type" : "integer",
-      "description" : "RGBA for polygon and polyline"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -9443,10 +9330,6 @@ margin-bottom: 20px;
     "displayNames" : {
       "type" : "integer",
       "description" : "Display object names on the map (1 for yes, 0 for no)"
-    },
-    "terrain" : {
-      "type" : "string",
-      "description" : "Terrain used for 3D map (E.g: 'Ellipsoid' or 'Cesium World Terrain')"
     },
     "title" : {
       "type" : "string"
@@ -13614,54 +13497,6 @@ margin-bottom: 20px;
     },
     "audioDeviceName" : {
       "type" : "string"
-    },
-    "gpioControl" : {
-      "type" : "integer",
-      "description" : "GPIO control\n  * 0 - No GPIO control\n  * 1 - Rx side controls GPIO\n  * 2 - Tx side controls GPIO\n"
-    },
-    "rx2txGPIOEnable" : {
-      "type" : "integer",
-      "description" : "Enable Rx to Tx GPIO control\n  * 0 - disable\n  * 1 - enable\n"
-    },
-    "rx2txGPIOMask" : {
-      "type" : "integer",
-      "format" : "int8",
-      "description" : "Rx to Tx change GPIO mask"
-    },
-    "rx2txGPIOValues" : {
-      "type" : "integer",
-      "format" : "int8",
-      "description" : "Rx to Tx change GPIO values"
-    },
-    "rx2txCommandEnable" : {
-      "type" : "integer",
-      "description" : "Enable Rx to Tx command\n  * 0 - disable\n  * 1 - enable\n"
-    },
-    "rx2txCommand" : {
-      "type" : "string",
-      "description" : "Command to be executed when Rx switches to Tx"
-    },
-    "tx2rxGPIOEnable" : {
-      "type" : "integer",
-      "description" : "Enable Tx to Rx GPIO control\n  * 0 - disable\n  * 1 - enable\n"
-    },
-    "tx2rxGPIOMask" : {
-      "type" : "integer",
-      "format" : "int8",
-      "description" : "Tx to Rx change GPIO mask"
-    },
-    "tx2rxGPIOValues" : {
-      "type" : "integer",
-      "format" : "int8",
-      "description" : "Tx to Rx change GPIO values"
-    },
-    "tx2rxCommandEnable" : {
-      "type" : "integer",
-      "description" : "Enable Tx to Rx command\n  * 0 - disable\n  * 1 - enable\n"
-    },
-    "tx2rxCommand" : {
-      "type" : "string",
-      "description" : "Command to be executed when Tx switches to Rx"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -57471,7 +57306,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-04-01T18:43:55.658+02:00
+              Generated 2023-03-23T18:22:37.731+01:00
             </div>
           </div>
       </div>

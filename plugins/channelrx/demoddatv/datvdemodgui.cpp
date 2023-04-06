@@ -751,8 +751,13 @@ void DATVDemodGUI::on_spiSymbolRate_valueChanged(int value)
 void DATVDemodGUI::on_datvStdSR_valueChanged(int value)
 {
     m_settings.m_symbolRate = symbolRateFromIndex(value);
+    m_settings.m_rfBandwidth = (m_settings.m_symbolRate * 3) / 2;
     ui->spiSymbolRate->blockSignals(true);
+    ui->rfBandwidth->blockSignals(true);
     ui->spiSymbolRate->setValue(m_settings.m_symbolRate);
+    ui->rfBandwidth->setValue(m_settings.m_rfBandwidth);
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+    ui->rfBandwidth->blockSignals(false);
     ui->spiSymbolRate->blockSignals(false);
     applySettings();
 }

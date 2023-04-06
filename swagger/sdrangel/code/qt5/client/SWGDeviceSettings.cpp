@@ -120,6 +120,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_xtrx_output_settings_isSet = false;
     xtrx_mimo_settings = nullptr;
     m_xtrx_mimo_settings_isSet = false;
+    aaronia_rtsa_settings = nullptr;
+    m_aaronia_rtsa_settings_isSet = false;
 }
 
 SWGDeviceSettings::~SWGDeviceSettings() {
@@ -220,6 +222,8 @@ SWGDeviceSettings::init() {
     m_xtrx_output_settings_isSet = false;
     xtrx_mimo_settings = new SWGXtrxMIMOSettings();
     m_xtrx_mimo_settings_isSet = false;
+    aaronia_rtsa_settings = new SWGAaroniaRTSASettings();
+    m_aaronia_rtsa_settings_isSet = false;
 }
 
 void
@@ -358,6 +362,9 @@ SWGDeviceSettings::cleanup() {
     if(xtrx_mimo_settings != nullptr) { 
         delete xtrx_mimo_settings;
     }
+    if(aaronia_rtsa_settings != nullptr) { 
+        delete aaronia_rtsa_settings;
+    }
 }
 
 SWGDeviceSettings*
@@ -462,6 +469,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&xtrx_output_settings, pJson["xtrxOutputSettings"], "SWGXtrxOutputSettings", "SWGXtrxOutputSettings");
     
     ::SWGSDRangel::setValue(&xtrx_mimo_settings, pJson["xtrxMIMOSettings"], "SWGXtrxMIMOSettings", "SWGXtrxMIMOSettings");
+    
+    ::SWGSDRangel::setValue(&aaronia_rtsa_settings, pJson["aaroniaRTSASettings"], "SWGAaroniaRTSASettings", "SWGAaroniaRTSASettings");
     
 }
 
@@ -616,6 +625,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((xtrx_mimo_settings != nullptr) && (xtrx_mimo_settings->isSet())){
         toJsonValue(QString("xtrxMIMOSettings"), xtrx_mimo_settings, obj, QString("SWGXtrxMIMOSettings"));
+    }
+    if((aaronia_rtsa_settings != nullptr) && (aaronia_rtsa_settings->isSet())){
+        toJsonValue(QString("aaroniaRTSASettings"), aaronia_rtsa_settings, obj, QString("SWGAaroniaRTSASettings"));
     }
 
     return obj;
@@ -1081,6 +1093,16 @@ SWGDeviceSettings::setXtrxMimoSettings(SWGXtrxMIMOSettings* xtrx_mimo_settings) 
     this->m_xtrx_mimo_settings_isSet = true;
 }
 
+SWGAaroniaRTSASettings*
+SWGDeviceSettings::getAaroniaRtsaSettings() {
+    return aaronia_rtsa_settings;
+}
+void
+SWGDeviceSettings::setAaroniaRtsaSettings(SWGAaroniaRTSASettings* aaronia_rtsa_settings) {
+    this->aaronia_rtsa_settings = aaronia_rtsa_settings;
+    this->m_aaronia_rtsa_settings_isSet = true;
+}
+
 
 bool
 SWGDeviceSettings::isSet(){
@@ -1222,6 +1244,9 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(xtrx_mimo_settings && xtrx_mimo_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(aaronia_rtsa_settings && aaronia_rtsa_settings->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

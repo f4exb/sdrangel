@@ -100,3 +100,5 @@ DeviceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputSettings"
     xtrxMIMOSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxMIMOSettings"
+    aaroniaRTSASettings:
+      $ref: "http://swgserver:8081/api/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSASettings"

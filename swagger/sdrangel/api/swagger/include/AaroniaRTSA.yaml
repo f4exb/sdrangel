@@ -1,0 +1,29 @@
+AaroniaRTSASettings:
+  description: AaroniaRTSA
+  properties:
+    centerFrequency:
+      description: Sets the center frequency (Hz) of the distant IQ demodulator
+      type: integer
+      format: int64
+    sampleRate:
+      description: Sets the sample rate (S/s) and span (Hz) of the distant IQ demodulator
+      type: integer
+    serverAddress:
+      description: Distant AaroniaRTSA instance URL or IPv4 address with port
+      type: string
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
+AaroniaRTSAReport:
+  description: AaroniaRTSA
+  properties:
+    status:
+      description: 0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected
+      type: integer

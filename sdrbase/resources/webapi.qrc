@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>webapi/doc/html2/index.html</file>
         <file>webapi/doc/swagger/swagger.yaml</file>
+        <file>webapi/doc/swagger/include/AaroniaRTSA.yaml</file>
         <file>webapi/doc/swagger/include/ADSBDemod.yaml</file>
         <file>webapi/doc/swagger/include/AFC.yaml</file>
         <file>webapi/doc/swagger/include/Airspy.yaml</file>
