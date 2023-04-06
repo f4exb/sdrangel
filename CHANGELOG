@@ -1,5 +1,17 @@
 sdrangel (7.12.0-1) unstable; urgency=medium
 
+  - New Aaronia input (Rx) plugin
+  - Channel analyzer: engage rational down sampler also when no channel decimation takes place. Fixes #1622
+  - Display rotator on Star Tracker and Satellite Tracker polar charts for #1641. PR #1650
+  - AFC and Demod Analyzer: fixed message queue disconnect. Fixes #1634
+  - Fixed ValueDial value settings when it is equal to previous value
+  - DATV demod: GUI: set RF bandwidth with standard SR
+  - Airspy: corrected transverter frequency and mode setting from GUI
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 06 Apr 2023 20:38:25 +0200
+
+sdrangel (7.12.0-1) unstable; urgency=medium
+
   - New ILS demod plugin. PR #1635
   - Heatmap: added 10 MS/s and fixed bandwidth limit. PR #1638
   - Correct settings keys for Satellite Tracker settings dialog. Fixes #1642. PR #1643
