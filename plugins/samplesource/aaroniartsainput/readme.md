@@ -33,6 +33,10 @@ This button is used to start the "device" i.e connect to the remote and start st
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
 
+<h2>2: Stream sample rate</h2>
+
+This is the stream sample rate in S/s with multiplier. It should be equal to what is displayed in (4).
+
 <h3>3: Frequency</h3>
 
 This is the center frequency received in he stream meta data. When setting it it will try to set the center frequency of the `IQ Demodulator` in RTSA suite the closest to the `HTTP server`.
