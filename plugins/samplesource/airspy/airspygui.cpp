@@ -399,8 +399,8 @@ void AirspyGui::on_transverter_clicked()
     updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
     m_settingsKeys.append("transverterMode");
-    m_settingsKeys.append("m_transverterDeltaFrequency");
-    m_settingsKeys.append("m_iqOrder");
+    m_settingsKeys.append("transverterDeltaFrequency");
+    m_settingsKeys.append("iqOrder");
     m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
