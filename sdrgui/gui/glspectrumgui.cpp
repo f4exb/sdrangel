@@ -100,7 +100,6 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 
     displaySettings();
     setAveragingCombo();
-    applySettings();
 }
 
 GLSpectrumGUI::~GLSpectrumGUI()
@@ -119,6 +118,7 @@ void GLSpectrumGUI::setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum)
     m_glSpectrum->setSpectrumVis(spectrumVis);
     m_glSpectrum->setMessageQueueToGUI(&m_messageQueue);
     m_spectrumVis->setMessageQueueToGUI(&m_messageQueue);
+    applySettings();
 }
 
 void GLSpectrumGUI::resetToDefaults()
@@ -370,7 +370,7 @@ void GLSpectrumGUI::applySpectrumSettings()
 
     Real refLevel = m_settings.m_linear ? pow(10.0, m_settings.m_refLevel/10.0) : m_settings.m_refLevel;
     Real powerRange = m_settings.m_linear ? pow(10.0, m_settings.m_refLevel/10.0) :  m_settings.m_powerRange;
-    qDebug("GLSpectrumGUI::applySettings: refLevel: %e powerRange: %e", refLevel, powerRange);
+    qDebug("GLSpectrumGUI::applySpectrumSettings: refLevel: %e powerRange: %e", refLevel, powerRange);
     m_glSpectrum->setReferenceLevel(refLevel);
     m_glSpectrum->setPowerRange(powerRange);
     m_glSpectrum->setFPSPeriodMs(m_settings.m_fpsPeriodMs);
