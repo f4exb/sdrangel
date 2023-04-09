@@ -141,10 +141,16 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
 
+    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+
     ui->glSpectrum->setCenterFrequency(0);
     ui->glSpectrum->setSampleRate(ui->sampleRate->text().toInt());
-    ui->glSpectrum->setDisplayWaterfall(true);
-    ui->glSpectrum->setDisplayMaxHold(true);
+
+    SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
+    spectrumSettings.m_displayWaterfall = true;
+    spectrumSettings.m_displayMaxHold = true;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis->getInputMessageQueue()->push(msg);
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -160,8 +166,6 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_deviceUISet->addChannelMarker(&m_channelMarker);
 
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
-
-    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
     m_udpSource->setLevelMeter(ui->volumeMeter);

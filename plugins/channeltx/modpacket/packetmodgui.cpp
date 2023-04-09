@@ -467,18 +467,24 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
+    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+
     m_spectrumVis = m_packetMod->getSpectrumVis();
     m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 
     // Extra /2 here because SSB?
     ui->glSpectrum->setCenterFrequency(m_settings.m_spectrumRate/4);
     ui->glSpectrum->setSampleRate(m_settings.m_spectrumRate/2);
-    ui->glSpectrum->setSsbSpectrum(true);
-    ui->glSpectrum->setDisplayCurrent(true);
     ui->glSpectrum->setLsbDisplay(false);
-    ui->glSpectrum->setDisplayWaterfall(false);
-    ui->glSpectrum->setDisplayMaxHold(false);
-    ui->glSpectrum->setDisplayHistogram(false);
+
+    SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
+    spectrumSettings.m_ssb = true;
+    spectrumSettings.m_displayCurrent = true;
+    spectrumSettings.m_displayWaterfall = false;
+    spectrumSettings.m_displayMaxHold = false;
+    spectrumSettings.m_displayHistogram = false;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis->getInputMessageQueue()->push(msg);
 
     CRightClickEnabler *repeatRightClickEnabler = new CRightClickEnabler(ui->repeat);
     connect(repeatRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(repeatSelect(const QPoint &)));
@@ -514,8 +520,6 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setRollupState(&m_rollupState);
-
-    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
     ui->spectrumContainer->setVisible(false);
 

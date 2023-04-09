@@ -436,14 +436,20 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     m_spectrumVis = m_IEEE_802_15_4_Mod->getSpectrumVis();
     m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 
+    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+
     ui->glSpectrum->setCenterFrequency(0);
     ui->glSpectrum->setSampleRate(m_settings.m_spectrumRate);
-    ui->glSpectrum->setSsbSpectrum(false);
-    ui->glSpectrum->setDisplayCurrent(true);
     ui->glSpectrum->setLsbDisplay(false);
-    ui->glSpectrum->setDisplayWaterfall(false);
-    ui->glSpectrum->setDisplayMaxHold(false);
-    ui->glSpectrum->setDisplayHistogram(false);
+
+    SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
+    spectrumSettings.m_ssb = false;
+    spectrumSettings.m_displayCurrent = true;
+    spectrumSettings.m_displayWaterfall = false;
+    spectrumSettings.m_displayMaxHold = false;
+    spectrumSettings.m_displayHistogram = false;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis->getInputMessageQueue()->push(msg);
 
     CRightClickEnabler *repeatRightClickEnabler = new CRightClickEnabler(ui->repeat);
     connect(repeatRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(repeatSelect(const QPoint &)));
@@ -473,8 +479,6 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setRollupState(&m_rollupState);
-
-    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
     displaySettings();
     makeUIConnections();

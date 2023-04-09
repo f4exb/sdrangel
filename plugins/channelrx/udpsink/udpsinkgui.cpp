@@ -183,10 +183,16 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
     ui->squelchLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
-	ui->glSpectrum->setCenterFrequency(0);
+	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+
+    ui->glSpectrum->setCenterFrequency(0);
 	ui->glSpectrum->setSampleRate(ui->sampleRate->text().toInt());
-	ui->glSpectrum->setDisplayWaterfall(true);
-	ui->glSpectrum->setDisplayMaxHold(true);
+
+    SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
+    spectrumSettings.m_displayWaterfall = true;
+    spectrumSettings.m_displayMaxHold = true;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis->getInputMessageQueue()->push(msg);
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -209,8 +215,6 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-
-	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
 	displaySettings();
     makeUIConnections();

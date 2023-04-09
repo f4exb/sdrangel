@@ -359,11 +359,16 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 	ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
+	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+
     ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
     ui->glSpectrum->setSampleRate(m_spectrumRate);
-	ui->glSpectrum->setDisplayWaterfall(true);
-	ui->glSpectrum->setDisplayMaxHold(true);
-    ui->glSpectrum->setSsbSpectrum(true);
+
+    SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
+    spectrumSettings.m_displayWaterfall = true;
+    spectrumSettings.m_ssb = true;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis->getInputMessageQueue()->push(msg);
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -386,7 +391,6 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
 	m_iconDSBUSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
     m_iconDSBUSB.addPixmap(QPixmap("://usb.png"), QIcon::Normal, QIcon::Off);
@@ -480,6 +484,8 @@ void SSBDemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     QString bwStr   = QString::number(bw/10.0, 'f', 1);
     QString lwStr   = QString::number(lw/10.0, 'f', 1);
 
+    SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
+
     if (dsb)
     {
         ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(bwStr));
@@ -491,7 +497,7 @@ void SSBDemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
         ui->usbLabel->setText("");
         ui->glSpectrum->setCenterFrequency(0);
         ui->glSpectrum->setSampleRate(2*m_spectrumRate);
-        ui->glSpectrum->setSsbSpectrum(false);
+        spectrumSettings.m_ssb = false;
         ui->glSpectrum->setLsbDisplay(false);
     }
     else
@@ -505,9 +511,12 @@ void SSBDemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
         ui->usbLabel->setText("USB");
         ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
         ui->glSpectrum->setSampleRate(m_spectrumRate);
-        ui->glSpectrum->setSsbSpectrum(true);
+        spectrumSettings.m_ssb = true;
         ui->glSpectrum->setLsbDisplay(bw < 0);
     }
+
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis->getInputMessageQueue()->push(msg);
 
     ui->lowCutText->setText(tr("%1k").arg(lwStr));
 

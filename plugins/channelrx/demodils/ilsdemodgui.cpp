@@ -131,7 +131,7 @@ bool ILSDemodGUI::deserialize(const QByteArray& data)
         applySettings(true);
         return true;
     }
-    else 
+    else
     {
         resetToDefaults();
         return false;
@@ -1070,18 +1070,12 @@ ILSDemodGUI::ILSDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_scopeVis->configure(500, 1, 0, 0, true);   // not working!
     //m_scopeVis->setFreeRun(false); // FIXME: add method rather than call m_scopeVis->configure()
 
-    // FIXME: Don't do this - SpectrumSettings will be inconsistant..
+    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+
     ui->glSpectrum->setCenterFrequency(0);
     ui->glSpectrum->setSampleRate(ILSDemodSettings::ILSDEMOD_SPECTRUM_SAMPLE_RATE);
-	ui->glSpectrum->setDisplayWaterfall(true);
-	ui->glSpectrum->setDisplayMaxHold(false);
-    ui->glSpectrum->setSsbSpectrum(false);
-    ui->glSpectrum->setDisplayHistogram(false);
-    ui->glSpectrum->setDisplayCurrent(true);
-    ui->glSpectrum->setSpectrumStyle(SpectrumSettings::Gradient);
     ui->glSpectrum->setMeasurementParams(SpectrumSettings::MeasurementPeaks, 0, 1000, 90, 150, 1, 5, true, 1);
     ui->glSpectrum->setMeasurementsVisible(true);
-	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
     m_channelMarker.setColor(Qt::yellow);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
@@ -1133,6 +1127,12 @@ ILSDemodGUI::ILSDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     spectrumSettings.m_fftSize = 2048;
     spectrumSettings.m_averagingMode = SpectrumSettings::AvgModeMoving;
     spectrumSettings.m_averagingValue = 1;
+    spectrumSettings.m_displayWaterfall = true;
+    spectrumSettings.m_displayMaxHold = false;
+    spectrumSettings.m_ssb = false;
+    spectrumSettings.m_displayHistogram = false;
+    spectrumSettings.m_displayCurrent = true;
+    spectrumSettings.m_spectrumStyle = SpectrumSettings::Gradient;
     // FLAT TOP?
     SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
     m_spectrumVis->getInputMessageQueue()->push(msg);

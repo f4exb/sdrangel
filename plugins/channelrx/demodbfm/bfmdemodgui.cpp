@@ -406,11 +406,18 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_bfmDemod->setMessageQueueToGUI(getInputMessageQueue());
     m_bfmDemod->setBasebandMessageQueueToGUI(getInputMessageQueue());
 
-	ui->glSpectrum->setCenterFrequency(m_rate / 4);
+	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+
+    ui->glSpectrum->setCenterFrequency(m_rate / 4);
 	ui->glSpectrum->setSampleRate(m_rate / 2);
-	ui->glSpectrum->setDisplayWaterfall(false);
-	ui->glSpectrum->setDisplayMaxHold(false);
-	ui->glSpectrum->setSsbSpectrum(true);
+
+    SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
+    spectrumSettings.m_displayWaterfall = false;
+    spectrumSettings.m_displayMaxHold = false;
+    spectrumSettings.m_ssb = true;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis->getInputMessageQueue()->push(msg);
+
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.blockSignals(true);
@@ -431,8 +438,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
-
-	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
 	ui->g00AltFrequenciesBox->setEnabled(false);
 	ui->g14MappedFrequencies->setEnabled(false);

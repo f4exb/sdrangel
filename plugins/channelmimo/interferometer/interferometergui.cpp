@@ -125,12 +125,20 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_interferometer->setMessageQueueToGUI(getInputMessageQueue());
     m_sampleRate = m_interferometer->getDeviceSampleRate();
 
-	ui->glSpectrum->setDisplayWaterfall(true);
-	ui->glSpectrum->setDisplayMaxHold(true);
+	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
+
     ui->glSpectrum->setCenterFrequency(0);
     ui->glSpectrum->setSampleRate(m_sampleRate);
-	ui->glSpectrum->setSsbSpectrum(false);
     ui->glSpectrum->setLsbDisplay(false);
+
+    SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
+    spectrumSettings.m_displayWaterfall = true;
+    spectrumSettings.m_displayMaxHold = true;
+    spectrumSettings.m_ssb = false;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis->getInputMessageQueue()->push(msg);
+
     ui->glScope->setTraceModulo(Interferometer::m_fftSize);
 
 	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
@@ -150,9 +158,6 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_settings.setSpectrumGUI(ui->spectrumGUI);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
-
-	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
-	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
     m_scopeVis->setTraceChunkSize(Interferometer::m_fftSize); // Set scope trace length unit to FFT size
     ui->scopeGUI->traceLengthChange();

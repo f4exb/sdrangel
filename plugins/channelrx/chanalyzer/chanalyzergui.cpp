@@ -192,18 +192,22 @@ void ChannelAnalyzerGUI::setSpectrumDisplay()
 {
     int sinkSampleRate = getSinkSampleRate();
     qDebug("ChannelAnalyzerGUI::setSpectrumDisplay: m_sinkSampleRate: %d", sinkSampleRate);
+
+    SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
+    spectrumSettings.m_ssb = m_settings.m_ssb;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis->getInputMessageQueue()->push(msg);
+
     if (m_settings.m_ssb)
     {
         ui->glSpectrum->setCenterFrequency(sinkSampleRate/4);
         ui->glSpectrum->setSampleRate(sinkSampleRate/2);
-        ui->glSpectrum->setSsbSpectrum(true);
         ui->glSpectrum->setLsbDisplay(ui->BW->value() < 0);
     }
     else
     {
         ui->glSpectrum->setCenterFrequency(0);
         ui->glSpectrum->setSampleRate(sinkSampleRate);
-        ui->glSpectrum->setSsbSpectrum(false);
         ui->glSpectrum->setLsbDisplay(false);
     }
 }
@@ -550,9 +554,6 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 
 	ui->glSpectrum->setCenterFrequency(m_basebandSampleRate/2);
 	ui->glSpectrum->setSampleRate(m_basebandSampleRate);
-	ui->glSpectrum->setDisplayWaterfall(true);
-	ui->glSpectrum->setDisplayMaxHold(true);
-	ui->glSpectrum->setSsbSpectrum(false);
     ui->glSpectrum->setLsbDisplay(false);
 
 	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
@@ -572,6 +573,13 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
+
+    SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
+    spectrumSettings.m_displayWaterfall = true;
+    spectrumSettings.m_displayMaxHold = false;
+    spectrumSettings.m_ssb = false;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis->getInputMessageQueue()->push(msg);
 
 	m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setRollupState(&m_rollupState);
