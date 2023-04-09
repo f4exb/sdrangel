@@ -78,7 +78,7 @@ void GLSpectrum::setMeasurementParams(SpectrumSettings::Measurement measurement,
     // Resize splitter so there's just enough space for the measurements table
     // But don't use more than 50%
     QList<int> sizes = m_splitter->sizes();
-    if ((sizes[0] == 0) && (sizes[1] == 0))
+    if (parentWidget() && (sizes[0] == 0) && (sizes[1] == 0))
     {
         // Initial sizing when first created
         QSize s = parentWidget()->size();

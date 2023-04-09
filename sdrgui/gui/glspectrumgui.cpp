@@ -330,10 +330,6 @@ void GLSpectrumGUI::applySettings()
         return;
     }
 
-    if (m_glSpectrum) {
-        applySpectrumSettings();
-    }
-
     if (m_spectrumVis)
     {
         SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(m_settings, false);

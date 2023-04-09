@@ -915,6 +915,12 @@ void SpectrumVis::applySettings(const SpectrumSettings& settings, bool force)
 
     m_settings = settings;
     m_settings.m_fftSize = fftSize;
+
+    if (m_guiMessageQueue)
+    {
+        MsgConfigureSpectrumVis *msg = MsgConfigureSpectrumVis::create(m_settings, false);
+        m_guiMessageQueue->push(msg);
+    }
 }
 
 void SpectrumVis::handleConfigureDSP(uint64_t centerFrequency, int sampleRate)
