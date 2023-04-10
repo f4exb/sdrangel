@@ -695,7 +695,7 @@ void HeatMapGUI::displaySettings()
 
     value = (int)std::log10(m_settings.m_sampleRate);
     ui->sampleRate->setValue(value);
-    int idx = std::min(std::max(0, value-2), m_sampleRateTexts.size() - 1);
+    int idx = std::min(std::max(0, value-2), (int)m_sampleRateTexts.size() - 1);
     ui->sampleRateText->setText(m_sampleRateTexts[idx]);
     ui->averagePeriod->setMinimum(std::max(1, static_cast<int> (m_averagePeriodTexts.size()) - value));
 

@@ -355,7 +355,7 @@ void NavtexDemodSink::receiveBit(bool bit)
                         getMessageQueueToChannel()->push(msg);
                     }
                     // Add character to message buffer
-                    m_messageBuffer.append(c);
+                    m_messageBuffer.append(QChar(c));
                 }
                 else
                 {
