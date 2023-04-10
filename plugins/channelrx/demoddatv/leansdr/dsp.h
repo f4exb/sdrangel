@@ -131,6 +131,13 @@ struct cfft_engine
         {
             int r = bitrev[i];
 
+            if ((r < 0) || (r >= n)) // corruption: init again and exit
+            {
+                fprintf(stderr, "cfft_engine::inplace: corruption detected\n");
+                init(n);
+                return;
+            }
+
             if (r < i)
             {
                 std::complex<T> tmp = data[i];

@@ -357,8 +357,10 @@ struct pipewriter
 
     void written(unsigned long n)
     {
-        if (buf.wr + n > buf.end) {
+        if (buf.wr + n > buf.end)
+        {
             fprintf(stderr, "pipewriter::written: bug: overflow to %s\n", buf.name);
+            return;
         }
 
         buf.wr += n;
