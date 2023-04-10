@@ -1391,16 +1391,12 @@ void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
     }
 
     if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth)
-     || (m_settings.m_symbolRate != settings.m_symbolRate) || force)
+     || (m_settings.m_symbolRate != settings.m_symbolRate)
+     || (m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
     {
         m_interpolator.create(m_interpolatorPhaseSteps, m_channelSampleRate, settings.m_rfBandwidth / 2.2,  m_interpolatorTapsPerPhase);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) (2 * settings.m_symbolRate);
-    }
-
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
-        || force)
-    {
         m_nco.setFreq(-(float) settings.m_centerFrequency, (float) m_channelSampleRate);
     }
 
