@@ -43,6 +43,8 @@
 #include "SWGATVDemodSettings.h"
 #include "SWGATVModReport.h"
 #include "SWGATVModSettings.h"
+#include "SWGAaroniaRTSAOutputReport.h"
+#include "SWGAaroniaRTSAOutputSettings.h"
 #include "SWGAaroniaRTSAReport.h"
 #include "SWGAaroniaRTSASettings.h"
 #include "SWGAirspyHFReport.h"
@@ -499,6 +501,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGATVModSettings").compare(type) == 0) {
       SWGATVModSettings *obj = new SWGATVModSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAaroniaRTSAOutputReport").compare(type) == 0) {
+      SWGAaroniaRTSAOutputReport *obj = new SWGAaroniaRTSAOutputReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAaroniaRTSAOutputSettings").compare(type) == 0) {
+      SWGAaroniaRTSAOutputSettings *obj = new SWGAaroniaRTSAOutputSettings();
       obj->init();
       return obj;
     }

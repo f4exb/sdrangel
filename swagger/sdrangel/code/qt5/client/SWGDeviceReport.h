@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGAaroniaRTSAOutputReport.h"
 #include "SWGAaroniaRTSAReport.h"
 #include "SWGAirspyHFReport.h"
 #include "SWGAirspyReport.h"
@@ -171,6 +172,9 @@ public:
     SWGAaroniaRTSAReport* getAaroniaSdrReport();
     void setAaroniaSdrReport(SWGAaroniaRTSAReport* aaronia_sdr_report);
 
+    SWGAaroniaRTSAOutputReport* getAaroniaRtsaOutputReport();
+    void setAaroniaRtsaOutputReport(SWGAaroniaRTSAOutputReport* aaronia_rtsa_output_report);
+
 
     virtual bool isSet() override;
 
@@ -273,6 +277,9 @@ private:
 
     SWGAaroniaRTSAReport* aaronia_sdr_report;
     bool m_aaronia_sdr_report_isSet;
+
+    SWGAaroniaRTSAOutputReport* aaronia_rtsa_output_report;
+    bool m_aaronia_rtsa_output_report_isSet;
 
 };
 

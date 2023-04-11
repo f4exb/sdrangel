@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGAaroniaRTSAOutputSettings.h"
 #include "SWGAaroniaRTSASettings.h"
 #include "SWGAirspyHFSettings.h"
 #include "SWGAirspySettings.h"
@@ -227,6 +228,9 @@ public:
     SWGAaroniaRTSASettings* getAaroniaRtsaSettings();
     void setAaroniaRtsaSettings(SWGAaroniaRTSASettings* aaronia_rtsa_settings);
 
+    SWGAaroniaRTSAOutputSettings* getAaroniaRtsaOutputSettings();
+    void setAaroniaRtsaOutputSettings(SWGAaroniaRTSAOutputSettings* aaronia_rtsa_output_settings);
+
 
     virtual bool isSet() override;
 
@@ -371,6 +375,9 @@ private:
 
     SWGAaroniaRTSASettings* aaronia_rtsa_settings;
     bool m_aaronia_rtsa_settings_isSet;
+
+    SWGAaroniaRTSAOutputSettings* aaronia_rtsa_output_settings;
+    bool m_aaronia_rtsa_output_settings_isSet;
 
 };
 

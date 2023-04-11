@@ -94,6 +94,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_xtrx_mimo_report_isSet = false;
     aaronia_sdr_report = nullptr;
     m_aaronia_sdr_report_isSet = false;
+    aaronia_rtsa_output_report = nullptr;
+    m_aaronia_rtsa_output_report_isSet = false;
 }
 
 SWGDeviceReport::~SWGDeviceReport() {
@@ -168,6 +170,8 @@ SWGDeviceReport::init() {
     m_xtrx_mimo_report_isSet = false;
     aaronia_sdr_report = new SWGAaroniaRTSAReport();
     m_aaronia_sdr_report_isSet = false;
+    aaronia_rtsa_output_report = new SWGAaroniaRTSAOutputReport();
+    m_aaronia_rtsa_output_report_isSet = false;
 }
 
 void
@@ -269,6 +273,9 @@ SWGDeviceReport::cleanup() {
     if(aaronia_sdr_report != nullptr) { 
         delete aaronia_sdr_report;
     }
+    if(aaronia_rtsa_output_report != nullptr) { 
+        delete aaronia_rtsa_output_report;
+    }
 }
 
 SWGDeviceReport*
@@ -347,6 +354,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&xtrx_mimo_report, pJson["xtrxMIMOReport"], "SWGXtrxMIMOReport", "SWGXtrxMIMOReport");
     
     ::SWGSDRangel::setValue(&aaronia_sdr_report, pJson["aaroniaSDRReport"], "SWGAaroniaRTSAReport", "SWGAaroniaRTSAReport");
+    
+    ::SWGSDRangel::setValue(&aaronia_rtsa_output_report, pJson["aaroniaRTSAOutputReport"], "SWGAaroniaRTSAOutputReport", "SWGAaroniaRTSAOutputReport");
     
 }
 
@@ -462,6 +471,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((aaronia_sdr_report != nullptr) && (aaronia_sdr_report->isSet())){
         toJsonValue(QString("aaroniaSDRReport"), aaronia_sdr_report, obj, QString("SWGAaroniaRTSAReport"));
+    }
+    if((aaronia_rtsa_output_report != nullptr) && (aaronia_rtsa_output_report->isSet())){
+        toJsonValue(QString("aaroniaRTSAOutputReport"), aaronia_rtsa_output_report, obj, QString("SWGAaroniaRTSAOutputReport"));
     }
 
     return obj;
@@ -797,6 +809,16 @@ SWGDeviceReport::setAaroniaSdrReport(SWGAaroniaRTSAReport* aaronia_sdr_report) {
     this->m_aaronia_sdr_report_isSet = true;
 }
 
+SWGAaroniaRTSAOutputReport*
+SWGDeviceReport::getAaroniaRtsaOutputReport() {
+    return aaronia_rtsa_output_report;
+}
+void
+SWGDeviceReport::setAaroniaRtsaOutputReport(SWGAaroniaRTSAOutputReport* aaronia_rtsa_output_report) {
+    this->aaronia_rtsa_output_report = aaronia_rtsa_output_report;
+    this->m_aaronia_rtsa_output_report_isSet = true;
+}
+
 
 bool
 SWGDeviceReport::isSet(){
@@ -899,6 +921,9 @@ SWGDeviceReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(aaronia_sdr_report && aaronia_sdr_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(aaronia_rtsa_output_report && aaronia_rtsa_output_report->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

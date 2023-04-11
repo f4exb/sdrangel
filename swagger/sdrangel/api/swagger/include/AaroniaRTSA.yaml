@@ -27,3 +27,25 @@ AaroniaRTSAReport:
     status:
       description: 0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected
       type: integer
+
+AaroniaRTSAOutputSettings:
+  description: AaroniaRTSAOutput
+  properties:
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
+AaroniaRTSAOutputReport:
+  description: AaroniaRTSAOutput
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    sampleRate:
+      type: integer

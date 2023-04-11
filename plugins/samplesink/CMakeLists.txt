@@ -4,6 +4,7 @@ add_subdirectory(testsink)
 add_subdirectory(fileoutput)
 add_subdirectory(localoutput)
 add_subdirectory(audiooutput)
+add_subdirectory(aaroniartsaoutput)
 
 if (CM256CC_FOUND AND (HAS_SSE3 OR HAS_NEON))
     add_subdirectory(remoteoutput)
