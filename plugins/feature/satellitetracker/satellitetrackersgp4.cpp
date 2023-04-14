@@ -473,7 +473,8 @@ void getSatelliteState(QDateTime dateTime,
                         QTime passStartTime, QTime passFinishTime, bool utc,
                         int noOfPasses, int groundTrackSteps, SatelliteState *satState)
 {
-    try {
+    try
+    {
         Tle tle = Tle(tle0.toStdString(), tle1.toStdString(), tle2.toStdString());
         SGP4 sgp4(tle);
         Observer obs(latitude, longitude, altitude);
@@ -522,14 +523,14 @@ void getSatelliteState(QDateTime dateTime,
     }
     catch (SatelliteException& se)
     {
-        qDebug() << "getSatelliteState: " << satState->m_name << ": " << se.what();
+        qDebug() << "getSatelliteState:SatelliteException " << satState->m_name << ": " << se.what();
     }
     catch (DecayedException& de)
     {
-        qDebug() << "getSatelliteState: " << satState->m_name << ": " << de.what();
+        qDebug() << "getSatelliteState:DecayedException " << satState->m_name << ": " << de.what();
     }
     catch (TleException& tlee)
     {
-        qDebug() << "getSatelliteState: " << satState->m_name << ": " << tlee.what();
+        qDebug() << "getSatelliteState:TleException " << satState->m_name << ": " << tlee.what() << "\n" << tle0 << "\n" << tle1 << "\n" << tle2;
     }
 }
