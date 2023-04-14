@@ -132,6 +132,7 @@ bool SatelliteTrackerGUI::handleMessage(const Message& message)
 
             ui->azimuth->setText(convertDegreesToText(satState->m_azimuth));
             ui->elevation->setText(convertDegreesToText(satState->m_elevation));
+            plotChart();
 
             if (satState->m_passes.size() > 0)
             {
@@ -143,7 +144,6 @@ bool SatelliteTrackerGUI::handleMessage(const Message& message)
                     m_nextTargetAOS = pass.m_aos;
                     m_nextTargetLOS = pass.m_los;
                     m_geostationarySatVisible = geostationary;
-                    plotChart();
                     updateTimeToAOS();
                 }
             }
@@ -1084,14 +1084,11 @@ void SatelliteTrackerGUI::plotPolarChart()
             m_polarChart->addSeries(nowSeries);
             nowSeries->attachAxis(angularAxis);
             nowSeries->attachAxis(radialAxis);
-            if (!redrawTime) {
-                redrawTime = 5000;
-            }
         }
 
         if (redrawTime > 0)
         {
-            // Redraw to show updated satellite position or rotator position
+            // Redraw to show updated rotator position
             m_redrawTimer.setSingleShot(true);
             m_redrawTimer.start(redrawTime);
         }
@@ -1237,6 +1234,30 @@ void SatelliteTrackerGUI::plotAzElChart()
         m_lineChart->addSeries(azSeriesList[i]);
         azSeriesList[i]->attachAxis(xAxis);
         azSeriesList[i]->attachAxis(yRightAxis);
+    }
+
+    // Plot current target on elevation series
+    if (m_targetSatState && (m_targetSatState->m_elevation > 0.0))
+    {
+        QDateTime currentTime;
+
+        if (m_settings.m_dateTime == "") {
+            currentTime = m_satelliteTracker->currentDateTimeUtc();
+        } else if (m_settings.m_utc) {
+            currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
+        } else {
+            currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs).toUTC();
+        }
+
+        QScatterSeries *posSeries = new QScatterSeries();
+        posSeries->setMarkerSize(3);
+        posSeries->append(currentTime.toMSecsSinceEpoch(), m_targetSatState->m_elevation);
+        posSeries->setPointLabelsVisible(true);
+        posSeries->setPointLabelsFormat(m_settings.m_target);
+        posSeries->setPointLabelsClipping(false);
+        m_lineChart->addSeries(posSeries);
+        posSeries->attachAxis(xAxis);
+        posSeries->attachAxis(yLeftAxis);
     }
 
     xAxis->setRange(pass.m_aos, pass.m_los);

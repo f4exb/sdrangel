@@ -1540,12 +1540,14 @@ void StarTrackerGUI::plotElevationLineChart()
     azSeries->setPen(pen);
 
     QDateTime dt;
+    QDateTime currentTime;
 
     if (m_settings.m_dateTime.isEmpty()) {
-        dt = QDateTime::currentDateTime();
+        currentTime = QDateTime::currentDateTime();
     } else {
-        dt = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
+        currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
     }
+    dt = currentTime;
 
     dt.setTime(QTime(0,0));
     QDateTime startTime = dt;
@@ -1635,6 +1637,28 @@ void StarTrackerGUI::plotElevationLineChart()
         azSeriesList[i]->attachAxis(yRightAxis);
     }
 
+    // Plot current target on elevation series
+    if (ui->azimuth->hasValue() && ui->elevation->hasValue() && (ui->elevation->value() > 0.0))
+    {
+        QScatterSeries *posSeries = new QScatterSeries();
+        posSeries->setMarkerSize(3);
+        posSeries->append(currentTime.toMSecsSinceEpoch(), ui->elevation->value());
+        if (m_settings.m_target.startsWith("Custom"))
+        {
+            posSeries->setPointLabelsVisible(false);
+            posSeries->setPointLabelsFormat("");
+        }
+        else
+        {
+            posSeries->setPointLabelsVisible(true);
+            posSeries->setPointLabelsFormat(m_settings.m_target);
+        }
+        posSeries->setPointLabelsClipping(false);
+        m_azElLineChart->addSeries(posSeries);
+        posSeries->attachAxis(xAxis);
+        posSeries->attachAxis(yLeftAxis);
+    }
+
     elSeries->attachAxis(xAxis);
     elSeries->attachAxis(yLeftAxis);
     xAxis->setTitleText(QString("%1 %2").arg(startTime.date().toString()).arg(startTime.timeZoneAbbreviation()));
@@ -1719,14 +1743,15 @@ void StarTrackerGUI::plotElevationPolarChart()
     double maxElevation = -90.0;
 
     QLineSeries *polarSeries = new QLineSeries();
+    QDateTime currentTime;
     QDateTime dt;
 
     if (m_settings.m_dateTime.isEmpty()) {
-        dt = QDateTime::currentDateTime();
+        currentTime = QDateTime::currentDateTime();
     } else {
-        dt = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
+        currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
     }
-
+    dt = currentTime;
     dt.setTime(QTime(0,0));
     QDateTime startTime = dt;
     QDateTime endTime = dt;
@@ -1976,6 +2001,28 @@ void StarTrackerGUI::plotElevationPolarChart()
         m_azElPolarChart->addSeries(setSeries);
         setSeries->attachAxis(angularAxis);
         setSeries->attachAxis(radialAxis);
+    }
+
+    // Plot target current position
+    if (ui->azimuth->hasValue() && ui->elevation->hasValue() && (ui->elevation->value() > 0.0))
+    {
+        QScatterSeries *posSeries = new QScatterSeries();
+        posSeries->setMarkerSize(3);
+        posSeries->append(ui->azimuth->value(), 90 - ui->elevation->value());
+        if (m_settings.m_target.startsWith("Custom"))
+        {
+            posSeries->setPointLabelsVisible(false);
+            posSeries->setPointLabelsFormat("");
+        }
+        else
+        {
+            posSeries->setPointLabelsVisible(true);
+            posSeries->setPointLabelsFormat(m_settings.m_target);
+        }
+        posSeries->setPointLabelsClipping(false);
+        m_azElPolarChart->addSeries(posSeries);
+        posSeries->attachAxis(angularAxis);
+        posSeries->attachAxis(radialAxis);
     }
 
     if (maxElevation < 0) {
