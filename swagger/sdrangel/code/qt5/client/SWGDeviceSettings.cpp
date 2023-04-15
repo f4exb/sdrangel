@@ -38,6 +38,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_airspy_settings_isSet = false;
     airspy_hf_settings = nullptr;
     m_airspy_hf_settings_isSet = false;
+    audio_catsiso_settings = nullptr;
+    m_audio_catsiso_settings_isSet = false;
     audio_input_settings = nullptr;
     m_audio_input_settings_isSet = false;
     audio_output_settings = nullptr;
@@ -142,6 +144,8 @@ SWGDeviceSettings::init() {
     m_airspy_settings_isSet = false;
     airspy_hf_settings = new SWGAirspyHFSettings();
     m_airspy_hf_settings_isSet = false;
+    audio_catsiso_settings = new SWGAudioCATSISOSettings();
+    m_audio_catsiso_settings_isSet = false;
     audio_input_settings = new SWGAudioInputSettings();
     m_audio_input_settings_isSet = false;
     audio_output_settings = new SWGAudioOutputSettings();
@@ -242,6 +246,9 @@ SWGDeviceSettings::cleanup() {
     }
     if(airspy_hf_settings != nullptr) { 
         delete airspy_hf_settings;
+    }
+    if(audio_catsiso_settings != nullptr) { 
+        delete audio_catsiso_settings;
     }
     if(audio_input_settings != nullptr) { 
         delete audio_input_settings;
@@ -395,6 +402,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&airspy_hf_settings, pJson["airspyHFSettings"], "SWGAirspyHFSettings", "SWGAirspyHFSettings");
     
+    ::SWGSDRangel::setValue(&audio_catsiso_settings, pJson["audioCATSISOSettings"], "SWGAudioCATSISOSettings", "SWGAudioCATSISOSettings");
+    
     ::SWGSDRangel::setValue(&audio_input_settings, pJson["audioInputSettings"], "SWGAudioInputSettings", "SWGAudioInputSettings");
     
     ::SWGSDRangel::setValue(&audio_output_settings, pJson["audioOutputSettings"], "SWGAudioOutputSettings", "SWGAudioOutputSettings");
@@ -511,6 +520,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((airspy_hf_settings != nullptr) && (airspy_hf_settings->isSet())){
         toJsonValue(QString("airspyHFSettings"), airspy_hf_settings, obj, QString("SWGAirspyHFSettings"));
+    }
+    if((audio_catsiso_settings != nullptr) && (audio_catsiso_settings->isSet())){
+        toJsonValue(QString("audioCATSISOSettings"), audio_catsiso_settings, obj, QString("SWGAudioCATSISOSettings"));
     }
     if((audio_input_settings != nullptr) && (audio_input_settings->isSet())){
         toJsonValue(QString("audioInputSettings"), audio_input_settings, obj, QString("SWGAudioInputSettings"));
@@ -693,6 +705,16 @@ void
 SWGDeviceSettings::setAirspyHfSettings(SWGAirspyHFSettings* airspy_hf_settings) {
     this->airspy_hf_settings = airspy_hf_settings;
     this->m_airspy_hf_settings_isSet = true;
+}
+
+SWGAudioCATSISOSettings*
+SWGDeviceSettings::getAudioCatsisoSettings() {
+    return audio_catsiso_settings;
+}
+void
+SWGDeviceSettings::setAudioCatsisoSettings(SWGAudioCATSISOSettings* audio_catsiso_settings) {
+    this->audio_catsiso_settings = audio_catsiso_settings;
+    this->m_audio_catsiso_settings_isSet = true;
 }
 
 SWGAudioInputSettings*
@@ -1143,6 +1165,9 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(airspy_hf_settings && airspy_hf_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(audio_catsiso_settings && audio_catsiso_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(audio_input_settings && audio_input_settings->isSet()){

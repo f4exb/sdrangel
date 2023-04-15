@@ -26,6 +26,7 @@
 #include "SWGAaroniaRTSASettings.h"
 #include "SWGAirspyHFSettings.h"
 #include "SWGAirspySettings.h"
+#include "SWGAudioCATSISOSettings.h"
 #include "SWGAudioInputSettings.h"
 #include "SWGAudioOutputSettings.h"
 #include "SWGBladeRF1InputSettings.h"
@@ -101,6 +102,9 @@ public:
 
     SWGAirspyHFSettings* getAirspyHfSettings();
     void setAirspyHfSettings(SWGAirspyHFSettings* airspy_hf_settings);
+
+    SWGAudioCATSISOSettings* getAudioCatsisoSettings();
+    void setAudioCatsisoSettings(SWGAudioCATSISOSettings* audio_catsiso_settings);
 
     SWGAudioInputSettings* getAudioInputSettings();
     void setAudioInputSettings(SWGAudioInputSettings* audio_input_settings);
@@ -249,6 +253,9 @@ private:
 
     SWGAirspyHFSettings* airspy_hf_settings;
     bool m_airspy_hf_settings_isSet;
+
+    SWGAudioCATSISOSettings* audio_catsiso_settings;
+    bool m_audio_catsiso_settings_isSet;
 
     SWGAudioInputSettings* audio_input_settings;
     bool m_audio_input_settings_isSet;

@@ -16,6 +16,7 @@ if(ENABLE_IIO AND LIBIIO_FOUND)
     add_subdirectory(plutosdrmimo)
 endif()
 
+add_subdirectory(audiocatsiso)
 add_subdirectory(metismiso)
 add_subdirectory(testmi)
 add_subdirectory(testmosync)

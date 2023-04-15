@@ -1,0 +1,99 @@
+AudioCATSISOSettings:
+  description: AudioCATSISO
+  properties:
+    rxCenterFrequency:
+      type: integer
+      format: int64
+    txCenterFrequency:
+      type: integer
+      format: int64
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64
+    iqOrder:
+      type: integer
+      description: >
+        IQ samples order
+          * 0 - Q then I (swapped)
+          * 1 - I then Q (straight)
+    streamIndex:
+      type: integer
+      description: The index of the stream currently in scope
+    spectrumStreamIndex:
+      type: integer
+      description: The index of the stream that is used as source of the main spectrum
+    txEnable:
+      type: integer
+      description: >
+        Enable or disable transmission
+          * 0 - Disable transmission
+          * 1 - Enable transmission
+    rxDeviceName:
+      description: The name of the input audio device
+      type: string
+    rxIQMapping:
+      type: integer
+      description: >
+        Audio channel to IQ mapping
+          * 0 - I=L, Q=R
+          * 1 - I=R, Q=L
+          * 2 - I=L, Q=0
+          * 3 - I=R, Q=0
+    log2Decim:
+      description: Decimation factor (Rx)
+      type: integer
+    fcPosRx:
+      type: integer
+      description: >
+        Decimated bandpass center frequency position
+          * 0 - Infradyne
+          * 1 - Supradyne
+          * 2 - Centered
+    dcBlock:
+      type: integer
+      description: >
+        Auto DC blocking
+          * 0 - Off
+          * 1 - On
+    iqCorrection:
+      type: integer
+      description: >
+        Auto IQ balance (you need auto DC blocking active)
+          * 0 - Off
+          * 1 - On
+    rxVolume:
+      type: number
+      format: float
+    txDeviceName:
+      description: The name of the output audio device
+      type: string
+    txIQMapping:
+      type: integer
+      description: >
+        Audio channel to IQ mapping
+          * 0 - I=L, Q=R
+          * 1 - I=R, Q=L
+    log2Interp:
+      description: Interpolation factor (Tx)
+      type: integer
+    fcPosTx:
+      type: integer
+      description: >
+        Interpolated bandpass center frequency position
+          * 0 - Infradyne
+          * 1 - Supradyne
+          * 2 - Centered
+    txVolume:
+      type: number
+      format: float
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer

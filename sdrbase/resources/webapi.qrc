@@ -18,6 +18,7 @@
         <file>webapi/doc/swagger/include/APTDemod.yaml</file>
         <file>webapi/doc/swagger/include/ATVDemod.yaml</file>
         <file>webapi/doc/swagger/include/ATVMod.yaml</file>
+        <file>webapi/doc/swagger/include/AudioCATSISO.yaml</file>
         <file>webapi/doc/swagger/include/AudioInput.yaml</file>
         <file>webapi/doc/swagger/include/AudioOutput.yaml</file>
         <file>webapi/doc/swagger/include/BeamSteeringCWMod.yaml</file>

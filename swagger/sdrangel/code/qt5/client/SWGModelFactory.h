@@ -54,6 +54,7 @@
 #include "SWGAntennaToolsSettings.h"
 #include "SWGArgInfo.h"
 #include "SWGArgValue.h"
+#include "SWGAudioCATSISOSettings.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioInputDevice.h"
 #include "SWGAudioInputSettings.h"
@@ -556,6 +557,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGArgValue").compare(type) == 0) {
       SWGArgValue *obj = new SWGArgValue();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAudioCATSISOSettings").compare(type) == 0) {
+      SWGAudioCATSISOSettings *obj = new SWGAudioCATSISOSettings();
       obj->init();
       return obj;
     }
