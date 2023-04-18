@@ -95,5 +95,6 @@ The received messages table displays information about each AIS message received
 * Data - A textual decode of the message displaying the most interesting fields.
 * NMEA - The message in NMEA format.
 * Hex - The message in hex format.
+* Slot - Time slot (0-2249). Due to SDR to SDRangel latency being unknown, this is likely to have some offset.
 
 Right clicking on the table header allows you to select which columns to show. The columns can be reorderd by left clicking and dragging the column header. Right clicking on an item in the table allows you to copy the value to the clipboard.

@@ -222,7 +222,8 @@ bool AISDemod::handleMessage(const Message& cmd)
                 << QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0')) << ","
                 << ais->getType() << ","
                 << "\"" << ais->toString() << "\"" << ","
-                << "\"" << ais->toNMEA() << "\"" << "\n";
+                << "\"" << ais->toNMEA() << "\"" << ","
+                << report.getSlot() << "\n";
 
             delete ais;
         }
@@ -354,7 +355,7 @@ void AISDemod::applySettings(const AISDemodSettings& settings, bool force)
                 if (newFile)
                 {
                     // Write header
-                    m_logStream << "Date,Time,Data,MMSI,Type,Message,NMEA\n";
+                    m_logStream << "Date,Time,Data,MMSI,Type,Message,NMEA,Slot\n";
                 }
             }
             else

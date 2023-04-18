@@ -27,7 +27,7 @@
 class Serializable;
 
 // Number of columns in the tables
-#define AISDEMOD_MESSAGE_COLUMNS 7
+#define AISDEMOD_MESSAGE_COLUMNS 8
 
 struct AISDemodSettings
 {
