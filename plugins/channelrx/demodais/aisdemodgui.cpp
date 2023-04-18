@@ -68,6 +68,7 @@ void AISDemodGUI::resizeTable()
     ui->messages->setItem(row, MESSAGE_COL_DATA, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZ"));
     ui->messages->setItem(row, MESSAGE_COL_NMEA, new QTableWidgetItem("!AIVDM,1,1,,A,AAAAAAAAAAAAAAAAAAAAAAAAAAAA,0*00"));
     ui->messages->setItem(row, MESSAGE_COL_HEX, new QTableWidgetItem("04058804002000069a0760728d9e00000040000000"));
+    ui->messages->setItem(row, MESSAGE_COL_SLOT, new QTableWidgetItem("2450"));
     ui->messages->resizeColumnsToContents();
     ui->messages->removeRow(row);
 }
@@ -154,7 +155,7 @@ bool AISDemodGUI::deserialize(const QByteArray& data)
 }
 
 // Add row to table
-void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& dateTime)
+void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& dateTime, int slot)
 {
     AISMessage *ais;
 
@@ -177,6 +178,7 @@ void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& da
     QTableWidgetItem *dataItem = new QTableWidgetItem();
     QTableWidgetItem *nmeaItem = new QTableWidgetItem();
     QTableWidgetItem *hexItem = new QTableWidgetItem();
+    QTableWidgetItem *slotItem = new QTableWidgetItem();
     ui->messages->setItem(row, MESSAGE_COL_DATE, dateItem);
     ui->messages->setItem(row, MESSAGE_COL_TIME, timeItem);
     ui->messages->setItem(row, MESSAGE_COL_MMSI, mmsiItem);
@@ -184,6 +186,7 @@ void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& da
     ui->messages->setItem(row, MESSAGE_COL_DATA, dataItem);
     ui->messages->setItem(row, MESSAGE_COL_NMEA, nmeaItem);
     ui->messages->setItem(row, MESSAGE_COL_HEX, hexItem);
+    ui->messages->setItem(row, MESSAGE_COL_SLOT, slotItem);
     dateItem->setText(dateTime.date().toString());
     timeItem->setText(dateTime.time().toString());
     mmsiItem->setText(QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0')));
@@ -191,6 +194,7 @@ void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& da
     dataItem->setText(ais->toString());
     nmeaItem->setText(ais->toNMEA());
     hexItem->setText(ais->toHex());
+    slotItem->setData(Qt::DisplayRole, slot);
     ui->messages->setSortingEnabled(true);
     if (scrollToBottom) {
         ui->messages->scrollToBottom();
@@ -217,7 +221,7 @@ bool AISDemodGUI::handleMessage(const Message& message)
     else if (AISDemod::MsgMessage::match(message))
     {
         AISDemod::MsgMessage& report = (AISDemod::MsgMessage&) message;
-        messageReceived(report.getMessage(), report.getDateTime());
+        messageReceived(report.getMessage(), report.getDateTime(), report.getSlot());
         return true;
     }
     else if (DSPSignalNotification::match(message))
@@ -702,13 +706,14 @@ void AISDemodGUI::on_logOpen_clicked()
             {
                 QTextStream in(&file);
                 QString error;
-                QHash<QString, int> colIndexes = CSV::readHeader(in, {"Date", "Time", "Data"}, error);
+                QHash<QString, int> colIndexes = CSV::readHeader(in, {"Date", "Time", "Data", "Slot"}, error);
                 if (error.isEmpty())
                 {
                     int dateCol = colIndexes.value("Date");
                     int timeCol = colIndexes.value("Time");
                     int dataCol = colIndexes.value("Data");
-                    int maxCol = std::max({dateCol, timeCol, dataCol});
+                    int slotCol = colIndexes.value("Slot");
+                    int maxCol = std::max({dateCol, timeCol, dataCol, slotCol});
 
                     QMessageBox dialog(this);
                     dialog.setText("Reading messages");
@@ -730,9 +735,10 @@ void AISDemodGUI::on_logOpen_clicked()
                             QTime time = QTime::fromString(cols[timeCol]);
                             QDateTime dateTime(date, time);
                             QByteArray bytes = QByteArray::fromHex(cols[dataCol].toLatin1());
+                            int slot = cols[slotCol].toInt();
 
                             // Add to table
-                            messageReceived(bytes, dateTime);
+                            messageReceived(bytes, dateTime, slot);
 
                             // Forward to AIS feature
                             for (const auto& pipe : aisPipes)

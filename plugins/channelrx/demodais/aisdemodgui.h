@@ -98,7 +98,7 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
-    void messageReceived(const QByteArray& message, const QDateTime& dateTime);
+    void messageReceived(const QByteArray& message, const QDateTime& dateTime, int slot);
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
@@ -116,7 +116,8 @@ private:
         MESSAGE_COL_TYPE,
         MESSAGE_COL_DATA,
         MESSAGE_COL_NMEA,
-        MESSAGE_COL_HEX
+        MESSAGE_COL_HEX,
+        MESSAGE_COL_SLOT
     };
 
 private slots:

@@ -181,6 +181,7 @@ void AISDemodSink::processOneSample(Complex &ci)
             int onesCount = 0;
             int byteCount = 0;
             int symbolPrev = 0;
+            int totalBitCount = 0; // Count of bits after start flag, before bit stuffing removal, including stop flag
             for (int sampleIdx = 0; sampleIdx < m_rxBufLength; sampleIdx += m_samplesPerSymbol)
             {
                 // Sum and slice
@@ -247,7 +248,14 @@ void AISDemodSink::processOneSample(Complex &ci)
                                 //qDebug() << "RX: " << rxPacket.toHex();
                                 if (getMessageQueueToChannel())
                                 {
-                                    AISDemod::MsgMessage *msg = AISDemod::MsgMessage::create(rxPacket);
+                                    // Calculate slot number based on time of start of transmission
+                                    // This is unlikely to be accurate in absolute terms, given we don't know latency from SDR or buffering within SDRangel
+                                    // But can be used to get an idea of congestion
+                                    QDateTime currentTime = QDateTime::currentDateTime();
+                                    QDateTime startDateTime = currentTime.addMSecs(-(totalBitCount + 8 + 24 + 8) * (1000.0 / m_settings.m_baud)); // Add ramp up, preamble and start-flag
+                                    int ms = startDateTime.time().second() * 1000 + startDateTime.time().msec();
+                                    int slot = ms / 26.67; // 2250 slots per minute, 26ms per slot
+                                    AISDemod::MsgMessage *msg = AISDemod::MsgMessage::create(rxPacket, currentTime, slot);
                                     getMessageQueueToChannel()->push(msg);
                                 }
 
@@ -273,6 +281,7 @@ void AISDemodSink::processOneSample(Complex &ci)
                             bits = 0;
                             bitCount = 0;
                             byteCount = 0;
+                            totalBitCount = 0;
                         }
                     }
                     onesCount = 0;
@@ -280,6 +289,7 @@ void AISDemodSink::processOneSample(Complex &ci)
 
                 if (gotSOP)
                 {
+                    totalBitCount++;
                     if (bitCount == 8)
                     {
                         // Could also check count according to message ID as that varies
