@@ -29,7 +29,7 @@ set(SOAPYSDR_AUDIO_TAG "soapy-audio-0.1.1")
 set(SOAPYSDR_REMOTE_TAG "soapy-remote-0.5.1")
 set(AIRSPY_TAG "37c768ce9997b32e7328eb48972a7fda0a1f8554")
 set(HACKRF_TAG "v2022.09.1")
-set(LIBXML2_TAG "v2.9.9")
+set(LIBXML2_TAG "v2.10.4")
 
 # For some external project macros
 include(ExternalProject)
@@ -1325,16 +1325,17 @@ if (WIN32 OR APPLE)
                     TEST_COMMAND ""
                     )
         elseif (APPLE)
-            set(LIBXML2_PATCH_COMMAND /usr/bin/sed -i '' "s/libtoolize/glibtoolize/g" autogen.sh)
             ExternalProject_Add(libxml2
                     GIT_REPOSITORY https://github.com/GNOME/libxml2.git
                     GIT_TAG ${LIBXML2_TAG}
                     PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libxml2"
-                    BUILD_IN_SOURCE 1
-                    PATCH_COMMAND ${LIBXML2_PATCH_COMMAND}
-                    CONFIGURE_COMMAND ./autogen.sh
-                    BUILD_COMMAND make
-                    INSTALL_COMMAND ""
+                    CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+                    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+                    -DBUILD_SHARED_LIBS=OFF
+                    -DLIBXML2_WITH_ICONV=OFF
+                    -DLIBXML2_WITH_LZMA=OFF
+                    -DLIBXML2_WITH_PYTHON=OFF
+                    -DLIBXML2_WITH_ZLIB=OFF
                     TEST_COMMAND ""
                     )
         endif ()
@@ -1342,17 +1343,23 @@ if (WIN32 OR APPLE)
         set_global(LIBXML2_DEPENDS libxml2)
         set(LIBXML2_FOUND ON CACHE INTERNAL "")
         set(LIBXML2_EXTERNAL ON CACHE INTERNAL "")
-        set(LIBXML2_INCLUDE_DIR "${source_dir}/include" CACHE INTERNAL "")
+        if (WIN32)
+            set(LIBXML2_INCLUDE_DIR "${source_dir}/include" CACHE INTERNAL "")
+        else ()
+            set(LIBXML2_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libxml2/include/libxml2" CACHE INTERNAL "")
+        endif ()
         if (WIN32)
             set(LIBXML2_LIBRARIES "${source_dir}/win32/bin.msvc/libxml2.lib" CACHE INTERNAL "")
             set(LIBIIO_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/libiio.lib" CACHE INTERNAL "")
             makeCopy("${source_dir}/win32/bin.msvc/libxml2${CMAKE_SHARED_LIBRARY_SUFFIX}" "${SDRANGEL_BINARY_BIN_DIR}/libxml2${CMAKE_SHARED_LIBRARY_SUFFIX}" libxml2)
             install(FILES "${source_dir}/win32/bin.msvc/libxml2${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-        elseif (APPLE)
-            set(LIBXML2_LIBRARIES "${source_dir}/.libs/libxml2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-            install(DIRECTORY "${source_dir}/.libs/" DESTINATION "${INSTALL_LIB_DIR}"
-                    FILES_MATCHING PATTERN "libxml2*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${source_dir}/.libs")
+        else ()
+            set(LIBXML2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/libxml2/lib/libxml2.a" CACHE INTERNAL "")
+        endif ()
+        if (WIN32)
+            set(IIO_LIBUSB_INCLUDE_DIR ${LIBUSB_INCLUDE_DIR})
+        else ()
+            set(IIO_LIBUSB_INCLUDE_DIR ${LIBUSB_INCLUDE_DIR}/..)
         endif ()
         # needs pkgconfig, libusb, pthreads, libxml2
         ExternalProject_Add(libiio
@@ -1362,7 +1369,7 @@ if (WIN32 OR APPLE)
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libiio"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
                 -DLIBUSB_LIBRARIES=${LIBUSB_LIBRARIES}
-                -DLIBUSB_INCLUDE_DIR=${LIBUSB_INCLUDE_DIR}
+                -DLIBUSB_INCLUDE_DIR=${IIO_LIBUSB_INCLUDE_DIR}
                 -DTHREADS_PTHREADS_INCLUDE_DIR=${PTHREADS4W_INCLUDE_DIR}
                 -DTHREADS_PTHREADS_WIN32_LIBRARY=${PTHREADS4W_LIBRARIES}
                 -DLIBXML2_INCLUDE_DIR=${LIBXML2_INCLUDE_DIR}
@@ -1390,8 +1397,7 @@ if (WIN32 OR APPLE)
             set(LIBIIO_LIBRARIES "${binary_dir}/libiio${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
             install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
                     FILES_MATCHING PATTERN "libiio*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-            string(REPLACE "v" "" IIO_VERSION ${LIBIIO_TAG})
-            makeCopy("${binary_dir}/libiio.framework/Versions/${IIO_VERSION}/libiio" "${binary_dir}/libiio${CMAKE_SHARED_LIBRARY_SUFFIX}" libiio)
+            makeCopy("${binary_dir}/iio.framework/iio" "${binary_dir}/libiio${CMAKE_SHARED_LIBRARY_SUFFIX}" libiio)
             add_custom_command(TARGET libiio POST_BUILD COMMAND install_name_tool -id "${binary_dir}/libiio${CMAKE_SHARED_LIBRARY_SUFFIX}" "${binary_dir}/libiio${CMAKE_SHARED_LIBRARY_SUFFIX}")
             set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
         endif ()
