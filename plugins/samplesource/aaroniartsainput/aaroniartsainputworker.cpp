@@ -311,7 +311,7 @@ void AaroniaRTSAInputWorker::onReadyRead()
                     // qDebug() << jdoc.toJson();
                     quint64 endFreq = jdoc["endFrequency"].toDouble();
                     quint64 startFreq = jdoc["startFrequency"].toDouble();
-                    int bw = endFreq - startFreq;
+                    int bw = jdoc["sampleFrequency"].toInt();
                     quint64 midFreq = (endFreq + startFreq) / 2;
 
                     if ((bw != m_sampleRate) || (midFreq != m_centerFrequency))
