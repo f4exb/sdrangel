@@ -51,4 +51,4 @@ export IMAGE_CODEGEN_VERSION=${image_tag_codegen}
 export IMAGE_SERVER_VERSION=${image_tag_server}
 export SDRANGEL_BASE=${sdrangel_codebase}
 
-docker compose -f compose.yml ${stack_name} ${action}
+docker-compose -f compose.yml ${stack_name} ${action}
