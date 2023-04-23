@@ -610,9 +610,7 @@ else()
                      MultimediaWidgets
                      Positioning
                      Charts
-                     SerialPort
-                   OPTIONAL_COMPONENTS
-                     Gamepad)
+                     SerialPort)
 endif()
 
 # for the server we don't need OpenGL/Qt Quick components
@@ -664,7 +662,8 @@ if (BUILD_GUI)
                            OPTIONAL_COMPONENTS
                             WebEngine
                             WebEngineCore
-                            WebEngineWidgets)
+                            WebEngineWidgets
+                            Gamepad)
         endif()
     endif()
 endif()
