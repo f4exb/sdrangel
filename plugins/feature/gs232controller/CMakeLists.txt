@@ -38,17 +38,27 @@ if(NOT SERVER_MODE)
         gs232controllergui.ui
         dfmstatusdialog.cpp
         dfmstatusdialog.ui
+        inputcontroller.cpp
     )
     set(gs232controller_HEADERS
         ${gs232controller_HEADERS}
         gs232controllergui.h
         dfmstatusdialog.h
+        inputcontroller.h
     )
 
     set(TARGET_NAME featuregs232controller)
     set(TARGET_LIB Qt::Widgets)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+
+    if(Qt${QT_DEFAULT_MAJOR_VERSION}Gamepad_FOUND)
+        add_compile_definitions(QT_GAMEPAD_FOUND)
+        set(TARGET_LIB ${TARGET_LIB} Qt::Gamepad)
+        set(gs232controller_SOURCES ${gs232controller_SOURCES} gamepadinputcontroller.cpp)
+        set(gs232controller_HEADERS ${gs232controller_HEADERS} gamepadinputcontroller.h)
+    endif()
+
 else()
     set(TARGET_NAME featuregs232controllersrv)
     set(TARGET_LIB "")

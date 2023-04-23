@@ -58,6 +58,13 @@ GS232ControllerSettings:
     coordinates:
       description: (0 Az/El, 1 X/Y 85, 2 X/Y 30)
       type: integer
+    inputController:
+      description: Name of input controller
+      type: string
+    inputSensitivity:
+      description: Input controller sensitivity
+      type: number
+      format: float      
     title:
       type: string
     rgbColor:

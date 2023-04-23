@@ -64,6 +64,8 @@ void GS232ControllerSettings::resetToDefaults()
     m_connection = SERIAL;
     m_precision = 0;
     m_coordinates = AZ_EL;
+    m_inputController = "None";
+    m_inputSensitivity = 0.25;
     m_dfmTrackOn = false;
     m_dfmLubePumpsOn = false;
     m_dfmBrakesOn = false;
@@ -119,6 +121,8 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeBool(32, m_dfmLubePumpsOn);
     s.writeBool(33, m_dfmBrakesOn);
     s.writeBool(34, m_dfmDrivesOn);
+    s.writeString(35, m_inputController);
+    s.writeFloat(36, m_inputSensitivity);
 
     return s.final();
 }
@@ -187,6 +191,8 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         d.readBool(32, &m_dfmLubePumpsOn);
         d.readBool(33, &m_dfmBrakesOn);
         d.readBool(34, &m_dfmDrivesOn);
+        d.readString(35, &m_inputController, "None");
+        d.readFloat(36, &m_inputSensitivity, 0.25);
 
         return true;
     }
@@ -270,6 +276,12 @@ void GS232ControllerSettings::applySettings(const QStringList& settingsKeys, con
     }
     if (settingsKeys.contains("coordinates")) {
         m_coordinates = settings.m_coordinates;
+    }
+    if (settingsKeys.contains("inputController")) {
+        m_inputController = settings.m_inputController;
+    }
+    if (settingsKeys.contains("inputSensitivity")) {
+        m_inputSensitivity = settings.m_inputSensitivity;
     }
     if (settingsKeys.contains("dfmTrackOn")) {
         m_dfmTrackOn = settings.m_dfmTrackOn;
@@ -370,6 +382,12 @@ QString GS232ControllerSettings::getDebugString(const QStringList& settingsKeys,
     if (settingsKeys.contains("coordinates") || force) {
         ostr << " m_coordinates: " << m_precision;
     }
+    if (settingsKeys.contains("inputController") || force) {
+        ostr << " m_inputController: " << m_inputController.toStdString();
+    }
+    if (settingsKeys.contains("inputSensitivity") || force) {
+        ostr << " m_inputSensitivity: " << m_inputSensitivity;
+    }
     if (settingsKeys.contains("title") || force) {
         ostr << " m_title: " << m_title.toStdString();
     }
@@ -397,4 +415,3 @@ QString GS232ControllerSettings::getDebugString(const QStringList& settingsKeys,
 
     return QString(ostr.str().c_str());
 }
-

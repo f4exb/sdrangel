@@ -610,7 +610,9 @@ else()
                      MultimediaWidgets
                      Positioning
                      Charts
-                     SerialPort)
+                     SerialPort
+                   OPTIONAL_COMPONENTS
+                     Gamepad)
 endif()
 
 # for the server we don't need OpenGL/Qt Quick components

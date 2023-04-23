@@ -2,10 +2,10 @@
 
 <h2>Introduction</h2>
 
-The Rotator Controller feature plugin allows SDRangel to send commands to GS-232 and SPID rotators as well as hamlib's rotctld, via a serial or TCP connection. 
+The Rotator Controller feature plugin allows SDRangel to send commands to GS-232 and SPID rotators as well as hamlib's rotctld, via a serial or TCP connection.
 This allows SDRangel to point antennas mounted on a rotator to a specified azimuth and elevation.
 
-Azimuth and elevation can be set manually by a user in the GUI, via the REST API, or via another plugin, such as the Map Feature, the ADS-B Demodulator, or the Star Tracker.
+Azimuth and elevation can be set manually by a user in the GUI, via the REST API, via another plugin, such as the Map Feature, the ADS-B Demodulator, or the Star Tracker, or by controller/gamepads (such as an XBox Controller).
 
 <h2>Interface</h2>
 
@@ -106,6 +106,20 @@ Specifies the coordinate system used by the GUI for entry and display of the pos
 * X/Y 30' - For X/Y coordinates in degrees. 0,0 is zenith. X is positivie Eastward. Y is positive Northward.
 
 Equations for translating between these coordinate systems can be found [here](https://ntrs.nasa.gov/citations/19670030005).
+
+<h3>22: Input Control</h3>
+
+Specifies a controller/gamepad (such as an XBox Wireless Controller) that can be used to specify target coordinates or azimuth and elevation offset.
+
+When a controller with 2 sticks (4 axes) such as the XBox Wireless Controller is used, the right stick is used for controlling target coordinates,
+while the left stick is for controlling azimuth and elevation offset.
+If a controller only has 2 axes, target coordinates will be controlled when not tracking (6) and offset will be controlled when tracking.
+
+The [Qt Gamepad](https://doc.qt.io/qt-5/qtgamepad-index.html) library is used to implement gamepad support.
+
+<h3>23: Sensitivity</h3>
+
+Specifies the sensitivity on the input controls (22). The higher the value, the faster coordinates will change for a given control stick movement.
 
 <h2>Protocol Implementations</h2>
 

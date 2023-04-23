@@ -97,6 +97,12 @@ public:
     qint32 getCoordinates();
     void setCoordinates(qint32 coordinates);
 
+    QString* getInputController();
+    void setInputController(QString* input_controller);
+
+    float getInputSensitivity();
+    void setInputSensitivity(float input_sensitivity);
+
     QString* getTitle();
     void setTitle(QString* title);
 
@@ -178,6 +184,12 @@ private:
 
     qint32 coordinates;
     bool m_coordinates_isSet;
+
+    QString* input_controller;
+    bool m_input_controller_isSet;
+
+    float input_sensitivity;
+    bool m_input_sensitivity_isSet;
 
     QString* title;
     bool m_title_isSet;
