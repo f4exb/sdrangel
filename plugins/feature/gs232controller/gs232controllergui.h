@@ -127,6 +127,7 @@ private slots:
     void updateStatus();
     void on_inputController_currentIndexChanged(int index);
     void on_inputSensitivty_valueChanged(int value);
+    void on_inputConfigure_clicked();
     void updateInputControllerList();
     void checkInputController();
 };

@@ -19,6 +19,7 @@
 #include <QGamepadManager>
 
 #include "gamepadinputcontroller.h"
+#include "gamepadconfigurationdialog.h"
 
 GamepadInputController::GamepadInputController(int deviceId) :
     m_gamepad(deviceId),
@@ -52,6 +53,28 @@ double GamepadInputController::getAxisValue(int axis)
 int GamepadInputController::getNumberOfAxes() const
 {
     return 4;
+}
+
+bool GamepadInputController::supportsConfiguration() const
+{
+    // Should only return true on Linux evdev or Android
+    return QGamepadManager::instance()->isConfigurationNeeded(m_gamepad.deviceId());
+}
+
+void GamepadInputController::configure()
+{
+    disconnect(&m_gamepad, &QGamepad::axisRightXChanged, this, &GamepadInputController::axisRightXChanged);
+    disconnect(&m_gamepad, &QGamepad::axisRightYChanged, this, &GamepadInputController::axisRightYChanged);
+    disconnect(&m_gamepad, &QGamepad::axisLeftXChanged, this, &GamepadInputController::axisLeftXChanged);
+    disconnect(&m_gamepad, &QGamepad::axisLeftYChanged, this, &GamepadInputController::axisLeftYChanged);
+
+    GamepadConfigurationDialog dialog(&m_gamepad);
+    dialog.exec();
+
+    connect(&m_gamepad, &QGamepad::axisRightXChanged, this, &GamepadInputController::axisRightXChanged);
+    connect(&m_gamepad, &QGamepad::axisRightYChanged, this, &GamepadInputController::axisRightYChanged);
+    connect(&m_gamepad, &QGamepad::axisLeftXChanged, this, &GamepadInputController::axisLeftXChanged);
+    connect(&m_gamepad, &QGamepad::axisLeftYChanged, this, &GamepadInputController::axisLeftYChanged);
 }
 
 void GamepadInputController::axisRightXChanged(double value)

@@ -304,6 +304,8 @@ void GS232ControllerGUI::updateInputController()
     ui->inputSensitivityLabel->setEnabled(enabled);
     ui->inputSensitivity->setEnabled(enabled);
     ui->inputSensitivityText->setEnabled(enabled);
+    ui->inputConfigure->setEnabled(enabled);
+    ui->inputConfigure->setVisible(enabled);
 }
 
 void GS232ControllerGUI::checkInputController()
@@ -381,6 +383,13 @@ void GS232ControllerGUI::on_inputSensitivty_valueChanged(int value)
     m_settings.m_inputSensitivity = value / 1000.0;
     ui->inputSensitivityText->setText(QString("%1%").arg(m_settings.m_inputSensitivity * 100.0));
     applySettings();
+}
+
+void GS232ControllerGUI::on_inputConfigure_clicked()
+{
+    if (m_inputController) {
+        m_inputController->configure();
+    }
 }
 
 GS232ControllerGUI::~GS232ControllerGUI()
@@ -949,6 +958,7 @@ void GS232ControllerGUI::makeUIConnections()
     QObject::connect(ui->coordinates, qOverload<int>(&QComboBox::currentIndexChanged), this, &GS232ControllerGUI::on_coordinates_currentIndexChanged);
     QObject::connect(ui->inputController, qOverload<int>(&QComboBox::currentIndexChanged), this, &GS232ControllerGUI::on_inputController_currentIndexChanged);
     QObject::connect(ui->inputSensitivity, qOverload<int>(&QSlider::valueChanged), this, &GS232ControllerGUI::on_inputSensitivty_valueChanged);
+    QObject::connect(ui->inputConfigure, &QToolButton::clicked, this, &GS232ControllerGUI::on_inputConfigure_clicked);
     QObject::connect(ui->dfmTrack, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmTrack_clicked);
     QObject::connect(ui->dfmLubePumps, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmLubePumps_clicked);
     QObject::connect(ui->dfmBrakes, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmBrakes_clicked);

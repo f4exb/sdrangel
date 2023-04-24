@@ -5,7 +5,7 @@
 The Rotator Controller feature plugin allows SDRangel to send commands to GS-232 and SPID rotators as well as hamlib's rotctld, via a serial or TCP connection.
 This allows SDRangel to point antennas mounted on a rotator to a specified azimuth and elevation.
 
-Azimuth and elevation can be set manually by a user in the GUI, via the REST API, via another plugin, such as the Map Feature, the ADS-B Demodulator, or the Star Tracker, or by controller/gamepads (such as an XBox Controller).
+Azimuth and elevation can be set manually by a user in the GUI, via the REST API, via another plugin, such as the Map Feature, the ADS-B Demodulator, or the Star Tracker, or by controller/gamepads (such as an XBox Wireless Controller).
 
 <h2>Interface</h2>
 
@@ -109,13 +109,16 @@ Equations for translating between these coordinate systems can be found [here](h
 
 <h3>22: Input Control</h3>
 
-Specifies a controller/gamepad (such as an XBox Wireless Controller) that can be used to specify target coordinates or azimuth and elevation offset.
+Specifies a controller/gamepad that can be used to specify target coordinates or azimuth and elevation offset.
 
-When a controller with 2 sticks (4 axes) such as the XBox Wireless Controller is used, the right stick is used for controlling target coordinates,
+When a gamepad with 2 sticks (4 axes) such as the XBox Wireless Controller is used, the right stick is used for controlling target coordinates,
 while the left stick is for controlling azimuth and elevation offset.
 If a controller only has 2 axes, target coordinates will be controlled when not tracking (6) and offset will be controlled when tracking.
 
 The [Qt Gamepad](https://doc.qt.io/qt-5/qtgamepad-index.html) library is used to implement gamepad support.
+On Linux, using Qt Gamepad with the evdev backend, all joysticks & gamepads appear as though they have 4 axes (a limitation of Qt Gamepad).
+If using a joystick which only has 2 axes, whether it corresponds to the left or right stick can be configured by pressing the 'C' button.
+On Linux, the [xone driver](https://github.com/medusalix/xone) has support for the Xbox Wireless Controller, that isn't supported by the older xpad driver that is included with Ubuntu.
 
 <h3>23: Sensitivity</h3>
 

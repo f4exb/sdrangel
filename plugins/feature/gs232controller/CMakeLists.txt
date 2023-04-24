@@ -55,8 +55,15 @@ if(NOT SERVER_MODE)
     if(Qt${QT_DEFAULT_MAJOR_VERSION}Gamepad_FOUND)
         add_compile_definitions(QT_GAMEPAD_FOUND)
         set(TARGET_LIB ${TARGET_LIB} Qt::Gamepad)
-        set(gs232controller_SOURCES ${gs232controller_SOURCES} gamepadinputcontroller.cpp)
-        set(gs232controller_HEADERS ${gs232controller_HEADERS} gamepadinputcontroller.h)
+        set(gs232controller_SOURCES
+            ${gs232controller_SOURCES}
+            gamepadinputcontroller.cpp
+            gamepadconfigurationdialog.cpp
+            gamepadconfigurationdialog.ui)
+        set(gs232controller_HEADERS
+            ${gs232controller_HEADERS}
+            gamepadinputcontroller.h
+            gamepadconfiguration.h)
     endif()
 
 else()

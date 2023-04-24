@@ -29,6 +29,8 @@ public:
     GamepadInputController(int deviceId);
     double getAxisValue(int axis) override;
     int getNumberOfAxes() const override;
+    bool supportsConfiguration() const override;
+    void configure() override;
 
     static QStringList getAllControllers();
     static GamepadInputController* open(const QString& name);

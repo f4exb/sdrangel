@@ -15,46 +15,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_INPUTCONTROLLER_H_
-#define INCLUDE_FEATURE_INPUTCONTROLLER_H_
+#ifndef INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
+#define INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
 
-#include <QObject>
+#include "ui_gamepadconfigurationdialog.h"
 
-class InputController : public QObject {
+class QGamepad;
+
+class GamepadConfigurationDialog : public QDialog {
     Q_OBJECT
+
 public:
-
-    // Called every ~50ms
-    // axis 0-3. 0=Az/X, 1=El/Y, 2=Az Offset, 3=El Offset
-    // value returned should be current axis position in range [-1,1]
-    virtual double getAxisValue(int axis) = 0;
-    virtual int getNumberOfAxes() const = 0;
-    virtual bool supportsConfiguration() const { return false; }
-    virtual void configure() {};
-
-};
-
-class InputControllerManager : public QObject {
-    Q_OBJECT
-public:
-
-    static QStringList getAllControllers();
-    static InputController* open(const QString& name);
-    static InputControllerManager* instance();
-
-signals:
-
-    void controllersChanged();
+    explicit GamepadConfigurationDialog(QGamepad *gamepad, QWidget* parent = 0);
+    ~GamepadConfigurationDialog();
 
 private slots:
-    void connectedGamepadsChanged();
+    void accept();
+    void on_config0_clicked();
+    void on_config1_clicked();
+    void on_config2_clicked();
+    void on_config3_clicked();
+    void axisRightXChanged(double value);
+    void axisRightYChanged(double value);
+    void axisLeftXChanged(double value);
+    void axisLeftYChanged(double value);
 
 private:
-    InputControllerManager();
-
-    static InputControllerManager *m_instance;
-
+    Ui::GamepadConfigurationDialog* ui;
+    QGamepad *m_gamepad;
 };
 
+#endif // INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
 
-#endif // INCLUDE_FEATURE_INPUTCONTROLLER_H_
