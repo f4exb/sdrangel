@@ -635,7 +635,9 @@ if (BUILD_GUI)
                             Location
                             TextToSpeech
                             Svg
-                            AndroidExtras)
+                            AndroidExtras
+                           OPTIONAL_COMPONENTS
+                            Gamepad)
         endif()
     else()
         find_package(OpenGL REQUIRED)
@@ -662,7 +664,8 @@ if (BUILD_GUI)
                            OPTIONAL_COMPONENTS
                             WebEngine
                             WebEngineCore
-                            WebEngineWidgets)
+                            WebEngineWidgets
+                            Gamepad)
         endif()
     endif()
 endif()

@@ -27,6 +27,7 @@
 
 #include "gs232controllersettings.h"
 #include "dfmstatusdialog.h"
+#include "inputcontroller.h"
 
 class PluginAPI;
 class FeatureUISet;
@@ -68,6 +69,14 @@ private:
 
     DFMStatusDialog m_dfmStatusDialog;
 
+    InputController *m_inputController;
+    QTimer m_inputTimer;
+    double m_inputCoord1;
+    double m_inputCoord2;
+    double m_inputAzOffset;
+    double m_inputElOffset;
+    bool m_inputUpdate;
+
     explicit GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~GS232ControllerGUI();
 
@@ -84,6 +93,7 @@ private:
     void makeUIConnections();
     void azElToDisplay(float az, float el, float& coord1, float& coord2) const;
     void displayToAzEl(float coord1, float coord2);
+    void updateInputController();
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);
@@ -115,6 +125,11 @@ private slots:
     void on_dfmDrives_clicked(bool checked=false);
     void on_dfmShowStatus_clicked();
     void updateStatus();
+    void on_inputController_currentIndexChanged(int index);
+    void on_inputSensitivty_valueChanged(int value);
+    void on_inputConfigure_clicked();
+    void updateInputControllerList();
+    void checkInputController();
 };
 
 #endif // INCLUDE_FEATURE_GS232CONTROLLERGUI_H_

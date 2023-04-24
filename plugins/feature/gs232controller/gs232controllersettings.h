@@ -62,6 +62,8 @@ struct GS232ControllerSettings
     enum Connection { SERIAL, TCP } m_connection;
     int m_precision;
     enum Coordinates { AZ_EL, X_Y_85, X_Y_30 } m_coordinates;
+    QString m_inputController;
+    float m_inputSensitivity;
 
     bool m_dfmTrackOn;
     bool m_dfmLubePumpsOn;

@@ -64,6 +64,10 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_precision_isSet = false;
     coordinates = 0;
     m_coordinates_isSet = false;
+    input_controller = nullptr;
+    m_input_controller_isSet = false;
+    input_sensitivity = 0.0f;
+    m_input_sensitivity_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -124,6 +128,10 @@ SWGGS232ControllerSettings::init() {
     m_precision_isSet = false;
     coordinates = 0;
     m_coordinates_isSet = false;
+    input_controller = new QString("");
+    m_input_controller_isSet = false;
+    input_sensitivity = 0.0f;
+    m_input_sensitivity_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -167,6 +175,10 @@ SWGGS232ControllerSettings::cleanup() {
 
 
 
+
+    if(input_controller != nullptr) { 
+        delete input_controller;
+    }
 
     if(title != nullptr) { 
         delete title;
@@ -230,6 +242,10 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&precision, pJson["precision"], "qint32", "");
     
     ::SWGSDRangel::setValue(&coordinates, pJson["coordinates"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&input_controller, pJson["inputController"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&input_sensitivity, pJson["inputSensitivity"], "float", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -316,6 +332,12 @@ SWGGS232ControllerSettings::asJsonObject() {
     }
     if(m_coordinates_isSet){
         obj->insert("coordinates", QJsonValue(coordinates));
+    }
+    if(input_controller != nullptr && *input_controller != QString("")){
+        toJsonValue(QString("inputController"), input_controller, obj, QString("QString"));
+    }
+    if(m_input_sensitivity_isSet){
+        obj->insert("inputSensitivity", QJsonValue(input_sensitivity));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -526,6 +548,26 @@ SWGGS232ControllerSettings::setCoordinates(qint32 coordinates) {
 }
 
 QString*
+SWGGS232ControllerSettings::getInputController() {
+    return input_controller;
+}
+void
+SWGGS232ControllerSettings::setInputController(QString* input_controller) {
+    this->input_controller = input_controller;
+    this->m_input_controller_isSet = true;
+}
+
+float
+SWGGS232ControllerSettings::getInputSensitivity() {
+    return input_sensitivity;
+}
+void
+SWGGS232ControllerSettings::setInputSensitivity(float input_sensitivity) {
+    this->input_sensitivity = input_sensitivity;
+    this->m_input_sensitivity_isSet = true;
+}
+
+QString*
 SWGGS232ControllerSettings::getTitle() {
     return title;
 }
@@ -662,6 +704,12 @@ SWGGS232ControllerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_coordinates_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(input_controller && *input_controller != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_input_sensitivity_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

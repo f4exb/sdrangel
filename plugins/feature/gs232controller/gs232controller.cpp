@@ -491,6 +491,8 @@ void GS232Controller::webapiFormatFeatureSettings(
     response.getGs232ControllerSettings()->setProtocol(settings.m_protocol);
     response.getGs232ControllerSettings()->setPrecision(settings.m_precision);
     response.getGs232ControllerSettings()->setCoordinates((int)settings.m_coordinates);
+    response.getGs232ControllerSettings()->setInputController(new QString(settings.m_inputController));
+    response.getGs232ControllerSettings()->setInputSensitivity(settings.m_inputSensitivity);
 
     if (response.getGs232ControllerSettings()->getTitle()) {
         *response.getGs232ControllerSettings()->getTitle() = settings.m_title;
@@ -585,6 +587,12 @@ void GS232Controller::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("coordinates")) {
         settings.m_coordinates = (GS232ControllerSettings::Coordinates)response.getGs232ControllerSettings()->getCoordinates();
     }
+    if (featureSettingsKeys.contains("inputController")) {
+        settings.m_inputController = *response.getGs232ControllerSettings()->getInputController();
+    }
+    if (featureSettingsKeys.contains("inputSensitivity")) {
+        settings.m_inputSensitivity = response.getGs232ControllerSettings()->getInputSensitivity();
+    }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getGs232ControllerSettings()->getTitle();
     }
@@ -675,6 +683,12 @@ void GS232Controller::webapiReverseSendSettings(const QList<QString>& featureSet
     }
     if (featureSettingsKeys.contains("coordinates") || force) {
         swgGS232ControllerSettings->setCoordinates(settings.m_coordinates);
+    }
+    if (featureSettingsKeys.contains("inputController") || force) {
+        swgGS232ControllerSettings->setInputController(new QString(settings.m_inputController));
+    }
+    if (featureSettingsKeys.contains("inputSensitivity") || force) {
+        swgGS232ControllerSettings->setInputSensitivity(settings.m_inputSensitivity);
     }
     if (featureSettingsKeys.contains("title") || force) {
         swgGS232ControllerSettings->setTitle(new QString(settings.m_title));

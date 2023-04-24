@@ -16,6 +16,7 @@ Build-Depends: debhelper (>= 9),
  libqt5websockets5-dev,
  libqt5quick5,
  libqt5texttospeech5-dev,
+ libqt5gamepad5-dev,
  qml-module-qtlocation,
  qml-module-qtpositioning,
  qml-module-qtquick-window2,
@@ -61,6 +62,7 @@ Depends: ${shlibs:Depends},
  libasound2,
  libgl1-mesa-glx,
  libqt5multimedia5-plugins,
+ libqt5gamepad5,
  qtspeech5-speechd-plugin,
  pulseaudio,
  ffmpeg,
@@ -80,8 +82,8 @@ Description: SDR/Analyzer/Generator front-end for various hardware
  Based on Qt5 framework and OpenGL for the spectrum and scope rendering.
  Builds on Linux, Windows and Mac O/S
  Reception modes supported:
-   Analog: AM, ATV, NFM, WFM, SSB, broadcast FM, APT
-   Digital: D-Star, Yaesu SF, DMR, dPMR, FreeDV, DAB, DVB-S, LoRa, ADS-B, Packet (AX.25/APRS), AIS
+   Analog: AM, ATV, NFM, WFM, SSB, broadcast FM, APT, ILS, VOR
+   Digital: D-Star, Yaesu SF, DMR, dPMR, FreeDV, M17, DAB, DVB-S, LoRa, ADS-B, Packet (AX.25/APRS), AIS, FT8, Navtex, Radiosonde, RTTY, Pager
    Analyzer: Generic channel
  Transmission modes supported:
    Analog: AM, ATV, NFM, SSB, WFM
