@@ -58,7 +58,11 @@ int GamepadInputController::getNumberOfAxes() const
 bool GamepadInputController::supportsConfiguration() const
 {
     // Should only return true on Linux evdev or Android
-    return QGamepadManager::instance()->isConfigurationNeeded(m_gamepad.deviceId());
+#if defined(LINUX) || defined(ANDROID)
+    return true;
+#else
+    return false;
+#endif
 }
 
 void GamepadInputController::configure()
