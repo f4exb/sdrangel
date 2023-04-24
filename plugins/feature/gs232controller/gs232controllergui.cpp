@@ -252,6 +252,7 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
 
     m_settings.setRollupState(&m_rollupState);
 
+    ui->inputConfigure->setVisible(false);
     updateInputControllerList();
     connect(InputControllerManager::instance(), &InputControllerManager::controllersChanged, this, &GS232ControllerGUI::updateInputControllerList);
     connect(&m_inputTimer, &QTimer::timeout, this, &GS232ControllerGUI::checkInputController);
@@ -305,7 +306,7 @@ void GS232ControllerGUI::updateInputController()
     ui->inputSensitivity->setEnabled(enabled);
     ui->inputSensitivityText->setEnabled(enabled);
     ui->inputConfigure->setEnabled(enabled);
-    ui->inputConfigure->setVisible(enabled);
+    ui->inputConfigure->setVisible(enabled && m_inputController->supportsConfiguration());
 }
 
 void GS232ControllerGUI::checkInputController()

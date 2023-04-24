@@ -44,96 +44,80 @@ void GamepadConfigurationDialog::accept()
 
 void GamepadConfigurationDialog::on_config0_clicked()
 {
-    if (ui->config0->text() == "Configure")
-    {
-        ui->config0->setText("Done");
-        ui->config1->setEnabled(false);
-        ui->config2->setEnabled(false);
-        ui->config3->setEnabled(false);
-        QGamepadManager::instance()->configureAxis(m_gamepad->deviceId(), QGamepadManager ::AxisRightX);
-    }
-    else
-    {
-        ui->config0->setText("Configure");
-        ui->config1->setEnabled(true);
-        ui->config2->setEnabled(true);
-        ui->config3->setEnabled(true);
-    }
+    ui->config0->setText("Configuring");
+    ui->config0->setEnabled(false);
+    ui->config1->setEnabled(false);
+    ui->config2->setEnabled(false);
+    ui->config3->setEnabled(false);
+    QGamepadManager::instance()->configureAxis(m_gamepad->deviceId(), QGamepadManager ::AxisRightX);
 }
 
 void GamepadConfigurationDialog::on_config1_clicked()
 {
-    if (ui->config1->text() == "Configure")
-    {
-        ui->config1->setText("Done");
-        ui->config0->setEnabled(false);
-        ui->config2->setEnabled(false);
-        ui->config3->setEnabled(false);
-        QGamepadManager::instance()->configureAxis(m_gamepad->deviceId(), QGamepadManager ::AxisRightY);
-    }
-    else
-    {
-        ui->config1->setText("Configure");
-        ui->config0->setEnabled(true);
-        ui->config2->setEnabled(true);
-        ui->config3->setEnabled(true);
-    }
+    ui->config1->setText("Configuring");
+    ui->config0->setEnabled(false);
+    ui->config1->setEnabled(false);
+    ui->config2->setEnabled(false);
+    ui->config3->setEnabled(false);
+    QGamepadManager::instance()->configureAxis(m_gamepad->deviceId(), QGamepadManager ::AxisRightY);
 }
 
 void GamepadConfigurationDialog::on_config2_clicked()
 {
-    if (ui->config2->text() == "Configure")
-    {
-        ui->config2->setText("Done");
-        ui->config0->setEnabled(false);
-        ui->config1->setEnabled(false);
-        ui->config3->setEnabled(false);
-        QGamepadManager::instance()->configureAxis(m_gamepad->deviceId(), QGamepadManager ::AxisLeftX);
-    }
-    else
-    {
-        ui->config2->setText("Configure");
-        ui->config0->setEnabled(true);
-        ui->config1->setEnabled(true);
-        ui->config3->setEnabled(true);
-    }
+    ui->config2->setText("Configuring");
+    ui->config0->setEnabled(false);
+    ui->config1->setEnabled(false);
+    ui->config2->setEnabled(false);
+    ui->config3->setEnabled(false);
+    QGamepadManager::instance()->configureAxis(m_gamepad->deviceId(), QGamepadManager ::AxisLeftX);
 }
 
 void GamepadConfigurationDialog::on_config3_clicked()
 {
-    if (ui->config3->text() == "Configure")
-    {
-        ui->config3->setText("Done");
-        ui->config0->setEnabled(false);
-        ui->config1->setEnabled(false);
-        ui->config2->setEnabled(false);
-        QGamepadManager::instance()->configureAxis(m_gamepad->deviceId(), QGamepadManager ::AxisLeftY);
-    }
-    else
-    {
-        ui->config3->setText("Configure");
-        ui->config0->setEnabled(true);
-        ui->config1->setEnabled(true);
-        ui->config2->setEnabled(true);
-    }
+    ui->config3->setText("Configuring");
+    ui->config0->setEnabled(false);
+    ui->config1->setEnabled(false);
+    ui->config2->setEnabled(false);
+    ui->config3->setEnabled(false);
+    QGamepadManager::instance()->configureAxis(m_gamepad->deviceId(), QGamepadManager ::AxisLeftY);
 }
 
 void GamepadConfigurationDialog::axisRightXChanged(double value)
 {
     ui->value0->setText(QString::number(value));
+    ui->config0->setText("Configure");
+    ui->config0->setEnabled(true);
+    ui->config1->setEnabled(true);
+    ui->config2->setEnabled(true);
+    ui->config3->setEnabled(true);
 }
 
 void GamepadConfigurationDialog::axisRightYChanged(double value)
 {
     ui->value1->setText(QString::number(value));
+    ui->config1->setText("Configure");
+    ui->config0->setEnabled(true);
+    ui->config1->setEnabled(true);
+    ui->config2->setEnabled(true);
+    ui->config3->setEnabled(true);
 }
 
 void GamepadConfigurationDialog::axisLeftXChanged(double value)
 {
     ui->value2->setText(QString::number(value));
+    ui->config2->setText("Configure");
+    ui->config0->setEnabled(true);
+    ui->config1->setEnabled(true);
+    ui->config2->setEnabled(true);
+    ui->config3->setEnabled(true);
 }
 
 void GamepadConfigurationDialog::axisLeftYChanged(double value)
 {
     ui->value3->setText(QString::number(value));
+    ui->config3->setText("Configure");
+    ui->config0->setEnabled(true);
+    ui->config1->setEnabled(true);
+    ui->config2->setEnabled(true);
+    ui->config3->setEnabled(true);
 }

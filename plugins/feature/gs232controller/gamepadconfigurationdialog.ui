@@ -54,7 +54,7 @@
       <item row="4" column="0">
        <widget class="QLabel" name="config3Label">
         <property name="text">
-         <string>Azimuth Offset Axis</string>
+         <string>Elevation Offset Axis</string>
         </property>
        </widget>
       </item>
@@ -75,7 +75,7 @@
       <item row="3" column="0">
        <widget class="QLabel" name="config2Label">
         <property name="text">
-         <string>Elevation Offset Axis</string>
+         <string>Azimuth Offset Axis</string>
         </property>
        </widget>
       </item>
@@ -113,7 +113,14 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
+      <item row="1" column="1">
+       <widget class="QPushButton" name="config0">
+        <property name="text">
+         <string>Configure</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="instructions">
         <property name="minimumSize">
          <size>
@@ -125,15 +132,7 @@
          <string>To configure a controller axis:
 
  - press the Configure button,
- - move the controller axis,
- - then press Done</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="config0">
-        <property name="text">
-         <string>Configure</string>
+ - move the controller axis you want for that function.</string>
         </property>
        </widget>
       </item>
