@@ -520,14 +520,10 @@ void M17DemodProcessor::processAudio(const std::array<int16_t, 160>& in)
 
     if (m_audioBufferFill >= m_audioBuffer.size() - 960)
     {
-        if (m_audioBufferFill > m_audioBuffer.size()) {
-            qDebug("M17DemodProcessor::processAudio: dropping %d samples", (int) m_audioBufferFill - (int) m_audioBuffer.size());
-        }
+        uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
-        uint res = m_audioFifo->write((const quint8*)&m_audioBuffer[0], m_audioBuffer.size());
-
-        if (res != m_audioBuffer.size()) {
-            qDebug("M17DemodProcessor::processAudio: %u/%lu audio samples written", res, m_audioBuffer.size());
+        if (res != m_audioBufferFill) {
+            qDebug("M17DemodProcessor::processAudio: %u/%u audio samples written", res, m_audioBufferFill);
         }
 
         m_audioBufferFill = 0;

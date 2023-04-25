@@ -203,15 +203,11 @@ void AMDemodSink::processOneSample(Complex &ci)
 
     if (m_audioBufferFill >= m_audioBuffer.size())
     {
-        if (m_audioBufferFill > m_audioBuffer.size()) {
-            qDebug("AMDemodSink::processOneSample: dropping %d samples", (int) m_audioBufferFill - (int) m_audioBuffer.size());
-        }
+        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
-        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBuffer.size());
-
-        if (res != m_audioBuffer.size())
+        if (res != m_audioBufferFill)
         {
-            qDebug("AMDemodSink::processOneSample: %u/%lu audio samples written", res, m_audioBuffer.size());
+            qDebug("AMDemodSink::processOneSample: %u/%u audio samples written", res, m_audioBufferFill);
             m_audioFifo.clear();
         }
 

@@ -244,16 +244,12 @@ void NFMDemodSink::processOneSample(Complex &ci)
 
     if (m_audioBufferFill >= m_audioBuffer.size())
     {
-        if (m_audioBufferFill > m_audioBuffer.size()) {
-            qDebug("NFMDemodSink::processOneSample: dropping %d samples", (int) m_audioBufferFill - (int) m_audioBuffer.size());
-        }
+        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
-        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBuffer.size());
-
-        if (res != m_audioBuffer.size())
+        if (res != m_audioBufferFill)
         {
-            qDebug("NFMDemodSink::processOneSample: %u/%lu audio samples written m_audioSampleRate: %u m_channelSampleRate: %d",
-                res, m_audioBuffer.size(), m_audioSampleRate, m_channelSampleRate);
+            qDebug("NFMDemodSink::processOneSample: %u/%u audio samples written m_audioSampleRate: %u m_channelSampleRate: %d",
+                res, m_audioBufferFill, m_audioSampleRate, m_channelSampleRate);
         }
 
         m_audioBufferFill = 0;
