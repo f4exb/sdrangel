@@ -244,11 +244,11 @@ void NFMDemodSink::processOneSample(Complex &ci)
 
     if (m_audioBufferFill >= m_audioBuffer.size())
     {
-        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+        std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], std::min(m_audioBufferFill, m_audioBuffer.size()));
 
         if (res != m_audioBufferFill)
         {
-            qDebug("NFMDemodSink::processOneSample: %u/%u audio samples written m_audioSampleRate: %u m_channelSampleRate: %d",
+            qDebug("NFMDemodSink::processOneSample: %lu/%lu audio samples written m_audioSampleRate: %u m_channelSampleRate: %d",
                 res, m_audioBufferFill, m_audioSampleRate, m_channelSampleRate);
         }
 

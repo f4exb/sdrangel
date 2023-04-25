@@ -114,7 +114,7 @@ private:
 
     int m_audioSampleRate;
     AudioVector m_audioBuffer;
-    uint m_audioBufferFill;
+    std::size_t m_audioBufferFill;
     AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
 

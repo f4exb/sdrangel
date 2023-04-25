@@ -115,7 +115,7 @@ private:
     Real m_audioInterpolatorDistanceRemain;
     AudioVector m_audioBuffer;
     AudioFifo m_audioFifo;
-    uint32_t m_audioBufferFill;
+    std::size_t m_audioBufferFill;
 
     NCO m_ncoRef;
     Lowpass<Complex> m_lowpassRef;

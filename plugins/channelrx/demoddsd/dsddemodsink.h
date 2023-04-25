@@ -141,7 +141,6 @@ private:
 
 	SampleVector m_scopeSampleBuffer;
 	AudioVector m_audioBuffer;
-	uint m_audioBufferFill;
 	FixReal *m_sampleBuffer; //!< samples ring buffer
 	int m_sampleBufferIndex;
 	int m_scaleFromShort;

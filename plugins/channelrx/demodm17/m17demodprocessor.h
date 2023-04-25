@@ -117,7 +117,7 @@ private:
     AudioFifo *m_audioFifo;
     bool m_audioMute;
     AudioVector m_audioBuffer;
-    uint m_audioBufferFill;
+    std::size_t m_audioBufferFill;
     float m_volume;
     int m_upsampling;            //!< upsampling factor
     float m_upsamplingFactors[7];

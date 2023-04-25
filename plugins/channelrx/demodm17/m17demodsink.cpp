@@ -60,7 +60,6 @@ M17DemodSink::M17DemodSink() :
     m_scopeEnabled(true)
 {
 	m_audioBuffer.resize(1<<14);
-	m_audioBufferFill = 0;
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
     m_m17DemodProcessor.setAudioFifo(&m_audioFifo);

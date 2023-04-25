@@ -103,7 +103,7 @@ private:
 
     int m_audioSampleRate;
     AudioVector m_audioBuffer;
-    uint m_audioBufferFill;
+    std::size_t m_audioBufferFill;
     AudioFifo m_audioFifo;
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;

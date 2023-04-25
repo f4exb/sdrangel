@@ -330,10 +330,10 @@ void FreeDVDemodSink::pushSampleToAudio(int16_t sample)
 
     if (m_audioBufferFill >= m_audioBuffer.size())
     {
-        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+        std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], std::min(m_audioBufferFill, m_audioBuffer.size()));
 
         if (res != m_audioBufferFill) {
-            qDebug("FreeDVDemodSink::pushSampleToAudio: %u/%u samples written", res, m_audioBufferFill);
+            qDebug("FreeDVDemodSink::pushSampleToAudio: %lu/%lu samples written", res, m_audioBufferFill);
         }
 
         m_audioBufferFill = 0;

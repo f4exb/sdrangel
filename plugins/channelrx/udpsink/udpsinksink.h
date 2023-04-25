@@ -104,7 +104,7 @@ private:
     UDPSinkUtil<Sample24> *m_udpBuffer24;
 
 	AudioVector m_audioBuffer;
-	uint m_audioBufferFill;
+	std::size_t m_audioBufferFill;
 	AudioFifo m_audioFifo;
 
 	BasebandSampleSink* m_spectrum;

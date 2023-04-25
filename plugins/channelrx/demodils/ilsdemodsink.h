@@ -149,7 +149,7 @@ private:
     Real m_audioInterpolatorDistanceRemain;
     AudioVector m_audioBuffer;
     AudioFifo m_audioFifo;
-    uint32_t m_audioBufferFill;
+    std::size_t m_audioBufferFill;
 
     SampleVector m_sampleBuffer;
     static const int m_sampleBufferSize = ILSDemodSettings::ILSDEMOD_CHANNEL_SAMPLE_RATE / 20;

@@ -64,7 +64,6 @@ DSDDemodSink::DSDDemodSink() :
     m_signalFormat(signalFormatNone)
 {
 	m_audioBuffer.resize(1<<14);
-	m_audioBufferFill = 0;
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
 

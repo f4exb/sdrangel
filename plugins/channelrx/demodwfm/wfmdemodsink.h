@@ -114,7 +114,7 @@ private:
 	Real m_fmExcursion;
 
 	AudioVector m_audioBuffer;
-	uint m_audioBufferFill;
+	std::size_t m_audioBufferFill;
 
 	AudioFifo m_audioFifo;
 	PhaseDiscriminators m_phaseDiscri;
