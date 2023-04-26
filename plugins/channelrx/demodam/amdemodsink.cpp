@@ -203,7 +203,7 @@ void AMDemodSink::processOneSample(Complex &ci)
 
     if (m_audioBufferFill >= m_audioBuffer.size())
     {
-        std:;size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], std::min(m_audioBufferFill, m_audioBuffer.size()));
+        std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], std::min(m_audioBufferFill, m_audioBuffer.size()));
 
         if (res != m_audioBufferFill)
         {
