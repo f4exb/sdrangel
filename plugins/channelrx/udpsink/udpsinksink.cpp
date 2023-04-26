@@ -314,7 +314,7 @@ void UDPSinkSink::audioReadyRead()
 
 					if (m_audioBufferFill >= m_audioBuffer.size())
 					{
-						std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], std::min(m_audioBufferFill, m_sampleBuffer.size()));
+						std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], std::min(m_audioBufferFill, m_audioBuffer.size()));
 
 						if (res != m_audioBufferFill) {
 							qDebug("WFMDemodSink::feed: %lu/%lu audio samples written", res, m_audioBufferFill);
