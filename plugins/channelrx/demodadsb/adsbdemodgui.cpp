@@ -2165,7 +2165,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         float longitude = longitudeFix * (360.0f / 1048576.0f);
 
         bool positionInconsistent = !aircraft->m_positionValid
-                                || (positionValid && aircraft->m_positionValid && ((abs(latitude - aircraft->m_latitude > 2.0f)) || (abs(longitude - aircraft->m_longitude) > 2.0f)))
+                                || (positionValid && aircraft->m_positionValid && ((abs(latitude - aircraft->m_latitude) > 2.0f) || (abs(longitude - aircraft->m_longitude) > 2.0f)))
                                 || (!positionValid && ((latitudeFix != 0) || (longitudeFix != 0)));
 
         int pressureAltFix = ((data[9] & 0x7f) << 8) | (data[10] & 0xff);
