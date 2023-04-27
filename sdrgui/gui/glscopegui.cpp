@@ -809,7 +809,7 @@ void GLScopeGUI::on_memorySave_clicked(bool checked)
 {
     (void) checked;
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Open trace memory file"), ".", tr("Trace memory files (*.trcm)"), 0, QFileDialog::DontUseNativeDialog);
+        tr("Create trace memory file"), ".", tr("Trace memory files (*.trcm)"), 0, QFileDialog::DontUseNativeDialog);
 
     if (fileName != "")
     {
@@ -1008,6 +1008,8 @@ void GLScopeGUI::on_freerun_toggled(bool checked)
         (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
         ui->freerun->isChecked()
     );
+
+    m_settings.m_freerun = checked;
 }
 
 void GLScopeGUI::setTraceIndexDisplay()
@@ -1367,6 +1369,7 @@ void GLScopeGUI::fillTraceData(GLScopeSettings::TraceData& traceData)
 
 void GLScopeGUI::fillTriggerData(GLScopeSettings::TriggerData& triggerData)
 {
+    triggerData.m_streamIndex = ui->trigStream->currentIndex();
     triggerData.m_projectionType = (Projector::ProjectionType) ui->trigMode->currentIndex();
     triggerData.m_inputIndex = 0;
     triggerData.m_triggerLevel = (ui->trigLevelCoarse->value() / 100.0) + (ui->trigLevelFine->value() / 50000.0);
@@ -1428,6 +1431,7 @@ void GLScopeGUI::setTriggerUI(const GLScopeSettings::TriggerData& triggerData)
 {
     TrigUIBlocker trigUIBlocker(ui);
 
+    ui->trigStream->setCurrentIndex(triggerData.m_streamIndex);
     ui->trigMode->setCurrentIndex((int) triggerData.m_projectionType);
     ui->trigCount->setValue(triggerData.m_triggerRepeat);
     setTrigCountDisplay();
@@ -1507,6 +1511,9 @@ void GLScopeGUI::displaySettings()
     ui->timeOfs->setValue(m_settings.m_timeOfs);
     setTimeOfsDisplay();
     ui->traceLen->setValue(m_settings.m_traceLenMult);
+    setPreTrigger(100.0f * m_settings.m_trigPre / m_glScope->getTraceSize());
+    ui->freerun->setChecked(m_settings.m_freerun);
+    changeCurrentTrigger(); // Ensure consistency with GUI
 }
 
 bool GLScopeGUI::handleMessage(Message* message)
@@ -1518,6 +1525,7 @@ bool GLScopeGUI::handleMessage(Message* message)
 GLScopeGUI::TrigUIBlocker::TrigUIBlocker(Ui::GLScopeGUI *ui) :
         m_ui(ui)
 {
+    m_oldStateTrigStream      = ui->trigStream->blockSignals(true);
     m_oldStateTrigMode        = ui->trigMode->blockSignals(true);
     m_oldStateTrigCount       = ui->trigCount->blockSignals(true);
     m_oldStateTrigPos         = ui->trigPos->blockSignals(true);
@@ -1537,6 +1545,7 @@ GLScopeGUI::TrigUIBlocker::~TrigUIBlocker()
 
 void GLScopeGUI::TrigUIBlocker::unBlock()
 {
+    m_ui->trigStream->blockSignals(m_oldStateTrigStream);
     m_ui->trigMode->blockSignals(m_oldStateTrigMode);
     m_ui->trigCount->blockSignals(m_oldStateTrigCount);
     m_ui->trigPos->blockSignals(m_oldStateTrigPos);
@@ -1746,7 +1755,7 @@ void GLScopeGUI::changeTrace(int traceIndex, const GLScopeSettings::TraceData& t
 
 void GLScopeGUI::addTrace(const GLScopeSettings::TraceData& traceData)
 {
-    if (ui->trace->maximum() < 3)
+    if (ui->trace->maximum() < 7) // Limit number of channels to 8. Is it necessary?
     {
         if (ui->trace->value() == 0)
         {
