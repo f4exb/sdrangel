@@ -148,7 +148,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 #else
     qInfo("%s %s Qt %s %db DSP Rx:%db Tx:%db PID: %lld",
             qPrintable(qApp->applicationName()),
-            qPrintable((qApp->applicationVersion()),
+            qPrintable(qApp->applicationVersion()),
             qPrintable(QString(QT_VERSION_STR)),
             QT_POINTER_SIZE*8,
             SDR_RX_SAMP_SZ,
