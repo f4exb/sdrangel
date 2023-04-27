@@ -66,6 +66,7 @@ void GLScopeSettings::resetToDefaults()
     m_timeOfs = 0;
     m_traceLenMult = 1;
     m_trigPre = 0;
+    m_freerun = true;
 }
 
 QByteArray GLScopeSettings::serialize() const
@@ -79,6 +80,7 @@ QByteArray GLScopeSettings::serialize() const
     s.writeS32(4, m_time);
     // s.writeS32(5, m_timeOfs);
     s.writeS32(6, m_traceLenMult);
+    s.writeBool(7, m_freerun);
 
     std::vector<TraceData>::const_iterator traceDataIt = m_tracesData.begin();
     unsigned int i = 0;
@@ -148,6 +150,7 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
         d.readS32(4, &m_time, 1);
         // d.readS32(5, &m_timeOfs, 0);
         d.readS32(6, &m_traceLenMult, 1);
+        d.readBool(7, &m_freerun, true);
         d.readS32(201, &m_trigPre, 0);
 
         uint32_t nbTracesSaved;

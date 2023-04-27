@@ -89,6 +89,7 @@ private:
 
     private:
         Ui::GLScopeGUI *m_ui;
+        bool m_oldStateTrigStream;
         bool m_oldStateTrigMode;
         bool m_oldStateTrigCount;
         bool m_oldStateTrigPos;

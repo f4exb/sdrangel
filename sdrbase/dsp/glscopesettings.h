@@ -162,6 +162,7 @@ public:
     int m_timeOfs;
     int m_traceLenMult;
     int m_trigPre;
+    bool m_freerun;
     std::vector<TraceData> m_tracesData;
     std::vector<TriggerData> m_triggersData;
     static const double AMPS[27];
