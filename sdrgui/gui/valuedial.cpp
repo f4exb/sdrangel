@@ -22,6 +22,7 @@
 #include <QPainter>
 #include <QWheelEvent>
 #include <QApplication>
+#include <QAccessibleValueChangeEvent>
 #include <cstdlib>
 
 #include "gui/valuedial.h"
@@ -115,6 +116,9 @@ void ValueDial::setValue(quint64 value)
     } else if (m_valueNew > m_valueMax) {
         m_valueNew = m_valueMax;
     }
+
+    QAccessibleValueChangeEvent event(this, value);
+    QAccessible::updateAccessibility(&event);
 
     if (m_valueNew < m_value)
     {
