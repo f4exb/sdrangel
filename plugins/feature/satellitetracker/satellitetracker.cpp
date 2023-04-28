@@ -847,8 +847,19 @@ QString SatelliteTracker::tleURLToFilename(const QString& string)
 {
     if (string == "https://db.satnogs.org/api/tle/")
         return satNogsTLEFilename();
+
+    // Celestrak now uses the same filename with different queries, so we need to include the query
+    // in the file name, so the filenames don't clash. E.g:
+    // https://celestrak.org/NORAD/elements/gp.php?GROUP=gps-ops&FORMAT=tle
+    // https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle
     QUrl url(string);
-    return HttpDownloadManager::downloadDir() + "/tle_" + url.fileName();
+    QString fileName = HttpDownloadManager::downloadDir() + "/tle_" + url.fileName();
+    if (url.hasQuery())
+    {
+        QString query = url.query().replace('%', '_').replace('&', '_').replace('=', '_');
+        fileName = fileName + query;
+    }
+    return fileName;
 }
 
 void SatelliteTracker::downloadFinished(const QString& filename, bool success)
