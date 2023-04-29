@@ -25,6 +25,7 @@
 #include <QKeyEvent>
 #include <QLocale>
 #include <QApplication>
+#include <QAccessibleValueChangeEvent>
 
 #include "gui/valuedialz.h"
 
@@ -119,6 +120,9 @@ void ValueDialZ::setValue(qint64 value)
 	else if(m_valueNew > m_valueMax) {
 		m_valueNew = m_valueMax;
 	}
+
+    QAccessibleValueChangeEvent event(this, m_valueNew);
+    QAccessible::updateAccessibility(&event);
 
 	if(m_valueNew < m_value) {
 		m_animationState = 1;

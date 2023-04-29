@@ -118,6 +118,8 @@ set(sdrgui_SOURCES
 set(sdrgui_HEADERS
     mainwindow.h
     gui/aboutdialog.h
+    gui/accessiblevaluedial.h
+    gui/accessiblevaluedialz.h
     gui/addpresetdialog.h
     gui/audiodialog.h
     gui/audioselectdialog.h

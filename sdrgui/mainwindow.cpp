@@ -106,6 +106,9 @@
 #include <QSplashScreen>
 #include <QProgressDialog>
 
+#include "gui/accessiblevaluedial.h"
+#include "gui/accessiblevaluedialz.h"
+
 MainWindow *MainWindow::m_instance = 0;
 
 MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent) :
@@ -125,6 +128,9 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 #else
     bool showWelcome = false;
 #endif
+
+    QAccessible::installFactory(AccessibleValueDial::factory);
+    QAccessible::installFactory(AccessibleValueDialZ::factory);
 
 	qDebug() << "MainWindow::MainWindow: start";
     setWindowTitle("SDRangel");

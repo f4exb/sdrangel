@@ -82,4 +82,6 @@ private:
 private slots:
 	void animate();
 	void blink();
+
+        friend class AccessibleValueDial;
 };
