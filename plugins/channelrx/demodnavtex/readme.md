@@ -34,7 +34,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 <h3>4: Navarea</h3>
 
 Specifies the geographical area in which the receiver is in. This enables the plugin to decode transmitter station identifiers, and display which transmitter the current transmission timeslot is assigned to (5).
-Note that with good propagation conditions, it is possible to receive messages from another area, so the station indicated in the message table (17) should be checked against the location given in the recevied message text.
+Note that with good propagation conditions, it is possible to receive messages from another area, so the station indicated in the message table (17) should be checked against the location given in the received message text.
 
 <h3>5: TX</h3>
 
@@ -90,7 +90,7 @@ The received messages table displays the contents of the messages that have been
 
 * Date - Date the message was received.
 * Time - Time the message was received.
-* SID - Station identifer of the transmitting station.
+* SID - Station identifier of the transmitting station.
 * Station - SID decoded according to the currently selected navarea (4).
 * TID - Message type identifier.
 * MID - Message identifier.

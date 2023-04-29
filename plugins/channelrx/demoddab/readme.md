@@ -79,7 +79,7 @@ If you are hearing dropouts in audio, try adjusting your antenna in order to imp
 
 <h3>Transmitter</h3>
 
-Displays the TII (Transmitter Identification Information) main and sub IDs in hexidecimal, which can identify which transmitter the DAB signal is being primarily received from.
+Displays the TII (Transmitter Identification Information) main and sub IDs in hexadecimal, which can identify which transmitter the DAB signal is being primarily received from.
 Pressing the "Find Transmitter on Map" button will attempt to locate the transmitter with the same IDs and Ensemble name on the [Map](../../feature/map/readme.md) feature.
 
 <h2>Attribution</h2>

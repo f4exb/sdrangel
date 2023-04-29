@@ -149,13 +149,13 @@ Example:
 ---- 1 ------    --2---           -3-  -4- --5- --6--- --7- --8-
 </pre></code>
 
-  - **1**: Date and time of decoder slot in YYMMDD_HHmmss fomat
+  - **1**: Date and time of decoder slot in YYMMDD_HHmmss format
   - **2**: Base frequency in MHz
   - **3**: SNR in 2.5 kHz bandwidth
   - **4**: Message start delay in seconds from standard sequence start
   - **5**: Message carrier shift from base frequency in Hz
-  - **6**: First callsign area. May contain spaces (ex: "CQ DX"). Note that for messages types 0.1 and 5 it is slighlty different from the standard (See C.10)
-  - **7**: Second callsign area and is always a callsign. This might be slighlty different from the standard (see above)
+  - **6**: First callsign area. May contain spaces (ex: "CQ DX"). Note that for messages types 0.1 and 5 it is slightly different from the standard (See C.10)
+  - **7**: Second callsign area and is always a callsign. This might be slightly different from the standard (see above)
   - **8**: Locator area maybe a 4 or 6 digit locator, a report, acknowledgement (RRR) or a greetings (RR73, 73)
 
 The splitting and naming of files is different from WSJT-X scheme.
@@ -192,7 +192,7 @@ Displays the received messages in a table which columns are the following:
     - **2**: European VHF (4 char locator) minor change to standard message above
     - **3**: Russian RTTY
     - **4**: Non standard call
-    - **5**: European VHF (6 char locator). The report + QSO number is appended to first call area not to pollute the second call area which contains only a callsign, This is slightly diffrent from the standard.
+    - **5**: European VHF (6 char locator). The report + QSO number is appended to first call area not to pollute the second call area which contains only a callsign, This is slightly different from the standard.
   - **P**: LDPC decoder pass index that was successful (0 to 2) as there are 3 passes
   - **OKb**: Number of correct bits in the message before FEC correction. Maximum is 174 in which case no FEC would be needed.
   - **dt**: Message start time shift in seconds from standard FT8 time slot
