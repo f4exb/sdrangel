@@ -63,7 +63,7 @@ bandwidth should be set wide enough to cover all signals (E.g. ~16kHz).
 
 <h3>7: Ident</h3>
 
-Specifies the identifer for the ILS. This is typically 3 or 4 characters. The drop-down contains a number of identifiers for ILSs at
+Specifies the identifier for the ILS. This is typically 3 or 4 characters. The drop-down contains a number of identifiers for ILSs at
 airports within the South East of the UK. Selecting one of these will automatically fill in the other fields with details of the ILS.
 The ILS identifier is broadcast as Morse code at an offset of 1020Hz from the ILS carrier. This is demodulated and displayed below the CDI.
 
@@ -190,7 +190,7 @@ Full scale deviation is 2.5 degrees (centre to edge) for LOC and 0.35 degrees fo
 Pilots would fly towards the diamond. So if the diamond is left-of-center, then the aircraft should turn to the left.
 
 The decoded Morse code identifier will be displayed underneath the CDI in both Morse and letters.
-If will be displayed in white if it matches the specified identifer (7) or red if not.
+If will be displayed in white if it matches the specified identifier (7) or red if not.
 
 <h3>36: Demodulated Spectrum</h3>
 
@@ -222,7 +222,7 @@ adjust the setting until the centre of the localizer (the course line) lines up 
 
 The ILS Reference Datum Height (RDH) to be set in (15) can often be found in the AIP, and is typically 15m (50ft).
 
-The course width (16) is ocassionaly specified in the AIP.
+The course width (16) is occasionally specified in the AIP.
 
 If not in the AIP, it may be possible to calculate it from an SBAS FAS Data Block if available:
 * Calculate the distance between LTP (Landing Threshold Point) and FPAP (Fight Path Alignment Point) from
