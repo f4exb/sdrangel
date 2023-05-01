@@ -34,7 +34,7 @@ The vessels table displays the current status for each vessel, base station or a
 * Updated - Gives the date and time the last message was received.
 * Messages - Displays the number of messages received.
 
-Right clicking on the table header allows you to select which columns to show. The columns can be reorderd by left clicking and dragging the column header.
+Right clicking on the table header allows you to select which columns to show. The columns can be reordered by left clicking and dragging the column header.
 
 Right clicking on a table cell allows you to copy the cell contents, view the vessel on a variety of websites or find the vessel on the map.
 

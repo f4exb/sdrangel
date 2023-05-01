@@ -95,6 +95,6 @@ This appears to work only on HF band. Turns on or off the LNA (+6dB). Gain is co
 
 This appears to work only on HF band and is active only if AGC is off (10). Attenuator value can be set from 0 to 48 dB in 6 dB steps.
 
-<h3>13: LibaispyHF DSP</h3>
+<h3>13: LibairspyHF DSP</h3>
 
 Turns on or off the libairspyhf DSP routines. When on the internal DC and IQ imbalance corrections (4) and (5) are useless and should be turned off.

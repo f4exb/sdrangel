@@ -30,7 +30,7 @@ This is the center frequency of reception in Hz of the track (or capture) being 
 
 <h3>3: Track sample rate</h3>
 
-This is the sample rate in S/s of the track being  played currently. It is possibly suffixed by a thousands mutiplier ('k' for kHz, 'M' for MHz). Recording SigMF files in SDRangel offers the possibility to change sample rate within the same record creating a new track.
+This is the sample rate in S/s of the track being  played currently. It is possibly suffixed by a thousands multiplier ('k' for kHz, 'M' for MHz). Recording SigMF files in SDRangel offers the possibility to change sample rate within the same record creating a new track.
 
 <h3>4: Open file</h3>
 

@@ -4,7 +4,7 @@
 
 This plugin supports the [LimeRFE](https://github.com/myriadrf/LimeRFE) board. This board hosts a hardware power amplifier (PA) module with appropriate filtering and support circuitry to augment primarily but not only the LimeSDR, LimeSDR Mini, and LimeNET Micro platforms, providing a complete solution that addresses real life applications ranging from HAM radio to standards-compliant cellular network implementations.
 
-As mentioned above it can be connected to a wide variety of SDR receivers and transmitters and this feature supports the synchronization with any receiver or trasmiiter device sets.
+As mentioned above it can be connected to a wide variety of SDR receivers and transmitters and this feature supports the synchronization with any receiver or transmitter device sets.
 
 This plugin depends on [LimeSuite](https://github.com/myriadrf/LimeSuite) that should be available in your system in order to be compiled.
 
@@ -12,7 +12,7 @@ This plugin depends on [LimeSuite](https://github.com/myriadrf/LimeSuite) that s
 
 ![LimeRFE controller GUI](../../../doc/img/LimeRFE_plugin.png)
 
-When starting you need first to open the LimeRFE device with button (2). You havr to select the appropriate serial device from (1). Note that all serial USB based devices are listed. You need to identify which one corresponds to the LimeRFE board you want to target.
+When starting you need first to open the LimeRFE device with button (2). You have to select the appropriate serial device from (1). Note that all serial USB based devices are listed. You need to identify which one corresponds to the LimeRFE board you want to target.
 
 Once opened successfully (check status message in 6) you will apply the settings using the Apply button (5). Whenever the settings are changed this button lits in green showing that you may press it to update the board. Conversely the "to GUI" button (4) reads the settings from the board and updates the GUI.
 

@@ -164,7 +164,7 @@ The file name is constructed as follows where date is the day date in YYYYMMDD f
 
 &lt;date&gt;_d&lt;device index&gt;c&lt;channel index&gt;.txt
 
-Files will be stored in the system application data location in the `ft8/logs` folder. The application dat location depends on the O/S:
+Files will be stored in the system application data location in the `ft8/logs` folder. The application data location depends on the O/S:
 
   - Linux: ~/.local/share/f4exb/SDRangel
   - Windows: C:&bsol;Users&bsol;&lt;your user&gt;&bsol;AppData&bsol;Local&bsol;f4exb&bsol;SDRangel
@@ -272,7 +272,7 @@ This restores the default band preset values:
   - **17m**: 18100 kHz
   - **15m**: 21074 kHz
   - **12m**: 24915 kHz
-  - **10m**: 28074 kHZ
+  - **10m**: 28074 kHz
   - **6m**: 50313 kHz
   - **4m**: 70100 kHz
   - **2m**: 144120 kHz

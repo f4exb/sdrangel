@@ -1,6 +1,6 @@
 <h1>Spectrum calibration management</h1>
 
-The spectrum calibration is controlled by this dialog. It manages the list of calibration points (calibration chart), genaral options and the import/export from/to a .csv file.
+The spectrum calibration is controlled by this dialog. It manages the list of calibration points (calibration chart), general options and the import/export from/to a .csv file.
 
 This calibration is an artifact of the spectrum display it does not make any change in the actual levels in the DSP processing. It assumes nothing about the receiving or transmitting chains it is up to the user to run the calibration procedure to make the face power levels match the desired levels. If anything is changed in the receiving or transmitting parameters then the calibration procedure may have to be re-run again. Also it assumes nothing about the units of the calibrated power. Normally one would like to make dBm (or mW) measurements but it is up to the user to assume the actual units. One may want to use dBW or any other custom units therefore the displayed calibrated values will remain unit-less (dB).
 

@@ -62,7 +62,7 @@ Click to open the character encoding dialog, which allows a mapping from the rec
 
 ![Character encoding dialog](../../../doc/img/PagerDemod_plugin_charset.png)
 
-Each row contains a mapping from a 7-bit value to a Unicode code point. Values should be entered in hexideicmal
+Each row contains a mapping from a 7-bit value to a Unicode code point. Values should be entered in hexadecimal
 
 <h3>10: Find</h3>
 

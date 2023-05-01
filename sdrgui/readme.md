@@ -122,7 +122,7 @@ Arranges windows in the MDI area of the workspace as tiled windows.
 
 <h3>1.9: Stack windows</h3>
 
-Arranges windowsa in the MDO area of the workspace in a way similar to the arrangement in version 6:
+Arranges windows in the MDO area of the workspace in a way similar to the arrangement in version 6:
 
   - Devices are stacked in numerical order top left.
   - Fixed height features are stacked in order underneath devices and resized to match width of devices
@@ -261,7 +261,7 @@ Short description of a command.
 
 <h4>2.3.5: Key binding sequence</h4>
 
-Thisis a descriptive text of the key sequence that is used for the key binding.
+This is a descriptive text of the key sequence that is used for the key binding.
 
 <h4>2.3.6: Command control or actions</h4>
 

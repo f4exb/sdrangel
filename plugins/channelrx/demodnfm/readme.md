@@ -187,7 +187,7 @@ Use the checkbox to toggle DCS activation. When activated it will look for a squ
 
 <h3>C.5: DCS code</h3>
 
-This is the DCS code to be selected among the normalized values. The value is in octal format suffixed by "P" for positive or normal codes and "N" for negative or inverted codes. The values are those listed [here](http://onfreq.com/syntorx/dcs.html). The special value `--` desactivates the squelch but the DCS code is still searched.
+This is the DCS code to be selected among the normalized values. The value is in octal format suffixed by "P" for positive or normal codes and "N" for negative or inverted codes. The values are those listed [here](http://onfreq.com/syntorx/dcs.html). The special value `--` deactivates the squelch but the DCS code is still searched.
 
 <h3>C.6: Show positive or negative code</h3>
 

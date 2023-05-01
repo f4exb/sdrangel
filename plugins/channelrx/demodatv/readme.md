@@ -92,7 +92,7 @@ For FM choose the algorithm that best suits your conditions.
 
 &#9758; only FM3 is accurate with regard to FM deviation (see 10).
 
-&#9888; in AM modes (also USB and LSB) there is an automatic amplitude scaling so that the video signal fits in the 0.0 to 1.0 range. For synchronziation standards other than HSkip (see B.3) it may be difficult for the system to find the appropriate level when the standard changes or the signal power changes abruptly. In this case you have to select HSkip (B.3) until the video signal reaches the 0.0 to 1.0 range approximately (use scope tab see C) before returning to the desired standard.
+&#9888; in AM modes (also USB and LSB) there is an automatic amplitude scaling so that the video signal fits in the 0.0 to 1.0 range. For synchronization standards other than HSkip (see B.3) it may be difficult for the system to find the appropriate level when the standard changes or the signal power changes abruptly. In this case you have to select HSkip (B.3) until the video signal reaches the 0.0 to 1.0 range approximately (use scope tab see C) before returning to the desired standard.
 
 &#9888; USB and LSB modes are experimental and do not show good results for sample rates greater than 1 MS/s. Adjusting the BFO can be picky and unstable.
 

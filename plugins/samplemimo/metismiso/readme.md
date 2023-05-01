@@ -64,7 +64,7 @@ This lets you compensate for the main oscillator frequency inaccuracy. Value is 
 
 <h4>8.1: Sample rate</h4>
 
-This combo box lets you control the four pssible values for the device to host sample rate (Rx). Host to device (Tx) sample rate is fixed by design of the Metis interface at 48 kS/s:
+This combo box lets you control the four possible values for the device to host sample rate (Rx). Host to device (Tx) sample rate is fixed by design of the Metis interface at 48 kS/s:
 
   - **48k**: 48000 samples per second
   - **96k**: 96000 samples per second

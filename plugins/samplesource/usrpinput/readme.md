@@ -136,7 +136,7 @@ This label turns green when data is being received from the device.
 
 The stream warning indicators are reset when the acquisition is started.
 
-<h2>Dependendices</h2>
+<h2>Dependencies</h2>
 
 On Ubuntu 20, the libuhd-dev package should be installed. The FPGA images then need to be downloaded with:
 

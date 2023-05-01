@@ -41,5 +41,5 @@ We are interested to find out how other people make use of this software.
 * Please list Center Frequency, bandwidth and any other applicable RF settings that are pertinent to the issue.
 
 ### Log Files
-* Please read any pertinant log files!
+* Please read any pertinent log files!
 * Attach any relevant information you find here.

@@ -97,7 +97,7 @@ This selects the IF frequency between these values:
 
   - **0 for zero IF**
   - 450 kHz.
-    - Move center frequency by -450 kHZ (3).
+    - Move center frequency by -450 kHz (3).
       - Direct frequency reading is -450 kHz off from real Rx frequency.
       - You may use the transverter mode (7) with a shift of +450 kHz to correct the frequency reading
       - If you already use the transverter mode for transverter work just add 450 kHz to the current shift

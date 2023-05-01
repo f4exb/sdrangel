@@ -43,7 +43,7 @@ Pressing this button displays a settings dialog, that allows you to set:
 * Air pressure in millibars. This value can be automatically updated from OpenWeatherMap.
 * Air temperature in degrees Celsius. This value can be automatically updated from OpenWeatherMap.
 * Relative humidity in %. This value can be automatically updated from OpenWeatherMap.
-* Height above sea level in metres of the observation point (anntenna location).
+* Height above sea level in metres of the observation point (antenna location).
 * Temperature lapse rate in Kelvin per kilometre.
 * What data to display for the Solar flux measurement. Data can be selected from 2800 from DRAO or a number of different frequencies from Learmonth. Also, the Learmonth data can be linearly interpolated to the observation frequency set in the main window.
 * The units to display the solar flux in, either Solar Flux Units, Jansky or Wm^-2Hz-1. 1 sfu equals 10,000 Jansky or 10^-22 Wm^-2Hz-1.
@@ -151,7 +151,7 @@ An offset in degrees that is added to the computed target elevation.
 
 When the target is set to Custom l/b, you specify the galactic longitude (angle in degrees, Eastward from the galactic centre) of the target object.
 
-For all other target settings, this sisplays the calculated galactic longitude to the object.
+For all other target settings, this displays the calculated galactic longitude to the object.
 
 <h3>21: b - Galactic Latitude</h3>
 

@@ -127,25 +127,25 @@ This is a LoRa specific feature and is also known as explicit (with header) or i
 
 <h4>10.5: My callsign (QSO mode)</h4>
 
-Enter your callsign so it can populate message palceholders (See next)
+Enter your callsign so it can populate message placeholders (See next)
 
 <h4>10.6: Your callsign (QSO mode)</h4>
 
-Enter the other party callsign so it can populate message palceholders (See next)
+Enter the other party callsign so it can populate message placeholders (See next)
 
 <h4>10.7: My locator (QSO mode)</h4>
 
-Enter your Maidenhead QRA locator so it can populate message palceholders (See next)
+Enter your Maidenhead QRA locator so it can populate message placeholders (See next)
 
 <h4>10.8: My report (QSO mode)</h4>
 
-Enter the signal report you will send to the other party so it can populate message palceholders (See next)
+Enter the signal report you will send to the other party so it can populate message placeholders (See next)
 
 <h4>10.9: Message selector</h4>
 
 This lets you choose which pre-formatted message to send:
 
-  - **None**: empty message. In fact this is used to make a transition to trigger sending of the sa,e ,essage again. It is used internally by the "play" button (11) and can be used with the REST API.
+  - **None**: empty message. In fact this is used to make a transition to trigger sending of the same message again. It is used internally by the "play" button (11) and can be used with the REST API.
   - **Beacon**: a beacon message
   - **CQ**: (QSO mode) CQ general call message
   - **Reply**: (QSO mode) reply to a CQ call

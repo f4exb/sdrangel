@@ -11,7 +11,7 @@ Each recording is written in a new file with the starting timestamp before the `
   - Given file name: `test.sdriq` then a recording file will be like: `test.2020-08-05T21_39_07_974.sdriq`
   - Given file name: `test.2020-08-05T20_36_15_974.sdriq` then a recording file will be like (with timestamp updated): `test.2020-08-05T21_41_21_173.sdriq`
   - Given file name: `test.first.sdriq` then a recording file will be like: `test.2020-08-05T22_00_07_974.sdriq`
-  - Given file name: `record.test.first.sdriq` then a recording file will be like: `reocrd.test.2020-08-05T21_39_52_974.sdriq`
+  - Given file name: `record.test.first.sdriq` then a recording file will be like: `record.test.2020-08-05T21_39_52_974.sdriq`
 
 If a filename is given without `.sdriq` extension then the `.sdriq` extension is appended automatically before the above algorithm is applied.
 If a filename is given with an extension different of `.sdriq` or `.wav` then the extension is replaced by `.sdriq` automatically before the above algorithm is applied.
@@ -48,7 +48,7 @@ This is the total recording time for the session.
 
 This is the total number of bytes recorded for the session.The number is possibly suffixed by a multiplier character:
   - **k**: _kilo_ for kilobytes
-  - **M**: _mega_ for meabytes
+  - **M**: _mega_ for megabytes
   - **G**: _giga_ for gigabytes
 
 <h3>7: Fixed frequency shift positions</h3>
@@ -95,7 +95,7 @@ The button turns red if recording is active.
 
 <h3>14: Select output file</h3>
 
-Use this button to open a file dialog that lets you specify the location and name of the output files. Please refer to the indtroduction at the top of this page for details on how the recording file name is composed from the given file name.
+Use this button to open a file dialog that lets you specify the location and name of the output files. Please refer to the introduction at the top of this page for details on how the recording file name is composed from the given file name.
 
 The file path currently being written (or last closed) appears at the right of the button.
 

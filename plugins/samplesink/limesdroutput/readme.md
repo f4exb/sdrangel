@@ -4,7 +4,7 @@
 
 This output sample sink plugin sends its samples to a [LimeSDR device](https://myriadrf.org/projects/limesdr/).
 
-<p>&#9888; Version 18.04.1 of LimeSuite is used in the buildsand corresponding gateware loaded in the LimeSDR should be is used (2.16 for LimeSDR-USB and 1.24 for LimeSDR-Mini). If you compile from source version 18.04.1 of LimeSuite must be used.</p>
+<p>&#9888; Version 18.04.1 of LimeSuite is used in the builds and corresponding gateware loaded in the LimeSDR should be is used (2.16 for LimeSDR-USB and 1.24 for LimeSDR-Mini). If you compile from source version 18.04.1 of LimeSuite must be used.</p>
 
 <p>&#9888; LimeSDR-Mini seems to have problems with Zadig driver therefore it is supported in Linux only.</p>
 

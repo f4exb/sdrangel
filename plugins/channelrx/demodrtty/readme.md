@@ -4,7 +4,7 @@
 
 This plugin can be used to demodulate RTTY (Radioteletype) transmissions.
 RTTY uses BFSK (Binary Frequency Shift Keying), where transmission of data alternates between two frequencies,
-the mark frequency and the space frequency. The RTTY Demodulor should be centered in between these frequencies.
+the mark frequency and the space frequency. The RTTY Demodulator should be centered in between these frequencies.
 The baud rate, frequency shift (difference between mark and space frequencies), bandwidth and baudot character set are configurable.
 
 <h2>Interface</h2>

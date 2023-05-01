@@ -114,13 +114,13 @@ See the principle of operation section below for optimum scope settings.
 
 <h4>C.1.1 Port side incoming wave</h4>
 
-The red arrow shows the direction of the incoming wave assuming it is ccoming from the port side of the antenna system (antenna 1 to 2). The value in degrees is displayed in (C.2).
+The red arrow shows the direction of the incoming wave assuming it is coming from the port side of the antenna system (antenna 1 to 2). The value in degrees is displayed in (C.2).
 
 This also corresponds to positive angles in the trigonometric sense with respect to the antenna baseline.
 
 <h4>C.1.2 Starboard side incoming wave</h4>
 
-The green arrow shows the direction of the incoming wave assuming it is ccoming from the starboard side of the antenna system (antenna 1 to 2). The value in degrees is displayed in (C.3).
+The green arrow shows the direction of the incoming wave assuming it is coming from the starboard side of the antenna system (antenna 1 to 2). The value in degrees is displayed in (C.3).
 
 This also corresponds to negative angles in the trigonometric sense with respect to the antenna baseline.
 
@@ -134,7 +134,7 @@ The darker area on the compass background shows the sector where no readings can
 
 <h3>C.2 Positive DOA angle (Port side)</h3>
 
-Displays the posiive azimuth in degrees with respect to antenna direction of the incoming wave. This corresponds to the port side with respect to the antenna system from antenna 1 to antenna 2. This direction is displayed with a red arrow on the compass (1).
+Displays the positive azimuth in degrees with respect to antenna direction of the incoming wave. This corresponds to the port side with respect to the antenna system from antenna 1 to antenna 2. This direction is displayed with a red arrow on the compass (1).
 
 <h3>C.3 Negative DOA angle (Starboard side)</h3>
 
@@ -168,13 +168,13 @@ This is the number of FFT series used for DOA calculation thus the weighting ave
 
 <h2>Principle of operation</h2>
 
-DOA estimation is based on the "FFT" correlation function and active only when selected with (A.2). FFT analysis helps in removing non essential contributions and is more efficient than simple product wutn conjugate (A.B*).
+DOA estimation is based on the "FFT" correlation function and active only when selected with (A.2). FFT analysis helps in removing non essential contributions and is more efficient than simple product with conjugate (A.B*).
 
 It assumes that channel A is connected to antenna 1 or antenna of reference (device stream 0) and channel B is connected antenna 2 the second antenna (device stream 1) in the following configuration:
 
 ![Interferometer antennas](../../../doc/img/interferometer_antennas.png)
 
-<h3>Configuring the scope dsisplay</h3>
+<h3>Configuring the scope display</h3>
 
 The scope shall be configured to have X and Y displays with Y1 set to a magnitude display projection and X to a phase related projection. See scope controls in B section for setup. Here are the different possibilities:
   - **X**: Phi, DOAP, DOAN
@@ -204,7 +204,7 @@ In general the angle can be calculated from the baseline distance D (distance be
 &phi; = &pi; D cos(&theta;) / (&lambda;/2) &rArr;
 cos(&theta;) = (&phi; / &pi;) . ((&lambda;/2) / D)
 
-If D is larger than &lambda;/2 the possible values of cos(&theta;) do not cover the whole [-1:1] interval and thus there is a blind sector at the front of antenna 2 and the back of antenna 1 which is shown on the compass as a darker area (C.1.4). However signals coming from this blind sector will fold into the valid sector. Putting antennas further apart than &lambda;/2 can give more accurate measurements inside the valid sector at the condition you already validated the assunption that the incoming wave angle is inside the valid sector and that no significant signal from the blind sector can influence the masurement. One can imagine having a pair of directive antennas placed at a distance for which the valid sector matches the antenna system lobe for final accurate measurement.
+If D is larger than &lambda;/2 the possible values of cos(&theta;) do not cover the whole [-1:1] interval and thus there is a blind sector at the front of antenna 2 and the back of antenna 1 which is shown on the compass as a darker area (C.1.4). However signals coming from this blind sector will fold into the valid sector. Putting antennas further apart than &lambda;/2 can give more accurate measurements inside the valid sector at the condition you already validated the assumption that the incoming wave angle is inside the valid sector and that no significant signal from the blind sector can influence the measurement. One can imagine having a pair of directive antennas placed at a distance for which the valid sector matches the antenna system lobe for final accurate measurement.
 
 If D is smaller than &lambda;/2 extreme incoming angles (0 or &pi;) yield smaller &phi; which will be compensated by the (&lambda;/2) / D factor however with less accuracy.
 
@@ -224,7 +224,7 @@ For best results the antenna system should be clear of possible reflectors inclu
 
 <h3>Device settings</h3>
 
-The actual connections to RF ports depends on each device to get the angles right. BladeRF and Pluto+ have constant corrections and do not require calibration for each new masurement. This is not the case of LimeSDR USB or XTRX however and it makes them not practical for this application.
+The actual connections to RF ports depends on each device to get the angles right. BladeRF and Pluto+ have constant corrections and do not require calibration for each new measurement. This is not the case of LimeSDR USB or XTRX however and it makes them not practical for this application.
 
 Known corrections and connections for some devices:
 

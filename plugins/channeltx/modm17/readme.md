@@ -141,7 +141,7 @@ This is a special mode for Bit Error Rate Testing. In this mode only a synchroni
 
 Panels corresponding to each available packet type are arranged in a tabbed setup. Tabs can be selected with icons on the right. These are:
 
-  - **SMS**: SMS data with the chat icon. Selects SMS packet tyoe.
+  - **SMS**: SMS data with the chat icon. Selects SMS packet type.
   - **APRS**: APRS data with the world icon. Selects APRS packet type.
 
 <h3>C.6.1: SMS data</h3>
@@ -158,9 +158,9 @@ Selected with the tab with word icon (bottom most). Selecting this tab will set 
 
 ![M17 Modulator APRS GUI](../../../doc/img/M17Mod_aprs.png)
 
-<h4>C.6.2.1: From idnetifier</h4>
+<h4>C.6.2.1: From identifier</h4>
 
-This is the "FROM" of APRS message and usuaiiy is the station callsign followed by a dash and a numeric suffix.
+This is the "FROM" of APRS message and usually is the station callsign followed by a dash and a numeric suffix.
 
 <h4>C.6.2.2: Add location data</h4>
 
@@ -184,7 +184,7 @@ Arbitrary data payload to be added to the APRS message. As per APRS standard it 
 
 <h3>D.1: Baud rate</h3>
 
-Only the standard 4.8 kBaud rate is available. This is a provision for possible future experimnentations.
+Only the standard 4.8 kBaud rate is available. This is a provision for possible future experimentations.
 
 <h3>D.2: Source call</h3>
 

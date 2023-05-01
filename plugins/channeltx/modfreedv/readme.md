@@ -120,7 +120,7 @@ Use this button to stop sending text. When resuming keying restarts at the start
 
 10.7: Activate morse keys keyboard control
 
-This disables text or continuous dots or dashes. Toggle input from keyboard. Occasionnaly the focus may get lost and you will have to deactivate and reactivate it to recover the key bindings.
+This disables text or continuous dots or dashes. Toggle input from keyboard. Occasionally the focus may get lost and you will have to deactivate and reactivate it to recover the key bindings.
 
 10.8: Iambic or straight
 

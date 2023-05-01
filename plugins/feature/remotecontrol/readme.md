@@ -59,7 +59,7 @@ The Devices tab displays a list of devices that have been added to this Remote C
 * Press Remove to remove the selected device.
 * Press Edit... to edit settings for the selected device.
 * The up and down arrows move the selected device up or down in the list.
-The order of devices in the list determines the display order of the device's controls and senors in the Remote Control's GUI.
+The order of devices in the list determines the display order of the device's controls and sensors in the Remote Control's GUI.
 
 <h3>Settings Tab</h3>
 
@@ -80,7 +80,7 @@ The Home Assistant fields must be completed in order to discover devices connect
 
 <h4>VISA Settings</h4>
 
-* Resource filter - A regular expression of VISA resources not to attempt to open. This can be used to speed up VISA device discovery. As an example, devices using TCP and serial connections can be filted with: ^(TCPIP|ASRL). Leave the field empty to try to connect to all VISA devices.
+* Resource filter - A regular expression of VISA resources not to attempt to open. This can be used to speed up VISA device discovery. As an example, devices using TCP and serial connections can be filtered with: ^(TCPIP|ASRL). Leave the field empty to try to connect to all VISA devices.
 * Log I/O - Check to log VISA commands and responses to the SDRangel log file.
 
 <h4>Devices Settings</h4>
@@ -94,7 +94,7 @@ The Home Assistant fields must be completed in order to discover devices connect
 
 <h2>Device Dialog</h2>
 
-The Device Dialog allows selecting devices to add to the Remote Control, as well as customing what controls and sensors are displayed for the device in the GUI.
+The Device Dialog allows selecting devices to add to the Remote Control, as well as customizing what controls and sensors are displayed for the device in the GUI.
 
 ![Device dialog](../../../doc/img/RemoteControl_plugin_device.png)
 
@@ -119,7 +119,7 @@ By default, real numbers are displayed to 1 decimal place. To increase this to 3
 
 Checking the Plot column will result in a chart being drawn that plots sensor data versus time.
 All enabled sensors for a device will be plotted on the same chart.
-The Y Axis field below the table determines whether each series will have it's own Y axis (Per-sensor) or whether a single Y axis will be used for all series (Common).
+The Y Axis field below the table determines whether each series will have its own Y axis (Per-sensor) or whether a single Y axis will be used for all series (Common).
 
 The Layout fields control how the Controls and Sensors will be laid-out in the GUI. This can be set to be either Horizontally or Vertically.
 

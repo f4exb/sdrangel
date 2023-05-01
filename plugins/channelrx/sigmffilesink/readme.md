@@ -8,7 +8,7 @@ Such files can be read in SDRangel using the [SigMF file input plugin](../../sam
 
 As per SigMF specifications two files are created in fact.
   - One with `.sigmf-meta` extension contains meta data and details to find the different captures in the data file blob. It is written in JSON format and is human readable. You can refer to SigMF documentation in the link at top to read about the details.
-  - Another with `.sigmf-data` contains the IQ data as a blob indexed by structures in the `.sigmf-meta` file. Thus to the SigMF file reader data appears as a sequence of captures having idependent start time and length, center frequency and with SDRangel specific extensions independent sample rates.
+  - Another with `.sigmf-data` contains the IQ data as a blob indexed by structures in the `.sigmf-meta` file. Thus to the SigMF file reader data appears as a sequence of captures having independent start time and length, center frequency and with SDRangel specific extensions independent sample rates.
 
 If a filename is given without `.sigmf-meta` extension then the `.sigmf-meta` extension is appended automatically.
 If a filename is given with an extension different of `.sigmf-meta` then the extension is replaced by `.sigmf-meta` automatically.
@@ -49,7 +49,7 @@ This is the current recording time of the whole file (all captures)
 
 This is the total number of bytes including all captures. This corresponds to the size of the `.sigmf-data` file. The number is possibly suffixed by a multiplier character:
   - **k**: _kilo_ for kilobytes
-  - **M**: _mega_ for meabytes
+  - **M**: _mega_ for megabytes
   - **G**: _giga_ for gigabytes
 
 <h3>7: Fixed frequency shift positions</h3>

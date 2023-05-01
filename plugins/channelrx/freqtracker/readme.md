@@ -20,7 +20,7 @@ Both manual and automatic controls are active at the same time and the user can 
 
 To change the frequency manually use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-<h3>2: Instantateous tracker error</h2>
+<h3>2: Instantaneous tracker error</h2>
 
 This is the instantaneous frequency error in Hz. It is activated as soon as the FLL or PLL tracker is selected (7.3) regardless of the tracking activation (7.1)
 
@@ -85,7 +85,7 @@ This is the order of m-ary PSK modulation for the PLL. It can be selected in pow
 
 <h3>7.5 Toggle root raised cosine filter</h3>
 
-Use this toggle button to activate or de-activate the root raised cosine (RRC) filter. When active the bnadpass boxcar filter is replaced by a RRC filter. This takes effect only in normal (DSB) mode (see control 14).
+Use this toggle button to activate or de-activate the root raised cosine (RRC) filter. When active the bandpass boxcar filter is replaced by a RRC filter. This takes effect only in normal (DSB) mode (see control 14).
 
 <h3>7.6 Tune RRC filter rolloff factor</h3>
 
