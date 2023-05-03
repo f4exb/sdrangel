@@ -505,7 +505,7 @@ void APTDemodGUI::on_showSettings_clicked()
 // Save image to disk
 void APTDemodGUI::on_saveImage_clicked()
 {
-    QFileDialog fileDialog(nullptr, "Select file to save image to", "", "*.png;*.jpg;*.jpeg;*.bmp;*.ppm;*.xbm;*.xpm");
+    QFileDialog fileDialog(nullptr, "Select file to save image to", "", "*.png *.jpg *.jpeg *.bmp *.ppm *.xbm *.xpm");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec())
     {
