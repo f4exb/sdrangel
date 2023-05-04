@@ -17,7 +17,7 @@ Each device is represented by a row in the list. Move the cursor with the mouse 
 In this column there are two indicators:
 
   - `S`: for system default device. This is the device that is defined as system default. You may configure it directly or via the ` System default device` entry. <br/>&#9758; Note that (at least in Linux) you may affect different parameters to one or the other.
-  - `D`: the device is unregistered so if you associate an output stream to it it will be registered with default values. Default values are:
+  - `D`: the device is unregistered so if you associate an output stream to it, it will be registered with default values. Default values are:
     - Sample rate: 48000 S/s
     - UDP address: 127.0.0.1
     - UDP port: 9998
@@ -199,7 +199,7 @@ Each device is represented by a row in the list. Move the cursor with the mouse 
 In this column there are two indicators:
 
   - `S`: for system default device. This is the device that is defined as system default. You may configure it directly or via the ` System default device` entry. <br/>&#9758; Note that (at least in Linux) you may affect different parameters to one or the other.
-  - `D`: the device is unregistered so if you associate an input stream to it it will be registered with default values. Default values are:
+  - `D`: the device is unregistered so if you associate an input stream to it, it will be registered with default values. Default values are:
     - Sample rate: 48000 S/s
     - Volume: 0.15
 
@@ -259,7 +259,7 @@ The dialog for input or output is similar. The screenshot below is taken from an
 In this column there are two indicators:
 
   - `S`: for system default device. This is the device that is defined as system default. You may configure it directly or via the ` System default device` entry. <br/>&#9758; Note that (at least in Linux) you may affect different parameters to one or the other.
-  - `D`: the device is unregistered so if you associate an input stream to it it will be registered with default values. Default values depend on the input or output nature and are listed in the 2.1 and 1.1 sections respectively.
+  - `D`: the device is unregistered so if you associate an input stream to it, it will be registered with default values. Default values depend on the input or output nature and are listed in the 2.1 and 1.1 sections respectively.
 
 A unset indicator is marked with an underscore character: `_`
 

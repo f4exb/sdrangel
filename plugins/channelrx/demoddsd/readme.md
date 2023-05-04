@@ -107,7 +107,7 @@ Use this switch to toggle high-pass filter on the audio
 
 Left click to mute/unmute audio. This button lights in green when the squelch opens.
 
-If you right click on it it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
+If you right click on it, it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
 <h3>A.12: Format specific status display</h3>
 

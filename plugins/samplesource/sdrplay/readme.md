@@ -77,7 +77,7 @@ You have the choice between various sample rates from 1536 to 8192 kHz. Some val
 
 Decimation in powers of two from 1 (no decimation) to 64.
 
-<h3>9: Decimated bandpass center frequency position relative the SDRplay center frequency</h3>
+<h3>9: Decimated bandpass center frequency position relative to the SDRplay center frequency</h3>
 
   - **Cen**: the decimation operation takes place around the SDRplay center frequency Fs
   - **Inf**: the decimation operation takes place around Fs - Fc.

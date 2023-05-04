@@ -82,7 +82,7 @@ The device stream from the HackRF is decimated to obtain the baseband stream. Po
   - **16**: divide device stream sample rate by 16
   - **32**: divide device stream sample rate by 32
 
-<h3>8: Baseband center frequency position relative the the HackRF Rx center frequency</h3>
+<h3>8: Baseband center frequency position relative to the HackRF Rx center frequency</h3>
 
   - **Cen**: the decimation operation takes place around the HackRF Rx center frequency Fs
   - **Inf**: the decimation operation takes place around Fs - Fc.

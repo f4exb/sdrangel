@@ -36,7 +36,7 @@ Toggle a 300 Hz cutoff high pass filter on audio to cut-off CTCSS frequencies. I
 
 Left click on this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
 
-If you right click on it it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
+If you right click on it, it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
 
 <h3>A: RF parameters</h3>

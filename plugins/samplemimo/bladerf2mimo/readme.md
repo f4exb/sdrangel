@@ -87,7 +87,7 @@ Use this toggle button to switch the sample rate input next (15) between device 
 
 This controls the sample rate between Host and Device in both directions. Effectively ADC and DAC run on the same sample rate.
 
-<h3>16. Baseband center frequency position relative the the BladeRF center frequency</h3>
+<h3>16. Baseband center frequency position relative to the BladeRF center frequency</h3>
 
 Possible values are:
 

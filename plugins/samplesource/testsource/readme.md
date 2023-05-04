@@ -50,7 +50,7 @@ The I/Q stream from the generator is downsampled by a power of two before being 
 
 This exercises the decimation chain.
 
-<h4>2.3: Baseband center frequency position relative the center frequency</h4>
+<h4>2.3: Baseband center frequency position relative to the center frequency</h4>
 
   - **Cen**: the decimation operation takes place around the center frequency Fs
   - **Inf**: the decimation operation takes place around Fs - Fc.

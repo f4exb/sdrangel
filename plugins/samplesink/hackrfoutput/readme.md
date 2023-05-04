@@ -74,7 +74,7 @@ The limits are adjusted automatically. In baseband input mode the limits are dri
 
 Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-<h3>9: Baseband center frequency position relative the the HackRF Tx center frequency</h3>
+<h3>9: Baseband center frequency position relative to the HackRF Tx center frequency</h3>
 
   - **Cen**: the decimation operation takes place around the HackRF Tx center frequency Fs
   - **Inf**: the decimation operation takes place around Fs - Fc.

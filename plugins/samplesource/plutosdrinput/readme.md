@@ -84,7 +84,7 @@ This button opens a dialog to set the transverter mode frequency translation opt
 
 The I/Q stream from the PlutoSDR is downsampled by a power of two by software inside the plugin before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
 
-<h3>6: Decimated bandpass center frequency position relative the the PlutoSDR Rx center frequency</h3>
+<h3>6: Decimated bandpass center frequency position relative to the PlutoSDR Rx center frequency</h3>
 
   - **Cen**: the decimation operation takes place around the PlutoSDR Rx center frequency Fs
   - **Inf**: the decimation operation takes place around Fs - Fc.

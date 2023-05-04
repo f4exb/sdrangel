@@ -84,7 +84,7 @@ Use the wheels to adjust the sample rate. Left click on a digit sets the cursor 
 
 The I/Q stream from the BladeRF ADC is downsampled by a power of two before being sent to the baseband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
 
-<h3>6: Baseband center frequency position relative the the BladeRF Rx center frequency</h3>
+<h3>6: Baseband center frequency position relative to the BladeRF Rx center frequency</h3>
 
 Possible values are:
 

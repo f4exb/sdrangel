@@ -129,7 +129,7 @@ Sets the ADC IQ sample rats from 2M to 10.66M Hz.
 
 Decimation in powers of two from 1 (no decimation) to 64.
 
-<h3>19: Decimated bandpass center frequency position relative the SDRplay center frequency</h3>
+<h3>19: Decimated bandpass center frequency position relative to the SDRplay center frequency</h3>
 
   - **Cen**: the decimation operation takes place around the SDRplay center frequency Fs.
   - **Inf**: the decimation operation takes place around Fs - Fc.

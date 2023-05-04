@@ -110,7 +110,7 @@ These buttons control the SDRangel internal DSP auto correction options:
   - **DC**: auto remove DC component
   - **IQ**: auto make I/Q balance. The DC correction must be enabled for this to be effective.
 
-<h3>3: Baseband center frequency position relative the LO center frequency</h3>
+<h3>3: Baseband center frequency position relative to the LO center frequency</h3>
 
 Possible values are:
 

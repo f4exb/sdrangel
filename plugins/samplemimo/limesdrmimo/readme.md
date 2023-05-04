@@ -222,7 +222,7 @@ This label turns green when status can be obtained from the current stream. Usua
 
 <h3>13. Stream global (all Rx or all Tx) throughput in MB/s</h3>
 
-This is the stream throughput in MB/s and is about 6 times the sample rate for a for a dual Rx or Tx stream. This is due to the fact that 12 bits samples are used and although they are represented as 16 bit values only 12 bits travel on the USB link.
+This is the stream throughput in MB/s and is about 6 times the sample rate for a dual Rx or Tx stream. This is due to the fact that 12 bits samples are used and although they are represented as 16 bit values only 12 bits travel on the USB link.
 
 The Rx or Tx stream is displayed depending on the side display selection (3)
 
