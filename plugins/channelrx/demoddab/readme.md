@@ -24,7 +24,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 Left click on this button to toggle audio mute for this channel.
 
-If you right click on it it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
+If you right click on it, it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
 <h3>4: RF level meter in dB</h3>
 

@@ -39,11 +39,11 @@ This is the stream sample rate in S/s with multiplier. It should be equal to wha
 
 <h3>3: Frequency</h3>
 
-This is the center frequency received in he stream meta data. When setting it it will try to set the center frequency of the `IQ Demodulator` in RTSA suite the closest to the `HTTP server`.
+This is the center frequency received in he stream meta data. When setting it, it will try to set the center frequency of the `IQ Demodulator` in RTSA suite the closest to the `HTTP server`.
 
 <h3>4: Stream sample rate</h3>
 
-This is sample rate (actually the frequency span) received in the stream meta data. When setting it it will try to set the sample rate and frequency span of the IQ Demodulator` in RTSA suite the closest to the `HTTP server`.
+This is sample rate (actually the frequency span) received in the stream meta data. When setting it, it will try to set the sample rate and frequency span of the IQ Demodulator` in RTSA suite the closest to the `HTTP server`.
 
 <h3>5: Remote address and port</h3>
 
