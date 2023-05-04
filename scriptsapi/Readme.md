@@ -229,12 +229,12 @@ The script runs in daemon mode and is stopped using `Ctl-C`.
   - `-j` or `--psd-in` JSON file containing PSD floor information previously saved with the `-J` option
   - `-J` or `--psd-out` Write PSD floor information to JSON file
   - `-n` or `--nb-passes` Number of passes for PSD floor estimation. Default: `10`
-  - `-f` or `--psd-level` Use a fixed PSD floor value therefore do not perform PSD floor estimaton
+  - `-f` or `--psd-level` Use a fixed PSD floor value therefore do not perform PSD floor estimation
   - `-X` or `--psd-exclude-higher` Level above which to exclude bin scan during PSD floor estimation
   - `-x` or `--psd-exclude-lower` Level below which to exclude bin scan during PSD floor estimation
   - `-G` or `--psd-graph` Show PSD floor graphs. Requires `matplotlib`
   - `-N` or `--hotspots-noise` Number of hotspots above which detection is considered as noise. Default `8`
-  - `-m` or `--margin` Margin in dB above PSD floor to detect acivity. Default: `3`
+  - `-m` or `--margin` Margin in dB above PSD floor to detect activity. Default: `3`
   - `-g` or `--group-tolerance` Radius (1D) tolerance in points (bins) for hotspot aggregation. Default `1`
   - `-r` or `--freq-round` Frequency rounding value in Hz. Default: `1` (no rounding)
   - `-o` or `--freq-offset` Frequency rounding offset in Hz. Default: `0` (no offset)
@@ -281,7 +281,7 @@ This file drives how channels in the connected SDRangel instance are managed.
 
 Refer to supervisord documentation.
 
-Esample of `superscanner.conf` file to put in your `/etc//etc/supervisor/conf.d/` folder (add it in the `[include]` section of `/etc/supervisor/supervisord.conf`). Environment variable `PYTHONUNBUFFERED=1` is important for the log tail to work correctly.
+Example of `superscanner.conf` file to put in your `/etc//etc/supervisor/conf.d/` folder (add it in the `[include]` section of `/etc/supervisor/supervisord.conf`). Environment variable `PYTHONUNBUFFERED=1` is important for the log tail to work correctly.
 
 ```
 [program:superscanner]

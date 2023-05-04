@@ -34,7 +34,7 @@ For example, this allows an aircraft to be tracked, by setting the Source to the
 
 <h3>5: Source</h3>
 
-Specify the SDRangel Channel or Feature that that will control the target aziumth and elevation values, when Track (4) is checked.
+Specify the SDRangel Channel or Feature that that will control the target azimuth and elevation values, when Track (4) is checked.
 
 <h3>6: Target</h3>
 
@@ -76,12 +76,12 @@ The elevation offset specifies an angle in degrees that is added to the target e
 <h3>15 and 16: Azimuth Min and Max</h3>
 
 The azimuth min and max values specify the minimum and maximum azimuth values (after offset has been applied), that will be sent to the rotator.
-These values can be used to prevent the rotator from rotating an antenna in to an obstable.
+These values can be used to prevent the rotator from rotating an antenna in to an obstacle.
 
 <h3>17 and 18: Elevation Min and Max</h3>
 
 The elevation min and max values specify the minimum and maximum elevation values (after offset has been applied), that will be sent to the rotator.
-These values can be used to prevent the rotator from rotating an antenna in to an obstable.
+These values can be used to prevent the rotator from rotating an antenna in to an obstacle.
 If the maximum elevation is set to 0, the controller will only use the M GS-232 command, rather than M and W.
 
 <h3>19: Tolerance</h3>
@@ -103,7 +103,7 @@ Specifies the coordinate system used by the GUI for entry and display of the pos
 
 * Az/El - For azimuth and elevation in degrees.
 * X/Y 85' - For X/Y coordinates in degrees. 0,0 is zenith. X is positive Southward. Y is positive Eastward.
-* X/Y 30' - For X/Y coordinates in degrees. 0,0 is zenith. X is positivie Eastward. Y is positive Northward.
+* X/Y 30' - For X/Y coordinates in degrees. 0,0 is zenith. X is positive Eastward. Y is positive Northward.
 
 Equations for translating between these coordinate systems can be found [here](https://ntrs.nasa.gov/citations/19670030005).
 

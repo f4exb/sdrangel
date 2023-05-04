@@ -96,7 +96,7 @@ When changing the RF bandwidth the channel spacing selection in the combo box is
 
 <h3>5: Audio Filters</h3>
 
-  - The slider controls the bandwidth in khz of the modulating signal filtered before modulation.
+  - The slider controls the bandwidth in kHz of the modulating signal filtered before modulation.
   - The "P" switch button next activates or de-activates pre-emphasis (fixed 120 &mu;s)
   - The rightmost button next activates or de-activates 300 Hz highpass filter when no CTCSS nor DCS is active
 
@@ -211,7 +211,7 @@ Use this button to stop sending text. When resuming keying restarts at the start
 
 18.7: Activate morse keys keyboard control
 
-This disables text or continuous dots or dashes. Toggle input from keyboard. Occasionnaly the focus may get lost and you will have to deactivate and reactivate it to recover the key bindings.
+This disables text or continuous dots or dashes. Toggle input from keyboard. Occasionally the focus may get lost and you will have to deactivate and reactivate it to recover the key bindings.
 
 18.8: Iambic or straight
 

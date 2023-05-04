@@ -48,7 +48,7 @@ Adjusts the gain in dB from -60 to 0dB. The gain should be set to ensure the lev
 
 Enter your amateur radio callsign and optionally a sub-station ID (SSID). E.g. M7RCE or M7RCE-1
 
-<h3>10: Preemphaisis Filter</h3>
+<h3>10: Preemphasis Filter</h3>
 
 Check this button to enable a FM preemphasis filter, which amplifies higher frequencies. Right click to open the dialog to adjust settings for the filter.
 

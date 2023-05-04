@@ -4,7 +4,7 @@
 
 This plugin draws I/Q samples from a Local Output plugin device sink in another device set into the baseband. It is basically the same as the Remote Source channel plugin but pipes the samples internally instead of receiving them over the network.
 
-It may be used when you want to use a particular sub area of the baseband for madulation.
+It may be used when you want to use a particular sub area of the baseband for modulation.
 
 Note that because it uses only the channelizer half band filter chain to achieve interpolation and center frequency shift you have a limited choice on the center frequencies that may be used (similarly to the Remote Source). The available center frequencies depend on the baseband sample rate, the channel interpolation and the filter chain that is used so you have to play with these parameters to obtain a suitable center frequency and pass band.
 

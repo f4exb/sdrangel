@@ -29,7 +29,7 @@ Specify the number of packets to transmit.
 Controls when the test is started, after the start button (1) is pressed. This can be either:
 
 * Immediately
-* On satellite AOS (Acquistion of signal)
+* On satellite AOS (Acquisition of signal)
 * On satellite mid pass ((AOS-LOS)/2)
 
 When either satellite option is selected, the Satellites field appears, allowing you to enter the names of satellites which should start the test.
@@ -42,7 +42,7 @@ Specify the interval in seconds between packet transmissions.
 
 Specify the contents of the packet to transmit and expect to be received. Data should be entered in hexadecimal bytes (E.g: 00 11 22 33 44).
 
-The exact format required will depend on the underlying protocol being used. For AX.25 using the Packet modulator, LoRo using the ChirpChat modulator, AIS and 802.15.4, it is not necessary to include the trailing CRC, as this is appended automatically by the SDRangel modulators.
+The exact format required will depend on the underlying protocol being used. For AX.25 using the Packet modulator, LoRa using the ChirpChat modulator, AIS and 802.15.4, it is not necessary to include the trailing CRC, as this is appended automatically by the SDRangel modulators.
 
 Aside from hex values, a number of variables can be used:
 

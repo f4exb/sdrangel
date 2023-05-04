@@ -88,7 +88,7 @@ Each recording is written in a new file with the starting timestamp before the `
   - Given file name: `test.wav` then a recording file will be like: `test.2020-08-05T21_39_07_974.wav`
   - Given file name: `test.2020-08-05T20_36_15_974.wav` then a recording file will be like (with timestamp updated): `test.2020-08-05T21_41_21_173.wav`
   - Given file name: `test.first.wav` then a recording file will be like: `test.2020-08-05T22_00_07_974.wav`
-  - Given file name: `record.test.first.eav` then a recording file will be like: `reocrd.test.2020-08-05T21_39_52_974.wav`
+  - Given file name: `record.test.first.wav` then a recording file will be like: `record.test.2020-08-05T21_39_52_974.wav`
 
 If a filename is given without `.wav` extension then the `.wav` extension is appended automatically before the above algorithm is applied. If a filename is given with an extension different of `.wav` then the extension is replaced by `.wav` automatically before the above algorithm is applied.
 

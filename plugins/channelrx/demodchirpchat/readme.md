@@ -137,13 +137,13 @@ You can suspend and resume decoding activity using this button. This is useful i
 
 This is used to determine the end of message automatically. It can be de-activated by turning the button completely to the right (as shown on the picture). In this case it relies on the message length set with (A.4).
 
-During paylaod detection the maximum power value in the FFT (at argmax) P<sub>max</sub> is stored and compared to the current argmax power value P<sub>i</sub> if S<sub>EOM</sub> is this squelch value the end of message is detected if S<sub>EOM</sub> &times; S<sub>i</sub> &lt; S<sub>max</sub>
+During payload detection the maximum power value in the FFT (at argmax) P<sub>max</sub> is stored and compared to the current argmax power value P<sub>i</sub> if S<sub>EOM</sub> is this squelch value the end of message is detected if S<sub>EOM</sub> &times; S<sub>i</sub> &lt; S<sub>max</sub>
 
 <h4>A.4: Expected message length in symbols</h4>
 
 This is the expected number of symbols in a message. When a header is present in the payload it should match the size given in the header (A.11).
 
-<h4>A.5: Auto mesasge length</h4>
+<h4>A.5: Auto message length</h4>
 
 LoRa mode only. Set message length (A.4) equal to the number of symbols specified in the message just received. When messages are sent repeatedly this helps adjusting in possible message length changes automatically.
 

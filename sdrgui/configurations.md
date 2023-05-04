@@ -1,12 +1,12 @@
 <h1>Configurations dialog</h1>
 
-Configuraitons stores the complete setup of a SDRangel instance:
+Configurations stores the complete setup of a SDRangel instance:
 
   - Workspaces
   - Device sets
   - Features
 
-It also stores the geometry of all windows and workspaces so that the entire aspect of a configuration of the instance can be saved and retrieved. A default configuration is saved at program exit and retrieved at the next prograp start. Use the `--scratch` command line option to skip the retrieval of the default configuration and start with an empty setup.
+It also stores the geometry of all windows and workspaces so that the entire aspect of a configuration of the instance can be saved and retrieved. A default configuration is saved at program exit and retrieved at the next program start. Use the `--scratch` command line option to skip the retrieval of the default configuration and start with an empty setup.
 
 ![Workspaces feature presets](../doc/img/Configurations.png)
 
@@ -27,7 +27,7 @@ Update the selected configuration with the current setup
 Change configuration name or the configuration group to which this configuration belongs. If selection is a group the group name can be changed.
 
 <h3>5: Export configuration</h3>
-Export selected configraton in a file that can be imported on another machine possibly with a different O/S. The configuration binary data (BLOB) is saved in Base-64 format.
+Export selected configuration in a file that can be imported on another machine possibly with a different O/S. The configuration binary data (BLOB) is saved in Base-64 format.
 
 <h3>6: Import preset</h3>
 This is the opposite of the previous operation. This will create a new configuration in the selected group or the same group as the configuration being selected.

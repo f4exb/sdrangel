@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-You can use this plugin to interface with a http server block in the Aaronia RTSA suite connected to a Spectran V6 device. It is assumed that you have prior knowledge of the Aaronia RTSA suite software and operation of the Spectran V6 RTSA (Real Time Spectrum Analyzer). However in this context there are some specificities i.e. it assumes that the "mission" (in RTSA suite terms) that is the equivalent of a "configuration" in SDRangel has a `HTTP Server` block preceded by a `IQ Demodulator` block (the equivalent of the "Frequency translating FIR filter" in GNU radio). The center frequency and span (equal to decimated sample rate) can be controlled from either RTSA sutie or SDRangel.
+You can use this plugin to interface with a http server block in the Aaronia RTSA suite connected to a Spectran V6 device. It is assumed that you have prior knowledge of the Aaronia RTSA suite software and operation of the Spectran V6 RTSA (Real Time Spectrum Analyzer). However in this context there are some specificities i.e. it assumes that the "mission" (in RTSA suite terms) that is the equivalent of a "configuration" in SDRangel has a `HTTP Server` block preceded by a `IQ Demodulator` block (the equivalent of the "Frequency translating FIR filter" in GNU radio). The center frequency and span (equal to decimated sample rate) can be controlled from either RTSA suite or SDRangel.
 
 An example flow graph could be the following (with two http servers) hence two possible Aaronia receivers in SDRangel:
 

@@ -6,7 +6,7 @@ This plugin can be used to demodulate RS41 radiosonde weather balloon signals. R
 
 RS41 radiosondes transmit data frames every second, containing position, velocity and PTU (Pressure, Temperature and Humidity) readings. The radios use GFSK modulation, with �2.4kHz deviation at 4,800 baud. Reed Solomon encoding is used for ECC (Error Checking and Correction).
 
-The Radiosonde demodulator can forward received data to the [Radiosone feature](../../feature/radiosonde/readme.md), which can plot charts showing how altitude and PTU vary over time, and also plot the position of the radiosonde on the 2D and 3D maps.
+The Radiosonde demodulator can forward received data to the [Radiosonde feature](../../feature/radiosonde/readme.md), which can plot charts showing how altitude and PTU vary over time, and also plot the position of the radiosonde on the 2D and 3D maps.
 
 <h2>Interface</h2>
 
@@ -80,7 +80,7 @@ The received frames table displays information about each radiosonde frame recei
 
 * Date - The date the frame was received.
 * Time - The time the frame was received.
-* Serial - The serial number of the radiosonde. Double clicking on this column will search for the radiosone on https://sondehub.org/
+* Serial - The serial number of the radiosonde. Double clicking on this column will search for the radiosonde on https://sondehub.org/
 * Frame - Frame number
 * Phase - Flight phase: On ground, Ascent and Descent.
 * Lat (�) - Latitude in degrees, North positive. Double clicking on this column will search for the radiosonde on the Map.
@@ -103,6 +103,6 @@ The received frames table displays information about each radiosonde frame recei
 * GPS Time - GPS date and time on board radiosonde. GPS time is offset 18 seconds from UTC.
 * GPS Sats - Number of GPS satellites used in position estimate.
 * ECC - Number of symbol errors corrected by Reed Solomon ECC.
-* Corr - Premable correlation value calculated for the frame. This can be used to choose a value for TH (6).
+* Corr - Preamble correlation value calculated for the frame. This can be used to choose a value for TH (6).
 
-Right clicking on the table header allows you to select which columns to show. The columns can be reorderd by left clicking and dragging the column header. Right clicking on an item in the table allows you to copy the value to the clipboard.
+Right clicking on the table header allows you to select which columns to show. The columns can be reordered by left clicking and dragging the column header. Right clicking on an item in the table allows you to copy the value to the clipboard.

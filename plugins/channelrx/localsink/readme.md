@@ -75,7 +75,7 @@ Use this button to start or stop processing.
 
 <h4>A.7.3: DSP functions</h4>
 
-Togles DSP functions (gain and FFT filter)
+Toggles DSP functions (gain and FFT filter)
 
 <h4>A.7.4: Gain</h4>
 
@@ -113,9 +113,9 @@ Displays the index of the selected FFT band. Displays "0" if no FFT bands are av
 
 This is the relative position to the center of the passband of the lower bound of the FFT band. The actual frequency shift from center is displayed on the right.
 
-<h3>A.12: FFT band relative bandwidth or higher boumd</h3>
+<h3>A.12: FFT band relative bandwidth or higher bound</h3>
 
-This is the relative badnwidth of the FFT band. The value displayed on the right is either the bandwidth or the higher frequency band depending on the (A.13) button setting.
+This is the relative bandwidth of the FFT band. The value displayed on the right is either the bandwidth or the higher frequency band depending on the (A.13) button setting.
 
 <h3>A.13: Toggle bandwidth or higher frequency bound</h3>
 

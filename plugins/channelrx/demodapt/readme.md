@@ -71,7 +71,7 @@ This includes:
    - Whether to automatically save images on LOS.
    - Whether a combined image including telemetry should be saved.
    - Whether separate images of channel A and B, without telemetry, should be saved.
-   - Whether equidistant cylindrical (plate carr�e) project images used for the map, should be saved.
+   - Whether equidistant cylindrical (plate carrée) project images used for the map, should be saved.
    - Path to save automatically saved images in.
    - The minimum number of scanlines required to be in an image, after noise cropping, for it to be automatically saved.
    - After how many scanlines image processing is applied and updates sent to the map. Lower values require more CPU power.

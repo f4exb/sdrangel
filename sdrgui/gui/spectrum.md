@@ -193,7 +193,7 @@ Toggles the spectrum on bottom (off) or on top (on) versus waterfall/spectrogram
 
 Toggles the waterfall display
 
-<h4>B.3.3: 3D Spectrgram</h4>
+<h4>B.3.3: 3D Spectrogram</h4>
 
 Toggles the 3D spectrogram display. Controls inside the spectrogram window are described at the bottom of this page
 
@@ -203,11 +203,11 @@ This control is only visible when the 3D Spectrogram is being displayed.
 
 This dropdown determines how the 3D Spectrogram data is rendered.
 
-  - **Points**: The data are rendeded as points.
+  - **Points**: The data are rendered as points.
   - **Lines**: The data points are connected by lines.
-  - **Solid**: The data are rendeded as a solid surface with constant illumination.
+  - **Solid**: The data are rendered as a solid surface with constant illumination.
   - **Outline**: The data are rendered as a solid surface with outlines of the polygons highlighted.
-  - **Shaded**: The data are rendeder as a solid surface with a combination of ambient and diffuse lighting. This requires OpenGL 3.3 or greater.
+  - **Shaded**: The data are rendered as a solid surface with a combination of ambient and diffuse lighting. This requires OpenGL 3.3 or greater.
 
 <h3>B.4: Spectrum FFT controls - block #4</h3>
 

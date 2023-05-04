@@ -7,7 +7,7 @@ based on data received via [Radiosonde Demodulators](../../channelrx/demodradios
 
 The chart can plot two data series vs time for the radiosonde selected in the table.
 
-The Radiosonde feature can draw ballons objects on the [Map](../../feature/map/readme.md) feature in 2D and 3D.
+The Radiosonde feature can draw balloons objects on the [Map](../../feature/map/readme.md) feature in 2D and 3D.
 
 <h2>Interface</h2>
 
@@ -36,13 +36,13 @@ The Radiosonde table displays the current status of each radiosonde, based on th
 * Updated - Gives the date and time the last message was received.
 * Messages - Displays the number of messages received.
 
-Right clicking on the table header allows you to select which columns to show. The columns can be reorderd by left clicking and dragging the column header.
+Right clicking on the table header allows you to select which columns to show. The columns can be reordered by left clicking and dragging the column header.
 
 Right clicking on a table cell allows you to copy the cell contents, or find the radiosonde on the map.
 
 <h3>Map</h3>
 
-The Radiosonde feature can plot ballons (during ascent) and parachutes (during descent) on the [Map](../../feature/map/readme.md).
+The Radiosonde feature can plot balloons (during ascent) and parachutes (during descent) on the [Map](../../feature/map/readme.md).
 To use, simply open a Map feature and the Radiosonde plugin will display objects based upon the data it receives from that point.
 Selecting a radiosonde item on the map will display a text bubble containing information from the above table.
 To centre the map on an item in the table, double click in the Lat or Lon columns.

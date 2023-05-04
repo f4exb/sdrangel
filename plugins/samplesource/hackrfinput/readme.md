@@ -88,7 +88,7 @@ The device stream from the HackRF is decimated to obtain the baseband stream. Po
   - **Inf**: the decimation operation takes place around Fs - Fc.
   - **Sup**: the decimation operation takes place around Fs + Fc.
 
-With SR as the sample rate before decimation Fc is calculated depending on the decimaton factor:
+With SR as the sample rate before decimation Fc is calculated depending on the decimation factor:
 
   - **2**: Fc = SR/4
   - **4**: Fc = 3*SR/8

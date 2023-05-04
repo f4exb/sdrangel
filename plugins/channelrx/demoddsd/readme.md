@@ -206,7 +206,7 @@ String is in the form: `02223297>G00000222`
 
 ![DSD dPMR status](../../../doc/img/DSDdemod_plugin_dpmr_status.png)
 
-<h5>A11.3.1: dPMR frame tyoe</h5>
+<h5>A11.3.1: dPMR frame type</h5>
 
   - `--`: undetermined
   - `HD`: Header of FS1 type

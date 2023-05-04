@@ -76,7 +76,7 @@ Use this combo to select which (complex) signal to use as the display source:
 
 <h3>7: Locked loop</h3>
 
-Locks a PLL or FLL on the signal and mixes its NCO with the input signal. This is mostly useful for carrier recovery on PSK modulations (PLL is used). This effectively de-rotates the signal and symbol points (constellation) can be seen in XY mode with real part as X and imagiary part as Y.
+Locks a PLL or FLL on the signal and mixes its NCO with the input signal. This is mostly useful for carrier recovery on PSK modulations (PLL is used). This effectively de-rotates the signal and symbol points (constellation) can be seen in XY mode with real part as X and imaginary part as Y.
 
 When the PLL is locked the icon lights up in green. The frequency shift from carrier appears in the tooltip. Locking indicator is pretty sharp with about +/- 100 Hz range. The FLL has no indicator.
 
@@ -122,7 +122,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 <h3>10. Toggle root raised cosine filter</h3>
 
-Use this toggle button to activate or de-activate the root raised cosine (RRC) filter. When active the bnadpass boxcar filter is replaced by a RRC filter. This takes effect only in normal (DSB) mode (see control 14).
+Use this toggle button to activate or de-activate the root raised cosine (RRC) filter. When active the bandpass boxcar filter is replaced by a RRC filter. This takes effect only in normal (DSB) mode (see control 14).
 
 <h3>11. Tune RRC filter rolloff factor</h3>
 

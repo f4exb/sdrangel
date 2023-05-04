@@ -46,13 +46,13 @@ This specifies the channel sample rate the demodulator uses. Values of 2M-12MSa/
 
 Checking the S button will enable demodulation of Mode-S ELS (Elementary Surveillance), EHS (Enhanced Surveillance) and MRAR (Meteorological Routine Air Report) frames.
 
-<h3>7: FP - Correlate Against Full Preamable</h3>
+<h3>7: FP - Correlate Against Full Preamble</h3>
 
 When the FP button is checked, the demodulator will correlated the received signal against all expected 8 bits of the ES1090 preamble. When unchecked, the correlation will only be against the first 6 bits. Only correlating the first 6 bits can reduce the processing requirements, but may result in more invalid frames.
 
 <h3>8: Threshold</h3>
 
-This sets the correlation threshold in dB between the received signal and expected 1090ES preamble, that is required to be exceeded before the demodulator will try to decode a frame. Lower values should decode more frames amd will require more processing power, but will more often decode invalid frames. You may also look at correlation values obtained with reliable signals in the "Correlation" column of the data table.
+This sets the correlation threshold in dB between the received signal and expected 1090ES preamble, that is required to be exceeded before the demodulator will try to decode a frame. Lower values should decode more frames and will require more processing power, but will more often decode invalid frames. You may also look at correlation values obtained with reliable signals in the "Correlation" column of the data table.
 
 <h3>9: Download Opensky-Network Aircraft Database</h3>
 
@@ -86,7 +86,7 @@ Clicking the Display Settings button will open the Display Settings dialog, whic
 * Whether demodulator statistics are displayed (primarily an option for developers).
 * Whether the columns in the table are automatically resized after an aircraft is added to it. If unchecked, columns can be resized manually and should be saved with presets.
 
-You can also enter an [avaiationstack](https://aviationstack.com/product) API key, needed to download flight information (such as departure and arrival airports and times).
+You can also enter an [aviationstack](https://aviationstack.com/product) API key, needed to download flight information (such as departure and arrival airports and times).
 
 A [CheckWX](https://www.checkwxapi.com/) API key can be entered in order to download airport weather (METARs) which can be displayed on the map.
 
@@ -287,7 +287,7 @@ The table displays the decoded ADS-B and Mode-S data for each aircraft along sid
 * Updated - The local time at which the last message was received. (ADS-B / Mode-S)
 * RX Frames - A count of the number of frames received from this aircraft. (ADS-B / Mode-S)
 * TIS-B - A count of the number of TIS-B frames for this aircraft. (ADS-B)
-* Correlation - Displays the minimum, average and maximum of the preamable correlation in dB for each received frame. These values can be used to help select a threshold setting. This correlation value is the ratio between the presence and absence of the signal corresponding to the "ones" and the "zeros" of the sync word adjusted by the bits ratio. It can be interpreted as a SNR estimation.
+* Correlation - Displays the minimum, average and maximum of the preamble correlation in dB for each received frame. These values can be used to help select a threshold setting. This correlation value is the ratio between the presence and absence of the signal corresponding to the "ones" and the "zeros" of the sync word adjusted by the bits ratio. It can be interpreted as a SNR estimation.
 * RSSI - This Received Signal Strength Indicator is based on the signal power during correlation estimation. This is the power sum during the expected presence of the signal i.e. the "ones" of the sync word.
 * Flight status - scheduled, active, landed, cancelled, incident or diverted. (API)
 * Dep - Departure airport. (API)

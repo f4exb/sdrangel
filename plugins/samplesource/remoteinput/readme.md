@@ -57,7 +57,7 @@ This string represents the sequence of half-band filters used in the decimation 
 
 <h3>7: Remote sink center frequency shift</h3>
 
-This is the shift of the remote sink channel center frequency from the remte device center frequency. Its value is driven by the remote device sample rate, the decimation (5) and the filter chain sequence (8).
+This is the shift of the remote sink channel center frequency from the remote device center frequency. Its value is driven by the remote device sample rate, the decimation (5) and the filter chain sequence (8).
 
 <h3>8: Remote sink half-band filter chain sequence</h3>
 

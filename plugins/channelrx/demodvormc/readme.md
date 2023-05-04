@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to demodulate VOR (VHF omnidirectional range) navaids (navigation aids). VORs are radio naviation aids in the VHF 108 - 117.975MHz band commonly used for aircraft navigation.
+This plugin can be used to demodulate VOR (VHF omnidirectional range) navaids (navigation aids). VORs are radio navigation aids in the VHF 108 - 117.975MHz band commonly used for aircraft navigation.
 
 VORs transmit two 30Hz signals, one AM at the VOR center frequency and one FM on a 9960Hz sub-carrier. The FM reference signal's phase is set so 0 degrees corresponds to magnetic north from the VOR (Some VORs at high latitudes use true North). The phase of the AM variable signal is such that the phase difference to the reference signal corresponds to the bearing from the VOR to the receiver. For example, if a receiver is North from the VOR, the AM and FM 30Hz signals will be received in phase. If a receiver is East from the VOR, the phase difference will be 90 degrees.
 
@@ -64,19 +64,19 @@ The VOR table displays information about selected VORs. To select or deselect a 
 
 * Name - The name of the VOR. For example: 'LONDON'.
 * Freq (MHz) - The center frequency the VOR transmits on in MHz.
-* Offset (kHz) - This is the current difference between the VOR's center frequency and SDRangle's device center frequency. If displayed in red, the VOR is out of range and it's signal will not be able to be received.
+* Offset (kHz) - This is the current difference between the VOR's center frequency and SDRangel's device center frequency. If displayed in red, the VOR is out of range and its signal will not be able to be received.
 * Ident - A 2 or 3 character identifier for the VOR. For example: 'LON'.
 * Morse - The Morse code identifier for the VOR. For example: '.-.. --- -.'
 * RX Ident - This contains the demodulated ident. If it matches the expected ident, it will be displayed in green, if not, it will be displayed in red. If an ident is received that is not 2 or 3 characters, it will not be displayed, but the last received ident will be displayed in yellow.
 * RX Morse - This contains the demodulated Morse code ident. Colour coding is as for RX Ident.
 * Radial - This contains the demodulated radial direction in degrees (unadjusted for magnetic declination). If there is a low confidence the value is correct (due to a weak signal), it will be displayed in red.
 * Ref (dB) - This displays the magnitude of the received 30Hz FM reference signal in dB.
-* Var (dB) - This displays the mangitude of the received 30Hz AM variable signal in dB.
+* Var (dB) - This displays the magnitude of the received 30Hz AM variable signal in dB.
 * Mute - This button allows you to mute or unmute the audio from the corresponding VOR.
 
 <h3>Map</h3>
 
-The map displays the locations of each VOR, with an information box containing the information about the VOR, such as it's name, frequency, ident (in text and Morse), range and magnetic declination.
+The map displays the locations of each VOR, with an information box containing the information about the VOR, such as its name, frequency, ident (in text and Morse), range and magnetic declination.
 
 To initialise the VORs on the map, first set your position using the Preferences > My position menu, then open the VOR Demodulator channel (close and reopen it, if already open). Then press the Download VOR Database button (This only needs to be performed once). The map should then display VORs in your vicinity.
 

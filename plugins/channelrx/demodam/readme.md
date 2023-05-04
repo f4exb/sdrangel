@@ -22,7 +22,7 @@ When the PLL is locked the icon lights up in green. The frequency shift from car
 
 <h3>3: DSB/SSB selection</h2>
 
-Use the left mouse button to toggle DSB/SSB operation. Soemtimes one of the two sidebands is affected by interference. Selecting SSB may help by using only the sideband without interference. Right click to open a dialog to select which sideband is used (LSB or USB).
+Use the left mouse button to toggle DSB/SSB operation. Sometimes one of the two sidebands is affected by interference. Selecting SSB may help by using only the sideband without interference. Right click to open a dialog to select which sideband is used (LSB or USB).
 
 <h3>4: Channel power</h3>
 

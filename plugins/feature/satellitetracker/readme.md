@@ -53,8 +53,8 @@ To perform an action on an SDRangel device set on AOS or LOS, press the "Add dev
 * Whether to stop acquisition on LOS.
 * Whether any file sinks in the preset should be started on AOS and stopped on LOS. This allows the baseband signal received from the satellite to be recorded to a file.
 * Whether to override the centre frequency in the preset. This allows a single preset to be used with multiple satellites.
-* A command or script to execute on AOS. See (8) for list of subsitituions.
-* A command or script to execute on LOS. See (8) for list of subsitituions.
+* A command or script to execute on AOS. See (8) for list of substitutions.
+* A command or script to execute on LOS. See (8) for list of substitutions.
 
 Multiple tabs can be added, to allow independent control of multiple device sets. To remove a tab, click the cross next to the device set name in the tab list.
 

@@ -251,7 +251,7 @@ Specifies the baseline used for calculating Tsource from Tsys. This can be:
 
 <h3>1.25: delta G / G - Gain Variation</h3>
 
-delta G / G specifies the gain variation of the LNA / receiver. Gain variation places a limit on the sensitvity improvement available by increased integration counts.
+delta G / G specifies the gain variation of the LNA / receiver. Gain variation places a limit on the sensitivity improvement available by increased integration counts.
 This value is only used for the estimation of sigma_Tsys0 and sigma_Ssys0, it does not affect any measurements.
 
 <h3>1.26: HPBW / Omega A</h3>
@@ -507,7 +507,7 @@ Allows the user to scroll through and select the recorded spectra, showing the d
 Specifies the rest frequency of the reference spectral line:
 
 - HI neutral hydrogen at 1420.405760MHz.
-- OH hydroxyl at 1612.231040Mhz.
+- OH hydroxyl at 1612.231040MHz.
 - DI neutral deuterium at 327.384MHz.
 - Custom allows a user-defined frequency in MHz to be entered.
 

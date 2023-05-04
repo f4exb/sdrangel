@@ -28,7 +28,7 @@ This is the bandwidth in kHz of the channel signal filtered after modulation. It
 
 <h3>6: Audio frequency bandwidth</h3>
 
-This is the bandwidth in khz of the modulating signal filtered before modulation. It can be set in kHz steps from 1 to 20 kHz
+This is the bandwidth in kHz of the modulating signal filtered before modulation. It can be set in kHz steps from 1 to 20 kHz
 
 <h3>7: Frequency deviation</h3>
 
@@ -115,7 +115,7 @@ Use this button to stop sending text. When resuming keying restarts at the start
 
 13.7: Activate morse keys keyboard control
 
-This disables text or continuous dots or dashes. Toggle input from keyboard. Occasionnaly the focus may get lost and you will have to deactivate and reactivate it to recover the key bindings.
+This disables text or continuous dots or dashes. Toggle input from keyboard. Occasionally the focus may get lost and you will have to deactivate and reactivate it to recover the key bindings.
 
 13.8: Iambic or straight
 

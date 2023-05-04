@@ -46,7 +46,7 @@ This is the power of the reconstructed stereo pilot signal.
 
 <h3>A.7: Toggle RDS decoding</h3>
 
-USe this button to activate or de-activate RDS decoding
+Use this button to activate or de-activate RDS decoding
 
 <h3>A.8: Level meter in dB</h3>
 
@@ -120,7 +120,7 @@ Shows counters of received message by type.
   - **EWS**: Emergency Warning System (C.19)
   - **EON**: Enhanced Other Networks information (C.24, 25, 26, 27)
 
-<h3>C.8: Proram Identification</h3>
+<h3>C.8: Program Identification</h3>
 
 The ¨PI" label lights up if a PI message is received.
 

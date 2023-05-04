@@ -27,7 +27,7 @@ Stream I/Q sample rate in kS/s
 
 <h3>5: Auto remove DC component</h3>
 
-Filters out the possible DC component. You use this if yoy notice a spike in the center of the pass band.
+Filters out the possible DC component. You use this if you notice a spike in the center of the pass band.
 
 <h3>6: Auto make I/Q balance</h3>
 

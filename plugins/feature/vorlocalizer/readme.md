@@ -69,12 +69,12 @@ The VOR table displays information about selected VORs. To select or deselect a 
 * RX Morse - This contains the demodulated Morse code ident. Colour coding is as for RX Ident.
 * Radial - This contains the demodulated radial direction in degrees (unadjusted for magnetic declination). If there is a low confidence the value is correct (due to a weak signal), it will be displayed in red.
 * Ref (dB) - This displays the magnitude of the received 30Hz FM reference signal in dB.
-* Var (dB) - This displays the mangitude of the received 30Hz AM variable signal in dB.
+* Var (dB) - This displays the magnitude of the received 30Hz AM variable signal in dB.
 * Mute - This button allows you to mute or unmute the audio from the corresponding VOR.
 
 <h2>C: Map</h2>
 
-The map displays the locations of each VOR, with an information box containing the information about the VOR, such as it's name, frequency, ident (in text and Morse), range and magnetic declination.
+The map displays the locations of each VOR, with an information box containing the information about the VOR, such as its name, frequency, ident (in text and Morse), range and magnetic declination.
 
 To initialise the VORs on the map, first set your position using the Preferences > My position menu. Then press the Download VOR Database button (This only needs to be performed once). The map should then display VORs in your vicinity.
 

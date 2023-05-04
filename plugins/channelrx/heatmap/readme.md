@@ -4,7 +4,7 @@
 
 This plugin can be used to generate a heat map based on RF channel power. Channel power is measured as average power, maximum peak power, minimum peak power as well as pulse average power (i.e. average power above a threshold).
 
-To view the Heat Map visually, the [Map Feature](../../feature/map/readme.md) should be opened. If using the 3D map, it is recommended to set the Terrain to Ellisoid (as the heat map is 2D).
+To view the Heat Map visually, the [Map Feature](../../feature/map/readme.md) should be opened. If using the 3D map, it is recommended to set the Terrain to Ellipsoid (as the heat map is 2D).
 
 To record data for a heat map, a GPS is required, and Preferences > My Position should have "Auto-update from GPS" enabled.
 
@@ -53,7 +53,7 @@ Sets the sample rate at which channel power is sampled and measured. Values rang
 
 <h3>7: Tavg - Average Time</h3>
 
-Time period overwhich the channel power is averaged. Values range from 10us to 10s in powers of 10. The available values depend upon the sample rate.
+Time period over which the channel power is averaged. Values range from 10us to 10s in powers of 10. The available values depend upon the sample rate.
 
 <h3>8: THp - Pulse Threshold</h3>
 

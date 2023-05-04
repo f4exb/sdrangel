@@ -62,7 +62,7 @@ This button opens a dialog to set the transverter mode frequency translation opt
 
 <h3>7: Set default values</h3>
 
-Use this oush button to force default reasonable values for all parameters below (8)
+Use this push button to force default reasonable values for all parameters below (8)
 
 <h3>8: Parameters</h3>
 

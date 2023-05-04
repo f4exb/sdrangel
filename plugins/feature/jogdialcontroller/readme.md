@@ -52,7 +52,7 @@ It displays "D" when in device control or "C" when in channel control mode.
 
 <h3>Contour devices</h3>
 
-The Controur devices generally have a central "jog" wheel inside a spring loaded ring called the "shuttle" wheel plus a series of buttons.
+The Contour devices generally have a central "jog" wheel inside a spring loaded ring called the "shuttle" wheel plus a series of buttons.
 
 <b>ShuttleXpress layout</b>
 
@@ -95,7 +95,7 @@ The contour devices proceed by mapping their events to keyboard events and this 
 
 Contour provides software to perform the mapping on Windows. You just need to install the driver software downloaded from Contour web site, open the support program and then follow instructions. You will have to specify the target program when you create the profile for SDRangel. This is `sdrangel.exe` located in `C:\Program Files\SDRangel`. Note also that the buttons are named differently but the program shows their location on an interactive diagram so this should be no problem to identify them correctly.
 
-When running on Linux ou may use [ShuttlePRO](https://github.com/nanosyzygy/ShuttlePRO) for keyboard mapping. It will work also for the ShuttleXpress with minor changes. You will have to identify the path of the Shuttle device and run the program with the device path as argument in a terminal. See the last section for details.
+When running on Linux you may use [ShuttlePRO](https://github.com/nanosyzygy/ShuttlePRO) for keyboard mapping. It will work also for the ShuttleXpress with minor changes. You will have to identify the path of the Shuttle device and run the program with the device path as argument in a terminal. See the last section for details.
 
 <h4>Keyboard mapping</h4>
 
