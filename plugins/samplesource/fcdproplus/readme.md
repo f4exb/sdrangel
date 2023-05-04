@@ -41,7 +41,7 @@ These buttons control the local DSP auto correction options:
   - **DC**: auto remove DC component
   - **IQ**: auto make I/Q balance. The DC correction must be enabled for this to be effective.
 
-<h3>4: Decimated bandpass center frequency position relative the FCD Pro+ center frequency</h3>
+<h3>4: Decimated bandpass center frequency position relative to the FCD Pro+ center frequency</h3>
 
   - **Cen**: the decimation operation takes place around the FCD Pro+ center frequency Fs
   - **Inf**: the decimation operation takes place around Fs - Fc.

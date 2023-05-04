@@ -42,7 +42,7 @@ Audio sample rate in Hz (Sa/s).
 
 A decimation factor to apply to the audio data. The baseband sample rate will be the audio sample, divided by this decimation factor.
 
-<h3>8: Decimated bandpass center frequency position relative the device center frequency</h3>
+<h3>8: Decimated bandpass center frequency position relative to the device center frequency</h3>
 
 This will work in I/Q mode (stereo I/Q) only.
 

@@ -34,7 +34,7 @@ For example, this allows an aircraft to be tracked, by setting the Source to the
 
 <h3>5: Source</h3>
 
-Specify the SDRangel Channel or Feature that that will control the target azimuth and elevation values, when Track (4) is checked.
+Specify the SDRangel Channel or Feature that will control the target azimuth and elevation values, when Track (4) is checked.
 
 <h3>6: Target</h3>
 

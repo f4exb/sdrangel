@@ -53,7 +53,7 @@ These buttons control the local DSP auto correction options:
 
 Activates or de-activates the antenna bias tee. Works with v3 dongles only it will be simply ignored by others. It actually activates or de-activates GPIO pin 0 that commands bias tee on v3 dongles.
 
-<h3>4: Decimated bandpass center frequency position relative the RTL-SDR center frequency</h3>
+<h3>4: Decimated bandpass center frequency position relative to the RTL-SDR center frequency</h3>
 
   - **Cen**: the decimation operation takes place around the RTL-SDR center frequency Fs
   - **Inf**: the decimation operation takes place around Fs - Fc.

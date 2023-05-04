@@ -10,7 +10,7 @@ VORs also transmit a Morse code ident signal at a 1020Hz offset. This is a 2 or 
 
 Some VORs also transmit an AM voice identification or information signal between 300-3kHz.
 
-This plugin can demodulate all four signals from multiple VORs simultaneously, allowing your position to be determined and plotted on a map. It can also demodulate the Morse code ident signal and and check they are correct for each VOR. The Morse code ident and any voice signal will also be heard as audio.
+This plugin can demodulate all four signals from multiple VORs simultaneously, allowing your position to be determined and plotted on a map. It can also demodulate the Morse code ident signal and check they are correct for each VOR. The Morse code ident and any voice signal will also be heard as audio.
 
 Note that for aircraft, there is typically a direct line-of-sight to the VOR. This is unlikely to be the case when using an SDR on the ground. To get good results, ideally you want to be on a nice high hill or close to the VOR.
 

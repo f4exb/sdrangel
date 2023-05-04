@@ -76,7 +76,7 @@ Use the wheels to adjust the sample rate. Left click on a digit sets the cursor 
 
 The ADC sample rate is the same for all Rx channels. The GUI of the sibling channel if present is adjusted automatically.
 
-<h3>7: Baseband center frequency position relative the the BladeRF Rx center frequency</h3>
+<h3>7: Baseband center frequency position relative to the BladeRF Rx center frequency</h3>
 
 Possible values are:
 

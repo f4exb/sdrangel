@@ -93,7 +93,7 @@ Use the wheels to adjust the value. Left click on a digit sets the cursor positi
 
 <h3>4: Interpolation factor</h3>
 
-The I/Q stream from the application is upsampled by a power of two before being sent to the the SoapySDR controlled device. Possible values are increasing powers of two: 1 (no interpolation), 2, 4, 8, 16, 32, 64.
+The I/Q stream from the application is upsampled by a power of two before being sent to the SoapySDR controlled device. Possible values are increasing powers of two: 1 (no interpolation), 2, 4, 8, 16, 32, 64.
 
 <h3>5: Transverter mode open dialog</h3>
 
