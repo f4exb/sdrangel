@@ -390,7 +390,7 @@ void HeatMapGUI::on_readCSV_clicked()
 void HeatMapGUI::on_writeImage_clicked()
 {
     m_imageFileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    m_imageFileDialog.setNameFilter("*.png;*.jpg;*.jpeg;*.bmp;*.ppm;*.xbm;*.xpm");
+    m_imageFileDialog.setNameFilter("*.png *.jpg *.jpeg *.bmp *.ppm *.xbm *.xpm");
     if (m_imageFileDialog.exec())
     {
         QStringList fileNames = m_imageFileDialog.selectedFiles();

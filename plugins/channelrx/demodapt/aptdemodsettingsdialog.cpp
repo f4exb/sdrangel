@@ -100,7 +100,7 @@ void APTDemodSettingsDialog::on_autoSave_clicked(bool checked)
 
 void APTDemodSettingsDialog::on_addPalette_clicked()
 {
-    QFileDialog fileDialog(nullptr, "Select palette files", "", "*.png;*.bmp");
+    QFileDialog fileDialog(nullptr, "Select palette files", "", "*.png *.bmp");
     fileDialog.setFileMode(QFileDialog::ExistingFiles);
     if (fileDialog.exec())
     {
