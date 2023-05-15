@@ -99,6 +99,8 @@
 #include "SWGDATVModSettings.h"
 #include "SWGDOA2Report.h"
 #include "SWGDOA2Settings.h"
+#include "SWGDSCDemodReport.h"
+#include "SWGDSCDemodSettings.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGDVSerialDevice.h"
@@ -777,6 +779,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDOA2Settings").compare(type) == 0) {
       SWGDOA2Settings *obj = new SWGDOA2Settings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSCDemodReport").compare(type) == 0) {
+      SWGDSCDemodReport *obj = new SWGDSCDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDSCDemodSettings").compare(type) == 0) {
+      SWGDSCDemodSettings *obj = new SWGDSCDemodSettings();
       obj->init();
       return obj;
     }

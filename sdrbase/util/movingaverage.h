@@ -120,6 +120,7 @@ class MovingAverageUtilVar
     double asDouble() const { return m_total * m_samplesSizeInvD; }
     float asFloat() const { return m_total * m_samplesSizeInvF; }
     operator T() const { return  m_total / m_samples.size(); }
+    T instantAverage() const { return m_total / (m_num_samples == 0 ? 1 : m_num_samples); }
 
   private:
     std::vector<T> m_samples;

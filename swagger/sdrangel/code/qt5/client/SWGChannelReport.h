@@ -34,6 +34,7 @@
 #include "SWGDATVDemodReport.h"
 #include "SWGDATVModReport.h"
 #include "SWGDOA2Report.h"
+#include "SWGDSCDemodReport.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGFT8DemodReport.h"
 #include "SWGFileSinkReport.h"
@@ -127,6 +128,9 @@ public:
 
     SWGDOA2Report* getDoa2Report();
     void setDoa2Report(SWGDOA2Report* doa2_report);
+
+    SWGDSCDemodReport* getDscDemodReport();
+    void setDscDemodReport(SWGDSCDemodReport* dsc_demod_report);
 
     SWGDSDDemodReport* getDsdDemodReport();
     void setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report);
@@ -269,6 +273,9 @@ private:
 
     SWGDOA2Report* doa2_report;
     bool m_doa2_report_isSet;
+
+    SWGDSCDemodReport* dsc_demod_report;
+    bool m_dsc_demod_report_isSet;
 
     SWGDSDDemodReport* dsd_demod_report;
     bool m_dsd_demod_report_isSet;

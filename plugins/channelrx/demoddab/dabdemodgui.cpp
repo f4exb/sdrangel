@@ -191,8 +191,8 @@ void DABDemodGUI::addProgramName(const DABDemod::MsgDABProgramName& program)
         frequencyItem->setData(Qt::UserRole, 0.0);
     }
     ensembleItem->setText(ui->ensemble->text());
-    ui->programs->setSortingEnabled(true);
     filterRow(row);
+    ui->programs->setSortingEnabled(true);
 }
 
 // Tune to the selected program

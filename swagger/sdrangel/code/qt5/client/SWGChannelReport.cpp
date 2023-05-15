@@ -56,6 +56,8 @@ SWGChannelReport::SWGChannelReport() {
     m_datv_mod_report_isSet = false;
     doa2_report = nullptr;
     m_doa2_report_isSet = false;
+    dsc_demod_report = nullptr;
+    m_dsc_demod_report_isSet = false;
     dsd_demod_report = nullptr;
     m_dsd_demod_report_isSet = false;
     ieee_802_15_4_mod_report = nullptr;
@@ -156,6 +158,8 @@ SWGChannelReport::init() {
     m_datv_mod_report_isSet = false;
     doa2_report = new SWGDOA2Report();
     m_doa2_report_isSet = false;
+    dsc_demod_report = new SWGDSCDemodReport();
+    m_dsc_demod_report_isSet = false;
     dsd_demod_report = new SWGDSDDemodReport();
     m_dsd_demod_report_isSet = false;
     ieee_802_15_4_mod_report = new SWGIEEE_802_15_4_ModReport();
@@ -263,6 +267,9 @@ SWGChannelReport::cleanup() {
     }
     if(doa2_report != nullptr) { 
         delete doa2_report;
+    }
+    if(dsc_demod_report != nullptr) { 
+        delete dsc_demod_report;
     }
     if(dsd_demod_report != nullptr) { 
         delete dsd_demod_report;
@@ -401,6 +408,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&doa2_report, pJson["DOA2Report"], "SWGDOA2Report", "SWGDOA2Report");
     
+    ::SWGSDRangel::setValue(&dsc_demod_report, pJson["DSCDemodReport"], "SWGDSCDemodReport", "SWGDSCDemodReport");
+    
     ::SWGSDRangel::setValue(&dsd_demod_report, pJson["DSDDemodReport"], "SWGDSDDemodReport", "SWGDSDDemodReport");
     
     ::SWGSDRangel::setValue(&ieee_802_15_4_mod_report, pJson["IEEE_802_15_4_ModReport"], "SWGIEEE_802_15_4_ModReport", "SWGIEEE_802_15_4_ModReport");
@@ -522,6 +531,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((doa2_report != nullptr) && (doa2_report->isSet())){
         toJsonValue(QString("DOA2Report"), doa2_report, obj, QString("SWGDOA2Report"));
+    }
+    if((dsc_demod_report != nullptr) && (dsc_demod_report->isSet())){
+        toJsonValue(QString("DSCDemodReport"), dsc_demod_report, obj, QString("SWGDSCDemodReport"));
     }
     if((dsd_demod_report != nullptr) && (dsd_demod_report->isSet())){
         toJsonValue(QString("DSDDemodReport"), dsd_demod_report, obj, QString("SWGDSDDemodReport"));
@@ -761,6 +773,16 @@ void
 SWGChannelReport::setDoa2Report(SWGDOA2Report* doa2_report) {
     this->doa2_report = doa2_report;
     this->m_doa2_report_isSet = true;
+}
+
+SWGDSCDemodReport*
+SWGChannelReport::getDscDemodReport() {
+    return dsc_demod_report;
+}
+void
+SWGChannelReport::setDscDemodReport(SWGDSCDemodReport* dsc_demod_report) {
+    this->dsc_demod_report = dsc_demod_report;
+    this->m_dsc_demod_report_isSet = true;
 }
 
 SWGDSDDemodReport*
@@ -1128,6 +1150,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(doa2_report && doa2_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(dsc_demod_report && dsc_demod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(dsd_demod_report && dsd_demod_report->isSet()){
