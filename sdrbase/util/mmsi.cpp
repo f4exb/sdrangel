@@ -414,6 +414,7 @@ QString MMSI::getCategory(const QString &mmsi)
                 return "AtoN"; // Aid-to-navigation
             }
         }
+        break;
     default:
         return "Ship"; // Vessel better?
     }

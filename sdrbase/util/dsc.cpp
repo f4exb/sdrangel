@@ -905,6 +905,10 @@ bool DSCDecoder::decodeSymbol(signed char symbol)
         ret = true;
         break;
 
+    case DONE:
+    case NO_EOS:
+        break;
+
     }
 
     return ret;
