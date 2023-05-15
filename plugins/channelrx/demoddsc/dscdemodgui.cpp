@@ -1070,6 +1070,8 @@ void DSCDemodGUI::on_feed_clicked(bool checked)
 
 void DSCDemodGUI::on_feed_rightClicked(const QPoint &point)
 {
+    (void) point;
+
     QString id = MainCore::instance()->getSettings().getStationName();
     QString url = QString("http://yaddnet.org/pages/php/live_rx.php?rxid=%1").arg(id);
     QDesktopServices::openUrl(QUrl(url));

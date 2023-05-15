@@ -425,7 +425,7 @@ void MapGUI::addIBPBeacons()
 // GQD/GQZ callsigns: https://groups.io/g/VLF/message/19212?p=%2C%2C%2C20%2C0%2C0%2C0%3A%3Arecentpostdate%2Fsticky%2C%2C19.6%2C20%2C2%2C0%2C38924431
 const QList<RadioTimeTransmitter> MapGUI::m_vlfTransmitters = {
     // Other signals possibly seen: 13800, 19000
-    {"VTX2",  17000, 8.387015,  77.752762},         // South Vijayanarayanam, India
+    {"VTX2",  17000, 8.387015,  77.752762, -1},     // South Vijayanarayanam, India
     {"GQD",   19580, 54.911643, -3.278456, 100},    // Anthorn, UK, Often referred to as GBZ
     {"NWC",   19800, -21.816325, 114.16546, 1000},  // Exmouth, Aus
     {"ICV",   20270, 40.922946, 9.731881,  50},     // Isola di Tavolara, Italy (Can be distorted on 3D map if terrain used)
