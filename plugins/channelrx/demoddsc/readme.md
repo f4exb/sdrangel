@@ -74,8 +74,10 @@ Click to specify a previously written .csv log file, which is read and used to u
 
 <h3>12: Received Messages Table</h3>
 
+![DSC Demodulator plugin GUI](../../../doc/img/DSCDemod_plugin_messages.png)
+
 The received messages table displays the contents of the messages that have been received. Most of the fields are decoded directly from the message,
-however, a few, such as ships names, are found by querying aprs.fi with the MMSI.
+however, a few, such as ships names, are found by querying [aprs.fi](http://aprs.fi) with the MMSI.
 
 * Date - Date the message was received.
 * Time - Time the message was received.
@@ -114,3 +116,5 @@ Right clicking on a cell will open a pop-up menu that that allows:
 * georaphical call areas to be drawn on the map,
 * ships to be located on the [Map](../../feature/map/readme.md) if also being tracked via AIS, or
 * tune SSB Demods to the RX frequency.
+
+![DSC Demodulator plugin GUI](../../../doc/img/DSCDemod_plugin_geocall.png)
