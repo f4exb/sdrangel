@@ -145,7 +145,8 @@ bool RttyDemodBaseband::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         qDebug() << "RttyDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         setBasebandSampleRate(notif.getSampleRate());
-        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
+        // We can run with very slow sample rate (E.g. 4k), but we don't want FIFO getting too small
+        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(std::max(notif.getSampleRate(), 48000)));
 
         return true;
     }
