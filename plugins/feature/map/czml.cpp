@@ -77,6 +77,7 @@ QJsonObject CZML::update(PolygonMapItem *mapItem)
     if (   !mapItem->m_itemSettings->m_enabled
         || !mapItem->m_itemSettings->m_display3DTrack
         || filter(mapItem)
+        || mapItem->m_deleted
        )
     {
         // Delete obj completely (including any history)
@@ -147,6 +148,15 @@ QJsonObject CZML::update(PolygonMapItem *mapItem)
         polygon.insert("extrudedHeight", mapItem->m_extrudedHeight);
     }
 
+    // We need to have a position, otherwise viewer entity tracking doesn't seem to work
+    QJsonArray coords {
+        mapItem->m_longitude, mapItem->m_latitude, mapItem->m_altitude
+    };
+    QJsonObject position {
+        {"cartographicDegrees", coords},
+    };
+    obj.insert("position", position);
+
     obj.insert("polygon", polygon);
     obj.insert("description", mapItem->m_label);
 
@@ -165,6 +175,7 @@ QJsonObject CZML::update(PolylineMapItem *mapItem)
     if (   !mapItem->m_itemSettings->m_enabled
         || !mapItem->m_itemSettings->m_display3DTrack
         || filter(mapItem)
+        || mapItem->m_deleted
        )
     {
         // Delete obj completely (including any history)
@@ -213,6 +224,15 @@ QJsonObject CZML::update(PolylineMapItem *mapItem)
     if (mapItem->m_altitudeReference == 3) {
         polyline.insert("altitudeReference", m_heightReferences[mapItem->m_altitudeReference]); // Custom code in map3d.html
     }
+
+    // We need to have a position, otherwise viewer entity tracking doesn't seem to work
+    QJsonArray coords {
+        mapItem->m_longitude, mapItem->m_latitude, mapItem->m_altitude
+    };
+    QJsonObject position {
+        {"cartographicDegrees", coords},
+    };
+    obj.insert("position", position);
 
     obj.insert("polyline", polyline);
     obj.insert("description", mapItem->m_label);

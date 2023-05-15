@@ -15,6 +15,7 @@ On top of this, it can plot data from other plugins, such as:
 * RF Heat Maps from the Heap Map channel,
 * Radials and estimated position from the VOR localizer feature,
 * ILS course line and glide path from the ILS Demodulator.
+* DSC geographic call areas.
 
 As well as internet data sources:
 
@@ -25,6 +26,7 @@ As well as internet data sources:
 * GRAVES radar,
 * Ionosonde station data,
 * Navtex transmitters.
+* VLF transmitters.
 
 It can also create tracks showing the path aircraft, ships and APRS objects have taken, as well as predicted paths for satellites.
 
