@@ -62,6 +62,8 @@ public:
     void allUpdated();
 
     MapItem *findMapItem(const QObject *source, const QString& name);
+    MapItem *findMapItem(const QString& name);
+    QModelIndex findMapItemIndex(const QString& name);
 
     QHash<int, QByteArray> roleNames() const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -234,9 +236,6 @@ public:
 
     Q_INVOKABLE void moveToFront(int oldRow);
     Q_INVOKABLE void moveToBack(int oldRow);
-
-    ObjectMapItem *findMapItem(const QString& name);
-    QModelIndex findMapItemIndex(const QString& name);
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant& value, int role = Qt::EditRole) override;
