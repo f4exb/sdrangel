@@ -249,11 +249,11 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     numericItem->setText(numericMessage);
     evenPEItem->setText(QString("%1").arg(evenParityErrors));
     bchPEItem->setText(QString("%1").arg(bchParityErrors));
+    filterRow(row);
     ui->messages->setSortingEnabled(true);
     if (scrollToBottom) {
         ui->messages->scrollToBottom();
     }
-    filterRow(row);
 }
 
 bool PagerDemodGUI::handleMessage(const Message& message)

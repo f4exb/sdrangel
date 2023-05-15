@@ -193,11 +193,11 @@ void PacketDemodGUI::packetReceived(QByteArray packet)
         pidItem->setText(ax25.m_pid);
         dataASCIIItem->setText(ax25.m_dataASCII);
         dataHexItem->setText(ax25.m_dataHex);
+        filterRow(row);
         ui->packets->setSortingEnabled(true);
         if (scrollToBottom) {
             ui->packets->scrollToBottom();
         }
-        filterRow(row);
     }
     else
         qDebug() << "Unsupported AX.25 packet: " << packet;
