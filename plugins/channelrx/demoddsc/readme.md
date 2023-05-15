@@ -46,7 +46,7 @@ This drop down displays a list of all columns which can be used for filtering (8
 
 <h3>8: Filter Reg Exp</h3>
 
-Specifes a regular expression used to filter data in the table, using data in the column specified by (8).
+Specifes a [regular expression](https://regexr.com/) used to filter data in the table, using data in the column specified by (7).
 
 <h3>9: Filter Invalid</h3>
 
@@ -55,7 +55,7 @@ When checked, invalid messages will be filtered from the table.
 <h3>10: Feed to YaDDNet</h3>
 
 When checked, valid messages will be forwarded to [YaDDNet](http://yaddnet.org/).
-YaDDNet aggregates DSD messages from different users around the world storing them in a searchable database.
+YaDDNet aggregates DSC messages from different users around the world storing them in a searchable database.
 The messages are submitted with Preferences > My Position... > Station name used as the ID.
 
 Right click to open http://yaddnet.org/ in your browser, showing recent messages received from this ID.
@@ -72,18 +72,18 @@ Click to specify the name of the .csv file which received messasges are logged t
 
 Click to specify a previously written .csv log file, which is read and used to update the table.
 
-<h3>12: Received Messages Table</h3>
+<h3>14: Received Messages Table</h3>
 
 ![DSC Demodulator plugin GUI](../../../doc/img/DSCDemod_plugin_messages.png)
 
 The received messages table displays the contents of the messages that have been received. Most of the fields are decoded directly from the message,
-however, a few, such as ships names, are found by querying [aprs.fi](http://aprs.fi) with the MMSI.
+however, a few, such as ship names, are found by querying [aprs.fi](http://aprs.fi) with the MMSI.
 
 * Date - Date the message was received.
 * Time - Time the message was received.
 * Format - The message format (Selective call, Geographic call, Group call, Distress alert, All ships, Automatic call).
 * To - Who the message is to (The address field). This is typically an MMSI, but can also be a geographic area.
-* Country - Country with jurisdiction of the destination of the message
+* Country - Country with jurisdiction of the destination of the message.
 * Type - MMSI type of the destination of the message (Ship / Coast station).
 * Name - The name of ship / station the message is for (From aprs.fi).
 * Category - The message category (Safety, Routine, Urgency, Distress).
@@ -111,10 +111,11 @@ however, a few, such as ships names, are found by querying [aprs.fi](http://aprs
 Right clicking on the header will open a menu allowing you to select which columns are visible.
 To reorder the columns, left click and drag left or right a column header.
 Left click on a header to sort the table by the data in that column.
+
 Right clicking on a cell will open a pop-up menu that that allows:
 * MMSIs to be looked up on some popular web sites,
-* georaphical call areas to be drawn on the map,
-* ships to be located on the [Map](../../feature/map/readme.md) if also being tracked via AIS, or
-* tune SSB Demods to the RX frequency.
+* Ships to be located on the [Map](../../feature/map/readme.md) if also being tracked via AIS,
+* Tune SSB Demods to the RX frequency or
+* Geographical call areas to be drawn on the [Map](../../feature/map/readme.md):
 
 ![DSC Demodulator plugin GUI](../../../doc/img/DSCDemod_plugin_geocall.png)
