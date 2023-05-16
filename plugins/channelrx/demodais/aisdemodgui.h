@@ -24,6 +24,8 @@
 #include <QToolButton>
 #include <QHBoxLayout>
 #include <QMenu>
+#include <QPainter>
+#include <QHash>
 
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
@@ -88,9 +90,24 @@ private:
     AISDemod* m_aisDemod;
     uint32_t m_tickCount;
     MessageQueue m_inputMessageQueue;
+    bool m_loadingData;
 
     QMenu *messagesMenu;                        // Column select context menu
     QMenu *copyMenu;
+
+    QPixmap m_image;
+    QPainter m_painter;
+    QPen m_pen;
+    QDateTime m_lastSlotMapUpdate;
+    int m_slotsUsed;
+    static QMutex m_colorMutex;
+    static QHash<QString, bool> m_usedInFrame;        // Indicates if MMSI used in current frame
+    static QHash<QString, QColor> m_slotMapColors;    // MMSI to color
+    static QHash<QString, QString> m_category;        // MMSI to category
+    static QList<QRgb> m_colors;
+    static QDateTime m_lastColorUpdate;
+    static const int m_slotMapWidth = 50;      // 2250 slots per minute
+    static const int m_slotMapHeight = 45;
 
     explicit AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~AISDemodGUI();
@@ -98,10 +115,14 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
-    void messageReceived(const QByteArray& message, const QDateTime& dateTime, int slot);
+    void messageReceived(const QByteArray& message, const QDateTime& dateTime, int slot, int slots);
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+    void updateSlotMap();
+    static void updateColors();
+    static QColor getColor(const QString& mmsi);
+    static void updateCategory(const QString& mmsi, const AISMessage *message);
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
@@ -113,7 +134,9 @@ private:
         MESSAGE_COL_DATE,
         MESSAGE_COL_TIME,
         MESSAGE_COL_MMSI,
+        MESSAGE_COL_COUNTRY,
         MESSAGE_COL_TYPE,
+        MESSAGE_COL_ID,
         MESSAGE_COL_DATA,
         MESSAGE_COL_NMEA,
         MESSAGE_COL_HEX,
@@ -131,12 +154,11 @@ private slots:
     void on_udpAddress_editingFinished();
     void on_udpPort_editingFinished();
     void on_udpFormat_currentIndexChanged(int value);
-    void on_channel1_currentIndexChanged(int index);
-    void on_channel2_currentIndexChanged(int index);
     void on_messages_cellDoubleClicked(int row, int column);
     void on_logEnable_clicked(bool checked=false);
     void on_logFilename_clicked();
     void on_logOpen_clicked();
+    void on_showSlotMap_clicked(bool checked=false);
     void filterRow(int row);
     void filter();
     void messages_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);

@@ -79,7 +79,7 @@ public:
     int m_specialManoeuvre;
 
     AISPositionReport(const QByteArray ba);
-    virtual QString getType() override { return "Position report"; }
+    virtual QString getType() override;
     virtual bool hasPosition() { return m_latitudeAvailable && m_longitudeAvailable; }
     virtual float getLatitude() { return m_latitude; }
     virtual float getLongitude() { return m_longitude; }
@@ -229,8 +229,16 @@ public:
 
 class SDRBASE_API AISAssignedModeCommand : public AISMessage {
 public:
+    int m_destinationIdA;
+    int m_offsetA;
+    int m_incrementA;
+    int m_destinationIdB;
+    int m_offsetB;
+    int m_incrementB;
+    bool m_bAvailable;
     AISAssignedModeCommand(const QByteArray ba);
     virtual QString getType() override { return "Assigned mode command"; }
+    virtual QString toString() override;
 };
 
 class SDRBASE_API AISGNSSBroadcast : public AISMessage {
@@ -345,8 +353,14 @@ public:
 
 class SDRBASE_API AISSingleSlotBinaryMessage : public AISMessage {
 public:
+    bool m_destinationIndicator;
+    bool m_binaryDataFlag;
+    int m_destinationId;
+    bool m_destinationIdAvailable;
+
     AISSingleSlotBinaryMessage(const QByteArray ba);
     virtual QString getType() override { return "Single slot binary message"; }
+    virtual QString toString() override;
 };
 
 class SDRBASE_API AISMultipleSlotBinaryMessage : public AISMessage {

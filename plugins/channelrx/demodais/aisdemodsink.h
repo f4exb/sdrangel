@@ -128,13 +128,13 @@ private:
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;
 
-    SampleVector m_sampleBuffer;
+    ComplexVector m_sampleBuffer[AISDemodSettings::m_scopeStreams];
     static const int m_sampleBufferSize = AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE / 20;
     int m_sampleBufferIndex;
 
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
-    void sampleToScope(Complex sample);
+    void sampleToScope(Complex sample, Real magsq, Real fmDemod, Real filt, Real rxBuf, Real corr, Real thresholdMet, Real dcOffset, Real crcValid);
 };
 
 #endif // INCLUDE_AISDEMODSINK_H

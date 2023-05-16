@@ -91,7 +91,18 @@
       </column>
       <column>
        <property name="text">
+        <string>Country</string>
+       </property>
+       <property name="toolTip">
+        <string>Country with jurisdiction over station/vessel</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>Type</string>
+       </property>
+       <property name="toolTip">
+        <string>Message type</string>
        </property>
       </column>
       <column>

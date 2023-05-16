@@ -336,12 +336,24 @@ QString AISPositionReport::getStatusString(int status)
    return statuses[status];
 }
 
+QString AISPositionReport::getType()
+{
+    if (m_id == 1) {
+        return "Position report (Scheduled)";
+    } else if (m_id == 2) {
+        return "Position report (Assigned)";
+    } else {
+        return "Position report (Interrogated)";
+    }
+}
+
 QString AISPositionReport::toString()
 {
+    QString speed = m_speedOverGround == 1022 ? ">102.2" : QString::number(m_speedOverGround);
     return QString("Lat: %1%6 Lon: %2%6 Speed: %3 knts Course: %4%6 Status: %5")
                 .arg(m_latitude)
                 .arg(m_longitude)
-                .arg(m_speedOverGround)
+                .arg(speed)
                 .arg(m_course)
                 .arg(AISPositionReport::getStatusString(m_status))
                 .arg(QChar(0xb0));
@@ -444,7 +456,7 @@ AISSARAircraftPositionReport::AISSARAircraftPositionReport(QByteArray ba) :
 
     int sog = ((ba[6] & 0x3f) << 4) | ((ba[7] >> 4) & 0xf);
     m_speedOverGroundAvailable = sog != 1023;
-    m_speedOverGround = sog * 0.1f;
+    m_speedOverGround = sog;
 
     m_positionAccuracy = (ba[7] >> 3) & 0x1;
 
@@ -467,12 +479,14 @@ AISSARAircraftPositionReport::AISSARAircraftPositionReport(QByteArray ba) :
 
 QString AISSARAircraftPositionReport::toString()
 {
+    QString altitude = m_altitude == 4094 ? ">4094" : QString::number(m_altitude);
+    QString speed = m_speedOverGround == 1022 ? ">1022" : QString::number(m_speedOverGround);
     return QString("Lat: %1%6 Lon: %2%6 Speed: %3 knts Course: %4%6 Alt: %5 m")
                 .arg(m_latitude)
                 .arg(m_longitude)
-                .arg(m_speedOverGround)
+                .arg(speed)
                 .arg(m_course)
-                .arg(m_altitude)
+                .arg(altitude)
                 .arg(QChar(0xb0));
 }
 
@@ -520,6 +534,18 @@ AISInterrogation::AISInterrogation(QByteArray ba) :
 AISAssignedModeCommand::AISAssignedModeCommand(QByteArray ba) :
     AISMessage(ba)
 {
+    m_destinationIdA = ((ba[5] & 0xff) << 22) | ((ba[6] & 0xff) << 14) | ((ba[7] & 0xff) << 6) | ((ba[8] >> 2) & 0x3f);
+    m_offsetA = ((ba[8] & 0x3) << 10) | ((ba[9] & 0xff) << 2) | ((ba[10] >> 6) & 0x3);
+    m_incrementA = ((ba[10] & 0x3f) << 4) | ((ba[11] >> 4) & 0xf);
+    m_bAvailable = false;
+}
+
+QString AISAssignedModeCommand::toString()
+{
+    return QString("Dest A: %1 Offset A: %2 Inc A: %3")
+                .arg(m_destinationIdA)
+                .arg(m_offsetA)
+                .arg(m_incrementA);
 }
 
 AISGNSSBroadcast::AISGNSSBroadcast(QByteArray ba) :
@@ -721,6 +747,25 @@ QString AISStaticDataReport::toString()
 AISSingleSlotBinaryMessage::AISSingleSlotBinaryMessage(QByteArray ba) :
     AISMessage(ba)
 {
+    m_destinationIndicator = (ba[4] >> 1) & 1;
+    m_binaryDataFlag = ba[4] & 1;
+    if (m_destinationIndicator) {
+        m_destinationId = ((ba[5] & 0xff) << 22) | ((ba[6] & 0xff) << 14) | ((ba[7] & 0xff) << 6) | ((ba[8] >> 2) & 0x3f);
+    }
+    m_destinationIdAvailable = m_destinationIndicator;
+}
+
+QString AISSingleSlotBinaryMessage::toString()
+{
+    QStringList s;
+
+    s.append(QString("Destination: %1").arg(m_destinationIndicator ? "Broadcast" : "Addressed"));
+    s.append(QString("Flag: %1").arg(m_binaryDataFlag ? "Unstructured" : "Structured"));
+    if (m_destinationIdAvailable) {
+        s.append(QString("Destination Id: %1").arg(m_destinationId));
+    }
+
+    return s.join(" ");
 }
 
 AISMultipleSlotBinaryMessage::AISMultipleSlotBinaryMessage(QByteArray ba) :

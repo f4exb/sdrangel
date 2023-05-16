@@ -47,7 +47,9 @@ AISDemodSink::AISDemodSink(AISDemod *aisDemod) :
 
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
-    m_sampleBuffer.resize(m_sampleBufferSize);
+    for (int i = 0; i < AISDemodSettings::m_scopeStreams; i++) {
+        m_sampleBuffer[i].resize(m_sampleBufferSize);
+    }
 
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -59,18 +61,28 @@ AISDemodSink::~AISDemodSink()
     delete[] m_train;
 }
 
-void AISDemodSink::sampleToScope(Complex sample)
+void AISDemodSink::sampleToScope(Complex sample, Real magsq, Real fmDemod, Real filt, Real rxBuf, Real corr, Real thresholdMet, Real dcOffset, Real crcValid)
 {
     if (m_scopeSink)
     {
-        Real r = std::real(sample) * SDR_RX_SCALEF;
-        Real i = std::imag(sample) * SDR_RX_SCALEF;
-        m_sampleBuffer[m_sampleBufferIndex++] = Sample(r, i);
-
+        m_sampleBuffer[0][m_sampleBufferIndex] = sample;
+        m_sampleBuffer[1][m_sampleBufferIndex] = Complex(m_magsq, 0.0f);
+        m_sampleBuffer[2][m_sampleBufferIndex] = Complex(fmDemod, 0.0f);
+        m_sampleBuffer[3][m_sampleBufferIndex] = Complex(filt, 0.0f);
+        m_sampleBuffer[4][m_sampleBufferIndex] = Complex(rxBuf, 0.0f);
+        m_sampleBuffer[5][m_sampleBufferIndex] = Complex(corr, 0.0f);
+        m_sampleBuffer[6][m_sampleBufferIndex] = Complex(thresholdMet, 0.0f);
+        m_sampleBuffer[7][m_sampleBufferIndex] = Complex(dcOffset, 0.0f);
+        m_sampleBuffer[8][m_sampleBufferIndex] = Complex(crcValid, 0.0f);
+        m_sampleBufferIndex++;
         if (m_sampleBufferIndex == m_sampleBufferSize)
         {
-            std::vector<SampleVector::const_iterator> vbegin;
-            vbegin.push_back(m_sampleBuffer.begin());
+            std::vector<ComplexVector::const_iterator> vbegin;
+
+            for (int i = 0; i < AISDemodSettings::m_scopeStreams; i++) {
+                vbegin.push_back(m_sampleBuffer[i].begin());
+            }
+
             m_scopeSink->feed(vbegin, m_sampleBufferSize);
             m_sampleBufferIndex = 0;
         }
@@ -252,10 +264,13 @@ void AISDemodSink::processOneSample(Complex &ci)
                                     // This is unlikely to be accurate in absolute terms, given we don't know latency from SDR or buffering within SDRangel
                                     // But can be used to get an idea of congestion
                                     QDateTime currentTime = QDateTime::currentDateTime();
-                                    QDateTime startDateTime = currentTime.addMSecs(-(totalBitCount + 8 + 24 + 8) * (1000.0 / m_settings.m_baud)); // Add ramp up, preamble and start-flag
+                                    int txTimeMs = (totalBitCount + 8 + 24 + 8) * (1000.0 / m_settings.m_baud); // Add ramp up, preamble and start-flag
+                                    QDateTime startDateTime = currentTime.addMSecs(-txTimeMs);
                                     int ms = startDateTime.time().second() * 1000 + startDateTime.time().msec();
-                                    int slot = ms / 26.67; // 2250 slots per minute, 26ms per slot
-                                    AISDemod::MsgMessage *msg = AISDemod::MsgMessage::create(rxPacket, currentTime, slot);
+                                    float slotTime = 60.0f * 1000.0f / 2250.0f; // 2250 slots per minute, 26.6ms per slot
+                                    int slot = ms / slotTime;
+                                    int totalSlots = std::ceil(txTimeMs / slotTime);
+                                    AISDemod::MsgMessage *msg = AISDemod::MsgMessage::create(rxPacket, currentTime, slot, totalSlots);
                                     getMessageQueueToChannel()->push(msg);
                                 }
 
@@ -318,74 +333,7 @@ void AISDemodSink::processOneSample(Complex &ci)
     }
 
     // Select signals to feed to scope
-    Complex scopeSample;
-    switch (m_settings.m_scopeCh1)
-    {
-    case 0:
-        scopeSample.real(ci.real() / SDR_RX_SCALEF);
-        break;
-    case 1:
-        scopeSample.real(ci.imag() / SDR_RX_SCALEF);
-        break;
-    case 2:
-        scopeSample.real(magsq);
-        break;
-    case 3:
-        scopeSample.real(fmDemod);
-        break;
-    case 4:
-        scopeSample.real(filt);
-        break;
-    case 5:
-        scopeSample.real(m_rxBuf[m_rxBufIdx]);
-        break;
-    case 6:
-        scopeSample.real(corr / 100.0);
-        break;
-    case 7:
-        scopeSample.real(thresholdMet);
-        break;
-    case 8:
-        scopeSample.real(dcOffset);
-        break;
-    case 9:
-        scopeSample.real(scopeCRCValid ? 1.0 : (scopeCRCInvalid ? -1.0 : 0));
-        break;
-    }
-    switch (m_settings.m_scopeCh2)
-    {
-    case 0:
-        scopeSample.imag(ci.real() / SDR_RX_SCALEF);
-        break;
-    case 1:
-        scopeSample.imag(ci.imag() / SDR_RX_SCALEF);
-        break;
-    case 2:
-        scopeSample.imag(magsq);
-        break;
-    case 3:
-        scopeSample.imag(fmDemod);
-        break;
-    case 4:
-        scopeSample.imag(filt);
-        break;
-    case 5:
-        scopeSample.imag(m_rxBuf[m_rxBufIdx]);
-        break;
-    case 6:
-        scopeSample.imag(corr / 100.0);
-        break;
-    case 7:
-        scopeSample.imag(thresholdMet);
-        break;
-    case 8:
-        scopeSample.imag(dcOffset);
-        break;
-    case 9:
-        scopeSample.imag(scopeCRCValid ? 1.0 : (scopeCRCInvalid ? -1.0 : 0));
-        break;
-    }
-    sampleToScope(scopeSample);
+    sampleToScope(ci / SDR_RX_SCALEF, magsq, fmDemod, filt, m_rxBuf[m_rxBufIdx], corr / 100.0, thresholdMet, dcOffset, scopeCRCValid ? 1.0 : (scopeCRCInvalid ? -1.0 : 0));
 
     // Send demod signal to Demod Analzyer feature
     m_demodBuffer[m_demodBufferFill++] = fmDemod * std::numeric_limits<int16_t>::max();

@@ -28,6 +28,7 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QScrollBar>
+#include <QIcon>
 
 #include "aisdemodgui.h"
 
@@ -40,6 +41,7 @@
 #include "util/ais.h"
 #include "util/csv.h"
 #include "util/db.h"
+#include "util/mmsi.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/dialpopup.h"
@@ -61,10 +63,12 @@ void AISDemodGUI::resizeTable()
     // Trailing spaces are for sort arrow
     int row = ui->messages->rowCount();
     ui->messages->setRowCount(row + 1);
-    ui->messages->setItem(row, MESSAGE_COL_DATE, new QTableWidgetItem("Fri Apr 15 2016-"));
+    ui->messages->setItem(row, MESSAGE_COL_DATE, new QTableWidgetItem("Frid Apr 15 2016-"));
     ui->messages->setItem(row, MESSAGE_COL_TIME, new QTableWidgetItem("10:17:00"));
     ui->messages->setItem(row, MESSAGE_COL_MMSI, new QTableWidgetItem("123456789"));
+    ui->messages->setItem(row, MESSAGE_COL_COUNTRY, new QTableWidgetItem("flag"));
     ui->messages->setItem(row, MESSAGE_COL_TYPE, new QTableWidgetItem("Position report"));
+    ui->messages->setItem(row, MESSAGE_COL_ID, new QTableWidgetItem("25"));
     ui->messages->setItem(row, MESSAGE_COL_DATA, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZ"));
     ui->messages->setItem(row, MESSAGE_COL_NMEA, new QTableWidgetItem("!AIVDM,1,1,,A,AAAAAAAAAAAAAAAAAAAAAAAAAAAA,0*00"));
     ui->messages->setItem(row, MESSAGE_COL_HEX, new QTableWidgetItem("04058804002000069a0760728d9e00000040000000"));
@@ -154,8 +158,270 @@ bool AISDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
+// Distint palette generator
+// https://mokole.com/palette.html
+QList<QRgb> AISDemodGUI::m_colors = {
+    0xffffff,
+    0xff0000,
+    0x00ff00,
+    0x0000ff,
+    0x00ffff,
+    0xff00ff,
+    0x7fff00,
+    0x000080,
+    0xa9a9a9,
+    0x2f4f4f,
+    0x556b2f,
+    0x8b4513,
+    0x6b8e23,
+    0x191970,
+    0x006400,
+    0x708090,
+    0x8b0000,
+    0x3cb371,
+    0xbc8f8f,
+    0x663399,
+    0xb8860b,
+    0xbdb76b,
+    0x008b8b,
+    0x4682b4,
+    0xd2691e,
+    0x9acd32,
+    0xcd5c5c,
+    0x32cd32,
+    0x8fbc8f,
+    0x8b008b,
+    0xb03060,
+    0x66cdaa,
+    0x9932cc,
+    0x00ced1,
+    0xff8c00,
+    0xffd700,
+    0xc71585,
+    0x0000cd,
+    0xdeb887,
+    0x00ff7f,
+    0x4169e1,
+    0xe9967a,
+    0xdc143c,
+    0x00bfff,
+    0xf4a460,
+    0x9370db,
+    0xa020f0,
+    0xff6347,
+    0xd8bfd8,
+    0xdb7093,
+    0xf0e68c,
+    0xffff54,
+    0x6495ed,
+    0xdda0dd,
+    0x87ceeb,
+    0xff1493,
+    0xafeeee,
+    0xee82ee,
+    0xfaf0e6,
+    0x98fb98,
+    0x7fffd4,
+    0xff69b4,
+    0xfffacd,
+    0xffb6c1,
+};
+
+QHash<QString, QRgb> m_categoryColors = {
+    {"Class A Vessel", 0xff0000},
+    {"Class B Vessel", 0x0000ff},
+    {"Coast", 0x00ff00},
+    {"Physical AtoN", 0xffff00},
+    {"Virtual AtoN", 0xc0c000},
+    {"Mobile AtoN", 0xa0a000},
+    {"AtoN", 0x808000},
+    {"SAR", 0x00ffff},
+    {"SAR Aircraft", 0x00c0c0},
+    {"SAR Helicopter", 0x00a0a0},
+    {"Group", 0xff00ff},
+    {"Man overboard", 0xc000c0},
+    {"EPIRB", 0xa000a0},
+    {"AMRD", 0x800080},
+    {"Craft with parent ship", 0x600060}
+};
+
+QMutex AISDemodGUI::m_colorMutex;
+QHash<QString, bool> AISDemodGUI::m_usedInFrame;
+QHash<QString, QColor> AISDemodGUI::m_slotMapColors;
+QDateTime AISDemodGUI::m_lastColorUpdate;
+QHash<QString, QString> AISDemodGUI::m_category;
+
+QColor AISDemodGUI::getColor(const QString& mmsi)
+{
+    if (true)
+    {
+        if (m_category.contains(mmsi))
+        {
+            QString category = m_category.value(mmsi);
+            if (m_categoryColors.contains(category)) {
+                return QColor(m_categoryColors.value(category));
+            }
+            qDebug() << "No color for " << category;
+        }
+        else
+        {
+            // Use white for no category
+            return Qt::white;
+        }
+    }
+    else
+    {
+        QMutexLocker locker(&m_colorMutex);
+
+        QColor color;
+        if (m_slotMapColors.contains(mmsi))
+        {
+            m_usedInFrame.insert(mmsi, true);
+            color = m_slotMapColors.value(mmsi);
+        }
+        else
+        {
+            if (m_colors.size() > 0)
+            {
+                color = m_colors.takeFirst();
+                qDebug() << "Taking colour from list " << color << "for" << mmsi << " - remaining " << m_colors.size();
+            }
+            else
+            {
+                qDebug() << "Out of colors - looking to reuse";
+                // Look for recently unused color
+                QMutableHashIterator<QString, bool> it(m_usedInFrame);
+                color = Qt::black;
+                while (it.hasNext())
+                {
+                    it.next();
+                    if (!it.value())
+                    {
+                        color = m_slotMapColors.value(it.key());
+                        if (color != Qt::black)
+                        {
+                            qDebug() << "Reusing " << color << " from " << it.key();
+                            m_slotMapColors.remove(it.key());
+                            m_usedInFrame.remove(it.key());
+                            break;
+                        }
+                    }
+                }
+            }
+            if (color != Qt::black)
+            {
+                m_slotMapColors.insert(mmsi, color);
+                m_usedInFrame.insert(mmsi, true);
+            }
+            else
+            {
+                qDebug() << "No free colours";
+            }
+        }
+
+        // Don't actually draw with black, as it's the background colour
+        if (color == Qt::black) {
+            return Qt::white;
+        } else {
+            return color;
+        }
+    }
+}
+
+void AISDemodGUI::updateColors()
+{
+    QMutexLocker locker(&m_colorMutex);
+
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    if (!m_lastColorUpdate.isValid() || (m_lastColorUpdate.time().minute() != currentDateTime.time().minute()))
+    {
+        QHashIterator<QString, bool> it(m_usedInFrame);
+        while (it.hasNext())
+        {
+            it.next();
+            m_usedInFrame.insert(it.key(), false);
+        }
+    }
+    m_lastColorUpdate = currentDateTime;
+}
+
+void AISDemodGUI::updateSlotMap()
+{
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+
+    if (!m_lastSlotMapUpdate.isValid() || (m_lastSlotMapUpdate.time().minute() != currentDateTime.time().minute()))
+    {
+        // Update slot utilisation stats for previous frame
+        ui->slotsFree->setText(QString::number(2250 - m_slotsUsed));
+        ui->slotsUsed->setText(QString::number(m_slotsUsed));
+        ui->slotUtilization->setValue(std::round(m_slotsUsed * 100.0 / 2250.0));
+        m_slotsUsed = 0;
+        // Draw empty grid
+        m_image.fill(Qt::transparent);
+        //m_image.fill(Qt::);
+        m_painter.setPen(Qt::black);
+        for (int x = 0; x < m_image.width(); x += 5) {
+            m_painter.drawLine(x, 0, x, m_image.height() - 1);
+        }
+        for (int y = 0; y < m_image.height(); y += 5) {
+            m_painter.drawLine(0, y, m_image.width() - 1, y);
+        }
+        updateColors();
+    }
+    ui->slotMap->setPixmap(m_image);
+
+    m_lastSlotMapUpdate = currentDateTime;
+}
+
+void AISDemodGUI::updateCategory(const QString& mmsi, const AISMessage *message)
+{
+    QMutexLocker locker(&m_colorMutex);
+
+    if (!m_category.contains(mmsi))
+    {
+        // Categorise by MMSI
+        QString category = MMSI::getCategory(mmsi);
+        if (category != "Ship")
+        {
+            m_category.insert(mmsi, category);
+            return;
+        }
+
+        // Handle Search and Rescue Aircraft Report, where MMSI doesn't indicate SAR
+        if (message->m_id == 9)
+        {
+            m_category.insert(mmsi, "SAR");
+            return;
+        }
+
+        // If ship, determine Class A or B by message type
+        // See table 42 in ITU-R M.1371-5
+        if (   (message->m_id <= 12)
+            || ((message->m_id >= 15) && (message->m_id <= 17))
+            || ((message->m_id >= 20) && (message->m_id <= 23))
+            || (message->m_id >= 25)
+           )
+        {
+            m_category.insert(mmsi, "Class A Vessel");
+            return;
+        }
+
+        // Only Class B should transmit Part B static data reports
+        const AISStaticDataReport *staticDataReport = dynamic_cast<const AISStaticDataReport *>(message);
+        if (   (message->m_id == 18)
+            || (message->m_id == 19)
+            || (staticDataReport && (staticDataReport->m_partNumber == 1))
+           )
+        {
+            m_category.insert(mmsi, "Class B Vessel");
+            return;
+        }
+        // Other messages (such as safety) could be broadcast from either Class A or B
+    }
+}
+
 // Add row to table
-void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& dateTime, int slot)
+void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& dateTime, int slot, int totalSlots)
 {
     AISMessage *ais;
 
@@ -174,7 +440,9 @@ void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& da
     QTableWidgetItem *dateItem = new QTableWidgetItem();
     QTableWidgetItem *timeItem = new QTableWidgetItem();
     QTableWidgetItem *mmsiItem = new QTableWidgetItem();
+    QTableWidgetItem *countryItem = new QTableWidgetItem();
     QTableWidgetItem *typeItem = new QTableWidgetItem();
+    QTableWidgetItem *idItem = new QTableWidgetItem();
     QTableWidgetItem *dataItem = new QTableWidgetItem();
     QTableWidgetItem *nmeaItem = new QTableWidgetItem();
     QTableWidgetItem *hexItem = new QTableWidgetItem();
@@ -182,24 +450,51 @@ void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& da
     ui->messages->setItem(row, MESSAGE_COL_DATE, dateItem);
     ui->messages->setItem(row, MESSAGE_COL_TIME, timeItem);
     ui->messages->setItem(row, MESSAGE_COL_MMSI, mmsiItem);
+    ui->messages->setItem(row, MESSAGE_COL_COUNTRY, countryItem);
     ui->messages->setItem(row, MESSAGE_COL_TYPE, typeItem);
+    ui->messages->setItem(row, MESSAGE_COL_ID, idItem);
     ui->messages->setItem(row, MESSAGE_COL_DATA, dataItem);
     ui->messages->setItem(row, MESSAGE_COL_NMEA, nmeaItem);
     ui->messages->setItem(row, MESSAGE_COL_HEX, hexItem);
     ui->messages->setItem(row, MESSAGE_COL_SLOT, slotItem);
     dateItem->setText(dateTime.date().toString());
     timeItem->setText(dateTime.time().toString());
-    mmsiItem->setText(QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0')));
+    QString mmsi = QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0'));
+    mmsiItem->setText(mmsi);
+    QIcon *flag = MMSI::getFlagIcon(mmsi);
+    if (flag)
+    {
+        countryItem->setSizeHint(QSize(40, 20));
+        countryItem->setIcon(*flag);
+    }
     typeItem->setText(ais->getType());
+    idItem->setData(Qt::DisplayRole, ais->m_id);
     dataItem->setText(ais->toString());
     nmeaItem->setText(ais->toNMEA());
     hexItem->setText(ais->toHex());
     slotItem->setData(Qt::DisplayRole, slot);
-    ui->messages->setSortingEnabled(true);
-    if (scrollToBottom) {
-        ui->messages->scrollToBottom();
+    if (!m_loadingData)
+    {
+        filterRow(row);
+        ui->messages->setSortingEnabled(true);
+        if (scrollToBottom) {
+            ui->messages->scrollToBottom();
+        }
     }
-    filterRow(row);
+
+    updateCategory(mmsi, ais);
+
+    // Update slot map
+    updateSlotMap();
+    QColor color = getColor(mmsi);
+    m_painter.setPen(color);
+    for (int i = 0; i < totalSlots; i++)
+    {
+        int y = (slot + i) / m_slotMapWidth;
+        int x = (slot + i) % m_slotMapWidth;
+        m_painter.fillRect(x * 5 + 1, y * 5 + 1, 4, 4, color);
+    }
+    m_slotsUsed += totalSlots;
 
     delete ais;
 }
@@ -221,7 +516,7 @@ bool AISDemodGUI::handleMessage(const Message& message)
     else if (AISDemod::MsgMessage::match(message))
     {
         AISDemod::MsgMessage& report = (AISDemod::MsgMessage&) message;
-        messageReceived(report.getMessage(), report.getDateTime(), report.getSlot());
+        messageReceived(report.getMessage(), report.getDateTime(), report.getSlot(), report.getSlots());
         return true;
     }
     else if (DSPSignalNotification::match(message))
@@ -330,18 +625,6 @@ void AISDemodGUI::on_udpFormat_currentIndexChanged(int value)
     applySettings();
 }
 
-void AISDemodGUI::on_channel1_currentIndexChanged(int index)
-{
-    m_settings.m_scopeCh1 = index;
-    applySettings();
-}
-
-void AISDemodGUI::on_channel2_currentIndexChanged(int index)
-{
-    m_settings.m_scopeCh2 = index;
-    applySettings();
-}
-
 void AISDemodGUI::on_messages_cellDoubleClicked(int row, int column)
 {
     // Get MMSI of message in row double clicked
@@ -440,7 +723,9 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_deviceCenterFrequency(0),
     m_basebandSampleRate(1),
     m_doApplySettings(true),
-    m_tickCount(0)
+    m_tickCount(0),
+    m_loadingData(false),
+    m_slotsUsed(0)
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodais/readme.md";
@@ -458,8 +743,10 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     m_scopeVis = m_aisDemod->getScopeSink();
     m_scopeVis->setGLScope(ui->glScope);
+    m_scopeVis->setNbStreams(AISDemodSettings::m_scopeStreams);
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
+    ui->scopeGUI->setStreams(QStringList({"IQ", "MagSq", "FM demod", "Gaussian", "RX buf", "Correlation", "Threshold met", "DC offset", "CRC"}));
 
     // Scope settings to display the IQ waveforms
     ui->scopeGUI->setPreTrigger(1);
@@ -533,6 +820,16 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(tableTapAndHold, &TableTapAndHold::tapAndHold, this, &AISDemodGUI::customContextMenuRequested);
 
     ui->scopeContainer->setVisible(false);
+
+    // Create slot map image
+    m_image = QPixmap(m_slotMapWidth*5+1, m_slotMapHeight*5+1);
+    m_image.fill(Qt::transparent);
+    m_image.fill(Qt::black);
+    m_painter.begin(&m_image);
+    m_pen.setColor(Qt::white);
+    m_painter.setPen(m_pen);
+    ui->slotMap->setPixmap(m_image);
+    updateSlotMap();
 
     displaySettings();
     makeUIConnections();
@@ -612,11 +909,11 @@ void AISDemodGUI::displaySettings()
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
     ui->udpFormat->setCurrentIndex((int)m_settings.m_udpFormat);
 
-    ui->channel1->setCurrentIndex(m_settings.m_scopeCh1);
-    ui->channel2->setCurrentIndex(m_settings.m_scopeCh2);
-
     ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
     ui->logEnable->setChecked(m_settings.m_logEnabled);
+
+    ui->showSlotMap->setChecked(m_settings.m_showSlotMap);
+    ui->slotMapWidget->setVisible(m_settings.m_showSlotMap);
 
     // Order and size columns
     QHeaderView *header = ui->messages->horizontalHeader();
@@ -662,11 +959,20 @@ void AISDemodGUI::tick()
             (100.0f + powDbPeak) / 100.0f,
             nbMagsqSamples);
 
-    if (m_tickCount % 4 == 0) {
+    if (m_tickCount % 4 == 0)
+    {
         ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
+        updateSlotMap();
     }
 
     m_tickCount++;
+}
+
+void AISDemodGUI::on_showSlotMap_clicked(bool checked)
+{
+    ui->slotMapWidget->setVisible(checked);
+    m_settings.m_showSlotMap = checked;
+    applySettings();
 }
 
 void AISDemodGUI::on_logEnable_clicked(bool checked)
@@ -704,6 +1010,8 @@ void AISDemodGUI::on_logOpen_clicked()
             QFile file(fileNames[0]);
             if (file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
+                QDateTime startTime = QDateTime::currentDateTime();
+                m_loadingData = true;
                 QTextStream in(&file);
                 QString error;
                 QHash<QString, int> colIndexes = CSV::readHeader(in, {"Date", "Time", "Data", "Slot"}, error);
@@ -713,7 +1021,8 @@ void AISDemodGUI::on_logOpen_clicked()
                     int timeCol = colIndexes.value("Time");
                     int dataCol = colIndexes.value("Data");
                     int slotCol = colIndexes.value("Slot");
-                    int maxCol = std::max({dateCol, timeCol, dataCol, slotCol});
+                    int slotsCol = colIndexes.contains("Slots") ? colIndexes.value("Slots") : -1;
+                    int maxCol = std::max({dateCol, timeCol, dataCol, slotCol, slotsCol});
 
                     QMessageBox dialog(this);
                     dialog.setText("Reading messages");
@@ -725,7 +1034,7 @@ void AISDemodGUI::on_logOpen_clicked()
                     QStringList cols;
 
                     QList<ObjectPipe*> aisPipes;
-                    MainCore::instance()->getMessagePipes().getMessagePipes(this, "ais", aisPipes);
+                    MainCore::instance()->getMessagePipes().getMessagePipes(m_aisDemod, "ais", aisPipes);
 
                     while (!cancelled && CSV::readRow(in, &cols))
                     {
@@ -736,9 +1045,10 @@ void AISDemodGUI::on_logOpen_clicked()
                             QDateTime dateTime(date, time);
                             QByteArray bytes = QByteArray::fromHex(cols[dataCol].toLatin1());
                             int slot = cols[slotCol].toInt();
+                            int totalSlots = slotsCol == -1 ? 1 : cols[slotsCol].toInt();
 
                             // Add to table
-                            messageReceived(bytes, dateTime, slot);
+                            messageReceived(bytes, dateTime, slot, totalSlots);
 
                             // Forward to AIS feature
                             for (const auto& pipe : aisPipes)
@@ -764,6 +1074,10 @@ void AISDemodGUI::on_logOpen_clicked()
                 {
                     QMessageBox::critical(this, "AIS Demod", error);
                 }
+                m_loadingData = false;
+                ui->messages->setSortingEnabled(true);
+                QDateTime finishTime = QDateTime::currentDateTime();
+                qDebug() << "Read CSV in " << startTime.secsTo(finishTime);
             }
             else
             {
@@ -789,8 +1103,7 @@ void AISDemodGUI::makeUIConnections()
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &AISDemodGUI::on_logEnable_clicked);
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &AISDemodGUI::on_logFilename_clicked);
     QObject::connect(ui->logOpen, &QToolButton::clicked, this, &AISDemodGUI::on_logOpen_clicked);
-    QObject::connect(ui->channel1, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AISDemodGUI::on_channel1_currentIndexChanged);
-    QObject::connect(ui->channel2, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AISDemodGUI::on_channel2_currentIndexChanged);
+    QObject::connect(ui->showSlotMap, &ButtonSwitch::clicked, this, &AISDemodGUI::on_showSlotMap_clicked);
 }
 
 void AISDemodGUI::updateAbsoluteCenterFrequency()
