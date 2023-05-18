@@ -77,6 +77,7 @@ ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
+    m_networkManager = new QNetworkAccessManager();
 
     QObject::connect(
         this,

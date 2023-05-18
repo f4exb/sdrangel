@@ -51,6 +51,7 @@ FileOutput::FileOutput(DeviceAPI *deviceAPI) :
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_deviceAPI->setNbSinkStreams(1);
+    m_networkManager = new QNetworkAccessManager();
 }
 
 FileOutput::~FileOutput()

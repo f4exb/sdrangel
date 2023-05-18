@@ -50,6 +50,7 @@ AudioOutput::AudioOutput(DeviceAPI *deviceAPI) :
     m_sampleRate = audioDeviceManager->getOutputSampleRate(m_audioDeviceIndex);
     m_settings.m_deviceName = AudioDeviceManager::m_defaultDeviceName;
     m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(48000));
+    m_networkManager = new QNetworkAccessManager();
 }
 
 AudioOutput::~AudioOutput()
