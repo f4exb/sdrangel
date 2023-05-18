@@ -82,19 +82,40 @@ Click to specify the name of the .csv file which received AIS messages are logge
 
 Click to specify a previously written AIS .csv log file, which is read and used to update the table.
 
+<h3>Slot Map</h3>
+
+AIS uses TMDA (Time Division Multiple Access), whereby each one minute frame is divided into 2,250 26.6ms slots.
+The slot map shows which slots within a frame are used. The slot map is drawn as bitmap of 50x45 pixels.
+
+![AIS Slot Map](../../../doc/img/AISDemod_plugin_slotmap.png)
+
+Slots are by category:
+
+* Red: Class A Mobile
+* Blue: Class B Mobile
+* Green: Base Station
+* Yellow: AtoN (Aid-to-Navigation)
+* Cyan: Search and Rescue
+* Magenta: Other (Man overboard / EPIRB / AMRD).
+
+Due to SDR to SDRangel latency being unknown, the slot map is likely to have some offset, as slot timing is calculated based on the time messages
+are demodulated in SDRangel.
+
 <h3>Received Messages Table</h3>
 
 The received messages table displays information about each AIS message received. Only messages with valid CRCs are displayed.
 
-![AIS Demodulator plugin GUI](../../../doc/img/AISDemod_plugin_messages.png)
+![AIS Received Messages Table](../../../doc/img/AISDemod_plugin_messages.png)
 
 * Date - The date the message was received.
 * Time - The time the message was received.
 * MMSI - The Maritime Mobile Service Identity number of the source of the message. Double clicking on this column will search for the MMSI on https://www.vesselfinder.com/
+* Country - The country with jurisdiction over station/vessel.
 * Type - The type of AIS message. E.g. Position report, Base station report or Ship static and voyage related data.
+* Id - Message type numeric identifier.
 * Data - A textual decode of the message displaying the most interesting fields.
 * NMEA - The message in NMEA format.
 * Hex - The message in hex format.
-* Slot - Time slot (0-2249). Due to SDR to SDRangel latency being unknown, this is likely to have some offset.
+* Slot - Time slot (0-2249).
 
 Right clicking on the table header allows you to select which columns to show. The columns can be reordered by left clicking and dragging the column header. Right clicking on an item in the table allows you to copy the value to the clipboard.

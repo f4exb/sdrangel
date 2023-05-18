@@ -87,12 +87,11 @@ void MapModel::update(const QObject *sourcePipe, SWGSDRangel::SWGMapItem *swgMap
         QString image = *swgMapItem->getImage();
         if (image.isEmpty())
         {
-            // Delete the item
+            // Delete the item from 2D map
             remove(item);
-            // Need to call update, for it to be removed in 3D map
-            // Item is set to not be available from this point in time
-            // It will still be available if time is set in the past
+            // Delete from 3D map
             item->update(swgMapItem);
+            update3D(item);
         }
         else
         {
@@ -176,6 +175,36 @@ MapItem *MapModel::findMapItem(const QObject *source, const QString& name)
         return m_itemsHash.value(key);
     }
     return nullptr;
+}
+
+// FIXME: This should potentially return a list, as we have have multiple items with the same name
+// from different sources
+MapItem *MapModel::findMapItem(const QString& name)
+{
+    QListIterator<MapItem *> i(m_items);
+    while (i.hasNext())
+    {
+        MapItem *item = i.next();
+        if (!item->m_name.compare(name, Qt::CaseInsensitive)) {
+            return item;
+        }
+    }
+    return nullptr;
+}
+
+QModelIndex MapModel::findMapItemIndex(const QString& name)
+{
+    int idx = 0;
+    QListIterator<MapItem *> i(m_items);
+    while (i.hasNext())
+    {
+        MapItem *item = i.next();
+        if (item->m_name == name) {
+            return index(idx);
+        }
+        idx++;
+    }
+    return index(-1);
 }
 
 QHash<int, QByteArray> MapModel::roleNames() const
@@ -587,36 +616,6 @@ Q_INVOKABLE void ObjectMapModel::moveToBack(int oldRow)
         endResetModel();
         //emit dataChanged(index(oldRow), index(newRow));
     }
-}
-
-// FIXME: This should potentially return a list, as we have have multiple items with the same name
-// from different sources
-ObjectMapItem *ObjectMapModel::findMapItem(const QString& name)
-{
-    QListIterator<MapItem *> i(m_items);
-    while (i.hasNext())
-    {
-        MapItem *item = i.next();
-        if (!item->m_name.compare(name, Qt::CaseInsensitive)) {
-            return (ObjectMapItem *)item;
-        }
-    }
-    return nullptr;
-}
-
-QModelIndex ObjectMapModel::findMapItemIndex(const QString& name)
-{
-    int idx = 0;
-    QListIterator<MapItem *> i(m_items);
-    while (i.hasNext())
-    {
-        MapItem *item = i.next();
-        if (item->m_name == name) {
-            return index(idx);
-        }
-        idx++;
-    }
-    return index(-1);
 }
 
 QVariant ObjectMapModel::data(const QModelIndex &index, int role) const

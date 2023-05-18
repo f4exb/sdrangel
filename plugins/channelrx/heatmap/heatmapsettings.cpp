@@ -107,9 +107,9 @@ QByteArray HeatMapSettings::serialize() const
         s.writeBlob(30, m_rollupState->serialize());
     }
 
-    s.writeS32(32, m_workspaceIndex);
-    s.writeBlob(33, m_geometryBytes);
-    s.writeBool(34, m_hidden);
+    s.writeS32(31, m_workspaceIndex);
+    s.writeBlob(32, m_geometryBytes);
+    s.writeBool(33, m_hidden);
 
     return s.final();
 }

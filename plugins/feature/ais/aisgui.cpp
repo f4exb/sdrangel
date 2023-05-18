@@ -31,6 +31,7 @@
 #include "gui/dialogpositioner.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
+#include "util/mmsi.h"
 
 #include "ui_aisgui.h"
 #include "ais.h"
@@ -377,6 +378,7 @@ void AISGUI::resizeTable()
     int row = ui->vessels->rowCount();
     ui->vessels->setRowCount(row + 1);
     ui->vessels->setItem(row, VESSEL_COL_MMSI, new QTableWidgetItem("123456789"));
+    ui->vessels->setItem(row, VESSEL_COL_COUNTRY, new QTableWidgetItem("flag"));
     ui->vessels->setItem(row, VESSEL_COL_TYPE, new QTableWidgetItem("Base station"));
     ui->vessels->setItem(row, VESSEL_COL_LATITUDE, new QTableWidgetItem("90.000000-"));
     ui->vessels->setItem(row, VESSEL_COL_LONGITUDE, new QTableWidgetItem("180.00000-"));
@@ -503,6 +505,7 @@ void AISGUI::sendToMap(const QString &name, const QString &label,
 void AISGUI::updateVessels(AISMessage *ais, QDateTime dateTime)
 {
     QTableWidgetItem *mmsiItem;
+    QTableWidgetItem *countryItem;
     QTableWidgetItem *typeItem;
     QTableWidgetItem *latitudeItem;
     QTableWidgetItem *longitudeItem;
@@ -534,6 +537,7 @@ void AISGUI::updateVessels(AISMessage *ais, QDateTime dateTime)
         {
             // Update existing item
             mmsiItem = ui->vessels->item(row, VESSEL_COL_MMSI);
+            countryItem = ui->vessels->item(row, VESSEL_COL_COUNTRY);
             typeItem = ui->vessels->item(row, VESSEL_COL_TYPE);
             latitudeItem = ui->vessels->item(row, VESSEL_COL_LATITUDE);
             longitudeItem = ui->vessels->item(row, VESSEL_COL_LONGITUDE);
@@ -563,6 +567,7 @@ void AISGUI::updateVessels(AISMessage *ais, QDateTime dateTime)
         ui->vessels->setRowCount(row + 1);
 
         mmsiItem = new QTableWidgetItem();
+        countryItem = new QTableWidgetItem();
         typeItem = new QTableWidgetItem();
         latitudeItem = new QTableWidgetItem();
         longitudeItem = new QTableWidgetItem();
@@ -580,6 +585,7 @@ void AISGUI::updateVessels(AISMessage *ais, QDateTime dateTime)
         lastUpdateItem = new QTableWidgetItem();
         messagesItem = new QTableWidgetItem();
         ui->vessels->setItem(row, VESSEL_COL_MMSI, mmsiItem);
+        ui->vessels->setItem(row, VESSEL_COL_COUNTRY, countryItem);
         ui->vessels->setItem(row, VESSEL_COL_TYPE, typeItem);
         ui->vessels->setItem(row, VESSEL_COL_LATITUDE, latitudeItem);
         ui->vessels->setItem(row, VESSEL_COL_LONGITUDE, longitudeItem);
@@ -605,7 +611,15 @@ void AISGUI::updateVessels(AISMessage *ais, QDateTime dateTime)
     previousType = typeItem->text();
     previousShipType = shipTypeItem->text();
 
-    mmsiItem->setText(QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0')));
+    QString mmsi = QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0'));
+    mmsiItem->setText(mmsi);
+    QIcon *flag = MMSI::getFlagIcon(mmsi);
+    if (flag)
+    {
+        countryItem->setSizeHint(QSize(40, 20));
+        countryItem->setIcon(*flag);
+    }
+
     lastUpdateItem->setData(Qt::DisplayRole, dateTime);
     messagesItem->setData(Qt::DisplayRole, messagesItem->data(Qt::DisplayRole).toInt() + 1);
 
@@ -991,24 +1005,24 @@ void AISGUI::vessels_customContextMenuRequested(QPoint pos)
 
         QAction* mmsiAction = new QAction(QString("View MMSI %1 on vesselfinder.com...").arg(mmsi), tableContextMenu);
         connect(mmsiAction, &QAction::triggered, this, [mmsi]()->void {
-            QDesktopServices::openUrl(QUrl(QString("https://www.vesselfinder.net/vessels?name=%1").arg(mmsi)));
+            QDesktopServices::openUrl(QUrl(QString("https://www.vesselfinder.com/vessels?name=%1").arg(mmsi)));
         });
         tableContextMenu->addAction(mmsiAction);
 
         if (!imo.isEmpty())
         {
-            QAction* imoAction = new QAction(QString("View IMO %1 on vesselfinder.net...").arg(imo), tableContextMenu);
+            QAction* imoAction = new QAction(QString("View IMO %1 on vesselfinder.com...").arg(imo), tableContextMenu);
             connect(imoAction, &QAction::triggered, this, [imo]()->void {
-                QDesktopServices::openUrl(QUrl(QString("https://www.vesselfinder.net/vessels?name=%1").arg(imo)));
+                QDesktopServices::openUrl(QUrl(QString("https://www.vesselfinder.com/vessels?name=%1").arg(imo)));
             });
             tableContextMenu->addAction(imoAction);
         }
 
         if (!name.isEmpty())
         {
-            QAction* nameAction = new QAction(QString("View %1 on vesselfinder.net...").arg(name), tableContextMenu);
+            QAction* nameAction = new QAction(QString("View %1 on vesselfinder.com...").arg(name), tableContextMenu);
             connect(nameAction, &QAction::triggered, this, [name]()->void {
-                QDesktopServices::openUrl(QUrl(QString("https://www.vesselfinder.net/vessels?name=%1").arg(name)));
+                QDesktopServices::openUrl(QUrl(QString("https://www.vesselfinder.com/vessels?name=%1").arg(name)));
             });
             tableContextMenu->addAction(nameAction);
         }

@@ -222,12 +222,12 @@ void NavtexDemodGUI::messageReceived(const NavtexMessage& message, int errors, f
         rssiItem->setData(Qt::DisplayRole, rssi);
     }
     messageItem->setText(message.m_message);
+    filterRow(row);
     ui->messages->setSortingEnabled(true);
     ui->messages->resizeRowToContents(row);
     if (scrollToBottom) {
         ui->messages->scrollToBottom();
     }
-    filterRow(row);
 }
 
 bool NavtexDemodGUI::handleMessage(const Message& message)

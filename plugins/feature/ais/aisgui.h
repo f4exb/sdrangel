@@ -106,6 +106,7 @@ private:
 
     enum VesselCol {
         VESSEL_COL_MMSI,
+        VESSEL_COL_COUNTRY,
         VESSEL_COL_TYPE,
         VESSEL_COL_LATITUDE,
         VESSEL_COL_LONGITUDE,

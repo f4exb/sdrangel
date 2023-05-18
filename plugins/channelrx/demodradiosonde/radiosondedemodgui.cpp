@@ -298,11 +298,11 @@ void RadiosondeDemodGUI::frameReceived(const QByteArray& frame, const QDateTime&
     eccItem->setData(Qt::DisplayRole, errorsCorrected);
     thItem->setData(Qt::DisplayRole, threshold);
 
+    filterRow(row);
     ui->frames->setSortingEnabled(true);
     if (scrollToBottom) {
         ui->frames->scrollToBottom();
     }
-    filterRow(row);
 
     delete radiosonde;
 }

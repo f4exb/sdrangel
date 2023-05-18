@@ -172,6 +172,7 @@ set(sdrbase_SOURCES
 
     util/ais.cpp
     util/android.cpp
+    util/aprsfi.cpp
     util/aviationweather.cpp
     util/ax25.cpp
     util/aprs.cpp
@@ -184,6 +185,7 @@ set(sdrbase_SOURCES
     util/CRC64.cpp
     util/csv.cpp
     util/db.cpp
+    util/dsc.cpp
     util/fixedtraits.cpp
     util/fits.cpp
     util/flightinformation.cpp
@@ -196,6 +198,7 @@ set(sdrbase_SOURCES
     util/maidenhead.cpp
     util/message.cpp
     util/messagequeue.cpp
+    util/mmsi.cpp
     util/morse.cpp
     util/navtex.cpp
     util/openaip.cpp
@@ -398,6 +401,7 @@ set(sdrbase_HEADERS
 
     util/ais.h
     util/android.h
+    util/aprsfi.h
     util/aviationweather.h
     util/ax25.h
     util/aprs.h
@@ -409,6 +413,7 @@ set(sdrbase_HEADERS
     util/CRC64.h
     util/csv.h
     util/db.h
+    util/dsc.h
     util/doublebuffer.h
     util/doublebufferfifo.h
     util/doublebuffermultiple.h
@@ -426,6 +431,7 @@ set(sdrbase_HEADERS
     util/maidenhead.h
     util/message.h
     util/messagequeue.h
+    util/mmsi.h
     util/morse.h
     util/movingaverage.h
     util/movingmaximum.h

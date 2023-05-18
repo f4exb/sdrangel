@@ -309,6 +309,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     addAirspace();
     addAirports();
     addNavtex();
+    addVLF();
 
     displaySettings();
     applySettings(true);
@@ -418,6 +419,53 @@ void MapGUI::addIBPBeacons()
         update(m_map, &beaconMapItem, "Beacons");
     }
 }
+
+// https://sidstation.loudet.org/stations-list-en.xhtml
+// https://core.ac.uk/download/pdf/224769021.pdf -- Table 1
+// GQD/GQZ callsigns: https://groups.io/g/VLF/message/19212?p=%2C%2C%2C20%2C0%2C0%2C0%3A%3Arecentpostdate%2Fsticky%2C%2C19.6%2C20%2C2%2C0%2C38924431
+const QList<RadioTimeTransmitter> MapGUI::m_vlfTransmitters = {
+    // Other signals possibly seen: 13800, 19000
+    {"VTX2",  17000, 8.387015,  77.752762, -1},     // South Vijayanarayanam, India
+    {"GQD",   19580, 54.911643, -3.278456, 100},    // Anthorn, UK, Often referred to as GBZ
+    {"NWC",   19800, -21.816325, 114.16546, 1000},  // Exmouth, Aus
+    {"ICV",   20270, 40.922946, 9.731881,  50},     // Isola di Tavolara, Italy (Can be distorted on 3D map if terrain used)
+    {"FTA",   20900, 48.544632, 2.579429,  50},     // Sainte-Assise, France (Satellite imagary obfuscated)
+    {"NPM",   21400, 21.420166, -158.151140, 600},  // Pearl Harbour, Lualuahei, USA (Not seen?)
+    {"HWU",   21750, 46.713129, 1.245248, 200},     // Rosnay, France
+    {"GQZ",   22100, 54.731799, -2.883033, 100},    // Skelton, UK (GVT in paper)
+    {"DHO38", 23400, 53.078900, 7.615000,  300},    // Rhauderfehn, Germany - Off air 7-8 UTC - Not seen on air!
+    {"NAA",   24000, 44.644506, -67.284565, 1000},  // Cutler, Maine, USA
+    {"TFK/NRK", 37500, 63.850365, -22.466773, 100}, // Grindavik, Iceland
+    {"SRC/SHR", 38000, 57.120328, 16.153083, -1},   // Ruda, Sweden
+};
+
+void MapGUI::addVLF()
+{
+    for (int i = 0; i < m_vlfTransmitters.size(); i++)
+    {
+        SWGSDRangel::SWGMapItem vlfMapItem;
+        // Need to suffix frequency, as there are multiple becaons with same callsign at different locations
+        QString name = QString("%1").arg(m_vlfTransmitters[i].m_callsign);
+        vlfMapItem.setName(new QString(name));
+        vlfMapItem.setLatitude(m_vlfTransmitters[i].m_latitude);
+        vlfMapItem.setLongitude(m_vlfTransmitters[i].m_longitude);
+        vlfMapItem.setAltitude(0.0);
+        vlfMapItem.setImage(new QString("antenna.png"));
+        vlfMapItem.setImageRotation(0);
+        QString text = QString("VLF Transmitter\nCallsign: %1\nFrequency: %2 kHz")
+                                .arg(m_vlfTransmitters[i].m_callsign)
+                                .arg(m_vlfTransmitters[i].m_frequency/1000.0);
+        vlfMapItem.setText(new QString(text));
+        vlfMapItem.setModel(new QString("antenna.glb"));
+        vlfMapItem.setFixedPosition(true);
+        vlfMapItem.setOrientation(0);
+        vlfMapItem.setLabel(new QString(name));
+        vlfMapItem.setLabelAltitudeOffset(4.5);
+        vlfMapItem.setAltitudeReference(1);
+        update(m_map, &vlfMapItem, "VLF");
+    }
+}
+
 
 const QList<RadioTimeTransmitter> MapGUI::m_radioTimeTransmitters = {
     {"MSF", 60000, 54.9075f, -3.27333f, 17},            // UK
@@ -1575,8 +1623,7 @@ void MapGUI::find(const QString& target)
             }
             else
             {
-                // FIXME: Support polygon/polyline
-                ObjectMapItem *mapItem = m_objectMapModel.findMapItem(target);
+                ObjectMapItem *mapItem = (ObjectMapItem *)m_objectMapModel.findMapItem(target);
                 if (mapItem != nullptr)
                 {
                     map->setProperty("center", QVariant::fromValue(mapItem->getCoordinates()));
@@ -1584,25 +1631,47 @@ void MapGUI::find(const QString& target)
                         m_cesium->track(target);
                     }
                     m_objectMapModel.moveToFront(m_objectMapModel.findMapItemIndex(target).row());
+                    return;
+                }
+
+                PolylineMapItem *polylineMapItem = (PolylineMapItem *)m_polylineMapModel.findMapItem(target);
+                if (polylineMapItem != nullptr)
+                {
+                    map->setProperty("center", QVariant::fromValue(polylineMapItem->getCoordinates()));
+                    if (m_cesium) {
+                        m_cesium->track(target);
+                    }
+                    //m_polylineMapModel.moveToFront(m_polylineMapModel.findMapItemIndex(target).row());
+                    return;
+                }
+
+                PolygonMapItem *polygonMapItem = (PolygonMapItem *)m_polylineMapModel.findMapItem(target);
+                if (polygonMapItem != nullptr)
+                {
+                    map->setProperty("center", QVariant::fromValue(polygonMapItem->getCoordinates()));
+                    if (m_cesium) {
+                        m_cesium->track(target);
+                    }
+                    //m_polylineMapModel.moveToFront(m_polylineMapModel.findMapItemIndex(target).row());
+                    return;
+                }
+
+                // Search as an address
+                QGeoServiceProvider* geoSrv = new QGeoServiceProvider("osm");
+                if (geoSrv != nullptr)
+                {
+                    QLocale qLocaleC(QLocale::C, QLocale::AnyCountry);
+                    geoSrv->setLocale(qLocaleC);
+                    QGeoCodeReply *pQGeoCode = geoSrv->geocodingManager()->geocode(target);
+                    if (pQGeoCode) {
+                        QObject::connect(pQGeoCode, &QGeoCodeReply::finished, this, &MapGUI::geoReply);
+                    } else {
+                        qDebug() << "MapGUI::find: GeoCoding failed";
+                    }
                 }
                 else
                 {
-                    QGeoServiceProvider* geoSrv = new QGeoServiceProvider("osm");
-                    if (geoSrv != nullptr)
-                    {
-                        QLocale qLocaleC(QLocale::C, QLocale::AnyCountry);
-                        geoSrv->setLocale(qLocaleC);
-                        QGeoCodeReply *pQGeoCode = geoSrv->geocodingManager()->geocode(target);
-                        if (pQGeoCode) {
-                            QObject::connect(pQGeoCode, &QGeoCodeReply::finished, this, &MapGUI::geoReply);
-                        } else {
-                            qDebug() << "MapGUI::find: GeoCoding failed";
-                        }
-                    }
-                    else
-                    {
-                        qDebug() << "MapGUI::find: osm not available";
-                    }
+                    qDebug() << "MapGUI::find: osm not available";
                 }
             }
         }

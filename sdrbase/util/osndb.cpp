@@ -527,6 +527,7 @@ QIcon *AircraftInformation::getAirlineIcon(const QString &operatorICAO)
         return icon;
     }
 }
+
 QString AircraftInformation::getFlagIconPath(const QString &country)
 {
     QString endPath = QString("/flags/%1.bmp").arg(country);
@@ -548,6 +549,15 @@ QString AircraftInformation::getFlagIconPath(const QString &country)
         }
     }
     return QString();
+}
+
+QString AircraftInformation::getFlagIconURL(const QString &country)
+{
+    QString path = getFlagIconPath(country);
+    if (path.startsWith(':')) {
+        path = "qrc://" + path.mid(1);
+    }
+    return path;
 }
 
 QIcon *AircraftInformation::getFlagIcon(const QString &country)

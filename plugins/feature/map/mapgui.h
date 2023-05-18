@@ -161,6 +161,7 @@ public:
     void addAirspace();
     void addAirports();
     void addNavtex();
+    void addVLF();
     void find(const QString& target);
     void track3D(const QString& target);
     Q_INVOKABLE void supportedMapsChanged();
@@ -228,6 +229,7 @@ private:
 
     static QString getDataDir();
     static const QList<RadioTimeTransmitter> m_radioTimeTransmitters;
+    static const QList<RadioTimeTransmitter> m_vlfTransmitters;
 
 private slots:
     void init3DMap();

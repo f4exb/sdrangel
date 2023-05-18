@@ -51,6 +51,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/DABDemod.yaml#/DABDemodSettings"
     DOA2Settings:
       $ref: "http://swgserver:8081/api/swagger/include/DOA2.yaml#/DOA2Settings"
+    DSCDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/DSCDemod.yaml#/DSCDemodSettings"
     DSDDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
     FileSinkSettings:

@@ -27,7 +27,7 @@
 class Serializable;
 
 // Number of columns in the tables
-#define AISDEMOD_MESSAGE_COLUMNS 8
+#define AISDEMOD_MESSAGE_COLUMNS 10
 
 struct AISDemodSettings
 {
@@ -44,11 +44,10 @@ struct AISDemodSettings
         Binary,
         NMEA
     } m_udpFormat;
-    int m_scopeCh1;
-    int m_scopeCh2;
 
     QString m_logFilename;
     bool m_logEnabled;
+    bool m_showSlotMap;
 
     quint32 m_rgbColor;
     QString m_title;
@@ -69,6 +68,7 @@ struct AISDemodSettings
     int m_messageColumnSizes[AISDEMOD_MESSAGE_COLUMNS];  //!< Size of the columns in the table
 
     static const int AISDEMOD_CHANNEL_SAMPLE_RATE = 57600; //!< 6x 9600 baud rate (use even multiple so Gausian filter has odd number of taps)
+    static const int m_scopeStreams = 9;
 
     AISDemodSettings();
     void resetToDefaults();

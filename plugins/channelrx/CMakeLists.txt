@@ -125,6 +125,10 @@ if (ENABLE_CHANNELRX_DEMODILS)
     add_subdirectory(demodils)
 endif()
 
+if (ENABLE_CHANNELRX_DEMODDSC)
+    add_subdirectory(demoddsc)
+endif()
+
 if(NOT SERVER_MODE)
     add_subdirectory(heatmap)
 

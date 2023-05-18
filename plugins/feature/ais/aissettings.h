@@ -27,7 +27,7 @@
 class Serializable;
 
 // Number of columns in the tables
-#define AIS_VESSEL_COLUMNS  16
+#define AIS_VESSEL_COLUMNS  18
 
 struct AISSettings
 {

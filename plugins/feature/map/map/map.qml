@@ -194,6 +194,7 @@ Item {
                     Text {
                         id: polygonText
                         text: label
+                        textFormat: TextEdit.RichText
                     }
                 }
             }
@@ -226,6 +227,7 @@ Item {
                     Text {
                         id: polylineText
                         text: label
+                        textFormat: TextEdit.RichText
                     }
                 }
             }

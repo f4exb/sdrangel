@@ -44,6 +44,7 @@ set(sdrgui_SOURCES
     gui/fftwisdomdialog.cpp
     gui/flowlayout.cpp
     gui/framelesswindowresizer.cpp
+    gui/frequencydelegate.cpp
     gui/glscope.cpp
     gui/glscopegui.cpp
     gui/glshadercolors.cpp
@@ -157,6 +158,7 @@ set(sdrgui_HEADERS
     gui/fftwisdomdialog.h
     gui/flowlayout.h
     gui/framelesswindowresizer.h
+    gui/frequencydelegate.h
     gui/glscope.h
     gui/glscopegui.h
     gui/glshadercolors.h

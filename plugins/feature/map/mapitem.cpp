@@ -39,6 +39,14 @@ void MapItem::update(SWGSDRangel::SWGMapItem *mapItem)
     m_altitude = mapItem->getAltitude();
 }
 
+QGeoCoordinate MapItem::getCoordinates()
+{
+    QGeoCoordinate coords;
+    coords.setLatitude(m_latitude);
+    coords.setLongitude(m_longitude);
+    return coords;
+}
+
 void ObjectMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
 {
     MapItem::update(mapItem);
@@ -116,6 +124,7 @@ void PolygonMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
     m_colorValid = mapItem->getColorValid();
     m_color = mapItem->getColor();
     m_altitudeReference = mapItem->getAltitudeReference();
+    m_deleted = *mapItem->getImage() == "";
 
     qDeleteAll(m_points);
     m_points.clear();
@@ -151,6 +160,7 @@ void PolylineMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
     m_colorValid = mapItem->getColorValid();
     m_color = mapItem->getColor();
     m_altitudeReference = mapItem->getAltitudeReference();
+    m_deleted = *mapItem->getImage() == "";
 
     qDeleteAll(m_points);
     m_points.clear();
@@ -178,14 +188,6 @@ void PolylineMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
         m_polyline.push_back(QVariant::fromValue(coord));
     }
     m_bounds = QGeoRectangle(QGeoCoordinate(latMax, lonMin), QGeoCoordinate(latMin, lonMax));
-}
-
-QGeoCoordinate ObjectMapItem::getCoordinates()
-{
-    QGeoCoordinate coords;
-    coords.setLatitude(m_latitude);
-    coords.setLongitude(m_longitude);
-    return coords;
 }
 
 void ObjectMapItem::findFrequency()

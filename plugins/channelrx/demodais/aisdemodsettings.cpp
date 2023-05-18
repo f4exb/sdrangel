@@ -43,10 +43,9 @@ void AISDemodSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_udpFormat = Binary;
-    m_scopeCh1 = 5;
-    m_scopeCh2 = 6;
     m_logFilename = "ais_log.csv";
     m_logEnabled = false;
+    m_showSlotMap = false;
     m_rgbColor = QColor(102, 0, 0).rgb();
     m_title = "AIS Demodulator";
     m_streamIndex = 0;
@@ -78,8 +77,6 @@ QByteArray AISDemodSettings::serialize() const
     s.writeString(7, m_udpAddress);
     s.writeU32(8, m_udpPort);
     s.writeS32(9, (int)m_udpFormat);
-    s.writeS32(10, m_scopeCh1);
-    s.writeS32(11, m_scopeCh2);
     s.writeU32(12, m_rgbColor);
     s.writeString(13, m_title);
 
@@ -105,6 +102,7 @@ QByteArray AISDemodSettings::serialize() const
     s.writeS32(26, m_workspaceIndex);
     s.writeBlob(27, m_geometryBytes);
     s.writeBool(28, m_hidden);
+    s.writeBool(29, m_showSlotMap);
 
     for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -146,8 +144,6 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         }
 
         d.readS32(9, (int *)&m_udpFormat, (int)Binary);
-        d.readS32(10, &m_scopeCh1, 0);
-        d.readS32(11, &m_scopeCh2, 0);
         d.readU32(12, &m_rgbColor, QColor(102, 0, 0).rgb());
         d.readString(13, &m_title, "AIS Demodulator");
 
@@ -192,6 +188,7 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         d.readS32(26, &m_workspaceIndex, 0);
         d.readBlob(27, &m_geometryBytes);
         d.readBool(28, &m_hidden, false);
+        d.readBool(29, &m_showSlotMap, false);
 
         for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);

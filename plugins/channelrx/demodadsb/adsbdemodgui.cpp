@@ -951,10 +951,7 @@ Aircraft *ADSBDemodGUI::getAircraft(int icao, bool &newAircraft)
                 QIcon *icon = nullptr;
                 if (aircraft->m_aircraftInfo->m_operatorICAO.size() > 0)
                 {
-                    aircraft->m_airlineIconURL = AircraftInformation::getAirlineIconPath(aircraft->m_aircraftInfo->m_operatorICAO);
-                    if (aircraft->m_airlineIconURL.startsWith(':')) {
-                        aircraft->m_airlineIconURL = "qrc://" + aircraft->m_airlineIconURL.mid(1);
-                    }
+                    aircraft->m_airlineIconURL = AircraftInformation::getFlagIconURL(aircraft->m_aircraftInfo->m_operatorICAO);
                     icon = AircraftInformation::getAirlineIcon(aircraft->m_aircraftInfo->m_operatorICAO);
                     if (icon != nullptr)
                     {

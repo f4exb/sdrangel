@@ -223,7 +223,8 @@ bool AISDemod::handleMessage(const Message& cmd)
                 << ais->getType() << ","
                 << "\"" << ais->toString() << "\"" << ","
                 << "\"" << ais->toNMEA() << "\"" << ","
-                << report.getSlot() << "\n";
+                << report.getSlot() << ","
+                << report.getSlots() << "\n";
 
             delete ais;
         }
@@ -355,7 +356,7 @@ void AISDemod::applySettings(const AISDemodSettings& settings, bool force)
                 if (newFile)
                 {
                     // Write header
-                    m_logStream << "Date,Time,Data,MMSI,Type,Message,NMEA,Slot\n";
+                    m_logStream << "Date,Time,Data,MMSI,Type,Message,NMEA,Slot,Slots\n";
                 }
             }
             else

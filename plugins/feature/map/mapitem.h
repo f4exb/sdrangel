@@ -41,6 +41,7 @@ public:
 
     MapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem);
     virtual void update(SWGSDRangel::SWGMapItem *mapItem);
+    QGeoCoordinate getCoordinates();
 
 protected:
 
@@ -74,7 +75,6 @@ public:
         update(mapItem);
     }
     void update(SWGSDRangel::SWGMapItem *mapItem) override;
-    QGeoCoordinate getCoordinates();
 
 protected:
     void findFrequency();
@@ -143,6 +143,7 @@ protected:
     bool m_colorValid;
     QRgb m_color;
     int m_altitudeReference;
+    bool m_deleted;
 };
 
 class PolylineMapItem : public MapItem {
@@ -165,6 +166,7 @@ protected:
     bool m_colorValid;
     QRgb m_color;
     int m_altitudeReference;
+    bool m_deleted;
 };
 
 class ImageMapItem : public MapItem {

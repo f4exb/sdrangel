@@ -73,22 +73,25 @@ public:
         QByteArray getMessage() const { return m_message; }
         QDateTime getDateTime() const { return m_dateTime; }
         int getSlot() const { return m_slot; }
+        int getSlots() const { return m_slots; }
 
-        static MsgMessage* create(QByteArray message, QDateTime dateTime, int slot)
+        static MsgMessage* create(QByteArray message, QDateTime dateTime, int slot, int totalSlots)
         {
-            return new MsgMessage(message, dateTime, slot);
+            return new MsgMessage(message, dateTime, slot, totalSlots);
         }
 
     private:
         QByteArray m_message;
         QDateTime m_dateTime;
         int m_slot;
+        int m_slots;
 
-        MsgMessage(QByteArray message, QDateTime dateTime, int slot) :
+        MsgMessage(QByteArray message, QDateTime dateTime, int slot, int totalSlots) :
             Message(),
             m_message(message),
             m_dateTime(dateTime),
-            m_slot(slot)
+            m_slot(slot),
+            m_slots(totalSlots)
         {
         }
     };
