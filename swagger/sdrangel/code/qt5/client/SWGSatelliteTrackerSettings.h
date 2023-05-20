@@ -129,6 +129,12 @@ public:
     QList<SWGSatelliteDeviceSettingsList*>* getDeviceSettings();
     void setDeviceSettings(QList<SWGSatelliteDeviceSettingsList*>* device_settings);
 
+    float getAzimuthOffset();
+    void setAzimuthOffset(float azimuth_offset);
+
+    float getElevationOffset();
+    void setElevationOffset(float elevation_offset);
+
     QString* getTitle();
     void setTitle(QString* title);
 
@@ -240,6 +246,12 @@ private:
 
     QList<SWGSatelliteDeviceSettingsList*>* device_settings;
     bool m_device_settings_isSet;
+
+    float azimuth_offset;
+    bool m_azimuth_offset_isSet;
+
+    float elevation_offset;
+    bool m_elevation_offset_isSet;
 
     QString* title;
     bool m_title_isSet;

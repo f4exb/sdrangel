@@ -26,7 +26,7 @@
 #include "satellitetrackersettings.h"
 
 #define DEAFULT_TARGET                  "ISS"
-#define DEFAULT_TLES                    {"https://db.satnogs.org/api/tle/", "https://www.amsat.org/tle/current/nasabare.txt", "https://www.celestrak.com/NORAD/elements/goes.txt"}
+#define DEFAULT_TLES                    {"https://db.satnogs.org/api/tle/", "https://www.amsat.org/tle/current/nasabare.txt", "https://www.celestrak.com/NORAD/elements/goes.txt", "https://celestrak.org/NORAD/elements/gp.php?GROUP=gps-ops&FORMAT=tle"}
 #define DEFAULT_DATE_FORMAT              "yyyy/MM/dd"
 #define DEFAULT_AOS_SPEECH              "${name} is visible for ${duration} minutes. Max elevation, ${elevation} degrees."
 #define DEFAULT_LOS_SPEECH              "${name} is no longer visible."
@@ -80,6 +80,8 @@ void SatelliteTrackerSettings::resetToDefaults()
     m_mapFeature = "";
     m_fileInputDevice = "";
     m_drawRotators = MATCHING_TARGET;
+    m_azimuthOffset = 0.0;
+    m_elevationOffset = 0.0;
     m_workspaceIndex = 0;
     m_columnSort = -1;
     m_columnSortOrder = Qt::AscendingOrder;
@@ -144,6 +146,8 @@ QByteArray SatelliteTrackerSettings::serialize() const
     s.writeS32(47, m_columnSort);
     s.writeS32(48, (int)m_columnSortOrder);
     s.writeS32(49, (int)m_drawRotators);
+    s.writeDouble(50, m_azimuthOffset);
+    s.writeDouble(51, m_elevationOffset);
 
     for (int i = 0; i < SAT_COL_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -240,6 +244,8 @@ bool SatelliteTrackerSettings::deserialize(const QByteArray& data)
         d.readS32(47, &m_columnSort, -1);
         d.readS32(48, (int *)&m_columnSortOrder, (int)Qt::AscendingOrder);
         d.readS32(49, (int*)&m_drawRotators, (int)MATCHING_TARGET);
+        d.readDouble(50, &m_azimuthOffset, 0.0);
+        d.readDouble(51, &m_elevationOffset, 0.0);
 
         for (int i = 0; i < SAT_COL_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);
@@ -458,6 +464,12 @@ void SatelliteTrackerSettings::applySettings(const QStringList& settingsKeys, co
     if (settingsKeys.contains("drawRotators")) {
         m_drawRotators = settings.m_drawRotators;
     }
+    if (settingsKeys.contains("azimuthOffset")) {
+        m_azimuthOffset = settings.m_azimuthOffset;
+    }
+    if (settingsKeys.contains("elevationOffset")) {
+        m_elevationOffset = settings.m_elevationOffset;
+    }
     if (settingsKeys.contains("columnSort")) {
         m_columnSort = settings.m_columnSort;
     }
@@ -637,6 +649,12 @@ QString SatelliteTrackerSettings::getDebugString(const QStringList& settingsKeys
     }
     if (settingsKeys.contains("drawRotators") || force) {
         ostr << " m_drawRotators: " << m_drawRotators;
+    }
+    if (settingsKeys.contains("azimuthOffset") || force) {
+        ostr << " m_azimuthOffset: " << m_azimuthOffset;
+    }
+    if (settingsKeys.contains("elevationOffset") || force) {
+        ostr << " m_elevationOffset: " << m_elevationOffset;
     }
     if (settingsKeys.contains("columnSort") || force) {
         ostr << " m_columnSort: " << m_columnSort;
