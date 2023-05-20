@@ -262,6 +262,7 @@ QColor AISDemodGUI::getColor(const QString& mmsi)
                 return QColor(m_categoryColors.value(category));
             }
             qDebug() << "No color for " << category;
+            return Qt::white;
         }
         else
         {
