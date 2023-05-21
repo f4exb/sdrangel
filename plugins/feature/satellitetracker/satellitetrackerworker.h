@@ -60,6 +60,7 @@ protected:
     QTimer m_losTimer;
     QTimer m_dopplerTimer;
     QList<int> m_initFrequencyOffset;
+    QList<int> m_doppler;       // How much doppler we've applied to a channel
     SatelliteState m_satState;
     bool m_hasSignalledAOS;    // For pass specified by m_aos and m_los
 
@@ -145,6 +146,8 @@ private:
     void calculateRotation(SatWorkerState *satWorkerState);
     QString substituteVariables(const QString &textIn, const QString &satelliteName);
     void executeCommand(const QString &command, const QString &satelliteName);
+    void enableDoppler(SatWorkerState *satWorkerState);
+    void disableDoppler(SatWorkerState *satWorkerState);
 
 private slots:
     void stopWork();

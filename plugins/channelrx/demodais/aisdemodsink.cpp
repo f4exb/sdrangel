@@ -66,7 +66,7 @@ void AISDemodSink::sampleToScope(Complex sample, Real magsq, Real fmDemod, Real 
     if (m_scopeSink)
     {
         m_sampleBuffer[0][m_sampleBufferIndex] = sample;
-        m_sampleBuffer[1][m_sampleBufferIndex] = Complex(m_magsq, 0.0f);
+        m_sampleBuffer[1][m_sampleBufferIndex] = Complex(magsq, 0.0f);
         m_sampleBuffer[2][m_sampleBufferIndex] = Complex(fmDemod, 0.0f);
         m_sampleBuffer[3][m_sampleBufferIndex] = Complex(filt, 0.0f);
         m_sampleBuffer[4][m_sampleBufferIndex] = Complex(rxBuf, 0.0f);

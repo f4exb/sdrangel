@@ -84,6 +84,10 @@ SWGSatelliteTrackerSettings::SWGSatelliteTrackerSettings() {
     m_los_command_isSet = false;
     device_settings = nullptr;
     m_device_settings_isSet = false;
+    azimuth_offset = 0.0f;
+    m_azimuth_offset_isSet = false;
+    elevation_offset = 0.0f;
+    m_elevation_offset_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -164,6 +168,10 @@ SWGSatelliteTrackerSettings::init() {
     m_los_command_isSet = false;
     device_settings = new QList<SWGSatelliteDeviceSettingsList*>();
     m_device_settings_isSet = false;
+    azimuth_offset = 0.0f;
+    m_azimuth_offset_isSet = false;
+    elevation_offset = 0.0f;
+    m_elevation_offset_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -248,6 +256,8 @@ SWGSatelliteTrackerSettings::cleanup() {
         }
         delete device_settings;
     }
+
+
     if(title != nullptr) { 
         delete title;
     }
@@ -331,6 +341,10 @@ SWGSatelliteTrackerSettings::fromJsonObject(QJsonObject &pJson) {
     
     
     ::SWGSDRangel::setValue(&device_settings, pJson["deviceSettings"], "QList", "SWGSatelliteDeviceSettingsList");
+    ::SWGSDRangel::setValue(&azimuth_offset, pJson["azimuthOffset"], "float", "");
+    
+    ::SWGSDRangel::setValue(&elevation_offset, pJson["elevationOffset"], "float", "");
+    
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
@@ -446,6 +460,12 @@ SWGSatelliteTrackerSettings::asJsonObject() {
     }
     if(device_settings && device_settings->size() > 0){
         toJsonArray((QList<void*>*)device_settings, obj, "deviceSettings", "SWGSatelliteDeviceSettingsList");
+    }
+    if(m_azimuth_offset_isSet){
+        obj->insert("azimuthOffset", QJsonValue(azimuth_offset));
+    }
+    if(m_elevation_offset_isSet){
+        obj->insert("elevationOffset", QJsonValue(elevation_offset));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -755,6 +775,26 @@ SWGSatelliteTrackerSettings::setDeviceSettings(QList<SWGSatelliteDeviceSettingsL
     this->m_device_settings_isSet = true;
 }
 
+float
+SWGSatelliteTrackerSettings::getAzimuthOffset() {
+    return azimuth_offset;
+}
+void
+SWGSatelliteTrackerSettings::setAzimuthOffset(float azimuth_offset) {
+    this->azimuth_offset = azimuth_offset;
+    this->m_azimuth_offset_isSet = true;
+}
+
+float
+SWGSatelliteTrackerSettings::getElevationOffset() {
+    return elevation_offset;
+}
+void
+SWGSatelliteTrackerSettings::setElevationOffset(float elevation_offset) {
+    this->elevation_offset = elevation_offset;
+    this->m_elevation_offset_isSet = true;
+}
+
 QString*
 SWGSatelliteTrackerSettings::getTitle() {
     return title;
@@ -922,6 +962,12 @@ SWGSatelliteTrackerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(device_settings && (device_settings->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_azimuth_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_elevation_offset_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

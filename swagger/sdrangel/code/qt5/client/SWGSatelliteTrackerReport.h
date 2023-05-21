@@ -46,6 +46,12 @@ public:
     qint32 getRunningState();
     void setRunningState(qint32 running_state);
 
+    float getTargetAzimuth();
+    void setTargetAzimuth(float target_azimuth);
+
+    float getTargetElevation();
+    void setTargetElevation(float target_elevation);
+
     QList<SWGSatelliteState*>* getSatelliteState();
     void setSatelliteState(QList<SWGSatelliteState*>* satellite_state);
 
@@ -55,6 +61,12 @@ public:
 private:
     qint32 running_state;
     bool m_running_state_isSet;
+
+    float target_azimuth;
+    bool m_target_azimuth_isSet;
+
+    float target_elevation;
+    bool m_target_elevation_isSet;
 
     QList<SWGSatelliteState*>* satellite_state;
     bool m_satellite_state_isSet;

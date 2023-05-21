@@ -30,6 +30,10 @@ SWGSatelliteTrackerReport::SWGSatelliteTrackerReport(QString* json) {
 SWGSatelliteTrackerReport::SWGSatelliteTrackerReport() {
     running_state = 0;
     m_running_state_isSet = false;
+    target_azimuth = 0.0f;
+    m_target_azimuth_isSet = false;
+    target_elevation = 0.0f;
+    m_target_elevation_isSet = false;
     satellite_state = nullptr;
     m_satellite_state_isSet = false;
 }
@@ -42,12 +46,18 @@ void
 SWGSatelliteTrackerReport::init() {
     running_state = 0;
     m_running_state_isSet = false;
+    target_azimuth = 0.0f;
+    m_target_azimuth_isSet = false;
+    target_elevation = 0.0f;
+    m_target_elevation_isSet = false;
     satellite_state = new QList<SWGSatelliteState*>();
     m_satellite_state_isSet = false;
 }
 
 void
 SWGSatelliteTrackerReport::cleanup() {
+
+
 
     if(satellite_state != nullptr) { 
         auto arr = satellite_state;
@@ -71,6 +81,10 @@ void
 SWGSatelliteTrackerReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&running_state, pJson["runningState"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&target_azimuth, pJson["targetAzimuth"], "float", "");
+    
+    ::SWGSDRangel::setValue(&target_elevation, pJson["targetElevation"], "float", "");
+    
     
     ::SWGSDRangel::setValue(&satellite_state, pJson["satelliteState"], "QList", "SWGSatelliteState");
 }
@@ -92,6 +106,12 @@ SWGSatelliteTrackerReport::asJsonObject() {
     if(m_running_state_isSet){
         obj->insert("runningState", QJsonValue(running_state));
     }
+    if(m_target_azimuth_isSet){
+        obj->insert("targetAzimuth", QJsonValue(target_azimuth));
+    }
+    if(m_target_elevation_isSet){
+        obj->insert("targetElevation", QJsonValue(target_elevation));
+    }
     if(satellite_state && satellite_state->size() > 0){
         toJsonArray((QList<void*>*)satellite_state, obj, "satelliteState", "SWGSatelliteState");
     }
@@ -107,6 +127,26 @@ void
 SWGSatelliteTrackerReport::setRunningState(qint32 running_state) {
     this->running_state = running_state;
     this->m_running_state_isSet = true;
+}
+
+float
+SWGSatelliteTrackerReport::getTargetAzimuth() {
+    return target_azimuth;
+}
+void
+SWGSatelliteTrackerReport::setTargetAzimuth(float target_azimuth) {
+    this->target_azimuth = target_azimuth;
+    this->m_target_azimuth_isSet = true;
+}
+
+float
+SWGSatelliteTrackerReport::getTargetElevation() {
+    return target_elevation;
+}
+void
+SWGSatelliteTrackerReport::setTargetElevation(float target_elevation) {
+    this->target_elevation = target_elevation;
+    this->m_target_elevation_isSet = true;
 }
 
 QList<SWGSatelliteState*>*
@@ -125,6 +165,12 @@ SWGSatelliteTrackerReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_running_state_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_target_azimuth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_target_elevation_isSet){
             isObjectUpdated = true; break;
         }
         if(satellite_state && (satellite_state->size() > 0)){

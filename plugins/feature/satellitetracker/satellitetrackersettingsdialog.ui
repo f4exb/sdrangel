@@ -179,70 +179,70 @@
             </property>
            </widget>
           </item>
-          <item row="8" column="0">
+          <item row="10" column="0">
            <widget class="QLabel" name="aosSpeechLabel">
             <property name="text">
              <string>AOS speech warning</string>
             </property>
            </widget>
           </item>
-          <item row="8" column="1">
+          <item row="10" column="1">
            <widget class="QLineEdit" name="aosSpeech">
             <property name="toolTip">
              <string>Text to say when a satellite signal is acquired</string>
             </property>
            </widget>
           </item>
-          <item row="9" column="0">
+          <item row="11" column="0">
            <widget class="QLabel" name="losSpeechLabel">
             <property name="text">
              <string>LOS speech warning</string>
             </property>
            </widget>
           </item>
-          <item row="9" column="1">
+          <item row="11" column="1">
            <widget class="QLineEdit" name="losSpeech">
             <property name="toolTip">
              <string>Text to say when a satellite signal is lost</string>
             </property>
            </widget>
           </item>
-          <item row="10" column="0">
+          <item row="12" column="0">
            <widget class="QLabel" name="aosCommandLabel">
             <property name="text">
              <string>AOS command</string>
             </property>
            </widget>
           </item>
-          <item row="10" column="1">
+          <item row="12" column="1">
            <widget class="QLineEdit" name="aosCommand">
             <property name="toolTip">
              <string>Program / script to execute on AOS</string>
             </property>
            </widget>
           </item>
-          <item row="11" column="0">
+          <item row="13" column="0">
            <widget class="QLabel" name="losCommandLabel">
             <property name="text">
              <string>LOS command</string>
             </property>
            </widget>
           </item>
-          <item row="11" column="1">
+          <item row="13" column="1">
            <widget class="QLineEdit" name="losCommand">
             <property name="toolTip">
              <string>Program / script to execute on LOS</string>
             </property>
            </widget>
           </item>
-          <item row="12" column="0">
+          <item row="14" column="0">
            <widget class="QLabel" name="dopplerPeriodLabel">
             <property name="text">
              <string>Doppler period (s)</string>
             </property>
            </widget>
           </item>
-          <item row="12" column="1">
+          <item row="14" column="1">
            <widget class="QDoubleSpinBox" name="dopplerPeriod">
             <property name="toolTip">
              <string>Enter the time in seconds between each Doppler correction</string>
@@ -258,7 +258,7 @@
             </property>
            </widget>
           </item>
-          <item row="13" column="0">
+          <item row="15" column="0">
            <spacer name="verticalSpacer">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -275,6 +275,52 @@
            <widget class="QLabel" name="predictionPeriodLabel">
             <property name="text">
              <string>Prediction period (days)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QDoubleSpinBox" name="azimuthOffset">
+            <property name="toolTip">
+             <string>Azimuth offset to add to target azimuth sent to rotator controller in degrees</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-360.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>360.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <widget class="QDoubleSpinBox" name="elevationOffset">
+            <property name="toolTip">
+             <string>Elevation offset added to target elevation send to rotator controller in degrees</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-180.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>180.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="azimuthOffsetLabel">
+            <property name="text">
+             <string>Rotator azimuth offset (°)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QLabel" name="elevationOffsetLabel">
+            <property name="text">
+             <string>Rotator elevation offset (°)</string>
             </property>
            </widget>
           </item>
