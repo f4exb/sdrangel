@@ -1019,16 +1019,16 @@ ILSDemodGUI::ILSDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodils/readme.md";
     RollupContents *rollupContents = getRollupContents();
-	ui->setupUi(rollupContents);
+    ui->setupUi(rollupContents);
     setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
-	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_ilsDemod = reinterpret_cast<ILSDemod*>(rxChannel);
     m_ilsDemod->setMessageQueueToGUI(getInputMessageQueue());
     m_spectrumVis = m_ilsDemod->getSpectrumVis();
-	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
+    m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
@@ -1124,7 +1124,8 @@ ILSDemodGUI::ILSDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->p150Units->setVisible(devMode);
 
     SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
-    spectrumSettings.m_fftSize = 2048;
+    spectrumSettings.m_fftSize = 256;
+    spectrumSettings.m_fftWindow = FFTWindow::Flattop;  // To match what's used in sink
     spectrumSettings.m_averagingMode = SpectrumSettings::AvgModeMoving;
     spectrumSettings.m_averagingValue = 1;
     spectrumSettings.m_displayWaterfall = true;
@@ -1133,7 +1134,6 @@ ILSDemodGUI::ILSDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     spectrumSettings.m_displayHistogram = false;
     spectrumSettings.m_displayCurrent = true;
     spectrumSettings.m_spectrumStyle = SpectrumSettings::Gradient;
-    // FLAT TOP?
     SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
     m_spectrumVis->getInputMessageQueue()->push(msg);
 
