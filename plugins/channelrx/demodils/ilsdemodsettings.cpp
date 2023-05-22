@@ -221,9 +221,9 @@ bool ILSDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(52, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
-        d.readS32(28, &m_workspaceIndex, 0);
-        d.readBlob(29, &m_geometryBytes);
-        d.readBool(30, &m_hidden, false);
+        d.readS32(53, &m_workspaceIndex, 0);
+        d.readBlob(54, &m_geometryBytes);
+        d.readBool(55, &m_hidden, false);
 
         return true;
     }
