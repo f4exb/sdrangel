@@ -75,7 +75,7 @@ void RotCtrlDProtocol::readData()
                 int rprt = matchRprt.captured(1).toInt();
                 if (rprt != 0)
                 {
-                    qWarning() << "GS232ControllerWorker::readData - rotctld error: " << errors[-rprt];
+                    qWarning() << "RotCtrlDProtocol::readData - rotctld error: " << errors[-rprt];
                     // Seem to get a lot of EPROTO errors from rotctld due to extra 00 char in response to GS232 C2 command
                     // E.g: ./rotctld.exe -m 603 -r com7 -vvvvv
                     // read_string(): RX 16 characters
@@ -97,12 +97,12 @@ void RotCtrlDProtocol::readData()
                 QString az = m_rotCtlDAz;
                 QString el = response;
                 m_rotCtlDReadAz = false;
-                //qDebug() << "GS232ControllerWorker::readData read Az " << az << " El " << el;
+                //qDebug() << "RotCtrlDProtocol::readData read Az " << az << " El " << el;
                 reportAzEl(az.toFloat(), el.toFloat());
             }
             else
             {
-                qWarning() << "GS232ControllerWorker::readData - Unexpected rotctld response \"" << response << "\"";
+                qWarning() << "RotCtrlDProtocol::readData - Unexpected rotctld response \"" << response << "\"";
                 reportError(QString("Unexpected rotctld response: %1").arg(response));
             }
         }
