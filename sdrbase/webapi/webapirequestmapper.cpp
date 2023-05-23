@@ -4830,7 +4830,17 @@ bool WebAPIRequestMapper::getDeviceSettings(
         extractKeys(settingsJsonObject, deviceSettingsKeys);
         qDebug() << "WebAPIRequestMapper::getDeviceSettings: deviceSettingsKeys: " << deviceSettingsKeys;
 
-        if (deviceSettingsKey == "airspySettings")
+        if (deviceSettingsKey == "aaroniaRTSASettings")
+        {
+            deviceSettings->setAaroniaRtsaSettings(new SWGSDRangel::SWGAaroniaRTSASettings());
+            deviceSettings->getAaroniaRtsaSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "aaroniaRTSAOutputSettings")
+        {
+            deviceSettings->setAaroniaRtsaOutputSettings(new SWGSDRangel::SWGAaroniaRTSAOutputSettings());
+            deviceSettings->getAaroniaRtsaOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "airspySettings")
         {
             deviceSettings->setAirspySettings(new SWGSDRangel::SWGAirspySettings());
             deviceSettings->getAirspySettings()->fromJsonObject(settingsJsonObject);
