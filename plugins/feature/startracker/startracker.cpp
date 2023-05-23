@@ -927,7 +927,6 @@ void StarTracker::scanAvailableFeatures()
 {
     qDebug("StarTracker::scanAvailableFeatures");
     MainCore *mainCore = MainCore::instance();
-    MessagePipes& messagePipes = mainCore->getMessagePipes();
     std::vector<FeatureSet*>& featureSets = mainCore->getFeatureeSets();
     m_satelliteTrackers.clear();
 
@@ -951,11 +950,17 @@ void StarTracker::scanAvailableFeatures()
 
 void StarTracker::handleFeatureAdded(int featureSetIndex, Feature *feature)
 {
+    (void) featureSetIndex;
+    (void) feature;
+
     scanAvailableFeatures();
 }
 
 void StarTracker::handleFeatureRemoved(int featureSetIndex, Feature *feature)
 {
+    (void) featureSetIndex;
+    (void) feature;
+
     scanAvailableFeatures();
 }
 
