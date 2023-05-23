@@ -32,6 +32,7 @@
 
 #include "webapi/webapiadapterinterface.h"
 #include "webapi/webapiutils.h"
+#include "channel/channelwebapiutils.h"
 
 #include "util/units.h"
 #include "maincore.h"
@@ -141,8 +142,8 @@ void StarTrackerWorker::applySettings(const StarTrackerSettings& settings, const
         || settingsKeys.contains("temperatureLapseRate")
         || settingsKeys.contains("frequency")
         || settingsKeys.contains("beamwidth")
-        || settingsKeys.contains("az")
-        || settingsKeys.contains("el")
+        || settingsKeys.contains("azimuth")
+        || settingsKeys.contains("elevation")
         || settingsKeys.contains("l")
         || settingsKeys.contains("b")
         || settingsKeys.contains("azimuthOffset")
@@ -382,7 +383,7 @@ void StarTrackerWorker::updateRaDec(RADec rd, QDateTime dt, bool lbTarget)
     // Send to Stellarium
     writeStellariumTarget(rdJ2000.ra, rdJ2000.dec);
     // Send to GUI
-    if (m_settings.m_target == "Sun" || m_settings.m_target == "Moon" || (m_settings.m_target == "Custom Az/El") || lbTarget)
+    if (m_settings.m_target == "Sun" || m_settings.m_target == "Moon" || (m_settings.m_target == "Custom Az/El") || lbTarget || m_settings.m_target.contains("SatelliteTracker"))
     {
         if (getMessageQueueToGUI())
         {
@@ -495,6 +496,32 @@ void StarTrackerWorker::update()
         getMessageQueueToGUI()->push(StarTrackerReport::MsgReportRADec::create(moonRD.ra, moonRD.dec, "moon"));
     }
 
+    if (m_settings.m_target.contains("SatelliteTracker"))
+    {
+        // Get Az/El from Satellite Tracker
+        double azimuth, elevation;
+
+        const QRegExp re("F([0-9]+):([0-9]+)");
+        if (re.indexIn(m_settings.m_target) >= 0)
+        {
+            int satelliteTrackerFeatureSetIndex = re.capturedTexts()[1].toInt();
+            int satelliteTrackerFeatureIndex = re.capturedTexts()[2].toInt();
+
+            if (ChannelWebAPIUtils::getFeatureReportValue(satelliteTrackerFeatureSetIndex, satelliteTrackerFeatureIndex, "targetAzimuth", azimuth)
+                && ChannelWebAPIUtils::getFeatureReportValue(satelliteTrackerFeatureSetIndex, satelliteTrackerFeatureIndex, "targetElevation", elevation))
+            {
+                m_settings.m_el = elevation;
+                m_settings.m_az = azimuth;
+            }
+            else
+                qDebug() << "StarTrackerWorker::update - Failed to target from feature " << m_settings.m_target;
+        }
+        else
+            qDebug() << "StarTrackerWorker::update - Failed to parse feature name " << m_settings.m_target;
+    }
+    else
+        qDebug() << "TARGET IS NOT SAT TRACKER!! " << m_settings.m_target;
+
     if (m_settings.m_target == "Sun")
     {
         rd = sunRD;
@@ -507,7 +534,7 @@ void StarTrackerWorker::update()
         aa = moonAA;
         Astronomy::equatorialToGalactic(rd.ra, rd.dec, l, b);
     }
-    else if (m_settings.m_target == "Custom Az/El")
+    else if ((m_settings.m_target == "Custom Az/El") || m_settings.m_target.contains("SatelliteTracker"))
     {
         // Convert Alt/Az to RA/Dec
         aa.alt = m_settings.m_el;

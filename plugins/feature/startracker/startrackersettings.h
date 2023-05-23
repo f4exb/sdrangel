@@ -28,6 +28,23 @@ class Serializable;
 
 struct StarTrackerSettings
 {
+    struct AvailableFeature
+    {
+        int m_featureSetIndex;
+        int m_featureIndex;
+        QString m_type;
+
+        AvailableFeature() = default;
+        AvailableFeature(const AvailableFeature&) = default;
+        AvailableFeature& operator=(const AvailableFeature&) = default;
+        bool operator==(const AvailableFeature& a) const {
+            return (m_featureSetIndex == a.m_featureSetIndex) && (m_featureIndex == a.m_featureIndex) && (m_type == a.m_type);
+        }
+        QString getName() const {
+            return QString("F%1:%2 %3").arg(m_featureSetIndex).arg(m_featureIndex).arg(m_type);
+        }
+    };
+
     QString m_ra;
     QString m_dec;
     double m_latitude;

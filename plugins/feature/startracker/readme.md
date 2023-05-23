@@ -99,6 +99,7 @@ To allow Stellarium to set the RA and Dec, select Custom RA/Dec, and ensure the 
 | S7               | HI                | IAU secondary calibration region (l=132,b=-1)  | Tb=100 peak                                |
 | S8               | HI                | IAU primary calibration region (l=207,b=-15)   | Tb=72 peak                                 |
 | S9               | HI                | IAU secondary calibration region (l=356,b=-4)  | Tb=85 peak                                 |
+| SatelliteTracker |                   | Gets target Az/El from Satellite Tracker       |                                            |
 
 References:
 
@@ -172,6 +173,9 @@ Click on this icon ![Star Tracker Chart theme](../../../doc/img/StarTracker_char
 In order to assist in determining whether and when observations of the target object may be possible, an elevation vs time plot is drawn for the 24 hours encompassing the selected date and time.
 This can be plotted on Cartesian or polar axis.
 Some objects may not be visible from a particular latitude for the specified time, in which case, the graph title will indicate the object is not visible on that particular date.
+
+When the target is set to a Satellite Tracker, this chart is plotted based on the Satellite's current position only. It does not take in to consideration the satellite's movement. For that,
+use the chart in the Satellite Tracker.
 
 <h3>Solar flux vs frequency</h3>
 
