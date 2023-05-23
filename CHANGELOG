@@ -1,4 +1,35 @@
-sdrangel (7.12.0-1) unstable; urgency=medium
+sdrangel (7.14.0-1) unstable; urgency=medium
+
+  * New DSC channel Rx plugin (PR #1693)
+  * New Aaronia output (Tx) plugin
+  * GLSpectrumGUI: apply settings when buddies are set
+  * SpectrumVis: propagate apply settings to GUI message quque if it exists
+  * use MsgConfigureSpectrumVis in place of corresponding GLSpectrum set methods. Fixes #1624
+  * DATV demod: change interpolator and NCO in the same block
+  * DATV demod: leansdr: fix possible segfaults
+  * Fix Qt6 compilation. PR #1654
+  * Sat & Star tracker: Plot target on Az/El chart. Fixes #1641. PR #1641
+  * Use latest libxml2 that has cmake support for use on Mac. For #1657. PR #1663
+  * Set LIBXML2_LIBRARIES for static lib. PR #1663
+  * AIS Demod: Calculate time slot used for messages. PR #1664
+  * Aaroniartsainput: Changes with RTSA suite build 12830. PR #1667
+  * Fixed swagger docker compose run script
+  * GLSpectrum: set default waterfall share to 0.5
+  * Rotator Controller: Add gamepad input controller support. PR #1668
+  * Rx channel demods: prevent possible reading past audio buffer end. Fixes #1661
+  * Upgrade dsdcc to 1.9.4
+  * Scope GUI updates. PR #1671
+  * Add query to TLE download filename, to avoid clashes. Fixes #1647. PR #1673
+  * Add accessibility interface for ValueDial widgets, so they work with screen readers. Fixes #1672. PR #1675
+  * Fix QFileDialog filters to work with non-native dialog. Fixes #1681. PR #1685
+  * Fixed missing initializations of QNetworkManager. Fixes #1689
+  * Fix doppler correction for #1682. Add Az/El offset setting. PR #1694
+  * Update spectrum settings to match what's used in sink. Fix deserialisation of UI related settings. PR #1695
+  * Aaronia RTSA: Fixed API device settings PUT and PATCH
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 23 May 2023 20:09:23 +0200
+
+sdrangel (7.13.0-1) unstable; urgency=medium
 
   - New Aaronia input (Rx) plugin
   - Channel analyzer: engage rational down sampler also when no channel decimation takes place. Fixes #1622
