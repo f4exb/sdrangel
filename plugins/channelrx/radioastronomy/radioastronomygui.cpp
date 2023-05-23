@@ -2596,9 +2596,13 @@ void RadioAstronomyGUI::updateRotatorList(const QList<RadioAstronomySettings::Av
     // if the chosen rotator appears
     int rotatorIndex = ui->rotator->findText(m_settings.m_rotator);
 
-    if (rotatorIndex >= 0) {
+    if (rotatorIndex >= 0)
+    {
         ui->rotator->setCurrentIndex(rotatorIndex);
-    } else {
+        setColumnPrecisionFromRotator();
+    }
+    else
+    {
         ui->rotator->setCurrentIndex(0); // return to None
     }
 
@@ -2709,6 +2713,36 @@ void RadioAstronomyGUI::on_rotator_currentTextChanged(const QString& text)
 {
     m_settings.m_rotator = text;
     applySettings();
+    setColumnPrecisionFromRotator();
+}
+
+void RadioAstronomyGUI::setColumnPrecisionFromRotator()
+{
+    // Match rotator precision
+    const QRegExp re("F([0-9]+):([0-9]+)");
+    if (re.indexIn(m_settings.m_rotator) >= 0)
+    {
+        int featureSetIndex = re.capturedTexts()[1].toInt();
+        int featureIndex = re.capturedTexts()[2].toInt();
+
+        int precision = 0;
+        if (ChannelWebAPIUtils::getFeatureSetting(featureSetIndex, featureIndex, "precision", precision))
+        {
+            int old = ((DecimalDelegate *)ui->powerTable->itemDelegateForColumn(POWER_COL_GAL_LAT))->getPrecision();
+            ((DecimalDelegate *)ui->powerTable->itemDelegateForColumn(POWER_COL_GAL_LAT))->setPrecision(precision);
+            ((DecimalDelegate *)ui->powerTable->itemDelegateForColumn(POWER_COL_GAL_LON))->setPrecision(precision);
+            ((DecimalDelegate *)ui->powerTable->itemDelegateForColumn(POWER_COL_AZ))->setPrecision(precision);
+            ((DecimalDelegate *)ui->powerTable->itemDelegateForColumn(POWER_COL_EL))->setPrecision(precision);
+            if (precision > old)
+            {
+                ui->powerTable->resizeColumnToContents(POWER_COL_GAL_LAT);
+                ui->powerTable->resizeColumnToContents(POWER_COL_GAL_LON);
+                ui->powerTable->resizeColumnToContents(POWER_COL_AZ);
+                ui->powerTable->resizeColumnToContents(POWER_COL_EL);
+            }
+            ui->powerTable->viewport()->update();
+        }
+    }
 }
 
 void RadioAstronomyGUI::on_showSensors_clicked()
