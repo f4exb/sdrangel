@@ -44,14 +44,12 @@ MESSAGE_CLASS_DEFINITION(AaroniaRTSAOutput::MsgSetStatus, Message)
 AaroniaRTSAOutput::AaroniaRTSAOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
-    m_centerFrequency(0),
-    m_sampleRate(48000),
 	m_deviceDescription("AaroniaRTSAOutput"),
     m_worker(nullptr),
     m_workerThread(nullptr),
     m_running(false)
 {
-	m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_sampleRate));
+	m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_settings.m_sampleRate));
     m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -174,40 +172,26 @@ const QString& AaroniaRTSAOutput::getDeviceDescription() const
 
 int AaroniaRTSAOutput::getSampleRate() const
 {
-    return m_sampleRate;
-}
-
-void AaroniaRTSAOutput::setSampleRate(int sampleRate)
-{
-    m_sampleRate = sampleRate;
-    m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_sampleRate));
-
-    DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency); // Frequency in Hz for the DSP engine
-    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
-
-    if (getMessageQueueToGUI())
-    {
-        MsgReportSampleRateAndFrequency *msg = MsgReportSampleRateAndFrequency::create(m_sampleRate, m_centerFrequency);
-        getMessageQueueToGUI()->push(msg);
-    }
+    return m_settings.m_sampleRate;
 }
 
 quint64 AaroniaRTSAOutput::getCenterFrequency() const
 {
-    return m_centerFrequency;
+    return m_settings.m_centerFrequency;
 }
 
 void AaroniaRTSAOutput::setCenterFrequency(qint64 centerFrequency)
 {
-    m_centerFrequency = centerFrequency;
+    AaroniaRTSAOutputSettings settings = m_settings;
+    settings.m_centerFrequency = centerFrequency;
 
-    DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency); // Frequency in Hz for the DSP engine
-    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+    MsgConfigureAaroniaRTSAOutput* message = MsgConfigureAaroniaRTSAOutput::create(settings, QList<QString>{"centerFrequency"}, false);
+    m_inputMessageQueue.push(message);
 
-    if (getMessageQueueToGUI())
+    if (m_guiMessageQueue)
     {
-        MsgReportSampleRateAndFrequency *msg = MsgReportSampleRateAndFrequency::create(m_sampleRate, m_centerFrequency);
-        getMessageQueueToGUI()->push(msg);
+        MsgConfigureAaroniaRTSAOutput* messageToGUI = MsgConfigureAaroniaRTSAOutput::create(settings, QList<QString>{"centerFrequency"}, false);
+        m_guiMessageQueue->push(messageToGUI);
     }
 }
 

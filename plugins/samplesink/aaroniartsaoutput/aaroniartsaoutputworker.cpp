@@ -150,7 +150,7 @@ void AaroniaRTSAOutputWorker::callbackPart(int16_t *buf, SampleVector& data, uns
 void AaroniaRTSAOutputWorker::postData(QJsonDocument jdoc, int16_t *samplesArray, int nSamples)
 {
     QUrl url(tr("http://%1/sample").arg(m_serverAddress));
-    qDebug() << "AaroniaRTSAOutputWorker::postData:" << url;
+    // qDebug() << "AaroniaRTSAOutputWorker::postData:" << url;
 	QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QString("application/json"));
     QByteArray byteArray = jdoc.toJson(QJsonDocument::Compact);

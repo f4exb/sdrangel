@@ -139,7 +139,7 @@ public:
     virtual void setMessageQueueToGUI(MessageQueue *queue);
 	virtual const QString& getDeviceDescription() const;
 	virtual int getSampleRate() const;
-    virtual void setSampleRate(int sampleRate);
+    virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
 	virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
 	std::time_t getStartingTimeStamp() const;
@@ -182,8 +182,6 @@ private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	AaroniaRTSAOutputSettings m_settings;
-    qint64 m_centerFrequency;
-    int m_sampleRate;
 	QString m_deviceDescription;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
