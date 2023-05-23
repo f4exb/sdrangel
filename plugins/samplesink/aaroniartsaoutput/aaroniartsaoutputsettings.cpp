@@ -25,6 +25,9 @@ AaroniaRTSAOutputSettings::AaroniaRTSAOutputSettings()
 
 void AaroniaRTSAOutputSettings::resetToDefaults()
 {
+    m_centerFrequency = 433200000;
+    m_sampleRate = 100000;
+	m_serverAddress = "127.0.0.1:5550";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -35,9 +38,12 @@ QByteArray AaroniaRTSAOutputSettings::serialize() const
 {
     SimpleSerializer s(1);
 
-    s.writeString(4, m_reverseAPIAddress);
-    s.writeU32(5, m_reverseAPIPort);
-    s.writeU32(6, m_reverseAPIDeviceIndex);
+    s.writeU64(1, m_centerFrequency);
+	s.writeString(2, m_serverAddress);
+    s.writeS32(3, m_sampleRate);
+    s.writeString(20, m_reverseAPIAddress);
+    s.writeU32(21, m_reverseAPIPort);
+    s.writeU32(22, m_reverseAPIDeviceIndex);
 
     return s.final();
 }
@@ -56,8 +62,11 @@ bool AaroniaRTSAOutputSettings::deserialize(const QByteArray& data)
     {
         quint32 uintval;
 
-        d.readString(4, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(5, &uintval, 0);
+        d.readU64(1, &m_centerFrequency, 433200000);
+		d.readString(2, &m_serverAddress, "127.0.0.1:5550");
+        d.readS32(3, &m_sampleRate, 100000);
+        d.readString(20, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(21, &uintval, 0);
 
         if ((uintval > 1023) && (uintval < 65535)) {
             m_reverseAPIPort = uintval;
@@ -65,7 +74,7 @@ bool AaroniaRTSAOutputSettings::deserialize(const QByteArray& data)
             m_reverseAPIPort = 8888;
         }
 
-        d.readU32(6, &uintval, 0);
+        d.readU32(22, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
         return true;
@@ -79,6 +88,15 @@ bool AaroniaRTSAOutputSettings::deserialize(const QByteArray& data)
 
 void AaroniaRTSAOutputSettings::applySettings(const QStringList& settingsKeys, const AaroniaRTSAOutputSettings& settings)
 {
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("sampleRate")) {
+        m_sampleRate = settings.m_sampleRate;
+    }
+    if (settingsKeys.contains("serverAddress")) {
+        m_serverAddress = settings.m_serverAddress;
+    }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
     }
@@ -97,6 +115,15 @@ QString AaroniaRTSAOutputSettings::getDebugString(const QStringList& settingsKey
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("sampleRate") || force) {
+        ostr << " m_sampleRate: " << m_sampleRate;
+    }
+    if (settingsKeys.contains("serverAddress") || force) {
+        ostr << " m_serverAddress: " << m_serverAddress.toStdString();
+    }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;
     }

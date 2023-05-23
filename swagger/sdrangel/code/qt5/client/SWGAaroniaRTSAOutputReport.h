@@ -41,21 +41,15 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAaroniaRTSAOutputReport* fromJson(QString &jsonString) override;
 
-    qint64 getCenterFrequency();
-    void setCenterFrequency(qint64 center_frequency);
-
-    qint32 getSampleRate();
-    void setSampleRate(qint32 sample_rate);
+    qint32 getStatus();
+    void setStatus(qint32 status);
 
 
     virtual bool isSet() override;
 
 private:
-    qint64 center_frequency;
-    bool m_center_frequency_isSet;
-
-    qint32 sample_rate;
-    bool m_sample_rate_isSet;
+    qint32 status;
+    bool m_status_isSet;
 
 };
 

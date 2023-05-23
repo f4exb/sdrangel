@@ -2100,18 +2100,28 @@ margin-bottom: 20px;
 };
             defs.AaroniaRTSAOutputReport = {
   "properties" : {
-    "centerFrequency" : {
+    "status" : {
       "type" : "integer",
-      "format" : "int64"
-    },
-    "sampleRate" : {
-      "type" : "integer"
+      "description" : "Connection to RTSA server status:\n  * 0 - Idle\n  * 1 - Unstable\n  * 2 - Connected\n  * 3 - Error\n  * 4 - Disconnected\n"
     }
   },
   "description" : "AaroniaRTSAOutput"
 };
             defs.AaroniaRTSAOutputSettings = {
   "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Sets the center frequency (Hz) of the distant IQ demodulator"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Sets the sample rate (S/s) and span (Hz) of the distant IQ demodulator"
+    },
+    "serverAddress" : {
+      "type" : "string",
+      "description" : "Distant AaroniaRTSA instance URL or IPv4 address with port"
+    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
@@ -2132,7 +2142,7 @@ margin-bottom: 20px;
   "properties" : {
     "status" : {
       "type" : "integer",
-      "description" : "0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected"
+      "description" : "Connection to RTSA server status:\n  * 0 - Idle\n  * 1 - Unstable\n  * 2 - Connected\n  * 3 - Error\n  * 4 - Disconnected\n"
     }
   },
   "description" : "AaroniaRTSA"
@@ -5276,7 +5286,7 @@ margin-bottom: 20px;
     "xtrxMIMOReport" : {
       "$ref" : "#/definitions/XtrxMIMOReport"
     },
-    "aaroniaSDRReport" : {
+    "AaroniaRTSAReport" : {
       "$ref" : "#/definitions/AaroniaRTSAReport"
     },
     "aaroniaRTSAOutputReport" : {
@@ -57561,7 +57571,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-04-10T20:01:50.318+02:00
+              Generated 2023-04-22T13:14:49.587+02:00
             </div>
           </div>
       </div>

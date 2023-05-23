@@ -5,6 +5,7 @@ set(aaroniartsaoutput_SOURCES
 	aaroniartsaoutputplugin.cpp
     aaroniartsaoutputsettings.cpp
     aaroniartsaoutputwebapiadapter.cpp
+    aaroniartsaoutputworker.cpp
 )
 
 set(aaroniartsaoutput_HEADERS
@@ -12,6 +13,7 @@ set(aaroniartsaoutput_HEADERS
 	aaroniartsaoutputplugin.h
     aaroniartsaoutputsettings.h
     aaroniartsaoutputwebapiadapter.h
+    aaroniartsaoutputworker.h
 )
 
 include_directories(

@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_LOCALOUTPUTGUI_H
-#define INCLUDE_LOCALOUTPUTGUI_H
+#ifndef INCLUDE_AARONIARTSAOUTPUTGUI_H
+#define INCLUDE_AARONIARTSAOUTPUTGUI_H
 
 #include <QTimer>
 #include <QWidget>
@@ -70,6 +70,9 @@ private:
     QPalette m_paletteGreenText;
     QPalette m_paletteWhiteText;
 
+	std::vector<QString> m_statusColors;
+	std::vector<QString> m_statusTooltips;
+
     void blockApplySettings(bool block);
 	void displaySettings();
     void sendSettings();
@@ -80,9 +83,13 @@ private:
 private slots:
     void handleInputMessages();
 	void on_startStop_toggled(bool checked);
+    void on_centerFrequency_changed(quint64 value);
+    void on_sampleRate_changed(quint64 value);
+	void on_serverAddress_returnPressed();
+	void on_serverAddressApplyButton_clicked();
     void updateHardware();
 	void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
 };
 
-#endif // INCLUDE_LOCALOUTPUTGUI_H
+#endif // INCLUDE_AARONIARTSAOUTPUTGUI_H

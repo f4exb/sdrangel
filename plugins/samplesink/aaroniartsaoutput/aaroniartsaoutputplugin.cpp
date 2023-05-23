@@ -30,8 +30,8 @@
 
 const PluginDescriptor AaroniaRTSAOutputPlugin::m_pluginDescriptor = {
     QStringLiteral("AaroniaRTSAOutput"),
-	QStringLiteral("Local device output"),
-    QStringLiteral("7.8.2"),
+	QStringLiteral("AaroniaRTSA output"),
+    QStringLiteral("7.14.0"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
@@ -39,7 +39,7 @@ const PluginDescriptor AaroniaRTSAOutputPlugin::m_pluginDescriptor = {
 };
 
 static constexpr const char* const m_hardwareID = "AaroniaRTSAOutput";
-static constexpr const char* const m_deviceTypeID = LOCALOUTPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_deviceTypeID = AARONIARTSAOUTPUT_DEVICE_TYPE_ID;
 
 AaroniaRTSAOutputPlugin::AaroniaRTSAOutputPlugin(QObject* parent) :
 	QObject(parent)

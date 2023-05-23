@@ -18,6 +18,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#ifndef PLUGINS_AARONIARTSAOUTPUTWEBAPIADAPTER_H_
+#define PLUGINS_AARONIARTSAOUTPUTWEBAPIADAPTER_H_
+
 #include "device/devicewebapiadapter.h"
 #include "aaroniartsaoutputsettings.h"
 
@@ -42,3 +45,5 @@ public:
 private:
     AaroniaRTSAOutputSettings m_settings;
 };
+
+#endif // PLUGINS_AARONIARTSAOUTPUTWEBAPIADAPTER_H_

@@ -71,7 +71,7 @@ DeviceReport:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputReport"
     xtrxMIMOReport:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxMIMOReport"
-    aaroniaSDRReport:
+    AaroniaRTSAReport:
       $ref: "/doc/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSAReport"
     aaroniaRTSAOutputReport:
       $ref: "/doc/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSAOutputReport"

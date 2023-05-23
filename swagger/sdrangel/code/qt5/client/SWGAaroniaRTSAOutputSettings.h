@@ -42,6 +42,15 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAaroniaRTSAOutputSettings* fromJson(QString &jsonString) override;
 
+    qint64 getCenterFrequency();
+    void setCenterFrequency(qint64 center_frequency);
+
+    qint32 getSampleRate();
+    void setSampleRate(qint32 sample_rate);
+
+    QString* getServerAddress();
+    void setServerAddress(QString* server_address);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -58,6 +67,15 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint64 center_frequency;
+    bool m_center_frequency_isSet;
+
+    qint32 sample_rate;
+    bool m_sample_rate_isSet;
+
+    QString* server_address;
+    bool m_server_address_isSet;
+
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;
 

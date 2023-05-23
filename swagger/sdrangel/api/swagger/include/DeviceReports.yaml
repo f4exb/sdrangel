@@ -71,7 +71,7 @@ DeviceReport:
       $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputReport"
     xtrxMIMOReport:
       $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxMIMOReport"
-    aaroniaSDRReport:
+    AaroniaRTSAReport:
       $ref: "http://swgserver:8081/api/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSAReport"
     aaroniaRTSAOutputReport:
       $ref: "http://swgserver:8081/api/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSAOutputReport"

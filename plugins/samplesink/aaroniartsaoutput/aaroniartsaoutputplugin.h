@@ -15,20 +15,20 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_LOCALOUTPUTPLUGIN_H
-#define INCLUDE_LOCALOUTPUTPLUGIN_H
+#ifndef INCLUDE_AARONIARTSAOUTPUTPLUGIN_H
+#define INCLUDE_AARONIARTSAOUTPUTPLUGIN_H
 
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-#define LOCALOUTPUT_DEVICE_TYPE_ID "sdrangel.samplesink.localoutput"
+#define AARONIARTSAOUTPUT_DEVICE_TYPE_ID "sdrangel.samplesink.aaroniartsaoutput"
 
 class PluginAPI;
 
 class AaroniaRTSAOutputPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID LOCALOUTPUT_DEVICE_TYPE_ID)
+	Q_PLUGIN_METADATA(IID AARONIARTSAOUTPUT_DEVICE_TYPE_ID)
 
 public:
 	explicit AaroniaRTSAOutputPlugin(QObject* parent = nullptr);
@@ -49,4 +49,4 @@ private:
 	static const PluginDescriptor m_pluginDescriptor;
 };
 
-#endif // INCLUDE_LOCALOUTPUTPLUGIN_H
+#endif // INCLUDE_AARONIARTSAOUTPUTPLUGIN_H

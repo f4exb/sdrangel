@@ -28,10 +28,8 @@ SWGAaroniaRTSAOutputReport::SWGAaroniaRTSAOutputReport(QString* json) {
 }
 
 SWGAaroniaRTSAOutputReport::SWGAaroniaRTSAOutputReport() {
-    center_frequency = 0L;
-    m_center_frequency_isSet = false;
-    sample_rate = 0;
-    m_sample_rate_isSet = false;
+    status = 0;
+    m_status_isSet = false;
 }
 
 SWGAaroniaRTSAOutputReport::~SWGAaroniaRTSAOutputReport() {
@@ -40,15 +38,12 @@ SWGAaroniaRTSAOutputReport::~SWGAaroniaRTSAOutputReport() {
 
 void
 SWGAaroniaRTSAOutputReport::init() {
-    center_frequency = 0L;
-    m_center_frequency_isSet = false;
-    sample_rate = 0;
-    m_sample_rate_isSet = false;
+    status = 0;
+    m_status_isSet = false;
 }
 
 void
 SWGAaroniaRTSAOutputReport::cleanup() {
-
 
 }
 
@@ -63,9 +58,7 @@ SWGAaroniaRTSAOutputReport::fromJson(QString &json) {
 
 void
 SWGAaroniaRTSAOutputReport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
-    
-    ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
+    ::SWGSDRangel::setValue(&status, pJson["status"], "qint32", "");
     
 }
 
@@ -83,34 +76,21 @@ SWGAaroniaRTSAOutputReport::asJson ()
 QJsonObject*
 SWGAaroniaRTSAOutputReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_center_frequency_isSet){
-        obj->insert("centerFrequency", QJsonValue(center_frequency));
-    }
-    if(m_sample_rate_isSet){
-        obj->insert("sampleRate", QJsonValue(sample_rate));
+    if(m_status_isSet){
+        obj->insert("status", QJsonValue(status));
     }
 
     return obj;
 }
 
-qint64
-SWGAaroniaRTSAOutputReport::getCenterFrequency() {
-    return center_frequency;
-}
-void
-SWGAaroniaRTSAOutputReport::setCenterFrequency(qint64 center_frequency) {
-    this->center_frequency = center_frequency;
-    this->m_center_frequency_isSet = true;
-}
-
 qint32
-SWGAaroniaRTSAOutputReport::getSampleRate() {
-    return sample_rate;
+SWGAaroniaRTSAOutputReport::getStatus() {
+    return status;
 }
 void
-SWGAaroniaRTSAOutputReport::setSampleRate(qint32 sample_rate) {
-    this->sample_rate = sample_rate;
-    this->m_sample_rate_isSet = true;
+SWGAaroniaRTSAOutputReport::setStatus(qint32 status) {
+    this->status = status;
+    this->m_status_isSet = true;
 }
 
 
@@ -118,10 +98,7 @@ bool
 SWGAaroniaRTSAOutputReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_sample_rate_isSet){
+        if(m_status_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

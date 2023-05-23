@@ -169,8 +169,8 @@ public:
     SWGXtrxMIMOReport* getXtrxMimoReport();
     void setXtrxMimoReport(SWGXtrxMIMOReport* xtrx_mimo_report);
 
-    SWGAaroniaRTSAReport* getAaroniaSdrReport();
-    void setAaroniaSdrReport(SWGAaroniaRTSAReport* aaronia_sdr_report);
+    SWGAaroniaRTSAReport* getAaroniaRtsaReport();
+    void setAaroniaRtsaReport(SWGAaroniaRTSAReport* aaronia_rtsa_report);
 
     SWGAaroniaRTSAOutputReport* getAaroniaRtsaOutputReport();
     void setAaroniaRtsaOutputReport(SWGAaroniaRTSAOutputReport* aaronia_rtsa_output_report);
@@ -275,8 +275,8 @@ private:
     SWGXtrxMIMOReport* xtrx_mimo_report;
     bool m_xtrx_mimo_report_isSet;
 
-    SWGAaroniaRTSAReport* aaronia_sdr_report;
-    bool m_aaronia_sdr_report_isSet;
+    SWGAaroniaRTSAReport* aaronia_rtsa_report;
+    bool m_aaronia_rtsa_report_isSet;
 
     SWGAaroniaRTSAOutputReport* aaronia_rtsa_output_report;
     bool m_aaronia_rtsa_output_report_isSet;

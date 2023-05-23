@@ -62,10 +62,26 @@ AaroniaRTSAOutputGui::AaroniaRTSAOutputGui(DeviceUISet *deviceUISet, QWidget* pa
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
+	m_statusTooltips.push_back("Idle");          // 0
+	m_statusTooltips.push_back("Unstable");      // 1
+	m_statusTooltips.push_back("Connected");     // 2
+	m_statusTooltips.push_back("Error");         // 3
+	m_statusTooltips.push_back("Disconnected");  // 4
+
+	m_statusColors.push_back("gray");               // Idle
+	m_statusColors.push_back("rgb(232, 212, 35)");  // Unstable (yellow)
+	m_statusColors.push_back("rgb(35, 138, 35)");   // Connected (green)
+	m_statusColors.push_back("rgb(232, 85, 85)");   // Error (red)
+	m_statusColors.push_back("rgb(232, 85, 232)");  // Disconnected (magenta)
+
     ui->setupUi(getContents());
     sizeToContents();
     getContents()->setStyleSheet("#AaroniaRTSAOutputGui { background-color: rgb(64, 64, 64); }");
-    m_helpURL = "plugins/samplesink/localoutput/readme.md";
+    m_helpURL = "plugins/samplesink/aaroniartsaoutput/readme.md";
+    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->centerFrequency->setValueRange(9, 0, 999999999);
+    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
+    ui->sampleRate->setValueRange(7, 2000U, 8000000U);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
@@ -168,6 +184,28 @@ bool AaroniaRTSAOutputGui::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_streamSampleRate = notif.getSampleRate();
+        m_streamCenterFrequency = notif.getCenterFrequency();
+        qDebug("AaroniaRTSAOutputGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu",
+                notif.getSampleRate(),
+                notif.getCenterFrequency());
+        updateSampleRateAndFrequency();
+
+        return true;
+    }
+	else if (AaroniaRTSAOutput::MsgSetStatus::match(message))
+	{
+		qDebug("AaroniaRTSAOutputGui::handleMessage: MsgSetStatus");
+		AaroniaRTSAOutput::MsgSetStatus& notif = (AaroniaRTSAOutput::MsgSetStatus&) message;
+		int status = notif.getStatus();
+		ui->statusIndicator->setToolTip(m_statusTooltips[status]);
+		ui->statusIndicator->setStyleSheet("QLabel { background-color: " +
+			m_statusColors[status] + "; border-radius: 7px; }");
+		return true;
+	}
 	else
 	{
 		return false;
@@ -209,13 +247,12 @@ void AaroniaRTSAOutputGui::handleInputMessages()
     }
 }
 
-void AaroniaRTSAOutputGui::updateSampleRateAndFrequency()
-{
+void AaroniaRTSAOutputGui::updateSampleRateAndFrequency(){
     m_deviceUISet->getSpectrum()->setSampleRate(m_streamSampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_streamCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)m_streamSampleRate / 1000));
     blockApplySettings(true);
-    ui->centerFrequency->setText(QString("%L1").arg(m_streamCenterFrequency / 1000));
+    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     blockApplySettings(false);
 }
 
@@ -223,8 +260,10 @@ void AaroniaRTSAOutputGui::displaySettings()
 {
     blockApplySettings(true);
 
-    ui->centerFrequency->setText(QString("%L1").arg(m_streamCenterFrequency / 1000));
+    ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
+    ui->sampleRate->setValue(m_settings.m_sampleRate);
     ui->deviceRateText->setText(tr("%1k").arg(m_streamSampleRate / 1000.0));
+    ui->serverAddress->setText(m_settings.m_serverAddress);
 
 	blockApplySettings(false);
 }
@@ -243,6 +282,40 @@ void AaroniaRTSAOutputGui::on_startStop_toggled(bool checked)
         AaroniaRTSAOutput::MsgStartStop *message = AaroniaRTSAOutput::MsgStartStop::create(checked);
         m_sampleSink->getInputMessageQueue()->push(message);
     }
+}
+
+void AaroniaRTSAOutputGui::on_centerFrequency_changed(quint64 value)
+{
+    m_settings.m_centerFrequency = value * 1000;
+    m_settingsKeys.append("centerFrequency");
+    sendSettings();
+}
+
+void AaroniaRTSAOutputGui::on_sampleRate_changed(quint64 value)
+{
+    m_settings.m_sampleRate = value;
+    m_settingsKeys.append("sampleRate");
+    sendSettings();
+}
+
+void AaroniaRTSAOutputGui::on_serverAddress_returnPressed()
+{
+    on_serverAddressApplyButton_clicked();
+}
+
+void AaroniaRTSAOutputGui::on_serverAddressApplyButton_clicked()
+{
+	QString serverAddress = ui->serverAddress->text();
+    QUrl url(serverAddress);
+
+    if (QStringList{"ws", "wss", "http", "https"}.contains(url.scheme())) {
+        m_settings.m_serverAddress = QString("%1:%2").arg(url.host()).arg(url.port());
+    } else {
+        m_settings.m_serverAddress = serverAddress;
+    }
+
+    m_settingsKeys.append("serverAddress");
+	sendSettings();
 }
 
 void AaroniaRTSAOutputGui::updateHardware()
@@ -320,4 +393,8 @@ void AaroniaRTSAOutputGui::openDeviceSettingsDialog(const QPoint& p)
 void AaroniaRTSAOutputGui::makeUIConnections()
 {
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AaroniaRTSAOutputGui::on_startStop_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &AaroniaRTSAOutputGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &AaroniaRTSAOutputGui::on_sampleRate_changed);
+    QObject::connect(ui->serverAddress, &QLineEdit::returnPressed, this, &AaroniaRTSAOutputGui::on_serverAddress_returnPressed);
+    QObject::connect(ui->serverAddressApplyButton, &QPushButton::clicked, this, &AaroniaRTSAOutputGui::on_serverAddressApplyButton_clicked);
 }

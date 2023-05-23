@@ -15,13 +15,28 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESINK_LOCALOUTPUT_LOCALOUTPUTSETTINGS_H_
-#define PLUGINS_SAMPLESINK_LOCALOUTPUT_LOCALOUTPUTSETTINGS_H_
+#ifndef PLUGINS_AARONIARTSAOUTPUTSETTINGS_H_
+#define PLUGINS_AARONIARTSAOUTPUTSETTINGS_H_
 
 #include <QByteArray>
 #include <QString>
 
-struct AaroniaRTSAOutputSettings {
+struct AaroniaRTSAOutputSettings
+{
+    enum ConnectionStatus
+    {
+        ConnectionIdle,        // 0 - gray
+        ConnectionUnstable,    // 1 - yellow
+        ConnectionOK,          // 2 - green
+        ConnectionError,       // 3 - red
+        ConnectionDisconnected // 4 - magenta
+    };
+
+    quint64 m_centerFrequency;
+    int m_sampleRate;
+	QString m_serverAddress;
+
+
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
@@ -35,4 +50,4 @@ struct AaroniaRTSAOutputSettings {
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
-#endif /* PLUGINS_SAMPLESINK_LOCALOUTPUT_LOCALOUTPUTSETTINGS_H_ */
+#endif /* PLUGINS_AARONIARTSAOUTPUTSETTINGS_H_ */

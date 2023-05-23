@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_LOCALOUTPUT_H
-#define INCLUDE_LOCALOUTPUT_H
+#ifndef INCLUDE_AARONIARTSAOUTPUT_H
+#define INCLUDE_AARONIARTSAOUTPUT_H
 
 #include <ctime>
 #include <iostream>
@@ -34,6 +34,8 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
+class QThread;
+class AaroniaRTSAOutputWorker;
 
 class AaroniaRTSAOutput : public DeviceSampleSink {
     Q_OBJECT
@@ -104,6 +106,25 @@ public:
         { }
     };
 
+	class MsgSetStatus : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		int getStatus() const { return m_status; }
+
+		static MsgSetStatus* create(int status) {
+			return new MsgSetStatus(status);
+		}
+
+	protected:
+		int m_status;
+
+		MsgSetStatus(int status) :
+			Message(),
+			m_status(status)
+		{ }
+	};
+
 	AaroniaRTSAOutput(DeviceAPI *deviceAPI);
 	virtual ~AaroniaRTSAOutput();
 	virtual void destroy();
@@ -163,11 +184,14 @@ private:
 	AaroniaRTSAOutputSettings m_settings;
     qint64 m_centerFrequency;
     int m_sampleRate;
-    QString m_remoteAddress;
 	QString m_deviceDescription;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+	AaroniaRTSAOutputWorker *m_worker;
+    QThread *m_workerThread;
+    bool m_running;
 
+    int getStatus() const;
     void applySettings(const AaroniaRTSAOutputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AaroniaRTSAOutputSettings& settings, bool force);
@@ -175,6 +199,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void setWorkerStatus(int status);
 };
 
-#endif // INCLUDE_LOCALOUTPUT_H
+#endif // INCLUDE_AARONIARTSAOUTPUT_H

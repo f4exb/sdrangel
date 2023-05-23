@@ -25,12 +25,28 @@ AaroniaRTSAReport:
   description: AaroniaRTSA
   properties:
     status:
-      description: 0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected
       type: integer
+      description: >
+        Connection to RTSA server status:
+          * 0 - Idle
+          * 1 - Unstable
+          * 2 - Connected
+          * 3 - Error
+          * 4 - Disconnected
 
 AaroniaRTSAOutputSettings:
   description: AaroniaRTSAOutput
   properties:
+    centerFrequency:
+      description: Sets the center frequency (Hz) of the distant IQ demodulator
+      type: integer
+      format: int64
+    sampleRate:
+      description: Sets the sample rate (S/s) and span (Hz) of the distant IQ demodulator
+      type: integer
+    serverAddress:
+      description: Distant AaroniaRTSA instance URL or IPv4 address with port
+      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -44,8 +60,12 @@ AaroniaRTSAOutputSettings:
 AaroniaRTSAOutputReport:
   description: AaroniaRTSAOutput
   properties:
-    centerFrequency:
+    status:
       type: integer
-      format: int64
-    sampleRate:
-      type: integer
+      description: >
+        Connection to RTSA server status:
+          * 0 - Idle
+          * 1 - Unstable
+          * 2 - Connected
+          * 3 - Error
+          * 4 - Disconnected

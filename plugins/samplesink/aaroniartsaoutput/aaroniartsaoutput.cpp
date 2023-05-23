@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QThread>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -32,18 +33,23 @@
 #include "dsp/dspengine.h"
 #include "device/deviceapi.h"
 
+#include "aaroniartsaoutputworker.h"
 #include "aaroniartsaoutput.h"
 
 MESSAGE_CLASS_DEFINITION(AaroniaRTSAOutput::MsgConfigureAaroniaRTSAOutput, Message)
 MESSAGE_CLASS_DEFINITION(AaroniaRTSAOutput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(AaroniaRTSAOutput::MsgReportSampleRateAndFrequency, Message)
+MESSAGE_CLASS_DEFINITION(AaroniaRTSAOutput::MsgSetStatus, Message)
 
 AaroniaRTSAOutput::AaroniaRTSAOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_centerFrequency(0),
     m_sampleRate(48000),
-	m_deviceDescription("AaroniaRTSAOutput")
+	m_deviceDescription("AaroniaRTSAOutput"),
+    m_worker(nullptr),
+    m_workerThread(nullptr),
+    m_running(false)
 {
 	m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_sampleRate));
     m_deviceAPI->setNbSinkStreams(1);
@@ -80,13 +86,53 @@ void AaroniaRTSAOutput::init()
 
 bool AaroniaRTSAOutput::start()
 {
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
+
 	qDebug() << "AaroniaRTSAOutput::start";
+
+    m_workerThread = new QThread();
+	m_worker = new AaroniaRTSAOutputWorker(&m_sampleSourceFifo);
+    m_worker->moveToThread(m_workerThread);
+
+    QObject::connect(m_workerThread, &QThread::started, m_worker, &AaroniaRTSAOutputWorker::startWork);
+    QObject::connect(m_workerThread, &QThread::finished, m_worker, &QObject::deleteLater);
+    QObject::connect(m_workerThread, &QThread::finished, m_workerThread, &QThread::deleteLater);
+    QObject::connect(m_worker, &AaroniaRTSAOutputWorker::updateStatus, this, &AaroniaRTSAOutput::setWorkerStatus);
+
+    m_workerThread->start();
+    m_running = true;
+
+	mutexLocker.unlock();
+    applySettings(m_settings, QList<QString>(), true);
+
+	qDebug("AaroniaRTSAOutput::start: started");
 	return true;
 }
 
+
 void AaroniaRTSAOutput::stop()
 {
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
 	qDebug() << "AaroniaRTSAOutput::stop";
+    m_running = false;
+
+	if (m_workerThread)
+	{
+        m_worker->stopWork();
+        m_workerThread->quit();
+        m_workerThread->wait();
+		m_worker = nullptr;
+        m_workerThread = nullptr;
+	}
 }
 
 QByteArray AaroniaRTSAOutput::serialize() const
@@ -165,6 +211,13 @@ void AaroniaRTSAOutput::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
+void AaroniaRTSAOutput::setWorkerStatus(int status)
+{
+	if (m_guiMessageQueue) {
+		m_guiMessageQueue->push(MsgSetStatus::create(status));
+    }
+}
+
 bool AaroniaRTSAOutput::handleMessage(const Message& message)
 {
     if (DSPSignalNotification::match(message))
@@ -206,13 +259,48 @@ bool AaroniaRTSAOutput::handleMessage(const Message& message)
 	}
 }
 
+int AaroniaRTSAOutput::getStatus() const
+{
+    // TODO
+    // if (m_aaroniaRTSAWorker) {
+    //     return m_aaroniaRTSAWorker->getStatus();
+    // } else {
+        return 0;
+    // }
+}
+
 void AaroniaRTSAOutput::applySettings(const AaroniaRTSAOutputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
     qDebug() << "AaroniaRTSAOutput::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
     QMutexLocker mutexLocker(&m_mutex);
     std::ostringstream os;
-    QString remoteAddress;
     QList<QString> reverseAPIKeys;
+    bool forwardChangeToDSP = false;
+
+    if (settingsKeys.contains("centerFrequency") || force)
+    {
+        if (m_worker) {
+            m_worker->setCenterFrequency(settings.m_centerFrequency);
+        }
+
+        forwardChangeToDSP = true;
+    }
+
+    if (settingsKeys.contains("sampleRate") || force)
+    {
+        if (m_worker) {
+            m_worker->setSampleRate(settings.m_sampleRate);
+        }
+
+        forwardChangeToDSP = true;
+    }
+
+    if (settingsKeys.contains("serverAddress") || force)
+    {
+        if (m_worker) {
+            m_worker->setServerAddress(settings.m_serverAddress);
+        }
+    }
 
     if (settingsKeys.contains("useReverseAPI"))
     {
@@ -223,13 +311,17 @@ void AaroniaRTSAOutput::applySettings(const AaroniaRTSAOutputSettings& settings,
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
+    if (forwardChangeToDSP)
+    {
+        DSPSignalNotification *notif = new DSPSignalNotification(settings.m_sampleRate, settings.m_centerFrequency);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+    }
+
     if (force) {
         m_settings = settings;
     } else {
         m_settings.applySettings(settingsKeys, settings);
     }
-
-    m_remoteAddress = remoteAddress;
 }
 
 int AaroniaRTSAOutput::webapiRunGet(
@@ -299,6 +391,15 @@ void AaroniaRTSAOutput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getAaroniaRtsaOutputSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("sampleRate")) {
+        settings.m_sampleRate = response.getAaroniaRtsaOutputSettings()->getSampleRate();
+    }
+    if (deviceSettingsKeys.contains("serverAddress")) {
+        settings.m_serverAddress = *response.getAaroniaRtsaOutputSettings()->getServerAddress();
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getAaroniaRtsaOutputSettings()->getUseReverseApi() != 0;
     }
@@ -315,6 +416,15 @@ void AaroniaRTSAOutput::webapiUpdateDeviceSettings(
 
 void AaroniaRTSAOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AaroniaRTSAOutputSettings& settings)
 {
+    response.getAaroniaRtsaOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getAaroniaRtsaOutputSettings()->setSampleRate(settings.m_sampleRate);
+
+    if (response.getAaroniaRtsaOutputSettings()->getServerAddress()) {
+        *response.getAaroniaRtsaOutputSettings()->getServerAddress() = settings.m_serverAddress;
+    } else {
+        response.getAaroniaRtsaOutputSettings()->setServerAddress(new QString(settings.m_serverAddress));
+    }
+
     response.getAaroniaRtsaOutputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getAaroniaRtsaOutputSettings()->getReverseApiAddress()) {
@@ -340,8 +450,7 @@ int AaroniaRTSAOutput::webapiReportGet(
 
 void AaroniaRTSAOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    response.getAaroniaRtsaOutputReport()->setCenterFrequency(m_centerFrequency);
-    response.getAaroniaRtsaOutputReport()->setSampleRate(m_sampleRate);
+    response.getAaroniaRtsaOutputReport()->setStatus(getStatus());
 }
 
 void AaroniaRTSAOutput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AaroniaRTSAOutputSettings& settings, bool force)

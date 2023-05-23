@@ -282,7 +282,7 @@ bool AaroniaRTSAInput::applySettings(const AaroniaRTSAInputSettings& settings, c
 	qDebug() << "AaroniaRTSAInput::applySettings: force: "<< force << settings.getDebugString(settingsKeys, force);
 
 	if (settingsKeys.contains("serverAddress") || force)
-    {
+{
 		emit setWorkerServerAddress(settings.m_serverAddress);
     }
 
@@ -412,7 +412,7 @@ int AaroniaRTSAInput::webapiReportGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-	response.setAaroniaSdrReport(new SWGSDRangel::SWGAaroniaRTSAReport());
+	response.setAaroniaRtsaReport(new SWGSDRangel::SWGAaroniaRTSAReport());
 	response.getAirspyHfReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
@@ -443,7 +443,7 @@ void AaroniaRTSAInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings
 
 void AaroniaRTSAInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-	response.getAaroniaSdrReport()->setStatus(getStatus());
+	response.getAaroniaRtsaReport()->setStatus(getStatus());
 }
 
 void AaroniaRTSAInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AaroniaRTSAInputSettings& settings, bool force)

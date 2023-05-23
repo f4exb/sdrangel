@@ -28,6 +28,12 @@ SWGAaroniaRTSAOutputSettings::SWGAaroniaRTSAOutputSettings(QString* json) {
 }
 
 SWGAaroniaRTSAOutputSettings::SWGAaroniaRTSAOutputSettings() {
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
+    sample_rate = 0;
+    m_sample_rate_isSet = false;
+    server_address = nullptr;
+    m_server_address_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -44,6 +50,12 @@ SWGAaroniaRTSAOutputSettings::~SWGAaroniaRTSAOutputSettings() {
 
 void
 SWGAaroniaRTSAOutputSettings::init() {
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
+    sample_rate = 0;
+    m_sample_rate_isSet = false;
+    server_address = new QString("");
+    m_server_address_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -56,6 +68,11 @@ SWGAaroniaRTSAOutputSettings::init() {
 
 void
 SWGAaroniaRTSAOutputSettings::cleanup() {
+
+
+    if(server_address != nullptr) { 
+        delete server_address;
+    }
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -75,6 +92,12 @@ SWGAaroniaRTSAOutputSettings::fromJson(QString &json) {
 
 void
 SWGAaroniaRTSAOutputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&server_address, pJson["serverAddress"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
@@ -99,6 +122,15 @@ SWGAaroniaRTSAOutputSettings::asJson ()
 QJsonObject*
 SWGAaroniaRTSAOutputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_center_frequency_isSet){
+        obj->insert("centerFrequency", QJsonValue(center_frequency));
+    }
+    if(m_sample_rate_isSet){
+        obj->insert("sampleRate", QJsonValue(sample_rate));
+    }
+    if(server_address != nullptr && *server_address != QString("")){
+        toJsonValue(QString("serverAddress"), server_address, obj, QString("QString"));
+    }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
     }
@@ -113,6 +145,36 @@ SWGAaroniaRTSAOutputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+qint64
+SWGAaroniaRTSAOutputSettings::getCenterFrequency() {
+    return center_frequency;
+}
+void
+SWGAaroniaRTSAOutputSettings::setCenterFrequency(qint64 center_frequency) {
+    this->center_frequency = center_frequency;
+    this->m_center_frequency_isSet = true;
+}
+
+qint32
+SWGAaroniaRTSAOutputSettings::getSampleRate() {
+    return sample_rate;
+}
+void
+SWGAaroniaRTSAOutputSettings::setSampleRate(qint32 sample_rate) {
+    this->sample_rate = sample_rate;
+    this->m_sample_rate_isSet = true;
+}
+
+QString*
+SWGAaroniaRTSAOutputSettings::getServerAddress() {
+    return server_address;
+}
+void
+SWGAaroniaRTSAOutputSettings::setServerAddress(QString* server_address) {
+    this->server_address = server_address;
+    this->m_server_address_isSet = true;
 }
 
 qint32
@@ -160,6 +222,15 @@ bool
 SWGAaroniaRTSAOutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(server_address && *server_address != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_use_reverse_api_isSet){
             isObjectUpdated = true; break;
         }
