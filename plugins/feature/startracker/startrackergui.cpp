@@ -214,8 +214,65 @@ bool StarTrackerGUI::handleMessage(const Message& message)
         }
         return true;
     }
+    else if (StarTracker::MsgReportAvailableSatelliteTrackers::match(message))
+    {
+        StarTracker::MsgReportAvailableSatelliteTrackers& report = (StarTracker::MsgReportAvailableSatelliteTrackers&) message;
+        updateSatelliteTrackerList(report.getFeatures());
+        return true;
+    }
 
     return false;
+}
+
+void StarTrackerGUI::updateSatelliteTrackerList(const QList<StarTrackerSettings::AvailableFeature>& satelliteTrackers)
+{
+    // Update list of satellite trackers
+    ui->target->blockSignals(true);
+
+    // Remove Satellite Trackers no longer available
+    for (int i = 0; i < ui->target->count(); )
+    {
+        QString text = ui->target->itemText(i);
+        bool found = false;
+        if (text.contains("SatelliteTracker"))
+        {
+            for (const auto& satelliteTracker : satelliteTrackers)
+            {
+                if (satelliteTracker.getName() == text)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                ui->target->removeItem(i);
+            } else {
+                i++;
+            }
+        }
+        else
+        {
+            i++;
+        }
+    }
+
+    // Add new Satellite Trackers
+    for (const auto& satelliteTracker : satelliteTrackers)
+    {
+        QString name = satelliteTracker.getName();
+        if (ui->target->findText(name) == -1) {
+            ui->target->addItem(name);
+        }
+    }
+
+    // Satellite Tracker feature can be created after this plugin, so select it
+    // if the chosen tracker appears
+    int index = ui->target->findText(m_settings.m_target);
+    if (index >= 0) {
+        ui->target->setCurrentIndex(index);
+    }
+
+    ui->target->blockSignals(false);
 }
 
 void StarTrackerGUI::handleInputMessages()
@@ -568,7 +625,7 @@ void StarTrackerGUI::on_declination_editingFinished()
 void StarTrackerGUI::on_azimuth_valueChanged(double value)
 {
     m_settings.m_az = value;
-    m_settingsKeys.append("az");
+    m_settingsKeys.append("azimuth");
     applySettings();
     plotChart();
 }
@@ -576,7 +633,7 @@ void StarTrackerGUI::on_azimuth_valueChanged(double value)
 void StarTrackerGUI::on_elevation_valueChanged(double value)
 {
     m_settings.m_el = value;
-    m_settingsKeys.append("el");
+    m_settingsKeys.append("elevation");
     applySettings();
     plotChart();
 }
@@ -691,7 +748,14 @@ void StarTrackerGUI::updateForTarget()
         on_rightAscension_editingFinished();
         on_declination_editingFinished();
     }
-    if (m_settings.m_target != "Custom Az/El")
+    if (m_settings.m_target.contains("SatelliteTracker"))
+    {
+        ui->azimuth->setReadOnly(true);
+        ui->elevation->setReadOnly(true);
+        ui->rightAscension->setReadOnly(true);
+        ui->declination->setReadOnly(true);
+    }
+    else if (m_settings.m_target != "Custom Az/El")
     {
         ui->azimuth->setReadOnly(true);
         ui->elevation->setReadOnly(true);
@@ -710,11 +774,14 @@ void StarTrackerGUI::updateForTarget()
 
 void StarTrackerGUI::on_target_currentTextChanged(const QString &text)
 {
-    m_settings.m_target = text;
-    m_settingsKeys.append("target");
-    applySettings();
-    updateForTarget();
-    plotChart();
+    if (!text.isEmpty())
+    {
+        m_settings.m_target = text;
+        m_settingsKeys.append("target");
+        applySettings();
+        updateForTarget();
+        plotChart();
+    }
 }
 
 void StarTrackerGUI::updateLST()
@@ -1672,6 +1739,8 @@ void StarTrackerGUI::plotElevationLineChart()
 
     if (maxElevation < 0) {
         m_azElLineChart->setTitle("Not visible from this latitude");
+    } else if (m_settings.m_target.contains("SatelliteTracker")) {
+        m_azElLineChart->setTitle("See Satellite Tracker for chart that accounts for satellite's movement");
     } else {
         m_azElLineChart->setTitle("");
     }
@@ -2027,6 +2096,8 @@ void StarTrackerGUI::plotElevationPolarChart()
 
     if (maxElevation < 0) {
         m_azElPolarChart->setTitle("Not visible from this latitude");
+    } else if (m_settings.m_target.contains("SatelliteTracker")) {
+        m_azElPolarChart->setTitle("See Satellite Tracker for chart that accounts for satellite's movement");
     } else {
         m_azElPolarChart->setTitle("");
     }

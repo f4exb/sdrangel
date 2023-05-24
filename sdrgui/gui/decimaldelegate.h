@@ -29,6 +29,8 @@ public:
     DecimalDelegate(int precision = 2);
 
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override;
+    int getPrecision() const { return m_precision; }
+    void setPrecision(int precision) { m_precision = precision; }
 
 private:
     int m_precision;

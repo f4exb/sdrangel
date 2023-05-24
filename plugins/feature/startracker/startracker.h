@@ -106,6 +106,24 @@ public:
         { }
     };
 
+    class MsgReportAvailableSatelliteTrackers : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<StarTrackerSettings::AvailableFeature>& getFeatures() { return m_availableFeatures; }
+
+        static MsgReportAvailableSatelliteTrackers* create() {
+            return new MsgReportAvailableSatelliteTrackers();
+        }
+
+    private:
+        QList<StarTrackerSettings::AvailableFeature> m_availableFeatures;
+
+        MsgReportAvailableSatelliteTrackers() :
+            Message()
+        {}
+    };
+
     StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~StarTracker();
     virtual void destroy() { delete this; }
@@ -165,6 +183,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
     QSet<ChannelAPI*> m_availableChannels;
+    QHash<Feature*, StarTrackerSettings::AvailableFeature> m_satelliteTrackers;
     Weather *m_weather;
     float m_solarFlux;
 
@@ -178,12 +197,16 @@ private:
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
     double applyBeam(const FITS *fits, double beamwidth, double ra, double dec, int& imgX, int& imgY) const;
     void scanAvailableChannels();
+    void scanAvailableFeatures();
+    void notifyUpdateSatelliteTrackers();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void weatherUpdated(float temperature, float pressure, float humidity);
     void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
     void handleMessagePipeToBeDeleted(int reason, QObject* object);
+    void handleFeatureAdded(int featureSetIndex, Feature *feature);
+    void handleFeatureRemoved(int featureSetIndex, Feature *feature);
     void handleChannelMessageQueue(MessageQueue* messageQueue);
 };
 

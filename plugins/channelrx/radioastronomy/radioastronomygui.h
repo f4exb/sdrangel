@@ -449,6 +449,7 @@ private:
     void calcPowerChartTickCount(int width);
     void calcSpectrumChartTickCount(QValueAxis *axis, int width);
     int powerYUnitsToIndex(RadioAstronomySettings::PowerYUnits units);
+    void setColumnPrecisionFromRotator();
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);

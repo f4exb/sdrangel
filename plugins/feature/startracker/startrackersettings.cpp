@@ -341,10 +341,10 @@ void StarTrackerSettings::applySettings(const QStringList& settingsKeys, const S
     if (settingsKeys.contains("reverseAPIFeatureIndex")) {
         m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
     }
-    if (settingsKeys.contains("az")) {
+    if (settingsKeys.contains("azimuth")) {
         m_az = settings.m_az;
     }
-    if (settingsKeys.contains("el")) {
+    if (settingsKeys.contains("elevation")) {
         m_el = settings.m_el;
     }
     if (settingsKeys.contains("l")) {
@@ -482,10 +482,10 @@ QString StarTrackerSettings::getDebugString(const QStringList& settingsKeys, boo
     if (settingsKeys.contains("reverseAPIFeatureIndex") || force) {
         ostr << " m_reverseAPIFeatureIndex: " << m_reverseAPIFeatureIndex;
     }
-    if (settingsKeys.contains("az") || force) {
+    if (settingsKeys.contains("azimuth") || force) {
         ostr << " m_az: " << m_az;
     }
-    if (settingsKeys.contains("el") || force) {
+    if (settingsKeys.contains("elevation") || force) {
         ostr << " m_el: " << m_el;
     }
     if (settingsKeys.contains("l") || force) {

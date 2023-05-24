@@ -163,6 +163,7 @@ private:
     void updateSolarFlux(bool all);
     void makeUIConnections();
     void limitAzElRange(double& azimuth, double& elevation) const;
+    void updateSatelliteTrackerList(const QList<StarTrackerSettings::AvailableFeature>& satelliteTrackers);
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);

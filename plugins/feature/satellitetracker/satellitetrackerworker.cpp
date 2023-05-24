@@ -811,28 +811,30 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
 void SatelliteTrackerWorker::enableDoppler(SatWorkerState *satWorkerState)
 {
     QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *m_deviceSettingsList = m_settings.m_deviceSettings.value(satWorkerState->m_name);
-
-    satWorkerState->m_doppler.clear();
-    bool requiresDoppler = false;
-    for (int i = 0; i < m_deviceSettingsList->size(); i++)
+    if (m_deviceSettingsList)
     {
-        SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
-        if (devSettings->m_doppler.size() > 0)
+        satWorkerState->m_doppler.clear();
+        bool requiresDoppler = false;
+        for (int i = 0; i < m_deviceSettingsList->size(); i++)
         {
-            requiresDoppler = true;
-            for (int j = 0; j < devSettings->m_doppler.size(); j++) {
-                satWorkerState->m_doppler.append(0);
+            SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
+            if (devSettings->m_doppler.size() > 0)
+            {
+                requiresDoppler = true;
+                for (int j = 0; j < devSettings->m_doppler.size(); j++) {
+                    satWorkerState->m_doppler.append(0);
+                }
             }
         }
-    }
-    if (requiresDoppler)
-    {
-        qDebug() << "SatelliteTrackerWorker::applyDeviceAOSSettings: Enabling doppler for " << satWorkerState->m_name;
-        satWorkerState->m_dopplerTimer.setInterval(m_settings.m_dopplerPeriod * 1000);
-        satWorkerState->m_dopplerTimer.start();
-        connect(&satWorkerState->m_dopplerTimer, &QTimer::timeout, [this, satWorkerState]() {
-            doppler(satWorkerState);
-        });
+        if (requiresDoppler)
+        {
+            qDebug() << "SatelliteTrackerWorker::applyDeviceAOSSettings: Enabling doppler for " << satWorkerState->m_name;
+            satWorkerState->m_dopplerTimer.setInterval(m_settings.m_dopplerPeriod * 1000);
+            satWorkerState->m_dopplerTimer.start();
+            connect(&satWorkerState->m_dopplerTimer, &QTimer::timeout, [this, satWorkerState]() {
+                doppler(satWorkerState);
+            });
+        }
     }
 }
 
@@ -874,7 +876,7 @@ void SatelliteTrackerWorker::doppler(SatWorkerState *satWorkerState)
     qDebug() << "SatelliteTrackerWorker::doppler " << satWorkerState->m_name;
 
     QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *m_deviceSettingsList = m_settings.m_deviceSettings.value(satWorkerState->m_name);
-    if (m_deviceSettingsList != nullptr)
+    if (m_deviceSettingsList)
     {
         for (int i = 0; i < m_deviceSettingsList->size(); i++)
         {

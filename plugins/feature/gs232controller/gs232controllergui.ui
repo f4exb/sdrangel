@@ -339,6 +339,9 @@
       </item>
       <item row="4" column="1">
        <widget class="QSpinBox" name="azimuthMin">
+        <property name="minimum">
+         <number>-180</number>
+        </property>
         <property name="maximum">
          <number>450</number>
         </property>
