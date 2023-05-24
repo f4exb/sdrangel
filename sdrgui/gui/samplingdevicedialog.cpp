@@ -31,15 +31,18 @@ SamplingDeviceDialog::SamplingDeviceDialog(int deviceType, QWidget* parent) :
     ui(new Ui::SamplingDeviceDialog),
     m_deviceType(deviceType),
     m_selectedDeviceIndex(-1),
-    m_hasChanged(false)
+    m_hasChanged(false),
+    m_progressDialog(nullptr)
 {
     ui->setupUi(this);
     // Don't automatically call on_refreshDevices_clicked(), some drivers can be slow to enumerate
     displayDevices();
+    connect(DeviceEnumerator::instance(), &DeviceEnumerator::enumeratingDevices, this, &SamplingDeviceDialog::enumeratingDevice);
 }
 
 SamplingDeviceDialog::~SamplingDeviceDialog()
 {
+    disconnect(DeviceEnumerator::instance(), &DeviceEnumerator::enumeratingDevices, this, &SamplingDeviceDialog::enumeratingDevice);
     delete ui;
 }
 
@@ -87,18 +90,18 @@ void SamplingDeviceDialog::on_deviceSelect_currentIndexChanged(int index)
 
 void SamplingDeviceDialog::on_refreshDevices_clicked()
 {
-    QProgressDialog *progressDialog = new QProgressDialog("Enumerating devices", "", 0, 0, this);
-    progressDialog->setWindowModality(Qt::WindowModal);
-    progressDialog->setCancelButton(nullptr);
-    progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
-    progressDialog->show();
-    SamplingDeviceDialogWorker *worker = new SamplingDeviceDialogWorker(m_deviceType, progressDialog);
+    m_progressDialog = new QProgressDialog("Enumerating devices", "", 0, 0, this);
+    m_progressDialog->setWindowModality(Qt::WindowModal);
+    m_progressDialog->setCancelButton(nullptr);
+    m_progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
+    m_progressDialog->show();
+    SamplingDeviceDialogWorker *worker = new SamplingDeviceDialogWorker(m_deviceType);
     QThread *thread = new QThread();
     worker->moveToThread(thread);
     connect(thread, &QThread::started, worker, &SamplingDeviceDialogWorker::enumerateDevices);
     connect(worker, &SamplingDeviceDialogWorker::finishedWork, thread, &QThread::quit);
-    connect(worker, &SamplingDeviceDialogWorker::finishedWork, progressDialog, &QProgressDialog::close);
-    connect(worker, &SamplingDeviceDialogWorker::finishedWork, progressDialog, &QProgressDialog::deleteLater);
+    connect(worker, &SamplingDeviceDialogWorker::finishedWork, m_progressDialog, &QProgressDialog::close);
+    connect(worker, &SamplingDeviceDialogWorker::finishedWork, m_progressDialog, &QProgressDialog::deleteLater);
     connect(worker, &SamplingDeviceDialogWorker::finishedWork, this, &SamplingDeviceDialog::displayDevices);
     connect(worker, &SamplingDeviceDialogWorker::finishedWork, worker, &SamplingDeviceDialog::deleteLater);
     connect(thread, &QThread::finished, thread, &QThread::deleteLater);
@@ -117,10 +120,16 @@ void SamplingDeviceDialog::reject()
     QDialog::reject();
 }
 
+void SamplingDeviceDialog::enumeratingDevice(const QString &deviceId)
+{
+    if (m_progressDialog) {
+        m_progressDialog->setLabelText("Enumerating " + deviceId);
+    }
+}
+
 void SamplingDeviceDialogWorker::enumerateDevices()
 {
     PluginManager *pluginManager = MainCore::instance()->getPluginManager();
-    connect(DeviceEnumerator::instance(), &DeviceEnumerator::enumeratingDevices, this, &SamplingDeviceDialogWorker::enumeratingDevices);
     if (m_deviceType == 0) {
         DeviceEnumerator::instance()->enumerateRxDevices(pluginManager);
     } else if (m_deviceType == 1) {
@@ -130,9 +139,3 @@ void SamplingDeviceDialogWorker::enumerateDevices()
     }
     emit finishedWork();
 }
-
-void SamplingDeviceDialogWorker::enumeratingDevices(const QString &deviceId)
-{
-    m_progressDialog->setLabelText("Enumerating " + deviceId);
-}
-
