@@ -37,9 +37,8 @@ class SDRGUI_API SamplingDeviceDialogWorker : public QObject {
     Q_OBJECT
 
 public:
-    SamplingDeviceDialogWorker(int deviceType, QProgressDialog *progressDialog) :
-        m_deviceType(deviceType),
-        m_progressDialog(progressDialog)
+    SamplingDeviceDialogWorker(int deviceType) :
+        m_deviceType(deviceType)
     {
     }
     void enumerateDevices();
@@ -48,11 +47,9 @@ signals:
     void finishedWork();
 
 private slots:
-    void enumeratingDevices(const QString &deviceId);
 
 private:
     int m_deviceType;
-    QProgressDialog *m_progressDialog;
 };
 
 class SDRGUI_API SamplingDeviceDialog : public QDialog {
@@ -73,6 +70,7 @@ private:
     int m_selectedDeviceIndex;
     std::vector<int> m_deviceIndexes;
     bool m_hasChanged;
+    QProgressDialog *m_progressDialog;
 
     void displayDevices();
 
@@ -81,6 +79,7 @@ private slots:
     void on_refreshDevices_clicked();
     void accept();
     void reject();
+    void enumeratingDevice(const QString &deviceId);
 };
 
 #endif /* SDRGUI_GUI_SAMPLINGDEVICEDIALOG_H_ */
