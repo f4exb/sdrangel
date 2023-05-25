@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMessageBox>
+#include <QFileDialog>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -226,6 +227,18 @@ void SimplePTTGUI::displaySettings()
     ui->voxLevel->setValue(m_settings.m_voxLevel);
     ui->voxLevelText->setText(tr("%1").arg(m_settings.m_voxLevel));
     ui->voxHold->setValue(m_settings.m_voxHold);
+    ui->commandRxTxEnable->setChecked(m_settings.m_rx2txCommandEnable);
+    ui->commandTxRxEnable->setChecked(m_settings.m_tx2rxCommandEnable);
+    ui->gpioRxTxControlEnable->setChecked(m_settings.m_rx2txGPIOEnable);
+    ui->gpioTxRxControlEnable->setChecked(m_settings.m_tx2rxGPIOEnable);
+    ui->gpioTxControl->setChecked(m_settings.m_gpioControl == SimplePTTSettings::GPIOTx);
+    ui->gpioRxControl->setChecked(m_settings.m_gpioControl == SimplePTTSettings::GPIORx);
+    ui->gpioRxTxMask->setText(QString("%1").arg((m_settings.m_rx2txGPIOMask % 256), 2, 16, QChar('0')).toUpper());
+    ui->gpioRxTxValue->setText(QString("%1").arg((m_settings.m_rx2txGPIOValues % 256), 2, 16, QChar('0')).toUpper());
+    ui->gpioTxRxMask->setText(QString("%1").arg((m_settings.m_tx2rxGPIOMask % 256), 2, 16, QChar('0')).toUpper());
+    ui->gpioTxRxValue->setText(QString("%1").arg((m_settings.m_tx2rxGPIOValues % 256), 2, 16, QChar('0')).toUpper());
+    ui->commandRxTx->setText(m_settings.m_rx2txCommand);
+    ui->commandTxRx->setText(m_settings.m_tx2rxCommand);
     blockApplySettings(false);
 }
 
@@ -442,6 +455,155 @@ void SimplePTTGUI::on_voxHold_valueChanged(int value)
     applySettings();
 }
 
+void SimplePTTGUI::on_commandRxTxEnable_toggled(bool checked)
+{
+    m_settings.m_rx2txCommandEnable = checked;
+    m_settingsKeys.append("rx2txCommandEnable");
+    applySettings();
+}
+
+void SimplePTTGUI::on_commandTxRxEnable_toggled(bool checked)
+{
+    m_settings.m_tx2rxCommandEnable = checked;
+    m_settingsKeys.append("tx2rxCommandEnable");
+    applySettings();
+}
+
+void SimplePTTGUI::on_commandRxTxFileDialog_clicked()
+{
+    QString commandFileName = ui->commandRxTx->text();
+    QFileInfo commandFileInfo(commandFileName);
+    QString commandFolderName = commandFileInfo.baseName();
+    QFileInfo commandDirInfo(commandFolderName);
+    QString dirStr;
+
+    if (commandFileInfo.exists()) {
+        dirStr = commandFileName;
+    } else if (commandDirInfo.exists()) {
+        dirStr = commandFolderName;
+    } else {
+        dirStr = ".";
+    }
+
+    QString fileName = QFileDialog::getOpenFileName(
+            this,
+            tr("Select command"),
+            dirStr,
+            tr("All (*);;Python (*.py);;Shell (*.sh *.bat);;Binary (*.bin *.exe)"), 0, QFileDialog::DontUseNativeDialog);
+
+    if (fileName != "")
+    {
+        ui->commandRxTx->setText(fileName);
+        m_settings.m_rx2txCommand = fileName;
+        m_settingsKeys.append("rx2txCommand");
+        applySettings();
+    }
+}
+
+void SimplePTTGUI::on_commandTxRxFileDialog_clicked()
+{
+    QString commandFileName = ui->commandTxRx->text();
+    QFileInfo commandFileInfo(commandFileName);
+    QString commandFolderName = commandFileInfo.baseName();
+    QFileInfo commandDirInfo(commandFolderName);
+    QString dirStr;
+
+    if (commandFileInfo.exists()) {
+        dirStr = commandFileName;
+    } else if (commandDirInfo.exists()) {
+        dirStr = commandFolderName;
+    } else {
+        dirStr = ".";
+    }
+
+    QString fileName = QFileDialog::getOpenFileName(
+            this,
+            tr("Select command"),
+            dirStr,
+            tr("All (*);;Python (*.py);;Shell (*.sh *.bat);;Binary (*.bin *.exe)"), 0, QFileDialog::DontUseNativeDialog);
+
+    if (fileName != "")
+    {
+        ui->commandTxRx->setText(fileName);
+        m_settings.m_tx2rxCommand = fileName;
+        m_settingsKeys.append("tx2rxCommand");
+        applySettings();
+    }
+}
+
+void SimplePTTGUI::on_gpioRxTxControlEnable_toggled(bool checked)
+{
+    m_settings.m_rx2txGPIOEnable = checked;
+    m_settingsKeys.append("rx2txGPIOEnable");
+    applySettings();
+}
+
+void SimplePTTGUI::on_gpioTxRxControlEnable_toggled(bool checked)
+{
+    m_settings.m_tx2rxGPIOEnable = checked;
+    m_settingsKeys.append("tx2rxGPIOEnable");
+    applySettings();
+}
+
+void SimplePTTGUI::on_gpioRxTxMask_editingFinished()
+{
+    bool ok;
+    int mask = ui->gpioRxTxMask->text().toInt(&ok, 16);
+
+    if (ok)
+    {
+        m_settings.m_rx2txGPIOMask = mask;
+        m_settingsKeys.append("rx2txGPIOMask");
+        applySettings();
+    }
+}
+
+void SimplePTTGUI::on_gpioRxTxValue_editingFinished()
+{
+    bool ok;
+    int values = ui->gpioRxTxValue->text().toInt(&ok, 16);
+
+    if (ok)
+    {
+        m_settings.m_rx2txGPIOValues = values;
+        m_settingsKeys.append("rx2txGPIOValues");
+        applySettings();
+    }
+}
+
+void SimplePTTGUI::on_gpioTxRxMask_editingFinished()
+{
+    bool ok;
+    int mask = ui->gpioTxRxMask->text().toInt(&ok, 16);
+
+    if (ok)
+    {
+        m_settings.m_tx2rxGPIOMask = mask;
+        m_settingsKeys.append("tx2rxGPIOMask");
+        applySettings();
+    }
+}
+
+void SimplePTTGUI::on_gpioTxRxValue_editingFinished()
+{
+    bool ok;
+    int values = ui->gpioTxRxValue->text().toInt(&ok, 16);
+
+    if (ok)
+    {
+        m_settings.m_tx2rxGPIOValues = values;
+        m_settingsKeys.append("tx2rxGPIOValues");
+        applySettings();
+    }
+}
+
+void SimplePTTGUI::on_gpioControl_clicked()
+{
+    m_settings.m_gpioControl = ui->gpioRxControl->isChecked() ? SimplePTTSettings::GPIORx : SimplePTTSettings::GPIOTx;
+    m_settingsKeys.append("gpioControl");
+    applySettings();
+}
+
 void SimplePTTGUI::updateStatus()
 {
     int state = m_simplePTT->getState();
@@ -528,4 +690,16 @@ void SimplePTTGUI::makeUIConnections()
 	QObject::connect(ui->voxEnable, &QCheckBox::clicked, this, &SimplePTTGUI::on_voxEnable_clicked);
 	QObject::connect(ui->voxLevel, &QDial::valueChanged, this, &SimplePTTGUI::on_voxLevel_valueChanged);
 	QObject::connect(ui->voxHold, qOverload<int>(&QSpinBox::valueChanged), this, &SimplePTTGUI::on_voxHold_valueChanged);
+    QObject::connect(ui->commandRxTxEnable, &ButtonSwitch::toggled, this, &SimplePTTGUI::on_commandRxTxEnable_toggled);
+    QObject::connect(ui->commandTxRxEnable, &ButtonSwitch::toggled, this, &SimplePTTGUI::on_commandTxRxEnable_toggled);
+    QObject::connect(ui->commandRxTxFileDialog, &QPushButton::clicked, this, &SimplePTTGUI::on_commandRxTxFileDialog_clicked);
+    QObject::connect(ui->commandTxRxFileDialog, &QPushButton::clicked, this, &SimplePTTGUI::on_commandTxRxFileDialog_clicked);
+    QObject::connect(ui->gpioRxTxControlEnable, &ButtonSwitch::toggled, this, &SimplePTTGUI::on_gpioRxTxControlEnable_toggled);
+    QObject::connect(ui->gpioTxRxControlEnable, &ButtonSwitch::toggled, this, &SimplePTTGUI::on_gpioTxRxControlEnable_toggled);
+    QObject::connect(ui->gpioRxTxMask, &QLineEdit::editingFinished, this, &SimplePTTGUI::on_gpioRxTxMask_editingFinished);
+    QObject::connect(ui->gpioRxTxValue, &QLineEdit::editingFinished, this, &SimplePTTGUI::on_gpioRxTxValue_editingFinished);
+    QObject::connect(ui->gpioTxRxMask, &QLineEdit::editingFinished, this, &SimplePTTGUI::on_gpioTxRxMask_editingFinished);
+    QObject::connect(ui->gpioTxRxValue, &QLineEdit::editingFinished, this, &SimplePTTGUI::on_gpioTxRxValue_editingFinished);
+    QObject::connect(ui->gpioRxControl, &QRadioButton::clicked, this, &SimplePTTGUI::on_gpioControl_clicked);
+    QObject::connect(ui->gpioTxControl, &QRadioButton::clicked, this, &SimplePTTGUI::on_gpioControl_clicked);
 }

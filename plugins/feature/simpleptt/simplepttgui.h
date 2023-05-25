@@ -91,6 +91,18 @@ private slots:
 	void on_voxEnable_clicked(bool checked);
 	void on_voxLevel_valueChanged(int value);
 	void on_voxHold_valueChanged(int value);
+    void on_commandRxTxEnable_toggled(bool checked);
+    void on_commandTxRxEnable_toggled(bool checked);
+    void on_commandRxTxFileDialog_clicked();
+    void on_commandTxRxFileDialog_clicked();
+    void on_gpioRxTxControlEnable_toggled(bool checked);
+    void on_gpioTxRxControlEnable_toggled(bool checked);
+    void on_gpioRxTxMask_editingFinished();
+    void on_gpioRxTxValue_editingFinished();
+    void on_gpioTxRxMask_editingFinished();
+    void on_gpioTxRxValue_editingFinished();
+    void on_gpioControl_clicked();
+
 	void updateStatus();
 	void audioSelect(const QPoint& p);
 };

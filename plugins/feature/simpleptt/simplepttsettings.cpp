@@ -214,20 +214,32 @@ void SimplePTTSettings::applySettings(const QStringList& settingsKeys, const Sim
     if (settingsKeys.contains("gpioControl")) {
         m_gpioControl = settings.m_gpioControl;
     }
+    if (settingsKeys.contains("rx2txGPIOEnable")) {
+        m_rx2txGPIOMask = settings.m_rx2txGPIOEnable;
+    }
     if (settingsKeys.contains("rx2txGPIOMask")) {
         m_rx2txGPIOMask = settings.m_rx2txGPIOMask;
     }
     if (settingsKeys.contains("rx2txGPIOValues")) {
         m_rx2txGPIOValues = settings.m_rx2txGPIOValues;
     }
+    if (settingsKeys.contains("rx2txCommandEnable")) {
+        m_rx2txCommand = settings.m_rx2txCommandEnable;
+    }
     if (settingsKeys.contains("rx2txCommand")) {
         m_rx2txCommand = settings.m_rx2txCommand;
+    }
+    if (settingsKeys.contains("tx2rxGPIOEnable")) {
+        m_tx2rxGPIOMask = settings.m_tx2rxGPIOEnable;
     }
     if (settingsKeys.contains("tx2rxGPIOMask")) {
         m_tx2rxGPIOMask = settings.m_tx2rxGPIOMask;
     }
     if (settingsKeys.contains("tx2rxGPIOValues")) {
         m_tx2rxGPIOValues = settings.m_tx2rxGPIOValues;
+    }
+    if (settingsKeys.contains("tx2rxCommandEnable")) {
+        m_tx2rxCommand = settings.m_tx2rxCommandEnable;
     }
     if (settingsKeys.contains("tx2rxCommand")) {
         m_tx2rxCommand = settings.m_tx2rxCommand;
@@ -283,20 +295,32 @@ QString SimplePTTSettings::getDebugString(const QStringList& settingsKeys, bool 
     if (settingsKeys.contains("gpioControl") || force) {
         ostr << " m_gpioControl: " << m_gpioControl;
     }
+    if (settingsKeys.contains("rx2txGPIOEnable") || force) {
+        ostr << " m_rx2txGPIOEnable: " << m_rx2txGPIOEnable;
+    }
     if (settingsKeys.contains("rx2txGPIOMask") || force) {
         ostr << " m_rx2txGPIOMask: " << m_rx2txGPIOMask;
     }
     if (settingsKeys.contains("rx2txGPIOValues") || force) {
         ostr << " m_rx2txGPIOValues: " << m_rx2txGPIOValues;
     }
+    if (settingsKeys.contains("rx2txCommandEnable") || force) {
+        ostr << " m_rx2txCommandEnable: " << m_rx2txCommandEnable;
+    }
     if (settingsKeys.contains("rx2txCommand") || force) {
         ostr << " m_rx2txCommand: " << m_rx2txCommand.toStdString();
+    }
+    if (settingsKeys.contains("tx2rxGPIOEnable") || force) {
+        ostr << " m_tx2rxGPIOEnable: " << m_tx2rxGPIOEnable;
     }
     if (settingsKeys.contains("tx2rxGPIOMask") || force) {
         ostr << " m_tx2rxGPIOMask: " << m_tx2rxGPIOMask;
     }
     if (settingsKeys.contains("tx2rxGPIOValues") || force) {
         ostr << " m_tx2rxGPIOValues: " << m_tx2rxGPIOValues;
+    }
+    if (settingsKeys.contains("tx2rxCommandEnable") || force) {
+        ostr << " m_tx2rxCommandEnable: " << m_tx2rxCommandEnable;
     }
     if (settingsKeys.contains("tx2rxCommand") || force) {
         ostr << " m_tx2rxCommand: " << m_tx2rxCommand.toStdString();
