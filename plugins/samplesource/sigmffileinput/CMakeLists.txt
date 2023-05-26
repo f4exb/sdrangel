@@ -62,8 +62,12 @@ target_link_libraries(${TARGET_NAME}
 	${TARGET_LIB_GUI}
     swagger
 )
-target_link_libraries(${TARGET_NAME} optimized ${LIBSIGMF_LIBRARIES})
-target_link_libraries(${TARGET_NAME} debug ${LIBSIGMF_LIBRARIES_DEBUG})
+if(WIN32)
+    target_link_libraries(sdrbase optimized ${LIBSIGMF_LIBRARIES})
+    target_link_libraries(sdrbase debug ${LIBSIGMF_LIBRARIES_DEBUG})
+else()
+    target_link_libraries(sdrbase ${LIBSIGMF_LIBRARIES})
+endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
