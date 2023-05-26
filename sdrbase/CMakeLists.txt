@@ -519,8 +519,12 @@ target_link_libraries(sdrbase
     swagger
 )
 if (LIBSIGMF_FOUND)
-    target_link_libraries(sdrbase optimized ${LIBSIGMF_LIBRARIES})
-    target_link_libraries(sdrbase debug ${LIBSIGMF_LIBRARIES_DEBUG})
+    if(WIN32)
+        target_link_libraries(sdrbase optimized ${LIBSIGMF_LIBRARIES})
+        target_link_libraries(sdrbase debug ${LIBSIGMF_LIBRARIES_DEBUG})
+    else()
+        target_link_libraries(sdrbase ${LIBSIGMF_LIBRARIES})
+    endif()
 endif()
 if (Qt6_FOUND)
     target_link_libraries(sdrbase
