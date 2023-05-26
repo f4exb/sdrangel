@@ -228,6 +228,14 @@ elseif(WIN32 OR MINGW)
     )
   endforeach(openssl_dll)
 
+  file(GLOB LIBSIGMF_DLLS "${LIBSIGMF_DLL_DIR}/libsigmf*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  foreach(libsigmf_dll ${LIBSIGMF_DLLS})
+    get_filename_component(libsigmf_dll_name "${libsigmf_dll}"  NAME)
+    add_custom_target(copy_libsigmf_${libsigmf_dll_name} ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${libsigmf_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+    )
+  endforeach(libsigmf_dll)
+
   # TODO we need a way to fixup_bundle() on the build bin/ directory without call install
   if(BUILD_GUI)
     install(CODE "
@@ -283,6 +291,9 @@ elseif(WIN32 OR MINGW)
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     # OpenSSL
     install(DIRECTORY "${OPENSSL_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
+      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    # libsigmf
+    install(DIRECTORY "${LIBSIGMF_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
 
