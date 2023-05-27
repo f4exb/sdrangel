@@ -32,7 +32,7 @@ else(FFTW3F_FOUND)
     add_definitions(-DUSE_KISSFFT)
 endif(FFTW3F_FOUND)
 
-if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if (LIBSIGMF_FOUND)
     set(sdrbase_SOURCES
         ${sdrbase_SOURCES}
         dsp/sigmffilerecord.cpp
@@ -43,7 +43,6 @@ if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         dsp/sigmffilerecord.h
     )
     include_directories(${LIBSIGMF_INCLUDE_DIR})
-    set(sdrbase_LIBSIGMF_LIB ${LIBSIGMF_LIBRARIES})
 endif()
 
 if (LIBSERIALDV_FOUND)
@@ -519,6 +518,14 @@ target_link_libraries(sdrbase
     qrtplib
     swagger
 )
+if (LIBSIGMF_FOUND)
+    if(WIN32)
+        target_link_libraries(sdrbase optimized ${LIBSIGMF_LIBRARIES})
+        target_link_libraries(sdrbase debug ${LIBSIGMF_LIBRARIES_DEBUG})
+    else()
+        target_link_libraries(sdrbase ${LIBSIGMF_LIBRARIES})
+    endif()
+endif()
 if (Qt6_FOUND)
     target_link_libraries(sdrbase
         Qt::Core5Compat

@@ -62,7 +62,7 @@ if(ENABLE_SOAPYSDR AND SOAPYSDR_FOUND)
     add_subdirectory(soapysdrinput)
 endif()
 
-if(LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if(LIBSIGMF_FOUND)
     add_subdirectory(sigmffileinput)
 endif()
 

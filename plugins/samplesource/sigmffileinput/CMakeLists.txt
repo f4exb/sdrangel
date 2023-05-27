@@ -19,6 +19,7 @@ set(sigmffileinput_HEADERS
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${LIBSIGMF_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
@@ -49,14 +50,24 @@ add_library(${TARGET_NAME} SHARED
 	${sigmffileinput_SOURCES}
 )
 
+if (NOT WIN32)
+    link_directories(${Boost_LIBRARY_DIRS})
+endif()
+
 target_link_libraries(${TARGET_NAME}
+    Boost::disable_autolinking
     Qt::Core
     ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
     swagger
-    ${LIBSIGMF_LIBRARIES}
 )
+if(WIN32)
+    target_link_libraries(sdrbase optimized ${LIBSIGMF_LIBRARIES})
+    target_link_libraries(sdrbase debug ${LIBSIGMF_LIBRARIES_DEBUG})
+else()
+    target_link_libraries(sdrbase ${LIBSIGMF_LIBRARIES})
+endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
