@@ -1,3 +1,11 @@
+sdrangel (7.14.2-1) unstable; urgency=medium
+
+  * Implement GPIO and script control from Simple PTT feature. Implements #1558
+  * Allow SigMF plugins to work in Windows. PR #1700
+  * Only update widgets from UI thread. Fixes #1692. PR #1692
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 28 May 2023 22:04:01 +0200
+
 sdrangel (7.14.1-1) unstable; urgency=medium
 
   * Fix Sat Tracker crash in previous release. Fixes #1682. PR #1696.

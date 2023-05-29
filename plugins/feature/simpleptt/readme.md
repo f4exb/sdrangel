@@ -84,7 +84,13 @@ Enable/disable execution of a transition script (12) when PTT is switched from R
 
 <h3>12: Rx to Tx transition script</h3>
 
-Click on the button with a folder icon to open a file dialog where you can locate the script to be executed when transitioning from Rx to Tx. The full path of the script (if any) is shown next to the button.
+Click on the button with a folder icon to open a file dialog where you can locate the script to be executed when transitioning from Rx to Tx. The full path of the script (if any) is shown next to the button. When invoked 4 positional parameters are passed as arguments to the script in this order:
+
+  - Rx device set index (integer)
+  - Rx device center frequency (floating point scientific notation)
+  - Tx device set index (integer)
+  - Tx device center frequency (floating point scientific notation)
+
 
 <h3>13: Enable Tx to Rx transition script</h3>
 
@@ -92,7 +98,13 @@ Enable/disable execution of a transition script (14) when PTT is switched from T
 
 <h3>14: Tx to Rx transition script</h3>
 
-Click on the button with a folder icon to open a file dialog where you can locate the script to be executed when transitioning from Tx to Rx. The full path of the script (if any) is shown next to the button.
+Click on the button with a folder icon to open a file dialog where you can locate the script to be executed when transitioning from Tx to Rx. The full path of the script (if any) is shown next to the button. When invoked 4 positional parameters are passed as arguments to the script in this order:
+
+  - Rx device set index (integer)
+  - Rx device center frequency (floating point scientific notation)
+  - Tx device set index (integer)
+  - Tx device center frequency (floating point scientific notation)
+
 
 <h3>15: Enable Rx to Tx GPIO activation</h3>
 
