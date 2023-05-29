@@ -20,17 +20,49 @@
 #include <QObject>
 #include <QProcess>
 
-class MessageQueue;
+#include "util/message.h"
+#include "util/messagequeue.h"
 
 class SimplePTTCommand : public QObject
 {
     Q_OBJECT
 public:
+    class MsgRun : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        const QString& getCommand() const { return m_command; }
+        int getRxDeviceSetIndex() const { return m_rxDeviceSetIndex; }
+        double getRxCenterFrequency() const { return m_rxCenterFrequency; }
+        int getTxDeviceSetIndex() const { return m_txDeviceSetIndex; }
+        double getTxCenterFrequency() const { return m_txCenterFrequency; }
+
+        static MsgRun* create(const QString& command, int rxDeviceSetIndex, double rxCenterFrequency, int txDeviceSetIndex, double txCenterFrequency) {
+            return new MsgRun(command, rxDeviceSetIndex, rxCenterFrequency, txDeviceSetIndex, txCenterFrequency);
+        }
+
+    private:
+        QString m_command;
+        int m_rxDeviceSetIndex;
+        double m_rxCenterFrequency;
+        int m_txDeviceSetIndex;
+        double m_txCenterFrequency;
+
+        MsgRun(const QString& command, int rxDeviceSetIndex, double rxCenterFrequency, int txDeviceSetIndex, double txCenterFrequency) :
+            Message(),
+            m_command(command),
+            m_rxDeviceSetIndex(rxDeviceSetIndex),
+            m_rxCenterFrequency(rxCenterFrequency),
+            m_txDeviceSetIndex(txDeviceSetIndex),
+            m_txCenterFrequency(txCenterFrequency)
+        { }
+    };
+
     SimplePTTCommand();
     ~SimplePTTCommand();
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
-    void run(const QString& command, int rxDeviceSetIndex, double rxCenterFrequency, int txDeviceSetIndex, double txCenterFrequency);
     const QString& getLastLog() { return m_log; }
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
 private:
     QProcess *m_currentProcess;
@@ -45,11 +77,16 @@ private:
     QProcess::ExitStatus m_currentProcessExitStatus;
     bool m_hasExited;
     MessageQueue *m_msgQueueToGUI; //!< Queue to report state to GUI
+    MessageQueue m_inputMessageQueue;
+
+    bool handleMessage(const Message& message);
+    void run(const QString& command, int rxDeviceSetIndex, double rxCenterFrequency, int txDeviceSetIndex, double txCenterFrequency);
 
 private slots:
     void processStateChanged(QProcess::ProcessState newState);
     void processError(QProcess::ProcessError error);
     void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void handleInputMessages();
 };
 
 #endif // INCLUDE_FEATURE_SIMPLEPTTCOMMAND_H_

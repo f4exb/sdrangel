@@ -44,6 +44,7 @@ SimplePTTWorker::SimplePTTWorker(WebAPIAdapterInterface *webAPIAdapterInterface)
     m_voxState(false),
     m_updateTimer(this)
 {
+    m_audioFifo.setLabel("SimplePTTWorker");
     m_audioReadBuffer.resize(16384);
     m_audioReadBufferFill = 0;
     qDebug("SimplePTTWorker::SimplePTTWorker");
@@ -124,7 +125,6 @@ void SimplePTTWorker::applySettings(const SimplePTTSettings& settings, const QLi
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
         audioDeviceManager->removeAudioSource(&m_audioFifo);
-        audioDeviceManager->addAudioSource(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
         m_audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
         m_voxHoldCount = 0;
         m_voxState = false;
@@ -143,10 +143,18 @@ void SimplePTTWorker::applySettings(const SimplePTTSettings& settings, const QLi
             m_msgQueueToGUI->push(msg);
         }
 
-        if (settings.m_vox) {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+
+        if (settings.m_vox)
+        {
             connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
-        } else {
+            audioDeviceManager->addAudioSource(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        }
+        else
+        {
             disconnect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
+            audioDeviceManager->removeAudioSource(&m_audioFifo);
         }
     }
 
@@ -165,12 +173,13 @@ void SimplePTTWorker::applySettings(const SimplePTTSettings& settings, const QLi
 void SimplePTTWorker::sendPTT(bool tx)
 {
     qDebug("SimplePTTWorker::sendPTT: %s", tx ? "tx" : "rx");
+
 	if (!m_updateTimer.isActive())
 	{
         bool switchedOff = false;
         m_mutex.lock();
 
-        if (tx)
+        if (tx) // Rx to Tx
         {
             if (m_settings.m_rxDeviceSetIndex >= 0)
             {
@@ -185,7 +194,7 @@ void SimplePTTWorker::sendPTT(bool tx)
                 m_updateTimer.start(m_settings.m_rx2TxDelayMs);
             }
         }
-        else
+        else // Tx to Rx
         {
             if (m_settings.m_txDeviceSetIndex >= 0)
             {
@@ -254,18 +263,25 @@ bool SimplePTTWorker::turnDevice(bool on)
 
 void SimplePTTWorker::preSwitch(bool tx)
 {
-    double rxFrequency = 0;
-    double txFrequency = 0;
-    ChannelWebAPIUtils::getCenterFrequency(m_settings.m_rxDeviceSetIndex, rxFrequency);
-    ChannelWebAPIUtils::getCenterFrequency(m_settings.m_txDeviceSetIndex, txFrequency);
+    bool validCommand = tx ? m_settings.m_rx2txCommand.size() > 0 : m_settings.m_tx2rxCommand.size() > 0;
 
-    m_command.run(
-        tx ? m_settings.m_rx2txCommand : m_settings.m_tx2rxCommand,
-        m_settings.m_rxDeviceSetIndex,
-        rxFrequency,
-        m_settings.m_txDeviceSetIndex,
-        txFrequency
-    );
+    if (validCommand)
+    {
+        double rxFrequency = 0;
+        double txFrequency = 0;
+        ChannelWebAPIUtils::getCenterFrequency(m_settings.m_rxDeviceSetIndex, rxFrequency);
+        ChannelWebAPIUtils::getCenterFrequency(m_settings.m_txDeviceSetIndex, txFrequency);
+
+        SimplePTTCommand::MsgRun *msg = SimplePTTCommand::MsgRun::create(
+            tx ? m_settings.m_rx2txCommand : m_settings.m_tx2rxCommand,
+            m_settings.m_rxDeviceSetIndex,
+            rxFrequency,
+            m_settings.m_txDeviceSetIndex,
+            txFrequency
+        );
+
+        m_command.getInputMessageQueue()->push(msg);
+    }
 
     if (m_settings.m_gpioControl == SimplePTTSettings::GPIONone) {
         return;

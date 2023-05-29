@@ -358,6 +358,28 @@ void SimplePTT::webapiFormatFeatureSettings(
     response.getSimplePttSettings()->setVoxEnable(settings.m_voxEnable ? 1 : 0);
     response.getSimplePttSettings()->setVoxHold(settings.m_voxHold);
     response.getSimplePttSettings()->setVoxLevel(settings.m_voxLevel);
+    response.getSimplePttSettings()->setGpioControl((int) settings.m_gpioControl);
+    response.getSimplePttSettings()->setRx2txGpioEnable(settings.m_rx2txGPIOEnable ? 1 : 0);
+    response.getSimplePttSettings()->setRx2txGpioMask(settings.m_rx2txGPIOMask);
+    response.getSimplePttSettings()->setRx2txGpioValues(settings.m_rx2txGPIOValues);
+    response.getSimplePttSettings()->setRx2txCommandEnable(settings.m_rx2txCommandEnable ? 1 : 0);
+
+    if (response.getSimplePttSettings()->getRx2txCommand()) {
+        *response.getSimplePttSettings()->getRx2txCommand() = settings.m_rx2txCommand;
+    } else {
+        response.getSimplePttSettings()->setRx2txCommand(new QString(settings.m_rx2txCommand));
+    }
+
+    response.getSimplePttSettings()->setTx2rxGpioEnable(settings.m_tx2rxGPIOEnable ? 1 : 0);
+    response.getSimplePttSettings()->setTx2rxGpioMask(settings.m_tx2rxGPIOMask);
+    response.getSimplePttSettings()->setTx2rxGpioValues(settings.m_tx2rxGPIOValues);
+    response.getSimplePttSettings()->setTx2rxCommandEnable(settings.m_tx2rxCommandEnable ? 1 : 0);
+
+    if (response.getSimplePttSettings()->getTx2rxCommand()) {
+        *response.getSimplePttSettings()->getTx2rxCommand() = settings.m_tx2rxCommand;
+    } else {
+        response.getSimplePttSettings()->setTx2rxCommand(new QString(settings.m_tx2rxCommand));
+    }
 
     response.getSimplePttSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -420,6 +442,39 @@ void SimplePTT::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("voxLevel")) {
         settings.m_voxLevel = response.getSimplePttSettings()->getVoxLevel();
+    }
+    if (featureSettingsKeys.contains("gpioControl")) {
+        settings.m_gpioControl = (SimplePTTSettings::GPIOControl) response.getSimplePttSettings()->getGpioControl();
+    }
+    if (featureSettingsKeys.contains("rx2txGPIOEnable")) {
+        settings.m_rx2txGPIOEnable = response.getSimplePttSettings()->getRx2txGpioEnable() != 0;
+    }
+    if (featureSettingsKeys.contains("rx2txGPIOMask")) {
+        settings.m_rx2txGPIOMask = response.getSimplePttSettings()->getRx2txGpioMask();
+    }
+    if (featureSettingsKeys.contains("rx2txGPIOValues")) {
+        settings.m_rx2txGPIOValues = response.getSimplePttSettings()->getRx2txGpioValues();
+    }
+    if (featureSettingsKeys.contains("rx2txGPIOEnable")) {
+        settings.m_rx2txCommandEnable = response.getSimplePttSettings()->getRx2txCommandEnable() != 0;
+    }
+    if (featureSettingsKeys.contains("rx2txCommand")) {
+        settings.m_rx2txCommand = *response.getSimplePttSettings()->getRx2txCommand();
+    }
+    if (featureSettingsKeys.contains("tx2rxGPIOEnable")) {
+        settings.m_tx2rxGPIOEnable = response.getSimplePttSettings()->getTx2rxGpioEnable() != 0;
+    }
+    if (featureSettingsKeys.contains("tx2rxGPIOMask")) {
+        settings.m_tx2rxGPIOMask = response.getSimplePttSettings()->getTx2rxGpioMask();
+    }
+    if (featureSettingsKeys.contains("tx2rxGPIOValues")) {
+        settings.m_tx2rxGPIOValues = response.getSimplePttSettings()->getTx2rxGpioValues();
+    }
+    if (featureSettingsKeys.contains("tx2rxGPIOEnable")) {
+        settings.m_tx2rxCommandEnable = response.getSimplePttSettings()->getTx2rxCommandEnable() != 0;
+    }
+    if (featureSettingsKeys.contains("tx2rxCommand")) {
+        settings.m_tx2rxCommand = *response.getSimplePttSettings()->getTx2rxCommand();
     }
     if (featureSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getSimplePttSettings()->getUseReverseApi() != 0;
@@ -487,6 +542,39 @@ void SimplePTT::webapiReverseSendSettings(const QList<QString>& channelSettingsK
     }
     if (channelSettingsKeys.contains("voxLevel") || force) {
         swgSimplePTTSettings->setVoxLevel(settings.m_voxLevel);
+    }
+    if (channelSettingsKeys.contains("gpioControl") || force) {
+        swgSimplePTTSettings->setGpioControl((int) settings.m_gpioControl);
+    }
+    if (channelSettingsKeys.contains("rx2txGPIOEnable") || force) {
+        swgSimplePTTSettings->setRx2txGpioEnable(settings.m_rx2txGPIOEnable ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rx2txGPIOMask") || force) {
+        swgSimplePTTSettings->setRx2txGpioMask(settings.m_rx2txGPIOMask);
+    }
+    if (channelSettingsKeys.contains("rx2txGPIOValues") || force) {
+        swgSimplePTTSettings->setRx2txGpioValues(settings.m_rx2txGPIOValues);
+    }
+    if (channelSettingsKeys.contains("rx2txCommandEnable") || force) {
+        swgSimplePTTSettings->setRx2txCommandEnable(settings.m_rx2txCommandEnable ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rx2txCommand") || force) {
+        swgSimplePTTSettings->setRx2txCommand(new QString(settings.m_rx2txCommand));
+    }
+    if (channelSettingsKeys.contains("tx2rxGPIOEnable") || force) {
+        swgSimplePTTSettings->setTx2rxGpioEnable(settings.m_tx2rxGPIOEnable ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("t2rxGPIOMask") || force) {
+        swgSimplePTTSettings->setTx2rxGpioMask(settings.m_tx2rxGPIOMask);
+    }
+    if (channelSettingsKeys.contains("tx2rxGPIOValues") || force) {
+        swgSimplePTTSettings->setTx2rxGpioValues(settings.m_tx2rxGPIOValues);
+    }
+    if (channelSettingsKeys.contains("tx2rxCommandEnable") || force) {
+        swgSimplePTTSettings->setTx2rxCommandEnable(settings.m_tx2rxCommandEnable ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("tx2rxCommand") || force) {
+        swgSimplePTTSettings->setTx2rxCommand(new QString(settings.m_tx2rxCommand));
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/featureset/%3/feature/%4/settings")

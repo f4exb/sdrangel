@@ -19,6 +19,7 @@
 #define INCLUDE_FEATURE_SIMPLEPTTGUI_H_
 
 #include <QTimer>
+#include <QDateTime>
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
@@ -65,6 +66,14 @@ private:
 	std::vector<QString> m_statusColors;
 	std::vector<QString> m_statusTooltips;
 
+    bool m_lastCommandResult;
+    int m_lastCommandExitCode;
+    int m_lastCommandExitStatus;
+    int m_lastCommandError;
+    bool m_lastCommandErrorReported;
+    QDateTime m_lastCommandEndTime;
+    QString m_lastCommandLog;
+
 	explicit SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
 	virtual ~SimplePTTGUI();
 
@@ -102,6 +111,7 @@ private slots:
     void on_gpioTxRxMask_editingFinished();
     void on_gpioTxRxValue_editingFinished();
     void on_gpioControl_clicked();
+    void on_lastCommandLog_clicked();
 
 	void updateStatus();
 	void audioSelect(const QPoint& p);

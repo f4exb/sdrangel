@@ -20,6 +20,8 @@
 #include "simplepttmessages.h"
 #include "simplepttcommand.h"
 
+MESSAGE_CLASS_DEFINITION(SimplePTTCommand::MsgRun, Message)
+
 SimplePTTCommand::SimplePTTCommand() :
     m_currentProcess(nullptr),
     m_currentProcessPid(0),
@@ -33,6 +35,7 @@ SimplePTTCommand::SimplePTTCommand() :
 {
     m_currentProcessStartTimeStampms = 0;
     m_currentProcessFinishTimeStampms = 0;
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 SimplePTTCommand::~SimplePTTCommand()
@@ -95,10 +98,9 @@ void SimplePTTCommand::processError(QProcess::ProcessError error)
     }
 }
 
-
 void SimplePTTCommand::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    //qDebug("Command::processFinished: (%d) %d", exitCode, exitStatus);
+    qDebug("SimplePTTCommand::processFinished: (%d) %d", exitCode, exitStatus);
     m_currentProcessFinishTimeStampms = TimeUtil::nowms();
     m_currentProcessExitCode = exitCode;
     m_currentProcessExitStatus = exitStatus;
@@ -134,6 +136,8 @@ void SimplePTTCommand::run(const QString& command, int rxDeviceSetIndex, double 
         return;
     }
 
+    qDebug("SimplePTTCommand::run: %s", qPrintable(command));
+
     m_currentProcess = new QProcess(this);
     m_isInError = false;
     m_hasExited = false;
@@ -155,4 +159,29 @@ void SimplePTTCommand::run(const QString& command, int rxDeviceSetIndex, double 
     QStringList allArgs = args.split(" ", QString::SkipEmptyParts);
 #endif
     m_currentProcess->start(command, allArgs);
+}
+
+void SimplePTTCommand::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()))
+    {
+        if (handleMessage(*message)) {
+            delete message;
+        }
+    }
+}
+
+bool SimplePTTCommand::handleMessage(const Message& message)
+{
+    if (MsgRun::match(message))
+    {
+        qDebug("SimplePTTCommand::handleMessage: MsgRun");
+        const MsgRun& cmd = (const MsgRun&) message;
+        run(cmd.getCommand(), cmd.getRxDeviceSetIndex(), cmd.getRxCenterFrequency(), cmd.getTxDeviceSetIndex(), cmd.getTxCenterFrequency());
+        return true;
+    }
+
+    return false;
 }

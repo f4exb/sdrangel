@@ -31,11 +31,14 @@ if(NOT SERVER_MODE)
         ${simpleptt_SOURCES}
         simplepttgui.cpp
         simplepttgui.ui
+        simplepttcommandoutputdialog.cpp
+        simplepttcommandoutputdialog.ui
     )
     set(simpleptt_HEADERS
         ${simpleptt_HEADERS}
 	    simplepttgui.h
-    )
+        simplepttcommandoutputdialog.h
+        )
 
     set(TARGET_NAME featuresimpleptt)
     set(TARGET_LIB "Qt::Widgets")

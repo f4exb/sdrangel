@@ -17,6 +17,7 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QProcess>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -33,6 +34,8 @@
 #include "simplepttreport.h"
 #include "simpleptt.h"
 #include "simplepttgui.h"
+#include "simplepttmessages.h"
+#include "simplepttcommandoutputdialog.h"
 
 SimplePTTGUI* SimplePTTGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
 {
@@ -127,6 +130,31 @@ bool SimplePTTGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (SimplePTTMessages::MsgCommandError::match(message))
+    {
+        qDebug("SimplePTTGUI::handleMessage: SimplePTTMessages::MsgCommandError");
+        SimplePTTMessages::MsgCommandError& report = (SimplePTTMessages::MsgCommandError&) message;
+        m_lastCommandError = report.getError();
+        m_lastCommandLog = report.getLog();
+        m_lastCommandEndTime = QDateTime::fromMSecsSinceEpoch(report.getFinishedTimeStamp());
+        m_lastCommandErrorReported = true;
+        m_lastCommandResult = true;
+
+        return true;
+    }
+    else if (SimplePTTMessages::MsgCommandFinished::match(message))
+    {
+        qDebug("SimplePTTGUI::handleMessage: SimplePTTMessages::MsgCommandFinished");
+        SimplePTTMessages::MsgCommandFinished& report = (SimplePTTMessages::MsgCommandFinished&) message;
+        m_lastCommandExitCode = report.getExitCode();
+        m_lastCommandExitStatus = report.getExitStatus();
+        m_lastCommandLog = report.getLog();
+        m_lastCommandEndTime = QDateTime::fromMSecsSinceEpoch(report.getFinishedTimeStamp());
+        m_lastCommandErrorReported = false;
+        m_lastCommandResult = true;
+
+        return true;
+    }
 
 	return false;
 }
@@ -158,7 +186,12 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 	m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
 	m_doApplySettings(true),
-    m_lastFeatureState(0)
+    m_lastFeatureState(0),
+    m_lastCommandResult(false),
+    m_lastCommandExitCode(0),
+    m_lastCommandExitStatus(QProcess::NormalExit),
+    m_lastCommandError(QProcess::UnknownError),
+    m_lastCommandErrorReported(false)
 {
     m_feature = feature;
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -604,6 +637,23 @@ void SimplePTTGUI::on_gpioControl_clicked()
     applySettings();
 }
 
+void SimplePTTGUI::on_lastCommandLog_clicked()
+{
+    if (!m_lastCommandResult) {
+        return;
+    }
+
+    SimplePTTCommandOutputDialog commandOutputDialog(this);
+    commandOutputDialog.setErrorText((QProcess::ProcessError) m_lastCommandError);
+    commandOutputDialog.setExitText((QProcess::ExitStatus) m_lastCommandExitStatus);
+    commandOutputDialog.setExitCode(m_lastCommandExitCode);
+    commandOutputDialog.setLog(m_lastCommandLog);
+    commandOutputDialog.setStatusIndicator(m_lastCommandErrorReported ?
+        SimplePTTCommandOutputDialog::StatusIndicatorKO : SimplePTTCommandOutputDialog::StatusIndicatorOK);
+    commandOutputDialog.setEndTime(m_lastCommandEndTime);
+    commandOutputDialog.exec();
+}
+
 void SimplePTTGUI::updateStatus()
 {
     int state = m_simplePTT->getState();
@@ -702,4 +752,5 @@ void SimplePTTGUI::makeUIConnections()
     QObject::connect(ui->gpioTxRxValue, &QLineEdit::editingFinished, this, &SimplePTTGUI::on_gpioTxRxValue_editingFinished);
     QObject::connect(ui->gpioRxControl, &QRadioButton::clicked, this, &SimplePTTGUI::on_gpioControl_clicked);
     QObject::connect(ui->gpioTxControl, &QRadioButton::clicked, this, &SimplePTTGUI::on_gpioControl_clicked);
+	QObject::connect(ui->lastCommandLog, &QPushButton::clicked, this, &SimplePTTGUI::on_lastCommandLog_clicked);
 }

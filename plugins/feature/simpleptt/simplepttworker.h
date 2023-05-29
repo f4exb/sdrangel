@@ -86,7 +86,8 @@ public:
     void stopWork();
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
-    void setMessageQueueToGUI(MessageQueue *messageQueue) {
+    void setMessageQueueToGUI(MessageQueue *messageQueue)
+    {
         m_msgQueueToGUI = messageQueue;
         m_command.setMessageQueueToGUI(messageQueue);
     }
