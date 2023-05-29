@@ -64,12 +64,64 @@ Use this combo to select which Rx device is controlled
 
 <h3>7: Select Tx device set</h3>
 
-Use this combo to select which Tx device is controlled
+Use this combo to select which Tx device is controlled. If no device label appears you can use the refresh button (5) to re-populate the list. Else it means that there are no Tx devices in the SDRangel instance.
 
-<h3>8: Transition delay from Rx to Tx</h3>
+<h3>8: Show last command status and log</h3>
+
+When a transition script (11) (13) is enabled this will show the log and status of the last execution of such script.
+
+<h3>9: Transition delay from Rx to Tx</h3>
 
 Value in milliseconds between Rx stop and Tx start
 
-<h3>9: Transition delay from Tx to Rx</h3>
+<h3>10: Transition delay from Tx to Rx</h3>
 
 Value in milliseconds between Tx stop and Rx start
+
+<h3>11: Enable Rx to Tx transition script</h3>
+
+Enable/disable execution of a transition script (12) when PTT is switched from Rx to Tx.
+
+<h3>12: Rx to Tx transition script</h3>
+
+Click on the button with a folder icon to open a file dialog where you can locate the script to be executed when transitioning from Rx to Tx. The full path of the script (if any) is shown next to the button.
+
+<h3>13: Enable Tx to Rx transition script</h3>
+
+Enable/disable execution of a transition script (14) when PTT is switched from Tx to Rx.
+
+<h3>14: Tx to Rx transition script</h3>
+
+Click on the button with a folder icon to open a file dialog where you can locate the script to be executed when transitioning from Tx to Rx. The full path of the script (if any) is shown next to the button.
+
+<h3>15: Enable Rx to Tx GPIO activation</h3>
+
+If the controlling device (Rx or Tx specified with radio buttons (18) and (22)) has GPIO support it will use the mask (16) and values (16) bits to activate the corresponding GPIO pins of the device.
+
+<h3>16: Rx to Tx GPIO mask bits</h3>
+
+Specify which bits of the GPIO are activated (0x00 to 0xFF) during Rx to Tx transition. Bit value 0 to ignore the bit or 1 to take it.
+
+<h3>17: Rx to Tx GPIO value bits</h3>
+
+Specify the value of the GPIO bits that are activated (0x00 to 0xFF) during Rx to Tx transition. Masked bit positions are ignored and can take any value.
+
+<h3>18: Set the Rx device as taking GPIO control</h3>
+
+You can specify either the Rx or Tx device for GPIO control. Click on this radio button to specify the Rx device.
+
+<h3>19: Enable Tx to Rx GPIO activation</h3>
+
+If the controlling device (Rx or Tx specified with radio buttons (18) and (22)) has GPIO support it will use the mask (20) and values (21) bits to activate the corresponding GPIO pins of the device.
+
+<h3>20: Tx to Rx GPIO mask bits</h3>
+
+Specify which bits of the GPIO are activated (0x00 to 0xFF) during Tx to Rx transition. Bit value 0 to ignore the bit or 1 to take it.
+
+<h3>21: Tx to Rx GPIO value bits</h3>
+
+Specify the value of the GPIO bits that are activated (0x00 to 0xFF) during Tx to Rx transition. Masked bit positions are ignored and can take any value.
+
+<h3>22: Set the Tx device as taking GPIO control</h3>
+
+You can specify either the Rx or Tx device for GPIO control. Click on this radio button to specify the Tx device.
