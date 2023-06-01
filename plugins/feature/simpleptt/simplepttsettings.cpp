@@ -224,7 +224,7 @@ void SimplePTTSettings::applySettings(const QStringList& settingsKeys, const Sim
         m_rx2txGPIOValues = settings.m_rx2txGPIOValues;
     }
     if (settingsKeys.contains("rx2txCommandEnable")) {
-        m_rx2txCommand = settings.m_rx2txCommandEnable;
+        m_rx2txCommandEnable = settings.m_rx2txCommandEnable;
     }
     if (settingsKeys.contains("rx2txCommand")) {
         m_rx2txCommand = settings.m_rx2txCommand;
@@ -239,7 +239,7 @@ void SimplePTTSettings::applySettings(const QStringList& settingsKeys, const Sim
         m_tx2rxGPIOValues = settings.m_tx2rxGPIOValues;
     }
     if (settingsKeys.contains("tx2rxCommandEnable")) {
-        m_tx2rxCommand = settings.m_tx2rxCommandEnable;
+        m_tx2rxCommandEnable = settings.m_tx2rxCommandEnable;
     }
     if (settingsKeys.contains("tx2rxCommand")) {
         m_tx2rxCommand = settings.m_tx2rxCommand;
