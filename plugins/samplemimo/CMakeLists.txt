@@ -16,7 +16,11 @@ if(ENABLE_IIO AND LIBIIO_FOUND)
     add_subdirectory(plutosdrmimo)
 endif()
 
-add_subdirectory(audiocatsiso)
+find_package (Hamlib)
+if(hamlib_FOUND)
+    add_subdirectory(audiocatsiso)
+endif()
+
 add_subdirectory(metismiso)
 add_subdirectory(testmi)
 add_subdirectory(testmosync)

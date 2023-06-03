@@ -776,7 +776,7 @@
         </sizepolicy>
        </property>
        <property name="toolTip">
-        <string>CAT Device</string>
+        <string>CAT serial device</string>
        </property>
       </widget>
      </item>
