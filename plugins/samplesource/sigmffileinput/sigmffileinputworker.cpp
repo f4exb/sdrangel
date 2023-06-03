@@ -194,7 +194,7 @@ void SigMFFileInputWorker::tick()
         if (throttlems != m_throttlems)
         {
             m_throttlems = throttlems;
-            m_chunksize = 2 * m_samplebytes * ((m_samplerate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
+            m_chunksize = 2 * m_samplebytes * ((m_samplerate * m_accelerationFactor * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000);
             m_throttleToggle = !m_throttleToggle;
             setBuffers(m_chunksize);
         }
