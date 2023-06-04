@@ -70,6 +70,8 @@ private:
     void displayFrequency();
     void displaySampleRate();
     void displayFcRxTooltip();
+    void displayCatDevice();
+    void displayCatType();
     void updateSpectrum();
 	void sendSettings();
 	void setCenterFrequency(qint64 centerFrequency);
@@ -95,6 +97,8 @@ private slots:
     void on_txChannels_currentIndexChanged(int index);
     void on_txVolume_valueChanged(int value);
     void on_fcPosRx_currentIndexChanged(int index);
+    void on_catDevice_currentIndexChanged(int index);
+    void on_catType_currentIndexChanged(int index);
     void openDeviceSettingsDialog(const QPoint& p);
     void updateStatus();
     void updateHardware();

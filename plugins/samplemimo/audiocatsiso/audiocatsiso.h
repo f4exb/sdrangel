@@ -29,6 +29,7 @@
 #include "audio/audiooutputdevice.h"
 #include "audio/audiofifo.h"
 #include "audiocatsisosettings.h"
+#include "audiocatsisohamlib.h"
 
 class DeviceAPI;
 class QNetworkAccessManager;
@@ -117,6 +118,10 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+    const QStringList& getComPorts() { return m_comPorts; }
+    const QMap<uint32_t, QString>& getRigModels() const { return m_hamlibHandler.getRigModels(); }
+    const QMap<QString, uint32_t>& getRigNames() const { return m_hamlibHandler.getRigNames(); }
+
     virtual int webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage);
@@ -175,8 +180,11 @@ private:
     const QTimer& m_masterTimer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    QStringList m_comPorts;
+    AudioCATSISOHamlib m_hamlibHandler;
 
     void applySettings(const AudioCATSISOSettings& settings, const QList<QString>& settingsKeys, bool force);
+    void listComPorts();
     void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AudioCATSISOSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 

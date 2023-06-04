@@ -72,6 +72,14 @@ AudioCATSISOGUI::AudioCATSISOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(9, 0, m_absMaxFreq);
 
+    for (const auto& comPortName : m_sampleMIMO->getComPorts()) {
+        ui->catDevice->addItem(comPortName);
+    }
+
+    for (const auto& rigName : m_sampleMIMO->getRigNames().keys()) {
+        ui->catType->addItem(rigName);
+    }
+
     displaySettings();
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -355,6 +363,20 @@ void AudioCATSISOGUI::on_fcPosRx_currentIndexChanged(int index)
 
 }
 
+void AudioCATSISOGUI::on_catDevice_currentIndexChanged(int index)
+{
+    m_settings.m_catDevicePath = ui->catDevice->itemText(index);
+    m_settingsKeys.append("catDevicePath");
+    sendSettings();
+}
+
+void AudioCATSISOGUI::on_catType_currentIndexChanged(int index)
+{
+    m_settings.m_hamlibModel = m_sampleMIMO->getRigNames()[ui->catType->itemText(index)];
+    m_settingsKeys.append("hamlibModel");
+    sendSettings();
+}
+
 void AudioCATSISOGUI::displaySettings()
 {
     blockApplySettings(true);
@@ -378,6 +400,8 @@ void AudioCATSISOGUI::displaySettings()
     displaySampleRate();
     updateSpectrum();
     displayFcRxTooltip();
+    displayCatDevice();
+    displayCatType();
 
     blockApplySettings(false);
 }
@@ -391,6 +415,37 @@ void AudioCATSISOGUI::displayFcRxTooltip()
         DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD
     );
     ui->fcPosRx->setToolTip(tr("Relative position of device center frequency: %1 kHz").arg(QString::number(fShift / 1000.0f, 'g', 5)));
+}
+
+void AudioCATSISOGUI::displayCatDevice()
+{
+    QMap<QString, int> catDevices;
+
+    for (int index = 0; index < ui->catDevice->count(); index++) {
+        catDevices[ui->catDevice->itemText(index)] = index;
+    }
+
+    if (catDevices.contains(m_settings.m_catDevicePath)) {
+        ui->catDevice->setCurrentIndex(catDevices[m_settings.m_catDevicePath]);
+    }
+}
+
+void AudioCATSISOGUI::displayCatType()
+{
+    QMap<QString, int> catTypes;
+
+    for (int index = 0; index < ui->catType->count(); index++) {
+        catTypes[ui->catType->itemText(index)] = index;
+    }
+
+    auto const it = m_sampleMIMO->getRigModels().find(m_settings.m_hamlibModel);
+
+    if (it != m_sampleMIMO->getRigModels().end())
+    {
+        if (catTypes.contains(it.value())) {
+            ui->catType->setCurrentIndex(catTypes[it.value()]);
+        }
+    }
 }
 
 void AudioCATSISOGUI::sendSettings()
@@ -619,4 +674,6 @@ void AudioCATSISOGUI::makeUIConnections()
     QObject::connect(ui->txChannels, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_txChannels_currentIndexChanged);
     QObject::connect(ui->txVolume, &QDial::valueChanged, this, &AudioCATSISOGUI::on_txVolume_valueChanged);
     QObject::connect(ui->fcPosRx, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_fcPosRx_currentIndexChanged);
+    QObject::connect(ui->catDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_catDevice_currentIndexChanged);
+    QObject::connect(ui->catType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_catType_currentIndexChanged);
 }

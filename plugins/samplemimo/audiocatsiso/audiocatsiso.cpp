@@ -34,6 +34,7 @@
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
 #include "device/deviceapi.h"
+#include "util/serialutil.h"
 
 #include "audiocatsiso.h"
 #include "audiocatinputworker.h"
@@ -81,6 +82,8 @@ AudioCATSISO::AudioCATSISO(DeviceAPI *deviceAPI) :
         this,
         &AudioCATSISO::networkManagerFinished
     );
+
+    listComPorts();
 }
 
 AudioCATSISO::~AudioCATSISO()
@@ -488,6 +491,17 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
 
         DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(m_txSampleRate, settings.m_txCenterFrequency, false, 0);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+    }
+}
+
+void AudioCATSISO::listComPorts()
+{
+    m_comPorts.clear();
+    std::vector<std::string> comPorts;
+    SerialUtil::getComPorts(comPorts, "tty(USB|ACM)[0-9]+"); // regex is for Linux only
+
+    for (std::vector<std::string>::const_iterator it = comPorts.begin(); it != comPorts.end(); ++it) {
+        m_comPorts.push_back(QString(it->c_str()));
     }
 }
 

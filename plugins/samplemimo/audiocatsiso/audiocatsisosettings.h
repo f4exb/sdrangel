@@ -58,6 +58,9 @@ struct AudioCATSISOSettings {
     fcPos_t      m_fcPosTx;  //!< Not implemented yet
     float        m_txVolume; //!< Not implemented yet
 
+    QString      m_catDevicePath;
+    uint32_t     m_hamlibModel; //!< Hamlib model number
+
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
