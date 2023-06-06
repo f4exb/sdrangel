@@ -467,10 +467,10 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
-
     m_spectrumVis = m_packetMod->getSpectrumVis();
     m_spectrumVis->setGLSpectrum(ui->glSpectrum);
+
+    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
     // Extra /2 here because SSB?
     ui->glSpectrum->setCenterFrequency(m_settings.m_spectrumRate/4);
