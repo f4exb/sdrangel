@@ -23,6 +23,7 @@
 #include <QGeoCoordinate>
 #include <QGeoCodingManager>
 #include <QGeoServiceProvider>
+#include <QSettings>
 
 #ifdef QT_WEBENGINE_FOUND
 #include <QtWebEngineWidgets/QWebEngineView>
@@ -212,6 +213,8 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
         format.setSamples(multisamples);
         ui->map->setFormat(format);
     }
+
+    clearWikiMediaOSMCache();
 
     m_osmPort = 0;
     m_templateServer = new OSMTemplateServer(thunderforestAPIKey(), maptilerAPIKey(), m_osmPort);
@@ -1103,6 +1106,31 @@ void MapGUI::clearOSMCache()
                 qDebug() << "MapGUI::clearOSMCache: Failed to remove " << file;
             }
         }
+    }
+}
+
+// Delete old cache if it might contain wikimedia OSM images before switch to using OSM directly
+// as the images are different
+void MapGUI::clearWikiMediaOSMCache()
+{
+    QSettings settings;
+    QString cacheCleared = "sdrangel.feature.map/cacheCleared";
+    if (!settings.value(cacheCleared).toBool())
+    {
+        qDebug() << "MapGUI::clearWikiMediaOSMCache: Clearing cache";
+        QDir dir(osmCachePath());
+        if (dir.exists())
+        {
+            QStringList filenames = dir.entryList({"osm_100-l-1-*.png"});
+            for (const auto& filename : filenames)
+            {
+                QFile file(dir.filePath(filename));
+                if (!file.remove()) {
+                    qDebug() << "MapGUI::clearWikiMediaOSMCache: Failed to remove " << file;
+                }
+            }
+        }
+        settings.setValue(cacheCleared, true);
     }
 }
 
