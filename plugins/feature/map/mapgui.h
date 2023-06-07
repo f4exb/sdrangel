@@ -218,6 +218,7 @@ private:
     void applyMap3DSettings(bool reloadMap);
     QString osmCachePath();
     void clearOSMCache();
+    void clearWikiMediaOSMCache();
     void displaySettings();
     bool handleMessage(const Message& message);
     void geoReply();
