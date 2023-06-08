@@ -68,6 +68,20 @@ SWGAudioCATSISOSettings::SWGAudioCATSISOSettings() {
     m_fc_pos_tx_isSet = false;
     tx_volume = 0.0f;
     m_tx_volume_isSet = false;
+    cat_speed_index = 0;
+    m_cat_speed_index_isSet = false;
+    cat_data_bits_index = 0;
+    m_cat_data_bits_index_isSet = false;
+    cat_stop_bits_index = 0;
+    m_cat_stop_bits_index_isSet = false;
+    cat_handshake_index = 0;
+    m_cat_handshake_index_isSet = false;
+    cat_ptt_method_index = 0;
+    m_cat_ptt_method_index_isSet = false;
+    cat_dtr_high = 0;
+    m_cat_dtr_high_isSet = false;
+    cat_rts_high = 0;
+    m_cat_rts_high_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -124,6 +138,20 @@ SWGAudioCATSISOSettings::init() {
     m_fc_pos_tx_isSet = false;
     tx_volume = 0.0f;
     m_tx_volume_isSet = false;
+    cat_speed_index = 0;
+    m_cat_speed_index_isSet = false;
+    cat_data_bits_index = 0;
+    m_cat_data_bits_index_isSet = false;
+    cat_stop_bits_index = 0;
+    m_cat_stop_bits_index_isSet = false;
+    cat_handshake_index = 0;
+    m_cat_handshake_index_isSet = false;
+    cat_ptt_method_index = 0;
+    m_cat_ptt_method_index_isSet = false;
+    cat_dtr_high = 0;
+    m_cat_dtr_high_isSet = false;
+    cat_rts_high = 0;
+    m_cat_rts_high_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -156,6 +184,13 @@ SWGAudioCATSISOSettings::cleanup() {
     if(tx_device_name != nullptr) { 
         delete tx_device_name;
     }
+
+
+
+
+
+
+
 
 
 
@@ -218,6 +253,20 @@ SWGAudioCATSISOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&fc_pos_tx, pJson["fcPosTx"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx_volume, pJson["txVolume"], "float", "");
+    
+    ::SWGSDRangel::setValue(&cat_speed_index, pJson["catSpeedIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&cat_data_bits_index, pJson["catDataBitsIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&cat_stop_bits_index, pJson["catStopBitsIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&cat_handshake_index, pJson["catHandshakeIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&cat_ptt_method_index, pJson["catPTTMethodIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&cat_dtr_high, pJson["catDTRHigh"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&cat_rts_high, pJson["catRTSHigh"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -302,6 +351,27 @@ SWGAudioCATSISOSettings::asJsonObject() {
     }
     if(m_tx_volume_isSet){
         obj->insert("txVolume", QJsonValue(tx_volume));
+    }
+    if(m_cat_speed_index_isSet){
+        obj->insert("catSpeedIndex", QJsonValue(cat_speed_index));
+    }
+    if(m_cat_data_bits_index_isSet){
+        obj->insert("catDataBitsIndex", QJsonValue(cat_data_bits_index));
+    }
+    if(m_cat_stop_bits_index_isSet){
+        obj->insert("catStopBitsIndex", QJsonValue(cat_stop_bits_index));
+    }
+    if(m_cat_handshake_index_isSet){
+        obj->insert("catHandshakeIndex", QJsonValue(cat_handshake_index));
+    }
+    if(m_cat_ptt_method_index_isSet){
+        obj->insert("catPTTMethodIndex", QJsonValue(cat_ptt_method_index));
+    }
+    if(m_cat_dtr_high_isSet){
+        obj->insert("catDTRHigh", QJsonValue(cat_dtr_high));
+    }
+    if(m_cat_rts_high_isSet){
+        obj->insert("catRTSHigh", QJsonValue(cat_rts_high));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -520,6 +590,76 @@ SWGAudioCATSISOSettings::setTxVolume(float tx_volume) {
 }
 
 qint32
+SWGAudioCATSISOSettings::getCatSpeedIndex() {
+    return cat_speed_index;
+}
+void
+SWGAudioCATSISOSettings::setCatSpeedIndex(qint32 cat_speed_index) {
+    this->cat_speed_index = cat_speed_index;
+    this->m_cat_speed_index_isSet = true;
+}
+
+qint32
+SWGAudioCATSISOSettings::getCatDataBitsIndex() {
+    return cat_data_bits_index;
+}
+void
+SWGAudioCATSISOSettings::setCatDataBitsIndex(qint32 cat_data_bits_index) {
+    this->cat_data_bits_index = cat_data_bits_index;
+    this->m_cat_data_bits_index_isSet = true;
+}
+
+qint32
+SWGAudioCATSISOSettings::getCatStopBitsIndex() {
+    return cat_stop_bits_index;
+}
+void
+SWGAudioCATSISOSettings::setCatStopBitsIndex(qint32 cat_stop_bits_index) {
+    this->cat_stop_bits_index = cat_stop_bits_index;
+    this->m_cat_stop_bits_index_isSet = true;
+}
+
+qint32
+SWGAudioCATSISOSettings::getCatHandshakeIndex() {
+    return cat_handshake_index;
+}
+void
+SWGAudioCATSISOSettings::setCatHandshakeIndex(qint32 cat_handshake_index) {
+    this->cat_handshake_index = cat_handshake_index;
+    this->m_cat_handshake_index_isSet = true;
+}
+
+qint32
+SWGAudioCATSISOSettings::getCatPttMethodIndex() {
+    return cat_ptt_method_index;
+}
+void
+SWGAudioCATSISOSettings::setCatPttMethodIndex(qint32 cat_ptt_method_index) {
+    this->cat_ptt_method_index = cat_ptt_method_index;
+    this->m_cat_ptt_method_index_isSet = true;
+}
+
+qint32
+SWGAudioCATSISOSettings::getCatDtrHigh() {
+    return cat_dtr_high;
+}
+void
+SWGAudioCATSISOSettings::setCatDtrHigh(qint32 cat_dtr_high) {
+    this->cat_dtr_high = cat_dtr_high;
+    this->m_cat_dtr_high_isSet = true;
+}
+
+qint32
+SWGAudioCATSISOSettings::getCatRtsHigh() {
+    return cat_rts_high;
+}
+void
+SWGAudioCATSISOSettings::setCatRtsHigh(qint32 cat_rts_high) {
+    this->cat_rts_high = cat_rts_high;
+    this->m_cat_rts_high_isSet = true;
+}
+
+qint32
 SWGAudioCATSISOSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -622,6 +762,27 @@ SWGAudioCATSISOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_tx_volume_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_cat_speed_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_cat_data_bits_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_cat_stop_bits_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_cat_handshake_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_cat_ptt_method_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_cat_dtr_high_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_cat_rts_high_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

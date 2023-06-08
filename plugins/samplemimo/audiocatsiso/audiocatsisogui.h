@@ -99,6 +99,7 @@ private slots:
     void on_fcPosRx_currentIndexChanged(int index);
     void on_catDevice_currentIndexChanged(int index);
     void on_catType_currentIndexChanged(int index);
+    void on_catSettings_clicked();
     void openDeviceSettingsDialog(const QPoint& p);
     void updateStatus();
     void updateHardware();

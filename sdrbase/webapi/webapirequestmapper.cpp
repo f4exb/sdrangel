@@ -4850,6 +4850,11 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
             deviceSettings->getAirspyHfSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "audioCATSISOSettings")
+        {
+            deviceSettings->setAudioCatsisoSettings(new SWGSDRangel::SWGAudioCATSISOSettings());
+            deviceSettings->getAudioCatsisoSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "audioInputSettings")
         {
             deviceSettings->setAudioInputSettings(new SWGSDRangel::SWGAudioInputSettings());

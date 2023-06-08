@@ -15,9 +15,48 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <hamlib/rig.h>
+
 #include <QtGlobal>
 #include "util/simpleserializer.h"
 #include "audiocatsisosettings.h"
+
+const int AudioCATSISOSettings::m_catSpeeds[] = {
+    1200,
+    2400,
+    4800,
+    9600,
+    19200,
+    38400,
+    57600,
+    115200
+};
+
+const int AudioCATSISOSettings::m_catDataBits[]
+{
+    7,
+    8
+};
+
+const int AudioCATSISOSettings::m_catStopBits[]
+{
+    1,
+    2
+};
+
+const int AudioCATSISOSettings::m_catHandshakes[]
+{
+    RIG_HANDSHAKE_NONE,
+    RIG_HANDSHAKE_XONXOFF,
+    RIG_HANDSHAKE_HARDWARE
+};
+
+const int AudioCATSISOSettings::m_catPTTMethods[]
+{
+    RIG_PTT_RIG,
+    RIG_PTT_SERIAL_DTR,
+    RIG_PTT_SERIAL_RTS
+};
 
 AudioCATSISOSettings::AudioCATSISOSettings()
 {
@@ -45,6 +84,13 @@ void AudioCATSISOSettings::resetToDefaults()
     m_txEnable = false;
     m_catDevicePath = "";
     m_hamlibModel = 1; // Hamlib dummy model
+    m_catSpeedIndex = 4; // 19200
+    m_catDataBitsIndex = 1; // 8
+    m_catStopBitsIndex = 0; // 1
+    m_catHandshakeIndex = 0; // None
+    m_catPTTMethodIndex = 0; // PTT
+    m_catDTRHigh = true; // High
+    m_catRTSHigh = true; // High
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -72,6 +118,13 @@ AudioCATSISOSettings::AudioCATSISOSettings(const AudioCATSISOSettings& other)
     m_txEnable = other.m_txEnable;
     m_catDevicePath = other.m_catDevicePath;
     m_hamlibModel = other.m_hamlibModel;
+    m_catSpeedIndex = other.m_catSpeedIndex;
+    m_catDataBitsIndex = other.m_catDataBitsIndex;
+    m_catStopBitsIndex = other.m_catStopBitsIndex;
+    m_catHandshakeIndex = other.m_catHandshakeIndex;
+    m_catPTTMethodIndex = other.m_catPTTMethodIndex;
+    m_catDTRHigh = other.m_catDTRHigh;
+    m_catRTSHigh = other.m_catRTSHigh;
     m_useReverseAPI = other.m_useReverseAPI;
     m_reverseAPIAddress = other.m_reverseAPIAddress;
     m_reverseAPIPort = other.m_reverseAPIPort;
@@ -100,6 +153,13 @@ QByteArray AudioCATSISOSettings::serialize() const
 
     s.writeString(31, m_catDevicePath);
     s.writeU32(32, m_hamlibModel);
+    s.writeS32(33, m_catSpeedIndex);
+    s.writeS32(34, m_catDataBitsIndex);
+    s.writeS32(35, m_catStopBitsIndex);
+    s.writeS32(36, m_catHandshakeIndex);
+    s.writeS32(37, m_catPTTMethodIndex);
+    s.writeBool(38, m_catDTRHigh);
+    s.writeBool(39, m_catRTSHigh);
 
     s.writeBool(51, m_useReverseAPI);
     s.writeString(52, m_reverseAPIAddress);
@@ -147,6 +207,13 @@ bool AudioCATSISOSettings::deserialize(const QByteArray& data)
 
         d.readString(31, &m_catDevicePath, "");
         d.readU32(32, &m_hamlibModel, 1);
+        d.readS32(33, &m_catSpeedIndex, 4);
+        d.readS32(34, &m_catDataBitsIndex, 1);
+        d.readS32(35, &m_catStopBitsIndex, 0);
+        d.readS32(36, &m_catHandshakeIndex, 0);
+        d.readS32(37, &m_catPTTMethodIndex, 0);
+        d.readBool(38, &m_catDTRHigh, true);
+        d.readBool(39, &m_catRTSHigh, true);
 
         d.readBool(51, &m_useReverseAPI, false);
         d.readString(52, &m_reverseAPIAddress, "127.0.0.1");
@@ -235,6 +302,28 @@ void AudioCATSISOSettings::applySettings(const QStringList& settingsKeys, const 
     if (settingsKeys.contains("hamlibModel")) {
         m_hamlibModel = settings.m_hamlibModel;
     }
+    if (settingsKeys.contains("catSpeedIndex")) {
+        m_catSpeedIndex = settings.m_catSpeedIndex;
+    }
+    if (settingsKeys.contains("catHandshakeIndex")) {
+        m_catHandshakeIndex = settings.m_catHandshakeIndex;
+    }
+    if (settingsKeys.contains("catDataBitsIndex")) {
+        m_catDataBitsIndex = settings.m_catDataBitsIndex;
+    }
+    if (settingsKeys.contains("catStopBitsIndex")) {
+        m_catStopBitsIndex = settings.m_catStopBitsIndex;
+    }
+    if (settingsKeys.contains("catPTTMethodIndex")) {
+        m_catPTTMethodIndex = settings.m_catPTTMethodIndex;
+    }
+    if (settingsKeys.contains("catDTRHigh")) {
+        m_catDTRHigh = settings.m_catDTRHigh;
+    }
+    if (settingsKeys.contains("catRTSHigh")) {
+        m_catRTSHigh = settings.m_catRTSHigh;
+    }
+
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
     }
@@ -309,6 +398,28 @@ QString AudioCATSISOSettings::getDebugString(const QStringList& settingsKeys, bo
     if (settingsKeys.contains("hamlibModel") || force) {
         ostr << " m_hamlibModel: " << m_hamlibModel;
     }
+    if (settingsKeys.contains("catSpeedIndex") || force) {
+        ostr << " m_catSpeedIndex: " << m_catSpeedIndex;
+    }
+    if (settingsKeys.contains("catHandshakeIndex") || force) {
+        ostr << " m_catHandshakeIndex: " << m_catHandshakeIndex;
+    }
+    if (settingsKeys.contains("catStopBits") || force) {
+        ostr << " m_catStopBits: " << m_catStopBits;
+    }
+    if (settingsKeys.contains("catDataBits") || force) {
+        ostr << " m_catDataBits: " << m_catDataBits;
+    }
+    if (settingsKeys.contains("catPTTMethodIndex") || force) {
+        ostr << " m_catPTTMethodIndex: " << m_catPTTMethodIndex;
+    }
+    if (settingsKeys.contains("catDTRHigh") || force) {
+        ostr << " m_catDTRHigh: " << m_catDTRHigh;
+    }
+    if (settingsKeys.contains("catRTSHigh") || force) {
+        ostr << " m_catRTSHigh: " << m_catRTSHigh;
+    }
+
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;
     }

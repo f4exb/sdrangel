@@ -640,6 +640,28 @@ void AudioCATSISO::webapiUpdateDeviceSettings(
         settings.m_txVolume = response.getAudioCatsisoSettings()->getTxVolume();
     }
 
+    if (deviceSettingsKeys.contains("catSpeedIndex")) {
+        settings.m_catSpeedIndex = response.getAudioCatsisoSettings()->getCatSpeedIndex();
+    }
+    if (deviceSettingsKeys.contains("catHandshakeIndex")) {
+        settings.m_catHandshakeIndex = response.getAudioCatsisoSettings()->getCatHandshakeIndex();
+    }
+    if (deviceSettingsKeys.contains("catDataBitsIndex")) {
+        settings.m_catDataBitsIndex = response.getAudioCatsisoSettings()->getCatDataBitsIndex();
+    }
+    if (deviceSettingsKeys.contains("catStopBitsIndex")) {
+        settings.m_catStopBitsIndex = response.getAudioCatsisoSettings()->getCatStopBitsIndex();
+    }
+    if (deviceSettingsKeys.contains("catPTTMethodIndex")) {
+        settings.m_catPTTMethodIndex = response.getAudioCatsisoSettings()->getCatPttMethodIndex();
+    }
+    if (deviceSettingsKeys.contains("catPTTMethodIndex")) {
+        settings.m_catDTRHigh = response.getAudioCatsisoSettings()->getCatDtrHigh() != 0;
+    }
+    if (deviceSettingsKeys.contains("catRTSHigh")) {
+        settings.m_catRTSHigh = response.getAudioCatsisoSettings()->getCatRtsHigh() != 0;
+    }
+
     if (deviceSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getAudioCatsisoSettings()->getStreamIndex();
     }
@@ -689,6 +711,15 @@ void AudioCATSISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getAudioCatsisoSettings()->setStreamIndex(settings.m_streamIndex);
     response.getAudioCatsisoSettings()->setSpectrumStreamIndex(settings.m_spectrumStreamIndex);
     response.getAudioCatsisoSettings()->setTxEnable(settings.m_txEnable ? 1 : 0);
+
+    response.getAudioCatsisoSettings()->setCatSpeedIndex(settings.m_catSpeedIndex);
+    response.getAudioCatsisoSettings()->setCatHandshakeIndex(settings.m_catHandshakeIndex);
+    response.getAudioCatsisoSettings()->setCatDataBitsIndex(settings.m_catDataBitsIndex);
+    response.getAudioCatsisoSettings()->setCatStopBitsIndex(settings.m_catStopBitsIndex);
+    response.getAudioCatsisoSettings()->setCatStopBitsIndex(settings.m_catPTTMethodIndex);
+    response.getAudioCatsisoSettings()->setCatDtrHigh(settings.m_catDTRHigh ? 1 : 0);
+    response.getAudioCatsisoSettings()->setCatRtsHigh(settings.m_catRTSHigh ? 1 : 0);
+
     response.getAudioCatsisoSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getAudioCatsisoSettings()->getReverseApiAddress()) {
@@ -779,6 +810,28 @@ void AudioCATSISO::webapiReverseSendSettings(const QList<QString>& deviceSetting
     }
     if (deviceSettingsKeys.contains("txEnable")) {
         swgAudioCATSISOSettings->setTxEnable(settings.m_txEnable ? 1 : 0);
+    }
+
+    if (deviceSettingsKeys.contains("catSpeedIndex")) {
+        swgAudioCATSISOSettings->setCatSpeedIndex(settings.m_catSpeedIndex);
+    }
+    if (deviceSettingsKeys.contains("catHandshakeIndex")) {
+        swgAudioCATSISOSettings->setCatHandshakeIndex(settings.m_catHandshakeIndex);
+    }
+    if (deviceSettingsKeys.contains("catDataBitsIndex")) {
+        swgAudioCATSISOSettings->setCatDataBitsIndex(settings.m_catDataBitsIndex);
+    }
+    if (deviceSettingsKeys.contains("catStopBitsIndex")) {
+        swgAudioCATSISOSettings->setCatStopBitsIndex(settings.m_catStopBitsIndex);
+    }
+    if (deviceSettingsKeys.contains("catPTTMethodIndex")) {
+        swgAudioCATSISOSettings->setCatPttMethodIndex(settings.m_catPTTMethodIndex);
+    }
+    if (deviceSettingsKeys.contains("m_catDTRHigh")) {
+        swgAudioCATSISOSettings->setCatDtrHigh(settings.m_catDTRHigh ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("catRTSHigh")) {
+        swgAudioCATSISOSettings->setCatRtsHigh(settings.m_catRTSHigh ? 1 : 0);
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

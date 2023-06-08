@@ -88,6 +88,56 @@ AudioCATSISOSettings:
     txVolume:
       type: number
       format: float
+    catSpeedIndex:
+      type: integer
+      descriptoion: >
+        CAT serial link baud rate
+          * 0 - 1200
+          * 1 - 2400
+          * 2 - 4800
+          * 3 - 9800
+          * 4 - 19200 (default)
+          * 5 - 38400
+          * 6 - 57600
+          * 7 - 115200
+    catDataBitsIndex:
+      type: integer
+      description: >
+        CAT serial link data bits
+          * 0 - 7
+          * 1 - 8 (default)
+    catStopBitsIndex:
+      type: integer
+      description: >
+        CAT serial linkj stop bits
+          * 0 - 1 (default)
+          * 1 - 2
+    catHandshakeIndex:
+      type: integer
+      description: >
+        CAT serial link handshake type
+          * 0 - none (default)
+          * 1 - XON/XOFF
+          * 2 - hardware
+    catPTTMethodIndex:
+      type: integer
+      description: >
+        CAT PTT metgod
+          * 0 - PTT (default)
+          * 1 - DTR
+          * 2 - RTS
+    catDTRHigh:
+      type: integer
+      description: >
+        CAT DTR control
+          * 0 - low
+          * 1 - high (default)
+    catRTSHigh:
+      type: integer
+      description: >
+        CAT RTS control
+          * 0 - low
+          * 1 - high (default)
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

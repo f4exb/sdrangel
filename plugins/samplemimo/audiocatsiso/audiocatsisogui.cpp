@@ -42,6 +42,7 @@
 
 #include "ui_audiocatsisogui.h"
 #include "audiocatsisogui.h"
+#include "audiocatsisocatdialog.h"
 
 AudioCATSISOGUI::AudioCATSISOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
@@ -377,6 +378,15 @@ void AudioCATSISOGUI::on_catType_currentIndexChanged(int index)
     sendSettings();
 }
 
+void AudioCATSISOGUI::on_catSettings_clicked()
+{
+    AudioCATSISOCATDialog dialog(m_settings, m_settingsKeys);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        sendSettings();
+    }
+}
+
 void AudioCATSISOGUI::displaySettings()
 {
     blockApplySettings(true);
@@ -676,4 +686,5 @@ void AudioCATSISOGUI::makeUIConnections()
     QObject::connect(ui->fcPosRx, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_fcPosRx_currentIndexChanged);
     QObject::connect(ui->catDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_catDevice_currentIndexChanged);
     QObject::connect(ui->catType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_catType_currentIndexChanged);
+    QObject::connect(ui->catSettings, &QPushButton::clicked, this, &AudioCATSISOGUI::on_catSettings_clicked);
 }

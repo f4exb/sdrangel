@@ -102,6 +102,27 @@ public:
     float getTxVolume();
     void setTxVolume(float tx_volume);
 
+    qint32 getCatSpeedIndex();
+    void setCatSpeedIndex(qint32 cat_speed_index);
+
+    qint32 getCatDataBitsIndex();
+    void setCatDataBitsIndex(qint32 cat_data_bits_index);
+
+    qint32 getCatStopBitsIndex();
+    void setCatStopBitsIndex(qint32 cat_stop_bits_index);
+
+    qint32 getCatHandshakeIndex();
+    void setCatHandshakeIndex(qint32 cat_handshake_index);
+
+    qint32 getCatPttMethodIndex();
+    void setCatPttMethodIndex(qint32 cat_ptt_method_index);
+
+    qint32 getCatDtrHigh();
+    void setCatDtrHigh(qint32 cat_dtr_high);
+
+    qint32 getCatRtsHigh();
+    void setCatRtsHigh(qint32 cat_rts_high);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -177,6 +198,27 @@ private:
 
     float tx_volume;
     bool m_tx_volume_isSet;
+
+    qint32 cat_speed_index;
+    bool m_cat_speed_index_isSet;
+
+    qint32 cat_data_bits_index;
+    bool m_cat_data_bits_index_isSet;
+
+    qint32 cat_stop_bits_index;
+    bool m_cat_stop_bits_index_isSet;
+
+    qint32 cat_handshake_index;
+    bool m_cat_handshake_index_isSet;
+
+    qint32 cat_ptt_method_index;
+    bool m_cat_ptt_method_index_isSet;
+
+    qint32 cat_dtr_high;
+    bool m_cat_dtr_high_isSet;
+
+    qint32 cat_rts_high;
+    bool m_cat_rts_high_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

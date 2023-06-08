@@ -94,6 +94,7 @@ const QMap<QString, QString> WebAPIUtils::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesink.aaroniartsaoutput", "aaroniaRTSAOutputSettings"},
     {"sdrangel.samplesource.airspy", "airspySettings"},
     {"sdrangel.samplesource.airspyhf", "airspyHFSettings"},
+    {"sdrangel.samplemimo.audiocatsiso", "audioCATSISOSettings"},
     {"sdrangel.samplesource.audioinput", "audioInputSettings"},
     {"sdrangel.samplesink.audiooutput", "audioOutputSettings"},
     {"sdrangel.samplesource.bladerf1input", "bladeRF1InputSettings"},
@@ -282,6 +283,7 @@ const QMap<QString, QString> WebAPIUtils::m_sinkDeviceHwIdToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToSettingsKey = {
+    {"AudioCATSISO", "audioCATSISOSettings"},
     {"BladeRF2", "bladeRF2MIMOSettings"},
     {"MetisMISO", "metisMISOSettings"},
     {"TestMI", "testMISettings"},

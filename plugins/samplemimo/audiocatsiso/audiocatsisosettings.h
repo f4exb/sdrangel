@@ -60,6 +60,19 @@ struct AudioCATSISOSettings {
 
     QString      m_catDevicePath;
     uint32_t     m_hamlibModel; //!< Hamlib model number
+    int          m_catSpeedIndex;
+    int          m_catDataBitsIndex;
+    int          m_catStopBitsIndex;
+    int          m_catHandshakeIndex;
+    int          m_catPTTMethodIndex;
+    bool         m_catDTRHigh;
+    bool         m_catRTSHigh;
+
+    static const int m_catSpeeds[];
+    static const int m_catDataBits[];
+    static const int m_catStopBits[];
+    static const int m_catHandshakes[];
+    static const int m_catPTTMethods[];
 
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;

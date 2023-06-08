@@ -31,10 +31,13 @@ if (NOT SERVER_MODE)
         ${audiocatsiso_SOURCES}
         audiocatsisogui.cpp
         audiocatsisogui.ui
+        audiocatsisocatdialog.cpp
+        audiocatsisocatdialog.ui
     )
     set(audiocatsiso_HEADERS
         ${audiocatsiso_HEADERS}
         audiocatsisogui.h
+        audiocatsisocatdialog.h
     )
     set(TARGET_NAME mimoaudiocatsiso)
     set(TARGET_LIB "Qt::Widgets")

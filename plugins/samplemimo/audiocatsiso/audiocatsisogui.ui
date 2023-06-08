@@ -171,6 +171,16 @@
       </widget>
      </item>
      <item>
+      <widget class="ButtonSwitch" name="ptt">
+       <property name="toolTip">
+        <string>Push To Talk (PTT)</string>
+       </property>
+       <property name="text">
+        <string>PTT</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_7">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -755,6 +765,31 @@
    <item>
     <layout class="QHBoxLayout" name="catLayout">
      <item>
+      <widget class="QLabel" name="catStatusIndicator">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>14</width>
+         <height>14</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Idle</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel { background-color: gray; border-radius: 7px; }</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="catDeviceLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -810,6 +845,26 @@
        <property name="icon">
         <iconset resource="../../../sdrgui/resources/res.qrc">
          <normaloff>:/tool.png</normaloff>:/tool.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="catConnect">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>CAT (re)connect</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/arrow_left.png</normaloff>:/arrow_left.png</iconset>
        </property>
       </widget>
      </item>
