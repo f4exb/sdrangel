@@ -97,6 +97,12 @@ SatelliteTrackerSettings:
       type: array
       items:
         $ref: "/doc/swagger/include/SatelliteTracker.yaml#/SatelliteDeviceSettingsList"
+    azimuthOffset:
+      type: number
+      format: float
+    elevationOffset:
+      type: number
+      format: float
     title:
       type: string
     rgbColor:
@@ -179,6 +185,12 @@ SatelliteTrackerReport:
           * 1 - idle
           * 2 - running
           * 3 - error
+    targetAzimuth:
+      type: number
+      format: float
+    targetElevation:
+      type: number
+      format: float
     satelliteState:
       type: array
       items:

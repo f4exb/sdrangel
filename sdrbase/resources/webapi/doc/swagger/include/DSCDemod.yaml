@@ -1,0 +1,59 @@
+DSCDemodSettings:
+  description: DSCDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    filterInvalid:
+      type: integer
+    filterColumn:
+      type: integer
+    filter:
+      type: string
+    udpEnabled:
+      type: integer
+    udpAddress:
+      type: string
+    udpPort:
+      type: integer
+    logFilename:
+      type: string
+    logEnabled:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    scopeConfig:
+      $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+DSCDemodReport:
+  description: DSCDemod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer

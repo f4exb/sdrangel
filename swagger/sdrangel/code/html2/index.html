@@ -3588,6 +3588,9 @@ margin-bottom: 20px;
     "DOA2Report" : {
       "$ref" : "#/definitions/DOA2Report"
     },
+    "DSCDemodReport" : {
+      "$ref" : "#/definitions/DSCDemodReport"
+    },
     "DSDDemodReport" : {
       "$ref" : "#/definitions/DSDDemodReport"
     },
@@ -3757,6 +3760,9 @@ margin-bottom: 20px;
     },
     "DOA2Settings" : {
       "$ref" : "#/definitions/DOA2Settings"
+    },
+    "DSCDemodSettings" : {
+      "$ref" : "#/definitions/DSCDemodSettings"
     },
     "DSDDemodSettings" : {
       "$ref" : "#/definitions/DSDDemodSettings"
@@ -4856,6 +4862,91 @@ margin-bottom: 20px;
     }
   },
   "description" : "DOA2"
+};
+            defs.DSCDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "DSCDemod"
+};
+            defs.DSCDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "filterInvalid" : {
+      "type" : "integer"
+    },
+    "filterColumn" : {
+      "type" : "integer"
+    },
+    "filter" : {
+      "type" : "string"
+    },
+    "udpEnabled" : {
+      "type" : "integer"
+    },
+    "udpAddress" : {
+      "type" : "string"
+    },
+    "udpPort" : {
+      "type" : "integer"
+    },
+    "logFilename" : {
+      "type" : "string"
+    },
+    "logEnabled" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "DSCDemod"
 };
             defs.DSDDemodReport = {
   "properties" : {
@@ -7098,6 +7189,15 @@ margin-bottom: 20px;
     "coordinates" : {
       "type" : "integer",
       "description" : "(0 Az/El, 1 X/Y 85, 2 X/Y 30)"
+    },
+    "inputController" : {
+      "type" : "string",
+      "description" : "Name of input controller"
+    },
+    "inputSensitivity" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Input controller sensitivity"
     },
     "title" : {
       "type" : "string"
@@ -13232,6 +13332,14 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Running state\n  * 0 - not started\n  * 1 - idle\n  * 2 - running\n  * 3 - error\n"
     },
+    "targetAzimuth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "targetElevation" : {
+      "type" : "number",
+      "format" : "float"
+    },
     "satelliteState" : {
       "type" : "array",
       "items" : {
@@ -13368,6 +13476,14 @@ margin-bottom: 20px;
       "items" : {
         "$ref" : "#/definitions/SatelliteDeviceSettingsList"
       }
+    },
+    "azimuthOffset" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "elevationOffset" : {
+      "type" : "number",
+      "format" : "float"
     },
     "title" : {
       "type" : "string"
@@ -57571,7 +57687,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-04-22T13:14:49.587+02:00
+              Generated 2023-06-08T05:18:29.115+02:00
             </div>
           </div>
       </div>

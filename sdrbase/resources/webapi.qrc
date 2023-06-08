@@ -38,6 +38,7 @@
         <file>webapi/doc/swagger/include/DATVMod.yaml</file>
         <file>webapi/doc/swagger/include/DemodAnalyzer.yaml</file>
         <file>webapi/doc/swagger/include/DOA2.yaml</file>
+        <file>webapi/doc/swagger/include/DSCDemod.yaml</file>
         <file>webapi/doc/swagger/include/DSDDemod.yaml</file>
         <file>webapi/doc/swagger/include/DeviceActions.yaml</file>
         <file>webapi/doc/swagger/include/DeviceSettings.yaml</file>

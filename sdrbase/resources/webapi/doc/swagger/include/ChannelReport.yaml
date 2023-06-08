@@ -35,6 +35,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/DATVMod.yaml#/DATVModReport"
     DOA2Report:
       $ref: "/doc/swagger/include/DOA2.yaml#/DOA2Report"
+    DSCDemodReport:
+      $ref: "/doc/swagger/include/DSCDemod.yaml#/DSCDemodReport"
     DSDDemodReport:
       $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
     IEEE_802_15_4_ModReport:
