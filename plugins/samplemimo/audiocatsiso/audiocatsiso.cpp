@@ -39,6 +39,7 @@
 #include "audiocatsiso.h"
 #include "audiocatinputworker.h"
 #include "audiocatoutputworker.h"
+#include "audiocatsisocatworker.h"
 
 MESSAGE_CLASS_DEFINITION(AudioCATSISO::MsgConfigureAudioCATSISO, Message)
 MESSAGE_CLASS_DEFINITION(AudioCATSISO::MsgStartStop, Message)
@@ -50,13 +51,16 @@ AudioCATSISO::AudioCATSISO(DeviceAPI *deviceAPI) :
 	m_settings(),
     m_inputWorker(nullptr),
     m_outputWorker(nullptr),
+    m_catWorker(nullptr),
     m_inputWorkerThread(nullptr),
     m_outputWorkerThread(nullptr),
+    m_catWorkerThread(nullptr),
 	m_deviceDescription("AudioCATSISO"),
 	m_rxRunning(false),
     m_rxAudioDeviceIndex(-1),
     m_txRunning(false),
     m_txAudioDeviceIndex(-1),
+    m_catRunning(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_mimoType = MIMOAsynchronous;
@@ -145,6 +149,27 @@ bool AudioCATSISO::startRx()
     qDebug("AudioCATSISO::startRx: started");
     m_rxRunning = true;
 
+    qDebug() << "AudioCATSISO::startRx: start CAT";
+
+    m_catWorkerThread = new QThread();
+    m_catWorker = new AudioCATSISOCATWorker();
+    m_inputWorker->moveToThread(m_catWorkerThread);
+
+    QObject::connect(m_catWorkerThread, &QThread::started, m_catWorker, &AudioCATSISOCATWorker::startWork);
+    QObject::connect(m_catWorkerThread, &QThread::finished, m_catWorker, &QObject::deleteLater);
+    QObject::connect(m_catWorkerThread, &QThread::finished, m_catWorkerThread, &QThread::deleteLater);
+
+    m_catWorker->setMessageQueueToGUI(getMessageQueueToGUI());
+    m_catWorkerThread->start();
+
+    AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker *msgToCAT = AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker::create(
+        m_settings, QList<QString>(), true
+    );
+    m_catWorker->getInputMessageQueue()->push(msgToCAT);
+
+    qDebug() << "AudioCATSISO::startRx: CAT started";
+    m_catRunning = true;
+
     return true;
 }
 
@@ -205,6 +230,18 @@ void AudioCATSISO::stopRx()
     audioDeviceManager->removeAudioSource(&m_inputFifo);
 
     qDebug("AudioCATSISO::stopRx: stopped");
+    qDebug("AudioCATSISO::stopRx: stop CAT");
+    m_catRunning = false;
+
+    if (m_catWorkerThread)
+    {
+        m_catWorkerThread->quit();
+        m_catWorkerThread->wait();
+        m_catWorkerThread = nullptr;
+        m_catWorker = nullptr;
+    }
+
+    qDebug("AudioCATSISO::stopRx: CAT stopped");
 }
 
 void AudioCATSISO::stopTx()
@@ -351,6 +388,34 @@ bool AudioCATSISO::handleMessage(const Message& message)
         }
 
         return true;
+    }
+    else if (AudioCATSISOSettings::MsgPTT::match(message))
+    {
+        AudioCATSISOSettings::MsgPTT& cmd = (AudioCATSISOSettings::MsgPTT&) message;
+        qDebug("AudioCATSISO::handleMessage: MsgPTT: %s", cmd.getPTT() ? "on" : "off");
+        if (m_catRunning)
+        {
+            m_catWorker->getInputMessageQueue()->push(&cmd);
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    else if (AudioCATSISOSettings::MsgCATConnect::match(message))
+    {
+        AudioCATSISOSettings::MsgCATConnect& cmd = (AudioCATSISOSettings::MsgCATConnect&) message;
+        qDebug("AudioCATSISO::handleMessage: MsgCATConnect: %s", cmd.getConnect() ? "on" : "off");
+        if (m_catRunning)
+        {
+            m_catWorker->getInputMessageQueue()->push(&cmd);
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
     else
     {

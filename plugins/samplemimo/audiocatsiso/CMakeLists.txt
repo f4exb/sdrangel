@@ -8,6 +8,7 @@ set(audiocatsiso_SOURCES
     audiocatsisosettings.cpp
     audiocatsisowebapiadapter.cpp
     audiocatsisohamlib.cpp
+    audiocatsisocatworker.cpp
 )
 
 set(audiocatsiso_HEADERS
@@ -18,6 +19,7 @@ set(audiocatsiso_HEADERS
     audiocatsisosettings.h
     audiocatsisowebapiadapter.h
     audiocatsisohamlib.h
+    audiocatsisocatworker.h
 )
 
 include_directories(

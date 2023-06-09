@@ -64,6 +64,7 @@ private:
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
     static const int m_absMaxFreq = 61440; // kHz
+    AudioCATSISOSettings::MsgCATReportStatus::Status m_lastCATStatus;
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
@@ -73,6 +74,7 @@ private:
     void displayCatDevice();
     void displayCatType();
     void updateSpectrum();
+    void updateCATStatus(AudioCATSISOSettings::MsgCATReportStatus::Status status);
 	void sendSettings();
 	void setCenterFrequency(qint64 centerFrequency);
 	bool handleMessage(const Message& message);
@@ -84,6 +86,8 @@ private slots:
     void on_spectrumSource_currentIndexChanged(int index);
     void on_streamLock_toggled(bool checked);
 	void on_startStop_toggled(bool checked);
+    void on_ptt_toggled(bool checked);
+    void on_catConnect_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
     void on_log2Decim_currentIndexChanged(int index);
     void on_dcBlock_toggled(bool checked);

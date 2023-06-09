@@ -20,8 +20,73 @@
 
 #include <QString>
 #include "audio/audiodeviceinfo.h"
+#include "util/message.h"
 
 struct AudioCATSISOSettings {
+
+    class MsgPTT : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getPTT() const { return m_ptt; }
+
+        static MsgPTT* create(bool ptt) {
+            return new MsgPTT(ptt);
+        }
+
+    protected:
+        bool m_ptt;
+
+        MsgPTT(bool ptt) :
+            Message(),
+            m_ptt(ptt)
+        { }
+    };
+
+    class MsgCATConnect : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getConnect() const { return m_connect; }
+
+        static MsgCATConnect* create(bool connect) {
+            return new MsgCATConnect(connect);
+        }
+
+    protected:
+        bool m_connect;
+
+        MsgCATConnect(bool connect) :
+            Message(),
+            m_connect(connect)
+        { }
+    };
+
+    class MsgCATReportStatus : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        enum Status {
+            StatusNone,
+            StatusConnected,
+            StatusError
+        };
+
+        Status getStatus() const { return m_status; }
+
+        static MsgCATReportStatus* create(Status status) {
+            return new MsgCATReportStatus(status);
+        }
+
+    protected:
+        Status m_status;
+
+        MsgCATReportStatus(Status status) :
+            Message(),
+            m_status(status)
+        { }
+    };
+
 	typedef enum {
 		FC_POS_INFRA = 0,
 		FC_POS_SUPRA,

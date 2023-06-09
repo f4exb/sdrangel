@@ -37,6 +37,7 @@ class QNetworkReply;
 class QThread;
 class AudioCATInputWorker;
 class AudioCATOutputWorker;
+class AudioCATSISOCATWorker;
 
 class AudioCATSISO : public DeviceSampleMIMO {
     Q_OBJECT
@@ -168,8 +169,10 @@ private:
 	AudioCATSISOSettings m_settings;
     AudioCATInputWorker* m_inputWorker;
     AudioCATOutputWorker* m_outputWorker;
+    AudioCATSISOCATWorker* m_catWorker;
     QThread *m_inputWorkerThread;
     QThread *m_outputWorkerThread;
+    QThread *m_catWorkerThread;
 	QString m_deviceDescription;
 	bool m_rxRunning;
     int m_rxAudioDeviceIndex;
@@ -177,6 +180,7 @@ private:
 	bool m_txRunning;
     int m_txAudioDeviceIndex;
     int m_txSampleRate;
+    bool m_catRunning;
     const QTimer& m_masterTimer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

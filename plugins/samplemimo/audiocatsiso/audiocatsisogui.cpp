@@ -52,7 +52,8 @@ AudioCATSISOGUI::AudioCATSISOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_forceSettings(true),
     m_sampleMIMO(nullptr),
     m_tickCount(0),
-    m_lastEngineState(DeviceAPI::StNotStarted)
+    m_lastEngineState(DeviceAPI::StNotStarted),
+    m_lastCATStatus(AudioCATSISOSettings::MsgCATReportStatus::StatusNone)
 {
     qDebug("AudioCATSISOGUI::AudioCATSISOGUI");
     m_deviceUISet = deviceUISet;
@@ -72,6 +73,7 @@ AudioCATSISOGUI::AudioCATSISOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_helpURL = "plugins/samplemimo/metismiso/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(9, 0, m_absMaxFreq);
+    ui->catStatusIndicator->setStyleSheet("QLabel { background-color:gray; border-radius: 7px; }");
 
     for (const auto& comPortName : m_sampleMIMO->getComPorts()) {
         ui->catDevice->addItem(comPortName);
@@ -156,6 +158,18 @@ void AudioCATSISOGUI::on_startStop_toggled(bool checked)
         AudioCATSISO::MsgStartStop *message = AudioCATSISO::MsgStartStop::create(checked);
         m_sampleMIMO->getInputMessageQueue()->push(message);
     }
+}
+
+void AudioCATSISOGUI::on_ptt_toggled(bool checked)
+{
+    AudioCATSISOSettings::MsgPTT *msg = AudioCATSISOSettings::MsgPTT::create(checked);
+    m_sampleMIMO->getInputMessageQueue()->push(msg);
+}
+
+void AudioCATSISOGUI::on_catConnect_toggled(bool checked)
+{
+    AudioCATSISOSettings::MsgCATConnect *msg = AudioCATSISOSettings::MsgCATConnect::create(checked);
+    m_sampleMIMO->getInputMessageQueue()->push(msg);
 }
 
 void AudioCATSISOGUI::on_streamIndex_currentIndexChanged(int index)
@@ -437,6 +451,8 @@ void AudioCATSISOGUI::displayCatDevice()
 
     if (catDevices.contains(m_settings.m_catDevicePath)) {
         ui->catDevice->setCurrentIndex(catDevices[m_settings.m_catDevicePath]);
+    } else if (ui->catDevice->count() > 0) {
+        m_settings.m_catDevicePath = ui->catDevice->itemText(0);
     }
 }
 
@@ -508,7 +524,38 @@ void AudioCATSISOGUI::updateStatus()
 
 bool AudioCATSISOGUI::handleMessage(const Message& message)
 {
-    if (AudioCATSISO::MsgConfigureAudioCATSISO::match(message))
+    if (DSPMIMOSignalNotification::match(message))
+    {
+        DSPMIMOSignalNotification& notif = (DSPMIMOSignalNotification&) message;
+        int istream = notif.getIndex();
+        bool sourceOrSink = notif.getSourceOrSink();
+        qint64 frequency = notif.getCenterFrequency();
+
+        if (sourceOrSink)
+        {
+            m_rxSampleRate = notif.getSampleRate();
+            m_settings.m_rxCenterFrequency = frequency;
+        }
+        else
+        {
+            m_txSampleRate = notif. getSampleRate();
+            m_settings.m_txCenterFrequency = frequency;
+        }
+
+        qDebug() << "AudioCATSISOGUI::handleInputMessages: DSPMIMOSignalNotification: "
+            << "sourceOrSink:" << sourceOrSink
+            << "istream:" << istream
+            << "m_rxSampleRate:" << m_rxSampleRate
+            << "m_txSampleRate:" << m_txSampleRate
+            << "frequency:" << frequency;
+
+        displayFrequency();
+        displaySampleRate();
+        updateSpectrum();
+
+        return true;
+    }
+    else if (AudioCATSISO::MsgConfigureAudioCATSISO::match(message))
     {
         qDebug("AudioCATSISOGUI::handleMessage: MsgConfigureAudioCATSISO");
         const AudioCATSISO::MsgConfigureAudioCATSISO& cfg = (AudioCATSISO::MsgConfigureAudioCATSISO&) message;
@@ -539,6 +586,12 @@ bool AudioCATSISOGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (AudioCATSISOSettings::MsgCATReportStatus::match(message))
+    {
+        AudioCATSISOSettings::MsgCATReportStatus& notif = (AudioCATSISOSettings::MsgCATReportStatus&) message;
+        updateCATStatus(notif.getStatus());
+        return true;
+    }
     else
     {
         return false;
@@ -551,43 +604,8 @@ void AudioCATSISOGUI::handleInputMessages()
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        if (DSPMIMOSignalNotification::match(*message))
-        {
-            DSPMIMOSignalNotification* notif = (DSPMIMOSignalNotification*) message;
-            int istream = notif->getIndex();
-            bool sourceOrSink = notif->getSourceOrSink();
-            qint64 frequency = notif->getCenterFrequency();
-
-            if (sourceOrSink)
-            {
-                m_rxSampleRate = notif->getSampleRate();
-                m_settings.m_rxCenterFrequency = frequency;
-            }
-            else
-            {
-                m_txSampleRate = notif->getSampleRate();
-                m_settings.m_txCenterFrequency = frequency;
-            }
-
-            qDebug() << "AudioCATSISOGUI::handleInputMessages: DSPMIMOSignalNotification: "
-                << "sourceOrSink:" << sourceOrSink
-                << "istream:" << istream
-                << "m_rxSampleRate:" << m_rxSampleRate
-                << "m_txSampleRate:" << m_txSampleRate
-                << "frequency:" << frequency;
-
-            displayFrequency();
-            displaySampleRate();
-            updateSpectrum();
-
+        if (handleMessage(*message)) {
             delete message;
-        }
-        else
-        {
-            if (handleMessage(*message))
-            {
-                delete message;
-            }
         }
     }
 }
@@ -613,6 +631,32 @@ void AudioCATSISOGUI::displaySampleRate()
     } else {
         ui->deviceRateText->setText(tr("%1k").arg((float) m_txSampleRate / 1000));
     }
+}
+
+void AudioCATSISOGUI::updateCATStatus(AudioCATSISOSettings::MsgCATReportStatus::Status status)
+{
+    if (m_lastCATStatus != status)
+    {
+        switch (status)
+        {
+            case AudioCATSISOSettings::MsgCATReportStatus::StatusNone:
+                ui->catStatusIndicator->setStyleSheet("QLabel { background-color:gray; border-radius: 7px; }");
+                ui->catStatusIndicator->setToolTip("Idle");
+                break;
+            case AudioCATSISOSettings::MsgCATReportStatus::StatusConnected:
+                ui->catStatusIndicator->setStyleSheet("QLabel { background-color:rgb(35, 138, 35); border-radius: 7px; }");
+                ui->catStatusIndicator->setToolTip("Connected");
+                break;
+            case AudioCATSISOSettings::MsgCATReportStatus::StatusError:
+                ui->catStatusIndicator->setStyleSheet("QLabel { background-color:rgb(232, 85, 85); border-radius: 7px; }");
+                ui->catStatusIndicator->setToolTip("Error");
+                break;
+            default:
+                break;
+        }
+    }
+
+    m_lastCATStatus = status;
 }
 
 void AudioCATSISOGUI::updateSpectrum()
@@ -671,6 +715,8 @@ void AudioCATSISOGUI::makeUIConnections()
     QObject::connect(ui->spectrumSource, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_spectrumSource_currentIndexChanged);
     QObject::connect(ui->streamLock, &QToolButton::toggled, this, &AudioCATSISOGUI::on_streamLock_toggled);
 	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_startStop_toggled);
+	QObject::connect(ui->ptt, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_ptt_toggled);
+	QObject::connect(ui->catConnect, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_catConnect_toggled);
     QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &AudioCATSISOGUI::on_centerFrequency_changed);
     QObject::connect(ui->log2Decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_log2Decim_currentIndexChanged);
     QObject::connect(ui->dcBlock, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_dcBlock_toggled);

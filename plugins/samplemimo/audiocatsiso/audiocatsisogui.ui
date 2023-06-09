@@ -765,31 +765,6 @@
    <item>
     <layout class="QHBoxLayout" name="catLayout">
      <item>
-      <widget class="QLabel" name="catStatusIndicator">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>14</width>
-         <height>14</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Idle</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QLabel { background-color: gray; border-radius: 7px; }</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="catDeviceLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -849,7 +824,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="catConnect">
+      <widget class="ButtonSwitch" name="catConnect">
        <property name="maximumSize">
         <size>
          <width>24</width>
@@ -857,14 +832,39 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>CAT (re)connect</string>
+        <string>CAT connect/disconnect</string>
        </property>
        <property name="text">
         <string/>
        </property>
        <property name="icon">
         <iconset resource="../../../sdrgui/resources/res.qrc">
-         <normaloff>:/arrow_left.png</normaloff>:/arrow_left.png</iconset>
+         <normaloff>:/link.png</normaloff>:/link.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="catStatusIndicator">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>14</width>
+         <height>14</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Idle</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel { background-color: gray; border-radius: 7px; }</string>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>

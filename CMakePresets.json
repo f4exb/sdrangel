@@ -15,6 +15,7 @@
                 "DAB_DIR": "/opt/install/libdab",
                 "DSDCC_DIR": "/opt/install/dsdcc",
                 "HACKRF_DIR": "/opt/install/libhackrf",
+                "HAMLIB_DIR": "/opt/build/hamlib-prefix",
                 "IIO_DIR": "/opt/install/libiio",
                 "LIBSIGMF_DIR": "/opt/install/libsigmf",
                 "LIMESUITE_DIR": "/opt/install/LimeSuite",

@@ -21,6 +21,10 @@
 #include "util/simpleserializer.h"
 #include "audiocatsisosettings.h"
 
+MESSAGE_CLASS_DEFINITION(AudioCATSISOSettings::MsgPTT, Message)
+MESSAGE_CLASS_DEFINITION(AudioCATSISOSettings::MsgCATConnect, Message)
+MESSAGE_CLASS_DEFINITION(AudioCATSISOSettings::MsgCATReportStatus, Message)
+
 const int AudioCATSISOSettings::m_catSpeeds[] = {
     1200,
     2400,
