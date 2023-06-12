@@ -57,12 +57,6 @@ public:
     qint32 getIqOrder();
     void setIqOrder(qint32 iq_order);
 
-    qint32 getStreamIndex();
-    void setStreamIndex(qint32 stream_index);
-
-    qint32 getSpectrumStreamIndex();
-    void setSpectrumStreamIndex(qint32 spectrum_stream_index);
-
     qint32 getTxEnable();
     void setTxEnable(qint32 tx_enable);
 
@@ -93,14 +87,8 @@ public:
     qint32 getTxIqMapping();
     void setTxIqMapping(qint32 tx_iq_mapping);
 
-    qint32 getLog2Interp();
-    void setLog2Interp(qint32 log2_interp);
-
-    qint32 getFcPosTx();
-    void setFcPosTx(qint32 fc_pos_tx);
-
-    float getTxVolume();
-    void setTxVolume(float tx_volume);
+    qint32 getTxVolume();
+    void setTxVolume(qint32 tx_volume);
 
     qint32 getCatSpeedIndex();
     void setCatSpeedIndex(qint32 cat_speed_index);
@@ -154,12 +142,6 @@ private:
     qint32 iq_order;
     bool m_iq_order_isSet;
 
-    qint32 stream_index;
-    bool m_stream_index_isSet;
-
-    qint32 spectrum_stream_index;
-    bool m_spectrum_stream_index_isSet;
-
     qint32 tx_enable;
     bool m_tx_enable_isSet;
 
@@ -190,13 +172,7 @@ private:
     qint32 tx_iq_mapping;
     bool m_tx_iq_mapping_isSet;
 
-    qint32 log2_interp;
-    bool m_log2_interp_isSet;
-
-    qint32 fc_pos_tx;
-    bool m_fc_pos_tx_isSet;
-
-    float tx_volume;
+    qint32 tx_volume;
     bool m_tx_volume_isSet;
 
     qint32 cat_speed_index;

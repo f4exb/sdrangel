@@ -79,12 +79,8 @@ void AudioCATSISOSettings::resetToDefaults()
     m_iqCorrection = false;
     m_fcPosRx = FC_POS_CENTER;
     m_txDeviceName = "";
-    m_txVolume = 1.0f;
+    m_txVolume = -10;
     m_txIQMapping = LR;
-    m_log2Interp = 0;
-    m_fcPosTx = FC_POS_CENTER;
-    m_streamIndex = 0;
-    m_spectrumStreamIndex = 0;
     m_txEnable = false;
     m_catDevicePath = "";
     m_hamlibModel = 1; // Hamlib dummy model
@@ -95,6 +91,7 @@ void AudioCATSISOSettings::resetToDefaults()
     m_catPTTMethodIndex = 0; // PTT
     m_catDTRHigh = true; // High
     m_catRTSHigh = true; // High
+    m_catPollingMs = 5000;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -115,10 +112,6 @@ AudioCATSISOSettings::AudioCATSISOSettings(const AudioCATSISOSettings& other)
     m_txDeviceName = other.m_txDeviceName;
     m_txVolume = other.m_txVolume;
     m_txIQMapping = other.m_txIQMapping;
-    m_log2Interp = other.m_log2Interp;
-    m_fcPosTx = other.m_fcPosTx;
-    m_streamIndex = other.m_streamIndex;
-    m_spectrumStreamIndex = other.m_spectrumStreamIndex;
     m_txEnable = other.m_txEnable;
     m_catDevicePath = other.m_catDevicePath;
     m_hamlibModel = other.m_hamlibModel;
@@ -129,6 +122,7 @@ AudioCATSISOSettings::AudioCATSISOSettings(const AudioCATSISOSettings& other)
     m_catPTTMethodIndex = other.m_catPTTMethodIndex;
     m_catDTRHigh = other.m_catDTRHigh;
     m_catRTSHigh = other.m_catRTSHigh;
+    m_catPollingMs = other.m_catPollingMs;
     m_useReverseAPI = other.m_useReverseAPI;
     m_reverseAPIAddress = other.m_reverseAPIAddress;
     m_reverseAPIPort = other.m_reverseAPIPort;
@@ -149,11 +143,9 @@ QByteArray AudioCATSISOSettings::serialize() const
     s.writeS32(8, (int) m_fcPosRx);
 
     s.writeString(21, m_txDeviceName);
-    s.writeU64(22, m_rxCenterFrequency);
-    s.writeFloat(23, m_txVolume);
+    s.writeU64(22, m_txCenterFrequency);
+    s.writeS32(23, m_txVolume);
     s.writeS32(24, (int)m_txIQMapping);
-    s.writeU32(25, m_log2Decim);
-    s.writeS32(26, (int) m_fcPosTx);
 
     s.writeString(31, m_catDevicePath);
     s.writeU32(32, m_hamlibModel);
@@ -164,13 +156,12 @@ QByteArray AudioCATSISOSettings::serialize() const
     s.writeS32(37, m_catPTTMethodIndex);
     s.writeBool(38, m_catDTRHigh);
     s.writeBool(39, m_catRTSHigh);
+    s.writeU32(40, m_catPollingMs);
 
     s.writeBool(51, m_useReverseAPI);
     s.writeString(52, m_reverseAPIAddress);
     s.writeU32(53, m_reverseAPIPort);
     s.writeU32(54, m_reverseAPIDeviceIndex);
-    s.writeS32(55, m_streamIndex);
-    s.writeS32(56, m_spectrumStreamIndex);
     s.writeBool(57, m_txEnable);
 
     return s.final();
@@ -203,11 +194,8 @@ bool AudioCATSISOSettings::deserialize(const QByteArray& data)
 
         d.readString(21, &m_txDeviceName, "");
         d.readU64(22, &m_txCenterFrequency, 14200000);
-        d.readFloat(23, &m_txVolume, 1.0f);
+        d.readS32(23, &m_txVolume, -10);
         d.readS32(24,(int *)&m_txIQMapping, IQMapping::LR);
-        d.readU32(25, &m_log2Interp, 0);
-        d.readS32(26, &intval, 2);
-        m_fcPosTx = (fcPos_t) intval;
 
         d.readString(31, &m_catDevicePath, "");
         d.readU32(32, &m_hamlibModel, 1);
@@ -218,6 +206,7 @@ bool AudioCATSISOSettings::deserialize(const QByteArray& data)
         d.readS32(37, &m_catPTTMethodIndex, 0);
         d.readBool(38, &m_catDTRHigh, true);
         d.readBool(39, &m_catRTSHigh, true);
+        d.readU32(40, &m_catPollingMs, 500);
 
         d.readBool(51, &m_useReverseAPI, false);
         d.readString(52, &m_reverseAPIAddress, "127.0.0.1");
@@ -232,8 +221,6 @@ bool AudioCATSISOSettings::deserialize(const QByteArray& data)
         d.readU32(54, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
-        d.readS32(55, &m_streamIndex, 0);
-        d.readS32(56, &m_spectrumStreamIndex, 0);
         d.readBool(57, &m_txEnable, false);
 
         return true;
@@ -284,19 +271,7 @@ void AudioCATSISOSettings::applySettings(const QStringList& settingsKeys, const 
     if (settingsKeys.contains("txIQMapping")) {
         m_txIQMapping = settings.m_txIQMapping;
     }
-    if (settingsKeys.contains("log2Interp")) {
-        m_log2Interp = settings.m_log2Interp;
-    }
-    if (settingsKeys.contains("fcPosTx")) {
-        m_fcPosTx = settings.m_fcPosTx;
-    }
 
-    if (settingsKeys.contains("streamIndex")) {
-        m_streamIndex = settings.m_streamIndex;
-    }
-    if (settingsKeys.contains("spectrumStreamIndex")) {
-        m_spectrumStreamIndex = settings.m_spectrumStreamIndex;
-    }
     if (settingsKeys.contains("txEnable")) {
         m_txEnable = settings.m_txEnable;
     }
@@ -326,6 +301,9 @@ void AudioCATSISOSettings::applySettings(const QStringList& settingsKeys, const 
     }
     if (settingsKeys.contains("catRTSHigh")) {
         m_catRTSHigh = settings.m_catRTSHigh;
+    }
+    if (settingsKeys.contains("catPollingMs")) {
+        m_catPollingMs = settings.m_catPollingMs;
     }
 
     if (settingsKeys.contains("useReverseAPI")) {
@@ -374,25 +352,16 @@ QString AudioCATSISOSettings::getDebugString(const QStringList& settingsKeys, bo
     if (settingsKeys.contains("txDeviceName") || force) {
         ostr << " m_txDeviceName: " << m_txDeviceName.toStdString();
     }
+    if (settingsKeys.contains("txCenterFrequency") || force) {
+        ostr << " m_txCenterFrequency: " << m_txCenterFrequency;
+    }
     if (settingsKeys.contains("txVolume") || force) {
         ostr << " m_txVolume: " << m_txVolume;
     }
     if (settingsKeys.contains("txIQMapping") || force) {
         ostr << " m_txIQMapping: " << m_txIQMapping;
     }
-    if (settingsKeys.contains("log2Interp") || force) {
-        ostr << " m_log2Interp: " << m_log2Interp;
-    }
-    if (settingsKeys.contains("fcPosTx") || force) {
-        ostr << " m_fcPosTx: " << m_fcPosTx;
-    }
 
-    if (settingsKeys.contains("streamIndex") || force) {
-        ostr << " m_streamIndex: " << m_streamIndex;
-    }
-    if (settingsKeys.contains("spectrumStreamIndex") || force) {
-        ostr << " m_spectrumStreamIndex: " << m_spectrumStreamIndex;
-    }
     if (settingsKeys.contains("txEnable") || force) {
         ostr << " m_txEnable: " << m_txEnable;
     }
@@ -422,6 +391,9 @@ QString AudioCATSISOSettings::getDebugString(const QStringList& settingsKeys, bo
     }
     if (settingsKeys.contains("catRTSHigh") || force) {
         ostr << " m_catRTSHigh: " << m_catRTSHigh;
+    }
+    if (settingsKeys.contains("catPollingMs") || force) {
+        ostr << " m_catPollingMs: " << m_catPollingMs;
     }
 
     if (settingsKeys.contains("useReverseAPI") || force) {

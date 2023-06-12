@@ -51,6 +51,7 @@ private:
 
 	AudioCATSISOSettings m_settings;
     QList<QString> m_settingsKeys;
+    bool m_rxElseTx;   //!< Which side is being dealt with
     int m_rxSampleRate;
     int m_txSampleRate;
     QTimer m_updateTimer;
@@ -70,9 +71,11 @@ private:
 	void displaySettings();
     void displayFrequency();
     void displaySampleRate();
+    void displayDecim();
     void displayFcRxTooltip();
     void displayCatDevice();
     void displayCatType();
+    void updateTxEnable();
     void updateSpectrum();
     void updateCATStatus(AudioCATSISOSettings::MsgCATReportStatus::Status status);
 	void sendSettings();
@@ -82,8 +85,8 @@ private:
 
 private slots:
     void handleInputMessages();
-    void on_streamIndex_currentIndexChanged(int index);
-    void on_spectrumSource_currentIndexChanged(int index);
+    void on_streamSide_currentIndexChanged(int index);
+    void on_spectrumSide_currentIndexChanged(int index);
     void on_streamLock_toggled(bool checked);
 	void on_startStop_toggled(bool checked);
     void on_ptt_toggled(bool checked);

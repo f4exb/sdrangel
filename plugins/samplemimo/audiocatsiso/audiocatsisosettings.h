@@ -105,8 +105,6 @@ struct AudioCATSISOSettings {
     bool    m_transverterMode;
     qint64  m_transverterDeltaFrequency;
     bool    m_iqOrder;
-    int     m_streamIndex;
-    int     m_spectrumStreamIndex; //!< spectrum source
     bool    m_txEnable;
 
     QString      m_rxDeviceName;       // Including realm, as from getFullDeviceName below
@@ -119,9 +117,7 @@ struct AudioCATSISOSettings {
 
     QString      m_txDeviceName;       // Including realm, as from getFullDeviceName below
     IQMapping    m_txIQMapping;
-    unsigned int m_log2Interp;
-    fcPos_t      m_fcPosTx;  //!< Not implemented yet
-    float        m_txVolume; //!< Not implemented yet
+    int          m_txVolume; //!< dB
 
     QString      m_catDevicePath;
     uint32_t     m_hamlibModel; //!< Hamlib model number
@@ -132,6 +128,7 @@ struct AudioCATSISOSettings {
     int          m_catPTTMethodIndex;
     bool         m_catDTRHigh;
     bool         m_catRTSHigh;
+    uint32_t     m_catPollingMs; //!< CAT polling interval in ms
 
     static const int m_catSpeeds[];
     static const int m_catDataBits[];

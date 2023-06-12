@@ -38,12 +38,14 @@ public:
     void startWork();
     void stopWork();
     void setSamplerate(int samplerate);
+    void setVolume(int volume);
     void setIQMapping(AudioCATSISOSettings::IQMapping iqMapping) {m_iqMapping = iqMapping;}
     void connectTimer(const QTimer& timer);
 
 private:
     bool m_running;
     int m_samplerate;
+    float m_volume;
     int m_throttlems;
     int m_maxThrottlems;
     QElapsedTimer m_elapsedTimer;

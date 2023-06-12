@@ -48,6 +48,7 @@ AudioCATSISOGUI::AudioCATSISOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::AudioCATSISOGUI),
     m_settings(),
+    m_rxElseTx(true),
     m_doApplySettings(true),
     m_forceSettings(true),
     m_sampleMIMO(nullptr),
@@ -74,6 +75,7 @@ AudioCATSISOGUI::AudioCATSISOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(9, 0, m_absMaxFreq);
     ui->catStatusIndicator->setStyleSheet("QLabel { background-color:gray; border-radius: 7px; }");
+    ui->streamLock->setChecked(true);
 
     for (const auto& comPortName : m_sampleMIMO->getComPorts()) {
         ui->catDevice->addItem(comPortName);
@@ -84,6 +86,7 @@ AudioCATSISOGUI::AudioCATSISOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     }
 
     displaySettings();
+    updateTxEnable();
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -118,12 +121,12 @@ void AudioCATSISOGUI::resetToDefaults()
 
 void AudioCATSISOGUI::setCenterFrequency(qint64 centerFrequency)
 {
-    if (m_settings.m_streamIndex == 0)
+    if (m_rxElseTx)
     {
         m_settings.m_rxCenterFrequency = centerFrequency;
         m_settingsKeys.append("rxCenterFrequency");
     }
-    else if (m_settings.m_streamIndex == 1)
+    else
     {
         m_settings.m_txCenterFrequency = centerFrequency;
         m_settingsKeys.append("txCenterFrequency");
@@ -172,14 +175,14 @@ void AudioCATSISOGUI::on_catConnect_toggled(bool checked)
     m_sampleMIMO->getInputMessageQueue()->push(msg);
 }
 
-void AudioCATSISOGUI::on_streamIndex_currentIndexChanged(int index)
+void AudioCATSISOGUI::on_streamSide_currentIndexChanged(int index)
 {
+    qDebug("AudioCATSISOGUI::on_streamSide_currentIndexChanged: %d", index);
+    m_rxElseTx = index == 0;
+
     if (ui->streamLock->isChecked())
     {
-        m_settings.m_spectrumStreamIndex = index;
-        m_settingsKeys.append("spectrumStreamIndex");
-
-        if (m_settings.m_spectrumStreamIndex == 0)
+        if (index == 0)
         {
             m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
             m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, 0);
@@ -194,25 +197,19 @@ void AudioCATSISOGUI::on_streamIndex_currentIndexChanged(int index)
 
         updateSpectrum();
 
-        ui->spectrumSource->blockSignals(true);
-        ui->spectrumSource->setCurrentIndex(index);
-        ui->spectrumSource->blockSignals(false);
+        ui->spectrumSide->blockSignals(true);
+        ui->spectrumSide->setCurrentIndex(index);
+        ui->spectrumSide->blockSignals(false);
     }
 
-    m_settings.m_streamIndex = index;
-    m_settingsKeys.append("streamIndex");
-    sendSettings();
-
+    displayDecim();
     displayFrequency();
     displaySampleRate();
 }
 
-void AudioCATSISOGUI::on_spectrumSource_currentIndexChanged(int index)
+void AudioCATSISOGUI::on_spectrumSide_currentIndexChanged(int index)
 {
-    m_settings.m_spectrumStreamIndex = index;
-    m_settingsKeys.append("spectrumStreamIndex");
-
-    if (m_settings.m_spectrumStreamIndex == 0)
+    if (index == 0)
     {
         m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
         m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, 0);
@@ -229,33 +226,29 @@ void AudioCATSISOGUI::on_spectrumSource_currentIndexChanged(int index)
 
     if (ui->streamLock->isChecked())
     {
-        ui->streamIndex->blockSignals(true);
-        ui->streamIndex->setCurrentIndex(index);
-        ui->streamIndex->blockSignals(false);
-        m_settings.m_streamIndex = index;
-        m_settingsKeys.append("streamIndex");
+        ui->streamSide->blockSignals(true);
+        ui->streamSide->setCurrentIndex(index);
+        ui->streamSide->blockSignals(false);
         displayFrequency();
         displaySampleRate();
     }
-
-    sendSettings();
 }
 
 void AudioCATSISOGUI::on_streamLock_toggled(bool checked)
 {
-    if (checked && (ui->streamIndex->currentIndex() != ui->spectrumSource->currentIndex())) {
-        ui->spectrumSource->setCurrentIndex(ui->streamIndex->currentIndex());
+    if (checked && (ui->streamSide->currentIndex() != ui->spectrumSide->currentIndex())) {
+        ui->spectrumSide->setCurrentIndex(ui->streamSide->currentIndex());
     }
 }
 
 void AudioCATSISOGUI::on_centerFrequency_changed(quint64 value)
 {
-    if (m_settings.m_streamIndex == 0)
+    if (m_rxElseTx)
     {
         m_settings.m_rxCenterFrequency = value * 1000;
         m_settingsKeys.append("rxCenterFrequency");
     }
-    else if (m_settings.m_streamIndex == 1)
+    else
     {
         m_settings.m_txCenterFrequency = value * 1000;
         m_settingsKeys.append("txCenterFrequency");
@@ -266,10 +259,14 @@ void AudioCATSISOGUI::on_centerFrequency_changed(quint64 value)
 
 void AudioCATSISOGUI::on_log2Decim_currentIndexChanged(int index)
 {
+    if (!m_rxElseTx) { // No interpolation
+        return;
+    }
+
     m_settings.m_log2Decim = index < 0 ? 0 : index > 3 ? 3 : index;
+    m_settingsKeys.append("log2Decim");
     // displaySampleRate();
     displayFcRxTooltip();
-    m_settingsKeys.append("log2Decim");
     sendSettings();
 }
 
@@ -290,6 +287,7 @@ void AudioCATSISOGUI::on_iqCorrection_toggled(bool checked)
 void AudioCATSISOGUI::on_txEnable_toggled(bool checked)
 {
     m_settings.m_txEnable = checked;
+    updateTxEnable();
     m_settingsKeys.append("txEnable");
     sendSettings();
 }
@@ -363,8 +361,8 @@ void AudioCATSISOGUI::on_txChannels_currentIndexChanged(int index)
 
 void AudioCATSISOGUI::on_txVolume_valueChanged(int value)
 {
-    m_settings.m_txVolume = value/10.0f;
-    ui->txVolumeText->setText(QString("%1").arg(m_settings.m_txVolume, 3, 'f', 1));
+    m_settings.m_txVolume = value;
+    ui->txVolumeText->setText(tr("%1").arg(m_settings.m_txVolume));
     m_settingsKeys.append("txVolume");
     sendSettings();
 }
@@ -407,9 +405,6 @@ void AudioCATSISOGUI::displaySettings()
 
     ui->rxDeviceLabel->setText(m_settings.m_rxDeviceName);
     ui->txDeviceLabel->setText(m_settings.m_txDeviceName);
-    ui->streamIndex->setCurrentIndex(m_settings.m_streamIndex);
-    ui->spectrumSource->setCurrentIndex(m_settings.m_spectrumStreamIndex);
-    ui->log2Decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->dcBlock->setChecked(m_settings.m_dcBlock);
     ui->iqCorrection->setChecked(m_settings.m_iqCorrection);
     ui->txEnable->setChecked(m_settings.m_txEnable);
@@ -417,17 +412,19 @@ void AudioCATSISOGUI::displaySettings()
     ui->rxVolumeText->setText(QString("%1").arg(m_settings.m_rxVolume, 3, 'f', 1));
     ui->rxChannels->setCurrentIndex((int)m_settings.m_rxIQMapping);
     ui->txVolume->setValue((int)(m_settings.m_txVolume*10.0f));
-    ui->txVolumeText->setText(QString("%1").arg(m_settings.m_txVolume, 3, 'f', 1));
+    ui->txVolumeText->setText(tr("%1").arg(m_settings.m_txVolume));
     ui->txChannels->setCurrentIndex((int)m_settings.m_txIQMapping);
     ui->fcPosRx->setCurrentIndex(m_settings.m_fcPosRx);
+
+    blockApplySettings(false);
+
     displayFrequency();
     displaySampleRate();
+    displayDecim();
     updateSpectrum();
     displayFcRxTooltip();
     displayCatDevice();
     displayCatType();
-
-    blockApplySettings(false);
 }
 
 void AudioCATSISOGUI::displayFcRxTooltip()
@@ -443,6 +440,7 @@ void AudioCATSISOGUI::displayFcRxTooltip()
 
 void AudioCATSISOGUI::displayCatDevice()
 {
+    blockApplySettings(true);
     QMap<QString, int> catDevices;
 
     for (int index = 0; index < ui->catDevice->count(); index++) {
@@ -454,10 +452,13 @@ void AudioCATSISOGUI::displayCatDevice()
     } else if (ui->catDevice->count() > 0) {
         m_settings.m_catDevicePath = ui->catDevice->itemText(0);
     }
+
+    blockApplySettings(false);
 }
 
 void AudioCATSISOGUI::displayCatType()
 {
+    blockApplySettings(true);
     QMap<QString, int> catTypes;
 
     for (int index = 0; index < ui->catType->count(); index++) {
@@ -472,6 +473,23 @@ void AudioCATSISOGUI::displayCatType()
             ui->catType->setCurrentIndex(catTypes[it.value()]);
         }
     }
+
+    blockApplySettings(false);
+}
+
+void AudioCATSISOGUI::updateTxEnable()
+{
+    if (!m_settings.m_txEnable) // Rx only
+    {
+        ui->streamLock->setChecked(true);
+        ui->streamSide->setCurrentIndex(0);
+        ui->spectrumSide->setCurrentIndex(0);
+    }
+
+    ui->ptt->setEnabled(m_settings.m_txEnable);
+    ui->streamLock->setEnabled(m_settings.m_txEnable);
+    ui->streamSide->setEnabled(m_settings.m_txEnable);
+    ui->spectrumSide->setEnabled(m_settings.m_txEnable);
 }
 
 void AudioCATSISOGUI::sendSettings()
@@ -546,8 +564,10 @@ bool AudioCATSISOGUI::handleMessage(const Message& message)
             << "sourceOrSink:" << sourceOrSink
             << "istream:" << istream
             << "m_rxSampleRate:" << m_rxSampleRate
+            << "m_log2Decim:" << m_settings.m_log2Decim
             << "m_txSampleRate:" << m_txSampleRate
-            << "frequency:" << frequency;
+            << "m_rxCenterFrequency:" << m_settings.m_rxCenterFrequency
+            << "m_txCenterFrequency:" << m_settings.m_txCenterFrequency;
 
         displayFrequency();
         displaySampleRate();
@@ -564,13 +584,6 @@ bool AudioCATSISOGUI::handleMessage(const Message& message)
             m_settings = cfg.getSettings();
         } else {
             m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
-        }
-
-        if ((m_settings.m_spectrumStreamIndex != m_settings.m_streamIndex) && (ui->streamLock->isChecked()))
-        {
-            m_settings.m_spectrumStreamIndex = m_settings.m_streamIndex;
-            m_settingsKeys.append("spectrumStreamIndex");
-            sendSettings();
         }
 
         displaySettings();
@@ -614,23 +627,43 @@ void AudioCATSISOGUI::displayFrequency()
 {
     qint64 centerFrequency;
 
-    if (m_settings.m_streamIndex == 0) {
+    if (m_rxElseTx) {
         centerFrequency = m_settings.m_rxCenterFrequency;
-    } else if (m_settings.m_streamIndex == 1) {
+    } else {
         centerFrequency = m_settings.m_txCenterFrequency;
     }
 
+    blockApplySettings(true);
     ui->centerFrequency->setValueRange(9, 0, 9999999999);
     ui->centerFrequency->setValue(centerFrequency / 1000);
+    blockApplySettings(false);
 }
 
 void AudioCATSISOGUI::displaySampleRate()
 {
-    if (m_settings.m_streamIndex == 0) {
-        ui->deviceRateText->setText(tr("%1k").arg((float) m_rxSampleRate / 1000));
+    if (m_rxElseTx) {
+        ui->deviceRateText->setText(tr("%1k").arg((float) (m_rxSampleRate/(1<<m_settings.m_log2Decim)) / 1000));
     } else {
         ui->deviceRateText->setText(tr("%1k").arg((float) m_txSampleRate / 1000));
     }
+}
+
+void AudioCATSISOGUI::displayDecim()
+{
+    blockApplySettings(true);
+
+    if (m_rxElseTx)
+    {
+        ui->log2Decim->setCurrentIndex(m_settings.m_log2Decim);
+        ui->fcPosRx->setCurrentIndex(m_settings.m_fcPosRx);
+    }
+    else
+    {
+        ui->log2Decim->setCurrentIndex(0); // no interpolation
+        ui->fcPosRx->setCurrentIndex(2);   // center
+    }
+
+    blockApplySettings(false);
 }
 
 void AudioCATSISOGUI::updateCATStatus(AudioCATSISOSettings::MsgCATReportStatus::Status status)
@@ -663,18 +696,16 @@ void AudioCATSISOGUI::updateSpectrum()
 {
     qint64 centerFrequency;
 
-    if (m_settings.m_spectrumStreamIndex == 0) {
+    if (m_rxElseTx) {
         centerFrequency = m_settings.m_rxCenterFrequency;
-    } else if (m_settings.m_spectrumStreamIndex == 1) {
-        centerFrequency = m_settings.m_txCenterFrequency;
     } else {
-        centerFrequency = 0;
+        centerFrequency = m_settings.m_txCenterFrequency;
     }
 
     m_deviceUISet->getSpectrum()->setCenterFrequency(centerFrequency);
 
-    if (m_settings.m_spectrumStreamIndex == 0) {
-        m_deviceUISet->getSpectrum()->setSampleRate(m_rxSampleRate);
+    if (m_rxElseTx) {
+        m_deviceUISet->getSpectrum()->setSampleRate(m_rxSampleRate/(1<<m_settings.m_log2Decim));
     } else {
         m_deviceUISet->getSpectrum()->setSampleRate(m_txSampleRate);
     }
@@ -711,8 +742,8 @@ void AudioCATSISOGUI::openDeviceSettingsDialog(const QPoint& p)
 
 void AudioCATSISOGUI::makeUIConnections()
 {
-	QObject::connect(ui->streamIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_streamIndex_currentIndexChanged);
-    QObject::connect(ui->spectrumSource, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_spectrumSource_currentIndexChanged);
+	QObject::connect(ui->streamSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_streamSide_currentIndexChanged);
+    QObject::connect(ui->spectrumSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_spectrumSide_currentIndexChanged);
     QObject::connect(ui->streamLock, &QToolButton::toggled, this, &AudioCATSISOGUI::on_streamLock_toggled);
 	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_startStop_toggled);
 	QObject::connect(ui->ptt, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_ptt_toggled);

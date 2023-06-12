@@ -60,6 +60,7 @@ AudioCATSISO::AudioCATSISO(DeviceAPI *deviceAPI) :
     m_rxAudioDeviceIndex(-1),
     m_txRunning(false),
     m_txAudioDeviceIndex(-1),
+    m_ptt(false),
     m_catRunning(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
@@ -160,6 +161,7 @@ bool AudioCATSISO::startRx()
     QObject::connect(m_catWorkerThread, &QThread::finished, m_catWorkerThread, &QThread::deleteLater);
 
     m_catWorker->setMessageQueueToGUI(getMessageQueueToGUI());
+    m_catWorker->setMessageQueueToSISO(getInputMessageQueue());
     m_catWorkerThread->start();
 
     AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker *msgToCAT = AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker::create(
@@ -195,6 +197,7 @@ bool AudioCATSISO::startTx()
     QObject::connect(m_outputWorkerThread, &QThread::finished, m_outputWorkerThread, &QThread::deleteLater);
 
     m_outputWorker->setSamplerate(m_txSampleRate);
+    m_outputWorker->setVolume(m_settings.m_txVolume);
     m_outputWorker->setIQMapping(m_settings.m_txIQMapping);
     m_outputWorker->connectTimer(m_deviceAPI->getMasterTimer());
     m_outputWorkerThread->start();
@@ -392,7 +395,8 @@ bool AudioCATSISO::handleMessage(const Message& message)
     else if (AudioCATSISOSettings::MsgPTT::match(message))
     {
         AudioCATSISOSettings::MsgPTT& cmd = (AudioCATSISOSettings::MsgPTT&) message;
-        qDebug("AudioCATSISO::handleMessage: MsgPTT: %s", cmd.getPTT() ? "on" : "off");
+        m_ptt = cmd.getPTT();
+        qDebug("AudioCATSISO::handleMessage: MsgPTT: %s", m_ptt ? "on" : "off");
         if (m_catRunning)
         {
             m_catWorker->getInputMessageQueue()->push(&cmd);
@@ -417,6 +421,27 @@ bool AudioCATSISO::handleMessage(const Message& message)
             return true;
         }
     }
+    else if (AudioCATSISOCATWorker::MsgReportFrequency::match(message))
+    {
+        AudioCATSISOCATWorker::MsgReportFrequency& report = (AudioCATSISOCATWorker::MsgReportFrequency&) message;
+
+        if (m_ptt) // Tx
+        {
+            m_settings.m_txCenterFrequency = report.getFrequency();
+            DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(
+                m_txSampleRate, m_settings.m_txCenterFrequency, false, 0);
+            m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+        }
+        else // Rx
+        {
+            m_settings.m_rxCenterFrequency = report.getFrequency();
+            DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(
+                m_rxSampleRate, m_settings.m_rxCenterFrequency, true, 0);
+            m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+        }
+
+        return true;
+    }
     else
     {
         return false;
@@ -427,6 +452,7 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
 {
     bool forwardRxChange = false;
     bool forwardTxChange = false;
+    bool forwardToCAT = false;
 
     qDebug() << "AudioCATSISO::applySettings: "
         << " force:" << force
@@ -468,7 +494,10 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
 
     if (settingsKeys.contains("txVolume") || force)
     {
-        m_audioOutput.setVolume(settings.m_txVolume);
+        if (m_txRunning) {
+            m_outputWorker->setVolume(settings.m_txVolume);
+        }
+        // m_audioOutput.setVolume(settings.m_txVolume); // doesn't work
         qDebug() << "AudioCATSISO::applySettings: set Tx volume to " << settings.m_txVolume;
     }
 
@@ -516,13 +545,13 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
 
     if (settingsKeys.contains("rxCenterFrequency") || force)
     {
-        // TBD with CAT
+        forwardToCAT = true;
         forwardRxChange = true;
     }
 
     if (settingsKeys.contains("txCenterFrequency") || force)
     {
-        // TBD with CAT
+        forwardToCAT = true;
         forwardTxChange = true;
     }
 
@@ -541,10 +570,16 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
         m_settings.applySettings(settingsKeys, settings);
     }
 
+    if (forwardToCAT && m_catRunning)
+    {
+        AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker *msg =
+            AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker::create(settings, settingsKeys, force);
+        m_catWorker->getInputMessageQueue()->push(msg);
+    }
+
     if (forwardRxChange)
     {
-        int sampleRate = m_rxSampleRate / (1<<m_settings.m_log2Decim);
-        DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(sampleRate, settings.m_rxCenterFrequency, true, 0);
+        DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(m_rxSampleRate, settings.m_rxCenterFrequency, true, 0);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -661,12 +696,6 @@ void AudioCATSISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("iqOrder")) {
         settings.m_iqOrder = response.getAudioCatsisoSettings()->getIqOrder() != 0;
     }
-    if (deviceSettingsKeys.contains("spectrumStreamIndex")) {
-        settings.m_spectrumStreamIndex = response.getAudioCatsisoSettings()->getSpectrumStreamIndex();
-    }
-    if (deviceSettingsKeys.contains("streamIndex")) {
-        settings.m_streamIndex = response.getAudioCatsisoSettings()->getStreamIndex();
-    }
     if (deviceSettingsKeys.contains("rxDeviceName")) {
         settings.m_rxDeviceName = *response.getAudioCatsisoSettings()->getRxDeviceName();
     }
@@ -695,12 +724,6 @@ void AudioCATSISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("txIQMapping")) {
         settings.m_txIQMapping = (AudioCATSISOSettings::IQMapping)response.getAudioCatsisoSettings()->getTxIqMapping();
     }
-    if (deviceSettingsKeys.contains("log2Interp")) {
-        settings.m_log2Interp = response.getAudioCatsisoSettings()->getLog2Interp();
-    }
-    if (deviceSettingsKeys.contains("fcPosTx")) {
-        settings.m_fcPosTx = (AudioCATSISOSettings::fcPos_t) response.getAudioCatsisoSettings()->getFcPosTx();
-    }
     if (deviceSettingsKeys.contains("txVolume")) {
         settings.m_txVolume = response.getAudioCatsisoSettings()->getTxVolume();
     }
@@ -727,12 +750,6 @@ void AudioCATSISO::webapiUpdateDeviceSettings(
         settings.m_catRTSHigh = response.getAudioCatsisoSettings()->getCatRtsHigh() != 0;
     }
 
-    if (deviceSettingsKeys.contains("streamIndex")) {
-        settings.m_streamIndex = response.getAudioCatsisoSettings()->getStreamIndex();
-    }
-    if (deviceSettingsKeys.contains("spectrumStreamIndex")) {
-        settings.m_spectrumStreamIndex = response.getAudioCatsisoSettings()->getSpectrumStreamIndex();
-    }
     if (deviceSettingsKeys.contains("txEnable")) {
         settings.m_txEnable = response.getAudioCatsisoSettings()->getTxEnable() != 0;
     }
@@ -757,8 +774,6 @@ void AudioCATSISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getAudioCatsisoSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getAudioCatsisoSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getAudioCatsisoSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-    response.getAudioCatsisoSettings()->setSpectrumStreamIndex(settings.m_spectrumStreamIndex);
-    response.getAudioCatsisoSettings()->setStreamIndex(settings.m_streamIndex);
     response.getAudioCatsisoSettings()->setRxDeviceName(new QString(settings.m_rxDeviceName));
     response.getAudioCatsisoSettings()->setRxIqMapping((int)settings.m_rxIQMapping);
     response.getAudioCatsisoSettings()->setLog2Decim(settings.m_log2Decim);
@@ -769,12 +784,8 @@ void AudioCATSISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 
     response.getAudioCatsisoSettings()->setTxDeviceName(new QString(settings.m_txDeviceName));
     response.getAudioCatsisoSettings()->setTxIqMapping((int)settings.m_txIQMapping);
-    response.getAudioCatsisoSettings()->setLog2Interp(settings.m_log2Interp);
-    response.getAudioCatsisoSettings()->setFcPosTx((int) settings.m_fcPosTx);
     response.getAudioCatsisoSettings()->setTxVolume(settings.m_txVolume);
 
-    response.getAudioCatsisoSettings()->setStreamIndex(settings.m_streamIndex);
-    response.getAudioCatsisoSettings()->setSpectrumStreamIndex(settings.m_spectrumStreamIndex);
     response.getAudioCatsisoSettings()->setTxEnable(settings.m_txEnable ? 1 : 0);
 
     response.getAudioCatsisoSettings()->setCatSpeedIndex(settings.m_catSpeedIndex);
@@ -823,12 +834,6 @@ void AudioCATSISO::webapiReverseSendSettings(const QList<QString>& deviceSetting
     if (deviceSettingsKeys.contains("iqOrder")) {
         swgAudioCATSISOSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("spectrumStreamIndex")) {
-        swgAudioCATSISOSettings->setSpectrumStreamIndex(settings.m_spectrumStreamIndex);
-    }
-    if (deviceSettingsKeys.contains("streamIndex")) {
-        swgAudioCATSISOSettings->setStreamIndex(settings.m_streamIndex);
-    }
     if (deviceSettingsKeys.contains("rxDeviceName") || force) {
         swgAudioCATSISOSettings->setRxDeviceName(new QString(settings.m_rxDeviceName));
     }
@@ -857,22 +862,10 @@ void AudioCATSISO::webapiReverseSendSettings(const QList<QString>& deviceSetting
     if (deviceSettingsKeys.contains("txIQMapping")) {
         swgAudioCATSISOSettings->setTxIqMapping((int) settings.m_txIQMapping);
     }
-    if (deviceSettingsKeys.contains("log2Interp")) {
-        swgAudioCATSISOSettings->setLog2Interp(settings.m_log2Interp);
-    }
-    if (deviceSettingsKeys.contains("fcPosTx")) {
-        swgAudioCATSISOSettings->setFcPosTx((int) settings.m_fcPosTx);
-    }
     if (deviceSettingsKeys.contains("txVolume")) {
         swgAudioCATSISOSettings->setTxVolume(settings.m_txVolume);
     }
 
-    if (deviceSettingsKeys.contains("streamIndex")) {
-        swgAudioCATSISOSettings->setStreamIndex(settings.m_streamIndex);
-    }
-    if (deviceSettingsKeys.contains("spectrumStreamIndex")) {
-        swgAudioCATSISOSettings->setSpectrumStreamIndex(settings.m_spectrumStreamIndex);
-    }
     if (deviceSettingsKeys.contains("txEnable")) {
         swgAudioCATSISOSettings->setTxEnable(settings.m_txEnable ? 1 : 0);
     }

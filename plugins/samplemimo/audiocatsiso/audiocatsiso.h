@@ -180,6 +180,7 @@ private:
 	bool m_txRunning;
     int m_txAudioDeviceIndex;
     int m_txSampleRate;
+    bool m_ptt;
     bool m_catRunning;
     const QTimer& m_masterTimer;
     QNetworkAccessManager *m_networkManager;

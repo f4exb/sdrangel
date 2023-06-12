@@ -38,10 +38,6 @@ SWGAudioCATSISOSettings::SWGAudioCATSISOSettings() {
     m_transverter_delta_frequency_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
-    stream_index = 0;
-    m_stream_index_isSet = false;
-    spectrum_stream_index = 0;
-    m_spectrum_stream_index_isSet = false;
     tx_enable = 0;
     m_tx_enable_isSet = false;
     rx_device_name = nullptr;
@@ -62,11 +58,7 @@ SWGAudioCATSISOSettings::SWGAudioCATSISOSettings() {
     m_tx_device_name_isSet = false;
     tx_iq_mapping = 0;
     m_tx_iq_mapping_isSet = false;
-    log2_interp = 0;
-    m_log2_interp_isSet = false;
-    fc_pos_tx = 0;
-    m_fc_pos_tx_isSet = false;
-    tx_volume = 0.0f;
+    tx_volume = 0;
     m_tx_volume_isSet = false;
     cat_speed_index = 0;
     m_cat_speed_index_isSet = false;
@@ -108,10 +100,6 @@ SWGAudioCATSISOSettings::init() {
     m_transverter_delta_frequency_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
-    stream_index = 0;
-    m_stream_index_isSet = false;
-    spectrum_stream_index = 0;
-    m_spectrum_stream_index_isSet = false;
     tx_enable = 0;
     m_tx_enable_isSet = false;
     rx_device_name = new QString("");
@@ -132,11 +120,7 @@ SWGAudioCATSISOSettings::init() {
     m_tx_device_name_isSet = false;
     tx_iq_mapping = 0;
     m_tx_iq_mapping_isSet = false;
-    log2_interp = 0;
-    m_log2_interp_isSet = false;
-    fc_pos_tx = 0;
-    m_fc_pos_tx_isSet = false;
-    tx_volume = 0.0f;
+    tx_volume = 0;
     m_tx_volume_isSet = false;
     cat_speed_index = 0;
     m_cat_speed_index_isSet = false;
@@ -170,8 +154,6 @@ SWGAudioCATSISOSettings::cleanup() {
 
 
 
-
-
     if(rx_device_name != nullptr) { 
         delete rx_device_name;
     }
@@ -184,8 +166,6 @@ SWGAudioCATSISOSettings::cleanup() {
     if(tx_device_name != nullptr) { 
         delete tx_device_name;
     }
-
-
 
 
 
@@ -224,10 +204,6 @@ SWGAudioCATSISOSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&spectrum_stream_index, pJson["spectrumStreamIndex"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&tx_enable, pJson["txEnable"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rx_device_name, pJson["rxDeviceName"], "QString", "QString");
@@ -248,11 +224,7 @@ SWGAudioCATSISOSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&tx_iq_mapping, pJson["txIQMapping"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&log2_interp, pJson["log2Interp"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&fc_pos_tx, pJson["fcPosTx"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&tx_volume, pJson["txVolume"], "float", "");
+    ::SWGSDRangel::setValue(&tx_volume, pJson["txVolume"], "qint32", "");
     
     ::SWGSDRangel::setValue(&cat_speed_index, pJson["catSpeedIndex"], "qint32", "");
     
@@ -307,12 +279,6 @@ SWGAudioCATSISOSettings::asJsonObject() {
     if(m_iq_order_isSet){
         obj->insert("iqOrder", QJsonValue(iq_order));
     }
-    if(m_stream_index_isSet){
-        obj->insert("streamIndex", QJsonValue(stream_index));
-    }
-    if(m_spectrum_stream_index_isSet){
-        obj->insert("spectrumStreamIndex", QJsonValue(spectrum_stream_index));
-    }
     if(m_tx_enable_isSet){
         obj->insert("txEnable", QJsonValue(tx_enable));
     }
@@ -342,12 +308,6 @@ SWGAudioCATSISOSettings::asJsonObject() {
     }
     if(m_tx_iq_mapping_isSet){
         obj->insert("txIQMapping", QJsonValue(tx_iq_mapping));
-    }
-    if(m_log2_interp_isSet){
-        obj->insert("log2Interp", QJsonValue(log2_interp));
-    }
-    if(m_fc_pos_tx_isSet){
-        obj->insert("fcPosTx", QJsonValue(fc_pos_tx));
     }
     if(m_tx_volume_isSet){
         obj->insert("txVolume", QJsonValue(tx_volume));
@@ -437,26 +397,6 @@ void
 SWGAudioCATSISOSettings::setIqOrder(qint32 iq_order) {
     this->iq_order = iq_order;
     this->m_iq_order_isSet = true;
-}
-
-qint32
-SWGAudioCATSISOSettings::getStreamIndex() {
-    return stream_index;
-}
-void
-SWGAudioCATSISOSettings::setStreamIndex(qint32 stream_index) {
-    this->stream_index = stream_index;
-    this->m_stream_index_isSet = true;
-}
-
-qint32
-SWGAudioCATSISOSettings::getSpectrumStreamIndex() {
-    return spectrum_stream_index;
-}
-void
-SWGAudioCATSISOSettings::setSpectrumStreamIndex(qint32 spectrum_stream_index) {
-    this->spectrum_stream_index = spectrum_stream_index;
-    this->m_spectrum_stream_index_isSet = true;
 }
 
 qint32
@@ -560,31 +500,11 @@ SWGAudioCATSISOSettings::setTxIqMapping(qint32 tx_iq_mapping) {
 }
 
 qint32
-SWGAudioCATSISOSettings::getLog2Interp() {
-    return log2_interp;
-}
-void
-SWGAudioCATSISOSettings::setLog2Interp(qint32 log2_interp) {
-    this->log2_interp = log2_interp;
-    this->m_log2_interp_isSet = true;
-}
-
-qint32
-SWGAudioCATSISOSettings::getFcPosTx() {
-    return fc_pos_tx;
-}
-void
-SWGAudioCATSISOSettings::setFcPosTx(qint32 fc_pos_tx) {
-    this->fc_pos_tx = fc_pos_tx;
-    this->m_fc_pos_tx_isSet = true;
-}
-
-float
 SWGAudioCATSISOSettings::getTxVolume() {
     return tx_volume;
 }
 void
-SWGAudioCATSISOSettings::setTxVolume(float tx_volume) {
+SWGAudioCATSISOSettings::setTxVolume(qint32 tx_volume) {
     this->tx_volume = tx_volume;
     this->m_tx_volume_isSet = true;
 }
@@ -719,12 +639,6 @@ SWGAudioCATSISOSettings::isSet(){
         if(m_iq_order_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_stream_index_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_spectrum_stream_index_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_tx_enable_isSet){
             isObjectUpdated = true; break;
         }
@@ -753,12 +667,6 @@ SWGAudioCATSISOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_tx_iq_mapping_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_log2_interp_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_fc_pos_tx_isSet){
             isObjectUpdated = true; break;
         }
         if(m_tx_volume_isSet){

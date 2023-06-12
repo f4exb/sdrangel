@@ -21,6 +21,7 @@
 #include "dsp/samplemofifo.h"
 #include "dsp/samplesourcefifo.h"
 #include "audio/audiofifo.h"
+#include "util/db.h"
 
 #include "audiocatoutputworker.h"
 
@@ -30,6 +31,7 @@ AudioCATOutputWorker::AudioCATOutputWorker(SampleMOFifo* sampleFifo, AudioFifo *
     QObject(parent),
     m_running(false),
     m_samplerate(0),
+    m_volume(1.0f),
     m_throttlems(AUDIOOUTPUT_THROTTLE_MS),
     m_maxThrottlems(50),
     m_throttleToggle(false),
@@ -39,8 +41,9 @@ AudioCATOutputWorker::AudioCATOutputWorker(SampleMOFifo* sampleFifo, AudioFifo *
     m_sampleFifo(sampleFifo),
     m_audioFifo(fifo)
 {
-    m_audioBuffer.resize(1<<14);
+    m_audioBuffer.resize(1<<15);
     m_audioBufferFill = 0;
+    setSamplerate(48000);
 }
 
 AudioCATOutputWorker::~AudioCATOutputWorker()
@@ -105,6 +108,11 @@ void AudioCATOutputWorker::setSamplerate(int samplerate)
 	}
 }
 
+void AudioCATOutputWorker::setVolume(int volume)
+{
+    m_volume = CalcDb::powerFromdB(volume);
+}
+
 void AudioCATOutputWorker::tick()
 {
 	if (m_running)
@@ -138,8 +146,8 @@ void AudioCATOutputWorker::callbackPart(SampleVector& data, unsigned int iBegin,
 {
     for (unsigned int i = iBegin; i < iEnd; i++)
     {
-        m_audioBuffer[m_audioBufferFill].l = m_iqMapping == AudioCATSISOSettings::LR ? data[i].m_real : data[i].m_imag;
-        m_audioBuffer[m_audioBufferFill].r = m_iqMapping == AudioCATSISOSettings::LR ? data[i].m_imag : data[i].m_real;
+        m_audioBuffer[m_audioBufferFill].l = (m_iqMapping == AudioCATSISOSettings::LR ? data[i].m_real : data[i].m_imag) * m_volume;
+        m_audioBuffer[m_audioBufferFill].r = (m_iqMapping == AudioCATSISOSettings::LR ? data[i].m_imag : data[i].m_real) * m_volume;
         m_audioBufferFill++;
 
         if (m_audioBufferFill >= m_audioBuffer.size())

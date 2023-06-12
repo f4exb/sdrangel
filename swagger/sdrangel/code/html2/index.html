@@ -157,7 +157,7 @@ h={};g()}};typeof define==="function"&&define.amd&&define("google-code-prettify"
     });
   </script>
   <style type="text/css">
-
+  
 /*!
  * Bootstrap v2.3.2
  *
@@ -2470,14 +2470,6 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
     },
-    "streamIndex" : {
-      "type" : "integer",
-      "description" : "The index of the stream currently in scope"
-    },
-    "spectrumStreamIndex" : {
-      "type" : "integer",
-      "description" : "The index of the stream that is used as source of the main spectrum"
-    },
     "txEnable" : {
       "type" : "integer",
       "description" : "Enable or disable transmission\n  * 0 - Disable transmission\n  * 1 - Enable transmission\n"
@@ -2518,17 +2510,36 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Audio channel to IQ mapping\n  * 0 - I=L, Q=R\n  * 1 - I=R, Q=L\n"
     },
-    "log2Interp" : {
-      "type" : "integer",
-      "description" : "Interpolation factor (Tx)"
-    },
-    "fcPosTx" : {
-      "type" : "integer",
-      "description" : "Interpolated bandpass center frequency position\n  * 0 - Infradyne\n  * 1 - Supradyne\n  * 2 - Centered\n"
-    },
     "txVolume" : {
-      "type" : "number",
-      "format" : "float"
+      "type" : "integer",
+      "description" : "Tx volume in dB usually negative"
+    },
+    "catSpeedIndex" : {
+      "type" : "integer"
+    },
+    "catDataBitsIndex" : {
+      "type" : "integer",
+      "description" : "CAT serial link data bits\n  * 0 - 7\n  * 1 - 8 (default)\n"
+    },
+    "catStopBitsIndex" : {
+      "type" : "integer",
+      "description" : "CAT serial linkj stop bits\n  * 0 - 1 (default)\n  * 1 - 2\n"
+    },
+    "catHandshakeIndex" : {
+      "type" : "integer",
+      "description" : "CAT serial link handshake type\n  * 0 - none (default)\n  * 1 - XON/XOFF\n  * 2 - hardware\n"
+    },
+    "catPTTMethodIndex" : {
+      "type" : "integer",
+      "description" : "CAT PTT metgod\n  * 0 - PTT (default)\n  * 1 - DTR\n  * 2 - RTS\n"
+    },
+    "catDTRHigh" : {
+      "type" : "integer",
+      "description" : "CAT DTR control\n  * 0 - low\n  * 1 - high (default)\n"
+    },
+    "catRTSHigh" : {
+      "type" : "integer",
+      "description" : "CAT RTS control\n  * 0 - low\n  * 1 - high (default)\n"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -16734,7 +16745,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
@@ -16834,7 +16845,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
@@ -16883,7 +16894,7 @@ my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
 my $body = SWGSDRangel::Object::ChannelActions->new(); # ChannelActions | Action(s) to apply to the channel
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelActionsPost(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex, body => $body);
     print Dumper($result);
 };
@@ -16905,7 +16916,7 @@ deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
 body =  # ChannelActions | Action(s) to apply to the channel
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_actions_post(deviceSetIndex, channelIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -17280,7 +17291,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of channel in the channels list
@@ -17374,7 +17385,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of channel in the channels list
@@ -17420,7 +17431,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of channel in the channels list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelDelete(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex);
     print Dumper($result);
 };
@@ -17441,7 +17452,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of channel in the channels list
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_delete(deviceSetIndex, channelIndex)
     pprint(api_response)
 except ApiException as e:
@@ -17774,7 +17785,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         ChannelSettings body = ; // ChannelSettings | Channel identification (no settings data)
@@ -17868,7 +17879,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new ChannelSettings(); // ChannelSettings | Channel identification (no settings data)
@@ -17914,7 +17925,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::ChannelSettings->new(); # ChannelSettings | Channel identification (no settings data)
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelPost(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -17935,7 +17946,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # ChannelSettings | Channel identification (no settings data)
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_post(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -18287,7 +18298,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
@@ -18381,7 +18392,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
@@ -18427,7 +18438,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelReportGet(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex);
     print Dumper($result);
 };
@@ -18448,7 +18459,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_report_get(deviceSetIndex, channelIndex)
     pprint(api_response)
 except ApiException as e:
@@ -18781,7 +18792,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
@@ -18875,7 +18886,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
@@ -18921,7 +18932,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelSettingsGet(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex);
     print Dumper($result);
 };
@@ -18942,7 +18953,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_settings_get(deviceSetIndex, channelIndex)
     pprint(api_response)
 except ApiException as e:
@@ -19275,7 +19286,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
@@ -19375,7 +19386,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
@@ -19424,7 +19435,7 @@ my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
 my $body = SWGSDRangel::Object::ChannelSettings->new(); # ChannelSettings | Channel settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelSettingsPatch(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex, body => $body);
     print Dumper($result);
 };
@@ -19446,7 +19457,7 @@ deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
 body =  # ChannelSettings | Channel settings to apply
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_settings_patch(deviceSetIndex, channelIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -19821,7 +19832,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
@@ -19921,7 +19932,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
@@ -19970,7 +19981,7 @@ my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
 my $body = SWGSDRangel::Object::ChannelSettings->new(); # ChannelSettings | Channel settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelSettingsPut(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex, body => $body);
     print Dumper($result);
 };
@@ -19992,7 +20003,7 @@ deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
 body =  # ChannelSettings | Channel settings to apply
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_settings_put(deviceSetIndex, channelIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -20367,7 +20378,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
@@ -20461,7 +20472,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
@@ -20507,7 +20518,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelWorkspaceGet(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex);
     print Dumper($result);
 };
@@ -20528,7 +20539,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_workspace_get(deviceSetIndex, channelIndex)
     pprint(api_response)
 except ApiException as e:
@@ -20818,7 +20829,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
@@ -20918,7 +20929,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
@@ -20967,7 +20978,7 @@ my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
 my $body = SWGSDRangel::Object::WorkspaceInfo->new(); # WorkspaceInfo | Destination workspace information
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelWorkspacePut(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex, body => $body);
     print Dumper($result);
 };
@@ -20989,7 +21000,7 @@ deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
 body =  # WorkspaceInfo | Destination workspace information
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_workspace_put(deviceSetIndex, channelIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -21321,7 +21332,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -21409,7 +21420,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -21452,7 +21463,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelsReportGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -21472,7 +21483,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_channels_report_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -21782,7 +21793,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         DeviceActions body = ; // DeviceActions | Action(s) to apply to the device
@@ -21876,7 +21887,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new DeviceActions(); // DeviceActions | Action(s) to apply to the device
@@ -21922,7 +21933,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::DeviceActions->new(); # DeviceActions | Action(s) to apply to the device
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceActionsPost(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -21943,7 +21954,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # DeviceActions | Action(s) to apply to the device
 
-try:
+try: 
     api_response = api_instance.deviceset_device_actions_post(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -22295,7 +22306,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
@@ -22389,7 +22400,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new DeviceListItem(); // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
@@ -22435,7 +22446,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::DeviceListItem->new(); # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDevicePut(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -22456,7 +22467,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
 
-try:
+try: 
     api_response = api_instance.deviceset_device_put(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -22808,7 +22819,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -22896,7 +22907,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -22939,7 +22950,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceReportGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -22959,7 +22970,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_device_report_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -23269,7 +23280,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
@@ -23333,7 +23344,7 @@ var api = new SdRangel.DeviceSetApi()
 
 var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
-var opts = {
+var opts = { 
   'body':  // {DeviceSettings} Originator information in the reverse API case
 };
 
@@ -23364,10 +23375,10 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
-            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional)
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
 
             try
             {
@@ -23410,7 +23421,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceRunDelete(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -23431,7 +23442,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # DeviceSettings | Originator information in the reverse API case (optional)
 
-try:
+try: 
     api_response = api_instance.deviceset_device_run_delete(deviceSetIndex, body=body)
     pprint(api_response)
 except ApiException as e:
@@ -23783,7 +23794,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -23871,7 +23882,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -23914,7 +23925,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceRunGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -23934,7 +23945,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_device_run_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -24244,7 +24255,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
@@ -24308,7 +24319,7 @@ var api = new SdRangel.DeviceSetApi()
 
 var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
-var opts = {
+var opts = { 
   'body':  // {DeviceSettings} Originator information in the reverse API case
 };
 
@@ -24339,10 +24350,10 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
-            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional)
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
 
             try
             {
@@ -24385,7 +24396,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceRunPost(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -24406,7 +24417,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # DeviceSettings | Originator information in the reverse API case (optional)
 
-try:
+try: 
     api_response = api_instance.deviceset_device_run_post(deviceSetIndex, body=body)
     pprint(api_response)
 except ApiException as e:
@@ -24758,7 +24769,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -24846,7 +24857,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -24889,7 +24900,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceSettingsGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -24909,7 +24920,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_device_settings_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -25176,7 +25187,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         DeviceSettings body = ; // DeviceSettings | Device settings to apply
@@ -25270,7 +25281,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new DeviceSettings(); // DeviceSettings | Device settings to apply
@@ -25316,7 +25327,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Device settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceSettingsPatch(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -25337,7 +25348,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # DeviceSettings | Device settings to apply
 
-try:
+try: 
     api_response = api_instance.deviceset_device_settings_patch(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -25646,7 +25657,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         DeviceSettings body = ; // DeviceSettings | Device settings to apply
@@ -25740,7 +25751,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new DeviceSettings(); // DeviceSettings | Device settings to apply
@@ -25786,7 +25797,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Device settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceSettingsPut(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -25807,7 +25818,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # DeviceSettings | Device settings to apply
 
-try:
+try: 
     api_response = api_instance.deviceset_device_settings_put(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -26116,7 +26127,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
@@ -26186,7 +26197,7 @@ var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
 var subsystemIndex = 56; // {Integer} Index of subsystem (0 for Rx, 1 for Tx)
 
-var opts = {
+var opts = { 
   'body':  // {DeviceSettings} Originator information in the reverse API case
 };
 
@@ -26217,11 +26228,11 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var subsystemIndex = 56;  // Integer | Index of subsystem (0 for Rx, 1 for Tx)
-            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional)
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
 
             try
             {
@@ -26266,7 +26277,7 @@ my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $subsystemIndex = 56; # Integer | Index of subsystem (0 for Rx, 1 for Tx)
 my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceSubsystemRunDelete(deviceSetIndex => $deviceSetIndex, subsystemIndex => $subsystemIndex, body => $body);
     print Dumper($result);
 };
@@ -26288,7 +26299,7 @@ deviceSetIndex = 56 # Integer | Index of device set in the device set list
 subsystemIndex = 56 # Integer | Index of subsystem (0 for Rx, 1 for Tx)
 body =  # DeviceSettings | Originator information in the reverse API case (optional)
 
-try:
+try: 
     api_response = api_instance.deviceset_device_subsystem_run_delete(deviceSetIndex, subsystemIndex, body=body)
     pprint(api_response)
 except ApiException as e:
@@ -26663,7 +26674,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
@@ -26757,7 +26768,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var subsystemIndex = 56;  // Integer | Index of subsystem (0 for Rx, 1 for Tx)
@@ -26803,7 +26814,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $subsystemIndex = 56; # Integer | Index of subsystem (0 for Rx, 1 for Tx)
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceSubsystemRunGet(deviceSetIndex => $deviceSetIndex, subsystemIndex => $subsystemIndex);
     print Dumper($result);
 };
@@ -26824,7 +26835,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 subsystemIndex = 56 # Integer | Index of subsystem (0 for Rx, 1 for Tx)
 
-try:
+try: 
     api_response = api_instance.deviceset_device_subsystem_run_get(deviceSetIndex, subsystemIndex)
     pprint(api_response)
 except ApiException as e:
@@ -27157,7 +27168,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
@@ -27227,7 +27238,7 @@ var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
 var subsystemIndex = 56; // {Integer} Index of subsystem (0 for Rx, 1 for Tx)
 
-var opts = {
+var opts = { 
   'body':  // {DeviceSettings} Originator information in the reverse API case
 };
 
@@ -27258,11 +27269,11 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var subsystemIndex = 56;  // Integer | Index of subsystem (0 for Rx, 1 for Tx)
-            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional)
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
 
             try
             {
@@ -27307,7 +27318,7 @@ my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $subsystemIndex = 56; # Integer | Index of subsystem (0 for Rx, 1 for Tx)
 my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceSubsystemRunPost(deviceSetIndex => $deviceSetIndex, subsystemIndex => $subsystemIndex, body => $body);
     print Dumper($result);
 };
@@ -27329,7 +27340,7 @@ deviceSetIndex = 56 # Integer | Index of device set in the device set list
 subsystemIndex = 56 # Integer | Index of subsystem (0 for Rx, 1 for Tx)
 body =  # DeviceSettings | Originator information in the reverse API case (optional)
 
-try:
+try: 
     api_response = api_instance.deviceset_device_subsystem_run_post(deviceSetIndex, subsystemIndex, body=body)
     pprint(api_response)
 except ApiException as e:
@@ -27704,7 +27715,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -27792,7 +27803,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -27835,7 +27846,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceWorkspaceGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -27855,7 +27866,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_device_workspace_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -28122,7 +28133,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         WorkspaceInfo body = ; // WorkspaceInfo | Destination workspace information
@@ -28216,7 +28227,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new WorkspaceInfo(); // WorkspaceInfo | Destination workspace information
@@ -28262,7 +28273,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::WorkspaceInfo->new(); # WorkspaceInfo | Destination workspace information
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceWorkspacePut(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -28283,7 +28294,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # WorkspaceInfo | Destination workspace information
 
-try:
+try: 
     api_response = api_instance.deviceset_device_workspace_put(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -28592,7 +28603,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -28680,7 +28691,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -28723,7 +28734,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -28743,7 +28754,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -29010,7 +29021,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -29098,7 +29109,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -29141,7 +29152,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetSpectrumServerDelete(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -29161,7 +29172,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_spectrum_server_delete(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -29471,7 +29482,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -29559,7 +29570,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -29602,7 +29613,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetSpectrumServerGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -29622,7 +29633,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_spectrum_server_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -29889,7 +29900,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -29977,7 +29988,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -30020,7 +30031,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetSpectrumServerPost(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -30040,7 +30051,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_spectrum_server_post(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -30350,7 +30361,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -30438,7 +30449,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -30481,7 +30492,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetSpectrumSettingsGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -30501,7 +30512,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_spectrum_settings_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -30768,7 +30779,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         GLSpectrum body = ; // GLSpectrum | Spectrum settings to apply
@@ -30862,7 +30873,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new GLSpectrum(); // GLSpectrum | Spectrum settings to apply
@@ -30908,7 +30919,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::GLSpectrum->new(); # GLSpectrum | Spectrum settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->devicesetSpectrumSettingsPatch(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -30929,7 +30940,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # GLSpectrum | Spectrum settings to apply
 
-try:
+try: 
     api_response = api_instance.deviceset_spectrum_settings_patch(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -31238,7 +31249,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         GLSpectrum body = ; // GLSpectrum | Spectrum settings to apply
@@ -31332,7 +31343,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new GLSpectrum(); // GLSpectrum | Spectrum settings to apply
@@ -31378,7 +31389,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::GLSpectrum->new(); # GLSpectrum | Spectrum settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->devicesetSpectrumSettingsPut(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -31399,7 +31410,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # GLSpectrum | Spectrum settings to apply
 
-try:
+try: 
     api_response = api_instance.deviceset_spectrum_settings_put(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -31708,7 +31719,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -31796,7 +31807,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -31839,7 +31850,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetSpectrumWorkspaceGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -31859,7 +31870,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_spectrum_workspace_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -32126,7 +32137,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         WorkspaceInfo body = ; // WorkspaceInfo | Destination workspace information
@@ -32220,7 +32231,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new WorkspaceInfo(); // WorkspaceInfo | Destination workspace information
@@ -32266,7 +32277,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::WorkspaceInfo->new(); # WorkspaceInfo | Destination workspace information
 
-eval {
+eval { 
     my $result = $api_instance->devicesetSpectrumWorkspacePut(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -32287,7 +32298,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # WorkspaceInfo | Destination workspace information
 
-try:
+try: 
     api_response = api_instance.deviceset_spectrum_workspace_put(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -32596,7 +32607,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         try {
             SuccessResponse result = apiInstance.instanceDeviceSetDelete();
@@ -32634,7 +32645,7 @@ public class DeviceSetApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
-[apiInstance instanceDeviceSetDeleteWithCompletionHandler:
+[apiInstance instanceDeviceSetDeleteWithCompletionHandler: 
               ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -32678,7 +32689,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
 
             try
@@ -32718,7 +32729,7 @@ use SWGSDRangel::DeviceSetApi;
 
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceDeviceSetDelete();
     print Dumper($result);
 };
@@ -32737,7 +32748,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.DeviceSetApi()
 
-try:
+try: 
     api_response = api_instance.instance_device_set_delete()
     pprint(api_response)
 except ApiException as e:
@@ -32974,7 +32985,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
@@ -33032,7 +33043,7 @@ DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
 var api = new SdRangel.DeviceSetApi()
 
-var opts = {
+var opts = { 
   'direction': 56 // {Integer} 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 };
 
@@ -33063,9 +33074,9 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
-            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
+            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional) 
 
             try
             {
@@ -33106,7 +33117,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $direction = 56; # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
-eval {
+eval { 
     my $result = $api_instance->instanceDeviceSetPost(direction => $direction);
     print Dumper($result);
 };
@@ -33126,7 +33137,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 direction = 56 # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
-try:
+try: 
     api_response = api_instance.instance_device_set_post(direction=direction)
     pprint(api_response)
 except ApiException as e:
@@ -33350,7 +33361,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         Integer featureIndex = 56; // Integer | Index of the feature in the features list
         FeatureSettings body = ; // FeatureSettings | Feature settings to apply
@@ -33444,7 +33455,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var featureIndex = 56;  // Integer | Index of the feature in the features list
             var body = new FeatureSettings(); // FeatureSettings | Feature settings to apply
@@ -33490,7 +33501,7 @@ my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $featureIndex = 56; # Integer | Index of the feature in the features list
 my $body = SWGSDRangel::Object::FeatureSettings->new(); # FeatureSettings | Feature settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFEatureSettingsPut(featureIndex => $featureIndex, body => $body);
     print Dumper($result);
 };
@@ -33511,7 +33522,7 @@ api_instance = swagger_sdrangel.FeatureSetApi()
 featureIndex = 56 # Integer | Index of the feature in the features list
 body =  # FeatureSettings | Feature settings to apply
 
-try:
+try: 
     api_response = api_instance.featureset_f_eature_settings_put(featureIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -33863,7 +33874,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         Integer featureIndex = 56; // Integer | Index of the feature in the features list
         FeatureActions body = ; // FeatureActions | Action(s) to apply to the feature
@@ -33957,7 +33968,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var featureIndex = 56;  // Integer | Index of the feature in the features list
             var body = new FeatureActions(); // FeatureActions | Action(s) to apply to the feature
@@ -34003,7 +34014,7 @@ my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $featureIndex = 56; # Integer | Index of the feature in the features list
 my $body = SWGSDRangel::Object::FeatureActions->new(); # FeatureActions | Action(s) to apply to the feature
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFeatureActionsPost(featureIndex => $featureIndex, body => $body);
     print Dumper($result);
 };
@@ -34024,7 +34035,7 @@ api_instance = swagger_sdrangel.FeatureSetApi()
 featureIndex = 56 # Integer | Index of the feature in the features list
 body =  # FeatureActions | Action(s) to apply to the feature
 
-try:
+try: 
     api_response = api_instance.featureset_feature_actions_post(featureIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -34376,7 +34387,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
@@ -34464,7 +34475,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var featureIndex = 56;  // Integer | Index of feature in the features list
 
@@ -34507,7 +34518,7 @@ use SWGSDRangel::FeatureSetApi;
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $featureIndex = 56; # Integer | Index of feature in the features list
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFeatureDelete(featureIndex => $featureIndex);
     print Dumper($result);
 };
@@ -34527,7 +34538,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.FeatureSetApi()
 featureIndex = 56 # Integer | Index of feature in the features list
 
-try:
+try: 
     api_response = api_instance.featureset_feature_delete(featureIndex)
     pprint(api_response)
 except ApiException as e:
@@ -34837,7 +34848,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         FeatureSettings body = ; // FeatureSettings | Feature identification (no settings data)
         try {
@@ -34925,7 +34936,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var body = new FeatureSettings(); // FeatureSettings | Feature identification (no settings data)
 
@@ -34968,7 +34979,7 @@ use SWGSDRangel::FeatureSetApi;
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $body = SWGSDRangel::Object::FeatureSettings->new(); # FeatureSettings | Feature identification (no settings data)
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFeaturePost(body => $body);
     print Dumper($result);
 };
@@ -34988,7 +34999,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.FeatureSetApi()
 body =  # FeatureSettings | Feature identification (no settings data)
 
-try:
+try: 
     api_response = api_instance.featureset_feature_post(body)
     pprint(api_response)
 except ApiException as e:
@@ -35267,7 +35278,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         Integer featureIndex = 56; // Integer | Index of the feature in the features list
         try {
@@ -35355,7 +35366,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var featureIndex = 56;  // Integer | Index of the feature in the features list
 
@@ -35398,7 +35409,7 @@ use SWGSDRangel::FeatureSetApi;
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $featureIndex = 56; # Integer | Index of the feature in the features list
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFeatureReportGet(featureIndex => $featureIndex);
     print Dumper($result);
 };
@@ -35418,7 +35429,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.FeatureSetApi()
 featureIndex = 56 # Integer | Index of the feature in the features list
 
-try:
+try: 
     api_response = api_instance.featureset_feature_report_get(featureIndex)
     pprint(api_response)
 except ApiException as e:
@@ -35728,7 +35739,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
@@ -35816,7 +35827,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var featureIndex = 56;  // Integer | Index of feature in the features list
 
@@ -35859,7 +35870,7 @@ use SWGSDRangel::FeatureSetApi;
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $featureIndex = 56; # Integer | Index of feature in the features list
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFeatureRunDelete(featureIndex => $featureIndex);
     print Dumper($result);
 };
@@ -35879,7 +35890,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.FeatureSetApi()
 featureIndex = 56 # Integer | Index of feature in the features list
 
-try:
+try: 
     api_response = api_instance.featureset_feature_run_delete(featureIndex)
     pprint(api_response)
 except ApiException as e:
@@ -36189,7 +36200,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
@@ -36277,7 +36288,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var featureIndex = 56;  // Integer | Index of feature in the features list
 
@@ -36320,7 +36331,7 @@ use SWGSDRangel::FeatureSetApi;
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $featureIndex = 56; # Integer | Index of feature in the features list
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFeatureRunGet(featureIndex => $featureIndex);
     print Dumper($result);
 };
@@ -36340,7 +36351,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.FeatureSetApi()
 featureIndex = 56 # Integer | Index of feature in the features list
 
-try:
+try: 
     api_response = api_instance.featureset_feature_run_get(featureIndex)
     pprint(api_response)
 except ApiException as e:
@@ -36607,7 +36618,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
@@ -36695,7 +36706,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var featureIndex = 56;  // Integer | Index of feature in the features list
 
@@ -36738,7 +36749,7 @@ use SWGSDRangel::FeatureSetApi;
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $featureIndex = 56; # Integer | Index of feature in the features list
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFeatureRunPost(featureIndex => $featureIndex);
     print Dumper($result);
 };
@@ -36758,7 +36769,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.FeatureSetApi()
 featureIndex = 56 # Integer | Index of feature in the features list
 
-try:
+try: 
     api_response = api_instance.featureset_feature_run_post(featureIndex)
     pprint(api_response)
 except ApiException as e:
@@ -37025,7 +37036,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         Integer featureIndex = 56; // Integer | Index of the feature in the features list
         try {
@@ -37113,7 +37124,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var featureIndex = 56;  // Integer | Index of the feature in the features list
 
@@ -37156,7 +37167,7 @@ use SWGSDRangel::FeatureSetApi;
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $featureIndex = 56; # Integer | Index of the feature in the features list
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFeatureSettingsGet(featureIndex => $featureIndex);
     print Dumper($result);
 };
@@ -37176,7 +37187,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.FeatureSetApi()
 featureIndex = 56 # Integer | Index of the feature in the features list
 
-try:
+try: 
     api_response = api_instance.featureset_feature_settings_get(featureIndex)
     pprint(api_response)
 except ApiException as e:
@@ -37486,7 +37497,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         Integer featureIndex = 56; // Integer | Index of the feature in the features list
         FeatureSettings body = ; // FeatureSettings | Feature settings to apply
@@ -37580,7 +37591,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var featureIndex = 56;  // Integer | Index of the feature in the features list
             var body = new FeatureSettings(); // FeatureSettings | Feature settings to apply
@@ -37626,7 +37637,7 @@ my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $featureIndex = 56; # Integer | Index of the feature in the features list
 my $body = SWGSDRangel::Object::FeatureSettings->new(); # FeatureSettings | Feature settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFeatureSettingsPatch(featureIndex => $featureIndex, body => $body);
     print Dumper($result);
 };
@@ -37647,7 +37658,7 @@ api_instance = swagger_sdrangel.FeatureSetApi()
 featureIndex = 56 # Integer | Index of the feature in the features list
 body =  # FeatureSettings | Feature settings to apply
 
-try:
+try: 
     api_response = api_instance.featureset_feature_settings_patch(featureIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -37999,7 +38010,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         Integer featureIndex = 56; // Integer | Index of feature in the feature set
         try {
@@ -38087,7 +38098,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var featureIndex = 56;  // Integer | Index of feature in the feature set
 
@@ -38130,7 +38141,7 @@ use SWGSDRangel::FeatureSetApi;
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $featureIndex = 56; # Integer | Index of feature in the feature set
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFeatureWorkspaceGet(featureIndex => $featureIndex);
     print Dumper($result);
 };
@@ -38150,7 +38161,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.FeatureSetApi()
 featureIndex = 56 # Integer | Index of feature in the feature set
 
-try:
+try: 
     api_response = api_instance.featureset_feature_workspace_get(featureIndex)
     pprint(api_response)
 except ApiException as e:
@@ -38417,7 +38428,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         Integer featureIndex = 56; // Integer | Index of feature in the feature set
         WorkspaceInfo body = ; // WorkspaceInfo | Destination workspace information
@@ -38511,7 +38522,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var featureIndex = 56;  // Integer | Index of feature in the feature set
             var body = new WorkspaceInfo(); // WorkspaceInfo | Destination workspace information
@@ -38557,7 +38568,7 @@ my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $featureIndex = 56; # Integer | Index of feature in the feature set
 my $body = SWGSDRangel::Object::WorkspaceInfo->new(); # WorkspaceInfo | Destination workspace information
 
-eval {
+eval { 
     my $result = $api_instance->featuresetFeatureWorkspacePut(featureIndex => $featureIndex, body => $body);
     print Dumper($result);
 };
@@ -38578,7 +38589,7 @@ api_instance = swagger_sdrangel.FeatureSetApi()
 featureIndex = 56 # Integer | Index of feature in the feature set
 body =  # WorkspaceInfo | Destination workspace information
 
-try:
+try: 
     api_response = api_instance.featureset_feature_workspace_put(featureIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -38887,7 +38898,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         try {
             FeatureSet result = apiInstance.featuresetGet();
@@ -38925,7 +38936,7 @@ public class FeatureSetApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetGetWithCompletionHandler:
+[apiInstance featuresetGetWithCompletionHandler: 
               ^(FeatureSet output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -38969,7 +38980,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
 
             try
@@ -39009,7 +39020,7 @@ use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->featuresetGet();
     print Dumper($result);
 };
@@ -39028,7 +39039,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
 
-try:
+try: 
     api_response = api_instance.featureset_get()
     pprint(api_response)
 except ApiException as e:
@@ -39222,7 +39233,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | Load preset settings to the features
         try {
@@ -39310,7 +39321,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | Load preset settings to the features
 
@@ -39353,7 +39364,7 @@ use SWGSDRangel::FeatureSetApi;
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | Load preset settings to the features
 
-eval {
+eval { 
     my $result = $api_instance->featuresetPresetPatch(body => $body);
     print Dumper($result);
 };
@@ -39373,7 +39384,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.FeatureSetApi()
 body =  # FeaturePresetIdentifier | Load preset settings to the features
 
-try:
+try: 
     api_response = api_instance.featureset_preset_patch(body)
     pprint(api_response)
 except ApiException as e:
@@ -39695,7 +39706,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save features settings on a new preset
         try {
@@ -39783,7 +39794,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | save features settings on a new preset
 
@@ -39826,7 +39837,7 @@ use SWGSDRangel::FeatureSetApi;
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | save features settings on a new preset
 
-eval {
+eval { 
     my $result = $api_instance->featuresetPresetPost(body => $body);
     print Dumper($result);
 };
@@ -39846,7 +39857,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.FeatureSetApi()
 body =  # FeaturePresetIdentifier | save features settings on a new preset
 
-try:
+try: 
     api_response = api_instance.featureset_preset_post(body)
     pprint(api_response)
 except ApiException as e:
@@ -40211,7 +40222,7 @@ import java.util.*;
 public class FeatureSetApiExample {
 
     public static void main(String[] args) {
-
+        
         FeatureSetApi apiInstance = new FeatureSetApi();
         FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save features settings to the preset
         try {
@@ -40299,7 +40310,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new FeatureSetApi();
             var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | save features settings to the preset
 
@@ -40342,7 +40353,7 @@ use SWGSDRangel::FeatureSetApi;
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
 my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | save features settings to the preset
 
-eval {
+eval { 
     my $result = $api_instance->featuresetPresetPut(body => $body);
     print Dumper($result);
 };
@@ -40362,7 +40373,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.FeatureSetApi()
 body =  # FeaturePresetIdentifier | save features settings to the preset
 
-try:
+try: 
     api_response = api_instance.featureset_preset_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -40687,7 +40698,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             AudioDevices result = apiInstance.instanceAudioGet();
@@ -40725,7 +40736,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceAudioGetWithCompletionHandler:
+[apiInstance instanceAudioGetWithCompletionHandler: 
               ^(AudioDevices output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -40769,7 +40780,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -40809,7 +40820,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioGet();
     print Dumper($result);
 };
@@ -40828,7 +40839,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_audio_get()
     pprint(api_response)
 except ApiException as e:
@@ -41022,7 +41033,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             SuccessResponse result = apiInstance.instanceAudioInputCleanupPatch();
@@ -41060,7 +41071,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceAudioInputCleanupPatchWithCompletionHandler:
+[apiInstance instanceAudioInputCleanupPatchWithCompletionHandler: 
               ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -41104,7 +41115,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -41144,7 +41155,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioInputCleanupPatch();
     print Dumper($result);
 };
@@ -41163,7 +41174,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_audio_input_cleanup_patch()
     pprint(api_response)
 except ApiException as e:
@@ -41357,7 +41368,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         AudioInputDevice body = ; // AudioInputDevice | Audio input parameters. Index is used to identify the device.
         try {
@@ -41445,7 +41456,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new AudioInputDevice(); // AudioInputDevice | Audio input parameters. Index is used to identify the device.
 
@@ -41488,7 +41499,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::AudioInputDevice->new(); # AudioInputDevice | Audio input parameters. Index is used to identify the device.
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioInputDelete(body => $body);
     print Dumper($result);
 };
@@ -41508,7 +41519,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # AudioInputDevice | Audio input parameters. Index is used to identify the device.
 
-try:
+try: 
     api_response = api_instance.instance_audio_input_delete(body)
     pprint(api_response)
 except ApiException as e:
@@ -41787,7 +41798,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         AudioInputDevice body = ; // AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
         try {
@@ -41875,7 +41886,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new AudioInputDevice(); // AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
@@ -41918,7 +41929,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::AudioInputDevice->new(); # AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioInputPatch(body => $body);
     print Dumper($result);
 };
@@ -41938,7 +41949,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
-try:
+try: 
     api_response = api_instance.instance_audio_input_patch(body)
     pprint(api_response)
 except ApiException as e:
@@ -42217,7 +42228,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             SuccessResponse result = apiInstance.instanceAudioOutputCleanupPatch();
@@ -42255,7 +42266,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceAudioOutputCleanupPatchWithCompletionHandler:
+[apiInstance instanceAudioOutputCleanupPatchWithCompletionHandler: 
               ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -42299,7 +42310,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -42339,7 +42350,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioOutputCleanupPatch();
     print Dumper($result);
 };
@@ -42358,7 +42369,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_audio_output_cleanup_patch()
     pprint(api_response)
 except ApiException as e:
@@ -42552,7 +42563,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         AudioOutputDevice body = ; // AudioOutputDevice | Audio output parameters. Index is used to identify the device.
         try {
@@ -42640,7 +42651,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new AudioOutputDevice(); // AudioOutputDevice | Audio output parameters. Index is used to identify the device.
 
@@ -42683,7 +42694,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::AudioOutputDevice->new(); # AudioOutputDevice | Audio output parameters. Index is used to identify the device.
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioOutputDelete(body => $body);
     print Dumper($result);
 };
@@ -42703,7 +42714,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # AudioOutputDevice | Audio output parameters. Index is used to identify the device.
 
-try:
+try: 
     api_response = api_instance.instance_audio_output_delete(body)
     pprint(api_response)
 except ApiException as e:
@@ -42982,7 +42993,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         AudioOutputDevice body = ; // AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
         try {
@@ -43070,7 +43081,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new AudioOutputDevice(); // AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
 
@@ -43113,7 +43124,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::AudioOutputDevice->new(); # AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioOutputPatch(body => $body);
     print Dumper($result);
 };
@@ -43133,7 +43144,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
 
-try:
+try: 
     api_response = api_instance.instance_audio_output_patch(body)
     pprint(api_response)
 except ApiException as e:
@@ -43412,7 +43423,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
@@ -43470,7 +43481,7 @@ InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
 var api = new SdRangel.InstanceApi()
 
-var opts = {
+var opts = { 
   'direction': 56 // {Integer} 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 };
 
@@ -43501,9 +43512,9 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
-            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
+            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional) 
 
             try
             {
@@ -43544,7 +43555,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $direction = 56; # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
-eval {
+eval { 
     my $result = $api_instance->instanceChannels(direction => $direction);
     print Dumper($result);
 };
@@ -43564,7 +43575,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 direction = 56 # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
-try:
+try: 
     api_response = api_instance.instance_channels(direction=direction)
     pprint(api_response)
 except ApiException as e:
@@ -43785,7 +43796,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             InstanceConfigResponse result = apiInstance.instanceConfigGet();
@@ -43823,7 +43834,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceConfigGetWithCompletionHandler:
+[apiInstance instanceConfigGetWithCompletionHandler: 
               ^(InstanceConfigResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -43867,7 +43878,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -43907,7 +43918,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigGet();
     print Dumper($result);
 };
@@ -43926,7 +43937,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_config_get()
     pprint(api_response)
 except ApiException as e:
@@ -44120,7 +44131,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         InstanceConfigResponse body = ; // InstanceConfigResponse | Config information
         try {
@@ -44208,7 +44219,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new InstanceConfigResponse(); // InstanceConfigResponse | Config information
 
@@ -44251,7 +44262,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::InstanceConfigResponse->new(); # InstanceConfigResponse | Config information
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigPatch(body => $body);
     print Dumper($result);
 };
@@ -44271,7 +44282,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # InstanceConfigResponse | Config information
 
-try:
+try: 
     api_response = api_instance.instance_config_patch(body)
     pprint(api_response)
 except ApiException as e:
@@ -44507,7 +44518,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         InstanceConfigResponse body = ; // InstanceConfigResponse | Config information
         try {
@@ -44595,7 +44606,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new InstanceConfigResponse(); // InstanceConfigResponse | Config information
 
@@ -44638,7 +44649,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::InstanceConfigResponse->new(); # InstanceConfigResponse | Config information
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigPut(body => $body);
     print Dumper($result);
 };
@@ -44658,7 +44669,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # InstanceConfigResponse | Config information
 
-try:
+try: 
     api_response = api_instance.instance_config_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -44894,7 +44905,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         ConfigurationIdentifier body = ; // ConfigurationIdentifier | configuration identification
         try {
@@ -44982,7 +44993,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new ConfigurationIdentifier(); // ConfigurationIdentifier | configuration identification
 
@@ -45025,7 +45036,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::ConfigurationIdentifier->new(); # ConfigurationIdentifier | configuration identification
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigurationBlobPost(body => $body);
     print Dumper($result);
 };
@@ -45045,7 +45056,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # ConfigurationIdentifier | configuration identification
 
-try:
+try: 
     api_response = api_instance.instance_configuration_blob_post(body)
     pprint(api_response)
 except ApiException as e:
@@ -45367,7 +45378,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         Base64Blob body = ; // Base64Blob | Blob in base64 format
         try {
@@ -45455,7 +45466,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new Base64Blob(); // Base64Blob | Blob in base64 format
 
@@ -45498,7 +45509,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::Base64Blob->new(); # Base64Blob | Blob in base64 format
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigurationBlobPut(body => $body);
     print Dumper($result);
 };
@@ -45518,7 +45529,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # Base64Blob | Blob in base64 format
 
-try:
+try: 
     api_response = api_instance.instance_configuration_blob_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -45797,7 +45808,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         ConfigurationIdentifier body = ; // ConfigurationIdentifier | delete this configuration
         try {
@@ -45885,7 +45896,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new ConfigurationIdentifier(); // ConfigurationIdentifier | delete this configuration
 
@@ -45928,7 +45939,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::ConfigurationIdentifier->new(); # ConfigurationIdentifier | delete this configuration
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigurationDelete(body => $body);
     print Dumper($result);
 };
@@ -45948,7 +45959,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # ConfigurationIdentifier | delete this configuration
 
-try:
+try: 
     api_response = api_instance.instance_configuration_delete(body)
     pprint(api_response)
 except ApiException as e:
@@ -46270,7 +46281,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         ConfigurationImportExport body = ; // ConfigurationImportExport | export details
         try {
@@ -46358,7 +46369,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new ConfigurationImportExport(); // ConfigurationImportExport | export details
 
@@ -46401,7 +46412,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::ConfigurationImportExport->new(); # ConfigurationImportExport | export details
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigurationFilePost(body => $body);
     print Dumper($result);
 };
@@ -46421,7 +46432,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # ConfigurationImportExport | export details
 
-try:
+try: 
     api_response = api_instance.instance_configuration_file_post(body)
     pprint(api_response)
 except ApiException as e:
@@ -46743,7 +46754,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         FilePath body = ; // FilePath | File path
         try {
@@ -46831,7 +46842,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new FilePath(); // FilePath | File path
 
@@ -46874,7 +46885,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::FilePath->new(); # FilePath | File path
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigurationFilePut(body => $body);
     print Dumper($result);
 };
@@ -46894,7 +46905,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # FilePath | File path
 
-try:
+try: 
     api_response = api_instance.instance_configuration_file_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -47216,7 +47227,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         ConfigurationIdentifier body = ; // ConfigurationIdentifier | Load configuration settings
         try {
@@ -47304,7 +47315,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new ConfigurationIdentifier(); // ConfigurationIdentifier | Load configuration settings
 
@@ -47347,7 +47358,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::ConfigurationIdentifier->new(); # ConfigurationIdentifier | Load configuration settings
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigurationPatch(body => $body);
     print Dumper($result);
 };
@@ -47367,7 +47378,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # ConfigurationIdentifier | Load configuration settings
 
-try:
+try: 
     api_response = api_instance.instance_configuration_patch(body)
     pprint(api_response)
 except ApiException as e:
@@ -47689,7 +47700,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         ConfigurationIdentifier body = ; // ConfigurationIdentifier | save setup in a new configuration
         try {
@@ -47777,7 +47788,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new ConfigurationIdentifier(); // ConfigurationIdentifier | save setup in a new configuration
 
@@ -47820,7 +47831,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::ConfigurationIdentifier->new(); # ConfigurationIdentifier | save setup in a new configuration
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigurationPost(body => $body);
     print Dumper($result);
 };
@@ -47840,7 +47851,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # ConfigurationIdentifier | save setup in a new configuration
 
-try:
+try: 
     api_response = api_instance.instance_configuration_post(body)
     pprint(api_response)
 except ApiException as e:
@@ -48162,7 +48173,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         ConfigurationIdentifier body = ; // ConfigurationIdentifier | save setup to the configuration
         try {
@@ -48250,7 +48261,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new ConfigurationIdentifier(); // ConfigurationIdentifier | save setup to the configuration
 
@@ -48293,7 +48304,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::ConfigurationIdentifier->new(); # ConfigurationIdentifier | save setup to the configuration
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigurationPut(body => $body);
     print Dumper($result);
 };
@@ -48313,7 +48324,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # ConfigurationIdentifier | save setup to the configuration
 
-try:
+try: 
     api_response = api_instance.instance_configuration_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -48635,7 +48646,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             Configurations result = apiInstance.instanceConfigurationsGet();
@@ -48673,7 +48684,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceConfigurationsGetWithCompletionHandler:
+[apiInstance instanceConfigurationsGetWithCompletionHandler: 
               ^(Configurations output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -48717,7 +48728,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -48757,7 +48768,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigurationsGet();
     print Dumper($result);
 };
@@ -48776,7 +48787,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_configurations_get()
     pprint(api_response)
 except ApiException as e:
@@ -48970,7 +48981,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             InstanceSummaryResponse result = apiInstance.instanceDelete();
@@ -49008,7 +49019,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceDeleteWithCompletionHandler:
+[apiInstance instanceDeleteWithCompletionHandler: 
               ^(InstanceSummaryResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -49052,7 +49063,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -49092,7 +49103,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceDelete();
     print Dumper($result);
 };
@@ -49111,7 +49122,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_delete()
     pprint(api_response)
 except ApiException as e:
@@ -49348,7 +49359,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             DeviceSetList result = apiInstance.instanceDeviceSetsGet();
@@ -49386,7 +49397,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceDeviceSetsGetWithCompletionHandler:
+[apiInstance instanceDeviceSetsGetWithCompletionHandler: 
               ^(DeviceSetList output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -49430,7 +49441,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -49470,7 +49481,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceDeviceSetsGet();
     print Dumper($result);
 };
@@ -49489,7 +49500,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_device_sets_get()
     pprint(api_response)
 except ApiException as e:
@@ -49683,7 +49694,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
@@ -49741,7 +49752,7 @@ InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
 var api = new SdRangel.InstanceApi()
 
-var opts = {
+var opts = { 
   'direction': 56 // {Integer} 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 };
 
@@ -49772,9 +49783,9 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
-            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
+            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional) 
 
             try
             {
@@ -49815,7 +49826,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $direction = 56; # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
-eval {
+eval { 
     my $result = $api_instance->instanceDevices(direction => $direction);
     print Dumper($result);
 };
@@ -49835,7 +49846,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 direction = 56 # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
-try:
+try: 
     api_response = api_instance.instance_devices(direction=direction)
     pprint(api_response)
 except ApiException as e:
@@ -50056,7 +50067,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | delete this feature preset
         try {
@@ -50144,7 +50155,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | delete this feature preset
 
@@ -50187,7 +50198,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | delete this feature preset
 
-eval {
+eval { 
     my $result = $api_instance->instanceFeaturePresetDelete(body => $body);
     print Dumper($result);
 };
@@ -50207,7 +50218,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # FeaturePresetIdentifier | delete this feature preset
 
-try:
+try: 
     api_response = api_instance.instance_feature_preset_delete(body)
     pprint(api_response)
 except ApiException as e:
@@ -50529,7 +50540,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             FeaturePresets result = apiInstance.instanceFeaturePresetGet();
@@ -50567,7 +50578,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceFeaturePresetGetWithCompletionHandler:
+[apiInstance instanceFeaturePresetGetWithCompletionHandler: 
               ^(FeaturePresets output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -50611,7 +50622,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -50651,7 +50662,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceFeaturePresetGet();
     print Dumper($result);
 };
@@ -50670,7 +50681,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_feature_preset_get()
     pprint(api_response)
 except ApiException as e:
@@ -50864,7 +50875,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             InstanceFeaturesResponse result = apiInstance.instanceFeatures();
@@ -50902,7 +50913,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceFeaturesWithCompletionHandler:
+[apiInstance instanceFeaturesWithCompletionHandler: 
               ^(InstanceFeaturesResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -50946,7 +50957,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -50986,7 +50997,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceFeatures();
     print Dumper($result);
 };
@@ -51005,7 +51016,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_features()
     pprint(api_response)
 except ApiException as e:
@@ -51199,7 +51210,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             LocationInformation result = apiInstance.instanceLocationGet();
@@ -51237,7 +51248,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceLocationGetWithCompletionHandler:
+[apiInstance instanceLocationGetWithCompletionHandler: 
               ^(LocationInformation output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -51281,7 +51292,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -51321,7 +51332,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceLocationGet();
     print Dumper($result);
 };
@@ -51340,7 +51351,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_location_get()
     pprint(api_response)
 except ApiException as e:
@@ -51534,7 +51545,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         LocationInformation body = ; // LocationInformation | Location of instance in latitude and longitude
         try {
@@ -51622,7 +51633,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new LocationInformation(); // LocationInformation | Location of instance in latitude and longitude
 
@@ -51665,7 +51676,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::LocationInformation->new(); # LocationInformation | Location of instance in latitude and longitude
 
-eval {
+eval { 
     my $result = $api_instance->instanceLocationPut(body => $body);
     print Dumper($result);
 };
@@ -51685,7 +51696,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # LocationInformation | Location of instance in latitude and longitude
 
-try:
+try: 
     api_response = api_instance.instance_location_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -51929,7 +51940,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             LoggingInfo result = apiInstance.instanceLoggingGet();
@@ -51967,7 +51978,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceLoggingGetWithCompletionHandler:
+[apiInstance instanceLoggingGetWithCompletionHandler: 
               ^(LoggingInfo output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -52011,7 +52022,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -52051,7 +52062,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceLoggingGet();
     print Dumper($result);
 };
@@ -52070,7 +52081,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_logging_get()
     pprint(api_response)
 except ApiException as e:
@@ -52264,7 +52275,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         LoggingInfo body = ; // LoggingInfo | Logging information
         try {
@@ -52352,7 +52363,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new LoggingInfo(); // LoggingInfo | Logging information
 
@@ -52395,7 +52406,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::LoggingInfo->new(); # LoggingInfo | Logging information
 
-eval {
+eval { 
     my $result = $api_instance->instanceLoggingPut(body => $body);
     print Dumper($result);
 };
@@ -52415,7 +52426,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # LoggingInfo | Logging information
 
-try:
+try: 
     api_response = api_instance.instance_logging_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -52694,7 +52705,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetIdentifier body = ; // PresetIdentifier | Preset identification
         try {
@@ -52782,7 +52793,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetIdentifier(); // PresetIdentifier | Preset identification
 
@@ -52825,7 +52836,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetIdentifier->new(); # PresetIdentifier | Preset identification
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetBlobPost(body => $body);
     print Dumper($result);
 };
@@ -52845,7 +52856,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetIdentifier | Preset identification
 
-try:
+try: 
     api_response = api_instance.instance_preset_blob_post(body)
     pprint(api_response)
 except ApiException as e:
@@ -53167,7 +53178,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         Base64Blob body = ; // Base64Blob | Blob in base64 format
         try {
@@ -53255,7 +53266,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new Base64Blob(); // Base64Blob | Blob in base64 format
 
@@ -53298,7 +53309,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::Base64Blob->new(); # Base64Blob | Blob in base64 format
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetBlobPut(body => $body);
     print Dumper($result);
 };
@@ -53318,7 +53329,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # Base64Blob | Blob in base64 format
 
-try:
+try: 
     api_response = api_instance.instance_preset_blob_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -53597,7 +53608,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetIdentifier body = ; // PresetIdentifier | delete this preset
         try {
@@ -53685,7 +53696,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetIdentifier(); // PresetIdentifier | delete this preset
 
@@ -53728,7 +53739,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetIdentifier->new(); # PresetIdentifier | delete this preset
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetDelete(body => $body);
     print Dumper($result);
 };
@@ -53748,7 +53759,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetIdentifier | delete this preset
 
-try:
+try: 
     api_response = api_instance.instance_preset_delete(body)
     pprint(api_response)
 except ApiException as e:
@@ -54070,7 +54081,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetExport body = ; // PresetExport | export details
         try {
@@ -54158,7 +54169,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetExport(); // PresetExport | export details
 
@@ -54201,7 +54212,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetExport->new(); # PresetExport | export details
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetFilePost(body => $body);
     print Dumper($result);
 };
@@ -54221,7 +54232,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetExport | export details
 
-try:
+try: 
     api_response = api_instance.instance_preset_file_post(body)
     pprint(api_response)
 except ApiException as e:
@@ -54543,7 +54554,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         FilePath body = ; // FilePath | File path
         try {
@@ -54631,7 +54642,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new FilePath(); // FilePath | File path
 
@@ -54674,7 +54685,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::FilePath->new(); # FilePath | File path
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetFilePut(body => $body);
     print Dumper($result);
 };
@@ -54694,7 +54705,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # FilePath | File path
 
-try:
+try: 
     api_response = api_instance.instance_preset_file_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -55016,7 +55027,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             Presets result = apiInstance.instancePresetGet();
@@ -55054,7 +55065,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instancePresetGetWithCompletionHandler:
+[apiInstance instancePresetGetWithCompletionHandler: 
               ^(Presets output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -55098,7 +55109,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -55138,7 +55149,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetGet();
     print Dumper($result);
 };
@@ -55157,7 +55168,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_preset_get()
     pprint(api_response)
 except ApiException as e:
@@ -55351,7 +55362,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetTransfer body = ; // PresetTransfer | Load preset settings to the device set
         try {
@@ -55439,7 +55450,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetTransfer(); // PresetTransfer | Load preset settings to the device set
 
@@ -55482,7 +55493,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetTransfer->new(); # PresetTransfer | Load preset settings to the device set
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetPatch(body => $body);
     print Dumper($result);
 };
@@ -55502,7 +55513,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetTransfer | Load preset settings to the device set
 
-try:
+try: 
     api_response = api_instance.instance_preset_patch(body)
     pprint(api_response)
 except ApiException as e:
@@ -55824,7 +55835,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetTransfer body = ; // PresetTransfer | save device set settings on a new preset
         try {
@@ -55912,7 +55923,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetTransfer(); // PresetTransfer | save device set settings on a new preset
 
@@ -55955,7 +55966,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetTransfer->new(); # PresetTransfer | save device set settings on a new preset
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetPost(body => $body);
     print Dumper($result);
 };
@@ -55975,7 +55986,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetTransfer | save device set settings on a new preset
 
-try:
+try: 
     api_response = api_instance.instance_preset_post(body)
     pprint(api_response)
 except ApiException as e:
@@ -56340,7 +56351,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetTransfer body = ; // PresetTransfer | save device set settings to the preset
         try {
@@ -56428,7 +56439,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetTransfer(); // PresetTransfer | save device set settings to the preset
 
@@ -56471,7 +56482,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetTransfer->new(); # PresetTransfer | save device set settings to the preset
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetPut(body => $body);
     print Dumper($result);
 };
@@ -56491,7 +56502,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetTransfer | save device set settings to the preset
 
-try:
+try: 
     api_response = api_instance.instance_preset_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -56813,7 +56824,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             InstanceSummaryResponse result = apiInstance.instanceSummary();
@@ -56851,7 +56862,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceSummaryWithCompletionHandler:
+[apiInstance instanceSummaryWithCompletionHandler: 
               ^(InstanceSummaryResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -56895,7 +56906,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -56935,7 +56946,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceSummary();
     print Dumper($result);
 };
@@ -56954,7 +56965,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_summary()
     pprint(api_response)
 except ApiException as e:
@@ -57151,7 +57162,7 @@ import java.util.*;
 public class WorkspaceApiExample {
 
     public static void main(String[] args) {
-
+        
         WorkspaceApi apiInstance = new WorkspaceApi();
         try {
             SuccessResponse result = apiInstance.instanceWorkspaceAdd();
@@ -57189,7 +57200,7 @@ public class WorkspaceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 WorkspaceApi *apiInstance = [[WorkspaceApi alloc] init];
 
-[apiInstance instanceWorkspaceAddWithCompletionHandler:
+[apiInstance instanceWorkspaceAddWithCompletionHandler: 
               ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -57233,7 +57244,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new WorkspaceApi();
 
             try
@@ -57273,7 +57284,7 @@ use SWGSDRangel::WorkspaceApi;
 
 my $api_instance = SWGSDRangel::WorkspaceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceWorkspaceAdd();
     print Dumper($result);
 };
@@ -57292,7 +57303,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.WorkspaceApi()
 
-try:
+try: 
     api_response = api_instance.instance_workspace_add()
     pprint(api_response)
 except ApiException as e:
@@ -57485,7 +57496,7 @@ import java.util.*;
 public class WorkspaceApiExample {
 
     public static void main(String[] args) {
-
+        
         WorkspaceApi apiInstance = new WorkspaceApi();
         try {
             SuccessResponse result = apiInstance.instanceWorkspacesDeleteEmpty();
@@ -57523,7 +57534,7 @@ public class WorkspaceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 WorkspaceApi *apiInstance = [[WorkspaceApi alloc] init];
 
-[apiInstance instanceWorkspacesDeleteEmptyWithCompletionHandler:
+[apiInstance instanceWorkspacesDeleteEmptyWithCompletionHandler: 
               ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -57567,7 +57578,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new WorkspaceApi();
 
             try
@@ -57607,7 +57618,7 @@ use SWGSDRangel::WorkspaceApi;
 
 my $api_instance = SWGSDRangel::WorkspaceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceWorkspacesDeleteEmpty();
     print Dumper($result);
 };
@@ -57626,7 +57637,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.WorkspaceApi()
 
-try:
+try: 
     api_response = api_instance.instance_workspaces_delete_empty()
     pprint(api_response)
 except ApiException as e:
@@ -57787,7 +57798,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-06-08T05:18:29.115+02:00
+              Generated 2023-06-12T01:13:22.125+02:00
             </div>
           </div>
       </div>
@@ -58292,7 +58303,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
-
+	
 	// load the styles
 	var content = __webpack_require__(3);
 	if(typeof content === 'string') content = [[module.id, content, '']];
@@ -58319,11 +58330,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports = module.exports = __webpack_require__(4)();
 	// imports
-
-
+	
+	
 	// module
 	exports.push([module.id, ".json-formatter-row {\n  font-family: monospace;\n}\n.json-formatter-row,\n.json-formatter-row a,\n.json-formatter-row a:hover {\n  color: black;\n  text-decoration: none;\n}\n.json-formatter-row .json-formatter-row {\n  margin-left: 1rem;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty {\n  opacity: 0.5;\n  margin-left: 1rem;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty:after {\n  display: none;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-object:after {\n  content: \"No properties\";\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-array:after {\n  content: \"[]\";\n}\n.json-formatter-row .json-formatter-string {\n  color: green;\n  white-space: pre;\n  word-wrap: break-word;\n}\n.json-formatter-row .json-formatter-number {\n  color: blue;\n}\n.json-formatter-row .json-formatter-boolean {\n  color: red;\n}\n.json-formatter-row .json-formatter-null {\n  color: #855A00;\n}\n.json-formatter-row .json-formatter-undefined {\n  color: #ca0b69;\n}\n.json-formatter-row .json-formatter-function {\n  color: #FF20ED;\n}\n.json-formatter-row .json-formatter-date {\n  background-color: rgba(0, 0, 0, 0.05);\n}\n.json-formatter-row .json-formatter-url {\n  text-decoration: underline;\n  color: blue;\n  cursor: pointer;\n}\n.json-formatter-row .json-formatter-bracket {\n  color: blue;\n}\n.json-formatter-row .json-formatter-key {\n  color: #00008B;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-row .json-formatter-constructor-name {\n  cursor: pointer;\n}\n.json-formatter-row .json-formatter-toggler {\n  line-height: 1.2rem;\n  font-size: 0.7rem;\n  vertical-align: middle;\n  opacity: 0.6;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-row .json-formatter-toggler:after {\n  display: inline-block;\n  transition: transform 100ms ease-in;\n  content: \"\\25BA\";\n}\n.json-formatter-row > a > .json-formatter-preview-text {\n  opacity: 0;\n  transition: opacity 0.15s ease-in;\n  font-style: italic;\n}\n.json-formatter-row:hover > a > .json-formatter-preview-text {\n  opacity: 0.6;\n}\n.json-formatter-row.json-formatter-open > .json-formatter-toggler-link .json-formatter-toggler:after {\n  transform: rotate(90deg);\n}\n.json-formatter-row.json-formatter-open > .json-formatter-children:after {\n  display: inline-block;\n}\n.json-formatter-row.json-formatter-open > a > .json-formatter-preview-text {\n  display: none;\n}\n.json-formatter-row.json-formatter-open.json-formatter-empty:after {\n  display: block;\n}\n.json-formatter-dark.json-formatter-row {\n  font-family: monospace;\n}\n.json-formatter-dark.json-formatter-row,\n.json-formatter-dark.json-formatter-row a,\n.json-formatter-dark.json-formatter-row a:hover {\n  color: white;\n  text-decoration: none;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-row {\n  margin-left: 1rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty {\n  opacity: 0.5;\n  margin-left: 1rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty:after {\n  display: none;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-object:after {\n  content: \"No properties\";\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-array:after {\n  content: \"[]\";\n}\n.json-formatter-dark.json-formatter-row .json-formatter-string {\n  color: #31F031;\n  white-space: pre;\n  word-wrap: break-word;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-number {\n  color: #66C2FF;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-boolean {\n  color: #EC4242;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-null {\n  color: #EEC97D;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-undefined {\n  color: #ef8fbe;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-function {\n  color: #FD48CB;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-date {\n  background-color: rgba(255, 255, 255, 0.05);\n}\n.json-formatter-dark.json-formatter-row .json-formatter-url {\n  text-decoration: underline;\n  color: #027BFF;\n  cursor: pointer;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-bracket {\n  color: #9494FF;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-key {\n  color: #23A0DB;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-constructor-name {\n  cursor: pointer;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-toggler {\n  line-height: 1.2rem;\n  font-size: 0.7rem;\n  vertical-align: middle;\n  opacity: 0.6;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-toggler:after {\n  display: inline-block;\n  transition: transform 100ms ease-in;\n  content: \"\\25BA\";\n}\n.json-formatter-dark.json-formatter-row > a > .json-formatter-preview-text {\n  opacity: 0;\n  transition: opacity 0.15s ease-in;\n  font-style: italic;\n}\n.json-formatter-dark.json-formatter-row:hover > a > .json-formatter-preview-text {\n  opacity: 0.6;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > .json-formatter-toggler-link .json-formatter-toggler:after {\n  transform: rotate(90deg);\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > .json-formatter-children:after {\n  display: inline-block;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > a > .json-formatter-preview-text {\n  display: none;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open.json-formatter-empty:after {\n  display: block;\n}\n", "", {"version":3,"sources":["/./src/style.less","/./src/style.less"],"names":[],"mappings":"AA0GA;EA3FE,uBAAA;CCbD;ADcC;;;EACE,aAAA;EACA,sBAAA;CCVH;ADkGD;EApFI,kBAAA;CCXH;ADeG;EACE,aAAA;EACA,kBAAA;CCbL;ADeK;EAAU,cAAA;CCZf;ADaK;EAAgC,yBAAA;CCVrC;ADWK;EAA+B,cAAA;CCRpC;ADkFD;EArEI,aAAA;EACA,iBAAA;EACA,sBAAA;CCVH;AD6ED;EAjE2B,YAAA;CCT1B;AD0ED;EAhE4B,WAAA;CCP3B;ADuED;EA/DyB,eAAA;CCLxB;ADoED;EA9D8B,eAAA;CCH7B;ADiED;EA7D6B,eAAA;CCD5B;AD8DD;EA5DyB,sCAAA;CCCxB;AD2DD;EA1DI,2BAAA;EACA,YAAA;EACA,gBAAA;CCEH;ADsDD;EArD4B,YAAA;CCE3B;ADmDD;EAnDI,eAAA;EACA,gBAAA;EACA,sBAAA;CCGH;AD8CD;EA9CI,gBAAA;CCGH;AD2CD;EA1CI,oBAAA;EACA,kBAAA;EACA,uBAAA;EACA,aAAA;EACA,gBAAA;EACA,sBAAA;CCEH;ADAG;EACE,sBAAA;EACA,oCAAA;EACA,iBAAA;CCEL;AD8BD;EA1BI,WAAA;EACA,kCAAA;EACA,mBAAA;CCDH;ADGC;EACE,aAAA;CCDH;ADKC;EAEI,yBAAA;CCJL;ADEC;EAKI,sBAAA;CCJL;ADDC;EAQI,cAAA;CCJL;ADMG;EACE,eAAA;CCJL;ADeD;EAhGE,uBAAA;CCoFD;ADnFC;;;EACE,aAAA;EACA,sBAAA;CCuFH;ADMD;EAzFI,kBAAA;CCsFH;ADlFG;EACE,aAAA;EACA,kBAAA;CCoFL;ADlFK;EAAU,cAAA;CCqFf;ADpFK;EAAgC,yBAAA;CCuFrC;ADtFK;EAA+B,cAAA;CCyFpC;ADVD;EA1EI,eAAA;EACA,iBAAA;EACA,sBAAA;CCuFH;ADfD;EAtE2B,eAAA;CCwF1B;ADlBD;EArE4B,eAAA;CC0F3B;ADrBD;EApEyB,eAAA;CC4FxB;ADxBD;EAnE8B,eAAA;CC8F7B;AD3BD;EAlE6B,eAAA;CCgG5B;AD9BD;EAjEyB,4CAAA;CCkGxB;ADjCD;EA/DI,2BAAA;EACA,eAAA;EACA,gBAAA;CCmGH;ADtCD;EA1D4B,eAAA;CCmG3B;ADzCD;EAxDI,eAAA;EACA,gBAAA;EACA,sBAAA;CCoGH;AD9CD;EAnDI,gBAAA;CCoGH;ADjDD;EA/CI,oBAAA;EACA,kBAAA;EACA,uBAAA;EACA,aAAA;EACA,gBAAA;EACA,sBAAA;CCmGH;ADjGG;EACE,sBAAA;EACA,oCAAA;EACA,iBAAA;CCmGL;AD9DD;EA/BI,WAAA;EACA,kCAAA;EACA,mBAAA;CCgGH;AD9FC;EACE,aAAA;CCgGH;AD5FC;EAEI,yBAAA;CC6FL;AD/FC;EAKI,sBAAA;CC6FL;ADlGC;EAQI,cAAA;CC6FL;AD3FG;EACE,eAAA;CC6FL","file":"style.less","sourcesContent":[".theme(\n  @default-color: black,\n  @string-color: green,\n  @number-color: blue,\n  @boolean-color: red,\n  @null-color: #855A00,\n  @undefined-color: rgb(202, 11, 105),\n  @function-color: #FF20ED,\n  @rotate-time: 100ms,\n  @toggler-opacity: 0.6,\n  @toggler-color: #45376F,\n  @bracket-color: blue,\n  @key-color: #00008B,\n  @url-color: blue ){\n\n  font-family: monospace;\n  &, a, a:hover {\n    color: @default-color;\n    text-decoration: none;\n  }\n\n  .json-formatter-row {\n    margin-left: 1rem;\n  }\n\n  .json-formatter-children {\n    &.json-formatter-empty {\n      opacity: 0.5;\n      margin-left: 1rem;\n\n      &:after { display: none; }\n      &.json-formatter-object:after { content: \"No properties\"; }\n      &.json-formatter-array:after { content: \"[]\"; }\n    }\n  }\n\n  .json-formatter-string {\n    color: @string-color;\n    white-space: pre;\n    word-wrap: break-word;\n  }\n  .json-formatter-number { color: @number-color; }\n  .json-formatter-boolean { color: @boolean-color; }\n  .json-formatter-null { color: @null-color; }\n  .json-formatter-undefined { color: @undefined-color; }\n  .json-formatter-function { color: @function-color; }\n  .json-formatter-date { background-color: fade(@default-color, 5%); }\n  .json-formatter-url {\n    text-decoration: underline;\n    color: @url-color;\n    cursor: pointer;\n  }\n\n  .json-formatter-bracket { color: @bracket-color; }\n  .json-formatter-key {\n    color: @key-color;\n    cursor: pointer;\n    padding-right: 0.2rem;\n  }\n  .json-formatter-constructor-name {\n    cursor: pointer;\n  }\n\n  .json-formatter-toggler {\n    line-height: 1.2rem;\n    font-size: 0.7rem;\n    vertical-align: middle;\n    opacity: @toggler-opacity;\n    cursor: pointer;\n    padding-right: 0.2rem;\n\n    &:after {\n      display: inline-block;\n      transition: transform @rotate-time ease-in;\n      content: \"►\";\n    }\n  }\n\n  // Inline preview on hover (optional)\n  > a > .json-formatter-preview-text {\n    opacity: 0;\n    transition: opacity .15s ease-in;\n    font-style: italic;\n  }\n  &:hover > a > .json-formatter-preview-text {\n    opacity: 0.6;\n  }\n\n  // Open state\n  &.json-formatter-open {\n    > .json-formatter-toggler-link .json-formatter-toggler:after{\n      transform: rotate(90deg);\n    }\n    > .json-formatter-children:after {\n      display: inline-block;\n    }\n    > a > .json-formatter-preview-text {\n      display: none;\n    }\n    &.json-formatter-empty:after {\n      display: block;\n    }\n  }\n}\n\n// Default theme\n.json-formatter-row {\n  .theme();\n}\n\n// Dark theme\n.json-formatter-dark.json-formatter-row {\n  .theme(\n    @default-color: white,\n    @string-color: #31F031,\n    @number-color: #66C2FF,\n    @boolean-color: #EC4242,\n    @null-color: #EEC97D,\n    @undefined-color: rgb(239, 143, 190),\n    @function-color: #FD48CB,\n    @rotate-time: 100ms,\n    @toggler-opacity: 0.6,\n    @toggler-color: #45376F,\n    @bracket-color: #9494FF,\n    @key-color: #23A0DB,\n    @url-color: #027BFF);\n}\n",".json-formatter-row {\n  font-family: monospace;\n}\n.json-formatter-row,\n.json-formatter-row a,\n.json-formatter-row a:hover {\n  color: black;\n  text-decoration: none;\n}\n.json-formatter-row .json-formatter-row {\n  margin-left: 1rem;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty {\n  opacity: 0.5;\n  margin-left: 1rem;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty:after {\n  display: none;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-object:after {\n  content: \"No properties\";\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-array:after {\n  content: \"[]\";\n}\n.json-formatter-row .json-formatter-string {\n  color: green;\n  white-space: pre;\n  word-wrap: break-word;\n}\n.json-formatter-row .json-formatter-number {\n  color: blue;\n}\n.json-formatter-row .json-formatter-boolean {\n  color: red;\n}\n.json-formatter-row .json-formatter-null {\n  color: #855A00;\n}\n.json-formatter-row .json-formatter-undefined {\n  color: #ca0b69;\n}\n.json-formatter-row .json-formatter-function {\n  color: #FF20ED;\n}\n.json-formatter-row .json-formatter-date {\n  background-color: rgba(0, 0, 0, 0.05);\n}\n.json-formatter-row .json-formatter-url {\n  text-decoration: underline;\n  color: blue;\n  cursor: pointer;\n}\n.json-formatter-row .json-formatter-bracket {\n  color: blue;\n}\n.json-formatter-row .json-formatter-key {\n  color: #00008B;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-row .json-formatter-constructor-name {\n  cursor: pointer;\n}\n.json-formatter-row .json-formatter-toggler {\n  line-height: 1.2rem;\n  font-size: 0.7rem;\n  vertical-align: middle;\n  opacity: 0.6;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-row .json-formatter-toggler:after {\n  display: inline-block;\n  transition: transform 100ms ease-in;\n  content: \"►\";\n}\n.json-formatter-row > a > .json-formatter-preview-text {\n  opacity: 0;\n  transition: opacity 0.15s ease-in;\n  font-style: italic;\n}\n.json-formatter-row:hover > a > .json-formatter-preview-text {\n  opacity: 0.6;\n}\n.json-formatter-row.json-formatter-open > .json-formatter-toggler-link .json-formatter-toggler:after {\n  transform: rotate(90deg);\n}\n.json-formatter-row.json-formatter-open > .json-formatter-children:after {\n  display: inline-block;\n}\n.json-formatter-row.json-formatter-open > a > .json-formatter-preview-text {\n  display: none;\n}\n.json-formatter-row.json-formatter-open.json-formatter-empty:after {\n  display: block;\n}\n.json-formatter-dark.json-formatter-row {\n  font-family: monospace;\n}\n.json-formatter-dark.json-formatter-row,\n.json-formatter-dark.json-formatter-row a,\n.json-formatter-dark.json-formatter-row a:hover {\n  color: white;\n  text-decoration: none;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-row {\n  margin-left: 1rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty {\n  opacity: 0.5;\n  margin-left: 1rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty:after {\n  display: none;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-object:after {\n  content: \"No properties\";\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-array:after {\n  content: \"[]\";\n}\n.json-formatter-dark.json-formatter-row .json-formatter-string {\n  color: #31F031;\n  white-space: pre;\n  word-wrap: break-word;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-number {\n  color: #66C2FF;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-boolean {\n  color: #EC4242;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-null {\n  color: #EEC97D;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-undefined {\n  color: #ef8fbe;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-function {\n  color: #FD48CB;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-date {\n  background-color: rgba(255, 255, 255, 0.05);\n}\n.json-formatter-dark.json-formatter-row .json-formatter-url {\n  text-decoration: underline;\n  color: #027BFF;\n  cursor: pointer;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-bracket {\n  color: #9494FF;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-key {\n  color: #23A0DB;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-constructor-name {\n  cursor: pointer;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-toggler {\n  line-height: 1.2rem;\n  font-size: 0.7rem;\n  vertical-align: middle;\n  opacity: 0.6;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-toggler:after {\n  display: inline-block;\n  transition: transform 100ms ease-in;\n  content: \"►\";\n}\n.json-formatter-dark.json-formatter-row > a > .json-formatter-preview-text {\n  opacity: 0;\n  transition: opacity 0.15s ease-in;\n  font-style: italic;\n}\n.json-formatter-dark.json-formatter-row:hover > a > .json-formatter-preview-text {\n  opacity: 0.6;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > .json-formatter-toggler-link .json-formatter-toggler:after {\n  transform: rotate(90deg);\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > .json-formatter-children:after {\n  display: inline-block;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > a > .json-formatter-preview-text {\n  display: none;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open.json-formatter-empty:after {\n  display: block;\n}\n"],"sourceRoot":"webpack://"}]);
-
+	
 	// exports
 
 
@@ -58338,7 +58349,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// css base code, injected by the css-loader
 	module.exports = function() {
 		var list = [];
-
+	
 		// return the list of modules as css string
 		list.toString = function toString() {
 			var result = [];
@@ -58352,7 +58363,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 			return result.join("");
 		};
-
+	
 		// import a list of modules into the list
 		list.i = function(modules, mediaQuery) {
 			if(typeof modules === "string")
@@ -58408,23 +58419,23 @@ return /******/ (function(modules) { // webpackBootstrap
 		singletonElement = null,
 		singletonCounter = 0,
 		styleElementsInsertedAtTop = [];
-
+	
 	module.exports = function(list, options) {
 		if(false) {
 			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
 		}
-
+	
 		options = options || {};
 		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
 		// tags it will allow on a page
 		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
-
+	
 		// By default, add <style> tags to the bottom of <head>.
 		if (typeof options.insertAt === "undefined") options.insertAt = "bottom";
-
+	
 		var styles = listToStyles(list);
 		addStylesToDom(styles, options);
-
+	
 		return function update(newList) {
 			var mayRemove = [];
 			for(var i = 0; i < styles.length; i++) {
@@ -58447,7 +58458,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		};
 	}
-
+	
 	function addStylesToDom(styles, options) {
 		for(var i = 0; i < styles.length; i++) {
 			var item = styles[i];
@@ -58469,7 +58480,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		}
 	}
-
+	
 	function listToStyles(list) {
 		var styles = [];
 		var newStyles = {};
@@ -58487,7 +58498,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 		return styles;
 	}
-
+	
 	function insertStyleElement(options, styleElement) {
 		var head = getHeadElement();
 		var lastStyleElementInsertedAtTop = styleElementsInsertedAtTop[styleElementsInsertedAtTop.length - 1];
@@ -58506,7 +58517,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
 		}
 	}
-
+	
 	function removeStyleElement(styleElement) {
 		styleElement.parentNode.removeChild(styleElement);
 		var idx = styleElementsInsertedAtTop.indexOf(styleElement);
@@ -58514,24 +58525,24 @@ return /******/ (function(modules) { // webpackBootstrap
 			styleElementsInsertedAtTop.splice(idx, 1);
 		}
 	}
-
+	
 	function createStyleElement(options) {
 		var styleElement = document.createElement("style");
 		styleElement.type = "text/css";
 		insertStyleElement(options, styleElement);
 		return styleElement;
 	}
-
+	
 	function createLinkElement(options) {
 		var linkElement = document.createElement("link");
 		linkElement.rel = "stylesheet";
 		insertStyleElement(options, linkElement);
 		return linkElement;
 	}
-
+	
 	function addStyle(obj, options) {
 		var styleElement, update, remove;
-
+	
 		if (options.singleton) {
 			var styleIndex = singletonCounter++;
 			styleElement = singletonElement || (singletonElement = createStyleElement(options));
@@ -58557,9 +58568,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				removeStyleElement(styleElement);
 			};
 		}
-
+	
 		update(obj);
-
+	
 		return function updateStyle(newObj) {
 			if(newObj) {
 				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
@@ -58570,19 +58581,19 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		};
 	}
-
+	
 	var replaceText = (function () {
 		var textStore = [];
-
+	
 		return function (index, replacement) {
 			textStore[index] = replacement;
 			return textStore.filter(Boolean).join('\n');
 		};
 	})();
-
+	
 	function applyToSingletonTag(styleElement, index, remove, obj) {
 		var css = remove ? "" : obj.css;
-
+	
 		if (styleElement.styleSheet) {
 			styleElement.styleSheet.cssText = replaceText(index, css);
 		} else {
@@ -58596,15 +58607,15 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		}
 	}
-
+	
 	function applyToTag(styleElement, obj) {
 		var css = obj.css;
 		var media = obj.media;
-
+	
 		if(media) {
 			styleElement.setAttribute("media", media)
 		}
-
+	
 		if(styleElement.styleSheet) {
 			styleElement.styleSheet.cssText = css;
 		} else {
@@ -58614,22 +58625,22 @@ return /******/ (function(modules) { // webpackBootstrap
 			styleElement.appendChild(document.createTextNode(css));
 		}
 	}
-
+	
 	function updateLink(linkElement, obj) {
 		var css = obj.css;
 		var sourceMap = obj.sourceMap;
-
+	
 		if(sourceMap) {
             // https://developer.mozilla.org/en/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
 			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
 		}
-
+	
 		var blob = new Blob([css], { type: "text/css" });
-
+	
 		var oldSrc = linkElement.href;
-
+	
 		linkElement.href = URL.createObjectURL(blob);
-
+	
 		if(oldSrc)
 			URL.revokeObjectURL(oldSrc);
 	}

@@ -20,13 +20,18 @@
 #include "audiocatsisocatworker.h"
 
 MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker, Message)
+MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgReportFrequency, Message)
 
 AudioCATSISOCATWorker::AudioCATSISOCATWorker(QObject* parent) :
     QObject(parent),
     m_inputMessageQueueToGUI(nullptr),
+    m_inputMessageQueueToSISO(nullptr),
     m_running(false),
-    m_connected(false)
+    m_connected(false),
+    m_ptt(false),
+    m_frequency(0)
 {
+    rig_set_debug(RIG_DEBUG_ERR);
 }
 
 AudioCATSISOCATWorker::~AudioCATSISOCATWorker()
@@ -60,6 +65,20 @@ void AudioCATSISOCATWorker::applySettings(const AudioCATSISOSettings& settings, 
         << " force:" << force
         << settings.getDebugString(settingsKeys, force);
 
+    if (settingsKeys.contains("rxCenterFrequency") || force)
+    {
+        if (!m_ptt) {
+            catSetFrequency(settings.m_rxCenterFrequency);
+        }
+    }
+
+    if (settingsKeys.contains("txCenterFrequency") || force)
+    {
+        if (m_ptt) {
+            catSetFrequency(settings.m_txCenterFrequency);
+        }
+    }
+
     if (force) {
         m_settings = settings;
     } else {
@@ -85,6 +104,14 @@ bool AudioCATSISOCATWorker::handleMessage(const Message& message)
         } else {
             catDisconnect();
         }
+
+        return true;
+    }
+    else if (AudioCATSISOSettings::MsgPTT::match(message))
+    {
+        AudioCATSISOSettings::MsgPTT& cmd = (AudioCATSISOSettings::MsgPTT&) message;
+        m_ptt = cmd.getPTT();
+        catPTT(m_ptt);
 
         return true;
     }
@@ -140,6 +167,8 @@ void AudioCATSISOCATWorker::catConnect()
     if (retcode == RIG_OK)
     {
         m_connected = true;
+        connect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(pollingTick()));
+        m_pollTimer.start(m_settings.m_catPollingMs);
         msg = AudioCATSISOSettings::MsgCATReportStatus::create(AudioCATSISOSettings::MsgCATReportStatus::StatusConnected);
     }
     else
@@ -157,6 +186,9 @@ void AudioCATSISOCATWorker::catConnect()
 
 void AudioCATSISOCATWorker::catDisconnect()
 {
+    disconnect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(pollingTick()));
+    m_pollTimer.stop();
+    m_connected = false;
 	rig_close(m_rig); /* close port */
 	rig_cleanup(m_rig); /* if you care about memory */
 
@@ -166,5 +198,103 @@ void AudioCATSISOCATWorker::catDisconnect()
             AudioCATSISOSettings::MsgCATReportStatus::StatusNone
         );
         m_inputMessageQueueToGUI->push(msg);
+    }
+}
+
+void AudioCATSISOCATWorker::catPTT(bool ptt)
+{
+    if (!m_connected) {
+        return;
+    }
+
+    if (m_ptt)
+    {
+        if (m_settings.m_txCenterFrequency != m_frequency) {
+            catSetFrequency(m_settings.m_txCenterFrequency);
+        }
+    }
+    else
+    {
+        if (m_settings.m_rxCenterFrequency != m_frequency) {
+            catSetFrequency(m_settings.m_rxCenterFrequency);
+        }
+    }
+
+    int retcode = rig_set_ptt(m_rig, RIG_VFO_CURR, ptt ? RIG_PTT_ON : RIG_PTT_OFF);
+
+    if (retcode != RIG_OK)
+    {
+        if (m_inputMessageQueueToGUI)
+        {
+            AudioCATSISOSettings::MsgCATReportStatus *msg = AudioCATSISOSettings::MsgCATReportStatus::create(
+                AudioCATSISOSettings::MsgCATReportStatus::StatusError
+            );
+            m_inputMessageQueueToGUI->push(msg);
+        }
+    }
+}
+
+void AudioCATSISOCATWorker::catSetFrequency(uint64_t frequency)
+{
+    if (!m_connected) {
+        return;
+    }
+
+    qDebug("AudioCATSISOCATWorker::catSetFrequency: %lu", frequency);
+    int retcode = rig_set_freq(m_rig, RIG_VFO_CURR, frequency);
+
+    if (retcode != RIG_OK)
+    {
+        m_frequency = frequency;
+
+        if (m_inputMessageQueueToGUI)
+        {
+            AudioCATSISOSettings::MsgCATReportStatus *msg = AudioCATSISOSettings::MsgCATReportStatus::create(
+                AudioCATSISOSettings::MsgCATReportStatus::StatusError
+            );
+            m_inputMessageQueueToGUI->push(msg);
+        }
+    }
+}
+
+void AudioCATSISOCATWorker::pollingTick()
+{
+    if (!m_connected) {
+        return;
+    }
+
+    freq_t freq; // double
+    int retcode = rig_get_freq(m_rig, RIG_VFO_CURR, &freq);
+
+    if (retcode == RIG_OK)
+    {
+        if (m_frequency != freq)
+        {
+            qDebug("AudioCATSISOCATWorker::pollingTick: %lu", m_frequency);
+
+            if (m_inputMessageQueueToSISO)
+            {
+                MsgReportFrequency *msgFreq = MsgReportFrequency::create(freq);
+                m_inputMessageQueueToSISO->push(msgFreq);
+            }
+
+            m_frequency = freq;
+        }
+
+        if (m_inputMessageQueueToGUI)
+        {
+            AudioCATSISOSettings::MsgCATReportStatus *msgStatus =
+                AudioCATSISOSettings::MsgCATReportStatus::create(AudioCATSISOSettings::MsgCATReportStatus::StatusConnected);
+            m_inputMessageQueueToGUI->push(msgStatus);
+        }
+    }
+    else
+    {
+        if (m_inputMessageQueueToGUI)
+        {
+            AudioCATSISOSettings::MsgCATReportStatus *msgStatus =
+                AudioCATSISOSettings::MsgCATReportStatus::create(AudioCATSISOSettings::MsgCATReportStatus::StatusError);
+            m_inputMessageQueueToGUI->push(msgStatus);
+        }
     }
 }

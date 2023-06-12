@@ -21,6 +21,8 @@
 #include <hamlib/rig.h>
 
 #include <QObject>
+#include <QTimer>
+
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "audiocatsisosettings.h"
@@ -54,6 +56,25 @@ public:
 		{ }
 	};
 
+    class MsgReportFrequency : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        uint64_t getFrequency() const { return m_frequency; }
+
+        static MsgReportFrequency* create(uint64_t frequency) {
+            return new MsgReportFrequency(frequency);
+        }
+
+    protected:
+        uint64_t m_frequency; //!< Frequency in Hz
+
+        MsgReportFrequency(uint64_t frequency) :
+            Message(),
+            m_frequency(frequency)
+        { }
+    };
+
     AudioCATSISOCATWorker(QObject* parent = nullptr);
     ~AudioCATSISOCATWorker();
 
@@ -61,22 +82,30 @@ public:
     void stopWork();
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToGUI(MessageQueue *queue) { m_inputMessageQueueToGUI = queue; }
+    void setMessageQueueToSISO(MessageQueue *queue) { m_inputMessageQueueToSISO = queue; }
 
 private:
     void applySettings(const AudioCATSISOSettings& settings, const QList<QString>& settingsKeys, bool force);
     bool handleMessage(const Message& message);
     void catConnect();
     void catDisconnect();
+    void catPTT(bool ptt);
+    void catSetFrequency(uint64_t frequency);
 
     MessageQueue m_inputMessageQueue;
     MessageQueue *m_inputMessageQueueToGUI;
+    MessageQueue *m_inputMessageQueueToSISO;
     bool m_running;
     bool m_connected;
     AudioCATSISOSettings m_settings;
     RIG *m_rig;
+    QTimer m_pollTimer;
+    bool m_ptt;
+    uint64_t m_frequency;
 
 private slots:
     void handleInputMessages();
+    void pollingTick();
 };
 
 
