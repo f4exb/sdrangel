@@ -146,8 +146,11 @@ void AudioCATOutputWorker::callbackPart(SampleVector& data, unsigned int iBegin,
 {
     for (unsigned int i = iBegin; i < iEnd; i++)
     {
-        m_audioBuffer[m_audioBufferFill].l = (m_iqMapping == AudioCATSISOSettings::LR ? data[i].m_real : data[i].m_imag) * m_volume;
-        m_audioBuffer[m_audioBufferFill].r = (m_iqMapping == AudioCATSISOSettings::LR ? data[i].m_imag : data[i].m_real) * m_volume;
+
+        m_audioBuffer[m_audioBufferFill].l =
+            ((m_iqMapping == AudioCATSISOSettings::LR || m_iqMapping == AudioCATSISOSettings::L) ? data[i].m_real : data[i].m_imag) * m_volume;
+        m_audioBuffer[m_audioBufferFill].r =
+            ((m_iqMapping == AudioCATSISOSettings::LR || m_iqMapping == AudioCATSISOSettings::R) ? data[i].m_imag : data[i].m_real) * m_volume;
         m_audioBufferFill++;
 
         if (m_audioBufferFill >= m_audioBuffer.size())

@@ -790,6 +790,16 @@
          <string>I=R, Q=L</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Mono L</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Mono R</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>

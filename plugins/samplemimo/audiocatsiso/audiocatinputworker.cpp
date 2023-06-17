@@ -31,8 +31,7 @@ AudioCATInputWorker::AudioCATInputWorker(SampleMIFifo* sampleFifo, AudioFifo *fi
     m_log2Decim(0),
     m_iqMapping(AudioCATSISOSettings::IQMapping::L),
     m_convertBuffer(m_convBufSamples),
-    m_sampleFifo(sampleFifo),
-    m_quNCOPhase(0)
+    m_sampleFifo(sampleFifo)
 {
 }
 
@@ -60,31 +59,10 @@ void AudioCATInputWorker::workIQ(unsigned int nbRead)
     {
         for (uint32_t i = 0; i < nbRead; i++)
         {
-            qint16 r = m_buf[i*2 + (m_iqMapping == AudioCATSISOSettings::IQMapping::R ? 1 : 0)]; // real sample
-
-            if (m_quNCOPhase == 0) // 0
-            {
-                m_buf[i*2]   = r;  // 1
-                m_buf[i*2+1] = 0;  // 0
-                m_quNCOPhase = 1;  // next phase
-            }
-            else if (m_quNCOPhase == 1) // -pi/2
-            {
-                m_buf[i*2]   = 0;  // 0
-                m_buf[i*2+1] = -r; // -1
-                m_quNCOPhase = 2;  // next phase
-            }
-            else if (m_quNCOPhase == 2) // pi or -pi
-            {
-                m_buf[i*2]   = -r; // -1
-                m_buf[i*2+1] = 0;  // 0
-                m_quNCOPhase = 3;  // next phase
-            }
-            else if (m_quNCOPhase == 3) // pi/2
-            {
-                m_buf[i*2]   = 0;  // 0
-                m_buf[i*2+1] = r;  // 1
-                m_quNCOPhase = 0;  // next phase
+            if (m_iqMapping == AudioCATSISOSettings::IQMapping::L) {
+                m_buf[i*2+1] = m_buf[i*2];
+            } else {
+                m_buf[i*2] = m_buf[i*2+1];
             }
         }
     }

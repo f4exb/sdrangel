@@ -76,7 +76,7 @@ private:
     void displayCatDevice();
     void displayCatType();
     void updateTxEnable();
-    void updateSpectrum();
+    void updateSpectrum(bool rxElseTx);
     void updateCATStatus(AudioCATSISOSettings::MsgCATReportStatus::Status status);
 	void sendSettings();
 	void setCenterFrequency(qint64 centerFrequency);

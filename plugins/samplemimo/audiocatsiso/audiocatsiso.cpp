@@ -523,6 +523,8 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
 
     if (settingsKeys.contains("rxIQMapping") || force)
     {
+        forwardRxChange = true;
+
         if (m_rxRunning) {
             m_inputWorker->setIQMapping(settings.m_rxIQMapping);
         }
@@ -530,6 +532,8 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
 
     if (settingsKeys.contains("txIQMapping") || force)
     {
+        forwardTxChange = true;
+
         if (m_txRunning) {
             m_outputWorker->setIQMapping(settings.m_txIQMapping);
         }
@@ -579,7 +583,15 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
 
     if (forwardRxChange)
     {
-        DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(m_rxSampleRate, settings.m_rxCenterFrequency, true, 0);
+        bool realElseComplex = (m_settings.m_rxIQMapping == AudioCATSISOSettings::L)
+            || (m_settings.m_rxIQMapping == AudioCATSISOSettings::R);
+        DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(
+            m_rxSampleRate / (1<<m_settings.m_log2Decim),
+            settings.m_rxCenterFrequency,
+            true,
+            0,
+            realElseComplex
+        );
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -589,7 +601,15 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
             m_outputWorker->setSamplerate(m_txSampleRate);
         }
 
-        DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(m_txSampleRate, settings.m_txCenterFrequency, false, 0);
+        bool realElseComplex = (m_settings.m_txIQMapping == AudioCATSISOSettings::L)
+            || (m_settings.m_txIQMapping == AudioCATSISOSettings::R);
+        DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(
+            m_txSampleRate,
+            settings.m_txCenterFrequency,
+            false,
+            0,
+            realElseComplex
+        );
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 }
