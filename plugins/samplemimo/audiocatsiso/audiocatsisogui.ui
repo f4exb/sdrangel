@@ -181,6 +181,26 @@
       </widget>
      </item>
      <item>
+      <widget class="ButtonSwitch" name="pttSpectrumLink">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Toggles PTT switches spectrum view</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/link.png</normaloff>:/link.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_7">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

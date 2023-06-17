@@ -106,6 +106,7 @@ struct AudioCATSISOSettings {
     qint64  m_transverterDeltaFrequency;
     bool    m_iqOrder;
     bool    m_txEnable;
+    bool    m_pttSpectrumLink;
 
     QString      m_rxDeviceName;       // Including realm, as from getFullDeviceName below
     IQMapping    m_rxIQMapping;

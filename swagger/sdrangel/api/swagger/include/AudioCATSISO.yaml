@@ -24,6 +24,12 @@ AudioCATSISOSettings:
         Enable or disable transmission
           * 0 - Disable transmission
           * 1 - Enable transmission
+    pttSpectrumLink:
+      type: integer
+      description: >
+        Main spectrum display (Rx/Tx) follows PTT (GUI)
+          * 0 - Disable PTT following
+          * 1 - Enable PTT following
     rxDeviceName:
       description: The name of the input audio device
       type: string
@@ -122,6 +128,9 @@ AudioCATSISOSettings:
         CAT RTS control
           * 0 - low
           * 1 - high (default)
+    catPollingMs:
+      type: integer
+      description: CAT frequency polling interval in milliseconds
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

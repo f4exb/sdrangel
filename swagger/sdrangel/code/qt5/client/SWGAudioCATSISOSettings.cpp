@@ -40,6 +40,8 @@ SWGAudioCATSISOSettings::SWGAudioCATSISOSettings() {
     m_iq_order_isSet = false;
     tx_enable = 0;
     m_tx_enable_isSet = false;
+    ptt_spectrum_link = 0;
+    m_ptt_spectrum_link_isSet = false;
     rx_device_name = nullptr;
     m_rx_device_name_isSet = false;
     rx_iq_mapping = 0;
@@ -74,6 +76,8 @@ SWGAudioCATSISOSettings::SWGAudioCATSISOSettings() {
     m_cat_dtr_high_isSet = false;
     cat_rts_high = 0;
     m_cat_rts_high_isSet = false;
+    cat_polling_ms = 0;
+    m_cat_polling_ms_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -102,6 +106,8 @@ SWGAudioCATSISOSettings::init() {
     m_iq_order_isSet = false;
     tx_enable = 0;
     m_tx_enable_isSet = false;
+    ptt_spectrum_link = 0;
+    m_ptt_spectrum_link_isSet = false;
     rx_device_name = new QString("");
     m_rx_device_name_isSet = false;
     rx_iq_mapping = 0;
@@ -136,6 +142,8 @@ SWGAudioCATSISOSettings::init() {
     m_cat_dtr_high_isSet = false;
     cat_rts_high = 0;
     m_cat_rts_high_isSet = false;
+    cat_polling_ms = 0;
+    m_cat_polling_ms_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -154,6 +162,7 @@ SWGAudioCATSISOSettings::cleanup() {
 
 
 
+
     if(rx_device_name != nullptr) { 
         delete rx_device_name;
     }
@@ -166,6 +175,7 @@ SWGAudioCATSISOSettings::cleanup() {
     if(tx_device_name != nullptr) { 
         delete tx_device_name;
     }
+
 
 
 
@@ -206,6 +216,8 @@ SWGAudioCATSISOSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&tx_enable, pJson["txEnable"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&ptt_spectrum_link, pJson["pttSpectrumLink"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&rx_device_name, pJson["rxDeviceName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&rx_iq_mapping, pJson["rxIQMapping"], "qint32", "");
@@ -239,6 +251,8 @@ SWGAudioCATSISOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&cat_dtr_high, pJson["catDTRHigh"], "qint32", "");
     
     ::SWGSDRangel::setValue(&cat_rts_high, pJson["catRTSHigh"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&cat_polling_ms, pJson["catPollingMs"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -281,6 +295,9 @@ SWGAudioCATSISOSettings::asJsonObject() {
     }
     if(m_tx_enable_isSet){
         obj->insert("txEnable", QJsonValue(tx_enable));
+    }
+    if(m_ptt_spectrum_link_isSet){
+        obj->insert("pttSpectrumLink", QJsonValue(ptt_spectrum_link));
     }
     if(rx_device_name != nullptr && *rx_device_name != QString("")){
         toJsonValue(QString("rxDeviceName"), rx_device_name, obj, QString("QString"));
@@ -332,6 +349,9 @@ SWGAudioCATSISOSettings::asJsonObject() {
     }
     if(m_cat_rts_high_isSet){
         obj->insert("catRTSHigh", QJsonValue(cat_rts_high));
+    }
+    if(m_cat_polling_ms_isSet){
+        obj->insert("catPollingMs", QJsonValue(cat_polling_ms));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -407,6 +427,16 @@ void
 SWGAudioCATSISOSettings::setTxEnable(qint32 tx_enable) {
     this->tx_enable = tx_enable;
     this->m_tx_enable_isSet = true;
+}
+
+qint32
+SWGAudioCATSISOSettings::getPttSpectrumLink() {
+    return ptt_spectrum_link;
+}
+void
+SWGAudioCATSISOSettings::setPttSpectrumLink(qint32 ptt_spectrum_link) {
+    this->ptt_spectrum_link = ptt_spectrum_link;
+    this->m_ptt_spectrum_link_isSet = true;
 }
 
 QString*
@@ -580,6 +610,16 @@ SWGAudioCATSISOSettings::setCatRtsHigh(qint32 cat_rts_high) {
 }
 
 qint32
+SWGAudioCATSISOSettings::getCatPollingMs() {
+    return cat_polling_ms;
+}
+void
+SWGAudioCATSISOSettings::setCatPollingMs(qint32 cat_polling_ms) {
+    this->cat_polling_ms = cat_polling_ms;
+    this->m_cat_polling_ms_isSet = true;
+}
+
+qint32
 SWGAudioCATSISOSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -642,6 +682,9 @@ SWGAudioCATSISOSettings::isSet(){
         if(m_tx_enable_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_ptt_spectrum_link_isSet){
+            isObjectUpdated = true; break;
+        }
         if(rx_device_name && *rx_device_name != QString("")){
             isObjectUpdated = true; break;
         }
@@ -691,6 +734,9 @@ SWGAudioCATSISOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_cat_rts_high_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_cat_polling_ms_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

@@ -79,6 +79,11 @@ void AudioCATSISOCATWorker::applySettings(const AudioCATSISOSettings& settings, 
         }
     }
 
+    if (settingsKeys.contains("catPollingMs") || force)
+    {
+        m_pollTimer.setInterval(settings.m_catPollingMs);
+    }
+
     if (force) {
         m_settings = settings;
     } else {
@@ -268,6 +273,7 @@ void AudioCATSISOCATWorker::pollingTick()
 
     if (retcode == RIG_OK)
     {
+        // qDebug("AudioCATSISOCATWorker::pollingTick: %f %lu", freq, m_frequency);
         if (m_frequency != freq)
         {
             qDebug("AudioCATSISOCATWorker::pollingTick: %lu", m_frequency);

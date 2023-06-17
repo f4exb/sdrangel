@@ -90,6 +90,7 @@ private slots:
     void on_streamLock_toggled(bool checked);
 	void on_startStop_toggled(bool checked);
     void on_ptt_toggled(bool checked);
+    void on_pttSpectrumLinkToggled(bool checked);
     void on_catConnect_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
     void on_log2Decim_currentIndexChanged(int index);

@@ -33,6 +33,7 @@ AudioCATSISOCATDialog::AudioCATSISOCATDialog(AudioCATSISOSettings& settings, QLi
     ui->pttMethod->blockSignals(true);
     ui->dtrHigh->blockSignals(true);
     ui->rtsHigh->blockSignals(true);
+    ui->pollingTime->blockSignals(true);
 
     ui->baudRate->setCurrentIndex(m_settings.m_catSpeedIndex);
     ui->handshake->setCurrentIndex(m_settings.m_catHandshakeIndex);
@@ -41,6 +42,7 @@ AudioCATSISOCATDialog::AudioCATSISOCATDialog(AudioCATSISOSettings& settings, QLi
     ui->pttMethod->setCurrentIndex(m_settings.m_catPTTMethodIndex);
     ui->dtrHigh->setCurrentIndex(m_settings.m_catDTRHigh ? 1 : 0);
     ui->rtsHigh->setCurrentIndex(m_settings.m_catRTSHigh ? 1 : 0);
+    ui->pollingTime->setValue(m_settings.m_catPollingMs);
 
     ui->baudRate->blockSignals(false);
     ui->handshake->blockSignals(false);
@@ -49,6 +51,7 @@ AudioCATSISOCATDialog::AudioCATSISOCATDialog(AudioCATSISOSettings& settings, QLi
     ui->pttMethod->blockSignals(false);
     ui->dtrHigh->blockSignals(false);
     ui->rtsHigh->blockSignals(false);
+    ui->pollingTime->blockSignals(false);
 }
 
 AudioCATSISOCATDialog::~AudioCATSISOCATDialog()
@@ -121,5 +124,14 @@ void AudioCATSISOCATDialog::on_rtsHigh_currentIndexChanged(int index)
 
     if (!m_settingsKeys.contains("catRTSHigh")) {
         m_settingsKeys.append("catRTSHigh");
+    }
+}
+
+void AudioCATSISOCATDialog::on_pollingTime_valueChanged(int value)
+{
+    m_settings.m_catPollingMs = value;
+
+    if (!m_settingsKeys.contains("catPollingMs")) {
+        m_settingsKeys.append("catPollingMs");
     }
 }

@@ -60,6 +60,9 @@ public:
     qint32 getTxEnable();
     void setTxEnable(qint32 tx_enable);
 
+    qint32 getPttSpectrumLink();
+    void setPttSpectrumLink(qint32 ptt_spectrum_link);
+
     QString* getRxDeviceName();
     void setRxDeviceName(QString* rx_device_name);
 
@@ -111,6 +114,9 @@ public:
     qint32 getCatRtsHigh();
     void setCatRtsHigh(qint32 cat_rts_high);
 
+    qint32 getCatPollingMs();
+    void setCatPollingMs(qint32 cat_polling_ms);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -144,6 +150,9 @@ private:
 
     qint32 tx_enable;
     bool m_tx_enable_isSet;
+
+    qint32 ptt_spectrum_link;
+    bool m_ptt_spectrum_link_isSet;
 
     QString* rx_device_name;
     bool m_rx_device_name_isSet;
@@ -195,6 +204,9 @@ private:
 
     qint32 cat_rts_high;
     bool m_cat_rts_high_isSet;
+
+    qint32 cat_polling_ms;
+    bool m_cat_polling_ms_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

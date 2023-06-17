@@ -156,6 +156,8 @@ bool AudioCATSISOGUI::deserialize(const QByteArray& data)
 
 void AudioCATSISOGUI::on_startStop_toggled(bool checked)
 {
+    ui->txEnable->setEnabled(!checked);
+
     if (m_doApplySettings)
     {
         AudioCATSISO::MsgStartStop *message = AudioCATSISO::MsgStartStop::create(checked);
@@ -165,8 +167,19 @@ void AudioCATSISOGUI::on_startStop_toggled(bool checked)
 
 void AudioCATSISOGUI::on_ptt_toggled(bool checked)
 {
+    if (m_settings.m_pttSpectrumLink) {
+        ui->streamSide->setCurrentIndex(checked ? 1 : 0);
+    }
+
     AudioCATSISOSettings::MsgPTT *msg = AudioCATSISOSettings::MsgPTT::create(checked);
     m_sampleMIMO->getInputMessageQueue()->push(msg);
+}
+
+void AudioCATSISOGUI::on_pttSpectrumLinkToggled(bool checked)
+{
+    m_settings.m_pttSpectrumLink = checked;
+    m_settingsKeys.append("pttSpectrumLink");
+    sendSettings();
 }
 
 void AudioCATSISOGUI::on_catConnect_toggled(bool checked)
@@ -408,10 +421,11 @@ void AudioCATSISOGUI::displaySettings()
     ui->dcBlock->setChecked(m_settings.m_dcBlock);
     ui->iqCorrection->setChecked(m_settings.m_iqCorrection);
     ui->txEnable->setChecked(m_settings.m_txEnable);
+    ui->pttSpectrumLink->setChecked(m_settings.m_pttSpectrumLink);
     ui->rxVolume->setValue((int)(m_settings.m_rxVolume*10.0f));
     ui->rxVolumeText->setText(QString("%1").arg(m_settings.m_rxVolume, 3, 'f', 1));
     ui->rxChannels->setCurrentIndex((int)m_settings.m_rxIQMapping);
-    ui->txVolume->setValue((int)(m_settings.m_txVolume*10.0f));
+    ui->txVolume->setValue((int)(m_settings.m_txVolume));
     ui->txVolumeText->setText(tr("%1").arg(m_settings.m_txVolume));
     ui->txChannels->setCurrentIndex((int)m_settings.m_txIQMapping);
     ui->fcPosRx->setCurrentIndex(m_settings.m_fcPosRx);
@@ -753,6 +767,7 @@ void AudioCATSISOGUI::makeUIConnections()
     QObject::connect(ui->dcBlock, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_dcBlock_toggled);
     QObject::connect(ui->iqCorrection, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_iqCorrection_toggled);
     QObject::connect(ui->txEnable, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_txEnable_toggled);
+    QObject::connect(ui->pttSpectrumLink, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_pttSpectrumLinkToggled);
     QObject::connect(ui->transverter, &TransverterButton::clicked, this, &AudioCATSISOGUI::on_transverter_clicked);
     QObject::connect(ui->rxDeviceSelect, &QPushButton::clicked, this, &AudioCATSISOGUI::on_rxDeviceSelect_clicked);
     QObject::connect(ui->txDeviceSelect, &QPushButton::clicked, this, &AudioCATSISOGUI::on_txDeviceSelect_clicked);

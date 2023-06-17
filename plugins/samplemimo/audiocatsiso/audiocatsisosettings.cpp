@@ -69,6 +69,8 @@ AudioCATSISOSettings::AudioCATSISOSettings()
 
 void AudioCATSISOSettings::resetToDefaults()
 {
+    m_txEnable = false;
+    m_pttSpectrumLink = true;
     m_rxCenterFrequency = 14200000;
     m_txCenterFrequency = 14200000;
     m_rxDeviceName = "";
@@ -100,6 +102,8 @@ void AudioCATSISOSettings::resetToDefaults()
 
 AudioCATSISOSettings::AudioCATSISOSettings(const AudioCATSISOSettings& other)
 {
+    m_txEnable = other.m_txEnable;
+    m_pttSpectrumLink = other.m_pttSpectrumLink;
     m_rxCenterFrequency = other.m_rxCenterFrequency;
     m_txCenterFrequency = other.m_txCenterFrequency;
     m_rxDeviceName = other.m_rxDeviceName;
@@ -112,7 +116,6 @@ AudioCATSISOSettings::AudioCATSISOSettings(const AudioCATSISOSettings& other)
     m_txDeviceName = other.m_txDeviceName;
     m_txVolume = other.m_txVolume;
     m_txIQMapping = other.m_txIQMapping;
-    m_txEnable = other.m_txEnable;
     m_catDevicePath = other.m_catDevicePath;
     m_hamlibModel = other.m_hamlibModel;
     m_catSpeedIndex = other.m_catSpeedIndex;
@@ -162,6 +165,7 @@ QByteArray AudioCATSISOSettings::serialize() const
     s.writeString(52, m_reverseAPIAddress);
     s.writeU32(53, m_reverseAPIPort);
     s.writeU32(54, m_reverseAPIDeviceIndex);
+    s.writeBool(56, m_pttSpectrumLink);
     s.writeBool(57, m_txEnable);
 
     return s.final();
@@ -221,6 +225,7 @@ bool AudioCATSISOSettings::deserialize(const QByteArray& data)
         d.readU32(54, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
+        d.readBool(56, &m_pttSpectrumLink, true);
         d.readBool(57, &m_txEnable, false);
 
         return true;
@@ -274,6 +279,9 @@ void AudioCATSISOSettings::applySettings(const QStringList& settingsKeys, const 
 
     if (settingsKeys.contains("txEnable")) {
         m_txEnable = settings.m_txEnable;
+    }
+    if (settingsKeys.contains("pttSpectrumLink")) {
+        m_pttSpectrumLink = settings.m_pttSpectrumLink;
     }
     if (settingsKeys.contains("catDevicePath")) {
         m_catDevicePath = settings.m_catDevicePath;
@@ -364,6 +372,9 @@ QString AudioCATSISOSettings::getDebugString(const QStringList& settingsKeys, bo
 
     if (settingsKeys.contains("txEnable") || force) {
         ostr << " m_txEnable: " << m_txEnable;
+    }
+    if (settingsKeys.contains("pttSpectrumLink") || force) {
+        ostr << " m_pttSpectrumLink: " << m_pttSpectrumLink;
     }
     if (settingsKeys.contains("catDevicePath") || force) {
         ostr << " m_catDevicePath: " << m_catDevicePath.toStdString();

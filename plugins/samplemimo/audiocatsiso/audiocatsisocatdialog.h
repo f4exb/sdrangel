@@ -44,6 +44,7 @@ private slots:
     void on_pttMethod_currentIndexChanged(int index);
     void on_dtrHigh_currentIndexChanged(int index);
     void on_rtsHigh_currentIndexChanged(int index);
+    void on_pollingTime_valueChanged(int value);
 
 private:
     Ui::AudioCATSISOCATDialog* ui;

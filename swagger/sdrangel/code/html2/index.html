@@ -2474,6 +2474,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Enable or disable transmission\n  * 0 - Disable transmission\n  * 1 - Enable transmission\n"
     },
+    "pttSpectrumLink" : {
+      "type" : "integer",
+      "description" : "Main spectrum display (Rx/Tx) follows PTT (GUI)\n  * 0 - Disable PTT following\n  * 1 - Enable PTT following\n"
+    },
     "rxDeviceName" : {
       "type" : "string",
       "description" : "The name of the input audio device"
@@ -2540,6 +2544,10 @@ margin-bottom: 20px;
     "catRTSHigh" : {
       "type" : "integer",
       "description" : "CAT RTS control\n  * 0 - low\n  * 1 - high (default)\n"
+    },
+    "catPollingMs" : {
+      "type" : "integer",
+      "description" : "CAT frequency polling interval in milliseconds"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -57798,7 +57806,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-06-12T01:13:22.125+02:00
+              Generated 2023-06-16T17:40:24.489+02:00
             </div>
           </div>
       </div>
