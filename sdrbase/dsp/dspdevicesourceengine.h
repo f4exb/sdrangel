@@ -92,6 +92,7 @@ private:
 
 	uint m_sampleRate;
 	quint64 m_centerFrequency;
+    bool m_realElseComplex;
 
 	bool m_dcOffsetCorrection;
 	bool m_iqImbalanceCorrection;

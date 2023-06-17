@@ -269,37 +269,43 @@ class SDRBASE_API DSPSignalNotification : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPSignalNotification(int samplerate, qint64 centerFrequency) :
+	DSPSignalNotification(int samplerate, qint64 centerFrequency, bool realElseComplex = false) :
 		Message(),
 		m_sampleRate(samplerate),
-		m_centerFrequency(centerFrequency)
+		m_centerFrequency(centerFrequency),
+        m_realElseComplex(realElseComplex)
 	{ }
 
 	int getSampleRate() const { return m_sampleRate; }
 	qint64 getCenterFrequency() const { return m_centerFrequency; }
+    bool getRealElseComplex() const { return m_realElseComplex; }
 
 private:
 	int m_sampleRate;
 	qint64 m_centerFrequency;
+    bool m_realElseComplex;
 };
 
 class SDRBASE_API DSPMIMOSignalNotification : public Message {
 	MESSAGE_CLASS_DECLARATION
 public:
-	DSPMIMOSignalNotification(int samplerate, qint64 centerFrequency, bool sourceOrSink, unsigned int index) :
+	DSPMIMOSignalNotification(int samplerate, qint64 centerFrequency, bool sourceOrSink, unsigned int index, bool realElseComplex = false) :
 		Message(),
 		m_sampleRate(samplerate),
 		m_centerFrequency(centerFrequency),
+        m_realElseComplex(realElseComplex),
 		m_sourceOrSink(sourceOrSink),
 		m_index(index)
 	{ }
 	int getSampleRate() const { return m_sampleRate; }
 	qint64 getCenterFrequency() const { return m_centerFrequency; }
+    bool getRealElseComplex() const { return m_realElseComplex; }
 	bool getSourceOrSink() const { return m_sourceOrSink; }
 	unsigned int getIndex() const { return m_index; }
 private:
 	int m_sampleRate;
 	qint64 m_centerFrequency;
+    bool m_realElseComplex;
 	bool m_sourceOrSink;
 	unsigned int m_index;
 };

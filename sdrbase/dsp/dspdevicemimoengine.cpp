@@ -399,7 +399,9 @@ void DSPDeviceMIMOEngine::workSampleSourceFifo(unsigned int streamIndex)
  */
 void DSPDeviceMIMOEngine::workSamplesSink(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int streamIndex)
 {
-	bool positiveOnly = false;
+    std::map<int, bool>::const_iterator rcIt = m_rxRealElseComplex.find(streamIndex);
+	bool positiveOnly = (rcIt == m_rxRealElseComplex.end() ? false : rcIt->second);
+
     // DC and IQ corrections
     // if (m_sourcesCorrections[streamIndex].m_dcOffsetCorrection) {
     //     iqCorrections(vbegin, vend, streamIndex, m_sourcesCorrections[streamIndex].m_iqImbalanceCorrection);
@@ -483,8 +485,11 @@ void DSPDeviceMIMOEngine::workSamplesSource(SampleVector& data, unsigned int iBe
     }
 
     // possibly feed data to spectrum sink
+    std::map<int, bool>::const_iterator rcIt = m_txRealElseComplex.find(streamIndex);
+	bool positiveOnly = (rcIt == m_txRealElseComplex.end() ? false : rcIt->second);
+
     if ((m_spectrumSink) && (!m_spectrumInputSourceElseSink) && (streamIndex == m_spectrumInputIndex)) {
-        m_spectrumSink->feed(begin, begin + nbSamples, false);
+        m_spectrumSink->feed(begin, begin + nbSamples, positiveOnly);
     }
 }
 
@@ -1173,12 +1178,20 @@ void DSPDeviceMIMOEngine::handleInputMessages()
             unsigned int istream = notif->getIndex();
 			int sampleRate = notif->getSampleRate();
 			qint64 centerFrequency = notif->getCenterFrequency();
+            bool realElseComplex = notif->getRealElseComplex();
 
 			qDebug() << "DeviceMIMOEngine::handleInputMessages: DSPMIMOSignalNotification:"
                 << " sourceElseSink: " << sourceElseSink
                 << " istream: " << istream
 				<< " sampleRate: " << sampleRate
-				<< " centerFrequency: " << centerFrequency;
+				<< " centerFrequency: " << centerFrequency
+                << " realElseComplex" << realElseComplex;
+
+            if (sourceElseSink) {
+                m_rxRealElseComplex[istream] = realElseComplex;
+            } else {
+                m_txRealElseComplex[istream] = realElseComplex;
+            }
 
             for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
             {

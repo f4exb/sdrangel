@@ -103,6 +103,7 @@ private:
 
 	uint32_t m_sampleRate;
 	quint64 m_centerFrequency;
+    bool m_realElseComplex;
     unsigned int m_sumIndex; //!< channel index when summing channels
 
 	void run();

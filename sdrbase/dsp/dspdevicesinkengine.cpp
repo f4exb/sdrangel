@@ -36,7 +36,8 @@ DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
 	m_basebandSampleSources(),
 	m_spectrumSink(nullptr),
 	m_sampleRate(0),
-	m_centerFrequency(0)
+	m_centerFrequency(0),
+    m_realElseComplex(false)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 	connect(&m_syncMessenger, SIGNAL(messageSent()), this, SLOT(handleSynchronousMessages()), Qt::QueuedConnection);
@@ -242,7 +243,7 @@ void DSPDeviceSinkEngine::workSamples(SampleVector& data, unsigned int iBegin, u
 
     // possibly feed data to spectrum sink
     if (m_spectrumSink) {
-        m_spectrumSink->feed(data.begin() + iBegin, data.begin() + iEnd, false);
+        m_spectrumSink->feed(data.begin() + iBegin, data.begin() + iEnd, m_realElseComplex);
     }
 }
 
@@ -515,10 +516,12 @@ void DSPDeviceSinkEngine::handleInputMessages()
 
 			m_sampleRate = notif->getSampleRate();
 			m_centerFrequency = notif->getCenterFrequency();
+            m_realElseComplex = notif->getRealElseComplex();
 
 			qDebug() << "DSPDeviceSinkEngine::handleInputMessages: DSPSignalNotification:"
 				<< " m_sampleRate: " << m_sampleRate
-				<< " m_centerFrequency: " << m_centerFrequency;
+				<< " m_centerFrequency: " << m_centerFrequency
+                << " m_realElseComplex" << m_realElseComplex;
 
             // forward source changes to sources with immediate execution
 

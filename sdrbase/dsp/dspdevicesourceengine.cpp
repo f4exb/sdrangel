@@ -35,6 +35,7 @@ DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
 	m_basebandSampleSinks(),
 	m_sampleRate(0),
 	m_centerFrequency(0),
+    m_realElseComplex(false),
 	m_dcOffsetCorrection(false),
 	m_iqImbalanceCorrection(false),
 	m_iOffset(0),
@@ -320,7 +321,7 @@ void DSPDeviceSourceEngine::work()
 {
 	SampleSinkFifo* sampleFifo = m_deviceSampleSource->getSampleFifo();
 	std::size_t samplesDone = 0;
-	bool positiveOnly = false;
+	bool positiveOnly = m_realElseComplex;
 
 	while ((sampleFifo->fill() > 0) && (m_inputMessageQueue.size() == 0) && (samplesDone < m_sampleRate))
 	{
@@ -335,14 +336,12 @@ void DSPDeviceSourceEngine::work()
 		if (part1begin != part1end)
 		{
 			// correct stuff
-            if (m_dcOffsetCorrection)
-            {
+            if (m_dcOffsetCorrection) {
                 iqCorrections(part1begin, part1end, m_iqImbalanceCorrection);
             }
 
 			// feed data to direct sinks
-			for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); ++it)
-			{
+			for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); ++it) {
 				(*it)->feed(part1begin, part1end, positiveOnly);
 			}
 
@@ -352,14 +351,12 @@ void DSPDeviceSourceEngine::work()
 		if(part2begin != part2end)
 		{
 			// correct stuff
-            if (m_dcOffsetCorrection)
-            {
+            if (m_dcOffsetCorrection) {
                 iqCorrections(part2begin, part2end, m_iqImbalanceCorrection);
             }
 
 			// feed data to direct sinks
-			for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++)
-			{
+			for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++) {
 				(*it)->feed(part2begin, part2end, positiveOnly);
 			}
 
@@ -655,6 +652,7 @@ void DSPDeviceSourceEngine::handleInputMessages()
 
 			m_sampleRate = notif->getSampleRate();
 			m_centerFrequency = notif->getCenterFrequency();
+            m_realElseComplex = notif->getRealElseComplex();
 
 			qDebug() << "DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification:"
 				<< " m_sampleRate: " << m_sampleRate

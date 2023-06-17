@@ -324,8 +324,10 @@ private:
 
 	typedef std::list<BasebandSampleSink*> BasebandSampleSinks;
 	std::vector<BasebandSampleSinks> m_basebandSampleSinks; //!< ancillary sample sinks on main thread (per input stream)
+    std::map<int, bool> m_rxRealElseComplex; //!< map of real else complex indicators for device sources (by input stream)
 	typedef std::list<BasebandSampleSource*> BasebandSampleSources;
 	std::vector<BasebandSampleSources> m_basebandSampleSources; //!< channel sample sources (per output stream)
+    std::map<int, bool> m_txRealElseComplex; //!< map of real else complex indicators for device sinks (by input stream)
     std::vector<IncrementalVector<Sample>> m_sourceSampleBuffers;
     std::vector<IncrementalVector<Sample>> m_sourceZeroBuffers;
     unsigned int m_sumIndex;            //!< channel index when summing channels
