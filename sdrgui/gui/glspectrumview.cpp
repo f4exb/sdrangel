@@ -2706,17 +2706,17 @@ void GLSpectrumView::applyChanges()
 
         if (m_sampleRate > 0)
         {
-            float scaleDiv = ((float)m_sampleRate / (float)m_timingRate) * (m_ssbSpectrum ? 2 : 1);
+            float timeScaleDiv = ((float)m_sampleRate / (float)m_timingRate) * (m_ssbSpectrum ? 2 : 1);
             float halfFFTSize = m_fftSize / 2;
 
             if (halfFFTSize > m_fftOverlap) {
-                scaleDiv *= halfFFTSize / (halfFFTSize - m_fftOverlap);
+                timeScaleDiv *= halfFFTSize / (halfFFTSize - m_fftOverlap);
             }
 
             if (!m_invertedWaterfall) {
-                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (m_waterfallHeight * m_fftSize) / scaleDiv, 0);
+                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (m_waterfallHeight * m_fftSize) / timeScaleDiv, 0);
             } else {
-                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 0, (m_waterfallHeight * m_fftSize) / scaleDiv);
+                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 0, (m_waterfallHeight * m_fftSize) / timeScaleDiv);
             }
         }
         else
@@ -2800,17 +2800,17 @@ void GLSpectrumView::applyChanges()
 
         if (m_sampleRate > 0)
         {
-            float scaleDiv = ((float)m_sampleRate / (float)m_timingRate) * (m_ssbSpectrum ? 2 : 1);
+            float timeScaleDiv = ((float)m_sampleRate / (float)m_timingRate) * (m_ssbSpectrum ? 2 : 1);
             float halfFFTSize = m_fftSize / 2;
 
             if (halfFFTSize > m_fftOverlap) {
-                scaleDiv *= halfFFTSize / (halfFFTSize - m_fftOverlap);
+                timeScaleDiv *= halfFFTSize / (halfFFTSize - m_fftOverlap);
             }
 
             if (!m_invertedWaterfall) {
-                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (m_waterfallHeight * m_fftSize) / scaleDiv, 0);
+                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (m_waterfallHeight * m_fftSize) / timeScaleDiv, 0);
             } else {
-                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 0, (m_waterfallHeight * m_fftSize) / scaleDiv);
+                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 0, (m_waterfallHeight * m_fftSize) / timeScaleDiv);
             }
         }
         else
@@ -2990,16 +2990,7 @@ void GLSpectrumView::applyChanges()
     // channel overlays
     int64_t centerFrequency;
     int frequencySpan;
-
-    if (m_frequencyZoomFactor == 1.0f)
-    {
-        centerFrequency = m_centerFrequency;
-        frequencySpan = m_sampleRate;
-    }
-    else
-    {
-        getFrequencyZoom(centerFrequency, frequencySpan);
-    }
+    getFrequencyZoom(centerFrequency, frequencySpan);
 
     for (int i = 0; i < m_channelMarkerStates.size(); ++i)
     {
@@ -4518,10 +4509,12 @@ void GLSpectrumView::setPowerScale(int height)
 
 void GLSpectrumView::getFrequencyZoom(int64_t& centerFrequency, int& frequencySpan)
 {
+    int adjSampleRate = m_ssbSpectrum ? m_sampleRate/2 : m_sampleRate;
+    qint64 adjCenterFrequency = m_centerFrequency + (m_ssbSpectrum ? m_sampleRate/4 : 0);
     frequencySpan = (m_frequencyZoomFactor == 1) ?
-        m_sampleRate : m_sampleRate * (1.0 / m_frequencyZoomFactor);
+        adjSampleRate : adjSampleRate * (1.0 / m_frequencyZoomFactor);
     centerFrequency = (m_frequencyZoomFactor == 1) ?
-        m_centerFrequency : (m_frequencyZoomPos - 0.5) * m_sampleRate + m_centerFrequency;
+        adjCenterFrequency : (m_frequencyZoomPos - 0.5) * adjSampleRate + adjCenterFrequency;
 }
 
 // void GLSpectrumView::updateFFTLimits()
