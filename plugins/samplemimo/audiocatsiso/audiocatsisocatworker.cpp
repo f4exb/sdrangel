@@ -19,6 +19,11 @@
 
 #include "audiocatsisocatworker.h"
 
+// Compatibility with all versions of Hamlib
+#ifndef HAMLIB_FILPATHLEN
+#define HAMLIB_FILPATHLEN FILEPATHLEN
+#endif
+
 MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker, Message)
 MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgReportFrequency, Message)
 
