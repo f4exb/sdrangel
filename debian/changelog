@@ -1,3 +1,13 @@
+sdrangel (7.15.0-1) unstable; urgency=medium
+
+   * New Audio CAT SISO plugin. Implements #1597
+   * Map: Change Street Map from WikiMedia to OpenStreetMap. PR #1711. Issue #1709
+   * Packet Modulator: fixed segfault in GUI
+   * SigMFFileInput: fixed acceleration. Part of issue #1699
+   * SimplePTT: fixed typo in code. Fixes #1705
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 18 Jun 2023 22:38:65 +0200
+
 sdrangel (7.14.2-1) unstable; urgency=medium
 
   * Implement GPIO and script control from Simple PTT feature. Implements #1558
