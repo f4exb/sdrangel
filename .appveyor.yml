@@ -88,7 +88,7 @@ for:
             libusb-1.0-0-dev libhidapi-dev libboost-all-dev libasound2-dev libopencv-dev libopencv-imgcodecs-dev \
             libxml2-dev bison flex ffmpeg  libpostproc-dev libavcodec-dev libavformat-dev \
             libopus-dev libcodec2-dev libairspy-dev libhackrf-dev \
-            libbladerf-dev libsoapysdr-dev libiio-dev libuhd-dev \
+            libbladerf-dev libsoapysdr-dev libiio-dev libuhd-dev libhamlib-dev \
             python3-mako python3-cheetah python3-numpy \
             autoconf automake libtool ninja-build libclang1-11
       - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES" ]]; then bash cmake/ci/build_cm256cc.sh; fi

@@ -50,6 +50,7 @@ Build-Depends: debhelper (>= 9),
  libairspy-dev,
  libhackrf-dev,
  libuhd-dev,
+ libhamlib-dev,
  zlib1g-dev
 # TODO:
 #   - more dependencies based on version; newer has more devices
