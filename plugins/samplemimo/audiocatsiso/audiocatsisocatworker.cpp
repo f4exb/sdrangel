@@ -21,7 +21,7 @@
 
 // Compatibility with all versions of Hamlib
 #ifndef HAMLIB_FILPATHLEN
-#define HAMLIB_FILPATHLEN FILEPATHLEN
+#define HAMLIB_FILPATHLEN FILPATHLEN
 #endif
 
 MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker, Message)
