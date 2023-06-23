@@ -517,7 +517,7 @@ void RttyDemodSink::receiveBit(bool bit)
         else
         {
             QString c = m_rttyDecoder.decode((m_bits >> 1) & 0x1f);
-            if ((c != '\0') && (c != '<') && (c != '>') && (c != '^'))
+            if ((c != "\0") && (c != "<") && (c != ">") && (c != "^"))
             {
                 // Calculate average power over received byte
                 float rssi = CalcDb::dbPower(m_rssiMagSqSum / m_rssiMagSqCount);
