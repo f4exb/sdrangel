@@ -166,7 +166,7 @@ QString BaudotDecoder::decode(char bits)
 {
     QString c = m_figure ? m_figures[(int)bits] : m_letters[(int)bits];
 
-    if ((c == '>') || (m_unshiftOnSpace && (c == " ")))
+    if ((c == ">") || (m_unshiftOnSpace && (c == " ")))
     {
         // Switch to letters
         m_figure = false;
@@ -174,17 +174,17 @@ QString BaudotDecoder::decode(char bits)
             m_letters = Baudot::m_ita2Letter;
         }
     }
-    if (c == '<')
+    if (c == "<")
     {
         // Switch to figures
         m_figure = true;
     }
-    if ((m_characterSet == Baudot::RUSSIAN) && (c == '\0'))
+    if ((m_characterSet == Baudot::RUSSIAN) && (c == "\0"))
     {
         // Switch to Cyrillic
         m_figure = false;
         m_letters = Baudot::m_russianLetter;
-        c = '^';
+        c = "^";
     }
 
     return c;
