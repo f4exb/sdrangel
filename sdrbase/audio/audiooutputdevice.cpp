@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <string.h>
+#include <QThread>
 #include <QAudioFormat>
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 #include <QAudioSink>
@@ -28,6 +29,9 @@
 #include "audiofifo.h"
 #include "audionetsink.h"
 #include "dsp/wavfilerecord.h"
+
+MESSAGE_CLASS_DEFINITION(AudioOutputDevice::MsgStart, Message)
+MESSAGE_CLASS_DEFINITION(AudioOutputDevice::MsgStop, Message)
 
 AudioOutputDevice::AudioOutputDevice() :
 	m_audioOutput(nullptr),
@@ -45,6 +49,7 @@ AudioOutputDevice::AudioOutputDevice() :
     m_recordSilenceCount(0),
 	m_audioFifos()
 {
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 AudioOutputDevice::~AudioOutputDevice()
@@ -63,8 +68,12 @@ AudioOutputDevice::~AudioOutputDevice()
 
 bool AudioOutputDevice::start(int device, int rate)
 {
+    // if (m_audioOutput) {
+    //     return true;
+    // }
 //	if (m_audioUsageCount == 0)
 //	{
+        qDebug("AudioOutputDevice::start: device: %d rate: %d thread: %p", device, rate, QThread::currentThread());
         QMutexLocker mutexLocker(&m_mutex);
         AudioDeviceInfo devInfo;
 
@@ -149,6 +158,7 @@ bool AudioOutputDevice::start(int device, int rate)
         m_audioNetSink = new AudioNetSink(0, m_audioFormat.sampleRate(), false);
         m_wavFileRecord = new WavFileRecord(m_audioFormat.sampleRate());
 		m_audioOutput->setVolume(m_volume);
+        m_audioOutput->setBufferSize(m_audioFormat.sampleRate() / 5); // min 200ms
         m_recordSilenceNbSamples = (m_recordSilenceTime * m_audioFormat.sampleRate()) / 10; // time in 100'ś ms
 
         QIODevice::open(QIODevice::ReadOnly);
@@ -157,6 +167,8 @@ bool AudioOutputDevice::start(int device, int rate)
 
         if (m_audioOutput->state() != QAudio::ActiveState) {
             qWarning() << "AudioOutputDevice::start: cannot start - " << m_audioOutput->error();
+        } else {
+            qDebug("AudioOutputDevice::start: started buffer: %d bytes", m_audioOutput->bufferSize());
         }
 //	}
 //
@@ -167,7 +179,11 @@ bool AudioOutputDevice::start(int device, int rate)
 
 void AudioOutputDevice::stop()
 {
-    qDebug("AudioOutputDevice::stop");
+    if (!m_audioOutput) {
+        return;
+    }
+
+    qDebug("AudioOutputDevice::stop: thread: %p", QThread::currentThread());
 
     QMutexLocker mutexLocker(&m_mutex);
     m_audioOutput->stop();
@@ -327,6 +343,7 @@ qint64 AudioOutputDevice::readData(char* data, qint64 maxLen)
 //#ifndef __APPLE__
 //    QMutexLocker mutexLocker(&m_mutex);
 //#endif
+    // qDebug("AudioOutputDevice::readData: thread %p (%s)", (void *) QThread::currentThread(), qPrintable(m_deviceName));
 
 	unsigned int samplesPerBuffer = maxLen / 4;
 
@@ -521,4 +538,33 @@ qint64 AudioOutputDevice::bytesAvailable() const
         available = 2048; // Is there a better value to use?
     }
     return available * 2 * 2; // 2 Channels of 16-bit data
+}
+
+bool AudioOutputDevice::handleMessage(const Message& cmd)
+{
+    if (MsgStart::match(cmd))
+    {
+        MsgStart ctl = (MsgStart&) cmd;
+        start(ctl.getDeviceIndex(), ctl.getSampleRate());
+        return true;
+    }
+    else if (MsgStop::match(cmd))
+    {
+        stop();
+        return true;
+    }
+
+    return false;
+}
+
+void AudioOutputDevice::handleInputMessages()
+{
+	Message* message;
+
+	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }

@@ -25,6 +25,8 @@
 #include <list>
 #include <vector>
 #include <stdint.h>
+#include "util/message.h"
+#include "util/messagequeue.h"
 #include "export.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -37,8 +39,44 @@ class AudioOutputPipe;
 class AudioNetSink;
 class WavFileRecord;
 
-class SDRBASE_API AudioOutputDevice : QIODevice {
+class SDRBASE_API AudioOutputDevice : public QIODevice {
+    Q_OBJECT
 public:
+    class MsgStart : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        int getDeviceIndex() const { return m_deviceIndex; }
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgStart* create(int deviceIndex, int sampleRate) {
+            return new MsgStart(deviceIndex, sampleRate);
+        }
+
+    private:
+        int m_deviceIndex;
+        int m_sampleRate;
+
+        MsgStart(int deviceIndex, int sampleRate) :
+            Message(),
+            m_deviceIndex(deviceIndex),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
+    class MsgStop : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        static MsgStop* create() {
+            return new MsgStop();
+        }
+
+    private:
+
+        MsgStop() :
+            Message()
+        { }
+    };
+
     enum UDPChannelMode
     {
         UDPChannelLeft,
@@ -60,9 +98,6 @@ public:
 	AudioOutputDevice();
 	virtual ~AudioOutputDevice();
 
-	bool start(int device, int rate);
-	void stop();
-
 	void addFifo(AudioFifo* audioFifo);
 	void removeFifo(AudioFifo* audioFifo);
 	int getNbFifos() const { return m_audioFifos.size(); }
@@ -80,6 +115,9 @@ public:
     void setFileRecordName(const QString& fileRecordName);
     void setRecordToFile(bool recordToFile);
     void setRecordSilenceTime(int recordSilenceTime);
+    void setDeviceName(const QString& deviceName) { m_deviceName = deviceName;}
+
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
 private:
 	QRecursiveMutex m_mutex;
@@ -106,14 +144,24 @@ private:
 	std::vector<qint32> m_mixBuffer;
 
 	QAudioFormat m_audioFormat;
+    QString m_deviceName;
+
+    MessageQueue m_inputMessageQueue;
 
 	//virtual bool open(OpenMode mode);
 	virtual qint64 readData(char* data, qint64 maxLen);
 	virtual qint64 writeData(const char* data, qint64 len);
     virtual qint64 bytesAvailable() const override;
     void writeSampleToFile(qint16 lSample, qint16 rSample);
+    bool handleMessage(const Message& cmd);
+
+	bool start(int device, int rate);
+	void stop();
 
 	friend class AudioOutputPipe;
+
+private slots:
+    void handleInputMessages();
 };
 
 #endif // INCLUDE_AUDIOOUTPUTDEVICE_H

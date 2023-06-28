@@ -28,6 +28,7 @@
 #include "audio/audiodeviceinfo.h"
 #include "export.h"
 
+class QThread;
 class QDataStream;
 class AudioFifo;
 class MessageQueue;
@@ -136,6 +137,7 @@ private:
     QMap<AudioFifo*, MessageQueue*> m_audioFifoToSinkMessageQueues; //!< audio sink FIFO to attached sink message queue
     QMap<int, QList<MessageQueue*> > m_outputDeviceSinkMessageQueues; //!< sink message queues attached to device
     QMap<int, AudioOutputDevice*> m_audioOutputs; //!< audio device index to audio output map (index -1 is default device)
+    QMap<int, QThread*> m_audioOutputThreads; //!< audio device index to audio output threads map
     QMap<QString, OutputDeviceInfo> m_audioOutputInfos; //!< audio device name to audio output info
 
     QMap<AudioFifo*, int> m_audioSourceFifos; //< audio source FIFO to audio input device index-1 map

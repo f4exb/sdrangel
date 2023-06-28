@@ -21,6 +21,7 @@
 #include "util/messagequeue.h"
 #include "dsp/dspcommands.h"
 
+#include <QThread>
 #include <QDataStream>
 #include <QSet>
 #include <QDebug>
@@ -99,10 +100,18 @@ AudioDeviceManager::AudioDeviceManager()
 
 AudioDeviceManager::~AudioDeviceManager()
 {
-    QMap<int, AudioOutputDevice*>::iterator it = m_audioOutputs.begin();
+    QMap<int, AudioOutputDevice*>::iterator ait = m_audioOutputs.begin();
 
-    for (; it != m_audioOutputs.end(); ++it) {
-        delete(*it);
+    for (; ait != m_audioOutputs.end(); ++ait) {
+        (*ait)->getInputMessageQueue()->push(AudioOutputDevice::MsgStop::create());
+    }
+
+    QMap<int, QThread*>::iterator it = m_audioOutputThreads.begin();
+
+    for (; it != m_audioOutputThreads.end(); ++it)
+    {
+        (*it)->exit();
+        (*it)->wait();
     }
 }
 
@@ -258,8 +267,36 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, MessageQueue *sample
 {
     qDebug("AudioDeviceManager::addAudioSink: %d: %p", outputDeviceIndex, audioFifo);
 
-    if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end()) {
-        m_audioOutputs[outputDeviceIndex] = new AudioOutputDevice();
+    if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end())
+    {
+        QThread *thread = new QThread();
+        AudioOutputDevice *audioOutputDevice = new AudioOutputDevice();
+        m_audioOutputs[outputDeviceIndex] = audioOutputDevice;
+        m_audioOutputThreads[outputDeviceIndex] = thread;
+
+        if (outputDeviceIndex < 0) {
+            audioOutputDevice->setDeviceName("System default");
+        } else {
+            audioOutputDevice->setDeviceName(m_outputDevicesInfo[outputDeviceIndex].deviceName());
+        }
+
+        qDebug("AudioDeviceManager::addAudioSink: new AudioOutputDevice on thread: %p", thread);
+        audioOutputDevice->moveToThread(thread);
+
+        QObject::connect(
+            thread,
+            &QThread::finished,
+            audioOutputDevice,
+            &QObject::deleteLater
+        );
+        QObject::connect(
+            thread,
+            &QThread::finished,
+            thread,
+            &QThread::deleteLater
+        );
+
+        thread->start();
     }
 
     if ((m_audioOutputs[outputDeviceIndex]->getNbFifos() == 0) &&
@@ -405,8 +442,10 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
             decimationFactor = m_audioOutputInfos[deviceName].udpDecimationFactor;
         }
 
-        m_audioOutputs[outputDeviceIndex]->start(outputDeviceIndex, sampleRate);
-        m_audioOutputInfos[deviceName].sampleRate = m_audioOutputs[outputDeviceIndex]->getRate(); // update with actual rate
+        AudioOutputDevice::MsgStart *msg = AudioOutputDevice::MsgStart::create(outputDeviceIndex, sampleRate);
+        m_audioOutputs[outputDeviceIndex]->getInputMessageQueue()->push(msg);
+
+        m_audioOutputInfos[deviceName].sampleRate = sampleRate; // FIXME: possible change of sample rate in AudioOutputDevice
         m_audioOutputInfos[deviceName].udpAddress = udpAddress;
         m_audioOutputInfos[deviceName].udpPort = udpPort;
         m_audioOutputInfos[deviceName].copyToUDP = copyAudioToUDP;
@@ -424,7 +463,8 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
 
 void AudioDeviceManager::stopAudioOutput(int outputDeviceIndex)
 {
-    m_audioOutputs[outputDeviceIndex]->stop();
+    AudioOutputDevice::MsgStop *msg = AudioOutputDevice::MsgStop::create();
+    m_audioOutputs[outputDeviceIndex]->getInputMessageQueue()->push(msg);
 }
 
 void AudioDeviceManager::startAudioInput(int inputDeviceIndex)
@@ -626,8 +666,12 @@ void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const Output
 
     if (oldDeviceInfo.sampleRate != deviceInfo.sampleRate)
     {
-        audioOutput->stop();
-        audioOutput->start(outputDeviceIndex, deviceInfo.sampleRate);
+        AudioOutputDevice::MsgStop *msgStop = AudioOutputDevice::MsgStop::create();
+        audioOutput->getInputMessageQueue()->push(msgStop);
+
+        AudioOutputDevice::MsgStart *msgStart = AudioOutputDevice::MsgStart::create(outputDeviceIndex, deviceInfo.sampleRate);
+        audioOutput->getInputMessageQueue()->push(msgStart);
+
         m_audioOutputInfos[deviceName].sampleRate = audioOutput->getRate(); // store actual sample rate
 
         // send message to attached channels
