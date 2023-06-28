@@ -60,7 +60,7 @@ SSBDemodSink::SSBDemodSink() :
 	m_channelSampleRate = 48000;
 	m_channelFrequencyOffset = 0;
 
-	m_audioBuffer.resize(1<<14);
+	m_audioBuffer.resize(m_audioSampleRate / 10);
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
 	m_sum = 0;
@@ -312,7 +312,8 @@ void SSBDemodSink::applyAudioSampleRate(int sampleRate)
 
     m_audioFifo.setSize(sampleRate);
     m_audioSampleRate = sampleRate;
-
+    m_audioBuffer.resize(sampleRate / 10);
+    m_audioBufferFill = 0;
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);
