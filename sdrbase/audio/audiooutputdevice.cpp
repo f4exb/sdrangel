@@ -158,7 +158,7 @@ bool AudioOutputDevice::start(int device, int rate)
         m_audioNetSink = new AudioNetSink(0, m_audioFormat.sampleRate(), false);
         m_wavFileRecord = new WavFileRecord(m_audioFormat.sampleRate());
 		m_audioOutput->setVolume(m_volume);
-        m_audioOutput->setBufferSize(m_audioFormat.sampleRate() / 5); // min 200ms
+        // m_audioOutput->setBufferSize(m_audioFormat.sampleRate() / 5); FIXME: does not work generally
         m_recordSilenceNbSamples = (m_recordSilenceTime * m_audioFormat.sampleRate()) / 10; // time in 100'ś ms
 
         QIODevice::open(QIODevice::ReadOnly);
