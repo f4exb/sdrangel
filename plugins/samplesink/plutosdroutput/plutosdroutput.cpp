@@ -217,7 +217,7 @@ bool PlutoSDROutput::handleMessage(const Message& message)
         PlutoSDROutputSettings newSettings = m_settings;
         newSettings.m_lpfFIREnable = conf.isLpfFirEnable();
 
-        applySettings(newSettings, QList<QString>{"lpfFIREnable"});
+        applySettings(newSettings, QList<QString>{"devSampleRate", "lpfFIRlog2Interp", "lpfFIRBW", "LOppmTenths", "lpfFIREnable"});
 
         return true;
     }
