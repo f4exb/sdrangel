@@ -599,6 +599,7 @@ void SSBModGUI::applyBandwidths(int spanLog2, bool force)
         ui->glSpectrum->setSampleRate(2*m_spectrumRate);
         spectrumSettings.m_ssb = false;
         ui->glSpectrum->setLsbDisplay(false);
+        ui->glSpectrum->setSsbSpectrum(false);
     }
     else
     {
@@ -613,6 +614,7 @@ void SSBModGUI::applyBandwidths(int spanLog2, bool force)
         ui->glSpectrum->setSampleRate(m_spectrumRate);
         spectrumSettings.m_ssb = true;
         ui->glSpectrum->setLsbDisplay(bw < 0);
+        ui->glSpectrum->setSsbSpectrum(true);
     }
 
     SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
