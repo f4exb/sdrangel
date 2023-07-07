@@ -96,6 +96,8 @@ AudioDeviceManager::AudioDeviceManager()
 
     m_defaultInputStarted = false;
     m_defaultOutputStarted = false;
+
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
 AudioDeviceManager::~AudioDeviceManager()
@@ -281,6 +283,7 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, MessageQueue *sample
         }
 
         qDebug("AudioDeviceManager::addAudioSink: new AudioOutputDevice on thread: %p", thread);
+        audioOutputDevice->setManagerMessageQueue(&m_inputMessageQueue);
         audioOutputDevice->moveToThread(thread);
 
         QObject::connect(
@@ -445,7 +448,6 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
         AudioOutputDevice::MsgStart *msg = AudioOutputDevice::MsgStart::create(outputDeviceIndex, sampleRate);
         m_audioOutputs[outputDeviceIndex]->getInputMessageQueue()->push(msg);
 
-        m_audioOutputInfos[deviceName].sampleRate = sampleRate; // FIXME: possible change of sample rate in AudioOutputDevice
         m_audioOutputInfos[deviceName].udpAddress = udpAddress;
         m_audioOutputInfos[deviceName].udpPort = udpPort;
         m_audioOutputInfos[deviceName].copyToUDP = copyAudioToUDP;
@@ -488,7 +490,7 @@ void AudioDeviceManager::startAudioInput(int inputDeviceIndex)
 
         m_audioInputs[inputDeviceIndex]->start(inputDeviceIndex, sampleRate);
         m_audioInputs[inputDeviceIndex]->setVolume(volume);
-        m_audioInputInfos[deviceName].sampleRate = m_audioInputs[inputDeviceIndex]->getRate();
+        m_audioInputInfos[deviceName].sampleRate = m_audioInputs[inputDeviceIndex]->getRate(); // FIXME
         m_audioInputInfos[deviceName].volume = volume;
         m_defaultInputStarted = (inputDeviceIndex == -1);
     }
@@ -671,17 +673,6 @@ void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const Output
 
         AudioOutputDevice::MsgStart *msgStart = AudioOutputDevice::MsgStart::create(outputDeviceIndex, deviceInfo.sampleRate);
         audioOutput->getInputMessageQueue()->push(msgStart);
-
-        m_audioOutputInfos[deviceName].sampleRate = audioOutput->getRate(); // store actual sample rate
-
-        // send message to attached channels
-        QList<MessageQueue *>::const_iterator it = m_outputDeviceSinkMessageQueues[outputDeviceIndex].begin();
-
-        for (; it != m_outputDeviceSinkMessageQueues[outputDeviceIndex].end(); ++it)
-        {
-            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioOutputInfos[deviceName].sampleRate, DSPConfigureAudio::AudioOutput);
-            (*it)->push(msg);
-        }
     }
 
     audioOutput->setUdpCopyToUDP(deviceInfo.copyToUDP);
@@ -724,18 +715,6 @@ void AudioDeviceManager::unsetOutputDeviceInfo(int outputDeviceIndex)
 
     stopAudioOutput(outputDeviceIndex);
     startAudioOutput(outputDeviceIndex);
-
-    if (oldDeviceInfo.sampleRate != m_audioOutputInfos[deviceName].sampleRate)
-    {
-        // send message to attached channels
-        QList<MessageQueue *>::const_iterator it = m_outputDeviceSinkMessageQueues[outputDeviceIndex].begin();
-
-        for (; it != m_outputDeviceSinkMessageQueues[outputDeviceIndex].end(); ++it)
-        {
-            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioOutputInfos[deviceName].sampleRate, DSPConfigureAudio::AudioOutput);
-            (*it)->push(msg);
-        }
-    }
 }
 
 void AudioDeviceManager::unsetInputDeviceInfo(int inputDeviceIndex)
@@ -864,4 +843,41 @@ void AudioDeviceManager::debugAudioOutputInfos() const
                 << " udpChannelCodec: " << (int) it.value().udpChannelCodec
                 << " decimationFactor: " << it.value().udpDecimationFactor;
     }
+}
+
+bool AudioDeviceManager::handleMessage(const Message& msg)
+{
+    if (AudioOutputDevice::MsgReportSampleRate::match(msg))
+    {
+        AudioOutputDevice::MsgReportSampleRate& report = (AudioOutputDevice::MsgReportSampleRate&) msg;
+        int deviceIndex = report.getDeviceIndex();
+        const QString& deviceName = report.getDeviceName();
+        int sampleRate = report.getSampleRate();
+        qDebug("AudioDeviceManager::handleMessage: AudioOutputDevice::MsgReportSampleRate: device(%d) %s: rate: %d",
+            deviceIndex, qPrintable(deviceName), sampleRate);
+        m_audioOutputInfos[deviceName].sampleRate = sampleRate;
+
+        // send message to attached channels
+        for (auto& messageQueue : m_outputDeviceSinkMessageQueues[deviceIndex])
+        {
+            DSPConfigureAudio *msg = new DSPConfigureAudio(m_audioOutputInfos[deviceName].sampleRate, DSPConfigureAudio::AudioOutput);
+            messageQueue->push(msg);
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+void AudioDeviceManager::handleInputMessages()
+{
+	Message* message;
+
+	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }

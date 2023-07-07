@@ -77,6 +77,30 @@ public:
         { }
     };
 
+    class MsgReportSampleRate : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        int getDeviceIndex() const { return m_deviceIndex; }
+        const QString& getDeviceName() const { return m_deviceName; }
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgReportSampleRate* create(int deviceIndex, const QString& deviceName, int sampleRate) {
+            return new MsgReportSampleRate(deviceIndex, deviceName, sampleRate);
+        }
+
+    private:
+        int m_deviceIndex;
+        QString m_deviceName;
+        int m_sampleRate;
+
+        MsgReportSampleRate(int deviceIndex, const QString& deviceName, int sampleRate) :
+            Message(),
+            m_deviceIndex(deviceIndex),
+            m_deviceName(deviceName),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
     enum UDPChannelMode
     {
         UDPChannelLeft,
@@ -118,6 +142,7 @@ public:
     void setDeviceName(const QString& deviceName) { m_deviceName = deviceName;}
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    void setManagerMessageQueue(MessageQueue *messageQueue) { m_managerMessageQueue = messageQueue; }
 
 private:
 	QRecursiveMutex m_mutex;
@@ -147,6 +172,7 @@ private:
     QString m_deviceName;
 
     MessageQueue m_inputMessageQueue;
+    MessageQueue *m_managerMessageQueue;
 
 	//virtual bool open(OpenMode mode);
 	virtual qint64 readData(char* data, qint64 maxLen);
@@ -155,7 +181,7 @@ private:
     void writeSampleToFile(qint16 lSample, qint16 rSample);
     bool handleMessage(const Message& cmd);
 
-	bool start(int device, int rate);
+	bool start(int deviceIndex, int sampleRate);
 	void stop();
 
 	friend class AudioOutputPipe;

@@ -22,18 +22,20 @@
 #include <QStringList>
 #include <QList>
 #include <QMap>
+#include <QObject>
 
 #include "audio/audioinputdevice.h"
 #include "audio/audiooutputdevice.h"
 #include "audio/audiodeviceinfo.h"
+#include "util/messagequeue.h"
 #include "export.h"
 
 class QThread;
 class QDataStream;
 class AudioFifo;
-class MessageQueue;
 
-class SDRBASE_API AudioDeviceManager {
+class SDRBASE_API AudioDeviceManager : public QObject {
+    Q_OBJECT
 public:
     class InputDeviceInfo
     {
@@ -149,6 +151,8 @@ private:
     bool m_defaultOutputStarted; //!< True if the default audio output (-1) has already been started
     bool m_defaultInputStarted;  //!< True if the default audio input (-1) has already been started
 
+    MessageQueue m_inputMessageQueue;
+
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
@@ -166,7 +170,12 @@ private:
     void deserializeOutputMap(QByteArray& data);
     void debugAudioOutputInfos() const;
 
+    bool handleMessage(const Message& cmd);
+
 	friend class MainSettings;
+
+private slots:
+    void handleInputMessages();
 };
 
 QDataStream& operator<<(QDataStream& ds, const AudioDeviceManager::InputDeviceInfo& info);
