@@ -66,8 +66,10 @@ RTPSink::~RTPSink()
     qrtplib::RTPTime delay = qrtplib::RTPTime(10.0);
     m_rtpSession.BYEDestroy(delay, "Time's up", 9);
 
-    if (m_byteBuffer) {
+    if (m_byteBuffer)
+    {
         delete[] m_byteBuffer;
+        m_byteBuffer = nullptr;
     }
 }
 
@@ -127,8 +129,10 @@ void RTPSink::setPayloadInformation(PayloadType payloadType, int sampleRate)
 
     m_bufferSize = m_packetSamples * m_sampleBytes;
 
-    if (m_byteBuffer) {
+    if (m_byteBuffer)
+    {
         delete[] m_byteBuffer;
+        m_byteBuffer = nullptr;
     }
 
     m_byteBuffer = new uint8_t[m_bufferSize];
