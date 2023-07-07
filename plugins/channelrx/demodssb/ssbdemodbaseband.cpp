@@ -140,6 +140,35 @@ bool SSBDemodBaseband::handleMessage(const Message& cmd)
 
 		return true;
     }
+    else if (DSPConfigureAudio::match(cmd))
+    {
+        DSPConfigureAudio& cfg = (DSPConfigureAudio&) cmd;
+        unsigned int audioSampleRate = cfg.getSampleRate();
+
+        if (m_audioSampleRate != audioSampleRate)
+        {
+            qDebug("SSBDemodBaseband::handleMessage: DSPConfigureAudio: new sample rate %d",audioSampleRate);
+            m_sink.applyAudioSampleRate(audioSampleRate);
+            m_channelizer.setChannelization(audioSampleRate, m_settings.m_inputFrequencyOffset);
+            m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
+            m_audioSampleRate = audioSampleRate;
+
+            if (getMessageQueueToGUI())
+            {
+                qDebug("SSBDemodBaseband::handleMessage: DSPConfigureAudio: forward to GUI");
+                DSPConfigureAudio *msg = new DSPConfigureAudio((int) audioSampleRate, DSPConfigureAudio::AudioOutput);
+                getMessageQueueToGUI()->push(msg);
+            }
+
+            if (m_spectrumVis)
+            {
+                DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2), 0);
+                m_spectrumVis->getInputMessageQueue()->push(msg);
+            }
+        }
+
+        return true;
+    }
     else
     {
         return false;

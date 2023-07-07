@@ -95,6 +95,8 @@ bool SSBDemodGUI::handleMessage(const Message& message)
         const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
         m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        qDebug("SSBDemodGUI::handleMessage: DSPSignalNotification: centerFrequency: %lld sampleRate: %d",
+             m_deviceCenterFrequency, m_basebandSampleRate);
         ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
         ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
         updateAbsoluteCenterFrequency();

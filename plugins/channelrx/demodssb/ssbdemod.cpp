@@ -112,6 +112,15 @@ uint32_t SSBDemod::getNumberOfDeviceStreams() const
     return m_deviceAPI->getNbSourceStreams();
 }
 
+void SSBDemod::setMessageQueueToGUI(MessageQueue* queue)
+{
+    ChannelAPI::setMessageQueueToGUI(queue);
+
+    if (m_basebandSink) {
+        m_basebandSink->setMessageQueueToGUI(queue);
+    }
+}
+
 void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
     (void) positiveOnly;

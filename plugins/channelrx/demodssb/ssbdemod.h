@@ -96,7 +96,7 @@ public:
         return m_settings.m_inputFrequencyOffset;
     }
 
-    void setMessageQueueToGUI(MessageQueue* queue) override { ChannelAPI::setMessageQueueToGUI(queue); }
+    void setMessageQueueToGUI(MessageQueue* queue) override;
     uint32_t getAudioSampleRate() const { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
     uint32_t getChannelSampleRate() const { return m_running ? m_basebandSink->getChannelSampleRate() : 0; }
     double getMagSq() const { return m_running ? m_basebandSink->getMagSq() : 0.0; }
