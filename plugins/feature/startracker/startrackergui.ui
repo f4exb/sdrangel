@@ -539,7 +539,7 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
       <item row="2" column="3">
        <widget class="QDoubleSpinBox" name="longitude">
         <property name="toolTip">
-         <string>Longitude in decimal degress (East positive) of observation point / antenna location</string>
+         <string>Longitude in decimal degrees (East positive) of observation point / antenna location</string>
         </property>
         <property name="decimals">
          <number>6</number>

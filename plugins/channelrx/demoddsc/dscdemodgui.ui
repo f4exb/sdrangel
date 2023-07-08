@@ -865,7 +865,7 @@
         <string>RSSI</string>
        </property>
        <property name="toolTip">
-        <string>Received signal strenth indicator (Average power in dBFS)</string>
+        <string>Received signal strength indicator (Average power in dBFS)</string>
        </property>
       </column>
      </widget>

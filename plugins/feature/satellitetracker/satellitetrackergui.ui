@@ -312,7 +312,7 @@
       <item row="2" column="4">
        <widget class="QDoubleSpinBox" name="longitude">
         <property name="toolTip">
-         <string>Longitude in decimal degress (East positive) of antenna location</string>
+         <string>Longitude in decimal degrees (East positive) of antenna location</string>
         </property>
         <property name="decimals">
          <number>6</number>

@@ -1100,7 +1100,7 @@
             <string>OAT (C)</string>
            </property>
            <property name="toolTip">
-            <string>Outside air temperature in degrees Celsuis estimated from Mach and TAS</string>
+            <string>Outside air temperature in degrees Celsius estimated from Mach and TAS</string>
            </property>
           </column>
           <column>
@@ -1132,7 +1132,7 @@
             <string>T (C)</string>
            </property>
            <property name="toolTip">
-            <string>Static air temperature in degrees Celsuis</string>
+            <string>Static air temperature in degrees Celsius</string>
            </property>
           </column>
           <column>
@@ -1148,7 +1148,7 @@
             <string>Lat (°)</string>
            </property>
            <property name="toolTip">
-            <string extracomment="Double click to centre the map on this aircraft">Latitude in degrees postive towards the North</string>
+            <string extracomment="Double click to centre the map on this aircraft">Latitude in degrees positive towards the North</string>
            </property>
           </column>
           <column>
@@ -1180,7 +1180,7 @@
             <string>TIS-B</string>
            </property>
            <property name="toolTip">
-            <string>Number of TIS-B frames received with this aircrafts ICAO</string>
+            <string>Number of TIS-B frames received with this aircraft's ICAO</string>
            </property>
           </column>
           <column>

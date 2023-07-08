@@ -140,7 +140,7 @@ Lines beginning with # are comments</string>
          <item>
           <widget class="QLabel" name="delayLabel">
            <property name="text">
-            <string>Delay in seconds betwen power on/off and measurement</string>
+            <string>Delay in seconds between power on/off and measurement</string>
            </property>
           </widget>
          </item>

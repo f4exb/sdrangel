@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Set chararcter encoding</string>
+   <string>Set character encoding</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

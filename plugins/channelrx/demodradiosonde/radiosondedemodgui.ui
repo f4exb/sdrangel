@@ -771,7 +771,7 @@
         <string>PCB (°C)</string>
        </property>
        <property name="toolTip">
-        <string>PCB temperature in degrees Celsuis</string>
+        <string>PCB temperature in degrees Celsius</string>
        </property>
       </column>
       <column>

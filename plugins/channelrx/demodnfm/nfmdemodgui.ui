@@ -619,7 +619,7 @@
          <bool>true</bool>
         </property>
         <property name="toolTip">
-         <string>Display DCS code as postive/normal (+) or negative/inverted (-)</string>
+         <string>Display DCS code as positive/normal (+) or negative/inverted (-)</string>
         </property>
         <property name="text">
          <string/>
