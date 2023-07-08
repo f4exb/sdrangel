@@ -377,9 +377,10 @@ void FreeDVDemodGUI::displayBandwidths(int spanLog2)
     QString spanStr = QString::number(bwMax/10.0, 'f', 1);
 
     ui->spanText->setText(tr("%1k").arg(spanStr));
-    ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
-    ui->glSpectrum->setSampleRate(m_spectrumRate);
+    ui->glSpectrum->setCenterFrequency(0);
+    ui->glSpectrum->setSampleRate(2*m_spectrumRate);
     ui->glSpectrum->setLsbDisplay(false);
+    ui->glSpectrum->setSsbSpectrum(true);
 }
 
 void FreeDVDemodGUI::displaySettings()

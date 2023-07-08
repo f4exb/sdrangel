@@ -43,6 +43,7 @@ MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMemoryTrace, Message)
 ScopeVis::ScopeVis() :
     m_glScope(nullptr),
     m_spectrumVis(nullptr),
+    m_ssbSpectrum(false),
     m_preTriggerDelay(0),
     m_livePreTriggerDelay(0),
     m_currentTriggerIndex(0),
@@ -765,7 +766,7 @@ int ScopeVis::processTraces(const std::vector<ComplexVector::const_iterator>& vc
     int remainder = ilength;
 
     if (m_spectrumVis) {
-        m_spectrumVis->feed(vcbegin[0], vcbegin[0] + ilength, false);
+        m_spectrumVis->feed(vcbegin[0], vcbegin[0] + ilength, m_ssbSpectrum);
     }
 
     while ((remainder > 0) && (m_nbSamples > 0))

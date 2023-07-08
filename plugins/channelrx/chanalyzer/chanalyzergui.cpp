@@ -200,15 +200,17 @@ void ChannelAnalyzerGUI::setSpectrumDisplay()
 
     if (m_settings.m_ssb)
     {
-        ui->glSpectrum->setCenterFrequency(sinkSampleRate/4);
-        ui->glSpectrum->setSampleRate(sinkSampleRate/2);
+        ui->glSpectrum->setCenterFrequency(0);
+        ui->glSpectrum->setSampleRate(sinkSampleRate);
         ui->glSpectrum->setLsbDisplay(ui->BW->value() < 0);
+        ui->glSpectrum->setSsbSpectrum(true);
     }
     else
     {
         ui->glSpectrum->setCenterFrequency(0);
         ui->glSpectrum->setSampleRate(sinkSampleRate);
         ui->glSpectrum->setLsbDisplay(false);
+        ui->glSpectrum->setSsbSpectrum(false);
     }
 }
 

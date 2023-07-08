@@ -322,6 +322,13 @@ void ChannelAnalyzerSink::applySettings(const ChannelAnalyzerSettings& settings,
         doApplySampleRate = true;
     }
 
+    if ((settings.m_ssb != m_settings.m_ssb) || force)
+    {
+        if (m_scopeVis) {
+            m_scopeVis->setSSBSpectrum(settings.m_ssb);
+        }
+    }
+
     m_settings = settings;
 
     qDebug() << "ChannelAnalyzerSink::applySettings:"

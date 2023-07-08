@@ -728,9 +728,10 @@ void FT8DemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
 
     ui->BWText->setText(tr("%1k").arg(bwStr));
     ui->spanText->setText(tr("%1k").arg(spanStr));
-    ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
-    ui->glSpectrum->setSampleRate(m_spectrumRate);
+    ui->glSpectrum->setCenterFrequency(0);
+    ui->glSpectrum->setSampleRate(2*m_spectrumRate);
     ui->glSpectrum->setLsbDisplay(bw < 0);
+    ui->glSpectrum->setSsbSpectrum(true);
 
     ui->lowCutText->setText(tr("%1k").arg(lwStr));
 

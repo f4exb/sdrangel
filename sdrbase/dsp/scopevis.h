@@ -341,6 +341,7 @@ public:
 
     void setGLScope(GLScopeInterface* glScope);
     void setSpectrumVis(SpectrumVis *spectrumVis) { m_spectrumVis = spectrumVis; }
+    void setSSBSpectrum(bool ssbSpectrum) { m_ssbSpectrum = ssbSpectrum; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
     void setLiveRate(int sampleRate);
@@ -1216,6 +1217,7 @@ private:
 
     GLScopeInterface* m_glScope;
     SpectrumVis *m_spectrumVis;
+    bool m_ssbSpectrum;
     GLScopeSettings m_settings;
     MessageQueue m_inputMessageQueue;
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples
