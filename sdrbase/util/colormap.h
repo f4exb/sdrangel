@@ -57,6 +57,8 @@ private:
     static const float m_rainbow[m_size];
     static const float m_prism[m_size];
     static const float m_viridis[m_size];
+    static const float m_loggray[m_size];
+    static const float m_shrimp[m_size];
 };
 
 #endif
