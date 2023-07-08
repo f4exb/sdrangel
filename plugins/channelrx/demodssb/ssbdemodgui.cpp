@@ -512,8 +512,8 @@ void SSBDemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
         ui->scalePlus->setText("+");
         ui->lsbLabel->setText("LSB");
         ui->usbLabel->setText("USB");
-        ui->glSpectrum->setCenterFrequency(m_spectrumRate/2);
-        ui->glSpectrum->setSampleRate(m_spectrumRate);
+        ui->glSpectrum->setCenterFrequency(0);
+        ui->glSpectrum->setSampleRate(2*m_spectrumRate);
         spectrumSettings.m_ssb = true;
         ui->glSpectrum->setLsbDisplay(bw < 0);
         ui->glSpectrum->setSsbSpectrum(true);
