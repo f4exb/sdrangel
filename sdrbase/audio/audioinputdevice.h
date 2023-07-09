@@ -24,6 +24,8 @@
 #include <list>
 #include <vector>
 #include "export.h"
+#include "util/message.h"
+#include "util/messagequeue.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 class QAudioSource;
@@ -35,12 +37,76 @@ class AudioOutputPipe;
 
 
 class SDRBASE_API AudioInputDevice : public QIODevice {
+    Q_OBJECT
 public:
+    class MsgStart : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        int getDeviceIndex() const { return m_deviceIndex; }
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgStart* create(int deviceIndex, int sampleRate) {
+            return new MsgStart(deviceIndex, sampleRate);
+        }
+
+    private:
+        int m_deviceIndex;
+        int m_sampleRate;
+
+        MsgStart(int deviceIndex, int sampleRate) :
+            Message(),
+            m_deviceIndex(deviceIndex),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
+    class MsgStop : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        static MsgStop* create() {
+            return new MsgStop();
+        }
+
+    private:
+
+        MsgStop() :
+            Message()
+        { }
+    };
+
+    class MsgReportSampleRate : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        int getDeviceIndex() const { return m_deviceIndex; }
+        const QString& getDeviceName() const { return m_deviceName; }
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgReportSampleRate* create(int deviceIndex, const QString& deviceName, int sampleRate) {
+            return new MsgReportSampleRate(deviceIndex, deviceName, sampleRate);
+        }
+
+    private:
+        int m_deviceIndex;
+        QString m_deviceName;
+        int m_sampleRate;
+
+        MsgReportSampleRate(int deviceIndex, const QString& deviceName, int sampleRate) :
+            Message(),
+            m_deviceIndex(deviceIndex),
+            m_deviceName(deviceName),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
 	AudioInputDevice();
 	virtual ~AudioInputDevice();
 
-	bool start(int device, int rate);
-	void stop();
+	bool startDirect(int deviceIndex, int sampleRate) {
+        return start(deviceIndex, sampleRate);
+    }
+	void stopDirect() {
+        stop();
+    }
 
     void addFifo(AudioFifo* audioFifo);
 	void removeFifo(AudioFifo* audioFifo);
@@ -49,6 +115,10 @@ public:
 	uint getRate() const { return m_audioFormat.sampleRate(); }
 	void setOnExit(bool onExit) { m_onExit = onExit; }
 	void setVolume(float volume);
+    void setDeviceName(const QString& deviceName) { m_deviceName = deviceName;}
+
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    void setManagerMessageQueue(MessageQueue *messageQueue) { m_managerMessageQueue = messageQueue; }
 
 private:
 	QRecursiveMutex m_mutex;
@@ -65,12 +135,25 @@ private:
 	std::vector<qint32> m_mixBuffer;
 
 	QAudioFormat m_audioFormat;
+    QString m_deviceName;
+
+    MessageQueue m_inputMessageQueue;
+    MessageQueue *m_managerMessageQueue;
 
 	//virtual bool open(OpenMode mode);
 	virtual qint64 readData(char* data, qint64 maxLen);
 	virtual qint64 writeData(const char* data, qint64 len);
+    bool handleMessage(const Message& cmd);
+	bool start(int deviceIndex, int sampleRate);
+	void stop();
 
 	friend class AudioOutputPipe;
+    friend class AudioInput;
+    friend class FCDProInput;
+    friend class FCDProPlusInput;
+
+private slots:
+    void handleInputMessages();
 };
 
 
