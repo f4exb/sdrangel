@@ -1109,7 +1109,7 @@ When unchecked, if remote device is using SDRA protocol, local settings are upda
        </property>
        <property name="toolTip">
         <string>Output buffer.
-This should typically be empy. If full, your CPU cannot keep up and data will be lost</string>
+This should typically be empty. If full, your CPU cannot keep up and data will be lost</string>
        </property>
        <property name="minimum">
         <number>0</number>

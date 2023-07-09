@@ -4,7 +4,7 @@
 
 You can use this plugin to interface with a http server block in the Aaronia RTSA suite connected to a Spectran V6 device. It is assumed that you have prior knowledge of the Aaronia RTSA suite software and operation of the Spectran V6 RTSA (Real Time Spectrum Analyzer). However in this context there are some specificities i.e. it assumes that the "mission" (in RTSA suite terms) that is the equivalent of a "configuration" in SDRangel has a `HTTP Server` block followed by an `IQ Modulator` block.
 
-An example flow graph could be the following (Stram Debugger is optional):
+An example flow graph could be the following (Stream Debugger is optional):
 
 ![Aaronia RTSA Tx flowgraph](../../../doc/img/aaronia_http_tx.jpg)
 

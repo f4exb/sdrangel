@@ -75,7 +75,7 @@
      <item>
       <widget class="QCheckBox" name="reverseAPI">
        <property name="toolTip">
-        <string>Sychronize with reverse API </string>
+        <string>Synchronize with reverse API </string>
        </property>
        <property name="text">
         <string>reverse API</string>

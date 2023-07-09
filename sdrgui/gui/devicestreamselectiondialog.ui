@@ -32,7 +32,7 @@
      <item>
       <widget class="QComboBox" name="deviceStream">
        <property name="toolTip">
-        <string>Devcie stream index</string>
+        <string>Device stream index</string>
        </property>
       </widget>
      </item>

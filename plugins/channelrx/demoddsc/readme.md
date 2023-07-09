@@ -46,7 +46,7 @@ This drop down displays a list of all columns which can be used for filtering (8
 
 <h3>8: Filter Reg Exp</h3>
 
-Specifes a [regular expression](https://regexr.com/) used to filter data in the table, using data in the column specified by (7).
+Specifies a [regular expression](https://regexr.com/) used to filter data in the table, using data in the column specified by (7).
 
 <h3>9: Filter Invalid</h3>
 

@@ -388,7 +388,7 @@
           <item row="11" column="0">
            <widget class="QCheckBox" name="utc">
             <property name="toolTip">
-             <string>When checked times are dispayed using UTC rather than the local time zone</string>
+             <string>When checked times are displayed using UTC rather than the local time zone</string>
             </property>
             <property name="text">
              <string>Display times in UTC</string>
