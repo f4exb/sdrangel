@@ -178,11 +178,13 @@ bool FCDProPlusInput::openFCDAudio(const char* cardname)
         if (itAudio.deviceName().contains(QString(cardname)))
         {
             int fcdDeviceIndex = audioDeviceManager->getInputDeviceIndex(itAudio.deviceName());
-            m_fcdAudioInput.start(fcdDeviceIndex, fcd_traits<ProPlus>::sampleRate);
-            int fcdSampleRate = m_fcdAudioInput.getRate();
-            qDebug("FCDProPlusInput::openFCDAudio: %s index %d at %d S/s",
-                    itAudio.deviceName().toStdString().c_str(), fcdDeviceIndex, fcdSampleRate);
-            m_fcdAudioInput.addFifo(&m_fcdFIFO);
+            AudioDeviceManager::InputDeviceInfo fcdDeviceInfo;
+            audioDeviceManager->getInputDeviceInfo(itAudio.deviceName(), fcdDeviceInfo);
+            fcdDeviceInfo.sampleRate = fcd_traits<ProPlus>::sampleRate;
+            audioDeviceManager->setInputDeviceInfo(fcdDeviceIndex, fcdDeviceInfo);
+            audioDeviceManager->addAudioSource(&m_fcdFIFO, getInputMessageQueue(), fcdDeviceIndex);
+            qDebug("FCDProPlusInput::openFCDAudio: %s index %d",
+                itAudio.deviceName().toStdString().c_str(), fcdDeviceIndex);
             return true;
         }
     }
@@ -193,8 +195,8 @@ bool FCDProPlusInput::openFCDAudio(const char* cardname)
 
 void FCDProPlusInput::closeFCDAudio()
 {
-    m_fcdAudioInput.removeFifo(&m_fcdFIFO);
-    m_fcdAudioInput.stop();
+    AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+    audioDeviceManager->removeAudioSource(&m_fcdFIFO);
 }
 
 void FCDProPlusInput::stop()

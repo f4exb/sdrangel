@@ -25,7 +25,6 @@
 #include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
-#include "audio/audioinputdevice.h"
 #include "audio/audiofifo.h"
 
 #include "fcdprosettings.h"
@@ -158,7 +157,6 @@ public:
 private:
 	DeviceAPI *m_deviceAPI;
 	hid_device *m_dev;
-    AudioInputDevice m_fcdAudioInput;
     AudioFifo m_fcdFIFO;
 	QMutex m_mutex;
 	FCDProSettings m_settings;

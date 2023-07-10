@@ -149,8 +149,6 @@ private:
 
 	friend class AudioOutputPipe;
     friend class AudioInput;
-    friend class FCDProInput;
-    friend class FCDProPlusInput;
 
 private slots:
     void handleInputMessages();
