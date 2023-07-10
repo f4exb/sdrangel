@@ -66,6 +66,7 @@ private:
     void refreshSampleRates(QString deviceName);
     void displaySettings();
     void displayFcTooltip();
+    void updateSpectrum();
     void sendSettings();
     void updateSampleRateAndFrequency();
     bool handleMessage(const Message& message);

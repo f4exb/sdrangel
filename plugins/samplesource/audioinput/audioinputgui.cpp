@@ -104,7 +104,18 @@ bool AudioInputGui::deserialize(const QByteArray& data)
 
 bool AudioInputGui::handleMessage(const Message& message)
 {
-    if (AudioInput::MsgConfigureAudioInput::match(message))
+    if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_sampleRate = notif.getSampleRate();
+        m_centerFrequency = notif.getCenterFrequency();
+        qDebug("AudioInputGui::handleInputMessages: DSPSignalNotification: SampleRate: %d", notif.getSampleRate());
+        updateSampleRateAndFrequency();
+        updateSpectrum();
+
+        return true;
+    }
+    else if (AudioInput::MsgConfigureAudioInput::match(message))
     {
         const AudioInput::MsgConfigureAudioInput& cfg = (AudioInput::MsgConfigureAudioInput&) message;
 
@@ -117,6 +128,7 @@ bool AudioInputGui::handleMessage(const Message& message)
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
+
         return true;
     }
     else if (AudioInput::MsgStartStop::match(message))
@@ -142,22 +154,8 @@ void AudioInputGui::handleInputMessages()
     {
         qDebug("AudioInputGui::handleInputMessages: message: %s", message->getIdentifier());
 
-        if (DSPSignalNotification::match(*message))
-        {
-            DSPSignalNotification* notif = (DSPSignalNotification*) message;
-            m_sampleRate = notif->getSampleRate();
-            m_centerFrequency = notif->getCenterFrequency();
-            qDebug("AudioInputGui::handleInputMessages: DSPSignalNotification: SampleRate: %d", notif->getSampleRate());
-            updateSampleRateAndFrequency();
-
+        if (handleMessage(*message)) {
             delete message;
-        }
-        else
-        {
-            if (handleMessage(*message))
-            {
-                delete message;
-            }
         }
     }
 }
@@ -246,6 +244,7 @@ void AudioInputGui::displaySettings()
 	ui->iqImbalance->setChecked(m_settings.m_iqImbalance);
     refreshSampleRates(ui->device->currentText());
     displayFcTooltip();
+    updateSpectrum();
 }
 
 void AudioInputGui::displayFcTooltip()
@@ -257,6 +256,15 @@ void AudioInputGui::displayFcTooltip()
         DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD
     );
     ui->fcPos->setToolTip(tr("Relative position of device center frequency: %1 kHz").arg(QString::number(fShift / 1000.0f, 'g', 5)));
+}
+
+void AudioInputGui::updateSpectrum()
+{
+    bool realElseComplex = (m_settings.m_iqMapping == AudioInputSettings::L)
+        || (m_settings.m_iqMapping == AudioInputSettings::R);
+    m_deviceUISet->getSpectrum()->setCenterFrequency(0);
+    m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
+    m_deviceUISet->getSpectrum()->setSsbSpectrum(realElseComplex);
 }
 
 void AudioInputGui::on_device_currentIndexChanged(int index)

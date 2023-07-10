@@ -53,7 +53,6 @@ private:
     SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimatorsIQ;
-    int m_quNCOPhase; //!< Quarter sample rate pseudo NCO phase index (0, 90, 180, 270)
 
     void workIQ(unsigned int nbRead);
     void decimate(qint16 *buf, unsigned int nbRead);

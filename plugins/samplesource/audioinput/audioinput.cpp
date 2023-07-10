@@ -346,11 +346,9 @@ void AudioInput::applySettings(const AudioInputSettings& settings, QList<QString
 
     if (forwardChange)
     {
-        qint64 dF =
-            ((m_settings.m_iqMapping == AudioInputSettings::IQMapping::L) ||
-            (m_settings.m_iqMapping == AudioInputSettings::IQMapping::R)) ?
-                m_settings.m_sampleRate / 4 : 0;
-        DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate/(1<<m_settings.m_log2Decim), dF);
+        bool realElseComplex = (m_settings.m_iqMapping == AudioInputSettings::L)
+            || (m_settings.m_iqMapping == AudioInputSettings::R);
+        DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate/(1<<m_settings.m_log2Decim), 0, realElseComplex);
         m_sampleRate = notif->getSampleRate();
         m_centerFrequency = notif->getCenterFrequency();
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
