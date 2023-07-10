@@ -25,8 +25,6 @@
 #include <QThread>
 
 #include "dsp/devicesamplemimo.h"
-#include "audio/audioinputdevice.h"
-#include "audio/audiooutputdevice.h"
 #include "audio/audiofifo.h"
 #include "audiocatsisosettings.h"
 #include "audiocatsisohamlib.h"
@@ -161,9 +159,7 @@ private:
     };
 
 	DeviceAPI *m_deviceAPI;
-    AudioInputDevice m_audioInput;
     AudioFifo m_inputFifo;
-    AudioOutputDevice m_audioOutput;
     AudioFifo m_outputFifo;
 	QMutex m_mutex;
 	AudioCATSISOSettings m_settings;

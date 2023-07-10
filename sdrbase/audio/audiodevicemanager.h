@@ -124,6 +124,8 @@ public:
     void unsetOutputDeviceInfo(int outputDeviceIndex);
     void inputInfosCleanup();  //!< Remove input info from map for input devices not present
     void outputInfosCleanup(); //!< Remove output info from map for output devices not present
+    bool setInputDeviceVolume(float volume, int inputDeviceIndex);
+    bool setOutputDeviceVolume(float volume, int outputDeviceIndex);
 
     static const int m_defaultAudioSampleRate = 48000;
     static const float m_defaultAudioInputVolume;

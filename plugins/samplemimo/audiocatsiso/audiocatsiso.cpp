@@ -488,7 +488,8 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
 
     if (settingsKeys.contains("rxVolume") || force)
     {
-        m_audioInput.setVolume(settings.m_rxVolume);
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        audioDeviceManager->setInputDeviceVolume(settings.m_rxVolume, m_rxAudioDeviceIndex);
         qDebug() << "AudioCATSISO::applySettings: set Rx volume to " << settings.m_rxVolume;
     }
 

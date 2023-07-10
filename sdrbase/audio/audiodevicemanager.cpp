@@ -839,6 +839,27 @@ void AudioDeviceManager::outputInfosCleanup()
     }
 }
 
+bool AudioDeviceManager::setInputDeviceVolume(float volume, int inputDeviceIndex)
+{
+    if (m_audioInputs.find(inputDeviceIndex) == m_audioInputs.end()) { // no FIFO registered yet hence no audio input has been allocated yet
+        return false;
+    }
+
+    m_audioInputs[inputDeviceIndex]->setVolume(volume);
+    return true;
+}
+
+bool AudioDeviceManager::setOutputDeviceVolume(float volume, int outputDeviceIndex)
+{
+    if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end()) { // no FIFO registered yet hence no audio output has been allocated yet
+        return false;
+    }
+
+    m_audioOutputs[outputDeviceIndex]->setVolume(volume);
+    return true;
+
+}
+
 void AudioDeviceManager::debugAudioInputInfos() const
 {
     QMap<QString, InputDeviceInfo>::const_iterator it = m_audioInputInfos.begin();
