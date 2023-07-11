@@ -33,7 +33,7 @@ class DeviceAPI;
 const PluginDescriptor PlutoSDRInputPlugin::m_pluginDescriptor = {
     QStringLiteral("PlutoSDR"),
 	QStringLiteral("PlutoSDR Input"),
-    QStringLiteral("7.8.2"),
+    QStringLiteral("7.15.1"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

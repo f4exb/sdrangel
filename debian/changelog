@@ -1,3 +1,20 @@
+sdrangel (7.15.1-1) unstable; urgency=medium
+
+   * Remove comparison of strings and chars. Fix #1713, PR #1718
+   * Run audio out on its own thread. Fixes #1717
+   * PlutoSDR:  Add missing settings keys. PR #1727
+   * RTPSink: nullify m_byteBuffer after delete
+   * Audio output: forward actual sample rate to Audio Manager
+   * SSB demod: handle DSPConfigureAudio message correctly
+   * SSB mod/demod: handle DSPConfigureAudio message correctly
+   * Fixed some spelling mistakes. PR #1733
+   * Run audio in on its own thread. For #1731
+   * FCD/AudioInpout: use AudioDeviceManager in place of manupulating AudioInputDevice directly
+   * Audio Input: handle real signals with new main spectrum feature
+   * PlutoSDR input/output: do not apply settings to self when coming from a buddy change. Fixes #1690
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 11 Jul 2023 15:45:58 +0200
+
 sdrangel (7.15.0-1) unstable; urgency=medium
 
    * New Audio CAT SISO plugin. Implements #1597
