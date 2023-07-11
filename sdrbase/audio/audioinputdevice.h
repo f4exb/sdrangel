@@ -148,7 +148,6 @@ private:
 	void stop();
 
 	friend class AudioOutputPipe;
-    friend class AudioInput;
 
 private slots:
     void handleInputMessages();
