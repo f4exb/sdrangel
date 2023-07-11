@@ -40,6 +40,7 @@ MESSAGE_CLASS_DEFINITION(AudioInput::MsgStartStop, Message)
 AudioInput::AudioInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
+    m_audioDeviceIndex(-1),
     m_worker(nullptr),
     m_workerThread(nullptr),
     m_deviceDescription("AudioInput"),
@@ -48,8 +49,10 @@ AudioInput::AudioInput(DeviceAPI *deviceAPI) :
 {
     m_sampleFifo.setLabel(m_deviceDescription);
     m_fifo.setSize(20*AudioInputWorker::m_convBufSamples);
-    openDevice();
     m_deviceAPI->setNbSourceStreams(1);
+    AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+    m_sampleRate = audioDeviceManager->getInputSampleRate(m_audioDeviceIndex);
+    m_settings.m_deviceName = AudioDeviceManager::m_defaultDeviceName;
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,
@@ -72,43 +75,11 @@ AudioInput::~AudioInput()
     if (m_running) {
         stop();
     }
-
-    closeDevice();
 }
 
 void AudioInput::destroy()
 {
     delete this;
-}
-
-bool AudioInput::openDevice()
-{
-    if (!openAudioDevice(m_settings.m_deviceName, m_settings.m_sampleRate))
-    {
-        qCritical("AudioInput::openDevice: could not open audio source");
-        return false;
-    }
-    else
-        return true;
-}
-
-bool AudioInput::openAudioDevice(QString deviceName, qint32 sampleRate)
-{
-    AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-    const QList<AudioDeviceInfo>& audioList = audioDeviceManager->getInputDevices();
-
-    for (const auto &itAudio : audioList)
-    {
-        if (AudioInputSettings::getFullDeviceName(itAudio) == deviceName)
-        {
-            // FIXME: getInputDeviceIndex needs a realm parameter (itAudio.realm())
-            int deviceIndex = audioDeviceManager->getInputDeviceIndex(itAudio.deviceName());
-            m_audioInput.start(deviceIndex, sampleRate);
-            m_audioInput.addFifo(&m_fifo);
-            return true;
-        }
-    }
-    return false;
 }
 
 void AudioInput::init()
@@ -131,7 +102,9 @@ bool AudioInput::start()
     }
 
     qDebug() << "AudioInput::start";
-    applySettings(m_settings, QList<QString>(), true, true);
+
+    AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+    audioDeviceManager->addAudioSource(&m_fifo, getInputMessageQueue(), m_audioDeviceIndex);
 
     m_workerThread = new QThread();
     m_worker = new AudioInputWorker(&m_sampleFifo, &m_fifo);
@@ -145,17 +118,12 @@ bool AudioInput::start()
     m_worker->setIQMapping(m_settings.m_iqMapping);
     m_worker->startWork();
     m_workerThread->start();
-
-    qDebug("AudioInput::started");
     m_running = true;
+	mutexLocker.unlock();
+
+    qDebug("AudioInput::start: started");
 
     return true;
-}
-
-void AudioInput::closeDevice()
-{
-    m_audioInput.removeFifo(&m_fifo);
-    m_audioInput.stop();
 }
 
 void AudioInput::stop()
@@ -177,6 +145,8 @@ void AudioInput::stop()
         m_worker = nullptr;
     }
 
+    AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+    audioDeviceManager->removeAudioSource(&m_fifo);
 }
 
 QByteArray AudioInput::serialize() const
@@ -259,7 +229,7 @@ bool AudioInput::handleMessage(const Message& message)
     }
 }
 
-void AudioInput::applySettings(const AudioInputSettings& settings, QList<QString> settingsKeys, bool force, bool starting)
+void AudioInput::applySettings(const AudioInputSettings& settings, QList<QString> settingsKeys, bool force)
 {
     bool forwardChange = false;
 
@@ -267,19 +237,25 @@ void AudioInput::applySettings(const AudioInputSettings& settings, QList<QString
         << " force:" << force
         << settings.getDebugString(settingsKeys, force);
 
-    if (settingsKeys.contains("deviceName")
-        || settingsKeys.contains("sampleRate") || force)
+
+    if (settingsKeys.contains("deviceName") || settingsKeys.contains("sampleRate") || force)
     {
-        // Don't call openAudioDevice if called from start(), otherwise ::AudioInput
-        // will be created on wrong thread and we'll crash after ::AudioInput::stop calls delete
-        if (!starting)
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        m_audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_deviceName);
+        AudioDeviceManager::InputDeviceInfo deviceInfo;
+
+        if (audioDeviceManager->getInputDeviceInfo(settings.m_deviceName, deviceInfo))
         {
-            closeDevice();
-            if (openAudioDevice(settings.m_deviceName, settings.m_sampleRate))
-                qDebug() << "AudioInput::applySettings: opened device " << settings.m_deviceName << " with sample rate " << m_audioInput.getRate();
-            else
-                qCritical() << "AudioInput::applySettings: failed to open device " << settings.m_deviceName;
-            }
+            deviceInfo.sampleRate = settings.m_sampleRate;
+            audioDeviceManager->setInputDeviceInfo(m_audioDeviceIndex, deviceInfo);
+        }
+
+        audioDeviceManager->removeAudioSource(&m_fifo);
+        audioDeviceManager->addAudioSource(&m_fifo, getInputMessageQueue(), m_audioDeviceIndex);
+        m_sampleRate = audioDeviceManager->getInputSampleRate(m_audioDeviceIndex);
+        qDebug("AudioInput::applySettings: audioDeviceName: %s audioDeviceIndex: %d sampleRate: %d",
+            qPrintable(settings.m_deviceName), m_audioDeviceIndex, m_sampleRate);
+        forwardChange = true;
     }
 
     if (settingsKeys.contains("sampleRate") || force) {
@@ -288,8 +264,13 @@ void AudioInput::applySettings(const AudioInputSettings& settings, QList<QString
 
     if (settingsKeys.contains("volume") || force)
     {
-        m_audioInput.setVolume(settings.m_volume);
-        qDebug() << "AudioInput::applySettings: set volume to " << settings.m_volume;
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+
+        if (audioDeviceManager->setInputDeviceVolume(settings.m_volume, m_audioDeviceIndex)) {
+            qDebug("AudioInput::applySettings: set volume of %d to %f", m_audioDeviceIndex, settings.m_volume);
+        } else {
+            qWarning("AudioInput::applySettings: failed to set volume of %d to %f", m_audioDeviceIndex, settings.m_volume);
+        }
     }
 
     if (settingsKeys.contains("log2Decim") || force)

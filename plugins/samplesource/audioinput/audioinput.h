@@ -27,7 +27,6 @@
 #include <QMutex>
 
 #include "dsp/devicesamplesource.h"
-#include "audio/audioinputdevice.h"
 #include "audio/audiofifo.h"
 
 #include "audioinputsettings.h"
@@ -136,10 +135,10 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    AudioInputDevice m_audioInput;
     AudioFifo m_fifo;
     QMutex m_mutex;
     AudioInputSettings m_settings;
+    int m_audioDeviceIndex;
     AudioInputWorker* m_worker;
     QThread *m_workerThread;
     QString m_deviceDescription;
@@ -149,10 +148,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    bool openDevice();
-    void closeDevice();
-    bool openAudioDevice(QString deviceName, int sampleRate);
-    void applySettings(const AudioInputSettings& settings, QList<QString> settingsKeys, bool force, bool starting=false);
+    void applySettings(const AudioInputSettings& settings, QList<QString> settingsKeys, bool force);
 
     void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AudioInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
