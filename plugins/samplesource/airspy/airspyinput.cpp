@@ -137,7 +137,7 @@ bool AirspyInput::openDevice()
 #endif
 
 #ifdef LIBAIRSPY_DEFAULT_RATES
-    qDebug("AirspyInput::start: detault rates");
+    qDebug("AirspyInput::start: default rates");
     m_sampleRates.clear();
     m_sampleRates.push_back(10000000);
     m_sampleRates.push_back(2500000);

@@ -122,7 +122,7 @@ void SampleMOFifo::writeSync(
     }
     else if (rwDelta > m_highGuard)
     {
-        qWarning("SampleMOFifo::write: overrrun (read too slow) dropping %d samples", m_highGuard - m_midPoint);
+        qWarning("SampleMOFifo::write: overrun (read too slow) dropping %d samples", m_highGuard - m_midPoint);
         m_writeHead = m_readHead + m_midPoint < m_size ? m_readHead + m_midPoint : m_readHead + m_midPoint - m_size;
     }
 
@@ -200,7 +200,7 @@ void SampleMOFifo::writeAsync( //!< in place write with given amount
     }
     else if (rwDelta > m_highGuard)
     {
-        qWarning("SampleMOFifo::write: overrrun on stream %u (read too slow) dropping %d samples", stream, m_highGuard - m_midPoint);
+        qWarning("SampleMOFifo::write: overrun on stream %u (read too slow) dropping %d samples", stream, m_highGuard - m_midPoint);
         m_vWriteHead[stream] = m_vReadHead[stream] + m_midPoint < m_size ?
             m_vReadHead[stream] + m_midPoint : m_vReadHead[stream] + m_midPoint - m_size;
     }

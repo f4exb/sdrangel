@@ -565,7 +565,7 @@ bool APRSPacket::parseWeather(QString& info, int& idx, bool positionLess)
         case 't': // Temp
             if (!parseInt(info, idx, 3, m_temp, m_hasTemp))
             {
-            qDebug() << "Failed parseing temp: idx" << idx;
+            qDebug() << "Failed parsing temp: idx" << idx;
                 return false;
         }
             break;

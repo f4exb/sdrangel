@@ -101,7 +101,7 @@ void SampleSourceFifo::write(
     }
     else if (rwDelta > m_highGuard)
     {
-        qWarning("SampleSourceFifo::write: overrrun (read too slow) dropping %d samples", m_highGuard - m_midPoint);
+        qWarning("SampleSourceFifo::write: overrun (read too slow) dropping %d samples", m_highGuard - m_midPoint);
         m_writeHead = m_readHead + m_midPoint < m_size ? m_readHead + m_midPoint : m_readHead + m_midPoint - m_size;
     }
 

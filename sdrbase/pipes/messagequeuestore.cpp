@@ -40,7 +40,7 @@ void MessageQueueStore::deleteElement(QObject *element)
 
     if (i >= 0)
     {
-        qDebug("MessageQueueStore::deleteElement: delte element at %d", i);
+        qDebug("MessageQueueStore::deleteElement: delete element at %d", i);
         delete m_messageQueues[i];
         m_messageQueues.removeAt(i);
     }

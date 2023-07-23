@@ -369,7 +369,7 @@ bool BladeRF2Input::start()
 
     if (needsStart)
     {
-        qDebug("BladeRF2Input::start: enabling channel(s) and (re)sart buddy thread");
+        qDebug("BladeRF2Input::start: enabling channel(s) and (re)start buddy thread");
 
         int nbChannels = bladerf2InputThread->getNbChannels();
 

@@ -409,7 +409,7 @@ void NavtexDemodSink::receiveBit(bool bit)
                 }
                 if (m_consecutiveErrors >= 5)
                 {
-                    //qDebug() << "Too many consequtive errors";
+                    //qDebug() << "Too many consecutive errors";
                     init();
                 }
             }

@@ -192,7 +192,7 @@ static const char *dabLanguageCode[] =
     "Vietnamese",
     "Uzbek",
     "Urdu",
-    "Ukranian",
+    "Ukrainian",
     "Thai",
     "Telugu",
     "Tatar",

@@ -45,7 +45,7 @@ void MainBench::run()
         << " testStr: " << m_parser.getTestStr()
         << " testType: " << (int) m_parser.getTestType()
         << " nsamples: " << m_parser.getNbSamples()
-        << " repet: " << m_parser.getRepetition()
+        << " repeat: " << m_parser.getRepetition()
         << " log2f: " << m_parser.getLog2Factor()
         << " file: " << m_parser.getFileName()
         << " args: " << m_parser.getArgsStr();

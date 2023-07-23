@@ -115,7 +115,7 @@ bool SDRPlayV3Input::openDevice()
             sdrplay_api_UnlockDeviceApi();
             if ((err = sdrplay_api_GetDeviceParams(m_dev->dev, &m_devParams)) == sdrplay_api_Success)
             {
-                qDebug() << "SDRPlayV3Input::openDevice: opened sucessfully";
+                qDebug() << "SDRPlayV3Input::openDevice: opened successfully";
             }
             else
             {
