@@ -1,4 +1,4 @@
-<h1>Radiosonde Feature Plugin</h1>
+ï»¿<h1>Radiosonde Feature Plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -19,15 +19,15 @@ The Radiosonde table displays the current status of each radiosonde, based on th
 
 * Serial - The serial number that uniquely identifiers each radiosonde.
 * Type - The type of radiosonde.
-* Lat (°) - Latitude in degrees. East positive. Double clicking on this column will center the map on this object.
-* Lon (°) - Longitude in degrees. West positive. Double clicking on this column will center the map on this object.
+* Lat (Â°) - Latitude in degrees. East positive. Double clicking on this column will center the map on this object.
+* Lon (Â°) - Longitude in degrees. West positive. Double clicking on this column will center the map on this object.
 * Alt (m) - The altitude of the radiosonde in metres.
 * Spd (km/h) - Speed over ground in kilometres per hour.
 * VR (m/s) - Vertical climb rate in metres per second.
-* Hdg (°) - Heading in degrees.
+* Hdg (Â°) - Heading in degrees.
 * Status - Flight status of the radiosonde (E.g. On ground, ascent or descent).
 * P (hPA) - Air pressure in hectopascals. Not all RS41s include a pressure sensor. A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
-* T (°C) - Air temperature in degrees Celsius.  A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
+* T (Â°C) - Air temperature in degrees Celsius.  A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
 * U (%) - Relative humidity in percent.  A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
 * Alt Max (m) - The maximum altitude seen for the radiosonde in metres.
 * Freq (MHz) - The transmission frequency in megahertz as indicated by the radiosonde.
