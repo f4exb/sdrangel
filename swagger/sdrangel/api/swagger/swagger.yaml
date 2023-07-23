@@ -219,7 +219,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
     put:
-      description: Change logging parmeters for this instance
+      description: Change logging parameters for this instance
       operationId: instanceLoggingPut
       tags:
         - Instance
@@ -266,7 +266,7 @@ paths:
   /sdrangel/audio/input/parameters:
     x-swagger-router-controller: instance
     patch:
-      description: Set audio input device paramaters
+      description: Set audio input device parameters
       operationId: instanceAudioInputPatch
       tags:
         - Instance
@@ -293,7 +293,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
     delete:
-      description: Delete audio input device paramaters and return to defaults
+      description: Delete audio input device parameters and return to defaults
       operationId: instanceAudioInputDelete
       tags:
         - Instance
@@ -368,7 +368,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
     delete:
-      description: Delete audio output device paramaters and return to defaults
+      description: Delete audio output device parameters and return to defaults
       operationId: instanceAudioOutputDelete
       tags:
         - Instance
@@ -1192,7 +1192,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
     put:
-      description: Apply main spectrun settings unconditionnaly (force)
+      description: Apply main spectrum settings unconditionally (force)
       operationId: devicesetSpectrumSettingsPut
       tags:
         - DeviceSet
@@ -1222,7 +1222,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
     patch:
-      description: Apply main spectrun settings differentially (no force)
+      description: Apply main spectrum settings differentially (no force)
       operationId: devicesetSpectrumSettingsPatch
       tags:
         - DeviceSet
@@ -1415,7 +1415,7 @@ paths:
             $ref: "#/definitions/DeviceListItem"
       responses:
         "202":
-          description: On successful semding of the message it returns the details of the device being set
+          description: On successful sending of the message it returns the details of the device being set
           schema:
             $ref: "#/definitions/DeviceListItem"
         "400":
@@ -3268,14 +3268,14 @@ definitions:
     description: "A target azimuth and elevation"
     properties:
       name:
-        descrption: "The name of the target"
+        description: "The name of the target"
         type: string
       azimuth:
-        descrption: "The azimuth angle in degrees to the target"
+        description: "The azimuth angle in degrees to the target"
         type: number
         format: float
       elevation:
-        descrption: "The elevation angle in degrees to the target"
+        description: "The elevation angle in degrees to the target"
         type: number
         format: float
 

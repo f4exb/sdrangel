@@ -58,7 +58,7 @@ MapItem:
       type: integer
       default: 0
     text:
-      descrption: "Text to draw on the map when item is selected"
+      description: "Text to draw on the map when item is selected"
       type: string
     latitude:
       description: "Latitude in decimal degrees, positive to the North"
@@ -113,7 +113,7 @@ MapItem:
       description: "Label for the model"
       type: string
     labelAltitudeOffset:
-      description: "Veritical offset to position label at"
+      description: "Vertical offset to position label at"
       type: number
       format: float
     modelAltitudeOffset:
