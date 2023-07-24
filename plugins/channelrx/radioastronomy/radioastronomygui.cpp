@@ -4465,7 +4465,7 @@ void RadioAstronomyGUI::plotRefLine(FFTMeasurement *fft)
     double lineFreqMHz = ui->spectrumLineFrequency->value();
     double lineFreq = lineFreqMHz * 1e6;
     QString refFrame[] = {"Topocentric", "Barycentric", "LSR"};
-    m_fftDopplerAxis->setTitleText(QString("%1 radial velocity (km/s - +ve receeding)").arg(refFrame[m_settings.m_refFrame]));
+    m_fftDopplerAxis->setTitleText(QString("%1 radial velocity (km/s - +ve receding)").arg(refFrame[m_settings.m_refFrame]));
     m_fftHlineSeries->setName(QString("%1 line").arg(ui->spectrumLine->currentText()));
     m_fftHlineSeries->append(0.0f, -200.0f); // For dB
     m_fftHlineSeries->append(0.0f, 10000.0f); // For temp can be >1e6?

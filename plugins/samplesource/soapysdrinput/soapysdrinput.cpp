@@ -562,7 +562,7 @@ bool SoapySDRInput::start()
 
     if (needsStart)
     {
-        qDebug("SoapySDRInput::start: (re)sart buddy thread");
+        qDebug("SoapySDRInput::start: (re)start buddy thread");
         soapySDRInputThread->setSampleRate(m_settings.m_devSampleRate);
         soapySDRInputThread->startWork();
     }

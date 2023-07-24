@@ -405,13 +405,13 @@ void AaroniaRTSAInputWorker::parseConfig(QByteArray bytes)
         }
         else
         {
-            qDebug() << "AaroniaRTSAInputWorker::parseConfig: document has no config obhect: " << documentObject;
+            qDebug() << "AaroniaRTSAInputWorker::parseConfig: document has no config object: " << documentObject;
         }
 
     }
     else
     {
-        qDebug() << "AaroniaRTSAInputWorker::parseConfig: Document is not an object: " << document;
+        qDebug() << "AaroniaRTSAInputWorker::parseConfig: document is not an object: " << document;
     }
 
     if (m_iqDemodName == "") {

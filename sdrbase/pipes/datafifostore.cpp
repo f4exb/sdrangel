@@ -40,7 +40,7 @@ void DataFifoStore::deleteElement(QObject *element)
 
     if (i >= 0)
     {
-        qDebug("DataFifoStore::deleteElement: delte element at %d", i);
+        qDebug("DataFifoStore::deleteElement: delete element at %d", i);
         delete m_dataFifos[i];
         m_dataFifos.removeAt(i);
     }

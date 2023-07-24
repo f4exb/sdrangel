@@ -53,7 +53,7 @@ StarTrackerSettings:
       type: number
       format: float
     temperature:
-      description: "Air temperature in Celsuis, for refraction"
+      description: "Air temperature in Celsius, for refraction"
       type: number
       format: float
     humidity:
@@ -73,7 +73,7 @@ StarTrackerSettings:
       type: number
       format: float
     stellariumServerEnabled:
-      descrption: "Enable Stellarium server (1 for yes, 0 for no)"
+      description: "Enable Stellarium server (1 for yes, 0 for no)"
       type: integer
     stellariumPort:
       description: "IP port number for Stellarium server to listen on (Default is 10001)."
@@ -116,14 +116,14 @@ StarTrackerTarget:
   description: "Star Tracker target. Sent to startracker.target message queue for other plugins to use."
   properties:
     name:
-      descrption: "The name of the target"
+      description: "The name of the target"
       type: string
     azimuth:
-      descrption: "The azimuth angle in degrees to the target"
+      description: "The azimuth angle in degrees to the target"
       type: number
       format: float
     elevation:
-      descrption: "The elevation angle in degrees to the target"
+      description: "The elevation angle in degrees to the target"
       type: number
       format: float
     ra:
@@ -135,11 +135,11 @@ StarTrackerTarget:
       type: number
       format: float
     b:
-      descrption: "Galactic latitude in degrees"
+      description: "Galactic latitude in degrees"
       type: number
       format: float
     l:
-      descrption: "Galactic longitude in degrees"
+      description: "Galactic longitude in degrees"
       type: number
       format: float
     earthRotationVelocity:
@@ -178,11 +178,11 @@ StarTrackerDisplaySettings:
       description: "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
       type: string
     azimuth:
-      descrption: "The azimuth angle in degrees to the target"
+      description: "The azimuth angle in degrees to the target"
       type: number
       format: float
     elevation:
-      descrption: "The elevation angle in degrees to the target"
+      description: "The elevation angle in degrees to the target"
       type: number
       format: float
 
@@ -192,15 +192,15 @@ StarTrackerDisplayLoSSettings:
     name:
       type: string
     b:
-      descrption: "Galactic latitude in degrees"
+      description: "Galactic latitude in degrees"
       type: number
       format: float
     l:
-      descrption: "Galactic longitude in degrees"
+      description: "Galactic longitude in degrees"
       type: number
       format: float
     d:
-      descrption: "Distance to object from Sun in kpc"
+      description: "Distance to object from Sun in kpc"
       type: number
       format: float
 

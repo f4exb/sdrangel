@@ -2788,7 +2788,7 @@ int WebAPIAdapter::devicesetChannelSettingsGet(
             }
             else
             {
-                *error.getMessage() = QString("Ther is no channel with index %1").arg(channelIndex);
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
                 return 404;
             }
 
@@ -2800,7 +2800,7 @@ int WebAPIAdapter::devicesetChannelSettingsGet(
             }
             else
             {
-                *error.getMessage() = QString("Ther is no channel with index %1").arg(channelIndex);
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
                 return 404;
             }
         }

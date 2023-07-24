@@ -760,7 +760,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                 SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
                 if (devSettings->m_startOnAOS)
                 {
-                    qDebug() << "SatelliteTrackerWorker::aos: starting acqusition";
+                    qDebug() << "SatelliteTrackerWorker::aos: starting acquisition";
                     ChannelWebAPIUtils::run(devSettings->m_deviceSetIndex);
                 }
             }

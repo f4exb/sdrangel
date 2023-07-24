@@ -372,7 +372,7 @@ bool OurAirportsDB::readFrequenciesDB(const QString &filename, QHash<int, Airpor
             idx = colNames.indexOf("type");
             if (idx >= 0)
                  typeCol = idx;
-            idx = colNames.indexOf("descrption");
+            idx = colNames.indexOf("description");
             if (idx >= 0)
                  descriptionCol = idx;
             idx = colNames.indexOf("frequency_mhz");

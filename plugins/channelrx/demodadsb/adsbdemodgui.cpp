@@ -112,9 +112,9 @@ const QString ADSBDemodGUI::m_emergencyStatus[] = {
 };
 
 const QString ADSBDemodGUI::m_flightStatuses[] = {
-    QStringLiteral("Airbourne"),
+    QStringLiteral("Airborne"),
     QStringLiteral("On-ground"),
-    QStringLiteral("Alert, airboune"),
+    QStringLiteral("Alert, airborne"),
     QStringLiteral("Alert, on-ground"),
     QStringLiteral("Alert, SPI"),
     QStringLiteral("SPI"),
@@ -1107,7 +1107,7 @@ void ADSBDemodGUI::handleADSB(
         else
         {
             // Ignore if not from a known aircraft, as its likely not to be a valid packet
-            //qDebug() << "Skiping Mode-S from unknown aircraft - DF " << df << " ICAO " << Qt::hex << icao;
+            //qDebug() << "Skipping Mode-S from unknown aircraft - DF " << df << " ICAO " << Qt::hex << icao;
             return;
         }
     }

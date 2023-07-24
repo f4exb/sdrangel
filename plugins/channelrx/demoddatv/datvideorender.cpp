@@ -485,7 +485,7 @@ bool DATVideoRender::renderStream()
 
                     if (sws_init_context(m_swsCtx, nullptr, nullptr) < 0)
                     {
-                        qDebug() << "DATVideoRender::renderStream cannont init video data converter";
+                        qDebug() << "DATVideoRender::renderStream cannot init video data converter";
                         m_swsCtx = nullptr;
                         av_packet_unref(&packet);
                         return false;
@@ -499,7 +499,7 @@ bool DATVideoRender::renderStream()
 
                     if (av_image_alloc(m_decodedData, m_decodedLineSize, m_frame->width, m_frame->height, AV_PIX_FMT_RGB24, 1) < 0)
                     {
-                        qDebug() << "DATVideoRender::renderStream cannont init video image buffer";
+                        qDebug() << "DATVideoRender::renderStream cannot init video image buffer";
                         sws_freeContext(m_swsCtx);
                         m_swsCtx = nullptr;
                         av_packet_unref(&packet);

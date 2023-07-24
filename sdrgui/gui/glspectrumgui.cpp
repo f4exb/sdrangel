@@ -79,7 +79,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     QString levelStyle = QString(
         "QSpinBox {background-color: rgb(79, 79, 79);}"
         "QLineEdit {color: white; background-color: rgb(79, 79, 79); border: 1px solid gray; border-radius: 4px;}"
-        "QTooltip {color: white; background-color: balck;}"
+        "QTooltip {color: white; background-color: black;}"
     );
     ui->refLevel->setStyleSheet(levelStyle);
     ui->levelRange->setStyleSheet(levelStyle);

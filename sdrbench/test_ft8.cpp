@@ -231,7 +231,7 @@ void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
 
     if (msgMap.size() != 15)
     {
-        qDebug("MainBench::testFT8: failed: invlid size: %lu expected 15", msgMap.size());
+        qDebug("MainBench::testFT8: failed: invalid size: %lu expected 15", msgMap.size());
         return;
     }
 

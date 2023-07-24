@@ -770,7 +770,7 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
         }
         else
         {
-            qDebug() << "VORLocalizerGUI::handleMessage: Got MsgReportRadial for non-existant subChannelId " << subChannelId;
+            qDebug() << "VORLocalizerGUI::handleMessage: Got MsgReportRadial for non-existent subChannelId " << subChannelId;
         }
 
         return true;
@@ -820,7 +820,7 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
         }
         else
         {
-            qDebug() << "VORLocalizerGUI::handleMessage: Got MsgReportIdent for non-existant subChannelId " << subChannelId;
+            qDebug() << "VORLocalizerGUI::handleMessage: Got MsgReportIdent for non-existent subChannelId " << subChannelId;
         }
 
         return true;
