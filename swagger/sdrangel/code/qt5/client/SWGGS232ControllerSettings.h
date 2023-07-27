@@ -67,11 +67,11 @@ public:
     QString* getSource();
     void setSource(QString* source);
 
-    qint32 getAzimuthOffset();
-    void setAzimuthOffset(qint32 azimuth_offset);
+    float getAzimuthOffset();
+    void setAzimuthOffset(float azimuth_offset);
 
-    qint32 getElevationOffset();
-    void setElevationOffset(qint32 elevation_offset);
+    float getElevationOffset();
+    void setElevationOffset(float elevation_offset);
 
     qint32 getAzimuthMin();
     void setAzimuthMin(qint32 azimuth_min);
@@ -155,10 +155,10 @@ private:
     QString* source;
     bool m_source_isSet;
 
-    qint32 azimuth_offset;
+    float azimuth_offset;
     bool m_azimuth_offset_isSet;
 
-    qint32 elevation_offset;
+    float elevation_offset;
     bool m_elevation_offset_isSet;
 
     qint32 azimuth_min;

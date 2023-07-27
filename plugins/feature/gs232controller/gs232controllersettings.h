@@ -51,8 +51,8 @@ struct GS232ControllerSettings
     int m_port;
     bool m_track;
     QString m_source;           // Plugin to get az/el from. E.g: "R0:0 ADSBDemod". Use a string, so can be set via WebAPI
-    int m_azimuthOffset;
-    int m_elevationOffset;
+    float m_azimuthOffset;
+    float m_elevationOffset;
     int m_azimuthMin;
     int m_azimuthMax;
     int m_elevationMin;

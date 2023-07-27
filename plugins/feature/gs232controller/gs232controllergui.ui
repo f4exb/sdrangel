@@ -406,22 +406,6 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="3">
-       <widget class="QSpinBox" name="elevationOffset">
-        <property name="toolTip">
-         <string>Specify an offset angle in degrees that will be added to the target elevation to correct for misalignment</string>
-        </property>
-        <property name="minimum">
-         <number>-180</number>
-        </property>
-        <property name="maximum">
-         <number>180</number>
-        </property>
-        <property name="singleStep">
-         <number>1</number>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QComboBox" name="protocol">
         <property name="toolTip">
@@ -628,19 +612,6 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="azimuthOffset">
-        <property name="toolTip">
-         <string>Specify an offset angel in degrees that will be added to the target azimuth to correct for misalignment</string>
-        </property>
-        <property name="minimum">
-         <number>-360</number>
-        </property>
-        <property name="maximum">
-         <number>360</number>
-        </property>
-       </widget>
-      </item>
       <item row="6" column="1">
        <widget class="QDoubleSpinBox" name="tolerance">
         <property name="toolTip">
@@ -758,6 +729,38 @@
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="3" column="1">
+       <widget class="QDoubleSpinBox" name="azimuthOffset">
+        <property name="toolTip">
+         <string>Specify an offset angle in degrees that will be added to the target azimuth to correct for misalignment</string>
+        </property>
+        <property name="decimals">
+         <number>0</number>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QDoubleSpinBox" name="elevationOffset">
+        <property name="toolTip">
+         <string>Specify an offset angle in degrees that will be added to the target elevation to correct for misalignment</string>
+        </property>
+        <property name="decimals">
+         <number>0</number>
+        </property>
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

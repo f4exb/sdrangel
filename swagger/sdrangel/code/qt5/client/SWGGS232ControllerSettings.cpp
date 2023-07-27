@@ -44,9 +44,9 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_track_isSet = false;
     source = nullptr;
     m_source_isSet = false;
-    azimuth_offset = 0;
+    azimuth_offset = 0.0f;
     m_azimuth_offset_isSet = false;
-    elevation_offset = 0;
+    elevation_offset = 0.0f;
     m_elevation_offset_isSet = false;
     azimuth_min = 0;
     m_azimuth_min_isSet = false;
@@ -108,9 +108,9 @@ SWGGS232ControllerSettings::init() {
     m_track_isSet = false;
     source = new QString("");
     m_source_isSet = false;
-    azimuth_offset = 0;
+    azimuth_offset = 0.0f;
     m_azimuth_offset_isSet = false;
-    elevation_offset = 0;
+    elevation_offset = 0.0f;
     m_elevation_offset_isSet = false;
     azimuth_min = 0;
     m_azimuth_min_isSet = false;
@@ -223,9 +223,9 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&source, pJson["source"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&azimuth_offset, pJson["azimuthOffset"], "qint32", "");
+    ::SWGSDRangel::setValue(&azimuth_offset, pJson["azimuthOffset"], "float", "");
     
-    ::SWGSDRangel::setValue(&elevation_offset, pJson["elevationOffset"], "qint32", "");
+    ::SWGSDRangel::setValue(&elevation_offset, pJson["elevationOffset"], "float", "");
     
     ::SWGSDRangel::setValue(&azimuth_min, pJson["azimuthMin"], "qint32", "");
     
@@ -447,22 +447,22 @@ SWGGS232ControllerSettings::setSource(QString* source) {
     this->m_source_isSet = true;
 }
 
-qint32
+float
 SWGGS232ControllerSettings::getAzimuthOffset() {
     return azimuth_offset;
 }
 void
-SWGGS232ControllerSettings::setAzimuthOffset(qint32 azimuth_offset) {
+SWGGS232ControllerSettings::setAzimuthOffset(float azimuth_offset) {
     this->azimuth_offset = azimuth_offset;
     this->m_azimuth_offset_isSet = true;
 }
 
-qint32
+float
 SWGGS232ControllerSettings::getElevationOffset() {
     return elevation_offset;
 }
 void
-SWGGS232ControllerSettings::setElevationOffset(qint32 elevation_offset) {
+SWGGS232ControllerSettings::setElevationOffset(float elevation_offset) {
     this->elevation_offset = elevation_offset;
     this->m_elevation_offset_isSet = true;
 }

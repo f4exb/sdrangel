@@ -633,6 +633,8 @@ void GS232ControllerGUI::setPrecision()
     ui->coord1->setDecimals(m_settings.m_precision);
     ui->coord2->setDecimals(m_settings.m_precision);
     ui->tolerance->setDecimals(m_settings.m_precision);
+    ui->azimuthOffset->setDecimals(m_settings.m_precision);
+    ui->elevationOffset->setDecimals(m_settings.m_precision);
 }
 
 void GS232ControllerGUI::on_protocol_currentIndexChanged(int index)
@@ -699,22 +701,22 @@ void GS232ControllerGUI::on_coord2_valueChanged(double value)
     ui->targetName->setText("");
 }
 
-void GS232ControllerGUI::on_azimuthOffset_valueChanged(int value)
+void GS232ControllerGUI::on_azimuthOffset_valueChanged(double value)
 {
     if (!m_inputUpdate) {
         m_inputAzOffset = value;
     }
-    m_settings.m_azimuthOffset = value;
+    m_settings.m_azimuthOffset = (float) value;
     m_settingsKeys.append("azimuthOffset");
     applySettings();
 }
 
-void GS232ControllerGUI::on_elevationOffset_valueChanged(int value)
+void GS232ControllerGUI::on_elevationOffset_valueChanged(double value)
 {
     if (!m_inputUpdate) {
         m_inputElOffset = value;
     }
-    m_settings.m_elevationOffset = value;
+    m_settings.m_elevationOffset = (float) value;
     m_settingsKeys.append("elevationOffset");
     applySettings();
 }
@@ -948,8 +950,8 @@ void GS232ControllerGUI::makeUIConnections()
     QObject::connect(ui->coord1, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_coord1_valueChanged);
     QObject::connect(ui->coord2, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_coord2_valueChanged);
     QObject::connect(ui->sources, &QComboBox::currentTextChanged, this, &GS232ControllerGUI::on_sources_currentTextChanged);
-    QObject::connect(ui->azimuthOffset, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_azimuthOffset_valueChanged);
-    QObject::connect(ui->elevationOffset, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_elevationOffset_valueChanged);
+    QObject::connect(ui->azimuthOffset, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_azimuthOffset_valueChanged);
+    QObject::connect(ui->elevationOffset, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_elevationOffset_valueChanged);
     QObject::connect(ui->azimuthMin, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_azimuthMin_valueChanged);
     QObject::connect(ui->azimuthMax, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_azimuthMax_valueChanged);
     QObject::connect(ui->elevationMin, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_elevationMin_valueChanged);
