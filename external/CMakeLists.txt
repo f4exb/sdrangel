@@ -402,7 +402,7 @@ else()
     endif()
 endif()
 
-if (NOT FFMEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
+if (NOT FFMPEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
     # Libs only used by ffmpeg
 
