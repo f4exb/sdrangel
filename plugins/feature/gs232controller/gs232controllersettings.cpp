@@ -53,8 +53,8 @@ void GS232ControllerSettings::resetToDefaults()
     m_port = 4533;
     m_track = false;
     m_source = "";
-    m_azimuthOffset = 0;
-    m_elevationOffset = 0;
+    m_azimuthOffset = 0.0f;
+    m_elevationOffset = 0.0f;
     m_azimuthMin = 0;
     m_azimuthMax = 450;
     m_elevationMin = 0;
@@ -97,8 +97,8 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeU32(12, m_reverseAPIPort);
     s.writeU32(13, m_reverseAPIFeatureSetIndex);
     s.writeU32(14, m_reverseAPIFeatureIndex);
-    s.writeS32(15, m_azimuthOffset);
-    s.writeS32(16, m_elevationOffset);
+    s.writeFloat(15, m_azimuthOffset);
+    s.writeFloat(16, m_elevationOffset);
     s.writeS32(17, m_azimuthMin);
     s.writeS32(18, m_azimuthMax);
     s.writeS32(19, m_elevationMin);
@@ -165,8 +165,8 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(14, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
-        d.readS32(15, &m_azimuthOffset, 0);
-        d.readS32(16, &m_elevationOffset, 0);
+        d.readFloat(15, &m_azimuthOffset, 0.0f);
+        d.readFloat(16, &m_elevationOffset, 0.0f);
         d.readS32(17, &m_azimuthMin, 0);
         d.readS32(18, &m_azimuthMax, 450);
         d.readS32(19, &m_elevationMin, 0);

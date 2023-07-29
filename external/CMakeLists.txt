@@ -595,8 +595,10 @@ if ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT USE_PRECOMPILED_LIBS)
     elseif (LINUX)
         set(CODEC2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif ()
+    # Repo temp set to codec2-dev to use v1.0.3 tag
+    # Should revert to codec2 when we eventually update to latest (v1.2.0+) release
     ExternalProject_Add(codec2
-            GIT_REPOSITORY https://github.com/drowe67/codec2.git
+            GIT_REPOSITORY https://github.com/drowe67/codec2-dev.git
             GIT_TAG ${CODEC2_TAG}
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/codec2"
             CMAKE_ARGS ${COMMON_CMAKE_ARGS}

@@ -110,8 +110,8 @@ private slots:
     void on_coord1_valueChanged(double value);
     void on_coord2_valueChanged(double value);
     void on_sources_currentTextChanged(const QString& text);
-    void on_azimuthOffset_valueChanged(int value);
-    void on_elevationOffset_valueChanged(int value);
+    void on_azimuthOffset_valueChanged(double value);
+    void on_elevationOffset_valueChanged(double value);
     void on_azimuthMin_valueChanged(int value);
     void on_azimuthMax_valueChanged(int value);
     void on_elevationMin_valueChanged(int value);
