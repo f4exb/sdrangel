@@ -171,30 +171,6 @@ endif (WIN32)
 
 set(MACOS_EXTERNAL_LIBS_FIXUP "${CMAKE_BINARY_DIR}/${INSTALL_LIB_DIR}")
 
-if (AUTO_EXTERNAL_LIBRARIES)
-    find_package(Codec2)
-    find_package(CM256cc)
-    find_package(LibMbe)
-    find_package(SerialDV)
-    find_package(LibDSDcc)
-    find_package(LimeSuite)
-    find_package(LibBLADERF)
-    find_package(LibMiriSDR)
-    find_package(LibIIO)
-    find_package(LibAIRSPYHF)
-    find_package(LibPerseus)
-    find_package(LibRTLSDR)
-    find_package(LibUSB)
-    find_package(Opus)
-    find_package(Boost)
-    find_package(ZLIB)
-    find_package(UHD)
-    find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
-    find_package(FAAD)
-    find_package(FFTW3F)
-    find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio)
-endif (AUTO_EXTERNAL_LIBRARIES)
-
 # While some of the following projects are not installed (to save time & space), some have to
 # be so that on MacOS, the paths embedded in the libraries to other libraries are correct (as they are set to
 # install path, not build). This is required for macdeployqt to be able to find them
