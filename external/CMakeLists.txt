@@ -240,7 +240,7 @@ if (NOT HIDAPI_FOUND AND NOT USE_PRECOMPILED_LIBS AND ENABLE_FUNCUBE)
         set(HIDAPI_LIBRARIES "${install_dir}/lib/libhidapi${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
-endif (NOT HIDAPI_FOUND AND NOT USE_PRECOMPILED_LIBS)
+endif ()
 
 if (NOT OPUS_FOUND AND NOT USE_PRECOMPILED_LIBS)
     ExternalProject_Add(opus
@@ -570,7 +570,7 @@ if (NOT OpenCV_FOUND AND NOT USE_PRECOMPILED_LIBS AND ENABLE_CHANNELTX_MODATV)
         set(OpenCV_LIBS "${binary_dir}/lib/libopencv_core${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_core${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_highgui${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_video${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_videoio${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_imgproc${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_imgcodecs${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/lib")
     endif ()
-endif (NOT OpenCV_FOUND AND NOT USE_PRECOMPILED_LIBS)
+endif (NOT OpenCV_FOUND AND NOT USE_PRECOMPILED_LIBS AND ENABLE_CHANNELTX_MODATV)
 
 if ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT USE_PRECOMPILED_LIBS)
     # needs speexdsp
