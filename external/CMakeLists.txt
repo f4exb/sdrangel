@@ -223,7 +223,7 @@ if (NOT LIBUSB_FOUND AND NOT USE_PRECOMPILED_LIBS)
     endif ()
 endif (NOT LIBUSB_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
-if (NOT HIDAPI_FOUND AND NOT USE_PRECOMPILED_LIBS)
+if (NOT HIDAPI_FOUND AND NOT USE_PRECOMPILED_LIBS AND ENABLE_FUNCUBE)
     ExternalProject_Add(hidapi
             GIT_REPOSITORY https://github.com/libusb/hidapi.git
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/hidapi"
@@ -522,7 +522,8 @@ if (NOT FFMPEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
 endif (NOT FFMPEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
-if (NOT OpenCV_FOUND AND NOT USE_PRECOMPILED_LIBS)
+# OpenCV only used by Mod ATV curently
+if (NOT OpenCV_FOUND AND NOT USE_PRECOMPILED_LIBS AND ENABLE_CHANNELTX_MODATV)
     ExternalProject_Add(opencv
             GIT_REPOSITORY https://github.com/opencv/opencv.git
             GIT_TAG 4.5.5
@@ -750,65 +751,68 @@ if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
 endif ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
 
 # For APT demodulator
-if (WIN32)
-    set(APT_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/apt.lib" CACHE INTERNAL "")
-elseif (LINUX)
-    set(APT_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libapt${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-endif()
-ExternalProject_Add(apt
-        GIT_REPOSITORY https://github.com/srcejon/aptdec.git
-        GIT_TAG libaptdec
-        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/apt"
-        CMAKE_ARGS ${COMMON_CMAKE_ARGS}
-        BUILD_BYPRODUCTS "${APT_LIBRARIES}"
-        INSTALL_COMMAND ""
-        TEST_COMMAND ""
-        )
-ExternalProject_Get_Property(apt source_dir binary_dir)
-set(APT_DEPENDS apt CACHE INTERNAL "")
-set_global_cache(APT_FOUND ON)
-set(APT_EXTERNAL ON CACHE INTERNAL "")
-set(APT_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/apt/src/apt/src" CACHE INTERNAL "")
-if (WIN32)
-    install(FILES "${SDRANGEL_BINARY_BIN_DIR}/apt${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-elseif (APPLE)
-    set(APT_LIBRARIES "${binary_dir}/libapt${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
-            FILES_MATCHING PATTERN "libapt*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-    set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
+if(ENABLE_CHANNELRX_DEMODAPT)
+    if (WIN32)
+        set(APT_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/apt.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(APT_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libapt${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    endif()
+    ExternalProject_Add(apt
+            GIT_REPOSITORY https://github.com/srcejon/aptdec.git
+            GIT_TAG libaptdec
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/apt"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+            BUILD_BYPRODUCTS "${APT_LIBRARIES}"
+            INSTALL_COMMAND ""
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(apt source_dir binary_dir)
+    set(APT_DEPENDS apt CACHE INTERNAL "")
+    set_global_cache(APT_FOUND ON)
+    set(APT_EXTERNAL ON CACHE INTERNAL "")
+    set(APT_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/apt/src/apt/src" CACHE INTERNAL "")
+    if (WIN32)
+        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/apt${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+    elseif (APPLE)
+        set(APT_LIBRARIES "${binary_dir}/libapt${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
+                FILES_MATCHING PATTERN "libapt*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
+    endif ()
 endif ()
 
-# For Satellite Tracker feature
-# No tags for this in github - but doesn't change often
-# Fails to build with CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON on Windows
-if (WIN32)
-    set(SGP4_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/sgp4s.lib" CACHE INTERNAL "")
-elseif (LINUX)
-    set(SGP4_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libsgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-endif()
-ExternalProject_Add(sgp4
-        GIT_REPOSITORY https://github.com/dnwrnr/sgp4.git
-        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/sgp4"
-        CMAKE_ARGS ${COMMON_CMAKE_ARGS}
-        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
-        BUILD_BYPRODUCTS "${SGP4_LIBRARIES}"
-        INSTALL_COMMAND ""
-        TEST_COMMAND ""
-        )
-ExternalProject_Get_Property(sgp4 source_dir binary_dir)
-set(SGP4_DEPENDS sgp4 CACHE INTERNAL "")
-set_global_cache(SGP4_FOUND ON)
-set(SGP4_EXTERNAL ON CACHE INTERNAL "")
-set(SGP4_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/sgp4/src/sgp4/libsgp4" CACHE INTERNAL "")
-if (WIN32)
-    install(FILES "${SDRANGEL_BINARY_BIN_DIR}/sgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-elseif (APPLE)
-    set(SGP4_LIBRARIES "${binary_dir}/libsgp4/libsgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    install(DIRECTORY "${binary_dir}/libsgp4" DESTINATION "${INSTALL_LIB_DIR}"
-            FILES_MATCHING PATTERN "libsgp4s*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-    set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/libsgp4")
+# For Satellite Tracker feature and APT demod
+if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
+    # No tags for this in github - but doesn't change often
+    # Fails to build with CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON on Windows
+    if (WIN32)
+        set(SGP4_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/sgp4s.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(SGP4_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libsgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    endif()
+    ExternalProject_Add(sgp4
+            GIT_REPOSITORY https://github.com/dnwrnr/sgp4.git
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/sgp4"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+            -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
+            BUILD_BYPRODUCTS "${SGP4_LIBRARIES}"
+            INSTALL_COMMAND ""
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(sgp4 source_dir binary_dir)
+    set(SGP4_DEPENDS sgp4 CACHE INTERNAL "")
+    set_global_cache(SGP4_FOUND ON)
+    set(SGP4_EXTERNAL ON CACHE INTERNAL "")
+    set(SGP4_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/sgp4/src/sgp4/libsgp4" CACHE INTERNAL "")
+    if (WIN32)
+        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/sgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+    elseif (APPLE)
+        set(SGP4_LIBRARIES "${binary_dir}/libsgp4/libsgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        install(DIRECTORY "${binary_dir}/libsgp4" DESTINATION "${INSTALL_LIB_DIR}"
+                FILES_MATCHING PATTERN "libsgp4s*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/libsgp4")
+    endif ()
 endif ()
-
 
 # requirements needed by many packages on windows
 if (WIN32)
@@ -836,7 +840,7 @@ if (WIN32)
 endif (WIN32)
 
 # For DAB demodulator
-if (ZLIB_FOUND AND FAAD_FOUND)
+if (ZLIB_FOUND AND FAAD_FOUND AND ENABLE_CHANNELRX_DEMODDAB)
     if (WIN32)
         set(DAB_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/dab_lib.lib" CACHE INTERNAL "")
     elseif (LINUX)
@@ -897,11 +901,11 @@ else()
     message(STATUS "Can't build DAB library as missing zlib or faad")
 endif()
 
-# Device interface libraries. Use external libraries build for these. Only Linux for now.
+# Device interface libraries.
 if (LINUX)
     # apt install liblimesuite-dev (only on ubuntu 18.04). Can be picky on version though so let's build it.
     # needs pkgconfig and libusb
-    if (NOT LIMESUITE_FOUND OR LIMESUITE_EXTERNAL)
+    if (ENABLE_LIMESUITE AND (NOT LIMESUITE_FOUND OR LIMESUITE_EXTERNAL))
         set_global_cache(LIMESUITE_FOUND ON)
         set(LIMESUITE_EXTERNAL ON CACHE INTERNAL "")
         set(LIMESUITE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/limesuite/src/limesuite/src" CACHE INTERNAL "")
@@ -926,11 +930,11 @@ if (LINUX)
                 )
         ExternalProject_Get_Property(limesuite source_dir)
         makeCopyFile("${source_dir}/src/limeRFE/limeRFE.h" "${source_dir}/src/lime/limeRFE.h" limesuite)
-    endif (NOT LIMESUITE_FOUND OR LIMESUITE_EXTERNAL)
+    endif ()
 
     # apt install libbladerf-dev
     # needs pkgconfig and libusb
-    if (NOT LIBBLADERF_FOUND OR LIBBLADERF_EXTERNAL)
+    if (ENABLE_BLADERF AND (NOT LIBBLADERF_FOUND OR LIBBLADERF_EXTERNAL))
         set_global_cache(LIBBLADERF_FOUND ON)
         set(LIBBLADERF_EXTERNAL ON CACHE INTERNAL "")
         set(LIBBLADERF_INCLUDE_DIRS "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include" CACHE INTERNAL "")
@@ -947,11 +951,11 @@ if (LINUX)
                 TEST_COMMAND ""
                 )
         install(FILES "${LIBBLADERF_LIBRARIES}" DESTINATION "${INSTALL_LIB_DIR}")
-    endif (NOT LIBBLADERF_FOUND OR LIBBLADERF_EXTERNAL)
+    endif ()
 
     # apt install libiio-dev
     # needs pkgconfig, libusb, libxml2, lzma, xz, libiconv
-    if (NOT LIBIIO_FOUND OR LIBIIO_EXTERNAL)
+    if (ENABLE_IIO AND (NOT LIBIIO_FOUND OR LIBIIO_EXTERNAL))
         set_global_cache(LIBIIO_FOUND ON)
         set(LIBIIO_EXTERNAL ON CACHE INTERNAL "")
         set(LIBIIO_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libiio/src/libiio" CACHE INTERNAL "")
@@ -969,11 +973,11 @@ if (LINUX)
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
-    endif (NOT LIBIIO_FOUND OR LIBIIO_EXTERNAL)
+    endif ()
 
     # apt install libairspyhf-dev (only on ubuntu 18.04)
     # needs libusb and pkgconfig
-    if (NOT LIBAIRSPYHF_FOUND OR LIBAIRSPYHF_EXTERNAL)
+    if (ENABLE_AIRSPYHF AND (NOT LIBAIRSPYHF_FOUND OR LIBAIRSPYHF_EXTERNAL))
         set_global_cache(LIBAIRSPYHF_FOUND ON)
         set(LIBAIRSPYHF_EXTERNAL ON CACHE INTERNAL "")
         set(LIBAIRSPYHF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libairspyhf.so" CACHE INTERNAL "")
@@ -989,10 +993,10 @@ if (LINUX)
         ExternalProject_Get_Property(airspyhf source_dir)
         set(LIBAIRSPYHF_INCLUDE_DIR "${source_dir}/.." CACHE INTERNAL "")
         makeLink("${source_dir}/libairspyhf/src" "${source_dir}/../libairspyhf" airspyhf)
-    endif (NOT LIBAIRSPYHF_FOUND OR LIBAIRSPYHF_EXTERNAL)
+    endif ()
 
     # needs pkgconfig, libusb, autoconf, automake and libtool
-    if (NOT LIBPERSEUS_FOUND OR LIBPERSEUS_EXTERNAL)
+    if (ENABLE_PERSEUS AND (NOT LIBPERSEUS_FOUND OR LIBPERSEUS_EXTERNAL))
         set_global_cache(LIBPERSEUS_FOUND ON)
         set(LIBPERSEUS_EXTERNAL ON CACHE INTERNAL "")
         set(LIBPERSEUS_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/perseus/src/perseus" CACHE INTERNAL "")
@@ -1006,11 +1010,11 @@ if (LINUX)
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
-    endif (NOT LIBPERSEUS_FOUND OR LIBPERSEUS_EXTERNAL)
+    endif ()
 
     # apt install librtlsdr-dev
     # needs pkgconfig and libusb
-    if (NOT LIBRTLSDR_FOUND OR LIBRTLSDR_EXTERNAL)
+    if (ENABLE_RTLSDR AND (NOT LIBRTLSDR_FOUND OR LIBRTLSDR_EXTERNAL))
         set_global_cache(LIBRTLSDR_FOUND ON)
         set(LIBRTLSDR_EXTERNAL ON CACHE INTERNAL "")
         set(LIBRTLSDR_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr/src/rtlsdr/include" CACHE INTERNAL "")
@@ -1025,10 +1029,10 @@ if (LINUX)
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
-    endif (NOT LIBRTLSDR_FOUND OR LIBRTLSDR_EXTERNAL)
+    endif ()
 
     # needs pkgconfig and libusb
-    if (NOT LIBMIRISDR_FOUND OR LIBMIRISDR_EXTERNAL)
+    if (ENABLE_MIRISDR AND (NOT LIBMIRISDR_FOUND OR LIBMIRISDR_EXTERNAL))
         set_global_cache(LIBMIRISDR_FOUND ON)
         set(LIBMIRISDR_EXTERNAL ON CACHE INTERNAL "")
         set(LIBMIRISDR_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libmirisdr/src/libmirisdr/include" CACHE INTERNAL "")
@@ -1042,7 +1046,7 @@ if (LINUX)
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
-    endif (NOT LIBMIRISDR_FOUND OR LIBMIRISDR_EXTERNAL)
+    endif ()
 
 endif (LINUX)
 
