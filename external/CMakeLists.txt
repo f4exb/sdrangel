@@ -759,13 +759,12 @@ if (LINUX AND (NOT LIBSIGMF_FOUND OR LIBSIGMF_EXTERNAL))
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libsigmf"
             CMAKE_ARGS ${COMMON_CMAKE_ARGS}
             BUILD_BYPRODUCTS "${LIBSIGMF_LIBRARIES}"
-            INSTALL_COMMAND ""
             TEST_COMMAND ""
             )
-    ExternalProject_Get_Property(libsigmf source_dir binary_dir)
+    ExternalProject_Get_Property(libsigmf install_dir)
     set_global_cache(LIBSIGMF_FOUND ON)
     set(LIBSIGMF_EXTERNAL ON CACHE INTERNAL "")
-    set(LIBSIGMF_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libsigmf/src" CACHE INTERNAL "")
+    set(LIBSIGMF_INCLUDE_DIR "${install_dir}/include" CACHE INTERNAL "")
 endif (LINUX AND (NOT LIBSIGMF_FOUND OR LIBSIGMF_EXTERNAL))
 
 # For APT demodulator
