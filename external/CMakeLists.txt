@@ -757,7 +757,7 @@ if (LINUX AND (NOT LIBSIGMF_FOUND OR LIBSIGMF_EXTERNAL))
             GIT_REPOSITORY https://github.com/f4exb/libsigmf.git
             GIT_TAG ${LIBSIGMF_TAG}
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libsigmf"
-            CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
             BUILD_BYPRODUCTS "${LIBSIGMF_LIBRARIES}"
             TEST_COMMAND ""
             )
