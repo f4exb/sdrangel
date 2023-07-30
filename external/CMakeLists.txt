@@ -760,9 +760,11 @@ if (LINUX AND (NOT LIBSIGMF_FOUND OR LIBSIGMF_EXTERNAL))
             TEST_COMMAND ""
             )
     ExternalProject_Get_Property(libsigmf install_dir)
+    set_global(LIBSIGMF_DEPENDS libsigmf)
     set_global_cache(LIBSIGMF_FOUND ON)
     set(LIBSIGMF_EXTERNAL ON CACHE INTERNAL "")
-    set(LIBSIGMF_INCLUDE_DIR "${install_dir}/include" CACHE INTERNAL "")
+    set(LIBSIGMF_INCLUDE_DIR "${install_dir}/include" CACHE INT    set_global(FFTW3F_DEPENDS fftw3f)
+ERNAL "")
     set(LIBSIGMF_LIBRARIES "${install_dir}/lib${LIB_SUFFIX}/liblibsigmf${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
 endif (LINUX AND (NOT LIBSIGMF_FOUND OR LIBSIGMF_EXTERNAL))
 
