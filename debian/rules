@@ -5,6 +5,12 @@
 override_dh_auto_configure:
 	dh_auto_configure -- -DARCH_OPT=nehalem -DENABLE_EXTERNAL_LIBRARIES=AUTO -DDEBUG_OUTPUT=ON -DBUILD_SERVER=OFF
 
+# delete any external projects (such as libsigmf) that are installed
+# would be better if we could prevent them from being installed in CMakeLists.txt
+override_dh_install:
+	-find debian/sdrangel -type d -name external -exec rm -r {} \; -exec mkdir {} \; -exec rmdir -p {} \;
+	dh_install
+
 override_dh_auto_test:
 	echo "Skipping test step"
 
