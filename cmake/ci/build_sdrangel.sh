@@ -1,6 +1,6 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
-if [ "${TRAVIS_OS_NAME}" == "linux" ] || [ ${CI_LINUX} = true ]; then
+if [ "${TRAVIS_OS_NAME}" == "linux" ] || [ "${CI_LINUX}" == true ]; then
   debuild -i -us -uc -b
 else
   mkdir -p build;  cd build
