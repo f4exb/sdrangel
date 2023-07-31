@@ -975,7 +975,7 @@ void GLSpectrumView::paintGL()
     }
 
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
-    glFunctions->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glFunctions->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glFunctions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     QMatrix4x4 spectrogramGridMatrix;
