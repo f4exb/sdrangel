@@ -2,23 +2,33 @@ project(samplemimo)
 
 if(ENABLE_BLADERF AND LIBBLADERF_FOUND)
     add_subdirectory(bladerf2mimo)
+else()
+    message(STATUS "Not building bladerf2mimo (ENABLE_BLADERF=${ENABLE_BLADERF} LIBBLADERF_FOUND=${LIBBLADERF_FOUND})")
 endif()
 
 if(ENABLE_LIMESUITE AND LIMESUITE_FOUND)
     add_subdirectory(limesdrmimo)
+else()
+    message(STATUS "Not building limesdrmimo (ENABLE_LIMESUITE=${ENABLE_LIMESUITE} LIMESUITE_FOUND=${LIMESUITE_FOUND})")
 endif()
 
 if(ENABLE_XTRX AND LIBXTRX_FOUND)
     add_subdirectory(xtrxmimo)
+else()
+    message(STATUS "Not building xtrxmimo (ENABLE_XTRX=${ENABLE_XTRX} LIBXTRX_FOUND=${LIBXTRX_FOUND})")
 endif()
 
 if(ENABLE_IIO AND LIBIIO_FOUND)
     add_subdirectory(plutosdrmimo)
+else()
+    message(STATUS "Not building plutosdrmimo (ENABLE_IIO=${ENABLE_IIO} LIBIIO_FOUND=${LIBIIO_FOUND})")
 endif()
 
 find_package (Hamlib)
 if(hamlib_FOUND)
     add_subdirectory(audiocatsiso)
+else()
+    message(STATUS "Not building audiocatsiso (hamlib_FOUND=${hamlib_FOUND})")
 endif()
 
 add_subdirectory(metismiso)

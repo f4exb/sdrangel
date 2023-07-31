@@ -503,6 +503,10 @@ if(DEFINED OPUS_DEPENDS)
     add_dependencies(sdrbase "${OPUS_DEPENDS}")
 endif()
 
+if(DEFINED LIBSIGMF_DEPENDS)
+    add_dependencies(sdrbase "${LIBSIGMF_DEPENDS}")
+endif()
+
 target_link_libraries(sdrbase
     ${OPUS_LIBRARIES}
     ${sdrbase_FFTW3F_LIB}
