@@ -711,6 +711,8 @@ void DSDDemodGUI::makeUIConnections()
     QObject::connect(ui->traceLength, &QDial::valueChanged, this, &DSDDemodGUI::on_traceLength_valueChanged);
     QObject::connect(ui->traceStroke, &QDial::valueChanged, this, &DSDDemodGUI::on_traceStroke_valueChanged);
     QObject::connect(ui->traceDecay, &QDial::valueChanged, this, &DSDDemodGUI::on_traceDecay_valueChanged);
+    QObject::connect(ui->slot1On, &QToolButton::toggled, this, &DSDDemodGUI::on_slot1On_toggled);
+    QObject::connect(ui->slot2On, &QToolButton::toggled, this, &DSDDemodGUI::on_slot2On_toggled);
     QObject::connect(ui->tdmaStereoSplit, &QToolButton::toggled, this, &DSDDemodGUI::on_tdmaStereoSplit_toggled);
     QObject::connect(ui->fmDeviation, &QSlider::valueChanged, this, &DSDDemodGUI::on_fmDeviation_valueChanged);
     QObject::connect(ui->squelchGate, &QDial::valueChanged, this, &DSDDemodGUI::on_squelchGate_valueChanged);
