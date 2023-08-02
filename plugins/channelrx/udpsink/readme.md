@@ -8,8 +8,6 @@ The UDP block size or UDP payload size is fixed at 512 bytes.
 
 The receiving application must make sure it acknowledges this block size. UDP may fragment the block but there will be a point when the last UDP block will fill up a complete block of this amount of bytes. In particular in GNUradio the UDP source block must be configured with a 512 bytes payload size.
 
-This plugin is available for Linux and Mac O/S only.
-
 <h2>Interface</h2>
 
 The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
