@@ -1,3 +1,17 @@
+sdrangel (7.15.2-1) unstable; urgency=medium
+
+   * Fixed some spellings. PR #1742
+   * Rotator Controller: Use floats for az/el offsets. PR #1744. Fixes #1739
+   * Switch to codec2-dev repo to access v1.0.3 tag. PR #1746. Fixes #1741
+   * Move find_package from external/CMakeLists.txt to root CMakeLists.txt. PR #1750
+   * Have some libraries and plugins built in the Ubuntu package. PR #1750. Fixes #1740
+   * Remove external projects from .deb. PR #1754. Fixes #1740
+   * OpenGL code: Clear with alpha=1 to fix #1735. PR #1735
+   * DSD demod UI: Connect slot 1/2 on/off buttons. PR #1758. Fixes #1752
+   * Use texture() instead of texture2d() in v330 shaders, so they work on Mac. PR #1759. Fixes #1757
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Fri, 04 Aug 2023 01:17:54 +0200
+
 sdrangel (7.15.1-1) unstable; urgency=medium
 
    * Remove comparison of strings and chars. Fix #1713, PR #1718
