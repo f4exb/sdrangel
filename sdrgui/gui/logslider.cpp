@@ -19,6 +19,9 @@
 #include <QPainter>
 #include <QDebug>
 
+#include <cmath>
+
+
 #include "logslider.h"
 
 LogSlider::LogSlider(QWidget *parent) :

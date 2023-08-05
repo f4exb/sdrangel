@@ -17,6 +17,8 @@
 
 #include <QDebug>
 
+#include <cmath>
+
 #include "loglabelslider.h"
 
 LogLabelSlider::LogLabelSlider(QWidget *parent) :
