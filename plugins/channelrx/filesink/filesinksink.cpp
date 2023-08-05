@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QFileInfo>
 
 #include "dsp/dspcommands.h"
 #include "dsp/spectrumvis.h"
@@ -278,21 +279,14 @@ void FileSinkSink::applySettings(const FileSinkSettings& settings, bool force)
 
     if ((settings.m_fileRecordName != m_settings.m_fileRecordName) || force)
     {
-        QStringList dotBreakout = settings.m_fileRecordName.split(QLatin1Char('.'));
-
-        if (dotBreakout.size() > 1) {
-            QString extension = dotBreakout.last();
-
-            if ((extension != "sdriq") && (extension != "wav")) {
-                dotBreakout.last() = "sdriq";
-            }
+        QFileInfo fileInfo(settings.m_fileRecordName);
+        QString extension = fileInfo.suffix();
+        if (extension.isEmpty()) {
+            fileRecordName.append(".sdriq");
+        } else if ((extension != "sdriq") && (extension != "wav")) {
+            fileRecordName.chop(extension.size());
+            fileRecordName.append("sdriq");
         }
-        else
-        {
-            dotBreakout.append("sdriq");
-        }
-
-        fileRecordName = dotBreakout.join(QLatin1Char('.'));
 
         QString fileBase;
         FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(fileRecordName, fileBase);
