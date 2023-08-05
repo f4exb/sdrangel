@@ -22,6 +22,23 @@
 
 #include "inputcontroller.h"
 
+double InputController::getAxisCalibratedValue(int axis, InputControllerSettings *settings, bool highSensitvity)
+{
+    double value = getAxisValue(axis);
+    double absValue = abs(value);
+    double l = settings->m_deadzone[axis] / 100.0;
+    if (absValue < l) {
+        // Set to 0 if in deadzone
+        value = 0.0;
+    } else {
+        // Rescale to [0,1] if outside of deadzone
+        absValue = (absValue - l) / (1.0 - l);
+        // Negate if original value was negative
+        value = (value < 0.0) ? -absValue : absValue;
+    }
+    return value * (highSensitvity ? settings->m_highSensitivity : settings->m_lowSensitivity) / 100.0;
+}
+
 InputControllerManager* InputControllerManager::m_instance = nullptr;
 
 QStringList InputControllerManager::getAllControllers()

@@ -15,44 +15,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
-#define INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
+#include <QFontMetrics>
+#include <QPainter>
+#include <QDebug>
 
-#include "ui_gamepadconfigurationdialog.h"
+#include "logslider.h"
 
-class QGamepad;
-struct InputControllerSettings;
+LogSlider::LogSlider(QWidget *parent) :
+    QSlider(Qt::Horizontal, parent)
+{
+    setRange(0, 1000);
+    connect(this, &QSlider::valueChanged, this, &LogSlider::handleValueChanged);
+    setPageStep(1);
+    setTickPosition(QSlider::TicksAbove);
+    setTickInterval(m_stepsPerPower);
+}
 
-class GamepadConfigurationDialog : public QDialog {
-    Q_OBJECT
+void LogSlider::setRange(double min, double max)
+{
+    m_start = floor(log10(min));
+    m_stop = ceil(log10(max));
+    m_steps = m_stop - m_start;
+    setMinimum(0);
+    setMaximum(m_steps * m_stepsPerPower);
+}
 
-public:
-    explicit GamepadConfigurationDialog(QGamepad *gamepad, InputControllerSettings *settings, bool supportsConfiguraiton, QWidget* parent = 0);
-    ~GamepadConfigurationDialog();
+void LogSlider::handleValueChanged(int value)
+{
+    double v = pow(10.0, value/(double)m_stepsPerPower + m_start);
+    emit logValueChanged(v);
+}
 
-private slots:
-    void accept();
-    void on_configReset_clicked();
-    void on_config0_clicked();
-    void on_config1_clicked();
-    void on_config2_clicked();
-    void on_config3_clicked();
-    void axisRightXChanged(double value);
-    void axisRightYChanged(double value);
-    void axisLeftXChanged(double value);
-    void axisLeftYChanged(double value);
-    void on_lowSensitivity_logValueChanged(double value);
-    void on_highSensitivity_logValueChanged(double value);
-    void on_deadzone0_valueChanged(int value);
-    void on_deadzone1_valueChanged(int value);
-    void on_deadzone2_valueChanged(int value);
-    void on_deadzone3_valueChanged(int value);
-
-private:
-    Ui::GamepadConfigurationDialog* ui;
-    QGamepad *m_gamepad;
-    InputControllerSettings *m_settings;
-};
-
-#endif // INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
-
+void LogSlider::setValue(double value)
+{
+    int v = (int)((log10(value) - m_start) * 100);
+    QSlider::setValue(v);
+}

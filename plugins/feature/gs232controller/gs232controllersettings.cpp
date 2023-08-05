@@ -22,6 +22,7 @@
 #include "settings/serializable.h"
 
 #include "gs232controllersettings.h"
+#include "inputcontrollersettings.h"
 
 const QStringList GS232ControllerSettings::m_pipeTypes = {
     QStringLiteral("ADSBDemod"),
@@ -65,7 +66,14 @@ void GS232ControllerSettings::resetToDefaults()
     m_precision = 0;
     m_coordinates = AZ_EL;
     m_inputController = "None";
-    m_inputSensitivity = 0.25;
+    m_targetControlEnabled = true;
+    m_offsetControlEnabled = true;
+    m_highSensitivity = true;
+    m_inputControllerSettings.m_lowSensitivity = 5.0f;
+    m_inputControllerSettings.m_highSensitivity = 50.0f;
+    for (int i = 0; i < INPUTCONTROLLER_MAX_AXES; i++) {
+        m_inputControllerSettings.m_deadzone[i] = 10.0f;
+    }
     m_dfmTrackOn = false;
     m_dfmLubePumpsOn = false;
     m_dfmBrakesOn = false;
@@ -122,7 +130,15 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeBool(33, m_dfmBrakesOn);
     s.writeBool(34, m_dfmDrivesOn);
     s.writeString(35, m_inputController);
-    s.writeFloat(36, m_inputSensitivity);
+    s.writeBool(37, m_targetControlEnabled);
+    s.writeBool(38, m_offsetControlEnabled);
+    s.writeBool(39, m_highSensitivity);
+
+    s.writeFloat(50, m_inputControllerSettings.m_lowSensitivity);
+    s.writeFloat(51, m_inputControllerSettings.m_highSensitivity);
+    for (int i = 0; i < INPUTCONTROLLER_MAX_AXES; i++) {
+        s.writeFloat(60+i, m_inputControllerSettings.m_deadzone[i]);
+    }
 
     return s.final();
 }
@@ -192,7 +208,15 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         d.readBool(33, &m_dfmBrakesOn);
         d.readBool(34, &m_dfmDrivesOn);
         d.readString(35, &m_inputController, "None");
-        d.readFloat(36, &m_inputSensitivity, 0.25);
+        d.readBool(37, &m_targetControlEnabled, true);
+        d.readBool(38, &m_offsetControlEnabled, true);
+        d.readBool(39, &m_highSensitivity, true);
+
+        d.readFloat(50, &m_inputControllerSettings.m_lowSensitivity, 5.0f);
+        d.readFloat(51, &m_inputControllerSettings.m_highSensitivity, 50.0f);
+        for (int i = 0; i < INPUTCONTROLLER_MAX_AXES; i++) {
+            d.readFloat(60+i, &m_inputControllerSettings.m_deadzone[i], 10.0f);
+        }
 
         return true;
     }
@@ -280,8 +304,17 @@ void GS232ControllerSettings::applySettings(const QStringList& settingsKeys, con
     if (settingsKeys.contains("inputController")) {
         m_inputController = settings.m_inputController;
     }
-    if (settingsKeys.contains("inputSensitivity")) {
-        m_inputSensitivity = settings.m_inputSensitivity;
+    if (settingsKeys.contains("inputControllerSettings")) {
+        m_inputControllerSettings = settings.m_inputControllerSettings;
+    }
+    if (settingsKeys.contains("targetControlEnabled")) {
+        m_targetControlEnabled = settings.m_targetControlEnabled;
+    }
+    if (settingsKeys.contains("offsetControlEnabled")) {
+        m_offsetControlEnabled = settings.m_offsetControlEnabled;
+    }
+    if (settingsKeys.contains("highSensitivity")) {
+        m_highSensitivity = settings.m_highSensitivity;
     }
     if (settingsKeys.contains("dfmTrackOn")) {
         m_dfmTrackOn = settings.m_dfmTrackOn;
@@ -385,8 +418,21 @@ QString GS232ControllerSettings::getDebugString(const QStringList& settingsKeys,
     if (settingsKeys.contains("inputController") || force) {
         ostr << " m_inputController: " << m_inputController.toStdString();
     }
-    if (settingsKeys.contains("inputSensitivity") || force) {
-        ostr << " m_inputSensitivity: " << m_inputSensitivity;
+    if (settingsKeys.contains("inputControllerSettings") || force) {
+        ostr << " m_inputControllerSettings.m_lowSensitivity: " << m_inputControllerSettings.m_lowSensitivity;
+        ostr << " m_inputControllerSettings.m_highSensitivity: " << m_inputControllerSettings.m_highSensitivity;
+        for (int i = 0; i < INPUTCONTROLLER_MAX_AXES; i++) {
+            ostr << " m_inputControllerSettings.m_deadzone: " << m_inputControllerSettings.m_deadzone[i];
+        }
+    }
+    if (settingsKeys.contains("targetControlEnabled") || force) {
+        ostr << " m_targetControlEnabled: " << m_targetControlEnabled;
+    }
+    if (settingsKeys.contains("offsetControlEnabled") || force) {
+        ostr << " m_offsetControlEnabled: " << m_offsetControlEnabled;
+    }
+    if (settingsKeys.contains("highSensitivity") || force) {
+        ostr << " m_highSensitivity: " << m_highSensitivity;
     }
     if (settingsKeys.contains("title") || force) {
         ostr << " m_title: " << m_title.toStdString();
