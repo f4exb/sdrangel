@@ -97,7 +97,7 @@ void GamepadInputController::configure(InputControllerSettings *settings)
 
 void GamepadInputController::configurationDialogClosed()
 {
-    m_configurationDialog = false;
+    m_configurationDialog = nullptr;
     emit configurationComplete();
 }
 

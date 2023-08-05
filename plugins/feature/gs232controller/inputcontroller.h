@@ -49,7 +49,7 @@ public:
     double getAxisCalibratedValue(int axis, InputControllerSettings *settings, bool highSensitivity);
     virtual int getNumberOfAxes() const = 0;
     virtual bool supportsConfiguration() const { return false; }
-    virtual void configure(InputControllerSettings *settings) {};
+    virtual void configure(InputControllerSettings *settings) { (void) settings; };
 
 signals:
     void buttonChanged(int button, bool released);
