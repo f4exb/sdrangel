@@ -38,6 +38,7 @@ AudioInputGui::AudioInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_forceSettings(true),
     m_settings(),
     m_sampleSource(nullptr),
+    m_sampleRate(0),
     m_centerFrequency(0)
 {
     m_deviceUISet = deviceUISet;
