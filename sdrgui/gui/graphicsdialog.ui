@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>282</width>
-    <height>155</height>
+    <height>218</height>
    </rect>
   </property>
   <property name="font">
@@ -20,6 +20,45 @@
    <string>Graphics settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>UI</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="2">
+       <widget class="QLabel" name="uiScaleFactorText">
+        <property name="text">
+         <string>100.0%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="uiScaleFactorLabel">
+        <property name="text">
+         <string>UI Scale Factor</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSlider" name="uiScaleFactor">
+        <property name="toolTip">
+         <string>UI scale factor. Set &gt;100% for high DPI displays. Requires restarting SDRangel to apply</string>
+        </property>
+        <property name="minimum">
+         <number>100</number>
+        </property>
+        <property name="maximum">
+         <number>300</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item>
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
@@ -165,7 +204,10 @@ Requires windows to be reopened to take effect</string>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>buttonBox</tabstop>
+  <tabstop>uiScaleFactor</tabstop>
+  <tabstop>multisampling</tabstop>
+  <tabstop>mapMultisampling</tabstop>
+  <tabstop>mapSmoothing</tabstop>
  </tabstops>
  <resources>
   <include location="../resources/res.qrc"/>

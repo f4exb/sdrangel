@@ -16,6 +16,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QFileDialog>
+#include <QSettings>
+#include <QMessageBox>
 
 #include "graphicsdialog.h"
 #include "ui_graphicsdialog.h"
@@ -39,6 +41,10 @@ GraphicsDialog::GraphicsDialog(MainSettings& mainSettings, QWidget* parent) :
         ui->mapMultisampling->setCurrentText(QString::number(samples));
     }
     ui->mapSmoothing->setChecked(m_mainSettings.getMapSmoothing());
+
+    QSettings settings;
+    m_initScaleFactor = settings.value("graphics.ui_scale_factor", "1").toFloat();
+    ui->uiScaleFactor->setValue((int)(m_initScaleFactor * 100.0f));
 }
 
 GraphicsDialog::~GraphicsDialog()
@@ -51,5 +57,30 @@ void GraphicsDialog::accept()
     m_mainSettings.setMultisampling(ui->multisampling->currentText().toInt());
     m_mainSettings.setMapMultisampling(ui->mapMultisampling->currentText().toInt());
     m_mainSettings.setMapSmoothing(ui->mapSmoothing->isChecked());
+
+    // We use QSetting rather than MainSettings, as we need to set QT_SCALE_FACTOR
+    // before MainSettings are currently read
+    QSettings settings;
+    bool showRestart = false;
+
+    float scaleFactor = ui->uiScaleFactor->value() / 100.0f;
+    if (m_initScaleFactor != scaleFactor)
+    {
+        QString newScaleFactor = QString("%1").arg(scaleFactor);
+        settings.setValue("graphics.ui_scale_factor", newScaleFactor);
+        showRestart = true;
+    }
+
+    if (showRestart)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Please restart SDRangel to use the new UI settings.");
+        msgBox.exec();
+    }
     QDialog::accept();
+}
+
+void GraphicsDialog::on_uiScaleFactor_valueChanged(int value)
+{
+    ui->uiScaleFactorText->setText(QString("%1%").arg(value));
 }
