@@ -593,7 +593,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Qt requirements
 # See: https://doc-snapshots.qt.io/qt6-dev/cmake-qt5-and-qt6-compatibility.html
 if(ENABLE_QT6)
-    # Qt6 doesn't currently support Location
     find_package(Qt6
                    COMPONENTS
                      Core
@@ -657,7 +656,8 @@ if (BUILD_GUI)
                             WebEngineQuick
                             WebEngineCore
                             WebEngineWidgets
-                            TextToSpeech)
+                            TextToSpeech
+                            Location)
         else()
             find_package(Qt5
                            REQUIRED COMPONENTS
@@ -947,6 +947,7 @@ if (BUILD_GUI)
           ${OPENGL_LIBRARIES}
           Qt::Widgets
           Qt::Multimedia
+          Qt::Quick
           sdrbase
           sdrgui
           logging

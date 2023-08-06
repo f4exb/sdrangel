@@ -21,7 +21,11 @@
 #include <QToolButton>
 #include <QFileDialog>
 
+#if (QT_VERSION < QT_VERSION_CHECK(6, 6, 0))
 #include <QtGui/private/qzipreader_p.h>
+#else
+#include <QtCore/private/qzipreader_p.h>
+#endif
 
 #include "util/units.h"
 
@@ -113,6 +117,10 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui(new Ui::MapSettingsDialog)
 {
     ui->setupUi(this);
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+    ui->mapProvider->clear();
+    ui->mapProvider->addItem("OpenStreetMap");
+#endif
     ui->mapProvider->setCurrentIndex(MapSettings::m_mapProviders.indexOf(settings->m_mapProvider));
     ui->thunderforestAPIKey->setText(settings->m_thunderforestAPIKey);
     ui->maptilerAPIKey->setText(settings->m_maptilerAPIKey);

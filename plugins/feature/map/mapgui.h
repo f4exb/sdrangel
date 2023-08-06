@@ -21,9 +21,14 @@
 
 #include <QTimer>
 #include <QQuickItem>
+#include <QQuickWidget>
 #include <QJsonObject>
 #ifdef QT_WEBENGINE_FOUND
 #include <QWebEngineFullScreenRequest>
+#include <QWebEnginePage>
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+#include <QWebEngineLoadingInfo>
+#endif
 #endif
 
 #include <math.h>
@@ -255,7 +260,12 @@ private slots:
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
 #ifdef QT_WEBENGINE_FOUND
     void fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest);
+    void renderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode);
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+    void loadingChanged(const QWebEngineLoadingInfo &loadingInfo);
 #endif
+#endif
+    void statusChanged(QQuickWidget::Status status);
     void preferenceChanged(int elementType);
     void giroDataUpdated(const GIRO::GIROStationData& data);
     void mufUpdated(const QJsonDocument& document);

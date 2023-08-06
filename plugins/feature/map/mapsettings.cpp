@@ -152,7 +152,7 @@ MapSettings::~MapSettings()
 void MapSettings::resetToDefaults()
 {
     m_displayNames = true;
-#ifdef LINUX
+#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     m_mapProvider = "mapboxgl"; // osm maps do not work in some versions of Linux https://github.com/f4exb/sdrangel/issues/1169 & 1369
 #else
     m_mapProvider = "osm";
@@ -252,7 +252,7 @@ bool MapSettings::deserialize(const QByteArray& data)
 
         d.readBool(1, &m_displayNames, true);
         d.readString(2, &m_mapProvider, "osm");
-#ifdef LINUX
+#if defined(LINUX) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
         if (m_mapProvider == "osm") {
             m_mapProvider = "mapboxgl";
         }
