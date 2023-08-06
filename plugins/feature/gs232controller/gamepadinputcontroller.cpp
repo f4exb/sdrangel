@@ -26,12 +26,25 @@ GamepadInputController::GamepadInputController(int deviceId) :
     m_rightX(0.0),
     m_rightY(0.0),
     m_leftX(0.0),
-    m_leftY(0.0)
+    m_leftY(0.0),
+    m_configurationDialog(nullptr)
 {
     connect(&m_gamepad, &QGamepad::axisRightXChanged, this, &GamepadInputController::axisRightXChanged);
     connect(&m_gamepad, &QGamepad::axisRightYChanged, this, &GamepadInputController::axisRightYChanged);
     connect(&m_gamepad, &QGamepad::axisLeftXChanged, this, &GamepadInputController::axisLeftXChanged);
     connect(&m_gamepad, &QGamepad::axisLeftYChanged, this, &GamepadInputController::axisLeftYChanged);
+    connect(&m_gamepad, &QGamepad::buttonAChanged, this, &GamepadInputController::buttonAChanged);
+    connect(&m_gamepad, &QGamepad::buttonBChanged, this, &GamepadInputController::buttonBChanged);
+    connect(&m_gamepad, &QGamepad::buttonXChanged, this, &GamepadInputController::buttonXChanged);
+    connect(&m_gamepad, &QGamepad::buttonYChanged, this, &GamepadInputController::buttonYChanged);
+    connect(&m_gamepad, &QGamepad::buttonUpChanged, this, &GamepadInputController::buttonUpChanged);
+    connect(&m_gamepad, &QGamepad::buttonDownChanged, this, &GamepadInputController::buttonDownChanged);
+    connect(&m_gamepad, &QGamepad::buttonLeftChanged, this, &GamepadInputController::buttonLeftChanged);
+    connect(&m_gamepad, &QGamepad::buttonRightChanged, this, &GamepadInputController::buttonRightChanged);
+    connect(&m_gamepad, &QGamepad::buttonR1Changed, this, &GamepadInputController::buttonR1Changed);
+    connect(&m_gamepad, &QGamepad::buttonL1Changed, this, &GamepadInputController::buttonL1Changed);
+    connect(&m_gamepad, &QGamepad::buttonR3Changed, this, &GamepadInputController::buttonR3Changed);
+    connect(&m_gamepad, &QGamepad::buttonL3Changed, this, &GamepadInputController::buttonL3Changed);
 }
 
 double GamepadInputController::getAxisValue(int axis)
@@ -65,20 +78,27 @@ bool GamepadInputController::supportsConfiguration() const
 #endif
 }
 
-void GamepadInputController::configure()
+void GamepadInputController::configure(InputControllerSettings *settings)
 {
-    disconnect(&m_gamepad, &QGamepad::axisRightXChanged, this, &GamepadInputController::axisRightXChanged);
-    disconnect(&m_gamepad, &QGamepad::axisRightYChanged, this, &GamepadInputController::axisRightYChanged);
-    disconnect(&m_gamepad, &QGamepad::axisLeftXChanged, this, &GamepadInputController::axisLeftXChanged);
-    disconnect(&m_gamepad, &QGamepad::axisLeftYChanged, this, &GamepadInputController::axisLeftYChanged);
+    if (!m_configurationDialog)
+    {
+        m_configurationDialog = new GamepadConfigurationDialog(&m_gamepad, settings, supportsConfiguration());
+        connect(m_configurationDialog, &QDialog::finished, this, &GamepadInputController::configurationDialogClosed);
+        m_configurationDialog->setAttribute(Qt::WA_DeleteOnClose, true);
+        m_configurationDialog->setModal(false);
+        m_configurationDialog->show();
+    }
+    else
+    {
+        m_configurationDialog->raise();
+        m_configurationDialog->activateWindow();
+    }
+}
 
-    GamepadConfigurationDialog dialog(&m_gamepad);
-    dialog.exec();
-
-    connect(&m_gamepad, &QGamepad::axisRightXChanged, this, &GamepadInputController::axisRightXChanged);
-    connect(&m_gamepad, &QGamepad::axisRightYChanged, this, &GamepadInputController::axisRightYChanged);
-    connect(&m_gamepad, &QGamepad::axisLeftXChanged, this, &GamepadInputController::axisLeftXChanged);
-    connect(&m_gamepad, &QGamepad::axisLeftYChanged, this, &GamepadInputController::axisLeftYChanged);
+void GamepadInputController::configurationDialogClosed()
+{
+    m_configurationDialog = nullptr;
+    emit configurationComplete();
 }
 
 void GamepadInputController::axisRightXChanged(double value)
@@ -99,6 +119,66 @@ void GamepadInputController::axisLeftXChanged(double value)
 void GamepadInputController::axisLeftYChanged(double value)
 {
     m_leftY = value;
+}
+
+void GamepadInputController::buttonAChanged(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_RIGHT_BOTTOM, !value);
+}
+
+void GamepadInputController::buttonBChanged(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_RIGHT_RIGHT, !value);
+}
+
+void GamepadInputController::buttonXChanged(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_RIGHT_LEFT, !value);
+}
+
+void GamepadInputController::buttonYChanged(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_RIGHT_TOP, !value);
+}
+
+void GamepadInputController::buttonUpChanged(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_LEFT_UP, !value);
+}
+
+void GamepadInputController::buttonDownChanged(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_LEFT_DOWN, !value);
+}
+
+void GamepadInputController::buttonLeftChanged(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_LEFT_LEFT, !value);
+}
+
+void GamepadInputController::buttonRightChanged(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_LEFT_RIGHT, !value);
+}
+
+void GamepadInputController::buttonL1Changed(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_L1, !value);
+}
+
+void GamepadInputController::buttonR1Changed(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_R1, !value);
+}
+
+void GamepadInputController::buttonL3Changed(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_L3, !value);
+}
+
+void GamepadInputController::buttonR3Changed(bool value)
+{
+    emit buttonChanged(INPUTCONTROLLER_BUTTON_R3, !value);
 }
 
 QStringList GamepadInputController::getAllControllers()

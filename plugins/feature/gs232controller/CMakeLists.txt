@@ -45,6 +45,7 @@ if(NOT SERVER_MODE)
         gs232controllergui.h
         dfmstatusdialog.h
         inputcontroller.h
+        inputcontrollersettings.h
     )
 
     set(TARGET_NAME featuregs232controller)

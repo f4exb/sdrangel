@@ -62,6 +62,8 @@ set(sdrgui_SOURCES
     gui/indicator.cpp
     gui/levelmeter.cpp
     gui/loggingdialog.cpp
+    gui/logslider.cpp
+    gui/loglabelslider.cpp
     gui/mypositiondialog.cpp
     gui/pluginsdialog.cpp
     gui/presetitem.cpp
@@ -176,6 +178,8 @@ set(sdrgui_HEADERS
     gui/indicator.h
     gui/levelmeter.h
     gui/loggingdialog.h
+    gui/logslider.h
+    gui/loglabelslider.h
     gui/mypositiondialog.h
     gui/physicalunit.h
     gui/pluginsdialog.h

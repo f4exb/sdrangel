@@ -252,7 +252,8 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
 
     m_settings.setRollupState(&m_rollupState);
 
-    ui->inputConfigure->setVisible(false);
+    //ui->inputConfigure->setVisible(false);
+    ui->inputConfigure->setEnabled(false);
     updateInputControllerList();
     connect(InputControllerManager::instance(), &InputControllerManager::controllersChanged, this, &GS232ControllerGUI::updateInputControllerList);
     connect(&m_inputTimer, &QTimer::timeout, this, &GS232ControllerGUI::checkInputController);
@@ -293,6 +294,8 @@ void GS232ControllerGUI::updateInputController()
         m_inputController = InputControllerManager::open(m_settings.m_inputController);
         if (m_inputController)
         {
+            connect(m_inputController, &InputController::buttonChanged, this, &GS232ControllerGUI::buttonChanged);
+            connect(m_inputController, &InputController::configurationComplete, this, &GS232ControllerGUI::inputConfigurationComplete);
             m_inputTimer.start(20);
             enabled = true;
         }
@@ -301,12 +304,32 @@ void GS232ControllerGUI::updateInputController()
     {
         m_inputTimer.stop();
     }
-
-    ui->inputSensitivityLabel->setEnabled(enabled);
-    ui->inputSensitivity->setEnabled(enabled);
-    ui->inputSensitivityText->setEnabled(enabled);
     ui->inputConfigure->setEnabled(enabled);
-    ui->inputConfigure->setVisible(enabled && m_inputController->supportsConfiguration());
+}
+
+void GS232ControllerGUI::buttonChanged(int button, bool released)
+{
+    if (!released)
+    {
+        switch (button)
+        {
+        case INPUTCONTROLLER_BUTTON_RIGHT_TOP:
+            ui->startStop->doToggle(!ui->startStop->isChecked());
+            break;
+        case INPUTCONTROLLER_BUTTON_RIGHT_BOTTOM:
+            ui->track->click();
+            break;
+        case INPUTCONTROLLER_BUTTON_RIGHT_RIGHT:
+            ui->enableTargetControl->click();
+            break;
+        case INPUTCONTROLLER_BUTTON_RIGHT_LEFT:
+            ui->enableOffsetControl->click();
+            break;
+        case INPUTCONTROLLER_BUTTON_R1:
+            ui->highSensitivity->click();
+            break;
+        }
+    }
 }
 
 void GS232ControllerGUI::checkInputController()
@@ -319,8 +342,11 @@ void GS232ControllerGUI::checkInputController()
 
         if (!m_settings.m_track)
         {
-            m_inputCoord1 += m_settings.m_inputSensitivity * m_inputController->getAxisValue(0);
-            m_inputCoord2 += m_settings.m_inputSensitivity * -m_inputController->getAxisValue(1);
+            if (m_settings.m_targetControlEnabled)
+            {
+                m_inputCoord1 += m_extraSensitivity * m_inputController->getAxisCalibratedValue(0, &m_settings.m_inputControllerSettings, m_settings.m_highSensitivity);
+                m_inputCoord2 += m_extraSensitivity * -m_inputController->getAxisCalibratedValue(1, &m_settings.m_inputControllerSettings, m_settings.m_highSensitivity);
+            }
 
             if (m_settings.m_coordinates == GS232ControllerSettings::AZ_EL)
             {
@@ -340,13 +366,19 @@ void GS232ControllerGUI::checkInputController()
 
         if ((m_inputController->getNumberOfAxes() < 4) && m_settings.m_track)
         {
-            m_inputAzOffset += m_settings.m_inputSensitivity * m_inputController->getAxisValue(0);
-            m_inputElOffset += m_settings.m_inputSensitivity * -m_inputController->getAxisValue(1);
+            if (m_settings.m_offsetControlEnabled)
+            {
+                m_inputAzOffset += m_extraSensitivity * m_inputController->getAxisCalibratedValue(0, &m_settings.m_inputControllerSettings, m_settings.m_highSensitivity);
+                m_inputElOffset += m_extraSensitivity * -m_inputController->getAxisCalibratedValue(1, &m_settings.m_inputControllerSettings, m_settings.m_highSensitivity);
+            }
         }
         else if (m_inputController->getNumberOfAxes() >= 4)
         {
-            m_inputAzOffset += m_settings.m_inputSensitivity * m_inputController->getAxisValue(2);
-            m_inputElOffset += m_settings.m_inputSensitivity * -m_inputController->getAxisValue(3);
+            if (m_settings.m_offsetControlEnabled)
+            {
+                m_inputAzOffset += m_extraSensitivity * m_inputController->getAxisCalibratedValue(2, &m_settings.m_inputControllerSettings, m_settings.m_highSensitivity);
+                m_inputElOffset += m_extraSensitivity * -m_inputController->getAxisCalibratedValue(3, &m_settings.m_inputControllerSettings, m_settings.m_highSensitivity);
+            }
         }
         m_inputAzOffset = std::max(m_inputAzOffset, -360.0);
         m_inputAzOffset = std::min(m_inputAzOffset, 360.0);
@@ -374,23 +406,45 @@ void GS232ControllerGUI::on_inputController_currentIndexChanged(int index)
     if (index >= 0)
     {
         m_settings.m_inputController = ui->inputController->currentText();
+        m_settingsKeys.append("inputController");
         applySettings();
         updateInputController();
     }
 }
 
-void GS232ControllerGUI::on_inputSensitivty_valueChanged(int value)
-{
-    m_settings.m_inputSensitivity = value / 1000.0;
-    ui->inputSensitivityText->setText(QString("%1%").arg(m_settings.m_inputSensitivity * 100.0));
-    applySettings();
-}
-
 void GS232ControllerGUI::on_inputConfigure_clicked()
 {
     if (m_inputController) {
-        m_inputController->configure();
+        m_inputController->configure(&m_settings.m_inputControllerSettings);
     }
+}
+
+void GS232ControllerGUI::on_highSensitivity_clicked(bool checked)
+{
+    m_settings.m_highSensitivity = checked;
+    ui->highSensitivity->setText(checked ? "H" : "L");
+    m_settingsKeys.append("highSensitivity");
+    applySettings();
+}
+
+void GS232ControllerGUI::on_enableTargetControl_clicked(bool checked)
+{
+    m_settings.m_targetControlEnabled = checked;
+    m_settingsKeys.append("targetControlEnabled");
+    applySettings();
+}
+
+void GS232ControllerGUI::on_enableOffsetControl_clicked(bool checked)
+{
+    m_settings.m_offsetControlEnabled  = checked;
+    m_settingsKeys.append("offsetControlEnabled");
+    applySettings();
+}
+
+void GS232ControllerGUI::inputConfigurationComplete()
+{
+    m_settingsKeys.append("inputControllerSettings");
+    applySettings();
 }
 
 GS232ControllerGUI::~GS232ControllerGUI()
@@ -440,8 +494,9 @@ void GS232ControllerGUI::displaySettings()
     ui->elevationMax->setValue(m_settings.m_elevationMax);
     ui->tolerance->setValue(m_settings.m_tolerance);
     ui->inputController->setCurrentText(m_settings.m_inputController);
-    ui->inputSensitivity->setValue((int) (m_settings.m_inputSensitivity * 1000.0));
-    ui->inputSensitivityText->setText(QString("%1%").arg(m_settings.m_inputSensitivity * 100.0));
+    ui->highSensitivity->setChecked(m_settings.m_highSensitivity);
+    ui->enableTargetControl->setChecked(m_settings.m_targetControlEnabled);
+    ui->enableOffsetControl->setChecked(m_settings.m_offsetControlEnabled);
     ui->dfmTrack->setChecked(m_settings.m_dfmTrackOn);
     ui->dfmLubePumps->setChecked(m_settings.m_dfmLubePumpsOn);
     ui->dfmBrakes->setChecked(m_settings.m_dfmBrakesOn);
@@ -960,8 +1015,10 @@ void GS232ControllerGUI::makeUIConnections()
     QObject::connect(ui->precision, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_precision_valueChanged);
     QObject::connect(ui->coordinates, qOverload<int>(&QComboBox::currentIndexChanged), this, &GS232ControllerGUI::on_coordinates_currentIndexChanged);
     QObject::connect(ui->inputController, qOverload<int>(&QComboBox::currentIndexChanged), this, &GS232ControllerGUI::on_inputController_currentIndexChanged);
-    QObject::connect(ui->inputSensitivity, qOverload<int>(&QSlider::valueChanged), this, &GS232ControllerGUI::on_inputSensitivty_valueChanged);
     QObject::connect(ui->inputConfigure, &QToolButton::clicked, this, &GS232ControllerGUI::on_inputConfigure_clicked);
+    QObject::connect(ui->highSensitivity, &QToolButton::clicked, this, &GS232ControllerGUI::on_highSensitivity_clicked);
+    QObject::connect(ui->enableTargetControl, &QToolButton::clicked, this, &GS232ControllerGUI::on_enableTargetControl_clicked);
+    QObject::connect(ui->enableOffsetControl, &QToolButton::clicked, this, &GS232ControllerGUI::on_enableOffsetControl_clicked);
     QObject::connect(ui->dfmTrack, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmTrack_clicked);
     QObject::connect(ui->dfmLubePumps, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmLubePumps_clicked);
     QObject::connect(ui->dfmBrakes, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmBrakes_clicked);

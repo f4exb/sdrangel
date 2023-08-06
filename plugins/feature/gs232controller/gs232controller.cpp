@@ -492,7 +492,7 @@ void GS232Controller::webapiFormatFeatureSettings(
     response.getGs232ControllerSettings()->setPrecision(settings.m_precision);
     response.getGs232ControllerSettings()->setCoordinates((int)settings.m_coordinates);
     response.getGs232ControllerSettings()->setInputController(new QString(settings.m_inputController));
-    response.getGs232ControllerSettings()->setInputSensitivity(settings.m_inputSensitivity);
+    response.getGs232ControllerSettings()->setInputSensitivity(settings.m_inputControllerSettings.m_lowSensitivity);
 
     if (response.getGs232ControllerSettings()->getTitle()) {
         *response.getGs232ControllerSettings()->getTitle() = settings.m_title;
@@ -591,7 +591,7 @@ void GS232Controller::webapiUpdateFeatureSettings(
         settings.m_inputController = *response.getGs232ControllerSettings()->getInputController();
     }
     if (featureSettingsKeys.contains("inputSensitivity")) {
-        settings.m_inputSensitivity = response.getGs232ControllerSettings()->getInputSensitivity();
+        settings.m_inputControllerSettings.m_lowSensitivity = response.getGs232ControllerSettings()->getInputSensitivity();
     }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getGs232ControllerSettings()->getTitle();
@@ -688,7 +688,7 @@ void GS232Controller::webapiReverseSendSettings(const QList<QString>& featureSet
         swgGS232ControllerSettings->setInputController(new QString(settings.m_inputController));
     }
     if (featureSettingsKeys.contains("inputSensitivity") || force) {
-        swgGS232ControllerSettings->setInputSensitivity(settings.m_inputSensitivity);
+        swgGS232ControllerSettings->setInputSensitivity(settings.m_inputControllerSettings.m_lowSensitivity);
     }
     if (featureSettingsKeys.contains("title") || force) {
         swgGS232ControllerSettings->setTitle(new QString(settings.m_title));

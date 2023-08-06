@@ -15,44 +15,58 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
-#define INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
+#include <QDebug>
 
-#include "ui_gamepadconfigurationdialog.h"
+#include <cmath>
 
-class QGamepad;
-struct InputControllerSettings;
+#include "loglabelslider.h"
 
-class GamepadConfigurationDialog : public QDialog {
-    Q_OBJECT
+LogLabelSlider::LogLabelSlider(QWidget *parent) :
+    QWidget(parent)
+{
+    m_vLayout = new QVBoxLayout(this);
+    m_hLayout = new QHBoxLayout();
+    m_slider = new LogSlider();
+    connect(m_slider, &LogSlider::logValueChanged, this, &LogLabelSlider::handleLogValueChanged);
 
-public:
-    explicit GamepadConfigurationDialog(QGamepad *gamepad, InputControllerSettings *settings, bool supportsConfiguraiton, QWidget* parent = 0);
-    ~GamepadConfigurationDialog();
+    m_vLayout->addLayout(m_hLayout);
+    m_vLayout->addWidget(m_slider);
+}
 
-private slots:
-    void accept();
-    void on_configReset_clicked();
-    void on_config0_clicked();
-    void on_config1_clicked();
-    void on_config2_clicked();
-    void on_config3_clicked();
-    void axisRightXChanged(double value);
-    void axisRightYChanged(double value);
-    void axisLeftXChanged(double value);
-    void axisLeftYChanged(double value);
-    void on_lowSensitivity_logValueChanged(double value);
-    void on_highSensitivity_logValueChanged(double value);
-    void on_deadzone0_valueChanged(int value);
-    void on_deadzone1_valueChanged(int value);
-    void on_deadzone2_valueChanged(int value);
-    void on_deadzone3_valueChanged(int value);
+void LogLabelSlider::setRange(double min, double max)
+{
+    m_slider->setRange(min, max);
+    double start = floor(log10(min));
+    double stop = ceil(log10(max));
+    double steps = stop - start;
 
-private:
-    Ui::GamepadConfigurationDialog* ui;
-    QGamepad *m_gamepad;
-    InputControllerSettings *m_settings;
-};
+    qDeleteAll(m_labels);
+    m_labels.clear();
 
-#endif // INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
+    double v = pow(10.0, start);
+    for (int i = 0; i <= steps; i++)
+    {
+        QString t = QString("%1").arg(v);
 
+        QLabel *label = new QLabel(t);
+
+        if (i == 0) {
+            label->setAlignment(Qt::AlignLeft);
+        } else if (i == steps) {
+            label->setAlignment(Qt::AlignRight);
+        } else {
+            label->setAlignment(Qt::AlignCenter);
+        }
+
+
+        m_labels.append(label);
+        m_hLayout->addWidget(label);
+
+        v *= 10.0;
+    }
+}
+
+void LogLabelSlider::handleLogValueChanged(double value)
+{
+    emit logValueChanged(value);
+}

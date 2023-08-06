@@ -382,16 +382,6 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="2">
-       <widget class="QLabel" name="inputSensitivityLabel">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Sensitivity</string>
-        </property>
-       </widget>
-      </item>
       <item row="5" column="2">
        <widget class="QLabel" name="elevationMaxLabel">
         <property name="text">
@@ -668,63 +658,12 @@
       <item row="8" column="3">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QSlider" name="inputSensitivity">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="toolTip">
-           <string>Input controller sensitivity</string>
-          </property>
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>2000</number>
-          </property>
-          <property name="pageStep">
-           <number>10</number>
-          </property>
-          <property name="value">
-           <number>25</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="inputSensitivityText">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>100%</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="8" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QComboBox" name="inputController">
-          <property name="toolTip">
-           <string>Gamepad / joystick to use</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>None</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item>
          <widget class="QToolButton" name="inputConfigure">
           <property name="toolTip">
            <string>Configure input</string>
           </property>
           <property name="text">
-           <string>C</string>
+           <string>Config...</string>
           </property>
          </widget>
         </item>
@@ -761,6 +700,70 @@
          <double>180.000000000000000</double>
         </property>
        </widget>
+      </item>
+      <item row="8" column="1" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QComboBox" name="inputController">
+          <property name="toolTip">
+           <string>Gamepad / joystick to use</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>None</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="highSensitivity">
+          <property name="toolTip">
+           <string>Input controller sensitvitiy (High / low)</string>
+          </property>
+          <property name="text">
+           <string>H</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="enableOffsetControl">
+          <property name="toolTip">
+           <string>Enable offset control</string>
+          </property>
+          <property name="text">
+           <string>O</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="enableTargetControl">
+          <property name="toolTip">
+           <string>Enable target control</string>
+          </property>
+          <property name="text">
+           <string>T</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -800,6 +803,17 @@
   <tabstop>elevationMin</tabstop>
   <tabstop>elevationMax</tabstop>
   <tabstop>tolerance</tabstop>
+  <tabstop>precision</tabstop>
+  <tabstop>coordinates</tabstop>
+  <tabstop>inputController</tabstop>
+  <tabstop>highSensitivity</tabstop>
+  <tabstop>enableTargetControl</tabstop>
+  <tabstop>inputConfigure</tabstop>
+  <tabstop>dfmTrack</tabstop>
+  <tabstop>dfmLubePumps</tabstop>
+  <tabstop>dfmBrakes</tabstop>
+  <tabstop>dfmDrives</tabstop>
+  <tabstop>dfmShowStatus</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>380</width>
-    <height>309</height>
+    <width>383</width>
+    <height>568</height>
    </rect>
   </property>
   <property name="font">
@@ -21,10 +21,37 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="configurationGroup">
+     <property name="title">
+      <string>Configuration</string>
+     </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="2">
-       <widget class="QLabel" name="value0">
+      <item row="8" column="1">
+       <widget class="QPushButton" name="configReset">
+        <property name="toolTip">
+         <string>Reset configuration</string>
+        </property>
+        <property name="text">
+         <string>Reset</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLabel" name="value3">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="config3Label">
+        <property name="text">
+         <string>Elevation Offset Axis</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="value2">
         <property name="text">
          <string>0</string>
         </property>
@@ -37,86 +64,10 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="value1">
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QPushButton" name="config1">
-        <property name="text">
-         <string>Configure</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="config3Label">
-        <property name="text">
-         <string>Elevation Offset Axis</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLabel" name="value3">
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="config2">
-        <property name="text">
-         <string>Configure</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="config2Label">
-        <property name="text">
-         <string>Azimuth Offset Axis</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="config1Label">
         <property name="text">
          <string>Target Elevation/Y Axis</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="2">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="config0Label">
-        <property name="text">
-         <string>Target Aziumth/X Axis</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="value2">
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="config0">
-        <property name="text">
-         <string>Configure</string>
         </property>
        </widget>
       </item>
@@ -136,8 +87,263 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="config0">
+        <property name="text">
+         <string>Configure</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="config0Label">
+        <property name="text">
+         <string>Target Aziumth/X Axis</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="config1">
+        <property name="text">
+         <string>Configure</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="value0">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QPushButton" name="config2">
+        <property name="text">
+         <string>Configure</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="value1">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="config2Label">
+        <property name="text">
+         <string>Azimuth Offset Axis</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="deadzonesGroup">
+     <property name="title">
+      <string>Deadzones</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="deadzone0Label">
+        <property name="text">
+         <string>Target Azimuth/X Axis</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSlider" name="deadzone0">
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="deadzone0Text">
+        <property name="minimumSize">
+         <size>
+          <width>35</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>0%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="deadzone1Label">
+        <property name="text">
+         <string>Target Elevation/Y Axis</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSlider" name="deadzone1">
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="deadzone1Text">
+        <property name="text">
+         <string>0%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="deadzone2Label">
+        <property name="text">
+         <string>Azimuth Offset Axis</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSlider" name="deadzone2">
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="deadzone2Text">
+        <property name="text">
+         <string>0%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="deadzone3Label">
+        <property name="text">
+         <string>Elevation Offset Axis</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSlider" name="deadzone3">
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="deadzone3Text">
+        <property name="text">
+         <string>0%</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="responseGroup">
+     <property name="title">
+      <string>Sensitivity</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="1" column="1">
+       <widget class="LogLabelSlider" name="lowSensitivity"/>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="highSensitivityText">
+        <property name="text">
+         <string>100%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lowSensitivityLabel">
+        <property name="minimumSize">
+         <size>
+          <width>65</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="sizeIncrement">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Low</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="lowSensitivityText">
+        <property name="minimumSize">
+         <size>
+          <width>65</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>100%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="highSensitivityLabel">
+        <property name="text">
+         <string>High</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="LogLabelSlider" name="highSensitivity"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="widget" native="true"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -151,6 +357,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LogLabelSlider</class>
+   <extends>QSlider</extends>
+   <header>gui/loglabelslider.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>config0</tabstop>
   <tabstop>config1</tabstop>
@@ -166,8 +379,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>519</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -182,8 +395,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>519</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

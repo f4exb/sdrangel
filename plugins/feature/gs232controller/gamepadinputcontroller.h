@@ -22,6 +22,8 @@
 
 #include <QGamepad>
 
+class GamepadConfigurationDialog;
+
 class GamepadInputController : public InputController {
 
 public:
@@ -30,17 +32,30 @@ public:
     double getAxisValue(int axis) override;
     int getNumberOfAxes() const override;
     bool supportsConfiguration() const override;
-    void configure() override;
+    void configure(InputControllerSettings *settings) override;
 
     static QStringList getAllControllers();
     static GamepadInputController* open(const QString& name);
 
 private slots:
 
+    void configurationDialogClosed();
     void axisRightXChanged(double value);
     void axisRightYChanged(double value);
     void axisLeftXChanged(double value);
     void axisLeftYChanged(double value);
+    void buttonAChanged(bool value);
+    void buttonBChanged(bool value);
+    void buttonXChanged(bool value);
+    void buttonYChanged(bool value);
+    void buttonUpChanged(bool value);
+    void buttonDownChanged(bool value);
+    void buttonLeftChanged(bool value);
+    void buttonRightChanged(bool value);
+    void buttonL1Changed(bool value);
+    void buttonR1Changed(bool value);
+    void buttonL3Changed(bool value);
+    void buttonR3Changed(bool value);
 
 private:
 
@@ -49,6 +64,8 @@ private:
     double m_rightY;
     double m_leftX;
     double m_leftY;
+    GamepadConfigurationDialog *m_configurationDialog;
+
 };
 
 #endif // INCLUDE_FEATURE_GAMEPADINPUTCONTROLLER_H_

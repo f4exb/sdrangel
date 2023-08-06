@@ -115,14 +115,52 @@ When a gamepad with 2 sticks (4 axes) such as the XBox Wireless Controller is us
 while the left stick is for controlling azimuth and elevation offset.
 If a controller only has 2 axes, target coordinates will be controlled when not tracking (6) and offset will be controlled when tracking.
 
+Buttons on a controller are assigned to the following functions:
+
+| Button  | XBox Controller  | Function                                 |
+|---------|------------------|------------------------------------------|
+| 0       | Y                | Start/stop plugin                        |
+| 1       | A                | Enable/disabling tracking                |
+| 3       | B                | Enable/disable target control            |
+| 2       | X                | Enable/disable offset control            |
+| 8       | R1               | Switch between low and high sensitivity  |
+
 The [Qt Gamepad](https://doc.qt.io/qt-5/qtgamepad-index.html) library is used to implement gamepad support.
 On Linux, using Qt Gamepad with the evdev backend, all joysticks & gamepads appear as though they have 4 axes (a limitation of Qt Gamepad).
-If using a joystick which only has 2 axes, whether it corresponds to the left or right stick can be configured by pressing the 'C' button.
+If using a joystick which only has 2 axes, whether it corresponds to the left or right stick can be configured by pressing the 'Config...' button.
 On Linux, the [xone driver](https://github.com/medusalix/xone) has support for the Xbox Wireless Controller, that isn't supported by the older xpad driver that is included with Ubuntu.
 
-<h3>23: Sensitivity</h3>
+<h3>23: High or Low Sensitivity</h3>
 
-Specifies the sensitivity on the input controls (22). The higher the value, the faster coordinates will change for a given control stick movement.
+Specifies High (H) or Low (L) Sensitivity mode. This is how fast coordinates will change for a given control stick movement.
+High Sensitivity is used for coarse target/offset adjustment, whereas Low sensitivity is used for fine target/offset adjustment.
+The sensitivity in each mode can be set in the Input Configuration Dialog (22).
+
+<h3>24: (T) Enable Target Control</h3>
+
+When checked, the target coordinates can be set with the input controller. When unchecked, the axes controlling the target will be ignored.
+
+<h3>25: (O) Enable Offset Control</h3>
+
+When checked, the offset coordinates can be set with the input controller. When unchecked, the axes controlling the offset will be ignored.
+
+<h3>26: Input Control Configuration</h3>
+
+Pressing the Config... button will display the Input Configuration Dialog:
+
+<h4>1: Configuration</h4>
+
+The Configure buttons allow setting which axis is assigned to target or offset control. To assign an axis, press the corresponding Configure button, then move the controller axis.
+
+<h4>2: Deadzones</h3>
+
+Deadzones can be set individually for each for the 4 axes. A deadzone specifies the amount a controller axis can be moved without a response.
+This can be used to prevent very small movements around the center position on a stick from adjusting the target, or eliminate target adjustments
+when a stick is centered, but is reporting a non-zero position on the axis.
+
+<h4>3: Sensitivity</h3>
+
+Specifies the sensitivity of the input in Low and High Sensitivity mode (23). The higher the value, the faster coordinates will change for a given control stick movement.
 
 <h2>Protocol Implementations</h2>
 

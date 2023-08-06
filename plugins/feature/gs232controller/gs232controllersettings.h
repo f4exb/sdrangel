@@ -23,6 +23,7 @@
 #include <QString>
 
 #include "util/message.h"
+#include "inputcontrollersettings.h"
 
 class Serializable;
 
@@ -63,7 +64,10 @@ struct GS232ControllerSettings
     int m_precision;
     enum Coordinates { AZ_EL, X_Y_85, X_Y_30 } m_coordinates;
     QString m_inputController;
-    float m_inputSensitivity;
+    InputControllerSettings m_inputControllerSettings;
+    bool m_targetControlEnabled;
+    bool m_offsetControlEnabled;
+    bool m_highSensitivity;
 
     bool m_dfmTrackOn;
     bool m_dfmLubePumpsOn;

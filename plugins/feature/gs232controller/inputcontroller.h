@@ -20,6 +20,23 @@
 
 #include <QObject>
 
+#include "inputcontrollersettings.h"
+
+#define INPUTCONTROLLER_BUTTON_RIGHT_TOP        0           // Y / triangle
+#define INPUTCONTROLLER_BUTTON_RIGHT_BOTTOM     1           // A / X
+#define INPUTCONTROLLER_BUTTON_RIGHT_LEFT       2           // X / Square
+#define INPUTCONTROLLER_BUTTON_RIGHT_RIGHT      3           // B / Circle
+
+#define INPUTCONTROLLER_BUTTON_LEFT_UP          4           // D-Pad
+#define INPUTCONTROLLER_BUTTON_LEFT_DOWN        5
+#define INPUTCONTROLLER_BUTTON_LEFT_LEFT        6
+#define INPUTCONTROLLER_BUTTON_LEFT_RIGHT       7
+
+#define INPUTCONTROLLER_BUTTON_R1               8           // On top of controller
+#define INPUTCONTROLLER_BUTTON_L1               9
+#define INPUTCONTROLLER_BUTTON_R3               10          // Sticks pushed
+#define INPUTCONTROLLER_BUTTON_L3               11
+
 class InputController : public QObject {
     Q_OBJECT
 public:
@@ -28,9 +45,15 @@ public:
     // axis 0-3. 0=Az/X, 1=El/Y, 2=Az Offset, 3=El Offset
     // value returned should be current axis position in range [-1,1]
     virtual double getAxisValue(int axis) = 0;
+    // Gets axis value applying deadzone and sensitivity
+    double getAxisCalibratedValue(int axis, InputControllerSettings *settings, bool highSensitivity);
     virtual int getNumberOfAxes() const = 0;
     virtual bool supportsConfiguration() const { return false; }
-    virtual void configure() {};
+    virtual void configure(InputControllerSettings *settings) { (void) settings; };
+
+signals:
+    void buttonChanged(int button, bool released);
+    void configurationComplete();
 
 };
 

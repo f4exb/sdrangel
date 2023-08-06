@@ -15,44 +15,40 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
-#define INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
+#ifndef SDRGUI_GUI_LOGSLIDER_H
+#define SDRGUI_GUI_LOGSLIDER_H
 
-#include "ui_gamepadconfigurationdialog.h"
+#include <QSlider>
 
-class QGamepad;
-struct InputControllerSettings;
+#include "export.h"
 
-class GamepadConfigurationDialog : public QDialog {
+// Logarithmic Slider (hozizontal only)
+class SDRGUI_API LogSlider : public QSlider {
     Q_OBJECT
 
 public:
-    explicit GamepadConfigurationDialog(QGamepad *gamepad, InputControllerSettings *settings, bool supportsConfiguraiton, QWidget* parent = 0);
-    ~GamepadConfigurationDialog();
+
+    explicit LogSlider(QWidget *parent = nullptr);
+
+    void setRange(double min, double max);
+    void setValue(double value);
+
+
+signals:
+
+    void logValueChanged(double value);
 
 private slots:
-    void accept();
-    void on_configReset_clicked();
-    void on_config0_clicked();
-    void on_config1_clicked();
-    void on_config2_clicked();
-    void on_config3_clicked();
-    void axisRightXChanged(double value);
-    void axisRightYChanged(double value);
-    void axisLeftXChanged(double value);
-    void axisLeftYChanged(double value);
-    void on_lowSensitivity_logValueChanged(double value);
-    void on_highSensitivity_logValueChanged(double value);
-    void on_deadzone0_valueChanged(int value);
-    void on_deadzone1_valueChanged(int value);
-    void on_deadzone2_valueChanged(int value);
-    void on_deadzone3_valueChanged(int value);
+    void handleValueChanged(int value);
 
 private:
-    Ui::GamepadConfigurationDialog* ui;
-    QGamepad *m_gamepad;
-    InputControllerSettings *m_settings;
+
+    double m_start;
+    double m_stop;
+    double m_steps;
+
+    static const int m_stepsPerPower = 100;
+
 };
 
-#endif // INCLUDE_GAMEPADCONFIGURATIONDIALOG_H
-
+#endif // SDRGUI_GUI_LOGSLIDER_H
