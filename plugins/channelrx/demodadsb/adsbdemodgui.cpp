@@ -4250,6 +4250,7 @@ void ADSBDemodGUI::updateAirports()
         ++i;
     }
     // Save settings we've just used so we know if they've changed
+    m_currentAirportRange = m_settings.m_airportRange;
     m_currentAirportMinimumSize = m_settings.m_airportMinimumSize;
     m_currentDisplayHeliports = m_settings.m_displayHeliports;
 }
