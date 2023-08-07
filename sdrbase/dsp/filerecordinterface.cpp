@@ -18,6 +18,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDateTime>
+#include <QFileInfo>
 
 #include "filerecordinterface.h"
 
@@ -40,41 +41,32 @@ QString FileRecordInterface::genUniqueFileName(unsigned int deviceUID, int istre
 
 FileRecordInterface::RecordType FileRecordInterface::guessTypeFromFileName(const QString& fileName, QString& fileBase)
 {
-    QStringList dotBreakout = fileName.split(QLatin1Char('.'));
+    QFileInfo fileInfo(fileName);
+    QString extension = fileInfo.suffix();
 
-    if (dotBreakout.length() > 1)
+    fileBase = fileName;
+    if (!extension.isEmpty())
     {
-        QString extension = dotBreakout.last();
-        dotBreakout.removeLast();
-
+        fileBase.chop(extension.size() + 1);
         if (extension == "sdriq")
         {
-            if (dotBreakout.length() > 1) {
-                dotBreakout.removeLast();
-            }
-
-            fileBase = dotBreakout.join(QLatin1Char('.'));
             return RecordTypeSdrIQ;
         }
         else if (extension == "sigmf-meta")
         {
-            fileBase = dotBreakout.join(QLatin1Char('.'));
             return RecordTypeSigMF;
         }
         else if (extension == "wav")
         {
-            fileBase = dotBreakout.join(QLatin1Char('.'));
             return RecordTypeWav;
         }
         else
         {
-            fileBase = fileName;
             return RecordTypeUndefined;
         }
     }
     else
     {
-        fileBase = fileName;
         return RecordTypeUndefined;
     }
 }
