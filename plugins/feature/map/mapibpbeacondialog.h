@@ -39,6 +39,8 @@ private slots:
     void accept();
     void on_beacons_cellDoubleClicked(int row, int column);
     void updateTime();
+    void showEvent(QShowEvent *event);
+    void hideEvent(QHideEvent *event);
 
 private:
     MapGUI *m_gui;
