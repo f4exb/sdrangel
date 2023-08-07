@@ -22,6 +22,7 @@
 #include <QStyleFactory>
 #include <QFontDatabase>
 #include <QSysInfo>
+#include <QSettings>
 #ifdef __APPLE__
 #include <QGLFormat>
 #include <QSurfaceFormat>
@@ -55,6 +56,16 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 #ifndef ANDROID
      QApplication::setAttribute(Qt::AA_DontUseNativeDialogs); // Don't use on Android, otherwise we can't access files on internal storage
 #endif
+
+    // Set UI scale factor for High DPI displays
+    QSettings settings;
+    QString uiScaleFactor = "graphics.ui_scale_factor";
+    if (settings.contains(uiScaleFactor))
+    {
+        QString scaleFactor = settings.value(uiScaleFactor).toString();
+        qDebug() << "Setting QT_SCALE_FACTOR to" << scaleFactor;
+        qputenv("QT_SCALE_FACTOR", scaleFactor.toLatin1());
+    }
 
 	QApplication a(argc, argv);
 

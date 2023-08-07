@@ -35,9 +35,11 @@ public:
 private:
     Ui::GraphicsDialog* ui;
     MainSettings& m_mainSettings;
+    float m_initScaleFactor;
 
 private slots:
     void accept();
+    void on_uiScaleFactor_valueChanged(int value);
 };
 
 #endif /* SDRGUI_GUI_GRAPHICS_H_ */
