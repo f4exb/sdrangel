@@ -32,7 +32,6 @@ MapIBPBeaconDialog::MapIBPBeaconDialog(MapGUI *gui, QWidget* parent) :
     ui->setupUi(this);
     connect(&m_timer, &QTimer::timeout, this, &MapIBPBeaconDialog::updateTime);
     m_timer.setInterval(1000);
-    m_timer.start();
     ui->beacons->setRowCount(IBPBeacon::m_frequencies.size());
     for (int row = 0; row < IBPBeacon::m_frequencies.size(); row++)
     {
@@ -44,7 +43,6 @@ MapIBPBeaconDialog::MapIBPBeaconDialog(MapGUI *gui, QWidget* parent) :
         ui->beacons->setItem(row, IBP_BEACON_COL_DISTANCE, new QTableWidgetItem(""));
     }
     resizeTable();
-    updateTable(QTime::currentTime());
 }
 
 MapIBPBeaconDialog::~MapIBPBeaconDialog()
@@ -125,4 +123,18 @@ void MapIBPBeaconDialog::updateTime()
     if ((t.second() % IBPBeacon::m_period) == 0) {
         updateTable(t);
     }
+}
+
+void MapIBPBeaconDialog::showEvent(QShowEvent *event)
+{
+    (void) event;
+    updateTable(QTime::currentTime());
+    updateTime();
+    m_timer.start();
+}
+
+void MapIBPBeaconDialog::hideEvent(QHideEvent *event)
+{
+    (void) event;
+    m_timer.stop();
 }
