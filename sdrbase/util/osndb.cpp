@@ -18,7 +18,11 @@
 #include <QFileInfo>
 #include <QResource>
 
+#if (QT_VERSION < QT_VERSION_CHECK(6, 6, 0))
 #include <QtGui/private/qzipreader_p.h>
+#else
+#include <QtCore/private/qzipreader_p.h>
+#endif
 
 #include "util/osndb.h"
 

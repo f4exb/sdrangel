@@ -20,6 +20,7 @@
 
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QRegularExpression>
 #include <QDebug>
 
 class OSMTemplateServer : public QTcpServer
@@ -61,7 +62,7 @@ private slots:
         {
             QString line = socket->readLine();
             qDebug() << "HTTP Request: " << line;
-            QStringList tokens = QString(line).split(QRegExp("[ \r\n][ \r\n]*"));
+            QStringList tokens = QString(line).split(QRegularExpression("[ \r\n][ \r\n]*"));
             if (tokens[0] == "GET")
             {
                 bool hires = tokens[1].contains("hires");

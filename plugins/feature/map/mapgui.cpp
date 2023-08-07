@@ -27,8 +27,8 @@
 
 #ifdef QT_WEBENGINE_FOUND
 #include <QtWebEngineWidgets/QWebEngineView>
-#include <QtWebEngineWidgets/QWebEngineSettings>
-#include <QtWebEngineWidgets/QWebEngineProfile>
+#include <QWebEngineSettings>
+#include <QWebEngineProfile>
 #endif
 
 #include "feature/featureuiset.h"
@@ -235,7 +235,12 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     ui->map->rootContext()->setContextProperty("imageModelFiltered", &m_imageMapFilter);
     ui->map->rootContext()->setContextProperty("polygonModelFiltered", &m_polygonMapFilter);
     ui->map->rootContext()->setContextProperty("polylineModelFiltered", &m_polylineMapFilter);
+    connect(ui->map, &QQuickWidget::statusChanged, this, &MapGUI::statusChanged);
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     ui->map->setSource(QUrl(QStringLiteral("qrc:/map/map/map.qml")));
+#else
+    ui->map->setSource(QUrl(QStringLiteral("qrc:/map/map/map_6.qml")));
+#endif
 
     m_settings.m_modelURL = QString("http://127.0.0.1:%1/3d/").arg(m_webPort);
     m_webServer->addPathSubstitution("3d", m_settings.m_modelDir);
@@ -252,6 +257,10 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     QWebEngineSettings *settings = ui->web->settings();
     settings->setAttribute(QWebEngineSettings::FullScreenSupportEnabled, true);
     connect(ui->web->page(), &QWebEnginePage::fullScreenRequested, this, &MapGUI::fullScreenRequested);
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+    connect(ui->web->page(), &QWebEnginePage::loadingChanged, this, &MapGUI::loadingChanged);
+    connect(ui->web, &QWebEngineView::renderProcessTerminated, this, &MapGUI::renderProcessTerminated);
+#endif
 #endif
 
     // Get station position
@@ -1103,7 +1112,7 @@ void MapGUI::clearOSMCache()
         {
             QFile file(dir.filePath(filename));
             if (!file.remove()) {
-                qDebug() << "MapGUI::clearOSMCache: Failed to remove " << file;
+                qDebug() << "MapGUI::clearOSMCache: Failed to remove " << file.fileName();
             }
         }
     }
@@ -1126,7 +1135,7 @@ void MapGUI::clearWikiMediaOSMCache()
             {
                 QFile file(dir.filePath(filename));
                 if (!file.remove()) {
-                    qDebug() << "MapGUI::clearWikiMediaOSMCache: Failed to remove " << file;
+                    qDebug() << "MapGUI::clearWikiMediaOSMCache: Failed to remove " << file.fileName();
                 }
             }
         }
@@ -1213,7 +1222,6 @@ void MapGUI::applyMap2DSettings(bool reloadMap)
             qCritical() << "MapGUI::applyMap2DSettings - Failed to invoke createMap";
         }
         QObject *newMap = retVal.value<QObject *>();
-
         // Restore position of map
         if (newMap != nullptr)
         {
@@ -1398,6 +1406,39 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
     m_polylineMapModel.allUpdated();
 #endif
 }
+
+void MapGUI::statusChanged(QQuickWidget::Status status)
+{
+    // In Qt6, it seems a page can be loaded multiple times, and this slot is too
+    // This causes a problem in that the map created by the call to createMap can
+    // be lost, so we recreate it here each time
+    if (status == QQuickWidget::Ready) {
+        applyMap2DSettings(true);
+    }
+}
+
+#ifdef QT_WEBENGINE_FOUND
+
+void MapGUI::renderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode)
+{
+    qDebug() << "MapGUI::renderProcessTerminated: " << terminationStatus << "exitCode" << exitCode;
+}
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+
+void MapGUI::loadingChanged(const QWebEngineLoadingInfo &loadingInfo)
+{
+    if (loadingInfo.status() == QWebEngineLoadingInfo::LoadFailedStatus)
+    {
+        qDebug() << "MapGUI::loadingChanged: Failed to load " << loadingInfo.url().toString()
+            << "errorString: " << loadingInfo.errorString() << " "
+            << "errorDomain:" << loadingInfo.errorDomain()
+            << "errorCode:" << loadingInfo.errorCode()
+            ;
+    }
+}
+#endif
+#endif
 
 void MapGUI::init3DMap()
 {

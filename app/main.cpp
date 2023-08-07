@@ -30,6 +30,9 @@
 #ifdef ANDROID
 #include "util/android.h"
 #endif
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 4, 0))
+#include <QQuickWindow>
+#endif
 
 #include "loggerwithfile.h"
 #include "mainwindow.h"
@@ -52,6 +55,14 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 #endif
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)) && (QT_VERSION <= QT_VERSION_CHECK(6, 0, 0))
     QApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
+#endif
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 4, 0))
+    // Only use OpenGL, to easily combine QOpenGLWidget, QQuickWidget and QWebEngine
+    // in a single window
+    // See https://www.qt.io/blog/qt-quick-and-widgets-qt-6.4-edition
+    // This prevents Direct3D/Vulcan being used on Windows/Mac though for QQuickWidget
+    // and QWebEngine, so possibly should be reviewed in the future
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 #endif
 #ifndef ANDROID
      QApplication::setAttribute(Qt::AA_DontUseNativeDialogs); // Don't use on Android, otherwise we can't access files on internal storage

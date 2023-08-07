@@ -22,11 +22,13 @@ set(map_HEADERS
     webserver.h
 )
 
-if(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND)
+# WebEngine on Qt5, WebEngineCore on Qt6
+if(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND OR Qt${QT_DEFAULT_MAJOR_VERSION}WebEngineCore_FOUND)
     add_compile_definitions(QT_WEBENGINE_FOUND)
     configure_file(mapguiwebengine.ui mapgui.ui)
 else()
     configure_file(mapguinowebengine.ui mapgui.ui)
+    message(STATUS "Not building 3D map (Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND=${Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND} Qt${QT_DEFAULT_MAJOR_VERSION}WebEngineCore_FOUND=${Qt${QT_DEFAULT_MAJOR_VERSION}WebEngineCore_FOUND})")
 endif()
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -84,7 +86,9 @@ if(NOT SERVER_MODE)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 
-    if(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND)
+    if(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngineCore_FOUND)
+        set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location Qt::WebEngineCore Qt::WebEngineWidgets)
+    elseif(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND)
         set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location Qt::WebEngine Qt::WebEngineCore Qt::WebEngineWidgets)
     else()
         set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location)

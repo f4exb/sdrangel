@@ -17,6 +17,7 @@
 
 #include <QResource>
 #include <QFile>
+#include <QRegularExpression>
 #include <QDebug>
 
 #include "webserver.h"
@@ -126,7 +127,7 @@ void WebServer::readClient()
         QString line = socket->readLine();
         //qDebug() << "WebServer HTTP Request: " << line;
 
-        QStringList tokens = QString(line).split(QRegExp("[ \r\n][ \r\n]*"));
+        QStringList tokens = QString(line).split(QRegularExpression("[ \r\n][ \r\n]*"));
         if (tokens[0] == "GET")
         {
             // Get file type from extension
