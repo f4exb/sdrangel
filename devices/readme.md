@@ -22,6 +22,10 @@ This folder contains classes and methods that can be used by different plugins t
     - plutosdrinput
     - plutosdroutput
 
+  - JupiterSDR: two Rx and two Tx full duplex. Plugins are
+    - jupitersdrinput
+    - jupitersdroutput
+
   - SoapySDR: Soapy SDR virtual device
     - soapysdrinput
     - soapysdroutput

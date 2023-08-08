@@ -74,8 +74,10 @@ endif()
 
 if(ENABLE_IIO AND LIBIIO_FOUND)
     add_subdirectory(plutosdrinput)
+    add_subdirectory(jupitersdrinput)
 else()
     message(STATUS "Not building plutosdrinput (ENABLE_IIO=${ENABLE_IIO} LIBIIO_FOUND=${LIBIIO_FOUND})")
+    message(STATUS "Not building jupitersdrinput (ENABLE_IIO=${ENABLE_IIO} LIBIIO_FOUND=${LIBIIO_FOUND})")
 endif()
 
 if(ENABLE_RTLSDR AND LIBRTLSDR_FOUND)

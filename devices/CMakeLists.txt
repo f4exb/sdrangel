@@ -26,6 +26,7 @@ endif()
 
 if(ENABLE_IIO AND LIBIIO_FOUND)
     add_subdirectory(plutosdr)
+    add_subdirectory(jupitersdr)
 endif()
 
 if(ENABLE_PERSEUS AND LIBPERSEUS_FOUND)

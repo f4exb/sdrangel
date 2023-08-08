@@ -1,0 +1,75 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Benjamin Menkuec, DJ4LF                                    //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#ifndef PLUGINS_SAMPLESOURCE_JUPITERSDRINPUT_JUPITERSDRINPUTTHREAD_H_
+#define PLUGINS_SAMPLESOURCE_JUPITERSDRINPUT_JUPITERSDRINPUTTHREAD_H_
+
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
+
+#include "dsp/samplesinkfifo.h"
+#include "dsp/decimators.h"
+#include "jupitersdr/devicejupitersdrshared.h"
+
+class DeviceJupiterSDRBox;
+
+class JupiterSDRInputThread : public QThread, public DeviceJupiterSDRShared::ThreadInterface
+{
+    Q_OBJECT
+
+public:
+    JupiterSDRInputThread(uint32_t blocksize, DeviceJupiterSDRBox* plutoBox, SampleSinkFifo* sampleFifo, QObject* parent = 0);
+    ~JupiterSDRInputThread();
+
+    virtual void startWork();
+    virtual void stopWork();
+    virtual void setDeviceSampleRate(int sampleRate) { (void) sampleRate; }
+    virtual bool isRunning() { return m_running; }
+    void setLog2Decimation(unsigned int log2_decim);
+    void setFcPos(int fcPos);
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
+
+private:
+    QMutex m_startWaitMutex;
+    QWaitCondition m_startWaiter;
+    bool m_running;
+
+    DeviceJupiterSDRBox *m_plutoBox;
+    int16_t *m_buf;               //!< holds I+Q values of each sample from devce
+    int16_t *m_bufConv;           //!< holds I+Q values of each sample converted to host format via iio_channel_convert
+    uint32_t m_blockSizeSamples;  //!< buffer sizes in number of (I,Q) samples
+    SampleVector m_convertBuffer; //!< vector of (I,Q) samples used for decimation and scaling conversion
+    SampleVector::iterator m_convertIt;
+    SampleSinkFifo* m_sampleFifo; //!< DSP sample FIFO (I,Q)
+
+    unsigned int m_log2Decim; // soft decimation
+    int m_fcPos;
+    float m_phasor;
+    bool m_iqOrder;
+
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimatorsIQ;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, false> m_decimatorsQI;
+
+    void run();
+    void convertIQ(const qint16* buf, qint32 len);
+    void convertQI(const qint16* buf, qint32 len);
+};
+
+
+#endif /* PLUGINS_SAMPLESOURCE_JUPITERSDRINPUT_JUPITERSDRINPUTTHREAD_H_ */
