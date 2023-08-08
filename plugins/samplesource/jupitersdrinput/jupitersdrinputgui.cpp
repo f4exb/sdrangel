@@ -162,10 +162,7 @@ bool JupiterSDRInputGui::handleMessage(const Message& message)
     {
         DeviceJupiterSDRShared::MsgCrossReportToBuddy& conf = (DeviceJupiterSDRShared::MsgCrossReportToBuddy&) message;
         m_settings.m_devSampleRate = conf.getDevSampleRate();
-        m_settings.m_lpfFIRlog2Decim = conf.getLpfFiRlog2IntDec();
-        m_settings.m_lpfFIRBW = conf.getLpfFirbw();
         m_settings.m_LOppmTenths = conf.getLoPPMTenths();
-        m_settings.m_lpfFIREnable = conf.isLpfFirEnable();
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -283,33 +280,18 @@ void JupiterSDRInputGui::on_lpf_changed(quint64 value)
 
 void JupiterSDRInputGui::on_lpFIREnable_toggled(bool checked)
 {
-    m_settings.m_lpfFIREnable = checked;
-    ui->lpFIRDecimation->setEnabled(checked);
-    ui->lpFIRGain->setEnabled(checked);
-    m_settingsKeys.append("lpfFIREnable");
-    sendSettings();
 }
 
 void JupiterSDRInputGui::on_lpFIR_changed(quint64 value)
 {
-    m_settings.m_lpfFIRBW = value * 1000;
-    m_settingsKeys.append("lpfFIRBW");
-    sendSettings();
 }
 
 void JupiterSDRInputGui::on_lpFIRDecimation_currentIndexChanged(int index)
 {
-    m_settings.m_lpfFIRlog2Decim = index > 2 ? 2 : index;
-    setSampleRateLimits();
-    m_settingsKeys.append("lpfFIRlog2Decim");
-    sendSettings();
 }
 
 void JupiterSDRInputGui::on_lpFIRGain_currentIndexChanged(int index)
 {
-    m_settings.m_lpfFIRGain = 6*(index > 3 ? 3 : index) - 12;
-    m_settingsKeys.append("lpfFIRGain");
-    sendSettings();
 }
 
 void JupiterSDRInputGui::on_gainMode_currentIndexChanged(int index)
@@ -523,10 +505,6 @@ void JupiterSDRInputGui::updateStatus()
 
 void JupiterSDRInputGui::setFIRBWLimits()
 {
-    float high = DeviceJupiterSDR::firBWHighLimitFactor * ((JupiterSDRInput *) m_sampleSource)->getFIRSampleRate();
-    float low = DeviceJupiterSDR::firBWLowLimitFactor * ((JupiterSDRInput *) m_sampleSource)->getFIRSampleRate();
-    ui->lpFIR->setValueRange(5, (int(low)/1000)+1, (int(high)/1000)+1);
-    ui->lpFIR->setValue(m_settings.m_lpfFIRBW/1000);
 }
 
 void JupiterSDRInputGui::setSampleRateLimits()

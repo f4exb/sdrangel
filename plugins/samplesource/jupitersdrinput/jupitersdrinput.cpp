@@ -43,27 +43,31 @@ JupiterSDRInput::JupiterSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_deviceDescription("JupiterSDRInput"),
     m_running(false),
-    m_plutoRxBuffer(0),
-    m_plutoSDRInputThread(nullptr)
+    m_jupiterRxBuffer(0),
+    m_jupiterSDRInputThread(nullptr)
 {
     m_sampleFifo.setLabel(m_deviceDescription);
     m_deviceSampleRates.m_addaConnvRate = 0;
     m_deviceSampleRates.m_bbRateHz = 0;
-    m_deviceSampleRates.m_firRate = 0;
     m_deviceSampleRates.m_hb1Rate = 0;
     m_deviceSampleRates.m_hb2Rate = 0;
     m_deviceSampleRates.m_hb3Rate = 0;
 
     suspendBuddies();
+    qCritical("open");
     m_open = openDevice();
+    qCritical("open finished");
 
     if (!m_open) {
         qCritical("JupiterSDRInput::JupiterSDRInput: cannot open device");
     }
 
+    qCritical("resume");
     resumeBuddies();
 
+    qCritical("setNb");
     m_deviceAPI->setNbSourceStreams(1);
+    qCritical("setNb finished");
 
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -96,10 +100,12 @@ void JupiterSDRInput::destroy()
 void JupiterSDRInput::init()
 {
     applySettings(m_settings, QList<QString>(), true);
+    qCritical("init end");
 }
 
 bool JupiterSDRInput::start()
 {
+    qCritical("start");
     if (!m_deviceShared.m_deviceParams->getBox())
     {
         qCritical("JupiterSDRInput::start: device not open");
@@ -112,16 +118,20 @@ bool JupiterSDRInput::start()
 
     // start / stop streaming is done in the thread.
 
-    m_plutoSDRInputThread = new JupiterSDRInputThread(JUPITERSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo);
+    m_jupiterSDRInputThread = new JupiterSDRInputThread(JUPITERSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo);
     qDebug("JupiterSDRInput::start: thread created");
 
+    qCritical("apply");
     applySettings(m_settings, QList<QString>(), true);
 
-    m_plutoSDRInputThread->setLog2Decimation(m_settings.m_log2Decim);
-    m_plutoSDRInputThread->setIQOrder(m_settings.m_iqOrder);
-    m_plutoSDRInputThread->startWork();
+    qCritical("setLog2");
+    m_jupiterSDRInputThread->setLog2Decimation(m_settings.m_log2Decim);
+    qCritical("setIQOrder");
+    m_jupiterSDRInputThread->setIQOrder(m_settings.m_iqOrder);
+    qCritical("startWork");
+    m_jupiterSDRInputThread->startWork();
 
-    m_deviceShared.m_thread = m_plutoSDRInputThread;
+    m_deviceShared.m_thread = m_jupiterSDRInputThread;
     m_running = true;
 
     return true;
@@ -129,11 +139,11 @@ bool JupiterSDRInput::start()
 
 void JupiterSDRInput::stop()
 {
-    if (m_plutoSDRInputThread)
+    if (m_jupiterSDRInputThread)
     {
-        m_plutoSDRInputThread->stopWork();
-        delete m_plutoSDRInputThread;
-        m_plutoSDRInputThread = nullptr;
+        m_jupiterSDRInputThread->stopWork();
+        delete m_jupiterSDRInputThread;
+        m_jupiterSDRInputThread = nullptr;
     }
 
     m_deviceShared.m_thread = nullptr;
@@ -183,6 +193,7 @@ quint64 JupiterSDRInput::getCenterFrequency() const
 
 void JupiterSDRInput::setCenterFrequency(qint64 centerFrequency)
 {
+    qCritical("setCenterFrequency"); 
     JupiterSDRInputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
@@ -198,6 +209,7 @@ void JupiterSDRInput::setCenterFrequency(qint64 centerFrequency)
 
 bool JupiterSDRInput::handleMessage(const Message& message)
 {
+    qCritical("handleMessage"); 
     if (MsgConfigureJupiterSDR::match(message))
     {
         MsgConfigureJupiterSDR& conf = (MsgConfigureJupiterSDR&) message;
@@ -237,12 +249,9 @@ bool JupiterSDRInput::handleMessage(const Message& message)
         DeviceJupiterSDRShared::MsgCrossReportToBuddy& conf = (DeviceJupiterSDRShared::MsgCrossReportToBuddy&) message;
         JupiterSDRInputSettings newSettings = m_settings;
         newSettings.m_devSampleRate = conf.getDevSampleRate();
-        newSettings.m_lpfFIRlog2Decim = conf.getLpfFiRlog2IntDec();
-        newSettings.m_lpfFIRBW = conf.getLpfFirbw();
         newSettings.m_LOppmTenths = conf.getLoPPMTenths();
-        newSettings.m_lpfFIREnable = conf.isLpfFirEnable();
 
-        m_settings.applySettings(QList<QString>{"devSampleRate", "lpfFIRlog2Decim", "lpfFIRBW", "LOppmTenths", "lpfFIREnable"}, newSettings);
+        m_settings.applySettings(QList<QString>{"devSampleRate", "LOppmTenths"}, newSettings);
 
         return true;
     }
@@ -254,6 +263,7 @@ bool JupiterSDRInput::handleMessage(const Message& message)
 
 bool JupiterSDRInput::openDevice()
 {
+    qCritical("openDevice"); 
     if (!m_sampleFifo.setSize(JUPITERSDR_BLOCKSIZE_SAMPLES))
     {
         qCritical("JupiterSDRInput::openDevice: could not allocate SampleFifo");
@@ -332,16 +342,17 @@ bool JupiterSDRInput::openDevice()
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
 
     // acquire the channel
-    DeviceJupiterSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+    DeviceJupiterSDRBox *jupiterBox =  m_deviceShared.m_deviceParams->getBox();
 
-    if (!plutoBox->openRx())
+    if (!jupiterBox->openRx())
     {
         qCritical("JupiterSDRInput::openDevice: cannot open Rx channel");
         return false;
     }
 
-    m_plutoRxBuffer = plutoBox->createRxBuffer(JUPITERSDR_BLOCKSIZE_SAMPLES, false);
+    m_jupiterRxBuffer = jupiterBox->createRxBuffer(JUPITERSDR_BLOCKSIZE_SAMPLES, false);
 
+    qCritical("openDevice finished"); 
     return true;
 }
 
@@ -391,6 +402,7 @@ void JupiterSDRInput::resumeBuddies()
 
 bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
+    qCritical("applySettings"); 
     if (!m_open)
     {
         qCritical("JupiterSDRInput::applySettings: device not open");
@@ -401,7 +413,7 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
     bool forwardChangeOtherDSP  = false;
     bool ownThreadWasRunning    = false;
     bool suspendAllOtherThreads = false; // All others means Tx in fact
-    DeviceJupiterSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+    DeviceJupiterSDRBox *jupiterBox =  m_deviceShared.m_deviceParams->getBox();
     QLocale loc;
     QList<QString> reverseAPIKeys;
 
@@ -411,14 +423,8 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
 
     // changes affecting all buddies can occur if
     //   - device to host sample rate is changed
-    //   - FIR filter is enabled or disabled
-    //   - FIR filter is changed
     //   - LO correction is changed
     if (settingsKeys.contains("devSampleRate") ||
-        settingsKeys.contains("lpfFIREnable") ||
-        settingsKeys.contains("lpfFIRlog2Decim") ||
-        settingsKeys.contains("lpfFIRBW") ||
-        settingsKeys.contains("lpfFIRGain") ||
         settingsKeys.contains("LOppmTenths") || force)
     {
         suspendAllOtherThreads = true;
@@ -444,9 +450,9 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
         }
     }
 
-    if (m_plutoSDRInputThread && m_plutoSDRInputThread->isRunning())
+    if (m_jupiterSDRInputThread && m_jupiterSDRInputThread->isRunning())
     {
-        m_plutoSDRInputThread->stopWork();
+        m_jupiterSDRInputThread->stopWork();
         ownThreadWasRunning = true;
     }
 
@@ -459,23 +465,16 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
     }
 
     // Change affecting device sample rate chain and other buddies
-    if (settingsKeys.contains("devSampleRate") ||
-        settingsKeys.contains("lpfFIREnable") ||
-        settingsKeys.contains("lpfFIRlog2Decim") ||
-        settingsKeys.contains("lpfFIRBW") ||
-        settingsKeys.contains("lpfFIRGain") || force)
+    if (settingsKeys.contains("devSampleRate") || force)
     {
-        plutoBox->setFIR(settings.m_devSampleRate, settings.m_lpfFIRlog2Decim, DeviceJupiterSDRBox::USE_RX, settings.m_lpfFIRBW, settings.m_lpfFIRGain);
-        plutoBox->setFIREnable(settings.m_lpfFIREnable);   // eventually enable/disable FIR
-        plutoBox->setSampleRate(settings.m_devSampleRate); // and set end point sample rate
+        jupiterBox->setSampleRate(settings.m_devSampleRate); // and set end point sample rate
 
-        plutoBox->getRxSampleRates(m_deviceSampleRates); // pick up possible new rates
+        jupiterBox->getRxSampleRates(m_deviceSampleRates); // pick up possible new rates
         qDebug() << "JupiterSDRInput::applySettings: BBPLL(Hz): " << m_deviceSampleRates.m_bbRateHz
                  << " ADC: " << m_deviceSampleRates.m_addaConnvRate
                  << " -HB3-> " << m_deviceSampleRates.m_hb3Rate
                  << " -HB2-> " << m_deviceSampleRates.m_hb2Rate
-                 << " -HB1-> " << m_deviceSampleRates.m_hb1Rate
-                 << " -FIR-> " << m_deviceSampleRates.m_firRate;
+                 << " -HB1-> " << m_deviceSampleRates.m_hb1Rate;
 
         forwardChangeOtherDSP = true;
         forwardChangeOwnDSP = (m_settings.m_devSampleRate != settings.m_devSampleRate) || force;
@@ -483,9 +482,9 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
 
     if (settingsKeys.contains("log2Decim") || force)
     {
-        if (m_plutoSDRInputThread)
+        if (m_jupiterSDRInputThread)
         {
-            m_plutoSDRInputThread->setLog2Decimation(settings.m_log2Decim);
+            m_jupiterSDRInputThread->setLog2Decimation(settings.m_log2Decim);
             qDebug() << "JupiterSDRInput::applySettings: set soft decimation to " << (1<<settings.m_log2Decim);
         }
 
@@ -494,14 +493,14 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
 
     if (settingsKeys.contains("iqOrder") || force)
     {
-        if (m_plutoSDRInputThread) {
-            m_plutoSDRInputThread->setIQOrder(settings.m_iqOrder);
+        if (m_jupiterSDRInputThread) {
+            m_jupiterSDRInputThread->setIQOrder(settings.m_iqOrder);
         }
     }
 
     if (settingsKeys.contains("LOppmTenths") || force)
     {
-        plutoBox->setLOPPMTenths(settings.m_LOppmTenths);
+        jupiterBox->setLOPPMTenths(settings.m_LOppmTenths);
         forwardChangeOtherDSP = true;
     }
 
@@ -530,9 +529,9 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
 
         if (settingsKeys.contains("fcPos") || force)
         {
-            if (m_plutoSDRInputThread)
+            if (m_jupiterSDRInputThread)
             {
-                m_plutoSDRInputThread->setFcPos(settings.m_fcPos);
+                m_jupiterSDRInputThread->setFcPos(settings.m_fcPos);
                 qDebug() << "JupiterSDRInput::applySettings: set fcPos to " << settings.m_fcPos;
             }
         }
@@ -540,16 +539,16 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
 
     if (settingsKeys.contains("lpfBW") || force)
     {
-        params.push_back(QString(tr("in_voltage_rf_bandwidth=%1").arg(settings.m_lpfBW)).toStdString());
+        params.push_back(QString(tr("in_voltage0_rf_bandwidth=%1").arg(settings.m_lpfBW)).toStdString());
         paramsToSet = true;
     }
 
     if (settingsKeys.contains("antennaPath") || force)
     {
-        QString rfPortStr;
-        JupiterSDRInputSettings::translateRFPath(settings.m_antennaPath, rfPortStr);
-        params.push_back(QString(tr("in_voltage0_rf_port_select=%1").arg(rfPortStr)).toStdString());
-        paramsToSet = true;
+        // QString rfPortStr;
+        // JupiterSDRInputSettings::translateRFPath(settings.m_antennaPath, rfPortStr);
+        // params.push_back(QString(tr("in_voltage0_rf_port_select=%1").arg(rfPortStr)).toStdString());
+        // paramsToSet = true;
     }
 
     if (settingsKeys.contains("gainMode") || force)
@@ -568,25 +567,25 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
 
     if (settingsKeys.contains("hwBBDCBlock") || force)
     {
-        params.push_back(QString(tr("in_voltage_bb_dc_offset_tracking_en=%1").arg(settings.m_hwBBDCBlock ? 1 : 0)).toStdString());
+        params.push_back(QString(tr("in_voltage0_bbdc_rejection_tracking_en=%1").arg(settings.m_hwBBDCBlock ? 1 : 0)).toStdString());
         paramsToSet = true;
     }
 
     if (settingsKeys.contains("hwRFDCBlock") || force)
     {
-        params.push_back(QString(tr("in_voltage_rf_dc_offset_tracking_en=%1").arg(settings.m_hwRFDCBlock ? 1 : 0)).toStdString());
+        params.push_back(QString(tr("in_voltage0_rfdc_tracking_en=%1").arg(settings.m_hwRFDCBlock ? 1 : 0)).toStdString());
         paramsToSet = true;
     }
 
     if (settingsKeys.contains("hwIQCorrection") || force)
     {
-        params.push_back(QString(tr("in_voltage_quadrature_tracking_en=%1").arg(settings.m_hwIQCorrection ? 1 : 0)).toStdString());
+        params.push_back(QString(tr("in_voltage0_quadrature_fic_tracking_en=%1").arg(settings.m_hwIQCorrection ? 1 : 0)).toStdString());
         paramsToSet = true;
     }
 
     if (paramsToSet)
     {
-        plutoBox->set_params(DeviceJupiterSDRBox::DEVICE_PHY, params);
+        jupiterBox->set_params(DeviceJupiterSDRBox::DEVICE_PHY, params);
     }
 
     if (settingsKeys.contains("useReverseAPI"))
@@ -620,7 +619,7 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
     }
 
     if (ownThreadWasRunning) {
-        m_plutoSDRInputThread->startWork();
+        m_jupiterSDRInputThread->startWork();
     }
 
     // TODO: forward changes to other (Tx) DSP
@@ -636,9 +635,6 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
         {
             DeviceJupiterSDRShared::MsgCrossReportToBuddy *msg = DeviceJupiterSDRShared::MsgCrossReportToBuddy::create(
                     settings.m_devSampleRate,
-                    settings.m_lpfFIREnable,
-                    settings.m_lpfFIRlog2Decim,
-                    settings.m_lpfFIRBW,
                     settings.m_LOppmTenths);
 
             if ((*itSink)->getSamplingDeviceGUIMessageQueue())
@@ -660,6 +656,7 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
+    qCritical("applySettings finished"); 
     return true;
 }
 
@@ -671,9 +668,9 @@ void JupiterSDRInput::getRSSI(std::string& rssiStr)
         return;
     }
 
-    DeviceJupiterSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+    DeviceJupiterSDRBox *jupiterBox =  m_deviceShared.m_deviceParams->getBox();
 
-    if (!plutoBox->getRxRSSI(rssiStr, 0)) {
+    if (!jupiterBox->getRxRSSI(rssiStr, 0)) {
         rssiStr = "xxx dB";
     }
 }
@@ -687,9 +684,9 @@ void JupiterSDRInput::getLORange(qint64& minLimit, qint64& maxLimit)
     }
 
     uint64_t min, max;
-    DeviceJupiterSDRBox *plutoBox = m_deviceShared.m_deviceParams->getBox();
+    DeviceJupiterSDRBox *jupiterBox = m_deviceShared.m_deviceParams->getBox();
 
-    plutoBox->getRxLORange(min, max);
+    jupiterBox->getRxLORange(min, max);
     minLimit = min;
     maxLimit = max;
 }
@@ -703,9 +700,9 @@ void JupiterSDRInput::getbbLPRange(quint32& minLimit, quint32& maxLimit)
     }
 
     uint32_t min, max;
-    DeviceJupiterSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+    DeviceJupiterSDRBox *jupiterBox =  m_deviceShared.m_deviceParams->getBox();
 
-    plutoBox->getbbLPRxRange(min, max);
+    jupiterBox->getbbLPRxRange(min, max);
     minLimit = min;
     maxLimit = max;
 }
@@ -718,9 +715,9 @@ void JupiterSDRInput::getGain(int& gaindB)
         return;
     }
 
-    DeviceJupiterSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
+    DeviceJupiterSDRBox *jupiterBox =  m_deviceShared.m_deviceParams->getBox();
 
-    if (!plutoBox->getRxGain(gaindB, 0)) {
+    if (!jupiterBox->getRxGain(gaindB, 0)) {
         gaindB = 0;
     }
 }
@@ -733,8 +730,8 @@ bool JupiterSDRInput::fetchTemperature()
         return false;
     }
 
-    DeviceJupiterSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
-    return plutoBox->fetchTemp();
+    DeviceJupiterSDRBox *jupiterBox =  m_deviceShared.m_deviceParams->getBox();
+    return jupiterBox->fetchTemp();
 }
 
 float JupiterSDRInput::getTemperature()
@@ -745,8 +742,8 @@ float JupiterSDRInput::getTemperature()
         return 0.0;
     }
 
-    DeviceJupiterSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
-    return plutoBox->getTemp();
+    DeviceJupiterSDRBox *jupiterBox =  m_deviceShared.m_deviceParams->getBox();
+    return jupiterBox->getTemp();
 }
 
 int JupiterSDRInput::webapiRunGet(
@@ -824,18 +821,6 @@ void JupiterSDRInput::webapiUpdateDeviceSettings(
     }
     if (deviceSettingsKeys.contains("LOppmTenths")) {
         settings.m_LOppmTenths = response.getPlutoSdrInputSettings()->getLOppmTenths();
-    }
-    if (deviceSettingsKeys.contains("lpfFIREnable")) {
-        settings.m_lpfFIREnable = response.getPlutoSdrInputSettings()->getLpfFirEnable() != 0;
-    }
-    if (deviceSettingsKeys.contains("lpfFIRBW")) {
-        settings.m_lpfFIRBW = response.getPlutoSdrInputSettings()->getLpfFirbw();
-    }
-    if (deviceSettingsKeys.contains("lpfFIRlog2Decim")) {
-        settings.m_lpfFIRlog2Decim = response.getPlutoSdrInputSettings()->getLpfFiRlog2Decim();
-    }
-    if (deviceSettingsKeys.contains("lpfFIRGain")) {
-        settings.m_lpfFIRGain = response.getPlutoSdrInputSettings()->getLpfFirGain();
     }
     if (deviceSettingsKeys.contains("fcPos")) {
         int fcPos = response.getPlutoSdrInputSettings()->getFcPos();
@@ -915,10 +900,6 @@ void JupiterSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings&
     response.getPlutoSdrInputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getPlutoSdrInputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getPlutoSdrInputSettings()->setLOppmTenths(settings.m_LOppmTenths);
-    response.getPlutoSdrInputSettings()->setLpfFirEnable(settings.m_lpfFIREnable ? 1 : 0);
-    response.getPlutoSdrInputSettings()->setLpfFirbw(settings.m_lpfFIRBW);
-    response.getPlutoSdrInputSettings()->setLpfFiRlog2Decim(settings.m_lpfFIRlog2Decim);
-    response.getPlutoSdrInputSettings()->setLpfFirGain(settings.m_lpfFIRGain);
     response.getPlutoSdrInputSettings()->setFcPos((int) settings.m_fcPos);
     response.getPlutoSdrInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getPlutoSdrInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
@@ -978,18 +959,6 @@ void JupiterSDRInput::webapiReverseSendSettings(const QList<QString>& deviceSett
     }
     if (deviceSettingsKeys.contains("LOppmTenths") || force) {
         swgPlutoSdrInputSettings->setLOppmTenths(settings.m_LOppmTenths);
-    }
-    if (deviceSettingsKeys.contains("lpfFIREnable") || force) {
-        swgPlutoSdrInputSettings->setLpfFirEnable(settings.m_lpfFIREnable ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("lpfFIRBW") || force) {
-        swgPlutoSdrInputSettings->setLpfFirbw(settings.m_lpfFIRBW);
-    }
-    if (deviceSettingsKeys.contains("lpfFIRlog2Decim") || force) {
-        swgPlutoSdrInputSettings->setLpfFiRlog2Decim(settings.m_lpfFIRlog2Decim);
-    }
-    if (deviceSettingsKeys.contains("lpfFIRGain") || force) {
-        swgPlutoSdrInputSettings->setLpfFirGain(settings.m_lpfFIRGain);
     }
     if (deviceSettingsKeys.contains("fcPos") || force) {
         swgPlutoSdrInputSettings->setFcPos((int) settings.m_fcPos);

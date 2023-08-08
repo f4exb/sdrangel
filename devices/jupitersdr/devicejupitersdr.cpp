@@ -18,22 +18,19 @@
 
 #include "devicejupitersdr.h"
 
-const uint64_t DeviceJupiterSDR::rxLOLowLimitFreq  =   70000000UL; // 70 MHz: take AD9364 specs
-const uint64_t DeviceJupiterSDR::rxLOHighLimitFreq = 6000000000UL; //  6 GHz: take AD9364 specs
+const uint64_t DeviceJupiterSDR::rxLOLowLimitFreq  =   30000000UL; // 30 MHz
+const uint64_t DeviceJupiterSDR::rxLOHighLimitFreq = 6000000000UL; //  6 GHz
 
-const uint64_t DeviceJupiterSDR::txLOLowLimitFreq  =   46875000UL; // 46.875 MHz: take AD9364 specs
-const uint64_t DeviceJupiterSDR::txLOHighLimitFreq = 6000000000UL; //  6 GHz: take AD9364 specs
+const uint64_t DeviceJupiterSDR::txLOLowLimitFreq  =   30000000UL; // 30 MHz
+const uint64_t DeviceJupiterSDR::txLOHighLimitFreq = 6000000000UL; //  6 GHz
 
-const uint32_t DeviceJupiterSDR::srLowLimitFreq  = (25000000U/12U)+3U; // 25/12 MS/s without FIR interpolation/decimation (+3 so it is the next multiple of 4)
-const uint32_t DeviceJupiterSDR::srHighLimitFreq = 20000000U;     // 20 MS/s: take AD9363 speces
+const uint32_t DeviceJupiterSDR::srLowLimitFreq  =         12000U; // 12 KSPS
+const uint32_t DeviceJupiterSDR::srHighLimitFreq =     61440000UL; // 61.44 MSPS
 
-const uint32_t DeviceJupiterSDR::bbLPRxLowLimitFreq  =   200000U; // 200 kHz
-const uint32_t DeviceJupiterSDR::bbLPRxHighLimitFreq = 14000000U; // 14 MHz
-const uint32_t DeviceJupiterSDR::bbLPTxLowLimitFreq  =   625000U; // 625 kHz
-const uint32_t DeviceJupiterSDR::bbLPTxHighLimitFreq = 16000000U; // 16 MHz
-
-const float DeviceJupiterSDR::firBWLowLimitFactor  = 0.05f;
-const float DeviceJupiterSDR::firBWHighLimitFactor = 0.9f;
+const uint32_t DeviceJupiterSDR::bbLPRxLowLimitFreq  =    12000U; // 12 kHz
+const uint32_t DeviceJupiterSDR::bbLPRxHighLimitFreq = 40000000U; // 40 MHz
+const uint32_t DeviceJupiterSDR::bbLPTxLowLimitFreq  =    12000U; // 12 kHz
+const uint32_t DeviceJupiterSDR::bbLPTxHighLimitFreq = 40000000U; // 40 MHz
 
 DeviceJupiterSDR::DeviceJupiterSDR()
 {

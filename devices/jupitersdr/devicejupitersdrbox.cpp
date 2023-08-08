@@ -25,18 +25,12 @@
 #include <QtGlobal>
 
 #include "dsp/dsptypes.h"
-#include "dsp/wfir.h"
 #include "devicejupitersdr.h"
 #include "devicejupitersdrbox.h"
 
 DeviceJupiterSDRBox::DeviceJupiterSDRBox(const std::string& uri) :
         m_devSampleRate(0),
         m_LOppmTenths(0),
-        m_lpfFIREnable(false),
-        m_lpfFIRBW(100.0f),
-        m_lpfFIRlog2Decim(0),
-        m_lpfFIRRxGain(0),
-        m_lpfFIRTxGain(0),
         m_ctx(nullptr),
         m_devPhy(nullptr),
         m_devRx(nullptr),
@@ -52,9 +46,11 @@ DeviceJupiterSDRBox::DeviceJupiterSDRBox(const std::string& uri) :
 
     if (m_ctx)
     {
-        m_devPhy = iio_context_find_device(m_ctx, "ad9361-phy");
-        m_devRx = iio_context_find_device(m_ctx, "cf-ad9361-lpc");
-        m_devTx = iio_context_find_device(m_ctx, "cf-ad9361-dds-core-lpc");
+        m_devPhy = iio_context_find_device(m_ctx, "adrv9002-phy");
+        m_devRx = iio_context_find_device(m_ctx, "axi-adrv9002-rx-lpc");
+        // TODO: what about axi-adrv9002-rx2-lpc ?
+        m_devTx = iio_context_find_device(m_ctx, "axi-adrv9002-tx-lpc");
+        // TODO: what about axi-adrv9002-tx2-lpc ?
     }
     else
     {
@@ -65,9 +61,9 @@ DeviceJupiterSDRBox::DeviceJupiterSDRBox(const std::string& uri) :
 
     if (m_valid)
     {
-        std::regex channelIdReg("voltage([0-9]+)");
+        std::regex channelIdReg("voltage([0-9]+)_[iq]");
 
-        getXO();
+        // getXO(); // this is not supported by jupiterSDR
         int nbRxChannels = iio_device_get_channels_count(m_devRx);
 
         for (int i = 0; i < nbRxChannels; i++)
@@ -265,18 +261,6 @@ bool DeviceJupiterSDRBox::get_param(DeviceType devType, const std::string &param
     {
         value.assign(valuestr);
         return true;
-    }
-}
-
-void DeviceJupiterSDRBox::setFilter(const std::string &filterConfigStr)
-{
-    int ret;
-
-    ret = iio_device_attr_write_raw(m_devPhy, "filter_fir_config", filterConfigStr.c_str(), filterConfigStr.size());
-
-    if (ret < 0)
-    {
-        std::cerr << "DeviceJupiterSDRBox::set_filter: Unable to set: " <<  filterConfigStr <<  ": " << ret << std::endl;
     }
 }
 
@@ -687,7 +671,6 @@ bool DeviceJupiterSDRBox::parseSampleRates(const std::string& rateStr, SampleRat
             sampleRates.m_hb3Rate = boost::lexical_cast<uint32_t>(desc_match[3]);
             sampleRates.m_hb2Rate = boost::lexical_cast<uint32_t>(desc_match[4]);
             sampleRates.m_hb1Rate = boost::lexical_cast<uint32_t>(desc_match[5]);
-            sampleRates.m_firRate = boost::lexical_cast<uint32_t>(desc_match[6]);
             return true;
         }
         catch (const boost::bad_lexical_cast &e)
@@ -706,136 +689,39 @@ void DeviceJupiterSDRBox::setSampleRate(uint32_t sampleRate)
 {
     char buff[100];
     std::vector<std::string> params;
-    snprintf(buff, sizeof(buff), "in_voltage_sampling_frequency=%d", sampleRate);
+    snprintf(buff, sizeof(buff), "in_voltage0_sampling_frequency=%d", sampleRate);
     params.push_back(std::string(buff));
-    snprintf(buff, sizeof(buff), "out_voltage_sampling_frequency=%d", sampleRate);
+    snprintf(buff, sizeof(buff), "out_voltage0_sampling_frequency=%d", sampleRate);
     params.push_back(std::string(buff));
     set_params(DEVICE_PHY, params);
     m_devSampleRate = sampleRate;
 }
 
-/**
- * @param sampleRate baseband sample rate (S/s)
- * @param log2IntDec FIR interpolation or decimation factor
- * @param use Rx or Tx. Applies to the rest of the parameters
- * @param bw FIR filter bandwidth at approximately -6 dB cutoff (Hz)
- * @param gain FIR filter gain (dB)
- */
-void DeviceJupiterSDRBox::setFIR(uint32_t sampleRate, uint32_t log2IntDec, DeviceUse use, uint32_t bw, int gain)
-{
-    SampleRates sampleRates;
-    std::ostringstream ostr;
-
-    uint32_t nbTaps;
-    double normalizedBW;
-    uint32_t intdec = 1<<(log2IntDec > 2 ? 2 : log2IntDec);
-
-    // update gain parameter
-
-    if (use == USE_RX) {
-        m_lpfFIRRxGain = gain;
-    } else {
-        m_lpfFIRTxGain = gain;
-    }
-
-    // set a dummy minimal filter first to get the sample rates right
-
-    setFIREnable(false); // disable first
-
-    formatFIRHeader(ostr, intdec);
-    formatFIRCoefficients(ostr, 16, 0.5);
-    setFilter(ostr.str());
-    ostr.str(""); // reset string stream
-
-    setFIREnable(true);        // re-enable
-    setSampleRate(sampleRate); // set to new sample rate
-
-    if (!getRxSampleRates(sampleRates)) {
-        return;
-    }
-
-    setFIREnable(false); // disable again
-
-    uint32_t nbGroups = sampleRates.m_addaConnvRate / 16;
-    nbTaps = nbGroups*8 > 128 ? 128 : nbGroups*8;
-    nbTaps = intdec == 1 ? (nbTaps > 64 ? 64 : nbTaps) : nbTaps;
-    normalizedBW = ((float) bw) / sampleRates.m_hb1Rate;
-    normalizedBW = normalizedBW < DeviceJupiterSDR::firBWLowLimitFactor ?
-            DeviceJupiterSDR::firBWLowLimitFactor :
-            normalizedBW > DeviceJupiterSDR::firBWHighLimitFactor ? DeviceJupiterSDR::firBWHighLimitFactor : normalizedBW;
-
-    qDebug("DeviceJupiterSDRBox::setFIR: intdec: %u gain: %d nbTaps: %u BWin: %u BW: %f (%f)",
-            intdec,
-            gain,
-            nbTaps,
-            bw,
-            normalizedBW*sampleRates.m_hb1Rate,
-            normalizedBW);
-
-    // set the right filter
-
-    formatFIRHeader(ostr, intdec);
-    formatFIRCoefficients(ostr, nbTaps, normalizedBW);
-    setFilter(ostr.str());
-
-    m_lpfFIRlog2Decim = log2IntDec;
-    m_lpfFIRBW = bw;
-
-    // enable and set sample rate will be done by the caller
-}
-
-void DeviceJupiterSDRBox::setFIREnable(bool enable)
-{
-    char buff[100];
-    std::vector<std::string> params;
-    snprintf(buff, sizeof(buff), "in_out_voltage_filter_fir_en=%d", enable ? 1 : 0);
-    params.push_back(std::string(buff));
-    set_params(DEVICE_PHY, params);
-    m_lpfFIREnable = enable;
-}
 
 void DeviceJupiterSDRBox::setLOPPMTenths(int ppmTenths)
 {
-    char buff[100];
-    std::vector<std::string> params;
-    int64_t newXO = m_xoInitial + ((m_xoInitial*ppmTenths) / 10000000L);
-    snprintf(buff, sizeof(buff), "xo_correction=%ld", (long int) newXO);
-    params.push_back(std::string(buff));
-    set_params(DEVICE_PHY, params);
-    m_LOppmTenths = ppmTenths;
-}
-
-void DeviceJupiterSDRBox::formatFIRHeader(std::ostringstream& ostr,uint32_t intdec)
-{
-    ostr << "RX 3 GAIN " << m_lpfFIRRxGain << " DEC " << intdec << std::endl;
-    ostr << "TX 3 GAIN " << m_lpfFIRTxGain << " INT " << intdec << std::endl;
-}
-
-void DeviceJupiterSDRBox::formatFIRCoefficients(std::ostringstream& ostr, uint32_t nbTaps, double normalizedBW)
-{
-    double *fcoeffs = new double[nbTaps];
-    WFIR::BasicFIR(fcoeffs, nbTaps, WFIR::LPF, normalizedBW, 0.0, normalizedBW < 0.2 ? WFIR::wtHAMMING : WFIR::wtBLACKMAN_HARRIS, 0.0);
-
-    for (unsigned int i = 0; i < nbTaps; i++) {
-        ostr << (int16_t) (fcoeffs[i] * 32768.0f) << ", " <<  (int16_t) (fcoeffs[i] * 32768.0f) << std::endl;
-    }
-
-    delete[] fcoeffs;
+    // char buff[100];
+    // std::vector<std::string> params;
+    // int64_t newXO = m_xoInitial + ((m_xoInitial*ppmTenths) / 10000000L);
+    // snprintf(buff, sizeof(buff), "xo_correction=%ld", (long int) newXO);
+    // params.push_back(std::string(buff));
+    // set_params(DEVICE_PHY, params);
+    // m_LOppmTenths = ppmTenths;
 }
 
 void DeviceJupiterSDRBox::getXO()
 {
-    std::string valueStr;
-    get_param(DEVICE_PHY, "xo_correction", valueStr);
-    try
-    {
-        m_xoInitial = boost::lexical_cast<quint64>(valueStr);
-        qDebug("DeviceJupiterSDRBox::getXO: %ld", m_xoInitial);
-    }
-    catch (const boost::bad_lexical_cast &e)
-    {
-        qWarning("DeviceJupiterSDRBox::getXO: cannot get initial XO correction");
-    }
+    // std::string valueStr;
+    // get_param(DEVICE_PHY, "xo_correction", valueStr);
+    // try
+    // {
+    //     m_xoInitial = boost::lexical_cast<quint64>(valueStr);
+    //     qDebug("DeviceJupiterSDRBox::getXO: %ld", m_xoInitial);
+    // }
+    // catch (const boost::bad_lexical_cast &e)
+    // {
+    //     qWarning("DeviceJupiterSDRBox::getXO: cannot get initial XO correction");
+    // }
 }
 
 bool DeviceJupiterSDRBox::getRxGain(int& gaindB, unsigned int chan)
@@ -887,86 +773,26 @@ bool DeviceJupiterSDRBox::getTxRSSI(std::string& rssiStr, unsigned int chan)
 
 void DeviceJupiterSDRBox::getRxLORange(uint64_t& minLimit, uint64_t& maxLimit)
 {
-    // values are returned in Hz
-    qint64 stepLimit;
-    std::string rangeStr;
-
-    char buff[50];
-    snprintf(buff, sizeof(buff), "out_altvoltage0_RX_LO_frequency_available");
-
-    if (get_param(DEVICE_PHY, buff, rangeStr))
-    {
-        std::istringstream instream(rangeStr.substr(1, rangeStr.size() - 2));
-	    instream >> minLimit >> stepLimit >> maxLimit;
-    }
-    else
-    {
-        minLimit = DeviceJupiterSDR::rxLOLowLimitFreq;
-	    maxLimit = DeviceJupiterSDR::rxLOHighLimitFreq;
-    }
+    minLimit = DeviceJupiterSDR::rxLOLowLimitFreq;
+    maxLimit = DeviceJupiterSDR::rxLOHighLimitFreq;
 }
 
 void DeviceJupiterSDRBox::getTxLORange(uint64_t& minLimit, uint64_t& maxLimit)
 {
-    // values are returned in Hz
-    qint64 stepLimit;
-    std::string rangeStr;
-
-    char buff[50];
-    snprintf(buff, sizeof(buff), "out_altvoltage1_TX_LO_frequency_available");
-
-    if (get_param(DEVICE_PHY, buff, rangeStr))
-    {
-        std::istringstream instream(rangeStr.substr(1, rangeStr.size() - 2));
-	    instream >> minLimit >> stepLimit >> maxLimit;
-    }
-    else
-    {
-        minLimit = DeviceJupiterSDR::txLOLowLimitFreq;
-	    maxLimit = DeviceJupiterSDR::txLOHighLimitFreq;
-    }
+    minLimit = DeviceJupiterSDR::txLOLowLimitFreq;
+    maxLimit = DeviceJupiterSDR::txLOHighLimitFreq;
 }
 
 void DeviceJupiterSDRBox::getbbLPRxRange(uint32_t& minLimit, uint32_t& maxLimit)
 {
-    // values are returned in Hz of RF (complex channel) bandwidth
-    qint32 stepLimit;
-    std::string rangeStr;
-
-    char buff[50];
-    snprintf(buff, sizeof(buff), "in_voltage_rf_bandwidth_available");
-
-    if (get_param(DEVICE_PHY, buff, rangeStr))
-    {
-	std::istringstream instream(rangeStr.substr(1, rangeStr.size() - 2));
-	instream >> minLimit >> stepLimit >> maxLimit;
-    }
-    else
-    {
 	minLimit = DeviceJupiterSDR::bbLPRxLowLimitFreq;
 	maxLimit = DeviceJupiterSDR::bbLPRxHighLimitFreq;
-    }
 }
 
 void DeviceJupiterSDRBox::getbbLPTxRange(uint32_t& minLimit, uint32_t& maxLimit)
 {
-    // values are returned in Hz
-    qint32 stepLimit;
-    std::string rangeStr;
-
-    char buff[50];
-    snprintf(buff, sizeof(buff), "out_voltage_rf_bandwidth_available");
-
-    if (get_param(DEVICE_PHY, buff, rangeStr))
-    {
-        std::istringstream instream(rangeStr.substr(1, rangeStr.size() - 2));
-        instream >> minLimit >> stepLimit >> maxLimit;
-    }
-    else
-    {
 	minLimit = DeviceJupiterSDR::bbLPTxLowLimitFreq;
 	maxLimit = DeviceJupiterSDR::bbLPTxHighLimitFreq;
-    }
 }
 
 

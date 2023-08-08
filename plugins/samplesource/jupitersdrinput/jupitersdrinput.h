@@ -135,7 +135,6 @@ public:
             SWGSDRangel::SWGDeviceSettings& response);
 
     uint32_t getADCSampleRate() const { return m_deviceSampleRates.m_addaConnvRate; }
-    uint32_t getFIRSampleRate() const { return m_deviceSampleRates.m_hb1Rate; }
     void getRSSI(std::string& rssiStr);
     void getLORange(qint64& minLimit, qint64& maxLimit);
     void getbbLPRange(quint32& minLimit, quint32& maxLimit);
@@ -150,8 +149,8 @@ public:
     JupiterSDRInputSettings m_settings;
     bool m_running;
     DeviceJupiterSDRShared m_deviceShared;
-    struct iio_buffer *m_plutoRxBuffer;
-    JupiterSDRInputThread *m_plutoSDRInputThread;
+    struct iio_buffer *m_jupiterRxBuffer;
+    JupiterSDRInputThread *m_jupiterSDRInputThread;
     DeviceJupiterSDRBox::SampleRates m_deviceSampleRates;
     QMutex m_mutex;
     QNetworkAccessManager *m_networkManager;

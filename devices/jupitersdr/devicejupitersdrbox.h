@@ -63,16 +63,10 @@ public:
         uint32_t m_hb3Rate;       //!< Rate of the HB3/(DEC3 or INT3) filter (Rx: out, Tx: in) - this is the HB2 working sample rate
         uint32_t m_hb2Rate;       //!< Rate of the HB2 filter (Rx: out, Tx: in) - this is the HB1 working sample rate
         uint32_t m_hb1Rate;       //!< Rate of the HB1 filter (Rx: out, Tx: in) - this is the FIR working sample rate
-        uint32_t m_firRate;       //!< Rate of FIR filter (Rx: out, Tx: in) - this is the host/device communication sample rate
     };
 
     uint64_t m_devSampleRate;      //!< Host interface sample rate
     int32_t  m_LOppmTenths;        //!< XO correction
-    bool     m_lpfFIREnable;       //!< enable digital lowpass FIR filter
-    float    m_lpfFIRBW;           //!< digital lowpass FIR filter bandwidth (Hz)
-    uint32_t m_lpfFIRlog2Decim;    //!< digital lowpass FIR filter log2 of decimation factor (0..2)
-    int      m_lpfFIRRxGain;       //!< digital lowpass FIR filter gain Rx side (dB)
-    int      m_lpfFIRTxGain;       //!< digital lowpass FIR filter gain Tx side (dB)
 
     DeviceJupiterSDRBox(const std::string& uri);
     ~DeviceJupiterSDRBox();
@@ -112,8 +106,6 @@ public:
     bool getRxSampleRates(SampleRates& sampleRates);
     bool getTxSampleRates(SampleRates& sampleRates);
     void setSampleRate(uint32_t sampleRate);
-    void setFIR(uint32_t sampleRate, uint32_t intdec, DeviceUse use, uint32_t bw, int gain);
-    void setFIREnable(bool enable);
     void setLOPPMTenths(int ppmTenths);
     bool getRxGain(int& gaindB, unsigned int chan);
     bool getRxRSSI(std::string& rssiStr, unsigned int chan);
@@ -144,9 +136,6 @@ private:
     QList<iio_channel*> m_txChannels;
 
     bool parseSampleRates(const std::string& rateStr, SampleRates& sampleRates);
-    void setFilter(const std::string& filterConfigStr);
-    void formatFIRHeader(std::ostringstream& str, uint32_t intdec);
-    void formatFIRCoefficients(std::ostringstream& str, uint32_t nbTaps, double normalizedBW);
     void getXO();
 };
 
