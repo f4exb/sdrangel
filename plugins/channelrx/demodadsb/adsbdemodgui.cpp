@@ -3439,7 +3439,7 @@ void ADSBDemodGUI::adsbData_customContextMenuRequested(QPoint pos)
         });
         tableContextMenu->addAction(planeSpottersAction);
 
-        QAction* adsbExchangeAction = new QAction("View aircraft on adsbexchange.net...", tableContextMenu);
+        QAction* adsbExchangeAction = new QAction("View aircraft on adsbexchange.com...", tableContextMenu);
         connect(adsbExchangeAction, &QAction::triggered, this, [icaoHex]()->void {
             QDesktopServices::openUrl(QUrl(QString("https://globe.adsbexchange.com/?icao=%1").arg(icaoHex)));
         });
@@ -3453,7 +3453,7 @@ void ADSBDemodGUI::adsbData_customContextMenuRequested(QPoint pos)
 
         if (!aircraft->m_callsign.isEmpty())
         {
-            QAction* flightRadarAction = new QAction("View flight on flightradar24.net...", tableContextMenu);
+            QAction* flightRadarAction = new QAction("View flight on flightradar24.com...", tableContextMenu);
             connect(flightRadarAction, &QAction::triggered, this, [aircraft]()->void {
                 QDesktopServices::openUrl(QUrl(QString("https://www.flightradar24.com/%1").arg(aircraft->m_callsign)));
             });

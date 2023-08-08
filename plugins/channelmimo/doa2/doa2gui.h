@@ -85,7 +85,7 @@ private:
     void applyPosition();
 	void displaySettings();
     void displayRateAndShift();
-    void setFFTAveragingToolitp();
+    void setFFTAveragingTooltip();
     static void setNumberStr(float v, int decimalPlaces, QString& s);
     bool handleMessage(const Message& message);
     void makeUIConnections();

@@ -82,7 +82,7 @@ bool DOA2GUI::handleMessage(const Message& message)
         m_centerFrequency = notif.getCenterFrequency();
         displayRateAndShift();
         updateAbsoluteCenterFrequency();
-        setFFTAveragingToolitp();
+        setFFTAveragingTooltip();
         return true;
     }
     else if (DOA2::MsgConfigureDOA2::match(message))
@@ -211,7 +211,7 @@ void DOA2GUI::displaySettings()
     ui->squelch->setValue(m_settings.m_squelchdB);
     ui->squelchText->setText(tr("%1").arg(m_settings.m_squelchdB, 3));
     ui->fftAveraging->setCurrentIndex(m_settings.m_fftAveragingIndex);
-    setFFTAveragingToolitp();
+    setFFTAveragingTooltip();
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
@@ -229,7 +229,7 @@ void DOA2GUI::displayRateAndShift()
     m_scopeVis->setLiveRate(channelSampleRate);
 }
 
-void DOA2GUI::setFFTAveragingToolitp()
+void DOA2GUI::setFFTAveragingTooltip()
 {
     float channelSampleRate = ((float) m_sampleRate) / (1<<m_settings.m_log2Decim);
     float averagingTime = (DOA2::m_fftSize * DOA2Settings::getAveragingValue(m_settings.m_fftAveragingIndex)) /
@@ -378,7 +378,7 @@ void DOA2GUI::on_fftAveraging_currentIndexChanged(int index)
     qDebug("DOA2GUI::on_averaging_currentIndexChanged: %d", index);
     m_settings.m_fftAveragingIndex = index;
     applySettings();
-    setFFTAveragingToolitp();
+    setFFTAveragingTooltip();
 }
 
 void DOA2GUI::on_centerPosition_clicked()

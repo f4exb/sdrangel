@@ -49,7 +49,7 @@ struct IBPBeacon {
         QStringList list;
         list.append("IBP Beacon");
         list.append(QString("Callsign: %1").arg(m_callsign));
-        list.append(QString("Frequency: 14.1, 18.11, 21.15, 24.92, 28.2MHz"));
+        list.append(QString("Frequency: 14.1, 18.11, 21.15, 24.93, 28.2 MHz"));
         list.append(QString("Power: 100 Watts ERP"));
         list.append(QString("Polarization: V"));
         list.append(QString("Pattern: Omni"));
