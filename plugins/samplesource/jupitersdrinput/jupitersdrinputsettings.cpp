@@ -217,7 +217,7 @@ void JupiterSDRInputSettings::translateGainMode(GainMode mode, QString& s)
     switch(mode)
     {
     case GAIN_MANUAL:
-        s = "manual";
+        s = "spi";
         break;
     case GAIN_AGC_SLOW:
         s = "slow_attack";
