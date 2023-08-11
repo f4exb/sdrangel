@@ -220,16 +220,16 @@ void JupiterSDRInputSettings::translateGainMode(GainMode mode, QString& s)
         s = "spi";
         break;
     case GAIN_AGC_SLOW:
-        s = "slow_attack";
+        s = "automatic";
         break;
     case GAIN_AGC_FAST:
-        s = "fast_attack";
+        s = "automatic";
         break;
     case GAIN_HYBRID:
-        s = "hybrid";
+        s = "automatic";
         break;
     default:
-        s = "manual";
+        s = "spi";
         break;
     }
 }
