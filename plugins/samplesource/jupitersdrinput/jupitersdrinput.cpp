@@ -523,7 +523,7 @@ bool JupiterSDRInput::applySettings(const JupiterSDRInputSettings& settings, con
                 DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
                 settings.m_transverterMode);
 
-        params.push_back(QString(tr("out_altvoltage0_RX_LO_frequency=%1").arg(deviceCenterFrequency)).toStdString());
+        params.push_back(QString(tr("out_altvoltage0_RX1_LO_frequency=%1").arg(deviceCenterFrequency)).toStdString());
         paramsToSet = true;
         forwardChangeOwnDSP = true;
 
