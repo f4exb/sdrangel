@@ -17,22 +17,23 @@
 
 #include "ibpbeacon.h"
 
+// Beacon information from https://www.ncdxf.org/beacon/beaconlocations.html
 QList<IBPBeacon> IBPBeacon::m_beacons = {
     IBPBeacon("4U1UN", "United Nations NY", "FN30AS", 0),
-    IBPBeacon("VE8AT", "North Canada", "EQ79AX", 10),
+    IBPBeacon("VE8AT", "North Canada", "CP38GH", 10),
     IBPBeacon("W6WX", "USA (CA)", "CM97BD", 20),
-    IBPBeacon("KH6WO", "Hawaii", "BL10TS", 30),
+    IBPBeacon("KH6RS", "Hawaii", "BL10TS", 30),
     IBPBeacon("ZL6B", "New Zealand", "RE78TW", 40),
     IBPBeacon("VK6RBP", "West Australia", "OF87AV", 50),
     IBPBeacon("JA2IGY", "Japan", "PM84JK", 60),
     IBPBeacon("RR9O", "Siberia", "NO14KX", 70),
-    IBPBeacon("VR2HK", "China", "OL72CQ", 80),
-    IBPBeacon("4S7B", "Sri Lanka", "NJ06CR", 90),
-    IBPBeacon("ZS6DN", "South Africa", "KG44DC", 100),
-    IBPBeacon("5Z4B", "Kenya", "KI88MX", 110),
+    IBPBeacon("VR2B", "China", "OL72BG", 80),
+    IBPBeacon("4S7B", "Sri Lanka", "MJ96WV", 90),
+    IBPBeacon("ZS6DN", "South Africa", "KG33XI", 100),
+    IBPBeacon("5Z4B", "Kenya", "KI88HR", 110),
     IBPBeacon("4X6TU", "Israel", "KM72JB", 120),
-    IBPBeacon("OH2B", "Finland", "KP20BM", 130),
-    IBPBeacon("CS3B", "Madeira", "IM12OR", 140),
+    IBPBeacon("OH2B", "Finland", "KP20EH", 130),
+    IBPBeacon("CS3B", "Madeira", "IM12JT", 140),
     IBPBeacon("LU4AA", "Argentina", "GF05TJ", 150),
     IBPBeacon("OA4B", "Peru", "FH17MW", 160),
     IBPBeacon("YV5B", "Venezuela", "FJ69CC", 170)
