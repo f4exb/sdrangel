@@ -57,8 +57,10 @@ void MapBeaconDialog::updateTable()
             freq->setText(beacon->getFrequencyText());
             freq->setData(Qt::UserRole, beacon->m_frequency);
             ui->beacons->setItem(row, BEACON_COL_FREQUENCY, freq);
+            ui->beacons->item(row, BEACON_COL_FREQUENCY)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             ui->beacons->setItem(row, BEACON_COL_LOCATION, new QTableWidgetItem(beacon->m_locator));
             ui->beacons->setItem(row, BEACON_COL_POWER, new QTableWidgetItem(beacon->m_power));
+            ui->beacons->item(row, BEACON_COL_POWER)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             ui->beacons->setItem(row, BEACON_COL_POLARIZATION, new QTableWidgetItem(beacon->m_polarization));
             ui->beacons->setItem(row, BEACON_COL_PATTERN, new QTableWidgetItem(beacon->m_pattern));
             ui->beacons->setItem(row, BEACON_COL_KEY, new QTableWidgetItem(beacon->m_key));
@@ -66,11 +68,14 @@ void MapBeaconDialog::updateTable()
             azEl.setTarget(beacon->m_latitude, beacon->m_longitude, beacon->m_altitude);
             azEl.calculate();
             ui->beacons->setItem(row, BEACON_COL_AZIMUTH, new QTableWidgetItem(QString("%1").arg(round(azEl.getAzimuth()))));
+            ui->beacons->item(row, BEACON_COL_AZIMUTH)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             ui->beacons->setItem(row, BEACON_COL_ELEVATION, new QTableWidgetItem(QString("%1").arg(round(azEl.getElevation()))));
+            ui->beacons->item(row, BEACON_COL_ELEVATION)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             int km = round(azEl.getDistance()/1000);
             QTableWidgetItem *dist = new QTableWidgetItem();
             dist->setData(Qt::DisplayRole, km);
             ui->beacons->setItem(row, BEACON_COL_DISTANCE, dist);
+            ui->beacons->item(row, BEACON_COL_DISTANCE)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             row++;
         }
     }
