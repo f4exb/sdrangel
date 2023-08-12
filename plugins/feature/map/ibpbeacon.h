@@ -28,6 +28,7 @@
 
 struct IBPBeacon {
 
+    QString m_dxEntity;
     QString m_callsign;
     QString m_location;
     QString m_locator;
@@ -35,7 +36,8 @@ struct IBPBeacon {
     float m_latitude;
     float m_longitude;
 
-    IBPBeacon(const QString& callsign, const QString& location, const QString& locator, int offset) :
+    IBPBeacon(const QString& dxEntity, const QString& callsign, const QString& location, const QString& locator, int offset) :
+        m_dxEntity(dxEntity),
         m_callsign(callsign),
         m_location(location),
         m_locator(locator),
@@ -48,6 +50,7 @@ struct IBPBeacon {
     {
         QStringList list;
         list.append("IBP Beacon");
+        list.append(QString("DX Entity: %1").arg(m_dxEntity));
         list.append(QString("Callsign: %1").arg(m_callsign));
         list.append(QString("Frequency: 14.1, 18.11, 21.15, 24.93, 28.2 MHz"));
         list.append(QString("Power: 100 Watts ERP"));

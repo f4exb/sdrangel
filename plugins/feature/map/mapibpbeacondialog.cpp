@@ -38,6 +38,7 @@ MapIBPBeaconDialog::MapIBPBeaconDialog(MapGUI *gui, QWidget* parent) :
         ui->beacons->setItem(row, IBP_BEACON_COL_FREQUENCY, new QTableWidgetItem(QString::number(IBPBeacon::m_frequencies[row], 'f', 3)));
         ui->beacons->setItem(row, IBP_BEACON_COL_CALLSIGN, new QTableWidgetItem(""));
         ui->beacons->setItem(row, IBP_BEACON_COL_LOCATION, new QTableWidgetItem(""));
+        ui->beacons->setItem(row, IBP_BEACON_COL_DX_ENTITY, new QTableWidgetItem(""));
         ui->beacons->setItem(row, IBP_BEACON_COL_AZIMUTH, new QTableWidgetItem(""));
         ui->beacons->setItem(row, IBP_BEACON_COL_DISTANCE, new QTableWidgetItem(""));
     }
@@ -60,6 +61,7 @@ void MapIBPBeaconDialog::updateTable(QTime time)
     {
         ui->beacons->item(row, IBP_BEACON_COL_CALLSIGN)->setText(IBPBeacon::m_beacons[index].m_callsign);
         ui->beacons->item(row, IBP_BEACON_COL_LOCATION)->setText(IBPBeacon::m_beacons[index].m_location);
+        ui->beacons->item(row, IBP_BEACON_COL_DX_ENTITY)->setText(IBPBeacon::m_beacons[index].m_dxEntity);
 
         // Calculate azimuth and distance to beacon
         azEl.setTarget(IBPBeacon::m_beacons[index].m_latitude, IBPBeacon::m_beacons[index].m_longitude, 0.0);

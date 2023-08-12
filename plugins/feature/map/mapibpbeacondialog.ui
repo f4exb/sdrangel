@@ -91,6 +91,11 @@
         </column>
         <column>
          <property name="text">
+          <string>DX Entity</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
           <string>Azimuth (°)</string>
          </property>
         </column>
