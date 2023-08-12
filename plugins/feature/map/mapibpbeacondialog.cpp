@@ -59,6 +59,7 @@ void MapIBPBeaconDialog::updateTable(QTime time)
 
     for (int row = 0; row < IBPBeacon::m_frequencies.size(); row++)
     {
+        ui->beacons->item(row, IBP_BEACON_COL_FREQUENCY)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         ui->beacons->item(row, IBP_BEACON_COL_CALLSIGN)->setText(IBPBeacon::m_beacons[index].m_callsign);
         ui->beacons->item(row, IBP_BEACON_COL_LOCATION)->setText(IBPBeacon::m_beacons[index].m_location);
         ui->beacons->item(row, IBP_BEACON_COL_DX_ENTITY)->setText(IBPBeacon::m_beacons[index].m_dxEntity);
@@ -67,8 +68,10 @@ void MapIBPBeaconDialog::updateTable(QTime time)
         azEl.setTarget(IBPBeacon::m_beacons[index].m_latitude, IBPBeacon::m_beacons[index].m_longitude, 0.0);
         azEl.calculate();
         ui->beacons->item(row, IBP_BEACON_COL_AZIMUTH)->setData(Qt::DisplayRole, round(azEl.getAzimuth()));
+        ui->beacons->item(row, IBP_BEACON_COL_AZIMUTH)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         int km = round(azEl.getDistance()/1000);
         ui->beacons->item(row, IBP_BEACON_COL_DISTANCE)->setData(Qt::DisplayRole, km);
+        ui->beacons->item(row, IBP_BEACON_COL_DISTANCE)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
         index--;
         if (index < 0) {
