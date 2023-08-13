@@ -1,5 +1,12 @@
 #include "dsp/kissengine.h"
 
+const QString KissEngine::m_name = "Kiss";
+
+QString KissEngine::getName() const
+{
+    return m_name;
+}
+
 void KissEngine::configure(int n, bool inverse)
 {
 	m_fft.configure(n, inverse);
@@ -11,7 +18,11 @@ void KissEngine::configure(int n, bool inverse)
 
 void KissEngine::transform()
 {
+    PROFILER_START()
+
 	m_fft.transform(&m_in[0], &m_out[0]);
+
+    PROFILER_STOP(QString("%1 %2").arg(getName()).arg(m_out.size()))
 }
 
 Complex* KissEngine::in()

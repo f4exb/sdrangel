@@ -832,6 +832,20 @@ if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
     endif ()
 endif ()
 
+# VkFFT (header only library)
+ExternalProject_Add(vkfft
+        GIT_REPOSITORY https://github.com/DTolm/VkFFT.git
+        GIT_TAG v1.3.1
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/vkfft"
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        BUILD_BYPRODUCTS ""
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+        )
+ExternalProject_Get_Property(vkfft source_dir)
+set(VKFFT_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
+
 # requirements needed by many packages on windows
 if (WIN32)
     ExternalProject_Add(pthreads4w

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,44 +15,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _SDRBASE_FFTWFACTORY_H
-#define _SDRBASE_FFTWFACTORY_H
+#include "dsp/fftengine.h"
 
-#include <map>
-#include <vector>
+#include "fftdialog.h"
+#include "ui_fftdialog.h"
 
-#include <QRecursiveMutex>
-#include <QString>
+FFTDialog::FFTDialog(MainSettings& mainSettings, QWidget* parent) :
+    QDialog(parent),
+    ui(new Ui::FFTDialog),
+    m_mainSettings(mainSettings)
+{
+    ui->setupUi(this);
 
-#include "export.h"
-#include "dsp/dsptypes.h"
-#include "fftengine.h"
+    for (const auto& engine: FFTEngine::getAllNames()) {
+        ui->fftEngine->addItem(engine);
+    }
+    int idx = ui->fftEngine->findText(m_mainSettings.getFFTEngine());
+    if (idx != -1) {
+        ui->fftEngine->setCurrentIndex(idx);
+    }
+}
 
-class SDRBASE_API FFTFactory {
-public:
-	FFTFactory(const QString& fftwWisdomFileName);
-	~FFTFactory();
+FFTDialog::~FFTDialog()
+{
+    delete ui;
+}
 
-    void preallocate(unsigned int minLog2Size, unsigned int maxLog2Size, unsigned int numberFFT, unsigned int numberInvFFT);
-    unsigned int getEngine(unsigned int fftSize, bool inverse, FFTEngine **engine, const QString& preferredEngine=""); //!< returns an engine sequence
-    void releaseEngine(unsigned int fftSize, bool inverse, unsigned int engineSequence);
-
-private:
-    struct AllocatedEngine
-    {
-        FFTEngine *m_engine;
-        bool m_inUse;
-
-        AllocatedEngine() :
-            m_engine(nullptr),
-            m_inUse(false)
-        {}
-    };
-
-    QString m_fftwWisdomFileName;
-    std::map<unsigned int, std::vector<AllocatedEngine>> m_fftEngineBySize;
-    std::map<unsigned int, std::vector<AllocatedEngine>> m_invFFTEngineBySize;
-    QRecursiveMutex m_mutex;
-};
-
-#endif // _SDRBASE_FFTWFACTORY_H
+void FFTDialog::accept()
+{
+    m_mainSettings.setFFTEngine(ui->fftEngine->currentText());
+    QDialog::accept();
+}

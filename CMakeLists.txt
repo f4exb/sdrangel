@@ -30,6 +30,8 @@ option(BUNDLE "Enable distribution bundle" OFF)
 set(ARCH_OPT "native" CACHE STRING "Specify instruction set to use. Will be passed directly as `-march` or `/arch:` argument on supported compilers. \
                                    'native' option will figure out host machine compatibilities and set flags accordingly (even with MSVC).")
 option(ENABLE_QT6 "Build with Qt6 rather than Qt5" OFF)
+option(ENABLE_PROFILER "Enable runtime profiler" OFF)
+set(VKFFT_BACKEND 1 CACHE STRING "vkFFT Backend: 0 - Vulkan, 1 - CUDA")
 
 # Sampling devices enablers
 option(ENABLE_AIRSPY "Enable AirSpy support" ON)
@@ -572,6 +574,10 @@ if (RX_SAMPLE_24BIT)
     add_compile_definitions(SDR_RX_SAMPLE_24BIT)
 else()
     message(STATUS "Compiling for 16 bit Rx DSP chain")
+endif()
+
+if (ENABLE_PROFILER)
+    add_compile_definitions(ENABLE_PROFILER)
 endif()
 
 # Set compiler options based on target architecture and selected extensions

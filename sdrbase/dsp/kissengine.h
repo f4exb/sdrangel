@@ -14,6 +14,8 @@ public:
 	virtual Complex* out();
 
     virtual void setReuse(bool reuse);
+    QString getName() const override;
+    static const QString m_name;
 
 protected:
 	typedef kissfft<Real, Complex> KissFFT;
