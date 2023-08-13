@@ -690,6 +690,12 @@ void GS232ControllerGUI::setPrecision()
     ui->tolerance->setDecimals(m_settings.m_precision);
     ui->azimuthOffset->setDecimals(m_settings.m_precision);
     ui->elevationOffset->setDecimals(m_settings.m_precision);
+    double step = pow(10.0, -m_settings.m_precision);
+    ui->coord1->setSingleStep(step);
+    ui->coord2->setSingleStep(step);
+    ui->tolerance->setSingleStep(step);
+    ui->azimuthOffset->setSingleStep(step);
+    ui->elevationOffset->setSingleStep(step);
 }
 
 void GS232ControllerGUI::on_protocol_currentIndexChanged(int index)
