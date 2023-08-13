@@ -207,18 +207,18 @@ bool PlutoSDRMIMOSettings::deserialize(const QByteArray& data)
         }
 
         // Rx1
-        d.readU32(50, &m_rx0Gain, 40);
+        d.readU32(50, &m_rx1Gain, 40);
         d.readS32(51, &intval, 0);
         if ((intval >= 0) && (intval < (int) RFPATHRX_END)) {
-            m_rx0AntennaPath = (RFPathRx) intval;
+            m_rx1AntennaPath = (RFPathRx) intval;
         } else {
-            m_rx0AntennaPath = RFPATHRX_A_BAL;
+            m_rx1AntennaPath = RFPATHRX_A_BAL;
         }
         d.readS32(52, &intval, 0);
         if ((intval >= 0) && (intval < (int) GAIN_END)) {
-            m_rx0GainMode = (GainMode) intval;
+            m_rx1GainMode = (GainMode) intval;
         } else {
-            m_rx0GainMode = GAIN_MANUAL;
+            m_rx1GainMode = GAIN_MANUAL;
         }
 
         // Tx
