@@ -37,27 +37,31 @@ add_definitions(-DUSE_KISSFFT)
 # Windows Vulkan SDK is missing glslang_c_interface.h
 # See bug: https://vulkan.lunarg.com/issue/view/63d158a85df11200d569b2ab
 # Copy it from Linux SDK
-find_package(Vulkan)
-if(Vulkan_FOUND AND (${VKFFT_BACKEND} EQUAL 0))
-    set(sdrbase_SOURCES
-        ${sdrbase_SOURCES}
-        dsp/vulkanvkfftengine.cpp
-        dsp/vulkanvkfftengine.h
-    )
+if (${VKFFT_BACKEND} EQUAL 0)
+    find_package(Vulkan)
+    if(Vulkan_FOUND)
+        set(sdrbase_SOURCES
+            ${sdrbase_SOURCES}
+            dsp/vulkanvkfftengine.cpp
+            dsp/vulkanvkfftengine.h
+        )
+    endif()
 endif()
 
 # CUDA Toolkit: https://developer.nvidia.com/cuda-downloads
-find_package(CUDA 9.0)
-if(CUDA_FOUND AND (${VKFFT_BACKEND} EQUAL 1))
-    enable_language(CUDA)
-    set(sdrbase_SOURCES
-        ${sdrbase_SOURCES}
-        dsp/cudavkfftengine.cpp
-        dsp/cudavkfftengine.h
-    )
+if (${VKFFT_BACKEND} EQUAL 1)
+    find_package(CUDA 9.0)
+    if(CUDA_FOUND)
+        enable_language(CUDA)
+        set(sdrbase_SOURCES
+            ${sdrbase_SOURCES}
+            dsp/cudavkfftengine.cpp
+            dsp/cudavkfftengine.h
+        )
+    endif()
 endif()
 
-if(Vulkan_FOUND OR CUDA_FOUND)
+if((Vulkan_FOUND AND (${VKFFT_BACKEND} EQUAL 0)) OR (CUDA_FOUND AND (${VKFFT_BACKEND} EQUAL 1)))
     set(sdrbase_SOURCES
         ${sdrbase_SOURCES}
         dsp/vkfftengine.cpp
@@ -553,8 +557,8 @@ if(Vulkan_FOUND AND (${VKFFT_BACKEND} EQUAL 0))
     find_library(VULKAN_SPIRV_LIB SPIRV HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
     find_library(VULKAN_SPVREMAPPER_LIB SPVRemapper HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
     find_library(VULKAN_SPIRV_TOOLS_LIB SPIRV-Tools HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPIRV_TOOLS_OPT_LIB SPIRV-Tools-Opt HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPIRV_TOOLS_SHARED_LIB SPIRV-Tools-Shared HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_SPIRV_TOOLS_OPT_LIB SPIRV-Tools-opt HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_SPIRV_TOOLS_SHARED_LIB SPIRV-Tools-shared HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
     find_library(VULKAN_HLSL_LIB HLSL HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
     find_library(VULKAN_OGLCOMPILER_LIB OGLCompiler HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
     find_library(VULKAN_OSDEPENDENT_LIB OSDependent HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
@@ -563,18 +567,23 @@ if(Vulkan_FOUND AND (${VKFFT_BACKEND} EQUAL 0))
     find_library(VULKAN_MACHINEINDEPENDENT_LIB MachineIndependent HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
     find_library(VULKAN_GENERICCODEGEN_LIB GenericCodeGen HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
 
-    find_library(VULKAN_SPIRVD_LIB SPIRVd HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPVREMAPPERD_LIB SPVRemapperd HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPIRV_TOOLSD_LIB SPIRV-Toolsd HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPIRV_TOOLS_OPTD_LIB SPIRV-Tools-Optd HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPIRV_TOOLS_SHAREDD_LIB SPIRV-Tools-Sharedd HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_HLSLD_LIB HLSLd HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_OGLCOMPILERD_LIB OGLCompilerd HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_OSDEPENDENTD_LIB OSDependentd HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_GLSLANGD_LIB glslangd HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_GLSLANG_RESD_LIB glslang-default-resource-limitsd HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_MACHINEINDEPENDENTD_LIB MachineIndependentd HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_GENERICCODEGEND_LIB GenericCodeGend HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    if(MSVC)
+        set(VULKAN_DEBUG_POSTFIX "d")
+    else()
+        set(VULKAN_DEBUG_POSTFIX "")
+    endif()
+    find_library(VULKAN_SPIRVD_LIB SPIRV${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_SPVREMAPPERD_LIB SPVRemapper${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_SPIRV_TOOLSD_LIB SPIRV-Tools${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_SPIRV_TOOLS_OPTD_LIB SPIRV-Tools-opt${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_SPIRV_TOOLS_SHAREDD_LIB SPIRV-Tools-shared${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_HLSLD_LIB HLSL${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_OGLCOMPILERD_LIB OGLCompiler${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_OSDEPENDENTD_LIB OSDependent${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_GLSLANGD_LIB glslang${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_GLSLANG_RESD_LIB glslang-default-resource-limits${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_MACHINEINDEPENDENTD_LIB MachineIndependent${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    find_library(VULKAN_GENERICCODEGEND_LIB GenericCodeGen${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
 
     target_link_libraries(sdrbase
         optimized ${VULKAN_SPIRV_LIB}
@@ -602,7 +611,7 @@ if(Vulkan_FOUND AND (${VKFFT_BACKEND} EQUAL 0))
         debug ${VULKAN_GLSLANG_RESD_LIB}
         debug ${VULKAN_MACHINEINDEPENDENTD_LIB}
         debug ${VULKAN_GENERICCODEGEND_LIB}
-        Vulkan::Vulkan
+        debug Vulkan::Vulkan
     )
 endif()
 

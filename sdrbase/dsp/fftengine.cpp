@@ -25,10 +25,12 @@
 #ifdef USE_FFTW
 #include "dsp/fftwengine.h"
 #endif
+#ifdef VKFFT_BACKEND
 #if VKFFT_BACKEND==0
 #include "dsp/vulkanvkfftengine.h"
-#elif  VKFFT_BACKEND==1
+#elif VKFFT_BACKEND==1
 #include "dsp/cudavkfftengine.h"
+#endif
 #endif
 
 QStringList FFTEngine::m_allAvailableEngines;
@@ -61,6 +63,7 @@ FFTEngine* FFTEngine::create(const QString& fftWisdomFileName, const QString& pr
 
 	qDebug("FFTEngine::create: using %s engine", qPrintable(engine));
 
+#ifdef VKFFT_BACKEND
 #if VKFFT_BACKEND==0
     if (engine == VulkanvkFFTEngine::m_name) {
 	    return new VulkanvkFFTEngine();
@@ -70,6 +73,7 @@ FFTEngine* FFTEngine::create(const QString& fftWisdomFileName, const QString& pr
     if (engine == CUDAvkFFTEngine::m_name) {
 	    return new CUDAvkFFTEngine();
     }
+#endif
 #endif
 #ifdef USE_FFTW
 	if (engine == FFTWEngine::m_name) {
@@ -94,6 +98,7 @@ QStringList FFTEngine::getAllNames()
 #ifdef USE_KISSFFT
         m_allAvailableEngines.append(KissEngine::m_name);
 #endif
+#ifdef VKFFT_BACKEND
 #if VKFFT_BACKEND==0
         VulkanvkFFTEngine vulkanvkFFT;
         if (vulkanvkFFT.isAvailable()) {
@@ -104,6 +109,7 @@ QStringList FFTEngine::getAllNames()
         if (cudavkFFT.isAvailable()) {
             m_allAvailableEngines.append(cudavkFFT.getName());
         }
+#endif
 #endif
     }
     return m_allAvailableEngines;

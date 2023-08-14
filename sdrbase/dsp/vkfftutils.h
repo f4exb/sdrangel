@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include <vkFFT/vkFFT.h>
+#include <vkFFT.h>
 
 typedef struct {
 #if(VKFFT_BACKEND==0)

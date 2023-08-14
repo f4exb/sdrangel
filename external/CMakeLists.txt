@@ -844,7 +844,7 @@ ExternalProject_Add(vkfft
         TEST_COMMAND ""
         )
 ExternalProject_Get_Property(vkfft source_dir)
-set(VKFFT_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
+set(VKFFT_INCLUDE_DIR "${source_dir}/vkFFT" CACHE INTERNAL "")
 
 # requirements needed by many packages on windows
 if (WIN32)

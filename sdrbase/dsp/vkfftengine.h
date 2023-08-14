@@ -20,7 +20,7 @@
 
 #include <QMutex>
 
-#include <vkFFT/vkFFT.h>
+#include <vkFFT.h>
 
 #include "dsp/fftengine.h"
 #include "dsp/vkfftutils.h"
