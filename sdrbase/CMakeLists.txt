@@ -59,6 +59,9 @@ if (${VKFFT_BACKEND} EQUAL 1)
             dsp/cudavkfftengine.h
         )
     endif()
+    if(WIN32)
+        set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS ${WINDOWS_FIXUP_BUNDLE_LIB_DIRS} ${CUDA_TOOLKIT_ROOT_DIR}/bin PARENT_SCOPE)
+    endif()
 endif()
 
 if((Vulkan_FOUND AND (${VKFFT_BACKEND} EQUAL 0)) OR (CUDA_FOUND AND (${VKFFT_BACKEND} EQUAL 1)))
