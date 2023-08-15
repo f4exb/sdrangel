@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,44 +15,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _SDRBASE_FFTWFACTORY_H
-#define _SDRBASE_FFTWFACTORY_H
+#include "nanosecondsdelegate.h"
 
-#include <map>
-#include <vector>
+NanoSecondsDelegate::NanoSecondsDelegate()
+{
+}
 
-#include <QRecursiveMutex>
-#include <QString>
+QString NanoSecondsDelegate::displayText(const QVariant &value, const QLocale &locale) const
+{
+    (void) locale;
 
-#include "export.h"
-#include "dsp/dsptypes.h"
-#include "fftengine.h"
-
-class SDRBASE_API FFTFactory {
-public:
-	FFTFactory(const QString& fftwWisdomFileName);
-	~FFTFactory();
-
-    void preallocate(unsigned int minLog2Size, unsigned int maxLog2Size, unsigned int numberFFT, unsigned int numberInvFFT);
-    unsigned int getEngine(unsigned int fftSize, bool inverse, FFTEngine **engine, const QString& preferredEngine=""); //!< returns an engine sequence
-    void releaseEngine(unsigned int fftSize, bool inverse, unsigned int engineSequence);
-
-private:
-    struct AllocatedEngine
+    if (value.toString() == "")
     {
-        FFTEngine *m_engine;
-        bool m_inUse;
+        return "";
+    }
+    else
+    {
+        double timeInNanoSec = value.toDouble();
+        QString s;
 
-        AllocatedEngine() :
-            m_engine(nullptr),
-            m_inUse(false)
-        {}
-    };
-
-    QString m_fftwWisdomFileName;
-    std::map<unsigned int, std::vector<AllocatedEngine>> m_fftEngineBySize;
-    std::map<unsigned int, std::vector<AllocatedEngine>> m_invFFTEngineBySize;
-    QRecursiveMutex m_mutex;
-};
-
-#endif // _SDRBASE_FFTWFACTORY_H
+        if (timeInNanoSec < 1e3) {
+            s = QString("%1 ns").arg(timeInNanoSec, 0, 'f', 3);
+        } else if (timeInNanoSec < 1e6) {
+            s = QString("%1 us").arg(timeInNanoSec/1e3, 0, 'f', 3);
+        } else if (timeInNanoSec < 1e9) {
+            s = QString("%1 ms").arg(timeInNanoSec/1e6, 0, 'f', 3);
+        } else {
+            s = QString("%1 s").arg(timeInNanoSec/1e9, 0, 'f', 3);
+        }
+        return s;
+    }
+}

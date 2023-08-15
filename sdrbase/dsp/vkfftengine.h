@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,44 +15,57 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _SDRBASE_FFTWFACTORY_H
-#define _SDRBASE_FFTWFACTORY_H
+#ifndef INCLUDE_VKFFTENGINE_H
+#define INCLUDE_VKFFTENGINE_H
 
-#include <map>
-#include <vector>
+#include <QMutex>
 
-#include <QRecursiveMutex>
-#include <QString>
+#include <vkFFT.h>
 
+#include "dsp/fftengine.h"
+#include "dsp/vkfftutils.h"
 #include "export.h"
-#include "dsp/dsptypes.h"
-#include "fftengine.h"
 
-class SDRBASE_API FFTFactory {
+class SDRBASE_API vkFFTEngine : public FFTEngine {
 public:
-	FFTFactory(const QString& fftwWisdomFileName);
-	~FFTFactory();
+	vkFFTEngine();
+	virtual ~vkFFTEngine();
 
-    void preallocate(unsigned int minLog2Size, unsigned int maxLog2Size, unsigned int numberFFT, unsigned int numberInvFFT);
-    unsigned int getEngine(unsigned int fftSize, bool inverse, FFTEngine **engine, const QString& preferredEngine=""); //!< returns an engine sequence
-    void releaseEngine(unsigned int fftSize, bool inverse, unsigned int engineSequence);
+	virtual void configure(int n, bool inverse);
 
-private:
-    struct AllocatedEngine
-    {
-        FFTEngine *m_engine;
-        bool m_inUse;
+	virtual Complex* in();
+	virtual Complex* out();
 
-        AllocatedEngine() :
-            m_engine(nullptr),
-            m_inUse(false)
-        {}
-    };
+    virtual void setReuse(bool reuse) { m_reuse = reuse; }
+    bool isAvailable() override;
 
-    QString m_fftwWisdomFileName;
-    std::map<unsigned int, std::vector<AllocatedEngine>> m_fftEngineBySize;
-    std::map<unsigned int, std::vector<AllocatedEngine>> m_invFFTEngineBySize;
-    QRecursiveMutex m_mutex;
+protected:
+	static QMutex m_globalPlanMutex;
+
+	struct Plan {
+        Plan();
+        virtual ~Plan();
+		int n;
+        uint64_t m_bufferSize;
+        bool m_inverse;
+		VkFFTConfiguration* m_configuration;
+        VkFFTApplication* m_app;
+        Complex* m_in;              // CPU memory
+        Complex* m_out;
+	};
+	QList<Plan *> m_plans;
+	Plan* m_currentPlan;
+    bool m_reuse;
+
+    VkGPU *vkGPU;
+
+    virtual VkFFTResult gpuInit() = 0;
+    virtual VkFFTResult gpuAllocateBuffers() = 0;
+    virtual VkFFTResult gpuConfigure() = 0;
+    virtual Plan *gpuAllocatePlan() = 0;
+    virtual void gpuDeallocatePlan(Plan *plan) = 0;
+
+	void freeAll();
 };
 
-#endif // _SDRBASE_FFTWFACTORY_H
+#endif // INCLUDE_VKFFTENGINE_H

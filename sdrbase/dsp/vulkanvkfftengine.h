@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB                              //
+// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,49 +15,47 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FFTWENGINE_H
-#define INCLUDE_FFTWENGINE_H
+#ifndef INCLUDE_VULKANVKFFTENGINE_H
+#define INCLUDE_VULKANVKFFTENGINE_H
 
-#include <QMutex>
-#include <QString>
+#include "vkfftengine.h"
 
-#include <fftw3.h>
-#include <list>
-#include "dsp/fftengine.h"
-#include "export.h"
+#include "vulkan/vulkan.h"
 
-class SDRBASE_API FFTWEngine : public FFTEngine {
+class SDRBASE_API VulkanvkFFTEngine : public vkFFTEngine {
 public:
-	FFTWEngine(const QString& fftWisdomFileName);
-	virtual ~FFTWEngine();
+	VulkanvkFFTEngine();
+	virtual ~VulkanvkFFTEngine();
 
-	virtual void configure(int n, bool inverse);
-	virtual void transform();
-
-	virtual Complex* in();
-	virtual Complex* out();
-
-    virtual void setReuse(bool reuse) { m_reuse = reuse; }
+	void transform() override;
     QString getName() const override;
     static const QString m_name;
 
 protected:
-	static QMutex m_globalPlanMutex;
-    QString m_fftWisdomFileName;
 
-	struct Plan {
-		int n;
-		bool inverse;
-		fftwf_plan plan;
-		fftwf_complex* in;
-		fftwf_complex* out;
-	};
-	typedef std::list<Plan*> Plans;
-	Plans m_plans;
-	Plan* m_currentPlan;
-    bool m_reuse;
+    struct VulkanPlan : Plan {
+        VkBuffer m_inBuffer;        // CPU input memory
+        VkDeviceMemory m_inMemory;
+        VkBuffer m_outBuffer;       // CPU output memory
+        VkDeviceMemory m_outMemory;
+        VkBuffer m_buffer;          // GPU memory
+        VkDeviceMemory m_bufferDeviceMemory;
+        VkCommandBuffer m_commandBuffer;
+    };
 
-	void freeAll();
+    VkFFTResult gpuInit() override;
+    VkFFTResult gpuAllocateBuffers() override;
+    VkFFTResult gpuConfigure() override;
+
+    Plan *gpuAllocatePlan() override;
+    void gpuDeallocatePlan(Plan *) override;
+
+    VkFFTResult vulkanAllocateOut(VulkanPlan *plan);
+    VkFFTResult vulkanAllocateIn(VulkanPlan *plan);
+    void vulkanDeallocateOut(VulkanPlan *plan);
+    void vulkanDeallocateIn(VulkanPlan *plan);
+    VkFFTResult vulkanAllocateFFTCommand(VulkanPlan *plan);
+
 };
 
-#endif // INCLUDE_FFTWENGINE_H
+#endif // INCLUDE_VULKANVKFFTENGINE_H

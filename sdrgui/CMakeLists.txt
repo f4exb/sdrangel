@@ -41,6 +41,7 @@ set(sdrgui_SOURCES
     gui/featureadddialog.cpp
     gui/featurelayout.cpp
     gui/featurepresetsdialog.cpp
+    gui/fftdialog.cpp
     gui/fftwisdomdialog.cpp
     gui/flowlayout.cpp
     gui/framelesswindowresizer.cpp
@@ -65,8 +66,10 @@ set(sdrgui_SOURCES
     gui/logslider.cpp
     gui/loglabelslider.cpp
     gui/mypositiondialog.cpp
+    gui/nanosecondsdelegate.cpp
     gui/pluginsdialog.cpp
     gui/presetitem.cpp
+    gui/profiledialog.cpp
     gui/rollupcontents.cpp
     gui/rollupwidget.cpp
     gui/samplingdevicedialog.cpp
@@ -157,6 +160,7 @@ set(sdrgui_HEADERS
     gui/featureadddialog.h
     gui/featurelayout.h
     gui/featurepresetsdialog.h
+    gui/fftdialog.h
     gui/fftwisdomdialog.h
     gui/flowlayout.h
     gui/framelesswindowresizer.h
@@ -181,9 +185,11 @@ set(sdrgui_HEADERS
     gui/logslider.h
     gui/loglabelslider.h
     gui/mypositiondialog.h
+    gui/nanosecondsdelegate.h
     gui/physicalunit.h
     gui/pluginsdialog.h
     gui/presetitem.h
+    gui/profiledialog.h
     gui/qtcompatibility.h
     gui/rollupcontents.h
     gui/rollupwidget.h
@@ -254,11 +260,13 @@ set(sdrgui_FORMS
     gui/fmpreemphasisdialog.ui
     gui/featureadddialog.ui
     gui/featurepresetsdialog.ui
+    gui/fftdialog.ui
     gui/fftwisdomdialog.ui
     gui/glscopegui.ui
     gui/glspectrumgui.ui
     gui/graphicsdialog.ui
     gui/pluginsdialog.ui
+    gui/profiledialog.ui
     gui/audiodialog.ui
     gui/audioselectdialog.ui
     gui/samplingdevicecontrol.ui

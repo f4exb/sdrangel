@@ -59,6 +59,7 @@ class Command;
 class FeatureSetPreset;
 class CommandKeyReceiver;
 class ConfigurationsDialog;
+class ProfileDialog;
 
 class QMenuBar;
 class Workspace;
@@ -127,6 +128,7 @@ private:
 	QAction *m_spectrumToggleViewAction;
 
 	CommandKeyReceiver *m_commandKeyReceiver;
+    ProfileDialog *m_profileDialog;
 
 	QProcess *m_fftWisdomProcess;
 
@@ -183,12 +185,14 @@ private slots:
 	void on_action_View_KeepScreenOn_toggled(bool checked);
 #endif
 	void on_action_View_Fullscreen_toggled(bool checked);
+	void on_action_Profile_triggered();
 	void on_action_saveAll_triggered();
     void on_action_Configurations_triggered();
 	void on_action_Audio_triggered();
 	void on_action_Graphics_triggered();
     void on_action_Logging_triggered();
 	void on_action_FFT_triggered();
+	void on_action_FFTWisdom_triggered();
 	void on_action_My_Position_triggered();
     void on_action_DeviceUserArguments_triggered();
     void on_action_commands_triggered();

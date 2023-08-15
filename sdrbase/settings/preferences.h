@@ -25,7 +25,8 @@ public:
         Multisampling,
         AutoUpdatePosition,
         MapMultisampling,
-        MapSmoothing
+        MapSmoothing,
+        FFTEngine
     };
 
     Preferences();
@@ -87,6 +88,9 @@ public:
     bool getMapSmoothing() const { return m_mapSmoothing; }
     void setMapSmoothing(bool smoothing) { m_mapSmoothing = smoothing; }
 
+    const QString& getFFTEngine() const { return m_fftEngine; }
+    void setFFTEngine(const QString& fftEngine) { m_fftEngine = fftEngine; }
+
 protected:
 	QString m_sourceDevice; //!< Identification of the source used in R0 tab (GUI flavor) at startup
 	int m_sourceIndex;      //!< Index of the source used in R0 tab (GUI flavor) at startup
@@ -109,6 +113,8 @@ protected:
     int m_multisampling;    //!< Number of samples to use for multisampling anti-aliasing for spectrums (typically 0 or 4)
     int m_mapMultisampling; //!< Number of samples to use for multisampling anti-aliasing for 2D maps (16 gives best text, if not using mapSmoothing)
     bool m_mapSmoothing;    //!< Whether to use smoothing for text boxes on 2D maps
+
+    QString m_fftEngine;    //!< FFT Engine (FFTW, Kiss, vkFFT)
 };
 
 #endif // INCLUDE_PREFERENCES_H

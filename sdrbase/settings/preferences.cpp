@@ -25,6 +25,7 @@ void Preferences::resetToDefaults()
     m_multisampling = 0;
     m_mapMultisampling = 0;
     m_mapSmoothing = true;
+    m_fftEngine = "FFTW";
 }
 
 QByteArray Preferences::serialize() const
@@ -47,6 +48,7 @@ QByteArray Preferences::serialize() const
     s.writeBool((int) AutoUpdatePosition, m_autoUpdatePosition);
     s.writeS32((int) MapMultisampling, m_mapMultisampling);
     s.writeBool((int) MapSmoothing, m_mapSmoothing);
+    s.writeString((int) FFTEngine, m_fftEngine);
 	return s.final();
 }
 
@@ -104,6 +106,8 @@ bool Preferences::deserialize(const QByteArray& data)
         d.readBool((int) AutoUpdatePosition, &m_autoUpdatePosition, true);
         d.readS32((int) MapMultisampling, &m_mapMultisampling, 0);
         d.readBool((int) MapSmoothing, &m_mapSmoothing, true);
+
+        d.readString((int) FFTEngine, &m_fftEngine, "FFTW");
 
 		return true;
 	}

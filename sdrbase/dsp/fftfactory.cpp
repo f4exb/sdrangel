@@ -17,6 +17,7 @@
 
 #include <QMutexLocker>
 #include "fftfactory.h"
+#include "maincore.h"
 
 FFTFactory::FFTFactory(const QString& fftwWisdomFileName) :
     m_fftwWisdomFileName(fftwWisdomFileName)
@@ -69,11 +70,19 @@ void FFTFactory::preallocate(
     }
 }
 
-unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine **engine)
+unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine **engine, const QString& preferredEngine)
 {
     QMutexLocker mutexLocker(&m_mutex);
     std::map<unsigned int, std::vector<AllocatedEngine>>& enginesBySize = inverse ?
         m_invFFTEngineBySize : m_fftEngineBySize;
+
+    // If no preferred engine requested, use user preference
+    QString requestedEngine = preferredEngine;
+    if (requestedEngine.isEmpty())
+    {
+        const MainSettings& mainSettings = MainCore::instance()->getSettings();
+        requestedEngine = mainSettings.getFFTEngine();
+    }
 
     if (enginesBySize.find(fftSize) == enginesBySize.end())
     {
@@ -82,7 +91,7 @@ unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine
         std::vector<AllocatedEngine>& engines = enginesBySize[fftSize];
         engines.push_back(AllocatedEngine());
         engines.back().m_inUse = true;
-        engines.back().m_engine = FFTEngine::create(m_fftwWisdomFileName);
+        engines.back().m_engine = FFTEngine::create(m_fftwWisdomFileName, requestedEngine);
         engines.back().m_engine->setReuse(false);
         engines.back().m_engine->configure(fftSize, inverse);
         *engine = engines.back().m_engine;
@@ -92,9 +101,10 @@ unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine
     {
         unsigned int i = 0;
 
+        // Look for existing engine of requested size and type not currently in use
         for (; i < enginesBySize[fftSize].size(); i++)
         {
-            if (!enginesBySize[fftSize][i].m_inUse) {
+            if (!enginesBySize[fftSize][i].m_inUse && (enginesBySize[fftSize][i].m_engine->getName() == requestedEngine)) {
                 break;
             }
         }
@@ -112,7 +122,7 @@ unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine
             qDebug("FFTFactory::getEngine: create engine: %lu FFT %s size: %u", engines.size(), (inverse ? "inv" : "fwd"), fftSize);
             engines.push_back(AllocatedEngine());
             engines.back().m_inUse = true;
-            engines.back().m_engine = FFTEngine::create(m_fftwWisdomFileName);
+            engines.back().m_engine = FFTEngine::create(m_fftwWisdomFileName, requestedEngine);
             engines.back().m_engine->setReuse(false);
             engines.back().m_engine->configure(fftSize, inverse);
             *engine = engines.back().m_engine;

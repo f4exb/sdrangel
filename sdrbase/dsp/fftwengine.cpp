@@ -15,7 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QElapsedTimer>
+#include <QDebug>
+
 #include "dsp/fftwengine.h"
 
 FFTWEngine::FFTWEngine(const QString& fftWisdomFileName) :
@@ -29,6 +30,13 @@ FFTWEngine::FFTWEngine(const QString& fftWisdomFileName) :
 FFTWEngine::~FFTWEngine()
 {
 	freeAll();
+}
+
+const QString FFTWEngine::m_name = "FFTW";
+
+QString FFTWEngine::getName() const
+{
+    return m_name;
 }
 
 void FFTWEngine::configure(int n, bool inverse)
@@ -78,8 +86,12 @@ void FFTWEngine::configure(int n, bool inverse)
 
 void FFTWEngine::transform()
 {
+    PROFILER_START()
+
 	if(m_currentPlan != NULL)
 		fftwf_execute(m_currentPlan->plan);
+
+    PROFILER_STOP(QString("%1 %2").arg(getName()).arg(m_currentPlan->n))
 }
 
 Complex* FFTWEngine::in()

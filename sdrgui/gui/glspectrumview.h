@@ -424,6 +424,10 @@ private:
     static const QVector4D m_measurementLightMarkerColor;
     static const QVector4D m_measurementDarkMarkerColor;
 
+#ifdef ENABLE_PROFILER
+    QString m_profileName;
+#endif
+
     void updateWaterfall(const Real *spectrum);
     void update3DSpectrogram(const Real *spectrum);
     void updateHistogram(const Real *spectrum);

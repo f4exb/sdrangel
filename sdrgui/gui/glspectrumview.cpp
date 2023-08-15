@@ -34,6 +34,7 @@
 #include "settings/mainsettings.h"
 #include "util/messagequeue.h"
 #include "util/db.h"
+#include "util/profiler.h"
 
 #include <QDebug>
 
@@ -958,6 +959,8 @@ void GLSpectrumView::clearSpectrumHistogram()
 
 void GLSpectrumView::paintGL()
 {
+    PROFILER_START()
+
     if (!m_mutex.tryLock(2)) {
         return;
     }
@@ -1808,6 +1811,29 @@ void GLSpectrumView::paintGL()
     }
 
     m_mutex.unlock();
+
+#ifdef ENABLE_PROFILER
+    if (m_profileName.isEmpty())
+    {
+        // Try to use the window name for the profile name
+        QString windowTitle;
+        for (QWidget *widget = parentWidget(); widget != nullptr; widget = widget->parentWidget())
+        {
+            windowTitle = widget->windowTitle();
+            if (!windowTitle.isEmpty()) {
+                break;
+            }
+        }
+        // Add this address so we get per-spectrum profile data
+        if (windowTitle.isEmpty()) {
+            m_profileName = QString("Spectrum @%1").arg((quint64)this, 0, 16);
+        } else {
+            m_profileName = QString("%1 @%2").arg(windowTitle).arg((quint64)this, 0, 16);
+        }
+    }
+#endif
+
+    PROFILER_STOP(m_profileName)
 } // paintGL
 
 // Hightlight power band for SFDR

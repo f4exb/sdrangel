@@ -210,6 +210,13 @@ public:
         emit preferenceChanged(Preferences::MapSmoothing);
     }
 
+    const QString& getFFTEngine() const { return m_preferences.getFFTEngine(); }
+    void setFFTEngine(const QString& fftEngine)
+    {
+        m_preferences.setFFTEngine(fftEngine);
+        emit preferenceChanged(Preferences::FFTEngine);
+    }
+
 signals:
 	void preferenceChanged(int);
 
