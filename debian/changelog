@@ -1,3 +1,16 @@
+sdrangel (7.15.3-1) unstable; urgency=medium
+
+   * Rotator Controller: Add additional gamepad calibration and functionality. PR #1761
+   * Use QFileInfo to get file extension. Fixes #1760. PR #1762
+   * Add UI scale factor setting for high DPI screens. PR #1763
+   * Support Map plugin for Qt 6.5. Some Qt 6.6 fixes. PR #1764
+   * Map plugin: Fix beacon frequency. PR #1765
+   * PlutoSDR MIMO: fix variable names. PR #1770
+   * Rotator controller: use precision to determine step size. PR #1775
+   * Add VkFFT support and profiler. Implements #1166. PR #1779.
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 20 Aug 2023 21:10:13 +0200
+
 sdrangel (7.15.2-1) unstable; urgency=medium
 
    * Fixed some spellings. PR #1742
