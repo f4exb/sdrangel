@@ -42,12 +42,28 @@ MapIBPBeaconDialog::MapIBPBeaconDialog(MapGUI *gui, QWidget* parent) :
         ui->beacons->setItem(row, IBP_BEACON_COL_AZIMUTH, new QTableWidgetItem(""));
         ui->beacons->setItem(row, IBP_BEACON_COL_DISTANCE, new QTableWidgetItem(""));
     }
+    resizeTable();
     updateTable(QTime::currentTime());
 }
 
 MapIBPBeaconDialog::~MapIBPBeaconDialog()
 {
     delete ui;
+}
+
+// Fill table with a row of dummy data that will size the columns nicely
+void MapIBPBeaconDialog::resizeTable(void)
+{
+    int row = ui->beacons->rowCount();
+    ui->beacons->setRowCount(row + 1);
+    ui->beacons->setItem(row, IBP_BEACON_COL_FREQUENCY, new QTableWidgetItem("12.345"));
+    ui->beacons->setItem(row, IBP_BEACON_COL_CALLSIGN, new QTableWidgetItem("12345"));
+    ui->beacons->setItem(row, IBP_BEACON_COL_LOCATION, new QTableWidgetItem("1234567890123456"));
+    ui->beacons->setItem(row, IBP_BEACON_COL_DX_ENTITY, new QTableWidgetItem("1234567890123456"));
+    ui->beacons->setItem(row, IBP_BEACON_COL_AZIMUTH, new QTableWidgetItem("-123"));
+    ui->beacons->setItem(row, IBP_BEACON_COL_DISTANCE, new QTableWidgetItem("12345"));
+    ui->beacons->resizeColumnsToContents();
+    ui->beacons->removeRow(row);
 }
 
 void MapIBPBeaconDialog::updateTable(QTime time)
