@@ -719,12 +719,21 @@ endif()
 # When ENABLE_EXTERNAL_LIBRARIES is AUTO, we only build 3rd party libraries that aren't already available
 # When ENABLE_EXTERNAL_LIBRARIES is OFF, we only use prebuilt libraries
 
-if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO"))
+if (NOT ENABLE_EXTERNAL_LIBRARIES)
     find_package(Boost REQUIRED)
     find_package(FFTW3F REQUIRED)
     if(NOT ANDROID)
-        find_package(LibUSB REQUIRED)  # used by so many packages
+        find_package(LibUSB REQUIRED)
     endif()
+elseif(ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
+    find_package(Boost)
+    find_package(FFTW3T)
+    if(NOT ANDROID)
+        find_package(LibUSB)
+    endif()
+endif()
+
+if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO"))
     find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
     find_package(LibSigMF) # SigMF recording files support
     find_package(ZLIB) # For DAB
@@ -770,18 +779,20 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     if(ENABLE_RTLSDR)
         find_package(LibRTLSDR)
     endif()
-    if(ENABLE_SDRPLAY)
-        find_package(SDRplay)
-    endif()
     if(ENABLE_SOAPYSDR)
         find_package(SoapySDR)
-    endif()
-    if(ENABLE_XTRX)
-        find_package(LibXTRX)
     endif()
     if(ENABLE_USRP)
         find_package(UHD)
     endif()
+endif()
+
+# The following devices can't yet be built by external/CMakeLists.txt, so always call find_package
+if(ENABLE_SDRPLAY)
+    find_package(SDRplay)
+endif()
+if(ENABLE_XTRX)
+    find_package(LibXTRX)
 endif()
 
 if(ENABLE_EXTERNAL_LIBRARIES)
