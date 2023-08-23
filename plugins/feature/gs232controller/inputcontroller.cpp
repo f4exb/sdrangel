@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
+
 #ifdef QT_GAMEPAD_FOUND
 #include <QGamepadManager>
 #include "gamepadinputcontroller.h"
@@ -25,7 +27,7 @@
 double InputController::getAxisCalibratedValue(int axis, InputControllerSettings *settings, bool highSensitvity)
 {
     double value = getAxisValue(axis);
-    double absValue = abs(value);
+    double absValue = std::abs(value);
     double l = settings->m_deadzone[axis] / 100.0;
     if (absValue < l) {
         // Set to 0 if in deadzone
