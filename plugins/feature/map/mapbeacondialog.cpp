@@ -67,9 +67,13 @@ void MapBeaconDialog::updateTable()
             ui->beacons->setItem(row, BEACON_COL_MGM, new QTableWidgetItem(beacon->m_mgm));
             azEl.setTarget(beacon->m_latitude, beacon->m_longitude, beacon->m_altitude);
             azEl.calculate();
-            ui->beacons->setItem(row, BEACON_COL_AZIMUTH, new QTableWidgetItem(QString("%1").arg(round(azEl.getAzimuth()))));
+            QTableWidgetItem *azymuth = new QTableWidgetItem();
+            azymuth->setData(Qt::DisplayRole, round(azEl.getAzimuth()));
+            ui->beacons->setItem(row, BEACON_COL_AZIMUTH, azymuth);
             ui->beacons->item(row, BEACON_COL_AZIMUTH)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-            ui->beacons->setItem(row, BEACON_COL_ELEVATION, new QTableWidgetItem(QString("%1").arg(round(azEl.getElevation()))));
+            QTableWidgetItem *elevation = new QTableWidgetItem();
+            elevation->setData(Qt::DisplayRole, round(azEl.getElevation()));
+            ui->beacons->setItem(row, BEACON_COL_ELEVATION, elevation);
             ui->beacons->item(row, BEACON_COL_ELEVATION)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             int km = round(azEl.getDistance()/1000);
             QTableWidgetItem *dist = new QTableWidgetItem();
