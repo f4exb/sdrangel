@@ -848,6 +848,7 @@ public:
     qint64 getElapsedNsecs() const { return m_masterElapsedTimer.nsecsElapsed(); } //!< Elapsed nanoseconds since main core construction
     qint64 getStartMsecsSinceEpoch() const { return m_startMsecsSinceEpoch; } //!< Epoch timestamp in millisecodns close to elapsed timer start
     const MainSettings& getSettings() const { return m_settings; }
+    MainSettings& getMutableSettings() { return m_settings; }
     MessageQueue *getMainMessageQueue() { return m_mainMessageQueue; }
     PluginManager *getPluginManager() const { return m_pluginManager; }
     std::vector<DeviceSet*>& getDeviceSets() { return m_deviceSets; }

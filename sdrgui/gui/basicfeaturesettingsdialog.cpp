@@ -1,5 +1,11 @@
 #include <QColorDialog>
 
+#include "gui/pluginpresetsdialog.h"
+#include "gui/dialogpositioner.h"
+#include "feature/feature.h"
+#include "feature/featuregui.h"
+#include "maincore.h"
+
 #include "basicfeaturesettingsdialog.h"
 #include "ui_basicfeaturesettingsdialog.h"
 
@@ -79,6 +85,28 @@ void BasicFeatureSettingsDialog::on_reverseAPIFeatureIndex_editingFinished()
         return;
     } else {
         m_reverseAPIFeatureIndex = reverseAPIFeatureIndex;
+    }
+}
+
+void BasicFeatureSettingsDialog::on_presets_clicked()
+{
+    FeatureGUI *featureGUI = qobject_cast<FeatureGUI *>(parent());
+    if (!featureGUI)
+    {
+        qDebug() << "BasicFeatureSettingsDialog::on_presets_clicked: parent not a FeatureGUI";
+        return;
+    }
+    Feature *feature = MainCore::instance()->getFeature(0, featureGUI->getIndex());
+    const QString& id = feature->getURI();
+
+    PluginPresetsDialog dialog(id);
+    dialog.setPresets(MainCore::instance()->getMutableSettings().getPluginPresets());
+    dialog.setSerializableInterface(featureGUI);
+    dialog.populateTree();
+    new DialogPositioner(&dialog, true);
+    dialog.exec();
+    if (dialog.wasPresetLoaded()) {
+        QDialog::reject(); // Settings may have changed, so GUI will be inconsistent. Just close it
     }
 }
 

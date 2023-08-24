@@ -28,6 +28,7 @@
 
 #include "gui/channeladddialog.h"
 #include "gui/framelesswindowresizer.h"
+#include "settings/serializableinterface.h"
 #include "export.h"
 
 class QCloseEvent;
@@ -39,7 +40,7 @@ class QHBoxLayout;
 class QSizeGrip;
 class DeviceUISet;
 
-class SDRGUI_API DeviceGUI : public QMdiSubWindow {
+class SDRGUI_API DeviceGUI : public QMdiSubWindow, public SerializableInterface {
     Q_OBJECT
 public:
     enum DeviceType
@@ -60,8 +61,6 @@ public:
 	virtual void destroy() = 0;
 
 	virtual void resetToDefaults() = 0;
-	virtual QByteArray serialize() const = 0;
-	virtual bool deserialize(const QByteArray& data) = 0;
     void setWorkspaceIndex(int index);
     int getWorkspaceIndex() const { return m_workspaceIndex; }
 
@@ -78,6 +77,7 @@ public:
     int getIndex() const { return m_deviceSetIndex; }
     void setCurrentDeviceIndex(int index) { m_currentDeviceIndex = index; } //!< index in plugins list
     void setChannelNames(const QStringList& channelNames) { m_channelAddDialog.addChannelNames(channelNames); }
+    DeviceUISet* getDeviceUISet() { return m_deviceUISet; }
 
 protected:
     void closeEvent(QCloseEvent *event) override;

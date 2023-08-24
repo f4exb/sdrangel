@@ -68,6 +68,7 @@ set(sdrgui_SOURCES
     gui/mypositiondialog.cpp
     gui/nanosecondsdelegate.cpp
     gui/pluginsdialog.cpp
+    gui/pluginpresetsdialog.cpp
     gui/presetitem.cpp
     gui/profiledialog.cpp
     gui/rollupcontents.cpp
@@ -188,7 +189,9 @@ set(sdrgui_HEADERS
     gui/nanosecondsdelegate.h
     gui/physicalunit.h
     gui/pluginsdialog.h
+    gui/pluginpresetsdialog.h
     gui/presetitem.h
+    gui/presets/dialog.h
     gui/profiledialog.h
     gui/qtcompatibility.h
     gui/rollupcontents.h
@@ -266,6 +269,7 @@ set(sdrgui_FORMS
     gui/glspectrumgui.ui
     gui/graphicsdialog.ui
     gui/pluginsdialog.ui
+    gui/pluginpresetsdialog.ui
     gui/profiledialog.ui
     gui/audiodialog.ui
     gui/audioselectdialog.ui

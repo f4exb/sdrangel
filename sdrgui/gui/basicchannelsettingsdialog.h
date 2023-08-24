@@ -43,6 +43,7 @@ private slots:
     void on_reverseAPIDeviceIndex_editingFinished();
     void on_reverseAPIChannelIndex_editingFinished();
     void on_streamIndex_valueChanged(int value);
+    void on_presets_clicked();
     void accept();
 
 private:

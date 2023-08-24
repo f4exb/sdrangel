@@ -31,6 +31,7 @@ private slots:
     void on_reverseAPIAddress_editingFinished();
     void on_reverseAPIPort_editingFinished();
     void on_reverseAPIDeviceIndex_editingFinished();
+    void on_presets_clicked();
     void accept();
 
 private:
