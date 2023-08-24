@@ -482,10 +482,10 @@ QList<quint64> DeviceAPI::getCenterFrequency() const
     }
     else if (m_deviceMIMOEngine && m_deviceMIMOEngine->getMIMO())
     {
-        for (int i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSourceStreams(); i++) {
+        for (uint32_t i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSourceStreams(); i++) {
             frequencies.append(m_deviceMIMOEngine->getMIMO()->getSourceCenterFrequency(i));
         }
-        for (int i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSinkStreams(); i++) {
+        for (uint32_t i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSinkStreams(); i++) {
             frequencies.append(m_deviceMIMOEngine->getMIMO()->getSinkCenterFrequency(i));
         }
     }
@@ -505,10 +505,10 @@ void DeviceAPI::setCenterFrequency(QList<quint64> centerFrequency)
     else if (m_deviceMIMOEngine && m_deviceMIMOEngine->getMIMO())
     {
         int idx = 0;
-        for (int i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSourceStreams(); i++, idx++) {
+        for (uint32_t i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSourceStreams(); i++, idx++) {
             m_deviceMIMOEngine->getMIMO()->setSourceCenterFrequency(centerFrequency[idx], i);
         }
-        for (int i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSinkStreams(); i++) {
+        for (uint32_t i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSinkStreams(); i++, idx++) {
             m_deviceMIMOEngine->getMIMO()->setSinkCenterFrequency(centerFrequency[idx], i);
         }
     }
@@ -570,6 +570,8 @@ bool DeviceAPI::deserialize(const QByteArray& data)
         }
         d.readList<quint64>(4, &centerFrequency);
         setCenterFrequency(centerFrequency);
+
+        return true;
     }
     else
     {
