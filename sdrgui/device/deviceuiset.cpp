@@ -229,6 +229,8 @@ bool DeviceUISet::deserialize(const QByteArray& data)
         m_deviceGUI->deserialize(data);
         d.readBlob(3, &data);
         m_spectrumGUI->deserialize(data);
+
+        return true;
     }
     else
     {
