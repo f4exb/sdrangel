@@ -1091,7 +1091,11 @@ if (WIN32 OR APPLE)
         endif ()
         # Disable pkg-config to allow LIBUSB_INCLUDE_DIRS to be used
         set(DISABLE_PKGCONFIG "-DCMAKE_DISABLE_FIND_PACKAGE_PkgConfig=ON")
-        # needs libusb
+        # If we want to use https://github.com/librtlsdr/librtlsdr instead of https://github.com/osmocom/rtl-sdr.git
+        #  - Don't use DISABLE_PKGCONFIG
+        #  - Use -DLIBUSB_INCLUDE_DIR instead of -DLIBUSB_INCLUDE_DIRS
+        #  - Build target is rtl_sdr rather than rtlsdr
+        #  - Use tag development otherwise it will not build with MSVC
         ExternalProject_Add(rtlsdr
                 GIT_REPOSITORY https://github.com/osmocom/rtl-sdr.git
                 GIT_TAG ${RTLSDR_TAG}

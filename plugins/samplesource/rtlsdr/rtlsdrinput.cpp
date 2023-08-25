@@ -57,6 +57,7 @@ RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
 	m_dev(0),
 	m_rtlSDRThread(nullptr),
 	m_deviceDescription("RTLSDR"),
+    m_tunerType(RTLSDR_TUNER_UNKNOWN),
 	m_running(false)
 {
     m_sampleFifo.setLabel(m_deviceDescription);
@@ -155,7 +156,9 @@ bool RTLSDRInput::openDevice()
         return false;
     }
 
-    qInfo("RTLSDRInput::openDevice: open: %s %s, SN: %s", vendor, product, serial);
+    m_tunerType = rtlsdr_get_tuner_type(m_dev);
+
+    qInfo("RTLSDRInput::openDevice: open: %s %s, SN: %s Tuner: %s", vendor, product, serial, getTunerName());
     m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
 
     if ((res = rtlsdr_set_sample_rate(m_dev, 1152000)) < 0)
@@ -504,7 +507,8 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, const QList<QStr
         }
     }
 
-    if (settingsKeys.contains("offsetTuning") || force)
+    // Reapply offset_tuning setting if bandwidth is changed, otherwise frequency response of filter looks wrong on E4000
+    if (settingsKeys.contains("offsetTuning") || settingsKeys.contains("rfBandwidth") || force)
     {
         if (m_dev != 0)
         {
@@ -520,6 +524,11 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, const QList<QStr
     {
         if(m_dev != 0)
         {
+            // Nooelec E4000 SDRs appear to require tuner_gain_mode to be reset to manual before
+            // each call to set_tuner_gain, otherwise tuner AGC seems to be reenabled
+            if (rtlsdr_set_tuner_gain_mode(m_dev, 1) < 0) {
+                qCritical("RTLSDRInput::applySettings: error setting tuner gain mode to manual");
+            }
             qDebug() << "Set tuner gain " << settings.m_gain;
             if (rtlsdr_set_tuner_gain(m_dev, settings.m_gain) != 0) {
                 qCritical("RTLSDRInput::applySettings: rtlsdr_set_tuner_gain() failed");
@@ -564,6 +573,17 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, const QList<QStr
     }
 
     return true;
+}
+
+QString RTLSDRInput::getTunerName() const
+{
+    const static QStringList names = {"Unknown", "E4000", "FC0012", "FC0013", "FC2580", "R820T", "R828D"};
+
+    if ((int) m_tunerType <= names.size()) {
+        return names[(int) m_tunerType];
+    } else {
+        return names[0];
+    }
 }
 
 void RTLSDRInput::set_ds_mode(int on)

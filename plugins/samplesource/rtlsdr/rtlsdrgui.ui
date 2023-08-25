@@ -500,12 +500,12 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_direct">
      <item>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QLabel" name="tunerType">
        <property name="toolTip">
-        <string>RTLSDR special direct sampling mode (HF Bands)</string>
+        <string>Tuner type</string>
        </property>
        <property name="text">
-        <string>No-mod DS</string>
+        <string>Tuner: Unknown</string>
        </property>
       </widget>
      </item>
@@ -521,6 +521,16 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBox">
+       <property name="toolTip">
+        <string>RTLSDR special direct sampling mode (HF Bands)</string>
+       </property>
+       <property name="text">
+        <string>DS</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QCheckBox" name="offsetTuning">

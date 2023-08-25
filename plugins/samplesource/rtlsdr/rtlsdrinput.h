@@ -133,6 +133,8 @@ public:
             SWGSDRangel::SWGDeviceSettings& response);
 
 	const std::vector<int>& getGains() const { return m_gains; }
+    rtlsdr_tuner getTunerType() const { return m_tunerType; }
+    QString getTunerName() const;
 	void set_ds_mode(int on);
 
 	static const quint64 frequencyLowRangeMin;
@@ -152,6 +154,7 @@ private:
 	RTLSDRThread* m_rtlSDRThread;
 	QString m_deviceDescription;
 	std::vector<int> m_gains;
+    rtlsdr_tuner m_tunerType;
 	bool m_running;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
