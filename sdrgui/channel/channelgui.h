@@ -23,6 +23,7 @@
 
 #include "gui/qtcompatibility.h"
 #include "gui/framelesswindowresizer.h"
+#include "settings/serializableinterface.h"
 #include "export.h"
 
 class QCloseEvent;
@@ -35,7 +36,7 @@ class QSizeGrip;
 class RollupContents;
 class ChannelMarker;
 
-class SDRGUI_API ChannelGUI : public QMdiSubWindow
+class SDRGUI_API ChannelGUI : public QMdiSubWindow, public SerializableInterface
 {
     Q_OBJECT
 public:
@@ -57,8 +58,6 @@ public:
 	virtual void destroy() = 0;
 
 	virtual void resetToDefaults() = 0;
-	virtual QByteArray serialize() const = 0;
-	virtual bool deserialize(const QByteArray& data) = 0;
     // Data saved in the derived settings
     virtual void setWorkspaceIndex(int index)= 0;
     virtual int getWorkspaceIndex() const = 0;

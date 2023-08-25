@@ -25,6 +25,7 @@
 #include "dsp/devicesamplemimo.h"
 #include "settings/preset.h"
 #include "channel/channelapi.h"
+#include "util/simpleserializer.h"
 
 #include "deviceapi.h"
 
@@ -464,6 +465,117 @@ ChannelAPI *DeviceAPI::getMIMOChannelAPIAt(int index)
         return m_mimoChannelAPIs.at(index);
     } else {
         return nullptr;
+    }
+}
+
+QList<quint64> DeviceAPI::getCenterFrequency() const
+{
+    QList<quint64> frequencies;
+
+    if (m_deviceSourceEngine && m_deviceSourceEngine->getSource())
+    {
+        frequencies.append(m_deviceSourceEngine->getSource()->getCenterFrequency());
+    }
+    else if (m_deviceSinkEngine && m_deviceSinkEngine->getSink())
+    {
+        frequencies.append(m_deviceSinkEngine->getSink()->getCenterFrequency());
+    }
+    else if (m_deviceMIMOEngine && m_deviceMIMOEngine->getMIMO())
+    {
+        for (uint32_t i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSourceStreams(); i++) {
+            frequencies.append(m_deviceMIMOEngine->getMIMO()->getSourceCenterFrequency(i));
+        }
+        for (uint32_t i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSinkStreams(); i++) {
+            frequencies.append(m_deviceMIMOEngine->getMIMO()->getSinkCenterFrequency(i));
+        }
+    }
+    return frequencies;
+}
+
+void DeviceAPI::setCenterFrequency(QList<quint64> centerFrequency)
+{
+    if (m_deviceSourceEngine && m_deviceSourceEngine->getSource())
+    {
+        m_deviceSourceEngine->getSource()->setCenterFrequency(centerFrequency[0]);
+    }
+    else if (m_deviceSinkEngine && m_deviceSinkEngine->getSink())
+    {
+        m_deviceSinkEngine->getSink()->setCenterFrequency(centerFrequency[0]);
+    }
+    else if (m_deviceMIMOEngine && m_deviceMIMOEngine->getMIMO())
+    {
+        int idx = 0;
+        for (uint32_t i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSourceStreams(); i++, idx++) {
+            m_deviceMIMOEngine->getMIMO()->setSourceCenterFrequency(centerFrequency[idx], i);
+        }
+        for (uint32_t i = 0; i < m_deviceMIMOEngine->getMIMO()->getNbSinkStreams(); i++, idx++) {
+            m_deviceMIMOEngine->getMIMO()->setSinkCenterFrequency(centerFrequency[idx], i);
+        }
+    }
+}
+
+// Serialization is only currently used for saving device settings as part of a Device preset
+// loadSamplingDeviceSettings/saveSamplingDeviceSettings is used for Device Set presets (which includes channel settings)
+
+QByteArray DeviceAPI::serialize() const
+{
+    SimpleSerializer s(1);
+
+    if (m_deviceSourceEngine && m_deviceSourceEngine->getSource()) {
+        s.writeBlob(1, m_deviceSourceEngine->getSource()->serialize());
+    }
+    if (m_deviceSinkEngine && m_deviceSinkEngine->getSink()) {
+        s.writeBlob(2, m_deviceSinkEngine->getSink()->serialize());
+    }
+    if (m_deviceMIMOEngine && m_deviceMIMOEngine->getMIMO()) {
+        s.writeBlob(3, m_deviceMIMOEngine->getMIMO()->serialize());
+    }
+    s.writeList<quint64>(4, getCenterFrequency());
+    return s.final();
+}
+
+bool DeviceAPI::deserialize(const QByteArray& data)
+{
+    SimpleDeserializer d(data);
+
+    if (!d.isValid()) {
+        return false;
+    }
+
+    if (d.getVersion() == 1)
+    {
+        QByteArray data;
+        QList<quint64> centerFrequency;
+
+        if (m_deviceSourceEngine && m_deviceSourceEngine->getSource())
+        {
+            d.readBlob(1, &data);
+            if (data.size() > 0) {
+                m_deviceSourceEngine->getSource()->deserialize(data);
+            }
+        }
+        if (m_deviceSinkEngine && m_deviceSinkEngine->getSink())
+        {
+            d.readBlob(2, &data);
+            if (data.size() > 0) {
+                m_deviceSinkEngine->getSink()->deserialize(data);
+            }
+        }
+        if (m_deviceMIMOEngine && m_deviceMIMOEngine->getMIMO())
+        {
+            d.readBlob(3, &data);
+            if (data.size() > 0) {
+                m_deviceMIMOEngine->getMIMO()->deserialize(data);
+            }
+        }
+        d.readList<quint64>(4, &centerFrequency);
+        setCenterFrequency(centerFrequency);
+
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 

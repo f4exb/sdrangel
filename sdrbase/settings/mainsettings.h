@@ -7,6 +7,7 @@
 #include "preferences.h"
 #include "preset.h"
 #include "featuresetpreset.h"
+#include "pluginpreset.h"
 #include "configuration.h"
 #include "export.h"
 #include "plugin/pluginmanager.h"
@@ -71,6 +72,20 @@ public:
     const FeatureSetPreset& getWorkingFeatureSetPresetConst() const { return m_workingFeatureSetPreset; }
 	FeatureSetPreset* getWorkingFeatureSetPreset() { return &m_workingFeatureSetPreset; }
 	QList<FeatureSetPreset*> *getFeatureSetPresets() { return &m_featureSetPresets; }
+
+    PluginPreset* newPluginPreset(const QString& group, const QString& description);
+    void addPluginPreset(PluginPreset *preset);
+    void deletePluginPreset(const PluginPreset* preset);
+    int getPluginPresetCount() const { return m_pluginPresets.count(); }
+    const PluginPreset* getPluginPreset(int index) const { return m_pluginPresets[index]; }
+    const PluginPreset* getPluginPreset(const QString& groupName, const QString& description) const;
+    void sortPluginPresets();
+    void renamePluginPresetGroup(const QString& oldGroupName, const QString& newGroupName);
+    void deletePluginPresetGroup(const QString& groupName);
+    void clearPluginPresets();
+    const PluginPreset& getWorkingPluginPresetConst() const { return m_workingPluginPreset; }
+    PluginPreset* getWorkingPluginPreset() { return &m_workingPluginPreset; }
+    QList<PluginPreset*> *getPluginPresets() { return &m_pluginPresets; }
 
     Configuration* newConfiguration(const QString& group, const QString& description);
     void addConfiguration(Configuration *configuration);
@@ -231,6 +246,9 @@ protected:
 	FeatureSetPreset m_workingFeatureSetPreset;
     typedef QList<FeatureSetPreset*> FeatureSetPresets;
     FeatureSetPresets m_featureSetPresets;
+    PluginPreset m_workingPluginPreset;
+    typedef QList<PluginPreset*> PluginPresets;
+    PluginPresets m_pluginPresets;
     Configuration m_workingConfiguration;
     typedef QList<Configuration*> Configurations;
     Configurations m_configurations;

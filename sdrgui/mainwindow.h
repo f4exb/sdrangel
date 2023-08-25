@@ -60,6 +60,7 @@ class FeatureSetPreset;
 class CommandKeyReceiver;
 class ConfigurationsDialog;
 class ProfileDialog;
+class SerializableInterface;
 
 class QMenuBar;
 class Workspace;
@@ -171,6 +172,7 @@ private:
         DeviceUISet *deviceUISet
     );
     void deleteFeature(int featureSetIndex, int featureIndex);
+    void loadDefaultPreset(const QString& pluginId, SerializableInterface *serializableInterface);
 
     bool handleMessage(const Message& cmd);
 

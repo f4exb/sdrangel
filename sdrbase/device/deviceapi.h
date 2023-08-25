@@ -22,6 +22,7 @@
 #include <QString>
 #include <QTimer>
 
+#include "settings/serializableinterface.h"
 #include "export.h"
 
 class BasebandSampleSink;
@@ -38,7 +39,7 @@ class DSPDeviceSinkEngine;
 class DSPDeviceMIMOEngine;
 class Preset;
 
-class SDRBASE_API DeviceAPI : public QObject {
+class SDRBASE_API DeviceAPI : public QObject, public SerializableInterface {
     Q_OBJECT
 public:
     enum StreamType //!< This is the same enum as in PluginInterface
@@ -145,6 +146,13 @@ public:
     void saveSamplingDeviceSettings(Preset* preset);
     // void saveSourceSettings(Preset* preset);
     // void saveSinkSettings(Preset* preset);
+
+    QByteArray serialize() const override;
+    bool deserialize(const QByteArray& data) override;
+
+    // List of one frequency for Single Rx / Tx or one frequency per stream for MIMO
+    QList<quint64> getCenterFrequency() const;
+    void setCenterFrequency(QList<quint64> centerFrequency);
 
     DSPDeviceSourceEngine *getDeviceSourceEngine() { return m_deviceSourceEngine; }
     DSPDeviceSinkEngine *getDeviceSinkEngine() { return m_deviceSinkEngine; }

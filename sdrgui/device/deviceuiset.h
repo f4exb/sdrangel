@@ -22,6 +22,7 @@
 #include <QTimer>
 #include <QByteArray>
 
+#include "settings/serializableinterface.h"
 #include "export.h"
 
 class SpectrumVis;
@@ -48,7 +49,7 @@ namespace SWGSDRangel {
     class SWGSuccessResponse;
 };
 
-class SDRGUI_API DeviceUISet : public QObject
+class SDRGUI_API DeviceUISet : public QObject, public SerializableInterface
 {
     Q_OBJECT
 public:
@@ -83,6 +84,9 @@ public:
     void deleteChannel(int channelIndex);
     ChannelAPI *getChannelAt(int channelIndex);
     ChannelGUI *getChannelGUIAt(int channelIndex);
+
+    QByteArray serialize() const override;
+    bool deserialize(const QByteArray& data) override;
 
     void loadDeviceSetSettings(
         const Preset* preset,

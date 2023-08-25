@@ -1,6 +1,11 @@
 #include <QColorDialog>
 
 #include "dsp/channelmarker.h"
+#include "gui/pluginpresetsdialog.h"
+#include "gui/dialogpositioner.h"
+#include "channel/channelapi.h"
+#include "channel/channelgui.h"
+#include "maincore.h"
 
 #include "basicchannelsettingsdialog.h"
 #include "ui_basicchannelsettingsdialog.h"
@@ -152,6 +157,28 @@ void BasicChannelSettingsDialog::on_streamIndex_valueChanged(int value)
 void BasicChannelSettingsDialog::on_titleReset_clicked()
 {
     ui->title->setText(m_defaultTitle);
+}
+
+void BasicChannelSettingsDialog::on_presets_clicked()
+{
+    ChannelGUI *channelGUI = qobject_cast<ChannelGUI *>(parent());
+    if (!channelGUI)
+    {
+        qDebug() << "BasicChannelSettingsDialog::on_presets_clicked: parent not a ChannelGUI";
+        return;
+    }
+    ChannelAPI *channel = MainCore::instance()->getChannel(channelGUI->getDeviceSetIndex(), channelGUI->getIndex());
+    const QString& id = channel->getURI();
+
+    PluginPresetsDialog dialog(id);
+    dialog.setPresets(MainCore::instance()->getMutableSettings().getPluginPresets());
+    dialog.setSerializableInterface(channelGUI);
+    dialog.populateTree();
+    new DialogPositioner(&dialog, true);
+    dialog.exec();
+    if (dialog.wasPresetLoaded()) {
+        QDialog::reject(); // Settings may have changed, so GUI will be inconsistent. Just close it
+    }
 }
 
 void BasicChannelSettingsDialog::accept()

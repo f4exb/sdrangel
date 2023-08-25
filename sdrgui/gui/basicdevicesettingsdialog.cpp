@@ -1,3 +1,10 @@
+#include "gui/pluginpresetsdialog.h"
+#include "gui/dialogpositioner.h"
+#include "device/deviceapi.h"
+#include "device/devicegui.h"
+#include "device/deviceuiset.h"
+#include "maincore.h"
+
 #include "basicdevicesettingsdialog.h"
 #include "ui_basicdevicesettingsdialog.h"
 
@@ -78,6 +85,30 @@ void BasicDeviceSettingsDialog::on_reverseAPIDeviceIndex_editingFinished()
         return;
     } else {
         m_reverseAPIDeviceIndex = reverseAPIDeviceIndex;
+    }
+}
+
+void BasicDeviceSettingsDialog::on_presets_clicked()
+{
+    DeviceGUI *deviceGUI = qobject_cast<DeviceGUI *>(parent());
+    if (!deviceGUI)
+    {
+        qDebug() << "BasicDeviceSettingsDialog::on_presets_clicked: parent not a DeviceGUI";
+        return;
+    }
+    DeviceAPI *device = MainCore::instance()->getDevice(deviceGUI->getIndex());
+    const QString& id = device->getSamplingDeviceId();
+    // To include spectrum settings, we need to serialize DeviceUISet rather than just the DeviceGUI
+    DeviceUISet *deviceUISet = deviceGUI->getDeviceUISet();
+
+    PluginPresetsDialog dialog(id);
+    dialog.setPresets(MainCore::instance()->getMutableSettings().getPluginPresets());
+    dialog.setSerializableInterface(deviceUISet);
+    dialog.populateTree();
+    new DialogPositioner(&dialog, true);
+    dialog.exec();
+    if (dialog.wasPresetLoaded()) {
+        QDialog::reject(); // Settings may have changed, so GUI will be inconsistent. Just close it
     }
 }
 

@@ -31,6 +31,10 @@ MainSettings::~MainSettings()
     {
         delete m_featureSetPresets[i];
     }
+    for (int i = 0; i < m_pluginPresets.count(); ++i)
+    {
+        delete m_pluginPresets[i];
+    }
 }
 
 QString MainSettings::getFileLocation() const
@@ -110,6 +114,22 @@ void MainSettings::load()
 
             s.endGroup();
         }
+        else if (groups[i].startsWith("pluginpreset"))
+        {
+            s.beginGroup(groups[i]);
+            PluginPreset* pluginPreset = new PluginPreset;
+
+            if (pluginPreset->deserialize(qUncompress(QByteArray::fromBase64(s.value("data").toByteArray()))))
+            {
+                m_pluginPresets.append(pluginPreset);
+            }
+            else
+            {
+                delete pluginPreset;
+            }
+
+            s.endGroup();
+        }
 		else if (groups[i].startsWith("configuration"))
         {
             s.beginGroup(groups[i]);
@@ -176,6 +196,14 @@ void MainSettings::save() const
 		s.endGroup();
 	}
 
+    for (int i = 0; i < m_pluginPresets.count(); ++i)
+    {
+        QString group = QString("pluginpreset-%1").arg(i + 1);
+        s.beginGroup(group);
+        s.setValue("data", qCompress(m_pluginPresets[i]->serialize()).toBase64());
+        s.endGroup();
+    }
+
 	for (int i = 0; i < m_configurations.count(); ++i)
 	{
 		QString group = QString("configuration-%1").arg(i + 1);
@@ -193,6 +221,7 @@ void MainSettings::initialize()
     clearCommands();
     clearPresets();
     clearFeatureSetPresets();
+    clearPluginPresets();
     clearConfigurations();
 }
 
@@ -201,6 +230,7 @@ void MainSettings::resetToDefaults()
 	m_preferences.resetToDefaults();
 	m_workingPreset.resetToDefaults();
     m_workingFeatureSetPreset.resetToDefaults();
+    m_workingPluginPreset.resetToDefaults();
     m_workingConfiguration.resetToDefaults();
 }
 
@@ -450,6 +480,86 @@ void MainSettings::clearFeatureSetPresets()
     }
 
     m_featureSetPresets.clear();
+}
+
+// FeatureSet presets
+
+PluginPreset* MainSettings::newPluginPreset(const QString& group, const QString& description)
+{
+	PluginPreset* preset = new PluginPreset();
+	preset->setGroup(group);
+	preset->setDescription(description);
+	addPluginPreset(preset);
+	return preset;
+}
+
+void MainSettings::addPluginPreset(PluginPreset *preset)
+{
+    m_pluginPresets.append(preset);
+}
+
+void MainSettings::deletePluginPreset(const PluginPreset* preset)
+{
+	m_pluginPresets.removeAll((PluginPreset*) preset);
+	delete (PluginPreset*) preset;
+}
+
+void MainSettings::deletePluginPresetGroup(const QString& groupName)
+{
+    PluginPresets::iterator it = m_pluginPresets.begin();
+
+    while (it != m_pluginPresets.end())
+    {
+        if ((*it)->getGroup() == groupName) {
+            it = m_pluginPresets.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void MainSettings::sortPluginPresets()
+{
+    std::sort(m_pluginPresets.begin(), m_pluginPresets.end(), PluginPreset::presetCompare);
+}
+
+void MainSettings::renamePluginPresetGroup(const QString& oldGroupName, const QString& newGroupName)
+{
+    int nbPresets = getPluginPresetCount();
+
+    for (int i = 0; i < nbPresets; i++)
+    {
+        if (getPluginPreset(i)->getGroup() == oldGroupName)
+        {
+            PluginPreset *preset_mod = const_cast<PluginPreset*>(getPluginPreset(i));
+            preset_mod->setGroup(newGroupName);
+        }
+    }
+}
+
+const PluginPreset* MainSettings::getPluginPreset(const QString& groupName, const QString& description) const
+{
+    int nbPresets = getPluginPresetCount();
+
+    for (int i = 0; i < nbPresets; i++)
+    {
+        if ((getPluginPreset(i)->getGroup() == groupName) &&
+            (getPluginPreset(i)->getDescription() == description))
+        {
+            return getPluginPreset(i);
+        }
+    }
+
+    return nullptr;
+}
+
+void MainSettings::clearPluginPresets()
+{
+    foreach (PluginPreset *preset, m_pluginPresets) {
+        delete preset;
+    }
+
+    m_pluginPresets.clear();
 }
 
 // Configurations

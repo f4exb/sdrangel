@@ -38,6 +38,7 @@
 #include "channel/channelgui.h"
 #include "mainspectrum/mainspectrumgui.h"
 #include "settings/preset.h"
+#include "util/simpleserializer.h"
 #include "mainwindow.h"
 
 #include "deviceuiset.h"
@@ -194,6 +195,47 @@ ChannelAPI *DeviceUISet::getChannelAt(int channelIndex)
 ChannelGUI *DeviceUISet::getChannelGUIAt(int channelIndex)
 {
     return m_channelInstanceRegistrations[channelIndex].m_gui;
+}
+
+// Serialization is only used for Device and Spectrum settings in a Device preset
+// To include channels, use a Device Set preset via loadDeviceSetSettings/saveDeviceSetSettings
+
+QByteArray DeviceUISet::serialize() const
+{
+    SimpleSerializer s(1);
+
+    s.writeBlob(1, m_deviceAPI->serialize());
+    s.writeBlob(2, m_deviceGUI->serialize());
+    s.writeBlob(3, m_spectrumGUI->serialize());
+
+    return s.final();
+}
+
+bool DeviceUISet::deserialize(const QByteArray& data)
+{
+    SimpleDeserializer d(data);
+
+    if (!d.isValid()) {
+        return false;
+    }
+
+    if (d.getVersion() == 1)
+    {
+        QByteArray data;
+
+        d.readBlob(1, &data);
+        m_deviceAPI->deserialize(data);
+        d.readBlob(2, &data);
+        m_deviceGUI->deserialize(data);
+        d.readBlob(3, &data);
+        m_spectrumGUI->deserialize(data);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void DeviceUISet::loadDeviceSetSettings(
