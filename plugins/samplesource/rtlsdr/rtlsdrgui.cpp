@@ -208,7 +208,7 @@ void RTLSDRGui::updateFrequencyLimits()
 {
     // values in kHz
     qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
-    qint64 minLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMin : RTLSDRInput::frequencyHighRangeMin) + deltaFrequency;
+    qint64 minLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMin : m_sampleSource->m_frequencyHighRangeMin) + deltaFrequency;
     qint64 maxLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMax : RTLSDRInput::frequencyHighRangeMax) + deltaFrequency;
 
     if (m_settings.m_transverterMode)

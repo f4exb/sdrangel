@@ -139,7 +139,7 @@ public:
 
 	static const quint64 frequencyLowRangeMin;
 	static const quint64 frequencyLowRangeMax;
-    static const quint64 frequencyHighRangeMin;
+    quint64 m_frequencyHighRangeMin;
     static const quint64 frequencyHighRangeMax;
 	static const int sampleRateLowRangeMin;
     static const int sampleRateLowRangeMax;

@@ -44,7 +44,6 @@ MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgStartStop, Message)
 
 const quint64 RTLSDRInput::frequencyLowRangeMin = 0UL;
 const quint64 RTLSDRInput::frequencyLowRangeMax = 275000UL;
-const quint64 RTLSDRInput::frequencyHighRangeMin = 24000UL;
 const quint64 RTLSDRInput::frequencyHighRangeMax = 2400000UL;
 const int RTLSDRInput::sampleRateLowRangeMin = 225001;
 const int RTLSDRInput::sampleRateLowRangeMax = 300000;
@@ -158,8 +157,14 @@ bool RTLSDRInput::openDevice()
 
     m_tunerType = rtlsdr_get_tuner_type(m_dev);
 
-    qInfo("RTLSDRInput::openDevice: open: %s %s, SN: %s Tuner: %s", vendor, product, serial, getTunerName());
+    qInfo("RTLSDRInput::openDevice: open: %s %s, SN: %s Tuner: %s", vendor, product, serial, qPrintable(getTunerName()));
     m_deviceDescription = QString("%1 (SN %2)").arg(product).arg(serial);
+
+    if ((vendor == QStringLiteral("RTLSDRBlog")) && (product == QStringLiteral("Blog V4"))) {
+        m_frequencyHighRangeMin = 0;
+    } else {
+        m_frequencyHighRangeMin = 24000UL;
+    }
 
     if ((res = rtlsdr_set_sample_rate(m_dev, 1152000)) < 0)
     {
