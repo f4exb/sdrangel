@@ -98,6 +98,12 @@ class RadioAstronomyGUI : public ChannelGUI {
         float m_skyTemp;
         float m_sensor[RADIOASTRONOMY_SENSORS];
 
+        bool m_rotValid;
+        float m_rotAz;
+        float m_rotEl;
+        float m_rotAzOff;
+        float m_rotElOff;
+
         int m_sweepIndex;
 
         FFTMeasurement() :
@@ -121,6 +127,11 @@ class RadioAstronomyGUI : public ChannelGUI {
             m_coordsValid(false),
             m_airTemp(0.0),
             m_skyTemp(0.0),
+            m_rotValid(false),
+            m_rotAz(0.0),
+            m_rotEl(0.0),
+            m_rotAzOff(0.0),
+            m_rotElOff(0.0),
             m_sweepIndex(0)
         {
         }
@@ -450,6 +461,7 @@ private:
     void calcSpectrumChartTickCount(QValueAxis *axis, int width);
     int powerYUnitsToIndex(RadioAstronomySettings::PowerYUnits units);
     void setColumnPrecisionFromRotator();
+    void getRotatorData(FFTMeasurement *fft);
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
@@ -487,7 +499,11 @@ private:
         POWER_COL_AIR_TEMP,
         POWER_COL_SENSOR_1,
         POWER_COL_SENSOR_2,
-        POWER_COL_UTC
+        POWER_COL_UTC,
+        POWER_COL_ROT_AZ,
+        POWER_COL_ROT_EL,
+        POWER_COL_ROT_AZ_OFF,
+        POWER_COL_ROT_EL_OFF
     };
 
     enum PowerMarkerTable {
