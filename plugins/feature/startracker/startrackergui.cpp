@@ -108,9 +108,7 @@ bool StarTrackerGUI::handleMessage(const Message& message)
             m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
         }
 
-        blockApplySettings(true);
         displaySettings();
-        blockApplySettings(false);
 
         return true;
     }
@@ -118,8 +116,10 @@ bool StarTrackerGUI::handleMessage(const Message& message)
     {
         StarTrackerReport::MsgReportAzAl& azAl = (StarTrackerReport::MsgReportAzAl&) message;
         blockApplySettings(true);
+        blockPlotChart();
         ui->azimuth->setValue(azAl.getAzimuth());
         ui->elevation->setValue(azAl.getElevation());
+        unblockPlotChartAndPlot();
         blockApplySettings(false);
         return true;
     }
@@ -131,8 +131,10 @@ bool StarTrackerGUI::handleMessage(const Message& message)
         {
             m_settings.m_ra = Units::decimalHoursToHoursMinutesAndSeconds(raDec.getRA());
             m_settings.m_dec = Units::decimalDegreesToDegreeMinutesAndSeconds(raDec.getDec());
+            blockPlotChart();
             ui->rightAscension->setText(m_settings.m_ra);
             ui->declination->setText(m_settings.m_dec);
+            unblockPlotChartAndPlot();
         }
         else if (target == "sun")
         {
@@ -151,8 +153,10 @@ bool StarTrackerGUI::handleMessage(const Message& message)
     {
         StarTrackerReport::MsgReportGalactic& galactic = (StarTrackerReport::MsgReportGalactic&) message;
         blockApplySettings(true);
+        blockPlotChart();
         ui->galacticLongitude->setValue(galactic.getL());
         ui->galacticLatitude->setValue(galactic.getB());
+        unblockPlotChartAndPlot();
         blockApplySettings(false);
         return true;
     }
@@ -166,8 +170,10 @@ bool StarTrackerGUI::handleMessage(const Message& message)
             QDateTime dt = QDateTime::fromString(*swgSettings->getDateTime(), Qt::ISODateWithMs);
             ui->dateTime->setDateTime(dt);
             ui->target->setCurrentText("Custom Az/El");
+            blockPlotChart();
             ui->azimuth->setValue(swgSettings->getAzimuth());
             ui->elevation->setValue(swgSettings->getElevation());
+            unblockPlotChartAndPlot();
         }
         return true;
     }
@@ -304,6 +310,7 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
+    m_doPlotChart(true),
     m_lastFeatureState(0),
     m_azElLineChart(nullptr),
     m_azElPolarChart(nullptr),
@@ -399,6 +406,7 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     ui->dateTime->setDateTime(QDateTime::currentDateTime());
     displaySettings();
     applySettings(true);
+    disconnect(ui->azimuth, SIGNAL(valueChanged(double)), this, SLOT(on_azimuth_valueChanged(double)));
     makeUIConnections();
 
     // Populate subchart menu
@@ -471,12 +479,24 @@ void StarTrackerGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
+void StarTrackerGUI::blockPlotChart()
+{
+    m_doPlotChart = false;
+}
+
+void StarTrackerGUI::unblockPlotChartAndPlot()
+{
+    m_doPlotChart = true;
+    plotChart();
+}
+
 void StarTrackerGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
     setTitle(m_settings.m_title);
     blockApplySettings(true);
+    blockPlotChart();
     ui->darkTheme->setChecked(m_settings.m_chartsDarkTheme);
 
     if (m_solarFluxChart) {
@@ -536,7 +556,7 @@ void StarTrackerGUI::displaySettings()
     ui->beamwidth->setValue(m_settings.m_beamwidth);
     updateForTarget();
     getRollupContents()->restoreState(m_rollupState);
-    plotChart();
+    unblockPlotChartAndPlot();
     blockApplySettings(false);
 }
 
@@ -923,6 +943,9 @@ void StarTrackerGUI::on_dateTime_dateTimeChanged(const QDateTime &datetime)
 
 void StarTrackerGUI::plotChart()
 {
+    if (!m_doPlotChart) {
+        return;
+    }
     if (ui->chartSelect->currentIndex() == 0)
     {
         if (ui->chartSubSelect->currentIndex() == 0) {
@@ -1647,32 +1670,8 @@ void StarTrackerGUI::plotElevationLineChart()
             maxElevation = aa.alt;
         }
 
-        // Adjust for refraction
-        if (m_settings.m_refraction == "Positional Astronomy Library")
-        {
-            aa.alt += Astronomy::refractionPAL(
-                aa.alt,
-                m_settings.m_pressure,
-                m_settings.m_temperature,
-                m_settings.m_humidity,
-                m_settings.m_frequency,
-                m_settings.m_latitude,
-                m_settings.m_heightAboveSeaLevel,
-                m_settings.m_temperatureLapseRate
-            );
-
-            if (aa.alt > 90.0) {
-                aa.alt = 90.0f;
-            }
-        }
-        else if (m_settings.m_refraction == "Saemundsson")
-        {
-            aa.alt += Astronomy::refractionSaemundsson(aa.alt, m_settings.m_pressure, m_settings.m_temperature);
-
-            if (aa.alt > 90.0) {
-                aa.alt = 90.0f;
-            }
-        }
+        // Skip adjusting for refraction, as it's too slow to calculate using Astronomy::refractionPAL
+        // in this loop, and doesn't typically make a visible difference in the chart
 
         if (step == 0) {
             prevAz = aa.az;
@@ -1857,32 +1856,8 @@ void StarTrackerGUI::plotElevationPolarChart()
             maxElevation = aa.alt;
         }
 
-        // Adjust for refraction
-        if (m_settings.m_refraction == "Positional Astronomy Library")
-        {
-            aa.alt += Astronomy::refractionPAL(
-                aa.alt,
-                m_settings.m_pressure,
-                m_settings.m_temperature,
-                m_settings.m_humidity,
-                m_settings.m_frequency,
-                m_settings.m_latitude,
-                m_settings.m_heightAboveSeaLevel,
-                m_settings.m_temperatureLapseRate
-            );
-
-            if (aa.alt > 90.0) {
-                aa.alt = 90.0f;
-            }
-        }
-        else if (m_settings.m_refraction == "Saemundsson")
-        {
-            aa.alt += Astronomy::refractionSaemundsson(aa.alt, m_settings.m_pressure, m_settings.m_temperature);
-
-            if (aa.alt > 90.0) {
-                aa.alt = 90.0f;
-            }
-        }
+        // Skip adjusting for refraction, as it's too slow to calculate using Astronomy::refractionPAL
+        // in this loop, and doesn't typically make a visible difference in the chart
 
         if (idx == 0) {
             prevAlt = aa.alt;
