@@ -68,6 +68,14 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_gains = m_sampleSource->getGains();
 	displayGains();
 
+    rtlsdr_tuner tunerType = m_sampleSource->getTunerType();
+    // Disable widgets not relevent for this tuner
+    bool offsetTuningEnabled = (tunerType != RTLSDR_TUNER_R820T) && (tunerType != RTLSDR_TUNER_R828D);
+    if (!offsetTuningEnabled) {
+        ui->offsetTuning->setEnabled(false);
+    }
+    ui->tunerType->setText("Tuner: " + m_sampleSource->getTunerName());
+
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 }
@@ -200,7 +208,7 @@ void RTLSDRGui::updateFrequencyLimits()
 {
     // values in kHz
     qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
-    qint64 minLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMin : RTLSDRInput::frequencyHighRangeMin) + deltaFrequency;
+    qint64 minLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMin : m_sampleSource->m_frequencyHighRangeMin) + deltaFrequency;
     qint64 maxLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMax : RTLSDRInput::frequencyHighRangeMax) + deltaFrequency;
 
     if (m_settings.m_transverterMode)
@@ -474,6 +482,7 @@ void RTLSDRGui::on_checkBox_stateChanged(int state)
 	if (state == Qt::Checked)
 	{
 		ui->gain->setEnabled(false);
+        ui->offsetTuning->setEnabled(false);
         m_settings.m_noModMode = true;
 	    updateFrequencyLimits();
 		ui->centerFrequency->setValue(7000);
@@ -482,6 +491,7 @@ void RTLSDRGui::on_checkBox_stateChanged(int state)
 	else
 	{
 		ui->gain->setEnabled(true);
+        ui->offsetTuning->setEnabled(true);
         m_settings.m_noModMode = false;
 	    updateFrequencyLimits();
 		ui->centerFrequency->setValue(434000);
