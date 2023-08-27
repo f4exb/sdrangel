@@ -45,10 +45,13 @@ private:
     QTimer m_timer;
     Ui::MapIBPBeaconDialog* ui;
 
+    void resizeTable(void);
+
     enum BeaconCol {
         IBP_BEACON_COL_FREQUENCY,
         IBP_BEACON_COL_CALLSIGN,
         IBP_BEACON_COL_LOCATION,
+        IBP_BEACON_COL_DX_ENTITY,
         IBP_BEACON_COL_AZIMUTH,
         IBP_BEACON_COL_DISTANCE
     };

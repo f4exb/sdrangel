@@ -19,24 +19,24 @@
 
 // Beacon information from https://www.ncdxf.org/beacon/beaconlocations.html
 QList<IBPBeacon> IBPBeacon::m_beacons = {
-    IBPBeacon("4U1UN", "United Nations NY", "FN30AS", 0),
-    IBPBeacon("VE8AT", "North Canada", "CP38GH", 10),
-    IBPBeacon("W6WX", "USA (CA)", "CM97BD", 20),
-    IBPBeacon("KH6RS", "Hawaii", "BL10TS", 30),
-    IBPBeacon("ZL6B", "New Zealand", "RE78TW", 40),
-    IBPBeacon("VK6RBP", "West Australia", "OF87AV", 50),
-    IBPBeacon("JA2IGY", "Japan", "PM84JK", 60),
-    IBPBeacon("RR9O", "Siberia", "NO14KX", 70),
-    IBPBeacon("VR2B", "China", "OL72BG", 80),
-    IBPBeacon("4S7B", "Sri Lanka", "MJ96WV", 90),
-    IBPBeacon("ZS6DN", "South Africa", "KG33XI", 100),
-    IBPBeacon("5Z4B", "Kenya", "KI88HR", 110),
-    IBPBeacon("4X6TU", "Israel", "KM72JB", 120),
-    IBPBeacon("OH2B", "Finland", "KP20EH", 130),
-    IBPBeacon("CS3B", "Madeira", "IM12JT", 140),
-    IBPBeacon("LU4AA", "Argentina", "GF05TJ", 150),
-    IBPBeacon("OA4B", "Peru", "FH17MW", 160),
-    IBPBeacon("YV5B", "Venezuela", "FJ69CC", 170)
+    IBPBeacon("United Nations", "4U1UN", "New York City", "FN30AS", 0),
+    IBPBeacon("Canada", "VE8AT", "Inuvik (NT)", "CP38GH", 10),
+    IBPBeacon("United States", "W6WX", "Mt. Umunhum (CA)", "CM97BD", 20),
+    IBPBeacon("Hawaii", "KH6RS", "Maui	", "BL10TS", 30),
+    IBPBeacon("New Zealand", "ZL6B", "Masterton", "RE78TW", 40),
+    IBPBeacon("Australia", "VK6RBP", "Rolystone (WA)", "OF87AV", 50),
+    IBPBeacon("Japan", "JA2IGY", "Mt. Asama", "PM84JK", 60),
+    IBPBeacon("Russia", "RR9O", "Novosibirsk", "NO14KX", 70),
+    IBPBeacon("Hong Kong", "VR2B", "Hong Kong", "OL72BG", 80),
+    IBPBeacon("Sri Lanka", "4S7B", "Colombo", "MJ96WV", 90),
+    IBPBeacon("South Africa", "ZS6DN", "Pretoria", "KG33XI", 100),
+    IBPBeacon("Kenya", "5Z4B", "Kikuyu", "KI88HR", 110),
+    IBPBeacon("Israel", "4X6TU", "Tel Aviv", "KM72JB", 120),
+    IBPBeacon("Finland", "OH2B", "Lohja", "KP20EH", 130),
+    IBPBeacon("Madeira", "CS3B", "São Jorge", "IM12JT", 140),
+    IBPBeacon("Argentina", "LU4AA", "Buenos Aires", "GF05TJ", 150),
+    IBPBeacon("Peru", "OA4B", "Lima", "FH17MW", 160),
+    IBPBeacon("Venezuela", "YV5B", "Caracas", "FJ69CC", 170)
 };
 
 // The frequencies in MHz through which the IBP beacons rotate

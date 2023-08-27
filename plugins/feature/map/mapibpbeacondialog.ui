@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>584</width>
+    <width>590</width>
     <height>311</height>
    </rect>
   </property>
@@ -87,6 +87,11 @@
         <column>
          <property name="text">
           <string>Location</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>DX Entity</string>
          </property>
         </column>
         <column>

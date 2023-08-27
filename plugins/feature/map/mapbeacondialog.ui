@@ -156,12 +156,12 @@
         </column>
         <column>
          <property name="text">
-          <string>Azimuth</string>
+          <string>Azimuth (°)</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>Elevation</string>
+          <string>Elevation (°)</string>
          </property>
         </column>
         <column>

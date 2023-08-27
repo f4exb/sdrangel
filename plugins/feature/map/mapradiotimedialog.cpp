@@ -52,16 +52,21 @@ void MapRadioTimeDialog::updateTable()
         freq->setText(QString("%1").arg(transmitters[i].m_frequency/1000.0));
         freq->setData(Qt::UserRole, transmitters[i].m_frequency);
         ui->transmitters->setItem(row, TRANSMITTER_COL_FREQUENCY, freq);
+        ui->transmitters->item(row, TRANSMITTER_COL_FREQUENCY)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         ui->transmitters->setItem(row, TRANSMITTER_COL_LOCATION, new QTableWidgetItem(QString("%1,%2").arg(transmitters[i].m_latitude).arg(transmitters[i].m_longitude)));
         ui->transmitters->setItem(row, TRANSMITTER_COL_POWER, new QTableWidgetItem(QString("%1").arg(transmitters[i].m_power)));
+        ui->transmitters->item(row, TRANSMITTER_COL_POWER)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         azEl.setTarget(transmitters[i].m_latitude, transmitters[i].m_longitude, 1.0);
         azEl.calculate();
         ui->transmitters->setItem(row, TRANSMITTER_COL_AZIMUTH, new QTableWidgetItem(QString("%1").arg(round(azEl.getAzimuth()))));
+        ui->transmitters->item(row, TRANSMITTER_COL_AZIMUTH)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         ui->transmitters->setItem(row, TRANSMITTER_COL_ELEVATION, new QTableWidgetItem(QString("%1").arg(round(azEl.getElevation()))));
+        ui->transmitters->item(row, TRANSMITTER_COL_ELEVATION)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         int km = round(azEl.getDistance()/1000);
         QTableWidgetItem *dist = new QTableWidgetItem();
         dist->setData(Qt::DisplayRole, km);
         ui->transmitters->setItem(row, TRANSMITTER_COL_DISTANCE, dist);
+        ui->transmitters->item(row, TRANSMITTER_COL_DISTANCE)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         row++;
     }
     ui->transmitters->setSortingEnabled(true);
