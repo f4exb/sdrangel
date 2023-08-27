@@ -49,18 +49,24 @@ void MapRadioTimeDialog::updateTable()
     {
         ui->transmitters->setItem(row, TRANSMITTER_COL_CALLSIGN, new QTableWidgetItem(transmitters[i].m_callsign));
         QTableWidgetItem *freq = new QTableWidgetItem();
-        freq->setText(QString("%1").arg(transmitters[i].m_frequency/1000.0));
+        freq->setData(Qt::DisplayRole, transmitters[i].m_frequency/1000.0);
         freq->setData(Qt::UserRole, transmitters[i].m_frequency);
         ui->transmitters->setItem(row, TRANSMITTER_COL_FREQUENCY, freq);
         ui->transmitters->item(row, TRANSMITTER_COL_FREQUENCY)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         ui->transmitters->setItem(row, TRANSMITTER_COL_LOCATION, new QTableWidgetItem(QString("%1,%2").arg(transmitters[i].m_latitude).arg(transmitters[i].m_longitude)));
-        ui->transmitters->setItem(row, TRANSMITTER_COL_POWER, new QTableWidgetItem(QString("%1").arg(transmitters[i].m_power)));
+        QTableWidgetItem *power = new QTableWidgetItem();
+        power->setData(Qt::DisplayRole, transmitters[i].m_power);
+        ui->transmitters->setItem(row, TRANSMITTER_COL_POWER, power);
         ui->transmitters->item(row, TRANSMITTER_COL_POWER)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         azEl.setTarget(transmitters[i].m_latitude, transmitters[i].m_longitude, 1.0);
         azEl.calculate();
-        ui->transmitters->setItem(row, TRANSMITTER_COL_AZIMUTH, new QTableWidgetItem(QString("%1").arg(round(azEl.getAzimuth()))));
+        QTableWidgetItem *azymuth = new QTableWidgetItem();
+        azymuth->setData(Qt::DisplayRole, round(azEl.getAzimuth()));
+        ui->transmitters->setItem(row, TRANSMITTER_COL_AZIMUTH, azymuth);
         ui->transmitters->item(row, TRANSMITTER_COL_AZIMUTH)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        ui->transmitters->setItem(row, TRANSMITTER_COL_ELEVATION, new QTableWidgetItem(QString("%1").arg(round(azEl.getElevation()))));
+        QTableWidgetItem *elevation = new QTableWidgetItem();
+        elevation->setData(Qt::DisplayRole, round(azEl.getElevation()));
+        ui->transmitters->setItem(row, TRANSMITTER_COL_ELEVATION, elevation);
         ui->transmitters->item(row, TRANSMITTER_COL_ELEVATION)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
         int km = round(azEl.getDistance()/1000);
         QTableWidgetItem *dist = new QTableWidgetItem();
