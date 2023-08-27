@@ -81,6 +81,7 @@ private:
     QList<QString> m_settingsKeys;
     RollupState m_rollupState;
     bool m_doApplySettings;
+    bool m_doPlotChart;
 
     StarTracker* m_starTracker;
     MessageQueue m_inputMessageQueue;
@@ -135,6 +136,8 @@ private:
     virtual ~StarTrackerGUI();
 
     void blockApplySettings(bool block);
+    void blockPlotChart();
+    void unblockPlotChartAndPlot();
     void applySettings(bool force = false);
     void displaySettings();
     void updateForTarget();

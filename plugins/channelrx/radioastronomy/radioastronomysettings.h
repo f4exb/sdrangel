@@ -28,7 +28,7 @@
 class Serializable;
 
 // Number of columns in the tables
-#define RADIOASTRONOMY_POWERTABLE_COLUMNS 28
+#define RADIOASTRONOMY_POWERTABLE_COLUMNS 32
 
 // Number of sensors
 #define RADIOASTRONOMY_SENSORS 2

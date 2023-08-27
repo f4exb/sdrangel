@@ -5147,6 +5147,38 @@ This should be close to the expected difference in power between hot and cold ca
         <string>UTC date and time measurement finished</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>Az (Rot)</string>
+       </property>
+       <property name="toolTip">
+        <string>Azimuth of rotator controller in degrees</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>El (Rot)</string>
+       </property>
+       <property name="toolTip">
+        <string>Elevation of rotator controller in degrees</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Az Off (Rot)</string>
+       </property>
+       <property name="toolTip">
+        <string>Azimuth offset of rotator controller in degrees</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>El Off (Rot)</string>
+       </property>
+       <property name="toolTip">
+        <string>Elevation offset of rotator controller in degrees</string>
+       </property>
+      </column>
      </widget>
     </item>
    </layout>

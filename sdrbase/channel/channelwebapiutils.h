@@ -81,13 +81,13 @@ public:
     static bool getChannelReportValue(unsigned int deviceIndex, unsigned int channelIndex, const QString &key, int &value);
     static bool getChannelReportValue(unsigned int deviceIndex, unsigned int channelIndex, const QString &key, double &value);
     static bool getChannelReportValue(unsigned int deviceIndex, unsigned int channelIndex, const QString &key, QString &value);
-protected:
     static bool getDeviceSettings(unsigned int deviceIndex, SWGSDRangel::SWGDeviceSettings &deviceSettingsResponse, DeviceSet *&deviceSet);
     static bool getDeviceReport(unsigned int deviceIndex, SWGSDRangel::SWGDeviceReport &deviceReport);
     static bool getFeatureSettings(unsigned int featureSetIndex, unsigned int featureIndex, SWGSDRangel::SWGFeatureSettings &featureSettingsResponse, Feature *&feature);
     static bool getFeatureReport(unsigned int featureSetIndex, unsigned int featureIndex, SWGSDRangel::SWGFeatureReport &featureReport);
     static bool getChannelSettings(unsigned int deviceIndex, unsigned int channelIndex, SWGSDRangel::SWGChannelSettings &channelSettingsResponse, ChannelAPI *&channel);
     static bool getChannelReport(unsigned int deviceIndex, unsigned int channelIndex, SWGSDRangel::SWGChannelReport &channelReport);
+protected:
     static QString getDeviceHardwareId(unsigned int deviceIndex);
 };
 

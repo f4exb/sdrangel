@@ -792,6 +792,10 @@ The columns in the table include:
 - Sensor 1 - Data recorded for Sensor 1.
 - Sensor 2 - Data recorded for Sensor 2.
 - UTC - UTC date and time at the end of the measurement.
+- Az (Rot) - Azimuth of rotator controller in degrees at the end of measurement.
+- El (Rot) - Elevation of rotator controller in degrees at the end of measurement.
+- Az Off (Rot) - Azimimuth offset of rotator controller in degrees at the end of measurement.
+- El Off (Rot) - Elevation offset of rotator controller in degrees at the end of measurement.
 
 Right clicking on the table shows a popup menu that supports:
 

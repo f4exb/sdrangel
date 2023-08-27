@@ -519,8 +519,6 @@ void StarTrackerWorker::update()
         else
             qDebug() << "StarTrackerWorker::update - Failed to parse feature name " << m_settings.m_target;
     }
-    else
-        qDebug() << "TARGET IS NOT SAT TRACKER!! " << m_settings.m_target;
 
     if (m_settings.m_target == "Sun")
     {
