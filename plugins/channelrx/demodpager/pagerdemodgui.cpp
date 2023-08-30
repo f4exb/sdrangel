@@ -819,6 +819,8 @@ void PagerDemodGUI::makeUIConnections()
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &PagerDemodGUI::on_logEnable_clicked);
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &PagerDemodGUI::on_logFilename_clicked);
     QObject::connect(ui->logOpen, &QToolButton::clicked, this, &PagerDemodGUI::on_logOpen_clicked);
+    QObject::connect(ui->channel1, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PagerDemodGUI::on_channel1_currentIndexChanged);
+    QObject::connect(ui->channel2, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PagerDemodGUI::on_channel2_currentIndexChanged);
 }
 
 void PagerDemodGUI::updateAbsoluteCenterFrequency()

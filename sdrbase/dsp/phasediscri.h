@@ -25,13 +25,25 @@
 class PhaseDiscriminators
 {
 public:
-	/**
+
+    PhaseDiscriminators() :
+        m_fmScaling(1.0f)
+    {
+        reset();
+    }
+
+    /**
 	 * Reset stored values
 	 */
 	void reset()
 	{
 		m_m1Sample = 0;
 		m_m2Sample = 0;
+        m_fltPreviousI = 0.0f;
+        m_fltPreviousQ = 0.0f;
+        m_fltPreviousI2 = 0.0f;
+        m_fltPreviousQ2 = 0.0f;
+        m_prevArg = 0.0f;
 	}
 
 	/**
