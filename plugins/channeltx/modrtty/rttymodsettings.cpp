@@ -43,7 +43,6 @@ void RttyModSettings::resetToDefaults()
     m_repeat = false;
     m_repeatCount = 10;
     m_lpfTaps = 301;
-    m_bbNoise = false;
     m_rfNoise = false;
     m_writeToFile = false;
     m_text = "CQ CQ CQ DE SDRangel CQ";
@@ -94,7 +93,6 @@ QByteArray RttyModSettings::serialize() const
     s.writeBool(7, m_repeat);
     s.writeS32(9, m_repeatCount);
     s.writeS32(23, m_lpfTaps);
-    s.writeBool(24, m_bbNoise);
     s.writeBool(25, m_rfNoise);
     s.writeBool(26, m_writeToFile);
     s.writeString(30, m_text);
@@ -165,7 +163,6 @@ bool RttyModSettings::deserialize(const QByteArray& data)
         d.readBool(7, &m_repeat, false);
         d.readS32(9, &m_repeatCount, -1);
         d.readS32(23, &m_lpfTaps, 301);
-        d.readBool(24, &m_bbNoise, false);
         d.readBool(25, &m_rfNoise, false);
         d.readBool(26, &m_writeToFile, false);
         d.readString(30, &m_text, "CQ CQ CQ anyone using SDRangel");

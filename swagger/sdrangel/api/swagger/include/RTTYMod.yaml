@@ -23,12 +23,6 @@ RTTYModSettings:
       type: integer
     lpfTaps:
       type: integer
-    bbNoise:
-      type: integer
-      description: >
-        Boolean
-          * 0 - off
-          * 1 - on
     rfNoise:
       type: integer
       description: >

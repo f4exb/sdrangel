@@ -27,7 +27,7 @@ public:
     explicit RttyModRepeatDialog(int repeatCount, QWidget* parent = 0);
     ~RttyModRepeatDialog();
 
-    int m_repeatCount;          // Number of packets to transmit (-1 = infinite)
+    int m_repeatCount;          // Number of times to transmit
 
 private slots:
     void accept();

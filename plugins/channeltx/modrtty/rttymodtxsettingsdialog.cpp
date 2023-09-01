@@ -39,7 +39,6 @@ RttyModTXSettingsDialog::RttyModTXSettingsDialog(RttyModSettings* settings, QWid
     ui->beta->setValue(m_settings->m_beta);
     ui->symbolSpan->setValue(m_settings->m_symbolSpan);
     ui->lpfTaps->setValue(m_settings->m_lpfTaps);
-    ui->bbNoise->setChecked(m_settings->m_bbNoise);
     ui->rfNoise->setChecked(m_settings->m_rfNoise);
 }
 
@@ -60,7 +59,6 @@ void RttyModTXSettingsDialog::accept()
     m_settings->m_beta = ui->beta->value();
     m_settings->m_symbolSpan = ui->symbolSpan->value();
     m_settings->m_lpfTaps = ui->lpfTaps->value();
-    m_settings->m_bbNoise = ui->bbNoise->isChecked();
     m_settings->m_rfNoise = ui->rfNoise->isChecked();
 
     QDialog::accept();

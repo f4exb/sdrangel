@@ -37,7 +37,6 @@ struct RttyModSettings
     bool m_repeat;
     int m_repeatCount;
     int m_lpfTaps;
-    bool m_bbNoise;
     bool m_rfNoise;
     bool m_writeToFile;
     QString m_text;     // Text to send

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>351</width>
-    <height>546</height>
+    <height>554</height>
    </rect>
   </property>
   <property name="font">
@@ -220,16 +220,6 @@ ${location}</string>
      </property>
      <layout class="QFormLayout" name="formLayout_3">
       <item row="0" column="0">
-       <widget class="QCheckBox" name="bbNoise">
-        <property name="toolTip">
-         <string>Generate white noise as baseband signal.</string>
-        </property>
-        <property name="text">
-         <string>Generate BB noise</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
        <widget class="QCheckBox" name="rfNoise">
         <property name="toolTip">
          <string>Generate white noise as RF signal.</string>

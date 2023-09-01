@@ -29,10 +29,10 @@
 RttyModSource::RttyModSource() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
-    m_spectrumRate(8000),
-    m_audioPhase(0.0f),
+    m_spectrumRate(2000),
     m_fmPhase(0.0),
     m_spectrumSink(nullptr),
+    m_specSampleBufferIndex(0),
     m_magsq(0.0),
     m_levelCalcCount(0),
     m_peakLevel(0.0f),
@@ -48,6 +48,7 @@ RttyModSource::RttyModSource() :
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
 
+    m_specSampleBuffer.resize(m_specSampleBufferSize);
     m_interpolatorDistanceRemain = 0;
     m_interpolatorConsumed = false;
     m_interpolatorDistance = (Real)m_channelSampleRate / (Real)m_spectrumRate;
@@ -98,21 +99,22 @@ void RttyModSource::pullOne(Sample& sample)
     sample.m_imag = (FixReal) (ci.imag() * SDR_TX_SCALEF);
 }
 
-void RttyModSource::sampleToSpectrum(Real sample)
+void RttyModSource::sampleToSpectrum(Complex sample)
 {
     if (m_spectrumSink)
     {
         Complex out;
-        Complex in;
-        in.real(sample);
-        in.imag(0.0f);
-        if (m_interpolator.decimate(&m_interpolatorDistanceRemain, in, &out))
+        if (m_interpolator.decimate(&m_interpolatorDistanceRemain, sample, &out))
         {
-            sample = std::real(out);
-            m_sampleBuffer.push_back(Sample(sample * 0.891235351562f * SDR_TX_SCALEF, 0.0f));
-            m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
-            m_sampleBuffer.clear();
             m_interpolatorDistanceRemain += m_interpolatorDistance;
+            Real r = std::real(out) * SDR_TX_SCALEF;
+            Real i = std::imag(out) * SDR_TX_SCALEF;
+            m_specSampleBuffer[m_specSampleBufferIndex++] = Sample(r, i);
+            if (m_specSampleBufferIndex == m_specSampleBufferSize)
+            {
+                m_spectrumSink->feed(m_specSampleBuffer.begin(), m_specSampleBuffer.end(), false);
+                m_specSampleBufferIndex = 0;
+            }
         }
     }
 }
@@ -130,12 +132,12 @@ void RttyModSource::modulateSample()
                 // Encode a character at a time, so we get a TxReport after each character
                 QString s = m_textToTransmit.left(1);
                 m_textToTransmit = m_textToTransmit.mid(1);
-                encodePacket(s);
+                encodeText(s);
             }
             else
             {
                 // Transmit "diddle"
-                encodePacket(">");
+                encodeText(">");
             }
             initTX();
         }
@@ -148,29 +150,19 @@ void RttyModSource::modulateSample()
         m_sampleIdx = 0;
     }
 
-    if (!m_settings.m_bbNoise)
+    // FSK
+    if (m_settings.m_pulseShaping)
     {
-        // FSK
-        if (m_settings.m_pulseShaping)
-        {
-            if (m_sampleIdx == 1) {
-                audioMod = m_pulseShape.filter(m_bit ? 1.0f : -1.0f);
-            } else {
-                audioMod = m_pulseShape.filter(0.0f);
-            }
-        }
-        else
-        {
-            audioMod = m_bit ? 1.0f : -1.0f;
+        if (m_sampleIdx == 1) {
+            audioMod = m_pulseShape.filter(m_bit ? 1.0f : -1.0f);
+        } else {
+            audioMod = m_pulseShape.filter(0.0f);
         }
     }
     else
     {
-        audioMod = (Real)rand() / ((Real)RAND_MAX) - 0.5; // Noise to test filter frequency response
+        audioMod = m_bit ? 1.0f : -1.0f;
     }
-
-    // Display baseband audio in spectrum analyser
-    sampleToSpectrum(audioMod);
 
     // FM
     m_fmPhase += m_phaseSensitivity * audioMod * (m_settings.m_spaceHigh ? -1.0f : 1.0f);
@@ -195,6 +187,9 @@ void RttyModSource::modulateSample()
 
     // Apply low pass filter to limit RF BW
     m_modSample = m_lowpass.filter(m_modSample);
+
+    // Display in spectrum analyser
+    sampleToSpectrum(m_modSample);
 
     Real s = std::real(m_modSample);
     calculateLevel(s);
@@ -245,7 +240,12 @@ void RttyModSource::calculateLevel(Real& sample)
 
 void RttyModSource::applySettings(const RttyModSettings& settings, bool force)
 {
-    // Only recreate filters if settings have changed
+    if ((settings.m_baud != m_settings.m_baud) || force)
+    {
+        m_samplesPerSymbol = m_channelSampleRate / settings.m_baud;
+        qDebug() << "m_samplesPerSymbol: " << m_samplesPerSymbol << " (" << m_channelSampleRate << "/" << settings.m_baud << ")";
+    }
+
     if ((settings.m_lpfTaps != m_settings.m_lpfTaps) || (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
         qDebug() << "RttyModSource::applySettings: Creating new lpf with taps " << settings.m_lpfTaps << " rfBW " << settings.m_rfBandwidth;
@@ -272,9 +272,6 @@ void RttyModSource::applySettings(const RttyModSettings& settings, bool force)
     }
 
     m_settings = settings;
-
-    m_samplesPerSymbol = m_channelSampleRate / m_settings.m_baud;
-    qDebug() << "m_samplesPerSymbol: " << m_samplesPerSymbol << " (" << m_channelSampleRate << "/" << m_settings.m_baud << ")";
 
     // Precalculate FM sensensity and linear gain to save doing it in the loop
     m_phaseSensitivity = 2.0f * M_PI * (m_settings.m_frequencyShift/2.0f) / (double)m_channelSampleRate;
@@ -320,6 +317,7 @@ void RttyModSource::applyChannelSettings(int channelSampleRate, int channelFrequ
     m_channelFrequencyOffset = channelFrequencyOffset;
     m_samplesPerSymbol = m_channelSampleRate / m_settings.m_baud;
     qDebug() << "m_samplesPerSymbol: " << m_samplesPerSymbol << " (" << m_channelSampleRate << "/" << m_settings.m_baud << ")";
+
     // Precalculate FM sensensity to save doing it in the loop
     m_phaseSensitivity = 2.0f * M_PI * (m_settings.m_frequencyShift/2.0f) / (double)m_channelSampleRate;
 
@@ -385,25 +383,26 @@ void RttyModSource::initTX()
     m_bit = 0;
 }
 
-void RttyModSource::addTXPacket(QString data)
+void RttyModSource::addTXText(QString text)
 {
     int count = m_settings.m_repeat ? m_settings.m_repeatCount : 1;
 
     for (int i = 0; i < count; i++) {
-        m_textToTransmit.append(data);
+
+        QString s = text;
+
+        if (m_settings.m_prefixCRLF) {
+            s.prepend("\r\r\n>"); // '>' switches to letters
+        }
+        if (m_settings.m_postfixCRLF) {
+            s.append("\r\r\n");
+        }
+
+        m_textToTransmit.append(s);
     }
 }
 
-void RttyModSource::addTXPacket(QByteArray data)
-{
-    int count = m_settings.m_repeat ? m_settings.m_repeatCount : 1;
-
-    for (int i = 0; i < count; i++) {
-        m_textToTransmit.append(QString(data));
-    }
-}
-
-void RttyModSource::encodePacket(const QString& text)
+void RttyModSource::encodeText(const QString& text)
 {
     // RTTY encoding
     m_byteIdx = 0;

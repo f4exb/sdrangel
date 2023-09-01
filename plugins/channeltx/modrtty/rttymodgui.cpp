@@ -71,7 +71,7 @@ QByteArray RttyModGUI::serialize() const
 
 bool RttyModGUI::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if (m_settings.deserialize(data)) {
         displaySettings();
         applySettings(true);
         return true;
@@ -246,8 +246,7 @@ void RttyModGUI::on_endian_clicked(bool checked)
     m_settings.m_msbFirst = checked;
     if (checked) {
         ui->endian->setText("MSB");
-    }
-    else {
+    } else {
         ui->endian->setText("LSB");
     }
     applySettings();
@@ -258,8 +257,7 @@ void RttyModGUI::on_spaceHigh_clicked(bool checked)
     m_settings.m_spaceHigh = checked;
     if (checked) {
         ui->spaceHigh->setText("M-S");
-    }
-    else {
+    } else {
         ui->spaceHigh->setText("S-M");
     }
     applySettings();
@@ -436,10 +434,9 @@ RttyModGUI::RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
     ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
-    // Extra /2 here because SSB?
-    ui->glSpectrum->setCenterFrequency(8000/4);
-    ui->glSpectrum->setSampleRate(8000/2);
-    ui->glSpectrum->setLsbDisplay(true);
+    ui->glSpectrum->setCenterFrequency(0);
+    ui->glSpectrum->setSampleRate(2000);
+    ui->glSpectrum->setLsbDisplay(false);
 
     SpectrumSettings spectrumSettings = m_spectrumVis->getSettings();
     spectrumSettings.m_ssb = false;
@@ -464,7 +461,7 @@ RttyModGUI::RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_channelMarker.setColor(Qt::red);
     m_channelMarker.setBandwidth(12500);
     m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setTitle("Packet Modulator");
+    m_channelMarker.setTitle("RTTY Modulator");
     m_channelMarker.setSourceOrSinkStream(false);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
@@ -496,18 +493,9 @@ RttyModGUI::~RttyModGUI()
     delete ui;
 }
 
-void RttyModGUI::transmit(const QString& str)
+void RttyModGUI::transmit(const QString& text)
 {
-    QString s = str;
-
-    if (m_settings.m_prefixCRLF) {
-        s.prepend("\r\r\n>"); // '>' switches to letters
-    }
-    if (m_settings.m_postfixCRLF) {
-        s.append("\r\r\n");
-    }
-
-    RttyMod::MsgTXPacketData *msg = RttyMod::MsgTXPacketData::create(s);
+    RttyMod::MsgTXText*msg = RttyMod::MsgTXText::create(text);
     m_rttyMod->getInputMessageQueue()->push(msg);
 }
 
@@ -566,12 +554,11 @@ void RttyModGUI::displaySettings()
 
     ui->mode->setCurrentText("Custom");
     ui->rfBWText->setText(formatFrequency(m_settings.m_rfBandwidth));
-    ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
+    ui->rfBW->setValue(m_settings.m_rfBandwidth);
     QString baudRate;
     if (m_settings.m_baud < 46.0f && m_settings.m_baud > 45.0f) {
         baudRate = "45.45";
-    }
-    else {
+    } else {
         baudRate = QString("%1").arg(m_settings.m_baud);
     }
     ui->baudRate->setCurrentIndex(ui->baudRate->findText(baudRate));
@@ -583,15 +570,13 @@ void RttyModGUI::displaySettings()
     ui->endian->setChecked(m_settings.m_msbFirst);
     if (m_settings.m_msbFirst) {
         ui->endian->setText("MSB");
-    }
-    else {
+    } else {
         ui->endian->setText("LSB");
     }
     ui->spaceHigh->setChecked(m_settings.m_spaceHigh);
     if (m_settings.m_spaceHigh) {
         ui->spaceHigh->setText("M-S");
-    }
-    else {
+    } else {
         ui->spaceHigh->setText("S-M");
     }
 

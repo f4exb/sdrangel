@@ -102,40 +102,22 @@ public:
         { }
     };
 
-    class MsgTXPacketBytes : public Message {
+    class MsgTXText : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgTXPacketBytes* create(QByteArray data) {
-            return new MsgTXPacketBytes(data);
-        }
-
-        QByteArray m_data;
-
-   private:
-
-        MsgTXPacketBytes(QByteArray data) :
-            Message(),
-            m_data(data)
-        { }
-    };
-
-    class MsgTXPacketData : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgTXPacketData* create(QString data)
+        static MsgTXText* create(QString text)
         {
-            return new MsgTXPacketData(data);
+            return new MsgTXText(text);
         }
 
-        QString m_data;
+        QString m_text;
 
    private:
 
-        MsgTXPacketData(QString data) :
+       MsgTXText(QString text) :
             Message(),
-            m_data(data)
+            m_text(text)
         { }
     };
 

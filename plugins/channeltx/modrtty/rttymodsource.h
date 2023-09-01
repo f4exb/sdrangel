@@ -58,10 +58,7 @@ public:
     void setSpectrumSink(BasebandSampleSink *sampleSink) { m_spectrumSink = sampleSink; }
     void applySettings(const RttyModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void addTXPacket(QString data);
-    void addTXPacket(QByteArray data);
-    //void encodePacket(uint8_t *packet, int packet_length, uint8_t *packet_end);
-    void encodePacket(const QString& data);
+    void addTXText(QString data);
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
     int getChannelSampleRate() const { return m_channelSampleRate; }
 
@@ -73,7 +70,6 @@ private:
     ChannelAPI *m_channel;
 
     NCO m_carrierNco;
-    Real m_audioPhase;
     double m_fmPhase;                   // Double gives cleaner spectrum than Real
     double m_phaseSensitivity;
     Real m_linearGain;
@@ -84,8 +80,10 @@ private:
     Lowpass<Complex> m_lowpass;         // Low pass filter to limit RF bandwidth
 
     BasebandSampleSink* m_spectrumSink; // Spectrum GUI to display baseband waveform
-    SampleVector m_sampleBuffer;
-    Interpolator m_interpolator;        // Interpolator to downsample to 4k in spectrum
+    SampleVector m_specSampleBuffer;
+    static const int m_specSampleBufferSize = 256;
+    int m_specSampleBufferIndex;
+    Interpolator m_interpolator;        // Interpolator to downsample to spectrum
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
@@ -121,13 +119,14 @@ private:
 
     MessageQueue* getMessageQueueToGUI() { return m_messageQueueToGUI; }
 
+    void encodeText(const QString& data);
     int getBit();                       // Get bit from m_bits
     void addBit(int bit);               // Add bit to m_bits, with zero stuffing
     void initTX();
 
     void calculateLevel(Real& sample);
     void modulateSample();
-    void sampleToSpectrum(Real sample);
+    void sampleToSpectrum(Complex sample);
 
 };
 

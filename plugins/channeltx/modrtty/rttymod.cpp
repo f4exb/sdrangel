@@ -51,8 +51,7 @@
 MESSAGE_CLASS_DEFINITION(RttyMod::MsgConfigureRttyMod, Message)
 MESSAGE_CLASS_DEFINITION(RttyMod::MsgTx, Message)
 MESSAGE_CLASS_DEFINITION(RttyMod::MsgReportTx, Message)
-MESSAGE_CLASS_DEFINITION(RttyMod::MsgTXPacketBytes, Message)
-MESSAGE_CLASS_DEFINITION(RttyMod::MsgTXPacketData, Message)
+MESSAGE_CLASS_DEFINITION(RttyMod::MsgTXText, Message)
 
 const char* const RttyMod::m_channelIdURI = "sdrangel.channeltx.modrtty";
 const char* const RttyMod::m_channelId = "RTTYMod";
@@ -151,9 +150,9 @@ bool RttyMod::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgTXPacketData::match(cmd))
+    else if (MsgTXText::match(cmd))
     {
-        MsgTXPacketData* msg = new MsgTXPacketData((const MsgTXPacketData&)cmd);
+        MsgTXText* msg = new MsgTXText((const MsgTXText&)cmd);
         m_basebandSource->getInputMessageQueue()->push(msg);
 
         return true;
@@ -209,6 +208,13 @@ void RttyMod::applySettings(const RttyModSettings& settings, bool force)
             << " m_channelMute: " << settings.m_channelMute
             << " m_repeat: " << settings.m_repeat
             << " m_repeatCount: " << settings.m_repeatCount
+            << " m_text: " << settings.m_text
+            << " m_characterSet: " << settings.m_characterSet
+            << " m_unshiftOnSpace: " << settings.m_unshiftOnSpace
+            << " m_msbFirst: " << settings.m_msbFirst
+            << " m_spaceHigh: " << settings.m_spaceHigh
+            << " m_prefixCRLF: " << settings.m_prefixCRLF
+            << " m_postfixCRLF: " << settings.m_postfixCRLF
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
             << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
@@ -254,10 +260,6 @@ void RttyMod::applySettings(const RttyModSettings& settings, bool force)
         reverseAPIKeys.append("lpfTaps");
     }
 
-    if ((settings.m_bbNoise != m_settings.m_bbNoise) || force) {
-        reverseAPIKeys.append("bbNoise");
-    }
-
     if ((settings.m_rfNoise != m_settings.m_rfNoise) || force) {
         reverseAPIKeys.append("rfNoise");
     }
@@ -272,6 +274,30 @@ void RttyMod::applySettings(const RttyModSettings& settings, bool force)
 
     if ((settings.m_symbolSpan != m_settings.m_symbolSpan) || force) {
         reverseAPIKeys.append("symbolSpan");
+    }
+
+    if ((settings.m_characterSet != m_settings.m_characterSet) || force) {
+        reverseAPIKeys.append("characterSet");
+    }
+
+    if ((settings.m_unshiftOnSpace != m_settings.m_unshiftOnSpace) || force) {
+        reverseAPIKeys.append("unshiftOnSpace");
+    }
+
+    if ((settings.m_msbFirst != m_settings.m_msbFirst) || force) {
+        reverseAPIKeys.append("msbFirst");
+    }
+
+    if ((settings.m_spaceHigh != m_settings.m_spaceHigh) || force) {
+        reverseAPIKeys.append("spaceHigh");
+    }
+
+    if ((settings.m_prefixCRLF != m_settings.m_prefixCRLF) || force) {
+        reverseAPIKeys.append("prefixCRLF");
+    }
+
+    if ((settings.m_postfixCRLF != m_settings.m_postfixCRLF) || force) {
+        reverseAPIKeys.append("postfixCRLF");
     }
 
     if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
@@ -450,20 +476,35 @@ void RttyMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("lpfTaps")) {
         settings.m_lpfTaps = response.getRttyModSettings()->getLpfTaps();
     }
-    if (channelSettingsKeys.contains("bbNoise")) {
-        settings.m_bbNoise = response.getRttyModSettings()->getBbNoise() != 0;
-    }
     if (channelSettingsKeys.contains("rfNoise")) {
         settings.m_rfNoise = response.getRttyModSettings()->getRfNoise() != 0;
     }
     if (channelSettingsKeys.contains("text")) {
-        settings.m_text = *response.getRttyModSettings()->getData();
+        settings.m_text = *response.getRttyModSettings()->getText();
     }
     if (channelSettingsKeys.contains("beta")) {
         settings.m_beta = response.getRttyModSettings()->getBeta();
     }
     if (channelSettingsKeys.contains("symbolSpan")) {
         settings.m_symbolSpan = response.getRttyModSettings()->getSymbolSpan();
+    }
+    if (channelSettingsKeys.contains("characterSet")) {
+        settings.m_characterSet = (Baudot::CharacterSet) response.getRttyModSettings()->getCharacterSet();
+    }
+    if (channelSettingsKeys.contains("unshiftOnSpace")) {
+        settings.m_unshiftOnSpace = response.getRttyModSettings()->getUnshiftOnSpace();
+    }
+    if (channelSettingsKeys.contains("msbFirst")) {
+        settings.m_msbFirst = response.getRttyModSettings()->getMsbFirst();
+    }
+    if (channelSettingsKeys.contains("spaceHigh")) {
+        settings.m_spaceHigh = response.getRttyModSettings()->getSpaceHigh();
+    }
+    if (channelSettingsKeys.contains("prefixCRLF")) {
+        settings.m_prefixCRLF = response.getRttyModSettings()->getPrefixCrlf();
+    }
+    if (channelSettingsKeys.contains("postfixCRLF")) {
+        settings.m_postfixCRLF = response.getRttyModSettings()->getPostfixCrlf();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getRttyModSettings()->getRgbColor();
@@ -531,10 +572,10 @@ int RttyMod::webapiActionsPost(
             if (swgRttyModActions->getTx() != 0)
             {
                 if (channelActionsKeys.contains("payload")
-                   && (swgRttyModActions->getPayload()->getData()))
+                   && (swgRttyModActions->getPayload()->getText()))
                 {
-                    MsgTXPacketData *msg = MsgTXPacketData::create(
-                        *swgRttyModActions->getPayload()->getData()
+                    MsgTXText *msg = MsgTXText::create(
+                        *swgRttyModActions->getPayload()->getText()
                     );
                     m_basebandSource->getInputMessageQueue()->push(msg);
                 }
@@ -548,19 +589,19 @@ int RttyMod::webapiActionsPost(
             }
             else
             {
-                errorMessage = "Packet must contain tx action";
+                errorMessage = "Must contain tx action";
                 return 400;
             }
         }
         else
         {
-            errorMessage = "Unknown action";
+            errorMessage = "Unknown RTTYMod action";
             return 400;
         }
     }
     else
     {
-        errorMessage = "Missing RttyModActions in query";
+        errorMessage = "Missing RTTYModActions in query";
         return 400;
     }
     return 0;
@@ -577,18 +618,26 @@ void RttyMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     response.getRttyModSettings()->setRepeat(settings.m_repeat ? 1 : 0);
     response.getRttyModSettings()->setRepeatCount(settings.m_repeatCount);
     response.getRttyModSettings()->setLpfTaps(settings.m_lpfTaps);
-    response.getRttyModSettings()->setBbNoise(settings.m_bbNoise ? 1 : 0);
     response.getRttyModSettings()->setRfNoise(settings.m_rfNoise ? 1 : 0);
 
-    if (response.getRttyModSettings()->getData()) {
-        *response.getRttyModSettings()->getData() = settings.m_text;
+    if (response.getRttyModSettings()->getText()) {
+        *response.getRttyModSettings()->getText() = settings.m_text;
     } else {
-        response.getRttyModSettings()->setData(new QString(settings.m_text));
+        response.getRttyModSettings()->setText(new QString(settings.m_text));
     }
 
     response.getRttyModSettings()->setPulseShaping(settings.m_pulseShaping ? 1 : 0);
     response.getRttyModSettings()->setBeta(settings.m_beta);
     response.getRttyModSettings()->setSymbolSpan(settings.m_symbolSpan);
+
+    response.getRttyModSettings()->setCharacterSet((int) settings.m_characterSet);
+    response.getRttyModSettings()->setSymbolSpan(settings.m_symbolSpan);
+    response.getRttyModSettings()->setUnshiftOnSpace(settings.m_unshiftOnSpace);
+    response.getRttyModSettings()->setMsbFirst(settings.m_msbFirst);
+    response.getRttyModSettings()->setSpaceHigh(settings.m_spaceHigh);
+    response.getRttyModSettings()->setPrefixCrlf(settings.m_prefixCRLF);
+    response.getRttyModSettings()->setPostfixCrlf(settings.m_postfixCRLF);
+
     response.getRttyModSettings()->setUdpEnabled(settings.m_udpEnabled);
     response.getRttyModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     response.getRttyModSettings()->setUdpPort(settings.m_udpPort);
@@ -741,20 +790,35 @@ void RttyMod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("lpfTaps")) {
         swgRttyModSettings->setLpfTaps(settings.m_lpfTaps);
     }
-    if (channelSettingsKeys.contains("bbNoise")) {
-        swgRttyModSettings->setBbNoise(settings.m_bbNoise ? 1 : 0);
-    }
     if (channelSettingsKeys.contains("rfNoise")) {
         swgRttyModSettings->setRfNoise(settings.m_rfNoise ? 1 : 0);
     }
     if (channelSettingsKeys.contains("text")) {
-        swgRttyModSettings->setData(new QString(settings.m_text));
+        swgRttyModSettings->setText(new QString(settings.m_text));
     }
     if (channelSettingsKeys.contains("beta")) {
         swgRttyModSettings->setBeta(settings.m_beta);
     }
     if (channelSettingsKeys.contains("symbolSpan")) {
         swgRttyModSettings->setSymbolSpan(settings.m_symbolSpan);
+    }
+    if (channelSettingsKeys.contains("characterSet")) {
+        swgRttyModSettings->setCharacterSet((int) settings.m_characterSet);
+    }
+    if (channelSettingsKeys.contains("unshiftOnSpace")) {
+        swgRttyModSettings->setUnshiftOnSpace(settings.m_unshiftOnSpace);
+    }
+    if (channelSettingsKeys.contains("msbFirst")) {
+        swgRttyModSettings->setMsbFirst(settings.m_msbFirst);
+    }
+    if (channelSettingsKeys.contains("spaceHigh")) {
+        swgRttyModSettings->setSpaceHigh(settings.m_spaceHigh);
+    }
+    if (channelSettingsKeys.contains("prefixCRLF")) {
+        swgRttyModSettings->setPrefixCrlf(settings.m_prefixCRLF);
+    }
+    if (channelSettingsKeys.contains("postfixCRLF")) {
+        swgRttyModSettings->setPostfixCrlf(settings.m_postfixCRLF);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgRttyModSettings->setRgbColor(settings.m_rgbColor);
@@ -838,7 +902,7 @@ void RttyMod::openUDP(const RttyModSettings& settings)
     if (!m_udpSocket->bind(QHostAddress(settings.m_udpAddress), settings.m_udpPort))
         qCritical() << "RttyMod::openUDP: Failed to bind to port " << settings.m_udpAddress << ":" << settings.m_udpPort << ". Error: " << m_udpSocket->error();
     else
-        qDebug() << "RttyMod::openUDP: Listening for packets on " << settings.m_udpAddress << ":" << settings.m_udpPort;
+        qDebug() << "RttyMod::openUDP: Listening for text on " << settings.m_udpAddress << ":" << settings.m_udpPort;
     connect(m_udpSocket, &QUdpSocket::readyRead, this, &RttyMod::udpRx);
 }
 
@@ -857,7 +921,7 @@ void RttyMod::udpRx()
     while (m_udpSocket->hasPendingDatagrams())
     {
         QNetworkDatagram datagram = m_udpSocket->receiveDatagram();
-        MsgTXPacketBytes *msg = MsgTXPacketBytes::create(datagram.data());
+        MsgTXText *msg = MsgTXText::create(QString(datagram.data()));
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
 }
