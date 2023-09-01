@@ -58,9 +58,9 @@ RTTYModSettings:
     spaceHigh:
       type: integer
     prefixCRLF:
-      type: string
+      type: integer
     postfixCRLF:
-      type: string
+      type: integer
     udpEnabled:
       description: "Whether to receive text to transmit on specified UDP port"
       type: integer
