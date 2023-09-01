@@ -288,6 +288,7 @@ void PacketModGUI::preEmphasisSelect(const QPoint& p)
 {
     FMPreemphasisDialog dialog(m_settings.m_preEmphasisTau, m_settings.m_preEmphasisHighFreq);
     dialog.move(p);
+    new DialogPositioner(&dialog, false);
 
     if (dialog.exec() == QDialog::Accepted)
     {
@@ -301,6 +302,7 @@ void PacketModGUI::bpfSelect(const QPoint& p)
 {
     PacketModBPFDialog dialog(m_settings.m_bpfLowCutoff, m_settings.m_bpfHighCutoff, m_settings.m_bpfTaps);
     dialog.move(p);
+    new DialogPositioner(&dialog, false);
 
     if (dialog.exec() == QDialog::Accepted)
     {
@@ -315,6 +317,7 @@ void PacketModGUI::repeatSelect(const QPoint& p)
 {
     PacketModRepeatDialog dialog(m_settings.m_repeatDelay, m_settings.m_repeatCount);
     dialog.move(p);
+    new DialogPositioner(&dialog, false);
 
     if (dialog.exec() == QDialog::Accepted)
     {
@@ -339,6 +342,7 @@ void PacketModGUI::txSettingsSelect(const QPoint& p)
                                         m_settings.m_writeToFile);
 
     dialog.move(p);
+    new DialogPositioner(&dialog, false);
 
     if (dialog.exec() == QDialog::Accepted)
     {
