@@ -77,8 +77,8 @@ public:
     qint32 getRfNoise();
     void setRfNoise(qint32 rf_noise);
 
-    QString* getData();
-    void setData(QString* data);
+    QString* getText();
+    void setText(QString* text);
 
     qint32 getPulseShaping();
     void setPulseShaping(qint32 pulse_shaping);
@@ -88,6 +88,24 @@ public:
 
     qint32 getSymbolSpan();
     void setSymbolSpan(qint32 symbol_span);
+
+    qint32 getCharacterSet();
+    void setCharacterSet(qint32 character_set);
+
+    qint32 getUnshiftOnSpace();
+    void setUnshiftOnSpace(qint32 unshift_on_space);
+
+    qint32 getMsbFirst();
+    void setMsbFirst(qint32 msb_first);
+
+    qint32 getSpaceHigh();
+    void setSpaceHigh(qint32 space_high);
+
+    qint32 getPrefixCrlf();
+    void setPrefixCrlf(qint32 prefix_crlf);
+
+    qint32 getPostfixCrlf();
+    void setPostfixCrlf(qint32 postfix_crlf);
 
     qint32 getUdpEnabled();
     void setUdpEnabled(qint32 udp_enabled);
@@ -165,8 +183,8 @@ private:
     qint32 rf_noise;
     bool m_rf_noise_isSet;
 
-    QString* data;
-    bool m_data_isSet;
+    QString* text;
+    bool m_text_isSet;
 
     qint32 pulse_shaping;
     bool m_pulse_shaping_isSet;
@@ -176,6 +194,24 @@ private:
 
     qint32 symbol_span;
     bool m_symbol_span_isSet;
+
+    qint32 character_set;
+    bool m_character_set_isSet;
+
+    qint32 unshift_on_space;
+    bool m_unshift_on_space_isSet;
+
+    qint32 msb_first;
+    bool m_msb_first_isSet;
+
+    qint32 space_high;
+    bool m_space_high_isSet;
+
+    qint32 prefix_crlf;
+    bool m_prefix_crlf_isSet;
+
+    qint32 postfix_crlf;
+    bool m_postfix_crlf_isSet;
 
     qint32 udp_enabled;
     bool m_udp_enabled_isSet;

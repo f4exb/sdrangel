@@ -50,14 +50,26 @@ SWGRTTYModSettings::SWGRTTYModSettings() {
     m_bb_noise_isSet = false;
     rf_noise = 0;
     m_rf_noise_isSet = false;
-    data = nullptr;
-    m_data_isSet = false;
+    text = nullptr;
+    m_text_isSet = false;
     pulse_shaping = 0;
     m_pulse_shaping_isSet = false;
     beta = 0.0f;
     m_beta_isSet = false;
     symbol_span = 0;
     m_symbol_span_isSet = false;
+    character_set = 0;
+    m_character_set_isSet = false;
+    unshift_on_space = 0;
+    m_unshift_on_space_isSet = false;
+    msb_first = 0;
+    m_msb_first_isSet = false;
+    space_high = 0;
+    m_space_high_isSet = false;
+    prefix_crlf = 0;
+    m_prefix_crlf_isSet = false;
+    postfix_crlf = 0;
+    m_postfix_crlf_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
     udp_address = nullptr;
@@ -114,14 +126,26 @@ SWGRTTYModSettings::init() {
     m_bb_noise_isSet = false;
     rf_noise = 0;
     m_rf_noise_isSet = false;
-    data = new QString("");
-    m_data_isSet = false;
+    text = new QString("");
+    m_text_isSet = false;
     pulse_shaping = 0;
     m_pulse_shaping_isSet = false;
     beta = 0.0f;
     m_beta_isSet = false;
     symbol_span = 0;
     m_symbol_span_isSet = false;
+    character_set = 0;
+    m_character_set_isSet = false;
+    unshift_on_space = 0;
+    m_unshift_on_space_isSet = false;
+    msb_first = 0;
+    m_msb_first_isSet = false;
+    space_high = 0;
+    m_space_high_isSet = false;
+    prefix_crlf = 0;
+    m_prefix_crlf_isSet = false;
+    postfix_crlf = 0;
+    m_postfix_crlf_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
     udp_address = new QString("");
@@ -163,9 +187,15 @@ SWGRTTYModSettings::cleanup() {
 
 
 
-    if(data != nullptr) { 
-        delete data;
+    if(text != nullptr) { 
+        delete text;
     }
+
+
+
+
+
+
 
 
 
@@ -227,13 +257,25 @@ SWGRTTYModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&rf_noise, pJson["rfNoise"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&data, pJson["data"], "QString", "QString");
+    ::SWGSDRangel::setValue(&text, pJson["text"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&pulse_shaping, pJson["pulseShaping"], "qint32", "");
     
     ::SWGSDRangel::setValue(&beta, pJson["beta"], "float", "");
     
     ::SWGSDRangel::setValue(&symbol_span, pJson["symbolSpan"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&character_set, pJson["characterSet"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&unshift_on_space, pJson["unshiftOnSpace"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&msb_first, pJson["msbFirst"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&space_high, pJson["spaceHigh"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&prefix_crlf, pJson["prefixCRLF"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&postfix_crlf, pJson["postfixCRLF"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
     
@@ -310,8 +352,8 @@ SWGRTTYModSettings::asJsonObject() {
     if(m_rf_noise_isSet){
         obj->insert("rfNoise", QJsonValue(rf_noise));
     }
-    if(data != nullptr && *data != QString("")){
-        toJsonValue(QString("data"), data, obj, QString("QString"));
+    if(text != nullptr && *text != QString("")){
+        toJsonValue(QString("text"), text, obj, QString("QString"));
     }
     if(m_pulse_shaping_isSet){
         obj->insert("pulseShaping", QJsonValue(pulse_shaping));
@@ -321,6 +363,24 @@ SWGRTTYModSettings::asJsonObject() {
     }
     if(m_symbol_span_isSet){
         obj->insert("symbolSpan", QJsonValue(symbol_span));
+    }
+    if(m_character_set_isSet){
+        obj->insert("characterSet", QJsonValue(character_set));
+    }
+    if(m_unshift_on_space_isSet){
+        obj->insert("unshiftOnSpace", QJsonValue(unshift_on_space));
+    }
+    if(m_msb_first_isSet){
+        obj->insert("msbFirst", QJsonValue(msb_first));
+    }
+    if(m_space_high_isSet){
+        obj->insert("spaceHigh", QJsonValue(space_high));
+    }
+    if(m_prefix_crlf_isSet){
+        obj->insert("prefixCRLF", QJsonValue(prefix_crlf));
+    }
+    if(m_postfix_crlf_isSet){
+        obj->insert("postfixCRLF", QJsonValue(postfix_crlf));
     }
     if(m_udp_enabled_isSet){
         obj->insert("udpEnabled", QJsonValue(udp_enabled));
@@ -476,13 +536,13 @@ SWGRTTYModSettings::setRfNoise(qint32 rf_noise) {
 }
 
 QString*
-SWGRTTYModSettings::getData() {
-    return data;
+SWGRTTYModSettings::getText() {
+    return text;
 }
 void
-SWGRTTYModSettings::setData(QString* data) {
-    this->data = data;
-    this->m_data_isSet = true;
+SWGRTTYModSettings::setText(QString* text) {
+    this->text = text;
+    this->m_text_isSet = true;
 }
 
 qint32
@@ -513,6 +573,66 @@ void
 SWGRTTYModSettings::setSymbolSpan(qint32 symbol_span) {
     this->symbol_span = symbol_span;
     this->m_symbol_span_isSet = true;
+}
+
+qint32
+SWGRTTYModSettings::getCharacterSet() {
+    return character_set;
+}
+void
+SWGRTTYModSettings::setCharacterSet(qint32 character_set) {
+    this->character_set = character_set;
+    this->m_character_set_isSet = true;
+}
+
+qint32
+SWGRTTYModSettings::getUnshiftOnSpace() {
+    return unshift_on_space;
+}
+void
+SWGRTTYModSettings::setUnshiftOnSpace(qint32 unshift_on_space) {
+    this->unshift_on_space = unshift_on_space;
+    this->m_unshift_on_space_isSet = true;
+}
+
+qint32
+SWGRTTYModSettings::getMsbFirst() {
+    return msb_first;
+}
+void
+SWGRTTYModSettings::setMsbFirst(qint32 msb_first) {
+    this->msb_first = msb_first;
+    this->m_msb_first_isSet = true;
+}
+
+qint32
+SWGRTTYModSettings::getSpaceHigh() {
+    return space_high;
+}
+void
+SWGRTTYModSettings::setSpaceHigh(qint32 space_high) {
+    this->space_high = space_high;
+    this->m_space_high_isSet = true;
+}
+
+qint32
+SWGRTTYModSettings::getPrefixCrlf() {
+    return prefix_crlf;
+}
+void
+SWGRTTYModSettings::setPrefixCrlf(qint32 prefix_crlf) {
+    this->prefix_crlf = prefix_crlf;
+    this->m_prefix_crlf_isSet = true;
+}
+
+qint32
+SWGRTTYModSettings::getPostfixCrlf() {
+    return postfix_crlf;
+}
+void
+SWGRTTYModSettings::setPostfixCrlf(qint32 postfix_crlf) {
+    this->postfix_crlf = postfix_crlf;
+    this->m_postfix_crlf_isSet = true;
 }
 
 qint32
@@ -683,7 +803,7 @@ SWGRTTYModSettings::isSet(){
         if(m_rf_noise_isSet){
             isObjectUpdated = true; break;
         }
-        if(data && *data != QString("")){
+        if(text && *text != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_pulse_shaping_isSet){
@@ -693,6 +813,24 @@ SWGRTTYModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_symbol_span_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_character_set_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_unshift_on_space_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_msb_first_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_space_high_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_prefix_crlf_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_postfix_crlf_isSet){
             isObjectUpdated = true; break;
         }
         if(m_udp_enabled_isSet){
