@@ -101,11 +101,11 @@ public:
     qint32 getSpaceHigh();
     void setSpaceHigh(qint32 space_high);
 
-    QString* getPrefixCrlf();
-    void setPrefixCrlf(QString* prefix_crlf);
+    qint32 getPrefixCrlf();
+    void setPrefixCrlf(qint32 prefix_crlf);
 
-    QString* getPostfixCrlf();
-    void setPostfixCrlf(QString* postfix_crlf);
+    qint32 getPostfixCrlf();
+    void setPostfixCrlf(qint32 postfix_crlf);
 
     qint32 getUdpEnabled();
     void setUdpEnabled(qint32 udp_enabled);
@@ -207,10 +207,10 @@ private:
     qint32 space_high;
     bool m_space_high_isSet;
 
-    QString* prefix_crlf;
+    qint32 prefix_crlf;
     bool m_prefix_crlf_isSet;
 
-    QString* postfix_crlf;
+    qint32 postfix_crlf;
     bool m_postfix_crlf_isSet;
 
     qint32 udp_enabled;
