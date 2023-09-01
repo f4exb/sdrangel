@@ -349,7 +349,7 @@ void PacketModSource::applySettings(const PacketModSettings& settings, bool forc
                 << " symbolSpan: " << settings.m_symbolSpan
                 << " channelSampleRate:" << m_channelSampleRate
                 << " baud:" << settings.m_baud;
-        m_pulseShape.create(settings.m_beta, m_settings.m_symbolSpan, m_channelSampleRate/settings.m_baud);
+        m_pulseShape.create(settings.m_beta, settings.m_symbolSpan, m_channelSampleRate/settings.m_baud);
     }
     if ((settings.m_polynomial != m_settings.m_polynomial) || force)
         m_scrambler.setPolynomial(settings.m_polynomial);
