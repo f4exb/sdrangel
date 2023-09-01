@@ -125,11 +125,11 @@ void RttyModSource::modulateSample()
     {
         if (m_bitCount == 0)
         {
-            if (!m_dataToTransmit.isEmpty())
+            if (!m_textToTransmit.isEmpty())
             {
                 // Encode a character at a time, so we get a TxReport after each character
-                QString s = m_dataToTransmit.left(1);
-                m_dataToTransmit = m_dataToTransmit.mid(1);
+                QString s = m_textToTransmit.left(1);
+                m_textToTransmit = m_textToTransmit.mid(1);
                 encodePacket(s);
             }
             else
@@ -390,7 +390,7 @@ void RttyModSource::addTXPacket(QString data)
     int count = m_settings.m_repeat ? m_settings.m_repeatCount : 1;
 
     for (int i = 0; i < count; i++) {
-        m_dataToTransmit.append(data);
+        m_textToTransmit.append(data);
     }
 }
 
@@ -399,7 +399,7 @@ void RttyModSource::addTXPacket(QByteArray data)
     int count = m_settings.m_repeat ? m_settings.m_repeatCount : 1;
 
     for (int i = 0; i < count; i++) {
-        m_dataToTransmit.append(QString(data));
+        m_textToTransmit.append(QString(data));
     }
 }
 
@@ -432,7 +432,7 @@ void RttyModSource::encodePacket(const QString& text)
 
     if (getMessageQueueToGUI())
     {
-        RttyMod::MsgReportTx* msg = RttyMod::MsgReportTx::create(s, m_dataToTransmit.size());
+        RttyMod::MsgReportTx* msg = RttyMod::MsgReportTx::create(s, m_textToTransmit.size());
         getMessageQueueToGUI()->push(msg);
     }
 }

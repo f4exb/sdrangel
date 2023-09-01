@@ -102,12 +102,12 @@ Full details of the API can be found in the Swagger documentation. Below are a f
 
 To transmit the current text simply send a "tx" action:
 
-    curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/actions" -d '{"channelType": "RttyMod",  "direction": 1, "RttyModActions": { "tx": 1}}'
+    curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/0/channel/0/actions" -d '{"channelType": "RTTYMod",  "direction": 1, "RTTYModActions": { "tx": 1}}'
 
 To transmit a packet from the command line:
 
-    curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/actions" -d '{"channelType": "RttyMod",  "direction": 1, "RttyModActions": { "tx": 1, "payload": {"text": "CQ CQ CQ anyone using SDRangel" }}}'
+    curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/0/channel/0/actions" -d '{"channelType": "RTTYMod",  "direction": 1, "RTTYModActions": { "tx": 1, "payload": {"text": "CQ CQ CQ anyone using SDRangel" }}}'
 
 To set the baud rate and frequency shift:
 
-    curl -X PATCH "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/settings" -d '{"channelType": "RttyMod", "direction": 1, "RttyModSettings": {"baud": 45.45; "frequencyShift": 170 }}'
+    curl -X PATCH "http://127.0.0.1:8091/sdrangel/deviceset/0/channel/0/settings" -d '{"channelType": "RTTYMod", "direction": 1, "RTTYModSettings": {"baud": 45.45; "frequencyShift": 170 }}'

@@ -55,7 +55,7 @@ MESSAGE_CLASS_DEFINITION(RttyMod::MsgTXPacketBytes, Message)
 MESSAGE_CLASS_DEFINITION(RttyMod::MsgTXPacketData, Message)
 
 const char* const RttyMod::m_channelIdURI = "sdrangel.channeltx.modrtty";
-const char* const RttyMod::m_channelId = "RttyMod";
+const char* const RttyMod::m_channelId = "RTTYMod";
 
 RttyMod::RttyMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
@@ -262,8 +262,8 @@ void RttyMod::applySettings(const RttyModSettings& settings, bool force)
         reverseAPIKeys.append("rfNoise");
     }
 
-    if ((settings.m_data != m_settings.m_data) || force) {
-        reverseAPIKeys.append("data");
+    if ((settings.m_text != m_settings.m_text) || force) {
+        reverseAPIKeys.append("text");
     }
 
     if ((settings.m_beta != m_settings.m_beta) || force) {
@@ -456,8 +456,8 @@ void RttyMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("rfNoise")) {
         settings.m_rfNoise = response.getRttyModSettings()->getRfNoise() != 0;
     }
-    if (channelSettingsKeys.contains("data")) {
-        settings.m_data = *response.getRttyModSettings()->getData();
+    if (channelSettingsKeys.contains("text")) {
+        settings.m_text = *response.getRttyModSettings()->getData();
     }
     if (channelSettingsKeys.contains("beta")) {
         settings.m_beta = response.getRttyModSettings()->getBeta();
@@ -581,9 +581,9 @@ void RttyMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     response.getRttyModSettings()->setRfNoise(settings.m_rfNoise ? 1 : 0);
 
     if (response.getRttyModSettings()->getData()) {
-        *response.getRttyModSettings()->getData() = settings.m_data;
+        *response.getRttyModSettings()->getData() = settings.m_text;
     } else {
-        response.getRttyModSettings()->setData(new QString(settings.m_data));
+        response.getRttyModSettings()->setData(new QString(settings.m_text));
     }
 
     response.getRttyModSettings()->setPulseShaping(settings.m_pulseShaping ? 1 : 0);
@@ -747,8 +747,8 @@ void RttyMod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("rfNoise")) {
         swgRttyModSettings->setRfNoise(settings.m_rfNoise ? 1 : 0);
     }
-    if (channelSettingsKeys.contains("data")) {
-        swgRttyModSettings->setData(new QString(settings.m_data));
+    if (channelSettingsKeys.contains("text")) {
+        swgRttyModSettings->setData(new QString(settings.m_text));
     }
     if (channelSettingsKeys.contains("beta")) {
         swgRttyModSettings->setBeta(settings.m_beta);

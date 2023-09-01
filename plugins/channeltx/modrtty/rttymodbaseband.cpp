@@ -152,7 +152,7 @@ bool RttyModBaseband::handleMessage(const Message& cmd)
     else if (RttyMod::MsgTx::match(cmd))
     {
         qDebug() << "RttyModBaseband::handleMessage: MsgTx";
-        m_source.addTXPacket(m_settings.m_data);
+        m_source.addTXPacket(m_settings.m_text);
 
         return true;
     }

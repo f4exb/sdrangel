@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Packet TX Extra Settings</string>
+   <string>Transmit Settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

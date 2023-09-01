@@ -70,6 +70,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.demod.remotetcpsink", "RemoteTCPSinkSettings"},
     {"sdrangel.channeltx.remotesource", "RemoteSourceSettings"},
     {"sdrangel.channel.rttydemod", "RTTYDemodSettings"},
+    {"sdrangel.channel.rttymod", "RTTYModSettings"},
     {"sdrangel.channeltx.modssb", "SSBModSettings"},
     {"sdrangel.channel.ssbdemod", "SSBDemodSettings"},
     {"sdrangel.channel.ft8demod", "FT8DemodSettings"},
@@ -185,7 +186,8 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"RemoteSink", "RemoteSinkSettings"},
     {"RemoteSource", "RemoteSourceSettings"},
     {"RemoteTCPSink", "RemoteTCPSinkSettings"},
-    {"RTTYDemodSettings", "RTTYDemodSettings"},
+    {"RTTYDemod", "RTTYDemodSettings"},
+    {"RTTYMod", "RTTYModSettings"},
     {"SSBMod", "SSBModSettings"},
     {"SSBDemod", "SSBDemodSettings"},
     {"FT8Demod", "FT8DemodSettings"},
@@ -208,7 +210,8 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToActionsKey = {
     {"SigMFFileSink", "SigMFFileSinkActions"},
     {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModActions"},
     {"RadioAstronomy", "RadioAstronomyActions"},
-    {"PacketMod", "PacketModActions"}
+    {"PacketMod", "PacketModActions"},
+    {"RTTYMod", "RTTYModActions"}
 };
 
 const QMap<QString, QString> WebAPIUtils::m_sourceDeviceHwIdToSettingsKey = {

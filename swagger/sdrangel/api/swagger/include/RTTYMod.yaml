@@ -35,8 +35,9 @@ RTTYModSettings:
         Boolean
           * 0 - off
           * 1 - on
-    data:
+    text:
       type: string
+      description: Text to transmit
     pulseShaping:
       type: integer
       description: >
@@ -47,6 +48,18 @@ RTTYModSettings:
       type: number
       format: float
     symbolSpan:
+      type: integer
+    characterSet:
+      type: integer
+    unshiftOnSpace:
+      type: integer
+    msbFirst:
+      type: integer
+    spaceHigh:
+      type: integer
+    prefixCRLF:
+      type: integer
+    postfixCRLF:
       type: integer
     udpEnabled:
       description: "Whether to receive text to transmit on specified UDP port"

@@ -40,7 +40,7 @@ struct RttyModSettings
     bool m_bbNoise;
     bool m_rfNoise;
     bool m_writeToFile;
-    QString m_data;     // Text to send
+    QString m_text;     // Text to send
     bool m_pulseShaping;
     float m_beta;
     int m_symbolSpan;

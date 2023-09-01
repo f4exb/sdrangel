@@ -104,7 +104,7 @@ private:
     int m_sampleIdx;                    // Sample index in to symbol
     int m_samplesPerSymbol;             // Number of samples per symbol
 
-    QString m_dataToTransmit;           // Transmit data buffer (before RTTY encoding)
+    QString m_textToTransmit;           // Transmit buffer (before RTTY encoding)
 
     BaudotEncoder m_rttyEncoder;
 

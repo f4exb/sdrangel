@@ -296,7 +296,7 @@ void RttyModGUI::on_text_returnPressed()
 
 void RttyModGUI::on_text_editingFinished()
 {
-    m_settings.m_data = ui->text->currentText();
+    m_settings.m_text = ui->text->currentText();
     applySettings();
 }
 
@@ -609,7 +609,7 @@ void RttyModGUI::displaySettings()
     for (const auto& text : m_settings.m_predefinedTexts) {
         ui->text->addItem(substitute(text));
     }
-    ui->text->setCurrentText(m_settings.m_data);
+    ui->text->setCurrentText(m_settings.m_text);
 
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
