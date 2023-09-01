@@ -66,9 +66,9 @@ SWGRTTYModSettings::SWGRTTYModSettings() {
     m_msb_first_isSet = false;
     space_high = 0;
     m_space_high_isSet = false;
-    prefix_crlf = 0;
+    prefix_crlf = nullptr;
     m_prefix_crlf_isSet = false;
-    postfix_crlf = 0;
+    postfix_crlf = nullptr;
     m_postfix_crlf_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
@@ -142,9 +142,9 @@ SWGRTTYModSettings::init() {
     m_msb_first_isSet = false;
     space_high = 0;
     m_space_high_isSet = false;
-    prefix_crlf = 0;
+    prefix_crlf = new QString("");
     m_prefix_crlf_isSet = false;
-    postfix_crlf = 0;
+    postfix_crlf = new QString("");
     m_postfix_crlf_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
@@ -197,8 +197,12 @@ SWGRTTYModSettings::cleanup() {
 
 
 
-
-
+    if(prefix_crlf != nullptr) { 
+        delete prefix_crlf;
+    }
+    if(postfix_crlf != nullptr) { 
+        delete postfix_crlf;
+    }
 
     if(udp_address != nullptr) { 
         delete udp_address;
@@ -273,9 +277,9 @@ SWGRTTYModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&space_high, pJson["spaceHigh"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&prefix_crlf, pJson["prefixCRLF"], "qint32", "");
+    ::SWGSDRangel::setValue(&prefix_crlf, pJson["prefixCRLF"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&postfix_crlf, pJson["postfixCRLF"], "qint32", "");
+    ::SWGSDRangel::setValue(&postfix_crlf, pJson["postfixCRLF"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
     
@@ -376,11 +380,11 @@ SWGRTTYModSettings::asJsonObject() {
     if(m_space_high_isSet){
         obj->insert("spaceHigh", QJsonValue(space_high));
     }
-    if(m_prefix_crlf_isSet){
-        obj->insert("prefixCRLF", QJsonValue(prefix_crlf));
+    if(prefix_crlf != nullptr && *prefix_crlf != QString("")){
+        toJsonValue(QString("prefixCRLF"), prefix_crlf, obj, QString("QString"));
     }
-    if(m_postfix_crlf_isSet){
-        obj->insert("postfixCRLF", QJsonValue(postfix_crlf));
+    if(postfix_crlf != nullptr && *postfix_crlf != QString("")){
+        toJsonValue(QString("postfixCRLF"), postfix_crlf, obj, QString("QString"));
     }
     if(m_udp_enabled_isSet){
         obj->insert("udpEnabled", QJsonValue(udp_enabled));
@@ -615,22 +619,22 @@ SWGRTTYModSettings::setSpaceHigh(qint32 space_high) {
     this->m_space_high_isSet = true;
 }
 
-qint32
+QString*
 SWGRTTYModSettings::getPrefixCrlf() {
     return prefix_crlf;
 }
 void
-SWGRTTYModSettings::setPrefixCrlf(qint32 prefix_crlf) {
+SWGRTTYModSettings::setPrefixCrlf(QString* prefix_crlf) {
     this->prefix_crlf = prefix_crlf;
     this->m_prefix_crlf_isSet = true;
 }
 
-qint32
+QString*
 SWGRTTYModSettings::getPostfixCrlf() {
     return postfix_crlf;
 }
 void
-SWGRTTYModSettings::setPostfixCrlf(qint32 postfix_crlf) {
+SWGRTTYModSettings::setPostfixCrlf(QString* postfix_crlf) {
     this->postfix_crlf = postfix_crlf;
     this->m_postfix_crlf_isSet = true;
 }
@@ -827,10 +831,10 @@ SWGRTTYModSettings::isSet(){
         if(m_space_high_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_prefix_crlf_isSet){
+        if(prefix_crlf && *prefix_crlf != QString("")){
             isObjectUpdated = true; break;
         }
-        if(m_postfix_crlf_isSet){
+        if(postfix_crlf && *postfix_crlf != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_udp_enabled_isSet){

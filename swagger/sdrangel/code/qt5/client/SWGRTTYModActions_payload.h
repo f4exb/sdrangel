@@ -42,15 +42,15 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGRTTYModActions_payload* fromJson(QString &jsonString) override;
 
-    QString* getData();
-    void setData(QString* data);
+    QString* getText();
+    void setText(QString* text);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* data;
-    bool m_data_isSet;
+    QString* text;
+    bool m_text_isSet;
 
 };
 

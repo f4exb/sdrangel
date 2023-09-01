@@ -28,8 +28,8 @@ SWGRTTYModActions_payload::SWGRTTYModActions_payload(QString* json) {
 }
 
 SWGRTTYModActions_payload::SWGRTTYModActions_payload() {
-    data = nullptr;
-    m_data_isSet = false;
+    text = nullptr;
+    m_text_isSet = false;
 }
 
 SWGRTTYModActions_payload::~SWGRTTYModActions_payload() {
@@ -38,14 +38,14 @@ SWGRTTYModActions_payload::~SWGRTTYModActions_payload() {
 
 void
 SWGRTTYModActions_payload::init() {
-    data = new QString("");
-    m_data_isSet = false;
+    text = new QString("");
+    m_text_isSet = false;
 }
 
 void
 SWGRTTYModActions_payload::cleanup() {
-    if(data != nullptr) { 
-        delete data;
+    if(text != nullptr) { 
+        delete text;
     }
 }
 
@@ -60,7 +60,7 @@ SWGRTTYModActions_payload::fromJson(QString &json) {
 
 void
 SWGRTTYModActions_payload::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&data, pJson["data"], "QString", "QString");
+    ::SWGSDRangel::setValue(&text, pJson["text"], "QString", "QString");
     
 }
 
@@ -78,21 +78,21 @@ SWGRTTYModActions_payload::asJson ()
 QJsonObject*
 SWGRTTYModActions_payload::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(data != nullptr && *data != QString("")){
-        toJsonValue(QString("data"), data, obj, QString("QString"));
+    if(text != nullptr && *text != QString("")){
+        toJsonValue(QString("text"), text, obj, QString("QString"));
     }
 
     return obj;
 }
 
 QString*
-SWGRTTYModActions_payload::getData() {
-    return data;
+SWGRTTYModActions_payload::getText() {
+    return text;
 }
 void
-SWGRTTYModActions_payload::setData(QString* data) {
-    this->data = data;
-    this->m_data_isSet = true;
+SWGRTTYModActions_payload::setText(QString* text) {
+    this->text = text;
+    this->m_text_isSet = true;
 }
 
 
@@ -100,7 +100,7 @@ bool
 SWGRTTYModActions_payload::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(data && *data != QString("")){
+        if(text && *text != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);
