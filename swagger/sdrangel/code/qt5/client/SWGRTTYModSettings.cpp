@@ -46,8 +46,6 @@ SWGRTTYModSettings::SWGRTTYModSettings() {
     m_repeat_count_isSet = false;
     lpf_taps = 0;
     m_lpf_taps_isSet = false;
-    bb_noise = 0;
-    m_bb_noise_isSet = false;
     rf_noise = 0;
     m_rf_noise_isSet = false;
     text = nullptr;
@@ -122,8 +120,6 @@ SWGRTTYModSettings::init() {
     m_repeat_count_isSet = false;
     lpf_taps = 0;
     m_lpf_taps_isSet = false;
-    bb_noise = 0;
-    m_bb_noise_isSet = false;
     rf_noise = 0;
     m_rf_noise_isSet = false;
     text = new QString("");
@@ -176,7 +172,6 @@ SWGRTTYModSettings::init() {
 
 void
 SWGRTTYModSettings::cleanup() {
-
 
 
 
@@ -252,8 +247,6 @@ SWGRTTYModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&repeat_count, pJson["repeatCount"], "qint32", "");
     
     ::SWGSDRangel::setValue(&lpf_taps, pJson["lpfTaps"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&bb_noise, pJson["bbNoise"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rf_noise, pJson["rfNoise"], "qint32", "");
     
@@ -345,9 +338,6 @@ SWGRTTYModSettings::asJsonObject() {
     }
     if(m_lpf_taps_isSet){
         obj->insert("lpfTaps", QJsonValue(lpf_taps));
-    }
-    if(m_bb_noise_isSet){
-        obj->insert("bbNoise", QJsonValue(bb_noise));
     }
     if(m_rf_noise_isSet){
         obj->insert("rfNoise", QJsonValue(rf_noise));
@@ -513,16 +503,6 @@ void
 SWGRTTYModSettings::setLpfTaps(qint32 lpf_taps) {
     this->lpf_taps = lpf_taps;
     this->m_lpf_taps_isSet = true;
-}
-
-qint32
-SWGRTTYModSettings::getBbNoise() {
-    return bb_noise;
-}
-void
-SWGRTTYModSettings::setBbNoise(qint32 bb_noise) {
-    this->bb_noise = bb_noise;
-    this->m_bb_noise_isSet = true;
 }
 
 qint32
@@ -795,9 +775,6 @@ SWGRTTYModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_lpf_taps_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_bb_noise_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rf_noise_isSet){
