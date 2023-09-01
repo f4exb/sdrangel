@@ -63,6 +63,7 @@
 #include "SWGPacketModSettings.h"
 #include "SWGPagerDemodSettings.h"
 #include "SWGRTTYDemodSettings.h"
+#include "SWGRTTYModSettings.h"
 #include "SWGRadioAstronomySettings.h"
 #include "SWGRadioClockSettings.h"
 #include "SWGRadiosondeDemodSettings.h"
@@ -186,6 +187,9 @@ public:
 
     SWGRTTYDemodSettings* getRttyDemodSettings();
     void setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settings);
+
+    SWGRTTYModSettings* getRttyModSettings();
+    void setRttyModSettings(SWGRTTYModSettings* rtty_mod_settings);
 
     SWGHeatMapSettings* getHeatMapSettings();
     void setHeatMapSettings(SWGHeatMapSettings* heat_map_settings);
@@ -367,6 +371,9 @@ private:
 
     SWGRTTYDemodSettings* rtty_demod_settings;
     bool m_rtty_demod_settings_isSet;
+
+    SWGRTTYModSettings* rtty_mod_settings;
+    bool m_rtty_mod_settings_isSet;
 
     SWGHeatMapSettings* heat_map_settings;
     bool m_heat_map_settings_isSet;

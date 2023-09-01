@@ -30,8 +30,8 @@
 #include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
-/*#include "SWGRttyModReport.h"
-#include "SWGRttyModActions.h"*/
+#include "SWGRTTYModReport.h"
+#include "SWGRTTYModActions.h"
 
 #include <stdio.h>
 #include <complex.h>
@@ -262,10 +262,6 @@ void RttyMod::applySettings(const RttyModSettings& settings, bool force)
         reverseAPIKeys.append("rfNoise");
     }
 
-    if ((settings.m_writeToFile != m_settings.m_writeToFile) || force) {
-        reverseAPIKeys.append("writeToFile");
-    }
-
     if ((settings.m_data != m_settings.m_data) || force) {
         reverseAPIKeys.append("data");
     }
@@ -382,10 +378,10 @@ int RttyMod::webapiSettingsGet(
                 QString& errorMessage)
 {
     (void) errorMessage;
-    /*response.setRttyModSettings(new SWGSDRangel::SWGRttyModSettings());
+    response.setRttyModSettings(new SWGSDRangel::SWGRTTYModSettings());
     response.getRttyModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
-    */
+
     return 200;
 }
 
@@ -427,7 +423,7 @@ void RttyMod::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
-    /*if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getRttyModSettings()->getInputFrequencyOffset();
     }
     if (channelSettingsKeys.contains("baud")) {
@@ -448,9 +444,6 @@ void RttyMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("repeat")) {
         settings.m_repeat = response.getRttyModSettings()->getRepeat() != 0;
     }
-    if (channelSettingsKeys.contains("repeatDelay")) {
-        settings.m_repeatDelay = response.getRttyModSettings()->getRepeatDelay();
-    }
     if (channelSettingsKeys.contains("repeatCount")) {
         settings.m_repeatCount = response.getRttyModSettings()->getRepeatCount();
     }
@@ -462,9 +455,6 @@ void RttyMod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("rfNoise")) {
         settings.m_rfNoise = response.getRttyModSettings()->getRfNoise() != 0;
-    }
-    if (channelSettingsKeys.contains("writeToFile")) {
-        settings.m_writeToFile = response.getRttyModSettings()->getWriteToFile() != 0;
     }
     if (channelSettingsKeys.contains("data")) {
         settings.m_data = *response.getRttyModSettings()->getData();
@@ -513,7 +503,7 @@ void RttyMod::webapiUpdateChannelSettings(
     }
     if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
         settings.m_rollupState->updateFrom(channelSettingsKeys, response.getRttyModSettings()->getRollupState());
-    }*/
+    }
 }
 
 int RttyMod::webapiReportGet(
@@ -521,9 +511,9 @@ int RttyMod::webapiReportGet(
                 QString& errorMessage)
 {
     (void) errorMessage;
-    /*response.setRttyModReport(new SWGSDRangel::SWGRttyModReport());
+    response.setRttyModReport(new SWGSDRangel::SWGRTTYModReport());
     response.getRttyModReport()->init();
-    webapiFormatChannelReport(response);*/
+    webapiFormatChannelReport(response);
     return 200;
 }
 
@@ -532,7 +522,7 @@ int RttyMod::webapiActionsPost(
         SWGSDRangel::SWGChannelActions& query,
         QString& errorMessage)
 {
-    /*SWGSDRangel::SWGRttyModActions *swgRttyModActions = query.getRttyModActions();
+    SWGSDRangel::SWGRTTYModActions *swgRttyModActions = query.getRttyModActions();
 
     if (swgRttyModActions)
     {
@@ -544,7 +534,7 @@ int RttyMod::webapiActionsPost(
                    && (swgRttyModActions->getPayload()->getData()))
                 {
                     MsgTXPacketData *msg = MsgTXPacketData::create(
-                        *swgRttyModActions->getPayload()->getData(
+                        *swgRttyModActions->getPayload()->getData()
                     );
                     m_basebandSource->getInputMessageQueue()->push(msg);
                 }
@@ -572,25 +562,23 @@ int RttyMod::webapiActionsPost(
     {
         errorMessage = "Missing RttyModActions in query";
         return 400;
-    }*/
+    }
     return 0;
 }
 
 void RttyMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RttyModSettings& settings)
 {
-    /*response.getRttyModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getRttyModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getRttyModSettings()->setBaud(settings.m_baud);
     response.getRttyModSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getRttyModSettings()->setFrequencyShift(settings.m_frequencyShift);
     response.getRttyModSettings()->setGain(settings.m_gain);
     response.getRttyModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
     response.getRttyModSettings()->setRepeat(settings.m_repeat ? 1 : 0);
-    response.getRttyModSettings()->setRepeatDelay(settings.m_repeatDelay);
     response.getRttyModSettings()->setRepeatCount(settings.m_repeatCount);
     response.getRttyModSettings()->setLpfTaps(settings.m_lpfTaps);
     response.getRttyModSettings()->setBbNoise(settings.m_bbNoise ? 1 : 0);
     response.getRttyModSettings()->setRfNoise(settings.m_rfNoise ? 1 : 0);
-    response.getRttyModSettings()->setWriteToFile(settings.m_writeToFile ? 1 : 0);
 
     if (response.getRttyModSettings()->getData()) {
         *response.getRttyModSettings()->getData() = settings.m_data;
@@ -651,13 +639,13 @@ void RttyMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
             settings.m_rollupState->formatTo(swgRollupState);
             response.getRttyModSettings()->setRollupState(swgRollupState);
         }
-    }*/
+    }
 }
 
 void RttyMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
-    /*response.getRttyModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
-    response.getRttyModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());*/
+    response.getRttyModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getRttyModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
 }
 
 void RttyMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RttyModSettings& settings, bool force)
@@ -717,12 +705,12 @@ void RttyMod::webapiFormatChannelSettings(
         bool force
 )
 {
-    /*swgChannelSettings->setDirection(1); // single source (Tx)
+    swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString(m_channelId));
-    swgChannelSettings->setRttyModSettings(new SWGSDRangel::SWGRttyModSettings());
-    SWGSDRangel::SWGRttyModSettings *swgRttyModSettings = swgChannelSettings->getRttyModSettings();
+    swgChannelSettings->setRttyModSettings(new SWGSDRangel::SWGRTTYModSettings());
+    SWGSDRangel::SWGRTTYModSettings *swgRttyModSettings = swgChannelSettings->getRttyModSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
@@ -747,9 +735,6 @@ void RttyMod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("repeat") || force) {
         swgRttyModSettings->setRepeat(settings.m_repeat ? 1 : 0);
     }
-    if (channelSettingsKeys.contains("repeatDelay") || force) {
-        swgRttyModSettings->setRepeatDelay(settings.m_repeatDelay);
-    }
     if (channelSettingsKeys.contains("repeatCount") || force) {
         swgRttyModSettings->setRepeatCount(settings.m_repeatCount);
     }
@@ -761,9 +746,6 @@ void RttyMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("rfNoise")) {
         swgRttyModSettings->setRfNoise(settings.m_rfNoise ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("writeToFile")) {
-        swgRttyModSettings->setWriteToFile(settings.m_writeToFile ? 1 : 0);
     }
     if (channelSettingsKeys.contains("data")) {
         swgRttyModSettings->setData(new QString(settings.m_data));
@@ -805,7 +787,7 @@ void RttyMod::webapiFormatChannelSettings(
         SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
         settings.m_rollupState->formatTo(swgRollupState);
         swgRttyModSettings->setRollupState(swgRollupState);
-    }*/
+    }
 }
 
 void RttyMod::networkManagerFinished(QNetworkReply *reply)

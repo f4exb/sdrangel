@@ -55,6 +55,7 @@
 #include "SWGPacketModReport.h"
 #include "SWGPagerDemodReport.h"
 #include "SWGRTTYDemodReport.h"
+#include "SWGRTTYModReport.h"
 #include "SWGRadioAstronomyReport.h"
 #include "SWGRadioClockReport.h"
 #include "SWGRadiosondeDemodReport.h"
@@ -197,6 +198,9 @@ public:
 
     SWGRemoteSourceReport* getRemoteSourceReport();
     void setRemoteSourceReport(SWGRemoteSourceReport* remote_source_report);
+
+    SWGRTTYModReport* getRttyModReport();
+    void setRttyModReport(SWGRTTYModReport* rtty_mod_report);
 
     SWGPacketDemodReport* getPacketDemodReport();
     void setPacketDemodReport(SWGPacketDemodReport* packet_demod_report);
@@ -342,6 +346,9 @@ private:
 
     SWGRemoteSourceReport* remote_source_report;
     bool m_remote_source_report_isSet;
+
+    SWGRTTYModReport* rtty_mod_report;
+    bool m_rtty_mod_report_isSet;
 
     SWGPacketDemodReport* packet_demod_report;
     bool m_packet_demod_report_isSet;

@@ -31,9 +31,9 @@ int RttyModWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    /*response.setRttyModSettings(new SWGSDRangel::SWGRttyModSettings());
+    response.setRttyModSettings(new SWGSDRangel::SWGRTTYModSettings());
     response.getRttyModSettings()->init();
-    RttyMod::webapiFormatChannelSettings(response, m_settings);*/
+    RttyMod::webapiFormatChannelSettings(response, m_settings);
 
     return 200;
 }
