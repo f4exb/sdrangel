@@ -69,6 +69,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FT8Demod.yaml#/FT8DemodSettings"
     RTTYDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RTTYDemod.yaml#/RTTYDemodSettings"
+    RTTYModSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/RTTYMod.yaml#/RTTYModSettings"
     HeatMapSettings:
       $ref: "http://swgserver:8081/api/swagger/include/HeatMap.yaml#/HeatMapSettings"
     ILSDemodSettings:

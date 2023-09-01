@@ -23,84 +23,84 @@
 // We use < for FIGS and > for LTRS and ^ for Cyrillic
 // Unicode used for source file encoding
 
-const QString Baudot::m_ita2Letter[] = {
+const QStringList Baudot::m_ita2Letter = {
     "\0",   "E",    "\n",   "A",    " ",    "S",    "I",    "U",
     "\r",   "D",    "R",    "J",    "N",    "F",    "C",    "K",
     "T",    "Z",    "L",    "W",    "H",    "Y",    "P",    "Q",
     "O",    "B",    "G",    "<",    "M",    "X",    "V",    ">"
 };
 
-const QString Baudot::m_ita2Figure[] = {
+const QStringList Baudot::m_ita2Figure = {
     "\0",   "3",    "\n",   "-",    " ",    "\'",   "8",    "7",
     "\r",   "\x5",  "4",    "\a",   ",",    "!",    ":",    "(",
     "5",    "+",    ")",    "2",    "£",    "6",    "0",    "1",
     "9",    "?",    "&",    "<",    ".",    "/",    "=",    ">"
 };
 
-const QString Baudot::m_ukLetter[] = {
+const QStringList Baudot::m_ukLetter = {
     "\0",   "A",    "E",    "/",    "Y",    "U",    "I",    "O",
     "<",    "J",    "G",    "H",    "B",    "C",    "F",    "D",
     " ",    "-",    "X",    "Z",    "S",    "T",    "W",    "V",
     "\b",   "K",    "M",    "L",    "R",    "Q",    "N",    "P"
 };
 
-const QString Baudot::m_ukFigure[] = {
+const QStringList Baudot::m_ukFigure = {
     "\0",   "1",    "2",    "⅟",   "3",    "4",    "³⁄",    "5",
     " ",    "6",    "7",    "¹",   "8",    "9",    "⁵⁄",    "0",
     ">",    ".",    "⁹⁄",   ":",   "⁷⁄",   "²",    "?",     "\'",
     "\b",   "(",    ")",    "=",    "-",   "/",    "£",     "+"
 };
 
-const QString Baudot::m_europeanLetter[] = {
+const QStringList Baudot::m_europeanLetter = {
     "\0",   "A",    "E",    "É",    "Y",    "U",    "I",    "O",
     "<",    "J",    "G",    "H",    "B",    "C",    "F",    "D",
     " ",    "t",    "X",    "Z",    "S",    "T",    "W",    "V",
     "\b",   "K",    "M",    "L",    "R",    "Q",    "N",    "P"
 };
 
-const QString Baudot::m_europeanFigure[] = {
+const QStringList Baudot::m_europeanFigure = {
     "\0",   "1",    "2",   "&",    "3",    "4",    "º",     "5",
     " ",    "6",    "7",    "H̱",   "8",    "9",    "F̱",    "0",
     ">",    ".",    ",",   ":",    ";",    "!",    "?",     "\'",
     "\b",   "(",    ")",    "=",    "-",   "/",    "№",     "%"
 };
 
-const QString Baudot::m_usLetter[] = {
+const QStringList Baudot::m_usLetter = {
     "\0",   "E",    "\n",   "A",    " ",    "S",    "I",    "U",
     "\r",   "D",    "R",    "J",    "N",    "F",    "C",    "K",
     "T",    "Z",    "L",    "W",    "H",    "Y",    "P",    "Q",
     "O",    "B",    "G",    "<",    "M",    "X",    "V",    ">"
 };
 
-const QString Baudot::m_usFigure[] = {
+const QStringList Baudot::m_usFigure = {
     "\0",   "3",    "\n",   "-",    " ",    "\a",   "8",    "7",
     "\r",   "\x5",  "4",    "\'",   ",",    "!",    ":",    "(",
     "5",    "\"",   ")",    "2",    "#",    "6",    "0",    "1",
     "9",    "?",    "&",    "<",    ".",    "/",    ";",    ">"
 };
 
-const QString Baudot::m_russianLetter[] = {
+const QStringList Baudot::m_russianLetter = {
     "\0",   "Е",    "\n",   "А",    " ",    "С",    "И",    "У",
     "\r",   "Д",    "П",    "Й",    "Н",    "Ф",    "Ц",    "К",
     "Т",    "З",    "Л",    "В",    "Х",    "Ы",    "P",    "Я",
     "О",    "Б",    "Г",    "<",    "М",    "Ь",    "Ж",    ">"
 };
 
-const QString Baudot::m_russianFigure[] = {
+const QStringList Baudot::m_russianFigure = {
     "\0",   "3",    "\n",   "-",    " ",    "\'",   "8",    "7",
     "\r",   "Ч",    "4",    "Ю",    ",",    "Э",    ":",    "(",
     "5",    "+",    ")",    "2",    "Щ",    "6",    "0",    "1",
     "9",    "?",    "Ш",    "<",    ".",    "/",    ";",    ">"
 };
 
-const QString Baudot::m_murrayLetter[] = {
+const QStringList Baudot::m_murrayLetter = {
     " ",    "E",    "?",    "A",    ">",    "S",    "I",    "U",
     "\n",   "D",    "R",    "J",    "N",    "F",    "C",    "K",
     "T",    "Z",    "L",    "W",    "H",    "Y",    "P",    "Q",
     "O",    "B",    "G",    "<",    "M",    "X",    "V",    "\b"
 };
 
-const QString Baudot::m_murrayFigure[] = {
+const QStringList Baudot::m_murrayFigure = {
     " ",    "3",    "?",    " ",    ">",    "'",    "8",    "7",
     "\n",   "²",    "4",    "⁷⁄",   "-",    "⅟",    "(",    "⁹⁄",
     "5",    ".",    "/",    "2",    "⁵⁄",   "6",    "0",    "1",
@@ -190,3 +190,172 @@ QString BaudotDecoder::decode(char bits)
     return c;
 }
 
+BaudotEncoder::BaudotEncoder()
+{
+    setCharacterSet(Baudot::ITA2);
+    setUnshiftOnSpace(false);
+    setMsbFirst(false);
+    setStartBits(1);
+    setStopBits(1);
+    init();
+}
+
+void BaudotEncoder::setCharacterSet(Baudot::CharacterSet characterSet)
+{
+    m_characterSet = characterSet;
+    switch (m_characterSet)
+    {
+    case Baudot::ITA2:
+        m_letters = Baudot::m_ita2Letter;
+        m_figures = Baudot::m_ita2Figure;
+        break;
+    case Baudot::UK:
+        m_letters = Baudot::m_ukLetter;
+        m_figures = Baudot::m_ukFigure;
+        break;
+    case Baudot::EUROPEAN:
+        m_letters = Baudot::m_europeanLetter;
+        m_figures = Baudot::m_europeanFigure;
+        break;
+    case Baudot::US:
+        m_letters = Baudot::m_usLetter;
+        m_figures = Baudot::m_usFigure;
+        break;
+    case Baudot::RUSSIAN:
+        m_letters = Baudot::m_russianLetter;
+        m_figures = Baudot::m_russianFigure;
+        break;
+    case Baudot::MURRAY:
+        m_letters = Baudot::m_murrayLetter;
+        m_figures = Baudot::m_murrayFigure;
+        break;
+    default:
+        qDebug() << "BaudotEncoder::BaudotEncoder: Unsupported character set " << m_characterSet;
+        m_letters = Baudot::m_ita2Letter;
+        m_figures = Baudot::m_ita2Figure;
+        m_characterSet = Baudot::ITA2;
+        break;
+    }
+}
+
+void BaudotEncoder::setUnshiftOnSpace(bool unshiftOnSpace)
+{
+    m_unshiftOnSpace = unshiftOnSpace;
+}
+
+void BaudotEncoder::setMsbFirst(bool msbFirst)
+{
+    m_msbFirst = msbFirst;
+}
+
+// startBits should be 0 or 1
+void BaudotEncoder::setStartBits(int startBits)
+{
+    m_startBits = startBits;
+}
+
+// stopBits should be 0, 1 or 2
+void BaudotEncoder::setStopBits(int stopBits)
+{
+    m_stopBits = stopBits;
+}
+
+void BaudotEncoder::init()
+{
+    m_figure = false;
+}
+
+bool BaudotEncoder::encode(QChar c, unsigned &bits, unsigned int &bitCount)
+{
+    unsigned int code;
+    const unsigned int codeLen = 5;
+
+    bits = 0;
+    bitCount = 0;
+
+    // Only upper case is supported
+    c = c.toUpper();
+    QString s(c);
+
+    // We could create reverse look-up tables to speed this up, but it's only 200 baud...
+    if (m_letters.contains(s))
+    {
+        if (m_figure)
+        {
+            // Switch to letters
+            addStartBits(bits, bitCount);
+            code = reverseBits(m_letters.indexOf(">"), codeLen);
+            addBits(bits, bitCount, code, codeLen);
+            addStopBits(bits, bitCount);
+            m_figure = false;
+        }
+        addStartBits(bits, bitCount);
+        code = reverseBits(m_letters.indexOf(s), codeLen);
+        addBits(bits, bitCount, code, codeLen);
+        addStopBits(bits, bitCount);
+        return true;
+    }
+    else if (m_figures.contains(s))
+    {
+        if (!m_figure)
+        {
+            // Switch to figures
+            addStartBits(bits, bitCount);
+            code = reverseBits(m_letters.indexOf("<"), codeLen);
+            addBits(bits, bitCount, code, codeLen);
+            addStopBits(bits, bitCount);
+            m_figure = true;
+        }
+        addStartBits(bits, bitCount);
+        code = reverseBits(m_figures.indexOf(s), codeLen);
+        addBits(bits, bitCount, code, codeLen);
+        addStopBits(bits, bitCount);
+        if ((s == " ") && m_unshiftOnSpace) {
+            m_figure = false;
+        }
+    }
+    else
+    {
+        qDebug() << "BaudotEncoder::encode: Can't encode" << c;
+        return false;
+    }
+
+    return true;
+}
+
+void BaudotEncoder::addStartBits(unsigned& bits, unsigned int& bitCount) const
+{
+    // Start bit is 0
+    addBits(bits, bitCount, 0, m_startBits);
+}
+
+void BaudotEncoder::addStopBits(unsigned& bits, unsigned int& bitCount) const
+{
+    // Stop bit is 1
+    addBits(bits, bitCount, ((1 << m_stopBits)) - 1, m_stopBits);
+}
+
+void BaudotEncoder::addBits(unsigned& bits, unsigned int& bitCount, int data, int count) const
+{
+    bits |= data << bitCount;
+    bitCount += count;
+}
+
+unsigned BaudotEncoder::reverseBits(unsigned bits, unsigned int count) const
+{
+    if (m_msbFirst) {
+        return BaudotEncoder::reverse(bits) >> (sizeof(unsigned int) * 8 - count);
+    } else {
+        return bits;
+    }
+}
+
+unsigned int BaudotEncoder::reverse(unsigned int x)
+{
+    x = (((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1));
+    x = (((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2));
+    x = (((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4));
+    x = (((x & 0xff00ff00) >> 8) | ((x & 0x00ff00ff) << 8));
+
+    return((x >> 16) | (x << 16));
+}
