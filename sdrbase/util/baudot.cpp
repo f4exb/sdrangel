@@ -81,8 +81,8 @@ const QStringList Baudot::m_usFigure = {
 
 const QStringList Baudot::m_russianLetter = {
     "\0",   "Е",    "\n",   "А",    " ",    "С",    "И",    "У",
-    "\r",   "Д",    "П",    "Й",    "Н",    "Ф",    "Ц",    "К",
-    "Т",    "З",    "Л",    "В",    "Х",    "Ы",    "P",    "Я",
+    "\r",   "Д",    "Р",    "Й",    "Ч",    "Ф",    "Ц",    "К",
+    "Т",    "З",    "Л",    "В",    "Х",    "Ы",    "П",    "Я",
     "О",    "Б",    "Г",    "<",    "М",    "Ь",    "Ж",    ">"
 };
 
@@ -206,36 +206,37 @@ void BaudotEncoder::setCharacterSet(Baudot::CharacterSet characterSet)
     switch (m_characterSet)
     {
     case Baudot::ITA2:
-        m_letters = Baudot::m_ita2Letter;
-        m_figures = Baudot::m_ita2Figure;
+        m_chars[LETTERS] = Baudot::m_ita2Letter;
+        m_chars[FIGURES] = Baudot::m_ita2Figure;
         break;
     case Baudot::UK:
-        m_letters = Baudot::m_ukLetter;
-        m_figures = Baudot::m_ukFigure;
+        m_chars[LETTERS] = Baudot::m_ukLetter;
+        m_chars[FIGURES] = Baudot::m_ukFigure;
         break;
     case Baudot::EUROPEAN:
-        m_letters = Baudot::m_europeanLetter;
-        m_figures = Baudot::m_europeanFigure;
+        m_chars[LETTERS] = Baudot::m_europeanLetter;
+        m_chars[FIGURES] = Baudot::m_europeanFigure;
         break;
     case Baudot::US:
-        m_letters = Baudot::m_usLetter;
-        m_figures = Baudot::m_usFigure;
+        m_chars[LETTERS] = Baudot::m_usLetter;
+        m_chars[FIGURES] = Baudot::m_usFigure;
         break;
     case Baudot::RUSSIAN:
-        m_letters = Baudot::m_russianLetter;
-        m_figures = Baudot::m_russianFigure;
+        m_chars[LETTERS] = Baudot::m_ita2Letter;
+        m_chars[FIGURES] = Baudot::m_russianFigure;
         break;
     case Baudot::MURRAY:
-        m_letters = Baudot::m_murrayLetter;
-        m_figures = Baudot::m_murrayFigure;
+        m_chars[LETTERS] = Baudot::m_murrayLetter;
+        m_chars[FIGURES] = Baudot::m_murrayFigure;
         break;
     default:
         qDebug() << "BaudotEncoder::BaudotEncoder: Unsupported character set " << m_characterSet;
-        m_letters = Baudot::m_ita2Letter;
-        m_figures = Baudot::m_ita2Figure;
+        m_chars[LETTERS] = Baudot::m_ita2Letter;
+        m_chars[FIGURES] = Baudot::m_ita2Figure;
         m_characterSet = Baudot::ITA2;
         break;
     }
+    m_chars[(int)CYRILLIC] = Baudot::m_russianLetter;
 }
 
 void BaudotEncoder::setUnshiftOnSpace(bool unshiftOnSpace)
@@ -262,14 +263,11 @@ void BaudotEncoder::setStopBits(int stopBits)
 
 void BaudotEncoder::init()
 {
-    m_figure = false;
+    m_page = LETTERS;
 }
 
 bool BaudotEncoder::encode(QChar c, unsigned &bits, unsigned int &bitCount)
 {
-    unsigned int code;
-    const unsigned int codeLen = 5;
-
     bits = 0;
     bitCount = 0;
 
@@ -277,50 +275,63 @@ bool BaudotEncoder::encode(QChar c, unsigned &bits, unsigned int &bitCount)
     c = c.toUpper();
     QString s(c);
 
-    // We could create reverse look-up tables to speed this up, but it's only 200 baud...
-    if (m_letters.contains(s))
+    if (s == '>')
     {
-        if (m_figure)
-        {
-            // Switch to letters
-            addStartBits(bits, bitCount);
-            code = reverseBits(m_letters.indexOf(">"), codeLen);
-            addBits(bits, bitCount, code, codeLen);
-            addStopBits(bits, bitCount);
-            m_figure = false;
-        }
-        addStartBits(bits, bitCount);
-        code = reverseBits(m_letters.indexOf(s), codeLen);
-        addBits(bits, bitCount, code, codeLen);
-        addStopBits(bits, bitCount);
+        addCode(bits, bitCount, m_chars[m_page].indexOf(s));
+        m_page = LETTERS;
         return true;
     }
-    else if (m_figures.contains(s))
+    else if (s == '<')
     {
-        if (!m_figure)
-        {
-            // Switch to figures
-            addStartBits(bits, bitCount);
-            code = reverseBits(m_letters.indexOf("<"), codeLen);
-            addBits(bits, bitCount, code, codeLen);
-            addStopBits(bits, bitCount);
-            m_figure = true;
-        }
-        addStartBits(bits, bitCount);
-        code = reverseBits(m_figures.indexOf(s), codeLen);
-        addBits(bits, bitCount, code, codeLen);
-        addStopBits(bits, bitCount);
-        if ((s == " ") && m_unshiftOnSpace) {
-            m_figure = false;
-        }
+        addCode(bits, bitCount, m_chars[m_page].indexOf(s));
+        m_page = FIGURES;
+        return true;
+    }
+    else if ((m_characterSet == Baudot::RUSSIAN) && (s == '\0'))
+    {
+        addCode(bits, bitCount, m_chars[m_page].indexOf(s));
+        m_page = CYRILLIC;
+        return true;
+    }
+
+    // We could create reverse look-up tables to speed this up, but it's only 200 baud...
+
+    // Is character in current page? If so, use that, as it avoids switching
+    if (m_chars[m_page].contains(s))
+    {
+        addCode(bits, bitCount, m_chars[m_page].indexOf(s));
+        return true;
     }
     else
     {
-        qDebug() << "BaudotEncoder::encode: Can't encode" << c;
-        return false;
+        // Look for character in other pages
+        const QString switchPage[] = { ">", "<", "\0" };
+
+        for (int page = m_page == LETTERS ? 1 : 0; page < (m_characterSet == Baudot::RUSSIAN) ? 3 : 2; page++)
+        {
+            if (m_chars[page].contains(s))
+            {
+                // Switch to page
+                addCode(bits, bitCount, m_chars[m_page].indexOf(switchPage[page]));
+                m_page = (BaudotEncoder::Page)page;
+
+                addCode(bits, bitCount, m_chars[m_page].indexOf(s));
+                return true;
+            }
+        }
     }
 
-    return true;
+    return false;
+}
+
+void BaudotEncoder::addCode(unsigned& bits, unsigned int& bitCount, unsigned int code) const
+{
+    const unsigned int codeLen = 5;
+
+    addStartBits(bits, bitCount);
+    code = reverseBits(code, codeLen);
+    addBits(bits, bitCount, code, codeLen);
+    addStopBits(bits, bitCount);
 }
 
 void BaudotEncoder::addStartBits(unsigned& bits, unsigned int& bitCount) const
