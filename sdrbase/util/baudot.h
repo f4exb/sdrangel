@@ -88,6 +88,7 @@ public:
 
 private:
 
+    void addCode(unsigned& bits, unsigned int& bitCount, unsigned int code) const;
     void addStartBits(unsigned int& bits, unsigned int& bitCount) const;
     void addStopBits(unsigned int& bits, unsigned int& bitCount) const;
     void addBits(unsigned int& bits, unsigned int& bitCount, int data, int count) const;
@@ -96,9 +97,12 @@ private:
 
     Baudot::CharacterSet m_characterSet;
     bool m_unshiftOnSpace;
-    QStringList m_letters;
-    QStringList m_figures;
-    bool m_figure;
+    QStringList m_chars[3];
+    enum Page {
+        LETTERS,
+        FIGURES,
+        CYRILLIC
+    } m_page;
     bool m_msbFirst;
     int m_startBits;
     int m_stopBits;

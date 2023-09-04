@@ -79,7 +79,12 @@ Specifies whether bits are transmitted least-significant-bit first (LSB) or most
 
 <h3>14: Mark/Space Frequency</h3>
 
-When unchecked, the mark frequency is the higher frequency, when checked the space frequency is higher.
+When unchecked, the mark frequency is the higher RF frequency, when checked the space frequency is higher.
+
+This should be unchecked when transmitter is using LSB AFSK and checked for USB AFSK and DWD
+[1](https://www.dwd.de/EN/specialusers/shipping/broadcast_en/brodcast_rtty_1_052014.pdf?__blob=publicationFile&v=1)
+[2](https://www.dwd.de/EN/specialusers/shipping/broadcast_en/broadcast_rtty_2_052014.pdf?__blob=publicationFile&v=1)
+shipping weather broadcasts.
 
 <h3>15: Suppress CR LF</h3>
 
@@ -101,3 +106,4 @@ Click to specify the name of the .txt file which received characters are logged 
 
 The received text area shows characters as they are received.
 
+Holding the cursor over an acronym may show a tooltip with the decoded acronym.

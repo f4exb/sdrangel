@@ -7,6 +7,7 @@ set(CMAKE_AUTOUIC OFF)
 set(sdrgui_SOURCES
     mainwindow.cpp
     gui/aboutdialog.cpp
+    gui/acronymview.cpp
     gui/addpresetdialog.cpp
     gui/audiodialog.cpp
     gui/audioselectdialog.cpp
@@ -127,6 +128,7 @@ set(sdrgui_HEADERS
     gui/aboutdialog.h
     gui/accessiblevaluedial.h
     gui/accessiblevaluedialz.h
+    gui/acronymview.h
     gui/addpresetdialog.h
     gui/audiodialog.h
     gui/audioselectdialog.h

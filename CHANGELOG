@@ -1,3 +1,17 @@
+sdrangel (7.15.4-1) unstable; urgency=medium
+
+   * Fix Mac compilation. PR #1786
+   * Add support for plugin presets. PR #1789
+   * Map feature updates. PR #1778
+   * Fix RTLSDR E4000 gain and bandwidth settings. Add tuner type to GUI. PR #1790
+   * Add support for RTLSDRBlog V4 with HF upsampler. PR #1790
+   * Update RTLSDR driver to include RTLSDRBlog V4 support. PR #1790
+   * Add rotator az/el and offset to table. PR #1791
+   * Optmize redrawing of charts in Star Tracker. PR #1791
+   * Initialise PhaseDiscriminators state, to avoid outputting huge values. Fix #1794. PR #1794
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 02 Sep 2023 19:12:12 +0200
+
 sdrangel (7.15.3-1) unstable; urgency=medium
 
    * Rotator Controller: Add additional gamepad calibration and functionality. PR #1761

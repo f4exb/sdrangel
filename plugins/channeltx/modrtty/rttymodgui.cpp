@@ -31,6 +31,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
+#include "util/rtty.h"
 #include "util/maidenhead.h"
 #include "gui/glspectrum.h"
 #include "gui/crightclickenabler.h"
@@ -475,6 +476,8 @@ RttyModGUI::RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setRollupState(&m_rollupState);
+
+    ui->transmittedText->addAcronyms(Rtty::m_acronyms);
 
     ui->spectrumContainer->setVisible(false);
 
