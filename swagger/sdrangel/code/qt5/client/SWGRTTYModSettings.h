@@ -71,9 +71,6 @@ public:
     qint32 getLpfTaps();
     void setLpfTaps(qint32 lpf_taps);
 
-    qint32 getBbNoise();
-    void setBbNoise(qint32 bb_noise);
-
     qint32 getRfNoise();
     void setRfNoise(qint32 rf_noise);
 
@@ -176,9 +173,6 @@ private:
 
     qint32 lpf_taps;
     bool m_lpf_taps_isSet;
-
-    qint32 bb_noise;
-    bool m_bb_noise_isSet;
 
     qint32 rf_noise;
     bool m_rf_noise_isSet;
