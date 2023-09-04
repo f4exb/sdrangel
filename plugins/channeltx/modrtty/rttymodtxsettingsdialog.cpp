@@ -26,8 +26,8 @@ static QListWidgetItem* newItem(const QString& text)
 
 RttyModTXSettingsDialog::RttyModTXSettingsDialog(RttyModSettings* settings, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::RttyModTXSettingsDialog),
-    m_settings(settings)
+    m_settings(settings),
+    ui(new Ui::RttyModTXSettingsDialog)
 {
     ui->setupUi(this);
     ui->prefixCRLF->setChecked(m_settings->m_prefixCRLF);
