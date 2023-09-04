@@ -57,7 +57,7 @@ void RttyModSettings::resetToDefaults()
         "UR 599 QTH IS ${location}",
         "TU DE ${callsign} CQ"
     });
-    m_rgbColor = QColor(0, 105, 2).rgb();
+    m_rgbColor = QColor(180, 205, 130).rgb();
     m_title = "RTTY Modulator";
     m_streamIndex = 0;
     m_useReverseAPI = false;

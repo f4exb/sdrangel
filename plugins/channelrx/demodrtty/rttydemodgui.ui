@@ -916,7 +916,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <widget class="QPlainTextEdit" name="text">
+     <widget class="AcronymView" name="text">
       <property name="toolTip">
        <string>Received text</string>
       </property>
@@ -1291,6 +1291,12 @@
    <class>GLScopeGUI</class>
    <extends>QWidget</extends>
    <header>gui/glscopegui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AcronymView</class>
+   <extends>QTextEdit</extends>
+   <header>gui/acronymview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

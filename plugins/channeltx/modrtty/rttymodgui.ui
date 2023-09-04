@@ -751,7 +751,7 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_2">
+       <spacer name="horizontalSpacerSettings">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -854,11 +854,7 @@
      <number>3</number>
     </property>
     <item>
-     <widget class="QPlainTextEdit" name="transmittedText">
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
+     <widget class="AcronymView" name="transmittedText"/>
     </item>
    </layout>
   </widget>
@@ -958,6 +954,12 @@
    <class>LevelMeterVU</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AcronymView</class>
+   <extends>QTextEdit</extends>
+   <header>gui/acronymview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

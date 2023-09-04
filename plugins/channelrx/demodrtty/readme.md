@@ -106,3 +106,4 @@ Click to specify the name of the .txt file which received characters are logged 
 
 The received text area shows characters as they are received.
 
+Holding the cursor over an acronym may show a tooltip with the decoded acronym.

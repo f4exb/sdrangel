@@ -259,6 +259,7 @@ set(sdrbase_SOURCES
     util/simpleserializer.cpp
     util/serialutil.cpp
     #util/spinlock.cpp
+    util/rtty.cpp
     util/uid.cpp
     util/units.cpp
     util/timeutil.cpp
@@ -491,6 +492,7 @@ set(sdrbase_HEADERS
     util/profiler.h
     util/radiosonde.h
     util/rtpsink.h
+    util/rtty.h
     util/syncmessenger.h
     util/samplesourceserializer.h
     util/simpleserializer.h

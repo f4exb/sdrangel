@@ -34,6 +34,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
+#include "util/rtty.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
@@ -481,6 +482,8 @@ RttyDemodGUI::RttyDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
+    ui->text->addAcronyms(Rtty::m_acronyms);
 
     ui->scopeContainer->setVisible(false);
 

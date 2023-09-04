@@ -115,6 +115,12 @@ Predefined text supports the following variable substitutions:
 
 The substitutions are applied when the Transmit Settings dialog is closed.
 
+<h3>21: Transmitted Text</h3>
+
+The trasnmitted text area shows characters as they are transmitted.
+
+Holding the cursor over an acronym may show a tooltip with the decoded acronym.
+
 <h2>API</h2>
 
 Full details of the API can be found in the Swagger documentation. Below are a few examples.
