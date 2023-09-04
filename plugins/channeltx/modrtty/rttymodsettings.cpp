@@ -66,7 +66,7 @@ void RttyModSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_pulseShaping = false;
-    m_beta = 0.5f;
+    m_beta = 1.0f;
     m_symbolSpan = 6;
     m_udpEnabled = false;
     m_udpAddress = "127.0.0.1";
@@ -200,7 +200,7 @@ bool RttyModSettings::deserialize(const QByteArray& data)
         d.readU32(39, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readBool(46, &m_pulseShaping, false);
-        d.readReal(47, &m_beta, 0.5f);
+        d.readReal(47, &m_beta, 1.0f);
         d.readS32(48, &m_symbolSpan, 6);
         d.readBool(51, &m_udpEnabled);
         d.readString(52, &m_udpAddress, "127.0.0.1");
