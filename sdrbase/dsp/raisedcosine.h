@@ -40,7 +40,7 @@ public:
     void create(double beta, int symbolSpan, int samplesPerSymbol, bool normaliseUpsampledAmplitude = false)
     {
         int nTaps = symbolSpan * samplesPerSymbol + 1;
-        int i, j;
+        int i;
 
         // check constraints
         if(!(nTaps & 1)) {

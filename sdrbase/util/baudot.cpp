@@ -307,7 +307,7 @@ bool BaudotEncoder::encode(QChar c, unsigned &bits, unsigned int &bitCount)
         // Look for character in other pages
         const QString switchPage[] = { ">", "<", "\0" };
 
-        for (int page = m_page == LETTERS ? 1 : 0; page < (m_characterSet == Baudot::RUSSIAN) ? 3 : 2; page++)
+        for (int page = m_page == LETTERS ? 1 : 0; page < ((m_characterSet == Baudot::RUSSIAN) ? 3 : 2); page++)
         {
             if (m_chars[page].contains(s))
             {

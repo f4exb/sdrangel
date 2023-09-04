@@ -420,10 +420,9 @@ void RttyModSource::encodeText(const QString& text)
     {
         unsigned bits;
         unsigned bitCount;
-        bool error;
 
-        error = m_rttyEncoder.encode(s[i], bits, bitCount);
-        for (int j = 0; j < bitCount; j++)
+        m_rttyEncoder.encode(s[i], bits, bitCount);
+        for (unsigned int j = 0; j < bitCount; j++)
         {
             int txBit = (bits >> j) & 1;
             addBit(txBit);
