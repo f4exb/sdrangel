@@ -329,6 +329,8 @@ void NavtexDemodSink::receiveBit(bool bit)
                 m_gotSOP = true;
                 m_bitCount = 0;
                 m_sitorBDecoder.init();
+                m_rssiMagSqSum = 0.0;
+                m_rssiMagSqCount = 0;
             }
             else
             {

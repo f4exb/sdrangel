@@ -227,6 +227,8 @@ void DSCDemodSink::receiveBit(bool bit)
                     m_dscDecoder.init(m_phasingPatterns[i].m_offset);
                     m_gotSOP = true;
                     m_bitCount = 0;
+                    m_rssiMagSqSum = 0.0;
+                    m_rssiMagSqCount = 0;
                     break;
                 }
             }
