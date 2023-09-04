@@ -43,7 +43,7 @@ RttyModSource::RttyModSource() :
  {
     m_bits.append(0);
     m_lowpass.create(301, m_channelSampleRate, 400.0 / 2.0);
-    m_pulseShape.create(0.5, 6, m_channelSampleRate/45.45);
+    m_pulseShape.create(0.5, 6, m_channelSampleRate / 45.45, true);
 
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
@@ -121,7 +121,7 @@ void RttyModSource::sampleToSpectrum(Complex sample)
 
 void RttyModSource::modulateSample()
 {
-    Real audioMod;
+    Real mod;
 
     if (m_sampleIdx == 0)
     {
@@ -154,18 +154,18 @@ void RttyModSource::modulateSample()
     if (m_settings.m_pulseShaping)
     {
         if (m_sampleIdx == 1) {
-            audioMod = m_pulseShape.filter(m_bit ? 1.0f : -1.0f);
+            mod = m_pulseShape.filter(m_bit ? 1.0f : -1.0f);
         } else {
-            audioMod = m_pulseShape.filter(0.0f);
+            mod = m_pulseShape.filter(0.0f);
         }
     }
     else
     {
-        audioMod = m_bit ? 1.0f : -1.0f;
+        mod = m_bit ? 1.0f : -1.0f;
     }
 
     // FM
-    m_fmPhase += m_phaseSensitivity * audioMod * (m_settings.m_spaceHigh ? -1.0f : 1.0f);
+    m_fmPhase += m_phaseSensitivity * mod * (m_settings.m_spaceHigh ? -1.0f : 1.0f);
     // Keep phase in range -pi,pi
     if (m_fmPhase > M_PI) {
         m_fmPhase -= 2.0f * M_PI;
@@ -194,7 +194,8 @@ void RttyModSource::modulateSample()
     Real s = std::real(m_modSample);
     calculateLevel(s);
 
-    m_demodBuffer[m_demodBufferFill] = audioMod * std::numeric_limits<int16_t>::max();
+    // Send to demod analyser
+    m_demodBuffer[m_demodBufferFill] = mod * std::numeric_limits<int16_t>::max();
     ++m_demodBufferFill;
 
     if (m_demodBufferFill >= m_demodBuffer.size())
@@ -258,7 +259,7 @@ void RttyModSource::applySettings(const RttyModSettings& settings, bool force)
                 << " symbolSpan: " << settings.m_symbolSpan
                 << " channelSampleRate:" << m_channelSampleRate
                 << " baud:" << settings.m_baud;
-        m_pulseShape.create(settings.m_beta, m_settings.m_symbolSpan, m_channelSampleRate/settings.m_baud);
+        m_pulseShape.create(settings.m_beta, settings.m_symbolSpan, m_channelSampleRate/settings.m_baud, true);
     }
 
     if ((settings.m_characterSet != m_settings.m_characterSet) || force) {
@@ -302,7 +303,7 @@ void RttyModSource::applyChannelSettings(int channelSampleRate, int channelFrequ
                 << " symbolSpan: " << m_settings.m_symbolSpan
                 << " channelSampleRate:" << m_channelSampleRate
                 << " baud:" << m_settings.m_baud;
-        m_pulseShape.create(m_settings.m_beta, m_settings.m_symbolSpan, channelSampleRate/m_settings.m_baud);
+        m_pulseShape.create(m_settings.m_beta, m_settings.m_symbolSpan, channelSampleRate/m_settings.m_baud, true);
     }
 
     if ((m_channelSampleRate != channelSampleRate) || force)

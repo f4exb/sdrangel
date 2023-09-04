@@ -2,7 +2,10 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to transmit RTTY encoded text.
+This plugin can be used to modulate RTTY (Radioteletype) encoded text.
+RTTY uses BFSK (Binary Frequency Shift Keying), where transmission of data alternates between two frequencies,
+the mark frequency and the space frequency. The RTTY Modulator should be centered in between these frequencies.
+The baud rate, frequency shift (difference between mark and space frequencies), filter bandwidth and baudot character set are configurable.
 
 <h2>Interface</h2>
 
@@ -64,7 +67,14 @@ UDP port number to receive text to be transmitted on.
 
 <h3>13: Baudot Character Set</h3>
 
-Specifies the Baudot character set used to encode the text to transmit.
+Specifies the Baudot character set used to encode the text to transmit. The following character sets are supported:
+
+* ITA 2
+* UK
+* European
+* US
+* Russian
+* Murray
 
 <h3>14: Bit Ordering</h3>
 
@@ -90,11 +100,20 @@ Press to clear the transmitted text.
 
 Enter text to transmit. Pressing return will transmit the text and clear this field. Press the arrow to display and select a list of pre-defined text or previously transmitted text to enter in to the field.
 
+The list of pre-defined text can be customised via the Transmit Settings dialog (20).
+
 <h3>20: TX</h3>
 
-Press to transmits the current text. The text field will not be cleared.
+Press to transmit the current text. The text field will not be cleared.
 
-Right click to open a dialog to adjust additional transmitter settings.
+Right click to open a dialog to adjust additional Transmit Settings, including the list of pre-defined text.
+
+Predefined text supports the following variable substitutions:
+
+* ${callsign} - Gets replaced with the station name from Preferences > My Position
+* ${location} = Gets replaced with the Maidenhead locator for the position specified under Preferences > My Position
+
+The substitutions are applied when the Transmit Settings dialog is closed.
 
 <h2>API</h2>
 
