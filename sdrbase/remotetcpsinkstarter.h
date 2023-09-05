@@ -26,7 +26,7 @@ class SDRBASE_API RemoteTCPSinkStarter {
 public:
     static void listAvailableDevices();
     static void start(const MainParser& parser);
-    
+
 };
 
 #endif /* REMOTETCPSINKSTARTER_H */

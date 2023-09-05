@@ -81,7 +81,7 @@ static void startRemoteTCPSink(const QString& address, int port, const QString& 
     }
 
     // Create DeviceSet
-    int deviceSetIndex = mainCore->getDeviceSets().size();
+    unsigned int deviceSetIndex = mainCore->getDeviceSets().size();
     MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(0);
     mainCore->getMainMessageQueue()->push(msg);
 

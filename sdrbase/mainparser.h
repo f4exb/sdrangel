@@ -39,10 +39,10 @@ public:
     const QString& getFFTWFWisdomFileName() const { return m_fftwfWindowFileName; }
     bool getRemoteTCPSink() const { return m_remoteTCPSink; }
     const QString& getRemoteTCPSinkAddressOption() const { return m_remoteTCPSinkAddress; }
-    const int getRemoteTCPSinkPortOption() const { return m_remoteTCPSinkPort; }
+    int getRemoteTCPSinkPortOption() const { return m_remoteTCPSinkPort; }
     const QString& getRemoteTCPSinkHWType() const { return m_remoteTCPSinkHWType; }
     const QString& getRemoteTCPSinkSerial() const { return m_remoteTCPSinkSerial; }
-    const bool getListDevices() const { return m_listDevices; }
+    bool getListDevices() const { return m_listDevices; }
 
 private:
     QString  m_serverAddress;
