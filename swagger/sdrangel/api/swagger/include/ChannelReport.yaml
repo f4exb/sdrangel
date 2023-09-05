@@ -81,6 +81,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/RadiosondeDemod.yaml#/RadiosondeDemodReport"
     RemoteSourceReport:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
+    RTTYModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/RTTYMod.yaml#/RTTYModReport"
     PacketDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/PacketDemod.yaml#/PacketDemodReport"
     PacketModReport:

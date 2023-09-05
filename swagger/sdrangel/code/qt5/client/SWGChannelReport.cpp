@@ -102,6 +102,8 @@ SWGChannelReport::SWGChannelReport() {
     m_radiosonde_demod_report_isSet = false;
     remote_source_report = nullptr;
     m_remote_source_report_isSet = false;
+    rtty_mod_report = nullptr;
+    m_rtty_mod_report_isSet = false;
     packet_demod_report = nullptr;
     m_packet_demod_report_isSet = false;
     packet_mod_report = nullptr;
@@ -204,6 +206,8 @@ SWGChannelReport::init() {
     m_radiosonde_demod_report_isSet = false;
     remote_source_report = new SWGRemoteSourceReport();
     m_remote_source_report_isSet = false;
+    rtty_mod_report = new SWGRTTYModReport();
+    m_rtty_mod_report_isSet = false;
     packet_demod_report = new SWGPacketDemodReport();
     m_packet_demod_report_isSet = false;
     packet_mod_report = new SWGPacketModReport();
@@ -337,6 +341,9 @@ SWGChannelReport::cleanup() {
     if(remote_source_report != nullptr) { 
         delete remote_source_report;
     }
+    if(rtty_mod_report != nullptr) { 
+        delete rtty_mod_report;
+    }
     if(packet_demod_report != nullptr) { 
         delete packet_demod_report;
     }
@@ -453,6 +460,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&radiosonde_demod_report, pJson["RadiosondeDemodReport"], "SWGRadiosondeDemodReport", "SWGRadiosondeDemodReport");
     
     ::SWGSDRangel::setValue(&remote_source_report, pJson["RemoteSourceReport"], "SWGRemoteSourceReport", "SWGRemoteSourceReport");
+    
+    ::SWGSDRangel::setValue(&rtty_mod_report, pJson["RTTYModReport"], "SWGRTTYModReport", "SWGRTTYModReport");
     
     ::SWGSDRangel::setValue(&packet_demod_report, pJson["PacketDemodReport"], "SWGPacketDemodReport", "SWGPacketDemodReport");
     
@@ -600,6 +609,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((remote_source_report != nullptr) && (remote_source_report->isSet())){
         toJsonValue(QString("RemoteSourceReport"), remote_source_report, obj, QString("SWGRemoteSourceReport"));
+    }
+    if((rtty_mod_report != nullptr) && (rtty_mod_report->isSet())){
+        toJsonValue(QString("RTTYModReport"), rtty_mod_report, obj, QString("SWGRTTYModReport"));
     }
     if((packet_demod_report != nullptr) && (packet_demod_report->isSet())){
         toJsonValue(QString("PacketDemodReport"), packet_demod_report, obj, QString("SWGPacketDemodReport"));
@@ -1005,6 +1017,16 @@ SWGChannelReport::setRemoteSourceReport(SWGRemoteSourceReport* remote_source_rep
     this->m_remote_source_report_isSet = true;
 }
 
+SWGRTTYModReport*
+SWGChannelReport::getRttyModReport() {
+    return rtty_mod_report;
+}
+void
+SWGChannelReport::setRttyModReport(SWGRTTYModReport* rtty_mod_report) {
+    this->rtty_mod_report = rtty_mod_report;
+    this->m_rtty_mod_report_isSet = true;
+}
+
 SWGPacketDemodReport*
 SWGChannelReport::getPacketDemodReport() {
     return packet_demod_report;
@@ -1219,6 +1241,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(remote_source_report && remote_source_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rtty_mod_report && rtty_mod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(packet_demod_report && packet_demod_report->isSet()){

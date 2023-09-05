@@ -4643,7 +4643,12 @@ bool WebAPIRequestMapper::getChannelSettings(
         {
             channelSettings->setRttyDemodSettings(new SWGSDRangel::SWGRTTYDemodSettings());
             channelSettings->getRttyDemodSettings()->fromJsonObject(settingsJsonObject);
-        }
+            }
+        else if (channelSettingsKey == "RTTYModSettings")
+        {
+            channelSettings->setRttyModSettings(new SWGSDRangel::SWGRTTYModSettings());
+            channelSettings->getRttyModSettings()->fromJsonObject(settingsJsonObject);
+            }
         else if (channelSettingsKey == "SigMFFileSinkSettings")
         {
             channelSettings->setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
@@ -4750,6 +4755,11 @@ bool WebAPIRequestMapper::getChannelActions(
         {
             channelActions->setPacketModActions(new SWGSDRangel::SWGPacketModActions());
             channelActions->getPacketModActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "RTTYModActions")
+        {
+            channelActions->setRttyModActions(new SWGSDRangel::SWGRTTYModActions());
+            channelActions->getRttyModActions()->fromJsonObject(actionsJsonObject);
         }
         else if (channelActionsKey == "SigMFFileSinkActions")
         {
@@ -5432,6 +5442,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setRemoteSourceSettings(nullptr);
     channelSettings.setRemoteTcpSinkSettings(nullptr);
     channelSettings.setRttyDemodSettings(nullptr);
+    channelSettings.setRttyModSettings(nullptr);
     channelSettings.setSsbDemodSettings(nullptr);
     channelSettings.setSsbModSettings(nullptr);
     channelSettings.setUdpSourceSettings(nullptr);
@@ -5468,6 +5479,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setRadiosondeDemodReport(nullptr);
     channelReport.setRemoteSourceReport(nullptr);
     channelReport.setRttyDemodReport(nullptr);
+    channelReport.setRttyModReport(nullptr);
     channelReport.setSsbDemodReport(nullptr);
     channelReport.setSsbModReport(nullptr);
     channelReport.setUdpSourceReport(nullptr);
@@ -5488,6 +5500,7 @@ void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& ch
     channelActions.setIeee802154ModActions(nullptr);
     channelActions.setRadioAstronomyActions(nullptr);
     channelActions.setPacketModActions(nullptr);
+    channelActions.setRttyModActions(nullptr);
 }
 
 void WebAPIRequestMapper::resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice)

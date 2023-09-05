@@ -88,6 +88,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_ft8_demod_settings_isSet = false;
     rtty_demod_settings = nullptr;
     m_rtty_demod_settings_isSet = false;
+    rtty_mod_settings = nullptr;
+    m_rtty_mod_settings_isSet = false;
     heat_map_settings = nullptr;
     m_heat_map_settings_isSet = false;
     ils_demod_settings = nullptr;
@@ -214,6 +216,8 @@ SWGChannelSettings::init() {
     m_ft8_demod_settings_isSet = false;
     rtty_demod_settings = new SWGRTTYDemodSettings();
     m_rtty_demod_settings_isSet = false;
+    rtty_mod_settings = new SWGRTTYModSettings();
+    m_rtty_mod_settings_isSet = false;
     heat_map_settings = new SWGHeatMapSettings();
     m_heat_map_settings_isSet = false;
     ils_demod_settings = new SWGILSDemodSettings();
@@ -359,6 +363,9 @@ SWGChannelSettings::cleanup() {
     }
     if(rtty_demod_settings != nullptr) { 
         delete rtty_demod_settings;
+    }
+    if(rtty_mod_settings != nullptr) { 
+        delete rtty_mod_settings;
     }
     if(heat_map_settings != nullptr) { 
         delete heat_map_settings;
@@ -519,6 +526,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ft8_demod_settings, pJson["FT8DemodSettings"], "SWGFT8DemodSettings", "SWGFT8DemodSettings");
     
     ::SWGSDRangel::setValue(&rtty_demod_settings, pJson["RTTYDemodSettings"], "SWGRTTYDemodSettings", "SWGRTTYDemodSettings");
+    
+    ::SWGSDRangel::setValue(&rtty_mod_settings, pJson["RTTYModSettings"], "SWGRTTYModSettings", "SWGRTTYModSettings");
     
     ::SWGSDRangel::setValue(&heat_map_settings, pJson["HeatMapSettings"], "SWGHeatMapSettings", "SWGHeatMapSettings");
     
@@ -683,6 +692,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((rtty_demod_settings != nullptr) && (rtty_demod_settings->isSet())){
         toJsonValue(QString("RTTYDemodSettings"), rtty_demod_settings, obj, QString("SWGRTTYDemodSettings"));
+    }
+    if((rtty_mod_settings != nullptr) && (rtty_mod_settings->isSet())){
+        toJsonValue(QString("RTTYModSettings"), rtty_mod_settings, obj, QString("SWGRTTYModSettings"));
     }
     if((heat_map_settings != nullptr) && (heat_map_settings->isSet())){
         toJsonValue(QString("HeatMapSettings"), heat_map_settings, obj, QString("SWGHeatMapSettings"));
@@ -1075,6 +1087,16 @@ SWGChannelSettings::setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settin
     this->m_rtty_demod_settings_isSet = true;
 }
 
+SWGRTTYModSettings*
+SWGChannelSettings::getRttyModSettings() {
+    return rtty_mod_settings;
+}
+void
+SWGChannelSettings::setRttyModSettings(SWGRTTYModSettings* rtty_mod_settings) {
+    this->rtty_mod_settings = rtty_mod_settings;
+    this->m_rtty_mod_settings_isSet = true;
+}
+
 SWGHeatMapSettings*
 SWGChannelSettings::getHeatMapSettings() {
     return heat_map_settings;
@@ -1458,6 +1480,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(rtty_demod_settings && rtty_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rtty_mod_settings && rtty_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(heat_map_settings && heat_map_settings->isSet()){

@@ -154,8 +154,8 @@ void RttyDemodSink::processOneSample(Complex &ci)
     m_expIdx = (m_expIdx + 1) % m_expLength;
     //Complex exp = m_exp[m_sampleIdx];
     //qDebug() << "IQ " << real(ci) << imag(ci);
-    Complex corr1 = ci * exp;
-    Complex corr2 = ci * std::conj(exp);
+    Complex corr1 = ci * std::conj(exp);    // Conj is high/mark freq (as for matched filter, we need to time reverse and take conjugate)
+    Complex corr2 = ci * exp;               // Low/space freq
 
     // Filter
     Real abs1, abs2;
@@ -238,6 +238,8 @@ void RttyDemodSink::processOneSample(Complex &ci)
             m_clockCount = 0;
             m_clock = false;
             m_cycleCount = 0;
+            m_rssiMagSqSum = 0.0;
+            m_rssiMagSqCount = 0;
         }
     }
     else

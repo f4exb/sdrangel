@@ -40,7 +40,7 @@ public:
     void create(double beta, int symbolSpan, int samplesPerSymbol, bool normaliseUpsampledAmplitude = false)
     {
         int nTaps = symbolSpan * samplesPerSymbol + 1;
-        int i, j;
+        int i;
 
         // check constraints
         if(!(nTaps & 1)) {
@@ -89,18 +89,38 @@ public:
         else
         {
             // Calculate maximum output of filter, assuming upsampled bipolar input E.g. [1 0 0 -1 0 0..]
-            // This doesn't necessarily include the centre tap, so we try each offset
-            double maxGain = 0.0;
-            for (i = 0; i < samplesPerSymbol; i++)
+            // This doesn't necessarily include the centre tap, as ISI there should be zero,
+            // it's often at the midpoint between two symbols. However, depending on beta,
+            // the input that produces the worst case can vary, so we currently try them all
+            double maxGain = 0;
+            for (int input = 0; input < (1 << symbolSpan); input++)
             {
-                double g = 0.0;
-                for (j = 0; j < (int)m_taps.size() - 1; j += samplesPerSymbol)
-                    g += std::fabs(2.0 * m_taps[j]);
-                if ((i & 1) == 0)
-                    g += std::fabs(m_taps[j]);
-                if (g > maxGain)
-                    maxGain = g;
+                double maxV = 0;
+                for(int i = 0; i < nTaps; i++) {
+                    m_samples[i] = 0;
+                }
+                for (int i = 0; i < symbolSpan; i++)
+                {
+                    Type sym = (input >> i) & 1 ? 1 : -1;
+                    for (int j = 0; j < samplesPerSymbol; j++)
+                    {
+                        Type out;
+                        if (j == 1) {
+                            out = filter(sym);
+                        } else {
+                            out = filter(0);
+                        }
+                        double outAbs = abs(out);
+                        if (outAbs > maxV) {
+                            maxV = outAbs;
+                        }
+                    }
+                }
+                if (maxV > maxGain) {
+                    maxGain = maxV;
+                }
             }
+
             // Scale up so maximum out is 1
             for(i = 0; i < (int)m_taps.size(); i++)
                 m_taps[i] /= maxGain;

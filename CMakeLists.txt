@@ -107,6 +107,7 @@ option(ENABLE_CHANNELTX_MODATV "Enable channeltx modatv plugin" ON)
 option(ENABLE_CHANNELTX_MOD802.15.4 "Enable channeltx mod802.15.4 plugin" ON)
 option(ENABLE_CHANNELTX_REMOTESOURCE "Enable channeltx remotesource plugin" ON)
 option(ENABLE_CHANNELTX_FILESOURCE "Enable channeltx filesource plugin" ON)
+option(ENABLE_CHANNELTX_MODRTTY "Enable channeltx modrtty plugin" ON)
 
 # Channel MIMO enablers
 option(ENABLE_CHANNELMIMO "Enable channelmimo plugins" ON)

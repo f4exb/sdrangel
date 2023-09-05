@@ -3484,6 +3484,9 @@ margin-bottom: 20px;
     "RadioAstronomyActions" : {
       "$ref" : "#/definitions/RadioAstronomyActions"
     },
+    "RTTYModActions" : {
+      "$ref" : "#/definitions/RTTYModActions"
+    },
     "SigMFFileSinkActions" : {
       "$ref" : "#/definitions/SigMFFileSinkActions"
     }
@@ -3773,6 +3776,9 @@ margin-bottom: 20px;
     "RemoteSourceReport" : {
       "$ref" : "#/definitions/RemoteSourceReport"
     },
+    "RTTYModReport" : {
+      "$ref" : "#/definitions/RTTYModReport"
+    },
     "PacketDemodReport" : {
       "$ref" : "#/definitions/PacketDemodReport"
     },
@@ -3903,6 +3909,9 @@ margin-bottom: 20px;
     },
     "RTTYDemodSettings" : {
       "$ref" : "#/definitions/RTTYDemodSettings"
+    },
+    "RTTYModSettings" : {
+      "$ref" : "#/definitions/RTTYModSettings"
     },
     "HeatMapSettings" : {
       "$ref" : "#/definitions/HeatMapSettings"
@@ -5895,7 +5904,8 @@ margin-bottom: 20px;
     },
     "bandwidth" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "bandwidth ratio [0.0, 1.0]"
     }
   },
   "description" : "FFT filter band definition"
@@ -7269,11 +7279,13 @@ margin-bottom: 20px;
       "description" : "Identifier of the channel or feature plugin providing azimuth and elevation (E.g. R0:0 ADSBDemod)"
     },
     "azimuthOffset" : {
-      "type" : "integer",
+      "type" : "number",
+      "format" : "float",
       "description" : "Azimuth offset in degrees"
     },
     "elevationOffset" : {
-      "type" : "integer",
+      "type" : "number",
+      "format" : "float",
       "description" : "Elevation offset in degrees"
     },
     "azimuthMin" : {
@@ -8960,7 +8972,7 @@ margin-bottom: 20px;
     },
     "fftOn" : {
       "type" : "integer",
-      "description" : "Activate FFT multiband filter\n  * 0 - do not run flter\n  * 1 - run filter\n"
+      "description" : "Activate FFT multiband filter\n  * 0 - do not run filter\n  * 1 - run filter\n"
     },
     "log2FFT" : {
       "type" : "integer",
@@ -8977,7 +8989,8 @@ margin-bottom: 20px;
       }
     },
     "reverseFilter" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "* 0 - band definitions are bandpass * 1 - band definitions are band reject\n"
     },
     "streamIndex" : {
       "type" : "integer",
@@ -9446,7 +9459,8 @@ margin-bottom: 20px;
       "description" : "Angle to rotate the image by"
     },
     "text" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "Text to draw on the map when item is selected"
     },
     "latitude" : {
       "type" : "number",
@@ -9519,7 +9533,7 @@ margin-bottom: 20px;
     "labelAltitudeOffset" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Veritical offset to position label at"
+      "description" : "Vertical offset to position label at"
     },
     "modelAltitudeOffset" : {
       "type" : "number",
@@ -9605,7 +9619,8 @@ margin-bottom: 20px;
       "description" : "Angle to rotate the image by"
     },
     "text" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "Text to draw on the map when item is selected"
     },
     "latitude" : {
       "type" : "number",
@@ -9678,7 +9693,7 @@ margin-bottom: 20px;
     "labelAltitudeOffset" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Veritical offset to position label at"
+      "description" : "Vertical offset to position label at"
     },
     "modelAltitudeOffset" : {
       "type" : "number",
@@ -11747,6 +11762,155 @@ margin-bottom: 20px;
     }
   },
   "description" : "ACARSDemod"
+};
+            defs.RTTYModActions = {
+  "properties" : {
+    "tx" : {
+      "type" : "integer",
+      "description" : "Transmit current text\n  * 0 - Do nothing\n  * 1 - Transmit\n"
+    },
+    "payload" : {
+      "$ref" : "#/definitions/RTTYModActions_payload"
+    }
+  },
+  "description" : "RTTYMod"
+};
+            defs.RTTYModActions_payload = {
+  "properties" : {
+    "text" : {
+      "type" : "string"
+    }
+  }
+};
+            defs.RTTYModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "RTTYMod"
+};
+            defs.RTTYModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "baud" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Baud rate"
+    },
+    "rfBandwidth" : {
+      "type" : "integer"
+    },
+    "frequencyShift" : {
+      "type" : "integer"
+    },
+    "gain" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "channelMute" : {
+      "type" : "integer"
+    },
+    "repeat" : {
+      "type" : "integer"
+    },
+    "repeatCount" : {
+      "type" : "integer"
+    },
+    "lpfTaps" : {
+      "type" : "integer"
+    },
+    "rfNoise" : {
+      "type" : "integer",
+      "description" : "Boolean\n  * 0 - off\n  * 1 - on\n"
+    },
+    "text" : {
+      "type" : "string",
+      "description" : "Text to transmit"
+    },
+    "pulseShaping" : {
+      "type" : "integer",
+      "description" : "Boolean\n  * 0 - off\n  * 1 - on\n"
+    },
+    "beta" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "symbolSpan" : {
+      "type" : "integer"
+    },
+    "characterSet" : {
+      "type" : "integer"
+    },
+    "unshiftOnSpace" : {
+      "type" : "integer"
+    },
+    "msbFirst" : {
+      "type" : "integer"
+    },
+    "spaceHigh" : {
+      "type" : "integer"
+    },
+    "prefixCRLF" : {
+      "type" : "integer"
+    },
+    "postfixCRLF" : {
+      "type" : "integer"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to receive text to transmit on specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to receive text to transmit via"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to receive text to transmit via"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "RTTYMod"
 };
             defs.RadioAstronomyActions = {
   "properties" : {
@@ -14449,15 +14613,18 @@ margin-bottom: 20px;
     },
     "b" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Galactic latitude in degrees"
     },
     "l" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Galactic longitude in degrees"
     },
     "d" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Distance to object from Sun in kpc"
     }
   },
   "description" : "Details of object to display in Star Tracker line-of-sight view. Can be sent by other plugins to startracker.display message queue"
@@ -14469,15 +14636,18 @@ margin-bottom: 20px;
     },
     "b" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Galactic latitude in degrees"
     },
     "l" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Galactic longitude in degrees"
     },
     "d" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Distance to object from Sun in kpc"
     }
   },
   "description" : "Details of object to display in Star Tracker line-of-sight view. Can be sent by other plugins to startracker.display message queue"
@@ -14490,11 +14660,13 @@ margin-bottom: 20px;
     },
     "azimuth" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "The azimuth angle in degrees to the target"
     },
     "elevation" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "The elevation angle in degrees to the target"
     }
   },
   "description" : "Settings to display in Star Tracker. Can be sent by other plugins to startracker.display message queue."
@@ -14507,11 +14679,13 @@ margin-bottom: 20px;
     },
     "azimuth" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "The azimuth angle in degrees to the target"
     },
     "elevation" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "The elevation angle in degrees to the target"
     }
   },
   "description" : "Settings to display in Star Tracker. Can be sent by other plugins to startracker.display message queue."
@@ -14595,7 +14769,7 @@ margin-bottom: 20px;
     "temperature" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Air temperature in Celsuis, for refraction"
+      "description" : "Air temperature in Celsius, for refraction"
     },
     "humidity" : {
       "type" : "number",
@@ -14618,7 +14792,8 @@ margin-bottom: 20px;
       "description" : "Frequency of radio waves being observed in MHz"
     },
     "stellariumServerEnabled" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Enable Stellarium server (1 for yes, 0 for no)"
     },
     "stellariumPort" : {
       "type" : "integer",
@@ -14676,15 +14851,18 @@ margin-bottom: 20px;
             defs.StarTrackerTarget = {
   "properties" : {
     "name" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "The name of the target"
     },
     "azimuth" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "The azimuth angle in degrees to the target"
     },
     "elevation" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "The elevation angle in degrees to the target"
     },
     "ra" : {
       "type" : "number",
@@ -14698,11 +14876,13 @@ margin-bottom: 20px;
     },
     "b" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Galactic latitude in degrees"
     },
     "l" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Galactic longitude in degrees"
     },
     "earthRotationVelocity" : {
       "type" : "number",
@@ -14745,15 +14925,18 @@ margin-bottom: 20px;
             defs.StarTrackerTarget_2 = {
   "properties" : {
     "name" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "The name of the target"
     },
     "azimuth" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "The azimuth angle in degrees to the target"
     },
     "elevation" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "The elevation angle in degrees to the target"
     },
     "ra" : {
       "type" : "number",
@@ -14767,11 +14950,13 @@ margin-bottom: 20px;
     },
     "b" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Galactic latitude in degrees"
     },
     "l" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Galactic longitude in degrees"
     },
     "earthRotationVelocity" : {
       "type" : "number",
@@ -14822,15 +15007,18 @@ margin-bottom: 20px;
             defs.TargetAzimuthElevation = {
   "properties" : {
     "name" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "The name of the target"
     },
     "azimuth" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "The azimuth angle in degrees to the target"
     },
     "elevation" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "The elevation angle in degrees to the target"
     }
   },
   "description" : "A target azimuth and elevation"
@@ -22563,7 +22751,7 @@ $(document).ready(function() {
 
 
                           <h2>Responses</h2>
-                            <h3> Status: 202 - On successful semding of the message it returns the details of the device being set </h3>
+                            <h3> Status: 202 - On successful sending of the message it returns the details of the device being set </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -22578,7 +22766,7 @@ $(document).ready(function() {
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "On successful semding of the message it returns the details of the device being set",
+  "description" : "On successful sending of the message it returns the details of the device being set",
   "schema" : {
     "$ref" : "#/definitions/DeviceListItem"
   }
@@ -31220,7 +31408,7 @@ $(document).ready(function() {
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Apply main spectrum settings unconditionnaly (force)</p>
+                        <p class="marked">Apply main spectrum settings unconditionally (force)</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/spectrum/settings</span></code></pre>
@@ -41339,7 +41527,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Delete audio input device paramaters and return to defaults</p>
+                        <p class="marked">Delete audio input device parameters and return to defaults</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/audio/input/parameters</span></code></pre>
@@ -41769,7 +41957,7 @@ $(document).ready(function() {
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Set audio input device paramaters</p>
+                        <p class="marked">Set audio input device parameters</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrangel/audio/input/parameters</span></code></pre>
@@ -42534,7 +42722,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Delete audio output device paramaters and return to defaults</p>
+                        <p class="marked">Delete audio output device parameters and return to defaults</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/audio/output/parameters</span></code></pre>
@@ -52246,7 +52434,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Change logging parmeters for this instance</p>
+                        <p class="marked">Change logging parameters for this instance</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/logging</span></code></pre>
@@ -57806,7 +57994,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-07-09T18:31:34.285+02:00
+              Generated 2023-09-01T21:10:19.928+02:00
             </div>
           </div>
       </div>

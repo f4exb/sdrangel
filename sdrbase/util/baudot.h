@@ -38,18 +38,18 @@ public:
     };
 
     // QString used for fractions in figure set
-    static const QString m_ita2Letter[];
-    static const QString m_ita2Figure[];
-    static const QString m_ukLetter[];
-    static const QString m_ukFigure[];
-    static const QString m_europeanLetter[];
-    static const QString m_europeanFigure[];
-    static const QString m_usLetter[];
-    static const QString m_usFigure[];
-    static const QString m_russianLetter[];
-    static const QString m_russianFigure[];
-    static const QString m_murrayLetter[];
-    static const QString m_murrayFigure[];
+    static const QStringList m_ita2Letter;
+    static const QStringList m_ita2Figure;
+    static const QStringList m_ukLetter;
+    static const QStringList m_ukFigure;
+    static const QStringList m_europeanLetter;
+    static const QStringList m_europeanFigure;
+    static const QStringList m_usLetter;
+    static const QStringList m_usFigure;
+    static const QStringList m_russianLetter;
+    static const QStringList m_russianFigure;
+    static const QStringList m_murrayLetter;
+    static const QStringList m_murrayFigure;
 
 };
 
@@ -58,7 +58,7 @@ class SDRBASE_API BaudotDecoder {
 public:
 
     BaudotDecoder();
-    void setCharacterSet(Baudot::CharacterSet characterSet=Baudot::ITA2);
+    void setCharacterSet(Baudot::CharacterSet characterSet = Baudot::ITA2);
     void setUnshiftOnSpace(bool unshiftOnSpace);
     void init();
     QString decode(char bits);
@@ -67,9 +67,45 @@ private:
 
     Baudot::CharacterSet m_characterSet;
     bool m_unshiftOnSpace;
-    const QString *m_letters;
-    const QString *m_figures;
+    QStringList m_letters;
+    QStringList m_figures;
     bool m_figure;
+
+};
+
+class SDRBASE_API BaudotEncoder {
+
+public:
+
+    BaudotEncoder();
+    void setCharacterSet(Baudot::CharacterSet characterSet = Baudot::ITA2);
+    void setUnshiftOnSpace(bool unshiftOnSpace);
+    void setMsbFirst(bool msbFirst);
+    void setStartBits(int startBits);
+    void setStopBits(int stopBits);
+    void init();
+    bool encode(QChar c, unsigned& bits, unsigned int &bitCount);
+
+private:
+
+    void addCode(unsigned& bits, unsigned int& bitCount, unsigned int code) const;
+    void addStartBits(unsigned int& bits, unsigned int& bitCount) const;
+    void addStopBits(unsigned int& bits, unsigned int& bitCount) const;
+    void addBits(unsigned int& bits, unsigned int& bitCount, int data, int count) const;
+    unsigned reverseBits(unsigned int bits, unsigned int count) const;
+    static unsigned reverse(unsigned int bits);
+
+    Baudot::CharacterSet m_characterSet;
+    bool m_unshiftOnSpace;
+    QStringList m_chars[3];
+    enum Page {
+        LETTERS,
+        FIGURES,
+        CYRILLIC
+    } m_page;
+    bool m_msbFirst;
+    int m_startBits;
+    int m_stopBits;
 
 };
 
