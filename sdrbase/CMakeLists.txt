@@ -252,6 +252,7 @@ set(sdrbase_SOURCES
     util/png.cpp
     util/prettyprint.cpp
     util/profiler.cpp
+    util/psk31.cpp
     util/radiosonde.cpp
     util/rtpsink.cpp
     util/syncmessenger.cpp
@@ -491,6 +492,7 @@ set(sdrbase_HEADERS
     util/png.h
     util/prettyprint.h
     util/profiler.h
+    util/psk31.h
     util/radiosonde.h
     util/rtpsink.h
     util/rtty.h

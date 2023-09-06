@@ -53,8 +53,6 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
     FT8DemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/FT8Demod.yaml#/FT8DemodReport"
-    RTTYDemodReport:
-      $ref: "http://swgserver:8081/api/swagger/include/RTTYDemod.yaml#/RTTYDemodReport"
     HeatMapReport:
       $ref: "http://swgserver:8081/api/swagger/include/HeatMap.yaml#/HeatMapReport"
     ILSDemodReport:
@@ -81,6 +79,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/RadiosondeDemod.yaml#/RadiosondeDemodReport"
     RemoteSourceReport:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
+    RTTYDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/RTTYDemod.yaml#/RTTYDemodReport"
     RTTYModReport:
       $ref: "http://swgserver:8081/api/swagger/include/RTTYMod.yaml#/RTTYModReport"
     PacketDemodReport:
@@ -89,6 +89,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/PacketMod.yaml#/PacketModReport"
     PagerDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/PagerDemod.yaml#/PagerDemodReport"
+    PSK31ModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/PSK31Mod.yaml#/PSK31ModReport"
     SigMFFileSinkReport:
       $ref: "http://swgserver:8081/api/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkReport"
     SSBModReport:

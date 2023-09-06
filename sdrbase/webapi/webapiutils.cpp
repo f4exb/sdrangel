@@ -63,6 +63,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.packetdemod", "PacketDemodSettings"},
     {"sdrangel.channel.pagerdemod", "PagerDemodSettings"},
     {"sdrangel.channeltx.modpacket", "PacketModSettings"},
+    {"sdrangel.channel.psk31mod", "PSK31ModSettings"},
     {"sdrangel.channeltx.mod802.15.4", "IEEE_802_15_4_ModSettings"},
     {"sdrangel.channel.radioclock", "RadioClockSettings"},
     {"sdrangel.channel.radiosondedemod", "RadiosondeDemodSettings"},
@@ -178,6 +179,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"PacketDemod", "PacketDemodSettings"},
     {"PacketMod", "PacketModSettings"},
     {"PagerDemod", "PagerDemodSettings"},
+    {"PSK31Mod", "PSK31ModSettings"},
     {"LocalSink", "LocalSinkSettings"},
     {"LocalSource", "LocalSourceSettings"},
     {"RadioAstronomy", "RadioAstronomySettings"},
@@ -211,6 +213,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToActionsKey = {
     {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModActions"},
     {"RadioAstronomy", "RadioAstronomyActions"},
     {"PacketMod", "PacketModActions"},
+    {"PSK31Mod", "PSK31ModActions"},
     {"RTTYMod", "RTTYModActions"}
 };
 
