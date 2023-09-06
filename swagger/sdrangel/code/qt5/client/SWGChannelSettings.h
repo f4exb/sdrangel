@@ -59,6 +59,7 @@
 #include "SWGNFMModSettings.h"
 #include "SWGNavtexDemodSettings.h"
 #include "SWGNoiseFigureSettings.h"
+#include "SWGPSK31ModSettings.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGPacketModSettings.h"
 #include "SWGPagerDemodSettings.h"
@@ -185,12 +186,6 @@ public:
     SWGFT8DemodSettings* getFt8DemodSettings();
     void setFt8DemodSettings(SWGFT8DemodSettings* ft8_demod_settings);
 
-    SWGRTTYDemodSettings* getRttyDemodSettings();
-    void setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settings);
-
-    SWGRTTYModSettings* getRttyModSettings();
-    void setRttyModSettings(SWGRTTYModSettings* rtty_mod_settings);
-
     SWGHeatMapSettings* getHeatMapSettings();
     void setHeatMapSettings(SWGHeatMapSettings* heat_map_settings);
 
@@ -236,6 +231,9 @@ public:
     SWGPagerDemodSettings* getPagerDemodSettings();
     void setPagerDemodSettings(SWGPagerDemodSettings* pager_demod_settings);
 
+    SWGPSK31ModSettings* getPsk31ModSettings();
+    void setPsk31ModSettings(SWGPSK31ModSettings* psk31_mod_settings);
+
     SWGRadioAstronomySettings* getRadioAstronomySettings();
     void setRadioAstronomySettings(SWGRadioAstronomySettings* radio_astronomy_settings);
 
@@ -253,6 +251,12 @@ public:
 
     SWGRemoteTCPSinkSettings* getRemoteTcpSinkSettings();
     void setRemoteTcpSinkSettings(SWGRemoteTCPSinkSettings* remote_tcp_sink_settings);
+
+    SWGRTTYDemodSettings* getRttyDemodSettings();
+    void setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settings);
+
+    SWGRTTYModSettings* getRttyModSettings();
+    void setRttyModSettings(SWGRTTYModSettings* rtty_mod_settings);
 
     SWGSigMFFileSinkSettings* getSigMfFileSinkSettings();
     void setSigMfFileSinkSettings(SWGSigMFFileSinkSettings* sig_mf_file_sink_settings);
@@ -369,12 +373,6 @@ private:
     SWGFT8DemodSettings* ft8_demod_settings;
     bool m_ft8_demod_settings_isSet;
 
-    SWGRTTYDemodSettings* rtty_demod_settings;
-    bool m_rtty_demod_settings_isSet;
-
-    SWGRTTYModSettings* rtty_mod_settings;
-    bool m_rtty_mod_settings_isSet;
-
     SWGHeatMapSettings* heat_map_settings;
     bool m_heat_map_settings_isSet;
 
@@ -420,6 +418,9 @@ private:
     SWGPagerDemodSettings* pager_demod_settings;
     bool m_pager_demod_settings_isSet;
 
+    SWGPSK31ModSettings* psk31_mod_settings;
+    bool m_psk31_mod_settings_isSet;
+
     SWGRadioAstronomySettings* radio_astronomy_settings;
     bool m_radio_astronomy_settings_isSet;
 
@@ -437,6 +438,12 @@ private:
 
     SWGRemoteTCPSinkSettings* remote_tcp_sink_settings;
     bool m_remote_tcp_sink_settings_isSet;
+
+    SWGRTTYDemodSettings* rtty_demod_settings;
+    bool m_rtty_demod_settings_isSet;
+
+    SWGRTTYModSettings* rtty_mod_settings;
+    bool m_rtty_mod_settings_isSet;
 
     SWGSigMFFileSinkSettings* sig_mf_file_sink_settings;
     bool m_sig_mf_file_sink_settings_isSet;

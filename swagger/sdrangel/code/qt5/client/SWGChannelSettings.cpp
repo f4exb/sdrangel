@@ -86,10 +86,6 @@ SWGChannelSettings::SWGChannelSettings() {
     m_freq_tracker_settings_isSet = false;
     ft8_demod_settings = nullptr;
     m_ft8_demod_settings_isSet = false;
-    rtty_demod_settings = nullptr;
-    m_rtty_demod_settings_isSet = false;
-    rtty_mod_settings = nullptr;
-    m_rtty_mod_settings_isSet = false;
     heat_map_settings = nullptr;
     m_heat_map_settings_isSet = false;
     ils_demod_settings = nullptr;
@@ -120,6 +116,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_packet_mod_settings_isSet = false;
     pager_demod_settings = nullptr;
     m_pager_demod_settings_isSet = false;
+    psk31_mod_settings = nullptr;
+    m_psk31_mod_settings_isSet = false;
     radio_astronomy_settings = nullptr;
     m_radio_astronomy_settings_isSet = false;
     radio_clock_settings = nullptr;
@@ -132,6 +130,10 @@ SWGChannelSettings::SWGChannelSettings() {
     m_remote_source_settings_isSet = false;
     remote_tcp_sink_settings = nullptr;
     m_remote_tcp_sink_settings_isSet = false;
+    rtty_demod_settings = nullptr;
+    m_rtty_demod_settings_isSet = false;
+    rtty_mod_settings = nullptr;
+    m_rtty_mod_settings_isSet = false;
     sig_mf_file_sink_settings = nullptr;
     m_sig_mf_file_sink_settings_isSet = false;
     ssb_mod_settings = nullptr;
@@ -214,10 +216,6 @@ SWGChannelSettings::init() {
     m_freq_tracker_settings_isSet = false;
     ft8_demod_settings = new SWGFT8DemodSettings();
     m_ft8_demod_settings_isSet = false;
-    rtty_demod_settings = new SWGRTTYDemodSettings();
-    m_rtty_demod_settings_isSet = false;
-    rtty_mod_settings = new SWGRTTYModSettings();
-    m_rtty_mod_settings_isSet = false;
     heat_map_settings = new SWGHeatMapSettings();
     m_heat_map_settings_isSet = false;
     ils_demod_settings = new SWGILSDemodSettings();
@@ -248,6 +246,8 @@ SWGChannelSettings::init() {
     m_packet_mod_settings_isSet = false;
     pager_demod_settings = new SWGPagerDemodSettings();
     m_pager_demod_settings_isSet = false;
+    psk31_mod_settings = new SWGPSK31ModSettings();
+    m_psk31_mod_settings_isSet = false;
     radio_astronomy_settings = new SWGRadioAstronomySettings();
     m_radio_astronomy_settings_isSet = false;
     radio_clock_settings = new SWGRadioClockSettings();
@@ -260,6 +260,10 @@ SWGChannelSettings::init() {
     m_remote_source_settings_isSet = false;
     remote_tcp_sink_settings = new SWGRemoteTCPSinkSettings();
     m_remote_tcp_sink_settings_isSet = false;
+    rtty_demod_settings = new SWGRTTYDemodSettings();
+    m_rtty_demod_settings_isSet = false;
+    rtty_mod_settings = new SWGRTTYModSettings();
+    m_rtty_mod_settings_isSet = false;
     sig_mf_file_sink_settings = new SWGSigMFFileSinkSettings();
     m_sig_mf_file_sink_settings_isSet = false;
     ssb_mod_settings = new SWGSSBModSettings();
@@ -361,12 +365,6 @@ SWGChannelSettings::cleanup() {
     if(ft8_demod_settings != nullptr) { 
         delete ft8_demod_settings;
     }
-    if(rtty_demod_settings != nullptr) { 
-        delete rtty_demod_settings;
-    }
-    if(rtty_mod_settings != nullptr) { 
-        delete rtty_mod_settings;
-    }
     if(heat_map_settings != nullptr) { 
         delete heat_map_settings;
     }
@@ -412,6 +410,9 @@ SWGChannelSettings::cleanup() {
     if(pager_demod_settings != nullptr) { 
         delete pager_demod_settings;
     }
+    if(psk31_mod_settings != nullptr) { 
+        delete psk31_mod_settings;
+    }
     if(radio_astronomy_settings != nullptr) { 
         delete radio_astronomy_settings;
     }
@@ -429,6 +430,12 @@ SWGChannelSettings::cleanup() {
     }
     if(remote_tcp_sink_settings != nullptr) { 
         delete remote_tcp_sink_settings;
+    }
+    if(rtty_demod_settings != nullptr) { 
+        delete rtty_demod_settings;
+    }
+    if(rtty_mod_settings != nullptr) { 
+        delete rtty_mod_settings;
     }
     if(sig_mf_file_sink_settings != nullptr) { 
         delete sig_mf_file_sink_settings;
@@ -525,10 +532,6 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&ft8_demod_settings, pJson["FT8DemodSettings"], "SWGFT8DemodSettings", "SWGFT8DemodSettings");
     
-    ::SWGSDRangel::setValue(&rtty_demod_settings, pJson["RTTYDemodSettings"], "SWGRTTYDemodSettings", "SWGRTTYDemodSettings");
-    
-    ::SWGSDRangel::setValue(&rtty_mod_settings, pJson["RTTYModSettings"], "SWGRTTYModSettings", "SWGRTTYModSettings");
-    
     ::SWGSDRangel::setValue(&heat_map_settings, pJson["HeatMapSettings"], "SWGHeatMapSettings", "SWGHeatMapSettings");
     
     ::SWGSDRangel::setValue(&ils_demod_settings, pJson["ILSDemodSettings"], "SWGILSDemodSettings", "SWGILSDemodSettings");
@@ -559,6 +562,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&pager_demod_settings, pJson["PagerDemodSettings"], "SWGPagerDemodSettings", "SWGPagerDemodSettings");
     
+    ::SWGSDRangel::setValue(&psk31_mod_settings, pJson["PSK31ModSettings"], "SWGPSK31ModSettings", "SWGPSK31ModSettings");
+    
     ::SWGSDRangel::setValue(&radio_astronomy_settings, pJson["RadioAstronomySettings"], "SWGRadioAstronomySettings", "SWGRadioAstronomySettings");
     
     ::SWGSDRangel::setValue(&radio_clock_settings, pJson["RadioClockSettings"], "SWGRadioClockSettings", "SWGRadioClockSettings");
@@ -570,6 +575,10 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&remote_source_settings, pJson["RemoteSourceSettings"], "SWGRemoteSourceSettings", "SWGRemoteSourceSettings");
     
     ::SWGSDRangel::setValue(&remote_tcp_sink_settings, pJson["RemoteTCPSinkSettings"], "SWGRemoteTCPSinkSettings", "SWGRemoteTCPSinkSettings");
+    
+    ::SWGSDRangel::setValue(&rtty_demod_settings, pJson["RTTYDemodSettings"], "SWGRTTYDemodSettings", "SWGRTTYDemodSettings");
+    
+    ::SWGSDRangel::setValue(&rtty_mod_settings, pJson["RTTYModSettings"], "SWGRTTYModSettings", "SWGRTTYModSettings");
     
     ::SWGSDRangel::setValue(&sig_mf_file_sink_settings, pJson["SigMFFileSinkSettings"], "SWGSigMFFileSinkSettings", "SWGSigMFFileSinkSettings");
     
@@ -690,12 +699,6 @@ SWGChannelSettings::asJsonObject() {
     if((ft8_demod_settings != nullptr) && (ft8_demod_settings->isSet())){
         toJsonValue(QString("FT8DemodSettings"), ft8_demod_settings, obj, QString("SWGFT8DemodSettings"));
     }
-    if((rtty_demod_settings != nullptr) && (rtty_demod_settings->isSet())){
-        toJsonValue(QString("RTTYDemodSettings"), rtty_demod_settings, obj, QString("SWGRTTYDemodSettings"));
-    }
-    if((rtty_mod_settings != nullptr) && (rtty_mod_settings->isSet())){
-        toJsonValue(QString("RTTYModSettings"), rtty_mod_settings, obj, QString("SWGRTTYModSettings"));
-    }
     if((heat_map_settings != nullptr) && (heat_map_settings->isSet())){
         toJsonValue(QString("HeatMapSettings"), heat_map_settings, obj, QString("SWGHeatMapSettings"));
     }
@@ -741,6 +744,9 @@ SWGChannelSettings::asJsonObject() {
     if((pager_demod_settings != nullptr) && (pager_demod_settings->isSet())){
         toJsonValue(QString("PagerDemodSettings"), pager_demod_settings, obj, QString("SWGPagerDemodSettings"));
     }
+    if((psk31_mod_settings != nullptr) && (psk31_mod_settings->isSet())){
+        toJsonValue(QString("PSK31ModSettings"), psk31_mod_settings, obj, QString("SWGPSK31ModSettings"));
+    }
     if((radio_astronomy_settings != nullptr) && (radio_astronomy_settings->isSet())){
         toJsonValue(QString("RadioAstronomySettings"), radio_astronomy_settings, obj, QString("SWGRadioAstronomySettings"));
     }
@@ -758,6 +764,12 @@ SWGChannelSettings::asJsonObject() {
     }
     if((remote_tcp_sink_settings != nullptr) && (remote_tcp_sink_settings->isSet())){
         toJsonValue(QString("RemoteTCPSinkSettings"), remote_tcp_sink_settings, obj, QString("SWGRemoteTCPSinkSettings"));
+    }
+    if((rtty_demod_settings != nullptr) && (rtty_demod_settings->isSet())){
+        toJsonValue(QString("RTTYDemodSettings"), rtty_demod_settings, obj, QString("SWGRTTYDemodSettings"));
+    }
+    if((rtty_mod_settings != nullptr) && (rtty_mod_settings->isSet())){
+        toJsonValue(QString("RTTYModSettings"), rtty_mod_settings, obj, QString("SWGRTTYModSettings"));
     }
     if((sig_mf_file_sink_settings != nullptr) && (sig_mf_file_sink_settings->isSet())){
         toJsonValue(QString("SigMFFileSinkSettings"), sig_mf_file_sink_settings, obj, QString("SWGSigMFFileSinkSettings"));
@@ -1077,26 +1089,6 @@ SWGChannelSettings::setFt8DemodSettings(SWGFT8DemodSettings* ft8_demod_settings)
     this->m_ft8_demod_settings_isSet = true;
 }
 
-SWGRTTYDemodSettings*
-SWGChannelSettings::getRttyDemodSettings() {
-    return rtty_demod_settings;
-}
-void
-SWGChannelSettings::setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settings) {
-    this->rtty_demod_settings = rtty_demod_settings;
-    this->m_rtty_demod_settings_isSet = true;
-}
-
-SWGRTTYModSettings*
-SWGChannelSettings::getRttyModSettings() {
-    return rtty_mod_settings;
-}
-void
-SWGChannelSettings::setRttyModSettings(SWGRTTYModSettings* rtty_mod_settings) {
-    this->rtty_mod_settings = rtty_mod_settings;
-    this->m_rtty_mod_settings_isSet = true;
-}
-
 SWGHeatMapSettings*
 SWGChannelSettings::getHeatMapSettings() {
     return heat_map_settings;
@@ -1247,6 +1239,16 @@ SWGChannelSettings::setPagerDemodSettings(SWGPagerDemodSettings* pager_demod_set
     this->m_pager_demod_settings_isSet = true;
 }
 
+SWGPSK31ModSettings*
+SWGChannelSettings::getPsk31ModSettings() {
+    return psk31_mod_settings;
+}
+void
+SWGChannelSettings::setPsk31ModSettings(SWGPSK31ModSettings* psk31_mod_settings) {
+    this->psk31_mod_settings = psk31_mod_settings;
+    this->m_psk31_mod_settings_isSet = true;
+}
+
 SWGRadioAstronomySettings*
 SWGChannelSettings::getRadioAstronomySettings() {
     return radio_astronomy_settings;
@@ -1305,6 +1307,26 @@ void
 SWGChannelSettings::setRemoteTcpSinkSettings(SWGRemoteTCPSinkSettings* remote_tcp_sink_settings) {
     this->remote_tcp_sink_settings = remote_tcp_sink_settings;
     this->m_remote_tcp_sink_settings_isSet = true;
+}
+
+SWGRTTYDemodSettings*
+SWGChannelSettings::getRttyDemodSettings() {
+    return rtty_demod_settings;
+}
+void
+SWGChannelSettings::setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settings) {
+    this->rtty_demod_settings = rtty_demod_settings;
+    this->m_rtty_demod_settings_isSet = true;
+}
+
+SWGRTTYModSettings*
+SWGChannelSettings::getRttyModSettings() {
+    return rtty_mod_settings;
+}
+void
+SWGChannelSettings::setRttyModSettings(SWGRTTYModSettings* rtty_mod_settings) {
+    this->rtty_mod_settings = rtty_mod_settings;
+    this->m_rtty_mod_settings_isSet = true;
 }
 
 SWGSigMFFileSinkSettings*
@@ -1479,12 +1501,6 @@ SWGChannelSettings::isSet(){
         if(ft8_demod_settings && ft8_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
-        if(rtty_demod_settings && rtty_demod_settings->isSet()){
-            isObjectUpdated = true; break;
-        }
-        if(rtty_mod_settings && rtty_mod_settings->isSet()){
-            isObjectUpdated = true; break;
-        }
         if(heat_map_settings && heat_map_settings->isSet()){
             isObjectUpdated = true; break;
         }
@@ -1530,6 +1546,9 @@ SWGChannelSettings::isSet(){
         if(pager_demod_settings && pager_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
+        if(psk31_mod_settings && psk31_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(radio_astronomy_settings && radio_astronomy_settings->isSet()){
             isObjectUpdated = true; break;
         }
@@ -1546,6 +1565,12 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(remote_tcp_sink_settings && remote_tcp_sink_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rtty_demod_settings && rtty_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rtty_mod_settings && rtty_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(sig_mf_file_sink_settings && sig_mf_file_sink_settings->isSet()){

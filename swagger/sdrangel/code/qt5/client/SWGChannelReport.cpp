@@ -74,8 +74,6 @@ SWGChannelReport::SWGChannelReport() {
     m_freq_tracker_report_isSet = false;
     ft8_demod_report = nullptr;
     m_ft8_demod_report_isSet = false;
-    rtty_demod_report = nullptr;
-    m_rtty_demod_report_isSet = false;
     heat_map_report = nullptr;
     m_heat_map_report_isSet = false;
     ils_demod_report = nullptr;
@@ -102,6 +100,8 @@ SWGChannelReport::SWGChannelReport() {
     m_radiosonde_demod_report_isSet = false;
     remote_source_report = nullptr;
     m_remote_source_report_isSet = false;
+    rtty_demod_report = nullptr;
+    m_rtty_demod_report_isSet = false;
     rtty_mod_report = nullptr;
     m_rtty_mod_report_isSet = false;
     packet_demod_report = nullptr;
@@ -110,6 +110,8 @@ SWGChannelReport::SWGChannelReport() {
     m_packet_mod_report_isSet = false;
     pager_demod_report = nullptr;
     m_pager_demod_report_isSet = false;
+    psk31_mod_report = nullptr;
+    m_psk31_mod_report_isSet = false;
     sig_mf_file_sink_report = nullptr;
     m_sig_mf_file_sink_report_isSet = false;
     ssb_mod_report = nullptr;
@@ -178,8 +180,6 @@ SWGChannelReport::init() {
     m_freq_tracker_report_isSet = false;
     ft8_demod_report = new SWGFT8DemodReport();
     m_ft8_demod_report_isSet = false;
-    rtty_demod_report = new SWGRTTYDemodReport();
-    m_rtty_demod_report_isSet = false;
     heat_map_report = new SWGHeatMapReport();
     m_heat_map_report_isSet = false;
     ils_demod_report = new SWGILSDemodReport();
@@ -206,6 +206,8 @@ SWGChannelReport::init() {
     m_radiosonde_demod_report_isSet = false;
     remote_source_report = new SWGRemoteSourceReport();
     m_remote_source_report_isSet = false;
+    rtty_demod_report = new SWGRTTYDemodReport();
+    m_rtty_demod_report_isSet = false;
     rtty_mod_report = new SWGRTTYModReport();
     m_rtty_mod_report_isSet = false;
     packet_demod_report = new SWGPacketDemodReport();
@@ -214,6 +216,8 @@ SWGChannelReport::init() {
     m_packet_mod_report_isSet = false;
     pager_demod_report = new SWGPagerDemodReport();
     m_pager_demod_report_isSet = false;
+    psk31_mod_report = new SWGPSK31ModReport();
+    m_psk31_mod_report_isSet = false;
     sig_mf_file_sink_report = new SWGSigMFFileSinkReport();
     m_sig_mf_file_sink_report_isSet = false;
     ssb_mod_report = new SWGSSBModReport();
@@ -299,9 +303,6 @@ SWGChannelReport::cleanup() {
     if(ft8_demod_report != nullptr) { 
         delete ft8_demod_report;
     }
-    if(rtty_demod_report != nullptr) { 
-        delete rtty_demod_report;
-    }
     if(heat_map_report != nullptr) { 
         delete heat_map_report;
     }
@@ -341,6 +342,9 @@ SWGChannelReport::cleanup() {
     if(remote_source_report != nullptr) { 
         delete remote_source_report;
     }
+    if(rtty_demod_report != nullptr) { 
+        delete rtty_demod_report;
+    }
     if(rtty_mod_report != nullptr) { 
         delete rtty_mod_report;
     }
@@ -352,6 +356,9 @@ SWGChannelReport::cleanup() {
     }
     if(pager_demod_report != nullptr) { 
         delete pager_demod_report;
+    }
+    if(psk31_mod_report != nullptr) { 
+        delete psk31_mod_report;
     }
     if(sig_mf_file_sink_report != nullptr) { 
         delete sig_mf_file_sink_report;
@@ -433,8 +440,6 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&ft8_demod_report, pJson["FT8DemodReport"], "SWGFT8DemodReport", "SWGFT8DemodReport");
     
-    ::SWGSDRangel::setValue(&rtty_demod_report, pJson["RTTYDemodReport"], "SWGRTTYDemodReport", "SWGRTTYDemodReport");
-    
     ::SWGSDRangel::setValue(&heat_map_report, pJson["HeatMapReport"], "SWGHeatMapReport", "SWGHeatMapReport");
     
     ::SWGSDRangel::setValue(&ils_demod_report, pJson["ILSDemodReport"], "SWGILSDemodReport", "SWGILSDemodReport");
@@ -461,6 +466,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&remote_source_report, pJson["RemoteSourceReport"], "SWGRemoteSourceReport", "SWGRemoteSourceReport");
     
+    ::SWGSDRangel::setValue(&rtty_demod_report, pJson["RTTYDemodReport"], "SWGRTTYDemodReport", "SWGRTTYDemodReport");
+    
     ::SWGSDRangel::setValue(&rtty_mod_report, pJson["RTTYModReport"], "SWGRTTYModReport", "SWGRTTYModReport");
     
     ::SWGSDRangel::setValue(&packet_demod_report, pJson["PacketDemodReport"], "SWGPacketDemodReport", "SWGPacketDemodReport");
@@ -468,6 +475,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&packet_mod_report, pJson["PacketModReport"], "SWGPacketModReport", "SWGPacketModReport");
     
     ::SWGSDRangel::setValue(&pager_demod_report, pJson["PagerDemodReport"], "SWGPagerDemodReport", "SWGPagerDemodReport");
+    
+    ::SWGSDRangel::setValue(&psk31_mod_report, pJson["PSK31ModReport"], "SWGPSK31ModReport", "SWGPSK31ModReport");
     
     ::SWGSDRangel::setValue(&sig_mf_file_sink_report, pJson["SigMFFileSinkReport"], "SWGSigMFFileSinkReport", "SWGSigMFFileSinkReport");
     
@@ -568,9 +577,6 @@ SWGChannelReport::asJsonObject() {
     if((ft8_demod_report != nullptr) && (ft8_demod_report->isSet())){
         toJsonValue(QString("FT8DemodReport"), ft8_demod_report, obj, QString("SWGFT8DemodReport"));
     }
-    if((rtty_demod_report != nullptr) && (rtty_demod_report->isSet())){
-        toJsonValue(QString("RTTYDemodReport"), rtty_demod_report, obj, QString("SWGRTTYDemodReport"));
-    }
     if((heat_map_report != nullptr) && (heat_map_report->isSet())){
         toJsonValue(QString("HeatMapReport"), heat_map_report, obj, QString("SWGHeatMapReport"));
     }
@@ -610,6 +616,9 @@ SWGChannelReport::asJsonObject() {
     if((remote_source_report != nullptr) && (remote_source_report->isSet())){
         toJsonValue(QString("RemoteSourceReport"), remote_source_report, obj, QString("SWGRemoteSourceReport"));
     }
+    if((rtty_demod_report != nullptr) && (rtty_demod_report->isSet())){
+        toJsonValue(QString("RTTYDemodReport"), rtty_demod_report, obj, QString("SWGRTTYDemodReport"));
+    }
     if((rtty_mod_report != nullptr) && (rtty_mod_report->isSet())){
         toJsonValue(QString("RTTYModReport"), rtty_mod_report, obj, QString("SWGRTTYModReport"));
     }
@@ -621,6 +630,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((pager_demod_report != nullptr) && (pager_demod_report->isSet())){
         toJsonValue(QString("PagerDemodReport"), pager_demod_report, obj, QString("SWGPagerDemodReport"));
+    }
+    if((psk31_mod_report != nullptr) && (psk31_mod_report->isSet())){
+        toJsonValue(QString("PSK31ModReport"), psk31_mod_report, obj, QString("SWGPSK31ModReport"));
     }
     if((sig_mf_file_sink_report != nullptr) && (sig_mf_file_sink_report->isSet())){
         toJsonValue(QString("SigMFFileSinkReport"), sig_mf_file_sink_report, obj, QString("SWGSigMFFileSinkReport"));
@@ -877,16 +889,6 @@ SWGChannelReport::setFt8DemodReport(SWGFT8DemodReport* ft8_demod_report) {
     this->m_ft8_demod_report_isSet = true;
 }
 
-SWGRTTYDemodReport*
-SWGChannelReport::getRttyDemodReport() {
-    return rtty_demod_report;
-}
-void
-SWGChannelReport::setRttyDemodReport(SWGRTTYDemodReport* rtty_demod_report) {
-    this->rtty_demod_report = rtty_demod_report;
-    this->m_rtty_demod_report_isSet = true;
-}
-
 SWGHeatMapReport*
 SWGChannelReport::getHeatMapReport() {
     return heat_map_report;
@@ -1017,6 +1019,16 @@ SWGChannelReport::setRemoteSourceReport(SWGRemoteSourceReport* remote_source_rep
     this->m_remote_source_report_isSet = true;
 }
 
+SWGRTTYDemodReport*
+SWGChannelReport::getRttyDemodReport() {
+    return rtty_demod_report;
+}
+void
+SWGChannelReport::setRttyDemodReport(SWGRTTYDemodReport* rtty_demod_report) {
+    this->rtty_demod_report = rtty_demod_report;
+    this->m_rtty_demod_report_isSet = true;
+}
+
 SWGRTTYModReport*
 SWGChannelReport::getRttyModReport() {
     return rtty_mod_report;
@@ -1055,6 +1067,16 @@ void
 SWGChannelReport::setPagerDemodReport(SWGPagerDemodReport* pager_demod_report) {
     this->pager_demod_report = pager_demod_report;
     this->m_pager_demod_report_isSet = true;
+}
+
+SWGPSK31ModReport*
+SWGChannelReport::getPsk31ModReport() {
+    return psk31_mod_report;
+}
+void
+SWGChannelReport::setPsk31ModReport(SWGPSK31ModReport* psk31_mod_report) {
+    this->psk31_mod_report = psk31_mod_report;
+    this->m_psk31_mod_report_isSet = true;
 }
 
 SWGSigMFFileSinkReport*
@@ -1201,9 +1223,6 @@ SWGChannelReport::isSet(){
         if(ft8_demod_report && ft8_demod_report->isSet()){
             isObjectUpdated = true; break;
         }
-        if(rtty_demod_report && rtty_demod_report->isSet()){
-            isObjectUpdated = true; break;
-        }
         if(heat_map_report && heat_map_report->isSet()){
             isObjectUpdated = true; break;
         }
@@ -1243,6 +1262,9 @@ SWGChannelReport::isSet(){
         if(remote_source_report && remote_source_report->isSet()){
             isObjectUpdated = true; break;
         }
+        if(rtty_demod_report && rtty_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(rtty_mod_report && rtty_mod_report->isSet()){
             isObjectUpdated = true; break;
         }
@@ -1253,6 +1275,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(pager_demod_report && pager_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(psk31_mod_report && psk31_mod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(sig_mf_file_sink_report && sig_mf_file_sink_report->isSet()){
