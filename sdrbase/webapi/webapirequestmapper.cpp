@@ -4763,7 +4763,7 @@ bool WebAPIRequestMapper::getChannelActions(
         }
         else if (channelActionsKey == "PSK31ModActions")
         {
-            channelActions->setPsk31ModActions(new SWGSDRangel::SWGPsk31ModActions());
+            channelActions->setPsk31ModActions(new SWGSDRangel::SWGPSK31ModActions());
             channelActions->getPsk31ModActions()->fromJsonObject(actionsJsonObject);
         }
         else if (channelActionsKey == "RTTYModActions")
@@ -5485,7 +5485,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setNoiseFigureReport(nullptr);
     channelReport.setIeee802154ModReport(nullptr);
     channelReport.setPacketModReport(nullptr);
-    channelReport.setPsk31Report(nullptr);
+    channelReport.setPsk31ModReport(nullptr);
     channelReport.setRadioAstronomyReport(nullptr);
     channelReport.setRadioClockReport(nullptr);
     channelReport.setRadiosondeDemodReport(nullptr);
