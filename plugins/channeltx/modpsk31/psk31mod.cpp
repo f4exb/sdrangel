@@ -427,9 +427,6 @@ void PSK31::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getPsk31ModSettings()->getInputFrequencyOffset();
     }
-    if (channelSettingsKeys.contains("baud")) {
-        settings.m_baud = response.getPsk31ModSettings()->getBaud();
-    }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getPsk31ModSettings()->getRfBandwidth();
     }
@@ -570,7 +567,6 @@ int PSK31::webapiActionsPost(
 void PSK31::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const PSK31Settings& settings)
 {
     response.getPsk31ModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getPsk31ModSettings()->setBaud(settings.m_baud);
     response.getPsk31ModSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getPsk31ModSettings()->setGain(settings.m_gain);
     response.getPsk31ModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
@@ -719,9 +715,6 @@ void PSK31::webapiFormatChannelSettings(
 
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgPSK31ModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    }
-    if (channelSettingsKeys.contains("baud") || force) {
-        swgPSK31ModSettings->setBaud((int) settings.m_baud);
     }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
         swgPSK31ModSettings->setRfBandwidth(settings.m_rfBandwidth);
