@@ -285,6 +285,7 @@ set(sdrbase_SOURCES
 
     mainparser.cpp
     maincore.cpp
+    remotetcpsinkstarter.cpp
 
     resources/webapi.qrc
 )
@@ -519,6 +520,7 @@ set(sdrbase_HEADERS
 
     mainparser.h
     maincore.h
+    remotetcpsinkstarter.h
 )
 
 include_directories(

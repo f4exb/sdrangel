@@ -36,6 +36,7 @@
 
 #include "loggerwithfile.h"
 #include "mainwindow.h"
+#include "remotetcpsinkstarter.h"
 #include "dsp/dsptypes.h"
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
@@ -74,7 +75,6 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     if (settings.contains(uiScaleFactor))
     {
         QString scaleFactor = settings.value(uiScaleFactor).toString();
-        qDebug() << "Setting QT_SCALE_FACTOR to" << scaleFactor;
         qputenv("QT_SCALE_FACTOR", scaleFactor.toLatin1());
     }
 
@@ -178,7 +178,27 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
             applicationPid);
 #endif
 
+    if (parser.getListDevices())
+    {
+        // Disable log on console, so we can more easily see device list
+        logger->setConsoleMinMessageLevel(QtFatalMsg);
+        // Don't pass logger to MainWindow, otherwise it can reenable log output
+        logger = nullptr;
+    }
+
 	MainWindow w(logger, parser);
+
+    if (parser.getListDevices())
+    {
+        // List available physical devices and exit
+        RemoteTCPSinkStarter::listAvailableDevices();
+        exit (EXIT_SUCCESS);
+    }
+
+    if (parser.getRemoteTCPSink()) {
+        RemoteTCPSinkStarter::start(parser);
+    }
+
 	w.show();
 
 	return a.exec();

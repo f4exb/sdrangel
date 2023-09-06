@@ -37,6 +37,12 @@ public:
     bool getScratch() const { return m_scratch; }
     bool getSoapy() const { return m_soapy; }
     const QString& getFFTWFWisdomFileName() const { return m_fftwfWindowFileName; }
+    bool getRemoteTCPSink() const { return m_remoteTCPSink; }
+    const QString& getRemoteTCPSinkAddressOption() const { return m_remoteTCPSinkAddress; }
+    int getRemoteTCPSinkPortOption() const { return m_remoteTCPSinkPort; }
+    const QString& getRemoteTCPSinkHWType() const { return m_remoteTCPSinkHWType; }
+    const QString& getRemoteTCPSinkSerial() const { return m_remoteTCPSinkSerial; }
+    bool getListDevices() const { return m_listDevices; }
 
 private:
     QString  m_serverAddress;
@@ -44,6 +50,12 @@ private:
     QString  m_fftwfWindowFileName;
     bool m_scratch;
     bool m_soapy;
+    bool m_remoteTCPSink;
+    QString m_remoteTCPSinkAddress;
+    int m_remoteTCPSinkPort;
+    QString m_remoteTCPSinkHWType;
+    QString m_remoteTCPSinkSerial;
+    bool m_listDevices;
 
     QCommandLineParser m_parser;
     QCommandLineOption m_serverAddressOption;
@@ -51,6 +63,12 @@ private:
     QCommandLineOption m_fftwfWisdomOption;
     QCommandLineOption m_scratchOption;
     QCommandLineOption m_soapyOption;
+    QCommandLineOption m_remoteTCPSinkOption;
+    QCommandLineOption m_remoteTCPSinkAddressOption;
+    QCommandLineOption m_remoteTCPSinkPortOption;
+    QCommandLineOption m_remoteTCPSinkHWTypeOption;
+    QCommandLineOption m_remoteTCPSinkSerialOption;
+    QCommandLineOption m_listDevicesOption;
 };
 
 

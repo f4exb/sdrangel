@@ -1,8 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
-// Swagger server adapter interface                                              //
-//                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
@@ -26,6 +24,7 @@
 #include "loggerwithfile.h"
 #include "mainparser.h"
 #include "mainserver.h"
+#include "remotetcpsinkstarter.h"
 #include "dsp/dsptypes.h"
 
 void handler(int sig) {
@@ -92,20 +91,39 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
                      QCoreApplication::applicationPid());
 #endif
 
-          MainServer m(logger, parser, &a);
+    if (parser.getListDevices())
+    {
+        // Disable log on console, so we can more easily see device list
+        logger->setConsoleMinMessageLevel(QtFatalMsg);
+        // Don't pass logger to MainServer, otherwise it can reenable log output
+        logger = nullptr;
+    }
 
-          // This will cause the application to exit when the main core is finished
-          QObject::connect(&m, SIGNAL(finished()), &a, SLOT(quit()));
+    MainServer m(logger, parser, &a);
 
-          return a.exec();
-          }
+    // This will cause the application to exit when the main core is finished
+    QObject::connect(&m, SIGNAL(finished()), &a, SLOT(quit()));
 
-      int main(int argc, char* argv[])
-      {
-        qtwebapp::LoggerWithFile *logger = new qtwebapp::LoggerWithFile(qApp);
-        logger->installMsgHandler();
-        int res = runQtApplication(argc, argv, logger);
-        delete logger;
-        qWarning("SDRangel quit.");
-        return res;
-      }
+    if (parser.getListDevices())
+    {
+        // List available physical devices and exit
+        RemoteTCPSinkStarter::listAvailableDevices();
+        exit (EXIT_SUCCESS);
+    }
+
+    if (parser.getRemoteTCPSink()) {
+        RemoteTCPSinkStarter::start(parser);
+    }
+
+    return a.exec();
+}
+
+int main(int argc, char* argv[])
+{
+    qtwebapp::LoggerWithFile *logger = new qtwebapp::LoggerWithFile(qApp);
+    logger->installMsgHandler();
+    int res = runQtApplication(argc, argv, logger);
+    delete logger;
+    qWarning("SDRangel quit.");
+    return res;
+}
