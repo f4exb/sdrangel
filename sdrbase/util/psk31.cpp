@@ -177,7 +177,7 @@ void PSK31Encoder::addCode(unsigned& bits, unsigned int& bitCount, const QString
     int codeBits = 0;
     unsigned int codeLen = code.size();
 
-    for (int i = 0; i < codeLen; i++) {
+    for (unsigned int i = 0; i < codeLen; i++) {
         codeBits |= (code[i] == "1" ? 1 : 0) << i;
     }
 
