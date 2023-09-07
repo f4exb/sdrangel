@@ -27,6 +27,7 @@
 #include "SWGFileSinkActions.h"
 #include "SWGFileSourceActions.h"
 #include "SWGIEEE_802_15_4_ModActions.h"
+#include "SWGPSK31ModActions.h"
 #include "SWGPacketModActions.h"
 #include "SWGRTTYModActions.h"
 #include "SWGRadioAstronomyActions.h"
@@ -81,6 +82,9 @@ public:
     SWGPacketModActions* getPacketModActions();
     void setPacketModActions(SWGPacketModActions* packet_mod_actions);
 
+    SWGPSK31ModActions* getPsk31ModActions();
+    void setPsk31ModActions(SWGPSK31ModActions* psk31_mod_actions);
+
     SWGRadioAstronomyActions* getRadioAstronomyActions();
     void setRadioAstronomyActions(SWGRadioAstronomyActions* radio_astronomy_actions);
 
@@ -123,6 +127,9 @@ private:
 
     SWGPacketModActions* packet_mod_actions;
     bool m_packet_mod_actions_isSet;
+
+    SWGPSK31ModActions* psk31_mod_actions;
+    bool m_psk31_mod_actions_isSet;
 
     SWGRadioAstronomyActions* radio_astronomy_actions;
     bool m_radio_astronomy_actions_isSet;

@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_MODRTTY_RTTYMODGUI_H_
-#define PLUGINS_CHANNELTX_MODRTTY_RTTYMODGUI_H_
+#ifndef PLUGINS_CHANNELTX_MODPSK31_PSK31MODGUI_H_
+#define PLUGINS_CHANNELTX_MODPSK31_PSK31MODGUI_H_
 
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
@@ -25,8 +25,8 @@
 #include "util/messagequeue.h"
 #include "settings/rollupstate.h"
 
-#include "rttymod.h"
-#include "rttymodsettings.h"
+#include "psk31mod.h"
+#include "psk31modsettings.h"
 
 class PluginAPI;
 class DeviceUISet;
@@ -34,14 +34,14 @@ class BasebandSampleSource;
 class SpectrumVis;
 
 namespace Ui {
-    class RttyModGUI;
+    class PSK31GUI;
 }
 
-class RttyModGUI : public ChannelGUI {
+class PSK31GUI : public ChannelGUI {
     Q_OBJECT
 
 public:
-    static RttyModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
+    static PSK31GUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
     virtual void destroy();
 
     void resetToDefaults();
@@ -64,31 +64,30 @@ public slots:
     void channelMarkerChangedByCursor();
 
 private:
-    Ui::RttyModGUI* ui;
+    Ui::PSK31GUI* ui;
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
-    RttyModSettings m_settings;
+    PSK31Settings m_settings;
     qint64 m_deviceCenterFrequency;
     int m_basebandSampleRate;
     bool m_doApplySettings;
     SpectrumVis* m_spectrumVis;
     QString m_initialToolTip;
 
-    RttyMod* m_rttyMod;
+    PSK31* m_psk31Mod;
     MovingAverageUtil<double, double, 20> m_channelPowerDbAvg;
 
     MessageQueue m_inputMessageQueue;
 
-    explicit RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
-    virtual ~RttyModGUI();
+    explicit PSK31GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
+    virtual ~PSK31GUI();
 
     void transmit(const QString& str);
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
-    QString formatFrequency(int frequency) const;
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
@@ -101,16 +100,9 @@ private slots:
     void handleSourceMessages();
 
     void on_deltaFrequency_changed(qint64 value);
-    void on_mode_currentIndexChanged(int value);
     void on_rfBW_valueChanged(int index);
-    void on_baudRate_currentIndexChanged(int index);
-    void on_frequencyShift_valueChanged(int value);
     void on_gain_valueChanged(int value);
     void on_channelMute_toggled(bool checked);
-    void on_characterSet_currentIndexChanged(int index);
-    void on_endian_clicked(bool checked);
-    void on_spaceHigh_clicked(bool checked);
-    void on_unshiftOnSpace_clicked(bool checked);
     void on_clearTransmittedText_clicked();
     void on_txButton_clicked();
     void on_text_editingFinished();
@@ -128,4 +120,4 @@ private slots:
     void tick();
 };
 
-#endif /* PLUGINS_CHANNELTX_MODRTTY_RTTYMODGUI_H_ */
+#endif /* PLUGINS_CHANNELTX_MODPSK31_PSK31MODGUI_H_ */

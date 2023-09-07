@@ -42,35 +42,35 @@
 #include "gui/dialogpositioner.h"
 #include "maincore.h"
 
-#include "ui_rttymodgui.h"
-#include "rttymodgui.h"
-#include "rttymodrepeatdialog.h"
-#include "rttymodtxsettingsdialog.h"
+#include "ui_psk31modgui.h"
+#include "psk31modgui.h"
+#include "psk31modrepeatdialog.h"
+#include "psk31modtxsettingsdialog.h"
 
-RttyModGUI* RttyModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
+PSK31GUI* PSK31GUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {
-    RttyModGUI* gui = new RttyModGUI(pluginAPI, deviceUISet, channelTx);
+    PSK31GUI* gui = new PSK31GUI(pluginAPI, deviceUISet, channelTx);
     return gui;
 }
 
-void RttyModGUI::destroy()
+void PSK31GUI::destroy()
 {
     delete this;
 }
 
-void RttyModGUI::resetToDefaults()
+void PSK31GUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
     applySettings(true);
 }
 
-QByteArray RttyModGUI::serialize() const
+QByteArray PSK31GUI::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool RttyModGUI::deserialize(const QByteArray& data)
+bool PSK31GUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data)) {
         displaySettings();
@@ -82,11 +82,11 @@ bool RttyModGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool RttyModGUI::handleMessage(const Message& message)
+bool PSK31GUI::handleMessage(const Message& message)
 {
-    if (RttyMod::MsgConfigureRttyMod::match(message))
+    if (PSK31::MsgConfigurePSK31::match(message))
     {
-        const RttyMod::MsgConfigureRttyMod& cfg = (RttyMod::MsgConfigureRttyMod&) message;
+        const PSK31::MsgConfigurePSK31& cfg = (PSK31::MsgConfigurePSK31&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
@@ -94,9 +94,9 @@ bool RttyModGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
-    else if (RttyMod::MsgReportTx::match(message))
+    else if (PSK31::MsgReportTx::match(message))
     {
-        const RttyMod::MsgReportTx& report = (RttyMod::MsgReportTx&)message;
+        const PSK31::MsgReportTx& report = (PSK31::MsgReportTx&)message;
         QString s = report.getText();
         int bufferedCharacters = report.getBufferedCharacters();
 
@@ -113,7 +113,6 @@ bool RttyModGUI::handleMessage(const Message& message)
         }
         ui->txButton->setToolTip(tooltip);
 
-        s = s.replace(">", "");  // Don't display LTRS
         s = s.replace("\r", ""); // Don't display carriage returns
 
         if (!s.isEmpty())
@@ -155,14 +154,14 @@ bool RttyModGUI::handleMessage(const Message& message)
     }
 }
 
-void RttyModGUI::channelMarkerChangedByCursor()
+void PSK31GUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     applySettings();
 }
 
-void RttyModGUI::handleSourceMessages()
+void PSK31GUI::handleSourceMessages()
 {
     Message* message;
 
@@ -175,7 +174,7 @@ void RttyModGUI::handleSourceMessages()
     }
 }
 
-void RttyModGUI::on_deltaFrequency_changed(qint64 value)
+void PSK31GUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
@@ -183,137 +182,59 @@ void RttyModGUI::on_deltaFrequency_changed(qint64 value)
     applySettings();
 }
 
-void RttyModGUI::on_mode_currentIndexChanged(int index)
-{
-    (void)index;
-
-    QString mode = ui->mode->currentText();
-
-    bool custom = mode == "Custom";
-    if (!custom)
-    {
-        QStringList settings = mode.split("/");
-        int baudRate = settings[0].toInt();
-        int frequencyShift = settings[1].toInt();
-        int bandwidth = frequencyShift * 2 + baudRate;
-        ui->baudRate->setCurrentText(settings[0]);
-        ui->frequencyShift->setValue(frequencyShift);
-        ui->rfBW->setValue(bandwidth);
-    }
-
-    ui->baudRateLabel->setEnabled(custom);
-    ui->baudRate->setEnabled(custom);
-    ui->frequencyShiftLabel->setEnabled(custom);
-    ui->frequencyShift->setEnabled(custom);
-    ui->frequencyShiftText->setEnabled(custom);
-    ui->rfBWLabel->setEnabled(custom);
-    ui->rfBW->setEnabled(custom);
-    ui->rfBWText->setEnabled(custom);
-
-    applySettings();
-}
-
-void RttyModGUI::on_rfBW_valueChanged(int value)
+void PSK31GUI::on_rfBW_valueChanged(int value)
 {
     int bw = value;
-    ui->rfBWText->setText(formatFrequency(bw));
+    ui->rfBWText->setText(QString("%1 Hz").arg(bw));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
     applySettings();
 }
 
-void RttyModGUI::on_baudRate_currentIndexChanged(int index)
-{
-    (void)index;
-    m_settings.m_baud = ui->baudRate->currentText().toFloat();
-    applySettings();
-}
-
-void RttyModGUI::on_frequencyShift_valueChanged(int value)
-{
-    m_settings.m_frequencyShift = value;
-    ui->frequencyShiftText->setText(formatFrequency(m_settings.m_frequencyShift));
-    applySettings();
-}
-
-void RttyModGUI::on_characterSet_currentIndexChanged(int index)
-{
-    m_settings.m_characterSet = (Baudot::CharacterSet)index;
-    applySettings();
-}
-
-void RttyModGUI::on_endian_clicked(bool checked)
-{
-    m_settings.m_msbFirst = checked;
-    if (checked) {
-        ui->endian->setText("MSB");
-    } else {
-        ui->endian->setText("LSB");
-    }
-    applySettings();
-}
-
-void RttyModGUI::on_spaceHigh_clicked(bool checked)
-{
-    m_settings.m_spaceHigh = checked;
-    if (checked) {
-        ui->spaceHigh->setText("M-S");
-    } else {
-        ui->spaceHigh->setText("S-M");
-    }
-    applySettings();
-}
-
-void RttyModGUI::on_unshiftOnSpace_clicked(bool checked)
-{
-    m_settings.m_unshiftOnSpace = checked;
-    applySettings();
-}
-
-void RttyModGUI::on_clearTransmittedText_clicked()
+void PSK31GUI::on_clearTransmittedText_clicked()
 {
     ui->transmittedText->clear();
 }
 
-void RttyModGUI::on_gain_valueChanged(int value)
+void PSK31GUI::on_gain_valueChanged(int value)
 {
     ui->gainText->setText(QString("%1dB").arg(value));
     m_settings.m_gain = value;
     applySettings();
 }
 
-void RttyModGUI::on_channelMute_toggled(bool checked)
+void PSK31GUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
     applySettings();
 }
 
-void RttyModGUI::on_txButton_clicked()
+void PSK31GUI::on_txButton_clicked()
 {
     transmit(ui->text->currentText());
 }
 
-void RttyModGUI::on_text_returnPressed()
+void PSK31GUI::on_text_returnPressed()
 {
     transmit(ui->text->currentText());
     ui->text->setCurrentText("");
 }
 
-void RttyModGUI::on_text_editingFinished()
+void PSK31GUI::on_text_editingFinished()
 {
     m_settings.m_text = ui->text->currentText();
     applySettings();
 }
 
-void RttyModGUI::on_repeat_toggled(bool checked)
+void PSK31GUI::on_repeat_toggled(bool checked)
 {
     m_settings.m_repeat = checked;
     applySettings();
 }
 
-void RttyModGUI::repeatSelect(const QPoint& p)
+void PSK31GUI::repeatSelect(const QPoint& p)
 {
-    RttyModRepeatDialog dialog(m_settings.m_repeatCount);
+    PSK31RepeatDialog dialog(m_settings.m_repeatCount);
     dialog.move(p);
     new DialogPositioner(&dialog, false);
 
@@ -324,9 +245,9 @@ void RttyModGUI::repeatSelect(const QPoint& p)
     }
 }
 
-void RttyModGUI::txSettingsSelect(const QPoint& p)
+void PSK31GUI::txSettingsSelect(const QPoint& p)
 {
-    RttyModTXSettingsDialog dialog(&m_settings);
+    PSK31TXSettingsDialog dialog(&m_settings);
     dialog.move(p);
     new DialogPositioner(&dialog, false);
 
@@ -337,25 +258,25 @@ void RttyModGUI::txSettingsSelect(const QPoint& p)
     }
 }
 
-void RttyModGUI::on_udpEnabled_clicked(bool checked)
+void PSK31GUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
     applySettings();
 }
 
-void RttyModGUI::on_udpAddress_editingFinished()
+void PSK31GUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
     applySettings();
 }
 
-void RttyModGUI::on_udpPort_editingFinished()
+void PSK31GUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
     applySettings();
 }
 
-void RttyModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void PSK31GUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
@@ -364,7 +285,7 @@ void RttyModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     applySettings();
 }
 
-void RttyModGUI::onMenuDialogCalled(const QPoint &p)
+void PSK31GUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
     {
@@ -378,7 +299,7 @@ void RttyModGUI::onMenuDialogCalled(const QPoint &p)
 
         if (m_deviceUISet->m_deviceMIMOEngine)
         {
-            dialog.setNumberOfStreams(m_rttyMod->getNumberOfDeviceStreams());
+            dialog.setNumberOfStreams(m_psk31Mod->getNumberOfDeviceStreams());
             dialog.setStreamIndex(m_settings.m_streamIndex);
         }
 
@@ -412,9 +333,9 @@ void RttyModGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
-RttyModGUI::RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
+PSK31GUI::PSK31GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
     ChannelGUI(parent),
-    ui(new Ui::RttyModGUI),
+    ui(new Ui::PSK31GUI),
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
@@ -423,7 +344,7 @@ RttyModGUI::RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_doApplySettings(true)
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
-    m_helpURL = "plugins/channeltx/modrtty/readme.md";
+    m_helpURL = "plugins/channeltx/modpsk31/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
     setSizePolicy(rollupContents->sizePolicy());
@@ -431,12 +352,12 @@ RttyModGUI::RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-    m_rttyMod = (RttyMod*) channelTx;
-    m_rttyMod->setMessageQueueToGUI(getInputMessageQueue());
+    m_psk31Mod = (PSK31*) channelTx;
+    m_psk31Mod->setMessageQueueToGUI(getInputMessageQueue());
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-    m_spectrumVis = m_rttyMod->getSpectrumVis();
+    m_spectrumVis = m_psk31Mod->getSpectrumVis();
     m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 
     ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
@@ -468,7 +389,7 @@ RttyModGUI::RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_channelMarker.setColor(Qt::red);
     m_channelMarker.setBandwidth(12500);
     m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setTitle("RTTY Modulator");
+    m_channelMarker.setTitle("PSK31 Modulator");
     m_channelMarker.setSourceOrSinkStream(false);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
@@ -478,7 +399,7 @@ RttyModGUI::RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    m_rttyMod->setLevelMeter(ui->volumeMeter);
+    m_psk31Mod->setLevelMeter(ui->volumeMeter);
 
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setRollupState(&m_rollupState);
@@ -495,43 +416,34 @@ RttyModGUI::RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_initialToolTip = ui->txButton->toolTip();
 }
 
-RttyModGUI::~RttyModGUI()
+PSK31GUI::~PSK31GUI()
 {
     // If we don't disconnect, we can get this signal after this has been deleted!
-    QObject::disconnect(ui->text->lineEdit(), &QLineEdit::editingFinished, this, &RttyModGUI::on_text_editingFinished);
+    QObject::disconnect(ui->text->lineEdit(), &QLineEdit::editingFinished, this, &PSK31GUI::on_text_editingFinished);
     delete ui;
 }
 
-void RttyModGUI::transmit(const QString& text)
+void PSK31GUI::transmit(const QString& text)
 {
-    RttyMod::MsgTXText*msg = RttyMod::MsgTXText::create(text);
-    m_rttyMod->getInputMessageQueue()->push(msg);
+    PSK31::MsgTXText*msg = PSK31::MsgTXText::create(text);
+    m_psk31Mod->getInputMessageQueue()->push(msg);
 }
 
-void RttyModGUI::blockApplySettings(bool block)
+void PSK31GUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void RttyModGUI::applySettings(bool force)
+void PSK31GUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        RttyMod::MsgConfigureRttyMod *msg = RttyMod::MsgConfigureRttyMod::create(m_settings, force);
-        m_rttyMod->getInputMessageQueue()->push(msg);
+        PSK31::MsgConfigurePSK31 *msg = PSK31::MsgConfigurePSK31::create(m_settings, force);
+        m_psk31Mod->getInputMessageQueue()->push(msg);
     }
 }
 
-QString RttyModGUI::formatFrequency(int frequency) const
-{
-    QString suffix = "";
-    if (width() > 450) {
-        suffix = " Hz";
-    }
-    return QString("%1%2").arg(frequency).arg(suffix);
-}
-
-QString RttyModGUI::substitute(const QString& text)
+QString PSK31GUI::substitute(const QString& text)
 {
     const MainSettings& mainSettings = MainCore::instance()->getSettings();
     QString location = Maidenhead::toMaidenhead(mainSettings.getLatitude(), mainSettings.getLongitude());
@@ -543,7 +455,7 @@ QString RttyModGUI::substitute(const QString& text)
     return s;
 }
 
-void RttyModGUI::displaySettings()
+void PSK31GUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
@@ -561,33 +473,8 @@ void RttyModGUI::displaySettings()
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-    ui->mode->setCurrentText("Custom");
-    ui->rfBWText->setText(formatFrequency(m_settings.m_rfBandwidth));
+    ui->rfBWText->setText(QString("%1 Hz").arg(m_settings.m_rfBandwidth));
     ui->rfBW->setValue(m_settings.m_rfBandwidth);
-    QString baudRate;
-    if (m_settings.m_baud < 46.0f && m_settings.m_baud > 45.0f) {
-        baudRate = "45.45";
-    } else {
-        baudRate = QString("%1").arg(m_settings.m_baud);
-    }
-    ui->baudRate->setCurrentIndex(ui->baudRate->findText(baudRate));
-    ui->frequencyShiftText->setText(formatFrequency(m_settings.m_frequencyShift));
-    ui->frequencyShift->setValue(m_settings.m_frequencyShift);
-
-    ui->characterSet->setCurrentIndex((int)m_settings.m_characterSet);
-    ui->endian->setChecked(m_settings.m_msbFirst);
-    if (m_settings.m_msbFirst) {
-        ui->endian->setText("MSB");
-    } else {
-        ui->endian->setText("LSB");
-    }
-    ui->spaceHigh->setChecked(m_settings.m_spaceHigh);
-    if (m_settings.m_spaceHigh) {
-        ui->spaceHigh->setText("M-S");
-    } else {
-        ui->spaceHigh->setText("S-M");
-    }
-    ui->unshiftOnSpace->setChecked(m_settings.m_unshiftOnSpace);
 
     ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
     ui->udpAddress->setText(m_settings.m_udpAddress);
@@ -610,49 +497,42 @@ void RttyModGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void RttyModGUI::leaveEvent(QEvent* event)
+void PSK31GUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
     ChannelGUI::leaveEvent(event);
 }
 
-void RttyModGUI::enterEvent(EnterEventType* event)
+void PSK31GUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);
 }
 
-void RttyModGUI::tick()
+void PSK31GUI::tick()
 {
-    double powDb = CalcDb::dbPower(m_rttyMod->getMagSq());
+    double powDb = CalcDb::dbPower(m_psk31Mod->getMagSq());
     m_channelPowerDbAvg(powDb);
     ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
 }
 
-void RttyModGUI::makeUIConnections()
+void PSK31GUI::makeUIConnections()
 {
-    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &RttyModGUI::on_deltaFrequency_changed);
-    QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RttyModGUI::on_mode_currentIndexChanged);
-    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &RttyModGUI::on_rfBW_valueChanged);
-    QObject::connect(ui->baudRate, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RttyModGUI::on_baudRate_currentIndexChanged);
-    QObject::connect(ui->frequencyShift, &QSlider::valueChanged, this, &RttyModGUI::on_frequencyShift_valueChanged);
-    QObject::connect(ui->characterSet, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RttyModGUI::on_characterSet_currentIndexChanged);
-    QObject::connect(ui->endian, &QCheckBox::clicked, this, &RttyModGUI::on_endian_clicked);
-    QObject::connect(ui->spaceHigh, &QCheckBox::clicked, this, &RttyModGUI::on_spaceHigh_clicked);
-    QObject::connect(ui->unshiftOnSpace, &QCheckBox::clicked, this, &RttyModGUI::on_unshiftOnSpace_clicked);
-    QObject::connect(ui->clearTransmittedText, &QToolButton::clicked, this, &RttyModGUI::on_clearTransmittedText_clicked);
-    QObject::connect(ui->gain, &QDial::valueChanged, this, &RttyModGUI::on_gain_valueChanged);
-    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &RttyModGUI::on_channelMute_toggled);
-    QObject::connect(ui->txButton, &QToolButton::clicked, this, &RttyModGUI::on_txButton_clicked);
-    QObject::connect(ui->text->lineEdit(), &QLineEdit::editingFinished, this, &RttyModGUI::on_text_editingFinished);
-    QObject::connect(ui->text->lineEdit(), &QLineEdit::returnPressed, this, &RttyModGUI::on_text_returnPressed);
-    QObject::connect(ui->repeat, &ButtonSwitch::toggled, this, &RttyModGUI::on_repeat_toggled);
-    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &RttyModGUI::on_udpEnabled_clicked);
-    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &RttyModGUI::on_udpAddress_editingFinished);
-    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &RttyModGUI::on_udpPort_editingFinished);
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &PSK31GUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &PSK31GUI::on_rfBW_valueChanged);
+    QObject::connect(ui->clearTransmittedText, &QToolButton::clicked, this, &PSK31GUI::on_clearTransmittedText_clicked);
+    QObject::connect(ui->gain, &QDial::valueChanged, this, &PSK31GUI::on_gain_valueChanged);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &PSK31GUI::on_channelMute_toggled);
+    QObject::connect(ui->txButton, &QToolButton::clicked, this, &PSK31GUI::on_txButton_clicked);
+    QObject::connect(ui->text->lineEdit(), &QLineEdit::editingFinished, this, &PSK31GUI::on_text_editingFinished);
+    QObject::connect(ui->text->lineEdit(), &QLineEdit::returnPressed, this, &PSK31GUI::on_text_returnPressed);
+    QObject::connect(ui->repeat, &ButtonSwitch::toggled, this, &PSK31GUI::on_repeat_toggled);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &PSK31GUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &PSK31GUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &PSK31GUI::on_udpPort_editingFinished);
 }
 
-void RttyModGUI::updateAbsoluteCenterFrequency()
+void PSK31GUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

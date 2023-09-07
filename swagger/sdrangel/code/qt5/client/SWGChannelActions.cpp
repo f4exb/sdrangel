@@ -48,6 +48,8 @@ SWGChannelActions::SWGChannelActions() {
     m_ieee_802_15_4_mod_actions_isSet = false;
     packet_mod_actions = nullptr;
     m_packet_mod_actions_isSet = false;
+    psk31_mod_actions = nullptr;
+    m_psk31_mod_actions_isSet = false;
     radio_astronomy_actions = nullptr;
     m_radio_astronomy_actions_isSet = false;
     rtty_mod_actions = nullptr;
@@ -82,6 +84,8 @@ SWGChannelActions::init() {
     m_ieee_802_15_4_mod_actions_isSet = false;
     packet_mod_actions = new SWGPacketModActions();
     m_packet_mod_actions_isSet = false;
+    psk31_mod_actions = new SWGPSK31ModActions();
+    m_psk31_mod_actions_isSet = false;
     radio_astronomy_actions = new SWGRadioAstronomyActions();
     m_radio_astronomy_actions_isSet = false;
     rtty_mod_actions = new SWGRTTYModActions();
@@ -115,6 +119,9 @@ SWGChannelActions::cleanup() {
     }
     if(packet_mod_actions != nullptr) { 
         delete packet_mod_actions;
+    }
+    if(psk31_mod_actions != nullptr) { 
+        delete psk31_mod_actions;
     }
     if(radio_astronomy_actions != nullptr) { 
         delete radio_astronomy_actions;
@@ -157,6 +164,8 @@ SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ieee_802_15_4_mod_actions, pJson["IEEE_802_15_4_ModActions"], "SWGIEEE_802_15_4_ModActions", "SWGIEEE_802_15_4_ModActions");
     
     ::SWGSDRangel::setValue(&packet_mod_actions, pJson["PacketModActions"], "SWGPacketModActions", "SWGPacketModActions");
+    
+    ::SWGSDRangel::setValue(&psk31_mod_actions, pJson["PSK31ModActions"], "SWGPSK31ModActions", "SWGPSK31ModActions");
     
     ::SWGSDRangel::setValue(&radio_astronomy_actions, pJson["RadioAstronomyActions"], "SWGRadioAstronomyActions", "SWGRadioAstronomyActions");
     
@@ -209,6 +218,9 @@ SWGChannelActions::asJsonObject() {
     }
     if((packet_mod_actions != nullptr) && (packet_mod_actions->isSet())){
         toJsonValue(QString("PacketModActions"), packet_mod_actions, obj, QString("SWGPacketModActions"));
+    }
+    if((psk31_mod_actions != nullptr) && (psk31_mod_actions->isSet())){
+        toJsonValue(QString("PSK31ModActions"), psk31_mod_actions, obj, QString("SWGPSK31ModActions"));
     }
     if((radio_astronomy_actions != nullptr) && (radio_astronomy_actions->isSet())){
         toJsonValue(QString("RadioAstronomyActions"), radio_astronomy_actions, obj, QString("SWGRadioAstronomyActions"));
@@ -323,6 +335,16 @@ SWGChannelActions::setPacketModActions(SWGPacketModActions* packet_mod_actions) 
     this->m_packet_mod_actions_isSet = true;
 }
 
+SWGPSK31ModActions*
+SWGChannelActions::getPsk31ModActions() {
+    return psk31_mod_actions;
+}
+void
+SWGChannelActions::setPsk31ModActions(SWGPSK31ModActions* psk31_mod_actions) {
+    this->psk31_mod_actions = psk31_mod_actions;
+    this->m_psk31_mod_actions_isSet = true;
+}
+
 SWGRadioAstronomyActions*
 SWGChannelActions::getRadioAstronomyActions() {
     return radio_astronomy_actions;
@@ -386,6 +408,9 @@ SWGChannelActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(packet_mod_actions && packet_mod_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(psk31_mod_actions && psk31_mod_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(radio_astronomy_actions && radio_astronomy_actions->isSet()){

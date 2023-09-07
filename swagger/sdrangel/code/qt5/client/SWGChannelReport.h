@@ -51,6 +51,7 @@
 #include "SWGNFMModReport.h"
 #include "SWGNavtexDemodReport.h"
 #include "SWGNoiseFigureReport.h"
+#include "SWGPSK31ModReport.h"
 #include "SWGPacketDemodReport.h"
 #include "SWGPacketModReport.h"
 #include "SWGPagerDemodReport.h"
@@ -157,9 +158,6 @@ public:
     SWGFT8DemodReport* getFt8DemodReport();
     void setFt8DemodReport(SWGFT8DemodReport* ft8_demod_report);
 
-    SWGRTTYDemodReport* getRttyDemodReport();
-    void setRttyDemodReport(SWGRTTYDemodReport* rtty_demod_report);
-
     SWGHeatMapReport* getHeatMapReport();
     void setHeatMapReport(SWGHeatMapReport* heat_map_report);
 
@@ -199,6 +197,9 @@ public:
     SWGRemoteSourceReport* getRemoteSourceReport();
     void setRemoteSourceReport(SWGRemoteSourceReport* remote_source_report);
 
+    SWGRTTYDemodReport* getRttyDemodReport();
+    void setRttyDemodReport(SWGRTTYDemodReport* rtty_demod_report);
+
     SWGRTTYModReport* getRttyModReport();
     void setRttyModReport(SWGRTTYModReport* rtty_mod_report);
 
@@ -210,6 +211,9 @@ public:
 
     SWGPagerDemodReport* getPagerDemodReport();
     void setPagerDemodReport(SWGPagerDemodReport* pager_demod_report);
+
+    SWGPSK31ModReport* getPsk31ModReport();
+    void setPsk31ModReport(SWGPSK31ModReport* psk31_mod_report);
 
     SWGSigMFFileSinkReport* getSigMfFileSinkReport();
     void setSigMfFileSinkReport(SWGSigMFFileSinkReport* sig_mf_file_sink_report);
@@ -305,9 +309,6 @@ private:
     SWGFT8DemodReport* ft8_demod_report;
     bool m_ft8_demod_report_isSet;
 
-    SWGRTTYDemodReport* rtty_demod_report;
-    bool m_rtty_demod_report_isSet;
-
     SWGHeatMapReport* heat_map_report;
     bool m_heat_map_report_isSet;
 
@@ -347,6 +348,9 @@ private:
     SWGRemoteSourceReport* remote_source_report;
     bool m_remote_source_report_isSet;
 
+    SWGRTTYDemodReport* rtty_demod_report;
+    bool m_rtty_demod_report_isSet;
+
     SWGRTTYModReport* rtty_mod_report;
     bool m_rtty_mod_report_isSet;
 
@@ -358,6 +362,9 @@ private:
 
     SWGPagerDemodReport* pager_demod_report;
     bool m_pager_demod_report_isSet;
+
+    SWGPSK31ModReport* psk31_mod_report;
+    bool m_psk31_mod_report_isSet;
 
     SWGSigMFFileSinkReport* sig_mf_file_sink_report;
     bool m_sig_mf_file_sink_report_isSet;

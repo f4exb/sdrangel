@@ -222,6 +222,10 @@
 #include "SWGPERTesterActions_aos.h"
 #include "SWGPERTesterReport.h"
 #include "SWGPERTesterSettings.h"
+#include "SWGPSK31ModActions.h"
+#include "SWGPSK31ModActions_payload.h"
+#include "SWGPSK31ModReport.h"
+#include "SWGPSK31ModSettings.h"
 #include "SWGPacketDemodReport.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGPacketModActions.h"
@@ -252,7 +256,6 @@
 #include "SWGRTTYDemodReport.h"
 #include "SWGRTTYDemodSettings.h"
 #include "SWGRTTYModActions.h"
-#include "SWGRTTYModActions_payload.h"
 #include "SWGRTTYModReport.h"
 #include "SWGRTTYModSettings.h"
 #include "SWGRadioAstronomyActions.h"
@@ -1404,6 +1407,26 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGPSK31ModActions").compare(type) == 0) {
+      SWGPSK31ModActions *obj = new SWGPSK31ModActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGPSK31ModActions_payload").compare(type) == 0) {
+      SWGPSK31ModActions_payload *obj = new SWGPSK31ModActions_payload();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGPSK31ModReport").compare(type) == 0) {
+      SWGPSK31ModReport *obj = new SWGPSK31ModReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGPSK31ModSettings").compare(type) == 0) {
+      SWGPSK31ModSettings *obj = new SWGPSK31ModSettings();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGPacketDemodReport").compare(type) == 0) {
       SWGPacketDemodReport *obj = new SWGPacketDemodReport();
       obj->init();
@@ -1551,11 +1574,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRTTYModActions").compare(type) == 0) {
       SWGRTTYModActions *obj = new SWGRTTYModActions();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGRTTYModActions_payload").compare(type) == 0) {
-      SWGRTTYModActions_payload *obj = new SWGRTTYModActions_payload();
       obj->init();
       return obj;
     }

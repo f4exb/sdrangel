@@ -3481,6 +3481,9 @@ margin-bottom: 20px;
     "PacketModActions" : {
       "$ref" : "#/definitions/PacketModActions"
     },
+    "PSK31ModActions" : {
+      "$ref" : "#/definitions/PSK31ModActions"
+    },
     "RadioAstronomyActions" : {
       "$ref" : "#/definitions/RadioAstronomyActions"
     },
@@ -3734,9 +3737,6 @@ margin-bottom: 20px;
     "FT8DemodReport" : {
       "$ref" : "#/definitions/FT8DemodReport"
     },
-    "RTTYDemodReport" : {
-      "$ref" : "#/definitions/RTTYDemodReport"
-    },
     "HeatMapReport" : {
       "$ref" : "#/definitions/HeatMapReport"
     },
@@ -3776,6 +3776,9 @@ margin-bottom: 20px;
     "RemoteSourceReport" : {
       "$ref" : "#/definitions/RemoteSourceReport"
     },
+    "RTTYDemodReport" : {
+      "$ref" : "#/definitions/RTTYDemodReport"
+    },
     "RTTYModReport" : {
       "$ref" : "#/definitions/RTTYModReport"
     },
@@ -3787,6 +3790,9 @@ margin-bottom: 20px;
     },
     "PagerDemodReport" : {
       "$ref" : "#/definitions/PagerDemodReport"
+    },
+    "PSK31ModReport" : {
+      "$ref" : "#/definitions/PSK31ModReport"
     },
     "SigMFFileSinkReport" : {
       "$ref" : "#/definitions/SigMFFileSinkReport"
@@ -3907,12 +3913,6 @@ margin-bottom: 20px;
     "FT8DemodSettings" : {
       "$ref" : "#/definitions/FT8DemodSettings"
     },
-    "RTTYDemodSettings" : {
-      "$ref" : "#/definitions/RTTYDemodSettings"
-    },
-    "RTTYModSettings" : {
-      "$ref" : "#/definitions/RTTYModSettings"
-    },
     "HeatMapSettings" : {
       "$ref" : "#/definitions/HeatMapSettings"
     },
@@ -3958,6 +3958,9 @@ margin-bottom: 20px;
     "PagerDemodSettings" : {
       "$ref" : "#/definitions/PagerDemodSettings"
     },
+    "PSK31ModSettings" : {
+      "$ref" : "#/definitions/PSK31ModSettings"
+    },
     "RadioAstronomySettings" : {
       "$ref" : "#/definitions/RadioAstronomySettings"
     },
@@ -3975,6 +3978,12 @@ margin-bottom: 20px;
     },
     "RemoteTCPSinkSettings" : {
       "$ref" : "#/definitions/RemoteTCPSinkSettings"
+    },
+    "RTTYDemodSettings" : {
+      "$ref" : "#/definitions/RTTYDemodSettings"
+    },
+    "RTTYModSettings" : {
+      "$ref" : "#/definitions/RTTYModSettings"
     },
     "SigMFFileSinkSettings" : {
       "$ref" : "#/definitions/SigMFFileSinkSettings"
@@ -10523,6 +10532,135 @@ margin-bottom: 20px;
   },
   "description" : "PER Tester settings"
 };
+            defs.PSK31ModActions = {
+  "properties" : {
+    "tx" : {
+      "type" : "integer",
+      "description" : "Transmit current text\n  * 0 - Do nothing\n  * 1 - Transmit\n"
+    },
+    "payload" : {
+      "$ref" : "#/definitions/PSK31ModActions_payload"
+    }
+  },
+  "description" : "PSK31Mod"
+};
+            defs.PSK31ModActions_payload = {
+  "properties" : {
+    "text" : {
+      "type" : "string"
+    }
+  }
+};
+            defs.PSK31ModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "PSK31Mod"
+};
+            defs.PSK31ModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "integer"
+    },
+    "gain" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "channelMute" : {
+      "type" : "integer"
+    },
+    "repeat" : {
+      "type" : "integer"
+    },
+    "repeatCount" : {
+      "type" : "integer"
+    },
+    "lpfTaps" : {
+      "type" : "integer"
+    },
+    "rfNoise" : {
+      "type" : "integer",
+      "description" : "Boolean\n  * 0 - off\n  * 1 - on\n"
+    },
+    "text" : {
+      "type" : "string",
+      "description" : "Text to transmit"
+    },
+    "pulseShaping" : {
+      "type" : "integer",
+      "description" : "Boolean\n  * 0 - off\n  * 1 - on\n"
+    },
+    "beta" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "symbolSpan" : {
+      "type" : "integer"
+    },
+    "prefixCRLF" : {
+      "type" : "integer"
+    },
+    "postfixCRLF" : {
+      "type" : "integer"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to receive text to transmit on specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to receive text to transmit via"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to receive text to transmit via"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "PSK31Mod"
+};
             defs.PacketDemodReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -11770,17 +11908,10 @@ margin-bottom: 20px;
       "description" : "Transmit current text\n  * 0 - Do nothing\n  * 1 - Transmit\n"
     },
     "payload" : {
-      "$ref" : "#/definitions/RTTYModActions_payload"
+      "$ref" : "#/definitions/PSK31ModActions_payload"
     }
   },
   "description" : "RTTYMod"
-};
-            defs.RTTYModActions_payload = {
-  "properties" : {
-    "text" : {
-      "type" : "string"
-    }
-  }
 };
             defs.RTTYModReport = {
   "properties" : {
@@ -57994,7 +58125,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-09-01T21:10:19.928+02:00
+              Generated 2023-09-06T16:40:34.426+02:00
             </div>
           </div>
       </div>

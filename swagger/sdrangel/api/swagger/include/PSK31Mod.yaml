@@ -1,0 +1,99 @@
+PSK31ModSettings:
+  description: PSK31Mod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: integer
+    gain:
+      type: number
+      format: float
+    channelMute:
+      type: integer
+    repeat:
+      type: integer
+    repeatCount:
+      type: integer
+    lpfTaps:
+      type: integer
+    rfNoise:
+      type: integer
+      description: >
+        Boolean
+          * 0 - off
+          * 1 - on
+    text:
+      type: string
+      description: Text to transmit
+    pulseShaping:
+      type: integer
+      description: >
+        Boolean
+          * 0 - off
+          * 1 - on
+    beta:
+      type: number
+      format: float
+    symbolSpan:
+      type: integer
+    prefixCRLF:
+      type: integer
+    postfixCRLF:
+      type: integer
+    udpEnabled:
+      description: "Whether to receive text to transmit on specified UDP port"
+      type: integer
+    udpAddress:
+      description: "UDP address to receive text to transmit via"
+      type: string
+    udpPort:
+      description: "UDP port to receive text to transmit via"
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+PSK31ModReport:
+  description: PSK31Mod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+
+PSK31ModActions:
+  description: PSK31Mod
+  properties:
+    tx:
+      type: integer
+      description: >
+        Transmit current text
+          * 0 - Do nothing
+          * 1 - Transmit
+    payload:
+      type: object
+      properties:
+        text:
+          type: string

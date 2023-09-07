@@ -67,10 +67,6 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
     FT8DemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FT8Demod.yaml#/FT8DemodSettings"
-    RTTYDemodSettings:
-      $ref: "http://swgserver:8081/api/swagger/include/RTTYDemod.yaml#/RTTYDemodSettings"
-    RTTYModSettings:
-      $ref: "http://swgserver:8081/api/swagger/include/RTTYMod.yaml#/RTTYModSettings"
     HeatMapSettings:
       $ref: "http://swgserver:8081/api/swagger/include/HeatMap.yaml#/HeatMapSettings"
     ILSDemodSettings:
@@ -101,6 +97,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/PacketMod.yaml#/PacketModSettings"
     PagerDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/PagerDemod.yaml#/PagerDemodSettings"
+    PSK31ModSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/PSK31Mod.yaml#/PSK31ModSettings"
     RadioAstronomySettings:
       $ref: "http://swgserver:8081/api/swagger/include/RadioAstronomy.yaml#/RadioAstronomySettings"
     RadioClockSettings:
@@ -113,6 +111,10 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceSettings"
     RemoteTCPSinkSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteTCPSink.yaml#/RemoteTCPSinkSettings"
+    RTTYDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/RTTYDemod.yaml#/RTTYDemodSettings"
+    RTTYModSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/RTTYMod.yaml#/RTTYModSettings"
     SigMFFileSinkSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkSettings"
     SSBModSettings:

@@ -23,21 +23,20 @@
 #include "util/baudot.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
-#include "rttymodsettings.h"
+#include "psk31modsettings.h"
 
-RttyModSettings::RttyModSettings() :
+PSK31Settings::PSK31Settings() :
     m_channelMarker(nullptr),
     m_rollupState(nullptr)
 {
     resetToDefaults();
 }
 
-void RttyModSettings::resetToDefaults()
+void PSK31Settings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
-    m_baud = 45.45;
-    m_rfBandwidth = 340;
-    m_frequencyShift = 170;
+    m_baud = 31.25;
+    m_rfBandwidth = 100;
     m_gain = 0.0f;
     m_channelMute = false;
     m_repeat = false;
@@ -45,10 +44,6 @@ void RttyModSettings::resetToDefaults()
     m_lpfTaps = 301;
     m_rfNoise = false;
     m_text = "CQ CQ CQ DE SDRangel CQ";
-    m_characterSet = Baudot::ITA2;
-    m_unshiftOnSpace = false;
-    m_msbFirst = false;
-    m_spaceHigh = false;
     m_prefixCRLF = true;
     m_postfixCRLF = true;
     m_predefinedTexts = QStringList({
@@ -57,17 +52,17 @@ void RttyModSettings::resetToDefaults()
         "UR 599 QTH IS ${location}",
         "TU DE ${callsign} CQ"
     });
-    m_rgbColor = QColor(180, 205, 130).rgb();
-    m_title = "RTTY Modulator";
+    m_rgbColor = QColor(25, 180, 200).rgb();
+    m_title = "PSK31 Modulator";
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
-    m_pulseShaping = false;
+    m_pulseShaping = true;
     m_beta = 1.0f;
-    m_symbolSpan = 6;
+    m_symbolSpan = 2;
     m_udpEnabled = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9998;
@@ -75,19 +70,13 @@ void RttyModSettings::resetToDefaults()
     m_hidden = false;
 }
 
-QString RttyModSettings::getMode() const
-{
-    return QString("%1/%2").arg(m_baud).arg(m_frequencyShift);
-}
-
-QByteArray RttyModSettings::serialize() const
+QByteArray PSK31Settings::serialize() const
 {
     SimpleSerializer s(1);
 
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeReal(2, m_baud);
     s.writeS32(3, m_rfBandwidth);
-    s.writeS32(4, m_frequencyShift);
     s.writeReal(5, m_gain);
     s.writeBool(6, m_channelMute);
     s.writeBool(7, m_repeat);
@@ -96,10 +85,6 @@ QByteArray RttyModSettings::serialize() const
     s.writeBool(25, m_rfNoise);
     s.writeString(30, m_text);
 
-    s.writeS32(60, (int)m_characterSet);
-    s.writeBool(61, m_unshiftOnSpace);
-    s.writeBool(62, m_msbFirst);
-    s.writeBool(63, m_spaceHigh);
     s.writeBool(64, m_prefixCRLF);
     s.writeBool(65, m_postfixCRLF);
     s.writeList(66, m_predefinedTexts);
@@ -132,11 +117,10 @@ QByteArray RttyModSettings::serialize() const
     s.writeBlob(56, m_geometryBytes);
     s.writeBool(57, m_hidden);
 
-
     return s.final();
 }
 
-bool RttyModSettings::deserialize(const QByteArray& data)
+bool PSK31Settings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
@@ -154,9 +138,8 @@ bool RttyModSettings::deserialize(const QByteArray& data)
 
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
-        d.readReal(2, &m_baud, 45.45f);
-        d.readS32(3, &m_rfBandwidth, 340);
-        d.readS32(4, &m_frequencyShift, 170);
+        d.readReal(2, &m_baud, 31.25f);
+        d.readS32(3, &m_rfBandwidth, 100);
         d.readReal(5, &m_gain, 0.0f);
         d.readBool(6, &m_channelMute, false);
         d.readBool(7, &m_repeat, false);
@@ -165,16 +148,12 @@ bool RttyModSettings::deserialize(const QByteArray& data)
         d.readBool(25, &m_rfNoise, false);
         d.readString(30, &m_text, "CQ CQ CQ anyone using SDRangel");
 
-        d.readS32(60, (int*)&m_characterSet, (int)Baudot::ITA2);
-        d.readBool(61, &m_unshiftOnSpace, false);
-        d.readBool(62, &m_msbFirst, false);
-        d.readBool(63, &m_spaceHigh, false);
         d.readBool(64, &m_prefixCRLF, true);
         d.readBool(65, &m_postfixCRLF, true);
         d.readList(66, &m_predefinedTexts);
 
         d.readU32(31, &m_rgbColor);
-        d.readString(32, &m_title, "RTTY Modulator");
+        d.readString(32, &m_title, "PSK31 Modulator");
 
         if (m_channelMarker)
         {
@@ -197,9 +176,9 @@ bool RttyModSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(39, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
-        d.readBool(46, &m_pulseShaping, false);
+        d.readBool(46, &m_pulseShaping, true);
         d.readReal(47, &m_beta, 1.0f);
-        d.readS32(48, &m_symbolSpan, 6);
+        d.readS32(48, &m_symbolSpan, 2);
         d.readBool(51, &m_udpEnabled);
         d.readString(52, &m_udpAddress, "127.0.0.1");
         d.readU32(53, &utmp);
@@ -224,7 +203,7 @@ bool RttyModSettings::deserialize(const QByteArray& data)
     }
     else
     {
-        qDebug() << "RttyModSettings::deserialize: ERROR";
+        qDebug() << "PSK31Settings::deserialize: ERROR";
         resetToDefaults();
         return false;
     }

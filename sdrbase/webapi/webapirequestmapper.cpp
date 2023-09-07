@@ -4609,6 +4609,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setPagerDemodSettings(new SWGSDRangel::SWGPagerDemodSettings());
             channelSettings->getPagerDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "PSK31ModSettings")
+        {
+            channelSettings->setPsk31ModSettings(new SWGSDRangel::SWGPSK31ModSettings());
+            channelSettings->getPsk31ModSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "RadioAstronomySettings")
         {
             channelSettings->setRadioAstronomySettings(new SWGSDRangel::SWGRadioAstronomySettings());
@@ -4643,12 +4648,12 @@ bool WebAPIRequestMapper::getChannelSettings(
         {
             channelSettings->setRttyDemodSettings(new SWGSDRangel::SWGRTTYDemodSettings());
             channelSettings->getRttyDemodSettings()->fromJsonObject(settingsJsonObject);
-            }
+        }
         else if (channelSettingsKey == "RTTYModSettings")
         {
             channelSettings->setRttyModSettings(new SWGSDRangel::SWGRTTYModSettings());
             channelSettings->getRttyModSettings()->fromJsonObject(settingsJsonObject);
-            }
+        }
         else if (channelSettingsKey == "SigMFFileSinkSettings")
         {
             channelSettings->setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
@@ -4755,6 +4760,11 @@ bool WebAPIRequestMapper::getChannelActions(
         {
             channelActions->setPacketModActions(new SWGSDRangel::SWGPacketModActions());
             channelActions->getPacketModActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "PSK31ModActions")
+        {
+            channelActions->setPsk31ModActions(new SWGSDRangel::SWGPSK31ModActions());
+            channelActions->getPsk31ModActions()->fromJsonObject(actionsJsonObject);
         }
         else if (channelActionsKey == "RTTYModActions")
         {
@@ -5435,6 +5445,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setPacketDemodSettings(nullptr);
     channelSettings.setPacketModSettings(nullptr);
     channelSettings.setPagerDemodSettings(nullptr);
+    channelSettings.setPsk31ModSettings(nullptr);
     channelSettings.setRadioAstronomySettings(nullptr);
     channelSettings.setRadioClockSettings(nullptr);
     channelSettings.setRadiosondeDemodSettings(nullptr);
@@ -5474,6 +5485,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setNoiseFigureReport(nullptr);
     channelReport.setIeee802154ModReport(nullptr);
     channelReport.setPacketModReport(nullptr);
+    channelReport.setPsk31ModReport(nullptr);
     channelReport.setRadioAstronomyReport(nullptr);
     channelReport.setRadioClockReport(nullptr);
     channelReport.setRadiosondeDemodReport(nullptr);
@@ -5498,8 +5510,9 @@ void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& ch
     channelActions.setChannelType(nullptr);
     channelActions.setFileSourceActions(nullptr);
     channelActions.setIeee802154ModActions(nullptr);
-    channelActions.setRadioAstronomyActions(nullptr);
     channelActions.setPacketModActions(nullptr);
+    channelActions.setPsk31ModActions(nullptr);
+    channelActions.setRadioAstronomyActions(nullptr);
     channelActions.setRttyModActions(nullptr);
 }
 

@@ -42,6 +42,7 @@ void RttyDemodSettings::resetToDefaults()
     m_udpPort = 9999;
     m_characterSet = Baudot::ITA2;
     m_suppressCRLF = false;
+    m_unshiftOnSpace = false;
     m_filter = LOWPASS;
     m_atc = true;
     m_msbFirst = false;
