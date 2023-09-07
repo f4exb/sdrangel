@@ -19,8 +19,6 @@
 #define INCLUDE_UTIL_PSK31_H
 
 #include <QString>
-#include <QDateTime>
-#include <QMap>
 
 #include "export.h"
 
@@ -28,7 +26,7 @@ class SDRBASE_API PSK31Varicode {
 
 public:
 
-    static const QStringList m_varicode; // Index with 7-bit ASCII
+    static const QStringList m_varicode; // Index with 8-bit extended-ASCII
 
 };
 
