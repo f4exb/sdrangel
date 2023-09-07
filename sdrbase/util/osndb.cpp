@@ -457,8 +457,20 @@ QString AircraftInformation::getFlag() const
             {
                 // Try letters before '-'
                 prefix = m_registration.left(idx);
-                if (m_prefixMap->contains(prefix)) {
-                    flag = m_prefixMap->value(prefix);
+                // Both China and Taiwan use B prefix. China regs are <= 4 digits, with Taiwan 5
+                if (prefix == "B")
+                {
+                    if (m_registration.size() >= 7) {
+                        flag = "taiwan";
+                    } else {
+                        flag = "china";
+                    }
+                }
+                else
+                {
+                    if (m_prefixMap->contains(prefix)) {
+                        flag = m_prefixMap->value(prefix);
+                    }
                 }
             }
         }
