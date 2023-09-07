@@ -29,10 +29,10 @@
       <item row="0" column="0" colspan="2">
        <widget class="QCheckBox" name="prefixCRLF">
         <property name="toolTip">
-         <string>Prefix text with carriage returns, line feed and switch to letters</string>
+         <string>Prefix text with carriage returns and line feed</string>
         </property>
         <property name="text">
-         <string>Prefix CR+CR+LF+LTRS</string>
+         <string>Prefix CR+CR+LF</string>
         </property>
        </widget>
       </item>

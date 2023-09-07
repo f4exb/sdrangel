@@ -36,7 +36,7 @@ void PSK31Settings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
     m_baud = 31.25;
-    m_rfBandwidth = 340;
+    m_rfBandwidth = 100;
     m_gain = 0.0f;
     m_channelMute = false;
     m_repeat = false;
@@ -52,7 +52,7 @@ void PSK31Settings::resetToDefaults()
         "UR 599 QTH IS ${location}",
         "TU DE ${callsign} CQ"
     });
-    m_rgbColor = QColor(180, 205, 130).rgb();
+    m_rgbColor = QColor(25, 180, 200).rgb();
     m_title = "PSK31 Modulator";
     m_streamIndex = 0;
     m_useReverseAPI = false;
@@ -139,7 +139,7 @@ bool PSK31Settings::deserialize(const QByteArray& data)
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
         d.readReal(2, &m_baud, 31.25f);
-        d.readS32(3, &m_rfBandwidth, 340);
+        d.readS32(3, &m_rfBandwidth, 100);
         d.readReal(5, &m_gain, 0.0f);
         d.readBool(6, &m_channelMute, false);
         d.readBool(7, &m_repeat, false);

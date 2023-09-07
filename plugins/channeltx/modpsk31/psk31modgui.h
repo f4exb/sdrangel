@@ -77,7 +77,7 @@ private:
     QString m_initialToolTip;
 
     PSK31* m_psk31Mod;
-    MovingAverageUtil<double, double, 2> m_channelPowerDbAvg; // Less than other mods, as packets are short
+    MovingAverageUtil<double, double, 20> m_channelPowerDbAvg;
 
     MessageQueue m_inputMessageQueue;
 
@@ -88,7 +88,6 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
-    QString formatFrequency(int frequency) const;
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();

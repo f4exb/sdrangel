@@ -30,7 +30,6 @@ PSK31Source::PSK31Source() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
     m_spectrumRate(2000),
-    m_fmPhase(0.0),
     m_spectrumSink(nullptr),
     m_specSampleBufferIndex(0),
     m_magsq(0.0),
@@ -42,8 +41,8 @@ PSK31Source::PSK31Source() :
     m_bitCount(0)
  {
     m_bits.append(0);
-    m_lowpass.create(301, m_channelSampleRate, 400.0 / 2.0);
-    m_pulseShape.create(0.5, 6, m_channelSampleRate / 45.45, true);
+    m_lowpass.create(301, m_channelSampleRate, 100.0 / 2.0);
+    m_pulseShape.create(0.5, 6, m_channelSampleRate / 31.25, true);
 
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
@@ -258,8 +257,6 @@ void PSK31Source::applySettings(const PSK31Settings& settings, bool force)
 
     m_settings = settings;
 
-    // Precalculate FM sensensity and linear gain to save doing it in the loop
-    m_phaseSensitivity = 2.0f * M_PI * 1100 / (double)m_channelSampleRate;
     m_linearGain = powf(10.0f,  m_settings.m_gain/20.0f);
 }
 
@@ -302,9 +299,6 @@ void PSK31Source::applyChannelSettings(int channelSampleRate, int channelFrequen
     m_channelFrequencyOffset = channelFrequencyOffset;
     m_samplesPerSymbol = m_channelSampleRate / m_settings.m_baud;
     qDebug() << "m_samplesPerSymbol: " << m_samplesPerSymbol << " (" << m_channelSampleRate << "/" << m_settings.m_baud << ")";
-
-    // Precalculate FM sensensity to save doing it in the loop
-    m_phaseSensitivity = 2.0f * M_PI * 1100 / (double)m_channelSampleRate;
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);
@@ -349,7 +343,6 @@ void PSK31Source::addBit(int bit)
     m_bits[m_byteIdx] |= bit << m_bitIdx;
     m_bitIdx++;
     m_bitCount++;
-    m_bitCountTotal++;
     if (m_bitIdx == 8)
     {
         m_byteIdx++;
@@ -364,8 +357,6 @@ void PSK31Source::initTX()
 {
     m_byteIdx = 0;
     m_bitIdx = 0;
-    m_bitCount = m_bitCountTotal; // Reset to allow retransmission
-    m_bit = 0;
 }
 
 void PSK31Source::addTXText(QString text)
@@ -377,7 +368,7 @@ void PSK31Source::addTXText(QString text)
         QString s = text;
 
         if (m_settings.m_prefixCRLF) {
-            s.prepend("\r\r\n>"); // '>' switches to letters
+            s.prepend("\r\r\n");
         }
         if (m_settings.m_postfixCRLF) {
             s.append("\r\r\n");
@@ -393,7 +384,6 @@ void PSK31Source::encodeText(const QString& text)
     m_byteIdx = 0;
     m_bitIdx = 0;
     m_bitCount = 0;
-    m_bitCountTotal = 0;
     for (int i = 0; i < m_bits.size(); i++) {
         m_bits[i] = 0;
     }
@@ -423,12 +413,9 @@ void PSK31Source::encodeIdle()
     m_byteIdx = 0;
     m_bitIdx = 0;
     m_bitCount = 0;
-    m_bitCountTotal = 0;
     for (int i = 0; i < m_bits.size(); i++) {
         m_bits[i] = 0;
     }
-    addBit(0);
-    addBit(0);
     addBit(0);
     addBit(0);
 }

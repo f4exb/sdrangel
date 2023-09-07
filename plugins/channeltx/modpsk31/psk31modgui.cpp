@@ -113,7 +113,6 @@ bool PSK31GUI::handleMessage(const Message& message)
         }
         ui->txButton->setToolTip(tooltip);
 
-        s = s.replace(">", "");  // Don't display LTRS
         s = s.replace("\r", ""); // Don't display carriage returns
 
         if (!s.isEmpty())
@@ -186,7 +185,7 @@ void PSK31GUI::on_deltaFrequency_changed(qint64 value)
 void PSK31GUI::on_rfBW_valueChanged(int value)
 {
     int bw = value;
-    ui->rfBWText->setText(formatFrequency(bw));
+    ui->rfBWText->setText(QString("%1 Hz").arg(bw));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
     applySettings();
@@ -444,15 +443,6 @@ void PSK31GUI::applySettings(bool force)
     }
 }
 
-QString PSK31GUI::formatFrequency(int frequency) const
-{
-    QString suffix = "";
-    if (width() > 450) {
-        suffix = " Hz";
-    }
-    return QString("%1%2").arg(frequency).arg(suffix);
-}
-
 QString PSK31GUI::substitute(const QString& text)
 {
     const MainSettings& mainSettings = MainCore::instance()->getSettings();
@@ -483,14 +473,14 @@ void PSK31GUI::displaySettings()
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-    ui->rfBWText->setText(formatFrequency(m_settings.m_rfBandwidth));
+    ui->rfBWText->setText(QString("%1 Hz").arg(m_settings.m_rfBandwidth));
     ui->rfBW->setValue(m_settings.m_rfBandwidth);
 
     ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
-    ui->gainText->setText(QString("%1").arg((double)m_settings.m_gain, 0, 'f', 1));
+    ui->gainText->setText(QString("%1dB").arg((double)m_settings.m_gain, 0, 'f', 1));
     ui->gain->setValue(m_settings.m_gain);
 
     ui->channelMute->setChecked(m_settings.m_channelMute);

@@ -70,15 +70,12 @@ private:
     ChannelAPI *m_channel;
 
     NCO m_carrierNco;
-    double m_fmPhase;                   // Double gives cleaner spectrum than Real
-    double m_phaseSensitivity;
     Real m_linearGain;
     Complex m_modSample;
 
     int m_bit;                          // Current bit
-    int m_prevBit;                      // Previous bit, for differential encoding
     int m_symbol;                       // Current symbol
-    int m_prevSymbol;
+    int m_prevSymbol;                   // Previous symbol for differential encoding
     RaisedCosine<Real> m_pulseShape;    // Pulse shaping filter
     Lowpass<Complex> m_lowpass;         // Low pass filter to limit RF bandwidth
 
@@ -113,7 +110,6 @@ private:
     int m_byteIdx;                      // Index in to m_bits
     int m_bitIdx;                       // Index in to current byte of m_bits
     int m_bitCount;                     // Count of number of valid bits in m_bits
-    int m_bitCountTotal;
 
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;

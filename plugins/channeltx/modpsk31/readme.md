@@ -63,6 +63,8 @@ Enter text to transmit. Pressing return will transmit the text and clear this fi
 
 The list of pre-defined text can be customised via the Transmit Settings dialog (13).
 
+PSK31 supports the extended ASCII character set.
+
 <h3>13: TX</h3>
 
 Press to transmit the current text. The text field will not be cleared.
