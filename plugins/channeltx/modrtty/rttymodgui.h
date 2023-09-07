@@ -77,7 +77,7 @@ private:
     QString m_initialToolTip;
 
     RttyMod* m_rttyMod;
-    MovingAverageUtil<double, double, 2> m_channelPowerDbAvg; // Less than other mods, as packets are short
+    MovingAverageUtil<double, double, 20> m_channelPowerDbAvg;
 
     MessageQueue m_inputMessageQueue;
 
@@ -110,6 +110,7 @@ private slots:
     void on_characterSet_currentIndexChanged(int index);
     void on_endian_clicked(bool checked);
     void on_spaceHigh_clicked(bool checked);
+    void on_unshiftOnSpace_clicked(bool checked);
     void on_clearTransmittedText_clicked();
     void on_txButton_clicked();
     void on_text_editingFinished();

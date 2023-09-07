@@ -307,9 +307,16 @@ void RttyDemodGUI::on_spaceHigh_clicked(bool checked)
     m_settings.m_spaceHigh = checked;
     if (checked) {
         ui->spaceHigh->setText("M-S");
-    } else {
+    }
+    else {
         ui->spaceHigh->setText("S-M");
     }
+    applySettings();
+}
+
+void RttyDemodGUI::on_unshiftOnSpace_clicked(bool checked)
+{
+    m_settings.m_unshiftOnSpace = checked;
     applySettings();
 }
 
@@ -571,6 +578,7 @@ void RttyDemodGUI::displaySettings()
     } else {
         ui->spaceHigh->setText("S-M");
     }
+    ui->unshiftOnSpace->setChecked(m_settings.m_unshiftOnSpace);
 
     updateIndexLabel();
 
@@ -657,6 +665,7 @@ void RttyDemodGUI::makeUIConnections()
     QObject::connect(ui->atc, &QCheckBox::clicked, this, &RttyDemodGUI::on_atc_clicked);
     QObject::connect(ui->endian, &QCheckBox::clicked, this, &RttyDemodGUI::on_endian_clicked);
     QObject::connect(ui->spaceHigh, &QCheckBox::clicked, this, &RttyDemodGUI::on_spaceHigh_clicked);
+    QObject::connect(ui->unshiftOnSpace, &QCheckBox::clicked, this, &RttyDemodGUI::on_unshiftOnSpace_clicked);
     QObject::connect(ui->clearTable, &QPushButton::clicked, this, &RttyDemodGUI::on_clearTable_clicked);
     QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &RttyDemodGUI::on_udpEnabled_clicked);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &RttyDemodGUI::on_udpAddress_editingFinished);

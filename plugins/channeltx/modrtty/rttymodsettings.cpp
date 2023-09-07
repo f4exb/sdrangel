@@ -44,9 +44,9 @@ void RttyModSettings::resetToDefaults()
     m_repeatCount = 10;
     m_lpfTaps = 301;
     m_rfNoise = false;
-    m_writeToFile = false;
     m_text = "CQ CQ CQ DE SDRangel CQ";
     m_characterSet = Baudot::ITA2;
+    m_unshiftOnSpace = false;
     m_msbFirst = false;
     m_spaceHigh = false;
     m_prefixCRLF = true;
@@ -94,7 +94,6 @@ QByteArray RttyModSettings::serialize() const
     s.writeS32(9, m_repeatCount);
     s.writeS32(23, m_lpfTaps);
     s.writeBool(25, m_rfNoise);
-    s.writeBool(26, m_writeToFile);
     s.writeString(30, m_text);
 
     s.writeS32(60, (int)m_characterSet);
@@ -164,7 +163,6 @@ bool RttyModSettings::deserialize(const QByteArray& data)
         d.readS32(9, &m_repeatCount, -1);
         d.readS32(23, &m_lpfTaps, 301);
         d.readBool(25, &m_rfNoise, false);
-        d.readBool(26, &m_writeToFile, false);
         d.readString(30, &m_text, "CQ CQ CQ anyone using SDRangel");
 
         d.readS32(60, (int*)&m_characterSet, (int)Baudot::ITA2);

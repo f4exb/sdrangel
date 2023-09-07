@@ -112,6 +112,7 @@ private slots:
     void on_atc_clicked(bool checked);
     void on_endian_clicked(bool checked);
     void on_spaceHigh_clicked(bool checked);
+    void on_unshiftOnSpace_clicked(bool checked);
     void on_clearTable_clicked();
     void on_udpEnabled_clicked(bool checked);
     void on_udpAddress_editingFinished();

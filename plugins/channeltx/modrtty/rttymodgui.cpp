@@ -264,6 +264,12 @@ void RttyModGUI::on_spaceHigh_clicked(bool checked)
     applySettings();
 }
 
+void RttyModGUI::on_unshiftOnSpace_clicked(bool checked)
+{
+    m_settings.m_unshiftOnSpace = checked;
+    applySettings();
+}
+
 void RttyModGUI::on_clearTransmittedText_clicked()
 {
     ui->transmittedText->clear();
@@ -567,7 +573,6 @@ void RttyModGUI::displaySettings()
     ui->baudRate->setCurrentIndex(ui->baudRate->findText(baudRate));
     ui->frequencyShiftText->setText(formatFrequency(m_settings.m_frequencyShift));
     ui->frequencyShift->setValue(m_settings.m_frequencyShift);
-    ui->frequencyShift->setValue(m_settings.m_frequencyShift);
 
     ui->characterSet->setCurrentIndex((int)m_settings.m_characterSet);
     ui->endian->setChecked(m_settings.m_msbFirst);
@@ -582,12 +587,13 @@ void RttyModGUI::displaySettings()
     } else {
         ui->spaceHigh->setText("S-M");
     }
+    ui->unshiftOnSpace->setChecked(m_settings.m_unshiftOnSpace);
 
     ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
-    ui->gainText->setText(QString("%1").arg((double)m_settings.m_gain, 0, 'f', 1));
+    ui->gainText->setText(QString("%1dB").arg((double)m_settings.m_gain, 0, 'f', 1));
     ui->gain->setValue(m_settings.m_gain);
 
     ui->channelMute->setChecked(m_settings.m_channelMute);
@@ -633,6 +639,7 @@ void RttyModGUI::makeUIConnections()
     QObject::connect(ui->characterSet, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RttyModGUI::on_characterSet_currentIndexChanged);
     QObject::connect(ui->endian, &QCheckBox::clicked, this, &RttyModGUI::on_endian_clicked);
     QObject::connect(ui->spaceHigh, &QCheckBox::clicked, this, &RttyModGUI::on_spaceHigh_clicked);
+    QObject::connect(ui->unshiftOnSpace, &QCheckBox::clicked, this, &RttyModGUI::on_unshiftOnSpace_clicked);
     QObject::connect(ui->clearTransmittedText, &QToolButton::clicked, this, &RttyModGUI::on_clearTransmittedText_clicked);
     QObject::connect(ui->gain, &QDial::valueChanged, this, &RttyModGUI::on_gain_valueChanged);
     QObject::connect(ui->channelMute, &QToolButton::toggled, this, &RttyModGUI::on_channelMute_toggled);
