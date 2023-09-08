@@ -26,6 +26,7 @@
 #include "SWGAaroniaRTSASettings.h"
 #include "SWGAirspyHFSettings.h"
 #include "SWGAirspySettings.h"
+#include "SWGAndroidSDRDriverInputSettings.h"
 #include "SWGAudioCATSISOSettings.h"
 #include "SWGAudioInputSettings.h"
 #include "SWGAudioOutputSettings.h"
@@ -102,6 +103,9 @@ public:
 
     SWGAirspyHFSettings* getAirspyHfSettings();
     void setAirspyHfSettings(SWGAirspyHFSettings* airspy_hf_settings);
+
+    SWGAndroidSDRDriverInputSettings* getAndroidSdrDriverInputSettings();
+    void setAndroidSdrDriverInputSettings(SWGAndroidSDRDriverInputSettings* android_sdr_driver_input_settings);
 
     SWGAudioCATSISOSettings* getAudioCatsisoSettings();
     void setAudioCatsisoSettings(SWGAudioCATSISOSettings* audio_catsiso_settings);
@@ -253,6 +257,9 @@ private:
 
     SWGAirspyHFSettings* airspy_hf_settings;
     bool m_airspy_hf_settings_isSet;
+
+    SWGAndroidSDRDriverInputSettings* android_sdr_driver_input_settings;
+    bool m_android_sdr_driver_input_settings_isSet;
 
     SWGAudioCATSISOSettings* audio_catsiso_settings;
     bool m_audio_catsiso_settings_isSet;

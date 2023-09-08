@@ -4870,6 +4870,11 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
             deviceSettings->getAirspyHfSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "androidSDRDriverInputSettings")
+        {
+            deviceSettings->setAndroidSdrDriverInputSettings(new SWGSDRangel::SWGAndroidSDRDriverInputSettings());
+            deviceSettings->getAndroidSdrDriverInputSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "audioCATSISOSettings")
         {
             deviceSettings->setAudioCatsisoSettings(new SWGSDRangel::SWGAudioCATSISOSettings());
@@ -5367,6 +5372,7 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setDeviceHwType(nullptr);
     deviceSettings.setAirspySettings(nullptr);
     deviceSettings.setAirspyHfSettings(nullptr);
+    deviceSettings.setAndroidSdrDriverInputSettings(nullptr);
     deviceSettings.setAudioInputSettings(nullptr);
     deviceSettings.setBladeRf1InputSettings(nullptr);
     deviceSettings.setBladeRf1OutputSettings(nullptr);
@@ -5398,6 +5404,7 @@ void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& device
     deviceReport.setDeviceHwType(nullptr);
     deviceReport.setAirspyHfReport(nullptr);
     deviceReport.setAirspyReport(nullptr);
+    deviceReport.setAndroidSdrDriverInputReport(nullptr);
     deviceReport.setFileInputReport(nullptr);
     deviceReport.setLimeSdrInputReport(nullptr);
     deviceReport.setLimeSdrOutputReport(nullptr);

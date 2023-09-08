@@ -15,6 +15,8 @@ DeviceReport:
       $ref: "http://swgserver:8081/api/swagger/include/Airspy.yaml#/AirspyReport"
     airspyHFReport:
       $ref: "http://swgserver:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFReport"
+    androidSDRDriverInputReport:
+      $ref: "http://swgserver:8081/api/swagger/include/AndroidSDRDriverInput.yaml#/AndroidSDRDriverInputReport"
     bladeRF2InputReport:
       $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
     bladeRF2OutputReport:

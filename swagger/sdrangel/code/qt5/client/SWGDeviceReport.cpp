@@ -36,6 +36,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_airspy_report_isSet = false;
     airspy_hf_report = nullptr;
     m_airspy_hf_report_isSet = false;
+    android_sdr_driver_input_report = nullptr;
+    m_android_sdr_driver_input_report_isSet = false;
     blade_rf2_input_report = nullptr;
     m_blade_rf2_input_report_isSet = false;
     blade_rf2_output_report = nullptr;
@@ -112,6 +114,8 @@ SWGDeviceReport::init() {
     m_airspy_report_isSet = false;
     airspy_hf_report = new SWGAirspyHFReport();
     m_airspy_hf_report_isSet = false;
+    android_sdr_driver_input_report = new SWGAndroidSDRDriverInputReport();
+    m_android_sdr_driver_input_report_isSet = false;
     blade_rf2_input_report = new SWGBladeRF2InputReport();
     m_blade_rf2_input_report_isSet = false;
     blade_rf2_output_report = new SWGBladeRF2OutputReport();
@@ -185,6 +189,9 @@ SWGDeviceReport::cleanup() {
     }
     if(airspy_hf_report != nullptr) { 
         delete airspy_hf_report;
+    }
+    if(android_sdr_driver_input_report != nullptr) { 
+        delete android_sdr_driver_input_report;
     }
     if(blade_rf2_input_report != nullptr) { 
         delete blade_rf2_input_report;
@@ -297,6 +304,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&airspy_hf_report, pJson["airspyHFReport"], "SWGAirspyHFReport", "SWGAirspyHFReport");
     
+    ::SWGSDRangel::setValue(&android_sdr_driver_input_report, pJson["androidSDRDriverInputReport"], "SWGAndroidSDRDriverInputReport", "SWGAndroidSDRDriverInputReport");
+    
     ::SWGSDRangel::setValue(&blade_rf2_input_report, pJson["bladeRF2InputReport"], "SWGBladeRF2InputReport", "SWGBladeRF2InputReport");
     
     ::SWGSDRangel::setValue(&blade_rf2_output_report, pJson["bladeRF2OutputReport"], "SWGBladeRF2OutputReport", "SWGBladeRF2OutputReport");
@@ -384,6 +393,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((airspy_hf_report != nullptr) && (airspy_hf_report->isSet())){
         toJsonValue(QString("airspyHFReport"), airspy_hf_report, obj, QString("SWGAirspyHFReport"));
+    }
+    if((android_sdr_driver_input_report != nullptr) && (android_sdr_driver_input_report->isSet())){
+        toJsonValue(QString("androidSDRDriverInputReport"), android_sdr_driver_input_report, obj, QString("SWGAndroidSDRDriverInputReport"));
     }
     if((blade_rf2_input_report != nullptr) && (blade_rf2_input_report->isSet())){
         toJsonValue(QString("bladeRF2InputReport"), blade_rf2_input_report, obj, QString("SWGBladeRF2InputReport"));
@@ -517,6 +529,16 @@ void
 SWGDeviceReport::setAirspyHfReport(SWGAirspyHFReport* airspy_hf_report) {
     this->airspy_hf_report = airspy_hf_report;
     this->m_airspy_hf_report_isSet = true;
+}
+
+SWGAndroidSDRDriverInputReport*
+SWGDeviceReport::getAndroidSdrDriverInputReport() {
+    return android_sdr_driver_input_report;
+}
+void
+SWGDeviceReport::setAndroidSdrDriverInputReport(SWGAndroidSDRDriverInputReport* android_sdr_driver_input_report) {
+    this->android_sdr_driver_input_report = android_sdr_driver_input_report;
+    this->m_android_sdr_driver_input_report_isSet = true;
 }
 
 SWGBladeRF2InputReport*
@@ -834,6 +856,9 @@ SWGDeviceReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(airspy_hf_report && airspy_hf_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(android_sdr_driver_input_report && android_sdr_driver_input_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(blade_rf2_input_report && blade_rf2_input_report->isSet()){
