@@ -18,6 +18,8 @@ DeviceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Airspy.yaml#/AirspySettings"
     airspyHFSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
+    androidSDRDriverInputSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/AndroidSDRDriverInput.yaml#/AndroidSDRDriverInputSettings"
     audioCATSISOSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AudioCATSISO.yaml#/AudioCATSISOSettings"
     audioInputSettings:

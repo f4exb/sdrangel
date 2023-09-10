@@ -26,6 +26,7 @@
 #include "SWGAaroniaRTSAReport.h"
 #include "SWGAirspyHFReport.h"
 #include "SWGAirspyReport.h"
+#include "SWGAndroidSDRDriverInputReport.h"
 #include "SWGBladeRF2InputReport.h"
 #include "SWGBladeRF2MIMOReport.h"
 #include "SWGBladeRF2OutputReport.h"
@@ -84,6 +85,9 @@ public:
 
     SWGAirspyHFReport* getAirspyHfReport();
     void setAirspyHfReport(SWGAirspyHFReport* airspy_hf_report);
+
+    SWGAndroidSDRDriverInputReport* getAndroidSdrDriverInputReport();
+    void setAndroidSdrDriverInputReport(SWGAndroidSDRDriverInputReport* android_sdr_driver_input_report);
 
     SWGBladeRF2InputReport* getBladeRf2InputReport();
     void setBladeRf2InputReport(SWGBladeRF2InputReport* blade_rf2_input_report);
@@ -190,6 +194,9 @@ private:
 
     SWGAirspyHFReport* airspy_hf_report;
     bool m_airspy_hf_report_isSet;
+
+    SWGAndroidSDRDriverInputReport* android_sdr_driver_input_report;
+    bool m_android_sdr_driver_input_report_isSet;
 
     SWGBladeRF2InputReport* blade_rf2_input_report;
     bool m_blade_rf2_input_report_isSet;

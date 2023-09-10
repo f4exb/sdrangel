@@ -51,6 +51,8 @@
 #include "SWGAirspyHFSettings.h"
 #include "SWGAirspyReport.h"
 #include "SWGAirspySettings.h"
+#include "SWGAndroidSDRDriverInputReport.h"
+#include "SWGAndroidSDRDriverInputSettings.h"
 #include "SWGAntennaToolsSettings.h"
 #include "SWGArgInfo.h"
 #include "SWGArgValue.h"
@@ -549,6 +551,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAirspySettings").compare(type) == 0) {
       SWGAirspySettings *obj = new SWGAirspySettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAndroidSDRDriverInputReport").compare(type) == 0) {
+      SWGAndroidSDRDriverInputReport *obj = new SWGAndroidSDRDriverInputReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAndroidSDRDriverInputSettings").compare(type) == 0) {
+      SWGAndroidSDRDriverInputSettings *obj = new SWGAndroidSDRDriverInputSettings();
       obj->init();
       return obj;
     }

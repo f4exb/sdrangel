@@ -38,6 +38,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_airspy_settings_isSet = false;
     airspy_hf_settings = nullptr;
     m_airspy_hf_settings_isSet = false;
+    android_sdr_driver_input_settings = nullptr;
+    m_android_sdr_driver_input_settings_isSet = false;
     audio_catsiso_settings = nullptr;
     m_audio_catsiso_settings_isSet = false;
     audio_input_settings = nullptr;
@@ -144,6 +146,8 @@ SWGDeviceSettings::init() {
     m_airspy_settings_isSet = false;
     airspy_hf_settings = new SWGAirspyHFSettings();
     m_airspy_hf_settings_isSet = false;
+    android_sdr_driver_input_settings = new SWGAndroidSDRDriverInputSettings();
+    m_android_sdr_driver_input_settings_isSet = false;
     audio_catsiso_settings = new SWGAudioCATSISOSettings();
     m_audio_catsiso_settings_isSet = false;
     audio_input_settings = new SWGAudioInputSettings();
@@ -246,6 +250,9 @@ SWGDeviceSettings::cleanup() {
     }
     if(airspy_hf_settings != nullptr) { 
         delete airspy_hf_settings;
+    }
+    if(android_sdr_driver_input_settings != nullptr) { 
+        delete android_sdr_driver_input_settings;
     }
     if(audio_catsiso_settings != nullptr) { 
         delete audio_catsiso_settings;
@@ -402,6 +409,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&airspy_hf_settings, pJson["airspyHFSettings"], "SWGAirspyHFSettings", "SWGAirspyHFSettings");
     
+    ::SWGSDRangel::setValue(&android_sdr_driver_input_settings, pJson["androidSDRDriverInputSettings"], "SWGAndroidSDRDriverInputSettings", "SWGAndroidSDRDriverInputSettings");
+    
     ::SWGSDRangel::setValue(&audio_catsiso_settings, pJson["audioCATSISOSettings"], "SWGAudioCATSISOSettings", "SWGAudioCATSISOSettings");
     
     ::SWGSDRangel::setValue(&audio_input_settings, pJson["audioInputSettings"], "SWGAudioInputSettings", "SWGAudioInputSettings");
@@ -520,6 +529,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((airspy_hf_settings != nullptr) && (airspy_hf_settings->isSet())){
         toJsonValue(QString("airspyHFSettings"), airspy_hf_settings, obj, QString("SWGAirspyHFSettings"));
+    }
+    if((android_sdr_driver_input_settings != nullptr) && (android_sdr_driver_input_settings->isSet())){
+        toJsonValue(QString("androidSDRDriverInputSettings"), android_sdr_driver_input_settings, obj, QString("SWGAndroidSDRDriverInputSettings"));
     }
     if((audio_catsiso_settings != nullptr) && (audio_catsiso_settings->isSet())){
         toJsonValue(QString("audioCATSISOSettings"), audio_catsiso_settings, obj, QString("SWGAudioCATSISOSettings"));
@@ -705,6 +717,16 @@ void
 SWGDeviceSettings::setAirspyHfSettings(SWGAirspyHFSettings* airspy_hf_settings) {
     this->airspy_hf_settings = airspy_hf_settings;
     this->m_airspy_hf_settings_isSet = true;
+}
+
+SWGAndroidSDRDriverInputSettings*
+SWGDeviceSettings::getAndroidSdrDriverInputSettings() {
+    return android_sdr_driver_input_settings;
+}
+void
+SWGDeviceSettings::setAndroidSdrDriverInputSettings(SWGAndroidSDRDriverInputSettings* android_sdr_driver_input_settings) {
+    this->android_sdr_driver_input_settings = android_sdr_driver_input_settings;
+    this->m_android_sdr_driver_input_settings_isSet = true;
 }
 
 SWGAudioCATSISOSettings*
@@ -1165,6 +1187,9 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(airspy_hf_settings && airspy_hf_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(android_sdr_driver_input_settings && android_sdr_driver_input_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(audio_catsiso_settings && audio_catsiso_settings->isSet()){
