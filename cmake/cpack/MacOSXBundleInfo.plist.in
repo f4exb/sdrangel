@@ -38,5 +38,11 @@
         <string>True</string>
         <key>NSSupportsAutomaticGraphicsSwitching</key>
         <true/>
+        <key>NSLocationUsageDescription</key>
+        <string>Uses location to show position on maps</string>
+        <key>NSMicrophoneUsageDescription</key>
+        <string>Uses microphone to transmit voice</string>
+        <key>NSCameraUsageDescription</key>
+        <string>Uses camera to transmit video</string>
 </dict>
 </plist>
