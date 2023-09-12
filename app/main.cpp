@@ -220,6 +220,12 @@ int main(int argc, char* argv[])
     sfc.setVersion(3, 3);
     sfc.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(sfc);
+
+    // Request authorization for access to camera and microphone (mac/auth.mm)
+    extern int authCameraAndMic();
+    if (authCameraAndMic() < 0) {
+        qWarning("Failed to authorize access to camera and microphone. Enable access in System Settings > Privacy & Security");
+    }
 #endif
 
 #ifdef ANDROID

@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.13.0)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
-project(sdrangel)
+if(APPLE)
+    project(sdrangel LANGUAGES CXX OBJCXX)
+else()
+    project(sdrangel)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
@@ -911,6 +915,7 @@ target_link_libraries(sdrangelbench
   sdrbench
   logging
 )
+
 ############ build sdrangel gui ################
 if (BUILD_GUI)
     set(sdrangel_SOURCES
@@ -918,7 +923,9 @@ if (BUILD_GUI)
         sdrgui/resources/sdrangel.rc
         settings/settings.qrc
     )
-
+    if(APPLE)
+        set(sdrangel_SOURCES ${sdrangel_SOURCES} mac/auth.mm)
+    endif()
     if(ANDROID AND NOT ENABLE_QT6)
         add_library(${CMAKE_PROJECT_NAME} SHARED ${sdrangel_SOURCES})
     elseif(ANDROID)
@@ -970,7 +977,10 @@ if (BUILD_GUI)
           sdrbase
           sdrgui
           logging
-      )
+)
+  endif()
+  if(APPLE)
+      target_link_libraries(${CMAKE_PROJECT_NAME} "-framework AVFoundation" objc)
   endif()
 
   if(WIN32)
