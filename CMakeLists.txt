@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13.0)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 if(APPLE)
-    project(sdrangel LANGUAGES CXX OBJCXX)
+    project(sdrangel LANGUAGES C CXX OBJCXX)
 else()
     project(sdrangel)
 endif()

@@ -96,8 +96,8 @@ add_executable(ldpctool
 )
 install(TARGETS ldpctool DESTINATION ${INSTALL_BIN_DIR})
 
-if(FFMPEG_EXTERNAL)
-    add_dependencies(${TARGET_NAME} ffmpeg)
+if(DEFINED FFMPEG_DEPENDS)
+    add_dependencies(${TARGET_NAME} ${FFMPEG_DEPENDS})
 endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

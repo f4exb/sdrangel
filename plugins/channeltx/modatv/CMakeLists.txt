@@ -62,7 +62,7 @@ target_link_libraries(${TARGET_NAME}
 )
 
 if(DEFINED OpenCV_DEPENDS)
-    add_dependencies(${TARGET_NAME} opencv)
+    add_dependencies(${TARGET_NAME} ${OpenCV_DEPENDS})
 endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

@@ -87,8 +87,8 @@ target_link_libraries(${TARGET_NAME}
     ${SWRESAMPLE_LIBRARIES}
 )
 
-if(FFMPEG_EXTERNAL)
-    add_dependencies(${TARGET_NAME} ffmpeg)
+if(DEFINED FFMPEG_DEPENDS)
+    add_dependencies(${TARGET_NAME} ${FFMPEG_DEPENDS})
 endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
