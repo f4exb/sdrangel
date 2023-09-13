@@ -258,6 +258,7 @@
 #include "SWGRTTYDemodReport.h"
 #include "SWGRTTYDemodSettings.h"
 #include "SWGRTTYModActions.h"
+#include "SWGRTTYModActions_payload.h"
 #include "SWGRTTYModReport.h"
 #include "SWGRTTYModSettings.h"
 #include "SWGRadioAstronomyActions.h"
@@ -1586,6 +1587,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRTTYModActions").compare(type) == 0) {
       SWGRTTYModActions *obj = new SWGRTTYModActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRTTYModActions_payload").compare(type) == 0) {
+      SWGRTTYModActions_payload *obj = new SWGRTTYModActions_payload();
       obj->init();
       return obj;
     }

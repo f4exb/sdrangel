@@ -29,7 +29,11 @@ ChannelActions:
       $ref: "/doc/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModActions"
     PacketModActions:
       $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModActions"
+    PSK31ModActions:
+      $ref: "/doc/swagger/include/PSK31Mod.yaml#/PSK31ModActions"
     RadioAstronomyActions:
       $ref: "/doc/swagger/include/RadioAstronomy.yaml#/RadioAstronomyActions"
+    RTTYModActions:
+      $ref: "/doc/swagger/include/RTTYMod.yaml#/RTTYModActions"
     SigMFFileSinkActions:
       $ref: "/doc/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkActions"

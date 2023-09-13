@@ -1,10 +1,16 @@
-PSK31ModSettings:
-  description: PSK31Mod
+RTTYModSettings:
+  description: RTTYMod
   properties:
     inputFrequencyOffset:
       type: integer
       format: int64
+    baud:
+      type: number
+      format: float
+      description: Baud rate
     rfBandwidth:
+      type: integer
+    frequencyShift:
       type: integer
     gain:
       type: number
@@ -36,6 +42,14 @@ PSK31ModSettings:
       type: number
       format: float
     symbolSpan:
+      type: integer
+    characterSet:
+      type: integer
+    unshiftOnSpace:
+      type: integer
+    msbFirst:
+      type: integer
+    spaceHigh:
       type: integer
     prefixCRLF:
       type: integer
@@ -69,12 +83,12 @@ PSK31ModSettings:
     reverseAPIChannelIndex:
       type: integer
     channelMarker:
-      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
     rollupState:
-      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
-PSK31ModReport:
-  description: PSK31Mod
+RTTYModReport:
+  description: RTTYMod
   properties:
     channelPowerDB:
       description: power transmitted in channel (dB)
@@ -83,8 +97,8 @@ PSK31ModReport:
     channelSampleRate:
       type: integer
 
-PSK31ModActions:
-  description: PSK31Mod
+RTTYModActions:
+  description: RTTYMod
   properties:
     tx:
       type: integer
@@ -96,5 +110,5 @@ PSK31ModActions:
       type: object
       properties:
         text:
-          description: PSK31 content to transmit
+          description: RTTY content to transmit
           type: string

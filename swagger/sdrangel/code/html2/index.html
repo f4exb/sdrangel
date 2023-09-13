@@ -2344,6 +2344,72 @@ margin-bottom: 20px;
   },
   "description" : "Airspy"
 };
+            defs.AndroidSDRDriverInputReport = {
+  "properties" : {
+    "sampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AndroidSDRDriverInput"
+};
+            defs.AndroidSDRDriverInputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "loPpmCorrection" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "biasTee" : {
+      "type" : "integer"
+    },
+    "directSampling" : {
+      "type" : "integer"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "gain" : {
+      "type" : "integer"
+    },
+    "agc" : {
+      "type" : "integer"
+    },
+    "rfBW" : {
+      "type" : "integer"
+    },
+    "sampleBits" : {
+      "type" : "integer"
+    },
+    "dataPort" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AndroidSDRDriverInput"
+};
             defs.AntennaToolsSettings = {
   "properties" : {
     "dipoleFrequencyMHz" : {
@@ -5427,6 +5493,9 @@ margin-bottom: 20px;
     "airspyHFReport" : {
       "$ref" : "#/definitions/AirspyHFReport"
     },
+    "androidSDRDriverInputReport" : {
+      "$ref" : "#/definitions/AndroidSDRDriverInputReport"
+    },
     "bladeRF2InputReport" : {
       "$ref" : "#/definitions/BladeRF2InputReport"
     },
@@ -5581,6 +5650,9 @@ margin-bottom: 20px;
     },
     "airspyHFSettings" : {
       "$ref" : "#/definitions/AirspyHFSettings"
+    },
+    "androidSDRDriverInputSettings" : {
+      "$ref" : "#/definitions/AndroidSDRDriverInputSettings"
     },
     "audioCATSISOSettings" : {
       "$ref" : "#/definitions/AudioCATSISOSettings"
@@ -10547,7 +10619,8 @@ margin-bottom: 20px;
             defs.PSK31ModActions_payload = {
   "properties" : {
     "text" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "PSK31 content to transmit"
     }
   }
 };
@@ -11908,10 +11981,18 @@ margin-bottom: 20px;
       "description" : "Transmit current text\n  * 0 - Do nothing\n  * 1 - Transmit\n"
     },
     "payload" : {
-      "$ref" : "#/definitions/PSK31ModActions_payload"
+      "$ref" : "#/definitions/RTTYModActions_payload"
     }
   },
   "description" : "RTTYMod"
+};
+            defs.RTTYModActions_payload = {
+  "properties" : {
+    "text" : {
+      "type" : "string",
+      "description" : "RTTY content to transmit"
+    }
+  }
 };
             defs.RTTYModReport = {
   "properties" : {
@@ -58125,7 +58206,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-09-06T16:40:34.426+02:00
+              Generated 2023-09-13T05:10:07.874+02:00
             </div>
           </div>
       </div>

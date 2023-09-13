@@ -31,7 +31,7 @@ LocalSinkSettings:
       type: integer
       description: >
         Activate FFT multiband filter
-          * 0 - do not run flter
+          * 0 - do not run filter
           * 1 - run filter
     log2FFT:
       description: log2 of FFT size.
@@ -55,7 +55,7 @@ LocalSinkSettings:
         $ref: "/doc/swagger/include/LocalSink.yaml#/FFTBand"
     reverseFilter:
       type: integer
-      descrption: >
+      description: >
         * 0 - band definitions are bandpass
         * 1 - band definitions are band reject
     streamIndex:
@@ -88,4 +88,4 @@ FFTBand:
     bandwidth:
       type: number
       format: float
-      desctiption: bandwidth ratio [0.0, 1.0]
+      description: bandwidth ratio [0.0, 1.0]

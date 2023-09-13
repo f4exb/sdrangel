@@ -13,6 +13,7 @@
         <file>webapi/doc/swagger/include/AMBE.yaml</file>
         <file>webapi/doc/swagger/include/AMDemod.yaml</file>
         <file>webapi/doc/swagger/include/AMMod.yaml</file>
+        <file>webapi/doc/swagger/include/AndroidSDRDriverInput.yaml</file>
         <file>webapi/doc/swagger/include/AntennaTools.yaml</file>
         <file>webapi/doc/swagger/include/APRS.yaml</file>
         <file>webapi/doc/swagger/include/APTDemod.yaml</file>
@@ -88,6 +89,7 @@
         <file>webapi/doc/swagger/include/PlutoSdr.yaml</file>
         <file>webapi/doc/swagger/include/Preferences.yaml</file>
         <file>webapi/doc/swagger/include/Preset.yaml</file>
+        <file>webapi/doc/swagger/include/PSK31Mod.yaml</file>
         <file>webapi/doc/swagger/include/RadioAstronomy.yaml</file>
         <file>webapi/doc/swagger/include/Radiosonde.yaml</file>
         <file>webapi/doc/swagger/include/RadiosondeDemod.yaml</file>
@@ -102,6 +104,7 @@
         <file>webapi/doc/swagger/include/RigCtlServer.yaml</file>
         <file>webapi/doc/swagger/include/RollupState.yaml</file>
         <file>webapi/doc/swagger/include/RTTYDemod.yaml</file>
+        <file>webapi/doc/swagger/include/RTTYMod.yaml</file>
         <file>webapi/doc/swagger/include/SatelliteTracker.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlayV3.yaml</file>

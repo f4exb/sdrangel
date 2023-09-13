@@ -29,10 +29,12 @@ GS232ControllerSettings:
       type: string
     azimuthOffset:
       description: Azimuth offset in degrees
-      type: integer
+      type: number
+      format: float
     elevationOffset:
       description: Elevation offset in degrees
-      type: integer
+      type: number
+      format: float
     azimuthMin:
       description: Minimum azimuth the controller will output
       type: integer

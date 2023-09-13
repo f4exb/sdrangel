@@ -18,6 +18,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/Airspy.yaml#/AirspySettings"
     airspyHFSettings:
       $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
+    androidSDRDriverInputSettings:
+      $ref: "/doc/swagger/include/AndroidSDRDriverInput.yaml#/AndroidSDRDriverInputSettings"
     audioCATSISOSettings:
       $ref: "/doc/swagger/include/AudioCATSISO.yaml#/AudioCATSISOSettings"
     audioInputSettings:

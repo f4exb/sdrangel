@@ -1,0 +1,45 @@
+AndroidSDRDriverInputSettings:
+  description: AndroidSDRDriverInput
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    loPpmCorrection:
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    biasTee:
+      type: integer
+    directSampling:
+      type: integer
+    devSampleRate:
+      type: integer
+    log2Decim:
+      type: integer
+    gain:
+      type: integer
+    agc:
+      type: integer
+    rfBW:
+      type: integer
+    sampleBits:
+      type: integer
+    dataPort:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
+AndroidSDRDriverInputReport:
+  description: AndroidSDRDriverInput
+  properties:
+    sampleRate:
+      type: integer

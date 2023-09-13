@@ -67,8 +67,6 @@ ChannelSettings:
       $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
     FT8DemodSettings:
       $ref: "/doc/swagger/include/FT8Demod.yaml#/FT8DemodSettings"
-    RTTYDemodSettings:
-      $ref: "/doc/swagger/include/RTTYDemod.yaml#/RTTYDemodSettings"
     HeatMapSettings:
       $ref: "/doc/swagger/include/HeatMap.yaml#/HeatMapSettings"
     ILSDemodSettings:
@@ -99,6 +97,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModSettings"
     PagerDemodSettings:
       $ref: "/doc/swagger/include/PagerDemod.yaml#/PagerDemodSettings"
+    PSK31ModSettings:
+      $ref: "/doc/swagger/include/PSK31Mod.yaml#/PSK31ModSettings"
     RadioAstronomySettings:
       $ref: "/doc/swagger/include/RadioAstronomy.yaml#/RadioAstronomySettings"
     RadioClockSettings:
@@ -111,6 +111,10 @@ ChannelSettings:
       $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceSettings"
     RemoteTCPSinkSettings:
       $ref: "/doc/swagger/include/RemoteTCPSink.yaml#/RemoteTCPSinkSettings"
+    RTTYDemodSettings:
+      $ref: "/doc/swagger/include/RTTYDemod.yaml#/RTTYDemodSettings"
+    RTTYModSettings:
+      $ref: "/doc/swagger/include/RTTYMod.yaml#/RTTYModSettings"
     SigMFFileSinkSettings:
       $ref: "/doc/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkSettings"
     SSBModSettings:

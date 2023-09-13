@@ -69,9 +69,9 @@ PSK31ModSettings:
     reverseAPIChannelIndex:
       type: integer
     channelMarker:
-      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
     rollupState:
-      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
 PSK31ModReport:
   description: PSK31Mod

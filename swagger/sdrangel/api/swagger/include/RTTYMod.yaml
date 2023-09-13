@@ -110,4 +110,5 @@ RTTYModActions:
       type: object
       properties:
         text:
+          description: RTTY content to transmit
           type: string
