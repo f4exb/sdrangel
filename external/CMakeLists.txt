@@ -185,9 +185,10 @@ else()
     set(USE_PRECOMPILED_LIBS TRUE)
 endif()
 
-# We don't CACHE the _DEPENDS variables, as the external project is only added when NOT _FOUND
-# and not in subsequent configures when _FOUND
-# Use PARENT_SCOPE so they can still be used in other CMakeFiles.
+# We don't CACHE the _DEPENDS variables, as some external projects are only added when NOT _FOUND
+# and not in subsequent configures when _FOUND (E.g. ffmpeg/opencv aren't added second time
+# around as it slows down the build and causes some dependencies to always be rebuilt.)
+# Use PARENT_SCOPE so they can be used in other CMakeFiles.
 macro(set_global NAME VALUE)
     set(${NAME} ${VALUE})
     set(${NAME} ${VALUE} PARENT_SCOPE)
