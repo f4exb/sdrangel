@@ -290,13 +290,13 @@ void M17Demod::applySettings(const M17DemodSettings& settings, const QList<QStri
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
-    if (settingsKeys.contains("m_useReverseAPI"))
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIDeviceIndex") ||
+                settingsKeys.contains("reverseAPIChannelIndex");
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
