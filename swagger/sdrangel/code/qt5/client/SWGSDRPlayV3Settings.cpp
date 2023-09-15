@@ -48,6 +48,8 @@ SWGSDRPlayV3Settings::SWGSDRPlayV3Settings() {
     m_iq_correction_isSet = false;
     lna_index = 0;
     m_lna_index_isSet = false;
+    lna_gain = 0;
+    m_lna_gain_isSet = false;
     if_agc = 0;
     m_if_agc_isSet = false;
     if_gain = 0;
@@ -108,6 +110,8 @@ SWGSDRPlayV3Settings::init() {
     m_iq_correction_isSet = false;
     lna_index = 0;
     m_lna_index_isSet = false;
+    lna_gain = 0;
+    m_lna_gain_isSet = false;
     if_agc = 0;
     m_if_agc_isSet = false;
     if_gain = 0;
@@ -144,6 +148,7 @@ SWGSDRPlayV3Settings::init() {
 
 void
 SWGSDRPlayV3Settings::cleanup() {
+
 
 
 
@@ -204,6 +209,8 @@ SWGSDRPlayV3Settings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
     
     ::SWGSDRangel::setValue(&lna_index, pJson["lnaIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&lna_gain, pJson["lnaGain"], "qint32", "");
     
     ::SWGSDRangel::setValue(&if_agc, pJson["ifAGC"], "qint32", "");
     
@@ -282,6 +289,9 @@ SWGSDRPlayV3Settings::asJsonObject() {
     }
     if(m_lna_index_isSet){
         obj->insert("lnaIndex", QJsonValue(lna_index));
+    }
+    if(m_lna_gain_isSet){
+        obj->insert("lnaGain", QJsonValue(lna_gain));
     }
     if(m_if_agc_isSet){
         obj->insert("ifAGC", QJsonValue(if_agc));
@@ -433,6 +443,16 @@ void
 SWGSDRPlayV3Settings::setLnaIndex(qint32 lna_index) {
     this->lna_index = lna_index;
     this->m_lna_index_isSet = true;
+}
+
+qint32
+SWGSDRPlayV3Settings::getLnaGain() {
+    return lna_gain;
+}
+void
+SWGSDRPlayV3Settings::setLnaGain(qint32 lna_gain) {
+    this->lna_gain = lna_gain;
+    this->m_lna_gain_isSet = true;
 }
 
 qint32
@@ -628,6 +648,9 @@ SWGSDRPlayV3Settings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_lna_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lna_gain_isSet){
             isObjectUpdated = true; break;
         }
         if(m_if_agc_isSet){
