@@ -780,6 +780,8 @@ void RTLSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respons
         response.getRtlSdrReport()->getGains()->append(new SWGSDRangel::SWGGain);
         response.getRtlSdrReport()->getGains()->back()->setGainCb(*it);
     }
+
+    response.getRtlSdrReport()->setTunerType(new QString(getTunerName()));
 }
 
 void RTLSDRInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const RTLSDRSettings& settings, bool force)
