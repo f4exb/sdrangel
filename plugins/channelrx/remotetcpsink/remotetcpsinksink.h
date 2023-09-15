@@ -48,7 +48,7 @@ public:
     void stop();
     void init();
 
-    void applySettings(const RemoteTCPSinkSettings& settings, bool force = false, bool remoteChange = false);
+    void applySettings(const RemoteTCPSinkSettings& settings, const QStringList& settingsKeys, bool force = false, bool remoteChange = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void setDeviceIndex(uint32_t deviceIndex) { m_deviceIndex = deviceIndex; }
     void setChannelIndex(uint32_t channelIndex) { m_channelIndex = channelIndex; }

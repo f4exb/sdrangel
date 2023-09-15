@@ -39,7 +39,7 @@ RemoteTCPSinkSink::RemoteTCPSinkSink() :
         m_server(nullptr)
 {
     qDebug("RemoteTCPSinkSink::RemoteTCPSinkSink");
-    applySettings(m_settings, true);
+    applySettings(m_settings, QStringList(), true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -237,21 +237,18 @@ void RemoteTCPSinkSink::applyChannelSettings(int channelSampleRate, int channelF
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void RemoteTCPSinkSink::applySettings(const RemoteTCPSinkSettings& settings, bool force, bool remoteChange)
+void RemoteTCPSinkSink::applySettings(const RemoteTCPSinkSettings& settings, const QStringList& settingsKeys, bool force, bool remoteChange)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    qDebug() << "RemoteTCPSinkSink::applySettings:"
-            << " m_dataAddress: " << settings.m_dataAddress
-            << " m_dataPort: " << settings.m_dataPort
-            << " m_channelSampleRate: " << settings.m_channelSampleRate
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " force: " << force
-            << " remoteChange: " << remoteChange;
+    qDebug() << "RemoteTCPSinkSink::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    m_linearGain = powf(10.0f,  m_settings.m_gain/20.0f);
+    if (settingsKeys.contains("gain") || force)
+    {
+        m_linearGain = powf(10.0f, settings.m_gain/20.0f);
+    }
 
-    if ((m_settings.m_channelSampleRate != settings.m_channelSampleRate) || force)
+    if (settingsKeys.contains("channelSampleRate") || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_channelSampleRate / 2.0);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) settings.m_channelSampleRate;
@@ -259,15 +256,19 @@ void RemoteTCPSinkSink::applySettings(const RemoteTCPSinkSettings& settings, boo
     }
 
     // Do clients need to reconnect to get these updated settings?
-    bool restart = (m_settings.m_dataAddress != settings.m_dataAddress)
-                || (m_settings.m_dataPort != settings.m_dataPort)
-                || (m_settings.m_sampleBits != settings.m_sampleBits)
-                || (m_settings.m_protocol != settings.m_protocol)
+    bool restart = (settingsKeys.contains("dataAddress") && (m_settings.m_dataAddress != settings.m_dataAddress))
+                || (settingsKeys.contains("dataPort") && (m_settings.m_dataPort != settings.m_dataPort))
+                || (settingsKeys.contains("sampleBits") && (m_settings.m_sampleBits != settings.m_sampleBits))
+                || (settingsKeys.contains("protocol") && (m_settings.m_protocol != settings.m_protocol))
                 || (   !remoteChange
-                    && (m_settings.m_channelSampleRate != settings.m_channelSampleRate)
+                    && (settingsKeys.contains("channelSampleRate") && (m_settings.m_channelSampleRate != settings.m_channelSampleRate))
                    );
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (m_running && restart) {
         startServer();
@@ -279,14 +280,14 @@ void RemoteTCPSinkSink::startServer()
     stopServer();
 
     m_server = new QTcpServer(this);
-    if (!m_server->listen(QHostAddress::Any, m_settings.m_dataPort))
+    if (!m_server->listen(QHostAddress(m_settings.m_dataAddress), m_settings.m_dataPort))
     {
-        qDebug() << "RemoteTCPSinkSink::startServer: failed to listen on port " << m_settings.m_dataPort;
+        qCritical() << "RemoteTCPSink failed to listen on" << m_settings.m_dataAddress << "port" << m_settings.m_dataPort;
         // FIXME: Report to GUI?
     }
     else
     {
-        qDebug() << "RemoteTCPSinkSink::startServer: listening on port " << m_settings.m_dataPort;
+        qInfo() << "RemoteTCPSink listening on" << m_settings.m_dataAddress << "port" << m_settings.m_dataPort;
         connect(m_server, &QTcpServer::newConnection, this, &RemoteTCPSinkSink::acceptConnection);
     }
 }
@@ -339,7 +340,6 @@ RemoteTCPProtocol::Device RemoteTCPSinkSink::getDevice()
             {"PlutoSDR", RemoteTCPProtocol::PLUTO_SDR},
             {"RemoteInput", RemoteTCPProtocol::REMOTE_INPUT},
             {"RemoteTCPInput", RemoteTCPProtocol::REMOTE_TCP_INPUT},
-            {"RTLSDR", RemoteTCPProtocol::RTLSDR_R820T},
             {"SDRplay1", RemoteTCPProtocol::SDRPLAY_1},
             {"SigMFFileInput", RemoteTCPProtocol::SIGMF_FILE_INPUT},
             {"SoapySDR", RemoteTCPProtocol::SOAPY_SDR},
@@ -371,6 +371,29 @@ RemoteTCPProtocol::Device RemoteTCPSinkSink::getDevice()
             else
             {
                 qDebug() << "RemoteTCPSinkSink::getDevice: Failed to get deviceType for SDRplayV3";
+            }
+        }
+        else if (id == "RTLSDR")
+        {
+            QString tunerType;
+            if (ChannelWebAPIUtils::getDeviceReportValue(m_deviceIndex, "tunerType", tunerType))
+            {
+                QHash<QString, RemoteTCPProtocol::Device> rtlsdrMap = {
+                    {"E4000", RemoteTCPProtocol::RTLSDR_E4000},
+                    {"FC0012", RemoteTCPProtocol::RTLSDR_FC0012},
+                    {"FC0013", RemoteTCPProtocol::RTLSDR_FC0013},
+                    {"FC2580", RemoteTCPProtocol::RTLSDR_FC2580},
+                    {"R820T", RemoteTCPProtocol::RTLSDR_R820T},
+                    {"R828D", RemoteTCPProtocol::RTLSDR_R828D},
+                };
+                if (rtlsdrMap.contains(tunerType)) {
+                    return rtlsdrMap.value(tunerType);
+                }
+                qDebug() << "RemoteTCPSinkSink::getDevice: Unknown RTLSDR tunerType: " << tunerType;
+            }
+            else
+            {
+                qDebug() << "RemoteTCPSinkSink::getDevice: Failed to get tunerType for RTLSDR";
             }
         }
     }
@@ -594,10 +617,10 @@ void RemoteTCPSinkSink::processCommand()
                 qDebug() << "RemoteTCPSinkSink::processCommand: set channel sample rate " << channelSampleRate;
                 settings.m_channelSampleRate = channelSampleRate;
                 if (m_messageQueueToGUI) {
-                    m_messageQueueToGUI->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, false, true));
+                    m_messageQueueToGUI->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, {"channelSampleRate"}, false, true));
                 }
                 if (m_messageQueueToChannel) {
-                    m_messageQueueToChannel->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, false, true));
+                    m_messageQueueToChannel->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, {"channelSampleRate"}, false, true));
                 }
                 break;
             }
@@ -607,10 +630,10 @@ void RemoteTCPSinkSink::processCommand()
                 qDebug() << "RemoteTCPSinkSink::processCommand: set channel input frequency offset " << offset;
                 settings.m_inputFrequencyOffset = offset;
                 if (m_messageQueueToGUI) {
-                    m_messageQueueToGUI->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, false, true));
+                    m_messageQueueToGUI->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, {"inputFrequencyOffset"}, false, true));
                 }
                 if (m_messageQueueToChannel) {
-                    m_messageQueueToChannel->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, false, true));
+                    m_messageQueueToChannel->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, {"inputFrequencyOffset"}, false, true));
                 }
                 break;
             }
@@ -620,10 +643,10 @@ void RemoteTCPSinkSink::processCommand()
                 qDebug() << "RemoteTCPSinkSink::processCommand: set channel gain " << gain;
                 settings.m_gain = gain;
                 if (m_messageQueueToGUI) {
-                    m_messageQueueToGUI->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, false, true));
+                    m_messageQueueToGUI->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, {"gain"}, false, true));
                 }
                 if (m_messageQueueToChannel) {
-                    m_messageQueueToChannel->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, false, true));
+                    m_messageQueueToChannel->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, {"gain"}, false, true));
                 }
                 break;
             }
@@ -633,10 +656,10 @@ void RemoteTCPSinkSink::processCommand()
                 qDebug() << "RemoteTCPSinkSink::processCommand: set sample bit depth " << bits;
                 settings.m_sampleBits = bits;
                 if (m_messageQueueToGUI) {
-                    m_messageQueueToGUI->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, false, true));
+                    m_messageQueueToGUI->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, {"sampleBits"}, false, true));
                 }
                 if (m_messageQueueToChannel) {
-                    m_messageQueueToChannel->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, false, true));
+                    m_messageQueueToChannel->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, {"sampleBits"}, false, true));
                 }
                 break;
             }

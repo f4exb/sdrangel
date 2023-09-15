@@ -39,22 +39,25 @@ public:
 
     public:
         const RemoteTCPSinkSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
         bool getRemoteChange() const { return m_remoteChange; }
 
-        static MsgConfigureRemoteTCPSink* create(const RemoteTCPSinkSettings& settings, bool force, bool remoteChange = false)
+        static MsgConfigureRemoteTCPSink* create(const RemoteTCPSinkSettings& settings, const QList<QString>& settingsKeys, bool force, bool remoteChange = false)
         {
-            return new MsgConfigureRemoteTCPSink(settings, force, remoteChange);
+            return new MsgConfigureRemoteTCPSink(settings, settingsKeys, force, remoteChange);
         }
 
     private:
         RemoteTCPSinkSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
         bool m_remoteChange; // This change of settings was requested by a remote client, so no need to restart server
 
-        MsgConfigureRemoteTCPSink(const RemoteTCPSinkSettings& settings, bool force, bool remoteChange) :
+        MsgConfigureRemoteTCPSink(const RemoteTCPSinkSettings& settings, const QList<QString>& settingsKeys, bool force, bool remoteChange) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force),
             m_remoteChange(remoteChange)
         { }
@@ -180,16 +183,16 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const RemoteTCPSinkSettings& settings, bool force = false, bool remoteChange = false);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteTCPSinkSettings& settings, bool force);
+    void applySettings(const RemoteTCPSinkSettings& settings, const QStringList& settingsKeys, bool force = false, bool remoteChange = false);
+    void webapiReverseSendSettings(const QStringList& channelSettingsKeys, const RemoteTCPSinkSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QStringList& channelSettingsKeys,
         const RemoteTCPSinkSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RemoteTCPSinkSettings& settings,
         bool force
