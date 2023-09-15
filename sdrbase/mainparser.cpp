@@ -38,7 +38,7 @@ MainParser::MainParser() :
     m_scratchOption("scratch", "Start from scratch (no current config)."),
     m_soapyOption("soapy", "Activate Soapy SDR support."),
     m_remoteTCPSinkOption("remote-tcp", "Start Remote TCP Sink"),
-    m_remoteTCPSinkAddressOption("remote-tcp-address", "Remote TCP Sink interface IP address (Default 127.0.0.1).", "address", "127.0.0.1"),
+    m_remoteTCPSinkAddressOption("remote-tcp-address", "Remote TCP Sink interface IP address (Default any).", "address", "0.0.0.0"),
     m_remoteTCPSinkPortOption("remote-tcp-port", "Remote TCP Sink port (Default 1234).", "port", "1234"),
     m_remoteTCPSinkHWTypeOption("remote-tcp-hwtype", "Remote TCP Sink device hardware type (Optional. E.g. RTLSDR/SDRplayV3/AirspyHF).", "hwtype"),
     m_remoteTCPSinkSerialOption("remote-tcp-serial", "Remote TCP Sink device serial (Optional).", "serial"),
@@ -51,7 +51,7 @@ MainParser::MainParser() :
     m_soapy = false;
     m_fftwfWindowFileName = "";
     m_remoteTCPSink = false;
-    m_remoteTCPSinkAddress = "127.0.0.1";
+    m_remoteTCPSinkAddress = "0.0.0.0";
     m_remoteTCPSinkPort = 1234;
     m_remoteTCPSinkHWType = "";
     m_remoteTCPSinkSerial = "";
