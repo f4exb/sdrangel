@@ -170,7 +170,11 @@ void LocalSinkBaseband::applySettings(const LocalSinkSettings& settings, const Q
     }
 
     m_sink.applySettings(settings, settingsKeys, force);
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int LocalSinkBaseband::getChannelSampleRate() const
