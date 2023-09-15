@@ -266,6 +266,23 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
             ui->centerFrequency->setValueRange(7, 0, 9999999);
         }
 
+        // Set sample rate range
+        if (m_sampleRateRanges.contains(m_remoteDevice))
+        {
+           const SampleRateRange *range = m_sampleRateRanges.value(m_remoteDevice);
+            ui->devSampleRate->setValueRange(8, range->m_min, range->m_max);
+        }
+        else if (m_sampleRateLists.contains(m_remoteDevice))
+        {
+            const QList<int> *list = m_sampleRateLists.value(m_remoteDevice);
+            // FIXME: Should probably use a combobox for devices that have a list of sample rates
+            ui->devSampleRate->setValueRange(8, list->front(), list->back());
+        }
+        else
+        {
+            ui->devSampleRate->setValueRange(8, 0, 99999999);
+        }
+
         displayGains();
         return true;
     }
@@ -352,7 +369,16 @@ void RemoteTCPInputGui::displaySettings()
     ui->sampleBits->setCurrentIndex(m_settings.m_sampleBits/8-1);
 
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
-    ui->dataAddress->setText(m_settings.m_dataAddress);
+    ui->dataAddress->blockSignals(true);
+    ui->dataAddress->clear();
+    for (const auto& address : m_settings.m_addressList) {
+        ui->dataAddress->addItem(address);
+    }
+    if (ui->dataAddress->findText(m_settings.m_dataAddress) == -1) {
+        ui->dataAddress->addItem(m_settings.m_dataAddress);
+    }
+    ui->dataAddress->setCurrentText(m_settings.m_dataAddress);
+    ui->dataAddress->blockSignals(false);
     ui->overrideRemoteSettings->setChecked(m_settings.m_overrideRemoteSettings);
 
     ui->preFill->setValue((int)(m_settings.m_preFill * 10.0));
@@ -361,6 +387,43 @@ void RemoteTCPInputGui::displaySettings()
     displayGains();
     blockApplySettings(false);
 }
+
+// Device sample rates
+
+const RemoteTCPInputGui::SampleRateRange RemoteTCPInputGui::m_rtlSDRSampleRateRange{900001, 3200000};
+const RemoteTCPInputGui::SampleRateRange RemoteTCPInputGui::m_sdrPlaySampleRateRange{2000000, 10660000};
+const RemoteTCPInputGui::SampleRateRange RemoteTCPInputGui::m_bladeRF1SampleRateRange{330000, 40000000};
+const RemoteTCPInputGui::SampleRateRange RemoteTCPInputGui::m_hackRFSampleRateRange{1000000, 20000000};
+const RemoteTCPInputGui::SampleRateRange RemoteTCPInputGui::m_limeSampleRateRange{100000, 614400000}; // Mini is lower than this
+const RemoteTCPInputGui::SampleRateRange RemoteTCPInputGui::m_plutoSampleRateRange{2000000, 20000000};
+const RemoteTCPInputGui::SampleRateRange RemoteTCPInputGui::m_usrpSampleRateRange{100000, 614400000}; // For B210
+
+const QHash<RemoteTCPProtocol::Device, const RemoteTCPInputGui::SampleRateRange *> RemoteTCPInputGui::m_sampleRateRanges =
+{
+    {RemoteTCPProtocol::RTLSDR_E4000, &m_rtlSDRSampleRateRange},
+    {RemoteTCPProtocol::RTLSDR_R820T, &m_rtlSDRSampleRateRange},
+    {RemoteTCPProtocol::BLADE_RF1, &m_bladeRF1SampleRateRange},
+    {RemoteTCPProtocol::HACK_RF, &m_hackRFSampleRateRange},
+    {RemoteTCPProtocol::LIME_SDR, &m_limeSampleRateRange},
+    {RemoteTCPProtocol::SDRPLAY_V3_RSP1, &m_sdrPlaySampleRateRange},
+    {RemoteTCPProtocol::SDRPLAY_V3_RSP1A, &m_sdrPlaySampleRateRange},
+    {RemoteTCPProtocol::SDRPLAY_V3_RSP2, &m_sdrPlaySampleRateRange},
+    {RemoteTCPProtocol::SDRPLAY_V3_RSPDUO, &m_sdrPlaySampleRateRange},
+    {RemoteTCPProtocol::SDRPLAY_V3_RSPDX, &m_sdrPlaySampleRateRange},
+    {RemoteTCPProtocol::PLUTO_SDR, &m_plutoSampleRateRange},
+    {RemoteTCPProtocol::USRP, &m_usrpSampleRateRange},
+};
+
+const QList<int> RemoteTCPInputGui::m_airspySampleRateList {2500000, 10000000};
+const QList<int> RemoteTCPInputGui::m_airspyHFSampleRateList {192000, 256000, 384000, 456000, 768000, 912000};
+
+const QHash<RemoteTCPProtocol::Device, const QList<int> *> RemoteTCPInputGui::m_sampleRateLists =
+{
+    {RemoteTCPProtocol::AIRSPY, &m_airspySampleRateList},
+    {RemoteTCPProtocol::AIRSPY_HF, &m_airspyHFSampleRateList}
+};
+
+// Device gains
 
 const RemoteTCPInputGui::DeviceGains::GainRange RemoteTCPInputGui::m_rtlSDR34kGainRange(
     "Gain",
@@ -408,8 +471,8 @@ const RemoteTCPInputGui::DeviceGains RemoteTCPInputGui::m_kiwiGains({m_kiwiGainR
 const RemoteTCPInputGui::DeviceGains::GainRange RemoteTCPInputGui::m_limeRange("Gain", 0, 70, 1);   // Assuming auto setting
 const RemoteTCPInputGui::DeviceGains RemoteTCPInputGui::m_limeGains({m_limeRange}, true, false);
 
-// SDRplay LNA gain is device & frequency dependent (See sdrplayv3input.h SDRPlayV3LNA) sp we just fix as 0 for now
-const RemoteTCPInputGui::DeviceGains::GainRange RemoteTCPInputGui::m_sdrplayV3LNAGainRange("LNA", {0});
+// SDRplay LNA gain is device & frequency dependent (See sdrplayv3input.h SDRPlayV3LNA), server should choose closest value
+const RemoteTCPInputGui::DeviceGains::GainRange RemoteTCPInputGui::m_sdrplayV3LNAGainRange("LNA", -80, 0, 1);
 const RemoteTCPInputGui::DeviceGains::GainRange RemoteTCPInputGui::m_sdrplayV3IFGainRange("IF", -59, 0, 1);
 const RemoteTCPInputGui::DeviceGains RemoteTCPInputGui::m_sdrplayV3Gains({m_sdrplayV3LNAGainRange, m_sdrplayV3IFGainRange}, true, true);
 
@@ -691,7 +754,21 @@ void RemoteTCPInputGui::on_sampleBits_currentIndexChanged(int index)
 
 void RemoteTCPInputGui::on_dataAddress_editingFinished()
 {
-    m_settings.m_dataAddress = ui->dataAddress->text();
+    m_settings.m_dataAddress = ui->dataAddress->currentText();
+    m_settingsKeys.append("dataAddress");
+    m_settings.m_addressList.clear();
+    for (int i = 0; i < ui->dataAddress->count(); i++) {
+        m_settings.m_addressList.append(ui->dataAddress->itemText(i));
+    }
+    m_settingsKeys.append("addressList");
+    sendSettings();
+}
+
+void RemoteTCPInputGui::on_dataAddress_currentIndexChanged(int index)
+{
+    (void) index;
+
+    m_settings.m_dataAddress = ui->dataAddress->currentText();
     m_settingsKeys.append("dataAddress");
     sendSettings();
 }
@@ -816,7 +893,8 @@ void RemoteTCPInputGui::makeUIConnections()
     QObject::connect(ui->channelSampleRate, &ValueDial::changed, this, &RemoteTCPInputGui::on_channelSampleRate_changed);
     QObject::connect(ui->decimation, &ButtonSwitch::toggled, this, &RemoteTCPInputGui::on_decimation_toggled);
     QObject::connect(ui->sampleBits, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteTCPInputGui::on_sampleBits_currentIndexChanged);
-    QObject::connect(ui->dataAddress, &QLineEdit::editingFinished, this, &RemoteTCPInputGui::on_dataAddress_editingFinished);
+    QObject::connect(ui->dataAddress->lineEdit(), &QLineEdit::editingFinished, this, &RemoteTCPInputGui::on_dataAddress_editingFinished);
+    QObject::connect(ui->dataAddress, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteTCPInputGui::on_dataAddress_currentIndexChanged);
     QObject::connect(ui->dataPort, &QLineEdit::editingFinished, this, &RemoteTCPInputGui::on_dataPort_editingFinished);
     QObject::connect(ui->overrideRemoteSettings, &ButtonSwitch::toggled, this, &RemoteTCPInputGui::on_overrideRemoteSettings_toggled);
     QObject::connect(ui->preFill, &QDial::valueChanged, this, &RemoteTCPInputGui::on_preFill_valueChanged);

@@ -80,6 +80,7 @@ QByteArray RemoteTCPInputSettings::serialize() const
     s.writeString(21, m_reverseAPIAddress);
     s.writeU32(22, m_reverseAPIPort);
     s.writeU32(23, m_reverseAPIDeviceIndex);
+    s.writeList(24, m_addressList);
 
     for (int i = 0; i < m_maxGains; i++) {
         s.writeS32(30+i, m_gain[i]);
@@ -133,6 +134,8 @@ bool RemoteTCPInputSettings::deserialize(const QByteArray& data)
 
         d.readU32(23, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+
+        d.readList(24, &m_addressList);
 
         for (int i = 0; i < m_maxGains; i++) {
             d.readS32(30+i, &m_gain[i], 0);
@@ -218,6 +221,9 @@ void RemoteTCPInputSettings::applySettings(const QStringList& settingsKeys, cons
     if (settingsKeys.contains("reverseAPIDeviceIndex")) {
         m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
     }
+    if (settingsKeys.contains("addressList")) {
+        m_addressList = settings.m_addressList;
+    }
 
     for (int i = 0; i < m_maxGains; i++)
     {
@@ -299,6 +305,9 @@ QString RemoteTCPInputSettings::getDebugString(const QStringList& settingsKeys, 
     }
     if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
         ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("addressList") || force) {
+        ostr << " m_addressList: " << m_addressList.join(",").toStdString();
     }
 
     for (int i = 0; i < m_maxGains; i++)
