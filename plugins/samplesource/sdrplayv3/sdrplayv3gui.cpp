@@ -171,6 +171,7 @@ bool SDRPlayV3Gui::handleMessage(const Message& message)
     if (SDRPlayV3Input::MsgConfigureSDRPlayV3::match(message))
     {
         const SDRPlayV3Input::MsgConfigureSDRPlayV3& cfg = (SDRPlayV3Input::MsgConfigureSDRPlayV3&) message;
+        qDebug() << "SDRPlayV3Gui::handleMessage: MsgConfigureSDRPlayV3: " << cfg.getSettings().getDebugString(cfg.getSettingsKeys(), cfg.getForce());
 
         if (cfg.getForce()) {
             m_settings = cfg.getSettings();
@@ -313,6 +314,7 @@ void SDRPlayV3Gui::updateLNAValues()
 
     const int *attenuations = SDRPlayV3LNA::getAttenuations(m_sdrPlayV3Input->getDeviceId(), m_settings.m_centerFrequency);
     int len = attenuations[0];
+    ui->gainLNA->blockSignals(true);
     ui->gainLNA->clear();
     for (int i = 1; i <= len; i++)
     {
@@ -328,6 +330,7 @@ void SDRPlayV3Gui::updateLNAValues()
             found = true;
         }
     }
+    ui->gainLNA->blockSignals(false);
 }
 
 void SDRPlayV3Gui::sendSettings()

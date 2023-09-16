@@ -134,7 +134,7 @@ public:
             const QStringList& deviceSettingsKeys,
             SWGSDRangel::SWGDeviceSettings& response);
 
-    int getDeviceId();
+    int getDeviceId() const;
 
 private:
     DeviceAPI *m_deviceAPI;
@@ -157,6 +157,8 @@ private:
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const SDRPlayV3Settings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
+    int mapLNAGainDBToLNAIndex(int gainDB, qint64 frequency) const;
+    int mapLNAIndexToLNAGainDB(int lnaIndex, qint64 frequency) const;
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

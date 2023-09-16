@@ -86,6 +86,11 @@ class RemoteTCPInputGui : public DeviceGUI {
         bool m_biasTee;
     };
 
+    struct SampleRateRange {
+        int m_min;
+        int m_max;
+    };
+
 public:
     explicit RemoteTCPInputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
     virtual ~RemoteTCPInputGui();
@@ -151,6 +156,19 @@ private:
     static const DeviceGains m_xtrxGains;
     static const QHash<RemoteTCPProtocol::Device, const DeviceGains *> m_gains;
 
+    static const SampleRateRange m_rtlSDRSampleRateRange;
+    static const SampleRateRange m_sdrPlaySampleRateRange;
+    static const SampleRateRange m_bladeRF1SampleRateRange;
+    static const SampleRateRange m_hackRFSampleRateRange;
+    static const SampleRateRange m_limeSampleRateRange;
+    static const SampleRateRange m_plutoSampleRateRange;
+    static const SampleRateRange m_usrpSampleRateRange;
+    static const QHash<RemoteTCPProtocol::Device, const SampleRateRange *> m_sampleRateRanges;
+
+    static const QList<int> m_airspySampleRateList;
+    static const QList<int> m_airspyHFSampleRateList;
+    static const QHash<RemoteTCPProtocol::Device, const QList<int> *> m_sampleRateLists;
+
     void blockApplySettings(bool block);
     void displaySettings();
     QString gainText(int stage);
@@ -186,6 +204,7 @@ private slots:
     void on_decimation_toggled(bool checked);
     void on_sampleBits_currentIndexChanged(int index);
     void on_dataAddress_editingFinished();
+    void on_dataAddress_currentIndexChanged(int index);
     void on_dataPort_editingFinished();
     void on_overrideRemoteSettings_toggled(bool checked);
     void on_preFill_valueChanged(int value);

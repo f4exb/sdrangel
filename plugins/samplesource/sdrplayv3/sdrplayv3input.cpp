@@ -778,14 +778,24 @@ int SDRPlayV3Input::webapiSettingsPutPatch(
 {
     (void) errorMessage;
     SDRPlayV3Settings settings = m_settings;
-    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
+    QStringList deviceSettingsKeysModifiable = deviceSettingsKeys;
 
-    MsgConfigureSDRPlayV3 *msg = MsgConfigureSDRPlayV3::create(settings, deviceSettingsKeys, force);
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeysModifiable, response);
+
+    // Convert lnaGain to lnaIndex
+    if (deviceSettingsKeysModifiable.contains("lnaGain"))
+    {
+        int lnaGain = response.getSdrPlayV3Settings()->getLnaGain();
+        settings.m_lnaIndex = mapLNAGainDBToLNAIndex(lnaGain, settings.m_centerFrequency);
+        deviceSettingsKeysModifiable.append("lnaIndex");
+    }
+
+    MsgConfigureSDRPlayV3 *msg = MsgConfigureSDRPlayV3::create(settings, deviceSettingsKeysModifiable, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSDRPlayV3 *msgToGUI = MsgConfigureSDRPlayV3::create(settings, deviceSettingsKeys, force);
+        MsgConfigureSDRPlayV3 *msgToGUI = MsgConfigureSDRPlayV3::create(settings, deviceSettingsKeysModifiable, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -893,6 +903,7 @@ void SDRPlayV3Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
     response.getSdrPlayV3Settings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getSdrPlayV3Settings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getSdrPlayV3Settings()->setLnaIndex(settings.m_lnaIndex);
+    response.getSdrPlayV3Settings()->setLnaGain(0); // Write only setting
     response.getSdrPlayV3Settings()->setIfAgc(settings.m_ifAGC ? 1 : 0);
     response.getSdrPlayV3Settings()->setIfGain(settings.m_ifGain);
     response.getSdrPlayV3Settings()->setAmNotch(settings.m_amNotch);
@@ -1011,6 +1022,9 @@ void SDRPlayV3Input::webapiReverseSendSettings(const QList<QString>& deviceSetti
     if (deviceSettingsKeys.contains("lnaIndex") || force) {
         swgSDRPlayV3Settings->setLnaIndex(settings.m_lnaIndex);
     }
+    if (deviceSettingsKeys.contains("lnaGain") || force) {
+        swgSDRPlayV3Settings->setLnaGain(0); // Write only setting
+    }
     if (deviceSettingsKeys.contains("ifAGC") || force) {
         swgSDRPlayV3Settings->setIfAgc(settings.m_ifAGC ? 1 : 0);
     }
@@ -1118,12 +1132,39 @@ void SDRPlayV3Input::networkManagerFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
-int SDRPlayV3Input::getDeviceId()
+int SDRPlayV3Input::getDeviceId() const
 {
     if (m_dev != nullptr)
         return m_dev->hwVer; // E.g. SDRPLAY_RSPduo_ID
     else
         return -1;
+}
+
+// Convert gain in dB to closest index
+int SDRPlayV3Input::mapLNAGainDBToLNAIndex(int gainDB, qint64 frequency) const
+{
+    const int *attenuations = SDRPlayV3LNA::getAttenuations(getDeviceId(), frequency);
+    int len = attenuations[0];
+
+    for (int i = 1; i <= len; i++)
+    {
+        if (gainDB >= -attenuations[i]) {
+            return i - 1;
+        }
+    }
+    return len - 1;
+}
+
+// Convert index to gain in dB
+int SDRPlayV3Input::mapLNAIndexToLNAGainDB(int lnaIndex, qint64 frequency) const
+{
+    const int *attenuations = SDRPlayV3LNA::getAttenuations(getDeviceId(), frequency);
+    int len = attenuations[0];
+    if (lnaIndex < len) {
+        return attenuations[lnaIndex+1];
+    } else {
+        return -1000;
+    }
 }
 
 // ====================================================================

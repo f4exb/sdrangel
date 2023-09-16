@@ -344,6 +344,7 @@ void M17DemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
+    applySettings({"rollupState"});
 }
 
 void M17DemodGUI::onMenuDialogCalled(const QPoint &p)

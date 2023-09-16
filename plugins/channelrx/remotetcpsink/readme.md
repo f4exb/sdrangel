@@ -30,7 +30,7 @@ Specifies number of bits per I/Q sample transmitted via TCP/IP.
 
 <h3>5: IP address</h3>
 
-IP address of the local network interface on which the server will listen for TCP/IP connections from network clients.
+IP address of the local network interface on which the server will listen for TCP/IP connections from network clients. Use 0.0.0.0 for any interface.
 
 <h3>6: Port</h3>
 

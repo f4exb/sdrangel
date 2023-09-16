@@ -30,6 +30,8 @@ SWGRtlSdrReport::SWGRtlSdrReport(QString* json) {
 SWGRtlSdrReport::SWGRtlSdrReport() {
     gains = nullptr;
     m_gains_isSet = false;
+    tuner_type = nullptr;
+    m_tuner_type_isSet = false;
 }
 
 SWGRtlSdrReport::~SWGRtlSdrReport() {
@@ -40,6 +42,8 @@ void
 SWGRtlSdrReport::init() {
     gains = new QList<SWGGain*>();
     m_gains_isSet = false;
+    tuner_type = new QString("");
+    m_tuner_type_isSet = false;
 }
 
 void
@@ -50,6 +54,9 @@ SWGRtlSdrReport::cleanup() {
             delete o;
         }
         delete gains;
+    }
+    if(tuner_type != nullptr) { 
+        delete tuner_type;
     }
 }
 
@@ -66,6 +73,8 @@ void
 SWGRtlSdrReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&gains, pJson["gains"], "QList", "SWGGain");
+    ::SWGSDRangel::setValue(&tuner_type, pJson["tunerType"], "QString", "QString");
+    
 }
 
 QString
@@ -85,6 +94,9 @@ SWGRtlSdrReport::asJsonObject() {
     if(gains && gains->size() > 0){
         toJsonArray((QList<void*>*)gains, obj, "gains", "SWGGain");
     }
+    if(tuner_type != nullptr && *tuner_type != QString("")){
+        toJsonValue(QString("tunerType"), tuner_type, obj, QString("QString"));
+    }
 
     return obj;
 }
@@ -99,12 +111,25 @@ SWGRtlSdrReport::setGains(QList<SWGGain*>* gains) {
     this->m_gains_isSet = true;
 }
 
+QString*
+SWGRtlSdrReport::getTunerType() {
+    return tuner_type;
+}
+void
+SWGRtlSdrReport::setTunerType(QString* tuner_type) {
+    this->tuner_type = tuner_type;
+    this->m_tuner_type_isSet = true;
+}
+
 
 bool
 SWGRtlSdrReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(gains && (gains->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(tuner_type && *tuner_type != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

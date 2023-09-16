@@ -24,6 +24,7 @@
 
 #include "SWGGain.h"
 #include <QList>
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -46,12 +47,18 @@ public:
     QList<SWGGain*>* getGains();
     void setGains(QList<SWGGain*>* gains);
 
+    QString* getTunerType();
+    void setTunerType(QString* tuner_type);
+
 
     virtual bool isSet() override;
 
 private:
     QList<SWGGain*>* gains;
     bool m_gains_isSet;
+
+    QString* tuner_type;
+    bool m_tuner_type_isSet;
 
 };
 

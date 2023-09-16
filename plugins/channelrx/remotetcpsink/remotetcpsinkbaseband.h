@@ -63,7 +63,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const RemoteTCPSinkSettings& settings, bool force = false, bool remoteChange = false);
+    void applySettings(const RemoteTCPSinkSettings& settings, const QStringList& settingsKeys, bool force = false, bool remoteChange = false);
 
 private slots:
     void handleInputMessages();

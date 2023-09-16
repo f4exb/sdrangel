@@ -502,10 +502,9 @@ bool ChannelWebAPIUtils::getGain(unsigned int deviceIndex, int stage, int &gain)
     }
     else if ((devId == "SDRplayV3"))
     {
-        QStringList sdrplayStages = {"lnaIndex", "ifGain"};
+        QStringList sdrplayStages = {"lnaGain", "ifGain"};
         if (stage < sdrplayStages.size())
         {
-            // FIXME: How to map to lnaIndex - gain can vary by SDR
             error = ChannelWebAPIUtils::getDeviceSetting(deviceIndex, sdrplayStages[stage], gain);
             gain *= 10;
         }
@@ -561,10 +560,8 @@ bool ChannelWebAPIUtils::setGain(unsigned int deviceIndex, int stage, int gain)
     }
     else if (devId == "SDRplayV3")
     {
-        QStringList sdrplayStages = {"lnaIndex", "ifGain"};
-        if (stage < sdrplayStages.size())
-        {
-            // FIXME: How to map to lnaIndex - gain can vary by SDR
+        QStringList sdrplayStages = {"lnaGain", "ifGain"};
+        if (stage < sdrplayStages.size()) {
             return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, sdrplayStages[stage], gain / 10);
         }
     }
@@ -1120,7 +1117,7 @@ bool ChannelWebAPIUtils::patchDeviceSetting(unsigned int deviceIndex, const QStr
 
     if (getDeviceSettings(deviceIndex, deviceSettingsResponse, deviceSet))
     {
-        // Patch centerFrequency
+        // Patch setting
         QJsonObject *jsonObj = deviceSettingsResponse.asJsonObject();
         int oldValue;
         if (WebAPIUtils::getSubObjectInt(*jsonObj, setting, oldValue))

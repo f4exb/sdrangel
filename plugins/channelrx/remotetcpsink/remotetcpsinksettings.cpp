@@ -35,7 +35,7 @@ void RemoteTCPSinkSettings::resetToDefaults()
     m_inputFrequencyOffset = 0;
     m_gain = 0;
     m_sampleBits = 8;
-    m_dataAddress = "127.0.0.1";
+    m_dataAddress = "0.0.0.0";
     m_dataPort = 1234;
     m_protocol = SDRA;
     m_rgbColor = QColor(140, 4, 4).rgb();
@@ -106,7 +106,7 @@ bool RemoteTCPSinkSettings::deserialize(const QByteArray& data)
         d.readS32(2, &m_inputFrequencyOffset, 0);
         d.readS32(3, &m_gain, 0);
         d.readU32(4, &m_sampleBits, 8);
-        d.readString(5, &m_dataAddress, "127.0.0.1");
+        d.readString(5, &m_dataAddress, "0.0.0.0");
         d.readU32(6, &tmp, 0);
 
         if ((tmp > 1023) && (tmp < 65535)) {
@@ -157,4 +157,118 @@ bool RemoteTCPSinkSettings::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void RemoteTCPSinkSettings::applySettings(const QStringList& settingsKeys, const RemoteTCPSinkSettings& settings)
+{
+    if (settingsKeys.contains("channelSampleRate")) {
+        m_channelSampleRate = settings.m_channelSampleRate;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("gain")) {
+        m_gain = settings.m_gain;
+    }
+    if (settingsKeys.contains("sampleBits")) {
+        m_sampleBits = settings.m_sampleBits;
+    }
+    if (settingsKeys.contains("dataAddress")) {
+        m_dataAddress = settings.m_dataAddress;
+    }
+    if (settingsKeys.contains("dataPort")) {
+        m_dataPort = settings.m_dataPort;
+    }
+    if (settingsKeys.contains("protocol")) {
+        m_protocol = settings.m_protocol;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString RemoteTCPSinkSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("channelSampleRate") || force) {
+        ostr << " m_channelSampleRate: " << m_channelSampleRate;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("gain") || force) {
+        ostr << " m_gain: " << m_gain;
+    }
+    if (settingsKeys.contains("sampleBits") || force) {
+        ostr << " m_sampleBits: " << m_sampleBits;
+    }
+    if (settingsKeys.contains("dataAddress") || force) {
+        ostr << " m_dataAddress: " << m_dataAddress.toStdString();
+    }
+    if (settingsKeys.contains("dataPort") || force) {
+        ostr << " m_dataPort: " << m_dataPort;
+    }
+    if (settingsKeys.contains("protocol") || force) {
+        ostr << " m_protocol: " << m_protocol;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
 }

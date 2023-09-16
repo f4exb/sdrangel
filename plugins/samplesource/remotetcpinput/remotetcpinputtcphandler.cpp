@@ -495,11 +495,6 @@ void RemoteTCPInputTCPHandler::connected()
 {
     QMutexLocker mutexLocker(&m_mutex);
     qDebug() << "RemoteTCPInputTCPHandler::connected";
-    if (m_settings.m_overrideRemoteSettings)
-    {
-        // Force settings to be sent to remote device
-        applySettings(m_settings, QList<QString>(), true);
-    }
     if (m_messageQueueToGUI)
     {
         MsgReportConnection *msg = MsgReportConnection::create(true);
@@ -648,6 +643,11 @@ void RemoteTCPInputTCPHandler::dataReadyRead()
                 else
                 {
                     qDebug() << "RemoteTCPInputTCPHandler::dataReadyRead: Unknown protocol: " << protocol;
+                }
+                if (m_settings.m_overrideRemoteSettings)
+                {
+                    // Force settings to be sent to remote device (this needs to be after m_sdra is determined above)
+                    applySettings(m_settings, QList<QString>(), true);
                 }
             }
             m_readMetaData = true;

@@ -22,6 +22,9 @@ SDRPlayV3Settings:
       type: integer
     lnaIndex:
       type: integer
+    lnaGain:
+      description: Gain in dB, as an alternative to lnaIndex setting
+      type: integer
     ifAGC:
       type: integer
     ifGain:

@@ -308,21 +308,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="dataAddress">
-        <property name="minimumSize">
-         <size>
-          <width>120</width>
-          <height>0</height>
-         </size>
-        </property>
+       <widget class="QComboBox" name="dataAddress">
         <property name="toolTip">
-         <string>IP address of local network interface to start TCP server on</string>
+         <string>IP address of local network interface to start TCP server on. Use 0.0.0.0 for any interface.</string>
         </property>
-        <property name="inputMask">
-         <string>000.000.000.000</string>
-        </property>
-        <property name="text">
-         <string>0...</string>
+        <property name="editable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

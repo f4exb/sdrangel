@@ -876,7 +876,7 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
       <widget class="QLabel" name="dataAddressLabel">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>0</width>
          <height>0</height>
         </size>
        </property>
@@ -886,28 +886,24 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="dataAddress">
+      <widget class="QComboBox" name="dataAddress">
        <property name="minimumSize">
         <size>
          <width>120</width>
          <height>0</height>
         </size>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>120</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <property name="toolTip">
         <string>Remote IPv4 address or hostname to connect to</string>
        </property>
-       <property name="inputMask">
-        <string/>
+       <property name="editable">
+        <bool>true</bool>
        </property>
-       <property name="text">
-        <string/>
-       </property>
+       <item>
+        <property name="text">
+         <string>127.0.0.1</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
@@ -1185,15 +1181,15 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -1213,7 +1209,6 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
   <tabstop>channelGain</tabstop>
   <tabstop>decimation</tabstop>
   <tabstop>sampleBits</tabstop>
-  <tabstop>dataAddress</tabstop>
   <tabstop>dataPort</tabstop>
   <tabstop>overrideRemoteSettings</tabstop>
   <tabstop>preFill</tabstop>

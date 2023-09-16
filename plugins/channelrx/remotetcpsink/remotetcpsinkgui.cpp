@@ -17,6 +17,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QLocale>
+#include <QHostAddress>
+#include <QNetworkInterface>
 
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -46,7 +48,7 @@ void RemoteTCPSinkGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applyAllSettings();
 }
 
 QByteArray RemoteTCPSinkGUI::serialize() const
@@ -58,7 +60,7 @@ bool RemoteTCPSinkGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applyAllSettings();
         return true;
     } else {
         resetToDefaults();
@@ -113,7 +115,11 @@ bool RemoteTCPSinkGUI::handleMessage(const Message& message)
             || (cfg.getSettings().m_sampleBits != m_settings.m_sampleBits)) {
             m_bwAvg.reset();
         }
-        m_settings = cfg.getSettings();
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
         blockApplySettings(true);
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
@@ -160,8 +166,7 @@ RemoteTCPSinkGUI::RemoteTCPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
         m_basebandSampleRate(0),
-        m_deviceCenterFrequency(0),
-        m_tickCount(0)
+        m_deviceCenterFrequency(0)
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/remotetcpsink/readme.md";
@@ -194,18 +199,27 @@ RemoteTCPSinkGUI::RemoteTCPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
+    // Add all IP addresses
+    for (const QHostAddress& address: QNetworkInterface::allAddresses())
+    {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol && !address.isLoopback()) {
+             ui->dataAddress->addItem(address.toString());
+        }
+    }
+
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applyAllSettings();
     DialPopup::addPopupsToChildDials(this);
 }
 
 RemoteTCPSinkGUI::~RemoteTCPSinkGUI()
 {
+    QObject::disconnect(ui->dataAddress->lineEdit(), &QLineEdit::editingFinished, this, &RemoteTCPSinkGUI::on_dataAddress_editingFinished);
     delete ui;
 }
 
@@ -214,15 +228,25 @@ void RemoteTCPSinkGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void RemoteTCPSinkGUI::applySettings(bool force)
+void RemoteTCPSinkGUI::applySetting(const QString& settingsKey)
+{
+    applySettings({settingsKey});
+}
+
+void RemoteTCPSinkGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        RemoteTCPSink::MsgConfigureRemoteTCPSink* message = RemoteTCPSink::MsgConfigureRemoteTCPSink::create(m_settings, force);
+        RemoteTCPSink::MsgConfigureRemoteTCPSink* message = RemoteTCPSink::MsgConfigureRemoteTCPSink::create(m_settings, settingsKeys, force);
         m_remoteSink->getInputMessageQueue()->push(message);
     }
+}
+
+void RemoteTCPSinkGUI::applyAllSettings()
+{
+    applySettings(QStringList(), true);
 }
 
 void RemoteTCPSinkGUI::displaySettings()
@@ -244,7 +268,10 @@ void RemoteTCPSinkGUI::displaySettings()
     ui->gain->setValue(m_settings.m_gain);
     ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
     ui->sampleBits->setCurrentIndex(m_settings.m_sampleBits/8 - 1);
-    ui->dataAddress->setText(m_settings.m_dataAddress);
+    if (ui->dataAddress->findText(m_settings.m_dataAddress) == -1) {
+        ui->dataAddress->addItem(m_settings.m_dataAddress);
+    }
+    ui->dataAddress->setCurrentText(m_settings.m_dataAddress);
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
     ui->protocol->setCurrentIndex((int)m_settings.m_protocol);
     getRollupContents()->restoreState(m_rollupState);
@@ -288,7 +315,7 @@ void RemoteTCPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySetting("rollupState");
 }
 
 void RemoteTCPSinkGUI::onMenuDialogCalled(const QPoint &p)
@@ -325,14 +352,26 @@ void RemoteTCPSinkGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
+        QList<QString> settingsKeys({
+            "m_rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex"
+        });
+
         if (m_deviceUISet->m_deviceMIMOEngine)
         {
+            settingsKeys.append("streamIndex");
             m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
             m_channelMarker.clearStreamIndexes();
             m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(settingsKeys);
     }
 
     resetContextMenuType();
@@ -342,7 +381,7 @@ void RemoteTCPSinkGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySetting("inputFrequencyOffset");
 }
 
 void RemoteTCPSinkGUI::channelMarkerHighlightedByCursor()
@@ -353,34 +392,42 @@ void RemoteTCPSinkGUI::channelMarkerHighlightedByCursor()
 void RemoteTCPSinkGUI::on_deltaFrequency_changed(int index)
 {
     m_settings.m_inputFrequencyOffset = index;
-    applySettings();
+    applySetting("inputFrequencyOffset");
 }
 
 void RemoteTCPSinkGUI::on_channelSampleRate_changed(int index)
 {
     m_settings.m_channelSampleRate = index;
     m_bwAvg.reset();
-    applySettings();
+    applySetting("channelSampleRate");
 }
 
 void RemoteTCPSinkGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gain = (float)value;
     ui->gainText->setText(tr("%1dB").arg(m_settings.m_gain));
-    applySettings();
+    applySetting("gain");
 }
 
 void RemoteTCPSinkGUI::on_sampleBits_currentIndexChanged(int index)
 {
     m_settings.m_sampleBits = 8 * (index + 1);
     m_bwAvg.reset();
-    applySettings();
+    applySetting("sampleBits");
 }
 
 void RemoteTCPSinkGUI::on_dataAddress_editingFinished()
 {
-    m_settings.m_dataAddress = ui->dataAddress->text();
-    applySettings();
+    m_settings.m_dataAddress = ui->dataAddress->currentText();
+    applySetting("dataAddress");
+}
+
+void RemoteTCPSinkGUI::on_dataAddress_currentIndexChanged(int index)
+{
+    (void) index;
+
+    m_settings.m_dataAddress = ui->dataAddress->currentText();
+    applySetting("dataAddress");
 }
 
 void RemoteTCPSinkGUI::on_dataPort_editingFinished()
@@ -397,20 +444,13 @@ void RemoteTCPSinkGUI::on_dataPort_editingFinished()
         m_settings.m_dataPort = dataPort;
     }
 
-    applySettings();
+    applySetting("dataPort");
 }
 
 void RemoteTCPSinkGUI::on_protocol_currentIndexChanged(int index)
 {
     m_settings.m_protocol = (RemoteTCPSinkSettings::Protocol)index;
-    applySettings();
-}
-
-void RemoteTCPSinkGUI::tick()
-{
-    if (++m_tickCount == 20) { // once per second
-        m_tickCount = 0;
-    }
+    applySetting("protocol");
 }
 
 void RemoteTCPSinkGUI::makeUIConnections()
@@ -419,7 +459,8 @@ void RemoteTCPSinkGUI::makeUIConnections()
     QObject::connect(ui->channelSampleRate, &ValueDial::changed, this, &RemoteTCPSinkGUI::on_channelSampleRate_changed);
     QObject::connect(ui->gain, &QDial::valueChanged, this, &RemoteTCPSinkGUI::on_gain_valueChanged);
     QObject::connect(ui->sampleBits, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteTCPSinkGUI::on_sampleBits_currentIndexChanged);
-    QObject::connect(ui->dataAddress, &QLineEdit::editingFinished, this, &RemoteTCPSinkGUI::on_dataAddress_editingFinished);
+    QObject::connect(ui->dataAddress->lineEdit(), &QLineEdit::editingFinished, this, &RemoteTCPSinkGUI::on_dataAddress_editingFinished);
+    QObject::connect(ui->dataAddress, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteTCPSinkGUI::on_dataAddress_currentIndexChanged);
     QObject::connect(ui->dataPort, &QLineEdit::editingFinished, this, &RemoteTCPSinkGUI::on_dataPort_editingFinished);
     QObject::connect(ui->protocol, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteTCPSinkGUI::on_protocol_currentIndexChanged);
 }

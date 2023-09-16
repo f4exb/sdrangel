@@ -72,6 +72,9 @@ public:
     qint32 getLnaIndex();
     void setLnaIndex(qint32 lna_index);
 
+    qint32 getLnaGain();
+    void setLnaGain(qint32 lna_gain);
+
     qint32 getIfAgc();
     void setIfAgc(qint32 if_agc);
 
@@ -153,6 +156,9 @@ private:
 
     qint32 lna_index;
     bool m_lna_index_isSet;
+
+    qint32 lna_gain;
+    bool m_lna_gain_isSet;
 
     qint32 if_agc;
     bool m_if_agc_isSet;

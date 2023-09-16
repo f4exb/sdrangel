@@ -56,7 +56,7 @@ RemoteTCPSink::RemoteTCPSink(DeviceAPI *deviceAPI) :
     m_basebandSink->setMessageQueueToChannel(&m_inputMessageQueue);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(m_settings, QStringList(), true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -147,7 +147,7 @@ bool RemoteTCPSink::handleMessage(const Message& cmd)
     {
         MsgConfigureRemoteTCPSink& cfg = (MsgConfigureRemoteTCPSink&) cmd;
         qDebug() << "RemoteTCPSink::handleMessage: MsgConfigureRemoteTCPSink";
-        applySettings(cfg.getSettings(), cfg.getForce(), cfg.getRemoteChange());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce(), cfg.getRemoteChange());
 
         return true;
     }
@@ -183,14 +183,14 @@ bool RemoteTCPSink::deserialize(const QByteArray& data)
     (void) data;
     if (m_settings.deserialize(data))
     {
-        MsgConfigureRemoteTCPSink *msg = MsgConfigureRemoteTCPSink::create(m_settings, true);
+        MsgConfigureRemoteTCPSink *msg = MsgConfigureRemoteTCPSink::create(m_settings, QStringList(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureRemoteTCPSink *msg = MsgConfigureRemoteTCPSink::create(m_settings, true);
+        MsgConfigureRemoteTCPSink *msg = MsgConfigureRemoteTCPSink::create(m_settings, QStringList(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -200,18 +200,19 @@ void RemoteTCPSink::setCenterFrequency(qint64 frequency)
 {
     RemoteTCPSinkSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(settings, {"inputFrequencyOffset"}, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRemoteTCPSink *msgToGUI = MsgConfigureRemoteTCPSink::create(settings, false);
+        MsgConfigureRemoteTCPSink *msgToGUI = MsgConfigureRemoteTCPSink::create(settings, {"inputFrequencyOffset"}, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void RemoteTCPSink::applySettings(const RemoteTCPSinkSettings& settings, bool force, bool remoteChange)
+void RemoteTCPSink::applySettings(const RemoteTCPSinkSettings& settings, const QStringList& settingsKeys, bool force, bool remoteChange)
 {
     qDebug() << "RemoteTCPSink::applySettings:"
+            << " settingsKeys: " << settingsKeys
             << " m_channelSampleRate: " << settings.m_channelSampleRate
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_gain: " << settings.m_gain
@@ -223,37 +224,7 @@ void RemoteTCPSink::applySettings(const RemoteTCPSinkSettings& settings, bool fo
             << " force: " << force
             << " remoteChange: " << remoteChange;
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_channelSampleRate != settings.m_channelSampleRate) || force) {
-        reverseAPIKeys.append("m_channelSampleRate");
-    }
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((m_settings.m_gain != settings.m_gain) || force) {
-        reverseAPIKeys.append("gain");
-    }
-    if ((m_settings.m_sampleBits != settings.m_sampleBits) || force) {
-        reverseAPIKeys.append("sampleBits");
-    }
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
-        reverseAPIKeys.append("dataAddress");
-    }
-    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
-        reverseAPIKeys.append("dataPort");
-    }
-    if ((m_settings.m_protocol != settings.m_protocol) || force) {
-        reverseAPIKeys.append("protocol");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex"))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -262,31 +233,33 @@ void RemoteTCPSink::applySettings(const RemoteTCPSinkSettings& settings, bool fo
             m_deviceAPI->addChannelSink(this, settings.m_streamIndex);
             m_deviceAPI->addChannelSinkAPI(this);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    MsgConfigureRemoteTCPSink *msg = MsgConfigureRemoteTCPSink::create(settings, force, remoteChange);
+    MsgConfigureRemoteTCPSink *msg = MsgConfigureRemoteTCPSink::create(settings, settingsKeys, force, remoteChange);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    if ((settings.m_useReverseAPI) && (reverseAPIKeys.size() != 0))
+    if (settingsKeys.contains("useReverseAPI"))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIDeviceIndex") ||
+                settingsKeys.contains("reverseAPIChannelIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int RemoteTCPSink::webapiSettingsGet(
@@ -319,14 +292,14 @@ int RemoteTCPSink::webapiSettingsPutPatch(
     RemoteTCPSinkSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureRemoteTCPSink *msg = MsgConfigureRemoteTCPSink::create(settings, force);
+    MsgConfigureRemoteTCPSink *msg = MsgConfigureRemoteTCPSink::create(settings, channelSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("RemoteTCPSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRemoteTCPSink *msgToGUI = MsgConfigureRemoteTCPSink::create(settings, force);
+        MsgConfigureRemoteTCPSink *msgToGUI = MsgConfigureRemoteTCPSink::create(settings, channelSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -467,7 +440,7 @@ void RemoteTCPSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings&
     }
 }
 
-void RemoteTCPSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteTCPSinkSettings& settings, bool force)
+void RemoteTCPSink::webapiReverseSendSettings(const QStringList& channelSettingsKeys, const RemoteTCPSinkSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -494,7 +467,7 @@ void RemoteTCPSink::webapiReverseSendSettings(QList<QString>& channelSettingsKey
 
 void RemoteTCPSink::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QStringList& channelSettingsKeys,
     const RemoteTCPSinkSettings& settings,
     bool force)
 {
@@ -518,7 +491,7 @@ void RemoteTCPSink::sendChannelSettings(
 }
 
 void RemoteTCPSink::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RemoteTCPSinkSettings& settings,
         bool force

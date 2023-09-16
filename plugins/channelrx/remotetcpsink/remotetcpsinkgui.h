@@ -81,14 +81,15 @@ private:
     RemoteTCPSink* m_remoteSink;
     MessageQueue m_inputMessageQueue;
 
-    uint32_t m_tickCount;
     MovingAverageUtil<float, float, 10> m_bwAvg;
 
     explicit RemoteTCPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~RemoteTCPSinkGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySetting(const QString& settingsKey);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
+    void applyAllSettings();
     void displaySettings();
     void displayRateAndShift();
     bool handleMessage(const Message& message);
@@ -109,11 +110,11 @@ private slots:
     void on_gain_valueChanged(int value);
     void on_sampleBits_currentIndexChanged(int index);
     void on_dataAddress_editingFinished();
+    void on_dataAddress_currentIndexChanged(int index);
     void on_dataPort_editingFinished();
     void on_protocol_currentIndexChanged(int index);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
-    void tick();
 };
 
 #endif /* PLUGINS_CHANNELRX_REMOTETCPSINK_REMOTETCPSINKGUI_H_ */
