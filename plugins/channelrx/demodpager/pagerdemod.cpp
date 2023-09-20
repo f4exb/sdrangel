@@ -199,6 +199,7 @@ bool PagerDemod::handleMessage(const Message& cmd)
                 << report.getNumericMessage() << ","
                 << QString::number(report.getEvenParityErrors()) << ","
                 << QString::number(report.getBCHParityErrors()) << "\n";
+            m_logStream.flush();
         }
 
         return true;
