@@ -1,3 +1,20 @@
+sdrangel (7.16.0-1) unstable; urgency=medium
+
+   * Added RTTY modulator. PR #1800
+   * Added PSK31 modulator. PR #1814
+   * Flush log stream after write, so data is available immediately. PR #1834. Fixes #1833
+   * Remote TCP improvements. PR #1830. Fixes #1827
+   * Fix ffpmeg/opencv dependencies. Enable C lang on Mac, for external project. PR #1828. Fixes #1819
+   * Request authorization for access to camera and microphone on Mac. PR #1824. Fixes #1819
+   * Fixed Swagger files generation and added missing files. Fixes #1821
+   * Add strings describing why Microphone, Camera and Location are required on MacOS. PR #1822. Fixes #1819
+   * Add windows-default preset for building with Visual Studio. PR #1816
+   * Add Android SDR Driver sample source. PR #1815
+   * Distingush between China and Taiwan. PR #1810. Fixes #1805
+   * Add command line options to start Remote TCP Sink on a specified device/ PR #1809.
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 21 Sep 2023 22:44:31 +0200
+
 sdrangel (7.15.4-1) unstable; urgency=medium
 
    * Fix Mac compilation. PR #1786

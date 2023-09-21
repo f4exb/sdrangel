@@ -32,7 +32,7 @@
 const PluginDescriptor RemoteTCPInputPlugin::m_pluginDescriptor = {
     QStringLiteral("RemoteTCPInput"),
     QStringLiteral("Remote TCP device input"),
-    QStringLiteral("7.8.3"),
+    QStringLiteral("7.16.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
