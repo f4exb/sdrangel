@@ -30,6 +30,8 @@ jobs:
         run: brew update
       - name: Install brew packages
         run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
+      - name: Unstall brew's Qt6, so we use 5.15 installed above
+        run: brew uninstall qt
       - name: build sdrangel on Mac
         run: |
           mkdir build && cd build
