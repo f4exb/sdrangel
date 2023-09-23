@@ -753,6 +753,7 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     find_package(AptDec)
     find_package(LibDAB)
     find_package(HIDAPI)
+    find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
 
     # Devices
     if(ENABLE_AIRSPY)
