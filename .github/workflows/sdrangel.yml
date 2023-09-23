@@ -27,9 +27,9 @@ jobs:
           setup-python: false
           modules: 'qtcharts qtwebengine'
       - name: Update brew
-          run: brew update
+        run: brew update
       - name: Install brew packages
-          run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
+        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
       - name: build sdrangel on Mac
         run: |
           mkdir build && cd build
