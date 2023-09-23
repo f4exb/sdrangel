@@ -16,7 +16,6 @@ jobs:
     runs-on: macos-11
     steps:
       - uses: actions/checkout@v3      
-      - uses: ilammy/setup-nasm@v1
       - name: Install Qt
         uses: jurplel/install-qt-action@v3          
         with:
@@ -27,6 +26,10 @@ jobs:
           arch: 'clang_64'
           setup-python: false
           modules: 'qtcharts qtwebengine'
+      - name: Update brew
+          run: brew update
+      - name: Install brew packages
+          run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
       - name: build sdrangel on Mac
         run: |
           mkdir build && cd build
