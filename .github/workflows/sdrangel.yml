@@ -11,6 +11,27 @@ on:
   pull_request:
 
 jobs:
+  build_mac:
+    runs-on: macos-11
+    steps:
+      - uses: actions/checkout@v3      
+      - uses: ilammy/setup-nasm@v1
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3          
+        with:
+          dir: '${{ github.workspace }}/qt/'
+          version: '5.15.2'
+          host: 'mac'
+          target: 'desktop'
+          arch: 'clang_64'
+          setup-python: false
+          modules: 'qtcharts qtwebengine'
+      - name: build sdrangel on Mac
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON  -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=ON -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          make package -j4
+     
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
