@@ -16,24 +16,14 @@ jobs:
     runs-on: macos-11
     steps:
       - uses: actions/checkout@v3      
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3          
-        with:
-          dir: '${{ github.workspace }}/qt/'
-          version: '5.15.2'
-          host: 'mac'
-          target: 'desktop'
-          arch: 'clang_64'
-          setup-python: false
-          modules: 'qtcharts qtwebengine'
       - name: Update brew
         run: brew update
       - name: Install brew packages
-        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
+        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr qt@5
       - name: build sdrangel on Mac
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON  -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE -DQt5_ROOT=$QT_ROOT_DIR
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON  -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE -DCMAKE_PREFIX_PATH="$(brew --prefix qt@5)"
           make package -j4
      
   build:
