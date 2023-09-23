@@ -19,11 +19,11 @@ jobs:
       - name: Update brew
         run: brew update
       - name: Install brew packages
-        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr qt@5
+        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
       - name: build sdrangel on Mac
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON  -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE -DCMAKE_PREFIX_PATH="$(brew --prefix qt@5)"
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON  -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE"
           make package -j4
      
   build:
