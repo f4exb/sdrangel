@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - master
+      - mac_ci
     tags:
       - 'v*'
   pull_request:
