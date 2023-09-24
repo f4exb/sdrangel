@@ -107,7 +107,7 @@ jobs:
         # Need with clause so git describe --tags works?
       - name: Get version
         id: get_version
-        run: echo "version=$(git describe --tags | cut -c2-)" >> $env:GITHUB_OUTPUT
+        run: echo "version=$(git describe --tags | cut -c2-)" >> $GITHUB_OUTPUT
         # Requires git fetch --tags upstream to have been run!
       - name: Get version 3
         id: get_version3
@@ -117,7 +117,7 @@ jobs:
         id: get_os_version
         run: |
           sw_vers -productVersion
-          echo "os_version=$(sw_vers -productVersion)" >> $env:GITHUB_OUTPUT
+          echo "os_version=$(sw_vers -productVersion)" >> $GITHUB_OUTPUT
       - name: Diplay version
         run: |
           echo ${{ steps.get_version.outputs.version }}
