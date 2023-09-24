@@ -89,6 +89,8 @@ jobs:
         #run: echo "version=$(git describe --tags | cut -c2-)" >> $env:GITHUB_OUTPUT
       - name: Diplay version
         run: echo ${{ steps.get_version.outputs.version }}
+      - name: Build size
+        run: ls -l ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
@@ -99,6 +101,8 @@ jobs:
         uses: softprops/action-gh-release@v0.1.13
         with:
           files: ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
+      - name: Check space
+        run: Get-PSDrive
 
   build_mac:
     runs-on: macos-11
