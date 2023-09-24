@@ -12,20 +12,6 @@ on:
   pull_request:
 
 jobs:
-  build_mac:
-    runs-on: macos-11
-    steps:
-      - uses: actions/checkout@v3      
-      - name: Update brew
-        run: brew update
-      - name: Install brew packages
-        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
-      - name: build sdrangel on Mac
-        run: |
-          mkdir build && cd build
-          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON  -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
-          make package -j4
-     
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -110,3 +96,39 @@ jobs:
         uses: softprops/action-gh-release@v0.1.13
         with:
           files: ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
+
+  build_mac:
+    runs-on: macos-11
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update brew
+        run: brew update
+      - name: Install brew packages
+        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
+      - name: Build sdrangel on Mac
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON  -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
+          make package -j4
+      - id: get_version2
+        uses: battila7/get-version-action@v2
+      - name: Get version
+        id: get_version
+        run: echo "version=$(git describe --tags | cut -c2-)" >> $env:GITHUB_OUTPUT
+        # Requires git fetch --tags upstream to have been run!
+      - name: Set output
+        id: get_version3
+        run: echo "version=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+      - name: Diplay version
+        run: |
+          echo ${{ steps.get_version.outputs.version }}
+          echo ${{ steps.get_version2.outputs.version }}
+          echo ${{ steps.get_version3.outputs.version }}
+      - name: Get OS version
+        id: get_os_version
+        run: echo "version=$(sw_vers -productVersion)" >> $env:GITHUB_OUTPUT
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sdrangel-${{ steps.get_version3.outputs.version }}_${{ steps.get_os_version.outputs.version }}_x86_64.dmg
+          path: ${{ github.workspace }}/build/sdrangel-${{ steps.get_version3.outputs.version }}_${{ steps.get_os_version.outputs.version }}_x86_64.dmg
