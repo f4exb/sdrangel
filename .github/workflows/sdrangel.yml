@@ -104,11 +104,13 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
-        # Need with clause so git describe --tags works?
+        # Need with clause so git describe --tags works
       - name: Get version
         id: get_version
         run: echo "version=$(git describe --tags | cut -c2-)" >> $GITHUB_OUTPUT
-        # Requires git fetch --tags upstream to have been run!
+        # Requires git fetch --tags upstream to have been run on the branch!
+        #   git remote add upstream https://github.com/f4exb/sdrangel.git
+        #   git fetch --tags upstream
       - name: Get version 3
         id: get_version3
         run: echo "version=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
