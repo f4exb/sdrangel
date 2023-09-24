@@ -41,8 +41,6 @@ jobs:
           echo github.event_name: ${{ github.event_name }}
           echo github.ref: ${{ github.ref }}
           echo github.workspace: ${{ github.workspace }}
-      - name: Check space 1
-        run: Get-PSDrive
       - name: Install basic dependencies on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
@@ -77,8 +75,6 @@ jobs:
           arch: ${{matrix.config.QT_ARCH}}
           setup-python: false
           modules: 'qtcharts qtwebengine'
-      - name: Check space 2
-        run: Get-PSDrive
       - name: build sdrangel on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
@@ -87,16 +83,11 @@ jobs:
           mkdir build && cd build
           cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=SSE4_2 -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DCMAKE_PREFIX_PATH="C:\Qt\5.15.2\msvc2019_64;C:\Libraries\boost_1_73_0"
           cmake --build . --config Release --target package
-      - name: Check space 3
+      - name: Check disk space
         run: Get-PSDrive
       - name: Get version
         id: get_version
         run: echo "version=$(grep sdrangel_VERSION build/CMakeCache.txt | cut -d "=" -f2)" >> $env:GITHUB_OUTPUT
-        #run: echo "version=$(git describe --tags | cut -c2-)" >> $env:GITHUB_OUTPUT
-      - name: Diplay version
-        run: echo ${{ steps.get_version.outputs.version }}
-      - name: Build size
-        run: ls -l ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
@@ -107,8 +98,6 @@ jobs:
         uses: softprops/action-gh-release@v0.1.13
         with:
           files: ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
-      - name: Check space 3
-        run: Get-PSDrive
 
   build_mac:
     runs-on: macos-11
