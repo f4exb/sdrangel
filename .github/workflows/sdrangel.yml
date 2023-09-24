@@ -122,7 +122,7 @@ jobs:
         run: |
           echo ${{ steps.get_version.outputs.version }}
           echo ${{ steps.get_version3.outputs.version }}
-          echo ${{ steps.get_os_version.outputs.version }}
+          echo ${{ steps.get_os_version.outputs.os_version }}
       - name: Update brew
         run: brew update
       - name: Install brew packages
