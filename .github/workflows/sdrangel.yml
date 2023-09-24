@@ -43,7 +43,11 @@ jobs:
           echo github.workspace: ${{ github.workspace }}
       - name: Get version
         id: get_version
-        run: echo "version=$(git describe --tags | cut -c2-)" >> $env:GITHUB_OUTPUT
+        run: echo "version=$(grep sdrangel_VERSION CMakeCache.txt  | cut -d "=" -f2)" >> $env:GITHUB_OUTPUT
+        #run: echo "version=$(git describe --tags | cut -c2-)" >> $env:GITHUB_OUTPUT
+      - name: Diplay version
+        run:
+          echo ${{ steps.get_version.outputs.version }}
       - name: Install basic dependencies on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
@@ -107,7 +111,8 @@ jobs:
         # Need with clause so git describe --tags works
       - name: Get version
         id: get_version
-        run: echo "version=$(git describe --tags | cut -c2-)" >> $GITHUB_OUTPUT
+        run: echo "version=$(grep CPACK_PACKAGE_FILE_NAME CMakeCache.txt  | cut -d "=" -f2)" >> $GITHUB_OUTPUT
+        #
         # Requires git fetch --tags upstream to have been run on the branch!
         #   git remote add upstream https://github.com/f4exb/sdrangel.git
         #   git fetch --tags upstream
