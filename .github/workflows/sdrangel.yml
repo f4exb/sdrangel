@@ -41,12 +41,6 @@ jobs:
           echo github.event_name: ${{ github.event_name }}
           echo github.ref: ${{ github.ref }}
           echo github.workspace: ${{ github.workspace }}
-      - name: Get version
-        id: get_version
-        run: echo "version=$(grep sdrangel_VERSION CMakeCache.txt  | cut -d "=" -f2)" >> $env:GITHUB_OUTPUT
-        #run: echo "version=$(git describe --tags | cut -c2-)" >> $env:GITHUB_OUTPUT
-      - name: Diplay version
-        run: echo ${{ steps.get_version.outputs.version }}
       - name: Install basic dependencies on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
@@ -89,6 +83,12 @@ jobs:
           mkdir build && cd build
           cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=SSE4_2 -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DCMAKE_PREFIX_PATH="C:\Qt\5.15.2\msvc2019_64;C:\Libraries\boost_1_73_0"
           cmake --build . --config Release --target package
+      - name: Get version
+        id: get_version
+        run: echo "version=$(grep sdrangel_VERSION build/CMakeCache.txt | cut -d "=" -f2)" >> $env:GITHUB_OUTPUT
+        #run: echo "version=$(git describe --tags | cut -c2-)" >> $env:GITHUB_OUTPUT
+      - name: Diplay version
+        run: echo ${{ steps.get_version.outputs.version }}
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
@@ -108,9 +108,17 @@ jobs:
           submodules: true
           fetch-depth: 0
         # Need with clause so git describe --tags works
+      - name: Update brew
+        run: brew update
+      - name: Install brew packages
+        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
+      - name: Configure sdrangel
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON  -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
       - name: Get version
         id: get_version
-        run: echo "version=$(grep CPACK_PACKAGE_FILE_NAME CMakeCache.txt  | cut -d "=" -f2)" >> $GITHUB_OUTPUT
+        run: echo "version=$(grep CPACK_PACKAGE_FILE_NAME build/CMakeCache.txt  | cut -d "=" -f2)" >> $GITHUB_OUTPUT
         #
         # Requires git fetch --tags upstream to have been run on the branch!
         #   git remote add upstream https://github.com/f4exb/sdrangel.git
@@ -129,14 +137,9 @@ jobs:
           echo ${{ steps.get_version.outputs.version }}
           echo ${{ steps.get_version3.outputs.version }}
           echo ${{ steps.get_os_version.outputs.os_version }}
-      - name: Update brew
-        run: brew update
-      - name: Install brew packages
-        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
       - name: Build sdrangel on Mac
         run: |
-          mkdir build && cd build
-          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON  -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
+          cd build
           make package -j4
       - name: Upload artifact
         uses: actions/upload-artifact@v3
