@@ -107,42 +107,23 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
-        # Need with clause so git describe --tags works
       - name: Update brew
         run: brew update
       - name: Install brew packages
         run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
-      - name: Configure sdrangel
+      - name: Configure SDRangel
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON  -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
-      - name: Get version
-        id: get_version
-        run: echo "version=$(grep CPACK_PACKAGE_FILE_NAME build/CMakeCache.txt  | cut -d "=" -f2)" >> $GITHUB_OUTPUT
-        #
-        # Requires git fetch --tags upstream to have been run on the branch!
-        #   git remote add upstream https://github.com/f4exb/sdrangel.git
-        #   git fetch --tags upstream
-      - name: Get version 3
-        id: get_version3
-        run: echo "version=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
-        # This just gives branch name
-      - name: Get OS version
-        id: get_os_version
-        run: |
-          sw_vers -productVersion
-          echo "os_version=$(sw_vers -productVersion)" >> $GITHUB_OUTPUT
-      - name: Diplay version
-        run: |
-          echo ${{ steps.get_version.outputs.version }}
-          echo ${{ steps.get_version3.outputs.version }}
-          echo ${{ steps.get_os_version.outputs.os_version }}
-      - name: Build sdrangel on Mac
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
+      - name: Get filename
+        id: get_filename
+        run: echo "filename=$(grep CPACK_PACKAGE_FILE_NAME build/CMakeCache.txt | cut -d "=" -f2)" >> $GITHUB_OUTPUT
+      - name: Build SDRangel on Mac
         run: |
           cd build
-          make package -j4
+          make package -j3
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: sdrangel-${{ steps.get_version.outputs.version }}_${{ steps.get_os_version.outputs.os_version }}_x86_64.dmg
-          path: ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}_${{ steps.get_os_version.outputs.os_version }}_x86_64.dmg
+          name: ${{ steps.get_filename.outputs.filename }}.dmg
+          path: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.dmg
