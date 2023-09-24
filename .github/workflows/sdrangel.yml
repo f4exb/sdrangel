@@ -46,8 +46,7 @@ jobs:
         run: echo "version=$(grep sdrangel_VERSION CMakeCache.txt  | cut -d "=" -f2)" >> $env:GITHUB_OUTPUT
         #run: echo "version=$(git describe --tags | cut -c2-)" >> $env:GITHUB_OUTPUT
       - name: Diplay version
-        run:
-          echo ${{ steps.get_version.outputs.version }}
+        run: echo ${{ steps.get_version.outputs.version }}
       - name: Install basic dependencies on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
