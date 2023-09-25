@@ -24,7 +24,9 @@
 #include <QSysInfo>
 #include <QSettings>
 #ifdef __APPLE__
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 #include <QGLFormat>
+#endif
 #include <QSurfaceFormat>
 #endif
 #ifdef ANDROID
@@ -212,10 +214,12 @@ int main(int argc, char* argv[])
     // will not work. Because of this, we have two versions of the shaders:
     // OpenGL 2 versions for compatiblity with older drivers and OpenGL 3.3
     // versions for newer drivers
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     QGLFormat fmt;
     fmt.setVersion(3, 3);
     fmt.setProfile(QGLFormat::CoreProfile);
     QGLFormat::setDefaultFormat(fmt);
+#endif
     QSurfaceFormat sfc;
     sfc.setVersion(3, 3);
     sfc.setProfile(QSurfaceFormat::CoreProfile);

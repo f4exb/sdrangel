@@ -1478,7 +1478,7 @@ if (WIN32 OR APPLE)
         endif ()
     endif (ENABLE_BLADERF)
 
-    if (ENABLE_USRP AND Boost_FOUND AND NOT WIN32)
+    if (ENABLE_USRP AND Boost_FOUND AND NOT WIN32 AND ((NOT UHD_FOUND) OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "ON")))
         ExternalProject_Add(uhd
                 GIT_REPOSITORY https://github.com/EttusResearch/uhd.git
                 GIT_TAG v4.2.0.0
@@ -1504,7 +1504,7 @@ if (WIN32 OR APPLE)
             set(UHD_LIBRARIES "${install_dir}/lib/libuhd${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
             set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
         endif ()
-    endif (ENABLE_USRP AND Boost_FOUND AND NOT WIN32)
+    endif (ENABLE_USRP AND Boost_FOUND AND NOT WIN32 AND ((NOT UHD_FOUND) OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "ON")))
 
 endif (WIN32 OR APPLE)
 

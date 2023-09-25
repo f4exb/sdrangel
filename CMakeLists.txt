@@ -173,7 +173,7 @@ if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git/")
     endif()
 endif()
 
-set(sdrangel_VERSION "${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}${sdrangel_VERSION_SUFFIX}")
+set(sdrangel_VERSION "${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}${sdrangel_VERSION_SUFFIX}" CACHE INTERNAL "")
 message(STATUS "${APPLICATION_NAME} Version: ${sdrangel_VERSION}")
 add_definitions("-DSDRANGEL_LIB_VERSION=\"${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}\"")
 add_definitions("-DSDRANGEL_VERSION=\"${sdrangel_VERSION}\"")
@@ -753,6 +753,7 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     find_package(AptDec)
     find_package(LibDAB)
     find_package(HIDAPI)
+    find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
 
     # Devices
     if(ENABLE_AIRSPY)
