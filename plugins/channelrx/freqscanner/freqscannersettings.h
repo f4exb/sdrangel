@@ -33,7 +33,6 @@ struct FreqScannerSettings
     {
         int m_deviceSetIndex;
         int m_channelIndex;
-        ChannelAPI* m_channelAPI;
 
         AvailableChannel() = default;
         AvailableChannel(const AvailableChannel&) = default;

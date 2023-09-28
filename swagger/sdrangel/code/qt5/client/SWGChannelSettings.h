@@ -46,6 +46,7 @@
 #include "SWGFileSourceSettings.h"
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModSettings.h"
+#include "SWGFreqScannerSettings.h"
 #include "SWGFreqTrackerSettings.h"
 #include "SWGHeatMapSettings.h"
 #include "SWGIEEE_802_15_4_ModSettings.h"
@@ -179,6 +180,9 @@ public:
 
     SWGFreeDVModSettings* getFreeDvModSettings();
     void setFreeDvModSettings(SWGFreeDVModSettings* free_dv_mod_settings);
+
+    SWGFreqScannerSettings* getFreqScannerSettings();
+    void setFreqScannerSettings(SWGFreqScannerSettings* freq_scanner_settings);
 
     SWGFreqTrackerSettings* getFreqTrackerSettings();
     void setFreqTrackerSettings(SWGFreqTrackerSettings* freq_tracker_settings);
@@ -366,6 +370,9 @@ private:
 
     SWGFreeDVModSettings* free_dv_mod_settings;
     bool m_free_dv_mod_settings_isSet;
+
+    SWGFreqScannerSettings* freq_scanner_settings;
+    bool m_freq_scanner_settings_isSet;
 
     SWGFreqTrackerSettings* freq_tracker_settings;
     bool m_freq_tracker_settings_isSet;

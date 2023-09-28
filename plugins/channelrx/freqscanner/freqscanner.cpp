@@ -30,7 +30,7 @@
 
 #include "SWGChannelSettings.h"
 #include "SWGWorkspaceInfo.h"
-//#include "SWGFreqScannerSettings.h"
+#include "SWGFreqScannerSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGMapItem.h"
 
@@ -285,9 +285,7 @@ void FreqScanner::initScan()
         qInfo() << "m_minFFTStartTime" << m_minFFTStartTime.toString("ss.z");
     }
 
-    qDebug() << "********* initScan: Clear results";
     m_scanResults.clear();
-    qDebug() << "********* initScan: Clear results done";
 
     if (m_guiMessageQueue) {
         m_guiMessageQueue->push(FreqScanner::MsgReportScanning::create());
@@ -301,6 +299,8 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
 
     switch (m_state)
     {
+    case IDLE:
+        break;
 
     case START_SCAN:
         {
@@ -642,9 +642,9 @@ int FreqScanner::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    /*response.ssetFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
-    response.gsetFreqScannerSettings()->init();
-    webapiFormatChannelSettings(response, m_settings);*/
+    response.setFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
+    response.getFreqScannerSettings()->init();
+    webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
 
@@ -687,9 +687,9 @@ int FreqScanner::webapiReportGet(
             QString& errorMessage)
 {
     (void) errorMessage;
-    /*response.ssetFreqScannerReport(new SWGSDRangel::SWGFreqScannerReport());
-    response.gsetFreqScannerReport()->init();
-    webapiFormatChannelReport(response);*/
+    response.setFreqScannerReport(new SWGSDRangel::SWGFreqScannerReport());
+    response.getFreqScannerReport()->init();
+    webapiFormatChannelReport(response);
     return 200;
 }
 
@@ -698,134 +698,105 @@ void FreqScanner::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
-    /*if (channelSettingsKeys.contains("inputFrequencyOffset")) {
-        settings.m_inputFrequencyOffset = response.gsetFreqScannerSettings()->getInputFrequencyOffset();
+    if (channelSettingsKeys.contains("channelFrequencyOffset")) {
+        settings.m_channelFrequencyOffset = response.getFreqScannerSettings()->getChannelFrequencyOffset();
     }
-    if (channelSettingsKeys.contains("rfBandwidth")) {
-        settings.m_channelBandwidth = response.gsetFreqScannerSettings()->getRfBandwidth();
-    }
-    if (channelSettingsKeys.contains("audioMute")) {
-        settings.m_audioMute = response.gsetFreqScannerSettings()->getAudioMute();
+    if (channelSettingsKeys.contains("channelBandwidth")) {
+        settings.m_channelBandwidth = response.getFreqScannerSettings()->getChannelBandwidth();
     }
     if (channelSettingsKeys.contains("threshold")) {
-        settings.m_threshold = response.gsetFreqScannerSettings()->getThreshold();
-    }
-    if (channelSettingsKeys.contains("logFilename")) {
-        settings.m_logFilename = *response.getAdsbDemodSettings()->getLogFilename();
-    }
-    if (channelSettingsKeys.contains("logEnabled")) {
-        settings.m_logEnabled = response.getAdsbDemodSettings()->getLogEnabled();
+        settings.m_threshold = response.getFreqScannerSettings()->getThreshold();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.gsetFreqScannerSettings()->getRgbColor();
+        settings.m_rgbColor = response.getFreqScannerSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.gsetFreqScannerSettings()->getTitle();
+        settings.m_title = *response.getFreqScannerSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("streamIndex")) {
-        settings.m_streamIndex = response.gsetFreqScannerSettings()->getStreamIndex();
+        settings.m_streamIndex = response.getFreqScannerSettings()->getStreamIndex();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.gsetFreqScannerSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getFreqScannerSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.gsetFreqScannerSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getFreqScannerSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.gsetFreqScannerSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getFreqScannerSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.gsetFreqScannerSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getFreqScannerSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.gsetFreqScannerSettings()->getReverseApiChannelIndex();
-    }
-    if (settings.m_scopeGUI && channelSettingsKeys.contains("scopeConfig")) {
-        settings.m_scopeGUI->updateFrom(channelSettingsKeys, response.gsetFreqScannerSettings()->getScopeConfig());
+        settings.m_reverseAPIChannelIndex = response.getFreqScannerSettings()->getReverseApiChannelIndex();
     }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
-        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.gsetFreqScannerSettings()->getChannelMarker());
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getFreqScannerSettings()->getChannelMarker());
     }
     if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
-        settings.m_rollupState->updateFrom(channelSettingsKeys, response.gsetFreqScannerSettings()->getRollupState());
-    }*/
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getFreqScannerSettings()->getRollupState());
+    }
 }
 
 void FreqScanner::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FreqScannerSettings& settings)
 {
-    /*response.gsetFreqScannerSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.gsetFreqScannerSettings()->setRfBandwidth(settings.m_channelBandwidth);
-    response.gsetFreqScannerSettings()->setAudioMute(settings.m_audioMute);
-    response.gsetFreqScannerSettings()->setThreshold(settings.m_threshold);
-    response.gsetFreqScannerSettings()->setLogFilename(new QString(settings.m_logFilename));
-    response.gsetFreqScannerSettings()->setLogEnabled(settings.m_logEnabled);
+    response.getFreqScannerSettings()->setChannelFrequencyOffset(settings.m_channelFrequencyOffset);
+    response.getFreqScannerSettings()->setChannelBandwidth(settings.m_channelBandwidth);
+    response.getFreqScannerSettings()->setThreshold(settings.m_threshold);
 
-    response.gsetFreqScannerSettings()->setRgbColor(settings.m_rgbColor);
-    if (response.gsetFreqScannerSettings()->getTitle()) {
-        *response.gsetFreqScannerSettings()->getTitle() = settings.m_title;
+    response.getFreqScannerSettings()->setRgbColor(settings.m_rgbColor);
+    if (response.getFreqScannerSettings()->getTitle()) {
+        *response.getFreqScannerSettings()->getTitle() = settings.m_title;
     } else {
-        response.gsetFreqScannerSettings()->setTitle(new QString(settings.m_title));
+        response.getFreqScannerSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.gsetFreqScannerSettings()->setStreamIndex(settings.m_streamIndex);
-    response.gsetFreqScannerSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getFreqScannerSettings()->setStreamIndex(settings.m_streamIndex);
+    response.getFreqScannerSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.gsetFreqScannerSettings()->getReverseApiAddress()) {
-        *response.gsetFreqScannerSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getFreqScannerSettings()->getReverseApiAddress()) {
+        *response.getFreqScannerSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.gsetFreqScannerSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getFreqScannerSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.gsetFreqScannerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.gsetFreqScannerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.gsetFreqScannerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getFreqScannerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getFreqScannerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getFreqScannerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 
-    if (settings.m_scopeGUI)
-    {
-        if (response.gsetFreqScannerSettings()->getScopeConfig())
-        {
-            settings.m_scopeGUI->formatTo(response.gsetFreqScannerSettings()->getScopeConfig());
-        }
-        else
-        {
-            SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
-            settings.m_scopeGUI->formatTo(swgGLScope);
-            response.gsetFreqScannerSettings()->setScopeConfig(swgGLScope);
-        }
-    }
     if (settings.m_channelMarker)
     {
-        if (response.gsetFreqScannerSettings()->getChannelMarker())
+        if (response.getFreqScannerSettings()->getChannelMarker())
         {
-            settings.m_channelMarker->formatTo(response.gsetFreqScannerSettings()->getChannelMarker());
+            settings.m_channelMarker->formatTo(response.getFreqScannerSettings()->getChannelMarker());
         }
         else
         {
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
-            response.gsetFreqScannerSettings()->setChannelMarker(swgChannelMarker);
+            response.getFreqScannerSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 
     if (settings.m_rollupState)
     {
-        if (response.gsetFreqScannerSettings()->getRollupState())
+        if (response.getFreqScannerSettings()->getRollupState())
         {
-            settings.m_rollupState->formatTo(response.gsetFreqScannerSettings()->getRollupState());
+            settings.m_rollupState->formatTo(response.getFreqScannerSettings()->getRollupState());
         }
         else
         {
             SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
-            response.gsetFreqScannerSettings()->setRollupState(swgRollupState);
+            response.getFreqScannerSettings()->setRollupState(swgRollupState);
         }
-    }*/
+    }
 }
 
 void FreqScanner::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
-    /*response.gsetFreqScannerReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    response.gsetFreqScannerReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());*/
+    response.getFreqScannerReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
 void FreqScanner::webapiReverseSendSettings(const QStringList& channelSettingsKeys, const FreqScannerSettings& settings, bool force)
@@ -860,32 +831,23 @@ void FreqScanner::webapiFormatChannelSettings(
         bool force
 )
 {
-    /*swgChannelSettings->setDirection(0); // Single sink (Rx)
+    swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("FreqScanner"));
-    swgChannelSettings->ssetFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
-    SWGSDRangel::SWGFreqScannerSettings *swgFreqScannerSettings = swgChannelSettings->gsetFreqScannerSettings();
+    swgChannelSettings->setFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
+    SWGSDRangel::SWGFreqScannerSettings *swgFreqScannerSettings = swgChannelSettings->getFreqScannerSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
-    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
-        swgFreqScannerSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    if (channelSettingsKeys.contains("channelFrequencyOffset") || force) {
+        swgFreqScannerSettings->setChannelFrequencyOffset(settings.m_channelFrequencyOffset);
     }
-    if (channelSettingsKeys.contains("rfBandwidth") || force) {
-        swgFreqScannerSettings->setRfBandwidth(settings.m_channelBandwidth);
-    }
-    if (channelSettingsKeys.contains("audioMute") || force) {
-        swgFreqScannerSettings->setAudioMute(settings.m_audioMute);
+    if (channelSettingsKeys.contains("channelBandwidth") || force) {
+        swgFreqScannerSettings->setChannelBandwidth(settings.m_channelBandwidth);
     }
     if (channelSettingsKeys.contains("threshold") || force) {
         swgFreqScannerSettings->setThreshold(settings.m_threshold);
-    }
-    if (channelSettingsKeys.contains("logFilename") || force) {
-        swgFreqScannerSettings->setLogFilename(new QString(settings.m_logFilename));
-    }
-    if (channelSettingsKeys.contains("logEnabled") || force) {
-        swgFreqScannerSettings->setLogEnabled(settings.m_logEnabled);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFreqScannerSettings->setRgbColor(settings.m_rgbColor);
@@ -895,13 +857,6 @@ void FreqScanner::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFreqScannerSettings->setStreamIndex(settings.m_streamIndex);
-    }
-
-    if (settings.m_scopeGUI && (channelSettingsKeys.contains("scopeConfig") || force))
-    {
-        SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
-        settings.m_scopeGUI->formatTo(swgGLScope);
-        swgFreqScannerSettings->setScopeConfig(swgGLScope);
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
@@ -916,7 +871,7 @@ void FreqScanner::webapiFormatChannelSettings(
         SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
         settings.m_rollupState->formatTo(swgRollupState);
         swgFreqScannerSettings->setRollupState(swgRollupState);
-    }*/
+    }
 }
 
 void FreqScanner::networkManagerFinished(QNetworkReply *reply)
@@ -956,7 +911,6 @@ void FreqScanner::handleIndexInDeviceSetChanged(int index)
 void FreqScanner::scanAvailableChannels()
 {
     MainCore* mainCore = MainCore::instance();
-    MessagePipes& messagePipes = mainCore->getMessagePipes();
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     m_availableChannels.clear();
 
@@ -971,7 +925,7 @@ void FreqScanner::scanAvailableChannels()
                 ChannelAPI* channel = deviceSet->getChannelAt(chi);
 
                 FreqScannerSettings::AvailableChannel availableChannel =
-                    FreqScannerSettings::AvailableChannel{ channel->getDeviceSetIndex(), channel->getIndexInDeviceSet(), channel };
+                    FreqScannerSettings::AvailableChannel{ channel->getDeviceSetIndex(), channel->getIndexInDeviceSet()};
                 m_availableChannels[channel] = availableChannel;
             }
         }
@@ -991,7 +945,7 @@ void FreqScanner::handleChannelAdded(int deviceSetIndex, ChannelAPI* channel)
     if (deviceSourceEngine)
     {
         FreqScannerSettings::AvailableChannel availableChannel =
-            FreqScannerSettings::AvailableChannel{ deviceSetIndex, channel->getIndexInDeviceSet(), channel };
+            FreqScannerSettings::AvailableChannel{ deviceSetIndex, channel->getIndexInDeviceSet()};
         m_availableChannels[channel] = availableChannel;
     }
 

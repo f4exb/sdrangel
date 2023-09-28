@@ -31,9 +31,9 @@ int FreqScannerWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    /*response.ssetFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
-    response.gsetFreqScannerSettings()->init();
-    FreqScanner::webapiFormatChannelSettings(response, m_settings);*/
+    response.setFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
+    response.getFreqScannerSettings()->init();
+    FreqScanner::webapiFormatChannelSettings(response, m_settings);
 
     return 200;
 }

@@ -4525,8 +4525,8 @@ bool WebAPIRequestMapper::getChannelSettings(
         }
         else if (channelSettingsKey == "FreqScannerSettings")
         {
-            //channelSettings->setFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
-            //channelSettings->getFreqScannerSettings()->fromJsonObject(settingsJsonObject);
+            channelSettings->setFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
+            channelSettings->getFreqScannerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "FreqTrackerSettings")
         {
@@ -5447,7 +5447,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDatvModSettings(nullptr);
     channelSettings.setDabDemodSettings(nullptr);
     channelSettings.setDsdDemodSettings(nullptr);
-    //channelSettings.setFreqScannerSettings(nullptr);
+    channelSettings.setFreqScannerSettings(nullptr);
     channelSettings.setFreqTrackerSettings(nullptr);
     channelSettings.setHeatMapSettings(nullptr);
     channelSettings.setIeee802154ModSettings(nullptr);
@@ -5491,7 +5491,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setBfmDemodReport(nullptr);
     channelReport.setDatvModReport(nullptr);
     channelReport.setDsdDemodReport(nullptr);
-    //channelReport.setFreqScannerReport(nullptr);
+    channelReport.setFreqScannerReport(nullptr);
     channelReport.setFreqTrackerReport(nullptr);
     channelReport.setHeatMapReport(nullptr);
     channelReport.setIlsDemodReport(nullptr);

@@ -1,5 +1,5 @@
-FreqTrackerSettings:
-  description: FreqTracker
+FreqScannerSettings:
+  description: FreqScanner
   properties:
     channelBandwidth:
       description: channel RF bandwidth in Hz

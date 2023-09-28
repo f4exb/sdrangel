@@ -36,7 +36,10 @@ FreqScannerSink::FreqScannerSink(FreqScanner *ilsDemod) :
         m_messageQueueToChannel(nullptr),
         m_fftSequence(-1),
         m_fft(nullptr),
-        m_fftCounter(0)
+        m_fftCounter(0),
+        m_fftSize(1024),
+        m_binsPerChannel(16),
+        m_averageCount(0)
 {
     applySettings(m_settings, QStringList(), true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, 16, 4, true);

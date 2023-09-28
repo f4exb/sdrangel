@@ -185,12 +185,12 @@ bool FreqScannerGUI::handleMessage(const Message& message)
             QList<QTableWidgetItem *> items = ui->table->findItems(QString::number(freq), Qt::MatchExactly);
             for (auto item : items) {
                 int row = item->row();
-                QTableWidgetItem* item = ui->table->item(row, COL_POWER);
-                item->setData(Qt::DisplayRole, results[i].m_power);
+                QTableWidgetItem* powerItem = ui->table->item(row, COL_POWER);
+                powerItem->setData(Qt::DisplayRole, results[i].m_power);
                 bool active = results[i].m_power >= m_settings.m_threshold;
                 if (active)
                 {
-                    item->setBackground(Qt::darkGreen);
+                    powerItem->setBackground(Qt::darkGreen);
                     QTableWidgetItem* activeCountItem = ui->table->item(row, COL_ACTIVE_COUNT);
                     activeCountItem->setData(Qt::DisplayRole, activeCountItem->data(Qt::DisplayRole).toInt() + 1);
                 }
@@ -736,7 +736,7 @@ void FreqScannerGUI::updateAnnotation(int row)
         {
             if ((marker.m_startFrequency <= frequency) && (frequency < marker.m_startFrequency + marker.m_bandwidth))
             {
-                if (marker.m_bandwidth == m_settings.m_channelBandwidth) {
+                if (marker.m_bandwidth == (unsigned)m_settings.m_channelBandwidth) {
                     // Exact match
                     annotationItem->setText(marker.m_text);
                     return;
