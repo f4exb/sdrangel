@@ -15,31 +15,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_GUI_FREQUENCYDELGATE_H
-#define SDRGUI_GUI_FREQUENCYDELGATE_H
+#ifndef INCLUDE_FREQSCANNERADDRANGEDIALOG_H
+#define INCLUDE_FREQSCANNERADDRANGEDIALOG_H
 
-#include <QStyledItemDelegate>
+#include <QDialog>
 
-#include "export.h"
+namespace Ui {
+    class FreqScannerAddRangeDialog;
+}
 
-// Delegate for table to display frequency
-class SDRGUI_API FrequencyDelegate : public QStyledItemDelegate {
-
+class FreqScannerAddRangeDialog : public QDialog {
+    Q_OBJECT
 public:
-    FrequencyDelegate(const QString& units = "kHz", int precision=1, bool group=true);
-    QString displayText(const QVariant &value, const QLocale &locale) const override;
+    explicit FreqScannerAddRangeDialog(QWidget* parent = nullptr);
+    ~FreqScannerAddRangeDialog();
 
-protected:
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const;
-    void setEditorData(QWidget* editor, const QModelIndex& index) const;
-    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
-    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    qint64 m_start;
+    qint64 m_stop;
+    int m_step;
+
+private slots:
+    void accept();
 
 private:
-    QString m_units;
-    int m_precision;
-    bool m_group;
-
+    Ui::FreqScannerAddRangeDialog *ui;
 };
 
-#endif // SDRGUI_GUI_FREQUENCYDELGATE_H
+#endif // INCLUDE_FREQSCANNERADDRANGEDIALOG_H

@@ -15,31 +15,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_GUI_FREQUENCYDELGATE_H
-#define SDRGUI_GUI_FREQUENCYDELGATE_H
+#include "freqscanneraddrangedialog.h"
+#include "ui_freqscanneraddrangedialog.h"
 
-#include <QStyledItemDelegate>
+FreqScannerAddRangeDialog::FreqScannerAddRangeDialog(QWidget* parent) :
+    QDialog(parent),
+    ui(new Ui::FreqScannerAddRangeDialog)
+{
+    ui->setupUi(this);
 
-#include "export.h"
+    ui->start->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->start->setValueRange(false, 11, 0, 99999999999);
+    ui->stop->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->stop->setValueRange(false, 11, 0, 99999999999);
 
-// Delegate for table to display frequency
-class SDRGUI_API FrequencyDelegate : public QStyledItemDelegate {
+    // Airband frequency range
+    ui->start->setValue(118000000);
+    ui->stop->setValue(137000000);
+}
 
-public:
-    FrequencyDelegate(const QString& units = "kHz", int precision=1, bool group=true);
-    QString displayText(const QVariant &value, const QLocale &locale) const override;
+FreqScannerAddRangeDialog::~FreqScannerAddRangeDialog()
+{
+    delete ui;
+}
 
-protected:
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const;
-    void setEditorData(QWidget* editor, const QModelIndex& index) const;
-    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
-    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
-
-private:
-    QString m_units;
-    int m_precision;
-    bool m_group;
-
-};
-
-#endif // SDRGUI_GUI_FREQUENCYDELGATE_H
+void FreqScannerAddRangeDialog::accept()
+{
+    m_start = ui->start->getValue();
+    m_stop = ui->stop->getValue();
+    m_step = ui->step->currentText().toLongLong();
+    QDialog::accept();
+}

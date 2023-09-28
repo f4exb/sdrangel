@@ -63,6 +63,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodSettings"
     FreeDVModSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModSettings"
+    FreqScannerSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/FreqScanner.yaml#/FreqScannerSettings"
     FreqTrackerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
     FT8DemodSettings:

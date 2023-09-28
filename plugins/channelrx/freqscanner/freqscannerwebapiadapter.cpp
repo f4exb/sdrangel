@@ -1,4 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
 // Copyright (C) 2023 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -15,31 +16,37 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_GUI_FREQUENCYDELGATE_H
-#define SDRGUI_GUI_FREQUENCYDELGATE_H
+#include "SWGChannelSettings.h"
+#include "freqscanner.h"
+#include "freqscannerwebapiadapter.h"
 
-#include <QStyledItemDelegate>
+FreqScannerWebAPIAdapter::FreqScannerWebAPIAdapter()
+{}
 
-#include "export.h"
+FreqScannerWebAPIAdapter::~FreqScannerWebAPIAdapter()
+{}
 
-// Delegate for table to display frequency
-class SDRGUI_API FrequencyDelegate : public QStyledItemDelegate {
+int FreqScannerWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    /*response.ssetFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
+    response.gsetFreqScannerSettings()->init();
+    FreqScanner::webapiFormatChannelSettings(response, m_settings);*/
 
-public:
-    FrequencyDelegate(const QString& units = "kHz", int precision=1, bool group=true);
-    QString displayText(const QVariant &value, const QLocale &locale) const override;
+    return 200;
+}
 
-protected:
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const;
-    void setEditorData(QWidget* editor, const QModelIndex& index) const;
-    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
-    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+int FreqScannerWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) force;
+    (void) errorMessage;
+    FreqScanner::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 
-private:
-    QString m_units;
-    int m_precision;
-    bool m_group;
-
-};
-
-#endif // SDRGUI_GUI_FREQUENCYDELGATE_H
+    return 200;
+}

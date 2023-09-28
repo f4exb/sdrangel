@@ -937,6 +937,47 @@ bool ChannelWebAPIUtils::setFrequencyOffset(unsigned int deviceIndex, int channe
     return false;
 }
 
+bool ChannelWebAPIUtils::setAudioMute(unsigned int deviceIndex, int channelIndex, bool mute)
+{
+    SWGSDRangel::SWGChannelSettings channelSettingsResponse;
+    QString errorResponse;
+    int httpRC;
+    QJsonObject* jsonObj;
+
+    ChannelAPI* channel = MainCore::instance()->getChannel(deviceIndex, channelIndex);
+    if (channel != nullptr)
+    {
+        httpRC = channel->webapiSettingsGet(channelSettingsResponse, errorResponse);
+        if (httpRC / 100 != 2)
+        {
+            qWarning("ChannelWebAPIUtils::setAudioMute: get channel settings error %d: %s",
+                httpRC, qPrintable(errorResponse));
+            return false;
+        }
+
+        jsonObj = channelSettingsResponse.asJsonObject();
+
+        if (WebAPIUtils::setSubObjectInt(*jsonObj, "audioMute", (int)mute))
+        {
+            QStringList keys;
+            keys.append("audioMute");
+            channelSettingsResponse.init();
+            channelSettingsResponse.fromJsonObject(*jsonObj);
+            httpRC = channel->webapiSettingsPutPatch(false, keys, channelSettingsResponse, errorResponse);
+            if (httpRC / 100 != 2)
+            {
+                qWarning("ChannelWebAPIUtils::setAudioMute: patch channel settings error %d: %s",
+                    httpRC, qPrintable(errorResponse));
+                return false;
+            }
+
+            return true;
+        }
+    }
+    return false;
+}
+
+
 // Start or stop all file sinks in a given device set
 bool ChannelWebAPIUtils::startStopFileSinks(unsigned int deviceIndex, bool start)
 {
