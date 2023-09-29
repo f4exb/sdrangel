@@ -34,12 +34,12 @@ that corresponds to the set frequency is being recieved.
 
 <h3>6: t_s - Scan time</h3>
 
-Specifies the time in seconds that the Frequency Scanner will average its channel power measurement over.
+Specifies the time in seconds that the Frequency Scanner will average its power measurement over.
 
 <h3>7: t_rtx - Retransmission Time</h3>
 
 Specifies the time in seconds that the Frequency Scanner will wait after the power on the active frequency falls below the threshold, before restarting
-scanning. This allows for a temporary break in transmission.
+scanning. This enables the channel to remain tuned to a single frequency while there is a temporary break in transmission.
 
 <h3>8: Ch BW - Channel Bandwidth</h3>
 
@@ -86,9 +86,9 @@ Displays the current status of the Frequency Scanner.
 The frequency table contains the list of frequencies to be scanned, along with results of a scan. The columns are:
 
 - Freq (Hz): Specifies the channel center frequencies to be scanned. These should be spaced by integer multiples of the channel bandwidth (8). Values should be entered in Hertz.
-- Annotation: An annotation (description) for the frequency, that is based on the closest matching [annotation marker](../../../sdrgui/gui/spectrummarkers.md) in the Main Spectrum.
+- Annotation: An annotation (description) for the frequency, that is obtained from the closest matching [annotation marker](../../../sdrgui/gui/spectrummarkers.md) in the Main Spectrum.
 - Enable: Determines whether the frequency will be scanned. This can be used to temporaily disable frequencies you aren't interested in.
-- Power (dB): Displays the measured power in decibels during the previous scan. The cell will have a green background if the power was above the threshold (4).
+- Power (dB): Displays the measured power in decibels from the last scan. The cell will have a green background if the power was above the threshold (4).
 - Active Count: Displays the number of scans in which the power for this frequency was above the threshold (4). This allows you to see which frequencies are commonly in use.
 - Notes: Available for user-entry of notes/information about this frequency.
 
