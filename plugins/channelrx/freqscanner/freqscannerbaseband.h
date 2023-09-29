@@ -62,11 +62,9 @@ public:
         { }
     };
 
-    FreqScannerBaseband(FreqScanner *packetDemod);
+    FreqScannerBaseband(FreqScanner *freqScanner);
     ~FreqScannerBaseband();
     void reset();
-    void startWork();
-    void stopWork();
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_sink.setMessageQueueToChannel(messageQueue); }
@@ -74,7 +72,6 @@ public:
     void setBasebandSampleRate(int sampleRate);
     int getChannelSampleRate() const;
     void setChannel(ChannelAPI *channel);
-    bool isRunning() const { return m_running; }
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
@@ -86,7 +83,6 @@ private:
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     MessageQueue *m_messageQueueToGUI;
     FreqScannerSettings m_settings;
-    bool m_running;
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);

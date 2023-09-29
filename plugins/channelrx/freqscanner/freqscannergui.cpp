@@ -411,7 +411,7 @@ FreqScannerGUI::FreqScannerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     ui->deltaFrequency->setValueRange(true, 7, 0, 9999999);
 
     ui->channelBandwidth->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
-    ui->channelBandwidth->setValueRange(true, 7, 16, 9999999);
+    ui->channelBandwidth->setValueRange(true, 7, 0, 9999999);
 
     m_channelMarker.setColor(Qt::yellow);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
@@ -606,7 +606,7 @@ void FreqScannerGUI::on_addSingle_clicked()
 
 void FreqScannerGUI::on_addRange_clicked()
 {
-    FreqScannerAddRangeDialog dialog(this);
+    FreqScannerAddRangeDialog dialog(m_settings.m_channelBandwidth, this);
     new DialogPositioner(&dialog, false);
     if (dialog.exec())
     {

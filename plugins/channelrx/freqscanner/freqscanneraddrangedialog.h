@@ -27,7 +27,7 @@ namespace Ui {
 class FreqScannerAddRangeDialog : public QDialog {
     Q_OBJECT
 public:
-    explicit FreqScannerAddRangeDialog(QWidget* parent = nullptr);
+    explicit FreqScannerAddRangeDialog(int step, QWidget* parent = nullptr);
     ~FreqScannerAddRangeDialog();
 
     qint64 m_start;

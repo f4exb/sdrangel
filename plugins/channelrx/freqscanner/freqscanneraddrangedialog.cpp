@@ -18,7 +18,7 @@
 #include "freqscanneraddrangedialog.h"
 #include "ui_freqscanneraddrangedialog.h"
 
-FreqScannerAddRangeDialog::FreqScannerAddRangeDialog(QWidget* parent) :
+FreqScannerAddRangeDialog::FreqScannerAddRangeDialog(int step, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::FreqScannerAddRangeDialog)
 {
@@ -32,6 +32,8 @@ FreqScannerAddRangeDialog::FreqScannerAddRangeDialog(QWidget* parent) :
     // Airband frequency range
     ui->start->setValue(118000000);
     ui->stop->setValue(137000000);
+
+    ui->step->setCurrentText(QString::number(step));
 }
 
 FreqScannerAddRangeDialog::~FreqScannerAddRangeDialog()
@@ -43,6 +45,6 @@ void FreqScannerAddRangeDialog::accept()
 {
     m_start = ui->start->getValue();
     m_stop = ui->stop->getValue();
-    m_step = ui->step->currentText().toLongLong();
+    m_step = ui->step->currentText().toInt();
     QDialog::accept();
 }

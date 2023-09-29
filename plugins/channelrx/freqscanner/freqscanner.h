@@ -372,8 +372,9 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    QThread m_thread;
+    QThread *m_thread;
     FreqScannerBaseband* m_basebandSink;
+    QRecursiveMutex m_mutex;
     bool m_running;
     FreqScannerSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink

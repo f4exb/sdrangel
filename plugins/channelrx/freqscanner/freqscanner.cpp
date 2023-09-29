@@ -63,6 +63,8 @@ const char * const FreqScanner::m_channelId = "FreqScanner";
 FreqScanner::FreqScanner(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_thread(nullptr),
+        m_basebandSink(nullptr),
         m_running(false),
         m_basebandSampleRate(0),
         m_scanDeviceSetIndex(-1),
@@ -71,11 +73,6 @@ FreqScanner::FreqScanner(DeviceAPI *deviceAPI) :
         m_timeoutTimer(this)
 {
     setObjectName(m_channelId);
-
-    m_basebandSink = new FreqScannerBaseband(this);
-    m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
-    m_basebandSink->setChannel(this);
-    m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, QStringList(), true);
 
@@ -95,6 +92,8 @@ FreqScanner::FreqScanner(DeviceAPI *deviceAPI) :
         this,
         &FreqScanner::handleIndexInDeviceSetChanged
     );
+
+    start();
 
     scanAvailableChannels();
     QObject::connect(
@@ -126,11 +125,7 @@ FreqScanner::~FreqScanner()
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
 
-    if (m_basebandSink->isRunning()) {
-        stop();
-    }
-
-    delete m_basebandSink;
+    stop();
 }
 
 void FreqScanner::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -161,16 +156,38 @@ void FreqScanner::feed(const SampleVector::const_iterator& begin, const SampleVe
 
 void FreqScanner::start()
 {
+    QMutexLocker m_lock(&m_mutex);
+
     if (m_running) {
         return;
     }
 
     qDebug("FreqScanner::start");
+    m_thread = new QThread();
+    m_basebandSink = new FreqScannerBaseband(this);
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
+    m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
+    m_basebandSink->setChannel(this);
+    m_basebandSink->moveToThread(m_thread);
 
-    m_basebandSink->reset();
-    m_basebandSink->startWork();
-    m_thread.start();
-    // FIXME: Threading!! Compare to SSB
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_basebandSink,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_thread,
+        &QThread::deleteLater
+    );
+
+    m_thread->start();
 
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
@@ -183,15 +200,16 @@ void FreqScanner::start()
 
 void FreqScanner::stop()
 {
+    QMutexLocker m_lock(&m_mutex);
+
     if (!m_running) {
         return;
     }
 
     qDebug("FreqScanner::stop");
     m_running = false;
-    m_basebandSink->stopWork();
-    m_thread.quit();
-    m_thread.wait();
+    m_thread->exit();
+    m_thread->wait();
 }
 
 bool FreqScanner::handleMessage(const Message& cmd)
@@ -314,17 +332,20 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
             }
             qSort(frequencies);
 
-            // Calculate how many channels can be scanned in one go
-            int fftSize;
-            int binsPerChannel;
-            FreqScanner::calcScannerSampleRate(m_settings.m_channelBandwidth, m_basebandSampleRate, m_scannerSampleRate, fftSize, binsPerChannel);
+            if ((frequencies.size() > 0) && (m_settings.m_channelBandwidth > 0) && (m_basebandSampleRate > 0))
+            {
+                // Calculate how many channels can be scanned in one go
+                int fftSize;
+                int binsPerChannel;
+                FreqScanner::calcScannerSampleRate(m_settings.m_channelBandwidth, m_basebandSampleRate, m_scannerSampleRate, fftSize, binsPerChannel);
 
-            // Align first frequency so we cover as many channels as possible, while avoiding DC bin
-            m_stepStartFrequency = frequencies.front() + m_scannerSampleRate / 2 - m_settings.m_channelBandwidth + m_settings.m_channelBandwidth / 2;
-            m_stepStopFrequency = frequencies.back();
+                // Align first frequency so we cover as many channels as possible, while avoiding DC bin
+                m_stepStartFrequency = frequencies.front() + m_scannerSampleRate / 2 - m_settings.m_channelBandwidth + m_settings.m_channelBandwidth / 2;
+                m_stepStopFrequency = frequencies.back();
 
-            qInfo() << "START_SCAN: Scanning from " << frequencies.front() << "to" << frequencies.back();
-            initScan();
+                qInfo() << "START_SCAN: Scanning from " << frequencies.front() << "to" << frequencies.back();
+                initScan();
+            }
         }
         break;
 
@@ -335,19 +356,36 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                 m_scanResults.append(results);
             }
 
+            // Calculate next center frequency
             bool complete = false; // Have all frequencies been scanned?
+            bool freqInRange = false;
             qint64 nextCenterFrequency = m_centerFrequency;
+            do
+            {
+                if (nextCenterFrequency + m_scannerSampleRate / 2 > m_stepStopFrequency)
+                {
+                    nextCenterFrequency = m_stepStartFrequency;
+                    complete = true;
+                }
+                else
+                {
+                    nextCenterFrequency += m_scannerSampleRate;
+                    complete = false;
+                }
 
-            if (m_stepStopFrequency < m_centerFrequency + m_scannerSampleRate / 2)
-            {
-                nextCenterFrequency = m_stepStartFrequency;
-                complete = true;
+                // Are any frequencies in this new range?
+                for (int i = 0; i < m_settings.m_frequencies.size(); i++)
+                {
+                    if (m_settings.m_enabled[i]
+                        && (m_settings.m_frequencies[i] >= nextCenterFrequency - m_scannerSampleRate / 2)
+                        && (m_settings.m_frequencies[i] < nextCenterFrequency + m_scannerSampleRate / 2))
+                    {
+                        freqInRange = true;
+                        break;
+                    }
+                }
             }
-            else
-            {
-                nextCenterFrequency = m_centerFrequency + m_scannerSampleRate;
-                complete = false;
-            }
+            while (!complete && !freqInRange);
 
             if (complete)
             {

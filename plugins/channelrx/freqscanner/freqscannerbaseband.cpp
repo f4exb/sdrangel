@@ -29,15 +29,25 @@ MESSAGE_CLASS_DEFINITION(FreqScannerBaseband::MsgConfigureFreqScannerBaseband, M
 
 FreqScannerBaseband::FreqScannerBaseband(FreqScanner *freqScanner) :
     m_sink(freqScanner),
-    m_messageQueueToGUI(nullptr),
-    m_running(false)
+    m_messageQueueToGUI(nullptr)
 {
     qDebug("FreqScannerBaseband::FreqScannerBaseband");
 
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
+
+    QObject::connect(
+        &m_sampleFifo,
+        &SampleSinkFifo::dataReady,
+        this,
+        &FreqScannerBaseband::handleData,
+        Qt::QueuedConnection
+    );
+
     m_channelizer = new DownChannelizer(&m_sink);
     m_channelSampleRate = 0;
     m_scannerSampleRate = 0;
+
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 FreqScannerBaseband::~FreqScannerBaseband()
@@ -52,33 +62,6 @@ void FreqScannerBaseband::reset()
     m_inputMessageQueue.clear();
     m_sampleFifo.reset();
     m_channelSampleRate = 0;
-}
-
-void FreqScannerBaseband::startWork()
-{
-    QMutexLocker mutexLocker(&m_mutex);
-    QObject::connect(
-        &m_sampleFifo,
-        &SampleSinkFifo::dataReady,
-        this,
-        &FreqScannerBaseband::handleData,
-        Qt::QueuedConnection
-    );
-    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_running = true;
-}
-
-void FreqScannerBaseband::stopWork()
-{
-    QMutexLocker mutexLocker(&m_mutex);
-    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    QObject::disconnect(
-        &m_sampleFifo,
-        &SampleSinkFifo::dataReady,
-        this,
-        &FreqScannerBaseband::handleData
-    );
-    m_running = false;
 }
 
 void FreqScannerBaseband::setChannel(ChannelAPI *channel)
@@ -110,7 +93,7 @@ void FreqScannerBaseband::handleData()
         }
 
         // second part of FIFO data (used when block wraps around)
-        if(part2begin != part2end) {
+        if (part2begin != part2end) {
             m_channelizer->feed(part2begin, part2end);
         }
 
@@ -164,8 +147,12 @@ bool FreqScannerBaseband::handleMessage(const Message& cmd)
 
 void FreqScannerBaseband::applySettings(const FreqScannerSettings& settings, const QStringList& settingsKeys, bool force)
 {
-    if ((settings.m_channelBandwidth != m_settings.m_channelBandwidth) || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        calcScannerSampleRate(m_channelizer->getBasebandSampleRate(), settings.m_channelBandwidth, settings.m_inputFrequencyOffset);
+    if ((settings.m_channelBandwidth != m_settings.m_channelBandwidth) || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    {
+        int basebandSampleRate = m_channelizer->getBasebandSampleRate();
+        if ((basebandSampleRate != 0) && (settings.m_channelBandwidth != 0)) {
+            calcScannerSampleRate(basebandSampleRate, settings.m_channelBandwidth, settings.m_inputFrequencyOffset);
+        }
     }
 
     m_sink.applySettings(settings, settingsKeys, force);
@@ -185,7 +172,9 @@ int FreqScannerBaseband::getChannelSampleRate() const
 void FreqScannerBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);
-    calcScannerSampleRate(sampleRate, m_settings.m_channelBandwidth, m_settings.m_inputFrequencyOffset);
+    if ((sampleRate != 0) && (m_settings.m_channelBandwidth != 0)) {
+        calcScannerSampleRate(sampleRate, m_settings.m_channelBandwidth, m_settings.m_inputFrequencyOffset);
+    }
 }
 
 void FreqScannerBaseband::calcScannerSampleRate(int basebandSampleRate, float rfBandwidth, int inputFrequencyOffset)
