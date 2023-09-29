@@ -16,7 +16,9 @@ Specifies the channel (such as an AM, NFM or DSD Demod), by device set and chann
 
 <h3>2: Minimum frequency shift from center frequency of reception for channel</h3>
 
-Use the wheels of keyboard to adjust the minimim frequency shift in Hz from the center frequency of reception for the channel (1). Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
+Use the wheels of keyboard to adjust the minimim frequency shift in Hz from the center frequency of reception for the channel (1).
+
+This setting is typically used to avoid having the channel (1) centered at DC, which can be problematic for some demodulators used with SDRs with a DC spike.
 
 <h3>3: Active frequency power</h3>
 
@@ -119,3 +121,7 @@ Moves the selected rows up the frequency table (14).
 <h3>19: Down</h3>
 
 Moves the selected rows the the frequency table (14).
+
+<h3>20: Clear Active Count</h3>
+
+Press to reset the value in the Active Count column to 0 for all rows.

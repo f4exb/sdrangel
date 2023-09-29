@@ -505,6 +505,10 @@ void FreqScannerGUI::displaySettings()
 
     blockApplySettings(true);
 
+    int channelIndex = ui->channels->findText(m_settings.m_channel);
+    if (channelIndex >= 0) {
+        ui->channels->setCurrentIndex(channelIndex);
+    }
     ui->deltaFrequency->setValue(m_settings.m_channelFrequencyOffset);
     ui->channelBandwidth->setValue(m_settings.m_channelBandwidth);
     ui->scanTime->setValue(m_settings.m_scanTime * 10.0);
@@ -641,7 +645,14 @@ void FreqScannerGUI::on_remove_clicked()
         ui->table->removeRow(row);
         m_settings.m_frequencies.removeAt(row); // table_cellChanged isn't called for removeRow
         m_settings.m_enabled.removeAt(row);
+        m_settings.m_notes.removeAt(row);
     }
+    QList<QString> settingsKeys({
+        "frequencies",
+        "enabled",
+        "notes"
+    });
+    applySettings(settingsKeys);
 }
 
 static QList<QTableWidgetItem*> takeRow(QTableWidget* table, int row)
@@ -692,6 +703,13 @@ void FreqScannerGUI::on_down_clicked()
             setRow(ui->table, row, destItems);
             ui->table->setCurrentCell(row + 1, 0);
         }
+    }
+}
+
+void FreqScannerGUI::on_clearActiveCount_clicked()
+{
+    for (int i = 0; i < ui->table->rowCount(); i++) {
+        ui->table->item(i, COL_ACTIVE_COUNT)->setData(Qt::DisplayRole, 0);
     }
 }
 
@@ -911,6 +929,7 @@ void FreqScannerGUI::makeUIConnections()
     QObject::connect(ui->remove, &QToolButton::clicked, this, &FreqScannerGUI::on_remove_clicked);
     QObject::connect(ui->up, &QToolButton::clicked, this, &FreqScannerGUI::on_up_clicked);
     QObject::connect(ui->down, &QToolButton::clicked, this, &FreqScannerGUI::on_down_clicked);
+    QObject::connect(ui->clearActiveCount, &QToolButton::clicked, this, &FreqScannerGUI::on_clearActiveCount_clicked);
 }
 
 void FreqScannerGUI::updateAbsoluteCenterFrequency()

@@ -337,6 +337,16 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                 m_stepStartFrequency = frequencies.front() + m_scannerSampleRate / 2 - m_settings.m_channelBandwidth + m_settings.m_channelBandwidth / 2;
                 m_stepStopFrequency = frequencies.back();
 
+                // If all frequencies fit within bandwidth, we can have the first frequency more central
+                int totalBW = frequencies.back() - frequencies.front() + 2 * m_settings.m_channelBandwidth;
+                if (totalBW < m_scannerSampleRate)
+                {
+                    int spareBWEachSide = (m_scannerSampleRate - totalBW) / 2;
+                    int spareChannelsEachSide = spareBWEachSide / m_settings.m_channelBandwidth;
+                    int offset = spareChannelsEachSide * m_settings.m_channelBandwidth;
+                    m_stepStartFrequency -= offset;
+                }
+
                 initScan();
             }
         }

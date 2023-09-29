@@ -740,6 +740,20 @@
           </property>
          </spacer>
         </item>
+        <item>
+         <widget class="QToolButton" name="clearActiveCount">
+          <property name="toolTip">
+           <string>Clear Active Count in all rows</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
