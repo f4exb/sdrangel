@@ -523,9 +523,11 @@ void FreqScannerGUI::displaySettings()
     ui->measurement->setCurrentIndex((int)m_settings.m_measurement);
     ui->mode->setCurrentIndex((int)m_settings.m_mode);
 
+    ui->table->blockSignals(true);
     for (int i = 0; i < m_settings.m_frequencies.size(); i++) {
         addRow(m_settings.m_frequencies[i], m_settings.m_enabled[i], m_settings.m_notes[i]);
     }
+    ui->table->blockSignals(false);
 
     // Order and size columns
     QHeaderView* header = ui->table->horizontalHeader();

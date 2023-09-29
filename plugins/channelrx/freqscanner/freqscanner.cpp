@@ -505,7 +505,7 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                         else
                         {
                             if (m_guiMessageQueue) {
-                                m_guiMessageQueue->push(MsgStatus::create(QString("Scanning: No active channels - Max power %1 dB").arg(maxPower)));
+                                m_guiMessageQueue->push(MsgStatus::create(QString("Scanning: No active channels - Max power %1 dB").arg(maxPower, 0, 'f', 1)));
                             }
                         }
                     }
