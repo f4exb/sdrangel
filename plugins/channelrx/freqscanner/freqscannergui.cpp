@@ -524,8 +524,10 @@ void FreqScannerGUI::displaySettings()
     ui->mode->setCurrentIndex((int)m_settings.m_mode);
 
     ui->table->blockSignals(true);
-    for (int i = 0; i < m_settings.m_frequencies.size(); i++) {
+    for (int i = 0; i < m_settings.m_frequencies.size(); i++)
+    {
         addRow(m_settings.m_frequencies[i], m_settings.m_enabled[i], m_settings.m_notes[i]);
+        updateAnnotation(i);
     }
     ui->table->blockSignals(false);
 
