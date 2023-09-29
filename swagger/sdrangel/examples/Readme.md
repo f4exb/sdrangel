@@ -83,18 +83,6 @@ It uses the following APIs:
     - URI: `/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings`
     - HTTP method: `PATCH`
 
-<h2>ptt_active.py</h2>
-
-Handles the switchover between two arbitrary device sets
-  - Both device sets should have the reverse API feature set with the address and port of this server
-  - Once in place and you have started one of the devices you should only stop one or the other never start. There are two reasons for this:
-    - This module reacts on an action already taken so if you start Tx then the Rx is not stopped immediately and damage to the Rx could occur. If you start with a stop action you cannot get in this situation.
-    - For half duplex devices (only the HackRF) it will lock Tx or Rx. You can always recover the situation by stopping the running side.
-  - There is no assumption on the Rx or Tx nature you may as well switchover 2 Rx or 2 Tx
-  - Both devices have not to belong to the same physical device necessarily. You could mix a RTL-SDR Rx and a HackRF Tx for example
-
-Depends on `flask` and `requests`: to install do `pip install flask requests` in your virtual environment.
-
 <h2>ptt.py</h2>
 
 Implements a basic push to talk (PTT) feature. Verifies that devise set #0 is a Rx and that #1 is a Tx. Stops streaming on one device and start streaming on the other depending on the PTT move (Rx to Tx or Tx to Rx).
