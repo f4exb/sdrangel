@@ -209,8 +209,8 @@ void FreqScannerGUI::updateChannelsList(const QList<FreqScannerSettings::Availab
 
     for (const auto& channel : channels)
     {
-        // Add channels in this device set, other than ourself
-        if ((channel.m_deviceSetIndex == getDeviceSetIndex()) && (channel.m_channelIndex != getIndex()))
+        // Add channels in this device set, other than ourself (Don't use ChannelGUI::getDeviceSetIndex()/getIndex() as not valid when this is first called)
+        if ((channel.m_deviceSetIndex == m_freqScanner->getDeviceSetIndex()) && (channel.m_channelIndex != m_freqScanner->getIndexInDeviceSet()))
         {
             QString name = QString("R%1:%2").arg(channel.m_deviceSetIndex).arg(channel.m_channelIndex);
             ui->channels->addItem(name);

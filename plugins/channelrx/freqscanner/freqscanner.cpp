@@ -243,16 +243,12 @@ bool FreqScanner::handleMessage(const Message& cmd)
     }
     else if (MsgStartScan::match(cmd))
     {
-        qInfo() << "FreqScanner::handleMessage: StartScan";
-
         startScan();
 
         return true;
     }
     else if (MsgStopScan::match(cmd))
     {
-        qInfo() << "FreqScanner::handleMessage: StopScan";
-
         stopScan();
 
         return true;
@@ -295,12 +291,10 @@ void FreqScanner::initScan()
 
     if (m_centerFrequency != m_stepStartFrequency)
     {
-        qInfo() << "******************** Setting frequency to " << m_stepStartFrequency;
         if (!ChannelWebAPIUtils::setCenterFrequency(getDeviceSetIndex(), m_stepStartFrequency)) {
-            qWarning() << "Scanner failed to set frequency" << m_stepStartFrequency;
+            qWarning() << "Freq Scanner failed to set frequency" << m_stepStartFrequency;
         }
         m_minFFTStartTime = QDateTime::currentDateTime().addMSecs(m_settings.m_tuneTime);
-        qInfo() << "m_minFFTStartTime" << m_minFFTStartTime.toString("ss.z");
     }
 
     m_scanResults.clear();
@@ -343,7 +337,6 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                 m_stepStartFrequency = frequencies.front() + m_scannerSampleRate / 2 - m_settings.m_channelBandwidth + m_settings.m_channelBandwidth / 2;
                 m_stepStopFrequency = frequencies.back();
 
-                qInfo() << "START_SCAN: Scanning from " << frequencies.front() << "to" << frequencies.back();
                 initScan();
             }
         }
@@ -476,7 +469,7 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                                 }
                             }
 
-                            //qInfo() << "Tuning to active freq:" << frequency << "m_centerFrequency" << m_centerFrequency << "nextCenterFrequency" << nextCenterFrequency << "offset: " << offset << "deviceset: R" << m_scanDeviceSetIndex << ":" << m_scanChannelIndex;
+                            //qDebug() << "Tuning to active freq:" << frequency << "m_centerFrequency" << m_centerFrequency << "nextCenterFrequency" << nextCenterFrequency << "offset: " << offset << "deviceset: R" << m_scanDeviceSetIndex << ":" << m_scanChannelIndex;
 
                             ChannelWebAPIUtils::setFrequencyOffset(m_scanDeviceSetIndex, m_scanChannelIndex, offset);
 
@@ -513,7 +506,7 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
             {
                 // For RTL SDR, setCenterFrequency takes ~50ms, which means tuneTime can be 0
                 if (!ChannelWebAPIUtils::setCenterFrequency(getDeviceSetIndex(), nextCenterFrequency)) {
-                    qWarning() << "Scanner failed to set frequency" << nextCenterFrequency;
+                    qWarning() << "Freq Scanner failed to set frequency" << nextCenterFrequency;
                 }
                 m_minFFTStartTime = QDateTime::currentDateTime().addMSecs(m_settings.m_tuneTime);
             }

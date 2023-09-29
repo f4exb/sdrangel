@@ -364,7 +364,6 @@ public:
         fftSize = pow(2.0, floor(log2(basebandSampleRate / binBW)));
         fftSize = std::min(maxFFTSize, fftSize);
         scannerSampleRate = binBW * fftSize;
-        qInfo() << "binsPerChannel:" << binsPerChannel << "fftSize:" << fftSize << "scannerSampleRate:" << scannerSampleRate;
     }
 
     static const char * const m_channelIdURI;
