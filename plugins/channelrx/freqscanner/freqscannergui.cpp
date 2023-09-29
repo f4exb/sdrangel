@@ -614,12 +614,20 @@ void FreqScannerGUI::on_addRange_clicked()
         qint64 stop = dialog.m_stop;
         int step = dialog.m_step;
 
+        blockApplySettings(true);
         if ((start <= stop) && (step > 0))
         {
             for (qint64 f = start; f <= stop; f += step) {
                 addRow(f, true);
             }
         }
+        blockApplySettings(false);
+        QList<QString> settingsKeys({
+            "frequencies",
+            "enabled",
+            "notes"
+        });
+        applySettings(settingsKeys);
     }
 }
 

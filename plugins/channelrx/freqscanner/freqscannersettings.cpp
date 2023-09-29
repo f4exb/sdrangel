@@ -295,14 +295,16 @@ QString FreqScannerSettings::getDebugString(const QStringList& settingsKeys, boo
     }
     if (settingsKeys.contains("enabled") || force)
     {
-        QStringList s;
+        // Don't display
+        /*QStringList s;
         for (auto e : m_enabled) {
             s.append(e ? "true" : "false");
         }
-        ostr << " m_enabled: " << s.join(",").toStdString();
+        ostr << " m_enabled: " << s.join(",").toStdString();*/
     }
     if (settingsKeys.contains("notes") || force) {
-        ostr << " m_notes: " << m_notes.join(",").toStdString();
+        // Don't display
+        //ostr << " m_notes: " << m_notes.join(",").toStdString();
     }
     if (settingsKeys.contains("channel") || force) {
         ostr << " m_channel: " << m_channel.toStdString();

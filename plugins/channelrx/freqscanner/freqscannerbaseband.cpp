@@ -187,8 +187,7 @@ void FreqScannerBaseband::calcScannerSampleRate(int basebandSampleRate, float rf
     m_channelizer->setChannelization(m_scannerSampleRate, inputFrequencyOffset);
     m_channelSampleRate = m_channelizer->getChannelSampleRate();
     m_sink.applyChannelSettings(m_channelSampleRate, m_channelizer->getChannelFrequencyOffset(), m_scannerSampleRate, fftSize, binsPerChannel);
-
-    qInfo() << "FreqScannerBaseband::calcScannerSampleRate"
+    qDebug() << "FreqScannerBaseband::calcScannerSampleRate"
         << "basebandSampleRate:" << basebandSampleRate
         << "channelSampleRate:" << m_channelSampleRate
         << "scannerSampleRate:" << m_scannerSampleRate
