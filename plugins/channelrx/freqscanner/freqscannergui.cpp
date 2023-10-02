@@ -504,7 +504,6 @@ void FreqScannerGUI::displaySettings()
     setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
-
     int channelIndex = ui->channels->findText(m_settings.m_channel);
     if (channelIndex >= 0) {
         ui->channels->setCurrentIndex(channelIndex);
@@ -524,6 +523,7 @@ void FreqScannerGUI::displaySettings()
     ui->mode->setCurrentIndex((int)m_settings.m_mode);
 
     ui->table->blockSignals(true);
+    ui->table->setRowCount(0);
     for (int i = 0; i < m_settings.m_frequencies.size(); i++)
     {
         addRow(m_settings.m_frequencies[i], m_settings.m_enabled[i], m_settings.m_notes[i]);
@@ -618,16 +618,9 @@ void FreqScannerGUI::on_addRange_clicked()
     new DialogPositioner(&dialog, false);
     if (dialog.exec())
     {
-        qint64 start = dialog.m_start;
-        qint64 stop = dialog.m_stop;
-        int step = dialog.m_step;
-
         blockApplySettings(true);
-        if ((start <= stop) && (step > 0))
-        {
-            for (qint64 f = start; f <= stop; f += step) {
-                addRow(f, true);
-            }
+        for (const auto f : dialog.m_frequencies) {
+            addRow(f, true);
         }
         blockApplySettings(false);
         QList<QString> settingsKeys({
@@ -658,6 +651,27 @@ void FreqScannerGUI::on_remove_clicked()
     });
     applySettings(settingsKeys);
 }
+
+void FreqScannerGUI::on_removeInactive_clicked()
+{
+    for (int i = ui->table->rowCount() - 1; i >= 0; i--)
+    {
+        if (ui->table->item(i, COL_ACTIVE_COUNT)->data(Qt::DisplayRole).toInt() == 0)
+        {
+            ui->table->removeRow(i);
+            m_settings.m_frequencies.removeAt(i); // table_cellChanged isn't called for removeRow
+            m_settings.m_enabled.removeAt(i);
+            m_settings.m_notes.removeAt(i);
+        }
+    }
+    QList<QString> settingsKeys({
+        "frequencies",
+        "enabled",
+        "notes"
+        });
+    applySettings(settingsKeys);
+}
+
 
 static QList<QTableWidgetItem*> takeRow(QTableWidget* table, int row)
 {
@@ -805,6 +819,14 @@ void FreqScannerGUI::table_customContextMenuRequested(QPoint pos)
             });
         tableContextMenu->addAction(copyAction);
 
+        // Remove selected rows
+
+        QAction* removeAction = new QAction("Remove", tableContextMenu);
+        connect(removeAction, &QAction::triggered, this, [this]()->void {
+            on_remove_clicked();
+            });
+        tableContextMenu->addAction(removeAction);
+
         tableContextMenu->addSeparator();
 
         // Tune to frequency
@@ -904,7 +926,7 @@ void FreqScannerGUI::resizeTable()
     // Fill table with a row of dummy data that will size the columns nicely
     int row = ui->table->rowCount();
     ui->table->setRowCount(row + 1);
-    ui->table->setItem(row, COL_FREQUENCY, new QTableWidgetItem("999.000 MHz"));
+    ui->table->setItem(row, COL_FREQUENCY, new QTableWidgetItem("800,000.5 MHz"));
     ui->table->setItem(row, COL_ANNOTATION, new QTableWidgetItem("An annotation"));
     ui->table->setItem(row, COL_ENABLE, new QTableWidgetItem("Enable"));
     ui->table->setItem(row, COL_POWER, new QTableWidgetItem("-100.0"));
@@ -931,6 +953,7 @@ void FreqScannerGUI::makeUIConnections()
     QObject::connect(ui->addSingle, &QToolButton::clicked, this, &FreqScannerGUI::on_addSingle_clicked);
     QObject::connect(ui->addRange, &QToolButton::clicked, this, &FreqScannerGUI::on_addRange_clicked);
     QObject::connect(ui->remove, &QToolButton::clicked, this, &FreqScannerGUI::on_remove_clicked);
+    QObject::connect(ui->removeInactive, &QToolButton::clicked, this, &FreqScannerGUI::on_removeInactive_clicked);
     QObject::connect(ui->up, &QToolButton::clicked, this, &FreqScannerGUI::on_up_clicked);
     QObject::connect(ui->down, &QToolButton::clicked, this, &FreqScannerGUI::on_down_clicked);
     QObject::connect(ui->clearActiveCount, &QToolButton::clicked, this, &FreqScannerGUI::on_clearActiveCount_clicked);

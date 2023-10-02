@@ -132,6 +132,7 @@ private slots:
     void on_addSingle_clicked();
     void on_addRange_clicked();
     void on_remove_clicked();
+    void on_removeInactive_clicked();
     void on_up_clicked();
     void on_down_clicked();
     void on_clearActiveCount_clicked();

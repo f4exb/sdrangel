@@ -30,12 +30,11 @@ public:
     explicit FreqScannerAddRangeDialog(int step, QWidget* parent = nullptr);
     ~FreqScannerAddRangeDialog();
 
-    qint64 m_start;
-    qint64 m_stop;
-    int m_step;
+    QList<qint64> m_frequencies;
 
 private slots:
     void accept();
+    void on_preset_currentTextChanged(const QString& text);
 
 private:
     Ui::FreqScannerAddRangeDialog *ui;

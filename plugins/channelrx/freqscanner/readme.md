@@ -87,7 +87,7 @@ Displays the current status of the Frequency Scanner.
 
 The frequency table contains the list of frequencies to be scanned, along with results of a scan. The columns are:
 
-- Freq (Hz): Specifies the channel center frequencies to be scanned. These should be spaced by integer multiples of the channel bandwidth (8). Values should be entered in Hertz.
+- Freq (Hz): Specifies the channel center frequencies to be scanned. Values should be entered in Hertz.
 - Annotation: An annotation (description) for the frequency, that is obtained from the closest matching [annotation marker](../../../sdrgui/gui/spectrummarkers.md) in the Main Spectrum.
 - Enable: Determines whether the frequency will be scanned. This can be used to temporaily disable frequencies you aren't interested in.
 - Power (dB): Displays the measured power in decibels from the last scan. The cell will have a green background if the power was above the threshold (4).
@@ -99,6 +99,7 @@ When an active frequency is found after a scan, the corresponding row in the tab
 Right clicking on a cell will display a popup menu:
 
 - Copy contents of cell to clipboard.
+- Remove selected rows.
 - Tune selected channel (1) to the frequency in the row clicked on.
 
 <h3>15: Add</h3>
@@ -112,16 +113,20 @@ The step value should typically be an integer multiple of the channel bandwidth 
 
 <h3>17: Remove</h3>
 
-Removes the selected rows from the frequency table (14).
+Removes the selected rows from the frequency table (14). Press Ctrl-A to select all rows.
 
-<h3>18: Up</h3>
+<h3>18: Remove Inactive</h3>
+
+Removes all rows with Active Count of 0.
+
+<h3>19: Up</h3>
 
 Moves the selected rows up the frequency table (14).
 
-<h3>19: Down</h3>
+<h3>20: Down</h3>
 
 Moves the selected rows the the frequency table (14).
 
-<h3>20: Clear Active Count</h3>
+<h3>21: Clear Active Count</h3>
 
 Press to reset the value in the Active Count column to 0 for all rows.

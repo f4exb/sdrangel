@@ -181,6 +181,12 @@
        <layout class="QHBoxLayout" name="channelPowerLayout">
         <item>
          <widget class="QLabel" name="channelPower">
+          <property name="minimumSize">
+           <size>
+            <width>30</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Active frequency power </string>
           </property>
@@ -231,10 +237,10 @@
          <string>Power threshold in dB</string>
         </property>
         <property name="minimum">
-         <number>-1400</number>
+         <number>-1000</number>
         </property>
         <property name="maximum">
-         <number>100</number>
+         <number>0</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -696,6 +702,16 @@
           </property>
           <property name="text">
            <string>Remove</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="removeInactive">
+          <property name="toolTip">
+           <string>Remove rows with Active Count of 0</string>
+          </property>
+          <property name="text">
+           <string>Remove Inactive</string>
           </property>
          </widget>
         </item>

@@ -225,7 +225,13 @@ bool FreqScanner::handleMessage(const Message& cmd)
     else if (DSPSignalNotification::match(cmd))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
-        m_basebandSampleRate = notif.getSampleRate();
+        int newSampleRate = notif.getSampleRate();
+        if ((newSampleRate != m_basebandSampleRate) && (m_state != IDLE))
+        {
+            // Restart scan if sample rate changes
+            startScan();
+        }
+        m_basebandSampleRate = newSampleRate;
         m_centerFrequency = notif.getCenterFrequency();
         qDebug() << "FreqScanner::handleMessage: DSPSignalNotification";
         // Forward to the sink
@@ -645,7 +651,7 @@ void FreqScanner::applySettings(const FreqScannerSettings& settings, const QStri
     {
         // Restart scan if any settings change
         if (m_state != IDLE) {
-            m_state = START_SCAN;
+            startScan();
         }
     }
 

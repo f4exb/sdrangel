@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>385</width>
-    <height>162</height>
+    <height>190</height>
    </rect>
   </property>
   <property name="font">
@@ -31,82 +31,21 @@
       <string>Add Frequency Range</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="1">
-       <widget class="ValueDialZ" name="stop" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>32</width>
-          <height>16</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Liberation Mono</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>PointingHandCursor</cursorShape>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::StrongFocus</enum>
-        </property>
-        <property name="toolTip">
-         <string>Stop frequency in Hertz</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="stopLabel">
+      <item row="4" column="0">
+       <widget class="QLabel" name="stepLabel">
         <property name="text">
-         <string>Stop Frequency</string>
+         <string>Step</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="startLabel">
-        <property name="minimumSize">
-         <size>
-          <width>90</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Start Frequency</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="stopUnits">
+      <item row="1" column="2">
+       <widget class="QLabel" name="startUnits">
         <property name="text">
          <string>Hz</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QComboBox" name="step">
-        <property name="editable">
-         <bool>true</bool>
-        </property>
-        <item>
-         <property name="text">
-          <string>25000</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>8333.3</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="0" column="1">
+      <item row="1" column="1">
        <widget class="ValueDialZ" name="start" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
@@ -137,24 +76,129 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
+      <item row="4" column="2">
        <widget class="QLabel" name="stepUnits">
         <property name="text">
          <string>Hz</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="startUnits">
+      <item row="3" column="2">
+       <widget class="QLabel" name="stopUnits">
         <property name="text">
          <string>Hz</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="stepLabel">
+       <widget class="QLabel" name="stopLabel">
         <property name="text">
-         <string>Step</string>
+         <string>Stop Frequency</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="startLabel">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Start Frequency</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QComboBox" name="step">
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>25000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8333.3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>100000</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="ValueDialZ" name="stop" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Stop frequency in Hertz</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="preset">
+        <property name="toolTip">
+         <string>Select a preset range of frequencies</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Airband</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Broadcast FM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DAB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Digital Selective Calling</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Marine</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="presetLabel">
+        <property name="text">
+         <string>Preset</string>
         </property>
        </widget>
       </item>
