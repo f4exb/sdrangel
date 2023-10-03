@@ -535,6 +535,9 @@ private slots:
 signals:
     // Emitted when user tries to scroll to frequency currently out of range
     void requestCenterFrequency(qint64 frequency);
+    // Emitted when annotations are changed
+    void updateAnnotations();
+
 };
 
 #endif // INCLUDE_GLSPECTRUMVIEW_H
