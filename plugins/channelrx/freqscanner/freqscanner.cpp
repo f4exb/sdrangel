@@ -331,7 +331,7 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                     frequencies.append(m_settings.m_frequencies[i]);
                 }
             }
-            qSort(frequencies);
+            std::sort(frequencies.begin(), frequencies.end());
 
             if ((frequencies.size() > 0) && (m_settings.m_channelBandwidth > 0) && (m_basebandSampleRate > 0))
             {
@@ -352,8 +352,6 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                     int spareChannelsEachSide = spareBWEachSide / m_settings.m_channelBandwidth;
                     int offset = spareChannelsEachSide * m_settings.m_channelBandwidth;
                     m_stepStartFrequency -= offset;
-
-                    qDebug() << "*********** Starting scan: m_stepStartFrequency:" << m_stepStartFrequency << "offset:" << offset;
                 }
 
                 initScan();
