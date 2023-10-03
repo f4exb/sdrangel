@@ -44,6 +44,7 @@
 #include "util/db.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
+#include "dsp/spectrumvis.h"
 
 MESSAGE_CLASS_DEFINITION(FreqScanner::MsgConfigureFreqScanner, Message)
 MESSAGE_CLASS_DEFINITION(FreqScanner::MsgReportChannels, Message)
@@ -337,7 +338,7 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                 // Calculate how many channels can be scanned in one go
                 int fftSize;
                 int binsPerChannel;
-                FreqScanner::calcScannerSampleRate(m_settings.m_channelBandwidth, m_basebandSampleRate, m_scannerSampleRate, fftSize, binsPerChannel);
+                calcScannerSampleRate(m_settings.m_channelBandwidth, m_basebandSampleRate, m_scannerSampleRate, fftSize, binsPerChannel);
 
                 // Align first frequency so we cover as many channels as possible, while avoiding DC bin
                 m_stepStartFrequency = frequencies.front() + m_scannerSampleRate / 2 - m_settings.m_channelBandwidth + m_settings.m_channelBandwidth / 2;
@@ -351,6 +352,8 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                     int spareChannelsEachSide = spareBWEachSide / m_settings.m_channelBandwidth;
                     int offset = spareChannelsEachSide * m_settings.m_channelBandwidth;
                     m_stepStartFrequency -= offset;
+
+                    qDebug() << "*********** Starting scan: m_stepStartFrequency:" << m_stepStartFrequency << "offset:" << offset;
                 }
 
                 initScan();
@@ -582,6 +585,32 @@ void FreqScanner::timeout()
     initScan();
 }
 
+void FreqScanner::calcScannerSampleRate(int channelBW, int basebandSampleRate, int& scannerSampleRate, int& fftSize, int& binsPerChannel)
+{
+    const int maxFFTSize = 16384;
+    const int minBinsPerChannel = 8;
+
+    // Base FFT size on that used for main spectrum
+    std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
+    DeviceSet* deviceSet = deviceSets[m_deviceAPI->getDeviceSetIndex()];
+    const SpectrumSettings& spectrumSettings = deviceSet->m_spectrumVis->getSettings();
+    fftSize = spectrumSettings.m_fftSize;
+
+    // But ensure we have several bins per channel
+    // Adjust sample rate, to ensure we don't get massive FFT size
+    scannerSampleRate = basebandSampleRate;
+    while (fftSize / (scannerSampleRate / channelBW) < minBinsPerChannel)
+    {
+        if (fftSize == maxFFTSize) {
+            scannerSampleRate /= 2;
+        } else {
+            fftSize *= 2;
+        }
+    }
+
+    binsPerChannel = fftSize / (scannerSampleRate / (float)channelBW);
+}
+
 void FreqScanner::setCenterFrequency(qint64 frequency)
 {
     FreqScannerSettings settings = m_settings;
@@ -647,6 +676,7 @@ void FreqScanner::applySettings(const FreqScannerSettings& settings, const QStri
         || settingsKeys.contains("priority")
         || settingsKeys.contains("measurement")
         || settingsKeys.contains("mode")
+        || settingsKeys.contains("channelBandwidth")
         || force)
     {
         // Restart scan if any settings change

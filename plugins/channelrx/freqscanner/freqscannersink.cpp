@@ -107,7 +107,7 @@ void FreqScannerSink::processOneSample(Complex &ci)
         if (m_fftAverage.nextAverage())
         {
             // Send results to channel
-            if (getMessageQueueToChannel())
+            if (getMessageQueueToChannel() && (m_settings.m_channelBandwidth != 0) && (m_binsPerChannel != 0))
             {
                 FreqScanner::MsgScanResult* msg = FreqScanner::MsgScanResult::create(m_fftStartTime);
                 QList<FreqScanner::MsgScanResult::ScanResult>& results = msg->getScanResults();
@@ -119,11 +119,11 @@ void FreqScannerSink::processOneSample(Complex &ci)
                         qint64 frequency = m_settings.m_frequencies[i];
                         qint64 startFrequency = m_centerFrequency - m_scannerSampleRate / 2;
                         qint64 diff = frequency - startFrequency;
-                        int binBW = m_settings.m_channelBandwidth / m_binsPerChannel;
+                        float binBW = m_scannerSampleRate / (float)m_fftSize;
 
                         if ((diff < m_scannerSampleRate) && (diff >= 0))
                         {
-                            int bin = diff / binBW;
+                            int bin = std::round(diff / binBW);
 
                             // Calculate power at that frequency
                             Real power;
@@ -132,7 +132,7 @@ void FreqScannerSink::processOneSample(Complex &ci)
                             } else {
                                 power = totalPower(bin);
                             }
-
+                            //qDebug() << "startFrequency:" << startFrequency << "m_scannerSampleRate:" << m_scannerSampleRate << "m_centerFrequency:" << m_centerFrequency << "frequency" << frequency << "bin" << bin << "power" << power;
                             FreqScanner::MsgScanResult::ScanResult result = {frequency, power};
                             results.append(result);
                         }
@@ -177,6 +177,7 @@ Real FreqScannerSink::peakPower(int bin) const
         if ((idx < 0) || (idx >= m_fftSize)) {
             continue;
         }
+        //qDebug() << "idx:" << idx << "power:" << CalcDb::dbPower(m_magSq[idx]);
         maxMagSq = std::max(maxMagSq, m_magSq[idx]);
     }
     Real db = CalcDb::dbPower(maxMagSq);

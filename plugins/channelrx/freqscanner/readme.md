@@ -56,7 +56,9 @@ Specifies which frequency will be chosen as the active frequency, when multiple 
 
 <h3>10: Meas - Power Measurement</h3>
 
-Specifies how power is measured. In both cases, a FFT is used, with the channel bandwidth being spread over 8 to 32 bins, with the first and last bins being excluded from the measurement (to reduce spectral leakage from adjacent channels):
+Specifies how power is measured. In both cases, a FFT is used.
+FFT size is typically the same as used for the Main Spectrum, but may be increased to ensure at least 8 bins cover the channel bandwidth (8).
+The first and last bins are excluded from the measurement (to reduce spectral leakage from adjacent channels):
 
 - Peak: Power is the highest value in all of the bins, averaged over the scan time (6).
 - Total: Power is the sum of power in all of the bins, averaged over the scan time (6).

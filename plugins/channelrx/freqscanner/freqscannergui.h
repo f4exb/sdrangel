@@ -94,6 +94,7 @@ private:
     void updateAbsoluteCenterFrequency();
     void addRow(qint64 frequency, bool enabled, const QString& notes = "");
     void updateAnnotation(int row);
+    void updateAnnotations();
     void updateChannelsList(const QList<FreqScannerSettings::AvailableChannel>& channels);
 
     void leaveEvent(QEvent*);

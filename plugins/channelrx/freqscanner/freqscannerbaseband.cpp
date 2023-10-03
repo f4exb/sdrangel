@@ -28,6 +28,7 @@
 MESSAGE_CLASS_DEFINITION(FreqScannerBaseband::MsgConfigureFreqScannerBaseband, Message)
 
 FreqScannerBaseband::FreqScannerBaseband(FreqScanner *freqScanner) :
+    m_freqScanner(freqScanner),
     m_sink(freqScanner),
     m_messageQueueToGUI(nullptr)
 {
@@ -147,7 +148,7 @@ bool FreqScannerBaseband::handleMessage(const Message& cmd)
 
 void FreqScannerBaseband::applySettings(const FreqScannerSettings& settings, const QStringList& settingsKeys, bool force)
 {
-    if ((settings.m_channelBandwidth != m_settings.m_channelBandwidth) || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if (settingsKeys.contains("channelBandwidth") || settingsKeys.contains("inputFrequencyOffset") || force)
     {
         int basebandSampleRate = m_channelizer->getBasebandSampleRate();
         if ((basebandSampleRate != 0) && (settings.m_channelBandwidth != 0)) {
@@ -182,7 +183,7 @@ void FreqScannerBaseband::calcScannerSampleRate(int basebandSampleRate, float rf
     int fftSize;
     int binsPerChannel;
 
-    FreqScanner::calcScannerSampleRate(rfBandwidth, basebandSampleRate, m_scannerSampleRate, fftSize, binsPerChannel);
+    m_freqScanner->calcScannerSampleRate(rfBandwidth, basebandSampleRate, m_scannerSampleRate, fftSize, binsPerChannel);
 
     m_channelizer->setChannelization(m_scannerSampleRate, inputFrequencyOffset);
     m_channelSampleRate = m_channelizer->getChannelSampleRate();

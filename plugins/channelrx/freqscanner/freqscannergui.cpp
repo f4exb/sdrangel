@@ -103,7 +103,7 @@ bool FreqScannerGUI::handleMessage(const Message& message)
         m_basebandSampleRate = notif.getSampleRate();
         ui->deltaFrequency->setValueRange(true, 7, 0, m_basebandSampleRate/2);
         ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
-        ui->channelBandwidth->setValueRange(true, 7, 8, m_basebandSampleRate);
+        ui->channelBandwidth->setValueRange(true, 7, 0, m_basebandSampleRate);
         if (m_channelMarker.getBandwidth() == 0) {
             m_channelMarker.setBandwidth(m_basebandSampleRate);
         }
@@ -164,6 +164,7 @@ bool FreqScannerGUI::handleMessage(const Message& message)
         FreqScanner::MsgReportScanRange& report = (FreqScanner::MsgReportScanRange&)message;
         m_channelMarker.setCenterFrequency(report.getCenterFrequency());
         m_channelMarker.setBandwidth(report.getTotalBandwidth());
+        m_channelMarker.setVisible(report.getTotalBandwidth() < m_basebandSampleRate); // Hide marker if full bandwidth
         return true;
     }
     else if (FreqScanner::MsgScanResult::match(message))
@@ -417,7 +418,7 @@ FreqScannerGUI::FreqScannerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setTitle("Frequency Scanner");
     m_channelMarker.blockSignals(false);
-    m_channelMarker.setVisible(true); // activate signal on the last setting only
+    m_channelMarker.setVisible(true);
 
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
@@ -459,6 +460,8 @@ FreqScannerGUI::FreqScannerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
     ui->table->setItemDelegateForColumn(COL_FREQUENCY, new FrequencyDelegate("Auto", 3));
     ui->table->setItemDelegateForColumn(COL_POWER, new DecimalDelegate(1));
+
+    connect(m_deviceUISet->m_spectrum->getSpectrumView(), &GLSpectrumView::updateAnnotations, this, &FreqScannerGUI::updateAnnotations);
 }
 
 FreqScannerGUI::~FreqScannerGUI()
@@ -784,9 +787,13 @@ void FreqScannerGUI::updateAnnotation(int row)
                     // Exact match
                     annotationItem->setText(marker.m_text);
                     return;
-                } else if (!closest) {
+                }
+                else if (!closest)
+                {
                     closest = &marker;
-                } else {
+                }
+                else
+                {
                     if (marker.m_bandwidth < closest->m_bandwidth) {
                         closest = &marker;
                     }
@@ -796,6 +803,13 @@ void FreqScannerGUI::updateAnnotation(int row)
         if (closest) {
             annotationItem->setText(closest->m_text);
         }
+    }
+}
+
+void FreqScannerGUI::updateAnnotations()
+{
+    for (int i = 0; i < ui->table->rowCount(); i++) {
+        updateAnnotation(i);
     }
 }
 
@@ -927,7 +941,7 @@ void FreqScannerGUI::resizeTable()
     int row = ui->table->rowCount();
     ui->table->setRowCount(row + 1);
     ui->table->setItem(row, COL_FREQUENCY, new QTableWidgetItem("800,000.5 MHz"));
-    ui->table->setItem(row, COL_ANNOTATION, new QTableWidgetItem("An annotation"));
+    ui->table->setItem(row, COL_ANNOTATION, new QTableWidgetItem("London VOLMET"));
     ui->table->setItem(row, COL_ENABLE, new QTableWidgetItem("Enable"));
     ui->table->setItem(row, COL_POWER, new QTableWidgetItem("-100.0"));
     ui->table->setItem(row, COL_ACTIVE_COUNT, new QTableWidgetItem("10000"));

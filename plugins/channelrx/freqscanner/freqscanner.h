@@ -348,23 +348,7 @@ public:
 
     uint32_t getNumberOfDeviceStreams() const;
 
-    static void calcScannerSampleRate(int channelBW, int basebandSampleRate, int& scannerSampleRate, int& fftSize, int& binsPerChannel)
-    {
-        const int maxFFTSize = 2048;
-        const int maxBinsPerChannel = 32;
-        const int minBinsPerChannel = 8;
-
-        // Use multiple bins per channel, to account for FFT spectral leakage
-        binsPerChannel = maxFFTSize / (basebandSampleRate / channelBW);
-        binsPerChannel = std::min(binsPerChannel, maxBinsPerChannel);
-        binsPerChannel = std::max(binsPerChannel, minBinsPerChannel);
-        double binBW = channelBW / (double)binsPerChannel;
-
-        // Find next smallest power of 2
-        fftSize = pow(2.0, floor(log2(basebandSampleRate / binBW)));
-        fftSize = std::min(maxFFTSize, fftSize);
-        scannerSampleRate = binBW * fftSize;
-    }
+    void calcScannerSampleRate(int channelBW, int basebandSampleRate, int& scannerSampleRate, int& fftSize, int& binsPerChannel);
 
     static const char * const m_channelIdURI;
     static const char * const m_channelId;

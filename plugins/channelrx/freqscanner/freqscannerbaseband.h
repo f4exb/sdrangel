@@ -75,6 +75,7 @@ public:
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
+    FreqScanner *m_freqScanner;
     SampleSinkFifo m_sampleFifo;
     DownChannelizer *m_channelizer;
     int m_channelSampleRate;
