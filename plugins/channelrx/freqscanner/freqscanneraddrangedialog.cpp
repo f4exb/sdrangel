@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
+
 #include "freqscanneraddrangedialog.h"
 #include "ui_freqscanneraddrangedialog.h"
 
@@ -80,8 +82,18 @@ void FreqScannerAddRangeDialog::accept()
 
         if ((start <= stop) && (step > 0))
         {
-            for (qint64 f = start; f <= stop; f += step) {
-                m_frequencies.append(f);
+            if (step == 8333)
+            {
+                double fstep = 8333 + 1.0/3.0; // float will give incorrect results
+                for (double f = start; f <= stop; f += fstep) {
+                    m_frequencies.append(std::round(f));
+                }
+            }
+            else
+            {
+                for (qint64 f = start; f <= stop; f += step) {
+                    m_frequencies.append(f);
+                }
             }
         }
     }
