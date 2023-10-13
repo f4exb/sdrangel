@@ -313,12 +313,12 @@
        <widget class="QLabel" name="tuneTimeText">
         <property name="minimumSize">
          <size>
-          <width>45</width>
+          <width>54</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>100 ms</string>
+         <string>1000 ms</string>
         </property>
        </widget>
       </item>

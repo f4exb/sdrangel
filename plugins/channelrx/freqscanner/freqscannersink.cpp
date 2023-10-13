@@ -171,8 +171,9 @@ Real FreqScannerSink::peakPower(int bin) const
     // Skip bin between halfway between channels
     // Then skip first and last bins, to avoid spectral leakage (particularly at DC)
     int startBin = bin - m_binsPerChannel/2 + 1 + 1;
-    Real maxMagSq = m_magSq[startBin];
-    for (int i = 1; i < m_binsPerChannel - 2 - 1; i++) {
+    Real maxMagSq = std::numeric_limits<Real>::min();
+    for (int i = 0; i < m_binsPerChannel - 2 - 1; i++)
+    {
         int idx = startBin + i;
         if ((idx < 0) || (idx >= m_fftSize)) {
             continue;

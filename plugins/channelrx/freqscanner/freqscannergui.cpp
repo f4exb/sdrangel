@@ -101,9 +101,12 @@ bool FreqScannerGUI::handleMessage(const Message& message)
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
-        ui->deltaFrequency->setValueRange(true, 7, 0, m_basebandSampleRate/2);
-        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
-        ui->channelBandwidth->setValueRange(true, 7, 0, m_basebandSampleRate);
+        if (m_basebandSampleRate != 0)
+        {
+            ui->deltaFrequency->setValueRange(true, 7, 0, m_basebandSampleRate/2);
+            ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+            ui->channelBandwidth->setValueRange(true, 7, 0, m_basebandSampleRate);
+        }
         if (m_channelMarker.getBandwidth() == 0) {
             m_channelMarker.setBandwidth(m_basebandSampleRate);
         }
@@ -363,7 +366,7 @@ void FreqScannerGUI::onMenuDialogCalled(const QPoint &p)
         setTitleColor(m_settings.m_rgbColor);
 
         QList<QString> settingsKeys({
-            "m_rgbColor",
+            "rgbColor",
             "title",
             "useReverseAPI",
             "reverseAPIAddress",
