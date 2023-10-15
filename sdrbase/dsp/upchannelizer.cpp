@@ -259,6 +259,19 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
             << " chan: [" << chanStart << ":" << chanEnd << "]"
             << " rot: " << rot;
 
+    // check if it fits into the center
+    // Was: if(signalContainsChannel(sigStart + rot + safetyMargin, sigStart + rot + sigBw / 2.0f - safetyMargin, chanStart, chanEnd)) {
+    if(signalContainsChannel(sigStart + rot, sigEnd - rot, chanStart, chanEnd))
+    {
+        qDebug() << "UpChannelizer::createFilterChain: take center half (decimate by 2):"
+                << " [" << m_filterStages.size() << "]"
+                << " sig: ["  << sigStart + rot << ":" << sigEnd - rot << "]";
+        m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
+        m_stageSamples.push_back(s);
+        // Was: return createFilterChain(sigStart + rot, sigStart + sigBw / 2.0f + rot, chanStart, chanEnd);
+        return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
+    }
+
     // check if it fits into the left half
     if(signalContainsChannel(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd))
     {
@@ -279,19 +292,6 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
         m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
         m_stageSamples.push_back(s);
         return createFilterChain(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
-    }
-
-    // check if it fits into the center
-    // Was: if(signalContainsChannel(sigStart + rot + safetyMargin, sigStart + rot + sigBw / 2.0f - safetyMargin, chanStart, chanEnd)) {
-    if(signalContainsChannel(sigStart + rot, sigEnd - rot, chanStart, chanEnd))
-    {
-        qDebug() << "UpChannelizer::createFilterChain: take center half (decimate by 2):"
-                << " [" << m_filterStages.size() << "]"
-                << " sig: ["  << sigStart + rot << ":" << sigEnd - rot << "]";
-        m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
-        m_stageSamples.push_back(s);
-        // Was: return createFilterChain(sigStart + rot, sigStart + sigBw / 2.0f + rot, chanStart, chanEnd);
-        return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
     }
 
     Real ofs = ((chanEnd - chanStart) / 2.0 + chanStart) - ((sigEnd - sigStart) / 2.0 + sigStart);
