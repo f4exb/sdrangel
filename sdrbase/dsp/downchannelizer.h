@@ -87,7 +87,7 @@ protected:
 
 	void applyChannelization();
     void applyDecimation();
-	bool signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const;
+    static Real channelMinSpace(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd);
 	Real createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd);
     double setFilterChain(const std::vector<unsigned int>& stageIndexes);
 	void freeFilterChain();
