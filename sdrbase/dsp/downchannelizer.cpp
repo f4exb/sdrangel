@@ -218,46 +218,55 @@ DownChannelizer::FilterStage::~FilterStage()
 	delete m_filter;
 }
 
-bool DownChannelizer::signalContainsChannel(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd) const
+Real DownChannelizer::channelMinSpace(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd)
 {
-	//qDebug("   testing signal [%f, %f], channel [%f, %f]", sigStart, sigEnd, chanStart, chanEnd);
-	if(sigEnd <= sigStart)
-		return false;
-	if(chanEnd <= chanStart)
-		return false;
-	return (sigStart <= chanStart) && (sigEnd >= chanEnd);
+    Real leftSpace = chanStart - sigStart;
+    Real rightSpace = sigEnd - chanEnd;
+    return std::min(leftSpace, rightSpace);
 }
 
 Real DownChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart, Real chanEnd)
 {
 	Real sigBw = sigEnd - sigStart;
+    Real chanBw = chanEnd - chanStart;
 	Real rot = sigBw / 4;
 
 	qDebug("DownChannelizer::createFilterChain: Signal [%.1f, %.1f] (BW %.1f), Channel [%.1f, %.1f], Rot %.1f", sigStart, sigEnd, sigBw, chanStart, chanEnd, rot);
 
-	// check if it fits into the center
-	if(signalContainsChannel(sigStart + rot, sigEnd - rot, chanStart, chanEnd))
-    {
-		qDebug("DownChannelizer::createFilterChain: -> take center half (decimate by 2)");
-		m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
-		return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
-	}
+    std::array<Real, 3> filterMinSpaces; // Array of left, center and right filter min spaces respectively
+    filterMinSpaces[0] = channelMinSpace(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
+    filterMinSpaces[1] = channelMinSpace(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
+    filterMinSpaces[2] = channelMinSpace(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
+    auto maxIt = std::max_element(filterMinSpaces.begin(), filterMinSpaces.end());
+    int maxIndex = maxIt - filterMinSpaces.begin();
+    Real maxValue = *maxIt;
 
-	// check if it fits into the left half
-	if(signalContainsChannel(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd))
-    {
-		qDebug("DownChannelizer::createFilterChain: -> take left half (rotate by +1/4 and decimate by 2)");
-		m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
-		return createFilterChain(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
-	}
+    qDebug("DownChannelizer::createFilterChain: best index: %d best value: %.1f sigBW: %.1f chanBW: %.1f",
+        maxIndex, maxValue, sigBw, chanBw);
 
-	// check if it fits into the right half
-	if(signalContainsChannel(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd))
+    if ((sigStart < sigEnd) && (chanStart < chanEnd) && (maxValue >= chanBw/10.0))
     {
-		qDebug("DownChannelizer::createFilterChain: -> take right half (rotate by -1/4 and decimate by 2)");
-		m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
-		return createFilterChain(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
-	}
+        if (maxIndex == 0)
+        {
+            qDebug("DownChannelizer::createFilterChain: -> take left half (rotate by +1/4 and decimate by 2)");
+            m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
+            return createFilterChain(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
+        }
+
+        if (maxIndex == 1)
+        {
+            qDebug("DownChannelizer::createFilterChain: -> take center half (decimate by 2)");
+            m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
+            return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
+        }
+
+        if (maxIndex == 2)
+        {
+            qDebug("DownChannelizer::createFilterChain: -> take right half (rotate by -1/4 and decimate by 2)");
+            m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
+            return createFilterChain(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
+        }
+    }
 
 	Real ofs = ((chanEnd - chanStart) / 2.0 + chanStart) - ((sigEnd - sigStart) / 2.0 + sigStart);
 	qDebug("DownChannelizer::createFilterChain: -> complete (final BW %.1f, frequency offset %.1f)", sigBw, ofs);
