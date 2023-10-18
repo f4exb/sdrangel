@@ -252,12 +252,6 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
     Real rot = sigBw / 4;
     Sample s;
 
-    qDebug() << "UpChannelizer::createFilterChain: start:"
-            << " sig: ["  << sigStart << ":" << sigEnd << "]"
-            << " BW: " << sigBw
-            << " chan: [" << chanStart << ":" << chanEnd << "]"
-            << " rot: " << rot;
-
     std::array<Real, 3> filterMinSpaces; // Array of left, center and right filter min spaces respectively
     filterMinSpaces[0] = channelMinSpace(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
     filterMinSpaces[1] = channelMinSpace(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
@@ -266,16 +260,13 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
     int maxIndex = maxIt - filterMinSpaces.begin();
     Real maxValue = *maxIt;
 
-    qDebug("UpChannelizer::createFilterChain: best index: %d best value: %.1f sigBW: %.1f chanBW: %.1f",
-        maxIndex, maxValue, sigBw, chanBw);
+	qDebug("UpChannelizer::createFilterChain: Signal [%.1f, %.1f] (BW %.1f) Channel [%.1f, %.1f] (BW %.1f) Selected: %d (fit %.1f)",
+        sigStart, sigEnd, sigBw, chanStart, chanEnd, chanBw, maxIndex, maxValue);
 
-    if ((sigStart < sigEnd) && (chanStart < chanEnd) && (maxValue >= chanBw/10.0))
+    if ((sigStart < sigEnd) && (chanStart < chanEnd) && (maxValue >= chanBw/8.0))
     {
         if (maxIndex == 0)
         {
-            qDebug() << "UpChannelizer::createFilterChain: take left half (rotate by +1/4 and decimate by 2):"
-                    << " [" << m_filterStages.size() << "]"
-                    << " sig: ["  << sigStart << ":" << sigStart + sigBw / 2.0 << "]";
             m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
             m_stageSamples.push_back(s);
             return createFilterChain(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
@@ -283,9 +274,6 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
 
         if (maxIndex == 1)
         {
-            qDebug() << "UpChannelizer::createFilterChain: take center half (decimate by 2):"
-                    << " [" << m_filterStages.size() << "]"
-                    << " sig: ["  << sigStart + rot << ":" << sigEnd - rot << "]";
             m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
             m_stageSamples.push_back(s);
             return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
@@ -293,9 +281,6 @@ Real UpChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanStart
 
         if (maxIndex == 2)
         {
-            qDebug() << "UpChannelizer::createFilterChain: take right half (rotate by -1/4 and decimate by 2):"
-                    << " [" << m_filterStages.size() << "]"
-                    << " sig: ["  << sigEnd - sigBw / 2.0f << ":" << sigEnd << "]";
             m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
             m_stageSamples.push_back(s);
             return createFilterChain(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
