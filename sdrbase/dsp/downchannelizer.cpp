@@ -233,7 +233,6 @@ Real DownChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanSta
     Real chanBw = chanEnd - chanStart;
 	Real rot = sigBw / 4;
 
-	qDebug("DownChannelizer::createFilterChain: Signal [%.1f, %.1f] (BW %.1f), Channel [%.1f, %.1f], Rot %.1f", sigStart, sigEnd, sigBw, chanStart, chanEnd, rot);
 
     std::array<Real, 3> filterMinSpaces; // Array of left, center and right filter min spaces respectively
     filterMinSpaces[0] = channelMinSpace(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
@@ -243,28 +242,25 @@ Real DownChannelizer::createFilterChain(Real sigStart, Real sigEnd, Real chanSta
     int maxIndex = maxIt - filterMinSpaces.begin();
     Real maxValue = *maxIt;
 
-    qDebug("DownChannelizer::createFilterChain: best index: %d best value: %.1f sigBW: %.1f chanBW: %.1f",
-        maxIndex, maxValue, sigBw, chanBw);
+	qDebug("DownChannelizer::createFilterChain: Signal [%.1f, %.1f] (BW %.1f) Channel [%.1f, %.1f] (BW %.1f) Selected: %d (fit %.1f)",
+        sigStart, sigEnd, sigBw, chanStart, chanEnd, chanBw, maxIndex, maxValue);
 
-    if ((sigStart < sigEnd) && (chanStart < chanEnd) && (maxValue >= chanBw/10.0))
+    if ((sigStart < sigEnd) && (chanStart < chanEnd) && (maxValue >= chanBw/8.0))
     {
         if (maxIndex == 0)
         {
-            qDebug("DownChannelizer::createFilterChain: -> take left half (rotate by +1/4 and decimate by 2)");
             m_filterStages.push_back(new FilterStage(FilterStage::ModeLowerHalf));
             return createFilterChain(sigStart, sigStart + sigBw / 2.0, chanStart, chanEnd);
         }
 
         if (maxIndex == 1)
         {
-            qDebug("DownChannelizer::createFilterChain: -> take center half (decimate by 2)");
             m_filterStages.push_back(new FilterStage(FilterStage::ModeCenter));
             return createFilterChain(sigStart + rot, sigEnd - rot, chanStart, chanEnd);
         }
 
         if (maxIndex == 2)
         {
-            qDebug("DownChannelizer::createFilterChain: -> take right half (rotate by -1/4 and decimate by 2)");
             m_filterStages.push_back(new FilterStage(FilterStage::ModeUpperHalf));
             return createFilterChain(sigEnd - sigBw / 2.0f, sigEnd, chanStart, chanEnd);
         }
