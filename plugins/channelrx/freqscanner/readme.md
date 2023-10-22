@@ -4,6 +4,8 @@
 
 This plugin can be used to scan a range of frequencies looking for a transmission and then tune another channel (such as an AM or DSD Demod) to that frequency.
 
+[Tutorial Video](https://www.youtube.com/watch?v=IpKP3t4Bmmg)
+
 <h2>Interface</h2>
 
 The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
@@ -101,6 +103,8 @@ When an active frequency is found after a scan, the corresponding row in the tab
 Right clicking on a cell will display a popup menu:
 
 - Copy contents of cell to clipboard.
+- Enable all rows.
+- Disable all rows.
 - Remove selected rows.
 - Tune selected channel (1) to the frequency in the row clicked on.
 

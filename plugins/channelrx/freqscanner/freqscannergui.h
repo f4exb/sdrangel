@@ -96,6 +96,7 @@ private:
     void updateAnnotation(int row);
     void updateAnnotations();
     void updateChannelsList(const QList<FreqScannerSettings::AvailableChannel>& channels);
+    void setAllEnabled(bool enable);
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);

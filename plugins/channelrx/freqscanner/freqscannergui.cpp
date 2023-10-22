@@ -784,7 +784,13 @@ void FreqScannerGUI::updateAnnotation(int row)
         const SpectrumAnnotationMarker* closest = nullptr;
         for (const auto& marker : markers)
         {
-            if ((marker.m_startFrequency <= frequency) && (frequency < marker.m_startFrequency + marker.m_bandwidth))
+            qint64 start1 = marker.m_startFrequency;
+            qint64 stop1 = marker.m_startFrequency + marker.m_bandwidth;
+            qint64 start2 = frequency - m_settings.m_channelBandwidth / 2;
+            qint64 stop2 = frequency + m_settings.m_channelBandwidth / 2;
+            if (   ((start2 >= start1) && (start2 <= stop1))
+                || ((stop2 >= start1) && (stop2 <= stop1))
+               )
             {
                 if (marker.m_bandwidth == (unsigned)m_settings.m_channelBandwidth) {
                     // Exact match
@@ -816,6 +822,13 @@ void FreqScannerGUI::updateAnnotations()
     }
 }
 
+void FreqScannerGUI::setAllEnabled(bool enable)
+{
+    for (int i = 0; i < ui->table->rowCount(); i++) {
+        ui->table->item(i, COL_ENABLE)->setCheckState(enable ? Qt::Checked : Qt::Unchecked);
+    }
+}
+
 void FreqScannerGUI::table_customContextMenuRequested(QPoint pos)
 {
     QTableWidgetItem* item = ui->table->itemAt(pos);
@@ -835,6 +848,24 @@ void FreqScannerGUI::table_customContextMenuRequested(QPoint pos)
             clipboard->setText(text);
             });
         tableContextMenu->addAction(copyAction);
+
+        tableContextMenu->addSeparator();
+
+        // Enable all
+
+        QAction* enableAllAction = new QAction("Enable all", tableContextMenu);
+        connect(enableAllAction, &QAction::triggered, this, [this]()->void {
+            setAllEnabled(true);
+            });
+        tableContextMenu->addAction(enableAllAction);
+
+        // Disable all
+
+        QAction* disableAllAction = new QAction("Disable all", tableContextMenu);
+        connect(disableAllAction, &QAction::triggered, this, [this]()->void {
+            setAllEnabled(false);
+            });
+        tableContextMenu->addAction(disableAllAction);
 
         // Remove selected rows
 
