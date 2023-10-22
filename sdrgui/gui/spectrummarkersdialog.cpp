@@ -19,6 +19,7 @@
 #include <QStandardPaths>
 #include <QColorDialog>
 #include <QFileDialog>
+#include <QDebug>
 
 #include "gui/dialpopup.h"
 #include "util/db.h"
@@ -772,15 +773,22 @@ void SpectrumMarkersDialog::on_aMarkersImport_clicked()
 
                     while (CSV::readRow(in, &cols))
                     {
-                        m_annotationMarkers.push_back(SpectrumAnnotationMarker());
-                        m_annotationMarkers.back().m_startFrequency = cols[startCol].toLongLong();
-                        m_annotationMarkers.back().m_bandwidth = cols[widthCol].toUInt();
-                        m_annotationMarkers.back().m_text = cols[textCol];
-                        m_annotationMarkers.back().m_show = (SpectrumAnnotationMarker::ShowState) cols[showCol].toInt();
-                        int r = cols[redCol].toInt();
-                        int g = cols[greenCol].toInt();
-                        int b = cols[blueCol].toInt();
-                        m_annotationMarkers.back().m_markerColor = QColor(r, g, b);
+                        if (cols.size() >= 7)
+                        {
+                            m_annotationMarkers.push_back(SpectrumAnnotationMarker());
+                            m_annotationMarkers.back().m_startFrequency = cols[startCol].toLongLong();
+                            m_annotationMarkers.back().m_bandwidth = cols[widthCol].toUInt();
+                            m_annotationMarkers.back().m_text = cols[textCol];
+                            m_annotationMarkers.back().m_show = (SpectrumAnnotationMarker::ShowState) cols[showCol].toInt();
+                            int r = cols[redCol].toInt();
+                            int g = cols[greenCol].toInt();
+                            int b = cols[blueCol].toInt();
+                            m_annotationMarkers.back().m_markerColor = QColor(r, g, b);
+                        }
+                        else
+                        {
+                            qWarning() << "SpectrumMarkersDialog::on_aMarkersImport_clicked: Missing data in " << cols;
+                        }
                     }
 
                     m_annotationMarkerIndex = 0;
