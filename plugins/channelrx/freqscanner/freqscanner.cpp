@@ -292,16 +292,21 @@ void FreqScanner::stopScan()
     }
 }
 
+void FreqScanner::setDeviceCenterFrequency(qint64 frequency)
+{
+    // For RTL SDR, ChannelWebAPIUtils::setCenterFrequency takes ~50ms, which means tuneTime can be 0
+    if (!ChannelWebAPIUtils::setCenterFrequency(getDeviceSetIndex(), frequency)) {
+        qWarning() << "Freq Scanner failed to set frequency" << frequency;
+    }
+    m_minFFTStartTime = QDateTime::currentDateTime().addMSecs(m_settings.m_tuneTime);
+}
+
 void FreqScanner::initScan()
 {
     ChannelWebAPIUtils::setAudioMute(m_scanDeviceSetIndex, m_scanChannelIndex, true);
 
-    if (m_centerFrequency != m_stepStartFrequency)
-    {
-        if (!ChannelWebAPIUtils::setCenterFrequency(getDeviceSetIndex(), m_stepStartFrequency)) {
-            qWarning() << "Freq Scanner failed to set frequency" << m_stepStartFrequency;
-        }
-        m_minFFTStartTime = QDateTime::currentDateTime().addMSecs(m_settings.m_tuneTime);
+    if (m_centerFrequency != m_stepStartFrequency) {
+        setDeviceCenterFrequency(m_stepStartFrequency);
     }
 
     m_scanResults.clear();
@@ -340,13 +345,14 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                 int binsPerChannel;
                 calcScannerSampleRate(m_settings.m_channelBandwidth, m_basebandSampleRate, m_scannerSampleRate, fftSize, binsPerChannel);
 
-                // Align first frequency so we cover as many channels as possible, while avoiding DC bin
-                m_stepStartFrequency = frequencies.front() + m_scannerSampleRate / 2 - m_settings.m_channelBandwidth + m_settings.m_channelBandwidth / 2;
+                // Align first frequency so we cover as many channels as possible, while channel guard band
+                // Can we adjust this to avoid DC bin?
+                m_stepStartFrequency = frequencies.front() + m_scannerSampleRate / 2 - m_scannerSampleRate * 0.125f;
                 m_stepStopFrequency = frequencies.back();
 
-                // If all frequencies fit within bandwidth, we can have the first frequency more central
+                // If all frequencies fit within usable bandwidth, we can have the first frequency more central
                 int totalBW = frequencies.back() - frequencies.front() + 2 * m_settings.m_channelBandwidth;
-                if (totalBW < m_scannerSampleRate)
+                if (totalBW < m_scannerSampleRate * 0.75f)
                 {
                     int spareBWEachSide = (m_scannerSampleRate - totalBW) / 2;
                     int spareChannelsEachSide = spareBWEachSide / m_settings.m_channelBandwidth;
@@ -370,16 +376,17 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
             bool complete = false; // Have all frequencies been scanned?
             bool freqInRange = false;
             qint64 nextCenterFrequency = m_centerFrequency;
+            float usableBW = m_scannerSampleRate * 0.75f;
             do
             {
-                if (nextCenterFrequency + m_scannerSampleRate / 2 > m_stepStopFrequency)
+                if (nextCenterFrequency + usableBW / 2 > m_stepStopFrequency)
                 {
                     nextCenterFrequency = m_stepStartFrequency;
                     complete = true;
                 }
                 else
                 {
-                    nextCenterFrequency += m_scannerSampleRate;
+                    nextCenterFrequency += usableBW;
                     complete = false;
                 }
 
@@ -387,8 +394,8 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                 for (int i = 0; i < m_settings.m_frequencies.size(); i++)
                 {
                     if (m_settings.m_enabled[i]
-                        && (m_settings.m_frequencies[i] >= nextCenterFrequency - m_scannerSampleRate / 2)
-                        && (m_settings.m_frequencies[i] < nextCenterFrequency + m_scannerSampleRate / 2))
+                        && (m_settings.m_frequencies[i] >= nextCenterFrequency - usableBW / 2)
+                        && (m_settings.m_frequencies[i] < nextCenterFrequency + usableBW / 2))
                     {
                         freqInRange = true;
                         break;
@@ -457,7 +464,7 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
 
                             // Tune device/channel to frequency
                             int offset;
-                            if ((frequency < m_centerFrequency - m_scannerSampleRate / 2) || (frequency >= m_centerFrequency + m_scannerSampleRate / 2))
+                            if ((frequency < m_centerFrequency - usableBW / 2) || (frequency >= m_centerFrequency + usableBW / 2))
                             {
                                 nextCenterFrequency = frequency;
                                 offset = 0;
@@ -519,13 +526,8 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                 }
             }
 
-            if (nextCenterFrequency != m_centerFrequency)
-            {
-                // For RTL SDR, setCenterFrequency takes ~50ms, which means tuneTime can be 0
-                if (!ChannelWebAPIUtils::setCenterFrequency(getDeviceSetIndex(), nextCenterFrequency)) {
-                    qWarning() << "Freq Scanner failed to set frequency" << nextCenterFrequency;
-                }
-                m_minFFTStartTime = QDateTime::currentDateTime().addMSecs(m_settings.m_tuneTime);
+            if (nextCenterFrequency != m_centerFrequency) {
+                setDeviceCenterFrequency(nextCenterFrequency);
             }
 
             if (complete) {

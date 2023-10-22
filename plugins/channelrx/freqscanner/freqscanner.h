@@ -405,6 +405,7 @@ private:
     void stopScan();
     void initScan();
     void processScanResults(const QDateTime& fftStartTime, const QList<MsgScanResult::ScanResult>& results);
+    void setDeviceCenterFrequency(qint64 frequency);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

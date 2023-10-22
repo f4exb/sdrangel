@@ -58,11 +58,7 @@ void FreqScannerSink::feed(const SampleVector::const_iterator& begin, const Samp
         Complex c(it->real(), it->imag());
         c *= m_nco.nextIQ();
 
-        if (m_interpolatorDistance == 1.0f) // Don't call decimate, as we don't want filter applied if possible
-        {
-            processOneSample(c);
-        }
-        else if (m_interpolatorDistance < 1.0f) // interpolate
+        if (m_interpolatorDistance < 1.0f) // interpolate
         {
             while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
             {
@@ -70,7 +66,7 @@ void FreqScannerSink::feed(const SampleVector::const_iterator& begin, const Samp
                 m_interpolatorDistanceRemain += m_interpolatorDistance;
             }
         }
-        else // decimate
+        else // decimate (and filter)
         {
             if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
             {
@@ -121,7 +117,8 @@ void FreqScannerSink::processOneSample(Complex &ci)
                         qint64 diff = frequency - startFrequency;
                         float binBW = m_scannerSampleRate / (float)m_fftSize;
 
-                        if ((diff < m_scannerSampleRate) && (diff >= 0))
+                        // Ignore results in uppper and lower 12.5%, as there may be aliasing here from half-band filters
+                        if ((diff < m_scannerSampleRate * 0.875f) && (diff >= m_scannerSampleRate * 0.125f))
                         {
                             int bin = std::round(diff / binBW);
 
@@ -210,7 +207,7 @@ void FreqScannerSink::applyChannelSettings(int channelSampleRate, int channelFre
 
     if ((m_channelSampleRate != channelSampleRate) || (m_scannerSampleRate != scannerSampleRate) || force)
     {
-        m_interpolator.create(16, channelSampleRate, scannerSampleRate / 2.0); // Highest cutoff, so we don't attentuate first/last channel
+        m_interpolator.create(16, channelSampleRate, scannerSampleRate / 2.2); // Filter potential aliasing resulting from half-band filters
         m_interpolatorDistance = (Real) channelSampleRate / (Real)scannerSampleRate;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
