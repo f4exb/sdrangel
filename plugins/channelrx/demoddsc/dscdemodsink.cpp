@@ -29,8 +29,9 @@
 #include "dscdemod.h"
 #include "dscdemodsink.h"
 
-DSCDemodSink::DSCDemodSink(DSCDemod *packetDemod) :
-        m_dscDemod(packetDemod),
+DSCDemodSink::DSCDemodSink(DSCDemod *dscDemod) :
+        m_scopeSink(nullptr),
+        m_dscDemod(dscDemod),
         m_channelSampleRate(DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),
