@@ -111,6 +111,9 @@ QString FrequencyDelegate::displayText(const QVariant &value, const QLocale &loc
 
 QWidget* FrequencyDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+    (void) option;
+    (void) index;
+
     QLineEdit* editor = new QLineEdit(parent);
     QIntValidator* validator = new QIntValidator();
     validator->setBottom(0);
@@ -134,5 +137,6 @@ void FrequencyDelegate::setModelData(QWidget* editor, QAbstractItemModel* model,
 
 void FrequencyDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+    (void) index;
     editor->setGeometry(option.rect);
 }
