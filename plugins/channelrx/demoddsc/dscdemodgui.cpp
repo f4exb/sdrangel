@@ -576,7 +576,6 @@ DSCDemodGUI::DSCDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     m_scopeVis = m_dscDemod->getScopeSink();
     m_scopeVis->setGLScope(ui->glScope);
-    m_scopeVis->setNbStreams(DSCDemodSettings::m_scopeStreams);
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
     ui->scopeGUI->setStreams(QStringList({"IQ", "MagSq", "abs1", "abs2", "Unbiased", "Biased", "Data", "Clock", "Bit", "GotSOP"}));

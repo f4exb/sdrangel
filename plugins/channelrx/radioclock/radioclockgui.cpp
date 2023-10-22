@@ -292,7 +292,6 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     m_scopeVis = m_radioClock->getScopeSink();
     m_scopeVis->setGLScope(ui->glScope);
-    m_scopeVis->setNbStreams(RadioClockSettings::m_scopeStreams);
     m_scopeVis->setLiveRate(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE);
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);

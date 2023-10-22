@@ -26,8 +26,8 @@
 
 MESSAGE_CLASS_DEFINITION(NavtexDemodBaseband::MsgConfigureNavtexDemodBaseband, Message)
 
-NavtexDemodBaseband::NavtexDemodBaseband(NavtexDemod *packetDemod) :
-    m_sink(packetDemod),
+NavtexDemodBaseband::NavtexDemodBaseband(NavtexDemod *navtexDemod) :
+    m_sink(navtexDemod),
     m_running(false)
 {
     qDebug("NavtexDemodBaseband::NavtexDemodBaseband");
@@ -92,7 +92,7 @@ void NavtexDemodBaseband::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    while ((m_sampleFifo.fill() > 0) && (m_inputMessageQueue.size() == 0))
+    while ((m_sampleFifo.fill() > 0) && (m_inputMessageQueue.size() == 0) && m_channelizer->getBasebandSampleRate())
     {
         SampleVector::iterator part1begin;
         SampleVector::iterator part1end;

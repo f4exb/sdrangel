@@ -744,7 +744,6 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     m_scopeVis = m_aisDemod->getScopeSink();
     m_scopeVis->setGLScope(ui->glScope);
-    m_scopeVis->setNbStreams(AISDemodSettings::m_scopeStreams);
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
     ui->scopeGUI->setStreams(QStringList({"IQ", "MagSq", "FM demod", "Gaussian", "RX buf", "Correlation", "Threshold met", "DC offset", "CRC"}));
