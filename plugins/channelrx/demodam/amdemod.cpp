@@ -218,6 +218,7 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
     qDebug() << "AMDemod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
+            << " m_afBandwidth: " << settings.m_afBandwidth
             << " m_volume: " << settings.m_volume
             << " m_squelch: " << settings.m_squelch
             << " m_audioMute: " << settings.m_audioMute
@@ -237,6 +238,9 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
 
     if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force) {
         reverseAPIKeys.append("rfBandwidth");
+    }
+    if ((m_settings.m_afBandwidth != settings.m_afBandwidth) || force) {
+        reverseAPIKeys.append("afBandwidth");
     }
     if ((m_settings.m_bandpassEnable != settings.m_bandpassEnable) || force) {
         reverseAPIKeys.append("bandpassEnable");
@@ -411,6 +415,9 @@ void AMDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getAmDemodSettings()->getRfBandwidth();
     }
+    if (channelSettingsKeys.contains("afBandwidth")) {
+        settings.m_afBandwidth = response.getAmDemodSettings()->getAfBandwidth();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getAmDemodSettings()->getRgbColor();
     }
@@ -483,6 +490,7 @@ void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     response.getAmDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getAmDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getAmDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getAmDemodSettings()->setAfBandwidth(settings.m_afBandwidth);
     response.getAmDemodSettings()->setRgbColor(settings.m_rgbColor);
     response.getAmDemodSettings()->setSquelch(settings.m_squelch);
     response.getAmDemodSettings()->setVolume(settings.m_volume);
@@ -633,6 +641,9 @@ void AMDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
         swgAMDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("afBandwidth") || force) {
+        swgAMDemodSettings->setAfBandwidth(settings.m_afBandwidth);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgAMDemodSettings->setRgbColor(settings.m_rgbColor);

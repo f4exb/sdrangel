@@ -273,19 +273,21 @@ void AMDemodSink::applySettings(const AMDemodSettings& settings, bool force)
             << " m_squelch: " << settings.m_squelch
             << " m_audioMute: " << settings.m_audioMute
             << " m_bandpassEnable: " << settings.m_bandpassEnable
+            << " m_afBandwidth: " << settings.m_afBandwidth
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_pll: " << settings.m_pll
             << " m_syncAMOperation: " << (int) settings.m_syncAMOperation
             << " force: " << force;
 
     if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
-        (m_settings.m_bandpassEnable != settings.m_bandpassEnable) || force)
+        (m_settings.m_bandpassEnable != settings.m_bandpassEnable) ||
+        (m_settings.m_afBandwidth != settings.m_afBandwidth) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_audioSampleRate;
-        m_bandpass.create(301, m_audioSampleRate, 300.0, settings.m_rfBandwidth / 2.0f);
-        m_lowpass.create(301, m_audioSampleRate,  settings.m_rfBandwidth / 2.0f);
+        m_bandpass.create(301, m_audioSampleRate, 300.0, settings.m_afBandwidth / 2.0f);
+        m_lowpass.create(301, m_audioSampleRate,  settings.m_afBandwidth / 2.0f);
         DSBFilter->create_dsb_filter((2.0f * settings.m_rfBandwidth) / (float) m_audioSampleRate);
     }
 
@@ -326,8 +328,8 @@ void AMDemodSink::applyAudioSampleRate(int sampleRate)
     m_interpolator.create(16, m_channelSampleRate, m_settings.m_rfBandwidth / 2.2f);
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_channelSampleRate / (Real) sampleRate;
-    m_bandpass.create(301, sampleRate, 300.0, m_settings.m_rfBandwidth / 2.0f);
-    m_lowpass.create(301, sampleRate,  m_settings.m_rfBandwidth / 2.0f);
+    m_bandpass.create(301, sampleRate, 300.0, m_settings.m_afBandwidth / 2.0f);
+    m_lowpass.create(301, sampleRate,  m_settings.m_afBandwidth / 2.0f);
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/5);
     DSBFilter->create_dsb_filter((2.0f * m_settings.m_rfBandwidth) / (float) sampleRate);

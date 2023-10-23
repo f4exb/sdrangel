@@ -87,6 +87,7 @@ private slots:
 	void on_ssb_toggled(bool checked);
 	void on_bandpassEnable_toggled(bool checked);
 	void on_rfBW_valueChanged(int value);
+	void on_afBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
 	void on_audioMute_toggled(bool checked);

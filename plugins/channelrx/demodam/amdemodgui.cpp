@@ -160,10 +160,18 @@ void AMDemodGUI::on_bandpassEnable_toggled(bool checked)
 
 void AMDemodGUI::on_rfBW_valueChanged(int value)
 {
-	ui->rfBWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
-	m_channelMarker.setBandwidth(value * 100);
-	m_settings.m_rfBandwidth = value * 100;
-	applySettings();
+    ui->rfBWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
+    m_channelMarker.setBandwidth(value * 100);
+    m_settings.m_rfBandwidth = value * 100;
+    ui->afBW->setMaximum(value);
+    applySettings();
+}
+
+void AMDemodGUI::on_afBW_valueChanged(int value)
+{
+    ui->afBWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
+    m_settings.m_afBandwidth = value * 100;
+    applySettings();
 }
 
 void AMDemodGUI::on_volume_valueChanged(int value)
@@ -354,6 +362,10 @@ void AMDemodGUI::displaySettings()
     ui->rfBW->setValue(displayValue);
     ui->rfBWText->setText(QString("%1 kHz").arg(displayValue / 10.0, 0, 'f', 1));
 
+    displayValue = m_settings.m_afBandwidth / 100.0;
+    ui->afBW->setValue(displayValue);
+    ui->afBWText->setText(QString("%1 kHz").arg(displayValue / 10.0, 0, 'f', 1));
+
     ui->volume->setValue(m_settings.m_volume * 10.0);
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 0, 'f', 1));
 
@@ -503,6 +515,7 @@ void AMDemodGUI::makeUIConnections()
     QObject::connect(ui->ssb, &QToolButton::toggled, this, &AMDemodGUI::on_ssb_toggled);
     QObject::connect(ui->bandpassEnable, &ButtonSwitch::toggled, this, &AMDemodGUI::on_bandpassEnable_toggled);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &AMDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->afBW, &QSlider::valueChanged, this, &AMDemodGUI::on_afBW_valueChanged);
     QObject::connect(ui->volume, &QSlider::valueChanged, this, &AMDemodGUI::on_volume_valueChanged);
     QObject::connect(ui->squelch, &QSlider::valueChanged, this, &AMDemodGUI::on_squelch_valueChanged);
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &AMDemodGUI::on_audioMute_toggled);

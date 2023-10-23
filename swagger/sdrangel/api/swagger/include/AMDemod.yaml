@@ -9,6 +9,10 @@ AMDemodSettings:
       description: channel RF bandwidth in Hz (floors to next 100 Hz)
       type: number
       format: float
+    afBandwidth:
+      description: AF bandwidth in Hz
+      type: number
+      format: float
     squelch:
       description: power squelch threshold in decibels
       type: number
