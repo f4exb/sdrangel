@@ -1,4 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
 // Copyright (C) 2023 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -15,31 +16,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_GUI_FREQUENCYDELGATE_H
-#define SDRGUI_GUI_FREQUENCYDELGATE_H
+#ifndef INCLUDE_FREQSCANNERPLUGIN_H
+#define INCLUDE_FREQSCANNERPLUGIN_H
 
-#include <QStyledItemDelegate>
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-#include "export.h"
+class DeviceUISet;
+class BasebandSampleSink;
 
-// Delegate for table to display frequency
-class SDRGUI_API FrequencyDelegate : public QStyledItemDelegate {
+class FreqScannerPlugin : public QObject, PluginInterface {
+    Q_OBJECT
+    Q_INTERFACES(PluginInterface)
+    Q_PLUGIN_METADATA(IID "sdrangel.channel.freqscanner")
 
 public:
-    FrequencyDelegate(const QString& units = "kHz", int precision=1, bool group=true);
-    QString displayText(const QVariant &value, const QLocale &locale) const override;
+    explicit FreqScannerPlugin(QObject* parent = NULL);
 
-protected:
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const;
-    void setEditorData(QWidget* editor, const QModelIndex& index) const;
-    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
-    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    const PluginDescriptor& getPluginDescriptor() const;
+    void initPlugin(PluginAPI* pluginAPI);
+
+    virtual void createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const;
+    virtual ChannelGUI* createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const;
+    virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const;
 
 private:
-    QString m_units;
-    int m_precision;
-    bool m_group;
+    static const PluginDescriptor m_pluginDescriptor;
 
+    PluginAPI* m_pluginAPI;
 };
 
-#endif // SDRGUI_GUI_FREQUENCYDELGATE_H
+#endif // INCLUDE_FREQSCANNERPLUGIN_H
+

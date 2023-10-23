@@ -3599,6 +3599,8 @@ void GLSpectrumView::updateWaterfallMarkers()
 
 void GLSpectrumView::updateAnnotationMarkers()
 {
+    emit updateAnnotations(); // Notify other plugins we have updated annotations
+
     if (!(m_markersDisplay & SpectrumSettings::MarkersDisplayAnnotations)) {
         return;
     }

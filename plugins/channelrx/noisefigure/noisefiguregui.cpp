@@ -667,6 +667,8 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     ui->results->setItemDelegateForColumn(RESULTS_COL_ENR, new DecimalDelegate(2));
     ui->results->setItemDelegateForColumn(RESULTS_COL_FLOOR, new DecimalDelegate(1));
 
+    ui->startStop->setStyleSheet(QString("QToolButton{ background-color: blue; } QToolButton:checked{ background-color: green; }"));
+
     displaySettings();
     makeUIConnections();
     applySettings(true);
