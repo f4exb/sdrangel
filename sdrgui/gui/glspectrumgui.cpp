@@ -904,8 +904,7 @@ void GLSpectrumGUI::setFFTSize(int log2FFTSize)
 
 void GLSpectrumGUI::setMaximumOverlap()
 {
-    int halfSize = m_settings.m_fftSize/2;
-    ui->fftOverlap->setMaximum(halfSize);
+    ui->fftOverlap->setMaximum(m_settings.m_fftSize -1);
     int value = ui->fftOverlap->value();
     ui->fftOverlap->setValue(value);
     ui->fftOverlap->setToolTip(tr("FFT overlap %1 %").arg((value/(float)m_settings.m_fftSize)*100.0f));
