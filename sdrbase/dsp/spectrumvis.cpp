@@ -327,7 +327,7 @@ void SpectrumVis::feed(const ComplexVector::const_iterator& cbegin, const Comple
 	while (begin < end)
 	{
 		std::size_t todo = end - begin;
-		std::size_t samplesNeeded = m_refillSize - m_fftBufferFill;
+		std::size_t samplesNeeded = m_settings.m_fftSize - m_fftBufferFill;
 
 		if (todo >= samplesNeeded)
 		{
@@ -338,6 +338,7 @@ void SpectrumVis::feed(const ComplexVector::const_iterator& cbegin, const Comple
             processFFT(positiveOnly);
 
 			// advance buffer respecting the fft overlap factor
+			// undefined bahavior if the memory regions overlap, valid code for 50% overlap
 			std::copy(m_fftBuffer.begin() + m_refillSize, m_fftBuffer.end(), m_fftBuffer.begin());
 
 			// start over
@@ -377,7 +378,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 	while (begin < end)
 	{
 		std::size_t todo = end - begin;
-		std::size_t samplesNeeded = m_refillSize - m_fftBufferFill;
+		std::size_t samplesNeeded = m_settings.m_fftSize - m_fftBufferFill;
 
 		if (todo >= samplesNeeded)
 		{
@@ -391,6 +392,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
             processFFT(positiveOnly);
 
 			// advance buffer respecting the fft overlap factor
+			// undefined bahavior if the memory regions overlap, valid code for 50% overlap
 			std::copy(m_fftBuffer.begin() + m_refillSize, m_fftBuffer.end(), m_fftBuffer.begin());
 
 			// start over
@@ -890,8 +892,8 @@ void SpectrumVis::applySettings(const SpectrumSettings& settings, bool force)
     if ((fftSize != m_settings.m_fftSize)
      || (settings.m_fftOverlap != m_settings.m_fftOverlap) || force)
     {
-        m_overlapSize = settings.m_fftOverlap < 0 ? 0 :
-            settings.m_fftOverlap < fftSize/2 ? settings.m_fftOverlap : (fftSize/2) - 1;
+		m_overlapSize = settings.m_fftOverlap < 0 ? 0 :
+			settings.m_fftOverlap < fftSize ? settings.m_fftOverlap : (fftSize/2);
         m_refillSize = fftSize - m_overlapSize;
         m_fftBufferFill = m_overlapSize;
     }
