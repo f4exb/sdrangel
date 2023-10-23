@@ -41,6 +41,7 @@
 #include "SWGFileSourceReport.h"
 #include "SWGFreeDVDemodReport.h"
 #include "SWGFreeDVModReport.h"
+#include "SWGFreqScannerReport.h"
 #include "SWGFreqTrackerReport.h"
 #include "SWGHeatMapReport.h"
 #include "SWGIEEE_802_15_4_ModReport.h"
@@ -151,6 +152,9 @@ public:
 
     SWGFreeDVModReport* getFreeDvModReport();
     void setFreeDvModReport(SWGFreeDVModReport* free_dv_mod_report);
+
+    SWGFreqScannerReport* getFreqScannerReport();
+    void setFreqScannerReport(SWGFreqScannerReport* freq_scanner_report);
 
     SWGFreqTrackerReport* getFreqTrackerReport();
     void setFreqTrackerReport(SWGFreqTrackerReport* freq_tracker_report);
@@ -302,6 +306,9 @@ private:
 
     SWGFreeDVModReport* free_dv_mod_report;
     bool m_free_dv_mod_report_isSet;
+
+    SWGFreqScannerReport* freq_scanner_report;
+    bool m_freq_scanner_report_isSet;
 
     SWGFreqTrackerReport* freq_tracker_report;
     bool m_freq_tracker_report_isSet;

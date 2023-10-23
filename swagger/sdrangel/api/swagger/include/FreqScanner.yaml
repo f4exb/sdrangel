@@ -1,0 +1,70 @@
+FreqScannerSettings:
+  description: FreqScanner
+  properties:
+    channelBandwidth:
+      description: channel RF bandwidth in Hz
+      type: integer
+    channelFrequencyOffset:
+      description: channel center frequency shift from baseband center in Hz
+      type: integer
+    threshold:
+      type: number
+      format: float
+    m_frequencies:
+      type: array
+      items:
+        type: integer
+        format: int64
+    m_enabled:
+      type: array
+      items:
+        type: integer
+    m_notes:
+      type: array
+      items:
+        type: string
+    channel:
+      type: string
+    scanTime:
+      type: number
+      format: float
+    retransmitTime:
+      type: number
+      format: float
+    tuneTime:
+      type: number
+      format: float
+    priority:
+      type: integer
+    measurement:
+      type: integer
+    mode:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+FreqScannerReport:
+  description: FreqScanner
+  properties:
+    channelSampleRate:
+      type: integer

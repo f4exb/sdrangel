@@ -92,6 +92,7 @@ option(ENABLE_CHANNELRX_DEMODRTTY "Enable channelrx demodrtty plugin" ON)
 option(ENABLE_CHANNELRX_DEMODILS "Enable channelrx demodils plugin" ON)
 option(ENABLE_CHANNELRX_DEMODDSC "Enable channelrx demoddsc plugin" ON)
 option(ENABLE_CHANNELRX_HEATMAP "Enable channelrx heatmap plugin" ON)
+option(ENABLE_CHANNELRX_FREQSCANNER "Enable channelrx freqscanner plugin" ON)
 
 # Channel Tx enablers
 option(ENABLE_CHANNELTX "Enable channeltx plugins" ON)

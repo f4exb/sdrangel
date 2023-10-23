@@ -79,18 +79,18 @@ void DialogPositioner::positionDialog(QWidget *dialog)
 
     // Position so fully on screen
     QRect desktop = dialog->screen()->availableGeometry();
-    QSize size = dialog->size();
+    QRect geometry = dialog->frameGeometry();
     QPoint pos = dialog->pos();
 
     bool move = false;
-    if (pos.x() + size.width() > desktop.width())
+    if (pos.x() + geometry.width() > desktop.width())
     {
-        pos.setX(desktop.width() - size.width());
+        pos.setX(desktop.width() - geometry.width());
         move = true;
     }
-    if (pos.y() + size.height() > desktop.height())
+    if (pos.y() + geometry.height() > desktop.height())
     {
-        pos.setY(desktop.height() - size.height());
+        pos.setY(desktop.height() - geometry.height());
         move = true;
     }
     if (move) {

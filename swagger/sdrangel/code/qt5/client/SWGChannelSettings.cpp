@@ -82,6 +82,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_free_dv_demod_settings_isSet = false;
     free_dv_mod_settings = nullptr;
     m_free_dv_mod_settings_isSet = false;
+    freq_scanner_settings = nullptr;
+    m_freq_scanner_settings_isSet = false;
     freq_tracker_settings = nullptr;
     m_freq_tracker_settings_isSet = false;
     ft8_demod_settings = nullptr;
@@ -212,6 +214,8 @@ SWGChannelSettings::init() {
     m_free_dv_demod_settings_isSet = false;
     free_dv_mod_settings = new SWGFreeDVModSettings();
     m_free_dv_mod_settings_isSet = false;
+    freq_scanner_settings = new SWGFreqScannerSettings();
+    m_freq_scanner_settings_isSet = false;
     freq_tracker_settings = new SWGFreqTrackerSettings();
     m_freq_tracker_settings_isSet = false;
     ft8_demod_settings = new SWGFT8DemodSettings();
@@ -358,6 +362,9 @@ SWGChannelSettings::cleanup() {
     }
     if(free_dv_mod_settings != nullptr) { 
         delete free_dv_mod_settings;
+    }
+    if(freq_scanner_settings != nullptr) { 
+        delete freq_scanner_settings;
     }
     if(freq_tracker_settings != nullptr) { 
         delete freq_tracker_settings;
@@ -528,6 +535,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&free_dv_mod_settings, pJson["FreeDVModSettings"], "SWGFreeDVModSettings", "SWGFreeDVModSettings");
     
+    ::SWGSDRangel::setValue(&freq_scanner_settings, pJson["FreqScannerSettings"], "SWGFreqScannerSettings", "SWGFreqScannerSettings");
+    
     ::SWGSDRangel::setValue(&freq_tracker_settings, pJson["FreqTrackerSettings"], "SWGFreqTrackerSettings", "SWGFreqTrackerSettings");
     
     ::SWGSDRangel::setValue(&ft8_demod_settings, pJson["FT8DemodSettings"], "SWGFT8DemodSettings", "SWGFT8DemodSettings");
@@ -692,6 +701,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((free_dv_mod_settings != nullptr) && (free_dv_mod_settings->isSet())){
         toJsonValue(QString("FreeDVModSettings"), free_dv_mod_settings, obj, QString("SWGFreeDVModSettings"));
+    }
+    if((freq_scanner_settings != nullptr) && (freq_scanner_settings->isSet())){
+        toJsonValue(QString("FreqScannerSettings"), freq_scanner_settings, obj, QString("SWGFreqScannerSettings"));
     }
     if((freq_tracker_settings != nullptr) && (freq_tracker_settings->isSet())){
         toJsonValue(QString("FreqTrackerSettings"), freq_tracker_settings, obj, QString("SWGFreqTrackerSettings"));
@@ -1067,6 +1079,16 @@ void
 SWGChannelSettings::setFreeDvModSettings(SWGFreeDVModSettings* free_dv_mod_settings) {
     this->free_dv_mod_settings = free_dv_mod_settings;
     this->m_free_dv_mod_settings_isSet = true;
+}
+
+SWGFreqScannerSettings*
+SWGChannelSettings::getFreqScannerSettings() {
+    return freq_scanner_settings;
+}
+void
+SWGChannelSettings::setFreqScannerSettings(SWGFreqScannerSettings* freq_scanner_settings) {
+    this->freq_scanner_settings = freq_scanner_settings;
+    this->m_freq_scanner_settings_isSet = true;
 }
 
 SWGFreqTrackerSettings*
@@ -1493,6 +1515,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(free_dv_mod_settings && free_dv_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(freq_scanner_settings && freq_scanner_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(freq_tracker_settings && freq_tracker_settings->isSet()){

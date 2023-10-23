@@ -49,6 +49,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
     FreeDVModReport:
       $ref: "http://swgserver:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
+    FreqScannerReport:
+      $ref: "http://swgserver:8081/api/swagger/include/FreqScanner.yaml#/FreqScannerReport"
     FreqTrackerReport:
       $ref: "http://swgserver:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
     FT8DemodReport:
