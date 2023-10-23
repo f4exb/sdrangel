@@ -37,6 +37,7 @@ struct AMDemodSettings
     Real m_volume;
     bool m_audioMute;
     bool m_bandpassEnable;
+    Real m_afBandwidth;  //!< High frequency for bandpass
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
