@@ -26,8 +26,8 @@
 
 MESSAGE_CLASS_DEFINITION(RttyDemodBaseband::MsgConfigureRttyDemodBaseband, Message)
 
-RttyDemodBaseband::RttyDemodBaseband(RttyDemod *packetDemod) :
-    m_sink(packetDemod),
+RttyDemodBaseband::RttyDemodBaseband(RttyDemod *rttyDemod) :
+    m_sink(rttyDemod),
     m_running(false)
 {
     qDebug("RttyDemodBaseband::RttyDemodBaseband");
@@ -92,7 +92,7 @@ void RttyDemodBaseband::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    while ((m_sampleFifo.fill() > 0) && (m_inputMessageQueue.size() == 0))
+    while ((m_sampleFifo.fill() > 0) && (m_inputMessageQueue.size() == 0) && m_channelizer->getBasebandSampleRate())
     {
         SampleVector::iterator part1begin;
         SampleVector::iterator part1end;

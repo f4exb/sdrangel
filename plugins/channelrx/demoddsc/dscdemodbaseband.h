@@ -61,7 +61,7 @@ public:
         { }
     };
 
-    DSCDemodBaseband(DSCDemod *packetDemod);
+    DSCDemodBaseband(DSCDemod *dscDemod);
     ~DSCDemodBaseband();
     void reset();
     void startWork();

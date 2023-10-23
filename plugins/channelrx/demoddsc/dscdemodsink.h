@@ -41,7 +41,7 @@ class ScopeVis;
 
 class DSCDemodSink : public ChannelSampleSink {
 public:
-    DSCDemodSink(DSCDemod *packetDemod);
+    DSCDemodSink(DSCDemod *dscDemod);
     ~DSCDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

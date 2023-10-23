@@ -61,7 +61,7 @@ public:
         { }
     };
 
-    RttyDemodBaseband(RttyDemod *packetDemod);
+    RttyDemodBaseband(RttyDemod *rttyDemod);
     ~RttyDemodBaseband();
     void reset();
     void startWork();

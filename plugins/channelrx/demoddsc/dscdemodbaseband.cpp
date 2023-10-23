@@ -26,12 +26,13 @@
 
 MESSAGE_CLASS_DEFINITION(DSCDemodBaseband::MsgConfigureDSCDemodBaseband, Message)
 
-DSCDemodBaseband::DSCDemodBaseband(DSCDemod *packetDemod) :
-    m_sink(packetDemod),
+DSCDemodBaseband::DSCDemodBaseband(DSCDemod *dscDemod) :
+    m_sink(dscDemod),
     m_running(false)
 {
     qDebug("DSCDemodBaseband::DSCDemodBaseband");
 
+    m_scopeSink.setNbStreams(DSCDemodSettings::m_scopeStreams);
     m_sink.setScopeSink(&m_scopeSink);
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
@@ -92,7 +93,7 @@ void DSCDemodBaseband::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    while ((m_sampleFifo.fill() > 0) && (m_inputMessageQueue.size() == 0))
+    while ((m_sampleFifo.fill() > 0) && (m_inputMessageQueue.size() == 0) && m_channelizer->getBasebandSampleRate())
     {
         SampleVector::iterator part1begin;
         SampleVector::iterator part1end;

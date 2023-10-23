@@ -32,6 +32,7 @@ AISDemodBaseband::AISDemodBaseband(AISDemod *aisDemod) :
 {
     qDebug("AISDemodBaseband::AISDemodBaseband");
 
+    m_scopeSink.setNbStreams(AISDemodSettings::m_scopeStreams);
     m_sink.setScopeSink(&m_scopeSink);
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
