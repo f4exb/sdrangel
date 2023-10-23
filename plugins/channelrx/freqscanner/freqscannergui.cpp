@@ -22,6 +22,7 @@
 #include <QMenu>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QRegExp>
 
 #include "device/deviceset.h"
 #include "device/deviceuiset.h"

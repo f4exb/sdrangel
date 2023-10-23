@@ -24,6 +24,7 @@
 #include <QNetworkReply>
 #include <QBuffer>
 #include <QThread>
+#include <QRegExp>
 
 #include <stdio.h>
 #include <complex.h>
