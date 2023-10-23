@@ -4450,7 +4450,7 @@ void GLSpectrumView::timeZoom(bool zoomInElseOut)
         return;
     }
 
-    if (zoomInElseOut && (m_fftOverlap == m_fftSize/2)) {
+	if (zoomInElseOut && (m_fftOverlap == m_fftSize - 1)) {
         return;
     }
 
