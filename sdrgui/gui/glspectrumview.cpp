@@ -2735,7 +2735,7 @@ void GLSpectrumView::applyChanges()
             float timeScaleDiv = ((float)m_sampleRate / (float)m_timingRate);
 
             if (m_fftSize > m_fftOverlap) {
-                timeScaleDiv *= m_fftSize / (m_fftSize - m_fftOverlap);
+                timeScaleDiv *= m_fftSize / (float)(m_fftSize - m_fftOverlap);
             }
 
             if (!m_invertedWaterfall) {
@@ -2828,7 +2828,7 @@ void GLSpectrumView::applyChanges()
             float timeScaleDiv = ((float)m_sampleRate / (float)m_timingRate);
 
             if (m_fftSize > m_fftOverlap) {
-                timeScaleDiv *= m_fftSize / (m_fftSize - m_fftOverlap);
+                timeScaleDiv *= m_fftSize / (float)(m_fftSize - m_fftOverlap);
             }
 
             if (!m_invertedWaterfall) {

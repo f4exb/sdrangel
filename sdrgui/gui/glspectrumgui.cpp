@@ -864,7 +864,7 @@ void GLSpectrumGUI::setAveragingToolitp()
     {
         QString s;
         int averagingIndex = m_settings.m_averagingMode == SpectrumSettings::AvgModeNone ? 0 : m_settings.m_averagingIndex;
-        float overlapFactor = (m_settings.m_fftSize - m_settings.m_fftOverlap) / m_settings.m_fftSize;
+        float overlapFactor = (m_settings.m_fftSize - m_settings.m_fftOverlap) / (float)m_settings.m_fftSize;
         float averagingTime = (m_settings.m_fftSize * (SpectrumSettings::getAveragingValue(averagingIndex, m_settings.m_averagingMode) == 0 ?
             1 :
             SpectrumSettings::getAveragingValue(averagingIndex, m_settings.m_averagingMode))) / (float) m_glSpectrum->getSampleRate();
