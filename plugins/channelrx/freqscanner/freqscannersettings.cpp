@@ -203,11 +203,7 @@ void FreqScannerSettings::applySettings(const QStringList& settingsKeys, const F
     }
     if (settingsKeys.contains("frequencies")) {
         m_frequencies = settings.m_frequencies;
-    }
-    if (settingsKeys.contains("enabled")) {
         m_enabled = settings.m_enabled;
-    }
-    if (settingsKeys.contains("notes")) {
         m_notes = settings.m_notes;
     }
     if (settingsKeys.contains("channel")) {
@@ -292,19 +288,6 @@ QString FreqScannerSettings::getDebugString(const QStringList& settingsKeys, boo
             s.append(QString::number(f));
         }
         ostr << " m_frequencies: " << s.join(",").toStdString();
-    }
-    if (settingsKeys.contains("enabled") || force)
-    {
-        // Don't display
-        /*QStringList s;
-        for (auto e : m_enabled) {
-            s.append(e ? "true" : "false");
-        }
-        ostr << " m_enabled: " << s.join(",").toStdString();*/
-    }
-    if (settingsKeys.contains("notes") || force) {
-        // Don't display
-        //ostr << " m_notes: " << m_notes.join(",").toStdString();
     }
     if (settingsKeys.contains("channel") || force) {
         ostr << " m_channel: " << m_channel.toStdString();

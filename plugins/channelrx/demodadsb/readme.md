@@ -80,11 +80,13 @@ Clicking the Display Settings button will open the Display Settings dialog, whic
 * What category of airspaces should be displayed.
 * The distance (in kilometres), from the location set under Preferences > My Position, at which airspaces will be displayed on the map. Displaying too many airspaces will slow down drawing of the map.
 * Whether NAVAIDs, such as VORs, are displayed on the map.
+* Whether callsigns as said by ATC (E.g. Speedbird) are used on the map instead of the airline ICAO designator (E.g. BAW).
 * Whether aircraft photos are displayed for the highlighted aircraft.
 * The timeout, in seconds, after which an aircraft will be removed from the table and map, if an ADS-B frame has not been received from it.
 * The font used for the table.
 * Whether demodulator statistics are displayed (primarily an option for developers).
 * Whether the columns in the table are automatically resized after an aircraft is added to it. If unchecked, columns can be resized manually and should be saved with presets.
+* The transistion altitude in feet for use in ATC mode. Below the TA, altitude will be displayed. Above the TA flight levels will be displayed.
 
 You can also enter an [aviationstack](https://aviationstack.com/product) API key, needed to download flight information (such as departure and arrival airports and times).
 
@@ -99,6 +101,10 @@ Checking this button draws a line on the map showing the highlighted aircraft's 
 <h3>14: Display Flight All Paths</h3>
 
 Checking this button draws flight paths for all aircraft.
+
+<h3>ATC Mode</h3>
+
+When in ATC mode, the map will display callsign, alitude, ground speed and type for all aircraft. When unchecked, only callsign (or ICAO, until callsign is received) will be displayed.
 
 <h3>15: Download flight information for selected flight</h3>
 
@@ -235,9 +241,9 @@ Click to specify the name of the .csv file which received ADS-B frames are logge
 
 Click to specify a previously written ADS-B .csv log file, which is read and used to update the ADS-B data table and map.
 
-<h3>21: Select device set</h3>
+<h3>21: AM Demod</h3>
 
-Specify the SDRangel device set that will be have its centre frequency set when an airport ATC frequency is clicked on the map. Typically, this device set would be a second SDR (as ATC frequencies are around 120MHz, so they can not be received simultaneously with 1090MHz for ADS-B) and have an AM Demodulator channel plugin.
+Specify the AM Demodulator that will be have its centre frequency set when an airport ATC frequency is clicked on the map.
 
 <h3>ADS-B Data</h3>
 
@@ -247,6 +253,7 @@ The table displays the decoded ADS-B and Mode-S data for each aircraft along sid
 
 * ICAO ID - 24-bit hexadecimal ICAO aircraft address. This is unique for each aircraft. (ADS-B)
 * Callsign - Aircraft callsign (which is sometimes also the flight number). (ADS-B / Mode-S)
+* ATC callsign - Callsign used by ATC (E.g. Speedbird for British Airways).
 * Aircraft - The aircraft model. (DB)
 * Airline - The logo of the operator of the aircraft (or owner if no operator known). (DB)
 * Country - The flag of the country the aircraft is registered in. (DB)
@@ -321,7 +328,7 @@ The map displays aircraft locations and data geographically. Four types of map c
 The antenna location is placed according to My Position set under the Preferences > My Position menu.
 If My Position is not set correctly, the position of aircraft may not be computed correctly.
 
-Aircraft are only placed upon the map when a position can be calculated, which can require several frames to be received.
+Aircraft are only placed upon the map when a position can be calculated, which can require several ADS-B frames to be received.
 
 * To pan around the map, click the left mouse button and drag. To zoom in or out, use the mouse scroll wheel.
 * Left clicking on an aircraft will highlight the corresponding row in the table for the aircraft and the information box on the map will be coloured orange, rather than blue.
@@ -330,13 +337,14 @@ Aircraft are only placed upon the map when a position can be calculated, which c
 * Left clicking the information box next to an airport will reveal ATC frequencies for the airport (if the OurAirports database has been downloaded) and METAR weather information (if the CheckWX API key has been entered).
 The METAR for the airport is downloaded each time the information box is opened.
 This information box can be closed by left clicking on the airport identifier.
-Double clicking on one of the listed frequencies, will set it as the centre frequency on the selected SDRangel device set (21).
+Double clicking on one of the listed frequencies, will tune the AM Demod  (21) to that frequency.
 The Az/El row gives the azimuth and elevation of the airport from the location set under Preferences > My Position. Double clicking on this row will set the airport as the active target.
+* Right clicking on an airport will display a popup menu, allowing range rings to be shown or hidden, and for the ATC frequencies for the airport to be send to a Frequency Scanner.
 
 <h2>Attribution</h2>
 
 Airline logos and flags are by Steve Hibberd from https://radarspotting.com
 
-Map icons are by Alice Design, Alex Ahineev, Botho Willer, Verry Obito, Sean Maldjia, Tinashe Mugayi, Georgiana Ionescu, Andreas Vögele, Tom Fricker, Will Sullivan, Tim Tores, BGBOXXX Design, and Angriawan Ditya Zulkarnain from the Noun Project https://thenounproject.com/
+Map icons are by Cuperto, Alice Design, Alex Ahineev, Botho Willer, Verry Obito, Sean Maldjia, Tinashe Mugayi, Georgiana Ionescu, Andreas Vögele, Tom Fricker, Will Sullivan, Tim Tores, BGBOXXX Design, and Angriawan Ditya Zulkarnain from the Noun Project https://thenounproject.com/
 
 NDB icon is by Inductiveload from WikiMedia.

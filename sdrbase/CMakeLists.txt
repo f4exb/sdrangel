@@ -213,6 +213,7 @@ set(sdrbase_SOURCES
     settings/mainsettings.cpp
     settings/rollupstate.cpp
 
+    util/airlines.cpp
     util/ais.cpp
     util/android.cpp
     util/aprsfi.cpp
@@ -447,6 +448,7 @@ set(sdrbase_HEADERS
     settings/mainsettings.h
     settings/rollupstate.h
 
+    util/airlines.h
     util/ais.h
     util/android.h
     util/aprsfi.h

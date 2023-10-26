@@ -511,7 +511,7 @@
         </property>
         <property name="icon">
          <iconset resource="icons.qrc">
-          <normaloff>:/icons/controltower.png</normaloff>:/icons/controltower.png</iconset>
+          <normaloff>:/icons/airport.png</normaloff>:/icons/airport.png</iconset>
         </property>
        </widget>
       </item>
@@ -574,6 +574,26 @@
         <property name="icon">
          <iconset resource="icons.qrc">
           <normaloff>:/icons/allflightpaths.png</normaloff>:/icons/allflightpaths.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="atcLabels">
+        <property name="toolTip">
+         <string>Display altitude, speed and short paths for all aircraft</string>
+        </property>
+        <property name="text">
+         <string>^</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/controltower.png</normaloff>:/icons/controltower.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -729,16 +749,16 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="amDemodLabel">
         <property name="text">
-         <string>Device</string>
+         <string>AM</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="device">
+       <widget class="QComboBox" name="amDemod">
         <property name="toolTip">
-         <string>Receive device set to set frequency on when selecting an ATC frequency on the map</string>
+         <string>AM Demod to tune when selecting an ATC frequency on the map</string>
         </property>
        </widget>
       </item>
@@ -861,6 +881,14 @@
            </property>
            <property name="toolTip">
             <string>Callsign. Links to www.flightradar24.com</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>ATC Callsign</string>
+           </property>
+           <property name="toolTip">
+            <string>Airline callsign used by ATC</string>
            </property>
           </column>
           <column>
@@ -1478,7 +1506,7 @@
   <tabstop>logFilename</tabstop>
   <tabstop>logOpen</tabstop>
   <tabstop>findOnMapFeature</tabstop>
-  <tabstop>device</tabstop>
+  <tabstop>amDemod</tabstop>
   <tabstop>adsbData</tabstop>
   <tabstop>map</tabstop>
  </tabstops>

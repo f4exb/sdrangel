@@ -853,6 +853,7 @@ public:
     PluginManager *getPluginManager() const { return m_pluginManager; }
     std::vector<DeviceSet*>& getDeviceSets() { return m_deviceSets; }
     std::vector<FeatureSet*>& getFeatureeSets() { return m_featureSets; }
+    std::vector<ChannelAPI*> getChannels(const QString& uri); //!< Get all channels from any device set with the given URI
     void setLoggingOptions();
     DeviceAPI *getDevice(unsigned int deviceSetIndex);
     ChannelAPI *getChannel(unsigned int deviceSetIndex, int channelIndex);

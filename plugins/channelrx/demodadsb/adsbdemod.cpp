@@ -49,6 +49,7 @@
 #include "adsbdemodworker.h"
 
 MESSAGE_CLASS_DEFINITION(ADSBDemod::MsgConfigureADSBDemod, Message)
+MESSAGE_CLASS_DEFINITION(ADSBDemod::MsgAircraftReport, Message)
 
 const char* const ADSBDemod::m_channelIdURI = "sdrangel.channel.adsbdemod";
 const char* const ADSBDemod::m_channelId = "ADSBDemod";
@@ -184,6 +185,12 @@ bool ADSBDemod::handleMessage(const Message& cmd)
             m_guiMessageQueue->push(new DSPSignalNotification(notif));
         }
 
+        return true;
+    }
+    else if (MsgAircraftReport::match(cmd))
+    {
+        MsgAircraftReport& msg = (MsgAircraftReport&) cmd;
+        m_aircraftReport = msg.getReport();
         return true;
     }
     else
@@ -635,6 +642,19 @@ void ADSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
         response.getAdsbDemodReport()->setTargetAzimuth(m_targetAzimuth);
         response.getAdsbDemodReport()->setTargetElevation(m_targetElevation);
         response.getAdsbDemodReport()->setTargetRange(m_targetRange);
+    }
+
+    QList<SWGSDRangel::SWGADSBDemodAircraftState *> *list = response.getAdsbDemodReport()->getAircraftState();
+    for (const auto& report : m_aircraftReport)
+    {
+        SWGSDRangel::SWGADSBDemodAircraftState *aircraftState = new SWGSDRangel::SWGADSBDemodAircraftState();
+        //aircraftState->setIcao(new QString(report.m_icao));
+        aircraftState->setCallsign(new QString(report.m_callsign));
+        aircraftState->setLatitude(report.m_latitude);
+        aircraftState->setLongitude(report.m_longitude);
+        aircraftState->setAltitude(report.m_altitude);
+        aircraftState->setGroundSpeed(report.m_groundSpeed);
+        list->append(aircraftState);
     }
 }
 
