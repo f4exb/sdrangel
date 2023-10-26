@@ -10,19 +10,10 @@ FreqScannerSettings:
     threshold:
       type: number
       format: float
-    m_frequencies:
+    frequencies:
       type: array
       items:
-        type: integer
-        format: int64
-    m_enabled:
-      type: array
-      items:
-        type: integer
-    m_notes:
-      type: array
-      items:
-        type: string
+        $ref: "http://swgserver:8081/api/swagger/include/FreqScanner.yaml#/FreqScannerFrequency"
     channel:
       type: string
     scanTime:
@@ -68,3 +59,13 @@ FreqScannerReport:
   properties:
     channelSampleRate:
       type: integer
+
+FreqScannerFrequency:
+  properties:
+    frequency:
+      type: integer
+      format: int64
+    enabled:
+      type: integer
+    notes:
+      type: string
