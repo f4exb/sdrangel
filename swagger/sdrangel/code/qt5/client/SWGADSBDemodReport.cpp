@@ -40,6 +40,8 @@ SWGADSBDemodReport::SWGADSBDemodReport() {
     m_target_elevation_isSet = false;
     target_range = 0.0f;
     m_target_range_isSet = false;
+    aircraft_state = nullptr;
+    m_aircraft_state_isSet = false;
 }
 
 SWGADSBDemodReport::~SWGADSBDemodReport() {
@@ -60,6 +62,8 @@ SWGADSBDemodReport::init() {
     m_target_elevation_isSet = false;
     target_range = 0.0f;
     m_target_range_isSet = false;
+    aircraft_state = new QList<SWGADSBDemodAircraftState*>();
+    m_aircraft_state_isSet = false;
 }
 
 void
@@ -72,6 +76,13 @@ SWGADSBDemodReport::cleanup() {
 
 
 
+    if(aircraft_state != nullptr) { 
+        auto arr = aircraft_state;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete aircraft_state;
+    }
 }
 
 SWGADSBDemodReport*
@@ -97,6 +108,8 @@ SWGADSBDemodReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&target_range, pJson["targetRange"], "float", "");
     
+    
+    ::SWGSDRangel::setValue(&aircraft_state, pJson["aircraftState"], "QList", "SWGADSBDemodAircraftState");
 }
 
 QString
@@ -130,6 +143,9 @@ SWGADSBDemodReport::asJsonObject() {
     }
     if(m_target_range_isSet){
         obj->insert("targetRange", QJsonValue(target_range));
+    }
+    if(aircraft_state && aircraft_state->size() > 0){
+        toJsonArray((QList<void*>*)aircraft_state, obj, "aircraftState", "SWGADSBDemodAircraftState");
     }
 
     return obj;
@@ -195,6 +211,16 @@ SWGADSBDemodReport::setTargetRange(float target_range) {
     this->m_target_range_isSet = true;
 }
 
+QList<SWGADSBDemodAircraftState*>*
+SWGADSBDemodReport::getAircraftState() {
+    return aircraft_state;
+}
+void
+SWGADSBDemodReport::setAircraftState(QList<SWGADSBDemodAircraftState*>* aircraft_state) {
+    this->aircraft_state = aircraft_state;
+    this->m_aircraft_state_isSet = true;
+}
+
 
 bool
 SWGADSBDemodReport::isSet(){
@@ -216,6 +242,9 @@ SWGADSBDemodReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_target_range_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(aircraft_state && (aircraft_state->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

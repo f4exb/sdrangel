@@ -23,6 +23,7 @@
 
 
 #include "SWGChannelMarker.h"
+#include "SWGFreqScannerFrequency.h"
 #include "SWGRollupState.h"
 #include <QList>
 #include <QString>
@@ -54,14 +55,8 @@ public:
     float getThreshold();
     void setThreshold(float threshold);
 
-    QList<qint64>* getMFrequencies();
-    void setMFrequencies(QList<qint64>* m_frequencies);
-
-    QList<qint32>* getMEnabled();
-    void setMEnabled(QList<qint32>* m_enabled);
-
-    QList<QString*>* getMNotes();
-    void setMNotes(QList<QString*>* m_notes);
+    QList<SWGFreqScannerFrequency*>* getFrequencies();
+    void setFrequencies(QList<SWGFreqScannerFrequency*>* frequencies);
 
     QString* getChannel();
     void setChannel(QString* channel);
@@ -127,14 +122,8 @@ private:
     float threshold;
     bool m_threshold_isSet;
 
-    QList<qint64>* m_frequencies;
-    bool m_m_frequencies_isSet;
-
-    QList<qint32>* m_enabled;
-    bool m_m_enabled_isSet;
-
-    QList<QString*>* m_notes;
-    bool m_m_notes_isSet;
+    QList<SWGFreqScannerFrequency*>* frequencies;
+    bool m_frequencies_isSet;
 
     QString* channel;
     bool m_channel_isSet;

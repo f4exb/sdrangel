@@ -11,19 +11,17 @@
  */
 
 /*
- * SWGADSBDemodReport.h
+ * SWGFreqScannerFrequency.h
  *
- * ADSBDemod
+ * 
  */
 
-#ifndef SWGADSBDemodReport_H_
-#define SWGADSBDemodReport_H_
+#ifndef SWGFreqScannerFrequency_H_
+#define SWGFreqScannerFrequency_H_
 
 #include <QJsonObject>
 
 
-#include "SWGADSBDemodAircraftState.h"
-#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -31,67 +29,43 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGADSBDemodReport: public SWGObject {
+class SWG_API SWGFreqScannerFrequency: public SWGObject {
 public:
-    SWGADSBDemodReport();
-    SWGADSBDemodReport(QString* json);
-    virtual ~SWGADSBDemodReport();
+    SWGFreqScannerFrequency();
+    SWGFreqScannerFrequency(QString* json);
+    virtual ~SWGFreqScannerFrequency();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGADSBDemodReport* fromJson(QString &jsonString) override;
+    virtual SWGFreqScannerFrequency* fromJson(QString &jsonString) override;
 
-    float getChannelPowerDb();
-    void setChannelPowerDb(float channel_power_db);
+    qint64 getFrequency();
+    void setFrequency(qint64 frequency);
 
-    qint32 getChannelSampleRate();
-    void setChannelSampleRate(qint32 channel_sample_rate);
+    qint32 getEnabled();
+    void setEnabled(qint32 enabled);
 
-    QString* getTargetName();
-    void setTargetName(QString* target_name);
-
-    float getTargetAzimuth();
-    void setTargetAzimuth(float target_azimuth);
-
-    float getTargetElevation();
-    void setTargetElevation(float target_elevation);
-
-    float getTargetRange();
-    void setTargetRange(float target_range);
-
-    QList<SWGADSBDemodAircraftState*>* getAircraftState();
-    void setAircraftState(QList<SWGADSBDemodAircraftState*>* aircraft_state);
+    QString* getNotes();
+    void setNotes(QString* notes);
 
 
     virtual bool isSet() override;
 
 private:
-    float channel_power_db;
-    bool m_channel_power_db_isSet;
+    qint64 frequency;
+    bool m_frequency_isSet;
 
-    qint32 channel_sample_rate;
-    bool m_channel_sample_rate_isSet;
+    qint32 enabled;
+    bool m_enabled_isSet;
 
-    QString* target_name;
-    bool m_target_name_isSet;
-
-    float target_azimuth;
-    bool m_target_azimuth_isSet;
-
-    float target_elevation;
-    bool m_target_elevation_isSet;
-
-    float target_range;
-    bool m_target_range_isSet;
-
-    QList<SWGADSBDemodAircraftState*>* aircraft_state;
-    bool m_aircraft_state_isSet;
+    QString* notes;
+    bool m_notes_isSet;
 
 };
 
 }
 
-#endif /* SWGADSBDemodReport_H_ */
+#endif /* SWGFreqScannerFrequency_H_ */

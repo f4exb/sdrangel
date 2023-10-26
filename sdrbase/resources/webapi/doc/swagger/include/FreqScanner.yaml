@@ -1,42 +1,40 @@
-AMDemodSettings:
-  description: AMDemod
+FreqScannerSettings:
+  description: FreqScanner
   properties:
-    inputFrequencyOffset:
+    channelBandwidth:
+      description: channel RF bandwidth in Hz
+      type: integer
+    channelFrequencyOffset:
       description: channel center frequency shift from baseband center in Hz
       type: integer
-      format: int64
-    rfBandwidth:
-      description: channel RF bandwidth in Hz (floors to next 100 Hz)
+    threshold:
       type: number
       format: float
-    afBandwidth:
-      description: AF bandwidth in Hz
+    frequencies:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/FreqScanner.yaml#/FreqScannerFrequency"
+    channel:
+      type: string
+    scanTime:
       type: number
       format: float
-    squelch:
-      description: power squelch threshold in decibels
+    retransmitTime:
       type: number
       format: float
-    volume:
+    tuneTime:
       type: number
       format: float
-    audioMute:
+    priority:
       type: integer
-    bandpassEnable:
-      description: use bandpass filter (1 for yes, 0 for no)
+    measurement:
+      type: integer
+    mode:
       type: integer
     rgbColor:
       type: integer
     title:
       type: string
-    audioDeviceName:
-      type: string
-    pll:
-      description: PLL active (for synchronous AM)
-      type: integer
-    syncAMOperation:
-      description: Synchronous AM sidebands mode (DSB, USB, LSB)
-      type: integer
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
@@ -56,17 +54,18 @@ AMDemodSettings:
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
-AMDemodReport:
-  description: AMDemod
+FreqScannerReport:
+  description: FreqScanner
   properties:
-    channelPowerDB:
-      description: power received in channel (dB)
-      type: number
-      format: float
-    squelch:
-      description: squelch status (1 if open else 0)
-      type: integer
-    audioSampleRate:
-      type: integer
     channelSampleRate:
       type: integer
+
+FreqScannerFrequency:
+  properties:
+    frequency:
+      type: integer
+      format: int64
+    enabled:
+      type: integer
+    notes:
+      type: string

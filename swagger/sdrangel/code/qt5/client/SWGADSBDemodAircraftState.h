@@ -11,19 +11,17 @@
  */
 
 /*
- * SWGADSBDemodReport.h
+ * SWGADSBDemodAircraftState.h
  *
- * ADSBDemod
+ * 
  */
 
-#ifndef SWGADSBDemodReport_H_
-#define SWGADSBDemodReport_H_
+#ifndef SWGADSBDemodAircraftState_H_
+#define SWGADSBDemodAircraftState_H_
 
 #include <QJsonObject>
 
 
-#include "SWGADSBDemodAircraftState.h"
-#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -31,67 +29,61 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGADSBDemodReport: public SWGObject {
+class SWG_API SWGADSBDemodAircraftState: public SWGObject {
 public:
-    SWGADSBDemodReport();
-    SWGADSBDemodReport(QString* json);
-    virtual ~SWGADSBDemodReport();
+    SWGADSBDemodAircraftState();
+    SWGADSBDemodAircraftState(QString* json);
+    virtual ~SWGADSBDemodAircraftState();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGADSBDemodReport* fromJson(QString &jsonString) override;
+    virtual SWGADSBDemodAircraftState* fromJson(QString &jsonString) override;
 
-    float getChannelPowerDb();
-    void setChannelPowerDb(float channel_power_db);
+    QString* getIcao();
+    void setIcao(QString* icao);
 
-    qint32 getChannelSampleRate();
-    void setChannelSampleRate(qint32 channel_sample_rate);
+    QString* getCallsign();
+    void setCallsign(QString* callsign);
 
-    QString* getTargetName();
-    void setTargetName(QString* target_name);
+    float getLatitude();
+    void setLatitude(float latitude);
 
-    float getTargetAzimuth();
-    void setTargetAzimuth(float target_azimuth);
+    float getLongitude();
+    void setLongitude(float longitude);
 
-    float getTargetElevation();
-    void setTargetElevation(float target_elevation);
+    qint32 getAltitude();
+    void setAltitude(qint32 altitude);
 
-    float getTargetRange();
-    void setTargetRange(float target_range);
-
-    QList<SWGADSBDemodAircraftState*>* getAircraftState();
-    void setAircraftState(QList<SWGADSBDemodAircraftState*>* aircraft_state);
+    qint32 getGroundSpeed();
+    void setGroundSpeed(qint32 ground_speed);
 
 
     virtual bool isSet() override;
 
 private:
-    float channel_power_db;
-    bool m_channel_power_db_isSet;
+    QString* icao;
+    bool m_icao_isSet;
 
-    qint32 channel_sample_rate;
-    bool m_channel_sample_rate_isSet;
+    QString* callsign;
+    bool m_callsign_isSet;
 
-    QString* target_name;
-    bool m_target_name_isSet;
+    float latitude;
+    bool m_latitude_isSet;
 
-    float target_azimuth;
-    bool m_target_azimuth_isSet;
+    float longitude;
+    bool m_longitude_isSet;
 
-    float target_elevation;
-    bool m_target_elevation_isSet;
+    qint32 altitude;
+    bool m_altitude_isSet;
 
-    float target_range;
-    bool m_target_range_isSet;
-
-    QList<SWGADSBDemodAircraftState*>* aircraft_state;
-    bool m_aircraft_state_isSet;
+    qint32 ground_speed;
+    bool m_ground_speed_isSet;
 
 };
 
 }
 
-#endif /* SWGADSBDemodReport_H_ */
+#endif /* SWGADSBDemodAircraftState_H_ */

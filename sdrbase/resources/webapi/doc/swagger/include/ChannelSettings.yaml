@@ -63,6 +63,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/FreeDVDemod.yaml#/FreeDVDemodSettings"
     FreeDVModSettings:
       $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModSettings"
+    FreqScannerSettings:
+      $ref: "/doc/swagger/include/FreqScanner.yaml#/FreqScannerSettings"
     FreqTrackerSettings:
       $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
     FT8DemodSettings:
