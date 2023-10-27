@@ -185,7 +185,8 @@ void PSK31Baseband::applySettings(const PSK31Settings& settings, bool force)
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer->setChannelization(m_channelizer->getChannelSampleRate(), settings.m_inputFrequencyOffset);
+        // Use fixed sample rate of 48000, so Cosine filter doesn't have a massive number of taps at high baseband sample rates (See #1862)
+        m_channelizer->setChannelization(48000, settings.m_inputFrequencyOffset);
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
