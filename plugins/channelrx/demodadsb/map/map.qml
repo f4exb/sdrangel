@@ -328,61 +328,189 @@ Item {
 
     Component {
         id: airportComponent
-        MapQuickItem {
-            id: aircraft
-            anchorPoint.x: image.width/2
-            anchorPoint.y: image.height/2
-            coordinate: position
-            zoomLevel: airportZoomLevel
+        MapItemGroup {
+            MapItemGroup {
+                property var groupVisible: false
+                id: rangeGroup
+                MapCircle {
+                    id: circle5nm
+                    center: position
+                    color: "transparent"
+                    border.color: "gray"
+                    radius: 9260 // 5nm in metres
+                    visible: rangeGroup.groupVisible
+                }
+                MapCircle {
+                    id: circle10nm
+                    center: position
+                    color: "transparent"
+                    border.color: "gray"
+                    radius: 18520
+                    visible: rangeGroup.groupVisible
+                }
+                MapCircle {
+                    id: circle15nm
+                    center: airport.coordinate
+                    color: "transparent"
+                    border.color: "gray"
+                    radius: 27780
+                    visible: rangeGroup.groupVisible
+                }
+                MapQuickItem {
+                    id: text5nm
+                    coordinate {
+                        latitude: position.latitude
+                        longitude: position.longitude + (5/60)/Math.cos(Math.abs(position.latitude)*Math.PI/180)
+                    }
+                    anchorPoint.x: 0
+                    anchorPoint.y: height/2
+                    sourceItem: Text {
+                        color: "grey"
+                        text: "5nm"
+                    }
+                    visible: rangeGroup.groupVisible
+                }
+                MapQuickItem {
+                    id: text10nm
+                    coordinate {
+                        latitude: position.latitude
+                        longitude: position.longitude + (10/60)/Math.cos(Math.abs(position.latitude)*Math.PI/180)
+                    }
+                    anchorPoint.x: 0
+                    anchorPoint.y: height/2
+                    sourceItem: Text {
+                        color: "grey"
+                        text: "10nm"
+                    }
+                    visible: rangeGroup.groupVisible
+                }
+                MapQuickItem {
+                    id: text15nm
+                    coordinate {
+                        latitude: position.latitude
+                        longitude: position.longitude + (15/60)/Math.cos(Math.abs(position.latitude)*Math.PI/180)
+                    }
+                    anchorPoint.x: 0
+                    anchorPoint.y: height/2
+                    sourceItem: Text {
+                        color: "grey"
+                        text: "15nm"
+                    }
+                    visible: rangeGroup.groupVisible
+                }
+            }
 
-            sourceItem: Grid {
-                columns: 1
-                Grid {
-                    horizontalItemAlignment: Grid.AlignHCenter
-                    layer.enabled: smoothing
-                    layer.smooth: smoothing
-                    Image {
-                        id: image
-                        source: airportImage
-                        visible: !lightIcons
-                    }
-                    ColorOverlay {
-                        cached: true
-                        width: image.width
-                        height: image.height
-                        source: image
-                        color: "#c0ffffff"
-                        visible: lightIcons
-                    }
-                    Rectangle {
-                        id: bubble
-                        color: bubbleColour
-                        border.width: 1
-                        width: text.width + 5
-                        height: text.height + 5
-                        radius: 5
-                        Text {
-                            id: text
-                            anchors.centerIn: parent
-                            text: airportData
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: (mouse) => {
-                                if (showFreq) {
-                                    var freqIdx = Math.floor((mouse.y-5)/((height-10)/airportDataRows))
-                                    if (freqIdx == 0) {
-                                        showFreq = false
+            MapQuickItem {
+                id: airport
+                anchorPoint.x: image.width/2
+                anchorPoint.y: image.height/2
+                coordinate: position
+                zoomLevel: airportZoomLevel
+                sourceItem: Grid {
+                    columns: 1
+                    Grid {
+                        horizontalItemAlignment: Grid.AlignHCenter
+                        layer.enabled: smoothing
+                        layer.smooth: smoothing
+                        Image {
+                            id: image
+                            source: airportImage
+                            visible: !lightIcons
+                            MouseArea {
+                                anchors.fill: parent
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                onClicked: (mouse) => {
+                                    if (mouse.button === Qt.RightButton) {
+                                        showRangeItem.visible = !rangeGroup.groupVisible
+                                        hideRangeItem.visible = rangeGroup.groupVisible
+                                        menuItems.clear()
+                                        var scanners = airportModel.getFreqScanners()
+                                        for (var i = 0; i < scanners.length; i++) {
+                                            menuItems.append({
+                                                text: "Send to Frequency Scanner " + scanners[i],
+                                                airport: index,
+                                                scanner: scanners[i]
+                                            })
+                                        }
+                                        contextMenu.popup()
                                     }
-                                } else {
-                                   showFreq = true
+                                }
+                                onDoubleClicked: (mouse) => {
+                                    rangeGroup.groupVisible = !rangeGroup.groupVisible
+                                }
+
+                                ListModel {
+                                    id: menuItems
+                                }
+
+                                Menu {
+                                    id: contextMenu
+                                    MenuItem {
+                                        id: showRangeItem
+                                        text: "Show range rings"
+                                        onTriggered: rangeGroup.groupVisible = true
+                                        height: visible ? implicitHeight : 0
+                                    }
+                                    MenuItem {
+                                        id: hideRangeItem
+                                        text: "Hide range rings"
+                                        onTriggered: rangeGroup.groupVisible = false
+                                        height: visible ? implicitHeight : 0
+                                    }
+                                    Instantiator {
+                                        model: menuItems
+                                        MenuItem {
+                                            text: model.text
+                                            onTriggered: airportModel.sendToFreqScanner(model.airport, model.scanner)
+                                        }
+                                        onObjectAdded: function(index, object) {
+                                            contextMenu.insertItem(index, object)
+                                        }
+                                        onObjectRemoved: function(index, object) {
+                                            contextMenu.removeItem(object)
+                                        }
+                                    }
                                 }
                             }
-                            onDoubleClicked: (mouse) => {
-                                if (showFreq) {
-                                    var freqIdx = Math.floor((mouse.y-5)/((height-10)/airportDataRows))
-                                    if (freqIdx != 0) {
-                                        selectedFreq = freqIdx - 1
+                        }
+                        ColorOverlay {
+                            cached: true
+                            width: image.width
+                            height: image.height
+                            source: image
+                            color: "#c0ffffff"
+                            visible: lightIcons
+                        }
+                        Rectangle {
+                            id: bubble
+                            color: bubbleColour
+                            border.width: 1
+                            width: text.width + 5
+                            height: text.height + 5
+                            radius: 5
+                            Text {
+                                id: text
+                                anchors.centerIn: parent
+                                text: airportData
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: (mouse) => {
+                                    if (showFreq) {
+                                        var freqIdx = Math.floor((mouse.y-5)/((height-10)/airportDataRows))
+                                        if (freqIdx == 0) {
+                                            showFreq = false
+                                        }
+                                    } else {
+                                        showFreq = true
+                                    }
+                                }
+                                onDoubleClicked: (mouse) => {
+                                    if (showFreq) {
+                                        var freqIdx = Math.floor((mouse.y-5)/((height-10)/airportDataRows))
+                                        if (freqIdx != 0) {
+                                            selectedFreq = freqIdx - 1
+                                        }
                                     }
                                 }
                             }

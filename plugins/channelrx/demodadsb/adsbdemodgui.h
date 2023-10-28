@@ -48,6 +48,7 @@
 #include "adsbdemodsettings.h"
 #include "util/ourairportsdb.h"
 #include "util/osndb.h"
+#include "util/airlines.h"
 
 class PluginAPI;
 class DeviceUISet;
@@ -150,6 +151,7 @@ struct Aircraft {
     bool m_showAll;
 
     QVariantList m_coordinates; // Coordinates we've recorded the aircraft at
+    QList<QDateTime> m_coordinateDateTimes;
 
     AircraftInformation *m_aircraftInfo; // Info about the aircraft from the database
     QString m_aircraft3DModel;    // 3D model for map based on aircraft type
@@ -180,6 +182,7 @@ struct Aircraft {
     // GUI table items for above data
     QTableWidgetItem *m_icaoItem;
     QTableWidgetItem *m_callsignItem;
+    QTableWidgetItem* m_atcCallsignItem;
     QTableWidgetItem *m_modelItem;
     QTableWidgetItem *m_airlineItem;
     QTableWidgetItem *m_latitudeItem;
@@ -299,6 +302,7 @@ struct Aircraft {
         // These are deleted by QTableWidget
         m_icaoItem = new QTableWidgetItem();
         m_callsignItem = new QTableWidgetItem();
+        m_atcCallsignItem = new QTableWidgetItem();
         m_modelItem = new QTableWidgetItem();
         m_airlineItem = new QTableWidgetItem();
         m_altitudeItem = new QTableWidgetItem();
@@ -353,9 +357,11 @@ struct Aircraft {
     }
 
     QString getImage() const;
-    QString getText(bool all=false) const;
+    QString getText(const ADSBDemodSettings *settings, bool all=false) const;
+    // Label to use for aircraft on map
+    QString getLabel(const ADSBDemodSettings *settings) const;
 
-    // Name to use when selected as a target
+    // Name to use when selected as a target (E.g. for use as target name in Rotator Controller)
     QString targetName()
     {
         if (!m_callsign.isEmpty())
@@ -463,6 +469,12 @@ public:
         allAircraftUpdated();
     }
 
+     void setSettings(const ADSBDemodSettings *settings)
+    {
+        m_settings = settings;
+        allAircraftUpdated();
+    }
+
     Q_INVOKABLE void findOnMap(int index);
 
     void updateAircraftInformation(QSharedPointer<const QHash<int, AircraftInformation *>> aircraftInfo)
@@ -481,6 +493,7 @@ private:
     QList<Aircraft *> m_aircrafts;
     bool m_flightPaths;
     bool m_allFlightPaths;
+    const ADSBDemodSettings *m_settings;
 };
 
 // Airport data model used by QML map item
@@ -622,6 +635,9 @@ public:
             }
         }
     }
+
+    Q_INVOKABLE QStringList getFreqScanners() const;
+    Q_INVOKABLE void sendToFreqScanner(int index, const QString& id);
 
 private:
     ADSBDemodGUI *m_gui;
@@ -874,7 +890,7 @@ public:
     void highlightAircraft(Aircraft *aircraft);
     void targetAircraft(Aircraft *aircraft);
     void target(const QString& name, float az, float el, float range);
-    bool setFrequency(float frequency);
+    bool setFrequency(qint64 frequency);
     bool useSIUints() const { return m_settings.m_siUnits; }
     Q_INVOKABLE void clearHighlighted();
     QString get3DModel(const QString &aircraft, const QString &operatorICAO) const;
@@ -974,6 +990,7 @@ private:
     void clearFromMap(const QString& name);
     void sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimation *> *animations);
     Aircraft *getAircraft(int icao, bool &newAircraft);
+    void atcCallsign(Aircraft *aircraft);
     void callsignToFlight(Aircraft *aircraft);
     int roundTo50Feet(int alt);
     bool calcAirTemp(Aircraft *aircraft);
@@ -1006,7 +1023,7 @@ private:
     void updateAirports();
     void updateAirspaces();
     void updateNavAids();
-    void updateDeviceSetList();
+    void updateChannelList();
     QAction *createCheckableItem(QString& text, int idx, bool checked);
     Aircraft* findAircraftByFlight(const QString& flight);
     QString dataTimeToShortString(QDateTime dt);
@@ -1021,6 +1038,7 @@ private:
     int grayToBinary(int gray, int bits) const;
     void redrawMap();
     void applyImportSettings();
+    void sendAircraftReport();
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
@@ -1050,11 +1068,12 @@ private slots:
     void on_getAirspacesDB_clicked();
     void on_flightPaths_clicked(bool checked);
     void on_allFlightPaths_clicked(bool checked);
+    void on_atcLabels_clicked(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
     void tick();
-    void on_device_currentIndexChanged(int index);
+    void on_amDemod_currentIndexChanged(int index);
     void feedSelect(const QPoint& p);
     void on_displaySettings_clicked();
     void on_logEnable_clicked(bool checked=false);

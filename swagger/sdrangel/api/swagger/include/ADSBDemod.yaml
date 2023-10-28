@@ -126,3 +126,30 @@ ADSBDemodReport:
     targetRange:
       type: number
       format: float
+    aircraftState:
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/ADSBDemod.yaml#/ADSBDemodAircraftState"
+
+ADSBDemodAircraftState:
+  properties:
+    icao:
+      description: "24-bit hex ICAO identifier"
+      type: string
+    callsign:
+      description: "Callsign (E.g. BAW123)"
+      type: string
+    latitude:
+      description: "Latitude of aircraft in degrees"
+      type: number
+      format: float
+    longitude:
+      description: "Longitude of aircraft in degrees"
+      type: number
+      format: float
+    altitude:
+      description: "Altitude of aircraft in feet"
+      type: integer
+    groundSpeed:
+      description: "Groundspeed of aircraft in knots"
+      type: integer

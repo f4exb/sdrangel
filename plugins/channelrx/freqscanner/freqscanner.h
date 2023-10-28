@@ -32,6 +32,8 @@
 #include "freqscannerbaseband.h"
 #include "freqscannersettings.h"
 
+#include "SWGChannelSettings.h"
+
 class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
@@ -406,6 +408,8 @@ private:
     void initScan();
     void processScanResults(const QDateTime& fftStartTime, const QList<MsgScanResult::ScanResult>& results);
     void setDeviceCenterFrequency(qint64 frequency);
+
+    static QList<SWGSDRangel::SWGFreqScannerFrequency *> *createFrequencyList(const FreqScannerSettings& settings);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

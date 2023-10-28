@@ -14,6 +14,7 @@
 #define ModelFactory_H_
 
 
+#include "SWGADSBDemodAircraftState.h"
 #include "SWGADSBDemodReport.h"
 #include "SWGADSBDemodSettings.h"
 #include "SWGAFCActions.h"
@@ -151,6 +152,7 @@
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModReport.h"
 #include "SWGFreeDVModSettings.h"
+#include "SWGFreqScannerFrequency.h"
 #include "SWGFreqScannerReport.h"
 #include "SWGFreqScannerSettings.h"
 #include "SWGFreqTrackerReport.h"
@@ -372,6 +374,11 @@
 namespace SWGSDRangel {
 
   inline void* create(QString type) {
+    if(QString("SWGADSBDemodAircraftState").compare(type) == 0) {
+      SWGADSBDemodAircraftState *obj = new SWGADSBDemodAircraftState();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGADSBDemodReport").compare(type) == 0) {
       SWGADSBDemodReport *obj = new SWGADSBDemodReport();
       obj->init();
@@ -1054,6 +1061,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFreeDVModSettings").compare(type) == 0) {
       SWGFreeDVModSettings *obj = new SWGFreeDVModSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGFreqScannerFrequency").compare(type) == 0) {
+      SWGFreqScannerFrequency *obj = new SWGFreqScannerFrequency();
       obj->init();
       return obj;
     }

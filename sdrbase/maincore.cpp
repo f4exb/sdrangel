@@ -433,3 +433,20 @@ void MainCore::updateWakeLock()
 }
 #endif
 
+std::vector<ChannelAPI*> MainCore::getChannels(const QString& uri)
+{
+    std::vector<ChannelAPI*> channels;
+
+    for (const auto deviceSet : m_deviceSets)
+    {
+        for (int chi = 0; chi < deviceSet->getNumberOfChannels(); chi++)
+        {
+            ChannelAPI* channel = deviceSet->getChannelAt(chi);
+            if (channel->getURI() == uri) {
+                channels.push_back(channel);
+            }
+        }
+    }
+
+    return channels;
+}

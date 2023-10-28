@@ -62,3 +62,5 @@ RtlSdrReport:
       type: array
       items:
         $ref: "/doc/swagger/include/Structs.yaml#/Gain"
+    tunerType:
+      type: string

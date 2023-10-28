@@ -40,6 +40,7 @@
 #include "channel/channelwebapiutils.h"
 #include "feature/featurewebapiutils.h"
 #include "plugin/pluginapi.h"
+#include "util/airlines.h"
 #include "util/crc.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
@@ -157,7 +158,7 @@ bool ADSBDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data))
     {
-        updateDeviceSetList();
+        updateChannelList();
         displaySettings();
         applySettings(true);
         return true;
@@ -244,7 +245,7 @@ QString Aircraft::getImage() const
     }
 }
 
-QString Aircraft::getText(bool all) const
+QString Aircraft::getText(const ADSBDemodSettings *settings, bool all) const
 {
     QStringList list;
     if (m_showAll || all)
@@ -264,6 +265,10 @@ QString Aircraft::getText(bool all) const
         list.append(QString("ICAO: %1").arg(m_icaoHex));
         if (!m_callsign.isEmpty()) {
             list.append(QString("Callsign: %1").arg(m_callsign));
+        }
+        QString atcCallsign = m_atcCallsignItem->text();
+        if (!atcCallsign.isEmpty()) {
+            list.append(QString("ATC Callsign: %1").arg(atcCallsign));
         }
         if (m_aircraftInfo != nullptr)
         {
@@ -372,15 +377,81 @@ QString Aircraft::getText(bool all) const
             }
         }
     }
-    else if (!m_callsign.isEmpty())
+    else
     {
-        list.append(m_callsign);
+        list.append(getLabel(settings));
+    }
+    return list.join("<br>");
+}
+
+// See https://nats.aero/blog/2017/07/drone-disruption-gatwick/ for example of UK ATC display
+QString Aircraft::getLabel(const ADSBDemodSettings *settings) const
+{
+    QString id;
+    if (!m_callsign.isEmpty())
+    {
+        QString atcCallsign = m_atcCallsignItem->text();
+        if (settings->m_atcCallsigns && !atcCallsign.isEmpty()) {
+            id = QString("%1 %2").arg(atcCallsign).arg(m_callsign.mid(3));
+        } else {
+            id = m_callsign;
+        }
     }
     else
     {
-        list.append(m_icaoHex);
+        id = m_icaoHex;
     }
-    return list.join("<br>");
+    QStringList strings;
+    strings.append(id);
+    if (settings->m_atcLabels)
+    {
+        if (m_altitudeValid)
+        {
+            QStringList row1;
+            int transitionAlt = 6500;
+            QChar c = m_altitude >= settings->m_transitionAlt ? 'F' : 'A';
+            // Convert altitude to flight level
+            int fl = m_altitude / 100;
+            row1.append(QString("%1%2").arg(c).arg(fl));
+            // Indicate whether climbing or descending
+            if (m_verticalRateValid && ((m_verticalRate != 0) || (m_selAltitudeValid && (m_altitude != m_selAltitude))))
+            {
+                QChar dir = m_verticalRate == 0 ? QChar('-') : (m_verticalRate > 0 ? QChar(0x2191) : QChar(0x2193));
+                row1.append(dir);
+            }
+            if (m_selAltitudeValid && (m_altitude != m_selAltitude))
+            {
+                int selfl = m_selAltitude / 100;
+                row1.append(QString::number(selfl));
+            }
+            strings.append(row1.join(" "));
+        }
+        QStringList row2;
+        // Display speed
+        if (m_groundspeedValid) {
+            row2.append(QString("G%2").arg(m_groundspeed));
+        } else if (m_indicatedAirspeedValid) {
+            row2.append(QString("I%1").arg(m_indicatedAirspeed));
+        }
+        // Aircraft type
+        if (m_aircraftInfo && !m_aircraftInfo->m_model.isEmpty())
+        {
+            QString name = m_aircraftInfo->m_model;
+            int idx;
+            idx = name.indexOf(' ');
+            if (idx >= 0) {
+                name = name.left(idx);
+            }
+            idx = name.indexOf('-');
+            if (idx >= 0) {
+                name = name.left(idx);
+            }
+            row2.append(name);
+        }
+        strings.append(row2.join(" "));
+        // FIXME: Add ATC altitude and waypoint from ATC feature
+    }
+    return strings.join("<br>");
 }
 
 QVariant AircraftModel::data(const QModelIndex &index, int role) const
@@ -405,7 +476,7 @@ QVariant AircraftModel::data(const QModelIndex &index, int role) const
     else if (role == AircraftModel::adsbDataRole)
     {
         // Create the text to go in the bubble next to the aircraft
-        return QVariant::fromValue(m_aircrafts[row]->getText());
+        return QVariant::fromValue(m_aircrafts[row]->getText(m_settings));
     }
     else if (role == AircraftModel::aircraftImageRole)
     {
@@ -426,10 +497,28 @@ QVariant AircraftModel::data(const QModelIndex &index, int role) const
     }
     else if (role == AircraftModel::aircraftPathRole)
     {
-       if ((m_flightPaths && m_aircrafts[row]->m_isHighlighted) || m_allFlightPaths)
-           return m_aircrafts[row]->m_coordinates;
-       else
-           return QVariantList();
+        if ((m_flightPaths && m_aircrafts[row]->m_isHighlighted) || m_allFlightPaths)
+        {
+            return m_aircrafts[row]->m_coordinates;
+        }
+        else if (m_settings->m_atcLabels)
+        {
+            // Display last 20 seconds of coordinates
+            QDateTime cutoff = QDateTime::currentDateTime().addSecs(-20);
+            QVariantList coordinates;
+            for (int i = m_aircrafts[row]->m_coordinateDateTimes.size() - 1; i >= 0; i--)
+            {
+                if (m_aircrafts[row]->m_coordinateDateTimes[i] < cutoff) {
+                    break;
+                }
+                coordinates.push_front(m_aircrafts[row]->m_coordinates[i]);
+            }
+            return coordinates;
+        }
+        else
+        {
+            return QVariantList();
+        }
     }
     else if (role == AircraftModel::showAllRole)
         return QVariant::fromValue(m_aircrafts[row]->m_showAll);
@@ -484,6 +573,53 @@ void AircraftModel::findOnMap(int index)
         return;
     }
     FeatureWebAPIUtils::mapFind(m_aircrafts[index]->m_icaoHex);
+}
+
+// Get list of frequeny scanners to use in menu
+QStringList AirportModel::getFreqScanners() const
+{
+    QStringList list;
+    std::vector<ChannelAPI*> channels = MainCore::instance()->getChannels("sdrangel.channel.freqscanner");
+    for (const auto channel : channels) {
+        list.append(QString("R%1:%2").arg(channel->getDeviceSetIndex()).arg(channel->getIndexInDeviceSet()));
+    }
+    return list;
+}
+
+// Send airport frequencies to frequency scanner with given id (Rn:n)
+void AirportModel::sendToFreqScanner(int index, const QString& id)
+{
+    if ((index < 0) || (index >= m_airports.count())) {
+        return;
+    }
+    const AirportInformation *airport = m_airports[index];
+
+    const QRegularExpression re("R([0-9]+):([0-9]+)");
+    QRegularExpressionMatch match = re.match(id);
+    if (match.hasMatch())
+    {
+        int deviceSet = match.capturedTexts()[1].toInt();
+        int channelIndex = match.capturedTexts()[2].toInt();
+
+        QJsonArray array;
+        for (const auto airportFrequency : airport->m_frequencies)
+        {
+            QJsonObject obj;
+            QJsonValue frequency(airportFrequency->m_frequency * 1000000);
+            QJsonValue enabled(1); // true doesn't work
+            QJsonValue notes(QString("%1 %2").arg(airport->m_ident).arg(airportFrequency->m_description));
+            obj.insert("frequency", frequency);
+            obj.insert("enabled", enabled);
+            obj.insert("notes", notes);
+            QJsonValue value(obj);
+            array.append(value);
+        }
+        ChannelWebAPIUtils::patchChannelSetting(deviceSet, channelIndex, "frequencies", array);
+    }
+    else
+    {
+        qDebug() << "AirportModel::sendToFreqScanner: Malformed id: " << id;
+    }
 }
 
 QVariant AirportModel::data(const QModelIndex &index, int role) const
@@ -565,7 +701,12 @@ bool AirportModel::setData(const QModelIndex &index, const QVariant& value, int 
     {
         int idx = value.toInt();
         if ((idx >= 0) && (idx < m_airports[row]->m_frequencies.size()))
-            m_gui->setFrequency(m_airports[row]->m_frequencies[idx]->m_frequency * 1000000);
+        {
+            // Do in two steps to avoid rounding errors
+            qint64 freqkHz = (qint64) std::round(m_airports[row]->m_frequencies[idx]->m_frequency*1000.0);
+            qint64 freqHz = freqkHz * 1000;
+            m_gui->setFrequency(freqHz);
+        }
         else if (idx == m_airports[row]->m_frequencies.size())
         {
             // Set airport as target
@@ -724,10 +865,56 @@ bool NavAidModel::setData(const QModelIndex &index, const QVariant& value, int r
     return true;
 }
 
-// Set selected device to the given centre frequency (used to tune to ATC selected from airports on map)
-bool ADSBDemodGUI::setFrequency(float targetFrequencyHz)
+// Set selected AM Demod to the given frequency (used to tune to ATC selected from airports on map)
+bool ADSBDemodGUI::setFrequency(qint64 targetFrequencyHz)
 {
-    return ChannelWebAPIUtils::setCenterFrequency(m_settings.m_deviceIndex, targetFrequencyHz);
+    const QRegularExpression re("R([0-9]+):([0-9]+)");
+    QRegularExpressionMatch match = re.match(m_settings.m_amDemod);
+    if (match.hasMatch())
+    {
+        int deviceSet = match.capturedTexts()[1].toInt();
+        int channelIndex = match.capturedTexts()[2].toInt();
+        const int halfChannelBW = 20000/2;
+        int dcOffset = halfChannelBW;
+
+        double centerFrequency;
+        int sampleRate;
+
+        if (ChannelWebAPIUtils::getCenterFrequency(deviceSet, centerFrequency))
+        {
+            if (ChannelWebAPIUtils::getDevSampleRate(deviceSet, sampleRate))
+            {
+                sampleRate *= 0.75; // Don't use guard bands
+
+                // Adjust device center frequency if not in range
+                if (   ((targetFrequencyHz - halfChannelBW) < (centerFrequency - sampleRate / 2))
+                    || ((targetFrequencyHz + halfChannelBW) >= (centerFrequency + sampleRate / 2))
+                   )
+                {
+                    ChannelWebAPIUtils::setCenterFrequency(deviceSet, targetFrequencyHz - dcOffset);
+                    ChannelWebAPIUtils::setFrequencyOffset(deviceSet, channelIndex, dcOffset);
+                }
+                else
+                {
+                    qint64 offset = targetFrequencyHz - centerFrequency;
+                    // Also adjust center frequency if channel would cross DC
+                    if (std::abs(offset) < halfChannelBW)
+                    {
+                        ChannelWebAPIUtils::setCenterFrequency(deviceSet, targetFrequencyHz - dcOffset);
+                        ChannelWebAPIUtils::setFrequencyOffset(deviceSet, channelIndex, dcOffset);
+                    }
+                    else
+                    {
+                        // Just tune channel
+                        ChannelWebAPIUtils::setFrequencyOffset(deviceSet, channelIndex, offset);
+                    }
+                }
+
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 // Called when we have both lat & long
@@ -825,7 +1012,7 @@ void ADSBDemodGUI::sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimat
             swgMapItem->setAvailableUntil(new QString(aircraft->m_positionDateTime.addSecs(60).toString(Qt::ISODateWithMs)));
             swgMapItem->setImage(new QString(QString("qrc:///map/%1").arg(aircraft->getImage())));
             swgMapItem->setImageRotation(aircraft->m_heading);
-            swgMapItem->setText(new QString(aircraft->getText(true)));
+            swgMapItem->setText(new QString(aircraft->getText(&m_settings, true)));
 
             if (!aircraft->m_aircraft3DModel.isEmpty()) {
                 swgMapItem->setModel(new QString(aircraft->m_aircraft3DModel));
@@ -833,7 +1020,7 @@ void ADSBDemodGUI::sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimat
                 swgMapItem->setModel(new QString(aircraft->m_aircraftCat3DModel));
             }
 
-            swgMapItem->setLabel(new QString(aircraft->m_callsign));
+            swgMapItem->setLabel(new QString(aircraft->getLabel(&m_settings)));
 
             if (aircraft->m_headingValid)
             {
@@ -883,6 +1070,7 @@ Aircraft *ADSBDemodGUI::getAircraft(int icao, bool &newAircraft)
         int row = ui->adsbData->rowCount();
         ui->adsbData->setRowCount(row + 1);
         ui->adsbData->setItem(row, ADSB_COL_ICAO, aircraft->m_icaoItem);
+        ui->adsbData->setItem(row, ADSB_COL_ATC_CALLSIGN, aircraft->m_atcCallsignItem);
         ui->adsbData->setItem(row, ADSB_COL_CALLSIGN, aircraft->m_callsignItem);
         ui->adsbData->setItem(row, ADSB_COL_MODEL, aircraft->m_modelItem);
         ui->adsbData->setItem(row, ADSB_COL_AIRLINE, aircraft->m_airlineItem);
@@ -1010,6 +1198,45 @@ Aircraft *ADSBDemodGUI::getAircraft(int icao, bool &newAircraft)
     }
 
     return aircraft;
+}
+
+void ADSBDemodGUI::atcCallsign(Aircraft *aircraft)
+{
+    QString icao = aircraft->m_callsign.left(3);
+    const Airline *airline = Airline::getByICAO(icao);
+    if (airline)
+    {
+        aircraft->m_atcCallsignItem->setText(airline->m_callsign);
+        // Create icons using data from Airline class, if it doesn't exist in database
+        if (!aircraft->m_aircraftInfo)
+        {
+            // Airline logo
+            QIcon *icon = nullptr;
+            aircraft->m_airlineIconURL = AircraftInformation::getFlagIconURL(airline->m_icao);
+            icon = AircraftInformation::getAirlineIcon(airline->m_icao);
+            if (icon != nullptr)
+            {
+                aircraft->m_airlineItem->setSizeHint(QSize(85, 20));
+                aircraft->m_airlineItem->setIcon(*icon);
+            }
+            else
+            {
+                aircraft->m_airlineItem->setText(airline->m_name);
+            }
+            // Flag
+            QString flag = airline->m_country.toLower().replace(" ", "_");
+            aircraft->m_flagIconURL = AircraftInformation::getFlagIconPath(flag);
+            if (aircraft->m_flagIconURL.startsWith(':')) {
+                aircraft->m_flagIconURL = "qrc://" + aircraft->m_flagIconURL.mid(1);
+            }
+            icon = AircraftInformation::getFlagIcon(flag);
+            if (icon != nullptr)
+            {
+                aircraft->m_countryItem->setSizeHint(QSize(40, 20));
+                aircraft->m_countryItem->setIcon(*icon);
+            }
+        }
+    }
 }
 
 // Try to map callsign to flight number
@@ -1187,6 +1414,7 @@ void ADSBDemodGUI::handleADSB(
             {
                 aircraft->m_callsign = callsignTrimmed;
                 aircraft->m_callsignItem->setText(aircraft->m_callsign);
+                atcCallsign(aircraft);
                 callsignToFlight(aircraft);
             }
 
@@ -1401,6 +1629,7 @@ void ADSBDemodGUI::handleADSB(
                         aircraft->m_positionDateTime = dateTime;
                         QGeoCoordinate coord(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude);
                         aircraft->m_coordinates.push_back(QVariant::fromValue(coord));
+                        aircraft->m_coordinateDateTimes.push_back(dateTime);
                         updatePosition(aircraft);
                     }
                 }
@@ -1457,6 +1686,7 @@ void ADSBDemodGUI::handleADSB(
                     aircraft->m_positionDateTime = dateTime;
                     QGeoCoordinate coord(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude);
                     aircraft->m_coordinates.push_back(QVariant::fromValue(coord));
+                    aircraft->m_coordinateDateTimes.push_back(dateTime);
                 }
             }
         }
@@ -2253,7 +2483,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         bool verticalVelInconsistent = (abs(verticalVel) > 6000) || (aircraft->m_verticalRateValid && abs(verticalVel - aircraft->m_verticalRate) > 2000)
                                     || (!verticalVelStatus && (verticalVelFix != 0));
 
-        bool bds_6_0 = !magHeadingInconsistent & !indicatedAirspeedInconsistent & !machInconsistent && !baroAltRateInconsistent && !verticalVelInconsistent;
+        bool bds_6_0 = !magHeadingInconsistent && !indicatedAirspeedInconsistent && !machInconsistent && !baroAltRateInconsistent && !verticalVelInconsistent;
 
         int possibleMatches = bds_1_0 + bds_1_7 + bds_2_0 + bds_2_1 + bds_3_0 + bds_4_0 + bds_4_1 + bds_4_4 + bds_4_5 + bds_5_0 + bds_5_1 + bds_5_3 + bds_6_0;
 
@@ -2295,6 +2525,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
                 {
                     aircraft->m_callsign = callsignTrimmed;
                     aircraft->m_callsignItem->setText(aircraft->m_callsign);
+                    atcCallsign(aircraft);
                     callsignToFlight(aircraft);
                 }
             }
@@ -3661,6 +3892,13 @@ void ADSBDemodGUI::on_allFlightPaths_clicked(bool checked)
     m_aircraftModel.setAllFlightPaths(checked);
 }
 
+void ADSBDemodGUI::on_atcLabels_clicked(bool checked)
+{
+    m_settings.m_atcLabels = checked;
+    m_aircraftModel.setSettings(&m_settings);
+    applySettings();
+}
+
 QString ADSBDemodGUI::getDataDir()
 {
     // Get directory to store app data in (aircraft & airport databases and user-definable icons)
@@ -3726,59 +3964,41 @@ void ADSBDemodGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
-void ADSBDemodGUI::updateDeviceSetList()
+void ADSBDemodGUI::updateChannelList()
 {
-    MainWindow *mainWindow = MainWindow::getInstance();
-    std::vector<DeviceUISet*>& deviceUISets = mainWindow->getDeviceUISets();
-    std::vector<DeviceUISet*>::const_iterator it = deviceUISets.begin();
+    std::vector<ChannelAPI*> channels = MainCore::instance()->getChannels("sdrangel.channel.amdemod");
 
-    ui->device->blockSignals(true);
+    ui->amDemod->blockSignals(true);
+    ui->amDemod->clear();
 
-    ui->device->clear();
-    unsigned int deviceIndex = 0;
-
-    for (; it != deviceUISets.end(); ++it, deviceIndex++)
-    {
-        DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
-
-        if (deviceSourceEngine) {
-            ui->device->addItem(QString("R%1").arg(deviceIndex), deviceIndex);
-        }
+    for (const auto channel : channels) {
+        ui->amDemod->addItem(QString("R%1:%2").arg(channel->getDeviceSetIndex()).arg(channel->getIndexInDeviceSet()));
     }
 
-    int newDeviceIndex;
-
-    if (it != deviceUISets.begin())
-    {
-        if (m_settings.m_deviceIndex < 0) {
-            ui->device->setCurrentIndex(0);
-        } else if (m_settings.m_deviceIndex >= (int) deviceUISets.size()) {
-            ui->device->setCurrentIndex(deviceUISets.size() - 1);
-        } else {
-            ui->device->setCurrentIndex(m_settings.m_deviceIndex);
-        }
-
-        newDeviceIndex = ui->device->currentData().toInt();
-    }
-    else
-    {
-        newDeviceIndex = -1;
+    // Select current setting, if exists
+    // If not, make sure nothing selected, as channel may be created later on
+    int idx = ui->amDemod->findText(m_settings.m_amDemod);
+    if (idx >= 0) {
+        ui->amDemod->setCurrentIndex(idx);
+    } else {
+        ui->amDemod->setCurrentIndex(-1);
     }
 
-    if (newDeviceIndex != m_settings.m_deviceIndex)
-    {
-        qDebug("ADSBDemodGUI::updateDeviceSetLists: device index changed: %d", newDeviceIndex);
-        m_settings.m_deviceIndex = newDeviceIndex;
-    }
+    ui->amDemod->blockSignals(false);
 
-    ui->device->blockSignals(false);
+    // If no current settting, select first channel
+    if (m_settings.m_amDemod.isEmpty())
+    {
+        ui->amDemod->setCurrentIndex(0);
+        on_amDemod_currentIndexChanged(0);
+    }
 }
 
-void ADSBDemodGUI::on_device_currentIndexChanged(int index)
+void ADSBDemodGUI::on_amDemod_currentIndexChanged(int index)
 {
     if (index >= 0)
     {
-        m_settings.m_deviceIndex = ui->device->currentData().toInt();
+        m_settings.m_amDemod = ui->amDemod->currentText();
         applySettings();
     }
 }
@@ -4790,11 +5010,11 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(&m_planeSpotters, &PlaneSpotters::aircraftPhoto, this, &ADSBDemodGUI::aircraftPhoto);
     connect(ui->photo, &ClickableLabel::clicked, this, &ADSBDemodGUI::photoClicked);
 
-    // Update device list when devices are added or removed
-    connect(MainCore::instance(), &MainCore::deviceSetAdded, this, &ADSBDemodGUI::updateDeviceSetList);
-    connect(MainCore::instance(), &MainCore::deviceSetRemoved, this, &ADSBDemodGUI::updateDeviceSetList);
+    // Update demod list when channels are added or removed
+    connect(MainCore::instance(), &MainCore::channelAdded, this, &ADSBDemodGUI::updateChannelList);
+    connect(MainCore::instance(), &MainCore::channelRemoved, this, &ADSBDemodGUI::updateChannelList);
 
-    updateDeviceSetList();
+    updateChannelList();
     displaySettings();
     makeUIConnections();
     applySettings(true);
@@ -4906,6 +5126,8 @@ void ADSBDemodGUI::displaySettings()
     m_aircraftModel.setFlightPaths(m_settings.m_flightPaths);
     ui->allFlightPaths->setChecked(m_settings.m_allFlightPaths);
     m_aircraftModel.setAllFlightPaths(m_settings.m_allFlightPaths);
+
+    m_aircraftModel.setSettings(&m_settings);
 
     ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
     ui->logEnable->setChecked(m_settings.m_logEnabled);
@@ -5051,6 +5273,40 @@ void ADSBDemodGUI::tick()
             }
         }
     }
+
+    // Create and send aircraft report every second for WebAPI
+    if (m_tickCount % (20*1) == 0) {
+        sendAircraftReport();
+    }
+}
+
+void ADSBDemodGUI::sendAircraftReport()
+{
+    ADSBDemod::MsgAircraftReport* message = ADSBDemod::MsgAircraftReport::create();
+
+    QList<ADSBDemod::MsgAircraftReport::AircraftReport>& report = message->getReport();
+    report.reserve(m_aircraft.size());
+
+    QHash<int, Aircraft *>::iterator i = m_aircraft.begin();
+    while (i != m_aircraft.end())
+    {
+        Aircraft *aircraft = i.value();
+
+        ADSBDemod::MsgAircraftReport::AircraftReport aircraftReport {
+            aircraft->m_icaoHex,
+            aircraft->m_callsign,
+            aircraft->m_latitude,
+            aircraft->m_longitude,
+            aircraft->m_altitude,
+            aircraft->m_groundspeed
+        };
+
+        report.append(aircraftReport);
+
+        ++i;
+    }
+
+    m_adsbDemod->getInputMessageQueue()->push(message);
 }
 
 void ADSBDemodGUI::resizeTable()
@@ -5059,7 +5315,8 @@ void ADSBDemodGUI::resizeTable()
     int row = ui->adsbData->rowCount();
     ui->adsbData->setRowCount(row + 1);
     ui->adsbData->setItem(row, ADSB_COL_ICAO, new QTableWidgetItem("ICAO ID"));
-    ui->adsbData->setItem(row, ADSB_COL_CALLSIGN, new QTableWidgetItem("Callsign-"));
+    ui->adsbData->setItem(row, ADSB_COL_CALLSIGN, new QTableWidgetItem("Callsign--"));
+    ui->adsbData->setItem(row, ADSB_COL_ATC_CALLSIGN, new QTableWidgetItem("ATC Callsign-"));
     ui->adsbData->setItem(row, ADSB_COL_MODEL, new QTableWidgetItem("Aircraft12345"));
     ui->adsbData->setItem(row, ADSB_COL_AIRLINE, new QTableWidgetItem("airbrigdecargo1"));
     ui->adsbData->setItem(row, ADSB_COL_ALTITUDE, new QTableWidgetItem("Alt (ft)"));
@@ -5611,6 +5868,7 @@ void ADSBDemodGUI::handleImportReply(QNetworkReply* reply)
                         {
                             aircraft->m_callsign = callsign;
                             aircraft->m_callsignItem->setText(aircraft->m_callsign);
+                            atcCallsign(aircraft);
                         }
 
                         QDateTime timePosition = dateTime;
@@ -5648,6 +5906,7 @@ void ADSBDemodGUI::handleImportReply(QNetworkReply* reply)
                             {
                                 QGeoCoordinate coord(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude);
                                 aircraft->m_coordinates.push_back(QVariant::fromValue(coord));
+                                aircraft->m_coordinateDateTimes.push_back(dateTime);
                             }
                             aircraft->m_positionDateTime = timePosition;
                         }
@@ -5824,7 +6083,8 @@ void ADSBDemodGUI::makeUIConnections()
     QObject::connect(ui->getAirspacesDB, &QToolButton::clicked, this, &ADSBDemodGUI::on_getAirspacesDB_clicked);
     QObject::connect(ui->flightPaths, &ButtonSwitch::clicked, this, &ADSBDemodGUI::on_flightPaths_clicked);
     QObject::connect(ui->allFlightPaths, &ButtonSwitch::clicked, this, &ADSBDemodGUI::on_allFlightPaths_clicked);
-    QObject::connect(ui->device, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ADSBDemodGUI::on_device_currentIndexChanged);
+    QObject::connect(ui->atcLabels, &ButtonSwitch::clicked, this, &ADSBDemodGUI::on_atcLabels_clicked);
+    QObject::connect(ui->amDemod, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ADSBDemodGUI::on_amDemod_currentIndexChanged);
     QObject::connect(ui->displaySettings, &QToolButton::clicked, this, &ADSBDemodGUI::on_displaySettings_clicked);
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &ADSBDemodGUI::on_logEnable_clicked);
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &ADSBDemodGUI::on_logFilename_clicked);

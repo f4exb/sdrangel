@@ -13,7 +13,7 @@ FreqScannerSettings:
     frequencies:
       type: array
       items:
-        $ref: "http://swgserver:8081/api/swagger/include/FreqScanner.yaml#/FreqScannerFrequency"
+        $ref: "/doc/swagger/include/FreqScanner.yaml#/FreqScannerFrequency"
     channel:
       type: string
     scanTime:
@@ -50,9 +50,9 @@ FreqScannerSettings:
     reverseAPIChannelIndex:
       type: integer
     channelMarker:
-      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
     rollupState:
-      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
 FreqScannerReport:
   description: FreqScanner

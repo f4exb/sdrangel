@@ -696,6 +696,36 @@ margin-bottom: 20px;
   <script>
     // Script section to load models into a JS Var
     var defs = {}
+            defs.ADSBDemodAircraftState = {
+  "properties" : {
+    "icao" : {
+      "type" : "string",
+      "description" : "24-bit hex ICAO identifier"
+    },
+    "callsign" : {
+      "type" : "string",
+      "description" : "Callsign (E.g. BAW123)"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude of aircraft in degrees"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude of aircraft in degrees"
+    },
+    "altitude" : {
+      "type" : "integer",
+      "description" : "Altitude of aircraft in feet"
+    },
+    "groundSpeed" : {
+      "type" : "integer",
+      "description" : "Groundspeed of aircraft in knots"
+    }
+  }
+};
             defs.ADSBDemodReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -720,6 +750,12 @@ margin-bottom: 20px;
     "targetRange" : {
       "type" : "number",
       "format" : "float"
+    },
+    "aircraftState" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ADSBDemodAircraftState"
+      }
     }
   },
   "description" : "ADSBDemod"
@@ -1398,6 +1434,11 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "channel RF bandwidth in Hz (floors to next 100 Hz)"
+    },
+    "afBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "AF bandwidth in Hz"
     },
     "squelch" : {
       "type" : "number",
@@ -3797,6 +3838,9 @@ margin-bottom: 20px;
     "FreeDVModReport" : {
       "$ref" : "#/definitions/FreeDVModReport"
     },
+    "FreqScannerReport" : {
+      "$ref" : "#/definitions/FreqScannerReport"
+    },
     "FreqTrackerReport" : {
       "$ref" : "#/definitions/FreqTrackerReport"
     },
@@ -3972,6 +4016,9 @@ margin-bottom: 20px;
     },
     "FreeDVModSettings" : {
       "$ref" : "#/definitions/FreeDVModSettings"
+    },
+    "FreqScannerSettings" : {
+      "$ref" : "#/definitions/FreqScannerSettings"
     },
     "FreqTrackerSettings" : {
       "$ref" : "#/definitions/FreqTrackerSettings"
@@ -6935,6 +6982,107 @@ margin-bottom: 20px;
     }
   },
   "description" : "FreeDVMod"
+};
+            defs.FreqScannerFrequency = {
+  "properties" : {
+    "frequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "enabled" : {
+      "type" : "integer"
+    },
+    "notes" : {
+      "type" : "string"
+    }
+  }
+};
+            defs.FreqScannerReport = {
+  "properties" : {
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "FreqScanner"
+};
+            defs.FreqScannerSettings = {
+  "properties" : {
+    "channelBandwidth" : {
+      "type" : "integer",
+      "description" : "channel RF bandwidth in Hz"
+    },
+    "channelFrequencyOffset" : {
+      "type" : "integer",
+      "description" : "channel center frequency shift from baseband center in Hz"
+    },
+    "threshold" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "frequencies" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/FreqScannerFrequency"
+      }
+    },
+    "channel" : {
+      "type" : "string"
+    },
+    "scanTime" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "retransmitTime" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "tuneTime" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "priority" : {
+      "type" : "integer"
+    },
+    "measurement" : {
+      "type" : "integer"
+    },
+    "mode" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "FreqScanner"
 };
             defs.FreqTrackerReport = {
   "properties" : {
@@ -13080,6 +13228,9 @@ margin-bottom: 20px;
       "items" : {
         "$ref" : "#/definitions/Gain"
       }
+    },
+    "tunerType" : {
+      "type" : "string"
     }
   },
   "description" : "RTLSDR"
@@ -13308,6 +13459,10 @@ margin-bottom: 20px;
     },
     "lnaIndex" : {
       "type" : "integer"
+    },
+    "lnaGain" : {
+      "type" : "integer",
+      "description" : "Gain in dB, as an alternative to lnaIndex setting"
     },
     "ifAGC" : {
       "type" : "integer"
@@ -58206,7 +58361,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-09-13T05:10:07.874+02:00
+              Generated 2023-10-26T10:32:08.802+02:00
             </div>
           </div>
       </div>

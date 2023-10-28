@@ -33,7 +33,6 @@
 #include "SWGWorkspaceInfo.h"
 #include "SWGFreqScannerSettings.h"
 #include "SWGChannelReport.h"
-#include "SWGMapItem.h"
 
 #include "device/deviceset.h"
 #include "dsp/dspengine.h"
@@ -673,7 +672,6 @@ void FreqScanner::applySettings(const FreqScannerSettings& settings, const QStri
     }
 
     if (settingsKeys.contains("frequencies")
-        || settingsKeys.contains("enabled")
         || settingsKeys.contains("priority")
         || settingsKeys.contains("measurement")
         || settingsKeys.contains("mode")
@@ -785,6 +783,26 @@ void FreqScanner::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("threshold")) {
         settings.m_threshold = response.getFreqScannerSettings()->getThreshold();
     }
+    if (channelSettingsKeys.contains("frequencies"))
+    {
+        settings.m_frequencies.clear();
+        settings.m_enabled.clear();
+        settings.m_notes.clear();
+        QList<SWGSDRangel::SWGFreqScannerFrequency *> *frequencies = response.getFreqScannerSettings()->getFrequencies();
+        if (frequencies)
+        {
+            for (const auto frequency : *frequencies)
+            {
+                settings.m_frequencies.append(frequency->getFrequency());
+                settings.m_enabled.append((bool)frequency->getEnabled());
+                if (frequency->getNotes()) {
+                    settings.m_notes.append(*frequency->getNotes());
+                } else {
+                    settings.m_notes.append("");
+                }
+            }
+        }
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getFreqScannerSettings()->getRgbColor();
     }
@@ -817,11 +835,35 @@ void FreqScanner::webapiUpdateChannelSettings(
     }
 }
 
+QList<SWGSDRangel::SWGFreqScannerFrequency *> *FreqScanner::createFrequencyList(const FreqScannerSettings& settings)
+{
+    QList<SWGSDRangel::SWGFreqScannerFrequency *> *frequencies = new QList<SWGSDRangel::SWGFreqScannerFrequency *>();
+    for (int i = 0; i < settings.m_frequencies.size(); i++)
+    {
+        SWGSDRangel::SWGFreqScannerFrequency *frequency = new SWGSDRangel::SWGFreqScannerFrequency();
+        frequency->init();
+        frequency->setFrequency(settings.m_frequencies[i]);
+        frequency->setEnabled(settings.m_enabled[i]);
+        if (!settings.m_notes[i].isEmpty()) {
+            frequency->setNotes(new QString(settings.m_notes[i]));
+        }
+        frequencies->append(frequency);
+    }
+    return frequencies;
+}
+
 void FreqScanner::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FreqScannerSettings& settings)
 {
     response.getFreqScannerSettings()->setChannelFrequencyOffset(settings.m_channelFrequencyOffset);
     response.getFreqScannerSettings()->setChannelBandwidth(settings.m_channelBandwidth);
     response.getFreqScannerSettings()->setThreshold(settings.m_threshold);
+
+    QList<SWGSDRangel::SWGFreqScannerFrequency *> *frequencies = createFrequencyList(settings);
+    if (response.getFreqScannerSettings()->getFrequencies()) {
+        *response.getFreqScannerSettings()->getFrequencies() = *frequencies;
+    } else {
+        response.getFreqScannerSettings()->setFrequencies(frequencies);
+    }
 
     response.getFreqScannerSettings()->setRgbColor(settings.m_rgbColor);
     if (response.getFreqScannerSettings()->getTitle()) {
@@ -927,6 +969,15 @@ void FreqScanner::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("threshold") || force) {
         swgFreqScannerSettings->setThreshold(settings.m_threshold);
     }
+    if (channelSettingsKeys.contains("frequencies") || force) {
+        QList<SWGSDRangel::SWGFreqScannerFrequency *> *frequencies = createFrequencyList(settings);
+        if (swgFreqScannerSettings->getFrequencies()) {
+            *swgFreqScannerSettings->getFrequencies() = *frequencies;
+        } else {
+            swgFreqScannerSettings->setFrequencies(frequencies);
+        }
+    }
+
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFreqScannerSettings->setRgbColor(settings.m_rgbColor);
     }

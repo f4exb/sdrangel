@@ -630,12 +630,7 @@ void FreqScannerGUI::on_addRange_clicked()
             addRow(f, true);
         }
         blockApplySettings(false);
-        QList<QString> settingsKeys({
-            "frequencies",
-            "enabled",
-            "notes"
-        });
-        applySettings(settingsKeys);
+        applySetting("frequencies");
     }
 }
 
@@ -651,12 +646,7 @@ void FreqScannerGUI::on_remove_clicked()
         m_settings.m_enabled.removeAt(row);
         m_settings.m_notes.removeAt(row);
     }
-    QList<QString> settingsKeys({
-        "frequencies",
-        "enabled",
-        "notes"
-    });
-    applySettings(settingsKeys);
+    applySetting("frequencies");
 }
 
 void FreqScannerGUI::on_removeInactive_clicked()
@@ -671,14 +661,8 @@ void FreqScannerGUI::on_removeInactive_clicked()
             m_settings.m_notes.removeAt(i);
         }
     }
-    QList<QString> settingsKeys({
-        "frequencies",
-        "enabled",
-        "notes"
-        });
-    applySettings(settingsKeys);
+    applySetting("frequencies");
 }
-
 
 static QList<QTableWidgetItem*> takeRow(QTableWidget* table, int row)
 {
@@ -754,22 +738,17 @@ void FreqScannerGUI::on_table_cellChanged(int row, int column)
             }
             m_settings.m_frequencies[row] = value;
             updateAnnotation(row);
-            QList<QString> settingsKeys({
-                 "frequencies",
-                 "enabled",
-                 "notes"
-                });
-            applySettings(settingsKeys);
+            applySetting("frequencies");
         }
         else if (column == COL_ENABLE)
         {
             m_settings.m_enabled[row] = item->checkState() == Qt::Checked;
-            applySetting("enabled");
+            applySetting("frequencies");
         }
         else if (column == COL_NOTES)
         {
             m_settings.m_notes[row] = item->text();
-            applySetting("notes");
+            applySetting("frequencies");
         }
     }
 }

@@ -49,9 +49,11 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
     ui->mapProvider->setCurrentText(settings->m_mapProvider);
     ui->mapType->setCurrentIndex((int)settings->m_mapType);
     ui->navAids->setChecked(settings->m_displayNavAids);
+    ui->atcCallsigns->setChecked(settings->m_atcCallsigns);
     ui->photos->setChecked(settings->m_displayPhotos);
     ui->verboseModelMatching->setChecked(settings->m_verboseModelMatching);
     ui->airfieldElevation->setValue(settings->m_airfieldElevation);
+    ui->transitionAltitude->setValue(settings->m_transitionAlt);
 }
 
 ADSBDemodDisplayDialog::~ADSBDemodDisplayDialog()
@@ -83,9 +85,11 @@ void ADSBDemodDisplayDialog::accept()
     m_settings->m_mapProvider = ui->mapProvider->currentText();
     m_settings->m_mapType = (ADSBDemodSettings::MapType)ui->mapType->currentIndex();
     m_settings->m_displayNavAids = ui->navAids->isChecked();
+    m_settings->m_atcCallsigns = ui->atcCallsigns->isChecked();
     m_settings->m_displayPhotos = ui->photos->isChecked();
     m_settings->m_verboseModelMatching = ui->verboseModelMatching->isChecked();
     m_settings->m_airfieldElevation = ui->airfieldElevation->value();
+    m_settings->m_transitionAlt = ui->transitionAltitude->value();
     m_settings->m_tableFontName = m_fontName;
     m_settings->m_tableFontSize = m_fontSize;
     QDialog::accept();

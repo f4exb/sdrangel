@@ -34,12 +34,8 @@ SWGFreqScannerSettings::SWGFreqScannerSettings() {
     m_channel_frequency_offset_isSet = false;
     threshold = 0.0f;
     m_threshold_isSet = false;
-    m_frequencies = new QList<qint64>();
-    m_m_frequencies_isSet = false;
-    m_enabled = new QList<qint32>();
-    m_m_enabled_isSet = false;
-    m_notes = nullptr;
-    m_m_notes_isSet = false;
+    frequencies = nullptr;
+    m_frequencies_isSet = false;
     channel = nullptr;
     m_channel_isSet = false;
     scan_time = 0.0f;
@@ -88,12 +84,8 @@ SWGFreqScannerSettings::init() {
     m_channel_frequency_offset_isSet = false;
     threshold = 0.0f;
     m_threshold_isSet = false;
-    m_frequencies = new QList<qint64>();
-    m_m_frequencies_isSet = false;
-    m_enabled = new QList<qint32>();
-    m_m_enabled_isSet = false;
-    m_notes = new QList<QString*>();
-    m_m_notes_isSet = false;
+    frequencies = new QList<SWGFreqScannerFrequency*>();
+    m_frequencies_isSet = false;
     channel = new QString("");
     m_channel_isSet = false;
     scan_time = 0.0f;
@@ -135,14 +127,12 @@ SWGFreqScannerSettings::cleanup() {
 
 
 
-
-
-    if(m_notes != nullptr) { 
-        auto arr = m_notes;
+    if(frequencies != nullptr) { 
+        auto arr = frequencies;
         for(auto o: *arr) { 
             delete o;
         }
-        delete m_notes;
+        delete frequencies;
     }
     if(channel != nullptr) { 
         delete channel;
@@ -191,11 +181,7 @@ SWGFreqScannerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&threshold, pJson["threshold"], "float", "");
     
     
-    ::SWGSDRangel::setValue(&m_frequencies, pJson["m_frequencies"], "QList", "qint64");
-    
-    ::SWGSDRangel::setValue(&m_enabled, pJson["m_enabled"], "QList", "qint32");
-    
-    ::SWGSDRangel::setValue(&m_notes, pJson["m_notes"], "QList", "QString");
+    ::SWGSDRangel::setValue(&frequencies, pJson["frequencies"], "QList", "SWGFreqScannerFrequency");
     ::SWGSDRangel::setValue(&channel, pJson["channel"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&scan_time, pJson["scanTime"], "float", "");
@@ -255,14 +241,8 @@ SWGFreqScannerSettings::asJsonObject() {
     if(m_threshold_isSet){
         obj->insert("threshold", QJsonValue(threshold));
     }
-    if(m_frequencies && m_frequencies->size() > 0){
-        toJsonArray((QList<void*>*)m_frequencies, obj, "m_frequencies", "");
-    }
-    if(m_enabled && m_enabled->size() > 0){
-        toJsonArray((QList<void*>*)m_enabled, obj, "m_enabled", "");
-    }
-    if(m_notes && m_notes->size() > 0){
-        toJsonArray((QList<void*>*)m_notes, obj, "m_notes", "QString");
+    if(frequencies && frequencies->size() > 0){
+        toJsonArray((QList<void*>*)frequencies, obj, "frequencies", "SWGFreqScannerFrequency");
     }
     if(channel != nullptr && *channel != QString("")){
         toJsonValue(QString("channel"), channel, obj, QString("QString"));
@@ -349,34 +329,14 @@ SWGFreqScannerSettings::setThreshold(float threshold) {
     this->m_threshold_isSet = true;
 }
 
-QList<qint64>*
-SWGFreqScannerSettings::getMFrequencies() {
-    return m_frequencies;
+QList<SWGFreqScannerFrequency*>*
+SWGFreqScannerSettings::getFrequencies() {
+    return frequencies;
 }
 void
-SWGFreqScannerSettings::setMFrequencies(QList<qint64>* m_frequencies) {
-    this->m_frequencies = m_frequencies;
-    this->m_m_frequencies_isSet = true;
-}
-
-QList<qint32>*
-SWGFreqScannerSettings::getMEnabled() {
-    return m_enabled;
-}
-void
-SWGFreqScannerSettings::setMEnabled(QList<qint32>* m_enabled) {
-    this->m_enabled = m_enabled;
-    this->m_m_enabled_isSet = true;
-}
-
-QList<QString*>*
-SWGFreqScannerSettings::getMNotes() {
-    return m_notes;
-}
-void
-SWGFreqScannerSettings::setMNotes(QList<QString*>* m_notes) {
-    this->m_notes = m_notes;
-    this->m_m_notes_isSet = true;
+SWGFreqScannerSettings::setFrequencies(QList<SWGFreqScannerFrequency*>* frequencies) {
+    this->frequencies = frequencies;
+    this->m_frequencies_isSet = true;
 }
 
 QString*
@@ -563,19 +523,7 @@ SWGFreqScannerSettings::isSet(){
         if(m_threshold_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_m_frequencies_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_frequencies && (m_frequencies->size() > 0)){
-            isObjectUpdated = true; break;
-        }
-        if(m_m_enabled_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_enabled && (m_enabled->size() > 0)){
-            isObjectUpdated = true; break;
-        }
-        if(m_notes && (m_notes->size() > 0)){
+        if(frequencies && (frequencies->size() > 0)){
             isObjectUpdated = true; break;
         }
         if(channel && *channel != QString("")){

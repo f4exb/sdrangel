@@ -1292,6 +1292,79 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
     }
 }
 
+bool ChannelWebAPIUtils::patchChannelSetting(unsigned int deviceSetIndex, unsigned int channelIndex, const QString &setting, const QJsonArray& value)
+{
+    SWGSDRangel::SWGChannelSettings channelSettingsResponse;
+    QString errorResponse;
+    int httpRC;
+    ChannelAPI *channel;
+
+    if (getChannelSettings(deviceSetIndex, channelIndex, channelSettingsResponse, channel))
+    {
+        // Patch setting
+        QJsonObject *jsonObj = channelSettingsResponse.asJsonObject();
+
+        // Set value
+        bool found = false;
+        for (QJsonObject::iterator it = jsonObj->begin(); it != jsonObj->end(); it++)
+        {
+            QJsonValue jsonValue = it.value();
+
+            if (jsonValue.isObject())
+            {
+                QJsonObject subObject = jsonValue.toObject();
+
+                if (subObject.contains(setting))
+                {
+                    subObject[setting] = value;
+                    it.value() = subObject;
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if (!found)
+        {
+            for (QJsonObject::iterator it = jsonObj->begin(); it != jsonObj->end(); it++)
+            {
+                QJsonValueRef jsonValue = it.value();
+
+                if (jsonValue.isObject())
+                {
+                    QJsonObject subObject = jsonValue.toObject();
+
+                    subObject.insert(setting, value);
+                    jsonValue = subObject;
+                }
+            }
+        }
+
+        QStringList channelSettingsKeys;
+        channelSettingsKeys.append(setting);
+        channelSettingsResponse.init();
+        channelSettingsResponse.fromJsonObject(*jsonObj);
+        SWGSDRangel::SWGErrorResponse errorResponse2;
+
+        httpRC = channel->webapiSettingsPutPatch(false, channelSettingsKeys, channelSettingsResponse, *errorResponse2.getMessage());
+
+        if (httpRC/100 == 2)
+        {
+            qDebug("ChannelWebAPIUtils::patchChannelSetting: set channel setting %s OK", qPrintable(setting));
+            return true;
+        }
+        else
+        {
+            qWarning("ChannelWebAPIUtils::patchChannelSetting: set channel setting error %d: %s",
+                httpRC, qPrintable(*errorResponse2.getMessage()));
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool ChannelWebAPIUtils::getFeatureSetting(unsigned int featureSetIndex,  unsigned int featureIndex, const QString &setting, int &value)
 {
     SWGSDRangel::SWGFeatureSettings featureSettingsResponse;

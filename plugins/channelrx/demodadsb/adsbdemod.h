@@ -62,6 +62,35 @@ public:
         { }
     };
 
+    class MsgAircraftReport : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+
+        struct AircraftReport {
+            QString m_icao;
+            QString m_callsign;
+            float m_latitude;
+            float m_longitude;
+            int m_altitude;
+            int m_groundSpeed;
+        };
+
+        QList<AircraftReport>& getReport() { return m_report; }
+
+        static MsgAircraftReport* create()
+        {
+            return new MsgAircraftReport();
+        }
+
+    private:
+        QList<AircraftReport> m_report;
+
+        MsgAircraftReport() :
+            Message()
+        { }
+    };
+
     ADSBDemod(DeviceAPI *deviceAPI);
     virtual ~ADSBDemod();
     virtual void destroy() { delete this; }
@@ -148,6 +177,7 @@ private:
     float m_targetElevation;
     float m_targetRange;
     QString m_targetName;
+    QList<MsgAircraftReport::AircraftReport> m_aircraftReport;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

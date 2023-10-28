@@ -49,6 +49,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
     FreeDVModReport:
       $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
+    FreqScannerReport:
+      $ref: "/doc/swagger/include/FreqScanner.yaml#/FreqScannerReport"
     FreqTrackerReport:
       $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
     FT8DemodReport:

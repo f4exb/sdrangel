@@ -77,7 +77,6 @@ void ADSBDemodSettings::resetToDefaults()
     m_displayDemodStats = false;
     m_correlateFullPreamble = true;
     m_demodModeS = true;
-    m_deviceIndex = -1;
     m_autoResizeTableColumns = false;
     m_interpolatorPhaseSteps = 4;      // Higher than these two values will struggle to run in real-time
     m_interpolatorTapsPerPhase = 3.5f; // without gaining much improvement in PER
@@ -105,6 +104,9 @@ void ADSBDemodSettings::resetToDefaults()
     m_aircraftMinZoom = 11;
     m_workspaceIndex = 0;
     m_hidden = false;
+    m_atcLabels = true;
+    m_atcCallsigns = true;
+    m_transitionAlt = 6000; // Depends on airport. 18,000 in USA
 }
 
 QByteArray ADSBDemodSettings::serialize() const
@@ -136,7 +138,6 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeS32(19, (int)m_airportMinimumSize);
     s.writeBool(20, m_displayHeliports);
     s.writeBool(21, m_flightPaths);
-    s.writeS32(22, m_deviceIndex);
     s.writeBool(23, m_siUnits);
     s.writeS32(24, (int)m_exportClientFormat);
     s.writeString(25, m_tableFontName);
@@ -187,6 +188,11 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeString(62, m_checkWXAPIKey);
     s.writeString(63, m_mapProvider);
     s.writeS32(64, m_aircraftMinZoom);
+
+    s.writeBool(65, m_atcLabels);
+    s.writeBool(66, m_atcCallsigns);
+    s.writeS32(67, m_transitionAlt);
+    s.writeString(68, m_amDemod);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -259,7 +265,6 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(19, (int *)&m_airportMinimumSize, AirportType::Medium);
         d.readBool(20, &m_displayHeliports, false);
         d.readBool(21, &m_flightPaths, true);
-        d.readS32(22, &m_deviceIndex, -1);
         d.readBool(23, &m_siUnits, false);
         d.readS32(24, (int *) &m_exportClientFormat, BeastBinary);
         d.readString(25, &m_tableFontName, "Liberation Sans");
@@ -319,6 +324,12 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readString(62, &m_checkWXAPIKey, "");
         d.readString(63, &m_mapProvider, "osm");
         d.readS32(64, &m_aircraftMinZoom, 11);
+
+        d.readBool(65, &m_atcLabels, true);
+        d.readBool(66, &m_atcCallsigns, true);
+        d.readS32(67, &m_transitionAlt, 6000);
+        d.readString(68, &m_amDemod);
+
 #ifdef LINUX
         if (m_mapProvider == "osm") {
             m_mapProvider = "mapboxgl";
