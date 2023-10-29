@@ -237,7 +237,7 @@
          <string>Power threshold in dB</string>
         </property>
         <property name="minimum">
-         <number>-1000</number>
+         <number>-1200</number>
         </property>
         <property name="maximum">
          <number>0</number>
