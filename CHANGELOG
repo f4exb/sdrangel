@@ -1,3 +1,16 @@
+sdrangel (7.17.0-1) unstable; urgency=medium
+
+   * Add frequency scanner channel plugin. PR #1852
+   * Implementation of Mac OS CI. PR #1841
+   * Change down and up channelizers filter chain strategy. Fixes #1846
+   * Fix race condition that can result in a crash or hang. PR #1854
+   * DSC Demod: initialise m_scopeSink. PR #1854
+   * Fix FFT Overlap for spectrum view. PR #1856
+   * Various ADS-B enhancements. PR #1861
+   * Use channel sample rate of 48k in RTTY and PSK31 mods. Fixes #1862. PR #1865
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 29 Oct 2023 04:21:18 +0100
+
 sdrangel (7.16.0-1) unstable; urgency=medium
 
    * Added RTTY modulator. PR #1800
