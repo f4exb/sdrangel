@@ -109,7 +109,7 @@ jobs:
       - name: Update brew
         run: brew update
       - name: Install brew packages
-        run: brew install --overwrite nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
+        run: brew install --force --overwrite nasm boost hidapi libusb fftw ffmpeg faad2 opencv zlib airspy airspyhf hackrf rtl-sdr libbladerf uhd soapysdr
       - name: Configure SDRangel
         run: |
           mkdir build && cd build
