@@ -340,7 +340,7 @@ endif (NOT FFTW3F_FOUND AND NOT USE_PRECOMPILED_LIBS)
 # So instead, we use FetchContent and build Boost at CMake configure time
 include(FetchContent)
 FetchContent_Declare(boost
-    URL https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz
+    URL https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.gz
 )
 
 find_package(Boost QUIET)
@@ -493,12 +493,17 @@ if (NOT FFMPEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
     # We have to install this so OpenCV can find it
     # OpenCV doesn't currently build with ffmpeg 5, so use 4
+    set(FFMPEG_EXTRA_LDFLAGS ${LAME_EXTRA_LDFLAGS})
+    set(FFMPEG_EXTRA_CFLAGS ${LAME_EXTRA_CFLAGS})
+    if (APPLE AND (XCODE_VERSION VERSION_GREATER_EQUAL 15.0.0))
+        set(FFMPEG_EXTRA_LDFLAGS "${FFMPEG_EXTRA_LDFLAGS} -Wl,-ld_classic")
+    endif()
     ExternalProject_Add(ffmpeg
             GIT_REPOSITORY https://github.com/FFmpeg/FFmpeg.git
             GIT_TAG n4.4.2
             DEPENDS ${X264_DEPENDS} ${X265_DEPENDS} ${OPUS_DEPENDS} ${FDK_AAC_DEPENDS} ${LAME_DEPENDS}
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/ffmpeg"
-            CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${X264_PKG_CONFIG_DIR}:${X265_PKG_CONFIG_DIR}:${OPUS_PKG_CONFIG_DIR}:${FDK_AAC_PKG_CONFIG_DIR} <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-shared --enable-gpl --enable-nonfree --enable-libx264 --enable-libx265 --enable-libopus --enable-libfdk-aac --enable-libmp3lame --extra-ldflags=${LAME_EXTRA_LDFLAGS} --extra-cflags=${LAME_EXTRA_CFLAGS}
+            CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${X264_PKG_CONFIG_DIR}:${X265_PKG_CONFIG_DIR}:${OPUS_PKG_CONFIG_DIR}:${FDK_AAC_PKG_CONFIG_DIR} <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-shared --enable-gpl --enable-nonfree --enable-libx264 --enable-libx265 --enable-libopus --enable-libfdk-aac --enable-libmp3lame --extra-ldflags=${FFMPEG_EXTRA_LDFLAGS} --extra-cflags=${FFMPEG_EXTRA_CFLAGS}
             BUILD_COMMAND ${MAKE}
             TEST_COMMAND ""
             )
@@ -1479,9 +1484,14 @@ if (WIN32 OR APPLE)
     endif (ENABLE_BLADERF)
 
     if (ENABLE_USRP AND Boost_FOUND AND NOT WIN32 AND ((NOT UHD_FOUND) OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "ON")))
+        if (DEFINED PYTHON_EXECUTABLE)
+            set(UHD_PYTHON_ARGS "-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}")
+        else ()
+            set(UHD_PYTHON_ARGS "")
+        endif ()
         ExternalProject_Add(uhd
                 GIT_REPOSITORY https://github.com/EttusResearch/uhd.git
-                GIT_TAG v4.2.0.0
+                GIT_TAG v4.5.0.0
                 DEPENDS ${LIBUSB_DEPENDS} ${Boost_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/uhd"
                 SOURCE_SUBDIR "host"
@@ -1490,7 +1500,7 @@ if (WIN32 OR APPLE)
                     -DBoost_INCLUDE_DIR=${Boost_INCLUDE_DIR}
                     -DLIBUSB_LIBRARIES=${LIBUSB_LIBRARIES}
                     -DLIBUSB_INCLUDE_DIR=${LIBUSB_INCLUDE_DIR}
-                    -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+                    ${UHD_PYTHON_ARGS}
                     -DCMAKE_INSTALL_NAME_DIR=<INSTALL_DIR>/lib
                 TEST_COMMAND ""
                 )
