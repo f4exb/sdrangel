@@ -109,7 +109,7 @@ jobs:
       - name: Update brew
         run: brew update
       - name: Install brew packages
-        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr
+        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt
       - name: Configure SDRangel
         run: |
           mkdir build && cd build
