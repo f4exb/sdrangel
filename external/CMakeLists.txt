@@ -1491,7 +1491,7 @@ if (WIN32 OR APPLE)
         endif ()
         ExternalProject_Add(uhd
                 GIT_REPOSITORY https://github.com/EttusResearch/uhd.git
-                GIT_TAG v4.2.0.0
+                GIT_TAG v4.5.0.0
                 DEPENDS ${LIBUSB_DEPENDS} ${Boost_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/uhd"
                 SOURCE_SUBDIR "host"
