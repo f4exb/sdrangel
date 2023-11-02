@@ -112,7 +112,7 @@ jobs:
         run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt
       - name: Install brew uhd package
         run: |
-          rm -f /usr/local/bin/2to3
+          rm -f /usr/local/bin/2to3*
           brew install uhd
       - name: Install brew opencv package
         run: |
