@@ -637,7 +637,7 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
         setValue(-m_value);
         update();
     }
-    else if ((c >= QChar('0')) && (c <= QChar('9')) && (m_cursor > 0)) // digits
+    else if ((c >= QChar('0')) && (c <= QChar('9')) && (m_cursor >= (m_positiveOnly ? 0 : 1))) // digits
     {
         if(m_animationState != 0) {
             m_value = m_valueNew;
