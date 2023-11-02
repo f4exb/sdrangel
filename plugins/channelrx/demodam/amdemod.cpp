@@ -226,6 +226,9 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_pll: " << settings.m_pll
             << " m_syncAMOperation: " << (int) settings.m_syncAMOperation
+            << " m_frequencyMode: " << settings.m_frequencyMode
+            << " m_frequency: " << settings.m_frequency
+            << " m_snap: " << settings.m_snap
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -274,6 +277,16 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
 
     if ((m_settings.m_volume != settings.m_volume) || force) {
         reverseAPIKeys.append("volume");
+    }
+
+    if ((m_settings.m_frequencyMode != settings.m_frequencyMode) || force) {
+        reverseAPIKeys.append("frequencyMode");
+    }
+    if ((m_settings.m_frequency != settings.m_frequency) || force) {
+        reverseAPIKeys.append("frequency");
+    }
+    if ((m_settings.m_snap != settings.m_snap) || force) {
+        reverseAPIKeys.append("snap");
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -448,6 +461,18 @@ void AMDemod::webapiUpdateChannelSettings(
                         AMDemodSettings::SyncAMLSB : (AMDemodSettings::SyncAMOperation) syncAMOperationCode;
     }
 
+    if (channelSettingsKeys.contains("frequencyMode")) {
+        settings.m_frequencyMode = (AMDemodSettings::FrequencyMode) response.getAmDemodSettings()->getFrequencyMode();
+    }
+
+    if (channelSettingsKeys.contains("frequency")) {
+        settings.m_frequency = response.getAmDemodSettings()->getFrequency();
+    }
+
+    if (channelSettingsKeys.contains("snap")) {
+        settings.m_snap = (bool) response.getAmDemodSettings()->getSnap();
+    }
+
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getAmDemodSettings()->getStreamIndex();
     }
@@ -510,6 +535,9 @@ void AMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
 
     response.getAmDemodSettings()->setPll(settings.m_pll ? 1 : 0);
     response.getAmDemodSettings()->setSyncAmOperation((int) settings.m_syncAMOperation);
+    response.getAmDemodSettings()->setFrequencyMode((int) settings.m_frequencyMode);
+    response.getAmDemodSettings()->setFrequency(settings.m_frequency);
+    response.getAmDemodSettings()->setSnap((int) settings.m_snap);
     response.getAmDemodSettings()->setStreamIndex(settings.m_streamIndex);
     response.getAmDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -668,6 +696,15 @@ void AMDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("syncAMOperation") || force) {
         swgAMDemodSettings->setSyncAmOperation((int) settings.m_syncAMOperation);
+    }
+    if (channelSettingsKeys.contains("frequencyMode") || force) {
+        swgAMDemodSettings->setFrequencyMode((int) settings.m_frequencyMode);
+    }
+    if (channelSettingsKeys.contains("frequency") || force) {
+        swgAMDemodSettings->setFrequency(settings.m_frequency);
+    }
+    if (channelSettingsKeys.contains("snap") || force) {
+        swgAMDemodSettings->setSnap(settings.m_snap);
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgAMDemodSettings->setStreamIndex(settings.m_streamIndex);

@@ -136,6 +136,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     // m_statusLabel->setText("OK"); // for future use
     m_statusLabel->setFixedHeight(20);
     m_statusLabel->setMinimumWidth(20);
+    m_statusLabel->setContentsMargins(10, 0, 0, 0); // Add space between statusFrequency and statusLabel
     m_statusLabel->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
     m_statusLabel->setToolTip("Channel status");
 

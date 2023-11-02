@@ -30,6 +30,12 @@ struct AMDemodSettings
         SyncAMUSB,
         SyncAMLSB
     };
+    enum FrequencyMode {
+        Offset,
+        MediumWave,
+        Airband25k,
+        Airband8K
+    };
 
     qint32 m_inputFrequencyOffset;
     Real m_rfBandwidth;
@@ -44,6 +50,9 @@ struct AMDemodSettings
     QString m_audioDeviceName;
     bool m_pll;
     SyncAMOperation m_syncAMOperation;
+    FrequencyMode m_frequencyMode;
+    qint64 m_frequency;
+    bool m_snap;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

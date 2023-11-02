@@ -82,16 +82,42 @@
       <item>
        <layout class="QHBoxLayout" name="deltaFrequencyLayout">
         <item>
-         <widget class="QLabel" name="deltaFrequencyLabel">
+         <widget class="QComboBox" name="frequencyMode">
           <property name="minimumSize">
            <size>
-            <width>16</width>
+            <width>58</width>
             <height>0</height>
            </size>
           </property>
-          <property name="text">
-           <string>Df</string>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>16777215</height>
+           </size>
           </property>
+          <property name="toolTip">
+           <string>Select frequency entry mode. Right click to snap makers to channel center</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Δf</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>MW</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>25k</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>8.33k</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item>
