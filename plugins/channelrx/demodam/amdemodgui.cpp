@@ -279,6 +279,8 @@ void AMDemodGUI::channelMarkerChangedByCursor()
 
 void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
+    (void) value;
+
     qint64 offset = 0;
     bool valid = true;
 
