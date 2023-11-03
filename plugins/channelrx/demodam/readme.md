@@ -1,4 +1,4 @@
-<h1>AM demodulator plugin</h1>
+﻿<h1>AM demodulator plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -10,9 +10,25 @@ The top and bottom bars of the channel window are described [here](../../../sdrg
 
 ![AM Demodulator plugin GUI](../../../doc/img/AMDemod_plugin.png)
 
-<h3>1: Frequency shift from center frequency of reception</h3>
+<h3>Channel frequency entry mode</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
+Select from one of the following modes to determine how the channel center frequency is calculated:
+
+* Δf - Specify an offset in Hz from device center frequency.
+* MW - Specify a LW/MW absolute frequency in kHz. Right click to snap channel marker to nearest 1kHz when dragged.
+* 25k - Specify absolute frequency in MHz. Right click to snap channel marker to 25kHz channels when dragged.
+* 8.33k - Specify airband 8.33kHz channel number. Right click to snap channel marker to 8.33kHz channels when dragged.
+
+<h3>1: Channel Frequency</h3>
+
+Specifies channel center frequency according to frequency entry mode:
+
+* Δf - Offset in Hz from device center frequency;
+* MW - Absolute frequency in kHz.
+* 25k - Absolute frequency in MHz.
+* 8.33k - Airband 8.33kHz channel number.
+
+Use the wheels to adjust the value. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
 <h3>2: PLL and synchronous AM</h2>
 

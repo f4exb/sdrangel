@@ -100,7 +100,7 @@ jobs:
           files: ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
 
   build_mac:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
         with:
@@ -109,7 +109,15 @@ jobs:
       - name: Update brew
         run: brew update
       - name: Install brew packages
-        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt uhd
+        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt
+      - name: Install brew uhd package
+        run: |
+          rm -f /usr/local/bin/2to3*
+          rm -f /usr/local/bin/idle3
+          rm -f /usr/local/bin/pydoc3
+          rm -f /usr/local/bin/python3
+          rm -f /usr/local/bin/python3-config
+          brew install uhd
       - name: Install brew opencv package
         run: |
           rm -f /usr/local/bin/2to3

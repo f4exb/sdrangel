@@ -68,6 +68,8 @@ private:
     QIcon m_iconDSBUSB;
     QIcon m_iconDSBLSB;
 
+	bool m_invalidChannel;
+
 	explicit AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~AMDemodGUI();
 
@@ -77,11 +79,15 @@ private:
 	bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+	void calcOffset();
+	void applySnap();
+	void displaySnap();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(EnterEventType*);
 
 private slots:
+	void on_frequencyMode_currentIndexChanged(int index);
 	void on_deltaFrequency_changed(qint64 value);
 	void on_pll_toggled(bool checked);
 	void on_ssb_toggled(bool checked);
@@ -96,6 +102,7 @@ private slots:
     void handleInputMessages();
     void audioSelect(const QPoint& p);
     void samSSBSelect(const QPoint& p);
+	void snapClicked();
 	void tick();
 };
 

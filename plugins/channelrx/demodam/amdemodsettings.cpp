@@ -44,6 +44,9 @@ void AMDemodSettings::resetToDefaults()
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_pll = false;
     m_syncAMOperation = SyncAMDSB;
+    m_frequencyMode = Offset;
+    m_frequency = 0;
+    m_snap = false;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -88,6 +91,9 @@ QByteArray AMDemodSettings::serialize() const
     s.writeBlob(21, m_geometryBytes);
     s.writeBool(22, m_hidden);
     s.writeBool(23, m_audioMute);
+    s.writeS32(24, (int) m_frequencyMode);
+    s.writeS64(25, m_frequency);
+    s.writeBool(26, m_snap);
 
     return s.final();
 }
@@ -157,6 +163,9 @@ bool AMDemodSettings::deserialize(const QByteArray& data)
         d.readBlob(21, &m_geometryBytes);
         d.readBool(22, &m_hidden, false);
         d.readBool(23, &m_audioMute);
+        d.readS32(24, (int *) &m_frequencyMode, (int) Offset);
+        d.readS64(25, &m_frequency);
+        d.readBool(26, &m_snap, false);
 
         return true;
     }
