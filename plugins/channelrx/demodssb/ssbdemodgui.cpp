@@ -196,6 +196,7 @@ void SSBDemodGUI::on_agcClamping_toggled(bool checked)
 void SSBDemodGUI::on_dnr_toggled(bool checked)
 {
     m_settings.m_dnr = checked;
+    m_settings.m_filterBank[m_settings.m_filterIndex].m_dnr = m_settings.m_dnr;
     applySettings();
 }
 
@@ -268,6 +269,12 @@ void SSBDemodGUI::on_filterIndex_valueChanged(int value)
     ui->BW->setMinimum(-480);
     ui->lowCut->setMaximum(480);
     ui->lowCut->setMinimum(-480);
+    m_settings.m_dnr = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnr;
+    m_settings.m_dnrScheme = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrScheme;
+    m_settings.m_dnrAboveAvgFactor = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrAboveAvgFactor;
+    m_settings.m_dnrSigmaFactor = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrSigmaFactor;
+    m_settings.m_dnrNbPeaks = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrNbPeaks;
+    m_settings.m_dnrAlpha = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrAlpha;
     displaySettings();
     applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
 }
@@ -748,22 +755,27 @@ void SSBDemodGUI::dnrSetup(int32_t iValueChanged)
     {
     case FFTNRDialog::ValueChanged::ChangedScheme:
         m_settings.m_dnrScheme = m_fftNRDialog->getScheme();
+        m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrScheme = m_settings.m_dnrScheme;
         applySettings();
         break;
     case FFTNRDialog::ValueChanged::ChangedAboveAvgFactor:
         m_settings.m_dnrAboveAvgFactor = m_fftNRDialog->getAboveAvgFactor();
+        m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrAboveAvgFactor = m_settings.m_dnrAboveAvgFactor;
         applySettings();
         break;
     case FFTNRDialog::ValueChanged::ChangedSigmaFactor:
         m_settings.m_dnrSigmaFactor = m_fftNRDialog->getSigmaFactor();
+        m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrSigmaFactor = m_settings.m_dnrSigmaFactor;
         applySettings();
         break;
     case FFTNRDialog::ValueChanged::ChangedNbPeaks:
         m_settings.m_dnrNbPeaks = m_fftNRDialog->getNbPeaks();
+        m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrNbPeaks = m_settings.m_dnrNbPeaks;
         applySettings();
         break;
     case FFTNRDialog::ValueChanged::ChangedAlpha:
         m_settings.m_dnrAlpha = m_fftNRDialog->getAlpha();
+        m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrAlpha = m_settings.m_dnrAlpha;
         applySettings();
         break;
     default:

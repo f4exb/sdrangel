@@ -121,6 +121,12 @@ QByteArray SSBDemodSettings::serialize() const
         s.writeS32(101 + 10*i, m_filterBank[i].m_rfBandwidth / 100.0);
         s.writeS32(102 + 10*i, m_filterBank[i].m_lowCutoff / 100.0);
         s.writeS32(103 + 10*i, (int) m_filterBank[i].m_fftWindow);
+        s.writeBool(104 + 10*i, m_filterBank[i].m_dnr);
+        s.writeS32(105 + 10*i, m_filterBank[i].m_dnrScheme);
+        s.writeFloat(106 + 10*i, m_filterBank[i].m_dnrAboveAvgFactor);
+        s.writeFloat(107 + 10*i, m_filterBank[i].m_dnrSigmaFactor);
+        s.writeS32(108 + 10*i, m_filterBank[i].m_dnrNbPeaks);
+        s.writeFloat(109 + 10*i, m_filterBank[i].m_dnrAlpha);
     }
 
     return s.final();
@@ -208,6 +214,12 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
             d.readS32(103 + 10*i, &tmp, (int) FFTWindow::Blackman);
             m_filterBank[i].m_fftWindow =
                 (FFTWindow::Function) (tmp < 0 ? 0 : tmp > (int) FFTWindow::BlackmanHarris7 ? (int) FFTWindow::BlackmanHarris7 : tmp);
+            d.readBool(104 + 10*i, &m_filterBank[i].m_dnr, false);
+            d.readS32(105 + 10*i, &m_filterBank[i].m_dnrScheme, 0);
+            d.readFloat(106 + 10*i, &m_filterBank[i].m_dnrAboveAvgFactor, 20.0f);
+            d.readFloat(107 + 10*i, &m_filterBank[i].m_dnrSigmaFactor, 4.0f);
+            d.readS32(108 + 10*i, &m_filterBank[i].m_dnrNbPeaks, 10);
+            d.readFloat(109 + 10*i, &m_filterBank[i].m_dnrAlpha, 0.95f);
         }
 
         return true;

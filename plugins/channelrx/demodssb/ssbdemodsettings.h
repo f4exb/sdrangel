@@ -31,6 +31,12 @@ struct SSBDemodFilterSettings
     Real m_rfBandwidth;
     Real m_lowCutoff;
     FFTWindow::Function m_fftWindow;
+    bool m_dnr;
+    int  m_dnrScheme;
+    float m_dnrAboveAvgFactor;
+    float m_dnrSigmaFactor;
+    int  m_dnrNbPeaks;
+    float m_dnrAlpha;
 
     SSBDemodFilterSettings() :
         m_spanLog2(3),
