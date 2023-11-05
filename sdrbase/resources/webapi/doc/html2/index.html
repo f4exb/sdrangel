@@ -1473,6 +1473,19 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Synchronous AM sidebands mode (DSB, USB, LSB)"
     },
+    "frequencyMode" : {
+      "type" : "integer",
+      "description" : "(0 for Offset, 1 for MW, 2 for 25k, 3 for 8.33k)"
+    },
+    "frequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Channel center frequency"
+    },
+    "snap" : {
+      "type" : "integer",
+      "description" : "Snap channel marker to channel center frequencies"
+    },
     "streamIndex" : {
       "type" : "integer",
       "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
@@ -13602,6 +13615,33 @@ margin-bottom: 20px;
     "agcThresholdGate" : {
       "type" : "integer",
       "description" : "Audio squelch gate in ms"
+    },
+    "dnr" : {
+      "type" : "integer",
+      "description" : "Toggle noise reduction:\n  * 0 - Noise reduction off\n  * 1 - Noise reduction on\n"
+    },
+    "dnrScheme" : {
+      "type" : "integer",
+      "description" : "Noise reduction scheme:\n  * 0 - Average of magnitudes\n  * 1 - Average and standard deviation of magnitudes\n  * 2 - Magnitude maxima (peaks)\n"
+    },
+    "dnrAboveAvgFactor" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Multiplier of the average to deteermine magnitude threshold in average scheme"
+    },
+    "dnrSigmaFactor" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Standard deviation (sigma) multiplier to deteermine magnitude threshold in average and standard deviation scheme"
+    },
+    "dnrNbPeaks" : {
+      "type" : "integer",
+      "description" : "Number of magnitude peak maxima selected in peaks scheme"
+    },
+    "dnrAlpha" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Smoothing constant (alpha) of the exponential smoothing filter. Must be between  0 and 1."
     },
     "rgbColor" : {
       "type" : "integer"
@@ -58361,7 +58401,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-10-26T10:32:08.802+02:00
+              Generated 2023-11-05T10:45:45.965+01:00
             </div>
           </div>
       </div>

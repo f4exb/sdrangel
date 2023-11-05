@@ -57,6 +57,34 @@ SSBDemodSettings:
     agcThresholdGate:
       description: Audio squelch gate in ms
       type: integer
+    dnr:
+      type: integer
+      description: >
+        Toggle noise reduction:
+          * 0 - Noise reduction off
+          * 1 - Noise reduction on
+    dnrScheme:
+      type: integer
+      description: >
+        Noise reduction scheme:
+          * 0 - Average of magnitudes
+          * 1 - Average and standard deviation of magnitudes
+          * 2 - Magnitude maxima (peaks)
+    dnrAboveAvgFactor:
+      type: number
+      format: float
+      description: Multiplier of the average to deteermine magnitude threshold in average scheme
+    dnrSigmaFactor:
+      type: number
+      format: float
+      description: Standard deviation (sigma) multiplier to deteermine magnitude threshold in average and standard deviation scheme
+    dnrNbPeaks:
+      type: integer
+      description: Number of magnitude peak maxima selected in peaks scheme
+    dnrAlpha:
+      type: number
+      format: float
+      description: Smoothing constant (alpha) of the exponential smoothing filter. Must be between  0 and 1.
     rgbColor:
       type: integer
     title:

@@ -542,6 +542,21 @@ void SSBDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("agcThresholdGate")) {
         settings.m_agcThresholdGate = response.getSsbDemodSettings()->getAgcThresholdGate();
     }
+    if (channelSettingsKeys.contains("dnr")) {
+        settings.m_dnr = response.getSsbDemodSettings()->getDnr() != 0;
+    }
+    if (channelSettingsKeys.contains("dnrAboveAvgFactor")) {
+        settings.m_dnrAboveAvgFactor = response.getSsbDemodSettings()->getDnrAboveAvgFactor();
+    }
+    if (channelSettingsKeys.contains("dnrSigmaFactor")) {
+        settings.m_dnrSigmaFactor = response.getSsbDemodSettings()->getDnrSigmaFactor();
+    }
+    if (channelSettingsKeys.contains("dnrNbPeaks")) {
+        settings.m_dnrNbPeaks = response.getSsbDemodSettings()->getDnrNbPeaks();
+    }
+    if (channelSettingsKeys.contains("dnrAlpha")) {
+        settings.m_dnrAlpha = response.getSsbDemodSettings()->getDnrAlpha();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getSsbDemodSettings()->getRgbColor();
     }
@@ -610,6 +625,12 @@ void SSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getSsbDemodSettings()->setAgcTimeLog2(settings.m_agcTimeLog2);
     response.getSsbDemodSettings()->setAgcPowerThreshold(settings.m_agcPowerThreshold);
     response.getSsbDemodSettings()->setAgcThresholdGate(settings.m_agcThresholdGate);
+    response.getSsbDemodSettings()->setDnr(settings.m_dnr ? 1 : 0);
+    response.getSsbDemodSettings()->setDnrScheme(settings.m_dnrScheme);
+    response.getSsbDemodSettings()->setDnrAboveAvgFactor(settings.m_dnrAboveAvgFactor);
+    response.getSsbDemodSettings()->setDnrSigmaFactor(settings.m_dnrSigmaFactor);
+    response.getSsbDemodSettings()->setDnrNbPeaks(settings.m_dnrNbPeaks);
+    response.getSsbDemodSettings()->setDnrAlpha(settings.m_dnrAlpha);
     response.getSsbDemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getSsbDemodSettings()->getTitle()) {
@@ -811,6 +832,21 @@ void SSBDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("agcThresholdGate") || force) {
         swgSSBDemodSettings->setAgcThresholdGate(settings.m_agcThresholdGate);
+    }
+    if (channelSettingsKeys.contains("dnr")) {
+        swgSSBDemodSettings->setDnr(settings.m_dnr ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("dnrAboveAvgFactor")) {
+        swgSSBDemodSettings->setDnrAboveAvgFactor(settings.m_dnrAboveAvgFactor);
+    }
+    if (channelSettingsKeys.contains("dnrSigmaFactor")) {
+        swgSSBDemodSettings->setDnrSigmaFactor(settings.m_dnrSigmaFactor);
+    }
+    if (channelSettingsKeys.contains("dnrNbPeaks")) {
+        swgSSBDemodSettings->setDnrNbPeaks(settings.m_dnrNbPeaks);
+    }
+    if (channelSettingsKeys.contains("dnrAlpha")) {
+        swgSSBDemodSettings->setDnrAlpha(settings.m_dnrAlpha);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgSSBDemodSettings->setRgbColor(settings.m_rgbColor);

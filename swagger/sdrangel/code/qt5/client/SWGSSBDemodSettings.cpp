@@ -60,6 +60,18 @@ SWGSSBDemodSettings::SWGSSBDemodSettings() {
     m_agc_power_threshold_isSet = false;
     agc_threshold_gate = 0;
     m_agc_threshold_gate_isSet = false;
+    dnr = 0;
+    m_dnr_isSet = false;
+    dnr_scheme = 0;
+    m_dnr_scheme_isSet = false;
+    dnr_above_avg_factor = 0.0f;
+    m_dnr_above_avg_factor_isSet = false;
+    dnr_sigma_factor = 0.0f;
+    m_dnr_sigma_factor_isSet = false;
+    dnr_nb_peaks = 0;
+    m_dnr_nb_peaks_isSet = false;
+    dnr_alpha = 0.0f;
+    m_dnr_alpha_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -124,6 +136,18 @@ SWGSSBDemodSettings::init() {
     m_agc_power_threshold_isSet = false;
     agc_threshold_gate = 0;
     m_agc_threshold_gate_isSet = false;
+    dnr = 0;
+    m_dnr_isSet = false;
+    dnr_scheme = 0;
+    m_dnr_scheme_isSet = false;
+    dnr_above_avg_factor = 0.0f;
+    m_dnr_above_avg_factor_isSet = false;
+    dnr_sigma_factor = 0.0f;
+    m_dnr_sigma_factor_isSet = false;
+    dnr_nb_peaks = 0;
+    m_dnr_nb_peaks_isSet = false;
+    dnr_alpha = 0.0f;
+    m_dnr_alpha_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -152,6 +176,12 @@ SWGSSBDemodSettings::init() {
 
 void
 SWGSSBDemodSettings::cleanup() {
+
+
+
+
+
+
 
 
 
@@ -236,6 +266,18 @@ SWGSSBDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&agc_power_threshold, pJson["agcPowerThreshold"], "qint32", "");
     
     ::SWGSDRangel::setValue(&agc_threshold_gate, pJson["agcThresholdGate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dnr, pJson["dnr"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dnr_scheme, pJson["dnrScheme"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dnr_above_avg_factor, pJson["dnrAboveAvgFactor"], "float", "");
+    
+    ::SWGSDRangel::setValue(&dnr_sigma_factor, pJson["dnrSigmaFactor"], "float", "");
+    
+    ::SWGSDRangel::setValue(&dnr_nb_peaks, pJson["dnrNbPeaks"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dnr_alpha, pJson["dnrAlpha"], "float", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -324,6 +366,24 @@ SWGSSBDemodSettings::asJsonObject() {
     }
     if(m_agc_threshold_gate_isSet){
         obj->insert("agcThresholdGate", QJsonValue(agc_threshold_gate));
+    }
+    if(m_dnr_isSet){
+        obj->insert("dnr", QJsonValue(dnr));
+    }
+    if(m_dnr_scheme_isSet){
+        obj->insert("dnrScheme", QJsonValue(dnr_scheme));
+    }
+    if(m_dnr_above_avg_factor_isSet){
+        obj->insert("dnrAboveAvgFactor", QJsonValue(dnr_above_avg_factor));
+    }
+    if(m_dnr_sigma_factor_isSet){
+        obj->insert("dnrSigmaFactor", QJsonValue(dnr_sigma_factor));
+    }
+    if(m_dnr_nb_peaks_isSet){
+        obj->insert("dnrNbPeaks", QJsonValue(dnr_nb_peaks));
+    }
+    if(m_dnr_alpha_isSet){
+        obj->insert("dnrAlpha", QJsonValue(dnr_alpha));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -526,6 +586,66 @@ SWGSSBDemodSettings::setAgcThresholdGate(qint32 agc_threshold_gate) {
 }
 
 qint32
+SWGSSBDemodSettings::getDnr() {
+    return dnr;
+}
+void
+SWGSSBDemodSettings::setDnr(qint32 dnr) {
+    this->dnr = dnr;
+    this->m_dnr_isSet = true;
+}
+
+qint32
+SWGSSBDemodSettings::getDnrScheme() {
+    return dnr_scheme;
+}
+void
+SWGSSBDemodSettings::setDnrScheme(qint32 dnr_scheme) {
+    this->dnr_scheme = dnr_scheme;
+    this->m_dnr_scheme_isSet = true;
+}
+
+float
+SWGSSBDemodSettings::getDnrAboveAvgFactor() {
+    return dnr_above_avg_factor;
+}
+void
+SWGSSBDemodSettings::setDnrAboveAvgFactor(float dnr_above_avg_factor) {
+    this->dnr_above_avg_factor = dnr_above_avg_factor;
+    this->m_dnr_above_avg_factor_isSet = true;
+}
+
+float
+SWGSSBDemodSettings::getDnrSigmaFactor() {
+    return dnr_sigma_factor;
+}
+void
+SWGSSBDemodSettings::setDnrSigmaFactor(float dnr_sigma_factor) {
+    this->dnr_sigma_factor = dnr_sigma_factor;
+    this->m_dnr_sigma_factor_isSet = true;
+}
+
+qint32
+SWGSSBDemodSettings::getDnrNbPeaks() {
+    return dnr_nb_peaks;
+}
+void
+SWGSSBDemodSettings::setDnrNbPeaks(qint32 dnr_nb_peaks) {
+    this->dnr_nb_peaks = dnr_nb_peaks;
+    this->m_dnr_nb_peaks_isSet = true;
+}
+
+float
+SWGSSBDemodSettings::getDnrAlpha() {
+    return dnr_alpha;
+}
+void
+SWGSSBDemodSettings::setDnrAlpha(float dnr_alpha) {
+    this->dnr_alpha = dnr_alpha;
+    this->m_dnr_alpha_isSet = true;
+}
+
+qint32
 SWGSSBDemodSettings::getRgbColor() {
     return rgb_color;
 }
@@ -696,6 +816,24 @@ SWGSSBDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_agc_threshold_gate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dnr_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dnr_scheme_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dnr_above_avg_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dnr_sigma_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dnr_nb_peaks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dnr_alpha_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

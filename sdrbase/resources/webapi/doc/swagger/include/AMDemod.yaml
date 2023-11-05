@@ -37,6 +37,16 @@ AMDemodSettings:
     syncAMOperation:
       description: Synchronous AM sidebands mode (DSB, USB, LSB)
       type: integer
+    frequencyMode:
+      description: (0 for Offset, 1 for MW, 2 for 25k, 3 for 8.33k)
+      type: integer
+    frequency:
+      description: Channel center frequency
+      type: integer
+      format: int64
+    snap:
+      description: Snap channel marker to channel center frequencies
+      type: integer
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer

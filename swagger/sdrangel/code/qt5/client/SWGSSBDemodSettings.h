@@ -93,6 +93,24 @@ public:
     qint32 getAgcThresholdGate();
     void setAgcThresholdGate(qint32 agc_threshold_gate);
 
+    qint32 getDnr();
+    void setDnr(qint32 dnr);
+
+    qint32 getDnrScheme();
+    void setDnrScheme(qint32 dnr_scheme);
+
+    float getDnrAboveAvgFactor();
+    void setDnrAboveAvgFactor(float dnr_above_avg_factor);
+
+    float getDnrSigmaFactor();
+    void setDnrSigmaFactor(float dnr_sigma_factor);
+
+    qint32 getDnrNbPeaks();
+    void setDnrNbPeaks(qint32 dnr_nb_peaks);
+
+    float getDnrAlpha();
+    void setDnrAlpha(float dnr_alpha);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -180,6 +198,24 @@ private:
 
     qint32 agc_threshold_gate;
     bool m_agc_threshold_gate_isSet;
+
+    qint32 dnr;
+    bool m_dnr_isSet;
+
+    qint32 dnr_scheme;
+    bool m_dnr_scheme_isSet;
+
+    float dnr_above_avg_factor;
+    bool m_dnr_above_avg_factor_isSet;
+
+    float dnr_sigma_factor;
+    bool m_dnr_sigma_factor_isSet;
+
+    qint32 dnr_nb_peaks;
+    bool m_dnr_nb_peaks_isSet;
+
+    float dnr_alpha;
+    bool m_dnr_alpha_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
