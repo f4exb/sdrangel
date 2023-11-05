@@ -262,6 +262,12 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
             << " m_agcTimeLog2: " << settings.m_agcTimeLog2
             << " agcPowerThreshold: " << settings.m_agcPowerThreshold
             << " agcThresholdGate: " << settings.m_agcThresholdGate
+            << " m_dnr: " << settings.m_dnr
+            << " m_dnrScheme: " << settings.m_dnrScheme
+            << " m_dnrAboveAvgFactor: " << settings.m_dnrAboveAvgFactor
+            << " m_dnrSigmaFactor: " << settings.m_dnrSigmaFactor
+            << " m_dnrNbPeaks: " << settings.m_dnrNbPeaks
+            << " m_dnrAlpha: " << settings.m_dnrAlpha
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
@@ -323,6 +329,24 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
     }
     if ((m_settings.m_agc != settings.m_agc) || force) {
         reverseAPIKeys.append("agc");
+    }
+    if ((m_settings.m_dnr != settings.m_dnr) || force) {
+        reverseAPIKeys.append("dnr");
+    }
+    if ((m_settings.m_dnrScheme != settings.m_dnrScheme) || force) {
+        reverseAPIKeys.append("dnrScheme");
+    }
+    if ((m_settings.m_dnrAboveAvgFactor != settings.m_dnrAboveAvgFactor) || force) {
+        reverseAPIKeys.append("dnrAboveAvgFactor");
+    }
+    if ((m_settings.m_dnrSigmaFactor != settings.m_dnrSigmaFactor) || force) {
+        reverseAPIKeys.append("dnrSigmaFactor");
+    }
+    if ((m_settings.m_dnrNbPeaks != settings.m_dnrNbPeaks) || force) {
+        reverseAPIKeys.append("dnrNbPeaks");
+    }
+    if ((m_settings.m_dnrAlpha != settings.m_dnrAlpha) || force) {
+        reverseAPIKeys.append("dnrAlpha");
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)

@@ -50,6 +50,7 @@ public:
 	bool getAudioActive() const { return m_audioActive; }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
     void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
+    void setDNR(bool dnr);
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {

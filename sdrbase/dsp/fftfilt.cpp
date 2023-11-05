@@ -78,28 +78,34 @@ void fftfilt::init_filter()
 // f1 == 0 ==> low pass filter
 // f2 == 0 ==> high pass filter
 //------------------------------------------------------------------------------
-fftfilt::fftfilt(int len)
+fftfilt::fftfilt(int len) :
+    m_noiseReduction(len)
 {
 	flen	= len;
 	pass    = 0;
 	window  = 0;
+    m_dnr   = false;
 	init_filter();
 }
 
-fftfilt::fftfilt(float f1, float f2, int len)
+fftfilt::fftfilt(float f1, float f2, int len) :
+    m_noiseReduction(len)
 {
 	flen	= len;
 	pass    = 0;
 	window  = 0;
+    m_dnr   = false;
 	init_filter();
 	create_filter(f1, f2);
 }
 
-fftfilt::fftfilt(float f2, int len)
+fftfilt::fftfilt(float f2, int len) :
+    m_noiseReduction(len)
 {
 	flen	= len;
     pass    = 0;
     window  = 0;
+    m_dnr   = false;
 	init_filter();
 	create_dsb_filter(f2);
 }
@@ -468,22 +474,53 @@ int fftfilt::runSSB(const cmplx & in, cmplx **out, bool usb, bool getDC)
 
 	// get or reject DC component
 	data[0] = getDC ? data[0]*filter[0] : 0;
+    m_noiseReduction.setScheme(m_dnrScheme);
+    m_noiseReduction.init();
 
 	// Discard frequencies for ssb
 	if (usb)
 	{
-		for (int i = 1; i < flen2; i++) {
+		for (int i = 1; i < flen2; i++)
+        {
 			data[i] *= filter[i];
 			data[flen2 + i] = 0;
+
+            if (m_dnr)
+            {
+                m_noiseReduction.push(data[i], i);
+                m_noiseReduction.push(data[flen2 + i], flen2 + i);
+            }
 		}
 	}
 	else
 	{
-		for (int i = 1; i < flen2; i++) {
+		for (int i = 1; i < flen2; i++)
+        {
 			data[i] = 0;
 			data[flen2 + i] *= filter[flen2 + i];
+
+            if (m_dnr)
+            {
+                m_noiseReduction.push(data[i], i);
+                m_noiseReduction.push(data[flen2 + i], flen2 + i);
+            }
 		}
 	}
+
+    if (m_dnr)
+    {
+        m_noiseReduction.m_aboveAvgFactor = m_dnrAboveAvgFactor;
+        m_noiseReduction.m_sigmaFactor = m_dnrSigmaFactor;
+        m_noiseReduction.m_nbPeaks = m_dnrNbPeaks;
+        m_noiseReduction.calc();
+
+        for (int i = 0; i < flen; i++)
+        {
+            if (m_noiseReduction.cut(i)) {
+                data[i] = 0;
+            }
+        }
+    }
 
 	// in-place FFT: freqdata overwritten with filtered timedata
 	fft->InverseComplexFFT(data);

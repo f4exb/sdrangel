@@ -193,6 +193,12 @@ void SSBDemodGUI::on_agcClamping_toggled(bool checked)
     applySettings();
 }
 
+void SSBDemodGUI::on_dnr_toggled(bool checked)
+{
+    m_settings.m_dnr = checked;
+    applySettings();
+}
+
 void SSBDemodGUI::on_agcTimeLog2_valueChanged(int value)
 {
     QString s = QString::number((1<<value), 'f', 0);
@@ -337,7 +343,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_audioFlipChannels(false),
     m_audioMute(false),
 	m_squelchOpen(false),
-    m_audioSampleRate(-1)
+    m_audioSampleRate(-1),
+    m_fftNRDialog(nullptr)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodssb/readme.md";
@@ -355,6 +362,9 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
     connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
+
+    CRightClickEnabler *dnrRightClickEnabler = new CRightClickEnabler(ui->dnr);
+    connect(dnrRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(dnrSetupDialog(const QPoint &)));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -602,6 +612,7 @@ void SSBDemodGUI::displaySettings()
 
     ui->agc->setChecked(m_settings.m_agc);
     ui->agcClamping->setChecked(m_settings.m_agcClamping);
+    ui->dnr->setChecked(m_settings.m_dnr);
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);
@@ -698,7 +709,6 @@ void SSBDemodGUI::enterEvent(EnterEventType* event)
 
 void SSBDemodGUI::audioSelect(const QPoint& p)
 {
-    qDebug("SSBDemodGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
     audioSelect.move(p);
     audioSelect.exec();
@@ -707,6 +717,57 @@ void SSBDemodGUI::audioSelect(const QPoint& p)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
         applySettings();
+    }
+}
+
+void SSBDemodGUI::dnrSetupDialog(const QPoint& p)
+{
+    m_fftNRDialog = new FFTNRDialog();
+    m_fftNRDialog->move(p);
+    QObject::connect(m_fftNRDialog, &FFTNRDialog::valueChanged, this, &SSBDemodGUI::dnrSetup);
+    m_fftNRDialog->setScheme((FFTNoiseReduction::Scheme) m_settings.m_dnrScheme);
+    m_fftNRDialog->setAboveAvgFactor(m_settings.m_dnrAboveAvgFactor);
+    m_fftNRDialog->setSigmaFactor(m_settings.m_dnrSigmaFactor);
+    m_fftNRDialog->setNbPeaks(m_settings.m_dnrNbPeaks);
+    m_fftNRDialog->setAlpha(m_settings.m_dnrAlpha, 2048, m_audioSampleRate);
+    m_fftNRDialog->exec();
+    QObject::disconnect(m_fftNRDialog, &FFTNRDialog::valueChanged, this, &SSBDemodGUI::dnrSetup);
+    m_fftNRDialog->deleteLater();
+    m_fftNRDialog = nullptr;
+}
+
+void SSBDemodGUI::dnrSetup(int32_t iValueChanged)
+{
+    if (!m_fftNRDialog) {
+        return;
+    }
+
+    FFTNRDialog::ValueChanged valueChanged = (FFTNRDialog::ValueChanged) iValueChanged;
+
+    switch (valueChanged)
+    {
+    case FFTNRDialog::ValueChanged::ChangedScheme:
+        m_settings.m_dnrScheme = m_fftNRDialog->getScheme();
+        applySettings();
+        break;
+    case FFTNRDialog::ValueChanged::ChangedAboveAvgFactor:
+        m_settings.m_dnrAboveAvgFactor = m_fftNRDialog->getAboveAvgFactor();
+        applySettings();
+        break;
+    case FFTNRDialog::ValueChanged::ChangedSigmaFactor:
+        m_settings.m_dnrSigmaFactor = m_fftNRDialog->getSigmaFactor();
+        applySettings();
+        break;
+    case FFTNRDialog::ValueChanged::ChangedNbPeaks:
+        m_settings.m_dnrNbPeaks = m_fftNRDialog->getNbPeaks();
+        applySettings();
+        break;
+    case FFTNRDialog::ValueChanged::ChangedAlpha:
+        m_settings.m_dnrAlpha = m_fftNRDialog->getAlpha();
+        applySettings();
+        break;
+    default:
+        break;
     }
 }
 
@@ -758,6 +819,7 @@ void SSBDemodGUI::makeUIConnections()
     QObject::connect(ui->volume, &QDial::valueChanged, this, &SSBDemodGUI::on_volume_valueChanged);
     QObject::connect(ui->agc, &ButtonSwitch::toggled, this, &SSBDemodGUI::on_agc_toggled);
     QObject::connect(ui->agcClamping, &ButtonSwitch::toggled, this, &SSBDemodGUI::on_agcClamping_toggled);
+    QObject::connect(ui->dnr, &ButtonSwitch::toggled, this, &SSBDemodGUI::on_dnr_toggled);
     QObject::connect(ui->agcTimeLog2, &QDial::valueChanged, this, &SSBDemodGUI::on_agcTimeLog2_valueChanged);
     QObject::connect(ui->agcPowerThreshold, &QDial::valueChanged, this, &SSBDemodGUI::on_agcPowerThreshold_valueChanged);
     QObject::connect(ui->agcThresholdGate, &QDial::valueChanged, this, &SSBDemodGUI::on_agcThresholdGate_valueChanged);

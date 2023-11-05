@@ -33,7 +33,7 @@
 
 #include "ssbdemodsink.h"
 
-const int SSBDemodSink::m_ssbFftLen = 1024;
+const int SSBDemodSink::m_ssbFftLen = 2048;
 const int SSBDemodSink::m_agcTarget = 3276; // 32768/10 -10 dB amplitude => -20 dB power: center of normal signal
 
 SSBDemodSink::SSBDemodSink() :
@@ -258,6 +258,11 @@ void SSBDemodSink::processOneSample(Complex &ci)
 	}
 }
 
+void SSBDemodSink::setDNR(bool dnr)
+{
+    SSBFilter->setDNR(dnr);
+}
+
 void SSBDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
 {
     qDebug() << "SSBDemodSink::applyChannelSettings:"
@@ -352,6 +357,12 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
             << " m_agcTimeLog2: " << settings.m_agcTimeLog2
             << " agcPowerThreshold: " << settings.m_agcPowerThreshold
             << " agcThresholdGate: " << settings.m_agcThresholdGate
+            << " m_dnr: " << settings.m_dnr
+            << " m_dnrScheme: " << settings.m_dnrScheme
+            << " m_dnrAboveAvgFactor: " << settings.m_dnrAboveAvgFactor
+            << " m_dnrSigmaFactor: " << settings.m_dnrSigmaFactor
+            << " m_dnrNbPeaks: " << settings.m_dnrNbPeaks
+            << " m_dnrAlpha: " << settings.m_dnrAlpha
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
@@ -442,6 +453,30 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
             << " agcPowerThreshold: " << agcPowerThreshold
             << " agcThresholdGate: " << agcThresholdGate
             << " agcClamping: " << agcClamping;
+    }
+
+    if ((m_settings.m_dnr != settings.m_dnr) || force) {
+        setDNR(settings.m_dnr);
+    }
+
+    if ((m_settings.m_dnrScheme != settings.m_dnrScheme) || force) {
+        SSBFilter->setDNRScheme((FFTNoiseReduction::Scheme) settings.m_dnrScheme);
+    }
+
+    if ((m_settings.m_dnrAboveAvgFactor != settings.m_dnrAboveAvgFactor) || force) {
+        SSBFilter->setDNRAboveAvgFactor(settings.m_dnrAboveAvgFactor);
+    }
+
+    if ((m_settings.m_dnrSigmaFactor != settings.m_dnrSigmaFactor) || force) {
+        SSBFilter->setDNRSigmaFactor(settings.m_dnrSigmaFactor);
+    }
+
+    if ((m_settings.m_dnrNbPeaks != settings.m_dnrNbPeaks) || force) {
+        SSBFilter->setDNRNbPeaks(settings.m_dnrNbPeaks);
+    }
+
+    if ((m_settings.m_dnrAlpha != settings.m_dnrAlpha) || force) {
+        SSBFilter->setDNRAlpha(settings.m_dnrAlpha);
     }
 
     m_spanLog2 = settings.m_filterBank[settings.m_filterIndex].m_spanLog2;

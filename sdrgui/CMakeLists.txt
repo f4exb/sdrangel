@@ -43,6 +43,7 @@ set(sdrgui_SOURCES
     gui/featurelayout.cpp
     gui/featurepresetsdialog.cpp
     gui/fftdialog.cpp
+    gui/fftnrdialog.cpp
     gui/fftwisdomdialog.cpp
     gui/flowlayout.cpp
     gui/framelesswindowresizer.cpp
@@ -164,6 +165,7 @@ set(sdrgui_HEADERS
     gui/featurelayout.h
     gui/featurepresetsdialog.h
     gui/fftdialog.h
+    gui/fftnrdialog.h
     gui/fftwisdomdialog.h
     gui/flowlayout.h
     gui/framelesswindowresizer.h
@@ -266,6 +268,7 @@ set(sdrgui_FORMS
     gui/featureadddialog.ui
     gui/featurepresetsdialog.ui
     gui/fftdialog.ui
+    gui/fftnrdialog.ui
     gui/fftwisdomdialog.ui
     gui/glscopegui.ui
     gui/glspectrumgui.ui

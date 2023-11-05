@@ -145,6 +145,7 @@ set(sdrbase_SOURCES
     dsp/fftengine.cpp
     dsp/fftfactory.cpp
     dsp/fftfilt.cpp
+    dsp/fftnr.cpp
     dsp/fftwindow.cpp
     dsp/filterrc.cpp
     dsp/filtermbe.cpp
@@ -351,6 +352,7 @@ set(sdrbase_HEADERS
     dsp/fftengine.h
     dsp/fftfactory.h
     dsp/fftfilt.h
+    dsp/fftnr.h
     dsp/fftwengine.h
     dsp/fftwindow.h
     dsp/filterrc.h

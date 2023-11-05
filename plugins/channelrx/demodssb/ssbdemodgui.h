@@ -6,6 +6,7 @@
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "gui/fftnrdialog.h"
 #include "util/messagequeue.h"
 #include "settings/rollupstate.h"
 #include "ssbdemodsettings.h"
@@ -70,6 +71,7 @@ private:
 	SSBDemod* m_ssbDemod;
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
+    FFTNRDialog* m_fftNRDialog;
 
 	QIcon m_iconDSBUSB;
 	QIcon m_iconDSBLSB;
@@ -101,6 +103,7 @@ private slots:
 	void on_volume_valueChanged(int value);
 	void on_agc_toggled(bool checked);
     void on_agcClamping_toggled(bool checked);
+    void on_dnr_toggled(bool checked);
 	void on_agcTimeLog2_valueChanged(int value);
     void on_agcPowerThreshold_valueChanged(int value);
     void on_agcThresholdGate_valueChanged(int value);
@@ -113,6 +116,8 @@ private slots:
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
     void audioSelect(const QPoint& p);
+    void dnrSetupDialog(const QPoint& p);
+    void dnrSetup(int valueChanged);
 	void tick();
 };
 

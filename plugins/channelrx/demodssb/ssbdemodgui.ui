@@ -869,6 +869,19 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="dnr">
+        <property name="toolTip">
+         <string>Toggle Digital Noise Reduction</string>
+        </property>
+        <property name="text">
+         <string>NR</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QDial" name="agcTimeLog2">
         <property name="maximumSize">
          <size>

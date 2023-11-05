@@ -10,6 +10,7 @@
 
 #include "gfft.h"
 #include "fftwindow.h"
+#include "fftnr.h"
 #include "export.h"
 
 //----------------------------------------------------------------------
@@ -39,7 +40,15 @@ public:
 	int runDSB(const cmplx& in, cmplx **out, bool getDC = true);
 	int runAsym(const cmplx & in, cmplx **out, bool usb); //!< Asymmetrical fitering can be used for vestigial sideband
 
+    void setDNR(bool dnr) { m_dnr = dnr; }
+    void setDNRScheme(FFTNoiseReduction::Scheme scheme) { m_dnrScheme = scheme; }
+    void setDNRAboveAvgFactor(float aboveAvgFactor) { m_dnrAboveAvgFactor = aboveAvgFactor; }
+    void setDNRSigmaFactor(float sigmaFactor) { m_dnrSigmaFactor = sigmaFactor; }
+    void setDNRNbPeaks(int nbPeaks) { m_dnrNbPeaks = nbPeaks; }
+    void setDNRAlpha(float alpha) { m_noiseReduction.setAlpha(alpha); }
+
 protected:
+    // helper class for FFT based noise reduction
 	int flen;
 	int flen2;
 	g_fft<float> *fft;
@@ -51,6 +60,12 @@ protected:
 	int inptr;
 	int pass;
 	int window;
+    bool m_dnr;
+    FFTNoiseReduction::Scheme m_dnrScheme;
+    float m_dnrAboveAvgFactor; //!< above average factor
+    float m_dnrSigmaFactor; //!< sigma multiplicator for average + std deviation
+    int m_dnrNbPeaks; //!< number of peaks (peaks scheme)
+    FFTNoiseReduction m_noiseReduction;
 
 	inline float fsinc(float fc, int i, int len)
 	{

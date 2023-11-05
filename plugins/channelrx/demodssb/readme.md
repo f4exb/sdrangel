@@ -125,7 +125,7 @@ Values are expressed in kHz and step is 100 Hz.
   - In SSB mode this is the lower cutoff (USB: positive frequencies) or higher cutoff (LSB: negative frequencies) of the in channel single side band bandpass filter.
   - In DSB mode it is inactive and set to zero (double side band filter).
 
-<h3>13: Volume and AGC</h3>
+<h3>13: Volume AGC Noise Reduction</h3>
 
 ![SSB volume and AGC controls](../../../doc/img/SSBDemod_plugin_vol.png)
 
@@ -141,15 +141,69 @@ If you are into digging weak signals out of the noise you probably will not turn
 
 This AGC is based on the calculated magnitude (square root of power of the filtered signal as I² + Q²) and will try to adjust audio volume as if a -20dB power signal was received.
 
-<h4>13.2A: AGC clamping</h4>
+<h4>13.3: AGC clamping</h4>
 
 When on this clamps signal at the maximum amplitude. Normally this is not needed for most signals as the AGC amplitude order is quite conservative at 10% of the maximum. You may switch it on if you notice a loud click when a transmission starts.
 
-<h4>13.3: AGC time constant</h4>
+<h4>13.4: Noise Reduction</h4>
+
+This is a FFT based noise reduction and is engaged only in SSB mode (USB, LSB).
+
+Usually this will not work great on weak signals and should not be used in this case. This feature is mostly intended at reducing ear fatigue when some background noise is present on a fairly strong signal. You can combine it with the squelch (13.7) to suppress the waterfall noise when there is no signal.
+
+The spectrum display (15) is that of the filtered signal. The AGC when engaged (13.2) is also working with the filtered signal.
+
+Use this button to toggle noise reduction on/off. Right click on this button to open a dialog controlling noise reduction filter characteristics:
+
+![SSB noise reduction controls](../../../doc/img/SSBDemod_plugin_nr.png)
+
+<h4>13.4.1: Noise reduction scheme</h4>
+
+Use this combo box to choose the noise reduction scheme among the follwing:
+
+  - **Average**: calculates the average of magnitudes of the FFT (PSD) and sets the magnitude threshold to this average multiplied by a factor that can be set with the control next (13.4.2).
+
+  - **Avg Std Dev**: calculates the average and standard deviation (sigma) of magnitudes of the FFT and sets the threshold at average plus half sigma multiplied by a factor that can be set with the control next (13.4.2). This is optimal for voice signals (SSB).
+
+  - **Peaks**: selects the bins of the FFT with highest magnitudes. You can select the number of these peaks with the control next (13.4.2). This can be used for CW signals with a small number of peaks or even just one effectively realizing a peak filter.
+
+<h4>13.4.2: Noise reduction parameter</h4>
+
+This parameter depends on the noise reduction scheme
+
+  - With average this is the multiplier of the average
+  - With average and standard deviation this is the standard deviation (sigma) multiplier.
+  - With FFT peaks this is the number of peaks.
+
+<h4>13.4.3: Smoothing filter constant (alpha)</h4>
+
+With average based schemes this controls the characteristic of the exponential filter used to smoothen the average or the threshold in case of the average plus standard deviation scheme.
+
+Smoothing prevents the return of noise during short pauses in the signal like voice signals. For voice signals (SSB) a time constant of 1 or 2 seconds gives good results (as shown in screenshot).
+
+The exponential filter is governed by this equation:
+
+$y(k) = \alpha y(k-1) + (1-\alpha)x(k)$
+
+where:
+
+  - $x(k)$ is the input at time step k
+  - $y(k)$ is the filtered output at time step k
+  - $\alpha$ is a constant between 0 and 1 and is the smoothing factor. The larger the value the more smoothing occurs
+
+The smoothing filter constant $\alpha$ is entered as minus the value in dB of $(1-\alpha)$ i.e. $-dB(1-\alpha)$. Thus a larger number corresponds to a longer time constant showed in 13.4.4. Using a logarithmic input (dB) allows a finer control of the filter time constant. The actual value of alpha will appear in the tooltip.
+
+<h4>13.4.4: Smoothing filter time constant</h4>
+
+The time constant of an exponential filter $\tau$ with constant time steps $T$ is expressed as $\tau = -T/ln(\alpha)$. Here the time step is the time of one FFT which is the FFT length divided by the sample rate.
+
+The resulting time constant $\tau$ is displayed here in seconds.
+
+<h4>13.5: AGC time constant</h4>
 
 This is the time window in milliseconds of the moving average used to calculate the signal power average. It can be varied in powers of two from 16 to 2048 ms that is: 16, 32, 64, 128, 256, 512, 1024 and 2048 ms. The most practical values are between 128 and 512 ms.
 
-<h4>13.4: Signal power threshold (squelch)</h4>
+<h4>13.6: Signal power threshold (squelch)</h4>
 
 Active only in AGC mode.
 
@@ -161,7 +215,7 @@ To turn off the squelch completely move the knob all the way down (left). Then "
 
 The signal power is calculated as the moving average over the AGC time constant (11.3) of the power  of the filtered signal as I² + Q².
 
-<h4>13.5: Signal power threshold (squelch) gate</h4>
+<h4>13.7: Signal power threshold (squelch) gate</h4>
 
 Active only in AGC mode with squelch enabled.
 

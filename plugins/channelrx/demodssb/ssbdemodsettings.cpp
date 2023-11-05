@@ -52,6 +52,12 @@ void SSBDemodSettings::resetToDefaults()
     m_agcTimeLog2 = 7;
     m_volume = 1.0;
     m_inputFrequencyOffset = 0;
+    m_dnr = false;
+    m_dnrScheme = 0;
+    m_dnrAboveAvgFactor = 40.0f;
+    m_dnrSigmaFactor = 4.0f;
+    m_dnrNbPeaks = 20;
+    m_dnrAlpha = 1.0;
     m_rgbColor = QColor(0, 255, 0).rgb();
     m_title = "SSB Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
@@ -102,6 +108,12 @@ QByteArray SSBDemodSettings::serialize() const
     s.writeBlob(26, m_geometryBytes);
     s.writeBool(27, m_hidden);
     s.writeU32(29, m_filterIndex);
+    s.writeBool(30, m_dnr);
+    s.writeS32(31, m_dnrScheme);
+    s.writeFloat(32, m_dnrAboveAvgFactor);
+    s.writeFloat(33, m_dnrSigmaFactor);
+    s.writeS32(34, m_dnrNbPeaks);
+    s.writeFloat(35, m_dnrAlpha);
 
     for (unsigned int i = 0; i <  10; i++)
     {
@@ -179,6 +191,12 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         d.readBool(27, &m_hidden, false);
         d.readU32(29, &utmp, 0);
         m_filterIndex = utmp < 10 ? utmp : 0;
+        d.readBool(30, &m_dnr, false);
+        d.readS32(31, &m_dnrScheme, 0);
+        d.readFloat(32, &m_dnrAboveAvgFactor, 40.0f);
+        d.readFloat(33, &m_dnrSigmaFactor, 4.0f);
+        d.readS32(34, &m_dnrNbPeaks, 20);
+        d.readFloat(35, &m_dnrAlpha, 1.0);
 
         for (unsigned int i = 0; (i < 10); i++)
         {
