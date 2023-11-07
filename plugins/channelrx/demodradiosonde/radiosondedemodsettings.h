@@ -27,7 +27,7 @@
 class Serializable;
 
 // Number of columns in the tables
-#define RADIOSONDEDEMOD_FRAME_COLUMNS 26
+#define RADIOSONDEDEMOD_FRAME_COLUMNS 28
 
 struct RadiosondeDemodSettings
 {

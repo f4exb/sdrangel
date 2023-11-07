@@ -846,6 +846,22 @@
         <string>Correlation</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>Range (km)</string>
+       </property>
+       <property name="toolTip">
+        <string>Range to Radiosonde in kilometres from My Position</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Frequency (MHz)</string>
+       </property>
+       <property name="toolTip">
+        <string>Demodulator center frequency when frame was received</string>
+       </property>
+      </column>
      </widget>
     </item>
    </layout>

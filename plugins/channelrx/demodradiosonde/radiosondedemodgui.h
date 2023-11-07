@@ -96,7 +96,7 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
-    void frameReceived(const QByteArray& frame, const QDateTime& dateTime, int errorsCorrected, int threshold);
+    void frameReceived(const QByteArray& frame, const QDateTime& dateTime, int errorsCorrected, int threshold, bool loadCSV);
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
@@ -133,7 +133,9 @@ private:
         FRAME_COL_GPS_TIME,
         FRAME_COL_GPS_SATS,
         FRAME_COL_ECC,
-        FRAME_COL_CORR
+        FRAME_COL_CORR,
+        FRAME_COL_RANGE,
+        FRAME_COL_FREQUENCY
     };
 
 private slots:
