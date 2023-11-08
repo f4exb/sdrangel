@@ -233,11 +233,16 @@ bool RadiosondeDemod::handleMessage(const Message& cmd)
             if (frame->m_posValid)
             {
                 m_logStream << frame->m_latitude << ","
-                            << frame->m_longitude << ",";
+                            << frame->m_longitude << ","
+                            << frame->m_height << ","
+                            << frame->m_speed << ","
+                            << frame->m_verticalRate << ","
+                            << frame->m_heading << ","
+                            ;
             }
             else
             {
-                m_logStream << ",,";
+                m_logStream << ",,,,,,";
             }
             if (frame->m_measValid)
             {
@@ -378,7 +383,7 @@ void RadiosondeDemod::applySettings(const RadiosondeDemodSettings& settings, boo
                 if (newFile)
                 {
                     // Write header
-                    m_logStream << "Date,Time,Data,Serial,Frame,Lat,Lon,P (hPa),T (C), U (%)\n";
+                    m_logStream << "Date,Time,Data,Serial,Frame,Lat,Lon,Alt (m),Speed (m/s),V/R (m/s),Heading,P (hPa),T (C), U (%)\n";
                 }
             }
             else

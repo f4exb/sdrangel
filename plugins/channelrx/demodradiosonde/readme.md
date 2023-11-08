@@ -1,4 +1,4 @@
-<h1>Radiosonde demodulator plugin</h1>
+﻿<h1>Radiosonde demodulator plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -83,18 +83,18 @@ The received frames table displays information about each radiosonde frame recei
 * Serial - The serial number of the radiosonde. Double clicking on this column will search for the radiosonde on https://sondehub.org/
 * Frame - Frame number
 * Phase - Flight phase: On ground, Ascent and Descent.
-* Lat (�) - Latitude in degrees, North positive. Double clicking on this column will search for the radiosonde on the Map.
-* Lon (�) - Longitude in degrees, East positive. Double clicking on this column will search for the radiosonde on the Map.
+* Lat (°) - Latitude in degrees, North positive. Double clicking on this column will search for the radiosonde on the Map.
+* Lon (°) - Longitude in degrees, East positive. Double clicking on this column will search for the radiosonde on the Map.
 * Alt (m) - Altitude in metres.
 * Spd (km/h)  - Speed over ground in kilometres per hour.
 * VR (m/s) - Vertical climb rate in metres per second.
-* Hdg (�) - Heading in degrees.
+* Hdg (°) - Heading in degrees.
 * P (hPA) - Air pressure in hectopascals. Not all RS41s include a pressure sensor. A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
-* T (�C) - Air temperature in degrees Celsius.  A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
+* T (°C) - Air temperature in degrees Celsius.  A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
 * U (%) - Relative humidity in percent.  A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
 * Bat (V) - Battery voltage in Volts.
 * Bat - Battery status: OK or low.
-* PCB (�C) - Temperature of PCB.
+* PCB (°C) - Temperature of PCB.
 * PWM (%) - Humidity sensor heater PWM (Pulse Width Modulation) setting, in percent.
 * TX (%) - Transmit power in percent.
 * Max SF - Maximum subframe number.
@@ -104,5 +104,7 @@ The received frames table displays information about each radiosonde frame recei
 * GPS Sats - Number of GPS satellites used in position estimate.
 * ECC - Number of symbol errors corrected by Reed Solomon ECC.
 * Corr - Preamble correlation value calculated for the frame. This can be used to choose a value for TH (6).
+* Range (km) - Distance from My Position to Radiosonde in kilometres.
+* Frequency (MHz) - Demodulator centre frequency when frame received, in MHz.
 
 Right clicking on the table header allows you to select which columns to show. The columns can be reordered by left clicking and dragging the column header. Right clicking on an item in the table allows you to copy the value to the clipboard.

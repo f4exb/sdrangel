@@ -86,6 +86,8 @@ void RadiosondeDemodGUI::resizeTable()
     ui->frames->setItem(row, FRAME_COL_GPS_SATS, new QTableWidgetItem("12"));
     ui->frames->setItem(row, FRAME_COL_ECC, new QTableWidgetItem("12"));
     ui->frames->setItem(row, FRAME_COL_CORR, new QTableWidgetItem("-500"));
+    ui->frames->setItem(row, FRAME_COL_RANGE, new QTableWidgetItem("200.0"));
+    ui->frames->setItem(row, FRAME_COL_FREQUENCY, new QTableWidgetItem("434.125"));
     ui->frames->resizeColumnsToContents();
     ui->frames->removeRow(row);
 }
@@ -172,7 +174,7 @@ bool RadiosondeDemodGUI::deserialize(const QByteArray& data)
 }
 
 // Add row to table
-void RadiosondeDemodGUI::frameReceived(const QByteArray& frame, const QDateTime& dateTime, int errorsCorrected, int threshold)
+void RadiosondeDemodGUI::frameReceived(const QByteArray& frame, const QDateTime& dateTime, int errorsCorrected, int threshold, bool loadCSV)
 {
     RS41Frame *radiosonde;
 
@@ -214,6 +216,8 @@ void RadiosondeDemodGUI::frameReceived(const QByteArray& frame, const QDateTime&
     QTableWidgetItem *gpsSatsItem = new QTableWidgetItem();
     QTableWidgetItem *eccItem = new QTableWidgetItem();
     QTableWidgetItem *thItem = new QTableWidgetItem();
+    QTableWidgetItem *rangeItem = new QTableWidgetItem();
+    QTableWidgetItem *frequencyItem = new QTableWidgetItem();
 
     ui->frames->setItem(row, FRAME_COL_DATE, dateItem);
     ui->frames->setItem(row, FRAME_COL_TIME, timeItem);
@@ -241,6 +245,8 @@ void RadiosondeDemodGUI::frameReceived(const QByteArray& frame, const QDateTime&
     ui->frames->setItem(row, FRAME_COL_GPS_SATS, gpsSatsItem);
     ui->frames->setItem(row, FRAME_COL_ECC, eccItem);
     ui->frames->setItem(row, FRAME_COL_CORR, thItem);
+    ui->frames->setItem(row, FRAME_COL_RANGE, rangeItem);
+    ui->frames->setItem(row, FRAME_COL_FREQUENCY, frequencyItem);
 
     dateItem->setData(Qt::DisplayRole, dateTime.date());
     timeItem->setData(Qt::DisplayRole, dateTime.time());
@@ -281,6 +287,14 @@ void RadiosondeDemodGUI::frameReceived(const QByteArray& frame, const QDateTime&
         verticalRateItem->setData(Qt::DisplayRole, radiosonde->m_verticalRate);
         headingItem->setData(Qt::DisplayRole, radiosonde->m_heading);
         gpsSatsItem->setData(Qt::DisplayRole, radiosonde->m_satellitesUsed);
+        // Calc distance from My Position to Radiosone
+        Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
+        Real stationLongitude = MainCore::instance()->getSettings().getLongitude();
+        Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
+        QGeoCoordinate stationPosition(stationLatitude, stationLongitude, stationAltitude);
+        QGeoCoordinate radiosondePosition(radiosonde->m_latitude, radiosonde->m_longitude, radiosonde->m_height);
+        float distance = stationPosition.distanceTo(radiosondePosition);
+        rangeItem->setData(Qt::DisplayRole, (int)std::round(distance / 1000.0));
     }
 
     if (radiosonde->m_gpsInfoValid)
@@ -295,8 +309,12 @@ void RadiosondeDemodGUI::frameReceived(const QByteArray& frame, const QDateTime&
         humidityItem->setData(Qt::DisplayRole, radiosonde->getHumidityString(subframe));
     }
 
-    eccItem->setData(Qt::DisplayRole, errorsCorrected);
-    thItem->setData(Qt::DisplayRole, threshold);
+    if (!loadCSV)
+    {
+        eccItem->setData(Qt::DisplayRole, errorsCorrected);
+        thItem->setData(Qt::DisplayRole, threshold);
+        frequencyItem->setData(Qt::DisplayRole, (m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset) / 1000000.0);
+    }
 
     filterRow(row);
     ui->frames->setSortingEnabled(true);
@@ -324,7 +342,7 @@ bool RadiosondeDemodGUI::handleMessage(const Message& frame)
     else if (RadiosondeDemod::MsgMessage::match(frame))
     {
         RadiosondeDemod::MsgMessage& report = (RadiosondeDemod::MsgMessage&) frame;
-        frameReceived(report.getMessage(), report.getDateTime(), report.getErrorsCorrected(), report.getThreshold());
+        frameReceived(report.getMessage(), report.getDateTime(), report.getErrorsCorrected(), report.getThreshold(), false);
         return true;
     }
     else if (DSPSignalNotification::match(frame))
@@ -643,6 +661,7 @@ RadiosondeDemodGUI::RadiosondeDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->frames->setItemDelegateForColumn(FRAME_COL_VERTICAL_RATE, new DecimalDelegate(1));
     ui->frames->setItemDelegateForColumn(FRAME_COL_HEADING, new DecimalDelegate(1));
     ui->frames->setItemDelegateForColumn(FRAME_COL_GPS_TIME, new DateTimeDelegate("yyyy/MM/dd hh:mm:ss"));
+    ui->frames->setItemDelegateForColumn(FRAME_COL_FREQUENCY, new DecimalDelegate(3));
 
     ui->scopeContainer->setVisible(false);
 
@@ -869,7 +888,7 @@ void RadiosondeDemodGUI::on_logOpen_clicked()
                             QByteArray bytes = QByteArray::fromHex(cols[dataCol].toLatin1());
 
                             // Add to table
-                            frameReceived(bytes, dateTime, 0, 0);
+                            frameReceived(bytes, dateTime, 0, 0, true);
 
                             // Forward to Radiosonde feature
                             for (const auto& pipe : radiosondePipes)
