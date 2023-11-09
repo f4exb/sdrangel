@@ -101,6 +101,11 @@ bool DSDDemodGUI::handleMessage(const Message& message)
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        if (m_basebandSampleRate < 48000) {
+            setStatusText(QString("Sample rate must be >= 48000 Hz (Currently %1 Hz)").arg(m_basebandSampleRate));
+        } else {
+            setStatusText("");
+        }
         ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
         ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
         updateAbsoluteCenterFrequency();
