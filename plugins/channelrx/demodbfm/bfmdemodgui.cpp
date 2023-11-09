@@ -532,6 +532,7 @@ void BFMDemodGUI::audioSelect(const QPoint& p)
     qDebug("BFMDemodGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
     audioSelect.move(p);
+    new DialogPositioner(&audioSelect, false);
     audioSelect.exec();
 
     if (audioSelect.m_selected)

@@ -324,6 +324,7 @@ void AudioCATSISOGUI::on_transverter_clicked()
 void AudioCATSISOGUI::on_rxDeviceSelect_clicked()
 {
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_txDeviceName, true, this);
+    new DialogPositioner(&audioSelect, false);
     audioSelect.exec();
 
     if (audioSelect.m_selected)
@@ -338,6 +339,7 @@ void AudioCATSISOGUI::on_rxDeviceSelect_clicked()
 void AudioCATSISOGUI::on_txDeviceSelect_clicked()
 {
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_txDeviceName, false, this);
+    new DialogPositioner(&audioSelect, false);
     audioSelect.exec();
 
     if (audioSelect.m_selected)
