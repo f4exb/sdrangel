@@ -178,6 +178,7 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     makeUIConnections();
     applySettings(true);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 UDPSourceGUI::~UDPSourceGUI()

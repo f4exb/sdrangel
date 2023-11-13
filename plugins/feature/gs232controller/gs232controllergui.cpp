@@ -266,6 +266,7 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     m_gs232Controller->getInputMessageQueue()->push(GS232Controller::MsgScanAvailableChannelOrFeatures::create());
 
     new DialogPositioner(&m_dfmStatusDialog, true);
+    m_resizer.enableChildMouseTracking();
 }
 
 void GS232ControllerGUI::updateInputControllerList()

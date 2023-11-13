@@ -149,6 +149,7 @@ AntennaToolsGUI::AntennaToolsGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     displaySettings();
     applySettings(true);
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 AntennaToolsGUI::~AntennaToolsGUI()

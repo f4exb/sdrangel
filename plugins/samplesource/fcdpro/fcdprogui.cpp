@@ -155,6 +155,7 @@ FCDProGui::FCDProGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	displaySettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);

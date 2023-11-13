@@ -99,6 +99,7 @@ AaroniaRTSAOutputGui::AaroniaRTSAOutputGui(DeviceUISet *deviceUISet, QWidget* pa
     m_forceSettings = true;
     sendSettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 AaroniaRTSAOutputGui::~AaroniaRTSAOutputGui()

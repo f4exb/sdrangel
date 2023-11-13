@@ -1286,6 +1286,7 @@ VORDemodMCGUI::VORDemodMCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     makeUIConnections();
     applySettings(true);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 VORDemodMCGUI::~VORDemodMCGUI()

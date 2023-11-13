@@ -75,6 +75,7 @@ FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	displaySettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 
     m_deviceSampleSink = (FileOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);

@@ -82,6 +82,7 @@ AndroidSDRDriverInputGui::AndroidSDRDriverInputGui(DeviceUISet *deviceUISet, QWi
     m_forceSettings = true;
     sendSettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 AndroidSDRDriverInputGui::~AndroidSDRDriverInputGui()

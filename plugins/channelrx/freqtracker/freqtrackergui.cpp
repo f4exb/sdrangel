@@ -376,6 +376,7 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     makeUIConnections();
 	applySettings(true);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 FreqTrackerGUI::~FreqTrackerGUI()

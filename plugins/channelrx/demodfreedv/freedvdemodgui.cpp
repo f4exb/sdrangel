@@ -334,6 +334,7 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     makeUIConnections();
 	applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 FreeDVDemodGUI::~FreeDVDemodGUI()

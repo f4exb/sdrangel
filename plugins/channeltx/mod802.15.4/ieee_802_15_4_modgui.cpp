@@ -484,6 +484,7 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     makeUIConnections();
     applySettings();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 IEEE_802_15_4_ModGUI::~IEEE_802_15_4_ModGUI()

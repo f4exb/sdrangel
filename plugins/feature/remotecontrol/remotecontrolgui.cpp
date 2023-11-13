@@ -157,6 +157,7 @@ RemoteControlGUI::RemoteControlGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
     displaySettings();
     applySettings(true);
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 RemoteControlGUI::~RemoteControlGUI()

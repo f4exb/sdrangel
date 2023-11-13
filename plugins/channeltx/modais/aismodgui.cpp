@@ -510,6 +510,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     makeUIConnections();
     applySettings();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 AISModGUI::~AISModGUI()

@@ -60,6 +60,7 @@ AudioInputGui::AudioInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 AudioInputGui::~AudioInputGui()

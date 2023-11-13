@@ -131,6 +131,7 @@ LocalSourceGUI::LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    m_resizer.enableChildMouseTracking();
 }
 
 LocalSourceGUI::~LocalSourceGUI()

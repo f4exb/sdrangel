@@ -90,6 +90,7 @@ USRPOutputGUI::USRPOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     sendSettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 USRPOutputGUI::~USRPOutputGUI()

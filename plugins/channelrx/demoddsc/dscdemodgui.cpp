@@ -664,6 +664,7 @@ DSCDemodGUI::DSCDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    m_resizer.enableChildMouseTracking();
 }
 
 void DSCDemodGUI::createMenuOpenURLAction(QMenu* tableContextMenu, const QString& text, const QString& url, const QString& arg)

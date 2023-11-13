@@ -596,6 +596,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
     makeUIConnections();
 	applySettings(true);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()

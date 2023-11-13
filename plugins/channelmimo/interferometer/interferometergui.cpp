@@ -168,6 +168,7 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     makeUIConnections();
     displayRateAndShift();
     applySettings(true);
+    m_resizer.enableChildMouseTracking();
 }
 
 InterferometerGUI::~InterferometerGUI()

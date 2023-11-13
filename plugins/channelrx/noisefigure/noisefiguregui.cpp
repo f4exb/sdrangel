@@ -672,6 +672,7 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    m_resizer.enableChildMouseTracking();
 }
 
 void NoiseFigureGUI::customContextMenuRequested(QPoint pos)

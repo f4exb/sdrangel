@@ -62,6 +62,7 @@ AMBEGUI::AMBEGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     refreshInUseList();
     displaySettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 AMBEGUI::~AMBEGUI()

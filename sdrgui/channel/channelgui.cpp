@@ -42,8 +42,8 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_deviceSetIndex(0),
     m_channelIndex(0),
     m_contextMenuType(ContextMenuNone),
-    m_drag(false),
     m_resizer(this),
+    m_drag(false),
     m_disableResize(false),
     m_mdi(nullptr)
 {
@@ -198,8 +198,6 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
         this,
         &ChannelGUI::onWidgetRolled
     );
-
-    m_resizer.enableChildMouseTracking();
 }
 
 ChannelGUI::~ChannelGUI()

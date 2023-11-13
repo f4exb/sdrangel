@@ -227,6 +227,7 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 	applySettings(true);
     makeUIConnections();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 SimplePTTGUI::~SimplePTTGUI()

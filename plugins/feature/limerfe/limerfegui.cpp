@@ -164,6 +164,7 @@ LimeRFEGUI::LimeRFEGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature
     highlightApplyButton(false);
     m_timer.setInterval(500);
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 LimeRFEGUI::~LimeRFEGUI()

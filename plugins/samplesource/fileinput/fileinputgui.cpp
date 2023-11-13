@@ -80,6 +80,7 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 FileInputGUI::~FileInputGUI()

@@ -36,8 +36,8 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     QMdiSubWindow(parent),
     m_featureIndex(0),
     m_contextMenuType(ContextMenuNone),
-    m_drag(false),
     m_resizer(this),
+    m_drag(false),
     m_disableResize(false),
     m_mdi(nullptr)
 {
@@ -153,8 +153,6 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
         this,
         &FeatureGUI::onWidgetRolled
     );
-
-    m_resizer.enableChildMouseTracking();
 }
 
 FeatureGUI::~FeatureGUI()

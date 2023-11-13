@@ -220,6 +220,7 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     makeUIConnections();
     applySettings(true);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 SigMFFileSinkGUI::~SigMFFileSinkGUI()

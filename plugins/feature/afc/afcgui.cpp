@@ -174,6 +174,7 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 	applySettings(true);
     makeUIConnections();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 AFCGUI::~AFCGUI()

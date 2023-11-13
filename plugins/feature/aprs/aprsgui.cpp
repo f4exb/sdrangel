@@ -586,6 +586,7 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     displaySettings();
     applySettings(true);
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 APRSGUI::~APRSGUI()

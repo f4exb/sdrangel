@@ -515,6 +515,7 @@ M17DemodGUI::M17DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     makeUIConnections();
 	applySettings(QList<QString>(), true);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 M17DemodGUI::~M17DemodGUI()

@@ -106,6 +106,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     sendSettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 SoapySDRInputGui::~SoapySDRInputGui()

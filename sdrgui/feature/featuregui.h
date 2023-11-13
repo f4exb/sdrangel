@@ -82,6 +82,7 @@ protected:
     RollupContents m_rollupContents;
     ContextMenuType m_contextMenuType;
     QString m_displayedName;
+    FramelessWindowResizer m_resizer;
 
 protected slots:
     void shrinkWindow();
@@ -107,7 +108,6 @@ private:
     bool m_drag;
     QPoint m_DragPosition;
     QMap<QWidget*, int> m_heightsMap;
-    FramelessWindowResizer m_resizer;
     bool m_disableResize;
     QMdiArea *m_mdi;                    // Saved pointer to MDI when in full screen mode
 

@@ -331,6 +331,7 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     makeUIConnections();
     applySettings(true);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 RadioClockGUI::~RadioClockGUI()

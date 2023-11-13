@@ -178,6 +178,7 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
     displaySettings();
 	applySettings(true);
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 JogdialControllerGUI::~JogdialControllerGUI()

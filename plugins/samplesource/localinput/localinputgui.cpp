@@ -84,6 +84,7 @@ LocalInputGui::LocalInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	displaySettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);

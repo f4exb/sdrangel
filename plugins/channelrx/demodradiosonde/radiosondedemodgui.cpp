@@ -669,6 +669,7 @@ RadiosondeDemodGUI::RadiosondeDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     makeUIConnections();
     applySettings(true);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 void RadiosondeDemodGUI::customContextMenuRequested(QPoint pos)

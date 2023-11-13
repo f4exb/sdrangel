@@ -96,6 +96,7 @@ protected:
     QString m_helpURL;
     QWidget *m_contents;
     ContextMenuType m_contextMenuType;
+    FramelessWindowResizer m_resizer;
 
 protected slots:
     void shrinkWindow();
@@ -130,7 +131,6 @@ private:
     QPoint m_DragPosition;
     int m_currentDeviceIndex; //!< Index in device plugins registrations
     ChannelAddDialog m_channelAddDialog;
-    FramelessWindowResizer m_resizer;
 
 private slots:
     void activateSettingsDialog();

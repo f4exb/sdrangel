@@ -194,6 +194,7 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
     displaySettings();
     applySettings(true);
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 
     plotChart();
 }

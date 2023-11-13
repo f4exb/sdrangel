@@ -516,6 +516,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     makeUIConnections();
     applySettings();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 NFMModGUI::~NFMModGUI()

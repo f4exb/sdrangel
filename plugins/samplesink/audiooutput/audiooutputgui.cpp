@@ -63,6 +63,7 @@ AudioOutputGui::AudioOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     makeUIConnections();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 AudioOutputGui::~AudioOutputGui()

@@ -2223,6 +2223,7 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    m_resizer.enableChildMouseTracking();
 
     create2DImage();
 

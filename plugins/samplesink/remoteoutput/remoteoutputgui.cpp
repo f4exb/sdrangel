@@ -94,6 +94,7 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
     sendSettings();
     makeUIConnections();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 RemoteOutputSinkGui::~RemoteOutputSinkGui()

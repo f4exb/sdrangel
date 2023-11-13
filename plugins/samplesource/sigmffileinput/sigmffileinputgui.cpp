@@ -82,6 +82,7 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 	setAccelerationCombo();
 	displaySettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
     updateStartStop();
 
 	ui->trackNavTimeSlider->setEnabled(false);

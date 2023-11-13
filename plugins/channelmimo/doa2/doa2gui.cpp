@@ -161,6 +161,7 @@ DOA2GUI::DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *ch
     ui->halfWLLabel->setText(QString("%1/2").arg(QChar(0xBB, 0x03)));
     ui->azUnits->setText(QString("%1").arg(QChar(0260)));
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 DOA2GUI::~DOA2GUI()

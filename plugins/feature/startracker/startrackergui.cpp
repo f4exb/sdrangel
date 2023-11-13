@@ -408,6 +408,7 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     applySettings(true);
     disconnect(ui->azimuth, SIGNAL(valueChanged(double)), this, SLOT(on_azimuth_valueChanged(double)));
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 
     // Populate subchart menu
     on_chartSelect_currentIndexChanged(0);

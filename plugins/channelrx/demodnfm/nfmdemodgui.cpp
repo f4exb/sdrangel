@@ -443,6 +443,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     makeUIConnections();
 	applySettings(true);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 NFMDemodGUI::~NFMDemodGUI()

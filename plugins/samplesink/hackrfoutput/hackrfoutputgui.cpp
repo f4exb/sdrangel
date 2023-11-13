@@ -68,6 +68,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	displayBandwidths();
 	sendSettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }

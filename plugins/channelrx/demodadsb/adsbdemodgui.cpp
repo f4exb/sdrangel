@@ -5033,6 +5033,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_redrawMapTimer.setSingleShot(true);
     ui->map->installEventFilter(this);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 ADSBDemodGUI::~ADSBDemodGUI()

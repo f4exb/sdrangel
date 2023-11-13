@@ -191,6 +191,7 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 	applySettings(true);
     makeUIConnections();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 DemodAnalyzerGUI::~DemodAnalyzerGUI()

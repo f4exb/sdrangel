@@ -101,6 +101,7 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_forceSettings = true;
     sendSettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 RemoteInputGui::~RemoteInputGui()

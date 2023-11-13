@@ -334,6 +334,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     new DialogPositioner(&m_beaconDialog, true);
     new DialogPositioner(&m_ibpBeaconDialog, true);
     new DialogPositioner(&m_radioTimeDialog, true);
+    m_resizer.enableChildMouseTracking();
 }
 
 MapGUI::~MapGUI()

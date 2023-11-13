@@ -69,6 +69,7 @@ AirspyGui::AirspyGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     sendSettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 AirspyGui::~AirspyGui()
