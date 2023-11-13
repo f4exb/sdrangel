@@ -58,6 +58,7 @@ private:
     bool m_audioMute;
     bool m_squelchOpen;
     int m_audioSampleRate;
+    bool m_recentAudioFifoError;
 
 	WFMDemod* m_wfmDemod;
 	MessageQueue m_inputMessageQueue;

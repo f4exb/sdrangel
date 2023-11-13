@@ -218,7 +218,8 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_basebandSampleRate(1),
 	m_basicSettingsShown(false),
     m_squelchOpen(false),
-    m_audioSampleRate(-1)
+    m_audioSampleRate(-1),
+    m_recentAudioFifoError(false)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodwfm/readme.md";
@@ -361,11 +362,15 @@ void WFMDemodGUI::tick()
 
     int audioSampleRate = m_wfmDemod->getAudioSampleRate();
     bool squelchOpen = m_wfmDemod->getSquelchOpen();
+    int secsSinceAudioFifoError = m_wfmDemod->getAudioFifoErrorDateTime().secsTo(QDateTime::currentDateTime());
+    bool recentAudioFifoError = (secsSinceAudioFifoError < 1) && squelchOpen;
 
-    if ((audioSampleRate != m_audioSampleRate) || (squelchOpen != m_squelchOpen))
+    if ((audioSampleRate != m_audioSampleRate) || (squelchOpen != m_squelchOpen) || (recentAudioFifoError != m_recentAudioFifoError))
     {
         if (audioSampleRate < 0) {
             ui->audioMute->setStyleSheet("QToolButton { background-color : red; }");
+        } else if (recentAudioFifoError) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : rgb(120,120,0); }");
         } else if (squelchOpen) {
             ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
         } else {
@@ -374,6 +379,7 @@ void WFMDemodGUI::tick()
 
         m_audioSampleRate = audioSampleRate;
         m_squelchOpen = squelchOpen;
+        m_recentAudioFifoError = recentAudioFifoError;
     }
 }
 
