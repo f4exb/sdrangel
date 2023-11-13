@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>650</width>
+    <width>500</width>
     <height>392</height>
    </size>
   </property>
@@ -54,7 +54,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>648</width>
+     <width>500</width>
      <height>0</height>
     </size>
    </property>
@@ -533,7 +533,7 @@
        <widget class="QLabel" name="formatStatusText">
         <property name="minimumSize">
          <size>
-          <width>595</width>
+          <width>480</width>
           <height>0</height>
          </size>
         </property>
@@ -569,13 +569,13 @@
     <rect>
      <x>10</x>
      <y>180</y>
-     <width>600</width>
+     <width>480</width>
      <height>210</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>600</width>
+     <width>480</width>
      <height>210</height>
     </size>
    </property>
@@ -1261,6 +1261,11 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
@@ -1277,11 +1282,6 @@
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>TVScreen</class>

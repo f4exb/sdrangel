@@ -27,7 +27,6 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/crightclickenabler.h"
-#include "gui/audioselectdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
 #include "util/db.h"

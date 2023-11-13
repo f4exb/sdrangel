@@ -32,7 +32,6 @@
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
 #include "gui/crightclickenabler.h"
-#include "gui/audioselectdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
 #include "maincore.h"

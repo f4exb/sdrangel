@@ -503,7 +503,7 @@ void AMModGUI::audioSelect(const QPoint& p)
     qDebug("AMModGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, true); // true for input
     audioSelect.move(p);
-
+    new DialogPositioner(&audioSelect, false);
     audioSelect.exec();
 
     if (audioSelect.m_selected)

@@ -1368,6 +1368,7 @@ void VORDemodMCGUI::audioSelect(const QPoint& p)
     qDebug("VORDemodMCGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
     audioSelect.move(p);
+    new DialogPositioner(&audioSelect, false);
     audioSelect.exec();
 
     if (audioSelect.m_selected)

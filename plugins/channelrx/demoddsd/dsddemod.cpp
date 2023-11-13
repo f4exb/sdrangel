@@ -59,7 +59,8 @@ DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_running(false),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_scopeXYSink(nullptr)
 {
     qDebug("DSDDemod::DSDDemod");
 	setObjectName(m_channelId);
@@ -175,6 +176,7 @@ void DSDDemod::start()
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
     }
+    m_basebandSink->setScopeXYSink(m_scopeXYSink);
 
     m_thread->start();
 
@@ -196,6 +198,14 @@ void DSDDemod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+}
+
+void DSDDemod::setScopeXYSink(BasebandSampleSink* sampleSink)
+{
+    m_scopeXYSink = sampleSink;
+    if (m_running) {
+        m_basebandSink->setScopeXYSink(sampleSink);
+    }
 }
 
 bool DSDDemod::handleMessage(const Message& cmd)

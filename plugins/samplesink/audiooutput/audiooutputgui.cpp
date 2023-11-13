@@ -183,6 +183,7 @@ void AudioOutputGui::displaySettings()
 void AudioOutputGui::on_deviceSelect_clicked()
 {
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_deviceName, false, this);
+    new DialogPositioner(&audioSelect, false);
     audioSelect.exec();
 
     if (audioSelect.m_selected)
