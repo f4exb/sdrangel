@@ -155,7 +155,7 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     uint32_t getNumberOfDeviceStreams() const;
-	void setScopeXYSink(BasebandSampleSink* sampleSink) { if (m_running) { m_basebandSink->setScopeXYSink(sampleSink); } }
+	void setScopeXYSink(BasebandSampleSink* sampleSink);
 	void configureMyPosition(float myLatitude, float myLongitude) { if (m_running) { m_basebandSink->configureMyPosition(myLatitude, myLongitude); } }
 	double getMagSq() { return m_running ? m_basebandSink->getMagSq() : 0.0; }
 	bool getSquelchOpen() const { return m_running && m_basebandSink->getSquelchOpen(); }
@@ -186,7 +186,7 @@ private:
 	DSDDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     QHash<Feature*, DSDDemodSettings::AvailableAMBEFeature> m_availableAMBEFeatures;
-
+    BasebandSampleSink *m_scopeXYSink;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
