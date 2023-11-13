@@ -46,6 +46,7 @@ RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler(SampleSinkFifo *sampleFifo, D
     m_converterBufferNbSamples(0),
     m_settings()
 {
+    m_sampleFifo->setSize(5000000); // Start with large FIFO, to avoid having to resize
     m_tcpBuf = new char[m_sampleFifo->size()*2*4];
     m_timer.setInterval(125);
     connect(&m_reconnectTimer, SIGNAL(timeout()), this, SLOT(reconnect()));
@@ -455,8 +456,7 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
     if ((settings.m_channelSampleRate != m_settings.m_channelSampleRate) || force)
     {
         // Resize FIFO to give us 1 second
-        // Can't do this while running
-        if (!m_running && settingsKeys.contains("channelSampleRate") && settings.m_channelSampleRate > (qint32)m_sampleFifo->size())
+        if ((settingsKeys.contains("channelSampleRate") || force) && (settings.m_channelSampleRate > (qint32)m_sampleFifo->size()))
         {
             qDebug() << "RemoteTCPInputTCPHandler::applySettings: Resizing sample FIFO from " << m_sampleFifo->size() << "to" << settings.m_channelSampleRate;
             m_sampleFifo->setSize(settings.m_channelSampleRate);
@@ -692,7 +692,7 @@ void RemoteTCPInputTCPHandler::processData()
                 qDebug() << "Buffer primed bytesAvailable:" << m_dataSocket->bytesAvailable();
                 m_fillBuffer = false;
                 m_prevDateTime = QDateTime::currentDateTime();
-                factor = 6.0f / 8.0f;
+                factor = 1.0f / 4.0f; // If this is too high, samples can just be dropped downstream
             }
         }
         else
