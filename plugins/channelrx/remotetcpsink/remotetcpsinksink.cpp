@@ -535,6 +535,18 @@ void RemoteTCPSinkSink::processCommand()
                 int sampleRate = RemoteTCPProtocol::extractUInt32(&cmd[1]);
                 qDebug() << "RemoteTCPSinkSink::processCommand: set sample rate " << sampleRate;
                 ChannelWebAPIUtils::setDevSampleRate(m_deviceIndex, sampleRate);
+                if (m_settings.m_protocol == RemoteTCPSinkSettings::RTL0)
+                {
+                    // Match channel sample rate with device sample rate for RTL0 protocol
+                    ChannelWebAPIUtils::setSoftDecim(m_deviceIndex, 0);
+                    settings.m_channelSampleRate = sampleRate;
+                    if (m_messageQueueToGUI) {
+                        m_messageQueueToGUI->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, {"channelSampleRate"}, false, true));
+                    }
+                    if (m_messageQueueToChannel) {
+                        m_messageQueueToChannel->push(RemoteTCPSink::MsgConfigureRemoteTCPSink::create(settings, {"channelSampleRate"}, false, true));
+                    }
+                }
                 break;
             }
             case RemoteTCPProtocol::setTunerGainMode:
