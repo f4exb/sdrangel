@@ -17,6 +17,7 @@
 
 #include <QGuiApplication>
 #include <QLayout>
+#include <QTableWidget>
 
 #include "framelesswindowresizer.h"
 
@@ -39,6 +40,14 @@ void FramelessWindowResizer::enableChildMouseTracking()
     QList<QWidget *> widgets = m_widget->findChildren<QWidget *>();
     for (auto widget : widgets) {
         widget->setMouseTracking(true);
+    }
+    // QTableWidgets don't send us mouseMoveEvents for some unknown reason
+    // so install an event filter on their viewport
+    QList<QTableWidget *> tables = m_widget->findChildren<QTableWidget *>();
+    for (auto table : tables)
+    {
+        table->viewport()->setMouseTracking(true);
+        table->viewport()->installEventFilter(this);
     }
 }
 
@@ -139,6 +148,16 @@ void FramelessWindowResizer::mouseReleaseEvent(QMouseEvent* event)
 void FramelessWindowResizer::leaveEvent(QEvent*)
 {
     clearCursor();
+}
+
+bool FramelessWindowResizer::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::MouseMove)
+    {
+        // Mouse moving over child table widget
+        clearCursor();
+    }
+    return QObject::eventFilter(obj, event);
 }
 
 void FramelessWindowResizer::mouseMoveEvent(QMouseEvent* event)

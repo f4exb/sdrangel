@@ -1217,6 +1217,7 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     // List already opened channels
     channelsRefresh();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 VORLocalizerGUI::~VORLocalizerGUI()

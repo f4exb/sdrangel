@@ -210,6 +210,7 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
     displayPosition();
     displayRateAndShift();
     applySettings(true);
+    m_resizer.enableChildMouseTracking();
 }
 
 RemoteSourceGUI::~RemoteSourceGUI()

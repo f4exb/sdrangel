@@ -1110,6 +1110,7 @@ ILSDemodGUI::ILSDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    m_resizer.enableChildMouseTracking();
     drawILSOnMap();
 
     bool devMode = false;

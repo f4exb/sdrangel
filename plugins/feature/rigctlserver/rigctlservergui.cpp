@@ -154,6 +154,7 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     displaySettings();
 	applySettings(true);
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 RigCtlServerGUI::~RigCtlServerGUI()

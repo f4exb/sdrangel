@@ -422,6 +422,7 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     displaySettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
     applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
     DialPopup::addPopupsToChildDials(this);
 }

@@ -115,6 +115,7 @@ DATVModGUI::DATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    m_resizer.enableChildMouseTracking();
     if (!m_settings.m_tsFileName.isEmpty())
         configureTsFileName();
 }

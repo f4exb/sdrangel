@@ -156,6 +156,7 @@ PERTesterGUI::PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     displaySettings();
     applySettings(true);
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 PERTesterGUI::~PERTesterGUI()

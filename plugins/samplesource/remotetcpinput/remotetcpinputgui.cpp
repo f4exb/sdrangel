@@ -90,6 +90,7 @@ RemoteTCPInputGui::RemoteTCPInputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     sendSettings();
     makeUIConnections();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 RemoteTCPInputGui::~RemoteTCPInputGui()

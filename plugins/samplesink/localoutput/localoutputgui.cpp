@@ -83,6 +83,7 @@ LocalOutputGui::LocalOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_forceSettings = true;
     sendSettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 LocalOutputGui::~LocalOutputGui()

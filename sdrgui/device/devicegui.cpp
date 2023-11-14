@@ -39,9 +39,9 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_deviceType(DeviceRx),
     m_deviceSetIndex(0),
     m_contextMenuType(ContextMenuNone),
+    m_resizer(this),
     m_drag(false),
-    m_currentDeviceIndex(-1),
-    m_resizer(this)
+    m_currentDeviceIndex(-1)
 {
     qDebug("DeviceGUI::DeviceGUI: %p", parent);
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
@@ -205,8 +205,6 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
         this,
         &DeviceGUI::addChannelEmitted
     );
-
-    m_resizer.enableChildMouseTracking();
 }
 
 DeviceGUI::~DeviceGUI()

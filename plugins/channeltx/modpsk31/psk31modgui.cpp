@@ -412,6 +412,7 @@ PSK31GUI::PSK31GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
     makeUIConnections();
     applySettings();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 
     m_initialToolTip = ui->txButton->toolTip();
 }

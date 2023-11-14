@@ -215,6 +215,7 @@ RemoteTCPSinkGUI::RemoteTCPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     makeUIConnections();
     applyAllSettings();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 RemoteTCPSinkGUI::~RemoteTCPSinkGUI()

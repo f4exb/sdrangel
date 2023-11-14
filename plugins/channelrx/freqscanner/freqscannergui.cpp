@@ -461,6 +461,7 @@ FreqScannerGUI::FreqScannerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     displaySettings();
     makeUIConnections();
     applyAllSettings();
+    m_resizer.enableChildMouseTracking();
 
     ui->table->setItemDelegateForColumn(COL_FREQUENCY, new FrequencyDelegate("Auto", 3));
     ui->table->setItemDelegateForColumn(COL_POWER, new DecimalDelegate(1));

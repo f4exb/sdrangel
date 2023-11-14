@@ -78,6 +78,7 @@ Bladerf1InputGui::Bladerf1InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	sendSettings();
     makeUIConnections();
+    m_resizer.enableChildMouseTracking();
 }
 
 Bladerf1InputGui::~Bladerf1InputGui()

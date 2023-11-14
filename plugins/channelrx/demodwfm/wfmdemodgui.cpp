@@ -267,6 +267,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     displaySettings();
     makeUIConnections();
 	applySettings(true);
+    m_resizer.enableChildMouseTracking();
 }
 
 WFMDemodGUI::~WFMDemodGUI()

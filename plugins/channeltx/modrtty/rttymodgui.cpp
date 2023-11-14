@@ -491,6 +491,7 @@ RttyModGUI::RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     makeUIConnections();
     applySettings();
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 
     m_initialToolTip = ui->txButton->toolTip();
 }

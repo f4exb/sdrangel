@@ -453,6 +453,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	displaySettings();
     makeUIConnections();
 	applySettings(true);
+    m_resizer.enableChildMouseTracking();
 }
 
 BFMDemodGUI::~BFMDemodGUI()

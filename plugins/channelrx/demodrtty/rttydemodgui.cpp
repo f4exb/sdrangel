@@ -501,6 +501,7 @@ RttyDemodGUI::RttyDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     displaySettings();
     makeUIConnections();
     applySettings(true);
+    m_resizer.enableChildMouseTracking();
 }
 
 RttyDemodGUI::~RttyDemodGUI()

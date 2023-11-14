@@ -633,6 +633,7 @@ HeatMapGUI::HeatMapGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     makeUIConnections();
     applySettings(true);
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 
     plotPowerVsTimeChart();
 }

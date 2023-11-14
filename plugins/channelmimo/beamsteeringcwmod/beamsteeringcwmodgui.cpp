@@ -133,6 +133,7 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     makeUIConnections();
     displayRateAndShift();
     applySettings(true);
+    m_resizer.enableChildMouseTracking();
 }
 
 BeamSteeringCWModGUI::~BeamSteeringCWModGUI()

@@ -528,6 +528,7 @@ M17ModGUI::M17ModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     makeUIConnections();
     applySettings(QList<QString>{"channelMarker", "rollupState"});
     DialPopup::addPopupsToChildDials(this);
+    m_resizer.enableChildMouseTracking();
 }
 
 M17ModGUI::~M17ModGUI()

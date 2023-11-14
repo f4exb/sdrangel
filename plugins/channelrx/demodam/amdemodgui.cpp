@@ -500,6 +500,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	displaySettings();
     makeUIConnections();
 	applySettings(true);
+    m_resizer.enableChildMouseTracking();
 }
 
 AMDemodGUI::~AMDemodGUI()
