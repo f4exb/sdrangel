@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "gui/mdiutils.h"
 #include "gui/workspace.h"
 #include "plugin/pluginapi.h"
 #include "settings/featuresetpreset.h"
@@ -198,14 +199,14 @@ void FeatureUISet::loadFeatureSetSettings(
             if (workspaces && (workspaces->size() > 0) && (originalWorkspaceIndex < workspaces->size())) // restore in original workspace
             {
                 (*workspaces)[originalWorkspaceIndex]->addToMdiArea((QMdiSubWindow*) featureGUI);
-                featureGUI->restoreGeometry(featureGUI->getGeometryBytes());
+                MDIUtils::restoreMDIGeometry(featureGUI, featureGUI->getGeometryBytes());
                 featureGUI->getRollupContents()->arrangeRollups();
             }
             else if (currentWorkspace) // restore in current workspace
             {
                 featureGUI->setWorkspaceIndex(currentWorkspace->getIndex());
                 currentWorkspace->addToMdiArea((QMdiSubWindow*) featureGUI);
-                featureGUI->restoreGeometry(featureGUI->getGeometryBytes());
+                MDIUtils::restoreMDIGeometry(featureGUI, featureGUI->getGeometryBytes());
                 featureGUI->getRollupContents()->arrangeRollups();
             }
         }
@@ -220,7 +221,7 @@ void FeatureUISet::saveFeatureSetSettings(FeatureSetPreset *preset)
             qPrintable(m_featureInstanceRegistrations.at(i).m_feature->getURI())
         );
         FeatureGUI *featureGUI = m_featureInstanceRegistrations.at(i).m_gui;
-        featureGUI->setGeometryBytes(featureGUI->saveGeometry());
+        featureGUI->setGeometryBytes(MDIUtils::saveMDIGeometry(featureGUI));
         preset->addFeature(
             m_featureInstanceRegistrations.at(i).m_feature->getURI(),
             m_featureInstanceRegistrations.at(i).m_gui->serialize()
