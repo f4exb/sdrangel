@@ -48,8 +48,12 @@ bool TableTapAndHold::eventFilter(QObject *obj, QEvent *event)
             if (vHeader) {
                 point.setX(point.x() - vHeader->width());
             }
-            emit tapAndHold(point);
-            return true;
+            QSize size = m_table->viewport()->size();
+            if ((point.x() >= 0) && (point.x() < size.width()) && (point.y() >= 0) && (point.y() < size.height()))
+            {
+                emit tapAndHold(point);
+                return true;
+            }
         }
     }
     return QObject::eventFilter(obj, event);
