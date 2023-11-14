@@ -309,8 +309,8 @@ public:
         if (last_packet)
         {
             packet_assembly[25] = 0x80 | ((packet_size+2)<<2); // sent packet size includes CRC
-            packet_assembly[packet_size]   = crc_.get_bytes()[1];
-            packet_assembly[packet_size+1] = crc_.get_bytes()[0];
+            packet_assembly[packet_size]   = crc_.get_bytes()[0];
+            packet_assembly[packet_size+1] = crc_.get_bytes()[1];
         }
         else
         {
