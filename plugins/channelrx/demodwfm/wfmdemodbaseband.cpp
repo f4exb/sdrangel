@@ -44,6 +44,8 @@ WFMDemodBaseband::WFMDemodBaseband()
     m_channelSampleRate = 0;
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    connect(m_sink.getAudioFifo(), &AudioFifo::underflow, this, &WFMDemodBaseband::audioUnderflow);
+    connect(m_sink.getAudioFifo(), &AudioFifo::overflow, this, &WFMDemodBaseband::audioOverflow);
 }
 
 WFMDemodBaseband::~WFMDemodBaseband()
@@ -187,4 +189,14 @@ void WFMDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);
     m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+}
+
+void WFMDemodBaseband::audioUnderflow()
+{
+    m_audioFifoErrorDateTime = QDateTime::currentDateTime();
+}
+
+void WFMDemodBaseband::audioOverflow()
+{
+    m_audioFifoErrorDateTime = QDateTime::currentDateTime();
 }

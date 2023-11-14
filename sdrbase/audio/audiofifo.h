@@ -68,6 +68,7 @@ private:
 signals:
 	void dataReady();
 	void overflow(int nsamples);
+    void underflow();
 };
 
 #endif // INCLUDE_AUDIOFIFO_H
