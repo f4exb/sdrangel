@@ -18,6 +18,7 @@
 #include <QWidget>
 #include <QDebug>
 #include <QDataStream>
+#include <QIODevice>
 
 #include "mdiutils.h"
 

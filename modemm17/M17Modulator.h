@@ -128,16 +128,12 @@ public:
         std::copy(source_.begin(), source_.end(), rit);
 
         lsf[12] = can_ >> 1;
-        lsf[13] = (streamElsePacket ? 5 : 4) | ((can_ & 1) << 7);
+        lsf[13] = (streamElsePacket ? 5 : 2) | ((can_ & 1) << 7);
 
         if (gnss_on_)
         {
             lsf[13] |= (1<<5);
             std::copy(gnss_.begin(), gnss_.end(), &lsf[14]);
-        }
-        else
-        {
-            lsf[13] |= (3<<5);
         }
 
         crc.reset();
