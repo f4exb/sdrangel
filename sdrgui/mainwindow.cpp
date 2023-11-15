@@ -64,6 +64,7 @@
 #include "gui/loggingdialog.h"
 #include "gui/deviceuserargsdialog.h"
 #include "gui/sdrangelsplash.h"
+#include "gui/mdiutils.h"
 #include "gui/mypositiondialog.h"
 #include "gui/fftdialog.h"
 #include "gui/fftwisdomdialog.h"
@@ -1492,8 +1493,8 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
             sampleMIMOAdd(m_workspaces[deviceWorkspaceIndex], m_workspaces[spectrumWorkspaceIndex], bestDeviceIndex);
         }
 
-        m_deviceUIs.back()->m_deviceGUI->restoreGeometry(deviceSetPreset.getDeviceGeometry());
-        m_deviceUIs.back()->m_mainSpectrumGUI->restoreGeometry(deviceSetPreset.getSpectrumGeometry());
+        MDIUtils::restoreMDIGeometry(m_deviceUIs.back()->m_deviceGUI, deviceSetPreset.getDeviceGeometry());
+        MDIUtils::restoreMDIGeometry(m_deviceUIs.back()->m_mainSpectrumGUI, deviceSetPreset.getSpectrumGeometry());
         m_deviceUIs.back()->loadDeviceSetSettings(&deviceSetPreset, m_pluginManager->getPluginAPI(), &m_workspaces, nullptr);
 
         if (waitBox)
@@ -1571,9 +1572,9 @@ void MainWindow::saveConfiguration(Configuration *configuration)
     {
         deviceSetPresets.push_back(Preset());
         deviceUISet->saveDeviceSetSettings(&deviceSetPresets.back());
-        deviceSetPresets.back().setSpectrumGeometry(deviceUISet->m_mainSpectrumGUI->saveGeometry());
+        deviceSetPresets.back().setSpectrumGeometry(MDIUtils::saveMDIGeometry(deviceUISet->m_mainSpectrumGUI));
         deviceSetPresets.back().setSpectrumWorkspaceIndex(deviceUISet->m_mainSpectrumGUI->getWorkspaceIndex());
-        deviceSetPresets.back().setDeviceGeometry(deviceUISet->m_deviceGUI->saveGeometry());
+        deviceSetPresets.back().setDeviceGeometry(MDIUtils::saveMDIGeometry(deviceUISet->m_deviceGUI));
         deviceSetPresets.back().setDeviceWorkspaceIndex(deviceUISet->m_deviceGUI->getWorkspaceIndex());
         qDebug("MainWindow::saveConfiguration: %s device in workspace %d spectrum in %d",
             qPrintable(deviceUISet->m_deviceAPI->getSamplingDeviceId()),
