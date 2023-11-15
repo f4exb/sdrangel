@@ -251,10 +251,10 @@ void M17DemodProcessor::decode_type(uint16_t type)
                 m_typeInfo += "UNK";
                 break;
             case 1:
-                m_typeInfo += "RAW";
+                m_typeInfo += "DAT";
                 break;
             case 2:
-                m_typeInfo += "ENC";
+                m_typeInfo += "UNK";
                 break;
             case 3:
                 m_typeInfo += "UNK";

@@ -60,6 +60,7 @@ bool M17ModProcessor::handleMessage(const Message& cmd)
         const MsgSendSMS& notif = (const MsgSendSMS&) cmd;
         QByteArray packetBytes = notif.getSMSText().toUtf8();
         packetBytes.prepend(0x05); // SMS standard type
+        packetBytes.append('\0'); // SMS should be null terminated
         packetBytes.truncate(798); // Maximum packet size is 798 payload + 2 bytes CRC = 800 bytes (32*25)
         processPacket(notif.getSourceCall(), notif.getDestCall(), notif.getCAN(), packetBytes);
         // test(notif.getSourceCall(), notif.getDestCall());
