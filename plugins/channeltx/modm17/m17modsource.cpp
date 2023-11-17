@@ -177,7 +177,7 @@ void M17ModSource::modulateSample()
         calculateLevel(t);
         t1 = m_lowpass.filter(t) * 1.5f;
 
-        m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * t1;
+        m_modPhasor += ((2.0f * M_PI * m_settings.m_fmDeviation) / (float) m_audioSampleRate) * t1;
 
         // limit phasor range to ]-pi,pi]
         if (m_modPhasor > M_PI) {

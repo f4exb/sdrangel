@@ -520,6 +520,7 @@ M17DemodGUI::M17DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 M17DemodGUI::~M17DemodGUI()
 {
+    m_m17Demod->setScopeXYSink(nullptr);
 	delete m_scopeVisXY;
     ui->screenTV->setParent(nullptr); // Prefer memory leak to core dump... ~TVScreen() is buggy
 	delete ui;

@@ -195,9 +195,9 @@ bool M17DemodProcessor::decode_lsf(modemm17::M17FrameDecoder::lsf_buffer_t const
     m_currentPacket.clear();
     m_packetFrameCounter = 0;
 
-    if (!lsf[111]) // LSF type bit 0
+    if (!(lsf[13] & 1)) // LSF type bit 0
     {
-        uint8_t packet_type = (lsf[109] << 1) | lsf[110];
+        uint8_t packet_type = (lsf[13] >> 1) & 0x3;
 
         switch (packet_type)
         {
@@ -254,7 +254,7 @@ void M17DemodProcessor::decode_type(uint16_t type)
                 m_typeInfo += "DAT";
                 break;
             case 2:
-                m_typeInfo += "UNK";
+                m_typeInfo += "ENC"; // Encapsulated passes LSF up stack along with data
                 break;
             case 3:
                 m_typeInfo += "UNK";

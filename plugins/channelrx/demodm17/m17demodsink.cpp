@@ -334,7 +334,7 @@ void M17DemodSink::applySettings(const M17DemodSettings& settings, const QList<Q
     }
 
     if (settingsKeys.contains("fmDeviation") || force) {
-        m_phaseDiscri.setFMScaling(48000.0f / (2.0f*settings.m_fmDeviation));
+        m_phaseDiscri.setFMScaling(48000.0f / (2.0f*M_PI*settings.m_fmDeviation));
     }
 
     if (settingsKeys.contains("squelchGate") || force)
