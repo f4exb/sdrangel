@@ -164,7 +164,7 @@ void M17ModGUI::on_rfBW_valueChanged(int value)
 void M17ModGUI::on_fmDev_valueChanged(int value)
 {
 	ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(value / 10.0, 0, 'f', 1));
-	m_settings.m_fmDeviation = value * 200.0;
+	m_settings.m_fmDeviation = value * 100.0;
 	applySettings(QList<QString>{"fmDeviation"});
 }
 
@@ -570,8 +570,8 @@ void M17ModGUI::displaySettings()
     ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
 
-    ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(m_settings.m_fmDeviation / 2000.0, 0, 'f', 1));
-    ui->fmDev->setValue(m_settings.m_fmDeviation / 200.0);
+    ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(m_settings.m_fmDeviation / 1000.0, 0, 'f', 1));
+    ui->fmDev->setValue(m_settings.m_fmDeviation / 100.0);
 
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volumeFactor, 0, 'f', 1));
     ui->volume->setValue(m_settings.m_volumeFactor * 10.0);
