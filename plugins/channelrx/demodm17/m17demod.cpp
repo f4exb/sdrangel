@@ -57,7 +57,8 @@ M17Demod::M17Demod(DeviceAPI *deviceAPI) :
         m_thread(nullptr),
         m_basebandSink(nullptr),
         m_running(false),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_scopeXYSink(nullptr)
 {
     qDebug("M17Demod::M17Demod");
 	setObjectName(m_channelId);
@@ -141,6 +142,7 @@ void M17Demod::start()
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
     }
+    m_basebandSink->setScopeXYSink(m_scopeXYSink);
 
     m_basebandSink->reset();
     m_thread->start();
@@ -750,4 +752,12 @@ void M17Demod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
     m_basebandSink->setAudioFifoLabel(fifoLabel);
+}
+
+void M17Demod::setScopeXYSink(BasebandSampleSink* sampleSink)
+{
+    m_scopeXYSink = sampleSink;
+    if (m_running) {
+        m_basebandSink->setScopeXYSink(sampleSink);
+    }
 }
