@@ -1,6 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
+// Copyright (C) 2015-2023 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2015 John Greb <hexameron@spam.no>                              //
+// Copyright (C) 2020 Kacper Michajłow <kasper93@gmail.com>                      //
+// Copyright (C) 2021 Jon Beniston, M7RCE <jon@beniston.com>                     //
 // (c) 2015 John Greb                                                            //
 // (c) 2020 Edouard Griffiths, F4EXB                                             //
 //                                                                               //

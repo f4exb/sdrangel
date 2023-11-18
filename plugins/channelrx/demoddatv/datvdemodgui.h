@@ -1,4 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2018-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2020 Kacper Michajłow <kasper93@gmail.com>                      //
+// Copyright (C) 2022 Jon Beniston, M7RCE <jon@beniston.com>                     //
 // Copyright (C) 2018 F4HKW                                                      //
 // for F4EXB / SDRAngel                                                          //
 // using LeanSDR Framework (C) 2016 F4DAV                                        //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
-// Copyright (C) 2022 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2022-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2022 Jiří Pinkava <jiri.pinkava@rossum.ai>                      //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //

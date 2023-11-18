@@ -1,4 +1,6 @@
 ﻿///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2018-2019, 2021 Edouard Griffiths, F4EXB <f4exb06@gmail.com>    //
+// Copyright (C) 2022 Jiří Pinkava <jiri.pinkava@rossum.ai>                      //
 // Copyright (C) 2018 F4HKW                                                      //
 // for F4EXB / SDRAngel                                                          //
 //                                                                               //
@@ -15,6 +17,7 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+
 
 #include "datvideostream.h"
 #include <stdio.h>

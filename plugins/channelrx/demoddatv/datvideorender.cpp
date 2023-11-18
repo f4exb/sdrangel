@@ -1,4 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2018-2021 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2022 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Copyright (C) 2023 Daniele Forsi <iu5hkx@gmail.com>                           //
 // Copyright (C) 2018 F4HKW                                                      //
 // for F4EXB / SDRAngel                                                          //
 //                                                                               //

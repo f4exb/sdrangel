@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2018-2019, 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
+// Copyright (C) 2021 Jon Beniston, M7RCE <jon@beniston.com>                     //
 //                                                                               //
 // Remote sink channel (Rx) UDP sender thread                                    //
 //                                                                               //

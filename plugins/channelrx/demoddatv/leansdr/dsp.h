@@ -1,5 +1,6 @@
+// Copyright (C) 2018-2019, 2021, 2023 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
+//
 // This file is part of LeanSDR Copyright (C) 2016-2018 <pabr@pabr.org>.
-// See the toplevel README for more information.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

@@ -1,5 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
+// written by Christian Daniel                                                   //
+// Copyright (C) 2016-2017, 2019, 2021 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
 // using LeanSDR Framework (C) 2016 F4DAV                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //

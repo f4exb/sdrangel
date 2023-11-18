@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2021 Jon Beniston, M7RCE <jon@beniston.com>                     //
 // Copyright (C) 2010, 2011, 2012 Jan van Katwijk (J.vanKatwijk@gmail.com)
-// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //

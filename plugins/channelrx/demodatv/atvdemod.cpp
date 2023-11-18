@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 F4HKW                                                      //
+// Copyright (C) 2017-2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>    //
+// Copyright (C) 2020 Kacper Michajłow <kasper93@gmail.com>                      //
 // for F4EXB / SDRAngel                                                          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //

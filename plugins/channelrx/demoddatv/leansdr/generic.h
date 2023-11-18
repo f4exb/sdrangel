@@ -1,3 +1,6 @@
+// Copyright (C) 2018-2019, 2021 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
+// Copyright (C) 2022 Jon Beniston, M7RCE <jon@beniston.com>        //
+
 // This file is part of LeanSDR Copyright (C) 2016-2018 <pabr@pabr.org>.
 // See the toplevel README for more information.
 //
