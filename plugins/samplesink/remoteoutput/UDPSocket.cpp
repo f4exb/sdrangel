@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2017-2019 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Remote - send I/Q samples read from a SDR device over the network via UDP.    //
 //                                                                               //
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //

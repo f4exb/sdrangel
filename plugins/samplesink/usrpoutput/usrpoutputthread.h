@@ -15,6 +15,11 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
+// written by Christian Daniel                                                   //
+// Copyright (C) 2014 John Greb <hexameron@spam.no>                              //
+// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2020 Jon Beniston, M7RCE <jon@beniston.com>                     //
 
 #ifndef PLUGINS_SAMPLESOURCE_USRPOUTPUT_USRPOUTPUTTHREAD_H_
 #define PLUGINS_SAMPLESOURCE_USRPOUTPUT_USRPOUTPUTTHREAD_H_
