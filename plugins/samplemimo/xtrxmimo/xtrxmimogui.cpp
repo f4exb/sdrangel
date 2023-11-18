@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>         //
+// Copyright (C) 2022 Jon Beniston, M7RCE <jon@beniston.com>                     //
 
 #include <QDebug>
 #include <QTime>

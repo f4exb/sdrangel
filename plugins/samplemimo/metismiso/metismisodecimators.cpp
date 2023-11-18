@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -34,7 +34,7 @@ int MetisMISODecimators::decimate2(qint32 sampleI, qint32 sampleQ, SampleVector&
         m_accumulators[streamIndex][m_counters[streamIndex]++] = sampleI;
         m_accumulators[streamIndex][m_counters[streamIndex]++] = sampleQ;
 
-        if (m_counters[streamIndex] >= 8) 
+        if (m_counters[streamIndex] >= 8)
         {
             SampleVector::iterator it = result.begin();
             m_decimatorsIQ[streamIndex].decimate2_cen(&it, m_accumulators[streamIndex], 8);
@@ -53,7 +53,7 @@ int MetisMISODecimators::decimate4(qint32 sampleI, qint32 sampleQ, SampleVector&
         m_accumulators[streamIndex][m_counters[streamIndex]++] = sampleI;
         m_accumulators[streamIndex][m_counters[streamIndex]++] = sampleQ;
 
-        if (m_counters[streamIndex] >= 16) 
+        if (m_counters[streamIndex] >= 16)
         {
             SampleVector::iterator it = result.begin();
             m_decimatorsIQ[streamIndex].decimate4_cen(&it, m_accumulators[streamIndex], 16);
@@ -72,7 +72,7 @@ int MetisMISODecimators::decimate8(qint32 sampleI, qint32 sampleQ, SampleVector&
         m_accumulators[streamIndex][m_counters[streamIndex]++] = sampleI;
         m_accumulators[streamIndex][m_counters[streamIndex]++] = sampleQ;
 
-        if (m_counters[streamIndex] >= 16) 
+        if (m_counters[streamIndex] >= 16)
         {
             SampleVector::iterator it = result.begin();
             m_decimatorsIQ[streamIndex].decimate8_cen(&it, m_accumulators[streamIndex], 16);
