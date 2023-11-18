@@ -193,6 +193,11 @@
           <string>Marine</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>FRS-GMRS</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="0">
