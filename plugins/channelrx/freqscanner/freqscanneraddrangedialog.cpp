@@ -77,6 +77,18 @@ void FreqScannerAddRangeDialog::accept()
         };
         m_frequencies.append(dabFreqs);
     }
+    else if (ui->preset->currentText() == "FRS-GMRS")
+    {
+        static const QList<qint64> FRS_GMRSFreqs = {
+            462562500, 462587500, 462612500, 462637500, // FRS1, FRS2, FRS3, FRS4
+            462662500, 462687500, 462712500, 467562500, // FRS5, FRS6, FRS7, FRS8
+            467587500, 467612500, 467637500, 467662500, // FRS9, FRS10, FRS11, FRS12
+            467687500, 467712500, 462550000, 462575000, // FRS13, FRS14, FRS15, FRS16
+            462600000, 462625000, 462650000, 462675000, // FRS17, FRS18, FRS19, FRS20
+            462700000, 462725000                        // FRS21, FRS22
+        };
+        m_frequencies.append(FRS_GMRSFreqs);
+    }
     else
     {
         qint64 start = ui->start->getValue();
@@ -130,6 +142,10 @@ void FreqScannerAddRangeDialog::on_preset_currentTextChanged(const QString& text
         ui->step->setCurrentText("25000");
     }
     else if (text == "Digital Selective Calling")
+    {
+        enableManAdjust = false;
+    }
+    else if (text == "FRS-GMRS")
     {
         enableManAdjust = false;
     }
