@@ -1,4 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // (C) Copyright 2007 Anthony Williams                                           //
 //                                                                               //
 // Distributed under the Boost Software License, Version 1.0.                    //

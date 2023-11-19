@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 F4EXB                                                      //
-// written by Edouard Griffiths                                                  //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
+// Copyright (C) 2020 Kacper Michajłow <kasper93@gmail.com>                      //
 //                                                                               //
 // Audio compressor based on sndfilter by Sean Connelly (@voidqk)                //
 // https://github.com/voidqk/sndfilter                                           //

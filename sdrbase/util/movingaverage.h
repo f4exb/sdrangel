@@ -1,8 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2016-2019 Edouard Griffiths, F4EXB <f4exb06@gmail.com>              //
+// Copyright (C) 2020 Vort <vvort@yandex.ru>                                         //
+// Copyright (C) 2023 Jon Beniston, M7RCE <jon@beniston.com>                         //
 //                                                                                   //
 // http://stackoverflow.com/questions/10990618/calculate-rolling-moving-average-in-c //
 //                                                                                   //
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                       //
 //                                                                                   //
 // This program is free software; you can redistribute it and/or modify              //
 // it under the terms of the GNU General Public License as published by              //

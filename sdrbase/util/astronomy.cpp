@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021, 2023 Jon Beniston, M7RCE <jon@beniston.com>               //
 // Copyright (C) 2004 Rutherford Appleton Laboratory                             //
 // Copyright (C) 2012 Science and Technology Facilities Council.                 //
 // Copyright (C) 2013-2021, NumFOCUS Foundation.                                 //
