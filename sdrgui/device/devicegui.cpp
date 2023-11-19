@@ -1,5 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2022 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
+// written by Christian Daniel                                                   //
+// Copyright (C) 2015-2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>    //
+// Copyright (C) 2022-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -241,7 +244,7 @@ void DeviceGUI::sizeToContents()
     QSizePolicy policy = getContents()->sizePolicy();
     setSizePolicy(policy);
 
-    // If size policy is fixed, hide widgets that resize the window 
+    // If size policy is fixed, hide widgets that resize the window
     if ((policy.verticalPolicy() == QSizePolicy::Fixed) && (policy.horizontalPolicy() == QSizePolicy::Fixed))
     {
         m_shrinkButton->hide();
