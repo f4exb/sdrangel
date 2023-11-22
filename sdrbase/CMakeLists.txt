@@ -399,6 +399,7 @@ set(sdrbase_HEADERS
     dsp/projector.h
     dsp/raisedcosine.h
     dsp/recursivefilters.h
+    dsp/replaybuffer.h
     dsp/rootraisedcosine.h
     dsp/samplemififo.h
     dsp/samplemofifo.h

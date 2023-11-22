@@ -47,6 +47,7 @@ MESSAGE_CLASS_DEFINITION(USRPInput::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(USRPInput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(USRPInput::MsgReportStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(USRPInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(USRPInput::MsgSaveReplay, Message)
 
 USRPInput::USRPInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -427,7 +428,7 @@ bool USRPInput::start()
 
     // start / stop streaming is done in the thread.
 
-    m_usrpInputThread = new USRPInputThread(m_streamId, m_bufSamples, &m_sampleFifo);
+    m_usrpInputThread = new USRPInputThread(m_streamId, m_bufSamples, &m_sampleFifo, &m_replayBuffer);
     qDebug("USRPInput::start: thread created");
 
     m_usrpInputThread->setLog2Decimation(m_settings.m_log2SoftDecim);
@@ -705,6 +706,12 @@ bool USRPInput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MsgSaveReplay::match(message))
+    {
+        MsgSaveReplay& cmd = (MsgSaveReplay&) message;
+        m_replayBuffer.save(cmd.getFilename(), m_settings.m_devSampleRate, getCenterFrequency());
+        return true;
+    }
     else
     {
         return false;
@@ -767,6 +774,10 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, const QList<QSt
                 qDebug("USRPInput::applySettings: set sample rate set to %d", settings.m_devSampleRate);
                 checkRates = true;
                 reapplySomeSettings = true;
+            }
+
+            if (settings.m_devSampleRate != m_settings.m_devSampleRate) {
+                m_replayBuffer.clear();
             }
         }
 
@@ -912,6 +923,18 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, const QList<QSt
             m_settings = settings;
         } else {
             m_settings.applySettings(settingsKeys, settings);
+        }
+
+        if (settingsKeys.contains("replayLength") || settingsKeys.contains("devSampleRate") || force) {
+            m_replayBuffer.setSize(m_settings.m_replayLength, m_settings.m_devSampleRate);
+        }
+
+        if (settingsKeys.contains("replayOffset") || settingsKeys.contains("devSampleRate")  || force) {
+            m_replayBuffer.setReadOffset(((unsigned)(m_settings.m_replayOffset * m_settings.m_devSampleRate)) * 2);
+        }
+
+        if (settingsKeys.contains("replayLoop") || force) {
+            m_replayBuffer.setLoop(m_settings.m_replayLoop);
         }
 
         if (checkRates)

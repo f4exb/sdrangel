@@ -45,6 +45,7 @@
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgSaveReplay, Message)
 
 const quint64 RTLSDRInput::frequencyLowRangeMin = 0UL;
 const quint64 RTLSDRInput::frequencyLowRangeMax = 275000UL;
@@ -238,7 +239,7 @@ bool RTLSDRInput::start()
 
     if (m_running) stop();
 
-	m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo);
+	m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo, &m_replayBuffer);
 	m_rtlSDRThread->setSamplerate(m_settings.m_devSampleRate);
 	m_rtlSDRThread->setLog2Decimation(m_settings.m_log2Decim);
 	m_rtlSDRThread->setFcPos((int) m_settings.m_fcPos);
@@ -374,6 +375,12 @@ bool RTLSDRInput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MsgSaveReplay::match(message))
+    {
+        MsgSaveReplay& cmd = (MsgSaveReplay&) message;
+        m_replayBuffer.save(cmd.getFilename(), m_settings.m_devSampleRate, getCenterFrequency());
+        return true;
+    }
     else
     {
         return false;
@@ -431,6 +438,9 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, const QList<QStr
                 }
 
                 qDebug("RTLSDRInput::applySettings: sample rate set to %d", settings.m_devSampleRate);
+            }
+            if (settings.m_devSampleRate != m_settings.m_devSampleRate) {
+                m_replayBuffer.clear();
             }
         }
     }
@@ -572,6 +582,18 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, const QList<QStr
         m_settings = settings;
     } else {
         m_settings.applySettings(settingsKeys, settings);
+    }
+
+    if (settingsKeys.contains("replayLength") || settingsKeys.contains("devSampleRate") || force) {
+        m_replayBuffer.setSize(m_settings.m_replayLength, m_settings.m_devSampleRate);
+    }
+
+    if (settingsKeys.contains("replayOffset") || settingsKeys.contains("devSampleRate")  || force) {
+        m_replayBuffer.setReadOffset(((unsigned)(m_settings.m_replayOffset * m_settings.m_devSampleRate)) * 2);
+    }
+
+    if (settingsKeys.contains("replayLoop") || force) {
+        m_replayBuffer.setLoop(m_settings.m_replayLoop);
     }
 
     if (forwardChange)

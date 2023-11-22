@@ -18,6 +18,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
+
 #include <stdio.h>
 #include <errno.h>
 #include "rtlsdrthread.h"
@@ -26,12 +28,13 @@
 
 #define FCD_BLOCKSIZE 16384
 
-RTLSDRThread::RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
+RTLSDRThread::RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<quint8> *replayBuffer, QObject* parent) :
 	QThread(parent),
 	m_running(false),
 	m_dev(dev),
 	m_convertBuffer(FCD_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
+	m_replayBuffer(replayBuffer),
 	m_samplerate(288000),
 	m_log2Decim(4),
 	m_fcPos(0),
@@ -92,95 +95,121 @@ void RTLSDRThread::run()
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void RTLSDRThread::callbackIQ(const quint8* buf, qint32 len)
+//  Len is total samples (i.e. one I and Q pair will have len=2)
+void RTLSDRThread::callbackIQ(const quint8* inBuf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
-	if (m_log2Decim == 0)
-	{
-		m_decimatorsIQ.decimate1(&it, buf, len);
+	// Save data to replay buffer
+	m_replayBuffer->lock();
+	bool replayEnabled = m_replayBuffer->getSize() > 0;
+	if (replayEnabled) {
+		m_replayBuffer->write(inBuf, len);
 	}
-	else
+
+	const quint8* buf = inBuf;
+	qint32 remaining = len;
+
+	while (remaining > 0)
 	{
-		if (m_fcPos == 0) // Infradyne
-		{
-			switch (m_log2Decim)
-			{
-			case 1:
-				m_decimatorsIQ.decimate2_inf(&it, buf, len);
-				break;
-			case 2:
-				m_decimatorsIQ.decimate4_inf(&it, buf, len);
-				break;
-			case 3:
-				m_decimatorsIQ.decimate8_inf(&it, buf, len);
-				break;
-			case 4:
-				m_decimatorsIQ.decimate16_inf(&it, buf, len);
-				break;
-            case 5:
-                m_decimatorsIQ.decimate32_inf(&it, buf, len);
-                break;
-            case 6:
-                m_decimatorsIQ.decimate64_inf(&it, buf, len);
-                break;
-			default:
-				break;
-			}
+		// Choose between live data or replayed data
+		if (replayEnabled && m_replayBuffer->useReplay()) {
+			len = m_replayBuffer->read(remaining, buf);
+			qDebug() << "Replay";
+		} else {
+			len = remaining;
+			qDebug() << "Live" << m_replayBuffer->useReplay();
 		}
-		else if (m_fcPos == 1) // Supradyne
+		remaining -= len;
+
+		if (m_log2Decim == 0)
 		{
-			switch (m_log2Decim)
-			{
-			case 1:
-				m_decimatorsIQ.decimate2_sup(&it, buf, len);
-				break;
-			case 2:
-				m_decimatorsIQ.decimate4_sup(&it, buf, len);
-				break;
-			case 3:
-				m_decimatorsIQ.decimate8_sup(&it, buf, len);
-				break;
-			case 4:
-				m_decimatorsIQ.decimate16_sup(&it, buf, len);
-				break;
-            case 5:
-                m_decimatorsIQ.decimate32_sup(&it, buf, len);
-                break;
-            case 6:
-                m_decimatorsIQ.decimate64_sup(&it, buf, len);
-                break;
-			default:
-				break;
-			}
+			m_decimatorsIQ.decimate1(&it, buf, len);
 		}
-		else // Centered
+		else
 		{
-			switch (m_log2Decim)
+			if (m_fcPos == 0) // Infradyne
 			{
-			case 1:
-				m_decimatorsIQ.decimate2_cen(&it, buf, len);
-				break;
-			case 2:
-				m_decimatorsIQ.decimate4_cen(&it, buf, len);
-				break;
-			case 3:
-				m_decimatorsIQ.decimate8_cen(&it, buf, len);
-				break;
-			case 4:
-				m_decimatorsIQ.decimate16_cen(&it, buf, len);
-				break;
-            case 5:
-                m_decimatorsIQ.decimate32_cen(&it, buf, len);
-                break;
-            case 6:
-                m_decimatorsIQ.decimate64_cen(&it, buf, len);
-                break;
-			default:
-				break;
+				switch (m_log2Decim)
+				{
+				case 1:
+					m_decimatorsIQ.decimate2_inf(&it, buf, len);
+					break;
+				case 2:
+					m_decimatorsIQ.decimate4_inf(&it, buf, len);
+					break;
+				case 3:
+					m_decimatorsIQ.decimate8_inf(&it, buf, len);
+					break;
+				case 4:
+					m_decimatorsIQ.decimate16_inf(&it, buf, len);
+					break;
+				case 5:
+					m_decimatorsIQ.decimate32_inf(&it, buf, len);
+					break;
+				case 6:
+					m_decimatorsIQ.decimate64_inf(&it, buf, len);
+					break;
+				default:
+					break;
+				}
+			}
+			else if (m_fcPos == 1) // Supradyne
+			{
+				switch (m_log2Decim)
+				{
+				case 1:
+					m_decimatorsIQ.decimate2_sup(&it, buf, len);
+					break;
+				case 2:
+					m_decimatorsIQ.decimate4_sup(&it, buf, len);
+					break;
+				case 3:
+					m_decimatorsIQ.decimate8_sup(&it, buf, len);
+					break;
+				case 4:
+					m_decimatorsIQ.decimate16_sup(&it, buf, len);
+					break;
+				case 5:
+					m_decimatorsIQ.decimate32_sup(&it, buf, len);
+					break;
+				case 6:
+					m_decimatorsIQ.decimate64_sup(&it, buf, len);
+					break;
+				default:
+					break;
+				}
+			}
+			else // Centered
+			{
+				switch (m_log2Decim)
+				{
+				case 1:
+					m_decimatorsIQ.decimate2_cen(&it, buf, len);
+					break;
+				case 2:
+					m_decimatorsIQ.decimate4_cen(&it, buf, len);
+					break;
+				case 3:
+					m_decimatorsIQ.decimate8_cen(&it, buf, len);
+					break;
+				case 4:
+					m_decimatorsIQ.decimate16_cen(&it, buf, len);
+					break;
+				case 5:
+					m_decimatorsIQ.decimate32_cen(&it, buf, len);
+					break;
+				case 6:
+					m_decimatorsIQ.decimate64_cen(&it, buf, len);
+					break;
+				default:
+					break;
+				}
 			}
 		}
 	}
+
+	m_replayBuffer->unlock();
 
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 
@@ -188,95 +217,118 @@ void RTLSDRThread::callbackIQ(const quint8* buf, qint32 len)
 		rtlsdr_cancel_async(m_dev);
 }
 
-void RTLSDRThread::callbackQI(const quint8* buf, qint32 len)
+void RTLSDRThread::callbackQI(const quint8* inBuf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
-	if (m_log2Decim == 0)
-	{
-		m_decimatorsQI.decimate1(&it, buf, len);
+	// Save data to replay buffer
+	m_replayBuffer->lock();
+	bool replayEnabled = m_replayBuffer->getSize() > 0;
+	if (replayEnabled) {
+		m_replayBuffer->write(inBuf, len);
 	}
-	else
+
+	const quint8* buf = inBuf;
+	qint32 remaining = len;
+
+	while (remaining > 0)
 	{
-		if (m_fcPos == 0) // Infradyne
-		{
-			switch (m_log2Decim)
-			{
-			case 1:
-				m_decimatorsQI.decimate2_inf(&it, buf, len);
-				break;
-			case 2:
-				m_decimatorsQI.decimate4_inf(&it, buf, len);
-				break;
-			case 3:
-				m_decimatorsQI.decimate8_inf(&it, buf, len);
-				break;
-			case 4:
-				m_decimatorsQI.decimate16_inf(&it, buf, len);
-				break;
-            case 5:
-                m_decimatorsQI.decimate32_inf(&it, buf, len);
-                break;
-            case 6:
-                m_decimatorsQI.decimate64_inf(&it, buf, len);
-                break;
-			default:
-				break;
-			}
+		// Choose between live data or replayed data
+		if (replayEnabled && m_replayBuffer->useReplay()) {
+			len = m_replayBuffer->read(remaining, buf);
+		} else {
+			len = remaining;
 		}
-		else if (m_fcPos == 1) // Supradyne
+		remaining -= len;
+
+		if (m_log2Decim == 0)
 		{
-			switch (m_log2Decim)
-			{
-			case 1:
-				m_decimatorsQI.decimate2_sup(&it, buf, len);
-				break;
-			case 2:
-				m_decimatorsQI.decimate4_sup(&it, buf, len);
-				break;
-			case 3:
-				m_decimatorsQI.decimate8_sup(&it, buf, len);
-				break;
-			case 4:
-				m_decimatorsQI.decimate16_sup(&it, buf, len);
-				break;
-            case 5:
-                m_decimatorsQI.decimate32_sup(&it, buf, len);
-                break;
-            case 6:
-                m_decimatorsQI.decimate64_sup(&it, buf, len);
-                break;
-			default:
-				break;
-			}
+			m_decimatorsQI.decimate1(&it, buf, len);
 		}
-		else // Centered
+		else
 		{
-			switch (m_log2Decim)
+			if (m_fcPos == 0) // Infradyne
 			{
-			case 1:
-				m_decimatorsQI.decimate2_cen(&it, buf, len);
-				break;
-			case 2:
-				m_decimatorsQI.decimate4_cen(&it, buf, len);
-				break;
-			case 3:
-				m_decimatorsQI.decimate8_cen(&it, buf, len);
-				break;
-			case 4:
-				m_decimatorsQI.decimate16_cen(&it, buf, len);
-				break;
-            case 5:
-                m_decimatorsQI.decimate32_cen(&it, buf, len);
-                break;
-            case 6:
-                m_decimatorsQI.decimate64_cen(&it, buf, len);
-                break;
-			default:
-				break;
+				switch (m_log2Decim)
+				{
+				case 1:
+					m_decimatorsQI.decimate2_inf(&it, buf, len);
+					break;
+				case 2:
+					m_decimatorsQI.decimate4_inf(&it, buf, len);
+					break;
+				case 3:
+					m_decimatorsQI.decimate8_inf(&it, buf, len);
+					break;
+				case 4:
+					m_decimatorsQI.decimate16_inf(&it, buf, len);
+					break;
+				case 5:
+					m_decimatorsQI.decimate32_inf(&it, buf, len);
+					break;
+				case 6:
+					m_decimatorsQI.decimate64_inf(&it, buf, len);
+					break;
+				default:
+					break;
+				}
+			}
+			else if (m_fcPos == 1) // Supradyne
+			{
+				switch (m_log2Decim)
+				{
+				case 1:
+					m_decimatorsQI.decimate2_sup(&it, buf, len);
+					break;
+				case 2:
+					m_decimatorsQI.decimate4_sup(&it, buf, len);
+					break;
+				case 3:
+					m_decimatorsQI.decimate8_sup(&it, buf, len);
+					break;
+				case 4:
+					m_decimatorsQI.decimate16_sup(&it, buf, len);
+					break;
+				case 5:
+					m_decimatorsQI.decimate32_sup(&it, buf, len);
+					break;
+				case 6:
+					m_decimatorsQI.decimate64_sup(&it, buf, len);
+					break;
+				default:
+					break;
+				}
+			}
+			else // Centered
+			{
+				switch (m_log2Decim)
+				{
+				case 1:
+					m_decimatorsQI.decimate2_cen(&it, buf, len);
+					break;
+				case 2:
+					m_decimatorsQI.decimate4_cen(&it, buf, len);
+					break;
+				case 3:
+					m_decimatorsQI.decimate8_cen(&it, buf, len);
+					break;
+				case 4:
+					m_decimatorsQI.decimate16_cen(&it, buf, len);
+					break;
+				case 5:
+					m_decimatorsQI.decimate32_cen(&it, buf, len);
+					break;
+				case 6:
+					m_decimatorsQI.decimate64_cen(&it, buf, len);
+					break;
+				default:
+					break;
+				}
 			}
 		}
 	}
+
+	m_replayBuffer->unlock();
 
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 
@@ -294,4 +346,3 @@ void RTLSDRThread::callbackHelper(unsigned char* buf, uint32_t len, void* ctx)
         thread->callbackQI(buf, len);
     }
 }
-

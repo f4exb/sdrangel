@@ -71,6 +71,9 @@ private:
 
     void displaySettings();
     void displaySampleRate();
+	void displayReplayLength();
+	void displayReplayOffset();
+	void displayReplayStep();
     void setCenterFrequencyDisplay();
     void setCenterFrequencySetting(uint64_t kHzValue);
     void sendSettings();
@@ -97,6 +100,12 @@ private slots:
     void on_clockSource_currentIndexChanged(int index);
     void on_transverter_clicked();
     void on_sampleRateMode_toggled(bool checked);
+ 	void on_replayOffset_valueChanged(int value);
+	void on_replayNow_clicked();
+	void on_replayPlus_clicked();
+	void on_replayMinus_clicked();
+	void on_replaySave_clicked();
+	void on_replayLoop_toggled(bool checked);
     void openDeviceSettingsDialog(const QPoint& p);
 
     void updateHardware();

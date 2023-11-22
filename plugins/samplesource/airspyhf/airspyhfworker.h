@@ -23,6 +23,7 @@
 #define INCLUDE_AIRSPYHFWORKER_H
 
 #include <dsp/decimatorsfi.h>
+#include "dsp/replaybuffer.h"
 #include <QObject>
 #include <libairspyhf/airspyhf.h>
 
@@ -34,7 +35,7 @@ class AirspyHFWorker : public QObject {
 	Q_OBJECT
 
 public:
-	AirspyHFWorker(airspyhf_device_t* dev, SampleSinkFifo* sampleFifo, QObject* parent = 0);
+	AirspyHFWorker(airspyhf_device_t* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<float> *replayBuffer, QObject* parent = 0);
 	~AirspyHFWorker();
 
 	void startWork();
@@ -49,6 +50,7 @@ private:
 	qint16 m_buf[2*AIRSPYHF_BLOCKSIZE];
 	SampleVector m_convertBuffer;
 	SampleSinkFifo* m_sampleFifo;
+	ReplayBuffer<float> *m_replayBuffer;
 
 	int m_samplerate;
 	unsigned int m_log2Decim;

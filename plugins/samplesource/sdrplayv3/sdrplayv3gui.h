@@ -64,6 +64,9 @@ private:
 
     void blockApplySettings(bool block) { m_doApplySettings = !block; }
     void displaySettings();
+ 	void displayReplayLength();
+	void displayReplayOffset();
+	void displayReplayStep();
     void updateLNAValues();
     void sendSettings();
     void updateSampleRateAndFrequency();
@@ -96,6 +99,12 @@ private slots:
     void on_gainIF_valueChanged(int value);
     void on_startStop_toggled(bool checked);
     void on_transverter_clicked();
+ 	void on_replayOffset_valueChanged(int value);
+	void on_replayNow_clicked();
+	void on_replayPlus_clicked();
+	void on_replayMinus_clicked();
+	void on_replaySave_clicked();
+	void on_replayLoop_toggled(bool checked);
     void openDeviceSettingsDialog(const QPoint& p);
 };
 

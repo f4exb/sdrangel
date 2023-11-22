@@ -29,6 +29,7 @@
 #include <sdrplay_api.h>
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
+#include "dsp/replaybuffer.h"
 
 #define SDRPLAYV3_INIT_NBSAMPLES (1<<14)
 
@@ -36,7 +37,7 @@ class SDRPlayV3Thread : public QThread {
     Q_OBJECT
 
 public:
-    SDRPlayV3Thread(sdrplay_api_DeviceT* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
+    SDRPlayV3Thread(sdrplay_api_DeviceT* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<qint16> *replayBuffer, QObject* parent = NULL);
     ~SDRPlayV3Thread();
 
     void startWork();
@@ -58,6 +59,7 @@ private:
     sdrplay_api_DeviceT *m_dev;
     SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;
+	ReplayBuffer<qint16> *m_replayBuffer;
 
     int m_samplerate;
     unsigned int m_log2Decim;

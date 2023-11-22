@@ -52,6 +52,10 @@ struct USRPInputSettings
     QString  m_clockSource;
     bool     m_transverterMode;
     qint64   m_transverterDeltaFrequency;
+	float    m_replayOffset; //!< Replay offset in seconds
+	float    m_replayLength; //!< Replay buffer size in seconds
+	float    m_replayStep;   //!< Replay forward/back step size in seconds
+	bool     m_replayLoop;    //!< Replay buffer repeatedly without recording new data
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

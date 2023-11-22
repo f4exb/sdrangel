@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU General Public License                 //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.              //
 ///////////////////////////////////////////////////////////////////////////////////////
+
+#include <cmath>
+
 #include "gui/pluginpresetsdialog.h"
 #include "gui/dialogpositioner.h"
 #include "device/deviceapi.h"
@@ -35,11 +38,55 @@ BasicDeviceSettingsDialog::BasicDeviceSettingsDialog(QWidget *parent) :
     setReverseAPIAddress("127.0.0.1");
     setReverseAPIPort(8888);
     setReverseAPIDeviceIndex(0);
+    setReplayBytesPerSecond(0);
+    setReplayStep(5.0f);
 }
 
 BasicDeviceSettingsDialog::~BasicDeviceSettingsDialog()
 {
     delete ui;
+}
+
+void BasicDeviceSettingsDialog::setReplayBytesPerSecond(int bytesPerSecond)
+{
+    bool enabled = bytesPerSecond > 0;
+    ui->replayLengthLabel->setEnabled(enabled);
+    ui->replayLength->setEnabled(enabled);
+    ui->replayLengthUnits->setEnabled(enabled);
+    ui->replayLengthSize->setEnabled(enabled);
+    ui->replayStepLabel->setEnabled(enabled);
+    ui->replayStep->setEnabled(enabled);
+    ui->replayStepUnits->setEnabled(enabled);
+    m_replayBytesPerSecond = bytesPerSecond;
+}
+
+void BasicDeviceSettingsDialog::setReplayLength(float replayLength)
+{
+    m_replayLength = replayLength;
+    ui->replayLength->setValue(replayLength);
+}
+
+void BasicDeviceSettingsDialog::on_replayLength_valueChanged(double value)
+{
+    m_replayLength = (float)value;
+    float size = m_replayLength * m_replayBytesPerSecond;
+    if (size < 1e6) {
+        ui->replayLengthSize->setText("(<1MB)");
+    } else {
+        ui->replayLengthSize->setText(QString("(%1MB)").arg(std::ceil(size/1e6)));
+    }
+}
+
+void BasicDeviceSettingsDialog::setReplayStep(float replayStep)
+{
+    m_replayStep = replayStep;
+    ui->replayStep->setValue(replayStep);
+}
+
+void BasicDeviceSettingsDialog::on_replayStep_valueChanged(double value)
+
+{
+    m_replayStep = value;
 }
 
 void BasicDeviceSettingsDialog::setUseReverseAPI(bool useReverseAPI)
