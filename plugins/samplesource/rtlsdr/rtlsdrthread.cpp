@@ -115,10 +115,8 @@ void RTLSDRThread::callbackIQ(const quint8* inBuf, qint32 len)
 		// Choose between live data or replayed data
 		if (replayEnabled && m_replayBuffer->useReplay()) {
 			len = m_replayBuffer->read(remaining, buf);
-			qDebug() << "Replay";
 		} else {
 			len = remaining;
-			qDebug() << "Live" << m_replayBuffer->useReplay();
 		}
 		remaining -= len;
 

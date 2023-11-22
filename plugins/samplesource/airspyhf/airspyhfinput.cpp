@@ -292,11 +292,12 @@ int AirspyHFInput::getSampleRate() const
 
 uint32_t AirspyHFInput::getSampleRateFromIndex(quint32 devSampleRateIndex) const
 {
+    int index;
     if (devSampleRateIndex >= m_sampleRates.size()) {
-        devSampleRateIndex = m_sampleRates.size() - 1;
+        index = m_sampleRates.size() - 1;
     }
-    if (devSampleRateIndex >= 0) {
-        return m_sampleRates[devSampleRateIndex];
+    if (index >= 0) {
+        return m_sampleRates[index];
     } else {
         return 0;
     }
