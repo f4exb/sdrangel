@@ -27,6 +27,8 @@ FreqScannerAddRangeDialog::FreqScannerAddRangeDialog(int step, QWidget* parent) 
     QDialog(parent),
     ui(new Ui::FreqScannerAddRangeDialog)
 {
+    (void) step;
+
     ui->setupUi(this);
 
     ui->start->setColorMapper(ColorMapper(ColorMapper::GrayGold));

@@ -286,7 +286,6 @@ void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
     (void) value;
 
     qint64 offset = 0;
-    bool valid = true;
 
     if (m_settings.m_frequencyMode == AMDemodSettings::Offset)
     {

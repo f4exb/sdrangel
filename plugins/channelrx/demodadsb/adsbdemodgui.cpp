@@ -408,7 +408,6 @@ QString Aircraft::getLabel(const ADSBDemodSettings *settings) const
         if (m_altitudeValid)
         {
             QStringList row1;
-            int transitionAlt = 6500;
             QChar c = m_altitude >= settings->m_transitionAlt ? 'F' : 'A';
             // Convert altitude to flight level
             int fl = m_altitude / 100;
