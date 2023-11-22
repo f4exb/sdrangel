@@ -185,7 +185,7 @@ private:
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AirspyHFSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
-    uint32_t getSampleRateFromIndex(int devSampleRateIndex) const;
+    uint32_t getSampleRateFromIndex(quint32 devSampleRateIndex) const;
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

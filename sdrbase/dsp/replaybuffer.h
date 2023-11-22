@@ -163,7 +163,7 @@ public:
 
         wavFile.startRecording();
         int offset = m_write + m_data.size() - m_count;
-        for (int i = 0; i < m_count; i += 2)
+        for (unsigned int i = 0; i < m_count; i += 2)
         {
             int idx = (i + offset) % m_data.size();
             qint16 l = conv(m_data[idx]);

@@ -290,7 +290,7 @@ int AirspyHFInput::getSampleRate() const
     }
 }
 
-uint32_t AirspyHFInput::getSampleRateFromIndex(int devSampleRateIndex) const
+uint32_t AirspyHFInput::getSampleRateFromIndex(quint32 devSampleRateIndex) const
 {
     if (devSampleRateIndex >= m_sampleRates.size()) {
         devSampleRateIndex = m_sampleRates.size() - 1;
