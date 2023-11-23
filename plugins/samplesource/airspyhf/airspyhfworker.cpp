@@ -24,11 +24,12 @@
 #include "dsp/samplesinkfifo.h"
 #include "airspyhfworker.h"
 
-AirspyHFWorker::AirspyHFWorker(airspyhf_device_t* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
+AirspyHFWorker::AirspyHFWorker(airspyhf_device_t* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<float> *replayBuffer, QObject* parent) :
 	QObject(parent),
 	m_dev(dev),
 	m_convertBuffer(AIRSPYHF_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
+    m_replayBuffer(replayBuffer),
 	m_samplerate(10),
 	m_log2Decim(0),
     m_iqOrder(true)
@@ -74,82 +75,128 @@ void AirspyHFWorker::setLog2Decimation(unsigned int log2_decim)
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void AirspyHFWorker::callbackIQ(const float* buf, qint32 len)
+void AirspyHFWorker::callbackIQ(const float* inBuf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
-    switch (m_log2Decim)
-    {
-    case 0:
-        m_decimatorsIQ.decimate1(&it, buf, len);
-        break;
-    case 1:
-        m_decimatorsIQ.decimate2_cen(&it, buf, len);
-        break;
-    case 2:
-        m_decimatorsIQ.decimate4_cen(&it, buf, len);
-        break;
-    case 3:
-        m_decimatorsIQ.decimate8_cen(&it, buf, len);
-        break;
-    case 4:
-        m_decimatorsIQ.decimate16_cen(&it, buf, len);
-        break;
-    case 5:
-        m_decimatorsIQ.decimate32_cen(&it, buf, len);
-        break;
-    case 6:
-        m_decimatorsIQ.decimate64_cen(&it, buf, len);
-        break;
-    case 7:
-        m_decimatorsIQ.decimate128_cen(&it, buf, len);
-        break;
-    case 8:
-        m_decimatorsIQ.decimate256_cen(&it, buf, len);
-        break;
-    default:
-        break;
+    // Save data to replay buffer
+	m_replayBuffer->lock();
+	bool replayEnabled = m_replayBuffer->getSize() > 0;
+	if (replayEnabled) {
+		m_replayBuffer->write(inBuf, len);
+	}
+
+	const float* buf = inBuf;
+	qint32 remaining = len;
+
+    while (remaining > 0)
+	{
+		// Choose between live data or replayed data
+		if (replayEnabled && m_replayBuffer->useReplay()) {
+			len = m_replayBuffer->read(remaining, buf);
+		} else {
+			len = remaining;
+		}
+		remaining -= len;
+
+        switch (m_log2Decim)
+        {
+        case 0:
+            m_decimatorsIQ.decimate1(&it, buf, len);
+            break;
+        case 1:
+            m_decimatorsIQ.decimate2_cen(&it, buf, len);
+            break;
+        case 2:
+            m_decimatorsIQ.decimate4_cen(&it, buf, len);
+            break;
+        case 3:
+            m_decimatorsIQ.decimate8_cen(&it, buf, len);
+            break;
+        case 4:
+            m_decimatorsIQ.decimate16_cen(&it, buf, len);
+            break;
+        case 5:
+            m_decimatorsIQ.decimate32_cen(&it, buf, len);
+            break;
+        case 6:
+            m_decimatorsIQ.decimate64_cen(&it, buf, len);
+            break;
+        case 7:
+            m_decimatorsIQ.decimate128_cen(&it, buf, len);
+            break;
+        case 8:
+            m_decimatorsIQ.decimate256_cen(&it, buf, len);
+            break;
+        default:
+            break;
+        }
     }
+
+    m_replayBuffer->unlock();
 
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-void AirspyHFWorker::callbackQI(const float* buf, qint32 len)
+void AirspyHFWorker::callbackQI(const float* inBuf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
-    switch (m_log2Decim)
-    {
-    case 0:
-        m_decimatorsQI.decimate1(&it, buf, len);
-        break;
-    case 1:
-        m_decimatorsQI.decimate2_cen(&it, buf, len);
-        break;
-    case 2:
-        m_decimatorsQI.decimate4_cen(&it, buf, len);
-        break;
-    case 3:
-        m_decimatorsQI.decimate8_cen(&it, buf, len);
-        break;
-    case 4:
-        m_decimatorsQI.decimate16_cen(&it, buf, len);
-        break;
-    case 5:
-        m_decimatorsQI.decimate32_cen(&it, buf, len);
-        break;
-    case 6:
-        m_decimatorsQI.decimate64_cen(&it, buf, len);
-        break;
-    case 7:
-        m_decimatorsQI.decimate128_cen(&it, buf, len);
-        break;
-    case 8:
-        m_decimatorsQI.decimate256_cen(&it, buf, len);
-        break;
-    default:
-        break;
+   // Save data to replay buffer
+	m_replayBuffer->lock();
+	bool replayEnabled = m_replayBuffer->getSize() > 0;
+	if (replayEnabled) {
+		m_replayBuffer->write(inBuf, len);
+	}
+
+	const float* buf = inBuf;
+	qint32 remaining = len;
+
+    while (remaining > 0)
+	{
+		// Choose between live data or replayed data
+		if (replayEnabled && m_replayBuffer->useReplay()) {
+			len = m_replayBuffer->read(remaining, buf);
+		} else {
+			len = remaining;
+		}
+		remaining -= len;
+
+        switch (m_log2Decim)
+        {
+        case 0:
+            m_decimatorsQI.decimate1(&it, buf, len);
+            break;
+        case 1:
+            m_decimatorsQI.decimate2_cen(&it, buf, len);
+            break;
+        case 2:
+            m_decimatorsQI.decimate4_cen(&it, buf, len);
+            break;
+        case 3:
+            m_decimatorsQI.decimate8_cen(&it, buf, len);
+            break;
+        case 4:
+            m_decimatorsQI.decimate16_cen(&it, buf, len);
+            break;
+        case 5:
+            m_decimatorsQI.decimate32_cen(&it, buf, len);
+            break;
+        case 6:
+            m_decimatorsQI.decimate64_cen(&it, buf, len);
+            break;
+        case 7:
+            m_decimatorsQI.decimate128_cen(&it, buf, len);
+            break;
+        case 8:
+            m_decimatorsQI.decimate256_cen(&it, buf, len);
+            break;
+        default:
+            break;
+        }
     }
+
+    m_replayBuffer->unlock();
 
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 }

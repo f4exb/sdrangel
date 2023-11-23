@@ -26,6 +26,7 @@
 #include <QWaitCondition>
 #include <rtl-sdr.h>
 
+#include "dsp/replaybuffer.h"
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimatorsu.h"
 
@@ -33,7 +34,7 @@ class RTLSDRThread : public QThread {
 	Q_OBJECT
 
 public:
-	RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
+	RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<quint8> *replayBuffer, QObject* parent = NULL);
 	~RTLSDRThread();
 
 	void startWork();
@@ -51,6 +52,7 @@ private:
 	rtlsdr_dev_t* m_dev;
 	SampleVector m_convertBuffer;
 	SampleSinkFifo* m_sampleFifo;
+	ReplayBuffer<quint8> *m_replayBuffer;
 
 	int m_samplerate;
 	unsigned int m_log2Decim;

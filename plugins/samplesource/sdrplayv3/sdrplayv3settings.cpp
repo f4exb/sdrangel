@@ -50,6 +50,10 @@ void SDRPlayV3Settings::resetToDefaults()
     m_transverterMode = false;
     m_iqOrder = true;
 	m_transverterDeltaFrequency = 0;
+    m_replayOffset = 0.0f;
+    m_replayLength = 20.0f;
+    m_replayStep = 5.0f;
+    m_replayLoop = false;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -85,6 +89,10 @@ QByteArray SDRPlayV3Settings::serialize() const
     s.writeBool(26, m_transverterMode);
     s.writeS64(27, m_transverterDeltaFrequency);
     s.writeBool(28, m_iqOrder);
+    s.writeFloat(29, m_replayOffset);
+    s.writeFloat(30, m_replayLength);
+    s.writeFloat(31, m_replayStep);
+    s.writeBool(32, m_replayLoop);
 
     return s.final();
 }
@@ -138,6 +146,10 @@ bool SDRPlayV3Settings::deserialize(const QByteArray& data)
         d.readBool(26, &m_transverterMode, false);
         d.readS64(27, &m_transverterDeltaFrequency, 0);
         d.readBool(28, &m_iqOrder, true);
+        d.readFloat(29, &m_replayOffset, 0.0f);
+        d.readFloat(30, &m_replayLength, 20.0f);
+        d.readFloat(31, &m_replayStep, 5.0f);
+        d.readBool(32, &m_replayLoop, false);
 
         return true;
     }
@@ -215,6 +227,18 @@ void SDRPlayV3Settings::applySettings(const QStringList& settingsKeys, const SDR
     }
     if (settingsKeys.contains("m_transverterDeltaFrequency")) {
         m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("replayOffset")) {
+        m_replayOffset = settings.m_replayOffset;
+    }
+    if (settingsKeys.contains("replayLength")) {
+        m_replayLength = settings.m_replayLength;
+    }
+    if (settingsKeys.contains("replayStep")) {
+        m_replayStep = settings.m_replayStep;
+    }
+    if (settingsKeys.contains("replayLoop")) {
+        m_replayLoop = settings.m_replayLoop;
     }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
@@ -299,6 +323,18 @@ QString SDRPlayV3Settings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("transverterDeltaFrequency") || force) {
         ostr << " m_transverterDeltaFrequency: " << m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("replayOffset") || force) {
+        ostr << " m_replayOffset: " << m_replayOffset;
+    }
+    if (settingsKeys.contains("replayLength") || force) {
+        ostr << " m_replayLength: " << m_replayLength;
+    }
+    if (settingsKeys.contains("replayStep") || force) {
+        ostr << " m_replayStep: " << m_replayStep;
+    }
+    if (settingsKeys.contains("replayLoop") || force) {
+        ostr << " m_replayLoop: " << m_replayLoop;
     }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;

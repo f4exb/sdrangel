@@ -43,6 +43,10 @@ void RTLSDRSettings::resetToDefaults()
 	m_rfBandwidth = 2500 * 1000; // Hz
 	m_offsetTuning = false;
     m_biasTee = false;
+    m_replayOffset = 0.0f;
+    m_replayLength = 20.0f;
+    m_replayStep = 5.0f;
+    m_replayLoop = false;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -73,6 +77,10 @@ QByteArray RTLSDRSettings::serialize() const
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeBool(20, m_iqOrder);
     s.writeBool(21, m_biasTee);
+    s.writeFloat(22, m_replayOffset);
+    s.writeFloat(23, m_replayLength);
+    s.writeFloat(24, m_replayStep);
+    s.writeBool(25, m_replayLoop);
 
 	return s.final();
 }
@@ -121,6 +129,10 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readBool(20, &m_iqOrder, true);
         d.readBool(21, &m_biasTee, false);
+        d.readFloat(22, &m_replayOffset, 0.0f);
+        d.readFloat(23, &m_replayLength, 20.0f);
+        d.readFloat(24, &m_replayStep, 5.0f);
+        d.readBool(25, &m_replayLoop, false);
 
 		return true;
 	}
@@ -186,6 +198,18 @@ void RTLSDRSettings::applySettings(const QStringList& settingsKeys, const RTLSDR
     }
     if (settingsKeys.contains("biasTee")) {
         m_biasTee = settings.m_biasTee;
+    }
+    if (settingsKeys.contains("replayOffset")) {
+        m_replayOffset = settings.m_replayOffset;
+    }
+    if (settingsKeys.contains("replayLength")) {
+        m_replayLength = settings.m_replayLength;
+    }
+    if (settingsKeys.contains("replayStep")) {
+        m_replayStep = settings.m_replayStep;
+    }
+    if (settingsKeys.contains("replayLoop")) {
+        m_replayLoop = settings.m_replayLoop;
     }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
@@ -255,6 +279,18 @@ QString RTLSDRSettings::getDebugString(const QStringList& settingsKeys, bool for
     }
     if (settingsKeys.contains("biasTee") || force) {
         ostr << " m_biasTee: " << m_biasTee;
+    }
+    if (settingsKeys.contains("replayOffset") || force) {
+        ostr << " m_replayOffset: " << m_replayOffset;
+    }
+    if (settingsKeys.contains("replayLength") || force) {
+        ostr << " m_replayLength: " << m_replayLength;
+    }
+    if (settingsKeys.contains("replayStep") || force) {
+        ostr << " m_replayStep: " << m_replayStep;
+    }
+    if (settingsKeys.contains("replayLoop") || force) {
+        ostr << " m_replayLoop: " << m_replayLoop;
     }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;

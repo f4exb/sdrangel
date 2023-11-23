@@ -31,6 +31,7 @@
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
+#include "dsp/replaybuffer.h"
 #include "usrp/deviceusrpshared.h"
 #include "usrp/deviceusrp.h"
 
@@ -39,7 +40,8 @@ class USRPInputThread : public QThread, public DeviceUSRPShared::ThreadInterface
     Q_OBJECT
 
 public:
-    USRPInputThread(uhd::rx_streamer::sptr stream, size_t bufSamples, SampleSinkFifo* sampleFifo, QObject* parent = 0);
+    USRPInputThread(uhd::rx_streamer::sptr stream, size_t bufSamples, SampleSinkFifo* sampleFifo,
+        ReplayBuffer<qint16> *replayBuffer, QObject* parent = 0);
     ~USRPInputThread();
 
     virtual void startWork();
@@ -64,6 +66,7 @@ private:
     size_t m_bufSamples;
     SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;
+	ReplayBuffer<qint16> *m_replayBuffer;
 
     unsigned int m_log2Decim; // soft decimation
 

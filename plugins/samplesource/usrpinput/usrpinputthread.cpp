@@ -26,13 +26,15 @@
 #include "usrpinputsettings.h"
 #include "usrpinputthread.h"
 
-USRPInputThread::USRPInputThread(uhd::rx_streamer::sptr stream, size_t bufSamples, SampleSinkFifo* sampleFifo, QObject* parent) :
+USRPInputThread::USRPInputThread(uhd::rx_streamer::sptr stream, size_t bufSamples,
+  SampleSinkFifo* sampleFifo, ReplayBuffer<qint16> *replayBuffer, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_stream(stream),
     m_bufSamples(bufSamples),
     m_convertBuffer(bufSamples),
     m_sampleFifo(sampleFifo),
+    m_replayBuffer(replayBuffer),
     m_log2Decim(0)
 {
     // *2 as samples are I+Q
@@ -53,8 +55,15 @@ void USRPInputThread::issueStreamCmd(bool start)
     stream_cmd.stream_now = true;
     stream_cmd.time_spec = uhd::time_spec_t();
 
-    m_stream->issue_stream_cmd(stream_cmd);
-    qDebug() << "USRPInputThread::issueStreamCmd " << (start ? "start" : "stop");
+    if (m_stream)
+    {
+        m_stream->issue_stream_cmd(stream_cmd);
+        qDebug() << "USRPInputThread::issueStreamCmd " << (start ? "start" : "stop");
+    }
+    else
+    {
+        qDebug() << "USRPInputThread::issueStreamCmd m_stream is null";
+    }
 }
 
 void USRPInputThread::startWork()
@@ -184,36 +193,59 @@ void USRPInputThread::run()
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void USRPInputThread::callbackIQ(const qint16* buf, qint32 len)
+void USRPInputThread::callbackIQ(const qint16* inBuf, qint32 len)
 {
     SampleVector::iterator it = m_convertBuffer.begin();
 
-    switch (m_log2Decim)
-    {
-    case 0:
-        m_decimatorsIQ.decimate1(&it, buf, len);
-        break;
-    case 1:
-        m_decimatorsIQ.decimate2_cen(&it, buf, len);
-        break;
-    case 2:
-        m_decimatorsIQ.decimate4_cen(&it, buf, len);
-        break;
-    case 3:
-        m_decimatorsIQ.decimate8_cen(&it, buf, len);
-        break;
-    case 4:
-        m_decimatorsIQ.decimate16_cen(&it, buf, len);
-        break;
-    case 5:
-        m_decimatorsIQ.decimate32_cen(&it, buf, len);
-        break;
-    case 6:
-        m_decimatorsIQ.decimate64_cen(&it, buf, len);
-        break;
-    default:
-        break;
+    // Save data to replay buffer
+	m_replayBuffer->lock();
+	bool replayEnabled = m_replayBuffer->getSize() > 0;
+	if (replayEnabled) {
+		m_replayBuffer->write(inBuf, len);
+	}
+
+	const qint16* buf = inBuf;
+	qint32 remaining = len;
+
+    while (remaining > 0)
+	{
+		// Choose between live data or replayed data
+		if (replayEnabled && m_replayBuffer->useReplay()) {
+			len = m_replayBuffer->read(remaining, buf);
+		} else {
+			len = remaining;
+		}
+		remaining -= len;
+
+        switch (m_log2Decim)
+        {
+        case 0:
+            m_decimatorsIQ.decimate1(&it, buf, len);
+            break;
+        case 1:
+            m_decimatorsIQ.decimate2_cen(&it, buf, len);
+            break;
+        case 2:
+            m_decimatorsIQ.decimate4_cen(&it, buf, len);
+            break;
+        case 3:
+            m_decimatorsIQ.decimate8_cen(&it, buf, len);
+            break;
+        case 4:
+            m_decimatorsIQ.decimate16_cen(&it, buf, len);
+            break;
+        case 5:
+            m_decimatorsIQ.decimate32_cen(&it, buf, len);
+            break;
+        case 6:
+            m_decimatorsIQ.decimate64_cen(&it, buf, len);
+            break;
+        default:
+            break;
+        }
     }
+
+    m_replayBuffer->unlock();
 
     m_sampleFifo->write(m_convertBuffer.begin(), it);
 }

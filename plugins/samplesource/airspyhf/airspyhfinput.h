@@ -28,6 +28,7 @@
 #include <QThread>
 
 #include <libairspyhf/airspyhf.h>
+#include "dsp/replaybuffer.h"
 #include <dsp/devicesamplesource.h>
 
 #include "airspyhfsettings.h"
@@ -85,7 +86,26 @@ public:
         { }
     };
 
-	AirspyHFInput(DeviceAPI *deviceAPI);
+  class MsgSaveReplay : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QString getFilename() const { return m_filename; }
+
+        static MsgSaveReplay* create(const QString& filename) {
+            return new MsgSaveReplay(filename);
+        }
+
+    protected:
+        QString m_filename;
+
+        MsgSaveReplay(const QString& filename) :
+            Message(),
+            m_filename(filename)
+        { }
+    };
+
+    AirspyHFInput(DeviceAPI *deviceAPI);
 	virtual ~AirspyHFInput();
 	virtual void destroy();
 
@@ -155,6 +175,7 @@ private:
 	bool m_running;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    ReplayBuffer<float> m_replayBuffer;
 
 	bool openDevice();
 	void closeDevice();
@@ -164,6 +185,7 @@ private:
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const AirspyHFSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
+    uint32_t getSampleRateFromIndex(quint32 devSampleRateIndex) const;
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

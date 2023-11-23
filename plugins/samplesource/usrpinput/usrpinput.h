@@ -31,6 +31,7 @@
 #include <uhd/usrp/multi_usrp.hpp>
 
 #include "dsp/devicesamplesource.h"
+#include "dsp/replaybuffer.h"
 #include "usrp/deviceusrpshared.h"
 #include "usrpinputsettings.h"
 
@@ -161,6 +162,25 @@ public:
         { }
     };
 
+    class MsgSaveReplay : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QString getFilename() const { return m_filename; }
+
+        static MsgSaveReplay* create(const QString& filename) {
+            return new MsgSaveReplay(filename);
+        }
+
+    protected:
+        QString m_filename;
+
+        MsgSaveReplay(const QString& filename) :
+            Message(),
+            m_filename(filename)
+        { }
+    };
+
     USRPInput(DeviceAPI *deviceAPI);
     virtual ~USRPInput();
     virtual void destroy();
@@ -235,6 +255,7 @@ private:
     size_t m_bufSamples;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    ReplayBuffer<qint16> m_replayBuffer;
 
     bool openDevice();
     void closeDevice();

@@ -334,6 +334,10 @@ void RTLSDRGui::displaySettings()
 	ui->lowSampleRate->setChecked(m_settings.m_lowSampleRate);
 	ui->offsetTuning->setChecked(m_settings.m_offsetTuning);
 	ui->biasT->setChecked(m_settings.m_biasTee);
+    displayReplayLength();
+    displayReplayOffset();
+    displayReplayStep();
+    ui->replayLoop->setChecked(m_settings.m_replayLoop);
 }
 
 void RTLSDRGui::sendSettings()
@@ -568,6 +572,9 @@ void RTLSDRGui::openDeviceSettingsDialog(const QPoint& p)
     if (m_contextMenuType == ContextMenuDeviceSettings)
     {
         BasicDeviceSettingsDialog dialog(this);
+        dialog.setReplayBytesPerSecond(m_settings.m_devSampleRate * 2);
+        dialog.setReplayLength(m_settings.m_replayLength);
+        dialog.setReplayStep(m_settings.m_replayStep);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -581,15 +588,107 @@ void RTLSDRGui::openDeviceSettingsDialog(const QPoint& p)
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
         m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_replayLength = dialog.getReplayLength();
+        m_settings.m_replayStep = dialog.getReplayStep();
+        displayReplayLength();
+        displayReplayOffset();
+        displayReplayStep();
         m_settingsKeys.append("useReverseAPI");
         m_settingsKeys.append("reverseAPIAddress");
         m_settingsKeys.append("reverseAPIPort");
         m_settingsKeys.append("reverseAPIDeviceIndex");
+        m_settingsKeys.append("replayLength");
+        m_settingsKeys.append("replayStep");
 
         sendSettings();
     }
 
     resetContextMenuType();
+}
+
+void RTLSDRGui::displayReplayLength()
+{
+    bool replayEnabled = m_settings.m_replayLength > 0.0f;
+    if (!replayEnabled) {
+        ui->replayOffset->setMaximum(0);
+    } else {
+        ui->replayOffset->setMaximum(m_settings.m_replayLength * 10 - 1);
+    }
+    ui->replayLabel->setEnabled(replayEnabled);
+    ui->replayOffset->setEnabled(replayEnabled);
+    ui->replayOffsetText->setEnabled(replayEnabled);
+    ui->replaySave->setEnabled(replayEnabled);
+}
+
+void RTLSDRGui::displayReplayOffset()
+{
+    bool replayEnabled = m_settings.m_replayLength > 0.0f;
+    ui->replayOffset->setValue(m_settings.m_replayOffset * 10);
+    ui->replayOffsetText->setText(QString("%1s").arg(m_settings.m_replayOffset, 0, 'f', 1));
+    ui->replayNow->setEnabled(replayEnabled && (m_settings.m_replayOffset > 0.0f));
+    ui->replayPlus->setEnabled(replayEnabled && (std::round(m_settings.m_replayOffset * 10) < ui->replayOffset->maximum()));
+    ui->replayMinus->setEnabled(replayEnabled && (m_settings.m_replayOffset > 0.0f));
+}
+
+void RTLSDRGui::displayReplayStep()
+{
+    QString step;
+    float intpart;
+    float frac = modf(m_settings.m_replayStep, &intpart);
+    if (frac == 0.0f) {
+        step = QString::number((int)intpart);
+    } else {
+        step = QString::number(m_settings.m_replayStep, 'f', 1);
+    }
+    ui->replayPlus->setText(QString("+%1s").arg(step));
+    ui->replayPlus->setToolTip(QString("Add %1 seconds to time delay").arg(step));
+    ui->replayMinus->setText(QString("-%1s").arg(step));
+    ui->replayMinus->setToolTip(QString("Remove %1 seconds from time delay").arg(step));
+}
+
+void RTLSDRGui::on_replayOffset_valueChanged(int value)
+{
+    m_settings.m_replayOffset = value / 10.0f;
+    displayReplayOffset();
+    m_settingsKeys.append("replayOffset");
+    sendSettings();
+}
+
+void RTLSDRGui::on_replayNow_clicked()
+{
+    ui->replayOffset->setValue(0);
+}
+
+void RTLSDRGui::on_replayPlus_clicked()
+{
+    ui->replayOffset->setValue(ui->replayOffset->value() + m_settings.m_replayStep * 10);
+}
+
+void RTLSDRGui::on_replayMinus_clicked()
+{
+    ui->replayOffset->setValue(ui->replayOffset->value() - m_settings.m_replayStep * 10);
+}
+
+void RTLSDRGui::on_replaySave_clicked()
+{
+    QFileDialog fileDialog(nullptr, "Select file to save IQ data to", "", "*.wav");
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            RTLSDRInput::MsgSaveReplay *message = RTLSDRInput::MsgSaveReplay::create(fileNames[0]);
+            m_sampleSource->getInputMessageQueue()->push(message);
+        }
+    }
+}
+
+void RTLSDRGui::on_replayLoop_toggled(bool checked)
+{
+    m_settings.m_replayLoop = checked;
+    m_settingsKeys.append("replayLoop");
+    sendSettings();
 }
 
 void RTLSDRGui::makeUIConnections()
@@ -611,4 +710,10 @@ void RTLSDRGui::makeUIConnections()
     QObject::connect(ui->transverter, &TransverterButton::clicked, this, &RTLSDRGui::on_transverter_clicked);
     QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &RTLSDRGui::on_sampleRateMode_toggled);
     QObject::connect(ui->biasT, &QCheckBox::stateChanged, this, &RTLSDRGui::on_biasT_stateChanged);
+    QObject::connect(ui->replayOffset, &QSlider::valueChanged, this, &RTLSDRGui::on_replayOffset_valueChanged);
+    QObject::connect(ui->replayNow, &QToolButton::clicked, this, &RTLSDRGui::on_replayNow_clicked);
+    QObject::connect(ui->replayPlus, &QToolButton::clicked, this, &RTLSDRGui::on_replayPlus_clicked);
+    QObject::connect(ui->replayMinus, &QToolButton::clicked, this, &RTLSDRGui::on_replayMinus_clicked);
+    QObject::connect(ui->replaySave, &QToolButton::clicked, this, &RTLSDRGui::on_replaySave_clicked);
+    QObject::connect(ui->replayLoop, &ButtonSwitch::toggled, this, &RTLSDRGui::on_replayLoop_toggled);
 }

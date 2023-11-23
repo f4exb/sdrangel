@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>394</width>
-    <height>77</height>
+    <height>137</height>
    </rect>
   </property>
   <property name="font">
@@ -120,6 +120,131 @@
      </item>
      <item>
       <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="replayOffsetLayout">
+     <item>
+      <widget class="QLabel" name="replayLengthLabel">
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Replay buffer length</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="replayLength">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Length of replay buffer in seconds</string>
+       </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <double>100000.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="replayLengthUnits">
+       <property name="text">
+        <string>s</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="replayLengthSize">
+       <property name="toolTip">
+        <string>Size of replay buffer in megabytes</string>
+       </property>
+       <property name="text">
+        <string>(100MB)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="replayOffsetSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="replayStepLayout">
+     <item>
+      <widget class="QLabel" name="replayStepLabel">
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Replay step</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="replayStep">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Step time in seconds</string>
+       </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="minimum">
+        <double>0.100000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>1000.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="replayStepUnits">
+       <property name="text">
+        <string>s</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="replayStepSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>

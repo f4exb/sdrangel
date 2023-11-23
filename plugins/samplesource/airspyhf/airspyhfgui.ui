@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>137</height>
+    <height>175</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>360</width>
-    <height>137</height>
+    <height>175</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>380</width>
-    <height>177</height>
+    <height>175</height>
    </size>
   </property>
   <property name="font">
@@ -579,6 +579,111 @@
        </property>
        <property name="text">
         <string>DSP</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="replayLayout">
+     <item>
+      <widget class="QLabel" name="replayLabel">
+       <property name="minimumSize">
+        <size>
+         <width>65</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Time Delay</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="replayOffset">
+       <property name="toolTip">
+        <string>Replay time delay in seconds</string>
+       </property>
+       <property name="maximum">
+        <number>500</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="replayOffsetText">
+       <property name="toolTip">
+        <string>Replay time delay in seconds</string>
+       </property>
+       <property name="text">
+        <string>0.0s</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="replayNow">
+       <property name="toolTip">
+        <string>Set time delay to 0 seconds</string>
+       </property>
+       <property name="text">
+        <string>Now</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="replayPlus">
+       <property name="toolTip">
+        <string>Add displayed number of seconds to time delay</string>
+       </property>
+       <property name="text">
+        <string>+5s</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="replayMinus">
+       <property name="toolTip">
+        <string>Remove displayed number of seconds from time delay</string>
+       </property>
+       <property name="text">
+        <string>-5s</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="replayLoop">
+       <property name="toolTip">
+        <string>Repeatedly replay data in replay buffer</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/playloop.png</normaloff>:/playloop.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="replaySave">
+       <property name="toolTip">
+        <string>Save replay buffer to a file</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/save.png</normaloff>:/save.png</iconset>
        </property>
       </widget>
      </item>

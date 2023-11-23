@@ -70,6 +70,9 @@ private:
 	void displaySettings();
 	void displaySampleRates();
 	void displayAGC();
+	void displayReplayLength();
+	void displayReplayOffset();
+	void displayReplayStep();
 	void sendSettings();
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
@@ -94,6 +97,12 @@ private slots:
 	void updateHardware();
     void updateStatus();
 	void handleInputMessages();
+ 	void on_replayOffset_valueChanged(int value);
+	void on_replayNow_clicked();
+	void on_replayPlus_clicked();
+	void on_replayMinus_clicked();
+	void on_replaySave_clicked();
+	void on_replayLoop_toggled(bool checked);
     void openDeviceSettingsDialog(const QPoint& p);
 };
 

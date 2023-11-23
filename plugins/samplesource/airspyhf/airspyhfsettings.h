@@ -44,6 +44,10 @@ struct AirspyHFSettings
     quint32  m_attenuatorSteps;
 	bool m_dcBlock;
 	bool m_iqCorrection;
+	float m_replayOffset; //!< Replay offset in seconds
+	float m_replayLength; //!< Replay buffer size in seconds
+	float m_replayStep;   //!< Replay forward/back step size in seconds
+	bool m_replayLoop;    //!< Replay buffer repeatedly without recording new data
 
     AirspyHFSettings();
 	void resetToDefaults();

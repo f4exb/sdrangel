@@ -47,6 +47,10 @@ struct RTLSDRSettings {
 	quint32 m_rfBandwidth; //!< RF filter bandwidth in Hz
 	bool m_offsetTuning;
     bool m_biasTee;
+	float m_replayOffset; //!< Replay offset in seconds
+	float m_replayLength; //!< Replay buffer size in seconds
+	float m_replayStep;   //!< Replay forward/back step size in seconds
+	bool m_replayLoop;    //!< Replay buffer repeatedly without recording new data
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

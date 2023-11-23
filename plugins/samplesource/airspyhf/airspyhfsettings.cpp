@@ -46,6 +46,10 @@ void AirspyHFSettings::resetToDefaults()
     m_attenuatorSteps = 0;
 	m_dcBlock = false;
 	m_iqCorrection = false;
+    m_replayOffset = 0.0f;
+    m_replayLength = 20.0f;
+    m_replayStep = 5.0f;
+    m_replayLoop = false;
 }
 
 QByteArray AirspyHFSettings::serialize() const
@@ -70,6 +74,10 @@ QByteArray AirspyHFSettings::serialize() const
 	s.writeBool(19, m_dcBlock);
 	s.writeBool(20, m_iqCorrection);
     s.writeBool(21, m_iqOrder);
+    s.writeFloat(22, m_replayOffset);
+    s.writeFloat(23, m_replayLength);
+    s.writeFloat(24, m_replayStep);
+    s.writeBool(25, m_replayLoop);
 
 	return s.final();
 }
@@ -117,6 +125,10 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
 		d.readBool(19, &m_dcBlock, false);
 		d.readBool(20, &m_iqCorrection, false);
         d.readBool(21, &m_iqOrder, true);
+        d.readFloat(22, &m_replayOffset, 0.0f);
+        d.readFloat(23, &m_replayLength, 20.0f);
+        d.readFloat(24, &m_replayStep, 5.0f);
+        d.readBool(25, &m_replayLoop, false);
 
 		return true;
 	}
@@ -186,6 +198,18 @@ void AirspyHFSettings::applySettings(const QStringList& settingsKeys, const Airs
     if (settingsKeys.contains("iqCorrection")) {
         m_iqCorrection = settings.m_iqCorrection;
     }
+    if (settingsKeys.contains("replayOffset")) {
+        m_replayOffset = settings.m_replayOffset;
+    }
+    if (settingsKeys.contains("replayLength")) {
+        m_replayLength = settings.m_replayLength;
+    }
+    if (settingsKeys.contains("replayStep")) {
+        m_replayStep = settings.m_replayStep;
+    }
+    if (settingsKeys.contains("replayLoop")) {
+        m_replayLoop = settings.m_replayLoop;
+    }
 }
 
 QString AirspyHFSettings::getDebugString(const QStringList& settingsKeys, bool force) const
@@ -248,6 +272,18 @@ QString AirspyHFSettings::getDebugString(const QStringList& settingsKeys, bool f
     }
     if (settingsKeys.contains("iqCorrection") || force) {
         ostr << " m_iqCorrection: " << m_iqCorrection;
+    }
+    if (settingsKeys.contains("replayOffset") || force) {
+        ostr << " m_replayOffset: " << m_replayOffset;
+    }
+    if (settingsKeys.contains("replayLength") || force) {
+        ostr << " m_replayLength: " << m_replayLength;
+    }
+    if (settingsKeys.contains("replayStep") || force) {
+        ostr << " m_replayStep: " << m_replayStep;
+    }
+    if (settingsKeys.contains("replayLoop") || force) {
+        ostr << " m_replayLoop: " << m_replayLoop;
     }
 
     return QString(ostr.str().c_str());

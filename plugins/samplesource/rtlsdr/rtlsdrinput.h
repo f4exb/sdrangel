@@ -27,6 +27,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
+#include "dsp/replaybuffer.h"
 #include "rtlsdrsettings.h"
 #include <rtl-sdr.h>
 
@@ -80,6 +81,25 @@ public:
         MsgStartStop(bool startStop) :
             Message(),
             m_startStop(startStop)
+        { }
+    };
+
+    class MsgSaveReplay : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QString getFilename() const { return m_filename; }
+
+        static MsgSaveReplay* create(const QString& filename) {
+            return new MsgSaveReplay(filename);
+        }
+
+    protected:
+        QString m_filename;
+
+        MsgSaveReplay(const QString& filename) :
+            Message(),
+            m_filename(filename)
         { }
     };
 
@@ -161,6 +181,7 @@ private:
 	bool m_running;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    ReplayBuffer<quint8> m_replayBuffer;
 
 	bool openDevice();
 	void closeDevice();
