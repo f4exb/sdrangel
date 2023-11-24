@@ -609,7 +609,7 @@ void ScopeVis::processTrace(const std::vector<ComplexVector::const_iterator>& vc
             }
 
             uint32_t triggerStreamIndex = triggerCondition->m_triggerData.m_streamIndex;
-            const Complex& s = *vbegin[triggerStreamIndex];
+            const Complex& s = vbegin[triggerStreamIndex][processed];
 
             if (m_triggerComparator.triggered(s, *triggerCondition)) // matched the current trigger
             {
