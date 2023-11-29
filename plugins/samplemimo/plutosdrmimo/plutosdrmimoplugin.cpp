@@ -34,7 +34,7 @@
 const PluginDescriptor PlutoSDRMIMOPlugin::m_pluginDescriptor = {
     QStringLiteral("PlutoSDR"),
 	QStringLiteral("PlutoSDR MIMO"),
-    QStringLiteral("7.15.3"),
+    QStringLiteral("7.17.1"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

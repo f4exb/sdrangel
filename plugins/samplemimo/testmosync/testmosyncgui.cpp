@@ -90,6 +90,7 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceUISet->setSpectrumScalingFactor(SDR_TX_SCALEF);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    m_resizer.enableChildMouseTracking();
 }
 
 TestMOSyncGui::~TestMOSyncGui()

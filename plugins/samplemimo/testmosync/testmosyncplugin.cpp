@@ -32,7 +32,7 @@
 const PluginDescriptor TestMOSyncPlugin::m_pluginDescriptor = {
     QStringLiteral("TestMOSync"),
 	QStringLiteral("Test Synchronous Multiple Output"),
-    QStringLiteral("7.8.2"),
+    QStringLiteral("7.17.1"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
