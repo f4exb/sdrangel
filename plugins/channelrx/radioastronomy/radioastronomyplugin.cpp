@@ -29,7 +29,7 @@
 const PluginDescriptor RadioAstronomyPlugin::m_pluginDescriptor = {
     RadioAstronomy::m_channelId,
     QStringLiteral("Radio Astronomy"),
-    QStringLiteral("7.14.1"),
+    QStringLiteral("7.17.1"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

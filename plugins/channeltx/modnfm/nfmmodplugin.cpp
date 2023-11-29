@@ -32,7 +32,7 @@
 const PluginDescriptor NFMModPlugin::m_pluginDescriptor = {
     NFMMod::m_channelId,
     QStringLiteral("NFM Modulator"),
-    QStringLiteral("7.6.3"),
+    QStringLiteral("7.17.1"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

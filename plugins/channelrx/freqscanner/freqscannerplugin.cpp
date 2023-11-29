@@ -33,7 +33,7 @@
 const PluginDescriptor FreqScannerPlugin::m_pluginDescriptor = {
     FreqScanner::m_channelId,
     QStringLiteral("Frequency Scanner"),
-    QStringLiteral("7.17.0"),
+    QStringLiteral("7.17.1"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

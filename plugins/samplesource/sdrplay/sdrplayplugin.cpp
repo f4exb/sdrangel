@@ -33,7 +33,7 @@
 const PluginDescriptor SDRPlayPlugin::m_pluginDescriptor = {
     QStringLiteral("SDRPlay"),
     QStringLiteral("SDRPlay RSP1 Input"),
-    QStringLiteral("7.9.0"),
+    QStringLiteral("7.17.1"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

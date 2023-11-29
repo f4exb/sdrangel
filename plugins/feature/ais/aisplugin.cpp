@@ -34,7 +34,7 @@
 const PluginDescriptor AISPlugin::m_pluginDescriptor = {
     AIS::m_featureId,
     QStringLiteral("AIS"),
-    QStringLiteral("7.8.4"),
+    QStringLiteral("7.17.1"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

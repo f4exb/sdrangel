@@ -1,3 +1,26 @@
+sdrangel (7.17.1-1) unstable; urgency=medium
+
+   * Fixes to Mac build. PR #1869
+   * AM demod: channel/frequency entry modes. PR #1876
+   * SSB demod noise reduction
+   * Radiosonde: Added more columns, PR #1881. Fixes  #1880
+   * DSD Demod - Fix loss of constellation. PR #1883. Fixes #1836
+   * Remote TCP - Fix FIFO size adjustment. Fixes SR > 3 MS/s. PR #1886. Fixes #1885.
+   * Indicate audio FIFO underflow/overflow. PR #1887
+   * ix resize cursor not being cleared when mouse moves over child widgets. PR #1888
+   * Prevent popup menu when scrolling tables. PR #1889
+   * Use custom save/restore geometry for MDI sub=windows. PR #1890. Fixes #1835
+   * Use MDI restore when loading config. PR #1890
+   * M17: Reverse byte ordering of CRC in packet mode. PR #1891. Fixes #1826
+   * M17: Update packet format to comply with current spec. PR #1892. Fixes #1826
+   * More M17 fixes. PR #1894
+   * Frequency scanner: Add FRS-GMRS presets. PR #1897
+   * ADS-B demod: Split widgets in to 2 tabs for small Android screens. PR #1898. Fixes #1896.
+   * Add instant replay for RTL SDR, SDR Play V3, USRP and Airspy HF RXes. PR #1900.
+   * Scope trigger fix. PR #1902. Part of #1901
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 29 Nov 2023 03:00:21 +0100
+
 sdrangel (7.17.0-1) unstable; urgency=medium
 
    * Add frequency scanner channel plugin. PR #1852
