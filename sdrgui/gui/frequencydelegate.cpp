@@ -21,6 +21,7 @@
 #include <QLineEdit>
 
 #include "frequencydelegate.h"
+#include "int64validator.h"
 
 FrequencyDelegate::FrequencyDelegate(const QString& units, int precision, bool group) :
     m_units(units),
@@ -112,13 +113,14 @@ QString FrequencyDelegate::displayText(const QVariant &value, const QLocale &loc
     }
 }
 
+
 QWidget* FrequencyDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     (void) option;
     (void) index;
 
     QLineEdit* editor = new QLineEdit(parent);
-    QIntValidator* validator = new QIntValidator();
+    Int64Validator* validator = new Int64Validator();
     validator->setBottom(0);
     editor->setValidator(validator);
     return editor;

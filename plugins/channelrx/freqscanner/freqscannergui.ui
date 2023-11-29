@@ -671,6 +671,46 @@
           <string>User notes about this frequency</string>
          </property>
         </column>
+        <column>
+         <property name="text">
+          <string>Channel</string>
+         </property>
+         <property name="toolTip">
+          <string>Frequency specific channel to tune
+
+Leave blank for common setting</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Ch BW (Hz)</string>
+         </property>
+         <property name="toolTip">
+          <string>Frequency specific channel BW
+
+Leave blank to use common setting</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>TH (dB)</string>
+         </property>
+         <property name="toolTip">
+          <string>Frequency specific threshold in dB
+
+Leave blank to use common setting</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Sq (dB)</string>
+         </property>
+         <property name="toolTip">
+          <string>Frequency specific squelch in dB
+
+Leave blank for no adjustment</string>
+         </property>
+        </column>
        </widget>
       </item>
       <item>
@@ -784,15 +824,15 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>RollupContents</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupcontents.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

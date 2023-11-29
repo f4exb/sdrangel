@@ -1293,6 +1293,53 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
     }
 }
 
+bool ChannelWebAPIUtils::patchChannelSetting(unsigned int deviceSetIndex, unsigned int channelIndex, const QString &setting, double value)
+{
+    SWGSDRangel::SWGChannelSettings channelSettingsResponse;
+    QString errorResponse;
+    int httpRC;
+    ChannelAPI *channel;
+
+    if (getChannelSettings(deviceSetIndex, channelIndex, channelSettingsResponse, channel))
+    {
+        // Patch settings
+        QJsonObject *jsonObj = channelSettingsResponse.asJsonObject();
+        double oldValue;
+        if (WebAPIUtils::getSubObjectDouble(*jsonObj, setting, oldValue))
+        {
+            WebAPIUtils::setSubObjectDouble(*jsonObj, setting, value);
+            QStringList channelSettingsKeys;
+            channelSettingsKeys.append(setting);
+            channelSettingsResponse.init();
+            channelSettingsResponse.fromJsonObject(*jsonObj);
+            SWGSDRangel::SWGErrorResponse errorResponse2;
+
+            httpRC = channel->webapiSettingsPutPatch(false, channelSettingsKeys, channelSettingsResponse, *errorResponse2.getMessage());
+
+            if (httpRC/100 == 2)
+            {
+                qDebug("ChannelWebAPIUtils::patchChannelSetting: set feature setting %s to %f OK", qPrintable(setting), value);
+                return true;
+            }
+            else
+            {
+                qWarning("ChannelWebAPIUtils::patchChannelSetting: set feature setting %s to %f error %d: %s",
+                    qPrintable(setting), value, httpRC, qPrintable(*errorResponse2.getMessage()));
+                return false;
+            }
+        }
+        else
+        {
+            qWarning("ChannelWebAPIUtils::patchChannelSetting: no key %s in feature settings", qPrintable(setting));
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool ChannelWebAPIUtils::patchChannelSetting(unsigned int deviceSetIndex, unsigned int channelIndex, const QString &setting, const QJsonArray& value)
 {
     SWGSDRangel::SWGChannelSettings channelSettingsResponse;

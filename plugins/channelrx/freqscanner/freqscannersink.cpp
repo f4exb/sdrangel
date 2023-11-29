@@ -107,11 +107,11 @@ void FreqScannerSink::processOneSample(Complex &ci)
                 FreqScanner::MsgScanResult* msg = FreqScanner::MsgScanResult::create(m_fftStartTime);
                 QList<FreqScanner::MsgScanResult::ScanResult>& results = msg->getScanResults();
 
-                for (int i = 0; i < m_settings.m_frequencies.size(); i++)
+                for (int i = 0; i < m_settings.m_frequencySettings.size(); i++)
                 {
-                    if (m_settings.m_enabled[i])
+                    if (m_settings.m_frequencySettings[i].m_enabled)
                     {
-                        qint64 frequency = m_settings.m_frequencies[i];
+                        qint64 frequency = m_settings.m_frequencySettings[i].m_frequency;
                         qint64 startFrequency = m_centerFrequency - m_scannerSampleRate / 2;
                         qint64 diff = frequency - startFrequency;
                         float binBW = m_scannerSampleRate / (float)m_fftSize;
@@ -120,13 +120,24 @@ void FreqScannerSink::processOneSample(Complex &ci)
                         if ((diff < m_scannerSampleRate * 0.875f) && (diff >= m_scannerSampleRate * 0.125f))
                         {
                             int bin = std::round(diff / binBW);
+                            int channelBins;
+
+                            if (m_settings.m_frequencySettings[i].m_channelBandwidth.isEmpty())
+                            {
+                                channelBins = m_binsPerChannel;
+                            }
+                            else
+                            {
+                                int channelBW = m_settings.getChannelBandwidth(&m_settings.m_frequencySettings[i]);
+                                channelBins = m_fftSize / (m_scannerSampleRate / (float)channelBW);
+                            }
 
                             // Calculate power at that frequency
                             Real power;
                             if (m_settings.m_measurement == FreqScannerSettings::PEAK) {
-                                power = peakPower(bin);
+                                power = peakPower(bin, channelBins);
                             } else {
-                                power = totalPower(bin);
+                                power = totalPower(bin, channelBins);
                             }
                             //qDebug() << "startFrequency:" << startFrequency << "m_scannerSampleRate:" << m_scannerSampleRate << "m_centerFrequency:" << m_centerFrequency << "frequency" << frequency << "bin" << bin << "power" << power;
                             FreqScanner::MsgScanResult::ScanResult result = {frequency, power};
@@ -144,13 +155,13 @@ void FreqScannerSink::processOneSample(Complex &ci)
 }
 
 // Calculate total power in a channel containing the specified bin (i.e. sums adjacent bins in the same channel)
-Real FreqScannerSink::totalPower(int bin) const
+Real FreqScannerSink::totalPower(int bin, int channelBins) const
 {
     // Skip bin between halfway between channels
     // Then skip first and last bins, to avoid spectral leakage (particularly at DC)
-    int startBin = bin - m_binsPerChannel / 2 + 1 + 1;
+    int startBin = bin - channelBins / 2 + 1 + 1;
     Real magSqSum = 0.0f;
-    for (int i = 0; i < m_binsPerChannel - 2 - 1; i++) {
+    for (int i = 0; i < channelBins - 2 - 1; i++) {
         int idx = startBin + i;
         if ((idx < 0) || (idx >= m_fftSize)) {
             continue;
@@ -162,13 +173,13 @@ Real FreqScannerSink::totalPower(int bin) const
 }
 
 // Calculate peak power in a channel containing the specified bin
-Real FreqScannerSink::peakPower(int bin) const
+Real FreqScannerSink::peakPower(int bin, int channelBins) const
 {
     // Skip bin between halfway between channels
     // Then skip first and last bins, to avoid spectral leakage (particularly at DC)
-    int startBin = bin - m_binsPerChannel/2 + 1 + 1;
+    int startBin = bin - channelBins/2 + 1 + 1;
     Real maxMagSq = std::numeric_limits<Real>::min();
-    for (int i = 0; i < m_binsPerChannel - 2 - 1; i++)
+    for (int i = 0; i < channelBins - 2 - 1; i++)
     {
         int idx = startBin + i;
         if ((idx < 0) || (idx >= m_fftSize)) {

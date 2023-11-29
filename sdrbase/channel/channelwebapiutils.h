@@ -73,6 +73,7 @@ public:
     static bool patchDeviceSetting(unsigned int deviceIndex, const QString &setting, int value);
     static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, const QString &value);
     static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, double value);
+    static bool patchChannelSetting(unsigned int deviceSetIndex, unsigned int channeIndex, const QString &setting, double value);
     static bool patchChannelSetting(unsigned int deviceSetIndex, unsigned int channeIndex, const QString &setting, const QJsonArray& value);
     static bool getFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, int &value);
     static bool getFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, double &value);

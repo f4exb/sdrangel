@@ -27,7 +27,7 @@ class Serializable;
 class ChannelAPI;
 
 // Number of columns in the table
-#define FREQSCANNER_COLUMNS           6
+#define FREQSCANNER_COLUMNS           10
 
 struct FreqScannerSettings
 {
@@ -41,14 +41,25 @@ struct FreqScannerSettings
         AvailableChannel& operator=(const AvailableChannel&) = default;
     };
 
+    struct FrequencySettings {
+        qint64 m_frequency;
+        bool m_enabled;
+        QString m_notes;
+        QString m_threshold;        // QStrings used, as we allow "" for no setting
+        QString m_channel;
+        QString m_channelBandwidth;
+        QString m_squelch;
+
+        QByteArray serialize() const;
+        bool deserialize(const QByteArray& data);
+    };
+
     qint32 m_inputFrequencyOffset;  //!< Not modifable in GUI
     qint32 m_channelBandwidth;      //!< Channel bandwidth
     qint32 m_channelFrequencyOffset;//!< Minium DC offset of tuned channel
     Real m_threshold;               //!< Power threshold in dB
-    QList<qint64> m_frequencies;    //!< Frequencies to scan
-    QList<bool> m_enabled;          //!< Whether corresponding frequency is enabled
-    QList<QString> m_notes;         //!< User editable notes about this frequency
     QString m_channel;              //!< Channel (E.g: R1:4) to tune to active frequency
+    QList<FrequencySettings> m_frequencySettings; //!< Frequencies to scan and corresponding settings
     float m_scanTime;               //!< In seconds
     float m_retransmitTime;         //!< In seconds
     int m_tuneTime;                 //!< In milliseconds
@@ -92,6 +103,9 @@ struct FreqScannerSettings
     bool deserialize(const QByteArray& data);
     void applySettings(const QStringList& settingsKeys, const FreqScannerSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force = false) const;
+    Real getThreshold(FreqScannerSettings::FrequencySettings *frequencySettings) const;
+    int getChannelBandwidth(FreqScannerSettings::FrequencySettings *frequencySettings) const;
+    FreqScannerSettings::FrequencySettings *getFrequencySettings(qint64 frequency);
 };
 
 #endif /* INCLUDE_FREQSCANNERSETTINGS_H */

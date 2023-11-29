@@ -105,7 +105,7 @@ public:
 	bool readBlob(quint32 id, QByteArray* result, const QByteArray& def = QByteArray()) const;
 
 	template<typename T>
-	bool readList(quint32 id, QList<T>* result)
+	bool readList(quint32 id, QList<T>* result, const QList<T>& def = {})
 	{
 		QByteArray data;
 		bool ok = readBlob(id, &data);
@@ -115,10 +115,14 @@ public:
 			(*stream) >> *result;
 			delete stream;
 		}
+		else
+		{
+			*result = def;
+		}
 		return ok;
 	}
 	template<typename TK, typename TV>
-	bool readHash(quint32 id, QHash<TK,TV>* result)
+	bool readHash(quint32 id, QHash<TK,TV>* result, const QHash<TK,TV>& def = {})
 	{
 		QByteArray data;
 		bool ok = readBlob(id, &data);
@@ -127,6 +131,10 @@ public:
 			QDataStream *stream = new QDataStream(data);
 			(*stream) >> *result;
 			delete stream;
+		}
+		else
+		{
+			*result = def;
 		}
 		return ok;
 	}
