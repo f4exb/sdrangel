@@ -33,6 +33,7 @@ public:
         ProjectionImag,     //!< Extract imaginary part
         ProjectionMagLin,   //!< Calculate linear magnitude or modulus
         ProjectionMagSq,    //!< Calculate linear squared magnitude or power
+        ProjectionDMagSq,   //!< Calculate time derivative of linear squared magnitude or power
         ProjectionMagDB,    //!< Calculate logarithmic (dB) of squared magnitude
         ProjectionPhase,    //!< Calculate phase
         ProjectionDOAP,     //!< Calculate ambiguous DOA from phase as phase difference (assuming positive)
@@ -60,6 +61,7 @@ private:
     static Real normalizeAngle(Real angle);
     ProjectionType m_projectionType;
     Real m_prevArg;
+    Real m_prevVal;
     Real *m_cache;
     bool m_cacheMaster;
 };

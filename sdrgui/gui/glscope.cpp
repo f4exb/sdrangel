@@ -1893,6 +1893,7 @@ void GLScope::setYScale(ScaleEngine &scale, uint32_t highlightedTraceIndex)
         break;
     case Projector::ProjectionMagLin:
     case Projector::ProjectionMagSq:
+    case Projector::ProjectionDMagSq:
         if (amp_range < 1e-9) {
             scale.setRange(Unit::None, amp_ofs * 1e12, amp_range * 1e12 + amp_ofs * 1e12);
         } else if (amp_range < 1e-6) {
