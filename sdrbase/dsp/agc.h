@@ -32,6 +32,7 @@ public:
 	void setOrder(double R) { m_R = R; }
 	Real getValue();
 	Real getAverage();
+    void reset(double R) { m_moving_average.fill(R); }
 	virtual void feed(Complex& ci) = 0;
 
 protected:
