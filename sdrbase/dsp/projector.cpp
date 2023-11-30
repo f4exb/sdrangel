@@ -60,6 +60,15 @@ Real Projector::run(const Sample& s)
             v = re*re + im*im;
         }
             break;
+        case ProjectionDMagSq:
+        {
+            Real re = s.m_real / SDR_RX_SCALEF;
+            Real im = s.m_imag / SDR_RX_SCALEF;
+            Real curMagSq = re*re + im*im;
+            v = curMagSq - m_prevVal;
+            m_prevVal = curMagSq;
+        }
+            break;
         case ProjectionMagDB:
         {
             Real re = s.m_real / SDR_RX_SCALEF;
@@ -234,6 +243,13 @@ Real Projector::run(const std::complex<float>& s)
             break;
         case ProjectionMagSq:
             v = std::norm(s);
+            break;
+        case ProjectionDMagSq:
+        {
+            Real curMagSq = std::norm(s);
+            v = curMagSq - m_prevVal;
+            m_prevVal = curMagSq;
+        }
             break;
         case ProjectionMagDB:
         {
