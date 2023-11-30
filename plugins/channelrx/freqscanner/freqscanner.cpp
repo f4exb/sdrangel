@@ -841,26 +841,35 @@ void FreqScanner::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("threshold")) {
         settings.m_threshold = response.getFreqScannerSettings()->getThreshold();
     }
-    /*if (channelSettingsKeys.contains("frequencies"))
+    if (channelSettingsKeys.contains("frequencies"))
     {
-        settings.m_frequencies.clear();
-        settings.m_enabled.clear();
-        settings.m_notes.clear();
+        settings.m_frequencySettings.clear();
         QList<SWGSDRangel::SWGFreqScannerFrequency *> *frequencies = response.getFreqScannerSettings()->getFrequencies();
         if (frequencies)
         {
             for (const auto frequency : *frequencies)
             {
-                settings.m_frequencies.append(frequency->getFrequency());
-                settings.m_enabled.append((bool)frequency->getEnabled());
+                FreqScannerSettings::FrequencySettings freqSetting;
+                freqSetting.m_frequency = frequency->getFrequency();
                 if (frequency->getNotes()) {
-                    settings.m_notes.append(*frequency->getNotes());
-                } else {
-                    settings.m_notes.append("");
+                    freqSetting.m_notes = *frequency->getNotes();
                 }
+                if (frequency->getChannel()) {
+                    freqSetting.m_channel = *frequency->getChannel();
+                }
+                if (frequency->getChannelBandwidth()) {
+                    freqSetting.m_channelBandwidth = *frequency->getChannelBandwidth();
+                }
+                if (frequency->getThreshold()) {
+                    freqSetting.m_threshold = *frequency->getThreshold();
+                }
+                if (frequency->getSquelch()) {
+                    freqSetting.m_squelch = *frequency->getSquelch();
+                }
+                settings.m_frequencySettings.append(freqSetting);
             }
         }
-    }*/
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getFreqScannerSettings()->getRgbColor();
     }
@@ -896,17 +905,29 @@ void FreqScanner::webapiUpdateChannelSettings(
 QList<SWGSDRangel::SWGFreqScannerFrequency *> *FreqScanner::createFrequencyList(const FreqScannerSettings& settings)
 {
     QList<SWGSDRangel::SWGFreqScannerFrequency *> *frequencies = new QList<SWGSDRangel::SWGFreqScannerFrequency *>();
-    /*for (int i = 0; i < settings.m_frequencies.size(); i++)
+    for (int i = 0; i < settings.m_frequencySettings.size(); i++)
     {
         SWGSDRangel::SWGFreqScannerFrequency *frequency = new SWGSDRangel::SWGFreqScannerFrequency();
         frequency->init();
-        frequency->setFrequency(settings.m_frequencies[i]);
-        frequency->setEnabled(settings.m_enabled[i]);
-        if (!settings.m_notes[i].isEmpty()) {
-            frequency->setNotes(new QString(settings.m_notes[i]));
+        frequency->setFrequency(settings.m_frequencySettings[i].m_frequency);
+        frequency->setEnabled(settings.m_frequencySettings[i].m_enabled);
+        if (!settings.m_frequencySettings[i].m_notes.isEmpty()) {
+            frequency->setNotes(new QString(settings.m_frequencySettings[i].m_notes));
+        }
+        if (!settings.m_frequencySettings[i].m_channel.isEmpty()) {
+            frequency->setChannel(new QString(settings.m_frequencySettings[i].m_channel));
+        }
+        if (!settings.m_frequencySettings[i].m_channelBandwidth.isEmpty()) {
+            frequency->setChannelBandwidth(new QString(settings.m_frequencySettings[i].m_channelBandwidth));
+        }
+        if (!settings.m_frequencySettings[i].m_threshold.isEmpty()) {
+            frequency->setThreshold(new QString(settings.m_frequencySettings[i].m_threshold));
+        }
+        if (!settings.m_frequencySettings[i].m_squelch.isEmpty()) {
+            frequency->setSquelch(new QString(settings.m_frequencySettings[i].m_squelch));
         }
         frequencies->append(frequency);
-    }*/
+    }
     return frequencies;
 }
 

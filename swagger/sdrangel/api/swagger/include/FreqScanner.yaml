@@ -69,3 +69,11 @@ FreqScannerFrequency:
       type: integer
     notes:
       type: string
+    channel:
+      type: string
+    channelBandwidth:
+      type: string
+    threshold:
+      type: string
+    squelch:
+      type: string
