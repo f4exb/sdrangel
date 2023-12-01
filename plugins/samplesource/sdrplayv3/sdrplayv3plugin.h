@@ -52,6 +52,7 @@ public:
     virtual DeviceWebAPIAdapter* createDeviceWebAPIAdapter() const;
 
 private:
+    bool m_opened; // Whether sdrplay_api_Open was successful
     static const PluginDescriptor m_pluginDescriptor;
 };
 
