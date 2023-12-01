@@ -510,8 +510,10 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
     QJsonObject labelDistanceDisplayCondition {
         {"distanceDisplayCondition", labelDisplayDistance}
     };
+    QString labelText = mapItem->m_label;
+    labelText.replace("<br>", "\n");
     QJsonObject label {
-        {"text", mapItem->m_label},
+        {"text", labelText},
         {"show", m_settings->m_displayNames && mapItem->m_itemSettings->m_enabled && mapItem->m_itemSettings->m_display3DLabel},
         {"scale", mapItem->m_itemSettings->m_3DLabelScale},
         {"pixelOffset", labelPixelOffset},
