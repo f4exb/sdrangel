@@ -56,6 +56,13 @@ target_link_libraries(${TARGET_NAME}
         ${SDRPLAY_LIBRARIES}
 )
 
+# Library name is wrong in 3.12 release
+if (APPLE AND (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL arm64))
+    add_custom_command(TARGET ${TARGET_NAME}
+        POST_BUILD COMMAND
+        ${CMAKE_INSTALL_NAME_TOOL} -change libsdrplay_api_arm64.so.3.12 libsdrplay_api.so.3.12  $<TARGET_FILE:${TARGET_NAME}>)
+endif()
+
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
 # Install debug symbols
