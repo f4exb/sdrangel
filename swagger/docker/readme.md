@@ -8,6 +8,12 @@ The `compose` folder contains files to build the Docker compose stack comprising
 
 The SDRangel source tree is mounted in both containers as writable so the generated code can be written directly from the code generator or the Swagger files served by the http server.
 
+<h2>Install Docker on Ubuntu</h2>
+
+sudo apt install docker.io docker-buildx docker-compose
+sudo usermod -aG docker $USER
+* reboot *
+
 <h2>Server</h2>
 
 Use `build.sh` to build the image. It takes the following arguments:
