@@ -420,6 +420,15 @@ QDataStream& operator>>(QDataStream& in, FreqScannerSettings::FrequencySettings&
     return in;
 }
 
+QString FreqScannerSettings::getChannel(FreqScannerSettings::FrequencySettings *frequencySettings) const
+{
+    QString channel = m_channel;
+    if (!frequencySettings->m_channel.isEmpty()) {
+        channel = frequencySettings->m_channel;
+    }
+    return channel;
+}
+
 Real FreqScannerSettings::getThreshold(FreqScannerSettings::FrequencySettings *frequencySettings) const
 {
     Real threshold = m_threshold;
