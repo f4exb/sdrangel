@@ -177,11 +177,12 @@ void SSBDemodSink::processOneSample(Complex &ci)
         m_audioActive = delayedSample.real() != 0.0;
         m_magsqCur = std::norm(sideband[i]*agcVal);
 
-        // Prevent overload if squared magnitude variation is 90% full scale (0.9*.0.9 = 0.81)
+        // Prevent overload based on squared magnitude variation
         // Only if AGC is active
-        if (m_agcActive && (m_magsqCur - m_magsqPrev > m_agcTarget*m_agcTarget*8.1))
+        if (m_agcActive && (std::abs(m_magsqCur - m_magsqPrev) > m_agcTarget*m_agcTarget*5.0))
         {
             m_agc.reset(m_agcTarget*100.0); // Quench AGC at -20dB the target
+            m_agc.resetStepCounters();
             m_squelchDelayLine.write(sideband[i]);
         }
         else
@@ -198,7 +199,8 @@ void SSBDemodSink::processOneSample(Complex &ci)
         }
         else
         {
-            fftfilt::cmplx z = m_agcActive ? delayedSample * m_agc.getStepValue() : delayedSample;
+            // fftfilt::cmplx z = m_agcActive ? delayedSample * m_agc.getStepValue() : delayedSample;
+            fftfilt::cmplx& z = delayedSample;
 
             if (m_audioBinaual)
             {
@@ -503,4 +505,3 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
     m_agcActive = settings.m_agc;
     m_settings = settings;
 }
-

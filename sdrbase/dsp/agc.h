@@ -64,6 +64,7 @@ public:
     int getStepDownDelay() const { return m_stepDownDelay; }
     float getStepValue() const;
     void setHardLimiting(bool hardLimiting) { m_hardLimiting = hardLimiting; }
+    void resetStepCounters() { m_stepUpCounter = 0; m_stepDownCounter = 0; }
 
 private:
     bool m_squared;        //!< use squared magnitude (power) to compute AGC value
