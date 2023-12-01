@@ -60,6 +60,9 @@ public:
     }
 
     // Print taps as a Matlab vector
+    // To view:
+    //   h=fvtool(filter);
+    //   h.Fs=...
     void printTaps(const char *name)
     {
         printf("%s = [", name);
