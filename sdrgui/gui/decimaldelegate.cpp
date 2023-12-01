@@ -18,10 +18,40 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QLineEdit>
+#include <QDoubleValidator>
+
 #include "decimaldelegate.h"
 
+// Allow "" or double
+class DoubleOrEmptyValidator : public QDoubleValidator {
+public:
+    DoubleOrEmptyValidator(double bottom, double top, int decimals, QObject *parent = nullptr) :
+        QDoubleValidator(bottom, top, decimals, parent)
+    {
+    }
+
+    QValidator::State validate(QString& input, int &pos) const
+    {
+        if (input == "") {
+            return QValidator::Acceptable;
+        } else {
+            return QDoubleValidator::validate(input, pos);
+        }
+    }
+};
+
 DecimalDelegate::DecimalDelegate(int precision) :
-    m_precision(precision)
+    m_precision(precision),
+    m_min(-std::numeric_limits<double>::max()),
+    m_max(std::numeric_limits<double>::max())
+{
+}
+
+DecimalDelegate::DecimalDelegate(int precision, double min, double max) :
+    m_precision(precision),
+    m_min(min),
+    m_max(max)
 {
 }
 
@@ -35,4 +65,23 @@ QString DecimalDelegate::displayText(const QVariant &value, const QLocale &local
     } else {
         return value.toString();
     }
+}
+
+QWidget *DecimalDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    (void) option;
+    (void) index;
+
+    QLineEdit* editor = new QLineEdit(parent);
+    DoubleOrEmptyValidator *validator = new DoubleOrEmptyValidator(m_min, m_max, m_precision);
+    validator->setBottom(m_min);
+    validator->setTop(m_max);
+    editor->setValidator(validator);
+    return editor;
+}
+
+void DecimalDelegate::setRange(double min, double max)
+{
+    m_min = min;
+    m_max = max;
 }

@@ -22,6 +22,7 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QRegExp>
+#include <QComboBox>
 
 #include "device/deviceset.h"
 #include "device/deviceuiset.h"
@@ -37,6 +38,7 @@
 #include "gui/dialogpositioner.h"
 #include "gui/decimaldelegate.h"
 #include "gui/frequencydelegate.h"
+#include "gui/int64delegate.h"
 #include "gui/glspectrum.h"
 #include "channel/channelwebapiutils.h"
 
@@ -103,9 +105,9 @@ bool FreqScannerGUI::handleMessage(const Message& message)
         m_basebandSampleRate = notif.getSampleRate();
         if (m_basebandSampleRate != 0)
         {
-            ui->deltaFrequency->setValueRange(true, 7, 0, m_basebandSampleRate/2);
+            ui->deltaFrequency->setValueRange(true, 8, 0, m_basebandSampleRate/2);
             ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
-            ui->channelBandwidth->setValueRange(true, 7, 0, m_basebandSampleRate);
+            ui->channelBandwidth->setValueRange(true, 8, 0, m_basebandSampleRate);
         }
         if (m_channelMarker.getBandwidth() == 0) {
             m_channelMarker.setBandwidth(m_basebandSampleRate);
@@ -116,7 +118,8 @@ bool FreqScannerGUI::handleMessage(const Message& message)
     else if (FreqScanner::MsgReportChannels::match(message))
     {
         FreqScanner::MsgReportChannels& report = (FreqScanner::MsgReportChannels&)message;
-        updateChannelsList(report.getChannels());
+        m_availableChannels = report.getChannels();
+        updateChannelsList(m_availableChannels);
         return true;
     }
     else if (FreqScanner::MsgStatus::match(message))
@@ -187,11 +190,14 @@ bool FreqScannerGUI::handleMessage(const Message& message)
         {
             qint64 freq = results[i].m_frequency;
             QList<QTableWidgetItem *> items = ui->table->findItems(QString::number(freq), Qt::MatchExactly);
-            for (auto item : items) {
+            for (auto item : items)
+            {
                 int row = item->row();
                 QTableWidgetItem* powerItem = ui->table->item(row, COL_POWER);
                 powerItem->setData(Qt::DisplayRole, results[i].m_power);
-                bool active = results[i].m_power >= m_settings.m_threshold;
+                FreqScannerSettings::FrequencySettings *frequencySettings = m_settings.getFrequencySettings(freq);
+                Real threshold = m_settings.getThreshold(frequencySettings);
+                bool active = results[i].m_power >= threshold;
                 if (active)
                 {
                     powerItem->setBackground(Qt::darkGreen);
@@ -206,10 +212,13 @@ bool FreqScannerGUI::handleMessage(const Message& message)
     return false;
 }
 
-void FreqScannerGUI::updateChannelsList(const QList<FreqScannerSettings::AvailableChannel>& channels)
+void FreqScannerGUI::updateChannelsCombo(QComboBox *combo, const QList<FreqScannerSettings::AvailableChannel>& channels, const QString& channel, bool empty)
 {
-    ui->channels->blockSignals(true);
-    ui->channels->clear();
+    combo->blockSignals(true);
+    combo->clear();
+    if (empty) {
+        combo->addItem("");
+    }
 
     for (const auto& channel : channels)
     {
@@ -217,21 +226,32 @@ void FreqScannerGUI::updateChannelsList(const QList<FreqScannerSettings::Availab
         if ((channel.m_deviceSetIndex == m_freqScanner->getDeviceSetIndex()) && (channel.m_channelIndex != m_freqScanner->getIndexInDeviceSet()))
         {
             QString name = QString("R%1:%2").arg(channel.m_deviceSetIndex).arg(channel.m_channelIndex);
-            ui->channels->addItem(name);
+            combo->addItem(name);
         }
     }
 
     // Channel can be created after this plugin, so select it
     // if the chosen channel appears
-    int channelIndex = ui->channels->findText(m_settings.m_channel);
+    int channelIndex = combo->findText(channel);
 
     if (channelIndex >= 0) {
-        ui->channels->setCurrentIndex(channelIndex);
+        combo->setCurrentIndex(channelIndex);
     } else {
-        ui->channels->setCurrentIndex(-1); // return to nothing selected
+        combo->setCurrentIndex(-1); // return to nothing selected
     }
 
-    ui->channels->blockSignals(false);
+    combo->blockSignals(false);
+}
+
+void FreqScannerGUI::updateChannelsList(const QList<FreqScannerSettings::AvailableChannel>& channels)
+{
+    updateChannelsCombo(ui->channels, channels, m_settings.m_channel, false);
+
+    for (int row = 0; row < ui->table->rowCount(); row++)
+    {
+        QComboBox *combo = qobject_cast<QComboBox *>(ui->table->cellWidget(row, COL_CHANNEL));
+        updateChannelsCombo(combo, channels, m_settings.m_frequencySettings[row].m_channel, true);
+    }
 }
 
 void FreqScannerGUI::on_channels_currentIndexChanged(int index)
@@ -412,10 +432,10 @@ FreqScannerGUI::FreqScannerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->deltaFrequency->setValueRange(true, 7, 0, 9999999);
+    ui->deltaFrequency->setValueRange(true, 8, 0, 9999999);
 
     ui->channelBandwidth->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
-    ui->channelBandwidth->setValueRange(true, 7, 0, 9999999);
+    ui->channelBandwidth->setValueRange(true, 8, 0, 9999999);
 
     m_channelMarker.setColor(Qt::yellow);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
@@ -464,6 +484,9 @@ FreqScannerGUI::FreqScannerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
     ui->table->setItemDelegateForColumn(COL_FREQUENCY, new FrequencyDelegate("Auto", 3));
     ui->table->setItemDelegateForColumn(COL_POWER, new DecimalDelegate(1));
+    ui->table->setItemDelegateForColumn(COL_CHANNEL_BW, new Int64Delegate(0, 10000000));
+    ui->table->setItemDelegateForColumn(COL_TH, new DecimalDelegate(1, -120.0, 0.0));
+    ui->table->setItemDelegateForColumn(COL_SQ, new DecimalDelegate(1, -120.0, 0.0));
 
     connect(m_deviceUISet->m_spectrum->getSpectrumView(), &GLSpectrumView::updateAnnotations, this, &FreqScannerGUI::updateAnnotations);
 }
@@ -531,9 +554,9 @@ void FreqScannerGUI::displaySettings()
 
     ui->table->blockSignals(true);
     ui->table->setRowCount(0);
-    for (int i = 0; i < m_settings.m_frequencies.size(); i++)
+    for (int i = 0; i < m_settings.m_frequencySettings.size(); i++)
     {
-        addRow(m_settings.m_frequencies[i], m_settings.m_enabled[i], m_settings.m_notes[i]);
+        addRow(m_settings.m_frequencySettings[i]);
         updateAnnotation(i);
     }
     ui->table->blockSignals(false);
@@ -584,7 +607,7 @@ void FreqScannerGUI::on_startStop_clicked(bool checked)
     }
 }
 
-void FreqScannerGUI::addRow(qint64 frequency, bool enabled, const QString& notes)
+void FreqScannerGUI::addRow(const FreqScannerSettings::FrequencySettings& frequencySettings)
 {
     int row = ui->table->rowCount();
     ui->table->setRowCount(row + 1);
@@ -594,11 +617,11 @@ void FreqScannerGUI::addRow(qint64 frequency, bool enabled, const QString& notes
     annotationItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     ui->table->setItem(row, COL_ANNOTATION, annotationItem);
 
-    ui->table->setItem(row, COL_FREQUENCY, new QTableWidgetItem(QString("%1").arg(frequency)));
+    ui->table->setItem(row, COL_FREQUENCY, new QTableWidgetItem(QString("%1").arg(frequencySettings.m_frequency)));
 
     QTableWidgetItem *enableItem = new QTableWidgetItem();
     enableItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-    enableItem->setCheckState(enabled ? Qt::Checked : Qt::Unchecked);
+    enableItem->setCheckState(frequencySettings.m_enabled ? Qt::Checked : Qt::Unchecked);
     ui->table->setItem(row, COL_ENABLE, enableItem);
 
     QTableWidgetItem* powerItem = new QTableWidgetItem();
@@ -610,13 +633,40 @@ void FreqScannerGUI::addRow(qint64 frequency, bool enabled, const QString& notes
     ui->table->setItem(row, COL_ACTIVE_COUNT, activeCountItem);
     activeCountItem->setData(Qt::DisplayRole, 0);
 
-    QTableWidgetItem* notesItem = new QTableWidgetItem(notes);
+    QTableWidgetItem* notesItem = new QTableWidgetItem(frequencySettings.m_notes);
     ui->table->setItem(row, COL_NOTES, notesItem);
+
+    QComboBox *channelComboBox = new QComboBox();
+    updateChannelsCombo(channelComboBox, m_availableChannels, frequencySettings.m_channel, true);
+    ui->table->setCellWidget(row, COL_CHANNEL, channelComboBox);
+    connect(channelComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FreqScannerGUI::on_table_channel_currentIndexChanged);
+
+    QTableWidgetItem* channelBandwidthItem = new QTableWidgetItem(frequencySettings.m_channelBandwidth);
+    ui->table->setItem(row, COL_CHANNEL_BW, channelBandwidthItem);
+
+    QTableWidgetItem* thresholdItem = new QTableWidgetItem(frequencySettings.m_threshold);
+    ui->table->setItem(row, COL_TH, thresholdItem);
+
+    QTableWidgetItem* squelchItem = new QTableWidgetItem(frequencySettings.m_squelch);
+    ui->table->setItem(row, COL_SQ, squelchItem);
+}
+
+void FreqScannerGUI::on_table_channel_currentIndexChanged(int index)
+{
+    if (index >= 0)
+    {
+        QComboBox *combo = qobject_cast<QComboBox *>(sender());
+        QModelIndex tableIndex = ui->table->indexAt(combo->pos());
+        on_table_cellChanged(tableIndex.row(), tableIndex.column());
+    }
 }
 
 void FreqScannerGUI::on_addSingle_clicked()
 {
-    addRow(0, true);
+    FreqScannerSettings::FrequencySettings frequencySettings;
+    frequencySettings.m_frequency = 0;
+    frequencySettings.m_enabled = true;
+    addRow(frequencySettings);
 }
 
 void FreqScannerGUI::on_addRange_clicked()
@@ -626,11 +676,15 @@ void FreqScannerGUI::on_addRange_clicked()
     if (dialog.exec())
     {
         blockApplySettings(true);
-        for (const auto f : dialog.m_frequencies) {
-            addRow(f, true);
+        for (const auto f : dialog.m_frequencies)
+        {
+            FreqScannerSettings::FrequencySettings frequencySettings;
+            frequencySettings.m_frequency = f;
+            frequencySettings.m_enabled = true;
+            addRow(frequencySettings);
         }
         blockApplySettings(false);
-        applySetting("frequencies");
+        applySetting("frequencySettings");
     }
 }
 
@@ -642,11 +696,9 @@ void FreqScannerGUI::on_remove_clicked()
     {
         int row = ui->table->row(item);
         ui->table->removeRow(row);
-        m_settings.m_frequencies.removeAt(row); // table_cellChanged isn't called for removeRow
-        m_settings.m_enabled.removeAt(row);
-        m_settings.m_notes.removeAt(row);
+        m_settings.m_frequencySettings.removeAt(row);
     }
-    applySetting("frequencies");
+    applySetting("frequencySettings");
 }
 
 void FreqScannerGUI::on_removeInactive_clicked()
@@ -656,12 +708,10 @@ void FreqScannerGUI::on_removeInactive_clicked()
         if (ui->table->item(i, COL_ACTIVE_COUNT)->data(Qt::DisplayRole).toInt() == 0)
         {
             ui->table->removeRow(i);
-            m_settings.m_frequencies.removeAt(i); // table_cellChanged isn't called for removeRow
-            m_settings.m_enabled.removeAt(i);
-            m_settings.m_notes.removeAt(i);
+            m_settings.m_frequencySettings.removeAt(i);
         }
     }
-    applySetting("frequencies");
+    applySetting("frequencySettings");
 }
 
 static QList<QTableWidgetItem*> takeRow(QTableWidget* table, int row)
@@ -730,26 +780,49 @@ void FreqScannerGUI::on_table_cellChanged(int row, int column)
         if (column == COL_FREQUENCY)
         {
             qint64 value = item->text().toLongLong();
-            while (m_settings.m_frequencies.size() <= row)
+            while (m_settings.m_frequencySettings.size() <= row)
             {
-                m_settings.m_frequencies.append(0);
-                m_settings.m_enabled.append(true);
-                m_settings.m_notes.append("");
+                FreqScannerSettings::FrequencySettings frequencySettings;
+                frequencySettings.m_frequency = 0;
+                frequencySettings.m_enabled = true;
+                m_settings.m_frequencySettings.append(frequencySettings);
             }
-            m_settings.m_frequencies[row] = value;
+            m_settings.m_frequencySettings[row].m_frequency = value;
             updateAnnotation(row);
-            applySetting("frequencies");
+            applySetting("frequencySettings");
         }
         else if (column == COL_ENABLE)
         {
-            m_settings.m_enabled[row] = item->checkState() == Qt::Checked;
-            applySetting("frequencies");
+            m_settings.m_frequencySettings[row].m_enabled = item->checkState() == Qt::Checked;
+            applySetting("frequencySettings");
         }
         else if (column == COL_NOTES)
         {
-            m_settings.m_notes[row] = item->text();
-            applySetting("frequencies");
+            m_settings.m_frequencySettings[row].m_notes = item->text();
+            applySetting("frequencySettings");
         }
+        else if (column == COL_CHANNEL_BW)
+        {
+            m_settings.m_frequencySettings[row].m_channelBandwidth = item->text();
+            applySetting("frequencySettings");
+        }
+        else if (column == COL_TH)
+        {
+            m_settings.m_frequencySettings[row].m_threshold = item->text();
+            applySetting("frequencySettings");
+        }
+        else if (column == COL_SQ)
+        {
+            m_settings.m_frequencySettings[row].m_squelch = item->text();
+            applySetting("frequencySettings");
+        }
+    }
+    else if (column == COL_CHANNEL)
+    {
+        QComboBox *combo = qobject_cast<QComboBox *>(ui->table->cellWidget(row, COL_CHANNEL));
+        m_settings.m_frequencySettings[row].m_channel = combo->currentText();
+        qDebug() << "Setting row" << row << "to" << combo->currentText();
+        applySetting("frequencySettings");
     }
 }
 
@@ -959,7 +1032,11 @@ void FreqScannerGUI::resizeTable()
     ui->table->setItem(row, COL_ENABLE, new QTableWidgetItem("Enable"));
     ui->table->setItem(row, COL_POWER, new QTableWidgetItem("-100.0"));
     ui->table->setItem(row, COL_ACTIVE_COUNT, new QTableWidgetItem("10000"));
-    ui->table->setItem(row, COL_NOTES, new QTableWidgetItem("Enter some notes"));
+    ui->table->setItem(row, COL_NOTES, new QTableWidgetItem("A channel name"));
+    ui->table->setItem(row, COL_CHANNEL, new QTableWidgetItem("Enter some notes"));
+    ui->table->setItem(row, COL_CHANNEL_BW, new QTableWidgetItem("100000000"));
+    ui->table->setItem(row, COL_TH, new QTableWidgetItem("-100.0"));
+    ui->table->setItem(row, COL_SQ, new QTableWidgetItem("-100.0"));
     ui->table->resizeColumnsToContents();
     ui->table->setRowCount(row);
 }

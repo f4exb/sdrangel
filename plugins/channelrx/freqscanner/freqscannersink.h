@@ -79,8 +79,8 @@ private:
 
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
-    Real totalPower(int bin) const;
-    Real peakPower(int bin) const;
+    Real totalPower(int bin, int channelBins) const;
+    Real peakPower(int bin, int channelBins) const;
     Real magSq(int bin) const;
 };
 

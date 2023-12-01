@@ -1,8 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2019 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2023 Jon Beniston, M7RCE <jon@beniston.com>                     //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,32 +15,61 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_GUI_DECIMALDELGATE_H
-#define SDRGUI_GUI_DECIMALDELGATE_H
+#include <limits>
 
-#include <QStyledItemDelegate>
+#include <QValidator>
+#include <QRegularExpression>
 
-#include "export.h"
-
-// Deligate for table to control precision used to display floating point values - also supports strings
-// Min and max values are constraints for editing
-class SDRGUI_API DecimalDelegate : public QStyledItemDelegate {
+// Like QIntValidator but for qint64
+class Int64Validator : public QValidator
+{
+    Q_OBJECT
 
 public:
-    DecimalDelegate(int precision = 2);
-    DecimalDelegate(int precision, double min, double max);
 
-    virtual QString displayText(const QVariant &value, const QLocale &locale) const override;
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-    int getPrecision() const { return m_precision; }
-    void setPrecision(int precision) { m_precision = precision; }
-    void setRange(double min, double max);
+    Int64Validator(QObject *parent = nullptr) :
+        QValidator(parent),
+        m_bottom(-std::numeric_limits<qint64>::max()),
+        m_top(std::numeric_limits<qint64>::max())
+    {
+    }
+
+    Int64Validator(qint64 bottom, qint64 top, QObject *parent = nullptr) :
+        QValidator(parent),
+        m_bottom(bottom),
+        m_top(top)
+    {
+    }
+
+    void setBottom(qint64 bottom)
+    {
+        m_bottom = bottom;
+    }
+
+    void setTop(qint64 top)
+    {
+        m_top = top;
+    }
+
+    void setRange(qint64 bottom, qint64 top)
+    {
+        m_bottom = bottom;
+        m_top = top;
+    }
+
+    qint64 bottom() const
+    {
+        return m_bottom;
+    }
+
+    qint64 top() const
+    {
+        return m_top;
+    }
+
+    QValidator::State validate(QString& input, int &pos) const;
 
 private:
-    int m_precision;
-    double m_min;
-    double m_max;
-
+    qint64 m_bottom;
+    qint64 m_top;
 };
-
-#endif // SDRGUI_GUI_DECIMALDELGATE_H

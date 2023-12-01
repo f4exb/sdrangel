@@ -51,6 +51,18 @@ public:
     QString* getNotes();
     void setNotes(QString* notes);
 
+    QString* getChannel();
+    void setChannel(QString* channel);
+
+    QString* getChannelBandwidth();
+    void setChannelBandwidth(QString* channel_bandwidth);
+
+    QString* getThreshold();
+    void setThreshold(QString* threshold);
+
+    QString* getSquelch();
+    void setSquelch(QString* squelch);
+
 
     virtual bool isSet() override;
 
@@ -63,6 +75,18 @@ private:
 
     QString* notes;
     bool m_notes_isSet;
+
+    QString* channel;
+    bool m_channel_isSet;
+
+    QString* channel_bandwidth;
+    bool m_channel_bandwidth_isSet;
+
+    QString* threshold;
+    bool m_threshold_isSet;
+
+    QString* squelch;
+    bool m_squelch_isSet;
 
 };
 

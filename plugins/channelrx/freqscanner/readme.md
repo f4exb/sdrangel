@@ -97,6 +97,10 @@ The frequency table contains the list of frequencies to be scanned, along with r
 - Power (dB): Displays the measured power in decibels from the last scan. The cell will have a green background if the power was above the threshold (4).
 - Active Count: Displays the number of scans in which the power for this frequency was above the threshold (4). This allows you to see which frequencies are commonly in use.
 - Notes: Available for user-entry of notes/information about this frequency.
+- Channel: Specifies the channel that should be tuned when this frequency is active. If blank, the common Channel setting (1) is used.
+- Ch Bw (Hz): Specifies the channel bandwidth in Hertz. If blank, the common Channel Bandwidth setting (8) is used.
+- TH (dB): Specifies the power threshold in dB that determines whether this frequency is active or not. If blank, the common Threshold setting (4) is used.
+- Sq (dB): Specifies a squelch level in dB that will be applied to the Channel when active. If blank, the squelch level will not be changed.
 
 When an active frequency is found after a scan, the corresponding row in the table will be selected.
 

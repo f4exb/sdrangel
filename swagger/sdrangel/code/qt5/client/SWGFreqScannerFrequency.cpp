@@ -34,6 +34,14 @@ SWGFreqScannerFrequency::SWGFreqScannerFrequency() {
     m_enabled_isSet = false;
     notes = nullptr;
     m_notes_isSet = false;
+    channel = nullptr;
+    m_channel_isSet = false;
+    channel_bandwidth = nullptr;
+    m_channel_bandwidth_isSet = false;
+    threshold = nullptr;
+    m_threshold_isSet = false;
+    squelch = nullptr;
+    m_squelch_isSet = false;
 }
 
 SWGFreqScannerFrequency::~SWGFreqScannerFrequency() {
@@ -48,6 +56,14 @@ SWGFreqScannerFrequency::init() {
     m_enabled_isSet = false;
     notes = new QString("");
     m_notes_isSet = false;
+    channel = new QString("");
+    m_channel_isSet = false;
+    channel_bandwidth = new QString("");
+    m_channel_bandwidth_isSet = false;
+    threshold = new QString("");
+    m_threshold_isSet = false;
+    squelch = new QString("");
+    m_squelch_isSet = false;
 }
 
 void
@@ -56,6 +72,18 @@ SWGFreqScannerFrequency::cleanup() {
 
     if(notes != nullptr) { 
         delete notes;
+    }
+    if(channel != nullptr) { 
+        delete channel;
+    }
+    if(channel_bandwidth != nullptr) { 
+        delete channel_bandwidth;
+    }
+    if(threshold != nullptr) { 
+        delete threshold;
+    }
+    if(squelch != nullptr) { 
+        delete squelch;
     }
 }
 
@@ -75,6 +103,14 @@ SWGFreqScannerFrequency::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&enabled, pJson["enabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&notes, pJson["notes"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&channel, pJson["channel"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&channel_bandwidth, pJson["channelBandwidth"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&threshold, pJson["threshold"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "QString", "QString");
     
 }
 
@@ -100,6 +136,18 @@ SWGFreqScannerFrequency::asJsonObject() {
     }
     if(notes != nullptr && *notes != QString("")){
         toJsonValue(QString("notes"), notes, obj, QString("QString"));
+    }
+    if(channel != nullptr && *channel != QString("")){
+        toJsonValue(QString("channel"), channel, obj, QString("QString"));
+    }
+    if(channel_bandwidth != nullptr && *channel_bandwidth != QString("")){
+        toJsonValue(QString("channelBandwidth"), channel_bandwidth, obj, QString("QString"));
+    }
+    if(threshold != nullptr && *threshold != QString("")){
+        toJsonValue(QString("threshold"), threshold, obj, QString("QString"));
+    }
+    if(squelch != nullptr && *squelch != QString("")){
+        toJsonValue(QString("squelch"), squelch, obj, QString("QString"));
     }
 
     return obj;
@@ -135,6 +183,46 @@ SWGFreqScannerFrequency::setNotes(QString* notes) {
     this->m_notes_isSet = true;
 }
 
+QString*
+SWGFreqScannerFrequency::getChannel() {
+    return channel;
+}
+void
+SWGFreqScannerFrequency::setChannel(QString* channel) {
+    this->channel = channel;
+    this->m_channel_isSet = true;
+}
+
+QString*
+SWGFreqScannerFrequency::getChannelBandwidth() {
+    return channel_bandwidth;
+}
+void
+SWGFreqScannerFrequency::setChannelBandwidth(QString* channel_bandwidth) {
+    this->channel_bandwidth = channel_bandwidth;
+    this->m_channel_bandwidth_isSet = true;
+}
+
+QString*
+SWGFreqScannerFrequency::getThreshold() {
+    return threshold;
+}
+void
+SWGFreqScannerFrequency::setThreshold(QString* threshold) {
+    this->threshold = threshold;
+    this->m_threshold_isSet = true;
+}
+
+QString*
+SWGFreqScannerFrequency::getSquelch() {
+    return squelch;
+}
+void
+SWGFreqScannerFrequency::setSquelch(QString* squelch) {
+    this->squelch = squelch;
+    this->m_squelch_isSet = true;
+}
+
 
 bool
 SWGFreqScannerFrequency::isSet(){
@@ -147,6 +235,18 @@ SWGFreqScannerFrequency::isSet(){
             isObjectUpdated = true; break;
         }
         if(notes && *notes != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(channel && *channel != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(channel_bandwidth && *channel_bandwidth != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(threshold && *threshold != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(squelch && *squelch != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

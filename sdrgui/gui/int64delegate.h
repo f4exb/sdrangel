@@ -1,8 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2019 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2023 Jon Beniston, M7RCE <jon@beniston.com>                     //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,32 +15,32 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_GUI_DECIMALDELGATE_H
-#define SDRGUI_GUI_DECIMALDELGATE_H
+#ifndef SDRGUI_GUI_INT64DELGATE_H
+#define SDRGUI_GUI_INT64DELGATE_H
 
 #include <QStyledItemDelegate>
 
 #include "export.h"
 
-// Deligate for table to control precision used to display floating point values - also supports strings
-// Min and max values are constraints for editing
-class SDRGUI_API DecimalDelegate : public QStyledItemDelegate {
+// Delegate for table to display a qint64 with input range validation
+// Also supports "" as a value
+class SDRGUI_API Int64Delegate : public QStyledItemDelegate {
 
 public:
-    DecimalDelegate(int precision = 2);
-    DecimalDelegate(int precision, double min, double max);
-
+    Int64Delegate();
+    Int64Delegate(qint64 min, qint64 max);
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override;
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-    int getPrecision() const { return m_precision; }
-    void setPrecision(int precision) { m_precision = precision; }
-    void setRange(double min, double max);
+    virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+    void setMin(qint64 min) { m_min = min; }
+    void setMax(qint64 max) { m_max = max; }
+    void setRange(qint64 min, qint64 max);
+    qint64 min() const { return m_min; }
+    qint64 max() const { return m_max; }
 
 private:
-    int m_precision;
-    double m_min;
-    double m_max;
+    qint64 m_min;
+    qint64 m_max;
 
 };
 
-#endif // SDRGUI_GUI_DECIMALDELGATE_H
+#endif // SDRGUI_GUI_INT64DELGATE_H

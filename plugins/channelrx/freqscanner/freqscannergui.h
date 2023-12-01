@@ -32,6 +32,7 @@ class BasebandSampleSink;
 class FreqScanner;
 class FreqScannerGUI;
 class QMenu;
+class QComboBox;
 
 namespace Ui {
     class FreqScannerGUI;
@@ -81,6 +82,8 @@ private:
 
     QMenu *m_menu;
 
+    QList<FreqScannerSettings::AvailableChannel> m_availableChannels;
+
     explicit FreqScannerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~FreqScannerGUI();
 
@@ -92,9 +95,10 @@ private:
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
-    void addRow(qint64 frequency, bool enabled, const QString& notes = "");
+    void addRow(const FreqScannerSettings::FrequencySettings& frequencySettings);
     void updateAnnotation(int row);
     void updateAnnotations();
+    void updateChannelsCombo(QComboBox *combo, const QList<FreqScannerSettings::AvailableChannel>& channels, const QString& channel, bool empty);
     void updateChannelsList(const QList<FreqScannerSettings::AvailableChannel>& channels);
     void setAllEnabled(bool enable);
 
@@ -110,7 +114,11 @@ private:
         COL_ENABLE,
         COL_POWER,
         COL_ACTIVE_COUNT,
-        COL_NOTES
+        COL_NOTES,
+        COL_CHANNEL,
+        COL_CHANNEL_BW,
+        COL_TH,
+        COL_SQ
     };
 
 private slots:
@@ -125,6 +133,7 @@ private slots:
     void on_measurement_currentIndexChanged(int index);
     void on_mode_currentIndexChanged(int index);
     void on_table_cellChanged(int row, int column);
+    void on_table_channel_currentIndexChanged(int index);
     void table_customContextMenuRequested(QPoint pos);
     void table_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
     void table_sectionResized(int logicalIndex, int oldSize, int newSize);

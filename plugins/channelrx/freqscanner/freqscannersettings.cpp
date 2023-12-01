@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QColor>
+#include <QDebug>
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
@@ -40,6 +41,7 @@ void FreqScannerSettings::resetToDefaults()
     m_channelFrequencyOffset = 25000;
     m_threshold = -60.0f;
     m_channel = "";
+    m_frequencySettings = {};
     m_scanTime = 0.1f;
     m_retransmitTime = 2.0f;
     m_tuneTime = 100;
@@ -73,9 +75,6 @@ QByteArray FreqScannerSettings::serialize() const
     s.writeS32(2, m_channelBandwidth);
     s.writeS32(3, m_channelFrequencyOffset);
     s.writeFloat(4, m_threshold);
-    s.writeList(5, m_notes);
-    s.writeList(6, m_enabled);
-    s.writeList(7, m_frequencies);
     s.writeString(8, m_channel);
     s.writeFloat(9, m_scanTime);
     s.writeFloat(10, m_retransmitTime);
@@ -83,6 +82,7 @@ QByteArray FreqScannerSettings::serialize() const
     s.writeS32(12, (int)m_priority);
     s.writeS32(13, (int)m_measurement);
     s.writeS32(14, (int)m_mode);
+    s.writeList(15, m_frequencySettings);
 
     s.writeList(20, m_columnIndexes);
     s.writeList(21, m_columnSizes);
@@ -128,22 +128,37 @@ bool FreqScannerSettings::deserialize(const QByteArray& data)
         d.readS32(2, &m_channelBandwidth, 25000);
         d.readS32(3, &m_channelFrequencyOffset, 25000);
         d.readFloat(4, &m_threshold, -60.0f);
-        d.readList(5, &m_notes);
-        d.readList(6, &m_enabled);
-        d.readList(7, &m_frequencies);
         d.readString(8, &m_channel);
-        while (m_notes.size() < m_frequencies.size()) {
-            m_notes.append("");
-        }
-        while (m_enabled.size() < m_frequencies.size()) {
-            m_enabled.append(true);
-        }
         d.readFloat(9, &m_scanTime, 0.1f);
         d.readFloat(10, &m_retransmitTime, 2.0f);
         d.readS32(11, &m_tuneTime, 100);
         d.readS32(12, (int*)&m_priority, (int)MAX_POWER);
         d.readS32(13, (int*)&m_measurement, (int)PEAK);
         d.readS32(14, (int*)&m_mode, (int)CONTINUOUS);
+        d.readList(15, &m_frequencySettings);
+        if (m_frequencySettings.size() == 0)
+        {
+            // Try reading old settings
+            QList<bool> enabled;
+            QList<qint64> frequencies;
+
+            d.readList(6, &enabled);
+            d.readList(7, &frequencies);
+            if (frequencies.size() > 0)
+            {
+                for (int i = 0; i < frequencies.size(); i++)
+                {
+                    FrequencySettings frequencySettings;
+                    frequencySettings.m_frequency = frequencies[i];
+                    if (i < enabled.size()) {
+                        frequencySettings.m_enabled = enabled[i];
+                    } else {
+                        frequencySettings.m_enabled = true;
+                    }
+                    m_frequencySettings.append(frequencySettings);
+                }
+            }
+        }
 
         d.readList(20, &m_columnIndexes);
         d.readList(21, &m_columnSizes);
@@ -200,10 +215,8 @@ void FreqScannerSettings::applySettings(const QStringList& settingsKeys, const F
     if (settingsKeys.contains("threshold")) {
         m_threshold = settings.m_threshold;
     }
-    if (settingsKeys.contains("frequencies")) {
-        m_frequencies = settings.m_frequencies;
-        m_enabled = settings.m_enabled;
-        m_notes = settings.m_notes;
+    if (settingsKeys.contains("frequencySettings")) {
+        m_frequencySettings = settings.m_frequencySettings;
     }
     if (settingsKeys.contains("channel")) {
         m_channel = settings.m_channel;
@@ -280,13 +293,13 @@ QString FreqScannerSettings::getDebugString(const QStringList& settingsKeys, boo
     if (settingsKeys.contains("threshold") || force) {
         ostr << " m_threshold: " << m_threshold;
     }
-    if (settingsKeys.contains("frequencies") || force)
+    if (settingsKeys.contains("frequencySettings") || force)
     {
         QStringList s;
-        for (auto f : m_frequencies) {
-            s.append(QString::number(f));
+        for (auto f : m_frequencySettings) {
+            s.append(QString::number(f.m_frequency));
         }
-        ostr << " m_frequencies: " << s.join(",").toStdString();
+        ostr << " m_frequencySettings: " << s.join(",").toStdString();
     }
     if (settingsKeys.contains("channel") || force) {
         ostr << " m_channel: " << m_channel.toStdString();
@@ -348,3 +361,105 @@ QString FreqScannerSettings::getDebugString(const QStringList& settingsKeys, boo
 
     return QString(ostr.str().c_str());
 }
+
+
+QByteArray FreqScannerSettings::FrequencySettings::serialize() const
+{
+    SimpleSerializer s(1);
+
+    s.writeS64(1, m_frequency);
+    s.writeBool(2, m_enabled);
+    s.writeString(3, m_notes);
+    s.writeString(4, m_threshold);
+    s.writeString(5, m_channel);
+    s.writeString(6, m_channelBandwidth);
+    s.writeString(7, m_squelch);
+
+    return s.final();
+}
+
+bool FreqScannerSettings::FrequencySettings::deserialize(const QByteArray& data)
+{
+    SimpleDeserializer d(data);
+
+    if (!d.isValid()) {
+        return false;
+    }
+
+    if (d.getVersion() == 1)
+    {
+        QByteArray blob;
+
+        d.readS64(1, &m_frequency);
+        d.readBool(2, &m_enabled);
+        d.readString(3, &m_notes);
+        d.readString(4, &m_threshold);
+        d.readString(5, &m_channel);
+        d.readString(6, &m_channelBandwidth);
+        d.readString(7, &m_squelch);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+QDataStream& operator<<(QDataStream& out, const FreqScannerSettings::FrequencySettings& settings)
+{
+    out << settings.serialize();
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, FreqScannerSettings::FrequencySettings& settings)
+{
+    QByteArray data;
+    in >> data;
+    settings.deserialize(data);
+    return in;
+}
+
+Real FreqScannerSettings::getThreshold(FreqScannerSettings::FrequencySettings *frequencySettings) const
+{
+    Real threshold = m_threshold;
+    if (!frequencySettings->m_threshold.isEmpty())
+    {
+        bool ok;
+        Real perFrequencyThreshold = frequencySettings->m_threshold.toFloat(&ok);
+        if (ok) {
+            threshold = perFrequencyThreshold;
+        } else {
+            qDebug() << "FreqScannerSettings::getThreshold: Failed to parse" << frequencySettings->m_threshold << "as a float";
+        }
+    }
+    return threshold;
+}
+
+int FreqScannerSettings::getChannelBandwidth(FreqScannerSettings::FrequencySettings *frequencySettings) const
+{
+    int channelBandwidth = m_channelBandwidth;
+    if (!frequencySettings->m_channelBandwidth.isEmpty())
+    {
+        bool ok;
+        Real perFrequencyChannelBandwidth = frequencySettings->m_channelBandwidth.toInt(&ok);
+        if (ok) {
+            channelBandwidth = perFrequencyChannelBandwidth;
+        } else {
+            qDebug() << "FreqScannerSettings::getChannelBandwidth: Failed to parse" << frequencySettings->m_channelBandwidth << "as an int";
+        }
+    }
+    return channelBandwidth;
+}
+
+FreqScannerSettings::FrequencySettings *FreqScannerSettings::getFrequencySettings(qint64 frequency)
+{
+    for (int i = 0; i < m_frequencySettings.size(); i++)
+    {
+        if (frequency == m_frequencySettings[i].m_frequency) {
+            return &this->m_frequencySettings[i];
+        }
+    }
+    return nullptr;
+}
+
