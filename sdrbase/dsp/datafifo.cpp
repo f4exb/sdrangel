@@ -116,14 +116,14 @@ unsigned int DataFifo::write(const quint8* data, unsigned int count, DataType da
         {
 			m_suppressed = 0;
 			m_msgRateTimer.start();
-			qCritical("DataFifo::write: overflow - dropping %u samples", count - total);
+			qCritical("DataFifo::write: overflow - dropping %u samples (size=%u)", count - total, m_size);
 		}
         else
         {
 			if (m_msgRateTimer.elapsed() > 2500)
             {
 				qCritical("DataFifo::write: %u messages dropped", m_suppressed);
-				qCritical("DataFifo::write: overflow - dropping %u samples", count - total);
+				qCritical("DataFifo::write: overflow - dropping %u samples (size=%u)", count - total, m_size);
 				m_suppressed = -1;
 			}
             else

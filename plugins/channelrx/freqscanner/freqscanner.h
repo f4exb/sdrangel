@@ -350,6 +350,7 @@ public:
     uint32_t getNumberOfDeviceStreams() const;
 
     void calcScannerSampleRate(int channelBW, int basebandSampleRate, int& scannerSampleRate, int& fftSize, int& binsPerChannel);
+    static void muteAll(const FreqScannerSettings& settings);
 
     static const char * const m_channelIdURI;
     static const char * const m_channelId;
@@ -408,7 +409,6 @@ private:
     void processScanResults(const QDateTime& fftStartTime, const QList<MsgScanResult::ScanResult>& results);
     void setDeviceCenterFrequency(qint64 frequency);
     void applyChannelSetting(const QString& channel);
-    void muteAll();
 
     static QList<SWGSDRangel::SWGFreqScannerFrequency *> *createFrequencyList(const FreqScannerSettings& settings);
 

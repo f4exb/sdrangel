@@ -103,6 +103,7 @@ struct FreqScannerSettings
     bool deserialize(const QByteArray& data);
     void applySettings(const QStringList& settingsKeys, const FreqScannerSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force = false) const;
+    QString getChannel(FreqScannerSettings::FrequencySettings *frequencySettings) const;
     Real getThreshold(FreqScannerSettings::FrequencySettings *frequencySettings) const;
     int getChannelBandwidth(FreqScannerSettings::FrequencySettings *frequencySettings) const;
     FreqScannerSettings::FrequencySettings *getFrequencySettings(qint64 frequency);

@@ -249,7 +249,7 @@ bool FreqScanner::handleMessage(const Message& cmd)
     }
     else if (MsgStartScan::match(cmd))
     {
-        muteAll();
+        muteAll(m_settings);
         startScan();
 
         return true;
@@ -657,14 +657,14 @@ void FreqScanner::setCenterFrequency(qint64 frequency)
 }
 
 // Mute all channels
-void FreqScanner::muteAll()
+void FreqScanner::muteAll(const FreqScannerSettings& settings)
 {
     QStringList channels;
 
-    channels.append(m_settings.m_channel);
-    for (int i = 0; i < m_settings.m_frequencySettings.size(); i++)
+    channels.append(settings.m_channel);
+    for (int i = 0; i < settings.m_frequencySettings.size(); i++)
     {
-        QString channel = m_settings.m_frequencySettings[i].m_channel;
+        QString channel = settings.m_frequencySettings[i].m_channel;
         if (!channel.isEmpty() && !channels.contains(channel)) {
             channels.append(channel);
         }

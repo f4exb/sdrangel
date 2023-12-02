@@ -932,18 +932,29 @@ void FreqScannerGUI::table_customContextMenuRequested(QPoint pos)
 
         // Tune to frequency
 
+        qint64 frequency = ui->table->item(row, COL_FREQUENCY)->text().toLongLong();
+        FreqScannerSettings::FrequencySettings *frequencySettings = m_settings.getFrequencySettings(frequency);
+        QString channel = m_settings.getChannel(frequencySettings);
         const QRegExp re("R([0-9]+):([0-9]+)");
-        if (re.indexIn(m_settings.m_channel) >= 0)
+        if (re.indexIn(channel) >= 0)
         {
             int scanDeviceSetIndex = re.capturedTexts()[1].toInt();
             int scanChannelIndex = re.capturedTexts()[2].toInt();
-            qDebug() << "scanDeviceSetIndex" << scanDeviceSetIndex << "scanChannelIndex" << scanChannelIndex;
 
-            qint64 frequency = ui->table->item(row, COL_FREQUENCY)->text().toLongLong();
+            ButtonSwitch *startStop = ui->startStop;
 
             QAction* findChannelMapAction = new QAction(QString("Tune R%1:%2 to %3").arg(scanDeviceSetIndex).arg(scanChannelIndex).arg(frequency), tableContextMenu);
-            connect(findChannelMapAction, &QAction::triggered, this, [this, scanDeviceSetIndex, scanChannelIndex, frequency]()->void {
+            connect(findChannelMapAction, &QAction::triggered, this, [this, scanDeviceSetIndex, scanChannelIndex, frequency, startStop]()->void {
 
+                // Stop scanning
+                if (startStop->isChecked()) {
+                    startStop->click();
+                }
+
+                // Mute all channels
+                m_freqScanner->muteAll(m_settings);
+
+                // Tune to frequency
                 if ((frequency - m_settings.m_channelBandwidth / 2 < m_deviceCenterFrequency - m_basebandSampleRate / 2)
                     || (frequency + m_settings.m_channelBandwidth / 2 >= m_deviceCenterFrequency + m_basebandSampleRate / 2))
                 {
@@ -958,7 +969,6 @@ void FreqScannerGUI::table_customContextMenuRequested(QPoint pos)
                     if (!ChannelWebAPIUtils::setCenterFrequency(getDeviceSetIndex(), centerFrequency)) {
                         qWarning() << "Scanner failed to set frequency" << centerFrequency;
                     }
-
                     ChannelWebAPIUtils::setFrequencyOffset(scanDeviceSetIndex, scanChannelIndex, offset);
                 }
                 else
@@ -966,6 +976,9 @@ void FreqScannerGUI::table_customContextMenuRequested(QPoint pos)
                     int offset = frequency - m_deviceCenterFrequency;
                     ChannelWebAPIUtils::setFrequencyOffset(scanDeviceSetIndex, scanChannelIndex, offset);
                 }
+
+                // Unmute channel
+                ChannelWebAPIUtils::setAudioMute(scanDeviceSetIndex, scanChannelIndex, false);
 
                 });
             tableContextMenu->addAction(findChannelMapAction);

@@ -719,6 +719,7 @@ void SimplePTTGUI::audioSelect(const QPoint& p)
     qDebug("SimplePTTGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, true);
     audioSelect.move(p);
+    new DialogPositioner(&audioSelect, false);
     audioSelect.exec();
 
     if (audioSelect.m_selected)
