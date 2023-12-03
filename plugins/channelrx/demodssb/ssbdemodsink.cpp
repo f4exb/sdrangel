@@ -179,11 +179,12 @@ void SSBDemodSink::processOneSample(Complex &ci)
 
         // Prevent overload based on squared magnitude variation
         // Only if AGC is active
-        if (m_agcActive && (std::abs(m_magsqCur - m_magsqPrev) > m_agcTarget*m_agcTarget*5.0))
+        if (m_agcActive && m_agcClamping && (std::abs(m_magsqCur - m_magsqPrev) > m_agcTarget*m_agcTarget*5.0) & (agcVal > 100.0))
         {
-            m_agc.reset(m_agcTarget*100.0); // Quench AGC at -20dB the target
-            m_agc.resetStepCounters();
-            m_squelchDelayLine.write(sideband[i]);
+            float target = m_agcTarget*sqrt(agcVal); // Quench AGC depending on previous value
+            m_agc.reset(target);
+            m_squelchDelayLine.write(fftfilt::cmplx{target, 0.0});
+            m_magsqCur = target*target;
         }
         else
         {
