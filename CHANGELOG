@@ -1,3 +1,19 @@
+sdrangel (7.17.2-1) unstable; urgency=medium
+
+   * Freq Scanner: Add per-frequency settings. Fix freq > 2GHz. PR #1905
+   * DSD demod: Upgrade dsdcc to 1.9.5. Fixes #1878
+   * Scope: Added derivative of magnitude squared to the list of projections
+   * SSB demod: mitigate AGC steep transitions causing audio clicks
+   * SSB demod: tie AGC steep transition correction to AGC clamping
+   * Fix AirspyHF instant replay. PR #1905
+   * Fix sdrplay shared library name on Mac arm64, as incorrect in 3.12 API release. PR #1905
+   * SDRPlay V3 API - don't call close unless open was a success, as will crash on Mac. PR #1905
+   * Add dialog positioner for audio select dialog. PR #1905
+   * Display FIFO size on overflow. PR #1905
+   * Freq scanner: Stop scanning when Tune menu selected. PR #1905
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 04 Dec 2023 20:35:40 +0100
+
 sdrangel (7.17.1-1) unstable; urgency=medium
 
    * Fixes to Mac build. PR #1869
