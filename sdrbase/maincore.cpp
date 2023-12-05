@@ -435,6 +435,121 @@ void MainCore::updateWakeLock()
 }
 #endif
 
+QChar MainCore::getDeviceSetTypeId(const DeviceSet* deviceSet)
+{
+    if (deviceSet->m_deviceMIMOEngine) {
+        return 'M';
+    } else if (deviceSet->m_deviceSinkEngine) {
+        return 'T';
+    } else if (deviceSet->m_deviceSourceEngine) {
+        return 'R';
+    } else {
+        return 'X'; // Unknown
+    }
+}
+
+QString MainCore::getDeviceSetId(const DeviceSet* deviceSet)
+{
+    QChar type = getDeviceSetTypeId(deviceSet);
+
+    return QString("%1%2").arg(type).arg(deviceSet->getIndex());
+}
+
+QString MainCore::getChannelId(const ChannelAPI* channel)
+{
+    std::vector<DeviceSet*> deviceSets = getDeviceSets();
+    DeviceSet* deviceSet = deviceSets[channel->getDeviceSetIndex()];
+    QString deviceSetId = getDeviceSetId(deviceSet);
+    int index = channel->getIndexInDeviceSet();
+    // FIXME: if (deviceSet->m_deviceMIMOEngine) {
+    // we should append stream index. E.g. "M0:0.0" However, only ChannelGUI seems to know what it is
+    return QString("%1:%2").arg(deviceSetId).arg(index);
+}
+
+QStringList MainCore::getDeviceSetIds(bool rx, bool tx, bool mimo)
+{
+    QStringList list;
+    std::vector<DeviceSet*> deviceSets = getDeviceSets();
+
+    for (const auto deviceSet : deviceSets)
+    {
+        DSPDeviceSourceEngine *deviceSourceEngine = deviceSet->m_deviceSourceEngine;
+        DSPDeviceSinkEngine *deviceSinkEngine = deviceSet->m_deviceSinkEngine;
+        DSPDeviceMIMOEngine *deviceMIMOEngine = deviceSet->m_deviceMIMOEngine;
+
+        if (((deviceSourceEngine != nullptr) && rx)
+            || ((deviceSinkEngine != nullptr) && tx)
+            || ((deviceMIMOEngine != nullptr) && mimo))
+        {
+            list.append(getDeviceSetId(deviceSet));
+        }
+    }
+    return list;
+}
+
+bool MainCore::getDeviceSetTypeFromId(const QString& deviceSetId, QChar &type)
+{
+    if (!deviceSetId.isEmpty())
+    {
+        type = deviceSetId[0];
+        return (type == 'R') || (type == 'T') || (type == 'M');
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool MainCore::getDeviceSetIndexFromId(const QString& deviceSetId, unsigned int &deviceSetIndex)
+{
+    const QRegularExpression re("[RTM]([0-9]+)");
+    QRegularExpressionMatch match = re.match(deviceSetId);
+
+    if (match.hasMatch())
+    {
+        deviceSetIndex = match.capturedTexts()[1].toInt();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool MainCore::getDeviceAndChannelIndexFromId(const QString& channelId, unsigned int &deviceSetIndex, unsigned int &channelIndex)
+{
+    const QRegularExpression re("[RTM]([0-9]+):([0-9]+)");
+    QRegularExpressionMatch match = re.match(channelId);
+
+    if (match.hasMatch())
+    {
+        deviceSetIndex = match.capturedTexts()[1].toInt();
+        channelIndex = match.capturedTexts()[2].toInt();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool MainCore::getFeatureIndexFromId(const QString& featureId, unsigned int &featureSetIndex, unsigned int &featureIndex)
+{
+    const QRegularExpression re("[F]([0-9]+):([0-9]+)");
+    QRegularExpressionMatch match = re.match(featureId);
+
+    if (match.hasMatch())
+    {
+        featureSetIndex = match.capturedTexts()[1].toInt();
+        featureIndex = match.capturedTexts()[2].toInt();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 std::vector<ChannelAPI*> MainCore::getChannels(const QString& uri)
 {
     std::vector<ChannelAPI*> channels;
@@ -451,4 +566,16 @@ std::vector<ChannelAPI*> MainCore::getChannels(const QString& uri)
     }
 
     return channels;
+}
+
+QStringList MainCore::getChannelIds(const QString& uri)
+{
+    QStringList list;
+    std::vector<ChannelAPI*> channels = getChannels(uri);
+
+    for (const auto channel : channels) {
+        list.append(getChannelId(channel));
+    }
+
+    return list;
 }

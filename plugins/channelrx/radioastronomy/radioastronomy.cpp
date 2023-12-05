@@ -24,7 +24,6 @@
 #include <QNetworkReply>
 #include <QBuffer>
 #include <QThread>
-#include <QRegExp>
 #include <QProcess>
 
 #include <stdio.h>
@@ -479,12 +478,8 @@ void RadioAstronomy::sweepStart()
     m_sweep1 = m_sweep1Start;
     m_sweep2 = m_settings.m_sweep2Start;
 
-    const QRegExp re("F([0-9]+):([0-9]+)");
-    if (re.indexIn(m_settings.m_starTracker) >= 0)
+    if (MainCore::getFeatureIndexFromId(m_settings.m_starTracker, m_starTrackerFeatureSetIndex, m_starTrackerFeatureIndex))
     {
-        m_starTrackerFeatureSetIndex = re.capturedTexts()[1].toInt();
-        m_starTrackerFeatureIndex = re.capturedTexts()[2].toInt();
-
         if (m_settings.m_sweepType == RadioAstronomySettings::SWP_AZEL) {
             ChannelWebAPIUtils::patchFeatureSetting(m_starTrackerFeatureSetIndex, m_starTrackerFeatureIndex, "target", "Custom Az/El");
         } else if (m_settings.m_sweepType == RadioAstronomySettings::SWP_LB) {
@@ -499,11 +494,8 @@ void RadioAstronomy::sweepStart()
             sweep2();
             callOnStartTime(&RadioAstronomy::sweep1);
         }
-        else if (re.indexIn(m_settings.m_rotator) >= 0)
+        else if (MainCore::getFeatureIndexFromId(m_settings.m_rotator, m_rotatorFeatureSetIndex, m_rotatorFeatureIndex))
         {
-            m_rotatorFeatureSetIndex = re.capturedTexts()[1].toInt();
-            m_rotatorFeatureIndex = re.capturedTexts()[2].toInt();
-
             sweep2();
             callOnStartTime(&RadioAstronomy::sweep1);
         }

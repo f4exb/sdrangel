@@ -577,12 +577,7 @@ void AircraftModel::findOnMap(int index)
 // Get list of frequeny scanners to use in menu
 QStringList AirportModel::getFreqScanners() const
 {
-    QStringList list;
-    std::vector<ChannelAPI*> channels = MainCore::instance()->getChannels("sdrangel.channel.freqscanner");
-    for (const auto channel : channels) {
-        list.append(QString("R%1:%2").arg(channel->getDeviceSetIndex()).arg(channel->getIndexInDeviceSet()));
-    }
-    return list;
+    return MainCore::instance()->getChannelIds("sdrangel.channel.freqscanner");
 }
 
 // Send airport frequencies to frequency scanner with given id (Rn:n)
@@ -592,14 +587,10 @@ void AirportModel::sendToFreqScanner(int index, const QString& id)
         return;
     }
     const AirportInformation *airport = m_airports[index];
+    unsigned int deviceSet, channelIndex;
 
-    const QRegularExpression re("R([0-9]+):([0-9]+)");
-    QRegularExpressionMatch match = re.match(id);
-    if (match.hasMatch())
+    if (MainCore::getDeviceAndChannelIndexFromId(id, deviceSet, channelIndex))
     {
-        int deviceSet = match.capturedTexts()[1].toInt();
-        int channelIndex = match.capturedTexts()[2].toInt();
-
         QJsonArray array;
         for (const auto airportFrequency : airport->m_frequencies)
         {
@@ -867,12 +858,10 @@ bool NavAidModel::setData(const QModelIndex &index, const QVariant& value, int r
 // Set selected AM Demod to the given frequency (used to tune to ATC selected from airports on map)
 bool ADSBDemodGUI::setFrequency(qint64 targetFrequencyHz)
 {
-    const QRegularExpression re("R([0-9]+):([0-9]+)");
-    QRegularExpressionMatch match = re.match(m_settings.m_amDemod);
-    if (match.hasMatch())
+    unsigned int deviceSet, channelIndex;
+
+    if (MainCore::getDeviceAndChannelIndexFromId(m_settings.m_amDemod, deviceSet, channelIndex))
     {
-        int deviceSet = match.capturedTexts()[1].toInt();
-        int channelIndex = match.capturedTexts()[2].toInt();
         const int halfChannelBW = 20000/2;
         int dcOffset = halfChannelBW;
 

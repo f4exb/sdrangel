@@ -23,7 +23,6 @@
 #include <QNetworkReply>
 #include <QBuffer>
 #include <QThread>
-#include <QRegExp>
 
 #include <stdio.h>
 #include <complex.h>
@@ -67,8 +66,8 @@ FreqScanner::FreqScanner(DeviceAPI *deviceAPI) :
         m_basebandSink(nullptr),
         m_running(false),
         m_basebandSampleRate(0),
-        m_scanDeviceSetIndex(-1),
-        m_scanChannelIndex(-1),
+        m_scanDeviceSetIndex(0),
+        m_scanChannelIndex(0),
         m_state(IDLE),
         m_timeoutTimer(this)
 {
@@ -670,28 +669,19 @@ void FreqScanner::muteAll(const FreqScannerSettings& settings)
         }
     }
 
-    const QRegExp re("R([0-9]+):([0-9]+)");
     for (const auto& channel : channels)
     {
-        if (re.indexIn(channel) >= 0)
-        {
-            int deviceSetIndex = re.capturedTexts()[1].toInt();
-            int scanChannelIndex = re.capturedTexts()[2].toInt();
-            ChannelWebAPIUtils::setAudioMute(deviceSetIndex, scanChannelIndex, true);
+        unsigned int deviceSetIndex, channelIndex;
+
+        if (MainCore::getDeviceAndChannelIndexFromId(channel, deviceSetIndex, channelIndex)) {
+            ChannelWebAPIUtils::setAudioMute(deviceSetIndex, channelIndex, true);
         }
     }
 }
 
 void FreqScanner::applyChannelSetting(const QString& channel)
 {
-    const QRegExp re("R([0-9]+):([0-9]+)");
-    if (re.indexIn(channel) >= 0)
-    {
-        m_scanDeviceSetIndex = re.capturedTexts()[1].toInt();
-        m_scanChannelIndex = re.capturedTexts()[2].toInt();
-    }
-    else
-    {
+    if (!MainCore::getDeviceAndChannelIndexFromId(channel, m_scanDeviceSetIndex, m_scanChannelIndex)) {
         qDebug() << "FreqScanner::applySettings: Failed to parse channel" << channel;
     }
 }

@@ -21,7 +21,6 @@
 #include <QMenu>
 #include <QTableWidget>
 #include <QTableWidgetItem>
-#include <QRegExp>
 #include <QComboBox>
 
 #include "device/deviceset.h"
@@ -41,6 +40,7 @@
 #include "gui/int64delegate.h"
 #include "gui/glspectrum.h"
 #include "channel/channelwebapiutils.h"
+#include "maincore.h"
 
 #include "freqscannergui.h"
 #include "freqscanneraddrangedialog.h"
@@ -935,15 +935,13 @@ void FreqScannerGUI::table_customContextMenuRequested(QPoint pos)
         qint64 frequency = ui->table->item(row, COL_FREQUENCY)->text().toLongLong();
         FreqScannerSettings::FrequencySettings *frequencySettings = m_settings.getFrequencySettings(frequency);
         QString channel = m_settings.getChannel(frequencySettings);
-        const QRegExp re("R([0-9]+):([0-9]+)");
-        if (re.indexIn(channel) >= 0)
-        {
-            int scanDeviceSetIndex = re.capturedTexts()[1].toInt();
-            int scanChannelIndex = re.capturedTexts()[2].toInt();
+        unsigned int scanDeviceSetIndex, scanChannelIndex;
 
+        if (MainCore::getDeviceAndChannelIndexFromId(channel, scanDeviceSetIndex, scanChannelIndex))
+        {
             ButtonSwitch *startStop = ui->startStop;
 
-            QAction* findChannelMapAction = new QAction(QString("Tune R%1:%2 to %3").arg(scanDeviceSetIndex).arg(scanChannelIndex).arg(frequency), tableContextMenu);
+            QAction* findChannelMapAction = new QAction(QString("Tune %1 to %2").arg(channel).arg(frequency), tableContextMenu);
             connect(findChannelMapAction, &QAction::triggered, this, [this, scanDeviceSetIndex, scanChannelIndex, frequency, startStop]()->void {
 
                 // Stop scanning

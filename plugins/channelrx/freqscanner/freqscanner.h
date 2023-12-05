@@ -370,8 +370,8 @@ private:
 
     QHash<ChannelAPI*, FreqScannerSettings::AvailableChannel> m_availableChannels;
 
-    int m_scanDeviceSetIndex;
-    int m_scanChannelIndex;
+    unsigned int m_scanDeviceSetIndex;
+    unsigned int m_scanChannelIndex;
     qint64 m_activeFrequency;
     QDateTime m_minFFTStartTime;
     int m_scannerSampleRate;

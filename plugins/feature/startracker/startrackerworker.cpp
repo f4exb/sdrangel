@@ -501,13 +501,10 @@ void StarTrackerWorker::update()
     {
         // Get Az/El from Satellite Tracker
         double azimuth, elevation;
+        unsigned int satelliteTrackerFeatureSetIndex,satelliteTrackerFeatureIndex;
 
-        const QRegExp re("F([0-9]+):([0-9]+)");
-        if (re.indexIn(m_settings.m_target) >= 0)
+        if (MainCore::getFeatureIndexFromId(m_settings.m_target, satelliteTrackerFeatureSetIndex, satelliteTrackerFeatureIndex))
         {
-            int satelliteTrackerFeatureSetIndex = re.capturedTexts()[1].toInt();
-            int satelliteTrackerFeatureIndex = re.capturedTexts()[2].toInt();
-
             if (ChannelWebAPIUtils::getFeatureReportValue(satelliteTrackerFeatureSetIndex, satelliteTrackerFeatureIndex, "targetAzimuth", azimuth)
                 && ChannelWebAPIUtils::getFeatureReportValue(satelliteTrackerFeatureSetIndex, satelliteTrackerFeatureIndex, "targetElevation", elevation))
             {
