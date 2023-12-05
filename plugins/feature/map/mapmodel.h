@@ -211,8 +211,8 @@ public:
         bubbleColourRole = MapModel::lastRole + 4,
         selectedRole = MapModel::lastRole + 5,
         targetRole = MapModel::lastRole + 6,
-        frequencyRole = MapModel::lastRole + 7,
-        frequencyStringRole = MapModel::lastRole + 8,
+        frequenciesRole = MapModel::lastRole + 7,
+        frequencyStringsRole = MapModel::lastRole + 8,
         predictedGroundTrack1Role = MapModel::lastRole + 9,
         predictedGroundTrack2Role = MapModel::lastRole + 10,
         groundTrack1Role = MapModel::lastRole + 11,
@@ -244,8 +244,10 @@ public:
     void setDisplayNames(bool displayNames);
     void setDisplaySelectedGroundTracks(bool displayGroundTracks);
     void setDisplayAllGroundTracks(bool displayGroundTracks);
-    Q_INVOKABLE void setFrequency(double frequency);
     Q_INVOKABLE void track3D(int index);
+    Q_INVOKABLE QStringList getDeviceSets() const;
+    Q_INVOKABLE void setFrequency(qint64 frequency, const QString& deviceSet);
+
 
     Q_INVOKABLE void viewChanged(double bottomLeftLongitude, double bottomRightLongitude);
 

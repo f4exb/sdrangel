@@ -77,7 +77,7 @@ public:
     void update(SWGSDRangel::SWGMapItem *mapItem) override;
 
 protected:
-    void findFrequency();
+    void findFrequencies();
     void updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track);
     void updatePredictedTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track);
 
@@ -92,8 +92,8 @@ protected:
     QString m_image;
     int m_imageRotation;
     QString m_text;
-    double m_frequency;                 // Frequency to set
-    QString m_frequencyString;
+    QList<qint64> m_frequencies;        // Frequencies that can be tuned (currently only extracted from text)
+    QStringList m_frequencyStrings;
     bool m_fixedPosition;               // Don't record/display track
     QList<QGeoCoordinate *> m_predictedTrackCoords;
     QList<QDateTime *> m_predictedTrackDateTimes;
