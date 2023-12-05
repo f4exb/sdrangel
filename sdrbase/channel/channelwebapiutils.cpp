@@ -333,10 +333,11 @@ bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &fr
 }
 
 // Set device center frequency
+// Doesn't support MIMO devices. We'd need stream index parameter
 bool ChannelWebAPIUtils::setCenterFrequency(unsigned int deviceIndex, double frequencyInHz)
 {
     SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
-    int httpRC;
+    int httpRC = 404;
     DeviceSet *deviceSet;
 
     if (getDeviceSettings(deviceIndex, deviceSettingsResponse, deviceSet))
@@ -354,8 +355,13 @@ bool ChannelWebAPIUtils::setCenterFrequency(unsigned int deviceIndex, double fre
             SWGSDRangel::SWGErrorResponse errorResponse2;
 
             DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
-
-            httpRC = source->webapiSettingsPutPatch(false, deviceSettingsKeys, deviceSettingsResponse, *errorResponse2.getMessage());
+            if (source) {
+                httpRC = source->webapiSettingsPutPatch(false, deviceSettingsKeys, deviceSettingsResponse, *errorResponse2.getMessage());
+            }
+            DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
+            if (sink) {
+                httpRC = sink->webapiSettingsPutPatch(false, deviceSettingsKeys, deviceSettingsResponse, *errorResponse2.getMessage());
+            }
 
             if (httpRC/100 == 2)
             {
