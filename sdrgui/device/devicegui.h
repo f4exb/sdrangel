@@ -81,7 +81,7 @@ public:
     void setCurrentDeviceIndex(int index) { m_currentDeviceIndex = index; } //!< index in plugins list
     void setChannelNames(const QStringList& channelNames) { m_channelAddDialog.addChannelNames(channelNames); }
     DeviceUISet* getDeviceUISet() { return m_deviceUISet; }
-    virtual void setReplayTime(float time) {} //!< Not supported by all devices
+    virtual void setReplayTime(float time) { (void) time; } //!< Not supported by all devices
 
 protected:
     void closeEvent(QCloseEvent *event) override;

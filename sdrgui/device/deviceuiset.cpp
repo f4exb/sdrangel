@@ -830,6 +830,8 @@ int DeviceUISet::webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& res
 
 void DeviceUISet::onTimeSelected(int deviceSetIndex, float time)
 {
+    (void) deviceSetIndex;
+
     if (m_deviceGUI) {
         m_deviceGUI->setReplayTime(time);
     }
