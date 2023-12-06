@@ -687,6 +687,11 @@ void SDRPlayV3Gui::on_replayLoop_toggled(bool checked)
     sendSettings();
 }
 
+void SDRPlayV3Gui::setReplayTime(float time)
+{
+    ui->replayOffset->setValue(std::ceil(time * 10.0f));
+}
+
 void SDRPlayV3Gui::makeUIConnections()
 {
     QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &SDRPlayV3Gui::on_centerFrequency_changed);

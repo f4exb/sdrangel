@@ -623,6 +623,11 @@ void AirspyHFGui::on_replayLoop_toggled(bool checked)
     sendSettings();
 }
 
+void AirspyHFGui::setReplayTime(float time)
+{
+    ui->replayOffset->setValue(std::ceil(time * 10.0f));
+}
+
 void AirspyHFGui::makeUIConnections()
 {
     QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &AirspyHFGui::on_centerFrequency_changed);

@@ -691,6 +691,11 @@ void RTLSDRGui::on_replayLoop_toggled(bool checked)
     sendSettings();
 }
 
+void RTLSDRGui::setReplayTime(float time)
+{
+    ui->replayOffset->setValue(std::ceil(time * 10.0f));
+}
+
 void RTLSDRGui::makeUIConnections()
 {
     QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &RTLSDRGui::on_centerFrequency_changed);

@@ -167,6 +167,7 @@ private:
 private slots:
     void handleChannelGUIClosing(ChannelGUI* channelGUI);
     void handleDeleteChannel(ChannelAPI *channelAPI);
+    void onTimeSelected(int deviceSetIndex, float time);
 };
 
 

@@ -50,6 +50,7 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    void setReplayTime(float time) override;
 
 private:
 	Ui::RTLSDRGui* ui;
