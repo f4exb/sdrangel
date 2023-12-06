@@ -18,15 +18,18 @@
 #include <errno.h>
 #include <algorithm>
 
+#include "dsp/replaybuffer.h"
 #include "limesdrinputsettings.h"
 #include "limesdrinputthread.h"
 
-LimeSDRInputThread::LimeSDRInputThread(lms_stream_t* stream, SampleSinkFifo* sampleFifo, QObject* parent) :
+LimeSDRInputThread::LimeSDRInputThread(lms_stream_t* stream, SampleSinkFifo* sampleFifo,
+        ReplayBuffer<qint16> *replayBuffer, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_stream(stream),
     m_convertBuffer(DeviceLimeSDR::blockSize),
     m_sampleFifo(sampleFifo),
+    m_replayBuffer(replayBuffer),
     m_log2Decim(0),
     m_iqOrder(true)
 {
@@ -106,70 +109,116 @@ void LimeSDRInputThread::run()
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void LimeSDRInputThread::callbackIQ(const qint16* buf, qint32 len)
+void LimeSDRInputThread::callbackIQ(const qint16* inBuf, qint32 len)
 {
     SampleVector::iterator it = m_convertBuffer.begin();
 
-    switch (m_log2Decim)
-    {
-    case 0:
-        m_decimatorsIQ.decimate1(&it, buf, len);
-        break;
-    case 1:
-        m_decimatorsIQ.decimate2_cen(&it, buf, len);
-        break;
-    case 2:
-        m_decimatorsIQ.decimate4_cen(&it, buf, len);
-        break;
-    case 3:
-        m_decimatorsIQ.decimate8_cen(&it, buf, len);
-        break;
-    case 4:
-        m_decimatorsIQ.decimate16_cen(&it, buf, len);
-        break;
-    case 5:
-        m_decimatorsIQ.decimate32_cen(&it, buf, len);
-        break;
-    case 6:
-        m_decimatorsIQ.decimate64_cen(&it, buf, len);
-        break;
-    default:
-        break;
+    // Save data to replay buffer
+	m_replayBuffer->lock();
+	bool replayEnabled = m_replayBuffer->getSize() > 0;
+	if (replayEnabled) {
+		m_replayBuffer->write(inBuf, len);
+	}
+
+	const qint16* buf = inBuf;
+	qint32 remaining = len;
+
+    while (remaining > 0)
+	{
+		// Choose between live data or replayed data
+		if (replayEnabled && m_replayBuffer->useReplay()) {
+			len = m_replayBuffer->read(remaining, buf);
+		} else {
+			len = remaining;
+		}
+		remaining -= len;
+
+        switch (m_log2Decim)
+        {
+        case 0:
+            m_decimatorsIQ.decimate1(&it, buf, len);
+            break;
+        case 1:
+            m_decimatorsIQ.decimate2_cen(&it, buf, len);
+            break;
+        case 2:
+            m_decimatorsIQ.decimate4_cen(&it, buf, len);
+            break;
+        case 3:
+            m_decimatorsIQ.decimate8_cen(&it, buf, len);
+            break;
+        case 4:
+            m_decimatorsIQ.decimate16_cen(&it, buf, len);
+            break;
+        case 5:
+            m_decimatorsIQ.decimate32_cen(&it, buf, len);
+            break;
+        case 6:
+            m_decimatorsIQ.decimate64_cen(&it, buf, len);
+            break;
+        default:
+            break;
+        }
     }
+
+    m_replayBuffer->unlock();
 
     m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-void LimeSDRInputThread::callbackQI(const qint16* buf, qint32 len)
+void LimeSDRInputThread::callbackQI(const qint16* inBuf, qint32 len)
 {
     SampleVector::iterator it = m_convertBuffer.begin();
 
-    switch (m_log2Decim)
-    {
-    case 0:
-        m_decimatorsQI.decimate1(&it, buf, len);
-        break;
-    case 1:
-        m_decimatorsQI.decimate2_cen(&it, buf, len);
-        break;
-    case 2:
-        m_decimatorsQI.decimate4_cen(&it, buf, len);
-        break;
-    case 3:
-        m_decimatorsQI.decimate8_cen(&it, buf, len);
-        break;
-    case 4:
-        m_decimatorsQI.decimate16_cen(&it, buf, len);
-        break;
-    case 5:
-        m_decimatorsQI.decimate32_cen(&it, buf, len);
-        break;
-    case 6:
-        m_decimatorsQI.decimate64_cen(&it, buf, len);
-        break;
-    default:
-        break;
-    }
+    // Save data to replay buffer
+	m_replayBuffer->lock();
+	bool replayEnabled = m_replayBuffer->getSize() > 0;
+	if (replayEnabled) {
+		m_replayBuffer->write(inBuf, len);
+	}
+
+	const qint16* buf = inBuf;
+	qint32 remaining = len;
+
+    while (remaining > 0)
+	{
+		// Choose between live data or replayed data
+		if (replayEnabled && m_replayBuffer->useReplay()) {
+			len = m_replayBuffer->read(remaining, buf);
+		} else {
+			len = remaining;
+		}
+		remaining -= len;
+
+        switch (m_log2Decim)
+        {
+        case 0:
+            m_decimatorsQI.decimate1(&it, buf, len);
+            break;
+        case 1:
+            m_decimatorsQI.decimate2_cen(&it, buf, len);
+            break;
+        case 2:
+            m_decimatorsQI.decimate4_cen(&it, buf, len);
+            break;
+        case 3:
+            m_decimatorsQI.decimate8_cen(&it, buf, len);
+            break;
+        case 4:
+            m_decimatorsQI.decimate16_cen(&it, buf, len);
+            break;
+        case 5:
+            m_decimatorsQI.decimate32_cen(&it, buf, len);
+            break;
+        case 6:
+            m_decimatorsQI.decimate64_cen(&it, buf, len);
+            break;
+        default:
+            break;
+        }
+            }
+
+    m_replayBuffer->unlock();
 
     m_sampleFifo->write(m_convertBuffer.begin(), it);
 }

@@ -48,6 +48,7 @@ MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgCalibrationResult, Message)
+MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgSaveReplay, Message)
 
 LimeSDRInput::LimeSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -422,7 +423,7 @@ bool LimeSDRInput::start()
 
     // start / stop streaming is done in the thread.
 
-    m_limeSDRInputThread = new LimeSDRInputThread(&m_streamId, &m_sampleFifo);
+    m_limeSDRInputThread = new LimeSDRInputThread(&m_streamId, &m_sampleFifo, &m_replayBuffer);
     qDebug("LimeSDRInput::start: thread created");
 
     applySettings(m_settings, QList<QString>(), true);
@@ -778,6 +779,12 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MsgSaveReplay::match(message))
+    {
+        MsgSaveReplay& cmd = (MsgSaveReplay&) message;
+        m_replayBuffer.save(cmd.getFilename(), m_settings.m_devSampleRate, getCenterFrequency());
+        return true;
+    }
     else
     {
         return false;
@@ -977,6 +984,9 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, const QLi
                         settings.m_devSampleRate,
                         1<<settings.m_log2HardDecim);
             }
+            if (settings.m_devSampleRate != m_settings.m_devSampleRate) {
+                m_replayBuffer.clear();
+            }
         }
     }
 
@@ -1166,6 +1176,18 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, const QLi
         m_settings = settings;
     } else {
         m_settings.applySettings(settingsKeys, settings);
+    }
+
+    if (settingsKeys.contains("replayLength") || settingsKeys.contains("devSampleRate") || force) {
+        m_replayBuffer.setSize(m_settings.m_replayLength, m_settings.m_devSampleRate);
+    }
+
+    if (settingsKeys.contains("replayOffset") || settingsKeys.contains("devSampleRate")  || force) {
+        m_replayBuffer.setReadOffset(((unsigned)(m_settings.m_replayOffset * m_settings.m_devSampleRate)) * 2);
+    }
+
+    if (settingsKeys.contains("replayLoop") || force) {
+        m_replayBuffer.setLoop(m_settings.m_replayLoop);
     }
 
     double clockGenFreqAfter;
