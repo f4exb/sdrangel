@@ -77,27 +77,27 @@ void AirspyHFWorker::setLog2Decimation(unsigned int log2_decim)
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
 void AirspyHFWorker::callbackIQ(const float* inBuf, qint32 len)
 {
-	SampleVector::iterator it = m_convertBuffer.begin();
+    SampleVector::iterator it = m_convertBuffer.begin();
 
     // Save data to replay buffer
-	m_replayBuffer->lock();
-	bool replayEnabled = m_replayBuffer->getSize() > 0;
-	if (replayEnabled) {
-		m_replayBuffer->write(inBuf, len);
-	}
+    m_replayBuffer->lock();
+    bool replayEnabled = m_replayBuffer->getSize() > 0;
+    if (replayEnabled) {
+        m_replayBuffer->write(inBuf, len);
+    }
 
-	const float* buf = inBuf;
-	qint32 remaining = len;
+    const float* buf = inBuf;
+    qint32 remaining = len;
 
     while (remaining > 0)
-	{
-		// Choose between live data or replayed data
-		if (replayEnabled && m_replayBuffer->useReplay()) {
-			len = m_replayBuffer->read(remaining, buf);
-		} else {
-			len = remaining;
-		}
-		remaining -= len;
+    {
+        // Choose between live data or replayed data
+        if (replayEnabled && m_replayBuffer->useReplay()) {
+            len = m_replayBuffer->read(remaining, buf);
+        } else {
+            len = remaining;
+        }
+        remaining -= len;
 
         switch (m_log2Decim)
         {
@@ -135,32 +135,32 @@ void AirspyHFWorker::callbackIQ(const float* inBuf, qint32 len)
 
     m_replayBuffer->unlock();
 
-	m_sampleFifo->write(m_convertBuffer.begin(), it);
+    m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
 void AirspyHFWorker::callbackQI(const float* inBuf, qint32 len)
 {
-	SampleVector::iterator it = m_convertBuffer.begin();
+    SampleVector::iterator it = m_convertBuffer.begin();
 
    // Save data to replay buffer
-	m_replayBuffer->lock();
-	bool replayEnabled = m_replayBuffer->getSize() > 0;
-	if (replayEnabled) {
-		m_replayBuffer->write(inBuf, len);
-	}
+    m_replayBuffer->lock();
+    bool replayEnabled = m_replayBuffer->getSize() > 0;
+    if (replayEnabled) {
+        m_replayBuffer->write(inBuf, len);
+    }
 
-	const float* buf = inBuf;
-	qint32 remaining = len;
+    const float* buf = inBuf;
+    qint32 remaining = len;
 
     while (remaining > 0)
-	{
-		// Choose between live data or replayed data
-		if (replayEnabled && m_replayBuffer->useReplay()) {
-			len = m_replayBuffer->read(remaining, buf);
-		} else {
-			len = remaining;
-		}
-		remaining -= len;
+    {
+        // Choose between live data or replayed data
+        if (replayEnabled && m_replayBuffer->useReplay()) {
+            len = m_replayBuffer->read(remaining, buf);
+        } else {
+            len = remaining;
+        }
+        remaining -= len;
 
         switch (m_log2Decim)
         {
@@ -198,7 +198,7 @@ void AirspyHFWorker::callbackQI(const float* inBuf, qint32 len)
 
     m_replayBuffer->unlock();
 
-	m_sampleFifo->write(m_convertBuffer.begin(), it);
+    m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
 int AirspyHFWorker::rx_callback(airspyhf_transfer_t* transfer)

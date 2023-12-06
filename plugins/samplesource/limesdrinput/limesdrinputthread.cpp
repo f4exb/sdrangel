@@ -114,24 +114,24 @@ void LimeSDRInputThread::callbackIQ(const qint16* inBuf, qint32 len)
     SampleVector::iterator it = m_convertBuffer.begin();
 
     // Save data to replay buffer
-	m_replayBuffer->lock();
-	bool replayEnabled = m_replayBuffer->getSize() > 0;
-	if (replayEnabled) {
-		m_replayBuffer->write(inBuf, len);
-	}
+    m_replayBuffer->lock();
+    bool replayEnabled = m_replayBuffer->getSize() > 0;
+    if (replayEnabled) {
+        m_replayBuffer->write(inBuf, len);
+    }
 
-	const qint16* buf = inBuf;
-	qint32 remaining = len;
+    const qint16* buf = inBuf;
+    qint32 remaining = len;
 
     while (remaining > 0)
-	{
-		// Choose between live data or replayed data
-		if (replayEnabled && m_replayBuffer->useReplay()) {
-			len = m_replayBuffer->read(remaining, buf);
-		} else {
-			len = remaining;
-		}
-		remaining -= len;
+    {
+        // Choose between live data or replayed data
+        if (replayEnabled && m_replayBuffer->useReplay()) {
+            len = m_replayBuffer->read(remaining, buf);
+        } else {
+            len = remaining;
+        }
+        remaining -= len;
 
         switch (m_log2Decim)
         {
@@ -171,24 +171,24 @@ void LimeSDRInputThread::callbackQI(const qint16* inBuf, qint32 len)
     SampleVector::iterator it = m_convertBuffer.begin();
 
     // Save data to replay buffer
-	m_replayBuffer->lock();
-	bool replayEnabled = m_replayBuffer->getSize() > 0;
-	if (replayEnabled) {
-		m_replayBuffer->write(inBuf, len);
-	}
+    m_replayBuffer->lock();
+    bool replayEnabled = m_replayBuffer->getSize() > 0;
+    if (replayEnabled) {
+        m_replayBuffer->write(inBuf, len);
+    }
 
-	const qint16* buf = inBuf;
-	qint32 remaining = len;
+    const qint16* buf = inBuf;
+    qint32 remaining = len;
 
     while (remaining > 0)
-	{
-		// Choose between live data or replayed data
-		if (replayEnabled && m_replayBuffer->useReplay()) {
-			len = m_replayBuffer->read(remaining, buf);
-		} else {
-			len = remaining;
-		}
-		remaining -= len;
+    {
+        // Choose between live data or replayed data
+        if (replayEnabled && m_replayBuffer->useReplay()) {
+            len = m_replayBuffer->read(remaining, buf);
+        } else {
+            len = remaining;
+        }
+        remaining -= len;
 
         switch (m_log2Decim)
         {
@@ -216,7 +216,7 @@ void LimeSDRInputThread::callbackQI(const qint16* inBuf, qint32 len)
         default:
             break;
         }
-            }
+    }
 
     m_replayBuffer->unlock();
 
