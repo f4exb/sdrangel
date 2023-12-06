@@ -95,7 +95,7 @@
                </item>
                <item>
                 <property name="text">
-                 <string>MapLibre</string>
+                 <string>MapLibreGL</string>
                 </property>
                </item>
               </widget>

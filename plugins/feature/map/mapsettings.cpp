@@ -66,7 +66,7 @@ const QStringList MapSettings::m_mapProviders = {
     QStringLiteral("esri"),
     QStringLiteral("mapbox"),
     QStringLiteral("mapboxgl"),
-    QStringLiteral("maplibre")
+    QStringLiteral("maplibregl")
 };
 
 MapSettings::MapSettings() :

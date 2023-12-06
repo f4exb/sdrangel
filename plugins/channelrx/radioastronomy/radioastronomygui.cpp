@@ -2744,12 +2744,10 @@ void RadioAstronomyGUI::on_rotator_currentTextChanged(const QString& text)
 void RadioAstronomyGUI::setColumnPrecisionFromRotator()
 {
     // Match rotator precision
-    const QRegExp re("F([0-9]+):([0-9]+)");
-    if (re.indexIn(m_settings.m_rotator) >= 0)
-    {
-        int featureSetIndex = re.capturedTexts()[1].toInt();
-        int featureIndex = re.capturedTexts()[2].toInt();
+    unsigned int featureSetIndex, featureIndex;
 
+    if (MainCore::getFeatureIndexFromId(m_settings.m_rotator, featureSetIndex, featureIndex))
+    {
         int precision = 0;
         if (ChannelWebAPIUtils::getFeatureSetting(featureSetIndex, featureIndex, "precision", precision))
         {
@@ -4687,12 +4685,10 @@ void RadioAstronomyGUI::addFFT(FFTMeasurement *fft, bool skipCalcs)
 
 void RadioAstronomyGUI::getRotatorData(FFTMeasurement *fft)
 {
-    const QRegExp re("F([0-9]+):([0-9]+)");
-    if (re.indexIn(m_settings.m_rotator) >= 0)
-    {
-        int rotatorFeatureSetIndex = re.capturedTexts()[1].toInt();
-        int rotatorFeatureIndex = re.capturedTexts()[2].toInt();
+    unsigned int rotatorFeatureSetIndex, rotatorFeatureIndex;
 
+    if (MainCore::getFeatureIndexFromId(m_settings.m_rotator, rotatorFeatureSetIndex, rotatorFeatureIndex))
+    {
         SWGSDRangel::SWGFeatureReport featureReport;
         double value;
         qDebug() << m_settings.m_rotator << rotatorFeatureSetIndex << rotatorFeatureIndex;

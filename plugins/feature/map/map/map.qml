@@ -269,12 +269,24 @@ Item {
                                         mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
                                     }
                                 } else if (mouse.button === Qt.RightButton) {
-                                    if (frequency > 0) {
-                                        freqMenuItem.text = "Set frequency to " + frequencyString
-                                        freqMenuItem.enabled = true
-                                    } else {
-                                        freqMenuItem.text = "No frequency available"
-                                        freqMenuItem.enabled = false
+                                    menuItems.clear()
+                                    menus.clear()
+                                    if (frequencies.length > 0) {
+                                        var deviceSets = mapModel.getDeviceSets()
+                                        for (var i = 0; i < deviceSets.length; i++) {
+                                            menus.append({
+                                                title: "Set " + deviceSets[i] + " to...",
+                                                deviceSet: i
+                                            })
+                                            for (var j = 0; j < frequencies.length; j++) {
+                                                menuItems.append({
+                                                    text: frequencyStrings[j],
+                                                    frequency: frequencies[j],
+                                                    deviceSet: deviceSets[i],
+                                                    menuIndex: i
+                                                })
+                                            }
+                                        }
                                     }
                                     var c = mapPtr.toCoordinate(Qt.point(mouse.x, mouse.y))
                                     coordsMenuItem.text = "Coords: " + c.latitude.toFixed(6) + ", " + c.longitude.toFixed(6)
@@ -308,28 +320,41 @@ Item {
                                         mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
                                     }
                                 } else if (mouse.button === Qt.RightButton) {
-                                    if (frequency > 0) {
-                                        freqMenuItem.text = "Set frequency to " + frequencyString
-                                        freqMenuItem.enabled = true
-                                    } else {
-                                        freqMenuItem.text = "No frequency available"
-                                        freqMenuItem.enabled = false
+                                    menuItems.clear()
+                                    menus.clear()
+                                    if (frequencies.length > 0) {
+                                        var deviceSets = mapModel.getDeviceSets()
+                                        for (var i = 0; i < deviceSets.length; i++) {
+                                            menus.append({
+                                                title: "Set " + deviceSets[i] + " to...",
+                                                deviceSet: i
+                                            })
+                                            for (var j = 0; j < frequencies.length; j++) {
+                                                menuItems.append({
+                                                    text: frequencyStrings[j],
+                                                    frequency: frequencies[j],
+                                                    deviceSet: deviceSets[i],
+                                                    menuIndex: i
+                                                })
+                                            }
+                                        }
                                     }
                                     var c = mapPtr.toCoordinate(Qt.point(mouse.x, mouse.y))
                                     coordsMenuItem.text = "Coords: " + c.latitude.toFixed(6) + ", " + c.longitude.toFixed(6)
                                     contextMenu.popup()
                                 }
                             }
+                            ListModel {
+                                id: menus
+                            }
+                            ListModel {
+                                id: menuItems
+                            }
                             Menu {
                                 id: contextMenu
                                 MenuItem {
                                     text: "Set as target"
                                     onTriggered: target = true
-                                }
-                                MenuItem {
-                                    id: freqMenuItem
-                                    text: "Not set"
-                                    onTriggered: mapModel.setFrequency(frequency)
                                 }
                                 MenuItem {
                                     text: "Move to front"
@@ -346,6 +371,38 @@ Item {
                                 MenuItem {
                                     id: coordsMenuItem
                                     text: ""
+                                }
+                                Instantiator {
+                                    model: menus
+                                    delegate: Menu {
+                                        //cascade: true
+                                        id: contextSubMenu
+                                        title: model.title
+                                    }
+                                    onObjectAdded: function(index, object) {
+                                        contextMenu.insertMenu(index, object)
+                                    }
+                                    onObjectRemoved: function(index, object) {
+                                        contextMenu.removeMenu(object)
+                                    }
+                                }
+                                Instantiator {
+                                    model: menuItems
+                                    delegate: MenuItem {
+                                        text: model.text
+                                        onTriggered: mapModel.setFrequency(model.frequency, model.deviceSet)
+                                    }
+                                    onObjectAdded: function(index, object) {
+                                        // index is index in to menuItems model
+                                        // object is the MenuItem
+                                        var menuItem = menuItems.get(index)
+                                        var menu = menus.get(menuItem.menuIndex)
+                                        contextMenu.menuAt(menuItem.menuIndex).insertItem(index, object)
+                                    }
+                                    onObjectRemoved: function(index, object) {
+                                        // Can't use menuItems.get(index) here, as already removed from model
+                                        object.menu.removeItem(object)
+                                    }
                                 }
                             }
                         }

@@ -90,7 +90,7 @@ void ObjectMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
             m_animations.append(new CesiumInterface::Animation(animation));
         }
     }
-    findFrequency();
+    findFrequencies();
     if (!m_fixedPosition)
     {
         updateTrack(mapItem->getTrack());
@@ -192,29 +192,33 @@ void PolylineMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
     m_bounds = QGeoRectangle(QGeoCoordinate(latMax, lonMin), QGeoCoordinate(latMin, lonMax));
 }
 
-void ObjectMapItem::findFrequency()
+// Look for a frequency in the text for this object
+void ObjectMapItem::findFrequencies()
 {
-    // Look for a frequency in the text for this object
-    QRegExp re("(([0-9]+(\\.[0-9]+)?) *([kMG])?Hz)");
-    if (re.indexIn(m_text) != -1)
+    m_frequencies.clear();
+    m_frequencyStrings.clear();
+
+    const QRegularExpression re("(([0-9]+(\\.[0-9]+)?) *([kMG])?Hz)");
+    QRegularExpressionMatchIterator itr = re.globalMatch(m_text);
+    while (itr.hasNext())
     {
-        QStringList capture = re.capturedTexts();
-        m_frequency = capture[2].toDouble();
+        QRegularExpressionMatch match = itr.next();
+        QStringList capture = match.capturedTexts();
+        double frequency = capture[2].toDouble();
+
         if (capture.length() == 5)
         {
             QChar unit = capture[4][0];
-            if (unit == 'k')
-                m_frequency *= 1000.0;
-            else if (unit == 'M')
-                m_frequency *= 1000000.0;
-            else if (unit == 'G')
-                m_frequency *= 1000000000.0;
+            if (unit == 'k') {
+                frequency *= 1000;
+            } else if (unit == 'M') {
+                frequency *= 1000000;
+            } else if (unit == 'G') {
+                frequency *= 1000000000;
+            }
         }
-        m_frequencyString = capture[0];
-    }
-    else
-    {
-        m_frequency = 0.0;
+        m_frequencies.append((qint64)frequency);
+        m_frequencyStrings.append(capture[0]);
     }
 }
 

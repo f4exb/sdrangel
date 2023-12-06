@@ -516,8 +516,8 @@ QHash<int, QByteArray> ObjectMapModel::roleNames() const
     roles[bubbleColourRole] = "bubbleColour";
     roles[selectedRole] = "selected";
     roles[targetRole] = "target";
-    roles[frequencyRole] = "frequency";
-    roles[frequencyStringRole] = "frequencyString";
+    roles[frequenciesRole] = "frequencies";
+    roles[frequencyStringsRole] = "frequencyStrings";
     roles[predictedGroundTrack1Role] = "predictedGroundTrack1";
     roles[predictedGroundTrack2Role] = "predictedGroundTrack2";
     roles[groundTrack1Role] = "groundTrack1";
@@ -675,10 +675,10 @@ QVariant ObjectMapModel::data(const QModelIndex &index, int role) const
         return QVariant::fromValue(m_selected[row]);
     case targetRole:
         return QVariant::fromValue(m_target == row);
-    case frequencyRole:
-        return QVariant::fromValue(mapItem->m_frequency);
-    case frequencyStringRole:
-        return QVariant::fromValue(mapItem->m_frequencyString);
+    case frequenciesRole:
+        return QVariant::fromValue(mapItem->m_frequencies);
+    case frequencyStringsRole:
+        return QVariant::fromValue(mapItem->m_frequencyStrings);
     case predictedGroundTrack1Role:
     {
         if (   (m_displayAllGroundTracks || (m_displaySelectedGroundTracks && m_selected[row]))
@@ -780,18 +780,28 @@ void ObjectMapModel::setDisplayAllGroundTracks(bool displayGroundTracks)
     allUpdated();
 }
 
-void ObjectMapModel::setFrequency(double frequency)
-{
-    // Set as centre frequency
-    ChannelWebAPIUtils::setCenterFrequency(0, frequency);
-}
-
 void ObjectMapModel::track3D(int index)
 {
     if (index < m_items.count())
     {
         MapItem *item = m_items[index];
         m_gui->track3D(item->m_name);
+    }
+}
+
+QStringList ObjectMapModel::getDeviceSets() const
+{
+    return MainCore::instance()->getDeviceSetIds(true, true, false); // FIXME: MIMO currently disabled, as we can't get channel stream indexes
+}
+
+void ObjectMapModel::setFrequency(qint64 frequency, const QString& deviceSetId)
+{
+    unsigned int deviceSetIndex;
+
+    if (MainCore::getDeviceSetIndexFromId(deviceSetId, deviceSetIndex))
+    {
+        // Set as centre frequency
+        ChannelWebAPIUtils::setCenterFrequency(deviceSetIndex, frequency);
     }
 }
 

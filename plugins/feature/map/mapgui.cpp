@@ -1189,11 +1189,12 @@ void MapGUI::applyMap2DSettings(bool reloadMap)
             if (!m_settings.m_mapBoxStyles.isEmpty())
                 parameters["mapboxgl.mapping.additional_style_urls"] = m_settings.m_mapBoxStyles;
         }
-        if (m_settings.m_mapProvider == "maplibre")
+        if (m_settings.m_mapProvider == "maplibregl")
         {
-            parameters["maplibre.access_token"] = m_settings.m_mapBoxAPIKey;
+            parameters["maplibregl.settings_template"] = "maptiler"; // Or "mapbox"
+            parameters["maplibregl.access_token"] = m_settings.m_maptilerAPIKey;
             if (!m_settings.m_mapBoxStyles.isEmpty())
-                parameters["maplibre.mapping.additional_style_urls"] = m_settings.m_mapBoxStyles;
+                parameters["maplibregl.mapping.additional_style_urls"] = m_settings.m_mapBoxStyles;
         }
         if (m_settings.m_mapProvider == "osm")
         {
