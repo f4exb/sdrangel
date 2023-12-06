@@ -46,6 +46,7 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    void setReplayTime(float time) override;
 
 private:
     Ui::SDRPlayV3Gui* ui;

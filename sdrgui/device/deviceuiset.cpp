@@ -73,6 +73,8 @@ DeviceUISet::DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet)
     font.setFamily(QStringLiteral("Liberation Sans"));
     font.setPointSize(9);
     m_spectrum->setFont(font);
+
+    connect(m_mainSpectrumGUI, &MainSpectrumGUI::timeSelected, this, &DeviceUISet::onTimeSelected);
 }
 
 DeviceUISet::~DeviceUISet()
@@ -824,4 +826,13 @@ int DeviceUISet::webapiSpectrumServerPost(SWGSDRangel::SWGSuccessResponse& respo
 int DeviceUISet::webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage)
 {
     return m_spectrumVis->webapiSpectrumServerDelete(response, errorMessage);
+}
+
+void DeviceUISet::onTimeSelected(int deviceSetIndex, float time)
+{
+    (void) deviceSetIndex;
+
+    if (m_deviceGUI) {
+        m_deviceGUI->setReplayTime(time);
+    }
 }

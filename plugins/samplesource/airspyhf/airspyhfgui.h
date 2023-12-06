@@ -46,6 +46,7 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
+    void setReplayTime(float time) override;
 
 	uint32_t getDevSampleRate(unsigned int index);
 	int getDevSampleRateIndex(uint32_t sampleRate);

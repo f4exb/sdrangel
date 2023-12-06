@@ -113,12 +113,14 @@ private slots:
     void shrinkWindow();
     void maximizeWindow();
     void onRequestCenterFrequency(qint64 frequency);
+    void onTimeSelected(float time);
 
 signals:
     void closing();
     void moveToWorkspace(int workspaceIndex);
     void forceShrink();
     void requestCenterFrequency(int deviceSetIndex, qint64 frequency); // an action from the user to move device center frequency
+    void timeSelected(int deviceSetIndex, float time); // user ctrl-clicked waterfall to set a time
 };
 
 

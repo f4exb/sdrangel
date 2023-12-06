@@ -71,6 +71,10 @@ struct LimeSDRInputSettings
     bool     m_iqOrder;
     uint8_t  m_gpioDir;      //!< GPIO pin direction LSB first; 0 input, 1 output
     uint8_t  m_gpioPins;     //!< GPIO pins to write; LSB first
+	float    m_replayOffset; //!< Replay offset in seconds
+	float    m_replayLength; //!< Replay buffer size in seconds
+	float    m_replayStep;   //!< Replay forward/back step size in seconds
+	bool     m_replayLoop;   //!< Replay buffer repeatedly without recording new data
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

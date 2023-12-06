@@ -4175,6 +4175,18 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
         {
             frequencyPan(event);
         }
+        else if (event->modifiers() & Qt::ControlModifier)
+        {
+            if (!m_display3DSpectrogram && pointInWaterfallOrSpectrogram(ep))
+            {
+                QPointF pWat = ep;
+                pWat.rx() = (ep.x()/width() - m_waterfallRect.left()) / m_waterfallRect.width();
+                pWat.ry() = (ep.y()/height() - m_waterfallRect.top()) / m_waterfallRect.height();
+                float time = m_timeScale.getRangeMin() + pWat.y()*m_timeScale.getRange();
+                emit timeSelected(time);
+            }
+            return;
+        }
         else if (m_display3DSpectrogram)
         {
             // Detect click and drag to rotate 3D spectrogram

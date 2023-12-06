@@ -132,6 +132,14 @@ jobs:
       - name: Build SDRangel on Mac
         run: |
           cd build
+          make -j3
+      - name: Stop XProtectBehaviorService
+        run: |
+          echo "killing XProject as it can interfere with hdiutil"; sudo pkill -9 XProtect >/dev/null || true;
+          echo "waiting..."; while pgrep XProtect; do sleep 3; done;
+      - name: Build DMG
+        run: |
+          cd build
           make package -j3
       - name: Upload artifact
         uses: actions/upload-artifact@v3

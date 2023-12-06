@@ -769,6 +769,11 @@ void USRPInputGUI::on_replayLoop_toggled(bool checked)
     sendSettings();
 }
 
+void USRPInputGUI::setReplayTime(float time)
+{
+    ui->replayOffset->setValue(std::ceil(time * 10.0f));
+}
+
 void USRPInputGUI::makeUIConnections()
 {
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &USRPInputGUI::on_startStop_toggled);

@@ -51,6 +51,10 @@ void LimeSDRInputSettings::resetToDefaults()
     m_iqOrder = true;
     m_gpioDir = 0;
     m_gpioPins = 0;
+    m_replayOffset = 0.0f;
+    m_replayLength = 20.0f;
+    m_replayStep = 5.0f;
+    m_replayLoop = false;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -88,6 +92,10 @@ QByteArray LimeSDRInputSettings::serialize() const
     s.writeU32(26, m_reverseAPIPort);
     s.writeU32(27, m_reverseAPIDeviceIndex);
     s.writeBool(28, m_iqOrder);
+    s.writeFloat(29, m_replayOffset);
+    s.writeFloat(30, m_replayLength);
+    s.writeFloat(31, m_replayStep);
+    s.writeBool(32, m_replayLoop);
 
     return s.final();
 }
@@ -146,6 +154,10 @@ bool LimeSDRInputSettings::deserialize(const QByteArray& data)
         d.readU32(27, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(28, &m_iqOrder, true);
+        d.readFloat(29, &m_replayOffset, 0.0f);
+        d.readFloat(30, &m_replayLength, 20.0f);
+        d.readFloat(31, &m_replayStep, 5.0f);
+        d.readBool(32, &m_replayLoop, false);
 
         return true;
     }
@@ -230,6 +242,18 @@ void LimeSDRInputSettings::applySettings(const QStringList& settingsKeys, const 
     }
     if (settingsKeys.contains("gpioPins")) {
         m_gpioPins = settings.m_gpioPins;
+    }
+    if (settingsKeys.contains("replayOffset")) {
+        m_replayOffset = settings.m_replayOffset;
+    }
+    if (settingsKeys.contains("replayLength")) {
+        m_replayLength = settings.m_replayLength;
+    }
+    if (settingsKeys.contains("replayStep")) {
+        m_replayStep = settings.m_replayStep;
+    }
+    if (settingsKeys.contains("replayLoop")) {
+        m_replayLoop = settings.m_replayLoop;
     }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
@@ -320,6 +344,18 @@ QString LimeSDRInputSettings::getDebugString(const QStringList& settingsKeys, bo
     }
     if (settingsKeys.contains("gpioPins") || force) {
         ostr << " m_gpioPins: " << m_gpioPins;
+    }
+    if (settingsKeys.contains("replayOffset") || force) {
+        ostr << " m_replayOffset: " << m_replayOffset;
+    }
+    if (settingsKeys.contains("replayLength") || force) {
+        ostr << " m_replayLength: " << m_replayLength;
+    }
+    if (settingsKeys.contains("replayStep") || force) {
+        ostr << " m_replayStep: " << m_replayStep;
+    }
+    if (settingsKeys.contains("replayLoop") || force) {
+        ostr << " m_replayLoop: " << m_replayLoop;
     }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;

@@ -157,6 +157,8 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     connect(spectrum->getSpectrumView(), &GLSpectrumView::requestCenterFrequency, this, &MainSpectrumGUI::onRequestCenterFrequency);
     connect(spectrumGUI, &GLSpectrumGUI::requestCenterFrequency, this, &MainSpectrumGUI::onRequestCenterFrequency);
 
+    connect(spectrum->getSpectrumView(), &GLSpectrumView::timeSelected, this, &MainSpectrumGUI::onTimeSelected);
+
     m_resizer.enableChildMouseTracking();
     shrinkWindow();
 }
@@ -379,4 +381,9 @@ QString MainSpectrumGUI::getDeviceTypeTag()
 void MainSpectrumGUI::onRequestCenterFrequency(qint64 frequency)
 {
     emit requestCenterFrequency(m_deviceSetIndex, frequency);
+}
+
+void MainSpectrumGUI::onTimeSelected(float time)
+{
+    emit timeSelected(m_deviceSetIndex, time);
 }

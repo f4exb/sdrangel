@@ -541,6 +541,8 @@ signals:
     void requestCenterFrequency(qint64 frequency);
     // Emitted when annotations are changed
     void updateAnnotations();
+    // Emitted when user ctrl-clicks on waterfall to select a time. time is in seconds.
+    void timeSelected(float time);
 
 };
 

@@ -37,7 +37,8 @@ class LimeSDRInputThread : public QThread, public DeviceLimeSDRShared::ThreadInt
     Q_OBJECT
 
 public:
-    LimeSDRInputThread(lms_stream_t* stream, SampleSinkFifo* sampleFifo, QObject* parent = 0);
+    LimeSDRInputThread(lms_stream_t* stream, SampleSinkFifo* sampleFifo,
+        ReplayBuffer<qint16> *replayBuffer, QObject* parent = 0);
     ~LimeSDRInputThread();
 
     virtual void startWork();
@@ -56,6 +57,7 @@ private:
     qint16 m_buf[2*DeviceLimeSDR::blockSize]; //must hold I+Q values of each sample hence 2xcomplex size
     SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;
+	ReplayBuffer<qint16> *m_replayBuffer;
 
     unsigned int m_log2Decim; // soft decimation
     bool m_iqOrder;
