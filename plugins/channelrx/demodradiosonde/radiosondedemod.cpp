@@ -383,7 +383,7 @@ void RadiosondeDemod::applySettings(const RadiosondeDemodSettings& settings, boo
                 if (newFile)
                 {
                     // Write header
-                    m_logStream << "Date,Time,Data,Serial,Frame,Lat,Lon,Alt (m),Speed (m/s),V/R (m/s),Heading,P (hPa),T (C), U (%)\n";
+                    m_logStream << "Date,Time,Data,Serial,Frame,Lat,Lon,Alt (m),Speed (m/s),V/R (m/s),Heading,P (hPa),T (C),U (%)\n";
                 }
             }
             else
