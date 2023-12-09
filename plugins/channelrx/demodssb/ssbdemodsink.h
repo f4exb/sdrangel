@@ -25,6 +25,7 @@
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
 #include "dsp/agc.h"
+#include "dsp/firfilter.h"
 #include "audio/audiofifo.h"
 #include "util/doublebufferfifo.h"
 
@@ -112,6 +113,9 @@ private:
     int m_agcThresholdGate;     //!< Gate length in number of samples befor threshold triggers
     DoubleBufferFIFO<fftfilt::cmplx> m_squelchDelayLine;
     bool m_audioActive;         //!< True if an audio signal is produced (no AGC or AGC and above threshold)
+    Lowpass<Real> m_lowpassI;
+    Lowpass<Real> m_lowpassQ;
+
 
 	NCOF m_nco;
     Interpolator m_interpolator;

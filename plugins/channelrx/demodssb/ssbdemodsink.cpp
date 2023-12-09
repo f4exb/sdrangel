@@ -82,6 +82,9 @@ SSBDemodSink::SSBDemodSink() :
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, m_ssbFftLen);
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
 
+    m_lowpassI.create(101, m_audioSampleRate, m_Bandwidth * 1.2);
+    m_lowpassQ.create(101, m_audioSampleRate, m_Bandwidth * 1.2);
+
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 	applySettings(m_settings, true);
 }
@@ -201,7 +204,9 @@ void SSBDemodSink::processOneSample(Complex &ci)
         else
         {
             // fftfilt::cmplx z = m_agcActive ? delayedSample * m_agc.getStepValue() : delayedSample;
-            fftfilt::cmplx& z = delayedSample;
+            fftfilt::cmplx z = (m_agcActive && m_agcClamping) ?
+                fftfilt::cmplx{m_lowpassI.filter(delayedSample.real()), m_lowpassQ.filter(delayedSample.imag())}
+                : delayedSample;
 
             if (m_audioBinaual)
             {
@@ -318,6 +323,9 @@ void SSBDemodSink::applyAudioSampleRate(int sampleRate)
     SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
     DSBFilter->create_dsb_filter(m_Bandwidth / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
 
+    m_lowpassI.create(101, sampleRate, m_Bandwidth * 1.2);
+    m_lowpassQ.create(101, sampleRate, m_Bandwidth * 1.2);
+
     int agcNbSamples = (sampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
     int agcThresholdGate = (sampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
 
@@ -423,6 +431,8 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_audioSampleRate;
         SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
         DSBFilter->create_dsb_filter(m_Bandwidth / (float) m_audioSampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
+        m_lowpassI.create(101, m_audioSampleRate, m_Bandwidth * 1.2);
+        m_lowpassQ.create(101, m_audioSampleRate, m_Bandwidth * 1.2);
     }
 
     if ((m_settings.m_volume != settings.m_volume) || force)
