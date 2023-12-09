@@ -90,7 +90,6 @@ FT8DemodSink::FT8DemodSink() :
 	m_magsqCount = 0;
 
     m_agc.setThresholdEnable(false); // no squelch
-	m_agc.setClamping(false); // no clamping
 
 	SSBFilter = new fftfilt(m_LowCutoff / FT8DemodSettings::m_ft8SampleRate, m_Bandwidth / FT8DemodSettings::m_ft8SampleRate, m_ssbFftLen);
 

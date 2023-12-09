@@ -76,9 +76,6 @@ SSBDemodSink::SSBDemodSink() :
     m_magsqCur = 0.0;
     m_magsqPrev = 0.0;
 
-	m_agc.setClampMax(SDR_RX_SCALED/100.0);
-	m_agc.setClamping(m_agcClamping);
-
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, m_ssbFftLen);
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
 
@@ -473,7 +470,6 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
 
         if (m_agcClamping != agcClamping)
         {
-            m_agc.setClamping(agcClamping);
             m_agcClamping = agcClamping;
         }
 

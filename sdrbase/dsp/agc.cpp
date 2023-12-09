@@ -63,9 +63,7 @@ MagAGC::MagAGC(int historySize, double R, double threshold) :
     m_stepDownCounter(0),
 	m_gateCounter(0),
 	m_stepDownDelay(historySize),
-	m_clamping(false),
 	m_R2(R*R),
-	m_clampMax(1.0),
     m_hardLimiting(false)
 {}
 
@@ -119,30 +117,7 @@ double MagAGC::feedAndGetValue(const Complex& ci)
 {
     m_magsq = ci.real()*ci.real() + ci.imag()*ci.imag();
     m_moving_average.feed(m_magsq);
-
-    if (m_clamping)
-    {
-        if (m_squared)
-        {
-            if (m_magsq > m_clampMax) {
-                m_u0 = m_clampMax / m_magsq;
-            } else {
-                m_u0 = m_R / m_moving_average.average();
-            }
-        }
-        else
-        {
-            if (sqrt(m_magsq) > m_clampMax) {
-                m_u0 = m_clampMax / sqrt(m_magsq);
-            } else {
-                m_u0 = m_R / sqrt(m_moving_average.average());
-            }
-        }
-    }
-    else
-    {
-        m_u0 = m_R / (m_squared ? m_moving_average.average() : sqrt(m_moving_average.average()));
-    }
+    m_u0 = m_R / (m_squared ? m_moving_average.average() : sqrt(m_moving_average.average()));
 
     if (m_thresholdEnable)
     {
