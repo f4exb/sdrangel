@@ -102,8 +102,6 @@ private:
 	double m_magsqSum;
 	double m_magsqPeak;
     int  m_magsqCount;
-    double m_magsqCur;
-    double m_magsqPrev;
     MagSqLevelsStore m_magSqLevelStore;
     MagAGC m_agc;
     bool m_agcActive;

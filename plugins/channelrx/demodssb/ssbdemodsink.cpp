@@ -73,8 +73,6 @@ SSBDemodSink::SSBDemodSink() :
 	m_magsqSum = 0.0;
 	m_magsqPeak = 0.0;
 	m_magsqCount = 0;
-    m_magsqCur = 0.0;
-    m_magsqPrev = 0.0;
 
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, m_ssbFftLen);
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
@@ -175,23 +173,19 @@ void SSBDemodSink::processOneSample(Complex &ci)
         float agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 1.0;
         fftfilt::cmplx& delayedSample = m_squelchDelayLine.readBack(m_agc.getStepDownDelay());
         m_audioActive = delayedSample.real() != 0.0;
-        m_magsqCur = std::norm(sideband[i]*agcVal);
 
         // Prevent overload based on squared magnitude variation
         // Only if AGC is active
-        if (m_agcActive && m_agcClamping && (std::abs(m_magsqCur - m_magsqPrev) > m_agcTarget*m_agcTarget*5.0) & (agcVal > 100.0))
+        if (m_agcActive && m_agcClamping && agcVal > 100.0)
         {
-            float target = m_agcTarget*sqrt(agcVal); // Quench AGC depending on previous value
-            m_agc.reset(target);
-            m_squelchDelayLine.write(fftfilt::cmplx{target, 0.0});
-            m_magsqCur = target*target;
+            qDebug("SSBDemodSink::processOneSample: %f", agcVal);
+            m_agc.reset(m_agcTarget*m_agcTarget);
+            m_squelchDelayLine.write(fftfilt::cmplx{0.0, 0.0});
         }
         else
         {
             m_squelchDelayLine.write(sideband[i]*agcVal);
         }
-
-        m_magsqPrev = m_magsqCur;
 
         if (m_audioMute)
         {
@@ -200,7 +194,6 @@ void SSBDemodSink::processOneSample(Complex &ci)
         }
         else
         {
-            // fftfilt::cmplx z = m_agcActive ? delayedSample * m_agc.getStepValue() : delayedSample;
             fftfilt::cmplx z = (m_agcActive && m_agcClamping) ?
                 fftfilt::cmplx{m_lowpassI.filter(delayedSample.real()), m_lowpassQ.filter(delayedSample.imag())}
                 : delayedSample;

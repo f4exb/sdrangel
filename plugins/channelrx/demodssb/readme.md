@@ -143,7 +143,7 @@ This AGC is based on the calculated magnitude (square root of power of the filte
 
 <h4>13.3: AGC clamping</h4>
 
-When on this clamps signal at the maximum amplitude. Normally this is not needed for most signals as the AGC amplitude order is quite conservative at 10% of the maximum. You may switch it on if you notice a loud click when a transmission starts.
+This limits AGC gain when signal rises up sharply avoiding peak audio overload. You may switch it on if you notice a loud click on strong signals after silences.
 
 <h4>13.4: Noise Reduction</h4>
 
