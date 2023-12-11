@@ -473,7 +473,7 @@
          <string>Squelch</string>
         </property>
         <property name="minimum">
-         <number>-100</number>
+         <number>-120</number>
         </property>
         <property name="maximum">
          <number>0</number>
