@@ -39,7 +39,7 @@ protected:
 	double m_u0;                            //!< AGC factor
 	double m_R;                             //!< ordered magnitude
 	MovingAverage<double> m_moving_average; //!< Averaging engine. The stack length conditions the smoothness of AGC.
-	int m_historySize;                      //!< Averaging length (attack)
+	int m_historySize;                      //!< Averaging length (the longer the slower the AGC)
 	int m_count;                            //!< Samples counter
 };
 
@@ -76,7 +76,6 @@ private:
     int m_stepDownCounter; //!< step down transition samples counter
     int m_gateCounter;     //!< threshold gate samples counter
     int m_stepDownDelay;   //!< delay in samples before cutoff (release)
-    double m_R2;           //!< square of ordered magnitude
     bool m_hardLimiting;   //!< hard limit multiplier so that resulting sample magnitude does not exceed 1.0
 
     double hardLimiter(double multiplier, double magsq);

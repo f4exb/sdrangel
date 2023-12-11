@@ -63,7 +63,6 @@ MagAGC::MagAGC(int historySize, double R, double threshold) :
     m_stepDownCounter(0),
 	m_gateCounter(0),
 	m_stepDownDelay(historySize),
-	m_R2(R*R),
     m_hardLimiting(false)
 {}
 
@@ -72,20 +71,18 @@ MagAGC::~MagAGC()
 
 void MagAGC::resize(int historySize, int stepLength, Real R)
 {
-    m_R2 = R*R;
     m_stepLength = stepLength;
     m_stepDelta = 1.0 / m_stepLength;
     m_stepUpCounter = 0;
     m_stepDownCounter = 0;
     AGC::resize(historySize, R);
-    m_moving_average.fill(0);
+    m_moving_average.fill(m_squared ? R : R*R);
 }
 
 void MagAGC::setOrder(double R)
 {
-    m_R2 = R*R;
     AGC::setOrder(R);
-    m_moving_average.fill(0);
+    m_moving_average.fill(m_squared ? R : R*R);
 }
 
 void MagAGC::setThresholdEnable(bool enable)
