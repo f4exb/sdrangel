@@ -183,7 +183,7 @@
          <widget class="QLabel" name="channelPower">
           <property name="minimumSize">
            <size>
-            <width>30</width>
+            <width>40</width>
             <height>0</height>
            </size>
           </property>
@@ -194,7 +194,10 @@
            <enum>Qt::RightToLeft</enum>
           </property>
           <property name="text">
-           <string>-</string>
+           <string>-120.0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
