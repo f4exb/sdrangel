@@ -113,6 +113,7 @@ public:
 
     virtual int getNbSinkStreams() const { return 2; }
     virtual int getNbSourceStreams() const { return 0; }
+    virtual int getStreamIndex() const { return -1; }
 
     virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
     {

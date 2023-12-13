@@ -178,7 +178,7 @@ void SSBDemodSink::processOneSample(Complex &ci)
         // Only if AGC is active
         if (m_agcActive && m_agcClamping && agcVal > 100.0)
         {
-            qDebug("SSBDemodSink::processOneSample: %f", agcVal);
+            // qDebug("SSBDemodSink::processOneSample: %f", agcVal);
             m_agc.reset(m_agcTarget*m_agcTarget);
             m_squelchDelayLine.write(fftfilt::cmplx{0.0, 0.0});
         }

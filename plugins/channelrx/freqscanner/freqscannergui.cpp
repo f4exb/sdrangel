@@ -225,7 +225,14 @@ void FreqScannerGUI::updateChannelsCombo(QComboBox *combo, const QList<FreqScann
         // Add channels in this device set, other than ourself (Don't use ChannelGUI::getDeviceSetIndex()/getIndex() as not valid when this is first called)
         if ((channel.m_deviceSetIndex == m_freqScanner->getDeviceSetIndex()) && (channel.m_channelIndex != m_freqScanner->getIndexInDeviceSet()))
         {
-            QString name = QString("R%1:%2").arg(channel.m_deviceSetIndex).arg(channel.m_channelIndex);
+            QString name;
+
+            if (channel.m_streamIndex < 0) { // Rx
+                name = QString("R%1:%2").arg(channel.m_deviceSetIndex).arg(channel.m_channelIndex);
+            } else { // MIMO
+                name = QString("M%1:%2.%3").arg(channel.m_deviceSetIndex).arg(channel.m_channelIndex).arg(channel.m_streamIndex);
+            }
+
             combo->addItem(name);
         }
     }

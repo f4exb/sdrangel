@@ -153,6 +153,7 @@ public:
     StreamType getStreamType() const { return m_streamType; }
     virtual int getNbSinkStreams() const = 0;
     virtual int getNbSourceStreams() const = 0;
+    virtual int getStreamIndex() const = 0;
     virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const = 0;
 
     void handlePipeMessageQueue(MessageQueue* messageQueue)

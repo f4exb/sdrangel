@@ -302,9 +302,9 @@ void FreqScanner::setDeviceCenterFrequency(qint64 frequency)
 
 void FreqScanner::initScan()
 {
-    if (m_scanChannelIndex < 0) {
-        applyChannelSetting(m_settings.m_channel);
-    }
+    // if (m_scanChannelIndex < 0) { // Always false
+    //     applyChannelSetting(m_settings.m_channel);
+    // }
     ChannelWebAPIUtils::setAudioMute(m_scanDeviceSetIndex, m_scanChannelIndex, true);
 
     if (m_centerFrequency != m_stepStartFrequency) {
@@ -700,6 +700,7 @@ void FreqScanner::applySettings(const FreqScannerSettings& settings, const QStri
             m_deviceAPI->removeChannelSink(this, m_settings.m_streamIndex);
             m_deviceAPI->addChannelSink(this, settings.m_streamIndex);
             m_deviceAPI->addChannelSinkAPI(this);
+            scanAvailableChannels(); // re-scan
         }
     }
 
@@ -1108,22 +1109,53 @@ void FreqScanner::handleIndexInDeviceSetChanged(int index)
 
 void FreqScanner::scanAvailableChannels()
 {
-    MainCore* mainCore = MainCore::instance();
-    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     m_availableChannels.clear();
 
-    for (const auto& deviceSet : deviceSets)
+    DSPDeviceSourceEngine* deviceSourceEngine = getDeviceAPI()->getDeviceSourceEngine();
+
+    if (deviceSourceEngine)
     {
-        DSPDeviceSourceEngine* deviceSourceEngine = deviceSet->m_deviceSourceEngine;
-
-        if (deviceSourceEngine)
+        for (int chi = 0; chi < getDeviceAPI()->getNbSinkChannels(); chi++) // Rx channels
         {
-            for (int chi = 0; chi < deviceSet->getNumberOfChannels(); chi++)
-            {
-                ChannelAPI* channel = deviceSet->getChannelAt(chi);
+            ChannelAPI* channel = getDeviceAPI()->getChanelSinkAPIAt(chi);
 
+            if (channel->getIndexInDeviceSet() == getIndexInDeviceSet()) { // Exclude oneself
+                continue;
+            }
+
+            FreqScannerSettings::AvailableChannel availableChannel =
+                FreqScannerSettings::AvailableChannel{
+                    channel->getDeviceSetIndex(),
+                    channel->getIndexInDeviceSet(),
+                    -1
+                };
+            m_availableChannels[channel] = availableChannel;
+        }
+    }
+
+    DSPDeviceMIMOEngine *deviceMIMOEngine = getDeviceAPI()->getDeviceMIMOEngine();
+
+    if (deviceMIMOEngine)
+    {
+        for (int chi = 0; chi < getDeviceAPI()->getNbSinkChannels(); chi++) // Rx channels
+        {
+            ChannelAPI* channel = getDeviceAPI()->getChanelSinkAPIAt(chi);
+
+            if (channel->getIndexInDeviceSet() == getIndexInDeviceSet()) { // Exclude oneself
+                continue;
+            }
+
+            // Single Rx on the same I/Q stream
+            if ((channel->getNbSinkStreams() == 1)
+                && (channel->getNbSourceStreams() == 0)
+                && (channel->getStreamIndex() == m_settings.m_streamIndex))
+            {
                 FreqScannerSettings::AvailableChannel availableChannel =
-                    FreqScannerSettings::AvailableChannel{ channel->getDeviceSetIndex(), channel->getIndexInDeviceSet()};
+                    FreqScannerSettings::AvailableChannel{
+                        channel->getDeviceSetIndex(),
+                        channel->getIndexInDeviceSet(),
+                        channel->getStreamIndex()
+                    };
                 m_availableChannels[channel] = availableChannel;
             }
         }
@@ -1134,16 +1166,34 @@ void FreqScanner::scanAvailableChannels()
 
 void FreqScanner::handleChannelAdded(int deviceSetIndex, ChannelAPI* channel)
 {
+    if (deviceSetIndex != getDeviceSetIndex()) { // Can control channels only in the same device set
+        return;
+    }
+
     qDebug("FreqScanner::handleChannelAdded: deviceSetIndex: %d:%d channel: %s (%p)",
         deviceSetIndex, channel->getIndexInDeviceSet(), qPrintable(channel->getURI()), channel);
-    std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
-    DeviceSet* deviceSet = deviceSets[deviceSetIndex];
-    DSPDeviceSourceEngine* deviceSourceEngine = deviceSet->m_deviceSourceEngine;
+    DSPDeviceSourceEngine* deviceSourceEngine = getDeviceAPI()->getDeviceSourceEngine();
 
     if (deviceSourceEngine)
     {
         FreqScannerSettings::AvailableChannel availableChannel =
-            FreqScannerSettings::AvailableChannel{ deviceSetIndex, channel->getIndexInDeviceSet()};
+            FreqScannerSettings::AvailableChannel{ deviceSetIndex, channel->getIndexInDeviceSet(), -1};
+        m_availableChannels[channel] = availableChannel;
+    }
+
+    DSPDeviceMIMOEngine *deviceMIMOEngine = getDeviceAPI()->getDeviceMIMOEngine();
+
+    if (deviceMIMOEngine
+        && (channel->getNbSinkStreams() == 1)
+        && (channel->getNbSourceStreams() == 0)
+        && (channel->getStreamIndex() == m_settings.m_streamIndex))
+    {
+        FreqScannerSettings::AvailableChannel availableChannel =
+            FreqScannerSettings::AvailableChannel{
+                deviceSetIndex,
+                channel->getIndexInDeviceSet(),
+                channel->getStreamIndex()
+            };
         m_availableChannels[channel] = availableChannel;
     }
 
@@ -1152,13 +1202,16 @@ void FreqScanner::handleChannelAdded(int deviceSetIndex, ChannelAPI* channel)
 
 void FreqScanner::handleChannelRemoved(int deviceSetIndex, ChannelAPI* channel)
 {
+    if (deviceSetIndex != getDeviceSetIndex()) { // Can control channels only in the same device set
+        return;
+    }
+
     qDebug("FreqScanner::handleChannelRemoved: deviceSetIndex: %d:%d channel: %s (%p)",
         deviceSetIndex, channel->getIndexInDeviceSet(), qPrintable(channel->getURI()), channel);
-    std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
-    DeviceSet* deviceSet = deviceSets[deviceSetIndex];
-    DSPDeviceSourceEngine* deviceSourceEngine = deviceSet->m_deviceSourceEngine;
+    DSPDeviceSourceEngine* deviceSourceEngine = getDeviceAPI()->getDeviceSourceEngine();
+    DSPDeviceMIMOEngine *deviceMIMOEngine = getDeviceAPI()->getDeviceMIMOEngine();
 
-    if (deviceSourceEngine) {
+    if (deviceSourceEngine || deviceMIMOEngine) {
         m_availableChannels.remove(channel);
     }
 
@@ -1178,8 +1231,9 @@ void FreqScanner::notifyUpdateChannels()
             FreqScannerSettings::AvailableChannel msgChannel =
                 FreqScannerSettings::AvailableChannel{
                     it->m_deviceSetIndex,
-                    it->m_channelIndex
-            };
+                    it->m_channelIndex,
+                    it->m_streamIndex
+                };
             msgChannels.push_back(msgChannel);
         }
 
