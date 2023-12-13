@@ -35,7 +35,8 @@
 #include "device/deviceset.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "dsp/morsedemod.h"
+#include "dsp/devicesamplesource.h"
+#include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
 #include "settings/serializable.h"
@@ -293,10 +294,17 @@ void FreqScanner::stopScan()
 
 void FreqScanner::setDeviceCenterFrequency(qint64 frequency)
 {
-    // For RTL SDR, ChannelWebAPIUtils::setCenterFrequency takes ~50ms, which means tuneTime can be 0
-    if (!ChannelWebAPIUtils::setCenterFrequency(getDeviceSetIndex(), frequency)) {
-        qWarning() << "Freq Scanner failed to set frequency" << frequency;
+    DSPDeviceSourceEngine* deviceSourceEngine = getDeviceAPI()->getDeviceSourceEngine();
+    DSPDeviceMIMOEngine *deviceMIMOEngine = getDeviceAPI()->getDeviceMIMOEngine();
+
+    if (deviceSourceEngine) // Rx device
+    {
+        // For RTL SDR, setCenterFrequency takes ~50ms, which means tuneTime can be 0
+        getDeviceAPI()->getSampleSource()->setCenterFrequency(frequency);
+    } else if (deviceMIMOEngine) { // MIMO device - I/Q stream is the same as this channel
+        getDeviceAPI()->getSampleMIMO()->setSourceCenterFrequency(frequency, m_settings.m_streamIndex);
     }
+
     m_minFFTStartTime = QDateTime::currentDateTime().addMSecs(m_settings.m_tuneTime);
 }
 
