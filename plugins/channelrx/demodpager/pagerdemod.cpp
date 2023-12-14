@@ -180,10 +180,15 @@ bool PagerDemod::handleMessage(const Message& cmd)
         {
             QByteArray message;
             message.append(report.getDateTime().toString().toLatin1());
+            message.append('\0');
             message.append(QString::number(report.getAddress()).toLatin1());
+            message.append('\0');
             message.append(QString::number(report.getFunctionBits()).toLatin1());
+            message.append('\0');
             message.append(report.getAlphaMessage().toLatin1());
+            message.append('\0');
             message.append(report.getNumericMessage().toLatin1());
+            message.append('\0');
             m_udpSocket.writeDatagram(message.data(), message.size(),
                                 QHostAddress(m_settings.m_udpAddress), m_settings.m_udpPort);
         }
