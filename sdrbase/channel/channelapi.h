@@ -188,6 +188,7 @@ private:
 
 signals:
     void indexInDeviceSetChanged(int index);
+    void streamIndexChanged(int index);
 };
 
 

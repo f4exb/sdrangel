@@ -395,6 +395,8 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
             m_deviceAPI->removeChannelSink(this, m_settings.m_streamIndex);
             m_deviceAPI->addChannelSink(this, settings.m_streamIndex);
             m_deviceAPI->addChannelSinkAPI(this);
+            m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
+            emit streamIndexChanged(settings.m_streamIndex);
         }
 
         reverseAPIKeys.append("streamIndex");

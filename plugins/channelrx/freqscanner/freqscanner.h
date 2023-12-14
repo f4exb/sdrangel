@@ -418,6 +418,7 @@ private slots:
     void handleIndexInDeviceSetChanged(int index);
     void handleChannelAdded(int deviceSetIndex, ChannelAPI* channel);
     void handleChannelRemoved(int deviceSetIndex, ChannelAPI* channel);
+    void handleChannelStreamIndexChanged(int streamIndex, ChannelAPI* channel);
     void timeout();
 
 };

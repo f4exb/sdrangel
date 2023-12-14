@@ -312,6 +312,8 @@ void DATVMod::applySettings(const DATVModSettings& settings, bool force)
             m_deviceAPI->removeChannelSource(this, m_settings.m_streamIndex);
             m_deviceAPI->addChannelSource(this, settings.m_streamIndex);
             m_deviceAPI->addChannelSourceAPI(this);
+            m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
+            emit streamIndexChanged(settings.m_streamIndex);
         }
 
         reverseAPIKeys.append("streamIndex");

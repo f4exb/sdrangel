@@ -271,6 +271,20 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
     if (settings.m_playerEnable != m_settings.m_playerEnable) {
         reverseAPIKeys.append("playerEnable");
     }
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSinkAPI(this);
+            m_deviceAPI->removeChannelSink(this, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSink(this, settings.m_streamIndex);
+            m_deviceAPI->addChannelSinkAPI(this);
+            m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
+            emit streamIndexChanged(settings.m_streamIndex);
+        }
+
+        reverseAPIKeys.append("streamIndex");
+    }
 
     DATVDemodBaseband::MsgConfigureDATVDemodBaseband *msg = DATVDemodBaseband::MsgConfigureDATVDemodBaseband::create(settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
