@@ -17,7 +17,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <hamlib/rig.h>
 #include "audiocatsisohamlib.h"
 
 AudioCATSISOHamlib::AudioCATSISOHamlib()
@@ -31,7 +30,7 @@ AudioCATSISOHamlib::~AudioCATSISOHamlib()
 {
 }
 
-int AudioCATSISOHamlib::hash_model_list(const struct rig_caps *caps, void *data)
+int AudioCATSISOHamlib::hash_model_list(HAMLIB_RIG_CAPS *caps, void *data)
 {
     AudioCATSISOHamlib *hamlibHandler = (AudioCATSISOHamlib*) data;
     hamlibHandler->m_rigModels[caps->rig_model] = caps->model_name;
