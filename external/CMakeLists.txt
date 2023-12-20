@@ -483,7 +483,7 @@ if (NOT FFMPEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
             UPDATE_DISCONNECTED TRUE
             DEPENDS ${MPG123_DEPENDS}
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/lame"
-            CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${MPG123_PKG_CONFIG_DIR} <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-shared
+            CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${MPG123_PKG_CONFIG_DIR} <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-shared --disable-frontend
             BUILD_COMMAND ${MAKE}
             TEST_COMMAND ""
             )
