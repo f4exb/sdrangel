@@ -179,9 +179,11 @@ bool PagerDemod::handleMessage(const Message& cmd)
         if (m_settings.m_udpEnabled)
         {
             QByteArray message;
-            message.append(report.getDateTime().toString().toLatin1());
+            message.append(report.getDateTime().date().toString().toLatin1());
             message.append('\0');
-            message.append(QString::number(report.getAddress()).toLatin1());
+            message.append(report.getDateTime().time().toString().toLatin1());
+            message.append('\0');
+            message.append(QString("%1").arg(report.getAddress(), 7, 10, QChar('0')).toLatin1());
             message.append('\0');
             message.append(QString::number(report.getFunctionBits()).toLatin1());
             message.append('\0');
