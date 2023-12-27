@@ -131,13 +131,13 @@ for:
     deploy:
       provider: Environment
       name: f4exb
-  - matrix:
-      only:
-        - TARGET: ubuntu2204docker
-    before_build:
-      - git clone https://github.com/f4exb/sdrangel-docker.git
-      - cd sdrangel-docker
-    build_script:
-      - cd sdrangel
-      - ./build_vanilla.sh -T ${APPVEYOR_PULL_REQUEST_HEAD_COMMIT:-${APPVEYOR_REPO_COMMIT}}
-      - ./build_server.sh -T ${APPVEYOR_PULL_REQUEST_HEAD_COMMIT:-${APPVEYOR_REPO_COMMIT}}
+  # - matrix:
+  #     only:
+  #       - TARGET: ubuntu2204docker
+  #   before_build:
+  #     - git clone https://github.com/f4exb/sdrangel-docker.git
+  #     - cd sdrangel-docker
+  #   build_script:
+  #     - cd sdrangel
+  #     - ./build_vanilla.sh -T ${APPVEYOR_PULL_REQUEST_HEAD_COMMIT:-${APPVEYOR_REPO_COMMIT}}
+  #     - ./build_server.sh -T ${APPVEYOR_PULL_REQUEST_HEAD_COMMIT:-${APPVEYOR_REPO_COMMIT}}
