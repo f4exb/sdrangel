@@ -1,3 +1,33 @@
+sdrangel (7.17.3-1) unstable; urgency=medium
+
+   * Map updates: Allow selection of which device to tune to frequency. PR #1911
+   * Map updates: Support tuning of multiple frequencies per map item. Update maplibre to maplibregl. PR #1911
+   * Use common code for creating and processing device and channel Ids. PR #1911
+   * Prevent crash that can occur if preset type is unknown. PR #1911
+   * Add support for setting center frequency on Tx devices. PR #1911
+   * Allow replay time offset to be set by ctrl+left click in waterfall. PR #1914
+   * Add replay support to Lime Input. PR #1914
+   * Remove space in CSV header. PR #1916
+   * SDRPlayV3 on Mac: Update library path so is works with API 3.12.1. PR #1916
+   * Fixed AudioNetSink stereo handling
+   * SSB demod: added FIR LP filter after AGC to smooth out sharp peaks
+   * Removed useless AGC clamping
+   * Fixed some AGC issues
+   * SSB demod: better algorithm for AGC limitation. Fixes #1918
+   * AM demod: extend squelch limit to -120 dB
+   * Start file browser in directory of last file selected. PR #1926
+   * Fix #1928. Add null-terminator between strings. PR #1929
+   * Frequency Scanner: allow scanning channels of a MIMO device
+   * Frequency scanner: set device frequency for both Rx and MIMO devices
+   * Frequency Scanner: GUI: give more space to channel power display
+   * Frequency Scanner: handle change of I/Q stream in tracked channels (MIMO)
+   * AudioCATSISO: adapt to newer versions of Hamlib. Fixes #1919
+   * Mac O/S: Disable build of LAME frontend. PR #1935
+   * Use separate date/time fields and prefix address with leading 0. Fixes #1936. PR #1937.
+   * Star Tracker: Handle negative flux values in .srd file. PR #1940.
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 31 Dec 2023 17:58:51 +0100
+
 sdrangel (7.17.2-1) unstable; urgency=medium
 
    * Freq Scanner: Add per-frequency settings. Fix freq > 2GHz. PR #1905
