@@ -61,6 +61,7 @@ FileInput::FileInput(DeviceAPI *deviceAPI) :
 	m_sampleRate(48000),
 	m_sampleSize(0),
 	m_centerFrequency(435000000),
+    m_dataStartPos(0),
 	m_recordLengthMuSec(0),
     m_startingTimeStamp(0)
 {
@@ -156,11 +157,11 @@ void FileInput::openFileStream()
         if (headerOK && (m_sampleRate > 0) && (m_sampleSize > 0))
         {
 #ifdef ANDROID
-            qint64 pos = m_inputFile.pos();
+            m_dataStartPos = m_inputFile.pos();
 #else
-            qint64 pos = m_ifstream.tellg();
+            m_dataStartPos = m_ifstream.tellg();
 #endif
-            m_recordLengthMuSec = ((fileSize - pos) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
+            m_recordLengthMuSec = ((fileSize - m_dataStartPos) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
         }
         else
         {
@@ -184,7 +185,8 @@ void FileInput::openFileStream()
 	    m_ifstream.seekg(0,std::ios_base::beg);
 		bool crcOK = FileRecord::readHeader(m_ifstream, header);
 #endif
-		m_sampleRate = header.sampleRate;
+		m_dataStartPos = sizeof(FileRecord::Header);
+        m_sampleRate = header.sampleRate;
 		m_centerFrequency = header.centerFrequency;
 		m_startingTimeStamp = header.startTimeStamp;
 		m_sampleSize = header.sampleSize;
@@ -193,7 +195,7 @@ void FileInput::openFileStream()
 	    if (crcOK && (m_sampleRate > 0) && (m_sampleSize > 0))
 	    {
 	        qDebug("FileInput::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
-	        m_recordLengthMuSec = ((fileSize - sizeof(FileRecord::Header)) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
+	        m_recordLengthMuSec = ((fileSize - m_dataStartPos) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
 	    }
 	    else if (!crcOK)
 	    {
@@ -260,12 +262,12 @@ void FileInput::seekFileStream(int seekMillis)
         quint64 seekPoint = ((m_recordLengthMuSec * seekMillis) / 1000) * m_sampleRate;
         seekPoint /= 1000000UL;
 		m_fileInputWorker->setSamplesCount(seekPoint);
-        seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileRecord::Header)
+        seekPoint *= (m_sampleSize == 24 ? 8 : 4);
 #ifdef ANDROID
-        m_inputFile.seek(seekPoint + sizeof(FileRecord::Header));
+        m_inputFile.seek(seekPoint + m_dataStartPos);
 #else
 		m_ifstream.clear();
-		m_ifstream.seekg(seekPoint + sizeof(FileRecord::Header), std::ios::beg);
+		m_ifstream.seekg(seekPoint + m_dataStartPos, std::ios::beg);
 #endif
 	}
 }

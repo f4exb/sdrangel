@@ -2444,13 +2444,13 @@ float GLSpectrumView::calPower(float power) const
 
 int GLSpectrumView::frequencyToBin(int64_t frequency) const
 {
-    float rbw = m_sampleRate / (float)m_fftSize;
+    float rbw = (m_ssbSpectrum ? (m_sampleRate/2) : m_sampleRate) / (float)m_fftSize;
     return (frequency - m_frequencyScale.getRangeMin()) / rbw;
 }
 
 int64_t GLSpectrumView::binToFrequency(int bin) const
 {
-    float rbw = m_sampleRate / (float)m_fftSize;
+    float rbw = (m_ssbSpectrum ? (m_sampleRate/2) : m_sampleRate) / (float)m_fftSize;
     return m_frequencyScale.getRangeMin() + bin * rbw;
 }
 
@@ -3453,6 +3453,9 @@ void GLSpectrumView::applyChanges()
 
 void GLSpectrumView::updateHistogramMarkers()
 {
+    if (m_sampleRate == 0) {
+        return;
+    }
     int64_t centerFrequency;
     int frequencySpan;
     getFrequencyZoom(centerFrequency, frequencySpan);
