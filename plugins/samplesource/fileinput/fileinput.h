@@ -350,6 +350,7 @@ public:
 	int m_sampleRate;
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
+	qint64 m_dataStartPos;       //!< Position of IQ data in file
     quint64 m_recordLengthMuSec; //!< record length in microseconds computed from file size
     quint64 m_startingTimeStamp;
 	QTimer m_masterTimer;
