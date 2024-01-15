@@ -4414,61 +4414,73 @@ bool WebAPIRequestMapper::getChannelSettings(
         if (channelSettingsKey == "ADSBDemodSettings")
         {
             channelSettings->setAdsbDemodSettings(new SWGSDRangel::SWGADSBDemodSettings());
+            channelSettings->getAdsbDemodSettings()->init();
             channelSettings->getAdsbDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "AISDemodSettings")
         {
             channelSettings->setAisDemodSettings(new SWGSDRangel::SWGAISDemodSettings());
+            channelSettings->getAisDemodSettings()->init();
             channelSettings->getAisDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "AISModSettings")
         {
             channelSettings->setAisModSettings(new SWGSDRangel::SWGAISModSettings());
+            channelSettings->getAisModSettings()->init();
             channelSettings->getAisModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "AMDemodSettings")
         {
             channelSettings->setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
+            channelSettings->getAmDemodSettings()->init();
             channelSettings->getAmDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "AMModSettings")
         {
             channelSettings->setAmModSettings(new SWGSDRangel::SWGAMModSettings());
+            channelSettings->getAmModSettings()->init();
             channelSettings->getAmModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "APTDemodSettings")
         {
             channelSettings->setAptDemodSettings(new SWGSDRangel::SWGAPTDemodSettings());
+            channelSettings->getAptDemodSettings()->init();
             channelSettings->getAptDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "ATVDemodSettings")
         {
             channelSettings->setAtvDemodSettings(new SWGSDRangel::SWGATVDemodSettings());
+            channelSettings->getAtvDemodSettings()->init();
             channelSettings->getAtvDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "ATVModSettings")
         {
             channelSettings->setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
+            channelSettings->getAtvModSettings()->init();
             channelSettings->getAtvModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "BeamSteeringCWModSettings")
         {
             channelSettings->setBeamSteeringCwModSettings(new SWGSDRangel::SWGBeamSteeringCWModSettings());
+            channelSettings->getBeamSteeringCwModSettings()->init();
             channelSettings->getBeamSteeringCwModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "BFMDemodSettings")
         {
             channelSettings->setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());
+            channelSettings->getBfmDemodSettings()->init();
             channelSettings->getBfmDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "ChannelAnalyzerSettings")
         {
             channelSettings->setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
+            channelSettings->getChannelAnalyzerSettings()->init();
             channelSettings->getChannelAnalyzerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "ChirpChatDemodSettings")
         {
             channelSettings->setChirpChatDemodSettings(new SWGSDRangel::SWGChirpChatDemodSettings());
+            channelSettings->getChirpChatDemodSettings()->init();
             channelSettings->getChirpChatDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "ChirpChatModSettings")
@@ -4480,116 +4492,139 @@ bool WebAPIRequestMapper::getChannelSettings(
         else if (channelSettingsKey == "DATVDemodSettings")
         {
             channelSettings->setDatvDemodSettings(new SWGSDRangel::SWGDATVDemodSettings());
+            channelSettings->getDatvDemodSettings()->init();
             channelSettings->getDatvDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "DATVModSettings")
         {
             channelSettings->setDatvModSettings(new SWGSDRangel::SWGDATVModSettings());
+            channelSettings->getDatvModSettings()->init();
             channelSettings->getDatvModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "DABDemodSettings")
         {
             channelSettings->setDabDemodSettings(new SWGSDRangel::SWGDABDemodSettings());
+            channelSettings->getDabDemodSettings()->init();
             channelSettings->getDabDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "DOA2Settings")
         {
             channelSettings->setDoa2Settings(new SWGSDRangel::SWGDOA2Settings());
+            channelSettings->getDoa2Settings()->init();
             channelSettings->getDoa2Settings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "DSCDemodSettings")
         {
             channelSettings->setDscDemodSettings(new SWGSDRangel::SWGDSCDemodSettings());
+            channelSettings->getDscDemodSettings()->init();
             channelSettings->getDscDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "DSDDemodSettings")
         {
             channelSettings->setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
+            channelSettings->getDsdDemodSettings()->init();
             channelSettings->getDsdDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "FileSinkSettings")
         {
             channelSettings->setFileSinkSettings(new SWGSDRangel::SWGFileSinkSettings());
+            channelSettings->getFileSinkSettings()->init();
             channelSettings->getFileSinkSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "FileSourceSettings")
         {
             channelSettings->setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
+            channelSettings->getFileSourceSettings()->init();
             channelSettings->getFileSourceSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "FreeDVDemodSettings")
         {
             channelSettings->setFreeDvDemodSettings(new SWGSDRangel::SWGFreeDVDemodSettings());
+            channelSettings->getFreeDvDemodSettings()->init();
             channelSettings->getFreeDvDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "FreeDVModSettings")
         {
             channelSettings->setFreeDvModSettings(new SWGSDRangel::SWGFreeDVModSettings());
+            channelSettings->getFreeDvModSettings()->init();
             channelSettings->getFreeDvModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "FreqScannerSettings")
         {
             channelSettings->setFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
+	        channelSettings->getFreqScannerSettings()->init();
             channelSettings->getFreqScannerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "FreqTrackerSettings")
         {
             channelSettings->setFreqTrackerSettings(new SWGSDRangel::SWGFreqTrackerSettings());
+	        channelSettings->getFreqTrackerSettings()->init();
             channelSettings->getFreqTrackerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "FT8DemodSettings")
         {
             channelSettings->setFt8DemodSettings(new SWGSDRangel::SWGFT8DemodSettings());
+	        channelSettings->getFt8DemodSettings()->init();
             channelSettings->getFt8DemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "HeatMapSettings")
         {
             channelSettings->setHeatMapSettings(new SWGSDRangel::SWGHeatMapSettings());
+            channelSettings->getHeatMapSettings()->init();
             channelSettings->getHeatMapSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "IEEE_802_15_4_ModSettings")
         {
             channelSettings->setIeee802154ModSettings(new SWGSDRangel::SWGIEEE_802_15_4_ModSettings());
+            channelSettings->getIeee802154ModSettings()->init();
             channelSettings->getIeee802154ModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "ILSDemodSettings")
         {
             channelSettings->setIlsDemodSettings(new SWGSDRangel::SWGILSDemodSettings());
+            channelSettings->getIlsDemodSettings()->init();
             channelSettings->getIlsDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "InterferometerSettings")
         {
             channelSettings->setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
+            channelSettings->getInterferometerSettings()->init();
             channelSettings->getInterferometerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "NavtexDemodSettings")
         {
             channelSettings->setNavtexDemodSettings(new SWGSDRangel::SWGNavtexDemodSettings());
+            channelSettings->getNavtexDemodSettings()->init();
             channelSettings->getNavtexDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "M17DemodSettings")
         {
             channelSettings->setM17DemodSettings(new SWGSDRangel::SWGM17DemodSettings());
+            channelSettings->getM17DemodSettings()->init();
             channelSettings->getM17DemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "M17ModSettings")
         {
             channelSettings->setM17ModSettings(new SWGSDRangel::SWGM17ModSettings());
+            channelSettings->getM17ModSettings()->init();
             channelSettings->getM17ModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "NFMDemodSettings")
         {
             channelSettings->setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
+            channelSettings->getNfmDemodSettings()->init();
             channelSettings->getNfmDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "NFMModSettings")
         {
             channelSettings->setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
+            channelSettings->getNfmModSettings()->init();
             channelSettings->getNfmModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "NoiseFigureSettings")
         {
             channelSettings->setNoiseFigureSettings(new SWGSDRangel::SWGNoiseFigureSettings());
+            channelSettings->getNoiseFigureSettings()->init();
             channelSettings->getNoiseFigureSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "LocalSinkSettings")
@@ -4601,91 +4636,109 @@ bool WebAPIRequestMapper::getChannelSettings(
         else if (channelSettingsKey == "LocalSourceSettings")
         {
             channelSettings->setLocalSourceSettings(new SWGSDRangel::SWGLocalSourceSettings());
+            channelSettings->getLocalSourceSettings()->init();
             channelSettings->getLocalSourceSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "PacketDemodSettings")
         {
             channelSettings->setPacketDemodSettings(new SWGSDRangel::SWGPacketDemodSettings());
+            channelSettings->getPacketDemodSettings()->init();
             channelSettings->getPacketDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "PacketModSettings")
         {
             channelSettings->setPacketModSettings(new SWGSDRangel::SWGPacketModSettings());
+            channelSettings->getPacketModSettings()->init();
             channelSettings->getPacketModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "PagerDemodSettings")
         {
             channelSettings->setPagerDemodSettings(new SWGSDRangel::SWGPagerDemodSettings());
+            channelSettings->getPagerDemodSettings()->init();
             channelSettings->getPagerDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "PSK31ModSettings")
         {
             channelSettings->setPsk31ModSettings(new SWGSDRangel::SWGPSK31ModSettings());
+            channelSettings->getPsk31ModSettings()->init();
             channelSettings->getPsk31ModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "RadioAstronomySettings")
         {
             channelSettings->setRadioAstronomySettings(new SWGSDRangel::SWGRadioAstronomySettings());
+            channelSettings->getRadioAstronomySettings()->init();
             channelSettings->getRadioAstronomySettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "RadioClockSettings")
         {
             channelSettings->setRadioClockSettings(new SWGSDRangel::SWGRadioClockSettings());
+            channelSettings->getRadioClockSettings()->init();
             channelSettings->getRadioClockSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "RadiosondeDemodSettings")
         {
             channelSettings->setRadiosondeDemodSettings(new SWGSDRangel::SWGRadiosondeDemodSettings());
+            channelSettings->getRadiosondeDemodSettings()->init();
             channelSettings->getRadiosondeDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "RemoteSinkSettings")
         {
             channelSettings->setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
+            channelSettings->getRemoteSinkSettings()->init();
             channelSettings->getRemoteSinkSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "RemoteSourceSettings")
         {
             channelSettings->setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
+            channelSettings->getRemoteSourceSettings()->init();
             channelSettings->getRemoteSourceSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "RemoteTCPSinkSettings")
         {
             channelSettings->setRemoteTcpSinkSettings(new SWGSDRangel::SWGRemoteTCPSinkSettings());
+            channelSettings->getRemoteTcpSinkSettings()->init();
             channelSettings->getRemoteTcpSinkSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "RTTYDemodSettings")
         {
             channelSettings->setRttyDemodSettings(new SWGSDRangel::SWGRTTYDemodSettings());
+            channelSettings->getRttyDemodSettings()->init();
             channelSettings->getRttyDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "RTTYModSettings")
         {
             channelSettings->setRttyModSettings(new SWGSDRangel::SWGRTTYModSettings());
+            channelSettings->getRttyModSettings()->init();
             channelSettings->getRttyModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "SigMFFileSinkSettings")
         {
             channelSettings->setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
+            channelSettings->getSigMfFileSinkSettings()->init();
             channelSettings->getSigMfFileSinkSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "SSBDemodSettings")
         {
             channelSettings->setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
+            channelSettings->getSsbDemodSettings()->init();
             channelSettings->getSsbDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "SSBModSettings")
         {
             channelSettings->setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
+            channelSettings->getSsbModSettings()->init();
             channelSettings->getSsbModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "UDPSourceSettings")
         {
             channelSettings->setUdpSourceSettings(new SWGSDRangel::SWGUDPSourceSettings());
+            channelSettings->getUdpSourceSettings()->init();
             channelSettings->getUdpSourceSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "UDPSinkSettings")
         {
             channelSettings->setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
+            channelSettings->getUdpSinkSettings()->init();
             channelSettings->getUdpSinkSettings()->fromJsonObject(settingsJsonObject);
         }
         // else if (channelSettingsKey == "VORDemodMCSettings")
@@ -4696,16 +4749,19 @@ bool WebAPIRequestMapper::getChannelSettings(
         else if (channelSettingsKey == "VORDemodSettings")
         {
             channelSettings->setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
+            channelSettings->getVorDemodSettings()->init();
             channelSettings->getVorDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "WFMDemodSettings")
         {
             channelSettings->setWfmDemodSettings(new SWGSDRangel::SWGWFMDemodSettings());
+            channelSettings->getWfmDemodSettings()->init();
             channelSettings->getWfmDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "WFMModSettings")
         {
             channelSettings->setWfmModSettings(new SWGSDRangel::SWGWFMModSettings());
+            channelSettings->getWfmModSettings()->init();
             channelSettings->getWfmModSettings()->fromJsonObject(settingsJsonObject);
         }
         else
