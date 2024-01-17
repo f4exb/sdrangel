@@ -199,6 +199,13 @@ bool SatelliteTrackerGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (SatelliteTracker::MsgError::match(message))
+    {
+        SatelliteTracker::MsgError& errorMsg = (SatelliteTracker::MsgError&) message;
+        QString error = errorMsg.getError();
+        QMessageBox::critical(this, "Satellite Tracker", error);
+        return true;
+    }
 
     return false;
 }
