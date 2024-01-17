@@ -124,6 +124,25 @@ public:
         { }
     };
 
+    class MsgError : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QString getError() { return m_error; }
+
+        static MsgError* create(const QString& error) {
+            return new MsgError(error);
+        }
+
+    private:
+        QString m_error;
+
+        MsgError(const QString& error) :
+            Message(),
+            m_error(error)
+        { }
+    };
+
     SatelliteTracker(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~SatelliteTracker();
     virtual void destroy() { delete this; }
@@ -220,7 +239,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-    void downloadFinished(const QString& filename, bool success);
+    void downloadFinished(const QString& filename, bool success, const QString& url, const QString& error);
 };
 
 #endif // INCLUDE_FEATURE_SATELLITETRACKER_H_
