@@ -335,7 +335,8 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
     {"SatelliteTracker", "SatelliteTrackerActions"},
     {"SimplePTT", "SimplePTTActions"},
     {"StarTracker", "StarTrackerActions"},
-    {"VORLocalizer", "VORLocalizerActions"}
+    {"VORLocalizer", "VORLocalizerActions"},
+    {"DemodAnalyzer", "DemodAnalyzerActions"}
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {

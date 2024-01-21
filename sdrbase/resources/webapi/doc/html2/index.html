@@ -5404,6 +5404,19 @@ margin-bottom: 20px;
   },
   "description" : "List of DV serial devices available in the system"
 };
+            defs.DemodAnalyzerActions = {
+  "properties" : {
+    "deviceId" : {
+      "type" : "integer",
+      "description" : "Device Id/Number that channel belongs to"
+    },
+    "channelId" : {
+      "type" : "integer",
+      "description" : "Channel Id/Number of the channel within the device"
+    }
+  },
+  "description" : "Demod Analyzer actions"
+};
             defs.DemodAnalyzerSettings = {
   "properties" : {
     "log2Decim" : {
@@ -6241,6 +6254,9 @@ margin-bottom: 20px;
     },
     "VORLocalizerActions" : {
       "$ref" : "#/definitions/VORLocalizerActions"
+    },
+    "DemodAnalyzerActions" : {
+      "$ref" : "#/definitions/DemodAnalyzerActions"
     }
   },
   "description" : "Base feature actions. Only the feature actions corresponding to the feature specified in the featureType field is or should be present."
@@ -58413,7 +58429,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2023-11-30T13:04:24.913+01:00
+              Generated 2024-01-21T13:22:02.160+01:00
             </div>
           </div>
       </div>

@@ -56,6 +56,8 @@ SWGFeatureActions::SWGFeatureActions() {
     m_star_tracker_actions_isSet = false;
     vor_localizer_actions = nullptr;
     m_vor_localizer_actions_isSet = false;
+    demod_analyzer_actions = nullptr;
+    m_demod_analyzer_actions_isSet = false;
 }
 
 SWGFeatureActions::~SWGFeatureActions() {
@@ -92,6 +94,8 @@ SWGFeatureActions::init() {
     m_star_tracker_actions_isSet = false;
     vor_localizer_actions = new SWGVORLocalizerActions();
     m_vor_localizer_actions_isSet = false;
+    demod_analyzer_actions = new SWGDemodAnalyzerActions();
+    m_demod_analyzer_actions_isSet = false;
 }
 
 void
@@ -134,6 +138,9 @@ SWGFeatureActions::cleanup() {
     if(vor_localizer_actions != nullptr) { 
         delete vor_localizer_actions;
     }
+    if(demod_analyzer_actions != nullptr) { 
+        delete demod_analyzer_actions;
+    }
 }
 
 SWGFeatureActions*
@@ -174,6 +181,8 @@ SWGFeatureActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&star_tracker_actions, pJson["StarTrackerActions"], "SWGStarTrackerActions", "SWGStarTrackerActions");
     
     ::SWGSDRangel::setValue(&vor_localizer_actions, pJson["VORLocalizerActions"], "SWGVORLocalizerActions", "SWGVORLocalizerActions");
+    
+    ::SWGSDRangel::setValue(&demod_analyzer_actions, pJson["DemodAnalyzerActions"], "SWGDemodAnalyzerActions", "SWGDemodAnalyzerActions");
     
 }
 
@@ -232,6 +241,9 @@ SWGFeatureActions::asJsonObject() {
     }
     if((vor_localizer_actions != nullptr) && (vor_localizer_actions->isSet())){
         toJsonValue(QString("VORLocalizerActions"), vor_localizer_actions, obj, QString("SWGVORLocalizerActions"));
+    }
+    if((demod_analyzer_actions != nullptr) && (demod_analyzer_actions->isSet())){
+        toJsonValue(QString("DemodAnalyzerActions"), demod_analyzer_actions, obj, QString("SWGDemodAnalyzerActions"));
     }
 
     return obj;
@@ -377,6 +389,16 @@ SWGFeatureActions::setVorLocalizerActions(SWGVORLocalizerActions* vor_localizer_
     this->m_vor_localizer_actions_isSet = true;
 }
 
+SWGDemodAnalyzerActions*
+SWGFeatureActions::getDemodAnalyzerActions() {
+    return demod_analyzer_actions;
+}
+void
+SWGFeatureActions::setDemodAnalyzerActions(SWGDemodAnalyzerActions* demod_analyzer_actions) {
+    this->demod_analyzer_actions = demod_analyzer_actions;
+    this->m_demod_analyzer_actions_isSet = true;
+}
+
 
 bool
 SWGFeatureActions::isSet(){
@@ -422,6 +444,9 @@ SWGFeatureActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(vor_localizer_actions && vor_localizer_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(demod_analyzer_actions && demod_analyzer_actions->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

@@ -35,3 +35,5 @@ FeatureActions:
       $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerActions"
     VORLocalizerActions:
       $ref: "http://swgserver:8081/api/swagger/include/VORLocalizer.yaml#/VORLocalizerActions"
+    DemodAnalyzerActions:
+      $ref: "http://swgserver:8081/api/swagger/include/DemodAnalyzer.yaml#/DemodAnalyzerActions"

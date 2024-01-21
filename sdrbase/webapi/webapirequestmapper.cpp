@@ -27,6 +27,7 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "SWGDemodAnalyzerActions.h"
 #include "httpdocrootsettings.h"
 #include "webapirequestmapper.h"
 #include "webapiutils.h"
@@ -5374,6 +5375,11 @@ bool WebAPIRequestMapper::getFeatureActions(
         {
             featureActions->setVorLocalizerActions(new SWGSDRangel::SWGVORLocalizerActions());
             featureActions->getVorLocalizerActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "DemodAnalyzerActions") 
+        {
+            featureActions->setDemodAnalyzerActions(new SWGSDRangel::SWGDemodAnalyzerActions());
+            featureActions->getDemodAnalyzerActions()->fromJsonObject(actionsJsonObject);
         }
         else
         {

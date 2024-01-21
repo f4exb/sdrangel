@@ -39,3 +39,15 @@ DemodAnalyzerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+DemodAnalyzerActions:
+  description: "Demod Analyzer actions"
+  properties:
+    deviceId:
+      type: integer
+      required: true
+      description: "Device Id/Number that channel belongs to"
+    channelId:
+      type: integer
+      required: true
+      description: "Channel Id/Number of the channel within the device"
