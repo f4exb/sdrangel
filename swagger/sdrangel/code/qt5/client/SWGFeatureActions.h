@@ -24,6 +24,7 @@
 
 #include "SWGAFCActions.h"
 #include "SWGAMBEActions.h"
+#include "SWGDemodAnalyzerActions.h"
 #include "SWGGS232ControllerActions.h"
 #include "SWGLimeRFEActions.h"
 #include "SWGMapActions.h"
@@ -95,6 +96,9 @@ public:
     SWGVORLocalizerActions* getVorLocalizerActions();
     void setVorLocalizerActions(SWGVORLocalizerActions* vor_localizer_actions);
 
+    SWGDemodAnalyzerActions* getDemodAnalyzerActions();
+    void setDemodAnalyzerActions(SWGDemodAnalyzerActions* demod_analyzer_actions);
+
 
     virtual bool isSet() override;
 
@@ -140,6 +144,9 @@ private:
 
     SWGVORLocalizerActions* vor_localizer_actions;
     bool m_vor_localizer_actions_isSet;
+
+    SWGDemodAnalyzerActions* demod_analyzer_actions;
+    bool m_demod_analyzer_actions_isSet;
 
 };
 

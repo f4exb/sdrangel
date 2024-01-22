@@ -708,3 +708,34 @@ void DemodAnalyzer::handleDataPipeToBeDeleted(int reason, QObject *object)
         }
     }
 }
+
+int DemodAnalyzer::webapiActionsPost(
+            const QStringList& featureActionsKeys,
+            SWGSDRangel::SWGFeatureActions& query,
+            QString& errorMessage) {
+
+    MainCore* m_core = MainCore::instance();
+    auto action = query.getDemodAnalyzerActions();
+    if (action == nullptr) {
+        errorMessage = QString("missing DemodAnalyzerActions in request");
+        return 404;
+    }
+
+    auto deviceId = action->getDeviceId();
+    auto chanId = action->getChannelId();
+
+    ChannelAPI * chan = m_core->getChannel(deviceId, chanId);
+    if (chan == nullptr) {
+        errorMessage = QString("device(%1) or channel (%2) on the device does not exist").arg(deviceId).arg(chanId);
+        return 404;
+    }
+
+    MsgRefreshChannels *m1 = MsgRefreshChannels::create();
+    getInputMessageQueue()->push(m1);
+    MsgSelectChannel *msg = MsgSelectChannel::create(chan);
+    getInputMessageQueue()->push(msg);
+    return 200;
+}
+
+
+

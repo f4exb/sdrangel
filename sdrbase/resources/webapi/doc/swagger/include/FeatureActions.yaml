@@ -35,3 +35,5 @@ FeatureActions:
       $ref: "/doc/swagger/include/StarTracker.yaml#/StarTrackerActions"
     VORLocalizerActions:
       $ref: "/doc/swagger/include/VORLocalizer.yaml#/VORLocalizerActions"
+    DemodAnalyzerActions:
+      $ref: "/doc/swagger/include/DemodAnalyzer.yaml#/DemodAnalyzerActions"
