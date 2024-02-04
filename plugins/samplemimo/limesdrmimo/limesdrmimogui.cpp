@@ -258,6 +258,15 @@ bool LimeSDRMIMOGUI::handleMessage(const Message& message)
         ui->gpioText->setText(tr("%1").arg(report.getGPIOPins(), 2, 16, QChar('0')).toUpper());
         return true;
     }
+    else if (LimeSDRMIMO::MsgStartStop::match(message))
+    {
+        LimeSDRMIMO::MsgStartStop& notif = (LimeSDRMIMO::MsgStartStop&) message;
+        blockApplySettings(true);
+        (notif.getRxElseTx() ? ui->startStopRx : ui->startStopTx)->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
     else
     {
         return false;

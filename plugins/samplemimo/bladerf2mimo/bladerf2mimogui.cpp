@@ -366,6 +366,15 @@ bool BladeRF2MIMOGui::handleMessage(const Message& message)
 
         return true;
     }
+    else if (BladeRF2MIMO::MsgStartStop::match(message))
+    {
+        BladeRF2MIMO::MsgStartStop& notif = (BladeRF2MIMO::MsgStartStop&) message;
+        blockApplySettings(true);
+        (notif.getRxElseTx() ? ui->startStopRx : ui->startStopTx)->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
 
     return false;
 }
