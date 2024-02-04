@@ -308,6 +308,8 @@ void LimeSDRMIMOGUI::displaySettings()
 
         updateADCRate();
 
+        ui->gainMode->setEnabled(true);
+
         if (m_streamIndex == 0)
         {
             ui->lpf->setValue(m_settings.m_lpfBWRx0 / 1000);
@@ -388,6 +390,13 @@ void LimeSDRMIMOGUI::displaySettings()
         ui->swDecim->setCurrentIndex(m_settings.m_log2SoftInterp);
 
         updateDACRate();
+
+
+        ui->gainMode->setEnabled(false);
+        ui->gain->setEnabled(true);
+        ui->lnaGain->setEnabled(false);
+        ui->tiaGain->setEnabled(false);
+        ui->pgaGain->setEnabled(false);
 
         if (m_streamIndex == 0)
         {
