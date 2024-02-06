@@ -96,7 +96,7 @@ struct DEVICES_API DeviceLimeSDRParams
     /**
      * Opens and initialize the device and obtain information (# channels, ranges, ...)
      */
-    bool open(lms_info_str_t deviceStr);
+    bool open(lms_info_str_t deviceStr, bool init = true);
     void close();
     lms_device_t *getDevice() { return m_dev; }
 
