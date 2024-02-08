@@ -57,6 +57,9 @@ public:
     float getLongitude();
     void setLongitude(float longitude);
 
+    float getAltitude();
+    void setAltitude(float altitude);
+
     float getAzimuth();
     void setAzimuth(float azimuth);
 
@@ -84,6 +87,9 @@ private:
 
     float longitude;
     bool m_longitude_isSet;
+
+    float altitude;
+    bool m_altitude_isSet;
 
     float azimuth;
     bool m_azimuth_isSet;

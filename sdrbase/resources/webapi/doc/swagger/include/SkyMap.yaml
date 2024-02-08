@@ -70,6 +70,10 @@ SkyMapReport:
       description: "Longitude in decimal degrees (East positive) of observation/antenna location"
       type: number
       format: float
+    altitude:
+      description: "Altitude in metres of observation/antenna location"
+      type: number
+      format: float
     azimuth:
       description: "The azimuth angle in degrees to the target"
       type: number
@@ -107,6 +111,10 @@ SkyMapTarget:
       format: float
     longitude:
       description: "Longitude in decimal degrees (East positive) of observation/antenna location"
+      type: number
+      format: float
+    altitude:
+      description: "Altitude in metres of observation/antenna location"
       type: number
       format: float
     hpbw:

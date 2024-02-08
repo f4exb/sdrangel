@@ -36,6 +36,8 @@ SWGSkyMapTarget::SWGSkyMapTarget() {
     m_latitude_isSet = false;
     longitude = 0.0f;
     m_longitude_isSet = false;
+    altitude = 0.0f;
+    m_altitude_isSet = false;
     hpbw = 0.0f;
     m_hpbw_isSet = false;
     date_time = nullptr;
@@ -56,6 +58,8 @@ SWGSkyMapTarget::init() {
     m_latitude_isSet = false;
     longitude = 0.0f;
     m_longitude_isSet = false;
+    altitude = 0.0f;
+    m_altitude_isSet = false;
     hpbw = 0.0f;
     m_hpbw_isSet = false;
     date_time = new QString("");
@@ -64,6 +68,7 @@ SWGSkyMapTarget::init() {
 
 void
 SWGSkyMapTarget::cleanup() {
+
 
 
 
@@ -92,6 +97,8 @@ SWGSkyMapTarget::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&latitude, pJson["latitude"], "float", "");
     
     ::SWGSDRangel::setValue(&longitude, pJson["longitude"], "float", "");
+    
+    ::SWGSDRangel::setValue(&altitude, pJson["altitude"], "float", "");
     
     ::SWGSDRangel::setValue(&hpbw, pJson["hpbw"], "float", "");
     
@@ -124,6 +131,9 @@ SWGSkyMapTarget::asJsonObject() {
     }
     if(m_longitude_isSet){
         obj->insert("longitude", QJsonValue(longitude));
+    }
+    if(m_altitude_isSet){
+        obj->insert("altitude", QJsonValue(altitude));
     }
     if(m_hpbw_isSet){
         obj->insert("hpbw", QJsonValue(hpbw));
@@ -176,6 +186,16 @@ SWGSkyMapTarget::setLongitude(float longitude) {
 }
 
 float
+SWGSkyMapTarget::getAltitude() {
+    return altitude;
+}
+void
+SWGSkyMapTarget::setAltitude(float altitude) {
+    this->altitude = altitude;
+    this->m_altitude_isSet = true;
+}
+
+float
 SWGSkyMapTarget::getHpbw() {
     return hpbw;
 }
@@ -210,6 +230,9 @@ SWGSkyMapTarget::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_longitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_altitude_isSet){
             isObjectUpdated = true; break;
         }
         if(m_hpbw_isSet){

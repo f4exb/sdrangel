@@ -38,6 +38,8 @@ SWGSkyMapReport::SWGSkyMapReport() {
     m_latitude_isSet = false;
     longitude = 0.0f;
     m_longitude_isSet = false;
+    altitude = 0.0f;
+    m_altitude_isSet = false;
     azimuth = 0.0f;
     m_azimuth_isSet = false;
     elevation = 0.0f;
@@ -62,6 +64,8 @@ SWGSkyMapReport::init() {
     m_latitude_isSet = false;
     longitude = 0.0f;
     m_longitude_isSet = false;
+    altitude = 0.0f;
+    m_altitude_isSet = false;
     azimuth = 0.0f;
     m_azimuth_isSet = false;
     elevation = 0.0f;
@@ -75,6 +79,7 @@ SWGSkyMapReport::cleanup() {
     if(date_time != nullptr) { 
         delete date_time;
     }
+
 
 
 
@@ -104,6 +109,8 @@ SWGSkyMapReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&latitude, pJson["latitude"], "float", "");
     
     ::SWGSDRangel::setValue(&longitude, pJson["longitude"], "float", "");
+    
+    ::SWGSDRangel::setValue(&altitude, pJson["altitude"], "float", "");
     
     ::SWGSDRangel::setValue(&azimuth, pJson["azimuth"], "float", "");
     
@@ -141,6 +148,9 @@ SWGSkyMapReport::asJsonObject() {
     }
     if(m_longitude_isSet){
         obj->insert("longitude", QJsonValue(longitude));
+    }
+    if(m_altitude_isSet){
+        obj->insert("altitude", QJsonValue(altitude));
     }
     if(m_azimuth_isSet){
         obj->insert("azimuth", QJsonValue(azimuth));
@@ -206,6 +216,16 @@ SWGSkyMapReport::setLongitude(float longitude) {
 }
 
 float
+SWGSkyMapReport::getAltitude() {
+    return altitude;
+}
+void
+SWGSkyMapReport::setAltitude(float altitude) {
+    this->altitude = altitude;
+    this->m_altitude_isSet = true;
+}
+
+float
 SWGSkyMapReport::getAzimuth() {
     return azimuth;
 }
@@ -253,6 +273,9 @@ SWGSkyMapReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_longitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_altitude_isSet){
             isObjectUpdated = true; break;
         }
         if(m_azimuth_isSet){

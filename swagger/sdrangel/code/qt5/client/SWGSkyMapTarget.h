@@ -54,6 +54,9 @@ public:
     float getLongitude();
     void setLongitude(float longitude);
 
+    float getAltitude();
+    void setAltitude(float altitude);
+
     float getHpbw();
     void setHpbw(float hpbw);
 
@@ -75,6 +78,9 @@ private:
 
     float longitude;
     bool m_longitude_isSet;
+
+    float altitude;
+    bool m_altitude_isSet;
 
     float hpbw;
     bool m_hpbw_isSet;
