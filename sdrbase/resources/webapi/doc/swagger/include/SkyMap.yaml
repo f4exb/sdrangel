@@ -13,9 +13,6 @@ SkyMapSettings:
     displayGrid:
       description: "Display grid on the sky map (1 for yes, 0 for no)"
       type: integer
-    displayReticle:
-      description: "Display reticle on the sky map (1 for yes, 0 for no)"
-      type: integer
     displayAntennaFoV:
       description: "Display antenna field-of-view on the sky map (1 for yes, 0 for no)"
       type: integer      
