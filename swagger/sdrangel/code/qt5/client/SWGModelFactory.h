@@ -322,6 +322,8 @@
 #include "SWGSkyMapActions.h"
 #include "SWGSkyMapReport.h"
 #include "SWGSkyMapSettings.h"
+#include "SWGSkyMapTarget.h"
+#include "SWGSkyMapTarget_2.h"
 #include "SWGSoapySDRFrequencySetting.h"
 #include "SWGSoapySDRGainSetting.h"
 #include "SWGSoapySDRInputSettings.h"
@@ -1915,6 +1917,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSkyMapSettings").compare(type) == 0) {
       SWGSkyMapSettings *obj = new SWGSkyMapSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSkyMapTarget").compare(type) == 0) {
+      SWGSkyMapTarget *obj = new SWGSkyMapTarget();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSkyMapTarget_2").compare(type) == 0) {
+      SWGSkyMapTarget_2 *obj = new SWGSkyMapTarget_2();
       obj->init();
       return obj;
     }

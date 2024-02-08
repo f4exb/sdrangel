@@ -14750,6 +14750,74 @@ margin-bottom: 20px;
   },
   "description" : "Sky Map"
 };
+            defs.SkyMapTarget = {
+  "properties" : {
+    "ra" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Right ascension of target (In decimal hours, J2000)"
+    },
+    "dec" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Declination of target (In decimal degrees, J2000)"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees (North positive) of observation/antenna location"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees (East positive) of observation/antenna location"
+    },
+    "hpbw" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Antenna half-power beam width in degrees"
+    },
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
+    }
+  },
+  "description" : "Sky Map target. Sent by other plugins to skymap.target message queue."
+};
+            defs.SkyMapTarget_2 = {
+  "properties" : {
+    "ra" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Right ascension of target (In decimal hours, J2000)"
+    },
+    "dec" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Declination of target (In decimal degrees, J2000)"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees (North positive) of observation/antenna location"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees (East positive) of observation/antenna location"
+    },
+    "hpbw" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Antenna half-power beam width in degrees"
+    },
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
+    }
+  },
+  "description" : "Sky Map target. Sent by other plugins to skymap.target message queue."
+};
             defs.SoapySDRFrequencySetting = {
   "properties" : {
     "name" : {
@@ -58560,7 +58628,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-02-08T11:25:37.924+01:00
+              Generated 2024-02-08T12:07:33.630+01:00
             </div>
           </div>
       </div>

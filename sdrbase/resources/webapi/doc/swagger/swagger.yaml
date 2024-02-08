@@ -3263,6 +3263,10 @@ definitions:
   StarTrackerDisplayLoSSettings:
       $ref: "/doc/swagger/include/StarTracker.yaml#/StarTrackerDisplayLoSSettings"
 
+  # Sky Map target passed from Star Tracker plugin
+  SkyMapTarget:
+      $ref: "/doc/swagger/include/SkyMap.yaml#/SkyMapTarget"
+
   # This isn't in GS232Controller, as it may eventually be used by other controllers or features
   TargetAzimuthElevation:
     description: "A target azimuth and elevation"
