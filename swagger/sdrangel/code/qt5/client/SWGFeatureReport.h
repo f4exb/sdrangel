@@ -31,6 +31,7 @@
 #include "SWGRigCtlServerReport.h"
 #include "SWGSatelliteTrackerReport.h"
 #include "SWGSimplePTTReport.h"
+#include "SWGSkyMapReport.h"
 #include "SWGStarTrackerReport.h"
 #include "SWGVORLocalizerReport.h"
 #include <QString>
@@ -83,6 +84,9 @@ public:
     SWGSimplePTTReport* getSimplePttReport();
     void setSimplePttReport(SWGSimplePTTReport* simple_ptt_report);
 
+    SWGSkyMapReport* getSkyMapReport();
+    void setSkyMapReport(SWGSkyMapReport* sky_map_report);
+
     SWGStarTrackerReport* getStarTrackerReport();
     void setStarTrackerReport(SWGStarTrackerReport* star_tracker_report);
 
@@ -122,6 +126,9 @@ private:
 
     SWGSimplePTTReport* simple_ptt_report;
     bool m_simple_ptt_report_isSet;
+
+    SWGSkyMapReport* sky_map_report;
+    bool m_sky_map_report_isSet;
 
     SWGStarTrackerReport* star_tracker_report;
     bool m_star_tracker_report_isSet;

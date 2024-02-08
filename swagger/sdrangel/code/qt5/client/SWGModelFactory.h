@@ -319,6 +319,9 @@
 #include "SWGSimplePTTActions.h"
 #include "SWGSimplePTTReport.h"
 #include "SWGSimplePTTSettings.h"
+#include "SWGSkyMapActions.h"
+#include "SWGSkyMapReport.h"
+#include "SWGSkyMapSettings.h"
 #include "SWGSoapySDRFrequencySetting.h"
 #include "SWGSoapySDRGainSetting.h"
 #include "SWGSoapySDRInputSettings.h"
@@ -1897,6 +1900,21 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSimplePTTSettings").compare(type) == 0) {
       SWGSimplePTTSettings *obj = new SWGSimplePTTSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSkyMapActions").compare(type) == 0) {
+      SWGSkyMapActions *obj = new SWGSkyMapActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSkyMapReport").compare(type) == 0) {
+      SWGSkyMapReport *obj = new SWGSkyMapReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSkyMapSettings").compare(type) == 0) {
+      SWGSkyMapSettings *obj = new SWGSkyMapSettings();
       obj->init();
       return obj;
     }

@@ -41,9 +41,11 @@ FeatureSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
     SatelliteTrackerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerSettings"
-    StarTrackerSettings:
-      $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerSettings"
     SimplePTTSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
+    SkyMapSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/SkyMap.yaml#/SkyMapSettings"
+    StarTrackerSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerSettings"
     VORLocalizerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/VORLocalizer.yaml#/VORLocalizerSettings"

@@ -25,6 +25,8 @@ FeatureReport:
       $ref: "/doc/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerReport"
     SimplePTTReport:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTReport"
+    SkyMapReport:
+      $ref: "/doc/swagger/include/SkyMap.yaml#/SkyMapReport"
     StarTrackerReport:
       $ref: "/doc/swagger/include/StarTracker.yaml#/StarTrackerReport"
     VORLocalizerReport:

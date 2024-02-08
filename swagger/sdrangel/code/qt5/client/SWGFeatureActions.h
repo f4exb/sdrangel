@@ -32,6 +32,7 @@
 #include "SWGRigCtlServerActions.h"
 #include "SWGSatelliteTrackerActions.h"
 #include "SWGSimplePTTActions.h"
+#include "SWGSkyMapActions.h"
 #include "SWGStarTrackerActions.h"
 #include "SWGVORLocalizerActions.h"
 #include <QString>
@@ -90,6 +91,9 @@ public:
     SWGSimplePTTActions* getSimplePttActions();
     void setSimplePttActions(SWGSimplePTTActions* simple_ptt_actions);
 
+    SWGSkyMapActions* getSkyMapActions();
+    void setSkyMapActions(SWGSkyMapActions* sky_map_actions);
+
     SWGStarTrackerActions* getStarTrackerActions();
     void setStarTrackerActions(SWGStarTrackerActions* star_tracker_actions);
 
@@ -138,6 +142,9 @@ private:
 
     SWGSimplePTTActions* simple_ptt_actions;
     bool m_simple_ptt_actions_isSet;
+
+    SWGSkyMapActions* sky_map_actions;
+    bool m_sky_map_actions_isSet;
 
     SWGStarTrackerActions* star_tracker_actions;
     bool m_star_tracker_actions_isSet;

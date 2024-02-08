@@ -31,6 +31,8 @@ FeatureActions:
       $ref: "/doc/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerActions"
     SimplePTTActions:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTActions"
+    SkyMapActions:
+      $ref: "/doc/swagger/include/SkyMap.yaml#/SkyMapActions"
     StarTrackerActions:
       $ref: "/doc/swagger/include/StarTracker.yaml#/StarTrackerActions"
     VORLocalizerActions:
