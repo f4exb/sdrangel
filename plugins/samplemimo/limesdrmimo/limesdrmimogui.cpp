@@ -258,6 +258,15 @@ bool LimeSDRMIMOGUI::handleMessage(const Message& message)
         ui->gpioText->setText(tr("%1").arg(report.getGPIOPins(), 2, 16, QChar('0')).toUpper());
         return true;
     }
+    else if (LimeSDRMIMO::MsgStartStop::match(message))
+    {
+        LimeSDRMIMO::MsgStartStop& notif = (LimeSDRMIMO::MsgStartStop&) message;
+        blockApplySettings(true);
+        (notif.getRxElseTx() ? ui->startStopRx : ui->startStopTx)->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
     else
     {
         return false;
@@ -298,6 +307,8 @@ void LimeSDRMIMOGUI::displaySettings()
         ui->swDecim->setCurrentIndex(m_settings.m_log2SoftDecim);
 
         updateADCRate();
+
+        ui->gainMode->setEnabled(true);
 
         if (m_streamIndex == 0)
         {
@@ -379,6 +390,13 @@ void LimeSDRMIMOGUI::displaySettings()
         ui->swDecim->setCurrentIndex(m_settings.m_log2SoftInterp);
 
         updateDACRate();
+
+
+        ui->gainMode->setEnabled(false);
+        ui->gain->setEnabled(true);
+        ui->lnaGain->setEnabled(false);
+        ui->tiaGain->setEnabled(false);
+        ui->pgaGain->setEnabled(false);
 
         if (m_streamIndex == 0)
         {

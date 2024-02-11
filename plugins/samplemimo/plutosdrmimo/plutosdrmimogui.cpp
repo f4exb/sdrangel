@@ -442,6 +442,15 @@ bool PlutoSDRMIMOGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (PlutoSDRMIMO::MsgStartStop::match(message))
+    {
+        PlutoSDRMIMO::MsgStartStop& notif = (PlutoSDRMIMO::MsgStartStop&) message;
+        blockApplySettings(true);
+        (notif.getRxElseTx() ? ui->startStopRx : ui->startStopTx)->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
 
     return false;
 }
