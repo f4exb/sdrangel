@@ -23,6 +23,7 @@
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 
+#include "maincore.h"
 #include "webapi/webapiadapterinterface.h"
 #include "audio/audiodevicemanager.h"
 #include "dsp/dspengine.h"
@@ -242,13 +243,31 @@ bool SimplePTTWorker::turnDevice(bool on)
     SWGSDRangel::SWGDeviceState response;
     SWGSDRangel::SWGErrorResponse error;
     int httpCode;
-
+    unsigned int deviceSetIndex = m_tx ? m_settings.m_txDeviceSetIndex : m_settings.m_rxDeviceSetIndex;
+    MainCore *mainCore = MainCore::instance();
+    auto deviceSets = mainCore->getDeviceSets();
+    if (deviceSetIndex >= deviceSets.size()) 
+    {
+        qWarning("SimplePTTWorker::turnDevice: deviceSetIndex out of range");
+        return false;
+    }
+    bool isDeviceMIMO = mainCore->getDeviceSetTypeId(deviceSets[deviceSetIndex]) == 'M';
     if (on) {
-        httpCode = m_webAPIAdapterInterface->devicesetDeviceRunPost(
-            m_tx ? m_settings.m_txDeviceSetIndex : m_settings.m_rxDeviceSetIndex, response, error);
+        if (isDeviceMIMO) {
+            httpCode = m_webAPIAdapterInterface->devicesetDeviceSubsystemRunPost(
+                deviceSetIndex, m_tx ? 1 : 0, response, error);
+        } else {
+            httpCode = m_webAPIAdapterInterface->devicesetDeviceRunPost(
+                deviceSetIndex, response, error);
+        }
     } else {
-        httpCode = m_webAPIAdapterInterface->devicesetDeviceRunDelete(
-            m_tx ? m_settings.m_txDeviceSetIndex : m_settings.m_rxDeviceSetIndex, response, error);
+        if (isDeviceMIMO) {
+            httpCode = m_webAPIAdapterInterface->devicesetDeviceSubsystemRunDelete(
+                deviceSetIndex, m_tx ? 1 : 0, response, error);
+        } else {
+            httpCode = m_webAPIAdapterInterface->devicesetDeviceRunDelete(
+                deviceSetIndex, response, error);
+        }
     }
 
     if (httpCode/100 == 2)

@@ -288,6 +288,8 @@ void SimplePTTGUI::updateDeviceSetLists()
 
     ui->rxDevice->clear();
     ui->txDevice->clear();
+    ui->rxDevice->addItem(tr("None"), -1);
+    ui->txDevice->addItem(tr("None"), -1);
     unsigned int deviceIndex = 0;
     unsigned int rxIndex = 0;
     unsigned int txIndex = 0;
@@ -296,6 +298,7 @@ void SimplePTTGUI::updateDeviceSetLists()
     {
         DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
         DSPDeviceSinkEngine *deviceSinkEngine = (*it)->m_deviceSinkEngine;
+        DSPDeviceMIMOEngine *deviceMIMOEngine = (*it)->m_deviceMIMOEngine;
 
         if (deviceSourceEngine)
         {
@@ -307,6 +310,14 @@ void SimplePTTGUI::updateDeviceSetLists()
             ui->txDevice->addItem(QString("T%1").arg(deviceIndex), deviceIndex);
             txIndex++;
         }
+        else if (deviceMIMOEngine)
+        {
+            QString text = QString("M%1").arg(deviceIndex);
+            ui->rxDevice->addItem(text, deviceIndex);
+            ui->txDevice->addItem(text, deviceIndex);
+            rxIndex++;
+            txIndex++;
+        }
     }
 
     int rxDeviceIndex;
@@ -314,11 +325,8 @@ void SimplePTTGUI::updateDeviceSetLists()
 
     if (rxIndex > 0)
     {
-        if (m_settings.m_rxDeviceSetIndex < 0) {
-            ui->rxDevice->setCurrentIndex(0);
-        } else {
-            ui->rxDevice->setCurrentIndex(m_settings.m_rxDeviceSetIndex);
-        }
+        int index = ui->rxDevice->findData(m_settings.m_rxDeviceSetIndex);
+        ui->rxDevice->setCurrentIndex(index == -1 ? 0 : index);
 
         rxDeviceIndex = ui->rxDevice->currentData().toInt();
     }
@@ -330,11 +338,8 @@ void SimplePTTGUI::updateDeviceSetLists()
 
     if (txIndex > 0)
     {
-        if (m_settings.m_txDeviceSetIndex < 0) {
-            ui->txDevice->setCurrentIndex(0);
-        } else {
-            ui->txDevice->setCurrentIndex(m_settings.m_txDeviceSetIndex);
-        }
+        int index = ui->txDevice->findData(m_settings.m_txDeviceSetIndex);
+        ui->txDevice->setCurrentIndex(index == -1 ? 0 : index);
 
         txDeviceIndex = ui->txDevice->currentData().toInt();
     }
@@ -425,7 +430,7 @@ void SimplePTTGUI::on_rxDevice_currentIndexChanged(int index)
 {
     if (index >= 0)
     {
-        m_settings.m_rxDeviceSetIndex = index;
+        m_settings.m_rxDeviceSetIndex = ui->rxDevice->currentData().toInt();
         m_settingsKeys.append("rxDeviceSetIndex");
         applySettings();
     }
@@ -435,7 +440,7 @@ void SimplePTTGUI::on_txDevice_currentIndexChanged(int index)
 {
     if (index >= 0)
     {
-        m_settings.m_txDeviceSetIndex = index;
+        m_settings.m_txDeviceSetIndex = ui->txDevice->currentData().toInt();
         m_settingsKeys.append("txDeviceSetIndex");
         applySettings();
     }
