@@ -14727,6 +14727,31 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Whether to track the specified source plugin"
     },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees (North positive) of observation/antenna location"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees (East positive) of observation/antenna location"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Altitude in metres of observation/antenna location"
+    },
+    "hpbw" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Antenna half-power beam width in degrees"
+    },
+    "useMyPosition" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Use My Position instead of latitude/longitude settings"
+    },
     "title" : {
       "type" : "string"
     },
@@ -58643,7 +58668,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-02-08T12:36:55.592+01:00
+              Generated 2024-02-12T10:33:45.606+01:00
             </div>
           </div>
       </div>

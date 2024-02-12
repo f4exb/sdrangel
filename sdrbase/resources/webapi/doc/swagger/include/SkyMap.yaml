@@ -30,6 +30,26 @@ SkyMapSettings:
     track:
       description: "Whether to track the specified source plugin"
       type: integer
+    latitude:
+      description: "Latitude in decimal degrees (North positive) of observation/antenna location"
+      type: number
+      format: float
+    longitude:
+      description: "Longitude in decimal degrees (East positive) of observation/antenna location"
+      type: number
+      format: float
+    altitude:
+      description: "Altitude in metres of observation/antenna location"
+      type: number
+      format: float
+    hpbw:
+      description: "Antenna half-power beam width in degrees"
+      type: number
+      format: float
+    useMyPosition:
+      description: "Use My Position instead of latitude/longitude settings"
+      type: number
+      format: float
     title:
       type: string
     rgbColor:

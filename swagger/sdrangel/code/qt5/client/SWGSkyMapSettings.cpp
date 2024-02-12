@@ -48,6 +48,16 @@ SWGSkyMapSettings::SWGSkyMapSettings() {
     m_source_isSet = false;
     track = 0;
     m_track_isSet = false;
+    latitude = 0.0f;
+    m_latitude_isSet = false;
+    longitude = 0.0f;
+    m_longitude_isSet = false;
+    altitude = 0.0f;
+    m_altitude_isSet = false;
+    hpbw = 0.0f;
+    m_hpbw_isSet = false;
+    use_my_position = 0.0f;
+    m_use_my_position_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -92,6 +102,16 @@ SWGSkyMapSettings::init() {
     m_source_isSet = false;
     track = 0;
     m_track_isSet = false;
+    latitude = 0.0f;
+    m_latitude_isSet = false;
+    longitude = 0.0f;
+    m_longitude_isSet = false;
+    altitude = 0.0f;
+    m_altitude_isSet = false;
+    hpbw = 0.0f;
+    m_hpbw_isSet = false;
+    use_my_position = 0.0f;
+    m_use_my_position_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -129,6 +149,11 @@ SWGSkyMapSettings::cleanup() {
     if(source != nullptr) { 
         delete source;
     }
+
+
+
+
+
 
     if(title != nullptr) { 
         delete title;
@@ -176,6 +201,16 @@ SWGSkyMapSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&source, pJson["source"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&track, pJson["track"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&latitude, pJson["latitude"], "float", "");
+    
+    ::SWGSDRangel::setValue(&longitude, pJson["longitude"], "float", "");
+    
+    ::SWGSDRangel::setValue(&altitude, pJson["altitude"], "float", "");
+    
+    ::SWGSDRangel::setValue(&hpbw, pJson["hpbw"], "float", "");
+    
+    ::SWGSDRangel::setValue(&use_my_position, pJson["useMyPosition"], "float", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -238,6 +273,21 @@ SWGSkyMapSettings::asJsonObject() {
     }
     if(m_track_isSet){
         obj->insert("track", QJsonValue(track));
+    }
+    if(m_latitude_isSet){
+        obj->insert("latitude", QJsonValue(latitude));
+    }
+    if(m_longitude_isSet){
+        obj->insert("longitude", QJsonValue(longitude));
+    }
+    if(m_altitude_isSet){
+        obj->insert("altitude", QJsonValue(altitude));
+    }
+    if(m_hpbw_isSet){
+        obj->insert("hpbw", QJsonValue(hpbw));
+    }
+    if(m_use_my_position_isSet){
+        obj->insert("useMyPosition", QJsonValue(use_my_position));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -367,6 +417,56 @@ SWGSkyMapSettings::setTrack(qint32 track) {
     this->m_track_isSet = true;
 }
 
+float
+SWGSkyMapSettings::getLatitude() {
+    return latitude;
+}
+void
+SWGSkyMapSettings::setLatitude(float latitude) {
+    this->latitude = latitude;
+    this->m_latitude_isSet = true;
+}
+
+float
+SWGSkyMapSettings::getLongitude() {
+    return longitude;
+}
+void
+SWGSkyMapSettings::setLongitude(float longitude) {
+    this->longitude = longitude;
+    this->m_longitude_isSet = true;
+}
+
+float
+SWGSkyMapSettings::getAltitude() {
+    return altitude;
+}
+void
+SWGSkyMapSettings::setAltitude(float altitude) {
+    this->altitude = altitude;
+    this->m_altitude_isSet = true;
+}
+
+float
+SWGSkyMapSettings::getHpbw() {
+    return hpbw;
+}
+void
+SWGSkyMapSettings::setHpbw(float hpbw) {
+    this->hpbw = hpbw;
+    this->m_hpbw_isSet = true;
+}
+
+float
+SWGSkyMapSettings::getUseMyPosition() {
+    return use_my_position;
+}
+void
+SWGSkyMapSettings::setUseMyPosition(float use_my_position) {
+    this->use_my_position = use_my_position;
+    this->m_use_my_position_isSet = true;
+}
+
 QString*
 SWGSkyMapSettings::getTitle() {
     return title;
@@ -480,6 +580,21 @@ SWGSkyMapSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_track_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_latitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_longitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_altitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_hpbw_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_my_position_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

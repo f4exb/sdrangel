@@ -73,6 +73,21 @@ public:
     qint32 getTrack();
     void setTrack(qint32 track);
 
+    float getLatitude();
+    void setLatitude(float latitude);
+
+    float getLongitude();
+    void setLongitude(float longitude);
+
+    float getAltitude();
+    void setAltitude(float altitude);
+
+    float getHpbw();
+    void setHpbw(float hpbw);
+
+    float getUseMyPosition();
+    void setUseMyPosition(float use_my_position);
+
     QString* getTitle();
     void setTitle(QString* title);
 
@@ -130,6 +145,21 @@ private:
 
     qint32 track;
     bool m_track_isSet;
+
+    float latitude;
+    bool m_latitude_isSet;
+
+    float longitude;
+    bool m_longitude_isSet;
+
+    float altitude;
+    bool m_altitude_isSet;
+
+    float hpbw;
+    bool m_hpbw_isSet;
+
+    float use_my_position;
+    bool m_use_my_position_isSet;
 
     QString* title;
     bool m_title_isSet;
