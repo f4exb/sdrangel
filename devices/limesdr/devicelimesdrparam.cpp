@@ -18,7 +18,7 @@
 #include <QDebug>
 #include "devicelimesdrparam.h"
 
-bool DeviceLimeSDRParams::open(lms_info_str_t deviceStr)
+bool DeviceLimeSDRParams::open(lms_info_str_t deviceStr, bool init)
 {
     getHardwareType((const char *) deviceStr);
 
@@ -30,10 +30,13 @@ bool DeviceLimeSDRParams::open(lms_info_str_t deviceStr)
         return false;
     }
 
-    if (LMS_Init(m_dev) < 0)
+    if (init) 
     {
-        qCritical() << "DeviceLimeSDRParams::open: cannot init device " << deviceStr;
-        return false;
+        if (LMS_Init(m_dev) < 0)
+        {
+            qCritical() << "DeviceLimeSDRParams::open: cannot init device " << deviceStr;
+            return false;
+        }
     }
 
     int n;
