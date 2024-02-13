@@ -41,6 +41,7 @@ public:
     void enumerateRxDevices(PluginManager *pluginManager);
     void enumerateTxDevices(PluginManager *pluginManager);
     void enumerateMIMODevices(PluginManager *pluginManager);
+    void enumerateAllDevices(PluginManager *pluginManager);
     void addNonDiscoverableDevices(PluginManager *pluginManager, const DeviceUserArgs& deviceUserArgs);
     void listRxDeviceNames(QList<QString>& list, std::vector<int>& indexes) const;
     void listTxDeviceNames(QList<QString>& list, std::vector<int>& indexes) const;
@@ -93,7 +94,7 @@ private:
     DevicesEnumeration m_txEnumeration;
     DevicesEnumeration m_mimoEnumeration;
 
-    void enumerateDevices(PluginAPI::SamplingDeviceRegistrations& deviceRegistrations, DevicesEnumeration& enumeration, PluginInterface::SamplingDevice::StreamType type);
+    void enumerateDevices(std::initializer_list<PluginAPI::SamplingDeviceRegistrations*>  deviceRegistrations, std::initializer_list<DevicesEnumeration*> enumerations);
     PluginInterface *getRxRegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId);
     PluginInterface *getTxRegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId);
     PluginInterface *getMIMORegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId);

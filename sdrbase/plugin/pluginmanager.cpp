@@ -130,9 +130,7 @@ void PluginManager::loadPluginsFinal()
         it->pluginInterface->initPlugin(&m_pluginAPI);
     }
 
-    DeviceEnumerator::instance()->enumerateRxDevices(this);
-    DeviceEnumerator::instance()->enumerateTxDevices(this);
-    DeviceEnumerator::instance()->enumerateMIMODevices(this);
+    DeviceEnumerator::instance()->enumerateAllDevices(this);
 }
 
 void PluginManager::loadPluginsNonDiscoverable(const DeviceUserArgs& deviceUserArgs)
