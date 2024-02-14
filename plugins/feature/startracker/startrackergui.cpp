@@ -232,15 +232,15 @@ bool StarTrackerGUI::handleMessage(const Message& message)
 
 void StarTrackerGUI::updateSatelliteTrackerList(const QList<StarTrackerSettings::AvailableFeature>& satelliteTrackers)
 {
-    // Update list of satellite trackers
+    // Update list of plugins we can get target from
     ui->target->blockSignals(true);
 
-    // Remove Satellite Trackers no longer available
+    // Remove targets no longer available
     for (int i = 0; i < ui->target->count(); )
     {
         QString text = ui->target->itemText(i);
         bool found = false;
-        if (text.contains("SatelliteTracker"))
+        if (text.contains("SatelliteTracker") || text.contains("SkyMap"))
         {
             for (const auto& satelliteTracker : satelliteTrackers)
             {
@@ -262,7 +262,7 @@ void StarTrackerGUI::updateSatelliteTrackerList(const QList<StarTrackerSettings:
         }
     }
 
-    // Add new Satellite Trackers
+    // Add new targets
     for (const auto& satelliteTracker : satelliteTrackers)
     {
         QString name = satelliteTracker.getName();
@@ -271,7 +271,7 @@ void StarTrackerGUI::updateSatelliteTrackerList(const QList<StarTrackerSettings:
         }
     }
 
-    // Satellite Tracker feature can be created after this plugin, so select it
+    // Features can be created after this plugin, so select it
     // if the chosen tracker appears
     int index = ui->target->findText(m_settings.m_target);
     if (index >= 0) {

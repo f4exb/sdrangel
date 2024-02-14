@@ -68,6 +68,7 @@ public:
     void setIndex(int index);
     int getIndex() const { return m_featureIndex; }
     void setDisplayedame(const QString& name);
+    void setStatusText(const QString& text);
 
 protected:
     void closeEvent(QCloseEvent *event) override;

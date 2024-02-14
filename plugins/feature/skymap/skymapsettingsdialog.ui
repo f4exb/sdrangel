@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SkyMapSettingsDialog</class>
+ <widget class="QDialog" name="SkyMapSettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>441</width>
+    <height>671</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>SkyMap Display Settings</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Settings</string>
+         </attribute>
+         <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0" colspan="2">
+           <widget class="QCheckBox" name="useMyPosition">
+            <property name="text">
+             <string>Use observation location from Preferences &gt; My Position</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="latitudeLabel">
+            <property name="text">
+             <string>Latitude (°)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="longitudeLabel">
+            <property name="text">
+             <string>Longitude (°)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="altitudeLabel">
+            <property name="text">
+             <string>Altitude (m)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="altitude">
+            <property name="toolTip">
+             <string>Antenna/observation altitude in metres</string>
+            </property>
+            <property name="minimum">
+             <number>-100</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="hpbwLabel">
+            <property name="text">
+             <string>HPBW (°)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QDoubleSpinBox" name="hpbw">
+            <property name="toolTip">
+             <string>Antenna half-power beamwidth in degrees</string>
+            </property>
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>360.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="latitude">
+            <property name="toolTip">
+             <string>Latitude of antenna/observation location in degrees. North positive</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="longitude">
+            <property name="toolTip">
+             <string>Longitude of antenna/observation location in degrees. East positive</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="skymapsTab">
+         <attribute name="title">
+          <string>WWT</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="2" column="0" colspan="2">
+           <widget class="QGroupBox" name="gridGroupBox">
+            <property name="title">
+             <string>Grids</string>
+            </property>
+            <layout class="QFormLayout" name="formLayout_3">
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="ecliptic">
+               <property name="minimumSize">
+                <size>
+                 <width>160</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Ecliptic</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="eclipticGrid">
+               <property name="text">
+                <string>Ecliptic Grid</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="eclipticOverviewText">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Ecliptic Overview Text</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QCheckBox" name="eclipticGridText">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Ecliptic Grid Text</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QCheckBox" name="altAzGrid">
+               <property name="text">
+                <string>Alt Az Grid</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QCheckBox" name="altAzGridText">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Alt Az Grid Text</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QCheckBox" name="equatorialGrid">
+               <property name="text">
+                <string>Equatorial Grid</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QCheckBox" name="equatorialGridText">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Equatorial Grid Text</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QCheckBox" name="galacticGrid">
+               <property name="text">
+                <string>Galactic Grid</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QCheckBox" name="galacticGridText">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Galactic Grid Text</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QCheckBox" name="precessionChart">
+               <property name="text">
+                <string>Precession Chart</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="23" column="0">
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QGroupBox" name="constellationGroupBox">
+            <property name="title">
+             <string>Constellations</string>
+            </property>
+            <layout class="QFormLayout" name="formLayout_2">
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="constellationFigures">
+               <property name="toolTip">
+                <string>Display constellation stick figures</string>
+               </property>
+               <property name="text">
+                <string>Figures</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QCheckBox" name="constellationBoundaries">
+               <property name="minimumSize">
+                <size>
+                 <width>160</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Display boundaries between constellations</string>
+               </property>
+               <property name="text">
+                <string>Boundaries</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QCheckBox" name="constellationSelection">
+               <property name="toolTip">
+                <string>Displays boundary only for constellation at the center of view</string>
+               </property>
+               <property name="text">
+                <string>Centre boundary only</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="constellationLabels">
+               <property name="toolTip">
+                <string>Display constellation names</string>
+               </property>
+               <property name="text">
+                <string>Labels</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="constellationPictures">
+               <property name="toolTip">
+                <string>Display constellation pictures</string>
+               </property>
+               <property name="text">
+                <string>Pictures</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="19" column="0">
+           <widget class="QCheckBox" name="iss">
+            <property name="toolTip">
+             <string>Display ISS model</string>
+            </property>
+            <property name="text">
+             <string>ISS</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QGroupBox" name="solarSystemGroupBox">
+            <property name="toolTip">
+             <string>Settings that apply only to the Solar System view</string>
+            </property>
+            <property name="title">
+             <string>Solar System View</string>
+            </property>
+            <layout class="QFormLayout" name="formLayout_4">
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="solarSystemCosmos">
+               <property name="minimumSize">
+                <size>
+                 <width>160</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Displays cosmos (when zoomed far out)</string>
+               </property>
+               <property name="text">
+                <string>Cosmos</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="solarSystemMilkyWay">
+               <property name="toolTip">
+                <string>Displays Milky Way</string>
+               </property>
+               <property name="text">
+                <string>Milky Way</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="solarSystemStars">
+               <property name="toolTip">
+                <string>Displays stars</string>
+               </property>
+               <property name="text">
+                <string>Stars</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QCheckBox" name="solarSystemPlanets">
+               <property name="toolTip">
+                <string>Displays planets</string>
+               </property>
+               <property name="text">
+                <string>Planets</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QCheckBox" name="solarSystemMinorPlanets">
+               <property name="toolTip">
+                <string>Displays asteroids</string>
+               </property>
+               <property name="text">
+                <string>Asteroids</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QCheckBox" name="solarSystemOrbits">
+               <property name="toolTip">
+                <string>Displays planetary orbits</string>
+               </property>
+               <property name="text">
+                <string>Planetary Orbits</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QCheckBox" name="solarSystemMinorOrbits">
+               <property name="toolTip">
+                <string>Displays orbits of moons and minor satellites</string>
+               </property>
+               <property name="text">
+                <string>Moon and Satellite Orbits</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QCheckBox" name="solarSystemLighting">
+               <property name="toolTip">
+                <string>Applies lighting and shadows to planets</string>
+               </property>
+               <property name="text">
+                <string>Lighting and Shadows</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QCheckBox" name="solarSystemMultiRes">
+               <property name="toolTip">
+                <string>Uses higher resolution planetary imagery when zooming in</string>
+               </property>
+               <property name="text">
+                <string>Mulit Res Planets</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="icons.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>SkyMapSettingsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>SkyMapSettingsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

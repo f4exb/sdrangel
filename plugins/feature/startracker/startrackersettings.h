@@ -52,7 +52,7 @@ struct StarTrackerSettings
     double m_latitude;
     double m_longitude;
     QString m_target;           // Sun, Moon, Custom
-    QString m_dateTime;         // Date/time for observation, or "" for now
+    QString m_dateTime;         // Local date/time for observation, or "" for now
     QString m_refraction;       // Refraction correction. "None", "Saemundsson" or "Positional Astronomy Library"
     double m_pressure;          // Air pressure in millibars
     double m_temperature;       // Air temperature in C

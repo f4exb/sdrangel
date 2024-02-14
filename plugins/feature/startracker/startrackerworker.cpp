@@ -30,6 +30,7 @@
 #include "SWGTargetAzimuthElevation.h"
 #include "SWGMapItem.h"
 #include "SWGStarTrackerTarget.h"
+#include "SWGSkyMapTarget.h"
 
 #include "webapi/webapiadapterinterface.h"
 #include "webapi/webapiutils.h"
@@ -384,7 +385,7 @@ void StarTrackerWorker::updateRaDec(RADec rd, QDateTime dt, bool lbTarget)
     // Send to Stellarium
     writeStellariumTarget(rdJ2000.ra, rdJ2000.dec);
     // Send to GUI
-    if (m_settings.m_target == "Sun" || m_settings.m_target == "Moon" || (m_settings.m_target == "Custom Az/El") || lbTarget || m_settings.m_target.contains("SatelliteTracker"))
+    if (m_settings.m_target == "Sun" || m_settings.m_target == "Moon" || (m_settings.m_target == "Custom Az/El") || lbTarget || m_settings.m_target.contains("SatelliteTracker") || m_settings.m_target.contains("SkyMap"))
     {
         if (getMessageQueueToGUI())
         {
@@ -510,6 +511,26 @@ void StarTrackerWorker::update()
             {
                 m_settings.m_el = elevation;
                 m_settings.m_az = azimuth;
+            }
+            else
+                qDebug() << "StarTrackerWorker::update - Failed to target from feature " << m_settings.m_target;
+        }
+        else
+            qDebug() << "StarTrackerWorker::update - Failed to parse feature name " << m_settings.m_target;
+    }
+    if (m_settings.m_target.contains("SkyMap"))
+    {
+        // Get RA/Dec from Sky Map
+        double ra, dec;
+        unsigned int featureSetIndex,featureIndex;
+
+        if (MainCore::getFeatureIndexFromId(m_settings.m_target, featureSetIndex, featureIndex))
+        {
+            if (ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "ra", ra)
+                && ChannelWebAPIUtils::getFeatureReportValue(featureSetIndex, featureIndex, "dec", dec))
+            {
+                m_settings.m_ra = QString::number(ra, 'f', 10);
+                m_settings.m_dec = QString::number(dec, 'f', 10);
             }
             else
                 qDebug() << "StarTrackerWorker::update - Failed to target from feature " << m_settings.m_target;
@@ -652,6 +673,33 @@ void StarTrackerWorker::update()
             swgTarget->setSunVelocityLsr(vLSRK);
             messageQueue->push(MainCore::MsgStarTrackerTarget::create(m_starTracker, swgTarget));
         }
+    }
+
+    // Send RA/Dec, position, beamwidth and date to Sky Map
+    QList<ObjectPipe*> skyMapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_starTracker, "skymap.target", skyMapPipes);
+    for (const auto& pipe : skyMapPipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        SWGSDRangel::SWGSkyMapTarget *swgTarget = new SWGSDRangel::SWGSkyMapTarget();
+        if (m_settings.m_jnow)
+        {
+            double jd = Astronomy::julianDate(dt);
+            RADec rdJ2000 = Astronomy::precess(rd, jd, Astronomy::jd_j2000());
+            swgTarget->setRa(rdJ2000.ra);
+            swgTarget->setDec(rdJ2000.dec);
+        }
+        else
+        {
+            swgTarget->setRa(rd.ra);
+            swgTarget->setDec(rd.dec);
+        }
+        swgTarget->setLatitude(m_settings.m_latitude);
+        swgTarget->setLongitude(m_settings.m_longitude);
+        swgTarget->setAltitude(m_settings.m_heightAboveSeaLevel);
+        swgTarget->setDateTime(new QString(dt.toString(Qt::ISODateWithMs)));
+        swgTarget->setHpbw(m_settings.m_beamwidth);
+        messageQueue->push(MainCore::MsgSkyMapTarget::create(m_starTracker, swgTarget));
     }
 
     // Send to Map

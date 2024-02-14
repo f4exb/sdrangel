@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/skymap/">
+        <file>icons/constellation.png</file>
+        <file>icons/reticle.png</file>
+    </qresource>
+</RCC>

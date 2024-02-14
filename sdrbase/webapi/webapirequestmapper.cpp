@@ -5273,6 +5273,11 @@ bool WebAPIRequestMapper::getFeatureSettings(
             featureSettings->setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
             featureSettings->getSimplePttSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (featureSettingsKey == "SkyMapSettings")
+        {
+            featureSettings->setSkyMapSettings(new SWGSDRangel::SWGSkyMapSettings());
+            featureSettings->getSkyMapSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (featureSettingsKey == "StarTrackerSettings")
         {
             featureSettings->setStarTrackerSettings(new SWGSDRangel::SWGStarTrackerSettings());
@@ -5366,6 +5371,11 @@ bool WebAPIRequestMapper::getFeatureActions(
             featureActions->setSimplePttActions(new SWGSDRangel::SWGSimplePTTActions());
             featureActions->getSimplePttActions()->fromJsonObject(actionsJsonObject);
         }
+        else if (featureActionsKey == "SkyMapActions")
+        {
+            featureActions->setSkyMapActions(new SWGSDRangel::SWGSkyMapActions());
+            featureActions->getSkyMapActions()->fromJsonObject(actionsJsonObject);
+        }
         else if (featureActionsKey == "StarTrackerActions")
         {
             featureActions->setStarTrackerActions(new SWGSDRangel::SWGStarTrackerActions());
@@ -5376,7 +5386,7 @@ bool WebAPIRequestMapper::getFeatureActions(
             featureActions->setVorLocalizerActions(new SWGSDRangel::SWGVORLocalizerActions());
             featureActions->getVorLocalizerActions()->fromJsonObject(actionsJsonObject);
         }
-        else if (featureActionsKey == "DemodAnalyzerActions") 
+        else if (featureActionsKey == "DemodAnalyzerActions")
         {
             featureActions->setDemodAnalyzerActions(new SWGSDRangel::SWGDemodAnalyzerActions());
             featureActions->getDemodAnalyzerActions()->fromJsonObject(actionsJsonObject);
@@ -5623,6 +5633,7 @@ void WebAPIRequestMapper::resetFeatureSettings(SWGSDRangel::SWGFeatureSettings& 
     featureSettings.setPerTesterSettings(nullptr);
     featureSettings.setSatelliteTrackerSettings(nullptr);
     featureSettings.setSimplePttSettings(nullptr);
+    featureSettings.setSkyMapSettings(nullptr);
     featureSettings.setStarTrackerSettings(nullptr);
     featureSettings.setRadiosondeSettings(nullptr);
     featureSettings.setRigCtlServerSettings(nullptr);
@@ -5639,6 +5650,7 @@ void WebAPIRequestMapper::resetFeatureReport(SWGSDRangel::SWGFeatureReport& feat
     featureReport.setMapReport(nullptr);
     featureReport.setSatelliteTrackerReport(nullptr);
     featureReport.setSimplePttReport(nullptr);
+    featureReport.setSkyMapReport(nullptr);
     featureReport.setStarTrackerReport(nullptr);
     featureReport.setVorLocalizerReport(nullptr);
 }
@@ -5654,6 +5666,7 @@ void WebAPIRequestMapper::resetFeatureActions(SWGSDRangel::SWGFeatureActions& fe
     featureActions.setRigCtlServerActions(nullptr);
     featureActions.setSatelliteTrackerActions(nullptr);
     featureActions.setSimplePttActions(nullptr);
+    featureActions.setSkyMapActions(nullptr);
     featureActions.setStarTrackerActions(nullptr);
     featureActions.setVorLocalizerActions(nullptr);
 }

@@ -9,6 +9,7 @@ The Star Tracker feature plugin is for use in radio astronomy and EME (Earth-Moo
 * The overhead position of the Sun, Moon and selected star can be displayed on the Map Feature.
 * It can display local Sidereal time, solar flux density and sky temperature.
 * It can plot the line of sight through the Milky Way.
+* It can send the target to the Sky Map plugin, to display associated imagery in a variety of wavelengths. It can also use the Sky Map to set the target.
 * The plugin can communicate with Stellarium, allowing Stellarium to control SDRangel as though it was a telescope and for the direction the antenna is pointing to be displayed in Stellarium.
 
 <h2>Settings</h2>
@@ -66,7 +67,7 @@ Specifies the longitude in decimal degrees (East positive) of the observation po
 
 <h3>8: Time</h3>
 
-Select the date and time at which the position of the target should be calculated. Select either Now, for the current time, or Custom to manually enter a date and time.
+Select the local date and time at which the position of the target should be calculated. Select either Now, for the current time, or Custom to manually enter a date and time.
 
 <h3>9: LST - Local Sidereal Time</h3>
 
@@ -100,6 +101,7 @@ To allow Stellarium to set the RA and Dec, select Custom RA/Dec, and ensure the 
 | S8               | HI                | IAU primary calibration region (l=207,b=-15)   | Tb=72 peak                                 |
 | S9               | HI                | IAU secondary calibration region (l=356,b=-4)  | Tb=85 peak                                 |
 | SatelliteTracker |                   | Gets target Az/El from Satellite Tracker       |                                            |
+| SkyMap           |                   | Gets target RA/Dec from Sky Map Tracker        |                                            |
 
 References:
 
@@ -240,6 +242,12 @@ The Star Tracker feature can send the overhead position of the Sun, Moon and tar
 
 When using the Find feature in the Map GUI, you can search for "Sun", "Moon" or "Star".
 
+<h2>Sky Map</h2>
+
+The Star Tracker feature will send the target RA/Dec, observation point (antenna location) and antenna beamwidth to the Sky Map.
+If the Star Tracker is set as the Source plugin in the Sky Map, pressing the Track button in the Sky Map will result in the Sky Map tracking the target
+selected in the Star Tracker.
+
 <h2>Stellarium Interface</h2>
 
 In Star Tracker:
@@ -288,15 +296,15 @@ Icons are by Freepik from Flaticon https://www.flaticon.com/
 
 Full details of the API can be found in the Swagger documentation. Here is a quick example of how to set the target to the Moon at the current time:
 
-    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/settings" -d '{"featureType": "StarTracker",  "StarTrackerSettings": { "target": "Moon", "dateTime": "" }}'
+    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/feature/0/settings" -d '{"featureType": "StarTracker",  "StarTrackerSettings": { "target": "Moon", "dateTime": "" }}'
 
 Or to a custom RA and declination on a given date and time:
 
-    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/settings" -d '{"featureType": "StarTracker",  "StarTrackerSettings": { "target": "Custom", "ra": "03h32m59.35s", "dec": "54d34m45.05s", "dateTime": "1921-04-15T10:17:05" }}'
+    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/feature/0/settings" -d '{"featureType": "StarTracker",  "StarTrackerSettings": { "target": "Custom", "ra": "03h32m59.35s", "dec": "54d34m45.05s", "dateTime": "1921-04-15T10:17:05" }}'
 
 To start tracking:
 
-    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/run"
+    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/feature/0/run"
 
 <h2>Developer Notes</h2>
 

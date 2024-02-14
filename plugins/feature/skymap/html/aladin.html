@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en" style="height:100%;min-height:100%;">
+<head>
+    <title>SDRangel Aladin</title>
+
+    <style>
+        .aladin-fov {
+            display: none;
+            visibility: hidden
+        }
+        .aladin-location {
+            display: none;
+            visibility: hidden
+        }
+    </style>
+</head>
+<body style="margin:0;padding:0;height:100%;">
+
+    <div id="aladin-lite-div" style="width:100%;height:100%;"></div>
+    <script type="text/javascript" src="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js" charset="utf-8"></script>
+    <script type="text/javascript">
+        let aladin;
+        A.init.then(() => {
+            // Create Aladin
+            aladin = A.aladin('#aladin-lite-div', {
+                survey: "P/DSS2/color",
+                fov: 60,
+                showProjectionControl: false,
+                showFrame: false,
+                fullScreen: true,           // fullScreen in terms of the div element, not the entire monitor
+                showFullscreenControl: false,
+                showGotoControl: false,
+                showZoomControl: false,
+                showSimbadPointerControl: true,
+                showContextMenu: true
+            });
+
+            // Load some catalogs, but don't show them - displayLabel doesn't seem to work for these ProgressiveCat only Catalog
+            let hips = A.catalogHiPS('https://axel.u-strasbg.fr/HiPSCatService/Simbad', { onClick: 'showTable', name: 'Simbad' });
+            hips.isShowing = false;
+            aladin.addCatalog(hips);
+            hips = A.catalogHiPS('http://axel.u-strasbg.fr/HiPSCatService/I/345/gaia2', { onClick: 'showTable', color: 'orange', name: 'Gaia' });
+            hips.isShowing = false;
+            aladin.addCatalog(hips);
+
+            // Report ra/dec/time
+            setInterval(function () { reportView(); }, 100);
+
+            reportReady();
+        });
+
+        // Stop browser popup menu from appearing over the top of the Aladin menu
+        document.addEventListener('contextmenu', event => event.preventDefault());
+    </script>
+
+    <script type="text/javascript">
+
+        // Use WebSockets for handling commands from SDRangel Plugin
+        // and sending events back to it
+        let socket = new WebSocket("ws://127.0.0.1:$WS_PORT$");
+
+        var antennaHpbw = 5.0;
+        var antennaOverlay;
+        var antennaCircle;
+
+        socket.onmessage = function (event) {
+            try {
+                const command = JSON.parse(event.data);
+
+                if (command.command == "setView") {
+                    aladin.gotoRaDec(command.ra * 15.0, command.dec); // Convert RA from hours to degrees, J2000
+                } else if (command.command == "setPosition") {
+                    // Not supported
+                } else if (command.command == "projection") {
+                    aladin.setProjection(command.projection);
+                } else if (command.command == "setDateTime") {
+                    // Not supported
+                } else if (command.command == "track") {
+                    aladin.gotoObject(command.name);
+                } else if (command.command == "setBackground") {
+                    aladin.setImageSurvey(command.background);
+                } else if (command.command == "setProjection") {
+                    aladin.setProjection(command.projection);
+                } else if (command.command == "showNames") {
+                    for (var i = 0; i < aladin.view.catalogs.length; i++) {
+                        aladin.view.catalogs[i].displayLabel = command.show;
+                    }
+                    aladin.view.requestRedraw();
+                } else if (command.command == "showConstellations") {
+                    // Not supported
+                } else if (command.command == "showReticle") {
+                    aladin.showReticle(command.show);
+                } else if (command.command == "showGrid") {
+                    if (command.show) {
+                        aladin.showCooGrid();
+                    } else {
+                        aladin.hideCooGrid();
+                    }
+                } else if (command.command == "showAntennaFoV") {
+                    if (command.show) {
+                        showAntennaFoV();
+                    } else {
+                        hideAntennaFoV();
+                    }
+                } else if (command.command == "setAntennaFoV") {
+                    antennaHpbw = command.hpbw;
+                    if (antennaCircle) {
+                        antennaCircle.setRadius(antennaHpbw);
+                    }
+                } else {
+                    console.log(`Unknown command ${command.command}`);
+                }
+
+            } catch (e) {
+                console.log(`Erroring processing received message:\n${e}\n${event.data}`);
+            }
+        };
+
+        function createAntennaFoV() {
+            antennaOverlay = A.graphicOverlay({ color: '#ffffff', lineWidth: 1 });
+            aladin.addOverlay(antennaOverlay);
+            const [ra, dec] = aladin.getRaDec();
+            antennaCircle = A.circle(ra, dec, antennaHpbw);
+            antennaOverlay.add(antennaCircle);
+        }
+
+        function showAntennaFoV() {
+            antennaCircle.show();
+        }
+
+        function hideAntennaFoV() {
+            antennaCircle.hide();
+        }
+
+        function reportReady() {
+            console.log("reportReady " + socket.readyState);
+
+            createAntennaFoV();
+
+            if (socket.readyState === 1) {
+                socket.send(JSON.stringify({
+                    event: "ready"
+                }));
+            } else {
+                setTimeout(reportReady, 100);
+            }
+        }
+
+        function reportView() {
+            if (socket.readyState === 1) {
+                const [ra, dec] = aladin.getRaDec();
+                const [fovX, fovY] = aladin.getFov();
+                socket.send(JSON.stringify({
+                    event: "view",
+                    ra: ra / 15.0, // Convert RA from degrees to hours
+                    dec: dec,
+                    fov: fovX
+                }));
+
+                antennaCircle.setCenter([ra, dec]);
+            }
+        }
+
+    </script>
+</body>
+</html>

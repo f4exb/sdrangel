@@ -936,7 +936,7 @@ void StarTracker::scanAvailableFeatures()
         {
             Feature *feature = featureSet->getFeatureAt(fei);
 
-            if (feature->getURI() == "sdrangel.feature.satellitetracker")
+            if ((feature->getURI() == "sdrangel.feature.satellitetracker") || (feature->getURI() == "sdrangel.feature.skymap"))
             {
                 StarTrackerSettings::AvailableFeature satelliteTracker =
                     StarTrackerSettings::AvailableFeature{featureSet->getIndex(), fei, feature->getIdentifier()};

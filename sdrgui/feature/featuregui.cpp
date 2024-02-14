@@ -417,3 +417,8 @@ void FeatureGUI::setDisplayedame(const QString& name)
     m_displayedName = name;
     m_indexLabel->setToolTip(tr("%1").arg(m_displayedName));
 }
+
+void FeatureGUI::setStatusText(const QString& text)
+{
+    m_statusLabel->setText(text);
+}
