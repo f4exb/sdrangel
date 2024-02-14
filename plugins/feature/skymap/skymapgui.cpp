@@ -106,6 +106,7 @@ bool SkyMapGUI::handleMessage(const Message& message)
     else if (SkyMap::MsgSetDateTime::match(message))
     {
         SkyMap::MsgSetDateTime& msgSetDateTime = (SkyMap::MsgSetDateTime&) message;
+        setDateTime(msgSetDateTime.getDateTime());
         return true;
     }
     else if (MainCore::MsgTargetAzimuthElevation::match(message))
@@ -292,6 +293,8 @@ void SkyMapGUI::blockApplySettings(bool block)
 
 void SkyMapGUI::on_map_currentIndexChanged(int index)
 {
+    (void) index;
+
     m_settings.m_map = ui->map->currentText();
     applySetting("map");
 
@@ -458,7 +461,7 @@ void SkyMapGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        SkyMap::MsgConfigureSkyMap* message = SkyMap::MsgConfigureSkyMap::create(m_settings, m_settingsKeys, force);
+        SkyMap::MsgConfigureSkyMap* message = SkyMap::MsgConfigureSkyMap::create(m_settings, settingsKeys, force);
         m_skymap->getInputMessageQueue()->push(message);
 
         QObject *oldSource = m_source;
@@ -482,8 +485,6 @@ void SkyMapGUI::applySettings(const QStringList& settingsKeys, bool force)
                 MainCore::instance()->getSettings().getAltitude());
         }
     }
-
-    m_settingsKeys.clear();
 }
 
 void SkyMapGUI::applyAllSettings()
@@ -1045,21 +1046,33 @@ void SkyMapGUI::updateSourceList()
 
 void SkyMapGUI::handleFeatureAdded(int featureSetIndex, Feature *feature)
 {
+    (void) featureSetIndex;
+    (void) feature;
+
     updateSourceList();
 }
 
 void SkyMapGUI::handleFeatureRemoved(int featureSetIndex, Feature *oldFeature)
 {
+    (void) featureSetIndex;
+    (void) oldFeature;
+
     updateSourceList();
 }
 
 void SkyMapGUI::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
 {
+    (void) deviceSetIndex;
+    (void) channel;
+
     updateSourceList();
 }
 
 void SkyMapGUI::handleChannelRemoved(int deviceSetIndex, ChannelAPI *channel)
 {
+    (void) deviceSetIndex;
+    (void) channel;
+
     updateSourceList();
 }
 

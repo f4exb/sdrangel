@@ -28,6 +28,7 @@ WebView::WebView(QWidget *parent) :
 
 QWebEngineView *WebView::createWindow(QWebEnginePage::WebWindowType type)
 {
+    (void) type;
     QWebEngineView *view = new QWebEngineView();
     connect(view, &QWebEngineView::titleChanged, this, &WebView::on_titleChanged);
 

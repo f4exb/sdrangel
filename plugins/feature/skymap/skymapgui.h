@@ -72,7 +72,6 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     SkyMapSettings m_settings;
-    QList<QString> m_settingsKeys;
     RollupState m_rollupState;
     bool m_doApplySettings;
     QList<MainCore::AvailableChannelOrFeature> m_availableChannelOrFeatures;

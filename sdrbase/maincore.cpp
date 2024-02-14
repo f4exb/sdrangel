@@ -439,7 +439,6 @@ void MainCore::updateWakeLock()
 QList<MainCore::AvailableChannelOrFeature> MainCore::getAvailableChannels(const QStringList& uris)
 {
     QList<AvailableChannelOrFeature> list;
-    std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
 
     for (const auto deviceSet : m_deviceSets)
     {

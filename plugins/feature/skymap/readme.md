@@ -7,7 +7,7 @@ Multiple Sky Maps are supported, including the [World Wide Telescope](https://ww
 
 The Rotator Controller and Star Tracker plugins can track the position viewed in the Sky Map. The Sky Map can also be set to track coordinates from the Star Tracker, Satellite Tracker, Rotator Controller or Map.
 
-![Sky Map feature WWT](../../../doc/img/SkyMap_WWT.png)
+![Sky Map feature WWT](../../../doc/img/SkyMap_wwt.png)
 
 With the ESASky map, a host of astronomical data is available from JWST, Hubble, Gaia, Herschel and others, including images, spectra and publications:
 
