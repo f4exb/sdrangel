@@ -27,6 +27,7 @@
 
 #include "feature/feature.h"
 #include "util/message.h"
+#include "maincore.h"
 
 #include "gs232controllersettings.h"
 
@@ -110,14 +111,14 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        QList<GS232ControllerSettings::AvailableChannelOrFeature>& getItems() { return m_availableChannelOrFeatures; }
+        QList<MainCore::AvailableChannelOrFeature>& getItems() { return m_availableChannelOrFeatures; }
 
         static MsgReportAvailableChannelOrFeatures* create() {
             return new MsgReportAvailableChannelOrFeatures();
         }
 
     private:
-        QList<GS232ControllerSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
+        QList<MainCore::AvailableChannelOrFeature> m_availableChannelOrFeatures;
 
         MsgReportAvailableChannelOrFeatures() :
             Message()
@@ -212,7 +213,8 @@ private:
     QThread *m_thread;
     GS232ControllerWorker *m_worker;
     GS232ControllerSettings m_settings;
-    QHash<QObject*, GS232ControllerSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
+    //QHash<QObject*, GS232ControllerSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
+    QList<MainCore::AvailableChannelOrFeature> m_availableChannelOrFeatures;
     QObject *m_selectedPipe;
 
     QTimer m_timer;
@@ -239,7 +241,7 @@ private slots:
     void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
     void handleFeatureRemoved(int featureSetIndex, Feature *feature);
     void handleChannelRemoved(int deviceSetIndex, ChannelAPI *feature);
-    void handleMessagePipeToBeDeleted(int reason, QObject* object);
+    //void handleMessagePipeToBeDeleted(int reason, QObject* object);
     void handlePipeMessageQueue(MessageQueue* messageQueue);
     void scanSerialPorts();
 };

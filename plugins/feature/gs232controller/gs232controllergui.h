@@ -90,7 +90,7 @@ private:
     void setProtocol(GS232ControllerSettings::Protocol protocol);
     void setPrecision();
     void updateConnectionWidgets();
-    void updatePipeList(const QList<GS232ControllerSettings::AvailableChannelOrFeature>& sources);
+    void updatePipeList(const QList<MainCore::AvailableChannelOrFeature>& sources);
     void updateSerialPortList();
     void updateSerialPortList(const QStringList& serialPorts);
     bool handleMessage(const Message& message);

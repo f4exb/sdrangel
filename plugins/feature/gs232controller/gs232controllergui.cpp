@@ -546,21 +546,15 @@ void GS232ControllerGUI::updateSerialPortList(const QStringList& serialPorts)
     ui->serialPort->blockSignals(false);
 }
 
-void GS232ControllerGUI::updatePipeList(const QList<GS232ControllerSettings::AvailableChannelOrFeature>& sources)
+void GS232ControllerGUI::updatePipeList(const QList<MainCore::AvailableChannelOrFeature>& sources)
 {
     QString currentText = ui->sources->currentText();
     QString newText;
     ui->sources->blockSignals(true);
     ui->sources->clear();
 
-    for (const auto& source : sources)
-    {
-        QString name = tr("%1%2:%3 %4")
-            .arg(source.m_kind)
-            .arg(source.m_superIndex)
-            .arg(source.m_index)
-            .arg(source.m_type);
-        ui->sources->addItem(name);
+    for (const auto& source : sources) {
+        ui->sources->addItem(source.getLongId());
     }
 
     int index = ui->sources->findText(m_settings.m_source);

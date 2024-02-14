@@ -345,6 +345,7 @@ void SkyMapGUI::on_source_currentIndexChanged(int index)
     }
     else
     {
+        ui->track->setChecked(false);
         ui->track->setEnabled(false);
     }
 }
@@ -413,6 +414,7 @@ void SkyMapGUI::displaySettings()
     }
     else
     {
+        ui->track->setChecked(false);
         ui->track->setEnabled(false);
     }
     initSkyMap();
@@ -1047,6 +1049,7 @@ void SkyMapGUI::updateSourceList()
     else
     {
         ui->source->setCurrentIndex(-1);
+        ui->track->setChecked(false);
         ui->track->setEnabled(false);
     }
 
