@@ -29,6 +29,7 @@
 const QStringList GS232ControllerSettings::m_pipeTypes = {
     QStringLiteral("ADSBDemod"),
     QStringLiteral("Map"),
+    QStringLiteral("SkyMap"),
     QStringLiteral("StarTracker"),
     QStringLiteral("SatelliteTracker")
 };
@@ -36,6 +37,7 @@ const QStringList GS232ControllerSettings::m_pipeTypes = {
 const QStringList GS232ControllerSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.adsbdemod"),
     QStringLiteral("sdrangel.feature.map"),
+    QStringLiteral("sdrangel.feature.skymap"),
     QStringLiteral("sdrangel.feature.startracker"),
     QStringLiteral("sdrangel.feature.satellitetracker")
 };
