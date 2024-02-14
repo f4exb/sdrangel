@@ -260,12 +260,18 @@
       </item>
       <item>
        <widget class="QComboBox" name="source">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Source feature to get target from</string>
         </property>
         <item>
          <property name="text">
-          <string>None</string>
+          <string>F0:1 StarTracker</string>
          </property>
         </item>
        </widget>

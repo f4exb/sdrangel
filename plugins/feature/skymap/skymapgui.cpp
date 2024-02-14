@@ -341,6 +341,11 @@ void SkyMapGUI::on_source_currentIndexChanged(int index)
     {
         m_settings.m_source = ui->source->currentText();
         applySetting("source");
+        ui->track->setEnabled(true);
+    }
+    else
+    {
+        ui->track->setEnabled(false);
     }
 }
 
@@ -401,8 +406,14 @@ void SkyMapGUI::displaySettings()
     }
     ui->track->setChecked(m_settings.m_track);
     idx = ui->source->findText(m_settings.m_source);
-    if (idx >= 0) {
+    if (idx >= 0)
+    {
         ui->source->setCurrentIndex(idx);
+        ui->track->setEnabled(true);
+    }
+    else
+    {
+        ui->track->setEnabled(false);
     }
     initSkyMap();
     getRollupContents()->restoreState(m_rollupState);
@@ -1028,10 +1039,15 @@ void SkyMapGUI::updateSourceList()
     // Select current setting, if exists
     // If not, make sure nothing selected, as channel may be created later on
     int idx = ui->source->findText(m_settings.m_source);
-    if (idx >= 0) {
+    if (idx >= 0)
+    {
         ui->source->setCurrentIndex(idx);
-    } else {
+        ui->track->setEnabled(true);
+    }
+    else
+    {
         ui->source->setCurrentIndex(-1);
+        ui->track->setEnabled(false);
     }
 
     ui->source->blockSignals(false);
