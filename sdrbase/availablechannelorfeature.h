@@ -57,7 +57,7 @@ inline uint qHash(const AvailableChannelOrFeature &c, uint seed = 0) noexcept
     return qHash(c.getLongId(), seed);
 }
 #else
-size_t qHash(const AvailableChannelOrFeatureList &c, size_t seed = 0) noexcept
+inline size_t qHash(const AvailableChannelOrFeature &c, size_t seed = 0) noexcept
 {
     return qHash(c.getLongId(), seed);
 }
