@@ -40,7 +40,7 @@ struct AvailableChannelOrFeature
 
     QString getId() const { // Eg: "R3:4"
         QString id = QString("%1%2:%3").arg(m_kind).arg(m_superIndex).arg(m_index);
-        if (m_kind == "M") {
+        if (m_kind == 'M') {
             id.append(QString(".%1").arg(m_streamIndex));
         }
         return id;
