@@ -258,6 +258,7 @@ SkyMapGUI::SkyMapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *
     m_resizer.enableChildMouseTracking();
 
     QObject::connect(&m_availableChannelOrFeatureHandler, &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged, this, &SkyMapGUI::updateSourceList);
+    QObject::connect(&m_availableChannelOrFeatureHandler, &AvailableChannelOrFeatureHandler::messageEnqueued, this, &SkyMapGUI::handlePipeMessageQueue);
     m_availableChannelOrFeatureHandler.scanAvailableChannelsAndFeatures();
 
     connect(&m_wtml, &WTML::dataUpdated, this, &SkyMapGUI::wtmlUpdated);
@@ -473,10 +474,10 @@ void SkyMapGUI::applySettings(const QStringList& settingsKeys, bool force)
         m_skymap->getInputMessageQueue()->push(message);
         m_settingsKeys.clear();
 
-        m_availableChannelOrFeatureHandler.deregisterPipes(m_source, this, {"target", "skymap.target"});
+        m_availableChannelOrFeatureHandler.deregisterPipes(m_source, {"target", "skymap.target"});
 
         QObject *oldSource = m_source;
-        m_source = m_availableChannelOrFeatureHandler.registerPipes(m_settings.m_source, this, {"target", "skymap.target"});
+        m_source = m_availableChannelOrFeatureHandler.registerPipes(m_settings.m_source, {"target", "skymap.target"});
 
         // When we change plugins, default to current date and time and My Position, until we get something different
         if (oldSource && !m_source)
@@ -486,7 +487,6 @@ void SkyMapGUI::applySettings(const QStringList& settingsKeys, bool force)
                 MainCore::instance()->getSettings().getLongitude(),
                 MainCore::instance()->getSettings().getAltitude());
         }
-
     }
 }
 

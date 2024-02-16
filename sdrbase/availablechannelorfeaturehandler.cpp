@@ -89,7 +89,7 @@ void AvailableChannelOrFeatureHandler::scanAvailableChannelsAndFeatures()
     }
 }
 
-QObject* AvailableChannelOrFeatureHandler::registerPipes(const QString& longIdFrom, QObject* to, const QStringList& pipeNames)
+QObject* AvailableChannelOrFeatureHandler::registerPipes(const QString& longIdFrom, const QStringList& pipeNames)
 {
     int index = m_availableChannelOrFeatureList.indexOfLongId(longIdFrom);
     if (index >= 0)
@@ -106,14 +106,16 @@ QObject* AvailableChannelOrFeatureHandler::registerPipes(const QString& longIdFr
     }
 }
 
-void AvailableChannelOrFeatureHandler::deregisterPipes(QObject* from, QObject* to, const QStringList& pipeNames)
+void AvailableChannelOrFeatureHandler::deregisterPipes(QObject* from, const QStringList& pipeNames)
 {
     // Don't dereference 'from' here, as it may have been deleted
     if (from)
     {
         qDebug("AvailableChannelOrFeatureHandler::deregisterPipes: unregister (%p)", from);
         MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
-        messagePipes.unregisterProducerToConsumer(from, to, "target");
+        for (const auto& pipeName : pipeNames) {
+            messagePipes.unregisterProducerToConsumer(from, this, pipeName);
+        }
     }
 }
 

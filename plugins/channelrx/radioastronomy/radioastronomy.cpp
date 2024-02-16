@@ -70,9 +70,9 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(0),
-    m_sweeping(false),
     m_availableFeatureHandler({"sdrangel.feature.startracker"}, QStringList{"startracker.target"}),
-    m_availableRotatorHandler({"sdrangel.feature.gs232controller"})
+    m_availableRotatorHandler({"sdrangel.feature.gs232controller"}),
+    m_sweeping(false)
 {
     qDebug("RadioAstronomy::RadioAstronomy");
     setObjectName(m_channelId);

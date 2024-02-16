@@ -55,8 +55,8 @@ public:
         return m_availableChannelOrFeatureList;
     }
 
-    QObject* registerPipes(const QString& longIdFrom, QObject* to, const QStringList& pipeNames);
-    void deregisterPipes(QObject* from, QObject* to, const QStringList& pipeNames);
+    QObject* registerPipes(const QString& longIdFrom, const QStringList& pipeNames);
+    void deregisterPipes(QObject* from, const QStringList& pipeNames);
 
 private:
 

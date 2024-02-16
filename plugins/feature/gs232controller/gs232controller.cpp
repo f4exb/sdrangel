@@ -286,40 +286,8 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, con
         || (!settings.m_source.isEmpty() && (m_selectedPipe == nullptr)) // Change in available pipes
         || force)
     {
-        MainCore *mainCore = MainCore::instance();
-        MessagePipes& messagePipes = mainCore->getMessagePipes();
-
-        m_availableChannelOrFeatureHandler.deregisterPipes(m_selectedPipe, this, {"target"});
-
-        /*if (m_selectedPipe)
-        {
-            // Don't deref m_selectedPipe, as plugin may have been deleted
-            qDebug("GS232Controller::applySettings: unregister (%p)", m_selectedPipe);
-            messagePipes.unregisterProducerToConsumer(m_selectedPipe, this, "target");
-        }*/
-
-        m_selectedPipe = m_availableChannelOrFeatureHandler.registerPipes(settings.m_source, this, {"target"});
-
-        /*if (!settings.m_source.isEmpty())
-        {
-            int index = m_availableChannelOrFeatures.indexOfLongId(settings.m_source);
-
-            if (index >= 0)
-            {
-                QObject *object = m_availableChannelOrFeatures[index].m_object;
-                registerPipe(object);
-                m_selectedPipe = object;
-            }
-            else
-            {
-                m_selectedPipe = nullptr;
-                qDebug() << "GS232Controller::applySettings: No plugin corresponding to source " << settings.m_source;
-            }
-        }
-        else
-        {
-            m_selectedPipe = nullptr;
-        }*/
+        m_availableChannelOrFeatureHandler.deregisterPipes(m_selectedPipe, {"target"});
+        m_selectedPipe = m_availableChannelOrFeatureHandler.registerPipes(settings.m_source, {"target"});
     }
 
     GS232ControllerWorker::MsgConfigureGS232ControllerWorker *msg = GS232ControllerWorker::MsgConfigureGS232ControllerWorker::create(
