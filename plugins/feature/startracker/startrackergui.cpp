@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -220,17 +220,17 @@ bool StarTrackerGUI::handleMessage(const Message& message)
         }
         return true;
     }
-    else if (StarTracker::MsgReportAvailableSatelliteTrackers::match(message))
+    else if (StarTracker::MsgReportAvailableFeatures::match(message))
     {
-        StarTracker::MsgReportAvailableSatelliteTrackers& report = (StarTracker::MsgReportAvailableSatelliteTrackers&) message;
-        updateSatelliteTrackerList(report.getFeatures());
+        StarTracker::MsgReportAvailableFeatures& report = (StarTracker::MsgReportAvailableFeatures&) message;
+        updateFeatureList(report.getFeatures());
         return true;
     }
 
     return false;
 }
 
-void StarTrackerGUI::updateSatelliteTrackerList(const QList<StarTrackerSettings::AvailableFeature>& satelliteTrackers)
+void StarTrackerGUI::updateFeatureList(const AvailableChannelOrFeatureList& features)
 {
     // Update list of plugins we can get target from
     ui->target->blockSignals(true);
@@ -242,9 +242,9 @@ void StarTrackerGUI::updateSatelliteTrackerList(const QList<StarTrackerSettings:
         bool found = false;
         if (text.contains("SatelliteTracker") || text.contains("SkyMap"))
         {
-            for (const auto& satelliteTracker : satelliteTrackers)
+            for (const auto& feature : features)
             {
-                if (satelliteTracker.getName() == text)
+                if (feature.getLongId() == text)
                 {
                     found = true;
                     break;
@@ -263,9 +263,9 @@ void StarTrackerGUI::updateSatelliteTrackerList(const QList<StarTrackerSettings:
     }
 
     // Add new targets
-    for (const auto& satelliteTracker : satelliteTrackers)
+    for (const auto& feature : features)
     {
-        QString name = satelliteTracker.getName();
+        QString name = feature.getLongId();
         if (ui->target->findText(name) == -1) {
             ui->target->addItem(name);
         }
@@ -454,6 +454,9 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
 
     createGalacticLineOfSightScene();
     plotChart();
+
+    StarTracker::MsgRequestAvailableFeatures *message = StarTracker::MsgRequestAvailableFeatures::create();
+    m_starTracker->getInputMessageQueue()->push(message);
 }
 
 StarTrackerGUI::~StarTrackerGUI()

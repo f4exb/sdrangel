@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2020-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2020-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2020 Kacper Michajłow <kasper93@gmail.com>                      //
 //                                                                               //
@@ -56,6 +56,8 @@ GS232Controller::GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface)
     Feature(m_featureIdURI, webAPIAdapterInterface),
     m_thread(nullptr),
     m_worker(nullptr),
+    m_availableChannelOrFeatureHandler(GS232ControllerSettings::m_pipeURIs),
+    m_selectedPipe(nullptr),
     m_currentAzimuth(0.0f),
     m_currentElevation(0.0f)
 {
@@ -63,7 +65,6 @@ GS232Controller::GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface)
     setObjectName(m_featureId);
     m_state = StIdle;
     m_errorMessage = "GS232Controller error";
-    m_selectedPipe = nullptr;
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,
@@ -71,30 +72,21 @@ GS232Controller::GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface)
         this,
         &GS232Controller::networkManagerFinished
     );
+
     QObject::connect(
-        MainCore::instance(),
-        &MainCore::featureAdded,
+        &m_availableChannelOrFeatureHandler,
+        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
         this,
-        &GS232Controller::handleFeatureAdded
+        &GS232Controller::channelsOrFeaturesChanged
     );
     QObject::connect(
-        MainCore::instance(),
-        &MainCore::channelAdded,
+        &m_availableChannelOrFeatureHandler,
+        &AvailableChannelOrFeatureHandler::messageEnqueued,
         this,
-        &GS232Controller::handleChannelAdded
+        &GS232Controller::handlePipeMessageQueue
     );
-    QObject::connect(
-        MainCore::instance(),
-        &MainCore::featureRemoved,
-        this,
-        &GS232Controller::handleFeatureRemoved
-    );
-    QObject::connect(
-        MainCore::instance(),
-        &MainCore::channelRemoved,
-        this,
-        &GS232Controller::handleChannelRemoved
-    );
+    m_availableChannelOrFeatureHandler.scanAvailableChannelsAndFeatures();
+
     connect(&m_timer, &QTimer::timeout, this, &GS232Controller::scanSerialPorts);
     m_timer.start(5000);
 }
@@ -104,28 +96,16 @@ GS232Controller::~GS232Controller()
     m_timer.stop();
     disconnect(&m_timer, &QTimer::timeout, this, &GS232Controller::scanSerialPorts);
     QObject::disconnect(
-        MainCore::instance(),
-        &MainCore::channelRemoved,
+        &m_availableChannelOrFeatureHandler,
+        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
         this,
-        &GS232Controller::handleChannelRemoved
+        &GS232Controller::channelsOrFeaturesChanged
     );
     QObject::disconnect(
-        MainCore::instance(),
-        &MainCore::featureRemoved,
+        &m_availableChannelOrFeatureHandler,
+        &AvailableChannelOrFeatureHandler::messageEnqueued,
         this,
-        &GS232Controller::handleFeatureRemoved
-    );
-    QObject::disconnect(
-        MainCore::instance(),
-        &MainCore::channelAdded,
-        this,
-        &GS232Controller::handleChannelAdded
-    );
-    QObject::disconnect(
-        MainCore::instance(),
-        &MainCore::featureAdded,
-        this,
-        &GS232Controller::handleFeatureAdded
+        &GS232Controller::handlePipeMessageQueue
     );
     QObject::disconnect(
         m_networkManager,
@@ -154,8 +134,6 @@ void GS232Controller::start()
     GS232ControllerWorker::MsgConfigureGS232ControllerWorker *msg =
         GS232ControllerWorker::MsgConfigureGS232ControllerWorker::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
-
-    scanAvailableChannelsAndFeatures();
 }
 
 void GS232Controller::stop()
@@ -210,7 +188,7 @@ bool GS232Controller::handleMessage(const Message& cmd)
     }
     else if (MsgScanAvailableChannelOrFeatures::match(cmd))
     {
-        scanAvailableChannelsAndFeatures();
+        notifyUpdate({}, {});
         return true;
     }
     else if (GS232ControllerReport::MsgReportAzAl::match(cmd))
@@ -248,8 +226,6 @@ bool GS232Controller::handleMessage(const Message& cmd)
                     applySettings(m_settings, QList<QString>{"azimuth", "elevation"});
                 }
             }
-            else
-                qDebug() << "GS232Controller::handleMessage: No match " << msg.getPipeSource() << " " << m_selectedPipe;
         }
         return true;
     }
@@ -306,10 +282,6 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, con
 {
     qDebug() << "GS232Controller::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    // if ((m_settings.m_source != settings.m_source)
-    //     || (!settings.m_source.isEmpty() && (m_selectedPipe == nullptr)) // Change in available pipes
-    //     || force)
-
     if (settingsKeys.contains("source")
         || (!settings.m_source.isEmpty() && (m_selectedPipe == nullptr)) // Change in available pipes
         || force)
@@ -317,27 +289,24 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, con
         MainCore *mainCore = MainCore::instance();
         MessagePipes& messagePipes = mainCore->getMessagePipes();
 
-        if (m_selectedPipe)
+        m_availableChannelOrFeatureHandler.deregisterPipes(m_selectedPipe, this, {"target"});
+
+        /*if (m_selectedPipe)
         {
-            qDebug("GS232Controller::applySettings: unregister %s (%p)", qPrintable(m_selectedPipe->objectName()), m_selectedPipe);
+            // Don't deref m_selectedPipe, as plugin may have been deleted
+            qDebug("GS232Controller::applySettings: unregister (%p)", m_selectedPipe);
             messagePipes.unregisterProducerToConsumer(m_selectedPipe, this, "target");
-        }
+        }*/
 
-        if (!settings.m_source.isEmpty())
+        m_selectedPipe = m_availableChannelOrFeatureHandler.registerPipes(settings.m_source, this, {"target"});
+
+        /*if (!settings.m_source.isEmpty())
         {
-            QObject *object = nullptr;
+            int index = m_availableChannelOrFeatures.indexOfLongId(settings.m_source);
 
-            for (const auto& oval : m_availableChannelOrFeatures)
+            if (index >= 0)
             {
-                if (settings.m_source == oval.getLongId())
-                {
-                    object = oval.m_object;
-                    break;
-                }
-            }
-
-            if (object)
-            {
+                QObject *object = m_availableChannelOrFeatures[index].m_object;
                 registerPipe(object);
                 m_selectedPipe = object;
             }
@@ -350,7 +319,7 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, con
         else
         {
             m_selectedPipe = nullptr;
-        }
+        }*/
     }
 
     GS232ControllerWorker::MsgConfigureGS232ControllerWorker *msg = GS232ControllerWorker::MsgConfigureGS232ControllerWorker::create(
@@ -718,12 +687,7 @@ void GS232Controller::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& r
 
     for (const auto& item : m_availableChannelOrFeatures)
     {
-        QString itemText = tr("%1%2:%3 %4")
-            .arg(item.m_kind)
-            .arg(item.m_superIndex)
-            .arg(item.m_index)
-            .arg(item.m_type);
-
+        QString itemText = item.getLongId();
         response.getGs232ControllerReport()->getSources()->append(new QString(itemText));
     }
 
@@ -763,67 +727,20 @@ void GS232Controller::networkManagerFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
-void GS232Controller::scanAvailableChannelsAndFeatures()
+void GS232Controller::channelsOrFeaturesChanged(const QStringList& renameFrom, const QStringList& renameTo)
 {
-    m_availableChannelOrFeatures = MainCore::instance()->getAvailableChannelsAndFeatures(GS232ControllerSettings::m_pipeURIs);
-    notifyUpdate();
+    m_availableChannelOrFeatures = m_availableChannelOrFeatureHandler.getAvailableChannelOrFeatureList();
+    notifyUpdate(renameFrom, renameTo);
 }
 
-void GS232Controller::notifyUpdate()
+void GS232Controller::notifyUpdate(const QStringList& renameFrom, const QStringList& renameTo)
 {
     if (getMessageQueueToGUI())
     {
-        MsgReportAvailableChannelOrFeatures *msg = MsgReportAvailableChannelOrFeatures::create();
+        MsgReportAvailableChannelOrFeatures *msg = MsgReportAvailableChannelOrFeatures::create(renameFrom, renameTo);
         msg->getItems() = m_availableChannelOrFeatures;
         getMessageQueueToGUI()->push(msg);
     }
-}
-
-void GS232Controller::handleFeatureAdded(int featureSetIndex, Feature *feature)
-{
-    (void) featureSetIndex;
-    (void) feature;
-
-    scanAvailableChannelsAndFeatures();
-}
-
-void GS232Controller::handleFeatureRemoved(int featureSetIndex, Feature *feature)
-{
-    (void) featureSetIndex;
-    (void) feature;
-
-    scanAvailableChannelsAndFeatures();
-}
-
-void GS232Controller::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
-{
-    (void) deviceSetIndex;
-    (void) channel;
-
-    scanAvailableChannelsAndFeatures();
-}
-
-void GS232Controller::handleChannelRemoved(int deviceSetIndex, ChannelAPI *channel)
-{
-    (void) deviceSetIndex;
-    (void) channel;
-
-    scanAvailableChannelsAndFeatures();
-}
-
-void GS232Controller::registerPipe(QObject *object)
-{
-    qDebug("GS232Controller::registerPipe: register %s (%p)", qPrintable(object->objectName()), object);
-    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
-    ObjectPipe *pipe = messagePipes.registerProducerToConsumer(object, this, "target");
-    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
-    QObject::connect(
-        messageQueue,
-        &MessageQueue::messageEnqueued,
-        this,
-        [=](){ this->handlePipeMessageQueue(messageQueue); },
-        Qt::QueuedConnection
-    );
 }
 
 void GS232Controller::handlePipeMessageQueue(MessageQueue* messageQueue)

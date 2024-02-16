@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2015-2018 Edouard Griffiths, F4EXB.                             //
-// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -67,10 +67,12 @@ const char * const RadioAstronomy::m_channelIdURI = "sdrangel.channel.radioastro
 const char * const RadioAstronomy::m_channelId = "RadioAstronomy";
 
 RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
-        ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
-        m_deviceAPI(deviceAPI),
-        m_basebandSampleRate(0),
-        m_sweeping(false)
+    ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
+    m_deviceAPI(deviceAPI),
+    m_basebandSampleRate(0),
+    m_sweeping(false),
+    m_availableFeatureHandler({"sdrangel.feature.startracker"}, QStringList{"startracker.target"}),
+    m_availableRotatorHandler({"sdrangel.feature.gs232controller"})
 {
     qDebug("RadioAstronomy::RadioAstronomy");
     setObjectName(m_channelId);
@@ -105,17 +107,26 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
         &RadioAstronomy::handleIndexInDeviceSetChanged
     );
     QObject::connect(
-        MainCore::instance(),
-        &MainCore::featureAdded,
+        &m_availableFeatureHandler,
+        &AvailableChannelOrFeatureHandler::messageEnqueued,
         this,
-        &RadioAstronomy::handleFeatureAdded
+        &RadioAstronomy::handleFeatureMessageQueue
     );
     QObject::connect(
-        MainCore::instance(),
-        &MainCore::featureRemoved,
+        &m_availableFeatureHandler,
+        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
         this,
-        &RadioAstronomy::handleFeatureRemoved
+        &RadioAstronomy::featuresChanged
     );
+    m_availableFeatureHandler.scanAvailableChannelsAndFeatures();
+
+    QObject::connect(
+        &m_availableRotatorHandler,
+        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
+        this,
+        &RadioAstronomy::rotatorsChanged
+    );
+    m_availableRotatorHandler.scanAvailableChannelsAndFeatures();
 
     m_sweepTimer.setSingleShot(true);
 }
@@ -123,17 +134,20 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
 RadioAstronomy::~RadioAstronomy()
 {
     qDebug("RadioAstronomy::~RadioAstronomy");
-    QObject::disconnect(
-        MainCore::instance(),
-        &MainCore::featureRemoved,
+    QObject::disconnect(&m_availableFeatureHandler,
+        &AvailableChannelOrFeatureHandler::messageEnqueued,
         this,
-        &RadioAstronomy::handleFeatureRemoved
+        &RadioAstronomy::handleFeatureMessageQueue
     );
-    QObject::disconnect(
-        MainCore::instance(),
-        &MainCore::featureAdded,
+    QObject::disconnect(&m_availableFeatureHandler,
+        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
         this,
-        &RadioAstronomy::handleFeatureAdded
+        &RadioAstronomy::featuresChanged
+    );
+    QObject::disconnect(&m_availableRotatorHandler,
+        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
+        this,
+        &RadioAstronomy::rotatorsChanged
     );
     QObject::disconnect(
         m_networkManager,
@@ -194,8 +208,6 @@ void RadioAstronomy::start()
     m_basebandSink->getInputMessageQueue()->push(new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency));
     m_basebandSink->getInputMessageQueue()->push(RadioAstronomyBaseband::MsgConfigureRadioAstronomyBaseband::create(m_settings, true));
     m_worker->getInputMessageQueue()->push(RadioAstronomyWorker::MsgConfigureRadioAstronomyWorker::create(m_settings, true));
-
-    scanAvailableFeatures();
 }
 
 void RadioAstronomy::stop()
@@ -330,7 +342,8 @@ bool RadioAstronomy::handleMessage(const Message& cmd)
     }
     else if (MsgScanAvailableFeatures::match(cmd))
     {
-        scanAvailableFeatures();
+        notifyUpdateFeatures({}, {});
+        notifyUpdateRotators({}, {});
         return true;
     }
     else
@@ -753,22 +766,14 @@ void RadioAstronomy::applySettings(const RadioAstronomySettings& settings, bool 
     {
         if (!settings.m_starTracker.isEmpty())
         {
-            Feature *feature = nullptr;
-
-            for (const auto& fval : m_availableFeatures)
+            int index = m_availableFeatures.indexOfLongId(settings.m_starTracker);
+            if (index >= 0)
             {
-                QString starTrackerText = tr("F%1:%2 %3").arg(fval.m_featureSetIndex).arg(fval.m_featureIndex).arg(fval.m_type);
-
-                if (settings.m_starTracker == starTrackerText)
-                {
-                    feature = m_availableFeatures.key(fval);
-                    break;
-                }
+                m_selectedPipe = m_availableFeatures[index].m_object;
             }
-
-            if (feature) {
-                m_selectedPipe = feature;
-            } else {
+            else
+            {
+                m_selectedPipe = nullptr;
                 qDebug() << "RadioAstronomy::applySettings: No plugin corresponding to target " << settings.m_starTracker;
             }
         }
@@ -1246,142 +1251,36 @@ void RadioAstronomy::handleIndexInDeviceSetChanged(int index)
     m_basebandSink->setFifoLabel(fifoLabel);
 }
 
-void RadioAstronomy::scanAvailableFeatures()
+void RadioAstronomy::featuresChanged(const QStringList& renameFrom, const QStringList& renameTo)
 {
-    qDebug("RadioAstronomy::scanAvailableFeatures");
-    MainCore *mainCore = MainCore::instance();
-    MessagePipes& messagePipes = mainCore->getMessagePipes();
-    std::vector<FeatureSet*>& featureSets = mainCore->getFeatureeSets();
-    m_availableFeatures.clear();
-    m_rotators.clear();
-
-    for (const auto& featureSet : featureSets)
-    {
-        for (int fei = 0; fei < featureSet->getNumberOfFeatures(); fei++)
-        {
-            Feature *feature = featureSet->getFeatureAt(fei);
-
-            if (RadioAstronomySettings::m_pipeURIs.contains(feature->getURI()))
-            {
-                if (!m_availableFeatures.contains(feature))
-                {
-                    qDebug("RadioAstronomy::scanAvailableFeatures: register %d:%d %s (%p)",
-                        featureSet->getIndex(), fei, qPrintable(feature->getURI()), feature);
-                    ObjectPipe *pipe = messagePipes.registerProducerToConsumer(feature, this, "startracker.target");
-                    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
-                    QObject::connect(
-                        messageQueue,
-                        &MessageQueue::messageEnqueued,
-                        this,
-                        [=](){ this->handleFeatureMessageQueue(messageQueue); },
-                        Qt::QueuedConnection
-                    );
-                    connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
-                    RadioAstronomySettings::AvailableFeature availableFeature =
-                        RadioAstronomySettings::AvailableFeature{featureSet->getIndex(), fei, feature->getIdentifier()};
-                    m_availableFeatures[feature] = availableFeature;
-                }
-            }
-            else if (feature->getURI() == "sdrangel.feature.gs232controller")
-            {
-                RadioAstronomySettings::AvailableFeature rotator =
-                    RadioAstronomySettings::AvailableFeature{featureSet->getIndex(), fei, feature->getIdentifier()};
-                m_rotators[feature] = rotator;
-            }
-        }
-    }
-
-    notifyUpdateFeatures();
-    notifyUpdateRotators();
+    m_availableFeatures = m_availableFeatureHandler.getAvailableChannelOrFeatureList();
+    notifyUpdateFeatures(renameFrom, renameTo);
 }
 
-void RadioAstronomy::notifyUpdateFeatures()
+
+void RadioAstronomy::notifyUpdateFeatures(const QStringList& renameFrom, const QStringList& renameTo)
 {
     if (getMessageQueueToGUI())
     {
-        MsgReportAvailableFeatures *msg = MsgReportAvailableFeatures::create();
-        msg->getFeatures() = m_availableFeatures.values();
+        MsgReportAvailableFeatures *msg = MsgReportAvailableFeatures::create(renameFrom, renameTo);
+        msg->getFeatures() = m_availableFeatures;
         getMessageQueueToGUI()->push(msg);
     }
 }
 
-void RadioAstronomy::notifyUpdateRotators()
+void RadioAstronomy::rotatorsChanged(const QStringList& renameFrom, const QStringList& renameTo)
+{
+    m_rotators = m_availableRotatorHandler.getAvailableChannelOrFeatureList();
+    notifyUpdateRotators(renameFrom, renameTo);
+}
+
+void RadioAstronomy::notifyUpdateRotators(const QStringList& renameFrom, const QStringList& renameTo)
 {
     if (getMessageQueueToGUI())
     {
-        MsgReportAvailableRotators *msg = MsgReportAvailableRotators::create();
-        msg->getFeatures() = m_rotators.values();
+        MsgReportAvailableRotators *msg = MsgReportAvailableRotators::create(renameFrom, renameTo);
+        msg->getFeatures() = m_rotators;
         getMessageQueueToGUI()->push(msg);
-    }
-}
-
-void RadioAstronomy::handleFeatureAdded(int featureSetIndex, Feature *feature)
-{
-    qDebug("RadioAstronomy::handleFeatureAdded: featureSetIndex: %d:%d feature: %s (%p)",
-        featureSetIndex, feature->getIndexInFeatureSet(), qPrintable(feature->getURI()), feature);
-    FeatureSet *featureSet = MainCore::instance()->getFeatureeSets()[featureSetIndex];
-
-    if (RadioAstronomySettings::m_pipeURIs.contains(feature->getURI()))
-    {
-        int fei = feature->getIndexInFeatureSet();
-
-        if (!m_availableFeatures.contains(feature))
-        {
-            MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
-            ObjectPipe *pipe = messagePipes.registerProducerToConsumer(feature, this, "startracker.target");
-            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
-            QObject::connect(
-                messageQueue,
-                &MessageQueue::messageEnqueued,
-                this,
-                [=](){ this->handleFeatureMessageQueue(messageQueue); },
-                Qt::QueuedConnection
-            );
-            QObject::connect(
-                pipe,
-                &ObjectPipe::toBeDeleted,
-                this,
-                &RadioAstronomy::handleMessagePipeToBeDeleted
-            );
-        }
-
-        RadioAstronomySettings::AvailableFeature availableFeature =
-            RadioAstronomySettings::AvailableFeature{featureSet->getIndex(), fei, feature->getIdentifier()};
-        m_availableFeatures[feature] = availableFeature;
-
-        notifyUpdateFeatures();
-    }
-    else if (feature->getURI() == "sdrangel.feature.gs232controller")
-    {
-        if (!m_rotators.contains(feature))
-        {
-            RadioAstronomySettings::AvailableFeature rotator =
-                RadioAstronomySettings::AvailableFeature{featureSet->getIndex(), feature->getIndexInFeatureSet(), feature->getIdentifier()};
-            m_rotators[feature] = rotator;
-        }
-
-        notifyUpdateRotators();
-    }
-}
-
-void RadioAstronomy::handleFeatureRemoved(int featureSetIndex, Feature *feature)
-{
-    qDebug("RadioAstronomy::handleFeatureRemoved: featureSetIndex: %d (%p)", featureSetIndex, feature);
-
-    if (m_rotators.contains(feature))
-    {
-        m_rotators.remove(feature);
-        notifyUpdateRotators();
-    }
-}
-
-void RadioAstronomy::handleMessagePipeToBeDeleted(int reason, QObject* object)
-{
-    if ((reason == 0) && m_availableFeatures.contains((Feature*) object)) // producer (feature)
-    {
-        qDebug("RadioAstronomy::handleMessagePipeToBeDeleted: removing feature at (%p)", object);
-        m_availableFeatures.remove((Feature*) object);
-        notifyUpdateFeatures();
     }
 }
 

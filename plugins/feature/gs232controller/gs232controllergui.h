@@ -85,12 +85,14 @@ private:
     virtual ~GS232ControllerGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySetting(const QString& settingsKey);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
+    void applyAllSettings();
     void displaySettings();
     void setProtocol(GS232ControllerSettings::Protocol protocol);
     void setPrecision();
     void updateConnectionWidgets();
-    void updatePipeList(const QList<MainCore::AvailableChannelOrFeature>& sources);
+    void updatePipeList(const AvailableChannelOrFeatureList& sources, const QStringList& renameFrom, const QStringList& renameTo);
     void updateSerialPortList();
     void updateSerialPortList(const QStringList& serialPorts);
     bool handleMessage(const Message& message);

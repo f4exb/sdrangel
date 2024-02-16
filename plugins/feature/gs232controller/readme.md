@@ -185,8 +185,8 @@ The controller uses the 'P' and 'p' commands to set and get azimuth and elevatio
 
 Full details of the API can be found in the Swagger documentation. Here is a quick example of how to set the azimuth and elevation from the command line:
 
-    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/settings" -d '{"featureType": "GS232Controller",  "GS232ControllerSettings": { "azimuth": 180, "elevation": 45 }}'
+    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/feature/0/settings" -d '{"featureType": "GS232Controller",  "GS232ControllerSettings": { "azimuth": 180, "elevation": 45 }}'
 
 To start sending commands to the rotator:
 
-    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/run"
+    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/feature/0/run"

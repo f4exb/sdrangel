@@ -34,6 +34,7 @@
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "settings/rollupstate.h"
+#include "availablechannelorfeaturehandler.h"
 #include "maincore.h"
 
 #include "skymapsettings.h"
@@ -72,10 +73,12 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     SkyMapSettings m_settings;
+    QList<QString> m_settingsKeys;
     RollupState m_rollupState;
     bool m_doApplySettings;
-    QList<MainCore::AvailableChannelOrFeature> m_availableChannelOrFeatures;
     QObject *m_source;
+    AvailableChannelOrFeatureList m_availableChannelOrFeatures;
+    AvailableChannelOrFeatureHandler m_availableChannelOrFeatureHandler;
 
     SkyMap* m_skymap;
     MessageQueue m_inputMessageQueue;
@@ -89,6 +92,8 @@ private:
     double m_ra;                //!< Target from source plugin
     double m_dec;
     QDateTime m_dateTime;       //!< Date time from source plugin
+
+    QStringList m_wwtBackgrounds;
 
     explicit SkyMapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~SkyMapGUI();
@@ -112,8 +117,6 @@ private:
     void updateProjection();
     void find(const QString& text);
     void sendToRotator(const QString& name, double az, double alt);
-    void updateSourceList();
-    void registerPipe(QObject *object);
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);
@@ -140,11 +143,7 @@ private slots:
     void preferenceChanged(int elementType);
     void receivedEvent(const QJsonObject &obj);
     void wtmlUpdated(const QList<WTML::ImageSet>& dataSets);
-
-    void handleFeatureAdded(int featureSetIndex, Feature *feature);
-    void handleFeatureRemoved(int featureSetIndex, Feature *oldFeature);
-    void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
-    void handleChannelRemoved(int deviceSetIndex, ChannelAPI *channel);
+    void updateSourceList(const QStringList& renameFrom, const QStringList& renameTo);
     void handlePipeMessageQueue(MessageQueue* messageQueue);
 
 };

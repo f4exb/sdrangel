@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -46,7 +46,8 @@ const char* const APRS::m_featureId = "APRS";
 APRS::APRS(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
     m_thread(nullptr),
-    m_worker(nullptr)
+    m_worker(nullptr),
+    m_availableChannelHandler(APRSSettings::m_pipeURIs, QStringList{"packets"})
 {
     qDebug("APRS::APRS: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
@@ -59,23 +60,31 @@ APRS::APRS(WebAPIAdapterInterface *webAPIAdapterInterface) :
         this,
         &APRS::networkManagerFinished
     );
-    scanAvailableChannels();
     QObject::connect(
-        MainCore::instance(),
-        &MainCore::channelAdded,
+        &m_availableChannelHandler,
+        &AvailableChannelOrFeatureHandler::messageEnqueued,
         this,
-        &APRS::handleChannelAdded
-    );
+        &APRS::handleChannelMessageQueue);
+    QObject::connect(
+        &m_availableChannelHandler,
+        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
+        this,
+        &APRS::channelsChanged);
+    m_availableChannelHandler.scanAvailableChannelsAndFeatures();
 }
 
 APRS::~APRS()
 {
     QObject::disconnect(
-        MainCore::instance(),
-        &MainCore::channelAdded,
+        &m_availableChannelHandler,
+        &AvailableChannelOrFeatureHandler::messageEnqueued,
         this,
-        &APRS::handleChannelAdded
-    );
+        &APRS::handleChannelMessageQueue);
+    QObject::disconnect(
+        &m_availableChannelHandler,
+        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
+        this,
+        &APRS::channelsChanged);
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -858,6 +867,7 @@ void APRS::networkManagerFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
+/*
 void APRS::scanAvailableChannels()
 {
     MainCore *mainCore = MainCore::instance();
@@ -905,18 +915,25 @@ void APRS::scanAvailableChannels()
         }
     }
 }
+*/
+
+void APRS::channelsChanged()
+{
+    m_availableChannels = m_availableChannelHandler.getAvailableChannelOrFeatureList();
+    notifyUpdateChannels();
+}
 
 void APRS::notifyUpdateChannels()
 {
     if (getMessageQueueToGUI())
     {
         MsgReportAvailableChannels *msg = MsgReportAvailableChannels::create();
-        msg->getChannels() = m_availableChannels.values();
+        msg->getChannels() = m_availableChannels;
         getMessageQueueToGUI()->push(msg);
     }
 }
 
-void APRS::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
+/*void APRS::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
 {
     qDebug("APRS::handleChannelAdded: deviceSetIndex: %d:%d channel: %s (%p)",
         deviceSetIndex, channel->getIndexInDeviceSet(), qPrintable(channel->getURI()), channel);
@@ -964,7 +981,7 @@ void APRS::handleMessagePipeToBeDeleted(int reason, QObject* object)
         m_availableChannels.remove((ChannelAPI*) object);
         notifyUpdateChannels();
     }
-}
+}*/
 
 void APRS::handleChannelMessageQueue(MessageQueue* messageQueue)
 {

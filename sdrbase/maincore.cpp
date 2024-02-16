@@ -436,9 +436,9 @@ void MainCore::updateWakeLock()
 }
 #endif
 
-QList<MainCore::AvailableChannelOrFeature> MainCore::getAvailableChannels(const QStringList& uris)
+AvailableChannelOrFeatureList MainCore::getAvailableChannels(const QStringList& uris)
 {
-    QList<AvailableChannelOrFeature> list;
+    AvailableChannelOrFeatureList list;
 
     for (const auto deviceSet : m_deviceSets)
     {
@@ -467,9 +467,9 @@ QList<MainCore::AvailableChannelOrFeature> MainCore::getAvailableChannels(const 
     return list;
 }
 
-QList<MainCore::AvailableChannelOrFeature> MainCore::getAvailableFeatures(const QStringList& uris)
+AvailableChannelOrFeatureList MainCore::getAvailableFeatures(const QStringList& uris)
 {
-    QList<AvailableChannelOrFeature> list;
+    AvailableChannelOrFeatureList list;
     std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
 
     for (const auto& featureSet : featureSets)
@@ -496,37 +496,18 @@ QList<MainCore::AvailableChannelOrFeature> MainCore::getAvailableFeatures(const 
     return list;
 }
 
-QList<MainCore::AvailableChannelOrFeature> MainCore::getAvailableChannelsAndFeatures(const QStringList& uris)
+AvailableChannelOrFeatureList MainCore::getAvailableChannelsAndFeatures(const QStringList& uris, const QString& kinds)
 {
-    QList<AvailableChannelOrFeature> list;
+    AvailableChannelOrFeatureList list;
 
-    list.append(getAvailableChannels(uris));
-    list.append(getAvailableFeatures(uris));
+    if (kinds != "F") {
+        list.append(getAvailableChannels(uris));
+    }
+    if (kinds.contains("F")) {
+        list.append(getAvailableFeatures(uris));
+    }
 
     return list;
-
-}
-
-QObject *MainCore::getAvailableChannelOrFeatureById(const QString& id, const QList<AvailableChannelOrFeature>& list)
-{
-    for (const auto& item : list)
-    {
-        if (item.getId() == id) {
-            return item.m_object;
-        }
-    }
-    return nullptr;
-}
-
-QObject *MainCore::getAvailableChannelOrFeatureByLongId(const QString& longId, const QList<AvailableChannelOrFeature>& list)
-{
-    for (const auto& item : list)
-    {
-        if (item.getLongId() == longId) {
-            return item.m_object;
-        }
-    }
-    return nullptr;
 }
 
 QChar MainCore::getDeviceSetTypeId(const DeviceSet* deviceSet)

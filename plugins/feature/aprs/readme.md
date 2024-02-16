@@ -48,4 +48,4 @@ APRS icons are from: https://github.com/hessu/aprs-symbols
 
 Full details of the API can be found in the Swagger documentation. Here is a quick example of how to enable the APRS-IS IGate:
 
-    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/settings" -d '{"featureType": "APRS",  "APRSSettings": { "igateCallsign": "MYCALLSIGN", "igatePasscode": "12345", "igateFilter": "r/50.2/10.2/25", "igateEnabled": 1  }}'
+    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/feature/0/settings" -d '{"featureType": "APRS",  "APRSSettings": { "igateCallsign": "MYCALLSIGN", "igatePasscode": "12345", "igateFilter": "r/50.2/10.2/25", "igateEnabled": 1  }}'

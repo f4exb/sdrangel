@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>         //
 // Copyright (C) 2020 Kacper Michajłow <kasper93@gmail.com>                      //
-// Copyright (C) 2021-2022 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -26,6 +26,7 @@
 
 #include "feature/feature.h"
 #include "util/message.h"
+#include "availablechannelorfeaturehandler.h"
 
 #include "aprssettings.h"
 
@@ -104,14 +105,14 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        QList<APRSSettings::AvailableChannel>& getChannels() { return m_availableChannels; }
+        AvailableChannelOrFeatureList& getChannels() { return m_availableChannels; }
 
         static MsgReportAvailableChannels* create() {
             return new MsgReportAvailableChannels();
         }
 
     private:
-        QList<APRSSettings::AvailableChannel> m_availableChannels;
+        AvailableChannelOrFeatureList m_availableChannels;
 
         MsgReportAvailableChannels() :
             Message()
@@ -160,7 +161,8 @@ private:
     QThread *m_thread;
     APRSWorker *m_worker;
     APRSSettings m_settings;
-    QHash<ChannelAPI*, APRSSettings::AvailableChannel> m_availableChannels;
+    AvailableChannelOrFeatureHandler m_availableChannelHandler;
+    AvailableChannelOrFeatureList m_availableChannels;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -169,14 +171,12 @@ private:
     void stop();
     void applySettings(const APRSSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const APRSSettings& settings, bool force);
-    void scanAvailableChannels();
     void notifyUpdateChannels();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-    void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
-    void handleMessagePipeToBeDeleted(int reason, QObject* object);
     void handleChannelMessageQueue(MessageQueue* messageQueue);
+    void channelsChanged();
 };
 
 #endif // INCLUDE_FEATURE_APRS_H_

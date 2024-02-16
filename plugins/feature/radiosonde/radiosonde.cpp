@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2021-2022 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -41,7 +41,8 @@ const char* const Radiosonde::m_featureIdURI = "sdrangel.feature.radiosonde";
 const char* const Radiosonde::m_featureId = "Radiosonde";
 
 Radiosonde::Radiosonde(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    Feature(m_featureIdURI, webAPIAdapterInterface)
+    Feature(m_featureIdURI, webAPIAdapterInterface),
+    m_availableChannelHandler({"sdrangel.channel.radiosondedemod"}, QStringList{"radiosonde"})
 {
     qDebug("Radiosonde::Radiosonde: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
@@ -54,22 +55,22 @@ Radiosonde::Radiosonde(WebAPIAdapterInterface *webAPIAdapterInterface) :
         this,
         &Radiosonde::networkManagerFinished
     );
-    scanAvailableChannels();
+
     QObject::connect(
-        MainCore::instance(),
-        &MainCore::channelAdded,
+        &m_availableChannelHandler,
+        &AvailableChannelOrFeatureHandler::messageEnqueued,
         this,
-        &Radiosonde::handleChannelAdded
-    );
+        &Radiosonde::handleChannelMessageQueue);
+    m_availableChannelHandler.scanAvailableChannelsAndFeatures();
 }
 
 Radiosonde::~Radiosonde()
 {
     QObject::disconnect(
-        MainCore::instance(),
-        &MainCore::channelAdded,
+        &m_availableChannelHandler,
+        &AvailableChannelOrFeatureHandler::messageEnqueued,
         this,
-        &Radiosonde::handleChannelAdded
+        &Radiosonde::handleChannelMessageQueue
     );
     QObject::disconnect(
         m_networkManager,
@@ -360,90 +361,6 @@ void Radiosonde::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
-}
-
-void Radiosonde::scanAvailableChannels()
-{
-    MainCore *mainCore = MainCore::instance();
-    MessagePipes& messagePipes = mainCore->getMessagePipes();
-    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
-    m_availableChannels.clear();
-
-    for (const auto& deviceSet : deviceSets)
-    {
-        DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
-
-        if (deviceSourceEngine)
-        {
-            for (int chi = 0; chi < deviceSet->getNumberOfChannels(); chi++)
-            {
-                ChannelAPI *channel = deviceSet->getChannelAt(chi);
-
-                if ((channel->getURI() == "sdrangel.channel.radiosondedemod") && !m_availableChannels.contains(channel))
-                {
-                    qDebug("Radiosonde::scanAvailableChannels: register %d:%d (%p)", deviceSet->getIndex(), chi, channel);
-                    ObjectPipe *pipe = messagePipes.registerProducerToConsumer(channel, this, "radiosonde");
-                    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
-                    QObject::connect(
-                        messageQueue,
-                        &MessageQueue::messageEnqueued,
-                        this,
-                        [=](){ this->handleChannelMessageQueue(messageQueue); },
-                        Qt::QueuedConnection
-                    );
-                    QObject::connect(
-                        pipe,
-                        &ObjectPipe::toBeDeleted,
-                        this,
-                        &Radiosonde::handleMessagePipeToBeDeleted
-                    );
-                    m_availableChannels.insert(channel);
-                }
-            }
-        }
-    }
-}
-
-void Radiosonde::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
-{
-    qDebug("Radiosonde::handleChannelAdded: deviceSetIndex: %d:%d channel: %s (%p)",
-        deviceSetIndex, channel->getIndexInDeviceSet(), qPrintable(channel->getURI()), channel);
-    std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
-    DeviceSet *deviceSet = deviceSets[deviceSetIndex];
-    DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
-
-    if (deviceSourceEngine && (channel->getURI() == "sdrangel.channel.radiosondedemod"))
-    {
-        if (!m_availableChannels.contains(channel))
-        {
-            MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
-            ObjectPipe *pipe = messagePipes.registerProducerToConsumer(channel, this, "radiosonde");
-            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
-            QObject::connect(
-                messageQueue,
-                &MessageQueue::messageEnqueued,
-                this,
-                [=](){ this->handleChannelMessageQueue(messageQueue); },
-                Qt::QueuedConnection
-            );
-            QObject::connect(
-                pipe,
-                &ObjectPipe::toBeDeleted,
-                this,
-                &Radiosonde::handleMessagePipeToBeDeleted
-            );
-            m_availableChannels.insert(channel);
-        }
-    }
-}
-
-void Radiosonde::handleMessagePipeToBeDeleted(int reason, QObject* object)
-{
-    if ((reason == 0) && m_availableChannels.contains((ChannelAPI*) object)) // producer (channel)
-    {
-        qDebug("Radiosonde::handleMessagePipeToBeDeleted: removing channel at (%p)", object);
-        m_availableChannels.remove((ChannelAPI*) object);
-    }
 }
 
 void Radiosonde::handleChannelMessageQueue(MessageQueue* messageQueue)

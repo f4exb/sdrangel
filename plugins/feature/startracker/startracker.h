@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2020-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2020 Kacper Michajłow <kasper93@gmail.com>                      //
-// Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -22,11 +22,11 @@
 
 #include <QThread>
 #include <QNetworkRequest>
-#include <QSet>
 
 #include "feature/feature.h"
 #include "util/message.h"
 #include "util/fits.h"
+#include "availablechannelorfeaturehandler.h"
 
 #include "startrackersettings.h"
 
@@ -107,20 +107,34 @@ public:
         { }
     };
 
-    class MsgReportAvailableSatelliteTrackers : public Message {
+    class MsgRequestAvailableFeatures : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        QList<StarTrackerSettings::AvailableFeature>& getFeatures() { return m_availableFeatures; }
-
-        static MsgReportAvailableSatelliteTrackers* create() {
-            return new MsgReportAvailableSatelliteTrackers();
+        static MsgRequestAvailableFeatures* create() {
+            return new MsgRequestAvailableFeatures();
         }
 
     private:
-        QList<StarTrackerSettings::AvailableFeature> m_availableFeatures;
+        MsgRequestAvailableFeatures() :
+            Message()
+        {}
+    };
 
-        MsgReportAvailableSatelliteTrackers() :
+    class MsgReportAvailableFeatures : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        AvailableChannelOrFeatureList& getFeatures() { return m_availableFeatures; }
+
+        static MsgReportAvailableFeatures* create() {
+            return new MsgReportAvailableFeatures();
+        }
+
+    private:
+        AvailableChannelOrFeatureList m_availableFeatures;
+
+        MsgReportAvailableFeatures() :
             Message()
         {}
     };
@@ -183,10 +197,12 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
-    QSet<ChannelAPI*> m_availableChannels;
-    QHash<Feature*, StarTrackerSettings::AvailableFeature> m_satelliteTrackers;
     Weather *m_weather;
     float m_solarFlux;
+
+    AvailableChannelOrFeatureHandler m_availableChannelHandler;
+    AvailableChannelOrFeatureHandler m_availableFeatureHandler;
+    AvailableChannelOrFeatureList m_availableFeatures;
 
     QList<FITS*> m_temps;
     FITS *m_spectralIndex;
@@ -197,17 +213,12 @@ private:
     void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const StarTrackerSettings& settings, bool force);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
     double applyBeam(const FITS *fits, double beamwidth, double ra, double dec, int& imgX, int& imgY) const;
-    void scanAvailableChannels();
-    void scanAvailableFeatures();
-    void notifyUpdateSatelliteTrackers();
+    void notifyUpdateFeatures();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void weatherUpdated(float temperature, float pressure, float humidity);
-    void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
-    void handleMessagePipeToBeDeleted(int reason, QObject* object);
-    void handleFeatureAdded(int featureSetIndex, Feature *feature);
-    void handleFeatureRemoved(int featureSetIndex, Feature *feature);
+    void featuresChanged();
     void handleChannelMessageQueue(MessageQueue* messageQueue);
 };
 

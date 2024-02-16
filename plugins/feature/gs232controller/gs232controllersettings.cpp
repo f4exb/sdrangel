@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2017, 2019-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
-// Copyright (C) 2020-2021, 2023 Jon Beniston, M7RCE <jon@beniston.com>          //
+// Copyright (C) 2020-2021, 2024 Jon Beniston, M7RCE <jon@beniston.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -25,14 +25,6 @@
 
 #include "gs232controllersettings.h"
 #include "inputcontrollersettings.h"
-
-const QStringList GS232ControllerSettings::m_pipeTypes = {
-    QStringLiteral("ADSBDemod"),
-    QStringLiteral("Map"),
-    QStringLiteral("SkyMap"),
-    QStringLiteral("StarTracker"),
-    QStringLiteral("SatelliteTracker")
-};
 
 const QStringList GS232ControllerSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.adsbdemod"),

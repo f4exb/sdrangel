@@ -286,6 +286,8 @@ set(sdrbase_SOURCES
 
     websockets/wsspectrum.cpp
 
+    availablechannelorfeature.cpp
+    availablechannelorfeaturehandler.cpp
     mainparser.cpp
     maincore.cpp
     remotetcpsinkstarter.cpp
@@ -525,6 +527,8 @@ set(sdrbase_HEADERS
 
     websockets/wsspectrum.h
 
+    availablechannelorfeature.h
+    availablechannelorfeaturehandler.h
     mainparser.h
     maincore.h
     remotetcpsinkstarter.h

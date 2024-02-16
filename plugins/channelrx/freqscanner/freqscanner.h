@@ -27,6 +27,7 @@
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
+#include "availablechannelorfeaturehandler.h"
 
 #include "freqscannerbaseband.h"
 #include "freqscannersettings.h"
@@ -71,17 +72,23 @@ public:
 
     public:
 
-        QList<FreqScannerSettings::AvailableChannel>& getChannels() { return m_channels; }
+        AvailableChannelOrFeatureList& getChannels() { return m_channels; }
+        const QStringList& getRenameFrom() const { return m_renameFrom; }
+        const QStringList& getRenameTo() const { return m_renameTo; }
 
-        static MsgReportChannels* create() {
-            return new MsgReportChannels();
+        static MsgReportChannels* create(const QStringList& renameFrom, const QStringList& renameTo) {
+            return new MsgReportChannels(renameFrom, renameTo);
         }
 
     private:
-        QList<FreqScannerSettings::AvailableChannel> m_channels;
+        AvailableChannelOrFeatureList m_channels;
+        QStringList m_renameFrom;
+        QStringList m_renameTo;
 
-        MsgReportChannels() :
-            Message()
+        MsgReportChannels(const QStringList& renameFrom, const QStringList& renameTo) :
+            Message(),
+            m_renameFrom(renameFrom),
+            m_renameTo(renameTo)
         {}
     };
 
@@ -369,7 +376,8 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    QHash<ChannelAPI*, FreqScannerSettings::AvailableChannel> m_availableChannels;
+    AvailableChannelOrFeatureList m_availableChannels;
+    AvailableChannelOrFeatureHandler m_availableChannelHandler;
 
     unsigned int m_scanDeviceSetIndex;
     unsigned int m_scanChannelIndex;
@@ -402,8 +410,8 @@ private:
     );
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
-    void scanAvailableChannels();
-    void notifyUpdateChannels();
+    //void scanAvailableChannels();
+    void notifyUpdateChannels(const QStringList& renameFrom, const QStringList& renameTo);
     void startScan();
     void stopScan();
     void initScan();
@@ -416,9 +424,7 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void handleIndexInDeviceSetChanged(int index);
-    void handleChannelAdded(int deviceSetIndex, ChannelAPI* channel);
-    void handleChannelRemoved(int deviceSetIndex, ChannelAPI* channel);
-    void handleChannelStreamIndexChanged(int streamIndex, ChannelAPI* channel);
+    void channelsChanged(const QStringList& renameFrom, const QStringList& renameTo);
     void timeout();
 
 };

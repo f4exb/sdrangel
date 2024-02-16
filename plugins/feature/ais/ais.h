@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>         //
 // Copyright (C) 2020 Kacper Michajłow <kasper93@gmail.com>                      //
-// Copyright (C) 2021-2022 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -25,6 +25,7 @@
 
 #include "feature/feature.h"
 #include "util/message.h"
+#include "availablechannelorfeaturehandler.h"
 
 #include "aissettings.h"
 
@@ -101,7 +102,8 @@ public:
 
 private:
     AISSettings m_settings;
-    QSet<ChannelAPI*> m_availableChannels;
+    AvailableChannelOrFeatureHandler m_availableChannelHandler;
+    AvailableChannelOrFeatureList m_availableChannels;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -110,12 +112,9 @@ private:
     void stop();
     void applySettings(const AISSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const AISSettings& settings, bool force);
-    void scanAvailableChannels();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-    void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
-    void handleMessagePipeToBeDeleted(int reason, QObject* object);
     void handleChannelMessageQueue(MessageQueue* messageQueue);
 };
 

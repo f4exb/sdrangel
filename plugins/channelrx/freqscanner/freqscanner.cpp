@@ -67,6 +67,7 @@ FreqScanner::FreqScanner(DeviceAPI *deviceAPI) :
         m_basebandSink(nullptr),
         m_running(false),
         m_basebandSampleRate(0),
+        m_availableChannelHandler({}),
         m_scanDeviceSetIndex(0),
         m_scanChannelIndex(0),
         m_state(IDLE),
@@ -95,19 +96,8 @@ FreqScanner::FreqScanner(DeviceAPI *deviceAPI) :
 
     start();
 
-    scanAvailableChannels();
-    QObject::connect(
-        MainCore::instance(),
-        &MainCore::channelAdded,
-        this,
-        &FreqScanner::handleChannelAdded
-    );
-    QObject::connect(
-        MainCore::instance(),
-        &MainCore::channelRemoved,
-        this,
-        &FreqScanner::handleChannelRemoved
-    );
+    QObject::connect(&m_availableChannelHandler, &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged, this, &FreqScanner::channelsChanged);
+    m_availableChannelHandler.scanAvailableChannelsAndFeatures();
 
     m_timeoutTimer.callOnTimeout(this, &FreqScanner::timeout);
 }
@@ -708,7 +698,7 @@ void FreqScanner::applySettings(const FreqScannerSettings& settings, const QStri
             m_deviceAPI->removeChannelSink(this, m_settings.m_streamIndex);
             m_deviceAPI->addChannelSink(this, settings.m_streamIndex);
             m_deviceAPI->addChannelSinkAPI(this);
-            scanAvailableChannels(); // re-scan
+            //FIXME:scanAvailableChannels(); // re-scan
             emit streamIndexChanged(settings.m_streamIndex);
         }
     }
@@ -1116,186 +1106,18 @@ void FreqScanner::handleIndexInDeviceSetChanged(int index)
     m_basebandSink->setFifoLabel(fifoLabel);
 }
 
-void FreqScanner::scanAvailableChannels()
+void FreqScanner::channelsChanged(const QStringList& renameFrom, const QStringList& renameTo)
 {
-    m_availableChannels.clear();
-
-    DSPDeviceSourceEngine* deviceSourceEngine = getDeviceAPI()->getDeviceSourceEngine();
-
-    if (deviceSourceEngine)
-    {
-        for (int chi = 0; chi < getDeviceAPI()->getNbSinkChannels(); chi++) // Rx channels
-        {
-            ChannelAPI* channel = getDeviceAPI()->getChanelSinkAPIAt(chi);
-
-            if (channel->getIndexInDeviceSet() == getIndexInDeviceSet()) { // Exclude oneself
-                continue;
-            }
-
-            FreqScannerSettings::AvailableChannel availableChannel =
-                FreqScannerSettings::AvailableChannel{
-                    channel->getDeviceSetIndex(),
-                    channel->getIndexInDeviceSet(),
-                    -1
-                };
-            m_availableChannels[channel] = availableChannel;
-            QObject::connect(
-                channel,
-                &ChannelAPI::streamIndexChanged,
-                [=](int streamIndex){
-                    this->handleChannelStreamIndexChanged(streamIndex, channel);
-                }
-            );
-        }
-    }
-
-    DSPDeviceMIMOEngine *deviceMIMOEngine = getDeviceAPI()->getDeviceMIMOEngine();
-
-    if (deviceMIMOEngine)
-    {
-        for (int chi = 0; chi < getDeviceAPI()->getNbSinkChannels(); chi++) // Rx channels
-        {
-            ChannelAPI* channel = getDeviceAPI()->getChanelSinkAPIAt(chi);
-
-            if (channel->getIndexInDeviceSet() == getIndexInDeviceSet()) { // Exclude oneself
-                continue;
-            }
-
-            // Single Rx on the same I/Q stream
-            if ((channel->getNbSinkStreams() == 1)
-                && (channel->getNbSourceStreams() == 0)
-                && (channel->getStreamIndex() == m_settings.m_streamIndex))
-            {
-                FreqScannerSettings::AvailableChannel availableChannel =
-                    FreqScannerSettings::AvailableChannel{
-                        channel->getDeviceSetIndex(),
-                        channel->getIndexInDeviceSet(),
-                        channel->getStreamIndex()
-                    };
-                m_availableChannels[channel] = availableChannel;
-                QObject::connect(
-                    channel,
-                    &ChannelAPI::streamIndexChanged,
-                    [=](int streamIndex){
-                        this->handleChannelStreamIndexChanged(streamIndex, channel);
-                    }
-                );
-            }
-        }
-    }
-
-    notifyUpdateChannels();
+    m_availableChannels = m_availableChannelHandler.getAvailableChannelOrFeatureList();
+    notifyUpdateChannels(renameFrom, renameTo);
 }
 
-void FreqScanner::handleChannelAdded(int deviceSetIndex, ChannelAPI* channel)
-{
-    if (deviceSetIndex != getDeviceSetIndex()) { // Can control channels only in the same device set
-        return;
-    }
-
-    qDebug("FreqScanner::handleChannelAdded: deviceSetIndex: %d:%d channel: %s (%p)",
-        deviceSetIndex, channel->getIndexInDeviceSet(), qPrintable(channel->getURI()), channel);
-    DSPDeviceSourceEngine* deviceSourceEngine = getDeviceAPI()->getDeviceSourceEngine();
-
-    if (deviceSourceEngine)
-    {
-        FreqScannerSettings::AvailableChannel availableChannel =
-            FreqScannerSettings::AvailableChannel{ deviceSetIndex, channel->getIndexInDeviceSet(), -1};
-        m_availableChannels[channel] = availableChannel;
-        QObject::connect(
-            channel,
-            &ChannelAPI::streamIndexChanged,
-            [=](int streamIndex){
-                this->handleChannelStreamIndexChanged(streamIndex, channel);
-            }
-        );
-    }
-
-    DSPDeviceMIMOEngine *deviceMIMOEngine = getDeviceAPI()->getDeviceMIMOEngine();
-
-    if (deviceMIMOEngine
-        && (channel->getNbSinkStreams() == 1)
-        && (channel->getNbSourceStreams() == 0)
-        && (channel->getStreamIndex() == m_settings.m_streamIndex))
-    {
-        FreqScannerSettings::AvailableChannel availableChannel =
-            FreqScannerSettings::AvailableChannel{
-                deviceSetIndex,
-                channel->getIndexInDeviceSet(),
-                channel->getStreamIndex()
-            };
-        m_availableChannels[channel] = availableChannel;
-        QObject::connect(
-            channel,
-            &ChannelAPI::streamIndexChanged,
-            [=](int streamIndex){
-                this->handleChannelStreamIndexChanged(streamIndex, channel);
-            }
-        );
-    }
-
-    notifyUpdateChannels();
-}
-
-void FreqScanner::handleChannelRemoved(int deviceSetIndex, ChannelAPI* channel)
-{
-    if (deviceSetIndex != getDeviceSetIndex()) { // Can control channels only in the same device set
-        return;
-    }
-
-    qDebug("FreqScanner::handleChannelRemoved: deviceSetIndex: %d:%d channel: %s (%p)",
-        deviceSetIndex, channel->getIndexInDeviceSet(), qPrintable(channel->getURI()), channel);
-    DSPDeviceSourceEngine* deviceSourceEngine = getDeviceAPI()->getDeviceSourceEngine();
-    DSPDeviceMIMOEngine *deviceMIMOEngine = getDeviceAPI()->getDeviceMIMOEngine();
-
-    if (deviceSourceEngine || deviceMIMOEngine) {
-        m_availableChannels.remove(channel);
-    }
-
-    notifyUpdateChannels();
-}
-
-void FreqScanner::handleChannelStreamIndexChanged(int streamIndex, ChannelAPI* channel)
-{
-    qDebug("FreqScanner::handleChannelStreamIndexChanged: channel:  %s (%p) stream: %d",
-        qPrintable(channel->getURI()), channel, streamIndex);
-    if (streamIndex != m_settings.m_streamIndex) // channel has moved to another I/Q stream
-    {
-        m_availableChannels.remove(channel);
-        notifyUpdateChannels();
-    }
-    else if (!m_availableChannels.contains(channel)) // if channel has been tracked before put back it in the list
-    {
-        FreqScannerSettings::AvailableChannel availableChannel =
-            FreqScannerSettings::AvailableChannel{
-                getDeviceSetIndex(),
-                channel->getIndexInDeviceSet(),
-                channel->getStreamIndex()
-            };
-        m_availableChannels[channel] = availableChannel;
-        notifyUpdateChannels();
-    }
-}
-
-void FreqScanner::notifyUpdateChannels()
+void FreqScanner::notifyUpdateChannels(const QStringList& renameFrom, const QStringList& renameTo)
 {
     if (getMessageQueueToGUI())
     {
-        MsgReportChannels* msgToGUI = MsgReportChannels::create();
-        QList<FreqScannerSettings::AvailableChannel>& msgChannels = msgToGUI->getChannels();
-        QHash<ChannelAPI*, FreqScannerSettings::AvailableChannel>::iterator it = m_availableChannels.begin();
-
-        for (; it != m_availableChannels.end(); ++it)
-        {
-            FreqScannerSettings::AvailableChannel msgChannel =
-                FreqScannerSettings::AvailableChannel{
-                    it->m_deviceSetIndex,
-                    it->m_channelIndex,
-                    it->m_streamIndex
-                };
-            msgChannels.push_back(msgChannel);
-        }
-
+        MsgReportChannels* msgToGUI = MsgReportChannels::create(renameFrom, renameTo);
+        msgToGUI->getChannels() = m_availableChannels;
         getMessageQueueToGUI()->push(msgToGUI);
     }
 }

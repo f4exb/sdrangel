@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -47,7 +47,7 @@ QStringList AISGUI::m_shipModels = {
     "tug_20m.glbe", "tug_30m_1.glbe", "tug_30m_2.glbe", "tug_30m_3.glbe",
     "cargo_75m.glbe", "tanker_50m.glbe", "dredger_53m.glbe",
     "trawler_22m.glbe",
-    "speedboat_8m.glbe", "yacht_10m.glbe", "yacht_20m.glbe", "yacht_42m.glbe"
+    "speedboat_8m.glbe", /*"yacht_10m.glbe",*/ "yacht_20m.glbe", "yacht_42m.glbe"
 };
 
 QStringList AISGUI::m_sailboatModels = {
@@ -236,6 +236,7 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 
     displaySettings();
     applySettings(true);
+    m_resizer.enableChildMouseTracking();
 }
 
 AISGUI::~AISGUI()
@@ -845,14 +846,14 @@ void AISGUI::getImageAndModel(const QString &type, const QString &shipType, int 
                 {
                     vessel->m_model = "cargo_75m.glbe";
                 }
-                else if (length < 200)
+                else /*if (length < 200)*/
                 {
                     vessel->m_model = "cargo_190m.glbe";
                 }
-                else
+                /*else
                 {
                     vessel->m_model = "cargo_230m.glbe";
-                }
+                }*/
             }
             else if (shipType == "Tanker")
             {
@@ -905,10 +906,10 @@ void AISGUI::getImageAndModel(const QString &type, const QString &shipType, int 
                 {
                     vessel->m_model = "speedboat_8m.glbe";
                 }
-                else if (length < 18)
+                /*else if (length < 18)
                 {
                     vessel->m_model = "yacht_10m.glbe";
-                }
+                }*/
                 else if (length < 32)
                 {
                     vessel->m_model = "yacht_20m.glbe";

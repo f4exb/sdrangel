@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -30,6 +30,7 @@
 #include "util/messagequeue.h"
 #include "util/aprs.h"
 #include "settings/rollupstate.h"
+#include "availablechannelorfeature.h"
 
 #include "aprssettings.h"
 
@@ -123,7 +124,7 @@ private:
     QList<QString> m_settingsKeys;
     RollupState m_rollupState;
     bool m_doApplySettings;
-    QList<APRSSettings::AvailableChannel> m_availableChannels;
+    AvailableChannelOrFeatureList m_availableChannels;
 
     APRS* m_aprs;
     MessageQueue m_inputMessageQueue;

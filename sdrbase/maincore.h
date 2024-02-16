@@ -38,6 +38,7 @@
 #include "pipes/messagepipes.h"
 #include "pipes/datapipes.h"
 #include "channel/channelapi.h"
+#include "availablechannelorfeature.h"
 
 class DeviceSet;
 class FeatureSet;
@@ -908,39 +909,10 @@ public:
     // Position
     const QGeoPositionInfo& getPosition() const;
 
-    struct AvailableChannelOrFeature
-    {
-        QChar m_kind;           //!< 'R' or 'T' for channel, 'M' for MIMO channel, 'F' for feature as from MainCore::getDeviceSetTypeId
-        int m_superIndex;       //!< Device Set index or Feature Set index
-        int m_index;            //!< Channel or Feature index
-        int m_streamIndex;      //!< For MIMO channels only
-        QString m_type;         //!< Plugin type (E.g. NFMDemod)
-        QObject *m_object;      //!< Pointer to the object (ChannelAPI or Feature object)
-
-        AvailableChannelOrFeature() = default;
-        AvailableChannelOrFeature(const AvailableChannelOrFeature&) = default;
-        AvailableChannelOrFeature& operator=(const AvailableChannelOrFeature&) = default;
-        bool operator==(const AvailableChannelOrFeature& a) const {
-            return (m_kind == a.m_kind) && (m_superIndex == a.m_superIndex) && (m_index == a.m_index) && (m_type == a.m_type);
-        }
-        QString getId() const { // Eg: "R3:4"
-            QString id = QString("%1%2:%3").arg(m_kind).arg(m_superIndex).arg(m_index);
-            if (m_kind == "M") {
-                id.append(QString(".%1").arg(m_streamIndex));
-            }
-            return id;
-        }
-        QString getLongId() const { // Eg: "F0:1 StarTracker"
-            return QString("%1 %2").arg(getId()).arg(m_type);
-        }
-    };
-
-    // Use QList so ordered numerically
-    QList<AvailableChannelOrFeature> getAvailableChannels(const QStringList& uris); // Get hash of available channels with given URIs or all if empty list. Hash hey is Id
-    QList<AvailableChannelOrFeature> getAvailableFeatures(const QStringList& uris); // Get hash of available features with given URIs or all if empty list. Hash key is Id
-    QList<AvailableChannelOrFeature> getAvailableChannelsAndFeatures(const QStringList& uris); // Get hash of available channels and features with given URIs or all if empty list. Hash key is Id
-    static QObject *getAvailableChannelOrFeatureById(const QString& id, const QList<AvailableChannelOrFeature>& list);
-    static QObject *getAvailableChannelOrFeatureByLongId(const QString& longId, const QList<AvailableChannelOrFeature>& list);
+    // Lists of available channels and features. List should be ordered by indexes. Plugins should use AvailableChannelOrFeatureHandler to maintain this list
+    AvailableChannelOrFeatureList getAvailableChannels(const QStringList& uris); // Get list of available channels with given URIs or all if empty list.
+    AvailableChannelOrFeatureList getAvailableFeatures(const QStringList& uris); // Get list of available features with given URIs or all if empty list.
+    AvailableChannelOrFeatureList getAvailableChannelsAndFeatures(const QStringList& uris, const QString& kinds); // Get list of available channels and features with given URIs or all if empty list.
 
     // Ids
     QChar getDeviceSetTypeId(const DeviceSet* deviceSet); //!< Get Type Id (E.g. 'R', 'T' or 'M') for the given device set

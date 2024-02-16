@@ -190,6 +190,7 @@ void SkyMapGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
+    applySetting("rollupState");
 }
 
 SkyMapGUI::SkyMapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -198,7 +199,8 @@ SkyMapGUI::SkyMapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *
     m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
-    m_source(nullptr)
+    m_source(nullptr),
+    m_availableChannelOrFeatureHandler(SkyMapSettings::m_pipeURIs, {"target", "skymap.target"})
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -255,11 +257,8 @@ SkyMapGUI::SkyMapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *
     makeUIConnections();
     m_resizer.enableChildMouseTracking();
 
-    QObject::connect(MainCore::instance(), &MainCore::featureAdded, this, &SkyMapGUI::handleFeatureAdded);
-    QObject::connect(MainCore::instance(), &MainCore::channelAdded, this, &SkyMapGUI::handleChannelAdded);
-    QObject::connect(MainCore::instance(), &MainCore::featureRemoved, this, &SkyMapGUI::handleFeatureRemoved);
-    QObject::connect(MainCore::instance(), &MainCore::channelRemoved, this, &SkyMapGUI::handleChannelRemoved);
-    updateSourceList();
+    QObject::connect(&m_availableChannelOrFeatureHandler, &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged, this, &SkyMapGUI::updateSourceList);
+    m_availableChannelOrFeatureHandler.scanAvailableChannelsAndFeatures();
 
     connect(&m_wtml, &WTML::dataUpdated, this, &SkyMapGUI::wtmlUpdated);
     m_wtml.getData();
@@ -267,11 +266,7 @@ SkyMapGUI::SkyMapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *
 
 SkyMapGUI::~SkyMapGUI()
 {
-    QObject::disconnect(MainCore::instance(), &MainCore::featureAdded, this, &SkyMapGUI::handleFeatureAdded);
-    QObject::disconnect(MainCore::instance(), &MainCore::channelAdded, this, &SkyMapGUI::handleChannelAdded);
-    QObject::disconnect(MainCore::instance(), &MainCore::featureRemoved, this, &SkyMapGUI::handleFeatureRemoved);
-    QObject::disconnect(MainCore::instance(), &MainCore::channelRemoved, this, &SkyMapGUI::handleChannelRemoved);
-
+    QObject::disconnect(&m_availableChannelOrFeatureHandler, &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged, this, &SkyMapGUI::updateSourceList);
     if (m_webServer)
     {
         m_webServer->close();
@@ -349,7 +344,6 @@ void SkyMapGUI::on_source_currentIndexChanged(int index)
         ui->track->setEnabled(false);
     }
 }
-
 
 void SkyMapGUI::renderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode)
 {
@@ -472,22 +466,17 @@ void SkyMapGUI::applySetting(const QString& settingsKey)
 
 void SkyMapGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
+    m_settingsKeys.append(settingsKeys);
     if (m_doApplySettings)
     {
-        SkyMap::MsgConfigureSkyMap* message = SkyMap::MsgConfigureSkyMap::create(m_settings, settingsKeys, force);
+        SkyMap::MsgConfigureSkyMap* message = SkyMap::MsgConfigureSkyMap::create(m_settings, m_settingsKeys, force);
         m_skymap->getInputMessageQueue()->push(message);
+        m_settingsKeys.clear();
+
+        m_availableChannelOrFeatureHandler.deregisterPipes(m_source, this, {"target", "skymap.target"});
 
         QObject *oldSource = m_source;
-        QObject *source = MainCore::getAvailableChannelOrFeatureByLongId(m_settings.m_source, m_availableChannelOrFeatures);
-        if (source)
-        {
-            registerPipe(source);
-            m_source = source;
-        }
-        else
-        {
-            m_source = nullptr;
-        }
+        m_source = m_availableChannelOrFeatureHandler.registerPipes(m_settings.m_source, this, {"target", "skymap.target"});
 
         // When we change plugins, default to current date and time and My Position, until we get something different
         if (oldSource && !m_source)
@@ -497,6 +486,7 @@ void SkyMapGUI::applySettings(const QStringList& settingsKeys, bool force)
                 MainCore::instance()->getSettings().getLongitude(),
                 MainCore::instance()->getSettings().getAltitude());
         }
+
     }
 }
 
@@ -784,91 +774,85 @@ void SkyMapGUI::receivedEvent(const QJsonObject &obj)
     }
 }
 
-// Loaded via WTML
-QStringList wwtBackgrounds;
-
-const QStringList wwtPlanets = {
-    "Sun",
-    "Mercury",
-    "Venus",
-    "Earth",
-    "Moon",
-    "Mars",
-    "Jupiter",
-    "Saturn",
-    "Uranus",
-    "Neptune",
-    "Pluto",
-    "Io",
-    "Europa",
-    "Ganymede",
-    "Callisto"
+static const QStringList wwtPlanets = {
+    QStringLiteral("Sun"),
+    QStringLiteral("Mercury"),
+    QStringLiteral("Venus"),
+    QStringLiteral("Earth"),
+    QStringLiteral("Moon"),
+    QStringLiteral("Mars"),
+    QStringLiteral("Jupiter"),
+    QStringLiteral("Saturn"),
+    QStringLiteral("Uranus"),
+    QStringLiteral("Neptune"),
+    QStringLiteral("Pluto"),
+    QStringLiteral("Io"),
+    QStringLiteral("Europa"),
+    QStringLiteral("Ganymede"),
+    QStringLiteral("Callisto")
 };
 
-const QStringList wwtPlanetIDs = {
-    "Sun",
-    "Mercury",
-    "Venus",
-    "Bing Maps Aerial", //"Earth",
-    "Moon",
-    "Visible Imagery", // Mars
-    "Jupiter",
-    "Saturn",
-    "Uranus",
-    "Neptune",
-    "Pluto (New Horizons)",
-    "Io",
-    "Europa",
-    "Ganymede",
-    "Callisto"
+static const QStringList wwtPlanetIDs = {
+    QStringLiteral("Sun"),
+    QStringLiteral("Mercury"),
+    QStringLiteral("Venus"),
+    QStringLiteral("Bing Maps Aerial"), //"Earth",
+    QStringLiteral("Moon"),
+    QStringLiteral("Visible Imagery"), // Mars
+    QStringLiteral("Jupiter"),
+    QStringLiteral("Saturn"),
+    QStringLiteral("Uranus"),
+    QStringLiteral("Neptune"),
+    QStringLiteral("Pluto (New Horizons)"),
+    QStringLiteral("Io"),
+    QStringLiteral("Europa"),
+    QStringLiteral("Ganymede"),
+    QStringLiteral("Callisto")
 };
 
 // From https://github.com/cds-astro/aladin-lite/blob/master/src/js/ImageLayer.js
-const QStringList aladinBackgrounds = {
-    "DSS colored",
-    "DSS2 Red (F+R)",
-    "2MASS colored",
-    "Density map for Gaia EDR3 (I/350/gaiaedr3)",
-    "PanSTARRS DR1 g",
-    "PanSTARRS DR1 color",
-    "DECaPS DR1 color",
-    "Fermi color",
-    "Halpha",
-    "GALEXGR6_7 NUV",
-    "IRIS colored",
-    "Mellinger colored",
-    "SDSS9 colored",
-    "SDSS9 band-g",
-    "IRAC color I1,I2,I4 - (GLIMPSE, SAGE, SAGE-SMC, SINGS)",
-    "VTSS-Ha",
-    "XMM PN colored",
-    "AllWISE color",
-    "GLIMPSE360"
+static const QStringList aladinBackgrounds = {
+    QStringLiteral("DSS colored"),
+    QStringLiteral("DSS2 Red (F+R)"),
+    QStringLiteral("2MASS colored"),
+    QStringLiteral("Density map for Gaia EDR3 (I/350/gaiaedr3)"),
+    QStringLiteral("PanSTARRS DR1 g"),
+    QStringLiteral("PanSTARRS DR1 color"),
+    QStringLiteral("DECaPS DR1 color"),
+    QStringLiteral("Fermi color"),
+    QStringLiteral("Halpha"),
+    QStringLiteral("GALEXGR6_7 NUV"),
+    QStringLiteral("IRIS colored"),
+    QStringLiteral("Mellinger colored"),
+    QStringLiteral("SDSS9 colored"),
+    QStringLiteral("SDSS9 band-g"),
+    QStringLiteral("IRAC color I1,I2,I4 - (GLIMPSE, SAGE, SAGE-SMC, SINGS)"),
+    QStringLiteral("VTSS-Ha"),
+    QStringLiteral("XMM PN colored"),
+    QStringLiteral("AllWISE color"),
+    QStringLiteral("GLIMPSE360")
 };
 
-const QStringList aladinBackgroundIDs = {
-    "P/DSS2/color",
-    "P/DSS2/red",
-    "P/2MASS/color",
-    "P/DM/I/350/gaiaedr3",
-    "P/PanSTARRS/DR1/g",
-    "P/PanSTARRS/DR1/color-z-zg-g",
-    "P/DECaPS/DR1/color",
-    "P/Fermi/color",
-    "P/Finkbeiner",
-    "P/GALEXGR6_7/NUV",
-    "P/IRIS/color",
-    "P/Mellinger/color",
-    "P/SDSS9/color",
-    "P/SDSS9/g",
-    "P/SPITZER/color",
-    "P/VTSS/Ha",
-    "xcatdb/P/XMM/PN/color",
-    "P/allWISE/color",
-    "P/GLIMPSE360"
-};
-
-const QStringList esaSkyBackgrounds = {
+static const QStringList aladinBackgroundIDs = {
+    QStringLiteral("P/DSS2/color"),
+    QStringLiteral("P/DSS2/red"),
+    QStringLiteral("P/2MASS/color"),
+    QStringLiteral("P/DM/I/350/gaiaedr3"),
+    QStringLiteral("P/PanSTARRS/DR1/g"),
+    QStringLiteral("P/PanSTARRS/DR1/color-z-zg-g"),
+    QStringLiteral("P/DECaPS/DR1/color"),
+    QStringLiteral("P/Fermi/color"),
+    QStringLiteral("P/Finkbeiner"),
+    QStringLiteral("P/GALEXGR6_7/NUV"),
+    QStringLiteral("P/IRIS/color"),
+    QStringLiteral("P/Mellinger/color"),
+    QStringLiteral("P/SDSS9/color"),
+    QStringLiteral("P/SDSS9/g"),
+    QStringLiteral("P/SPITZER/color"),
+    QStringLiteral("P/VTSS/Ha"),
+    QStringLiteral("xcatdb/P/XMM/PN/color"),
+    QStringLiteral("P/allWISE/color"),
+    QStringLiteral("P/GLIMPSE360")
 };
 
 QString SkyMapGUI::backgroundID(const QString& name)
@@ -906,7 +890,7 @@ void SkyMapGUI::updateBackgrounds()
 
     if (m_settings.m_map == "WWT") {
         if (m_settings.m_projection == "Sky") {
-            backgrounds = wwtBackgrounds;
+            backgrounds = m_wwtBackgrounds;
         } else if (m_settings.m_projection == "Solar system") {
             backgrounds = wwtPlanets;
         } else {
@@ -936,11 +920,11 @@ void SkyMapGUI::updateBackgrounds()
 
 void SkyMapGUI::wtmlUpdated(const QList<WTML::ImageSet>& dataSets)
 {
-    wwtBackgrounds.clear();
+    m_wwtBackgrounds.clear();
     for (int i = 0; i < dataSets.size(); i++)
     {
         if (dataSets[i].m_dataSetType == "Sky") {
-            wwtBackgrounds.append(dataSets[i].m_name);
+            m_wwtBackgrounds.append(dataSets[i].m_name);
         }
     }
     updateBackgrounds();
@@ -1027,10 +1011,18 @@ void SkyMapGUI::sendToRotator(const QString& name, double az, double alt)
     }
 }
 
-void SkyMapGUI::updateSourceList()
+void SkyMapGUI::updateSourceList(const QStringList& renameFrom, const QStringList& renameTo)
 {
-    m_availableChannelOrFeatures = MainCore::instance()->getAvailableChannelsAndFeatures(SkyMapSettings::m_pipeURIs);
+    m_availableChannelOrFeatures = m_availableChannelOrFeatureHandler.getAvailableChannelOrFeatureList();
 
+    // Update source settting if it has been renamed
+    if (renameFrom.contains(m_settings.m_source))
+    {
+        m_settings.m_source = renameTo[renameFrom.indexOf(m_settings.m_source)];
+        applySetting("source"); // Only call after m_availableChannelOrFeatures has been updated
+    }
+
+    int prevIdx = ui->source->currentIndex();
     ui->source->blockSignals(true);
     ui->source->clear();
 
@@ -1038,87 +1030,35 @@ void SkyMapGUI::updateSourceList()
         ui->source->addItem(item.getLongId());
     }
 
-    // Select current setting, if exists
-    // If not, make sure nothing selected, as channel may be created later on
+    // Select current setting, if it exists
+    // If not, and no prior setting, make sure nothing selected, as channel/feature may be created later on
+    // If not found and something was previously selected, clear the setting, as probably deleted
     int idx = ui->source->findText(m_settings.m_source);
     if (idx >= 0)
     {
         ui->source->setCurrentIndex(idx);
         ui->track->setEnabled(true);
     }
-    else
+    else if (prevIdx == -1)
     {
         ui->source->setCurrentIndex(-1);
         ui->track->setChecked(false);
         ui->track->setEnabled(false);
     }
+    else
+    {
+        m_settings.m_source = "";
+        applySetting("source");
+    }
 
     ui->source->blockSignals(false);
 
     // If no current settting, select first available
-    if (m_settings.m_source.isEmpty())
+    if (m_settings.m_source.isEmpty() && (ui->source->count() > 0))
     {
         ui->source->setCurrentIndex(0);
         on_source_currentIndexChanged(0);
     }
-}
-
-void SkyMapGUI::handleFeatureAdded(int featureSetIndex, Feature *feature)
-{
-    (void) featureSetIndex;
-    (void) feature;
-
-    updateSourceList();
-}
-
-void SkyMapGUI::handleFeatureRemoved(int featureSetIndex, Feature *oldFeature)
-{
-    (void) featureSetIndex;
-    (void) oldFeature;
-
-    updateSourceList();
-}
-
-void SkyMapGUI::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
-{
-    (void) deviceSetIndex;
-    (void) channel;
-
-    updateSourceList();
-}
-
-void SkyMapGUI::handleChannelRemoved(int deviceSetIndex, ChannelAPI *channel)
-{
-    (void) deviceSetIndex;
-    (void) channel;
-
-    updateSourceList();
-}
-
-void SkyMapGUI::registerPipe(QObject *object)
-{
-    qDebug("SkyMapGUI::registerPipe: register %s (%p)", qPrintable(object->objectName()), object);
-    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
-
-    ObjectPipe *pipe = messagePipes.registerProducerToConsumer(object, this, "target");
-    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
-    QObject::connect(
-        messageQueue,
-        &MessageQueue::messageEnqueued,
-        this,
-        [=](){ this->handlePipeMessageQueue(messageQueue); },
-        Qt::QueuedConnection
-    );
-
-    pipe = messagePipes.registerProducerToConsumer(object, this, "skymap.target");
-    messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
-    QObject::connect(
-        messageQueue,
-        &MessageQueue::messageEnqueued,
-        this,
-        [=](){ this->handlePipeMessageQueue(messageQueue); },
-        Qt::QueuedConnection
-    );
 }
 
 void SkyMapGUI::handlePipeMessageQueue(MessageQueue* messageQueue)
