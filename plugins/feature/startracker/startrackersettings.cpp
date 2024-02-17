@@ -23,14 +23,6 @@
 
 #include "startrackersettings.h"
 
-const QStringList StarTrackerSettings::m_pipeTypes = {
-    QStringLiteral("RadioAstronomy")
-};
-
-const QStringList StarTrackerSettings::m_pipeURIs = {
-    QStringLiteral("sdrangel.channel.radioastronomy")
-};
-
 StarTrackerSettings::StarTrackerSettings() :
     m_rollupState(nullptr)
 {

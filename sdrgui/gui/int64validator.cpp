@@ -19,6 +19,8 @@
 
 QValidator::State Int64Validator::validate(QString& input, int &pos) const
 {
+    (void) pos;
+
     if (input == "") {
         return QValidator::Acceptable;
     }

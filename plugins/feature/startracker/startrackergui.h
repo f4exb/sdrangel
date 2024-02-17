@@ -33,6 +33,7 @@
 #include "util/fits.h"
 #include "gui/httpdownloadmanagergui.h"
 #include "settings/rollupstate.h"
+#include "availablechannelorfeature.h"
 
 #include "startrackersettings.h"
 
@@ -169,7 +170,7 @@ private:
     void updateSolarFlux(bool all);
     void makeUIConnections();
     void limitAzElRange(double& azimuth, double& elevation) const;
-    void updateSatelliteTrackerList(const QList<StarTrackerSettings::AvailableFeature>& satelliteTrackers);
+    void updateFeatureList(const AvailableChannelOrFeatureList& features);
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);

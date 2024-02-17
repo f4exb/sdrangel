@@ -37,6 +37,7 @@
 #include "SWGRigCtlServerSettings.h"
 #include "SWGSatelliteTrackerSettings.h"
 #include "SWGSimplePTTSettings.h"
+#include "SWGSkyMapSettings.h"
 #include "SWGStarTrackerSettings.h"
 #include "SWGVORLocalizerSettings.h"
 #include <QString>
@@ -110,11 +111,14 @@ public:
     SWGSatelliteTrackerSettings* getSatelliteTrackerSettings();
     void setSatelliteTrackerSettings(SWGSatelliteTrackerSettings* satellite_tracker_settings);
 
-    SWGStarTrackerSettings* getStarTrackerSettings();
-    void setStarTrackerSettings(SWGStarTrackerSettings* star_tracker_settings);
-
     SWGSimplePTTSettings* getSimplePttSettings();
     void setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settings);
+
+    SWGSkyMapSettings* getSkyMapSettings();
+    void setSkyMapSettings(SWGSkyMapSettings* sky_map_settings);
+
+    SWGStarTrackerSettings* getStarTrackerSettings();
+    void setStarTrackerSettings(SWGStarTrackerSettings* star_tracker_settings);
 
     SWGVORLocalizerSettings* getVorLocalizerSettings();
     void setVorLocalizerSettings(SWGVORLocalizerSettings* vor_localizer_settings);
@@ -174,11 +178,14 @@ private:
     SWGSatelliteTrackerSettings* satellite_tracker_settings;
     bool m_satellite_tracker_settings_isSet;
 
-    SWGStarTrackerSettings* star_tracker_settings;
-    bool m_star_tracker_settings_isSet;
-
     SWGSimplePTTSettings* simple_ptt_settings;
     bool m_simple_ptt_settings_isSet;
+
+    SWGSkyMapSettings* sky_map_settings;
+    bool m_sky_map_settings_isSet;
+
+    SWGStarTrackerSettings* star_tracker_settings;
+    bool m_star_tracker_settings_isSet;
 
     SWGVORLocalizerSettings* vor_localizer_settings;
     bool m_vor_localizer_settings_isSet;

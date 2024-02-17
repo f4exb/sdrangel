@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2015-2018 Edouard Griffiths, F4EXB.                             //
-// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -31,6 +31,7 @@
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
+#include "availablechannelorfeaturehandler.h"
 
 #include "radioastronomybaseband.h"
 #include "radioastronomysettings.h"
@@ -329,17 +330,23 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        QList<RadioAstronomySettings::AvailableFeature>& getFeatures() { return m_availableFeatures; }
+        AvailableChannelOrFeatureList& getFeatures() { return m_availableFeatures; }
+        const QStringList& getRenameFrom() const { return m_renameFrom; }
+        const QStringList& getRenameTo() const { return m_renameTo; }
 
-        static MsgReportAvailableFeatures* create() {
-            return new MsgReportAvailableFeatures();
+        static MsgReportAvailableFeatures* create(const QStringList& renameFrom, const QStringList& renameTo) {
+            return new MsgReportAvailableFeatures(renameFrom, renameTo);
         }
 
     private:
-        QList<RadioAstronomySettings::AvailableFeature> m_availableFeatures;
+        AvailableChannelOrFeatureList m_availableFeatures;
+        QStringList m_renameFrom;
+        QStringList m_renameTo;
 
-        MsgReportAvailableFeatures() :
-            Message()
+        MsgReportAvailableFeatures(const QStringList& renameFrom, const QStringList& renameTo) :
+            Message(),
+            m_renameFrom(renameFrom),
+            m_renameTo(renameTo)
         {}
     };
 
@@ -347,17 +354,24 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        QList<RadioAstronomySettings::AvailableFeature>& getFeatures() { return m_availableFeatures; }
+        AvailableChannelOrFeatureList& getFeatures() { return m_availableFeatures; }
+        const QStringList& getRenameFrom() const { return m_renameFrom; }
+        const QStringList& getRenameTo() const { return m_renameTo; }
 
-        static MsgReportAvailableRotators* create() {
-            return new MsgReportAvailableRotators();
+
+        static MsgReportAvailableRotators* create(const QStringList& renameFrom, const QStringList& renameTo) {
+            return new MsgReportAvailableRotators(renameFrom, renameTo);
         }
 
     private:
-        QList<RadioAstronomySettings::AvailableFeature> m_availableFeatures;
+        AvailableChannelOrFeatureList m_availableFeatures;
+        QStringList m_renameFrom;
+        QStringList m_renameTo;
 
-        MsgReportAvailableRotators() :
-            Message()
+        MsgReportAvailableRotators(const QStringList& renameFrom, const QStringList& renameTo) :
+            Message(),
+            m_renameFrom(renameFrom),
+            m_renameTo(renameTo)
         {}
     };
 
@@ -448,8 +462,10 @@ private:
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency;
 
-    QHash<Feature*, RadioAstronomySettings::AvailableFeature> m_availableFeatures;
-    QHash<Feature*, RadioAstronomySettings::AvailableFeature> m_rotators;
+    AvailableChannelOrFeatureHandler m_availableFeatureHandler;
+    AvailableChannelOrFeatureList m_availableFeatures;
+    AvailableChannelOrFeatureHandler m_availableRotatorHandler;
+    AvailableChannelOrFeatureList m_rotators;
     QObject *m_selectedPipe;
 
     QNetworkAccessManager *m_networkManager;
@@ -482,9 +498,8 @@ private:
     void sweepStart();
     void startCal(bool hot);
     void calComplete(MsgCalComplete* report);
-    void scanAvailableFeatures();
-    void notifyUpdateFeatures();
-    void notifyUpdateRotators();
+    void notifyUpdateFeatures(const QStringList& renameFrom, const QStringList& renameTo);
+    void notifyUpdateRotators(const QStringList& renameFrom, const QStringList& renameTo);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
@@ -496,9 +511,8 @@ private slots:
     void sweepNext();
     void sweepComplete();
     void handleIndexInDeviceSetChanged(int index);
-    void handleFeatureAdded(int featureSetIndex, Feature *feature);
-    void handleFeatureRemoved(int featureSetIndex, Feature *feature);
-    void handleMessagePipeToBeDeleted(int reason, QObject* object);
+    void featuresChanged(const QStringList& renameFrom, const QStringList& renameTo);
+    void rotatorsChanged(const QStringList& renameFrom, const QStringList& renameTo);
     void handleFeatureMessageQueue(MessageQueue* messageQueue);
 };
 

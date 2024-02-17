@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2020-2021, 2023 Jon Beniston, M7RCE <jon@beniston.com>          //
+// Copyright (C) 2020-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -30,29 +30,12 @@ class Serializable;
 
 struct StarTrackerSettings
 {
-    struct AvailableFeature
-    {
-        int m_featureSetIndex;
-        int m_featureIndex;
-        QString m_type;
-
-        AvailableFeature() = default;
-        AvailableFeature(const AvailableFeature&) = default;
-        AvailableFeature& operator=(const AvailableFeature&) = default;
-        bool operator==(const AvailableFeature& a) const {
-            return (m_featureSetIndex == a.m_featureSetIndex) && (m_featureIndex == a.m_featureIndex) && (m_type == a.m_type);
-        }
-        QString getName() const {
-            return QString("F%1:%2 %3").arg(m_featureSetIndex).arg(m_featureIndex).arg(m_type);
-        }
-    };
-
     QString m_ra;
     QString m_dec;
     double m_latitude;
     double m_longitude;
     QString m_target;           // Sun, Moon, Custom
-    QString m_dateTime;         // Date/time for observation, or "" for now
+    QString m_dateTime;         // Local date/time for observation, or "" for now
     QString m_refraction;       // Refraction correction. "None", "Saemundsson" or "Positional Astronomy Library"
     double m_pressure;          // Air pressure in millibars
     double m_temperature;       // Air temperature in C
@@ -102,9 +85,6 @@ struct StarTrackerSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void applySettings(const QStringList& settingsKeys, const StarTrackerSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
-
-    static const QStringList m_pipeTypes;
-    static const QStringList m_pipeURIs;
 };
 
 #endif // INCLUDE_FEATURE_STARTRACKERSETTINGS_H_

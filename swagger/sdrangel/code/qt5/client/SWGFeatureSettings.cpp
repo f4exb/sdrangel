@@ -62,10 +62,12 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_rig_ctl_server_settings_isSet = false;
     satellite_tracker_settings = nullptr;
     m_satellite_tracker_settings_isSet = false;
-    star_tracker_settings = nullptr;
-    m_star_tracker_settings_isSet = false;
     simple_ptt_settings = nullptr;
     m_simple_ptt_settings_isSet = false;
+    sky_map_settings = nullptr;
+    m_sky_map_settings_isSet = false;
+    star_tracker_settings = nullptr;
+    m_star_tracker_settings_isSet = false;
     vor_localizer_settings = nullptr;
     m_vor_localizer_settings_isSet = false;
 }
@@ -110,10 +112,12 @@ SWGFeatureSettings::init() {
     m_rig_ctl_server_settings_isSet = false;
     satellite_tracker_settings = new SWGSatelliteTrackerSettings();
     m_satellite_tracker_settings_isSet = false;
-    star_tracker_settings = new SWGStarTrackerSettings();
-    m_star_tracker_settings_isSet = false;
     simple_ptt_settings = new SWGSimplePTTSettings();
     m_simple_ptt_settings_isSet = false;
+    sky_map_settings = new SWGSkyMapSettings();
+    m_sky_map_settings_isSet = false;
+    star_tracker_settings = new SWGStarTrackerSettings();
+    m_star_tracker_settings_isSet = false;
     vor_localizer_settings = new SWGVORLocalizerSettings();
     m_vor_localizer_settings_isSet = false;
 }
@@ -167,11 +171,14 @@ SWGFeatureSettings::cleanup() {
     if(satellite_tracker_settings != nullptr) { 
         delete satellite_tracker_settings;
     }
-    if(star_tracker_settings != nullptr) { 
-        delete star_tracker_settings;
-    }
     if(simple_ptt_settings != nullptr) { 
         delete simple_ptt_settings;
+    }
+    if(sky_map_settings != nullptr) { 
+        delete sky_map_settings;
+    }
+    if(star_tracker_settings != nullptr) { 
+        delete star_tracker_settings;
     }
     if(vor_localizer_settings != nullptr) { 
         delete vor_localizer_settings;
@@ -223,9 +230,11 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&satellite_tracker_settings, pJson["SatelliteTrackerSettings"], "SWGSatelliteTrackerSettings", "SWGSatelliteTrackerSettings");
     
-    ::SWGSDRangel::setValue(&star_tracker_settings, pJson["StarTrackerSettings"], "SWGStarTrackerSettings", "SWGStarTrackerSettings");
-    
     ::SWGSDRangel::setValue(&simple_ptt_settings, pJson["SimplePTTSettings"], "SWGSimplePTTSettings", "SWGSimplePTTSettings");
+    
+    ::SWGSDRangel::setValue(&sky_map_settings, pJson["SkyMapSettings"], "SWGSkyMapSettings", "SWGSkyMapSettings");
+    
+    ::SWGSDRangel::setValue(&star_tracker_settings, pJson["StarTrackerSettings"], "SWGStarTrackerSettings", "SWGStarTrackerSettings");
     
     ::SWGSDRangel::setValue(&vor_localizer_settings, pJson["VORLocalizerSettings"], "SWGVORLocalizerSettings", "SWGVORLocalizerSettings");
     
@@ -296,11 +305,14 @@ SWGFeatureSettings::asJsonObject() {
     if((satellite_tracker_settings != nullptr) && (satellite_tracker_settings->isSet())){
         toJsonValue(QString("SatelliteTrackerSettings"), satellite_tracker_settings, obj, QString("SWGSatelliteTrackerSettings"));
     }
-    if((star_tracker_settings != nullptr) && (star_tracker_settings->isSet())){
-        toJsonValue(QString("StarTrackerSettings"), star_tracker_settings, obj, QString("SWGStarTrackerSettings"));
-    }
     if((simple_ptt_settings != nullptr) && (simple_ptt_settings->isSet())){
         toJsonValue(QString("SimplePTTSettings"), simple_ptt_settings, obj, QString("SWGSimplePTTSettings"));
+    }
+    if((sky_map_settings != nullptr) && (sky_map_settings->isSet())){
+        toJsonValue(QString("SkyMapSettings"), sky_map_settings, obj, QString("SWGSkyMapSettings"));
+    }
+    if((star_tracker_settings != nullptr) && (star_tracker_settings->isSet())){
+        toJsonValue(QString("StarTrackerSettings"), star_tracker_settings, obj, QString("SWGStarTrackerSettings"));
     }
     if((vor_localizer_settings != nullptr) && (vor_localizer_settings->isSet())){
         toJsonValue(QString("VORLocalizerSettings"), vor_localizer_settings, obj, QString("SWGVORLocalizerSettings"));
@@ -479,16 +491,6 @@ SWGFeatureSettings::setSatelliteTrackerSettings(SWGSatelliteTrackerSettings* sat
     this->m_satellite_tracker_settings_isSet = true;
 }
 
-SWGStarTrackerSettings*
-SWGFeatureSettings::getStarTrackerSettings() {
-    return star_tracker_settings;
-}
-void
-SWGFeatureSettings::setStarTrackerSettings(SWGStarTrackerSettings* star_tracker_settings) {
-    this->star_tracker_settings = star_tracker_settings;
-    this->m_star_tracker_settings_isSet = true;
-}
-
 SWGSimplePTTSettings*
 SWGFeatureSettings::getSimplePttSettings() {
     return simple_ptt_settings;
@@ -497,6 +499,26 @@ void
 SWGFeatureSettings::setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settings) {
     this->simple_ptt_settings = simple_ptt_settings;
     this->m_simple_ptt_settings_isSet = true;
+}
+
+SWGSkyMapSettings*
+SWGFeatureSettings::getSkyMapSettings() {
+    return sky_map_settings;
+}
+void
+SWGFeatureSettings::setSkyMapSettings(SWGSkyMapSettings* sky_map_settings) {
+    this->sky_map_settings = sky_map_settings;
+    this->m_sky_map_settings_isSet = true;
+}
+
+SWGStarTrackerSettings*
+SWGFeatureSettings::getStarTrackerSettings() {
+    return star_tracker_settings;
+}
+void
+SWGFeatureSettings::setStarTrackerSettings(SWGStarTrackerSettings* star_tracker_settings) {
+    this->star_tracker_settings = star_tracker_settings;
+    this->m_star_tracker_settings_isSet = true;
 }
 
 SWGVORLocalizerSettings*
@@ -565,10 +587,13 @@ SWGFeatureSettings::isSet(){
         if(satellite_tracker_settings && satellite_tracker_settings->isSet()){
             isObjectUpdated = true; break;
         }
-        if(star_tracker_settings && star_tracker_settings->isSet()){
+        if(simple_ptt_settings && simple_ptt_settings->isSet()){
             isObjectUpdated = true; break;
         }
-        if(simple_ptt_settings && simple_ptt_settings->isSet()){
+        if(sky_map_settings && sky_map_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(star_tracker_settings && star_tracker_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(vor_localizer_settings && vor_localizer_settings->isSet()){

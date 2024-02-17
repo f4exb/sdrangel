@@ -31,6 +31,8 @@ FeatureActions:
       $ref: "http://swgserver:8081/api/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerActions"
     SimplePTTActions:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTActions"
+    SkyMapActions:
+      $ref: "http://swgserver:8081/api/swagger/include/SkyMap.yaml#/SkyMapActions"
     StarTrackerActions:
       $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerActions"
     VORLocalizerActions:

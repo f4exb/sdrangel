@@ -38,6 +38,7 @@
 #include "pipes/messagepipes.h"
 #include "pipes/datapipes.h"
 #include "channel/channelapi.h"
+#include "availablechannelorfeature.h"
 
 class DeviceSet;
 class FeatureSet;
@@ -59,6 +60,7 @@ namespace SWGSDRangel
     class SWGStarTrackerTarget;
     class SWGStarTrackerDisplaySettings;
     class SWGStarTrackerDisplayLoSSettings;
+    class SWGSkyMapTarget;
 }
 
 class SDRBASE_API MainCore : public QObject
@@ -842,7 +844,28 @@ public:
         { }
     };
 
+     class SDRBASE_API MsgSkyMapTarget : public Message {
+        MESSAGE_CLASS_DECLARATION
 
+    public:
+        const QObject *getPipeSource() const { return m_pipeSource; }
+        SWGSDRangel::SWGSkyMapTarget *getSWGSkyMapTarget() const { return m_swgSkyMapTarget; }
+
+        static MsgSkyMapTarget* create(const QObject *pipeSource, SWGSDRangel::SWGSkyMapTarget *swgSkyMapTarget)
+        {
+            return new MsgSkyMapTarget(pipeSource, swgSkyMapTarget);
+        }
+
+    private:
+        const QObject *m_pipeSource;
+        SWGSDRangel::SWGSkyMapTarget *m_swgSkyMapTarget;
+
+        MsgSkyMapTarget(const QObject *pipeSource, SWGSDRangel::SWGSkyMapTarget *swgSkyMapTarget) :
+            Message(),
+            m_pipeSource(pipeSource),
+            m_swgSkyMapTarget(swgSkyMapTarget)
+        { }
+    };
 
 	MainCore();
 	~MainCore();
@@ -885,6 +908,11 @@ public:
     DataPipes& getDataPipes() { return m_dataPipes; }
     // Position
     const QGeoPositionInfo& getPosition() const;
+
+    // Lists of available channels and features. List should be ordered by indexes. Plugins should use AvailableChannelOrFeatureHandler to maintain this list
+    AvailableChannelOrFeatureList getAvailableChannels(const QStringList& uris); // Get list of available channels with given URIs or all if empty list.
+    AvailableChannelOrFeatureList getAvailableFeatures(const QStringList& uris); // Get list of available features with given URIs or all if empty list.
+    AvailableChannelOrFeatureList getAvailableChannelsAndFeatures(const QStringList& uris, const QString& kinds); // Get list of available channels and features with given URIs or all if empty list.
 
     // Ids
     QChar getDeviceSetTypeId(const DeviceSet* deviceSet); //!< Get Type Id (E.g. 'R', 'T' or 'M') for the given device set

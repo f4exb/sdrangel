@@ -97,8 +97,8 @@ The statistics fields display the statistics for the current test:
 
 Full details of the API can be found in the Swagger documentation. Here is a quick example of how to set the azimuth and elevation from the command line:
 
-    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/settings" -d '{"featureType": "PERTester",  "PERTesterSettings": { "packetCount": 100 }}'
+    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/feature/0/settings" -d '{"featureType": "PERTester",  "PERTesterSettings": { "packetCount": 100 }}'
 
 To start sending the test:
 
-    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/run"
+    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/feature/0/run"

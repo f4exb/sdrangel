@@ -320,6 +320,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
     {"RigCtlServer", "RigCtlServerSettings"},
     {"SatelliteTracker", "SatelliteTrackerSettings"},
     {"SimplePTT", "SimplePTTSettings"},
+    {"SkyMap", "SkyMapSettings"},
     {"StarTracker", "StarTrackerSettings"},
     {"VORLocalizer", "VORLocalizerSettings"}
 };
@@ -334,6 +335,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
     {"RigCtlServer", "RigCtlServerActions"},
     {"SatelliteTracker", "SatelliteTrackerActions"},
     {"SimplePTT", "SimplePTTActions"},
+    {"SkyMap", "SkyMapActions"},
     {"StarTracker", "StarTrackerActions"},
     {"VORLocalizer", "VORLocalizerActions"},
     {"DemodAnalyzer", "DemodAnalyzerActions"}
@@ -355,6 +357,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
     {"sdrangel.feature.rigctlserver", "RigCtlServerSettings"},
     {"sdrangel.feature.satellitetracker", "SatelliteTrackerSettings"},
     {"sdrangel.feature.simpleptt", "SimplePTTSettings"},
+    {"sdrangel.feature.skymap", "SkyMapSettings"},
     {"sdrangel.feature.startracker", "StarTrackerSettings"},
     {"sdrangel.feature.vorlocalizer", "VORLocalizerSettings"}
 };

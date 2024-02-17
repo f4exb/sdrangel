@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2020-2021, 2023 Jon Beniston, M7RCE <jon@beniston.com>          //
+// Copyright (C) 2020-2021, 2024 Jon Beniston, M7RCE <jon@beniston.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -31,21 +31,6 @@ class Serializable;
 
 struct GS232ControllerSettings
 {
-    struct AvailableChannelOrFeature
-    {
-        QString m_kind; //!< "R" for channel, "F" for feature
-        int m_superIndex;
-        int m_index;
-        QString m_type;
-
-        AvailableChannelOrFeature() = default;
-        AvailableChannelOrFeature(const AvailableChannelOrFeature&) = default;
-        AvailableChannelOrFeature& operator=(const AvailableChannelOrFeature&) = default;
-        bool operator==(const AvailableChannelOrFeature& a) const {
-            return (m_kind == a.m_kind) && (m_superIndex == a.m_superIndex) && (m_index == a.m_index) && (m_type == a.m_type);
-        }
-    };
-
     float m_azimuth;
     float m_elevation;
     QString m_serialPort;
@@ -96,7 +81,6 @@ struct GS232ControllerSettings
     void applySettings(const QStringList& settingsKeys, const GS232ControllerSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
-    static const QStringList m_pipeTypes;
     static const QStringList m_pipeURIs;
 };
 

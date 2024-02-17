@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/skymap/">
+    <file>html/wwt.html</file>
+    <file>html/esasky.html</file>
+    <file>html/aladin.html</file>
+  </qresource>
+</RCC>

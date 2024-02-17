@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en" style="height:100%;min-height:100%;">
+<head>
+    <title>SDRangel ESASky</title>
+</head>
+
+<body style="margin:0;padding:0;height:100%;">
+
+    <script type="text/javascript">
+
+        var esaskyFrame;
+        var antennaHpbw = 5.0;
+        var showAntenna = false;
+
+        // API reference: https://www.cosmos.esa.int/web/esdc/esasky-javascript-api
+        function on_ready() {
+            esaskyFrame = document.getElementsByClassName("iframe-container")[0].children[0];
+
+            var cmd = { event: 'setModuleVisibility', content: { modules: { jwst_planning_button: false } } };
+            esaskyFrame.contentWindow.postMessage(cmd, 'https://sky.esa.int');
+
+            window.addEventListener("message", handleMessage);
+
+            setTimeout(function () { reportReady(); }, 500); // Add a delay, otherwise subsequent commands to set grid seem to get lost
+
+            // Can't access contentDocument due to same origin policy
+            //console.log(esaskyFrame.contentDocument);
+            //console.log("containers: " + esaskyFrame.contentDocument.getElementsByName("aladin-container"));
+
+            // Report ra/dec/time
+            // We don't use events, as they are too slow (view_changed is only sent after all data has been calculated)
+            setInterval(function () { reportView(); }, 100);
+            //setTimeout(function () { requestEvents(); }, 1000);
+        }
+
+        /*function requestEvents() {
+            var cmd1 = { event: 'registerEventListener', content: {} };
+            esaskyFrame.contentWindow.postMessage(cmd1, 'https://sky.esa.int');
+
+            var cmd2 = { event: 'registerFoVChangedListener', content: {} };
+            esaskyFrame.contentWindow.postMessage(cmd2, 'https://sky.esa.int');
+        }*/
+
+        // Use WebSockets for handling commands from SDRangel Plugin
+        // and sending events back to it
+        let socket = new WebSocket("ws://127.0.0.1:$WS_PORT$");
+
+        socket.onmessage = function (event) {
+            try {
+                const command = JSON.parse(event.data);
+
+                if (command.command == "setView") {
+                    var cmd = { event: 'goToRaDec', content: { ra: command.ra * 15.0, dec: command.dec } }; // Convert RA hours to decimal degrees
+                    esaskyFrame.contentWindow.postMessage(cmd, 'https://sky.esa.int');
+                } else if (command.command == "setPosition") {
+                    // Not supported
+                } else if (command.command == "setDateTime") {
+                    // Not supported
+                } else if (command.command == "track") {
+                    var cmd = { event: 'goToTargetName', content: { targetName: command.name } };
+                    esaskyFrame.contentWindow.postMessage(cmd, 'https://sky.esa.int');
+                } else if (command.command == "setBackground") {
+                    // Leave to its own GUI
+                } else if (command.command == "showConstellations") {
+                    // Not supported
+                } else if (command.command == "showReticle") {
+                    // Not supported
+                } else if (command.command == "showGrid") {
+                    var cmd = { event: 'showCoordinateGrid', content: { show: command.show } };
+                    esaskyFrame.contentWindow.postMessage(cmd, 'https://sky.esa.int');
+                } else if (command.command == "showAntennaFoV") {
+                    showAntenna = command.show;
+                    if (!showAntenna) {
+                        hideAntennaFoV();
+                    }
+                } else if (command.command == "setAntennaFoV") {
+                    antennaHpbw = command.hpbw;
+                } else {
+                    console.log(`Unknown command ${command.command}`);
+                }
+
+            } catch (e) {
+                console.log(`Erroring processing received message:\n${e}\n${event.data}`);
+            }
+        };
+
+        function reportReady() {
+            console.log("reportReady " + socket.readyState);
+            if (socket.readyState === 1) {
+                socket.send(JSON.stringify({
+                    event: "ready"
+                }));
+            } else {
+                setTimeout(reportReady, 100);
+            }
+        }
+
+        function handleMessage(e) {
+            //console.log(e);
+
+            var data = e.data;
+            if (data.origin == "esasky") {
+
+                var ra, dec, fov;
+
+                if (data.hasOwnProperty('event')) {
+                    if (data.event.action == "view_changed") {
+                        ra = data.event.values["ra"];
+                        dec = data.event.values["dec"];
+                        fov = data.event.values["fov"];
+                    }
+                } else {
+                    ra = data.values["ra"];
+                    dec = data.values["dec"];
+                    fov = data.values["fov"];
+                }
+
+                //console.log("handleMessage esasky: " + ra + " " + dec + " " + fov);
+                if (socket.readyState === 1) {
+                    socket.send(JSON.stringify({
+                        event: "view",
+                        ra: ra / 15.0, // convert decimal degrees to hours
+                        dec: dec,
+                        fov: fov
+                    }));
+                }
+
+                if (showAntenna) {
+                    showAntennaFoV(ra, dec);
+                }
+            }
+        }
+
+        function reportView() {
+            if (socket.readyState === 1) {
+                var cmd = { event: 'getCenter', content: { cooFrame: 'J2000' } };
+                esaskyFrame.contentWindow.postMessage(cmd, 'https://sky.esa.int');
+            }
+        }
+
+        function hideAntennaFoV() {
+            var cmd = { event: 'deleteFootprintsOverlay', content: { 'overlayName': 'Antenna FoV' } };
+            esaskyFrame.contentWindow.postMessage(cmd, 'https://sky.esa.int');
+        }
+
+        function showAntennaFoV(ra, dec) {
+            var cmd =
+            {
+                event: 'overlayFootprints',
+                content: {
+                    'overlaySet':
+                    {
+                        'type': 'FootprintListOverlay',
+                        'overlayName': 'Antenna FoV',
+                        'cooframe': 'J2000',
+                        'color': 'white',
+                        'lineWidth': 5,
+                        'skyObjectList': [
+                            {
+                                'name': 'Antenna FoV',
+                                'id': 1,
+                                'stcs': 'CIRCLE J2000 ' + ra + ' ' + dec + ' ' + (antennaHpbw / 2.0),
+                                'ra_deg': ra,
+                                'dec_deg': dec
+                            }]
+                    }
+                }
+            };
+            esaskyFrame.contentWindow.postMessage(cmd, 'https://sky.esa.int');
+        }
+
+    </script>
+
+    <div class="iframe-container" style="width: 100%; height: 100%">
+        <iframe alt="" border="0" bordercolor="#000000" frameborder="0" height="" hspace="0" id="_ESAsky" longdesc="" name="_ESASky" onload="on_ready();" scrolling="auto" src="https://sky.esa.int?hide_welcome=true&amp;&amp;hide_banner_info=true" title="" vspace="0" width="100%" class="" style="height: 100%;">
+            Frames not supported.
+        </iframe>
+    </div>
+
+</body >
+</html >

@@ -118,8 +118,7 @@ bool FreqScannerGUI::handleMessage(const Message& message)
     else if (FreqScanner::MsgReportChannels::match(message))
     {
         FreqScanner::MsgReportChannels& report = (FreqScanner::MsgReportChannels&)message;
-        m_availableChannels = report.getChannels();
-        updateChannelsList(m_availableChannels);
+        updateChannelsList(report.getChannels(), report.getRenameFrom(), report.getRenameTo());
         return true;
     }
     else if (FreqScanner::MsgStatus::match(message))
@@ -212,7 +211,7 @@ bool FreqScannerGUI::handleMessage(const Message& message)
     return false;
 }
 
-void FreqScannerGUI::updateChannelsCombo(QComboBox *combo, const QList<FreqScannerSettings::AvailableChannel>& channels, const QString& channel, bool empty)
+void FreqScannerGUI::updateChannelsCombo(QComboBox *combo, const AvailableChannelOrFeatureList& channels, const QString& channel, bool empty)
 {
     combo->blockSignals(true);
     combo->clear();
@@ -223,17 +222,8 @@ void FreqScannerGUI::updateChannelsCombo(QComboBox *combo, const QList<FreqScann
     for (const auto& channel : channels)
     {
         // Add channels in this device set, other than ourself (Don't use ChannelGUI::getDeviceSetIndex()/getIndex() as not valid when this is first called)
-        if ((channel.m_deviceSetIndex == m_freqScanner->getDeviceSetIndex()) && (channel.m_channelIndex != m_freqScanner->getIndexInDeviceSet()))
-        {
-            QString name;
-
-            if (channel.m_streamIndex < 0) { // Rx
-                name = QString("R%1:%2").arg(channel.m_deviceSetIndex).arg(channel.m_channelIndex);
-            } else { // MIMO
-                name = QString("M%1:%2.%3").arg(channel.m_deviceSetIndex).arg(channel.m_channelIndex).arg(channel.m_streamIndex);
-            }
-
-            combo->addItem(name);
+        if ((channel.m_superIndex == m_freqScanner->getDeviceSetIndex()) && (channel.m_index != m_freqScanner->getIndexInDeviceSet())) {
+            combo->addItem(channel.getId());
         }
     }
 
@@ -250,8 +240,29 @@ void FreqScannerGUI::updateChannelsCombo(QComboBox *combo, const QList<FreqScann
     combo->blockSignals(false);
 }
 
-void FreqScannerGUI::updateChannelsList(const QList<FreqScannerSettings::AvailableChannel>& channels)
+void FreqScannerGUI::updateChannelsList(const AvailableChannelOrFeatureList& channels, const QStringList& renameFrom, const QStringList& renameTo)
 {
+    m_availableChannels = channels;
+
+    // Update channel setting if it has been renamed
+    if (renameFrom.contains(m_settings.m_channel))
+    {
+        m_settings.m_channel = renameTo[renameFrom.indexOf(m_settings.m_channel)];
+        applySetting("channel");
+    }
+    bool rename = false;
+    for (auto& setting : m_settings.m_frequencySettings)
+    {
+         if (renameFrom.contains(setting.m_channel))
+         {
+             setting.m_channel = renameTo[renameFrom.indexOf(setting.m_channel)];
+             rename = true;
+         }
+    }
+    if (rename) {
+         applySetting("frequencySettings");
+    }
+
     updateChannelsCombo(ui->channels, channels, m_settings.m_channel, false);
 
     for (int row = 0; row < ui->table->rowCount(); row++)
@@ -515,10 +526,12 @@ void FreqScannerGUI::applySetting(const QString& settingsKey)
 
 void FreqScannerGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
+    m_settingsKeys.append(settingsKeys);
     if (m_doApplySettings)
     {
-        FreqScanner::MsgConfigureFreqScanner* message = FreqScanner::MsgConfigureFreqScanner::create(m_settings, settingsKeys, force);
+        FreqScanner::MsgConfigureFreqScanner* message = FreqScanner::MsgConfigureFreqScanner::create(m_settings, m_settingsKeys, force);
         m_freqScanner->getInputMessageQueue()->push(message);
+        m_settingsKeys.clear();
     }
 }
 

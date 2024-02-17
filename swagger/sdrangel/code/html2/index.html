@@ -6249,6 +6249,9 @@ margin-bottom: 20px;
     "SimplePTTActions" : {
       "$ref" : "#/definitions/SimplePTTActions"
     },
+    "SkyMapActions" : {
+      "$ref" : "#/definitions/SkyMapActions"
+    },
     "StarTrackerActions" : {
       "$ref" : "#/definitions/StarTrackerActions"
     },
@@ -6394,6 +6397,9 @@ margin-bottom: 20px;
     "SimplePTTReport" : {
       "$ref" : "#/definitions/SimplePTTReport"
     },
+    "SkyMapReport" : {
+      "$ref" : "#/definitions/SkyMapReport"
+    },
     "StarTrackerReport" : {
       "$ref" : "#/definitions/StarTrackerReport"
     },
@@ -6495,11 +6501,14 @@ margin-bottom: 20px;
     "SatelliteTrackerSettings" : {
       "$ref" : "#/definitions/SatelliteTrackerSettings"
     },
-    "StarTrackerSettings" : {
-      "$ref" : "#/definitions/StarTrackerSettings"
-    },
     "SimplePTTSettings" : {
       "$ref" : "#/definitions/SimplePTTSettings"
+    },
+    "SkyMapSettings" : {
+      "$ref" : "#/definitions/SkyMapSettings"
+    },
+    "StarTrackerSettings" : {
+      "$ref" : "#/definitions/StarTrackerSettings"
     },
     "VORLocalizerSettings" : {
       "$ref" : "#/definitions/VORLocalizerSettings"
@@ -14618,6 +14627,236 @@ margin-bottom: 20px;
     }
   },
   "description" : "Simple PTT settings"
+};
+            defs.SkyMapActions = {
+  "properties" : {
+    "find" : {
+      "type" : "string",
+      "description" : "The name of the object or the coordinates to centre the sky map on"
+    }
+  },
+  "description" : "Sky Map"
+};
+            defs.SkyMapReport = {
+  "properties" : {
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Current date and time being used for sky map"
+    },
+    "ra" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Right ascension of target (In decimal hours, J2000)"
+    },
+    "dec" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Declination of target (In decimal degrees, J2000)"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees (North positive) of observation/antenna location"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees (East positive) of observation/antenna location"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Altitude in metres of observation/antenna location"
+    },
+    "azimuth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "The azimuth angle in degrees to the target"
+    },
+    "elevation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "The elevation angle in degrees to the target"
+    },
+    "fov" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Current field-of-view in degrees"
+    }
+  },
+  "description" : "Sky Map"
+};
+            defs.SkyMapSettings = {
+  "properties" : {
+    "displayNames" : {
+      "type" : "integer",
+      "description" : "Display names on the sky map (1 for yes, 0 for no)"
+    },
+    "displayConstellations" : {
+      "type" : "integer",
+      "description" : "Display constellations on the sky map (1 for yes, 0 for no)"
+    },
+    "displayReticle" : {
+      "type" : "integer",
+      "description" : "Display reticle on the sky map (1 for yes, 0 for no)"
+    },
+    "displayGrid" : {
+      "type" : "integer",
+      "description" : "Display grid on the sky map (1 for yes, 0 for no)"
+    },
+    "displayAntennaFoV" : {
+      "type" : "integer",
+      "description" : "Display antenna field-of-view on the sky map (1 for yes, 0 for no)"
+    },
+    "map" : {
+      "type" : "string",
+      "description" : "WWT, ESASky or Aladin"
+    },
+    "background" : {
+      "type" : "string",
+      "description" : "Name of background image set"
+    },
+    "projection" : {
+      "type" : "string"
+    },
+    "source" : {
+      "type" : "string",
+      "description" : "Channel or Feature plugin to get target from"
+    },
+    "track" : {
+      "type" : "integer",
+      "description" : "Whether to track the specified source plugin"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees (North positive) of observation/antenna location"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees (East positive) of observation/antenna location"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Altitude in metres of observation/antenna location"
+    },
+    "hpbw" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Antenna half-power beam width in degrees"
+    },
+    "useMyPosition" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Use My Position instead of latitude/longitude settings"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureSetIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureIndex" : {
+      "type" : "integer"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "Sky Map"
+};
+            defs.SkyMapTarget = {
+  "properties" : {
+    "ra" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Right ascension of target (In decimal hours, J2000)"
+    },
+    "dec" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Declination of target (In decimal degrees, J2000)"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees (North positive) of observation/antenna location"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees (East positive) of observation/antenna location"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Altitude in metres of observation/antenna location"
+    },
+    "hpbw" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Antenna half-power beam width in degrees"
+    },
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
+    }
+  },
+  "description" : "Sky Map target. Sent by other plugins to skymap.target message queue."
+};
+            defs.SkyMapTarget_2 = {
+  "properties" : {
+    "ra" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Right ascension of target (In decimal hours, J2000)"
+    },
+    "dec" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Declination of target (In decimal degrees, J2000)"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees (North positive) of observation/antenna location"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees (East positive) of observation/antenna location"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Altitude in metres of observation/antenna location"
+    },
+    "hpbw" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Antenna half-power beam width in degrees"
+    },
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
+    }
+  },
+  "description" : "Sky Map target. Sent by other plugins to skymap.target message queue."
 };
             defs.SoapySDRFrequencySetting = {
   "properties" : {
@@ -58429,7 +58668,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-01-21T13:22:02.160+01:00
+              Generated 2024-02-12T10:33:45.606+01:00
             </div>
           </div>
       </div>

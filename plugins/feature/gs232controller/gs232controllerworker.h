@@ -32,6 +32,8 @@
 #include "gs232controllersettings.h"
 #include "controllerprotocol.h"
 
+class GS232Controller;
+
 class GS232ControllerWorker : public QObject
 {
     Q_OBJECT
@@ -62,7 +64,7 @@ public:
         { }
     };
 
-    GS232ControllerWorker();
+    GS232ControllerWorker(GS232Controller *controller);
     ~GS232ControllerWorker();
     void startWork();
     void stopWork();
@@ -72,6 +74,7 @@ public:
 
 private:
 
+    GS232Controller *m_controller;
     MessageQueue m_inputMessageQueue;  //!< Queue for asynchronous inbound communication
     MessageQueue *m_msgQueueToFeature; //!< Queue to report channel change to main feature object
     GS232ControllerSettings m_settings;
@@ -92,6 +95,7 @@ private:
     QIODevice *openSocket(const GS232ControllerSettings& settings);
     void setAzimuth(float azimuth);
     void setAzimuthElevation(float azimuth, float elevation);
+    void sendToSkyMap(float azimuth, float elevation);
 
 private slots:
     void handleInputMessages();

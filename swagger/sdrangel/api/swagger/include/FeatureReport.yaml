@@ -25,6 +25,8 @@ FeatureReport:
       $ref: "http://swgserver:8081/api/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerReport"
     SimplePTTReport:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTReport"
+    SkyMapReport:
+      $ref: "http://swgserver:8081/api/swagger/include/SkyMap.yaml#/SkyMapReport"
     StarTrackerReport:
       $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerReport"
     VORLocalizerReport:

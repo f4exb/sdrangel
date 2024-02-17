@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
-// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -916,31 +916,33 @@ bool RadioAstronomyGUI::deserialize(const QByteArray& data)
     }
 }
 
-void RadioAstronomyGUI::updateAvailableFeatures()
+void RadioAstronomyGUI::updateAvailableFeatures(const AvailableChannelOrFeatureList& availableFeatures, const QStringList& renameFrom, const QStringList& renameTo)
 {
-    QString currentText = ui->starTracker->currentText();
+    // Update starTracker settting if it has been renamed
+    if (renameFrom.contains(m_settings.m_starTracker))
+    {
+        m_settings.m_starTracker = renameTo[renameFrom.indexOf(m_settings.m_starTracker)];
+        applySettings();
+    }
+
     ui->starTracker->blockSignals(true);
     ui->starTracker->clear();
 
-    for (const auto& feature : m_availableFeatures) {
-        ui->starTracker->addItem(tr("F%1:%2 %3").arg(feature.m_featureSetIndex).arg(feature.m_featureIndex).arg(feature.m_type));
+    for (const auto& feature : availableFeatures) {
+        ui->starTracker->addItem(feature.getLongId());
     }
 
-    if (currentText.isEmpty())
-    {
-        if (m_availableFeatures.size() > 0) {
-            ui->starTracker->setCurrentIndex(0);
-        }
-    }
-    else
-    {
-        ui->starTracker->setCurrentIndex(ui->starTracker->findText(currentText));
+    int idx = ui->starTracker->findText(m_settings.m_starTracker);
+    if (idx >= 0) {
+        ui->starTracker->setCurrentIndex(idx);
+    } else  {
+        ui->starTracker->setCurrentIndex(0);
     }
 
     ui->starTracker->blockSignals(false);
-    QString newText = ui->starTracker->currentText();
 
-    if (currentText != newText)
+    QString newText = ui->starTracker->currentText();
+    if (m_settings.m_starTracker != newText)
     {
        m_settings.m_starTracker = newText;
        applySettings();
@@ -970,8 +972,7 @@ bool RadioAstronomyGUI::handleMessage(const Message& message)
     {
         qDebug("RadioAstronomyGUI::handleMessage: MsgReportAvailableFeatures");
         RadioAstronomy::MsgReportAvailableFeatures& report = (RadioAstronomy::MsgReportAvailableFeatures&) message;
-        m_availableFeatures = report.getFeatures();
-        updateAvailableFeatures();
+        updateAvailableFeatures(report.getFeatures(), report.getRenameFrom(), report.getRenameTo());
         return true;
     }
     else if (MainCore::MsgStarTrackerTarget::match(message))
@@ -1063,7 +1064,7 @@ bool RadioAstronomyGUI::handleMessage(const Message& message)
     else if (RadioAstronomy::MsgReportAvailableRotators::match(message))
     {
         RadioAstronomy::MsgReportAvailableRotators& report = (RadioAstronomy::MsgReportAvailableRotators&) message;
-        updateRotatorList(report.getFeatures());
+        updateRotatorList(report.getFeatures(), report.getRenameFrom(), report.getRenameTo());
         return true;
     }
 
@@ -1901,11 +1902,11 @@ void RadioAstronomyGUI::on_loadSpectrumData_clicked()
 
 void RadioAstronomyGUI::on_powerTable_cellDoubleClicked(int row, int column)
 {
-    if ((column >= POWER_COL_RA) && (column >= POWER_COL_EL))
+    if ((column >= POWER_COL_RA) && (column <= POWER_COL_EL))
     {
         // Display target in Star Tracker
         QList<ObjectPipe*> starTrackerPipes;
-        MainCore::instance()->getMessagePipes().getMessagePipes(this, "startracker.display", starTrackerPipes);
+        MainCore::instance()->getMessagePipes().getMessagePipes(m_radioAstronomy, "startracker.display", starTrackerPipes);
 
         for (const auto& pipe : starTrackerPipes)
         {
@@ -2604,17 +2605,22 @@ void RadioAstronomyGUI::tick()
     m_tickCount++;
 }
 
-void RadioAstronomyGUI::updateRotatorList(const QList<RadioAstronomySettings::AvailableFeature>& rotators)
+void RadioAstronomyGUI::updateRotatorList(const AvailableChannelOrFeatureList& rotators, const QStringList& renameFrom, const QStringList& renameTo)
 {
+    // Update rotator settting if it has been renamed
+    if (renameFrom.contains(m_settings.m_rotator))
+    {
+        m_settings.m_rotator = renameTo[renameFrom.indexOf(m_settings.m_rotator)];
+        applySettings();
+    }
+
     // Update list of rotators
     ui->rotator->blockSignals(true);
     ui->rotator->clear();
     ui->rotator->addItem("None");
 
-    for (const auto& rotator : rotators)
-    {
-        QString name = QString("F%1:%2 %3").arg(rotator.m_featureSetIndex).arg(rotator.m_featureIndex).arg(rotator.m_type);
-        ui->rotator->addItem(name);
+    for (const auto& rotator : rotators) {
+        ui->rotator->addItem(rotator.getLongId());
     }
 
     // Rotator feature can be created after this plugin, so select it
@@ -4335,7 +4341,7 @@ void RadioAstronomyGUI::updateLoSMarker(const QString& name, float l, float b, f
 {
     // Send to Star Tracker
     QList<ObjectPipe*> starTrackerPipes;
-    MainCore::instance()->getMessagePipes().getMessagePipes(this, "startracker.display", starTrackerPipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_radioAstronomy, "startracker.display", starTrackerPipes);
 
     for (const auto& pipe : starTrackerPipes)
     {
@@ -4794,7 +4800,7 @@ void RadioAstronomyGUI::on_spectrumIndex_valueChanged(int value)
 
         // Display target in Star Tracker
         QList<ObjectPipe*> starTrackerPipes;
-        MainCore::instance()->getMessagePipes().getMessagePipes(this, "startracker.display", starTrackerPipes);
+        MainCore::instance()->getMessagePipes().getMessagePipes(m_radioAstronomy, "startracker.display", starTrackerPipes);
 
         for (const auto& pipe : starTrackerPipes)
         {

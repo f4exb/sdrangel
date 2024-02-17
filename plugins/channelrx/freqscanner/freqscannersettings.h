@@ -31,17 +31,6 @@ class ChannelAPI;
 
 struct FreqScannerSettings
 {
-    struct AvailableChannel
-    {
-        int m_deviceSetIndex;
-        int m_channelIndex;
-        int m_streamIndex;
-
-        AvailableChannel() = default;
-        AvailableChannel(const AvailableChannel&) = default;
-        AvailableChannel& operator=(const AvailableChannel&) = default;
-    };
-
     struct FrequencySettings {
         qint64 m_frequency;
         bool m_enabled;

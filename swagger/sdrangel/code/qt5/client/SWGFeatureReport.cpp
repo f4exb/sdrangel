@@ -48,6 +48,8 @@ SWGFeatureReport::SWGFeatureReport() {
     m_satellite_tracker_report_isSet = false;
     simple_ptt_report = nullptr;
     m_simple_ptt_report_isSet = false;
+    sky_map_report = nullptr;
+    m_sky_map_report_isSet = false;
     star_tracker_report = nullptr;
     m_star_tracker_report_isSet = false;
     vor_localizer_report = nullptr;
@@ -80,6 +82,8 @@ SWGFeatureReport::init() {
     m_satellite_tracker_report_isSet = false;
     simple_ptt_report = new SWGSimplePTTReport();
     m_simple_ptt_report_isSet = false;
+    sky_map_report = new SWGSkyMapReport();
+    m_sky_map_report_isSet = false;
     star_tracker_report = new SWGStarTrackerReport();
     m_star_tracker_report_isSet = false;
     vor_localizer_report = new SWGVORLocalizerReport();
@@ -117,6 +121,9 @@ SWGFeatureReport::cleanup() {
     }
     if(simple_ptt_report != nullptr) { 
         delete simple_ptt_report;
+    }
+    if(sky_map_report != nullptr) { 
+        delete sky_map_report;
     }
     if(star_tracker_report != nullptr) { 
         delete star_tracker_report;
@@ -156,6 +163,8 @@ SWGFeatureReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&satellite_tracker_report, pJson["SatelliteTrackerReport"], "SWGSatelliteTrackerReport", "SWGSatelliteTrackerReport");
     
     ::SWGSDRangel::setValue(&simple_ptt_report, pJson["SimplePTTReport"], "SWGSimplePTTReport", "SWGSimplePTTReport");
+    
+    ::SWGSDRangel::setValue(&sky_map_report, pJson["SkyMapReport"], "SWGSkyMapReport", "SWGSkyMapReport");
     
     ::SWGSDRangel::setValue(&star_tracker_report, pJson["StarTrackerReport"], "SWGStarTrackerReport", "SWGStarTrackerReport");
     
@@ -206,6 +215,9 @@ SWGFeatureReport::asJsonObject() {
     }
     if((simple_ptt_report != nullptr) && (simple_ptt_report->isSet())){
         toJsonValue(QString("SimplePTTReport"), simple_ptt_report, obj, QString("SWGSimplePTTReport"));
+    }
+    if((sky_map_report != nullptr) && (sky_map_report->isSet())){
+        toJsonValue(QString("SkyMapReport"), sky_map_report, obj, QString("SWGSkyMapReport"));
     }
     if((star_tracker_report != nullptr) && (star_tracker_report->isSet())){
         toJsonValue(QString("StarTrackerReport"), star_tracker_report, obj, QString("SWGStarTrackerReport"));
@@ -317,6 +329,16 @@ SWGFeatureReport::setSimplePttReport(SWGSimplePTTReport* simple_ptt_report) {
     this->m_simple_ptt_report_isSet = true;
 }
 
+SWGSkyMapReport*
+SWGFeatureReport::getSkyMapReport() {
+    return sky_map_report;
+}
+void
+SWGFeatureReport::setSkyMapReport(SWGSkyMapReport* sky_map_report) {
+    this->sky_map_report = sky_map_report;
+    this->m_sky_map_report_isSet = true;
+}
+
 SWGStarTrackerReport*
 SWGFeatureReport::getStarTrackerReport() {
     return star_tracker_report;
@@ -370,6 +392,9 @@ SWGFeatureReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(simple_ptt_report && simple_ptt_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sky_map_report && sky_map_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(star_tracker_report && star_tracker_report->isSet()){

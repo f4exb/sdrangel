@@ -73,6 +73,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     FreqScannerSettings m_settings;
+    QList<QString> m_settingsKeys;
     qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
 
@@ -82,7 +83,7 @@ private:
 
     QMenu *m_menu;
 
-    QList<FreqScannerSettings::AvailableChannel> m_availableChannels;
+    AvailableChannelOrFeatureList m_availableChannels;
 
     explicit FreqScannerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~FreqScannerGUI();
@@ -98,8 +99,8 @@ private:
     void addRow(const FreqScannerSettings::FrequencySettings& frequencySettings);
     void updateAnnotation(int row);
     void updateAnnotations();
-    void updateChannelsCombo(QComboBox *combo, const QList<FreqScannerSettings::AvailableChannel>& channels, const QString& channel, bool empty);
-    void updateChannelsList(const QList<FreqScannerSettings::AvailableChannel>& channels);
+    void updateChannelsCombo(QComboBox *combo, const AvailableChannelOrFeatureList& channels, const QString& channel, bool empty);
+    void updateChannelsList(const AvailableChannelOrFeatureList& channels, const QStringList& renameFrom, const QStringList& renameTo);
     void setAllEnabled(bool enable);
 
     void leaveEvent(QEvent*);

@@ -339,6 +339,43 @@ public:
         return false;
     }
 
+    // Try to convert a string to Right Ascension (RA) and Declination. Returns false if not recognised format.
+    // This supports HMS/DMS or decimal.
+    // E.g.:
+    //   12 05 12.23 +17 06 21.0
+    //   12:05:12.23 -17:06:21.0
+    //   12h05m12.23s +17d06m21.0s
+    //      107.1324 -34.233
+    static bool stringToRADec(const QString& string, float& ra, float& dec)
+    {
+        QRegExp dms("([0-9]+)[ :h]([0-9]+)[ :m]([0-9]+(\\.[0-9]+)?)s? *,? *([+-]?[0-9]+)[ :d]([0-9]+)[ :m]([0-9]+(\\.[0-9]+)?)s?");
+        if (dms.exactMatch(string))
+        {
+            int raHours = dms.capturedTexts()[1].toInt();
+            int raMins = dms.capturedTexts()[2].toInt();
+            float raSecs = dms.capturedTexts()[3].toFloat();
+            ra = raHours + raMins / 60.0f + raSecs / (60.0f * 60.0f);
+            qDebug() << ra << raHours << raMins << raSecs;
+            int decDegs = dms.capturedTexts()[5].toInt();
+            int decMins = dms.capturedTexts()[6].toInt();
+            float decSecs = dms.capturedTexts()[7].toFloat();
+            bool neg = decDegs < 0;
+            dec = abs(decDegs) + decMins / 60.0f + decSecs / (60.0f * 60.0f);
+            if (neg) {
+                dec = -dec;
+            }
+            return true;
+        }
+        QRegExp decimal("([0-9]+(\\.[0-9]+)?) *,? *([+-]?[0-9]+(\\.[0-9]+)?)");
+        if (decimal.exactMatch(string))
+        {
+            ra = decimal.capturedTexts()[1].toFloat();
+            dec = decimal.capturedTexts()[3].toFloat();
+            return true;
+        }
+        return false;
+    }
+
     static float solarFluxUnitsToJansky(float sfu)
     {
         return sfu * 10000.0f;

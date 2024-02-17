@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="en" style="height:100%;min-height:100%;">
+<head>
+    <title>SDRangel WWT</title>
+    <script src="https://web.wwtassets.org/engine/7/wwtsdk.js"></script>
+
+    <style>
+        body {
+            overflow: hidden; /* Hide scrollbars if popup window near edge */
+        }
+        .popup {
+            visibility: hidden;
+            position: absolute;
+            z-index: 10;
+            background-color: #fff;
+            border-radius: 25px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+            font-size: 0.875em;
+        }
+        .popup .popuptext {
+        }
+        .popup .close {
+            float: right;
+        }
+    </style>
+
+</head>
+<body style="margin:0;padding:0;height:100%;">
+
+
+    <div class="popup" id="popupDiv" onmousedown="dragDown()">
+        <button aria-hidden="true" class="close" type="button" onclick="hidePlace()">x</button>
+        <span class="popuptext" id="myPopup"></span>
+    </div>
+
+
+    <div id="wwtcanvas" style="width: 100%; height: 100%; background-color: #000"></div>
+
+    <script type="text/javascript">
+        var script_interface, wwt;
+        var circle, antennaFoV;
+        var antennaHpbw = 5.0;
+        var wwtSettings = {
+            constellationBoundaries: "false",
+            constellationFigures: "true",
+            constellationLabels: "true",
+            constellationPictures: "false",
+            constellationSelection: "false",
+            ecliptic: "false",
+            eclipticOverviewText: "false",
+            eclipticGrid: "false",
+            eclipticGridText: "true",
+            altAzGrid: "true",
+            altAzGridText: "true",
+            equatorialGrid: "false",
+            equatorialGridText: "true",
+            galacticGrid: "false",
+            galacticGridText: "true",
+            precessionChart: "false",
+            iss: "false",
+            solarSystemCosmos: "false",
+            solarSystemLighting: "true",
+            solarSystemMilkyWay: "true",
+            solarSystemMinorOrbits: "false",
+            solarSystemMinorPlanets: "false",
+            solarSystemMultiRes: "true",
+            solarSystemOrbits: "true",
+            solarSystemOverlays: "false",
+            solarSystemPlanets: "true",
+            solarSystemStars: "true",
+        };
+        var showNames = true;
+        var showGrid = false;
+        var showConstellations = false;
+
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        var popup = document.getElementById("popupDiv");
+
+        function dragDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            popup.style.top = (popup.offsetTop - pos2) + "px";
+            popup.style.left = (popup.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            // stop moving when mouse button is released:
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+
+        function init_wwt() {
+            const builder = new wwtlib.WWTControlBuilder("wwtcanvas");
+            builder.startRenderLoop(true);
+            script_interface = builder.create();
+            script_interface.add_ready(on_ready);
+        }
+
+        // API reference: https://docs.worldwidetelescope.org/webgl-reference/latest/apiref/engine/classes/WWTControl-1.html
+        function on_ready() {
+            wwt = wwtlib.WWTControl.singleton;
+            reportReady();
+
+            // Report ra/dec/time
+            setInterval(function () { reportView(); }, 100);
+
+            // Load search data
+            // This sets the wwt.searchData variable to what's in https://web.wwtassets.org/data/searchdata_v2.min.js
+            var scr = document.createElement('script');
+            scr.setAttribute("src", wwtlib.URLHelpers.singleton.coreStaticUrl('data/searchdata_v2.min.js'));
+            document.getElementsByTagName("head")[0].appendChild(scr);
+            setTimeout(initSearch, 333);
+        }
+
+        window.addEventListener("load", init_wwt);
+
+        // Use WebSockets for handling commands from WorldwideTelescope SDRangel Plugin
+        // and sending events back to it
+        let socket = new WebSocket("ws://127.0.0.1:$WS_PORT$");
+
+        socket.onmessage = function (event) {
+            try {
+                const command = JSON.parse(event.data);
+
+                if (command.command == "setView") {
+                    wwt.gotoRADecZoom(command.ra, command.dec, wwt.renderContext.viewCamera.zoom, true); // Requires RA in hours, J2000
+                } else if (command.command == "setPosition") {
+                    script_interface.settings.set_locationLat(command.latitude);
+                    script_interface.settings.set_locationLng(command.longitude);
+                    script_interface.settings.set_locationAltitude(command.altitude);
+                } else if (command.command == "setProjection") {
+                    if (command.projection == "Solar system") {
+                        wwt.setBackgroundImageByName("Solar System");
+                    }
+                    // In other cases, we just use setBackground which will follow
+                } else if (command.command == "setDateTime") {
+                    // Set current date and time of viewer
+                    //console.log("setDateTime " + command.dateTime);
+                    //const dt = new Date(command.dateTime);
+                    const dt = Date.parse(command.dateTime);
+                    wwtlib.SpaceTimeController.set_now(dt);
+                } else if (command.command == "track") {
+                    //console.log("Finding " + command.name);
+                    const place = search(command.name);
+                    if (place) {
+                        //console.log(place);
+                        wwt.gotoTarget(place, false, true, true);
+                    } else {
+                        console.log("Can't find " + command.name);
+                    }
+                } else if (command.command == "setBackground") {
+                    if (command.background != "") {
+                        wwt.setBackgroundImageByName(command.background);
+                    }
+                } else if (command.command == "showNames") {
+                    showNames = command.show;
+                    script_interface.settings.set_showConstellationLabels(showNames && showConstellations && (wwtSettings.constellationLabels === "true"));
+                    script_interface.settings.set_showEclipticOverviewText(showNames && (wwtSettings.eclipticOverviewText === "true"))
+                } else if (command.command == "showConstellations") {
+                    showConstellations = command.show;
+                    const ok = script_interface.settings.set_showConstellations(showConstellations);
+                    script_interface.settings.set_showConstellationBoundries(showConstellations && (wwtSettings.constellationBoundaries === "true"));
+                    script_interface.settings.set_showConstellationFigures(showConstellations && (wwtSettings.constellationFigures === "true"));
+                    script_interface.settings.set_showConstellationLabels(showNames && showConstellations && (wwtSettings.constellationLabels === "true"));
+                    script_interface.settings.set_showConstellationPictures(showConstellations && (wwtSettings.constellationPictures === "true"));
+                    script_interface.settings.set_showConstellationSelection(showConstellations && (wwtSettings.constellationSelection === "true"));
+                } else if (command.command == "showReticle") {
+                    script_interface.settings.set_showCrosshairs(command.show);
+                } else if (command.command == "showGrid") {
+                    showGrid = command.show;
+                    script_interface.settings.set_showEclipticGrid(showGrid && (wwtSettings.eclipticGrid === "true"));
+                    script_interface.settings.set_showEclipticGridText(showGrid && (wwtSettings.eclipticGridText === "true"));
+                    script_interface.settings.set_showAltAzGrid(showGrid && (wwtSettings.altAzGrid === "true"));
+                    script_interface.settings.set_showAltAzGridText(showGrid && (wwtSettings.altAzGridText === "true"));
+                    script_interface.settings.set_showGrid(showGrid && (wwtSettings.equatorialGrid === "true"));
+                    script_interface.settings.set_showEquatorialGridText(showGrid && (wwtSettings.equatorialGridText === "true"));
+                    script_interface.settings.set_showGalacticGrid(showGrid && (wwtSettings.galacticGrid === "true"));
+                    script_interface.settings.set_showGalacticGridText(showGrid && (wwtSettings.galacticGridText === "true"));
+                } else if (command.command == "showAntennaFoV") {
+                    if (command.show) {
+                        showAntennaFoV();
+                    } else {
+                        hideAntennaFoV();
+                    }
+                } else if (command.command == "setAntennaFoV") {
+                    antennaHpbw = command.hpbw;
+                    if (antennaFoV) {
+                        antennaFoV.set_radius(radiusAdjust(antennaHpbw, script_interface.getDec()));
+                    }
+                } else if (command.command == "setWWTSettings") {
+                    Object.assign(wwtSettings, command);
+                    script_interface.settings.set_showConstellationBoundries(showConstellations && (wwtSettings.constellationBoundaries === "true"));
+                    script_interface.settings.set_showConstellationFigures(showConstellations && (wwtSettings.constellationFigures === "true"));
+                    script_interface.settings.set_showConstellationLabels(showNames && showConstellations && (wwtSettings.constellationLabels === "true"));
+                    script_interface.settings.set_showConstellationPictures(showConstellations && (wwtSettings.constellationPictures === "true"));
+                    script_interface.settings.set_showConstellationSelection(showConstellations && (wwtSettings.constellationSelection === "true"));
+
+                    script_interface.settings.set_showEcliptic(wwtSettings.ecliptic === "true")
+                    script_interface.settings.set_showEclipticOverviewText(showNames && (wwtSettings.eclipticOverviewText === "true"))
+
+                    script_interface.settings.set_showEclipticGrid(showGrid && (wwtSettings.eclipticGrid === "true"));
+                    script_interface.settings.set_showEclipticGridText(showGrid && (wwtSettings.eclipticGridText === "true"));
+                    script_interface.settings.set_showAltAzGrid(showGrid && (wwtSettings.altAzGrid === "true"));
+                    script_interface.settings.set_showAltAzGridText(showGrid && (wwtSettings.altAzGridText === "true"));
+                    script_interface.settings.set_showGrid(showGrid && (wwtSettings.equatorialGrid === "true"));
+                    script_interface.settings.set_showEquatorialGridText(showGrid && (wwtSettings.equatorialGridText === "true"));
+                    script_interface.settings.set_showGalacticGrid(showGrid && (wwtSettings.galacticGrid === "true"));
+                    script_interface.settings.set_showGalacticGridText(showGrid && (wwtSettings.galacticGridText === "true"));
+                    script_interface.settings.set_showPrecessionChart(showGrid && (wwtSettings.precessionChart === "true"));
+
+                    // Solar System view
+                    // Need to zoom a long way out to see Cosmos
+                    script_interface.settings.set_solarSystemCosmos(wwtSettings.solarSystemCosmos === "true");
+                    script_interface.settings.set_solarSystemLighting(wwtSettings.solarSystemLighting === "true");
+                    script_interface.settings.set_solarSystemMilkyWay(wwtSettings.solarSystemMilkyWay === "true");
+                    script_interface.settings.set_solarSystemMinorOrbits(wwtSettings.solarSystemMinorOrbits === "true");
+                    script_interface.settings.set_solarSystemMinorPlanets(wwtSettings.solarSystemMinorPlanets === "true");
+                    script_interface.settings.set_solarSystemMultiRes(wwtSettings.solarSystemMultiRes === "true");
+                    script_interface.settings.set_solarSystemOrbits(wwtSettings.solarSystemOrbits === "true");
+                    script_interface.settings.set_solarSystemOverlays(wwtSettings.solarSystemOverlays === "true");
+                    script_interface.settings.set_solarSystemPlanets(wwtSettings.solarSystemPlanets === "true");
+                    script_interface.settings.set_solarSystemStars(wwtSettings.solarSystemStars === "true");
+
+                    script_interface.settings.set_showISSModel(wwtSettings.iss === "true");
+
+                    // These only supported in Windows client, not WebGL client
+                    //script_interface.settings.set_showClouds(wwtSettings.clouds === "true");
+                    //script_interface.settings.set_showElevationModel(wwtSettings.elevationModel === "true");
+                    //script_interface.settings.set_showEarthSky(wwtSettings.earthSky === "true");
+                    //script_interface.settings.set_earthCutawayView(wwtSettings.earthCutawayView === "true");
+                    //script_interface.settings.get_showFieldOfView(wwtSettings.fieldOfView === "true")
+                    //script_interface.settings.set_solarSystemCMB(wwtSettings.solarSystemCMB === "true");
+
+                } else {
+                    console.log(`Unknown command ${command.command}`);
+                }
+
+            } catch (e) {
+                console.log(`Erroring processing received message:\n${e}\n${event.data}`);
+            }
+        };
+
+        // Workaround for https://github.com/WorldWideTelescope/wwt-webgl-engine/issues/297
+        // Although circles not drawn when abs(dec)=90
+        function radiusAdjust(radius, dec) {
+            if (Math.abs(dec) >= 89.9999999) {
+                return radius * 0.769 / Math.cos(89.9999999 * Math.PI / 180.0);
+            } else {
+                return radius * 0.769 / Math.cos(dec * Math.PI / 180.0);
+            }
+        }
+
+        function search(name) {
+            const firstChar = name.charAt(0).toLowerCase();
+            const searchData = wwt.searchDataIndexed[firstChar];
+            const nameLower = name.toLowerCase();
+            if (searchData) {
+                for (var i = 0; i < searchData.length; i++) {
+                    var names = searchData[i].get_names();
+                    for (var j = 0; j < names.length; j++) {
+                        if (names[j].toLowerCase() == nameLower) {
+                            return searchData[i];
+                        }
+                    }
+                }
+            } else {
+                console.log("No search index: " + name);
+            }
+        }
+
+        function reportReady() {
+            if (socket.readyState === 1) {
+                socket.send(JSON.stringify({
+                    event: "ready"
+                }));
+            } else {
+                setTimeout(reportReady, 100);
+            }
+        }
+
+        function reportView() {
+            if (socket.readyState === 1) {
+                socket.send(JSON.stringify({
+                    event: "view",
+                    ra: script_interface.getRA(), // RA in hours
+                    dec: script_interface.getDec(),
+                    fov: wwt.renderContext.get_fovAngle(),
+                    dateTime: wwtlib.SpaceTimeController.get_now().toISOString(),
+                    latitude: script_interface.settings.get_locationLat(),
+                    longitude: script_interface.settings.get_locationLng(),
+                }));
+            }
+            if (antennaFoV) {
+                showAntennaFoV();
+            }
+        }
+
+        // 'click' event doesn't work for right button, so use mousedown
+        // Based on code from www-web-client FinderScope.js (MIT license)
+        var div = document.getElementById('wwtcanvas');
+        div.addEventListener('mousedown', function (event) {
+            if (event.button == 2) {
+                var rect = div.getBoundingClientRect();
+                var x = event.clientX - rect.left;
+                var y = event.clientY - rect.top;
+                const obj = wwt.getCoordinatesForScreenPoint(x, y);
+                var scope = wwtlib.Coordinates.raDecTo3d(obj.x, obj.y);
+
+                // findConstellationForPoint can return error if x < 0, but not always
+                // Also this isn't in the original code, but seems to work better
+                var ob = obj.x;
+                if (ob < 0) {
+                    ob = ob + 24;
+                }
+
+                var constellation = wwtlib.Constellations.containment.findConstellationForPoint(ob, obj.y);
+                var closestDist, closestPlace;
+                var constellationPlaces, ssPlaces;
+                for (var i = 0; i < wwt.searchData.Constellations.length; i++) {
+                    var item = wwt.searchData.Constellations[i];
+                    if (item.name === constellation) {
+                        constellationPlaces = item.places;
+                    } else if (item.name === 'SolarSystem') {
+                        ssPlaces = item.places;
+                    }
+                }
+                var searchPlaces = ssPlaces.concat(constellationPlaces);
+                for (var i = 0; i < searchPlaces.length; i++) {
+                    var place = searchPlaces[i];
+                    try {
+                        var placeDist = wwtlib.Vector3d.subtractVectors(place.get_location3d(), scope);
+                        if ((i === 0) || closestDist.length() > placeDist.length()) {
+                            closestPlace = place;
+                            closestDist = placeDist;
+                        }
+                    } catch (er) {
+                        if (place && place.get_name() != 'Earth') {
+                            console.log(er);
+                        }
+                    }
+                }
+
+                getAstroDetails(closestPlace);
+
+                //console.log("Closest place " + JSON.stringify(closestPlace));
+
+                showPlace(event.clientX, event.clientY, closestPlace);
+            }
+
+        });
+
+        function hideAntennaFoV() {
+            if (antennaFoV) {
+                script_interface.removeAnnotation(antennaFoV);
+                antennaFoV = undefined;
+            }
+        }
+
+        function showAntennaFoV() {
+            if (!antennaFoV) {
+                antennaFoV = new wwtlib.Circle();
+                antennaFoV.set_id('antennaFoV');
+                antennaFoV.setCenter(script_interface.getRA() * 15, script_interface.getDec());
+                antennaFoV.set_skyRelative(false);
+                antennaFoV.set_radius(radiusAdjust(antennaHpbw, script_interface.getDec()));
+                antennaFoV.set_lineWidth(3);
+                script_interface.addAnnotation(antennaFoV);
+            } else {
+                antennaFoV.setCenter(script_interface.getRA() * 15, script_interface.getDec());
+                antennaFoV.set_radius(radiusAdjust(antennaHpbw, script_interface.getDec()));
+            }
+        }
+
+        function hidePlace() {
+            var popupDiv = document.getElementById("popupDiv");
+            popupDiv.style.visibility = "hidden";
+            // Remove annotation
+            if (circle) {
+                script_interface.removeAnnotation(circle);
+            }
+        }
+
+        function showPlace(x, y, place) {
+
+            // Set text to display for the place
+            var str = "<p>";
+
+            if (place.get_names()) {
+                str += "Names: " + place.get_names().join(', ');
+            } else {
+                str += "Name: " + place.get_name();
+            }
+            str += "<p>";
+            str += "Classification: " + getClassificationText(place.get_classification());
+            if (!place.isSurvey && (typeof place.get_constellation() !== "undefined")) {
+                if (place.get_constellation() != "SolarSystem") {
+                    str += " in " + wwtlib.Constellations.fullNames[place.get_constellation()];
+                }
+            }
+
+            str += "<p>";
+            str += "<img src=" + place.get_thumbnailUrl() + ">";
+
+            str += "<p>";
+            str += "<table>";
+            if (!place.isSurvey) {
+                str += "<tr><td>RA<td>" + formatHms(place.get_RA(), true, false, false, 1);
+                str += "<tr><td>Dec<td>" + formatHms(place.get_dec(), false, true, true);
+                str += "<tr><td>Az<td>" + formatHms(place.altAz.get_az(), false, false, true);
+                str += "<tr><td>Alt<td>" + formatHms(place.altAz.get_alt(), false, false, true);
+            }
+            if (place.get_magnitude() != 0) {
+                str += "<tr><td>Magnitude<td>" + place.get_magnitude().toFixed(2);
+            }
+            if (place.get_distance() != 0) {
+                str += "<tr><td>Distance<td>" + wwtlib.UiTools.formatDistance(place.get_distance());
+            }
+            if (!place.riseSet.bNeverRises) {
+                str += "<tr><td>Rise<td>" + formatDecimalHours(place.riseSet.rise, false, false, true);
+            }
+            if (!place.riseSet.bNeverSets) {
+                str += "<tr><td>Set<td>" + formatDecimalHours(place.riseSet.set, false, false, true);
+            }
+            str += "</table>";
+
+            // Add links to research databases
+            const name = placeNameForQueryString(place);
+            str += "<p>";
+            str += "<a href=\"//wikipedia.org/wiki/Special:Search?search=" + name + "\" target=\"_blank\">Wiki</a>";
+            str += " <a href=\"//ui.adsabs.harvard.edu/search/q=object:%22" + name + "%22\" target=\"_blank\">ADS</a>";
+            str += " <a href=\"//simbad.u-strasbg.fr/simbad/sim-id?Ident=" + name + "\" target=\"_blank\">SIMBAD</a>";
+            str += " <a href=\"//ned.ipac.caltech.edu/cgi-bin/nph-imgdata?objname=" + name + "\" target=\"_blank\">NED</a>";
+            str += " <a href=\"//cdsportal.u-strasbg.fr/gadgets/ifr?url=http://cdsportal.unistra.fr/widgets/SED_plotter.xml&SED_plot_object=" + name + "&SED_plot_radius=5\" target=\"_blank\">VizieR</a>";
+
+            var popup = document.getElementById("myPopup");
+            popup.innerHTML = str;
+
+            // Get location of place on screen, as may not be exactly where clicked
+            const pos = wwt.getScreenPointForCoordinates(place.get_RA(), place.get_dec());
+
+            // Position and show
+            var popupDiv = document.getElementById("popupDiv");
+            popupDiv.style.visibility = "visible";
+            popupDiv.style.left = pos.x + "px";
+            popupDiv.style.top = pos.y + "px";
+
+            // Remove old annotation
+            if (circle) {
+                script_interface.removeAnnotation(circle);
+            }
+
+            // Create circle annotation
+            circle = new wwtlib.Circle();
+            circle.set_id('focused');
+            circle.setCenter(place.get_RA() * 15, place.get_dec());
+            circle.set_skyRelative(false);
+            circle.set_radius(radiusAdjust(.22, place.get_dec()));
+            circle.set_lineWidth(3);
+            script_interface.addAnnotation(circle);
+        }
+
+        function placeNameForQueryString(item) {
+            // Various "research" menus like to put an item's name into URL query
+            // strings. Compute the proper (well, good-enough) representation. When
+            // the name has multiple semicolon-separated identifiers, usually the
+            // first one is a description of a particular image, and the subsequent
+            // ones (if any) are names for the object.
+
+            var name_segments = item.get_name().split(';');
+            var name_to_use = (name_segments.length > 1) ? name_segments[1] : name_segments[0];
+            name_to_use = encodeURIComponent(name_to_use);
+            return name_to_use.replace(/%20/g, '+');
+        }
+
+        // The following code based on code from www-web-client Util.js (MIT license)
+
+        function formatHms(angle, isHmsFormat, signed, spaced, extraPrecision) {
+            var sign = '';
+
+            if (angle < 0) {
+                sign = '-';
+                angle = -angle;
+            } else if (signed) {
+                sign = '+';
+            }
+
+            var seps = [':', ':', ''];
+
+            if (isHmsFormat) {
+                seps = ['h', 'm', 's'];
+            } else if (spaced) {
+                seps = [' : ', ' : ', ''];
+            }
+
+            var values = ['??', '??', '??'];
+
+            if (!isNaN(angle)) {
+                var hourlike = Math.floor(angle);
+                var remainder = (angle - hourlike) * 60;
+                var minutes = Math.floor(remainder);
+                var seconds = (remainder - minutes) * 60;
+
+                if (isNaN(extraPrecision)) {
+                    extraPrecision = 0;
+                }
+                var secondsStr = seconds.toFixed(extraPrecision);
+
+                if (secondsStr.startsWith('60')) {
+                    seconds = 0;
+                    secondsStr = seconds.toFixed(extraPrecision);
+                    minutes += 1;
+
+                    if (minutes == 60) {
+                        minutes = 0;
+                        hourlike += 1;
+                    }
+                }
+
+                values[0] = hourlike.toFixed(0);
+                if (hourlike < 10) {
+                    values[0] = '0' + values[0];
+                }
+
+                values[1] = minutes.toFixed(0);
+                if (minutes < 10) {
+                    values[1] = '0' + values[1];
+                }
+
+                values[2] = secondsStr;
+                if (seconds < 10) {
+                    values[2] = '0' + values[2];
+                }
+            }
+
+            return sign.concat(values[0], seps[0], values[1], seps[1], values[2], seps[2]);
+        };
+
+        function formatDecimalHours(dayFraction, spaced) {
+            var ts = new Date(new Date().toUTCString()).valueOf() - new Date().valueOf();
+            var hr = ts / (1000 * 60 * 60);
+            var day = (dayFraction - hr) + 0.0083333334;
+            while (day > 24) {
+                day -= 24;
+            }
+            while (day < 0) {
+                day += 24;
+            }
+            var hours = day.toFixed(0);
+            var minutes = ((day * 60) - (hours * 60)).toFixed(0);
+
+            var join = spaced ? ' : ' : ':';
+            //var seconds = ((day * 3600) - (((hours * 3600) + ((double)minutes * 60.0)));
+
+            return ([int2(hours), int2(minutes)]).join(join);
+        }
+
+        function int2(dec) {
+            var sign = dec < 0 ? '-' : '';
+            var int = Math.floor(Math.abs(dec));
+            var pad = int < 10 ? '0' : '';
+            return sign + pad + int;
+        }
+
+        function getClassificationText(clsid) {
+            if (clsid && !isNaN(parseInt(clsid))) {
+                var str;
+                for (const [k, v] of Object.entries(wwtlib.Classification)) {
+                    if (v === clsid) {
+                        str = k;
+                    }
+                }
+                var out = str.replace(/^\s*/, ""); // strip leading spaces
+                out = out.replace(/^[a-z]|[^\s][A-Z]/g, function (str, offset) {
+                    if (offset == 0) {
+                        return (str.toUpperCase());
+                    } else {
+                        return (str.substr(0, 1) + " " + str.substr(1).toUpperCase());
+                    }
+                });
+                return (out);
+            } else {
+                return null;
+            }
+        };
+
+        function getAstroDetails(place) {
+            var coords = wwtlib.Coordinates.fromRaDec(place.get_RA(), place.get_dec());
+            var stc = wwtlib.SpaceTimeController;
+            var altAz = wwtlib.Coordinates.equitorialToHorizon(coords, stc.get_location(), stc.get_now());
+            place.altAz = altAz;
+            var classificationText = getClassificationText(place.get_classification());
+            var riseSet;
+            if (classificationText == 'Solar System') {
+                var jNow = stc.get_jNow() + .5;
+                var p1 = wwtlib.Planets.getPlanetLocation(place.get_name(), jNow - 1);
+                var p2 = wwtlib.Planets.getPlanetLocation(place.get_name(), jNow);
+                var p3 = wwtlib.Planets.getPlanetLocation(place.get_name(), jNow + 1);
+
+                var type = 0;
+                switch (place.get_name()) {
+                    case "Sun":
+                        type = 1;
+                        break;
+                    case "Moon":
+                        type = 2;
+                        break;
+                    default:
+                        type = 0;
+                        break;
+                }
+
+                riseSet = wwtlib.AstroCalc.getRiseTrinsitSet(
+                    jNow,
+                    stc.get_location().get_lat(),
+                    -stc.get_location().get_lng(),
+                    p1.RA, p1.dec,
+                    p2.RA, p2.dec,
+                    p3.RA, p3.dec,
+                    type
+                );
+            } else {
+                riseSet = wwtlib.AstroCalc.getRiseTrinsitSet(
+                    stc.get_jNow() + .5,
+                    stc.get_location().get_lat(),
+                    -stc.get_location().get_lng(),
+                    place.get_RA(), place.get_dec(),
+                    place.get_RA(), place.get_dec(),
+                    place.get_RA(), place.get_dec(),
+                    0
+                );
+            }
+
+            if (!riseSet.bValid && !riseSet.bNeverRises) {
+                riseSet.bNeverSets = true;
+            }
+
+            place.riseSet = riseSet;
+        }
+
+
+        // The following code based on code from www-web-client SearchUtil.js (MIT license)
+
+        // searchData gets inserted here
+        var wwt = {};
+        var searchIndex = {};
+
+        var imageset_id = 100;
+
+        function initSearch() {
+            // The special `wwt.searchData` global is assigned in the JS file that
+            // the main webclient app loads asynchronously (see `app.js`).
+            if (!wwt.searchData) {
+                setTimeout(initSearch, 333);
+            } else {
+                // searchDataIndexed is used in `factories/SearchUtil.js`.
+                wwt.searchDataIndexed = [];
+
+                data = wwt.searchData;
+                var start = new Date();
+
+                for (var i = 0; i < data.Constellations.length; i++) {
+                    var item = data.Constellations[i];
+                    //constellations[i] = item.name;
+                    for (var j = 0; j < item.places.length; j++) {
+                        var place = item.places[j];
+                        var fgi = place.fgi,
+                            imgSet;
+
+                        if (fgi) {
+                            imageset_id++;
+
+                            var band_pass = (fgi.bp !== undefined) ? fgi.bp : wwtlib.BandPass.visible;
+                            var projection = (fgi.pr !== undefined) ? fgi.pr : wwtlib.ProjectionType.tan;
+                            var base_tile_level = (fgi.bl !== undefined) ? fgi.bl : 0;
+                            var file_type = (fgi.ft !== undefined) ? fgi.ft : ".png";
+                            var tile_levels = (fgi.lv !== undefined) ? fgi.lv : 4;
+                            var bottoms_up = (fgi.bu !== undefined) ? fgi.bu : false;
+                            var quad_tree_map = (fgi.q !== undefined) ? fgi.q : "";
+                            var offset_x = (fgi.oX !== undefined) ? fgi.oX : 0;
+                            var offset_y = (fgi.oY !== undefined) ? fgi.oY : 0;
+                            var default_set = (fgi.ds !== undefined) ? fgi.ds : false; // "StockSet" in XML
+                            var rotation = (fgi.r !== undefined) ? fgi.r : 0;
+                            var width_factor = (fgi.wf !== undefined) ? fgi.wf : 2;
+                            imgSet = wwtlib.Imageset.create(
+                                fgi.n, // name
+                                fgi.u, // url
+                                wwtlib.ImageSetType.sky, // data_set_type -- never changes (for now?)
+                                band_pass,
+                                projection,
+                                imageset_id, // imageset id
+                                base_tile_level,
+                                tile_levels,
+                                null, // tile_size
+                                fgi.bd, // baseTileDegrees
+                                file_type,
+                                bottoms_up,
+                                quad_tree_map,
+                                fgi.cX, // centerX
+                                fgi.cY,  // centerY
+                                rotation,
+                                true, // sparse
+                                fgi.tu, // thumbnailUrl,
+                                default_set,
+                                false, // elevationModel
+                                width_factor,
+                                offset_x,
+                                offset_y,
+                                fgi.ct, // creditsText
+                                fgi.cu, // creditsUrl
+                                '', // demUrl
+                                '', // altUrl
+                                0, // meanRadius
+                                null // referenceFrame
+                            );
+
+                            rewritePlaceUrls(imgSet);
+                        }
+
+                        var classification = (place.c !== undefined) ? place.c : wwtlib.Classification.unidentified;
+                        var zoom_factor = (place.z !== undefined) ? place.z : -1;
+
+                        //console.log("Creating place " + place.n + " of type " + classification + " in " + item.name);
+                        var pl = wwtlib.Place.create(
+                            place.n, // name
+                            place.d, // dec
+                            place.r, // ra
+                            classification,
+                            item.name, // constellation
+                            wwtlib.ImageSetType.sky, // type -- never changes (for now?)
+                            zoom_factor,
+                        );
+
+                        if (imgSet) {
+                            pl.set_studyImageset(imgSet);
+                        }
+
+                        if (item.name === 'SolarSystem') {
+                            for (const [k, member] of Object.entries(pl)) {
+                                if (wwtlib.ss.canCast(member, wwtlib.CameraParameters)) {
+                                    member.target = wwtlib.SolarSystemObjects.undefined;
+                                }
+                            }
+                        }
+
+                        pl.guid = i + "." + j;
+                        rewritePlaceUrls(pl);
+                        item.places[j] = pl;
+                        indexPlaceNames(pl);
+                    }
+                }
+
+                var end = new Date();
+                //console.log('parsed places in ' + (end.valueOf() - start.valueOf()) + 'ms', data);
+            }
+        };
+
+        function addPlace(s, place) {
+            var firstChar = s.charAt(0).toLowerCase();
+
+            if (firstChar === "'")
+                firstChar = s.charAt(1).toLowerCase();
+
+            if (searchIndex[firstChar]) {
+                if (searchIndex[firstChar][searchIndex[firstChar].length - 1] !== place) {
+                    searchIndex[firstChar].push(place);
+                    wwt.searchDataIndexed = searchIndex;
+                }
+            } else {
+                try {
+                    wwt.searchDataIndexed[firstChar] = searchIndex[firstChar] = [place];
+                } catch (er) {
+                    console.error(er);
+                }
+            }
+        }
+
+        function indexPlaceNames(pl) {
+
+            var names = pl.get_names();
+            for (var n = 0; n < names.length; n++) {
+                var name = names[n];
+                if (name.indexOf(' ') !== -1) {
+                    var words = name.split(' ');
+                    for (var w = 0; w < words.length; w++) {
+                        var word = words[w];
+                        addPlace(word, pl);
+                    }
+                } else if (name.charAt(0)) {
+                    addPlace(name, pl);
+                }
+            }
+        };
+
+        function rewritePlaceUrls(item) {
+            if (item.get_thumbnailUrl) {
+                var u = item.get_thumbnailUrl();
+                if (u)
+                    item.thumb = wwtlib.URLHelpers.singleton.rewrite(u, wwtlib.URLRewriteMode.asIfAbsolute);
+            }
+
+            if (item.get_url) {
+                var u = item.get_url();
+                if (u)
+                    item.url = wwtlib.URLHelpers.singleton.rewrite(u, wwtlib.URLRewriteMode.asIfAbsolute);
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
-// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -235,7 +235,6 @@ private:
     RollupState m_rollupState;
     RadioAstronomySettings m_settings;
     bool m_doApplySettings;
-    QList<RadioAstronomySettings::AvailableFeature> m_availableFeatures;
 
     int m_basebandSampleRate;
     quint64 m_centerFrequency;
@@ -351,8 +350,8 @@ private:
     void displaySettings();
     void displaySpectrumLineFrequency();
     void displayRunModeSettings();
-    void updateAvailableFeatures();
-    void updateRotatorList(const QList<RadioAstronomySettings::AvailableFeature>& rotators);
+    void updateAvailableFeatures(const AvailableChannelOrFeatureList& availableFeatures, const QStringList& renameFrom, const QStringList& renameTo);
+    void updateRotatorList(const AvailableChannelOrFeatureList& rotators, const QStringList& renameFrom, const QStringList& renameTo);
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();

@@ -1,0 +1,146 @@
+SkyMapSettings:
+  description: Sky Map
+  properties:
+    displayNames:
+      description: "Display names on the sky map (1 for yes, 0 for no)"
+      type: integer
+    displayConstellations:
+      description: "Display constellations on the sky map (1 for yes, 0 for no)"
+      type: integer
+    displayReticle:
+      description: "Display reticle on the sky map (1 for yes, 0 for no)"
+      type: integer
+    displayGrid:
+      description: "Display grid on the sky map (1 for yes, 0 for no)"
+      type: integer
+    displayAntennaFoV:
+      description: "Display antenna field-of-view on the sky map (1 for yes, 0 for no)"
+      type: integer      
+    map:
+      description: "WWT, ESASky or Aladin"
+      type: string
+    background:
+      description: "Name of background image set"
+      type: string
+    projection:
+      type: string
+    source:
+      description: "Channel or Feature plugin to get target from"
+      type: string
+    track:
+      description: "Whether to track the specified source plugin"
+      type: integer
+    latitude:
+      description: "Latitude in decimal degrees (North positive) of observation/antenna location"
+      type: number
+      format: float
+    longitude:
+      description: "Longitude in decimal degrees (East positive) of observation/antenna location"
+      type: number
+      format: float
+    altitude:
+      description: "Altitude in metres of observation/antenna location"
+      type: number
+      format: float
+    hpbw:
+      description: "Antenna half-power beam width in degrees"
+      type: number
+      format: float
+    useMyPosition:
+      description: "Use My Position instead of latitude/longitude settings"
+      type: number
+      format: float
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIFeatureSetIndex:
+      type: integer
+    reverseAPIFeatureIndex:
+      type: integer
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+SkyMapReport:
+  description: Sky Map
+  properties:
+    dateTime:
+      description: "Current date and time being used for sky map"
+      type: string
+    ra:
+      description: "Right ascension of target (In decimal hours, J2000)"
+      type: number
+      format: float
+    dec:
+      description: "Declination of target (In decimal degrees, J2000)"
+      type: number
+      format: float
+    latitude:
+      description: "Latitude in decimal degrees (North positive) of observation/antenna location"
+      type: number
+      format: float
+    longitude:
+      description: "Longitude in decimal degrees (East positive) of observation/antenna location"
+      type: number
+      format: float
+    altitude:
+      description: "Altitude in metres of observation/antenna location"
+      type: number
+      format: float
+    azimuth:
+      description: "The azimuth angle in degrees to the target"
+      type: number
+      format: float
+    elevation:
+      description: "The elevation angle in degrees to the target"
+      type: number
+      format: float
+    fov:
+      description: "Current field-of-view in degrees"
+      type: number
+      format: float
+
+SkyMapActions:
+  description: Sky Map
+  properties:
+    find:
+      description: "The name of the object or the coordinates to centre the sky map on"
+      type: string
+
+SkyMapTarget:
+  description: "Sky Map target. Sent by other plugins to skymap.target message queue."
+  properties:
+    ra:
+      description: "Right ascension of target (In decimal hours, J2000)"
+      type: number
+      format: float
+    dec:
+      description: "Declination of target (In decimal degrees, J2000)"
+      type: number
+      format: float
+    latitude:
+      description: "Latitude in decimal degrees (North positive) of observation/antenna location"
+      type: number
+      format: float
+    longitude:
+      description: "Longitude in decimal degrees (East positive) of observation/antenna location"
+      type: number
+      format: float
+    altitude:
+      description: "Altitude in metres of observation/antenna location"
+      type: number
+      format: float
+    hpbw:
+      description: "Antenna half-power beam width in degrees"
+      type: number
+      format: float
+    dateTime:
+      description: "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
+      type: string

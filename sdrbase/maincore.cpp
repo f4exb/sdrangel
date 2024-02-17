@@ -71,6 +71,7 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgTargetAzimuthElevation, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgStarTrackerTarget, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgStarTrackerDisplaySettings, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgStarTrackerDisplayLoSSettings, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgSkyMapTarget, Message)
 
 MainCore::MainCore()
 {
@@ -435,6 +436,80 @@ void MainCore::updateWakeLock()
 }
 #endif
 
+AvailableChannelOrFeatureList MainCore::getAvailableChannels(const QStringList& uris)
+{
+    AvailableChannelOrFeatureList list;
+
+    for (const auto deviceSet : m_deviceSets)
+    {
+        for (int chi = 0; chi < deviceSet->getNumberOfChannels(); chi++)
+        {
+            ChannelAPI* channel = deviceSet->getChannelAt(chi);
+
+            if ((uris.size() == 0) || uris.contains(channel->getURI()))
+            {
+                QChar type = getDeviceSetTypeId(deviceSet);
+                int streamIdx = type == 'M' ? channel->getStreamIndex() : -1;
+
+                AvailableChannelOrFeature item {
+                    type,
+                    deviceSet->getIndex(),
+                    chi,
+                    streamIdx,
+                    channel->getIdentifier(),
+                    channel
+                };
+                list.append(item);
+            }
+        }
+    }
+
+    return list;
+}
+
+AvailableChannelOrFeatureList MainCore::getAvailableFeatures(const QStringList& uris)
+{
+    AvailableChannelOrFeatureList list;
+    std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
+
+    for (const auto& featureSet : featureSets)
+    {
+        for (int fei = 0; fei < featureSet->getNumberOfFeatures(); fei++)
+        {
+            Feature *feature = featureSet->getFeatureAt(fei);
+
+            if ((uris.size() == 0) || uris.contains(feature->getURI()))
+            {
+                AvailableChannelOrFeature item {
+                    'F',
+                    featureSet->getIndex(),
+                    fei,
+                    -1,
+                    feature->getIdentifier(),
+                    feature
+                };
+                list.append(item);
+            }
+        }
+    }
+
+    return list;
+}
+
+AvailableChannelOrFeatureList MainCore::getAvailableChannelsAndFeatures(const QStringList& uris, const QString& kinds)
+{
+    AvailableChannelOrFeatureList list;
+
+    if (kinds != "F") {
+        list.append(getAvailableChannels(uris));
+    }
+    if (kinds.contains("F")) {
+        list.append(getAvailableFeatures(uris));
+    }
+
+    return list;
+}
+
 QChar MainCore::getDeviceSetTypeId(const DeviceSet* deviceSet)
 {
     if (deviceSet->m_deviceMIMOEngine) {
@@ -461,9 +536,11 @@ QString MainCore::getChannelId(const ChannelAPI* channel)
     DeviceSet* deviceSet = deviceSets[channel->getDeviceSetIndex()];
     QString deviceSetId = getDeviceSetId(deviceSet);
     int index = channel->getIndexInDeviceSet();
-    // FIXME: if (deviceSet->m_deviceMIMOEngine) {
-    // we should append stream index. E.g. "M0:0.0" However, only ChannelGUI seems to know what it is
-    return QString("%1:%2").arg(deviceSetId).arg(index);
+    if (deviceSet->m_deviceMIMOEngine) {
+        return QString("%1:%2.%3").arg(deviceSetId).arg(index).arg(channel->getStreamIndex());
+    } else {
+        return QString("%1:%2").arg(deviceSetId).arg(index);
+    }
 }
 
 QStringList MainCore::getDeviceSetIds(bool rx, bool tx, bool mimo)
