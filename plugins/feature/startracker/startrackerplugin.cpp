@@ -34,7 +34,7 @@
 const PluginDescriptor StarTrackerPlugin::m_pluginDescriptor = {
     StarTracker::m_featureId,
     QStringLiteral("Star Tracker"),
-    QStringLiteral("7.17.3"),
+    QStringLiteral("7.18.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

@@ -1,3 +1,21 @@
+sdrangel (7.18.0-1) unstable; urgency=medium
+
+   * New SkyMap feature PR #1986
+   * Add AvailableChannelOrFeatureHandler. PR #1986
+   * Use MainCore code for managing available channel and feature list. PR #1986
+   * Optimize eumerator of origin device PR #1984
+   * Fix SimpltPTT device id; Add "None" Rx/Tx device option PR #1983
+   * Fix LimeSDR MIMO Tx gain mode. PR #1973
+   * Fix GUI handle Startstop message. PR #1973
+   * Speedup compilation on all platforms using ccache. PR #1967
+   * Demod Analyzer plugin: channel selection via api. PR #1956
+   * Sat Tracker: Update default TLEs to latest URLs. PR #1954
+   * Fix failure due to access by null pointer. PR #1952 Issue #1951
+   * Fix frequency calculation for SSB spectrum. PR #1946
+   * File Input: Fix seeking over .wav header. PR #1946
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 18 Feb 2024 10:46:39 +0100
+
 sdrangel (7.17.3-1) unstable; urgency=medium
 
    * Map updates: Allow selection of which device to tune to frequency. PR #1911
