@@ -513,6 +513,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
             switch (getDeviceId())
             {
             case SDRPLAY_RSP1A_ID:
+            case SDRPLAY_RSP1B_ID:
                 m_devParams->rxChannelA->rsp1aTunerParams.biasTEnable = settings.m_biasTee;
                 update = sdrplay_api_Update_Rsp1a_BiasTControl;
                 break;
@@ -574,6 +575,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
             switch (getDeviceId())
             {
             case SDRPLAY_RSP1A_ID:
+            case SDRPLAY_RSP1B_ID:
                 m_devParams->devParams->rsp1aParams.rfNotchEnable = settings.m_fmNotch;
                 update = sdrplay_api_Update_Rsp1a_RfNotchControl;
                 break;
@@ -610,6 +612,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
             switch (getDeviceId())
             {
             case SDRPLAY_RSP1A_ID:
+            case SDRPLAY_RSP1B_ID:
                 m_devParams->devParams->rsp1aParams.rfDabNotchEnable = settings.m_dabNotch;
                 update = sdrplay_api_Update_Rsp1a_RfDabNotchControl;
                 break;
@@ -658,7 +661,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
                 updateExt = sdrplay_api_Update_RspDx_AntennaControl;
                 break;
             default:
-                // SDRPLAY_RSP1_ID and SDRPLAY_RSP1A_ID only have one antenna
+                // SDRPLAY_RSP1_ID, SDRPLAY_RSP1A_ID, SDRPLAY_RSP1B_ID only have one antenna
                 break;
             }
             if ((err = sdrplay_api_Update(m_dev->dev, m_dev->tuner, update, updateExt)) != sdrplay_api_Success)
@@ -1335,6 +1338,15 @@ const int SDRPlayV3LNA::rsp1AAttenuation[4][11] =
     { 9, 0, 6, 12, 20, 26, 32, 38, 43, 62}
 };
 
+const int SDRPlayV3LNA::rsp1BAttenuation[5][11] =
+{
+    {7,  0, 6, 12, 18, 37, 42, 61},
+    {10, 0, 6, 12, 18, 20, 26, 32, 38, 57, 62},
+    {10, 0, 6, 12, 18, 20, 26, 32, 38, 57, 62},
+    {10, 0, 7, 13, 19, 20, 27, 33, 39, 45, 64},
+    { 9, 0, 6, 12, 20, 26, 32, 38, 43, 62}
+};
+
 const int SDRPlayV3LNA::rsp2Attenuation[3][10] =
 {
     {9, 0, 10, 15, 21, 24, 34, 39, 45, 64},
@@ -1388,6 +1400,19 @@ const int *SDRPlayV3LNA::getAttenuations(int deviceId, qint64 frequency)
         else
             row = 3;
         lnaAttenuation = &rsp1AAttenuation[row][0];
+        break;
+    case SDRPLAY_RSP1B_ID:
+        if (frequency < 50000000)
+            row = 0;
+        else if (frequency < 60000000)
+            row = 1;
+        else if (frequency < 420000000)
+            row = 2;
+        else if (frequency < 1000000000)
+            row = 3;
+        else
+            row = 4;
+        lnaAttenuation = &rsp1BAttenuation[row][0];
         break;
     case SDRPLAY_RSP2_ID:
         if (frequency < 420000000)

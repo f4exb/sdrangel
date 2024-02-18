@@ -87,6 +87,7 @@ SDRPlayV3Gui::SDRPlayV3Gui(DeviceUISet *deviceUISet, QWidget* parent) :
         ui->extRef->setVisible(false);
         break;
     case SDRPLAY_RSP1A_ID:
+    case SDRPLAY_RSP1B_ID:
         ui->tuner->addItem("1");
         ui->antenna->addItem("50Ohm");
         ui->amNotch->setVisible(false);

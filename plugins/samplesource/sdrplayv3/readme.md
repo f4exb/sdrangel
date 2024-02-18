@@ -6,7 +6,7 @@ This plugin supports input from SDRplay RSP devices using V3 of SDRplay's API, i
 
 <h2>Driver Prerequisites</h2>
 
-This plugin requires the SDRplay API V3.07 to have been installed and for the service to be running. It can be downloaded for Windows, Linux and Mac from: https://www.sdrplay.com/softwarehome/
+This plugin requires the SDRplay API V3.14 to have been installed and for the service to be running. It can be downloaded for Windows, Linux and Mac from: https://www.sdrplay.com/softwarehome/
 
 <h2>Interface</h2>
 
