@@ -217,6 +217,7 @@ public:
 private:
     static const int rsp1Attenuation[3][5];
     static const int rsp1AAttenuation[4][11];
+    static const int rsp1BAttenuation[5][11];
     static const int rsp2Attenuation[3][10];
     static const int rspDuoAttenuation[5][11];
     static const int rspDxAttenuation[7][29];

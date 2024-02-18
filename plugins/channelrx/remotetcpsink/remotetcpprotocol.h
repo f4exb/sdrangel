@@ -61,7 +61,8 @@ public:
         SOAPY_SDR,
         TEST_SOURCE,
         USRP,
-        XTRX
+        XTRX,
+        SDRPLAY_V3_RSP1B
     };
 
     enum Command {

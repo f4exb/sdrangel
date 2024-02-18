@@ -359,6 +359,7 @@ RemoteTCPProtocol::Device RemoteTCPSinkSink::getDevice()
                 QHash<QString, RemoteTCPProtocol::Device> sdrplayMap = {
                     {"RSP1", RemoteTCPProtocol::SDRPLAY_V3_RSP1},
                     {"RSP1A", RemoteTCPProtocol::SDRPLAY_V3_RSP1A},
+                    {"RSP1B", RemoteTCPProtocol::SDRPLAY_V3_RSP1B},
                     {"RSP2", RemoteTCPProtocol::SDRPLAY_V3_RSP2},
                     {"RSPduo", RemoteTCPProtocol::SDRPLAY_V3_RSPDUO},
                     {"RSPdx", RemoteTCPProtocol::SDRPLAY_V3_RSPDX},

@@ -312,6 +312,7 @@ const QHash<RemoteTCPProtocol::Device, const AndroidSDRDriverInputGui::DeviceGai
     {RemoteTCPProtocol::HACK_RF, &m_hackRFGains},
     {RemoteTCPProtocol::SDRPLAY_V3_RSP1, &m_sdrplayV3Gains},
     {RemoteTCPProtocol::SDRPLAY_V3_RSP1A, &m_sdrplayV3Gains},
+    {RemoteTCPProtocol::SDRPLAY_V3_RSP1B, &m_sdrplayV3Gains},
     {RemoteTCPProtocol::SDRPLAY_V3_RSP2, &m_sdrplayV3Gains},
     {RemoteTCPProtocol::SDRPLAY_V3_RSPDUO, &m_sdrplayV3Gains},
     {RemoteTCPProtocol::SDRPLAY_V3_RSPDX, &m_sdrplayV3Gains},
