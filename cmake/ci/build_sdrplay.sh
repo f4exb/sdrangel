@@ -4,4 +4,4 @@ mkdir -p sdrplayapi && cd sdrplayapi
 
 git clone https://github.com/srcejon/sdrplayapi.git
 cd sdrplayapi
-sudo yes | sh install_lib.sh
+sudo yes | bash install_lib.sh
