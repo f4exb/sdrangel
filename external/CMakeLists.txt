@@ -31,7 +31,7 @@ set(SOAPYSDR_REMOTE_TAG "soapy-remote-0.5.1")
 set(AIRSPY_TAG "37c768ce9997b32e7328eb48972a7fda0a1f8554")
 set(HACKRF_TAG "v2022.09.1")
 set(LIBXML2_TAG "v2.10.4")
-set(UHD_TAG "v4.5.0.0")
+set(UHD_TAG "v4.6.0.0")
 if (APPLE AND (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL x86_64))
     # UHD fails to load with 1.80+
     set(BOOST_TAG "1.78.0")
