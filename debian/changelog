@@ -1,5 +1,11 @@
 sdrangel (7.18.0-1) unstable; urgency=medium
 
+    * Upgrade to SDRPlay API to 3.14 and support for RSP 1B
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 21 Feb 2024 12:53:33 +0100
+
+sdrangel (7.18.0-1) unstable; urgency=medium
+
    * New SkyMap feature PR #1986
    * Add AvailableChannelOrFeatureHandler. PR #1986
    * Use MainCore code for managing available channel and feature list. PR #1986
