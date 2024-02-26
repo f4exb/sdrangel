@@ -159,10 +159,8 @@ public:
     DSPDeviceSinkEngine *getDeviceSinkEngine() { return m_deviceSinkEngine; }
     DSPDeviceMIMOEngine *getDeviceMIMOEngine() { return m_deviceMIMOEngine; }
 
-    void addSourceBuddy(DeviceAPI* buddy);
-    void addSinkBuddy(DeviceAPI* buddy);
-    void removeSourceBuddy(DeviceAPI* buddy);
-    void removeSinkBuddy(DeviceAPI* buddy);
+    void addBuddy(DeviceAPI* buddy);
+    void removeBuddy(DeviceAPI* buddy);
     void clearBuddiesLists();
     void *getBuddySharedPtr() const { return m_buddySharedPtr; }
     void setBuddySharedPtr(void *ptr) { m_buddySharedPtr = ptr; }

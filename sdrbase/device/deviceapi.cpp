@@ -29,6 +29,7 @@
 #include "util/simpleserializer.h"
 
 #include "deviceapi.h"
+#include <algorithm>
 
 DeviceAPI::DeviceAPI(
         StreamType streamType,
@@ -738,28 +739,32 @@ void DeviceAPI::saveSamplingDeviceSettings(Preset* preset)
     }
 }
 
-void DeviceAPI::addSourceBuddy(DeviceAPI* buddy)
+void DeviceAPI::addBuddy(DeviceAPI* buddy)
 {
-    if (buddy->m_streamType != StreamSingleRx)
+    if (buddy->m_streamType == StreamSingleRx)
     {
-        qDebug("DeviceAPI::addSourceBuddy: buddy %s(%s) is not of single Rx type",
-                qPrintable(buddy->getHardwareId()),
-                qPrintable(buddy->getSamplingDeviceSerial()));
+        m_sourceBuddies.push_back(buddy); // this is a source
+    }
+    else if (buddy->m_streamType == StreamSingleTx)
+    {
+        m_sinkBuddies.push_back(buddy); // this is a sink
+    }
+    else
+    {
+        qDebug("DeviceAPI::addBuddy: not relevant if buddy is not a single Rx or Tx");
         return;
     }
-
-    m_sourceBuddies.push_back(buddy);
 
     if (m_streamType == StreamSingleRx) {
         buddy->m_sourceBuddies.push_back(this); // this is a source
     } else if (m_streamType == StreamSingleTx) {
         buddy->m_sinkBuddies.push_back(this); // this is a sink
     } else {
-        qDebug("DeviceAPI::addSourceBuddy: not relevant if this is not a single Rx or Tx");
+        qDebug("DeviceAPI::addBuddy: not relevant if this is not a single Rx or Tx");
         return;
     }
 
-    qDebug("DeviceAPI::addSourceBuddy: added buddy %s(%s) [%llu] <-> [%llu]",
+    qDebug("DeviceAPI::addBuddy: added buddy %s(%s) [%llu] <-> [%llu]",
             qPrintable(buddy->getHardwareId()),
             qPrintable(buddy->getSamplingDeviceSerial()),
             (quint64) buddy,
@@ -767,98 +772,21 @@ void DeviceAPI::addSourceBuddy(DeviceAPI* buddy)
 }
 
 
-void DeviceAPI::addSinkBuddy(DeviceAPI* buddy)
+void DeviceAPI::removeBuddy(DeviceAPI* buddy)
 {
-    if (buddy->m_streamType != StreamSingleTx)
-    {
-        qDebug("DeviceAPI::addSinkBuddy: buddy %s(%s) is not of single Tx type",
+    switch(buddy->m_streamType) {
+    case StreamSingleRx:
+        m_sourceBuddies.erase(std::find(m_sourceBuddies.begin(), m_sourceBuddies.end(), buddy));
+        break;
+    case StreamSingleTx:
+        m_sinkBuddies.erase(std::find(m_sinkBuddies.begin(), m_sinkBuddies.end(), buddy));
+        break;
+    default:
+        qDebug("DeviceAPI::removeSourceBuddy: buddy %s(%s) is not of single Rx or Tx type",
                 qPrintable(buddy->getHardwareId()),
                 qPrintable(buddy->getSamplingDeviceSerial()));
         return;
     }
-
-    m_sinkBuddies.push_back(buddy);
-
-    if (m_streamType == StreamSingleRx) {
-        buddy->m_sourceBuddies.push_back(this); // this is a source
-    } else if (m_streamType == StreamSingleTx) {
-        buddy->m_sinkBuddies.push_back(this); // this is a sink
-    } else {
-        qDebug("DeviceAPI::addSinkBuddy: not relevant if this is not a  single Rx or Tx");
-        return;
-    }
-
-    qDebug("DeviceAPI::addSinkBuddy: added buddy %s(%s) [%llu] <-> [%llu]",
-            qPrintable(buddy->getHardwareId()),
-            qPrintable(buddy->getSamplingDeviceSerial()),
-            (quint64) buddy,
-            (quint64) this);
-}
-
-void DeviceAPI::removeSourceBuddy(DeviceAPI* buddy)
-{
-    if (buddy->m_streamType != StreamSingleRx)
-    {
-        qDebug("DeviceAPI::removeSourceBuddy: buddy %s(%s) is not of single Rx type",
-                qPrintable(buddy->getHardwareId()),
-                qPrintable(buddy->getSamplingDeviceSerial()));
-        return;
-    }
-
-    std::vector<DeviceAPI*>::iterator it = m_sourceBuddies.begin();
-
-    for (;it != m_sourceBuddies.end(); ++it)
-    {
-        if (*it == buddy)
-        {
-            qDebug("DeviceAPI::removeSourceBuddy: buddy %s(%s) [%llu] removed from the list of [%llu]",
-                    qPrintable(buddy->getHardwareId()),
-                    qPrintable(buddy->getSamplingDeviceSerial()),
-                    (quint64) (*it),
-                    (quint64) this);
-            m_sourceBuddies.erase(it);
-            return;
-        }
-    }
-
-    qDebug("DeviceAPI::removeSourceBuddy: buddy %s(%s) [%llu] not found in the list of [%llu]",
-            qPrintable(buddy->getHardwareId()),
-            qPrintable(buddy->getSamplingDeviceSerial()),
-            (quint64) buddy,
-            (quint64) this);
-}
-
-void DeviceAPI::removeSinkBuddy(DeviceAPI* buddy)
-{
-    if (buddy->m_streamType != StreamSingleTx)
-    {
-        qDebug("DeviceAPI::removeSinkBuddy: buddy %s(%s) is not of single Tx type",
-                qPrintable(buddy->getHardwareId()),
-                qPrintable(buddy->getSamplingDeviceSerial()));
-        return;
-    }
-
-    std::vector<DeviceAPI*>::iterator it = m_sinkBuddies.begin();
-
-    for (;it != m_sinkBuddies.end(); ++it)
-    {
-        if (*it == buddy)
-        {
-            qDebug("DeviceAPI::removeSinkBuddy: buddy %s(%s) [%llu] removed from the list of [%llu]",
-                    qPrintable(buddy->getHardwareId()),
-                    qPrintable(buddy->getSamplingDeviceSerial()),
-                    (quint64) (*it),
-                    (quint64) this);
-            m_sinkBuddies.erase(it);
-            return;
-        }
-    }
-
-    qDebug("DeviceAPI::removeSourceBuddy: buddy %s(%s) [%llu] not found in the list of [%llu]",
-            qPrintable(buddy->getHardwareId()),
-            qPrintable(buddy->getSamplingDeviceSerial()),
-            (quint64) buddy,
-            (quint64) this);
 }
 
 void DeviceAPI::clearBuddiesLists()
@@ -875,7 +803,7 @@ void DeviceAPI::clearBuddiesLists()
             leaderElected = true;
         }
 
-        (*itSource)->removeSinkBuddy(this);
+        (*itSource)->removeBuddy(this);
     }
 
     m_sourceBuddies.clear();
@@ -888,7 +816,7 @@ void DeviceAPI::clearBuddiesLists()
             leaderElected = true;
         }
 
-        (*itSink)->removeSinkBuddy(this);
+        (*itSink)->removeBuddy(this);
     }
 
     m_sinkBuddies.clear();

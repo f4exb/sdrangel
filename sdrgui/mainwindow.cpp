@@ -482,24 +482,11 @@ void MainWindow::sampleSourceCreate(
     {
         if (*it != deviceUISet) // do not add to itself
         {
-            if ((*it)->m_deviceSourceEngine) // it is a source device
+            if ((deviceUISet->m_deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
+                (deviceUISet->m_deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
             {
-                if ((deviceUISet->m_deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
-                    (deviceUISet->m_deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
-                {
-                    (*it)->m_deviceAPI->addSourceBuddy(deviceUISet->m_deviceAPI);
-                    nbOfBuddies++;
-                }
-            }
-
-            if ((*it)->m_deviceSinkEngine) // it is a sink device
-            {
-                if ((deviceUISet->m_deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
-                    (deviceUISet->m_deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
-                {
-                    (*it)->m_deviceAPI->addSourceBuddy(deviceUISet->m_deviceAPI);
-                    nbOfBuddies++;
-                }
+                (*it)->m_deviceAPI->addBuddy(deviceUISet->m_deviceAPI);
+                nbOfBuddies++;
             }
         }
     }
@@ -713,24 +700,11 @@ void MainWindow::sampleSinkCreate(
     {
         if (*it != deviceUISet) // do not add to itself
         {
-            if ((*it)->m_deviceSourceEngine) // it is a source device
+            if ((deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
+                (deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
             {
-                if ((deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
-                    (deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
-                {
-                    (*it)->m_deviceAPI->addSinkBuddy(deviceAPI);
-                    nbOfBuddies++;
-                }
-            }
-
-            if ((*it)->m_deviceSinkEngine) // it is a sink device
-            {
-                if ((deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
-                    (deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
-                {
-                    (*it)->m_deviceAPI->addSinkBuddy(deviceAPI);
-                    nbOfBuddies++;
-                }
+                (*it)->m_deviceAPI->addBuddy(deviceAPI);
+                nbOfBuddies++;
             }
         }
     }
