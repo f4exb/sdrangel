@@ -21,11 +21,23 @@
 #include <QNetworkReply>
 #include <QXmlStreamReader>
 #include <QDebug>
+#include <QNetworkDiskCache>
 
 WTML::WTML()
 {
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(m_networkManager, &QNetworkAccessManager::finished, this, &WTML::handleReply);
+
+    QStringList locations = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
+    QDir writeableDir(locations[0]);
+    if (!writeableDir.mkpath(QStringLiteral("cache") + QDir::separator() + QStringLiteral("wtml"))) {
+        qDebug() << "Failed to create cache/wtml";
+    }
+
+    m_cache = new QNetworkDiskCache();
+    m_cache->setCacheDirectory(locations[0] + QDir::separator() + QStringLiteral("cache") + QDir::separator() + QStringLiteral("wtml"));
+    m_cache->setMaximumCacheSize(100000000);
+    m_networkManager->setCache(m_cache);
 }
 
 WTML::~WTML()

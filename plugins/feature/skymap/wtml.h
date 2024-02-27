@@ -22,6 +22,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QNetworkDiskCache;
 
 // World Wide Telescope WTML files containing imageset catalogs
 class WTML : public QObject
@@ -48,6 +49,7 @@ signals:
 
 private:
     QNetworkAccessManager *m_networkManager;
+    QNetworkDiskCache *m_cache;
 
 };
 

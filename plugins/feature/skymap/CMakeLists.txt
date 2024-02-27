@@ -80,12 +80,6 @@ target_link_libraries(${TARGET_NAME}
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
-if(WIN32)
-  # Run deployqt for QtQuick etc
-  include(DeployQt)
-  windeployqt(${TARGET_NAME} ${SDRANGEL_BINARY_BIN_DIR} ${PROJECT_SOURCE_DIR}/skymap)
-endif()
-
 # Install debug symbols
 if (WIN32)
     install(FILES $<TARGET_PDB_FILE:${TARGET_NAME}> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_FOLDER} )
