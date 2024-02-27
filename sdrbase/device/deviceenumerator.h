@@ -52,6 +52,7 @@ public:
     void removeRxSelection(int tabIndex);
     void removeTxSelection(int tabIndex);
     void removeMIMOSelection(int tabIndex);
+    void renumeratetabIndex(int skippedTabIndex);
     int getNbRxSamplingDevices() const { return m_rxEnumeration.size(); }
     int getNbTxSamplingDevices() const { return m_txEnumeration.size(); }
     int getNbMIMOSamplingDevices() const { return m_mimoEnumeration.size(); }

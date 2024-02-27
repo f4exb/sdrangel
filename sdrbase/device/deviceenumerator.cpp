@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QGlobalStatic>
+#include <functional>
 
 #include "deviceenumerator.h"
 
@@ -428,6 +429,20 @@ void DeviceEnumerator::removeMIMOSelection(int tabIndex)
     {
         if (it->m_samplingDevice.claimed == tabIndex) {
             it->m_samplingDevice.claimed = -1;
+        }
+    }
+}
+
+void DeviceEnumerator::renumeratetabIndex(int skippedTabIndex)
+{
+    std::reference_wrapper<DevicesEnumeration> denums[] = {m_rxEnumeration, m_txEnumeration, m_mimoEnumeration};
+    for (DevicesEnumeration &denum : denums)
+    {
+        for (DevicesEnumeration::iterator it = denum.begin(); it != denum.end(); ++it)
+        {
+            if (it->m_samplingDevice.claimed > skippedTabIndex) {
+                it->m_samplingDevice.claimed--;
+            }
         }
     }
 }
