@@ -40,7 +40,7 @@ It can also create tracks showing the path aircraft, ships, radiosondes and APRS
 
 ![3D Map feature](../../../doc/img/Map_plugin_apt.png)
 
-3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (13).
+3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (20).
 
 <h2>Interface</h2>
 
@@ -96,14 +96,16 @@ When clicked, opens the Radio Time Transmitters dialog.
 
 ![Radio Time transmitters dialog](../../../doc/img/Map_plugin_radiotime_dialog.png)
 
-<h3>Display Satellite Infrared</h3>
+<h3>7: Display Satellite Infrared</h3>
 
 When checked, satellite infrared measurements (10.3um) are downloaded from the internet and are overlaid on the maps. 
 This essentially shows cloud cover. The images are updated every 10 minutes.
 
+![Satellite IR](../../../doc/img/Map_plugin_clouds.png)
+
 The data is similar to that which can be received using the [APT Demodulator](../../channelrx/demodapt/readme.md) in the Thermal-infrared (10.3-11.3 um) channel.
 
-<h3>Display Weather Radar</h3>
+<h3>8: Display Weather Radar</h3>
 
 When checked, weather radar measurements are downloaded form the internet and are overlaid on the maps. 
 This shows rain and other forms of precipitation.
@@ -112,29 +114,31 @@ The images are updated every 10 minutes.
 Green, yellow and red are rain, with red being the most intense. 
 Light blue through dark blue is snow, with dark blue being the most intense.
 
-<h3>Display Sea Marks</h3>
+![Weather Radar](../../../doc/img/Map_plugin_weather_radar.png)
+
+<h3>9: Display Sea Marks</h3>
 
 When checked, sea marks are overlaid on the maps.
 
 ![Sea Marks Legend](../../../doc/img/Map_plugin_seamarks_legend.png)
 
-<h3>Display Railways</h3>
+<h3>10: Display Railways</h3>
 
 When checked, railway routes are overlaid on the maps.
 
 ![Railway Legend](../../../doc/img/Map_plugin_railway_legend.png)
 
-<h3>7: Display MUF Contours</h3>
+<h3>11: Display MUF Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing the MUF (Maximum Usable Frequency) for a 3000km path that reflects off the ionosphere.
 The contours will be updated every 15 minutes. The latest contour data will always be displayed, irrespective of the time set on the 3D Map.
 
-<h3>8: Display coF2 Contours</h3>
+<h3>12: Display coF2 Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing coF2 (F2 layer critical frequency), the maximum frequency at which radio waves will be reflected vertically from the F2 region of the ionosphere.
 The contours will be updated every 15 minutes. The latest contour data will always be displayed, irrespective of the time set on the 3D Map.
 
-<h3>Display NASA GIBS Data</h3>
+<h3>13: Display NASA GIBS Data</h3>
 
 When checked, enables overlay of data from NASA GIBS (Global Imagery Browse Services). This includes a vast array of Earth observation satellite data,
 such as land and sea temperatures, atmospheric conditions, flux measurements and the like.
@@ -143,31 +147,33 @@ Details of available data products can be found [here](https://nasa-gibs.github.
 For some data sets, GIBS has data spanning many decades. The data period may be hours, days or months. The 3D map will attemp to show data from the closest time set in the 3D map's timescale.
 The 2D map will only show data from the default date (which is displayed in the table at the bottom).
 
-<h3>NASA GIBS Data</h3>
+![NASA GIBS](../../../doc/img/Map_plugin_GIBS.png)
+
+<h3>14: NASA GIBS Data</h3>
 
 Selects which data from NASA GIBS to overlay on the maps.
 
-<h3>NASA GIBS Opacity</h3>
+<h3>15: NASA GIBS Opacity</h3>
 
 Sets the opacity used for the NASA GIBS overlay image overlay on the 3D map. Lower values make the image more transparent.
 
-<h3>8: Display Names</h3>
+<h3>16: Display Names</h3>
 
 When checked, names of objects are displayed in a bubble next to each object.
 
-<h3>9: Display tracks for selected object</h3>
+<h3>17: Display tracks for selected object</h3>
 
 When checked, displays the track (taken or predicted) for the selected object.
 
-<h3>10: Display tracks for all objects</h3>
+<h3>18: Display tracks for all objects</h3>
 
 When checked, displays the track (taken or predicted) for the all objects.
 
-<h3>11: Delete</h3>
+<h3>19: Delete</h3>
 
 When clicked, all items will be deleted from the map.
 
-<h3>12: Display settings</h3>
+<h3>20: Display settings</h3>
 
 When clicked, opens the Map Display Settings dialog:
 
@@ -227,6 +233,14 @@ The map feature displays a 2D and a 3D map overlaid with objects reported by oth
 The 2D map will only display the last reported positions for objects.
 The 3D map, however, has a timeline that allows replaying how objects have moved over time.
 To the right of the timeline is the fullscreen toggle button, which allows the 3D map to be displayed fullscreen.
+
+<h4>SDRs</h4>
+
+The map can display KiwiSDRs and Spy Servers that are publically accessible via the Internet. A URL is displayed in the info box.
+Clicking on the URL will open a new KiwiSDR or RemoteTCPInput device which will connect to the corresponding SDR.
+Before connecting, you should check the whether the number of users is below the maximum. Server data is updated every 2 minutes.
+
+![SDRs](../../../doc/img/Map_plugin_SDRs.png)
 
 <h4>Ionosonde Stations</h4>
 
