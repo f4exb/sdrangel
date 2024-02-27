@@ -29,13 +29,17 @@ class OSMTemplateServer : public QTcpServer
 private:
     QString m_thunderforestAPIKey;
     QString m_maptilerAPIKey;
+    quint16 m_tileServerPort;
+    bool m_overlay;
 
 public:
     // port - port to listen on / is listening on. Use 0 for any free port.
-    OSMTemplateServer(const QString &thunderforestAPIKey, const QString &maptilerAPIKey, quint16 &port, QObject* parent = 0) :
+    OSMTemplateServer(const QString &thunderforestAPIKey, const QString &maptilerAPIKey, quint16 tileServerPort, quint16 &port, QObject* parent = 0) :
         QTcpServer(parent),
         m_thunderforestAPIKey(thunderforestAPIKey),
-        m_maptilerAPIKey(maptilerAPIKey)
+        m_maptilerAPIKey(maptilerAPIKey),
+        m_tileServerPort(tileServerPort),
+        m_overlay(false)
     {
         listen(QHostAddress::Any, port);
         port = serverPort();
@@ -50,13 +54,24 @@ public:
         //addPendingConnection(socket);
     }
 
+    void setThunderforestAPIKey(const QString& thunderforestAPIKey)
+    {
+        m_thunderforestAPIKey = thunderforestAPIKey;
+    }
+
+    void setMaptilerAPIKey(const QString& maptilerAPIKey)
+    {
+        m_maptilerAPIKey = maptilerAPIKey;
+    }
+
+    void setEnableOverlay(bool enableOverlay)
+    {
+        m_overlay = enableOverlay;
+    }
+
 private slots:
     void readClient()
     {
-        QStringList map({"/cycle", "/cycle-hires", "/hiking", "/hiking-hires", "/night-transit", "/night-transit-hires", "/terrain", "/terrain-hires", "/transit", "/transit-hires"});
-        QStringList mapId({"thf-cycle", "thf-cycle-hires", "thf-hike", "thf-hike-hires", "thf-nighttransit", "thf-nighttransit-hires", "thf-landsc", "thf-landsc-hires", "thf-transit", "thf-transit-hires"});
-        QStringList mapUrl({"cycle", "cycle", "outdoors", "outdoors", "transport-dark", "transport-dark", "landscape", "landscape", "transport", "transport"});
-
         QTcpSocket* socket = (QTcpSocket*)sender();
         if (socket->canReadLine())
         {
@@ -67,33 +82,43 @@ private slots:
             {
                 bool hires = tokens[1].contains("hires");
                 QString hiresURL = hires ? "@2x" : "";
-                QString xml;
+                QString xml, url;
                 if ((tokens[1] == "/street") || (tokens[1] == "/street-hires"))
                 {
+                    if (m_overlay) {
+                        url = QString("http://127.0.0.1:%1/street/%z/%x/%y.png").arg(m_tileServerPort);
+                    } else {
+                        url = "https://tile.openstreetmap.org/%z/%x/%y.png";
+                    }
                     xml = QString("\
-                    {\
-                        \"UrlTemplate\" : \"https://tile.openstreetmap.org/%z/%x/%y.png\",\
-                        \"ImageFormat\" : \"png\",\
-                        \"QImageFormat\" : \"Indexed8\",\
-                        \"ID\" : \"wmf-intl-1x\",\
-                        \"MaximumZoomLevel\" : 19,\
-                        \"MapCopyRight\" : \"<a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>\",\
-                        \"DataCopyRight\" : \"\"\
-                    }");
+                        {\
+                            \"UrlTemplate\" : \"%1\",\
+                            \"ImageFormat\" : \"png\",\
+                            \"QImageFormat\" : \"Indexed8\",\
+                            \"ID\" : \"wmf-intl-1x\",\
+                            \"MaximumZoomLevel\" : 19,\
+                            \"MapCopyRight\" : \"<a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>\",\
+                            \"DataCopyRight\" : \"\"\
+                        }").arg(url);
                 }
                 else if (tokens[1] == "/satellite")
                 {
+                    if (m_overlay) {
+                        url = QString("http://127.0.0.1:%1/satellite/%z/%x/%y.jpg").arg(m_tileServerPort);
+                    } else {
+                        url = QString("https://api.maptiler.com/tiles/satellite-v2/%z/%x/%y%1.jpg?key=%2").arg(hiresURL).arg(m_maptilerAPIKey);
+                    }
                     xml = QString("\
                     {\
                         \"Enabled\" : true,\
-                        \"UrlTemplate\" : \"https://api.maptiler.com/tiles/satellite/%z/%x/%y%1.jpg?key=%2\",\
+                        \"UrlTemplate\" : \"%1\",\
                         \"ImageFormat\" : \"jpg\",\
                         \"QImageFormat\" : \"RGB888\",\
                         \"ID\" : \"usgs-l7\",\
-                        \"MaximumZoomLevel\" : 20,\
+                        \"MaximumZoomLevel\" : 22,\
                         \"MapCopyRight\" : \"<a href='http://maptiler.com/'>Maptiler</a>\",\
                         \"DataCopyRight\" : \"\"\
-                    }").arg(hiresURL).arg(m_maptilerAPIKey);
+                    }").arg(url);
                 }
                 else if (tokens[1].contains("transit"))
                 {
@@ -103,32 +128,46 @@ private slots:
 
                     // Use CartoDB maps without labels for aviation maps
                     int idx = map.indexOf(tokens[1]);
+                    if (m_overlay) {
+                        url = QString("http://127.0.0.1:%1/%2/%z/%x/%y.png").arg(m_tileServerPort).arg(mapUrl[idx]);
+                    } else {
+                        url = QString("http://1.basemaps.cartocdn.com/%2/%z/%x/%y.png%1").arg(hiresURL).arg(mapUrl[idx]);
+                    }
                     xml = QString("\
                     {\
-                        \"UrlTemplate\" : \"http://1.basemaps.cartocdn.com/%2/%z/%x/%y.png%1\",\
+                        \"UrlTemplate\" : \"%1\",\
                         \"ImageFormat\" : \"png\",\
                         \"QImageFormat\" : \"Indexed8\",\
-                        \"ID\" : \"%3\",\
+                        \"ID\" : \"%2\",\
                         \"MaximumZoomLevel\" : 20,\
                         \"MapCopyRight\" : \"<a href='https://carto.com'>CartoDB</a>\",\
                         \"DataCopyRight\" : \"\"\
-                    }").arg(hiresURL).arg(mapUrl[idx]).arg(mapId[idx]);
+                    }").arg(url).arg(mapId[idx]);
                 }
                 else
                 {
+                    QStringList map({"/cycle", "/cycle-hires", "/hiking", "/hiking-hires", "/night-transit", "/night-transit-hires", "/terrain", "/terrain-hires", "/transit", "/transit-hires"});
+                    QStringList mapId({"thf-cycle", "thf-cycle-hires", "thf-hike", "thf-hike-hires", "thf-nighttransit", "thf-nighttransit-hires", "thf-landsc", "thf-landsc-hires", "thf-transit", "thf-transit-hires"});
+                    QStringList mapUrl({"cycle", "cycle", "outdoors", "outdoors", "transport-dark", "transport-dark", "landscape", "landscape", "transport", "transport"});
+
                     int idx = map.indexOf(tokens[1]);
                     if (idx != -1)
                     {
+                        if (m_overlay) {
+                            url = QString("http://127.0.0.1:%1/%2/%z/%x/%y.png").arg(m_tileServerPort).arg(mapUrl[idx]);
+                        } else {
+                            url = QString("http://a.tile.thunderforest.com/%1/%z/%x/%y%3.png?apikey=%2").arg(mapUrl[idx]).arg(m_thunderforestAPIKey).arg(hiresURL);
+                        }
                         xml = QString("\
                         {\
-                            \"UrlTemplate\" : \"http://a.tile.thunderforest.com/%1/%z/%x/%y%4.png?apikey=%2\",\
+                            \"UrlTemplate\" : \"%1\",\
                             \"ImageFormat\" : \"png\",\
                             \"QImageFormat\" : \"Indexed8\",\
-                            \"ID\" : \"%3\",\
+                            \"ID\" : \"%2\",\
                             \"MaximumZoomLevel\" : 20,\
                             \"MapCopyRight\" : \"<a href='http://www.thunderforest.com/'>Thunderforest</a>\",\
                             \"DataCopyRight\" : \"<a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors\"\
-                        }").arg(mapUrl[idx]).arg(m_thunderforestAPIKey).arg(mapId[idx]).arg(hiresURL);
+                        }").arg(url).arg(mapId[idx]);
                     }
                 }
                 QTextStream os(socket);

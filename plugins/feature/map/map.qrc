@@ -8,6 +8,8 @@
     <file>map/antennadab.png</file>
     <file>map/antennafm.png</file>
     <file>map/antennaam.png</file>
+    <file>map/antennakiwi.png</file>
+    <file>map/antennaspyserver.png</file>
     <file>map/ionosonde.png</file>
     <file>map/VOR.png</file>
     <file>map/VOR-DME.png</file>
@@ -21,6 +23,7 @@
     <file>map/airport_medium.png</file>
     <file>map/airport_small.png</file>
     <file>map/heliport.png</file>
+    <file>map/waypoint.png</file>
     <file>map/map3d.html</file>
   </qresource>
   <qresource prefix="/">

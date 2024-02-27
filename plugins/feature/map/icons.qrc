@@ -1,11 +1,18 @@
 <RCC>
-  <qresource prefix="/map/">
-    <file>icons/groundtracks.png</file>
-    <file>icons/clock.png</file>
-    <file>icons/ibp.png</file>
-    <file>icons/muf.png</file>
-    <file>icons/fof2.png</file>
-    <file>icons/controltower.png</file>
-    <file>icons/vor.png</file>
-  </qresource>
+    <qresource prefix="/map/">
+        <file>icons/groundtracks.png</file>
+        <file>icons/clock.png</file>
+        <file>icons/ibp.png</file>
+        <file>icons/muf.png</file>
+        <file>icons/fof2.png</file>
+        <file>icons/controltower.png</file>
+        <file>icons/vor.png</file>
+        <file>icons/precipitation.png</file>
+        <file>icons/anchor.png</file>
+        <file>icons/cloud.png</file>
+        <file>icons/layers.png</file>
+        <file>icons/railway.png</file>
+        <file>icons/waypoints.png</file>
+        <file>icons/earthsat.png</file>
+    </qresource>
 </RCC>

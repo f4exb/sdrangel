@@ -475,6 +475,7 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
     if ((mapItem->m_group == "Beacons")
         || (mapItem->m_group == "AM") || (mapItem->m_group == "FM") || (mapItem->m_group == "DAB")
         || (mapItem->m_group == "NavAid")
+        || (mapItem->m_group == "Waypoints")
        ) {
         displayDistanceMax = 1000000;
     } else if ((mapItem->m_group == "Station") || (mapItem->m_group == "Radar") || (mapItem->m_group == "Radio Time Transmitters")) {

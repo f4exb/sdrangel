@@ -120,8 +120,14 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     ui->mapProvider->clear();
     ui->mapProvider->addItem("OpenStreetMap");
+#else
+#ifdef WIN32
+    ui->mapProvider->removeItem(ui->mapProvider->findText("MapboxGL")); // Not supported on Windows
 #endif
-    ui->mapProvider->setCurrentIndex(MapSettings::m_mapProviders.indexOf(settings->m_mapProvider));
+    ui->mapProvider->removeItem(ui->mapProvider->findText("ESRI")); // Currently broken https://bugreports.qt.io/browse/QTBUG-121228
+#endif
+    const QString mapProviderName = MapSettings::m_mapProviderNames[MapSettings::m_mapProviders.indexOf(settings->m_mapProvider)];
+    ui->mapProvider->setCurrentIndex(ui->mapProvider->findText(mapProviderName));
     ui->thunderforestAPIKey->setText(settings->m_thunderforestAPIKey);
     ui->maptilerAPIKey->setText(settings->m_maptilerAPIKey);
     ui->mapBoxAPIKey->setText(settings->m_mapBoxAPIKey);
@@ -198,6 +204,7 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     connect(&m_ourAirportsDB, &OurAirportsDB::downloadProgress, this, &MapSettingsDialog::downloadProgress);
     connect(&m_ourAirportsDB, &OurAirportsDB::downloadError, this, &MapSettingsDialog::downloadError);
     connect(&m_ourAirportsDB, &OurAirportsDB::downloadAirportInformationFinished, this, &MapSettingsDialog::downloadAirportInformationFinished);
+    connect(&m_waypoints, &Waypoints::downloadWaypointsFinished, this, &MapSettingsDialog::downloadWaypointsFinished);
 
 #ifndef QT_WEBENGINE_FOUND
     ui->map3DSettings->setVisible(false);
@@ -219,7 +226,7 @@ MapSettingsDialog::~MapSettingsDialog()
 
 void MapSettingsDialog::accept()
 {
-    QString mapProvider = MapSettings::m_mapProviders[ui->mapProvider->currentIndex()];
+    QString mapProvider = MapSettings::m_mapProviders[MapSettings::m_mapProviderNames.indexOf(ui->mapProvider->currentText())];
     QString osmURL = ui->osmURL->text();
     QString mapBoxStyles = ui->mapBoxStyles->text();
     QString mapBoxAPIKey = ui->mapBoxAPIKey->text();
@@ -515,6 +522,19 @@ void MapSettingsDialog::on_getAirspacesDB_clicked()
     }
 }
 
+void MapSettingsDialog::on_getWaypoints_clicked()
+{
+    // Don't try to download while already in progress
+    if (m_progressDialog == nullptr)
+    {
+        m_progressDialog = new QProgressDialog(this);
+        m_progressDialog->setMaximum(1);
+        m_progressDialog->setCancelButton(nullptr);
+        m_progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
+        m_waypoints.downloadWaypoints();
+    }
+}
+
 void MapSettingsDialog::downloadingURL(const QString& url)
 {
     if (m_progressDialog)
@@ -573,6 +593,20 @@ void MapSettingsDialog::downloadAirportInformationFinished()
         m_progressDialog->setLabelText("Reading airports.");
     }
     emit airportsUpdated();
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
+    }
+}
+
+void MapSettingsDialog::downloadWaypointsFinished()
+{
+    if (m_progressDialog) {
+        m_progressDialog->setLabelText("Reading waypoints.");
+    }
+    emit waypointsUpdated();
     if (m_progressDialog)
     {
         m_progressDialog->close();

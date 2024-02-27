@@ -11,7 +11,7 @@ On top of this, it can plot data from other plugins, such as:
 * Satellites from the Satellite Tracker,
 * Weather imagery from APT Demodulator,
 * The Sun, Moon and Stars from the Star Tracker,
-* Weather balloons from the RadioSonde feature,
+* Weather balloons from the Radiosonde feature,
 * RF Heat Maps from the Heap Map channel,
 * Radials and estimated position from the VOR localizer feature,
 * ILS course line and glide path from the ILS Demodulator.
@@ -25,10 +25,15 @@ As well as internet data sources:
 * Radio time transmitters,
 * GRAVES radar,
 * Ionosonde station data,
-* Navtex transmitters.
-* VLF transmitters.
+* Navtex transmitters,
+* VLF transmitters,
+* KiwiSDRs,
+* Weather radar,
+* Satellite infra-red data (clouds),
+* Sea marks,
+* Satellite imagery from NASA GIBS (Global Imagery Browse Services).
 
-It can also create tracks showing the path aircraft, ships and APRS objects have taken, as well as predicted paths for satellites.
+It can also create tracks showing the path aircraft, ships, radiosondes and APRS objects have taken, as well as predicted paths for satellites.
 
 ![2D Map feature](../../../doc/img/Map_plugin_beacons.png)
 
@@ -90,6 +95,34 @@ When clicked, opens the Radio Time Transmitters dialog.
 
 ![Radio Time transmitters dialog](../../../doc/img/Map_plugin_radiotime_dialog.png)
 
+<h3>Display Satellite Infrared</h3>
+
+When checked, satellite infrared measurements (10.3um) are downloaded from the internet and are overlaid on the maps. 
+This essentially shows cloud cover. The images are updated every 10 minutes.
+
+The data is similar to that which can be received using the [APT Demodulator](../../channelrx/demodapt/readme.md) in the Thermal-infrared (10.3-11.3 um) channel.
+
+<h3>Display Weather Radar</h3>
+
+When checked, weather radar measurements are downloaded form the internet and are overlaid on the maps. 
+This shows rain and other forms of precipitation.
+The images are updated every 10 minutes.
+
+Green, yellow and red are rain, with red being the most intense. 
+Light blue through dark blue is snow, with dark blue being the most intense.
+
+<h3>Display Sea Marks</h3>
+
+When checked, sea marks are overlaid on the maps.
+
+![Sea Marks Legend](../../../doc/img/Map_plugin_seamarks_legend.png)
+
+<h3>Display Railways</h3>
+
+When checked, railway routes are overlaid on the maps.
+
+![Railway Legend](../../../doc/img/Map_plugin_railway_legend.png)
+
 <h3>7: Display MUF Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing the MUF (Maximum Usable Frequency) for a 3000km path that reflects off the ionosphere.
@@ -99,6 +132,23 @@ The contours will be updated every 15 minutes. The latest contour data will alwa
 
 When checked, contours will be downloaded and displayed on the 3D map, showing coF2 (F2 layer critical frequency), the maximum frequency at which radio waves will be reflected vertically from the F2 region of the ionosphere.
 The contours will be updated every 15 minutes. The latest contour data will always be displayed, irrespective of the time set on the 3D Map.
+
+<h3>Display NASA GIBS Data</h3>
+
+When checked, enables overlay of data from NASA GIBS (Global Imagery Browse Services). This includes a vast array of Earth observation satellite data,
+such as land and sea temperatures, atmospheric conditions, flux measurements and the like.
+Details of available data products can be found [here](https://nasa-gibs.github.io/gibs-api-docs/available-visualizations/#visualization-product-catalog).
+
+For some data sets, GIBS has data spanning many decades. The data period may be hours, days or months. The 3D map will attemp to show data from the closest time set in the 3D map's timescale.
+The 2D map will only show data from the default date (which is displayed in the table at the bottom).
+
+<h3>NASA GIBS Data</h3>
+
+Selects which data from NASA GIBS to overlay on the maps.
+
+<h3>NASA GIBS Opacity</h3>
+
+Sets the opacity used for the NASA GIBS overlay image overlay on the 3D map. Lower values make the image more transparent.
 
 <h3>8: Display Names</h3>
 
@@ -205,8 +255,17 @@ Mapbox: https://www.mapbox.com/ Cesium: https://www.cesium.com Bing: https://www
 
 Ionosonde data and MUF/coF2 contours from [KC2G](https://prop.kc2g.com/) with source data from [GIRO](https://giro.uml.edu/) and [NOAA NCEI](https://www.ngdc.noaa.gov/stp/iono/ionohome.html).
 
-Icons made by Google from Flaticon https://www.flaticon.com
-World icons created by turkkub from Flaticon https://www.flaticon.com
+Sea Marks are from OpenSeaMap: https://www.openseamap.org/
+
+Railways are from OpenRailwayMap: https://www.openrailwaymap.org/
+
+Weather radar and satellite data is from RainViewer: https://www.rainviewer
+
+Icons made by Google from Flaticon: https://www.flaticon.com
+World icons created by turkkub from Flaticon: https://www.flaticon.com
+Layers and Boat icons created by Freepik from Flaticon: https://www.flaticon.com
+Railway icons created by Prosymbols Premium from Flaticon: https://www.flaticon.com
+Satellite icons created by SyafriStudio from Flaticon: https://www.flaticon.com
 
 3D models are by various artists under a variety of licenses. See: https://github.com/srcejon/sdrangel-3d-models
 
@@ -218,8 +277,8 @@ If you wish to contribute a 3D model, see the https://github.com/srcejon/sdrange
 
 Full details of the API can be found in the Swagger documentation. Here is a quick example of how to centre the map on an object from the command line:
 
-    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/actions" -d '{"featureType": "Map",  "MapActions": { "find": "M7RCE" }}'
+    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/feature/0/actions" -d '{"featureType": "Map",  "MapActions": { "find": "M7RCE" }}'
 
 And to centre the map at a particular latitude and longitude:
 
-    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/actions" -d '{"featureType": "Map", "MapActions": { "find": "51.2 0.0" }}'
+    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/feature/0/actions" -d '{"featureType": "Map", "MapActions": { "find": "51.2 0.0" }}'

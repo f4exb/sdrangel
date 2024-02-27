@@ -619,6 +619,11 @@ Q_INVOKABLE void ObjectMapModel::moveToBack(int oldRow)
     }
 }
 
+Q_INVOKABLE void ObjectMapModel::link(const QString& url)
+{
+    emit linkClicked(url);
+}
+
 QVariant ObjectMapModel::data(const QModelIndex &index, int role) const
 {
     int row = index.row();

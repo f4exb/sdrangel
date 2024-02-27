@@ -172,6 +172,86 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="displayRain">
+        <property name="toolTip">
+         <string>Display weather radar (rain/snow)</string>
+        </property>
+        <property name="text">
+         <string>^</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/map/icons/precipitation.png</normaloff>:/map/icons/precipitation.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displaySeaMarks">
+        <property name="toolTip">
+         <string>Display sea marks</string>
+        </property>
+        <property name="text">
+         <string>^</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/map/icons/anchor.png</normaloff>:/map/icons/anchor.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayClouds">
+        <property name="toolTip">
+         <string>Display satellite infra-red (clouds)</string>
+        </property>
+        <property name="text">
+         <string>^</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/map/icons/cloud.png</normaloff>:/map/icons/cloud.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayRailways">
+        <property name="toolTip">
+         <string>Display railways</string>
+        </property>
+        <property name="text">
+         <string>^</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/map/icons/railway.png</normaloff>:/map/icons/railway.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="ButtonSwitch" name="displayMUF">
         <property name="toolTip">
          <string>Display MUF contours</string>

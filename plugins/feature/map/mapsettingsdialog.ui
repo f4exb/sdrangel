@@ -85,11 +85,6 @@
                </item>
                <item>
                 <property name="text">
-                 <string>Mapbox</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
                  <string>MapboxGL</string>
                 </property>
                </item>
@@ -334,6 +329,20 @@
               <property name="icon">
                <iconset resource="icons.qrc">
                 <normaloff>:/map/icons/vor.png</normaloff>:/map/icons/vor.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="getWaypoints">
+              <property name="toolTip">
+               <string>Download aviation waypoints (3MB)</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="icons.qrc">
+                <normaloff>:/map/icons/waypoints.png</normaloff>:/map/icons/waypoints.png</iconset>
               </property>
              </widget>
             </item>

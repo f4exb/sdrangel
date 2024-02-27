@@ -60,13 +60,19 @@ const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.feature.vorlocalizer")
 };
 
-// GUI combo box should match ordering in this list
 const QStringList MapSettings::m_mapProviders = {
     QStringLiteral("osm"),
     QStringLiteral("esri"),
-    QStringLiteral("mapbox"),
     QStringLiteral("mapboxgl"),
     QStringLiteral("maplibregl")
+};
+
+// Names as used in combo box in settings dialog
+const QStringList MapSettings::m_mapProviderNames = {
+    QStringLiteral("OpenStreetMap"),
+    QStringLiteral("ESRI"),
+    QStringLiteral("MapboxGL"),
+    QStringLiteral("MapLibreGL")
 };
 
 MapSettings::MapSettings() :
@@ -144,6 +150,13 @@ MapSettings::MapSettings() :
     m_itemSettings.insert("Airspace (Wave)", new MapItemSettings("Airspace (Wave)", false, QColor(255, 0, 0, 0x20), false, false, 11));
     m_itemSettings.insert("Airspace (Airports)", new MapItemSettings("Airspace (Airports)", false, QColor(0, 0, 255, 0x20), false, false, 11));
 
+    MapItemSettings *waypointsSettings = new MapItemSettings("Waypoints", false, QColor(255, 0, 255), false, true, 11);
+    waypointsSettings->m_filterDistance = 500000;
+    m_itemSettings.insert("Waypoints", waypointsSettings);
+
+    m_itemSettings.insert("KiwiSDR", new MapItemSettings("KiwiSDR", true, QColor(0, 255, 0), false, true, 8));
+    m_itemSettings.insert("SpyServer", new MapItemSettings("SpyServer", true, QColor(0, 0, 255), false, true, 8));
+
     resetToDefaults();
 }
 
@@ -184,6 +197,12 @@ void MapSettings::resetToDefaults()
     m_antiAliasing = "None";
     m_displayMUF = false;
     m_displayfoF2 = false;
+    m_displayRain = false;
+    m_displayClouds = false;
+    m_displaySeaMarks = false;
+    m_displayNASAGlobalImagery = false;
+    m_nasaGlobalImageryIdentifier = "";
+    m_nasaGlobalImageryOpacity = 50;
     m_workspaceIndex = 0;
     m_checkWXAPIKey = "";
 }
@@ -229,6 +248,13 @@ QByteArray MapSettings::serialize() const
 
     s.writeBool(35, m_displayMUF);
     s.writeBool(36, m_displayfoF2);
+    s.writeBool(37, m_displayRain);
+    s.writeBool(38, m_displayClouds);
+    s.writeBool(39, m_displaySeaMarks);
+    s.writeBool(40, m_displayRailways);
+    s.writeBool(41, m_displayNASAGlobalImagery);
+    s.writeString(42, m_nasaGlobalImageryIdentifier);
+    s.writeS32(43, m_nasaGlobalImageryOpacity);
 
     s.writeString(46, m_checkWXAPIKey);
 
@@ -308,6 +334,13 @@ bool MapSettings::deserialize(const QByteArray& data)
 
         d.readBool(35, &m_displayMUF, false);
         d.readBool(36, &m_displayfoF2, false);
+        d.readBool(37, &m_displayRain, false);
+        d.readBool(38, &m_displayClouds, false);
+        d.readBool(39, &m_displaySeaMarks, false);
+        d.readBool(40, &m_displayRailways, false);
+        d.readBool(41, &m_displayNASAGlobalImagery, false);
+        d.readString(42, &m_nasaGlobalImageryIdentifier, "");
+        d.readS32(43, &m_nasaGlobalImageryOpacity, 50);
 
         d.readString(46, &m_checkWXAPIKey, "");
 
@@ -556,8 +589,29 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("displayMUF")) {
         m_displayMUF = settings.m_displayMUF;
     }
-    if (settingsKeys.contains("misplayfoF2")) {
+    if (settingsKeys.contains("displayfoF2")) {
         m_displayfoF2 = settings.m_displayfoF2;
+    }
+    if (settingsKeys.contains("displayRain")) {
+        m_displayRain = settings.m_displayRain;
+    }
+    if (settingsKeys.contains("displayClouds")) {
+        m_displayClouds = settings.m_displayClouds;
+    }
+    if (settingsKeys.contains("displaySeaMarks")) {
+        m_displaySeaMarks = settings.m_displaySeaMarks;
+    }
+    if (settingsKeys.contains("displayRailways")) {
+        m_displayRailways = settings.m_displayRailways;
+    }
+    if (settingsKeys.contains("displayNASAGlobalImagery")) {
+        m_displayNASAGlobalImagery = settings.m_displayNASAGlobalImagery;
+    }
+    if (settingsKeys.contains("nasaGlobalImageryIdentifier")) {
+        m_nasaGlobalImageryIdentifier = settings.m_nasaGlobalImageryIdentifier;
+    }
+    if (settingsKeys.contains("nasaGlobalImageryOpacity")) {
+        m_nasaGlobalImageryOpacity = settings.m_nasaGlobalImageryOpacity;
     }
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
@@ -646,10 +700,30 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     if (settingsKeys.contains("displayfoF2") || force) {
         ostr << " m_displayfoF2: " << m_displayfoF2;
     }
+    if (settingsKeys.contains("displayRain") || force) {
+        ostr << " m_displayRain: " << m_displayRain;
+    }
+    if (settingsKeys.contains("displayClouds") || force) {
+        ostr << " m_displayClouds: " << m_displayClouds;
+    }
+    if (settingsKeys.contains("displaySeaMarks") || force) {
+        ostr << " m_displaySeaMarks: " << m_displaySeaMarks;
+    }
+    if (settingsKeys.contains("displayRailways") || force) {
+        ostr << " m_displayRailways: " << m_displayRailways;
+    }
+    if (settingsKeys.contains("displayNASAGlobalImagery") || force) {
+        ostr << " m_displayNASAGlobalImagery: " << m_displayNASAGlobalImagery;
+    }
+    if (settingsKeys.contains("nasaGlobalImageryIdentifier") || force) {
+        ostr << " m_nasaGlobalImageryIdentifier: " << m_nasaGlobalImageryIdentifier.toStdString();
+    }
+    if (settingsKeys.contains("nasaGlobalImageryOpacity") || force) {
+        ostr << " m_nasaGlobalImageryOpacity: " << m_nasaGlobalImageryOpacity;
+    }
     if (settingsKeys.contains("workspaceIndex") || force) {
         ostr << " m_workspaceIndex: " << m_workspaceIndex;
     }
 
     return QString(ostr.str().c_str());
 }
-

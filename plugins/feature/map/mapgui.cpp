@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -24,6 +24,10 @@
 #include <QGeoCodingManager>
 #include <QGeoServiceProvider>
 #include <QSettings>
+#include <QMenu>
+#include <QScreen>
+#include <QSvgWidget>
+#include <QTableWidgetItem>
 
 #ifdef QT_WEBENGINE_FOUND
 #include <QtWebEngineWidgets/QWebEngineView>
@@ -35,7 +39,11 @@
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
 #include "mainwindow.h"
+#include "device/deviceset.h"
+#include "device/deviceapi.h"
+#include "dsp/devicesamplesource.h"
 #include "device/deviceuiset.h"
+#include "device/deviceenumerator.h"
 #include "util/units.h"
 #include "util/maidenhead.h"
 #include "util/morse.h"
@@ -50,6 +58,9 @@
 #include "mapgui.h"
 #include "SWGMapItem.h"
 #include "SWGTargetAzimuthElevation.h"
+#include "SWGDeviceSettings.h"
+#include "SWGKiwiSDRSettings.h"
+#include "SWGRemoteTCPInputSettings.h"
 
 MapGUI* MapGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
 {
@@ -140,7 +151,7 @@ bool MapGUI::handleMessage(const Message& message)
 
         for (int i = 0; i < m_availableChannelOrFeatures.size(); i++)
         {
-            if (m_availableChannelOrFeatures[i].m_source == msgMapItem.getPipeSource())
+            if (m_availableChannelOrFeatures[i].m_object == msgMapItem.getPipeSource())
             {
                  for (int j = 0; j < MapSettings::m_pipeTypes.size(); j++)
                  {
@@ -192,7 +203,12 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_beaconDialog(this),
     m_ibpBeaconDialog(this),
     m_radioTimeDialog(this),
-    m_cesium(nullptr)
+    m_cesium(nullptr),
+    m_legend(nullptr),
+    m_nasaWidget(nullptr),
+    m_legendWidget(nullptr),
+    m_descriptionWidget(nullptr),
+    m_overviewWidget(nullptr)
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -214,10 +230,36 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
         ui->map->setFormat(format);
     }
 
+    createNASAGlobalImageryView();
+    connect(&m_nasaGlobalImagery, &NASAGlobalImagery::dataUpdated, this, &MapGUI::nasaGlobalImageryDataUpdated);
+    connect(&m_nasaGlobalImagery, &NASAGlobalImagery::metaDataUpdated, this, &MapGUI::nasaGlobalImageryMetaDataUpdated);
+    connect(&m_nasaGlobalImagery, &NASAGlobalImagery::legendAvailable, this, &MapGUI::nasaGlobalImageryLegendAvailable);
+    connect(&m_nasaGlobalImagery, &NASAGlobalImagery::htmlAvailable, this, &MapGUI::nasaGlobalImageryHTMLAvailable);
+    m_nasaGlobalImagery.getData();
+    m_nasaGlobalImagery.getMetaData();
+
+    createLayersMenu();
+    displayToolbar();
+    connect(screen(), &QScreen::orientationChanged, this, &MapGUI::orientationChanged);
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+    screen()->setOrientationUpdateMask(Qt::PortraitOrientation
+                                        | Qt::LandscapeOrientation
+                                        | Qt::InvertedPortraitOrientation
+                                        | Qt::InvertedLandscapeOrientation);
+#endif
+
     clearWikiMediaOSMCache();
 
+    m_rainViewer = new RainViewer();
+    connect(m_rainViewer, &RainViewer::pathUpdated, this, &MapGUI::pathUpdated);
+    m_rainViewer->getPathPeriodically();
+
+    m_mapTileServerPort = 60602;
+    m_mapTileServer = new MapTileServer(m_mapTileServerPort);
+    m_mapTileServer->setThunderforestAPIKey(thunderforestAPIKey());
+    m_mapTileServer->setMaptilerAPIKey(maptilerAPIKey());
     m_osmPort = 0;
-    m_templateServer = new OSMTemplateServer(thunderforestAPIKey(), maptilerAPIKey(), m_osmPort);
+    m_templateServer = new OSMTemplateServer(thunderforestAPIKey(), maptilerAPIKey(), m_mapTileServerPort, m_osmPort);
 
     // Web server to serve dynamic files from QResources
     m_webPort = 0;
@@ -252,6 +294,9 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
+    connect(&m_kiwiSDRList, &KiwiSDRList::dataUpdated, this, &MapGUI::kiwiSDRUpdated);
+    connect(&m_spyServerList, &SpyServerList::dataUpdated, this, &MapGUI::spyServerUpdated);
 
 #ifdef QT_WEBENGINE_FOUND
     QWebEngineSettings *settings = ui->web->settings();
@@ -320,11 +365,16 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     addNavAids();
     addAirspace();
     addAirports();
+    addWaypoints();
     addNavtex();
     addVLF();
+    addKiwiSDR();
+    addSpyServer();
 
     displaySettings();
     applySettings(true);
+
+    connect(&m_objectMapModel, &ObjectMapModel::linkClicked, this, &MapGUI::linkClicked);
 
     connect(&m_redrawMapTimer, &QTimer::timeout, this, &MapGUI::redrawMap);
     m_redrawMapTimer.setSingleShot(true);
@@ -342,11 +392,17 @@ MapGUI::~MapGUI()
     disconnect(&m_redrawMapTimer, &QTimer::timeout, this, &MapGUI::redrawMap);
     m_redrawMapTimer.stop();
     //m_cesium->deleteLater();
+    delete m_rainViewer;
     delete m_cesium;
     if (m_templateServer)
     {
         m_templateServer->close();
         delete m_templateServer;
+    }
+    if (m_mapTileServer)
+    {
+        m_mapTileServer->close();
+        delete m_mapTileServer;
     }
     if (m_webServer)
     {
@@ -542,6 +598,124 @@ void MapGUI::addRadar()
     update(m_map, &radarMapItem, "Radar");
 }
 
+QString MapGUI::formatFrequency(qint64 frequency) const
+{
+    QString s = QString::number(frequency);
+    if (s.endsWith("000000000")) {
+        return s.left(s.size() - 9) + " GHz";
+    } else if (s.endsWith("000000")) {
+        return s.left(s.size() - 6) + " MHz";
+    } else if (s.endsWith("000")) {
+        return s.left(s.size() - 3) + " kHz";
+    }
+    return s + " Hz";
+}
+
+void MapGUI::addKiwiSDR()
+{
+    m_kiwiSDRList.getDataPeriodically();
+}
+
+void MapGUI::kiwiSDRUpdated(const QList<KiwiSDRList::KiwiSDR>& sdrs)
+{
+    for (const auto& sdr : sdrs)
+    {
+        SWGSDRangel::SWGMapItem kiwiMapItem;
+        kiwiMapItem.setName(new QString(sdr.m_name));
+        kiwiMapItem.setLatitude(sdr.m_latitude);
+        kiwiMapItem.setLongitude(sdr.m_longitude);
+        kiwiMapItem.setAltitude(sdr.m_altitude);
+        kiwiMapItem.setImage(new QString("antennakiwi.png"));
+        kiwiMapItem.setImageRotation(0);
+        QString url = QString("sdrangel-kiwisdr://%1").arg(sdr.m_url);
+        QString antenna = sdr.m_antenna;
+        if (!sdr.m_antennaConnected) {
+            antenna.append(" (Not connected)");
+        }
+        QString text = QString("KiwiSDR\nName: %1\nHW: %2\nUsers: %3/%4\nFrequency: %5 - %6\nAntenna: %7\nSNR: %8 dB\nURL: %9")
+                                .arg(sdr.m_name)
+                                .arg(sdr.m_sdrHW)
+                                .arg(sdr.m_users)
+                                .arg(sdr.m_usersMax)
+                                .arg(formatFrequency(sdr.m_lowFrequency))
+                                .arg(formatFrequency(sdr.m_highFrequency))
+                                .arg(antenna)
+                                .arg(sdr.m_snr)
+                                .arg(QString("<a href=%1 onclick=\"return parent.infoboxLink('%1')\">%2</a>").arg(url).arg(sdr.m_url))
+                                ;
+        kiwiMapItem.setText(new QString(text));
+        kiwiMapItem.setModel(new QString("antenna.glb"));
+        kiwiMapItem.setFixedPosition(true);
+        kiwiMapItem.setOrientation(0);
+        QString band = "HF";
+        if (sdr.m_highFrequency > 300000000) {
+            band = "UHF";
+        } else if (sdr.m_highFrequency > 320000000) { // Technically 30MHz, but many HF Kiwis list up to 32MHz
+            band = "VHF";
+        }
+        QString label = QString("Kiwi %1").arg(band);
+        kiwiMapItem.setLabel(new QString(label));
+        kiwiMapItem.setLabelAltitudeOffset(4.5);
+        kiwiMapItem.setAltitudeReference(1);
+        update(m_map, &kiwiMapItem, "KiwiSDR");
+    }
+}
+
+void MapGUI::addSpyServer()
+{
+    m_spyServerList.getDataPeriodically();
+}
+
+void MapGUI::spyServerUpdated(const QList<SpyServerList::SpyServer>& sdrs)
+{
+    for (const auto& sdr : sdrs)
+    {
+        SWGSDRangel::SWGMapItem spyServerMapItem;
+
+        QString address = QString("%1:%2").arg(sdr.m_streamingHost).arg(sdr.m_streamingPort);
+        spyServerMapItem.setName(new QString(address));
+        spyServerMapItem.setLatitude(sdr.m_latitude);
+        spyServerMapItem.setLongitude(sdr.m_longitude);
+        spyServerMapItem.setAltitude(0);
+        spyServerMapItem.setImage(new QString("antennaspyserver.png"));
+        spyServerMapItem.setImageRotation(0);
+        QString url = QString("sdrangel-spyserver://%1").arg(address);
+        QString text = QString("SpyServer\nDescription: %1\nHW: %2\nUsers: %3/%4\nFrequency: %5 - %6\nAntenna: %7\nOnline: %8\nURL: %9")
+                                .arg(sdr.m_generalDescription)
+                                .arg(sdr.m_deviceType)
+                                .arg(sdr.m_currentClientCount)
+                                .arg(sdr.m_maxClients)
+                                .arg(formatFrequency(sdr.m_minimumFrequency))
+                                .arg(formatFrequency(sdr.m_maximumFrequency))
+                                .arg(sdr.m_antennaType)
+                                .arg(sdr.m_online ? "Yes" : "No")
+                                .arg(QString("<a href=%1 onclick=\"return parent.infoboxLink('%1')\">%2</a>").arg(url).arg(address))
+                                ;
+        spyServerMapItem.setText(new QString(text));
+        spyServerMapItem.setModel(new QString("antenna.glb"));
+        spyServerMapItem.setFixedPosition(true);
+        spyServerMapItem.setOrientation(0);
+        QStringList bands;
+        if (sdr.m_minimumFrequency < 30000000) {
+            bands.append("HF");
+        }
+        if ((sdr.m_minimumFrequency < 300000000) && (sdr.m_maximumFrequency > 30000000)) {
+            bands.append("VHF");
+        }
+        if ((sdr.m_minimumFrequency < 3000000000) && (sdr.m_maximumFrequency > 300000000)) {
+            bands.append("UHF");
+        }
+        if (sdr.m_maximumFrequency > 3000000000) {
+            bands.append("SHF");
+        }
+        QString label = QString("SpyServer %1").arg(bands.join(" "));
+        spyServerMapItem.setLabel(new QString(label));
+        spyServerMapItem.setLabelAltitudeOffset(4.5);
+        spyServerMapItem.setAltitudeReference(1);
+        update(m_map, &spyServerMapItem, "SpyServer");
+    }
+}
+
 // Ionosonde stations
 void MapGUI::addIonosonde()
 {
@@ -609,6 +783,24 @@ void MapGUI::foF2Updated(const QJsonDocument& document)
     m_webServer->addFile("/map/map/fof2.geojson", document.toJson());
     if (m_cesium) {
         m_cesium->showfoF2(m_settings.m_displayfoF2);
+    }
+}
+
+void MapGUI::pathUpdated(const QString& radarPath, const QString& satellitePath)
+{
+    m_radarPath = radarPath;
+    m_satellitePath = satellitePath;
+    m_mapTileServer->setRadarPath(radarPath);
+    m_mapTileServer->setSatellitePath(satellitePath);
+    if (m_settings.m_displayRain || m_settings.m_displayClouds)
+    {
+        clearOSMCache();
+        applyMap2DSettings(true);
+    }
+    if (m_cesium)
+    {
+        m_cesium->setLayerSettings("rain", {"path", "show"}, {radarPath, m_settings.m_displayRain});
+        m_cesium->setLayerSettings("clouds", {"path", "show"}, {satellitePath, m_settings.m_displayClouds});
     }
 }
 
@@ -1033,6 +1225,39 @@ void MapGUI::addAirports()
     }
 }
 
+void MapGUI::addWaypoints()
+{
+    m_waypoints = Waypoints::getWaypoints();
+    if (m_waypoints)
+    {
+        QHashIterator<QString, Waypoint *> i(*m_waypoints);
+        while (i.hasNext())
+        {
+            i.next();
+            const Waypoint *waypoint = i.value();
+
+            SWGSDRangel::SWGMapItem waypointMapItem;
+            waypointMapItem.setName(new QString(waypoint->m_name));
+            waypointMapItem.setLatitude(waypoint->m_latitude);
+            waypointMapItem.setLongitude(waypoint->m_longitude);
+            waypointMapItem.setAltitude(0);
+            waypointMapItem.setImage(new QString("waypoint.png"));
+            waypointMapItem.setImageRotation(0);
+            QStringList list;
+            list.append(QString("Waypoint: %1").arg(waypoint->m_name));
+            waypointMapItem.setText(new QString(list.join("\n")));
+            //waypointMapItem.setModel(new QString("waypoint.glb")); // No such model currently
+            waypointMapItem.setFixedPosition(true);
+            waypointMapItem.setOrientation(0);
+            waypointMapItem.setLabel(new QString(waypoint->m_name));
+            waypointMapItem.setLabelAltitudeOffset(4.5);
+            waypointMapItem.setAltitude(Units::feetToMetres(25000));
+            waypointMapItem.setAltitudeReference(1);
+            update(m_map, &waypointMapItem, "Waypoints");
+        }
+    }
+}
+
 void MapGUI::navAidsUpdated()
 {
     addNavAids();
@@ -1048,6 +1273,10 @@ void MapGUI::airportsUpdated()
     addAirports();
 }
 
+void MapGUI::waypointsUpdated()
+{
+    addWaypoints();
+}
 
 void MapGUI::addNavtex()
 {
@@ -1097,6 +1326,135 @@ void MapGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
+void MapGUI::nasaGlobalImageryDataUpdated(const QList<NASAGlobalImagery::DataSet>& dataSets)
+{
+    m_nasaDataSets = dataSets;
+    m_nasaDataSetsHash.clear();
+    ui->nasaGlobalImageryIdentifier->blockSignals(true);
+    ui->nasaGlobalImageryIdentifier->clear();
+    for (const auto& dataSet : m_nasaDataSets)
+    {
+        ui->nasaGlobalImageryIdentifier->addItem(dataSet.m_identifier);
+        m_nasaDataSetsHash.insert(dataSet.m_identifier, dataSet);
+    }
+    ui->nasaGlobalImageryIdentifier->blockSignals(false);
+    ui->nasaGlobalImageryIdentifier->setCurrentIndex(ui->nasaGlobalImageryIdentifier->findText(m_settings.m_nasaGlobalImageryIdentifier));
+}
+
+void MapGUI::createNASAGlobalImageryView()
+{
+    m_nasaWidget = new QWidget();
+    m_nasaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+    m_legendWidget = new QSvgWidget();
+
+    QPalette pal = QPalette();
+    pal.setColor(QPalette::Window, Qt::white);
+    m_legendWidget->setAutoFillBackground(true);
+    m_legendWidget->setPalette(pal);
+    m_nasaWidget->setAutoFillBackground(true);
+    m_nasaWidget->setPalette(pal);
+
+    m_descriptionWidget = new QTextEdit();
+    m_descriptionWidget->setReadOnly(true);
+    m_descriptionWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+    m_overviewWidget = new QTableWidget(NASA_ROWS, 2);
+    m_overviewWidget->setItem(NASA_TITLE, 0, new QTableWidgetItem("Title"));
+    m_overviewWidget->setItem(NASA_TITLE, 1, new QTableWidgetItem(""));
+    m_overviewWidget->setItem(NASA_SUBTITLE, 0, new QTableWidgetItem("Subtitle"));
+    m_overviewWidget->setItem(NASA_SUBTITLE, 1, new QTableWidgetItem(""));
+    m_overviewWidget->setItem(NASA_DEFAULT_DATE, 0, new QTableWidgetItem("Default Date"));
+    m_overviewWidget->setItem(NASA_DEFAULT_DATE, 1, new QTableWidgetItem(""));
+    m_overviewWidget->setItem(NASA_START_DATE, 0, new QTableWidgetItem("Start Date"));
+    m_overviewWidget->setItem(NASA_START_DATE, 1, new QTableWidgetItem(""));
+    m_overviewWidget->setItem(NASA_END_DATE, 0, new QTableWidgetItem("End Date"));
+    m_overviewWidget->setItem(NASA_END_DATE, 1, new QTableWidgetItem(""));
+    m_overviewWidget->setItem(NASA_PERIOD, 0, new QTableWidgetItem("Period"));
+    m_overviewWidget->setItem(NASA_PERIOD, 1, new QTableWidgetItem(""));
+    m_overviewWidget->setItem(NASA_LAYER_GROUP, 0, new QTableWidgetItem("Group"));
+    m_overviewWidget->setItem(NASA_LAYER_GROUP, 1, new QTableWidgetItem(""));
+    m_overviewWidget->horizontalHeader()->setStretchLastSection(true);
+    m_overviewWidget->horizontalHeader()->hide();
+    m_overviewWidget->verticalHeader()->hide();
+    m_overviewWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    m_overviewWidget->setSelectionMode(QAbstractItemView::NoSelection);
+
+    QHBoxLayout *hbox = new QHBoxLayout();
+    hbox->addWidget(m_overviewWidget);
+    hbox->addWidget(m_legendWidget, 0, Qt::AlignHCenter | Qt::AlignTop);
+    hbox->addWidget(m_descriptionWidget);
+    hbox->setContentsMargins(0, 0, 0, 0);
+
+    m_nasaWidget->setLayout(hbox);
+    ui->splitter->addWidget(m_nasaWidget);
+
+    // Limit size of widget, otherwise the splitter makes it bigger than the maps for some unknown reason
+    m_nasaWidget->setMaximumHeight(m_overviewWidget->sizeHint().height());
+
+    m_nasaWidget->show();
+}
+
+void MapGUI::displayNASAMetaData()
+{
+    if (m_nasaMetaData.m_layers.contains(m_settings.m_nasaGlobalImageryIdentifier))
+    {
+        const NASAGlobalImagery::Layer& layer = m_nasaMetaData.m_layers.value(m_settings.m_nasaGlobalImageryIdentifier);
+        const NASAGlobalImagery::DataSet& dataSet = m_nasaDataSetsHash.value(m_settings.m_nasaGlobalImageryIdentifier);
+
+        m_overviewWidget->item(NASA_TITLE, 1)->setText(layer.m_title);
+        m_overviewWidget->item(NASA_SUBTITLE, 1)->setText(layer.m_subtitle);
+        m_overviewWidget->item(NASA_DEFAULT_DATE, 1)->setText(dataSet.m_defaultDateTime);
+        m_overviewWidget->item(NASA_START_DATE, 1)->setText(layer.m_startDate.date().toString("yyyy-MM-dd"));
+        if (layer.m_endDate.isValid()) {
+            m_overviewWidget->item(NASA_END_DATE, 1)->setText(layer.m_endDate.date().toString("yyyy-MM-dd"));
+        } else if (layer.m_ongoing) {
+            m_overviewWidget->item(NASA_END_DATE, 1)->setText("Ongoing");
+        } else {
+            m_overviewWidget->item(NASA_END_DATE, 1)->setText("");
+        }
+        m_overviewWidget->item(NASA_PERIOD, 1)->setText(layer.m_layerPeriod);
+        m_overviewWidget->item(NASA_LAYER_GROUP, 1)->setText(layer.m_layerGroup);
+    }
+    else
+    {
+        qDebug() << "MapGUI::displayNASAMetaData: No metadata for " << m_settings.m_nasaGlobalImageryIdentifier;
+        m_overviewWidget->item(NASA_TITLE, 1)->setText("");
+        m_overviewWidget->item(NASA_SUBTITLE, 1)->setText("");
+        m_overviewWidget->item(NASA_DEFAULT_DATE, 1)->setText("");
+        m_overviewWidget->item(NASA_START_DATE, 1)->setText("");
+        m_overviewWidget->item(NASA_END_DATE, 1)->setText("");
+        m_overviewWidget->item(NASA_PERIOD, 1)->setText("");
+        m_overviewWidget->item(NASA_LAYER_GROUP, 1)->setText("");
+    }
+}
+
+void MapGUI::nasaGlobalImageryMetaDataUpdated(const NASAGlobalImagery::MetaData& metaData)
+{
+    m_nasaMetaData = metaData;
+    displayNASAMetaData();
+}
+
+void MapGUI::nasaGlobalImageryLegendAvailable(const QString& url, const QByteArray& data)
+{
+    if (m_legendWidget)
+    {
+        m_legendWidget->load(data);
+        if (m_legend && (m_legend->m_height > 0))
+        {
+            m_legendWidget->setFixedSize(m_legend->m_width, m_legend->m_height);
+            m_nasaWidget->updateGeometry();
+        }
+    }
+}
+
+void MapGUI::nasaGlobalImageryHTMLAvailable(const QString& url, const QByteArray& data)
+{
+    if (m_descriptionWidget) {
+        m_descriptionWidget->setHtml(data);
+    }
+}
+
 QString MapGUI::osmCachePath()
 {
     return QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/QtLocation/5.8/tiles/osm/sdrangel_map";
@@ -1105,10 +1463,13 @@ QString MapGUI::osmCachePath()
 void MapGUI::clearOSMCache()
 {
     // Delete all cached custom tiles when user changes the URL. Is there a better way to do this?
+    // Now deletes all cached tiles, to remove overlays
     QDir dir(osmCachePath());
     if (dir.exists())
     {
-        QStringList filenames = dir.entryList({"osm_100-l-8-*.png"});
+        // FIXME: Restore this - and use custom URL for overlays!!!
+        //QStringList filenames = dir.entryList({"osm_100-l-8-*.png"}); // 8=custom URL
+        QStringList filenames = dir.entryList({"osm_100-l-*"});
         for (const auto& filename : filenames)
         {
             QFile file(dir.filePath(filename));
@@ -1173,6 +1534,12 @@ void MapGUI::applyMap2DSettings(bool reloadMap)
             coords.setAltitude(stationAltitude);
             zoom = 10.0;
         }
+
+        // Update API keys in servers
+        m_templateServer->setThunderforestAPIKey(thunderforestAPIKey());
+        m_templateServer->setMaptilerAPIKey(maptilerAPIKey());
+        m_mapTileServer->setThunderforestAPIKey(thunderforestAPIKey());
+        m_mapTileServer->setMaptilerAPIKey(maptilerAPIKey());
 
         // Create the map using the specified provider
         QQmlProperty::write(item, "smoothing", MainCore::instance()->getSettings().getMapSmoothing());
@@ -1288,6 +1655,36 @@ bool MapGUI::eventFilter(QObject *obj, QEvent *event)
     return FeatureGUI::eventFilter(obj, event);
 }
 
+void MapGUI::orientationChanged(Qt::ScreenOrientation orientation)
+{
+    // Need a delay before geometry() reflects new orientation
+    // https://bugreports.qt.io/browse/QTBUG-109127
+    QTimer::singleShot(200, [this]() {
+        displayToolbar();
+    });
+}
+
+void MapGUI::displayToolbar()
+{
+    // Replace buttons with menu when window gets narrow
+    bool narrow = this->screen()->availableGeometry().width() < 400;
+    ui->layersMenu->setVisible(narrow);
+    bool overlayButtons = !narrow && ((m_settings.m_mapProvider == "osm") || m_settings.m_map3DEnabled);
+    ui->displayRain->setVisible(overlayButtons);
+    ui->displayClouds->setVisible(overlayButtons);
+    ui->displaySeaMarks->setVisible(overlayButtons);
+    ui->displayRailways->setVisible(overlayButtons);
+    ui->displayNASAGlobalImagery->setVisible(overlayButtons);
+    ui->displayMUF->setVisible(!narrow && m_settings.m_map3DEnabled);
+    ui->displayfoF2->setVisible(!narrow && m_settings.m_map3DEnabled);
+}
+
+void MapGUI::setEnableOverlay()
+{
+    bool enable = m_settings.m_displayClouds || m_settings.m_displayRain || m_settings.m_displaySeaMarks || m_settings.m_displayRailways || m_settings.m_displayNASAGlobalImagery;
+    m_templateServer->setEnableOverlay(enable);
+}
+
 MapSettings::MapItemSettings *MapGUI::getItemSettings(const QString &group)
 {
     if (m_settings.m_itemSettings.contains(group)) {
@@ -1388,6 +1785,12 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_cesium->getDateTime();
         m_cesium->showMUF(m_settings.m_displayMUF);
         m_cesium->showfoF2(m_settings.m_displayfoF2);
+        m_cesium->showLayer("rain", m_settings.m_displayRain);
+        m_cesium->showLayer("clouds", m_settings.m_displayClouds);
+        m_cesium->showLayer("seaMarks", m_settings.m_displaySeaMarks);
+        m_cesium->showLayer("railways", m_settings.m_displayRailways);
+        m_cesium->showLayer("nasaGlobalImagery", m_settings.m_displayNASAGlobalImagery);
+        applyNASAGlobalImagerySettings();
         m_objectMapModel.allUpdated();
         m_imageMapModel.allUpdated();
         m_polygonMapModel.allUpdated();
@@ -1471,6 +1874,19 @@ void MapGUI::init3DMap()
 
     m_cesium->showMUF(m_settings.m_displayMUF);
     m_cesium->showfoF2(m_settings.m_displayfoF2);
+
+    m_cesium->showLayer("rain", m_settings.m_displayRain);
+    m_cesium->showLayer("clouds", m_settings.m_displayClouds);
+    m_cesium->showLayer("seaMarks", m_settings.m_displaySeaMarks);
+    m_cesium->showLayer("railways", m_settings.m_displayRailways);
+    applyNASAGlobalImagerySettings();
+
+    if (!m_radarPath.isEmpty()) {
+        m_cesium->setLayerSettings("rain", {"path", "show"}, {m_radarPath, m_settings.m_displayRain});
+    }
+    if (!m_satellitePath.isEmpty()) {
+        m_cesium->setLayerSettings("clouds", {"path", "show"}, {m_satellitePath, m_settings.m_displayClouds});
+    }
 #endif
 }
 
@@ -1483,8 +1899,32 @@ void MapGUI::displaySettings()
     ui->displayNames->setChecked(m_settings.m_displayNames);
     ui->displaySelectedGroundTracks->setChecked(m_settings.m_displaySelectedGroundTracks);
     ui->displayAllGroundTracks->setChecked(m_settings.m_displayAllGroundTracks);
+    ui->displayRain->setChecked(m_settings.m_displayRain);
+    m_displayRain->setChecked(m_settings.m_displayRain);
+    m_mapTileServer->setDisplayRain(m_settings.m_displayRain);
+    ui->displayClouds->setChecked(m_settings.m_displayClouds);
+    m_displayClouds->setChecked(m_settings.m_displayClouds);
+    m_mapTileServer->setDisplayClouds(m_settings.m_displayClouds);
+    ui->displaySeaMarks->setChecked(m_settings.m_displaySeaMarks);
+    m_displaySeaMarks->setChecked(m_settings.m_displaySeaMarks);
+    m_mapTileServer->setDisplaySeaMarks(m_settings.m_displaySeaMarks);
+    ui->displayRailways->setChecked(m_settings.m_displayRailways);
+    m_displayRailways->setChecked(m_settings.m_displayRailways);
+    m_mapTileServer->setDisplayRailways(m_settings.m_displayRailways);
+    ui->displayNASAGlobalImagery->setChecked(m_settings.m_displayNASAGlobalImagery);
+    m_displayNASAGlobalImagery->setChecked(m_settings.m_displayNASAGlobalImagery);
+    ui->nasaGlobalImageryIdentifier->setVisible(m_settings.m_displayNASAGlobalImagery);
+    ui->nasaGlobalImageryOpacity->setVisible(m_settings.m_displayNASAGlobalImagery);
+    ui->nasaGlobalImageryOpacityText->setVisible(m_settings.m_displayNASAGlobalImagery);
+    ui->nasaGlobalImageryOpacity->setValue(m_settings.m_nasaGlobalImageryOpacity);
+    if (m_nasaWidget) {
+        m_nasaWidget->setVisible(m_settings.m_displayNASAGlobalImagery);
+    }
+    m_mapTileServer->setDisplayNASAGlobalImagery(m_settings.m_displayNASAGlobalImagery);
     ui->displayMUF->setChecked(m_settings.m_displayMUF);
+    m_displayMUF->setChecked(m_settings.m_displayMUF);
     ui->displayfoF2->setChecked(m_settings.m_displayfoF2);
+    m_displayfoF2->setChecked(m_settings.m_displayfoF2);
     m_objectMapModel.setDisplayNames(m_settings.m_displayNames);
     m_objectMapModel.setDisplaySelectedGroundTracks(m_settings.m_displaySelectedGroundTracks);
     m_objectMapModel.setDisplayAllGroundTracks(m_settings.m_displayAllGroundTracks);
@@ -1492,6 +1932,8 @@ void MapGUI::displaySettings()
     m_imageMapModel.updateItemSettings(m_settings.m_itemSettings);
     m_polygonMapModel.updateItemSettings(m_settings.m_itemSettings);
     m_polylineMapModel.updateItemSettings(m_settings.m_itemSettings);
+    setEnableOverlay();
+    displayToolbar();
     applyMap2DSettings(true);
     applyMap3DSettings(true);
     getRollupContents()->restoreState(m_rollupState);
@@ -1575,12 +2017,195 @@ void MapGUI::on_displayAllGroundTracks_clicked(bool checked)
     m_objectMapModel.setDisplayAllGroundTracks(checked);
 }
 
+void MapGUI::on_displayRain_clicked(bool checked)
+{
+    if (this->sender() != ui->displayRain) {
+        ui->displayRain->setChecked(checked);
+    }
+    if (this->sender() != m_displayRain) {
+        m_displayRain->setChecked(checked);
+    }
+    m_settings.m_displayRain = checked;
+    m_mapTileServer->setDisplayRain(m_settings.m_displayRain);
+    setEnableOverlay();
+    clearOSMCache();
+    applyMap2DSettings(true);
+    if (m_cesium) {
+        m_cesium->showLayer("rain", m_settings.m_displayRain);
+    }
+}
+
+void MapGUI::on_displayClouds_clicked(bool checked)
+{
+    if (this->sender() != ui->displayClouds) {
+        ui->displayClouds->setChecked(checked);
+    }
+    if (this->sender() != m_displayClouds) {
+        m_displayClouds->setChecked(checked);
+    }
+    m_settings.m_displayClouds = checked;
+    m_mapTileServer->setDisplayClouds(m_settings.m_displayClouds);
+    setEnableOverlay();
+    clearOSMCache();
+    applyMap2DSettings(true);
+    if (m_cesium) {
+        m_cesium->showLayer("clouds", m_settings.m_displayClouds);
+    }
+}
+
+void MapGUI::on_displaySeaMarks_clicked(bool checked)
+{
+    if (this->sender() != ui->displaySeaMarks) {
+        ui->displaySeaMarks->setChecked(checked);
+    }
+    if (this->sender() != m_displaySeaMarks) {
+        m_displaySeaMarks->setChecked(checked);
+    }
+    m_settings.m_displaySeaMarks = checked;
+    m_mapTileServer->setDisplaySeaMarks(m_settings.m_displaySeaMarks);
+    setEnableOverlay();
+    clearOSMCache();
+    applyMap2DSettings(true);
+    if (m_cesium) {
+        m_cesium->showLayer("seaMarks", m_settings.m_displaySeaMarks);
+    }
+}
+
+void MapGUI::on_displayRailways_clicked(bool checked)
+{
+    if (this->sender() != ui->displayRailways) {
+        ui->displayRailways->setChecked(checked);
+    }
+    if (this->sender() != m_displayRailways) {
+        m_displayRailways->setChecked(checked);
+    }
+    m_settings.m_displayRailways = checked;
+    m_mapTileServer->setDisplayRailways(m_settings.m_displayRailways);
+    setEnableOverlay();
+    clearOSMCache();
+    applyMap2DSettings(true);
+    if (m_cesium) {
+        m_cesium->showLayer("railways", m_settings.m_displayRailways);
+    }
+}
+
+void MapGUI::on_displayNASAGlobalImagery_clicked(bool checked)
+{
+    if (this->sender() != ui->displayNASAGlobalImagery) {
+        ui->displayNASAGlobalImagery->setChecked(checked);
+    }
+    if (this->sender() != m_displayNASAGlobalImagery) {
+        m_displayNASAGlobalImagery->setChecked(checked);
+    }
+    m_settings.m_displayNASAGlobalImagery = checked;
+    ui->nasaGlobalImageryIdentifier->setVisible(m_settings.m_displayNASAGlobalImagery);
+    ui->nasaGlobalImageryOpacity->setVisible(m_settings.m_displayNASAGlobalImagery);
+    ui->nasaGlobalImageryOpacityText->setVisible(m_settings.m_displayNASAGlobalImagery);
+    if (m_nasaWidget) {
+        m_nasaWidget->setVisible(m_settings.m_displayNASAGlobalImagery);
+    }
+    m_mapTileServer->setDisplayNASAGlobalImagery(m_settings.m_displayNASAGlobalImagery);
+    setEnableOverlay();
+    clearOSMCache();
+    applyMap2DSettings(true);
+    if (m_cesium) {
+        m_cesium->showLayer("NASAGlobalImagery", m_settings.m_displayNASAGlobalImagery);
+    }
+}
+
+void MapGUI::on_nasaGlobalImageryIdentifier_currentIndexChanged(int index)
+{
+    if ((index >= 0) && (index < m_nasaDataSets.size()))
+    {
+        m_settings.m_nasaGlobalImageryIdentifier = m_nasaDataSets[index].m_identifier;
+        // MODIS_Terra_Aerosol/default/2014-04-09/GoogleMapsCompatible_Level6
+        QString date = "default"; // FIXME: Get from 3D map
+        QString path = QString("%1/default/%2/%3").arg(m_settings.m_nasaGlobalImageryIdentifier).arg(date).arg(m_nasaDataSets[index].m_tileMatrixSet);
+        m_mapTileServer->setNASAGlobalImageryPath(path);
+        QString format = m_nasaDataSets[index].m_format;
+        if (format == "image/jpeg") {
+            m_mapTileServer->setNASAGlobalImageryFormat("jpeg");
+        } else {
+            m_mapTileServer->setNASAGlobalImageryFormat("png");
+        }
+        setEnableOverlay();
+        clearOSMCache();
+        applyMap2DSettings(true);
+        applyNASAGlobalImagerySettings();
+    }
+}
+
+void MapGUI::applyNASAGlobalImagerySettings()
+{
+    int index = ui->nasaGlobalImageryIdentifier->currentIndex();
+
+    // Update 3D map
+    if (m_cesium)
+    {
+        if ((index >= 0) && (index < m_nasaDataSets.size()))
+        {
+            QString format = m_nasaDataSets[index].m_format;
+            QString extension = (format == "image/jpeg") ? "jpg" : "png";
+            // Does cesium want epsg3857 or epsg4326
+            //QString url = QString("https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/%1/default/{Time}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.%2").arg(m_settings.m_nasaGlobalImageryIdentifier).arg(extension);
+            //QString url = QString("https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%1/default/default/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.%2").arg(m_settings.m_nasaGlobalImageryIdentifier).arg(extension);
+            QString url = QString("https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%1/default/{Time}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.%2").arg(m_settings.m_nasaGlobalImageryIdentifier).arg(extension);
+            QString show = m_settings.m_displayNASAGlobalImagery ? "true" : "false";
+
+            m_cesium->setLayerSettings("NASAGlobalImagery",
+                {"url", "tileMatrixSet", "format", "show", "opacity", "dates"},
+                {url, m_nasaDataSets[index].m_tileMatrixSet, format, m_settings.m_displayNASAGlobalImagery, m_settings.m_nasaGlobalImageryOpacity, m_nasaDataSets[index].m_dates});
+        }
+    }
+
+    // Update NASA table / legend / description
+    if ((index >= 0) && (m_nasaDataSets[index].m_legends.size() > 0))
+    {
+        m_legend = &m_nasaDataSets[index].m_legends[0];
+        m_nasaGlobalImagery.downloadLegend(*m_legend);
+        m_descriptionWidget->setHtml("");
+        if (m_nasaMetaData.m_layers.contains(m_settings.m_nasaGlobalImageryIdentifier))
+        {
+            QString url = m_nasaMetaData.m_layers.value(m_settings.m_nasaGlobalImageryIdentifier).m_descriptionURL;
+            m_nasaGlobalImagery.downloadHTML(url);
+        }
+        displayNASAMetaData();
+        m_nasaWidget->setVisible(m_settings.m_displayNASAGlobalImagery);
+    }
+    else
+    {
+        if (m_nasaWidget) {
+            m_nasaWidget->setVisible(false);
+        }
+    }
+}
+
+void MapGUI::on_nasaGlobalImageryOpacity_valueChanged(int value)
+{
+    m_settings.m_nasaGlobalImageryOpacity = value;
+    ui->nasaGlobalImageryOpacityText->setText(QString("%1%").arg(m_settings.m_nasaGlobalImageryOpacity));
+
+    if (m_cesium)
+    {
+        m_cesium->setLayerSettings("NASAGlobalImagery",
+                {"opacity"},
+                {m_settings.m_nasaGlobalImageryOpacity}
+        );
+    }
+}
+
 void MapGUI::on_displayMUF_clicked(bool checked)
 {
+    if (this->sender() != ui->displayMUF) {
+        ui->displayMUF->setChecked(checked);
+    }
+    if (this->sender() != m_displayMUF) {
+        m_displayMUF->setChecked(checked);
+    }
     m_settings.m_displayMUF = checked;
     // Only call show if disabling, so we don't get two updates
     // (as getMUFPeriodically results in a call to showMUF when the data is available)
-     m_giro->getMUFPeriodically(m_settings.m_displayMUF ? 15 : 0);
+    m_giro->getMUFPeriodically(m_settings.m_displayMUF ? 15 : 0);
     if (m_cesium && !m_settings.m_displayMUF) {
         m_cesium->showMUF(m_settings.m_displayMUF);
     }
@@ -1588,11 +2213,66 @@ void MapGUI::on_displayMUF_clicked(bool checked)
 
 void MapGUI::on_displayfoF2_clicked(bool checked)
 {
+    if (this->sender() != ui->displayfoF2) {
+        ui->displayfoF2->setChecked(checked);
+    }
+    if (this->sender() != m_displayfoF2) {
+        m_displayfoF2->setChecked(checked);
+    }
     m_settings.m_displayfoF2 = checked;
     m_giro->getfoF2Periodically(m_settings.m_displayfoF2 ? 15 : 0);
     if (m_cesium && !m_settings.m_displayfoF2) {
         m_cesium->showfoF2(m_settings.m_displayfoF2);
     }
+}
+
+void MapGUI::createLayersMenu()
+{
+    QMenu *menu = new QMenu();
+
+    m_displayRain = menu->addAction("Weather radar");
+    m_displayRain->setCheckable(true);
+    m_displayRain->setToolTip("Display weather radar (rain/snow)");
+    connect(m_displayRain, &QAction::triggered, this, &MapGUI::on_displayRain_clicked);
+
+    m_displayClouds = menu->addAction("Satellite IR");
+    m_displayClouds->setCheckable(true);
+    m_displayClouds->setToolTip("Display satellite infra-red (clouds)");
+    connect(m_displayClouds, &QAction::triggered, this, &MapGUI::on_displayClouds_clicked);
+
+    m_displaySeaMarks = menu->addAction("Sea marks");
+    m_displaySeaMarks->setCheckable(true);
+    m_displaySeaMarks->setToolTip("Display sea marks");
+    //QIcon seaMarksIcon;
+    //seaMarksIcon.addPixmap(QPixmap("://map/icons/anchor.png"), QIcon::Normal, QIcon::On);
+    //displaySeaMarks->setIcon(seaMarksIcon);
+    connect(m_displaySeaMarks, &QAction::triggered, this, &MapGUI::on_displaySeaMarks_clicked);
+
+    m_displayRailways = menu->addAction("Railways");
+    m_displayRailways->setCheckable(true);
+    m_displayRailways->setToolTip("Display railways");
+    connect(m_displayRailways, &QAction::triggered, this, &MapGUI::on_displayRailways_clicked);
+
+    m_displayNASAGlobalImagery = menu->addAction("NASA Global Imagery");
+    m_displayNASAGlobalImagery->setCheckable(true);
+    m_displayNASAGlobalImagery->setToolTip("Display NASA Global Imagery");
+    connect(m_displayNASAGlobalImagery, &QAction::triggered, this, &MapGUI::on_displayNASAGlobalImagery_clicked);
+
+    m_displayMUF = menu->addAction("MUF");
+    m_displayMUF->setCheckable(true);
+    m_displayMUF->setToolTip("Display Maximum Usable Frequency contours");
+    connect(m_displayMUF, &QAction::triggered, this, &MapGUI::on_displayMUF_clicked);
+
+    m_displayfoF2 = menu->addAction("foF2");
+    m_displayfoF2->setCheckable(true);
+    m_displayfoF2->setToolTip("Display F2 layer critical frequency contours");
+    connect(m_displayfoF2, &QAction::triggered, this, &MapGUI::on_displayfoF2_clicked);
+
+    ui->layersMenu->setMenu(menu);
+}
+
+void MapGUI::on_layersMenu_clicked()
+{
 }
 
 void MapGUI::on_find_returnPressed()
@@ -1781,6 +2461,7 @@ void MapGUI::on_displaySettings_clicked()
         if (dialog.m_osmURLChanged) {
             clearOSMCache();
         }
+        displayToolbar();
         applyMap2DSettings(dialog.m_map2DSettingsChanged);
         applyMap3DSettings(dialog.m_map3DSettingsChanged);
         m_settingsKeys.append(dialog.m_settingsKeysChanged);
@@ -1858,11 +2539,160 @@ void MapGUI::receivedCesiumEvent(const QJsonObject &obj)
                 m_map->setMapDateTime(mapDateTime, systemDateTime, canAnimate && shouldAnimate ? multiplier : 0.0);
             }
         }
+        else if (event == "link")
+        {
+            QString url = obj.value("url").toString();
+            linkClicked(url);
+        }
     }
     else
     {
         qDebug() << "MapGUI::receivedCesiumEvent - Unexpected event: " << obj;
     }
+}
+
+// Handle link clicked in 2D Map Text box or 3D map infobox.
+void MapGUI::linkClicked(const QString& url)
+{
+    if (url.startsWith("sdrangel-kiwisdr://"))
+    {
+        QString kiwiURL = url.mid(19);
+        openKiwiSDR(kiwiURL);
+    }
+    else if (url.startsWith("sdrangel-spyserver://"))
+    {
+        QString spyServerURL = url.mid(21);
+        openSpyServer(spyServerURL);
+    }
+}
+
+// Open a KiwiSDR RX device
+void MapGUI::openKiwiSDR(const QString& url)
+{
+    // Create DeviceSet
+    MainCore *mainCore = MainCore::instance();
+    unsigned int deviceSetIndex = mainCore->getDeviceSets().size();
+    MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(0);
+    mainCore->getMainMessageQueue()->push(msg);
+
+    // Switch to KiwiSDR
+    int nbSamplingDevices = DeviceEnumerator::instance()->getNbRxSamplingDevices();
+    bool found = false;
+    QString hwType = "KiwiSDR";
+    for (int i = 0; i < nbSamplingDevices; i++)
+    {
+        const PluginInterface::SamplingDevice *samplingDevice;
+
+        samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(i);
+
+        if (!hwType.isEmpty() && (hwType != samplingDevice->hardwareId)) {
+            continue;
+        }
+
+        int direction = 0;
+        MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, direction);
+        mainCore->getMainMessageQueue()->push(msg);
+        found = true;
+        break;
+    }
+    if (!found)
+    {
+        qCritical() << "MapGUI::openKiwiSDR: Failed to find KiwiSDR";
+        return;
+    }
+
+    // Wait until device is created - is there a better way?
+    DeviceSet *deviceSet = nullptr;
+    do
+    {
+        QTime dieTime = QTime::currentTime().addMSecs(100);
+        while (QTime::currentTime() < dieTime) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+        }
+        if (mainCore->getDeviceSets().size() > deviceSetIndex)
+        {
+            deviceSet = mainCore->getDeviceSets()[deviceSetIndex];
+        }
+    }
+    while (!deviceSet);
+
+    // Move to same workspace
+    //getWorkspaceIndex();
+
+    // Set address setting
+    QStringList deviceSettingsKeys = {"serverAddress"};
+    SWGSDRangel::SWGDeviceSettings response;
+    response.init();
+    SWGSDRangel::SWGKiwiSDRSettings *deviceSettings = response.getKiwiSdrSettings();
+    deviceSettings->setServerAddress(new QString(url));
+    QString errorMessage;
+    deviceSet->m_deviceAPI->getSampleSource()->webapiSettingsPutPatch(false, deviceSettingsKeys, response, errorMessage);
+}
+
+// Open a RemoteTCPInput device to use for SpyServer
+void MapGUI::openSpyServer(const QString& url)
+{
+    // Create DeviceSet
+    MainCore *mainCore = MainCore::instance();
+    unsigned int deviceSetIndex = mainCore->getDeviceSets().size();
+    MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(0);
+    mainCore->getMainMessageQueue()->push(msg);
+
+    // Switch to RemoteTCPInput
+    int nbSamplingDevices = DeviceEnumerator::instance()->getNbRxSamplingDevices();
+    bool found = false;
+    QString hwType = "RemoteTCPInput";
+    for (int i = 0; i < nbSamplingDevices; i++)
+    {
+        const PluginInterface::SamplingDevice *samplingDevice;
+
+        samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(i);
+
+        if (!hwType.isEmpty() && (hwType != samplingDevice->hardwareId)) {
+            continue;
+        }
+
+        int direction = 0;
+        MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, direction);
+        mainCore->getMainMessageQueue()->push(msg);
+        found = true;
+        break;
+    }
+    if (!found)
+    {
+        qCritical() << "MapGUI::openSpyServer: Failed to find RemoteTCPInput";
+        return;
+    }
+
+    // Wait until device is created - is there a better way?
+    DeviceSet *deviceSet = nullptr;
+    do
+    {
+        QTime dieTime = QTime::currentTime().addMSecs(100);
+        while (QTime::currentTime() < dieTime) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+        }
+        if (mainCore->getDeviceSets().size() > deviceSetIndex)
+        {
+            deviceSet = mainCore->getDeviceSets()[deviceSetIndex];
+        }
+    }
+    while (!deviceSet);
+
+    // Move to same workspace
+    //getWorkspaceIndex();
+
+    // Set address/port setting
+    QStringList address = url.split(":");
+    QStringList deviceSettingsKeys = {"dataAddress", "dataPort", "protocol"};
+    SWGSDRangel::SWGDeviceSettings response;
+    response.init();
+    SWGSDRangel::SWGRemoteTCPInputSettings *deviceSettings = response.getRemoteTcpInputSettings();
+    deviceSettings->setDataAddress(new QString(address[0]));
+    deviceSettings->setDataPort(address[1].toInt());
+    deviceSettings->setProtocol(new QString("Spy Server"));
+    QString errorMessage;
+    deviceSet->m_deviceAPI->getSampleSource()->webapiSettingsPutPatch(false, deviceSettingsKeys, response, errorMessage);
 }
 
 #ifdef QT_WEBENGINE_FOUND
@@ -1940,6 +2770,13 @@ void MapGUI::makeUIConnections()
     QObject::connect(ui->displayNames, &ButtonSwitch::clicked, this, &MapGUI::on_displayNames_clicked);
     QObject::connect(ui->displayAllGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displayAllGroundTracks_clicked);
     QObject::connect(ui->displaySelectedGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displaySelectedGroundTracks_clicked);
+    QObject::connect(ui->displayRain, &ButtonSwitch::clicked, this, &MapGUI::on_displayRain_clicked);
+    QObject::connect(ui->displayClouds, &ButtonSwitch::clicked, this, &MapGUI::on_displayClouds_clicked);
+    QObject::connect(ui->displaySeaMarks, &ButtonSwitch::clicked, this, &MapGUI::on_displaySeaMarks_clicked);
+    QObject::connect(ui->displayRailways, &ButtonSwitch::clicked, this, &MapGUI::on_displayRailways_clicked);
+    QObject::connect(ui->displayNASAGlobalImagery, &ButtonSwitch::clicked, this, &MapGUI::on_displayNASAGlobalImagery_clicked);
+    QObject::connect(ui->nasaGlobalImageryIdentifier, qOverload<int>(&QComboBox::currentIndexChanged), this, &MapGUI::on_nasaGlobalImageryIdentifier_currentIndexChanged);
+    QObject::connect(ui->nasaGlobalImageryOpacity, qOverload<int>(&QDial::valueChanged), this, &MapGUI::on_nasaGlobalImageryOpacity_valueChanged);
     QObject::connect(ui->displayMUF, &ButtonSwitch::clicked, this, &MapGUI::on_displayMUF_clicked);
     QObject::connect(ui->displayfoF2, &ButtonSwitch::clicked, this, &MapGUI::on_displayfoF2_clicked);
     QObject::connect(ui->find, &QLineEdit::returnPressed, this, &MapGUI::on_find_returnPressed);
