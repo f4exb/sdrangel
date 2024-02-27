@@ -165,7 +165,7 @@ void KiwiSDRList::handleHTML(const QString& url, const QByteArray& bytes)
                     }
                     else if (key == "loc")
                     {
-                        sdr.m_location = value.toInt();
+                        sdr.m_location = value;
                     }
                     else if (key == "antenna")
                     {
