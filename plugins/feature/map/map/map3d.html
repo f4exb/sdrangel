@@ -229,6 +229,10 @@
     viewer.screenSpaceEventHandler.setInputAction(pickEntity, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     viewer.screenSpaceEventHandler.setInputAction(showCoords, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK, Cesium.KeyboardEventModifier.SHIFT);
     viewer.screenSpaceEventHandler.setInputAction(hideCoords, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+    viewer.infoBox.frame.setAttribute('sandbox', 'allow-same-origin allow-popups allow-forms allow-scripts allow-top-navigation');
+    viewer.infoBox.frame.src = "about:blank"; // Force reload so new attributes are applied
+
     var buildings = undefined;
     const images = new Map();
 
@@ -289,6 +293,77 @@
         viewer.scene.light.direction = Cesium.Cartesian3.clone(scene.camera.directionWC, viewer.scene.light.direction);
     }
 
+    // Image overlays
+
+    function dataCallback(interval, index) {
+        let time;
+        //console.log("Interval: " + interval + " start:" + interval.start + " stop:" + interval.stop + " index: " + index);
+        if (index === 0) {
+            // leading
+            time = Cesium.JulianDate.toIso8601(interval.stop);
+        } else {
+            time = Cesium.JulianDate.toIso8601(interval.start);
+        }
+        //console.log("Returning time: " + time);
+        return {
+            Time: time,
+        };
+    }
+
+    const times = Cesium.TimeIntervalCollection.fromIso8601({
+        iso8601: "2015-07-30/2017-06-16/P1D",   // P1D = 1 day
+        leadingInterval: true,
+        trailingInterval: true,
+        isStopIncluded: false,
+        dataCallback: dataCallback,
+    });
+
+    // See https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+API+for+Developers#GIBSAPIforDevelopers-OGCWebMapService(WMS)
+    var gibsProvider = new Cesium.WebMapTileServiceImageryProvider({
+        url: "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/{Time}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.jpg",
+        style: "default",
+        tileMatrixSetID: "250m",
+        format: "image/jpeg",
+        clock: viewer.clock,
+        times: times
+    });
+    const seaMarksProvider = new Cesium.UrlTemplateImageryProvider({
+        url: "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png"
+    });
+    const railwaysProvider = new Cesium.UrlTemplateImageryProvider({
+        url: "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
+    });
+    var rainProvider = new Cesium.UrlTemplateImageryProvider({
+        url: "https://tilecache.rainviewer.com/v2/radar/0000000000/256/{z}/{x}/{y}/4/1_1.png"
+    });
+    var cloudProvider = new Cesium.UrlTemplateImageryProvider({
+        url: "https://tilecache.rainviewer.com/v2/satellite/0000000000/256/{z}/{x}/{y}/0/0_0.png"
+    });
+
+    var gibsLayer = new Cesium.ImageryLayer(gibsProvider);
+    gibsLayer.show = false;
+    viewer.imageryLayers.add(gibsLayer);
+    var cloudLayer = new Cesium.ImageryLayer(cloudProvider);
+    cloudLayer.show = false;
+    viewer.imageryLayers.add(cloudLayer);
+    var rainLayer = new Cesium.ImageryLayer(rainProvider);
+    rainLayer.show = false;
+    viewer.imageryLayers.add(rainLayer);
+    const seaMarksLayer = new Cesium.ImageryLayer(seaMarksProvider);
+    seaMarksLayer.show = false;
+    viewer.imageryLayers.add(seaMarksLayer);
+    const railwaysLayer = new Cesium.ImageryLayer(railwaysProvider);
+    railwaysLayer.show = false;
+    viewer.imageryLayers.add(railwaysLayer);
+
+    const layers = new Map([
+        ["nasaGlobalImagery", gibsLayer],
+        ["clouds", cloudLayer],
+        ["rain", rainLayer],
+        ["seaMarks", seaMarksLayer],
+        ["railways", railwaysLayer]
+    ]);
+
     // Use WebSockets for handling commands from MapPlugin
     // (CZML doesn't support camera control, for example)
     // and sending events back to it
@@ -308,7 +383,7 @@
                     command.latitude - command.angle,
                     command.longitude + command.angle,
                     command.latitude + command.angle
-                    );
+                );
                 Cesium.Camera.DEFAULT_VIEW_FACTOR = 0.0;
                 viewer.camera.flyHome(0);
             } else if (command.command == "setView") {
@@ -329,12 +404,12 @@
                     playAnimation(viewer, command, 30);
                 }
             } else if (command.command == "setDateTime") {
-                 // Set current date and time of viewer
-                 var dateTime = Cesium.JulianDate.fromIso8601(command.dateTime);
-                 viewer.clock.currentTime = dateTime;
+                // Set current date and time of viewer
+                var dateTime = Cesium.JulianDate.fromIso8601(command.dateTime);
+                viewer.clock.currentTime = dateTime;
             } else if (command.command == "getDateTime") {
-                 // Get current date and time of viewer
-                 reportClock();
+                // Get current date and time of viewer
+                reportClock();
             } else if (command.command == "setTerrain") {
                 // Support using Ellipsoid terrain for performance and also
                 // because paths can't be clammped to ground, so AIS paths
@@ -374,7 +449,7 @@
                 viewer.scene.globe.nightFadeOutDistance = 0.0;
                 if (!command.useSunLight) {
                     viewer.scene.light = new Cesium.DirectionalLight({
-                        direction : new Cesium.Cartesian3(1, 0, 0)
+                        direction: new Cesium.Cartesian3(1, 0, 0)
                     });
                     viewer.scene.preRender.addEventListener(cameraLight);
                 } else {
@@ -402,22 +477,94 @@
                     viewer.dataSources.add(
                         Cesium.GeoJsonDataSource.load(
                             "muf.geojson",
-                            {describe: describeMUF}
+                            { describe: describeMUF }
                         )
-                    ).then(function(dataSource) {mufGeoJSONStream = dataSource; });
+                    ).then(function (dataSource) { mufGeoJSONStream = dataSource; });
                 }
             } else if (command.command == "showfoF2") {
                 if (foF2GeoJSONStream != null) {
-                     viewer.dataSources.remove(foF2GeoJSONStream, true);
-                     foF2GeoJSONStream = null;
+                    viewer.dataSources.remove(foF2GeoJSONStream, true);
+                    foF2GeoJSONStream = null;
                 }
                 if (command.show == true) {
-                     viewer.dataSources.add(
+                    viewer.dataSources.add(
                         Cesium.GeoJsonDataSource.load(
                             "fof2.geojson",
-                            {describe: describefoF2}
+                            { describe: describefoF2 }
                         )
-                    ).then(function(dataSource) {foF2GeoJSONStream = dataSource; });
+                    ).then(function (dataSource) { foF2GeoJSONStream = dataSource; });
+                }
+            } else if (command.command == "showLayer") {
+                layers.get(command.layer).show = command.show;
+            } else if (command.command == "setLayerSettings") {
+                if (command.layer == "NASAGlobalImagery") {
+                    if ('url' in command) {
+                        console.log("Using URL: " + command.url + " format: " + command.format + " matrixSet: " + command.tileMatrixSet + " dates:" + command.dates + " length: " + command.dates.length + " typeof: " + typeof(command.dates));
+
+                        viewer.imageryLayers.remove(gibsLayer, true);
+
+                        const times = Cesium.TimeIntervalCollection.fromIso8601({
+                            iso8601: command.dates[0],
+                            leadingInterval: true,
+                            trailingInterval: true,
+                            isStopIncluded: false,
+                            dataCallback: dataCallback,
+                        });
+
+                        for (let i = 1; i < command.dates.length; i++) {
+
+                            const times2 = Cesium.TimeIntervalCollection.fromIso8601({
+                                iso8601: command.dates[i],
+                                leadingInterval: true,
+                                trailingInterval: true,
+                                isStopIncluded: false,
+                                dataCallback: dataCallback,
+                            });
+
+                            times.removeInterval(times.get(times.length - 1)); // Remove element that goes to end of time
+                            for (let i = 1; i < times2.length; i++) {
+                                times.addInterval(times2.get(i));
+                            }
+                        }
+
+                        gibsProvider = new Cesium.WebMapTileServiceImageryProvider({
+                            url: command.url,
+                            style: "default",
+                            tileMatrixSetID: command.tileMatrixSet,
+                            format: command.format,
+                            clock: viewer.clock,
+                            times: times
+                        });
+
+                        gibsLayer = new Cesium.ImageryLayer(gibsProvider);
+                        gibsLayer.alpha = 0.5;
+                        gibsLayer.show = command.show;
+                        viewer.imageryLayers.add(gibsLayer);
+                        layers.set(command.layer, gibsLayer);
+                    }
+                    if ('opacity' in command) {
+                        gibsLayer.alpha = command.opacity / 100.0;
+                    }
+                } else if (command.layer == "clouds") {
+                    viewer.imageryLayers.remove(cloudLayer, true);
+                    cloudProvider = new Cesium.UrlTemplateImageryProvider({
+                        url: "https://tilecache.rainviewer.com/" + command.path + "/256/{z}/{x}/{y}/0/0_0.png"
+                    });
+                    cloudLayer = new Cesium.ImageryLayer(cloudProvider);
+                    cloudLayer.show = command.show;
+                    viewer.imageryLayers.add(cloudLayer);
+                    layers.set(command.layer, cloudLayer);
+                } else if (command.layer == "rain") {
+                    viewer.imageryLayers.remove(rainLayer, true);
+                    rainProvider = new Cesium.UrlTemplateImageryProvider({
+                        url: "https://tilecache.rainviewer.com/" + command.path + "/256/{z}/{x}/{y}/4/1_1.png"
+                    });
+                    rainLayer = new Cesium.ImageryLayer(rainProvider);
+                    rainLayer.show = command.show;
+                    viewer.imageryLayers.add(rainLayer);
+                    layers.set(command.layer, rainLayer);
+                } else {
+                    console.log("Unknown layer: " + command.layer);
                 }
             } else if (command.command == "updateImage") {
 
@@ -599,6 +746,12 @@
             }));
         }
     };
+
+    // Can be called by onclick handler in anchors in the infobox, to pass a URL to SDRangel
+    function infoboxLink(url) {
+        socket.send(JSON.stringify({ event: "link", url: url }));
+        return false;
+    }
 
     Cesium.knockout.getObservable(viewer.clockViewModel, 'shouldAnimate').subscribe(function(isAnimating) {
         reportClock();

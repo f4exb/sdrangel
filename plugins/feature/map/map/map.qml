@@ -303,22 +303,18 @@ Item {
                         height: text.height + 5
                         radius: 5
                         visible: mapTextVisible
-                        Text {
-                            id: text
-                            anchors.centerIn: parent
-                            text: mapText
-                            textFormat: TextEdit.RichText
-                        }
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
+                            //propagateComposedEvents: true // so links in Text work
                             onClicked: {
                                 if (mouse.button === Qt.LeftButton) {
                                     selected = !selected
                                     if (selected) {
                                         mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
                                     }
+                                    //mouse.accepted = false // propagate to text
                                 } else if (mouse.button === Qt.RightButton) {
                                     menuItems.clear()
                                     menus.clear()
@@ -404,6 +400,17 @@ Item {
                                         object.menu.removeItem(object)
                                     }
                                 }
+                            }
+                        }
+                        // Have Text after MouseArea, so links can be clicked
+                        Text {
+                            id: text
+                            anchors.centerIn: parent
+                            text: mapText
+                            textFormat: TextEdit.RichText
+                            onLinkActivated: {
+                                console.log("Link", link);
+                                mapModel.link(link);
                             }
                         }
                     }
