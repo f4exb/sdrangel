@@ -407,7 +407,7 @@ void RemoteTCPInputTCPHandler::spyServerConnect()
     SpyServerProtocol::encodeUInt32(&request[0], 0);
     SpyServerProtocol::encodeUInt32(&request[4], 4+9);
     SpyServerProtocol::encodeUInt32(&request[8], SpyServerProtocol::ProtocolID);
-    memcpy(&request[8+5], "SDRangel", 9);
+    memcpy(&request[8+4], "SDRangel", 9);
     if (m_dataSocket) {
         m_dataSocket->write((char*)request, sizeof(request));
     }
@@ -876,7 +876,7 @@ void RemoteTCPInputTCPHandler::processSpyServerDevice(const SpyServerProtocol::D
     m_settings.m_devSampleRate = settings.m_devSampleRate = ssDevice->m_sampleRate;
     settingsKeys.append("devSampleRate");
     // Make sure decimation setting is at least the minimum
-    if (!m_settings.m_overrideRemoteSettings || (settings.m_log2Decim < ssDevice->m_minDecimation))
+    if (!m_settings.m_overrideRemoteSettings || (settings.m_log2Decim < (int) ssDevice->m_minDecimation))
     {
         m_settings.m_log2Decim = settings.m_log2Decim = ssDevice->m_minDecimation;
         settingsKeys.append("log2Decim");
@@ -914,7 +914,7 @@ void RemoteTCPInputTCPHandler::processSpyServerState(const SpyServerProtocol::St
             settings.m_centerFrequency = ssState->m_iqCenterFrequency;
             settingsKeys.append("centerFrequency");
         }
-        if (m_settings.m_gain[0] != ssState->m_gain)
+        if (m_settings.m_gain[0] != (qint32) ssState->m_gain)
         {
             settings.m_gain[0] = ssState->m_gain;
             settingsKeys.append("gain[0]");
@@ -943,7 +943,7 @@ void RemoteTCPInputTCPHandler::processSpyServerData(int requiredBytes, bool clea
     {
         if (m_state == HEADER)
         {
-            if (m_dataSocket->bytesAvailable() >= sizeof(SpyServerProtocol::Header))
+            if (m_dataSocket->bytesAvailable() >= (qint64) sizeof(SpyServerProtocol::Header))
             {
                 qint64 bytesRead = m_dataSocket->read((char *) &m_spyServerHeader, sizeof(SpyServerProtocol::Header));
                 if (bytesRead == sizeof(SpyServerProtocol::Header)) {

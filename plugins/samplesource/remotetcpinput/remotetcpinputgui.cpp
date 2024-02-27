@@ -847,6 +847,8 @@ void RemoteTCPInputGui::on_preFill_valueChanged(int value)
 
 void RemoteTCPInputGui::on_protocol_currentIndexChanged(int index)
 {
+    (void) index;
+
     m_settings.m_protocol = ui->protocol->currentText();
     m_settingsKeys.append("protocol");
     sendSettings();
