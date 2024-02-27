@@ -358,11 +358,6 @@ private slots:
                 {
                     qDebug() << "MapTileServer::downloadFinished: Failed to load image: " << url;
                 }
-                else
-                {
-                    bool cached = reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute).toBool();
-                    //qDebug() << "Downloaded " << url << "as" << image.size() << "cached:" << cached;
-                }
             }
             else
             {

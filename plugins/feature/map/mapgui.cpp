@@ -207,8 +207,8 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_legend(nullptr),
     m_nasaWidget(nullptr),
     m_legendWidget(nullptr),
-    m_descriptionWidget(nullptr),
-    m_overviewWidget(nullptr)
+    m_overviewWidget(nullptr),
+    m_descriptionWidget(nullptr)
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -1437,6 +1437,8 @@ void MapGUI::nasaGlobalImageryMetaDataUpdated(const NASAGlobalImagery::MetaData&
 
 void MapGUI::nasaGlobalImageryLegendAvailable(const QString& url, const QByteArray& data)
 {
+    (void) url;
+
     if (m_legendWidget)
     {
         m_legendWidget->load(data);
@@ -1450,6 +1452,8 @@ void MapGUI::nasaGlobalImageryLegendAvailable(const QString& url, const QByteArr
 
 void MapGUI::nasaGlobalImageryHTMLAvailable(const QString& url, const QByteArray& data)
 {
+    (void) url;
+
     if (m_descriptionWidget) {
         m_descriptionWidget->setHtml(data);
     }
@@ -1657,6 +1661,8 @@ bool MapGUI::eventFilter(QObject *obj, QEvent *event)
 
 void MapGUI::orientationChanged(Qt::ScreenOrientation orientation)
 {
+    (void) orientation;
+
     // Need a delay before geometry() reflects new orientation
     // https://bugreports.qt.io/browse/QTBUG-109127
     QTimer::singleShot(200, [this]() {
