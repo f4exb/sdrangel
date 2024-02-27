@@ -193,15 +193,7 @@ When clicked, all items will be deleted from the map.
 
 When clicked, opens the Map Display Settings dialog:
 
-![Map Display Settings Dialog](../../../doc/img/Map_plugin_display_settings.png)
-
-The top half of the dialog allows customization of how objects from different SDRangel
-plugins are displayed on the 2D and 3D maps. This includes:
-
-* Whether images are displayed on the 2D map and whether 3D models are displayed on the 2D map.
-* Whether labels are displayed giving the name of the object.
-* Whether taken and predicted tracks are displayed and in which colour.
-* How the image or 3D model is scaled as the zoom level changes.
+![Map Display Settings Dialog Maps Tab](../../../doc/img/Map_plugin_display_settings.png)
 
 For the 2D map, the settings include:
 
@@ -212,13 +204,28 @@ For the 2D map, the settings include:
 
 For the 3D map, the settings include:
 
+* Whether the 3D map is displayed.
 * The terrain provider, which provides elevation data. For a "flat" globe, terrain can be set to Ellipsoid for the WGS-84 ellipsoid.
 * The buildings provider, which provides 3D building models. This can be set to None if no buildings are desired.
 * Whether the globe and models are lit from the direction of the Sun or the camera.
 * The camera reference frame. For ECEF (Earth Centered Earth Fixed), the camera rotates with the globe.
 For ECI (Earth Centred Inertial) the camera is fixed in space and the globe will rotate under it.
 
-* API keys, required to access maps from different providers.
+The "Download 3D Models" button will download the 3D models of aircraft, ships and satellites that are required for the 3D map.
+These are not included with the SDRangel distribution, so must be downloaded. It is recommeded to restart SDRangel after downloading the models.
+
+![Map Display Settings Dialog Items Tab](../../../doc/img/Map_plugin_display_settings_items.png)
+
+The Map Items tab customization of how objects from different SDRangel plugins and the Internet are displayed on the 2D and 3D maps. This includes:
+
+* Whether images are displayed on the 2D map and whether 3D models are displayed on the 3D map.
+* Whether labels are displayed giving the name of the object.
+* Whether taken and predicted tracks are displayed and in which colour.
+* How the image or 3D model is scaled as the zoom level changes.
+
+![Map Display Settings Dialog API Keys Tab](../../../doc/img/Map_plugin_display_settings_apikeys.png)
+
+API keys are required to access maps from different providers.
 
 Free API keys are available by signing up for an accounts with:
 
@@ -228,9 +235,6 @@ Free API keys are available by signing up for an accounts with:
 * [Cesium ion](https://cesium.com/ion/signup)
 
 If API keys are not specified, a default key will be used, but this may not work if too many users use it.
-
-The "Download 3D Models" button will download the 3D models of aircraft, ships and satellites that are required for the 3D map.
-These are not included with the SDRangel distribution, so must be downloaded.
 
 <h3>Map</h3>
 
