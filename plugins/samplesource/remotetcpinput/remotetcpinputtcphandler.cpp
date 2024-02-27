@@ -49,7 +49,7 @@ RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler(SampleSinkFifo *sampleFifo, D
 {
     m_sampleFifo->setSize(5000000); // Start with large FIFO, to avoid having to resize
     m_tcpBuf = new char[m_sampleFifo->size()*2*4];
-    m_timer.setInterval(125);
+    m_timer.setInterval(50); // Previously 125, but this results in an obviously slow spectrum refresh rate
     connect(&m_reconnectTimer, SIGNAL(timeout()), this, SLOT(reconnect()));
     m_reconnectTimer.setSingleShot(true);
 }
@@ -165,7 +165,7 @@ void RemoteTCPInputTCPHandler::cleanup()
 // E.g. sample rate or bit depth
 void RemoteTCPInputTCPHandler::clearBuffer()
 {
-    if (m_dataSocket)
+    if (m_dataSocket && m_readMetaData)
     {
         if (m_spyServer)
         {
@@ -606,7 +606,9 @@ void RemoteTCPInputTCPHandler::connected()
     m_spyServer = m_settings.m_protocol == "Spy Server";
     m_state = HEADER;
     m_sdra = false;
-    spyServerConnect();
+    if (m_spyServer) {
+        spyServerConnect();
+    }
 }
 
 void RemoteTCPInputTCPHandler::reconnect()
