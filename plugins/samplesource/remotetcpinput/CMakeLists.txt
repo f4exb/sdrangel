@@ -14,6 +14,7 @@ set(remotetcpinput_HEADERS
     remotetcpinputsettings.h
     remotetcpinputwebapiadapter.h
     remotetcpinputplugin.h
+    spyserver.h
 )
 
 include_directories(

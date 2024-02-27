@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2022-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2022-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 // Copyright (C) 2022 Jiří Pinkava <jiri.pinkava@rossum.ai>                      //
 //                                                                               //
@@ -167,9 +167,19 @@ void RemoteTCPInputTCPHandler::clearBuffer()
 {
     if (m_dataSocket)
     {
-        m_dataSocket->flush();
-        m_dataSocket->readAll();
-        m_fillBuffer = true;
+        if (m_spyServer)
+        {
+            // Can't just flush buffer, otherwise we'll lose header sync
+            // Read and throw away any available data
+            processSpyServerData(m_dataSocket->bytesAvailable(), true);
+            m_fillBuffer = true;
+        }
+        else
+        {
+            m_dataSocket->flush();
+            m_dataSocket->readAll();
+            m_fillBuffer = true;
+        }
     }
 }
 
@@ -389,6 +399,60 @@ void RemoteTCPInputTCPHandler::setSampleBitDepth(int sampleBits)
     }
 }
 
+void RemoteTCPInputTCPHandler::spyServerConnect()
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    quint8 request[8+4+9];
+    SpyServerProtocol::encodeUInt32(&request[0], 0);
+    SpyServerProtocol::encodeUInt32(&request[4], 4+9);
+    SpyServerProtocol::encodeUInt32(&request[8], SpyServerProtocol::ProtocolID);
+    memcpy(&request[8+5], "SDRangel", 9);
+    if (m_dataSocket) {
+        m_dataSocket->write((char*)request, sizeof(request));
+    }
+}
+
+void RemoteTCPInputTCPHandler::spyServerSet(int setting, int value)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    quint8 request[8+8];
+    SpyServerProtocol::encodeUInt32(&request[0], 2);
+    SpyServerProtocol::encodeUInt32(&request[4], 8);
+    SpyServerProtocol::encodeUInt32(&request[8], setting);
+    SpyServerProtocol::encodeUInt32(&request[12], value);
+    if (m_dataSocket) {
+        m_dataSocket->write((char*)request, sizeof(request));
+    }
+}
+
+void RemoteTCPInputTCPHandler::spyServerSetIQFormat(int sampleBits)
+{
+    quint32 format;
+
+    if (sampleBits == 8) {
+        format = 1;
+    } else if (sampleBits == 16) {
+        format = 2;
+    } else if (sampleBits == 24) {
+        format = 3;
+    } else if (sampleBits == 32) {
+        format = 4; // This is float
+    } else {
+        qDebug() << "RemoteTCPInputTCPHandler::spyServerSetIQFormat: Unsupported value" << sampleBits;
+        format = 1;
+    }
+    spyServerSet(SpyServerProtocol::setIQFormat, format);
+}
+
+void RemoteTCPInputTCPHandler::spyServerSetStreamIQ()
+{
+    spyServerSetIQFormat(m_settings.m_sampleBits);
+    spyServerSet(SpyServerProtocol::setStreamingMode, 1);       // Stream IQ only
+    spyServerSet(SpyServerProtocol::setStreamingEnabled, 1);    // Enable streaming
+}
+
 void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
     qDebug() << "RemoteTCPInputTCPHandler::applySettings: "
@@ -396,86 +460,124 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
                 << settings.getDebugString(settingsKeys, force);
     QMutexLocker mutexLocker(&m_mutex);
 
-    if (settingsKeys.contains("centerFrequency") || force) {
-        setCenterFrequency(settings.m_centerFrequency);
-    }
-    if (settingsKeys.contains("loPpmCorrection") || force) {
-        setFreqCorrection(settings.m_loPpmCorrection);
-    }
-    if (settingsKeys.contains("dcBlock") || force) {
-        if (m_sdra) {
-            setDCOffsetRemoval(settings.m_dcBlock);
-        }
-    }
-    if (settingsKeys.contains("iqCorrection") || force) {
-        if (m_sdra) {
-            setIQCorrection(settings.m_iqCorrection);
-        }
-    }
-    if (settingsKeys.contains("biasTee") || force) {
-        setBiasTee(settings.m_biasTee);
-    }
-    if (settingsKeys.contains("directSampling") || force) {
-        setDirectSampling(settings.m_directSampling);
-    }
-    if (settingsKeys.contains("log2Decim") || force) {
-        if (m_sdra) {
-            setDecimation(settings.m_log2Decim);
-        }
-    }
-    if (settingsKeys.contains("devSampleRate") || force) {
-        setSampleRate(settings.m_devSampleRate);
-    }
-    if (settingsKeys.contains("agc") || force) {
-        setAGC(settings.m_agc);
-    }
-    if (force) {
-        setTunerAGC(1); // The SDRangel RTLSDR driver always has tuner gain as manual
-    }
-    if (settingsKeys.contains("gain[0]") || force) {
-        setTunerGain(settings.m_gain[0]);
-    }
-    for (int i = 1; i < 3; i++)
+    if (m_spyServer)
     {
-        if (settingsKeys.contains(QString("gain[%1]").arg(i)) || force) {
-            setIFGain(i, settings.m_gain[i]);
+        if (settingsKeys.contains("centerFrequency") || force) {
+            spyServerSet(SpyServerProtocol::setCenterFrequency, settings.m_centerFrequency);
         }
-    }
-    if (settingsKeys.contains("rfBW") || force) {
-        setBandwidth(settings.m_rfBW);
-    }
-    if (settingsKeys.contains("inputFrequencyOffset") || force) {
-        if (m_sdra) {
-            setChannelFreqOffset(settings.m_inputFrequencyOffset);
-        }
-    }
-    if (settingsKeys.contains("channelGain") || force) {
-        if (m_sdra) {
-            setChannelGain(settings.m_channelGain);
-        }
-    }
-    if ((settings.m_channelSampleRate != m_settings.m_channelSampleRate) || force)
-    {
-        // Resize FIFO to give us 1 second
-        if ((settingsKeys.contains("channelSampleRate") || force) && (settings.m_channelSampleRate > (qint32)m_sampleFifo->size()))
+        if ((settings.m_channelSampleRate != m_settings.m_channelSampleRate) || force)
         {
-            qDebug() << "RemoteTCPInputTCPHandler::applySettings: Resizing sample FIFO from " << m_sampleFifo->size() << "to" << settings.m_channelSampleRate;
-            m_sampleFifo->setSize(settings.m_channelSampleRate);
-            delete[] m_tcpBuf;
-            m_tcpBuf = new char[m_sampleFifo->size()*2*4];
-            m_fillBuffer = true; // So we reprime FIFO
+            // Resize FIFO to give us 1 second
+            if ((settingsKeys.contains("channelSampleRate") || force) && (settings.m_channelSampleRate > (qint32)m_sampleFifo->size()))
+            {
+                qDebug() << "RemoteTCPInputTCPHandler::applySettings: Resizing sample FIFO from " << m_sampleFifo->size() << "to" << settings.m_channelSampleRate;
+                m_sampleFifo->setSize(settings.m_channelSampleRate);
+                delete[] m_tcpBuf;
+                m_tcpBuf = new char[m_sampleFifo->size()*2*4];
+                m_fillBuffer = true; // So we reprime FIFO
+            }
+            // Protocol only seems to allow changing decimation
+            //spyServerSet(SpyServerProtocol::???, settings.m_channelSampleRate);
+            clearBuffer();
         }
-        if (m_sdra) {
-            setChannelSampleRate(settings.m_channelSampleRate);
+        if (settingsKeys.contains("sampleBits") || force)
+        {
+            spyServerSetIQFormat(settings.m_sampleBits);
+            clearBuffer();
         }
-        clearBuffer();
+        if (settingsKeys.contains("log2Decim") || force)
+        {
+            spyServerSet(SpyServerProtocol::setIQDecimation, settings.m_log2Decim);
+            clearBuffer();
+        }
+        if (settingsKeys.contains("gain[0]") || force)
+        {
+            spyServerSet(SpyServerProtocol::setGain, settings.m_gain[0] / 10); // Convert 10ths dB to index
+        }
     }
-    if (settingsKeys.contains("sampleBits") || force)
+    else
     {
-        if (m_sdra) {
-            setSampleBitDepth(settings.m_sampleBits);
+        if (settingsKeys.contains("centerFrequency") || force) {
+            setCenterFrequency(settings.m_centerFrequency);
         }
-        clearBuffer();
+        if (settingsKeys.contains("loPpmCorrection") || force) {
+            setFreqCorrection(settings.m_loPpmCorrection);
+        }
+        if (settingsKeys.contains("dcBlock") || force) {
+            if (m_sdra) {
+                setDCOffsetRemoval(settings.m_dcBlock);
+            }
+        }
+        if (settingsKeys.contains("iqCorrection") || force) {
+            if (m_sdra) {
+                setIQCorrection(settings.m_iqCorrection);
+            }
+        }
+        if (settingsKeys.contains("biasTee") || force) {
+            setBiasTee(settings.m_biasTee);
+        }
+        if (settingsKeys.contains("directSampling") || force) {
+            setDirectSampling(settings.m_directSampling);
+        }
+        if (settingsKeys.contains("log2Decim") || force) {
+            if (m_sdra) {
+                setDecimation(settings.m_log2Decim);
+            }
+        }
+        if (settingsKeys.contains("devSampleRate") || force) {
+            setSampleRate(settings.m_devSampleRate);
+        }
+        if (settingsKeys.contains("agc") || force) {
+            setAGC(settings.m_agc);
+        }
+        if (force) {
+            setTunerAGC(1); // The SDRangel RTLSDR driver always has tuner gain as manual
+        }
+        if (settingsKeys.contains("gain[0]") || force) {
+            setTunerGain(settings.m_gain[0]);
+        }
+        for (int i = 1; i < 3; i++)
+        {
+            if (settingsKeys.contains(QString("gain[%1]").arg(i)) || force) {
+                setIFGain(i, settings.m_gain[i]);
+            }
+        }
+        if (settingsKeys.contains("rfBW") || force) {
+            setBandwidth(settings.m_rfBW);
+        }
+        if (settingsKeys.contains("inputFrequencyOffset") || force) {
+            if (m_sdra) {
+                setChannelFreqOffset(settings.m_inputFrequencyOffset);
+            }
+        }
+        if (settingsKeys.contains("channelGain") || force) {
+            if (m_sdra) {
+                setChannelGain(settings.m_channelGain);
+            }
+        }
+        if ((settings.m_channelSampleRate != m_settings.m_channelSampleRate) || force)
+        {
+            // Resize FIFO to give us 1 second
+            if ((settingsKeys.contains("channelSampleRate") || force) && (settings.m_channelSampleRate > (qint32)m_sampleFifo->size()))
+            {
+                qDebug() << "RemoteTCPInputTCPHandler::applySettings: Resizing sample FIFO from " << m_sampleFifo->size() << "to" << settings.m_channelSampleRate;
+                m_sampleFifo->setSize(settings.m_channelSampleRate);
+                delete[] m_tcpBuf;
+                m_tcpBuf = new char[m_sampleFifo->size()*2*4];
+                m_fillBuffer = true; // So we reprime FIFO
+            }
+            if (m_sdra) {
+                setChannelSampleRate(settings.m_channelSampleRate);
+            }
+            clearBuffer();
+        }
+        if (settingsKeys.contains("sampleBits") || force)
+        {
+            if (m_sdra) {
+                setSampleBitDepth(settings.m_sampleBits);
+            }
+            clearBuffer();
+        }
     }
 
     // Don't use force, as disconnect can cause rtl_tcp to quit
@@ -501,6 +603,10 @@ void RemoteTCPInputTCPHandler::connected()
         MsgReportConnection *msg = MsgReportConnection::create(true);
         m_messageQueueToGUI->push(msg);
     }
+    m_spyServer = m_settings.m_protocol == "Spy Server";
+    m_state = HEADER;
+    m_sdra = false;
+    spyServerConnect();
 }
 
 void RemoteTCPInputTCPHandler::reconnect()
@@ -542,116 +648,366 @@ void RemoteTCPInputTCPHandler::dataReadyRead()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    if (!m_readMetaData)
+    if (!m_readMetaData && !m_spyServer)
     {
-        quint8 metaData[RemoteTCPProtocol::m_sdraMetaDataSize];
-        if (m_dataSocket->bytesAvailable() >= (qint64)sizeof(metaData))
+        processMetaData();
+    }
+    else if (!m_readMetaData && m_spyServer)
+    {
+        processSpyServerMetaData();
+    }
+}
+
+void RemoteTCPInputTCPHandler::processMetaData()
+{
+    quint8 metaData[RemoteTCPProtocol::m_sdraMetaDataSize];
+    if (m_dataSocket->bytesAvailable() >= (qint64)sizeof(metaData))
+    {
+        qint64 bytesRead = m_dataSocket->read((char *)&metaData[0], 4);
+        if (bytesRead == 4)
         {
-            qint64 bytesRead = m_dataSocket->read((char *)&metaData[0], 4);
-            if (bytesRead == 4)
+            // Read first 4 bytes which indicate which protocol is in use
+            // RTL0 or SDRA
+            char protochars[5];
+            memcpy(protochars, metaData, 4);
+            protochars[4] = '\0';
+            QString protocol(protochars);
+
+            if (protocol == "RTL0")
             {
-                // Read first 4 bytes which indicate which protocol is in use
-                // RTL0 or SDRA
-                char protochars[5];
-                memcpy(protochars, metaData, 4);
-                protochars[4] = '\0';
-                QString protocol(protochars);
+                m_sdra = false;
+                m_spyServer = false;
+                bytesRead = m_dataSocket->read((char *)&metaData[4], RemoteTCPProtocol::m_rtl0MetaDataSize-4);
 
-                if (protocol == "RTL0")
+                m_device = (RemoteTCPProtocol::Device)RemoteTCPProtocol::extractUInt32(&metaData[4]);
+                if (m_messageQueueToGUI) {
+                    m_messageQueueToGUI->push(MsgReportRemoteDevice::create(m_device, protocol));
+                }
+                if (m_settings.m_sampleBits != 8)
                 {
-                    m_sdra = false;
-                    bytesRead = m_dataSocket->read((char *)&metaData[4], RemoteTCPProtocol::m_rtl0MetaDataSize-4);
-
-                    RemoteTCPProtocol::Device tuner = (RemoteTCPProtocol::Device)RemoteTCPProtocol::extractUInt32(&metaData[4]);
-                    if (m_messageQueueToGUI) {
-                        m_messageQueueToGUI->push(MsgReportRemoteDevice::create(tuner, protocol));
+                    RemoteTCPInputSettings& settings = m_settings;
+                    settings.m_sampleBits = 8;
+                    QList<QString> settingsKeys{"sampleBits"};
+                    if (m_messageQueueToInput) {
+                        m_messageQueueToInput->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
                     }
-                    if (m_settings.m_sampleBits != 8)
-                    {
-                        RemoteTCPInputSettings& settings = m_settings;
-                        settings.m_sampleBits = 8;
-                        QList<QString> settingsKeys{"sampleBits"};
-                        if (m_messageQueueToInput) {
-                            m_messageQueueToInput->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
-                        }
-                        if (m_messageQueueToGUI) {
-                            m_messageQueueToGUI->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
-                        }
+                    if (m_messageQueueToGUI) {
+                        m_messageQueueToGUI->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
                     }
                 }
-                else if (protocol == "SDRA")
-                {
-                    m_sdra = true;
-                    bytesRead = m_dataSocket->read((char *)&metaData[4], RemoteTCPProtocol::m_sdraMetaDataSize-4);
+            }
+            else if (protocol == "SDRA")
+            {
+                m_sdra = true;
+                m_spyServer = false;
+                bytesRead = m_dataSocket->read((char *)&metaData[4], RemoteTCPProtocol::m_sdraMetaDataSize-4);
 
-                    RemoteTCPProtocol::Device device = (RemoteTCPProtocol::Device)RemoteTCPProtocol::extractUInt32(&metaData[4]);
-                    if (m_messageQueueToGUI) {
-                        m_messageQueueToGUI->push(MsgReportRemoteDevice::create(device, protocol));
-                    }
-                    if (!m_settings.m_overrideRemoteSettings)
+                m_device = (RemoteTCPProtocol::Device)RemoteTCPProtocol::extractUInt32(&metaData[4]);
+                if (m_messageQueueToGUI) {
+                    m_messageQueueToGUI->push(MsgReportRemoteDevice::create(m_device, protocol));
+                }
+                if (!m_settings.m_overrideRemoteSettings)
+                {
+                    // Update local settings to match remote
+                    RemoteTCPInputSettings& settings = m_settings;
+                    QList<QString> settingsKeys;
+                    settings.m_centerFrequency = RemoteTCPProtocol::extractUInt64(&metaData[8]);
+                    settingsKeys.append("centerFrequency");
+                    settings.m_loPpmCorrection = RemoteTCPProtocol::extractUInt32(&metaData[16]);
+                    settingsKeys.append("loPpmCorrection");
+                    quint32 flags = RemoteTCPProtocol::extractUInt32(&metaData[20]);
+                    settings.m_biasTee = flags & 1;
+                    settingsKeys.append("biasTee");
+                    settings.m_directSampling = (flags >> 1) & 1;
+                    settingsKeys.append("directSampling");
+                    settings.m_agc = (flags >> 2) & 1;
+                    settingsKeys.append("agc");
+                    settings.m_dcBlock = (flags >> 3) & 1;
+                    settingsKeys.append("dcBlock");
+                    settings.m_iqCorrection = (flags >> 4) & 1;
+                    settingsKeys.append("iqCorrection");
+                    settings.m_devSampleRate = RemoteTCPProtocol::extractUInt32(&metaData[24]);
+                    settingsKeys.append("devSampleRate");
+                    settings.m_log2Decim = RemoteTCPProtocol::extractUInt32(&metaData[28]);
+                    settingsKeys.append("log2Decim");
+                    settings.m_gain[0] = RemoteTCPProtocol::extractInt16(&metaData[32]);
+                    settings.m_gain[1] = RemoteTCPProtocol::extractInt16(&metaData[34]);
+                    settings.m_gain[2] = RemoteTCPProtocol::extractInt16(&metaData[36]);
+                    settingsKeys.append("gain[0]");
+                    settingsKeys.append("gain[1]");
+                    settingsKeys.append("gain[2]");
+                    settings.m_rfBW = RemoteTCPProtocol::extractUInt32(&metaData[40]);
+                    settingsKeys.append("rfBW");
+                    settings.m_inputFrequencyOffset = RemoteTCPProtocol::extractUInt32(&metaData[44]);
+                    settingsKeys.append("inputFrequencyOffset");
+                    settings.m_channelGain = RemoteTCPProtocol::extractUInt32(&metaData[48]);
+                    settingsKeys.append("channelGain");
+                    settings.m_channelSampleRate = RemoteTCPProtocol::extractUInt32(&metaData[52]);
+                    settingsKeys.append("channelSampleRate");
+                    settings.m_sampleBits = RemoteTCPProtocol::extractUInt32(&metaData[56]);
+                    settingsKeys.append("sampleBits");
+                    if (settings.m_channelSampleRate != (settings.m_devSampleRate >> settings.m_log2Decim))
                     {
-                        // Update local settings to match remote
-                        RemoteTCPInputSettings& settings = m_settings;
-                        QList<QString> settingsKeys;
-                        settings.m_centerFrequency = RemoteTCPProtocol::extractUInt64(&metaData[8]);
-                        settingsKeys.append("centerFrequency");
-                        settings.m_loPpmCorrection = RemoteTCPProtocol::extractUInt32(&metaData[16]);
-                        settingsKeys.append("loPpmCorrection");
-                        quint32 flags = RemoteTCPProtocol::extractUInt32(&metaData[20]);
-                        settings.m_biasTee = flags & 1;
-                        settingsKeys.append("biasTee");
-                        settings.m_directSampling = (flags >> 1) & 1;
-                        settingsKeys.append("directSampling");
-                        settings.m_agc = (flags >> 2) & 1;
-                        settingsKeys.append("agc");
-                        settings.m_dcBlock = (flags >> 3) & 1;
-                        settingsKeys.append("dcBlock");
-                        settings.m_iqCorrection = (flags >> 4) & 1;
-                        settingsKeys.append("iqCorrection");
-                        settings.m_devSampleRate = RemoteTCPProtocol::extractUInt32(&metaData[24]);
-                        settingsKeys.append("devSampleRate");
-                        settings.m_log2Decim = RemoteTCPProtocol::extractUInt32(&metaData[28]);
-                        settingsKeys.append("log2Decim");
-                        settings.m_gain[0] = RemoteTCPProtocol::extractInt16(&metaData[32]);
-                        settings.m_gain[1] = RemoteTCPProtocol::extractInt16(&metaData[34]);
-                        settings.m_gain[2] = RemoteTCPProtocol::extractInt16(&metaData[36]);
-                        settingsKeys.append("gain[0]");
-                        settingsKeys.append("gain[1]");
-                        settingsKeys.append("gain[2]");
-                        settings.m_rfBW = RemoteTCPProtocol::extractUInt32(&metaData[40]);
-                        settingsKeys.append("rfBW");
-                        settings.m_inputFrequencyOffset = RemoteTCPProtocol::extractUInt32(&metaData[44]);
-                        settingsKeys.append("inputFrequencyOffset");
-                        settings.m_channelGain = RemoteTCPProtocol::extractUInt32(&metaData[48]);
-                        settingsKeys.append("channelGain");
-                        settings.m_channelSampleRate = RemoteTCPProtocol::extractUInt32(&metaData[52]);
-                        settingsKeys.append("channelSampleRate");
-                        settings.m_sampleBits = RemoteTCPProtocol::extractUInt32(&metaData[56]);
-                        settingsKeys.append("sampleBits");
-                        if (settings.m_channelSampleRate != (settings.m_devSampleRate >> settings.m_log2Decim))
-                        {
-                            settings.m_channelDecimation = true;
-                            settingsKeys.append("channelDecimation");
-                        }
-                        if (m_messageQueueToInput) {
-                            m_messageQueueToInput->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
-                        }
-                        if (m_messageQueueToGUI) {
-                            m_messageQueueToGUI->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
-                        }
+                        settings.m_channelDecimation = true;
+                        settingsKeys.append("channelDecimation");
+                    }
+                    if (m_messageQueueToInput) {
+                        m_messageQueueToInput->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
+                    }
+                    if (m_messageQueueToGUI) {
+                        m_messageQueueToGUI->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
+                    }
+                }
+            }
+            else
+            {
+                qDebug() << "RemoteTCPInputTCPHandler::dataReadyRead: Unknown protocol: " << protocol;
+            }
+            if (m_settings.m_overrideRemoteSettings)
+            {
+                // Force settings to be sent to remote device (this needs to be after m_sdra is determined above)
+                applySettings(m_settings, QList<QString>(), true);
+            }
+        }
+        m_readMetaData = true;
+    }
+}
+
+void RemoteTCPInputTCPHandler::processSpyServerMetaData()
+{
+    bool done = false;
+
+    while (!done)
+    {
+        if (m_state == HEADER)
+        {
+            if (m_dataSocket->bytesAvailable() >= (qint64)sizeof(SpyServerProtocol::Header))
+            {
+                qint64 bytesRead = m_dataSocket->read((char *)&m_spyServerHeader, sizeof(SpyServerProtocol::Header));
+                if (bytesRead == sizeof(SpyServerProtocol::Header)) {
+                    m_state = DATA;
+                } else {
+                    qDebug() << "RemoteTCPInputTCPHandler::processSpyServerMetaData: Failed to read:" << bytesRead << "/" << sizeof(SpyServerProtocol::Header);
+                }
+            }
+            else
+            {
+                done = true;
+            }
+        }
+        else if (m_state == DATA)
+        {
+            if (m_dataSocket->bytesAvailable() >= m_spyServerHeader.m_size)
+            {
+                qint64 bytesRead = m_dataSocket->read(&m_tcpBuf[0], m_spyServerHeader.m_size);
+                if (bytesRead == m_spyServerHeader.m_size)
+                {
+                    if (m_spyServerHeader.m_message == SpyServerProtocol::DeviceMessage)
+                    {
+                        processSpyServerDevice((SpyServerProtocol::Device *) &m_tcpBuf[0]);
+                        m_state = HEADER;
+                    }
+                    else if (m_spyServerHeader.m_message == SpyServerProtocol::StateMessage)
+                    {
+                        // This call can result in applySettings() calling clearBuffer() then processSpyServerData()
+                        processSpyServerState((SpyServerProtocol::State *) &m_tcpBuf[0], true);
+                        spyServerSetStreamIQ();
+
+                        m_state = HEADER;
+                        m_readMetaData = true;
+                        done = true;
+                    }
+                    else
+                    {
+                        qDebug() << "RemoteTCPInputTCPHandler::processSpyServerMetaData: Unexpected message type" << m_spyServerHeader.m_message;
+                        m_state = HEADER;
                     }
                 }
                 else
                 {
-                    qDebug() << "RemoteTCPInputTCPHandler::dataReadyRead: Unknown protocol: " << protocol;
-                }
-                if (m_settings.m_overrideRemoteSettings)
-                {
-                    // Force settings to be sent to remote device (this needs to be after m_sdra is determined above)
-                    applySettings(m_settings, QList<QString>(), true);
+                    qDebug() << "RemoteTCPInputTCPHandler::processSpyServerMetaData: Failed to read:" << bytesRead << "/" << m_spyServerHeader.m_size;
                 }
             }
-            m_readMetaData = true;
+            else
+            {
+                done = true;
+            }
+        }
+    }
+}
+
+void RemoteTCPInputTCPHandler::processSpyServerDevice(const SpyServerProtocol::Device* ssDevice)
+{
+    qDebug() << "RemoteTCPInputTCPHandler::processSpyServerDevice:"
+        << "device:" << ssDevice->m_device
+        << "serial:" << ssDevice->m_serial
+        << "sampleRate:" << ssDevice->m_sampleRate
+        << "decimationStages:" << ssDevice->m_decimationStages
+        << "maxGainIndex:" << ssDevice->m_maxGainIndex
+        << "minFrequency:" << ssDevice->m_minFrequency
+        << "maxFrequency:" << ssDevice->m_maxFrequency
+        << "sampleBits:" << ssDevice->m_sampleBits
+        << "minDecimation:" << ssDevice->m_minDecimation;
+
+    switch (ssDevice->m_device)
+    {
+    case 1:
+        m_device = RemoteTCPProtocol::AIRSPY;
+        break;
+    case 2:
+        m_device = RemoteTCPProtocol::AIRSPY_HF;
+        break;
+    case 3:
+        m_device = ssDevice->m_maxGainIndex == 14
+            ? RemoteTCPProtocol::RTLSDR_E4000
+            : RemoteTCPProtocol::RTLSDR_R820T;
+        break;
+    default:
+        m_device = RemoteTCPProtocol::UNKNOWN;
+        break;
+    }
+    if (m_messageQueueToGUI) {
+        m_messageQueueToGUI->push(MsgReportRemoteDevice::create(m_device, "Spy Server", ssDevice->m_maxGainIndex));
+    }
+
+    RemoteTCPInputSettings& settings = m_settings;
+    QList<QString> settingsKeys{};
+    // We can't change sample rate, so always have to update local setting to match
+    m_settings.m_devSampleRate = settings.m_devSampleRate = ssDevice->m_sampleRate;
+    settingsKeys.append("devSampleRate");
+    // Make sure decimation setting is at least the minimum
+    if (!m_settings.m_overrideRemoteSettings || (settings.m_log2Decim < ssDevice->m_minDecimation))
+    {
+        m_settings.m_log2Decim = settings.m_log2Decim = ssDevice->m_minDecimation;
+        settingsKeys.append("log2Decim");
+    }
+    if (m_messageQueueToInput) {
+        m_messageQueueToInput->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
+    }
+    if (m_messageQueueToGUI) {
+        m_messageQueueToGUI->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
+    }
+}
+
+void RemoteTCPInputTCPHandler::processSpyServerState(const SpyServerProtocol::State* ssState, bool initial)
+{
+    qDebug() << "RemoteTCPInputTCPHandler::processSpyServerState: "
+        << "initial:" << initial
+        << "controllable:" << ssState->m_controllable
+        << "gain:" << ssState->m_gain
+        << "deviceCenterFrequency:" << ssState->m_deviceCenterFrequency
+        << "iqCenterFrequency:" << ssState->m_iqCenterFrequency;
+
+    if (initial && ssState->m_controllable && m_settings.m_overrideRemoteSettings)
+    {
+        // Force client settings to be sent to server
+        applySettings(m_settings, QList<QString>(), true);
+    }
+    else
+    {
+        // Update client settings with that from server
+        RemoteTCPInputSettings& settings = m_settings;
+        QList<QString> settingsKeys;
+
+        if (m_settings.m_centerFrequency != ssState->m_iqCenterFrequency)
+        {
+            settings.m_centerFrequency = ssState->m_iqCenterFrequency;
+            settingsKeys.append("centerFrequency");
+        }
+        if (m_settings.m_gain[0] != ssState->m_gain)
+        {
+            settings.m_gain[0] = ssState->m_gain;
+            settingsKeys.append("gain[0]");
+        }
+        if (settingsKeys.size() > 0)
+        {
+            if (m_messageQueueToInput) {
+                m_messageQueueToInput->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
+            }
+            if (m_messageQueueToGUI) {
+                m_messageQueueToGUI->push(RemoteTCPInput::MsgConfigureRemoteTCPInput::create(settings, settingsKeys));
+            }
+        }
+    }
+}
+
+void RemoteTCPInputTCPHandler::processSpyServerData(int requiredBytes, bool clear)
+{
+    if (!m_readMetaData) {
+        return;
+    }
+
+    bool done = false;
+
+    while (!done)
+    {
+        if (m_state == HEADER)
+        {
+            if (m_dataSocket->bytesAvailable() >= sizeof(SpyServerProtocol::Header))
+            {
+                qint64 bytesRead = m_dataSocket->read((char *) &m_spyServerHeader, sizeof(SpyServerProtocol::Header));
+                if (bytesRead == sizeof(SpyServerProtocol::Header)) {
+                    m_state = DATA;
+                } else {
+                    qDebug() << "RemoteTCPInputTCPHandler::processSpyServerData: Failed to read:" << bytesRead << "/" << sizeof(SpyServerProtocol::Header);
+                }
+            }
+            else
+            {
+                done = true;
+            }
+        }
+        else if (m_state == DATA)
+        {
+            int bytes;
+
+            if ((m_spyServerHeader.m_message >= SpyServerProtocol::IQ8MMessage) && (m_spyServerHeader.m_message <= SpyServerProtocol::IQ32Message)) {
+                bytes = std::min(requiredBytes, (int) m_spyServerHeader.m_size);
+            } else {
+                bytes = m_spyServerHeader.m_size;
+            }
+
+            if (m_dataSocket->bytesAvailable() >= bytes)
+            {
+                qint64 bytesRead = m_dataSocket->read(&m_tcpBuf[0], bytes);
+                if (bytesRead == bytes)
+                {
+                    if ((m_spyServerHeader.m_message >= SpyServerProtocol::IQ8MMessage) && (m_spyServerHeader.m_message <= SpyServerProtocol::IQ32Message))
+                    {
+                        if (!clear)
+                        {
+                            const int bytesPerIQPair = 2 * m_settings.m_sampleBits / 8;
+                            convert(bytesRead / bytesPerIQPair);
+                        }
+                        m_spyServerHeader.m_size -= bytesRead;
+                        requiredBytes -= bytesRead;
+                        if (m_spyServerHeader.m_size == 0) {
+                            m_state = HEADER;
+                        }
+                        if (requiredBytes <= 0) {
+                            done = true;
+                        }
+                    }
+                    else if (m_spyServerHeader.m_message == SpyServerProtocol::StateMessage)
+                    {
+                        processSpyServerState((SpyServerProtocol::State *) &m_tcpBuf[0], false);
+                        m_state = HEADER;
+                    }
+                    else
+                    {
+                        qDebug() << "RemoteTCPInputTCPHandler::processSpyServerData: Skipping unsupported message";
+                        m_state = HEADER;
+                    }
+                }
+                else
+                {
+                    qDebug() << "RemoteTCPInputTCPHandler::processSpyServerData: Failed to read:" << bytesRead << "/" << bytes;
+                }
+            }
+            else
+            {
+                done = true;
+            }
         }
     }
 }
@@ -663,12 +1019,12 @@ void RemoteTCPInputTCPHandler::processData()
     if (m_dataSocket && (m_dataSocket->state() == QAbstractSocket::ConnectedState))
     {
         int sampleRate = m_settings.m_channelSampleRate;
-        int bytesPerSample = m_settings.m_sampleBits / 8;
-        int bytesPerSecond = sampleRate * 2 * bytesPerSample;
+        int bytesPerIQPair = 2 * m_settings.m_sampleBits / 8;
+        int bytesPerSecond = sampleRate * bytesPerIQPair;
 
         if (m_dataSocket->bytesAvailable() < (0.1f * m_settings.m_preFill * bytesPerSecond))
         {
-            qDebug() << "RemoteTCPInputTCPHandler::processData: Buffering!";
+            qDebug() << "RemoteTCPInputTCPHandler::processData: Buffering - bytesAvailable:" << m_dataSocket->bytesAvailable();
             m_fillBuffer = true;
         }
 
@@ -690,7 +1046,7 @@ void RemoteTCPInputTCPHandler::processData()
         {
             if (m_dataSocket->bytesAvailable() >= m_settings.m_preFill * bytesPerSecond)
             {
-                qDebug() << "Buffer primed bytesAvailable:" << m_dataSocket->bytesAvailable();
+                qDebug() << "RemoteTCPInputTCPHandler::processData: Buffer primed - bytesAvailable:" << m_dataSocket->bytesAvailable();
                 m_fillBuffer = false;
                 m_prevDateTime = QDateTime::currentDateTime();
                 factor = 1.0f / 4.0f; // If this is too high, samples can just be dropped downstream
@@ -708,10 +1064,20 @@ void RemoteTCPInputTCPHandler::processData()
 
         if (!m_fillBuffer)
         {
-            if (m_dataSocket->bytesAvailable() >= requiredSamples*2*bytesPerSample)
+            if (!m_spyServer)
             {
-                m_dataSocket->read(&m_tcpBuf[0], requiredSamples*2*bytesPerSample);
-                convert(requiredSamples);
+                // rtl_tcp/SDRA stream is just IQ samples
+                if (m_dataSocket->bytesAvailable() >= requiredSamples*bytesPerIQPair)
+                {
+                    m_dataSocket->read(&m_tcpBuf[0], requiredSamples*bytesPerIQPair);
+                    convert(requiredSamples);
+                }
+            }
+            else
+            {
+                // SpyServer stream is packetized, into a header and body, with multiple packet types
+                int requiredBytes = requiredSamples*bytesPerIQPair;
+                processSpyServerData(requiredBytes, false);
             }
         }
     }

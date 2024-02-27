@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2022-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2022-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -48,6 +48,7 @@ void RemoteTCPInputSettings::resetToDefaults()
     m_dataPort = 1234;
     m_overrideRemoteSettings = true;
     m_preFill = 1.0f;
+    m_protocol = "SDRangel";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -81,6 +82,7 @@ QByteArray RemoteTCPInputSettings::serialize() const
     s.writeU32(22, m_reverseAPIPort);
     s.writeU32(23, m_reverseAPIDeviceIndex);
     s.writeList(24, m_addressList);
+    s.writeString(25, m_protocol);
 
     for (int i = 0; i < m_maxGains; i++) {
         s.writeS32(30+i, m_gain[i]);
@@ -136,6 +138,7 @@ bool RemoteTCPInputSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
         d.readList(24, &m_addressList);
+        d.readString(25, &m_protocol, "SDRangel");
 
         for (int i = 0; i < m_maxGains; i++) {
             d.readS32(30+i, &m_gain[i], 0);
@@ -224,6 +227,9 @@ void RemoteTCPInputSettings::applySettings(const QStringList& settingsKeys, cons
     if (settingsKeys.contains("addressList")) {
         m_addressList = settings.m_addressList;
     }
+    if (settingsKeys.contains("protocol")) {
+        m_protocol = settings.m_protocol;
+    }
 
     for (int i = 0; i < m_maxGains; i++)
     {
@@ -308,6 +314,9 @@ QString RemoteTCPInputSettings::getDebugString(const QStringList& settingsKeys, 
     }
     if (settingsKeys.contains("addressList") || force) {
         ostr << " m_addressList: " << m_addressList.join(",").toStdString();
+    }
+    if (settingsKeys.contains("protocol") || force) {
+        ostr << " m_protocol: " << m_protocol.toStdString();
     }
 
     for (int i = 0; i < m_maxGains; i++)
