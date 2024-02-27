@@ -396,6 +396,10 @@ if(VS2019)
   set(LIBSIGMF_LIBRARIES_DEBUG "${EXTERNAL_LIBRARY_FOLDER}/libsigmf/lib/libsigmfd.lib" DbgHelp CACHE INTERNAL "")
   set(LIBSIGMF_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/libsigmf/lib/" CACHE INTERNAL "")
 
+  set(LIBACARS_FOUND ON CACHE INTERNAL "")
+  set(LIBACARS_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/libacars/include/libacars-2" CACHE INTERNAL "")
+  set(LIBACARS_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/libacars/lib/acars-2.lib" CACHE INTERNAL "")
+
   # used on fixup_bundle phase
   set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
     "${EXTERNAL_LIBRARY_FOLDER}/fftw-3"
@@ -654,7 +658,8 @@ if (BUILD_GUI)
                             Quick
                             QuickWidgets
                             TextToSpeech
-                            Svg)
+                            Svg
+                            SvgWidgets)
         else()
             find_package(Qt5
                            REQUIRED COMPONENTS
@@ -677,6 +682,8 @@ if (BUILD_GUI)
                             OpenGLWidgets
                             Quick
                             QuickWidgets
+                            Svg
+                            SvgWidgets
                            OPTIONAL_COMPONENTS
                             WebEngineQuick
                             WebEngineCore
@@ -691,6 +698,7 @@ if (BUILD_GUI)
                             QuickWidgets
                             Location
                             TextToSpeech
+                            Svg
                            OPTIONAL_COMPONENTS
                             WebEngine
                             WebEngineCore
