@@ -105,9 +105,11 @@ This essentially shows cloud cover. The images are updated every 10 minutes.
 
 The data is similar to that which can be received using the [APT Demodulator](../../channelrx/demodapt/readme.md) in the Thermal-infrared (10.3-11.3 um) channel.
 
+This is only supported on 2D raster maps and the 3D map.
+
 <h3>8: Display Weather Radar</h3>
 
-When checked, weather radar measurements are downloaded form the internet and are overlaid on the maps. 
+When checked, weather radar measurements are downloaded from the internet and are overlaid on the maps. 
 This shows rain and other forms of precipitation.
 The images are updated every 10 minutes.
 
@@ -116,22 +118,34 @@ Light blue through dark blue is snow, with dark blue being the most intense.
 
 ![Weather Radar](../../../doc/img/Map_plugin_weather_radar.png)
 
+This is only supported on 2D raster maps and the 3D map.
+
 <h3>9: Display Sea Marks</h3>
 
 When checked, sea marks are overlaid on the maps.
 
+![Sea Marks](../../../doc/img/Map_plugin_seamarks.png)
+
 ![Sea Marks Legend](../../../doc/img/Map_plugin_seamarks_legend.png)
+
+This is only supported on 2D raster maps and the 3D map.
 
 <h3>10: Display Railways</h3>
 
 When checked, railway routes are overlaid on the maps.
 
+![Railways](../../../doc/img/Map_plugin_railways.png)
+
 ![Railway Legend](../../../doc/img/Map_plugin_railway_legend.png)
+
+This is only supported on 2D raster maps and the 3D map.
 
 <h3>11: Display MUF Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing the MUF (Maximum Usable Frequency) for a 3000km path that reflects off the ionosphere.
 The contours will be updated every 15 minutes. The latest contour data will always be displayed, irrespective of the time set on the 3D Map.
+
+![MUF contours](../../../doc/img/Map_plugin_muf.png)
 
 <h3>12: Display coF2 Contours</h3>
 
@@ -148,6 +162,8 @@ For some data sets, GIBS has data spanning many decades. The data period may be 
 The 2D map will only show data from the default date (which is displayed in the table at the bottom).
 
 ![NASA GIBS](../../../doc/img/Map_plugin_GIBS.png)
+
+This is only supported on 2D raster maps and the 3D map.
 
 <h3>14: NASA GIBS Data</h3>
 
@@ -236,7 +252,7 @@ To the right of the timeline is the fullscreen toggle button, which allows the 3
 
 <h4>SDRs</h4>
 
-The map can display KiwiSDRs and Spy Servers that are publically accessible via the Internet. A URL is displayed in the info box.
+The map can display KiwiSDRs and Spy Servers that are publically accessible via the internet. A URL is displayed in the info box.
 Clicking on the URL will open a new KiwiSDR or RemoteTCPInput device which will connect to the corresponding SDR.
 Before connecting, you should check the whether the number of users is below the maximum. Server data is updated every 2 minutes.
 
