@@ -68,6 +68,8 @@ SWGRemoteTCPInputSettings::SWGRemoteTCPInputSettings() {
     m_override_remote_settings_isSet = false;
     pre_fill = 0;
     m_pre_fill_isSet = false;
+    protocol = nullptr;
+    m_protocol_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -124,6 +126,8 @@ SWGRemoteTCPInputSettings::init() {
     m_override_remote_settings_isSet = false;
     pre_fill = 0;
     m_pre_fill_isSet = false;
+    protocol = new QString("");
+    m_protocol_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -158,6 +162,9 @@ SWGRemoteTCPInputSettings::cleanup() {
 
 
 
+    if(protocol != nullptr) { 
+        delete protocol;
+    }
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -216,6 +223,8 @@ SWGRemoteTCPInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&override_remote_settings, pJson["overrideRemoteSettings"], "qint32", "");
     
     ::SWGSDRangel::setValue(&pre_fill, pJson["preFill"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&protocol, pJson["protocol"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -300,6 +309,9 @@ SWGRemoteTCPInputSettings::asJsonObject() {
     }
     if(m_pre_fill_isSet){
         obj->insert("preFill", QJsonValue(pre_fill));
+    }
+    if(protocol != nullptr && *protocol != QString("")){
+        toJsonValue(QString("protocol"), protocol, obj, QString("QString"));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -517,6 +529,16 @@ SWGRemoteTCPInputSettings::setPreFill(qint32 pre_fill) {
     this->m_pre_fill_isSet = true;
 }
 
+QString*
+SWGRemoteTCPInputSettings::getProtocol() {
+    return protocol;
+}
+void
+SWGRemoteTCPInputSettings::setProtocol(QString* protocol) {
+    this->protocol = protocol;
+    this->m_protocol_isSet = true;
+}
+
 qint32
 SWGRemoteTCPInputSettings::getUseReverseApi() {
     return use_reverse_api;
@@ -620,6 +642,9 @@ SWGRemoteTCPInputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_pre_fill_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(protocol && *protocol != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){
