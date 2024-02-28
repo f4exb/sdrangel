@@ -1072,6 +1072,7 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
 
     m_deviceUIs.erase(m_deviceUIs.begin() + deviceSetIndex);
     m_mainCore->removeDeviceSet(deviceSetIndex);
+    DeviceEnumerator::instance()->renumeratetabIndex(deviceSetIndex);
 
     // Renumerate
     for (int i = 0; i < (int) m_deviceUIs.size(); i++)
