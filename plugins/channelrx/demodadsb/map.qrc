@@ -1,6 +1,8 @@
 <RCC>
   <qresource prefix="/">
     <file>map/map.qml</file>
+    <file>map/map_6.qml</file>
+    <file>map/ModifiedMapView.qml</file>
     <file>map/MapStation.qml</file>
     <file>map/aircraft_2engine.png</file>
     <file>map/aircraft_2enginesmall.png</file>
