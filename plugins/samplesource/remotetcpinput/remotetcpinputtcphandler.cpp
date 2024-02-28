@@ -1096,9 +1096,31 @@ void RemoteTCPInputTCPHandler::convert(int nbSamples)
         m_converterBuffer = new int32_t[nbSamples*2];
     }
 
-    if ((m_settings.m_sampleBits == 32) && (SDR_RX_SAMP_SZ == 24))
+    if ((m_settings.m_sampleBits == 32) && (SDR_RX_SAMP_SZ == 24) && !m_spyServer)
     {
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_tcpBuf), nbSamples*sizeof(Sample));
+    }
+    else if ((m_settings.m_sampleBits == 32) && (SDR_RX_SAMP_SZ == 24) && m_spyServer)
+    {
+        float *in = (float *)m_tcpBuf;
+        qint32 *out = (qint32 *)m_converterBuffer;
+
+        for (int is = 0; is < nbSamples*2; is++) {
+            out[is] = (qint32)(in[is] * SDR_RX_SCALEF);
+        }
+
+        m_sampleFifo->write(reinterpret_cast<quint8*>(out), nbSamples*sizeof(Sample));
+    }
+    else if ((m_settings.m_sampleBits == 32) && (SDR_RX_SAMP_SZ == 16) && m_spyServer)
+    {
+        float *in = (float *)m_tcpBuf;
+        qint16 *out = (qint16 *)m_converterBuffer;
+
+        for (int is = 0; is < nbSamples*2; is++) {
+            out[is] = (qint16)(in[is] * SDR_RX_SCALEF);
+        }
+
+        m_sampleFifo->write(reinterpret_cast<quint8*>(out), nbSamples*sizeof(Sample));
     }
     else if ((m_settings.m_sampleBits == 8) && (SDR_RX_SAMP_SZ == 16))
     {
