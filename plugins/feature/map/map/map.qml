@@ -307,14 +307,12 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            //propagateComposedEvents: true // so links in Text work
                             onClicked: {
                                 if (mouse.button === Qt.LeftButton) {
                                     selected = !selected
                                     if (selected) {
                                         mapModel.moveToFront(mapModelFiltered.mapRowToSource(index))
                                     }
-                                    //mouse.accepted = false // propagate to text
                                 } else if (mouse.button === Qt.RightButton) {
                                     menuItems.clear()
                                     menus.clear()

@@ -316,12 +316,6 @@ Item {
                         height: text.height + 5
                         radius: 5
                         visible: mapTextVisible
-                        Text {
-                            id: text
-                            anchors.centerIn: parent
-                            text: mapText
-                            textFormat: TextEdit.RichText
-                        }
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
@@ -417,6 +411,17 @@ Item {
                                         object.menu.removeItem(object)
                                     }
                                 }
+                             }
+                        }
+                        // Have Text after MouseArea, so links can be clicked
+                        Text {
+                            id: text
+                            anchors.centerIn: parent
+                            text: mapText
+                            textFormat: TextEdit.RichText
+                            onLinkActivated: {
+                                console.log("Link", link);
+                                mapModel.link(link);
                             }
                         }
                     }
