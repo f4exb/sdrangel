@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2022 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Copyright (C) 2022-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 // Copyright (C) 2022 Jiří Pinkava <jiri.pinkava@rossum.ai>                      //
 //                                                                               //
@@ -29,6 +29,7 @@
 #include "util/messagequeue.h"
 #include "remotetcpinputsettings.h"
 #include "../../channelrx/remotetcpsink/remotetcpprotocol.h"
+#include "spyserver.h"
 
 class SampleSinkFifo;
 class MessageQueue;
@@ -70,20 +71,23 @@ public:
     public:
         RemoteTCPProtocol::Device getDevice() const { return m_device; }
         QString getProtocol() const { return m_protocol; }
+        int getMaxGain() const { return m_maxGain; }
 
-        static MsgReportRemoteDevice* create(RemoteTCPProtocol::Device device, const QString& protocol)
+        static MsgReportRemoteDevice* create(RemoteTCPProtocol::Device device, const QString& protocol, int maxGain = 0)
         {
-            return new MsgReportRemoteDevice(device, protocol);
+            return new MsgReportRemoteDevice(device, protocol, maxGain);
         }
 
     protected:
         RemoteTCPProtocol::Device m_device;
         QString m_protocol;
+        int m_maxGain;
 
-        MsgReportRemoteDevice(RemoteTCPProtocol::Device device, const QString& protocol) :
+        MsgReportRemoteDevice(RemoteTCPProtocol::Device device, const QString& protocol, int maxGain) :
             Message(),
             m_device(device),
-            m_protocol(protocol)
+            m_protocol(protocol),
+            m_maxGain(maxGain)
         { }
     };
 
@@ -139,6 +143,11 @@ private:
     QTimer m_reconnectTimer;
     QDateTime m_prevDateTime;
     bool m_sdra;
+    bool m_spyServer;
+    RemoteTCPProtocol::Device m_device;
+    SpyServerProtocol::Header m_spyServerHeader;
+    enum {HEADER, DATA} m_state;    //!< FSM for reading Spy Server packets
+
 
     int32_t *m_converterBuffer;
     uint32_t m_converterBufferNbSamples;
@@ -172,6 +181,15 @@ private:
     void setChannelGain(int gain);
     void setSampleBitDepth(int sampleBits);
     void applySettings(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void processMetaData();
+    void spyServerConnect();
+    void spyServerSet(int setting, int value);
+    void spyServerSetIQFormat(int sampleBits);
+    void spyServerSetStreamIQ();
+    void processSpyServerMetaData();
+    void processSpyServerDevice(const SpyServerProtocol::Device* ssDevice);
+    void processSpyServerState(const SpyServerProtocol::State* ssState, bool initial);
+    void processSpyServerData(int requiredBytes, bool clear);
 
 private slots:
     void started();

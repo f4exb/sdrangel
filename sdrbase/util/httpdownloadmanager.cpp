@@ -149,7 +149,7 @@ void HttpDownloadManager::downloadFinished(QNetworkReply *reply)
 
                     QString action = match.captured(1);
                     action = action.replace("&amp;", "&");
-                    qDebug() << "HttpDownloadManager: Skipping Go ogle drive warning - downloading " << action;
+                    qDebug() << "HttpDownloadManager: Skipping Google drive warning - downloading " << action;
                     QUrl newUrl(action);
                     QNetworkReply *newReply = download(newUrl, filename);
 
@@ -160,7 +160,51 @@ void HttpDownloadManager::downloadFinished(QNetworkReply *reply)
                 }
                 else
                 {
-                    qDebug() << "HttpDownloadManager: Can't find action URL in Google Drive page " << data;
+                    qDebug() << "HttpDownloadManager: Can't find action URL in Google Drive page\nURL: " << url << "\nData:\n" << data;
+                }
+            }
+            else if (url.startsWith("https://drive.usercontent.google.com/download")
+                && data.startsWith("<!DOCTYPE html>")
+                && !filename.endsWith(".html")
+               )
+            {
+                QRegularExpression regexpAction("action=\\\"(.*?)\\\"");
+                QRegularExpressionMatch matchAction = regexpAction.match(data);
+                QRegularExpression regexpId("name=\"id\" value=\"([\\w-]+)\"");
+                QRegularExpressionMatch matchId = regexpId.match(data);
+                QRegularExpression regexpUuid("name=\"uuid\" value=\"([\\w-]+)\"");
+                QRegularExpressionMatch matchUuid = regexpUuid.match(data);
+                QRegularExpression regexpAt("name=\"at\" value=\"([\\w-]+\\:)\"");
+                QRegularExpressionMatch matchAt = regexpAt.match(data);
+
+                if (matchAction.hasMatch() && matchId.hasMatch() && matchUuid.hasMatch())
+                {
+                    m_downloads.removeAll(reply);
+                    m_filenames.remove(idx);
+
+                    QString newURLString = matchAction.captured(1)
+                        + "?id=" + matchId.captured(1)
+                        + "&export=download"
+                        + "&authuser=0"
+                        + "&confirm=t"
+                        + "&uuid=" + matchUuid.captured(1)
+                        ;
+                    if (matchAt.hasMatch()) {
+                        newURLString = newURLString + "at=" + matchAt.captured(1);
+                    }
+
+                    qDebug() << "HttpDownloadManager: Skipping Google drive warning - downloading " << newURLString;
+                    QUrl newUrl(newURLString);
+                    QNetworkReply *newReply = download(newUrl, filename);
+
+                    // Indicate that we are retrying, so progress dialogs can be updated
+                    emit retryDownload(filename, reply, newReply);
+
+                    retry = true;
+                }
+                else
+                {
+                    qDebug() << "HttpDownloadManager: Can't find action URL in Google Drive page\nURL: " << url << "\nData:\n" << data;
                 }
             }
             else if (writeToFile(filename, data))

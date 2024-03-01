@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2022-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2022-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -122,6 +122,9 @@ private:
     RemoteTCPProtocol::Device m_remoteDevice;     // Remote device reported when connecting
     bool m_connectionError;
 
+    DeviceGains::GainRange m_spyServerGainRange;
+    DeviceGains m_spyServerGains;
+
     static const DeviceGains::GainRange m_rtlSDR34kGainRange;
     static const DeviceGains m_rtlSDRe4kGains;
     static const DeviceGains::GainRange m_rtlSDRR820GainRange;
@@ -208,6 +211,7 @@ private slots:
     void on_dataPort_editingFinished();
     void on_overrideRemoteSettings_toggled(bool checked);
     void on_preFill_valueChanged(int value);
+    void on_protocol_currentIndexChanged(int index);
     void updateHardware();
     void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);

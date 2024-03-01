@@ -58,6 +58,7 @@ if(NOT SERVER_MODE)
         mapmodel.cpp
         mapitem.cpp
         mapwebsocketserver.cpp
+        maptileserver.cpp
         cesiuminterface.cpp
         czml.cpp
         map.qrc
@@ -78,6 +79,7 @@ if(NOT SERVER_MODE)
         mapmodel.h
         mapitem.h
         mapwebsocketserver.h
+        maptileserver.h
         cesiuminterface.h
         czml.h
     )
@@ -86,12 +88,12 @@ if(NOT SERVER_MODE)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 
-    if(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngineCore_FOUND)
-        set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location Qt::WebEngineCore Qt::WebEngineWidgets)
-    elseif(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND)
-        set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location Qt::WebEngine Qt::WebEngineCore Qt::WebEngineWidgets)
+    if(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND)
+        set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Svg Qt::Positioning Qt::Location Qt::WebEngine Qt::WebEngineCore Qt::WebEngineWidgets)
+    elseif(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngineCore_FOUND)
+        set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Svg Qt::SvgWidgets Qt::Positioning Qt::Location Qt::WebEngineCore Qt::WebEngineWidgets)
     else()
-        set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location)
+        set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Svg Qt::Positioning Qt::Location)
     endif()
 else()
     set(TARGET_NAME mapsrv)

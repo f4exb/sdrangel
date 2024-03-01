@@ -29,6 +29,7 @@
 #include "gui/httpdownloadmanagergui.h"
 #include "util/openaip.h"
 #include "util/ourairportsdb.h"
+#include "util/waypoints.h"
 
 #include "ui_mapsettingsdialog.h"
 #include "mapsettings.h"
@@ -104,6 +105,7 @@ private:
     QProgressDialog *m_progressDialog;
     OpenAIP m_openAIP;
     OurAirportsDB m_ourAirportsDB;
+    Waypoints m_waypoints;
 
     void unzip(const QString &filename);
 
@@ -114,6 +116,7 @@ private slots:
     void on_downloadModels_clicked();
     void on_getAirportDB_clicked();
     void on_getAirspacesDB_clicked();
+    void on_getWaypoints_clicked();
     void downloadComplete(const QString &filename, bool success, const QString &url, const QString &errorMessage);
     void downloadingURL(const QString& url);
     void downloadProgress(qint64 bytesRead, qint64 totalBytes);
@@ -121,11 +124,13 @@ private slots:
     void downloadAirspaceFinished();
     void downloadNavAidsFinished();
     void downloadAirportInformationFinished();
+    void downloadWaypointsFinished();
 
 signals:
     void navAidsUpdated();
     void airspacesUpdated();
     void airportsUpdated();
+    void waypointsUpdated();
 
 private:
     Ui::MapSettingsDialog* ui;

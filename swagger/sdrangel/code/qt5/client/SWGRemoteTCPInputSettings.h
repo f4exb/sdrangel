@@ -102,6 +102,9 @@ public:
     qint32 getPreFill();
     void setPreFill(qint32 pre_fill);
 
+    QString* getProtocol();
+    void setProtocol(QString* protocol);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -177,6 +180,9 @@ private:
 
     qint32 pre_fill;
     bool m_pre_fill_isSet;
+
+    QString* protocol;
+    bool m_protocol_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

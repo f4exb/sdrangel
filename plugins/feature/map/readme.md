@@ -9,9 +9,9 @@ On top of this, it can plot data from other plugins, such as:
 * Aircraft from the ADS-B Demodulator,
 * Ships from the AIS Demodulator,
 * Satellites from the Satellite Tracker,
-* Weather imagery from APT Demodulator,
+* Satellite imagery from APT Demodulator,
 * The Sun, Moon and Stars from the Star Tracker,
-* Weather balloons from the RadioSonde feature,
+* Weather balloons from the Radiosonde feature,
 * RF Heat Maps from the Heap Map channel,
 * Radials and estimated position from the VOR localizer feature,
 * ILS course line and glide path from the ILS Demodulator.
@@ -25,16 +25,22 @@ As well as internet data sources:
 * Radio time transmitters,
 * GRAVES radar,
 * Ionosonde station data,
-* Navtex transmitters.
-* VLF transmitters.
+* Navtex transmitters,
+* VLF transmitters,
+* KiwiSDRs,
+* Spy Servers,
+* Weather radar,
+* Satellite infra-red data (clouds),
+* Sea marks,
+* Satellite imagery from NASA GIBS (Global Imagery Browse Services).
 
-It can also create tracks showing the path aircraft, ships and APRS objects have taken, as well as predicted paths for satellites.
+It can also create tracks showing the path aircraft, ships, radiosondes and APRS objects have taken, as well as predicted paths for satellites.
 
 ![2D Map feature](../../../doc/img/Map_plugin_beacons.png)
 
 ![3D Map feature](../../../doc/img/Map_plugin_apt.png)
 
-3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (13).
+3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (20).
 
 <h2>Interface</h2>
 
@@ -90,45 +96,104 @@ When clicked, opens the Radio Time Transmitters dialog.
 
 ![Radio Time transmitters dialog](../../../doc/img/Map_plugin_radiotime_dialog.png)
 
-<h3>7: Display MUF Contours</h3>
+<h3>7: Display Satellite Infrared</h3>
+
+When checked, satellite infrared measurements (10.3um) are downloaded from the internet and are overlaid on the maps. 
+This essentially shows cloud cover. The images are updated every 10 minutes.
+
+![Satellite IR](../../../doc/img/Map_plugin_clouds.png)
+
+The data is similar to that which can be received using the [APT Demodulator](../../channelrx/demodapt/readme.md) in the Thermal-infrared (10.3-11.3 um) channel.
+
+This is only supported on 2D raster maps and the 3D map.
+
+<h3>8: Display Weather Radar</h3>
+
+When checked, weather radar measurements are downloaded from the internet and are overlaid on the maps. 
+This shows rain and other forms of precipitation.
+The images are updated every 10 minutes.
+
+Green, yellow and red are rain, with red being the most intense. 
+Light blue through dark blue is snow, with dark blue being the most intense.
+
+![Weather Radar](../../../doc/img/Map_plugin_weather_radar.png)
+
+This is only supported on 2D raster maps and the 3D map.
+
+<h3>9: Display Sea Marks</h3>
+
+When checked, sea marks are overlaid on the maps.
+
+![Sea Marks](../../../doc/img/Map_plugin_seamarks.png)
+
+![Sea Marks Legend](../../../doc/img/Map_plugin_seamarks_legend.png)
+
+This is only supported on 2D raster maps and the 3D map.
+
+<h3>10: Display Railways</h3>
+
+When checked, railway routes are overlaid on the maps.
+
+![Railways](../../../doc/img/Map_plugin_railways.png)
+
+![Railway Legend](../../../doc/img/Map_plugin_railway_legend.png)
+
+This is only supported on 2D raster maps and the 3D map.
+
+<h3>11: Display MUF Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing the MUF (Maximum Usable Frequency) for a 3000km path that reflects off the ionosphere.
 The contours will be updated every 15 minutes. The latest contour data will always be displayed, irrespective of the time set on the 3D Map.
 
-<h3>8: Display coF2 Contours</h3>
+![MUF contours](../../../doc/img/Map_plugin_muf.png)
+
+<h3>12: Display coF2 Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing coF2 (F2 layer critical frequency), the maximum frequency at which radio waves will be reflected vertically from the F2 region of the ionosphere.
 The contours will be updated every 15 minutes. The latest contour data will always be displayed, irrespective of the time set on the 3D Map.
 
-<h3>8: Display Names</h3>
+<h3>13: Display NASA GIBS Data</h3>
+
+When checked, enables overlay of data from NASA GIBS (Global Imagery Browse Services). This includes a vast array of Earth observation satellite data,
+such as land and sea temperatures, atmospheric conditions, flux measurements and the like.
+Details of available data products can be found [here](https://nasa-gibs.github.io/gibs-api-docs/available-visualizations/#visualization-product-catalog).
+
+For some data sets, GIBS has data spanning many decades. The data period may be hours, days or months. The 3D map will attemp to show data from the closest time set in the 3D map's timescale.
+The 2D map will only show data from the default date (which is displayed in the table at the bottom).
+
+![NASA GIBS](../../../doc/img/Map_plugin_GIBS.png)
+
+This is only supported on 2D raster maps and the 3D map.
+
+<h3>14: NASA GIBS Data</h3>
+
+Selects which data from NASA GIBS to overlay on the maps.
+
+<h3>15: NASA GIBS Opacity</h3>
+
+Sets the opacity used for the NASA GIBS overlay image overlay on the 3D map. Lower values make the image more transparent.
+
+<h3>16: Display Names</h3>
 
 When checked, names of objects are displayed in a bubble next to each object.
 
-<h3>9: Display tracks for selected object</h3>
+<h3>17: Display tracks for selected object</h3>
 
 When checked, displays the track (taken or predicted) for the selected object.
 
-<h3>10: Display tracks for all objects</h3>
+<h3>18: Display tracks for all objects</h3>
 
 When checked, displays the track (taken or predicted) for the all objects.
 
-<h3>11: Delete</h3>
+<h3>19: Delete</h3>
 
 When clicked, all items will be deleted from the map.
 
-<h3>12: Display settings</h3>
+<h3>20: Display settings</h3>
 
 When clicked, opens the Map Display Settings dialog:
 
-![Map Display Settings Dialog](../../../doc/img/Map_plugin_display_settings.png)
-
-The top half of the dialog allows customization of how objects from different SDRangel
-plugins are displayed on the 2D and 3D maps. This includes:
-
-* Whether images are displayed on the 2D map and whether 3D models are displayed on the 2D map.
-* Whether labels are displayed giving the name of the object.
-* Whether taken and predicted tracks are displayed and in which colour.
-* How the image or 3D model is scaled as the zoom level changes.
+![Map Display Settings Dialog Maps Tab](../../../doc/img/Map_plugin_display_settings.png)
 
 For the 2D map, the settings include:
 
@@ -139,13 +204,28 @@ For the 2D map, the settings include:
 
 For the 3D map, the settings include:
 
+* Whether the 3D map is displayed.
 * The terrain provider, which provides elevation data. For a "flat" globe, terrain can be set to Ellipsoid for the WGS-84 ellipsoid.
 * The buildings provider, which provides 3D building models. This can be set to None if no buildings are desired.
 * Whether the globe and models are lit from the direction of the Sun or the camera.
 * The camera reference frame. For ECEF (Earth Centered Earth Fixed), the camera rotates with the globe.
 For ECI (Earth Centred Inertial) the camera is fixed in space and the globe will rotate under it.
 
-* API keys, required to access maps from different providers.
+The "Download 3D Models" button will download the 3D models of aircraft, ships and satellites that are required for the 3D map.
+These are not included with the SDRangel distribution, so must be downloaded. It is recommeded to restart SDRangel after downloading the models.
+
+![Map Display Settings Dialog Items Tab](../../../doc/img/Map_plugin_display_settings_items.png)
+
+The Map Items tab customization of how objects from different SDRangel plugins and the Internet are displayed on the 2D and 3D maps. This includes:
+
+* Whether images are displayed on the 2D map and whether 3D models are displayed on the 3D map.
+* Whether labels are displayed giving the name of the object.
+* Whether taken and predicted tracks are displayed and in which colour.
+* How the image or 3D model is scaled as the zoom level changes.
+
+![Map Display Settings Dialog API Keys Tab](../../../doc/img/Map_plugin_display_settings_apikeys.png)
+
+API keys are required to access maps from different providers.
 
 Free API keys are available by signing up for an accounts with:
 
@@ -155,9 +235,6 @@ Free API keys are available by signing up for an accounts with:
 * [Cesium ion](https://cesium.com/ion/signup)
 
 If API keys are not specified, a default key will be used, but this may not work if too many users use it.
-
-The "Download 3D Models" button will download the 3D models of aircraft, ships and satellites that are required for the 3D map.
-These are not included with the SDRangel distribution, so must be downloaded.
 
 <h3>Map</h3>
 
@@ -176,6 +253,14 @@ The map feature displays a 2D and a 3D map overlaid with objects reported by oth
 The 2D map will only display the last reported positions for objects.
 The 3D map, however, has a timeline that allows replaying how objects have moved over time.
 To the right of the timeline is the fullscreen toggle button, which allows the 3D map to be displayed fullscreen.
+
+<h4>SDRs</h4>
+
+The map can display KiwiSDRs and Spy Servers that are publically accessible via the internet. A URL is displayed in the info box.
+Clicking on the URL will open a new KiwiSDR or RemoteTCPInput device which will connect to the corresponding SDR.
+Before connecting, you should check the whether the number of users is below the maximum. Server data is updated every 2 minutes.
+
+![SDRs](../../../doc/img/Map_plugin_SDRs.png)
 
 <h4>Ionosonde Stations</h4>
 
@@ -205,8 +290,17 @@ Mapbox: https://www.mapbox.com/ Cesium: https://www.cesium.com Bing: https://www
 
 Ionosonde data and MUF/coF2 contours from [KC2G](https://prop.kc2g.com/) with source data from [GIRO](https://giro.uml.edu/) and [NOAA NCEI](https://www.ngdc.noaa.gov/stp/iono/ionohome.html).
 
-Icons made by Google from Flaticon https://www.flaticon.com
-World icons created by turkkub from Flaticon https://www.flaticon.com
+Sea Marks are from OpenSeaMap: https://www.openseamap.org/
+
+Railways are from OpenRailwayMap: https://www.openrailwaymap.org/
+
+Weather radar and satellite data is from RainViewer: https://www.rainviewer
+
+Icons made by Google from Flaticon: https://www.flaticon.com
+World icons created by turkkub from Flaticon: https://www.flaticon.com
+Layers and Boat icons created by Freepik from Flaticon: https://www.flaticon.com
+Railway icons created by Prosymbols Premium from Flaticon: https://www.flaticon.com
+Satellite icons created by SyafriStudio from Flaticon: https://www.flaticon.com
 
 3D models are by various artists under a variety of licenses. See: https://github.com/srcejon/sdrangel-3d-models
 
@@ -218,8 +312,8 @@ If you wish to contribute a 3D model, see the https://github.com/srcejon/sdrange
 
 Full details of the API can be found in the Swagger documentation. Here is a quick example of how to centre the map on an object from the command line:
 
-    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/actions" -d '{"featureType": "Map",  "MapActions": { "find": "M7RCE" }}'
+    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/feature/0/actions" -d '{"featureType": "Map",  "MapActions": { "find": "M7RCE" }}'
 
 And to centre the map at a particular latitude and longitude:
 
-    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/actions" -d '{"featureType": "Map", "MapActions": { "find": "51.2 0.0" }}'
+    curl -X POST "http://127.0.0.1:8091/sdrangel/featureset/feature/0/actions" -d '{"featureType": "Map", "MapActions": { "find": "51.2 0.0" }}'

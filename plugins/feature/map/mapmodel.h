@@ -238,6 +238,8 @@ public:
     Q_INVOKABLE void moveToFront(int oldRow);
     Q_INVOKABLE void moveToBack(int oldRow);
 
+    Q_INVOKABLE void link(const QString& link);
+
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant& value, int role = Qt::EditRole) override;
 
@@ -247,7 +249,6 @@ public:
     Q_INVOKABLE void track3D(int index);
     Q_INVOKABLE QStringList getDeviceSets() const;
     Q_INVOKABLE void setFrequency(qint64 frequency, const QString& deviceSet);
-
 
     Q_INVOKABLE void viewChanged(double bottomLeftLongitude, double bottomRightLongitude);
 
@@ -263,6 +264,9 @@ public:
 
 //public slots:
 //    void update3DMap(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>()) override;
+
+signals:
+    void linkClicked(const QString& url);
 
 protected:
     void playAnimations(ObjectMapItem *item);

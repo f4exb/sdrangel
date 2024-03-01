@@ -394,6 +394,9 @@ void RemoteTCPInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("preFill")) {
         settings.m_preFill = response.getRemoteTcpInputSettings()->getPreFill() != 0;
     }
+    if (deviceSettingsKeys.contains("protocol")) {
+        settings.m_protocol = *response.getRemoteTcpInputSettings()->getProtocol();
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getRemoteTcpInputSettings()->getUseReverseApi() != 0;
     }
@@ -430,6 +433,7 @@ void RemoteTCPInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
     response.getRemoteTcpInputSettings()->setDataPort(settings.m_dataPort);
     response.getRemoteTcpInputSettings()->setOverrideRemoteSettings(settings.m_overrideRemoteSettings ? 1 : 0);
     response.getRemoteTcpInputSettings()->setPreFill(settings.m_preFill ? 1 : 0);
+    response.getRemoteTcpInputSettings()->setProtocol(new QString(settings.m_protocol));
 
     response.getRemoteTcpInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 

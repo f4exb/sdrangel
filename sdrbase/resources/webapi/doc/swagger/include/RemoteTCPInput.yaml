@@ -43,6 +43,9 @@ RemoteTCPInputSettings:
       type: integer
     preFill:
       type: integer
+    protocol:
+      description: (SDRangel or Spy Server)
+      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

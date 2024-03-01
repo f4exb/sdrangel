@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>    //
-// Copyright (C) 2020, 2022-2023 Jon Beniston, M7RCE <jon@beniston.com>          //
+// Copyright (C) 2020, 2022-2024 Jon Beniston, M7RCE <jon@beniston.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -53,6 +53,7 @@ struct RemoteTCPInputSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     QStringList m_addressList;          // List of dataAddresses that have been used in the past
+    QString  m_protocol;                // "SDRangel" or "Spy Server"
 
     RemoteTCPInputSettings();
     void resetToDefaults();

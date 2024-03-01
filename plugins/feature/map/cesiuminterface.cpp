@@ -177,6 +177,28 @@ void CesiumInterface::showfoF2(bool show)
     send(obj);
 }
 
+void CesiumInterface::showLayer(const QString& layer, bool show)
+{
+    QJsonObject obj {
+        {"command", "showLayer"},
+        {"layer", layer},
+        {"show", show}
+    };
+    send(obj);
+}
+
+void CesiumInterface::setLayerSettings(const QString& layer, const QStringList& settings, const QList<QVariant>& values)
+{
+    QJsonObject obj {
+        {"command", "setLayerSettings"},
+        {"layer", layer},
+    };
+    for (int i = 0; i < settings.size(); i++) {
+        obj.insert(settings[i], QJsonValue::fromVariant(values[i]));
+    }
+    send(obj);
+}
+
 void CesiumInterface::updateImage(const QString &name, float east, float west, float north, float south, float altitude, const QString &data)
 {
     QJsonObject obj {

@@ -320,22 +320,29 @@ void SDRPlayV3Gui::updateLNAValues()
     bool found = false;
 
     const int *attenuations = SDRPlayV3LNA::getAttenuations(m_sdrPlayV3Input->getDeviceId(), m_settings.m_centerFrequency);
-    int len = attenuations[0];
     ui->gainLNA->blockSignals(true);
     ui->gainLNA->clear();
-    for (int i = 1; i <= len; i++)
+    if (attenuations)
     {
-        if (attenuations[i] == 0)
-            ui->gainLNA->addItem("0");
-        else
-            ui->gainLNA->addItem(QString("-%1").arg(attenuations[i]));
-
-        // Find closest match
-        if ((attenuations[i] == -currentValue) || (!found && (attenuations[i] > -currentValue)))
+        int len = attenuations[0];
+        for (int i = 1; i <= len; i++)
         {
-            ui->gainLNA->setCurrentIndex(i - 1);
-            found = true;
+            if (attenuations[i] == 0)
+                ui->gainLNA->addItem("0");
+            else
+                ui->gainLNA->addItem(QString("-%1").arg(attenuations[i]));
+
+            // Find closest match
+            if ((attenuations[i] == -currentValue) || (!found && (attenuations[i] > -currentValue)))
+            {
+                ui->gainLNA->setCurrentIndex(i - 1);
+                found = true;
+            }
         }
+    }
+    else
+    {
+        qDebug() << "SDRPlayV3Gui::updateLNAValues: No attenuations for deviceID: " << m_sdrPlayV3Input->getDeviceId();
     }
     ui->gainLNA->blockSignals(false);
 }

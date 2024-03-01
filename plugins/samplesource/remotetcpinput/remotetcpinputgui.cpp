@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2022-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2022-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -49,7 +49,9 @@ RemoteTCPInputGui::RemoteTCPInputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_forceSettings(true),
     m_deviceGains(nullptr),
     m_remoteDevice(RemoteTCPProtocol::RTLSDR_R820T),
-    m_connectionError(false)
+    m_connectionError(false),
+    m_spyServerGainRange("Gain", 0, 41, 1, ""),
+    m_spyServerGains({m_spyServerGainRange}, false, false)
 {
     m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -223,23 +225,27 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
             device = devices.value(m_remoteDevice);
         }
         ui->device->setText(QString("Device: %1").arg(device));
-        ui->protocol->setText(QString("Protocol: %1").arg(report.getProtocol()));
+        ui->detectedProtocol->setText(QString("Protocol: %1").arg(report.getProtocol()));
 
         // Update GUI so we only show widgets available for the protocol in use
         bool sdra = report.getProtocol() == "SDRA";
-        if (sdra && (ui->sampleBits->count() != 4))
+        bool spyServer = report.getProtocol() == "Spy Server";
+        if (spyServer) {
+            m_spyServerGains.m_gains[0].m_max = report.getMaxGain();
+        }
+        if ((sdra || spyServer) && (ui->sampleBits->count() < 4))
         {
             ui->sampleBits->addItem("16");
             ui->sampleBits->addItem("24");
             ui->sampleBits->addItem("32");
         }
-        else if (!sdra && (ui->sampleBits->count() != 1))
+        else if (!(sdra || spyServer) && (ui->sampleBits->count() != 1))
         {
             while (ui->sampleBits->count() > 1) {
                 ui->sampleBits->removeItem(ui->sampleBits->count() - 1);
             }
         }
-        if (sdra && (ui->decim->count() != 7))
+        if ((sdra || spyServer) && (ui->decim->count() != 7))
         {
             ui->decim->addItem("2");
             ui->decim->addItem("4");
@@ -248,19 +254,24 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
             ui->decim->addItem("32");
             ui->decim->addItem("64");
         }
-        else if (!sdra && (ui->decim->count() != 1))
+        else if (!(sdra || spyServer) && (ui->decim->count() != 1))
         {
             while (ui->decim->count() > 1) {
                 ui->decim->removeItem(ui->decim->count() - 1);
             }
         }
-        if (!sdra) {
+        if (!sdra)
+        {
             ui->deltaFrequency->setValue(0);
             ui->channelGain->setValue(0);
             ui->decimation->setChecked(true);
         }
+        ui->deltaFrequencyLabel->setEnabled(sdra);
         ui->deltaFrequency->setEnabled(sdra);
+        ui->deltaUnits->setEnabled(sdra);
+        ui->channelGainLabel->setEnabled(sdra);
         ui->channelGain->setEnabled(sdra);
+        ui->channelGainText->setEnabled(sdra);
         ui->decimation->setEnabled(sdra);
         if (sdra) {
             ui->centerFrequency->setValueRange(9, 0, 999999999); // Should add transverter control to protocol in the future
@@ -271,7 +282,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
         // Set sample rate range
         if (m_sampleRateRanges.contains(m_remoteDevice))
         {
-           const SampleRateRange *range = m_sampleRateRanges.value(m_remoteDevice);
+            const SampleRateRange *range = m_sampleRateRanges.value(m_remoteDevice);
             ui->devSampleRate->setValueRange(8, range->m_min, range->m_max);
         }
         else if (m_sampleRateLists.contains(m_remoteDevice))
@@ -284,6 +295,18 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
         {
             ui->devSampleRate->setValueRange(8, 0, 99999999);
         }
+        ui->devSampleRateLabel->setEnabled(!spyServer);
+        ui->devSampleRate->setEnabled(!spyServer);
+        ui->devSampleRateUnits->setEnabled(!spyServer);
+        ui->agc->setEnabled(!spyServer);
+        ui->rfBWLabel->setEnabled(!spyServer);
+        ui->rfBW->setEnabled(!spyServer);
+        ui->rfBWUnits->setEnabled(!spyServer);
+        ui->dcOffset->setEnabled(!spyServer);
+        ui->iqImbalance->setEnabled(!spyServer);
+        ui->ppm->setEnabled(!spyServer);
+        ui->ppmLabel->setEnabled(!spyServer);
+        ui->ppmText->setEnabled(!spyServer);
 
         displayGains();
         return true;
@@ -368,7 +391,9 @@ void RemoteTCPInputGui::displaySettings()
     ui->deviceRateText->setText(tr("%1k").arg(m_settings.m_channelSampleRate / 1000.0));
     ui->decimation->setChecked(!m_settings.m_channelDecimation);
     ui->channelSampleRate->setEnabled(m_settings.m_channelDecimation);
-    ui->sampleBits->setCurrentIndex(m_settings.m_sampleBits/8-1);
+    ui->channelSampleRateLabel->setEnabled(m_settings.m_channelDecimation);
+    ui->channelSampleRateUnit->setEnabled(m_settings.m_channelDecimation);
+    ui->sampleBits->setCurrentText(QString::number(m_settings.m_sampleBits));
 
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
     ui->dataAddress->blockSignals(true);
@@ -385,6 +410,10 @@ void RemoteTCPInputGui::displaySettings()
 
     ui->preFill->setValue((int)(m_settings.m_preFill * 10.0));
     ui->preFillText->setText(QString("%1s").arg(m_settings.m_preFill, 0, 'f', 2));
+    int idx = ui->protocol->findText(m_settings.m_protocol);
+    if (idx > 0) {
+        ui->protocol->setCurrentIndex(idx);
+    }
 
     displayGains();
     blockApplySettings(false);
@@ -526,7 +555,11 @@ void RemoteTCPInputGui::displayGains()
     QLabel *gainTexts[3] = {ui->gain1Text, ui->gain2Text, ui->gain3Text};
     QWidget *gainLine[2] = {ui->gainLine1, ui->gainLine2};
 
-    m_deviceGains = m_gains.value(m_remoteDevice);
+    if (m_settings.m_protocol == "Spy Server") {
+        m_deviceGains = &m_spyServerGains;
+    } else {
+        m_deviceGains = m_gains.value(m_remoteDevice);
+    }
     if (m_deviceGains)
     {
         ui->agc->setVisible(m_deviceGains->m_agc);
@@ -746,12 +779,16 @@ void RemoteTCPInputGui::on_decimation_toggled(bool checked)
         ui->channelSampleRate->setValue(m_settings.m_channelSampleRate);
     }
     ui->channelSampleRate->setEnabled(!checked);
+    ui->channelSampleRateLabel->setEnabled(!checked);
+    ui->channelSampleRateUnit->setEnabled(!checked);
     sendSettings();
 }
 
 void RemoteTCPInputGui::on_sampleBits_currentIndexChanged(int index)
 {
-    m_settings.m_sampleBits = 8 * (index + 1);
+    (void) index;
+
+    m_settings.m_sampleBits = ui->sampleBits->currentText().toInt();
     m_settingsKeys.append("sampleBits");
     sendSettings();
 }
@@ -806,6 +843,16 @@ void RemoteTCPInputGui::on_preFill_valueChanged(int value)
     ui->preFillText->setText(QString("%1s").arg(m_settings.m_preFill, 0, 'f', 2));
     m_settingsKeys.append("preFill");
     sendSettings();
+}
+
+void RemoteTCPInputGui::on_protocol_currentIndexChanged(int index)
+{
+    (void) index;
+
+    m_settings.m_protocol = ui->protocol->currentText();
+    m_settingsKeys.append("protocol");
+    sendSettings();
+    displayGains();
 }
 
 void RemoteTCPInputGui::updateHardware()
@@ -902,4 +949,5 @@ void RemoteTCPInputGui::makeUIConnections()
     QObject::connect(ui->dataPort, &QLineEdit::editingFinished, this, &RemoteTCPInputGui::on_dataPort_editingFinished);
     QObject::connect(ui->overrideRemoteSettings, &ButtonSwitch::toggled, this, &RemoteTCPInputGui::on_overrideRemoteSettings_toggled);
     QObject::connect(ui->preFill, &QDial::valueChanged, this, &RemoteTCPInputGui::on_preFill_valueChanged);
+    QObject::connect(ui->protocol, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteTCPInputGui::on_protocol_currentIndexChanged);
 }

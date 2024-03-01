@@ -239,12 +239,14 @@ set(sdrbase_SOURCES
     util/golay2312.cpp
     util/httpdownloadmanager.cpp
     util/interpolation.cpp
+    util/kiwisdrlist.cpp
     util/lfsr.cpp
     util/maidenhead.cpp
     util/message.cpp
     util/messagequeue.cpp
     util/mmsi.cpp
     util/morse.cpp
+    util/nasaglobalimagery.cpp
     util/navtex.cpp
     util/openaip.cpp
     util/osndb.cpp
@@ -256,17 +258,20 @@ set(sdrbase_SOURCES
     util/profiler.cpp
     util/psk31.cpp
     util/radiosonde.cpp
+    util/rainviewer.cpp
     util/rtpsink.cpp
     util/syncmessenger.cpp
     util/samplesourceserializer.cpp
     util/simpleserializer.cpp
     util/serialutil.cpp
     #util/spinlock.cpp
+    util/spyserverlist.cpp
     util/rtty.cpp
     util/uid.cpp
     util/units.cpp
     util/timeutil.cpp
     util/visa.cpp
+    util/waypoints.cpp
     util/weather.cpp
     util/iot/device.cpp
     util/iot/homeassistant.cpp
@@ -482,6 +487,7 @@ set(sdrbase_HEADERS
     util/incrementalarray.h
     util/incrementalvector.h
     util/interpolation.h
+    util/kiwisdrlist.h
     util/lfsr.h
     util/maidenhead.h
     util/message.h
@@ -490,6 +496,7 @@ set(sdrbase_HEADERS
     util/morse.h
     util/movingaverage.h
     util/movingmaximum.h
+    util/nasaglobalimagery.h
     util/navtex.h
     util/openaip.h
     util/osndb.h
@@ -501,6 +508,7 @@ set(sdrbase_HEADERS
     util/profiler.h
     util/psk31.h
     util/radiosonde.h
+    util/rainviewer.h
     util/rtpsink.h
     util/rtty.h
     util/syncmessenger.h
@@ -508,10 +516,12 @@ set(sdrbase_HEADERS
     util/simpleserializer.h
     util/serialutil.h
     #util/spinlock.h
+    util/spyserverlist.h
     util/uid.h
     util/units.h
     util/timeutil.h
     util/visa.h
+    util/waypoints.h
     util/weather.h
     util/iot/device.h
     util/iot/homeassistant.h

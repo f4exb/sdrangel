@@ -2,7 +2,8 @@
 
 <h2>Introduction</h2>
 
-This input sample source plugin gets its I/Q samples over the network via a TCP/IP connection from a server such as rtl_tcp, rsp_tcp or SDRangel's [Remote TCP Channel Sink](../../channelrx/remotetcpsink/readme.md) plugin.
+This input sample source plugin gets its I/Q samples over the network via a TCP/IP connection from a server such as
+rtl_tcp, rsp_tcp, Spy Server or SDRangel's [Remote TCP Channel Sink](../../channelrx/remotetcpsink/readme.md) plugin.
 
 <h2>Interface</h2>
 
@@ -92,7 +93,7 @@ When unchecked, the channel sample rate can be set to any value.
 
 Specifies number of bits per I/Q sample transmitted via TCP/IP.
 
-When the protocol is RTL0, only 8-bits are supported. SDRA protocol supports 8, 16, 24 and 32-bit samples.
+When the protocol is RTL0, only 8-bits are supported. SDRA and Spy Server protocol supports 8, 16, 24 and 32-bit samples.
 
 <h3>19: Server IP address</h3>
 
@@ -102,7 +103,11 @@ IP address or hostname of the server that is running SDRangel's Remote TCP Sink 
 
 TCP port on the server to connect to.
 
-<h3>21: Connection settings</h3>
+<h3>21: Protocol</h3>
+
+Selects protocol to use. Set to SDRangel for rtl_tcp, rsp_tcp or SDRangel's own protocol. Alternative, Spy Server can be selected to connect to Spy Servers.
+
+<h3>23: Connection settings</h3>
 
 Determines which settings are used when connecting.
 
@@ -110,31 +115,32 @@ When checked, settings in the RemoteTCPInput GUI are written to the remote devic
 When unchecked, if the remote server is using the SDRA protocol, the RemoteTCPInput GUI will be updated with the current settings from the remote device.
 If the remote server is using the RTL0 protocol, the GUI will not be updated, which may mean the two are inconsistent.
 
-<h3>22: Pre-fill</h3>
+<h3>24: Pre-fill</h3>
 
 Determines how many seconds of I/Q samples are buffered locally from the remote device, before being processed in SDRangel.
 More buffering can handle more network congestion and other network problems, without gaps in the output, but increases the latency in changes to remote device settings.
 
-<h3>23: Input buffer gauge</h3>
+<h3>25: Input buffer gauge</h3>
 
 Shows how much data is in the input buffer. Typically this will be just under the pre-fill setting.
 If it becomes empty, the plugin will pause outputting of data until the buffer is refilled to the pre-fill level.
 If the buffer repeatedly runs empty, this suggests you do not have enough network bandwidth for the current combination
 of channel sample rate and sample bit depth. Reducing these to lower values may be required for uninterrupted data.
 
-<h3>24: Output buffer gauge</h3>
+<h3>26: Output buffer gauge</h3>
 
 Shows how much data is in the output buffer. This should typically be empty. If not empty, this suggests your CPU can't keep up with the amount of data being received.
 
-<h3>25: Device status</h3>
+<h3>27: Device status</h3>
 
 Shows the type of remote device that has been connected to.
 
-<h3>26: Protocol status</h3>
+<h3>28: Protocol status</h3>
 
-Shows the protocol being used by the remote server. This will be RTL0 or SDRA.
+Shows the protocol being used by the remote server. This will be RTL0, SDRA or Spy Server.
 
 rtl_tcp and rsp_tcp always use the RTL0 protocol.
 SDRangel's Remote TCP Sink plugin can use RTL0 or SDRA.
 
 RTL0 is limited to sending 8-bit data, doesn't support decimation and does not send the current device settings on connection.
+Spy Server supports decimation and gain, but no other settings.

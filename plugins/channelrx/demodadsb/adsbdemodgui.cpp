@@ -4875,8 +4875,11 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->map->rootContext()->setContextProperty("airportModel", &m_airportModel);
     ui->map->rootContext()->setContextProperty("airspaceModel", &m_airspaceModel);
     ui->map->rootContext()->setContextProperty("navAidModel", &m_navAidModel);
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     ui->map->setSource(QUrl(QStringLiteral("qrc:/map/map.qml")));
-
+#else
+    ui->map->setSource(QUrl(QStringLiteral("qrc:/map/map_6.qml")));
+#endif
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_adsbDemod = reinterpret_cast<ADSBDemod*>(rxChannel); //new ADSBDemod(m_deviceUISet->m_deviceSourceAPI);

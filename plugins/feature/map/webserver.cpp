@@ -97,7 +97,7 @@ void WebServer::addFile(const QString &path, const QByteArray &data)
 
 void WebServer::sendFile(QTcpSocket* socket, const QByteArray &data, MimeType *mimeType, const QString &path)
 {
-    QString header = QString("HTTP/1.0 200 Ok\r\nContent-Type: %1\r\n\r\n").arg(mimeType->m_type);
+    QString header = QString("HTTP/1.0 200 Ok\r\nContent-Type: %1\r\nAccess-Control-Allow-Headers: *\r\nAccess-Control-Allow-Methods: *\r\nAccess-Control-Allow-Origin: *\r\n\r\n").arg(mimeType->m_type);
     if (mimeType->m_binary)
     {
         // Send file as binary
@@ -125,7 +125,7 @@ void WebServer::readClient()
     if (socket->canReadLine())
     {
         QString line = socket->readLine();
-        //qDebug() << "WebServer HTTP Request: " << line;
+        qDebug() << "WebServer HTTP Request: " << line;
 
         QStringList tokens = QString(line).split(QRegularExpression("[ \r\n][ \r\n]*"));
         if (tokens[0] == "GET")

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -22,6 +22,7 @@
 #include <QTimer>
 #include <QQuickItem>
 #include <QQuickWidget>
+#include <QTextEdit>
 #include <QJsonObject>
 #ifdef QT_WEBENGINE_FOUND
 #include <QWebEngineFullScreenRequest>
@@ -40,7 +41,13 @@
 #include "util/azel.h"
 #include "util/openaip.h"
 #include "util/ourairportsdb.h"
+#include "util/waypoints.h"
+#include "util/rainviewer.h"
+#include "util/nasaglobalimagery.h"
+#include "util/kiwisdrlist.h"
+#include "util/spyserverlist.h"
 #include "settings/rollupstate.h"
+#include "availablechannelorfeaturehandler.h"
 
 #include "SWGMapItem.h"
 
@@ -50,6 +57,7 @@
 #include "mapradiotimedialog.h"
 #include "cesiuminterface.h"
 #include "osmtemplateserver.h"
+#include "maptileserver.h"
 #include "webserver.h"
 #include "mapmodel.h"
 
@@ -63,6 +71,7 @@ namespace Ui {
 
 class MapGUI;
 struct Beacon;
+class QSvgWidget;
 
 struct RadioTimeTransmitter {
     QString m_callsign;
@@ -165,8 +174,11 @@ public:
     void addAirspace(const Airspace *airspace, const QString& group, int cnt);
     void addAirspace();
     void addAirports();
+    void addWaypoints();
     void addNavtex();
     void addVLF();
+    void addKiwiSDR();
+    void addSpyServer();
     void find(const QString& target);
     void track3D(const QString& target);
     Q_INVOKABLE void supportedMapsChanged();
@@ -181,7 +193,7 @@ private:
     QList<QString> m_settingsKeys;
     RollupState m_rollupState;
     bool m_doApplySettings;
-    QList<MapSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
+    AvailableChannelOrFeatureList m_availableChannelOrFeatures;
 
     Map* m_map;
     MessageQueue m_inputMessageQueue;
@@ -201,17 +213,43 @@ private:
     MapRadioTimeDialog m_radioTimeDialog;
     quint16 m_osmPort;
     OSMTemplateServer *m_templateServer;
+    quint16 m_mapTileServerPort;
+    MapTileServer *m_mapTileServer;
     QTimer m_redrawMapTimer;
     GIRO *m_giro;
     QHash<QString, IonosondeStation *> m_ionosondeStations;
     QSharedPointer<const QList<NavAid *>> m_navAids;
     QSharedPointer<const QList<Airspace *>> m_airspaces;
     QSharedPointer<const QHash<int, AirportInformation *>> m_airportInfo;
+    QSharedPointer<const QHash<QString, Waypoint *>> m_waypoints;
     QGeoCoordinate m_lastFullUpdatePosition;
+    KiwiSDRList m_kiwiSDRList;
+    SpyServerList m_spyServerList;
 
     CesiumInterface *m_cesium;
     WebServer *m_webServer;
     quint16 m_webPort;
+    RainViewer *m_rainViewer;
+    NASAGlobalImagery m_nasaGlobalImagery;
+    QList<NASAGlobalImagery::DataSet> m_nasaDataSets;
+    QHash<QString, NASAGlobalImagery::DataSet> m_nasaDataSetsHash;
+    NASAGlobalImagery::MetaData m_nasaMetaData;
+    QAction *m_displaySeaMarks;
+    QAction *m_displayRailways;
+    QAction *m_displayRain;
+    QAction *m_displayClouds;
+    QAction *m_displayNASAGlobalImagery;
+    QAction *m_displayMUF;
+    QAction *m_displayfoF2;
+
+    QString m_radarPath;
+    QString m_satellitePath;
+
+    NASAGlobalImagery::Legend *m_legend;
+    QWidget *m_nasaWidget;
+    QSvgWidget *m_legendWidget;
+    QTableWidget *m_overviewWidget;
+    QTextEdit *m_descriptionWidget;
 
     explicit MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~MapGUI();
@@ -232,10 +270,30 @@ private:
     QString cesiumIonAPIKey() const;
     void redrawMap();
     void makeUIConnections();
+    void createLayersMenu();
+    void displayToolbar();
+    void setEnableOverlay();
+    void applyNASAGlobalImagerySettings();
+    void createNASAGlobalImageryView();
+    void displayNASAMetaData();
+    void openKiwiSDR(const QString& url);
+    void openSpyServer(const QString& url);
+    QString formatFrequency(qint64 frequency) const;
 
     static QString getDataDir();
     static const QList<RadioTimeTransmitter> m_radioTimeTransmitters;
     static const QList<RadioTimeTransmitter> m_vlfTransmitters;
+
+    enum NASARow {
+        NASA_TITLE,
+        NASA_SUBTITLE,
+        NASA_DEFAULT_DATE,
+        NASA_START_DATE,
+        NASA_END_DATE,
+        NASA_PERIOD,
+        NASA_LAYER_GROUP,
+        NASA_ROWS
+    };
 
 private slots:
     void init3DMap();
@@ -245,8 +303,16 @@ private slots:
     void on_displayNames_clicked(bool checked=false);
     void on_displayAllGroundTracks_clicked(bool checked=false);
     void on_displaySelectedGroundTracks_clicked(bool checked=false);
+    void on_displayRain_clicked(bool checked=false);
+    void on_displayClouds_clicked(bool checked=false);
+    void on_displaySeaMarks_clicked(bool checked=false);
+    void on_displayRailways_clicked(bool checked=false);
     void on_displayMUF_clicked(bool checked=false);
     void on_displayfoF2_clicked(bool checked=false);
+    void on_displayNASAGlobalImagery_clicked(bool checked=false);
+    void on_nasaGlobalImageryIdentifier_currentIndexChanged(int index);
+    void on_nasaGlobalImageryOpacity_valueChanged(int index);
+    void on_layersMenu_clicked();
     void on_find_returnPressed();
     void on_maidenhead_clicked();
     void on_deleteAll_clicked();
@@ -258,6 +324,7 @@ private slots:
     void receivedCesiumEvent(const QJsonObject &obj);
     virtual void showEvent(QShowEvent *event) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
+    void orientationChanged(Qt::ScreenOrientation orientation);
 #ifdef QT_WEBENGINE_FOUND
     void fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest);
     void renderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode);
@@ -270,9 +337,18 @@ private slots:
     void giroDataUpdated(const GIRO::GIROStationData& data);
     void mufUpdated(const QJsonDocument& document);
     void foF2Updated(const QJsonDocument& document);
+    void pathUpdated(const QString& radarPath, const QString& satellitePath);
+    void nasaGlobalImageryDataUpdated(const QList<NASAGlobalImagery::DataSet>& dataSets);
+    void nasaGlobalImageryMetaDataUpdated(const NASAGlobalImagery::MetaData& metaData);
+    void nasaGlobalImageryLegendAvailable(const QString& url, const QByteArray& data);
+    void nasaGlobalImageryHTMLAvailable(const QString& url, const QByteArray& data);
     void navAidsUpdated();
     void airspacesUpdated();
     void airportsUpdated();
+    void waypointsUpdated();
+    void kiwiSDRUpdated(const QList<KiwiSDRList::KiwiSDR>& sdrs);
+    void spyServerUpdated(const QList<SpyServerList::SpyServer>& sdrs);
+    void linkClicked(const QString& url);
 
 };
 
