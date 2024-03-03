@@ -1,14 +1,9 @@
-PacketDemodSettings:
-  description: PacketDemod
+EndOfTrainDemodSettings:
+  description: EndOfTrain
   properties:
     inputFrequencyOffset:
       type: integer
       format: int64
-    mode:
-      type: integer
-      description: >
-        Transmission mode
-          * 0 - 1200 AFSK
     rfBandwidth:
       type: number
       format: float
@@ -51,8 +46,8 @@ PacketDemodSettings:
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
 
-PacketDemodReport:
-  description: PacketDemod
+EndOfTrainDemodReport:
+  description: EndOfTrainDemod
   properties:
     channelPowerDB:
       description: power received in channel (dB)

@@ -55,6 +55,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/DSCDemod.yaml#/DSCDemodSettings"
     DSDDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
+    EndOfTrainDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/EndOfTrainDemod.yaml#/EndOfTrainDemodSettings"
     FileSinkSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FileSink.yaml#/FileSinkSettings"
     FileSourceSettings:

@@ -39,6 +39,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/DSCDemod.yaml#/DSCDemodReport"
     DSDDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+    EndOfTrainDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/EndOfTrainDemod.yaml#/EndOfTrainDemodReport"
     IEEE_802_15_4_ModReport:
       $ref: "http://swgserver:8081/api/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModReport"
     FileSinkReport:
