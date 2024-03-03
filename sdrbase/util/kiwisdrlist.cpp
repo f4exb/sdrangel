@@ -93,6 +93,8 @@ void KiwiSDRList::handleReply(QNetworkReply* reply)
 
 void KiwiSDRList::handleHTML(const QString& url, const QByteArray& bytes)
 {
+    (void) url;
+
     QList<KiwiSDR> sdrs;
     QString html(bytes);
     QRegularExpression div("<div class='cl-info'>(.*?)<\\/div>", QRegularExpression::DotMatchesEverythingOption);
