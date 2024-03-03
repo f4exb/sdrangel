@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGPacketDemodReport.h
+ * SWGEndOfTrainDemodReport.h
  *
- * PacketDemod
+ * EndOfTrainDemod
  */
 
-#ifndef SWGPacketDemodReport_H_
-#define SWGPacketDemodReport_H_
+#ifndef SWGEndOfTrainDemodReport_H_
+#define SWGEndOfTrainDemodReport_H_
 
 #include <QJsonObject>
 
@@ -28,18 +28,18 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGPacketDemodReport: public SWGObject {
+class SWG_API SWGEndOfTrainDemodReport: public SWGObject {
 public:
-    SWGPacketDemodReport();
-    SWGPacketDemodReport(QString* json);
-    virtual ~SWGPacketDemodReport();
+    SWGEndOfTrainDemodReport();
+    SWGEndOfTrainDemodReport(QString* json);
+    virtual ~SWGEndOfTrainDemodReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGPacketDemodReport* fromJson(QString &jsonString) override;
+    virtual SWGEndOfTrainDemodReport* fromJson(QString &jsonString) override;
 
     float getChannelPowerDb();
     void setChannelPowerDb(float channel_power_db);
@@ -61,4 +61,4 @@ private:
 
 }
 
-#endif /* SWGPacketDemodReport_H_ */
+#endif /* SWGEndOfTrainDemodReport_H_ */

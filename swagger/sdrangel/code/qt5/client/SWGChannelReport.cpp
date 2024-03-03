@@ -60,6 +60,8 @@ SWGChannelReport::SWGChannelReport() {
     m_dsc_demod_report_isSet = false;
     dsd_demod_report = nullptr;
     m_dsd_demod_report_isSet = false;
+    end_of_train_demod_report = nullptr;
+    m_end_of_train_demod_report_isSet = false;
     ieee_802_15_4_mod_report = nullptr;
     m_ieee_802_15_4_mod_report_isSet = false;
     file_sink_report = nullptr;
@@ -168,6 +170,8 @@ SWGChannelReport::init() {
     m_dsc_demod_report_isSet = false;
     dsd_demod_report = new SWGDSDDemodReport();
     m_dsd_demod_report_isSet = false;
+    end_of_train_demod_report = new SWGEndOfTrainDemodReport();
+    m_end_of_train_demod_report_isSet = false;
     ieee_802_15_4_mod_report = new SWGIEEE_802_15_4_ModReport();
     m_ieee_802_15_4_mod_report_isSet = false;
     file_sink_report = new SWGFileSinkReport();
@@ -285,6 +289,9 @@ SWGChannelReport::cleanup() {
     }
     if(dsd_demod_report != nullptr) { 
         delete dsd_demod_report;
+    }
+    if(end_of_train_demod_report != nullptr) { 
+        delete end_of_train_demod_report;
     }
     if(ieee_802_15_4_mod_report != nullptr) { 
         delete ieee_802_15_4_mod_report;
@@ -433,6 +440,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&dsd_demod_report, pJson["DSDDemodReport"], "SWGDSDDemodReport", "SWGDSDDemodReport");
     
+    ::SWGSDRangel::setValue(&end_of_train_demod_report, pJson["EndOfTrainDemodReport"], "SWGEndOfTrainDemodReport", "SWGEndOfTrainDemodReport");
+    
     ::SWGSDRangel::setValue(&ieee_802_15_4_mod_report, pJson["IEEE_802_15_4_ModReport"], "SWGIEEE_802_15_4_ModReport", "SWGIEEE_802_15_4_ModReport");
     
     ::SWGSDRangel::setValue(&file_sink_report, pJson["FileSinkReport"], "SWGFileSinkReport", "SWGFileSinkReport");
@@ -564,6 +573,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((dsd_demod_report != nullptr) && (dsd_demod_report->isSet())){
         toJsonValue(QString("DSDDemodReport"), dsd_demod_report, obj, QString("SWGDSDDemodReport"));
+    }
+    if((end_of_train_demod_report != nullptr) && (end_of_train_demod_report->isSet())){
+        toJsonValue(QString("EndOfTrainDemodReport"), end_of_train_demod_report, obj, QString("SWGEndOfTrainDemodReport"));
     }
     if((ieee_802_15_4_mod_report != nullptr) && (ieee_802_15_4_mod_report->isSet())){
         toJsonValue(QString("IEEE_802_15_4_ModReport"), ieee_802_15_4_mod_report, obj, QString("SWGIEEE_802_15_4_ModReport"));
@@ -829,6 +841,16 @@ void
 SWGChannelReport::setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report) {
     this->dsd_demod_report = dsd_demod_report;
     this->m_dsd_demod_report_isSet = true;
+}
+
+SWGEndOfTrainDemodReport*
+SWGChannelReport::getEndOfTrainDemodReport() {
+    return end_of_train_demod_report;
+}
+void
+SWGChannelReport::setEndOfTrainDemodReport(SWGEndOfTrainDemodReport* end_of_train_demod_report) {
+    this->end_of_train_demod_report = end_of_train_demod_report;
+    this->m_end_of_train_demod_report_isSet = true;
 }
 
 SWGIEEE_802_15_4_ModReport*
@@ -1222,6 +1244,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(dsd_demod_report && dsd_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(end_of_train_demod_report && end_of_train_demod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(ieee_802_15_4_mod_report && ieee_802_15_4_mod_report->isSet()){

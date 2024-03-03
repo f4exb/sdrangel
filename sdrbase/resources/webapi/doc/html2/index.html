@@ -3836,6 +3836,9 @@ margin-bottom: 20px;
     "DSDDemodReport" : {
       "$ref" : "#/definitions/DSDDemodReport"
     },
+    "EndOfTrainDemodReport" : {
+      "$ref" : "#/definitions/EndOfTrainDemodReport"
+    },
     "IEEE_802_15_4_ModReport" : {
       "$ref" : "#/definitions/IEEE_802_15_4_ModReport"
     },
@@ -4017,6 +4020,9 @@ margin-bottom: 20px;
     },
     "DSDDemodSettings" : {
       "$ref" : "#/definitions/DSDDemodSettings"
+    },
+    "EndOfTrainDemodSettings" : {
+      "$ref" : "#/definitions/EndOfTrainDemodSettings"
     },
     "FileSinkSettings" : {
       "$ref" : "#/definitions/FileSinkSettings"
@@ -5870,6 +5876,86 @@ margin-bottom: 20px;
     }
   },
   "description" : "Device running state"
+};
+            defs.EndOfTrainDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "EndOfTrainDemod"
+};
+            defs.EndOfTrainDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmDeviation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to forward received packets to specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to forward received packets to"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to forward received packets to"
+    },
+    "logFilename" : {
+      "type" : "string"
+    },
+    "logEnabled" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "EndOfTrain"
 };
             defs.ErrorResponse = {
   "required" : [ "message" ],
@@ -10943,7 +11029,7 @@ margin-bottom: 20px;
       "type" : "integer"
     }
   },
-  "description" : "AMDemod"
+  "description" : "PacketDemod"
 };
             defs.PacketDemodSettings = {
   "properties" : {
@@ -58672,7 +58758,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-02-27T15:07:08.970+01:00
+              Generated 2024-03-03T11:48:39.756+01:00
             </div>
           </div>
       </div>

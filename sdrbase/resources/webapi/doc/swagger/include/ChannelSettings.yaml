@@ -55,6 +55,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/DSCDemod.yaml#/DSCDemodSettings"
     DSDDemodSettings:
       $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
+    EndOfTrainDemodSettings:
+      $ref: "/doc/swagger/include/EndOfTrainDemod.yaml#/EndOfTrainDemodSettings"
     FileSinkSettings:
       $ref: "/doc/swagger/include/FileSink.yaml#/FileSinkSettings"
     FileSourceSettings:
