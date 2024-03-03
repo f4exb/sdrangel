@@ -310,6 +310,9 @@ void AISDemod::applySettings(const AISDemodSettings& settings, bool force)
     if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
         reverseAPIKeys.append("logEnabled");
     }
+    if ((settings.m_useFileTime != m_settings.m_useFileTime) || force) {
+        reverseAPIKeys.append("useFileTime");
+    }
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -495,6 +498,9 @@ void AISDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("logEnabled")) {
         settings.m_logEnabled = response.getAisDemodSettings()->getLogEnabled();
     }
+    if (channelSettingsKeys.contains("useFileTime")) {
+        settings.m_useFileTime = response.getAisDemodSettings()->getUseFileTime();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getAisDemodSettings()->getRgbColor();
     }
@@ -543,6 +549,7 @@ void AISDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getAisDemodSettings()->setUdpFormat((int)settings.m_udpFormat);
     response.getAisDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
     response.getAisDemodSettings()->setLogEnabled(settings.m_logEnabled);
+    response.getAisDemodSettings()->setUseFileTime(settings.m_useFileTime);
 
     response.getAisDemodSettings()->setRgbColor(settings.m_rgbColor);
     if (response.getAisDemodSettings()->getTitle()) {
@@ -680,6 +687,9 @@ void AISDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgAISDemodSettings->setLogEnabled(settings.m_logEnabled);
+    }
+    if (channelSettingsKeys.contains("useFileTime") || force) {
+        swgAISDemodSettings->setUseFileTime(settings.m_useFileTime);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgAISDemodSettings->setRgbColor(settings.m_rgbColor);

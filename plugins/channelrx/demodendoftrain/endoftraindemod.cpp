@@ -439,10 +439,13 @@ void EndOfTrainDemod::webapiUpdateChannelSettings(
         settings.m_udpPort = response.getEndOfTrainDemodSettings()->getUdpPort();
     }
     if (channelSettingsKeys.contains("logFilename")) {
-        settings.m_logFilename = *response.getAdsbDemodSettings()->getLogFilename();
+        settings.m_logFilename = *response.getEndOfTrainDemodSettings()->getLogFilename();
     }
     if (channelSettingsKeys.contains("logEnabled")) {
-        settings.m_logEnabled = response.getAdsbDemodSettings()->getLogEnabled();
+        settings.m_logEnabled = response.getEndOfTrainDemodSettings()->getLogEnabled();
+    }
+    if (channelSettingsKeys.contains("useFileTime")) {
+        settings.m_useFileTime = response.getEndOfTrainDemodSettings()->getUseFileTime();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getEndOfTrainDemodSettings()->getRgbColor();
@@ -486,6 +489,7 @@ void EndOfTrainDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetting
     response.getEndOfTrainDemodSettings()->setUdpPort(settings.m_udpPort);
     response.getEndOfTrainDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
     response.getEndOfTrainDemodSettings()->setLogEnabled(settings.m_logEnabled);
+    response.getEndOfTrainDemodSettings()->setUseFileTime(settings.m_useFileTime);
 
     response.getEndOfTrainDemodSettings()->setRgbColor(settings.m_rgbColor);
     if (response.getEndOfTrainDemodSettings()->getTitle()) {
@@ -610,6 +614,9 @@ void EndOfTrainDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgEndOfTrainDemodSettings->setLogEnabled(settings.m_logEnabled);
+    }
+    if (channelSettingsKeys.contains("useFileTime") || force) {
+        swgEndOfTrainDemodSettings->setUseFileTime(settings.m_useFileTime);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgEndOfTrainDemodSettings->setRgbColor(settings.m_rgbColor);

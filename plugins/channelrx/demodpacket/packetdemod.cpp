@@ -297,6 +297,9 @@ void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
     if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
         reverseAPIKeys.append("logEnabled");
     }
+    if ((settings.m_useFileTime != m_settings.m_useFileTime) || force) {
+        reverseAPIKeys.append("useFileTime");
+    }
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -482,10 +485,13 @@ void PacketDemod::webapiUpdateChannelSettings(
         settings.m_udpPort = response.getPacketDemodSettings()->getUdpPort();
     }
     if (channelSettingsKeys.contains("logFilename")) {
-        settings.m_logFilename = *response.getAdsbDemodSettings()->getLogFilename();
+        settings.m_logFilename = *response.getPacketDemodSettings()->getLogFilename();
     }
     if (channelSettingsKeys.contains("logEnabled")) {
-        settings.m_logEnabled = response.getAdsbDemodSettings()->getLogEnabled();
+        settings.m_logEnabled = response.getPacketDemodSettings()->getLogEnabled();
+    }
+    if (channelSettingsKeys.contains("useFileTime")) {
+        settings.m_useFileTime = response.getPacketDemodSettings()->getUseFileTime();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getPacketDemodSettings()->getRgbColor();
@@ -530,6 +536,7 @@ void PacketDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getPacketDemodSettings()->setUdpPort(settings.m_udpPort);
     response.getPacketDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
     response.getPacketDemodSettings()->setLogEnabled(settings.m_logEnabled);
+    response.getPacketDemodSettings()->setUseFileTime(settings.m_useFileTime);
 
     response.getPacketDemodSettings()->setRgbColor(settings.m_rgbColor);
     if (response.getPacketDemodSettings()->getTitle()) {
@@ -657,6 +664,9 @@ void PacketDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgPacketDemodSettings->setLogEnabled(settings.m_logEnabled);
+    }
+    if (channelSettingsKeys.contains("useFilTime") || force) {
+        swgPacketDemodSettings->setUseFileTime(settings.m_useFileTime);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgPacketDemodSettings->setRgbColor(settings.m_rgbColor);
