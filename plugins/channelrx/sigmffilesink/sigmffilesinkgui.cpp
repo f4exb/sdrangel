@@ -83,6 +83,7 @@ bool SigMFFileSinkGUI::handleMessage(const Message& message)
         ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
         ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
         displayRate();
+        updateAbsoluteCenterFrequency();
 
         if (m_fixedPosition)
         {
@@ -274,6 +275,7 @@ void SigMFFileSinkGUI::displaySettings()
     ui->postSquelchTime->setValue(m_settings.m_squelchPostRecordTime);
     ui->postSquelchTimeText->setText(tr("%1").arg(m_settings.m_squelchPostRecordTime));
     ui->squelchedRecording->setChecked(m_settings.m_squelchRecordingEnable);
+    ui->recordSampleSize->setCurrentIndex((int) m_settings.m_log2RecordSampleSize - 3);
 
     if (!m_settings.m_spectrumSquelchMode)
     {
@@ -431,6 +433,12 @@ void SigMFFileSinkGUI::on_decimationFactor_currentIndexChanged(int index)
     }
 }
 
+void SigMFFileSinkGUI::on_recordSampleSize_currentIndexChanged(int index)
+{
+    m_settings.m_log2RecordSampleSize = index + 3;
+    applySettings();
+}
+
 void SigMFFileSinkGUI::on_fixedPosition_toggled(bool checked)
 {
     m_fixedPosition = checked;
@@ -506,6 +514,7 @@ void SigMFFileSinkGUI::on_squelchedRecording_toggled(bool checked)
 
 void SigMFFileSinkGUI::on_record_toggled(bool checked)
 {
+    ui->recordSampleSize->setEnabled(!checked);
     m_sigMFFileSink->record(checked);
 }
 
@@ -603,6 +612,7 @@ void SigMFFileSinkGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &SigMFFileSinkGUI::on_deltaFrequency_changed);
     QObject::connect(ui->decimationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SigMFFileSinkGUI::on_decimationFactor_currentIndexChanged);
+    QObject::connect(ui->recordSampleSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SigMFFileSinkGUI::on_recordSampleSize_currentIndexChanged);
     QObject::connect(ui->fixedPosition, &QCheckBox::toggled, this, &SigMFFileSinkGUI::on_fixedPosition_toggled);
     QObject::connect(ui->position, &QSlider::valueChanged, this, &SigMFFileSinkGUI::on_position_valueChanged);
     QObject::connect(ui->spectrumSquelch, &ButtonSwitch::toggled, this, &SigMFFileSinkGUI::on_spectrumSquelch_toggled);

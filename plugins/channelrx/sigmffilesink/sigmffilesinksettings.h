@@ -39,6 +39,7 @@ struct SigMFFileSinkSettings
     int m_preRecordTime;
     int m_squelchPostRecordTime;
     bool m_squelchRecordingEnable;
+    uint32_t m_log2RecordSampleSize;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

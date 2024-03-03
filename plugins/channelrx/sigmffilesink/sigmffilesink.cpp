@@ -328,6 +328,7 @@ void SigMFFileSink::applySettings(const SigMFFileSinkSettings& settings, bool fo
         << "m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
         << "m_log2Decim: " << settings.m_log2Decim
         << "m_fileRecordName: " << settings.m_fileRecordName
+        << "m_log2RecordSampleSize: " << settings.m_log2RecordSampleSize
         << "force: " << force;
 
     QList<QString> reverseAPIKeys;
