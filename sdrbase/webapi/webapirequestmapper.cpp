@@ -4526,6 +4526,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getDsdDemodSettings()->init();
             channelSettings->getDsdDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "EndOfTrainDemodSettings")
+        {
+            channelSettings->setEndOfTrainDemodSettings(new SWGSDRangel::SWGEndOfTrainDemodSettings());
+            channelSettings->getEndOfTrainDemodSettings()->init();
+            channelSettings->getEndOfTrainDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "FileSinkSettings")
         {
             channelSettings->setFileSinkSettings(new SWGSDRangel::SWGFileSinkSettings());
@@ -5523,6 +5529,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDatvModSettings(nullptr);
     channelSettings.setDabDemodSettings(nullptr);
     channelSettings.setDsdDemodSettings(nullptr);
+    channelSettings.setEndOfTrainDemodSettings(nullptr);
     channelSettings.setFreqScannerSettings(nullptr);
     channelSettings.setFreqTrackerSettings(nullptr);
     channelSettings.setHeatMapSettings(nullptr);
@@ -5567,6 +5574,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setBfmDemodReport(nullptr);
     channelReport.setDatvModReport(nullptr);
     channelReport.setDsdDemodReport(nullptr);
+    channelReport.setEndOfTrainDemodReport(nullptr);
     channelReport.setFreqScannerReport(nullptr);
     channelReport.setFreqTrackerReport(nullptr);
     channelReport.setHeatMapReport(nullptr);

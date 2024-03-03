@@ -44,7 +44,7 @@ void crc::calculate(uint32_t data, int data_bits)
     {
         mask = (1 << m_poly_bits) - 1;
         msb = 1 << (m_poly_bits - 1);
-        tmp = m_crc ^ (data << (m_poly_bits - 8));
+        tmp = m_crc ^ (data << (m_poly_bits - data_bits));
         for (i = 0; i < data_bits; i++)
         {
             if (tmp & msb)
