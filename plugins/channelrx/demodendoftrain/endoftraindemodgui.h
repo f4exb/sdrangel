@@ -137,6 +137,7 @@ private slots:
     void on_logEnable_clicked(bool checked=false);
     void on_logFilename_clicked();
     void on_logOpen_clicked();
+    void on_useFileTime_toggled(bool checked=false);
     void filterRow(int row);
     void filter();
     void endoftrains_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);

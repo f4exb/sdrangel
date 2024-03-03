@@ -159,6 +159,7 @@ private slots:
     void on_logFilename_clicked();
     void on_logOpen_clicked();
     void on_showSlotMap_clicked(bool checked=false);
+    void on_useFileTime_toggled(bool checked=false);
     void filterRow(int row);
     void filter();
     void messages_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);

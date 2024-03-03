@@ -499,6 +499,27 @@
        </spacer>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="useFileTime">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Check to use date and time from input file. Uncheck to use date and time from clock.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/clockcurrent.png</normaloff>
+          <normalon>:/clockfile.png</normalon>:/clockcurrent.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="ButtonSwitch" name="logEnable">
         <property name="maximumSize">
          <size>

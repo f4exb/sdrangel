@@ -46,6 +46,7 @@ void DSCDemodSettings::resetToDefaults()
     m_logFilename = "dsc_log.csv";
     m_logEnabled = false;
     m_feed = true;
+    m_useFileTime = false;
 
     m_rgbColor = QColor(181, 230, 29).rgb();
     m_title = "DSC Demodulator";
@@ -85,6 +86,7 @@ QByteArray DSCDemodSettings::serialize() const
     s.writeString(12, m_logFilename);
     s.writeBool(13, m_logEnabled);
     s.writeBool(14, m_feed);
+    s.writeBool(15, m_useFileTime);
 
     s.writeU32(20, m_rgbColor);
     s.writeString(21, m_title);
@@ -155,6 +157,7 @@ bool DSCDemodSettings::deserialize(const QByteArray& data)
         d.readString(12, &m_logFilename, "dsc_log.csv");
         d.readBool(13, &m_logEnabled, false);
         d.readBool(14, &m_feed, true);
+        d.readBool(15, &m_useFileTime, false);
 
         d.readU32(20, &m_rgbColor, QColor(181, 230, 29).rgb());
         d.readString(21, &m_title, "DSC Demodulator");

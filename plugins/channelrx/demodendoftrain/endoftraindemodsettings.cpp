@@ -47,8 +47,9 @@ void EndOfTrainDemodSettings::resetToDefaults()
     m_udpPort = 9999;
     m_logFilename = "endoftrain_log.csv";
     m_logEnabled = false;
+    m_useFileTime = false;
 
-    m_rgbColor = QColor(0, 105, 2).rgb();
+    m_rgbColor = QColor(170, 85, 0).rgb();
     m_title = "End-of-Train Demodulator";
     m_streamIndex = 0;
     m_useReverseAPI = false;
@@ -79,6 +80,7 @@ QByteArray EndOfTrainDemodSettings::serialize() const
     s.writeU32(7, m_udpPort);
     s.writeString(8, m_logFilename);
     s.writeBool(9, m_logEnabled);
+    s.writeBool(10, m_useFileTime);
 
     s.writeU32(20, m_rgbColor);
     s.writeString(21, m_title);
@@ -134,8 +136,9 @@ bool EndOfTrainDemodSettings::deserialize(const QByteArray& data)
         }
         d.readString(8, &m_logFilename, "endoftrain_log.csv");
         d.readBool(9, &m_logEnabled, false);
+        d.readBool(10, &m_useFileTime, false);
 
-        d.readU32(20, &m_rgbColor, QColor(0, 105, 2).rgb());
+        d.readU32(20, &m_rgbColor, QColor(170, 85, 0).rgb());
         d.readString(21, &m_title, "End-of-Train Demodulator");
         if (m_channelMarker)
         {
@@ -206,8 +209,11 @@ void EndOfTrainDemodSettings::applySettings(const QStringList& settingsKeys, con
     if (settingsKeys.contains("logFilename")) {
         m_logFilename = settings.m_logFilename;
     }
-    if (settingsKeys.contains("logEnabledpPort")) {
+    if (settingsKeys.contains("logEnabled")) {
         m_logEnabled = settings.m_logEnabled;
+    }
+    if (settingsKeys.contains("useFileTime")) {
+        m_useFileTime = settings.m_useFileTime;
     }
     if (settingsKeys.contains("rgbColor")) {
         m_rgbColor = settings.m_rgbColor;
@@ -275,8 +281,11 @@ QString EndOfTrainDemodSettings::getDebugString(const QStringList& settingsKeys,
     if (settingsKeys.contains("logFilename")) {
         ostr << " m_logFilename: " << m_logFilename.toStdString();
     }
-    if (settingsKeys.contains("logEnabledpPort")) {
+    if (settingsKeys.contains("logEnabledp")) {
         ostr << " m_logEnabled: " << m_logEnabled;
+    }
+    if (settingsKeys.contains("useFileTime")) {
+        ostr << " m_useFileTime: " << m_useFileTime;
     }
     if (settingsKeys.contains("rgbColor") || force) {
         ostr << " m_rgbColor: " << m_rgbColor;

@@ -511,6 +511,8 @@ EndOfTrainDemodGUI::EndOfTrainDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
+    ui->scopeContainer->setVisible(false);
+
     // Resize the table using dummy data
     resizeTable();
     // Allow user to reorder columns
@@ -600,6 +602,8 @@ void EndOfTrainDemodGUI::displaySettings()
 
     ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
     ui->logEnable->setChecked(m_settings.m_logEnabled);
+
+    ui->useFileTime->setChecked(m_settings.m_useFileTime);
 
     // Order and size columns
     QHeaderView *header = ui->packets->horizontalHeader();
@@ -739,6 +743,12 @@ void EndOfTrainDemodGUI::on_logOpen_clicked()
     }
 }
 
+void EndOfTrainDemodGUI::on_useFileTime_toggled(bool checked)
+{
+    m_settings.m_useFileTime = checked;
+    applySetting("useFileTime");
+}
+
 void EndOfTrainDemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &EndOfTrainDemodGUI::on_deltaFrequency_changed);
@@ -752,6 +762,7 @@ void EndOfTrainDemodGUI::makeUIConnections()
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &EndOfTrainDemodGUI::on_logEnable_clicked);
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &EndOfTrainDemodGUI::on_logFilename_clicked);
     QObject::connect(ui->logOpen, &QToolButton::clicked, this, &EndOfTrainDemodGUI::on_logOpen_clicked);
+    QObject::connect(ui->useFileTime, &ButtonSwitch::toggled, this, &EndOfTrainDemodGUI::on_useFileTime_toggled);
 }
 
 void EndOfTrainDemodGUI::updateAbsoluteCenterFrequency()

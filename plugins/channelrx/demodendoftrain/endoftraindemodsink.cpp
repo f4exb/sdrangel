@@ -20,7 +20,9 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/datafifo.h"
+#include "device/deviceapi.h"
 #include "util/db.h"
+#include "channel/channelwebapiutils.h"
 #include "maincore.h"
 
 #include "endoftraindemod.h"
@@ -214,7 +216,23 @@ void EndOfTrainDemodSink::processOneSample(Complex &ci)
                             //qDebug() << "RX: " << rxPacket.toHex();
                             if (getMessageQueueToChannel())
                             {
-                                MainCore::MsgPacket *msg = MainCore::MsgPacket::create(m_endoftrainDemod, rxPacket, QDateTime::currentDateTime());
+                                QDateTime dateTime = QDateTime::currentDateTime();
+                                if (m_settings.m_useFileTime)
+                                {
+                                    QString hardwareId = m_endoftrainDemod->getDeviceAPI()->getHardwareId();
+
+                                    if ((hardwareId == "FileInput") || (hardwareId == "SigMFFileInput"))
+                                    {
+                                        QString dateTimeStr;
+                                        int deviceIdx = m_endoftrainDemod->getDeviceSetIndex();
+
+                                        if (ChannelWebAPIUtils::getDeviceReportValue(deviceIdx, "absoluteTime", dateTimeStr)) {
+                                            dateTime = QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
+                                        }
+                                    }
+                                }
+
+                                MainCore::MsgPacket *msg = MainCore::MsgPacket::create(m_endoftrainDemod, rxPacket, dateTime);
                                 getMessageQueueToChannel()->push(msg);
                             }
                             // Reset state to start receiving next packet

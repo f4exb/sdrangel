@@ -58,19 +58,24 @@ IP address of the host to forward received packets to via UDP.
 
 UDP port number to forward received packets to.
 
-<h3>10: Start/stop Logging Packets to .csv File</h3>
+<h3>10: Use Date and Time from File</h3>
 
-When checked, writes all received packets to a .csv file. The filename is specified by (11).
+When checked, if the source device is a File Input device, the date and time used for
+packet reception time is taken from the file playback time. Otherwise, the current system clock time is used.
 
-<h3>11: .csv Log Filename</h3>
+<h3>11: Start/stop Logging Packets to .csv File</h3>
+
+When checked, writes all received packets to a .csv file. The filename is specified by (12).
+
+<h3>12: .csv Log Filename</h3>
 
 Click to specify the name of the .csv file which received packets are logged to.
 
-<h3>12: Read Data from .csv File</h3>
+<h3>13: Read Data from .csv File</h3>
 
 Click to specify a previously written .csv log file, which is read and used to update the table.
 
-<h3>13: Clear table</h3>
+<h3>14: Clear table</h3>
 
 Pressing this button clears all packets from the table.
 
@@ -98,3 +103,5 @@ The received packets table displays the contents of the packets that have been r
 <h2>Attribution</h2>
 
 Based on code and reverse engineering by Eric Reuter
+
+Clock icons created by Pixel perfect from Flaticon https:://www.flaticon.com

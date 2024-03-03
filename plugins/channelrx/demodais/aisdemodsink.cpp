@@ -23,6 +23,8 @@
 #include "dsp/dspengine.h"
 #include "dsp/datafifo.h"
 #include "dsp/scopevis.h"
+#include "device/deviceapi.h"
+#include "channel/channelwebapiutils.h"
 #include "util/db.h"
 #include "util/stepfunctions.h"
 #include "maincore.h"
@@ -264,6 +266,21 @@ void AISDemodSink::processOneSample(Complex &ci)
                                     // This is unlikely to be accurate in absolute terms, given we don't know latency from SDR or buffering within SDRangel
                                     // But can be used to get an idea of congestion
                                     QDateTime currentTime = QDateTime::currentDateTime();
+                                    if (m_settings.m_useFileTime)
+                                    {
+                                        QString hardwareId = m_aisDemod->getDeviceAPI()->getHardwareId();
+
+                                        if ((hardwareId == "FileInput") || (hardwareId == "SigMFFileInput"))
+                                        {
+                                            QString dateTimeStr;
+                                            int deviceIdx = m_aisDemod->getDeviceSetIndex();
+
+                                            if (ChannelWebAPIUtils::getDeviceReportValue(deviceIdx, "absoluteTime", dateTimeStr)) {
+                                                currentTime = QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
+                                            }
+                                        }
+                                    }
+
                                     int txTimeMs = (totalBitCount + 8 + 24 + 8) * (1000.0 / m_settings.m_baud); // Add ramp up, preamble and start-flag
                                     QDateTime startDateTime = currentTime.addMSecs(-txTimeMs);
                                     int ms = startDateTime.time().second() * 1000 + startDateTime.time().msec();

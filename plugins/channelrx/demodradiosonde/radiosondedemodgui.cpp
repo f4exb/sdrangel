@@ -771,6 +771,8 @@ void RadiosondeDemodGUI::displaySettings()
     ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
     ui->logEnable->setChecked(m_settings.m_logEnabled);
 
+    ui->useFileTime->setChecked(m_settings.m_useFileTime);
+
     // Order and size columns
     QHeaderView *header = ui->frames->horizontalHeader();
     for (int i = 0; i < RADIOSONDEDEMOD_FRAME_COLUMNS; i++)
@@ -924,6 +926,12 @@ void RadiosondeDemodGUI::on_logOpen_clicked()
     }
 }
 
+void RadiosondeDemodGUI::on_useFileTime_toggled(bool checked)
+{
+    m_settings.m_useFileTime = checked;
+    applySettings();
+}
+
 void RadiosondeDemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &RadiosondeDemodGUI::on_deltaFrequency_changed);
@@ -939,6 +947,7 @@ void RadiosondeDemodGUI::makeUIConnections()
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &RadiosondeDemodGUI::on_logEnable_clicked);
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &RadiosondeDemodGUI::on_logFilename_clicked);
     QObject::connect(ui->logOpen, &QToolButton::clicked, this, &RadiosondeDemodGUI::on_logOpen_clicked);
+    QObject::connect(ui->useFileTime, &ButtonSwitch::toggled, this, &RadiosondeDemodGUI::on_useFileTime_toggled);
 }
 
 void RadiosondeDemodGUI::updateAbsoluteCenterFrequency()

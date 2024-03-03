@@ -23,6 +23,8 @@ EndOfTrainDemodSettings:
       type: string
     logEnabled:
       type: integer
+    useFileTime:
+      type: integer
     rgbColor:
       type: integer
     title:

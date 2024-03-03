@@ -386,6 +386,13 @@
     <item>
      <layout class="QHBoxLayout" name="udpLayout">
       <item>
+       <widget class="QLabel" name="udpEnabledLabel">
+        <property name="text">
+         <string>UDP</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="udpEnabled">
         <property name="toolTip">
          <string>Send packets via UDP</string>
@@ -394,7 +401,7 @@
          <enum>Qt::RightToLeft</enum>
         </property>
         <property name="text">
-         <string>UDP</string>
+         <string/>
         </property>
        </widget>
       </item>
@@ -537,6 +544,27 @@
        </spacer>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="useFileTime">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Check to use date and time from input file. Uncheck to use date and time from clock.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/clockcurrent.png</normaloff>
+          <normalon>:/clockfile.png</normalon>:/clockcurrent.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="ButtonSwitch" name="logEnable">
         <property name="maximumSize">
          <size>
@@ -652,6 +680,22 @@
       </property>
       <column>
        <property name="text">
+        <string>Date</string>
+       </property>
+       <property name="toolTip">
+        <string>Date packet was received</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Time</string>
+       </property>
+       <property name="toolTip">
+        <string>Time packet was received</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>From</string>
        </property>
        <property name="toolTip">
@@ -713,10 +757,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupContents</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupcontents.h</header>
-   <container>1</container>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>ValueDialZ</class>
@@ -725,15 +768,16 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>LevelMeterSignalDB</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

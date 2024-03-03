@@ -23,8 +23,10 @@
 #include "dsp/dspengine.h"
 #include "dsp/datafifo.h"
 #include "dsp/scopevis.h"
+#include "device/deviceapi.h"
 #include "util/db.h"
 #include "util/stepfunctions.h"
+#include "channel/channelwebapiutils.h"
 #include "util/reedsolomon.h"
 #include "maincore.h"
 
@@ -415,8 +417,23 @@ bool RadiosondeDemodSink::processFrame(int length, float corr, int sampleIdx)
         {
             if (getMessageQueueToChannel())
             {
+                QDateTime dateTime = QDateTime::currentDateTime();
+                if (m_settings.m_useFileTime)
+                {
+                    QString hardwareId = m_radiosondeDemod->getDeviceAPI()->getHardwareId();
+
+                    if ((hardwareId == "FileInput") || (hardwareId == "SigMFFileInput"))
+                    {
+                        QString dateTimeStr;
+                        int deviceIdx = m_radiosondeDemod->getDeviceSetIndex();
+
+                        if (ChannelWebAPIUtils::getDeviceReportValue(deviceIdx, "absoluteTime", dateTimeStr)) {
+                            dateTime = QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
+                        }
+                    }
+                }
                 QByteArray rxPacket((char *)m_bytes, length);
-                RadiosondeDemod::MsgMessage *msg = RadiosondeDemod::MsgMessage::create(rxPacket, errorsCorrected, corr);
+                RadiosondeDemod::MsgMessage *msg = RadiosondeDemod::MsgMessage::create(rxPacket, dateTime, errorsCorrected, corr);
                 getMessageQueueToChannel()->push(msg);
             }
 

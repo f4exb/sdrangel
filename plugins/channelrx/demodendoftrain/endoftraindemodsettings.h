@@ -42,6 +42,7 @@ struct EndOfTrainDemodSettings
     uint16_t m_udpPort;
     QString m_logFilename;
     bool m_logEnabled;
+    bool m_useFileTime;
 
     quint32 m_rgbColor;
     QString m_title;

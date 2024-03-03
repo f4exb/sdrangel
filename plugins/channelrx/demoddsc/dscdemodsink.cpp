@@ -21,8 +21,10 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/scopevis.h"
+#include "device/deviceapi.h"
 #include "util/db.h"
 #include "util/popcount.h"
+#include "channel/channelwebapiutils.h"
 #include "maincore.h"
 
 #include "dscdemod.h"
@@ -240,8 +242,25 @@ void DSCDemodSink::receiveBit(bool bit)
         {
             if (m_dscDecoder.decodeBits(m_bits & 0x3ff))
             {
+                QDateTime dateTime = QDateTime::currentDateTime();
+
+                if (m_settings.m_useFileTime)
+                {
+                    QString hardwareId = m_dscDemod->getDeviceAPI()->getHardwareId();
+
+                    if ((hardwareId == "FileInput") || (hardwareId == "SigMFFileInput"))
+                    {
+                        QString dateTimeStr;
+                        int deviceIdx = m_dscDemod->getDeviceSetIndex();
+
+                        if (ChannelWebAPIUtils::getDeviceReportValue(deviceIdx, "absoluteTime", dateTimeStr)) {
+                            dateTime = QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
+                        }
+                    }
+                }
+
                 QByteArray bytes = m_dscDecoder.getMessage();
-                DSCMessage message(bytes, QDateTime::currentDateTime());
+                DSCMessage message(bytes, dateTime);
                 //qDebug() << "RX Bytes: " << bytes.toHex();
                 //qDebug() << "DSC Message: " << message.toString();
 

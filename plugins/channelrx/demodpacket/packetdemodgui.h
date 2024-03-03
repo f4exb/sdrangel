@@ -97,7 +97,7 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
-    void packetReceived(QByteArray packet);
+    void packetReceived(const QByteArray& packet, QDateTime dateTime);
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
@@ -107,6 +107,18 @@ private:
 
     void resizeTable();
     QAction *createCheckableItem(QString& text, int idx, bool checked);
+
+    enum PacketCol {
+        PACKET_COL_DATE,
+        PACKET_COL_TIME,
+        PACKET_COL_FROM,
+        PACKET_COL_TO,
+        PACKET_COL_VIA,
+        PACKET_COL_TYPE,
+        PACKET_COL_PID,
+        PACKET_COL_DATA_ASCII,
+        PACKET_COL_DATA_HEX
+    };
 
 private slots:
     void on_deltaFrequency_changed(qint64 value);
@@ -123,6 +135,7 @@ private slots:
     void on_logEnable_clicked(bool checked=false);
     void on_logFilename_clicked();
     void on_logOpen_clicked();
+    void on_useFileTime_toggled(bool checked=false);
     void filterRow(int row);
     void filter();
     void packets_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);

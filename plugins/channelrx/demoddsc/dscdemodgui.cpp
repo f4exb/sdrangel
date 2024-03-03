@@ -1009,6 +1009,7 @@ void DSCDemodGUI::displaySettings()
     ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
     ui->logEnable->setChecked(m_settings.m_logEnabled);
 
+    ui->useFileTime->setChecked(m_settings.m_useFileTime);
     ui->feed->setChecked(m_settings.m_feed);
 
     // Order and size columns
@@ -1169,6 +1170,12 @@ void DSCDemodGUI::on_logOpen_clicked()
     }
 }
 
+void DSCDemodGUI::on_useFileTime_toggled(bool checked)
+{
+    m_settings.m_useFileTime = checked;
+    applySettings();
+}
+
 void DSCDemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &DSCDemodGUI::on_deltaFrequency_changed);
@@ -1183,6 +1190,7 @@ void DSCDemodGUI::makeUIConnections()
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &DSCDemodGUI::on_logFilename_clicked);
     QObject::connect(ui->logOpen, &QToolButton::clicked, this, &DSCDemodGUI::on_logOpen_clicked);
     QObject::connect(ui->feed, &ButtonSwitch::clicked, this, &DSCDemodGUI::on_feed_clicked);
+    QObject::connect(ui->useFileTime, &ButtonSwitch::toggled, this, &DSCDemodGUI::on_useFileTime_toggled);
 }
 
 void DSCDemodGUI::updateAbsoluteCenterFrequency()
