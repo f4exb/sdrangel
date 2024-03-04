@@ -29,9 +29,9 @@ QString KissEngine::getName() const
 void KissEngine::configure(int n, bool inverse)
 {
 	m_fft.configure(n, inverse);
-	if(n > m_in.size())
+	if(n > (int) m_in.size())
 		m_in.resize(n);
-	if(n > m_out.size())
+	if(n > (int) m_out.size())
 		m_out.resize(n);
 }
 

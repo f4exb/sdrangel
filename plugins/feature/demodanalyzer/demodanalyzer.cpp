@@ -710,7 +710,7 @@ void DemodAnalyzer::handleDataPipeToBeDeleted(int reason, QObject *object)
 }
 
 int DemodAnalyzer::webapiActionsPost(
-            const QStringList& featureActionsKeys,
+            const QStringList&,
             SWGSDRangel::SWGFeatureActions& query,
             QString& errorMessage) {
 
