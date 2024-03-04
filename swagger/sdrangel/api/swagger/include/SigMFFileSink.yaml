@@ -34,6 +34,9 @@ SigMFFileSinkSettings:
         Automatic recording triggered by spectrum squalch
         * 0 - disabled
         * 1 - enabled
+    log2RecordSampleSize:
+      type: integer
+      description: log2 of recording sample (I or Q) size in bits. Can be 3, 4 or 5.
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
