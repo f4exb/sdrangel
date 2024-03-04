@@ -1098,7 +1098,7 @@ void SpectrumVis::webapiUpdateSpectrumSettings(
 // so we can use the following approximation to get a good speed-up for both compilers:
 // https://www.vplesko.com/posts/replacing_log2f.html
 // https://www.vplesko.com/assets/replacing_log2f/main.c.txt
-float SpectrumVis::log2fapprox(float x)
+float SpectrumVis::log2fapprox(float x) const
 {
     // IEEE 754 representation constants.
     const int32_t mantissaLen = 23;
