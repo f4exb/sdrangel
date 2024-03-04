@@ -259,6 +259,7 @@ private:
     void handleScalef(Real scalef);
     void handleWSOpenClose(bool openClose);
     void handleConfigureWSSpectrum(const QString& address, uint16_t port);
+    float log2fapprox(float x);
 
     static void webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& response, const SpectrumSettings& settings);
     static void webapiUpdateSpectrumSettings(

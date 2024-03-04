@@ -5,6 +5,7 @@
 // Copyright (C) 2015-2023 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2022 Jiří Pinkava <jiri.pinkava@rossum.ai>                      //
 // Copyright (C) 2023 Arne Jünemann <das-iro@das-iro.de>                         //
+// Copyright (C) 2023 Vladimir Pleskonjic                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -135,7 +136,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
 
             v = c.real() * c.real() + c.imag() * c.imag();
             m_psd[i] = v/m_powFFTDiv;
-            v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+            v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
             m_powerSpectrum[i] = v;
         }
 
@@ -176,7 +177,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
             v = c.real() * c.real() + c.imag() * c.imag();
             v = m_movingAverage.storeAndGetAvg(v, i);
             m_psd[i] = v/m_powFFTDiv;
-            v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+            v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
             m_powerSpectrum[i] = v;
         }
 
@@ -224,7 +225,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
             if (m_fixedAverage.storeAndGetAvg(avg, v, i))
             {
                 m_psd[i] = avg/m_powFFTDiv;
-                avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
+                avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2fapprox(avg) + m_ofs;
                 m_powerSpectrum[i] = avg;
             }
         }
@@ -275,7 +276,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
             if (m_max.storeAndGetMax(max, v, i))
             {
                 m_psd[i] = max/m_powFFTDiv;
-                max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
+                max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2fapprox(max) + m_ofs;
                 m_powerSpectrum[i] = max;
             }
         }
@@ -450,7 +451,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 v = c.real() * c.real() + c.imag() * c.imag();
                 m_psd[i] = v/m_powFFTDiv;
                 m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
                 m_powerSpectrum[i * 2] = v;
                 m_powerSpectrum[i * 2 + 1] = v;
             }
@@ -463,14 +464,14 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 v = c.real() * c.real() + c.imag() * c.imag();
                 m_psd[i] = v/m_powFFTDiv;
                 m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
                 m_powerSpectrum[i] = v;
 
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
                 m_psd[i + halfSize] = v/m_powFFTDiv;
                 m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
                 m_powerSpectrum[i + halfSize] = v;
             }
         }
@@ -512,7 +513,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 v = m_movingAverage.storeAndGetAvg(v, i);
                 m_psd[i] = v/m_powFFTDiv;
                 m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
                 m_powerSpectrum[i * 2] = v;
                 m_powerSpectrum[i * 2 + 1] = v;
             }
@@ -526,7 +527,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 v = m_movingAverage.storeAndGetAvg(v, i+halfSize);
                 m_psd[i] = v/m_powFFTDiv;
                 m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
                 m_powerSpectrum[i] = v;
 
                 c = fftOut[i];
@@ -534,7 +535,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 v = m_movingAverage.storeAndGetAvg(v, i);
                 m_psd[i + halfSize] = v/m_powFFTDiv;
                 m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
                 m_powerSpectrum[i + halfSize] = v;
             }
         }
@@ -582,7 +583,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 {
                     m_psd[i] = avg/m_powFFTDiv;
                     specMax = avg > specMax ? avg : specMax;
-                    avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
+                    avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2fapprox(avg) + m_ofs;
                     m_powerSpectrum[i * 2] = avg;
                     m_powerSpectrum[i * 2 + 1] = avg;
                 }
@@ -600,7 +601,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 {
                     m_psd[i] = avg/m_powFFTDiv;
                     specMax = avg > specMax ? avg : specMax;
-                    avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
+                    avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2fapprox(avg) + m_ofs;
                     m_powerSpectrum[i] = avg;
                 }
 
@@ -612,7 +613,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 {
                     m_psd[i + halfSize] = avg/m_powFFTDiv;
                     specMax = avg > specMax ? avg : specMax;
-                    avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
+                    avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2fapprox(avg) + m_ofs;
                     m_powerSpectrum[i + halfSize] = avg;
                 }
             }
@@ -665,7 +666,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 {
                     m_psd[i] = max/m_powFFTDiv;
                     specMax = max > specMax ? max : specMax;
-                    max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
+                    max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2fapprox(max) + m_ofs;
                     m_powerSpectrum[i * 2] = max;
                     m_powerSpectrum[i * 2 + 1] = max;
                 }
@@ -683,7 +684,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 {
                     m_psd[i] = max/m_powFFTDiv;
                     specMax = max > specMax ? max : specMax;
-                    max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
+                    max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2fapprox(max) + m_ofs;
                     m_powerSpectrum[i] = max;
                 }
 
@@ -695,7 +696,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 {
                     m_psd[i + halfSize] = max/m_powFFTDiv;
                     specMax = max > specMax ? max : specMax;
-                    max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
+                    max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2fapprox(max) + m_ofs;
                     m_powerSpectrum[i + halfSize] = max;
                 }
             }
@@ -1083,4 +1084,49 @@ void SpectrumVis::webapiUpdateSpectrumSettings(
     }
 
     settings.updateFrom(prefixedKeys, &response);
+}
+
+// To calculate power, the usual equation:
+//    10*log10(V1/V2), where V2=fftSize^2
+// is calculated using log2 instead, with:
+//   ofs=20.0f * log10f(1.0f / fftSize)
+//   mult=(10.0f / log2(10.0f))
+//   dB = m_mult * log2f(v) + m_ofs
+// However, while the gcc version of log2f is twice as fast as log10f,
+// MSVC version is 6x slower.
+// Also, we don't need full accuracy of log2f for calculating the power for the spectrum,
+// so we can use the following approximation to get a good speed-up for both compilers:
+// https://www.vplesko.com/posts/replacing_log2f.html
+// https://www.vplesko.com/assets/replacing_log2f/main.c.txt
+float SpectrumVis::log2fapprox(float x)
+{
+    // IEEE 754 representation constants.
+    const int32_t mantissaLen = 23;
+    const int32_t mantissaMask = (1 << mantissaLen) - 1;
+    const int32_t baseExponent = -127;
+
+    // Reinterpret x as int in a standard compliant way.
+    int32_t xi;
+    memcpy(&xi, &x, sizeof(xi));
+
+    // Calculate exponent of x.
+    float e = (float)((xi >> mantissaLen) + baseExponent);
+
+    // Calculate mantissa of x. It will be in range [1, 2).
+    float m;
+    int32_t mxi = (xi & mantissaMask) | ((-baseExponent) << mantissaLen);
+    memcpy(&m, &mxi, sizeof(m));
+
+    // Use Remez algorithm-generated approximation polynomial
+    // for log2(a) where a is in range [1, 2].
+    float l = 0.15824871f;
+    l = l * m + -1.051875f;
+    l = l * m + 3.0478842f;
+    l = l * m + -2.1536207f;
+
+    // Add exponent to the calculation.
+    // Final log is log2(m*2^e)=log2(m)+e.
+    l += e;
+
+    return l;
 }
