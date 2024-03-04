@@ -93,6 +93,8 @@ void SpyServerList::handleReply(QNetworkReply* reply)
 
 void SpyServerList::handleJSON(const QString& url, const QByteArray& bytes)
 {
+    (void) url;
+
     QList<SpyServer> sdrs;
     QJsonDocument document = QJsonDocument::fromJson(bytes);
 

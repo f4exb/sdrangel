@@ -916,6 +916,8 @@ void AISDemodGUI::displaySettings()
     ui->showSlotMap->setChecked(m_settings.m_showSlotMap);
     ui->slotMapWidget->setVisible(m_settings.m_showSlotMap);
 
+    ui->useFileTime->setChecked(m_settings.m_useFileTime);
+
     // Order and size columns
     QHeaderView *header = ui->messages->horizontalHeader();
     for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
@@ -1088,6 +1090,12 @@ void AISDemodGUI::on_logOpen_clicked()
     }
 }
 
+void AISDemodGUI::on_useFileTime_toggled(bool checked)
+{
+    m_settings.m_useFileTime = checked;
+    applySettings();
+}
+
 void AISDemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &AISDemodGUI::on_deltaFrequency_changed);
@@ -1105,6 +1113,7 @@ void AISDemodGUI::makeUIConnections()
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &AISDemodGUI::on_logFilename_clicked);
     QObject::connect(ui->logOpen, &QToolButton::clicked, this, &AISDemodGUI::on_logOpen_clicked);
     QObject::connect(ui->showSlotMap, &ButtonSwitch::clicked, this, &AISDemodGUI::on_showSlotMap_clicked);
+    QObject::connect(ui->useFileTime, &ButtonSwitch::toggled, this, &AISDemodGUI::on_useFileTime_toggled);
 }
 
 void AISDemodGUI::updateAbsoluteCenterFrequency()

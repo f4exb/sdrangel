@@ -27,7 +27,7 @@
 class Serializable;
 
 // Number of columns in the table
-#define PACKETDEMOD_COLUMNS 7
+#define PACKETDEMOD_COLUMNS 9
 
 struct PacketDemodSettings
 {
@@ -45,6 +45,7 @@ struct PacketDemodSettings
     bool m_udpEnabled;
     QString m_udpAddress;
     uint16_t m_udpPort;
+    bool m_useFileTime;
 
     quint32 m_rgbColor;
     QString m_title;

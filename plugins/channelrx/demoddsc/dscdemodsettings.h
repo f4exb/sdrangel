@@ -52,6 +52,8 @@ struct DSCDemodSettings
 
     QString m_logFilename;
     bool m_logEnabled;
+
+    bool m_useFileTime;
     Serializable *m_scopeGUI;
     Serializable *m_rollupState;
     int m_workspaceIndex;

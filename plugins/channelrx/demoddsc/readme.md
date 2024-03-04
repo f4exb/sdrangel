@@ -60,19 +60,24 @@ The messages are submitted with Preferences > My Position... > Station name used
 
 Right click to open http://yaddnet.org/ in your browser, showing recent messages received from this ID.
 
-<h3>11: Start/stop Logging Messages to .csv File</h3>
+<h3>11: Use Date and Time from File</h3>
 
-When checked, writes all received messages to a .csv file, specified by (12).
+When checked, if the source device is a File Input device, the date and time used for
+packet reception time is taken from the file playback time. Otherwise, the current system clock time is used.
 
-<h3>12: .csv Log Filename</h3>
+<h3>12: Start/stop Logging Messages to .csv File</h3>
+
+When checked, writes all received messages to a .csv file, specified by (13).
+
+<h3>13: .csv Log Filename</h3>
 
 Click to specify the name of the .csv file which received messasges are logged to.
 
-<h3>13: Read Data from .csv File</h3>
+<h3>14: Read Data from .csv File</h3>
 
 Click to specify a previously written .csv log file, which is read and used to update the table.
 
-<h3>14: Received Messages Table</h3>
+<h3>15: Received Messages Table</h3>
 
 ![DSC Demodulator plugin GUI](../../../doc/img/DSCDemod_plugin_messages.png)
 

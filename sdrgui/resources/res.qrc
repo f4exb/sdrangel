@@ -154,6 +154,8 @@
     <file>stackvertical.png</file>
     <file>stackcolumns.png</file>
     <file>tab.png</file>
+    <file>clockfile.png</file>
+    <file>clockcurrent.png</file>
     <file>LiberationMono-Regular.ttf</file>
     <file>LiberationSans-Regular.ttf</file>
   </qresource>

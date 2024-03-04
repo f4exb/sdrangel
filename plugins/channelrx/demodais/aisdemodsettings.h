@@ -50,6 +50,7 @@ struct AISDemodSettings
     QString m_logFilename;
     bool m_logEnabled;
     bool m_showSlotMap;
+    bool m_useFileTime;
 
     quint32 m_rgbColor;
     QString m_title;

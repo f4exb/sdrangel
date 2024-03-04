@@ -46,6 +46,7 @@ void PacketDemodSettings::resetToDefaults()
     m_udpPort = 9999;
     m_logFilename = "packet_log.csv";
     m_logEnabled = false;
+    m_useFileTime = false;
 
     m_rgbColor = QColor(0, 105, 2).rgb();
     m_title = "Packet Demodulator";
@@ -102,6 +103,8 @@ QByteArray PacketDemodSettings::serialize() const
     s.writeS32(28, m_workspaceIndex);
     s.writeBlob(29, m_geometryBytes);
     s.writeBool(30, m_hidden);
+
+    s.writeBool(31, m_useFileTime);
 
     for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -184,6 +187,8 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
         d.readS32(28, &m_workspaceIndex, 0);
         d.readBlob(29, &m_geometryBytes);
         d.readBool(30, &m_hidden, false);
+
+        d.readBool(31, &m_useFileTime, false);
 
         for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

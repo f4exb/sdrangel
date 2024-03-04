@@ -74,6 +74,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_dsc_demod_settings_isSet = false;
     dsd_demod_settings = nullptr;
     m_dsd_demod_settings_isSet = false;
+    end_of_train_demod_settings = nullptr;
+    m_end_of_train_demod_settings_isSet = false;
     file_sink_settings = nullptr;
     m_file_sink_settings_isSet = false;
     file_source_settings = nullptr;
@@ -206,6 +208,8 @@ SWGChannelSettings::init() {
     m_dsc_demod_settings_isSet = false;
     dsd_demod_settings = new SWGDSDDemodSettings();
     m_dsd_demod_settings_isSet = false;
+    end_of_train_demod_settings = new SWGEndOfTrainDemodSettings();
+    m_end_of_train_demod_settings_isSet = false;
     file_sink_settings = new SWGFileSinkSettings();
     m_file_sink_settings_isSet = false;
     file_source_settings = new SWGFileSourceSettings();
@@ -350,6 +354,9 @@ SWGChannelSettings::cleanup() {
     }
     if(dsd_demod_settings != nullptr) { 
         delete dsd_demod_settings;
+    }
+    if(end_of_train_demod_settings != nullptr) { 
+        delete end_of_train_demod_settings;
     }
     if(file_sink_settings != nullptr) { 
         delete file_sink_settings;
@@ -527,6 +534,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&dsd_demod_settings, pJson["DSDDemodSettings"], "SWGDSDDemodSettings", "SWGDSDDemodSettings");
     
+    ::SWGSDRangel::setValue(&end_of_train_demod_settings, pJson["EndOfTrainDemodSettings"], "SWGEndOfTrainDemodSettings", "SWGEndOfTrainDemodSettings");
+    
     ::SWGSDRangel::setValue(&file_sink_settings, pJson["FileSinkSettings"], "SWGFileSinkSettings", "SWGFileSinkSettings");
     
     ::SWGSDRangel::setValue(&file_source_settings, pJson["FileSourceSettings"], "SWGFileSourceSettings", "SWGFileSourceSettings");
@@ -689,6 +698,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((dsd_demod_settings != nullptr) && (dsd_demod_settings->isSet())){
         toJsonValue(QString("DSDDemodSettings"), dsd_demod_settings, obj, QString("SWGDSDDemodSettings"));
+    }
+    if((end_of_train_demod_settings != nullptr) && (end_of_train_demod_settings->isSet())){
+        toJsonValue(QString("EndOfTrainDemodSettings"), end_of_train_demod_settings, obj, QString("SWGEndOfTrainDemodSettings"));
     }
     if((file_sink_settings != nullptr) && (file_sink_settings->isSet())){
         toJsonValue(QString("FileSinkSettings"), file_sink_settings, obj, QString("SWGFileSinkSettings"));
@@ -1039,6 +1051,16 @@ void
 SWGChannelSettings::setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings) {
     this->dsd_demod_settings = dsd_demod_settings;
     this->m_dsd_demod_settings_isSet = true;
+}
+
+SWGEndOfTrainDemodSettings*
+SWGChannelSettings::getEndOfTrainDemodSettings() {
+    return end_of_train_demod_settings;
+}
+void
+SWGChannelSettings::setEndOfTrainDemodSettings(SWGEndOfTrainDemodSettings* end_of_train_demod_settings) {
+    this->end_of_train_demod_settings = end_of_train_demod_settings;
+    this->m_end_of_train_demod_settings_isSet = true;
 }
 
 SWGFileSinkSettings*
@@ -1503,6 +1525,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(dsd_demod_settings && dsd_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(end_of_train_demod_settings && end_of_train_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(file_sink_settings && file_sink_settings->isSet()){

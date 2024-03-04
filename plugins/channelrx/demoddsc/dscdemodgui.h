@@ -151,6 +151,7 @@ private slots:
     void on_logEnable_clicked(bool checked=false);
     void on_logFilename_clicked();
     void on_logOpen_clicked();
+    void on_useFileTime_toggled(bool checked=false);
     void on_feed_clicked(bool checked=false);
     void on_feed_rightClicked(const QPoint &point);
     void filterRow(int row);

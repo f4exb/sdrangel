@@ -1,4 +1,4 @@
-<h1>Packet radio demodulator plugin</h1>
+<h1>Packet Radio Demodulator Plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -60,19 +60,24 @@ When checked, received packets are forwarded to the specified UDP address (12) a
 
 IP address of the host to forward received packets to via UDP.
 
-<h3>11: UDP port</h3>
+<h3>13: UDP port</h3>
 
 UDP port number to forward received packets to.
 
-<h3>12: Start/stop Logging Packets to .csv File</h3>
+<h3>14: Use Date and Time from File</h3>
+
+When checked, if the source device is a File Input device, the date and time used for
+packet reception time is taken from the file playback time. Otherwise, the current system clock time is used.
+
+<h3>15: Start/stop Logging Packets to .csv File</h3>
 
 When checked, writes all received packets to a .csv file.
 
-<h3>13: .csv Log Filename</h3>
+<h3>16: .csv Log Filename</h3>
 
 Click to specify the name of the .csv file which received packets are logged to.
 
-<h3>14: Read Data from .csv File</h3>
+<h3>17: Read Data from .csv File</h3>
 
 Click to specify a previously written .csv log file, which is read and used to update the table.
 
@@ -80,6 +85,8 @@ Click to specify a previously written .csv log file, which is read and used to u
 
 The received packets table displays the contents of the packets that have been received. Only packets with valid CRCs are displayed.
 
+* Date - The date the packet was received.
+* Time - The time the packet was received.
 * From - The source address / callsign of the sender of the packet.
 * To - The destination address.
 * Via - List of addresses of repeaters the packet has passed through or directed via.

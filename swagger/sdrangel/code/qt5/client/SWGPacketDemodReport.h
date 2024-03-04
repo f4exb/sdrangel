@@ -13,7 +13,7 @@
 /*
  * SWGPacketDemodReport.h
  *
- * AMDemod
+ * PacketDemod
  */
 
 #ifndef SWGPacketDemodReport_H_

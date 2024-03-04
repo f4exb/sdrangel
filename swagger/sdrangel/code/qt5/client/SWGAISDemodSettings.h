@@ -78,6 +78,9 @@ public:
     qint32 getLogEnabled();
     void setLogEnabled(qint32 log_enabled);
 
+    qint32 getUseFileTime();
+    void setUseFileTime(qint32 use_file_time);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -147,6 +150,9 @@ private:
 
     qint32 log_enabled;
     bool m_log_enabled_isSet;
+
+    qint32 use_file_time;
+    bool m_use_file_time_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

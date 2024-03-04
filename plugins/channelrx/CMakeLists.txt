@@ -1,5 +1,9 @@
 project(demod)
 
+if (ENABLE_CHANNELRX_ENDOFTRAIN)
+    add_subdirectory(demodendoftrain)
+endif()
+
 if (ENABLE_CHANNELRX_FREQSCANNER)
     add_subdirectory(freqscanner)
 endif()

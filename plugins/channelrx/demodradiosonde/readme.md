@@ -1,4 +1,4 @@
-﻿<h1>Radiosonde demodulator plugin</h1>
+﻿<h1>Radiosonde Demodulator Plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -56,19 +56,24 @@ UDP port number to forward received frames to.
 
 Entering a regular expression in the Find field displays only frames where the radiosonde serial number matches the given regular expression.
 
-<h3>11: Start/stop Logging Frames to .csv File</h3>
+<h3>11: Use Date and Time from File</h3>
+
+When checked, if the source device is a File Input device, the date and time used for
+frame reception time is taken from the file playback time. Otherwise, the current system clock time is used.
+
+<h3>12: Start/stop Logging Frames to .csv File</h3>
 
 When checked, writes all received frames to a .csv file.
 
-<h3>14: .csv Log Filename</h3>
+<h3>13: .csv Log Filename</h3>
 
 Click to specify the name of the .csv file which received frames are logged to.
 
-<h3>15: Read Data from .csv File</h3>
+<h3>14: Read Data from .csv File</h3>
 
 Click to specify a previously written radiosonde .csv log file, which is read and used to update the table.
 
-<h3>11: Clear Data from table</h3>
+<h3>15: Clear Data from table</h3>
 
 Pressing this button clears all data from the table.
 

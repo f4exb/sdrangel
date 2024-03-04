@@ -337,6 +337,9 @@ void RadiosondeDemod::applySettings(const RadiosondeDemodSettings& settings, boo
     if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
         reverseAPIKeys.append("logEnabled");
     }
+    if ((settings.m_useFileTime != m_settings.m_useFileTime) || force) {
+        reverseAPIKeys.append("useFileTime");
+    }
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -516,6 +519,9 @@ void RadiosondeDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("logEnabled")) {
         settings.m_logEnabled = response.getRadiosondeDemodSettings()->getLogEnabled();
     }
+    if (channelSettingsKeys.contains("useFileTime")) {
+        settings.m_useFileTime = response.getRadiosondeDemodSettings()->getUseFileTime();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getRadiosondeDemodSettings()->getRgbColor();
     }
@@ -563,6 +569,7 @@ void RadiosondeDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetting
     response.getRadiosondeDemodSettings()->setUdpPort(settings.m_udpPort);
     response.getRadiosondeDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
     response.getRadiosondeDemodSettings()->setLogEnabled(settings.m_logEnabled);
+    response.getRadiosondeDemodSettings()->setUseFileTime(settings.m_useFileTime);
 
     response.getRadiosondeDemodSettings()->setRgbColor(settings.m_rgbColor);
     if (response.getRadiosondeDemodSettings()->getTitle()) {
@@ -697,6 +704,9 @@ void RadiosondeDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgRadiosondeDemodSettings->setLogEnabled(settings.m_logEnabled);
+    }
+    if (channelSettingsKeys.contains("useFileTime") || force) {
+        swgRadiosondeDemodSettings->setUseFileTime(settings.m_useFileTime);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgRadiosondeDemodSettings->setRgbColor(settings.m_rgbColor);

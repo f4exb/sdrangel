@@ -28,6 +28,8 @@ PacketDemodSettings:
       type: string
     logEnabled:
       type: integer
+    useFileTime:
+      type: integer
     rgbColor:
       type: integer
     title:
@@ -52,7 +54,7 @@ PacketDemodSettings:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
 PacketDemodReport:
-  description: AMDemod
+  description: PacketDemod
   properties:
     channelPowerDB:
       description: power received in channel (dB)

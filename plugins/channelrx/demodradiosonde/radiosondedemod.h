@@ -82,9 +82,9 @@ public:
         int getErrorsCorrected() const { return m_errorsCorrected; }
         int getThreshold() const { return m_threshold; }
 
-        static MsgMessage* create(QByteArray message, int errorsCorrected, int threshold)
+        static MsgMessage* create(const QByteArray& message, QDateTime dateTime, int errorsCorrected, int threshold)
         {
-            return new MsgMessage(message, QDateTime::currentDateTime(), errorsCorrected, threshold);
+            return new MsgMessage(message, dateTime, errorsCorrected, threshold);
         }
 
     private:
@@ -93,7 +93,7 @@ public:
         int m_errorsCorrected;
         int m_threshold;
 
-        MsgMessage(QByteArray message, QDateTime dateTime, int errorsCorrected, int threshold) :
+        MsgMessage(const QByteArray& message, QDateTime dateTime, int errorsCorrected, int threshold) :
             Message(),
             m_message(message),
             m_dateTime(dateTime),

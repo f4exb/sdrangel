@@ -16,10 +16,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <limits>
-#include <ctype.h>
-#include <QDockWidget>
-#include <QMainWindow>
 #include <QDebug>
 #include <QMessageBox>
 #include <QAction>
@@ -38,7 +34,6 @@
 #include "util/simpleserializer.h"
 #include "util/csv.h"
 #include "util/db.h"
-#include "util/morse.h"
 #include "util/units.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
@@ -51,20 +46,14 @@
 #include "packetdemod.h"
 #include "packetdemodsink.h"
 
-#define PACKET_COL_FROM            0
-#define PACKET_COL_TO              1
-#define PACKET_COL_VIA             2
-#define PACKET_COL_TYPE            3
-#define PACKET_COL_PID             4
-#define PACKET_COL_DATA_ASCII      5
-#define PACKET_COL_DATA_HEX        6
-
 void PacketDemodGUI::resizeTable()
 {
     // Fill table with a row of dummy data that will size the columns nicely
     // Trailing spaces are for sort arrow
     int row = ui->packets->rowCount();
     ui->packets->setRowCount(row + 1);
+    ui->packets->setItem(row, PACKET_COL_DATE, new QTableWidgetItem("Frid Apr 15 2016-"));
+    ui->packets->setItem(row, PACKET_COL_TIME, new QTableWidgetItem("10:17:00"));
     ui->packets->setItem(row, PACKET_COL_FROM, new QTableWidgetItem("123456-15-"));
     ui->packets->setItem(row, PACKET_COL_TO, new QTableWidgetItem("123456-15-"));
     ui->packets->setItem(row, PACKET_COL_VIA, new QTableWidgetItem("123456-15-"));
@@ -158,7 +147,7 @@ bool PacketDemodGUI::deserialize(const QByteArray& data)
 }
 
 // Add row to table
-void PacketDemodGUI::packetReceived(QByteArray packet)
+void PacketDemodGUI::packetReceived(const QByteArray& packet, QDateTime dateTime)
 {
     AX25Packet ax25;
 
@@ -172,6 +161,8 @@ void PacketDemodGUI::packetReceived(QByteArray packet)
         int row = ui->packets->rowCount();
         ui->packets->setRowCount(row + 1);
 
+        QTableWidgetItem *dateItem = new QTableWidgetItem();
+        QTableWidgetItem *timeItem = new QTableWidgetItem();
         QTableWidgetItem *fromItem = new QTableWidgetItem();
         QTableWidgetItem *toItem = new QTableWidgetItem();
         QTableWidgetItem *viaItem = new QTableWidgetItem();
@@ -179,6 +170,8 @@ void PacketDemodGUI::packetReceived(QByteArray packet)
         QTableWidgetItem *pidItem = new QTableWidgetItem();
         QTableWidgetItem *dataASCIIItem = new QTableWidgetItem();
         QTableWidgetItem *dataHexItem = new QTableWidgetItem();
+        ui->packets->setItem(row, PACKET_COL_DATE, dateItem);
+        ui->packets->setItem(row, PACKET_COL_TIME, timeItem);
         ui->packets->setItem(row, PACKET_COL_FROM, fromItem);
         ui->packets->setItem(row, PACKET_COL_TO, toItem);
         ui->packets->setItem(row, PACKET_COL_VIA, viaItem);
@@ -186,6 +179,8 @@ void PacketDemodGUI::packetReceived(QByteArray packet)
         ui->packets->setItem(row, PACKET_COL_PID, pidItem);
         ui->packets->setItem(row, PACKET_COL_DATA_ASCII, dataASCIIItem);
         ui->packets->setItem(row, PACKET_COL_DATA_HEX, dataHexItem);
+        dateItem->setText(dateTime.date().toString());
+        timeItem->setText(dateTime.time().toString());
         fromItem->setText(ax25.m_from);
         toItem->setText(ax25.m_to);
         viaItem->setText(ax25.m_via);
@@ -229,7 +224,7 @@ bool PacketDemodGUI::handleMessage(const Message& message)
     else if (MainCore::MsgPacket::match(message))
     {
         MainCore::MsgPacket& report = (MainCore::MsgPacket&) message;
-        packetReceived(report.getPacket());
+        packetReceived(report.getPacket(), report.getDateTime());
         return true;
     }
 
@@ -554,6 +549,8 @@ void PacketDemodGUI::displaySettings()
     ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
     ui->logEnable->setChecked(m_settings.m_logEnabled);
 
+    ui->useFileTime->setChecked(m_settings.m_useFileTime);
+
     // Order and size columns
     QHeaderView *header = ui->packets->horizontalHeader();
     for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
@@ -666,7 +663,7 @@ void PacketDemodGUI::on_logOpen_clicked()
                             QTime time = QTime::fromString(cols[timeCol]);
                             QDateTime dateTime(date, time);
                             QByteArray bytes = QByteArray::fromHex(cols[dataCol].toLatin1());
-                            packetReceived(bytes);
+                            packetReceived(bytes, dateTime);
                             if (count % 1000 == 0)
                             {
                                 QApplication::processEvents();
@@ -692,6 +689,12 @@ void PacketDemodGUI::on_logOpen_clicked()
     }
 }
 
+void PacketDemodGUI::on_useFileTime_toggled(bool checked)
+{
+    m_settings.m_useFileTime = checked;
+    applySettings();
+}
+
 void PacketDemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &PacketDemodGUI::on_deltaFrequency_changed);
@@ -708,6 +711,7 @@ void PacketDemodGUI::makeUIConnections()
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &PacketDemodGUI::on_logEnable_clicked);
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &PacketDemodGUI::on_logFilename_clicked);
     QObject::connect(ui->logOpen, &QToolButton::clicked, this, &PacketDemodGUI::on_logOpen_clicked);
+    QObject::connect(ui->useFileTime, &ButtonSwitch::toggled, this, &PacketDemodGUI::on_useFileTime_toggled);
 }
 
 void PacketDemodGUI::updateAbsoluteCenterFrequency()

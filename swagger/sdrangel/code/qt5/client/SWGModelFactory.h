@@ -121,6 +121,8 @@
 #include "SWGDeviceSetList.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGEndOfTrainDemodReport.h"
+#include "SWGEndOfTrainDemodSettings.h"
 #include "SWGErrorResponse.h"
 #include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
@@ -912,6 +914,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDeviceState").compare(type) == 0) {
       SWGDeviceState *obj = new SWGDeviceState();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGEndOfTrainDemodReport").compare(type) == 0) {
+      SWGEndOfTrainDemodReport *obj = new SWGEndOfTrainDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGEndOfTrainDemodSettings").compare(type) == 0) {
+      SWGEndOfTrainDemodSettings *obj = new SWGEndOfTrainDemodSettings();
       obj->init();
       return obj;
     }

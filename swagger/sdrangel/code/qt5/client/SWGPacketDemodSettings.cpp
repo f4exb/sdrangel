@@ -46,6 +46,8 @@ SWGPacketDemodSettings::SWGPacketDemodSettings() {
     m_log_filename_isSet = false;
     log_enabled = 0;
     m_log_enabled_isSet = false;
+    use_file_time = 0;
+    m_use_file_time_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -92,6 +94,8 @@ SWGPacketDemodSettings::init() {
     m_log_filename_isSet = false;
     log_enabled = 0;
     m_log_enabled_isSet = false;
+    use_file_time = 0;
+    m_use_file_time_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -128,6 +132,7 @@ SWGPacketDemodSettings::cleanup() {
     if(log_filename != nullptr) { 
         delete log_filename;
     }
+
 
 
     if(title != nullptr) { 
@@ -177,6 +182,8 @@ SWGPacketDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&log_filename, pJson["logFilename"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&log_enabled, pJson["logEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_file_time, pJson["useFileTime"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -240,6 +247,9 @@ SWGPacketDemodSettings::asJsonObject() {
     }
     if(m_log_enabled_isSet){
         obj->insert("logEnabled", QJsonValue(log_enabled));
+    }
+    if(m_use_file_time_isSet){
+        obj->insert("useFileTime", QJsonValue(use_file_time));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -363,6 +373,16 @@ void
 SWGPacketDemodSettings::setLogEnabled(qint32 log_enabled) {
     this->log_enabled = log_enabled;
     this->m_log_enabled_isSet = true;
+}
+
+qint32
+SWGPacketDemodSettings::getUseFileTime() {
+    return use_file_time;
+}
+void
+SWGPacketDemodSettings::setUseFileTime(qint32 use_file_time) {
+    this->use_file_time = use_file_time;
+    this->m_use_file_time_isSet = true;
 }
 
 qint32
@@ -495,6 +515,9 @@ SWGPacketDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_log_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_file_time_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

@@ -36,6 +36,7 @@
 #include "SWGDOA2Report.h"
 #include "SWGDSCDemodReport.h"
 #include "SWGDSDDemodReport.h"
+#include "SWGEndOfTrainDemodReport.h"
 #include "SWGFT8DemodReport.h"
 #include "SWGFileSinkReport.h"
 #include "SWGFileSourceReport.h"
@@ -137,6 +138,9 @@ public:
 
     SWGDSDDemodReport* getDsdDemodReport();
     void setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report);
+
+    SWGEndOfTrainDemodReport* getEndOfTrainDemodReport();
+    void setEndOfTrainDemodReport(SWGEndOfTrainDemodReport* end_of_train_demod_report);
 
     SWGIEEE_802_15_4_ModReport* getIeee802154ModReport();
     void setIeee802154ModReport(SWGIEEE_802_15_4_ModReport* ieee_802_15_4_mod_report);
@@ -291,6 +295,9 @@ private:
 
     SWGDSDDemodReport* dsd_demod_report;
     bool m_dsd_demod_report_isSet;
+
+    SWGEndOfTrainDemodReport* end_of_train_demod_report;
+    bool m_end_of_train_demod_report_isSet;
 
     SWGIEEE_802_15_4_ModReport* ieee_802_15_4_mod_report;
     bool m_ieee_802_15_4_mod_report_isSet;

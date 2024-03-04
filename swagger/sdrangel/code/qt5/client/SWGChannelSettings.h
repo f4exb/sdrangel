@@ -41,6 +41,7 @@
 #include "SWGDOA2Settings.h"
 #include "SWGDSCDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
+#include "SWGEndOfTrainDemodSettings.h"
 #include "SWGFT8DemodSettings.h"
 #include "SWGFileSinkSettings.h"
 #include "SWGFileSourceSettings.h"
@@ -168,6 +169,9 @@ public:
 
     SWGDSDDemodSettings* getDsdDemodSettings();
     void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
+
+    SWGEndOfTrainDemodSettings* getEndOfTrainDemodSettings();
+    void setEndOfTrainDemodSettings(SWGEndOfTrainDemodSettings* end_of_train_demod_settings);
 
     SWGFileSinkSettings* getFileSinkSettings();
     void setFileSinkSettings(SWGFileSinkSettings* file_sink_settings);
@@ -358,6 +362,9 @@ private:
 
     SWGDSDDemodSettings* dsd_demod_settings;
     bool m_dsd_demod_settings_isSet;
+
+    SWGEndOfTrainDemodSettings* end_of_train_demod_settings;
+    bool m_end_of_train_demod_settings_isSet;
 
     SWGFileSinkSettings* file_sink_settings;
     bool m_file_sink_settings_isSet;

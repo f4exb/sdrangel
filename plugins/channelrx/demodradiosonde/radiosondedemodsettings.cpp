@@ -48,6 +48,7 @@ void RadiosondeDemodSettings::resetToDefaults()
     m_scopeCh2 = 6;
     m_logFilename = "radiosonde_log.csv";
     m_logEnabled = false;
+    m_useFileTime = false;
     m_rgbColor = QColor(102, 0, 102).rgb();
     m_title = "Radiosonde Demodulator";
     m_streamIndex = 0;
@@ -105,6 +106,8 @@ QByteArray RadiosondeDemodSettings::serialize() const
     s.writeS32(26, m_workspaceIndex);
     s.writeBlob(27, m_geometryBytes);
     s.writeBool(28, m_hidden);
+
+    s.writeBool(29, m_useFileTime);
 
     for (int i = 0; i < RADIOSONDEDEMOD_FRAME_COLUMNS; i++)
         s.writeS32(100 + i, m_frameColumnIndexes[i]);
@@ -191,6 +194,8 @@ bool RadiosondeDemodSettings::deserialize(const QByteArray& data)
         d.readS32(26, &m_workspaceIndex, 0);
         d.readBlob(27, &m_geometryBytes);
         d.readBool(28, &m_hidden, false);
+
+        d.readBool(29, &m_useFileTime, false);
 
         for (int i = 0; i < RADIOSONDEDEMOD_FRAME_COLUMNS; i++) {
             d.readS32(100 + i, &m_frameColumnIndexes[i], i);
