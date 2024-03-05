@@ -57,8 +57,24 @@ public:
     unsigned int getNbCaptures() const;
     uint64_t getInitialMsCount() const { return m_initialMsCount; }
     uint64_t getInitialBytesCount() const { return m_initialBytesCount; }
+    void setLog2RecordSampleSize(uint32_t log2RecordSampleSize) { m_log2RecordSampleSize = log2RecordSampleSize; }
 
 private:
+    struct Sample8 {
+        qint8 m_real;
+        qint8 m_imag;
+    };
+
+    struct Sample16 {
+        qint16 m_real;
+        qint16 m_imag;
+    };
+
+    struct Sample32 {
+        qint32 m_real;
+        qint32 m_imag;
+    };
+
     QString m_hardwareId;
 	QString m_fileName;
     QString m_sampleFileName;
@@ -75,12 +91,17 @@ private:
     quint64 m_sampleCount;
     quint64 m_initialMsCount;
     quint64 m_initialBytesCount;
+    uint32_t m_log2RecordSampleSize;
     sigmf::SigMF<sigmf::Global<core::DescrT, sdrangel::DescrT>,
             sigmf::Capture<core::DescrT, sdrangel::DescrT>,
             sigmf::Annotation<core::DescrT> > *m_metaRecord;
+    std::vector<Sample8> m_samples8;
+    std::vector<Sample16> m_samples16;
+    std::vector<Sample32> m_samples32;
     void makeHeader();
     void makeCapture();
     void clearMeta();
+    void feedConv(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 };
 
 #endif // INCLUDE_SIGMF_FILERECORD_H

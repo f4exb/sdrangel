@@ -44,6 +44,7 @@ void SigMFFileSinkSettings::resetToDefaults()
     m_preRecordTime = 0;
     m_squelchPostRecordTime = 0;
     m_squelchRecordingEnable = false;
+    m_log2RecordSampleSize = 5;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -91,6 +92,7 @@ QByteArray SigMFFileSinkSettings::serialize() const
     s.writeS32(21, m_workspaceIndex);
     s.writeBlob(22, m_geometryBytes);
     s.writeBool(23, m_hidden);
+    s.writeU32(24, m_log2RecordSampleSize);
 
     return s.final();
 }
@@ -163,6 +165,8 @@ bool SigMFFileSinkSettings::deserialize(const QByteArray& data)
         d.readS32(21, &m_workspaceIndex, 0);
         d.readBlob(22, &m_geometryBytes);
         d.readBool(23, &m_hidden, false);
+        d.readU32(24, &tmp, 5);
+        m_log2RecordSampleSize = (tmp < 3 ? 3 : tmp > 5 ? 5 : tmp);
 
         return true;
     }

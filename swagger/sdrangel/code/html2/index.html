@@ -14562,6 +14562,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Automatic recording triggered by spectrum squalch * 0 - disabled * 1 - enabled\n"
     },
+    "log2RecordSampleSize" : {
+      "type" : "integer",
+      "description" : "log2 of recording sample (I or Q) size in bits. Can be 3, 4 or 5."
+    },
     "streamIndex" : {
       "type" : "integer",
       "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
@@ -58773,7 +58777,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-03-03T22:27:13.533+01:00
+              Generated 2024-03-04T22:20:15.730+01:00
             </div>
           </div>
       </div>

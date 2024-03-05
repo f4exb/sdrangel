@@ -113,6 +113,7 @@ private slots:
     void handleSourceMessages();
     void on_deltaFrequency_changed(qint64 value);
     void on_decimationFactor_currentIndexChanged(int index);
+    void on_recordSampleSize_currentIndexChanged(int index);
     void on_fixedPosition_toggled(bool checked);
     void on_position_valueChanged(int value);
     void on_spectrumSquelch_toggled(bool checked);

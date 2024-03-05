@@ -51,6 +51,8 @@ SigMFFileRecord::SigMFFileRecord() :
     m_metaRecord = new sigmf::SigMF<sigmf::Global<core::DescrT, sdrangel::DescrT>,
             sigmf::Capture<core::DescrT, sdrangel::DescrT>,
             sigmf::Annotation<core::DescrT> >();
+    // sizeof(FixReal) is either 2 or 4 thus log2 sample size is either 4 (size 16) or 5 (size 32)
+    m_log2RecordSampleSize = (sizeof(FixReal) / 2) + 3;
 }
 
 SigMFFileRecord::SigMFFileRecord(const QString& fileName, const QString& hardwareId) :
@@ -71,6 +73,8 @@ SigMFFileRecord::SigMFFileRecord(const QString& fileName, const QString& hardwar
     m_metaRecord = new sigmf::SigMF<sigmf::Global<core::DescrT, sdrangel::DescrT>,
             sigmf::Capture<core::DescrT, sdrangel::DescrT>,
             sigmf::Annotation<core::DescrT> >();
+    // sizeof(FixReal) is either 2 or 4 thus log2 sample size is either 4 (size 16) or 5 (size 32)
+    m_log2RecordSampleSize = (sizeof(FixReal) / 2) + 3;
 }
 
 SigMFFileRecord::~SigMFFileRecord()
@@ -139,7 +143,7 @@ void SigMFFileRecord::setFileName(const QString& fileName)
                     m_sampleFileName = m_fileName + ".sigmf-data";
                     m_sampleFile.open(m_sampleFileName.toStdString().c_str(), std::ios::binary & std::ios::app);
                     m_initialBytesCount = (uint64_t) m_sampleFile.tellp();
-                    m_sampleStart =  m_initialBytesCount / sizeof(Sample);
+                    m_sampleStart =  m_initialBytesCount / ((1<<m_log2RecordSampleSize)/4); // sizeof(Sample);
 
                     m_recordStart = false;
                 }
@@ -245,7 +249,8 @@ void SigMFFileRecord::makeHeader()
     m_metaRecord->global.access<sdrangel::GlobalT>().arch = QString(QSysInfo::currentCpuArchitecture()).toStdString();
     m_metaRecord->global.access<sdrangel::GlobalT>().os = QString(QSysInfo::prettyProductName()).toStdString();
     QString endianSuffix = QSysInfo::ByteOrder == QSysInfo::LittleEndian ? "le" : "be";
-    int size = 8*sizeof(FixReal);
+    int size = 1<<m_log2RecordSampleSize;
+    qDebug("SigMFFileRecord::makeHeader: %u %u", m_log2RecordSampleSize, (1<<m_log2RecordSampleSize));
     m_metaRecord->global.access<core::GlobalT>().datatype = QString("ci%1_%2").arg(size).arg(endianSuffix).toStdString();
 }
 
@@ -294,8 +299,72 @@ void SigMFFileRecord::feed(const SampleVector::const_iterator& begin, const Samp
 
     if (begin < end) // if there is something to put out
     {
-        m_sampleFile.write(reinterpret_cast<const char*>(&*(begin)), (end - begin)*sizeof(Sample));
+        // m_sampleFile.write(reinterpret_cast<const char*>(&*(begin)), (end - begin)*sizeof(Sample));
+        feedConv(begin, end);
         m_sampleCount += end - begin;
+    }
+}
+
+void SigMFFileRecord::feedConv(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
+{
+    uint32_t desiredIorQSampleSize = 1<<m_log2RecordSampleSize;
+
+    if (2*desiredIorQSampleSize ==  8*sizeof(Sample)) // if size of sample matches desired sample size write directly
+    {
+        m_sampleFile.write(reinterpret_cast<const char*>(&*(begin)), (end - begin)*sizeof(Sample));
+    }
+    else
+    {
+        uint32_t nsamples = (end - begin);
+
+        // Only the 24 LSBits of the 32 bits samples are significant
+        if (desiredIorQSampleSize == 32) // can only be 16 bit samples => x8 (16 -> 24)
+        {
+            if (nsamples > m_samples32.size()) {
+                m_samples32.resize(nsamples);
+            }
+            std::transform(
+                begin,
+                end,
+                m_samples32.begin(),
+                [](const Sample& s) -> Sample32 {
+                    return Sample32{s.real()<<8, s.imag()<<8};
+                }
+            );
+            m_sampleFile.write(reinterpret_cast<const char*>(&*(m_samples32.begin())), nsamples*sizeof(Sample32));
+        }
+        else if (desiredIorQSampleSize == 16) // can only be 32 bit samples size => /8 (24 -> 16)
+        {
+            if (nsamples > m_samples16.size()) {
+                m_samples16.resize(nsamples);
+            }
+            std::transform(
+                begin,
+                end,
+                m_samples16.begin(),
+                [](const Sample& s) -> Sample16 {
+                    return Sample16{(qint16)(s.real()>>8), (qint16)(s.imag()>>8)};
+                }
+            );
+            m_sampleFile.write(reinterpret_cast<const char*>(&*(m_samples16.begin())), nsamples*sizeof(Sample16));
+        }
+        else // can only be 8 bit desired sample size
+        {
+            // divide by 8 for 16 -> 8 (sizeof(sample) == 4) or 16 for 24 -> 8 (sizeod(Sample) == 8)
+            // thus division of a I or Q sample is done with >>(2*sizeof(sample)) operation
+            if (nsamples > m_samples8.size()) {
+                m_samples8.resize(nsamples);
+            }
+            std::transform(
+                begin,
+                end,
+                m_samples8.begin(),
+                [](const Sample& s) -> Sample8 {
+                    return Sample8{(qint8)(s.real()>>(2*sizeof(Sample))), (qint8)(s.imag()>>(2*sizeof(Sample)))};
+                }
+            );
+            m_sampleFile.write(reinterpret_cast<const char*>(&*(m_samples8.begin())), nsamples*sizeof(Sample8));
+        }
     }
 }
 

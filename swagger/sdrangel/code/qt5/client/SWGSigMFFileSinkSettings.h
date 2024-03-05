@@ -75,6 +75,9 @@ public:
     qint32 getSquelchRecordingEnable();
     void setSquelchRecordingEnable(qint32 squelch_recording_enable);
 
+    qint32 getLog2RecordSampleSize();
+    void setLog2RecordSampleSize(qint32 log2_record_sample_size);
+
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
 
@@ -135,6 +138,9 @@ private:
 
     qint32 squelch_recording_enable;
     bool m_squelch_recording_enable_isSet;
+
+    qint32 log2_record_sample_size;
+    bool m_log2_record_sample_size_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;

@@ -48,6 +48,8 @@ SWGSigMFFileSinkSettings::SWGSigMFFileSinkSettings() {
     m_squelch_post_record_time_isSet = false;
     squelch_recording_enable = 0;
     m_squelch_recording_enable_isSet = false;
+    log2_record_sample_size = 0;
+    m_log2_record_sample_size_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -94,6 +96,8 @@ SWGSigMFFileSinkSettings::init() {
     m_squelch_post_record_time_isSet = false;
     squelch_recording_enable = 0;
     m_squelch_recording_enable_isSet = false;
+    log2_record_sample_size = 0;
+    m_log2_record_sample_size_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -124,6 +128,7 @@ SWGSigMFFileSinkSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
 
 
 
@@ -179,6 +184,8 @@ SWGSigMFFileSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&squelch_post_record_time, pJson["squelchPostRecordTime"], "qint32", "");
     
     ::SWGSDRangel::setValue(&squelch_recording_enable, pJson["squelchRecordingEnable"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&log2_record_sample_size, pJson["log2RecordSampleSize"], "qint32", "");
     
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
@@ -243,6 +250,9 @@ SWGSigMFFileSinkSettings::asJsonObject() {
     }
     if(m_squelch_recording_enable_isSet){
         obj->insert("squelchRecordingEnable", QJsonValue(squelch_recording_enable));
+    }
+    if(m_log2_record_sample_size_isSet){
+        obj->insert("log2RecordSampleSize", QJsonValue(log2_record_sample_size));
     }
     if(m_stream_index_isSet){
         obj->insert("streamIndex", QJsonValue(stream_index));
@@ -376,6 +386,16 @@ SWGSigMFFileSinkSettings::setSquelchRecordingEnable(qint32 squelch_recording_ena
 }
 
 qint32
+SWGSigMFFileSinkSettings::getLog2RecordSampleSize() {
+    return log2_record_sample_size;
+}
+void
+SWGSigMFFileSinkSettings::setLog2RecordSampleSize(qint32 log2_record_sample_size) {
+    this->log2_record_sample_size = log2_record_sample_size;
+    this->m_log2_record_sample_size_isSet = true;
+}
+
+qint32
 SWGSigMFFileSinkSettings::getStreamIndex() {
     return stream_index;
 }
@@ -498,6 +518,9 @@ SWGSigMFFileSinkSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_squelch_recording_enable_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_record_sample_size_isSet){
             isObjectUpdated = true; break;
         }
         if(m_stream_index_isSet){

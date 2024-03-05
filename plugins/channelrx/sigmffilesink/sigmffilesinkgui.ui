@@ -184,6 +184,41 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="recordSampleSizeLabel">
+        <property name="text">
+         <string>b</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="recordSampleSize">
+        <property name="maximumSize">
+         <size>
+          <width>55</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Record sample size I or Q (bits)</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>8</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>16</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>32</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_4">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
