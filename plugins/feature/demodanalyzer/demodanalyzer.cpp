@@ -51,8 +51,8 @@ DemodAnalyzer::DemodAnalyzer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_thread(nullptr),
     m_running(false),
     m_worker(nullptr),
-    m_availableChannelOrFeatureHandler(DemodAnalyzerSettings::m_channelURIs),
     m_spectrumVis(SDR_RX_SCALEF),
+    m_availableChannelOrFeatureHandler(DemodAnalyzerSettings::m_channelURIs),
     m_selectedChannel(nullptr),
     m_dataPipe(nullptr)
 {
