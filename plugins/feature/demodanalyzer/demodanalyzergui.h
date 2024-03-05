@@ -25,6 +25,7 @@
 #include "feature/featuregui.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
+#include "availablechannelorfeaturehandler.h"
 #include "settings/rollupstate.h"
 
 #include "demodanalyzersettings.h"
@@ -71,7 +72,7 @@ private:
 	MessageQueue m_inputMessageQueue;
 	QTimer m_statusTimer;
 	int m_lastFeatureState;
-	QList<DemodAnalyzerSettings::AvailableChannel> m_availableChannels;
+	AvailableChannelOrFeatureList m_availableChannels;
 	ChannelAPI *m_selectedChannel;
 	MovingAverageUtil<double, double, 40> m_channelPowerAvg;
 
@@ -91,7 +92,6 @@ private slots:
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();
 	void on_startStop_toggled(bool checked);
-	void on_devicesRefresh_clicked();
 	void on_channels_currentIndexChanged(int index);
 	void on_channelApply_clicked();
 	void on_log2Decim_currentIndexChanged(int index);

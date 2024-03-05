@@ -27,6 +27,7 @@
 #include "util/message.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/scopevis.h"
+#include "availablechannelorfeaturehandler.h"
 
 #include "demodanalyzersettings.h"
 
@@ -89,35 +90,27 @@ public:
         { }
     };
 
-    class MsgRefreshChannels : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgRefreshChannels* create() {
-            return new MsgRefreshChannels();
-        }
-
-    protected:
-        MsgRefreshChannels() :
-            Message()
-        { }
-    };
-
     class MsgReportChannels : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        QList<DemodAnalyzerSettings::AvailableChannel>& getAvailableChannels() { return m_availableChannels; }
+        AvailableChannelOrFeatureList& getAvailableChannels() { return m_availableChannels; }
+        const QStringList& getRenameFrom() const { return m_renameFrom; }
+        const QStringList& getRenameTo() const { return m_renameTo; }
 
-        static MsgReportChannels* create() {
-            return new MsgReportChannels();
+        static MsgReportChannels* create(const QStringList& renameFrom, const QStringList& renameTo) {
+            return new MsgReportChannels(renameFrom, renameTo);
         }
 
     private:
-        QList<DemodAnalyzerSettings::AvailableChannel> m_availableChannels;
+        AvailableChannelOrFeatureList m_availableChannels;
+        QStringList m_renameFrom;
+        QStringList m_renameTo;
 
-        MsgReportChannels() :
-            Message()
+        MsgReportChannels(const QStringList& renameFrom, const QStringList& renameTo) :
+            Message(),
+            m_renameFrom(renameFrom),
+            m_renameTo(renameTo)
         {}
     };
 
@@ -212,7 +205,8 @@ private:
     DemodAnalyzerSettings m_settings;
     SpectrumVis m_spectrumVis;
     ScopeVis m_scopeVis;
-    QHash<ChannelAPI*, DemodAnalyzerSettings::AvailableChannel> m_availableChannels;
+    AvailableChannelOrFeatureList m_availableChannels;
+    AvailableChannelOrFeatureHandler m_availableChannelOrFeatureHandler;
     ChannelAPI *m_selectedChannel;
     ObjectPipe *m_dataPipe;
     int m_sampleRate;
@@ -223,13 +217,14 @@ private:
     void start();
     void stop();
     void applySettings(const DemodAnalyzerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
-    void updateChannels();
+    void notifyUpdate(const QStringList& renameFrom, const QStringList& renameTo);
     void setChannel(ChannelAPI *selectedChannel);
     void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const DemodAnalyzerSettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void handleChannelMessageQueue(MessageQueue *messageQueues);
+    void channelsOrFeaturesChanged(const QStringList& renameFrom, const QStringList& renameTo);
     void handleDataPipeToBeDeleted(int reason, QObject *object);
 };
 

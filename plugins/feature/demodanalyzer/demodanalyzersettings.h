@@ -31,19 +31,6 @@ class ChannelAPI;
 
 struct DemodAnalyzerSettings
 {
-    struct AvailableChannel
-    {
-        bool m_tx;
-        int m_deviceSetIndex;
-        int m_channelIndex;
-        ChannelAPI *m_channelAPI;
-        QString m_id;
-
-        AvailableChannel() = default;
-        AvailableChannel(const AvailableChannel&) = default;
-        AvailableChannel& operator=(const AvailableChannel&) = default;
-    };
-
     int m_log2Decim;
     QString m_title;
     quint32 m_rgbColor;
@@ -71,7 +58,6 @@ struct DemodAnalyzerSettings
     void applySettings(const QStringList& settingsKeys, const DemodAnalyzerSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
-    static const QStringList m_channelTypes;
     static const QStringList m_channelURIs;
 };
 

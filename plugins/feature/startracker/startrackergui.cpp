@@ -1943,7 +1943,7 @@ void StarTrackerGUI::plotElevationPolarChart()
     {
         int redrawTime = 0;
         // Plot rotator position
-        QString ourSourceName = QString("F0:%1 %2").arg(m_starTracker->getIndexInFeatureSet()).arg(m_starTracker->getIdentifier());  // Only one feature set in practice?
+        QString ourSourceName = QString("F:%1 %2").arg(m_starTracker->getIndexInFeatureSet()).arg(m_starTracker->getIdentifier());
         std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
         for (int featureSetIndex = 0; featureSetIndex < (int)featureSets.size(); featureSetIndex++)
         {

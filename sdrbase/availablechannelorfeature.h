@@ -18,10 +18,13 @@
 #ifndef SDRBASE_AVAILABLECHANNELORFEATURE_H_
 #define SDRBASE_AVAILABLECHANNELORFEATURE_H_
 
-#include "pipes/messagepipes.h"
+#include <QString>
+#include <QObject>
+
+//#include "pipes/messagepipes.h"
 #include "export.h"
 
-struct AvailableChannelOrFeature
+struct SDRBASE_API AvailableChannelOrFeature
 {
     QChar m_kind;           //!< 'R' or 'T' for channel, 'M' for MIMO channel, 'F' for feature as from MainCore::getDeviceSetTypeId
     int m_superIndex;       //!< Device Set index or Feature Set index
@@ -34,21 +37,9 @@ struct AvailableChannelOrFeature
     AvailableChannelOrFeature(const AvailableChannelOrFeature&) = default;
     AvailableChannelOrFeature& operator=(const AvailableChannelOrFeature&) = default;
 
-    bool operator==(const AvailableChannelOrFeature& a) const {
-        return (m_kind == a.m_kind) && (m_superIndex == a.m_superIndex) && (m_index == a.m_index) && (m_type == a.m_type) && ((m_kind == 'M') && (m_streamIndex == a.m_streamIndex));
-    }
-
-    QString getId() const { // Eg: "R3:4"
-        QString id = QString("%1%2:%3").arg(m_kind).arg(m_superIndex).arg(m_index);
-        if (m_kind == 'M') {
-            id.append(QString(".%1").arg(m_streamIndex));
-        }
-        return id;
-    }
-
-    QString getLongId() const { // Eg: "F0:1 StarTracker"
-        return QString("%1 %2").arg(getId()).arg(m_type);
-    }
+    bool operator==(const AvailableChannelOrFeature& a) const;
+    QString getId() const; //!< Eg: "R3:4"
+    QString getLongId() const; //!< Eg: "F:1 StarTracker"
 };
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
