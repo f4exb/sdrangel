@@ -238,19 +238,14 @@ void DemodAnalyzerGUI::updateChannelList()
     ui->channels->blockSignals(true);
     ui->channels->clear();
 
-    QList<DemodAnalyzerSettings::AvailableChannel>::const_iterator it = m_availableChannels.begin();
+    AvailableChannelOrFeatureList::const_iterator it = m_availableChannels.begin();
     int selectedItem = -1;
 
     for (int i = 0; it != m_availableChannels.end(); ++it, i++)
     {
-        ui->channels->addItem(tr("%1%2:%3 %4")
-            .arg(it->m_tx ? "T" : "R")
-            .arg(it->m_deviceSetIndex)
-            .arg(it->m_channelIndex)
-            .arg(it->m_id)
-        );
+        ui->channels->addItem(it->getLongId());
 
-        if (it->m_channelAPI == m_selectedChannel) {
+        if (it->m_object == m_selectedChannel) {
             selectedItem = i;
         }
     }
@@ -317,17 +312,11 @@ void DemodAnalyzerGUI::on_startStop_toggled(bool checked)
     }
 }
 
-void DemodAnalyzerGUI::on_devicesRefresh_clicked()
-{
-    DemodAnalyzer::MsgRefreshChannels *msg = DemodAnalyzer::MsgRefreshChannels::create();
-    m_demodAnalyzer->getInputMessageQueue()->push(msg);
-}
-
 void DemodAnalyzerGUI::on_channels_currentIndexChanged(int index)
 {
     if ((index >= 0) && (index < m_availableChannels.size()))
     {
-        m_selectedChannel = m_availableChannels[index].m_channelAPI;
+        m_selectedChannel = qobject_cast<ChannelAPI*>(m_availableChannels[index].m_object);
         DemodAnalyzer::MsgSelectChannel *msg = DemodAnalyzer::MsgSelectChannel::create(m_selectedChannel);
         m_demodAnalyzer->getInputMessageQueue()->push(msg);
     }
@@ -448,7 +437,6 @@ void DemodAnalyzerGUI::applySettings(bool force)
 void DemodAnalyzerGUI::makeUIConnections()
 {
 	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &DemodAnalyzerGUI::on_startStop_toggled);
-	QObject::connect(ui->devicesRefresh, &QPushButton::clicked, this, &DemodAnalyzerGUI::on_devicesRefresh_clicked);
 	QObject::connect(ui->channels, qOverload<int>(&QComboBox::currentIndexChanged), this, &DemodAnalyzerGUI::on_channels_currentIndexChanged);
 	QObject::connect(ui->channelApply, &QPushButton::clicked, this, &DemodAnalyzerGUI::on_channelApply_clicked);
 	QObject::connect(ui->log2Decim, qOverload<int>(&QComboBox::currentIndexChanged), this, &DemodAnalyzerGUI::on_log2Decim_currentIndexChanged);

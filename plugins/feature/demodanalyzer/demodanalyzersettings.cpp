@@ -25,31 +25,6 @@
 
 #include "demodanalyzersettings.h"
 
-const QStringList DemodAnalyzerSettings::m_channelTypes = {
-    QStringLiteral("AISDemod"),
-    QStringLiteral("AISMod"),
-    QStringLiteral("AMDemod"),
-    QStringLiteral("AMMod"),
-    QStringLiteral("BFMDemod"),
-    QStringLiteral("DABDemod"),
-    QStringLiteral("DSDDemod"),
-    QStringLiteral("EndOfTrainDemod"),
-    QStringLiteral("FT8Demod"),
-    QStringLiteral("M17Demod"),
-    QStringLiteral("M17Mmod"),
-    QStringLiteral("NFMDemod"),
-    QStringLiteral("NFMMod"),
-    QStringLiteral("PacketDemod"),
-    QStringLiteral("PacketMod"),
-    QStringLiteral("RadiosondeDemod"),
-    QStringLiteral("PSK31Mod"),
-    QStringLiteral("RTTYMod"),
-    QStringLiteral("SSBDemod"),
-    QStringLiteral("SSBMod"),
-    QStringLiteral("WFMDemod"),
-    QStringLiteral("WFMMod"),
-};
-
 const QStringList DemodAnalyzerSettings::m_channelURIs = {
     QStringLiteral("sdrangel.channel.aisdemod"),
     QStringLiteral("sdrangel.channel.modais"),

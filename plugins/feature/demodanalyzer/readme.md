@@ -8,10 +8,15 @@ Rx plugins are:
 
   - AIS demodulator
   - AM demodulator
+  - Broadcast FM demodulator
   - DAB demodulator
   - DSD (FM digital voice) demodulator
+  - End-of-train demodulator 
+  - FT8 demodulator
+  - M17 demodulator
   - NFM demodulator
   - Packet demodulator
+  - Radiosonde demodulator
   - SSB demodulator
   - WFM demodulator
 
@@ -19,8 +24,11 @@ Tx plugins are:
 
   - AIS modulator
   - AM modulator
+  - M17 modulator
   - NFM modulator
   - Packet modulator
+  - PSK31 modulator
+  - RTTY modulator
   - SSB modulator
   - WFM modulator
 
@@ -41,17 +49,12 @@ The interface is essentially divided in the following sections
 Typical sequence of operations:
 
   1. Start the plugin (A.1)
-  2. Scan for displayable channels (A.2)
-  3. Select channel (A.3)
-  4. If channel is unique or default selection has not been changed press the (re)apply button (A.4)
+  2. Select channel (A.3)
+  3. If channel is unique or default selection has not been changed press the (re)apply button (A.4)
 
 <h3>A.1: Start/Stop plugin</h3>
 
 This button starts or stops the plugin
-
-<h3>A.2: (Re)scan available channels</h3>
-
-Use this button to scan for channels available for display (see list of channel types in introduction)
 
 <h3>A.3: Channel selection</h3>
 

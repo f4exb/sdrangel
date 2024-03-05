@@ -955,7 +955,7 @@ void SatelliteTrackerGUI::plotPolarChart()
         if (m_settings.m_drawRotators != SatelliteTrackerSettings::NO_ROTATORS)
         {
             // Plot rotator position
-            QString ourSourceName = QString("F0:%1 %2").arg(m_satelliteTracker->getIndexInFeatureSet()).arg(m_satelliteTracker->getIdentifier());  // Only one feature set in practice?
+            QString ourSourceName = QString("F:%1 %2").arg(m_satelliteTracker->getIndexInFeatureSet()).arg(m_satelliteTracker->getIdentifier());
             std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
             for (int featureSetIndex = 0; featureSetIndex < (int)featureSets.size(); featureSetIndex++)
             {
