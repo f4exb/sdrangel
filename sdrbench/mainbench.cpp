@@ -69,6 +69,8 @@ void MainBench::run()
         testGolay2312();
     } else if (m_parser.getTestType() == ParserBench::TestFT8) {
         testFT8(m_parser.getFileName(), m_parser.getArgsStr());
+    } else if (m_parser.getTestType() == ParserBench::TestCallsign) {
+        testCallsign(m_parser.getArgsStr());
     } else {
         qDebug() << "MainBench::run: unknown test type: " << m_parser.getTestType();
     }

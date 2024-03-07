@@ -9,6 +9,7 @@ set(sdrbench_SOURCES
     parserbench.cpp
     test_golay2312.cpp
     test_ft8.cpp
+    test_callsign.cpp
 )
 
 set(sdrbench_HEADERS

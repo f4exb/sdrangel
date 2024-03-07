@@ -224,8 +224,10 @@ set(sdrbase_SOURCES
     util/astronomy.cpp
     util/azel.cpp
     util/baudot.cpp
+    util/callsign.cpp
     util/colormap.cpp
     util/coordinates.cpp
+    util/countrydat.cpp
     util/crc.cpp
     util/CRC64.cpp
     util/csv.cpp
@@ -297,6 +299,7 @@ set(sdrbase_SOURCES
     maincore.cpp
     remotetcpsinkstarter.cpp
 
+    resources/data.qrc
     resources/webapi.qrc
 )
 
@@ -468,8 +471,10 @@ set(sdrbase_HEADERS
     util/astronomy.h
     util/azel.h
     util/baudot.h
+    util/callsign.h
     util/colormap.h
     util/coordinates.h
+    util/countrydat.h
     util/CRC64.h
     util/csv.h
     util/db.h
