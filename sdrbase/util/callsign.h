@@ -24,9 +24,10 @@
 #include <QObject>
 #include <QRegularExpression>
 
+#include "export.h"
 #include "countrydat.h"
 
-class Callsign : public QObject
+class SDRBASE_API Callsign : public QObject
 {
     Q_OBJECT
 

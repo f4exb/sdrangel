@@ -34,7 +34,9 @@
 #include <QHash>
 #include <QDate>
 
-class CountryDat
+#include "export.h"
+
+class SDRBASE_API CountryDat
 {
 public:
     struct CountryInfo {
