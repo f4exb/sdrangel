@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>data/cty.dat</file>
+    </qresource>
+</RCC>
