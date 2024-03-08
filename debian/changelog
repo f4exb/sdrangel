@@ -1,6 +1,40 @@
+sdrangel (7.19.0-1) unstable; urgency=medium
+
+   * Upgraded RTL-SDR library to v2.0.1
+   * Fix not remove source buddy. PR #1998
+   * Fix renumberate deviceset without modifying claimed of SamplingDevice. PR #2001
+   * Merge pull request #2000 from srcejon/freq_scanner
+   * ADS-B: Add QT 6 support for map. PR #2000
+   * Fix URLs on QT 6 map. PR #2000
+   * Fix 32-bit float support for Spy Server. PR #2000
+   * Fix Kiwi location. PR #2000
+   * Update map docs. PR #2000
+   * Fix gcc warnings. PR #2000
+   * Update map QML/HTML. PR #2000
+   * Add libqt5svg5-dev dependency. PR #2000
+   * Add SVG and libacars. PR #2000
+   * HTTPDownloadManager: Support latest updates to Google Drive. PR #2000
+   * Add utils. PR #2000
+   * SkyMap: Fix CORS and enabling caching. PR #2000
+   * Map: Add Spy Server and Kiwi SDR. Add weather and satellite overlays. PR #2000
+   * Fix SDRA protocol and improve spectrum refresh rate. PR #2000
+   * Fix gcc warnings. PR #2000
+   * RemoteTCPInput: Add Spy Server support. PR #2000
+   * SDRplay: Prevent nullpointer dereference for #1825 PR #2000
+   * Add End-of-Train demodulator for #1866. PR #2005
+   * AIS, DSC, End-of-Train, Packet, Radiosonde: date/time from File Input device or system clock. PR #2005
+   * Use log2 approximation to increase performance. Part of #2004. PR #2006
+   * SigMF File Sink: implement 16 and 8 bits sample sizes. Fixes #1921
+   * Use F:n for feature Ids. PR #2007
+   * Update Demod Analzyer to use AvailableChannelsOrFeature. PR #2007
+   * Class to handle amateur radio callsigns and corresponding country data. Part of #2008
+   * FT8 demod: implemented DXCC country decoding. Implements #2008
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Fri, 08 Mar 2024 18:12:42 +0100
+
 sdrangel (7.18.0-1) unstable; urgency=medium
 
-    * Upgrade to SDRPlay API to 3.14 and support for RSP 1B
+   * Upgrade to SDRPlay API to 3.14 and support for RSP 1B
 
   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 21 Feb 2024 12:53:33 +0100
 
