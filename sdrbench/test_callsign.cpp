@@ -38,9 +38,8 @@ void MainBench::testCallsign(const QString& argsStr)
     qInfo("%s is the base callsign of %s", qPrintable(Callsign::base_callsign(argsStr)), qPrintable(argsStr));
     qInfo("%s is the effective prefix of %s", qPrintable(Callsign::effective_prefix(argsStr)), qPrintable(argsStr));
     qInfo("%s is the striped prefix of %s", qPrintable(Callsign::striped_prefix(argsStr)), qPrintable(argsStr));
-    qInfo("%s is the country data for callsign %s", qPrintable(Callsign::instance()->getCountryData(argsStr)), qPrintable(argsStr));
     CountryDat::CountryInfo countryInfo = Callsign::instance()->getCountryInfo(argsStr);
-    qInfo("%s is the continent", qPrintable(countryInfo.continent));
+    qInfo("%s DXCC country infoirmation", qPrintable(argsStr));    qInfo("%s is the continent", qPrintable(countryInfo.continent));
     qInfo("%s is the country", qPrintable(countryInfo.country));
     qInfo("%s is the master prefix", qPrintable(countryInfo.masterPrefix));
     qInfo("%s is the cq zone", qPrintable(countryInfo.cqZone));

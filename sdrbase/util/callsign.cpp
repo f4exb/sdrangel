@@ -144,41 +144,6 @@ QString Callsign::striped_prefix (QString callsign)
     return match.captured("prefix");
 }
 
-QString Callsign::getCountryData(QString const& callsign)
-{
-    QString pf = callsign.toUpper();
-
-    while (!pf.isEmpty ())
-  	{
-        QString country = "";
-
-        if (pf.length() == callsign.length())
-        {
-            country = m_countryDat.getData().value("="+pf, country);
-
-            if (!country.isEmpty ()) {
-                return country;
-            } else {
-                pf = effective_prefix(callsign);
-            }
-        }
-
-        if (pf == "KG4" && callsign.length() != 5) {
-            pf = "AA";
-        }
-
-        country = m_countryDat.getData().value(pf, country);
-
-        if (!country.isEmpty ()) {
-	        return country;
-        }
-
-        pf = pf.left(pf.length()-1);
-	}
-
-    return "  ,?,where?,  ,  ";
-}
-
 CountryDat::CountryInfo Callsign::getCountryInfo(QString const& callsign)
 {
     QString pf = callsign.toUpper();

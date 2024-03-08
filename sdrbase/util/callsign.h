@@ -41,7 +41,6 @@ public:
     static QString base_callsign(QString);
     static QString effective_prefix(QString);
     static QString striped_prefix(QString);
-    QString getCountryData(QString const& callsign);
     CountryDat::CountryInfo getCountryInfo(QString const& callsign);
 
 private:

@@ -49,7 +49,6 @@ public:
 
     void init();
     void load();
-    const QHash<QString, QString>& getData() const { return _data; }
     const QHash<QString, CountryInfo>& getCountries() const { return _countries; }
     static const CountryInfo nullCountry;
 
@@ -63,7 +62,6 @@ private:
     QStringList _extractPrefix(QString &line, bool &more);
 
     QString _filename;
-    QHash<QString, QString> _data;
     QHash<QString, QString> _name;
     QHash<QString, CountryInfo> _countries;
 };

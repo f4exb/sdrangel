@@ -44,7 +44,7 @@ const CountryDat::CountryInfo CountryDat::nullCountry = CountryDat::CountryInfo{
 
 void CountryDat::init()
 {
-    _data.clear();
+    _countries.clear();
     _name.clear();
     _name.insert("where?","where?");
     _name.insert("Sov Mil Order of Malta","Sov Mil Order of Malta");
@@ -544,7 +544,7 @@ QStringList CountryDat::_extractPrefix(QString &line, bool &more)
 
 void CountryDat::load()
 {
-    _data.clear();
+    _countries.clear();
     QFile inputFile(":/data/cty.dat");
 
     if (inputFile.open(QIODevice::ReadOnly))
@@ -610,7 +610,6 @@ void CountryDat::load()
                                 _continent = continent;
                             }
 
-                            _data.insert(p, _continent + ',' + masterPrefix + ',' + country + ',' + _cqz + ',' + _ituz);
                             _countries.insert(p, CountryInfo{_continent, masterPrefix, country, _cqz, _ituz});
                         }
                     }
