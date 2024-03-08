@@ -124,6 +124,7 @@ Toggles the filtering of messages. Messages are filtered based on the selected c
   - **Call1**: will filter messages matching the call1 area value either in the call1 or call2 areas
   - **Call2**: same as above but taking the call2 value
   - **Loc**: will filter messages matching the value in the locator (loc) area
+  - **Country**: will filter messages matching the value in the country area
   - **Info**: will filter values starting with "OSD" or not starting with "OSD" thus filter messages decoded via OSD or not
 
 <h3>C.5: Band preset selection</h3>
@@ -201,6 +202,7 @@ Displays the received messages in a table which columns are the following:
   - **Call1**: This is the first call area and may contain the caller callsign, a CQ or a custom 13 character message in which case the second call and locator areas are empty. It may be slightly different from the standard for message type 5 (see above).
   - **Call2**: This is the second call area and will contain the callsign of the responding station. This is always a callsign and this may differ slightly from the standard for messages type 5 (see above).
   - **Loc**: Locator area which contains the 4 character Maidenhead locator, a report, an acknowledgement (RRR) or a greetings (73 or RR73)
+  - **Country**: DXCC country name derived from the caller callsign
   - **Info**: FT8 decoder information if any. If OSD is active (see C.1.3) and OSD was activated it reports the OSD decoder status as `OSD-N-MM` where N is the OSD depth reached and MM is the number of correct LDPC bits.
 
 <h3>C.1: More FT8 decoder settings</h2>

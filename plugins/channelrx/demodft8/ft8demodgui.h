@@ -56,6 +56,7 @@ struct FT8MesssageData
     QString m_call1;
     QString m_call2;
     QString m_loc;
+    QString m_country;
     QString m_info;
 };
 
@@ -77,7 +78,8 @@ public:
 
 private:
     QVector<FT8MesssageData> m_ft8Messages;
-    static const int m_columnCount = 11;
+    static const int m_columnCount = 12;
+    static QString getCaller(const QString& call1, const QString& call2);
 };
 
 class FT8DemodGUI : public ChannelGUI {

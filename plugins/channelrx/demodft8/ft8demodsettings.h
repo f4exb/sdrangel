@@ -64,6 +64,7 @@ struct FT8DemodSettings
         MESSAGE_COL_CALL1,
         MESSAGE_COL_CALL2,
         MESSAGE_COL_LOC,
+        MESSAGE_COL_COUNTRY,
         MESSAGE_COL_INFO,
     };
 
