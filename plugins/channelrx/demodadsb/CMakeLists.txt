@@ -60,7 +60,7 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME demodadsb)
-    set(TARGET_LIB Qt::Widgets Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::TextToSpeech)
+    set(TARGET_LIB Qt::Widgets Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location Qt::TextToSpeech)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
