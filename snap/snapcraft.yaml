@@ -34,7 +34,7 @@
 # We can clean and build a specific package, and then open a shell after the build in the snap filesystem, with:
 #
 #     snapcraft clean uhd
-#     snapcraft stage uhd--shell-after
+#     snapcraft stage uhd --shell-after
 #
 
 name: sdrangel
@@ -42,17 +42,19 @@ base: core22
 type: app
 version: "7.19.0"
 summary: SDRangel
-description: SDRangel is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware.
+description: SDRangel is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware. SSE 4.2 required.
 confinement: strict
 grade: stable
 license: GPL-3.0
 issues: https://github.com/f4exb/sdrangel/issues
 source-code: https://github.com/f4exb/sdrangel
 website: https://www.sdrangel.org/
+icon: cmake/cpack/sdrangel_icon.svg
 
 apps:
     sdrangel:
         command: bin/sdrangel_wrapper.sh
+        desktop: opt/install/sdrangel/share/applications/sdrangel.desktop
         plugs:
             - network
             - network-bind
@@ -80,6 +82,7 @@ apps:
             - avahi-control
         environment:
             LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/opt/install/sdrangel/lib/sdrangel:$SNAP/opt/install/sdrangel/lib:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/lapack
+        # Can't currently use kde-neon, as it doesn't include Qt Charts, Gamepad or TextToSpeech
         #extensions:
         #    - kde-neon
 
@@ -104,6 +107,13 @@ layout:
         bind: $SNAP/usr/share/qt5
 
 parts:
+
+    iconpath:
+        after:
+            - sdrangel
+        plugin: nil
+        override-prime: |
+            sed -i.bak -e 's|Icon=sdrangel_icon|Icon=/opt/install/sdrangel/share/icons/hicolor/scalable/apps/sdrangel_icon.svg|g' $SNAPCRAFT_PRIME/opt/install/sdrangel/share/applications/sdrangel.desktop
 
     cleanup:
         after:
@@ -132,7 +142,7 @@ parts:
         source-tag: v7.19.0
         after: [apt, libdab, mbelib, serialdv, dsdcc, codec2, sgp4, cm265cc, libsigmf, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
         cmake-parameters:
-            - -DDEBUG_OUTPUT=ON
+            - -DDEBUG_OUTPUT=OFF
             - -DBUILD_TYPE=RELEASE
             - -DRX_SAMPLE_24BIT=ON
             - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
@@ -383,6 +393,7 @@ parts:
             - libboost-thread1.74.0
             - libboost-program-options1.74.0
             - libboost-test1.74.0
+            - libnotify-bin
 
     apt:
         plugin: cmake
