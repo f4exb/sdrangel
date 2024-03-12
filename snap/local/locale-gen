@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+
+use strict;
+
+sub uniq
+{
+    my %seen;
+    grep !$seen{$_}++, @_;
+}
+
+# TODO support for KDE's in-app language switch feature.
+sub get_languages
+{
+    # Initialize with sane defaults.
+    my @found_languages = ($ENV{'LANG'} or 'C.UTF-8');
+
+    # Go through LC_.
+    foreach (sort keys %ENV)
+    {
+        if (substr($_, 0, length("LC_")) eq "LC_")
+        {
+            push(@found_languages, $ENV{$_});
+        }
+    }
+    # And finally LANGUAGE, but normalize it.
+    if (my $language = $ENV{'LANGUAGE'})
+    {
+        foreach (split(':', $language))
+        {
+            push(@found_languages, "$_.UTF-8");
+        }
+    }
+
+    # Remove duplicates before returning.
+    @found_languages = uniq(@found_languages);
+
+    return @found_languages
+}
+
+my $env_locpath = $ENV{'LOCPATH'} or die "LOCPATH must be set";
+my @locpaths = split(/:/, $env_locpath);
+
+foreach my $lang (get_languages())
+{
+    my $found = 0;
+    foreach my $locpath (@locpaths)
+    {
+        my $loc_target = "$locpath/$lang";
+        if (-e $loc_target)
+        {
+            $found = 1;
+            last;
+        }
+    }
+    next if $found;
+    my $target = "@locpaths[0]/$lang";
+
+    # localedef will exit !0 for unknown reasons, even when everything was
+    # generated fine.
+    my ($locale, $encoding) = split(/\./, $lang);
+    system('localedef', '-i', $locale, '-f', $encoding, $target);
+}

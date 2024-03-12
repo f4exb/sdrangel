@@ -1,68 +1,198 @@
+# Tested with snapcraft 8.0.4
+#
+# To install snapcraft on Ubuntu assuming snap is already installed:
+#
+#     sudo snap install snapcraft
+#
+# To build (in sdrangel directory):
+#
+#     snapcraft
+#
+# To install sdrangel local snap:
+#
+#     sudo snap install sdrangel_7.19.0_amd64.snap --dangerous
+#
+# Users appear to need to grant h/w access manually from command line with:
+#
+#     sudo snap connect sdrangel:raw-usb
+#     sudo snap connect sdrangel:hardware-observe
+#     sudo snap connect sdrangel:camera
+#     sudo snap connect sdrangel:alsa
+#     sudo snap connect sdrangel:audio-record
+#     sudo snap connect sdrangel:pulseaudio
+#     sudo snap connect sdrangel:joystick
+#     sudo snap connect sdrangel:removable-media
+#     sudo snap connect sdrangel:network-manager
+#     sudo snap connect sdrangel:location-observe   (This doesn't seem to be supported)
+#     sudo snap connect sdrangel:jack1
+#     sudo snap connect sdrangel:avahi-control
+#
+# To uninstall:
+#
+#     sudo snap remove sdrangel
+#
+# We can clean and build a specific package, and then open a shell after the build in the snap filesystem, with:
+#
+#     snapcraft clean uhd
+#     snapcraft stage uhd --shell-after
+#
+
 name: sdrangel
-version: 4.6.0
-summary: SDRangel + LimeSDR
-description: SDRangel is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware.
+base: core22
+type: app
+version: "7.19.0"
+summary: SDRangel
+description: SDRangel is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware. SSE 4.2 required.
 confinement: strict
 grade: stable
+license: GPL-3.0
+issues: https://github.com/f4exb/sdrangel/issues
+source-code: https://github.com/f4exb/sdrangel
+website: https://www.sdrangel.org/
+icon: cmake/cpack/sdrangel_icon.svg
 
 apps:
     sdrangel:
-        command: desktop-launch sdrangel
-        plugs: [network, network-bind, home, unity7, opengl, raw-usb]
-
-    LimeUtil:
-        command: LimeUtil
-        plugs: [network, network-bind, home, raw-usb]
+        command: bin/sdrangel_wrapper.sh
+        desktop: opt/install/sdrangel/share/applications/sdrangel.desktop
+        plugs:
+            - network
+            - network-bind
+            - network-manager
+            - desktop
+            - desktop-legacy
+            - wayland
+            - home
+            - unity7
+            - opengl
+            - raw-usb
+            - hardware-observe
+            - audio-playback
+            - audio-record
+            - joystick
+            - camera
+            - browser-support
+            - pulseaudio
+            - alsa
+            - jack1
+            - removable-media
+            - gsettings
+            - location-observe
+            - serial-port
+            - avahi-control
+        environment:
+            LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/opt/install/sdrangel/lib/sdrangel:$SNAP/opt/install/sdrangel/lib:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/lapack
+        # Can't currently use kde-neon, as it doesn't include Qt Charts, Gamepad or TextToSpeech
+        #extensions:
+        #    - kde-neon
 
     sdrangelsrv:
-        command: sdrangelsrv
-        plugs: [network, network-bind, home, raw-usb]
+        command: opt/install/sdrangel/bin/sdrangelsrv
+        plugs:
+            - network
+            - network-bind
+            - network-manager
+            - home
+            - raw-usb
+            - hardware-observe
+            - removable-media
+        environment:
+            LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/opt/install/sdrangel/lib/sdrangel
 
-    sdrangelbench:
-        command: sdrangelbench
+
+layout:
+    /usr/lib/x86_64-linux-gnu/qt5:
+        bind: $SNAP/usr/lib/x86_64-linux-gnu/qt5
+    /usr/share/qt5:
+        bind: $SNAP/usr/share/qt5
 
 parts:
 
-    limesuite:
-        plugin: cmake
-        source: https://github.com/myriadrf/LimeSuite.git
-        source-commit: 025ffa1a
-        configflags:
-            - -DENABLE_QUICKTEST=OFF
-            - -DENABLE_GUI=OFF
-            - -DENABLE_SOAPY_LMS7=OFF
-            - -DENABLE_EXAMPLES=OFF
-            - -DENABLE_UTILITIES=OFF
-            - -DENABLE_HEADERS=ON
-            - -DENABLE_SIMD_FLAGS=SSE3
-        build-packages:
-            - libusb-1.0-0-dev
-        stage-packages:
-            - libstdc++6
+    iconpath:
+        after:
+            - sdrangel
+        plugin: nil
+        override-prime: |
+            sed -i.bak -e 's|Icon=sdrangel_icon|Icon=/opt/install/sdrangel/share/icons/hicolor/scalable/apps/sdrangel_icon.svg|g' $SNAPCRAFT_PRIME/opt/install/sdrangel/share/applications/sdrangel.desktop
+
+    cleanup:
+        after:
+            - sdrangel
+        plugin: nil
+        build-snaps:  # List all content-snaps and base snaps you're using here
+            - core22
+            #- kde-frameworks-5-102-qt-5-15-8-core22
+        override-prime: |
+            set -eux
+            for snap in "core22" ; do  # List all content-snaps and base snaps you're using here
+                cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
+            done
+
+    launcher:
+        plugin: dump
+        source: snap/local
+        organize:
+            sdrangel_wrapper.sh: bin/
+            locale-gen: bin/
 
     sdrangel:
         plugin: cmake
         source: https://github.com/f4exb/sdrangel
         source-type: git
-        source-tag: v4.5.6
-        after: [desktop-qt5, limesuite, mbelib, serialdv, dsdcc, codec2, cm265cc, gcc7]
-        configflags:
-            - -DDEBUG_OUTPUT=ON
+        source-tag: v7.19.0
+        after: [apt, libdab, mbelib, serialdv, dsdcc, codec2, sgp4, cm265cc, libsigmf, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
+        cmake-parameters:
+            - -DDEBUG_OUTPUT=OFF
             - -DBUILD_TYPE=RELEASE
             - -DRX_SAMPLE_24BIT=ON
-            - -DCMAKE_CXX_COMPILER=/usr/bin/g++-7  #sdrangel fails to compile with with gcc5
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+            - -DMIRISDR_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DAIRSPY_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DAIRSPYHF_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DBLADERF_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DHACKRF_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DRTLSDR_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DLIMESUITE_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DIIO_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DPERSEUS_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DXTRX_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DSOAPYSDR_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DUHD_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DAPT_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DCM256CC_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DDSDCC_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DSERIALDV_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DMBE_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DCODEC2_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DSGP4_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DLIBSIGMF_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DDAB_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            #- -DQt5_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5
         build-packages:
             - libfftw3-dev
             - libusb-1.0-0-dev
             - libusb-dev
-            - qt5-default
+            - libhidapi-dev
             - qtbase5-dev
             - qtchooser
-            - libqt5multimedia5-plugins
             - qtmultimedia5-dev
+            - libqt5websockets5-dev
             - qttools5-dev
             - qttools5-dev-tools
             - libqt5opengl5-dev
+            - libqt5quick5
+            - libqt5serialport5-dev
+            - qtdeclarative5-dev
+            - qtpositioning5-dev
+            - qtlocation5-dev
+            - qtwebengine5-dev
+            - qtbase5-private-dev
+            - libqt5svg5-dev
+            - libqt5charts5-dev
+            - libqt5texttospeech5-dev
+            - libqt5gamepad5-dev
+            - libfaad-dev
+            - zlib1g-dev
             - libboost-all-dev
             - libasound2-dev
             - pulseaudio
@@ -74,60 +204,389 @@ parts:
             - libavcodec-dev
             - libavformat-dev
             - libopus-dev
+            - doxygen
+            - graphviz
+        stage-packages:
+            - libgl1-mesa-dri
+            - libgl1-mesa-glx
+            - libqt5core5a
+            - libqt5gui5
+            - libqt5network5
+            - libqt5widgets5
+            - libqt5multimedia5
+            - libqt5multimedia5-plugins
+            - libqt5positioning5
+            - libqt5positioning5-plugins
+            - libqt5location5
+            - libqt5location5-plugins
+            - libqt5location5-plugin-mapboxgl
+            - libqt5websockets5
+            - libqt5qml5
+            - libqt5quick5
+            - libqt5quickwidgets5
+            - libqt5printsupport5
+            - libqt5webchannel5
+            - libqt5webenginecore5
+            - libqt5webenginewidgets5
+            - libqt5serialport5
+            - libqt5charts5
+            - libqt5texttospeech5
+            - libqt5gamepad5
+            - libqt5dbus5
+            - libqt5sql5
+            - libqt5sql5-mysql
+            - libqt5sql5-sqlite
+            - libqt5svg5
+            - qml-module-qtlocation
+            - qml-module-qtpositioning
+            - qml-module-qtquick-window2
+            - qml-module-qtquick-dialogs
+            - qml-module-qtquick-controls
+            - qml-module-qtquick-controls2
+            - qml-module-qtquick-layouts
+            - libgraphite2-3
+            - libpcre2-16-0
+            - libicu70
+            - libxcb1
+            - libharfbuzz0b
+            - libx11-6
+            - libxau6
+            - libglx0
+            - libmd4c0
+            - libusb-1.0-0
+            - libfaad2
+            - libfftw3-single3
+            - libhidapi-libusb0
+            - libasyncns0
+            - libogg0
+            - libopus0
+            - libpulse0
+            - libsndfile1
+            - libvorbis0a
+            - libvorbisenc2
+            - ocl-icd-libopencl1
+            - libaom3
+            - libavcodec58
+            - libavformat58
+            - libavutil56
+            - libbluray2
+            - libcairo-gobject2
+            - libcairo2
+            - libchromaprint1
+            - libdatrie1
+            - libdav1d5
+            - libfribidi0
+            - libgme0
+            - libgomp1
+            - libgsm1
+            - libmfx1
+            - libmp3lame0
+            - libmpg123-0
+            - libnorm1
+            - libopenjp2-7
+            - libopenmpt0
+            - libpangoft2-1.0-0
+            - libpgm-5.3-0
+            - libpixman-1-0
+            - librabbitmq4
+            - librsvg2-2
+            - librsvg2-2
+            - libtheora0
+            - libswresample3
+            - libsrt1.4-gnutls
+            - libtwolame0
+            - libva-drm2
+            - libva-x11-2
+            - libva2
+            - libvdpau1
+            - libwebp7
+            - libswscale5
+            - libxcomposite1
+            - libxdamage1
+            - libxrandr2
+            - libxtst6
+            - libasound2
+            - libevent-2.1-7
+            - liblcms2-2
+            - libminizip1
+            - libnspr4
+            - libnss3
+            - libnspr4
+            - libnspr4
+            - libre2-9
+            - libwebpdemux2
+            - libxslt1.1
+            - libxdamage1
+            - libxrandr2
+            - libxtst6
+            - libminizip1
+            - libwebpdemux2
+            - libarmadillo10
+            - libhdf4-0-alt
+            - libgdal30
+            - libhdf4-0-alt
+            - libogdi4.1
+            - libilmbase25
+            - libopenexr25
+            - libaec0
+            - libarpack2
+            - libcfitsio9
+            - libcharls2
+            - libcurl3-gnutls
+            - libcurl4
+            - libdc1394-25
+            - libde265-0
+            - libdw1
+            - libexif12
+            - libfreexl1
+            - libfyba0
+            - libgdcm3.0
+            - libgeos3.10.2
+            - libgeos-c1v5
+            - libgeotiff5
+            - libgfortran5
+            - libgif7
+            - libgphoto2-6
+            - libgphoto2-port12
+            - libgstreamer-plugins-base1.0-0
+            - libgstreamer1.0-0
+            - libhdf5-103-1
+            - libhdf5-hl-100
+            - libheif1
+            - libkmlbase1
+            - libkmldom1
+            - libkmlengine1
+            - liblapack3
+            - libldap-2.5-0
+            - liblcms2-2
+            - libltdl7
+            - libminizip1
+            - libmysqlclient21
+            - libnetcdf19
+            - libnghttp2-14
+            - libodbcinst2
+            - libopencv-core4.5d
+            - libopencv-imgcodecs4.5d
+            - libopencv-imgproc4.5d
+            - libopencv-videoio4.5d
+            - libpoppler118
+            - libproj22
+            - libpq5
+            - libpsl5
+            - libqhull-r8.0
+            - libquadmath0
+            - libraw1394-11
+            - librtmp1
+            - librttopo1
+            - libsasl2-2
+            - libspatialite7
+            - libsuperlu5
+            - libswscale5
+            - libsz2
+            - libtbb2
+            - libunwind8
+            - liburiparser1
+            - libilmbase25
+            - libboost-chrono1.74.0
+            - libboost-filesystem1.74.0
+            - libboost-serialization1.74.0
+            - libboost-thread1.74.0
+            - libboost-program-options1.74.0
+            - libboost-test1.74.0
+            - libnotify-bin
 
-    gcc7:			#sdrangel fails to compile with with gcc5, install gcc7
-        plugin: nil
-        override-pull: |
-            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-            sudo apt update
-            sudo apt install g++-7 -y
-        build-packages:
-            - software-properties-common
+    apt:
+        plugin: cmake
+        source: https://github.com/srcejon/aptdec.git
+        source-type: git
+        source-branch: libaptdec
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+
+    libdab:
+        plugin: cmake
+        source: https://github.com/srcejon/dab-cmdline
+        source-type: git
+        source-branch: msvc
+        source-subdir: library
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
     mbelib:
         plugin: cmake
         source: https://github.com/szechyjs/mbelib.git
         source-type: git
-        source-commit: e2d84c1
+        source-commit: fe83b32c6a60cdd7bce8cecf3c7a0b9ec87a7667
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
     serialdv:
         plugin: cmake
         source: https://github.com/f4exb/serialDV.git
         source-type: git
-        source-commit: c58676a
-        configflags:
+        source-tag: v1.1.4
+        cmake-parameters:
             - -DCMAKE_CXX_FLAGS="-std=c++11"
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
     dsdcc:
         plugin: cmake
         source: https://github.com/f4exb/dsdcc.git
         source-type: git
-        source-commit: 2a89df4
-        configflags:
+        source-tag: v1.9.5
+        after: [mbelib, serialdv]
+        cmake-parameters:
             - -DUSE_MBELIB=ON
             - -DCMAKE_CXX_FLAGS="-std=c++11"
+            - -DCMAKE_INSTALL_PREFIX=/usr
+            - -DLIBMBE_INCLUDE_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel/include
+            - -DLIBMBE_LIBRARY=$SNAPCRAFT_STAGE/opt/install/sdrangel/lib/libmbe.so
+            - -DLIBSERIALDV_INCLUDE_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel/include/serialdv
+            - -DLIBSERIALDV_LIBRARY=$SNAPCRAFT_STAGE/opt/install/sdrangel/lib/libserialdv.so
+
     codec2:
         plugin: cmake
-        source: https://svn.code.sf.net/p/freetel/code/codec2-dev
-        source-type: svn
-        source-commit: "4067"
+        source: https://github.com/drowe67/codec2-dev.git
+        source-type: git
+        source-tag: v1.0.3
         build-packages:
             - libspeexdsp-dev
             - libsamplerate0-dev
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+
+    sgp4:
+        plugin: cmake
+        source: https://github.com/dnwrnr/sgp4.git
+        source-type: git
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
     cm265cc:
         plugin: cmake
         source: https://github.com/f4exb/cm256cc.git
         source-type: git
-        source-commit: 64beaaa
+        source-commit: c0e92b92aca3d1d36c990b642b937c64d363c559
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
+    libsigmf:
+        plugin: cmake
+        source: https://github.com/f4exb/libsigmf.git
+        source-type: git
+        source-branch: new-namespaces
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
+    airspy:
+        plugin: cmake
+        source: https://github.com/airspy/airspyone_host.git
+        source-type: git
+        source-commit: 37c768ce9997b32e7328eb48972a7fda0a1f8554
+        build-packages:
+            - libusb-1.0-0-dev
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
+    rtlsdr:
+        plugin: cmake
+        source: https://github.com/osmocom/rtl-sdr.git
+        source-type: git
+        source-commit: 420086af84d7eaaf98ff948cd11fea2cae71734a
+        build-packages:
+            - libusb-1.0-0-dev
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
+    pluto:
+        plugin: cmake
+        source: https://github.com/analogdevicesinc/libiio.git
+        source-type: git
+        source-tag: v0.21
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
+    bladerf:
+        plugin: cmake
+        source: https://github.com/Nuand/bladeRF.git
+        source-type: git
+        source-tag: 2021.02
+        build-packages:
+            - libusb-1.0-0-dev
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
+    hackrf:
+        plugin: cmake
+        source: https://github.com/greatscottgadgets/hackrf.git
+        source-type: git
+        source-tag: v2022.09.1
+        source-subdir: host/libhackrf
+        build-packages:
+            - libusb-1.0-0-dev
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
+    limesuite:
+        plugin: cmake
+        source: https://github.com/myriadrf/LimeSuite.git
+        source-commit: 70e3859a55d8d5353963a5318013c8454594769f
+        build-packages:
+            - libusb-1.0-0-dev
+        stage-packages:
+            - libstdc++6
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
+    airspyhf:
+        plugin: cmake
+        source: https://github.com/airspy/airspyhf.git
+        source-type: git
+        source-commit: 1af81c0ca18944b8c9897c3c98dc0a991815b686
+        build-packages:
+            - libusb-1.0-0-dev
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
+    uhd:
+        plugin: cmake
+        source: https://github.com/EttusResearch/uhd.git
+        source-type: git
+        source-commit: v4.5.0.0
+        source-subdir: host
+        build-packages:
+            - libusb-1.0-0-dev
+            - libboost-all-dev
+            - python3-mako
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 
+    uhdfpga:
+        after: [uhd]
+        plugin: nil
+        override-build:
+            pip install requests
+        override-prime: # We only include b2* firmware to keep size down
+            $SNAPCRAFT_STAGE/opt/install/sdrangel/lib/uhd/utils/uhd_images_downloader.py -i $SNAPCRAFT_PRIME/opt/install/sdrangel/share/uhd/images -t b2
+
+    soapysdr:
+        plugin: cmake
+        source: https://github.com/pothosware/SoapySDR.git
+        source-type: git
+        source-tag: soapy-sdr-0.7.1
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+
+    soapyremote:
+        plugin: cmake
+        source: https://github.com/pothosware/SoapyRemote.git
+        source-type: git
+        source-tag: soapy-remote-0.5.1
+        after: [soapysdr]
+        build-packages:
+            - libavahi-client-dev
+            - libavahi-core-dev
+        cmake-parameters:
+            - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+            - -DCMAKE_PREFIX_PATH=$SNAPCRAFT_STAGE/opt/install/sdrangel
 
