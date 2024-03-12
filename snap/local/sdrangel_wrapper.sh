@@ -650,5 +650,15 @@ fi
 # Qt: Session management error: None of the authentication protocols specified are supported
 unset SESSION_MANAGER
 
+# Check we have USB access
+if ! snapctl is-connected raw-usb ; then
+    notify-send -u critical -a SDRangel "SDRangel does not have USB access." "To enable, run:\n\nsnap connect sdrangel:raw-usb"
+fi
+
+# Check we have SSE 4.2
+if ! cat /proc/cpuinfo | grep sse4_2 > /dev/null ; then
+    notify-send -u critical -a SDRangel "SSE 4.2 support not detected in your CPU." "SDRangel may crash."
+fi
+
 # Safe to enable soapy, as we only include soapy remote
 exec $SNAP/opt/install/sdrangel/bin/sdrangel --soapy "$@"
