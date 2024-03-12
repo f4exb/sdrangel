@@ -34,6 +34,7 @@
 #include <QQmlProperty>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QGeoServiceProvider>
 
 #include "ui_adsbdemodgui.h"
 #include "device/deviceapi.h"
@@ -4725,14 +4726,24 @@ void ADSBDemodGUI::applyMapSettings()
         zoom = 10.0;
     }
 
+    // Check requested map provider is available - if not, try the other
+    QString mapProvider = m_settings.m_mapProvider;
+    QStringList mapProviders = QGeoServiceProvider::availableServiceProviders();
+    if ((mapProvider == "osm") && (!mapProviders.contains(mapProvider))) {
+        mapProvider = "mapboxgl";
+    }
+    if ((mapProvider == "mapboxgl") && (!mapProviders.contains(mapProvider))) {
+        mapProvider = "osm";
+    }
+
     // Create the map using the specified provider
     QQmlProperty::write(item, "smoothing", MainCore::instance()->getSettings().getMapSmoothing());
     QQmlProperty::write(item, "aircraftMinZoomLevel", m_settings.m_aircraftMinZoom);
-    QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
+    QQmlProperty::write(item, "mapProvider", mapProvider);
     QVariantMap parameters;
     QString mapType;
 
-    if (m_settings.m_mapProvider == "osm")
+    if (mapProvider == "osm")
     {
         // Use our repo, so we can append API key and redefine transmit maps
         parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
@@ -4760,7 +4771,7 @@ void ADSBDemodGUI::applyMapSettings()
             break;
         }
     }
-    else if (m_settings.m_mapProvider == "mapboxgl")
+    else if (mapProvider == "mapboxgl")
     {
         switch (m_settings.m_mapType)
         {

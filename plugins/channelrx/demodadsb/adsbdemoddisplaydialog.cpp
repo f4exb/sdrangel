@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QFontDialog>
+#include <QGeoServiceProvider>
 #include <QDebug>
 
 #include "adsbdemoddisplaydialog.h"
@@ -28,6 +29,15 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
     m_fontSize(settings->m_tableFontSize)
 {
     ui->setupUi(this);
+
+    QStringList mapProviders = QGeoServiceProvider::availableServiceProviders();
+    if (!mapProviders.contains("osm")) {
+        ui->mapProvider->removeItem(ui->mapProvider->findText("osm"));
+    }
+    if (!mapProviders.contains("mapboxgl")) {
+        ui->mapProvider->removeItem(ui->mapProvider->findText("mapboxgl"));
+    }
+
     ui->timeout->setValue(settings->m_removeTimeout);
     ui->aircraftMinZoom->setValue(settings->m_aircraftMinZoom);
     ui->airportRange->setValue(settings->m_airportRange);
@@ -46,7 +56,10 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
         }
     }
     ui->airspaceRange->setValue(settings->m_airspaceRange);
-    ui->mapProvider->setCurrentText(settings->m_mapProvider);
+    int idx = ui->mapProvider->findText(settings->m_mapProvider);
+    if (idx != -1) {
+        ui->mapProvider->setCurrentText(settings->m_mapProvider);
+    }
     ui->mapType->setCurrentIndex((int)settings->m_mapType);
     ui->navAids->setChecked(settings->m_displayNavAids);
     ui->atcCallsigns->setChecked(settings->m_atcCallsigns);
