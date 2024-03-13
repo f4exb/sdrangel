@@ -39,6 +39,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
     ChannelAnalyzerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelAnalyzer.yaml#/ChannelAnalyzerSettings"
+    ChannelPowerSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelPower.yaml#/ChannelPowerSettings"
     ChirpChatDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodSettings"
     ChirpChatModSettings:
