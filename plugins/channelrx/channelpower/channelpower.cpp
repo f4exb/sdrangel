@@ -418,10 +418,10 @@ void ChannelPower::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& resp
     double magAvg, magPulseAvg, magMaxPeak, magMinPeak;
     getMagLevels(magAvg, magPulseAvg, magMaxPeak, magMinPeak);
 
-    response.getChannelPowerReport()->setChannelPowerDb(CalcDb::dbPower(magAvg));
-    response.getChannelPowerReport()->setChannelPowerMaxDb(CalcDb::dbPower(magMaxPeak));
-    response.getChannelPowerReport()->setChannelPowerMinDb(CalcDb::dbPower(magMinPeak));
-    response.getChannelPowerReport()->setChannelPowerPulseDb(CalcDb::dbPower(magPulseAvg));
+    response.getChannelPowerReport()->setChannelPowerDb(CalcDb::dbPower(magAvg * magAvg));
+    response.getChannelPowerReport()->setChannelPowerMaxDb(CalcDb::dbPower(magMaxPeak * magMaxPeak));
+    response.getChannelPowerReport()->setChannelPowerMinDb(CalcDb::dbPower(magMinPeak * magMinPeak));
+    response.getChannelPowerReport()->setChannelPowerPulseDb(CalcDb::dbPower(magPulseAvg * magPulseAvg));
     response.getChannelPowerReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 

@@ -33,7 +33,7 @@ ChannelPowerSettings::ChannelPowerSettings() :
 void ChannelPowerSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
-    m_rfBandwidth = 16000.0f;
+    m_rfBandwidth = 10000.0f;
     m_pulseThreshold= -50.0f;
     m_averagePeriodUS = 100000;
     m_rgbColor = QColor(102, 40, 220).rgb();
@@ -99,7 +99,7 @@ bool ChannelPowerSettings::deserialize(const QByteArray& data)
         QString strtmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
-        d.readFloat(2, &m_rfBandwidth, 16000.0f);
+        d.readFloat(2, &m_rfBandwidth, 10000.0f);
         d.readFloat(3, &m_pulseThreshold, 50.0f);
         d.readS32(4, &m_averagePeriodUS, 100000);
 

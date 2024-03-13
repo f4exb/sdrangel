@@ -139,7 +139,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ValueDialZ" name="rfBW" native="true">
+       <widget class="ValueDial" name="rfBW" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
           <horstretch>0</horstretch>
@@ -587,6 +587,12 @@
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

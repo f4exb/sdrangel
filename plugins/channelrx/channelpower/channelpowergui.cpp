@@ -92,7 +92,7 @@ bool ChannelPowerGUI::handleMessage(const Message& message)
         m_basebandSampleRate = notif.getSampleRate();
         ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
         ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
-        ui->rfBW->setValueRange(false, ceil(log10(m_basebandSampleRate)), 0, m_basebandSampleRate);
+        ui->rfBW->setValueRange(floor(log10(m_basebandSampleRate))+1, 0, m_basebandSampleRate);
         updateAbsoluteCenterFrequency();
         return true;
     }
@@ -260,7 +260,7 @@ ChannelPowerGUI::ChannelPowerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
     ui->rfBW->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->rfBW->setValueRange(false, 7, -9999999, 9999999);
+    ui->rfBW->setValueRange(7, 0, 9999999);
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(Qt::yellow);
@@ -378,11 +378,13 @@ void ChannelPowerGUI::tick()
     powDbMinPeak = std::numeric_limits<double>::quiet_NaN();
     powDbPathLoss = std::numeric_limits<double>::quiet_NaN();
 
+    const int precision = 2;
+
     if (!std::isnan(magAvg))
     {
         powDbAvg = CalcDb::dbPower(magAvg * magAvg);
         if (m_tickCount % 4 == 0) {
-            ui->average->setText(QString::number(powDbAvg, 'f', 1));
+            ui->average->setText(QString::number(powDbAvg, 'f', precision));
         }
     }
     else
@@ -393,7 +395,7 @@ void ChannelPowerGUI::tick()
     {
         powDbPulseAvg = CalcDb::dbPower(magPulseAvg * magPulseAvg);
         if (m_tickCount % 4 == 0) {
-            ui->pulseAverage->setText(QString::number(powDbPulseAvg, 'f', 1));
+            ui->pulseAverage->setText(QString::number(powDbPulseAvg, 'f', precision));
         }
     }
     else
@@ -404,7 +406,7 @@ void ChannelPowerGUI::tick()
     {
         powDbMaxPeak = CalcDb::dbPower(magMaxPeak * magMaxPeak);
         if (m_tickCount % 4 == 0) {
-            ui->maxPeak->setText(QString::number(powDbMaxPeak, 'f', 1));
+            ui->maxPeak->setText(QString::number(powDbMaxPeak, 'f', precision));
         }
     }
     else
@@ -415,7 +417,7 @@ void ChannelPowerGUI::tick()
     {
         powDbMinPeak = CalcDb::dbPower(magMinPeak * magMinPeak);
         if (m_tickCount % 4 == 0) {
-            ui->minPeak->setText(QString::number(powDbMinPeak, 'f', 1));
+            ui->minPeak->setText(QString::number(powDbMinPeak, 'f', precision));
         }
     }
     else
@@ -434,7 +436,7 @@ void ChannelPowerGUI::on_clearMeasurements_clicked()
 void ChannelPowerGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ChannelPowerGUI::on_deltaFrequency_changed);
-    QObject::connect(ui->rfBW, &ValueDialZ::changed, this, &ChannelPowerGUI::on_rfBW_changed);
+    QObject::connect(ui->rfBW, &ValueDial::changed, this, &ChannelPowerGUI::on_rfBW_changed);
     QObject::connect(ui->pulseTH, QOverload<int>::of(&QDial::valueChanged), this, &ChannelPowerGUI::on_pulseTH_valueChanged);
     QObject::connect(ui->averagePeriod, QOverload<int>::of(&QDial::valueChanged), this, &ChannelPowerGUI::on_averagePeriod_valueChanged);
     QObject::connect(ui->clearChannelPower, &QPushButton::clicked, this, &ChannelPowerGUI::on_clearMeasurements_clicked);
