@@ -3802,6 +3802,11 @@ margin-bottom: 20px;
       "format" : "float",
       "description" : "min power received in channel (dB)"
     },
+    "channelPowerPulseDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "pulse power received in channel (dB)"
+    },
     "channelSampleRate" : {
       "type" : "integer"
     }
@@ -3860,7 +3865,7 @@ margin-bottom: 20px;
       "$ref" : "#/definitions/RollupState"
     }
   },
-  "description" : "ChannelDemod"
+  "description" : "ChannelPower"
 };
             defs.ChannelReport = {
   "required" : [ "direction" ],
@@ -58860,7 +58865,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-03-13T15:31:43.924+01:00
+              Generated 2024-03-13T16:45:40.518+01:00
             </div>
           </div>
       </div>

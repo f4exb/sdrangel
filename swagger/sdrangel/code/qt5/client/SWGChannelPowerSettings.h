@@ -13,7 +13,7 @@
 /*
  * SWGChannelPowerSettings.h
  *
- * ChannelDemod
+ * ChannelPower
  */
 
 #ifndef SWGChannelPowerSettings_H_

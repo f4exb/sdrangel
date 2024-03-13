@@ -34,6 +34,8 @@ SWGChannelPowerReport::SWGChannelPowerReport() {
     m_channel_power_max_db_isSet = false;
     channel_power_min_db = 0.0f;
     m_channel_power_min_db_isSet = false;
+    channel_power_pulse_db = 0.0f;
+    m_channel_power_pulse_db_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
 }
@@ -50,12 +52,15 @@ SWGChannelPowerReport::init() {
     m_channel_power_max_db_isSet = false;
     channel_power_min_db = 0.0f;
     m_channel_power_min_db_isSet = false;
+    channel_power_pulse_db = 0.0f;
+    m_channel_power_pulse_db_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
 }
 
 void
 SWGChannelPowerReport::cleanup() {
+
 
 
 
@@ -78,6 +83,8 @@ SWGChannelPowerReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_power_max_db, pJson["channelPowerMaxDB"], "float", "");
     
     ::SWGSDRangel::setValue(&channel_power_min_db, pJson["channelPowerMinDB"], "float", "");
+    
+    ::SWGSDRangel::setValue(&channel_power_pulse_db, pJson["channelPowerPulseDB"], "float", "");
     
     ::SWGSDRangel::setValue(&channel_sample_rate, pJson["channelSampleRate"], "qint32", "");
     
@@ -105,6 +112,9 @@ SWGChannelPowerReport::asJsonObject() {
     }
     if(m_channel_power_min_db_isSet){
         obj->insert("channelPowerMinDB", QJsonValue(channel_power_min_db));
+    }
+    if(m_channel_power_pulse_db_isSet){
+        obj->insert("channelPowerPulseDB", QJsonValue(channel_power_pulse_db));
     }
     if(m_channel_sample_rate_isSet){
         obj->insert("channelSampleRate", QJsonValue(channel_sample_rate));
@@ -143,6 +153,16 @@ SWGChannelPowerReport::setChannelPowerMinDb(float channel_power_min_db) {
     this->m_channel_power_min_db_isSet = true;
 }
 
+float
+SWGChannelPowerReport::getChannelPowerPulseDb() {
+    return channel_power_pulse_db;
+}
+void
+SWGChannelPowerReport::setChannelPowerPulseDb(float channel_power_pulse_db) {
+    this->channel_power_pulse_db = channel_power_pulse_db;
+    this->m_channel_power_pulse_db_isSet = true;
+}
+
 qint32
 SWGChannelPowerReport::getChannelSampleRate() {
     return channel_sample_rate;
@@ -165,6 +185,9 @@ SWGChannelPowerReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_channel_power_min_db_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_channel_power_pulse_db_isSet){
             isObjectUpdated = true; break;
         }
         if(m_channel_sample_rate_isSet){

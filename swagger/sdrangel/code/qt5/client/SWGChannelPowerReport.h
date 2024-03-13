@@ -50,6 +50,9 @@ public:
     float getChannelPowerMinDb();
     void setChannelPowerMinDb(float channel_power_min_db);
 
+    float getChannelPowerPulseDb();
+    void setChannelPowerPulseDb(float channel_power_pulse_db);
+
     qint32 getChannelSampleRate();
     void setChannelSampleRate(qint32 channel_sample_rate);
 
@@ -65,6 +68,9 @@ private:
 
     float channel_power_min_db;
     bool m_channel_power_min_db_isSet;
+
+    float channel_power_pulse_db;
+    bool m_channel_power_pulse_db_isSet;
 
     qint32 channel_sample_rate;
     bool m_channel_sample_rate_isSet;
