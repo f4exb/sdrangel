@@ -421,6 +421,7 @@ void ChannelPower::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& resp
     response.getChannelPowerReport()->setChannelPowerDb(CalcDb::dbPower(magAvg));
     response.getChannelPowerReport()->setChannelPowerMaxDb(CalcDb::dbPower(magMaxPeak));
     response.getChannelPowerReport()->setChannelPowerMinDb(CalcDb::dbPower(magMinPeak));
+    response.getChannelPowerReport()->setChannelPowerPulseDb(CalcDb::dbPower(magPulseAvg));
     response.getChannelPowerReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
