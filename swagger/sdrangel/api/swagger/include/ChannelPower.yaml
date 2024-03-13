@@ -1,5 +1,5 @@
 ChannelPowerSettings:
-  description: ChannelDemod
+  description: ChannelPower
   properties:
     inputFrequencyOffset:
       type: integer
@@ -50,6 +50,10 @@ ChannelPowerReport:
       format: float
     channelPowerMinDB:
       description: min power received in channel (dB)
+      type: number
+      format: float
+    channelPowerPulseDB:
+      description: pulse power received in channel (dB)
       type: number
       format: float
     channelSampleRate:
