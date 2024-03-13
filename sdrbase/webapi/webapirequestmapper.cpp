@@ -4481,8 +4481,8 @@ bool WebAPIRequestMapper::getChannelSettings(
         else if (channelSettingsKey == "ChannelPowerSettings")
         {
             channelSettings->setChannelPowerSettings(new SWGSDRangel::SWGChannelPowerSettings());
-            channelSettings->setChannelPowerSettings()->init();
-            channelSettings->setChannelPowerSettings()->fromJsonObject(settingsJsonObject);
+            channelSettings->getChannelPowerSettings()->init();
+            channelSettings->getChannelPowerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "ChirpChatDemodSettings")
         {
