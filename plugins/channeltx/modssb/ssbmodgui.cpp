@@ -790,7 +790,7 @@ void SSBModGUI::audioSelect(const QPoint& p)
 void SSBModGUI::audioFeedbackSelect(const QPoint& p)
 {
     qDebug("SSBModGUI::audioFeedbackSelect");
-    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, false); // false for output
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_feedbackAudioDeviceName, false); // false for output
     audioSelect.move(p);
     new DialogPositioner(&audioSelect, false);
     audioSelect.exec();

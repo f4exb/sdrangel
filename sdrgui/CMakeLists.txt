@@ -26,6 +26,7 @@ set(sdrgui_SOURCES
     gui/crightclickenabler.cpp
     gui/customtextedit.cpp
     gui/cwkeyergui.cpp
+    gui/cwmousekeyerenabler.cpp
     gui/datetimedelegate.cpp
     gui/decimaldelegate.cpp
     gui/devicesetselectiondialog.cpp
@@ -150,6 +151,7 @@ set(sdrgui_HEADERS
     gui/crightclickenabler.h
     gui/customtextedit.h
     gui/cwkeyergui.h
+    gui/cwmousekeyerenabler.h
     gui/datetimedelegate.h
     gui/decimaldelegate.h
     gui/devicesetselectiondialog.h

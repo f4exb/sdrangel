@@ -35,7 +35,7 @@ SSBModSource::SSBModSource() :
     m_spectrumSink(nullptr),
     m_audioSampleRate(48000),
     m_audioFifo(12000),
-    m_feedbackAudioFifo(48000),
+    m_feedbackAudioFifo(12000),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
@@ -55,7 +55,7 @@ SSBModSource::SSBModSource() :
 	m_audioReadBuffer.resize(24000);
 	m_audioReadBufferFill = 0;
 
-	m_feedbackAudioBuffer.resize(1<<14);
+	m_feedbackAudioBuffer.resize(4800);
 	m_feedbackAudioBufferFill = 0;
 
     m_demodBuffer.resize(1<<12);
@@ -538,22 +538,31 @@ void SSBModSource::pushFeedback(Complex c)
 
 void SSBModSource::processOneSample(Complex& ci)
 {
-    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].l = ci.real();
-    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].r = ci.imag();
-    ++m_feedbackAudioBufferFill;
-
-    if (m_feedbackAudioBufferFill >= m_feedbackAudioBuffer.size())
+    if (m_settings.m_modAFInput == SSBModSettings::SSBModInputCWTone) // minimize latency for CW
     {
-        uint res = m_feedbackAudioFifo.write((const quint8*)&m_feedbackAudioBuffer[0], m_feedbackAudioBufferFill);
+        m_feedbackAudioBuffer[0].l = ci.real();
+        m_feedbackAudioBuffer[0].r = ci.imag();
+        m_feedbackAudioFifo.writeOne((const quint8*) &m_feedbackAudioBuffer[0]);
+    }
+    else
+    {
+        m_feedbackAudioBuffer[m_feedbackAudioBufferFill].l = ci.real();
+        m_feedbackAudioBuffer[m_feedbackAudioBufferFill].r = ci.imag();
+        ++m_feedbackAudioBufferFill;
 
-        if (res != m_feedbackAudioBufferFill)
+        if (m_feedbackAudioBufferFill >= m_feedbackAudioBuffer.size())
         {
-            qDebug("SSBModSource::pushFeedback: %u/%u audio samples written m_feedbackInterpolatorDistance: %f",
-                res, m_feedbackAudioBufferFill, m_feedbackInterpolatorDistance);
-            m_feedbackAudioFifo.clear();
-        }
+            uint res = m_feedbackAudioFifo.write((const quint8*)&m_feedbackAudioBuffer[0], m_feedbackAudioBufferFill);
 
-        m_feedbackAudioBufferFill = 0;
+            if (res != m_feedbackAudioBufferFill)
+            {
+                qDebug("SSBModSource::pushFeedback: %u/%u audio samples written m_feedbackInterpolatorDistance: %f",
+                    res, m_feedbackAudioBufferFill, m_feedbackInterpolatorDistance);
+                m_feedbackAudioFifo.clear();
+            }
+
+            m_feedbackAudioBufferFill = 0;
+        }
     }
 }
 

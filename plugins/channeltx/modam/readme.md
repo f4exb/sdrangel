@@ -72,11 +72,11 @@ Enter the text to be keyed when Morse input is active and in text mode
 
 Clears the CW (Morse) text
 
-<h3>12: Morse keyer controls</h3>
+<h3>12a: Morse keyer controls (line 1)</h3>
 
 ![Morse keyer control GUI1](../../../doc/img/ModCWControls1.png)
 
-<h4>12.1: CW keying speed</h4>
+<h4>12a.1: CW keying speed</h4>
 
 Sets the CW speed in Words Per Minute (WPM). This is based on the word "PARIS" sent 5 times. For 5 WPM the dot length is 240 ms. In other terms the dot length is calculated as 1.2 / WPM seconds. The dot length is used as the base to compute other timings:
 
@@ -85,43 +85,49 @@ Sets the CW speed in Words Per Minute (WPM). This is based on the word "PARIS" s
   - Character silence separator: 3 dot lengths
   - Word silence separator: 7 dot lengths
 
-<h4>12.2: Dots keying</h4>
+<h4>12a.2: Dots keying</h4>
 
 Switch this button to send dots continuously
 
-<h4>12.3: Dashes keying</h4>
+<h4>12a.3: Dashes keying</h4>
 
 Switch this button to send dashes continuously
 
-<h4>12.4: Text keying</h4>
+<h4>12a.4: Text keying</h4>
 
 Switch this button to send the text typed into the text box (10)
 
-<h4>12.5: Text auto repeat</h4>
+<h4>12a.5: Text auto repeat</h4>
 
 Switch this button to auto repeat the text keying
 
-<h4>12.6: Text play/stop</h4>
+<h4>12a.6: Text play/stop</h4>
 
 Use this button to stop sending text. When resuming keying restarts at the start of text
+
+<h3>12a: Morse keyer controls (line 2)</h3>
 
 ![Morse keyer control GUI2](../../../doc/img/ModCWControls2.png)
 
 &#9888; WARNING: what follows is not really useful if you do not use a proper Morse keyer with direct audio feedback. There is a significant audio delay either with the direct monitoring or by monitoring the transmitted signal so keying with this audio as feedback is not practical
 
-12.7: Activate morse keys keyboard control
+12b.1: Activate morse keys keyboard and mouse control
 
-This disables text or continuous dots or dashes. Toggle input from keyboard. Occasionally the focus may get lost and you will have to deactivate and reactivate it to recover the key bindings.
+This disables text or continuous dots or dashes. Toggle input from keyboard or mouse (see 16b.3). Occasionally the focus may get lost and you will have to deactivate and reactivate it to recover the key bindings.
 
-12.8: Iambic or straight
+12b.2: Iambic or straight
 
 Choose iambic or straight keying style. When straight is selected the dot or dash key may be used.
 
-12.9: Register dot key
+12b.3: Mouse control pad
+
+When keyboard and mouse control is activated move the pointer to this area to use the left button as the dot paddle and the right button as the dash paddle. In straight mode both buttons have the same effect (key down).
+
+12a.4: Register dot key
 
 Click on the button and while selected type a character or character and modifier (Shift + key for example) to select which key is used for dots. The key or key sequence appears next (here dot `.`)
 
-12.10: Register dash key
+12a.5: Register dash key
 
 Click on the button and while selected type a character or character and modifier (Shift + key for example) to select which key is used for dashes. The key or key sequence appears next (here dot `.`)
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>375</width>
-    <height>91</height>
+    <height>92</height>
    </rect>
   </property>
   <property name="font">
@@ -82,6 +82,7 @@
        </property>
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>9</pointsize>
         </font>
        </property>
@@ -149,6 +150,7 @@
        </property>
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>12</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -215,6 +217,7 @@
        </property>
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>12</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -488,6 +491,28 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="cwMouseKeyerPad">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Put the mouse pointer here to activate the CW mouse keyer</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../resources/res.qrc">:/mouse.png</pixmap>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="ButtonSwitch" name="keyDotCapture">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -546,6 +571,7 @@
        </property>
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>12</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -634,6 +660,7 @@
        </property>
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>12</pointsize>
          <weight>75</weight>
          <bold>true</bold>

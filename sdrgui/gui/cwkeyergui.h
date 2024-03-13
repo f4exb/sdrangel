@@ -90,6 +90,10 @@ private slots:
     void on_keyboardKeyer_toggled(bool checked);
     void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
     void keyboardKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
+    void cwKeyerMouseLeftPressed();
+    void cwKeyerMouseLeftReleased();
+    void cwKeyerMouseRightPressed();
+    void cwKeyerMouseRightReleased();
 };
 
 

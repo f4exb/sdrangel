@@ -21,6 +21,7 @@
 
 #include "gui/cwkeyergui.h"
 #include "gui/dialpopup.h"
+#include "gui/cwmousekeyerenabler.h"
 #include "ui_cwkeyergui.h"
 #include "dsp/cwkeyer.h"
 #include "util/simpleserializer.h"
@@ -40,6 +41,11 @@ CWKeyerGUI::CWKeyerGUI(QWidget* parent) :
     m_commandKeyReceiver->setRelease(true);
     this->installEventFilter(m_commandKeyReceiver);
     DialPopup::addPopupsToChildDials(this);
+    CWMouseKeyerEnabler *cwMouseKeyerEnabler = new CWMouseKeyerEnabler(ui->cwMouseKeyerPad);
+    QObject::connect(cwMouseKeyerEnabler, &CWMouseKeyerEnabler::leftButtonPress, this, &CWKeyerGUI::cwKeyerMouseLeftPressed);
+    QObject::connect(cwMouseKeyerEnabler, &CWMouseKeyerEnabler::leftButtonRelease, this, &CWKeyerGUI::cwKeyerMouseLeftReleased);
+    QObject::connect(cwMouseKeyerEnabler, &CWMouseKeyerEnabler::rightButtonPress, this, &CWKeyerGUI::cwKeyerMouseRightPressed);
+    QObject::connect(cwMouseKeyerEnabler, &CWMouseKeyerEnabler::rightButtonRelease, this, &CWKeyerGUI::cwKeyerMouseRightReleased);
 }
 
 CWKeyerGUI::~CWKeyerGUI()
@@ -358,4 +364,24 @@ void CWKeyerGUI::setKeyLabel(QLabel *label, Qt::Key key, Qt::KeyboardModifiers k
 void CWKeyerGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
+}
+
+void CWKeyerGUI::cwKeyerMouseLeftPressed()
+{
+    m_cwKeyer->setKeyboardDots();
+}
+
+void CWKeyerGUI::cwKeyerMouseLeftReleased()
+{
+    m_cwKeyer->setKeyboardSilence();
+}
+
+void CWKeyerGUI::cwKeyerMouseRightPressed()
+{
+    m_cwKeyer->setKeyboardDashes();
+}
+
+void CWKeyerGUI::cwKeyerMouseRightReleased()
+{
+    m_cwKeyer->setKeyboardSilence();
 }
