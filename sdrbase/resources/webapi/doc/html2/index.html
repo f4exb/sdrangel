@@ -3785,6 +3785,83 @@ margin-bottom: 20px;
   },
   "description" : "ChannelMarker settings"
 };
+            defs.ChannelPowerReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelPowerMaxDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "max power received in channel (dB)"
+    },
+    "channelPowerMinDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "min power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "ChannelPower"
+};
+            defs.ChannelPowerSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "pulseThreshold" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "In dB"
+    },
+    "averagePeriodUS" : {
+      "type" : "integer",
+      "description" : "Average period in microseconds"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "ChannelDemod"
+};
             defs.ChannelReport = {
   "required" : [ "direction" ],
   "discriminator" : "channelType",
@@ -3817,6 +3894,9 @@ margin-bottom: 20px;
     },
     "BFMDemodReport" : {
       "$ref" : "#/definitions/BFMDemodReport"
+    },
+    "ChannelPowerReport" : {
+      "$ref" : "#/definitions/ChannelPowerReport"
     },
     "ChirpChatDemodReport" : {
       "$ref" : "#/definitions/ChirpChatDemodReport"
@@ -3999,6 +4079,9 @@ margin-bottom: 20px;
     },
     "ChannelAnalyzerSettings" : {
       "$ref" : "#/definitions/ChannelAnalyzerSettings"
+    },
+    "ChannelPowerSettings" : {
+      "$ref" : "#/definitions/ChannelPowerSettings"
     },
     "ChirpChatDemodSettings" : {
       "$ref" : "#/definitions/ChirpChatDemodSettings"
@@ -58777,7 +58860,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-03-04T22:20:15.730+01:00
+              Generated 2024-03-13T15:31:43.924+01:00
             </div>
           </div>
       </div>

@@ -84,6 +84,8 @@
 #include "SWGChannelConfig.h"
 #include "SWGChannelListItem.h"
 #include "SWGChannelMarker.h"
+#include "SWGChannelPowerReport.h"
+#include "SWGChannelPowerSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelsDetail.h"
@@ -729,6 +731,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGChannelMarker").compare(type) == 0) {
       SWGChannelMarker *obj = new SWGChannelMarker();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGChannelPowerReport").compare(type) == 0) {
+      SWGChannelPowerReport *obj = new SWGChannelPowerReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGChannelPowerSettings").compare(type) == 0) {
+      SWGChannelPowerSettings *obj = new SWGChannelPowerSettings();
       obj->init();
       return obj;
     }
