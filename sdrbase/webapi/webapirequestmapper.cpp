@@ -4478,6 +4478,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getChannelAnalyzerSettings()->init();
             channelSettings->getChannelAnalyzerSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "ChannelPowerSettings")
+        {
+            channelSettings->setChannelPowerSettings(new SWGSDRangel::SWGChannelPowerSettings());
+            channelSettings->getChannelPowerSettings()->init();
+            channelSettings->getChannelPowerSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "ChirpChatDemodSettings")
         {
             channelSettings->setChirpChatDemodSettings(new SWGSDRangel::SWGChirpChatDemodSettings());
@@ -5526,6 +5532,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setAptDemodSettings(nullptr);
     channelSettings.setAtvModSettings(nullptr);
     channelSettings.setBfmDemodSettings(nullptr);
+    channelSettings.setChannelPowerSettings(nullptr);
     channelSettings.setDatvModSettings(nullptr);
     channelSettings.setDabDemodSettings(nullptr);
     channelSettings.setDsdDemodSettings(nullptr);
@@ -5572,6 +5579,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setAmModReport(nullptr);
     channelReport.setAtvModReport(nullptr);
     channelReport.setBfmDemodReport(nullptr);
+    channelReport.setChannelPowerReport(nullptr);
     channelReport.setDatvModReport(nullptr);
     channelReport.setDsdDemodReport(nullptr);
     channelReport.setEndOfTrainDemodReport(nullptr);

@@ -1,5 +1,9 @@
 project(demod)
 
+if (ENABLE_CHANNELRX_CHANNELPOWER)
+    add_subdirectory(channelpower)
+endif()
+
 if (ENABLE_CHANNELRX_ENDOFTRAIN)
     add_subdirectory(demodendoftrain)
 endif()

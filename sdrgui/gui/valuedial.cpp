@@ -150,12 +150,25 @@ void ValueDial::setValueRange(uint numDigits, quint64 min, quint64 max)
     m_valueMin = min;
     m_valueMax = max;
 
-    m_text = formatText(m_value);
+    if (m_animationTimer.isActive())
+    {
+        m_textNew = formatText(m_valueNew);
 
-    if (m_value < min) {
-        setValue(min);
-    } else if (m_value > max) {
-        setValue(max);
+        if (m_valueNew < min) {
+            setValue(min);
+        } else if (m_valueNew > max) {
+            setValue(max);
+        }
+    }
+    else
+    {
+        m_text = formatText(m_value);
+
+        if (m_value < min) {
+            setValue(min);
+        } else if (m_value > max) {
+            setValue(max);
+        }
     }
 
     setFixedWidth((m_numDigits + m_numDecimalPoints) * m_digitWidth + 2);

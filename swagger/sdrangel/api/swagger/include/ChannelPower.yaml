@@ -1,0 +1,60 @@
+ChannelPowerSettings:
+  description: ChannelPower
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    pulseThreshold:
+      description: "In dB"
+      type: number
+      format: float
+    averagePeriodUS:
+      description: "Average period in microseconds"
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+ChannelPowerReport:
+  description: ChannelPower
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelPowerMaxDB:
+      description: max power received in channel (dB)
+      type: number
+      format: float
+    channelPowerMinDB:
+      description: min power received in channel (dB)
+      type: number
+      format: float
+    channelPowerPulseDB:
+      description: pulse power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer

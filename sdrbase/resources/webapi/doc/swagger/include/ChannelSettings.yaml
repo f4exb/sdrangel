@@ -39,6 +39,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
     ChannelAnalyzerSettings:
       $ref: "/doc/swagger/include/ChannelAnalyzer.yaml#/ChannelAnalyzerSettings"
+    ChannelPowerSettings:
+      $ref: "/doc/swagger/include/ChannelPower.yaml#/ChannelPowerSettings"
     ChirpChatDemodSettings:
       $ref: "/doc/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodSettings"
     ChirpChatModSettings:

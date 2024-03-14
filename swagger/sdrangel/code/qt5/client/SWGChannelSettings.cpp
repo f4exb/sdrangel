@@ -58,6 +58,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_bfm_demod_settings_isSet = false;
     channel_analyzer_settings = nullptr;
     m_channel_analyzer_settings_isSet = false;
+    channel_power_settings = nullptr;
+    m_channel_power_settings_isSet = false;
     chirp_chat_demod_settings = nullptr;
     m_chirp_chat_demod_settings_isSet = false;
     chirp_chat_mod_settings = nullptr;
@@ -192,6 +194,8 @@ SWGChannelSettings::init() {
     m_bfm_demod_settings_isSet = false;
     channel_analyzer_settings = new SWGChannelAnalyzerSettings();
     m_channel_analyzer_settings_isSet = false;
+    channel_power_settings = new SWGChannelPowerSettings();
+    m_channel_power_settings_isSet = false;
     chirp_chat_demod_settings = new SWGChirpChatDemodSettings();
     m_chirp_chat_demod_settings_isSet = false;
     chirp_chat_mod_settings = new SWGChirpChatModSettings();
@@ -330,6 +334,9 @@ SWGChannelSettings::cleanup() {
     }
     if(channel_analyzer_settings != nullptr) { 
         delete channel_analyzer_settings;
+    }
+    if(channel_power_settings != nullptr) { 
+        delete channel_power_settings;
     }
     if(chirp_chat_demod_settings != nullptr) { 
         delete chirp_chat_demod_settings;
@@ -518,6 +525,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&channel_analyzer_settings, pJson["ChannelAnalyzerSettings"], "SWGChannelAnalyzerSettings", "SWGChannelAnalyzerSettings");
     
+    ::SWGSDRangel::setValue(&channel_power_settings, pJson["ChannelPowerSettings"], "SWGChannelPowerSettings", "SWGChannelPowerSettings");
+    
     ::SWGSDRangel::setValue(&chirp_chat_demod_settings, pJson["ChirpChatDemodSettings"], "SWGChirpChatDemodSettings", "SWGChirpChatDemodSettings");
     
     ::SWGSDRangel::setValue(&chirp_chat_mod_settings, pJson["ChirpChatModSettings"], "SWGChirpChatModSettings", "SWGChirpChatModSettings");
@@ -674,6 +683,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((channel_analyzer_settings != nullptr) && (channel_analyzer_settings->isSet())){
         toJsonValue(QString("ChannelAnalyzerSettings"), channel_analyzer_settings, obj, QString("SWGChannelAnalyzerSettings"));
+    }
+    if((channel_power_settings != nullptr) && (channel_power_settings->isSet())){
+        toJsonValue(QString("ChannelPowerSettings"), channel_power_settings, obj, QString("SWGChannelPowerSettings"));
     }
     if((chirp_chat_demod_settings != nullptr) && (chirp_chat_demod_settings->isSet())){
         toJsonValue(QString("ChirpChatDemodSettings"), chirp_chat_demod_settings, obj, QString("SWGChirpChatDemodSettings"));
@@ -971,6 +983,16 @@ void
 SWGChannelSettings::setChannelAnalyzerSettings(SWGChannelAnalyzerSettings* channel_analyzer_settings) {
     this->channel_analyzer_settings = channel_analyzer_settings;
     this->m_channel_analyzer_settings_isSet = true;
+}
+
+SWGChannelPowerSettings*
+SWGChannelSettings::getChannelPowerSettings() {
+    return channel_power_settings;
+}
+void
+SWGChannelSettings::setChannelPowerSettings(SWGChannelPowerSettings* channel_power_settings) {
+    this->channel_power_settings = channel_power_settings;
+    this->m_channel_power_settings_isSet = true;
 }
 
 SWGChirpChatDemodSettings*
@@ -1501,6 +1523,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(channel_analyzer_settings && channel_analyzer_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(channel_power_settings && channel_power_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(chirp_chat_demod_settings && chirp_chat_demod_settings->isSet()){

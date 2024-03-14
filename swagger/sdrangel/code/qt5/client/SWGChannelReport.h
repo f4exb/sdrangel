@@ -29,6 +29,7 @@
 #include "SWGAMModReport.h"
 #include "SWGATVModReport.h"
 #include "SWGBFMDemodReport.h"
+#include "SWGChannelPowerReport.h"
 #include "SWGChirpChatDemodReport.h"
 #include "SWGChirpChatModReport.h"
 #include "SWGDATVDemodReport.h"
@@ -117,6 +118,9 @@ public:
 
     SWGBFMDemodReport* getBfmDemodReport();
     void setBfmDemodReport(SWGBFMDemodReport* bfm_demod_report);
+
+    SWGChannelPowerReport* getChannelPowerReport();
+    void setChannelPowerReport(SWGChannelPowerReport* channel_power_report);
 
     SWGChirpChatDemodReport* getChirpChatDemodReport();
     void setChirpChatDemodReport(SWGChirpChatDemodReport* chirp_chat_demod_report);
@@ -274,6 +278,9 @@ private:
 
     SWGBFMDemodReport* bfm_demod_report;
     bool m_bfm_demod_report_isSet;
+
+    SWGChannelPowerReport* channel_power_report;
+    bool m_channel_power_report_isSet;
 
     SWGChirpChatDemodReport* chirp_chat_demod_report;
     bool m_chirp_chat_demod_report_isSet;

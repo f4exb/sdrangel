@@ -33,6 +33,7 @@
 #include "SWGBFMDemodSettings.h"
 #include "SWGBeamSteeringCWModSettings.h"
 #include "SWGChannelAnalyzerSettings.h"
+#include "SWGChannelPowerSettings.h"
 #include "SWGChirpChatDemodSettings.h"
 #include "SWGChirpChatModSettings.h"
 #include "SWGDABDemodSettings.h"
@@ -145,6 +146,9 @@ public:
 
     SWGChannelAnalyzerSettings* getChannelAnalyzerSettings();
     void setChannelAnalyzerSettings(SWGChannelAnalyzerSettings* channel_analyzer_settings);
+
+    SWGChannelPowerSettings* getChannelPowerSettings();
+    void setChannelPowerSettings(SWGChannelPowerSettings* channel_power_settings);
 
     SWGChirpChatDemodSettings* getChirpChatDemodSettings();
     void setChirpChatDemodSettings(SWGChirpChatDemodSettings* chirp_chat_demod_settings);
@@ -338,6 +342,9 @@ private:
 
     SWGChannelAnalyzerSettings* channel_analyzer_settings;
     bool m_channel_analyzer_settings_isSet;
+
+    SWGChannelPowerSettings* channel_power_settings;
+    bool m_channel_power_settings_isSet;
 
     SWGChirpChatDemodSettings* chirp_chat_demod_settings;
     bool m_chirp_chat_demod_settings_isSet;
