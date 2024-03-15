@@ -371,12 +371,11 @@ void ChannelPowerGUI::tick()
     double magAvg, magPulseAvg, magMaxPeak, magMinPeak;
     m_channelPower->getMagLevels(magAvg, magPulseAvg, magMaxPeak, magMinPeak);
 
-    double powDbAvg, powDbPulseAvg, powDbMaxPeak, powDbMinPeak, powDbPathLoss;
+    double powDbAvg, powDbPulseAvg, powDbMaxPeak, powDbMinPeak;
     powDbAvg = std::numeric_limits<double>::quiet_NaN();
     powDbPulseAvg = std::numeric_limits<double>::quiet_NaN();
     powDbMaxPeak = std::numeric_limits<double>::quiet_NaN();
     powDbMinPeak = std::numeric_limits<double>::quiet_NaN();
-    powDbPathLoss = std::numeric_limits<double>::quiet_NaN();
 
     const int precision = 2;
 
