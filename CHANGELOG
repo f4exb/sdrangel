@@ -1,3 +1,15 @@
+sdrangel (7.19.1-1) unstable; urgency=medium
+
+   * Add channel power channel. PR #2019, #2021
+   * Use mouse keys for CW modulation in SSB modulator. Fixes #1948
+   * ADS-B: Only list available maps. PR #2017
+   * CRightClickEnabler: Prevent duplicate events... PR #2017
+   * Update snap. PR #2016
+   * Scan all plugins for qml (for Mac). PR #2014
+   * fix memset() arguments order in vkfftengine. PR #2013
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 17 Mar 2024 19:17:00 +0100
+
 sdrangel (7.19.0-1) unstable; urgency=medium
 
    * Upgraded RTL-SDR library to v2.0.1
