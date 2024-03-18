@@ -86,6 +86,36 @@ bool FeatureWebAPIUtils::mapSetDateTime(const QDateTime& dateTime, int featureSe
     }
 }
 
+// Find the specified target on the sky map
+bool FeatureWebAPIUtils::skyMapFind(const QString& target, int featureSetIndex, int featureIndex)
+{
+    Feature *feature = FeatureWebAPIUtils::getFeature(featureSetIndex, featureIndex, "sdrangel.feature.skymap");
+    if (feature != nullptr)
+    {
+        QString errorMessage;
+        QStringList featureActionKeys = {"find"};
+        SWGSDRangel::SWGFeatureActions query;
+        SWGSDRangel::SWGSkyMapActions *skyMapActions = new SWGSDRangel::SWGSkyMapActions();
+
+        skyMapActions->setFind(new QString(target));
+        query.setSkyMapActions(skyMapActions);
+
+        int httpRC = feature->webapiActionsPost(featureActionKeys, query, errorMessage);
+        if (httpRC/100 != 2)
+        {
+            qWarning() << "FeatureWebAPIUtils::skyMapFind: error " << httpRC << ":" << errorMessage;
+            return false;
+        }
+
+        return true;
+    }
+    else
+    {
+        qWarning("FeatureWebAPIUtils::skyMapFind: no Sky Map feature");
+        return false;
+    }
+}
+
 // Get first feature with the given URI
 Feature* FeatureWebAPIUtils::getFeature(int& featureSetIndex, int& featureIndex, const QString& uri)
 {
