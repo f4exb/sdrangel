@@ -66,7 +66,6 @@ struct SkyMapSettings
     void applySettings(const QStringList& settingsKeys, const SkyMapSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
-    static const QStringList m_pipeTypes;
     static const QStringList m_pipeURIs;
 
 };

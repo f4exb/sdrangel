@@ -28,13 +28,6 @@
 
 #include "skymapsettings.h"
 
-const QStringList SkyMapSettings::m_pipeTypes = {
-    QStringLiteral("StarTracker"),
-    QStringLiteral("SatelliteTracker"),
-    QStringLiteral("GS232Controller"),
-    QStringLiteral("Map")
-};
-
 const QStringList SkyMapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.feature.startracker"),
     QStringLiteral("sdrangel.feature.satellitetracker"),
