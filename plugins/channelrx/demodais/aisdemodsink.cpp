@@ -413,7 +413,6 @@ void AISDemodSink::applySettings(const AISDemodSettings& settings, bool force)
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
-        m_lowpass.create(301, AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE, settings.m_rfBandwidth / 2.0f);
     }
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
     {
@@ -423,7 +422,7 @@ void AISDemodSink::applySettings(const AISDemodSettings& settings, bool force)
     if ((settings.m_baud != m_settings.m_baud) || force)
     {
         m_samplesPerSymbol = AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE / settings.m_baud;
-        qDebug() << "ISDemodSink::applySettings: m_samplesPerSymbol: " << m_samplesPerSymbol << " baud " << settings.m_baud;
+        qDebug() << "AISDemodSink::applySettings: m_samplesPerSymbol: " << m_samplesPerSymbol << " baud " << settings.m_baud;
         m_pulseShape.create(0.5, 3, m_samplesPerSymbol);
 
         // Recieve buffer, long enough for one max length message
