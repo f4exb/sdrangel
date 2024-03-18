@@ -135,6 +135,9 @@ public:
     float getExtrudedHeight();
     void setExtrudedHeight(float extruded_height);
 
+    QString* getAvailableFrom();
+    void setAvailableFrom(QString* available_from);
+
     QString* getAvailableUntil();
     void setAvailableUntil(QString* available_until);
 
@@ -237,6 +240,9 @@ private:
 
     float extruded_height;
     bool m_extruded_height_isSet;
+
+    QString* available_from;
+    bool m_available_from_isSet;
 
     QString* available_until;
     bool m_available_until_isSet;
