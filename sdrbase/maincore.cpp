@@ -612,12 +612,16 @@ bool MainCore::getDeviceAndChannelIndexFromId(const QString& channelId, unsigned
 
 bool MainCore::getFeatureIndexFromId(const QString& featureId, unsigned int &featureSetIndex, unsigned int &featureIndex)
 {
-    const QRegularExpression re("[F]([0-9]+):([0-9]+)");
+    const QRegularExpression re("F([0-9]+)?:([0-9]+)");
     QRegularExpressionMatch match = re.match(featureId);
 
     if (match.hasMatch())
     {
-        featureSetIndex = match.capturedTexts()[1].toInt();
+        if (match.capturedTexts()[1].isEmpty()) {
+            featureSetIndex = 0;
+        } else {
+            featureSetIndex = match.capturedTexts()[1].toInt();
+        }
         featureIndex = match.capturedTexts()[2].toInt();
         return true;
     }
