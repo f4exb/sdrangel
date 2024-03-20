@@ -105,15 +105,21 @@ bool APRSWorker::handleMessage(const Message& cmd)
         APRSPacket *aprs = new APRSPacket();
         if (ax25.decode(report.getPacket()))
         {
-            // See: http://www.aprs-is.net/IGateDetails.aspx for gating rules
-            if (!aprs->m_via.contains("TCPIP")
-                && !aprs->m_via.contains("TCPXX")
-                && !aprs->m_via.contains("NOGATE")
-                && !aprs->m_via.contains("RFONLY"))
+            // #2029 - Forward data even if we can't decode it fully
+            aprs->decode(ax25);
+
+            if (!aprs->m_data.isEmpty())
             {
-                aprs->m_dateTime = report.getDateTime();
-                QString igateMsg = aprs->toTNC2(m_settings.m_igateCallsign);
-                send(igateMsg.toUtf8(), igateMsg.length());
+                // See: http://www.aprs-is.net/IGateDetails.aspx for gating rules
+                if (!aprs->m_via.contains("TCPIP")
+                    && !aprs->m_via.contains("TCPXX")
+                    && !aprs->m_via.contains("NOGATE")
+                    && !aprs->m_via.contains("RFONLY"))
+                {
+                    aprs->m_dateTime = report.getDateTime();
+                    QString igateMsg = aprs->toTNC2(m_settings.m_igateCallsign);
+                    send(igateMsg.toUtf8(), igateMsg.length());
+                }
             }
         }
         return true;
