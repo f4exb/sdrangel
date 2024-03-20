@@ -592,8 +592,9 @@ void PacketModSource::addTXPacket(QString callsign, QString to, QString via, QSt
     // PID
     *p++ = m_settings.m_ax25PID;
     // Data
-    len = data.length();
-    memcpy(p, data.toUtf8(), len);
+    QByteArray dataBytes = data.toUtf8();
+    len = dataBytes.length();
+    memcpy(p, dataBytes, len);
     p += len;
     // CRC (do not include flags)
     crc.calculate(crc_start, p-crc_start);
