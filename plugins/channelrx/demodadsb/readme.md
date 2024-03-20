@@ -116,13 +116,13 @@ To use this feature, an [aviationstack](https://aviationstack.com) API Key must 
 
 <h3>16: Feed</h3>
 
-Checking Feed enables feeding received ADS-B frames to aggregators such as [ADS-B Exchange](https://www.adsbexchange.com), [ADSBHub](https://www.adsbhub.org) or [OpenSky Network](https://opensky-network.org/)
+Checking Feed enables feeding received ADS-B frames to aggregators such as [Airplanes.Live](https://www.airplanes.live/), [ADS-B Exchange](https://www.adsbexchange.com), [ADSBHub](https://www.adsbhub.org) or [OpenSky Network](https://opensky-network.org/)
 and receiving aircraft state from anywhere in the world from [OpenSky Network](https://opensky-network.org/). Right clicking on the Feed button opens the Feed Settings dialog.
 
 The ADS-B plugin can export ADS-B frames acting as both a client and server. When a client, the ADS-B plugin opens a connection to a remote host. When a server, the remote computer connects to this computer.
 
 As a client:
-
+* For Airplanes.Live, check Enable Client, set Server hostname to feed.airplanes.live, Port to 30004 and Format to Beast binary. You can check for successful feeding at: https://www.airplanes.live/myfeed/
 * For ADS-B Exchange, check Enable Client, set Server hostname to feed.adsbexchange.com, Port to 30005 and Format to Beast binary. You can check for successful feeding (after about 30 seconds) at: https://www.adsbexchange.com/myip/
 * For ADSBHub, check Enable Client, set Server hostname to data.adsbhub.org, Port to 5002 and Format to Beast hex. You will need to have setup an account on ADSBHub first. You can check for successful feeding at: https://www.adsbhub.org/statistic.php
 
