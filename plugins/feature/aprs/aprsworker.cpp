@@ -102,23 +102,25 @@ bool APRSWorker::handleMessage(const Message& cmd)
     {
         MainCore::MsgPacket& report = (MainCore::MsgPacket&) cmd;
         AX25Packet ax25;
-        APRSPacket *aprs = new APRSPacket();
+
         if (ax25.decode(report.getPacket()))
         {
-            // #2029 - Forward data even if we can't decode it fully
-            aprs->decode(ax25);
+            APRSPacket aprs;
 
-            if (!aprs->m_data.isEmpty())
+            // #2029 - Forward data even if we can't decode it fully
+            aprs.decode(ax25);
+
+            if (!aprs.m_data.isEmpty())
             {
                 // See: http://www.aprs-is.net/IGateDetails.aspx for gating rules
-                if (!aprs->m_via.contains("TCPIP")
-                    && !aprs->m_via.contains("TCPXX")
-                    && !aprs->m_via.contains("NOGATE")
-                    && !aprs->m_via.contains("RFONLY"))
+                if (!aprs.m_via.contains("TCPIP")
+                    && !aprs.m_via.contains("TCPXX")
+                    && !aprs.m_via.contains("NOGATE")
+                    && !aprs.m_via.contains("RFONLY"))
                 {
-                    aprs->m_dateTime = report.getDateTime();
-                    QString igateMsg = aprs->toTNC2(m_settings.m_igateCallsign);
-                    send(igateMsg.toUtf8(), igateMsg.length());
+                    aprs.m_dateTime = report.getDateTime();
+                    QByteArray igateMsg = aprs.toTNC2(m_settings.m_igateCallsign);
+                    send(igateMsg.data(), igateMsg.length());
                 }
             }
         }
@@ -210,7 +212,7 @@ void APRSWorker::recv()
             if (!m_loggedIn)
             {
                 // Log in with callsign and passcode
-                QString login = QString("user %1 pass %2 vers SDRangel 6.4.0%3\r\n").arg(m_settings.m_igateCallsign).arg(m_settings.m_igatePasscode).arg(m_settings.m_igateFilter.isEmpty() ? "" : QString(" filter %1").arg(m_settings.m_igateFilter));
+                QString login = QString("user %1 pass %2 vers SDRangel 7.19.2%3\r\n").arg(m_settings.m_igateCallsign).arg(m_settings.m_igatePasscode).arg(m_settings.m_igateFilter.isEmpty() ? "" : QString(" filter %1").arg(m_settings.m_igateFilter));
                 send(login.toLatin1(), login.length());
                 m_loggedIn = true;
                 if (m_msgQueueToFeature)

@@ -408,7 +408,7 @@ bool APRSGUI::handleMessage(const Message& message)
             else
             {
                 qDebug() << "APRSGUI::handleMessage: Failed to decode as APRS";
-                qDebug() << ax25.m_from << " " << ax25.m_to << " " << ax25.m_via << " " << ax25.m_type << " " << ax25.m_pid << " "<< ax25.m_dataASCII;
+                qDebug() << "From:" << ax25.m_from << "To:" << ax25.m_to << "Via:" << ax25.m_via << "Type:" << ax25.m_type << "PID:" << ax25.m_pid << "Data:" << QString::fromLatin1(ax25.m_data);
             }
         }
         else

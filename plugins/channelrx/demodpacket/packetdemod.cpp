@@ -216,7 +216,7 @@ bool PacketDemod::handleMessage(const Message& cmd)
                     << "\"" << ax25.m_via << "\","
                     << ax25.m_type << ","
                     << ax25.m_pid << ","
-                    << "\"" << ax25.m_dataASCII << "\","
+                    << "\"" << QString::fromUtf8(ax25.m_data) << "\","
                     << "\"" << ax25.m_dataHex << "\"\n";
             }
             else
@@ -348,7 +348,7 @@ void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
                 if (newFile)
                 {
                     // Write header
-                    m_logStream << "Date,Time,Data,From,To,Via,Type,PID,Data ASCII,Data Hex\n";
+                    m_logStream << "Date,Time,Data,From,To,Via,Type,PID,Data UTF-8,Data Hex\n";
                 }
             }
             else

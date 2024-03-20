@@ -736,10 +736,10 @@
       </column>
       <column>
        <property name="text">
-        <string>Data (ASCII)</string>
+        <string>Data</string>
        </property>
        <property name="toolTip">
-        <string>Packet data as ASCII</string>
+        <string>Packet data as UTF-8 character string</string>
        </property>
       </column>
       <column>
@@ -757,9 +757,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>ValueDialZ</class>
@@ -768,10 +769,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>RollupContents</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupcontents.h</header>
-   <container>1</container>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>LevelMeterSignalDB</class>

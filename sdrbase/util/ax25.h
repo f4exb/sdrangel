@@ -32,7 +32,7 @@ struct SDRBASE_API AX25Packet {
     QString m_via;
     QString m_type;
     QString m_pid;
-    QString m_dataASCII;
+    QByteArray m_data;
     QString m_dataHex;
 
     bool decode(QByteArray packet);
