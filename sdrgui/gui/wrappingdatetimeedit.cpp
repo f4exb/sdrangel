@@ -29,7 +29,11 @@ WrappingDateTimeEdit::WrappingDateTimeEdit(QWidget *parent) :
 
 void WrappingDateTimeEdit::stepBy(int steps)
 {
-    if (currentSection() == QDateTimeEdit::MonthSection)
+    if (currentSection() == QDateTimeEdit::YearSection)
+    {
+        clipAndSetDate(date().addYears(steps));
+    }
+    else if (currentSection() == QDateTimeEdit::MonthSection)
     {
         clipAndSetDate(date().addMonths(steps));
     }
