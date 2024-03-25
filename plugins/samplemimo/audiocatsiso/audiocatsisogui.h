@@ -89,6 +89,7 @@ private slots:
     void on_streamSide_currentIndexChanged(int index);
     void on_spectrumSide_currentIndexChanged(int index);
     void on_streamLock_toggled(bool checked);
+    void on_freqRxToTx_clicked();
 	void on_startStop_toggled(bool checked);
     void on_ptt_toggled(bool checked);
     void on_pttSpectrumLinkToggled(bool checked);

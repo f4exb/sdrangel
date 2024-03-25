@@ -257,6 +257,14 @@ void AudioCATSISOGUI::on_streamLock_toggled(bool checked)
     }
 }
 
+void AudioCATSISOGUI::on_freqRxToTx_clicked()
+{
+    m_settings.m_txCenterFrequency = m_settings.m_rxCenterFrequency;
+    displayFrequency();
+    m_settingsKeys.append("txCenterFrequency");
+    sendSettings();
+}
+
 void AudioCATSISOGUI::on_centerFrequency_changed(quint64 value)
 {
     if (m_rxElseTx)
@@ -771,7 +779,8 @@ void AudioCATSISOGUI::makeUIConnections()
 	QObject::connect(ui->streamSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_streamSide_currentIndexChanged);
     QObject::connect(ui->spectrumSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_spectrumSide_currentIndexChanged);
     QObject::connect(ui->streamLock, &QToolButton::toggled, this, &AudioCATSISOGUI::on_streamLock_toggled);
-	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_startStop_toggled);
+	QObject::connect(ui->freqRxToTx, &QPushButton::clicked, this, &AudioCATSISOGUI::on_freqRxToTx_clicked);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_startStop_toggled);
 	QObject::connect(ui->ptt, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_ptt_toggled);
 	QObject::connect(ui->catConnect, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_catConnect_toggled);
     QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &AudioCATSISOGUI::on_centerFrequency_changed);
