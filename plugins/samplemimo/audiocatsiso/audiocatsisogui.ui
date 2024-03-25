@@ -161,6 +161,23 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="freqRxToTx">
+       <property name="toolTip">
+        <string>Send Rx frequency to Tx</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/arrow_left.png</normaloff>:/arrow_left.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="ButtonSwitch" name="txEnable">
        <property name="toolTip">
         <string>Enable/disable Tx</string>

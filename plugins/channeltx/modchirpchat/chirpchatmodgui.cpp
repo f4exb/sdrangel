@@ -97,6 +97,7 @@ bool ChirpChatModGUI::handleMessage(const Message& message)
         fourthsChirps += m_settings.hasSyncWord() ? 8 : 0;
         fourthsChirps += m_settings.getNbSFDFourths();
         float controlMs = fourthsChirps * fourthsMs; // preamble + sync word + SFD
+        ui->timeMessageLengthText->setText(tr("%1").arg(rpt.getNbSymbols()));
         ui->timePayloadText->setText(tr("%1 ms").arg(QString::number(rpt.getPayloadTimeMs(), 'f', 0)));
         ui->timeTotalText->setText(tr("%1 ms").arg(QString::number(rpt.getPayloadTimeMs() + controlMs, 'f', 0)));
         ui->timeSymbolText->setText(tr("%1 ms").arg(QString::number(4.0*fourthsMs, 'f', 1)));

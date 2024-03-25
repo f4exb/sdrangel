@@ -362,7 +362,7 @@ void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool forc
 
         if (getMessageQueueToGUI())
         {
-            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime);
+            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime, symbols.size());
             getMessageQueueToGUI()->push(rpt);
         }
     }
@@ -1095,7 +1095,7 @@ void ChirpChatMod::udpRx()
 
             if (getMessageQueueToGUI())
             {
-                MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime);
+                MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime, symbols.size());
                 getMessageQueueToGUI()->push(rpt);
             }
         }

@@ -25,7 +25,7 @@
 
 #include "audiocatoutputworker.h"
 
-#define AUDIOOUTPUT_THROTTLE_MS 50
+#define AUDIOOUTPUT_THROTTLE_MS 100
 
 AudioCATOutputWorker::AudioCATOutputWorker(SampleMOFifo* sampleFifo, AudioFifo *fifo, QObject* parent) :
     QObject(parent),
@@ -41,7 +41,7 @@ AudioCATOutputWorker::AudioCATOutputWorker(SampleMOFifo* sampleFifo, AudioFifo *
     m_sampleFifo(sampleFifo),
     m_audioFifo(fifo)
 {
-    m_audioBuffer.resize(1<<15);
+    m_audioBuffer.resize(12000);
     m_audioBufferFill = 0;
     setSamplerate(48000);
 }

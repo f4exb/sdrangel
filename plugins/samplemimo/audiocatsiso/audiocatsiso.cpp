@@ -46,7 +46,7 @@ MESSAGE_CLASS_DEFINITION(AudioCATSISO::MsgStartStop, Message)
 AudioCATSISO::AudioCATSISO(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_inputFifo(48000),
-    m_outputFifo(48000),
+    m_outputFifo(24000),
 	m_settings(),
     m_inputWorker(nullptr),
     m_outputWorker(nullptr),

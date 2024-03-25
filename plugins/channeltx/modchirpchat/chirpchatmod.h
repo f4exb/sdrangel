@@ -74,16 +74,19 @@ public:
 
     public:
         float getPayloadTimeMs() const { return m_timeMs; }
-        static MsgReportPayloadTime* create(float timeMs) {
-            return new MsgReportPayloadTime(timeMs);
+        std::size_t getNbSymbols() const { return m_nbSymbols; }
+        static MsgReportPayloadTime* create(float timeMs, std::size_t nbSymbols) {
+            return new MsgReportPayloadTime(timeMs, nbSymbols);
         }
 
     private:
         float m_timeMs; //!< time in milliseconds
+        std::size_t m_nbSymbols; //!< number of symbols
 
-        MsgReportPayloadTime(float timeMs) :
+        MsgReportPayloadTime(float timeMs, std::size_t nbSymbols) :
             Message(),
-            m_timeMs(timeMs)
+            m_timeMs(timeMs),
+            m_nbSymbols(nbSymbols)
         {}
     };
 
