@@ -6684,6 +6684,9 @@ margin-bottom: 20px;
     "SatelliteTrackerSettings" : {
       "$ref" : "#/definitions/SatelliteTrackerSettings"
     },
+    "SIDSettings" : {
+      "$ref" : "#/definitions/SIDSettings"
+    },
     "SimplePTTSettings" : {
       "$ref" : "#/definitions/SimplePTTSettings"
     },
@@ -13769,6 +13772,52 @@ margin-bottom: 20px;
     }
   },
   "description" : "SDRplayV3"
+};
+            defs.SIDSettings = {
+  "properties" : {
+    "period" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "autosave" : {
+      "type" : "integer"
+    },
+    "autoload" : {
+      "type" : "integer"
+    },
+    "filename" : {
+      "type" : "integer"
+    },
+    "autosavePeriod" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureSetIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureIndex" : {
+      "type" : "integer"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "SID settings"
 };
             defs.SSBDemodReport = {
   "properties" : {
@@ -58873,7 +58922,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-03-18T15:19:34.728+01:00
+              Generated 2024-03-27T17:49:13.510+01:00
             </div>
           </div>
       </div>

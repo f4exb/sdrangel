@@ -1,0 +1,31 @@
+SIDSettings:
+  description: "SID settings"
+  properties:
+    period:
+      type: number
+      format: float
+    autosave:
+      type: integer
+    autoload:
+      type: integer
+    filename:
+      type: integer
+    autosavePeriod:
+      type: integer
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIFeatureSetIndex:
+      type: integer
+    reverseAPIFeatureIndex:
+      type: integer
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
