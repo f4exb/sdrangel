@@ -40,6 +40,7 @@ public:
     static double julianDate(int year, int month, int day, int hours, int minutes, int seconds);
     static double julianDate(QDateTime dt);
     static double modifiedJulianDate(QDateTime dt);
+    static QDateTime julianDateToDateTime(double jd);
 
     static double jd_j2000(void);
     static double jd_b1950(void);
@@ -79,6 +80,8 @@ public:
     static double earthOrbitVelocityBCRS(RADec rd, QDateTime dt);
     static double sunVelocityLSRK(RADec rd);
     static double observerVelocityLSRK(RADec rd, double latitude, double longitude, QDateTime dt);
+
+    static void sunrise(QDate date, double latitude, double longitude, QDateTime& rise, QDateTime& set);
 
     static double noisePowerdBm(double temp, double bw);
     static double noiseTemp(double dBm, double bw);
