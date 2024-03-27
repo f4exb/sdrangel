@@ -22,6 +22,7 @@
 #define SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
 
 #include <QString>
+#include <QJsonArray>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceReport.h"
@@ -71,8 +72,11 @@ public:
     static bool getDeviceReportValue(unsigned int deviceIndex, const QString &key, QString &value);
     static bool getDeviceReportList(unsigned int deviceIndex, const QString &key, const QString &subKey, QList<int> &values);
     static bool patchDeviceSetting(unsigned int deviceIndex, const QString &setting, int value);
+    static bool runFeature(unsigned int featureSetIndex, unsigned int featureIndex);
+    static bool stopFeature(unsigned int featureSetIndex, unsigned int featureIndex);
     static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, const QString &value);
     static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, double value);
+    static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, const QJsonArray& value);
     static bool patchChannelSetting(unsigned int deviceSetIndex, unsigned int channeIndex, const QString &setting, double value);
     static bool patchChannelSetting(unsigned int deviceSetIndex, unsigned int channeIndex, const QString &setting, const QJsonArray& value);
     static bool getFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, int &value);
