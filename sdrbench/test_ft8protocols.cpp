@@ -34,7 +34,6 @@ void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
 
 #include "ft8/ft8.h"
 #include "ft8/packing.h"
-#include "ft8/pack0.h"
 
 class TestFT8Protocols
 {
@@ -122,13 +121,7 @@ void TestFT8Protocols::testMsg1(const QStringList& argElements, bool runLDPC)
 
     int a77[77];
     std::fill(a77, a77 + 77, 0);
-
-    FT8::pa64(a77, 0, 28, c28_1);
-    FT8::pa64(a77, 28+1, 28, c28_2);
-    a77[28+1+28+1] = report;
-    FT8::pa64(a77, 28+1+28+2, 15, g15);
-    FT8::pa64(a77, 28+1+28+2+15, 3, 1);
-
+    FT8::Packing::pack1(a77, c28_1, c28_2, g15, report);
     FT8::Packing packing;
 
     std::string call1, call2, loc;
