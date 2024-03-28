@@ -10,6 +10,7 @@ set(sdrbench_SOURCES
     test_golay2312.cpp
     test_ft8.cpp
     test_callsign.cpp
+    test_ft8protocols.cpp
 )
 
 set(sdrbench_HEADERS

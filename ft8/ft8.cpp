@@ -44,6 +44,7 @@
 #include "ft8.h"
 #include "libldpc.h"
 #include "osd.h"
+#include "arrays.h"
 
 namespace FT8 {
 
@@ -2478,13 +2479,11 @@ void FT8::soft_decode_triples(
 // given log likelyhood for each bit, try LDPC and OSD decoders.
 // on success, puts corrected 174 bits into a174[].
 //
-int FT8::decode(const float ll174[], int a174[], int use_osd, std::string &comment)
+int FT8::decode(const float ll174[], int a174[], FT8Params& _params, int use_osd, std::string &comment)
 {
-    void ldpc_decode(float llcodeword[], int iters, int plain[], int *ok);
-    void ldpc_decode_log(float codeword[], int iters, int plain[], int *ok);
     int plain[174];  // will be 0/1 bits.
     int ldpc_ok = 0; // 83 will mean success.
-    ldpc_decode((float *)ll174, params.ldpc_iters, plain, &ldpc_ok);
+    LDPC::ldpc_decode((float *)ll174, _params.ldpc_iters, plain, &ldpc_ok);
     int ok_thresh = 83; // 83 is perfect
 
     if (ldpc_ok >= ok_thresh)
@@ -2500,11 +2499,11 @@ int FT8::decode(const float ll174[], int a174[], int use_osd, std::string &comme
         }
     }
 
-    if (use_osd && params.osd_depth >= 0 && ldpc_ok >= params.osd_ldpc_thresh)
+    if (use_osd && _params.osd_depth >= 0 && ldpc_ok >= _params.osd_ldpc_thresh)
     {
         int oplain[91];
         int got_depth = -1;
-        int osd_ok = OSD::osd_decode((float *)ll174, params.osd_depth, oplain, &got_depth);
+        int osd_ok = OSD::osd_decode((float *)ll174, _params.osd_depth, oplain, &got_depth);
 
         if (osd_ok)
         {
@@ -2516,6 +2515,37 @@ int FT8::decode(const float ll174[], int a174[], int use_osd, std::string &comme
     }
 
     return 0;
+}
+
+//
+// encode a 77 bit message into a 174 bit payload
+// adds the 14 bit CRC to obtain 91 bits
+// apply (174, 91) generator mastrix to obtain the 83 parity bits
+// append the 83 bits to the 91 bits message + crc to obbain the 174 bit payload
+//
+void FT8::encode(int a174[], int s77[])
+{
+    int a91[91]; // msg + CRC
+    std::fill(a91, a91 + 91, 0);
+    std::copy(s77, s77+77, a91); // copy msg
+    LDPC::ft8_crc(a91, 82, &a91[77]); // append CRC - to match OSD::check_crc
+    std::copy(a91, a91+91, a174); // copy msg + CRC
+    int sum, n, ni, b;
+
+    for (int i=0; i<83; i++)
+    {
+        sum = 0;
+
+        for (int j=0; j<91; j++)
+        {
+            n = j/8;  // byte index in the generator matrix
+            ni = j%8;  // bit index in the generator matrix byte LSB first
+            b = (Arrays::Gm[i][n] >> (7-ni)) & 1; // bit in the generator matrix
+            sum += a91[j] * b;
+        }
+
+        a174[91+i] = sum % 2; // sum modulo 2
+    }
 }
 
 //
@@ -3418,7 +3448,7 @@ int FT8::try_decode(
     int a174[174];
     std::string comment(comment1);
 
-    if (decode(ll174, a174, use_osd, comment))
+    if (decode(ll174, a174, params, use_osd, comment))
     {
         // a174 is corrected 91 bits of plain message plus 83 bits of LDPC parity.
         // how many of the corrected 174 bits match the received signal in ll174?

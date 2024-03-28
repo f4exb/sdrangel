@@ -1,7 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2019, 2023 Edouard Griffiths, F4EXB <f4exb06@gmail.com>    //
+// Copyright (C) 2024 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 //                                                                               //
 // This is the code from ft8mon: https://github.com/rtmrtmrtmrtm/ft8mon          //
 // reformatted and adapted to Qt and SDRangel context                            //
@@ -19,23 +17,35 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
-#ifndef libldpc_h
-#define libldpc_h
+
+#include "pack0.h"
 
 namespace FT8 {
 
-class LDPC {
-public:
-    static void ldpc_decode(float llcodeword[], int iters, int plain[], int *ok);
-    static void ldpc_decode_log(float codeword[], int iters, int plain[], int *ok);
-    static void ft8_crc(int msg1[], int msglen, int out[14]);
-    static void gauss_jordan(int rows, int cols, int m[174][2 * 91], int which[91], int *ok);
+void pa128(int a77[], int start, int len, const boost::multiprecision::int128_t value)
+{
+    boost::multiprecision::int128_t x = value;
+    int i = start + len;
 
-private:
-    static int ldpc_check(int codeword[]);
-    static float fast_tanh(float x);
-};
+    while (x != 0)
+    {
+        i--;
+        a77[i] = (int) (x % 2);
+        x /= 2;
+    }
+}
 
-} // namespace FT8
+void pa64(int a77[], int start, int len, const uint64_t value)
+{
+    uint64_t x = value;
+    int i = start + len;
 
-#endif // libldpc_h
+    while (x != 0)
+    {
+        i--;
+        a77[i] = x % 2;
+        x /= 2;
+    }
+}
+
+} // namespae FT8

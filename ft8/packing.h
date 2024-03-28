@@ -35,6 +35,11 @@ class FT8_API Packing
 {
 public:
     std::string unpack(int a91[], std::string& call1str, std::string& call2str, std::string& locstr, std::string& type);
+    static std::string unpack_0_0(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
+    std::string unpack_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
+    static bool packcall_std(int& c28, const std::string& callstr);
+    static bool packgrid(int& g15, const std::string& locstr);
+    static bool packfree(int a77[], const std::string& msg);
 
 private:
     static int ihashcall(std::string call, int m);
@@ -42,16 +47,15 @@ private:
     std::string unpackgrid15(int ng, int ir);
     std::string unpackgrid25(int ng);
     void remember_call(std::string call);
-    std::string unpack_0_0(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_0_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     // 0.3 and 0.4
     std::string unpack_0_3(int a77[], int n3, std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_0_5(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     // 1 and 2
-    std::string unpack_1(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_3(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_4(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
     std::string unpack_5(int a77[], std::string& call1str, std::string& call2str, std::string& locstr);
+
 
     QMutex hashes_mu;
     std::map<int, std::string> hashes10;

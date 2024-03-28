@@ -34,7 +34,7 @@ void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
 #else
 
 #include "ft8/ft8.h"
-#include "ft8/unpack.h"
+#include "ft8/packing.h"
 
 class TestFT8Callback : public FT8::CallbackInterface
 {
