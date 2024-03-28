@@ -1,6 +1,7 @@
 project(ft8)
 
 set(ft8_SOURCES
+    arrays.cpp
     fft.cpp
     fftbuffers.cpp
     ft8.cpp
@@ -8,12 +9,14 @@ set(ft8_SOURCES
     ft8plans.cpp
     libldpc.cpp
     osd.cpp
-    unpack.cpp
+    packing.cpp
+    pack0.cpp
     unpack0.cpp
     util.cpp
 )
 
 set(ft8_HEADERS
+    arrays.h
     fft.h
     fftbuffers.h
     ft8.h
@@ -21,7 +24,9 @@ set(ft8_HEADERS
     ft8plans.h
     libldpc.h
     osd.h
-    unpack.h
+    packing.h
+    pack0.h
+    unpack0.h
     util.h
 )
 

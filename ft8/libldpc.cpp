@@ -37,6 +37,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "arrays.h"
+#include "libldpc.h"
 
 // float, long float, __float128
 #define REAL float
@@ -48,7 +49,7 @@ namespace FT8
 // returns the number of parity checks that passed.
 // 83 means total success.
 //
-int ldpc_check(int codeword[])
+int LDPC::ldpc_check(int codeword[])
 {
     int score = 0;
 
@@ -58,7 +59,7 @@ int ldpc_check(int codeword[])
         int x = 0;
         for (int ii1 = 0; ii1 < 7; ii1++)
         {
-            int i1 = Nm[j][ii1] - 1;
+            int i1 = Arrays::Nm[j][ii1] - 1;
             if (i1 >= 0)
             {
                 x ^= codeword[i1];
@@ -75,7 +76,7 @@ int ldpc_check(int codeword[])
 // iters is how hard to try.
 // ok is the number of parity checks that worked out,
 // ok == 83 means success.
-void ldpc_decode(float llcodeword[], int iters, int plain[], int *ok)
+void LDPC::ldpc_decode(float llcodeword[], int iters, int plain[], int *ok)
 {
     REAL m[83][174];
     REAL e[83][174];
@@ -114,13 +115,13 @@ void ldpc_decode(float llcodeword[], int iters, int plain[], int *ok)
         {
             for (int ii1 = 0; ii1 < 7; ii1++)
             {
-                int i1 = Nm[j][ii1] - 1;
+                int i1 = Arrays::Nm[j][ii1] - 1;
                 if (i1 < 0)
                     continue;
                 REAL a = 1.0;
                 for (int ii2 = 0; ii2 < 7; ii2++)
                 {
-                    int i2 = Nm[j][ii2] - 1;
+                    int i2 = Arrays::Nm[j][ii2] - 1;
                     if (i2 >= 0 && i2 != i1)
                     {
                         // tmp ranges from 1.0 to -1.0, for
@@ -145,7 +146,7 @@ void ldpc_decode(float llcodeword[], int iters, int plain[], int *ok)
             REAL q1 = 1.0 - q0;
             for (int j = 0; j < 3; j++)
             {
-                int j2 = Mn[i][j] - 1;
+                int j2 = Arrays::Mn[i][j] - 1;
                 q0 *= e[j2][i];
                 q1 *= 1.0 - e[j2][i];
             }
@@ -181,12 +182,12 @@ void ldpc_decode(float llcodeword[], int iters, int plain[], int *ok)
         {
             for (int ji1 = 0; ji1 < 3; ji1++)
             {
-                int j1 = Mn[i][ji1] - 1;
+                int j1 = Arrays::Mn[i][ji1] - 1;
                 REAL q0 = codeword[i];
                 REAL q1 = 1.0 - q0;
                 for (int ji2 = 0; ji2 < 3; ji2++)
                 {
-                    int j2 = Mn[i][ji2] - 1;
+                    int j2 = Arrays::Mn[i][ji2] - 1;
                     if (j1 != j2)
                     {
                         q0 *= e[j2][i];
@@ -217,7 +218,7 @@ void ldpc_decode(float llcodeword[], int iters, int plain[], int *ok)
 
 // thank you Douglas Bagnall
 // https://math.stackexchange.com/a/446411
-float fast_tanh(float x)
+float LDPC::fast_tanh(float x)
 {
     if (x < -7.6)
     {
@@ -256,7 +257,7 @@ return tanhtable[ind];
 // iters is how hard to try.
 // ok is the number of parity checks that worked out,
 // ok == 83 means success.
-void ldpc_decode_log(float codeword[], int iters, int plain[], int *ok)
+void LDPC::ldpc_decode_log(float codeword[], int iters, int plain[], int *ok)
 {
     REAL m[83][174];
     REAL e[83][174];
@@ -277,13 +278,13 @@ void ldpc_decode_log(float codeword[], int iters, int plain[], int *ok)
         {
             for (int ii1 = 0; ii1 < 7; ii1++)
             {
-                int i1 = Nm[j][ii1] - 1;
+                int i1 = Arrays::Nm[j][ii1] - 1;
                 if (i1 < 0)
                     continue;
                 REAL a = 1.0;
                 for (int ii2 = 0; ii2 < 7; ii2++)
                 {
-                    int i2 = Nm[j][ii2] - 1;
+                    int i2 = Arrays::Nm[j][ii2] - 1;
                     if (i2 >= 0 && i2 != i1)
                     {
                         // a *= table_tanh(m[j][i2] / 2.0);
@@ -312,7 +313,7 @@ void ldpc_decode_log(float codeword[], int iters, int plain[], int *ok)
         {
             REAL l = codeword[i];
             for (int j = 0; j < 3; j++)
-                l += e[Mn[i][j] - 1][i];
+                l += e[Arrays::Mn[i][j] - 1][i];
             cw[i] = (l <= 0.0);
         }
         int score = ldpc_check(cw);
@@ -335,11 +336,11 @@ void ldpc_decode_log(float codeword[], int iters, int plain[], int *ok)
         {
             for (int ji1 = 0; ji1 < 3; ji1++)
             {
-                int j1 = Mn[i][ji1] - 1;
+                int j1 = Arrays::Mn[i][ji1] - 1;
                 REAL l = codeword[i];
                 for (int ji2 = 0; ji2 < 3; ji2++)
                 {
-                    int j2 = Mn[i][ji2] - 1;
+                    int j2 = Arrays::Mn[i][ji2] - 1;
                     if (j1 != j2)
                     {
                         l += e[j2][i];
@@ -361,7 +362,7 @@ void ldpc_decode_log(float codeword[], int iters, int plain[], int *ok)
 // check the FT8 CRC-14
 //
 
-void ft8_crc(int msg1[], int msglen, int out[14])
+void LDPC::ft8_crc(int msg1[], int msglen, int out[14])
 {
     // the old FT8 polynomial for 12-bit CRC, 0xc06.
     // int div[] = { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0 };
@@ -407,7 +408,7 @@ void ft8_crc(int msg1[], int msglen, int out[14])
 // m[174][2*91].
 // m's right half should start out as zeros.
 // m's upper-right quarter will be the desired inverse.
-void gauss_jordan(int rows, int cols, int m[174][2 * 91], int which[91], int *ok)
+void LDPC::gauss_jordan(int rows, int cols, int m[174][2 * 91], int which[91], int *ok)
 // gauss_jordan(int rows, int cols, int m[cols][2*rows], int which[rows], int *ok)
 {
     *ok = 0;

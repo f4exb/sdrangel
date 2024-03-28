@@ -24,7 +24,7 @@
 #include <QSet>
 
 #include "ft8.h"
-#include "unpack.h"
+#include "packing.h"
 
 class QDateTime;
 class MessageQueue;
