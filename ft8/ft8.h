@@ -309,6 +309,16 @@ public:
     std::vector<Strength> coarse(const FFTEngine::ffts_t &bins, int si0, int si1);
 
     FT8Params& getParams() { return params; }
+    //
+    // given log likelyhood for each bit, try LDPC and OSD decoders.
+    // on success, puts corrected 174 bits into a174[].
+    //
+    static int decode(const float ll174[], int a174[], FT8Params& params, int use_osd, std::string &comment);
+    // encode a 77 bit message into a 174 bit payload
+    // adds the 14 bit CRC to obtain 91 bits
+    // apply (174, 91) generator mastrix to obtain the 83 parity bits
+    // append the 83 bits to the 91 bits messag e+ crc to obbain the 174 bit payload
+    static void encode(int a174[], int s77[]);
 
 private:
     //
@@ -504,11 +514,6 @@ private:
         const FFTEngine::ffts_t &m79x,
         float ll174[]
     );
-    //
-    // given log likelyhood for each bit, try LDPC and OSD decoders.
-    // on success, puts corrected 174 bits into a174[].
-    //
-    int decode(const float ll174[], int a174[], int use_osd, std::string &comment);
     //
     // bandpass filter some FFT bins.
     // smooth transition from stop-band to pass-band,

@@ -18,9 +18,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 #include <string>
+#include <regex>
 
-#include "unpack.h"
+#include "packing.h"
 #include "unpack0.h"
+#include "pack0.h"
 #include "util.h"
 
 namespace FT8 {
@@ -714,6 +716,222 @@ std::string Packing::unpack(int a77[], std::string& call1, std::string& call2, s
     call1 = "UNK";
     sprintf(tmp, "UNK i3=%d n3=%d", i3, n3);
     return std::string(tmp);
+}
+
+bool Packing::packcall_std(int& c28, const std::string& callstr)
+{
+    c28 = 0;
+
+    if (callstr.size() == 2)
+    {
+        if (callstr == "DE") {
+            return true;
+        }
+
+        if (callstr == "CQ")
+        {
+            c28 = 2;
+            return true;
+        }
+    }
+
+    if (callstr == "QRZ")
+    {
+        c28 = 1;
+        return true;
+    }
+
+    if (callstr.rfind("CQ ", 0) == 0) // special CQ
+    {
+        std::regex cq_regex_num("CQ (\\d\\d\\d)");
+        std::regex cq_regex_alpha("CQ ([A-Z]+)");
+        std::smatch cq_match;
+
+        if (std::regex_match(callstr, cq_match, cq_regex_num))
+        {
+            std::string cq_num_arg = cq_match[1].str();
+            int cq_num = stoi(cq_num_arg);
+            c28 = 3 + cq_num;
+            return true;
+        }
+
+        if (std::regex_match(callstr, cq_match, cq_regex_alpha))
+        {
+            std::string cq_alpha_arg = cq_match[1].str();
+
+            if (cq_alpha_arg.size() > 4) {
+                return false;
+            }
+
+            int arg_value = 1;
+
+            for (auto c : cq_alpha_arg) {
+                arg_value *= int(c) - int('A') + 1;
+            }
+
+            if (cq_alpha_arg.size() == 1) {
+                c28 = 1003 + arg_value;
+            } else if (cq_alpha_arg.size() == 2) {
+                c28 = 1030 + arg_value;
+            } else if (cq_alpha_arg.size() == 3) {
+                c28 = 1759 + arg_value;
+            } else if (cq_alpha_arg.size() == 4) {
+                c28 = 21442 + arg_value;
+            }
+
+            return true;
+        }
+    }
+
+    if ((callstr.size() < 3) || (callstr.size() > 6)) { // standard callsigns are 3 to 6 characters
+        return false;
+    }
+
+    std::string call_prefix;
+    int call_num;
+    std::string call_suffix;
+
+    if (isdigit(callstr.at(0)))
+    {
+        std::regex call_regex("(\\d[A-Z])(\\d)([A-Z]{1,3})");
+        std::smatch call_match;
+
+        if (std::regex_match(callstr, call_match, call_regex))
+        {
+            call_prefix = call_match[1].str();
+            call_num = stoi(call_match[2].str());
+            call_suffix = call_match[3].str();
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        std::regex call_regex("([A-Z0-9]{1,2})(\\d)([A-Z]{1,3})");
+        std::smatch call_match;
+
+        if (std::regex_match(callstr, call_match, call_regex))
+        {
+            call_prefix = call_match[1].str();
+            call_num = stoi(call_match[2].str());
+            call_suffix = call_match[3].str();
+
+            if (isdigit(call_prefix.at(0))) { // In this case the first character cannot be a digit
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    // qDebug("Packing::packcall_std: %s %d %s", call_prefix.c_str(), call_num, call_suffix.c_str());
+    int i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0, i6 = 0;
+    std::string alnums = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    std::string alphas = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    if (call_prefix.size() == 2)
+    {
+        i1 = alnums.find(call_prefix.at(0)) + 1;
+        i2 = alnums.find(call_prefix.at(1));
+    }
+    else
+    {
+        i2 = alnums.find(call_prefix.at(0));
+    }
+
+    i3 = call_num;
+    i4 = alphas.find(call_suffix.at(0)) + 1;
+
+    if (call_suffix.size() > 1) {
+        i5 = alphas.find(call_suffix.at(1)) + 1;
+    }
+    if (call_suffix.size() > 2) {
+        i6 = alphas.find(call_suffix.at(2)) + 1;
+    }
+
+    c28 = 2063592 + (1<<22) + 36*10*27*27*27*i1 + 10*27*27*27*i2 + 27*27*27*i3 + 27*27*i4 + 27*i5 + i6;
+    // qDebug("Packing::packcall c28: %d, i1: %d, i2: %d, i3: %d, i4: %d, i5: %d, i6: %d", c28, i1, i2, i3, i4, i5, i6);
+    return true;
+}
+
+bool Packing::packgrid(int& g15, const std::string& locstr)
+{
+    static const int MAXGRID4 = 32400;
+    std::regex loc_regex("[A-R][A-R][0-9][0-9]");
+    std::smatch loc_match;
+    g15 = 0;
+
+    if (locstr.size() == 0)
+    {
+        g15 = MAXGRID4 + 1;
+        return true;
+    }
+
+    if (locstr == "RRR")
+    {
+        g15 = MAXGRID4 + 2;
+        return true;
+    }
+
+    if (locstr == "RR73")
+    {
+        g15 = MAXGRID4 + 3;
+        return true;
+    }
+
+    if (locstr == "73")
+    {
+        g15 = MAXGRID4 + 4;
+        return true;
+    }
+
+    if (std::regex_match(locstr, loc_match, loc_regex)) // Maidenhead 4 char locator
+    {
+        int i1 = int(locstr.at(0)) - int('A');
+        int i2 = int(locstr.at(1)) - int('A');
+        int i3 = int(locstr.at(2)) - int('0');
+        int i4 = int(locstr.at(3)) - int('0');
+        g15 = i1*18*10*10 + i2*10*10 + i3*10 + i4;
+        return true;
+    }
+
+    std::regex rpt_regex("([+-])(\\d)(\\d)");
+
+    if (std::regex_match(locstr, loc_match, rpt_regex)) // Report -30 to +99
+    {
+        int i1 = int(locstr.at(1)) - int('0');
+        int i2 = int(locstr.at(2)) - int('0');
+        int s = (locstr.at(0) == '-') ? -1 : 1;
+        g15 = MAXGRID4 + 35 + s*(i1*10 + i2);
+        return true;
+    }
+
+    return false;
+}
+
+bool Packing::packfree(int a77[], const std::string& msg)
+{
+    std::string s = msg;
+    s.append(13, ' ');
+    s = s.substr(0, 13);
+
+    std::string a = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ+-./?";
+    boost::multiprecision::int128_t b = 1, x = 0;
+
+    for (int i=12; i>=0; i--)
+    {
+        int ai = a.find(s.at(i));
+        ai = (ai < 0) ? 0 : ai; // map unknown characters to blanks
+        x += ai * b;
+        b *= 42;
+    }
+
+    pa128(a77, 0, 71, x);
+    return true;
 }
 
 } // namespace FT8
