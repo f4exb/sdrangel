@@ -88,6 +88,8 @@ private:
     quint16 m_webPort;
     WTML m_wtml;
     WebInterface *m_webInterface;
+    bool m_ready;               //!< Web app is ready
+    QString m_find;
 
     double m_ra;                //!< Target from source plugin
     double m_dec;

@@ -200,7 +200,8 @@ SkyMapGUI::SkyMapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
     m_source(nullptr),
-    m_availableChannelOrFeatureHandler(SkyMapSettings::m_pipeURIs, {"target", "skymap.target"})
+    m_availableChannelOrFeatureHandler(SkyMapSettings::m_pipeURIs, {"target", "skymap.target"}),
+    m_ready(false)
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -294,6 +295,7 @@ void SkyMapGUI::on_map_currentIndexChanged(int index)
     m_settings.m_map = ui->map->currentText();
     applySetting("map");
 
+    m_ready = false;
     if (m_settings.m_map == "WWT") {
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/skymap/html/wwt.html").arg(m_webPort)));
     } else if (m_settings.m_map == "ESASky") {
@@ -497,13 +499,22 @@ void SkyMapGUI::applyAllSettings()
 
 void SkyMapGUI::find(const QString& text)
 {
-    float ra, dec;
+    qDebug() << "**********find" << text << m_ready;
+    if (!m_ready)
+    {
+        // Save for when ready
+        m_find = text;
+    }
+    else
+    {
+        float ra, dec;
 
-    // WWT's find doesn't support coordinates, so we check here
-    if (Units::stringToRADec(text, ra, dec)) {
-        m_webInterface->setView(ra, dec);
-    } else {
-        m_webInterface->track(text);
+        // WWT's find doesn't support coordinates, so we check here
+        if (Units::stringToRADec(text, ra, dec)) {
+            m_webInterface->setView(ra, dec);
+        } else {
+            m_webInterface->track(text);
+        }
     }
 }
 
@@ -765,7 +776,15 @@ void SkyMapGUI::receivedEvent(const QJsonObject &obj)
         }
         else if (event == "ready")
         {
+            m_ready = true;
             initSkyMap();
+
+            // Run find that was requested while map was initialising
+            if (!m_find.isEmpty())
+            {
+                find(m_find);
+                m_find = "";
+            }
         }
     }
     else
