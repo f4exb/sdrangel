@@ -73,28 +73,28 @@ QString AudioDeviceInfo::realm() const
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 const QList<AudioDeviceInfo> &AudioDeviceInfo::availableInputDevices()
 {
-    if (!m_inputDevicesEnumerated) {
+    if (!inputDevicesEnumerated) {
         QList<QAudioDevice> devInfos = QMediaDevices::audioInputs();
         for (auto devInfo : devInfos) {
-            m_inputDevices.append(AudioDeviceInfo(devInfo));
+            inputDevices.append(AudioDeviceInfo(devInfo));
         }
-        m_inputDevicesEnumerated = true;
+        inputDevicesEnumerated = true;
     }
 
-    return m_inputDevices;
+    return inputDevices;
 }
 
 const QList<AudioDeviceInfo> &AudioDeviceInfo::availableOutputDevices()
 {
-    if (!m_outputDevicesEnumerated) {
+    if (!outputDevicesEnumerated) {
         QList<QAudioDevice> devInfos = QMediaDevices::audioOutputs();
         for (auto devInfo : devInfos) {
-            m_outputDevices.append(AudioDeviceInfo(devInfo));
+            outputDevices.append(AudioDeviceInfo(devInfo));
         }
-        m_outputDevicesEnumerated = true;
+        outputDevicesEnumerated = true;
     }
 
-    return m_outputDevices;
+    return outputDevices;
 }
 #else
 const QList<AudioDeviceInfo> &AudioDeviceInfo::availableInputDevices()
