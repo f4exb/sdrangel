@@ -82,20 +82,22 @@ QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::OutputDeviceInfo& i
 AudioDeviceManager::AudioDeviceManager()
 {
     qDebug("AudioDeviceManager::AudioDeviceManager: scan input devices");
-    m_inputDevicesInfo = AudioDeviceInfo::availableInputDevices();
+    {
+        auto &devicesInfo = AudioDeviceInfo::availableInputDevices();
 
-    for (int i = 0; i < m_inputDevicesInfo.size(); i++) {
-        qDebug("AudioDeviceManager::AudioDeviceManager: input device #%d: %s", i, qPrintable(m_inputDevicesInfo[i].deviceName()));
+        for (int i = 0; i < devicesInfo.size(); i++) {
+            qDebug("AudioDeviceManager::AudioDeviceManager: input device #%d: %s", i, qPrintable(devicesInfo[i].deviceName()));
+        }
     }
-
     qDebug("AudioDeviceManager::AudioDeviceManager: scan output devices");
 
-    m_outputDevicesInfo = AudioDeviceInfo::availableOutputDevices();
+    {
+        auto &devicesInfo = AudioDeviceInfo::availableOutputDevices();
 
-    for (int i = 0; i < m_outputDevicesInfo.size(); i++) {
-        qDebug("AudioDeviceManager::AudioDeviceManager: output device #%d: %s", i, qPrintable(m_outputDevicesInfo[i].deviceName()));
+        for (int i = 0; i < devicesInfo.size(); i++) {
+            qDebug("AudioDeviceManager::AudioDeviceManager: output device #%d: %s", i, qPrintable(devicesInfo[i].deviceName()));
+        }
     }
-
     m_defaultInputStarted = false;
     m_defaultOutputStarted = false;
 
@@ -142,9 +144,9 @@ bool AudioDeviceManager::getOutputDeviceName(int outputDeviceIndex, QString &dev
     }
     else
     {
-        if (outputDeviceIndex < m_outputDevicesInfo.size())
+        if (outputDeviceIndex < AudioDeviceInfo::availableOutputDevices().size())
         {
-            deviceName = m_outputDevicesInfo[outputDeviceIndex].deviceName();
+            deviceName = AudioDeviceInfo::availableOutputDevices()[outputDeviceIndex].deviceName();
             return true;
         }
         else
@@ -163,9 +165,9 @@ bool AudioDeviceManager::getInputDeviceName(int inputDeviceIndex, QString &devic
     }
     else
     {
-        if (inputDeviceIndex < m_inputDevicesInfo.size())
+        if (inputDeviceIndex < AudioDeviceInfo::availableInputDevices().size())
         {
-            deviceName = m_inputDevicesInfo[inputDeviceIndex].deviceName();
+            deviceName = AudioDeviceInfo::availableInputDevices()[inputDeviceIndex].deviceName();
             return true;
         }
         else
@@ -177,10 +179,10 @@ bool AudioDeviceManager::getInputDeviceName(int inputDeviceIndex, QString &devic
 
 int AudioDeviceManager::getOutputDeviceIndex(const QString &deviceName) const
 {
-    for (int i = 0; i < m_outputDevicesInfo.size(); i++)
+    for (int i = 0; i < AudioDeviceInfo::availableOutputDevices().size(); i++)
     {
-        //qDebug("AudioDeviceManager::getOutputDeviceIndex: %d: %s|%s", i, qPrintable(deviceName), qPrintable(m_outputDevicesInfo[i].deviceName()));
-        if (deviceName == m_outputDevicesInfo[i].deviceName()) {
+        //qDebug("AudioDeviceManager::getOutputDeviceIndex: %d: %s|%s", i, qPrintable(deviceName), qPrintable(AudioDeviceInfo::availableOutputDevices()[i].deviceName()));
+        if (deviceName == AudioDeviceInfo::availableOutputDevices()[i].deviceName()) {
             return i;
         }
     }
@@ -190,10 +192,10 @@ int AudioDeviceManager::getOutputDeviceIndex(const QString &deviceName) const
 
 int AudioDeviceManager::getInputDeviceIndex(const QString &deviceName) const
 {
-    for (int i = 0; i < m_inputDevicesInfo.size(); i++)
+    for (int i = 0; i < AudioDeviceInfo::availableInputDevices().size(); i++)
     {
-        //qDebug("AudioDeviceManager::getInputDeviceIndex: %d: %s|%s", i, qPrintable(deviceName), qPrintable(m_inputDevicesInfo[i].deviceName()));
-        if (deviceName == m_inputDevicesInfo[i].deviceName()) {
+        //qDebug("AudioDeviceManager::getInputDeviceIndex: %d: %s|%s", i, qPrintable(deviceName), qPrintable(AudioDeviceInfo::availableInputDevices()[i].deviceName()));
+        if (deviceName == AudioDeviceInfo::availableInputDevices()[i].deviceName()) {
             return i;
         }
     }
@@ -295,7 +297,7 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, MessageQueue *sample
         if (outputDeviceIndex < 0) {
             audioOutputDevice->setDeviceName("System default");
         } else {
-            audioOutputDevice->setDeviceName(m_outputDevicesInfo[outputDeviceIndex].deviceName());
+            audioOutputDevice->setDeviceName(AudioDeviceInfo::availableOutputDevices()[outputDeviceIndex].deviceName());
         }
 
         qDebug("AudioDeviceManager::addAudioSink: new AudioOutputDevice on thread: %p", thread);
@@ -382,7 +384,7 @@ void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, MessageQueue *samp
         if (inputDeviceIndex < 0) {
             audioInputDevice->setDeviceName("System default");
         } else {
-            audioInputDevice->setDeviceName(m_outputDevicesInfo[inputDeviceIndex].deviceName());
+            audioInputDevice->setDeviceName(AudioDeviceInfo::availableOutputDevices()[inputDeviceIndex].deviceName());
         }
 
         qDebug("AudioDeviceManager::addAudioSource: new AudioInputDevice on thread: %p", thread);
@@ -789,9 +791,9 @@ void AudioDeviceManager::inputInfosCleanup()
 {
     QSet<QString> deviceNames;
     deviceNames.insert(m_defaultDeviceName);
-    QList<AudioDeviceInfo>::const_iterator itd = m_inputDevicesInfo.begin();
+    QList<AudioDeviceInfo>::const_iterator itd = AudioDeviceInfo::availableInputDevices().begin();
 
-    for (; itd != m_inputDevicesInfo.end(); ++itd)
+    for (; itd != AudioDeviceInfo::availableInputDevices().end(); ++itd)
     {
         qDebug("AudioDeviceManager::inputInfosCleanup: device: %s", qPrintable(itd->deviceName()));
         deviceNames.insert(itd->deviceName());
@@ -817,9 +819,9 @@ void AudioDeviceManager::outputInfosCleanup()
 {
     QSet<QString> deviceNames;
     deviceNames.insert(m_defaultDeviceName);
-    QList<AudioDeviceInfo>::const_iterator itd = m_outputDevicesInfo.begin();
+    QList<AudioDeviceInfo>::const_iterator itd = AudioDeviceInfo::availableOutputDevices().begin();
 
-    for (; itd != m_outputDevicesInfo.end(); ++itd)
+    for (; itd != AudioDeviceInfo::availableOutputDevices().end(); ++itd)
     {
         qDebug("AudioDeviceManager::outputInfosCleanup: device: %s", qPrintable(itd->deviceName()));
         deviceNames.insert(itd->deviceName());
