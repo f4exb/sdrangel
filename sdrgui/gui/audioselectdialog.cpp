@@ -40,7 +40,7 @@ AudioSelectDialog::AudioSelectDialog(const AudioDeviceManager* audioDeviceManage
     defaultItem->setText(2, tr("%1").arg(sampleRate));
     defaultItem->setTextAlignment(2, Qt::AlignRight);
 
-    QList<AudioDeviceInfo> devices = input ? m_audioDeviceManager->getInputDevices() : m_audioDeviceManager->getOutputDevices();
+    const QList<AudioDeviceInfo> &devices = input ? AudioDeviceInfo::availableInputDevices() : AudioDeviceInfo::availableOutputDevices();
 
     for(QList<AudioDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
     {

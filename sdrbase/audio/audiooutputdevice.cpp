@@ -91,7 +91,7 @@ bool AudioOutputDevice::start(int deviceIndex, int sampleRate)
         }
         else
         {
-            QList<AudioDeviceInfo> devicesInfo = AudioDeviceInfo::availableOutputDevices();
+            auto &devicesInfo = AudioDeviceInfo::availableOutputDevices();
 
             if (deviceIndex < devicesInfo.size())
             {

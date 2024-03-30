@@ -174,7 +174,7 @@ void FCDProInput::closeDevice()
 bool FCDProInput::openFCDAudio(const char* cardname)
 {
     AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-    const QList<AudioDeviceInfo>& audioList = audioDeviceManager->getInputDevices();
+    const QList<AudioDeviceInfo>& audioList = AudioDeviceInfo::availableInputDevices();
 
     for (const auto &itAudio : audioList)
     {

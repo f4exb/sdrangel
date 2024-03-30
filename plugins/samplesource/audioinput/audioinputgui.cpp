@@ -186,8 +186,7 @@ void AudioInputGui::updateSampleRateAndFrequency()
 void AudioInputGui::refreshDeviceList()
 {
     ui->device->blockSignals(true);
-    AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
-    const QList<AudioDeviceInfo>& audioList = audioDeviceManager->getInputDevices();
+    const QList<AudioDeviceInfo>& audioList = AudioDeviceInfo::availableInputDevices();
 
     ui->device->clear();
     for (const auto &itAudio : audioList)
