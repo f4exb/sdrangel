@@ -502,7 +502,7 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
         m_audioOutputInfos[deviceName].udpChannelMode = udpChannelMode;
         m_audioOutputInfos[deviceName].udpChannelCodec = udpChannelCodec;
         m_audioOutputInfos[deviceName].udpDecimationFactor = decimationFactor;
-        m_defaultOutputStarted = (outputDeviceIndex == -1);
+        m_defaultOutputStarted |= (outputDeviceIndex == -1);
     }
     else
     {
@@ -540,7 +540,7 @@ void AudioDeviceManager::startAudioInput(int inputDeviceIndex)
 
         m_audioInputs[inputDeviceIndex]->setVolume(volume);
         m_audioInputInfos[deviceName].volume = volume;
-        m_defaultInputStarted = (inputDeviceIndex == -1);
+        m_defaultInputStarted |= (inputDeviceIndex == -1);
     }
     else
     {
