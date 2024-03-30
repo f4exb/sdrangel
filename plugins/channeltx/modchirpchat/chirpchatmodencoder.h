@@ -34,10 +34,11 @@ public:
     void setLoRaParityBits(unsigned int parityBits) { m_nbParityBits = parityBits; }
     void setLoRaHasHeader(bool hasHeader) { m_hasHeader = hasHeader; }
     void setLoRaHasCRC(bool hasCRC) { m_hasCRC = hasCRC; }
-    void encodeString(const QString& str, std::vector<unsigned short>& symbols);
     void encodeBytes(const QByteArray& bytes, std::vector<unsigned short>& symbols);
+    void encode(ChirpChatModSettings settings, std::vector<unsigned short>& symbols);
 
 private:
+    void encodeString(const QString& str, std::vector<unsigned short>& symbols);
     // LoRa functions
     void encodeBytesLoRa(const QByteArray& bytes, std::vector<unsigned short>& symbols);
 

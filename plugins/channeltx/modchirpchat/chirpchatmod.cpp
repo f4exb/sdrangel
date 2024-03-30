@@ -284,74 +284,19 @@ void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool forc
     {
         payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create();
     }
-    else if ((settings.m_messageType == ChirpChatModSettings::MessageBeacon)
-        && ((settings.m_messageType != m_settings.m_messageType)
-         || (settings.m_beaconMessage != m_settings.m_beaconMessage) || force))
+    else if ((settings.m_messageType != m_settings.m_messageType)
+        || (settings.m_beaconMessage != m_settings.m_beaconMessage)
+        || (settings.m_cqMessage != m_settings.m_cqMessage)
+        || (settings.m_replyMessage != m_settings.m_replyMessage)
+        || (settings.m_reportMessage != m_settings.m_reportMessage)
+        || (settings.m_replyReportMessage != m_settings.m_replyReportMessage)
+        || (settings.m_rrrMessage != m_settings.m_rrrMessage)
+        || (settings.m_73Message != m_settings.m_73Message)
+        || (settings.m_qsoTextMessage != m_settings.m_qsoTextMessage)
+        || (settings.m_textMessage != m_settings.m_textMessage)
+        || (settings.m_bytesMessage != m_settings.m_bytesMessage) || force)
     {
-        m_encoder.encodeString(settings.m_beaconMessage, symbols);
-        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
-    }
-    else if ((settings.m_messageType == ChirpChatModSettings::MessageCQ)
-        && ((settings.m_messageType != m_settings.m_messageType)
-         || (settings.m_cqMessage != m_settings.m_cqMessage) || force))
-    {
-        m_encoder.encodeString(settings.m_cqMessage, symbols);
-        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
-    }
-    else if ((settings.m_messageType == ChirpChatModSettings::MessageReply)
-        && ((settings.m_messageType != m_settings.m_messageType)
-         || (settings.m_replyMessage != m_settings.m_replyMessage) || force))
-    {
-        m_encoder.encodeString(settings.m_replyMessage, symbols);
-        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
-    }
-    else if ((settings.m_messageType == ChirpChatModSettings::MessageReport)
-        && ((settings.m_messageType != m_settings.m_messageType)
-         || (settings.m_reportMessage != m_settings.m_reportMessage) || force))
-    {
-        m_encoder.encodeString(settings.m_reportMessage, symbols);
-        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
-    }
-    else if ((settings.m_messageType == ChirpChatModSettings::MessageReplyReport)
-        && ((settings.m_messageType != m_settings.m_messageType)
-         || (settings.m_replyReportMessage != m_settings.m_replyReportMessage) || force))
-    {
-        m_encoder.encodeString(settings.m_replyReportMessage, symbols);
-        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
-    }
-    else if ((settings.m_messageType == ChirpChatModSettings::MessageRRR)
-        && ((settings.m_messageType != m_settings.m_messageType)
-         || (settings.m_rrrMessage != m_settings.m_rrrMessage) || force))
-    {
-        m_encoder.encodeString(settings.m_rrrMessage, symbols);
-        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
-    }
-    else if ((settings.m_messageType == ChirpChatModSettings::Message73)
-        && ((settings.m_messageType != m_settings.m_messageType)
-         || (settings.m_73Message != m_settings.m_73Message) || force))
-    {
-        m_encoder.encodeString(settings.m_73Message, symbols);
-        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
-    }
-    else if ((settings.m_messageType == ChirpChatModSettings::MessageQSOText)
-        && ((settings.m_messageType != m_settings.m_messageType)
-         || (settings.m_qsoTextMessage != m_settings.m_qsoTextMessage) || force))
-    {
-        m_encoder.encodeString(settings.m_qsoTextMessage, symbols);
-        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
-    }
-    else if ((settings.m_messageType == ChirpChatModSettings::MessageText)
-        && ((settings.m_messageType != m_settings.m_messageType)
-         || (settings.m_textMessage != m_settings.m_textMessage) || force))
-    {
-        m_encoder.encodeString(settings.m_textMessage, symbols);
-        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
-    }
-    else if ((settings.m_messageType == ChirpChatModSettings::MessageBytes)
-        && ((settings.m_messageType != m_settings.m_messageType)
-         || (settings.m_bytesMessage != m_settings.m_bytesMessage) || force))
-    {
-        m_encoder.encodeBytes(settings.m_bytesMessage, symbols);
+        m_encoder.encode(settings, symbols);
         payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
     }
 

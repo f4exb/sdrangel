@@ -19,6 +19,7 @@
 #include "chirpchatmodencodertty.h"
 #include "chirpchatmodencoderascii.h"
 #include "chirpchatmodencoderlora.h"
+#include "chirpchatmodencoderft.h"
 
 ChirpChatModEncoder::ChirpChatModEncoder() :
     m_codingScheme(ChirpChatModSettings::CodingTTY),
@@ -42,6 +43,47 @@ void ChirpChatModEncoder::setNbSymbolBits(unsigned int spreadFactor, unsigned in
     }
 
     m_nbSymbolBits = m_spreadFactor - m_deBits;
+}
+
+void ChirpChatModEncoder::encode(ChirpChatModSettings settings, std::vector<unsigned short>& symbols)
+{
+    if (settings.m_codingScheme == ChirpChatModSettings::CodingFT)
+    {
+        ChirpChatModEncoderFT::encodeMsg(
+            settings.m_myCall,
+            settings.m_urCall,
+            settings.m_myLoc,
+            settings.m_myRpt,
+            settings.m_textMessage,
+            settings.m_messageType,
+            m_nbSymbolBits,
+            symbols
+        );
+    }
+    else
+    {
+        if (settings.m_messageType == ChirpChatModSettings::MessageBytes) {
+            encodeBytes(settings.m_bytesMessage, symbols);
+        } else if (settings.m_messageType == ChirpChatModSettings::MessageBeacon) {
+            encodeString(settings.m_beaconMessage, symbols);
+        } else if (settings.m_messageType == ChirpChatModSettings::MessageCQ) {
+            encodeString(settings.m_cqMessage, symbols);
+        } else if (settings.m_messageType == ChirpChatModSettings::MessageReply) {
+            encodeString(settings.m_replyMessage, symbols);
+        } else if (settings.m_messageType == ChirpChatModSettings::MessageReport) {
+            encodeString(settings.m_reportMessage, symbols);
+        } else if (settings.m_messageType == ChirpChatModSettings::MessageReplyReport) {
+            encodeString(settings.m_replyReportMessage, symbols);
+        } else if (settings.m_messageType == ChirpChatModSettings::MessageRRR) {
+            encodeString(settings.m_rrrMessage, symbols);
+        } else if (settings.m_messageType == ChirpChatModSettings::Message73) {
+            encodeString(settings.m_73Message, symbols);
+        } else if (settings.m_messageType == ChirpChatModSettings::MessageQSOText) {
+            encodeString(settings.m_qsoTextMessage, symbols);
+        } else if (settings.m_messageType == ChirpChatModSettings::MessageText) {
+            encodeString(settings.m_textMessage, symbols);
+        }
+    }
 }
 
 void ChirpChatModEncoder::encodeString(const QString& str, std::vector<unsigned short>& symbols)

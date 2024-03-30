@@ -1,5 +1,10 @@
 project(modchirpchat)
 
+if (FT8_SUPPORT)
+    set(chirpchatmod_FT8_LIB ft8)
+    set(chirpchatmod_FT8_INCLUDE ${CMAKE_SOURCE_DIR}/ft8)
+endif()
+
 set(modchirpchat_SOURCES
 	chirpchatmod.cpp
 	chirpchatmodsettings.cpp
@@ -10,6 +15,7 @@ set(modchirpchat_SOURCES
     chirpchatmodencodertty.cpp
     chirpchatmodencoderascii.cpp
     chirpchatmodencoderlora.cpp
+    chirpchatmodencoderft.cpp
     chirpchatmodwebapiadapter.cpp
 )
 
@@ -23,11 +29,13 @@ set(modchirpchat_HEADERS
     chirpchatmodencodertty.h
     chirpchatmodencoderascii.h
     chirpchatmodencoderlora.h
+    chirpchatmodencoderft.h
     chirpchatmodwebapiadapter.h
 )
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${chirpchatmod_FT8_INCLUDE}
 )
 
 if(NOT SERVER_MODE)
@@ -38,7 +46,7 @@ if(NOT SERVER_MODE)
     )
     set(modchirpchat_HEADERS
         ${modchirpchat_HEADERS}
-    	chirpchatmodgui.h
+        chirpchatmodgui.h
     )
 
     set(TARGET_NAME modchirpchat)
@@ -62,6 +70,7 @@ target_link_libraries(${TARGET_NAME}
     sdrbase
     ${TARGET_LIB_GUI}
     swagger
+    ${chirpchatmod_FT8_LIB}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

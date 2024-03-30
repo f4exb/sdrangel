@@ -551,6 +551,11 @@
           <string>TTY</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>FT</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

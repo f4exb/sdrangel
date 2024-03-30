@@ -98,16 +98,16 @@ void TestFT8Protocols::testMsg1(const QStringList& argElements, bool runLDPC)
 
 
     std::string locstr;
-    int report;
+    int reply;
 
     if (argElements[3].startsWith("R+") || argElements[3].startsWith("R-"))
     {
-        report = 1;
+        reply = 1;
         locstr = argElements[3].mid(1).toStdString();
     }
     else
     {
-        report = 0;
+        reply = 0;
         locstr = argElements[3].toStdString();
     }
 
@@ -121,13 +121,12 @@ void TestFT8Protocols::testMsg1(const QStringList& argElements, bool runLDPC)
 
     int a77[77];
     std::fill(a77, a77 + 77, 0);
-    FT8::Packing::pack1(a77, c28_1, c28_2, g15, report);
+    FT8::Packing::pack1(a77, c28_1, c28_2, g15, reply);
     FT8::Packing packing;
 
     std::string call1, call2, loc;
     std::string msg = packing.unpack_1(a77, call1, call2, loc);
     qInfo("TestFT8Protocols::testMsg1: msg: %s, call1: %s, call2: %s, loc: %s", msg.c_str(), call1.c_str(), call2.c_str(), loc.c_str());
-
 
     if (runLDPC)
     {
