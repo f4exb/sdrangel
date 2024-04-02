@@ -1,0 +1,767 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SIDGUI</class>
+ <widget class="RollupContents" name="SIDGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1044</width>
+    <height>580</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>320</width>
+    <height>100</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>SID</string>
+  </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>964</width>
+     <height>80</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="chartButtonsLayout">
+      <item>
+       <widget class="ButtonSwitch" name="startStop">
+        <property name="toolTip">
+         <string>Start/stop measurements</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/play.png</normaloff>
+          <normalon>:/stop.png</normalon>:/play.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="loadData">
+        <property name="toolTip">
+         <string>Load data from a .csv file</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/load.png</normaloff>:/load.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveData">
+        <property name="toolTip">
+         <string>Save data to a .csv file</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/save.png</normaloff>:/save.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveChartImage">
+        <property name="toolTip">
+         <string>Save chart to an image file</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/picture.png</normaloff>:/picture.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="deleteAll">
+        <property name="toolTip">
+         <string>Delete all data</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="averageLabel">
+        <property name="text">
+         <string>Avg</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="samples">
+        <property name="toolTip">
+         <string>Number of samples in average</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="plotXRayLongPrimary">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Display primary long wavelength X-Ray data on chart</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/sid/icons/xlp.svg</normaloff>:/sid/icons/xlp.svg</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="plotXRayLongSecondary">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Display secondary long wavelength X-Ray data on chart</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/sid/icons/xls.svg</normaloff>:/sid/icons/xls.svg</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="plotXRayShortPrimary">
+        <property name="toolTip">
+         <string>Display primary short wavelength X-Ray data on chart</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/sid/icons/xsp.svg</normaloff>:/sid/icons/xsp.svg</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="plotXRayShortSecondary">
+        <property name="toolTip">
+         <string>Display secondary short wavelength X-Ray data on chart</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/sid/icons/xss.svg</normaloff>:/sid/icons/xss.svg</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="plotProton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Display proton flux data on chart</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/sid/icons/proton.svg</normaloff>:/sid/icons/proton.svg</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="plotGRB">
+        <property name="toolTip">
+         <string>Display GRBs on chart</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/sid/icons/gamma.svg</normaloff>:/sid/icons/gamma.svg</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="plotSTIX">
+        <property name="toolTip">
+         <string>Display solar flares from STIX on chart</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/sid/icons/solar-orbiter.svg</normaloff>:/sid/icons/solar-orbiter.svg</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_6">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="separateCharts">
+        <property name="toolTip">
+         <string>Display as a single chart or multiple charts</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/sid/icons/chartcombined.png</normaloff>
+          <normalon>:/sid/icons/chartseparate.png</normalon>:/sid/icons/chartcombined.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayLegend">
+        <property name="toolTip">
+         <string>Display legend</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/sid/icons/legend.png</normaloff>:/sid/icons/legend.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="settings">
+        <property name="toolTip">
+         <string>Open settings dialog</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/listing.png</normaloff>:/listing.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="sdoLabel">
+        <property name="text">
+         <string>SDO/SOHO</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="sdoEnabled">
+        <property name="toolTip">
+         <string>Display SDO/SOHO imagery</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/sid/icons/sun.png</normaloff>:/sid/icons/sun.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="sdoVideoEnabled">
+        <property name="toolTip">
+         <string>Select image or video</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/picture.png</normaloff>
+          <normalon>:/film.png</normalon>:/picture.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="sdoData">
+        <property name="toolTip">
+         <string>Image/wavelength selection</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="showSats">
+        <property name="toolTip">
+         <string>Show GOES 16, 18 and SDO in Satellite Tracker</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/gps.png</normaloff>:/gps.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="chartAxisLayout">
+      <item>
+       <widget class="QToolButton" name="autoscaleX">
+        <property name="toolTip">
+         <string>Autoscale X-axis. Right click to continually autoscale</string>
+        </property>
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="autoscaleY">
+        <property name="toolTip">
+         <string>Autoscale Y-axis. Right click to continually autoscale</string>
+        </property>
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="today">
+        <property name="toolTip">
+         <string>Set X-axis range to today. Right click to set to today's daylight hours.</string>
+        </property>
+        <property name="text">
+         <string>T</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="prevDay">
+        <property name="toolTip">
+         <string>Set X-axis range to -1 day</string>
+        </property>
+        <property name="text">
+         <string>-1</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="nextDay">
+        <property name="toolTip">
+         <string>Set X-axis range to +1 day</string>
+        </property>
+        <property name="text">
+         <string>+1</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="startDateTimeLabel">
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="WrappingDateTimeEdit" name="startDateTime">
+        <property name="toolTip">
+         <string>X axis start time</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="endDateTimeLabel">
+        <property name="text">
+         <string>End</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="WrappingDateTimeEdit" name="endDateTime">
+        <property name="toolTip">
+         <string>X axis end time</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="minLabel">
+        <property name="text">
+         <string>Min</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="y1Min">
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>-150.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>-100.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="minUnits">
+        <property name="text">
+         <string>dB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="maxLabel">
+        <property name="text">
+         <string>Max</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="y1Max">
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>-150.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="maxUnits">
+        <property name="text">
+         <string>dB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="sdoNow">
+        <property name="toolTip">
+         <string>When checked SDO data is the latest available. When unchecked, date and time may be set manually</string>
+        </property>
+        <property name="text">
+         <string>Now</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="WrappingDateTimeEdit" name="sdoDateTime">
+        <property name="toolTip">
+         <string>Date and time for SDO data</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="mapLabel">
+        <property name="text">
+         <string>Map</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="map">
+        <property name="toolTip">
+         <string>3D Map feature to send date and time to</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="charts" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>100</y>
+     <width>661</width>
+     <height>384</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QSplitter" name="sdoSplitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QSplitter" name="chartSplitter">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QChartView" name="chart">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="windowTitle">
+         <string>Power vs Time</string>
+        </property>
+       </widget>
+       <widget class="QChartView" name="xRayChart"/>
+      </widget>
+      <widget class="QWidget" name="sdoContainer" native="true">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QProgressBar" name="sdoProgressBar">
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ScaledImage" name="sdoImage">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QVideoWidget" name="sdoVideo" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
+  </customwidget>
+  <customwidget>
+   <class>WrappingDateTimeEdit</class>
+   <extends>QDateTimeEdit</extends>
+   <header>gui/wrappingdatetimeedit.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ScaledImage</class>
+   <extends>QLabel</extends>
+   <header>gui/scaledimage.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QVideoWidget</class>
+   <extends>QWidget</extends>
+   <header>qvideowidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

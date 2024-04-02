@@ -1440,13 +1440,13 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
 
         if (httpRC/100 == 2)
         {
-            qDebug("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %s OK", qPrintable(setting), value.toVariantList());
+            qDebug("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s OK", qPrintable(setting));
             return true;
         }
         else
         {
-            qWarning("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %s error %d: %s",
-                qPrintable(setting), value.toVariantList(), httpRC, qPrintable(*errorResponse2.getMessage()));
+            qWarning("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s error %d: %s",
+                qPrintable(setting), httpRC, qPrintable(*errorResponse2.getMessage()));
             return false;
         }
     }

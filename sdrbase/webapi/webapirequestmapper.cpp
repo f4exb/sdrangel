@@ -5280,6 +5280,11 @@ bool WebAPIRequestMapper::getFeatureSettings(
             featureSettings->getSatelliteTrackerSettings()->init();
             featureSettings->getSatelliteTrackerSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (featureSettingsKey == "SIDSettings")
+        {
+            featureSettings->setSidSettings(new SWGSDRangel::SWGSIDSettings());
+            featureSettings->getSidSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (featureSettingsKey == "SimplePTTSettings")
         {
             featureSettings->setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
@@ -5648,6 +5653,7 @@ void WebAPIRequestMapper::resetFeatureSettings(SWGSDRangel::SWGFeatureSettings& 
     featureSettings.setMapSettings(nullptr);
     featureSettings.setPerTesterSettings(nullptr);
     featureSettings.setSatelliteTrackerSettings(nullptr);
+    featureSettings.setSidSettings(nullptr);
     featureSettings.setSimplePttSettings(nullptr);
     featureSettings.setSkyMapSettings(nullptr);
     featureSettings.setStarTrackerSettings(nullptr);
