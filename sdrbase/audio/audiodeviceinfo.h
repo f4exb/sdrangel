@@ -67,10 +67,10 @@ public:
     bool isFormatSupported(const QAudioFormat &settings) const;
     QList<int> supportedSampleRates() const;
 
-    static QList<AudioDeviceInfo> availableInputDevices();
-    static QList<AudioDeviceInfo> availableOutputDevices();
-    static AudioDeviceInfo defaultInputDevice();
-    static AudioDeviceInfo defaultOutputDevice();
+    static const QList<AudioDeviceInfo> &availableInputDevices();
+    static const QList<AudioDeviceInfo> &availableOutputDevices();
+    static const AudioDeviceInfo &defaultInputDevice();
+    static const AudioDeviceInfo &defaultOutputDevice();
 
 private:
 

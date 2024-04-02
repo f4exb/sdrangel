@@ -20,6 +20,10 @@
 
 #include "audiodeviceinfo.h"
 
+bool inputDevicesEnumerated = false, outputDevicesEnumerated = false;
+QList<AudioDeviceInfo> inputDevices, outputDevices;
+AudioDeviceInfo defaultInputDevice_, defaultOutputDevice_;
+
 QString AudioDeviceInfo::deviceName() const
 {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -67,69 +71,81 @@ QString AudioDeviceInfo::realm() const
 }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-QList<AudioDeviceInfo> AudioDeviceInfo::availableInputDevices()
+const QList<AudioDeviceInfo> &AudioDeviceInfo::availableInputDevices()
 {
-    QList<QAudioDevice> devInfos = QMediaDevices::audioInputs();
-    QList<AudioDeviceInfo> list;
-
-    for (auto devInfo : devInfos) {
-        list.append(AudioDeviceInfo(devInfo));
+    if (!inputDevicesEnumerated) {
+        QList<QAudioDevice> devInfos = QMediaDevices::audioInputs();
+        for (auto devInfo : devInfos) {
+            inputDevices.append(AudioDeviceInfo(devInfo));
+        }
+        inputDevicesEnumerated = true;
     }
 
-    return list;
+    return inputDevices;
 }
 
-QList<AudioDeviceInfo> AudioDeviceInfo::availableOutputDevices()
+const QList<AudioDeviceInfo> &AudioDeviceInfo::availableOutputDevices()
 {
-    QList<QAudioDevice> devInfos = QMediaDevices::audioOutputs();
-    QList<AudioDeviceInfo> list;
-
-    for (auto devInfo : devInfos) {
-        list.append(AudioDeviceInfo(devInfo));
+    if (!outputDevicesEnumerated) {
+        QList<QAudioDevice> devInfos = QMediaDevices::audioOutputs();
+        for (auto devInfo : devInfos) {
+            outputDevices.append(AudioDeviceInfo(devInfo));
+        }
+        outputDevicesEnumerated = true;
     }
 
-    return list;
+    return outputDevices;
 }
 #else
-QList<AudioDeviceInfo> AudioDeviceInfo::availableInputDevices()
+const QList<AudioDeviceInfo> &AudioDeviceInfo::availableInputDevices()
 {
-    QList<QAudioDeviceInfo> devInfos = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
-    QList<AudioDeviceInfo> list;
-
-    for (auto devInfo : devInfos) {
-        list.append(AudioDeviceInfo(devInfo));
+    if (!inputDevicesEnumerated) {
+        QList<QAudioDeviceInfo> devInfos = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+        for (auto devInfo : devInfos) {
+            inputDevices.append(AudioDeviceInfo(devInfo));
+        }
+        inputDevicesEnumerated = true;
     }
 
-    return list;
+    return inputDevices;
 }
 
-QList<AudioDeviceInfo> AudioDeviceInfo::availableOutputDevices()
+const QList<AudioDeviceInfo> &AudioDeviceInfo::availableOutputDevices()
 {
-    QList<QAudioDeviceInfo> devInfos = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
-    QList<AudioDeviceInfo> list;
-
-    for (auto devInfo : devInfos) {
-        list.append(AudioDeviceInfo(devInfo));
+    if (!outputDevicesEnumerated) {
+        QList<QAudioDeviceInfo> devInfos = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+        for (auto devInfo : devInfos) {
+            outputDevices.append(AudioDeviceInfo(devInfo));
+        }
+        outputDevicesEnumerated = true;
     }
 
-    return list;
+    return outputDevices;
 }
 #endif
 
-AudioDeviceInfo AudioDeviceInfo::defaultOutputDevice()
+const AudioDeviceInfo &AudioDeviceInfo::defaultOutputDevice()
 {
+    if (defaultOutputDevice_.m_deviceInfo.isNull()) 
+    {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    return AudioDeviceInfo(QMediaDevices::defaultAudioOutput());
+        defaultOutputDevice_ = AudioDeviceInfo(QMediaDevices::defaultAudioOutput());
 #else
-    return AudioDeviceInfo(QAudioDeviceInfo::defaultOutputDevice());
+        defaultOutputDevice_ = AudioDeviceInfo(QAudioDeviceInfo::defaultOutputDevice());
 #endif
+    }
+    return defaultOutputDevice_;
 }
 
-AudioDeviceInfo AudioDeviceInfo::defaultInputDevice()
+const AudioDeviceInfo &AudioDeviceInfo::defaultInputDevice()
 {
+    if (defaultInputDevice_.m_deviceInfo.isNull()) 
+    {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    return AudioDeviceInfo(QMediaDevices::defaultAudioInput());
+        defaultInputDevice_ = AudioDeviceInfo(QMediaDevices::defaultAudioInput());
 #else
-    return AudioDeviceInfo(QAudioDeviceInfo::defaultInputDevice());
+        defaultInputDevice_ = AudioDeviceInfo(QAudioDeviceInfo::defaultInputDevice());
 #endif
+    }
+    return defaultInputDevice_;
 }

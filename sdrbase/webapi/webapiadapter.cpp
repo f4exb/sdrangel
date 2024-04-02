@@ -454,8 +454,8 @@ int WebAPIAdapter::instanceAudioGet(
 {
     (void) error;
     DSPEngine *dspEngine = DSPEngine::instance();
-    const QList<AudioDeviceInfo>& audioInputDevices = dspEngine->getAudioDeviceManager()->getInputDevices();
-    const QList<AudioDeviceInfo>& audioOutputDevices = dspEngine->getAudioDeviceManager()->getOutputDevices();
+    const QList<AudioDeviceInfo>& audioInputDevices = AudioDeviceInfo::availableInputDevices();
+    const QList<AudioDeviceInfo>& audioOutputDevices = AudioDeviceInfo::availableOutputDevices();
     int nbInputDevices = audioInputDevices.size();
     int nbOutputDevices = audioOutputDevices.size();
 

@@ -574,6 +574,7 @@ void PacketModSource::addTXPacket(QString callsign, QString to, QString via, QSt
     uint16_t crcValue;
     int len;
     int packet_length;
+    QStringList viaList = via.split(',', Qt::SkipEmptyParts);
 
     // Create AX.25 packet
     p = packet;
@@ -584,9 +585,10 @@ void PacketModSource::addTXPacket(QString callsign, QString to, QString via, QSt
     // Dest
     p = ax25_address(p, to, 0xe0);
     // From
-    p = ax25_address(p, callsign, 0x60);
+    p = ax25_address(p, callsign, 0x60 | (viaList.empty() ? 0x01 : 0x00));
     // Via
-    p = ax25_address(p, via, 0x61);
+    for (int i = 0; i < viaList.size(); i++)
+        p = ax25_address(p, std::move(viaList[i]), 0x60 | (i == viaList.size()-1 ? 0x01 : 0x00));
     // Control
     *p++ = m_settings.m_ax25Control;
     // PID

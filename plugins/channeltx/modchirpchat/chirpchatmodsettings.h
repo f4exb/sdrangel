@@ -34,7 +34,8 @@ struct ChirpChatModSettings
     {
         CodingLoRa,  //!< Standard LoRa
         CodingASCII, //!< plain ASCII (7 bits)
-        CodingTTY    //!< plain TTY (5 bits)
+        CodingTTY,   //!< plain TTY (5 bits)
+        CodingFT     //!< FT8/4 scheme (payload 174 bits LDPC)
     };
 
     enum MessageType

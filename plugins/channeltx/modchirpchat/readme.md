@@ -13,9 +13,7 @@ LoRa is a property of Semtech and the details of the protocol are not made publi
 
 This LoRa encoder is designed for experimentation. For production grade applications it is recommended to use dedicated hardware instead.
 
-Modulation characteristics from LoRa have been augmented with more bandwidths and FFT bin collations (DE factor). Plain TTY and ASCII have also been added and there are plans to add some more complex typically amateur radio MFSK based modes like JT65.
-
-Note: this plugin is officially supported since version 6.
+Modulation characteristics from LoRa have been augmented with more bandwidths and FFT bin collations (DE factor). Plain TTY and ASCII have also been added that match character value to symbols directly. The FT protocol used in FT8 and FT4 is introduced packing the 174 bits payload into (SF -DE) bits symbols. There are plans to add some more of these typically amateur radio MFSK based modes like JT65.
 
 <h2>Interface</h2>
 
@@ -106,6 +104,7 @@ To populate messages you can specify your callsign (10.5), the other party calls
   - **LoRa**: LoRa compatible
   - **ASCII**: 7 bit plain ASCII without FEC and CRC. Requires exactly 7 bit effective samples thus SF-DE = 7 where SF is the spreading factor (5) and DE the distance enhancement factor (6)
   - **TTY**: 5 bit Baudot (Teletype) without FEC and CRC. Requires exactly 5 bit effective samples thus SF-DE = 5 where SF is the spreading factor (5) and DE the distance enhancement factor (6)
+  - **FT**: FT8/FT4 coding is applied using data in (10.5) to (10.8) to encode the 174 bit message payload with CRC and FEC as per FT8/FT4 protocol using a type 1 (standard) type of message. Note that the report (10.8) must comply with the FT rule (coded "-35" to "+99" with a leading 0 for the number) and would usually represent the integer part of the S/N ratio in the ChirpChat demodulator receiver. Calls should not be prefixed nor suffixed and the first 4 characters of the locator must represent a valid 4 character grid square. Plain text messages (13 characters) are also supported with the 0.0 type of message using the text entered in the message box (11). These 174 bits are packed into (SF - DE) bits symbols padded with zero bits if necessary. For the details of the FT protocol see: https://wsjt.sourceforge.io/FT4_FT8_QEX.pdf
 
 <h4>10.2: Number of FEC parity bits (LoRa)</h4>
 
@@ -156,6 +155,19 @@ This lets you choose which pre-formatted message to send:
   - **QSO text**: (QSO mode) free form message with callsigns
   - **Text**: plain text
   - **Bytes**: binary message in the form of a string of bytes. Use the hex window (12) to specify the message
+
+In FT mode standard FT type messages are generated regardless of placeholders based on MyCall, YourCall, MyLoc, Report and Msg data (entered while in "Text" format). Locators are 4 character grids i.e. only the 4 first characters are taken. Reports must be valid FT reports from -35 to 99 coded as < sign>< zero padded value> (e.g -12, -04, +00, +04, +12) :
+
+  - **Beacon**: DE < MyCall > < MyLoc >
+  - **CQ**: CQ < MyCall> < MyLoc >
+  - **Reply**: < YourCall > < MyCall > < MyLoc >
+  - **Report**: < YourCall > < MyCall > < Report >
+  - **R-Report**: < YourCall > < MyCall > R< Report >
+  - **RRR**: < YourCall > < MyCall > RRR
+  - **73**: < YourCall > < MyCall > 73
+  - **QSO text**: < Msg >
+  - **Text**: < Msg >
+  - **Bytes**: < Msg >
 
 <h4>10.10: Revert to standard messages</h4>
 

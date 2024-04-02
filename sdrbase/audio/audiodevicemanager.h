@@ -102,9 +102,6 @@ public:
 	AudioDeviceManager();
 	~AudioDeviceManager();
 
-    const QList<AudioDeviceInfo>& getInputDevices() const { return m_inputDevicesInfo; }
-    const QList<AudioDeviceInfo>& getOutputDevices() const { return m_outputDevicesInfo; }
-
     bool getOutputDeviceName(int outputDeviceIndex, QString &deviceName) const;
     bool getInputDeviceName(int inputDeviceIndex, QString &deviceName) const;
     int getOutputDeviceIndex(const QString &deviceName) const;
@@ -136,9 +133,6 @@ public:
     static const QString m_defaultDeviceName;
 
 private:
-    QList<AudioDeviceInfo> m_inputDevicesInfo;
-    QList<AudioDeviceInfo> m_outputDevicesInfo;
-
     QMap<AudioFifo*, int> m_audioSinkFifos; //< audio sink FIFO to audio output device index-1 map
     QMap<AudioFifo*, MessageQueue*> m_audioFifoToSinkMessageQueues; //!< audio sink FIFO to attached sink message queue
     QMap<int, QList<MessageQueue*> > m_outputDeviceSinkMessageQueues; //!< sink message queues attached to device
