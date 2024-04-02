@@ -121,7 +121,7 @@ else()
     message(STATUS "Not building remotecontrol (ENABLE_FEATURE_REMOTECONTROL=${ENABLE_FEATURE_REMOTECONTROL})")
 endif()
 
-if (ENABLED_FEATURE_SID)
+if (ENABLE_FEATURE_SID)
     add_subdirectory(sid)
 else()
     message(STATUS "Not building SID (ENABLED_FEATURE_SID=${ENABLED_FEATURE_SID})")
