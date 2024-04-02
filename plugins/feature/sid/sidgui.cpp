@@ -468,12 +468,18 @@ void SIDGUI::applyAllSettings()
 
 void SIDGUI::chartSplitterMoved(int pos, int index)
 {
+    (void) pos;
+    (void) index;
+
     m_settings.m_chartSplitterSizes = ui->chartSplitter->sizes();
     applySetting("chartSplitterSizes");
 }
 
 void SIDGUI::sdoSplitterMoved(int pos, int index)
 {
+    (void) pos;
+    (void) index;
+
     m_settings.m_sdoSplitterSizes = ui->sdoSplitter->sizes();
     applySetting("chartSplitterSizes");
 }
@@ -1153,7 +1159,6 @@ void SIDGUI::showContextMenu(QContextMenuEvent *contextEvent)
 
     if (chartView)
     {
-        qreal closestDistance;
         int closestPoint;
 
         if (m_grbSeries && findClosestPoint(contextEvent, chartView->chart(), m_grbSeries, closestPoint)) {
@@ -1589,7 +1594,8 @@ void SIDGUI::xRayDataUpdated(const QList<GOESXRay::XRayData>& data, bool primary
     {
         if (!start.isValid() || (measurement.m_dateTime > start))
         {
-            ChannelMeasurement* measurements = nullptr;
+            ChannelMeasurement* measurements;
+
             switch (measurement.m_band)
             {
             case GOESXRay::XRayData::SHORT:
@@ -1597,6 +1603,9 @@ void SIDGUI::xRayDataUpdated(const QList<GOESXRay::XRayData>& data, bool primary
                 break;
             case GOESXRay::XRayData::LONG:
                 measurements = &m_xrayLongMeasurements[idx];
+                break;
+            default:
+                measurements = nullptr;
                 break;
             }
             // Ignore flux measurements of 0, as log10(0) is -Inf
@@ -1613,7 +1622,10 @@ void SIDGUI::xRayDataUpdated(const QList<GOESXRay::XRayData>& data, bool primary
 
 void SIDGUI::protonDataUpdated(const QList<GOESXRay::ProtonData>& data, bool primary)
 {
+    (void) primary;
+
     QDateTime start;
+
     if (m_protonMeasurements[0].m_measurements.size() > 0) {
         start = m_protonMeasurements[0].m_measurements.last().m_dateTime;
     }
@@ -1678,12 +1690,7 @@ void SIDGUI::grbDataUpdated(const QList<GRB::Data>& data)
 
 void SIDGUI::sdoImageUpdated(const QImage& image)
 {
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    const QPixmap *currentPixmap = ui->sdoImage->pixmap();
-    bool setSize = (currentPixmap == nullptr) || currentPixmap->isNull();
-#else
-    bool setSize = ui->sdoImage->pixmap().isNull();
-#endif
+    bool setSize = ui->sdoImage->pixmap(Qt::ReturnByValueConstant()).isNull();
 
     QPixmap pixmap;
     pixmap.convertFromImage(image);

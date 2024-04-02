@@ -135,7 +135,7 @@ void SIDSettingsDialog::getChannels(QStringList& ids, QStringList& titles)
     {
         DeviceSet *deviceSet = deviceSets[deviceSetIndex];
 
-        for (unsigned int channelIndex = 0; channelIndex < deviceSet->getNumberOfChannels(); channelIndex++)
+        for (int channelIndex = 0; channelIndex < deviceSet->getNumberOfChannels(); channelIndex++)
         {
             QString title;
             ChannelWebAPIUtils::getChannelSetting(deviceSetIndex, channelIndex, "title", title);
