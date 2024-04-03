@@ -7,6 +7,7 @@ set(ft8_SOURCES
     ft8.cpp
     ft8plan.cpp
     ft8plans.cpp
+    ft8stats.cpp
     libldpc.cpp
     osd.cpp
     packing.cpp
@@ -22,6 +23,7 @@ set(ft8_HEADERS
     ft8.h
     ft8plan.h
     ft8plans.h
+    ft8stats.h
     libldpc.h
     osd.h
     packing.h
