@@ -22,7 +22,7 @@ The tooltip shows the device type, sequence number and serial number of the devi
 
 You may click on this area and drag the window with the mouse.
 
-<h3>3: Title</h3>
+<h3>2: Title</h3>
 
 The window title shows the device type and a sequence number for which the spectrum is displayed. It is the same as in the corresponding device window.
 

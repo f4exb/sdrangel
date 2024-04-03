@@ -382,18 +382,63 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
             m_fft->transform();
             m_fftCounter = 0;
             double magsq, magsqTotal;
+            unsigned short symbol;
 
-            unsigned short symbol = evalSymbol(
-                argmax(
-                    m_fft->out(),
-                    m_fftInterpolation,
-                    m_fftLength,
-                    magsq,
-                    magsqTotal,
-                    m_spectrumBuffer,
-                    m_fftInterpolation
-                )
-            ) % m_nbSymbolsEff;
+            if (m_settings.m_codingScheme == ChirpChatDemodSettings::CodingFT)
+            {
+                std::vector<float> magnitudes;
+                symbol = evalSymbol(
+                    extractMagnitudes(
+                        magnitudes,
+                        m_fft->out(),
+                        m_fftInterpolation,
+                        m_fftLength,
+                        magsq,
+                        magsqTotal,
+                        m_spectrumBuffer,
+                        m_fftInterpolation
+                    )
+                ) % m_nbSymbolsEff;
+                m_decodeMsg->pushBackSymbol(symbol);
+                m_decodeMsg->pushBackMagnitudes(magnitudes);
+            }
+            else
+            {
+                int imax;
+
+                if (m_settings.m_deBits > 0)
+                {
+                    double magSqNoise;
+                    imax = argmaxSpreaded(
+                        m_fft->out(),
+                        m_fftInterpolation,
+                        m_fftLength,
+                        magsq,
+                        magSqNoise,
+                        magsqTotal,
+                        m_spectrumBuffer,
+                        m_fftInterpolation
+                    );
+                    // double dbS = CalcDb::dbPower(magsq);
+                    // double dbN = CalcDb::dbPower(magSqNoise);
+                    // qDebug("ChirpChatDemodSink::processSample: S: %5.2f N: %5.2f S/N: %5.2f", dbS, dbN, dbS - dbN);
+                }
+                else
+                {
+                    imax = argmax(
+                        m_fft->out(),
+                        m_fftInterpolation,
+                        m_fftLength,
+                        magsq,
+                        magsqTotal,
+                        m_spectrumBuffer,
+                        m_fftInterpolation
+                    );
+                }
+
+                symbol = evalSymbol(imax) % m_nbSymbolsEff;
+                m_decodeMsg->pushBackSymbol(symbol);
+            }
 
             if (m_spectrumSink) {
                 m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
@@ -405,13 +450,18 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
 
             m_magsqTotalAvg(magsq);
 
-            m_decodeMsg->pushBackSymbol(symbol);
-
             if ((m_chirpCount == 0)
             ||  (m_settings.m_eomSquelchTenths == 121) // max - disable squelch
             || ((m_settings.m_eomSquelchTenths*magsq)/10.0 > m_magsqMax))
             {
                 qDebug("ChirpChatDemodSink::processSample: symbol %02u: %4u|%11.6f", m_chirpCount, symbol, magsq);
+                // const std::vector<float>& magnitudes = m_decodeMsg->getMagnitudes().back();
+                // int i = 0;
+                // for (auto magnitude : magnitudes)
+                // {
+                //     qDebug("ChirpChatDemodSink::processSample: mag[%02d] = %11.6f", i, magnitude);
+                //     i++;
+                // }
                 m_magsqOnAvg(magsq);
                 m_chirpCount++;
 
@@ -508,38 +558,93 @@ unsigned int ChirpChatDemodSink::argmax(
     return imax;
 }
 
+unsigned int ChirpChatDemodSink::extractMagnitudes(
+    std::vector<float>& magnitudes,
+    const Complex *fftBins,
+    unsigned int fftMult,
+    unsigned int fftLength,
+    double& magsqMax,
+    double& magsqTotal,
+    Complex *specBuffer,
+    unsigned int specDecim)
+{
+    magsqMax = 0.0;
+    magsqTotal = 0.0;
+    unsigned int imax = 0;
+    double magSum = 0.0;
+    unsigned int spread = fftMult * (1<<m_settings.m_deBits);
+    unsigned int istart = fftMult*fftLength - spread/2 + 1;
+    float magnitude = 0.0;
+
+    for (unsigned int i2 = istart; i2 < istart + fftMult*fftLength; i2++)
+    {
+        int i = i2 % (fftMult*fftLength);
+        double magsq = std::norm(fftBins[i]);
+        magsqTotal += magsq;
+        magnitude += magsq;
+
+        if (i % spread == (spread/2)-1) // boundary (inclusive)
+        {
+            if (magnitude > magsqMax)
+            {
+                imax = (i/spread)*spread;
+                magsqMax = magnitude;
+            }
+
+            magnitudes.push_back(magnitude);
+            magnitude = 0.0;
+        }
+
+        if (specBuffer)
+        {
+            magSum += magsq;
+
+            if (i % specDecim == specDecim - 1)
+            {
+                specBuffer[i/specDecim] = Complex(std::polar(magSum, 0.0));
+                magSum = 0.0;
+            }
+        }
+    }
+
+    magsqTotal /= fftMult*fftLength;
+
+    return imax;
+}
+
 unsigned int ChirpChatDemodSink::argmaxSpreaded(
     const Complex *fftBins,
     unsigned int fftMult,
     unsigned int fftLength,
     double& magsqMax,
     double& magsqNoise,
-    double& magSqTotal,
+    double& magsqTotal,
     Complex *specBuffer,
     unsigned int specDecim)
 {
     magsqMax = 0.0;
     magsqNoise = 0.0;
-    magSqTotal = 0.0;
+    magsqTotal = 0.0;
     unsigned int imax = 0;
     double magSum = 0.0;
-    double magSymbol = 0.0;
+    unsigned int nbsymbols = 1<<(m_settings.m_spreadFactor - m_settings.m_deBits);
     unsigned int spread = fftMult * (1<<m_settings.m_deBits);
     unsigned int istart = fftMult*fftLength - spread/2 + 1;
+    double magSymbol = 0.0;
 
     for (unsigned int i2 = istart; i2 < istart + fftMult*fftLength; i2++)
     {
-        unsigned int i = i2 % (fftMult*fftLength);
+        int i = i2 % (fftMult*fftLength);
         double magsq = std::norm(fftBins[i]);
+        magsqTotal += magsq;
         magSymbol += magsq;
-        magSqTotal += magsq;
 
-        if (i % spread == spread/2) // boundary (inclusive)
+        if (i % spread == (spread/2)-1) // boundary (inclusive)
         {
             if (magSymbol > magsqMax)
             {
+                imax = (i/spread)*spread;
                 magsqMax = magSymbol;
-                imax = i;
             }
 
             magsqNoise += magSymbol;
@@ -559,10 +664,12 @@ unsigned int ChirpChatDemodSink::argmaxSpreaded(
     }
 
     magsqNoise -= magsqMax;
-    magsqNoise /= fftLength;
-    magSqTotal /= fftMult*fftLength;
+    magsqNoise /= (nbsymbols - 1);
+    magsqTotal /= nbsymbols;
+        // magsqNoise /= fftLength;
+        // magsqTotal /= fftMult*fftLength;
 
-    return imax / spread;
+    return imax;
 }
 
 void ChirpChatDemodSink::decimateSpectrum(Complex *in, Complex *out, unsigned int size, unsigned int decimation)

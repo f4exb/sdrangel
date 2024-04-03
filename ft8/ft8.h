@@ -30,6 +30,7 @@
 #include <QString>
 
 #include "fft.h"
+#include "ft8stats.h"
 #include "export.h"
 
 class QThread;
@@ -51,53 +52,6 @@ public:
     virtual QString get_name() = 0;
 };
 
-//
-// manage statistics for soft decoding, to help
-// decide how likely each symbol is to be correct,
-// to drive LDPC decoding.
-//
-// meaning of the how (problt_how) parameter:
-// 0: gaussian
-// 1: index into the actual distribution
-// 2: do something complex for the tails.
-// 3: index into the actual distribution plus gaussian for tails.
-// 4: similar to 3.
-// 5: laplace
-//
-class FT8_API Stats
-{
-public:
-    std::vector<float> a_;
-    float sum_;
-    bool finalized_;
-    float mean_;   // cached
-    float stddev_; // cached
-    float b_;      // cached
-    int how_;
-
-public:
-    Stats(int how, float log_tail, float log_rate);
-    void add(float x);
-    void finalize();
-    float mean();
-    float stddev();
-
-    // fraction of distribution that's less than x.
-    // assumes normal distribution.
-    // this is PHI(x), or the CDF at x,
-    // or the integral from -infinity
-    // to x of the PDF.
-    float gaussian_problt(float x);
-    // https://en.wikipedia.org/wiki/Laplace_distribution
-    // m and b from page 116 of Mark Owen's Practical Signal Processing.
-    float laplace_problt(float x);
-    // look into the actual distribution.
-    float problt(float x);
-
-private:
-    float log_tail_;
-    float log_rate_;
-};
 
 class FT8_API Strength
 {
@@ -220,8 +174,8 @@ struct FT8_API FT8Params
         third_off_win = 0.075;
         log_tail = 0.1;
         log_rate = 8.0;
-        problt_how_noise = 0;
-        problt_how_sig = 0;
+        problt_how_noise = 0;    // Gaussian
+        problt_how_sig = 0;      // Gaussian
         use_apriori = 1;
         use_hints = 2;           // 1 means use all hints, 2 means just CQ hints
         win_type = 1;
@@ -319,6 +273,18 @@ public:
     // apply (174, 91) generator mastrix to obtain the 83 parity bits
     // append the 83 bits to the 91 bits messag e+ crc to obbain the 174 bit payload
     static void encode(int a174[], int s77[]);
+
+    //
+    // set ones and zero symbol indexes
+    //
+    static void set_ones_zeroes(int ones[], int zeroes[], int nbBits, int bitIndex);
+
+    //
+    // mags is the vector of 2^nbSymbolBits vector of magnitudes at each symbol time
+    // ll174 is the resulting 174 soft bits of payload
+    // used in FT-chirp modulation scheme - generalized to any number of symbol bits
+    //
+    static void soft_decode_mags(FT8Params& params, const std::vector<std::vector<float>>& mags, int nbSymbolBits, float ll174[]);
 
 private:
     //
@@ -444,6 +410,11 @@ private:
     // normalize levels by windowed median.
     // this helps, but why?
     //
+    static std::vector<std::vector<float>> convert_to_snr_gen(const FT8Params& params, int nbSymbolBits, const std::vector<std::vector<float>> &mags);
+    //
+    // normalize levels by windowed median.
+    // this helps, but why?
+    //
     std::vector<std::vector<std::complex<float>>> c_convert_to_snr(
         const std::vector<std::vector<std::complex<float>>> &m79
     );
@@ -453,8 +424,18 @@ private:
     // distribution of strongest tones, and
     // distribution of noise.
     //
-    void make_stats(
+    static void make_stats(
         const std::vector<std::vector<float>> &m79,
+        Stats &bests,
+        Stats &all
+    );
+    //
+    // generalized version of the above for any number of symbols and no Costas
+    // used by FT-chirp decoder
+    //
+    static void make_stats_gen(
+        const std::vector<std::vector<float>> &mags,
+        int nbSymbolBits,
         Stats &bests,
         Stats &all
     );
@@ -477,7 +458,8 @@ private:
     //
     // returns log-likelihood, zero is positive, one is negative.
     //
-    float bayes(
+    static float bayes(
+        FT8Params& params,
         float best_zero,
         float best_one,
         int lli,

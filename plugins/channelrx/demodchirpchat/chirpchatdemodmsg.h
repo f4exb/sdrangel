@@ -28,6 +28,7 @@ namespace ChirpChatDemodMsg
 
     public:
         const std::vector<unsigned short>& getSymbols() const { return m_symbols; }
+        const std::vector<std::vector<float>>& getMagnitudes() const { return m_magnitudes; }
         unsigned int getSyncWord() const { return m_syncWord; }
         float getSingalDb() const { return m_signalDb; }
         float getNoiseDb() const { return m_noiseDb; }
@@ -48,6 +49,10 @@ namespace ChirpChatDemodMsg
             m_noiseDb = db;
         }
 
+        void pushBackMagnitudes(const std::vector<float>& magnitudes) {
+            m_magnitudes.push_back(magnitudes);
+        }
+
         static MsgDecodeSymbols* create() {
             return new MsgDecodeSymbols();
         }
@@ -57,6 +62,7 @@ namespace ChirpChatDemodMsg
 
     private:
         std::vector<unsigned short> m_symbols;
+        std::vector<std::vector<float>> m_magnitudes;
         unsigned int m_syncWord;
         float m_signalDb;
         float m_noiseDb;

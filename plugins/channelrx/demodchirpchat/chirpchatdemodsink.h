@@ -138,6 +138,16 @@ private:
         Complex *specBuffer,
         unsigned int specDecim
         );
+    unsigned int extractMagnitudes(
+        std::vector<float>& magnitudes,
+        const Complex *fftBins,
+        unsigned int fftMult,
+        unsigned int fftLength,
+        double& magsqMax,
+        double& magSqTotal,
+        Complex *specBuffer,
+        unsigned int specDecim
+    );
     void decimateSpectrum(Complex *in, Complex *out, unsigned int size, unsigned int decimation);
     int toSigned(int u, int intSize);
     unsigned int evalSymbol(unsigned int rawSymbol);
