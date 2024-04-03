@@ -261,17 +261,17 @@ struct SDRBASE_API APRSPacket {
         data.append(':');
 
         // #2028 - Protect against APRS-IS server command injection, by only sending up to first CR/LF
-        int idx = m_data.indexOf("\r\n");
-        if (idx >= 0)
-        {
-            data.append(m_data.left(idx + 2));
+        int idx = m_data.indexOf("\r");
+        if (idx == -1) {
+            idx = m_data.indexOf("\n");
         }
-        else
-        {
+        if (idx >= 0) {
+            data.append(m_data.left(idx));
+        } else {
             data.append(m_data);
-            data.append('\r');
-            data.append('\n');
         }
+        data.append('\r');
+        data.append('\n');
 
         return data;
     }

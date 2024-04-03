@@ -185,7 +185,7 @@ bool APRSPacket::decode(AX25Packet packet)
             qDebug() << "APRSPacket::decode: AX.25 Destination did not match known regexp " << m_to;
         }
     } else {
-        qDebug() << "APRSPacket::decode: Not ARPS: type=" << packet.m_type << " pid=" << packet.m_pid << " length=" << packet.m_data.length();
+        qDebug() << "APRSPacket::decode: Not APRS: type=" << packet.m_type << " pid=" << packet.m_pid << " length=" << packet.m_data.length();
     }
 
     return false;
