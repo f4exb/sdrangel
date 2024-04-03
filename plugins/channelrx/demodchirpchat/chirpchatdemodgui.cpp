@@ -40,6 +40,7 @@
 #include "maincore.h"
 
 #include "chirpchatdemod.h"
+#include "chirpchatdemodmsg.h"
 #include "chirpchatdemodgui.h"
 
 ChirpChatDemodGUI* ChirpChatDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
@@ -103,7 +104,7 @@ bool ChirpChatDemodGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (ChirpChatDemod::MsgReportDecodeBytes::match(message))
+    else if (ChirpChatDemodMsg::MsgReportDecodeBytes::match(message))
     {
         if (m_settings.m_codingScheme == ChirpChatDemodSettings::CodingLoRa) {
             showLoRaMessage(message);
@@ -111,7 +112,7 @@ bool ChirpChatDemodGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (ChirpChatDemod::MsgReportDecodeString::match(message))
+    else if (ChirpChatDemodMsg::MsgReportDecodeString::match(message))
     {
         if ((m_settings.m_codingScheme == ChirpChatDemodSettings::CodingASCII)
          || (m_settings.m_codingScheme == ChirpChatDemodSettings::CodingTTY)) {
@@ -607,7 +608,7 @@ void ChirpChatDemodGUI::setBandwidths()
 
 void ChirpChatDemodGUI::showLoRaMessage(const Message& message)
 {
-    const ChirpChatDemod::MsgReportDecodeBytes& msg = (ChirpChatDemod::MsgReportDecodeBytes&) message;
+    const ChirpChatDemodMsg::MsgReportDecodeBytes& msg = (ChirpChatDemodMsg::MsgReportDecodeBytes&) message;
     QByteArray bytes = msg.getBytes();
     QString syncWordStr((tr("%1").arg(msg.getSyncWord(), 2, 16, QChar('0'))));
 
@@ -677,7 +678,7 @@ void ChirpChatDemodGUI::showLoRaMessage(const Message& message)
 
 void ChirpChatDemodGUI::showTextMessage(const Message& message)
 {
-    const ChirpChatDemod::MsgReportDecodeString& msg = (ChirpChatDemod::MsgReportDecodeString&) message;
+    const ChirpChatDemodMsg::MsgReportDecodeString& msg = (ChirpChatDemodMsg::MsgReportDecodeString&) message;
 
     QDateTime dt = QDateTime::currentDateTime();
     QString dateStr = dt.toString("HH:mm:ss");

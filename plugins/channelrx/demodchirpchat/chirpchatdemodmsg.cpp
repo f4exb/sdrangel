@@ -20,3 +20,6 @@
 #include "chirpchatdemodmsg.h"
 
 MESSAGE_CLASS_DEFINITION(ChirpChatDemodMsg::MsgDecodeSymbols, Message)
+MESSAGE_CLASS_DEFINITION(ChirpChatDemodMsg::MsgReportDecodeBytes, Message)
+MESSAGE_CLASS_DEFINITION(ChirpChatDemodMsg::MsgReportDecodeString, Message)
+MESSAGE_CLASS_DEFINITION(ChirpChatDemodMsg::MsgReportDecodeFT, Message)

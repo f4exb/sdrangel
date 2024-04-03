@@ -21,10 +21,15 @@
 #define INCLUDE_CHIRPCHATDEMODDECODER_H
 
 #include <vector>
+
+#include <QObject>
+
+#include "util/messagequeue.h"
 #include "chirpchatdemodsettings.h"
 
-class ChirpChatDemodDecoder
+class ChirpChatDemodDecoder : public QObject
 {
+    Q_OBJECT
 public:
     ChirpChatDemodDecoder();
     ~ChirpChatDemodDecoder();
@@ -47,8 +52,12 @@ public:
     bool getHeaderCRCStatus() const { return m_headerCRCStatus; }
     int getPayloadParityStatus() const { return m_payloadParityStatus; }
     bool getPayloadCRCStatus() const { return m_payloadCRCStatus; }
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    void setOutputMessageQueue(MessageQueue *messageQueue) { m_outputMessageQueue = messageQueue; }
 
 private:
+    bool handleMessage(const Message& cmd);
+
     ChirpChatDemodSettings::CodingScheme m_codingScheme;
     unsigned int m_spreadFactor;
     unsigned int m_deBits;
@@ -65,6 +74,11 @@ private:
     bool m_headerCRCStatus;
     int m_payloadParityStatus;
     bool m_payloadCRCStatus;
+    MessageQueue m_inputMessageQueue;
+    MessageQueue *m_outputMessageQueue;
+
+private slots:
+    void handleInputMessages();
 };
 
 #endif // INCLUDE_CHIRPCHATDEMODDECODER_H
