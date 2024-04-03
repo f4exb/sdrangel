@@ -1807,6 +1807,52 @@ void FT8::soft_decode(const FFTEngine::ffts_t &c79, float ll174[])
     m79 = un_gray_code_r(m79);
     int lli = 0;
 
+    // tone numbers that make second index bit zero or one.
+    int zeroi[4][3];
+    int onei[4][3];
+
+    for (int biti = 0; biti < 3; biti++)
+    {
+        if (biti == 0)
+        {
+            // high bit
+            zeroi[0][0] = 0;
+            zeroi[1][0] = 1;
+            zeroi[2][0] = 2;
+            zeroi[3][0] = 3;
+            onei[0][0] = 4;
+            onei[1][0] = 5;
+            onei[2][0] = 6;
+            onei[3][0] = 7;
+        }
+
+        if (biti == 1)
+        {
+            // middle bit
+            zeroi[0][1] = 0;
+            zeroi[1][1] = 1;
+            zeroi[2][1] = 4;
+            zeroi[3][1] = 5;
+            onei[0][1] = 2;
+            onei[1][1] = 3;
+            onei[2][1] = 6;
+            onei[3][1] = 7;
+        }
+
+        if (biti == 2)
+        {
+            // low bit
+            zeroi[0][2] = 0;
+            zeroi[1][2] = 2;
+            zeroi[2][2] = 4;
+            zeroi[3][2] = 6;
+            onei[0][2] = 1;
+            onei[1][2] = 3;
+            onei[2][2] = 5;
+            onei[3][2] = 7;
+        }
+    }
+
     for (int i79 = 0; i79 < 79; i79++)
     {
         if (i79 < 7 || (i79 >= 36 && i79 < 36 + 7) || i79 >= 72) {
@@ -1823,56 +1869,13 @@ void FT8::soft_decode(const FFTEngine::ffts_t &c79, float ll174[])
 
         for (int biti = 0; biti < 3; biti++)
         {
-            // tone numbers that make this bit zero or one.
-            int zeroi[4];
-            int onei[4];
-
-            if (biti == 0)
-            {
-                // high bit
-                zeroi[0] = 0;
-                zeroi[1] = 1;
-                zeroi[2] = 2;
-                zeroi[3] = 3;
-                onei[0] = 4;
-                onei[1] = 5;
-                onei[2] = 6;
-                onei[3] = 7;
-            }
-
-            if (biti == 1)
-            {
-                // middle bit
-                zeroi[0] = 0;
-                zeroi[1] = 1;
-                zeroi[2] = 4;
-                zeroi[3] = 5;
-                onei[0] = 2;
-                onei[1] = 3;
-                onei[2] = 6;
-                onei[3] = 7;
-            }
-
-            if (biti == 2)
-            {
-                // low bit
-                zeroi[0] = 0;
-                zeroi[1] = 2;
-                zeroi[2] = 4;
-                zeroi[3] = 6;
-                onei[0] = 1;
-                onei[1] = 3;
-                onei[2] = 5;
-                onei[3] = 7;
-            }
-
             // strongest tone that would make this bit be zero.
             int got_best_zero = 0;
             float best_zero = 0;
 
             for (int i = 0; i < 4; i++)
             {
-                float x = m79[i79][zeroi[i]];
+                float x = m79[i79][zeroi[i][biti]];
 
                 if (got_best_zero == 0 || x > best_zero)
                 {
@@ -1887,7 +1890,7 @@ void FT8::soft_decode(const FFTEngine::ffts_t &c79, float ll174[])
 
             for (int i = 0; i < 4; i++)
             {
-                float x = m79[i79][onei[i]];
+                float x = m79[i79][onei[i][biti]];
                 if (got_best_one == 0 || x > best_one)
                 {
                     got_best_one = 1;
@@ -2073,6 +2076,52 @@ void FT8::c_soft_decode(const FFTEngine::ffts_t &c79x, float ll174[])
     m79 = un_gray_code_r(m79);
     int lli = 0;
 
+    // tone numbers that make second index bit zero or one.
+    int zeroi[4][3];
+    int onei[4][3];
+
+    for (int biti = 0; biti < 3; biti++)
+    {
+        if (biti == 0)
+        {
+            // high bit
+            zeroi[0][0] = 0;
+            zeroi[1][0] = 1;
+            zeroi[2][0] = 2;
+            zeroi[3][0] = 3;
+            onei[0][0] = 4;
+            onei[1][0] = 5;
+            onei[2][0] = 6;
+            onei[3][0] = 7;
+        }
+
+        if (biti == 1)
+        {
+            // middle bit
+            zeroi[0][1] = 0;
+            zeroi[1][1] = 1;
+            zeroi[2][1] = 4;
+            zeroi[3][1] = 5;
+            onei[0][1] = 2;
+            onei[1][1] = 3;
+            onei[2][1] = 6;
+            onei[3][1] = 7;
+        }
+
+        if (biti == 2)
+        {
+            // low bit
+            zeroi[0][2] = 0;
+            zeroi[1][2] = 2;
+            zeroi[2][2] = 4;
+            zeroi[3][2] = 6;
+            onei[0][2] = 1;
+            onei[1][2] = 3;
+            onei[2][2] = 5;
+            onei[3][2] = 7;
+        }
+    }
+
     for (int i79 = 0; i79 < 79; i79++)
     {
         if (i79 < 7 || (i79 >= 36 && i79 < 36 + 7) || i79 >= 72) {
@@ -2089,56 +2138,13 @@ void FT8::c_soft_decode(const FFTEngine::ffts_t &c79x, float ll174[])
 
         for (int biti = 0; biti < 3; biti++)
         {
-            // tone numbers that make this bit zero or one.
-            int zeroi[4];
-            int onei[4];
-
-            if (biti == 0)
-            {
-                // high bit
-                zeroi[0] = 0;
-                zeroi[1] = 1;
-                zeroi[2] = 2;
-                zeroi[3] = 3;
-                onei[0] = 4;
-                onei[1] = 5;
-                onei[2] = 6;
-                onei[3] = 7;
-            }
-
-            if (biti == 1)
-            {
-                // middle bit
-                zeroi[0] = 0;
-                zeroi[1] = 1;
-                zeroi[2] = 4;
-                zeroi[3] = 5;
-                onei[0] = 2;
-                onei[1] = 3;
-                onei[2] = 6;
-                onei[3] = 7;
-            }
-
-            if (biti == 2)
-            {
-                // low bit
-                zeroi[0] = 0;
-                zeroi[1] = 2;
-                zeroi[2] = 4;
-                zeroi[3] = 6;
-                onei[0] = 1;
-                onei[1] = 3;
-                onei[2] = 5;
-                onei[3] = 7;
-            }
-
             // strongest tone that would make this bit be zero.
             int got_best_zero = 0;
             float best_zero = 0;
 
             for (int i = 0; i < 4; i++)
             {
-                float x = m79[i79][zeroi[i]];
+                float x = m79[i79][zeroi[i][biti]];
 
                 if (got_best_zero == 0 || x > best_zero)
                 {
@@ -2153,7 +2159,7 @@ void FT8::c_soft_decode(const FFTEngine::ffts_t &c79x, float ll174[])
 
             for (int i = 0; i < 4; i++)
             {
-                float x = m79[i79][onei[i]];
+                float x = m79[i79][onei[i][biti]];
 
                 if (got_best_one == 0 || x > best_one)
                 {
