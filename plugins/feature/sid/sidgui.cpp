@@ -99,8 +99,15 @@ bool SIDGUI::handleMessage(const Message& message)
     }
     else if (SIDMain::MsgMeasurement::match(message))
     {
-        const SIDMain::MsgMeasurement& measurement = (SIDMain::MsgMeasurement&) message;
-        addMeasurement(measurement.getId(), measurement.getDateTime(), measurement.getMeasurement());
+        // Measurements from SIDWorker
+        const SIDMain::MsgMeasurement& measurementsMsg = (SIDMain::MsgMeasurement&) message;
+        QDateTime dt = measurementsMsg.getDateTime();
+        const QStringList& ids = measurementsMsg.getIds();
+        const QList<double>& measurements = measurementsMsg.getMeasurements();
+
+        for (int i = 0; i < ids.size(); i++) {
+            addMeasurement(ids[i], dt, measurements[i]);
+        }
         return true;
     }
 
@@ -151,7 +158,8 @@ SIDGUI::SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_grbSeries(nullptr),
     m_stix(nullptr),
     m_stixSeries(nullptr),
-    m_availableFeatureHandler({"sdrangel.feature.map"})
+    m_availableFeatureHandler({"sdrangel.feature.map"}),
+    m_availableChannelHandler({}, "RM")
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -260,6 +268,13 @@ SIDGUI::SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
         &SIDGUI::featuresChanged
     );
     m_availableFeatureHandler.scanAvailableChannelsAndFeatures();
+    QObject::connect(
+        &m_availableChannelHandler,
+        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
+        this,
+        &SIDGUI::channelsChanged
+    );
+    m_availableChannelHandler.scanAvailableChannelsAndFeatures();
 
     QObject::connect(ui->chartSplitter, &QSplitter::splitterMoved, this, &SIDGUI::chartSplitterMoved);
     QObject::connect(ui->sdoSplitter, &QSplitter::splitterMoved, this, &SIDGUI::sdoSplitterMoved);
@@ -274,6 +289,11 @@ SIDGUI::~SIDGUI()
         &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
         this,
         &SIDGUI::featuresChanged
+    );
+    QObject::disconnect(&m_availableChannelHandler,
+        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
+        this,
+        &SIDGUI::channelsChanged
     );
     disconnectDataUpdates();
     if (m_grb) {
@@ -1413,6 +1433,14 @@ void SIDGUI::on_deleteAll_clicked()
 void SIDGUI::on_settings_clicked()
 {
     SIDSettingsDialog dialog(&m_settings);
+
+    QObject::connect(
+        &dialog,
+        &SIDSettingsDialog::removeChannels,
+        this,
+        &SIDGUI::removeChannels
+    );
+
     if (dialog.exec() == QDialog::Accepted)
     {
         setAutosaveTimer();
@@ -1959,6 +1987,61 @@ void SIDGUI::featuresChanged(const QStringList& renameFrom, const QStringList& r
     }
 }
 
+void SIDGUI::channelsChanged(const QStringList& renameFrom, const QStringList& renameTo, const QStringList& removed, const QStringList& added)
+{
+    removeChannels(removed);
+
+    // Rename measurements and settings that have had their id changed
+    for (int i = 0; i < renameFrom.size(); i++)
+    {
+        for (int j = 0; j < m_channelMeasurements.size(); j++)
+        {
+            if (m_channelMeasurements[j].m_id == renameFrom[i]) {
+                m_channelMeasurements[j].m_id = renameTo[i];
+            }
+        }
+        for (int j = 0; j < m_settings.m_channelSettings.size(); j++)
+        {
+            if (m_settings.m_channelSettings[j].m_id == renameFrom[i]) {
+                m_settings.m_channelSettings[j].m_id = renameTo[i];
+            }
+        }
+    }
+
+    // Create settings for any new channels
+    // Don't call createChannelSettings when channels are removed, as ids might not have been updated yet
+    if (added.size() > 0)
+    {
+        if (m_settings.createChannelSettings()) {
+            applySetting("channelSettings");
+        }
+    }
+}
+
+void SIDGUI::removeChannels(const QStringList& ids)
+{
+    for (int i = 0; i < ids.size(); i++)
+    {
+        for (int j = 0; j < m_channelMeasurements.size(); j++)
+        {
+            if (ids[i] == m_channelMeasurements[j].m_id)
+            {
+                m_channelMeasurements.removeAt(j);
+                break;
+            }
+        }
+
+        for (int j = 0; j < m_settings.m_channelSettings.size(); j++)
+        {
+            if (ids[i] == m_settings.m_channelSettings[j].m_id)
+            {
+                m_settings.m_channelSettings.removeAt(j);
+                break;
+            }
+        }
+    }
+}
+
 void SIDGUI::autosave()
 {
     qDebug() << "SIDGUI::autosave start";
@@ -2122,6 +2205,7 @@ void SIDGUI::readCSV(const QString& filename, bool autoload)
         colors.removeAll(channelSettings.m_color.rgb());
     }
 
+    bool channelSettingsChanged = false;
     QStringList colNames;
     if (CSV::readRow(in, &colNames))
     {
@@ -2185,6 +2269,7 @@ void SIDGUI::readCSV(const QString& filename, bool autoload)
                     newSettings.m_label = name.mid(idx + 1);
                     newSettings.m_color = colors.takeFirst();
                     m_settings.m_channelSettings.append(newSettings);
+                    channelSettingsChanged = true;
                 }
             }
         }
@@ -2236,6 +2321,9 @@ void SIDGUI::readCSV(const QString& filename, bool autoload)
         plotChart();
         connectDataUpdates();
         getData();
+        if (channelSettingsChanged) {
+            applySetting("channelSettings");
+        }
     }
 }
 

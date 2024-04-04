@@ -110,23 +110,23 @@ public:
 
     public:
         QDateTime getDateTime() const { return m_dateTime; }
-        QString getId() const { return m_id; }
-        double getMeasurement() const { return m_measurement; }
+        const QStringList& getIds() const { return m_ids; }
+        const QList<double>& getMeasurements() const { return m_measurements; }
 
-        static MsgMeasurement* create(QDateTime dateTime, const QString& id, double measurement) {
-            return new MsgMeasurement(dateTime, id, measurement);
+        static MsgMeasurement* create(QDateTime dateTime, const QStringList& ids, const QList<double>& measurements) {
+            return new MsgMeasurement(dateTime, ids, measurements);
         }
 
     private:
         QDateTime m_dateTime;
-        const QString m_id;
-        double m_measurement;
+        QStringList m_ids;
+        QList<double> m_measurements;
 
-        MsgMeasurement(QDateTime dateTime, const QString& id, double measurement) :
+        MsgMeasurement(QDateTime dateTime, const QStringList& ids, const QList<double>& measurements) :
             Message(),
             m_dateTime(dateTime),
-            m_id(id),
-            m_measurement(measurement)
+            m_ids(ids),
+            m_measurements(measurements)
         {}
     };
 

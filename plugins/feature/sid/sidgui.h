@@ -193,6 +193,7 @@ private:
     QScatterSeries *m_stixSeries;
 
     AvailableChannelOrFeatureHandler m_availableFeatureHandler;
+    AvailableChannelOrFeatureHandler m_availableChannelHandler;
 
     explicit SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~SIDGUI();
@@ -243,7 +244,6 @@ private:
     void connectDataUpdates();
     void disconnectDataUpdates();
     void getData();
-    void openSkyMap();
 
     static qreal pixelDistance(QChart *chart, QAbstractSeries *series, QPointF a, QPointF b);
 
@@ -306,6 +306,8 @@ private slots:
     void onSatTrackerAdded(int featureSetIndex, Feature *feature);
     void on_map_currentTextChanged(const QString& text);
     void featuresChanged(const QStringList& renameFrom, const QStringList& renameTo);
+    void channelsChanged(const QStringList& renameFrom, const QStringList& renameTo, const QStringList& removed, const QStringList& added);
+    void removeChannels(const QStringList& ids);
 };
 
 #endif // INCLUDE_FEATURE_SIDGUI_H_

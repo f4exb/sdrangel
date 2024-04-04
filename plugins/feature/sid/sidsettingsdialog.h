@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2023-2024 Jon Beniston, M7RCE                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -33,12 +33,12 @@ public:
     ~SIDSettingsDialog();
 
 private:
-    void getChannels(QStringList& ids, QStringList& titles);
     void addColor(const QString& name, QRgb rgb);
 
 private slots:
     void accept();
     void on_browse_clicked();
+    void on_remove_clicked();
 
 private:
     Ui::SIDSettingsDialog* ui;
@@ -46,6 +46,7 @@ private:
     QList<TableColorChooser *> m_channelColorGUIs;
     QList<TableColorChooser *> m_colorGUIs;
     QFileDialog m_fileDialog;
+    QStringList m_removeIds;
 
     enum ChannelsRows {
         CHANNELS_COL_ID,
@@ -58,6 +59,10 @@ private:
         COLORS_COL_NAME,
         COLORS_COL_COLOR
     };
+
+signals:
+    void removeChannels(const QStringList& ids);
+
 };
 
 #endif // INCLUDE_SIDSETTINGSDIALOG_H

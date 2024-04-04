@@ -21,6 +21,10 @@
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
+#include "channel/channelwebapiutils.h"
+#include "device/deviceset.h"
+#include "device/deviceapi.h"
+#include "maincore.h"
 
 #include "sidsettings.h"
 
@@ -432,7 +436,7 @@ void SIDSettings::applySettings(const QStringList& settingsKeys, const SIDSettin
     if (settingsKeys.contains("chartSplitterSizes")) {
         m_chartSplitterSizes = settings.m_chartSplitterSizes;
     }
-     if (settingsKeys.contains("title")) {
+    if (settingsKeys.contains("title")) {
         m_title = settings.m_title;
     }
     if (settingsKeys.contains("rgbColor")) {
@@ -453,7 +457,7 @@ void SIDSettings::applySettings(const QStringList& settingsKeys, const SIDSettin
     if (settingsKeys.contains("reverseAPIFeatureIndex")) {
         m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
     }
-   if (settingsKeys.contains("workspaceIndex")) {
+    if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
     }
 }
@@ -594,6 +598,62 @@ SIDSettings::ChannelSettings *SIDSettings::getChannelSettings(const QString& id)
         }
     }
     return nullptr;
+}
+
+bool SIDSettings::createChannelSettings()
+{
+    bool settingsChanged = false;
+    QStringList ids;
+    QStringList titles;
+
+    getChannels(ids, titles);
+
+    // Create settings for channels we don't currently have settings for
+    for (int i = 0; i < ids.size(); i++)
+    {
+        SIDSettings::ChannelSettings *channelSettings = getChannelSettings(ids[i]);
+        if (!channelSettings)
+        {
+            SIDSettings::ChannelSettings newSettings;
+            newSettings.m_id = ids[i];
+            newSettings.m_enabled = true;
+            newSettings.m_label = titles[i];
+            newSettings.m_color = SIDSettings::m_defaultColors[i % SIDSettings::m_defaultColors.size()];
+            m_channelSettings.append(newSettings);
+            settingsChanged = true;
+        }
+    }
+
+    return settingsChanged;
+}
+
+// Get channels that have channelPowerDB value in their report
+void SIDSettings::getChannels(QStringList& ids, QStringList& titles)
+{
+    MainCore *mainCore = MainCore::instance();
+
+    std::vector<DeviceSet*> deviceSets = mainCore->getDeviceSets();
+    for (unsigned int deviceSetIndex = 0; deviceSetIndex < deviceSets.size(); deviceSetIndex++)
+    {
+        DeviceSet *deviceSet = deviceSets[deviceSetIndex];
+
+        for (int channelIndex = 0; channelIndex < deviceSet->getNumberOfChannels(); channelIndex++)
+        {
+            QString title;
+            ChannelWebAPIUtils::getChannelSetting(deviceSetIndex, channelIndex, "title", title);
+
+            double power;
+            if (ChannelWebAPIUtils::getChannelReportValue(deviceSetIndex, channelIndex, "channelPowerDB", power))
+            {
+                ChannelAPI *channel = mainCore->getChannel(deviceSetIndex, channelIndex);
+
+                QString id = mainCore->getChannelId(channel);
+
+                ids.append(id);
+                titles.append(title);
+            }
+        }
+    }
 }
 
 QByteArray SIDSettings::ChannelSettings::serialize() const

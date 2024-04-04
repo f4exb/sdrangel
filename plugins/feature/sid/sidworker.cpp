@@ -112,6 +112,8 @@ void SIDWorker::update()
 {
     // Get powers from each channel
     QDateTime dateTime = QDateTime::currentDateTime();
+    QStringList ids;
+    QList<double> measurements;
 
     for (const auto& channelSettings : m_settings.m_channelSettings)
     {
@@ -133,8 +135,8 @@ void SIDWorker::update()
                         {
                             if (getMessageQueueToGUI())
                             {
-                                SIDMain::MsgMeasurement *msgToGUI = SIDMain::MsgMeasurement::create(dateTime, channelSettings.m_id, power);
-                                getMessageQueueToGUI()->push(msgToGUI);
+                                ids.append(channelSettings.m_id);
+                                measurements.append(power);
                             }
                         }
                         else
@@ -149,5 +151,11 @@ void SIDWorker::update()
                 qDebug() << "SIDWorker::update: Malformed channel id: " << channelSettings.m_id;
             }
         }
+    }
+
+    if (getMessageQueueToGUI() && (ids.size() > 0))
+    {
+        SIDMain::MsgMeasurement *msgToGUI = SIDMain::MsgMeasurement::create(dateTime, ids, measurements);
+        getMessageQueueToGUI()->push(msgToGUI);
     }
 }

@@ -25,7 +25,9 @@ To help determine the cause of a SID, addtional data can be plotted from a varie
 * it can display GRB events on the chart, measured by satellites such as Fermi and Swift,
 * it can display solar flare events detected by the STIX X-ray instrument on the Solar Orbiter satellite,
 * it can display proton flux measured by the GOES satellites,
-* it can control the time in a 3D Map, to see the corresponding effect on MUF (Maximum Usable Frequency) and foF2 (F2 layer critical frequency).
+* it can control the time in a 3D [Map](../../feature/map/readme.md), to see the corresponding effect on MUF (Maximum Usable Frequency) and foF2 (F2 layer critical frequency).
+
+The SID feature can record power from any RX channel plugin that has a channelPowerDB value in its channel report, so can be used for recording and plotting power vs time for purposes other than SID monitoring.
 
 ![SID feature plugin](../../../doc/img/SID_plugin.jpg)
 
@@ -88,9 +90,9 @@ Data from the secondary satellite may be useful when the primary is in eclipse.
 
 <h3>11: Display Proton Flux</h3>
 
-Check to display 10 MeV and 100 MeV proton flux measurements from the primary GOES satellte on the chart.
+Check to display 10 MeV and 100 MeV proton flux measurements from the primary GOES satellite on the chart.
 A peak in the proton flux can occur one to three days after a CME (Coronal Mass Ejection) is directed towards Earth.
-Whereas X-rays from flares can impact any part of the ionosphere that are facing the sun, the Earth's magnetosphere typically directs
+Whereas X-rays from flares can impact any part of the ionosphere that is facing the sun, the Earth's magnetosphere typically directs
 the particles in the CME towards the poles, so a corresponding SID is most likely to be detected if you are receiving 
 a signal from a transmitter crossing the polar region.
 
@@ -103,7 +105,7 @@ The context menu also has an item to display the location of the GRB in the [Sky
 
 <h3>13: Display Solar Flares</h3>
 
-Check to display solar flares on the chart as record by the STIX X-ray instrument on the Solar Oribter satellite.
+Check to display solar flares on the chart as record by the STIX X-ray instrument on the Solar Orbiter satellite.
 You can right click on a solar flare to display the context menu, which contains a number of links to additional data from the STIX instrument.
 The solar flare data is not realtime and can sometimes be delayed by 24 hours.
 
@@ -123,10 +125,14 @@ Click to open the Settings Dialog. The settings dialog allows a user to:
 
 - Select which channels data is recorded from.
 - What colours are used for the data series.
+- What labels will be used for the series.
 - Whether auto-save is enabled. When auto-save is enabled, data will be automatically saved as the specified interval.
 - Whether auto-load is enabled. When auto-load is enabled, auto-save data will be automatically loaded when the SID feature is opened.
 - The filename is use for auto-save.
+- How often, in minutes, the data is auto-saved.
 - Where the chart legend should be positioned.
+
+![SID settings dialog](../../../doc/img/SID_plugin_settings_dialog.png)
 
 <h3>17: Display SDO/SOHO Imagery</h3>
 
@@ -134,7 +140,7 @@ When checked, displays imagary from NASA's SDO (Solar Dynamic Observatory) and E
 
 SDOs images the Sun in a variety of UV and EUV wavelengths. SOHO shows images of the solar corona. The images are near real-time, updated every 15 minutes.
 
-Solar flares are particularly visibible in the AIA 131 Å images.
+Solar flares are particularly visible in the AIA 131 Å images.
 
 <h3>18: Image or Video Selection</h3>
 
@@ -215,12 +221,12 @@ When checked, the latest SDO imagery is displayed. When unchecked, you can enter
 
 <h3>31: Date Time</h3>
 
-Specifies the date and time for which SDR imagery should be displayed. Images are updated every 15 minutes. The data and time can also be set by clicking on the chart.
+Specifies the date and time for which SDO imagery should be displayed. Images are updated every 15 minutes. The date and time can also be set by clicking on the chart.
 
 <h3>32: Map</h3>
 
 Select a Map to link to the SID feature. When a time is selected on the SID charts, the [Map](../../feature/map/readme.md) feature will have it's time set accordingly. 
-This allows you, for example, to see the corresponding impact on MUF/foF2.
+This allows you, for example, to see the corresponding impact on MUF/foF2 displayed on the 3D map.
 
 <h2>Tips</h2>
 

@@ -103,6 +103,8 @@ struct SIDSettings
     void applySettings(const QStringList& settingsKeys, const SIDSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
     ChannelSettings *getChannelSettings(const QString& id);
+    void getChannels(QStringList& ids, QStringList& titles);
+    bool createChannelSettings();
 
     static const QList<QRgb> m_defaultColors;
     static const QList<QRgb> m_defaultXRayShortColors;

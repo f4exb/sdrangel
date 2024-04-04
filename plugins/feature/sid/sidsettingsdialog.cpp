@@ -16,12 +16,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "util/units.h"
-#include "device/deviceset.h"
-#include "device/deviceapi.h"
-#include "channel/channelwebapiutils.h"
 #include "gui/colordialog.h"
 #include "gui/tablecolorchooser.h"
-#include "maincore.h"
 
 #include "sidsettingsdialog.h"
 
@@ -54,25 +50,7 @@ SIDSettingsDialog::SIDSettingsDialog(SIDSettings *settings, QWidget* parent) :
     ui->displayAxisTitles->setChecked(m_settings->m_displayAxisTitles);
     ui->displaySecondaryAxis->setChecked(m_settings->m_displaySecondaryAxis);
 
-    QStringList ids;
-    QStringList titles;
-
-    getChannels(ids, titles);
-
-    // Create settings for channels we don't currently have settings for
-    for (int i = 0; i < ids.size(); i++)
-    {
-        SIDSettings::ChannelSettings *channelSettings = m_settings->getChannelSettings(ids[i]);
-        if (!channelSettings)
-        {
-            SIDSettings::ChannelSettings newSettings;
-            newSettings.m_id = ids[i];
-            newSettings.m_enabled = true;
-            newSettings.m_label = titles[i];
-            newSettings.m_color = SIDSettings::m_defaultColors[i % SIDSettings::m_defaultColors.size()];
-            m_settings->m_channelSettings.append(newSettings);
-        }
-    }
+    m_settings->createChannelSettings();
 
     // Add settings to table
     for (int i = 0; i < m_settings->m_channelSettings.size(); i++)
@@ -125,35 +103,6 @@ SIDSettingsDialog::~SIDSettingsDialog()
     qDeleteAll(m_colorGUIs);
 }
 
-// Get channels that have channelPowerDB value in their report
-void SIDSettingsDialog::getChannels(QStringList& ids, QStringList& titles)
-{
-    MainCore *mainCore = MainCore::instance();
-
-    std::vector<DeviceSet*> deviceSets = mainCore->getDeviceSets();
-    for (unsigned int deviceSetIndex = 0; deviceSetIndex < deviceSets.size(); deviceSetIndex++)
-    {
-        DeviceSet *deviceSet = deviceSets[deviceSetIndex];
-
-        for (int channelIndex = 0; channelIndex < deviceSet->getNumberOfChannels(); channelIndex++)
-        {
-            QString title;
-            ChannelWebAPIUtils::getChannelSetting(deviceSetIndex, channelIndex, "title", title);
-
-            double power;
-            if (ChannelWebAPIUtils::getChannelReportValue(deviceSetIndex, channelIndex, "channelPowerDB", power))
-            {
-                ChannelAPI *channel = mainCore->getChannel(deviceSetIndex, channelIndex);
-
-                QString id = mainCore->getChannelId(channel);
-
-                ids.append(id);
-                titles.append(title);
-            }
-        }
-    }
-}
-
 void SIDSettingsDialog::accept()
 {
     m_settings->m_period = ui->period->value();
@@ -179,6 +128,18 @@ void SIDSettingsDialog::accept()
     m_settings->m_displayAxisTitles = ui->displayAxisTitles->isChecked();
     m_settings->m_displaySecondaryAxis = ui->displaySecondaryAxis->isChecked();
 
+    m_settings->m_xrayLongColors[0] = m_colorGUIs[0]->m_color;
+    m_settings->m_xrayLongColors[1] = m_colorGUIs[1]->m_color;
+    m_settings->m_xrayShortColors[0] = m_colorGUIs[2]->m_color;
+    m_settings->m_xrayShortColors[1] = m_colorGUIs[3]->m_color;
+    m_settings->m_grbColor = m_colorGUIs[4]->m_color;
+    m_settings->m_stixColor = m_colorGUIs[5]->m_color;
+    m_settings->m_protonColors[0] = m_colorGUIs[6]->m_color;
+    m_settings->m_protonColors[2] = m_colorGUIs[7]->m_color;
+
+    if (m_removeIds.size() > 0) {
+        emit removeChannels(m_removeIds);
+    }
     for (int i = 0; i < m_settings->m_channelSettings.size(); i++)
     {
         SIDSettings::ChannelSettings *channelSettings = &m_settings->m_channelSettings[i];
@@ -188,15 +149,6 @@ void SIDSettingsDialog::accept()
         channelSettings->m_label = ui->channels->item(i, CHANNELS_COL_LABEL)->text();
         channelSettings->m_color = m_channelColorGUIs[i]->m_color;
     }
-
-    m_settings->m_xrayLongColors[0] = m_colorGUIs[0]->m_color;
-    m_settings->m_xrayLongColors[1] = m_colorGUIs[1]->m_color;
-    m_settings->m_xrayShortColors[0] = m_colorGUIs[2]->m_color;
-    m_settings->m_xrayShortColors[1] = m_colorGUIs[3]->m_color;
-    m_settings->m_grbColor = m_colorGUIs[4]->m_color;
-    m_settings->m_stixColor = m_colorGUIs[5]->m_color;
-    m_settings->m_protonColors[0] = m_colorGUIs[6]->m_color;
-    m_settings->m_protonColors[2] = m_colorGUIs[7]->m_color;
 
     QDialog::accept();
 }
@@ -210,5 +162,17 @@ void SIDSettingsDialog::on_browse_clicked()
         if (fileNames.size() > 0) {
             ui->filename->setText(fileNames[0]);
         }
+    }
+}
+
+void SIDSettingsDialog::on_remove_clicked()
+{
+    QItemSelectionModel *select = ui->channels->selectionModel();
+    while (select->hasSelection())
+    {
+        QModelIndexList list = select->selectedRows();
+        int row = list[0].row();
+        m_removeIds.append(ui->channels->item(row, CHANNELS_COL_ID)->text());
+        ui->channels->removeRow(row);
     }
 }
