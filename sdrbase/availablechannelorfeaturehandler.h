@@ -78,7 +78,7 @@ private slots:
     void handleFeatureRemoved(int featureSetIndex, Feature *feature);
 
 signals:
-    void channelsOrFeaturesChanged(const QStringList& renameFrom, const QStringList& renameTo);  //!< Emitted when list of channels or features has changed
+    void channelsOrFeaturesChanged(const QStringList& renameFrom, const QStringList& renameTo, const QStringList& removed, const QStringList& added);  //!< Emitted when list of channels or features has changed
     void messageEnqueued(MessageQueue *messageQueue);   //!< Emitted when message enqueued to a pipe
 
 };
