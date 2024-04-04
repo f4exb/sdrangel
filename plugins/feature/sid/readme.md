@@ -228,7 +228,7 @@ Specifies the date and time for which SDO imagery should be displayed. Images ar
 Select a Map to link to the SID feature. When a time is selected on the SID charts, the [Map](../../feature/map/readme.md) feature will have it's time set accordingly. 
 This allows you, for example, to see the corresponding impact on MUF/foF2 displayed on the 3D map.
 
-<h3>Show Paths on Map</h3>
+<h3>33: Show Paths on Map</h3>
 
 When clicked, shows the great circle paths between transmitters and receivers on a [Map](../../feature/map/readme.md).
 
