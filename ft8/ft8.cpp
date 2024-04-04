@@ -2566,7 +2566,13 @@ int FT8::decode(const float ll174[], int a174[], FT8Params& _params, int use_osd
         if (OSD::check_crc(a174)) {
             // success!
             return 1;
+        } else {
+            comment = "CRC fail";
         }
+    }
+    else
+    {
+        comment = "LDPC fail";
     }
 
     if (use_osd && _params.osd_depth >= 0 && ldpc_ok >= _params.osd_ldpc_thresh)
@@ -2581,6 +2587,10 @@ int FT8::decode(const float ll174[], int a174[], FT8Params& _params, int use_osd
             comment += "OSD-" + std::to_string(got_depth) + "-" + std::to_string(ldpc_ok);
             OSD::ldpc_encode(oplain, a174);
             return 1;
+        }
+        else
+        {
+            comment = "OSD fail";
         }
     }
 

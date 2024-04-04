@@ -96,7 +96,7 @@ void ChirpChatModEncoderFT::encodeTextMsg(const QString& text, int a174[])
     std::fill(a77, a77 + 77, 0);
     QString sentMsg = text.rightJustified(13, ' ', true);
 
-    if (!FT8::Packing::packfree(a77, sentMsg.toStdString()))
+    if (!FT8::Packing::packfree(a77, sentMsg.toUpper().toStdString()))
     {
         qDebug("ChirpChatModEncoderFT::encodeTextMsg: failed to encode free text message (%s)", qPrintable(sentMsg));
         return;
@@ -109,21 +109,27 @@ void ChirpChatModEncoderFT::encodeMsgBeaconOrCQ(const QString& myCall, const QSt
 {
     int c28_1, c28_2, g15;
 
-    if (!FT8::Packing::packcall_std(c28_1, shorthand.toStdString())) //
+    if (!FT8::Packing::packcall_std(c28_1, shorthand.toUpper().toStdString())) //
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode call1 (%s)", qPrintable(shorthand));
+        qDebug("ChirpChatModEncoderFT::encodeMsgBeaconOrCQ: failed to encode call1 (%s)", qPrintable(shorthand));
         return;
     }
 
-    if (!FT8::Packing::packcall_std(c28_2, myCall.toStdString()))
+    if (!FT8::Packing::packcall_std(c28_2, myCall.toUpper().toStdString()))
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode call2 (%s)", qPrintable(myCall));
+        qDebug("ChirpChatModEncoderFT::encodeMsgBeaconOrCQ: failed to encode call2 (%s)", qPrintable(myCall));
         return;
     }
 
-    if (!FT8::Packing::packgrid(g15, myLocator.toStdString()))
+    if (myLocator.size() < 4)
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode locator (%s)", qPrintable(myLocator));
+        qDebug("ChirpChatModEncoderFT::encodeMsgBeaconOrCQ: locator invalid (%s)", qPrintable(myLocator));
+        return;
+    }
+
+    if (!FT8::Packing::packgrid(g15, myLocator.left(4).toUpper().toStdString()))
+    {
+        qDebug("ChirpChatModEncoderFT::encodeMsgBeaconOrCQ: failed to encode locator (%s)", qPrintable(myLocator));
         return;
     }
 
@@ -137,21 +143,27 @@ void ChirpChatModEncoderFT::encodeMsgReply(const QString& myCall, const QString&
 {
     int c28_1, c28_2, g15;
 
-    if (!FT8::Packing::packcall_std(c28_1, urCall.toStdString())) //
+    if (!FT8::Packing::packcall_std(c28_1, urCall.toUpper().toStdString())) //
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode call1 (%s)", qPrintable(urCall));
+        qDebug("ChirpChatModEncoderFT::encodeMsgReply: failed to encode call1 (%s)", qPrintable(urCall));
         return;
     }
 
-    if (!FT8::Packing::packcall_std(c28_2, myCall.toStdString()))
+    if (!FT8::Packing::packcall_std(c28_2, myCall.toUpper().toStdString()))
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode call2 (%s)", qPrintable(myCall));
+        qDebug("ChirpChatModEncoderFT::encodeMsgReply: failed to encode call2 (%s)", qPrintable(myCall));
         return;
     }
 
-    if (!FT8::Packing::packgrid(g15, myLocator.toStdString()))
+    if (myLocator.size() < 4)
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode locator (%s)", qPrintable(myLocator));
+        qDebug("ChirpChatModEncoderFT::encodeMsgReply: locator invalid (%s)", qPrintable(myLocator));
+        return;
+    }
+
+    if (!FT8::Packing::packgrid(g15, myLocator.left(4).toUpper().toStdString()))
+    {
+        qDebug("ChirpChatModEncoderFT::encodeMsgReply: failed to encode locator (%s)", qPrintable(myLocator));
         return;
     }
 
@@ -165,21 +177,21 @@ void ChirpChatModEncoderFT::encodeMsgReport(const QString& myCall, const QString
 {
     int c28_1, c28_2, g15;
 
-    if (!FT8::Packing::packcall_std(c28_1, urCall.toStdString())) //
+    if (!FT8::Packing::packcall_std(c28_1, urCall.toUpper().toStdString())) //
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode call1 (%s)", qPrintable(urCall));
+        qDebug("ChirpChatModEncoderFT::encodeMsgReport: failed to encode call1 (%s)", qPrintable(urCall));
         return;
     }
 
-    if (!FT8::Packing::packcall_std(c28_2, myCall.toStdString()))
+    if (!FT8::Packing::packcall_std(c28_2, myCall.toUpper().toStdString()))
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode call2 (%s)", qPrintable(myCall));
+        qDebug("ChirpChatModEncoderFT::encodeMsgReport: failed to encode call2 (%s)", qPrintable(myCall));
         return;
     }
 
-    if (!FT8::Packing::packgrid(g15, myReport.toStdString()))
+    if (!FT8::Packing::packgrid(g15, myReport.toUpper().toStdString()))
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode report (%s)", qPrintable(myReport));
+        qDebug("ChirpChatModEncoderFT::encodeMsgReport: failed to encode report (%s)", qPrintable(myReport));
         return;
     }
 
@@ -193,21 +205,21 @@ void ChirpChatModEncoderFT::encodeMsgFinish(const QString& myCall, const QString
 {
     int c28_1, c28_2, g15;
 
-    if (!FT8::Packing::packcall_std(c28_1, urCall.toStdString())) //
+    if (!FT8::Packing::packcall_std(c28_1, urCall.toUpper().toStdString())) //
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode call1 (%s)", qPrintable(urCall));
+        qDebug("ChirpChatModEncoderFT::encodeMsgFinish: failed to encode call1 (%s)", qPrintable(urCall));
         return;
     }
 
-    if (!FT8::Packing::packcall_std(c28_2, myCall.toStdString()))
+    if (!FT8::Packing::packcall_std(c28_2, myCall.toUpper().toStdString()))
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode call2 (%s)", qPrintable(myCall));
+        qDebug("ChirpChatModEncoderFT::encodeMsgFinish: failed to encode call2 (%s)", qPrintable(myCall));
         return;
     }
 
-    if (!FT8::Packing::packgrid(g15, shorthand.toStdString()))
+    if (!FT8::Packing::packgrid(g15, shorthand.toUpper().toStdString()))
     {
-        qDebug("ChirpChatModEncoderFT::encodeMsgBeacon: failed to encode shorthand (%s)", qPrintable(shorthand));
+        qDebug("ChirpChatModEncoderFT::encodeMsgFinish: failed to encode shorthand (%s)", qPrintable(shorthand));
         return;
     }
 

@@ -26,14 +26,6 @@
 class ChirpChatDemodDecoderLoRa
 {
 public:
-    enum ParityStatus
-    {
-        ParityUndefined,
-        ParityError,
-        ParityCorrected,
-        ParityOK
-    };
-
     static void decodeBytes(
         QByteArray& bytes,
         const std::vector<unsigned short>& inSymbols,

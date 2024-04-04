@@ -40,7 +40,7 @@ public:
     static bool packcall_std(int& c28, const std::string& callstr);
     static bool packgrid(int& g15, const std::string& locstr);
     static bool packfree(int a77[], const std::string& msg);
-    static void pack1(int a77[], int c28_1, int c28_2, int g15, int report);
+    static void pack1(int a77[], int c28_1, int c28_2, int g15, int reply);
 
 private:
     static int ihashcall(std::string call, int m);

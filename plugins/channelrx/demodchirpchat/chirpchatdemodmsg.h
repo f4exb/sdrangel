@@ -21,6 +21,8 @@
 #include <QObject>
 #include "util/message.h"
 
+#include "chirpchatdemodsettings.h"
+
 namespace ChirpChatDemodMsg
 {
     class MsgDecodeSymbols : public Message {
@@ -178,7 +180,7 @@ namespace ChirpChatDemodMsg
             m_earlyEOM(false),
             m_headerParityStatus(false),
             m_headerCRCStatus(false),
-            m_payloadParityStatus(false),
+            m_payloadParityStatus((int) ChirpChatDemodSettings::ParityUndefined),
             m_payloadCRCStatus(false)
         { }
     };
@@ -240,6 +242,8 @@ namespace ChirpChatDemodMsg
         float getSingalDb() const { return m_signalDb; }
         float getNoiseDb() const { return m_noiseDb; }
         const QString& getMsgTimestamp() const { return m_msgTimestamp; }
+        int getPayloadParityStatus() const { return m_payloadParityStatus; }
+        bool getPayloadCRCStatus() const { return m_payloadCRCStatus; }
 
         static MsgReportDecodeFT* create()
         {
@@ -275,6 +279,12 @@ namespace ChirpChatDemodMsg
         void setMsgTimestamp(const QString& ts) {
             m_msgTimestamp = ts;
         }
+        void setPayloadParityStatus(int payloadParityStatus) {
+            m_payloadParityStatus = payloadParityStatus;
+        }
+        void setPayloadCRCStatus(bool payloadCRCStatus) {
+            m_payloadCRCStatus = payloadCRCStatus;
+        }
 
     private:
         QString m_message;
@@ -287,6 +297,8 @@ namespace ChirpChatDemodMsg
         float m_signalDb;
         float m_noiseDb;
         QString m_msgTimestamp;
+        int m_payloadParityStatus;
+        bool m_payloadCRCStatus;
 
         MsgReportDecodeFT() :
             Message(),
@@ -294,7 +306,9 @@ namespace ChirpChatDemodMsg
             m_freeText(false),
             m_syncWord(0),
             m_signalDb(0.0),
-            m_noiseDb(0.0)
+            m_noiseDb(0.0),
+            m_payloadParityStatus((int) ChirpChatDemodSettings::ParityUndefined),
+            m_payloadCRCStatus(false)
         { }
     };
 }

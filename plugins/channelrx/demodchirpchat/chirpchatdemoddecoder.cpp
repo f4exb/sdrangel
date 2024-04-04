@@ -21,6 +21,7 @@
 #include "chirpchatdemoddecodertty.h"
 #include "chirpchatdemoddecoderascii.h"
 #include "chirpchatdemoddecoderlora.h"
+#include "chirpchatdemoddecoderft.h"
 #include "chirpchatdemodmsg.h"
 
 ChirpChatDemodDecoder::ChirpChatDemodDecoder() :
@@ -60,7 +61,7 @@ void ChirpChatDemodDecoder::decodeSymbols(const std::vector<unsigned short>& sym
         }
         break;
     case ChirpChatDemodSettings::CodingASCII:
-        if (m_nbSymbolBits == 5) {
+        if (m_nbSymbolBits == 7) {
             ChirpChatDemodDecoderASCII::decodeSymbols(symbols, str);
         }
         break;
@@ -106,6 +107,33 @@ void ChirpChatDemodDecoder::decodeSymbols(const std::vector<unsigned short>& sym
     }
 }
 
+void ChirpChatDemodDecoder::decodeSymbols( //!< For FT coding scheme
+    const std::vector<std::vector<float>>& mags, // vector of symbols magnitudes
+    int nbSymbolBits, //!< number of bits per symbol
+    std::string& msg,     //!< formatted message
+    std::string& call1,   //!< 1st callsign or shorthand
+    std::string& call2,   //!< 2nd callsign
+    std::string& loc,     //!< locator, report or shorthand
+    bool& reply       //!< true if message is a reply report
+)
+{
+    if (m_codingScheme != ChirpChatDemodSettings::CodingFT) {
+        return;
+    }
+
+    ChirpChatDemodDecoderFT::decodeSymbols(
+        mags,
+        nbSymbolBits,
+        msg,
+        call1,
+        call2,
+        loc,
+        reply,
+        m_payloadParityStatus,
+        m_payloadCRCStatus
+    );
+}
+
 bool ChirpChatDemodDecoder::handleMessage(const Message& cmd)
 {
     if (ChirpChatDemodMsg::MsgDecodeSymbols::match(cmd))
@@ -145,7 +173,34 @@ bool ChirpChatDemodDecoder::handleMessage(const Message& cmd)
         }
         else if (m_codingScheme == ChirpChatDemodSettings::CodingFT)
         {
+            std::string fmsg, call1, call2, loc;
+            bool reply;
+            decodeSymbols(
+                msg.getMagnitudes(),
+                m_nbSymbolBits,
+                fmsg,
+                call1,
+                call2,
+                loc,
+                reply
+            );
 
+            if (m_outputMessageQueue)
+            {
+                ChirpChatDemodMsg::MsgReportDecodeFT *outputMsg = ChirpChatDemodMsg::MsgReportDecodeFT::create();
+                outputMsg->setSyncWord(msgSyncWord);
+                outputMsg->setSignalDb(msgSignalDb);
+                outputMsg->setNoiseDb(msgNoiseDb);
+                outputMsg->setMsgTimestamp(msgTimestamp);
+                outputMsg->setMessage(QString(fmsg.c_str()));
+                outputMsg->setCall1(QString(call1.c_str()));
+                outputMsg->setCall2(QString(call2.c_str()));
+                outputMsg->setLoc(QString(loc.c_str()));
+                outputMsg->setReply(reply);
+                outputMsg->setPayloadParityStatus(getPayloadParityStatus());
+                outputMsg->setPayloadCRCStatus(getPayloadCRCStatus());
+                m_outputMessageQueue->push(outputMsg);
+            }
         }
         else
         {

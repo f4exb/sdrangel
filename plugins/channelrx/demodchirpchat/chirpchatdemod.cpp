@@ -318,6 +318,29 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (ChirpChatDemodMsg::MsgReportDecodeFT::match(cmd))
+    {
+        qDebug() << "ChirpChatDemod::handleMessage: MsgReportDecodeFT";
+        ChirpChatDemodMsg::MsgReportDecodeFT& msg = (ChirpChatDemodMsg::MsgReportDecodeFT&) cmd;
+        m_lastMsgSignalDb = msg.getSingalDb();
+        m_lastMsgNoiseDb = msg.getNoiseDb();
+        m_lastMsgSyncWord = msg.getSyncWord();
+        m_lastMsgTimestamp = msg.getMsgTimestamp();
+        m_lastMsgString = msg.getMessage(); // for now we do not handle message components (call1, ...)
+
+        if (m_settings.m_sendViaUDP)
+        {
+            const QByteArray& byteArray = m_lastMsgString.toUtf8();
+            const uint8_t *bytes = reinterpret_cast<const uint8_t*>(byteArray.data());
+            m_udpSink.writeUnbuffered(bytes, byteArray.size());
+        }
+
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new ChirpChatDemodMsg::MsgReportDecodeFT(msg)); // make a copy
+        }
+
+        return true;
+    }
     else if (DSPSignalNotification::match(cmd))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;

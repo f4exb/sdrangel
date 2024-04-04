@@ -40,8 +40,22 @@ public:
     void setLoRaHasHeader(bool hasHeader) { m_hasHeader = hasHeader; }
     void setLoRaHasCRC(bool hasCRC) { m_hasCRC = hasCRC; }
     void setLoRaPacketLength(unsigned int packetLength) { m_packetLength = packetLength; }
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    void setOutputMessageQueue(MessageQueue *messageQueue) { m_outputMessageQueue = messageQueue; }
+
+private:
+    bool handleMessage(const Message& cmd);
     void decodeSymbols(const std::vector<unsigned short>& symbols, QString& str);      //!< For ASCII and TTY
     void decodeSymbols(const std::vector<unsigned short>& symbols, QByteArray& bytes); //!< For raw bytes (original LoRa)
+    void decodeSymbols( //!< For FT coding scheme
+        const std::vector<std::vector<float>>& mags, // vector of symbols magnitudes
+        int nbSymbolBits, //!< number of bits per symbol
+        std::string& msg,     //!< formatted message
+        std::string& call1,   //!< 1st callsign or shorthand
+        std::string& call2,   //!< 2nd callsign
+        std::string& loc,     //!< locator, report or shorthand
+        bool& reply       //!< true if message is a reply report
+    );
     unsigned int getNbParityBits() const { return m_nbParityBits; }
     unsigned int getPacketLength() const { return m_packetLength; }
     bool getHasCRC() const { return m_hasCRC; }
@@ -52,11 +66,6 @@ public:
     bool getHeaderCRCStatus() const { return m_headerCRCStatus; }
     int getPayloadParityStatus() const { return m_payloadParityStatus; }
     bool getPayloadCRCStatus() const { return m_payloadCRCStatus; }
-    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    void setOutputMessageQueue(MessageQueue *messageQueue) { m_outputMessageQueue = messageQueue; }
-
-private:
-    bool handleMessage(const Message& cmd);
 
     ChirpChatDemodSettings::CodingScheme m_codingScheme;
     unsigned int m_spreadFactor;
