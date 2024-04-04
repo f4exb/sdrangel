@@ -116,6 +116,11 @@
           <string>Aladin</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Moon</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -395,15 +400,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>QWebEngineView</class>

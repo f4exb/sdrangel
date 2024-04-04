@@ -302,6 +302,10 @@ void SkyMapGUI::on_map_currentIndexChanged(int index)
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/skymap/html/esasky.html").arg(m_webPort)));
     } else if (m_settings.m_map == "Aladin") {
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/skymap/html/aladin.html").arg(m_webPort)));
+    } else if (m_settings.m_map == "Moon") {
+        ui->web->load(QUrl(QString("http://quickmap.lroc.asu.edu/"))); // Jumping straight to 3D view doesn't seem to work
+        setStatusText("");
+        m_ready = true;
     }
     updateToolbar();
     updateBackgrounds();
@@ -499,7 +503,6 @@ void SkyMapGUI::applyAllSettings()
 
 void SkyMapGUI::find(const QString& text)
 {
-    qDebug() << "**********find" << text << m_ready;
     if (!m_ready)
     {
         // Save for when ready
@@ -984,6 +987,7 @@ void SkyMapGUI::updateToolbar()
     bool namesVisible = false;
     bool projectionVisible = true;
     bool backgroundVisible = true;
+    bool basicVisible = true;
 
     if (m_settings.m_map == "WWT")
     {
@@ -996,6 +1000,13 @@ void SkyMapGUI::updateToolbar()
         backgroundVisible = false;
         reticleVisible = false;
     }
+    else if (m_settings.m_map == "Moon")
+    {
+        projectionVisible = false;
+        backgroundVisible = false;
+        reticleVisible = false;
+        basicVisible = false;
+    }
 
     ui->background->setVisible(backgroundVisible);
     ui->projection->setVisible(projectionVisible);
@@ -1003,6 +1014,14 @@ void SkyMapGUI::updateToolbar()
     ui->displayNames->setVisible(namesVisible);
     ui->displayConstellations->setVisible(constellationsVisible);
     ui->displayReticle->setVisible(reticleVisible);
+
+    ui->find->setVisible(basicVisible);
+    ui->findLabel->setVisible(basicVisible);
+    ui->displayGrid->setVisible(basicVisible);
+    ui->displayReticle->setVisible(basicVisible);
+    ui->displayAntennaFoV->setVisible(basicVisible);
+    ui->track->setVisible(basicVisible);
+    ui->source->setVisible(basicVisible);
 
     updateProjection();
 }
