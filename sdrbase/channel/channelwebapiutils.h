@@ -23,6 +23,7 @@
 
 #include <QString>
 #include <QJsonArray>
+#include <QGeoCoordinate>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceReport.h"
@@ -71,6 +72,7 @@ public:
     static bool getDeviceSetting(unsigned int deviceIndex, const QString &setting, int &value);
     static bool getDeviceReportValue(unsigned int deviceIndex, const QString &key, QString &value);
     static bool getDeviceReportList(unsigned int deviceIndex, const QString &key, const QString &subKey, QList<int> &values);
+    static bool getDevicePosition(unsigned int deviceIndex, QGeoCoordinate& position);
     static bool patchDeviceSetting(unsigned int deviceIndex, const QString &setting, int value);
     static bool runFeature(unsigned int featureSetIndex, unsigned int featureIndex);
     static bool stopFeature(unsigned int featureSetIndex, unsigned int featureIndex);

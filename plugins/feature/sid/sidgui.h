@@ -305,6 +305,7 @@ private slots:
     void on_showSats_clicked();
     void onSatTrackerAdded(int featureSetIndex, Feature *feature);
     void on_map_currentTextChanged(const QString& text);
+    void on_showPaths_clicked();
     void featuresChanged(const QStringList& renameFrom, const QStringList& renameTo);
     void channelsChanged(const QStringList& renameFrom, const QStringList& renameTo, const QStringList& removed, const QStringList& added);
     void removeChannels(const QStringList& ids);

@@ -33,11 +33,14 @@
 #include "device/deviceuiset.h"
 #include "util/csv.h"
 #include "util/astronomy.h"
+#include "util/vlftransmitters.h"
 
 #include "ui_sidgui.h"
 #include "sid.h"
 #include "sidgui.h"
 #include "sidsettingsdialog.h"
+
+#include "SWGMapItem.h"
 
 SIDGUI* SIDGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
 {
@@ -1521,6 +1524,7 @@ void SIDGUI::makeUIConnections()
     QObject::connect(ui->sdoDateTime, &WrappingDateTimeEdit::dateTimeChanged, this, &SIDGUI::on_sdoDateTime_dateTimeChanged);
     QObject::connect(ui->showSats, &QToolButton::clicked, this, &SIDGUI::on_showSats_clicked);
     QObject::connect(ui->map, &QComboBox::currentTextChanged, this, &SIDGUI::on_map_currentTextChanged);
+    QObject::connect(ui->showPaths, &QToolButton::clicked, this, &SIDGUI::on_showPaths_clicked);
     QObject::connect(ui->autoscaleX, &QPushButton::clicked, this, &SIDGUI::on_autoscaleX_clicked);
     QObject::connect(ui->autoscaleY, &QPushButton::clicked, this, &SIDGUI::on_autoscaleY_clicked);
     QObject::connect(ui->today, &QPushButton::clicked, this, &SIDGUI::on_today_clicked);
@@ -1953,6 +1957,96 @@ void SIDGUI::on_map_currentTextChanged(const QString& text)
     m_settings.m_map = text;
     applySetting("map");
     applyDateTime();
+}
+
+// Plot paths from transmitters to receivers on map
+void SIDGUI::on_showPaths_clicked()
+{
+
+    for (int i = 0; i < m_settings.m_channelSettings.size(); i++)
+    {
+        unsigned int deviceSetIndex;
+        unsigned int channelIndex;
+
+        if (MainCore::getDeviceAndChannelIndexFromId(m_settings.m_channelSettings[i].m_id, deviceSetIndex, channelIndex))
+        {
+            // Get position of device, defaulting to My Position
+            QGeoCoordinate rxPosition;
+            if (!ChannelWebAPIUtils::getDevicePosition(deviceSetIndex, rxPosition))
+            {
+                rxPosition.setLatitude(MainCore::instance()->getSettings().getLatitude());
+                rxPosition.setLongitude(MainCore::instance()->getSettings().getLongitude());
+                rxPosition.setAltitude(MainCore::instance()->getSettings().getAltitude());
+            }
+
+            // Get position of transmitter
+            if (VLFTransmitters::m_callsignHash.contains(m_settings.m_channelSettings[i].m_label))
+            {
+                const VLFTransmitters::Transmitter *transmitter = VLFTransmitters::m_callsignHash.value(m_settings.m_channelSettings[i].m_label);
+                QGeoCoordinate txPosition;
+                txPosition.setLatitude(transmitter->m_latitude);
+                txPosition.setLongitude(transmitter->m_longitude);
+                txPosition.setAltitude(0);
+
+                // Calculate mid point for position of label
+                qreal distance = txPosition.distanceTo(rxPosition);
+                qreal az = txPosition.azimuthTo(rxPosition);
+                QGeoCoordinate midPoint = txPosition.atDistanceAndAzimuth(distance / 2.0, az);
+
+                // Create a path from transmitter to receiver
+                QList<ObjectPipe*> mapPipes;
+                MainCore::instance()->getMessagePipes().getMessagePipes(m_sid, "mapitems", mapPipes);
+                if (mapPipes.size() > 0)
+                {
+                    for (const auto& pipe : mapPipes)
+                    {
+                        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+
+                        QString deviceId = QString("%1%2").arg(m_settings.m_channelSettings[i].m_id[0]).arg(deviceSetIndex);
+
+                        QString name = QString("SID %1 to %2").arg(m_settings.m_channelSettings[i].m_label).arg(deviceId);
+                        QString details = QString("%1<br>Distance: %2 km").arg(name).arg((int) std::round(distance / 1000.0));
+
+                        swgMapItem->setName(new QString(name));
+                        swgMapItem->setLatitude(midPoint.latitude());
+                        swgMapItem->setLongitude(midPoint.longitude());
+                        swgMapItem->setAltitude(midPoint.altitude());
+                        QString image = QString("none");
+                        swgMapItem->setImage(new QString(image));
+                        swgMapItem->setImageRotation(0);
+                        swgMapItem->setText(new QString(details));   // Not used - label is used instead for now
+                        swgMapItem->setFixedPosition(true);
+                        swgMapItem->setLabel(new QString(details));
+                        swgMapItem->setAltitudeReference(0);
+                        QList<SWGSDRangel::SWGMapCoordinate *> *coords = new QList<SWGSDRangel::SWGMapCoordinate *>();
+
+                        SWGSDRangel::SWGMapCoordinate* c = new SWGSDRangel::SWGMapCoordinate();
+                        c->setLatitude(rxPosition.latitude());
+                        c->setLongitude(rxPosition.longitude());
+                        c->setAltitude(rxPosition.altitude());
+                        coords->append(c);
+
+                        c = new SWGSDRangel::SWGMapCoordinate();
+                        c->setLatitude(txPosition.latitude());
+                        c->setLongitude(txPosition.longitude());
+                        c->setAltitude(txPosition.altitude());
+                        coords->append(c);
+
+                        swgMapItem->setColorValid(1);
+                        swgMapItem->setColor(m_settings.m_channelSettings[i].m_color.rgba());
+
+                        swgMapItem->setCoordinates(coords);
+                        swgMapItem->setType(3);
+
+                        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_sid, swgMapItem);
+                        messageQueue->push(msg);
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 void SIDGUI::featuresChanged(const QStringList& renameFrom, const QStringList& renameTo)

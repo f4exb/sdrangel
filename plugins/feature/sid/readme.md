@@ -228,6 +228,18 @@ Specifies the date and time for which SDO imagery should be displayed. Images ar
 Select a Map to link to the SID feature. When a time is selected on the SID charts, the [Map](../../feature/map/readme.md) feature will have it's time set accordingly. 
 This allows you, for example, to see the corresponding impact on MUF/foF2 displayed on the 3D map.
 
+<h3>Show Paths on Map</h3>
+
+When clicked, shows the great circle paths between transmitters and receivers on a [Map](../../feature/map/readme.md).
+
+![SID paths](../../../doc/img/SID_plugin_paths.png)
+
+The positions of the transmitters are taken from the Map's VLF database. The position of the receiver is for most devices taken from Preferences > My Position. 
+For KiwiSDRs, the position is taken from the GPS position indicated by the device.
+
+In order to match a transmitter in the Map's VLF database, the label used in the SID chart must match the transmitter's name. It is possible to add user-defined VLF transmitters via 
+a `vlftransmitters.csv` file. See the [Map](../../feature/map/readme.md) documentation.
+
 <h2>Tips</h2>
 
 In order to check that a peak in the spectrum is a real VLF signal, you can:

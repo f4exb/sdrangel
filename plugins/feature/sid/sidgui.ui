@@ -607,6 +607,20 @@
         </item>
        </widget>
       </item>
+      <item>
+       <widget class="QToolButton" name="showPaths">
+        <property name="toolTip">
+         <string>Show propagation paths on map</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/world.png</normaloff>:/world.png</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
@@ -726,15 +740,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>QChartView</class>

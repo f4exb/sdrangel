@@ -277,6 +277,7 @@ set(sdrbase_SOURCES
     util/units.cpp
     util/timeutil.cpp
     util/visa.cpp
+    util/vlftransmitters.cpp
     util/waypoints.cpp
     util/weather.cpp
     util/iot/device.cpp
@@ -534,6 +535,7 @@ set(sdrbase_HEADERS
     util/units.h
     util/timeutil.h
     util/visa.h
+    util/vlftransmitters.h
     util/waypoints.h
     util/weather.h
     util/iot/device.h

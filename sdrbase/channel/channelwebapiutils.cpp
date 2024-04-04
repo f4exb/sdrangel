@@ -1156,6 +1156,35 @@ bool ChannelWebAPIUtils::getDeviceReportList(unsigned int deviceIndex, const QSt
     return false;
 }
 
+
+bool ChannelWebAPIUtils::getDevicePosition(unsigned int deviceIndex, QGeoCoordinate& position)
+{
+    SWGSDRangel::SWGDeviceReport deviceReport;
+
+    if (getDeviceReport(deviceIndex, deviceReport))
+    {
+        QJsonObject *jsonObj = deviceReport.asJsonObject();
+        double latitude, longitude, altitude;
+
+        if (WebAPIUtils::getSubObjectDouble(*jsonObj, "latitude", latitude)
+            && WebAPIUtils::getSubObjectDouble(*jsonObj, "longitude", longitude)
+            && WebAPIUtils::getSubObjectDouble(*jsonObj, "altitude", altitude))
+        {
+            position.setLatitude(latitude);
+            position.setLongitude(longitude);
+            position.setAltitude(altitude);
+            // Done
+            return true;
+        }
+        else
+        {
+            //qWarning("ChannelWebAPIUtils::getDevicePosition: no latitude/longitude/altitude in device report");
+            return false;
+        }
+    }
+    return false;
+}
+
 bool ChannelWebAPIUtils::runFeature(unsigned int featureSetIndex, unsigned int featureIndex)
 {
     SWGSDRangel::SWGDeviceState runResponse;
