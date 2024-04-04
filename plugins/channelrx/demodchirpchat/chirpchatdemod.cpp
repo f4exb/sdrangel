@@ -44,6 +44,7 @@
 #include "maincore.h"
 
 #include "chirpchatdemodmsg.h"
+#include "chirpchatdemoddecoder.h"
 #include "chirpchatdemod.h"
 
 MESSAGE_CLASS_DEFINITION(ChirpChatDemod::MsgConfigureChirpChatDemod, Message)
@@ -55,7 +56,9 @@ ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_thread(nullptr),
+        m_decoderThread(nullptr),
         m_basebandSink(nullptr),
+        m_decoder(nullptr),
         m_running(false),
         m_spectrumVis(SDR_RX_SCALEF),
         m_basebandSampleRate(0),
@@ -88,7 +91,6 @@ ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
         &ChirpChatDemod::handleIndexInDeviceSetChanged
     );
 
-    m_decoder.setOutputMessageQueue(getInputMessageQueue());
     start();
 }
 
@@ -121,7 +123,7 @@ void ChirpChatDemod::feed(const SampleVector::const_iterator& begin, const Sampl
     (void) pO;
 
     if (m_running) {
-    	m_basebandSink->feed(begin, end);
+        m_basebandSink->feed(begin, end);
     }
 }
 
@@ -132,10 +134,25 @@ void ChirpChatDemod::start()
     }
 
     qDebug() << "ChirpChatDemod::start";
+    m_decoderThread = new QThread(this);
+    m_decoder = new ChirpChatDemodDecoder();
+    m_decoder->setOutputMessageQueue(getInputMessageQueue());
+    m_decoder->setNbSymbolBits(m_settings.m_spreadFactor, m_settings.m_deBits);
+    m_decoder->setCodingScheme(m_settings.m_codingScheme);
+    m_decoder->setLoRaHasHeader(m_settings.m_hasHeader);
+    m_decoder->setLoRaHasCRC(m_settings.m_hasCRC);
+    m_decoder->setLoRaParityBits(m_settings.m_nbParityBits);
+    m_decoder->setLoRaPacketLength(m_settings.m_packetLength);
+    m_decoder->moveToThread(m_decoderThread);
+
+    QObject::connect(m_decoderThread, &QThread::finished, m_decoder, &QObject::deleteLater);
+    QObject::connect(m_decoderThread, &QThread::finished, m_decoderThread, &QThread::deleteLater);
+    m_decoderThread->start();
+
     m_thread = new QThread(this);
     m_basebandSink = new ChirpChatDemodBaseband();
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
-    m_basebandSink->setDecoderMessageQueue(m_decoder.getInputMessageQueue()); // Decoder held on the main thread
+    m_basebandSink->setDecoderMessageQueue(m_decoder->getInputMessageQueue());
     m_basebandSink->moveToThread(m_thread);
 
     QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
@@ -166,6 +183,9 @@ void ChirpChatDemod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_decoderThread->exit();
+    m_decoderThread->wait();
+    m_decoderThread = nullptr;
 }
 
 bool ChirpChatDemod::handleMessage(const Message& cmd)
@@ -404,38 +424,51 @@ void ChirpChatDemod::applySettings(const ChirpChatDemodSettings& settings, bool 
     }
 
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
-     || (settings.m_deBits != m_settings.m_deBits) || force) {
-         m_decoder.setNbSymbolBits(settings.m_spreadFactor, settings.m_deBits);
+    || (settings.m_deBits != m_settings.m_deBits) || force)
+    {
+        if (m_decoder) {
+            m_decoder->setNbSymbolBits(settings.m_spreadFactor, settings.m_deBits);
+        }
     }
 
     if ((settings.m_codingScheme != m_settings.m_codingScheme) || force)
     {
         reverseAPIKeys.append("codingScheme");
-        m_decoder.setCodingScheme(settings.m_codingScheme);
+        if (m_decoder) {
+            m_decoder->setCodingScheme(settings.m_codingScheme);
+        }
     }
 
     if ((settings.m_hasHeader != m_settings.m_hasHeader) || force)
     {
         reverseAPIKeys.append("hasHeader");
-        m_decoder.setLoRaHasHeader(settings.m_hasHeader);
+        if (m_decoder) {
+            m_decoder->setLoRaHasHeader(settings.m_hasHeader);
+        }
     }
 
     if ((settings.m_hasCRC != m_settings.m_hasCRC) || force)
     {
         reverseAPIKeys.append("hasCRC");
-        m_decoder.setLoRaHasCRC(settings.m_hasCRC);
+        if (m_decoder) {
+            m_decoder->setLoRaHasCRC(settings.m_hasCRC);
+        }
     }
 
     if ((settings.m_nbParityBits != m_settings.m_nbParityBits) || force)
     {
         reverseAPIKeys.append("nbParityBits");
-        m_decoder.setLoRaParityBits(settings.m_nbParityBits);
+        if (m_decoder) {
+            m_decoder->setLoRaParityBits(settings.m_nbParityBits);
+        }
     }
 
     if ((settings.m_packetLength != m_settings.m_packetLength) || force)
     {
         reverseAPIKeys.append("packetLength");
-        m_decoder.setLoRaPacketLength(settings.m_packetLength);
+        if (m_decoder) {
+            m_decoder->setLoRaPacketLength(settings.m_packetLength);
+        }
     }
 
     if ((settings.m_decodeActive != m_settings.m_decodeActive) || force) {

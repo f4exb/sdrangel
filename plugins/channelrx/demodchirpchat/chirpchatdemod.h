@@ -35,13 +35,13 @@
 #include "util/udpsinkutil.h"
 
 #include "chirpchatdemodbaseband.h"
-#include "chirpchatdemoddecoder.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
 class QThread;
 class ObjectPipe;
+class ChirpChatDemodDecoder;
 
 class ChirpChatDemod : public BasebandSampleSink, public ChannelAPI {
 public:
@@ -141,9 +141,10 @@ public:
 private:
 	DeviceAPI *m_deviceAPI;
     QThread *m_thread;
+    QThread *m_decoderThread;
     ChirpChatDemodBaseband *m_basebandSink;
+    ChirpChatDemodDecoder *m_decoder;
     bool m_running;
-    ChirpChatDemodDecoder m_decoder;
     ChirpChatDemodSettings m_settings;
     SpectrumVis m_spectrumVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
