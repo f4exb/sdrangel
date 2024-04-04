@@ -21,6 +21,7 @@
 #include "kiwisdrworker.h"
 
 MESSAGE_CLASS_DEFINITION(KiwiSDRWorker::MsgReportSampleRate, Message)
+MESSAGE_CLASS_DEFINITION(KiwiSDRWorker::MsgReportPosition, Message)
 
 KiwiSDRWorker::KiwiSDRWorker(SampleSinkFifo* sampleFifo) :
 	QObject(),
@@ -124,6 +125,41 @@ void KiwiSDRWorker::onBinaryMessageReceived(const QByteArray &message)
                 emit updateStatus(2);
             }
         }
+		else if ((al.size() >= 2) && al[1].startsWith("load_cfg="))
+		{
+			QByteArray urlEncoded = al[1].mid(9).toLatin1();
+			QString json =  QUrl::fromPercentEncoding(urlEncoded);
+			QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8());
+
+			if (doc.isObject())
+			{
+				QJsonObject obj = doc.object();
+
+				if (obj.contains("rx_gps"))
+				{
+					QString gps = obj.value("rx_gps").toString();
+					QRegularExpression re("\\((-?[0-9]+(\\.[0-9]+)?), *(-?[0-9]+(\\.[0-9]+)?)\\)");
+					QRegularExpressionMatch match = re.match(gps);
+
+					if (match.hasMatch())
+					{
+						float latitude = match.captured(1).toFloat();
+						float longitude = match.captured(3).toFloat();
+						float altitude = 0.0f;
+						if (obj.contains("rx_asl")) {
+							altitude = (float) obj.value("rx_asl").toInt();
+						}
+						if (m_inputMessageQueue) {
+							m_inputMessageQueue->push(MsgReportPosition::create(latitude, longitude, altitude));
+						}
+					}
+				}
+			}
+			else
+			{
+				qDebug() << "KiwiSDRWorker::onBinaryMessageReceived - Document is not an object";
+			}
+		}
 	}
 	else if (message[0] == 'S' && message[1] == 'N' && message[2] == 'D')
 	{

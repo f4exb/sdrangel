@@ -167,6 +167,9 @@ private:
     const QTimer& m_masterTimer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    float m_latitude;
+    float m_longitude;
+    float m_altitude;
 
     int getStatus() const;
 	bool applySettings(const KiwiSDRSettings& settings, const QList<QString>& settingsKeys, bool force);
