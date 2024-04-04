@@ -195,6 +195,8 @@ private:
     AvailableChannelOrFeatureHandler m_availableFeatureHandler;
     AvailableChannelOrFeatureHandler m_availableChannelHandler;
 
+    QStringList m_mapItemNames;
+
     explicit SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~SIDGUI();
 
@@ -244,6 +246,7 @@ private:
     void connectDataUpdates();
     void disconnectDataUpdates();
     void getData();
+    void clearFromMap();
 
     static qreal pixelDistance(QChart *chart, QAbstractSeries *series, QPointF a, QPointF b);
 

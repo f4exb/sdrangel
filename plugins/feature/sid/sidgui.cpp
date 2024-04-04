@@ -306,6 +306,9 @@ SIDGUI::~SIDGUI()
         disconnect(m_stix, &STIX::dataUpdated, this, &SIDGUI::stixDataUpdated);
     }
     m_statusTimer.stop();
+
+    clearFromMap();
+
     delete m_goesXRay;
     delete ui;
 }
@@ -1962,6 +1965,7 @@ void SIDGUI::on_map_currentTextChanged(const QString& text)
 // Plot paths from transmitters to receivers on map
 void SIDGUI::on_showPaths_clicked()
 {
+    clearFromMap();
 
     for (int i = 0; i < m_settings.m_channelSettings.size(); i++)
     {
@@ -2041,12 +2045,33 @@ void SIDGUI::on_showPaths_clicked()
 
                         MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_sid, swgMapItem);
                         messageQueue->push(msg);
+
+                        m_mapItemNames.append(name);
                     }
                 }
             }
         }
     }
+}
 
+void SIDGUI::clearFromMap()
+{
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_sid, "mapitems", mapPipes);
+
+    for (const auto& name : m_mapItemNames)
+    {
+        for (const auto& pipe : mapPipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+            swgMapItem->setName(new QString(name));
+            swgMapItem->setImage(new QString(""));
+            swgMapItem->setType(3);
+            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_sid, swgMapItem);
+            messageQueue->push(msg);
+        }
+    }
 }
 
 void SIDGUI::featuresChanged(const QStringList& renameFrom, const QStringList& renameTo)
