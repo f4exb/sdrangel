@@ -1295,11 +1295,20 @@ void SIDGUI::on_autoscaleX_clicked()
 
 void SIDGUI::on_autoscaleY_clicked()
 {
-    if (!std::isnan(m_minMeasurement)) {
-        ui->y1Min->setValue(m_minMeasurement);
+    if (!std::isnan(m_minMeasurement) && !std::isnan(m_maxMeasurement) && (m_minMeasurement == m_maxMeasurement))
+    {
+        // Graph doesn't display properly if min is the same as max
+        ui->y1Min->setValue(m_minMeasurement * 0.99);
+        ui->y1Max->setValue(m_maxMeasurement * 1.01);
     }
-    if (!std::isnan(m_maxMeasurement)) {
-        ui->y1Max->setValue(m_maxMeasurement);
+    else
+    {
+        if (!std::isnan(m_minMeasurement)) {
+            ui->y1Min->setValue(m_minMeasurement);
+        }
+        if (!std::isnan(m_maxMeasurement)) {
+            ui->y1Max->setValue(m_maxMeasurement);
+        }
     }
 }
 
@@ -1606,11 +1615,20 @@ void SIDGUI::autoscaleY()
 {
     if (m_settings.m_autoscaleY)
     {
-        if (!std::isnan(m_minMeasurement) && (m_minMeasurement != m_settings.m_y1Min)) {
-            ui->y1Min->setValue(m_minMeasurement);
+        if (!std::isnan(m_minMeasurement) && !std::isnan(m_maxMeasurement) && (m_minMeasurement == m_maxMeasurement))
+        {
+            // Graph doesn't display properly if min is the same as max
+            ui->y1Min->setValue(m_minMeasurement * 0.99);
+            ui->y1Max->setValue(m_maxMeasurement * 1.01);
         }
-        if (!std::isnan(m_maxMeasurement) && (m_maxMeasurement != m_settings.m_y1Max)) {
-            ui->y1Max->setValue(m_maxMeasurement);
+        else
+        {
+            if (!std::isnan(m_minMeasurement) && (m_minMeasurement != m_settings.m_y1Min)) {
+                ui->y1Min->setValue(m_minMeasurement);
+            }
+            if (!std::isnan(m_maxMeasurement) && (m_maxMeasurement != m_settings.m_y1Max)) {
+                ui->y1Max->setValue(m_maxMeasurement);
+            }
         }
     }
 }
@@ -1871,11 +1889,15 @@ void SIDGUI::sdoVideoError(QMediaPlayer::Error error)
     // Qt5/Windows doesn't support mp4 by default, so suggest K-Lite codecs
     // Qt6 doesn't need these
     if (error == QMediaPlayer::FormatError) {
-        QMessageBox::warning(this, "Video Error", "Unable to play video. Please try installing mp4 codec, such as: <a href='https://www.codecguide.com/download_k-lite_codec_pack_basic.htm'>K-Lite codedcs</a>.");
+        QMessageBox::warning(this, "Video Error", "Unable to play video. Please try installing mp4/h264 codec, such as: <a href='https://www.codecguide.com/download_k-lite_codec_pack_basic.htm'>K-Lite codedcs</a>.");
+    }
+#elif LINUX
+    if (error == QMediaPlayer::FormatError) {
+        QMessageBox::warning(this, "Video Error", "Unable to play video. Please try installing mp4/h264 codec, such as gstreamer libav.");
     }
 #else
     if (error == QMediaPlayer::FormatError) {
-        QMessageBox::warning(this, "Video Error", "Unable to play video. Please try installing an mp4 codec.");
+        QMessageBox::warning(this, "Video Error", "Unable to play video. Please try installing an mp4/h264 codec.");
     }
 #endif
 }

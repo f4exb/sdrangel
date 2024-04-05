@@ -48,7 +48,6 @@ public:
         bool m_reverse;
         bool m_loop;
         bool m_stop;            // Stop looped animation
-        float m_delay;          // Delay in seconds before animation starts
         float m_startOffset;    // [0..1] What point to start playing animation
         float m_duration;       // How long to play animation for
         float m_multiplier;     // Speed to play animation at

@@ -255,7 +255,11 @@ Also, as the D layer in the ionosphere essentially disappears at night, the rece
 
 <h2>Codecs</h2>
 
-On Windows, you may need to install an mp4 codec to view the SDO videos. Try [K-Lite Codecs](https://www.codecguide.com/download_k-lite_codec_pack_basic.htm).
+You may need to install an mp4/h264 codec to view the SDO videos. 
+
+On Windows, try [K-Lite Codecs](https://www.codecguide.com/download_k-lite_codec_pack_basic.htm).
+
+On Linux, install gstreamer libav. This can be installed on Ubuntu with: `sudo apt install gstreamer1.0-libav`
 
 <h2>Attribution</h2>
 
