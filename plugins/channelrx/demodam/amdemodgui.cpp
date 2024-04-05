@@ -268,7 +268,7 @@ void AMDemodGUI::channelMarkerChangedByCursor()
     }
 
     m_settings.m_frequency = m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset;
-    int value = 0;
+    qint64 value = 0;
 
     if (m_settings.m_frequencyMode == AMDemodSettings::Offset) {
         value = m_settings.m_inputFrequencyOffset;
@@ -292,8 +292,6 @@ void AMDemodGUI::channelMarkerChangedByCursor()
 
 void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-    (void) value;
-
     qint64 offset = 0;
 
     if (m_settings.m_frequencyMode == AMDemodSettings::Offset)
