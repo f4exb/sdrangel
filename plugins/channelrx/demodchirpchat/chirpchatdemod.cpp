@@ -327,6 +327,21 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
         m_lastMsgSyncWord = msg.getSyncWord();
         m_lastMsgTimestamp = msg.getMsgTimestamp();
         m_lastMsgString = msg.getMessage(); // for now we do not handle message components (call1, ...)
+        int nbSymbolBits = m_settings.m_spreadFactor - m_settings.m_deBits;
+        m_lastMsgNbSymbols = (174 / nbSymbolBits) + ((174 % nbSymbolBits) == 0 ? 0 : 1);
+
+        if (m_settings.m_autoNbSymbolsMax)
+        {
+            ChirpChatDemodSettings settings = m_settings;
+            settings.m_nbSymbolsMax = m_lastMsgNbSymbols;
+            applySettings(settings);
+
+            if (getMessageQueueToGUI()) // forward to GUI if any
+            {
+                MsgConfigureChirpChatDemod *msgToGUI = MsgConfigureChirpChatDemod::create(settings, false);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
 
         if (m_settings.m_sendViaUDP)
         {
