@@ -1201,10 +1201,47 @@ bool SIDGUI::eventFilter(QObject *obj, QEvent *event)
     {
         if (event->type() == QEvent::ContextMenu)
         {
+            // Show context menu on chart for GRBs/Flares
             QContextMenuEvent *contextEvent = static_cast<QContextMenuEvent *>(event);
 
             showContextMenu(contextEvent);
             contextEvent->accept();
+            return true;
+        }
+        else if (event->type() == QEvent::Wheel)
+        {
+            // Use wheel to zoom in / out of X axis or Y axis if shift held
+            QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
+
+            int delta = wheelEvent->angleDelta().y(); // delta is typically 120 for one click of wheel
+
+            if (wheelEvent->modifiers() & Qt::ShiftModifier)
+            {
+                double min = ui->y1Min->value();
+                double max = ui->y1Max->value();
+                double adj = (max - min) * 0.20 * delta / 120.0;
+                min += adj;
+                max -= adj;
+                ui->y1Min->setValue(min);
+                ui->y1Max->setValue(max);
+            }
+            else
+            {
+                QDateTime start = ui->startDateTime->dateTime();
+                QDateTime end = ui->endDateTime->dateTime();
+                qint64 startMS = start.toMSecsSinceEpoch();
+                qint64 endMS = end.toMSecsSinceEpoch();
+                qint64 diff = endMS - startMS;
+                qint64 adj = diff * 0.20 * delta / 120.0;
+                endMS -= adj;
+                startMS += adj;
+                start = QDateTime::fromMSecsSinceEpoch(startMS);
+                end = QDateTime::fromMSecsSinceEpoch(endMS);
+                ui->startDateTime->setDateTime(start);
+                ui->endDateTime->setDateTime(end);
+            }
+
+            wheelEvent->accept();
             return true;
         }
     }
