@@ -65,7 +65,7 @@ public:
     void write(const uint8_t *sampleByte, int nbSamples);
 
 protected:
-    /** Reverse endianess in destination buffer */
+    /** Reverse endianness in destination buffer */
     static void writeNetBuf(uint8_t *dest, const uint8_t *src, unsigned int elemLen, unsigned int bytesLen, bool endianReverse);
     static unsigned int elemLength(PayloadType payloadType);
 
