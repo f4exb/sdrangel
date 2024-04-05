@@ -879,7 +879,7 @@ void RadiosondeDemodGUI::on_logOpen_clicked()
                     QStringList cols;
 
                     QList<ObjectPipe*> radiosondePipes;
-                    MainCore::instance()->getMessagePipes().getMessagePipes(this, "radiosonde", radiosondePipes);
+                    MainCore::instance()->getMessagePipes().getMessagePipes(m_radiosondeDemod, "radiosonde", radiosondePipes);
 
                     while (!cancelled && CSV::readRow(in, &cols))
                     {
