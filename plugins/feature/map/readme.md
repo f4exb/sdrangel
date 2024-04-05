@@ -14,10 +14,11 @@ On top of this, it can plot data from other plugins, such as:
 * Weather balloons from the Radiosonde feature,
 * RF Heat Maps from the Heap Map channel,
 * Radials and estimated position from the VOR localizer feature,
-* ILS course line and glide path from the ILS Demodulator.
-* DSC geographic call areas.
+* ILS course line and glide path from the ILS Demodulator,
+* DSC geographic call areas,
+* SID paths.
 
-As well as internet data sources:
+As well as internet and built-in data sources:
 
 * AM, FM and DAB transmitters in the UK and DAB transmitters in France,
 * Airports, NavAids and airspaces,
@@ -40,7 +41,7 @@ It can also create tracks showing the path aircraft, ships, radiosondes and APRS
 
 ![3D Map feature](../../../doc/img/Map_plugin_apt.png)
 
-3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (20).
+3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (21).
 
 <h2>Interface</h2>
 
@@ -143,14 +144,14 @@ This is only supported on 2D raster maps and the 3D map.
 <h3>11: Display MUF Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing the MUF (Maximum Usable Frequency) for a 3000km path that reflects off the ionosphere.
-The contours will be updated every 15 minutes. The latest contour data will always be displayed, irrespective of the time set on the 3D Map.
+The contours will be updated every 15 minutes. MUF contour data is available for the preceeding 5 days.
 
 ![MUF contours](../../../doc/img/Map_plugin_muf.png)
 
 <h3>12: Display coF2 Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing coF2 (F2 layer critical frequency), the maximum frequency at which radio waves will be reflected vertically from the F2 region of the ionosphere.
-The contours will be updated every 15 minutes. The latest contour data will always be displayed, irrespective of the time set on the 3D Map.
+The contours will be updated every 15 minutes. coF2 contour data is available for the preceeding 5 days.
 
 <h3>13: Display NASA GIBS Data</h3>
 
@@ -185,11 +186,19 @@ When checked, displays the track (taken or predicted) for the selected object.
 
 When checked, displays the track (taken or predicted) for the all objects.
 
-<h3>19: Delete</h3>
+<h3>19: Save to .kml</h3>
+
+When clicked, items and tracks on the map will be saved to a [KML](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) (.kml or .kmz) file, for use in other applications.
+
+Note that the KML format requires 3D models in the Collada (.dae) format. However, SDRangel's models are in glTF (.glb or .gltf) format. 
+If you wish to view the models in a KML viewer, you will need to manually convert them. Note that you should still be able to view tracks without the models.
+Note that the .glbe files cannot be converted to .dae.
+
+<h3>20: Delete</h3>
 
 When clicked, all items will be deleted from the map.
 
-<h3>20: Display settings</h3>
+<h3>21: Display settings</h3>
 
 When clicked, opens the Map Display Settings dialog:
 
@@ -280,6 +289,17 @@ MUF and foF2 can be displayed as contours:
 ![MUF contours](../../../doc/img/Map_plugin_muf.png)
 
 The contours can be clicked on which will display the data for that contour in the info box.
+
+<h4>VLF Transmitters</h4>
+
+The Map contains a built-in list of VLF transmitters. This can be overridden by a user-defined list contained in a file `vlftransmitters.csv` in the application data directory.
+
+The file must have the following columns:
+
+```
+Callsign,Frequency,Latitude,Longitude,Power
+GQD,19580,54.911643,-3.278456,10
+```
 
 <h2>Attribution</h2>
 

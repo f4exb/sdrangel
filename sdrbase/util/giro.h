@@ -26,6 +26,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QNetworkDiskCache;
 
 // GIRO - Global Ionosphere Radio Observatory
 // Gets MUFD, TEC, foF2 and other data for various stations around the world
@@ -66,14 +67,26 @@ public:
         }
     };
 
+    struct DataSet {
+        QDateTime m_dateTime;
+        QString m_runId;
+    };
+
     static GIRO* create(const QString& service="prop.kc2g.com");
 
     ~GIRO();
-    void getDataPeriodically(int periodInMins);
-    void getMUFPeriodically(int periodInMins);
-    void getfoF2Periodically(int periodInMins);
+    void getIndexPeriodically(int periodInMins=15);
+    void getDataPeriodically(int periodInMins=2);
+    void getMUFPeriodically(int periodInMins=15);
+    void getfoF2Periodically(int periodInMins=15);
 
-private slots:
+    void getMUF(const QString& runId);
+    void getfoF2(const QString& runId);
+
+    QString getRunId(const QDateTime& dateTime);
+
+public slots:
+    void getIndex();
     void getData();
     void getMUF();
     void getfoF2();
@@ -82,17 +95,23 @@ private slots:
     void handleReply(QNetworkReply* reply);
 
 signals:
+    void indexUpdated(const QList<DataSet>& data);
     void dataUpdated(const GIROStationData& data);  // Called when new data available.
     void mufUpdated(const QJsonDocument& doc);
     void foF2Updated(const QJsonDocument& doc);
 
 private:
     bool containsNonNull(const QJsonObject& obj, const QString &key) const;
+    void handleIndex(QJsonDocument& document);
+    void handleStations(QJsonDocument& document);
 
+    QTimer m_indexTimer;
     QTimer m_dataTimer;             // Timer for periodic updates
     QTimer m_mufTimer;
     QTimer m_foF2Timer;
     QNetworkAccessManager *m_networkManager;
+    QNetworkDiskCache *m_cache;
+    QList<DataSet> m_index;
 
 };
 

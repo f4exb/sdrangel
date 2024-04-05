@@ -80,6 +80,7 @@ public:
     void update(PolygonMapItem *mapItem);
     void update(PolylineMapItem *mapItem);
     void setPosition(const QGeoCoordinate& position);
+    void save(const QString& filename, const QString& dataDir);
 
 protected:
 

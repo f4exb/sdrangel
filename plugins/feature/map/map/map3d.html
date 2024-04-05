@@ -364,6 +364,52 @@
         ["railways", railwaysLayer]
     ]);
 
+    function downloadBlob(filename, blob) {
+        if (window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveBlob(blob, filename);
+        } else {
+            const elem = window.document.createElement("a");
+            elem.href = window.URL.createObjectURL(blob);
+            elem.download = filename;
+            document.body.appendChild(elem);
+            elem.click();
+            document.body.removeChild(elem);
+        }
+    }
+
+    function downloadText(filename, text) {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+    }
+
+    var dataDir = ""; // Directory where 3D models are stored
+    function modelCallback(modelGraphics, time, externalFiles) {
+        const resource = modelGraphics.uri.getValue(time);
+        console.log("modelcallback " + resource);
+
+        const regex = /http:\/\/127.0.0.1:\d+/;
+
+        var file = resource.url.replace(regex, dataDir);
+
+        // KML only supports Collada files. User will have to convert the models if required
+        file = file.replace(/glb$/, "dae");
+        file = file.replace(/gltf$/, "dae");
+
+        if (navigator.platform.indexOf('Win') > -1) {
+            file = file.replace(/\//g, "\\");
+        }
+
+        return file;
+    }
+
     // Use WebSockets for handling commands from MapPlugin
     // (CZML doesn't support camera control, for example)
     // and sending events back to it
@@ -469,30 +515,40 @@
                     viewer.scene.postProcessStages.fxaa.enabled = false;
                 }
             } else if (command.command == "showMUF") {
-                if (mufGeoJSONStream != null) {
-                    viewer.dataSources.remove(mufGeoJSONStream, true);
-                    mufGeoJSONStream = null;
-                }
                 if (command.show == true) {
                     viewer.dataSources.add(
                         Cesium.GeoJsonDataSource.load(
                             "muf.geojson",
                             { describe: describeMUF }
                         )
-                    ).then(function (dataSource) { mufGeoJSONStream = dataSource; });
+                    ).then(function (dataSource) {
+                        if (mufGeoJSONStream != null) {
+                            viewer.dataSources.remove(mufGeoJSONStream, true);
+                            mufGeoJSONStream = null;
+                        }
+                        mufGeoJSONStream = dataSource;
+                    });
+                } else {
+                    viewer.dataSources.remove(mufGeoJSONStream, true);
+                    mufGeoJSONStream = null;
                 }
             } else if (command.command == "showfoF2") {
-                if (foF2GeoJSONStream != null) {
-                    viewer.dataSources.remove(foF2GeoJSONStream, true);
-                    foF2GeoJSONStream = null;
-                }
                 if (command.show == true) {
                     viewer.dataSources.add(
                         Cesium.GeoJsonDataSource.load(
                             "fof2.geojson",
                             { describe: describefoF2 }
                         )
-                    ).then(function (dataSource) { foF2GeoJSONStream = dataSource; });
+                    ).then(function (dataSource) {
+                        if (foF2GeoJSONStream != null) {
+                            viewer.dataSources.remove(foF2GeoJSONStream, true);
+                            foF2GeoJSONStream = null;
+                        }
+                        foF2GeoJSONStream = dataSource;
+                    });
+                } else {
+                    viewer.dataSources.remove(foF2GeoJSONStream, true);
+                    foF2GeoJSONStream = null;
                 }
             } else if (command.command == "showLayer") {
                 layers.get(command.layer).show = command.show;
@@ -639,7 +695,7 @@
                             czmlStream.process(command);
                         } else {
                             var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [position]);
-                            Cesium.when(promise, function(updatedPositions) {
+                            Cesium.when(promise, function (updatedPositions) {
                                 if (height < updatedPositions[0].height) {
                                     if (size == 3) {
                                         command.position.cartographicDegrees[2] = updatedPositions[0].height;
@@ -648,7 +704,7 @@
                                     }
                                 }
                                 czmlStream.process(command);
-                            }, function() {
+                            }, function () {
                                 console.log(`Terrain doesn't support sampleTerrainMostDetailed`);
                                 czmlStream.process(command);
                             });
@@ -657,47 +713,47 @@
                         console.log(`Can't currently use altitudeReference when more than one position`);
                         czmlStream.process(command);
                     }
-                } else if (   (command.hasOwnProperty('polygon') && command.polygon.hasOwnProperty('altitudeReference'))
-                           || (command.hasOwnProperty('polyline') && command.polyline.hasOwnProperty('altitudeReference'))) {
+                } else if ((command.hasOwnProperty('polygon') && command.polygon.hasOwnProperty('altitudeReference'))
+                    || (command.hasOwnProperty('polyline') && command.polyline.hasOwnProperty('altitudeReference'))) {
                     // Support per vertex height reference in polygons and CLIP_TO_GROUND in polylines
                     var prim = command.hasOwnProperty('polygon') ? command.polygon : command.polyline;
                     var clipToGround = prim.altitudeReference == "CLIP_TO_GROUND";
                     var clampToGround = prim.altitudeReference == "CLAMP_TO_GROUND";
                     var size = prim.positions.cartographicDegrees.length;
-                    var positionCount = size/3;
+                    var positionCount = size / 3;
                     var positions = new Array(positionCount);
                     if (viewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
                         if (clampToGround) {
                             for (let i = 0; i < positionCount; i++) {
-                                prim.positions.cartographicDegrees[i*3+2] = 0;
+                                prim.positions.cartographicDegrees[i * 3 + 2] = 0;
                             }
                         } else if (clipToGround) {
                             for (let i = 0; i < positionCount; i++) {
-                                if (prim.positions.cartographicDegrees[i*3+2] < 0) {
-                                    prim.positions.cartographicDegrees[i*3+2] = 0;
+                                if (prim.positions.cartographicDegrees[i * 3 + 2] < 0) {
+                                    prim.positions.cartographicDegrees[i * 3 + 2] = 0;
                                 }
                             }
                         }
                         czmlStream.process(command);
                     } else {
                         for (let i = 0; i < positionCount; i++) {
-                            positions[i] = Cesium.Cartographic.fromDegrees(prim.positions.cartographicDegrees[i*3+0], prim.positions.cartographicDegrees[i*3+1]);
+                            positions[i] = Cesium.Cartographic.fromDegrees(prim.positions.cartographicDegrees[i * 3 + 0], prim.positions.cartographicDegrees[i * 3 + 1]);
                         }
                         var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, positions);
-                        Cesium.when(promise, function(updatedPositions) {
+                        Cesium.when(promise, function (updatedPositions) {
                             if (clampToGround) {
                                 for (let i = 0; i < positionCount; i++) {
-                                    prim.positions.cartographicDegrees[i*3+2] = updatedPositions[i].height;
+                                    prim.positions.cartographicDegrees[i * 3 + 2] = updatedPositions[i].height;
                                 }
                             } else if (clipToGround) {
                                 for (let i = 0; i < positionCount; i++) {
-                                    if (prim.positions.cartographicDegrees[i*3+2] < updatedPositions[i].height) {
-                                        prim.positions.cartographicDegrees[i*3+2] = updatedPositions[i].height;
+                                    if (prim.positions.cartographicDegrees[i * 3 + 2] < updatedPositions[i].height) {
+                                        prim.positions.cartographicDegrees[i * 3 + 2] = updatedPositions[i].height;
                                     }
                                 }
                             }
                             czmlStream.process(command);
-                        }, function() {
+                        }, function () {
                             console.log(`Terrain doesn't support sampleTerrainMostDetailed`);
                             czmlStream.process(command);
                         });
@@ -705,7 +761,20 @@
                 } else {
                     czmlStream.process(command);
                 }
-
+            } else if (command.command == "save") {
+                // Export to kml/kmz
+                dataDir = command.dataDir;
+                Cesium.exportKml({
+                    entities: czmlStream.entities,
+                    kmz: command.filename.endsWith("kmz"),
+                    modelCallback: modelCallback
+                }).then(function (result) {
+                    if (command.filename.endsWith("kmz")) {
+                        downloadBlob(command.filename, result.kmz);
+                    } else {
+                        downloadText(command.filename, result.kml);
+                    }
+                });
             } else {
                 console.log(`Unknown command ${command.command}`);
             }
@@ -759,10 +828,13 @@
     Cesium.knockout.getObservable(viewer.clockViewModel, 'multiplier').subscribe(function(multiplier) {
         reportClock();
     });
-    // This is called every frame
+    // This is called every frame, which is too fast, so instead use setInterval with 1 second period
     //Cesium.knockout.getObservable(viewer.clockViewModel, 'currentTime').subscribe(function(currentTime) {
         //reportClock();
     //});
+    setInterval(function () {
+        reportClock();
+    }, 1000);
     viewer.timeline.addEventListener('settime', reportClock, false);
 
     socket.onopen = () => {

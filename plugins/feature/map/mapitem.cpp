@@ -96,6 +96,11 @@ void ObjectMapItem::update(SWGSDRangel::SWGMapItem *mapItem)
         updateTrack(mapItem->getTrack());
         updatePredictedTrack(mapItem->getPredictedTrack());
     }
+    if (mapItem->getAvailableFrom()) {
+        m_availableFrom = QDateTime::fromString(*mapItem->getAvailableFrom(), Qt::ISODateWithMs);
+    } else {
+        m_availableFrom = QDateTime();
+    }
     if (mapItem->getAvailableUntil()) {
         m_availableUntil = QDateTime::fromString(*mapItem->getAvailableUntil(), Qt::ISODateWithMs);
     } else {

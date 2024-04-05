@@ -275,3 +275,13 @@ void CesiumInterface::setPosition(const QGeoCoordinate& position)
 {
     m_czml.setPosition(position);
 }
+
+void CesiumInterface::save(const QString& filename, const QString& dataDir)
+{
+    QJsonObject obj {
+        {"command", "save"},
+        {"filename", filename},
+        {"dataDir", dataDir}
+    };
+    send(obj);
+}

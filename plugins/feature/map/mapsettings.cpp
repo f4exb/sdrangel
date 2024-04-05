@@ -41,6 +41,7 @@ const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("Radiosonde"),
     QStringLiteral("StarTracker"),
     QStringLiteral("SatelliteTracker"),
+    QStringLiteral("SID"),
     QStringLiteral("VORLocalizer")
 };
 
@@ -57,6 +58,7 @@ const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.feature.radiosonde"),
     QStringLiteral("sdrangel.feature.startracker"),
     QStringLiteral("sdrangel.feature.satellitetracker"),
+    QStringLiteral("sdrangel.feature.sid"),
     QStringLiteral("sdrangel.feature.vorlocalizer")
 };
 
@@ -125,6 +127,7 @@ MapSettings::MapSettings() :
     stationSettings->m_display3DTrack = false;
     m_itemSettings.insert("Station", stationSettings);
     m_itemSettings.insert("VORLocalizer", new MapItemSettings("VORLocalizer", true, QColor(255, 255, 0), false, true, 11));
+    m_itemSettings.insert("SID", new MapItemSettings("SID", true, QColor(255, 255, 0), false, true, 3));
 
     MapItemSettings *ionosondeItemSettings = new MapItemSettings("Ionosonde Stations", true, QColor(255, 255, 0), false, true, 4);
     ionosondeItemSettings->m_display2DIcon = false;

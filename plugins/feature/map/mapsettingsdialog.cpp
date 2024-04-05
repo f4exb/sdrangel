@@ -28,66 +28,10 @@
 #endif
 
 #include "util/units.h"
+#include "gui/colordialog.h"
 
 #include "mapsettingsdialog.h"
 #include "maplocationdialog.h"
-#include "mapcolordialog.h"
-
-static QString rgbToColor(quint32 rgb)
-{
-    QColor color = QColor::fromRgba(rgb);
-    return QString("%1,%2,%3").arg(color.red()).arg(color.green()).arg(color.blue());
-}
-
-static QString backgroundCSS(quint32 rgb)
-{
-    // Must specify a border, otherwise we end up with a gradient instead of solid background
-    return QString("QToolButton { background-color: rgb(%1); border: none; }").arg(rgbToColor(rgb));
-}
-
-static QString noColorCSS()
-{
-    return "QToolButton { background-color: black; border: none; }";
-}
-
-MapColorGUI::MapColorGUI(QTableWidget *table, int row, int col, bool noColor, quint32 color) :
-    m_noColor(noColor),
-    m_color(color)
-{
-    m_colorButton = new QToolButton(table);
-    m_colorButton->setFixedSize(22, 22);
-    if (!m_noColor)
-    {
-        m_colorButton->setStyleSheet(backgroundCSS(m_color));
-    }
-    else
-    {
-        m_colorButton->setStyleSheet(noColorCSS());
-        m_colorButton->setText("-");
-    }
-    table->setCellWidget(row, col, m_colorButton);
-    connect(m_colorButton, &QToolButton::clicked, this, &MapColorGUI::on_color_clicked);
-}
-
-void MapColorGUI::on_color_clicked()
-{
-    MapColorDialog dialog(QColor::fromRgba(m_color), m_colorButton);
-    if (dialog.exec() == QDialog::Accepted)
-    {
-        m_noColor = dialog.noColorSelected();
-        if (!m_noColor)
-        {
-            m_colorButton->setText("");
-            m_color = dialog.selectedColor().rgba();
-            m_colorButton->setStyleSheet(backgroundCSS(m_color));
-        }
-        else
-        {
-            m_colorButton->setText("-");
-            m_colorButton->setStyleSheet(noColorCSS());
-        }
-    }
-}
 
 MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings::MapItemSettings *settings) :
     m_track2D(table, row, MapSettingsDialog::COL_2D_TRACK, !settings->m_display2DTrack, settings->m_2DTrackColor),

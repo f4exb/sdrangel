@@ -53,7 +53,7 @@ void WebServer::incomingConnection(qintptr socket)
 // Don't include leading or trailing / in from
 void WebServer::addPathSubstitution(const QString &from, const QString &to)
 {
-    qDebug() << "Mapping " << from << " to " << to;
+    //qDebug() << "Mapping " << from << " to " << to;
     m_pathSubstitutions.insert(from, to);
 }
 
@@ -125,7 +125,7 @@ void WebServer::readClient()
     if (socket->canReadLine())
     {
         QString line = socket->readLine();
-        qDebug() << "WebServer HTTP Request: " << line;
+        //qDebug() << "WebServer HTTP Request: " << line;
 
         QStringList tokens = QString(line).split(QRegularExpression("[ \r\n][ \r\n]*"));
         if (tokens[0] == "GET")

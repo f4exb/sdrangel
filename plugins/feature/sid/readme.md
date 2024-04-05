@@ -161,7 +161,7 @@ Selects which image / wavelength to view.
 | 211 Å   | Active corona							|
 | 304 Å   | Chromosphere, transition region		    |
 | 335 Å   | Active corona							|
-| 1600 Å  | Transition region, uppoer photoshere    |
+| 1600 Å  | Transition region, upper photoshere     |
 | 1700 Å  | Temperature minimum, photosphere		|
 
 [Ref](https://sdo.gsfc.nasa.gov/data/channels.php)
