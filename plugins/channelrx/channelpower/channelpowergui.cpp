@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
-// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2023-2024 Jon Beniston, M7RCE                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,8 +18,6 @@
 
 #include <QDebug>
 
-#include "channelpowergui.h"
-
 #include "device/deviceuiset.h"
 #include "device/deviceapi.h"
 #include "dsp/dspengine.h"
@@ -36,6 +34,7 @@
 #include "maincore.h"
 
 #include "channelpower.h"
+#include "channelpowergui.h"
 
 ChannelPowerGUI* ChannelPowerGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -62,11 +61,14 @@ QByteArray ChannelPowerGUI::serialize() const
 
 bool ChannelPowerGUI::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if (m_settings.deserialize(data))
+    {
         displaySettings();
         applyAllSettings();
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }
@@ -90,8 +92,7 @@ bool ChannelPowerGUI::handleMessage(const Message& message)
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
-        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
-        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        calcOffset();
         ui->rfBW->setValueRange(floor(log10(m_basebandSampleRate))+1, 0, m_basebandSampleRate);
         updateAbsoluteCenterFrequency();
         return true;
@@ -115,9 +116,23 @@ void ChannelPowerGUI::handleInputMessages()
 
 void ChannelPowerGUI::channelMarkerChangedByCursor()
 {
-    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySetting("inputFrequencyOffset");
+    m_settings.m_frequency = m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset;
+
+    qint64 value = 0;
+
+    if (m_settings.m_frequencyMode == ChannelPowerSettings::Offset) {
+        value = m_settings.m_inputFrequencyOffset;
+    } else if (m_settings.m_frequencyMode == ChannelPowerSettings::Absolute) {
+        value = m_settings.m_frequency;
+    }
+
+    ui->deltaFrequency->blockSignals(true);
+    ui->deltaFrequency->setValue(value);
+    ui->deltaFrequency->blockSignals(false);
+
+    updateAbsoluteCenterFrequency();
+    applySettings({"frequency", "inputFrequencyOffset"});
 }
 
 void ChannelPowerGUI::channelMarkerHighlightedByCursor()
@@ -127,10 +142,23 @@ void ChannelPowerGUI::channelMarkerHighlightedByCursor()
 
 void ChannelPowerGUI::on_deltaFrequency_changed(qint64 value)
 {
-    m_channelMarker.setCenterFrequency(value);
+    qint64 offset = 0;
+
+    if (m_settings.m_frequencyMode == ChannelPowerSettings::Offset)
+    {
+        offset = value;
+        m_settings.m_frequency = m_deviceCenterFrequency + offset;
+    }
+    else if (m_settings.m_frequencyMode == ChannelPowerSettings::Absolute)
+    {
+        m_settings.m_frequency = value;
+        offset = m_settings.m_frequency - m_deviceCenterFrequency;
+    }
+
+    m_channelMarker.setCenterFrequency(offset);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySetting("inputFrequencyOffset");
+    applySettings({"frequency", "inputFrequencyOffset"});
 }
 
 void ChannelPowerGUI::on_rfBW_changed(qint64 value)
@@ -255,7 +283,6 @@ ChannelPowerGUI::ChannelPowerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
-    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
@@ -334,7 +361,8 @@ void ChannelPowerGUI::displaySettings()
 
     blockApplySettings(true);
 
-    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    ui->frequencyMode->setCurrentIndex((int) m_settings.m_frequencyMode);
+    on_frequencyMode_currentIndexChanged((int) m_settings.m_frequencyMode);
 
     ui->rfBW->setValue(m_settings.m_rfBandwidth);
 
@@ -427,6 +455,47 @@ void ChannelPowerGUI::tick()
     m_tickCount++;
 }
 
+void ChannelPowerGUI::on_frequencyMode_currentIndexChanged(int index)
+{
+    m_settings.m_frequencyMode = (ChannelPowerSettings::FrequencyMode) index;
+    ui->deltaFrequency->blockSignals(true);
+
+    if (m_settings.m_frequencyMode == ChannelPowerSettings::Offset)
+    {
+        ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
+        ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
+        ui->deltaUnits->setText("Hz");
+    }
+    else if (m_settings.m_frequencyMode == ChannelPowerSettings::Absolute)
+    {
+        ui->deltaFrequency->setValueRange(true, 11, 0, 99999999999, 0);
+        ui->deltaFrequency->setValue(m_settings.m_frequency);
+        ui->deltaUnits->setText("Hz");
+    }
+
+    ui->deltaFrequency->blockSignals(false);
+
+    updateAbsoluteCenterFrequency();
+    applySetting("frequencyMode");
+}
+
+// Calculate input frequency offset, when device center frequency changes
+void ChannelPowerGUI::calcOffset()
+{
+    if (m_settings.m_frequencyMode == ChannelPowerSettings::Offset)
+    {
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+    }
+    else
+    {
+        qint64 offset = m_settings.m_frequency - m_deviceCenterFrequency;
+        m_channelMarker.setCenterFrequency(offset);
+        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+        updateAbsoluteCenterFrequency();
+        applySetting("inputFrequencyOffset");
+    }
+}
+
 void ChannelPowerGUI::on_clearMeasurements_clicked()
 {
     m_channelPower->resetMagLevels();
@@ -434,6 +503,7 @@ void ChannelPowerGUI::on_clearMeasurements_clicked()
 
 void ChannelPowerGUI::makeUIConnections()
 {
+    QObject::connect(ui->frequencyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChannelPowerGUI::on_frequencyMode_currentIndexChanged);
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ChannelPowerGUI::on_deltaFrequency_changed);
     QObject::connect(ui->rfBW, &ValueDial::changed, this, &ChannelPowerGUI::on_rfBW_changed);
     QObject::connect(ui->pulseTH, QOverload<int>::of(&QDial::valueChanged), this, &ChannelPowerGUI::on_pulseTH_valueChanged);
@@ -443,5 +513,12 @@ void ChannelPowerGUI::makeUIConnections()
 
 void ChannelPowerGUI::updateAbsoluteCenterFrequency()
 {
-    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+    setStatusFrequency(m_settings.m_frequency);
+    if (   (m_basebandSampleRate > 1)
+        && (   (m_settings.m_inputFrequencyOffset >= m_basebandSampleRate / 2)
+            || (m_settings.m_inputFrequencyOffset < -m_basebandSampleRate / 2))) {
+        setStatusText("Frequency out of band");
+    } else {
+        setStatusText("");
+    }
 }

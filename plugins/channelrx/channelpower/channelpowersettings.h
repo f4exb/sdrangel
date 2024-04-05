@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
-// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2023-2024 Jon Beniston, M7RCE                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -32,6 +32,11 @@ struct ChannelPowerSettings
     Real m_rfBandwidth;
     float m_pulseThreshold;
     int m_averagePeriodUS;
+    enum FrequencyMode {
+        Offset,
+        Absolute
+    } m_frequencyMode;
+    qint64 m_frequency;
 
     quint32 m_rgbColor;
     QString m_title;
