@@ -286,8 +286,10 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
 
             m_preambleHistory[m_chirpCount] = imax;
             m_chirpCount++;
+            double preDrop = magsqPre - magsqSFD;
+            double dropRatio = -preDrop / magsqSFD;
 
-            if (magsqPre <  magsqSFD) // preamble drop
+            if ((preDrop <  0.0) && (dropRatio > 0.5)) // preamble drop
             {
                 m_magsqTotalAvg(magsqSFDTotal);
 
