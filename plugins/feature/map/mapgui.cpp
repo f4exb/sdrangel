@@ -717,6 +717,7 @@ void MapGUI::addIonosonde()
 
 void MapGUI::giroIndexUpdated(const QList<GIRO::DataSet>& data)
 {
+    (void) data;
 }
 
 void MapGUI::giroDataUpdated(const GIRO::GIROStationData& data)
