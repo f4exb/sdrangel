@@ -21,6 +21,7 @@
 #include <QtCore>
 #include <QTimer>
 #include <QImage>
+#include <QCache>
 
 #include "export.h"
 
@@ -63,16 +64,29 @@ signals:
 
 private:
 
+    struct Request {
+        QString m_url;
+        QDateTime m_dateTime;
+        int m_size;
+        QString m_image;
+    };
+
     QTimer m_dataTimer;             // Timer for periodic updates
+    QString m_image;                // Saved parameters for periodic updates
+    int m_size;
+
     QNetworkAccessManager *m_networkManager;
     QNetworkDiskCache *m_cache;
 
-    QString m_image;
-    int m_size;
-    QDateTime m_dateTime;
+    // Index page isn't cachable (using network cache), so we cache it ourselves, as it can take up to 5 seconds to fetch
+    QCache<QDate, QByteArray> m_indexCache;
+    QDateTime m_todayCacheDateTime;
+    QByteArray *m_todayCache;
+
+    QList<Request> m_requests;
 
     void handleJpeg(const QByteArray& bytes);
-    void handleIndex(const QByteArray& bytes);
+    void handleIndex(QByteArray *bytes, const Request& request);
     static const QStringList getImageFileNames();
     static const QStringList getVideoFileNames();
 

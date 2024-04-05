@@ -23,7 +23,8 @@
 #include <QNetworkDiskCache>
 
 SolarDynamicsObservatory::SolarDynamicsObservatory() :
-    m_size(512)
+    m_size(512),
+    m_todayCache(nullptr)
 {
     connect(&m_dataTimer, &QTimer::timeout, this, qOverload<>(&SolarDynamicsObservatory::getImage));
     m_networkManager = new QNetworkAccessManager();
@@ -46,6 +47,7 @@ SolarDynamicsObservatory::~SolarDynamicsObservatory()
     disconnect(&m_dataTimer, &QTimer::timeout, this, qOverload<>(&SolarDynamicsObservatory::getImage));
     disconnect(m_networkManager, &QNetworkAccessManager::finished, this, &SolarDynamicsObservatory::handleReply);
     delete m_networkManager;
+    delete m_todayCache;
 }
 
 SolarDynamicsObservatory* SolarDynamicsObservatory::create()
@@ -264,20 +266,35 @@ void SolarDynamicsObservatory::getImage(const QString& imageName, QDateTime date
     // Stop periodic updates, if not after latest data
     m_dataTimer.stop();
 
+    // Save details of image we are after
+    Request request;
+    request.m_dateTime = dateTime;
+    request.m_size = size;
+    request.m_image = imageName;
+
     // Get file index, as we don't know what time will be used in the file
     QDate date = dateTime.date();
-    QString urlString = QString("https://sdo.gsfc.nasa.gov/assets/img/browse/%1/%2/%3/")
-        .arg(date.year())
-        .arg(date.month(), 2, 10, QLatin1Char('0'))
-        .arg(date.day(), 2, 10, QLatin1Char('0'));
-    QUrl url(urlString);
+    if (m_indexCache.contains(date))
+    {
+        handleIndex(m_indexCache.take(date), request);
+    }
+    else if ((m_todayCache != nullptr) && (date == m_todayCacheDateTime.date()) && (dateTime < m_todayCacheDateTime.addSecs(-60 * 60)))
+    {
+        handleIndex(m_todayCache, request);
+    }
+    else
+    {
+        QString urlString = QString("https://sdo.gsfc.nasa.gov/assets/img/browse/%1/%2/%3/")
+            .arg(date.year())
+            .arg(date.month(), 2, 10, QLatin1Char('0'))
+            .arg(date.day(), 2, 10, QLatin1Char('0'));
+        QUrl url(urlString);
 
-    // Save details of image we are after
-    m_dateTime = dateTime;
-    m_size = size;
-    m_image = imageName;
+        request.m_url = urlString;
+        m_requests.append(request);
 
-    m_networkManager->get(QNetworkRequest(url));
+        m_networkManager->get(QNetworkRequest(url));
+    }
 }
 
 void SolarDynamicsObservatory::handleReply(QNetworkReply* reply)
@@ -292,9 +309,21 @@ void SolarDynamicsObservatory::handleReply(QNetworkReply* reply)
             }
             else
             {
-                handleIndex(reply->readAll());
-            }
+                // Find corresponding request
+                QString urlString = reply->url().toString();
 
+                for (int i = 0; i < m_requests.size(); i++)
+                {
+                    if (m_requests[i].m_url == urlString)
+                    {
+                        QByteArray *bytes = new QByteArray(reply->readAll());
+
+                        handleIndex(bytes, m_requests[i]);
+                        m_requests.removeAt(i);
+                        break;
+                    }
+                }
+            }
         }
         else
         {
@@ -319,21 +348,21 @@ void SolarDynamicsObservatory::handleJpeg(const QByteArray& bytes)
     }
 }
 
-void SolarDynamicsObservatory::handleIndex(const QByteArray& bytes)
+void SolarDynamicsObservatory::handleIndex(QByteArray* bytes, const Request& request)
 {
     const QStringList names = SolarDynamicsObservatory::getImageNames();
     const QStringList channelNames = SolarDynamicsObservatory::getChannelNames();
-    int idx = names.indexOf(m_image);
+    int idx = names.indexOf(request.m_image);
     if (idx < 0) {
         return;
     }
     QString channel = channelNames[idx];
 
-    QString file(bytes);
+    QString file(*bytes);
     QStringList lines = file.split("\n");
 
-    QString date = m_dateTime.date().toString("yyyyMMdd");
-    QString pattern = QString("\"%1_([0-9]{6})_%2_%3.jpg\"").arg(date).arg(m_size).arg(channel);
+    QString date = request.m_dateTime.date().toString("yyyyMMdd");
+    QString pattern = QString("\"%1_([0-9]{6})_%2_%3.jpg\"").arg(date).arg(request.m_size).arg(channel);
     QRegularExpression re(pattern);
 
     // Get all times the image is available
@@ -353,7 +382,7 @@ void SolarDynamicsObservatory::handleIndex(const QByteArray& bytes)
 
     if (times.length() > 0)
     {
-        QTime target = m_dateTime.time();
+        QTime target = request.m_dateTime.time();
         QTime current = times[0];
         for (int i = 1; i < times.size(); i++)
         {
@@ -364,7 +393,7 @@ void SolarDynamicsObservatory::handleIndex(const QByteArray& bytes)
         }
 
         // Get image
-        QDate date = m_dateTime.date();
+        QDate date = request.m_dateTime.date();
         QString urlString = QString("https://sdo.gsfc.nasa.gov/assets/img/browse/%1/%2/%3/%1%2%3_%4%5%6_%7_%8.jpg")
             .arg(date.year())
             .arg(date.month(), 2, 10, QLatin1Char('0'))
@@ -372,7 +401,7 @@ void SolarDynamicsObservatory::handleIndex(const QByteArray& bytes)
             .arg(current.hour(), 2, 10, QLatin1Char('0'))
             .arg(current.minute(), 2, 10, QLatin1Char('0'))
             .arg(current.second(), 2, 10, QLatin1Char('0'))
-            .arg(m_size)
+            .arg(request.m_size)
             .arg(channel);
 
         QUrl url(urlString);
@@ -381,6 +410,24 @@ void SolarDynamicsObservatory::handleIndex(const QByteArray& bytes)
     }
     else
     {
-        qDebug() << "SolarDynamicsObservatory: No image available";
+        qDebug() << "SolarDynamicsObservatory: No image available for " << request.m_dateTime;
+    }
+
+    // Save index in cache
+    if (request.m_dateTime.date() == QDate::currentDate())
+    {
+        if (m_todayCache != bytes)
+        {
+            m_todayCache = bytes;
+            m_todayCacheDateTime = QDateTime::currentDateTime();
+        }
+    }
+    else if (request.m_dateTime.date() < QDate::currentDate())
+    {
+        m_indexCache.insert(request.m_dateTime.date(), bytes);
+    }
+    else
+    {
+        delete bytes;
     }
 }
