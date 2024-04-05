@@ -336,8 +336,10 @@ private slots:
     void renderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode);
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     void loadingChanged(const QWebEngineLoadingInfo &loadingInfo);
-#endif
+    void downloadRequested(QWebEngineDownloadRequest *download);
+#else
     void downloadRequested(QWebEngineDownloadItem *download);
+#endif
 #endif
     void statusChanged(QQuickWidget::Status status);
     void preferenceChanged(int elementType);

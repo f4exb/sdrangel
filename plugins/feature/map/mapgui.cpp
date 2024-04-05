@@ -2744,11 +2744,17 @@ void MapGUI::fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest)
         ui->splitter->addWidget(ui->web);
     }
 }
-
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+void MapGUI::downloadRequested(QWebEngineDownloadRequest *download)
+{
+    download->accept();
+}
+#else
 void MapGUI::downloadRequested(QWebEngineDownloadItem *download)
 {
     download->accept();
 }
+#endif
 #endif
 
 void MapGUI::preferenceChanged(int elementType)
