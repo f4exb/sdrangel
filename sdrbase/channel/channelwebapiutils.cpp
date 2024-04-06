@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2020-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>         //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -256,6 +256,23 @@ bool ChannelWebAPIUtils::getChannelSettings(unsigned int deviceIndex, unsigned i
         qDebug() << "ChannelWebAPIUtils::getChannelSettings: no device " << deviceIndex;
         return false;
     }
+
+    if (httpRC/100 != 2)
+    {
+        qWarning("ChannelWebAPIUtils::getChannelSettings: get channel settings error %d: %s",
+            httpRC, qPrintable(errorResponse));
+        return false;
+    }
+
+    return true;
+}
+
+bool ChannelWebAPIUtils::getChannelSettings(ChannelAPI *channel, SWGSDRangel::SWGChannelSettings &channelSettingsResponse)
+{
+    QString errorResponse;
+    int httpRC;
+
+    httpRC = channel->webapiSettingsGet(channelSettingsResponse, errorResponse);
 
     if (httpRC/100 != 2)
     {
@@ -1485,22 +1502,19 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
     }
 }
 
-
-bool ChannelWebAPIUtils::patchChannelSetting(unsigned int deviceSetIndex, unsigned int channelIndex, const QString &setting, double value)
+bool ChannelWebAPIUtils::patchChannelSetting(ChannelAPI *channel, const QString &setting, const QVariant& value)
 {
     SWGSDRangel::SWGChannelSettings channelSettingsResponse;
     QString errorResponse;
     int httpRC;
-    ChannelAPI *channel;
 
-    if (getChannelSettings(deviceSetIndex, channelIndex, channelSettingsResponse, channel))
+    if (getChannelSettings(channel, channelSettingsResponse))
     {
         // Patch settings
         QJsonObject *jsonObj = channelSettingsResponse.asJsonObject();
-        double oldValue;
-        if (WebAPIUtils::getSubObjectDouble(*jsonObj, setting, oldValue))
+        if (WebAPIUtils::hasSubObject(*jsonObj, setting))
         {
-            WebAPIUtils::setSubObjectDouble(*jsonObj, setting, value);
+            WebAPIUtils::setSubObject(*jsonObj, setting, value);
             QStringList channelSettingsKeys;
             channelSettingsKeys.append(setting);
             channelSettingsResponse.init();
@@ -1511,24 +1525,57 @@ bool ChannelWebAPIUtils::patchChannelSetting(unsigned int deviceSetIndex, unsign
 
             if (httpRC/100 == 2)
             {
-                qDebug("ChannelWebAPIUtils::patchChannelSetting: set feature setting %s to %f OK", qPrintable(setting), value);
+                qDebug("ChannelWebAPIUtils::patchChannelSetting: set feature setting %s to %s OK", qPrintable(setting), qPrintable(value.toString()));
                 return true;
             }
             else
             {
-                qWarning("ChannelWebAPIUtils::patchChannelSetting: set feature setting %s to %f error %d: %s",
-                    qPrintable(setting), value, httpRC, qPrintable(*errorResponse2.getMessage()));
+                qWarning("ChannelWebAPIUtils::patchChannelSetting: set feature setting %s to %s error %d: %s",
+                    qPrintable(setting), qPrintable(value.toString()), httpRC, qPrintable(*errorResponse2.getMessage()));
                 return false;
             }
         }
         else
         {
-            qWarning("ChannelWebAPIUtils::patchChannelSetting: no key %s in feature settings", qPrintable(setting));
+            qWarning("ChannelWebAPIUtils::patchChannelSetting: no key %s in channel settings", qPrintable(setting));
             return false;
         }
     }
     else
     {
+        return false;
+    }
+}
+
+bool ChannelWebAPIUtils::patchChannelSetting(unsigned int deviceSetIndex, unsigned int channelIndex, const QString &setting, const QString& value)
+{
+    ChannelAPI *channel = MainCore::instance()->getChannel(deviceSetIndex, channelIndex);
+
+    if (channel) {
+        return patchChannelSetting(channel, setting, value);
+    } else {
+        return false;
+    }
+}
+
+bool ChannelWebAPIUtils::patchChannelSetting(unsigned int deviceSetIndex, unsigned int channelIndex, const QString &setting, int value)
+{
+    ChannelAPI *channel = MainCore::instance()->getChannel(deviceSetIndex, channelIndex);
+
+    if (channel) {
+        return patchChannelSetting(channel, setting, value);
+    } else {
+        return false;
+    }
+}
+
+bool ChannelWebAPIUtils::patchChannelSetting(unsigned int deviceSetIndex, unsigned int channelIndex, const QString &setting, double value)
+{
+    ChannelAPI *channel = MainCore::instance()->getChannel(deviceSetIndex, channelIndex);
+
+    if (channel) {
+        return patchChannelSetting(channel, setting, value);
+    } else {
         return false;
     }
 }
@@ -1835,3 +1882,30 @@ bool ChannelWebAPIUtils::getChannelReportValue(unsigned int deviceIndex, unsigne
     return false;
 }
 
+bool ChannelWebAPIUtils::addChannel(unsigned int deviceSetIndex, const QString& uri, int direction)
+{
+    MainCore *mainCore = MainCore::instance();
+    PluginAPI::ChannelRegistrations *channelRegistrations = mainCore->getPluginManager()->getRxChannelRegistrations();
+    int nbRegistrations = channelRegistrations->size();
+    int index = 0;
+
+    for (; index < nbRegistrations; index++)
+    {
+        if (channelRegistrations->at(index).m_channelIdURI == uri) {
+            break;
+        }
+    }
+
+    if (index < nbRegistrations)
+    {
+        MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, direction);
+        mainCore->getMainMessageQueue()->push(msg);
+
+        return true;
+    }
+    else
+    {
+        qWarning() << "ChannelWebAPIUtils::addChannel:" << uri << "plugin not available";
+        return false;
+    }
+}
