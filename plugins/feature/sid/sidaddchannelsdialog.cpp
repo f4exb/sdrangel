@@ -42,7 +42,7 @@ SIDAddChannelsDialog::SIDAddChannelsDialog(SIDSettings *settings, QWidget* paren
     // Create column header
     ui->channels->setHorizontalHeaderItem(COL_TX_NAME, new QTableWidgetItem("Callsign"));
     ui->channels->setHorizontalHeaderItem(COL_TX_FREQUENCY, new QTableWidgetItem("Frequency (Hz)"));
-    for (int i = 0; i < deviceSets.size(); i++)
+    for (unsigned int i = 0; i < deviceSets.size(); i++)
     {
         if (deviceSets[i]->m_deviceSourceEngine || deviceSets[i]->m_deviceMIMOEngine)
         {
@@ -136,6 +136,8 @@ void SIDAddChannelsDialog::nextChannel()
 
 void SIDAddChannelsDialog::channelAdded(int deviceSetIndex, ChannelAPI *channel)
 {
+    (void) deviceSetIndex;
+
     const VLFTransmitters::Transmitter *transmitter = VLFTransmitters::m_callsignHash.value(ui->channels->item(m_row, COL_TX_NAME)->text());
 
     ChannelWebAPIUtils::patchChannelSetting(channel, "title", transmitter->m_callsign);
