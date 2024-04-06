@@ -4,6 +4,13 @@ ChannelPowerSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+    frequencyMode:
+      description: (0 for Offset, 1 for Absolute)
+      type: integer
+    frequency:
+      description: Channel center frequency
+      type: integer
+      format: int64
     rfBandwidth:
       type: number
       format: float
