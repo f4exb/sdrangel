@@ -140,7 +140,7 @@ When checked, displays imagary from NASA's SDO (Solar Dynamic Observatory) and E
 
 SDOs images the Sun in a variety of UV and EUV wavelengths. SOHO shows images of the solar corona. The images are near real-time, updated every 15 minutes.
 
-Solar flares are particularly visible in the AIA 131 Å images.
+Solar flares are particularly visible in the AIA 131 Ã… images.
 
 <h3>18: Image or Video Selection</h3>
 
@@ -150,24 +150,24 @@ Selects whether to display images (unchecked) or video (checked).
 
 Selects which image / wavelength to view.
 
-* AIA 94 Å to 1700 Å - The AIA (Atmospheric Imaging Assembly) images the solar atmosphere at multiple EUV (Extreme Ultraviolet) and UV (Ultraviolet) wavelengths:
+* AIA 94 Ã… to 1700 Ã… - The AIA (Atmospheric Imaging Assembly) images the solar atmosphere at multiple EUV (Extreme Ultraviolet) and UV (Ultraviolet) wavelengths:
    
 | Band    | Region									|
 |---------|-----------------------------------------|
-| 94 Å    | Flaring									|
-| 131 Å   | Flaring									|	
-| 171 Å   | Quiet corona, upper transition region 	|
-| 193 Å   | Corona and hot flare plasma			 	|
-| 211 Å   | Active corona							|
-| 304 Å   | Chromosphere, transition region		    |
-| 335 Å   | Active corona							|
-| 1600 Å  | Transition region, upper photoshere     |
-| 1700 Å  | Temperature minimum, photosphere		|
+| 94 Ã…    | Flaring									|
+| 131 Ã…   | Flaring									|
+| 171 Ã…   | Quiet corona, upper transition region 	|
+| 193 Ã…   | Corona and hot flare plasma			 	|
+| 211 Ã…   | Active corona							|
+| 304 Ã…   | Chromosphere, transition region		    |
+| 335 Ã…   | Active corona							|
+| 1600 Ã…  | Transition region, upper photoshere     |
+| 1700 Ã…  | Temperature minimum, photosphere		|
 
 [Ref](https://sdo.gsfc.nasa.gov/data/channels.php)
 
 * MHI Magnetogram - HMI (Helioseismic and Magnetic Imager) Magnetogram shows the magnetic field in the photosphere, with black and white indicating opposite polarities.
-* MHI Intensitygram - Brightness in a visible light band (6173 Å - Red - Iron spectral line), useful for observing sun spots.
+* MHI Intensitygram - Brightness in a visible light band (6173 Ã… - Red - Iron spectral line), useful for observing sun spots.
 * Dopplergram - Shows velocities along the line-of-sight.
 
 * LASCO (Large Angle Spectrometric Coronagraph) shows solar corona. C2 shows corona up to 8.4Mkm. C3 shows corona up to 23Mkm.
