@@ -54,16 +54,40 @@ void ChirpChatDemodDecoderFT::decodeSymbols(
         return;
     }
 
-    float *lls = new float[mags.size()*nbSymbolBits]; // bits log likelihoods (>0 for 0, <0 for 1)
-    std::fill(lls, lls+mags.size()*nbSymbolBits, 0.0);
+    // float *lls = new float[mags.size()*nbSymbolBits]; // bits log likelihoods (>0 for 0, <0 for 1)
+    // std::fill(lls, lls+mags.size()*nbSymbolBits, 0.0);
     FT8::FT8Params params;
-    FT8::FT8::soft_decode_mags(params, mags, nbSymbolBits, lls);
+    // FT8::FT8::soft_decode_mags(params, mags, nbSymbolBits, lls);
     int r174[174];
     std::string comments;
     payloadParityStatus = (int) ChirpChatDemodSettings::ParityOK;
     payloadCRCStatus = false;
+    std::vector<std::vector<float>> magsp = mags;
 
-    if (FT8::FT8::decode(lls, r174, params, 0, comments) == 0)
+    qDebug("ChirpChatDemodDecoderFT::decodeSymbols: try decode with symbol shift 0");
+    int res = decodeWithShift(params, magsp, nbSymbolBits, r174, comments);
+
+    if (res == 0)
+    {
+        std::vector<std::vector<float>> magsn = mags;
+        int shiftcount = 0;
+
+        while ((res == 0) && (shiftcount < 7))
+        {
+            qDebug("ChirpChatDemodDecoderFT::decodeSymbols: try decode with symbol shift %d", shiftcount + 1);
+            res = decodeWithShift(params, magsp, nbSymbolBits, r174, comments, 1);
+
+            if (res == 0)
+            {
+                qDebug("ChirpChatDemodDecoderFT::decodeSymbols: try decode with symbol shift -%d", shiftcount + 1);
+                res = decodeWithShift(params, magsn, nbSymbolBits, r174, comments, -1);
+            }
+
+            shiftcount++;
+        }
+    }
+
+    if (res == 0)
     {
         if (comments == "LDPC fail")
         {
@@ -106,6 +130,47 @@ void ChirpChatDemodDecoderFT::decodeSymbols(
     if ((msgType == "5")) {
         reply = r174[34] != 0;
     }
+}
+
+int ChirpChatDemodDecoderFT::decodeWithShift(
+    FT8::FT8Params& params,
+    std::vector<std::vector<float>>& mags,
+    int nbSymbolBits,
+    int *r174,
+    std::string& comments,
+    int shift
+)
+{
+    if (shift > 0)
+    {
+        for (unsigned int si = 0; si < mags.size(); si++)
+        {
+            for (int bini = (1<<nbSymbolBits) - 1; bini > 0; bini--)
+            {
+                float x = mags[si][bini - 1];
+                mags[si][bini - 1] = mags[si][bini];
+                mags[si][bini] = x;
+            }
+        }
+    }
+
+    if (shift < 0)
+    {
+        for (unsigned int si = 0; si < mags.size(); si++)
+        {
+            for (int bini = 0; bini < (1<<nbSymbolBits) - 1; bini++)
+            {
+                float x = mags[si][bini + 1];
+                mags[si][bini + 1] = mags[si][bini];
+                mags[si][bini] = x;
+            }
+        }
+    }
+
+    float *lls = new float[mags.size()*nbSymbolBits]; // bits log likelihoods (>0 for 0, <0 for 1)
+    std::fill(lls, lls+mags.size()*nbSymbolBits, 0.0);
+    FT8::FT8::soft_decode_mags(params, mags, nbSymbolBits, lls);
+    return FT8::FT8::decode(lls, r174, params, 0, comments);
 }
 
 #endif // HAS_FT8

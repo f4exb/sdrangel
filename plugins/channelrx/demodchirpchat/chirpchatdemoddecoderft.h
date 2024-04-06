@@ -21,6 +21,10 @@
 #include <vector>
 #include <string>
 
+namespace FT8 {
+    class FT8Params;
+}
+
 class ChirpChatDemodDecoderFT
 {
 public:
@@ -39,9 +43,19 @@ public:
         std::string& call1,   //!< 1st callsign or shorthand
         std::string& call2,   //!< 2nd callsign
         std::string& loc,     //!< locator, report or shorthand
-        bool& reply ,         //!< true if message is a reply report
+        bool& reply,          //!< true if message is a reply report
         int& payloadParityStatus,
         bool& payloadCRCStatus
+    );
+
+private:
+    static int decodeWithShift(
+        FT8::FT8Params& params,
+        std::vector<std::vector<float>>& mags,
+        int nbSymbolBits,
+        int *r174,
+        std::string& comments,
+        int shift = 0
     );
 };
 
