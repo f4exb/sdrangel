@@ -289,6 +289,7 @@ void ChirpChatDemodGUI::on_header_stateChanged(int state)
 
     ui->fecParity->setEnabled(state != Qt::Checked);
     ui->crc->setEnabled(state != Qt::Checked);
+    ui->packetLength->setEnabled(state != Qt::Checked);
 
     applySettings();
 }
