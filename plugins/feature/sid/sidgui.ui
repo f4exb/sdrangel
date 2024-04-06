@@ -328,6 +328,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="addChannels">
+        <property name="toolTip">
+         <string>Add channels</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/channels_add.png</normaloff>:/channels_add.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="settings">
         <property name="toolTip">
          <string>Open settings dialog</string>

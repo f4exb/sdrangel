@@ -284,6 +284,7 @@ private slots:
     void updateStatus();
     void autosave();
     void on_settings_clicked();
+    void on_addChannels_clicked();
     void xRayDataUpdated(const QList<GOESXRay::XRayData>& data, bool primary);
     void protonDataUpdated(const QList<GOESXRay::ProtonData>& data, bool primary);
     void grbDataUpdated(const QList<GRB::Data>& data);

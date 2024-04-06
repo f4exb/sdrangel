@@ -27,12 +27,15 @@ if(NOT SERVER_MODE)
         sidgui.ui
         sidsettingsdialog.cpp
         sidsettingsdialog.ui
+        sidaddchannelsdialog.cpp
+        sidaddchannelsdialog.ui
         icons.qrc
     )
     set(sid_HEADERS
         ${sid_HEADERS}
         sidgui.h
         sidsettingsdialog.h
+        sidaddchannelsdialog.h
     )
 
     set(TARGET_NAME featuresid)
