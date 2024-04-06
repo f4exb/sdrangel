@@ -35,6 +35,7 @@
 #include "SWGPERTesterSettings.h"
 #include "SWGRadiosondeSettings.h"
 #include "SWGRigCtlServerSettings.h"
+#include "SWGSIDSettings.h"
 #include "SWGSatelliteTrackerSettings.h"
 #include "SWGSimplePTTSettings.h"
 #include "SWGSkyMapSettings.h"
@@ -111,6 +112,9 @@ public:
     SWGSatelliteTrackerSettings* getSatelliteTrackerSettings();
     void setSatelliteTrackerSettings(SWGSatelliteTrackerSettings* satellite_tracker_settings);
 
+    SWGSIDSettings* getSidSettings();
+    void setSidSettings(SWGSIDSettings* sid_settings);
+
     SWGSimplePTTSettings* getSimplePttSettings();
     void setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settings);
 
@@ -177,6 +181,9 @@ private:
 
     SWGSatelliteTrackerSettings* satellite_tracker_settings;
     bool m_satellite_tracker_settings_isSet;
+
+    SWGSIDSettings* sid_settings;
+    bool m_sid_settings_isSet;
 
     SWGSimplePTTSettings* simple_ptt_settings;
     bool m_simple_ptt_settings_isSet;

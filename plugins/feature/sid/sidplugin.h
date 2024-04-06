@@ -1,8 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2019 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2021-2022 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2023 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,31 +16,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_MAPCOLORDIALOG_H
-#define INCLUDE_FEATURE_MAPCOLORDIALOG_H
+#ifndef INCLUDE_FEATURE_SIDPLUGIN_H
+#define INCLUDE_FEATURE_SIDPLUGIN_H
 
-#include <QColorDialog>
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-class MapColorDialog : public QDialog {
-    Q_OBJECT
+class FeatureGUI;
+class WebAPIAdapterInterface;
+
+class SIDPlugin : public QObject, PluginInterface {
+	Q_OBJECT
+	Q_INTERFACES(PluginInterface)
+	Q_PLUGIN_METADATA(IID "sdrangel.feature.sid")
 
 public:
-    explicit MapColorDialog(const QColor &initial, QWidget *parent = nullptr);
-    QColor selectedColor() const;
-    bool noColorSelected() const;
+	explicit SIDPlugin(QObject* parent = nullptr);
 
-public slots:
-    virtual void accept() override;
-    void noColorClicked();
+	const PluginDescriptor& getPluginDescriptor() const;
+	void initPlugin(PluginAPI* pluginAPI);
+
+	virtual FeatureGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const;
+	virtual Feature* createFeature(WebAPIAdapterInterface *webAPIAdapterInterface) const;
+	virtual FeatureWebAPIAdapter* createFeatureWebAPIAdapter() const;
 
 private:
+	static const PluginDescriptor m_pluginDescriptor;
 
-    QColorDialog *m_colorDialog;
-    QPushButton *m_noColorButton;
-    QPushButton *m_cancelButton;
-    QPushButton *m_okButton;
-
-    bool m_noColorSelected;
+	PluginAPI* m_pluginAPI;
 };
 
-#endif // INCLUDE_FEATURE_MAPCOLORDIALOG_H
+#endif // INCLUDE_FEATURE_SIDPLUGIN_H

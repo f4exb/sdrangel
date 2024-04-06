@@ -88,6 +88,8 @@ SWGMapItem_2::SWGMapItem_2() {
     m_coordinates_isSet = false;
     extruded_height = 0.0f;
     m_extruded_height_isSet = false;
+    available_from = nullptr;
+    m_available_from_isSet = false;
     available_until = nullptr;
     m_available_until_isSet = false;
     color_valid = 0;
@@ -162,6 +164,8 @@ SWGMapItem_2::init() {
     m_coordinates_isSet = false;
     extruded_height = 0.0f;
     m_extruded_height_isSet = false;
+    available_from = new QString("");
+    m_available_from_isSet = false;
     available_until = new QString("");
     m_available_until_isSet = false;
     color_valid = 0;
@@ -240,6 +244,9 @@ SWGMapItem_2::cleanup() {
         delete coordinates;
     }
 
+    if(available_from != nullptr) { 
+        delete available_from;
+    }
     if(available_until != nullptr) { 
         delete available_until;
     }
@@ -317,6 +324,8 @@ SWGMapItem_2::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&coordinates, pJson["coordinates"], "QList", "SWGMapCoordinate");
     ::SWGSDRangel::setValue(&extruded_height, pJson["extrudedHeight"], "float", "");
+    
+    ::SWGSDRangel::setValue(&available_from, pJson["availableFrom"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&available_until, pJson["availableUntil"], "QString", "QString");
     
@@ -429,6 +438,9 @@ SWGMapItem_2::asJsonObject() {
     }
     if(m_extruded_height_isSet){
         obj->insert("extrudedHeight", QJsonValue(extruded_height));
+    }
+    if(available_from != nullptr && *available_from != QString("")){
+        toJsonValue(QString("availableFrom"), available_from, obj, QString("QString"));
     }
     if(available_until != nullptr && *available_until != QString("")){
         toJsonValue(QString("availableUntil"), available_until, obj, QString("QString"));
@@ -744,6 +756,16 @@ SWGMapItem_2::setExtrudedHeight(float extruded_height) {
 }
 
 QString*
+SWGMapItem_2::getAvailableFrom() {
+    return available_from;
+}
+void
+SWGMapItem_2::setAvailableFrom(QString* available_from) {
+    this->available_from = available_from;
+    this->m_available_from_isSet = true;
+}
+
+QString*
 SWGMapItem_2::getAvailableUntil() {
     return available_until;
 }
@@ -866,6 +888,9 @@ SWGMapItem_2::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_extruded_height_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(available_from && *available_from != QString("")){
             isObjectUpdated = true; break;
         }
         if(available_until && *available_until != QString("")){

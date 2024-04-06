@@ -390,7 +390,7 @@ bool M17DemodProcessor::decode_packet(modemm17::M17FrameDecoder::packet_buffer_t
                         << " Via: " << ax25.m_via
                         << " Type: " << ax25.m_type
                         << " PID: " << ax25.m_pid
-                        << " Data: " << ax25.m_dataASCII;
+                        << " Data: " << QString::fromUtf8(ax25.m_data);
 
                     if (m_demodInputMessageQueue)
                     {
@@ -402,7 +402,7 @@ bool M17DemodProcessor::decode_packet(modemm17::M17FrameDecoder::packet_buffer_t
                             ax25.m_via,
                             ax25.m_type,
                             ax25.m_pid,
-                            ax25.m_dataASCII
+                            ax25.m_data
                         );
                         msg->getPacket() = packet;
                         m_demodInputMessageQueue->push(msg);

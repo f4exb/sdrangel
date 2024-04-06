@@ -76,6 +76,12 @@ double Astronomy::modifiedJulianDate(QDateTime dt)
     return Astronomy::julianDate(dt) - 2400000.5;
 }
 
+// Convert Julian date to QDateTime
+QDateTime Astronomy::julianDateToDateTime(double jd)
+{
+    return QDateTime::fromSecsSinceEpoch((jd - 2440587.5) * 24.0*60.0*60.0);
+}
+
 // Get Julian date of J2000 Epoch
 double Astronomy::jd_j2000(void)
 {
@@ -901,6 +907,49 @@ double Astronomy::observerVelocityLSRK(RADec rd, double latitude, double longitu
     double vOrbit = Astronomy::earthOrbitVelocityBCRS(rd, dt);
     double vSun = Astronomy::sunVelocityLSRK(rd);
     return vRot + vOrbit + vSun;
+}
+
+// Calculate sunrise and sunset time
+// From: https://en.wikipedia.org/wiki/Sunrise_equation
+// Probably accurate to within a couple of minutes
+void Astronomy::sunrise(QDate date, double latitude, double longitude, QDateTime& rise, QDateTime& set)
+{
+    // Calculate Julian day
+    double n = std::ceil(Astronomy::julianDate(QDateTime(date, QTime(0, 0, 0))) - 2451545.0 + (69.184 / 86400.0));
+
+    // Mean solar time
+    double jStar = n - longitude / 360.0;
+
+    // Solar mean anomaly
+    double m = Astronomy::modulo(357.5291 + 0.98560028 * jStar, 360.0);
+    double mRad = Units::degreesToRadians(m);
+
+    // Equation of the center
+    double c = 1.9148 * sin(mRad) + 0.02 * sin(2.0 * mRad) + 0.0003 * sin(3 * mRad);
+
+    // Ecliptic longitude
+    double lambda = Astronomy::modulo(m + c + 180.0 + 102.9372, 360.0);
+    double lambdaRad = Units::degreesToRadians(lambda);
+
+    // Solar transit
+    double jTransit = 2451545.0 + jStar + 0.0053 * sin(mRad) - 0.0069 * sin(2.0 * lambdaRad);
+
+    // Declination of the Sun
+    const double tilt = 23.4397;
+    const double tiltRad = Units::degreesToRadians(tilt);
+    double sunDecRad = asin(sin(lambdaRad) * sin(tiltRad));
+
+    // Hour angle
+    double latitudeRad = Units::degreesToRadians(latitude);
+    double omega0Rad = acos((sin(Units::degreesToRadians(-0.833)) - sin(latitudeRad) * sin(sunDecRad)) / (cos(latitudeRad) *  cos(sunDecRad)));
+    double omega0 = Units::radiansToDegrees(omega0Rad);
+
+    // Rise and set times
+    double jRise = jTransit - omega0 / 360.0;
+    double jSet = jTransit + omega0 / 360.0;
+
+    rise = Astronomy::julianDateToDateTime(jRise);
+    set =  Astronomy::julianDateToDateTime(jSet);
 }
 
 // Calculate thermal noise power for a given temperature in Kelvin and bandwidth in Hz

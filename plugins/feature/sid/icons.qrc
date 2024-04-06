@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/sid/">
+        <file>icons/sun.png</file>
+        <file>icons/chartcombined.png</file>
+        <file>icons/chartseparate.png</file>
+        <file>icons/legend.png</file>
+        <file>icons/xlp.svg</file>
+        <file>icons/xls.svg</file>
+        <file>icons/xsp.svg</file>
+        <file>icons/xss.svg</file>
+        <file>icons/delta.svg</file>
+        <file>icons/gamma.svg</file>
+        <file>icons/proton.svg</file>
+        <file>icons/solar-orbiter.svg</file>
+    </qresource>
+</RCC>

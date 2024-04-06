@@ -264,7 +264,9 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
     const QStringList heightReferences = {"NONE", "CLAMP_TO_GROUND", "RELATIVE_TO_GROUND", "NONE"};
     QString dt;
 
-    if (mapItem->m_takenTrackDateTimes.size() > 0) {
+    if (mapItem->m_availableFrom.isValid()) {
+        dt = mapItem->m_availableFrom.toString(Qt::ISODateWithMs);
+    } else if (mapItem->m_takenTrackDateTimes.size() > 0) {
         dt = mapItem->m_takenTrackDateTimes.last()->toString(Qt::ISODateWithMs);
     } else {
         dt = QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs);
@@ -578,6 +580,14 @@ QJsonObject CZML::update(ObjectMapItem *mapItem, bool isTarget, bool isSelected)
                     QString period = QString("%1/%2").arg(m_ids[id]).arg(mapItem->m_availableUntil.toString(Qt::ISODateWithMs));
                     obj.insert("availability", period);
                 }
+            }
+        }
+        else
+        {
+            if (mapItem->m_availableUntil.isValid())
+            {
+                QString period = QString("%1/%2").arg(m_ids[id]).arg(mapItem->m_availableUntil.toString(Qt::ISODateWithMs));
+                obj.insert("availability", period);
             }
         }
         m_lastPosition.insert(id, coords);

@@ -24,6 +24,7 @@
 #include <QQuickWidget>
 #include <QTextEdit>
 #include <QJsonObject>
+#include <QFileDialog>
 #ifdef QT_WEBENGINE_FOUND
 #include <QWebEngineFullScreenRequest>
 #include <QWebEnginePage>
@@ -194,6 +195,7 @@ private:
     RollupState m_rollupState;
     bool m_doApplySettings;
     AvailableChannelOrFeatureList m_availableChannelOrFeatures;
+    QFileDialog m_fileDialog;
 
     Map* m_map;
     MessageQueue m_inputMessageQueue;
@@ -217,6 +219,8 @@ private:
     MapTileServer *m_mapTileServer;
     QTimer m_redrawMapTimer;
     GIRO *m_giro;
+    QDateTime m_giroDateTime;
+    QString m_giroRunId;
     QHash<QString, IonosondeStation *> m_ionosondeStations;
     QSharedPointer<const QList<NavAid *>> m_navAids;
     QSharedPointer<const QList<Airspace *>> m_airspaces;
@@ -279,6 +283,7 @@ private:
     void openKiwiSDR(const QString& url);
     void openSpyServer(const QString& url);
     QString formatFrequency(qint64 frequency) const;
+    void updateGIRO(const QDateTime& mapDateTime);
 
     static QString getDataDir();
     static const QList<RadioTimeTransmitter> m_radioTimeTransmitters;
@@ -315,6 +320,7 @@ private slots:
     void on_layersMenu_clicked();
     void on_find_returnPressed();
     void on_maidenhead_clicked();
+    void on_save_clicked();
     void on_deleteAll_clicked();
     void on_displaySettings_clicked();
     void on_mapTypes_currentIndexChanged(int index);
@@ -330,10 +336,14 @@ private slots:
     void renderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode);
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     void loadingChanged(const QWebEngineLoadingInfo &loadingInfo);
+    void downloadRequested(QWebEngineDownloadRequest *download);
+#else
+    void downloadRequested(QWebEngineDownloadItem *download);
 #endif
 #endif
     void statusChanged(QQuickWidget::Status status);
     void preferenceChanged(int elementType);
+    void giroIndexUpdated(const QList<GIRO::DataSet>& data);
     void giroDataUpdated(const GIRO::GIROStationData& data);
     void mufUpdated(const QJsonDocument& document);
     void foF2Updated(const QJsonDocument& document);

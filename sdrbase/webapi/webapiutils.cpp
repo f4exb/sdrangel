@@ -323,6 +323,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
     {"Radiosonde", "RadiosondeSettings"},
     {"RigCtlServer", "RigCtlServerSettings"},
     {"SatelliteTracker", "SatelliteTrackerSettings"},
+    {"SID", "SIDSettings"},
     {"SimplePTT", "SimplePTTSettings"},
     {"SkyMap", "SkyMapSettings"},
     {"StarTracker", "StarTrackerSettings"},

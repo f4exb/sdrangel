@@ -32,7 +32,7 @@ struct SDRBASE_API APRSPacket {
     QString m_from;
     QString m_to;
     QString m_via;
-    QString m_data;             // Original ASCII data
+    QByteArray m_data;          // Original binary data
 
     QDateTime m_dateTime;       // Date/time of reception / decoding
 
@@ -244,9 +244,36 @@ struct SDRBASE_API APRSPacket {
         return QString("%1,%2").arg(m_latitude).arg(m_longitude);
     }
 
-    QString toTNC2(QString igateCallsign)
+    QByteArray toTNC2(QString igateCallsign)
     {
-        return m_from + ">" + m_to + (m_via.isEmpty() ? "" : ("," + m_via)) + ",qAR," + igateCallsign + ":" + m_data + "\r\n";
+        QByteArray data;
+
+        data.append(m_from.toLatin1());
+        data.append('>');
+        data.append(m_to.toLatin1());
+        if (!m_via.isEmpty())
+        {
+            data.append(',');
+            data.append(m_via.toLatin1());
+        }
+        data.append(",qAR,");
+        data.append(igateCallsign.toLatin1());
+        data.append(':');
+
+        // #2028 - Protect against APRS-IS server command injection, by only sending up to first CR/LF
+        int idx = m_data.indexOf("\r");
+        if (idx == -1) {
+            idx = m_data.indexOf("\n");
+        }
+        if (idx >= 0) {
+            data.append(m_data.left(idx));
+        } else {
+            data.append(m_data);
+        }
+        data.append('\r');
+        data.append('\n');
+
+        return data;
     }
 
     // Convert a TNC2 formatted packet (as sent by APRS-IS Igates) to an AX25 byte array

@@ -198,7 +198,7 @@ void HeatMapSink::applySettings(const HeatMapSettings& settings, bool force)
         || (settings.m_sampleRate != m_settings.m_sampleRate)
         || force)
     {
-        m_averageCnt = (int)((settings.m_averagePeriodUS * settings.m_sampleRate / 1e6));
+        m_averageCnt = (int)((settings.m_averagePeriodUS * (qint64)settings.m_sampleRate / 1e6));
         // For low sample rates, we want a small buffer, so scope update isn't too slow
         if (settings.m_sampleRate < 100) {
             m_sampleBufferSize = 1;

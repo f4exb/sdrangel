@@ -19,10 +19,11 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QDebug>
+#include <QColorDialog>
 
-#include "mapcolordialog.h"
+#include "colordialog.h"
 
-MapColorDialog::MapColorDialog(const QColor &initial, QWidget *parent) :
+ColorDialog::ColorDialog(const QColor &initial, QWidget *parent) :
     QDialog(parent)
 {
     m_colorDialog = new QColorDialog();
@@ -41,30 +42,30 @@ MapColorDialog::MapColorDialog(const QColor &initial, QWidget *parent) :
     h->addWidget(m_okButton);
     v->addLayout(h);
 
-    connect(m_noColorButton, &QPushButton::clicked, this, &MapColorDialog::noColorClicked);
+    connect(m_noColorButton, &QPushButton::clicked, this, &ColorDialog::noColorClicked);
     connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::reject);
     connect(m_okButton, &QPushButton::clicked, this, &QDialog::accept);
 
     m_noColorSelected = false;
 }
 
-QColor MapColorDialog::selectedColor() const
+QColor ColorDialog::selectedColor() const
 {
     return m_colorDialog->selectedColor();
 }
 
-bool MapColorDialog::noColorSelected() const
+bool ColorDialog::noColorSelected() const
 {
     return m_noColorSelected;
 }
 
-void MapColorDialog::accept()
+void ColorDialog::accept()
 {
     m_colorDialog->accept();
     QDialog::accept();
 }
 
-void MapColorDialog::noColorClicked()
+void ColorDialog::noColorClicked()
 {
     m_noColorSelected = true;
     accept();

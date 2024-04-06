@@ -59,7 +59,7 @@ void PacketDemodGUI::resizeTable()
     ui->packets->setItem(row, PACKET_COL_VIA, new QTableWidgetItem("123456-15-"));
     ui->packets->setItem(row, PACKET_COL_TYPE, new QTableWidgetItem("Type-"));
     ui->packets->setItem(row, PACKET_COL_PID, new QTableWidgetItem("PID-"));
-    ui->packets->setItem(row, PACKET_COL_DATA_ASCII, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZ"));
+    ui->packets->setItem(row, PACKET_COL_DATA_STRING, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZ"));
     ui->packets->setItem(row, PACKET_COL_DATA_HEX, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZ"));
     ui->packets->resizeColumnsToContents();
     ui->packets->removeRow(row);
@@ -168,7 +168,7 @@ void PacketDemodGUI::packetReceived(const QByteArray& packet, QDateTime dateTime
         QTableWidgetItem *viaItem = new QTableWidgetItem();
         QTableWidgetItem *typeItem = new QTableWidgetItem();
         QTableWidgetItem *pidItem = new QTableWidgetItem();
-        QTableWidgetItem *dataASCIIItem = new QTableWidgetItem();
+        QTableWidgetItem *dataStringItem = new QTableWidgetItem();
         QTableWidgetItem *dataHexItem = new QTableWidgetItem();
         ui->packets->setItem(row, PACKET_COL_DATE, dateItem);
         ui->packets->setItem(row, PACKET_COL_TIME, timeItem);
@@ -177,7 +177,7 @@ void PacketDemodGUI::packetReceived(const QByteArray& packet, QDateTime dateTime
         ui->packets->setItem(row, PACKET_COL_VIA, viaItem);
         ui->packets->setItem(row, PACKET_COL_TYPE, typeItem);
         ui->packets->setItem(row, PACKET_COL_PID, pidItem);
-        ui->packets->setItem(row, PACKET_COL_DATA_ASCII, dataASCIIItem);
+        ui->packets->setItem(row, PACKET_COL_DATA_STRING, dataStringItem);
         ui->packets->setItem(row, PACKET_COL_DATA_HEX, dataHexItem);
         dateItem->setText(dateTime.date().toString());
         timeItem->setText(dateTime.time().toString());
@@ -186,7 +186,7 @@ void PacketDemodGUI::packetReceived(const QByteArray& packet, QDateTime dateTime
         viaItem->setText(ax25.m_via);
         typeItem->setText(ax25.m_type);
         pidItem->setText(ax25.m_pid);
-        dataASCIIItem->setText(ax25.m_dataASCII);
+        dataStringItem->setText(QString::fromUtf8(ax25.m_data)); // Should possibly support different encodings here. PacketMod uses UTF8.
         dataHexItem->setText(ax25.m_dataHex);
         filterRow(row);
         ui->packets->setSortingEnabled(true);

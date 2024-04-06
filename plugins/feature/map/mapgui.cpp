@@ -48,6 +48,7 @@
 #include "util/maidenhead.h"
 #include "util/morse.h"
 #include "util/navtex.h"
+#include "util/vlftransmitters.h"
 #include "maplocationdialog.h"
 #include "mapmaidenheaddialog.h"
 #include "mapsettingsdialog.h"
@@ -306,6 +307,9 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     connect(ui->web->page(), &QWebEnginePage::loadingChanged, this, &MapGUI::loadingChanged);
     connect(ui->web, &QWebEngineView::renderProcessTerminated, this, &MapGUI::renderProcessTerminated);
 #endif
+
+    QWebEngineProfile *profile = QWebEngineProfile::defaultProfile();
+    connect(profile, &QWebEngineProfile::downloadRequested, this, &MapGUI::downloadRequested);
 #endif
 
     // Get station position
@@ -489,41 +493,24 @@ void MapGUI::addIBPBeacons()
     }
 }
 
-// https://sidstation.loudet.org/stations-list-en.xhtml
-// https://core.ac.uk/download/pdf/224769021.pdf -- Table 1
-// GQD/GQZ callsigns: https://groups.io/g/VLF/message/19212?p=%2C%2C%2C20%2C0%2C0%2C0%3A%3Arecentpostdate%2Fsticky%2C%2C19.6%2C20%2C2%2C0%2C38924431
-const QList<RadioTimeTransmitter> MapGUI::m_vlfTransmitters = {
-    // Other signals possibly seen: 13800, 19000
-    {"VTX2",  17000, 8.387015,  77.752762, -1},     // South Vijayanarayanam, India
-    {"GQD",   19580, 54.911643, -3.278456, 100},    // Anthorn, UK, Often referred to as GBZ
-    {"NWC",   19800, -21.816325, 114.16546, 1000},  // Exmouth, Aus
-    {"ICV",   20270, 40.922946, 9.731881,  50},     // Isola di Tavolara, Italy (Can be distorted on 3D map if terrain used)
-    {"FTA",   20900, 48.544632, 2.579429,  50},     // Sainte-Assise, France (Satellite imagary obfuscated)
-    {"NPM",   21400, 21.420166, -158.151140, 600},  // Pearl Harbour, Lualuahei, USA (Not seen?)
-    {"HWU",   21750, 46.713129, 1.245248, 200},     // Rosnay, France
-    {"GQZ",   22100, 54.731799, -2.883033, 100},    // Skelton, UK (GVT in paper)
-    {"DHO38", 23400, 53.078900, 7.615000,  300},    // Rhauderfehn, Germany - Off air 7-8 UTC - Not seen on air!
-    {"NAA",   24000, 44.644506, -67.284565, 1000},  // Cutler, Maine, USA
-    {"TFK/NRK", 37500, 63.850365, -22.466773, 100}, // Grindavik, Iceland
-    {"SRC/SHR", 38000, 57.120328, 16.153083, -1},   // Ruda, Sweden
-};
-
 void MapGUI::addVLF()
 {
-    for (int i = 0; i < m_vlfTransmitters.size(); i++)
+    for (int i = 0; i < VLFTransmitters::m_transmitters.size(); i++)
     {
         SWGSDRangel::SWGMapItem vlfMapItem;
-        // Need to suffix frequency, as there are multiple becaons with same callsign at different locations
-        QString name = QString("%1").arg(m_vlfTransmitters[i].m_callsign);
+        QString name = QString("%1").arg(VLFTransmitters::m_transmitters[i].m_callsign);
         vlfMapItem.setName(new QString(name));
-        vlfMapItem.setLatitude(m_vlfTransmitters[i].m_latitude);
-        vlfMapItem.setLongitude(m_vlfTransmitters[i].m_longitude);
+        vlfMapItem.setLatitude(VLFTransmitters::m_transmitters[i].m_latitude);
+        vlfMapItem.setLongitude(VLFTransmitters::m_transmitters[i].m_longitude);
         vlfMapItem.setAltitude(0.0);
         vlfMapItem.setImage(new QString("antenna.png"));
         vlfMapItem.setImageRotation(0);
         QString text = QString("VLF Transmitter\nCallsign: %1\nFrequency: %2 kHz")
-                                .arg(m_vlfTransmitters[i].m_callsign)
-                                .arg(m_vlfTransmitters[i].m_frequency/1000.0);
+                                .arg(VLFTransmitters::m_transmitters[i].m_callsign)
+                                .arg(VLFTransmitters::m_transmitters[i].m_frequency/1000.0);
+        if (VLFTransmitters::m_transmitters[i].m_power > 0) {
+            text.append(QString("\nPower: %1 kW").arg(VLFTransmitters::m_transmitters[i].m_power));
+        }
         vlfMapItem.setText(new QString(text));
         vlfMapItem.setModel(new QString("antenna.glb"));
         vlfMapItem.setFixedPosition(true);
@@ -534,7 +521,6 @@ void MapGUI::addVLF()
         update(m_map, &vlfMapItem, "VLF");
     }
 }
-
 
 const QList<RadioTimeTransmitter> MapGUI::m_radioTimeTransmitters = {
     {"MSF", 60000, 54.9075f, -3.27333f, 17},            // UK
@@ -722,10 +708,16 @@ void MapGUI::addIonosonde()
     m_giro = GIRO::create();
     if (m_giro)
     {
+        connect(m_giro, &GIRO::indexUpdated, this, &MapGUI::giroIndexUpdated);
         connect(m_giro, &GIRO::dataUpdated, this, &MapGUI::giroDataUpdated);
         connect(m_giro, &GIRO::mufUpdated, this, &MapGUI::mufUpdated);
         connect(m_giro, &GIRO::foF2Updated, this, &MapGUI::foF2Updated);
     }
+}
+
+void MapGUI::giroIndexUpdated(const QList<GIRO::DataSet>& data)
+{
+    (void) data;
 }
 
 void MapGUI::giroDataUpdated(const GIRO::GIROStationData& data)
@@ -761,6 +753,8 @@ void MapGUI::giroDataUpdated(const GIRO::GIROStationData& data)
         ionosondeStationMapItem.setLabel(new QString(station->m_label));
         ionosondeStationMapItem.setLabelAltitudeOffset(4.5);
         ionosondeStationMapItem.setAltitudeReference(1);
+        ionosondeStationMapItem.setAvailableFrom(new QString(data.m_dateTime.toString(Qt::ISODateWithMs)));
+        ionosondeStationMapItem.setAvailableUntil(new QString(data.m_dateTime.addDays(3).toString(Qt::ISODateWithMs))); // Remove after data is too old
         update(m_map, &ionosondeStationMapItem, "Ionosonde Stations");
     }
 }
@@ -783,6 +777,24 @@ void MapGUI::foF2Updated(const QJsonDocument& document)
     m_webServer->addFile("/map/map/fof2.geojson", document.toJson());
     if (m_cesium) {
         m_cesium->showfoF2(m_settings.m_displayfoF2);
+    }
+}
+
+void MapGUI::updateGIRO(const QDateTime& mapDateTime)
+{
+    if (m_giro)
+    {
+        if (m_settings.m_displayMUF || m_settings.m_displayfoF2)
+        {
+            QString giroRunId = m_giro->getRunId(mapDateTime);
+            if (m_giroRunId.isEmpty() || (!giroRunId.isEmpty() && (giroRunId != m_giroRunId)))
+            {
+                m_giro->getMUF(giroRunId);
+                m_giro->getMUF(giroRunId);
+                m_giroRunId = giroRunId;
+                m_giroDateTime = mapDateTime;
+            }
+        }
     }
 }
 
@@ -1683,6 +1695,7 @@ void MapGUI::displayToolbar()
     ui->displayNASAGlobalImagery->setVisible(overlayButtons);
     ui->displayMUF->setVisible(!narrow && m_settings.m_map3DEnabled);
     ui->displayfoF2->setVisible(!narrow && m_settings.m_map3DEnabled);
+    ui->save->setVisible(m_settings.m_map3DEnabled);
 }
 
 void MapGUI::setEnableOverlay()
@@ -1803,11 +1816,10 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_polylineMapModel.allUpdated();
     }
     MapSettings::MapItemSettings *ionosondeItemSettings = getItemSettings("Ionosonde Stations");
+    m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
     if (ionosondeItemSettings) {
         m_giro->getDataPeriodically(ionosondeItemSettings->m_enabled ? 2 : 0);
     }
-    m_giro->getMUFPeriodically(m_settings.m_displayMUF ? 15 : 0);
-    m_giro->getfoF2Periodically(m_settings.m_displayfoF2 ? 15 : 0);
 #else
     ui->displayMUF->setVisible(false);
     ui->displayfoF2->setVisible(false);
@@ -2211,7 +2223,7 @@ void MapGUI::on_displayMUF_clicked(bool checked)
     m_settings.m_displayMUF = checked;
     // Only call show if disabling, so we don't get two updates
     // (as getMUFPeriodically results in a call to showMUF when the data is available)
-    m_giro->getMUFPeriodically(m_settings.m_displayMUF ? 15 : 0);
+    m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
     if (m_cesium && !m_settings.m_displayMUF) {
         m_cesium->showMUF(m_settings.m_displayMUF);
     }
@@ -2226,7 +2238,7 @@ void MapGUI::on_displayfoF2_clicked(bool checked)
         m_displayfoF2->setChecked(checked);
     }
     m_settings.m_displayfoF2 = checked;
-    m_giro->getfoF2Periodically(m_settings.m_displayfoF2 ? 15 : 0);
+    m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
     if (m_cesium && !m_settings.m_displayfoF2) {
         m_cesium->showfoF2(m_settings.m_displayfoF2);
     }
@@ -2442,6 +2454,22 @@ void MapGUI::track3D(const QString& target)
     }
 }
 
+void MapGUI::on_save_clicked()
+{
+    if (m_cesium)
+    {
+        m_fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+        m_fileDialog.setNameFilter("*.kml *.kmz");
+        if (m_fileDialog.exec())
+        {
+            QStringList fileNames = m_fileDialog.selectedFiles();
+            if (fileNames.size() > 0) {
+                m_cesium->save(fileNames[0], getDataDir());
+            }
+        }
+    }
+}
+
 void MapGUI::on_deleteAll_clicked()
 {
     m_objectMapModel.removeAll();
@@ -2543,6 +2571,7 @@ void MapGUI::receivedCesiumEvent(const QJsonObject &obj)
                 bool canAnimate = obj.value("canAnimate").toBool();
                 bool shouldAnimate = obj.value("shouldAnimate").toBool();
                 m_map->setMapDateTime(mapDateTime, systemDateTime, canAnimate && shouldAnimate ? multiplier : 0.0);
+                updateGIRO(mapDateTime);
             }
         }
         else if (event == "link")
@@ -2715,6 +2744,17 @@ void MapGUI::fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest)
         ui->splitter->addWidget(ui->web);
     }
 }
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+void MapGUI::downloadRequested(QWebEngineDownloadRequest *download)
+{
+    download->accept();
+}
+#else
+void MapGUI::downloadRequested(QWebEngineDownloadItem *download)
+{
+    download->accept();
+}
+#endif
 #endif
 
 void MapGUI::preferenceChanged(int elementType)
@@ -2787,6 +2827,7 @@ void MapGUI::makeUIConnections()
     QObject::connect(ui->displayfoF2, &ButtonSwitch::clicked, this, &MapGUI::on_displayfoF2_clicked);
     QObject::connect(ui->find, &QLineEdit::returnPressed, this, &MapGUI::on_find_returnPressed);
     QObject::connect(ui->maidenhead, &QToolButton::clicked, this, &MapGUI::on_maidenhead_clicked);
+    QObject::connect(ui->save, &QToolButton::clicked, this, &MapGUI::on_save_clicked);
     QObject::connect(ui->deleteAll, &QToolButton::clicked, this, &MapGUI::on_deleteAll_clicked);
     QObject::connect(ui->displaySettings, &QToolButton::clicked, this, &MapGUI::on_displaySettings_clicked);
     QObject::connect(ui->mapTypes, qOverload<int>(&QComboBox::currentIndexChanged), this, &MapGUI::on_mapTypes_currentIndexChanged);

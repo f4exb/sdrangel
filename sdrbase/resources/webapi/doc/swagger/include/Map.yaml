@@ -156,6 +156,9 @@ MapItem:
       description: "Extruded height (from surface) for polygons"
       type: number
       format: float
+    availableFrom:
+      description: "Date and time at which the item should first appear on 3D map"
+      type: string
     availableUntil:
       description: "Date and time until after which this item should no longer appear on 3D map"
       type: string

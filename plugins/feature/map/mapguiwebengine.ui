@@ -425,6 +425,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="save">
+        <property name="toolTip">
+         <string>Save to .kml</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/save.png</normaloff>:/save.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="deleteAll">
         <property name="toolTip">
          <string>Delete all items on the map</string>

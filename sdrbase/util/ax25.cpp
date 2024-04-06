@@ -139,7 +139,7 @@ bool AX25Packet::decode(QByteArray packet)
     infoStart = i;
     infoEnd = packet.size()-2-i;
     QByteArray info(packet.mid(infoStart, infoEnd));
-    m_dataASCII = QString::fromLatin1(info);
+    m_data = info;
     m_dataHex = QString(info.toHex());
 
     return true;

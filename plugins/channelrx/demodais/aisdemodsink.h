@@ -113,7 +113,6 @@ private:
 
     MovingAverageUtil<Real, double, 16> m_movingAverage;
 
-    Lowpass<Complex> m_lowpass;         // RF input filter
     PhaseDiscriminators m_phaseDiscri;  // FM demodulator
     Gaussian<Real> m_pulseShape;        // Pulse shaping filter
     Real *m_rxBuf;                      // Receive sample buffer, large enough for one max length messsage

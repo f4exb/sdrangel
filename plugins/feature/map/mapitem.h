@@ -61,6 +61,7 @@ protected:
     float m_latitude;                   // Position for label
     float m_longitude;
     float m_altitude;                   // In metres
+    QDateTime m_availableFrom;          // Date & time this item is visible from. Invalid date/time is forever
     QDateTime m_availableUntil;         // Date & time this item is visible until (for 3D map). Invalid date/time is forever
 };
 

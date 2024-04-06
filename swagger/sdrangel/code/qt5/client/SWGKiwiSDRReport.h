@@ -44,12 +44,30 @@ public:
     qint32 getStatus();
     void setStatus(qint32 status);
 
+    float getLatitude();
+    void setLatitude(float latitude);
+
+    float getLongitude();
+    void setLongitude(float longitude);
+
+    float getAltitude();
+    void setAltitude(float altitude);
+
 
     virtual bool isSet() override;
 
 private:
     qint32 status;
     bool m_status_isSet;
+
+    float latitude;
+    bool m_latitude_isSet;
+
+    float longitude;
+    bool m_longitude_isSet;
+
+    float altitude;
+    bool m_altitude_isSet;
 
 };
 

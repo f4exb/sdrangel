@@ -30,3 +30,12 @@ KiwiSDRReport:
     status:
       description: 0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected
       type: integer
+    latitude:
+      type: number
+      format: float
+    longitude:
+      type: number
+      format: float
+    altitude:
+      type: number
+      format: float

@@ -21,22 +21,36 @@
 #include <QUrl>
 #include <QUrlQuery>
 #include <QNetworkReply>
+#include <QNetworkDiskCache>
 #include <QJsonObject>
 
 GIRO::GIRO()
 {
+    connect(&m_indexTimer, &QTimer::timeout, this, &GIRO::getIndex);
     connect(&m_dataTimer, &QTimer::timeout, this, &GIRO::getData);
-    connect(&m_mufTimer, &QTimer::timeout, this, &GIRO::getMUF);
-    connect(&m_foF2Timer, &QTimer::timeout, this, &GIRO::getfoF2);
+    connect(&m_mufTimer, &QTimer::timeout, this, qOverload<>(&GIRO::getMUF));
+    connect(&m_foF2Timer, &QTimer::timeout, this, qOverload<>(&GIRO::getfoF2));
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, &QNetworkAccessManager::finished, this, &GIRO::handleReply);
+
+    QStringList locations = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
+    QDir writeableDir(locations[0]);
+    if (!writeableDir.mkpath(QStringLiteral("cache") + QDir::separator() + QStringLiteral("giro"))) {
+        qDebug() << "Failed to create cache/giro";
+    }
+
+    m_cache = new QNetworkDiskCache();
+    m_cache->setCacheDirectory(locations[0] + QDir::separator() + QStringLiteral("cache") + QDir::separator() + QStringLiteral("giro"));
+    m_cache->setMaximumCacheSize(100000000);
+    m_networkManager->setCache(m_cache);
 }
 
 GIRO::~GIRO()
 {
+    disconnect(&m_indexTimer, &QTimer::timeout, this, &GIRO::getIndex);
     disconnect(&m_dataTimer, &QTimer::timeout, this, &GIRO::getData);
-    disconnect(&m_mufTimer, &QTimer::timeout, this, &GIRO::getMUF);
-    disconnect(&m_foF2Timer, &QTimer::timeout, this, &GIRO::getfoF2);
+    disconnect(&m_mufTimer, &QTimer::timeout, this, qOverload<>(&GIRO::getMUF));
+    disconnect(&m_foF2Timer, &QTimer::timeout, this, qOverload<>(&GIRO::getfoF2));
     disconnect(m_networkManager, &QNetworkAccessManager::finished, this, &GIRO::handleReply);
     delete m_networkManager;
 }
@@ -51,6 +65,20 @@ GIRO* GIRO::create(const QString& service)
     {
         qDebug() << "GIRO::create: Unsupported service: " << service;
         return nullptr;
+    }
+}
+
+void GIRO::getIndexPeriodically(int periodInMins)
+{
+    if (periodInMins > 0)
+    {
+        m_indexTimer.setInterval(periodInMins*60*1000);
+        m_indexTimer.start();
+        getIndex();
+    }
+    else
+    {
+        m_indexTimer.stop();
     }
 }
 
@@ -96,21 +124,37 @@ void GIRO::getfoF2Periodically(int periodInMins)
     }
 }
 
+void GIRO::getIndex()
+{
+    QUrl url(QString("https://prop.kc2g.com/api/available_nowcasts.json?days=5"));
+    m_networkManager->get(QNetworkRequest(url));
+}
+
 void GIRO::getData()
 {
     QUrl url(QString("https://prop.kc2g.com/api/stations.json"));
     m_networkManager->get(QNetworkRequest(url));
 }
 
+void GIRO::getfoF2()
+{
+    getMUF("current");
+}
+
 void GIRO::getMUF()
 {
-    QUrl url(QString("https://prop.kc2g.com/renders/current/mufd-normal-now.geojson"));
+    getMUF("current");
+}
+
+void GIRO::getfoF2(const QString& runId)
+{
+    QUrl url(QString("https://prop.kc2g.com/renders/%1/fof2-normal-now.geojson").arg(runId));
     m_networkManager->get(QNetworkRequest(url));
 }
 
-void GIRO::getfoF2()
+void GIRO::getMUF(const QString& runId)
 {
-    QUrl url(QString("https://prop.kc2g.com/renders/current/fof2-normal-now.geojson"));
+    QUrl url(QString("https://prop.kc2g.com/renders/%1/mufd-normal-now.geojson").arg(runId));
     m_networkManager->get(QNetworkRequest(url));
 }
 
@@ -132,86 +176,26 @@ void GIRO::handleReply(QNetworkReply* reply)
         {
             QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
 
-            if (reply->url().fileName() == "stations.json")
+            QString fileName = reply->url().fileName();
+            if (fileName == "available_nowcasts.json")
             {
-                if (document.isArray())
-                {
-                    QJsonArray array = document.array();
-                    for (auto valRef : array)
-                    {
-                        if (valRef.isObject())
-                        {
-                            QJsonObject obj = valRef.toObject();
-
-                            GIROStationData data;
-
-                            if (obj.contains(QStringLiteral("station")))
-                            {
-                                QJsonObject stationObj = obj.value(QStringLiteral("station")).toObject();
-
-                                if (stationObj.contains(QStringLiteral("name"))) {
-                                    data.m_station = stationObj.value(QStringLiteral("name")).toString();
-                                }
-                                if (stationObj.contains(QStringLiteral("latitude"))) {
-                                    data.m_latitude = (float)stationObj.value(QStringLiteral("latitude")).toString().toFloat();
-                                }
-                                if (stationObj.contains(QStringLiteral("longitude"))) {
-                                    data.m_longitude = (float)stationObj.value(QStringLiteral("longitude")).toString().toFloat();
-                                    if (data.m_longitude >= 180.0f) {
-                                        data.m_longitude -= 360.0f;
-                                    }
-                                }
-                            }
-
-                            if (containsNonNull(obj, QStringLiteral("time"))) {
-                               data.m_dateTime = QDateTime::fromString(obj.value(QStringLiteral("time")).toString(), Qt::ISODateWithMs);
-                            }
-                            if (containsNonNull(obj, QStringLiteral("mufd"))) {
-                               data.m_mufd = (float)obj.value(QStringLiteral("mufd")).toDouble();
-                            }
-                            if (containsNonNull(obj, QStringLiteral("md"))) {
-                               data.m_md =  obj.value(QStringLiteral("md")).toString().toFloat();
-                            }
-                            if (containsNonNull(obj, QStringLiteral("tec"))) {
-                               data.m_tec = (float)obj.value(QStringLiteral("tec")).toDouble();
-                            }
-                            if (containsNonNull(obj, QStringLiteral("fof2"))) {
-                               data.m_foF2 = (float)obj.value(QStringLiteral("fof2")).toDouble();
-                            }
-                            if (containsNonNull(obj, QStringLiteral("hmf2"))) {
-                               data.m_hmF2 = (float)obj.value(QStringLiteral("hmf2")).toDouble();
-                            }
-                            if (containsNonNull(obj, QStringLiteral("foe"))) {
-                               data.m_foE = (float)obj.value(QStringLiteral("foe")).toDouble();
-                            }
-                            if (containsNonNull(obj, QStringLiteral("cs"))) {
-                               data.m_confidence = (int)obj.value(QStringLiteral("cs")).toDouble();
-                            }
-
-                            emit dataUpdated(data);
-                        }
-                        else
-                        {
-                            qDebug() << "GIRO::handleReply: Array element is not an object: " << valRef;
-                        }
-                    }
-                }
-                else
-                {
-                    qDebug() << "GIRO::handleReply: Document is not an array: " << document;
-                }
+                handleIndex(document);
             }
-            else if (reply->url().fileName() == "mufd-normal-now.geojson")
+            else if (fileName == "stations.json")
+            {
+                handleStations(document);
+            }
+            else if (fileName == "mufd-normal-now.geojson")
             {
                 emit mufUpdated(document);
             }
-            else if (reply->url().fileName() == "fof2-normal-now.geojson")
+            else if (fileName == "fof2-normal-now.geojson")
             {
                 emit foF2Updated(document);
             }
             else
             {
-                qDebug() << "GIRO::handleReply: unexpected filename: " << reply->url().fileName();
+                qDebug() << "GIRO::handleReply: unexpected filename: " << fileName;
             }
         }
         else
@@ -224,4 +208,117 @@ void GIRO::handleReply(QNetworkReply* reply)
     {
         qDebug() << "GIRO::handleReply: reply is null";
     }
+}
+
+void GIRO::handleStations(QJsonDocument& document)
+{
+    if (document.isArray())
+    {
+        QJsonArray array = document.array();
+        for (auto valRef : array)
+        {
+            if (valRef.isObject())
+            {
+                QJsonObject obj = valRef.toObject();
+
+                GIROStationData data;
+
+                if (obj.contains(QStringLiteral("station")))
+                {
+                    QJsonObject stationObj = obj.value(QStringLiteral("station")).toObject();
+
+                    if (stationObj.contains(QStringLiteral("name"))) {
+                        data.m_station = stationObj.value(QStringLiteral("name")).toString();
+                    }
+                    if (stationObj.contains(QStringLiteral("latitude"))) {
+                        data.m_latitude = (float)stationObj.value(QStringLiteral("latitude")).toString().toFloat();
+                    }
+                    if (stationObj.contains(QStringLiteral("longitude"))) {
+                        data.m_longitude = (float)stationObj.value(QStringLiteral("longitude")).toString().toFloat();
+                        if (data.m_longitude >= 180.0f) {
+                            data.m_longitude -= 360.0f;
+                        }
+                    }
+                }
+
+                if (containsNonNull(obj, QStringLiteral("time"))) {
+                    data.m_dateTime = QDateTime::fromString(obj.value(QStringLiteral("time")).toString(), Qt::ISODateWithMs);
+                }
+                if (containsNonNull(obj, QStringLiteral("mufd"))) {
+                    data.m_mufd = (float)obj.value(QStringLiteral("mufd")).toDouble();
+                }
+                if (containsNonNull(obj, QStringLiteral("md"))) {
+                    data.m_md =  obj.value(QStringLiteral("md")).toString().toFloat();
+                }
+                if (containsNonNull(obj, QStringLiteral("tec"))) {
+                    data.m_tec = (float)obj.value(QStringLiteral("tec")).toDouble();
+                }
+                if (containsNonNull(obj, QStringLiteral("fof2"))) {
+                    data.m_foF2 = (float)obj.value(QStringLiteral("fof2")).toDouble();
+                }
+                if (containsNonNull(obj, QStringLiteral("hmf2"))) {
+                    data.m_hmF2 = (float)obj.value(QStringLiteral("hmf2")).toDouble();
+                }
+                if (containsNonNull(obj, QStringLiteral("foe"))) {
+                    data.m_foE = (float)obj.value(QStringLiteral("foe")).toDouble();
+                }
+                if (containsNonNull(obj, QStringLiteral("cs"))) {
+                    data.m_confidence = (int)obj.value(QStringLiteral("cs")).toDouble();
+                }
+
+                emit dataUpdated(data);
+            }
+            else
+            {
+                qDebug() << "GIRO::handleReply: Array element is not an object: " << valRef;
+            }
+        }
+    }
+    else
+    {
+        qDebug() << "GIRO::handleReply: Document is not an array: " << document;
+    }
+}
+
+void GIRO::handleIndex(QJsonDocument& document)
+{
+    if (document.isArray())
+    {
+        QJsonArray array = document.array();
+
+        m_index.clear();
+
+        for (auto valRef : array)
+        {
+            if (valRef.isObject())
+            {
+                QJsonObject obj = valRef.toObject();
+
+                DataSet item;
+
+                int ts = obj.value(QStringLiteral("ts")).toInt();
+                item.m_dateTime = QDateTime::fromSecsSinceEpoch(ts);
+
+                item.m_runId = QString::number(obj.value(QStringLiteral("run_id")).toInt());
+
+                qDebug() << item.m_dateTime << item.m_runId;
+
+                m_index.append(item);
+            }
+        }
+
+        emit indexUpdated(m_index);
+    }
+}
+
+QString GIRO::getRunId(const QDateTime& dateTime)
+{
+    // Index is ordered newest first
+    for (int i = 0; i < m_index.size(); i++)
+    {
+        if (dateTime > m_index[i].m_dateTime) {
+            return m_index[i].m_runId;
+        }
+    }
+    return "";
 }

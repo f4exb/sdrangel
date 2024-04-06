@@ -301,6 +301,7 @@
 #include "SWGSDRPlaySettings.h"
 #include "SWGSDRPlayV3Report.h"
 #include "SWGSDRPlayV3Settings.h"
+#include "SWGSIDSettings.h"
 #include "SWGSSBDemodReport.h"
 #include "SWGSSBDemodSettings.h"
 #include "SWGSSBModReport.h"
@@ -1816,6 +1817,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSDRPlayV3Settings").compare(type) == 0) {
       SWGSDRPlayV3Settings *obj = new SWGSDRPlayV3Settings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSIDSettings").compare(type) == 0) {
+      SWGSIDSettings *obj = new SWGSIDSettings();
       obj->init();
       return obj;
     }

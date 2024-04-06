@@ -13,6 +13,10 @@ With the ESASky map, a host of astronomical data is available from JWST, Hubble,
 
 ![Sky Map feature ESASky](../../../doc/img/SkyMap_ESASky.png)
 
+Additionally, a map of the Moon can be viewed in 2D or 3D, that supports a variety of data layers from various Lunar missions, such as LRO (Lunar Reconnaissance Orbiter).
+
+![Moon map](../../../doc/img/SkyMap_Moon.png)
+
 <h2>Interface</h2>
 
 ![Sky Map feature plugin GUI](../../../doc/img/SkyMap_settings.png)
@@ -38,6 +42,7 @@ Allows you to select the sky map:
 * WWT - World Wide Telescope 
 * ESASky
 * Aladin
+* Moon - Map of the Moon
 
 Each map provides different features, image and data sets.
 
@@ -127,6 +132,14 @@ ESASky and Aladin are able to overlay catalog data:
 * In Aladin, zoom in to the areae of interest, then press the "Manage layers" button. In the popup window, select one or more of the available catalogs, or press Add catalogue to add a new one.  Boxes will be overlaid on the map for each catalog entry. Left click on a box to display the data for it in tabular form.
 
 <h2>Attribution</h2>
+
+WWT is from [NumFOCUS](https://worldwidetelescope.org/about/).
+
+ESASky is from [ESAC | ESA](https://www.cosmos.esa.int/web/esdc/esasky-credits).
+
+Aladin Sky Atlas is from [Centre de Données astronomiques de Strasbourg | CDS](https://aladin.cds.unistra.fr/).
+
+Moon map is from [Applied Coherent Technology | ACT](https://www.actgate.com/).
 
 Constellation icons created by Freepik - https://www.flaticon.com
 

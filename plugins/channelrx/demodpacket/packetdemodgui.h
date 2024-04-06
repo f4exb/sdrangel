@@ -116,7 +116,7 @@ private:
         PACKET_COL_VIA,
         PACKET_COL_TYPE,
         PACKET_COL_PID,
-        PACKET_COL_DATA_ASCII,
+        PACKET_COL_DATA_STRING,
         PACKET_COL_DATA_HEX
     };
 

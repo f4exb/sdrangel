@@ -74,7 +74,7 @@ Enter the routing for the packet. To have the packet repeated by digipeaters, us
 
 <h3>16: Data</h3>
 
-The packet of data to send. To send an APRS status message, use the format <tt>>Status</tt>. The APRS specification can be found at: http://www.aprs.org/doc/APRS101.PDF. APRS messages can be tracked on https://aprs.fi
+The packet of data to send. This is encoded using UTF-8. To send an APRS status message, use the format <tt>>Status</tt>. The APRS specification can be found at: http://www.aprs.org/doc/APRS101.PDF. APRS messages can be tracked on https://aprs.fi
 
 <h3>17: TX</h3>
 

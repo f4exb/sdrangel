@@ -92,6 +92,7 @@ private:
     void displaySettings();
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void calcOffset();
     void updateAbsoluteCenterFrequency();
     void on_clearMeasurements_clicked();
 
@@ -99,6 +100,7 @@ private:
     void enterEvent(EnterEventType*);
 
 private slots:
+    void on_frequencyMode_currentIndexChanged(int index);
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_changed(qint64 value);
     void on_clearChannelPower_clicked();

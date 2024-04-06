@@ -200,7 +200,8 @@ SkyMapGUI::SkyMapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
     m_source(nullptr),
-    m_availableChannelOrFeatureHandler(SkyMapSettings::m_pipeURIs, {"target", "skymap.target"})
+    m_availableChannelOrFeatureHandler(SkyMapSettings::m_pipeURIs, {"target", "skymap.target"}),
+    m_ready(false)
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -294,12 +295,17 @@ void SkyMapGUI::on_map_currentIndexChanged(int index)
     m_settings.m_map = ui->map->currentText();
     applySetting("map");
 
+    m_ready = false;
     if (m_settings.m_map == "WWT") {
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/skymap/html/wwt.html").arg(m_webPort)));
     } else if (m_settings.m_map == "ESASky") {
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/skymap/html/esasky.html").arg(m_webPort)));
     } else if (m_settings.m_map == "Aladin") {
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/skymap/html/aladin.html").arg(m_webPort)));
+    } else if (m_settings.m_map == "Moon") {
+        ui->web->load(QUrl(QString("http://quickmap.lroc.asu.edu/"))); // Jumping straight to 3D view doesn't seem to work
+        setStatusText("");
+        m_ready = true;
     }
     updateToolbar();
     updateBackgrounds();
@@ -497,13 +503,21 @@ void SkyMapGUI::applyAllSettings()
 
 void SkyMapGUI::find(const QString& text)
 {
-    float ra, dec;
+    if (!m_ready)
+    {
+        // Save for when ready
+        m_find = text;
+    }
+    else
+    {
+        float ra, dec;
 
-    // WWT's find doesn't support coordinates, so we check here
-    if (Units::stringToRADec(text, ra, dec)) {
-        m_webInterface->setView(ra, dec);
-    } else {
-        m_webInterface->track(text);
+        // WWT's find doesn't support coordinates, so we check here
+        if (Units::stringToRADec(text, ra, dec)) {
+            m_webInterface->setView(ra, dec);
+        } else {
+            m_webInterface->track(text);
+        }
     }
 }
 
@@ -765,7 +779,15 @@ void SkyMapGUI::receivedEvent(const QJsonObject &obj)
         }
         else if (event == "ready")
         {
+            m_ready = true;
             initSkyMap();
+
+            // Run find that was requested while map was initialising
+            if (!m_find.isEmpty())
+            {
+                find(m_find);
+                m_find = "";
+            }
         }
     }
     else
@@ -965,6 +987,7 @@ void SkyMapGUI::updateToolbar()
     bool namesVisible = false;
     bool projectionVisible = true;
     bool backgroundVisible = true;
+    bool basicVisible = true;
 
     if (m_settings.m_map == "WWT")
     {
@@ -977,6 +1000,13 @@ void SkyMapGUI::updateToolbar()
         backgroundVisible = false;
         reticleVisible = false;
     }
+    else if (m_settings.m_map == "Moon")
+    {
+        projectionVisible = false;
+        backgroundVisible = false;
+        reticleVisible = false;
+        basicVisible = false;
+    }
 
     ui->background->setVisible(backgroundVisible);
     ui->projection->setVisible(projectionVisible);
@@ -984,6 +1014,14 @@ void SkyMapGUI::updateToolbar()
     ui->displayNames->setVisible(namesVisible);
     ui->displayConstellations->setVisible(constellationsVisible);
     ui->displayReticle->setVisible(reticleVisible);
+
+    ui->find->setVisible(basicVisible);
+    ui->findLabel->setVisible(basicVisible);
+    ui->displayGrid->setVisible(basicVisible);
+    ui->displayReticle->setVisible(basicVisible);
+    ui->displayAntennaFoV->setVisible(basicVisible);
+    ui->track->setVisible(basicVisible);
+    ui->source->setVisible(basicVisible);
 
     updateProjection();
 }

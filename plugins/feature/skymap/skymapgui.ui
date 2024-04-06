@@ -116,6 +116,11 @@
           <string>Aladin</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Moon</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -271,7 +276,7 @@
         </property>
         <item>
          <property name="text">
-          <string>F0:1 StarTracker</string>
+          <string/>
          </property>
         </item>
        </widget>

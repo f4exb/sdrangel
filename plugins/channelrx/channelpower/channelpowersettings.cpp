@@ -36,6 +36,8 @@ void ChannelPowerSettings::resetToDefaults()
     m_rfBandwidth = 10000.0f;
     m_pulseThreshold= -50.0f;
     m_averagePeriodUS = 100000;
+    m_frequencyMode = Offset;
+    m_frequency = 0;
     m_rgbColor = QColor(102, 40, 220).rgb();
     m_title = "Channel Power";
     m_streamIndex = 0;
@@ -56,6 +58,8 @@ QByteArray ChannelPowerSettings::serialize() const
     s.writeFloat(2, m_rfBandwidth);
     s.writeFloat(3, m_pulseThreshold);
     s.writeS32(4, m_averagePeriodUS);
+    s.writeS32(5, (int) m_frequencyMode);
+    s.writeS64(6, m_frequency);
 
     s.writeU32(21, m_rgbColor);
     s.writeString(22, m_title);
@@ -102,6 +106,8 @@ bool ChannelPowerSettings::deserialize(const QByteArray& data)
         d.readFloat(2, &m_rfBandwidth, 10000.0f);
         d.readFloat(3, &m_pulseThreshold, 50.0f);
         d.readS32(4, &m_averagePeriodUS, 100000);
+        d.readS32(5, (int *) &m_frequencyMode, (int) Offset);
+        d.readS64(6, &m_frequency);
 
         d.readU32(21, &m_rgbColor, QColor(102, 40, 220).rgb());
         d.readString(22, &m_title, "Channel Power");
@@ -161,6 +167,18 @@ void ChannelPowerSettings::applySettings(const QStringList& settingsKeys, const 
     if (settingsKeys.contains("averagePeriodUS")) {
         m_averagePeriodUS = settings.m_averagePeriodUS;
     }
+    if (settingsKeys.contains("frequencyMode")) {
+        m_frequencyMode = settings.m_frequencyMode;
+    }
+    if (settingsKeys.contains("frequency")) {
+        m_frequency = settings.m_frequency;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
     }
@@ -191,6 +209,12 @@ QString ChannelPowerSettings::getDebugString(const QStringList& settingsKeys, bo
     if (settingsKeys.contains("averagePeriodUS") || force) {
         ostr << " m_averagePeriodUS: " << m_averagePeriodUS;
     }
+    if (settingsKeys.contains("frequencyMode") || force) {
+        ostr << " m_frequencyMode: " << m_frequencyMode;
+    }
+    if (settingsKeys.contains("frequency") || force) {
+        ostr << " m_frequency: " << m_frequency;
+    }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;
     }
@@ -200,7 +224,7 @@ QString ChannelPowerSettings::getDebugString(const QStringList& settingsKeys, bo
     if (settingsKeys.contains("reverseAPIPort") || force) {
         ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
     }
-    if (settingsKeys.contains("everseAPIDeviceIndex") || force) {
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
         ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
     }
 

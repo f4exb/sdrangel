@@ -17,6 +17,7 @@ set(sdrgui_SOURCES
     gui/buttonswitch.cpp
     gui/channeladddialog.cpp
     gui/clickablelabel.cpp
+    gui/colordialog.cpp
     gui/colormapper.cpp
     gui/commanditem.cpp
     gui/commandsdialog.cpp
@@ -88,6 +89,7 @@ set(sdrgui_SOURCES
     gui/spectrummarkersdialog.cpp
     gui/spectrummeasurementsdialog.cpp
     gui/spectrummeasurements.cpp
+    gui/tablecolorchooser.cpp
     gui/tabletapandhold.cpp
     gui/tickedslider.cpp
     gui/timedelegate.cpp
@@ -142,6 +144,7 @@ set(sdrgui_HEADERS
     gui/basicfeaturesettingsdialog.h
     gui/buttonswitch.h
     gui/channeladddialog.h
+    gui/colordialog.h
     gui/colormapper.h
     gui/commanditem.h
     gui/commandsdialog.h
@@ -217,6 +220,7 @@ set(sdrgui_HEADERS
     gui/spectrummarkersdialog.h
     gui/spectrummeasurementsdialog.h
     gui/spectrummeasurements.h
+    gui/tablecolorchooser.h
     gui/tabletapandhold.h
     gui/tickedslider.h
     gui/timedelegate.h

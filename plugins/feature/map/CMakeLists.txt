@@ -54,7 +54,6 @@ if(NOT SERVER_MODE)
         mapibpbeacondialog.ui
         mapradiotimedialog.cpp
         mapradiotimedialog.ui
-        mapcolordialog.cpp
         mapmodel.cpp
         mapitem.cpp
         mapwebsocketserver.cpp
@@ -75,7 +74,6 @@ if(NOT SERVER_MODE)
         mapbeacondialog.h
         mapibpbeacon.h
         mapradiotimedialog.h
-        mapcolordialog.h
         mapmodel.h
         mapitem.h
         mapwebsocketserver.h

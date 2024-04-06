@@ -27,6 +27,7 @@
 #include <QProgressDialog>
 
 #include "gui/httpdownloadmanagergui.h"
+#include "gui/tablecolorchooser.h"
 #include "util/openaip.h"
 #include "util/ourairportsdb.h"
 #include "util/waypoints.h"
@@ -34,34 +35,15 @@
 #include "ui_mapsettingsdialog.h"
 #include "mapsettings.h"
 
-class MapColorGUI : public QObject {
-    Q_OBJECT
-public:
-
-    MapColorGUI(QTableWidget *table, int row, int col, bool noColor, quint32 color);
-
-public slots:
-    void on_color_clicked();
-
-private:
-    QToolButton *m_colorButton;
-
-public:
-    // Have copies of settings, so we don't change unless main dialog is accepted
-    bool m_noColor;
-    quint32 m_color;
-
-};
-
 class MapItemSettingsGUI : public QObject {
     Q_OBJECT
 public:
 
     MapItemSettingsGUI(QTableWidget *table, int row, MapSettings::MapItemSettings *settings);
 
-    MapColorGUI m_track2D;
-    MapColorGUI m_point3D;
-    MapColorGUI m_track3D;
+    TableColorChooser m_track2D;
+    TableColorChooser m_point3D;
+    TableColorChooser m_track3D;
     QSpinBox *m_minZoom;
     QSpinBox *m_minPixels;
     QDoubleSpinBox *m_labelScale;

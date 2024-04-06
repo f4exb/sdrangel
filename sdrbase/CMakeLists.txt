@@ -238,7 +238,9 @@ set(sdrbase_SOURCES
     util/flightinformation.cpp
     util/ft8message.cpp
     util/giro.cpp
+    util/goesxray.cpp
     util/golay2312.cpp
+    util/grb.cpp
     util/httpdownloadmanager.cpp
     util/interpolation.cpp
     util/kiwisdrlist.cpp
@@ -266,13 +268,16 @@ set(sdrbase_SOURCES
     util/samplesourceserializer.cpp
     util/simpleserializer.cpp
     util/serialutil.cpp
+    util/solardynamicsobservatory.cpp
     #util/spinlock.cpp
     util/spyserverlist.cpp
+    util/stix.cpp
     util/rtty.cpp
     util/uid.cpp
     util/units.cpp
     util/timeutil.cpp
     util/visa.cpp
+    util/vlftransmitters.cpp
     util/waypoints.cpp
     util/weather.cpp
     util/iot/device.cpp
@@ -487,7 +492,9 @@ set(sdrbase_HEADERS
     util/flightinformation.h
     util/ft8message.h
     util/giro.h
+    util/goesxray.h
     util/golay2312.h
+    util/grb.h
     util/httpdownloadmanager.h
     util/incrementalarray.h
     util/incrementalvector.h
@@ -520,12 +527,15 @@ set(sdrbase_HEADERS
     util/samplesourceserializer.h
     util/simpleserializer.h
     util/serialutil.h
+    util/solardynamicsobservatory.h
     #util/spinlock.h
     util/spyserverlist.h
+    util/stix.h
     util/uid.h
     util/units.h
     util/timeutil.h
     util/visa.h
+    util/vlftransmitters.h
     util/waypoints.h
     util/weather.h
     util/iot/device.h

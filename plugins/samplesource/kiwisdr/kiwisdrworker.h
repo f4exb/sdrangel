@@ -53,6 +53,31 @@ public:
 		{ }
 	};
 
+	class MsgReportPosition : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		float getLatitude() const { return m_latitude; }
+		float getLongitude() const { return m_longitude; }
+		float getAltitude() const { return m_altitude; }
+
+		static MsgReportPosition* create(float latitude, float longitude, float altitude) {
+			return new MsgReportPosition(latitude, longitude, altitude);
+		}
+
+	private:
+		float m_latitude;
+		float m_longitude;
+		float m_altitude;
+
+		MsgReportPosition(float latitude, float longitude, float altitude) :
+			Message(),
+			m_latitude(latitude),
+			m_longitude(longitude),
+			m_altitude(altitude)
+		{ }
+	};
+
 	KiwiSDRWorker(SampleSinkFifo* sampleFifo);
     int getStatus() const { return m_status; }
     void setInputMessageQueue(MessageQueue *messageQueue) { m_inputMessageQueue = messageQueue; }

@@ -81,11 +81,28 @@ void AvailableChannelOrFeatureHandler::scanAvailableChannelsAndFeatures()
         }
     }
 
+    // Create lists of which channels and features have been added or removed
+    QStringList added;
+    QStringList removed;
+
+    for (const auto& channelOrFeature : availableChannelOrFeatureList)
+    {
+        if (m_availableChannelOrFeatureList.indexOfObject(channelOrFeature.m_object) < 0) {
+            added.append(channelOrFeature.getId());
+        }
+    }
+    for (const auto& channelOrFeature : m_availableChannelOrFeatureList)
+    {
+        if (availableChannelOrFeatureList.indexOfObject(channelOrFeature.m_object) < 0) {
+            removed.append(channelOrFeature.getId());
+        }
+    }
+
     m_availableChannelOrFeatureList = availableChannelOrFeatureList;
 
     // Signal if list has changed
     if (changes) {
-        emit channelsOrFeaturesChanged(renameFrom, renameTo);
+        emit channelsOrFeaturesChanged(renameFrom, renameTo, removed, added);
     }
 }
 

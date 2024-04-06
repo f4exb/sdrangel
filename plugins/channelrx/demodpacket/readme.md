@@ -92,5 +92,5 @@ The received packets table displays the contents of the packets that have been r
 * Via - List of addresses of repeaters the packet has passed through or directed via.
 * Type - The AX.25 frame type.
 * PID - Protocol Identifier.
-* Data (ASCII) - The AX.25 information field displayed as ASCII.
+* Data - The AX.25 information field displayed as UTF-8 character string.
 * Data (Hex) - The AX.25 information field displayed as hexadecimal.

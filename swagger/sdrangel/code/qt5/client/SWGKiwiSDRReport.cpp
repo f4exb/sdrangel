@@ -30,6 +30,12 @@ SWGKiwiSDRReport::SWGKiwiSDRReport(QString* json) {
 SWGKiwiSDRReport::SWGKiwiSDRReport() {
     status = 0;
     m_status_isSet = false;
+    latitude = 0.0f;
+    m_latitude_isSet = false;
+    longitude = 0.0f;
+    m_longitude_isSet = false;
+    altitude = 0.0f;
+    m_altitude_isSet = false;
 }
 
 SWGKiwiSDRReport::~SWGKiwiSDRReport() {
@@ -40,10 +46,19 @@ void
 SWGKiwiSDRReport::init() {
     status = 0;
     m_status_isSet = false;
+    latitude = 0.0f;
+    m_latitude_isSet = false;
+    longitude = 0.0f;
+    m_longitude_isSet = false;
+    altitude = 0.0f;
+    m_altitude_isSet = false;
 }
 
 void
 SWGKiwiSDRReport::cleanup() {
+
+
+
 
 }
 
@@ -59,6 +74,12 @@ SWGKiwiSDRReport::fromJson(QString &json) {
 void
 SWGKiwiSDRReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&status, pJson["status"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&latitude, pJson["latitude"], "float", "");
+    
+    ::SWGSDRangel::setValue(&longitude, pJson["longitude"], "float", "");
+    
+    ::SWGSDRangel::setValue(&altitude, pJson["altitude"], "float", "");
     
 }
 
@@ -79,6 +100,15 @@ SWGKiwiSDRReport::asJsonObject() {
     if(m_status_isSet){
         obj->insert("status", QJsonValue(status));
     }
+    if(m_latitude_isSet){
+        obj->insert("latitude", QJsonValue(latitude));
+    }
+    if(m_longitude_isSet){
+        obj->insert("longitude", QJsonValue(longitude));
+    }
+    if(m_altitude_isSet){
+        obj->insert("altitude", QJsonValue(altitude));
+    }
 
     return obj;
 }
@@ -93,12 +123,51 @@ SWGKiwiSDRReport::setStatus(qint32 status) {
     this->m_status_isSet = true;
 }
 
+float
+SWGKiwiSDRReport::getLatitude() {
+    return latitude;
+}
+void
+SWGKiwiSDRReport::setLatitude(float latitude) {
+    this->latitude = latitude;
+    this->m_latitude_isSet = true;
+}
+
+float
+SWGKiwiSDRReport::getLongitude() {
+    return longitude;
+}
+void
+SWGKiwiSDRReport::setLongitude(float longitude) {
+    this->longitude = longitude;
+    this->m_longitude_isSet = true;
+}
+
+float
+SWGKiwiSDRReport::getAltitude() {
+    return altitude;
+}
+void
+SWGKiwiSDRReport::setAltitude(float altitude) {
+    this->altitude = altitude;
+    this->m_altitude_isSet = true;
+}
+
 
 bool
 SWGKiwiSDRReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_status_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_latitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_longitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_altitude_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

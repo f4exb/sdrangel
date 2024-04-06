@@ -345,7 +345,7 @@ QString SDRPlayV3Settings::getDebugString(const QStringList& settingsKeys, bool 
     if (settingsKeys.contains("reverseAPIPort") || force) {
         ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
     }
-    if (settingsKeys.contains("everseAPIDeviceIndex") || force) {
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
         ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
     }
 
