@@ -61,7 +61,7 @@ SIDAddChannelsDialog::SIDAddChannelsDialog(SIDSettings *settings, QWidget* paren
         ui->channels->setItem(row, COL_TX_NAME, new QTableWidgetItem(VLFTransmitters::m_transmitters[j].m_callsign));
         ui->channels->setItem(row, COL_TX_FREQUENCY, new QTableWidgetItem(QString::number(VLFTransmitters::m_transmitters[j].m_frequency)));
 
-        for (int i = 0; i < deviceSets.size(); i++)
+        for (unsigned int i = 0; i < deviceSets.size(); i++)
         {
             if (deviceSets[i]->m_deviceSourceEngine || deviceSets[i]->m_deviceMIMOEngine)
             {
