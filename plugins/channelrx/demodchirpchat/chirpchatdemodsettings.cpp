@@ -26,6 +26,7 @@
 
 const int ChirpChatDemodSettings::bandwidths[] = {
     325,    // 384k / 1024
+    488,    // 500k / 1024
     750,    // 384k / 512
     1500,   // 384k / 256
     2604,   // 333k / 128
@@ -53,7 +54,7 @@ const int ChirpChatDemodSettings::bandwidths[] = {
     400000, // 400k / 1
     500000  // 500k / 1
 };
-const int ChirpChatDemodSettings::nbBandwidths = 3*8 + 3;
+const int ChirpChatDemodSettings::nbBandwidths = 3*8 + 4;
 const int ChirpChatDemodSettings::oversampling = 2;
 
 ChirpChatDemodSettings::ChirpChatDemodSettings() :
