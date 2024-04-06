@@ -228,6 +228,7 @@ void MainCore::removeLastDeviceSet()
         DeviceSet *deviceSet = m_deviceSets.back();
         m_deviceSetsMap.remove(deviceSet);
         m_deviceSets.pop_back();
+        delete deviceSet;
     }
 }
 
