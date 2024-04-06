@@ -713,7 +713,7 @@
         <string>Norad ID</string>
        </property>
        <property name="toolTip">
-        <string>Norad catalog idenfitier for the satellite</string>
+        <string>Norad catalog identifier for the satellite</string>
        </property>
       </column>
      </widget>

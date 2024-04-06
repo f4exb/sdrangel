@@ -18,7 +18,7 @@ The SID chart can plot multiple series, allowing different signals from differen
 This can be useful as SIDs can be localized to specific regions in the atmosphere, thus not all signals may be affected. 
 Data can come from multiple [Channel Power](../../channelrx/channelpower/readme.md) plugins within a single device, or separate devices.
 
-To help determine the cause of a SID, addtional data can be plotted from a variety of sources:
+To help determine the cause of a SID, additional data can be plotted from a variety of sources:
 
 * the chart can plot X-ray data from the GOES satellites, to allow visual correlation of spikes in the X-ray flux measurement with spikes in the VLF power measurements,
 * it can display images and video from the Solar Dynamics Observatory at EUV wavelengths, which may visually show the solar flare,
@@ -63,9 +63,9 @@ Number of samples to use in a moving average filter that can be applied to the d
 
 Check to display long wavelength (0.1-0.8nm) X-Ray data from the primary GOES satellite (Currently GOES 16) on the chart.
 
-This is probably the most useful data in order to see when a solar flare has occured, as there will typically be a sharp peak.
+This is probably the most useful data in order to see when a solar flare has occurred, as there will typically be a sharp peak.
 The GOES satellites are in a geostationary orbit around the Earth, so the measured increase in X-ray flux from a flare will be approximately 8 minutes
-after it has occured.
+after it has occurred.
 The Y-axis indicates the flare classification. M and X class flares are those most likely to have a measurable impact on the ionosphere.
 
 ![X-Ray data showing M class flare](../../../doc/img/SID_plugin_xray.png)
@@ -201,11 +201,11 @@ When clicked, the X-axis is set 1 day later than the current setting, at the sam
 
 <h3>26: Start Time</h3>
 
-Displays/sets the current start time of the chart (X-axis minimum). It's possible to scroll through hours/days/months by clicking on the relevent segment and using the mouse scroll wheel.
+Displays/sets the current start time of the chart (X-axis minimum). It's possible to scroll through hours/days/months by clicking on the relevant segment and using the mouse scroll wheel.
 
 <h3>27: End Time</h3>
 
-Displays/sets the current end time of the chart (X-axis maximum). It's possible to scroll through hours/days/months by clicking on the relevent segment and using the mouse scroll wheel.
+Displays/sets the current end time of the chart (X-axis maximum). It's possible to scroll through hours/days/months by clicking on the relevant segment and using the mouse scroll wheel.
 
 <h3>28: Min</h3>
 
@@ -248,7 +248,7 @@ In order to check that a peak in the spectrum is a real VLF signal, you can:
 * Check that the signal has diurnal variation (it should vary with the time of day, due to the changes in the ionosphere). 
 * Check with online lists of VLF signals (E.g. https://sidstation.loudet.org/stations-list-en.xhtml or https://www.mwlist.org/vlf.php). A number of these are plotted on the [Map](../../feature/map/readme.md) feature.
 
-Occasionally, the X-ray flux data may drop to 0. This is typically when the GOES satellite is in eclipse (The Earth or moon is inbetween the satellite and the Sun).
+Occasionally, the X-ray flux data may drop to 0. This is typically when the GOES satellite is in eclipse (The Earth or Moon is in between the satellite and the Sun).
 
 SIDs are most likely to be detected when it's day time in the path between the signal source and receiver, as at night, the atmosphere is shielded from the X-rays by the Earth.
 Also, as the D layer in the ionosphere essentially disappears at night, the received power is not as constant as during the day.

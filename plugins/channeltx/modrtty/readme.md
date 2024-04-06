@@ -117,7 +117,7 @@ The substitutions are applied when the Transmit Settings dialog is closed.
 
 <h3>21: Transmitted Text</h3>
 
-The trasnmitted text area shows characters as they are transmitted.
+The transmitted text area shows characters as they are transmitted.
 
 Holding the cursor over an acronym may show a tooltip with the decoded acronym.
 
