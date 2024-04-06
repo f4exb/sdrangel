@@ -209,6 +209,7 @@ void MainCore::removeLastFeatureSet()
         FeatureSet *featureSet = m_featureSets.back();
         m_featureSetsMap.remove(featureSet);
         m_featureSets.pop_back();
+        delete featureSet;
     }
 }
 
