@@ -18,7 +18,7 @@ Specifies the channel (such as an AM, NFM or DSD Demod), by device set and chann
 
 <h3>2: Minimum frequency shift from center frequency of reception for channel</h3>
 
-Use the wheels of keyboard to adjust the minimim frequency shift in Hz from the center frequency of reception for the channel (1).
+Use the wheels of keyboard to adjust the minimum frequency shift in Hz from the center frequency of reception for the channel (1).
 
 This setting is typically used to avoid having the channel (1) centered at DC, which can be problematic for some demodulators used with SDRs with a DC spike.
 
@@ -34,7 +34,7 @@ Power threshold in dB that determines whether a frequency is active or not.
 
 Specifies the time in milliseconds that the Frequency Scanner should wait after adjusting the device center frequency, before starting a measurement.
 This time should take in to account PLL settle time and the device to host transfer latency, so that the measurement only starts when IQ data
-that corresponds to the set frequency is being recieved.
+that corresponds to the set frequency is being received.
 
 <h3>6: t_s - Scan time</h3>
 
@@ -93,7 +93,7 @@ The frequency table contains the list of frequencies to be scanned, along with r
 
 - Freq (Hz): Specifies the channel center frequencies to be scanned. Values should be entered in Hertz.
 - Annotation: An annotation (description) for the frequency, that is obtained from the closest matching [annotation marker](../../../sdrgui/gui/spectrummarkers.md) in the Main Spectrum.
-- Enable: Determines whether the frequency will be scanned. This can be used to temporaily disable frequencies you aren't interested in.
+- Enable: Determines whether the frequency will be scanned. This can be used to temporarily disable frequencies you aren't interested in.
 - Power (dB): Displays the measured power in decibels from the last scan. The cell will have a green background if the power was above the threshold (4).
 - Active Count: Displays the number of scans in which the power for this frequency was above the threshold (4). This allows you to see which frequencies are commonly in use.
 - Notes: Available for user-entry of notes/information about this frequency.

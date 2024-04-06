@@ -86,7 +86,7 @@ Clicking the Display Settings button will open the Display Settings dialog, whic
 * The font used for the table.
 * Whether demodulator statistics are displayed (primarily an option for developers).
 * Whether the columns in the table are automatically resized after an aircraft is added to it. If unchecked, columns can be resized manually and should be saved with presets.
-* The transistion altitude in feet for use in ATC mode. Below the TA, altitude will be displayed. Above the TA flight levels will be displayed.
+* The transition altitude in feet for use in ATC mode. Below the TA, altitude will be displayed. Above the TA flight levels will be displayed.
 
 You can also enter an [aviationstack](https://aviationstack.com/product) API key, needed to download flight information (such as departure and arrival airports and times).
 

@@ -736,7 +736,7 @@
         <string>Light Batt</string>
        </property>
        <property name="toolTip">
-        <string>Market light battery condtion</string>
+        <string>Market light battery condition</string>
        </property>
       </column>
       <column>
