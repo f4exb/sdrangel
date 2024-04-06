@@ -431,7 +431,6 @@ Item {
                                 anchors.fill: parent
                                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                                 onClicked: (mouse) => {
-                                console.log("AIRPORT CLICKED ************************* ");
                                     if (mouse.button === Qt.RightButton) {
                                         showRangeItem.visible = !rangeGroup.groupVisible
                                         hideRangeItem.visible = rangeGroup.groupVisible
@@ -508,7 +507,6 @@ Item {
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: (mouse) => {
-                                console.log("AIRPORT 2 CLICKED ************************* ");
                                     if (showFreq) {
                                         var freqIdx = Math.floor((mouse.y-5)/((height-10)/airportDataRows))
                                         if (freqIdx == 0) {
