@@ -514,6 +514,8 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
 
 void GLShaderSpectrogram::cleanup()
 {
+    delete m_vao;
+    m_vao = nullptr;
     delete m_programShaded;
     m_programShaded = nullptr;
     delete m_programSimple;
