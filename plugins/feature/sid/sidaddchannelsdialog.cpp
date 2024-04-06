@@ -83,13 +83,20 @@ SIDAddChannelsDialog::~SIDAddChannelsDialog()
 
 void SIDAddChannelsDialog::accept()
 {
-    MainCore *mainCore = MainCore::instance();
-    connect(mainCore, &MainCore::channelAdded, this, &SIDAddChannelsDialog::channelAdded);
+    if (ui->channels->columnCount() > 2)
+    {
+        MainCore *mainCore = MainCore::instance();
+        connect(mainCore, &MainCore::channelAdded, this, &SIDAddChannelsDialog::channelAdded);
 
-    m_count = m_settings->m_channelSettings.size();
-    m_row = 0;
-    m_col = COL_DEVICE;
-    addNextChannel();
+        m_count = m_settings->m_channelSettings.size();
+        m_row = 0;
+        m_col = COL_DEVICE;
+        addNextChannel();
+    }
+    else
+    {
+        QDialog::accept();
+    }
 }
 
 void SIDAddChannelsDialog::addNextChannel()
