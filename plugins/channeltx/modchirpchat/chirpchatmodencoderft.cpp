@@ -84,6 +84,7 @@ void ChirpChatModEncoderFT::encodeMsg(
 
         if ((i % nbSymbolBits) == (nbSymbolBits - 1))
         {
+            symbol = symbol ^ (symbol >> 1); // Gray code
             symbols.push_back(symbol);
             symbol = 0;
         }
