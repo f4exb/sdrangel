@@ -1234,6 +1234,32 @@ std::vector<std::vector<float>> FT8::un_gray_code_r(const std::vector<std::vecto
 }
 
 //
+// Generic Gray decoding for magnitudes (floats)
+//
+std::vector<std::vector<float>> FT8::un_gray_code_r_gen(const std::vector<std::vector<float>> &mags)
+{
+    if (mags.size() == 0) {
+        return mags;
+    }
+
+    std::vector<std::vector<float>> magsa(mags.size());
+    int nsyms = mags.front().size();
+
+    for (unsigned int si = 0; si < mags.size(); si++)
+    {
+        magsa[si].resize(nsyms);
+
+        for (int bini = 0; bini < nsyms; bini++)
+        {
+            int grayi = bini ^ (bini >> 1);
+            magsa[si][bini] = mags[si][grayi];
+        }
+    }
+
+    return magsa;
+}
+
+//
 // normalize levels by windowed median.
 // this helps, but why?
 //
@@ -1919,6 +1945,7 @@ void FT8::soft_decode_mags(FT8Params& params, const std::vector<std::vector<floa
     Stats bests(params.problt_how_sig, params.log_tail, params.log_rate);
     Stats all(params.problt_how_noise, params.log_tail, params.log_rate);
     make_stats_gen(mags, nbSymbolBits, bests, all);
+    mags = un_gray_code_r_gen(mags);
     int lli = 0;
     int zoX = 1<<(nbSymbolBits-1);
     int zoY = nbSymbolBits;
@@ -3188,7 +3215,7 @@ int FT8::one_iter1(
             hz1_for_cb,
             params.use_osd,
             "",
-             m79
+            m79
         );
 
         if (ret) {
