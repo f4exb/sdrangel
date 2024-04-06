@@ -52,6 +52,11 @@ MainSettings::~MainSettings()
     {
         delete m_pluginPresets[i];
     }
+
+    for (int i = 0; i < m_configurations.count(); ++i)
+    {
+        delete m_configurations[i];
+    }
 }
 
 QString MainSettings::getFileLocation() const
