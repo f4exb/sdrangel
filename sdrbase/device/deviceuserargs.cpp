@@ -40,8 +40,8 @@ QByteArray DeviceUserArgs::serialize() const
 {
     SimpleSerializer s(1);
     QByteArray data;
-    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
-    *stream << m_argsByDevice;
+    QDataStream stream(&data, QIODevice::WriteOnly);
+    stream << m_argsByDevice;
     s.writeBlob(1, data);
     return s.final();
 }
