@@ -12701,6 +12701,15 @@ margin-bottom: 20px;
       "format" : "int64",
       "description" : "channel center frequency shift from baseband center in Hz"
     },
+    "frequencyMode" : {
+      "type" : "integer",
+      "description" : "(0 for Offset, 1 for Absolute)"
+    },
+    "frequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Channel center frequency"
+    },
     "rfBandwidth" : {
       "type" : "number",
       "format" : "float",
@@ -12712,7 +12721,7 @@ margin-bottom: 20px;
     },
     "modulation" : {
       "type" : "integer",
-      "description" : "0 - MSF, 1 - DCF77, 2 - TDF, 3 - WWVB"
+      "description" : "0 - MSF, 1 - DCF77, 2 - TDF, 3 - WWVB, 4 - JJY"
     },
     "timezone" : {
       "type" : "integer",
@@ -58943,7 +58952,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-04-06T20:04:32.029+02:00
+              Generated 2024-04-07T17:52:28.367+02:00
             </div>
           </div>
       </div>

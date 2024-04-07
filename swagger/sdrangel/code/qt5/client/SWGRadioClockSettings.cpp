@@ -30,6 +30,10 @@ SWGRadioClockSettings::SWGRadioClockSettings(QString* json) {
 SWGRadioClockSettings::SWGRadioClockSettings() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
+    frequency_mode = 0;
+    m_frequency_mode_isSet = false;
+    frequency = 0L;
+    m_frequency_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     threshold = 0.0f;
@@ -70,6 +74,10 @@ void
 SWGRadioClockSettings::init() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
+    frequency_mode = 0;
+    m_frequency_mode_isSet = false;
+    frequency = 0L;
+    m_frequency_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     threshold = 0.0f;
@@ -110,6 +118,8 @@ SWGRadioClockSettings::cleanup() {
 
 
 
+
+
     if(title != nullptr) { 
         delete title;
     }
@@ -144,6 +154,10 @@ SWGRadioClockSettings::fromJson(QString &json) {
 void
 SWGRadioClockSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&frequency_mode, pJson["frequencyMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&frequency, pJson["frequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
@@ -193,6 +207,12 @@ SWGRadioClockSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_input_frequency_offset_isSet){
         obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
+    }
+    if(m_frequency_mode_isSet){
+        obj->insert("frequencyMode", QJsonValue(frequency_mode));
+    }
+    if(m_frequency_isSet){
+        obj->insert("frequency", QJsonValue(frequency));
     }
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
@@ -251,6 +271,26 @@ void
 SWGRadioClockSettings::setInputFrequencyOffset(qint64 input_frequency_offset) {
     this->input_frequency_offset = input_frequency_offset;
     this->m_input_frequency_offset_isSet = true;
+}
+
+qint32
+SWGRadioClockSettings::getFrequencyMode() {
+    return frequency_mode;
+}
+void
+SWGRadioClockSettings::setFrequencyMode(qint32 frequency_mode) {
+    this->frequency_mode = frequency_mode;
+    this->m_frequency_mode_isSet = true;
+}
+
+qint64
+SWGRadioClockSettings::getFrequency() {
+    return frequency;
+}
+void
+SWGRadioClockSettings::setFrequency(qint64 frequency) {
+    this->frequency = frequency;
+    this->m_frequency_isSet = true;
 }
 
 float
@@ -409,6 +449,12 @@ SWGRadioClockSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_input_frequency_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_frequency_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_frequency_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rf_bandwidth_isSet){
