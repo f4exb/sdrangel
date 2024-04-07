@@ -43,6 +43,7 @@ private:
     static void encodeMsgReply(const QString& myCall, const QString& urCall, const QString& myLocator, int a174[]);
     static void encodeMsgReport(const QString& myCall, const QString& urCall, const QString& myReport, int reply, int a174[]);
     static void encodeMsgFinish(const QString& myCall, const QString& urCall, const QString& shorthand, int a174[]);
+    static void interleave174(int a174[]);
 };
 
 #endif // PLUGINS_CHANNELTX_MODCHIRPCHAT_CHIRPCHATMODENCODEFT_H_

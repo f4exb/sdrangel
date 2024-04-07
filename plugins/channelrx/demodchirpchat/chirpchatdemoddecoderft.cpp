@@ -54,10 +54,7 @@ void ChirpChatDemodDecoderFT::decodeSymbols(
         return;
     }
 
-    // float *lls = new float[mags.size()*nbSymbolBits]; // bits log likelihoods (>0 for 0, <0 for 1)
-    // std::fill(lls, lls+mags.size()*nbSymbolBits, 0.0);
     FT8::FT8Params params;
-    // FT8::FT8::soft_decode_mags(params, mags, nbSymbolBits, lls);
     int r174[174];
     std::string comments;
     payloadParityStatus = (int) ChirpChatDemodSettings::ParityOK;
@@ -170,7 +167,21 @@ int ChirpChatDemodDecoderFT::decodeWithShift(
     float *lls = new float[mags.size()*nbSymbolBits]; // bits log likelihoods (>0 for 0, <0 for 1)
     std::fill(lls, lls+mags.size()*nbSymbolBits, 0.0);
     FT8::FT8::soft_decode_mags(params, mags, nbSymbolBits, lls);
-    return FT8::FT8::decode(lls, r174, params, 0, comments);
+    deinterleave174(lls);
+    int ret = FT8::FT8::decode(lls, r174, params, 0, comments);
+    delete[] lls;
+    return ret;
+}
+
+void ChirpChatDemodDecoderFT::deinterleave174(float ll174[])
+{
+    // 174 = 2*3*29
+    float t174[174];
+    std::copy(ll174, ll174+174, t174);
+
+    for (int i = 0; i < 174; i++) {
+        ll174[i] = t174[(i%6)*29 + (i%29)];
+    }
 }
 
 #endif // HAS_FT8

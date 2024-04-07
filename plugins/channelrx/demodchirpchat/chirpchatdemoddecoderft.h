@@ -57,6 +57,7 @@ private:
         std::string& comments,
         int shift = 0
     );
+    static void deinterleave174(float ll174[]);
 };
 
 

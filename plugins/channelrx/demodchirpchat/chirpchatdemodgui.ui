@@ -954,22 +954,22 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="headerCRCStatus">
-        <property name="toolTip">
-         <string>Header CRC status</string>
-        </property>
-        <property name="text">
-         <string> HC </string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="headerHammingStatus">
         <property name="toolTip">
          <string>Header FEC parity status</string>
         </property>
         <property name="text">
          <string> HF </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="headerCRCStatus">
+        <property name="toolTip">
+         <string>Header CRC status</string>
+        </property>
+        <property name="text">
+         <string> HC </string>
         </property>
        </widget>
       </item>

@@ -74,6 +74,8 @@ void ChirpChatModEncoderFT::encodeMsg(
     int iBit;
     int symbol = 0;
 
+    interleave174(a174);
+
     for (int i = 0; i < allBits; i++)
     {
         iBit = nbSymbolBits - (i % nbSymbolBits) - 1; // MSB first
@@ -228,6 +230,17 @@ void ChirpChatModEncoderFT::encodeMsgFinish(const QString& myCall, const QString
     std::fill(a77, a77 + 77, 0);
     FT8::Packing::pack1(a77, c28_1, c28_2, g15, 0);
     FT8::FT8::encode(a174, a77);
+}
+
+void ChirpChatModEncoderFT::interleave174(int a174[])
+{
+    // 174 = 2*3*29
+    int t174[174];
+    std::copy(a174, a174+174, t174);
+
+    for (int i = 0; i < 174; i++) {
+        a174[i] = t174[(i%6)*29 + (i%29)];
+    }
 }
 
 #endif // HAS_FT8

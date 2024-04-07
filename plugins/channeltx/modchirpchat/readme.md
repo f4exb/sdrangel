@@ -74,13 +74,15 @@ The ChirpChat signal is oversampled by four therefore it needs a baseband of at 
 
 <h3>5: Spread Factor</h3>
 
-This is the Spread Factor parameter of the ChirpChat signal. This is the log2 of the possible frequency shifts used over the bandwidth (3). The number of symbols is 2<sup>SF-DE</sup> where SF is the spread factor and DE the  Distance Enhancement factor (8). To
+This is the Spread Factor parameter of the ChirpChat signal. This is the log2 of the possible frequency shifts used over the bandwidth (3). The number of symbols is 2<sup>SF-DE</sup> where SF is the spread factor and DE the  Distance Enhancement factor (6).
 
 <h3>6: Distance Enhancement factor</h3>
 
 The LoRa standard specifies 0 (no DE) or 2 (DE active). The ChirpChat range is extended to all values between 0 and 4 bits.
 
-This is the log2 of the number of frequency shifts separating two consecutive shifts that represent a symbol. On the receiving side this decreases the probability to detect the wrong symbol as an adjacent FFT bin. It can also overcome frequency drift on long messages.
+The LoRa standard also specifies that the LowDataRateOptimization flag (thus DE=2 vs DE=0 here) should be set when the symbol time defined as BW / 2^SF exceeds 16 ms (See section 4.1.1.6 of the SX127x datasheet). In practice this happens for SF=11 and SF=12 and large enough bandwidths (you can do the maths).
+
+Here this value is the log2 of the number of frequency shifts separating two consecutive shifts that represent a symbol. On the receiving side this decreases the probability to detect the wrong symbol as an adjacent FFT bin. It can also overcome frequency or sampling time drift on long messages particularly for small bandwidths.
 
 In practice it is difficult on the Rx side to make correct decodes if only one FFT bin is used to code one symbol (DE=0). It is therefore recommended to use a factor of 1 or more.
 

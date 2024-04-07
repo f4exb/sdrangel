@@ -11,7 +11,7 @@ LoRa is a property of Semtech and the details of the protocol are not made publi
   - To get an idea of what is LoRa: [here](https://www.link-labs.com/blog/what-is-lora)
   - A detailed inspection of LoRa modulation and protocol: [here](https://static1.squarespace.com/static/54cecce7e4b054df1848b5f9/t/57489e6e07eaa0105215dc6c/1464376943218/Reversing-Lora-Knight.pdf)
 
-&#9888; Only spread factors of 11 and 12 are working in LoRa mode thus with the distance enhancement active (DE=2)
+&#9888; Only spread factors of 11 and 12 are working in LoRa mode with the distance enhancement active (DE=2)
 
 Transmissions from the RN2483 module (SF=11 and SF=12 with DE=2) could be successfully received. It has not been tested with Semtech SX127x hardware. This LoRa decoder is designed for experimentation. For production grade applications it is recommended to use dedicated hardware instead.
 
@@ -110,7 +110,9 @@ This is the Spread Factor parameter of the ChirpChat signal. This is the log2 of
 
 The LoRa standard specifies 0 (no DE) or 2 (DE active). The ChirpChat DE range is extended to all values between 0 and 4 bits.
 
-This is the log2 of the number of FFT bins used for one symbol. Extending the number of FFT bins per symbol decreases the probability to detect the wrong symbol as an adjacent bin. It can also overcome frequency drift on long messages.
+The LoRa standard also specifies that the LowDataRateOptimizatio flag (thus DE=2 vs DE=0 here) should be set when the symbol time defined as BW / 2^SF exceeds 16 ms (See section 4.1.1.6 of the SX127x datasheet). In practice this happens for SF=11 and SF=12 and large enough bandwidths (you can do the maths).
+
+Here this value is the log2 of the number of FFT bins used for one symbol. Extending the number of FFT bins per symbol decreases the probability to detect the wrong symbol as an adjacent bin. It can also overcome frequency or samlping time drift on long messages particularly for small bandwidths.
 
 In practice it is difficult to make correct decodes if only one FFT bin is used to code one symbol (DE=0) therefore it is recommended to use a DE factor of 2 or more. With medium SNR DE=1 can still achieve good results.
 
