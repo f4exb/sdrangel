@@ -291,12 +291,12 @@ int ChannelPower::webapiSettingsPutPatch(
 
     // Ensure inputFrequencyOffset and frequency are consistent
     QStringList settingsKeys = channelSettingsKeys;
-    if (settingsKeys.contains("frequency") && (settings.m_frequencyMode == ChannelPowerSettings::Absolute))
+    if (settingsKeys.contains("frequency") && !settingsKeys.contains("inputFrequencyOffset"))
     {
         settings.m_inputFrequencyOffset = settings.m_frequency - m_centerFrequency;
         settingsKeys.append("inputFrequencyOffset");
     }
-    else if (settingsKeys.contains("inputFrequencyOffset") && (settings.m_frequencyMode == ChannelPowerSettings::Offset))
+    else if (settingsKeys.contains("inputFrequencyOffset") && !settingsKeys.contains("frequency"))
     {
         settings.m_frequency = m_centerFrequency + settings.m_inputFrequencyOffset;
         settingsKeys.append("frequency");
