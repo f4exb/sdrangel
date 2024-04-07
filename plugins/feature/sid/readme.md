@@ -18,7 +18,7 @@ The SID chart can plot multiple series, allowing different signals from differen
 This can be useful as SIDs can be localized to specific regions in the atmosphere, thus not all signals may be affected. 
 Data can come from multiple [Channel Power](../../channelrx/channelpower/readme.md) plugins within a single device, or separate devices.
 
-To help determine the cause of a SID, addtional data can be plotted from a variety of sources:
+To help determine the cause of a SID, additional data can be plotted from a variety of sources:
 
 * the chart can plot X-ray data from the GOES satellites, to allow visual correlation of spikes in the X-ray flux measurement with spikes in the VLF power measurements,
 * it can display images and video from the Solar Dynamics Observatory at EUV wavelengths, which may visually show the solar flare,
@@ -63,9 +63,9 @@ Number of samples to use in a moving average filter that can be applied to the d
 
 Check to display long wavelength (0.1-0.8nm) X-Ray data from the primary GOES satellite (Currently GOES 16) on the chart.
 
-This is probably the most useful data in order to see when a solar flare has occured, as there will typically be a sharp peak.
+This is probably the most useful data in order to see when a solar flare has occurred, as there will typically be a sharp peak.
 The GOES satellites are in a geostationary orbit around the Earth, so the measured increase in X-ray flux from a flare will be approximately 8 minutes
-after it has occured.
+after it has occurred.
 The Y-axis indicates the flare classification. M and X class flares are those most likely to have a measurable impact on the ionosphere.
 
 ![X-Ray data showing M class flare](../../../doc/img/SID_plugin_xray.png)
@@ -150,7 +150,7 @@ When checked, displays imagary from NASA's SDO (Solar Dynamic Observatory) and E
 
 SDOs images the Sun in a variety of UV and EUV wavelengths. SOHO shows images of the solar corona. The images are near real-time, updated every 15 minutes.
 
-Solar flares are particularly visible in the AIA 131 Å images.
+Solar flares are particularly visible in the AIA 131 Ã… images.
 
 <h3>19: Image or Video Selection</h3>
 
@@ -160,24 +160,24 @@ Selects whether to display images (unchecked) or video (checked).
 
 Selects which image / wavelength to view.
 
-* AIA 94 Å to 1700 Å - The AIA (Atmospheric Imaging Assembly) images the solar atmosphere at multiple EUV (Extreme Ultraviolet) and UV (Ultraviolet) wavelengths:
+* AIA 94 Ã… to 1700 Ã… - The AIA (Atmospheric Imaging Assembly) images the solar atmosphere at multiple EUV (Extreme Ultraviolet) and UV (Ultraviolet) wavelengths:
    
 | Band    | Region									|
 |---------|-----------------------------------------|
-| 94 Å    | Flaring									|
-| 131 Å   | Flaring									|	
-| 171 Å   | Quiet corona, upper transition region 	|
-| 193 Å   | Corona and hot flare plasma			 	|
-| 211 Å   | Active corona							|
-| 304 Å   | Chromosphere, transition region		    |
-| 335 Å   | Active corona							|
-| 1600 Å  | Transition region, upper photoshere     |
-| 1700 Å  | Temperature minimum, photosphere		|
+| 94 Ã…    | Flaring									|
+| 131 Ã…   | Flaring									|
+| 171 Ã…   | Quiet corona, upper transition region 	|
+| 193 Ã…   | Corona and hot flare plasma			 	|
+| 211 Ã…   | Active corona							|
+| 304 Ã…   | Chromosphere, transition region		    |
+| 335 Ã…   | Active corona							|
+| 1600 Ã…  | Transition region, upper photoshere     |
+| 1700 Ã…  | Temperature minimum, photosphere		|
 
 [Ref](https://sdo.gsfc.nasa.gov/data/channels.php)
 
 * MHI Magnetogram - HMI (Helioseismic and Magnetic Imager) Magnetogram shows the magnetic field in the photosphere, with black and white indicating opposite polarities.
-* MHI Intensitygram - Brightness in a visible light band (6173 Å - Red - Iron spectral line), useful for observing sun spots.
+* MHI Intensitygram - Brightness in a visible light band (6173 Ã… - Red - Iron spectral line), useful for observing sun spots.
 * Dopplergram - Shows velocities along the line-of-sight.
 
 * LASCO (Large Angle Spectrometric Coronagraph) shows solar corona. C2 shows corona up to 8.4Mkm. C3 shows corona up to 23Mkm.
@@ -211,11 +211,11 @@ When clicked, the X-axis is set 1 day later than the current setting, at the sam
 
 <h3>27: Start Time</h3>
 
-Displays/sets the current start time of the chart (X-axis minimum). It's possible to scroll through hours/days/months by clicking on the relevent segment and using the mouse scroll wheel.
+Displays/sets the current start time of the chart (X-axis minimum). It's possible to scroll through hours/days/months by clicking on the relevant segment and using the mouse scroll wheel.
 
 <h3>28: End Time</h3>
 
-Displays/sets the current end time of the chart (X-axis maximum). It's possible to scroll through hours/days/months by clicking on the relevent segment and using the mouse scroll wheel.
+Displays/sets the current end time of the chart (X-axis maximum). It's possible to scroll through hours/days/months by clicking on the relevant segment and using the mouse scroll wheel.
 
 <h3>29: Min</h3>
 
@@ -258,7 +258,7 @@ In order to check that a peak in the spectrum is a real VLF signal, you can:
 * Check that the signal has diurnal variation (it should vary with the time of day, due to the changes in the ionosphere). 
 * Check with online lists of VLF signals (E.g. https://sidstation.loudet.org/stations-list-en.xhtml or https://www.mwlist.org/vlf.php). A number of these are plotted on the [Map](../../feature/map/readme.md) feature.
 
-Occasionally, the X-ray flux data may drop to 0. This is typically when the GOES satellite is in eclipse (The Earth or moon is inbetween the satellite and the Sun).
+Occasionally, the X-ray flux data may drop to 0. This is typically when the GOES satellite is in eclipse (The Earth or Moon is in between the satellite and the Sun).
 
 SIDs are most likely to be detected when it's day time in the path between the signal source and receiver, as at night, the atmosphere is shielded from the X-rays by the Earth.
 Also, as the D layer in the ionosphere essentially disappears at night, the received power is not as constant as during the day.

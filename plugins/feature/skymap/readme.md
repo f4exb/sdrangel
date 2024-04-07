@@ -82,7 +82,7 @@ For WWT, when checked, displays names of constellations and Ecliptic text (when 
 
 For WWT, this option enables the display of constellations. How the constellations are drawn can be customised in the Display Settings dialog (12).
 
-<h3>7: Display gird</h3>
+<h3>7: Display grid</h3>
 
 When checked, displays a coordinate grid.
 
@@ -113,7 +113,7 @@ Select a Star Tracker, Rotator Controller, Satellite Tracker or Map plugin to re
 
 When clicked, opens the Display Settings dialog. The Display Settings dialog allows the user to set:
 
-* Observation location (latitude and longitude in degreees).
+* Observation location (latitude and longitude in degrees).
 * Antenna beamwidth in degrees.
 * Settings for WWT, such as how the constellations are drawn, what grids are displayed and how the Solar System view appears.
 

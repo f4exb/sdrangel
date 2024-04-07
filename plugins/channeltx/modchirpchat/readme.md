@@ -67,6 +67,7 @@ Thus available bandwidths are:
   - **2604** (333333 / 128) Hz not in LoRa standard
   - **1500** (384000 / 256) Hz not in LoRa standard
   - **750** (384000 / 512) Hz not in LoRa standard
+  - **488** (500000 / 1024) Hz not in LoRa standard
   - **375** (384000 / 1024) Hz not in LoRa standard
 
 The ChirpChat signal is oversampled by four therefore it needs a baseband of at least four times the bandwidth. This drives the maximum value on the slider automatically.

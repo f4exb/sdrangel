@@ -286,6 +286,11 @@ public:
     //
     static void soft_decode_mags(FT8Params& params, const std::vector<std::vector<float>>& mags, int nbSymbolBits, float ll174[]);
 
+    //
+    // Generic Gray decoding for magnitudes (floats)
+    //
+    static std::vector<std::vector<float>> un_gray_code_r_gen(const std::vector<std::vector<float>> &mags);
+
 private:
     //
     // reduce the sample rate from arate to brate.

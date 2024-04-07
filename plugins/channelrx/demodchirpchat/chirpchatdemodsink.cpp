@@ -286,8 +286,10 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
 
             m_preambleHistory[m_chirpCount] = imax;
             m_chirpCount++;
+            double preDrop = magsqPre - magsqSFD;
+            double dropRatio = -preDrop / magsqSFD;
 
-            if (magsqPre <  magsqSFD) // preamble drop
+            if ((preDrop <  0.0) && (dropRatio > 0.5)) // preamble drop
             {
                 m_magsqTotalAvg(magsqSFDTotal);
 
@@ -455,19 +457,12 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
             || ((m_settings.m_eomSquelchTenths*magsq)/10.0 > m_magsqMax))
             {
                 qDebug("ChirpChatDemodSink::processSample: symbol %02u: %4u|%11.6f", m_chirpCount, symbol, magsq);
-                // const std::vector<float>& magnitudes = m_decodeMsg->getMagnitudes().back();
-                // int i = 0;
-                // for (auto magnitude : magnitudes)
-                // {
-                //     qDebug("ChirpChatDemodSink::processSample: mag[%02d] = %11.6f", i, magnitude);
-                //     i++;
-                // }
                 m_magsqOnAvg(magsq);
                 m_chirpCount++;
 
                 if (m_chirpCount > m_settings.m_nbSymbolsMax)
                 {
-                    qDebug("ChirpChatDemodSink::processSample: message length exceeded");
+                    qDebug("ChirpChatDemodSink::processSample: message length reached");
                     m_state = ChirpChatStateReset;
                     m_decodeMsg->setSignalDb(CalcDb::dbPower(m_magsqOnAvg.asDouble() / (1<<m_settings.m_spreadFactor)));
                     m_decodeMsg->setNoiseDb(CalcDb::dbPower(m_magsqOffAvg.asDouble() / (1<<m_settings.m_spreadFactor)));

@@ -17,6 +17,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "chirpchatdemodsettings.h"
 #include "chirpchatdemoddecoderlora.h"
 
 void ChirpChatDemodDecoderLoRa::decodeHeader(
@@ -71,14 +72,14 @@ void ChirpChatDemodDecoderLoRa::decodeHeader(
 
     if (bad)
     {
-        headerParityStatus = (int) ParityError;
+        headerParityStatus = (int) ChirpChatDemodSettings::ParityError;
     }
     else
     {
         if (error) {
-            headerParityStatus = (int) ParityCorrected;
+            headerParityStatus = (int) ChirpChatDemodSettings::ParityCorrected;
         } else {
-            headerParityStatus = (int) ParityOK;
+            headerParityStatus = (int) ChirpChatDemodSettings::ParityOK;
         }
 
         if (bytes[2] != 0) {
@@ -300,11 +301,11 @@ void ChirpChatDemodDecoderLoRa::decodeBytes(
     }
 
     if (bad) {
-        payloadParityStatus = (int) ParityError;
+        payloadParityStatus = (int) ChirpChatDemodSettings::ParityError;
     } else if (error) {
-        payloadParityStatus = (int) ParityCorrected;
+        payloadParityStatus = (int) ChirpChatDemodSettings::ParityCorrected;
     } else {
-        payloadParityStatus = (int) ParityOK;
+        payloadParityStatus = (int) ChirpChatDemodSettings::ParityOK;
     }
 
     // finalization:

@@ -41,6 +41,14 @@ struct ChirpChatDemodSettings
         CodingFT     //!< FT8/4 scheme (payload 174 bits LDPC)
     };
 
+    enum ParityStatus
+    {
+        ParityUndefined,
+        ParityError,
+        ParityCorrected,
+        ParityOK
+    };
+
     int m_inputFrequencyOffset;
     int m_bandwidthIndex;
     int m_spreadFactor;

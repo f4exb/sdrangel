@@ -934,11 +934,11 @@ bool Packing::packfree(int a77[], const std::string& msg)
     return true;
 }
 
-void Packing::pack1(int a77[], int c28_1, int c28_2, int g15, int report)
+void Packing::pack1(int a77[], int c28_1, int c28_2, int g15, int reply)
 {
     pa64(a77, 0, 28, c28_1);
     pa64(a77, 28+1, 28, c28_2);
-    a77[28+1+28+1] = report;
+    a77[28+1+28+1] = reply;
     pa64(a77, 28+1+28+2, 15, g15);
     pa64(a77, 28+1+28+2+15, 3, 1);
 }

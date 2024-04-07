@@ -4,7 +4,7 @@
 
 This plugin can be used to demodulate End-of-Train packets. These are packets transmitted by an [End-of-Train Device](https://en.wikipedia.org/wiki/End-of-train_device),
 that can be found on some trains.
-It transmits information about whether motion is detected, brake pressue, whether the marker light is on and battery information.
+It transmits information about whether motion is detected, brake pressure, whether the marker light is on and battery information.
 
 * Frequency: 457.9375 MHz (North America, India), 477.7 MHz (Australia) and 450.2625 MHz (New Zealand).
 * Modulation: FSK, 1800Hz space, 1200 mark, +-3kHz deviation.
@@ -93,7 +93,7 @@ The received packets table displays the contents of the packets that have been r
 * Disc - Discretionary bit that is used for varying data by different vendors.
 * Valve - Valve circuit status (Ok or Fail).
 * Conf - Confirmation indicator.
-* Turbine - Air tubine equiped.
+* Turbine - Air turbine equipped.
 * Motion - Whether motion is detected (i.e. is the rear of the train is moving).
 * Light Batt - Marker light battery condition (Ok or Low).
 * Light - Marker light status (On or off).

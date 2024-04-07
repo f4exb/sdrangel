@@ -322,7 +322,8 @@ void TestFT8Protocols::testSoftDecode(const QStringList& argElements)
         }
 
         symbol = symbol % symbolSize;
-        magSymbols[symbol] += 0.01;
+        symbol = symbol ^(symbol >> 1); // Gray code
+        magSymbols[symbol] += 0.015;
         mags.push_back(magSymbols);
     }
 

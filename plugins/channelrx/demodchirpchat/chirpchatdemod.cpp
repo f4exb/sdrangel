@@ -44,11 +44,10 @@
 #include "maincore.h"
 
 #include "chirpchatdemodmsg.h"
+#include "chirpchatdemoddecoder.h"
 #include "chirpchatdemod.h"
 
 MESSAGE_CLASS_DEFINITION(ChirpChatDemod::MsgConfigureChirpChatDemod, Message)
-MESSAGE_CLASS_DEFINITION(ChirpChatDemod::MsgReportDecodeBytes, Message)
-MESSAGE_CLASS_DEFINITION(ChirpChatDemod::MsgReportDecodeString, Message)
 
 const char* const ChirpChatDemod::m_channelIdURI = "sdrangel.channel.chirpchatdemod";
 const char* const ChirpChatDemod::m_channelId = "ChirpChatDemod";
@@ -57,7 +56,9 @@ ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_thread(nullptr),
+        m_decoderThread(nullptr),
         m_basebandSink(nullptr),
+        m_decoder(nullptr),
         m_running(false),
         m_spectrumVis(SDR_RX_SCALEF),
         m_basebandSampleRate(0),
@@ -122,7 +123,7 @@ void ChirpChatDemod::feed(const SampleVector::const_iterator& begin, const Sampl
     (void) pO;
 
     if (m_running) {
-    	m_basebandSink->feed(begin, end);
+        m_basebandSink->feed(begin, end);
     }
 }
 
@@ -133,10 +134,25 @@ void ChirpChatDemod::start()
     }
 
     qDebug() << "ChirpChatDemod::start";
+    m_decoderThread = new QThread(this);
+    m_decoder = new ChirpChatDemodDecoder();
+    m_decoder->setOutputMessageQueue(getInputMessageQueue());
+    m_decoder->setNbSymbolBits(m_settings.m_spreadFactor, m_settings.m_deBits);
+    m_decoder->setCodingScheme(m_settings.m_codingScheme);
+    m_decoder->setLoRaHasHeader(m_settings.m_hasHeader);
+    m_decoder->setLoRaHasCRC(m_settings.m_hasCRC);
+    m_decoder->setLoRaParityBits(m_settings.m_nbParityBits);
+    m_decoder->setLoRaPacketLength(m_settings.m_packetLength);
+    m_decoder->moveToThread(m_decoderThread);
+
+    QObject::connect(m_decoderThread, &QThread::finished, m_decoder, &QObject::deleteLater);
+    QObject::connect(m_decoderThread, &QThread::finished, m_decoderThread, &QThread::deleteLater);
+    m_decoderThread->start();
+
     m_thread = new QThread(this);
     m_basebandSink = new ChirpChatDemodBaseband();
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
-    m_basebandSink->setDecoderMessageQueue(getInputMessageQueue()); // Decoder held on the main thread
+    m_basebandSink->setDecoderMessageQueue(m_decoder->getInputMessageQueue());
     m_basebandSink->moveToThread(m_thread);
 
     QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
@@ -167,6 +183,9 @@ void ChirpChatDemod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_decoderThread->exit();
+    m_decoderThread->wait();
+    m_decoderThread = nullptr;
 }
 
 bool ChirpChatDemod::handleMessage(const Message& cmd)
@@ -180,29 +199,28 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
-    else if (ChirpChatDemodMsg::MsgDecodeSymbols::match(cmd))
+    else if (ChirpChatDemodMsg::MsgReportDecodeBytes::match(cmd))
     {
-        qDebug() << "ChirpChatDemod::handleMessage: MsgDecodeSymbols";
-        ChirpChatDemodMsg::MsgDecodeSymbols& msg = (ChirpChatDemodMsg::MsgDecodeSymbols&) cmd;
+        qDebug() << "ChirpChatDemod::handleMessage: MsgReportDecodeBytes";
+        ChirpChatDemodMsg::MsgReportDecodeBytes& msg = (ChirpChatDemodMsg::MsgReportDecodeBytes&) cmd;
         m_lastMsgSignalDb = msg.getSingalDb();
         m_lastMsgNoiseDb = msg.getNoiseDb();
         m_lastMsgSyncWord = msg.getSyncWord();
+        m_lastMsgTimestamp = msg.getMsgTimestamp();
 
         if (m_settings.m_codingScheme == ChirpChatDemodSettings::CodingLoRa)
         {
-            m_decoder.decodeSymbols(msg.getSymbols(), m_lastMsgBytes);
-            QDateTime dt = QDateTime::currentDateTime();
-            m_lastMsgTimestamp = dt.toString(Qt::ISODateWithMs);
-            m_lastMsgPacketLength = m_decoder.getPacketLength();
-            m_lastMsgNbParityBits = m_decoder.getNbParityBits();
-            m_lastMsgHasCRC = m_decoder.getHasCRC();
-            m_lastMsgNbSymbols = m_decoder.getNbSymbols();
-            m_lastMsgNbCodewords = m_decoder.getNbCodewords();
-            m_lastMsgEarlyEOM = m_decoder.getEarlyEOM();
-            m_lastMsgHeaderCRC = m_decoder.getHeaderCRCStatus();
-            m_lastMsgHeaderParityStatus = m_decoder.getHeaderParityStatus();
-            m_lastMsgPayloadCRC = m_decoder.getPayloadCRCStatus();
-            m_lastMsgPayloadParityStatus = m_decoder.getPayloadParityStatus();
+            m_lastMsgBytes = msg.getBytes();
+            m_lastMsgPacketLength = msg.getPacketSize();
+            m_lastMsgNbParityBits = msg.getNbParityBits();
+            m_lastMsgHasCRC = msg.getHasCRC();
+            m_lastMsgNbSymbols = msg.getNbSymbols();
+            m_lastMsgNbCodewords = msg.getNbCodewords();
+            m_lastMsgEarlyEOM = msg.getEarlyEOM();
+            m_lastMsgHeaderCRC = msg.getHeaderCRCStatus();
+            m_lastMsgHeaderParityStatus = msg.getHeaderParityStatus();
+            m_lastMsgPayloadCRC = msg.getPayloadCRCStatus();
+            m_lastMsgPayloadParityStatus = msg.getPayloadParityStatus();
 
             QByteArray bytesCopy(m_lastMsgBytes);
             bytesCopy.truncate(m_lastMsgPacketLength);
@@ -215,23 +233,8 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
                 m_udpSink.writeUnbuffered(bytes, m_lastMsgPacketLength);
             }
 
-            if (getMessageQueueToGUI())
-            {
-                MsgReportDecodeBytes *msgToGUI = MsgReportDecodeBytes::create(m_lastMsgBytes);
-                msgToGUI->setSyncWord(m_lastMsgSyncWord);
-                msgToGUI->setSignalDb(m_lastMsgSignalDb);
-                msgToGUI->setNoiseDb(m_lastMsgNoiseDb);
-                msgToGUI->setPacketSize(m_lastMsgPacketLength);
-                msgToGUI->setNbParityBits(m_lastMsgNbParityBits);
-                msgToGUI->setHasCRC(m_lastMsgHasCRC);
-                msgToGUI->setNbSymbols(m_lastMsgNbSymbols);
-                msgToGUI->setNbCodewords(m_lastMsgNbCodewords);
-                msgToGUI->setEarlyEOM(m_lastMsgEarlyEOM);
-                msgToGUI->setHeaderParityStatus(m_lastMsgHeaderParityStatus);
-                msgToGUI->setHeaderCRCStatus(m_lastMsgHeaderCRC);
-                msgToGUI->setPayloadParityStatus(m_lastMsgPayloadParityStatus);
-                msgToGUI->setPayloadCRCStatus(m_lastMsgPayloadCRC);
-                getMessageQueueToGUI()->push(msgToGUI);
+            if (getMessageQueueToGUI()) {
+                getMessageQueueToGUI()->push(new ChirpChatDemodMsg::MsgReportDecodeBytes(msg)); // make a copy
             }
 
             // Is this an APRS packet?
@@ -243,7 +246,7 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
                 && (greaterThanIdx != -1)
                 && (colonIdx != -1)
                 && ((m_lastMsgHasCRC && m_lastMsgPayloadCRC) || !m_lastMsgHasCRC)
-               )
+                )
             {
                 QByteArray packet;
 
@@ -289,27 +292,66 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
                 }
             }
         }
-        else
+
+        return true;
+    }
+    else if (ChirpChatDemodMsg::MsgReportDecodeString::match(cmd))
+    {
+        qDebug() << "ChirpChatDemod::handleMessage: MsgReportDecodeString";
+        ChirpChatDemodMsg::MsgReportDecodeString& msg = (ChirpChatDemodMsg::MsgReportDecodeString&) cmd;
+        m_lastMsgSignalDb = msg.getSingalDb();
+        m_lastMsgNoiseDb = msg.getNoiseDb();
+        m_lastMsgSyncWord = msg.getSyncWord();
+        m_lastMsgTimestamp = msg.getMsgTimestamp();
+        m_lastMsgString = msg.getString();
+
+        if (m_settings.m_sendViaUDP)
         {
-            m_decoder.decodeSymbols(msg.getSymbols(), m_lastMsgString);
-            QDateTime dt = QDateTime::currentDateTime();
-            m_lastMsgTimestamp = dt.toString(Qt::ISODateWithMs);
+            const QByteArray& byteArray = m_lastMsgString.toUtf8();
+            const uint8_t *bytes = reinterpret_cast<const uint8_t*>(byteArray.data());
+            m_udpSink.writeUnbuffered(bytes, byteArray.size());
+        }
 
-            if (m_settings.m_sendViaUDP)
-            {
-                const QByteArray& byteArray = m_lastMsgString.toUtf8();
-                const uint8_t *bytes = reinterpret_cast<const uint8_t*>(byteArray.data());
-                m_udpSink.writeUnbuffered(bytes, byteArray.size());
-            }
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new ChirpChatDemodMsg::MsgReportDecodeString(msg)); // make a copy
+        }
 
-            if (getMessageQueueToGUI())
+        return true;
+    }
+    else if (ChirpChatDemodMsg::MsgReportDecodeFT::match(cmd))
+    {
+        qDebug() << "ChirpChatDemod::handleMessage: MsgReportDecodeFT";
+        ChirpChatDemodMsg::MsgReportDecodeFT& msg = (ChirpChatDemodMsg::MsgReportDecodeFT&) cmd;
+        m_lastMsgSignalDb = msg.getSingalDb();
+        m_lastMsgNoiseDb = msg.getNoiseDb();
+        m_lastMsgSyncWord = msg.getSyncWord();
+        m_lastMsgTimestamp = msg.getMsgTimestamp();
+        m_lastMsgString = msg.getMessage(); // for now we do not handle message components (call1, ...)
+        int nbSymbolBits = m_settings.m_spreadFactor - m_settings.m_deBits;
+        m_lastMsgNbSymbols = (174 / nbSymbolBits) + ((174 % nbSymbolBits) == 0 ? 0 : 1);
+
+        if (m_settings.m_autoNbSymbolsMax)
+        {
+            ChirpChatDemodSettings settings = m_settings;
+            settings.m_nbSymbolsMax = m_lastMsgNbSymbols;
+            applySettings(settings);
+
+            if (getMessageQueueToGUI()) // forward to GUI if any
             {
-                MsgReportDecodeString *msgToGUI = MsgReportDecodeString::create(m_lastMsgString);
-                msgToGUI->setSyncWord(m_lastMsgSyncWord);
-                msgToGUI->setSignalDb(m_lastMsgSignalDb);
-                msgToGUI->setNoiseDb(m_lastMsgNoiseDb);
+                MsgConfigureChirpChatDemod *msgToGUI = MsgConfigureChirpChatDemod::create(settings, false);
                 getMessageQueueToGUI()->push(msgToGUI);
             }
+        }
+
+        if (m_settings.m_sendViaUDP)
+        {
+            const QByteArray& byteArray = m_lastMsgString.toUtf8();
+            const uint8_t *bytes = reinterpret_cast<const uint8_t*>(byteArray.data());
+            m_udpSink.writeUnbuffered(bytes, byteArray.size());
+        }
+
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new ChirpChatDemodMsg::MsgReportDecodeFT(msg)); // make a copy
         }
 
         return true;
@@ -420,38 +462,51 @@ void ChirpChatDemod::applySettings(const ChirpChatDemodSettings& settings, bool 
     }
 
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
-     || (settings.m_deBits != m_settings.m_deBits) || force) {
-         m_decoder.setNbSymbolBits(settings.m_spreadFactor, settings.m_deBits);
+    || (settings.m_deBits != m_settings.m_deBits) || force)
+    {
+        if (m_decoder) {
+            m_decoder->setNbSymbolBits(settings.m_spreadFactor, settings.m_deBits);
+        }
     }
 
     if ((settings.m_codingScheme != m_settings.m_codingScheme) || force)
     {
         reverseAPIKeys.append("codingScheme");
-        m_decoder.setCodingScheme(settings.m_codingScheme);
+        if (m_decoder) {
+            m_decoder->setCodingScheme(settings.m_codingScheme);
+        }
     }
 
     if ((settings.m_hasHeader != m_settings.m_hasHeader) || force)
     {
         reverseAPIKeys.append("hasHeader");
-        m_decoder.setLoRaHasHeader(settings.m_hasHeader);
+        if (m_decoder) {
+            m_decoder->setLoRaHasHeader(settings.m_hasHeader);
+        }
     }
 
     if ((settings.m_hasCRC != m_settings.m_hasCRC) || force)
     {
         reverseAPIKeys.append("hasCRC");
-        m_decoder.setLoRaHasCRC(settings.m_hasCRC);
+        if (m_decoder) {
+            m_decoder->setLoRaHasCRC(settings.m_hasCRC);
+        }
     }
 
     if ((settings.m_nbParityBits != m_settings.m_nbParityBits) || force)
     {
         reverseAPIKeys.append("nbParityBits");
-        m_decoder.setLoRaParityBits(settings.m_nbParityBits);
+        if (m_decoder) {
+            m_decoder->setLoRaParityBits(settings.m_nbParityBits);
+        }
     }
 
     if ((settings.m_packetLength != m_settings.m_packetLength) || force)
     {
         reverseAPIKeys.append("packetLength");
-        m_decoder.setLoRaPacketLength(settings.m_packetLength);
+        if (m_decoder) {
+            m_decoder->setLoRaPacketLength(settings.m_packetLength);
+        }
     }
 
     if ((settings.m_decodeActive != m_settings.m_decodeActive) || force) {

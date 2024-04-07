@@ -1,7 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2024 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -17,9 +15,49 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "chirpchatdemodmsg.h"
+#ifndef INCLUDE_CHIRPCHATDEMODDECODERFT_H
+#define INCLUDE_CHIRPCHATDEMODDECODERFT_H
 
-MESSAGE_CLASS_DEFINITION(ChirpChatDemodMsg::MsgDecodeSymbols, Message)
-MESSAGE_CLASS_DEFINITION(ChirpChatDemodMsg::MsgReportDecodeBytes, Message)
-MESSAGE_CLASS_DEFINITION(ChirpChatDemodMsg::MsgReportDecodeString, Message)
-MESSAGE_CLASS_DEFINITION(ChirpChatDemodMsg::MsgReportDecodeFT, Message)
+#include <vector>
+#include <string>
+
+namespace FT8 {
+    class FT8Params;
+}
+
+class ChirpChatDemodDecoderFT
+{
+public:
+    enum ParityStatus
+    {
+        ParityUndefined,
+        ParityError,
+        ParityCorrected,
+        ParityOK
+    };
+
+    static void decodeSymbols(
+        const std::vector<std::vector<float>>& mags, // vector of symbols magnitudes
+        int nbSymbolBits, //!< number of bits per symbol
+        std::string& msg,     //!< formatted message
+        std::string& call1,   //!< 1st callsign or shorthand
+        std::string& call2,   //!< 2nd callsign
+        std::string& loc,     //!< locator, report or shorthand
+        bool& reply,          //!< true if message is a reply report
+        int& payloadParityStatus,
+        bool& payloadCRCStatus
+    );
+
+private:
+    static int decodeWithShift(
+        FT8::FT8Params& params,
+        std::vector<std::vector<float>>& mags,
+        int nbSymbolBits,
+        int *r174,
+        std::string& comments,
+        int shift = 0
+    );
+};
+
+
+#endif

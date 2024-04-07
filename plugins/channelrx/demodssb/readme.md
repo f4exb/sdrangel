@@ -159,7 +159,7 @@ Use this button to toggle noise reduction on/off. Right click on this button to 
 
 <h4>13.4.1: Noise reduction scheme</h4>
 
-Use this combo box to choose the noise reduction scheme among the follwing:
+Use this combo box to choose the noise reduction scheme among the following:
 
   - **Average**: calculates the average of magnitudes of the FFT (PSD) and sets the magnitude threshold to this average multiplied by a factor that can be set with the control next (13.4.2).
 

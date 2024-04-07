@@ -114,7 +114,7 @@ Use this dial to flip through standard DATV symbol rates: 25, 33, 66, 125, 250, 
 
 <h5>B.2a.4: FEC rate</h5>
 
-Dpends on the standard and modulation
+Depends on the standard and modulation
 
   - DVB-S with all modulations: 1/2 , 2/3 , 3/4, 5/6 and 7/8.
   - DVB-S2 and QPSK: 1/4, 1/3, 2/5, 1/2, 3/5, 2/3, 3/4, 4/5, 5/6, 8/9, 9/10

@@ -723,7 +723,7 @@
       <item>
        <widget class="QCheckBox" name="messageLengthAuto">
         <property name="toolTip">
-         <string>Set message length in symbols automatically to provided message length (LoRa only)</string>
+         <string>Set message length in symbols automatically to provided message length (LoRa and FT only)</string>
         </property>
         <property name="text">
          <string>Auto</string>

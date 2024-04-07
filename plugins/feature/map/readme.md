@@ -144,14 +144,14 @@ This is only supported on 2D raster maps and the 3D map.
 <h3>11: Display MUF Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing the MUF (Maximum Usable Frequency) for a 3000km path that reflects off the ionosphere.
-The contours will be updated every 15 minutes. MUF contour data is available for the preceeding 5 days.
+The contours will be updated every 15 minutes. MUF contour data is available for the preceding 5 days.
 
 ![MUF contours](../../../doc/img/Map_plugin_muf.png)
 
 <h3>12: Display coF2 Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing coF2 (F2 layer critical frequency), the maximum frequency at which radio waves will be reflected vertically from the F2 region of the ionosphere.
-The contours will be updated every 15 minutes. coF2 contour data is available for the preceeding 5 days.
+The contours will be updated every 15 minutes. coF2 contour data is available for the preceding 5 days.
 
 <h3>13: Display NASA GIBS Data</h3>
 
@@ -159,7 +159,7 @@ When checked, enables overlay of data from NASA GIBS (Global Imagery Browse Serv
 such as land and sea temperatures, atmospheric conditions, flux measurements and the like.
 Details of available data products can be found [here](https://nasa-gibs.github.io/gibs-api-docs/available-visualizations/#visualization-product-catalog).
 
-For some data sets, GIBS has data spanning many decades. The data period may be hours, days or months. The 3D map will attemp to show data from the closest time set in the 3D map's timescale.
+For some data sets, GIBS has data spanning many decades. The data period may be hours, days or months. The 3D map will attempt to show data from the closest time set in the 3D map's timescale.
 The 2D map will only show data from the default date (which is displayed in the table at the bottom).
 
 ![NASA GIBS](../../../doc/img/Map_plugin_GIBS.png)
@@ -221,7 +221,7 @@ For the 3D map, the settings include:
 For ECI (Earth Centred Inertial) the camera is fixed in space and the globe will rotate under it.
 
 The "Download 3D Models" button will download the 3D models of aircraft, ships and satellites that are required for the 3D map.
-These are not included with the SDRangel distribution, so must be downloaded. It is recommeded to restart SDRangel after downloading the models.
+These are not included with the SDRangel distribution, so must be downloaded. It is recommended to restart SDRangel after downloading the models.
 
 ![Map Display Settings Dialog Items Tab](../../../doc/img/Map_plugin_display_settings_items.png)
 
@@ -265,7 +265,7 @@ To the right of the timeline is the fullscreen toggle button, which allows the 3
 
 <h4>SDRs</h4>
 
-The map can display KiwiSDRs and Spy Servers that are publically accessible via the internet. A URL is displayed in the info box.
+The map can display KiwiSDRs and Spy Servers that are publicly accessible via the internet. A URL is displayed in the info box.
 Clicking on the URL will open a new KiwiSDR or RemoteTCPInput device which will connect to the corresponding SDR.
 Before connecting, you should check the whether the number of users is below the maximum. Server data is updated every 2 minutes.
 
