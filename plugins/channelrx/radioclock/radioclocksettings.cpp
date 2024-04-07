@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>    //
-// Copyright (C) 2021 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -35,7 +35,9 @@ RadioClockSettings::RadioClockSettings() :
 
 void RadioClockSettings::resetToDefaults()
 {
+    m_frequencyMode = Offset;
     m_inputFrequencyOffset = 0;
+    m_frequency = 0;
     m_rfBandwidth = 50.0f;
     m_threshold = 5;
     m_modulation = MSF;
@@ -58,9 +60,11 @@ QByteArray RadioClockSettings::serialize() const
 
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeFloat(2, m_rfBandwidth);
+    s.writeS64(3, m_frequency);
     s.writeFloat(4, m_threshold);
     s.writeS32(5, (int)m_modulation);
     s.writeS32(6, (int)m_timezone);
+    s.writeS32(7, (int)m_frequencyMode);
     s.writeU32(12, m_rgbColor);
     s.writeString(13, m_title);
 
@@ -108,9 +112,11 @@ bool RadioClockSettings::deserialize(const QByteArray& data)
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readFloat(2, &m_rfBandwidth, 50.0f);
+        d.readS64(3, &m_frequency, 0);
         d.readFloat(4, &m_threshold, 30);
         d.readS32(5, (int *)&m_modulation, DCF77);
         d.readS32(6, (int *)&m_timezone, BROADCAST);
+        d.readS32(7, (int *)&m_frequencyMode, Offset);
         d.readU32(12, &m_rgbColor, QColor(102, 0, 0).rgb());
         d.readString(13, &m_title, "Radio Clock");
 

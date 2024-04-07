@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2021 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -794,6 +794,158 @@ void RadioClockSink::wwvb()
     m_prevData = m_data;
 }
 
+// Japan JJY 40kHz
+// https://en.wikipedia.org/wiki/JJY
+void RadioClockSink::jjy()
+{
+    // JJY reduces carrier by -10dB
+    // Full power, then reduced power, which is the opposite of WWVB
+    // 0.8s full power is is zero bit, 0.5s full power is one bit
+    // 0.2s full power is a marker. Seven markers per minute (0, 9, 19, 29, 39, 49, and 59s) and for leap second
+    m_threshold = m_thresholdMovingAverage.asDouble() * m_linearThreshold; // xdB below average
+    m_data = m_magsq > m_threshold;
+
+    // Look for minute marker - two consequtive markers
+    if ((m_data == 1) && (m_prevData == 0))
+    {
+        if (   (m_highCount <= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.3)
+            && (m_lowCount >= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.7)
+           )
+        {
+            if (m_gotMarker && !m_gotMinuteMarker)
+            {
+                qDebug() << "RadioClockSink::jjy - Minute marker: (low " << m_lowCount << " high " << m_highCount << ") prev period " << m_periodCount;
+                m_gotMinuteMarker = true;
+                m_second = 1;
+                m_secondMarkers = 1;
+                if (getMessageQueueToChannel()) {
+                    getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Got minute marker"));
+                }
+            }
+            else
+            {
+                qDebug() << "RadioClockSink::jjy - Marker: (low " << m_lowCount << " high " << m_highCount << ") prev period " << m_periodCount << " second " << m_second;
+            }
+            m_gotMarker = true;
+            m_periodCount = 0;
+        }
+        else
+        {
+            m_gotMarker = false;
+        }
+        m_highCount = 0;
+    }
+    else if ((m_data == 0) && (m_prevData == 1))
+    {
+        m_lowCount = 0;
+    }
+    else if (m_data == 1)
+    {
+        m_highCount++;
+    }
+    else if (m_data == 0)
+    {
+        m_lowCount++;
+    }
+
+    m_sample = false;
+    if (m_gotMinuteMarker)
+    {
+        m_periodCount++;
+        if (m_periodCount == 100)
+        {
+            // Check we get second marker
+            m_secondMarkers += m_data == 1;
+            // If we see too many 0s instead of 1s, assume we've lost the signal
+            if ((m_second > 10) && (m_secondMarkers / m_second < 0.7))
+            {
+                qDebug() << "RadioClockSink::jjy - Lost lock: " << m_secondMarkers << m_second;
+                m_gotMinuteMarker = false;
+                if (getMessageQueueToChannel()) {
+                    getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Looking for minute marker"));
+                }
+            }
+            m_sample = true;
+        }
+        else if (m_periodCount == 650)
+        {
+            // Get data bit A for timecode
+            m_timeCode[m_second] = !m_data; // No carrier = 1, carrier = 0
+            m_sample = true;
+        }
+        else if (m_periodCount == 950)
+        {
+            if (m_second == 59)
+            {
+                // Check markers are decoded as 1s
+                const QList<int> markerBits = {9, 19, 29, 39, 49, 59};
+                int missingMarkers = 0;
+                for (int i = 0; i < markerBits.size(); i++)
+                {
+                    if (m_timeCode[markerBits[i]] != 1)
+                    {
+                        missingMarkers++;
+                        qDebug() << "RadioClockSink::jjy - Missing marker at bit " << markerBits[i];
+                    }
+                }
+                if (missingMarkers >= 3)
+                {
+                    m_gotMinuteMarker = false;
+                    qDebug() << "RadioClockSink::jjy - Lost lock: Missing markers: " << missingMarkers;
+                    if (getMessageQueueToChannel()) {
+                        getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Looking for minute marker"));
+                    }
+                }
+
+                // Check 0s where expected
+                const QList<int> zeroBits = {4, 10, 11, 14, 20, 21, 24, 34, 35, 44, 55, 56, 57, 58};
+                for (int i = 0; i < zeroBits.size(); i++)
+                {
+                    if (m_timeCode[zeroBits[i]] != 0) {
+                        qDebug() << "RadioClockSink::jjy - Unexpected 1 at bit " << zeroBits[i];
+                    }
+                }
+
+                // Decode timecode to time and date
+                int minute = bcdMSB(1, 8, 4);
+                int hour = bcdMSB(12, 18, 14);
+                int dayOfYear = bcdMSB(22, 33, 24, 29);
+                int year = 2000 + bcdMSB(41, 48);
+
+                // Japan doesn't have daylight savings
+                m_dst = RadioClockSettings::NOT_IN_EFFECT;
+
+                // Time is UTC
+                QDate date(year, 1, 1);
+                date = date.addDays(dayOfYear - 1);
+                m_dateTime = QDateTime(date, QTime(hour, minute), Qt::OffsetFromUTC, 0);
+                if (getMessageQueueToChannel()) {
+                    getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("OK"));
+                }
+
+                m_second = 0;
+            }
+            else
+            {
+                m_second++;
+                m_dateTime = m_dateTime.addSecs(1);
+            }
+
+            if (getMessageQueueToChannel())
+            {
+                RadioClock::MsgDateTime *msg = RadioClock::MsgDateTime::create(m_dateTime, m_dst);
+                getMessageQueueToChannel()->push(msg);
+            }
+        }
+        else if (m_periodCount == 1000)
+        {
+            m_periodCount = 0;
+        }
+    }
+
+    m_prevData = m_data;
+}
+
 void RadioClockSink::processOneSample(Complex &ci)
 {
     // Calculate average and peak levels for level meter
@@ -817,6 +969,8 @@ void RadioClockSink::processOneSample(Complex &ci)
         tdf(ci);
     } else if (m_settings.m_modulation == RadioClockSettings::WWVB) {
         wwvb();
+    } else if (m_settings.m_modulation == RadioClockSettings::JJY) {
+        jjy();
     } else {
         msf60();
     }

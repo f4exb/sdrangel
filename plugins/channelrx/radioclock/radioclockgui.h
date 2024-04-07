@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020-2022 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2020-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>         //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -93,6 +93,7 @@ private:
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+    void calcOffset();
 
     void displayDateTime();
 
@@ -100,6 +101,7 @@ private:
     void enterEvent(EnterEventType*);
 
 private slots:
+    void on_frequencyMode_currentIndexChanged(int index);
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int index);
     void on_threshold_valueChanged(int value);

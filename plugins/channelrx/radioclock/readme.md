@@ -1,4 +1,4 @@
-<h1>Radio clock plugin</h1>
+﻿<h1>Radio Clock Plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -8,6 +8,7 @@ This plugin can be used to receive the time and date as broadcast on Low Frequen
 * [DCF77](https://en.wikipedia.org/wiki/DCF77) - Germany - 77.5kHz
 * [TDF](https://en.wikipedia.org/wiki/TDF_time_signal) - France - 162kHz
 * [WWVB](https://en.wikipedia.org/wiki/WWVB) - USA - 60kHz
+* [JJY](https://en.wikipedia.org/wiki/JJY) - Japan - 40kHz
 
 If you'd like other transmitters to be supported, please upload a .sdriq file to SDRangel's [github issue tracker](https://github.com/f4exb/sdrangel/issues).
 
@@ -21,29 +22,39 @@ The top and bottom bars of the channel window are described [here](../../../sdrg
 
 ![Radio clock plugin GUI](../../../doc/img/RadioClock_plugin.png)
 
-<h3>1: Frequency shift from center frequency of reception</h3>
+<h3>1: Channel frequency entry mode</h3>
 
-Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
+Select from one of the following modes to determine how the channel center frequency is calculated:
 
-<h3>2: Channel power</h3>
+* Δf - Specify an offset in Hz from device center frequency.
+* f - Specific a frequency in Hz.
+
+<h3>2: Channel Frequency</h3>
+
+Specifies channel center frequency according to frequency entry mode (1):
+
+* Δf - Offset in Hz from device center frequency.
+* f - Absolute frequency in Hz.
+
+<h3>3: Channel power</h3>
 
 Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>3: Level meter in dB</h3>
+<h3>4: Level meter in dB</h3>
 
   - top bar (green): average value
   - bottom bar (blue green): instantaneous peak value
   - tip vertical bar (bright green): peak hold value
 
-<h3>4: BW - RF Bandwidth</h3>
+<h3>5: BW - RF Bandwidth</h3>
 
 This specifies the bandwidth of a LPF that is applied to the input signal to limit the RF bandwidth.
 
-<h3>5: TH - Threshold</h3>
+<h3>6: TH - Threshold</h3>
 
-For MSF, DCF77 and WWVB, specifies the threshold in dB below the average carrier power level that determines a binary 0 or 1.
+For MSF, DCF77, WWVB and JJY, specifies the threshold in dB below the average carrier power level that determines a binary 0 or 1.
 
-<h3>6: Modulation</h3>
+<h3>7: Modulation</h3>
 
 Specifies the modulation and timecode encoding used:
 
@@ -51,8 +62,9 @@ Specifies the modulation and timecode encoding used:
 * DCF77 - OOK (On-off keying)
 * TDF - PM (Phase modulation)
 * WWVB - OOK (On-off keying)
+* JJY - OOK (On-off keying)
 
-<h3>7: Display Time Zone</h3>
+<h3>8: Display Time Zone</h3>
 
 Specifies the time zone used to display the received time. This can be:
 
@@ -60,15 +72,15 @@ Specifies the time zone used to display the received time. This can be:
 * Local - the time is converted to the local time (as determined by your operating system's time zone).
 * UTC - the time is converted to Coordinated Universal Time.
 
-<h3>8: Date</h3>
+<h3>9: Date</h3>
 
 Displays the decoded date.
 
-<h3>9: Time</h3>
+<h3>10: Time</h3>
 
-Displays the decoded time, adjusted for the time zone set by (7).
+Displays the decoded time, adjusted for the time zone set by (8).
 
-<h3>10: Status</h3>
+<h3>11: Status</h3>
 
 Displays the demodulator status. This can be:
 
@@ -81,7 +93,7 @@ The date and time fields are only valid when the status indicates OK.
 
 If while in the OK state several second markers are not detected, the status will return to Looking for minute marker.
 
-<h3>11: Daylight Savings</h3>
+<h3>12: Daylight Savings</h3>
 
 Displays the daylight savings state:
 
@@ -90,7 +102,7 @@ Displays the daylight savings state:
 * Starting
 * Ending
 
-For MSF, DCF77 and TDF, starting/ending is indicated one hour before the change. For WWVB it is set for the whole day.
+For MSF, DCF77 and TDF, starting/ending is indicated one hour before the change. For WWVB it is set for the whole day. Japan does not use daylight savings.
 
 <h3>Waveforms</h3>
 
