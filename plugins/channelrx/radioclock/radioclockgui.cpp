@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2020-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2020-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -139,13 +139,29 @@ bool RadioClockGUI::handleMessage(const Message& message)
         const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
         m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
-        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
-        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        calcOffset();
         updateAbsoluteCenterFrequency();
         return true;
     }
 
     return false;
+}
+
+// Calculate input frequency offset, when device center frequency changes
+void RadioClockGUI::calcOffset()
+{
+    if (m_settings.m_frequencyMode == RadioClockSettings::Offset)
+    {
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+    }
+    else
+    {
+        qint64 offset = m_settings.m_frequency - m_deviceCenterFrequency;
+        m_channelMarker.setCenterFrequency(offset);
+        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+        updateAbsoluteCenterFrequency();
+        applySettings();
+    }
 }
 
 void RadioClockGUI::handleInputMessages()
@@ -163,8 +179,22 @@ void RadioClockGUI::handleInputMessages()
 
 void RadioClockGUI::channelMarkerChangedByCursor()
 {
-    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    m_settings.m_frequency = m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset;
+
+    qint64 value = 0;
+
+    if (m_settings.m_frequencyMode == RadioClockSettings::Offset) {
+        value = m_settings.m_inputFrequencyOffset;
+    } else if (m_settings.m_frequencyMode == RadioClockSettings::Absolute) {
+        value = m_settings.m_frequency;
+    }
+
+    ui->deltaFrequency->blockSignals(true);
+    ui->deltaFrequency->setValue(value);
+    ui->deltaFrequency->blockSignals(false);
+
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -173,9 +203,46 @@ void RadioClockGUI::channelMarkerHighlightedByCursor()
     setHighlighted(m_channelMarker.getHighlighted());
 }
 
+void RadioClockGUI::on_frequencyMode_currentIndexChanged(int index)
+{
+    m_settings.m_frequencyMode = (RadioClockSettings::FrequencyMode) index;
+    ui->deltaFrequency->blockSignals(true);
+
+    if (m_settings.m_frequencyMode == RadioClockSettings::Offset)
+    {
+        ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
+        ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
+        ui->deltaUnits->setText("Hz");
+    }
+    else if (m_settings.m_frequencyMode == RadioClockSettings::Absolute)
+    {
+        ui->deltaFrequency->setValueRange(true, 11, 0, 99999999999, 0);
+        ui->deltaFrequency->setValue(m_settings.m_frequency);
+        ui->deltaUnits->setText("Hz");
+    }
+
+    ui->deltaFrequency->blockSignals(false);
+
+    updateAbsoluteCenterFrequency();
+    applySettings();
+}
+
 void RadioClockGUI::on_deltaFrequency_changed(qint64 value)
 {
-    m_channelMarker.setCenterFrequency(value);
+    qint64 offset = 0;
+
+    if (m_settings.m_frequencyMode == RadioClockSettings::Offset)
+    {
+        offset = value;
+        m_settings.m_frequency = m_deviceCenterFrequency + offset;
+    }
+    else if (m_settings.m_frequencyMode == RadioClockSettings::Absolute)
+    {
+        m_settings.m_frequency = value;
+        offset = m_settings.m_frequency - m_deviceCenterFrequency;
+    }
+
+    m_channelMarker.setCenterFrequency(offset);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
     applySettings();
@@ -300,7 +367,6 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     ui->status->setText("Looking for minute marker");
 
-    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
@@ -368,7 +434,8 @@ void RadioClockGUI::displaySettings()
 
     blockApplySettings(true);
 
-    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    ui->frequencyMode->setCurrentIndex((int) m_settings.m_frequencyMode);
+    on_frequencyMode_currentIndexChanged((int) m_settings.m_frequencyMode);
 
     ui->rfBWText->setText(QString("%1 Hz").arg((int)m_settings.m_rfBandwidth));
     ui->rfBW->setValue(m_settings.m_rfBandwidth);
@@ -420,6 +487,7 @@ void RadioClockGUI::tick()
 
 void RadioClockGUI::makeUIConnections()
 {
+    QObject::connect(ui->frequencyMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioClockGUI::on_frequencyMode_currentIndexChanged);
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &RadioClockGUI::on_deltaFrequency_changed);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &RadioClockGUI::on_rfBW_valueChanged);
     QObject::connect(ui->threshold, &QDial::valueChanged, this, &RadioClockGUI::on_threshold_valueChanged);
@@ -430,4 +498,11 @@ void RadioClockGUI::makeUIConnections()
 void RadioClockGUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+    if (   (m_basebandSampleRate > 1)
+        && (   (m_settings.m_inputFrequencyOffset >= m_basebandSampleRate / 2)
+            || (m_settings.m_inputFrequencyOffset < -m_basebandSampleRate / 2))) {
+        setStatusText("Frequency out of band");
+    } else {
+        setStatusText("");
+    }
 }

@@ -1041,6 +1041,11 @@ void VORLocalizerGUI::applyMapSettings()
     m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
 
     QQuickItem *item = ui->map->rootObject();
+    if (!item)
+    {
+        qCritical("VORLocalizerGUI::applyMapSettings: Map not found. Are all required Qt plugins installed?");
+        return;
+    }
 
     QObject *object = item->findChild<QObject*>("map");
     QGeoCoordinate coords;
@@ -1146,7 +1151,11 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     ui->map->setAttribute(Qt::WA_AcceptTouchEvents, true);
 
     ui->map->rootContext()->setContextProperty("vorModel", &m_vorModel);
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     ui->map->setSource(QUrl(QStringLiteral("qrc:/demodvor/map/map.qml")));
+#else
+    ui->map->setSource(QUrl(QStringLiteral("qrc:/demodvor/map/map_6.qml")));
+#endif
 
     m_muteIcon.addPixmap(QPixmap("://sound_off.png"), QIcon::Normal, QIcon::On);
     m_muteIcon.addPixmap(QPixmap("://sound_on.png"), QIcon::Normal, QIcon::Off);

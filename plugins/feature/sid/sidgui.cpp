@@ -39,6 +39,7 @@
 #include "sid.h"
 #include "sidgui.h"
 #include "sidsettingsdialog.h"
+#include "sidaddchannelsdialog.h"
 
 #include "SWGMapItem.h"
 
@@ -1482,6 +1483,16 @@ void SIDGUI::on_deleteAll_clicked()
     getData();
 }
 
+void SIDGUI::on_addChannels_clicked()
+{
+    SIDAddChannelsDialog dialog(&m_settings);
+
+    new DialogPositioner(&dialog, true);
+
+    dialog.exec();
+}
+
+
 void SIDGUI::on_settings_clicked()
 {
     SIDSettingsDialog dialog(&m_settings);
@@ -1492,6 +1503,8 @@ void SIDGUI::on_settings_clicked()
         this,
         &SIDGUI::removeChannels
     );
+
+    new DialogPositioner(&dialog, true);
 
     if (dialog.exec() == QDialog::Accepted)
     {
@@ -1587,6 +1600,7 @@ void SIDGUI::makeUIConnections()
     QObject::connect(ui->saveData, &QToolButton::clicked, this, &SIDGUI::on_saveData_clicked);
     QObject::connect(ui->loadData, &QToolButton::clicked, this, &SIDGUI::on_loadData_clicked);
     QObject::connect(ui->saveChartImage, &QToolButton::clicked, this, &SIDGUI::on_saveChartImage_clicked);
+    QObject::connect(ui->addChannels, &QToolButton::clicked, this, &SIDGUI::on_addChannels_clicked);
     QObject::connect(ui->settings, &QToolButton::clicked, this, &SIDGUI::on_settings_clicked);
 }
 

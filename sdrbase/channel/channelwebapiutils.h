@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2020-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2020-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -79,6 +79,9 @@ public:
     static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, const QString &value);
     static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, double value);
     static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, const QJsonArray& value);
+    static bool patchChannelSetting(ChannelAPI *channel, const QString &setting, const QVariant &value);
+    static bool patchChannelSetting(unsigned int deviceSetIndex, unsigned int channeIndex, const QString &setting, const QString &value);
+    static bool patchChannelSetting(unsigned int deviceSetIndex, unsigned int channeIndex, const QString &setting, int value);
     static bool patchChannelSetting(unsigned int deviceSetIndex, unsigned int channeIndex, const QString &setting, double value);
     static bool patchChannelSetting(unsigned int deviceSetIndex, unsigned int channeIndex, const QString &setting, const QJsonArray& value);
     static bool getFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, int &value);
@@ -98,7 +101,9 @@ public:
     static bool getFeatureSettings(unsigned int featureSetIndex, unsigned int featureIndex, SWGSDRangel::SWGFeatureSettings &featureSettingsResponse, Feature *&feature);
     static bool getFeatureReport(unsigned int featureSetIndex, unsigned int featureIndex, SWGSDRangel::SWGFeatureReport &featureReport);
     static bool getChannelSettings(unsigned int deviceIndex, unsigned int channelIndex, SWGSDRangel::SWGChannelSettings &channelSettingsResponse, ChannelAPI *&channel);
+    static bool getChannelSettings(ChannelAPI *channel, SWGSDRangel::SWGChannelSettings &channelSettingsResponse);
     static bool getChannelReport(unsigned int deviceIndex, unsigned int channelIndex, SWGSDRangel::SWGChannelReport &channelReport);
+    static bool addChannel(unsigned int deviceSetIndex, const QString& uri, int direction);
 protected:
     static QString getDeviceHardwareId(unsigned int deviceIndex);
 };

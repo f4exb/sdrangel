@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2019-2021 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2020-2021 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2020-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2020 Kacper Michajłow <kasper93@gmail.com>                      //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -160,6 +160,7 @@ private:
     void tdf(Complex &ci);
     void msf60();
     void wwvb();
+    void jjy();
 };
 
 #endif // INCLUDE_RADIOCLOCKSINK_H

@@ -584,6 +584,54 @@ bool WebAPIUtils::getSubObjectIntList(const QJsonObject &json, const QString &ke
     return false;
 }
 
+bool WebAPIUtils::hasSubObject(const QJsonObject &json, const QString &key)
+{
+    for (QJsonObject::const_iterator  it = json.begin(); it != json.end(); it++)
+    {
+        QJsonValue jsonValue = it.value();
+
+        if (jsonValue.isObject())
+        {
+            QJsonObject subObject = jsonValue.toObject();
+
+            if (subObject.contains(key)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// Set value withing nested JSON object
+bool WebAPIUtils::setSubObject(QJsonObject &json, const QString &key, const QVariant &value)
+{
+    for (QJsonObject::iterator it = json.begin(); it != json.end(); it++)
+    {
+        QJsonValue jsonValue = it.value();
+
+        if (jsonValue.isObject())
+        {
+            QJsonObject subObject = jsonValue.toObject();
+
+            if (subObject.contains(key))
+            {
+                if (subObject[key].isString()) {
+                    subObject[key] = value.toString();
+                } else if (subObject[key].isDouble()) {
+                    subObject[key] = value.toDouble();
+                } else {
+                    qDebug() << "WebAPIUtils::setSubObject: Unsupported type";
+                }
+                it.value() = subObject;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 // look for value in key=value
 bool WebAPIUtils::extractValue(const QJsonObject &json, const QString &key, QJsonValue &value)
 {

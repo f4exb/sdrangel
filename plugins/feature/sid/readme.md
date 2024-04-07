@@ -119,7 +119,17 @@ When checked, all data is displayed on a single combined chart.
 Check to display a legend on the chart. When unchecked the legend will be hidden. You can click on items in the legend to temporarily hide and then show the corresponding series on the chart.
 The position of the legend can be set in the Settings Dialog.
 
-<h3>16: Open Settings Dialog</h3>
+<h3>16: Add Channels</h3>
+
+Click to open the Add Channels Dialog. This allows you to easily add the Channel Power channels for each VLF transmitter on each RX device.
+This dialog shows a table with one row for each VLF Transmitter, and a column for each RX device. 
+When OK is pressed, a corresponding Channel Power channel will be created for every cell that is checked.
+
+For example, in the image below, Channel Power channels will be added for the GDQ transmitter on both devices R0 and R1, with one for FTA on device R0 only.
+
+![SID Add Channels dialog](../../../doc/img/SID_plugin_addchannels.png)
+
+<h3>17: Open Settings Dialog</h3>
 
 Click to open the Settings Dialog. The settings dialog allows a user to:
 
@@ -134,7 +144,7 @@ Click to open the Settings Dialog. The settings dialog allows a user to:
 
 ![SID settings dialog](../../../doc/img/SID_plugin_settings_dialog.png)
 
-<h3>17: Display SDO/SOHO Imagery</h3>
+<h3>18: Display SDO/SOHO Imagery</h3>
 
 When checked, displays imagary from NASA's SDO (Solar Dynamic Observatory) and ESA/NASA's SOHO (Solar and Heliospheric Observatory) satellites. 
 
@@ -142,11 +152,11 @@ SDOs images the Sun in a variety of UV and EUV wavelengths. SOHO shows images of
 
 Solar flares are particularly visible in the AIA 131 Å images.
 
-<h3>18: Image or Video Selection</h3>
+<h3>19: Image or Video Selection</h3>
 
 Selects whether to display images (unchecked) or video (checked).
 
-<h3>19: Image/Wavelength Selection</h3>
+<h3>20: Image/Wavelength Selection</h3>
 
 Selects which image / wavelength to view.
 
@@ -172,63 +182,63 @@ Selects which image / wavelength to view.
 
 * LASCO (Large Angle Spectrometric Coronagraph) shows solar corona. C2 shows corona up to 8.4Mkm. C3 shows corona up to 23Mkm.
 
-<h3>20: Show GOES 16, 18 and SDO</h3>
+<h3>21: Show GOES 16, 18 and SDO</h3>
 
 When checked, opens a [Satellite Tracker](../../feature/satellitetracker/readme.md) feature and sets it to display data for the GOES 16, GOES 18 and SDO satellites.
 The position and tracks of the satellites will then be visible on a [Map](../../feature/map/readme.md) feature.
 
-<h3>21: Autoscale X</h3>
+<h3>22: Autoscale X</h3>
 
 When clicked, the chart X-axis is automatically scaled so that all power data is visible. When right-clicked, autoscaling of the X-axis will occur whenever new data is added to the chart.
 
-<h3>22: Autoscale Y</h3>
+<h3>23: Autoscale Y</h3>
 
 When clicked, the chart Y-axis is automatically scaled so that all power data is visible. When right-clicked, autoscaling of the Y-axis will occur whenever new data is added to the chart.
 
-<h3>23: Set X-axis to Today</h3>
+<h3>24: Set X-axis to Today</h3>
 
 When clicked, the X-axis is set to show today, from midnight to midnight.
 
 When right-clicked, the X-axis is set to show sunrise to sunset. This uses latitude and longitude from Preferences > My position.
 
-<h3>24: Set X-axis to -1 day</h3>
+<h3>25: Set X-axis to -1 day</h3>
 
 When clicked, the X-axis is set 1 day earlier than the current setting, at the same time.
 
-<h3>25: Set X-axis to +1 day</h3>
+<h3>26: Set X-axis to +1 day</h3>
 
 When clicked, the X-axis is set 1 day later than the current setting, at the same time.
 
-<h3>26: Start Time</h3>
+<h3>27: Start Time</h3>
 
 Displays/sets the current start time of the chart (X-axis minimum). It's possible to scroll through hours/days/months by clicking on the relevant segment and using the mouse scroll wheel.
 
-<h3>27: End Time</h3>
+<h3>28: End Time</h3>
 
 Displays/sets the current end time of the chart (X-axis maximum). It's possible to scroll through hours/days/months by clicking on the relevant segment and using the mouse scroll wheel.
 
-<h3>28: Min</h3>
+<h3>29: Min</h3>
 
 Displays/sets the minimum Y-axis value.
 
-<h3>29: Max</h3>
+<h3>30: Max</h3>
 
 Displays/sets the maximum Y-axis value.
 
-<h3>30: Now</h3>
+<h3>31: Now</h3>
 
 When checked, the latest SDO imagery is displayed. When unchecked, you can enter a date and time for which imagery should be displayed.
 
-<h3>31: Date Time</h3>
+<h3>32: Date Time</h3>
 
 Specifies the date and time for which SDO imagery should be displayed. Images are updated every 15 minutes. The date and time can also be set by clicking on the chart.
 
-<h3>32: Map</h3>
+<h3>33: Map</h3>
 
 Select a Map to link to the SID feature. When a time is selected on the SID charts, the [Map](../../feature/map/readme.md) feature will have it's time set accordingly. 
 This allows you, for example, to see the corresponding impact on MUF/foF2 displayed on the 3D map.
 
-<h3>33: Show Paths on Map</h3>
+<h3>34: Show Paths on Map</h3>
 
 When clicked, shows the great circle paths between transmitters and receivers on a [Map](../../feature/map/readme.md).
 

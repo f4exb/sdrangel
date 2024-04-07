@@ -289,13 +289,26 @@ int ChannelPower::webapiSettingsPutPatch(
     ChannelPowerSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureChannelPower *msg = MsgConfigureChannelPower::create(settings, channelSettingsKeys, force);
+    // Ensure inputFrequencyOffset and frequency are consistent
+    QStringList settingsKeys = channelSettingsKeys;
+    if (settingsKeys.contains("frequency") && !settingsKeys.contains("inputFrequencyOffset"))
+    {
+        settings.m_inputFrequencyOffset = settings.m_frequency - m_centerFrequency;
+        settingsKeys.append("inputFrequencyOffset");
+    }
+    else if (settingsKeys.contains("inputFrequencyOffset") && !settingsKeys.contains("frequency"))
+    {
+        settings.m_frequency = m_centerFrequency + settings.m_inputFrequencyOffset;
+        settingsKeys.append("frequency");
+    }
+
+    MsgConfigureChannelPower *msg = MsgConfigureChannelPower::create(settings, settingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("ChannelPower::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureChannelPower *msgToGUI = MsgConfigureChannelPower::create(settings, channelSettingsKeys, force);
+        MsgConfigureChannelPower *msgToGUI = MsgConfigureChannelPower::create(settings, settingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -311,6 +324,12 @@ void ChannelPower::webapiUpdateChannelSettings(
 {
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getChannelPowerSettings()->getInputFrequencyOffset();
+    }
+    if (channelSettingsKeys.contains("frequencyMode")) {
+        settings.m_frequencyMode = (ChannelPowerSettings::FrequencyMode) response.getChannelPowerSettings()->getFrequencyMode();
+    }
+    if (channelSettingsKeys.contains("frequency")) {
+        settings.m_frequency = response.getChannelPowerSettings()->getFrequency();
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getChannelPowerSettings()->getRfBandwidth();
@@ -356,6 +375,8 @@ void ChannelPower::webapiUpdateChannelSettings(
 void ChannelPower::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const ChannelPowerSettings& settings)
 {
     response.getChannelPowerSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getChannelPowerSettings()->setFrequencyMode(settings.m_frequencyMode);
+    response.getChannelPowerSettings()->setFrequency(settings.m_frequency);
     response.getChannelPowerSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getChannelPowerSettings()->setPulseThreshold(settings.m_pulseThreshold);
     response.getChannelPowerSettings()->setAveragePeriodUs(settings.m_averagePeriodUS);
@@ -468,6 +489,12 @@ void ChannelPower::webapiFormatChannelSettings(
 
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgChannelPowerSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("frequencyMode") || force) {
+        swgChannelPowerSettings->setFrequencyMode(settings.m_frequencyMode);
+    }
+    if (channelSettingsKeys.contains("inputFrequency") || force) {
+        swgChannelPowerSettings->setFrequency(settings.m_frequency);
     }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
         swgChannelPowerSettings->setRfBandwidth(settings.m_rfBandwidth);
