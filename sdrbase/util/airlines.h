@@ -55,6 +55,7 @@ private:
     friend struct Init;
     struct Init {
         Init();
+        ~Init();
         static const char *m_airlines[];
     };
     static Init m_init;
