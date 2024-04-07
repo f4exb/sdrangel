@@ -339,11 +339,17 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, MessageQueue *sample
 
         if (audioOutputDeviceIndex != outputDeviceIndex) // change of audio device
         {
-            removeAudioSink(audioFifo); // remove from current
+            // remove from current
+            m_audioOutputs[audioOutputDeviceIndex]->removeFifo(audioFifo);
+            if ((audioOutputDeviceIndex != -1) && (m_audioOutputs[audioOutputDeviceIndex]->getNbFifos() == 0)) {
+                stopAudioOutput(audioOutputDeviceIndex);
+            }
+
             m_audioOutputs[outputDeviceIndex]->addFifo(audioFifo); // add to new
             m_audioSinkFifos[audioFifo] = outputDeviceIndex; // new index
-            m_outputDeviceSinkMessageQueues[audioOutputDeviceIndex].removeOne(sampleSinkMessageQueue);
+            m_outputDeviceSinkMessageQueues[audioOutputDeviceIndex].removeOne(m_audioFifoToSinkMessageQueues[audioFifo]);
             m_outputDeviceSinkMessageQueues[outputDeviceIndex].append(sampleSinkMessageQueue);
+            m_audioFifoToSinkMessageQueues[audioFifo] = sampleSinkMessageQueue;
         }
     }
 }
@@ -416,6 +422,9 @@ void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, MessageQueue *samp
     if (m_audioSourceFifos.find(audioFifo) == m_audioSourceFifos.end()) // new FIFO
     {
         m_audioInputs[inputDeviceIndex]->addFifo(audioFifo);
+        m_audioSourceFifos[audioFifo] = inputDeviceIndex; // register audio FIFO
+        m_audioFifoToSourceMessageQueues[audioFifo] = sampleSourceMessageQueue;
+        m_inputDeviceSourceMessageQueues[inputDeviceIndex].append(sampleSourceMessageQueue);
     }
     else
     {
@@ -423,14 +432,19 @@ void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, MessageQueue *samp
 
         if (audioInputDeviceIndex != inputDeviceIndex) // change of audio device
         {
-            removeAudioSource(audioFifo); // remove from current
+            // remove from current
+            m_audioInputs[audioInputDeviceIndex]->removeFifo(audioFifo);
+            if ((audioInputDeviceIndex != -1) && (m_audioInputs[audioInputDeviceIndex]->getNbFifos() == 0)) {
+                stopAudioInput(audioInputDeviceIndex);
+            }
+
             m_audioInputs[inputDeviceIndex]->addFifo(audioFifo); // add to new
+            m_audioSourceFifos[audioFifo] = inputDeviceIndex; // new index
+            m_outputDeviceSinkMessageQueues[audioInputDeviceIndex].removeOne(m_audioFifoToSourceMessageQueues[audioFifo]);
+            m_inputDeviceSourceMessageQueues[inputDeviceIndex].append(sampleSourceMessageQueue);
+            m_audioFifoToSourceMessageQueues[audioFifo] = sampleSourceMessageQueue;
         }
     }
-
-    m_audioSourceFifos[audioFifo] = inputDeviceIndex; // register audio FIFO
-    m_audioFifoToSourceMessageQueues[audioFifo] = sampleSourceMessageQueue;
-    m_outputDeviceSinkMessageQueues[inputDeviceIndex].append(sampleSourceMessageQueue);
 }
 
 void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
