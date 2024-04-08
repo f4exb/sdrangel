@@ -21,7 +21,6 @@
 #include "dsp/samplesourcefifo.h"
 
 #include "limesdroutputthread.h"
-#include "limesdroutputsettings.h"
 
 LimeSDROutputThread::LimeSDROutputThread(lms_stream_t* stream, SampleSourceFifo* sampleFifo, QObject* parent) :
     QThread(parent),

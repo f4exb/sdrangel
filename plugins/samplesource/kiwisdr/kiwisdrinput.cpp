@@ -34,7 +34,6 @@
 #include "device/deviceapi.h"
 #include "kiwisdrworker.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 
 MESSAGE_CLASS_DEFINITION(KiwiSDRInput::MsgConfigureKiwiSDR, Message)
 MESSAGE_CLASS_DEFINITION(KiwiSDRInput::MsgStartStop, Message)

@@ -19,12 +19,7 @@
 
 #include <complex.h>
 
-#include "dsp/dspengine.h"
-#include "dsp/datafifo.h"
 #include "dsp/scopevis.h"
-#include "util/db.h"
-#include "util/stepfunctions.h"
-#include "maincore.h"
 
 #include "heatmap.h"
 #include "heatmapsink.h"

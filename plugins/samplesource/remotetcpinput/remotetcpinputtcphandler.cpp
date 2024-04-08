@@ -20,9 +20,8 @@
 #include <QUdpSocket>
 #include <QDebug>
 
-#include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "device/deviceapi.h"
+#include "util/message.h"
 
 #include "remotetcpinputtcphandler.h"
 #include "remotetcpinput.h"

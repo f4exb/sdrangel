@@ -26,9 +26,6 @@
 
 #include "opencv2/imgproc/imgproc.hpp"
 
-#include "dsp/dspcommands.h"
-#include "device/deviceapi.h"
-#include "util/db.h"
 #include "util/messagequeue.h"
 
 #include "atvmodreport.h"

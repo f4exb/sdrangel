@@ -20,8 +20,6 @@
 #include "plutosdrinputsettings.h"
 #include "plutosdrinputthread.h"
 
-#include "iio.h"
-
 PlutoSDRInputThread::PlutoSDRInputThread(uint32_t blocksizeSamples, DevicePlutoSDRBox* plutoBox, SampleSinkFifo* sampleFifo, QObject* parent) :
     QThread(parent),
     m_running(false),

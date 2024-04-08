@@ -18,10 +18,8 @@
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
-#include "gui/crightclickenabler.h"
 #include "gui/dialogpositioner.h"
 #include "util/db.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "device/deviceset.h"

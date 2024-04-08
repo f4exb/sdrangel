@@ -23,8 +23,6 @@
 #include <QString>
 #include <QDebug>
 
-#include "dsp/inthalfbandfilter.h"
-#include "dsp/dspcommands.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "downchannelizer.h"
 

@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <QDebug>
 
-#include "dsp/filerecord.h"
 #include "dsp/samplesinkfifo.h"
 #include "util/messagequeue.h"
 

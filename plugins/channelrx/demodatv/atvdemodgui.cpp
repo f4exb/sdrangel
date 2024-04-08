@@ -31,7 +31,6 @@
 #include "gui/dialogpositioner.h"
 #include "ui_atvdemodgui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
 #include "maincore.h"

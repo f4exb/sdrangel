@@ -27,7 +27,6 @@
 #include "SWGDeviceState.h"
 #include "SWGChannelReport.h"
 
-#include "dsp/dspengine.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/devicesamplesource.h"
 #include "device/deviceset.h"

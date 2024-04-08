@@ -18,7 +18,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "dsp/basebandsamplesource.h"
-#include "util/message.h"
 
 BasebandSampleSource::BasebandSampleSource()
 {

@@ -46,7 +46,6 @@
 #include "gui/dialogpositioner.h"
 #include "gui/dialpopup.h"
 #include "util/colormap.h"
-#include "util/simpleserializer.h"
 #include "util/db.h"
 #include "ui_glspectrumgui.h"
 

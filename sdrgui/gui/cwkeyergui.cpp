@@ -24,7 +24,6 @@
 #include "gui/cwmousekeyerenabler.h"
 #include "ui_cwkeyergui.h"
 #include "dsp/cwkeyer.h"
-#include "util/simpleserializer.h"
 #include "util/messagequeue.h"
 #include "commands/commandkeyreceiver.h"
 #include "mainwindow.h"

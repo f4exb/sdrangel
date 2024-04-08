@@ -22,15 +22,9 @@
 #include <QBuffer>
 
 #include "SWGFeatureSettings.h"
-#include "SWGDeviceState.h"
 
-#include "dsp/dspengine.h"
-
-#include "device/deviceset.h"
-#include "channel/channelapi.h"
 #include "feature/featureset.h"
 #include "settings/serializable.h"
-#include "maincore.h"
 #include "antennatools.h"
 
 MESSAGE_CLASS_DEFINITION(AntennaTools::MsgConfigureAntennaTools, Message)

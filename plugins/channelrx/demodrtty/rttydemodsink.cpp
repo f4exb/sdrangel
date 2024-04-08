@@ -23,7 +23,6 @@
 #include "dsp/dspengine.h"
 #include "dsp/scopevis.h"
 #include "util/db.h"
-#include "maincore.h"
 
 #include "rttydemod.h"
 #include "rttydemodsink.h"

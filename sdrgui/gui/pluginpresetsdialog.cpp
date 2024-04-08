@@ -22,7 +22,6 @@
 #include "gui/addpresetdialog.h"
 #include "settings/serializableinterface.h"
 #include "settings/pluginpreset.h"
-#include "maincore.h"
 
 #include "pluginpresetsdialog.h"
 #include "ui_pluginpresetsdialog.h"

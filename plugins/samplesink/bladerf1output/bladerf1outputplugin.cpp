@@ -21,7 +21,6 @@
 #include <QtPlugin>
 #include <libbladeRF.h>
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 
 #include "bladerf1outputplugin.h"
 #include "bladerf1outputwebapiadapter.h"

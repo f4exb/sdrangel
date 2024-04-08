@@ -23,17 +23,14 @@
 #include <QString>
 #include <QMessageBox>
 
-#include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/spectrumvis.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
-#include "maincore.h"
 
 #include "testmosync.h"
 #include "ui_testmosyncgui.h"

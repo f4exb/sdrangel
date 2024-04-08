@@ -21,12 +21,10 @@
 #include <QDebug>
 #include <QThread>
 
-#include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "dsp/basebandsamplesink.h"
 
 #include "device/deviceapi.h"

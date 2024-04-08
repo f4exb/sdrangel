@@ -28,16 +28,11 @@
 #include "SWGDeviceState.h"
 #include "SWGPERTesterActions.h"
 
-#include "dsp/dspengine.h"
-#include "device/deviceset.h"
-#include "channel/channelapi.h"
 #include "feature/featureset.h"
 #include "settings/serializable.h"
-#include "maincore.h"
 
 #include "pertester.h"
 #include "pertesterworker.h"
-#include "pertesterreport.h"
 
 MESSAGE_CLASS_DEFINITION(PERTester::MsgConfigurePERTester, Message)
 MESSAGE_CLASS_DEFINITION(PERTester::MsgStartStop, Message)

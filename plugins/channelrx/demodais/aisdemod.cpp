@@ -30,14 +30,10 @@
 
 #include "SWGChannelSettings.h"
 #include "SWGWorkspaceInfo.h"
-#include "SWGChannelReport.h"
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
-#include "feature/feature.h"
 #include "util/ais.h"
-#include "util/db.h"
 #include "maincore.h"
 
 MESSAGE_CLASS_DEFINITION(AISDemod::MsgConfigureAISDemod, Message)

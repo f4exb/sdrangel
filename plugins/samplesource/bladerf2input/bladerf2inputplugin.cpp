@@ -23,7 +23,6 @@
 #include <QtPlugin>
 #include <libbladeRF.h>
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "bladerf2inputwebapiadapter.h"
 
 #ifdef SERVER_MODE

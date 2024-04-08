@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <QDebug>
 #include "dsp/dspcommands.h"
-#include "util/fixed.h"
 #include "samplesinkfifo.h"
 
 DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :

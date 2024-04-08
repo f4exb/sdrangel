@@ -30,7 +30,6 @@
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
-#include "feature/feature.h"
 #include "util/db.h"
 #include "maincore.h"
 

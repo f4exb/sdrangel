@@ -22,7 +22,6 @@
 #include <libairspyhf/airspyhf.h>
 
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "airspyhfplugin.h"
 #include "airspyhfwebapiadapter.h"
 #ifdef SERVER_MODE

@@ -26,14 +26,12 @@
 #include <QJsonParseError>
 
 #include "SWGDeviceSettings.h"
-#include "SWGChannelSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
 #include "SWGRemoteTCPInputReport.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "device/deviceapi.h"
 
 #include "remotetcpinput.h"

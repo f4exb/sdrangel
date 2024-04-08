@@ -31,7 +31,6 @@
 #include "util/simpleserializer.h"
 #include "util/timeutil.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 
 #include "device/deviceapi.h"
 

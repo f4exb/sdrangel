@@ -26,16 +26,11 @@
 #include <QFileDialog>
 
 #include "ui_kiwisdrgui.h"
-#include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "util/db.h"
-
-#include "mainwindow.h"
 
 #include "kiwisdrgui.h"
 #include "device/deviceapi.h"

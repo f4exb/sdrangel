@@ -28,13 +28,8 @@
 #include "SWGFeatureActions.h"
 #include "SWGDeviceState.h"
 
-#include "dsp/dspengine.h"
-
-#include "device/deviceset.h"
-#include "channel/channelapi.h"
 #include "feature/featureset.h"
 #include "settings/serializable.h"
-#include "maincore.h"
 #include "skymap.h"
 
 MESSAGE_CLASS_DEFINITION(SkyMap::MsgConfigureSkyMap, Message)

@@ -21,7 +21,6 @@
 
 #include <complex.h>
 
-#include "audio/audiooutputdevice.h"
 #include "dsp/fftfilt.h"
 #include "dsp/datafifo.h"
 #include "util/db.h"

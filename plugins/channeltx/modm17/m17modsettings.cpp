@@ -21,7 +21,7 @@
 #include <QColor>
 #include <QDebug>
 
-#include "dsp/dspengine.h"
+#include "audio/audiodevicemanager.h"
 #include "dsp/ctcssfrequencies.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"

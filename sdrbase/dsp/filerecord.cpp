@@ -29,7 +29,6 @@
 #include <QDateTime>
 
 #include "dsp/dspcommands.h"
-#include "util/simpleserializer.h"
 #include "util/message.h"
 
 #include "filerecord.h"

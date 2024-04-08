@@ -27,7 +27,6 @@
 #include "SWGFeatureActions.h"
 #include "SWGDeviceState.h"
 
-#include "dsp/dspengine.h"
 #include "settings/serializable.h"
 
 #include "rigctlserverworker.h"

@@ -17,12 +17,10 @@
 
 #include <QDebug>
 
-#include "dsp/dspcommands.h"
 #include "dsp/basebandsamplesink.h"
 #include "util/db.h"
 
 #include "udpsourcesource.h"
-#include "udpsourcemsg.h"
 
 UDPSourceSource::UDPSourceSource() :
     m_channelSampleRate(48000),

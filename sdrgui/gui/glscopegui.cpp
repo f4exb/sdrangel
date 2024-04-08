@@ -26,7 +26,6 @@
 #include "glscope.h"
 #include "ui_glscopegui.h"
 #include "gui/dialpopup.h"
-#include "util/simpleserializer.h"
 #include "util/db.h"
 
 GLScopeGUI::GLScopeGUI(QWidget* parent) :

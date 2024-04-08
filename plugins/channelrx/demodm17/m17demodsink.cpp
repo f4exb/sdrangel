@@ -26,18 +26,8 @@
 #include <QNetworkReply>
 #include <QBuffer>
 
-#include "SWGChannelSettings.h"
-#include "SWGDSDDemodSettings.h"
-#include "SWGChannelReport.h"
-#include "SWGDSDDemodReport.h"
-
-#include "dsp/dspengine.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/datafifo.h"
-#include "dsp/dspcommands.h"
-#include "feature/feature.h"
-#include "audio/audiooutputdevice.h"
-#include "util/db.h"
 #include "util/messagequeue.h"
 #include "maincore.h"
 

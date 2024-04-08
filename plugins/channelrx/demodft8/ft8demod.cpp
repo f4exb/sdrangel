@@ -36,7 +36,6 @@
 #include "SWGChannelReport.h"
 #include "SWGFT8DemodReport.h"
 
-#include "dsp/dspengine.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicemimoengine.h"
 #include "dsp/devicesamplesource.h"
@@ -44,7 +43,6 @@
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
-#include "feature/feature.h"
 #include "util/db.h"
 #include "maincore.h"
 

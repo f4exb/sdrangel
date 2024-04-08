@@ -17,7 +17,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "rtpsink.h"
-#include "dsp/dsptypes.h"
 #include <algorithm>
 
 RTPSink::RTPSink(QUdpSocket *udpSocket, int sampleRate, bool stereo) :

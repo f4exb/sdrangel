@@ -20,7 +20,6 @@
 #include <QDebug>
 
 #include "dsp/upchannelizer.h"
-#include "dsp/dspcommands.h"
 
 #include "beamsteeringcwmodbaseband.h"
 

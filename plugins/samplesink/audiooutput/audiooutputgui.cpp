@@ -20,7 +20,6 @@
 #include <QFileDialog>
 
 #include "ui_audiooutputgui.h"
-#include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/audioselectdialog.h"

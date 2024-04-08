@@ -32,12 +32,9 @@
 #include "SWGWorkspaceInfo.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGChannelReport.h"
-#include "SWGMapItem.h"
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
-#include "feature/feature.h"
 #include "settings/serializable.h"
 #include "util/ax25.h"
 #include "util/db.h"

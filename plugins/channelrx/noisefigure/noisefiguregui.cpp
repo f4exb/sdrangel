@@ -28,17 +28,13 @@
 #include "dsp/dspcommands.h"
 #include "ui_noisefiguregui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
-#include "gui/crightclickenabler.h"
 #include "gui/decimaldelegate.h"
 #include "gui/dialogpositioner.h"
 #include "maincore.h"
 
 #include "noisefigure.h"
-#include "noisefiguresink.h"
 #include "noisefigurecontroldialog.h"
 #include "noisefigureenrdialog.h"
 

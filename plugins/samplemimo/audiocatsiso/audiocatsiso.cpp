@@ -30,8 +30,6 @@
 #include "dsp/dspengine.h"
 #include "dsp/samplesourcefifo.h"
 #include "dsp/samplesinkfifo.h"
-#include "dsp/devicesamplesource.h"
-#include "dsp/devicesamplesink.h"
 #include "device/deviceapi.h"
 #include "util/serialutil.h"
 

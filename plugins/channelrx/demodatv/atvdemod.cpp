@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <complex.h>
 
-#include "dsp/dspengine.h"
 #include "device/deviceapi.h"
 
 #include "atvdemod.h"

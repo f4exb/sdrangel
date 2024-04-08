@@ -31,13 +31,10 @@
 #include "SWGWorkspaceInfo.h"
 #include "SWGILSDemodSettings.h"
 #include "SWGChannelReport.h"
-#include "SWGMapItem.h"
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/morsedemod.h"
 #include "device/deviceapi.h"
-#include "feature/feature.h"
 #include "settings/serializable.h"
 #include "util/db.h"
 #include "maincore.h"

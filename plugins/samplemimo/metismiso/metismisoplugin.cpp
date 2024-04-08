@@ -21,7 +21,6 @@
 
 #include "plugin/pluginapi.h"
 #include "metis/devicemetis.h"
-#include "util/simpleserializer.h"
 
 #ifdef SERVER_MODE
 #include "metismiso.h"

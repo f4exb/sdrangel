@@ -42,12 +42,11 @@
 #include "gui/dmsspinbox.h"
 #include "gui/graphicsviewzoom.h"
 #include "gui/dialogpositioner.h"
-#include "mainwindow.h"
-#include "device/deviceuiset.h"
 #include "util/units.h"
 #include "util/astronomy.h"
 #include "util/interpolation.h"
 #include "util/png.h"
+#include "maincore.h"
 
 #include "ui_startrackergui.h"
 #include "startracker.h"

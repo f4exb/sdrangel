@@ -33,25 +33,18 @@
 #include "dsp/dspcommands.h"
 #include "ui_navtexdemodgui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/csv.h"
 #include "util/db.h"
-#include "util/morse.h"
-#include "util/units.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "gui/decimaldelegate.h"
 #include "dsp/dspengine.h"
 #include "dsp/glscopesettings.h"
-#include "gui/crightclickenabler.h"
 #include "gui/tabletapandhold.h"
 #include "gui/dialogpositioner.h"
-#include "channel/channelwebapiutils.h"
 #include "feature/featurewebapiutils.h"
 #include "maincore.h"
 
 #include "navtexdemod.h"
-#include "navtexdemodsink.h"
 
 void NavtexDemodGUI::resizeTable()
 {

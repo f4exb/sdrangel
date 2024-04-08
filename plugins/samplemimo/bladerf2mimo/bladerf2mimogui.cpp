@@ -25,20 +25,14 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
-#include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
-#include "dsp/dspengine.h"
-#include "dsp/dspdevicemimoengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplestatic.h"
-#include "util/db.h"
-
-#include "mainwindow.h"
 
 #include "bladerf2mimo.h"
 #include "ui_bladerf2mimogui.h"

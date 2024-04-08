@@ -20,11 +20,9 @@
 #include <QDebug>
 
 #include "dsp/dspengine.h"
-#include "dsp/dspcommands.h"
 #include "dsp/fftfilt.h"
 #include "dsp/spectrumvis.h"
 #include "util/db.h"
-#include "util/stepfunctions.h"
 #include "util/messagequeue.h"
 
 #include "freqtrackerreport.h"

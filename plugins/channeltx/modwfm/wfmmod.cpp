@@ -32,12 +32,9 @@
 #include "SWGChannelSettings.h"
 #include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
-#include "SWGAMModReport.h"
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
-#include "feature/feature.h"
 #include "util/db.h"
 #include "maincore.h"
 

@@ -31,22 +31,15 @@
 #include "dsp/dspcommands.h"
 #include "ui_rttydemodgui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/db.h"
 #include "util/rtty.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/glscopesettings.h"
-#include "gui/crightclickenabler.h"
-#include "gui/tabletapandhold.h"
 #include "gui/dialogpositioner.h"
-#include "channel/channelwebapiutils.h"
-#include "feature/featurewebapiutils.h"
 #include "maincore.h"
 
 #include "rttydemod.h"
-#include "rttydemodsink.h"
 
 RttyDemodGUI* RttyDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {

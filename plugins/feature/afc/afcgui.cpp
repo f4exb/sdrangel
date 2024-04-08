@@ -19,12 +19,9 @@
 #include <QMessageBox>
 
 #include "feature/featureuiset.h"
-#include "device/deviceset.h"
-#include "channel/channelapi.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
-#include "maincore.h"
 
 #include "ui_afcgui.h"
 #include "afcreport.h"

@@ -26,7 +26,6 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "gui/glspectrum.h"
-#include "gui/glspectrumview.h"
 #include "gui/glspectrumgui.h"
 // #include "gui/channelwindow.h"
 #include "gui/mdiutils.h"

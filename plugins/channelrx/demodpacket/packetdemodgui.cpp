@@ -31,20 +31,14 @@
 #include "dsp/dspcommands.h"
 #include "ui_packetdemodgui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/csv.h"
 #include "util/db.h"
-#include "util/units.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
-#include "gui/crightclickenabler.h"
 #include "gui/dialogpositioner.h"
-#include "channel/channelwebapiutils.h"
 #include "maincore.h"
 
 #include "packetdemod.h"
-#include "packetdemodsink.h"
 
 void PacketDemodGUI::resizeTable()
 {

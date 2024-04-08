@@ -16,9 +16,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "availablechannelorfeature.h"
-#include "feature/feature.h"
-#include "channel/channelapi.h"
-#include "maincore.h"
 
 bool AvailableChannelOrFeature::operator==(const AvailableChannelOrFeature& a) const
 {

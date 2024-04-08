@@ -26,11 +26,7 @@
 #include "SWGDeviceState.h"
 
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "dsp/datafifo.h"
-#include "dsp/dspdevicesourceengine.h"
-#include "dsp/devicesamplesource.h"
-#include "device/deviceset.h"
 #include "channel/channelapi.h"
 #include "maincore.h"
 

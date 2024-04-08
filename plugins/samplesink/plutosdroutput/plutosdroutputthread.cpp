@@ -15,11 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "iio.h"
-
 #include "dsp/samplesourcefifo.h"
 #include "plutosdr/deviceplutosdrbox.h"
-#include "plutosdroutputsettings.h"
 #include "plutosdroutputthread.h"
 
 PlutoSDROutputThread::PlutoSDROutputThread(uint32_t blocksizeSamples, DevicePlutoSDRBox* plutoBox, SampleSourceFifo* sampleFifo, QObject* parent) :

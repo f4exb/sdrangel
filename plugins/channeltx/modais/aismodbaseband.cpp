@@ -20,7 +20,6 @@
 #include <QDebug>
 
 #include "dsp/upchannelizer.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
 #include "aismodbaseband.h"

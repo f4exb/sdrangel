@@ -20,11 +20,7 @@
 
 #include <QDebug>
 
-#include "util/stepfunctions.h"
 #include "util/db.h"
-#include "dsp/dspengine.h"
-#include "dsp/dspcommands.h"
-#include "device/deviceapi.h"
 
 #include "adsbdemodreport.h"
 #include "adsbdemodsink.h"

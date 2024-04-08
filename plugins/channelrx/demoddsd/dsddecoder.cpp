@@ -18,8 +18,6 @@
 #include "dsddecoder.h"
 
 #include <QtGlobal>
-#include "audio/audiofifo.h"
-
 
 DSDDecoder::DSDDecoder()
 {

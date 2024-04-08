@@ -31,17 +31,12 @@
 #include <QAction>
 
 #include "feature/featureuiset.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "ui_vorlocalizergui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
-#include "util/db.h"
 #include "util/morse.h"
 #include "util/units.h"
 #include "gui/basicfeaturesettingsdialog.h"
-#include "gui/crightclickenabler.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
 #include "maincore.h"

@@ -24,11 +24,8 @@
 #include "SWGFeatureSettings.h"
 #include "SWGDeviceState.h"
 
-#include "dsp/dspengine.h"
-#include "device/deviceset.h"
 #include "feature/featureset.h"
 #include "settings/serializable.h"
-#include "maincore.h"
 
 #include "sid.h"
 #include "sidworker.h"

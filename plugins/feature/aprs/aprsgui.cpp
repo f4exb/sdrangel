@@ -34,9 +34,7 @@
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
-#include "mainwindow.h"
 #include "maincore.h"
-#include "device/deviceuiset.h"
 
 #include "ui_aprsgui.h"
 #include "aprs.h"

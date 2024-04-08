@@ -30,9 +30,7 @@
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "device/deviceapi.h"
-#include "hackrf/devicehackrfvalues.h"
 #include "hackrf/devicehackrfshared.h"
 
 #include "hackrfinput.h"

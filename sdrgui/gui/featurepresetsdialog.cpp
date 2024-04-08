@@ -21,7 +21,6 @@
 #include "gui/addpresetdialog.h"
 #include "feature/featureuiset.h"
 #include "settings/featuresetpreset.h"
-#include "maincore.h"
 
 #include "featurepresetsdialog.h"
 #include "ui_featurepresetsdialog.h"

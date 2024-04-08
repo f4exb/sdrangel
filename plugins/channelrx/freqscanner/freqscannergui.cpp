@@ -28,11 +28,8 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "ui_freqscannergui.h"
-#include "util/simpleserializer.h"
-#include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
-#include "dsp/glscopesettings.h"
 #include "gui/tabletapandhold.h"
 #include "gui/dialogpositioner.h"
 #include "gui/decimaldelegate.h"
@@ -45,7 +42,6 @@
 #include "freqscannergui.h"
 #include "freqscanneraddrangedialog.h"
 #include "freqscanner.h"
-#include "freqscannersink.h"
 
 FreqScannerGUI* FreqScannerGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {

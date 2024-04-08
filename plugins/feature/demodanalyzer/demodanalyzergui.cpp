@@ -26,7 +26,6 @@
 #include "gui/glscope.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
-#include "device/deviceset.h"
 #include "util/db.h"
 #include "maincore.h"
 

@@ -24,7 +24,6 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
-#include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "gui/colormapper.h"
@@ -32,12 +31,7 @@
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
 #include "gui/basicdevicesettingsdialog.h"
-#include "dsp/dspengine.h"
-#include "dsp/dspdevicemimoengine.h"
 #include "dsp/dspcommands.h"
-#include "util/db.h"
-
-#include "mainwindow.h"
 
 #include "ui_metismisogui.h"
 #include "metismisogui.h"

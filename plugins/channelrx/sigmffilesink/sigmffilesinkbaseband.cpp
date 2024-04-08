@@ -19,7 +19,6 @@
 #include <QTimer>
 #include <QDebug>
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/spectrumvis.h"
 #include "util/db.h"

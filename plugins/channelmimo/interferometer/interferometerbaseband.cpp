@@ -24,7 +24,6 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/scopevis.h"
-#include "dsp/dspcommands.h"
 
 #include "interferometerbaseband.h"
 

@@ -32,7 +32,6 @@
 #include "device/deviceapi.h"
 #include "testsourceworker.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 
 MESSAGE_CLASS_DEFINITION(TestSourceInput::MsgConfigureTestSource, Message)
 MESSAGE_CLASS_DEFINITION(TestSourceInput::MsgStartStop, Message)

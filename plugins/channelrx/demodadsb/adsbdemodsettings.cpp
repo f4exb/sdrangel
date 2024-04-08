@@ -20,10 +20,8 @@
 #include <QDataStream>
 #include <QDebug>
 
-#include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
-#include "settings/rollupstate.h"
 
 #include "adsbdemodsettings.h"
 

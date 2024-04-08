@@ -20,7 +20,6 @@
 #include <QWaitCondition>
 #include <QMutex>
 #include "util/message.h"
-#include "util/messagequeue.h"
 
 const char* Message::m_identifier = 0;
 

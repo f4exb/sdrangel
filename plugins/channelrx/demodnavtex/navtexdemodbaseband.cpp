@@ -19,7 +19,6 @@
 
 #include <QDebug>
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/downchannelizer.h"
 

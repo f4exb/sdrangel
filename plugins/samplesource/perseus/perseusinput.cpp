@@ -27,7 +27,6 @@
 #include "SWGPerseusReport.h"
 
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "device/deviceapi.h"
 #include "perseus/deviceperseus.h"
 

@@ -21,7 +21,6 @@
 #include <QtPlugin>
 
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "plutosdr/deviceplutosdr.h"
 
 #ifndef SERVER_MODE

@@ -18,7 +18,6 @@
 #include "plutosdr/deviceplutosdrbox.h"
 #include "dsp/samplemififo.h"
 
-#include "plutosdrmimosettings.h"
 #include "plutosdrmithread.h"
 
 PlutoSDRMIThread::PlutoSDRMIThread(DevicePlutoSDRBox* plutoBox, QObject* parent) :

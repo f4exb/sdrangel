@@ -24,9 +24,6 @@
 #include "dsp/scopevis.h"
 #include "util/stepfunctions.h"
 #include "util/db.h"
-#include "util/morse.h"
-#include "util/units.h"
-#include "maincore.h"
 
 #include "ilsdemod.h"
 #include "ilsdemodsink.h"

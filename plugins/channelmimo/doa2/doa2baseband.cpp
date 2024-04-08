@@ -22,9 +22,7 @@
 #include <QDebug>
 
 #include "dsp/downchannelizer.h"
-#include "dsp/basebandsamplesink.h"
 #include "dsp/scopevis.h"
-#include "dsp/dspcommands.h"
 
 #include "doa2baseband.h"
 #include "doa2settings.h"

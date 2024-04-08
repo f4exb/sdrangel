@@ -25,11 +25,8 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "gui/dialogpositioner.h"
 #include "util/db.h"
-
-#include "mainwindow.h"
 
 #include "filesourcereport.h"
 #include "filesourcegui.h"

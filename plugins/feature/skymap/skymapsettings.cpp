@@ -23,7 +23,6 @@
 #include <QDebug>
 
 #include "util/simpleserializer.h"
-#include "util/httpdownloadmanager.h"
 #include "settings/serializable.h"
 
 #include "skymapsettings.h"

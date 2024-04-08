@@ -26,7 +26,6 @@
 #include <vector>
 
 #include "audio/audiodevicemanager.h"
-#include "audio/audiooutputdevice.h"
 #include "export.h"
 
 class DSPDeviceSourceEngine;

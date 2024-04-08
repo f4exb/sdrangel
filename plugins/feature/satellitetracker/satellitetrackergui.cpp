@@ -27,8 +27,6 @@
 #include <QtCharts/QDateTimeAxis>
 #include <QtCharts/QValueAxis>
 
-#include "device/deviceapi.h"
-#include "device/deviceset.h"
 #include "channel/channelwebapiutils.h"
 #include "feature/featureset.h"
 #include "feature/featureuiset.h"
@@ -36,10 +34,10 @@
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
-#include "mainwindow.h"
-#include "device/deviceuiset.h"
 #include "util/units.h"
-#include "util/astronomy.h"
+#include "device/deviceapi.h"
+#include "device/deviceset.h"
+#include "maincore.h"
 
 #include "ui_satellitetrackergui.h"
 #include "satellitetracker.h"

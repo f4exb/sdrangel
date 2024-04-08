@@ -24,7 +24,6 @@
 #include <QCoreApplication>
 
 #include "webapi/webapiadapterinterface.h"
-#include "webapi/webapiutils.h"
 #include "maincore.h"
 #include "util/ax25.h"
 #include "util/aprs.h"

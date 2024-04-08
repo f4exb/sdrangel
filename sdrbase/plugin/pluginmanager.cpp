@@ -30,11 +30,6 @@
 #include <algorithm>
 
 #include "device/deviceenumerator.h"
-#include "settings/preset.h"
-#include "util/message.h"
-#include "dsp/dspdevicesourceengine.h"
-#include "dsp/dspdevicesinkengine.h"
-
 #include "plugin/pluginmanager.h"
 
 #ifndef LIB

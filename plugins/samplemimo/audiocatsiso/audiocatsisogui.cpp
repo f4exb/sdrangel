@@ -24,7 +24,6 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
-#include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "gui/colormapper.h"
@@ -34,12 +33,8 @@
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/audioselectdialog.h"
 #include "dsp/dspengine.h"
-#include "dsp/dspdevicemimoengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplesource.h"
-#include "util/db.h"
-
-#include "mainwindow.h"
 
 #include "ui_audiocatsisogui.h"
 #include "audiocatsisogui.h"

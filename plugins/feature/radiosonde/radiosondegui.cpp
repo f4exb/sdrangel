@@ -30,9 +30,8 @@
 #include "gui/tabletapandhold.h"
 #include "gui/dialogpositioner.h"
 #include "gui/crightclickenabler.h"
-#include "mainwindow.h"
-#include "device/deviceuiset.h"
 #include "device/deviceapi.h"
+#include "maincore.h"
 
 #include "ui_radiosondegui.h"
 #include "radiosonde.h"

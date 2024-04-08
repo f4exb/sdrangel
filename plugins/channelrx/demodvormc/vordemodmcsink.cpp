@@ -20,8 +20,6 @@
 
 #include <complex.h>
 
-#include "audio/audiooutputdevice.h"
-#include "dsp/dspengine.h"
 #include "util/db.h"
 #include "util/stepfunctions.h"
 #include "util/morse.h"

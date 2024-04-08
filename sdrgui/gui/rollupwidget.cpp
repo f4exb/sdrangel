@@ -28,7 +28,6 @@
 
 #include "gui/rollupwidget.h"
 #include "settings/rollupstate.h"
-#include "ui_glspectrumgui.h"
 
 RollupWidget::RollupWidget(QWidget* parent) :
     QWidget(parent),

@@ -29,7 +29,6 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
 #include "settings/serializable.h"
-#include "feature/feature.h"
 #include "maincore.h"
 
 #include "beamsteeringcwmodbaseband.h"

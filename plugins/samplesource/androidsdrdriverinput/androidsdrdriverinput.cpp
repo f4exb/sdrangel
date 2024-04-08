@@ -25,17 +25,13 @@
 #include <QJsonParseError>
 
 #include "SWGDeviceSettings.h"
-#include "SWGChannelSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
 #include "SWGAndroidSDRDriverInputReport.h"
 
 #include "util/simpleserializer.h"
-#include "util/android.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "device/deviceapi.h"
-#include "maincore.h"
 
 #include "androidsdrdriverinput.h"
 #include "androidsdrdriverinputtcphandler.h"

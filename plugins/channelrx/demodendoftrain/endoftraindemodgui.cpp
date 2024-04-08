@@ -32,21 +32,15 @@
 #include "dsp/dspcommands.h"
 #include "ui_endoftraindemodgui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/csv.h"
 #include "util/db.h"
-#include "util/units.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/glscopesettings.h"
-#include "gui/crightclickenabler.h"
 #include "gui/dialogpositioner.h"
-#include "channel/channelwebapiutils.h"
 #include "maincore.h"
 
 #include "endoftraindemod.h"
-#include "endoftraindemodsink.h"
 
 void EndOfTrainDemodGUI::resizeTable()
 {

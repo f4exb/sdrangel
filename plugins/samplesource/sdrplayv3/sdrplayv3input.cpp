@@ -33,7 +33,6 @@
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "sdrplayv3input.h"
 
 #include <device/deviceapi.h>

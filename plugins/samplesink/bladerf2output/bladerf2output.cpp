@@ -25,12 +25,10 @@
 
 #include "SWGDeviceState.h"
 #include "SWGDeviceSettings.h"
-#include "SWGBladeRF2InputSettings.h"
 #include "SWGDeviceReport.h"
 #include "SWGBladeRF2OutputReport.h"
 
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "device/deviceapi.h"
 #include "bladerf2/devicebladerf2shared.h"
 #include "bladerf2/devicebladerf2.h"

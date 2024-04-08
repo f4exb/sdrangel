@@ -19,8 +19,6 @@
 
 #include <QDebug>
 
-#include "SWGDeviceState.h"
-#include "SWGDeviceSettings.h"
 #include "SWGChannelSettings.h"
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
