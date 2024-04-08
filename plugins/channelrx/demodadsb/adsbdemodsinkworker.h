@@ -23,6 +23,7 @@
 
 #include "dsp/dsptypes.h"
 #include "util/crc.h"
+#include "util/message.h"
 #include "util/messagequeue.h"
 #include "adsbdemodstats.h"
 
