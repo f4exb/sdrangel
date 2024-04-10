@@ -697,7 +697,6 @@ bool RS41Subframe::getHumidityPressureCal(float *vec, float *mat) const
         for (int i = 0; i < 12; i++) {
             mat[i] = 0.0f;
         }
-        qDebug() << "hasHumidityPressureCal: false";
         return false;
     }
 }
@@ -709,8 +708,8 @@ QString RS41Subframe::getType() const
     {
         QByteArray bytes = m_subframe.mid(0x218, 10);
 
-        while ((bytes.size() > 0) && (bytes.back() == 0)) {
-            bytes.removeLast();
+        while ((bytes.size() > 0) && (bytes.back() == '\0')) {
+            bytes.remove(bytes.size() - 1, 1);
         }
 
         return QString(bytes).trimmed();
