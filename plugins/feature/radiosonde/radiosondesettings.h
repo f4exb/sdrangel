@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>    //
-// Copyright (C) 2021-2022 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -29,7 +29,7 @@
 class Serializable;
 
 // Number of columns in the table
-#define RADIOSONDES_COLUMNS  16
+#define RADIOSONDES_COLUMNS  18
 
 struct RadiosondeSettings
 {
@@ -57,6 +57,13 @@ struct RadiosondeSettings
     };
     ChartData m_y1;
     ChartData m_y2;
+
+    bool m_feedEnabled;
+    QString m_callsign;
+    QString m_antenna;
+    bool m_displayPosition;
+    bool m_mobile;
+    QString m_email;
 
     int m_radiosondesColumnIndexes[RADIOSONDES_COLUMNS];
     int m_radiosondesColumnSizes[RADIOSONDES_COLUMNS];

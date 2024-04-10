@@ -29,12 +29,15 @@
 #include "gui/decimaldelegate.h"
 #include "gui/tabletapandhold.h"
 #include "gui/dialogpositioner.h"
+#include "gui/crightclickenabler.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
+#include "device/deviceapi.h"
 
 #include "ui_radiosondegui.h"
 #include "radiosonde.h"
 #include "radiosondegui.h"
+#include "radiosondefeedsettingsdialog.h"
 
 #include "SWGMapItem.h"
 
@@ -153,6 +156,8 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
+    m_sondeHub = SondeHub::create();
+
     // Intialise chart
     ui->chart->setRenderHint(QPainter::Antialiasing);
 
@@ -180,14 +185,20 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
     TableTapAndHold *tableTapAndHold = new TableTapAndHold(ui->radiosondes);
     connect(tableTapAndHold, &TableTapAndHold::tapAndHold, this, &RadiosondeGUI::customContextMenuRequested);
 
-    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_LATITUDE, new DecimalDelegate(5));
-    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_LONGITUDE, new DecimalDelegate(5));
-    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_ALTITUDE, new DecimalDelegate(1));
-    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_SPEED, new DecimalDelegate(1));
-    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_VERTICAL_RATE, new DecimalDelegate(1));
-    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_HEADING, new DecimalDelegate(1));
-    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_ALT_MAX, new DecimalDelegate(1));
-    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_LAST_UPDATE, new DateTimeDelegate());
+    CRightClickEnabler *feedRightClickEnabler = new CRightClickEnabler(ui->feed);
+    connect(feedRightClickEnabler, &CRightClickEnabler::rightClick, this, &RadiosondeGUI::feedSelect);
+
+     // Get updated when position changes
+    connect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &RadiosondeGUI::preferenceChanged);
+
+    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_LATITUDE, new DecimalDelegate(5, ui->radiosondes));
+    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_LONGITUDE, new DecimalDelegate(5, ui->radiosondes));
+    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_ALTITUDE, new DecimalDelegate(1, ui->radiosondes));
+    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_SPEED, new DecimalDelegate(1, ui->radiosondes));
+    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_VERTICAL_RATE, new DecimalDelegate(1, ui->radiosondes));
+    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_HEADING, new DecimalDelegate(1, ui->radiosondes));
+    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_ALT_MAX, new DecimalDelegate(1, ui->radiosondes));
+    ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_LAST_UPDATE, new DateTimeDelegate("yyyy/MM/dd hh:mm:ss", ui->radiosondes));
 
     m_settings.setRollupState(&m_rollupState);
 
@@ -201,9 +212,11 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
 
 RadiosondeGUI::~RadiosondeGUI()
 {
+    disconnect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &RadiosondeGUI::preferenceChanged);
     // Remove from map and free memory
     on_deleteAll_clicked();
     delete ui;
+    delete m_sondeHub;
 }
 
 void RadiosondeGUI::setWorkspaceIndex(int index)
@@ -241,9 +254,13 @@ void RadiosondeGUI::displaySettings()
     ui->y1->setCurrentIndex((int)m_settings.m_y1);
     ui->y2->setCurrentIndex((int)m_settings.m_y2);
 
+    ui->feed->setChecked(m_settings.m_feedEnabled);
+
     getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
     getRollupContents()->arrangeRollups();
+
+    updatePosition();
 }
 
 void RadiosondeGUI::onMenuDialogCalled(const QPoint &p)
@@ -640,6 +657,20 @@ void RadiosondeGUI::updateRadiosondes(RS41Frame *message, QDateTime dateTime)
     }
 
     plotChart();
+
+    if (m_sondeHub && m_settings.m_feedEnabled)
+    {
+        // Feed to SondeHub
+        m_sondeHub->upload(
+            MainCore::instance()->getSettings().getStationName(),
+            dateTime,
+            message,
+            &radiosonde->m_subframe,
+            MainCore::instance()->getSettings().getLatitude(),
+            MainCore::instance()->getSettings().getLongitude(),
+            MainCore::instance()->getSettings().getAltitude()
+            );
+    }
 }
 
 void RadiosondeGUI::on_radiosondes_itemSelectionChanged()
@@ -894,4 +925,83 @@ void RadiosondeGUI::makeUIConnections()
     QObject::connect(ui->y1, qOverload<int>(&QComboBox::currentIndexChanged), this, &RadiosondeGUI::on_y1_currentIndexChanged);
     QObject::connect(ui->y2, qOverload<int>(&QComboBox::currentIndexChanged), this, &RadiosondeGUI::on_y2_currentIndexChanged);
     QObject::connect(ui->deleteAll, &QPushButton::clicked, this, &RadiosondeGUI::on_deleteAll_clicked);
+    QObject::connect(ui->feed, &ButtonSwitch::clicked, this, &RadiosondeGUI::on_feed_clicked);
+}
+
+void RadiosondeGUI::on_feed_clicked(bool checked)
+{
+    m_settings.m_feedEnabled = checked;
+    m_settingsKeys.append("feedEnabled");
+    applySettings();
+}
+
+// Show feed dialog
+void RadiosondeGUI::feedSelect(const QPoint& p)
+{
+    RadiosondeFeedSettingsDialog dialog(&m_settings);
+    dialog.move(p);
+    new DialogPositioner(&dialog, false);
+
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        m_settingsKeys.append("callsign");
+        m_settingsKeys.append("antenna");
+        m_settingsKeys.append("displayPosition");
+        m_settingsKeys.append("mobile");
+        m_settingsKeys.append("email");
+        applySettings();
+        updatePosition();
+    }
+}
+
+// Get names of devices with radiosonde demods, for SondeHub Radio string
+QStringList RadiosondeGUI::getRadios()
+{
+    MainCore *mainCore = MainCore::instance();
+    QStringList deviceList;
+    AvailableChannelOrFeatureList channels = mainCore->getAvailableChannels({"sdrangel.channel.radiosondedemod"});
+
+    for (const auto& channel : channels)
+    {
+        DeviceAPI *device = mainCore->getDevice(channel.m_index);
+        if (device)
+        {
+            QString name = device->getHardwareId();
+
+            if (!deviceList.contains(name)) {
+                deviceList.append(name);
+            }
+        }
+    }
+
+    return deviceList;
+}
+
+void RadiosondeGUI::updatePosition()
+{
+    if (m_sondeHub && m_settings.m_displayPosition)
+    {
+        float stationLatitude = MainCore::instance()->getSettings().getLatitude();
+        float stationLongitude = MainCore::instance()->getSettings().getLongitude();
+        float stationAltitude = MainCore::instance()->getSettings().getAltitude();
+
+        m_sondeHub->updatePosition(
+            m_settings.m_callsign,
+            stationLatitude,
+            stationLongitude,
+            stationAltitude,
+            getRadios().join(" "),
+            m_settings.m_antenna,
+            m_settings.m_email,
+            m_settings.m_mobile
+        );
+    }
+}
+
+void RadiosondeGUI::preferenceChanged(int elementType)
+{
+    Preferences::ElementType pref = (Preferences::ElementType)elementType;
+    if ((pref == Preferences::Latitude) || (pref == Preferences::Longitude) || (pref == Preferences::Altitude)) {
+        updatePosition();
+    }
 }

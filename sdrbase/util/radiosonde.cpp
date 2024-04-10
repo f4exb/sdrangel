@@ -163,8 +163,8 @@ void RS41Frame::decodeGPSPos(const QByteArray ba)
     }
 }
 
-// Find the water vapor saturation pressure for a given temperature.
-float waterVapourSaturationPressure(float tCelsius)
+// Find the water vapor saturation pressure for a given temperature (for tCelsius < 0C).
+static float waterVapourSaturationPressure(float tCelsius)
 {
     // Convert to Kelvin
     float T = tCelsius + 273.15f;
@@ -187,7 +187,7 @@ float waterVapourSaturationPressure(float tCelsius)
     return p / 100.0f;
 }
 
-float calcT(int f, int f1, int f2, float r1, float r2, float *poly, float *cal)
+static float calcT(int f, int f1, int f2, float r1, float r2, float *poly, float *cal)
 {
     /*float g = (float)(f2-f1) / (r2-r1);       // gain
     float Rb = (f1*r2-f2*r1) / (float)(f2-f1); // offset
@@ -219,11 +219,11 @@ float calcT(int f, int f1, int f2, float r1, float r2, float *poly, float *cal)
     return tCal;
 }
 
-float calcU(int cInt, int cMin, int cMax, float c1, float c2, float T, float HT, float *capCal, float *matrixCal)
+static float calcU(int cInt, int cMin, int cMax, float c1, float c2, float T, float HT, float *capCal, float *matrixCal, float height, float *vectorPCal, float *matrixPCal)
 {
-    //qDebug() << "cInt " << cInt << " cMin " << cMin << " cMax " << cMax << " c1 " << c1 << " c2 " << c2 << " T " << T << " HT " << HT << " capCal[0] " << capCal[0] << " capCal[1] " << capCal[1];
-  /*
-    float a0 = 7.5f;
+    //qDebug() << "cInt " << cInt << " cMin " << cMin << " cMax " << cMax << " c1 " << c1 << " c2 " << c2 << " T " << T << " HT " << HT << " capCal[0] " << capCal[0] << " capCal[1] " << capCal[1] << "height" << height;
+
+    /*float a0 = 7.5f;
     float a1 = 350.0f / capCal[0];
     float fh = (cInt-cMin) / (float)(cMax-cMin);
     float rh = 100.0f * (a1*fh - a0);
@@ -243,7 +243,7 @@ float calcU(int cInt, int cMin, int cMax, float c1, float c2, float T, float HT,
         rh = -1.0;
     }
 
-    qDebug() << "RH old method: " << rh;  */
+    qDebug() << "RH old method: " << rh;*/
 
 
     // Convert integer measurement to scale factor
@@ -252,8 +252,32 @@ float calcU(int cInt, int cMin, int cMax, float c1, float c2, float T, float HT,
     // Calculate capacitance (scale between two reference caps)
     float cUncal = c1 + (c2 - c1) * s;
     float cCal = (cUncal / capCal[0] - 1.0f) * capCal[1];
-    float uUncal = 0.0f;
+
     float t = (HT - 20.0f) / 180.0f;
+
+    // Calculate standard pressure at given height in hPa
+    float pressure = 1013.25f * expf(-1.18575919e-4f * height);
+
+    // Compensation for pressure
+    float p = pressure / 1000.0f;
+    float powc = 1.0f;
+    float sum = 0.0f;
+    for (int i = 0; i < 3; i++)
+    {
+        float l = 0.0f;
+        float powt = 1.0f;
+        for (int j = 0; j < 4; j++)
+        {
+            l += matrixPCal[4*i+j] * powt;
+            powt *= t;
+        }
+        float x = vectorPCal[i];
+        sum += l * (x * p / (1.0f + x * p) - x * powc / (1.0f + x));
+        powc *= cCal;
+    }
+    cCal -= sum;
+
+    float uUncal = 0.0f;
     float f1 = 1.0f;
     for (int i = 0; i < 7; i++)
     {
@@ -267,16 +291,18 @@ float calcU(int cInt, int cMin, int cMax, float c1, float c2, float T, float HT,
     }
 
     // Adjust for difference in outside air temperature and the humidty sensor temperature
-    float uCal = uUncal * waterVapourSaturationPressure(T) / waterVapourSaturationPressure(HT);
+    float uCal = uUncal * waterVapourSaturationPressure(HT) / waterVapourSaturationPressure(T);
 
     // Ensure within range of 0..100%
     uCal = std::min(100.0f, uCal);
     uCal = std::max(0.0f, uCal);
 
+    //qDebug() << "RH new method" << uCal;
+
     return uCal;
 }
 
-float calcP(int f, int f1, int f2, float pressureTemp, float *cal)
+static float calcP(int f, int f1, int f2, float pressureTemp, float *cal)
 {
     // Convert integer measurement to scale factor
     float s = (f-f1) / (float)(f2-f1);
@@ -434,6 +460,8 @@ void RS41Frame::calcHumidity(const RS41Subframe *subframe)
     float c1, c2;
     float capCal[2];
     float calMatrix[7*6];
+    float pCalMatrix[12];
+    float pCalVector[3];
 
     if (m_humidityMain == 0)
     {
@@ -449,10 +477,13 @@ void RS41Frame::calcHumidity(const RS41Subframe *subframe)
 
     m_humidityCalibrated = m_temperatureCalibrated && m_humidityTemperatureCalibrated && humidityCalibrated;
 
+    subframe->getHumidityPressureCal(pCalVector, pCalMatrix);
+
     m_humidity = calcU(m_humidityMain, m_humidityRef1, m_humidityRef2,
                        c1, c2,
                        temperature, humidityTemperature,
-                       capCal, calMatrix);
+                       capCal, calMatrix,
+                       m_height, pCalVector, pCalMatrix);
 
     // RS41 humidity resolution of 0.1%
     m_humidityString = QString::number(m_humidity, 'f', 1);
@@ -638,12 +669,51 @@ bool RS41Subframe::getPressureCal(float *cal) const
     }
 }
 
+// Indicate if we have all the required humidity pressure calibration data
+bool RS41Subframe::hasHumidityPressureCal() const
+{
+    return m_subframeValid[0x2a] && m_subframeValid[0x2b] && m_subframeValid[0x2c]
+            && m_subframeValid[0x2d] && m_subframeValid[0x2e] && m_subframeValid[0x2f];
+}
+
+bool RS41Subframe::getHumidityPressureCal(float *vec, float *mat) const
+{
+    if (hasHumidityPressureCal())
+    {
+        for (int i = 0; i < 3; i++) {
+            vec[i] = getFloat(0x2a6 + i * 4);
+        }
+        for (int i = 0; i < 12; i++) {
+            mat[i] = getFloat(0x2ba + i * 4);
+        }
+        return true;
+    }
+    else
+    {
+        // Use default values - TODO: Need to obtain from inflight device
+        for (int i = 0; i < 3; i++) {
+            vec[i] = 0.0f;
+        }
+        for (int i = 0; i < 12; i++) {
+            mat[i] = 0.0f;
+        }
+        qDebug() << "hasHumidityPressureCal: false";
+        return false;
+    }
+}
+
 // Get type of RS41. E.g. "RS41-SGP"
 QString RS41Subframe::getType() const
 {
-    if (m_subframeValid[0x21] & m_subframeValid[0x22])
+    if (m_subframeValid[0x21] && m_subframeValid[0x22])
     {
-        return QString(m_subframe.mid(0x218, 10)).trimmed();
+        QByteArray bytes = m_subframe.mid(0x218, 10);
+
+        while ((bytes.size() > 0) && (bytes.back() == 0)) {
+            bytes.removeLast();
+        }
+
+        return QString(bytes).trimmed();
     }
     else
     {

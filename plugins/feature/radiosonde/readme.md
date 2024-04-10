@@ -9,6 +9,8 @@ The chart can plot two data series vs time for the radiosonde selected in the ta
 
 The Radiosonde feature can draw balloons objects on the [Map](../../feature/map/readme.md) feature in 2D and 3D.
 
+Received data can be forwarded to [SondeHub](https://sondehub.org/). Your location can be displayed on the SondeHub map, as either a stationary receiver or chase car.
+
 <h2>Interface</h2>
 
 ![Radiosonde feature plugin GUI](../../../doc/img/Radiosonde_plugin.png)
@@ -48,6 +50,20 @@ Selecting a radiosonde item on the map will display a text bubble containing inf
 To centre the map on an item in the table, double click in the Lat or Lon columns.
 
 ![Radiosonde on map](../../../doc/img/Radiosonde_plugin_map.png)
+
+<h3>Feeding Data to SondeHub</h3>
+
+Received radiosonde frames can be forwarded to [SondeHub](https://sondehub.org/) by clicking the Feed button.
+
+Right clicking the feed button opens the SondeHub Feed Settings dialog:
+
+![SondeHub settings dialog](../../../doc/img/Radiosonde_plugin_sondehub_settings.png)
+
+* Callsign should be your amateur callsign and indicates who the frames have been received by.
+* Enter your e-mail address. This isn't displayed on the SondeHub map.
+* Check display position if you would like your position displayed on the SondeHub map.
+* Check mobile to indicate that your receiver is mobile, and it will be displayed on the SondeHub map as a chase car. If unchecked, your receiver will be displayed as stationary with a green circle.
+* Antenna is a free text string you can use to describe your antenna. This will be displayed on the SondeHub map.
 
 <h2>Attribution</h2>
 

@@ -399,6 +399,23 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="ButtonSwitch" name="feed">
+            <property name="toolTip">
+             <string>Enable feeding of received frames to SondeHub. Right click for settings.</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../sdrgui/resources/res.qrc">
+              <normaloff>:/txon.png</normaloff>:/txon.png</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
@@ -419,6 +436,11 @@
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
   <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>

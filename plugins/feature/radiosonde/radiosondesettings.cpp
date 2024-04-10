@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2017, 2019-2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
-// Copyright (C) 2021-2022 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -23,6 +23,7 @@
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
+#include "maincore.h"
 
 #include "radiosondesettings.h"
 
@@ -53,6 +54,13 @@ void RadiosondeSettings::resetToDefaults()
     m_y1 = ALTITUDE;
     m_y2 = TEMPERATURE;
 
+    m_feedEnabled = false;
+    m_callsign = MainCore::instance()->getSettings().getStationName();
+    m_antenna = "";
+    m_displayPosition = false;
+    m_mobile = false;
+    m_email = "";
+
     for (int i = 0; i < RADIOSONDES_COLUMNS; i++)
     {
         m_radiosondesColumnIndexes[i] = i;
@@ -80,6 +88,14 @@ QByteArray RadiosondeSettings::serialize() const
     s.writeS32(11, (int)m_y2);
     s.writeS32(12, m_workspaceIndex);
     s.writeBlob(13, m_geometryBytes);
+
+    s.writeBool(14, m_feedEnabled);
+    s.writeString(15, m_callsign);
+    s.writeString(16, m_antenna);
+    s.writeBool(17, m_displayPosition);
+    s.writeBool(18, m_mobile);
+    s.writeString(19, m_email);
+
 
     for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
         s.writeS32(300 + i, m_radiosondesColumnIndexes[i]);
@@ -137,6 +153,13 @@ bool RadiosondeSettings::deserialize(const QByteArray& data)
         d.readS32(12, &m_workspaceIndex, 0);
         d.readBlob(13, &m_geometryBytes);
 
+        d.readBool(14, &m_feedEnabled, false);
+        d.readString(15, &m_callsign, MainCore::instance()->getSettings().getStationName());
+        d.readString(16, &m_antenna, "");
+        d.readBool(17, &m_displayPosition, false);
+        d.readBool(18, &m_mobile, false);
+        d.readString(19, &m_email, "");
+
         for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
             d.readS32(300 + i, &m_radiosondesColumnIndexes[i], i);
         }
@@ -182,6 +205,24 @@ void RadiosondeSettings::applySettings(const QStringList& settingsKeys, const Ra
     }
     if (settingsKeys.contains("y2")) {
         m_y2 = settings.m_y2;
+    }
+    if (settingsKeys.contains("feedEnabled")) {
+        m_feedEnabled = settings.m_feedEnabled;
+    }
+    if (settingsKeys.contains("callsign")) {
+        m_callsign = settings.m_callsign;
+    }
+    if (settingsKeys.contains("antenna")) {
+        m_antenna = settings.m_antenna;
+    }
+    if (settingsKeys.contains("displayPosition")) {
+        m_displayPosition = settings.m_displayPosition;
+    }
+    if (settingsKeys.contains("mobile")) {
+        m_mobile = settings.m_mobile;
+    }
+    if (settingsKeys.contains("email")) {
+        m_email = settings.m_email;
     }
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
@@ -232,6 +273,24 @@ QString RadiosondeSettings::getDebugString(const QStringList& settingsKeys, bool
     }
     if (settingsKeys.contains("y2") || force) {
         ostr << " m_y2: " << m_y2;
+    }
+    if (settingsKeys.contains("feedEnabled") || force) {
+        ostr << " m_feedEnabled: " << m_feedEnabled;
+    }
+    if (settingsKeys.contains("callsign") || force) {
+        ostr << " m_callsign: " << m_callsign.toStdString();
+    }
+    if (settingsKeys.contains("antenna") || force) {
+        ostr << " m_antenna: " << m_antenna.toStdString();
+    }
+    if (settingsKeys.contains("displayPosition") || force) {
+        ostr << " m_displayPosition: " << m_displayPosition;
+    }
+    if (settingsKeys.contains("mobile") || force) {
+        ostr << " m_mobile: " << m_mobile;
+    }
+    if (settingsKeys.contains("email") || force) {
+        ostr << " m_email: " << m_email.toStdString();
     }
     if (settingsKeys.contains("workspaceIndex") || force) {
         ostr << " m_workspaceIndex: " << m_workspaceIndex;
