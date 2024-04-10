@@ -29,7 +29,7 @@
 class SDRGUI_API TimeDelegate : public QStyledItemDelegate {
 
 public:
-    TimeDelegate(QString format = "hh:mm:ss");
+    TimeDelegate(QString format = "hh:mm:ss", QObject *parent = nullptr);
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override;
 
 private:

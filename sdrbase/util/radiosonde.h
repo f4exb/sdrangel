@@ -113,11 +113,14 @@ public:
 
     float getPressureFloat(const RS41Subframe *subframe);
     QString getPressureString(const RS41Subframe *subframe);
+    bool isPressureCalibrated() const { return m_pressureCalibrated; }
     float getTemperatureFloat(const RS41Subframe *subframe);
     QString getTemperatureString(const RS41Subframe *subframe);
+    bool isTemperatureCalibrated() const { return m_temperatureCalibrated; }
     float getHumidityTemperatureFloat(const RS41Subframe *subframe);
     float getHumidityFloat(const RS41Subframe *subframe);
     QString getHumidityString(const RS41Subframe *subframe);
+    bool isHumidityCalibrated() const { return m_humidityCalibrated; }
 
     static RS41Frame* decode(const QByteArray ba);
     static int getFrameLength(int frameType);
@@ -162,6 +165,8 @@ public:
     bool getHumidityTempCal(float &r1, float &r2, float *poly, float *cal) const;
     bool hasPressureCal() const;
     bool getPressureCal(float *cal) const;
+    bool hasHumidityPressureCal() const;
+    bool getHumidityPressureCal(float *vec, float *mat) const;
     QString getType() const;
     QString getFrequencyMHz() const;
     QString getBurstKillStatus() const;

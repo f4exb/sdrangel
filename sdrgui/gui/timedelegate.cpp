@@ -22,7 +22,8 @@
 
 #include "timedelegate.h"
 
-TimeDelegate::TimeDelegate(QString format) :
+TimeDelegate::TimeDelegate(QString format, QObject *parent) :
+    QStyledItemDelegate(parent),
     m_format(format)
 {
 }

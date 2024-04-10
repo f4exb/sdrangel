@@ -24,10 +24,13 @@ if(NOT SERVER_MODE)
         radiosondegui.cpp
         radiosondegui.ui
         radiosonde.qrc
+        radiosondefeedsettingsdialog.cpp
+        radiosondefeedsettingsdialog.ui
     )
     set(radiosonde_HEADERS
         ${radiosonde_HEADERS}
         radiosondegui.h
+        radiosondefeedsettingsdialog.h
     )
 
     set(TARGET_NAME featureradiosonde)

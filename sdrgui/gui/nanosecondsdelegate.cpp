@@ -20,7 +20,8 @@
 
 #include "nanosecondsdelegate.h"
 
-NanoSecondsDelegate::NanoSecondsDelegate()
+NanoSecondsDelegate::NanoSecondsDelegate(QObject *parent) :
+    QStyledItemDelegate(parent)
 {
 }
 

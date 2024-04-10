@@ -103,12 +103,9 @@ private:
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
 
-    void applyDecimation();
-    void applyPosition();
-
 private slots:
     void handleSourceMessages();
-    void on_deltaFrequency_changed(int index);
+    void on_deltaFrequency_changed(qint64 value);
     void on_channelSampleRate_changed(int value);
     void on_gain_valueChanged(int value);
     void on_sampleBits_currentIndexChanged(int index);

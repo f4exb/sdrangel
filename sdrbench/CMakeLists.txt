@@ -24,6 +24,7 @@ add_library(sdrbench SHARED
 
 include_directories(
     ${FFTW3F_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/logging
@@ -31,6 +32,7 @@ include_directories(
 )
 
 target_link_libraries(sdrbench
+    Boost::disable_autolinking
     ${FFTW3F_LIBRARIES}
     Qt::Core
     Qt::Gui

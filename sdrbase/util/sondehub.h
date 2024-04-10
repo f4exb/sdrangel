@@ -1,8 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2020-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2024 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,23 +15,60 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#ifndef INCLUDE_SONDEHUB_H
+#define INCLUDE_SONDEHUB_H
+
+#include <QtCore>
 #include <QDateTime>
 
-#include "datetimedelegate.h"
+#include "export.h"
 
-DateTimeDelegate::DateTimeDelegate(QString format, QObject *parent) :
-    QStyledItemDelegate(parent),
-    m_format(format)
+class QNetworkAccessManager;
+class QNetworkReply;
+class RS41Frame;
+class RS41Subframe;
+
+class SDRBASE_API SondeHub : public QObject
 {
-}
+    Q_OBJECT
+protected:
+    SondeHub();
 
-QString DateTimeDelegate::displayText(const QVariant &value, const QLocale &locale) const
-{
-    (void) locale;
-    if (value.toString() == "") {
-        return "";
-    } else {
-        return value.toDateTime().toString(m_format);
-    }
-}
+public:
 
+    static SondeHub* create();
+
+    ~SondeHub();
+
+    void upload(
+        const QString uploaderCallsign,
+        QDateTime timeReceived,
+        RS41Frame *frame,
+        const RS41Subframe *subframe,
+        float uploaderLat,
+        float uploaderLon,
+        float uploaderAlt
+    );
+
+    void updatePosition(
+        const QString& callsign,
+        float latitude,
+        float longitude,
+        float altitude,
+        const QString& radio,
+        const QString& antenna,
+        const QString& email,
+        bool mobile
+    );
+
+
+private slots:
+    void handleReply(QNetworkReply* reply);
+
+private:
+
+    QNetworkAccessManager *m_networkManager;
+
+};
+
+#endif /* INCLUDE_SONDEHUB_H */

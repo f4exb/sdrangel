@@ -269,6 +269,7 @@ set(sdrbase_SOURCES
     util/simpleserializer.cpp
     util/serialutil.cpp
     util/solardynamicsobservatory.cpp
+    util/sondehub.cpp
     #util/spinlock.cpp
     util/spyserverlist.cpp
     util/stix.cpp
@@ -528,6 +529,7 @@ set(sdrbase_HEADERS
     util/simpleserializer.h
     util/serialutil.h
     util/solardynamicsobservatory.h
+    util/sondehub.h
     #util/spinlock.h
     util/spyserverlist.h
     util/stix.h

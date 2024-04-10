@@ -31,6 +31,7 @@
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "util/radiosonde.h"
+#include "util/sondehub.h"
 #include "settings/rollupstate.h"
 
 #include "radiosondesettings.h"
@@ -101,6 +102,8 @@ private:
 
     QMenu *radiosondesMenu;                         // Column select context menu
 
+    SondeHub *m_sondeHub;
+
     explicit RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~RadiosondeGUI();
 
@@ -121,6 +124,8 @@ private:
     QAction *createCheckableItem(QString& text, int idx, bool checked, const char *slot);
     void plotChart();
     float getData(RadiosondeSettings::ChartData dataType, RadiosondeData *radiosonde, RS41Frame *message);
+    void updatePosition();
+    QStringList getRadios();
 
     enum RadiosondeCol {
         RADIOSONDE_COL_SERIAL,
@@ -157,6 +162,10 @@ private slots:
     void on_y1_currentIndexChanged(int index);
     void on_y2_currentIndexChanged(int index);
     void on_deleteAll_clicked();
+    void on_feed_clicked(bool checked);
+    void feedSelect(const QPoint& p);
+    void preferenceChanged(int elementType);
+
 };
 
 #endif // INCLUDE_FEATURE_RADIOSONDEGUI_H_

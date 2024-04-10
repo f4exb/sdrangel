@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2019 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -30,8 +30,8 @@
 class SDRGUI_API DecimalDelegate : public QStyledItemDelegate {
 
 public:
-    DecimalDelegate(int precision = 2);
-    DecimalDelegate(int precision, double min, double max);
+    DecimalDelegate(int precision = 2, QObject *parent = nullptr);
+    DecimalDelegate(int precision, double min, double max, QObject *parent = nullptr);
 
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override;
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;

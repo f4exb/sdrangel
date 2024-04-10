@@ -21,6 +21,7 @@
 #include <QAbstractSocket>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QCoreApplication>
 
 #include "webapi/webapiadapterinterface.h"
 #include "webapi/webapiutils.h"
@@ -212,7 +213,12 @@ void APRSWorker::recv()
             if (!m_loggedIn)
             {
                 // Log in with callsign and passcode
-                QString login = QString("user %1 pass %2 vers SDRangel 7.19.2%3\r\n").arg(m_settings.m_igateCallsign).arg(m_settings.m_igatePasscode).arg(m_settings.m_igateFilter.isEmpty() ? "" : QString(" filter %1").arg(m_settings.m_igateFilter));
+                QString login = QString("user %1 pass %2 vers SDRangel %3%4\r\n")
+                    .arg(m_settings.m_igateCallsign)
+                    .arg(m_settings.m_igatePasscode)
+                    .arg(qApp->applicationVersion())
+                    .arg(m_settings.m_igateFilter.isEmpty() ? "" : QString(" filter %1").arg(m_settings.m_igateFilter)
+                    );
                 send(login.toLatin1(), login.length());
                 m_loggedIn = true;
                 if (m_msgQueueToFeature)

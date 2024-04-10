@@ -29,7 +29,7 @@
 class SDRGUI_API NanoSecondsDelegate : public QStyledItemDelegate {
 
 public:
-    NanoSecondsDelegate();
+    NanoSecondsDelegate(QObject *parent = nullptr);
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override;
 
 };

@@ -27,8 +27,8 @@
 class SDRGUI_API Int64Delegate : public QStyledItemDelegate {
 
 public:
-    Int64Delegate();
-    Int64Delegate(qint64 min, qint64 max);
+    Int64Delegate(QObject *parent = nullptr);
+    Int64Delegate(qint64 min, qint64 max, QObject *parent = nullptr);
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override;
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
     void setMin(qint64 min) { m_min = min; }

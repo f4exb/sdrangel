@@ -1,8 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2020-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2024 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,23 +15,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QDateTime>
+#include "radiosondefeedsettingsdialog.h"
 
-#include "datetimedelegate.h"
-
-DateTimeDelegate::DateTimeDelegate(QString format, QObject *parent) :
-    QStyledItemDelegate(parent),
-    m_format(format)
+RadiosondeFeedSettingsDialog::RadiosondeFeedSettingsDialog(RadiosondeSettings *settings, QWidget* parent) :
+    QDialog(parent),
+    ui(new Ui::RadiosondeFeedSettingsDialog),
+    m_settings(settings)
 {
+    ui->setupUi(this);
+
+    ui->callsign->setText(m_settings->m_callsign);
+    ui->antenna->setText(m_settings->m_antenna);
+    ui->displayPosition->setChecked(m_settings->m_displayPosition);
+    ui->mobile->setChecked(m_settings->m_mobile);
+    ui->email->setText(m_settings->m_email);
 }
 
-QString DateTimeDelegate::displayText(const QVariant &value, const QLocale &locale) const
+RadiosondeFeedSettingsDialog::~RadiosondeFeedSettingsDialog()
 {
-    (void) locale;
-    if (value.toString() == "") {
-        return "";
-    } else {
-        return value.toDateTime().toString(m_format);
-    }
+    delete ui;
 }
 
+void RadiosondeFeedSettingsDialog::accept()
+{
+    m_settings->m_callsign = ui->callsign->text();
+    m_settings->m_antenna = ui->antenna->text();
+    m_settings->m_displayPosition = ui->displayPosition->isChecked();
+    m_settings->m_mobile = ui->mobile->isChecked();
+    m_settings->m_email = ui->email->text();
+
+    QDialog::accept();
+}
