@@ -23,7 +23,8 @@
 #include "frequencydelegate.h"
 #include "int64validator.h"
 
-FrequencyDelegate::FrequencyDelegate(const QString& units, int precision, bool group) :
+FrequencyDelegate::FrequencyDelegate(const QString& units, int precision, bool group, QObject *parent) :
+    QStyledItemDelegate(parent),
     m_units(units),
     m_precision(precision),
     m_group(group)

@@ -20,13 +20,15 @@
 #include "int64delegate.h"
 #include "int64validator.h"
 
-Int64Delegate::Int64Delegate() :
+Int64Delegate::Int64Delegate(QObject *parent) :
+    QStyledItemDelegate(parent),
     m_min(-std::numeric_limits<qint64>::max()),
     m_max(std::numeric_limits<qint64>::max())
 {
 }
 
-Int64Delegate::Int64Delegate(qint64 min, qint64 max) :
+Int64Delegate::Int64Delegate(qint64 min, qint64 max, QObject *parent) :
+    QStyledItemDelegate(parent),
     m_min(min),
     m_max(max)
 {

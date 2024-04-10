@@ -29,7 +29,7 @@
 class SDRGUI_API FrequencyDelegate : public QStyledItemDelegate {
 
 public:
-    FrequencyDelegate(const QString& units = "kHz", int precision=1, bool group=true);
+    FrequencyDelegate(const QString& units = "kHz", int precision=1, bool group=true, QObject *parent = nullptr);
     QString displayText(const QVariant &value, const QLocale &locale) const override;
 
 protected:
