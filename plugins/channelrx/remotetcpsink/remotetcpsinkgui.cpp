@@ -282,6 +282,7 @@ void RemoteTCPSinkGUI::displayRateAndShift()
 {
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_channelSampleRate);
+    //m_channelMarker.setVisible(m_settings.m_channelSampleRate != m_basebandSampleRate); // Hide marker if it takes up full bandwidth
 }
 
 void RemoteTCPSinkGUI::leaveEvent(QEvent* event)
@@ -389,17 +390,19 @@ void RemoteTCPSinkGUI::channelMarkerHighlightedByCursor()
     setHighlighted(m_channelMarker.getHighlighted());
 }
 
-void RemoteTCPSinkGUI::on_deltaFrequency_changed(int index)
+void RemoteTCPSinkGUI::on_deltaFrequency_changed(qint64 value)
 {
-    m_settings.m_inputFrequencyOffset = index;
+    m_channelMarker.setCenterFrequency(value);
+    m_settings.m_inputFrequencyOffset = value;
     applySetting("inputFrequencyOffset");
 }
 
-void RemoteTCPSinkGUI::on_channelSampleRate_changed(int index)
+void RemoteTCPSinkGUI::on_channelSampleRate_changed(int value)
 {
-    m_settings.m_channelSampleRate = index;
+    m_settings.m_channelSampleRate = value;
     m_bwAvg.reset();
     applySetting("channelSampleRate");
+    displayRateAndShift();
 }
 
 void RemoteTCPSinkGUI::on_gain_valueChanged(int value)
