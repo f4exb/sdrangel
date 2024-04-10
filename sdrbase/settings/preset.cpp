@@ -31,10 +31,16 @@ Preset::Preset()
 }
 
 Preset::Preset(const Preset& other) :
+	m_presetType(other.m_presetType),
 	m_group(other.m_group),
 	m_description(other.m_description),
 	m_centerFrequency(other.m_centerFrequency),
 	m_spectrumConfig(other.m_spectrumConfig),
+	m_spectrumGeometry(other.m_spectrumGeometry),
+	m_spectrumWorkspaceIndex(other.m_spectrumWorkspaceIndex),
+	m_deviceGeometry(other.m_deviceGeometry),
+	m_deviceWorkspaceIndex(other.m_deviceWorkspaceIndex),
+	m_selectedDevice(other.m_selectedDevice),
 	m_dcOffsetCorrection(other.m_dcOffsetCorrection),
 	m_iqImbalanceCorrection(other.m_iqImbalanceCorrection),
 	m_channelConfigs(other.m_channelConfigs),
@@ -50,6 +56,14 @@ void Preset::resetToDefaults()
 	m_description = "no name";
 	m_centerFrequency = 0;
 	m_spectrumConfig.clear();
+	m_spectrumGeometry.clear();
+	m_spectrumWorkspaceIndex = 0;
+	m_selectedDevice.m_deviceId = "";
+	m_selectedDevice.m_deviceSerial = "";
+	m_selectedDevice.m_deviceSequence = 0;
+	m_selectedDevice.m_deviceItemIndex = 0;
+	m_deviceGeometry.clear();
+	m_deviceWorkspaceIndex = 0;
 	m_layout.clear();
 	m_channelConfigs.clear();
 	m_dcOffsetCorrection = false;
