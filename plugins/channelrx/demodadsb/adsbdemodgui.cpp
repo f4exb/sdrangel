@@ -4671,6 +4671,7 @@ void ADSBDemodGUI::feedSelect(const QPoint& p)
 {
     ADSBDemodFeedDialog dialog(&m_settings);
     dialog.move(p);
+    new DialogPositioner(&dialog, false);
 
     if (dialog.exec() == QDialog::Accepted)
     {
@@ -5040,6 +5041,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 ADSBDemodGUI::~ADSBDemodGUI()
 {
+    disconnect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &ADSBDemodGUI::preferenceChanged);
     if (m_templateServer)
     {
         m_templateServer->close();
