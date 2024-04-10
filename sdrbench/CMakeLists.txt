@@ -11,7 +11,6 @@ set(sdrbench_SOURCES
     test_ft8.cpp
     test_callsign.cpp
     test_ft8protocols.cpp
-    ../ft8/pack0.cpp
 )
 
 set(sdrbench_HEADERS
