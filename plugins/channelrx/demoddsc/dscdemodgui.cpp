@@ -22,6 +22,7 @@
 #include <QAction>
 #include <QClipboard>
 #include <QFileDialog>
+#include <QRegExp>
 #include <QScrollBar>
 #include <QMenu>
 #include <QDesktopServices>
