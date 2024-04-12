@@ -31,14 +31,12 @@
 #include "SWGRtlSdrSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGRtlSdrReport.h"
 
 #include "rtlsdrinput.h"
 #include "device/deviceapi.h"
 #include "rtlsdrthread.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #ifdef ANDROID
 #include "util/android.h"
 #endif

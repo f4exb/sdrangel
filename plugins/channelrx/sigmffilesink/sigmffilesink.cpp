@@ -37,10 +37,8 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspengine.h"
 #include "dsp/devicesamplesource.h"
-#include "dsp/hbfilterchainconverter.h"
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
-#include "feature/feature.h"
 #include "maincore.h"
 
 #include "sigmffilesinkmessages.h"

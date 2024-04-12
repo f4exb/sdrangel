@@ -24,7 +24,6 @@
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
 #include "channel/channelwebapiutils.h"
-#include "mainwindow.h"
 #include "maincore.h"
 #include "device/deviceuiset.h"
 #include "util/units.h"

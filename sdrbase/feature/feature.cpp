@@ -26,7 +26,6 @@
 #include "SWGDeviceState.h"
 
 #include "feature.h"
-#include "maincore.h"
 
 Feature::Feature(const QString& uri, WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_guiMessageQueue(nullptr),

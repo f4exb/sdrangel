@@ -24,7 +24,6 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"

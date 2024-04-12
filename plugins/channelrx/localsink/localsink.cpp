@@ -36,7 +36,6 @@
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 #include "device/deviceset.h"
-#include "feature/feature.h"
 #include "settings/serializable.h"
 #include "maincore.h"
 

@@ -32,7 +32,6 @@
 #include "SWGMapItem.h"
 
 #include "webapi/webapiadapterinterface.h"
-#include "webapi/webapiutils.h"
 
 #include "util/units.h"
 #include "device/deviceset.h"

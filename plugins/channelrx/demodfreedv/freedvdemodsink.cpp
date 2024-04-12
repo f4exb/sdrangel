@@ -22,7 +22,6 @@
 #include "codec2/modem_stats.h"
 
 #include "dsp/basebandsamplesink.h"
-#include "audio/audiooutputdevice.h"
 #include "util/db.h"
 
 #include "freedvdemodsink.h"

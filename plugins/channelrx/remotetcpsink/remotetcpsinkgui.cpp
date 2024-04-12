@@ -21,12 +21,9 @@
 
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
-#include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
-#include "mainwindow.h"
 
 #include "remotetcpsinkgui.h"
 #include "remotetcpsink.h"

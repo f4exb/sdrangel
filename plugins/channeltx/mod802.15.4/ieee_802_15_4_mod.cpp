@@ -39,12 +39,9 @@
 #include <complex.h>
 #include <algorithm>
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
-#include "feature/feature.h"
 #include "util/db.h"
-#include "util/crc.h"
 #include "maincore.h"
 
 #include "ieee_802_15_4_modbaseband.h"

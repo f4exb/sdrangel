@@ -31,10 +31,7 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
-#include "dsp/dspdevicesourceengine.h"
-#include "dsp/devicesamplesource.h"
 #include "device/deviceapi.h"
-#include "feature/feature.h"
 #include "settings/serializable.h"
 #include "maincore.h"
 

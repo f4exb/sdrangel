@@ -29,9 +29,8 @@
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/tabletapandhold.h"
 #include "gui/dialogpositioner.h"
-#include "mainwindow.h"
-#include "device/deviceuiset.h"
 #include "util/mmsi.h"
+#include "maincore.h"
 
 #include "ui_aisgui.h"
 #include "ais.h"

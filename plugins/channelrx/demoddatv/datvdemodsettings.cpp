@@ -22,7 +22,7 @@
 #include "leansdr/dvb.h"
 #include "leansdr/sdr.h"
 
-#include "dsp/dspengine.h"
+#include "audio/audiodevicemanager.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
 

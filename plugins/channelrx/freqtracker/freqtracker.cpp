@@ -35,14 +35,10 @@
 #include "SWGChannelReport.h"
 #include "SWGFreqTrackerReport.h"
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "dsp/fftfilt.h"
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 #include "util/db.h"
-#include "util/stepfunctions.h"
-#include "feature/feature.h"
 #include "maincore.h"
 
 #include "freqtrackerreport.h"

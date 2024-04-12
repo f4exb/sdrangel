@@ -19,7 +19,6 @@
 
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "soapysdr/devicesoapysdr.h"
 
 #include "soapysdrinputplugin.h"

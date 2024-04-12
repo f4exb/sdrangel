@@ -34,23 +34,19 @@
 #include "dsp/dspcommands.h"
 #include "ui_vordemodmcgui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/db.h"
 #include "util/morse.h"
 #include "util/units.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
-#include "channel/channelwebapiutils.h"
 #include "maincore.h"
 
 #include "vordemodmc.h"
 #include "vordemodmcreport.h"
-#include "vordemodmcsink.h"
 
 #define VOR_COL_NAME            0
 #define VOR_COL_FREQUENCY       1

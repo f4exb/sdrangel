@@ -21,7 +21,6 @@
 #include <QTime>
 #include "dsp/dsptypes.h"
 #include "audio/audiofifo.h"
-#include "audio/audionetsink.h"
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 

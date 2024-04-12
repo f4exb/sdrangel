@@ -32,7 +32,6 @@
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "soapysdr/devicesoapysdr.h"
 
 #include "soapysdrinputthread.h"

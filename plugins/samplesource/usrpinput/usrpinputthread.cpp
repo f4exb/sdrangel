@@ -23,7 +23,6 @@
 
 #include <uhd/types/stream_cmd.hpp>
 
-#include "usrpinputsettings.h"
 #include "usrpinputthread.h"
 
 USRPInputThread::USRPInputThread(uhd::rx_streamer::sptr stream, size_t bufSamples,

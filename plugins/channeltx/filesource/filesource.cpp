@@ -33,10 +33,7 @@
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
-#include "dsp/devicesamplesink.h"
 #include "dsp/hbfilterchainconverter.h"
-#include "dsp/filerecord.h"
-#include "feature/feature.h"
 #include "settings/serializable.h"
 #include "util/db.h"
 #include "maincore.h"

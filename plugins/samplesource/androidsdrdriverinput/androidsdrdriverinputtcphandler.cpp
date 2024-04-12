@@ -20,8 +20,6 @@
 #include <QUdpSocket>
 #include <QDebug>
 
-#include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "device/deviceapi.h"
 
 #include "androidsdrdriverinputtcphandler.h"

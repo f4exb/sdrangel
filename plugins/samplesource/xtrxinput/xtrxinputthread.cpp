@@ -21,7 +21,6 @@
 #include <thread>
 
 #include "xtrx/devicextrx.h"
-#include "xtrxinputsettings.h"
 #include "xtrxinputthread.h"
 
 XTRXInputThread::XTRXInputThread(struct xtrx_dev *dev, unsigned int nbChannels, unsigned int uniqueChannelIndex, QObject* parent) :

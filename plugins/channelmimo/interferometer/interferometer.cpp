@@ -28,7 +28,6 @@
 #include "device/deviceapi.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
-#include "feature/feature.h"
 #include "maincore.h"
 
 #include "interferometerbaseband.h"

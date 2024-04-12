@@ -24,9 +24,7 @@
 #include "device/deviceset.h"
 #include "settings/mainsettings.h"
 #include "maincore.h"
-#include "util/messagequeue.h"
 #include "plugin/pluginmanager.h"
-#include "plugin/pluginapi.h"
 
 SatelliteDeviceSettingsGUI::SatelliteDeviceSettingsGUI(SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings,
                                                        QTabWidget *tab, QWidget *parent) :

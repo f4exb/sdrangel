@@ -28,9 +28,7 @@
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
-#include "dsp/dspengine.h"
 #include "device/deviceapi.h"
 
 #include "bladerf1input.h"

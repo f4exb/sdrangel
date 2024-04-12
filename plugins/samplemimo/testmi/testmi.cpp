@@ -31,8 +31,6 @@
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
-#include "dsp/dspdevicemimoengine.h"
 #include "dsp/devicesamplesource.h"
 
 #include "testmiworker.h"

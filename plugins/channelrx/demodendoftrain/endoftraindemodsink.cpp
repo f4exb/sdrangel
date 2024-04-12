@@ -18,10 +18,8 @@
 
 #include <QDebug>
 
-#include "dsp/dspengine.h"
 #include "dsp/datafifo.h"
 #include "device/deviceapi.h"
-#include "util/db.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
 

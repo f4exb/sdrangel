@@ -28,7 +28,6 @@
 #include "SWGSatelliteTrackerSettings.h"
 #include "SWGSatelliteDeviceSettings.h"
 
-#include "dsp/dspengine.h"
 #include "util/httpdownloadmanager.h"
 #include "settings/serializable.h"
 #include "channel/channelwebapiutils.h"

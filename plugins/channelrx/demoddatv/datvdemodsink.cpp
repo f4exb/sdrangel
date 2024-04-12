@@ -26,10 +26,6 @@
 #include <QFileInfo>
 #include <QMutexLocker>
 
-#include "audio/audiooutputdevice.h"
-#include "dsp/dspengine.h"
-#include "device/deviceapi.h"
-
 #include "datvdemodreport.h"
 
 const unsigned int DATVDemodSink::m_rfFilterFftLength = 512;

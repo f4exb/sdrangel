@@ -37,7 +37,6 @@
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspdevicesourceengine.h"
-#include "dsp/dspengine.h"
 #include "device/deviceapi.h"
 #include "util/sha512.h"
 

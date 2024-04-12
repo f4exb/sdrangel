@@ -23,7 +23,6 @@
 #include "settings/serializable.h"
 #include "channel/channelwebapiutils.h"
 #include "device/deviceset.h"
-#include "device/deviceapi.h"
 #include "maincore.h"
 
 #include "sidsettings.h"

@@ -19,7 +19,6 @@
 #include <QDebug>
 #include <QThread>
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/spectrumvis.h"
 #include "maincore.h"

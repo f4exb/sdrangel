@@ -29,7 +29,6 @@
 #include "SWGSimplePTTReport.h"
 #include "SWGDeviceState.h"
 
-#include "dsp/dspengine.h"
 #include "settings/serializable.h"
 
 #include "simplepttworker.h"

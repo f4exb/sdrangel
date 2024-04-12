@@ -23,8 +23,6 @@
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
-#include "mainwindow.h"
-#include "device/deviceuiset.h"
 
 #include "ui_pertestergui.h"
 #include "pertester.h"

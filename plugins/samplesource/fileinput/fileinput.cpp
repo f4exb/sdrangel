@@ -33,7 +33,6 @@
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspdevicesourceengine.h"
-#include "dsp/dspengine.h"
 #include "dsp/filerecord.h"
 #include "dsp/wavfilerecord.h"
 #include "device/deviceapi.h"

@@ -22,8 +22,6 @@
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
-#include "device/deviceset.h"
-#include "util/db.h"
 #include "maincore.h"
 
 #include "ui_jogdialcontrollergui.h"

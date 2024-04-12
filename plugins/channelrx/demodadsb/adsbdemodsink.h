@@ -25,10 +25,8 @@
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "util/movingaverage.h"
 
 #include "adsbdemodsettings.h"
-#include "adsbdemodstats.h"
 #include "adsbdemodsinkworker.h"
 
 class ADSBDemodSink : public ChannelSampleSink {

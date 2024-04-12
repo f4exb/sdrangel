@@ -20,7 +20,6 @@
 #include <QDebug>
 
 #include "dsp/downchannelizer.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
 #include "remotetcpsinkbaseband.h"

@@ -22,6 +22,7 @@
 #include <QAction>
 #include <QClipboard>
 #include <QFileDialog>
+#include <QRegExp>
 #include <QScrollBar>
 #include <QMenu>
 #include <QDesktopServices>
@@ -36,13 +37,10 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "ui_dscdemodgui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/csv.h"
 #include "util/db.h"
 #include "util/mmsi.h"
-#include "util/units.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "gui/decimaldelegate.h"
 #include "dsp/dspengine.h"
 #include "dsp/glscopesettings.h"
@@ -55,7 +53,6 @@
 #include "maincore.h"
 
 #include "dscdemod.h"
-#include "dscdemodsink.h"
 
 #include "SWGMapItem.h"
 

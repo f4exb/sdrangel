@@ -23,9 +23,7 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "gui/dialogpositioner.h"
-#include "mainwindow.h"
 
 #include "remotesource.h"
 #include "ui_remotesourcegui.h"

@@ -22,10 +22,8 @@
 #include <QCheckBox>
 
 #include "device/deviceset.h"
-#include "settings/mainsettings.h"
-#include "settings/preset.h"
 #include "maincore.h"
-#include "util/messagequeue.h"
+
 #include "satelliteradiocontroldialog.h"
 
 SatelliteRadioControlDialog::SatelliteRadioControlDialog(SatelliteTrackerSettings *settings,

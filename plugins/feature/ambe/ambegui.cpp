@@ -18,7 +18,6 @@
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
-#include "gui/crightclickenabler.h"
 #include "gui/dialogpositioner.h"
 
 #include "ui_ambegui.h"

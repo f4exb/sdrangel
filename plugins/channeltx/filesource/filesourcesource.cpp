@@ -29,9 +29,6 @@
 
 #include <QDebug>
 
-#include "dsp/dspcommands.h"
-#include "dsp/devicesamplesink.h"
-#include "dsp/hbfilterchainconverter.h"
 #include "dsp/filerecord.h"
 #include "dsp/wavfilerecord.h"
 #include "util/db.h"

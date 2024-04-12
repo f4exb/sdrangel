@@ -30,7 +30,7 @@
 #include "airspyplugin.h"
 
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
+
 #ifdef ANDROID
 #include "util/android.h"
 #endif

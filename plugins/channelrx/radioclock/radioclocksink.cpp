@@ -20,10 +20,8 @@
 
 #include <complex.h>
 
-#include "dsp/dspengine.h"
 #include "dsp/scopevis.h"
 #include "util/db.h"
-#include "maincore.h"
 
 #include "radioclock.h"
 #include "radioclocksink.h"

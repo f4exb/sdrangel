@@ -37,25 +37,19 @@
 #include "dsp/dspcommands.h"
 #include "ui_aisdemodgui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/ais.h"
 #include "util/csv.h"
 #include "util/db.h"
 #include "util/mmsi.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
 #include "dsp/glscopesettings.h"
-#include "gui/crightclickenabler.h"
 #include "gui/tabletapandhold.h"
-#include "channel/channelwebapiutils.h"
 #include "maincore.h"
-#include "feature/featurewebapiutils.h"
 
 #include "aisdemod.h"
-#include "aisdemodsink.h"
 
 void AISDemodGUI::resizeTable()
 {

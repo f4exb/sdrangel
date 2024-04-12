@@ -21,12 +21,7 @@
 #include <QTime>
 #include <QDebug>
 
-#include "audio/audiooutputdevice.h"
-#include "dsp/dspengine.h"
-#include "dsp/dspcommands.h"
-#include "dsp/devicesamplemimo.h"
 #include "dsp/datafifo.h"
-#include "util/db.h"
 #include "util/messagequeue.h"
 #include "maincore.h"
 

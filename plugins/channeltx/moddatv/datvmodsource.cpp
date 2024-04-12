@@ -35,9 +35,6 @@ extern "C"
 #include <libavformat/avformat.h>
 }
 
-#include "dsp/dspcommands.h"
-#include "device/deviceapi.h"
-#include "util/db.h"
 #include "util/messagequeue.h"
 
 #include "datvmodreport.h"

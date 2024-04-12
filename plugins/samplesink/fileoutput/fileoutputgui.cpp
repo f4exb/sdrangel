@@ -26,15 +26,11 @@
 #include <QMessageBox>
 
 #include "ui_fileoutputgui.h"
-#include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-
-#include "mainwindow.h"
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"

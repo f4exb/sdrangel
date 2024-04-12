@@ -31,7 +31,6 @@
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/db.h"
 #include "maincore.h"
 

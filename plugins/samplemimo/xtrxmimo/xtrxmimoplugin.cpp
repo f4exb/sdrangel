@@ -21,7 +21,6 @@
 #include <QtPlugin>
 
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "xtrx/devicextrx.h"
 
 #ifndef SERVER_MODE

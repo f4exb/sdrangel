@@ -25,7 +25,6 @@
 #include <QRegExp>
 
 #include "dsp/dspcommands.h"
-#include "util/simpleserializer.h"
 #include "util/message.h"
 
 #include "wavfilerecord.h"

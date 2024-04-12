@@ -32,7 +32,6 @@
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
 AirspyGui::AirspyGui(DeviceUISet *deviceUISet, QWidget* parent) :

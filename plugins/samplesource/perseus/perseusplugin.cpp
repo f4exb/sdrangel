@@ -21,7 +21,6 @@
 #include "perseus-sdr.h"
 
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "perseus/deviceperseus.h"
 #include "perseusplugin.h"
 #include "perseuswebapiadapter.h"

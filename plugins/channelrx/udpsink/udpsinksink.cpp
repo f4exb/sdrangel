@@ -21,16 +21,7 @@
 #include <QNetworkReply>
 #include <QBuffer>
 
-#include "SWGChannelSettings.h"
-#include "SWGUDPSinkSettings.h"
-#include "SWGChannelReport.h"
-#include "SWGUDPSinkReport.h"
-
 #include "dsp/basebandsamplesink.h"
-#include "dsp/dspengine.h"
-#include "dsp/dspcommands.h"
-#include "dsp/devicesamplemimo.h"
-#include "device/deviceapi.h"
 #include "util/db.h"
 
 #include "udpsinksink.h"

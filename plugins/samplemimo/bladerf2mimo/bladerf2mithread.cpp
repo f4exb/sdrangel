@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-#include "bladerf2/devicebladerf2shared.h"
+#include "bladerf2/devicebladerf2.h"
 #include "dsp/samplemififo.h"
 
 #include "bladerf2mithread.h"

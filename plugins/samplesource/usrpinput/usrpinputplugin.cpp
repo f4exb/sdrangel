@@ -23,7 +23,6 @@
 #include <string>
 
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "usrp/deviceusrp.h"
 
 #ifdef SERVER_MODE

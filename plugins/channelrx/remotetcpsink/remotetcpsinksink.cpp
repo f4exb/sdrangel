@@ -20,14 +20,11 @@
 #include <QThread>
 
 #include "channel/channelwebapiutils.h"
-#include "dsp/hbfilterchainconverter.h"
 #include "device/deviceapi.h"
-#include "util/timeutil.h"
 #include "maincore.h"
 
 #include "remotetcpsinksink.h"
 #include "remotetcpsink.h"
-#include "remotetcpsinkbaseband.h"
 
 RemoteTCPSinkSink::RemoteTCPSinkSink() :
         m_running(false),

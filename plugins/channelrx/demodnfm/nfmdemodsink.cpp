@@ -22,16 +22,9 @@
 #include <QTime>
 #include <QDebug>
 
-#include "util/stepfunctions.h"
-#include "util/db.h"
 #include "util/messagequeue.h"
-#include "audio/audiooutputdevice.h"
-#include "dsp/dspengine.h"
-#include "dsp/dspcommands.h"
-#include "dsp/devicesamplemimo.h"
 #include "dsp/misc.h"
 #include "dsp/datafifo.h"
-#include "device/deviceapi.h"
 #include "maincore.h"
 
 #include "nfmdemodreport.h"

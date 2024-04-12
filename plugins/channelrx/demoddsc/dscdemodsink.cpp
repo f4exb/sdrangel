@@ -19,13 +19,10 @@
 
 #include <complex.h>
 
-#include "dsp/dspengine.h"
 #include "dsp/scopevis.h"
 #include "device/deviceapi.h"
 #include "util/db.h"
-#include "util/popcount.h"
 #include "channel/channelwebapiutils.h"
-#include "maincore.h"
 
 #include "dscdemod.h"
 #include "dscdemodsink.h"

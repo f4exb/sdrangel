@@ -19,7 +19,6 @@
 #include <QDebug>
 
 #include "webapi/webapiadapterinterface.h"
-#include "webapi/webapiutils.h"
 #include "channel/channelwebapiutils.h"
 #include "device/deviceset.h"
 #include "device/deviceapi.h"

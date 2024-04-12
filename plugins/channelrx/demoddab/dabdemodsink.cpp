@@ -21,9 +21,7 @@
 
 #include <complex.h>
 
-#include "dsp/dspengine.h"
 #include "dsp/datafifo.h"
-#include "util/db.h"
 #include "maincore.h"
 
 #include "dabdemod.h"

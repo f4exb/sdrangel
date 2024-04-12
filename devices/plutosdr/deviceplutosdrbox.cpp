@@ -27,7 +27,6 @@
 #include <boost/lexical_cast.hpp>
 #include <QtGlobal>
 
-#include "dsp/dsptypes.h"
 #include "dsp/wfir.h"
 #include "deviceplutosdr.h"
 #include "deviceplutosdrbox.h"

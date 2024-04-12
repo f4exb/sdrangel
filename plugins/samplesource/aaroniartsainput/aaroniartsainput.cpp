@@ -34,7 +34,6 @@
 #include "device/deviceapi.h"
 #include "aaroniartsainputworker.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 
 MESSAGE_CLASS_DEFINITION(AaroniaRTSAInput::MsgConfigureAaroniaRTSA, Message)
 MESSAGE_CLASS_DEFINITION(AaroniaRTSAInput::MsgStartStop, Message)

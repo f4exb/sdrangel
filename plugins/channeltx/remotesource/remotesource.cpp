@@ -34,10 +34,8 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
-#include "feature/feature.h"
 #include "settings/serializable.h"
 #include "util/timeutil.h"
-#include "util/db.h"
 #include "maincore.h"
 
 #include "remotesourcebaseband.h"

@@ -24,7 +24,6 @@
 #include <QJsonValue>
 
 #include "util/messagequeue.h"
-#include "dsp/dspcommands.h"
 
 #include "aaroniartsainputsettings.h"
 #include "aaroniartsainputworker.h"

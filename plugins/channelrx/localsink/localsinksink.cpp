@@ -20,7 +20,6 @@
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
 #include "dsp/devicesamplesource.h"
-#include "dsp/hbfilterchainconverter.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/fftfilt.h"
 #include "util/db.h"

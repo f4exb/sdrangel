@@ -33,7 +33,6 @@
 #include "SWGSkyMapTarget.h"
 
 #include "webapi/webapiadapterinterface.h"
-#include "webapi/webapiutils.h"
 #include "channel/channelwebapiutils.h"
 
 #include "util/units.h"

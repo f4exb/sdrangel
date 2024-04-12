@@ -24,7 +24,6 @@
 #include "dsp/downchannelizer.h"
 
 #include "vordemodbaseband.h"
-#include "vordemodreport.h"
 
 MESSAGE_CLASS_DEFINITION(VORDemodBaseband::MsgConfigureVORDemodBaseband, Message)
 

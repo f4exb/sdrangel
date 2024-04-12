@@ -24,7 +24,6 @@
 #include <QRegularExpression>
 
 #include "util/iot/homeassistant.h"
-#include "util/simpleserializer.h"
 
 HomeAssistantDevice::HomeAssistantDevice(const QString& apiKey, const QString& url, const QString &deviceId,
                                         const QStringList &controls, const QStringList &sensors,

@@ -25,17 +25,13 @@
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
 #include "SWGDeviceState.h"
-#include "SWGStarTrackerDisplaySettings.h"
 
-#include "device/deviceset.h"
-#include "dsp/dspengine.h"
 #include "feature/featureset.h"
 #include "util/weather.h"
 #include "util/units.h"
 #include "settings/serializable.h"
 #include "maincore.h"
 
-#include "startrackerreport.h"
 #include "startrackerworker.h"
 #include "startracker.h"
 

@@ -20,12 +20,6 @@
 
 #include <complex.h>
 
-#include "dsp/dspengine.h"
-#include "dsp/dspengine.h"
-#include "util/db.h"
-#include "util/stepfunctions.h"
-#include "maincore.h"
-
 #include "aptdemod.h"
 #include "aptdemodsink.h"
 

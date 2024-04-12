@@ -47,7 +47,6 @@
 #include "plugin/pluginmanager.h"
 #include "channel/channelapi.h"
 #include "webapi/webapiadapterbase.h"
-#include "util/serialutil.h"
 
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGInstanceConfigResponse.h"
@@ -80,8 +79,6 @@
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 #include "SWGDeviceState.h"
-#include "SWGLimeRFEDevices.h"
-#include "SWGLimeRFESettings.h"
 #include "SWGFeaturePresets.h"
 #include "SWGFeaturePresetGroup.h"
 #include "SWGFeaturePresetItem.h"

@@ -18,11 +18,9 @@
 
 #include <QDebug>
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/downchannelizer.h"
 
-#include "freqtrackerreport.h"
 #include "freqtrackerbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(FreqTrackerBaseband::MsgConfigureFreqTrackerBaseband, Message)

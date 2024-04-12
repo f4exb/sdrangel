@@ -19,8 +19,6 @@
 #include <QColorDialog>
 #include <QFileDialog>
 
-#include "util/db.h"
-#include "util/csv.h"
 #include "spectrummeasurementsdialog.h"
 #include "spectrummeasurements.h"
 #include "glspectrum.h"

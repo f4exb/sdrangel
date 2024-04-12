@@ -22,8 +22,6 @@
 #include <QDebug>
 #include <algorithm>
 
-#include "inthalfbandfilter.h"
-#include "dspcommands.h"
 #include "hbfilterchainconverter.h"
 #include "upchannelizer.h"
 

@@ -25,12 +25,9 @@
 #include "SWGDeviceReport.h"
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
-#include "dsp/dspdevicemimoengine.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
 #include "plutosdr/deviceplutosdrparams.h"
-#include "plutosdr/deviceplutosdrshared.h"
 
 #include "plutosdrmithread.h"
 #include "plutosdrmothread.h"

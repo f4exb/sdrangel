@@ -21,17 +21,13 @@
 #include <QToolButton>
 #include <QFileDialog>
 
+#include "mapsettingsdialog.h"
+
 #if (QT_VERSION < QT_VERSION_CHECK(6, 6, 0))
 #include <QtGui/private/qzipreader_p.h>
 #else
 #include <QtCore/private/qzipreader_p.h>
 #endif
-
-#include "util/units.h"
-#include "gui/colordialog.h"
-
-#include "mapsettingsdialog.h"
-#include "maplocationdialog.h"
 
 MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings::MapItemSettings *settings) :
     m_track2D(table, row, MapSettingsDialog::COL_2D_TRACK, !settings->m_display2DTrack, settings->m_2DTrackColor),

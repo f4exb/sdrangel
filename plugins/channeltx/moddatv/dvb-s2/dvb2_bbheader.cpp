@@ -15,7 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.              //
 ///////////////////////////////////////////////////////////////////////////////////////
 #include "DVB2.h"
-#include "memory.h"
 //
 // This file adds the BB header and new transport packets
 //

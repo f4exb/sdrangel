@@ -32,12 +32,10 @@
 #include "SWGChannelReport.h"
 #include "SWGUDPSinkReport.h"
 
-#include "dsp/dspengine.h"
 #include "util/db.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
-#include "feature/feature.h"
 #include "maincore.h"
 
 #include "udpsink.h"

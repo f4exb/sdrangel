@@ -21,11 +21,8 @@
 #include <QBuffer>
 
 #include "SWGFeatureSettings.h"
-#include "SWGFeatureActions.h"
 #include "SWGDeviceState.h"
 
-#include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "dsp/devicesamplesource.h"
@@ -33,7 +30,6 @@
 #include "device/deviceset.h"
 #include "channel/channelapi.h"
 #include "device/deviceapi.h"
-#include "commands/commandkeyreceiver.h"
 #include "settings/serializable.h"
 #include "maincore.h"
 

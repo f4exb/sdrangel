@@ -20,11 +20,9 @@
 #include <QCheckBox>
 #include <QResizeEvent>
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
-#include "util/simpleserializer.h"
 #include "ui_soapysdroutputgui.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"

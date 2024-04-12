@@ -23,7 +23,6 @@
 #include <QString>
 #include <QMessageBox>
 
-#include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "gui/colormapper.h"
@@ -31,16 +30,11 @@
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
-#include "dsp/dspengine.h"
-#include "dsp/dspdevicemimoengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplestatic.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
-#include "util/db.h"
 #include "plutosdr/deviceplutosdr.h"
-
-#include "mainwindow.h"
 
 #include "plutosdrmimo.h"
 #include "ui_plutosdrmimogui.h"

@@ -34,7 +34,6 @@
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
 #include "usrpoutputthread.h"
 #include "usrp/deviceusrpparam.h"
 #include "usrp/deviceusrp.h"

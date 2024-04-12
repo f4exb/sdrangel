@@ -24,16 +24,10 @@
 #include "SWGLimeSdrMIMOSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGLimeSdrMIMOReport.h"
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
-#include "dsp/dspdevicemimoengine.h"
-#include "dsp/devicesamplesource.h"
-#include "dsp/devicesamplesink.h"
-#include "limesdr/devicelimesdrparam.h"
 #include "limesdr/devicelimesdrshared.h"
 
 #include "limesdrmithread.h"

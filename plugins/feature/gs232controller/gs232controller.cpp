@@ -31,8 +31,6 @@
 #include "SWGDeviceState.h"
 #include "SWGTargetAzimuthElevation.h"
 
-#include "dsp/dspengine.h"
-#include "device/deviceset.h"
 #include "feature/featureset.h"
 #include "settings/serializable.h"
 #include "maincore.h"

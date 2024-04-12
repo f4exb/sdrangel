@@ -28,19 +28,14 @@
 #include "dsp/dspcommands.h"
 #include "ui_radioclockgui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
 #include "dsp/dspengine.h"
-#include "dsp/glscopesettings.h"
-#include "gui/crightclickenabler.h"
 #include "maincore.h"
 
 #include "radioclock.h"
-#include "radioclocksink.h"
 
 RadioClockGUI* RadioClockGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {

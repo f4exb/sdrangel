@@ -20,10 +20,8 @@
 
 #include <complex.h>
 
-#include "dsp/dspengine.h"
 #include "dsp/datafifo.h"
 #include "dsp/scopevis.h"
-#include "util/db.h"
 #include "util/popcount.h"
 #include "maincore.h"
 

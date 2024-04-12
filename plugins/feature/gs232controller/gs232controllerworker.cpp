@@ -26,7 +26,6 @@
 #include <QRegularExpression>
 
 #include "maincore.h"
-#include "util/astronomy.h"
 
 #include "SWGTargetAzimuthElevation.h"
 

@@ -19,7 +19,6 @@
 #include <algorithm>
 
 #include "dsp/replaybuffer.h"
-#include "limesdrinputsettings.h"
 #include "limesdrinputthread.h"
 
 LimeSDRInputThread::LimeSDRInputThread(lms_stream_t* stream, SampleSinkFifo* sampleFifo,

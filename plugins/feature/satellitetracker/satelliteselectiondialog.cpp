@@ -24,8 +24,8 @@
 #include <OrbitalElements.h>
 #include <Tle.h>
 
-#include "satelliteselectiondialog.h"
 #include "util/units.h"
+#include "satelliteselectiondialog.h"
 
 using namespace libsgp4;
 

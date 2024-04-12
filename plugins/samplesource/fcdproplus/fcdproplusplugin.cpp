@@ -20,7 +20,6 @@
 
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "fcdproplusplugin.h"
 #include "fcdpropluswebapiadapter.h"
 

@@ -16,21 +16,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
 #include <stdio.h>
 #include <complex.h>
 
 #include <QTime>
 #include <QDebug>
 
-#include "audio/audiooutputdevice.h"
-#include "dsp/dspengine.h"
-#include "dsp/dspcommands.h"
-#include "dsp/devicesamplemimo.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/datafifo.h"
 #include "pipes/datapipes.h"
-#include "util/db.h"
 #include "maincore.h"
 
 #include "rdsparser.h"

@@ -27,22 +27,15 @@
 #include <boost/lexical_cast.hpp>
 
 #include "ui_remoteoutputgui.h"
-#include "plugin/pluginapi.h"
-#include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-
-#include "mainwindow.h"
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "remoteoutputgui.h"
-
-#include "channel/remotedatablock.h"
 
 RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),

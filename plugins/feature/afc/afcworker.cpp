@@ -19,8 +19,6 @@
 
 #include <QDebug>
 
-#include "SWGDeviceState.h"
-#include "SWGSuccessResponse.h"
 #include "SWGDeviceSettings.h"
 #include "SWGChannelSettings.h"
 #include "SWGErrorResponse.h"
@@ -30,7 +28,6 @@
 #include "device/deviceset.h"
 #include "device/deviceapi.h"
 #include "channel/channelapi.h"
-#include "feature/feature.h"
 #include "maincore.h"
 
 #include "afcreport.h"

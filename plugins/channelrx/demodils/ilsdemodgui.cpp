@@ -36,27 +36,22 @@
 #include "dsp/morsedemod.h"
 #include "ui_ilsdemodgui.h"
 #include "plugin/pluginapi.h"
-#include "util/simpleserializer.h"
 #include "util/db.h"
 #include "util/units.h"
 #include "util/morse.h"
 #include "gui/basicchannelsettingsdialog.h"
-#include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/glscopesettings.h"
 #include "dsp/spectrumvis.h"
 #include "gui/crightclickenabler.h"
-#include "gui/tabletapandhold.h"
 #include "gui/dialogpositioner.h"
 #include "gui/audioselectdialog.h"
 #include "channel/channelwebapiutils.h"
 #include "feature/featurewebapiutils.h"
 #include "feature/feature.h"
-#include "feature/featureset.h"
 #include "maincore.h"
 
 #include "ilsdemod.h"
-#include "ilsdemodsink.h"
 
 MESSAGE_CLASS_DEFINITION(ILSDemodGUI::MsgGSAngle, Message)
 

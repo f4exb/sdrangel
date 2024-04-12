@@ -25,18 +25,13 @@
 #include <QMessageBox>
 
 #include "ui_sigmffileinputgui.h"
-#include "plugin/pluginapi.h"
-#include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/filerecordinterface.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
-
-#include "mainwindow.h"
 
 #include "recordinfodialog.h"
 #include "sigmffileinputgui.h"

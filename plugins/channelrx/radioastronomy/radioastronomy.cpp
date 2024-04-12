@@ -31,18 +31,13 @@
 
 #include "SWGChannelSettings.h"
 #include "SWGWorkspaceInfo.h"
-#include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
 #include "SWGRadioAstronomyActions.h"
 
-#include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
-#include "feature/feature.h"
 #include "channel/channelwebapiutils.h"
-#include "feature/featureset.h"
 #include "util/astronomy.h"
-#include "util/db.h"
 #include "maincore.h"
 
 #include "radioastronomyworker.h"

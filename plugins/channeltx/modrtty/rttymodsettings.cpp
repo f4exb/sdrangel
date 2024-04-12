@@ -18,7 +18,6 @@
 #include <QColor>
 #include <QDebug>
 
-#include "dsp/dspengine.h"
 #include "util/baudot.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"

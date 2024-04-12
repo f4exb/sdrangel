@@ -25,7 +25,6 @@
 #include "gui/dialogpositioner.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/scopevis.h"
-#include "dsp/spectrumvis.h"
 #include "maincore.h"
 
 #include "doa2gui.h"

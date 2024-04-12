@@ -24,7 +24,6 @@
 #include "dsp/samplesourcefifo.h"
 
 #include "usrpoutputthread.h"
-#include "usrpoutputsettings.h"
 
 USRPOutputThread::USRPOutputThread(uhd::tx_streamer::sptr stream, size_t bufSamples, SampleSourceFifo* sampleFifo, QObject* parent) :
     QThread(parent),
