@@ -24,6 +24,7 @@
 #include <QByteArray>
 #include <QString>
 #include <QHash>
+#include <QVariant>
 
 class Serializable;
 
