@@ -33,7 +33,7 @@
 const PluginDescriptor HeatMapPlugin::m_pluginDescriptor = {
     HeatMap::m_channelId,
     QStringLiteral("Heat Map"),
-    QStringLiteral("7.17.3"),
+    QStringLiteral("7.20.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

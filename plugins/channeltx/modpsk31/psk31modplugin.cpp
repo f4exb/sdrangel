@@ -33,7 +33,7 @@
 const PluginDescriptor PSK31Plugin::m_pluginDescriptor = {
     PSK31::m_channelId,
     QStringLiteral("PSK31 Modulator"),
-    QStringLiteral("7.17.3"),
+    QStringLiteral("7.20.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

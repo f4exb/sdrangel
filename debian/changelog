@@ -1,3 +1,31 @@
+sdrangel (7.20.0-1) unstable; urgency=medium
+
+   * New Sudden Ionospheric Disturbance feature. PR #2052
+   * Removed unused includes and use more direct includes. PR #2062
+   * Various updates and fixes. Fixing #2061. PR #2063
+   * ChirpChat: added FT mode (FT-chirp)
+   * Support VOR Localizer on Qt6. PR #2057
+   * Fix audio sink/source mapping. PR #2056
+   * Use mouse wheel to zoom in / out of charts. PR #2052
+   * Channel Power: Add absolute frequency setting. PR #2052
+   * RadiosondeDemod: Fix packets read from .csv not being sent to Radiosonde feature.. PR #2052
+   * KiwiSDR: Add position of device to web API report. PR #2052
+   * KiwiSDR: Add position to yaml. PR #2052
+   * SkyMap: Add Moon map. PR #2052
+   * APRS: Check for Cr or LF. For #2028. PR #2052
+   * AX.25 Packet: packetmod supports multi Via; packetdemod fix H bit. PR #2039
+   * Audio optimize & default input/output bugfix. PR #2038
+   * Sat Tracker: Prevent crash if satellite not found. PR #2052
+   * Astronomy: Add sunrise / sunset calculation. PR #2052
+   * APRS: Fix forwarding of binary data to APRS-IS for #2028. PR #2052
+   * APRS: Forward packets to aprsi-is, even if we can't decode them. For #2029. PR #2052
+   * ADSB: Add Airplanes.Live at request of user. PR #2027
+   * Heat Map: Fix overflow in average calculation. PR #2052
+   * AIS Demod: Remove unused filter. PR #2052
+   * SkyMap: Fix erronous entry in source list. PR #2052
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 14 Aprr 2024 09:15:24 +0200
+
 sdrangel (7.19.1-1) unstable; urgency=medium
 
    * Add channel power channel. PR #2019, #2021

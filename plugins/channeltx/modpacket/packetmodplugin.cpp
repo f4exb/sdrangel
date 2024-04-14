@@ -33,7 +33,7 @@
 const PluginDescriptor PacketModPlugin::m_pluginDescriptor = {
     PacketMod::m_channelId,
     QStringLiteral("Packet Modulator"),
-    QStringLiteral("7.17.3"),
+    QStringLiteral("7.20.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

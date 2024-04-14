@@ -31,7 +31,7 @@
 const PluginDescriptor TestSinkPlugin::m_pluginDescriptor = {
     QStringLiteral("TestSink"),
 	QStringLiteral("Test Sink Output"),
-    QStringLiteral("7.17.1"),
+    QStringLiteral("7.20.0"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

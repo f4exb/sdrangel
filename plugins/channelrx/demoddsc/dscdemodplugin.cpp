@@ -33,7 +33,7 @@
 const PluginDescriptor DSCDemodPlugin::m_pluginDescriptor = {
     DSCDemod::m_channelId,
     QStringLiteral("DSC Demodulator"),
-    QStringLiteral("7.17.3"),
+    QStringLiteral("7.20.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
