@@ -53,6 +53,7 @@ SIDAddChannelsDialog::SIDAddChannelsDialog(SIDSettings *settings, QWidget* paren
     }
 
     // Add row for each transmitter, with checkbox for each device
+    ui->channels->setSortingEnabled(false);
     for (int j = 0; j < VLFTransmitters::m_transmitters.size(); j++)
     {
         int row = ui->channels->rowCount();
@@ -60,6 +61,7 @@ SIDAddChannelsDialog::SIDAddChannelsDialog(SIDSettings *settings, QWidget* paren
 
         ui->channels->setItem(row, COL_TX_NAME, new QTableWidgetItem(VLFTransmitters::m_transmitters[j].m_callsign));
         ui->channels->setItem(row, COL_TX_FREQUENCY, new QTableWidgetItem(QString::number(VLFTransmitters::m_transmitters[j].m_frequency)));
+        ui->channels->item(row, COL_TX_FREQUENCY)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
         for (unsigned int i = 0; i < deviceSets.size(); i++)
         {
@@ -72,7 +74,8 @@ SIDAddChannelsDialog::SIDAddChannelsDialog(SIDSettings *settings, QWidget* paren
             }
         }
     }
-
+    ui->channels->sortItems(COL_TX_FREQUENCY);
+    ui->channels->setSortingEnabled(true);
     ui->channels->resizeColumnsToContents();
 }
 
