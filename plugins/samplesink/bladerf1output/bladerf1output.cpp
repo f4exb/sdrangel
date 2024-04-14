@@ -497,7 +497,7 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, const
         m_bladerfThread->startWork();
     }
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
             settingsKeys.contains("reverseAPIAddress") ||

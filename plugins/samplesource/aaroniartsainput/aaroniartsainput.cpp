@@ -299,7 +299,7 @@ bool AaroniaRTSAInput::applySettings(const AaroniaRTSAInputSettings& settings, c
         emit setWorkerSampleRate(settings.m_sampleRate);
     }
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
             settingsKeys.contains("reverseAPIAddress") ||

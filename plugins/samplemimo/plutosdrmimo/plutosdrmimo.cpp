@@ -713,7 +713,7 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, const QLi
         plutoBox->set_params(DevicePlutoSDRBox::DEVICE_PHY, params);
     }
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
             settingsKeys.contains("reverseAPIAddress") ||

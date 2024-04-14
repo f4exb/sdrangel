@@ -557,7 +557,7 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
         forwardTxChange = true;
     }
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
             settingsKeys.contains("reverseAPIAddress") ||

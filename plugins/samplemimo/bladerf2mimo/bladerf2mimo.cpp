@@ -727,7 +727,7 @@ bool BladeRF2MIMO::applySettings(const BladeRF2MIMOSettings& settings, const QLi
 
     // Reverse API settings
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
             settingsKeys.contains("reverseAPIAddress") ||
