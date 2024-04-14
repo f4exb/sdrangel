@@ -230,12 +230,16 @@ Use this combo box to select which window is applied to the FFT:
 <h4>B.4.2. FFT size</h4>
 
 Select the size of the FFT window among these values:
+  - 64
   - 128
   - 256
   - 512
   - 1k = 1024 (default)
   - 2k = 2048
   - 4k = 4096
+  - 8k = 8192
+  - 16k = 16384
+  - 32k = 32768
 
 <h4>B.4.3: FFT Overlap</h4>
 
