@@ -8,7 +8,7 @@ The format is S16LE or S32LE I/Q samples. Thus there are 4 or 8 bytes per sample
 
 You can also zap the 32 bytes header with this Linux command: `tail -c +33 myfile.sdriq > myfile.raw`
 
-To convert in another format you may use the sox utility. For example to convert to 32 bit (float) complex samples do: `sox -r 48k −b 16 −e signed-integer -c 2 myfile.raw -e float -c 2 myfilec.raw`
+To convert in another format you may use the sox utility. For example to convert to 32 bit (float) complex samples do: `sox -r 48k -b 16 -e signed-integer -c 2 myfile.raw -e float -c 2 myfilec.raw`
 
 Note that you have to specify the sampling rate and use .raw for the file extensions.
 
