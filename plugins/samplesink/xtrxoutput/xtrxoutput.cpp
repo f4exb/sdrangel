@@ -906,7 +906,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, const QList<Q
         forceNCOFrequency = true;
     }
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
             settingsKeys.contains("reverseAPIAddress") ||

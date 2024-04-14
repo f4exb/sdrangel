@@ -693,7 +693,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
         }
     }
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
             settingsKeys.contains("reverseAPIAddress") ||

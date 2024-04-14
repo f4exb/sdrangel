@@ -302,7 +302,7 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, const QLi
 
     mutexLocker.unlock();
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
             settingsKeys.contains("reverseAPIAddress") ||

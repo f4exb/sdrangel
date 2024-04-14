@@ -836,7 +836,7 @@ bool SigMFFileInput::applySettings(const SigMFFileInputSettings& settings, const
         openFileStreams(settings.m_fileName);
     }
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
             settingsKeys.contains("reverseAPIAddress") ||

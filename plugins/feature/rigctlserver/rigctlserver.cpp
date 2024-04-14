@@ -173,7 +173,7 @@ void RigCtlServer::applySettings(const RigCtlServerSettings& settings, const QLi
     );
     m_worker->getInputMessageQueue()->push(msg);
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
                 settingsKeys.contains("reverseAPIAddress") ||
