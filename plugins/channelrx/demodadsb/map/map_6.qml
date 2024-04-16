@@ -74,6 +74,7 @@ Item {
                 id: station
                 objectName: "station"
                 stationName: "Home"
+                parent: mapView.map
             }
 
             MapItemView {

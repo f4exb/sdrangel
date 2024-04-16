@@ -4802,6 +4802,25 @@ void ADSBDemodGUI::applyMapSettings()
     // Restore position of map
     if (newMap != nullptr)
     {
+        // Move antenna icon to My Position
+        QObject *stationObject = newMap->findChild<QObject*>("station");
+        if(stationObject != NULL)
+        {
+            QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
+            coords.setLatitude(stationLatitude);
+            coords.setLongitude(stationLongitude);
+            coords.setAltitude(stationAltitude);
+            stationObject->setProperty("coordinate", QVariant::fromValue(coords));
+            stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
+        }
+        else
+        {
+            qDebug() << "ADSBDemodGUI::applyMapSettings - Couldn't find station";
+        }
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+        newMap = newMap->findChild<QObject*>("map");
+#endif
         if (coords.isValid())
         {
             newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
@@ -4811,22 +4830,6 @@ void ADSBDemodGUI::applyMapSettings()
     else
     {
         qDebug() << "ADSBDemodGUI::applyMapSettings - createMap returned a nullptr";
-    }
-
-    // Move antenna icon to My Position
-    QObject *stationObject = newMap->findChild<QObject*>("station");
-    if(stationObject != NULL)
-    {
-        QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
-        coords.setLatitude(stationLatitude);
-        coords.setLongitude(stationLongitude);
-        coords.setAltitude(stationAltitude);
-        stationObject->setProperty("coordinate", QVariant::fromValue(coords));
-        stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
-    }
-    else
-    {
-        qDebug() << "ADSBDemodGUI::applyMapSettings - Couldn't find station";
     }
 }
 
@@ -6000,7 +6003,11 @@ void ADSBDemodGUI::preferenceChanged(int elementType)
 
             // Update icon position on Map
             QQuickItem *item = ui->map->rootObject();
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
             QObject *map = item->findChild<QObject*>("map");
+#else
+            QObject *map = item->findChild<QObject*>("mapView");
+#endif
             if (map != nullptr)
             {
                 QObject *stationObject = map->findChild<QObject*>("station");
@@ -6019,7 +6026,11 @@ void ADSBDemodGUI::preferenceChanged(int elementType)
     {
         // Update icon label on Map
         QQuickItem *item = ui->map->rootObject();
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
         QObject *map = item->findChild<QObject*>("map");
+#else
+        QObject *map = item->findChild<QObject*>("mapView");
+#endif
         if (map != nullptr)
         {
             QObject *stationObject = map->findChild<QObject*>("station");
