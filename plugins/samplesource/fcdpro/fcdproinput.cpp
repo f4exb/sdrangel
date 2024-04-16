@@ -495,7 +495,7 @@ void FCDProInput::applySettings(const FCDProSettings& settings, const QList<QStr
 		m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
 	}
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
             settingsKeys.contains("reverseAPIAddress") ||

@@ -139,7 +139,7 @@ void Radiosonde::applySettings(const RadiosondeSettings& settings, const QList<Q
 {
     qDebug() << "Radiosonde::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
                 settingsKeys.contains("reverseAPIAddress") ||

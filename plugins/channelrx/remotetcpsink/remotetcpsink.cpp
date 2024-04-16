@@ -239,7 +239,7 @@ void RemoteTCPSink::applySettings(const RemoteTCPSinkSettings& settings, const Q
     MsgConfigureRemoteTCPSink *msg = MsgConfigureRemoteTCPSink::create(settings, settingsKeys, force, remoteChange);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    if (settingsKeys.contains("useReverseAPI"))
+    if (settings.m_useReverseAPI)
     {
         bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
                 settingsKeys.contains("reverseAPIAddress") ||
