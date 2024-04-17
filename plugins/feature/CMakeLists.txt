@@ -13,7 +13,7 @@ else()
 endif()
 
 # WebEngine on Qt5, WebEngineCore on Qt6
-if(ENABLE_FEATURE_SKYMAP AND Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND OR Qt${QT_DEFAULT_MAJOR_VERSION}WebEngineCore_FOUND)
+if(ENABLE_FEATURE_SKYMAP AND (Qt${QT_DEFAULT_MAJOR_VERSION}WebEngine_FOUND OR Qt${QT_DEFAULT_MAJOR_VERSION}WebEngineCore_FOUND) AND Qt${QT_DEFAULT_MAJOR_VERSION}Location_FOUND)
     add_subdirectory(skymap)
 endif()
 
