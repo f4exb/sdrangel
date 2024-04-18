@@ -103,7 +103,7 @@ bool AudioInputDevice::start(int device, int rate)
         if (!devInfo.isFormatSupported(m_audioFormat))
         {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            qWarning("AudioInputDevice::start: %d Hz S16_LE audio format not supported.");
+            qWarning("AudioInputDevice::start: %d Hz S16_LE audio format not supported.", rate);
 #else
             m_audioFormat = devInfo.deviceInfo().nearestFormat(m_audioFormat);
             qWarning("AudioInputDevice::start: %d Hz S16_LE audio format not supported. Nearest is sampleRate: %d channelCount: %d sampleSize: %d sampleType: %d",
