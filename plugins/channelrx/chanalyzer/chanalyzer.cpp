@@ -380,13 +380,13 @@ void ChannelAnalyzer::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
-    if (channelSettingsKeys.contains("frequency")) {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getChannelAnalyzerSettings()->getFrequency();
     }
-    if (channelSettingsKeys.contains("downSample")) {
+    if (channelSettingsKeys.contains("rationalDownSample ")) {
         settings.m_rationalDownSample = response.getChannelAnalyzerSettings()->getDownSample() != 0;
     }
-    if (channelSettingsKeys.contains("downSampleRate")) {
+    if (channelSettingsKeys.contains("rationalDownSamplerRate")) {
         settings.m_rationalDownSamplerRate = response.getChannelAnalyzerSettings()->getDownSampleRate();
     }
     if (channelSettingsKeys.contains("bandwidth")) {
@@ -639,13 +639,13 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
-    if (channelSettingsKeys.contains("frequency") || force) {
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgChannelAnalyzerSettings->setFrequency(settings.m_inputFrequencyOffset);
     }
-    if (channelSettingsKeys.contains("downSample")) {
+    if (channelSettingsKeys.contains("rationalDownSample")) {
         swgChannelAnalyzerSettings->setDownSample(settings.m_rationalDownSample ? 1 : 0);
     }
-    if (channelSettingsKeys.contains("downSampleRate")) {
+    if (channelSettingsKeys.contains("rationalDownSamplerRate")) {
         swgChannelAnalyzerSettings->setDownSampleRate(settings.m_rationalDownSamplerRate);
     }
     if (channelSettingsKeys.contains("bandwidth")) {
