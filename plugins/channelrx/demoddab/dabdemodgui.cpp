@@ -40,7 +40,6 @@
 #include "maincore.h"
 
 #include "dabdemod.h"
-#include "dabdemodsink.h"
 
 // Table column indexes
 #define PROGRAMS_COL_NAME            0
