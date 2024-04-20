@@ -25,8 +25,6 @@
 #include <QtCore>
 #include <QDateTime>
 
-#include "util/units.h"
-
 #include "export.h"
 
 #define RS41_LENGTH_STD           320

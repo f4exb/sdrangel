@@ -24,7 +24,6 @@
 #include <QString>
 #include <QList>
 
-#include "util/units.h"
 #include "util/maidenhead.h"
 #include "util/csv.h"
 

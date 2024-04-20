@@ -25,7 +25,6 @@
 
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
-#include "dsp/movingaverage.h"
 #include "settings/rollupstate.h"
 
 #include "datvdemod.h"

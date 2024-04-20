@@ -39,7 +39,6 @@
 #define RTPERRORS_H
 
 #include "export.h"
-#include "rtpconfig.h"
 #include <string>
 
 namespace qrtplib

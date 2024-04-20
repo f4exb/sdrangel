@@ -31,7 +31,6 @@
 #include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
-#include "channel/remotedatablock.h"
 
 #include "remotetcpinputsettings.h"
 

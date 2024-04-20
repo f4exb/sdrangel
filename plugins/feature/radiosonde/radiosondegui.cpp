@@ -31,6 +31,7 @@
 #include "gui/dialogpositioner.h"
 #include "gui/crightclickenabler.h"
 #include "device/deviceapi.h"
+#include "util/units.h"
 #include "maincore.h"
 
 #include "ui_radiosondegui.h"

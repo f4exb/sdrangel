@@ -27,7 +27,6 @@
 #include <cstdlib>
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
-#include "export.h"
 
 template<uint32_t HBFilterOrder, bool IQOrder>
 class IntHalfbandFilterEOF {

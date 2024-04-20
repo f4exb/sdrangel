@@ -23,6 +23,7 @@
 
 #include <vector>
 
+#include "leansdr/dvb.h"
 #include "leansdr/framework.h"
 #include "gui/tvscreen.h"
 

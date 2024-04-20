@@ -24,6 +24,8 @@
 #include <QByteArray>
 #include <QHash>
 
+#include "dsp/dsptypes.h"
+
 class Serializable;
 
 struct VORDemodSettings

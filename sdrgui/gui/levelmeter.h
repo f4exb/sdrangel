@@ -67,7 +67,6 @@
 #include <QElapsedTimer>
 #include <QWidget>
 
-#include "dsp/dsptypes.h"
 #include "gui/scaleengine.h"
 #include "export.h"
 

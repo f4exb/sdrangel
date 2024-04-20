@@ -25,6 +25,8 @@
 #include <QString>
 #include <stdint.h>
 
+#include "dsp/dsptypes.h"
+
 class Serializable;
 
 struct FreeDVDemodSettings

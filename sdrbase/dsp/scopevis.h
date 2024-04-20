@@ -38,7 +38,6 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "util/doublebuffer.h"
-#include "util/doublebuffermultiple.h"
 
 
 class GLScopeInterface;

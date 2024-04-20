@@ -24,8 +24,6 @@
 #include <QDialog>
 #include <QProcess>
 
-#include "export.h"
-
 namespace Ui {
     class SimplePTTCommandOutputDialog;
 }

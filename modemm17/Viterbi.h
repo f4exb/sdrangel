@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Trellis.h"
 #include "Convolution.h"
 #include "Util.h"
 

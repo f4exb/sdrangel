@@ -28,7 +28,6 @@
 #include <fstream>
 #include <cstdlib>
 
-#include "dsp/inthalfbandfilter.h"
 #include "util/message.h"
 
 #define FILESOURCE_THROTTLE_MS 50

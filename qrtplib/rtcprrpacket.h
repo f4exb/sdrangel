@@ -38,7 +38,6 @@
 
 #define RTCPRRPACKET_H
 
-#include "rtpconfig.h"
 #include "rtcppacket.h"
 #include "rtpstructs.h"
 #include "rtpendian.h"

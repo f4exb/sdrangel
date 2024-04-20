@@ -36,9 +36,7 @@
 #include "dsp/basebandsamplesource.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
-#include "util/movingaverage.h"
 #include "filesourcesettings.h"
-#include "filesourcereport.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;

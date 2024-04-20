@@ -21,7 +21,6 @@
 #include <QTimer>
 
 #include "dsp/samplesourcefifo.h"
-#include "util/message.h"
 
 #include <QProcess>
 #include <QNetworkAccessManager>
@@ -29,7 +28,6 @@
 #include <QTimer>
 #include <QJsonDocument>
 #include <QObject>
-#include "dsp/decimatorsfi.h"
 
 class AaroniaRTSAOutputWorker : public QObject {
 	Q_OBJECT

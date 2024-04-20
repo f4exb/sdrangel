@@ -26,6 +26,7 @@
 #include "device/deviceapi.h"
 
 #include "atvdemod.h"
+#include "dsp/dspcommands.h"
 
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureATVDemod, Message)
 

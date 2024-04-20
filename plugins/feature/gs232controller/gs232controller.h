@@ -28,7 +28,6 @@
 #include "feature/feature.h"
 #include "util/message.h"
 #include "availablechannelorfeaturehandler.h"
-#include "maincore.h"
 
 #include "gs232controllersettings.h"
 

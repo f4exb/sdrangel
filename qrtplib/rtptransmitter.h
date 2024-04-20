@@ -38,7 +38,6 @@
 
 #define RTPTRANSMITTER_H
 
-#include "rtpconfig.h"
 #include "rtptypes.h"
 #include "rtptimeutilities.h"
 #include <cstddef>

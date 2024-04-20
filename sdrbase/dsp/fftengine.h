@@ -24,7 +24,6 @@
 #include <QString>
 
 #include "dsp/dsptypes.h"
-#include "util/profiler.h"
 #include "export.h"
 
 class SDRBASE_API FFTEngine {

@@ -26,12 +26,8 @@
 #include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "util/movingaverage.h"
-#include "dsp/agc.h"
-#include "dsp/firfilter.h"
 #include "dsp/phaselockcomplex.h"
 #include "dsp/freqlockcomplex.h"
-#include "util/message.h"
-#include "util/doublebufferfifo.h"
 
 #include "freqtrackersettings.h"
 

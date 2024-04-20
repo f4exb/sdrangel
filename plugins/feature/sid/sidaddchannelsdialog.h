@@ -18,6 +18,7 @@
 #ifndef INCLUDE_SIDADDCHANNELSDIALOG_H
 #define INCLUDE_SIDADDCHANNELSDIALOG_H
 
+#include "channel/channelapi.h"
 #include "ui_sidaddchannelsdialog.h"
 
 #include "sidsettings.h"

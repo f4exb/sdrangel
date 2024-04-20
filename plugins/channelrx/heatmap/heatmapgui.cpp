@@ -36,6 +36,7 @@
 #include "plugin/pluginapi.h"
 #include "util/astronomy.h"
 #include "util/csv.h"
+#include "util/colormap.h"
 #include "util/db.h"
 #include "util/units.h"
 #include "gui/basicchannelsettingsdialog.h"

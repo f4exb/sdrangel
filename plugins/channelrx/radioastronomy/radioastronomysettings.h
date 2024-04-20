@@ -23,8 +23,6 @@
 #include <QString>
 #include <QDateTime>
 
-#include "dsp/dsptypes.h"
-
 class Serializable;
 
 // Number of columns in the tables

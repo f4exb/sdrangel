@@ -38,11 +38,11 @@
 
 #define RTPSESSIONPARAMS_H
 
-#include "rtpconfig.h"
+#include <string>
+
 #include "rtptypes.h"
 #include "rtptransmitter.h"
 #include "rtptimeutilities.h"
-#include "rtpsources.h"
 
 #include "export.h"
 

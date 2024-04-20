@@ -27,7 +27,6 @@
 
 #include "lime/LimeSuite.h"
 
-#include "limesdr/devicelimesdr.h"
 #include "dsp/interpolators.h"
 
 class SampleMOFifo;

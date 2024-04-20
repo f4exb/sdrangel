@@ -32,7 +32,6 @@
 #include "channel/channelgui.h"
 #include "dsp/dsptypes.h"
 #include "dsp/channelmarker.h"
-#include "dsp/movingaverage.h"
 #include "util/aviationweather.h"
 #include "util/messagequeue.h"
 #include "util/azel.h"
@@ -48,7 +47,6 @@
 #include "adsbdemodsettings.h"
 #include "util/ourairportsdb.h"
 #include "util/osndb.h"
-#include "util/airlines.h"
 
 class PluginAPI;
 class DeviceUISet;

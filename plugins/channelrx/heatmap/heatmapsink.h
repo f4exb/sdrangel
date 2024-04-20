@@ -24,15 +24,10 @@
 #include <QMutex>
 
 #include "dsp/channelsamplesink.h"
-#include "dsp/phasediscri.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/firfilter.h"
-#include "dsp/gaussian.h"
 #include "util/movingaverage.h"
-#include "util/doublebufferfifo.h"
 #include "util/messagequeue.h"
-#include "util/crc.h"
 
 #include "heatmapsettings.h"
 

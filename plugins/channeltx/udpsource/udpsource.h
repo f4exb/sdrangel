@@ -26,7 +26,6 @@
 #include "dsp/basebandsamplesource.h"
 #include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
-#include "dsp/basebandsamplesink.h"
 #include "util/message.h"
 
 #include "udpsourcesettings.h"

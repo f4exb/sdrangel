@@ -31,6 +31,7 @@
  */
 
 #include "rtpsession.h"
+#include "rtcpcompoundpacketbuilder.h"
 #include "rtperrors.h"
 // TODO: this is for Create with transmitter creation. See if we keep it.
 //#include "rtpudpv4transmitter.h"
@@ -41,13 +42,9 @@
 #include "rtprawpacket.h"
 #include "rtppacket.h"
 #include "rtptimeutilities.h"
-#include "rtprandomrand48.h"
-#include "rtprandomrands.h"
-#include "rtprandomurandom.h"
 #ifdef RTP_SUPPORT_SENDAPP
 #include "rtcpcompoundpacket.h"
 #endif // RTP_SUPPORT_SENDAPP
-#include "rtpinternalutils.h"
 
 #include <stdlib.h>
 

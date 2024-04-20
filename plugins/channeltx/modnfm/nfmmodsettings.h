@@ -24,6 +24,7 @@
 #include <QByteArray>
 
 #include "dsp/cwkeyersettings.h"
+#include "dsp/dsptypes.h"
 
 class Serializable;
 

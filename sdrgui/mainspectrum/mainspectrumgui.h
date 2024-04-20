@@ -24,7 +24,6 @@
 #include <QMdiSubWindow>
 #include <QByteArray>
 
-#include "util/messagequeue.h"
 #include "gui/framelesswindowresizer.h"
 #include "export.h"
 

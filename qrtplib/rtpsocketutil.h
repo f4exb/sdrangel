@@ -38,7 +38,6 @@
 
 #define RTPSOCKETUTIL_H
 
-#include "rtpconfig.h"
 #ifdef RTP_SOCKETTYPE_WINSOCK
 #include "rtptypes.h"
 #endif // RTP_SOCKETTYPE_WINSOCK

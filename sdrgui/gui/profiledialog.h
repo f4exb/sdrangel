@@ -24,7 +24,6 @@
 #include <QDialog>
 #include <QTimer>
 
-#include "settings/mainsettings.h"
 #include "export.h"
 
 namespace Ui {

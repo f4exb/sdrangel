@@ -17,6 +17,7 @@
 
 #include "dsp/samplemofifo.h"
 
+#include "limesdr/devicelimesdr.h"
 #include "limesdrmothread.h"
 
 LimeSDRMOThread::LimeSDRMOThread(lms_stream_t* stream0, lms_stream_t* stream1, QObject* parent) :

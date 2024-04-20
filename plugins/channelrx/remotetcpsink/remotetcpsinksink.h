@@ -28,7 +28,6 @@
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "channel/remotedatablock.h"
 #include "util/messagequeue.h"
 
 #include "remotetcpsinksettings.h"

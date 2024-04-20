@@ -20,8 +20,6 @@
 
 #include <QWebEngineView>
 
-#include "websocketserver.h"
-
 class QTabWidget;
 
 class WebView : public QWebEngineView

@@ -18,7 +18,6 @@
 #ifndef INCLUDE_GPL_DSP_AFSQUELCH_H_
 #define INCLUDE_GPL_DSP_AFSQUELCH_H_
 
-#include "dsp/dsptypes.h"
 #include "dsp/movingaverage.h"
 #include "export.h"
 

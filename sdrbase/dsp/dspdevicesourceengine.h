@@ -27,7 +27,6 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include "dsp/dsptypes.h"
-#include "dsp/fftwindow.h"
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
 #include "export.h"

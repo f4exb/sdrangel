@@ -18,6 +18,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.              //
 ///////////////////////////////////////////////////////////////////////////////////////
 #include "dsp/kissengine.h"
+#include "util/profiler.h"
 
 const QString KissEngine::m_name = "Kiss";
 

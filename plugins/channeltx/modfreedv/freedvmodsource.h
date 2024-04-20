@@ -26,7 +26,6 @@
 #include <fstream>
 
 #include "dsp/channelsamplesource.h"
-#include "dsp/nco.h"
 #include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"

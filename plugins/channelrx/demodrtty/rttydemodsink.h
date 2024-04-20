@@ -25,11 +25,9 @@
 #include "dsp/interpolator.h"
 #include "dsp/firfilter.h"
 #include "dsp/raisedcosine.h"
-#include "dsp/fftfactory.h"
 #include "dsp/fftengine.h"
 #include "util/movingaverage.h"
 #include "util/movingmaximum.h"
-#include "util/doublebufferfifo.h"
 #include "util/messagequeue.h"
 
 #include "rttydemodsettings.h"

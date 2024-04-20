@@ -24,6 +24,7 @@
 #include "atvdemodgui.h"
 
 #include "device/deviceuiset.h"
+#include "dsp/dspcommands.h"
 #include "dsp/scopevis.h"
 #include "dsp/glscopesettings.h"
 #include "gui/basicchannelsettingsdialog.h"

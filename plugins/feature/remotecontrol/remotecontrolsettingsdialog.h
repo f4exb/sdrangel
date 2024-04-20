@@ -23,7 +23,6 @@
 
 #include "ui_remotecontrolsettingsdialog.h"
 #include "remotecontrolsettings.h"
-#include "remotecontroldevicedialog.h"
 
 class RemoteControlSettingsDialog : public QDialog {
     Q_OBJECT

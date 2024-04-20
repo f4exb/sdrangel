@@ -38,7 +38,6 @@
 
 #define RTPRANDOMRAND48_H
 
-#include "rtpconfig.h"
 #include "rtprandom.h"
 #include <stdio.h>
 

@@ -20,7 +20,6 @@
 
 #include "channel/channelwebapiadapter.h"
 #include "dsp/glscopesettings.h"
-#include "dsp/spectrumsettings.h"
 #include "doa2settings.h"
 
 /**

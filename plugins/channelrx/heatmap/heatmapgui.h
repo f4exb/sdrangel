@@ -30,7 +30,6 @@
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
-#include "util/colormap.h"
 #include "settings/rollupstate.h"
 
 #include "heatmapsettings.h"

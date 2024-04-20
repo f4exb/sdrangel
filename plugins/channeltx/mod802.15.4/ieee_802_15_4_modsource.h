@@ -27,11 +27,9 @@
 
 #include "dsp/channelsamplesource.h"
 #include "dsp/nco.h"
-#include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/firfilter.h"
 #include "dsp/raisedcosine.h"
-#include "dsp/fmpreemphasis.h"
 #include "util/lfsr.h"
 #include "util/movingaverage.h"
 #include "util/message.h"

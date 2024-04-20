@@ -26,7 +26,6 @@
 #include <QElapsedTimer>
 #include <QByteArray>
 
-#include "dsp/dsptypes.h"
 #include "export.h"
 
 class SDRBASE_API DataFifo : public QObject {

@@ -26,7 +26,6 @@
 
 #include "dsp/decimators.h"
 #include "dsp/ncof.h"
-#include "util/message.h"
 #include "util/messagequeue.h"
 
 #include "testmisettings.h"

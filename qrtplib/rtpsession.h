@@ -46,7 +46,6 @@
 #include "rtcpscheduler.h"
 #include "rtcppacketbuilder.h"
 #include "rtptimeutilities.h"
-#include "rtcpcompoundpacketbuilder.h"
 #include <list>
 
 #include "export.h"

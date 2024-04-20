@@ -21,6 +21,7 @@
 #ifndef PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
 #define PLUGINS_CHANNELRX_DEMODAM_AMDEMODSETTINGS_H_
 
+#include "dsp/dsptypes.h"
 #include <QByteArray>
 
 class Serializable;

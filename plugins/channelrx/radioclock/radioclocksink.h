@@ -27,12 +27,7 @@
 #include "dsp/phasediscri.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/firfilter.h"
-#include "dsp/fftfactory.h"
-#include "dsp/fftengine.h"
-#include "dsp/fftwindow.h"
 #include "util/movingaverage.h"
-#include "util/doublebufferfifo.h"
 #include "util/messagequeue.h"
 
 #include "radioclocksettings.h"

@@ -21,6 +21,8 @@
 #ifndef SDRGUI_GUI_TABLETAPANDHOLD_H
 #define SDRGUI_GUI_TABLETAPANDHOLD_H
 
+#include <QObject>
+
 #include "export.h"
 
 class QTableWidget;

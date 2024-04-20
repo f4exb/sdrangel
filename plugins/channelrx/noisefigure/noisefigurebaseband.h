@@ -24,7 +24,6 @@
 #include <QRecursiveMutex>
 
 #include "dsp/samplesinkfifo.h"
-#include "dsp/scopevis.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 

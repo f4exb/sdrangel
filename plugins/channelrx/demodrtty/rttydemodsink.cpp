@@ -21,6 +21,7 @@
 #include <complex.h>
 
 #include "dsp/dspengine.h"
+#include "dsp/fftfactory.h"
 #include "dsp/scopevis.h"
 #include "util/db.h"
 

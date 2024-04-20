@@ -27,7 +27,6 @@
 #include <QTimer>
 
 #include "maincore.h"
-#include "settings/mainsettings.h"
 #include "util/messagequeue.h"
 #include "export.h"
 

@@ -29,7 +29,6 @@
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 #include "dsp/ncof.h"
-#include "util/message.h"
 #include "util/messagequeue.h"
 
 #include "testsourcesettings.h"

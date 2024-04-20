@@ -27,7 +27,6 @@
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/firfilter.h"
-#include "dsp/movingaverage.h"
 #include "dsp/fftfilt.h"
 #include "dsp/phaselock.h"
 #include "dsp/filterrc.h"

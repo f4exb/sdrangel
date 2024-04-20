@@ -25,7 +25,6 @@
 #include <QMutex>
 #include <QWaitCondition>
 
-#include "dsp/dsptypes.h"
 #include "export.h"
 
 class SDRBASE_API AudioFifo : public QObject {

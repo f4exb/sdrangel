@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "leansdr/framework.h"
+#include "leansdr/sdr.h"
 #include "gui/tvscreen.h"
 
 namespace leansdr {

@@ -22,7 +22,6 @@
 #include <stdint.h>
 #include <vector>
 #include <algorithm>
-#include "dsp/dsptypes.h"
 
 template<typename Type> class MovingAverage {
 public:

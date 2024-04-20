@@ -19,8 +19,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QElapsedTimer>
 
 #include "dsp/fftwengine.h"
+#include "util/profiler.h"
 
 FFTWEngine::FFTWEngine(const QString& fftWisdomFileName) :
     m_fftWisdomFileName(fftWisdomFileName),

@@ -38,7 +38,6 @@
 
 #define RTPKEYHASHTABLE_H
 
-#include "rtpconfig.h"
 #include "rtperrors.h"
 
 namespace qrtplib

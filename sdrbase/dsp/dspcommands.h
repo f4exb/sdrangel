@@ -21,8 +21,8 @@
 #define INCLUDE_DSPCOMMANDS_H
 
 #include <QString>
+#include "dsp/dsptypes.h"
 #include "util/message.h"
-#include "fftwindow.h"
 #include "export.h"
 
 class DeviceSampleSource;

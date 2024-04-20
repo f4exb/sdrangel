@@ -23,7 +23,6 @@
 
 #include "dsp/dsptypes.h"
 #include "dsp/fftwindow.h"
-#include "util/message.h"
 
 #include "doa2settings.h"
 

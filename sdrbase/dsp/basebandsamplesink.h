@@ -22,7 +22,6 @@
 
 #include "dsp/dsptypes.h"
 #include "export.h"
-#include "util/messagequeue.h"
 
 class Message;
 

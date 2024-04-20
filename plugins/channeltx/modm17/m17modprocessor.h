@@ -26,7 +26,6 @@
 #include <QByteArray>
 
 #include "M17Modulator.h"
-#include "dsp/dsptypes.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "m17modfifo.h"

@@ -24,7 +24,6 @@
 #include <QByteArray>
 #include <QString>
 
-#include "util/message.h"
 #include "inputcontrollersettings.h"
 
 class Serializable;

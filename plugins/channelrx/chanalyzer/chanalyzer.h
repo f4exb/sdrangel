@@ -33,7 +33,6 @@
 #include "dsp/scopevis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
-#include "util/movingaverage.h"
 
 #include "chanalyzerbaseband.h"
 

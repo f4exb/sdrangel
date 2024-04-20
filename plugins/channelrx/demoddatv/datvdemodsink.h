@@ -43,8 +43,6 @@
 #include "dsp/fftfilt.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/movingaverage.h"
-#include "dsp/agc.h"
 #include "dsp/interpolator.h"
 #include "audio/audiofifo.h"
 #include "util/messagequeue.h"

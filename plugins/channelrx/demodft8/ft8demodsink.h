@@ -25,7 +25,6 @@
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
 #include "dsp/agc.h"
-#include "util/doublebufferfifo.h"
 
 #include "ft8demodsettings.h"
 

@@ -38,7 +38,6 @@
 
 #define RTPRAWPACKET_H
 
-#include "rtpconfig.h"
 #include "rtptimeutilities.h"
 #include "rtpaddress.h"
 #include "rtptypes.h"

@@ -25,7 +25,6 @@
 #include <QList>
 
 #include "util/message.h"
-#include "util/astronomy.h"
 
 class StarTrackerReport : public QObject
 {

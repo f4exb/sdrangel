@@ -23,12 +23,10 @@
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/firfilter.h"
 #include "util/movingaverage.h"
 #include "dsp/fftfilt.h"
 #include "dsp/phasediscri.h"
 #include "audio/audiofifo.h"
-#include "util/message.h"
 
 #include "wfmdemodsettings.h"
 

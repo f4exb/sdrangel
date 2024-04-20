@@ -29,7 +29,6 @@
 #include <cstdlib>
 #include <stdint.h>
 
-#include "dsp/inthalfbandfilter.h"
 #include "dsp/interpolators.h"
 
 #define FILEOUTPUT_THROTTLE_MS 50

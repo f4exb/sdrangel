@@ -34,8 +34,6 @@
 
 #define RTPINTERNALUTILS_H
 
-#include "rtpconfig.h"
-
 #if defined(RTP_HAVE_SNPRINTF_S)
 #include <windows.h>
 #include <stdio.h>

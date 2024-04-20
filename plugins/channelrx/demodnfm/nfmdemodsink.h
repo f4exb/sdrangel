@@ -28,7 +28,6 @@
 #include "dsp/fftfilt.h"
 #include "dsp/firfilter.h"
 #include "dsp/afsquelch.h"
-#include "dsp/agc.h"
 #include "dsp/ctcssdetector.h"
 #include "dsp/dcscodes.h"
 #include "util/movingaverage.h"

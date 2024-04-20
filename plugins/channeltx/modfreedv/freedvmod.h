@@ -28,7 +28,6 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
-#include "dsp/basebandsamplesink.h"
 #include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"

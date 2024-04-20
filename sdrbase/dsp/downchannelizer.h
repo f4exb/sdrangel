@@ -24,7 +24,6 @@
 #include <vector>
 
 #include "export.h"
-#include "util/message.h"
 #include "dsp/inthalfbandfiltereo.h"
 
 #include "channelsamplesink.h"
