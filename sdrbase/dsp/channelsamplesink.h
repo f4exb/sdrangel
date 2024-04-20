@@ -23,7 +23,7 @@
 #define SDRBASE_DSP_CHANNELSAMPLESINK_H_
 
 #include "export.h"
-#include "dsptypes.h"
+#include "dsp/dsptypes.h"
 
 class Message;
 

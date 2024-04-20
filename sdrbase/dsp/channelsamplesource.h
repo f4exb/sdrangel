@@ -23,7 +23,7 @@
 #define SDRBASE_DSP_CHANNELSAMPLESOURCE_H_
 
 #include "export.h"
-#include "dsptypes.h"
+#include "dsp/dsptypes.h"
 
 class SDRBASE_API ChannelSampleSource {
 public:
