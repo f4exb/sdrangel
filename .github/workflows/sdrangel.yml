@@ -121,7 +121,7 @@ jobs:
           rm -f /usr/local/bin/2to3
           brew install opencv
       - name: Install brew packages
-        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt
+        run: brew install nasm boost hidapi libusb fftw faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt svn
       - name: Configure SDRangel
         run: |
           mkdir build && cd build
