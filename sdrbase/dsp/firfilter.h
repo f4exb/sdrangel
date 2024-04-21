@@ -22,7 +22,6 @@
 #include <cmath>
 #include <cstdio>
 #include "dsp/dsptypes.h"
-#include "dsp/misc.h"
 #include "export.h"
 
 namespace FirFilterGenerators

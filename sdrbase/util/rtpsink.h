@@ -28,11 +28,8 @@
 // qrtplib includes
 #include "rtpsession.h"
 #include "rtpudptransmitter.h"
-#include "rtpaddress.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
-
-#include "export.h"
 
 class QUdpSocket;
 

@@ -23,6 +23,7 @@
 
 #include <QByteArray>
 
+#include "dsp/dsptypes.h"
 #include "util/baudot.h"
 
 class Serializable;

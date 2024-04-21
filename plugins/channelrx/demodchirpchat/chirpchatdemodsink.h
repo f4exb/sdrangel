@@ -25,7 +25,6 @@
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftwindow.h"
-#include "util/message.h"
 #include "util/movingaverage.h"
 
 #include "chirpchatdemodsettings.h"

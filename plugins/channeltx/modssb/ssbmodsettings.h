@@ -26,6 +26,7 @@
 #include <stdint.h>
 
 #include "dsp/cwkeyersettings.h"
+#include "dsp/dsptypes.h"
 
 class Serializable;
 

@@ -38,7 +38,6 @@
 
 #define RTPADDRESS_H
 
-#include "rtpconfig.h"
 #include <string>
 #include <stdint.h>
 #include <QHostAddress>

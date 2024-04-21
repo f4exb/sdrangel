@@ -20,7 +20,6 @@
 #ifndef SDRBASE_AUDIO_AUDIONETSINK_H_
 #define SDRBASE_AUDIO_AUDIONETSINK_H_
 
-#include "dsp/dsptypes.h"
 #include "audiofilter.h"
 #include "audiocompressor.h"
 #include "audiog722.h"

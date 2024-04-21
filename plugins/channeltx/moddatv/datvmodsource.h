@@ -32,8 +32,6 @@
 #include "dsp/interpolator.h"
 #include "dsp/rootraisedcosine.h"
 #include "util/movingaverage.h"
-#include "dsp/fftfilt.h"
-#include "util/message.h"
 
 #include "datvmodsettings.h"
 

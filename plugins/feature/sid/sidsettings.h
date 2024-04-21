@@ -24,8 +24,6 @@
 #include <QDateTime>
 #include <QColor>
 
-#include "util/message.h"
-
 class Serializable;
 
 struct SIDSettings

@@ -38,7 +38,6 @@
 
 #define RTPCOLLISIONLIST_H
 
-#include "rtpconfig.h"
 #include "rtpaddress.h"
 #include "rtptimeutilities.h"
 #include <list>

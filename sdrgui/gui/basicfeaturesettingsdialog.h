@@ -24,7 +24,7 @@
 
 #include <QDialog>
 
-#include "../../exports/export.h"
+#include "export.h"
 
 namespace Ui {
     class BasicFeatureSettingsDialog;

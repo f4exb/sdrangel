@@ -28,7 +28,6 @@
 #include "dsp/interpolator.h"
 #include "dsp/firfilter.h"
 #include "util/movingaverage.h"
-#include "util/doublebufferfifo.h"
 #include "util/messagequeue.h"
 #include "util/crc.h"
 

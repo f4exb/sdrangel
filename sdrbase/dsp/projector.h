@@ -22,7 +22,7 @@
 #define SDRBASE_DSP_PROJECTOR_H
 
 #include "export.h"
-#include "dsptypes.h"
+#include "dsp/dsptypes.h"
 
 class SDRBASE_API Projector
 {

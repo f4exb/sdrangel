@@ -21,7 +21,6 @@
 #include <QByteArray>
 #include <QString>
 
-#include "util/message.h"
 #include "util/iot/device.h"
 
 class Serializable;

@@ -25,6 +25,7 @@
 #include <QRecursiveMutex>
 
 #include "dsp/samplemififo.h"
+#include "util/message.h"
 #include "util/messagequeue.h"
 #include "interferometerstreamsink.h"
 #include "interferometercorr.h"

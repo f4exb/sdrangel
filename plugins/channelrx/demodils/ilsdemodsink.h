@@ -32,7 +32,6 @@
 #include "dsp/morsedemod.h"
 #include "audio/audiofifo.h"
 #include "util/movingaverage.h"
-#include "util/movingmaximum.h"
 #include "util/doublebufferfifo.h"
 #include "util/messagequeue.h"
 

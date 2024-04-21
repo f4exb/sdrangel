@@ -37,6 +37,7 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "channel/channelwebapiutils.h"
+#include "settings/serializable.h"
 #include "util/astronomy.h"
 #include "maincore.h"
 

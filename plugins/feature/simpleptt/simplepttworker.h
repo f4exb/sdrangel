@@ -23,6 +23,7 @@
 #include <QObject>
 #include <QTimer>
 
+#include "dsp/dsptypes.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "audio/audiofifo.h"

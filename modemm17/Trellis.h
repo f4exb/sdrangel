@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include "Util.h"
-#include "Convolution.h"
-
 #include <array>
 #include <cstdlib>
 #include <cstdint>

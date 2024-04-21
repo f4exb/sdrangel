@@ -39,6 +39,7 @@
 #include "maincore.h"
 
 #include "filesourcebaseband.h"
+#include "filesourcereport.h"
 
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSource, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceWork, Message)

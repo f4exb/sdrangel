@@ -21,6 +21,7 @@
 
 #include "dsp/dspengine.h"
 
+#include "dsp/fftfactory.h"
 #include "noisefigure.h"
 #include "noisefiguresink.h"
 

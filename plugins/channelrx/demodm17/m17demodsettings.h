@@ -24,7 +24,7 @@
 #include <QByteArray>
 #include <QString>
 
-#include <dsp/dsptypes.h>
+#include "dsp/dsptypes.h"
 
 class Serializable;
 

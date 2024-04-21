@@ -36,7 +36,6 @@
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
-#include "util/navtex.h"
 
 #include "dscdemodbaseband.h"
 #include "dscdemodsettings.h"

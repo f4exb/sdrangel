@@ -19,8 +19,6 @@
 #define INCLUDE_CHANALYZER_WEBAPIADAPTER_H
 
 #include "channel/channelwebapiadapter.h"
-#include "dsp/glscopesettings.h"
-#include "dsp/spectrumsettings.h"
 #include "chanalyzersettings.h"
 
 /**

@@ -38,7 +38,6 @@
 
 #define RTCPPACKETBUILDER_H
 
-#include "rtpconfig.h"
 #include "rtptypes.h"
 #include "rtperrors.h"
 #include "rtcpsdesinfo.h"

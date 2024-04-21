@@ -22,6 +22,9 @@
 #define INCLUDE_DABDEMODSETTINGS_H
 
 #include <QByteArray>
+#include <QString>
+
+#include "dsp/dsptypes.h"
 
 class Serializable;
 

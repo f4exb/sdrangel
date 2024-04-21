@@ -29,7 +29,6 @@
 #include <cstdlib>
 #include <stdint.h>
 
-#include "dsp/inthalfbandfilter.h"
 #include "dsp/interpolators.h"
 #include "util/incrementalvector.h"
 

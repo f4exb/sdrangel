@@ -29,8 +29,6 @@ class DeviceAPI;
 
 #include "channel/channelapi.h"
 #include "dsp/basebandsamplesink.h"
-#include "dsp/devicesamplesource.h"
-#include "dsp/dspcommands.h"
 #include "util/message.h"
 
 #include "datvdemodbaseband.h"

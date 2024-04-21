@@ -38,7 +38,6 @@
 
 #define RTPRANDOMRANDS_H
 
-#include "rtpconfig.h"
 #include "rtprandom.h"
 
 #include "export.h"

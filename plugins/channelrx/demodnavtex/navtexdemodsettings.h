@@ -23,6 +23,8 @@
 
 #include <QByteArray>
 
+#include "dsp/dsptypes.h"
+
 class Serializable;
 
 // Number of columns in the table

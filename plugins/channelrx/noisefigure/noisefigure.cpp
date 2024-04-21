@@ -35,6 +35,7 @@
 
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
+#include "settings/serializable.h"
 #include "util/interpolation.h"
 #include "channel/channelwebapiutils.h"
 

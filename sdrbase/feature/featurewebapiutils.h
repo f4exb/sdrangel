@@ -22,6 +22,7 @@
 #define SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
 
 #include <QDateTime>
+#include <QObject>
 
 #include "export.h"
 

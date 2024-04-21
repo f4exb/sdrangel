@@ -25,6 +25,7 @@
 #include <QRecursiveMutex>
 
 #include "dsp/samplemififo.h"
+#include "util/message.h"
 #include "util/messagequeue.h"
 #include "doa2streamsink.h"
 #include "doa2corr.h"

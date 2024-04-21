@@ -20,8 +20,6 @@
 #ifndef SDRBASE_DSP_GLSCOPEINTERFACE_H_
 #define SDRBASE_DSP_GLSCOPEINTERFACE_H_
 
-#include "dsptypes.h"
-#include "physicalunit.h"
 #include "glscopesettings.h"
 
 class GLScopeInterface

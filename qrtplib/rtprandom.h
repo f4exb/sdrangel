@@ -38,7 +38,6 @@
 
 #define RTPRANDOM_H
 
-#include "rtpconfig.h"
 #include "rtptypes.h"
 #include <stdlib.h>
 

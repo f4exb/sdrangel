@@ -30,7 +30,6 @@
 #include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
-#include "util/doublebufferfifo.h"
 
 #include "freedvdemodbaseband.h"
 

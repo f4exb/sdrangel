@@ -23,7 +23,6 @@
 #include <QByteArray>
 #include <QDateTime>
 
-#include "dsp/dsptypes.h"
 #include "util/message.h"
 #include "adsbdemodstats.h"
 

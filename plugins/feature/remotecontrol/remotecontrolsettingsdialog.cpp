@@ -17,9 +17,8 @@
 
 #include <QDebug>
 
+#include "remotecontroldevicedialog.h"
 #include "remotecontrolsettingsdialog.h"
-
-#include "channel/channelwebapiutils.h"
 
 RemoteControlSettingsDialog::RemoteControlSettingsDialog(RemoteControlSettings *settings, QWidget* parent) :
     QDialog(parent),

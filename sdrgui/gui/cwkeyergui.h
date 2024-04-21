@@ -22,7 +22,6 @@
 #define SDRBASE_GUI_CWKEYERGUI_H_
 
 #include <QWidget>
-#include "dsp/dsptypes.h"
 #include "export.h"
 #include "settings/serializable.h"
 #include "dsp/cwkeyersettings.h"

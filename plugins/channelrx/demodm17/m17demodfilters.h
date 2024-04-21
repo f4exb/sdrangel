@@ -24,7 +24,6 @@
 #define NXZEROS 134
 
 #include "dsp/iirfilter.h"
-#include "export.h"
 
 /**
  * This is a 2 pole lowpass Chebyshev (recursive) filter at fc=0.075 using coefficients found in table 20-1 of

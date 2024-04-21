@@ -30,6 +30,7 @@
 #include "SWGChannelReport.h"
 
 #include "device/deviceapi.h"
+#include "dsp/dspcommands.h"
 #include "settings/serializable.h"
 
 #include "datvdemod.h"

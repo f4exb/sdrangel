@@ -62,6 +62,8 @@
 #include "webserver.h"
 #include "mapmodel.h"
 
+#include "maincore.h"
+
 class PluginAPI;
 class FeatureUISet;
 class Map;

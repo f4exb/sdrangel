@@ -24,8 +24,6 @@
 #include <QByteArray>
 #include <QString>
 
-#include "util/message.h"
-
 class Serializable;
 class ChannelAPI;
 class DeviceAPI;

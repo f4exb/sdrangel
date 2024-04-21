@@ -32,7 +32,6 @@
 #include <map>
 
 #include "dsp/dsptypes.h"
-#include "dsp/fftwindow.h"
 #include "util/messagequeue.h"
 #include "util/syncmessenger.h"
 #include "util/incrementalvector.h"

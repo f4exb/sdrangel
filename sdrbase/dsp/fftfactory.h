@@ -29,7 +29,6 @@
 #include <QString>
 
 #include "export.h"
-#include "dsp/dsptypes.h"
 #include "fftengine.h"
 
 class SDRBASE_API FFTFactory {

@@ -27,14 +27,11 @@
 #include <QAtomicInt>
 
 #include "dsp/glscopeinterface.h"
-#include "dsp/dsptypes.h"
-#include "dsp/scopevis.h"
 #include "gui/scaleengine.h"
 #include "gui/glshadercolors.h"
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
 #include "export.h"
-#include "util/bitfieldindex.h"
 #include "util/incrementalarray.h"
 
 class QPainter;

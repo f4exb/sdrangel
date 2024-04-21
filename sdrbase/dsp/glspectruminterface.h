@@ -21,7 +21,7 @@
 #define SDRBASE_DSP_GLSPECTRUMINTERFACE_H_
 
 #include <vector>
-#include "dsptypes.h"
+#include "dsp/dsptypes.h"
 
 class GLSpectrumInterface
 {

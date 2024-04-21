@@ -22,6 +22,7 @@
 #include <QString>
 #include <QStringList>
 #include <QByteArray>
+#include <QDateTime>
 #include <QDebug>
 
 #include "export.h"

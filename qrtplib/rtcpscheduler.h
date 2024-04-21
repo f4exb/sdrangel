@@ -38,7 +38,6 @@
 
 #define RTCPSCHEDULER_H
 
-#include "rtpconfig.h"
 #include "rtptimeutilities.h"
 #include "rtprandom.h"
 #include <cstddef>

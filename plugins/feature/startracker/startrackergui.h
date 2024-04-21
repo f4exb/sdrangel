@@ -30,7 +30,6 @@
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
-#include "util/fits.h"
 #include "gui/httpdownloadmanagergui.h"
 #include "settings/rollupstate.h"
 #include "availablechannelorfeature.h"

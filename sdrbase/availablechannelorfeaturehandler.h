@@ -18,9 +18,9 @@
 #ifndef SDRBASE_AVAILABLECHANNELORFEATUREHANDLER_H_
 #define SDRBASE_AVAILABLECHANNELORFEATUREHANDLER_H_
 
-#include "pipes/messagepipes.h"
 #include "availablechannelorfeature.h"
 #include "export.h"
+#include "util/messagequeue.h"
 
 class ChannelAPI;
 class Feature;

@@ -23,7 +23,6 @@
 #include <QVector>
 
 #include "dsp/channelsamplesink.h"
-#include "dsp/fftfactory.h"
 #include "dsp/fftengine.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"

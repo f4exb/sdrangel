@@ -25,7 +25,6 @@
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/fftfactory.h"
 #include "dsp/fftengine.h"
 #include "dsp/fftwindow.h"
 #include "util/fixedaverage2d.h"

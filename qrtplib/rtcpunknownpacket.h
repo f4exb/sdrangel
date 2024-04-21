@@ -38,7 +38,6 @@
 
 #define RTCPUNKNOWNPACKET_H
 
-#include "rtpconfig.h"
 #include "rtcppacket.h"
 
 namespace qrtplib

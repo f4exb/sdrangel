@@ -32,8 +32,8 @@
 #include <QMenu>
 #include <QTimer>
 
+#include "dsp/dsptypes.h"
 #include "feature/featuregui.h"
-#include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
 #include "util/httpdownloadmanager.h"
 #include "util/azel.h"

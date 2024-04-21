@@ -33,6 +33,7 @@
 #include "gs232controllergui.h"
 #include "gs232controllerreport.h"
 #include "dfmprotocol.h"
+#include "maincore.h"
 
 GS232ControllerGUI* GS232ControllerGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
 {

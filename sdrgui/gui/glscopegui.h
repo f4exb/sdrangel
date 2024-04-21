@@ -25,7 +25,6 @@
 #include <QWidget>
 #include <QComboBox>
 
-#include "dsp/dsptypes.h"
 #include "export.h"
 #include "util/message.h"
 #include "dsp/scopevis.h"

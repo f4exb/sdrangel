@@ -20,7 +20,6 @@
 #ifndef DEVICES_BLADERF_DEVICEHACKRFSHARED_H_
 #define DEVICES_BLADERF_DEVICEHACKRFSHARED_H_
 
-#include "util/message.h"
 #include "export.h"
 
 class DEVICES_API DeviceBladeRF1Shared

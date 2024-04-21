@@ -38,7 +38,6 @@
 
 #define RTCPPACKET_H
 
-#include "rtpconfig.h"
 #include "rtptypes.h"
 #include <cstddef>
 

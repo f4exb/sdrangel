@@ -23,6 +23,8 @@
 
 #include "dsp/dsptypes.h"
 
+#include "dsp/dsptypes.h"
+
 class Serializable;
 
 struct WFMDemodSettings

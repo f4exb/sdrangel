@@ -19,6 +19,7 @@
 #include <QDebug>
 
 #include "dsp/datafifo.h"
+#include "dsp/misc.h"
 #include "util/messagequeue.h"
 #include "maincore.h"
 

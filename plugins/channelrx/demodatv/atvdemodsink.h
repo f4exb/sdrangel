@@ -25,9 +25,7 @@
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
-#include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
-#include "dsp/agc.h"
 #include "dsp/phaselock.h"
 #include "dsp/recursivefilters.h"
 #include "dsp/phasediscri.h"

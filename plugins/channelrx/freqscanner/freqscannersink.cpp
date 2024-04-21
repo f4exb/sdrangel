@@ -20,6 +20,7 @@
 #include <complex.h>
 
 #include "dsp/dspengine.h"
+#include "dsp/fftfactory.h"
 #include "util/db.h"
 
 #include "freqscanner.h"

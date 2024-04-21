@@ -18,8 +18,8 @@
 #ifndef INCLUDE_GPL_DSP_AGC_H_
 #define INCLUDE_GPL_DSP_AGC_H_
 
+#include "dsp/dsptypes.h"
 #include "movingaverage.h"
-#include "util/movingaverage.h"
 #include "export.h"
 
 class SDRBASE_API AGC
