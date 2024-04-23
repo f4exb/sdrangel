@@ -29,6 +29,7 @@ MapRadioTimeDialog::MapRadioTimeDialog(MapGUI *gui, QWidget* parent) :
     ui(new Ui::MapRadioTimeDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_QuitOnClose, false);
     // Don't call updateTable until m_gui->getAzEl() will return valid location
 }
 

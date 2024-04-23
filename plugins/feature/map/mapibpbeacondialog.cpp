@@ -30,6 +30,7 @@ MapIBPBeaconDialog::MapIBPBeaconDialog(MapGUI *gui, QWidget* parent) :
     ui(new Ui::MapIBPBeaconDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_QuitOnClose, false);
     connect(&m_timer, &QTimer::timeout, this, &MapIBPBeaconDialog::updateTime);
     m_timer.setInterval(1000);
     ui->beacons->setRowCount(IBPBeacon::m_frequencies.size());

@@ -31,6 +31,7 @@ MapBeaconDialog::MapBeaconDialog(MapGUI *gui, QWidget* parent) :
     ui(new Ui::MapBeaconDialog)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_QuitOnClose, false);
     connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &MapBeaconDialog::downloadFinished);
 }
 
