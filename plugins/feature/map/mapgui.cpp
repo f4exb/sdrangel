@@ -2507,17 +2507,20 @@ void MapGUI::on_displaySettings_clicked()
 void MapGUI::on_beacons_clicked()
 {
     m_beaconDialog.show();
+    m_beaconDialog.raise();
 }
 
 void MapGUI::on_ibpBeacons_clicked()
 {
     m_ibpBeaconDialog.show();
+    m_ibpBeaconDialog.raise();
 }
 
 void MapGUI::on_radiotime_clicked()
 {
     m_radioTimeDialog.updateTable();
     m_radioTimeDialog.show();
+    m_radioTimeDialog.raise();
 }
 
 QString MapGUI::getDataDir()
