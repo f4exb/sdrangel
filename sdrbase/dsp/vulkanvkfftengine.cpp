@@ -20,6 +20,7 @@
 #include "glslang_c_interface.h"
 
 #include "dsp/vulkanvkfftengine.h"
+#include "util/profiler.h"
 
 class GLSInitialiser {
 public:
