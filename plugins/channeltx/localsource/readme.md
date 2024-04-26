@@ -42,10 +42,10 @@ The slider moves the channel center frequency roughly from the lower to the high
   - **1**: centered
   - **2**: higher half-band
 
-<h3>6: Local Output source index</h2>
+<h3>6: Local Output source index</h3>
 
 This selects the index of the Local Output device sink from which to pull the I/Q samples. The list can be refreshed with the next button (7)
 
-<h3>7: Refresh local output devices list</h2>
+<h3>7: Refresh local output devices list</h3>
 
 Use this button to refresh the list of Local Output device sinks indexes.

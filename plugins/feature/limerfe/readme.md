@@ -36,7 +36,7 @@ Use this button to retrieve the LimeRFE device current configuration and populat
 
 Use this button to apply configuration changes. You must press this button to make any of your changes active. Whenever a change requires the LimeRFE configuration to be changed to become effective this button becomes green to suggest it should be activated.
 
-<h3>6. Status window</h3
+<h3>6. Status window</h3>
 
 <h2>A. Rx channel control</h2>
 

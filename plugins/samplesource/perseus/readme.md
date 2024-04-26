@@ -59,7 +59,7 @@ This resets the LO ppm correction (zero the value).
 
 This is the device to host sample rate in kilo samples per second (kS/s). The sample rate can be as low as 48 kS/s so there is no need for software decimation. Note that at 48 kS/s some slight rate mismatch can appear with the audio that has the same nominal rate. This may cause some occasional audio samples drops however hardly noticeable.
 
-<h3>5: Wideband mode</h5>
+<h3>5: Wideband mode</h3>
 
 Switch on this button to disable the preselection filters. The corresponding LED on the Perseus front panel will be lit accordingly.
 

@@ -101,7 +101,7 @@ Use this toggle button to switch the sample rate input next (8) between host to 
 
 The I/Q stream from the baseband can be upsampled by a power of two by software inside the plugin before being sent to the USRP device. Possible values are increasing powers of two: 1 (no interpolation), 2, 4, 8, 16, 32.
 
-<h3>10: Gain</h2>
+<h3>10: Gain</h3>
 
 Use this slider to adjust the global gain of the Tx chain. The allowable values of gain while depend upon the USRP device. The value in dB appears at the right of the slider.
 

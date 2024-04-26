@@ -104,7 +104,7 @@ This controls the offset tuning. Some RF frontends like the obsolete E4000 imple
 
 This controls the tuner filter bandwidth and can be varied from 350 kHz to 8 MHz. In practice depending on the value this appears to be larger and the filter center is slightly offset above the center frequency. This can still be very useful to eliminate or attenuate large signals outside the device to host I/Q stream passband.
 
-<h3>13: RF gain</h2>
+<h3>13: RF gain</h3>
 
 The slider sets RF gain in dB. The values are defined in the RTLSDR device and generally are: 0.0, 0.9, 1.4, 2.7, 3.7, 7.7, 8.7, 12.5, 14.4, 15.7, 16.6, 19.7, 20.7, 22.9, 25.4, 28.0, 29.7, 32.8, 33.8, 36.4, 37.2, 38.6, 40.2, 42.1, 43.4, 43.9, 44.5, 48.0, 49.6
 

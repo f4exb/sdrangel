@@ -191,7 +191,7 @@ Shows status information on the decoder:
   - **Samp**: sampling point offsets from 0 to 9 as there are 10 samples per symbols at 48 kS/s and 4800 Baud. Numbers are arranged in this order: symbol, sync and clock. The clock offset wins. These numbers should not differ by more than 1 (0 to 9 wrapping considered).
   - **Vit**: Viterbi cost. Should be positive and as low as possible. -1 if unavailable.
 
-<h3>C1.8: FM signal scope controls
+<h3>C1.8: FM signal scope controls</h3>
 
 ![M17 Demodulator scope controls GUI](../../../doc/img/M17Demod_scope_controls.png)
 

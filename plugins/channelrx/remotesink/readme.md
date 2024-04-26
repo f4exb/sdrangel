@@ -42,11 +42,11 @@ The slider moves the channel center frequency roughly from the lower to the high
   - **1**: centered
   - **2**: higher half-band
 
-<h3>6: Distant address</h2>
+<h3>6: Distant address</h3>
 
 IP address of the distant network interface from where the I/Q samples are sent via UDP
 
-<h3>7: Data distant port</h2>
+<h3>7: Data distant port</h3>
 
 Distant port to which the I/Q samples are sent via UDP
 

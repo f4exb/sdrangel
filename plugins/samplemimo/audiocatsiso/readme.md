@@ -124,43 +124,43 @@ Opens a dialog to set serial connection and CAT details:
 
 ![Audio CAT settings GUI](../../../doc/img/AudioCATSISO_CATsettings.png)
 
-<h4>23.1. Serial link baud rate</h3>
+<h4>23.1. Serial link baud rate</h4>
 
 Choice between 1200, 2400, 4800, 9600, 19200, 38400, 57600 and 115200 bauds.
 
-<h4>23.2. Handshake method</h3>
+<h4>23.2. Handshake method</h4>
 
 Choice between none, XON/XOFF and hardware.
 
-<h4>23.3. Data bits</h3>
+<h4>23.3. Data bits</h4>
 
 Choice between 7 or 8 bits.
 
-<h4>23.4. Stop bits</h3>
+<h4>23.4. Stop bits</h4>
 
 Choice between 1 or 2 bits.
 
-<h4>23.5. PTT method</h3>
+<h4>23.5. PTT method</h4>
 
 Choice between CAT, DTR or RTS signals.
 
-<h4>23.6. Polling interval</h3>
+<h4>23.6. Polling interval</h4>
 
 Set polling interval in milliseconds. Polls current VFO frequency via CAT regularly at this interval.
 
-<h4>23.7. DTR signal type</h3>
+<h4>23.7. DTR signal type</h4>
 
 When selecting PTT control via DTR signal (23.5) selects if a low or high signal triggers PTT.
 
-<h4>23.8. RTS signal type</h3>
+<h4>23.8. RTS signal type</h4>
 
 When selecting PTT control via RTS signal (23.5) selects if a low or high signal triggers PTT.
 
-<h4>23.9. Accept dialog</h3>
+<h4>23.9. Accept dialog</h4>
 
 Click **OK** to validate changes and close dialog.
 
-<h4>23.10. Dismiss dialog</h3>
+<h4>23.10. Dismiss dialog</h4>
 
 Click **Cancel** to dismiss dialog changes and close dialog.
 
