@@ -96,7 +96,7 @@ void SDRPlayV3Plugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices&
     sdrplay_api_LockDeviceApi();
 
     sdrplay_api_ErrT err;
-    sdrplay_api_DeviceT devs[6];
+    sdrplay_api_DeviceT devs[SDRPLAY_MAX_DEVICES];
     unsigned int count;
     if ((err = sdrplay_api_GetDevices(devs, &count, sizeof(devs) / sizeof(sdrplay_api_DeviceT))) == sdrplay_api_Success)
     {
