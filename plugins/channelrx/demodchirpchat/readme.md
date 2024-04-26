@@ -112,7 +112,7 @@ The LoRa standard specifies 0 (no DE) or 2 (DE active). The ChirpChat DE range i
 
 The LoRa standard also specifies that the LowDataRateOptimizatio flag (thus DE=2 vs DE=0 here) should be set when the symbol time defined as BW / 2^SF exceeds 16 ms (See section 4.1.1.6 of the SX127x datasheet). In practice this happens for SF=11 and SF=12 and large enough bandwidths (you can do the maths).
 
-Here this value is the log2 of the number of FFT bins used for one symbol. Extending the number of FFT bins per symbol decreases the probability to detect the wrong symbol as an adjacent bin. It can also overcome frequency or samlping time drift on long messages particularly for small bandwidths.
+Here this value is the log2 of the number of FFT bins used for one symbol. Extending the number of FFT bins per symbol decreases the probability to detect the wrong symbol as an adjacent bin. It can also overcome frequency or sampling time drift on long messages particularly for small bandwidths.
 
 In practice it is difficult to make correct decodes if only one FFT bin is used to code one symbol (DE=0) therefore it is recommended to use a DE factor of 2 or more. With medium SNR DE=1 can still achieve good results.
 

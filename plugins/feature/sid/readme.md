@@ -146,7 +146,7 @@ Click to open the Settings Dialog. The settings dialog allows a user to:
 
 <h3>18: Display SDO/SOHO Imagery</h3>
 
-When checked, displays imagary from NASA's SDO (Solar Dynamic Observatory) and ESA/NASA's SOHO (Solar and Heliospheric Observatory) satellites. 
+When checked, displays imagery from NASA's SDO (Solar Dynamic Observatory) and ESA/NASA's SOHO (Solar and Heliospheric Observatory) satellites.
 
 SDOs images the Sun in a variety of UV and EUV wavelengths. SOHO shows images of the solar corona. The images are near real-time, updated every 15 minutes.
 
@@ -171,7 +171,7 @@ Selects which image / wavelength to view.
 | 211 Å   | Active corona							|
 | 304 Å   | Chromosphere, transition region		    |
 | 335 Å   | Active corona							|
-| 1600 Å  | Transition region, upper photoshere     |
+| 1600 Å  | Transition region, upper photosphere	|
 | 1700 Å  | Temperature minimum, photosphere		|
 
 [Ref](https://sdo.gsfc.nasa.gov/data/channels.php)

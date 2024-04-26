@@ -19,7 +19,7 @@ Modulation characteristics from LoRa have been augmented with more bandwidths an
 
 The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
 
-![ChitpChat Modulator plugin GUI](../../../doc/img/ChirpChatMod_plugin.png)
+![ChirpChat Modulator plugin GUI](../../../doc/img/ChirpChatMod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
 

@@ -71,7 +71,7 @@ When checked, writes all received messages to a .csv file, specified by (13).
 
 <h3>13: .csv Log Filename</h3>
 
-Click to specify the name of the .csv file which received messasges are logged to.
+Click to specify the name of the .csv file which received messages are logged to.
 
 <h3>14: Read Data from .csv File</h3>
 

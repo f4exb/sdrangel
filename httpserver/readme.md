@@ -10,4 +10,4 @@ Files copied over from the original 'doc' folder:
 
   - copyright.txt
   - lgpl-3.0.txt
-  - releasenotes.txts
+  - releasenotes.txt
