@@ -1,4 +1,4 @@
-﻿<h1>Channel Power Plugin</h1>
+<h1>Channel Power Plugin</h1>
 
 <h2>Introduction</h2>
 

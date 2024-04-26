@@ -1,4 +1,4 @@
-﻿<h1>AM demodulator plugin</h1>
+<h1>AM demodulator plugin</h1>
 
 <h2>Introduction</h2>
 
