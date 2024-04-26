@@ -46,7 +46,7 @@ This is the total recording time for the session.
 
 <h3>6: Record size</h3>
 
-This is the total number of bytes recorded for the session.The number is possibly suffixed by a multiplier character:
+This is the total number of bytes recorded for the session. The number is possibly suffixed by a multiplier character:
   - **k**: _kilo_ for kilobytes
   - **M**: _mega_ for megabytes
   - **G**: _giga_ for gigabytes

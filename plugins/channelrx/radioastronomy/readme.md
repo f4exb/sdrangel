@@ -794,7 +794,7 @@ The columns in the table include:
 - UTC - UTC date and time at the end of the measurement.
 - Az (Rot) - Azimuth of rotator controller in degrees at the end of measurement.
 - El (Rot) - Elevation of rotator controller in degrees at the end of measurement.
-- Az Off (Rot) - Azimimuth offset of rotator controller in degrees at the end of measurement.
+- Az Off (Rot) - Azimuth offset of rotator controller in degrees at the end of measurement.
 - El Off (Rot) - Elevation offset of rotator controller in degrees at the end of measurement.
 
 Right clicking on the table shows a popup menu that supports:

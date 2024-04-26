@@ -1,4 +1,4 @@
-<h1>Android SDR Driver Input Olugin</h1>
+<h1>Android SDR Driver Input Plugin</h1>
 
 <h2>Introduction</h2>
 

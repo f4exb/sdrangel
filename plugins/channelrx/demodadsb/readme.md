@@ -104,7 +104,7 @@ Checking this button draws flight paths for all aircraft.
 
 <h3>ATC Mode</h3>
 
-When in ATC mode, the map will display callsign, alitude, ground speed and type for all aircraft. When unchecked, only callsign (or ICAO, until callsign is received) will be displayed.
+When in ATC mode, the map will display callsign, altitude, ground speed and type for all aircraft. When unchecked, only callsign (or ICAO, until callsign is received) will be displayed.
 
 <h3>15: Download flight information for selected flight</h3>
 

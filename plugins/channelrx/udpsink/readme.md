@@ -98,7 +98,7 @@ When any item of these items is changed the button is lit in green until it is p
 
 <h3>11: Audio volume</h3>
 
-Volume of the audio feedback (when se with button 12.2).
+Volume of the audio feedback (when set with button 12.2).
 
 <h3>12: Gain</h3>
 
