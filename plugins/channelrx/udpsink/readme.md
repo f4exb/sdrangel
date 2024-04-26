@@ -116,7 +116,7 @@ The background of the "Sq" text is lit in green when the squelch is open
 
 Use the slider to set the squelch power threshold based on channel input power (2). At the right of the slider the value in dB is displayed
 
-<h4>13.2: Squelch gate</h4>
+<h4>13.3: Squelch gate</h4>
 
 Sets the delay after which a signal constantly above the squelch threshold effectively opens the squelch. The same delay is used for squelch release except for SSB where the gate is fixed at 50 ms and this controls the release time only.
 
