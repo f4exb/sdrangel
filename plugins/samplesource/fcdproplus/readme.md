@@ -80,6 +80,6 @@ Use this slider to adjust the gain of the IF amplifier.
 
 This controls the tuner filter (band) used:
 
-<h3>11: IF filter</h2>
+<h3>11: IF filter</h3>
 
 Selects the IF filter bandwidth

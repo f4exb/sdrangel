@@ -62,7 +62,7 @@ Use this button to toggle mute for this channel. The radio waves on the icon are
 
 ![ATV Modulator plugin GUI signal](../../../doc/img/ATVMod_pluginA.png)
 
-<h3>A.1: Modulation type</h2>
+<h3>A.1: Modulation type</h3>
 
 The video signal can modulate the carrier in the following modes:
 
@@ -117,7 +117,7 @@ This controls the number of full frames per second. Choice is between 30, 25, 20
 
 &#9758; Perception of continuous motion is said to be acceptable down to 16 FPS. Down to 8 FPS fluidity is still acceptable. The 5 to 1 FPS modes can be used when you want to transmit images with only few movements or where motion is not important such as fixed webcams. Low FPS will allow for more lines and therefore definition in the same bandwidth.
 
-<h3>A.9: TV Standard</h2>
+<h3>A.9: TV Standard</h3>
 
 This controls the frame synchronization scheme and number of black lines:
 

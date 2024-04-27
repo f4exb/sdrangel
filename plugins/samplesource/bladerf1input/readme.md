@@ -101,7 +101,7 @@ With SR as the sample rate before decimation Fc is calculated as:
 
 This is the Rx filter bandwidth in kHz in the LMS6002D device. Possible values are: 1500, 1750, 2500, 2750, 3000, 3840, 5000, 5500, 6000, 7000, 8750, 10000, 12000, 14000, 20000, 28000 kHz.
 
-<h3>8: LNA gain</h2>
+<h3>8: LNA gain</h3>
 
 This is the LNA gain in dB. LNA is inside the LMS6002D chip and is placed before the RF mixer. Possible values are:
 

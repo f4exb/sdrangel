@@ -205,7 +205,7 @@ Displays the received messages in a table which columns are the following:
   - **Country**: DXCC country name derived from the caller callsign
   - **Info**: FT8 decoder information if any. If OSD is active (see C.1.3) and OSD was activated it reports the OSD decoder status as `OSD-N-MM` where N is the OSD depth reached and MM is the number of correct LDPC bits.
 
-<h3>C.1: More FT8 decoder settings</h2>
+<h3>C.1: More FT8 decoder settings</h3>
 
 This button will open a dialog for more settings
 

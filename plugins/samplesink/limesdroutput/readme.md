@@ -128,7 +128,7 @@ Can be varied from 5 to 300 MHz
 
 Use the thumbwheels to adjust frequency as done with the LO (1.1). Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. The boundaries are dynamically calculated from the LO center frequency, sample rate and hardware decimation factor.
 
-<h4>7A.2: Enable/disable external clock input</h7A>
+<h4>7A.2: Enable/disable external clock input</h4>
 
 Use this checkbox to enable or disable the external clock input
 
@@ -183,7 +183,7 @@ The TSP in the LMS7002M chip has a FIR filter chain per channel. Use this button
 
 Use the wheels to adjust the bandwidth of the hardware TSP FIR filter. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-<h3>14: Gain</h2>
+<h3>14: Gain</h3>
 
 Use this slider to adjust the global gain of the Tx chain. LimeSuite software automatically set optimal values of the amplifiers to achieve this global gain. This gain can be set between 0 and 70 dB in 1 dB steps. The value in dB appears at the right of the slider.
 

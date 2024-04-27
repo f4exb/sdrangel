@@ -100,7 +100,7 @@ This button opens a dialog to set the transverter mode frequency translation opt
 
 ![PlutoSDR MIMO plugin 12 GUI](../../../doc/img/PlutoSDRMIMO_plugin_12.png)
 
-<h4>12.1: DC<h4>
+<h4>12.1: DC</h4>
 
 Software DSP auto correction: auto remove DC component
 

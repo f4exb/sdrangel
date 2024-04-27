@@ -1,4 +1,4 @@
-﻿<h1>Sky Map Feature Plugin</h1>
+<h1>Sky Map Feature Plugin</h1>
 
 <h2>Introduction</h2>
 

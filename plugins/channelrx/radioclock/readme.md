@@ -1,4 +1,4 @@
-﻿<h1>Radio Clock Plugin</h1>
+<h1>Radio Clock Plugin</h1>
 
 <h2>Introduction</h2>
 

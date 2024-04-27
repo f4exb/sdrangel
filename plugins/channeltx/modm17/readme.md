@@ -129,7 +129,7 @@ Send packet frames immediately
 
 Send packet frames in an infinite loop with a delay between transmissions set by (C.4)
 
-<h3>C.4: Delay between packets<h3>
+<h3>C.4: Delay between packets</h3>
 
 Delay between packet frames in seconds when in loop mode (C.3)
 

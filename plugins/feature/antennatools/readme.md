@@ -1,4 +1,4 @@
-﻿<h1>Antenna Tools Feature Plugin</h1>
+<h1>Antenna Tools Feature Plugin</h1>
 
 <h2>Introduction</h2>
 

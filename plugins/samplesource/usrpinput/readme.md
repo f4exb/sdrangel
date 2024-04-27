@@ -101,19 +101,19 @@ Use this toggle button to switch the sample rate input next (8) between host to 
 
 The I/Q stream from the USRP device can be decimated by a power of two by software inside the plugin before being sent to the baseband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32.
 
-<h3>10: Gain Mode</h2>
+<h3>10: Gain Mode</h3>
 
 Choose between automatic or manual gain control.
 
-<h3>11: Gain</h2>
+<h3>11: Gain</h3>
 
 Use this slider to adjust the global gain of the Rx chain. The allowable values of gain depend upon the USRP device. The value in dB appears at the right of the slider.
 
-<h3>12: DC offset correction</h2>
+<h3>12: DC offset correction</h3>
 
 Check this button to enable DC offset correction.
 
-<h3>13: IQ imbalance correction</h2>
+<h3>13: IQ imbalance correction</h3>
 
 Check this button to enable IQ imbalance correction.
 

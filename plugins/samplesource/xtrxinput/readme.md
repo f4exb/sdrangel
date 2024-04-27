@@ -163,11 +163,11 @@ This is the Rx hardware filter bandwidth in kHz in the LMS7002M device for the g
 
 <h2>7: LMS002M power saving mode</h2>
 
-<h3>8: Gain settings</h2>
+<h3>8: Gain settings</h3>
 
 ![LimeSDR input plugin gain GUI](../../../doc/img/LimeSDRInput_plugin_9.png)
 
-<h4>8.1: Gain mode</h2>
+<h4>8.1: Gain mode</h4>
 
 Use this combo to select either the automatic gain (Aut) or the manual (Man) gain setting. Automatic gain sets the global gain using a predefined table for LNA, TIA and PGA gain blocks. This global gain is set with button 9.2. When manual gain is engaged the LNA, TIA and PGA gains can be set independently with the 9.3, 9.4 and 9.5 buttons respectively.
 

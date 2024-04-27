@@ -14,11 +14,11 @@ The top and bottom bars of the channel window are described [here](../../../sdrg
 
 ![Remote source channel plugin GUI](../../../doc/img/RemoteSource.png)
 
-<h3>1: Data local address</h2>
+<h3>1: Data local address</h3>
 
 IP address of the local network interface from where the I/Q samples are fetched via UDP
 
-<h3>2: Data local port</h2>
+<h3>2: Data local port</h3>
 
 Local port from where the I/Q samples are fetched via UDP
 

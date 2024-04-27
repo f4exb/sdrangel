@@ -93,7 +93,7 @@ With SR as the sample rate before decimation Fc is calculated as:
 
 The I/Q stream from the BladeRF ADC is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64.
 
-<h3>9: Gain mode</h2>
+<h3>9: Gain mode</h3>
 
 This selects the gain processing in use. Values are fetched automatically from the device. Normal values are
 

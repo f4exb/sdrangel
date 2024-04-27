@@ -1,4 +1,4 @@
-﻿<h1>Channel Power Plugin</h1>
+<h1>Channel Power Plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -30,7 +30,7 @@ Bandwidth in Hz of the channel for which power is to be measured.
 
 <h3>4: Tavg - Average Time</h3>
 
-Time period overwhich the channel power is averaged. Values range from 10us to 10s in powers of 10. The available values depend upon the sample rate.
+Time period over which the channel power is averaged. Values range from 10us to 10s in powers of 10. The available values depend upon the sample rate.
 
 <h3>5: THp - Pulse Threshold</h3>
 

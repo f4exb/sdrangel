@@ -21,11 +21,11 @@ Use this combo box to select channel output:
   - **A**: output A channel only
   - **B**: output B channel only
 
-<h3>2: Interpolation factor</h2>
+<h3>2: Interpolation factor</h3>
 
 The channel sample rate is interpolated by a power of two to feed the channels at baseband sample rate.
 
-<h3>3: Channel sample rate</h2>
+<h3>3: Channel sample rate</h3>
 
 This is the channel sample rate in kilo or mega samples per second indicated by the `k` or `M` letter.
 

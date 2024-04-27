@@ -1,4 +1,4 @@
-﻿<h1>AM demodulator plugin</h1>
+<h1>AM demodulator plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -30,13 +30,13 @@ Specifies channel center frequency according to frequency entry mode:
 
 Use the wheels to adjust the value. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-<h3>2: PLL and synchronous AM</h2>
+<h3>2: PLL and synchronous AM</h3>
 
 Use this toggle button to turn on or off the PLL locking and synchronous AM detection. When on the input signal is mixed with the NCO of the PLL that locks to the carrier of the AM transmission. Then the signal is processed as a DSB or SSB (see control 3) modulated signal. The main advantage compared to envelope detection is a better resilience to carrier selective fading. This does not prevents all selective fading distortion but addresses the most annoying.
 
 When the PLL is locked the icon lights up in green. The frequency shift from carrier appears in the tooltip. Locking indicator is pretty sharp with about +/- 100 Hz range.
 
-<h3>3: DSB/SSB selection</h2>
+<h3>3: DSB/SSB selection</h3>
 
 Use the left mouse button to toggle DSB/SSB operation. Sometimes one of the two sidebands is affected by interference. Selecting SSB may help by using only the sideband without interference. Right click to open a dialog to select which sideband is used (LSB or USB).
 

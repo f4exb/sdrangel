@@ -152,13 +152,13 @@ Pressing the Config... button will display the Input Configuration Dialog:
 
 The Configure buttons allow setting which axis is assigned to target or offset control. To assign an axis, press the corresponding Configure button, then move the controller axis.
 
-<h4>2: Deadzones</h3>
+<h4>2: Deadzones</h4>
 
 Deadzones can be set individually for each for the 4 axes. A deadzone specifies the amount a controller axis can be moved without a response.
 This can be used to prevent very small movements around the center position on a stick from adjusting the target, or eliminate target adjustments
 when a stick is centered, but is reporting a non-zero position on the axis.
 
-<h4>3: Sensitivity</h3>
+<h4>3: Sensitivity</h4>
 
 Specifies the sensitivity of the input in Low and High Sensitivity mode (23). The higher the value, the faster coordinates will change for a given control stick movement.
 

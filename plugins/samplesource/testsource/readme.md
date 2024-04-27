@@ -73,7 +73,7 @@ This is the sample size in number of bits. It corresponds to the actual sample s
 
 This controls the generator sample rate in samples per second.
 
-<h3>4: Modulation</h4>
+<h3>4: Modulation</h3>
 
   - **No**: No modulation
   - **AM**: Amplitude modulation (AM)
