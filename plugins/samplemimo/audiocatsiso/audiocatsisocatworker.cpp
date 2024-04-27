@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QTimer>
 
 #include "audiocatsisocatworker.h"
 
@@ -25,6 +26,7 @@
 #endif
 
 MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker, Message)
+MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgPollTimerConnect, Message)
 MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgReportFrequency, Message)
 
 AudioCATSISOCATWorker::AudioCATSISOCATWorker(QObject* parent) :
@@ -33,6 +35,7 @@ AudioCATSISOCATWorker::AudioCATSISOCATWorker(QObject* parent) :
     m_inputMessageQueueToSISO(nullptr),
     m_running(false),
     m_connected(false),
+    m_pollTimer(nullptr),
     m_ptt(false),
     m_frequency(0)
 {
@@ -42,6 +45,10 @@ AudioCATSISOCATWorker::AudioCATSISOCATWorker(QObject* parent) :
 AudioCATSISOCATWorker::~AudioCATSISOCATWorker()
 {
     stopWork();
+
+    if (m_pollTimer) {
+        delete m_pollTimer;
+    }
 }
 
 void AudioCATSISOCATWorker::startWork()
@@ -86,7 +93,9 @@ void AudioCATSISOCATWorker::applySettings(const AudioCATSISOSettings& settings, 
 
     if (settingsKeys.contains("catPollingMs") || force)
     {
-        m_pollTimer.setInterval(settings.m_catPollingMs);
+        if (m_pollTimer) {
+            m_pollTimer->setInterval(settings.m_catPollingMs);
+        }
     }
 
     if (force) {
@@ -122,6 +131,15 @@ bool AudioCATSISOCATWorker::handleMessage(const Message& message)
         AudioCATSISOSettings::MsgPTT& cmd = (AudioCATSISOSettings::MsgPTT&) message;
         m_ptt = cmd.getPTT();
         catPTT(m_ptt);
+
+        return true;
+    }
+    else if (MsgPollTimerConnect::match(message))
+    {
+        qDebug("AudioCATSISOCATWorker::handleMessage: MsgPollTimerConnect");
+        m_pollTimer = new QTimer();
+        connect(m_pollTimer, SIGNAL(timeout()), this, SLOT(pollingTick()));
+        m_pollTimer->start(m_settings.m_catPollingMs);
 
         return true;
     }
@@ -177,8 +195,6 @@ void AudioCATSISOCATWorker::catConnect()
     if (retcode == RIG_OK)
     {
         m_connected = true;
-        connect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(pollingTick()));
-        m_pollTimer.start(m_settings.m_catPollingMs);
         msg = AudioCATSISOSettings::MsgCATReportStatus::create(AudioCATSISOSettings::MsgCATReportStatus::StatusConnected);
     }
     else
@@ -196,8 +212,12 @@ void AudioCATSISOCATWorker::catConnect()
 
 void AudioCATSISOCATWorker::catDisconnect()
 {
-    disconnect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(pollingTick()));
-    m_pollTimer.stop();
+    if (m_pollTimer)
+    {
+        disconnect(m_pollTimer, SIGNAL(timeout()), this, SLOT(pollingTick()));
+        m_pollTimer->stop();
+    }
+
     m_connected = false;
 	rig_close(m_rig); /* close port */
 	rig_cleanup(m_rig); /* if you care about memory */

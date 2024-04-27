@@ -21,11 +21,12 @@
 #include <hamlib/rig.h>
 
 #include <QObject>
-#include <QTimer>
 
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "audiocatsisosettings.h"
+
+class QTimer;
 
 class AudioCATSISOCATWorker : public QObject {
     Q_OBJECT
@@ -55,6 +56,20 @@ public:
 			m_force(force)
 		{ }
 	};
+
+    class MsgPollTimerConnect : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgPollTimerConnect* create() {
+            return new MsgPollTimerConnect();
+        }
+
+    protected:
+        MsgPollTimerConnect() :
+            Message()
+        { }
+    };
 
     class MsgReportFrequency : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -99,7 +114,7 @@ private:
     bool m_connected;
     AudioCATSISOSettings m_settings;
     RIG *m_rig;
-    QTimer m_pollTimer;
+    QTimer *m_pollTimer;
     bool m_ptt;
     uint64_t m_frequency;
 

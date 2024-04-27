@@ -151,7 +151,7 @@ bool AudioCATSISO::startRx()
 
     m_catWorkerThread = new QThread();
     m_catWorker = new AudioCATSISOCATWorker();
-    m_inputWorker->moveToThread(m_catWorkerThread);
+    m_catWorker->moveToThread(m_catWorkerThread);
 
     QObject::connect(m_catWorkerThread, &QThread::started, m_catWorker, &AudioCATSISOCATWorker::startWork);
     QObject::connect(m_catWorkerThread, &QThread::finished, m_catWorker, &QObject::deleteLater);
@@ -159,12 +159,16 @@ bool AudioCATSISO::startRx()
 
     m_catWorker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_catWorker->setMessageQueueToSISO(getInputMessageQueue());
+    m_catWorker->startWork();
     m_catWorkerThread->start();
 
     AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker *msgToCAT = AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker::create(
         m_settings, QList<QString>(), true
     );
     m_catWorker->getInputMessageQueue()->push(msgToCAT);
+
+    AudioCATSISOCATWorker::MsgPollTimerConnect *startTimerMsg = AudioCATSISOCATWorker::MsgPollTimerConnect::create();
+    m_catWorker->getInputMessageQueue()->push(startTimerMsg);
 
     qDebug() << "AudioCATSISO::startRx: CAT started";
     m_catRunning = true;
@@ -555,6 +559,10 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
     {
         forwardToCAT = true;
         forwardTxChange = true;
+    }
+
+    if (settingsKeys.contains("catPollingMs") || force) {
+        forwardToCAT = true;
     }
 
     if (settings.m_useReverseAPI)
