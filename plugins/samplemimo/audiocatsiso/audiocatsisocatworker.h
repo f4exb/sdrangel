@@ -71,6 +71,25 @@ public:
         { }
     };
 
+    class MsgSetRxSampleRate : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgSetRxSampleRate* create(int sampleRate) {
+            return new MsgSetRxSampleRate(sampleRate);
+        }
+
+    protected:
+        int m_sampleRate;
+
+        MsgSetRxSampleRate(int sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
     class MsgReportFrequency : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -117,6 +136,7 @@ private:
     QTimer *m_pollTimer;
     bool m_ptt;
     uint64_t m_frequency;
+    int m_rxSampleRate;
 
 private slots:
     void handleInputMessages();

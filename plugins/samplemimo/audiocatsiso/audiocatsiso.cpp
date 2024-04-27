@@ -144,9 +144,6 @@ bool AudioCATSISO::startRx()
     m_inputWorker->startWork();
     m_inputWorkerThread->start();
 
-    qDebug("AudioCATSISO::startRx: started");
-    m_rxRunning = true;
-
     qDebug() << "AudioCATSISO::startRx: start CAT";
 
     m_catWorkerThread = new QThread();
@@ -161,6 +158,12 @@ bool AudioCATSISO::startRx()
     m_catWorker->setMessageQueueToSISO(getInputMessageQueue());
     m_catWorker->startWork();
     m_catWorkerThread->start();
+
+    qDebug("AudioCATSISO::startRx: started");
+    m_rxRunning = true;
+
+    AudioCATSISOCATWorker::MsgSetRxSampleRate *msgSetRxSampleRate = AudioCATSISOCATWorker::MsgSetRxSampleRate::create(m_rxSampleRate);
+    m_catWorker->getInputMessageQueue()->push(msgSetRxSampleRate);
 
     AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker *msgToCAT = AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker::create(
         m_settings, QList<QString>(), true
@@ -470,6 +473,8 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
         {
             audioDeviceManager->removeAudioSource(&m_inputFifo);
             audioDeviceManager->addAudioSource(&m_inputFifo, getInputMessageQueue(), m_rxAudioDeviceIndex);
+            AudioCATSISOCATWorker::MsgSetRxSampleRate *msgSetRxSampleRate = AudioCATSISOCATWorker::MsgSetRxSampleRate::create(m_rxSampleRate);
+            m_catWorker->getInputMessageQueue()->push(msgSetRxSampleRate);
         }
     }
 

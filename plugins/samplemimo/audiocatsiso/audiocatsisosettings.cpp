@@ -73,6 +73,8 @@ void AudioCATSISOSettings::resetToDefaults()
     m_pttSpectrumLink = true;
     m_rxCenterFrequency = 14200000;
     m_txCenterFrequency = 14200000;
+    m_transverterMode = false;
+    m_transverterDeltaFrequency = 0;
     m_rxDeviceName = "";
     m_rxVolume = 1.0f;
     m_log2Decim = 0;
@@ -106,6 +108,8 @@ AudioCATSISOSettings::AudioCATSISOSettings(const AudioCATSISOSettings& other)
     m_pttSpectrumLink = other.m_pttSpectrumLink;
     m_rxCenterFrequency = other.m_rxCenterFrequency;
     m_txCenterFrequency = other.m_txCenterFrequency;
+    m_transverterMode = other.m_transverterMode;
+    m_transverterDeltaFrequency = other.m_transverterDeltaFrequency;
     m_rxDeviceName = other.m_rxDeviceName;
     m_rxVolume = other.m_rxVolume;
     m_log2Decim = other.m_log2Decim;
@@ -144,6 +148,8 @@ QByteArray AudioCATSISOSettings::serialize() const
     s.writeBool(6, m_dcBlock);
     s.writeBool(7, m_iqCorrection);
     s.writeS32(8, (int) m_fcPosRx);
+    s.writeBool(9, m_transverterMode);
+    s.writeS64(10, m_transverterDeltaFrequency);
 
     s.writeString(21, m_txDeviceName);
     s.writeU64(22, m_txCenterFrequency);
@@ -195,6 +201,8 @@ bool AudioCATSISOSettings::deserialize(const QByteArray& data)
         d.readBool(7, &m_iqCorrection, false);
         d.readS32(8, &intval, 2);
         m_fcPosRx = (fcPos_t) intval;
+        d.readBool(9, &m_transverterMode, false);
+        d.readS64(10, &m_transverterDeltaFrequency, 0);
 
         d.readString(21, &m_txDeviceName, "");
         d.readU64(22, &m_txCenterFrequency, 14200000);
@@ -239,6 +247,13 @@ bool AudioCATSISOSettings::deserialize(const QByteArray& data)
 
 void AudioCATSISOSettings::applySettings(const QStringList& settingsKeys, const AudioCATSISOSettings& settings)
 {
+    if (settingsKeys.contains("transverterMode")) {
+        m_transverterMode = settings.m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency")) {
+        m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+    }
+
     if (settingsKeys.contains("rxDeviceName")) {
         m_rxDeviceName = settings.m_rxDeviceName;
     }
@@ -331,6 +346,13 @@ void AudioCATSISOSettings::applySettings(const QStringList& settingsKeys, const 
 QString AudioCATSISOSettings::getDebugString(const QStringList& settingsKeys, bool force) const
 {
     std::ostringstream ostr;
+
+    if (settingsKeys.contains("transverterMode") || force) {
+        ostr << " m_transverterMode: " << m_transverterMode;
+    }
+    if (settingsKeys.contains("transverterDeltaFrequency") || force) {
+        ostr << " m_transverterDeltaFrequency: " << m_transverterDeltaFrequency;
+    }
 
     if (settingsKeys.contains("rxDeviceName") || force) {
         ostr << " m_rxDeviceName: " << m_rxDeviceName.toStdString();

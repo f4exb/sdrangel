@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QTimer>
 
+#include "dsp/devicesamplesource.h"
 #include "audiocatsisocatworker.h"
 
 // Compatibility with all versions of Hamlib
@@ -27,6 +28,7 @@
 
 MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgConfigureAudioCATSISOCATWorker, Message)
 MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgPollTimerConnect, Message)
+MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgSetRxSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(AudioCATSISOCATWorker::MsgReportFrequency, Message)
 
 AudioCATSISOCATWorker::AudioCATSISOCATWorker(QObject* parent) :
@@ -77,17 +79,38 @@ void AudioCATSISOCATWorker::applySettings(const AudioCATSISOSettings& settings, 
         << " force:" << force
         << settings.getDebugString(settingsKeys, force);
 
-    if (settingsKeys.contains("rxCenterFrequency") || force)
+    qint64 rxXlatedDeviceCenterFrequency = settings.m_rxCenterFrequency;
+    rxXlatedDeviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
+    rxXlatedDeviceCenterFrequency = rxXlatedDeviceCenterFrequency < 0 ? 0 : rxXlatedDeviceCenterFrequency;
+
+    qint64 txXlatedDeviceCenterFrequency = settings.m_txCenterFrequency;
+    txXlatedDeviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
+    txXlatedDeviceCenterFrequency = txXlatedDeviceCenterFrequency < 0 ? 0 : txXlatedDeviceCenterFrequency;
+
+    if (settingsKeys.contains("rxCenterFrequency") ||
+        settingsKeys.contains("transverterMode") ||
+        settingsKeys.contains("transverterDeltaFrequency") || force)
     {
-        if (!m_ptt) {
-            catSetFrequency(settings.m_rxCenterFrequency);
+        if (!m_ptt)
+        {
+            qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                    rxXlatedDeviceCenterFrequency,
+                    0,
+                    settings.m_log2Decim,
+                    (DeviceSampleSource::fcPos_t) settings.m_fcPosRx,
+                    m_rxSampleRate,
+                    DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
+                    false);
+            catSetFrequency(deviceCenterFrequency);
         }
     }
 
-    if (settingsKeys.contains("txCenterFrequency") || force)
+    if (settingsKeys.contains("txCenterFrequency") ||
+        settingsKeys.contains("transverterMode") ||
+        settingsKeys.contains("transverterDeltaFrequency") || force)
     {
         if (m_ptt) {
-            catSetFrequency(settings.m_txCenterFrequency);
+            catSetFrequency(txXlatedDeviceCenterFrequency);
         }
     }
 
@@ -140,6 +163,30 @@ bool AudioCATSISOCATWorker::handleMessage(const Message& message)
         m_pollTimer = new QTimer();
         connect(m_pollTimer, SIGNAL(timeout()), this, SLOT(pollingTick()));
         m_pollTimer->start(m_settings.m_catPollingMs);
+
+        return true;
+    }
+    else if (MsgSetRxSampleRate::match(message))
+    {
+        MsgSetRxSampleRate& cmd = (MsgSetRxSampleRate&) message;
+        m_rxSampleRate = cmd.getSampleRate();
+        qDebug("AudioCATSISOCATWorker::handleMessage: MsgSetRxSampleRate: %d", m_rxSampleRate);
+
+        if (m_settings.m_transverterMode && !m_ptt)
+        {
+            qint64 rxXlatedDeviceCenterFrequency = m_settings.m_rxCenterFrequency;
+            rxXlatedDeviceCenterFrequency -= m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency : 0;
+            rxXlatedDeviceCenterFrequency = rxXlatedDeviceCenterFrequency < 0 ? 0 : rxXlatedDeviceCenterFrequency;
+            qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+                    rxXlatedDeviceCenterFrequency,
+                    0,
+                    m_settings.m_log2Decim,
+                    (DeviceSampleSource::fcPos_t) m_settings.m_fcPosRx,
+                    m_rxSampleRate,
+                    DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
+                    false);
+            catSetFrequency(deviceCenterFrequency);
+        }
 
         return true;
     }
@@ -295,6 +342,10 @@ void AudioCATSISOCATWorker::pollingTick()
 
     freq_t freq; // double
     int retcode = rig_get_freq(m_rig, RIG_VFO_CURR, &freq);
+
+    if (m_settings.m_transverterMode) {
+        freq += m_settings.m_transverterDeltaFrequency;
+    }
 
     if (retcode == RIG_OK)
     {

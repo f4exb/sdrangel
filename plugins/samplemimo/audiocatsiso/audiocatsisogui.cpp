@@ -424,6 +424,9 @@ void AudioCATSISOGUI::displaySettings()
 {
     blockApplySettings(true);
 
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+    ui->transverter->setIQOrder(m_settings.m_iqOrder);
     ui->rxDeviceLabel->setText(m_settings.m_rxDeviceName);
     ui->txDeviceLabel->setText(m_settings.m_txDeviceName);
     ui->dcBlock->setChecked(m_settings.m_dcBlock);
