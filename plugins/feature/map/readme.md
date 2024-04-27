@@ -314,7 +314,7 @@ Sea Marks are from OpenSeaMap: https://www.openseamap.org/
 
 Railways are from OpenRailwayMap: https://www.openrailwaymap.org/
 
-Weather radar and satellite data is from RainViewer: https://www.rainviewer
+Weather radar and satellite data is from RainViewer: https://www.rainviewer.com
 
 Icons made by Google from Flaticon: https://www.flaticon.com
 World icons created by turkkub from Flaticon: https://www.flaticon.com

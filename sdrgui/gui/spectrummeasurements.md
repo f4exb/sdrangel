@@ -40,7 +40,7 @@ Spectrum display with the highlight artifact on:
 
 The adjacent channel power measurement measures the power in a channel of user-defined bandwidth and compares it to the power in the left and right adjacent channels. Channel shift and adjacent channels width and separation are also adjustable with the dialog.
 
-![Spectrum Measurements dialog - adjacentchannel power](../../doc/img/Spectrum_Measurement_dialog_AdjChannelPower.png)
+![Spectrum Measurements dialog - adjacent channel power](../../doc/img/Spectrum_Measurement_dialog_AdjChannelPower.png)
 
   - **Center frequency offset**: channels offset from the center in Hz
   - **Channel bandwidth**: bandwidth of the center channel in Hz

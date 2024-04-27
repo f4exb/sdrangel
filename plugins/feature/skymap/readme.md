@@ -106,7 +106,7 @@ When checked, the centre of view will track the coordinates received from the se
 
 Select a Star Tracker, Rotator Controller, Satellite Tracker or Map plugin to read viewing coordinates from.
 
-* When a Star Tracker is selected, target RA/Dec, observation position, antenna beamwith and date/time will be read from the selected plugin.
+* When a Star Tracker is selected, target RA/Dec, observation position, antenna beamwidth and date/time will be read from the selected plugin.
 * For other plugin types, Alt/El will be read and other parameters are taken from the the Display Settings dialog (12).
 
 <h3>12: Display settings</h3>
@@ -129,7 +129,7 @@ The popup window can be moved by left clicking and dragging it.
 ESASky and Aladin are able to overlay catalog data:
 
 * In ESASky, zoom in to the area of interest, then press the "Explore catalog data for this region" button. A window will appear showing available catalogs. Left click and boxes will be overlaid on the map for each catalog entry. The data is also displayed in tabular form. You can left click on a box to view its data in the table.
-* In Aladin, zoom in to the areae of interest, then press the "Manage layers" button. In the popup window, select one or more of the available catalogs, or press Add catalogue to add a new one.  Boxes will be overlaid on the map for each catalog entry. Left click on a box to display the data for it in tabular form.
+* In Aladin, zoom in to the area of interest, then press the "Manage layers" button. In the popup window, select one or more of the available catalogs, or press Add catalogue to add a new one.  Boxes will be overlaid on the map for each catalog entry. Left click on a box to display the data for it in tabular form.
 
 <h2>Attribution</h2>
 

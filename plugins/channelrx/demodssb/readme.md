@@ -219,7 +219,7 @@ The signal power is calculated as the moving average over the AGC time constant 
 
 Active only in AGC mode with squelch enabled.
 
-To avoid unwanted squelch opening on short transient bursts only signals with power above threshold during this period in milliseconds will open the squelch.It can be varied from 0 to 20 ms in 1 ms steps then from 30 to 500 ms in 10 ms steps.
+To avoid unwanted squelch opening on short transient bursts only signals with power above threshold during this period in milliseconds will open the squelch. It can be varied from 0 to 20 ms in 1 ms steps then from 30 to 500 ms in 10 ms steps.
 
 When the power threshold is close to the noise floor a few milliseconds help in preventing noise power wiggle to open the squelch.
 

@@ -17,7 +17,7 @@ The main motivations are:
     - AM demodulator
     - BFM (Broadcast FM) demodulator
     - Remote sink
-    - DSD (Digital Vouice) demodulator
+    - DSD (Digital Voice) demodulator
     - NFM (Narrowband FM) demodulator
     - SSB demodulator
     - WFM (Wideband FM) demodulator
