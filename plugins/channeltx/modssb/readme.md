@@ -218,7 +218,7 @@ Click on the button and while selected type a character or character and modifie
 
 16b.5: Register dash key
 
-Click on the button and while selected type a character or character and modifier (Shift + key for example) to select which key is used for dashes. The key or key sequence appears next (here dot `.`)
+Click on the button and while selected type a character or character and modifier (Shift + key for example) to select which key is used for dashes. The key or key sequence appears next (here minus sign `-`)
 
 <h3>17: Audio file path</h3>
 
