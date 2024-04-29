@@ -12,7 +12,7 @@ The top and bottom bars of the device window are described [here](../../../sdrgu
 
 <h3>1: Start/Stop</h3>
 
-This button is used to start the "device" i.e connect to the remote and start stream or stop the "device" i.e. stop stream and disconnect from the remote. The button shows the following faces:
+This button is used to start the "device" i.e. connect to the remote and start stream or stop the "device" i.e. stop stream and disconnect from the remote. The button shows the following faces:
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped

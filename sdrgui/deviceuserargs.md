@@ -1,6 +1,6 @@
 <h1>Devices user arguments management</h1>
 
-The user can give arguments in the form of a string related to a specific device that appears in the list of enumerated device. At the moment these arguments are related to a specific hardware and its sequence in enumeration. For example `LimeSDR,0` for the first Lime SDR, `LimeSDR,1` for the second Lime SDR ...
+The user can give arguments in the form of a string related to a specific device that appears in the list of enumerated devices. At the moment these arguments are related to a specific hardware and its sequence in enumeration. For example `LimeSDR,0` for the first Lime SDR, `LimeSDR,1` for the second Lime SDR ...
 
 The corresponding plugin can make use of this user string in any way it finds useful. At present this is used only by the SoapySDR input/output plugins to override the `kwargs` (keyword arguments) at device open time (the `driver` argument is preserved as defined in the enumeration)
 

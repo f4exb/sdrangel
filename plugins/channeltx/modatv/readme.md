@@ -75,7 +75,7 @@ The video signal can modulate the carrier in the following modes:
 
 <h3>A.2: FM deviation percentage of total bandwidth</h3>
 
-Use this button to control FM deviation in FM modulation mode. This is a percentage of total available channel bandwidth. e.g for the sample rate of 2997 kS/s of the screenshot and a percentage of 19% this yields a full deviation of 2997 &#215; 0.19 = 569.43 kHz that is &#177;284.715 kHz
+Use this button to control FM deviation in FM modulation mode. This is a percentage of total available channel bandwidth. e.g. for the sample rate of 2997 kS/s of the screenshot and a percentage of 19% this yields a full deviation of 2997 &#215; 0.19 = 569.43 kHz that is &#177;284.715 kHz
 
 &#9758; You can adjust this value and see the result for yourself. A good starting point is half of the signal bandwidth.
 
@@ -124,7 +124,7 @@ This controls the frame synchronization scheme and number of black lines:
   - PAL625: this is the PAL 625 lines standard with 25 FPS. Since only black and white (luminance) is supported this corresponds to any of the B,G,I or L PAL standards
   - PAL525: this is the PAL 525 lines standard with 30 FPS. This corresponds to the PAL M standard.
   - 819L: this is the 819 lines system F (Belgium).
-  - ShI: this is an experimental mode that uses the least possible vertical sync lines as possible. That is one line for a long synchronization pulse and one line equalizing (short) pulses level to reset the vertical sync condition. Thus only 2 lines are consumed for vertical sync and the rest is left to the image. In this mode the frames are interleaved. In this mode the frames are interleaved and an odd number of lines should be used.
+  - ShI: this is an experimental mode that uses the least possible vertical sync lines as possible. That is one line for a long synchronization pulse and one line equalizing (short) pulses level to reset the vertical sync condition. Thus only 2 lines are consumed for vertical sync and the rest is left to the image. In this mode the frames are interleaved and an odd number of lines should be used.
   - ShNI: this is the same as above but with non interleaved frames.
   - HSkip: this is the horizontal sync skip technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pulse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
 

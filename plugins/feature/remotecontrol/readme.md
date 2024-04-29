@@ -141,7 +141,7 @@ The VISA Control Dialog allows the specification of a control for a VISA device.
    * String - For a text string.
    * List - For a list of text strings, selectable from a ComboBox in the GUI.
    * Button - For a button that executes a specific command, but does not have any state to be displayed. E.g. for a Reset button that executes *RST.
-* Units - The units of the control, if applicable. E.g V or Volts for a voltage control. This field is used as the default value for the Right Label in the GUI.
+* Units - The units of the control, if applicable. E.g. V or Volts for a voltage control. This field is used as the default value for the Right Label in the GUI.
 * Set state - SCPI commands that set the state in the device. The value of the control in the GUI can be substituted in to the command by using %d for boolean and integer, %f for float and %s for strings.
 * Get state - SCPI commands that get the state in the device. This is used to update the control in the GUI. If multiple queries are specified, the value is taken from the last response.
 
@@ -157,5 +157,5 @@ The VISA Sensor Dialog allows the specification of a sensor for a VISA device. B
    * Boolean - For on/off, true/false and 1/0 values.
    * Float - For real numbers.
    * String - For text strings.
-* Units - The units of the sensor, if applicable. E.g A or Amps for a current sensor. This field is used as the default value for the Right Label in the GUI and also for the Chart Y-axis label.
+* Units - The units of the sensor, if applicable. E.g. A or Amps for a current sensor. This field is used as the default value for the Right Label in the GUI and also for the Chart Y-axis label.
 * Get state - SCPI commands that get the state of the sensor from the device.

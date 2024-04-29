@@ -281,7 +281,7 @@ This file drives how channels in the connected SDRangel instance are managed.
 
 Refer to supervisord documentation.
 
-Example of `superscanner.conf` file to put in your `/etc//etc/supervisor/conf.d/` folder (add it in the `[include]` section of `/etc/supervisor/supervisord.conf`). Environment variable `PYTHONUNBUFFERED=1` is important for the log tail to work correctly.
+Example of `superscanner.conf` file to put in your `/etc/supervisor/conf.d/` folder (add it in the `[include]` section of `/etc/supervisor/supervisord.conf`). Environment variable `PYTHONUNBUFFERED=1` is important for the log tail to work correctly.
 
 ```
 [program:superscanner]

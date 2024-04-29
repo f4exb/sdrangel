@@ -95,7 +95,7 @@ This is the volume of the audio signal in dB from -10 (0.1) to 40 (10000). It ca
 
 This shows the level of the signal entering the FT8 demodulator and decoder and peaks (shown by the tiny red vertical bar) should never exceed 100&percnt;. In fact there is a 10&percnt; guard so 100&percnt; is actually 90&percnt; of the signal volume. Note that the decoder will work well even with a few &percnt; volume however you should try to set the volume (A.10) so that big signals reach at least ~20&percnt; to have the best dynamic range.
 
-Because this volume is based on he RF signal strength it can vary in large proportions and will be more stable if AGC (A.7) is engaged.
+Because this volume is based on the RF signal strength it can vary in large proportions and will be more stable if AGC (A.7) is engaged.
 
 <h2>B: Demodulator baseband spectrum</h2>
 
