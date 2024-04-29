@@ -167,7 +167,7 @@ The file name is constructed as follows where date is the day date in YYYYMMDD f
 
 Files will be stored in the system application data location in the `ft8/logs` folder. The application data location depends on the O/S:
 
-  - Linux: ~/.local/share/f4exb/SDRangel
+  - Linux: `~/.local/share/f4exb/SDRangel`
   - Windows: C:&bsol;Users&bsol;&lt;your user&gt;&bsol;AppData&bsol;Local&bsol;f4exb&bsol;SDRangel
 
 <h3>C.9: Record baseband</h3>

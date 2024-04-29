@@ -43,7 +43,7 @@ This is the center frequency received in the stream meta data. When setting it, 
 
 <h3>4: Stream sample rate</h3>
 
-This is sample rate (actually the frequency span) received in the stream meta data. When setting it, it will try to set the sample rate and frequency span of the IQ Demodulator` in RTSA suite the closest to the `HTTP server`.
+This is sample rate (actually the frequency span) received in the stream meta data. When setting it, it will try to set the sample rate and frequency span of the `IQ Demodulator` in RTSA suite the closest to the `HTTP server`.
 
 <h3>5: Remote address and port</h3>
 

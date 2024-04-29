@@ -151,8 +151,8 @@ Use this slider to adjust the PAD gain of the Tx chain. With the current version
 
 <h3>15: Antenna selection</h3>
 
-  - ** Hi **: Tx high range
-  - ** Wi **: Tx wide range: you should use this one (default)
+  - **Hi**: Tx high range
+  - **Wi**: Tx wide range: you should use this one (default)
 
 <h3>16: Stream status indicator</h3>
 

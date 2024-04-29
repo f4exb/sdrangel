@@ -189,9 +189,9 @@ Use this slider to adjust the global gain of the Tx chain. LimeSuite software au
 
 <h3>15: Antenna selection</h3>
 
-  - ** No **: no output
-  - ** Lo **: Tx low range 30 MHz to 1.9 GHz
-  - ** Hi **: Tx high range: 2 GHz and above
+  - **No**: no output
+  - **Lo**: Tx low range 30 MHz to 1.9 GHz
+  - **Hi**: Tx high range: 2 GHz and above
 
 <h3>16: Stream status indicator</h3>
 

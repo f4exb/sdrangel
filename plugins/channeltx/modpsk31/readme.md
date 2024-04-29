@@ -74,7 +74,7 @@ Right click to open a dialog to adjust additional Transmit Settings, including t
 Predefined text supports the following variable substitutions:
 
 * ${callsign} - Gets replaced with the station name from Preferences > My Position
-* ${location} = Gets replaced with the Maidenhead locator for the position specified under Preferences > My Position
+* ${location} - Gets replaced with the Maidenhead locator for the position specified under Preferences > My Position
 
 The substitutions are applied when the Transmit Settings dialog is closed.
 
