@@ -502,7 +502,7 @@ AISSafetyMessage::AISSafetyMessage(QByteArray ba) :
     m_sequenceNumber = ba[4] & 0x3;
     m_destinationId = ((ba[5] & 0xff) << 22) | ((ba[6] & 0xff) << 14) | ((ba[7] & 0xff) << 6) | ((ba[8] >> 2) & 0x3f);
     m_retransmitFlag = (ba[8] >> 1) & 0x1;
-    m_safetyRelatedText = AISMessage::getString(ba, 9, 0, (ba.size() - 9) * 8 / 6);
+    m_safetyRelatedText = AISMessage::getString(ba, 9, 8, (ba.size() - 9) * 8 / 6);
 }
 
 QString AISSafetyMessage::toString()
@@ -518,7 +518,7 @@ AISSafetyAck::AISSafetyAck(QByteArray ba) :
 AISSafetyBroadcast::AISSafetyBroadcast(QByteArray ba) :
     AISMessage(ba)
 {
-    m_safetyRelatedText = AISMessage::getString(ba, 5, 0, (ba.size() - 6) * 8 / 6);
+    m_safetyRelatedText = AISMessage::getString(ba, 5, 8, (ba.size() - 5) * 8 / 6);
 }
 
 QString AISSafetyBroadcast::toString()

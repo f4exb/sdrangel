@@ -601,7 +601,7 @@ void ValueDial::keyPressEvent(QKeyEvent *value)
         emit changed(m_valueNew);
         m_cursor++;
 
-        if (m_text[m_cursor] == m_groupSeparator) {
+        if ((m_cursor >= 0) && (m_cursor < m_text.size()) && (m_text[m_cursor] == m_groupSeparator)) {
             m_cursor++;
         }
 
