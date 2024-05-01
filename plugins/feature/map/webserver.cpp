@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QtAlgorithms>
 #include <QResource>
 #include <QFile>
 #include <QRegularExpression>
@@ -39,6 +40,11 @@ WebServer::WebServer(quint16 &port, QObject* parent) :
     m_mimeTypes.insert(".css", new MimeType("text/css"));
     m_mimeTypes.insert(".json", new MimeType("application/json"));
     m_mimeTypes.insert(".geojson", new MimeType("application/geo+json"));
+}
+
+WebServer::~WebServer()
+{
+    qDeleteAll(m_mimeTypes);
 }
 
 void WebServer::incomingConnection(qintptr socket)
