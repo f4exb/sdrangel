@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License                 //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.              //
 ///////////////////////////////////////////////////////////////////////////////////////
+#include <QtAlgorithms>
 #include <QSettings>
 #include <QStringList>
 #include <QDebug>
@@ -34,29 +35,11 @@ MainSettings::MainSettings() :
 
 MainSettings::~MainSettings()
 {
-	for (int i = 0; i < m_presets.count(); ++i)
-	{
-		delete m_presets[i];
-	}
-
-	for (int i = 0; i < m_commands.count(); ++i)
-    {
-        delete m_commands[i];
-    }
-
-	for (int i = 0; i < m_featureSetPresets.count(); ++i)
-    {
-        delete m_featureSetPresets[i];
-    }
-    for (int i = 0; i < m_pluginPresets.count(); ++i)
-    {
-        delete m_pluginPresets[i];
-    }
-
-    for (int i = 0; i < m_configurations.count(); ++i)
-    {
-        delete m_configurations[i];
-    }
+    qDeleteAll(m_presets);
+    qDeleteAll(m_commands);
+    qDeleteAll(m_featureSetPresets);
+    qDeleteAll(m_pluginPresets);
+    qDeleteAll(m_configurations);
 }
 
 QString MainSettings::getFileLocation() const
