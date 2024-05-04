@@ -41,6 +41,11 @@ WebServer::WebServer(quint16 &port, QObject* parent) :
     m_mimeTypes.insert(".geojson", new MimeType("application/geo+json"));
 }
 
+WebServer::~WebServer()
+{
+    qDeleteAll(m_mimeTypes);
+}
+
 void WebServer::incomingConnection(qintptr socket)
 {
     QTcpSocket* s = new QTcpSocket(this);

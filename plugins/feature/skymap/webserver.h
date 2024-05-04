@@ -64,6 +64,7 @@ private:
 
 public:
     WebServer(quint16 &port, QObject* parent = 0);
+    ~WebServer();
     void incomingConnection(qintptr socket) override;
     void addPathSubstitution(const QString &from, const QString &to);
     void addSubstitution(QString path, QString from, QString to);
