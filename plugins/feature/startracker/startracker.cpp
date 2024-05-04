@@ -172,16 +172,16 @@ bool StarTracker::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgStarTrackerDisplaySettings::match(cmd))
     {
-        MainCore::MsgStarTrackerDisplaySettings& settings = (MainCore::MsgStarTrackerDisplaySettings&) cmd;
         if (m_guiMessageQueue) {
+            MainCore::MsgStarTrackerDisplaySettings& settings = (MainCore::MsgStarTrackerDisplaySettings&) cmd;
             m_guiMessageQueue->push(new MainCore::MsgStarTrackerDisplaySettings(settings));
         }
         return true;
     }
     else if (MainCore::MsgStarTrackerDisplayLoSSettings::match(cmd))
     {
-        MainCore::MsgStarTrackerDisplayLoSSettings& settings = (MainCore::MsgStarTrackerDisplayLoSSettings&) cmd;
         if (m_guiMessageQueue) {
+            MainCore::MsgStarTrackerDisplayLoSSettings& settings = (MainCore::MsgStarTrackerDisplayLoSSettings&) cmd;
             m_guiMessageQueue->push(new MainCore::MsgStarTrackerDisplayLoSSettings(settings));
         }
         return true;
