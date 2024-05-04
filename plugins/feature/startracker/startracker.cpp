@@ -163,9 +163,9 @@ bool StarTracker::handleMessage(const Message& cmd)
     }
     else if (MsgSetSolarFlux::match(cmd))
     {
-        MsgSetSolarFlux& msg = (MsgSetSolarFlux&) cmd;
-        m_solarFlux = msg.getFlux();
         if (m_worker) {
+            MsgSetSolarFlux& msg = (MsgSetSolarFlux&) cmd;
+            m_solarFlux = msg.getFlux();
             m_worker->getInputMessageQueue()->push(new MsgSetSolarFlux(msg));
         }
         return true;
@@ -246,10 +246,10 @@ void StarTracker::applySettings(const StarTrackerSettings& settings, const QList
         }
     }
 
-    StarTrackerWorker::MsgConfigureStarTrackerWorker *msg = StarTrackerWorker::MsgConfigureStarTrackerWorker::create(
-        settings, settingsKeys, force
-    );
     if (m_worker) {
+        StarTrackerWorker::MsgConfigureStarTrackerWorker *msg = StarTrackerWorker::MsgConfigureStarTrackerWorker::create(
+            settings, settingsKeys, force
+            );
         m_worker->getInputMessageQueue()->push(msg);
     }
 

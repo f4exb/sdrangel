@@ -189,10 +189,10 @@ void PERTester::applySettings(const PERTesterSettings& settings, const QList<QSt
 {
     qDebug() << "PERTester::applySettings:" << settings.getDebugString(settingsKeys, force) << " force: " << force;
 
-    PERTesterWorker::MsgConfigurePERTesterWorker *msg = PERTesterWorker::MsgConfigurePERTesterWorker::create(
-        settings, settingsKeys, force
-    );
     if (m_worker) {
+        PERTesterWorker::MsgConfigurePERTesterWorker *msg = PERTesterWorker::MsgConfigurePERTesterWorker::create(
+            settings, settingsKeys, force
+            );
         m_worker->getInputMessageQueue()->push(msg);
     }
 
