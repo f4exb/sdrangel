@@ -441,8 +441,6 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	displaySettings();
     makeUIConnections();
 
-    qDebug() << "********************" << m_settings.m_filterBank.size() << m_settings.m_filterIndex;
-    qDebug() << "*********** " << m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2;
 	applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
@@ -472,10 +470,15 @@ void SSBDemodGUI::applySettings(bool force)
 uint32_t SSBDemodGUI::getValidAudioSampleRate() const
 {
     // When not running, m_ssbDemod->getAudioSampleRate() will return 0, but we
-    // want a valid value to initialise the GUI
+    // want a valid value to initialise the GUI, to allow a user to preselect settings
     int sr = m_ssbDemod->getAudioSampleRate();
-    if (sr == 0) {
-        sr = 48000;
+    if (sr == 0)
+    {
+        if (m_audioSampleRate > 0) {
+            sr = m_audioSampleRate;
+        } else {
+            sr = 48000;
+        }
     }
     return sr;
 }
