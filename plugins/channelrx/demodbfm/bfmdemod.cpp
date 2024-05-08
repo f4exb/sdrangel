@@ -76,7 +76,6 @@ BFMDemod::BFMDemod(DeviceAPI *deviceAPI) :
         this,
         &BFMDemod::handleIndexInDeviceSetChanged
     );
-    start();
 }
 
 BFMDemod::~BFMDemod()
@@ -129,21 +128,25 @@ void BFMDemod::start()
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(m_thread);
+    m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI());
 
     QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
     QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
 
-    if (m_basebandSampleRate != 0) {
-        m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
-    }
     m_basebandSink->reset();
     m_basebandSink->startWork();
     m_thread->start();
 
+    DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, 0);
+    m_basebandSink->getInputMessageQueue()->push(dspMsg);
+
+    BFMDemodBaseband::MsgConfigureBFMDemodBaseband *msg = BFMDemodBaseband::MsgConfigureBFMDemodBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
+
     SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
     spectrumSettings.m_ssb = true;
-    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
-    m_spectrumVis.getInputMessageQueue()->push(msg);
+    SpectrumVis::MsgConfigureSpectrumVis *visMsg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis.getInputMessageQueue()->push(visMsg);
 
     m_running = true;
 }

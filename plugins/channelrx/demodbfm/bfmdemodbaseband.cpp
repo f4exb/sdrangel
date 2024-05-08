@@ -43,8 +43,6 @@ BFMDemodBaseband::BFMDemodBaseband() :
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue());
     m_sink.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
     m_channelSampleRate = 0;
-
-    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 BFMDemodBaseband::~BFMDemodBaseband()
@@ -56,6 +54,7 @@ BFMDemodBaseband::~BFMDemodBaseband()
 void BFMDemodBaseband::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    m_inputMessageQueue.clear();
     m_sampleFifo.reset();
     m_channelSampleRate = 0;
 }

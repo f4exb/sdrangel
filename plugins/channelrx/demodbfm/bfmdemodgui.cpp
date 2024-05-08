@@ -413,7 +413,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_spectrumVis = m_bfmDemod->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 	m_bfmDemod->setMessageQueueToGUI(getInputMessageQueue());
-    m_bfmDemod->setBasebandMessageQueueToGUI(getInputMessageQueue());
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 

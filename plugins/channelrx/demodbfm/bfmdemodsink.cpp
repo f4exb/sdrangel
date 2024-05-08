@@ -222,8 +222,10 @@ void BFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 				{
 					std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], std::min(m_audioBufferFill, m_audioBuffer.size()));
 
-					if(res != m_audioBufferFill) {
+					if (res != m_audioBufferFill)
+                    {
 						qDebug("BFMDemodSink::feed: %lu/%lu audio samples written", res, m_audioBufferFill);
+                        m_audioFifo.clear();
 					}
 
 					m_audioBufferFill = 0;
