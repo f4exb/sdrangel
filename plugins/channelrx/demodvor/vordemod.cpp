@@ -78,8 +78,6 @@ VORDemod::VORDemod(DeviceAPI *deviceAPI) :
         this,
         &VORDemod::handleIndexInDeviceSetChanged
     );
-
-    start();
 }
 
 VORDemod::~VORDemod()

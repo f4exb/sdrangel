@@ -407,13 +407,16 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     ui->channelSpacing->setCurrentIndex(NFMDemodSettings::getChannelSpacingIndex(12500));
 
-    int ctcss_nbTones;
-    const Real *ctcss_tones = m_nfmDemod->getCtcssToneSet(ctcss_nbTones);
+    int ctcss_nbTones = CTCSSDetector::getNTones();
+    const Real *ctcss_tones = CTCSSDetector::getToneSet();
 
     ui->ctcss->addItem("--");
 
-    for (int i=0; i<ctcss_nbTones; i++) {
-        ui->ctcss->addItem(QString("%1").arg(ctcss_tones[i]));
+    if (ctcss_tones)
+    {
+        for (int i=0; i<ctcss_nbTones; i++) {
+            ui->ctcss->addItem(QString("%1").arg(ctcss_tones[i]));
+        }
     }
 
     ui->dcsOn->setChecked(m_settings.m_dcsOn);

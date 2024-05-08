@@ -46,12 +46,12 @@ public:
     bool analyze(Real *sample); // input signal sample
 
     // get the number of defined tones.
-    int getNTones() const {
+    static int getNTones() {
     	return CTCSSFrequencies::m_nbFreqs;
     }
 
     // get the tone set
-    const Real *getToneSet() const {
+    static const Real *getToneSet() {
     	return CTCSSFrequencies::m_Freqs;
     }
 

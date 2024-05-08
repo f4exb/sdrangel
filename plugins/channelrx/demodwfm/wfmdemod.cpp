@@ -79,7 +79,6 @@ WFMDemod::WFMDemod(DeviceAPI* deviceAPI) :
         this,
         &WFMDemod::handleIndexInDeviceSetChanged
     );
-    start();
 }
 
 WFMDemod::~WFMDemod()

@@ -102,11 +102,13 @@ private:
 	void applyBandwidths(unsigned int spanLog2, bool force = false);
     unsigned int spanLog2Max();
 	void displaySettings();
+	void displayAGC();
 	void displayAGCPowerThreshold(int value);
     void displayAGCThresholdGate(int value);
 	bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+	uint32_t getValidAudioSampleRate() const;
 
 	void leaveEvent(QEvent*);
 	void enterEvent(EnterEventType*);
