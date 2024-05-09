@@ -123,7 +123,7 @@ void BFMDemod::start()
     }
 
     qDebug() << "BFMDemod::start";
-    m_thread = new QThread(this);
+    m_thread = new QThread();
     m_basebandSink = new BFMDemodBaseband();
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setChannel(this);
