@@ -66,7 +66,6 @@ public:
     int getChannelSampleRate() const;
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
     bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
-    const Real *getCtcssToneSet(int& nbTones) const { return m_sink.getCtcssToneSet(nbTones); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
     int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
     void setBasebandSampleRate(int sampleRate);

@@ -45,11 +45,6 @@ public:
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
-    const Real *getCtcssToneSet(int& nbTones) const {
-        nbTones = m_ctcssDetector.getNTones();
-        return m_ctcssDetector.getToneSet();
-    }
-
     bool getSquelchOpen() const { return m_squelchOpen; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)

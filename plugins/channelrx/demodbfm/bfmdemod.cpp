@@ -53,17 +53,11 @@ const int BFMDemod::m_udpBlockSize = 512;
 BFMDemod::BFMDemod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
     m_deviceAPI(deviceAPI),
+    m_running(false),
     m_spectrumVis(SDR_RX_SCALEF),
     m_basebandSampleRate(0)
 {
 	setObjectName(m_channelId);
-
-    m_thread = new QThread(this);
-    m_basebandSink = new BFMDemodBaseband();
-    m_basebandSink->setSpectrumSink(&m_spectrumVis);
-    m_basebandSink->setChannel(this);
-    m_basebandSink->moveToThread(m_thread);
-
 	applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
@@ -96,8 +90,7 @@ BFMDemod::~BFMDemod()
 
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-    delete m_basebandSink;
-    delete m_thread;
+    stop();
 }
 
 void BFMDemod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -125,25 +118,48 @@ void BFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 void BFMDemod::start()
 {
-    qDebug() << "BFMDemod::start";
-
-    if (m_basebandSampleRate != 0) {
-        m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
+    if (m_running) {
+        return;
     }
 
+    qDebug() << "BFMDemod::start";
+    m_thread = new QThread();
+    m_basebandSink = new BFMDemodBaseband();
+    m_basebandSink->setSpectrumSink(&m_spectrumVis);
+    m_basebandSink->setChannel(this);
+    m_basebandSink->moveToThread(m_thread);
+    m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI());
+
+    QObject::connect(m_thread, &QThread::finished, m_basebandSink, &QObject::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
+
     m_basebandSink->reset();
+    m_basebandSink->startWork();
     m_thread->start();
+
+    DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, 0);
+    m_basebandSink->getInputMessageQueue()->push(dspMsg);
+
+    BFMDemodBaseband::MsgConfigureBFMDemodBaseband *msg = BFMDemodBaseband::MsgConfigureBFMDemodBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
 
     SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
     spectrumSettings.m_ssb = true;
-    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
-    m_spectrumVis.getInputMessageQueue()->push(msg);
+    SpectrumVis::MsgConfigureSpectrumVis *visMsg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis.getInputMessageQueue()->push(visMsg);
+
+    m_running = true;
 }
 
 void BFMDemod::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug() << "BFMDemod::stop";
-	m_thread->exit();
+    m_running = false;
+	m_thread->quit();
 	m_thread->wait();
 }
 
@@ -163,9 +179,12 @@ bool BFMDemod::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
         // Forward to the sink
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
-        qDebug() << "BFMDemod::handleMessage: DSPSignalNotification";
-        m_basebandSink->getInputMessageQueue()->push(rep);
+        if (m_running)
+        {
+            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            qDebug() << "BFMDemod::handleMessage: DSPSignalNotification";
+            m_basebandSink->getInputMessageQueue()->push(rep);
+        }
 
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
@@ -257,8 +276,11 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    BFMDemodBaseband::MsgConfigureBFMDemodBaseband *msg = BFMDemodBaseband::MsgConfigureBFMDemodBaseband::create(settings, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        BFMDemodBaseband::MsgConfigureBFMDemodBaseband *msg = BFMDemodBaseband::MsgConfigureBFMDemodBaseband::create(settings, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -511,6 +533,10 @@ void BFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 
 void BFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
+    if (!m_running) {
+        return;
+    }
+
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
@@ -535,28 +561,31 @@ void BFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
 
 void BFMDemod::webapiFormatRDSReport(SWGSDRangel::SWGRDSReport *report)
 {
-    report->setDemodStatus(round(getDemodQua()));
-    report->setDecodStatus(round(getDecoderQua()));
-    report->setRdsDemodAccumDb(CalcDb::dbPower(std::fabs(getDemodAcc())));
-    report->setRdsDemodFrequency(getDemodFclk());
-    report->setPid(new QString(str(boost::format("%04X") % getRDSParser().m_pi_program_identification).c_str()));
-    report->setPiType(new QString(getRDSParser().pty_table[getRDSParser().m_pi_program_type].c_str()));
-    report->setPiCoverage(new QString(getRDSParser().coverage_area_codes[getRDSParser().m_pi_area_coverage_index].c_str()));
-    report->setProgServiceName(new QString(getRDSParser().m_g0_program_service_name));
-    report->setMusicSpeech(new QString((getRDSParser().m_g0_music_speech ? "Music" : "Speech")));
-    report->setMonoStereo(new QString((getRDSParser().m_g0_mono_stereo ? "Mono" : "Stereo")));
-    report->setRadioText(new QString(getRDSParser().m_g2_radiotext));
-    std::string time = str(boost::format("%4i-%02i-%02i %02i:%02i (%+.1fh)")\
-        % (1900 + getRDSParser().m_g4_year) % getRDSParser().m_g4_month % getRDSParser().m_g4_day % getRDSParser().m_g4_hours % getRDSParser().m_g4_minutes % getRDSParser().m_g4_local_time_offset);
-    report->setTime(new QString(time.c_str()));
-    report->setAltFrequencies(new QList<SWGSDRangel::SWGRDSReport_altFrequencies*>);
-
-    for (std::set<double>::iterator it = getRDSParser().m_g0_alt_freq.begin(); it != getRDSParser().m_g0_alt_freq.end(); ++it)
+    if (getRDSParser())
     {
-        if (*it > 76.0)
+        report->setDemodStatus(round(getDemodQua()));
+        report->setDecodStatus(round(getDecoderQua()));
+        report->setRdsDemodAccumDb(CalcDb::dbPower(std::fabs(getDemodAcc())));
+        report->setRdsDemodFrequency(getDemodFclk());
+        report->setPid(new QString(str(boost::format("%04X") % getRDSParser()->m_pi_program_identification).c_str()));
+        report->setPiType(new QString(getRDSParser()->pty_table[getRDSParser()->m_pi_program_type].c_str()));
+        report->setPiCoverage(new QString(getRDSParser()->coverage_area_codes[getRDSParser()->m_pi_area_coverage_index].c_str()));
+        report->setProgServiceName(new QString(getRDSParser()->m_g0_program_service_name));
+        report->setMusicSpeech(new QString((getRDSParser()->m_g0_music_speech ? "Music" : "Speech")));
+        report->setMonoStereo(new QString((getRDSParser()->m_g0_mono_stereo ? "Mono" : "Stereo")));
+        report->setRadioText(new QString(getRDSParser()->m_g2_radiotext));
+        std::string time = str(boost::format("%4i-%02i-%02i %02i:%02i (%+.1fh)")\
+            % (1900 + getRDSParser()->m_g4_year) % getRDSParser()->m_g4_month % getRDSParser()->m_g4_day % getRDSParser()->m_g4_hours % getRDSParser()->m_g4_minutes % getRDSParser()->m_g4_local_time_offset);
+        report->setTime(new QString(time.c_str()));
+        report->setAltFrequencies(new QList<SWGSDRangel::SWGRDSReport_altFrequencies*>);
+
+        for (std::set<double>::iterator it = getRDSParser()->m_g0_alt_freq.begin(); it != getRDSParser()->m_g0_alt_freq.end(); ++it)
         {
-            report->getAltFrequencies()->append(new SWGSDRangel::SWGRDSReport_altFrequencies);
-            report->getAltFrequencies()->back()->setFrequency(*it);
+            if (*it > 76.0)
+            {
+                report->getAltFrequencies()->append(new SWGSDRangel::SWGRDSReport_altFrequencies);
+                report->getAltFrequencies()->back()->setFrequency(*it);
+            }
         }
     }
 }
@@ -712,7 +741,7 @@ void BFMDemod::networkManagerFinished(QNetworkReply *reply)
 
 void BFMDemod::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 

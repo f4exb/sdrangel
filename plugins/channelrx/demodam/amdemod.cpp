@@ -78,7 +78,6 @@ AMDemod::AMDemod(DeviceAPI *deviceAPI) :
         this,
         &AMDemod::handleIndexInDeviceSetChanged
     );
-    start();
 }
 
 AMDemod::~AMDemod()

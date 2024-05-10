@@ -202,6 +202,7 @@ void SSBDemodGUI::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
     applySettings();
+    displayAGC();
 }
 
 void SSBDemodGUI::on_agcClamping_toggled(bool checked)
@@ -466,10 +467,26 @@ void SSBDemodGUI::applySettings(bool force)
 	}
 }
 
+uint32_t SSBDemodGUI::getValidAudioSampleRate() const
+{
+    // When not running, m_ssbDemod->getAudioSampleRate() will return 0, but we
+    // want a valid value to initialise the GUI, to allow a user to preselect settings
+    int sr = m_ssbDemod->getAudioSampleRate();
+    if (sr == 0)
+    {
+        if (m_audioSampleRate > 0) {
+            sr = m_audioSampleRate;
+        } else {
+            sr = 48000;
+        }
+    }
+    return sr;
+}
+
 unsigned int SSBDemodGUI::spanLog2Max()
 {
     unsigned int spanLog2 = 0;
-    for (; m_ssbDemod->getAudioSampleRate() / (1<<spanLog2) >= 1000; spanLog2++);
+    for (; getValidAudioSampleRate() / (1<<spanLog2) >= 1000; spanLog2++);
     return spanLog2 == 0 ? 0 : spanLog2-1;
 }
 
@@ -481,10 +498,10 @@ void SSBDemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     ui->spanLog2->setMaximum(limit);
     bool dsb = ui->dsb->isChecked();
     //int spanLog2 = ui->spanLog2->value();
-    m_spectrumRate = m_ssbDemod->getAudioSampleRate() / (1<<spanLog2);
+    m_spectrumRate = getValidAudioSampleRate() / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
-    int bwMax = m_ssbDemod->getAudioSampleRate() / (100*(1<<spanLog2));
+    int bwMax = getValidAudioSampleRate() / (100*(1<<spanLog2));
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
@@ -636,6 +653,7 @@ void SSBDemodGUI::displaySettings()
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
     ui->agc->setChecked(m_settings.m_agc);
+    displayAGC();
     ui->agcClamping->setChecked(m_settings.m_agcClamping);
     ui->dnr->setChecked(m_settings.m_dnr);
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
@@ -692,6 +710,18 @@ void SSBDemodGUI::displaySettings()
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
+}
+
+void SSBDemodGUI::displayAGC()
+{
+    // Disable controls only valid when AGC is enabled
+    ui->agcClamping->setEnabled(m_settings.m_agc);
+    ui->agcTimeLog2->setEnabled(m_settings.m_agc);
+    ui->agcTimeText->setEnabled(m_settings.m_agc);
+    ui->agcPowerThreshold->setEnabled(m_settings.m_agc);
+    ui->agcPowerThresholdText->setEnabled(m_settings.m_agc);
+    ui->agcThresholdGate->setEnabled(m_settings.m_agc);
+    ui->agcThresholdGateText->setEnabled(m_settings.m_agc);
 }
 
 void SSBDemodGUI::displayAGCPowerThreshold(int value)

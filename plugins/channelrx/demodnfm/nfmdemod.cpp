@@ -78,8 +78,6 @@ NFMDemod::NFMDemod(DeviceAPI *devieAPI) :
         this,
         &NFMDemod::handleIndexInDeviceSetChanged
     );
-
-    start();
 }
 
 NFMDemod::~NFMDemod()
@@ -593,11 +591,11 @@ void NFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
     response.getNfmDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    int nbCtcssToneFrequencies;
 
     if (m_running)
     {
-        const Real *ctcssToneFrequencies = m_basebandSink->getCtcssToneSet(nbCtcssToneFrequencies);
+        int nbCtcssToneFrequencies = CTCSSDetector::getNTones();
+        const Real *ctcssToneFrequencies = CTCSSDetector::getToneSet();
         response.getNfmDemodReport()->setCtcssTone(
             m_settings.m_ctcssOn ?
                 m_settings.m_ctcssIndex < 0 ?

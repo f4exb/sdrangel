@@ -124,7 +124,6 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-	const Real *getCtcssToneSet(int& nbTones) const { return m_running ? m_basebandSink->getCtcssToneSet(nbTones) : nullptr; }
 	bool getSquelchOpen() const { return m_running && m_basebandSink->getSquelchOpen(); }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
