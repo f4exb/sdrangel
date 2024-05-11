@@ -38,6 +38,10 @@ SWGInterferometerSettings::SWGInterferometerSettings() {
     m_log2_decim_isSet = false;
     filter_chain_hash = 0;
     m_filter_chain_hash_isSet = false;
+    phase = 0;
+    m_phase_isSet = false;
+    gain = 0;
+    m_gain_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -74,6 +78,10 @@ SWGInterferometerSettings::init() {
     m_log2_decim_isSet = false;
     filter_chain_hash = 0;
     m_filter_chain_hash_isSet = false;
+    phase = 0;
+    m_phase_isSet = false;
+    gain = 0;
+    m_gain_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -101,6 +109,8 @@ SWGInterferometerSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
+
 
 
 
@@ -144,6 +154,10 @@ SWGInterferometerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
     
     ::SWGSDRangel::setValue(&filter_chain_hash, pJson["filterChainHash"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&phase, pJson["phase"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&gain, pJson["gain"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -193,6 +207,12 @@ SWGInterferometerSettings::asJsonObject() {
     }
     if(m_filter_chain_hash_isSet){
         obj->insert("filterChainHash", QJsonValue(filter_chain_hash));
+    }
+    if(m_phase_isSet){
+        obj->insert("phase", QJsonValue(phase));
+    }
+    if(m_gain_isSet){
+        obj->insert("gain", QJsonValue(gain));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -273,6 +293,26 @@ void
 SWGInterferometerSettings::setFilterChainHash(qint32 filter_chain_hash) {
     this->filter_chain_hash = filter_chain_hash;
     this->m_filter_chain_hash_isSet = true;
+}
+
+qint32
+SWGInterferometerSettings::getPhase() {
+    return phase;
+}
+void
+SWGInterferometerSettings::setPhase(qint32 phase) {
+    this->phase = phase;
+    this->m_phase_isSet = true;
+}
+
+qint32
+SWGInterferometerSettings::getGain() {
+    return gain;
+}
+void
+SWGInterferometerSettings::setGain(qint32 gain) {
+    this->gain = gain;
+    this->m_gain_isSet = true;
 }
 
 qint32
@@ -383,6 +423,12 @@ SWGInterferometerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_filter_chain_hash_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_phase_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_gain_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

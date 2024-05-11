@@ -184,6 +184,9 @@ void Interferometer::applySettings(const InterferometerSettings& settings, bool 
     if ((m_settings.m_phase != settings.m_phase) || force) {
         reverseAPIKeys.append("phase");
     }
+    if ((m_settings.m_phase != settings.m_gain) || force) {
+        reverseAPIKeys.append("gain");
+    }
     if ((m_settings.m_title != settings.m_title) || force) {
         reverseAPIKeys.append("title");
     }
@@ -393,6 +396,12 @@ void Interferometer::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getInterferometerSettings()->getLog2Decim();
     }
+    if (channelSettingsKeys.contains("phase")) {
+        settings.m_phase = response.getInterferometerSettings()->getPhase();
+    }
+    if (channelSettingsKeys.contains("gain")) {
+        settings.m_gain = response.getInterferometerSettings()->getGain();
+    }
 
     if (channelSettingsKeys.contains("filterChainHash"))
     {
@@ -440,6 +449,8 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
     }
 
     response.getInterferometerSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getInterferometerSettings()->setPhase(settings.m_phase);
+    response.getInterferometerSettings()->setGain(settings.m_gain);
     response.getInterferometerSettings()->setFilterChainHash(settings.m_filterChainHash);
     response.getInterferometerSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -584,6 +595,12 @@ void Interferometer::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgInterferometerSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (channelSettingsKeys.contains("phase") || force) {
+        swgInterferometerSettings->setPhase(settings.m_phase);
+    }
+    if (channelSettingsKeys.contains("gain") || force) {
+        swgInterferometerSettings->setGain(settings.m_gain);
     }
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgInterferometerSettings->setFilterChainHash(settings.m_filterChainHash);

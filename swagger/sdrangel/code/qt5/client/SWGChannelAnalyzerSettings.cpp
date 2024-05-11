@@ -210,11 +210,11 @@ SWGChannelAnalyzerSettings::fromJson(QString &json) {
 
 void
 SWGChannelAnalyzerSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&frequency, pJson["inputFrequencyOffset"], "qint32", "");
+    ::SWGSDRangel::setValue(&frequency, pJson["frequency"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&down_sample, pJson["rationalDownSample"], "qint32", "");
+    ::SWGSDRangel::setValue(&down_sample, pJson["downSample"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&down_sample_rate, pJson["rationalDownSamplerRate"], "qint32", "");
+    ::SWGSDRangel::setValue(&down_sample_rate, pJson["downSampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&bandwidth, pJson["bandwidth"], "qint32", "");
     
@@ -285,13 +285,13 @@ QJsonObject*
 SWGChannelAnalyzerSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_frequency_isSet){
-        obj->insert("inputFrequencyOffset", QJsonValue(frequency));
+        obj->insert("frequency", QJsonValue(frequency));
     }
     if(m_down_sample_isSet){
-        obj->insert("rationalDownSample", QJsonValue(down_sample));
+        obj->insert("downSample", QJsonValue(down_sample));
     }
     if(m_down_sample_rate_isSet){
-        obj->insert("rationalDownSamplerRate", QJsonValue(down_sample_rate));
+        obj->insert("downSampleRate", QJsonValue(down_sample_rate));
     }
     if(m_bandwidth_isSet){
         obj->insert("bandwidth", QJsonValue(bandwidth));

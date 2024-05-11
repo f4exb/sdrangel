@@ -12,6 +12,12 @@ InterferometerSettings:
       type: integer
     filterChainHash:
       type: integer
+    phase:
+      description: Channel B phase shift in degrees (-180 to 180)
+      type: integer
+    gain:
+      description: Channel B gain in centi-Bels
+      type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
