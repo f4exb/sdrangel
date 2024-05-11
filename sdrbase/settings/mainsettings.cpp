@@ -183,7 +183,7 @@ void MainSettings::save() const
 
 	for(int i = 0; i < groups.size(); ++i)
 	{
-		if ((groups[i].startsWith("preset")) || (groups[i].startsWith("command")))
+		if (groups[i] != "General")
 		{
 			s.remove(groups[i]);
 		}
