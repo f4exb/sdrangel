@@ -214,6 +214,8 @@ void InterferometerGUI::displaySettings()
     applyDecimation();
     ui->phaseCorrection->setValue(m_settings.m_phase);
     ui->phaseCorrectionText->setText(tr("%1").arg(m_settings.m_phase));
+    ui->gain->setValue(m_settings.m_gain);
+    ui->gainText->setText(QString("%1").arg(m_settings.m_gain / 10.0, 0, 'f', 1));
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
@@ -317,6 +319,25 @@ void InterferometerGUI::on_phaseCorrection_valueChanged(int value)
     applySettings();
 }
 
+void InterferometerGUI::on_gain_valueChanged(int value)
+{
+    m_settings.m_gain = value;
+    ui->gainText->setText(QString("%1").arg(m_settings.m_gain / 10.0, 0, 'f', 1));
+    applySettings();
+}
+
+void InterferometerGUI::on_phaseCorrectionLabel_clicked()
+{
+    m_settings.m_phase = 0;
+    ui->phaseCorrection->setValue(0);
+}
+
+void InterferometerGUI::on_gainLabel_clicked()
+{
+    m_settings.m_gain = 0;
+    ui->gain->setValue(0);
+}
+
 void InterferometerGUI::on_correlationType_currentIndexChanged(int index)
 {
     m_settings.m_correlationType = (InterferometerSettings::CorrelationType) index;
@@ -361,6 +382,9 @@ void InterferometerGUI::makeUIConnections()
     QObject::connect(ui->decimationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InterferometerGUI::on_decimationFactor_currentIndexChanged);
     QObject::connect(ui->position, &QSlider::valueChanged, this, &InterferometerGUI::on_position_valueChanged);
     QObject::connect(ui->phaseCorrection, &QSlider::valueChanged, this, &InterferometerGUI::on_phaseCorrection_valueChanged);
+    QObject::connect(ui->gain, &QDial::valueChanged, this, &InterferometerGUI::on_gain_valueChanged);
+    QObject::connect(ui->phaseCorrectionLabel, &ClickableLabel::clicked, this, &InterferometerGUI::on_phaseCorrectionLabel_clicked);
+    QObject::connect(ui->gainLabel, &ClickableLabel::clicked, this, &InterferometerGUI::on_gainLabel_clicked);
     QObject::connect(ui->correlationType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InterferometerGUI::on_correlationType_currentIndexChanged);
 }
 

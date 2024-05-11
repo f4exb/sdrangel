@@ -170,7 +170,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="corrLabel">
           <property name="text">
            <string>Corr</string>
           </property>
@@ -224,7 +224,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="phaseCorrectionLabel">
+         <widget class="ClickableLabel" name="phaseCorrectionLabel">
+          <property name="toolTip">
+           <string>Click to set phase correction to 0</string>
+          </property>
           <property name="text">
            <string>Ph</string>
           </property>
@@ -233,7 +236,7 @@
         <item>
          <widget class="QSlider" name="phaseCorrection">
           <property name="toolTip">
-           <string>Phase correction on stream 1</string>
+           <string>Phase correction on B</string>
           </property>
           <property name="minimum">
            <number>-180</number>
@@ -258,10 +261,74 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Phase correction on stream 1 in degrees</string>
+           <string>Phase correction on B in degrees</string>
           </property>
           <property name="text">
            <string>-180</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ClickableLabel" name="gainLabel">
+          <property name="toolTip">
+           <string>Click to set gain to 0dB</string>
+          </property>
+          <property name="text">
+           <string>Gain</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDial" name="gain">
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>B gain (dB)</string>
+          </property>
+          <property name="minimum">
+           <number>-300</number>
+          </property>
+          <property name="maximum">
+           <number>300</number>
+          </property>
+          <property name="singleStep">
+           <number>1</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="gainText">
+          <property name="minimumSize">
+           <size>
+            <width>30</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>B gain (dB)</string>
+          </property>
+          <property name="text">
+           <string>-99.9</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -520,6 +587,11 @@
    <extends>QWidget</extends>
    <header>gui/glscopegui.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>gui/clickablelabel.h</header>
   </customwidget>
  </customwidgets>
  <resources>

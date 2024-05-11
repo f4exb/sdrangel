@@ -162,6 +162,7 @@ void Interferometer::applySettings(const InterferometerSettings& settings, bool 
         << "m_filterChainHash: " << settings.m_filterChainHash
         << "m_log2Decim: " << settings.m_log2Decim
         << "m_phase: " << settings.m_phase
+        << "m_gain: " << settings.m_gain / 10.0
         << "m_useReverseAPI: " << settings.m_useReverseAPI
         << "m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << "m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -188,7 +189,7 @@ void Interferometer::applySettings(const InterferometerSettings& settings, bool 
     }
 
     if (m_running && ((m_settings.m_log2Decim != settings.m_log2Decim)
-     || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force))
+        || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force))
     {
         InterferometerBaseband::MsgConfigureChannelizer *msg = InterferometerBaseband::MsgConfigureChannelizer::create(
             settings.m_log2Decim, settings.m_filterChainHash);
@@ -204,6 +205,10 @@ void Interferometer::applySettings(const InterferometerSettings& settings, bool 
 
     if (m_running && ((m_settings.m_phase != settings.m_phase) || force)) {
         m_basebandSink->setPhase(settings.m_phase);
+    }
+
+    if (m_running && ((m_settings.m_gain != settings.m_gain) || force)) {
+        m_basebandSink->setGain(settings.m_gain);
     }
 
     QList<ObjectPipe*> pipes;

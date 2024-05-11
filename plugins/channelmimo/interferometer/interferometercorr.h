@@ -29,7 +29,7 @@
 class FFTEngine;
 
 class InterferometerCorrelator : public QObject {
-  	Q_OBJECT
+    Q_OBJECT
 public:
     InterferometerCorrelator(int fftSize);
     ~InterferometerCorrelator();
@@ -44,6 +44,7 @@ public:
     );
     int getFullFFTSize() const { return 2*m_fftSize; }
     void setPhase(int phase);
+    void setGain(int gainCB);
 
     SampleVector m_scorr; //!< raw correlation result (spectrum) - Sample vector expected
     SampleVector m_tcorr; //!< correlation result (time or spectrum inverse FFT) - Sample vector expected
@@ -57,27 +58,27 @@ private:
     bool performOpCorr( //!< Returns true if results were produced
         const SampleVector& data0,
         unsigned int size0,
-        const SampleVector& data1,
+        const SampleVector* data1,
         unsigned int size1,
         Sample sampleOp(const Sample& a, const Sample& b)
     );
     bool performIFFTCorr( //!< Returns true if results were produced
         const SampleVector& data0,
         unsigned int size0,
-        const SampleVector& data1,
+        const SampleVector* data1,
         unsigned int size1,
         bool star = false
     );
     bool performIFFT2Corr( //!< Returns true if results were produced
         const SampleVector& data0,
         unsigned int size0,
-        const SampleVector& data1,
+        const SampleVector* data1,
         unsigned int size1
     );
     bool performFFTProd( //!< Returns true if results were produced
         const SampleVector& data0,
         unsigned int size0,
-        const SampleVector& data1,
+        const SampleVector* data1,
         unsigned int size1
     );
     void adjustSCorrSize(int size);
@@ -101,6 +102,8 @@ private:
     int m_scorrSize;                 //!< spectrum correlations vector size
     int m_tcorrSize;                 //!< time correlations vector size
     int m_phase;   //!< phase correction
+    int m_gainCB;
+    double m_gain;
     int64_t m_sin; //!< scaled sine of phase correction
     int64_t m_cos; //!< scaled cosine of phase correction
 };

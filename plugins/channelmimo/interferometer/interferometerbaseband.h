@@ -112,6 +112,7 @@ public:
     void setSpectrumSink(BasebandSampleSink *spectrumSink) { m_spectrumSink = spectrumSink; }
     void setScopeSink(ScopeVis *scopeSink) { m_scopeSink = scopeSink; }
     void setPhase(int phase) { m_correlator.setPhase(phase); }
+    void setGain(int gain) { m_correlator.setGain(gain); }
 
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
     void setBasebandSampleRate(unsigned int sampleRate);

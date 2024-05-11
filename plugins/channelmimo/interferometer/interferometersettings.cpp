@@ -40,6 +40,7 @@ void InterferometerSettings::resetToDefaults()
     m_log2Decim = 0;
     m_filterChainHash = 0;
     m_phase = 0;
+    m_gain = 0;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
@@ -66,6 +67,7 @@ QByteArray InterferometerSettings::serialize() const
     s.writeS32(13,m_workspaceIndex);
     s.writeBlob(14, m_geometryBytes);
     s.writeBool(15, m_hidden);
+    s.writeS32(16, m_gain);
 
     if (m_spectrumGUI) {
         s.writeBlob(20, m_spectrumGUI->serialize());
@@ -125,6 +127,7 @@ bool InterferometerSettings::deserialize(const QByteArray& data)
         d.readS32(13, &m_workspaceIndex);
         d.readBlob(14, &m_geometryBytes);
         d.readBool(15, &m_hidden, false);
+        d.readS32(16, &m_gain, 0);
 
         if (m_spectrumGUI)
         {

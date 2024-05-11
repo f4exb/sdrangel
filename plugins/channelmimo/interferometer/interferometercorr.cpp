@@ -21,6 +21,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/fftfactory.h"
 #include "dsp/fftengine.h"
+#include "util/db.h"
 
 #include "interferometercorr.h"
 
@@ -123,6 +124,7 @@ InterferometerCorrelator::InterferometerCorrelator(int fftSize) :
     m_fftSize(fftSize)
 {
     setPhase(0);
+    setGain(0);
     FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
     m_window.create(FFTWindow::Function::Hanning, fftSize);
     m_data0w.resize(m_fftSize);
@@ -166,141 +168,78 @@ bool InterferometerCorrelator::performCorr(
 )
 {
     bool results = false;
+    const SampleVector *pdata1 = &data1;
 
-    if (m_phase == 0)
-    {
-        switch (m_corrType)
-        {
-            case InterferometerSettings::Correlation0:
-                results = performOpCorr(data0, size0, data1, size1, sFirst);
-                break;
-            case InterferometerSettings::Correlation1:
-                results = performOpCorr(data0, size0, data1, size1, sSecond);
-                break;
-            case InterferometerSettings::CorrelationAdd:
-                results = performOpCorr(data0, size0, data1, size1, sAdd);
-                break;
-            case InterferometerSettings::CorrelationMultiply:
-                results = performOpCorr(data0, size0, data1, size1, sMulConj);
-                break;
-            case InterferometerSettings::CorrelationIFFT:
-                results = performIFFTCorr(data0, size0, data1, size1);
-                break;
-            case InterferometerSettings::CorrelationIFFTStar:
-                results = performIFFTCorr(data0, size0, data1, size1, true);
-                break;
-            case InterferometerSettings::CorrelationFFT:
-                results = performFFTProd(data0, size0, data1, size1);
-                break;
-            case InterferometerSettings::CorrelationIFFT2:
-                results = performIFFT2Corr(data0, size0, data1, size1);
-                break;
-            default:
-                break;
-        }
-    }
-    else if ((m_phase == -180) || (m_phase == 180))
-    {
-        if ((m_corrType == InterferometerSettings::CorrelationIFFT)
-         || (m_corrType == InterferometerSettings::CorrelationIFFT2)
-         || (m_corrType == InterferometerSettings::CorrelationIFFTStar)
-         || (m_corrType == InterferometerSettings::CorrelationFFT))
-        {
-            if (size1 > m_data1p.size()) {
-                m_data1p.resize(size1);
-            }
-
-            std::transform(
-                data1.begin(),
-                data1.begin() + size1,
-                m_data1p.begin(),
-                [](const Sample& s) -> Sample {
-                    return Sample{-s.real(), -s.imag()};
-                }
-            );
-        }
-
-        switch (m_corrType)
-        {
-            case InterferometerSettings::Correlation0:
-                results = performOpCorr(data0, size0, data1, size1, sFirst);
-                break;
-            case InterferometerSettings::Correlation1:
-                results = performOpCorr(data0, size0, data1, size1, sSecondInv);
-                break;
-            case InterferometerSettings::CorrelationAdd:
-                results = performOpCorr(data0, size0, data1, size1, sAddInv);
-                break;
-            case InterferometerSettings::CorrelationMultiply:
-                results = performOpCorr(data0, size0, data1, size1, sMulConjInv);
-                break;
-            case InterferometerSettings::CorrelationIFFT:
-                results = performIFFTCorr(data0, size0, m_data1p, size1);
-                break;
-            case InterferometerSettings::CorrelationIFFTStar:
-                results = performIFFTCorr(data0, size0, m_data1p, size1, true);
-                break;
-            case InterferometerSettings::CorrelationFFT:
-                results = performFFTProd(data0, size0, m_data1p, size1);
-                break;
-            case InterferometerSettings::CorrelationIFFT2:
-                results = performIFFT2Corr(data0, size0, m_data1p, size1);
-                break;
-            default:
-                break;
-        }
-    }
-    else
+    if ((m_gain != 0) || (m_phase != 0))
     {
         if (size1 > m_data1p.size()) {
             m_data1p.resize(size1);
         }
 
-        std::transform(
-            data1.begin(),
-            data1.begin() + size1,
-            m_data1p.begin(),
-            [this](const Sample& s) -> Sample {
-                Sample t;
-                int64_t sx = s.real();
-                int64_t sy = s.imag();
-                int64_t x = sx*m_cos + sy*m_sin;
-                int64_t y = sy*m_cos - sx*m_sin;
-                t.setReal(x>>(SDR_RX_SAMP_SZ-1));
-                t.setImag(y>>(SDR_RX_SAMP_SZ-1));
-                return t;
-            }
-        );
+        pdata1 = &m_data1p;
 
-        switch (m_corrType)
+        if (m_phase == 0)
         {
-            case InterferometerSettings::Correlation0:
-                results = performOpCorr(data0, size0, m_data1p, size1, sFirst);
-                break;
-            case InterferometerSettings::Correlation1:
-                results = performOpCorr(data0, size0, m_data1p, size1, sSecond);
-                break;
-            case InterferometerSettings::CorrelationAdd:
-                results = performOpCorr(data0, size0, m_data1p, size1, sAdd);
-                break;
-            case InterferometerSettings::CorrelationMultiply:
-                results = performOpCorr(data0, size0, m_data1p, size1, sMulConj);
-                break;
-            case InterferometerSettings::CorrelationIFFT:
-                results = performIFFTCorr(data0, size0, m_data1p, size1);
-                break;
-            case InterferometerSettings::CorrelationIFFTStar:
-                results = performIFFTCorr(data0, size0, m_data1p, size1, true);
-                break;
-            case InterferometerSettings::CorrelationFFT:
-                results = performFFTProd(data0, size0, m_data1p, size1);
-                break;
-            case InterferometerSettings::CorrelationIFFT2:
-                results = performIFFT2Corr(data0, size0, m_data1p, size1);
-                break;
-            default:
-                break;
+            std::transform(
+                data1.begin(),
+                data1.begin() + size1,
+                m_data1p.begin(),
+                [this](const Sample& s) -> Sample
+                {
+                    FixReal sx = s.real()*m_gain;
+                    FixReal sy = s.imag()*m_gain;
+                    return Sample{sx, sy};
+                }
+            );
         }
+        else
+        {
+            std::transform(
+                data1.begin(),
+                data1.begin() + size1,
+                m_data1p.begin(),
+                [this](const Sample& s) -> Sample {
+                    Sample t;
+                    int64_t sx = s.real()*m_gain;
+                    int64_t sy = s.imag()*m_gain;
+                    int64_t x = sx*m_cos + sy*m_sin;
+                    int64_t y = sy*m_cos - sx*m_sin;
+                    t.setReal(x>>(SDR_RX_SAMP_SZ-1));
+                    t.setImag(y>>(SDR_RX_SAMP_SZ-1));
+                    return t;
+                }
+            );
+        }
+    }
+
+    switch (m_corrType)
+    {
+        case InterferometerSettings::Correlation0:
+            results = performOpCorr(data0, size0, pdata1, size1, sFirst);
+            break;
+        case InterferometerSettings::Correlation1:
+            results = performOpCorr(data0, size0, pdata1, size1, sSecond);
+            break;
+        case InterferometerSettings::CorrelationAdd:
+            results = performOpCorr(data0, size0, pdata1, size1, sAdd);
+            break;
+        case InterferometerSettings::CorrelationMultiply:
+            results = performOpCorr(data0, size0, pdata1, size1, sMulConj);
+            break;
+        case InterferometerSettings::CorrelationIFFT:
+            results = performIFFTCorr(data0, size0, pdata1, size1);
+            break;
+        case InterferometerSettings::CorrelationIFFTStar:
+            results = performIFFTCorr(data0, size0, pdata1, size1, true);
+            break;
+        case InterferometerSettings::CorrelationFFT:
+            results = performFFTProd(data0, size0, pdata1, size1);
+            break;
+        case InterferometerSettings::CorrelationIFFT2:
+            results = performIFFT2Corr(data0, size0, pdata1, size1);
+            break;
+        default:
+            break;
     }
 
     return results;
@@ -309,7 +248,7 @@ bool InterferometerCorrelator::performCorr(
 bool InterferometerCorrelator::performOpCorr(
     const SampleVector& data0,
     unsigned int size0,
-    const SampleVector& data1,
+    const SampleVector* data1,
     unsigned int size1,
     Sample sampleOp(const Sample& a, const Sample& b)
 )
@@ -320,7 +259,7 @@ bool InterferometerCorrelator::performOpCorr(
     std::transform(
         data0.begin(),
         data0.begin() + size,
-        data1.begin(),
+        data1->begin(),
         m_tcorr.begin(),
         sampleOp
     );
@@ -334,7 +273,7 @@ bool InterferometerCorrelator::performOpCorr(
 bool InterferometerCorrelator::performIFFTCorr(
     const SampleVector& data0,
     unsigned int size0,
-    const SampleVector& data1,
+    const SampleVector* data1,
     unsigned int size1,
     bool star
 )
@@ -342,7 +281,7 @@ bool InterferometerCorrelator::performIFFTCorr(
     unsigned int size = std::min(size0, size1);
     int nfft = 0;
     SampleVector::const_iterator begin0 = data0.begin();
-    SampleVector::const_iterator begin1 = data1.begin();
+    SampleVector::const_iterator begin1 = data1->begin();
     adjustSCorrSize(size);
     adjustTCorrSize(size);
 
@@ -458,14 +397,14 @@ bool InterferometerCorrelator::performIFFTCorr(
 bool InterferometerCorrelator::performIFFT2Corr(
     const SampleVector& data0,
     unsigned int size0,
-    const SampleVector& data1,
+    const SampleVector* data1,
     unsigned int size1
 )
 {
     unsigned int size = std::min(size0, size1);
     int nfft = 0;
     SampleVector::const_iterator begin0 = data0.begin();
-    SampleVector::const_iterator begin1 = data1.begin();
+    SampleVector::const_iterator begin1 = data1->begin();
     adjustSCorrSize(size);
     adjustTCorrSize(size);
 
@@ -567,14 +506,14 @@ bool InterferometerCorrelator::performIFFT2Corr(
 bool InterferometerCorrelator::performFFTProd(
     const SampleVector& data0,
     unsigned int size0,
-    const SampleVector& data1,
+    const SampleVector* data1,
     unsigned int size1
 )
 {
     unsigned int size = std::min(size0, size1);
     int nfft = 0;
     SampleVector::const_iterator begin0 = data0.begin();
-    SampleVector::const_iterator begin1 = data1.begin();
+    SampleVector::const_iterator begin1 = data1->begin();
     adjustSCorrSize(size);
     adjustTCorrSize(size);
 
@@ -722,4 +661,11 @@ void InterferometerCorrelator::setPhase(int phase)
         m_sin = d_sin;
         m_cos = d_cos;
     }
+}
+
+void InterferometerCorrelator::setGain(int gainCB)
+{
+    double db = gainCB / 10.0;
+    m_gainCB = gainCB;
+    m_gain = CalcDb::powerFromdB(db);
 }

@@ -46,6 +46,7 @@ struct InterferometerSettings
     uint32_t m_log2Decim;
     uint32_t m_filterChainHash;
     int m_phase;
+    int m_gain;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
