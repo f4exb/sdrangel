@@ -225,6 +225,11 @@ void InterferometerGUI::displaySettings()
     setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
+    int index = getLocalDeviceIndexInCombo(m_settings.m_localDeviceIndex);
+    if (index >= 0) {
+        ui->localDevice->setCurrentIndex(index);
+    }
+    ui->localDevicePlay->setChecked(m_settings.m_play);
     ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
     applyDecimation();
     ui->phaseCorrection->setValue(m_settings.m_phase);
@@ -338,6 +343,20 @@ void InterferometerGUI::updateDeviceSetList(const QList<int>& deviceSetIndexes)
     ui->localDevice->blockSignals(false);
 }
 
+int InterferometerGUI::getLocalDeviceIndexInCombo(int localDeviceIndex)
+{
+    int index = 0;
+
+    for (; index < ui->localDevice->count(); index++)
+    {
+        if (localDeviceIndex == ui->localDevice->itemData(index).toInt()) {
+            return index;
+        }
+    }
+
+    return -1;
+}
+
 void InterferometerGUI::on_decimationFactor_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index;
@@ -387,6 +406,23 @@ void InterferometerGUI::on_correlationType_currentIndexChanged(int index)
     applySettings();
 }
 
+void InterferometerGUI::on_localDevice_currentIndexChanged(int index)
+{
+    if (index >= 0)
+    {
+        m_settings.m_localDeviceIndex = ui->localDevice->currentData().toInt();
+        m_settingsKeys.append("localDeviceIndex");
+        applySettings();
+    }
+}
+
+void InterferometerGUI::on_localDevicePlay_toggled(bool checked)
+{
+    m_settings.m_play = checked;
+    m_settingsKeys.append("play");
+    applySettings();
+}
+
 void InterferometerGUI::applyDecimation()
 {
     uint32_t maxHash = 1;
@@ -430,6 +466,8 @@ void InterferometerGUI::makeUIConnections()
     QObject::connect(ui->phaseCorrectionLabel, &ClickableLabel::clicked, this, &InterferometerGUI::on_phaseCorrectionLabel_clicked);
     QObject::connect(ui->gainLabel, &ClickableLabel::clicked, this, &InterferometerGUI::on_gainLabel_clicked);
     QObject::connect(ui->correlationType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InterferometerGUI::on_correlationType_currentIndexChanged);
+    QObject::connect(ui->localDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InterferometerGUI::on_localDevice_currentIndexChanged);
+    QObject::connect(ui->localDevicePlay, &ButtonSwitch::toggled, this, &InterferometerGUI::on_localDevicePlay_toggled);
 }
 
 void InterferometerGUI::updateAbsoluteCenterFrequency()

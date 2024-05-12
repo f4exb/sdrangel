@@ -42,6 +42,7 @@ void InterferometerSettings::resetToDefaults()
     m_phase = 0;
     m_gain = 0;
     m_localDeviceIndex = -1;
+    m_play = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
@@ -191,6 +192,9 @@ void InterferometerSettings::applySettings(const QStringList& settingsKeys, cons
     if (settingsKeys.contains("localDeviceIndex")) {
         m_localDeviceIndex = settings.m_localDeviceIndex;
     }
+    if (settingsKeys.contains("play")) {
+        m_play = settings.m_play;
+    }
     if (settingsKeys.contains("reverseAPIAddress")) {
         m_reverseAPIAddress = settings.m_reverseAPIAddress;
     }
@@ -238,6 +242,9 @@ QString InterferometerSettings::getDebugString(const QStringList& settingsKeys, 
     }
     if (settingsKeys.contains("localDeviceIndex")) {
         ostr << " m_localDeviceIndex: " << m_localDeviceIndex;
+    }
+    if (settingsKeys.contains("play") || force) {
+        ostr << " m_play: " << m_play;
     }
     if (settingsKeys.contains("reverseAPIAddress")) {
         ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();

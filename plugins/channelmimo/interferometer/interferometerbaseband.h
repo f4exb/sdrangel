@@ -33,6 +33,7 @@
 class DownChannelizer;
 class BasebandSampleSink;
 class ScopeVis;
+class DeviceSampleSource;
 
 class InterferometerBaseband : public QObject
 {
@@ -103,6 +104,26 @@ public:
         { }
     };
 
+    class MsgConfigureLocalDeviceSampleSource : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgConfigureLocalDeviceSampleSource* create(DeviceSampleSource *deviceSampleSource) {
+            return new MsgConfigureLocalDeviceSampleSource(deviceSampleSource);
+        }
+
+        DeviceSampleSource *getDeviceSampleSource() const { return m_deviceSampleSource; }
+
+    private:
+
+        MsgConfigureLocalDeviceSampleSource(DeviceSampleSource *deviceSampleSource) :
+            Message(),
+            m_deviceSampleSource(deviceSampleSource)
+        { }
+
+        DeviceSampleSource *m_deviceSampleSource;
+    };
+
     InterferometerBaseband(int fftSize);
     ~InterferometerBaseband();
     void reset();
@@ -116,6 +137,7 @@ public:
 
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
     void setBasebandSampleRate(unsigned int sampleRate);
+    void play(bool play) { m_play = play; }
 
 private:
     void processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend);
@@ -133,6 +155,8 @@ private:
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     QRecursiveMutex m_mutex;
     unsigned int m_lastStream;
+    DeviceSampleSource *m_localSampleSource;
+    bool m_play;
 
 private slots:
     void handleInputMessages();

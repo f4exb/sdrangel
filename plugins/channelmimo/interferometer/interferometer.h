@@ -37,6 +37,7 @@ class InterferometerBaseband;
 class QNetworkReply;
 class QNetworkAccessManager;
 class ObjectPipe;
+class DevieSampleSource;
 class Interferometer: public MIMOChannel, public ChannelAPI
 {
 public:
@@ -192,6 +193,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;
     uint32_t m_deviceSampleRate;
     int m_count0, m_count1;
@@ -201,8 +203,10 @@ private:
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
     void applySettings(const InterferometerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     static void validateFilterChainHash(InterferometerSettings& settings);
-    void calculateFrequencyOffset();
+    void calculateFrequencyOffset(uint32_t log2Decim, uint32_t filterChainHash);
     void updateDeviceSetList();
+    DeviceSampleSource *getLocalDevice(int deviceSetIndex);
+    void propagateSampleRateAndFrequency(int index, uint32_t log2Decim);
     void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const InterferometerSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,

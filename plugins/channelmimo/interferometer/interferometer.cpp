@@ -30,6 +30,7 @@
 #include "dsp/dspcommands.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/devicesamplesource.h"
+#include "dsp/dspengine.h"
 #include "device/deviceset.h"
 #include "maincore.h"
 
@@ -52,6 +53,7 @@ Interferometer::Interferometer(DeviceAPI *deviceAPI) :
     m_basebandSink(nullptr),
     m_running(false),
     m_guiMessageQueue(nullptr),
+    m_centerFrequency(0),
     m_frequencyOffset(0),
     m_deviceSampleRate(48000)
 {
@@ -141,6 +143,11 @@ void Interferometer::startSinks()
     InterferometerBaseband::MsgConfigureChannelizer *msg = InterferometerBaseband::MsgConfigureChannelizer::create(
         m_settings.m_log2Decim, m_settings.m_filterChainHash);
     m_basebandSink->getInputMessageQueue()->push(msg);
+
+    DeviceSampleSource *deviceSource = getLocalDevice(m_settings.m_localDeviceIndex);
+    InterferometerBaseband::MsgConfigureLocalDeviceSampleSource *msgDevice =
+        InterferometerBaseband::MsgConfigureLocalDeviceSampleSource::create(deviceSource);
+    m_basebandSink->getInputMessageQueue()->push(msgDevice);
 }
 
 void Interferometer::stopSinks()
@@ -175,7 +182,7 @@ void Interferometer::pull(SampleVector::iterator& begin, unsigned int nbSamples,
 
 void Interferometer::applySettings(const InterferometerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "LocalSink::applySettings:" << settings.getDebugString(settingsKeys, force) << "force: " << force;
+    qDebug() << "Interferometer::applySettings:" << settings.getDebugString(settingsKeys, force) << "force: " << force;
 
     if (m_running && (settingsKeys.contains("log2Decim")
         || settingsKeys.contains("filterChainHash") || force))
@@ -183,6 +190,8 @@ void Interferometer::applySettings(const InterferometerSettings& settings, const
         InterferometerBaseband::MsgConfigureChannelizer *msg = InterferometerBaseband::MsgConfigureChannelizer::create(
             settings.m_log2Decim, settings.m_filterChainHash);
         m_basebandSink->getInputMessageQueue()->push(msg);
+        calculateFrequencyOffset(settings.m_log2Decim, settings.m_filterChainHash);
+        propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, settings.m_log2Decim);
     }
 
     if (m_running && ((settingsKeys.contains("correlationType")) || force))
@@ -198,6 +207,23 @@ void Interferometer::applySettings(const InterferometerSettings& settings, const
 
     if (m_running && ((settingsKeys.contains("gain")) || force)) {
         m_basebandSink->setGain(settings.m_gain);
+    }
+
+    if (settingsKeys.contains("localDeviceIndex") || force)
+    {
+        propagateSampleRateAndFrequency(settings.m_localDeviceIndex, settings.m_log2Decim);
+
+        if (m_running)
+        {
+            DeviceSampleSource *deviceSource = getLocalDevice(settings.m_localDeviceIndex);
+            InterferometerBaseband::MsgConfigureLocalDeviceSampleSource *msg =
+                InterferometerBaseband::MsgConfigureLocalDeviceSampleSource::create(deviceSource);
+            m_basebandSink->getInputMessageQueue()->push(msg);
+        }
+    }
+
+    if (m_running && (settingsKeys.contains("play") || force)) {
+        m_basebandSink->play(settings.m_play);
     }
 
     QList<ObjectPipe*> pipes;
@@ -259,7 +285,11 @@ bool Interferometer::handleMessage(const Message& cmd)
         if (notif.getSourceOrSink()) // deals with source messages only
         {
             m_deviceSampleRate = notif.getSampleRate();
-            calculateFrequencyOffset(); // This is when device sample rate changes
+            if (notif.getIndex() == 0) { // Take stream 0 (channel A) as the reference channel
+                m_centerFrequency = notif.getCenterFrequency();
+            }
+            calculateFrequencyOffset(m_settings.m_log2Decim, m_settings.m_filterChainHash); // This is when device sample rate changes
+            propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, m_settings.m_log2Decim);
 
             // Notify baseband sink of input sample rate change
             if (m_running)
@@ -322,9 +352,9 @@ void Interferometer::validateFilterChainHash(InterferometerSettings& settings)
     settings.m_filterChainHash = settings.m_filterChainHash >= s ? s-1 : settings.m_filterChainHash;
 }
 
-void Interferometer::calculateFrequencyOffset()
+void Interferometer::calculateFrequencyOffset(uint32_t log2Decim, uint32_t filterChainHash)
 {
-    double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Decim, m_settings.m_filterChainHash);
+    double shiftFactor = HBFilterChainConverter::getShiftFactor(log2Decim, filterChainHash);
     m_frequencyOffset = m_deviceSampleRate * shiftFactor;
 }
 
@@ -345,9 +375,9 @@ void Interferometer::updateDeviceSetList()
     std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
 
     m_localInputDeviceIndexes.clear();
-    unsigned int deviceIndex = 0;
+    unsigned int deviceSetIndex = 0;
 
-    for (; it != deviceSets.end(); ++it, deviceIndex++)
+    for (; it != deviceSets.end(); ++it, deviceSetIndex++)
     {
         DSPDeviceSourceEngine *deviceSourceEngine = (*it)->m_deviceSourceEngine;
 
@@ -356,7 +386,7 @@ void Interferometer::updateDeviceSetList()
             DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
 
             if (deviceSource->getDeviceDescription() == "LocalInput") {
-                m_localInputDeviceIndexes.append(deviceIndex);
+                m_localInputDeviceIndexes.append(deviceSetIndex);
             }
         }
     }
@@ -371,19 +401,19 @@ void Interferometer::updateDeviceSetList()
     InterferometerSettings settings = m_settings;
     int newIndexInList;
 
-    if (it != deviceSets.begin())
+    if (m_localInputDeviceIndexes.size() != 0) // there are some local input devices
     {
-        if (m_settings.m_localDeviceIndex < 0) {
-            newIndexInList = 0;
-        } else if (m_settings.m_localDeviceIndex >= m_localInputDeviceIndexes.size()) {
-            newIndexInList = m_localInputDeviceIndexes.size() - 1;
-        } else {
+        if (m_settings.m_localDeviceIndex < 0) { // not set before
+            newIndexInList = 0; // set to first device in list
+        } else if (m_settings.m_localDeviceIndex >= m_localInputDeviceIndexes.size()) { // past last device
+            newIndexInList = m_localInputDeviceIndexes.size() - 1; // set to last device in list
+        } else { // no change
             newIndexInList = m_settings.m_localDeviceIndex;
         }
     }
-    else
+    else // there are no local input devices
     {
-        newIndexInList = -1;
+        newIndexInList = -1; // set index to nothing
     }
 
     if (newIndexInList < 0) {
@@ -392,13 +422,71 @@ void Interferometer::updateDeviceSetList()
         settings.m_localDeviceIndex = m_localInputDeviceIndexes[newIndexInList];
     }
 
-    qDebug("LocalSink::updateDeviceSetLists: new device index: %d device: %d", newIndexInList, settings.m_localDeviceIndex);
+    qDebug("Interferometer::updateDeviceSetLists: new device index: %d device: %d", newIndexInList, settings.m_localDeviceIndex);
     applySettings(settings, QList<QString>{"localDeviceIndex"});
 
     if (m_guiMessageQueue)
     {
         MsgConfigureInterferometer *msg = MsgConfigureInterferometer::create(m_settings, QList<QString>{"localDeviceIndex"}, false);
         m_guiMessageQueue->push(msg);
+    }
+}
+
+DeviceSampleSource *Interferometer::getLocalDevice(int deviceSetIndex)
+{
+    if (deviceSetIndex < 0) {
+        return nullptr;
+    }
+
+    MainCore *mainCore = MainCore::instance();
+    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+
+    if (deviceSetIndex < (int) deviceSets.size())
+    {
+        DeviceSet *sourceDeviceSet = deviceSets[deviceSetIndex];
+        DSPDeviceSourceEngine *deviceSourceEngine = sourceDeviceSet->m_deviceSourceEngine;
+
+        if (deviceSourceEngine)
+        {
+            DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
+
+            if (deviceSource->getDeviceDescription() == "LocalInput") {
+                return deviceSource;
+            } else {
+                qDebug("Interferometer::getLocalDevice: source device at index %u is not a Local Input source", deviceSetIndex);
+            }
+        }
+        else
+        {
+            qDebug("Interferometer::getLocalDevice: device set at index %d has not a source device", deviceSetIndex);
+        }
+    }
+    else
+    {
+        qDebug("Interferometer::getLocalDevice: non existent device set at index: %d", deviceSetIndex);
+    }
+
+    return nullptr;
+}
+
+void Interferometer::propagateSampleRateAndFrequency(int deviceSetIndex, uint32_t log2Decim)
+{
+    qDebug() << "Interferometer::propagateSampleRateAndFrequency:"
+        << " index: " << deviceSetIndex
+        << " baseband_freq: " << m_deviceSampleRate
+        << " log2Decim: " <<  log2Decim
+        << " frequency: " << m_centerFrequency + m_frequencyOffset;
+
+    DeviceSampleSource *deviceSource = getLocalDevice(deviceSetIndex);
+
+    if (deviceSource)
+    {
+        deviceSource->setSampleRate(m_deviceSampleRate / (1 << log2Decim));
+        deviceSource->setCenterFrequency(m_centerFrequency + m_frequencyOffset);
+    }
+    else
+    {
+        qDebug("Interferometer::propagateSampleRateAndFrequency: no suitable device at index %u", deviceSetIndex);
     }
 }
 
@@ -525,8 +613,8 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
     }
 
     response.getInterferometerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getInterferometerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getInterferometerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    // response.getInterferometerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    // response.getInterferometerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 
     if (settings.m_spectrumGUI)
     {
@@ -666,6 +754,12 @@ void Interferometer::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("gain") || force) {
         swgInterferometerSettings->setGain(settings.m_gain);
     }
+    // if (channelSettingsKeys.contains("localDeviceIndex") || force) {
+    //     swgInterferometerSettings->setLocalDeviceIndex(settings.m_localDeviceIndex);
+    // }
+    // if (channelSettingsKeys.contains("play") || force) {
+    //     swgInterferometerSettings->setPlay(settings.m_play ? 1 : 0);
+    // }
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgInterferometerSettings->setFilterChainHash(settings.m_filterChainHash);
     }

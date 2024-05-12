@@ -95,6 +95,7 @@ private:
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
     void updateDeviceSetList(const QList<int>& deviceSetIndexes);
+    int getLocalDeviceIndexInCombo(int localDeviceIndex);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(EnterEventType*);
@@ -108,6 +109,8 @@ private slots:
     void on_phaseCorrectionLabel_clicked();
     void on_gainLabel_clicked();
     void on_correlationType_currentIndexChanged(int index);
+    void on_localDevice_currentIndexChanged(int index);
+    void on_localDevicePlay_toggled(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
 	void tick();

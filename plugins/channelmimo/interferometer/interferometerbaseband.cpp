@@ -24,6 +24,7 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/scopevis.h"
+#include "dsp/devicesamplesource.h"
 
 #include "interferometerbaseband.h"
 
@@ -31,11 +32,14 @@
 MESSAGE_CLASS_DEFINITION(InterferometerBaseband::MsgConfigureChannelizer, Message)
 MESSAGE_CLASS_DEFINITION(InterferometerBaseband::MsgSignalNotification, Message)
 MESSAGE_CLASS_DEFINITION(InterferometerBaseband::MsgConfigureCorrelation, Message)
+MESSAGE_CLASS_DEFINITION(InterferometerBaseband::MsgConfigureLocalDeviceSampleSource, Message)
 
 InterferometerBaseband::InterferometerBaseband(int fftSize) :
     m_correlator(fftSize),
     m_spectrumSink(nullptr),
-    m_scopeSink(nullptr)
+    m_scopeSink(nullptr),
+    m_localSampleSource(nullptr),
+    m_play(false)
 {
     m_sampleMIFifo.init(2, 96000 * 8);
     m_vbegin.resize(2);
@@ -164,6 +168,21 @@ void InterferometerBaseband::run()
                 m_spectrumSink->feed(m_correlator.m_tcorr.begin(), m_correlator.m_tcorr.begin() + m_correlator.m_processed, false);
             }
         }
+
+        if (m_localSampleSource && m_play)
+        {
+            if ((m_correlator.getCorrType() == InterferometerSettings::CorrelationFFT)
+                || (m_correlator.getCorrType() == InterferometerSettings::CorrelationIFFT)
+                || (m_correlator.getCorrType() == InterferometerSettings::CorrelationIFFT2)
+                || (m_correlator.getCorrType() == InterferometerSettings::CorrelationIFFTStar))
+            {
+                m_localSampleSource->getSampleFifo()->write(m_correlator.m_scorr.begin(), m_correlator.m_scorr.begin() + m_correlator.m_processed);
+            }
+            else
+            {
+                m_localSampleSource->getSampleFifo()->write(m_correlator.m_tcorr.begin(), m_correlator.m_tcorr.begin() + m_correlator.m_processed);
+            }
+        }
     }
 
     for (int i = 0; i < 2; i++)
@@ -180,12 +199,13 @@ void InterferometerBaseband::run()
 
 void InterferometerBaseband::handleInputMessages()
 {
-    qDebug("InterferometerBaseband::handleInputMessage");
 	Message* message;
 
 	while ((message = m_inputMessageQueue.pop()) != 0)
 	{
-		if (handleMessage(*message)) {
+        qDebug("InterferometerBaseband::handleInputMessage: %s", message->getIdentifier());
+
+        if (handleMessage(*message)) {
 			delete message;
 		}
 	}
@@ -246,6 +266,16 @@ bool InterferometerBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MsgConfigureLocalDeviceSampleSource::match(cmd))
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        MsgConfigureLocalDeviceSampleSource& notif  = (MsgConfigureLocalDeviceSampleSource&) cmd;
+        qDebug() << "InterferometerBaseband::handleMessage: MsgConfigureLocalDeviceSampleSource: " << notif.getDeviceSampleSource();
+        m_localSampleSource = notif.getDeviceSampleSource();
+
+        return  true;
+    }
+
     else
     {
         qDebug("InterferometerBaseband::handleMessage: unhandled: %s", cmd.getIdentifier());

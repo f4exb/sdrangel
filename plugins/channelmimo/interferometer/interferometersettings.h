@@ -47,7 +47,8 @@ struct InterferometerSettings
     uint32_t m_filterChainHash;
     int m_phase;
     int m_gain;
-    int m_localDeviceIndex;
+    int m_localDeviceIndex; //!< Local device set index (-1 if unset)
+    bool m_play;            //!< Play/Stop correlation IQ in local device
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
