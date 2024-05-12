@@ -258,51 +258,52 @@ bool LocalSink::deserialize(const QByteArray& data)
     }
 }
 
-DeviceSampleSource *LocalSink::getLocalDevice(int index)
+DeviceSampleSource *LocalSink::getLocalDevice(int deviceSetIndex)
 {
-    if (index < 0) {
+    if (deviceSetIndex < 0) {
         return nullptr;
     }
 
-    DSPEngine *dspEngine = DSPEngine::instance();
+    MainCore *mainCore = MainCore::instance();
+    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
 
-    if (index < (int) dspEngine->getDeviceSourceEnginesNumber())
+    if (deviceSetIndex < (int) deviceSets.size())
     {
-        DSPDeviceSourceEngine *deviceSourceEngine = dspEngine->getDeviceSourceEngineByIndex(index);
-        DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
+        DeviceSet *sourceDeviceSet = deviceSets[deviceSetIndex];
+        DSPDeviceSourceEngine *deviceSourceEngine = sourceDeviceSet->m_deviceSourceEngine;
 
-        if (deviceSource->getDeviceDescription() == "LocalInput")
+        if (deviceSourceEngine)
         {
-            if (!getDeviceAPI()) {
-                qDebug("LocalSink::getLocalDevice: the parent device is unset");
-            } else if (getDeviceAPI()->getDeviceUID() == deviceSourceEngine->getUID()) {
-                qDebug("LocalSink::getLocalDevice: source device at index %u is the parent device", index);
-            } else {
+            DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
+
+            if (deviceSource->getDeviceDescription() == "LocalInput") {
                 return deviceSource;
+            } else {
+                qDebug("LocalSink::getLocalDevice: source device at index %u is not a Local Input source", deviceSetIndex);
             }
         }
         else
         {
-            qDebug("LocalSink::getLocalDevice: source device at index %u is not a Local Input source", index);
+            qDebug("LocalSink::getLocalDevice: device set at index %d has not a source device", deviceSetIndex);
         }
     }
     else
     {
-        qDebug("LocalSink::getLocalDevice: non existent source device index: %u", index);
+        qDebug("LocalSink::getLocalDevice: non existent device set at index: %d", deviceSetIndex);
     }
 
     return nullptr;
 }
 
-void LocalSink::propagateSampleRateAndFrequency(int index, uint32_t log2Decim)
+void LocalSink::propagateSampleRateAndFrequency(int deviceSetIndex, uint32_t log2Decim)
 {
     qDebug() << "LocalSink::propagateSampleRateAndFrequency:"
-        << " index: " << index
+        << " index: " << deviceSetIndex
         << " baseband_freq: " << m_basebandSampleRate
         << " log2Decim: " <<  log2Decim
         << " frequency: " << m_centerFrequency + m_frequencyOffset;
 
-    DeviceSampleSource *deviceSource = getLocalDevice(index);
+    DeviceSampleSource *deviceSource = getLocalDevice(deviceSetIndex);
 
     if (deviceSource)
     {
@@ -311,7 +312,7 @@ void LocalSink::propagateSampleRateAndFrequency(int index, uint32_t log2Decim)
     }
     else
     {
-        qDebug("LocalSink::propagateSampleRateAndFrequency: no suitable device at index %u", index);
+        qDebug("LocalSink::propagateSampleRateAndFrequency: no suitable device at index %u", deviceSetIndex);
     }
 }
 
@@ -333,7 +334,7 @@ void LocalSink::applySettings(const LocalSinkSettings& settings, const QList<QSt
     }
 
     if (settingsKeys.contains("log2Decim")
-     || settingsKeys.contains("filterChainHash") || force)
+        || settingsKeys.contains("filterChainHash") || force)
     {
         calculateFrequencyOffset(settings.m_log2Decim, settings.m_filterChainHash);
         propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, settings.m_log2Decim);
