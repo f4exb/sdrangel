@@ -91,6 +91,7 @@ LocalSink::LocalSink(DeviceAPI *deviceAPI) :
         this,
         &LocalSink::updateDeviceSetList
     );
+    updateDeviceSetList();
 }
 
 LocalSink::~LocalSink()
