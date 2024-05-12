@@ -133,15 +133,29 @@ Thus a possible procedure to determine DOA could be the following:
 4. If when performing previous step (3) the DOA angle moves in the opposite direction to the one corresponding to your assumption then the wave is coming from the opposite side w.r to your assumption. You can then refine the antenna axis direction to obtain a &plusmn;&pi;/2 DOA as in (3).
 5. Once the  &plusmn;&pi;/2 DOA angle (zero phase difference) is obtained at &lambda;/2 distance between antennas you can move your antennas further apart to refine the &plusmn;&pi;/2 DOA angle.
 
+<h4>Cancellation of unwanted signals</h4>
+
+By using different antennas on each channel one may cancel unwanted signals if one of the antennas receives more of the undesirable signal than the other main antenna.
+
+You may use the A+B correlation function (A.4) so by summing the unwanted signal in phase opposition it gets cancelled in the correlated I/Q stream. This stream can then be sent to a Local Input device (A.9, A.10) in a Rx receiving chain.
+
+Adjust gain of channel B (A.6) so that noise levels of channels A and B match.
+
+Adjust channel B phase difference (A.5) to minimize the unwanted signal. You may also fine adjust the channel B gain (A.6).
+
 <h3>A.5. Phase difference correction</h3>
 
 This is the phase correction in degrees applied to signal in channel B.
 
-<h3>A.6 Center frequency shift</h3>
+<h3>A.6. Gain correction</h3>
+
+This is the gain correction in dB applied to signal in channel B.
+
+<h3>A.7 Center frequency shift</h3>
 
 This is the shift of the channel center frequency from the device center frequency. Its value is driven by the baseband sample rate, the decimation factor (A.1) and the filter chain sequence (A.7).
 
-<h3>A.7. Half-band filter chain sequence adjust</h3>
+<h3>A.8. Half-band filter chain sequence adjust</h3>
 
 The slider moves the channel center frequency roughly from the lower to the higher frequency in the device baseband. The number on the right represents the filter sequence as the decimal value of a base 3 number. Each base 3 digit represents the filter type and its sequence from MSB to LSB in the filter chain:
 
@@ -150,6 +164,16 @@ The slider moves the channel center frequency roughly from the lower to the high
   - **2**: higher half-band
 
 The resulting filter chain sequence is represented in (A.3)
+
+<h3>A.9. Local Input device to send correlation I/Q samples to</h3>
+
+The complex (I/Q) result of the correlation of signals in channels A and B (A.4) can be sent to a Local Input Rx device so that it can be used in a Rx stream. Its main usage is cancellation of parasitic signals using two antennas. You may also use this for any purpose you see fit.
+
+You may select the Local Input device in the combo box. If there are no Local Input devices the combo box remains empty.
+
+<h3>A.10. Start or stop sending correlation I/Q stream to the Local Input device</h2>
+
+Use this toggle to start or stop sending I/Q samples.
 
 <h2>B. Spectrum display</h2>
 
