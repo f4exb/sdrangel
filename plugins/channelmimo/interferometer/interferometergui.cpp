@@ -86,12 +86,24 @@ bool InterferometerGUI::handleMessage(const Message& message)
     }
     else if (Interferometer::MsgConfigureInterferometer::match(message))
     {
-        const Interferometer::MsgConfigureInterferometer& notif = (const Interferometer::MsgConfigureInterferometer&) message;
-        m_settings = notif.getSettings();
+        const Interferometer::MsgConfigureInterferometer& cfg = (const Interferometer::MsgConfigureInterferometer&) message;
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         ui->scopeGUI->updateSettings();
         ui->spectrumGUI->updateSettings();
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
+        return true;
+    }
+    else if (Interferometer::MsgReportDevices::match(message))
+    {
+        Interferometer::MsgReportDevices& report = (Interferometer::MsgReportDevices&) message;
+        updateDeviceSetList(report.getDeviceSetIndexes());
         return true;
     }
     else
@@ -165,6 +177,7 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
+    updateDeviceSetList(m_interferometer->getDeviceSetList());
     displaySettings();
     makeUIConnections();
     displayRateAndShift();
@@ -188,9 +201,11 @@ void InterferometerGUI::applySettings(bool force)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        Interferometer::MsgConfigureInterferometer* message = Interferometer::MsgConfigureInterferometer::create(m_settings, force);
+        Interferometer::MsgConfigureInterferometer* message = Interferometer::MsgConfigureInterferometer::create(m_settings, m_settingsKeys, force);
         m_interferometer->getInputMessageQueue()->push(message);
     }
+
+    m_settingsKeys.clear();
 }
 
 void InterferometerGUI::displaySettings()
@@ -294,27 +309,53 @@ void InterferometerGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
+        m_settingsKeys.append("title");
+        m_settingsKeys.append("rgbColor");
+        m_settingsKeys.append("useReverseAPI");
+        m_settingsKeys.append("reverseAPIAddress");
+        m_settingsKeys.append("reverseAPIPort");
+        m_settingsKeys.append("reverseAPIFeatureSetIndex");
+        m_settingsKeys.append("reverseAPIFeatureIndex");
+
         applySettings();
     }
 
     resetContextMenuType();
 }
 
+void InterferometerGUI::updateDeviceSetList(const QList<int>& deviceSetIndexes)
+{
+    QList<int>::const_iterator it = deviceSetIndexes.begin();
+
+    ui->localDevice->blockSignals(true);
+
+    ui->localDevice->clear();
+
+    for (; it != deviceSetIndexes.end(); ++it) {
+        ui->localDevice->addItem(QString("R%1").arg(*it), *it);
+    }
+
+    ui->localDevice->blockSignals(false);
+}
+
 void InterferometerGUI::on_decimationFactor_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index;
+    m_settingsKeys.append("log2Decim");
     applyDecimation();
 }
 
 void InterferometerGUI::on_position_valueChanged(int value)
 {
     m_settings.m_filterChainHash = value;
+    m_settingsKeys.append("filterChainHash");
     applyPosition();
 }
 
 void InterferometerGUI::on_phaseCorrection_valueChanged(int value)
 {
     m_settings.m_phase = value;
+    m_settingsKeys.append("phase");
     ui->phaseCorrectionText->setText(tr("%1").arg(value));
     applySettings();
 }
@@ -322,6 +363,7 @@ void InterferometerGUI::on_phaseCorrection_valueChanged(int value)
 void InterferometerGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gain = value;
+    m_settingsKeys.append("gain");
     ui->gainText->setText(QString("%1").arg(m_settings.m_gain / 10.0, 0, 'f', 1));
     applySettings();
 }
@@ -341,6 +383,7 @@ void InterferometerGUI::on_gainLabel_clicked()
 void InterferometerGUI::on_correlationType_currentIndexChanged(int index)
 {
     m_settings.m_correlationType = (InterferometerSettings::CorrelationType) index;
+    m_settingsKeys.append("correlationType");
     applySettings();
 }
 
@@ -355,6 +398,7 @@ void InterferometerGUI::applyDecimation()
     ui->position->setMaximum(maxHash-1);
     ui->position->setValue(m_settings.m_filterChainHash);
     m_settings.m_filterChainHash = ui->position->value();
+    m_settingsKeys.append("filterChainHash");
     applyPosition();
 }
 

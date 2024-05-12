@@ -70,6 +70,7 @@ private:
 	ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     InterferometerSettings m_settings;
+    QList<QString> m_settingsKeys;
     int m_sampleRate;
     qint64 m_centerFrequency;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
@@ -93,6 +94,7 @@ private:
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+    void updateDeviceSetList(const QList<int>& deviceSetIndexes);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(EnterEventType*);

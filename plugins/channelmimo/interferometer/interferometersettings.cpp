@@ -41,6 +41,7 @@ void InterferometerSettings::resetToDefaults()
     m_filterChainHash = 0;
     m_phase = 0;
     m_gain = 0;
+    m_localDeviceIndex = -1;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
@@ -68,6 +69,7 @@ QByteArray InterferometerSettings::serialize() const
     s.writeBlob(14, m_geometryBytes);
     s.writeBool(15, m_hidden);
     s.writeS32(16, m_gain);
+    s.writeS32(17, m_localDeviceIndex);
 
     if (m_spectrumGUI) {
         s.writeBlob(20, m_spectrumGUI->serialize());
@@ -128,6 +130,7 @@ bool InterferometerSettings::deserialize(const QByteArray& data)
         d.readBlob(14, &m_geometryBytes);
         d.readBool(15, &m_hidden, false);
         d.readS32(16, &m_gain, 0);
+        d.readS32(17, &m_localDeviceIndex, -1);
 
         if (m_spectrumGUI)
         {
@@ -160,4 +163,100 @@ bool InterferometerSettings::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void InterferometerSettings::applySettings(const QStringList& settingsKeys, const InterferometerSettings& settings)
+{
+    if (settingsKeys.contains("correlationType")) {
+        m_correlationType = settings.m_correlationType;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("filterChainHash")) {
+        m_filterChainHash = settings.m_filterChainHash;
+    }
+    if (settingsKeys.contains("phase")) {
+        m_phase = settings.m_phase;
+    }
+    if (settingsKeys.contains("gain")) {
+        m_gain = settings.m_gain;
+    }
+    if (settingsKeys.contains("localDeviceIndex")) {
+        m_localDeviceIndex = settings.m_localDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString InterferometerSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("correlationType")) {
+        ostr << " m_correlationType: " << m_correlationType;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("filterChainHash")) {
+        ostr << " m_filterChainHash: " << m_filterChainHash;
+    }
+    if (settingsKeys.contains("phase")) {
+        ostr << " m_phase: " << m_phase;
+    }
+    if (settingsKeys.contains("gain")) {
+        ostr << " m_gain: " << m_gain;
+    }
+    if (settingsKeys.contains("localDeviceIndex")) {
+        ostr << " m_localDeviceIndex: " << m_localDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden")) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
 }

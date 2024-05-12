@@ -45,20 +45,23 @@ public:
 
     public:
         const InterferometerSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureInterferometer* create(const InterferometerSettings& settings, bool force)
+        static MsgConfigureInterferometer* create(const InterferometerSettings& settings, const QList<QString>& settingsKeys, bool force)
         {
-            return new MsgConfigureInterferometer(settings, force);
+            return new MsgConfigureInterferometer(settings, settingsKeys, force);
         }
 
     private:
         InterferometerSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureInterferometer(const InterferometerSettings& settings, bool force) :
+        MsgConfigureInterferometer(const InterferometerSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -84,6 +87,24 @@ public:
 
         int m_sampleRate;
         qint64 m_centerFrequency;
+    };
+
+    class MsgReportDevices : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<int>& getDeviceSetIndexes() { return m_deviceSetIndexes; }
+
+        static MsgReportDevices* create() {
+            return new MsgReportDevices();
+        }
+
+    private:
+        QList<int> m_deviceSetIndexes;
+
+        MsgReportDevices() :
+            Message()
+        { }
     };
 
     Interferometer(DeviceAPI *deviceAPI);
@@ -128,6 +149,7 @@ public:
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     ScopeVis *getScopeVis() { return &m_scopeSink; }
     void applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash);
+    const QList<int>& getDeviceSetList() { return m_localInputDeviceIndexes; }
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
@@ -174,19 +196,22 @@ private:
     uint32_t m_deviceSampleRate;
     int m_count0, m_count1;
 
+    QList<int> m_localInputDeviceIndexes;
+
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
-    void applySettings(const InterferometerSettings& settings, bool force = false);
+    void applySettings(const InterferometerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     static void validateFilterChainHash(InterferometerSettings& settings);
     void calculateFrequencyOffset();
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const InterferometerSettings& settings, bool force);
+    void updateDeviceSetList();
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const InterferometerSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const InterferometerSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const InterferometerSettings& settings,
         bool force

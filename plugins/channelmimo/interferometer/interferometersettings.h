@@ -47,6 +47,7 @@ struct InterferometerSettings
     uint32_t m_filterChainHash;
     int m_phase;
     int m_gain;
+    int m_localDeviceIndex;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
@@ -69,6 +70,8 @@ struct InterferometerSettings
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const InterferometerSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif // INCLUDE_INTERFEROMETERSETTINGS_H
