@@ -18,6 +18,15 @@ InterferometerSettings:
     gain:
       description: Channel B gain in centi-Bels
       type: integer
+    localDeviceIndex:
+      description: "Receiving local input device set index for correlated IQ"
+      type: integer
+    play:
+      type: integer
+      description: >
+        Run correlated IQ samples transfer
+          * 0 - stop
+          * 1 - run
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

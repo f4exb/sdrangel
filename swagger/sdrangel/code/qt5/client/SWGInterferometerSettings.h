@@ -67,6 +67,12 @@ public:
     qint32 getGain();
     void setGain(qint32 gain);
 
+    qint32 getLocalDeviceIndex();
+    void setLocalDeviceIndex(qint32 local_device_index);
+
+    qint32 getPlay();
+    void setPlay(qint32 play);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -118,6 +124,12 @@ private:
 
     qint32 gain;
     bool m_gain_isSet;
+
+    qint32 local_device_index;
+    bool m_local_device_index_isSet;
+
+    qint32 play;
+    bool m_play_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

@@ -8509,6 +8509,14 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Channel B gain in centi-Bels"
     },
+    "localDeviceIndex" : {
+      "type" : "integer",
+      "description" : "Receiving local input device set index for correlated IQ"
+    },
+    "play" : {
+      "type" : "integer",
+      "description" : "Run correlated IQ samples transfer\n  * 0 - stop\n  * 1 - run\n"
+    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
@@ -58960,7 +58968,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-05-12T00:06:46.949+02:00
+              Generated 2024-05-12T21:57:44.126+02:00
             </div>
           </div>
       </div>

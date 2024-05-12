@@ -42,6 +42,10 @@ SWGInterferometerSettings::SWGInterferometerSettings() {
     m_phase_isSet = false;
     gain = 0;
     m_gain_isSet = false;
+    local_device_index = 0;
+    m_local_device_index_isSet = false;
+    play = 0;
+    m_play_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -82,6 +86,10 @@ SWGInterferometerSettings::init() {
     m_phase_isSet = false;
     gain = 0;
     m_gain_isSet = false;
+    local_device_index = 0;
+    m_local_device_index_isSet = false;
+    play = 0;
+    m_play_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -109,6 +117,8 @@ SWGInterferometerSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
+
 
 
 
@@ -158,6 +168,10 @@ SWGInterferometerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&phase, pJson["phase"], "qint32", "");
     
     ::SWGSDRangel::setValue(&gain, pJson["gain"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&local_device_index, pJson["localDeviceIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&play, pJson["play"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -213,6 +227,12 @@ SWGInterferometerSettings::asJsonObject() {
     }
     if(m_gain_isSet){
         obj->insert("gain", QJsonValue(gain));
+    }
+    if(m_local_device_index_isSet){
+        obj->insert("localDeviceIndex", QJsonValue(local_device_index));
+    }
+    if(m_play_isSet){
+        obj->insert("play", QJsonValue(play));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -313,6 +333,26 @@ void
 SWGInterferometerSettings::setGain(qint32 gain) {
     this->gain = gain;
     this->m_gain_isSet = true;
+}
+
+qint32
+SWGInterferometerSettings::getLocalDeviceIndex() {
+    return local_device_index;
+}
+void
+SWGInterferometerSettings::setLocalDeviceIndex(qint32 local_device_index) {
+    this->local_device_index = local_device_index;
+    this->m_local_device_index_isSet = true;
+}
+
+qint32
+SWGInterferometerSettings::getPlay() {
+    return play;
+}
+void
+SWGInterferometerSettings::setPlay(qint32 play) {
+    this->play = play;
+    this->m_play_isSet = true;
 }
 
 qint32
@@ -429,6 +469,12 @@ SWGInterferometerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_local_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_play_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

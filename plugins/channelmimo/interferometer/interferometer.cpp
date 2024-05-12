@@ -554,6 +554,12 @@ void Interferometer::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("gain")) {
         settings.m_gain = response.getInterferometerSettings()->getGain();
     }
+    if (channelSettingsKeys.contains("localDeviceIndex")) {
+        settings.m_localDeviceIndex = response.getInterferometerSettings()->getLocalDeviceIndex();
+    }
+    if (channelSettingsKeys.contains("play")) {
+        settings.m_play = response.getInterferometerSettings()->getPlay() != 0;
+    }
 
     if (channelSettingsKeys.contains("filterChainHash"))
     {
@@ -603,6 +609,8 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
     response.getInterferometerSettings()->setLog2Decim(settings.m_log2Decim);
     response.getInterferometerSettings()->setPhase(settings.m_phase);
     response.getInterferometerSettings()->setGain(settings.m_gain);
+    response.getInterferometerSettings()->setLocalDeviceIndex(settings.m_localDeviceIndex);
+    response.getInterferometerSettings()->setPlay(settings.m_play ? 1 : 0);
     response.getInterferometerSettings()->setFilterChainHash(settings.m_filterChainHash);
     response.getInterferometerSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -613,8 +621,8 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
     }
 
     response.getInterferometerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    // response.getInterferometerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    // response.getInterferometerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getInterferometerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getInterferometerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 
     if (settings.m_spectrumGUI)
     {
@@ -754,12 +762,12 @@ void Interferometer::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("gain") || force) {
         swgInterferometerSettings->setGain(settings.m_gain);
     }
-    // if (channelSettingsKeys.contains("localDeviceIndex") || force) {
-    //     swgInterferometerSettings->setLocalDeviceIndex(settings.m_localDeviceIndex);
-    // }
-    // if (channelSettingsKeys.contains("play") || force) {
-    //     swgInterferometerSettings->setPlay(settings.m_play ? 1 : 0);
-    // }
+    if (channelSettingsKeys.contains("localDeviceIndex") || force) {
+        swgInterferometerSettings->setLocalDeviceIndex(settings.m_localDeviceIndex);
+    }
+    if (channelSettingsKeys.contains("play") || force) {
+        swgInterferometerSettings->setPlay(settings.m_play ? 1 : 0);
+    }
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgInterferometerSettings->setFilterChainHash(settings.m_filterChainHash);
     }
