@@ -48,6 +48,8 @@ MetisMISOSettings::MetisMISOSettings(const MetisMISOSettings& other)
     m_txDrive = other.m_txDrive;
     m_streamIndex = other.m_streamIndex;
     m_spectrumStreamIndex = other.m_spectrumStreamIndex;
+    m_streamLock = other.m_streamLock;
+    m_rxLock = other.m_rxLock;
     m_useReverseAPI = other.m_useReverseAPI;
     m_reverseAPIAddress = other.m_reverseAPIAddress;
     m_reverseAPIPort = other.m_reverseAPIPort;
@@ -78,6 +80,8 @@ void MetisMISOSettings::resetToDefaults()
     m_txDrive = 15;
     m_streamIndex = 0;
     m_spectrumStreamIndex = 0;
+    m_streamLock = false;
+    m_rxLock = false;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -112,6 +116,8 @@ QByteArray MetisMISOSettings::serialize() const
     s.writeU32(22, m_reverseAPIDeviceIndex);
     s.writeS32(23, m_streamIndex);
     s.writeS32(24, m_spectrumStreamIndex);
+    s.writeBool(25, m_streamLock);
+    s.writeBool(26, m_rxLock);
 
     for (int i = 0; i < m_maxReceivers; i++)
     {
@@ -175,6 +181,8 @@ bool MetisMISOSettings::deserialize(const QByteArray& data)
 
         d.readS32(23, &m_streamIndex, 0);
         d.readS32(24, &m_spectrumStreamIndex, 0);
+        d.readBool(25, &m_streamLock, false);
+        d.readBool(26, &m_rxLock, false);
 
         return true;
     }
@@ -294,6 +302,12 @@ void MetisMISOSettings::applySettings(const QStringList& settingsKeys, const Met
     }
     if (settingsKeys.contains("spectrumStreamIndex")) {
         m_spectrumStreamIndex = settings.m_spectrumStreamIndex;
+    }
+    if (settingsKeys.contains("streamLock")) {
+        m_streamLock = settings.m_streamLock;
+    }
+    if (settingsKeys.contains("rxLock")) {
+        m_rxLock = settings.m_rxLock;
     }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
@@ -420,6 +434,12 @@ QString MetisMISOSettings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("spectrumStreamIndex") || force) {
         ostr << " m_spectrumStreamIndex: " << m_spectrumStreamIndex;
+    }
+    if (settingsKeys.contains("streamLock") || force) {
+        ostr << " m_streamLock: " << m_streamLock;
+    }
+    if (settingsKeys.contains("rxLock") || force) {
+        ostr << " m_rxLock: " << m_rxLock;
     }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;

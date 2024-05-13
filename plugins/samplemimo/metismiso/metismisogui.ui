@@ -124,6 +124,24 @@
       </widget>
      </item>
      <item>
+      <widget class="QToolButton" name="streamLock">
+       <property name="toolTip">
+        <string>Lock spectrum display to stream selection</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/unlocked.png</normaloff>
+         <normalon>:/locked.png</normalon>:/unlocked.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="spectrumSourceLabel">
        <property name="text">
         <string>Spectrum</string>
@@ -195,9 +213,16 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="streamLock">
+      <widget class="QLabel" name="rxLockLabel">
+       <property name="text">
+        <string>Rx</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="rxLock">
        <property name="toolTip">
-        <string>Lock spectrum display to stream selection</string>
+        <string>Lock all Rx frequencies</string>
        </property>
        <property name="text">
         <string/>

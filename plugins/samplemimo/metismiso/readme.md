@@ -28,15 +28,19 @@ Select for which streams the controls are active. Controls specific to each stre
   - Center frequency
   - Subsampling index
 
-<h3>2: Spectrum source selection</h3>
-
-Select which stream is routed to the main spectrum display
-
-<h3>3: Active stream / spectrum source lock</h3>
+<h3>2: Active stream / spectrum source lock</h3>
 
 This ties together the stream selection and spectrum source stream selections.
 
-<h3>4: Start/Stop</h3>
+<h3>3: Spectrum source selection</h3>
+
+Select which stream is routed to the main spectrum display
+
+<h3>4: Lock all Rx frequencies</h3>
+
+This ties together all Rx frequencies. When you change any of them it changes the frequency of all other receivers.
+
+<h3>5: Start/Stop</h3>
 
 Device start / stop button.
 
@@ -46,23 +50,23 @@ Device start / stop button.
 
 Starting the device means that the network stream from the Metis compatible device is started. It will be stopped by the stop button. This effectively starts all available streams that can be controlled with the Rx number select (9.5) or Tx enable (9.6)
 
-<h3>5: Stream sample rate</h3>
+<h3>6: Stream sample rate</h3>
 
 Baseband I/Q sample rate in kS/s. This is the device to host sample rate (8.1) divided by the software decimation factor (8.2).
 
-<h3>6: Center frequency</h3>
+<h3>7: Center frequency</h3>
 
 Tunes the center frequency of the active stream
 
-<h3>7: Local Oscillator frequency correction in ppm</h3>
+<h3>8: Local Oscillator frequency correction in ppm</h3>
 
 This lets you compensate for the main oscillator frequency inaccuracy. Value is in ppm (parts per million)
 
-<h3>8: Sample rate - Decimation - Subsampling - DC and IQ corrections</h3>
+<h3>9: Sample rate - Decimation - Subsampling - DC and IQ corrections</h3>
 
 ![Metis Miso GUI 1](../../../doc/img/MetisMISO_plugin_1.png)
 
-<h4>8.1: Sample rate</h4>
+<h4>9.1: Sample rate</h4>
 
 This combo box lets you control the four possible values for the device to host sample rate (Rx). Host to device (Tx) sample rate is fixed by design of the Metis interface at 48 kS/s:
 
@@ -71,13 +75,13 @@ This combo box lets you control the four possible values for the device to host 
   - **192k**: 192000 samples per second
   - **384k**: 384000 samples per second
 
-<h4>8.2: Decimation factor</h4>
+<h4>9.2: Decimation factor</h4>
 
 The I/Q stream from the Metis stream is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8.
 
 Note that there is no interpolation on the Tx side.
 
-<h4>8.3: Subsampling index</h4>
+<h4>9.3: Subsampling index</h4>
 
 The Red Pitaya has a LTC2185 ADC specified for a bandwidth up to 550 MHz. This lets you use the Red Pitaya receivers in subsampling mode with appropriate filtering and LNA chain as a front end. In this mode the received frequency may extend above 61.44 MHz in successive 61.44 MHz wide bands. This index corresponds to the frequency band index from 0 to 7 and let you input the frequency directly corresponding to the subsampling scheme. The band limits appear in the tooltip and are the following:
 
@@ -92,35 +96,35 @@ The Red Pitaya has a LTC2185 ADC specified for a bandwidth up to 550 MHz. This l
 
 Of course the more the higher the frequency above the fundamental range the worse the performance is. In practice it is still OK at VHF frequencies but not much above.
 
-<h4>8.4: DC correction</h4>
+<h4>9.4: DC correction</h4>
 
 This corrects residual DC present at the center of the passband. By construction this is useless for the Red Pitaya.
 
-<h4>8.5: IQ imbalance correction</h4>
+<h4>9.5: IQ imbalance correction</h4>
 
 This corrects I/Q imbalance. By construction this is useless for the Red Pitaya.
 
-<h3>9: Preamp - Random - Dither - Duplex - Number of receivers - Tx enable - Transverter</h3>
+<h3>10: Preamp - Random - Dither - Duplex - Number of receivers - Tx enable - Transverter</h3>
 
 ![Metis Miso GUI 1](../../../doc/img/MetisMISO_plugin_2.png)
 
-<h4>9.1: Preamp</h4>
+<h4>10.1: Preamp</h4>
 
 Toggle Rx preamplifier - not found to be effective
 
-<h4>9.2: Random</h4>
+<h4>10.2: Random</h4>
 
 Toggle LTC2185 randomization - not found to be effective
 
-<h4>9.3: Dither</h4>
+<h4>10.3: Dither</h4>
 
 Toggle LTC2185 dithering - not found to be effective
 
-<h4>9.4: Duplex</h4>
+<h4>10.4: Duplex</h4>
 
 Toggle duplex - not found to be effective
 
-<h4>9.5: Number or active receivers</h4>
+<h4>10.5: Number or active receivers</h4>
 
 Controls the number of active receivers. Each receiver allocates a slot in the data stream from the Metis interface.
 
@@ -129,16 +133,16 @@ Controls the number of active receivers. Each receiver allocates a slot in the d
 
 It is a waste to have more active receivers than you actually need because it will increase network traffic for nothing
 
-<h4>9.6: Toggle Tx activation</h4>
+<h4>10.6: Toggle Tx activation</h4>
 
 Use this button to toggle the generation and sending of Tx samples in the Metis stream from host to device. When inactivated null samples are sent in the return payload from host to device.
 
-<h4>9.7: Transverter mode</h4>
+<h4>10.7: Transverter mode</h4>
 
 This button opens a dialog to set the transverter mode frequency translation options. The details about this dialog can be found [here](../../../sdrgui/gui/transverterdialog.md)
 
 Transverter mixing is the same for all receivers and may be different for the transmitter.
 
-<h3>10: Tx drive level</h3>
+<h3>11: Tx drive level</h3>
 
 Choose a level from 0 (deactivated) to 15 (full power)

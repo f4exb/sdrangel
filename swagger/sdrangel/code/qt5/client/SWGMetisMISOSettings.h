@@ -150,6 +150,12 @@ public:
     qint32 getSpectrumStreamIndex();
     void setSpectrumStreamIndex(qint32 spectrum_stream_index);
 
+    qint32 getStreamLock();
+    void setStreamLock(qint32 stream_lock);
+
+    qint32 getRxLock();
+    void setRxLock(qint32 rx_lock);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -273,6 +279,12 @@ private:
 
     qint32 spectrum_stream_index;
     bool m_spectrum_stream_index_isSet;
+
+    qint32 stream_lock;
+    bool m_stream_lock_isSet;
+
+    qint32 rx_lock;
+    bool m_rx_lock_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

@@ -145,6 +145,18 @@ MetisMISOSettings:
     spectrumStreamIndex:
       type: integer
       description: The index of the stream that is used as source of the main spectrum
+    streamLock:
+      type: integer
+      description: >
+        Ties together the stream selection and spectrum source stream selections
+        * 0 - stream unlocked
+        * 1 - stream locked
+    rxLock:
+      type: integer
+      description: >
+        Ties together all Rx frequencies
+        * 0 - Rx frequencies untied
+        * 1 - Rx frequencies tied
     useReverseAPI:
       type: integer
       description: >

@@ -47,6 +47,8 @@ struct MetisMISOSettings {
     unsigned int m_txDrive;
     int m_streamIndex;
     int m_spectrumStreamIndex; //!< spectrum source
+    bool m_streamLock; //!< Lock stream control and spectrum to same Rx
+    bool m_rxLock;     //!< Lock all Rx frequencies together
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
