@@ -360,6 +360,7 @@ void MainCore::initPosition()
     m_positionSource = QGeoPositionInfoSource::createDefaultSource(this);
     if (m_positionSource)
     {
+        qDebug() << "MainCore::initPosition: Using position source" << m_positionSource->sourceName();
         connect(m_positionSource, &QGeoPositionInfoSource::positionUpdated, this, &MainCore::positionUpdated);
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
         connect(m_positionSource, &QGeoPositionInfoSource::updateTimeout, this, &MainCore::positionUpdateTimeout);
