@@ -209,7 +209,7 @@ This button tunes the stroke of the points displayed on C1.1. The trace has limi
 
 <h4>C1.8.4: Trace decay</h4>
 
-This button tunes the persistence decay of the points displayed on C1.1.1. The trace has limited persistence based on alpha blending. This controls the alpha value of the black screen printed at the end of each trace and thus the trace points decay time. The value is 255 minus he displayed value using 8 bit unsigned integers.
+This button tunes the persistence decay of the points displayed on C1.1.1. The trace has limited persistence based on alpha blending. This controls the alpha value of the black screen printed at the end of each trace and thus the trace points decay time. The value is 255 minus the displayed value using 8 bit unsigned integers.
 
   - A value of 0 yields no persistence
   - A value of 255 yields infinite persistence

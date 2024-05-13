@@ -216,7 +216,7 @@ This slider lets you move the start of traces on display. Each step moves the tr
 
 <h3>12. Trace length</h3>
 
-This slider lets you control the full length of the trace. Each step increases the corresponding amount of samples by 4800 samples with a minimum of 4800 samples and a maximum of 20*4800 = 96000 samples. The duration of a full trace appears on the left of the slider and he corresponding number of samples appears as a tooltip.
+This slider lets you control the full length of the trace. Each step increases the corresponding amount of samples by 4800 samples with a minimum of 4800 samples and a maximum of 20*4800 = 96000 samples. The duration of a full trace appears on the left of the slider and the corresponding number of samples appears as a tooltip.
 
 <h3>13. Trace sample rate</h3>
 

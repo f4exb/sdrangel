@@ -123,7 +123,7 @@ This selects the IF frequency between these values:
 
 <h3>17: Sample rate</h3>
 
-Sets the ADC IQ sample rats from 2M to 10.66M Hz.
+Sets the ADC IQ sample rates from 2M to 10.66M Hz.
 
 <h3>18: Decimation</h3>
 

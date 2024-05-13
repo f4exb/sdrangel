@@ -107,7 +107,7 @@ Check this box to activate the RTP protocol over UDP. RTP parameters are as foll
   - Channels: 1 for mono (Left, Right and Mixed copy channels mode); 2 for stereo (Stereo copy channels mode)
   - Address and port: destination address and port (local on the client machine)
 
-You may read the RTP stream using a SDP file (extension `.sdp`) that can be read with any program supporting SDP files (VLC, MX player, ffmpeg, ...). For a mono 48000 S/s stream at address `192.168.0.34:9998 and L16 codec the contents of the file would be as follows:
+You may read the RTP stream using a SDP file (extension `.sdp`) that can be read with any program supporting SDP files (VLC, MX player, ffmpeg, ...). For a mono 48000 S/s stream at address `192.168.0.34:9998` and L16 codec the contents of the file would be as follows:
 
 ```
 c=IN IP4 192.168.0.34

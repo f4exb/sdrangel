@@ -4,7 +4,7 @@
 
 This plugin can be used to calculate the noise figure (NF) of a receiver (SDR as well as optionally one or more LNAs). It uses the Y-factor method and requires a calibrated noise source.
 
-The noise figure of a receiver is important, as it determines the noise floor: Noise floor (dBm) = 10*log10(1000kT)+NF+10*log10(BW)
+The noise figure of a receiver is important, as it determines the noise floor: Noise floor (dBm) = 10\*log10(1000kT)+NF+10\*log10(BW)
 
 The noise figure will vary with frequency and gain settings. Typically, the noise figure will increase with frequency and decrease with gain. When measuring noise figure, AGC should be disabled.
 

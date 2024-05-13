@@ -35,7 +35,7 @@ Use this control to decimate the baseband samples by a power of two. Consequentl
 
 <h3>3: Number of sample bits</h3>
 
-Recording number of bits for an I or Q sample. Can be 8, 16 or 32 resulting in ci8_le, ci16_le or ci32_le file format respectively. 32 bit samples are actually coded as 24 bits i.e the 8 most significant bits are zero.
+Recording number of bits for an I or Q sample. Can be 8, 16 or 32 resulting in ci8_le, ci16_le or ci32_le file format respectively. 32 bit samples are actually coded as 24 bits i.e. the 8 most significant bits are zero.
 
 This recording format is defined for the whole file you cannot have different formats per capture.
 

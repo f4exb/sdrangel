@@ -10,9 +10,11 @@ The SDRangel source tree is mounted in both containers as writable so the genera
 
 <h2>Install Docker on Ubuntu</h2>
 
+```shell
 sudo apt install docker.io docker-buildx docker-compose
 sudo usermod -aG docker $USER
-* reboot *
+sudo reboot
+```
 
 <h2>Server</h2>
 

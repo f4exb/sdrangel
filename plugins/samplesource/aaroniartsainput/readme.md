@@ -28,7 +28,7 @@ The top and bottom bars of the device window are described [here](../../../sdrgu
 
 <h3>1: Start/Stop</h3>
 
-This button is used to start the "device" i.e connect to the remote and start stream or stop the "device" i.e. stop stream and disconnect from the remote. The button shows the following faces:
+This button is used to start the "device" i.e. connect to the remote and start stream or stop the "device" i.e. stop stream and disconnect from the remote. The button shows the following faces:
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
@@ -39,11 +39,11 @@ This is the stream sample rate in S/s with multiplier. It should be equal to wha
 
 <h3>3: Frequency</h3>
 
-This is the center frequency received in he stream meta data. When setting it, it will try to set the center frequency of the `IQ Demodulator` in RTSA suite the closest to the `HTTP server`.
+This is the center frequency received in the stream meta data. When setting it, it will try to set the center frequency of the `IQ Demodulator` in RTSA suite the closest to the `HTTP server`.
 
 <h3>4: Stream sample rate</h3>
 
-This is sample rate (actually the frequency span) received in the stream meta data. When setting it, it will try to set the sample rate and frequency span of the IQ Demodulator` in RTSA suite the closest to the `HTTP server`.
+This is sample rate (actually the frequency span) received in the stream meta data. When setting it, it will try to set the sample rate and frequency span of the `IQ Demodulator` in RTSA suite the closest to the `HTTP server`.
 
 <h3>5: Remote address and port</h3>
 
