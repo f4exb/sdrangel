@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>324</width>
-    <height>201</height>
+    <height>219</height>
    </rect>
   </property>
   <property name="font">
@@ -119,14 +119,14 @@
       <item row="4" column="0">
        <widget class="QLabel" name="autoUpdatePositionLabel">
         <property name="text">
-         <string>Auto-update from GPS</string>
+         <string>Auto-update position</string>
         </property>
        </widget>
       </item>
       <item row="1" column="2">
        <widget class="QToolButton" name="gps">
         <property name="toolTip">
-         <string>Set position using GPS (if available)</string>
+         <string>Set position now using GPS (or other means if available)</string>
         </property>
         <property name="text">
          <string/>
