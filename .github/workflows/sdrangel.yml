@@ -121,11 +121,11 @@ jobs:
           rm -f /usr/local/bin/2to3
           brew install opencv
       - name: Install brew packages
-        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt
+        run: brew install nasm boost hidapi libusb fftw faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt
       - name: Configure SDRangel
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON -DENABLE_CHANNELRX_DEMODDATV=OFF -DENABLE_CHANNELTX_MODDATV=OFF -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
       - name: Get filename
         id: get_filename
         run: echo "filename=$(grep CPACK_PACKAGE_FILE_NAME build/CMakeCache.txt | cut -d "=" -f2)" >> $GITHUB_OUTPUT
