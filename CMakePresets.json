@@ -28,6 +28,7 @@
         "SOAPYSDR_DIR": "/opt/install/SoapySDR",
         "UHD_DIR": "/opt/install/uhd",
         "XTRX_DIR": "/opt/install/xtrx-images",
+        "GGMORSE_DIR": "/opt/install/ggmorse",
         "CMAKE_INSTALL_PREFIX": "/opt/install/sdrangel"
       },
       "warnings": {

@@ -146,6 +146,7 @@ option(ENABLE_FEATURE_GS232CONTROLLER "Enable feature gs232controller plugin" ON
 option(ENABLE_FEATURE_REMOTECONTROL "Enable feature remote control plugin" ON)
 option(ENABLE_FEATURE_SKYMAP "Enable feature sky map plugin" ON)
 option(ENABLE_FEATURE_SID "Enable feature sid plugin" ON)
+option(ENABLE_FEATURE_MORSEDECODER "Enable feature morsedecoder plugin" ON)
 
 # on windows always build external libraries
 if(WIN32)
@@ -779,6 +780,7 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     find_package(LibDAB)
     find_package(HIDAPI)
     find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
+    find_package(GGMorse)
 
     # Devices
     if(ENABLE_AIRSPY)
