@@ -1,3 +1,39 @@
+sdrangel (7.20.1-1) unstable; urgency=medium
+
+   * Fix Qt6 build. PR #2069
+   * ADS-B: Fix map centering and station icon for Qt6. PR #2072
+   * Fix bug that prevents settings changes updates via reverse API. PR #2066
+   * SIDAddChannelsDialog: Make columns sortable. PR #2067
+   * Fix build failure when Qt Location is not available. PR #2073
+   * Fix "More '%' conversions than data arguments". PR #2075
+   * Remove unused includes and use more direct includes. PR #2076
+   * Make all include directives identical. PR #2076
+   * Fix build of DAB demodulation plugin. PR #2076
+   * Update the IPB beacons table only when the dialog is visible. PR #2068
+   * Raise the Beacon, IBP Beacons an Radio Time dialogs. PR #2068
+   * Close any open dialog when sdrangel quits. PR #2068
+   * vkFFT: Fix building with recent Vulkan SDKs. PR #2087
+   * Sdrplayv3: use SDRPLAY_MAX_DEVICES in enumOriginDevices(). PR #2088
+   * AudioCATSISO: fixed CAT worker handling
+   * AudioCATSISO: fixed transverter processing
+   * AIS: Fix string decoding in safetey messages. Fixes #2094. PR #2096
+   * ValueDial: Fix array being accessed out of range. PR #2096
+   * BFM Demod: Delete baseband on stop(). PR #2104
+   * Bring BFM demod closer to AM demod design. PR #2104
+   * Don't call start() in Demod's constructors. Fixes #2102. PR #2104
+   * SSDDemodGUI: Disable AGC widgets when AGC disable. PR #2104
+   * Fix saving configurations after deleting some entries. PR #2109
+   * Interferometer: added channel B gain control
+   * Interferometer: implement gain and phase in API
+   * LocalSink: update local input device list at construction time
+   * Interferometer: list local input devices and make update settings atomic
+   * Interferometer: added possibility to send correlated IQ to a Local Input device
+   * Interferometer: added localDeviceIndex and play to API
+   * LocalSink: refactored getLocalDevice method
+   * Metis MISO: added lock all Rx frequencies option
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 15 May 2024 10:01:05 +0200
+
 sdrangel (7.20.0-1) unstable; urgency=medium
 
    * New Sudden Ionospheric Disturbance feature. PR #2052
