@@ -21,6 +21,8 @@
 #include <QHash>
 #include <QNetworkRequest>
 #include <QRecursiveMutex>
+#include <QFile>
+#include <QTextStream>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -148,6 +150,29 @@ public:
         {}
     };
 
+    class MsgReportText : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QString getText() const { return m_text; }
+
+        static MsgReportText* create(const QString& text) {
+            return new MsgReportText(text);
+        }
+
+        float m_estimatedPitchHz;
+        float m_estimatedSpeedWPM;
+        float m_signalThreshold;
+        float m_costFunction;
+
+    private:
+        QString m_text;
+
+        MsgReportText(const QString& text) :
+            m_text(text)
+        {}
+    };
+
     MorseDecoder(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~MorseDecoder();
     virtual void destroy() { delete this; }
@@ -202,6 +227,8 @@ private:
     ChannelAPI *m_selectedChannel;
     ObjectPipe *m_dataPipe;
     int m_sampleRate;
+    QFile m_logFile;
+    QTextStream m_logStream;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

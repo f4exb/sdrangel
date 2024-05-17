@@ -17,6 +17,7 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QScrollBar>
 
 #include "feature/featureuiset.h"
 #include "dsp/spectrumvis.h"
@@ -109,6 +110,12 @@ bool MorseDecoderGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MorseDecoder::MsgReportText::match(message))
+    {
+        MorseDecoder::MsgReportText& report = (MorseDecoder::MsgReportText&) message;
+        textReceived(report.getText());
+        updateMorseStats(report.m_estimatedPitchHz, report.m_estimatedSpeedWPM, report.m_costFunction);
+    }
 
 	return false;
 }
@@ -123,6 +130,35 @@ void MorseDecoderGUI::handleInputMessages()
             delete message;
         }
     }
+}
+
+void MorseDecoderGUI::textReceived(const QString& text)
+{
+    // Is the scroll bar at the bottom?
+    int scrollPos = ui->text->verticalScrollBar()->value();
+    bool atBottom = scrollPos >= ui->text->verticalScrollBar()->maximum();
+
+    // Move cursor to end where we want to append new text
+    // (user may have moved it by clicking / highlighting text)
+    ui->text->moveCursor(QTextCursor::End);
+
+    // Restore scroll position
+    ui->text->verticalScrollBar()->setValue(scrollPos);
+
+    // Format and insert text
+    ui->text->insertPlainText(MorseDecoderSettings::formatText(text));
+
+    // Scroll to bottom, if we we're previously at the bottom
+    if (atBottom) {
+        ui->text->verticalScrollBar()->setValue(ui->text->verticalScrollBar()->maximum());
+    }
+}
+
+void MorseDecoderGUI::updateMorseStats(float estPitch, float estWPM, float cost)
+{
+    ui->pitchText->setText(QString("%1 Hz").arg(estPitch, 0, 'f', 1));
+    ui->speedText->setText(QString("%1 WPM").arg(estWPM, 0, 'f', 0));
+    ui->cText->setText(QString("%1").arg(cost, 0, 'f', 3));
 }
 
 void MorseDecoderGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -156,6 +192,7 @@ MorseDecoderGUI::MorseDecoderGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
     m_morseDecoder = reinterpret_cast<MorseDecoder*>(feature);
     m_morseDecoder->setMessageQueueToGUI(&m_inputMessageQueue);
+
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -199,6 +236,9 @@ void MorseDecoderGUI::displaySettings()
     setTitle(m_settings.m_title);
     blockApplySettings(true);
     getRollupContents()->restoreState(m_rollupState);
+    ui->statLock->setChecked(!m_settings.m_auto);
+    ui->logFilename->setToolTip(QString(".txt log filename: %1").arg(m_settings.m_logFilename));
+    ui->logEnable->setChecked(m_settings.m_logEnabled);
     blockApplySettings(false);
 }
 
@@ -304,6 +344,44 @@ void MorseDecoderGUI::on_channelApply_clicked()
     }
 }
 
+void MorseDecoderGUI::on_statLock_toggled(bool checked)
+{
+    m_settings.m_auto = !checked;
+    m_settingsKeys.append("auto");
+    applySettings();
+}
+
+void MorseDecoderGUI::on_logEnable_clicked(bool checked)
+{
+    m_settings.m_logEnabled = checked;
+    m_settingsKeys.append("logEnabled");
+    applySettings();
+}
+
+void MorseDecoderGUI::on_logFilename_clicked()
+{
+    // Get filename to save to
+    QFileDialog fileDialog(nullptr, "Select file to log received text to", "", "*.txt");
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            m_settings.m_logFilename = fileNames[0];
+            ui->logFilename->setToolTip(QString(".txt log filename: %1").arg(m_settings.m_logFilename));
+            m_settingsKeys.append("logFilename");
+            applySettings();
+        }
+    }
+}
+
+void MorseDecoderGUI::on_clearTable_clicked()
+{
+    ui->text->clear();
+}
+
 void MorseDecoderGUI::tick()
 {
 }
@@ -353,4 +431,8 @@ void MorseDecoderGUI::makeUIConnections()
 	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &MorseDecoderGUI::on_startStop_toggled);
 	QObject::connect(ui->channels, qOverload<int>(&QComboBox::currentIndexChanged), this, &MorseDecoderGUI::on_channels_currentIndexChanged);
 	QObject::connect(ui->channelApply, &QPushButton::clicked, this, &MorseDecoderGUI::on_channelApply_clicked);
+    QObject::connect(ui->statLock, &QToolButton::toggled, this, &MorseDecoderGUI::on_statLock_toggled);
+    QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &MorseDecoderGUI::on_logEnable_clicked);
+    QObject::connect(ui->logFilename, &QToolButton::clicked, this, &MorseDecoderGUI::on_logFilename_clicked);
+    QObject::connect(ui->clearTable, &QPushButton::clicked, this, &MorseDecoderGUI::on_clearTable_clicked);
 }

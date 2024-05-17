@@ -38,6 +38,7 @@ MESSAGE_CLASS_DEFINITION(MorseDecoder::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(MorseDecoder::MsgReportChannels, Message)
 MESSAGE_CLASS_DEFINITION(MorseDecoder::MsgSelectChannel, Message)
 MESSAGE_CLASS_DEFINITION(MorseDecoder::MsgReportSampleRate, Message)
+MESSAGE_CLASS_DEFINITION(MorseDecoder::MsgReportText, Message)
 
 const char* const MorseDecoder::m_featureIdURI = "sdrangel.feature.morsedecoder";
 const char* const MorseDecoder::m_featureId = "MorseDecoder";
@@ -238,6 +239,26 @@ bool MorseDecoder::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MsgReportText::match(cmd))
+    {
+        MsgReportText& report = (MsgReportText&) cmd;
+
+        // Write to log file
+        if (m_logFile.isOpen())
+        {
+            // Format text
+            m_logStream << MorseDecoderSettings::formatText(report.getText());
+        }
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportText *msg = new MsgReportText(report);
+            getMessageQueueToGUI()->push(msg);
+        }
+
+        // TODO: send via UDP
+        return true;
+    }
 	else
 	{
 		return false;
@@ -278,6 +299,29 @@ void MorseDecoder::applySettings(const MorseDecoderSettings& settings, const QLi
         m_worker->getInputMessageQueue()->push(msg);
     }
 
+    if (settingsKeys.contains("logEnabled")
+        || settingsKeys.contains("logFilename")
+        || force)
+    {
+        if (m_logFile.isOpen())
+        {
+            m_logStream.flush();
+            m_logFile.close();
+        }
+        if (settings.m_logEnabled && !settings.m_logFilename.isEmpty())
+        {
+            m_logFile.setFileName(settings.m_logFilename);
+            if (m_logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+            {
+                qDebug() << "RttyDemod::applySettings - Logging to: " << settings.m_logFilename;
+                m_logStream.setDevice(&m_logFile);
+            }
+            else
+            {
+                qDebug() << "RttyDemod::applySettings - Unable to open log file: " << settings.m_logFilename;
+            }
+        }
+    }
 
     if (settings.m_useReverseAPI)
     {

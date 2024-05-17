@@ -18,6 +18,7 @@ set(morsedecoder_HEADERS
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${GGMORSE_INCLUDE_DIR}
 )
 
 if(NOT SERVER_MODE)
@@ -51,6 +52,7 @@ target_link_libraries(${TARGET_NAME}
     ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
+    ${GGMORSE_LIBRARIES}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

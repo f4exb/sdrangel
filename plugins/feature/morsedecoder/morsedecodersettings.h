@@ -40,6 +40,7 @@ struct MorseDecoderSettings
     uint16_t m_udpPort;
     QString m_logFilename;
     bool m_logEnabled;
+    bool m_auto; //!< Auto pitch and speed
 
     MorseDecoderSettings();
     void resetToDefaults();
@@ -49,6 +50,8 @@ struct MorseDecoderSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void applySettings(const QStringList& settingsKeys, const MorseDecoderSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
+
+    static QString formatText(const QString& text);
 
     static const QStringList m_channelURIs;
 };

@@ -78,6 +78,8 @@ private:
 	void displaySampleRate(int sampleRate);
 	void updateChannelList();
 	bool handleMessage(const Message& message);
+    void textReceived(const QString& text);
+    void updateMorseStats(float estPitch, float estWPM, float cost);
     void makeUIConnections();
 
 private slots:
@@ -87,6 +89,10 @@ private slots:
 	void on_startStop_toggled(bool checked);
 	void on_channels_currentIndexChanged(int index);
 	void on_channelApply_clicked();
+    void on_statLock_toggled(bool checked);
+    void on_clearTable_clicked();
+    void on_logEnable_clicked(bool checked=false);
+    void on_logFilename_clicked();
 	void updateStatus();
 	void tick();
 

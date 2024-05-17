@@ -109,7 +109,6 @@ public:
 
 private:
     DataFifo *m_dataFifo;
-    int m_channelSampleRate;
     int m_sinkSampleRate;
 	MessageQueue m_inputMessageQueue;  //!< Queue for asynchronous inbound communication
     MessageQueue *m_msgQueueToFeature; //!< Queue to report channel change to main feature object

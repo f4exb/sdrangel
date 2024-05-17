@@ -20,6 +20,7 @@
 #include "dsp/scopevis.h"
 #include "dsp/datafifo.h"
 
+#include "morsedecoder.h"
 #include "morsedecoderworker.h"
 
 MESSAGE_CLASS_DEFINITION(MorseDecoderWorker::MsgConfigureMorseDecoderWorker, Message)
@@ -28,15 +29,30 @@ MESSAGE_CLASS_DEFINITION(MorseDecoderWorker::MsgConnectFifo, Message)
 MorseDecoderWorker::MorseDecoderWorker() :
     m_dataFifo(nullptr),
     m_msgQueueToFeature(nullptr),
-    m_sampleBufferSize(0),
-    m_nbBytes(0)
+    m_auto(false),
+    m_pitchHz(-1),
+    m_speedWPM(-1)
 {
     qDebug("MorseDecoderWorker::MorseDecoderWorker");
+    m_ggMorseParameters = new GGMorse::Parameters{
+        48000.0f,                         // sampleRateInp: capture sample rate
+        48000.0f,                         // sampleRateOut:  playback sample rate
+        GGMorse::kDefaultSamplesPerFrame, // samplesPerFrame: number of samples per audio frame (128)
+        GGMORSE_SAMPLE_FORMAT_I16,        // sampleFormatInp: format of the captured audio samples
+        GGMORSE_SAMPLE_FORMAT_I16         // sampleFormatOut: format of the playback audio samples
+    };
+    m_ggMorse = new GGMorse(*m_ggMorseParameters);
+    auto parametersDecode = m_ggMorse->getDefaultParametersDecode(); // auto pitch [200, 1200 Hz], auto speed, apply low pass and high pass
+    parametersDecode.applyFilterHighPass = false;
+    m_ggMorse->setParametersDecode(parametersDecode);
+    applySampleRate(48000);
 }
 
 MorseDecoderWorker::~MorseDecoderWorker()
 {
     m_inputMessageQueue.clear();
+    delete m_ggMorse;
+    delete m_ggMorseParameters;
 }
 
 void MorseDecoderWorker::reset()
@@ -63,31 +79,113 @@ void MorseDecoderWorker::feedPart(
     DataFifo::DataType dataType
 )
 {
-    int nbBytes;
+    int countBytes = end - begin;
+    int bytesLeft = m_bytesBufferSize - m_bytesBufferCount;
 
-    switch(dataType)
+    if (dataType == DataFifo::DataTypeCI16) // (re, im) -> one sample conversion
     {
-    case DataFifo::DataTypeCI16:
-        nbBytes = 4;
-        break;
-    case DataFifo::DataTypeI16:
-    default:
-        nbBytes = 2;
+        countBytes /= 2;
+
+        if (countBytes != m_convBuffer.size()) {
+            m_convBuffer.resize(countBytes);
+        }
+
+        int16_t *s = (int16_t*) begin;
+        int16_t *b = (int16_t*) m_convBuffer.begin();
+
+        for (int is = 0; is < countBytes; is++)
+        {
+            int32_t re = s[2*is];
+            int32_t im = s[2*is+1];
+            b[is] = (int16_t) ((re+im) / 2);
+        }
+
+        if (countBytes >= bytesLeft)
+        {
+            std::copy(m_convBuffer.begin(), m_convBuffer.begin() + bytesLeft, m_bytesBuffer.begin() + m_bytesBufferCount); // fill buffer
+            int unprocessedBytes = processBuffer(m_convBuffer);
+            std::copy(m_convBuffer.begin() + bytesLeft - unprocessedBytes, m_convBuffer.end(), m_bytesBuffer.begin());
+            m_bytesBufferCount = bytesLeft + unprocessedBytes;
+        }
+        else
+        {
+            std::copy(m_convBuffer.begin(), m_convBuffer.end(), m_bytesBuffer.begin() + m_bytesBufferCount);
+            m_bytesBufferCount += countBytes;
+        }
+    }
+    else
+    {
+        if (countBytes >= bytesLeft)
+        {
+            std::copy(begin, begin + bytesLeft, m_bytesBuffer.begin() + m_bytesBufferCount); // fill buffer
+            int unprocessedBytes = processBuffer(m_bytesBuffer);
+            std::copy(begin + bytesLeft - unprocessedBytes, end, m_bytesBuffer.begin());
+            m_bytesBufferCount = bytesLeft + unprocessedBytes;
+        }
+        else
+        {
+            std::copy(begin, end, m_bytesBuffer.begin() + m_bytesBufferCount);
+            m_bytesBufferCount += countBytes;
+        }
+    }
+}
+
+int MorseDecoderWorker::processBuffer(QByteArray& bytesBuffer)
+{
+    uint32_t samplesHave = bytesBuffer.size() / 2;
+    uint32_t samplesTotal = bytesBuffer.size() / 2;
+    int bytesLeft = 0;
+
+    GGMorse::CBWaveformInp cbWaveformInp = [&](void * data, uint32_t nMaxBytes)
+    {
+        if (samplesHave*2 < nMaxBytes)
+        {
+            if (samplesHave != 0)
+            {
+                bytesLeft = samplesHave*2;
+                qDebug("MorseDecoderWorker::processBuffer::cbWaveformInp: nMaxBytes: %u / %u samples left buffer size: %u",
+                    nMaxBytes, samplesHave, bytesBuffer.size());
+            }
+
+            return 0;
+        }
+
+        samplesHave -= nMaxBytes/2;
+        // qDebug("MorseDecoderWorker::processBuffer::cbWaveformInp: samplesTotal: %u samplesHave: %u nMaxBytes: %u",
+        //    samplesTotal, samplesHave, nMaxBytes);
+        memcpy(data, bytesBuffer.data() + (samplesTotal - samplesHave)*2, nMaxBytes);
+        return (int) nMaxBytes;
+    };
+
+    bool result = m_ggMorse->decode(cbWaveformInp);
+
+    if (result)
+    {
+        GGMorse::TxRx dst;
+        m_ggMorse->takeRxData(dst);
+        QString text;
+        std::for_each(
+            dst.begin(),
+            dst.end(),
+            [&](const uint8_t c) { text.append(c); }
+        );
+
+        const GGMorse::Statistics& stats = m_ggMorse->getStatistics();
+        m_pitchHz = stats.estimatedPitch_Hz;
+        m_speedWPM = stats.estimatedSpeed_wpm;
+
+        if (m_msgQueueToFeature)
+        {
+            MorseDecoder::MsgReportText *msg = MorseDecoder::MsgReportText::create(text);
+            msg->m_costFunction = stats.costFunction;
+            msg->m_estimatedPitchHz = m_settings.m_auto ? stats.estimatedPitch_Hz : m_pitchHz;
+            msg->m_estimatedSpeedWPM = m_settings.m_auto ? stats.estimatedSpeed_wpm : m_speedWPM;
+            msg->m_signalThreshold = stats.signalThreshold;
+            m_msgQueueToFeature->push(msg);
+        }
     }
 
-    m_nbBytes = nbBytes;
-    int countSamples = (end - begin) / nbBytes;
-
-    if (countSamples > m_sampleBufferSize)
-    {
-        m_sampleBuffer.resize(countSamples);
-        m_sampleBufferSize = countSamples;
-    }
-
-    // TODO
-    // for (int i = 0; i < countSamples; i++) {
-    //     processSample(dataType, begin, countSamples, i);
-    // }
+    return bytesLeft;
 }
 
 void MorseDecoderWorker::handleInputMessages()
@@ -120,7 +218,7 @@ bool MorseDecoderWorker::handleMessage(const Message& cmd)
         MsgConnectFifo& msg = (MsgConnectFifo&) cmd;
         m_dataFifo = msg.getFifo();
         bool doConnect = msg.getConnect();
-        qDebug("DemodAnalyzerWorker::handleMessage: MsgConnectFifo: %s", (doConnect ? "connect" : "disconnect"));
+        qDebug("MorseDecoderWorker::handleMessage: MsgConnectFifo: %s", (doConnect ? "connect" : "disconnect"));
 
         if (doConnect) {
             QObject::connect(
@@ -153,6 +251,25 @@ void MorseDecoderWorker::applySettings(const MorseDecoderSettings& settings, con
 {
     qDebug() << "MorseDecoderWorker::applySettings:" << settings.getDebugString(settingsKeys, force) << force;
 
+    if (settingsKeys.contains("auto") || force)
+    {
+        auto parametersDecode = m_ggMorse->getDefaultParametersDecode();
+        parametersDecode.applyFilterHighPass = false;
+
+        if (settings.m_auto)
+        {
+            parametersDecode.frequency_hz = -1.0f; // auto
+            parametersDecode.speed_wpm = -1.0f; // auto
+        }
+        else
+        {
+            parametersDecode.frequency_hz = m_pitchHz;
+            parametersDecode.speed_wpm = m_speedWPM;
+        }
+
+        m_ggMorse->setParametersDecode(parametersDecode);
+    }
+
     if (force) {
         m_settings = settings;
     } else {
@@ -163,7 +280,16 @@ void MorseDecoderWorker::applySettings(const MorseDecoderSettings& settings, con
 
 void MorseDecoderWorker::applySampleRate(int sampleRate)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_sinkSampleRate = sampleRate;
+    m_ggMorseParameters->sampleRateInp = sampleRate;
+    int ggMorseBlockSize = (sampleRate / GGMorse::kBaseSampleRate)*GGMorse::kDefaultSamplesPerFrame;
+    // m_bytesBufferSize = (GGMorse::kBaseSampleRate/GGMorse::kDefaultSamplesPerFrame)*ggMorseBlockSize*10; // ~10s
+    m_bytesBufferSize = sampleRate*10 + ggMorseBlockSize;
+    m_bytesBuffer.resize(m_bytesBufferSize);
+    m_bytesBufferCount = 0;
+    qDebug("MorseDecoderWorker::applySampleRate: m_sinkSampleRate: %d ggMorseBlockSize: %d m_bytesBufferSize: %d",
+        m_sinkSampleRate, ggMorseBlockSize, m_bytesBufferSize);
 }
 
 void MorseDecoderWorker::handleData()

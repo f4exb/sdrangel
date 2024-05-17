@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include "ggmorse/ggmorse.h"
+
 #include <QObject>
 #include <QRecursiveMutex>
 #include <QByteArray>
@@ -30,7 +32,6 @@
 #include "util/messagequeue.h"
 
 #include "morsedecodersettings.h"
-
 
 class MorseDecoderWorker : public QObject {
     Q_OBJECT
@@ -100,10 +101,16 @@ private:
     MessageQueue *m_msgQueueToFeature; //!< Queue to report channel change to main feature object
     MorseDecoderSettings m_settings;
 	double m_magsq;
-	SampleVector m_sampleBuffer;
-    int m_sampleBufferSize;
-    int m_nbBytes;
+    QByteArray m_bytesBuffer;
+    int m_bytesBufferSize;
+    int m_bytesBufferCount;
+    QByteArray m_convBuffer;
     QRecursiveMutex m_mutex;
+    GGMorse::Parameters *m_ggMorseParameters;
+    GGMorse *m_ggMorse;
+    bool m_auto;
+    float m_pitchHz;
+    float m_speedWPM;
 
     void feedPart(
         const QByteArray::const_iterator& begin,
@@ -112,6 +119,31 @@ private:
     );
 
     bool handleMessage(const Message& cmd);
+    int processBuffer(QByteArray& bytesBuffer); //!< return the number of bytes left
+
+    // inline void processSample(
+    //     DataFifo::DataType dataType,
+    //     const QByteArray::const_iterator& begin,
+    //     int nbBytesPerSample,
+    //     int i
+    // )
+    // {
+    //     int16_t *s = (int16_t*) begin + (i*nbBytesPerSample);
+
+    //     switch(dataType)
+    //     {
+    //         case DataFifo::DataTypeI16: {
+    //             m_sampleBuffer[i] = *s;
+    //         }
+    //         break;
+    //         case DataFifo::DataTypeCI16: {
+    //             int32_t re = s[2*i];
+    //             int32_t im = s[2*i+1];
+    //             m_sampleBuffer[i] = (int16_t) ((re+im) / 2);
+    //         }
+    //         break;
+    //     }
+    // }
 
 private slots:
     void handleInputMessages();
