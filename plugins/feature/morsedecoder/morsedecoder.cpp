@@ -122,6 +122,7 @@ void MorseDecoder::start()
         &QThread::deleteLater
     );
 
+    m_worker->setScopeVis(&m_scopeVis);
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->startWork();
     m_state = StRunning;

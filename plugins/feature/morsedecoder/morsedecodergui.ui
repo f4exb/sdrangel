@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>422</width>
-    <height>810</height>
+    <height>754</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -443,6 +443,335 @@
     </item>
    </layout>
   </widget>
+  <widget class="QWidget" name="scopeContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>400</y>
+     <width>420</width>
+     <height>341</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>420</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Waveforms</string>
+   </property>
+   <layout class="QVBoxLayout" name="transmittedLayout_2">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="scopelLayout">
+      <item>
+       <widget class="QLabel" name="channel1Label">
+        <property name="text">
+         <string>Real</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="channel1">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <item>
+         <property name="text">
+          <string>I</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Q</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Mag Sq</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Sample Idx</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(Sum1)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(Sum2)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bit</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bit Cnt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Got SOP</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Real(exp)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Imag(exp)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(sum1)Filt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(sum2)Filt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Diff</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DiffFilt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>data</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>clock</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Env1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Env2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bias1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bias2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Unbiased data</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Biased data</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="channel2Label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Imag</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="channel2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <item>
+         <property name="text">
+          <string>I</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Q</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Mag Sq</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Sample Idx</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(Sum1)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(Sum2)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bit</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bit Cnt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Got SOP</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Real(exp)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>imag(exp)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(sum1)Filt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>abs(sum2)Filt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Diff</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DiffFilt</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>data</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>clock</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Env1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Env2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bias1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Bias2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Unbiased data</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Biased data</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="GLScope" name="glScope" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>250</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Liberation Mono</family>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="GLScopeGUI" name="scopeGUI" native="true"/>
+    </item>
+   </layout>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>
@@ -454,6 +783,18 @@
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLScope</class>
+   <extends>QWidget</extends>
+   <header>gui/glscope.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLScopeGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/glscopegui.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

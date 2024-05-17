@@ -58,6 +58,10 @@ QByteArray MorseDecoderSettings::serialize() const
 {
     SimpleSerializer s(1);
 
+    if (m_scopeGUI) {
+        s.writeBlob(2, m_scopeGUI->serialize());
+    }
+
     s.writeString(5, m_title);
     s.writeU32(6, m_rgbColor);
     s.writeBool(7, m_useReverseAPI);
@@ -98,6 +102,12 @@ bool MorseDecoderSettings::deserialize(const QByteArray& data)
         QByteArray bytetmp;
         uint32_t utmp;
         QString strtmp;
+
+        if (m_scopeGUI)
+        {
+            d.readBlob(2, &bytetmp);
+            m_scopeGUI->deserialize(bytetmp);
+        }
 
         d.readString(5, &m_title, "Demod Analyzer");
         d.readU32(6, &m_rgbColor, QColor(0, 255, 0).rgb());

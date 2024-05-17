@@ -86,6 +86,7 @@ bool MorseDecoderGUI::handleMessage(const Message& message)
         }
 
         blockApplySettings(true);
+        ui->scopeGUI->updateSettings();
         displaySettings();
         blockApplySettings(false);
 
@@ -192,7 +193,10 @@ MorseDecoderGUI::MorseDecoderGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
     m_morseDecoder = reinterpret_cast<MorseDecoder*>(feature);
     m_morseDecoder->setMessageQueueToGUI(&m_inputMessageQueue);
-
+    m_scopeVis = m_morseDecoder->getScopeVis();
+    m_scopeVis->setGLScope(ui->glScope);
+    ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
+    m_scopeVis->setLiveRate(4000);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -204,6 +208,7 @@ MorseDecoderGUI::MorseDecoderGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
+    m_settings.setScopeGUI(ui->scopeGUI);
     m_settings.setRollupState(&m_rollupState);
 
     displaySettings();

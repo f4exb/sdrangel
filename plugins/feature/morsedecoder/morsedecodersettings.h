@@ -32,6 +32,7 @@ struct MorseDecoderSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
+    Serializable *m_scopeGUI;
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
@@ -47,6 +48,7 @@ struct MorseDecoderSettings
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 
+    void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void applySettings(const QStringList& settingsKeys, const MorseDecoderSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;

@@ -32,6 +32,7 @@ class PluginAPI;
 class FeatureUISet;
 class MorseDecoder;
 class Feature;
+class ScopeVis;
 
 namespace Ui {
 	class MorseDecoderGUI;
@@ -63,6 +64,7 @@ private:
 	bool m_doApplySettings;
 
 	MorseDecoder* m_morseDecoder;
+    ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
 	QTimer m_statusTimer;
 	int m_lastFeatureState;

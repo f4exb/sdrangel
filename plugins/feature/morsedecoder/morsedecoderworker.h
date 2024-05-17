@@ -33,6 +33,8 @@
 
 #include "morsedecodersettings.h"
 
+class ScopeVis;
+
 class MorseDecoderWorker : public QObject {
     Q_OBJECT
 public:
@@ -89,6 +91,7 @@ public:
     void stopWork();
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
+    void setScopeVis(ScopeVis* scopeVis) { m_scopeVis = scopeVis; }
 
     void applySampleRate(int sampleRate);
 	void applySettings(const MorseDecoderSettings& settings, const QList<QString>& settingsKeys, bool force = false);
@@ -111,6 +114,7 @@ private:
     bool m_auto;
     float m_pitchHz;
     float m_speedWPM;
+    ScopeVis* m_scopeVis;
 
     void feedPart(
         const QByteArray::const_iterator& begin,

@@ -27,6 +27,7 @@
 #include "feature/feature.h"
 #include "util/message.h"
 #include "availablechannelorfeaturehandler.h"
+#include "dsp/scopevis.h"
 
 #include "morsedecodersettings.h"
 
@@ -213,6 +214,8 @@ public:
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response);
 
+    ScopeVis *getScopeVis() { return &m_scopeVis; }
+
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
 
@@ -222,6 +225,7 @@ private:
     bool m_running;
     MorseDecoderWorker *m_worker;
     MorseDecoderSettings m_settings;
+    ScopeVis m_scopeVis;
     AvailableChannelOrFeatureList m_availableChannels;
     AvailableChannelOrFeatureHandler m_availableChannelOrFeatureHandler;
     ChannelAPI *m_selectedChannel;
