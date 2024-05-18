@@ -34,6 +34,7 @@
 #include "morsedecodersettings.h"
 
 class ScopeVis;
+class QTimer;
 
 class MorseDecoderWorker : public QObject {
     Q_OBJECT
@@ -115,6 +116,7 @@ private:
     float m_pitchHz;
     float m_speedWPM;
     ScopeVis* m_scopeVis;
+    QTimer *m_pollTimer;
 
     void feedPart(
         const QByteArray::const_iterator& begin,
@@ -123,7 +125,7 @@ private:
     );
 
     bool handleMessage(const Message& cmd);
-    int processBuffer(QByteArray& bytesBuffer); //!< return the number of bytes left
+    int processBuffer(QByteArray& bytesBuffer, int countBytes); //!< return the number of bytes left
 
     // inline void processSample(
     //     DataFifo::DataType dataType,
@@ -152,6 +154,7 @@ private:
 private slots:
     void handleInputMessages();
     void handleData(); //!< Handle data when samples have to be processed
+    void pollingTick();
 };
 
 #endif // INCLUDE_FEATURE_MORSEDECODERWORKER_H_

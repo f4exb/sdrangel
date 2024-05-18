@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QTimer>
 
 #include "dsp/scopevis.h"
 #include "dsp/datafifo.h"
@@ -31,7 +32,9 @@ MorseDecoderWorker::MorseDecoderWorker() :
     m_msgQueueToFeature(nullptr),
     m_auto(false),
     m_pitchHz(-1),
-    m_speedWPM(-1)
+    m_speedWPM(-1),
+    m_scopeVis(nullptr),
+    m_pollTimer(nullptr)
 {
     qDebug("MorseDecoderWorker::MorseDecoderWorker");
     m_ggMorseParameters = new GGMorse::Parameters{
@@ -50,6 +53,7 @@ MorseDecoderWorker::MorseDecoderWorker() :
 
 MorseDecoderWorker::~MorseDecoderWorker()
 {
+
     m_inputMessageQueue.clear();
     delete m_ggMorse;
     delete m_ggMorseParameters;
@@ -63,14 +67,23 @@ void MorseDecoderWorker::reset()
 
 void MorseDecoderWorker::startWork()
 {
+    qDebug("MorseDecoderWorker::startWork");
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
+    m_pollTimer = new QTimer();
+    connect(m_pollTimer, SIGNAL(timeout()), this, SLOT(pollingTick()));
+    m_pollTimer->start(1000);
 }
 
 void MorseDecoderWorker::stopWork()
 {
+    qDebug("MorseDecoderWorker::stopWork");
     QMutexLocker mutexLocker(&m_mutex);
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    disconnect(m_pollTimer, SIGNAL(timeout()), this, SLOT(pollingTick()));
+    m_pollTimer->stop();
+    delete m_pollTimer;
 }
 
 void MorseDecoderWorker::feedPart(
@@ -103,7 +116,7 @@ void MorseDecoderWorker::feedPart(
         if (countBytes >= bytesLeft)
         {
             std::copy(m_convBuffer.begin(), m_convBuffer.begin() + bytesLeft, m_bytesBuffer.begin() + m_bytesBufferCount); // fill buffer
-            int unprocessedBytes = processBuffer(m_convBuffer);
+            int unprocessedBytes = processBuffer(m_convBuffer, countBytes);
             std::copy(m_convBuffer.begin() + bytesLeft - unprocessedBytes, m_convBuffer.end(), m_bytesBuffer.begin());
             m_bytesBufferCount = bytesLeft + unprocessedBytes;
         }
@@ -118,7 +131,7 @@ void MorseDecoderWorker::feedPart(
         if (countBytes >= bytesLeft)
         {
             std::copy(begin, begin + bytesLeft, m_bytesBuffer.begin() + m_bytesBufferCount); // fill buffer
-            int unprocessedBytes = processBuffer(m_bytesBuffer);
+            int unprocessedBytes = processBuffer(m_bytesBuffer, countBytes);
             std::copy(begin + bytesLeft - unprocessedBytes, end, m_bytesBuffer.begin());
             m_bytesBufferCount = bytesLeft + unprocessedBytes;
         }
@@ -130,7 +143,7 @@ void MorseDecoderWorker::feedPart(
     }
 }
 
-int MorseDecoderWorker::processBuffer(QByteArray& bytesBuffer)
+int MorseDecoderWorker::processBuffer(QByteArray& bytesBuffer, int countBytes)
 {
     uint32_t samplesHave = bytesBuffer.size() / 2;
     uint32_t samplesTotal = bytesBuffer.size() / 2;
@@ -143,8 +156,8 @@ int MorseDecoderWorker::processBuffer(QByteArray& bytesBuffer)
             if (samplesHave != 0)
             {
                 bytesLeft = samplesHave*2;
-                qDebug("MorseDecoderWorker::processBuffer::cbWaveformInp: nMaxBytes: %u / %u samples left buffer size: %u",
-                    nMaxBytes, samplesHave, bytesBuffer.size());
+                qDebug("MorseDecoderWorker::processBuffer::cbWaveformInp: nMaxBytes: %u / %u samples left buffer size: %u countBytes: %d",
+                    nMaxBytes, samplesHave, bytesBuffer.size(), countBytes);
             }
 
             return 0;
@@ -182,6 +195,36 @@ int MorseDecoderWorker::processBuffer(QByteArray& bytesBuffer)
             msg->m_estimatedSpeedWPM = m_settings.m_auto ? stats.estimatedSpeed_wpm : m_speedWPM;
             msg->m_signalThreshold = stats.signalThreshold;
             m_msgQueueToFeature->push(msg);
+        }
+
+        if (m_scopeVis)
+        {
+            std::vector<float> trace;
+            int traceSize = m_ggMorse->takeSignalF(trace);
+            std::vector<float> thresholds;
+            int thrSize = m_ggMorse->takeThresholdF(thresholds);
+            qDebug("MorseDecoderWorker::processBuffer: traceSize: %d thrSize: %d", traceSize, thrSize);
+            int i = 0;
+            int d = (traceSize / thrSize) + 1;
+
+            if (traceSize != 0)
+            {
+                SampleVector strace;
+                strace.resize(traceSize);
+                std::transform(
+                    trace.begin(),
+                    trace.end(),
+                    strace.begin(),
+                    [&](float& t) {
+                        float im = thresholds[i/d];
+                        i++;
+                        return Sample(t*SDR_RX_SCALEF, im*SDR_RX_SCALEF);
+                    }
+                );
+                std::vector<SampleVector::const_iterator> vbegin;
+                vbegin.push_back(strace.begin());
+                m_scopeVis->feed(vbegin, traceSize);
+            }
         }
     }
 
@@ -284,8 +327,8 @@ void MorseDecoderWorker::applySampleRate(int sampleRate)
     m_sinkSampleRate = sampleRate;
     m_ggMorseParameters->sampleRateInp = sampleRate;
     int ggMorseBlockSize = (sampleRate / GGMorse::kBaseSampleRate)*GGMorse::kDefaultSamplesPerFrame;
-    // m_bytesBufferSize = (GGMorse::kBaseSampleRate/GGMorse::kDefaultSamplesPerFrame)*ggMorseBlockSize*10; // ~10s
-    m_bytesBufferSize = sampleRate*10 + ggMorseBlockSize;
+    // m_bytesBufferSize = (GGMorse::kBaseSampleRate/GGMorse::kDefaultSamplesPerFrame)*ggMorseBlockSize*10; // ~5s
+    m_bytesBufferSize = sampleRate*9.4976; // + ggMorseBlockSize;
     m_bytesBuffer.resize(m_bytesBufferSize);
     m_bytesBufferCount = 0;
     qDebug("MorseDecoderWorker::applySampleRate: m_sinkSampleRate: %d ggMorseBlockSize: %d m_bytesBufferSize: %d",
@@ -318,4 +361,8 @@ void MorseDecoderWorker::handleData()
 
 		m_dataFifo->readCommit((unsigned int) count);
     }
+}
+
+void MorseDecoderWorker::pollingTick()
+{
 }
