@@ -270,15 +270,25 @@ QString MorseDecoderSettings::formatText(const QString& text)
 {
     // Format text
     QString showText = text.simplified();
+    QString spaceFirst;
+    QString spaceLast;
 
-    if (text.size() > 3)
+    if (text.size() >= 2)
     {
         if (text.right(1)[0].isSpace()) {
-            showText.append(text.right(1));
+            spaceLast = text.right(1);
         }
         if (text.left(1)[0].isSpace()) {
-            showText = text.left(1) + showText;
+            spaceFirst = text.left(1);
         }
+    }
+
+    if (spaceFirst.size() != 0) {
+        showText = spaceFirst + showText;
+    }
+
+    if (spaceLast.size() != 0) {
+        showText.append(spaceLast);
     }
 
     return showText;

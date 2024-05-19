@@ -196,7 +196,7 @@ MorseDecoderGUI::MorseDecoderGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_scopeVis = m_morseDecoder->getScopeVis();
     m_scopeVis->setGLScope(ui->glScope);
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
-    m_scopeVis->setLiveRate(1484/4.7488);
+    m_scopeVis->setLiveRate(4800); // 1 second
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));

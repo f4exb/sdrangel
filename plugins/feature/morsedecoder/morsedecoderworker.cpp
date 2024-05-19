@@ -25,6 +25,7 @@
 #include "morsedecoderworker.h"
 
 MESSAGE_CLASS_DEFINITION(MorseDecoderWorker::MsgConfigureMorseDecoderWorker, Message)
+MESSAGE_CLASS_DEFINITION(MorseDecoderWorker::MsgConfigureSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(MorseDecoderWorker::MsgConnectFifo, Message)
 
 MorseDecoderWorker::MorseDecoderWorker() :
@@ -92,54 +93,28 @@ void MorseDecoderWorker::feedPart(
     DataFifo::DataType dataType
 )
 {
+    if (dataType != DataFifo::DataTypeI16) {
+        return;
+    }
+
     int countBytes = end - begin;
     int bytesLeft = m_bytesBufferSize - m_bytesBufferCount;
 
-    if (dataType == DataFifo::DataTypeCI16) // (re, im) -> one sample conversion
+    if (countBytes > m_bytesBufferSize) {
+        return;
+    }
+
+    if (countBytes >= bytesLeft)
     {
-        countBytes /= 2;
-
-        if (countBytes != m_convBuffer.size()) {
-            m_convBuffer.resize(countBytes);
-        }
-
-        int16_t *s = (int16_t*) begin;
-        int16_t *b = (int16_t*) m_convBuffer.begin();
-
-        for (int is = 0; is < countBytes; is++)
-        {
-            int32_t re = s[2*is];
-            int32_t im = s[2*is+1];
-            b[is] = (int16_t) ((re+im) / 2);
-        }
-
-        if (countBytes >= bytesLeft)
-        {
-            std::copy(m_convBuffer.begin(), m_convBuffer.begin() + bytesLeft, m_bytesBuffer.begin() + m_bytesBufferCount); // fill buffer
-            int unprocessedBytes = processBuffer(m_convBuffer, countBytes);
-            std::copy(m_convBuffer.begin() + bytesLeft - unprocessedBytes, m_convBuffer.end(), m_bytesBuffer.begin());
-            m_bytesBufferCount = bytesLeft + unprocessedBytes;
-        }
-        else
-        {
-            std::copy(m_convBuffer.begin(), m_convBuffer.end(), m_bytesBuffer.begin() + m_bytesBufferCount);
-            m_bytesBufferCount += countBytes;
-        }
+        std::copy(begin, begin + bytesLeft, m_bytesBuffer.begin() + m_bytesBufferCount); // fill buffer
+        int unprocessedBytes = processBuffer(m_bytesBuffer, countBytes);
+        std::copy(begin + bytesLeft - unprocessedBytes, end, m_bytesBuffer.begin());
+        m_bytesBufferCount = bytesLeft + unprocessedBytes;
     }
     else
     {
-        if (countBytes >= bytesLeft)
-        {
-            std::copy(begin, begin + bytesLeft, m_bytesBuffer.begin() + m_bytesBufferCount); // fill buffer
-            int unprocessedBytes = processBuffer(m_bytesBuffer, countBytes);
-            std::copy(begin + bytesLeft - unprocessedBytes, end, m_bytesBuffer.begin());
-            m_bytesBufferCount = bytesLeft + unprocessedBytes;
-        }
-        else
-        {
-            std::copy(begin, end, m_bytesBuffer.begin() + m_bytesBufferCount);
-            m_bytesBufferCount += countBytes;
-        }
+        std::copy(begin, end, m_bytesBuffer.begin() + m_bytesBufferCount);
+        m_bytesBufferCount += countBytes;
     }
 }
 
@@ -203,27 +178,31 @@ int MorseDecoderWorker::processBuffer(QByteArray& bytesBuffer, int countBytes)
             int traceSize = m_ggMorse->takeSignalF(trace);
             std::vector<float> thresholds;
             int thrSize = m_ggMorse->takeThresholdF(thresholds);
-            qDebug("MorseDecoderWorker::processBuffer: traceSize: %d thrSize: %d", traceSize, thrSize);
+            // qDebug("MorseDecoderWorker::processBuffer: traceSize: %d thrSize: %d", traceSize, thrSize);
             int i = 0;
-            int d = (traceSize / thrSize) + 1;
+            float ftrace = traceSize / 4800.0f; // interpolation to scope basic trace size
+            float fthres = thrSize / 4800.0f;
 
             if (traceSize != 0)
             {
                 SampleVector strace;
-                strace.resize(traceSize);
-                std::transform(
-                    trace.begin(),
-                    trace.end(),
+                strace.resize(4800, 0);
+                std::for_each(
                     strace.begin(),
-                    [&](float& t) {
-                        float im = thresholds[i/d];
+                    strace.end(),
+                    [&](Sample& s)
+                    {
+                        int itrace = ftrace * i;
+                        int ithres = fthres * i;
+                        float re = trace[itrace];
+                        float im = thresholds[ithres];
                         i++;
-                        return Sample(t*SDR_RX_SCALEF, im*SDR_RX_SCALEF);
+                        s = Sample(re*SDR_RX_SCALEF, im*SDR_RX_SCALEF);
                     }
                 );
                 std::vector<SampleVector::const_iterator> vbegin;
                 vbegin.push_back(strace.begin());
-                m_scopeVis->feed(vbegin, traceSize);
+                m_scopeVis->feed(vbegin, 4800);
             }
         }
     }
@@ -252,6 +231,15 @@ bool MorseDecoderWorker::handleMessage(const Message& cmd)
         qDebug("MorseDecoderWorker::handleMessage: MsgConfigureMorseDecoderWorker");
 
         applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
+
+        return true;
+    }
+    else if (MsgConfigureSampleRate::match(cmd))
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        MsgConfigureSampleRate& cfg = (MsgConfigureSampleRate&) cmd;
+        qDebug("MorseDecoderWorker::handleMessage: MsgConfigureSampleRate");
+        applySampleRate(cfg.getSampleRate());
 
         return true;
     }
@@ -323,14 +311,18 @@ void MorseDecoderWorker::applySettings(const MorseDecoderSettings& settings, con
 
 void MorseDecoderWorker::applySampleRate(int sampleRate)
 {
-    QMutexLocker mutexLocker(&m_mutex);
     m_sinkSampleRate = sampleRate;
     m_ggMorseParameters->sampleRateInp = sampleRate;
     int ggMorseBlockSize = (sampleRate / GGMorse::kBaseSampleRate)*GGMorse::kDefaultSamplesPerFrame;
-    // m_bytesBufferSize = (GGMorse::kBaseSampleRate/GGMorse::kDefaultSamplesPerFrame)*ggMorseBlockSize*10; // ~5s
-    m_bytesBufferSize = sampleRate*9.4976; // + ggMorseBlockSize;
+    m_bytesBufferSize = 64*ggMorseBlockSize*2;
     m_bytesBuffer.resize(m_bytesBufferSize);
     m_bytesBufferCount = 0;
+    float seconds = m_bytesBufferSize/(sampleRate*2.0f);
+
+    if (m_scopeVis) {
+        m_scopeVis->setLiveRate(4800/seconds);
+    }
+
     qDebug("MorseDecoderWorker::applySampleRate: m_sinkSampleRate: %d ggMorseBlockSize: %d m_bytesBufferSize: %d",
         m_sinkSampleRate, ggMorseBlockSize, m_bytesBufferSize);
 }

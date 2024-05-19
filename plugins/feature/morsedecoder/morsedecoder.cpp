@@ -128,9 +128,13 @@ void MorseDecoder::start()
     m_state = StRunning;
     m_thread->start();
 
-    MorseDecoderWorker::MsgConfigureMorseDecoderWorker *msg
+    MorseDecoderWorker::MsgConfigureMorseDecoderWorker *msgConfigure
         = MorseDecoderWorker::MsgConfigureMorseDecoderWorker::create(m_settings, QList<QString>(), true);
-    m_worker->getInputMessageQueue()->push(msg);
+    m_worker->getInputMessageQueue()->push(msgConfigure);
+
+    MorseDecoderWorker::MsgConfigureSampleRate *msgSampleRate
+        = MorseDecoderWorker::MsgConfigureSampleRate::create(m_sampleRate);
+    m_worker->getInputMessageQueue()->push(msgSampleRate);
 
     if (m_dataPipe)
     {
@@ -217,6 +221,7 @@ bool MorseDecoder::handleMessage(const Message& cmd)
         if (report.getChannelAPI() == m_selectedChannel)
         {
             m_sampleRate = report.getSampleRate();
+            qDebug("MorseDecoder::handleMessage: MainCore::MsgChannelDemodReport: %d S/s", m_sampleRate);
 
             if (m_running) {
                 m_worker->applySampleRate(m_sampleRate);

@@ -65,6 +65,26 @@ public:
         { }
     };
 
+    class MsgConfigureSampleRate : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgConfigureSampleRate* create(int sampleRate)
+        {
+            return new MsgConfigureSampleRate(sampleRate);
+        }
+
+    private:
+        int m_sampleRate;
+
+        MsgConfigureSampleRate(int sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
     class MsgConnectFifo : public Message {
         MESSAGE_CLASS_DECLARATION
 
