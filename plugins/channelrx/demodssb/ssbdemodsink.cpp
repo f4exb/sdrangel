@@ -171,7 +171,7 @@ void SSBDemodSink::processOneSample(Complex &ci)
 
         // Prevent overload based on squared magnitude variation
         // Only if AGC is active
-        if (m_agcActive && m_agcClamping && agcVal > 100.0)
+        if (m_agcActive && m_agcClamping && (agcVal > 100.0 || agcVal == 0.0))
         {
             // qDebug("SSBDemodSink::processOneSample: %f", agcVal);
             m_agc.reset(m_agcTarget*m_agcTarget);
