@@ -300,15 +300,18 @@ SIDGUI::~SIDGUI()
     disconnectDataUpdates();
     if (m_grb) {
         disconnect(m_grb, &GRB::dataUpdated, this, &SIDGUI::grbDataUpdated);
+        delete m_grb;
     }
     if (m_stix) {
         disconnect(m_stix, &STIX::dataUpdated, this, &SIDGUI::stixDataUpdated);
+        delete m_stix;
     }
     m_statusTimer.stop();
 
     clearFromMap();
 
     delete m_goesXRay;
+    delete m_solarDynamicsObservatory;
     delete ui;
 }
 
