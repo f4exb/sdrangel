@@ -23,6 +23,7 @@
 #include <QRecursiveMutex>
 #include <QFile>
 #include <QTextStream>
+#include <QUdpSocket>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -234,6 +235,7 @@ private:
     QFile m_logFile;
     QTextStream m_logStream;
 
+    QUdpSocket m_udpSocket;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

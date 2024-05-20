@@ -262,7 +262,17 @@ bool MorseDecoder::handleMessage(const Message& cmd)
             getMessageQueueToGUI()->push(msg);
         }
 
-        // TODO: send via UDP
+        // Send via UDP
+        if (m_settings.m_udpEnabled)
+        {
+            QByteArray bytes = MorseDecoderSettings::formatText(report.getText()).toUtf8();
+            m_udpSocket.writeDatagram(
+                bytes,
+                bytes.size(),
+                QHostAddress(m_settings.m_udpAddress), m_settings.m_udpPort
+            );
+        }
+
         return true;
     }
 	else
