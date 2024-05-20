@@ -288,11 +288,10 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, con
         m_selectedPipe = m_availableChannelOrFeatureHandler.registerPipes(settings.m_source, {"target"});
     }
 
-    GS232ControllerWorker::MsgConfigureGS232ControllerWorker *msg = GS232ControllerWorker::MsgConfigureGS232ControllerWorker::create(
-        settings, settingsKeys, force
-    );
-
     if (m_worker) {
+        GS232ControllerWorker::MsgConfigureGS232ControllerWorker *msg = GS232ControllerWorker::MsgConfigureGS232ControllerWorker::create(
+            settings, settingsKeys, force
+            );
         m_worker->getInputMessageQueue()->push(msg);
     }
 

@@ -25,7 +25,8 @@ set(sdrangel_VERSION_SUFFIX "")
 
 # SDRAngel cmake options
 option(DEBUG_OUTPUT "Print debug messages" OFF)
-option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
+option(SANITIZE_ADDRESS "Activate detection of uninitialized memory (AddressSanitizer)" OFF)
+option(SANITIZE_MEMORY "Activate detection of leaked memory (LeakSanitizer)" OFF)
 option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" ON)
 option(BUILD_SERVER "Build Server" ON)
 option(BUILD_GUI "Build GUI" ON)

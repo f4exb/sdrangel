@@ -103,6 +103,7 @@ bool AFCGUI::handleMessage(const Message& message)
     {
         const AFC::MsgDeviceSetListsReport& report = (AFC::MsgDeviceSetListsReport&) message;
         updateDeviceSetLists(report);
+        return true;
     }
 
 	return false;

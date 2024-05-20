@@ -209,6 +209,7 @@ void MainCore::removeLastFeatureSet()
         FeatureSet *featureSet = m_featureSets.back();
         m_featureSetsMap.remove(featureSet);
         m_featureSets.pop_back();
+        delete featureSet;
     }
 }
 
@@ -227,6 +228,7 @@ void MainCore::removeLastDeviceSet()
         DeviceSet *deviceSet = m_deviceSets.back();
         m_deviceSetsMap.remove(deviceSet);
         m_deviceSets.pop_back();
+        delete deviceSet;
     }
 }
 

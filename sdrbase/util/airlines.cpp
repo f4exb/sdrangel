@@ -5560,3 +5560,8 @@ Airline::Init::Init()
         s += 4;
     }
 }
+
+Airline::Init::~Init()
+{
+    qDeleteAll(m_icaoHash);
+}

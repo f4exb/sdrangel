@@ -208,11 +208,10 @@ void SatelliteTracker::applySettings(const SatelliteTrackerSettings& settings, c
         tlesChanged = true;
     }
 
-    SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker *msg = SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker::create(
-        settings, settingsKeys, force
-    );
-
     if (m_worker) {
+        SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker *msg = SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker::create(
+            settings, settingsKeys, force
+        );
         m_worker->getInputMessageQueue()->push(msg);
     }
 
