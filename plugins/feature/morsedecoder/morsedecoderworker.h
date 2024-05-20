@@ -145,7 +145,7 @@ private:
     );
 
     bool handleMessage(const Message& cmd);
-    int processBuffer(QByteArray& bytesBuffer, int countBytes); //!< return the number of bytes left
+    int processBuffer(QByteArray& bytesBuffer); //!< return the number of bytes left
 
     // inline void processSample(
     //     DataFifo::DataType dataType,
