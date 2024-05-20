@@ -437,6 +437,9 @@
      <height>0</height>
     </size>
    </property>
+   <property name="windowTitle">
+    <string>Text</string>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <widget class="QTextEdit" name="text"/>
