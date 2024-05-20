@@ -284,31 +284,15 @@ SIDGUI::SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 
 SIDGUI::~SIDGUI()
 {
-    QObject::disconnect(ui->chartSplitter, &QSplitter::splitterMoved, this, &SIDGUI::chartSplitterMoved);
-    QObject::disconnect(ui->sdoSplitter, &QSplitter::splitterMoved, this, &SIDGUI::sdoSplitterMoved);
+    delete m_grb;
+    delete m_stix;
 
-    QObject::disconnect(&m_availableFeatureHandler,
-        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
-        this,
-        &SIDGUI::featuresChanged
-    );
-    QObject::disconnect(&m_availableChannelHandler,
-        &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged,
-        this,
-        &SIDGUI::channelsChanged
-    );
-    disconnectDataUpdates();
-    if (m_grb) {
-        disconnect(m_grb, &GRB::dataUpdated, this, &SIDGUI::grbDataUpdated);
-    }
-    if (m_stix) {
-        disconnect(m_stix, &STIX::dataUpdated, this, &SIDGUI::stixDataUpdated);
-    }
     m_statusTimer.stop();
 
     clearFromMap();
 
     delete m_goesXRay;
+    delete m_solarDynamicsObservatory;
     delete ui;
 }
 
