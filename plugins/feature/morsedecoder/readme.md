@@ -8,7 +8,7 @@ This plugin uses the demodulated audio of some Rx channel plugins.
 
   - AM demodulator
   - NFM demodulator
-  - SSB demodulator
+  - SSB demodulator (use mono audio - not binaural)
   - WFM demodulator
 
 Typical sequence of operations:

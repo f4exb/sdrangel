@@ -851,6 +851,38 @@ if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
     endif ()
 endif ()
 
+# For Morse Decoder feature
+if(ENABLE_FEATURE_MORSEDECODER)
+    if (WIN32)
+        set(GGMORSE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/ggmorse.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(GGMORSE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    endif()
+    ExternalProject_Add(ggmorse
+        GIT_REPOSITORY https://github.com/f4exb/ggmorse.git
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/ggmorse"
+        CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+        -DGGMORSE_BUILD_TESTS=OFF
+        -DGGMORSE_BUILD_EXAMPLES=OFF
+        BUILD_BYPRODUCTS "${GGMORSE_LIBRARIES}"
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+        )
+    ExternalProject_Get_Property(ggmorse source_dir binary_dir)
+    set(GGMORSE_DEPENDS ggmorse CACHE INTERNAL "")
+    set_global_cache(GGMORSE_FOUND ON)
+    set(GGMORSE_EXTERNAL ON CACHE INTERNAL "")
+    set(GGMORSE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/ggmorse/src" CACHE INTERNAL "")
+    if (WIN32)
+        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/ggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+    elseif (APPLE)
+        set(GGMORSE_LIBRARIES "${binary_dir}/libsggmorse/libggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        install(DIRECTORY "${binary_dir}/libggmorse" DESTINATION "${INSTALL_LIB_DIR}"
+        FILES_MATCHING PATTERN "libggmorse*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/libggmorse")
+    endif ()
+endif()
+
 # VkFFT (header only library)
 ExternalProject_Add(vkfft
         GIT_REPOSITORY https://github.com/DTolm/VkFFT.git
