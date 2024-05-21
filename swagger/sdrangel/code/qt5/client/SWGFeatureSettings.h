@@ -32,6 +32,7 @@
 #include "SWGJogdialControllerSettings.h"
 #include "SWGLimeRFESettings.h"
 #include "SWGMapSettings.h"
+#include "SWGMorseDecoderSettings.h"
 #include "SWGPERTesterSettings.h"
 #include "SWGRadiosondeSettings.h"
 #include "SWGRigCtlServerSettings.h"
@@ -99,6 +100,9 @@ public:
 
     SWGMapSettings* getMapSettings();
     void setMapSettings(SWGMapSettings* map_settings);
+
+    SWGMorseDecoderSettings* getMorseDecoderSettings();
+    void setMorseDecoderSettings(SWGMorseDecoderSettings* morse_decoder_settings);
 
     SWGPERTesterSettings* getPerTesterSettings();
     void setPerTesterSettings(SWGPERTesterSettings* per_tester_settings);
@@ -169,6 +173,9 @@ private:
 
     SWGMapSettings* map_settings;
     bool m_map_settings_isSet;
+
+    SWGMorseDecoderSettings* morse_decoder_settings;
+    bool m_morse_decoder_settings_isSet;
 
     SWGPERTesterSettings* per_tester_settings;
     bool m_per_tester_settings_isSet;

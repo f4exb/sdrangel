@@ -6429,6 +6429,9 @@ margin-bottom: 20px;
     "MapActions" : {
       "$ref" : "#/definitions/MapActions"
     },
+    "MorseDecoderActions" : {
+      "$ref" : "#/definitions/MorseDecoderActions"
+    },
     "PERTesterActions" : {
       "$ref" : "#/definitions/PERTesterActions"
     },
@@ -6680,6 +6683,9 @@ margin-bottom: 20px;
     },
     "MapSettings" : {
       "$ref" : "#/definitions/MapSettings"
+    },
+    "MorseDecoderSettings" : {
+      "$ref" : "#/definitions/MorseDecoderSettings"
     },
     "PERTesterSettings" : {
       "$ref" : "#/definitions/PERTesterSettings"
@@ -10495,6 +10501,76 @@ margin-bottom: 20px;
     }
   },
   "description" : "MetisMISOSettings"
+};
+            defs.MorseDecoderActions = {
+  "properties" : {
+    "deviceId" : {
+      "type" : "integer",
+      "description" : "Device Id/Number that channel belongs to"
+    },
+    "channelId" : {
+      "type" : "integer",
+      "description" : "Channel Id/Number of the channel within the device"
+    }
+  },
+  "description" : "Morse Decoder actions"
+};
+            defs.MorseDecoderSettings = {
+  "properties" : {
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API\n  * 1 - yes\n  * 0 - no\n"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Send decoded text via UDP\n  * 1 - send\n  * 0 - do not send\n"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "Address to semd text via UDP"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "Port to semd text via UDP"
+    },
+    "logFiledName" : {
+      "type" : "string",
+      "description" : "File to log the decoded text to"
+    },
+    "logEnabled" : {
+      "type" : "integer",
+      "description" : "Log decoded text to file\n  * 1 - log\n  * 0 - do not log\n"
+    },
+    "auto" : {
+      "type" : "integer",
+      "description" : "Auto detect CW pitch and keying speed\n  * 1 - auto detect\n  * 0 - use last values\n"
+    },
+    "reverseAPIFeatureSetIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureIndex" : {
+      "type" : "integer"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "MorseDecoder"
 };
             defs.NFMDemodReport = {
   "properties" : {
@@ -58976,7 +59052,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-05-13T21:38:23.490+02:00
+              Generated 2024-05-21T02:18:43.789+02:00
             </div>
           </div>
       </div>

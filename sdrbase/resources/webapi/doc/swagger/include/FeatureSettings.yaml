@@ -33,6 +33,8 @@ FeatureSettings:
       $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFESettings"
     MapSettings:
       $ref: "/doc/swagger/include/Map.yaml#/MapSettings"
+    MorseDecoderSettings:
+      $ref: "/doc/swagger/include/MorseDecoder.yaml#/MorseDecoderSettings"
     PERTesterSettings:
       $ref: "/doc/swagger/include/PERTester.yaml#/PERTesterSettings"
     RadiosondeSettings:

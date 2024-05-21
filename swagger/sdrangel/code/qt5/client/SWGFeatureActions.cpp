@@ -44,6 +44,8 @@ SWGFeatureActions::SWGFeatureActions() {
     m_lime_rfe_actions_isSet = false;
     map_actions = nullptr;
     m_map_actions_isSet = false;
+    morse_decoder_actions = nullptr;
+    m_morse_decoder_actions_isSet = false;
     per_tester_actions = nullptr;
     m_per_tester_actions_isSet = false;
     rig_ctl_server_actions = nullptr;
@@ -84,6 +86,8 @@ SWGFeatureActions::init() {
     m_lime_rfe_actions_isSet = false;
     map_actions = new SWGMapActions();
     m_map_actions_isSet = false;
+    morse_decoder_actions = new SWGMorseDecoderActions();
+    m_morse_decoder_actions_isSet = false;
     per_tester_actions = new SWGPERTesterActions();
     m_per_tester_actions_isSet = false;
     rig_ctl_server_actions = new SWGRigCtlServerActions();
@@ -123,6 +127,9 @@ SWGFeatureActions::cleanup() {
     }
     if(map_actions != nullptr) { 
         delete map_actions;
+    }
+    if(morse_decoder_actions != nullptr) { 
+        delete morse_decoder_actions;
     }
     if(per_tester_actions != nullptr) { 
         delete per_tester_actions;
@@ -176,6 +183,8 @@ SWGFeatureActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&lime_rfe_actions, pJson["LimeRFEActions"], "SWGLimeRFEActions", "SWGLimeRFEActions");
     
     ::SWGSDRangel::setValue(&map_actions, pJson["MapActions"], "SWGMapActions", "SWGMapActions");
+    
+    ::SWGSDRangel::setValue(&morse_decoder_actions, pJson["MorseDecoderActions"], "SWGMorseDecoderActions", "SWGMorseDecoderActions");
     
     ::SWGSDRangel::setValue(&per_tester_actions, pJson["PERTesterActions"], "SWGPERTesterActions", "SWGPERTesterActions");
     
@@ -232,6 +241,9 @@ SWGFeatureActions::asJsonObject() {
     }
     if((map_actions != nullptr) && (map_actions->isSet())){
         toJsonValue(QString("MapActions"), map_actions, obj, QString("SWGMapActions"));
+    }
+    if((morse_decoder_actions != nullptr) && (morse_decoder_actions->isSet())){
+        toJsonValue(QString("MorseDecoderActions"), morse_decoder_actions, obj, QString("SWGMorseDecoderActions"));
     }
     if((per_tester_actions != nullptr) && (per_tester_actions->isSet())){
         toJsonValue(QString("PERTesterActions"), per_tester_actions, obj, QString("SWGPERTesterActions"));
@@ -341,6 +353,16 @@ SWGFeatureActions::setMapActions(SWGMapActions* map_actions) {
     this->m_map_actions_isSet = true;
 }
 
+SWGMorseDecoderActions*
+SWGFeatureActions::getMorseDecoderActions() {
+    return morse_decoder_actions;
+}
+void
+SWGFeatureActions::setMorseDecoderActions(SWGMorseDecoderActions* morse_decoder_actions) {
+    this->morse_decoder_actions = morse_decoder_actions;
+    this->m_morse_decoder_actions_isSet = true;
+}
+
 SWGPERTesterActions*
 SWGFeatureActions::getPerTesterActions() {
     return per_tester_actions;
@@ -448,6 +470,9 @@ SWGFeatureActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(map_actions && map_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(morse_decoder_actions && morse_decoder_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(per_tester_actions && per_tester_actions->isSet()){

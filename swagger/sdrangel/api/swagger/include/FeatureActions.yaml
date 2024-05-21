@@ -23,6 +23,8 @@ FeatureActions:
       $ref: "http://swgserver:8081/api/swagger/include/LimeRFE.yaml#/LimeRFEActions"
     MapActions:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapActions"
+    MorseDecoderActions:
+      $ref: "http://swgserver:8081/api/swagger/include/MorseDecoder.yaml#/MorseDecoderActions"
     PERTesterActions:
       $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterActions"
     RigCtlServerActions:

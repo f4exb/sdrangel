@@ -319,6 +319,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
     {"GS232Controller", "GS232ControllerSettings"}, // a.k.a Rotator Controller
     {"LimeRFE", "LimeRFESettings"},
     {"Map", "MapSettings"},
+    {"MorseDecoder", "MorseDecoderSettings"},
     {"PERTester", "PERTesterSettings"},
     {"Radiosonde", "RadiosondeSettings"},
     {"RigCtlServer", "RigCtlServerSettings"},
@@ -343,7 +344,8 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
     {"SkyMap", "SkyMapActions"},
     {"StarTracker", "StarTrackerActions"},
     {"VORLocalizer", "VORLocalizerActions"},
-    {"DemodAnalyzer", "DemodAnalyzerActions"}
+    {"DemodAnalyzer", "DemodAnalyzerActions"},
+    {"MorseDecoder", "MorseDecoderActions"}
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
@@ -357,6 +359,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
     {"sdrangel.feature.gs232controller", "GS232ControllerSettings"},
     {"sdrangel.feature.limerfe", "LimeRFESettings"},
     {"sdrangel.feature.map", "MapSettings"},
+    {"sdrangel.feature.morsedecoder", "MorseDecoderSettings"},
     {"sdrangel.feature.pertester", "PERTesterSettings"},
     {"sdrangel.feature.radiosonde", "RadiosondeSettings"},
     {"sdrangel.feature.rigctlserver", "RigCtlServerSettings"},

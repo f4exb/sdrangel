@@ -52,10 +52,10 @@ MorseDecoder::MorseDecoder(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_selectedChannel(nullptr),
     m_dataPipe(nullptr)
 {
-    qDebug("DemodAnalyzer::DemodAnalyzer: webAPIAdapterInterface: %p", webAPIAdapterInterface);
+    qDebug("MorseDecoder::MorseDecoder: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
     m_state = StIdle;
-    m_errorMessage = "DemodAnalyzer error";
+    m_errorMessage = "MorseDecoder error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,
@@ -183,7 +183,7 @@ bool MorseDecoder::handleMessage(const Message& cmd)
 	if (MsgConfigureMorseDecoder::match(cmd))
 	{
         MsgConfigureMorseDecoder& cfg = (MsgConfigureMorseDecoder&) cmd;
-        qDebug() << "MorseDecoder::handleMessage: MsgConfigureDemodAnalyzer";
+        qDebug() << "MorseDecoder::handleMessage: MsgConfigureMorseDecoder";
         applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
 		return true;
@@ -329,12 +329,12 @@ void MorseDecoder::applySettings(const MorseDecoderSettings& settings, const QLi
             m_logFile.setFileName(settings.m_logFilename);
             if (m_logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
             {
-                qDebug() << "RttyDemod::applySettings - Logging to: " << settings.m_logFilename;
+                qDebug() << "MorseDecoder::applySettings - Logging to: " << settings.m_logFilename;
                 m_logStream.setDevice(&m_logFile);
             }
             else
             {
-                qDebug() << "RttyDemod::applySettings - Unable to open log file: " << settings.m_logFilename;
+                qDebug() << "MorseDecoder::applySettings - Unable to open log file: " << settings.m_logFilename;
             }
         }
     }
@@ -455,8 +455,8 @@ int MorseDecoder::webapiSettingsGet(
     QString& errorMessage)
 {
     (void) errorMessage;
-    response.setDemodAnalyzerSettings(new SWGSDRangel::SWGDemodAnalyzerSettings());
-    response.getDemodAnalyzerSettings()->init();
+    response.setMorseDecoderSettings(new SWGSDRangel::SWGMorseDecoderSettings());
+    response.getMorseDecoderSettings()->init();
     webapiFormatFeatureSettings(response, m_settings);
     return 200;
 }
@@ -474,7 +474,7 @@ int MorseDecoder::webapiSettingsPutPatch(
     MsgConfigureMorseDecoder *msg = MsgConfigureMorseDecoder::create(settings, featureSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
-    qDebug("DemodAnalyzer::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    qDebug("MorseDecoder::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
         MsgConfigureMorseDecoder *msgToGUI = MsgConfigureMorseDecoder::create(settings, featureSettingsKeys, force);
@@ -490,36 +490,68 @@ void MorseDecoder::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const MorseDecoderSettings& settings)
 {
-    if (response.getDemodAnalyzerSettings()->getTitle()) {
-        *response.getDemodAnalyzerSettings()->getTitle() = settings.m_title;
+    if (response.getMorseDecoderSettings()->getTitle()) {
+        *response.getMorseDecoderSettings()->getTitle() = settings.m_title;
     } else {
-        response.getDemodAnalyzerSettings()->setTitle(new QString(settings.m_title));
+        response.getMorseDecoderSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getDemodAnalyzerSettings()->setRgbColor(settings.m_rgbColor);
-    response.getDemodAnalyzerSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getMorseDecoderSettings()->setRgbColor(settings.m_rgbColor);
+    response.getMorseDecoderSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getDemodAnalyzerSettings()->getReverseApiAddress()) {
-        *response.getDemodAnalyzerSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getMorseDecoderSettings()->getReverseApiAddress()) {
+        *response.getMorseDecoderSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getDemodAnalyzerSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getMorseDecoderSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getDemodAnalyzerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getDemodAnalyzerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
-    response.getDemodAnalyzerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+    response.getMorseDecoderSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getMorseDecoderSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getMorseDecoderSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+    response.getMorseDecoderSettings()->setUdpEnabled(settings.m_udpEnabled ? 1 : 0);
+
+    if (response.getMorseDecoderSettings()->getUdpAddress()) {
+        *response.getMorseDecoderSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getMorseDecoderSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+
+    response.getMorseDecoderSettings()->setUdpPort(settings.m_udpPort);
+
+    if (response.getMorseDecoderSettings()->getLogFiledName()) {
+        *response.getMorseDecoderSettings()->getLogFiledName() = settings.m_logFilename;
+    } else {
+        response.getMorseDecoderSettings()->setLogFiledName(new QString(settings.m_logFilename));
+    }
+
+    response.getMorseDecoderSettings()->setLogEnabled(settings.m_logEnabled ? 1 : 0);
+    response.getMorseDecoderSettings()->setAuto(settings.m_auto ? 1 : 0);
+
+    if (settings.m_scopeGUI)
+    {
+        if (response.getMorseDecoderSettings()->getScopeConfig())
+        {
+            settings.m_scopeGUI->formatTo(response.getMorseDecoderSettings()->getScopeConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+            settings.m_scopeGUI->formatTo(swgGLScope);
+            response.getMorseDecoderSettings()->setScopeConfig(swgGLScope);
+        }
+    }
 
     if (settings.m_rollupState)
     {
-        if (response.getDemodAnalyzerSettings()->getRollupState())
+        if (response.getMorseDecoderSettings()->getRollupState())
         {
-            settings.m_rollupState->formatTo(response.getDemodAnalyzerSettings()->getRollupState());
+            settings.m_rollupState->formatTo(response.getMorseDecoderSettings()->getRollupState());
         }
         else
         {
             SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
-            response.getDemodAnalyzerSettings()->setRollupState(swgRollupState);
+            response.getMorseDecoderSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -530,28 +562,49 @@ void MorseDecoder::webapiUpdateFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response)
 {
     if (featureSettingsKeys.contains("title")) {
-        settings.m_title = *response.getDemodAnalyzerSettings()->getTitle();
+        settings.m_title = *response.getMorseDecoderSettings()->getTitle();
     }
     if (featureSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getDemodAnalyzerSettings()->getRgbColor();
+        settings.m_rgbColor = response.getMorseDecoderSettings()->getRgbColor();
     }
     if (featureSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getDemodAnalyzerSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getMorseDecoderSettings()->getUseReverseApi() != 0;
     }
     if (featureSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getDemodAnalyzerSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getMorseDecoderSettings()->getReverseApiAddress();
     }
     if (featureSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getDemodAnalyzerSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getMorseDecoderSettings()->getReverseApiPort();
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
-        settings.m_reverseAPIFeatureSetIndex = response.getDemodAnalyzerSettings()->getReverseApiFeatureSetIndex();
+        settings.m_reverseAPIFeatureSetIndex = response.getMorseDecoderSettings()->getReverseApiFeatureSetIndex();
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
-        settings.m_reverseAPIFeatureIndex = response.getDemodAnalyzerSettings()->getReverseApiFeatureIndex();
+        settings.m_reverseAPIFeatureIndex = response.getMorseDecoderSettings()->getReverseApiFeatureIndex();
+    }
+    if (featureSettingsKeys.contains("udpEnabled")) {
+        settings.m_udpEnabled = response.getMorseDecoderSettings()->getUdpEnabled() != 0;
+    }
+    if (featureSettingsKeys.contains("udpAddress")) {
+        settings.m_udpAddress = *response.getMorseDecoderSettings()->getUdpAddress();
+    }
+    if (featureSettingsKeys.contains("udpPort")) {
+        settings.m_udpPort = response.getMorseDecoderSettings()->getUdpPort();
+    }
+    if (featureSettingsKeys.contains("logFilename")) {
+        settings.m_logFilename = *response.getMorseDecoderSettings()->getLogFiledName();
+    }
+    if (featureSettingsKeys.contains("logEnabled")) {
+        settings.m_logEnabled = response.getMorseDecoderSettings()->getLogEnabled() != 0;
+    }
+    if (featureSettingsKeys.contains("auto")) {
+        settings.m_auto = response.getMorseDecoderSettings()->getAuto() != 0;
+    }
+    if (settings.m_scopeGUI && featureSettingsKeys.contains("scopeGUI")) {
+        settings.m_scopeGUI->updateFrom(featureSettingsKeys, response.getMorseDecoderSettings()->getScopeConfig());
     }
     if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
-        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getDemodAnalyzerSettings()->getRollupState());
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getMorseDecoderSettings()->getRollupState());
     }
 }
 
@@ -560,17 +613,17 @@ void MorseDecoder::webapiReverseSendSettings(const QList<QString>& featureSettin
     SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
     // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());
     // swgFeatureSettings->setOriginatorFeatureSetIndex(getDeviceSetIndex());
-    swgFeatureSettings->setFeatureType(new QString("DemodAnalyzer"));
-    swgFeatureSettings->setDemodAnalyzerSettings(new SWGSDRangel::SWGDemodAnalyzerSettings());
-    SWGSDRangel::SWGDemodAnalyzerSettings *swgDemodAnalyzerSettings = swgFeatureSettings->getDemodAnalyzerSettings();
+    swgFeatureSettings->setFeatureType(new QString("MorseDecoder"));
+    swgFeatureSettings->setMorseDecoderSettings(new SWGSDRangel::SWGMorseDecoderSettings());
+    SWGSDRangel::SWGMorseDecoderSettings *swgMorseDecoderSettings = swgFeatureSettings->getMorseDecoderSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (featureSettingsKeys.contains("title") || force) {
-        swgDemodAnalyzerSettings->setTitle(new QString(settings.m_title));
+        swgMorseDecoderSettings->setTitle(new QString(settings.m_title));
     }
     if (featureSettingsKeys.contains("rgbColor") || force) {
-        swgDemodAnalyzerSettings->setRgbColor(settings.m_rgbColor);
+        swgMorseDecoderSettings->setRgbColor(settings.m_rgbColor);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/featureset/%3/feature/%4/settings")
@@ -650,7 +703,8 @@ int MorseDecoder::webapiActionsPost(
             QString& errorMessage) {
 
     MainCore* m_core = MainCore::instance();
-    auto action = query.getDemodAnalyzerActions();
+    auto action = query.getMorseDecoderActions();
+
     if (action == nullptr) {
         errorMessage = QString("missing MorseDecoderActions in request");
         return 404;
@@ -658,8 +712,8 @@ int MorseDecoder::webapiActionsPost(
 
     auto deviceId = action->getDeviceId();
     auto chanId = action->getChannelId();
-
     ChannelAPI * chan = m_core->getChannel(deviceId, chanId);
+
     if (chan == nullptr) {
         errorMessage = QString("device(%1) or channel (%2) on the device does not exist").arg(deviceId).arg(chanId);
         return 404;

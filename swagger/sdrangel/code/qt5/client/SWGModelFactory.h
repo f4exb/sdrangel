@@ -220,6 +220,8 @@
 #include "SWGMapReport.h"
 #include "SWGMapSettings.h"
 #include "SWGMetisMISOSettings.h"
+#include "SWGMorseDecoderActions.h"
+#include "SWGMorseDecoderSettings.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModReport.h"
@@ -1412,6 +1414,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGMetisMISOSettings").compare(type) == 0) {
       SWGMetisMISOSettings *obj = new SWGMetisMISOSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMorseDecoderActions").compare(type) == 0) {
+      SWGMorseDecoderActions *obj = new SWGMorseDecoderActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMorseDecoderSettings").compare(type) == 0) {
+      SWGMorseDecoderSettings *obj = new SWGMorseDecoderSettings();
       obj->init();
       return obj;
     }

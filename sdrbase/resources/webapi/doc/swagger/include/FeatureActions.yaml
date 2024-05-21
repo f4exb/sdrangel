@@ -23,6 +23,8 @@ FeatureActions:
       $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFEActions"
     MapActions:
       $ref: "/doc/swagger/include/Map.yaml#/MapActions"
+    MorseDecoderActions:
+      $ref: "/doc/swagger/include/MorseDecoder.yaml#/MorseDecoderActions"
     PERTesterActions:
       $ref: "/doc/swagger/include/PERTester.yaml#/PERTesterActions"
     RigCtlServerActions:

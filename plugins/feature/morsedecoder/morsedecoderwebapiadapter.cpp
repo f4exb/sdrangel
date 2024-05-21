@@ -30,8 +30,8 @@ int MorseDecoderWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setDemodAnalyzerSettings(new SWGSDRangel::SWGDemodAnalyzerSettings());
-    response.getDemodAnalyzerSettings()->init();
+    response.setMorseDecoderSettings(new SWGSDRangel::SWGMorseDecoderSettings());
+    response.getMorseDecoderSettings()->init();
     MorseDecoder::webapiFormatFeatureSettings(response, m_settings);
 
     return 200;

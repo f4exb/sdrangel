@@ -33,6 +33,8 @@ FeatureSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LimeRFE.yaml#/LimeRFESettings"
     MapSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapSettings"
+    MorseDecoderSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/MorseDecoder.yaml#/MorseDecoderSettings"
     PERTesterSettings:
       $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterSettings"
     RadiosondeSettings:

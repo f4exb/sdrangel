@@ -28,6 +28,7 @@
 #include "SWGGS232ControllerActions.h"
 #include "SWGLimeRFEActions.h"
 #include "SWGMapActions.h"
+#include "SWGMorseDecoderActions.h"
 #include "SWGPERTesterActions.h"
 #include "SWGRigCtlServerActions.h"
 #include "SWGSatelliteTrackerActions.h"
@@ -78,6 +79,9 @@ public:
 
     SWGMapActions* getMapActions();
     void setMapActions(SWGMapActions* map_actions);
+
+    SWGMorseDecoderActions* getMorseDecoderActions();
+    void setMorseDecoderActions(SWGMorseDecoderActions* morse_decoder_actions);
 
     SWGPERTesterActions* getPerTesterActions();
     void setPerTesterActions(SWGPERTesterActions* per_tester_actions);
@@ -130,6 +134,9 @@ private:
 
     SWGMapActions* map_actions;
     bool m_map_actions_isSet;
+
+    SWGMorseDecoderActions* morse_decoder_actions;
+    bool m_morse_decoder_actions_isSet;
 
     SWGPERTesterActions* per_tester_actions;
     bool m_per_tester_actions_isSet;

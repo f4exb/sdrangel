@@ -5265,6 +5265,11 @@ bool WebAPIRequestMapper::getFeatureSettings(
             featureSettings->setMapSettings(new SWGSDRangel::SWGMapSettings());
             featureSettings->getMapSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (featureSettingsKey == "MorseDecoderSettings")
+        {
+            featureSettings->setMorseDecoderSettings(new SWGSDRangel::SWGMorseDecoderSettings());
+            featureSettings->getMorseDecoderSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (featureSettingsKey == "PERTesterSettings")
         {
             featureSettings->setPerTesterSettings(new SWGSDRangel::SWGPERTesterSettings());
@@ -5404,6 +5409,11 @@ bool WebAPIRequestMapper::getFeatureActions(
         {
             featureActions->setDemodAnalyzerActions(new SWGSDRangel::SWGDemodAnalyzerActions());
             featureActions->getDemodAnalyzerActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "MorseDecoderActions")
+        {
+            featureActions->setMorseDecoderActions(new SWGSDRangel::SWGMorseDecoderActions());
+            featureActions->getMorseDecoderActions()->fromJsonObject(actionsJsonObject);
         }
         else
         {
