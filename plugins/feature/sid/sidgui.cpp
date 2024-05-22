@@ -292,7 +292,11 @@ SIDGUI::~SIDGUI()
     clearFromMap();
 
     delete m_goesXRay;
-    delete m_solarDynamicsObservatory;
+    if (m_solarDynamicsObservatory)
+    {
+        delete m_player;
+        delete m_solarDynamicsObservatory;
+    }
     delete ui;
 }
 
