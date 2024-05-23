@@ -92,6 +92,7 @@ private slots:
 	void on_channels_currentIndexChanged(int index);
 	void on_channelApply_clicked();
     void on_statLock_toggled(bool checked);
+    void on_showThreshold_clicked(bool checked);
     void on_clearTable_clicked();
     void on_logEnable_clicked(bool checked=false);
     void on_logFilename_clicked();

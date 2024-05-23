@@ -42,6 +42,12 @@ MorseDecoderSettings:
         Auto detect CW pitch and keying speed
           * 1 - auto detect
           * 0 - use last values
+    showThreshold:
+      type: integer
+      description: >
+        Show GGMorse decoder threshold on the imaginary part of the scope trace
+          * 1 - show
+          * 0 - do not show
     reverseAPIFeatureSetIndex:
       type: integer
     reverseAPIFeatureIndex:

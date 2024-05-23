@@ -242,6 +242,7 @@ void MorseDecoderGUI::displaySettings()
     blockApplySettings(true);
     getRollupContents()->restoreState(m_rollupState);
     ui->statLock->setChecked(!m_settings.m_auto);
+    ui->showThreshold->setChecked(m_settings.m_showThreshold);
     ui->logFilename->setToolTip(QString(".txt log filename: %1").arg(m_settings.m_logFilename));
     ui->logEnable->setChecked(m_settings.m_logEnabled);
     blockApplySettings(false);
@@ -356,6 +357,13 @@ void MorseDecoderGUI::on_statLock_toggled(bool checked)
     applySettings();
 }
 
+void MorseDecoderGUI::on_showThreshold_clicked(bool checked)
+{
+    m_settings.m_showThreshold = checked;
+    m_settingsKeys.append("showThreshold");
+    applySettings();
+}
+
 void MorseDecoderGUI::on_logEnable_clicked(bool checked)
 {
     m_settings.m_logEnabled = checked;
@@ -437,6 +445,7 @@ void MorseDecoderGUI::makeUIConnections()
 	QObject::connect(ui->channels, qOverload<int>(&QComboBox::currentIndexChanged), this, &MorseDecoderGUI::on_channels_currentIndexChanged);
 	QObject::connect(ui->channelApply, &QPushButton::clicked, this, &MorseDecoderGUI::on_channelApply_clicked);
     QObject::connect(ui->statLock, &QToolButton::toggled, this, &MorseDecoderGUI::on_statLock_toggled);
+    QObject::connect(ui->showThreshold, &ButtonSwitch::clicked, this, &MorseDecoderGUI::on_showThreshold_clicked);
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &MorseDecoderGUI::on_logEnable_clicked);
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &MorseDecoderGUI::on_logFilename_clicked);
     QObject::connect(ui->clearTable, &QPushButton::clicked, this, &MorseDecoderGUI::on_clearTable_clicked);

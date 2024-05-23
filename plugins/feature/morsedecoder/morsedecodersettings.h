@@ -42,6 +42,7 @@ struct MorseDecoderSettings
     QString m_logFilename;
     bool m_logEnabled;
     bool m_auto; //!< Auto pitch and speed
+    bool m_showThreshold; //!< Show decoder threshold on scope imaginary trace
 
     MorseDecoderSettings();
     void resetToDefaults();

@@ -229,7 +229,7 @@ int MorseDecoderWorker::processBuffer(QByteArray& bytesBuffer)
                         int itrace = ftrace * i;
                         int ithres = fthres * i;
                         float re = trace[itrace];
-                        float im = thresholds[ithres];
+                        float im = m_settings.m_showThreshold ? thresholds[ithres] : 3.16227766017e-2; // -30dB
                         i++;
                         s = Sample(re*SDR_RX_SCALEF, im*SDR_RX_SCALEF);
                     }

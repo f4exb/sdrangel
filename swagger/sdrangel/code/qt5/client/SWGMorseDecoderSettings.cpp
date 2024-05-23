@@ -50,6 +50,8 @@ SWGMorseDecoderSettings::SWGMorseDecoderSettings() {
     m_log_enabled_isSet = false;
     _auto = 0;
     m__auto_isSet = false;
+    show_threshold = 0;
+    m_show_threshold_isSet = false;
     reverse_api_feature_set_index = 0;
     m_reverse_api_feature_set_index_isSet = false;
     reverse_api_feature_index = 0;
@@ -88,6 +90,8 @@ SWGMorseDecoderSettings::init() {
     m_log_enabled_isSet = false;
     _auto = 0;
     m__auto_isSet = false;
+    show_threshold = 0;
+    m_show_threshold_isSet = false;
     reverse_api_feature_set_index = 0;
     m_reverse_api_feature_set_index_isSet = false;
     reverse_api_feature_index = 0;
@@ -117,6 +121,7 @@ SWGMorseDecoderSettings::cleanup() {
     if(log_filed_name != nullptr) { 
         delete log_filed_name;
     }
+
 
 
 
@@ -161,6 +166,8 @@ SWGMorseDecoderSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&log_enabled, pJson["logEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&_auto, pJson["auto"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&show_threshold, pJson["showThreshold"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_feature_set_index, pJson["reverseAPIFeatureSetIndex"], "qint32", "");
     
@@ -218,6 +225,9 @@ SWGMorseDecoderSettings::asJsonObject() {
     }
     if(m__auto_isSet){
         obj->insert("auto", QJsonValue(_auto));
+    }
+    if(m_show_threshold_isSet){
+        obj->insert("showThreshold", QJsonValue(show_threshold));
     }
     if(m_reverse_api_feature_set_index_isSet){
         obj->insert("reverseAPIFeatureSetIndex", QJsonValue(reverse_api_feature_set_index));
@@ -346,6 +356,16 @@ SWGMorseDecoderSettings::setAuto(qint32 _auto) {
 }
 
 qint32
+SWGMorseDecoderSettings::getShowThreshold() {
+    return show_threshold;
+}
+void
+SWGMorseDecoderSettings::setShowThreshold(qint32 show_threshold) {
+    this->show_threshold = show_threshold;
+    this->m_show_threshold_isSet = true;
+}
+
+qint32
 SWGMorseDecoderSettings::getReverseApiFeatureSetIndex() {
     return reverse_api_feature_set_index;
 }
@@ -421,6 +441,9 @@ SWGMorseDecoderSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m__auto_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_show_threshold_isSet){
             isObjectUpdated = true; break;
         }
         if(m_reverse_api_feature_set_index_isSet){

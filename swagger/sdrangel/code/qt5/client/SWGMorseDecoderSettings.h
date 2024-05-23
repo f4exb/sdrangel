@@ -77,6 +77,9 @@ public:
     qint32 getAuto();
     void setAuto(qint32 _auto);
 
+    qint32 getShowThreshold();
+    void setShowThreshold(qint32 show_threshold);
+
     qint32 getReverseApiFeatureSetIndex();
     void setReverseApiFeatureSetIndex(qint32 reverse_api_feature_set_index);
 
@@ -125,6 +128,9 @@ private:
 
     qint32 _auto;
     bool m__auto_isSet;
+
+    qint32 show_threshold;
+    bool m_show_threshold_isSet;
 
     qint32 reverse_api_feature_set_index;
     bool m_reverse_api_feature_set_index_isSet;

@@ -526,6 +526,7 @@ void MorseDecoder::webapiFormatFeatureSettings(
 
     response.getMorseDecoderSettings()->setLogEnabled(settings.m_logEnabled ? 1 : 0);
     response.getMorseDecoderSettings()->setAuto(settings.m_auto ? 1 : 0);
+    response.getMorseDecoderSettings()->setShowThreshold(settings.m_showThreshold ? 1 : 0);
 
     if (settings.m_scopeGUI)
     {
@@ -599,6 +600,9 @@ void MorseDecoder::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("auto")) {
         settings.m_auto = response.getMorseDecoderSettings()->getAuto() != 0;
+    }
+    if (featureSettingsKeys.contains("showThreshold")) {
+        settings.m_showThreshold = response.getMorseDecoderSettings()->getShowThreshold() != 0;
     }
     if (settings.m_scopeGUI && featureSettingsKeys.contains("scopeGUI")) {
         settings.m_scopeGUI->updateFrom(featureSettingsKeys, response.getMorseDecoderSettings()->getScopeConfig());

@@ -65,7 +65,11 @@ Lock the pitch and speed to the current values detected by GGMorse. Unlock to re
 
 <h3>11: Decoder cost factor</h3>
 
-This is the GGMorse decoder cost factor. Successful decodes yield to just a few millis.
+This is the GGMorse decoder cost factor. Successful decodes yield from a few millis to a few tens of millis.
+
+<h3>11a: Show decoder theshold</h3>
+
+Enable or disable the GGMorse decoder threshold display on the imaginary trace of the scope.
 
 <h3>12: Start/stop Logging Messages to .txt file</h3>
 
@@ -88,6 +92,19 @@ This area shows the decoded text. New text appears every 3 seconds which is the 
 This scope display shows waveforms related to the decoding with GGMorse.
 
   * On the real part it shows the average output of the Goertzel filter as exposed by GGMorse and that is used for decoding.
-  * On the imaginary part it shows the threshold level being used in GGMorse for decoding. It is not necessary on the same scale as the Goertzel output.
+  * On the imaginary part
+    * When the show decoder threshold is set (11a) it shows the threshold level being used in GGMorse for decoding. It is not necessary on the same scale as the Goertzel output.
+    * When the show decoder threshold is not set (11a) a constant 0.0316227766017 is applied which corresponds to a power of -30 dB.
 
 The elemetary trace length is 3 seconds. This is the time window used by GGMorse thus a new trace appears every 3 seconds. The actual traces are interpolated to fit in the 4800 samples of the elementary trace. Thus the sample rate is a fixed 1.6 kS/s.
+
+The best settings to visualize the Goertzel waveform is the following:
+
+* For "Real" (X) and "Imag" (Y) display mode:
+  * For the X trace (real): ![Morse decoder X settings](../../../doc/img/MorseDecoder_X.png)
+  * For the Y trace (imag): ![Morse decoder Y settings](../../../doc/img/MorseDecoder_Y.png)
+
+
+* For "MagDB" display mode (X trace): ![Morse decoder Mag settings](../../../doc/img/MorseDecoder_Mag.png)
+
+Note: the scope display has memories so you can come back to previous waveforms using the "M" dial button: ![Morse decoder memorise](../../../doc/img/MorseDecoder_M.png). You can also save and load traces.

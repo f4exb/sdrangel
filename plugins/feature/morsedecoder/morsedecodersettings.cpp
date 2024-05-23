@@ -52,6 +52,7 @@ void MorseDecoderSettings::resetToDefaults()
     m_logFilename = "cw_log.txt";
     m_logEnabled = false;
     m_auto = true;
+    m_showThreshold = false;
 }
 
 QByteArray MorseDecoderSettings::serialize() const
@@ -83,6 +84,7 @@ QByteArray MorseDecoderSettings::serialize() const
     s.writeString(25, m_logFilename);
     s.writeBool(26, m_logEnabled);
     s.writeBool(27, m_auto);
+    s.writeBool(28, m_showThreshold);
 
     return s.final();
 }
@@ -148,6 +150,7 @@ bool MorseDecoderSettings::deserialize(const QByteArray& data)
         d.readString(25, &m_logFilename, "cw_log.txt");
         d.readBool(26, &m_logEnabled, false);
         d.readBool(27, &m_auto, true);
+        d.readBool(28, &m_showThreshold, false);
 
         return true;
     }
@@ -202,6 +205,9 @@ void MorseDecoderSettings::applySettings(const QStringList& settingsKeys, const 
     if (settingsKeys.contains("auto")) {
         m_auto = settings.m_auto;
     }
+    if (settingsKeys.contains("showThreshold")) {
+        m_showThreshold = settings.m_showThreshold;
+    }
     if (settingsKeys.contains("logEnabled")) {
         m_logEnabled = settings.m_logEnabled;
     }
@@ -255,6 +261,9 @@ QString MorseDecoderSettings::getDebugString(const QStringList& settingsKeys, bo
     }
     if (settingsKeys.contains("auto") || force) {
         ostr << " m_auto: " << m_auto;
+    }
+    if (settingsKeys.contains("showThreshold") || force) {
+        ostr << " m_showThreshold: " << m_showThreshold;
     }
     if (settingsKeys.contains("logEnabled") || force) {
         ostr << " m_logEnabled: " << m_logEnabled;
