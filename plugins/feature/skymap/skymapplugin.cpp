@@ -34,7 +34,7 @@
 const PluginDescriptor SkyMapPlugin::m_pluginDescriptor = {
     SkyMap::m_featureId,
     QStringLiteral("Sky Map"),
-    QStringLiteral("7.20.0"),
+    QStringLiteral("7.21.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
