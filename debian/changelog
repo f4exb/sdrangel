@@ -1,3 +1,9 @@
+sdrangel (7.21.1-1) unstable; urgency=medium
+
+   * Morse Decoder feature: Fix for Qt6 and Windows. PR #2122
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Fri, 24 May 2024 10:29:04 +0200
+
 sdrangel (7.21.0-1) unstable; urgency=medium
 
    * Morse decoder feature. Implements #2112
