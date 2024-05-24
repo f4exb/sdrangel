@@ -188,7 +188,7 @@ int MorseDecoderWorker::processBuffer(QByteArray& bytesBuffer)
         std::for_each(
             dst.begin(),
             dst.end(),
-            [&](const uint8_t c) { text.append(c); }
+            [&](const uint8_t c) { text.append((char) c); }
         );
 
         const GGMorse::Statistics& stats = m_ggMorse->getStatistics();
