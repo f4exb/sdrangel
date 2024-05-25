@@ -29,6 +29,7 @@
         <file>webapi/doc/swagger/include/ChannelActions.yaml</file>
         <file>webapi/doc/swagger/include/ChannelAnalyzer.yaml</file>
         <file>webapi/doc/swagger/include/ChannelMarker.yaml</file>
+        <file>webapi/doc/swagger/include/ChannelPower.yaml</file>
         <file>webapi/doc/swagger/include/ChannelSettings.yaml</file>
         <file>webapi/doc/swagger/include/ChannelReport.yaml</file>
         <file>webapi/doc/swagger/include/ChirpChatDemod.yaml</file>
@@ -45,6 +46,7 @@
         <file>webapi/doc/swagger/include/DeviceActions.yaml</file>
         <file>webapi/doc/swagger/include/DeviceSettings.yaml</file>
         <file>webapi/doc/swagger/include/DeviceReports.yaml</file>
+        <file>webapi/doc/swagger/include/EndOfTrainDemod.yaml</file>
         <file>webapi/doc/swagger/include/FCDPro.yaml</file>
         <file>webapi/doc/swagger/include/FCDProPlus.yaml</file>
         <file>webapi/doc/swagger/include/FeatureActions.yaml</file>
@@ -57,7 +59,9 @@
         <file>webapi/doc/swagger/include/FileOutput.yaml</file>
         <file>webapi/doc/swagger/include/FreeDVDemod.yaml</file>
         <file>webapi/doc/swagger/include/FreeDVMod.yaml</file>
+        <file>webapi/doc/swagger/include/FreqScanner.yaml</file>
         <file>webapi/doc/swagger/include/FreqTracker.yaml</file>
+        <file>webapi/doc/swagger/include/FT8Demod.yaml</file>
         <file>webapi/doc/swagger/include/GLScope.yaml</file>
         <file>webapi/doc/swagger/include/GLSpectrum.yaml</file>
         <file>webapi/doc/swagger/include/GS232Controller.yaml</file>
@@ -76,7 +80,9 @@
         <file>webapi/doc/swagger/include/LocalSource.yaml</file>
         <file>webapi/doc/swagger/include/Map.yaml</file>
         <file>webapi/doc/swagger/include/MetisMISO.yaml</file>
+        <file>webapi/doc/swagger/include/MorseDecoder.yaml</file>
         <file>webapi/doc/swagger/include/M17Demod.yaml</file>
+        <file>webapi/doc/swagger/include/M17Mod.yaml</file>
         <file>webapi/doc/swagger/include/NavtexDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
@@ -108,9 +114,11 @@
         <file>webapi/doc/swagger/include/SatelliteTracker.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlayV3.yaml</file>
+        <file>webapi/doc/swagger/include/SID.yaml</file>
         <file>webapi/doc/swagger/include/SigMFFileInput.yaml</file>
         <file>webapi/doc/swagger/include/SigMFFileSink.yaml</file>
         <file>webapi/doc/swagger/include/SimplePTT.yaml</file>
+        <file>webapi/doc/swagger/include/SkyMap.yaml</file>
         <file>webapi/doc/swagger/include/SoapySDR.yaml</file>
         <file>webapi/doc/swagger/include/SSBDemod.yaml</file>
         <file>webapi/doc/swagger/include/SSBMod.yaml</file>
