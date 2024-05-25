@@ -30,8 +30,8 @@
         <file>webapi/doc/swagger/include/ChannelAnalyzer.yaml</file>
         <file>webapi/doc/swagger/include/ChannelMarker.yaml</file>
         <file>webapi/doc/swagger/include/ChannelPower.yaml</file>
-        <file>webapi/doc/swagger/include/ChannelSettings.yaml</file>
         <file>webapi/doc/swagger/include/ChannelReport.yaml</file>
+        <file>webapi/doc/swagger/include/ChannelSettings.yaml</file>
         <file>webapi/doc/swagger/include/ChirpChatDemod.yaml</file>
         <file>webapi/doc/swagger/include/ChirpChatMod.yaml</file>
         <file>webapi/doc/swagger/include/Command.yaml</file>
@@ -40,23 +40,23 @@
         <file>webapi/doc/swagger/include/DATVDemod.yaml</file>
         <file>webapi/doc/swagger/include/DATVMod.yaml</file>
         <file>webapi/doc/swagger/include/DemodAnalyzer.yaml</file>
+        <file>webapi/doc/swagger/include/DeviceActions.yaml</file>
+        <file>webapi/doc/swagger/include/DeviceReports.yaml</file>
+        <file>webapi/doc/swagger/include/DeviceSettings.yaml</file>
         <file>webapi/doc/swagger/include/DOA2.yaml</file>
         <file>webapi/doc/swagger/include/DSCDemod.yaml</file>
         <file>webapi/doc/swagger/include/DSDDemod.yaml</file>
-        <file>webapi/doc/swagger/include/DeviceActions.yaml</file>
-        <file>webapi/doc/swagger/include/DeviceSettings.yaml</file>
-        <file>webapi/doc/swagger/include/DeviceReports.yaml</file>
         <file>webapi/doc/swagger/include/EndOfTrainDemod.yaml</file>
         <file>webapi/doc/swagger/include/FCDPro.yaml</file>
         <file>webapi/doc/swagger/include/FCDProPlus.yaml</file>
         <file>webapi/doc/swagger/include/FeatureActions.yaml</file>
         <file>webapi/doc/swagger/include/FeatureReport.yaml</file>
-        <file>webapi/doc/swagger/include/FeatureSettings.yaml</file>
         <file>webapi/doc/swagger/include/FeatureSetPreset.yaml</file>
-        <file>webapi/doc/swagger/include/FileSink.yaml</file>
-        <file>webapi/doc/swagger/include/FileSource.yaml</file>
+        <file>webapi/doc/swagger/include/FeatureSettings.yaml</file>
         <file>webapi/doc/swagger/include/FileInput.yaml</file>
         <file>webapi/doc/swagger/include/FileOutput.yaml</file>
+        <file>webapi/doc/swagger/include/FileSink.yaml</file>
+        <file>webapi/doc/swagger/include/FileSource.yaml</file>
         <file>webapi/doc/swagger/include/FreeDVDemod.yaml</file>
         <file>webapi/doc/swagger/include/FreeDVMod.yaml</file>
         <file>webapi/doc/swagger/include/FreqScanner.yaml</file>
@@ -68,21 +68,21 @@
         <file>webapi/doc/swagger/include/HackRF.yaml</file>
         <file>webapi/doc/swagger/include/HeatMap.yaml</file>
         <file>webapi/doc/swagger/include/IEEE_802_15_4_Mod.yaml</file>
-        <file>webapi/doc/swagger/include/Interferometer.yaml</file>
         <file>webapi/doc/swagger/include/ILSDemod.yaml</file>
+        <file>webapi/doc/swagger/include/Interferometer.yaml</file>
         <file>webapi/doc/swagger/include/JogdialController.yaml</file>
+        <file>webapi/doc/swagger/include/KiwiSDR.yaml</file>
         <file>webapi/doc/swagger/include/LimeRFE.yaml</file>
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
-        <file>webapi/doc/swagger/include/KiwiSDR.yaml</file>
         <file>webapi/doc/swagger/include/LocalInput.yaml</file>
         <file>webapi/doc/swagger/include/LocalOutput.yaml</file>
         <file>webapi/doc/swagger/include/LocalSink.yaml</file>
         <file>webapi/doc/swagger/include/LocalSource.yaml</file>
+        <file>webapi/doc/swagger/include/M17Demod.yaml</file>
+        <file>webapi/doc/swagger/include/M17Mod.yaml</file>
         <file>webapi/doc/swagger/include/Map.yaml</file>
         <file>webapi/doc/swagger/include/MetisMISO.yaml</file>
         <file>webapi/doc/swagger/include/MorseDecoder.yaml</file>
-        <file>webapi/doc/swagger/include/M17Demod.yaml</file>
-        <file>webapi/doc/swagger/include/M17Mod.yaml</file>
         <file>webapi/doc/swagger/include/NavtexDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
@@ -97,18 +97,18 @@
         <file>webapi/doc/swagger/include/Preset.yaml</file>
         <file>webapi/doc/swagger/include/PSK31Mod.yaml</file>
         <file>webapi/doc/swagger/include/RadioAstronomy.yaml</file>
-        <file>webapi/doc/swagger/include/Radiosonde.yaml</file>
-        <file>webapi/doc/swagger/include/RadiosondeDemod.yaml</file>
-        <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
         <file>webapi/doc/swagger/include/RadioClock.yaml</file>
-        <file>webapi/doc/swagger/include/RemoteSink.yaml</file>
-        <file>webapi/doc/swagger/include/RemoteSource.yaml</file>
+        <file>webapi/doc/swagger/include/RadiosondeDemod.yaml</file>
+        <file>webapi/doc/swagger/include/Radiosonde.yaml</file>
         <file>webapi/doc/swagger/include/RemoteInput.yaml</file>
         <file>webapi/doc/swagger/include/RemoteOutput.yaml</file>
+        <file>webapi/doc/swagger/include/RemoteSink.yaml</file>
+        <file>webapi/doc/swagger/include/RemoteSource.yaml</file>
         <file>webapi/doc/swagger/include/RemoteTCPInput.yaml</file>
         <file>webapi/doc/swagger/include/RemoteTCPSink.yaml</file>
         <file>webapi/doc/swagger/include/RigCtlServer.yaml</file>
         <file>webapi/doc/swagger/include/RollupState.yaml</file>
+        <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
         <file>webapi/doc/swagger/include/RTTYDemod.yaml</file>
         <file>webapi/doc/swagger/include/RTTYMod.yaml</file>
         <file>webapi/doc/swagger/include/SatelliteTracker.yaml</file>
@@ -127,8 +127,8 @@
         <file>webapi/doc/swagger/include/TestMI.yaml</file>
         <file>webapi/doc/swagger/include/TestMOSync.yaml</file>
         <file>webapi/doc/swagger/include/TestSource.yaml</file>
-        <file>webapi/doc/swagger/include/UDPSource.yaml</file>
         <file>webapi/doc/swagger/include/UDPSink.yaml</file>
+        <file>webapi/doc/swagger/include/UDPSource.yaml</file>
         <file>webapi/doc/swagger/include/User.yaml</file>
         <file>webapi/doc/swagger/include/USRP.yaml</file>
         <file>webapi/doc/swagger/include/VORDemod.yaml</file>
