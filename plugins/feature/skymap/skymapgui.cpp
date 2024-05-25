@@ -274,6 +274,7 @@ SkyMapGUI::~SkyMapGUI()
         m_webServer->close();
         delete m_webServer;
     }
+    delete m_webInterface;
     delete ui;
 }
 
