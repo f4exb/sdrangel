@@ -35,6 +35,7 @@ ChannelPowerSink::ChannelPowerSink(ChannelPower *channelPower) :
 
 ChannelPowerSink::~ChannelPowerSink()
 {
+    delete m_lowpassFFT;
 }
 
 void ChannelPowerSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
