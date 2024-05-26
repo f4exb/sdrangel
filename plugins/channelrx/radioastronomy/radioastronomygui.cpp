@@ -2297,6 +2297,7 @@ void RadioAstronomyGUI::customContextMenuRequested(QPoint pos)
 
 RadioAstronomyGUI::~RadioAstronomyGUI()
 {
+    delete m_networkManager;
     delete ui;
     delete m_calHot;
     delete m_calCold;

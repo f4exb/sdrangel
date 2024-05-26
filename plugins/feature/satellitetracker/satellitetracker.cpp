@@ -73,6 +73,7 @@ SatelliteTracker::SatelliteTracker(WebAPIAdapterInterface *webAPIAdapterInterfac
 
 SatelliteTracker::~SatelliteTracker()
 {
+    delete m_networkManager;
     stop();
     qDeleteAll(m_satState);
 }

@@ -57,6 +57,7 @@ AudioOutput::AudioOutput(DeviceAPI *deviceAPI) :
 
 AudioOutput::~AudioOutput()
 {
+	delete m_networkManager;
 	stop();
 }
 
