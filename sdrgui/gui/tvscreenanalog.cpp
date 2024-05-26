@@ -131,6 +131,7 @@ TVScreenAnalog::TVScreenAnalog(QWidget *parent)	:
 
 TVScreenAnalog::~TVScreenAnalog()
 {
+	cleanup();
 	delete m_backBuffer;
 	delete m_frontBuffer;
 }
