@@ -40,6 +40,7 @@ public:
 
     bool hasChanged() const { return m_hasChanged; }
     int getSelectedIndex() const { return m_selectedDeviceSetIndex; }
+    void selectIndex(int channelDeviceSetIndex);
 
 private:
     Ui::WorkspaceSelectionDialog *ui;

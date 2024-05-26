@@ -23,7 +23,7 @@
 #include "workspaceselectiondialog.h"
 #include "ui_workspaceselectiondialog.h"
 
-WorkspaceSelectionDialog::WorkspaceSelectionDialog(int numberOfWorkspaces, QWidget *parent) :
+WorkspaceSelectionDialog::WorkspaceSelectionDialog(int numberOfWorkspaces, int workspaceIndex, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::WorkspaceSelectionDialog),
     m_numberOfWorkspaces(numberOfWorkspaces),
@@ -34,6 +34,7 @@ WorkspaceSelectionDialog::WorkspaceSelectionDialog(int numberOfWorkspaces, QWidg
     for (int i = 0; i < m_numberOfWorkspaces; i++) {
         ui->workspaceList->addItem(tr("W:%1").arg(i));
     }
+    ui->workspaceList->setCurrentRow(workspaceIndex);
 }
 
 WorkspaceSelectionDialog::~WorkspaceSelectionDialog()

@@ -52,6 +52,7 @@ DeviceSetSelectionDialog::DeviceSetSelectionDialog(std::vector<DeviceUISet*>& de
             m_deviceSetIndexes.push_back(i);
         }
     }
+    selectIndex(channelDeviceSetIndex);
 }
 
 DeviceSetSelectionDialog::~DeviceSetSelectionDialog()
@@ -64,4 +65,15 @@ void DeviceSetSelectionDialog::accept()
     m_selectedDeviceSetIndex = m_deviceSetIndexes[ui->workspaceList->currentRow()];
     m_hasChanged = true;
     QDialog::accept();
+}
+
+void DeviceSetSelectionDialog::selectIndex(int channelDeviceSetIndex)
+{
+    for (int i = 0; i < (int) m_deviceSetIndexes.size(); i++)
+    {
+        if (channelDeviceSetIndex == m_deviceSetIndexes[i]) {
+            ui->workspaceList->setCurrentRow(i);
+            break;
+        }
+    }
 }
