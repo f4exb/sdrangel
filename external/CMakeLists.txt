@@ -876,10 +876,10 @@ if(ENABLE_FEATURE_MORSEDECODER)
     if (WIN32)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/ggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (APPLE)
-        set(GGMORSE_LIBRARIES "${binary_dir}/libsggmorse/libggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-        install(DIRECTORY "${binary_dir}/libggmorse" DESTINATION "${INSTALL_LIB_DIR}"
+        set(GGMORSE_LIBRARIES "${binary_dir}/src/libggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        install(DIRECTORY "${binary_dir}/src" DESTINATION "${INSTALL_LIB_DIR}"
                 FILES_MATCHING PATTERN "libggmorse*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/libggmorse")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
     endif ()
 endif()
 
