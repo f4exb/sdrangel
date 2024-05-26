@@ -33,7 +33,7 @@ class SDRGUI_API WorkspaceSelectionDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit WorkspaceSelectionDialog(int numberOfWorkspaces, QWidget *parent = nullptr);
+    explicit WorkspaceSelectionDialog(int numberOfWorkspaces, int workspaceIndex, QWidget *parent = nullptr);
     ~WorkspaceSelectionDialog();
 
     bool hasChanged() const { return m_hasChanged; }

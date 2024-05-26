@@ -257,7 +257,7 @@ void MainSpectrumGUI::showHelp()
 void MainSpectrumGUI::openMoveToWorkspaceDialog()
 {
     int numberOfWorkspaces = MainWindow::getInstance()->getNumberOfWorkspaces();
-    WorkspaceSelectionDialog dialog(numberOfWorkspaces, this);
+    WorkspaceSelectionDialog dialog(numberOfWorkspaces, getWorkspaceIndex(), this);
     dialog.exec();
 
     if (dialog.hasChanged()) {
