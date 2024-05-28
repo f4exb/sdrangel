@@ -218,7 +218,6 @@ void AudioOutput::applySettings(const AudioOutputSettings& settings, const QList
         m_audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_deviceName);
         //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
         audioDeviceManager->removeAudioSink(&m_audioFifo);
-        audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), m_audioDeviceIndex);
         m_sampleRate = audioDeviceManager->getOutputSampleRate(m_audioDeviceIndex);
         forwardChange = true;
     }

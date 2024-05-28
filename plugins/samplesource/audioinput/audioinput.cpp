@@ -251,7 +251,6 @@ void AudioInput::applySettings(const AudioInputSettings& settings, QList<QString
         }
 
         audioDeviceManager->removeAudioSource(&m_fifo);
-        audioDeviceManager->addAudioSource(&m_fifo, getInputMessageQueue(), m_audioDeviceIndex);
         m_sampleRate = audioDeviceManager->getInputSampleRate(m_audioDeviceIndex);
         qDebug("AudioInput::applySettings: audioDeviceName: %s audioDeviceIndex: %d sampleRate: %d",
             qPrintable(settings.m_deviceName), m_audioDeviceIndex, m_sampleRate);
