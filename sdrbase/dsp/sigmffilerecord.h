@@ -22,12 +22,10 @@
 #ifndef INCLUDE_SIGMF_FILERECORD_H
 #define INCLUDE_SIGMF_FILERECORD_H
 
-#include <string>
-#include <iostream>
-#include <fstream>
 #include <ctime>
 
 #include <QDateTime>
+#include <QFile>
 
 #include "dsp/sigmf_forward.h"
 #include "dsp/filerecordinterface.h"
@@ -77,16 +75,14 @@ private:
 
     QString m_hardwareId;
 	QString m_fileName;
-    QString m_sampleFileName;
-    QString m_metaFileName;
     quint32 m_sampleRate;
     quint64 m_centerFrequency;
     qint64 m_msShift;
     bool m_recordOn;
     bool m_recordStart;
     QDateTime m_captureStartDT;
-    std::ofstream m_metaFile;
-    std::ofstream m_sampleFile;
+    QFile m_metaFile;
+    QFile m_sampleFile;
     quint64 m_sampleStart;
     quint64 m_sampleCount;
     quint64 m_initialMsCount;
