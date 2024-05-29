@@ -83,11 +83,11 @@ SigMFFileRecord::~SigMFFileRecord()
 
     stopRecording();
 
-    if (m_metaFile.is_open()) {
+    if (m_metaFile.isOpen()) {
         m_metaFile.close();
     }
 
-    if (m_sampleFile.is_open()) {
+    if (m_sampleFile.isOpen()) {
         m_sampleFile.close();
     }
 
@@ -100,37 +100,33 @@ void SigMFFileRecord::setFileName(const QString& fileName)
     {
         qDebug("SigMFFileRecord::setFileName: %s", qPrintable(fileName));
 
-        if (m_metaFile.is_open()) {
+        if (m_metaFile.isOpen()) {
             m_metaFile.close();
         }
 
-        if (m_sampleFile.is_open()) {
+        if (m_sampleFile.isOpen()) {
             m_sampleFile.close();
         }
 
         m_fileName = fileName;
+        QString metaFileName = m_fileName + ".sigmf-meta";
+        m_metaFile.setFileName(metaFileName);
+        QString sampleFileName = m_fileName + ".sigmf-data";
+        m_sampleFile.setFileName(sampleFileName);
 
-        if (QFile::exists(fileName + ".sigmf-data") && QFile::exists(fileName + ".sigmf-meta"))
+        if (QFile::exists(metaFileName) && QFile::exists(sampleFileName))
         {
-            m_metaFileName = m_fileName + ".sigmf-meta";
-            std::ifstream metaStream;
-#ifdef Q_OS_WIN
-        	metaStream.open(m_metaFileName.toStdWString().c_str());
-#else
-        	metaStream.open(m_metaFileName.toStdString().c_str());
-#endif
-            std::ostringstream meta_buffer;
-            meta_buffer << metaStream.rdbuf();
+            QFile metaStream(metaFileName);
+            metaStream.open(QIODevice::ReadOnly);
             try
             {
-                from_json(json::parse(meta_buffer.str()), *m_metaRecord);
+                from_json(json::parse(metaStream.readAll().toStdString()), *m_metaRecord);
                 metaStream.close();
                 std::string sdrAngelVersion = m_metaRecord->global.access<sdrangel::GlobalT>().version;
 
                 if (sdrAngelVersion.size() != 0)
                 {
                     qDebug("SigMFFileRecord::setFileName: appending mode");
-                    m_metaFile.open(m_metaFileName.toStdString().c_str(), std::ofstream::out);
                     m_initialMsCount = 0;
 
                     for (auto capture : m_metaRecord->captures)
@@ -140,10 +136,18 @@ void SigMFFileRecord::setFileName(const QString& fileName)
                         m_initialMsCount += (length * 1000) / sampleRate;
                     }
 
-                    m_sampleFileName = m_fileName + ".sigmf-data";
-                    m_sampleFile.open(m_sampleFileName.toStdString().c_str(), std::ios::binary & std::ios::app);
-                    m_initialBytesCount = (uint64_t) m_sampleFile.tellp();
+                    m_sampleFile.setFileName(m_fileName + ".sigmf-data");
+                    if (!m_sampleFile.open(QIODevice::WriteOnly | QIODevice::Append))
+                    {
+                        qWarning() << "SigMFFileRecord::setFileName: failed to open file: " << m_sampleFile.fileName();
+                    }
+                    m_initialBytesCount = (uint64_t) m_sampleFile.size();
                     m_sampleStart =  m_initialBytesCount / ((1<<m_log2RecordSampleSize)/4); // sizeof(Sample);
+                    
+                    if (!m_metaFile.open(QIODevice::WriteOnly | QIODevice::Append))
+                    {
+                        qWarning() << "SigMFFileRecord::setFileName: failed to open file: " << m_metaFile.fileName();
+                    }
 
                     m_recordStart = false;
                 }
@@ -186,18 +190,14 @@ bool SigMFFileRecord::startRecording()
       	qDebug("SigMFFileRecord::startRecording: new record %s", qPrintable(m_fileName));
         clearMeta();
         m_sampleStart = 0;
-        m_sampleFileName = m_fileName + ".sigmf-data";
-        m_metaFileName = m_fileName + ".sigmf-meta";
-        m_sampleFile.open(m_sampleFileName.toStdString().c_str(), std::ios::binary);
-        if (!m_sampleFile.is_open())
+        if (!m_sampleFile.open(QIODevice::WriteOnly))
         {
-            qWarning() << "SigMFFileRecord::startRecording: failed to open file: " << m_sampleFileName;
+            qWarning() << "SigMFFileRecord::startRecording: failed to open file: " << m_sampleFile.fileName();
             success = false;
         }
-        m_metaFile.open(m_metaFileName.toStdString().c_str(), std::ofstream::out);
-        if (!m_metaFile.is_open())
+        if (!m_metaFile.open(QIODevice::WriteOnly | QIODevice::Append))
         {
-            qWarning() << "SigMFFileRecord::startRecording: failed to open file: " << m_metaFileName;
+            qWarning() << "SigMFFileRecord::startRecording: failed to open file: " << m_metaFile.fileName();
             success = false;
         }
         makeHeader();
@@ -221,14 +221,14 @@ bool SigMFFileRecord::stopRecording()
       	qDebug("SigMFFileRecord::stopRecording: file previous capture");
         makeCapture();
         m_recordOn = false;
-        if (m_sampleFile.bad())
+        if (m_sampleFile.error())
         {
-            qWarning() << "SigMFFileRecord::stopRecording: an error occurred while writing to " << m_sampleFileName;
+            qWarning() << "SigMFFileRecord::stopRecording: an error occurred while writing to " << m_sampleFile.fileName();
             return false;
         }
-        if (m_metaFile.bad())
+        if (m_metaFile.error())
         {
-            qWarning() << "SigMFFileRecord::stopRecording: an error occurred while writing to " << m_metaFileName;
+            qWarning() << "SigMFFileRecord::stopRecording: an error occurred while writing to " << m_metaFile.fileName();
             return false;
         }
     }
@@ -274,10 +274,11 @@ void SigMFFileRecord::makeCapture()
         m_metaRecord->captures.emplace_back(recording_capture);
         m_sampleStart += m_sampleCount;
         // Flush meta to disk
-        m_metaFile.seekp(0);
+        m_metaFile.seek(0);
         std::string jsonRecord = json(*m_metaRecord).dump(2);
-        m_metaFile << jsonRecord;
+        m_metaFile.write(jsonRecord.c_str(), jsonRecord.size());
         m_metaFile.flush();
+        m_metaFile.resize(m_metaFile.pos());
     }
     else
     {
