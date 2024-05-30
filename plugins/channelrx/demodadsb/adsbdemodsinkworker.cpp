@@ -262,7 +262,7 @@ void ADSBDemodSinkWorker::run()
                         if (m_sink->getMessageQueueToGUI() && ((df == 4) || (df == 5) || (df == 20) || (df == 21)))
                         {
                             ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
-                                QByteArray((char*)data, sizeof(data)),
+                                QByteArray((char*)data, bytes),
                                 preambleCorrelation * m_correlationScale,
                                 preambleCorrelationOnes / samplesPerChip,
                                 rxDateTime(firstIdx, readBuffer),
@@ -273,7 +273,7 @@ void ADSBDemodSinkWorker::run()
                         if (m_sink->getMessageQueueToWorker())
                         {
                             ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
-                                QByteArray((char*)data, sizeof(data)),
+                                QByteArray((char*)data, bytes),
                                 preambleCorrelation * m_correlationScale,
                                 preambleCorrelationOnes / samplesPerChip,
                                 rxDateTime(firstIdx, readBuffer),
