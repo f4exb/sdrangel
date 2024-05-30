@@ -48,6 +48,7 @@ WFMModBaseband::WFMModBaseband()
 
 WFMModBaseband::~WFMModBaseband()
 {
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_source.getFeedbackAudioFifo());
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSource(m_source.getAudioFifo());
     delete m_channelizer;
 }
