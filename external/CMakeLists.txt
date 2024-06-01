@@ -1224,7 +1224,7 @@ if (WIN32 OR APPLE)
 
     if (ENABLE_SOAPYSDR)
         if (WIN32)
-            set(SOAPYSDR_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/SoapySDR.lib" CACHE INTERNAL "")
+            set(SOAPYSDR_LINK_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/SoapySDR.lib" CACHE INTERNAL "")
         endif ()
         ExternalProject_Add(soapysdr
                 GIT_REPOSITORY https://github.com/pothosware/SoapySDR.git
@@ -1235,7 +1235,7 @@ if (WIN32 OR APPLE)
                 -DENABLE_PYTHON=OFF
                 -DENABLE_PYTHON3=OFF
                 -DENABLE_TESTS=OFF
-                BUILD_BYPRODUCTS "${SOAPYSDR_LIBRARY}"
+                BUILD_BYPRODUCTS "${SOAPYSDR_LINK_LIBRARIES}"
                 BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> -- SoapySDR
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
@@ -1243,12 +1243,12 @@ if (WIN32 OR APPLE)
         ExternalProject_Get_Property(soapysdr source_dir binary_dir)
         set_global_cache(SOAPYSDR_FOUND ON)
         set(SOAPYSDR_EXTERNAL ON CACHE INTERNAL "")
-        set(SOAPYSDR_INCLUDE_DIR "${source_dir}/include" CACHE INTERNAL "")
+        set(SOAPYSDR_INCLUDE_DIRS "${source_dir}/include" CACHE INTERNAL "")
         if (WIN32)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/SoapySDR${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
             install(DIRECTORY "${SDRANGEL_BINARY_LIB_DIR}/SoapySDR" DESTINATION "${INSTALL_LIB_DIR}/lib")
         elseif (APPLE)
-            set(SOAPYSDR_LIBRARY "${binary_dir}/lib/libSoapySDR${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+            set(SOAPYSDR_LINK_LIBRARIES "${binary_dir}/lib/libSoapySDR${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
             install(DIRECTORY "${binary_dir}/lib/" DESTINATION "${INSTALL_LIB_DIR}"
                     FILES_MATCHING PATTERN "libSoapySDR*${CMAKE_SHARED_LIBRARY_SUFFIX}")
             set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/lib/")
