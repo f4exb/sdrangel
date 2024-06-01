@@ -4,7 +4,7 @@ cd $HOME
 mkdir -p external && cd external
 mkdir -p f4exb && cd f4exb
 
-git clone https://github.com/f4exb/ggmorse.git
+git clone https://github.com/ggerganov/ggmorse.git
 
 cd ggmorse
 mkdir -p build && cd build

@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This feature plugin can be used to decode Morse (CW) transmissions. It is based on a slightly modified decoding library called [GGMorse](https://github.com/f4exb/ggmorse). You must compile and install this library to build this plugin. The GGMorse installation folder is specified as `-DGGMORSE_DIR` on the cmake command line.
+This feature plugin can be used to decode Morse (CW) transmissions. It is based on a decoding library called [GGMorse](https://github.com/ggerganov/ggmorse.git). You must compile and install this library to build this plugin. The GGMorse installation folder is specified as `-DGGMORSE_DIR` on the cmake command line.
 
 This plugin uses the demodulated audio of some Rx channel plugins.
 
