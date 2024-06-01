@@ -67,7 +67,7 @@ void AudioInputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices
     // but I thought it makes it simpler to switch between inputs
     // if they are in the AudioInput GUI
     originDevices.append(OriginDevice(
-        "Audio",
+        "AudioInput",
         m_hardwareID,
         "0",
         0,

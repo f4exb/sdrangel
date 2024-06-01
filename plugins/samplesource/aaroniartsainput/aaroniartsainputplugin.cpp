@@ -65,7 +65,7 @@ void AaroniaRTSAInputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginD
     }
 
     originDevices.append(OriginDevice(
-        "AaroniaRTSA",
+        "AaroniaRTSAInput",
         m_hardwareID,
         QString(),
         0,
