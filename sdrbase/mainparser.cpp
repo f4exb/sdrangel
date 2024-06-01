@@ -151,7 +151,7 @@ void MainParser::parse(const QCoreApplication& app)
 
     if (m_remoteTCPSink && m_remoteTCPSinkHWType.isEmpty() && m_remoteTCPSinkSerial.isEmpty())
     {
-        qCritical() << "You must specify a device with either -remote-tcp-hwtype or -remote-tcp-serial";
+        qCritical() << "You must specify a device with either --remote-tcp-hwtype or --remote-tcp-serial";
         exit (EXIT_FAILURE);
     }
 }
