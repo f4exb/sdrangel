@@ -199,7 +199,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     {
         // List available physical devices and exit
         RemoteTCPSinkStarter::listAvailableDevices();
-        exit (EXIT_SUCCESS);
+        return EXIT_SUCCESS;
     }
 
     if (parser.getRemoteTCPSink()) {
@@ -247,7 +247,9 @@ int main(int argc, char* argv[])
 
 	int res = runQtApplication(argc, argv, logger);
 
-	delete logger;
+    if (logger) {
+        delete logger;
+    }
 
 	qWarning("SDRangel quit.");
 	return res;
