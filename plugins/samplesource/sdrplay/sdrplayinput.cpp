@@ -110,12 +110,6 @@ bool SDRPlayInput::openDevice()
         return false;
     }
 
-    if ((res = mirisdr_set_hw_flavour(m_dev, MIRISDR_HW_SDRPLAY)) < 0)
-    {
-        qCritical("SDRPlayInput::openDevice: failed to set HW flavour: %s", strerror(errno));
-        return false;
-    }
-
     char vendor[256];
     char product[256];
     char serial[256];
@@ -140,6 +134,12 @@ bool SDRPlayInput::openDevice()
         m_variant = SDRPlayRSP2;
     } else {
         m_variant = SDRPlayRSP1;
+    }
+
+    if ((res = mirisdr_set_hw_flavour(m_dev, (m_variant == SDRPlayRSP1) ? MIRISDR_HW_DEFAULT : MIRISDR_HW_SDRPLAY)) < 0)
+    {
+        qCritical("SDRPlayInput::openDevice: failed to set HW flavour: %s", strerror(errno));
+        return false;
     }
 
     qDebug("SDRPlayInput::openDevice: m_variant: %d", (int) m_variant);
