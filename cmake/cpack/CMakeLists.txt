@@ -43,11 +43,11 @@ if(APPLE AND BUNDLE AND BUILD_GUI)
   # probably libmirsdrapi-rsp.dylib can't be re-distribuited
   # we remove the file at the end of fixup_bundle
   if(ENABLE_SOAPYSDR AND SOAPYSDR_FOUND)
-    set(SOAPY_SDR_MOD_PATH "${SOAPYSDR_ROOT}/lib/SoapySDR/modules${SOAPYSDR_ABI_VERSION}")
+    set(SOAPY_SDR_MOD_PATH "${SOAPYSDR_LIBDIR}/lib/SoapySDR/modules${SOAPYSDR_VERSION}")
     file(GLOB SOAPY_MODS ${SOAPY_SDR_MOD_PATH}/*.so)
     foreach(SOAPY_MOD_FILE ${SOAPY_MODS})
       install( FILES "${SOAPY_MOD_FILE}"
-        DESTINATION "../Frameworks/SoapySDR/modules${SOAPYSDR_ABI_VERSION}"
+        DESTINATION "../Frameworks/SoapySDR/modules${SOAPYSDR_VERSION}"
         COMPONENT Runtime
         )
     endforeach()
