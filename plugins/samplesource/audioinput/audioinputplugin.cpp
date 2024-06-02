@@ -93,7 +93,7 @@ PluginInterface::SamplingDevices AudioInputPlugin::enumSampleSources(const Origi
                     m_deviceTypeID,
                     it->serial,
                     it->sequence,
-                    PluginInterface::SamplingDevice::PhysicalDevice,
+                    PluginInterface::SamplingDevice::BuiltInDevice,
                     PluginInterface::SamplingDevice::StreamSingleRx,
                     it->nbRxStreams,
                     j));
