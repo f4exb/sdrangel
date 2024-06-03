@@ -71,6 +71,7 @@ SatelliteSelectionDialog::SatelliteSelectionDialog(SatelliteTrackerSettings *set
 
 SatelliteSelectionDialog::~SatelliteSelectionDialog()
 {
+    delete m_networkManager;
     delete ui;
 }
 

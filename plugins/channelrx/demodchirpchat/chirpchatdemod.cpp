@@ -95,6 +95,7 @@ ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
 
 ChirpChatDemod::~ChirpChatDemod()
 {
+    delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
     stop();

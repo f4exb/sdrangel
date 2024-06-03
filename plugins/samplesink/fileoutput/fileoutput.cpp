@@ -56,6 +56,7 @@ FileOutput::FileOutput(DeviceAPI *deviceAPI) :
 
 FileOutput::~FileOutput()
 {
+	delete m_networkManager;
 	stop();
 }
 
