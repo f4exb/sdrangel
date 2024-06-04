@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include "dsp/cudavkfftengine.h"
+#include "util/profiler.h"
 
 CUDAvkFFTEngine::CUDAvkFFTEngine()
 {
