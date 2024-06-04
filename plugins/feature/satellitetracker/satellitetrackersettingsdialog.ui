@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>487</width>
-    <height>543</height>
+    <height>603</height>
    </rect>
   </property>
   <property name="font">
@@ -364,6 +364,20 @@
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="defaultTles">
+              <property name="toolTip">
+               <string>Load preset TLE sources</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../../../sdrgui/resources/res.qrc">
+                <normaloff>:/star.png</normaloff>:/star.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="buttonHorizontalSpacer">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -680,7 +694,9 @@
   <tabstop>utc</tabstop>
   <tabstop>drawOnMap</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

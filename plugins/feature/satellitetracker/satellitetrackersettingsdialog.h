@@ -40,6 +40,8 @@ private slots:
     void on_removeTle_clicked();
     void accept();
 
+    void on_defaultTles_clicked();
+
 private:
     Ui::SatelliteTrackerSettingsDialog* ui;
 };

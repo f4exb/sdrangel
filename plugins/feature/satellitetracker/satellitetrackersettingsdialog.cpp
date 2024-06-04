@@ -18,6 +18,7 @@
 #include "util/units.h"
 #include "satellitetrackersettingsdialog.h"
 #include <QDebug>
+#include <QMessageBox>
 
 SatelliteTrackerSettingsDialog::SatelliteTrackerSettingsDialog(SatelliteTrackerSettings *settings,
         QWidget* parent) :
@@ -82,6 +83,16 @@ void SatelliteTrackerSettingsDialog::on_removeTle_clicked()
     QList<QListWidgetItem *> items = ui->tles->selectedItems();
     for (int i = 0; i < items.size(); i++)
         delete items[i];
+}
+
+void SatelliteTrackerSettingsDialog::on_defaultTles_clicked()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Confirm ovewrite", "Replace the current TLE list with the default?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        ui->tles->clear();
+        updateTleWidget(DEFAULT_TLES);
+    }
 }
 
 void SatelliteTrackerSettingsDialog::accept()
