@@ -67,7 +67,7 @@ SatelliteTrackerSettingsDialog::~SatelliteTrackerSettingsDialog()
 
 void SatelliteTrackerSettingsDialog::on_addTle_clicked()
 {
-    QListWidgetItem *item = new QListWidgetItem("http://");
+    QListWidgetItem *item = new QListWidgetItem("https://");
     item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEditable|Qt::ItemIsEnabled);
     ui->tles->addItem(item);
 }
