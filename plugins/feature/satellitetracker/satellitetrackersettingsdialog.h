@@ -31,6 +31,8 @@ public:
     explicit SatelliteTrackerSettingsDialog(SatelliteTrackerSettings* settings, QWidget* parent = 0);
     ~SatelliteTrackerSettingsDialog();
 
+    void updateTleWidget(QList<QString> tles);
+
    SatelliteTrackerSettings *m_settings;
 
 private slots:

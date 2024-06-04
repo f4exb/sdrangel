@@ -49,12 +49,7 @@ SatelliteTrackerSettingsDialog::SatelliteTrackerSettingsDialog(SatelliteTrackerS
     ui->dateFormat->setText(settings->m_dateFormat);
     ui->utc->setChecked(settings->m_utc);
     ui->drawOnMap->setChecked(settings->m_drawOnMap);
-    for (int i = 0; i < settings->m_tles.size(); i++)
-    {
-        QListWidgetItem *item = new QListWidgetItem(settings->m_tles[i]);
-        item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEditable|Qt::ItemIsEnabled);
-        ui->tles->addItem(item);
-    }
+    updateTleWidget(settings->m_tles);
     ui->replayEnabled->setChecked(settings->m_replayEnabled);
     ui->replayDateTime->setDateTime(settings->m_replayStartDateTime);
     ui->sendTimeToMap->setChecked(settings->m_sendTimeToMap);
@@ -63,6 +58,16 @@ SatelliteTrackerSettingsDialog::SatelliteTrackerSettingsDialog(SatelliteTrackerS
 SatelliteTrackerSettingsDialog::~SatelliteTrackerSettingsDialog()
 {
     delete ui;
+}
+
+void SatelliteTrackerSettingsDialog::updateTleWidget(QList<QString> tles)
+{
+    for (int i = 0; i < tles.size(); i++)
+    {
+        QListWidgetItem *item = new QListWidgetItem(tles[i]);
+        item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEditable|Qt::ItemIsEnabled);
+        ui->tles->addItem(item);
+    }
 }
 
 void SatelliteTrackerSettingsDialog::on_addTle_clicked()
