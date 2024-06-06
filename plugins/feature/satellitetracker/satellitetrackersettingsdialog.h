@@ -31,12 +31,16 @@ public:
     explicit SatelliteTrackerSettingsDialog(SatelliteTrackerSettings* settings, QWidget* parent = 0);
     ~SatelliteTrackerSettingsDialog();
 
+    void updateTleWidget(QList<QString> tles);
+
    SatelliteTrackerSettings *m_settings;
 
 private slots:
     void on_addTle_clicked();
     void on_removeTle_clicked();
     void accept();
+
+    void on_defaultTles_clicked();
 
 private:
     Ui::SatelliteTrackerSettingsDialog* ui;

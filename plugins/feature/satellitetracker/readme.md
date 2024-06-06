@@ -103,14 +103,15 @@ For commands, scripts and speech, the following variables can be substituted: `$
 
 ![Satellite tracker settings dialog](../../../doc/img/SatelliteTracker_plugin_settingsdialog2.png)
 
-On the TLEs tab, you can provide a list of URL from which satellite Two Line Element files can be downloaded from.
+On the TLEs tab, you can manage the default list of URLs from which satellite Two Line Element files can be downloaded from.
+You can add, edit, delete single entries or restore the default list.
 TLE files contain the orbital parameters for a satellite and are required in order to be able to calculate a satellites position.
 TLEs for may satellites can be obtained from https://www.celestrak.com/NORAD/elements/
 To use a TLE file on a local disk, use a URL such as file:my_tle.txt
 
 ![Satellite tracker settings dialog](../../../doc/img/SatelliteTracker_plugin_settingsdialog3.png)
 
-On the display tab, you can set:
+On the Display tab, you can set:
 
 * The update period in seconds, which controls how frequently satellite positions are calculated.
 * The default frequency in MHz that is used for calculating Doppler and free space path loss in the Satellite Data table.
@@ -121,6 +122,13 @@ only be displayed if the source in the Rotator Controller is set to this Satelli
 * The format used for displaying dates. E.g. yyyy/MM/dd
 * Whether times are displayed in the local time zone or UTC.
 * Whether to draw the satellites on the map.
+
+![Satellite tracker settings dialog](../../../doc/img/SatelliteTracker_plugin_settingsdialog4.png)
+
+On the Replay tab, you can set what happens when the start button is pressed:
+* Whether to replay a satellite pass in the past.
+* The start date and time of the replay.
+* Whether to also send the replayed date and time to the Map feature.
 
 <h3>9: Latitude</h3>
 
