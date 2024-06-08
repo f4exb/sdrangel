@@ -496,11 +496,11 @@ FreqScannerGUI::FreqScannerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     applyAllSettings();
     m_resizer.enableChildMouseTracking();
 
-    ui->table->setItemDelegateForColumn(COL_FREQUENCY, new FrequencyDelegate("Auto", 3));
-    ui->table->setItemDelegateForColumn(COL_POWER, new DecimalDelegate(1));
-    ui->table->setItemDelegateForColumn(COL_CHANNEL_BW, new Int64Delegate(0, 10000000));
-    ui->table->setItemDelegateForColumn(COL_TH, new DecimalDelegate(1, -120.0, 0.0));
-    ui->table->setItemDelegateForColumn(COL_SQ, new DecimalDelegate(1, -120.0, 0.0));
+    ui->table->setItemDelegateForColumn(COL_FREQUENCY, new FrequencyDelegate("Auto", 3, true, ui->table));
+    ui->table->setItemDelegateForColumn(COL_POWER, new DecimalDelegate(1, ui->table));
+    ui->table->setItemDelegateForColumn(COL_CHANNEL_BW, new Int64Delegate(0, 10000000, ui->table));
+    ui->table->setItemDelegateForColumn(COL_TH, new DecimalDelegate(1, -120.0, 0.0, ui->table));
+    ui->table->setItemDelegateForColumn(COL_SQ, new DecimalDelegate(1, -120.0, 0.0, ui->table));
 
     connect(m_deviceUISet->m_spectrum->getSpectrumView(), &GLSpectrumView::updateAnnotations, this, &FreqScannerGUI::updateAnnotations);
 }
