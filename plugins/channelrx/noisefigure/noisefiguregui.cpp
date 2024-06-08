@@ -657,11 +657,11 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     ui->results->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->results, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customContextMenuRequested(QPoint)));
 
-    ui->results->setItemDelegateForColumn(RESULTS_COL_NF, new DecimalDelegate(2));
-    ui->results->setItemDelegateForColumn(RESULTS_COL_TEMP, new DecimalDelegate(0));
-    ui->results->setItemDelegateForColumn(RESULTS_COL_Y, new DecimalDelegate(2));
-    ui->results->setItemDelegateForColumn(RESULTS_COL_ENR, new DecimalDelegate(2));
-    ui->results->setItemDelegateForColumn(RESULTS_COL_FLOOR, new DecimalDelegate(1));
+    ui->results->setItemDelegateForColumn(RESULTS_COL_NF, new DecimalDelegate(2, ui->results));
+    ui->results->setItemDelegateForColumn(RESULTS_COL_TEMP, new DecimalDelegate(0, ui->results));
+    ui->results->setItemDelegateForColumn(RESULTS_COL_Y, new DecimalDelegate(2, ui->results));
+    ui->results->setItemDelegateForColumn(RESULTS_COL_ENR, new DecimalDelegate(2, ui->results));
+    ui->results->setItemDelegateForColumn(RESULTS_COL_FLOOR, new DecimalDelegate(1, ui->results));
 
     ui->startStop->setStyleSheet(QString("QToolButton{ background-color: blue; } QToolButton:checked{ background-color: green; }"));
 
