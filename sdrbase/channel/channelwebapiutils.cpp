@@ -338,7 +338,9 @@ bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &fr
     if (getDeviceSettings(deviceIndex, deviceSettingsResponse, deviceSet))
     {
         QJsonObject *jsonObj = deviceSettingsResponse.asJsonObject();
-        return WebAPIUtils::getSubObjectDouble(*jsonObj, "centerFrequency", frequencyInHz);
+        bool result = WebAPIUtils::getSubObjectDouble(*jsonObj, "centerFrequency", frequencyInHz);
+        delete jsonObj;
+        return result;
     }
     else
     {
