@@ -300,8 +300,8 @@ void SpectrumMeasurements::createPeakTable(int peaks)
     m_peakTable->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_peakTable->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
-    m_peakTable->setItemDelegateForColumn(COL_FREQUENCY, new UnitsDelegate());
-    m_peakTable->setItemDelegateForColumn(COL_POWER, new UnitsDelegate());
+    m_peakTable->setItemDelegateForColumn(COL_FREQUENCY, new UnitsDelegate(m_peakTable));
+    m_peakTable->setItemDelegateForColumn(COL_POWER, new UnitsDelegate(m_peakTable));
 
     // Cell context menu
     m_peakTable->setContextMenuPolicy(Qt::CustomContextMenu);
