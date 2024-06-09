@@ -66,6 +66,9 @@
 class TimeDeltaDelegate : public QStyledItemDelegate {
 
 public:
+    TimeDeltaDelegate(QObject *parent = nullptr) :
+        QStyledItemDelegate(parent) {}
+
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override
     {
         (void) locale;
@@ -97,6 +100,9 @@ private:
 class HMSDelegate : public QStyledItemDelegate {
 
 public:
+    HMSDelegate(QObject *parent = nullptr) :
+        QStyledItemDelegate(parent) {}
+
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override
     {
         (void) locale;
@@ -109,6 +115,9 @@ public:
 class DMSDelegate : public QStyledItemDelegate {
 
 public:
+    DMSDelegate(QObject *parent = nullptr) :
+        QStyledItemDelegate(parent) {}
+
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override
     {
         (void) locale;
@@ -2123,42 +2132,42 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     ui->powerTable->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->powerTable, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customContextMenuRequested(QPoint)));
 
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_TIME, new TimeDelegate());
-    //ui->powerTable->setItemDelegateForColumn(POWER_COL_POWER, new DecimalDelegate(6));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_POWER_DB, new DecimalDelegate(1));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_POWER_DBM, new DecimalDelegate(1));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_TSYS, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_TSYS0, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_TSOURCE, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_TB, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_TSKY, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_FLUX, new DecimalDelegate(2));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_SIGMA_T, new DecimalDelegate(2));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_SIGMA_S, new DecimalDelegate(1));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_RA, new HMSDelegate());
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_DEC, new DMSDelegate());
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_GAL_LAT, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_GAL_LON, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_AZ, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_EL, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_VBCRS, new DecimalDelegate(1));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_VLSR, new DecimalDelegate(1));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_AIR_TEMP, new DecimalDelegate(1));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_ROT_AZ, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_ROT_EL, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_ROT_AZ_OFF, new DecimalDelegate(0));
-    ui->powerTable->setItemDelegateForColumn(POWER_COL_ROT_EL_OFF, new DecimalDelegate(0));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_TIME, new TimeDelegate("hh:mm:ss", ui->powerTable));
+    //ui->powerTable->setItemDelegateForColumn(POWER_COL_POWER, new DecimalDelegate(6, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_POWER_DB, new DecimalDelegate(1, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_POWER_DBM, new DecimalDelegate(1, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_TSYS, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_TSYS0, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_TSOURCE, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_TB, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_TSKY, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_FLUX, new DecimalDelegate(2, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_SIGMA_T, new DecimalDelegate(2, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_SIGMA_S, new DecimalDelegate(1, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_RA, new HMSDelegate(ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_DEC, new DMSDelegate(ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_GAL_LAT, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_GAL_LON, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_AZ, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_EL, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_VBCRS, new DecimalDelegate(1, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_VLSR, new DecimalDelegate(1, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_AIR_TEMP, new DecimalDelegate(1, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_ROT_AZ, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_ROT_EL, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_ROT_AZ_OFF, new DecimalDelegate(0, ui->powerTable));
+    ui->powerTable->setItemDelegateForColumn(POWER_COL_ROT_EL_OFF, new DecimalDelegate(0, ui->powerTable));
 
     resizeSpectrumMarkerTable();
-    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_FREQ, new DecimalDelegate(6));
-    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_VALUE, new DecimalDelegate(1));
-    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_DELTA_X, new DecimalDelegate(6));
-    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_DELTA_Y, new DecimalDelegate(1));
-    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_VR, new DecimalDelegate(2));
-    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_R, new DecimalDelegate(1));
-    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_D, new DecimalDelegate(1));
-    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_R_MIN, new DecimalDelegate(1));
-    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_V, new DecimalDelegate(1));
+    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_FREQ, new DecimalDelegate(6, ui->spectrumMarkerTable));
+    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_VALUE, new DecimalDelegate(1, ui->spectrumMarkerTable));
+    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_DELTA_X, new DecimalDelegate(6, ui->spectrumMarkerTable));
+    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_DELTA_Y, new DecimalDelegate(1, ui->spectrumMarkerTable));
+    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_VR, new DecimalDelegate(2, ui->spectrumMarkerTable));
+    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_R, new DecimalDelegate(1, ui->spectrumMarkerTable));
+    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_D, new DecimalDelegate(1, ui->spectrumMarkerTable));
+    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_R_MIN, new DecimalDelegate(1, ui->spectrumMarkerTable));
+    ui->spectrumMarkerTable->setItemDelegateForColumn(SPECTRUM_MARKER_COL_V, new DecimalDelegate(1, ui->spectrumMarkerTable));
 
     // Create blank marker table
     ui->spectrumMarkerTable->setRowCount(SPECTRUM_MARKER_ROWS); // 1 peak and two markers
@@ -2187,10 +2196,10 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     connect(ui->spectrumMarkerTable, &QTableWidget::itemChanged, this, &RadioAstronomyGUI::spectrumMarkerTableItemChanged);
 
     resizePowerMarkerTable();
-    ui->powerMarkerTable->setItemDelegateForColumn(POWER_MARKER_COL_TIME, new TimeDelegate());
-    ui->powerMarkerTable->setItemDelegateForColumn(POWER_MARKER_COL_VALUE, new DecimalDelegate(1));
-    ui->powerMarkerTable->setItemDelegateForColumn(POWER_MARKER_COL_DELTA_X, new TimeDeltaDelegate());
-    ui->powerMarkerTable->setItemDelegateForColumn(POWER_MARKER_COL_DELTA_Y, new DecimalDelegate(1));
+    ui->powerMarkerTable->setItemDelegateForColumn(POWER_MARKER_COL_TIME, new TimeDelegate("hh:mm:ss", ui->powerMarkerTable));
+    ui->powerMarkerTable->setItemDelegateForColumn(POWER_MARKER_COL_VALUE, new DecimalDelegate(1, ui->powerMarkerTable));
+    ui->powerMarkerTable->setItemDelegateForColumn(POWER_MARKER_COL_DELTA_X, new TimeDeltaDelegate(ui->powerMarkerTable));
+    ui->powerMarkerTable->setItemDelegateForColumn(POWER_MARKER_COL_DELTA_Y, new DecimalDelegate(1, ui->powerMarkerTable));
 
     // Create blank marker table
     ui->powerMarkerTable->setRowCount(POWER_MARKER_ROWS); // 1 peak and two markers

@@ -525,8 +525,8 @@ NavtexDemodGUI::NavtexDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
-    ui->messages->setItemDelegateForColumn(MESSAGE_COL_ERROR_PERCENT, new DecimalDelegate(1));
-    ui->messages->setItemDelegateForColumn(MESSAGE_COL_RSSI, new DecimalDelegate(1));
+    ui->messages->setItemDelegateForColumn(MESSAGE_COL_ERROR_PERCENT, new DecimalDelegate(1, ui->messages));
+    ui->messages->setItemDelegateForColumn(MESSAGE_COL_RSSI, new DecimalDelegate(1, ui->messages));
 
     m_scopeVis = m_navtexDemod->getScopeSink();
     m_scopeVis->setGLScope(ui->glScope);

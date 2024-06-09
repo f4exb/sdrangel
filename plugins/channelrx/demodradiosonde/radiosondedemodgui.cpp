@@ -647,16 +647,16 @@ RadiosondeDemodGUI::RadiosondeDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     TableTapAndHold *tableTapAndHold = new TableTapAndHold(ui->frames);
     connect(tableTapAndHold, &TableTapAndHold::tapAndHold, this, &RadiosondeDemodGUI::customContextMenuRequested);
 
-    ui->frames->setItemDelegateForColumn(FRAME_COL_DATE, new DateTimeDelegate("yyyy/MM/dd"));
-    ui->frames->setItemDelegateForColumn(FRAME_COL_TIME, new TimeDelegate());
-    ui->frames->setItemDelegateForColumn(FRAME_COL_LATITUDE, new DecimalDelegate(5));
-    ui->frames->setItemDelegateForColumn(FRAME_COL_LONGITUDE, new DecimalDelegate(5));
-    ui->frames->setItemDelegateForColumn(FRAME_COL_ALTITUDE, new DecimalDelegate(1));
-    ui->frames->setItemDelegateForColumn(FRAME_COL_SPEED, new DecimalDelegate(1));
-    ui->frames->setItemDelegateForColumn(FRAME_COL_VERTICAL_RATE, new DecimalDelegate(1));
-    ui->frames->setItemDelegateForColumn(FRAME_COL_HEADING, new DecimalDelegate(1));
-    ui->frames->setItemDelegateForColumn(FRAME_COL_GPS_TIME, new DateTimeDelegate("yyyy/MM/dd hh:mm:ss"));
-    ui->frames->setItemDelegateForColumn(FRAME_COL_FREQUENCY, new DecimalDelegate(3));
+    ui->frames->setItemDelegateForColumn(FRAME_COL_DATE, new DateTimeDelegate("yyyy/MM/dd", ui->frames));
+    ui->frames->setItemDelegateForColumn(FRAME_COL_TIME, new TimeDelegate("hh:mm:ss", ui->frames));
+    ui->frames->setItemDelegateForColumn(FRAME_COL_LATITUDE, new DecimalDelegate(5, ui->frames));
+    ui->frames->setItemDelegateForColumn(FRAME_COL_LONGITUDE, new DecimalDelegate(5, ui->frames));
+    ui->frames->setItemDelegateForColumn(FRAME_COL_ALTITUDE, new DecimalDelegate(1, ui->frames));
+    ui->frames->setItemDelegateForColumn(FRAME_COL_SPEED, new DecimalDelegate(1, ui->frames));
+    ui->frames->setItemDelegateForColumn(FRAME_COL_VERTICAL_RATE, new DecimalDelegate(1, ui->frames));
+    ui->frames->setItemDelegateForColumn(FRAME_COL_HEADING, new DecimalDelegate(1, ui->frames));
+    ui->frames->setItemDelegateForColumn(FRAME_COL_GPS_TIME, new DateTimeDelegate("yyyy/MM/dd hh:mm:ss", ui->frames));
+    ui->frames->setItemDelegateForColumn(FRAME_COL_FREQUENCY, new DecimalDelegate(3, ui->frames));
 
     ui->scopeContainer->setVisible(false);
 
