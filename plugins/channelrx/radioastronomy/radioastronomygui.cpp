@@ -66,6 +66,9 @@
 class TimeDeltaDelegate : public QStyledItemDelegate {
 
 public:
+    TimeDeltaDelegate(QObject *parent = nullptr) :
+        QStyledItemDelegate(parent) {}
+
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override
     {
         (void) locale;
@@ -97,6 +100,9 @@ private:
 class HMSDelegate : public QStyledItemDelegate {
 
 public:
+    HMSDelegate(QObject *parent = nullptr) :
+        QStyledItemDelegate(parent) {}
+
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override
     {
         (void) locale;
@@ -109,6 +115,9 @@ public:
 class DMSDelegate : public QStyledItemDelegate {
 
 public:
+    DMSDelegate(QObject *parent = nullptr) :
+        QStyledItemDelegate(parent) {}
+
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override
     {
         (void) locale;
