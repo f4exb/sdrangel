@@ -20,7 +20,6 @@
 
 #include <cmath>
 
-#include <QRegExp>
 #include <QDateTime>
 #include <QDebug>
 
@@ -699,40 +698,6 @@ double Astronomy::refractionPAL(double alt, double pressure, double temperature,
     palRefz(zu, refa, refb, &zr);
 
     return z-Units::radiansToDegrees(zr);
-}
-
-double Astronomy::raToDecimal(const QString& value)
-{
-    QRegExp decimal("^([0-9]+(\\.[0-9]+)?)");
-    QRegExp hms("^([0-9]+)[ h]([0-9]+)[ m]([0-9]+(\\.[0-9]+)?)s?");
-
-    if (decimal.exactMatch(value))
-        return decimal.capturedTexts()[0].toDouble();
-    else if (hms.exactMatch(value))
-    {
-        return Units::hoursMinutesSecondsToDecimal(
-                    hms.capturedTexts()[1].toDouble(),
-                    hms.capturedTexts()[2].toDouble(),
-                    hms.capturedTexts()[3].toDouble());
-    }
-    return 0.0;
-}
-
-double Astronomy::decToDecimal(const QString& value)
-{
-    QRegExp decimal("^(-?[0-9]+(\\.[0-9]+)?)");
-    QRegExp dms(QString("^(-?[0-9]+)[ %1d]([0-9]+)[ 'm]([0-9]+(\\.[0-9]+)?)[\"s]?").arg(QChar(0xb0)));
-
-    if (decimal.exactMatch(value))
-        return decimal.capturedTexts()[0].toDouble();
-    else if (dms.exactMatch(value))
-    {
-        return Units::degreesMinutesSecondsToDecimal(
-                    dms.capturedTexts()[1].toDouble(),
-                    dms.capturedTexts()[2].toDouble(),
-                    dms.capturedTexts()[3].toDouble());
-    }
-    return 0.0;
 }
 
 double Astronomy::lstAndRAToLongitude(double lst, double raHours)

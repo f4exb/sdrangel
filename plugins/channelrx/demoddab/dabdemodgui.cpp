@@ -21,7 +21,7 @@
 
 #include <QDebug>
 #include <QAction>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include "dabdemodgui.h"
 
@@ -423,9 +423,10 @@ void DABDemodGUI::filterRow(int row)
     bool hidden = false;
     if (m_settings.m_filter != "")
     {
-        QRegExp re(m_settings.m_filter);
+        QRegularExpression re(m_settings.m_filter);
         QTableWidgetItem *fromItem = ui->programs->item(row, PROGRAMS_COL_NAME);
-        if (re.indexIn(fromItem->text()) == -1)
+        QRegularExpressionMatch match = re.match(fromItem->text());
+        if (!match.hasMatch())
             hidden = true;
     }
     ui->programs->setRowHidden(row, hidden);

@@ -26,7 +26,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QAction>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QClipboard>
 #include <QFileDialog>
 #include <QImage>
@@ -6054,10 +6054,11 @@ void RadioAstronomyGUI::networkManagerFinished(QNetworkReply *reply)
     else
     {
         QString answer = reply->readAll();
-        QRegExp re("a href=\\\"download.php([^\"]*)\"");
-        if (re.indexIn(answer) != -1)
+        QRegularExpression re("a href=\\\"download.php([^\"]*)\"");
+        QRegularExpressionMatch match = re.match(answer);
+        if (match.hasMatch())
         {
-            QString filename = re.capturedTexts()[1];
+            QString filename = match.capturedTexts()[1];
             qDebug() << "RadioAstronomyGUI: Downloading LAB reference data: " << filename;
             m_dlm.download(QUrl("https://www.astro.uni-bonn.de/hisurvey/euhou/LABprofile/download.php" + filename), m_filenameLAB);
         }

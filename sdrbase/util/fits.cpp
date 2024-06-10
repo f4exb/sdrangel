@@ -20,7 +20,7 @@
 #include <cmath>
 
 #include <QtGlobal>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QDebug>
 #include <QResource>
 
@@ -49,59 +49,73 @@ FITS::FITS(QString resourceName) :
     int hLen = std::min((qint64)m_headerSize * 3, m_fileSize);   // Could possibly be bigger
     QByteArray headerBytes = m_data.left(hLen);
     QString header = QString::fromLatin1(headerBytes);
-    QRegExp widthRE("NAXIS1 *= *([0-9]+)");
-    QRegExp heightRE("NAXIS2 *= *([0-9]+)");
-    QRegExp bitsPerPixelRE("BITPIX *= *(-?[0-9]+)");
-    QRegExp bzeroRE("BZERO *= *([0-9]+)");
-    QRegExp bscaleRE("BSCALE *= *(-?[0-9]+(.[0-9]+)?)");
-    QRegExp buintRE("BUNIT *= *\\'([A-Z ]+)\\'");
-    QRegExp cdelt1RE("CDELT1 *= *(-?[0-9]+(.[0-9]+)?)");
-    QRegExp cdelt2RE("CDELT2 *= *(-?[0-9]+(.[0-9]+)?)");
-    QRegExp endRE("END {77}");
+    QRegularExpression widthRE("NAXIS1 *= *([0-9]+)");
+    QRegularExpression heightRE("NAXIS2 *= *([0-9]+)");
+    QRegularExpression bitsPerPixelRE("BITPIX *= *(-?[0-9]+)");
+    QRegularExpression bzeroRE("BZERO *= *([0-9]+)");
+    QRegularExpression bscaleRE("BSCALE *= *(-?[0-9]+(.[0-9]+)?)");
+    QRegularExpression buintRE("BUNIT *= *\\'([A-Z ]+)\\'");
+    QRegularExpression cdelt1RE("CDELT1 *= *(-?[0-9]+(.[0-9]+)?)");
+    QRegularExpression cdelt2RE("CDELT2 *= *(-?[0-9]+(.[0-9]+)?)");
+    QRegularExpression endRE("END {77}");
+    QRegularExpressionMatch match;
 
-    if (widthRE.indexIn(header) != -1)
-        m_width = widthRE.capturedTexts()[1].toInt();
+    match = widthRE.match(header);
+    if (match.hasMatch())
+        m_width = match.capturedTexts()[1].toInt();
     else
     {
         qWarning() << "FITS: NAXIS1 missing";
         return;
     }
-    if (heightRE.indexIn(header) != -1)
-        m_height = heightRE.capturedTexts()[1].toInt();
+
+    match = heightRE.match(header);
+    if (match.hasMatch())
+        m_height = match.capturedTexts()[1].toInt();
     else
     {
         qWarning() << "FITS: NAXIS2 missing";
         return;
     }
-    if (bitsPerPixelRE.indexIn(header) != -1)
-        m_bitsPerPixel = bitsPerPixelRE.capturedTexts()[1].toInt();
+
+    match = bitsPerPixelRE.match(header);
+    if (match.hasMatch())
+        m_bitsPerPixel = match.capturedTexts()[1].toInt();
     else
     {
         qWarning() << "FITS: BITPIX missing";
         return;
     }
+
     m_bytesPerPixel = abs(m_bitsPerPixel)/8;
-    if (bzeroRE.indexIn(header) != -1)
-        m_bzero = bzeroRE.capturedTexts()[1].toInt();
+    match = bzeroRE.match(header);
+    if (match.hasMatch())
+        m_bzero = match.capturedTexts()[1].toInt();
     else
         m_bzero = 0;
-    if (bscaleRE.indexIn(header) != -1)
-        m_bscale = bscaleRE.capturedTexts()[1].toDouble();
+
+    match = bscaleRE.match(header);
+    if (match.hasMatch())
+        m_bscale = match.capturedTexts()[1].toDouble();
     else
         m_bscale = 1.0;
 
-    if (cdelt1RE.indexIn(header) != -1)
-        m_cdelta1 = cdelt1RE.capturedTexts()[1].toDouble();
+    match = cdelt1RE.match(header);
+    if (match.hasMatch())
+        m_cdelta1 = match.capturedTexts()[1].toDouble();
     else
         m_cdelta1 = 0.0;
-    if (cdelt2RE.indexIn(header) != -1)
-        m_cdelta2 = cdelt2RE.capturedTexts()[1].toDouble();
+
+    match = cdelt2RE.match(header);
+    if (match.hasMatch())
+        m_cdelta2 = match.capturedTexts()[1].toDouble();
     else
         m_cdelta2 = 0.0;
 
-    if (buintRE.indexIn(header) != -1)
+    match = buintRE.match(header);
+    if (match.hasMatch())
     {
-        m_buint = buintRE.capturedTexts()[1].trimmed();
+        m_buint = match.capturedTexts()[1].trimmed();
         if (m_buint.contains("MILLI"))
             m_uintScale = 0.001f;
         else
@@ -109,8 +123,10 @@ FITS::FITS(QString resourceName) :
     }
     else
         m_uintScale = 1.0f;
-    int endIdx = endRE.indexIn(header);
-    if (endIdx == -1)
+
+    match = endRE.match(header);
+    int endIdx = match.capturedStart(0);
+    if (!match.hasMatch())
     {
         qWarning() << "FITS: END missing";
         return;

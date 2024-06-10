@@ -20,7 +20,7 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QAction>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QClipboard>
 #include <QFileDialog>
 #include <QScrollBar>
@@ -473,9 +473,10 @@ void RadiosondeDemodGUI::filterRow(int row)
     bool hidden = false;
     if (m_settings.m_filterSerial != "")
     {
-        QRegExp re(m_settings.m_filterSerial);
+        QRegularExpression re(QRegularExpression::anchoredPattern(m_settings.m_filterSerial));
         QTableWidgetItem *fromItem = ui->frames->item(row, FRAME_COL_SERIAL);
-        if (!re.exactMatch(fromItem->text()))
+        QRegularExpressionMatch match = re.match(fromItem->text());
+        if (!match.hasMatch())
             hidden = true;
     }
     ui->frames->setRowHidden(row, hidden);

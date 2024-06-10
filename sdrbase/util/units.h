@@ -24,7 +24,7 @@
 #include <cmath>
 #include <QString>
 #include <QStringList>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QDebug>
 
 #include "export.h"
@@ -158,35 +158,35 @@ public:
     // Also supports decimal degrees
     static bool degreeMinuteAndSecondsToDecimalDegrees(const QString& string, float& degrees)
     {
-        QRegExp decimal("(-?[0-9]+(\\.[0-9]+)?)");
-        if (decimal.exactMatch(string))
+        QRegularExpression decimal(QRegularExpression::anchoredPattern("(-?[0-9]+(\\.[0-9]+)?)"));
+        QRegularExpressionMatch match;
+        match = decimal.match(string);
+        if (match.hasMatch())
         {
-             degrees = decimal.capturedTexts()[1].toFloat();
+             degrees = match.capturedTexts()[1].toFloat();
              return true;
         }
-        QRegExp dms(QString("(-)?([0-9]+)[%1d](([0-9]+)['m](([0-9]+(\\.[0-9]+)?)[\"s])?)?").arg(QChar(0xb0)));
-        if (dms.exactMatch(string))
+
+        QRegularExpression dms(QRegularExpression::anchoredPattern(QString("(-)?([0-9]+)[%1d](([0-9]+)['m](([0-9]+(\\.[0-9]+)?)[\"s])?)?").arg(QChar(0xb0))));
+        match = dms.match(string);
+        if (match.hasMatch())
         {
             float d = 0.0f;
             bool neg = false;
-            for (int i = 0; i < dms.captureCount(); i++) {
-                qDebug() << dms.capturedTexts()[i];
-            }
             if (dms.captureCount() >= 1) {
-                neg = dms.capturedTexts()[1] == "-";
+                neg = match.capturedTexts()[1] == "-";
             }
             if (dms.captureCount() >= 3) {
-                d = dms.capturedTexts()[2].toFloat();
+                d = match.capturedTexts()[2].toFloat();
             }
             float m = 0.0f;
             if (dms.captureCount() >= 5) {
-                m = dms.capturedTexts()[4].toFloat();
+                m = match.capturedTexts()[4].toFloat();
             }
             float s = 0.0f;
             if (dms.captureCount() >= 7) {
-                s = dms.capturedTexts()[6].toFloat();
+                s = match.capturedTexts()[6].toFloat();
             }
-            qDebug() << neg << d << m << s;
             degrees = d + m/60.0 + s/(60.0*60.0);
             if (neg) {
                 degrees = -degrees;
@@ -271,24 +271,29 @@ public:
     // We support both decimal and DMS formats
     static bool stringToLatitudeAndLongitude(const QString& string, float& latitude, float& longitude)
     {
-        QRegExp decimal("(-?[0-9]+(\\.[0-9]+)?) *,? *(-?[0-9]+(\\.[0-9]+)?)");
-        if (decimal.exactMatch(string))
+        QRegularExpressionMatch match;
+
+        QRegularExpression decimal(QRegularExpression::anchoredPattern("(-?[0-9]+(\\.[0-9]+)?) *,? *(-?[0-9]+(\\.[0-9]+)?)"));
+        match = decimal.match(string);
+        if (match.hasMatch())
         {
-             latitude = decimal.capturedTexts()[1].toFloat();
-             longitude = decimal.capturedTexts()[3].toFloat();
+             latitude = match.capturedTexts()[1].toFloat();
+             longitude = match.capturedTexts()[3].toFloat();
              return true;
         }
-        QRegExp dms(QString("([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([NS]) *,? *([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([EW])").arg(QChar(0xb0)));
-        if (dms.exactMatch(string))
+
+        QRegularExpression dms(QRegularExpression::anchoredPattern(QString("([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([NS]) *,? *([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([EW])").arg(QChar(0xb0))));
+        match = dms.match(string);
+        if (match.hasMatch())
         {
-             float latD = dms.capturedTexts()[1].toFloat();
-             float latM = dms.capturedTexts()[2].toFloat();
-             float latS = dms.capturedTexts()[3].toFloat();
-             bool north = dms.capturedTexts()[5] == "N";
-             float lonD = dms.capturedTexts()[6].toFloat();
-             float lonM = dms.capturedTexts()[7].toFloat();
-             float lonS = dms.capturedTexts()[8].toFloat();
-             bool east = dms.capturedTexts()[10] == "E";
+             float latD = match.capturedTexts()[1].toFloat();
+             float latM = match.capturedTexts()[2].toFloat();
+             float latS = match.capturedTexts()[3].toFloat();
+             bool north = match.capturedTexts()[5] == "N";
+             float lonD = match.capturedTexts()[6].toFloat();
+             float lonM = match.capturedTexts()[7].toFloat();
+             float lonS = match.capturedTexts()[8].toFloat();
+             bool east = match.capturedTexts()[10] == "E";
              latitude = latD + latM/60.0 + latS/(60.0*60.0);
              if (!north)
                  latitude = -latitude;
@@ -297,17 +302,19 @@ public:
                  longitude = -longitude;
              return true;
         }
-        QRegExp dms2(QString("([0-9]+)([NS])([0-9]{2})([0-9]{2}) *,?([0-9]+)([EW])([0-9]{2})([0-9]{2})"));
-        if (dms2.exactMatch(string))
+
+        QRegularExpression dms2(QRegularExpression::anchoredPattern(QString("([0-9]+)([NS])([0-9]{2})([0-9]{2}) *,?([0-9]+)([EW])([0-9]{2})([0-9]{2})")));
+        match = dms2.match(string);
+        if (match.hasMatch())
         {
-             float latD = dms2.capturedTexts()[1].toFloat();
-             bool north = dms2.capturedTexts()[2] == "N";
-             float latM = dms2.capturedTexts()[3].toFloat();
-             float latS = dms2.capturedTexts()[4].toFloat();
-             float lonD = dms2.capturedTexts()[5].toFloat();
-             bool east = dms2.capturedTexts()[6] == "E";
-             float lonM = dms2.capturedTexts()[7].toFloat();
-             float lonS = dms2.capturedTexts()[8].toFloat();
+             float latD = match.capturedTexts()[1].toFloat();
+             bool north = match.capturedTexts()[2] == "N";
+             float latM = match.capturedTexts()[3].toFloat();
+             float latS = match.capturedTexts()[4].toFloat();
+             float lonD = match.capturedTexts()[5].toFloat();
+             bool east = match.capturedTexts()[6] == "E";
+             float lonM = match.capturedTexts()[7].toFloat();
+             float lonS = match.capturedTexts()[8].toFloat();
              latitude = latD + latM/60.0 + latS/(60.0*60.0);
              if (!north)
                  latitude = -latitude;
@@ -316,18 +323,20 @@ public:
                  longitude = -longitude;
              return true;
         }
+
         // 512255.5900N 0024400.6105W as used on aviation charts
-        QRegExp dms3(QString("(\\d{2})(\\d{2})((\\d{2})(\\.\\d+)?)([NS]) *,?(\\d{3})(\\d{2})((\\d{2})(\\.\\d+)?)([EW])"));
-        if (dms3.exactMatch(string))
+        QRegularExpression dms3(QRegularExpression::anchoredPattern(QString("(\\d{2})(\\d{2})((\\d{2})(\\.\\d+)?)([NS]) *,?(\\d{3})(\\d{2})((\\d{2})(\\.\\d+)?)([EW])")));
+        match = dms3.match(string);
+        if (match.hasMatch())
         {
-             float latD = dms3.capturedTexts()[1].toFloat();
-             float latM = dms3.capturedTexts()[2].toFloat();
-             float latS = dms3.capturedTexts()[3].toFloat();
-             bool north = dms3.capturedTexts()[6] == "N";
-             float lonD = dms3.capturedTexts()[7].toFloat();
-             float lonM = dms3.capturedTexts()[8].toFloat();
-             float lonS = dms3.capturedTexts()[9].toFloat();
-             bool east = dms3.capturedTexts()[12] == "E";
+             float latD = match.capturedTexts()[1].toFloat();
+             float latM = match.capturedTexts()[2].toFloat();
+             float latS = match.capturedTexts()[3].toFloat();
+             bool north = match.capturedTexts()[6] == "N";
+             float lonD = match.capturedTexts()[7].toFloat();
+             float lonM = match.capturedTexts()[8].toFloat();
+             float lonS = match.capturedTexts()[9].toFloat();
+             bool east = match.capturedTexts()[12] == "E";
              latitude = latD + latM/60.0 + latS/(60.0*60.0);
              if (!north)
                  latitude = -latitude;
@@ -348,17 +357,19 @@ public:
     //      107.1324 -34.233
     static bool stringToRADec(const QString& string, float& ra, float& dec)
     {
-        QRegExp dms("([0-9]+)[ :h]([0-9]+)[ :m]([0-9]+(\\.[0-9]+)?)s? *,? *([+-]?[0-9]+)[ :d]([0-9]+)[ :m]([0-9]+(\\.[0-9]+)?)s?");
-        if (dms.exactMatch(string))
+        QRegularExpressionMatch match;
+        QRegularExpression dms(QRegularExpression::anchoredPattern("([0-9]+)[ :h]([0-9]+)[ :m]([0-9]+(\\.[0-9]+)?)s? *,? *([+-]?[0-9]+)[ :d]([0-9]+)[ :m]([0-9]+(\\.[0-9]+)?)s?"));
+        match = dms.match(string);
+        if (match.hasMatch())
         {
-            int raHours = dms.capturedTexts()[1].toInt();
-            int raMins = dms.capturedTexts()[2].toInt();
-            float raSecs = dms.capturedTexts()[3].toFloat();
+            int raHours = match.capturedTexts()[1].toInt();
+            int raMins = match.capturedTexts()[2].toInt();
+            float raSecs = match.capturedTexts()[3].toFloat();
             ra = raHours + raMins / 60.0f + raSecs / (60.0f * 60.0f);
             qDebug() << ra << raHours << raMins << raSecs;
-            int decDegs = dms.capturedTexts()[5].toInt();
-            int decMins = dms.capturedTexts()[6].toInt();
-            float decSecs = dms.capturedTexts()[7].toFloat();
+            int decDegs = match.capturedTexts()[5].toInt();
+            int decMins = match.capturedTexts()[6].toInt();
+            float decSecs = match.capturedTexts()[7].toFloat();
             bool neg = decDegs < 0;
             dec = abs(decDegs) + decMins / 60.0f + decSecs / (60.0f * 60.0f);
             if (neg) {
@@ -366,14 +377,54 @@ public:
             }
             return true;
         }
-        QRegExp decimal("([0-9]+(\\.[0-9]+)?) *,? *([+-]?[0-9]+(\\.[0-9]+)?)");
-        if (decimal.exactMatch(string))
+
+        QRegularExpression decimal(QRegularExpression::anchoredPattern("([0-9]+(\\.[0-9]+)?) *,? *([+-]?[0-9]+(\\.[0-9]+)?)"));
+        match = decimal.match(string);
+        if (match.hasMatch())
         {
-            ra = decimal.capturedTexts()[1].toFloat();
-            dec = decimal.capturedTexts()[3].toFloat();
+            ra = match.capturedTexts()[1].toFloat();
+            dec = match.capturedTexts()[3].toFloat();
             return true;
         }
         return false;
+    }
+
+    static double raToDecimal(const QString& value)
+    {
+        QRegularExpression decimal(QRegularExpression::anchoredPattern("^([0-9]+(\\.[0-9]+)?)"));
+        QRegularExpression hms(QRegularExpression::anchoredPattern("^([0-9]+)[ h]([0-9]+)[ m]([0-9]+(\\.[0-9]+)?)s?"));
+        QRegularExpressionMatch decimalMatch = decimal.match(value);
+        QRegularExpressionMatch hmsMatch = hms.match(value);
+
+        if (decimalMatch.hasMatch())
+            return decimalMatch.capturedTexts()[0].toDouble();
+        else if (hmsMatch.hasMatch())
+        {
+            return Units::hoursMinutesSecondsToDecimal(
+                        hmsMatch.capturedTexts()[1].toDouble(),
+                        hmsMatch.capturedTexts()[2].toDouble(),
+                        hmsMatch.capturedTexts()[3].toDouble());
+        }
+        return 0.0;
+    }
+
+    static double decToDecimal(const QString& value)
+    {
+        QRegularExpression decimal(QRegularExpression::anchoredPattern("^(-?[0-9]+(\\.[0-9]+)?)"));
+        QRegularExpression dms(QRegularExpression::anchoredPattern(QString("^(-?[0-9]+)[ %1d]([0-9]+)[ 'm]([0-9]+(\\.[0-9]+)?)[\"s]?").arg(QChar(0xb0))));
+        QRegularExpressionMatch decimalMatch = decimal.match(value);
+        QRegularExpressionMatch dmsMatch = dms.match(value);
+
+        if (decimalMatch.hasMatch())
+            return decimalMatch.capturedTexts()[0].toDouble();
+        else if (dmsMatch.hasMatch())
+        {
+            return Units::degreesMinutesSecondsToDecimal(
+                        dmsMatch.capturedTexts()[1].toDouble(),
+                        dmsMatch.capturedTexts()[2].toDouble(),
+                        dmsMatch.capturedTexts()[3].toDouble());
+        }
+        return 0.0;
     }
 
     static float solarFluxUnitsToJansky(float sfu)

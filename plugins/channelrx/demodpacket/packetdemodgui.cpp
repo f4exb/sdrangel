@@ -19,7 +19,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QAction>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QFileDialog>
 #include <QScrollBar>
 
@@ -330,16 +330,18 @@ void PacketDemodGUI::filterRow(int row)
     bool hidden = false;
     if (m_settings.m_filterFrom != "")
     {
-        QRegExp re(m_settings.m_filterFrom);
+        QRegularExpression re(QRegularExpression::anchoredPattern(m_settings.m_filterFrom));
         QTableWidgetItem *fromItem = ui->packets->item(row, PACKET_COL_FROM);
-        if (!re.exactMatch(fromItem->text()))
+        QRegularExpressionMatch match = re.match(fromItem->text());
+        if (!match.hasMatch())
             hidden = true;
     }
     if (m_settings.m_filterTo != "")
     {
-        QRegExp re(m_settings.m_filterTo);
+        QRegularExpression re(QRegularExpression::anchoredPattern(m_settings.m_filterTo));
         QTableWidgetItem *toItem = ui->packets->item(row, PACKET_COL_TO);
-        if (!re.exactMatch(toItem->text()))
+        QRegularExpressionMatch match = re.match(toItem->text());
+        if (!match.hasMatch())
             hidden = true;
     }
     if (m_settings.m_filterPID != "")

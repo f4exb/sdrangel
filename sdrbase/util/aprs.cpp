@@ -17,7 +17,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QRegExp>
 #include <QRegularExpression>
 #include <QStringList>
 #include <QDateTime>
@@ -407,34 +406,37 @@ bool APRSPacket::parseDataExension(QString& info, int& idx)
     QString s = info.right(remainingLength);
 
     // Course and speed
-    QRegExp courseSpeed("^([0-9]{3})\\/([0-9]{3})");
-    if (courseSpeed.indexIn(s) >= 0)
+    QRegularExpression courseSpeed("^([0-9]{3})\\/([0-9]{3})");
+    QRegularExpressionMatch match;
+    match = courseSpeed.match(s);
+    if (match.hasMatch())
     {
-        m_course = courseSpeed.capturedTexts()[1].toInt();
-        m_speed = courseSpeed.capturedTexts()[2].toInt();
+        m_course = match.capturedTexts()[1].toInt();
+        m_speed = match.capturedTexts()[2].toInt();
         m_hasCourseAndSpeed = true;
         idx += 7;
         return true;
     }
 
     // Station radio details
-    QRegExp phg("^PHG([0-9])([0-9])([0-9])([0-9])");
-    if (phg.indexIn(s) >= 0)
+    QRegularExpression phg("^PHG([0-9])([0-9])([0-9])([0-9])");
+    match = phg.match(s);
+    if (match.hasMatch())
     {
         // Transmitter power
-        int powerCode = phg.capturedTexts()[1].toInt();
+        int powerCode = match.capturedTexts()[1].toInt();
         int powerMap[] = {0, 1, 4, 9, 16, 25, 36, 49, 64, 81};
         m_powerWatts = powerMap[powerCode];
 
         // Antenna height
-        int heightCode = phg.capturedTexts()[2].toInt();
+        int heightCode = match.capturedTexts()[2].toInt();
         m_antennaHeightFt = heightMap[heightCode];
 
         // Antenna gain
-        m_antennaGainDB = phg.capturedTexts()[3].toInt();
+        m_antennaGainDB = match.capturedTexts()[3].toInt();
 
         // Antenna directivity
-        int directivityCode = phg.capturedTexts()[4].toInt();
+        int directivityCode = match.capturedTexts()[4].toInt();
         m_antennaDirectivity = directivityMap[directivityCode];
 
         m_hasStationDetails = true;
@@ -444,31 +446,33 @@ bool APRSPacket::parseDataExension(QString& info, int& idx)
     }
 
     // Radio range
-    QRegExp rng("^RNG([0-9]{4})");
-    if (rng.indexIn(s) >= 0)
+    QRegularExpression rng("^RNG([0-9]{4})");
+    match = rng.match(s);
+    if (match.hasMatch())
     {
-        m_radioRangeMiles = rng.capturedTexts()[1].toInt();
+        m_radioRangeMiles = match.capturedTexts()[1].toInt();
         m_hasRadioRange = true;
         idx += 7;
         return true;
     }
 
     // Omni-DF strength
-    QRegExp dfs("^DFS([0-9])([0-9])([0-9])([0-9])");
-    if (dfs.indexIn(s) >= 0)
+    QRegularExpression dfs("^DFS([0-9])([0-9])([0-9])([0-9])");
+    match = dfs.match(s);
+    if (match.hasMatch())
     {
         // Strength S-points
-        m_dfStrength = dfs.capturedTexts()[1].toInt();
+        m_dfStrength = match.capturedTexts()[1].toInt();
 
         // Antenna height
-        int heightCode = dfs.capturedTexts()[2].toInt();
+        int heightCode = match.capturedTexts()[2].toInt();
         m_dfHeightFt = heightMap[heightCode];
 
         // Antenna gain
-        m_dfGainDB = dfs.capturedTexts()[3].toInt();
+        m_dfGainDB = match.capturedTexts()[3].toInt();
 
         // Antenna directivity
-        int directivityCode = dfs.capturedTexts()[4].toInt();
+        int directivityCode = match.capturedTexts()[4].toInt();
         m_dfAntennaDirectivity = directivityMap[directivityCode];
 
         m_hasDf = true;
@@ -487,14 +491,14 @@ bool APRSPacket::parseComment(QString& info, int& idx)
         m_comment = info.right(commentLength);
 
         // Comment can contain altitude anywhere in it. Of the form /A=001234 in feet
-        QRegExp re("\\/A=([0-9]{6})");
-        int pos = re.indexIn(m_comment);
-        if (pos >= 0)
+        QRegularExpression re("\\/A=([0-9]{6})");
+        QRegularExpressionMatch match = re.match(m_comment);
+        if (match.hasMatch())
         {
-            m_altitudeFt = re.capturedTexts()[1].toInt();
+            m_altitudeFt = match.capturedTexts()[1].toInt();
             m_hasAltitude = true;
             // Strip it out of comment if at start of string
-            if (pos == 0)
+            if (match.capturedStart(0) == 0)
                 m_comment = m_comment.mid(9);
         }
     }
@@ -755,18 +759,20 @@ bool APRSPacket::parseStatus(QString& info, int& idx)
 {
     QString remaining = info.mid(idx);
 
-    QRegExp timestampRE("^([0-9]{6})z");                         // DHM timestamp
-    QRegExp maidenheadRE("^([A-Z]{2}[0-9]{2}[A-Z]{0,2})[/\\\\]."); // Maidenhead grid locator and symbol
+    QRegularExpression timestampRE("^([0-9]{6})z");                         // DHM timestamp
+    QRegularExpression maidenheadRE("^([A-Z]{2}[0-9]{2}[A-Z]{0,2})[/\\\\]."); // Maidenhead grid locator and symbol
+    QRegularExpressionMatch matchTimestamp = timestampRE.match(remaining);
+    QRegularExpressionMatch matchMaidenhead = maidenheadRE.match(remaining);
 
-    if (timestampRE.indexIn(remaining) >= 0)
+    if (matchTimestamp.hasMatch())
     {
         parseTime(info, idx);
         m_status = info.mid(idx);
         idx += m_status.length();
     }
-    else if (maidenheadRE.indexIn(remaining) >= 0)
+    else if (matchMaidenhead.hasMatch())
     {
-        m_maidenhead = maidenheadRE.capturedTexts()[1];
+        m_maidenhead = matchMaidenhead.capturedTexts()[1];
         idx += m_maidenhead.length();
         m_symbolTable = info[idx++].toLatin1();
         m_symbolCode = info[idx++].toLatin1();
@@ -959,10 +965,11 @@ bool APRSPacket::parseMessage(QString& info, int& idx)
     else
     {
         // Check for message number
-        QRegExp noRE("\\{([0-9]{1,5})$");
-        if (noRE.indexIn(m_message) >= 0)
+        QRegularExpression noRE("\\{([0-9]{1,5})$");
+        QRegularExpressionMatch match = noRE.match(m_message);
+        if (match.hasMatch())
         {
-            m_messageNo = noRE.capturedTexts()[1];
+            m_messageNo = match.capturedTexts()[1];
             m_message = m_message.left(m_message.length() - m_messageNo.length() - 1);
         }
     }
