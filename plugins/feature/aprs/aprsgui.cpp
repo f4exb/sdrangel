@@ -1147,9 +1147,10 @@ void APRSGUI::filterMessageRow(int row)
     bool hidden = false;
     if (m_settings.m_filterAddressee != "")
     {
-        QRegExp re(m_settings.m_filterAddressee);
+        QRegularExpression re(m_settings.m_filterAddressee);
         QTableWidgetItem *addressee = ui->messagesTable->item(row, MESSAGE_COL_ADDRESSEE);
-        if (!re.exactMatch(addressee->text()))
+        QRegularExpressionMatch match = re.match(addressee->text());
+        if (!match.hasMatch())
             hidden = true;
     }
     ui->messagesTable->setRowHidden(row, hidden);

@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QAction>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QFileDialog>
 #include <QScrollBar>
 
@@ -345,9 +345,10 @@ void EndOfTrainDemodGUI::filterRow(int row)
     bool hidden = false;
     if (m_settings.m_filterFrom != "")
     {
-        QRegExp re(m_settings.m_filterFrom);
+        QRegularExpression re(QRegularExpression::anchoredPattern(m_settings.m_filterFrom));
         QTableWidgetItem *fromItem = ui->packets->item(row, PACKETS_COL_ADDRESS);
-        if (!re.exactMatch(fromItem->text()))
+        QRegularExpressionMatch match = re.match(fromItem->text());
+        if (!match.hasMatch())
             hidden = true;
     }
     ui->packets->setRowHidden(row, hidden);

@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <QMessageBox>
 #include <QLineEdit>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QGraphicsScene>
@@ -1253,8 +1253,8 @@ void StarTrackerGUI::plotGalacticLineOfSight()
     }
 
     // Calculate Galactic longitude we're observing
-    float ra = Astronomy::raToDecimal(m_settings.m_ra);
-    float dec = Astronomy::decToDecimal(m_settings.m_dec);
+    float ra = Units::raToDecimal(m_settings.m_ra);
+    float dec = Units::decToDecimal(m_settings.m_dec);
     double l, b;
     Astronomy::equatorialToGalactic(ra, dec, l, b);
 
@@ -1365,8 +1365,8 @@ void StarTrackerGUI::plotSkyTemperatureChart()
     }
 
     QScatterSeries *series = new QScatterSeries();
-    float ra = Astronomy::raToDecimal(m_settings.m_ra);
-    float dec = Astronomy::decToDecimal(m_settings.m_dec);
+    float ra = Units::raToDecimal(m_settings.m_ra);
+    float dec = Units::decToDecimal(m_settings.m_dec);
 
     double beamWidth = m_settings.m_beamwidth;
     // Ellipse not supported, so draw circle on shorter axis
@@ -1664,8 +1664,8 @@ void StarTrackerGUI::plotElevationLineChart()
         }
         else
         {
-            rd.ra = Astronomy::raToDecimal(m_settings.m_ra);
-            rd.dec = Astronomy::decToDecimal(m_settings.m_dec);
+            rd.ra = Units::raToDecimal(m_settings.m_ra);
+            rd.dec = Units::decToDecimal(m_settings.m_dec);
             aa = Astronomy::raDecToAzAlt(rd, m_settings.m_latitude, m_settings.m_longitude, dt, !m_settings.m_jnow);
         }
 
@@ -1850,8 +1850,8 @@ void StarTrackerGUI::plotElevationPolarChart()
         }
         else
         {
-            rd.ra = Astronomy::raToDecimal(m_settings.m_ra);
-            rd.dec = Astronomy::decToDecimal(m_settings.m_dec);
+            rd.ra = Units::raToDecimal(m_settings.m_ra);
+            rd.dec = Units::decToDecimal(m_settings.m_dec);
             aa = Astronomy::raDecToAzAlt(rd, m_settings.m_latitude, m_settings.m_longitude, dt, !m_settings.m_jnow);
         }
 
@@ -2282,12 +2282,13 @@ bool StarTrackerGUI::readSolarFlux()
             // 000000 000019 000027 000037 000056 000073 000116 000202 000514  sfu
             // Occasionally, file will contain ////// in a column, presumably to indicate no data
             // Values can be negative
-            QRegExp re("([0-9]{2})([0-9]{2})([0-9]{2}) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+)");
+            QRegularExpression re("([0-9]{2})([0-9]{2})([0-9]{2}) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+) (-?[0-9\\/]+)");
+            QRegularExpressionMatch match = re.match(string);
 
-            if (re.indexIn(string) != -1)
+            if (match.hasMatch())
             {
                 for (int i = 0; i < 8; i++)
-                    m_solarFluxes[i] = re.capturedTexts()[i+4].toInt();
+                    m_solarFluxes[i] = match.capturedTexts()[i+4].toInt();
                 m_solarFluxesValid = true;
                 displaySolarFlux();
                 plotChart();
@@ -2322,11 +2323,12 @@ void StarTrackerGUI::networkManagerFinished(QNetworkReply *reply)
     else
     {
         QString answer = reply->readAll();
-        QRegExp re("\\<th\\>Observed Flux Density\\<\\/th\\>\\<td\\>([0-9]+(\\.[0-9]+)?)\\<\\/td\\>");
+        QRegularExpression re("\\<th\\>Observed Flux Density\\<\\/th\\>\\<td\\>([0-9]+(\\.[0-9]+)?)\\<\\/td\\>");
+        QRegularExpressionMatch match = re.match(answer);
 
-        if (re.indexIn(answer) != -1)
+        if (match.hasMatch())
         {
-            m_solarFlux = re.capturedTexts()[1].toDouble();
+            m_solarFlux = match.capturedTexts()[1].toDouble();
             displaySolarFlux();
         }
         else

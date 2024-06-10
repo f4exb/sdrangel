@@ -64,9 +64,6 @@ public:
     static double refractionSaemundsson(double alt, double pressure, double temperature);
     static double refractionPAL(double alt, double pressure, double temperature, double humidity, double frequency, double latitude, double heightAboveSeaLevel, double temperatureLapseRate);
 
-    static double raToDecimal(const QString& value);
-    static double decToDecimal(const QString& value);
-
     static double lstAndRAToLongitude(double lst, double raHours);
 
     static void equatorialToGalactic(double ra, double dec, double& l, double& b);

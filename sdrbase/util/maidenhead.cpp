@@ -19,7 +19,7 @@
 
 #include <cmath>
 
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include "maidenhead.h"
 
@@ -83,6 +83,6 @@ bool Maidenhead::isMaidenhead(const QString& maidenhead)
     int length = maidenhead.length();
     if ((length != 4) && (length != 6) && (length != 8))
         return false;
-    QRegExp re("[A-Ra-r][A-Ra-r][0-9][0-9]([A-Xa-x][A-Xa-x]([0-9][0-9])?)?");
-    return re.exactMatch(maidenhead);
+    QRegularExpression re(QRegularExpression::anchoredPattern("[A-Ra-r][A-Ra-r][0-9][0-9]([A-Xa-x][A-Xa-x]([0-9][0-9])?)?"));
+    return re.match(maidenhead).hasMatch();
 }

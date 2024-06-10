@@ -23,7 +23,7 @@
 #include <QHash>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <QRegExp>
+#include <QRegularExpression>
 
 struct SatNogsTransmitter {
 
@@ -196,10 +196,11 @@ struct SatNogsSatellite {
         // tle0 is of the form:
         //   MOZHAYETS 4 (RS-22)
         //   GOES 9 [-]
-        QRegExp re("([A-Za-z0-9\\- ]+)([\\(]([A-Z0-9\\- ]+)[\\)])?");
-        if (re.indexIn(tle->m_tle0) != -1)
+        QRegularExpression re("([A-Za-z0-9\\- ]+)([\\(]([A-Z0-9\\- ]+)[\\)])?");
+        QRegularExpressionMatch match = re.match(tle->m_tle0);
+        if (match.hasMatch())
         {
-            QStringList groups = re.capturedTexts();
+            QStringList groups = match.capturedTexts();
             m_name = groups[1].trimmed();
             if ((groups.size() >= 4) && (groups[3] != "-") && !groups[3].isEmpty())
                 m_names = QStringList({groups[3].trimmed()});

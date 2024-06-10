@@ -22,7 +22,6 @@
 #include <QAction>
 #include <QClipboard>
 #include <QFileDialog>
-#include <QRegExp>
 #include <QScrollBar>
 #include <QMenu>
 #include <QDesktopServices>
@@ -467,8 +466,9 @@ void DSCDemodGUI::filterRow(int row)
     if (m_settings.m_filter != "")
     {
         QTableWidgetItem *item = ui->messages->item(row, m_settings.m_filterColumn);
-        QRegExp re(m_settings.m_filter);
-        if (!re.exactMatch(item->text())) {
+        QRegularExpression re(m_settings.m_filter);
+        QRegularExpressionMatch match = re.match(item->text());
+        if (!match.hasMatch()) {
             hidden = true;
         }
     }

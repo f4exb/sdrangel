@@ -580,8 +580,8 @@ void StarTrackerWorker::update()
     else
     {
         // Convert RA/Dec to Alt/Az
-        rd.ra = Astronomy::raToDecimal(m_settings.m_ra);
-        rd.dec = Astronomy::decToDecimal(m_settings.m_dec);
+        rd.ra = Units::raToDecimal(m_settings.m_ra);
+        rd.dec = Units::decToDecimal(m_settings.m_dec);
         aa = Astronomy::raDecToAzAlt(rd, m_settings.m_latitude, m_settings.m_longitude, dt, !m_settings.m_jnow);
         Astronomy::equatorialToGalactic(rd.ra, rd.dec, l, b);
     }

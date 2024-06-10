@@ -24,7 +24,7 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QAction>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QClipboard>
 #include <QFileDialog>
 #include <QScrollBar>
@@ -636,9 +636,10 @@ void AISDemodGUI::filterRow(int row)
     bool hidden = false;
     if (m_settings.m_filterMMSI != "")
     {
-        QRegExp re(m_settings.m_filterMMSI);
+        QRegularExpression re(QRegularExpression::anchoredPattern(m_settings.m_filterMMSI));
         QTableWidgetItem *fromItem = ui->messages->item(row, MESSAGE_COL_MMSI);
-        if (!re.exactMatch(fromItem->text()))
+        QRegularExpressionMatch match = re.match(fromItem->text());
+        if (!match.hasMatch())
             hidden = true;
     }
     ui->messages->setRowHidden(row, hidden);

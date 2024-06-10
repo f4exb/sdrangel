@@ -23,7 +23,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QAction>
-#include <QRegExp>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QGraphicsScene>
