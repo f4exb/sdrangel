@@ -89,7 +89,7 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Number of samples to use for mulitsampling anti-aliasing (MSAA) for spectrums
+           <string>Number of samples to use for multisampling anti-aliasing (MSAA) for spectrums
 
 Requires windows to be reopened to take effect</string>
           </property>
@@ -123,7 +123,7 @@ Requires windows to be reopened to take effect</string>
         <item row="1" column="0">
          <widget class="QLabel" name="mapMultisamplingLabel">
           <property name="toolTip">
-           <string>Number of samples to use for mulitsampling anti-aliasing (MSAA) for 2D maps
+           <string>Number of samples to use for multisampling anti-aliasing (MSAA) for 2D maps
 
 Requires windows to be reopened to take effect</string>
           </property>
@@ -135,7 +135,7 @@ Requires windows to be reopened to take effect</string>
         <item row="1" column="1">
          <widget class="QComboBox" name="mapMultisampling">
           <property name="toolTip">
-           <string>Number of samples to use for mulitsampling anti-aliasing (MSAA) for 2D Map
+           <string>Number of samples to use for multisampling anti-aliasing (MSAA) for 2D Map
 
 Requires windows to be reopened to take effect</string>
           </property>

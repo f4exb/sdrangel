@@ -193,7 +193,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Display X and Y trances on top of each other</string>
+        <string>Display X and Y traces on top of each other</string>
        </property>
        <property name="text">
         <string>...</string>

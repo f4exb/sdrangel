@@ -889,7 +889,7 @@ This should be 2.73K when pointing at the sky</string>
       <item>
        <widget class="QDoubleSpinBox" name="tempAir">
         <property name="toolTip">
-         <string>Surface air temperature in degrees celsius</string>
+         <string>Surface air temperature in degrees Celsius</string>
         </property>
         <property name="decimals">
          <number>0</number>

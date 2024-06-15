@@ -220,7 +220,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Rest LO ppm correction</string>
+        <string>Reset LO ppm correction</string>
        </property>
        <property name="text">
         <string>R</string>

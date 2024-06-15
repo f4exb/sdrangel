@@ -215,7 +215,7 @@
         <item>
          <widget class="QPushButton" name="flipSidebands">
           <property name="toolTip">
-           <string>Flip sideband in SSB mode (LSB-&gt;USB or USB-&gt;LSB)</string>
+           <string>Flip sidebands in SSB mode (LSB-&gt;USB or USB-&gt;LSB)</string>
           </property>
           <property name="text">
            <string/>
