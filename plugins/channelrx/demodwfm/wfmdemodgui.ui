@@ -200,7 +200,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>channelPowerMeterUnits</string>
+         <string>Level meter (dB) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
         </property>
        </widget>
       </item>

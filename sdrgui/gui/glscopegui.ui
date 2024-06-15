@@ -1115,7 +1115,7 @@ kS/s</string>
             </size>
            </property>
            <property name="toolTip">
-            <string>Vertical offset fine</string>
+            <string>Vertical offset exponent</string>
            </property>
            <property name="minimum">
             <number>-10</number>
