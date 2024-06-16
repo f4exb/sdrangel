@@ -84,6 +84,9 @@
      </item>
      <item>
       <widget class="QComboBox" name="fftwMaxSize">
+       <property name="toolTip">
+        <string>FFT maximum size</string>
+       </property>
        <item>
         <property name="text">
          <string>128</string>

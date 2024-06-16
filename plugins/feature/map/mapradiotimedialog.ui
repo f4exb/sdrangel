@@ -46,7 +46,7 @@
       <item>
        <widget class="QTableWidget" name="transmitters">
         <property name="toolTip">
-         <string/>
+         <string>Transmitters table</string>
         </property>
         <column>
          <property name="text">

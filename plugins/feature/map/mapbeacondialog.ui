@@ -112,7 +112,7 @@
       <item>
        <widget class="QTableWidget" name="beacons">
         <property name="toolTip">
-         <string/>
+         <string>Displays which beacon is transmitting on which frequency</string>
         </property>
         <column>
          <property name="text">

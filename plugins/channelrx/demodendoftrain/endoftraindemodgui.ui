@@ -628,7 +628,7 @@
     <item>
      <widget class="QTableWidget" name="packets">
       <property name="toolTip">
-       <string/>
+       <string>Received packets</string>
       </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>

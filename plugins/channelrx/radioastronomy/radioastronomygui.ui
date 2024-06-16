@@ -2138,7 +2138,7 @@ This should be 2.73K when pointing at the sky</string>
        </size>
       </property>
       <property name="toolTip">
-       <string/>
+       <string>Spectrum chart</string>
       </property>
      </widget>
     </item>
@@ -3768,7 +3768,7 @@ This should be close to the expected difference in power between hot and cold ca
        </size>
       </property>
       <property name="toolTip">
-       <string/>
+       <string>Power chart</string>
       </property>
      </widget>
     </item>
@@ -4915,7 +4915,7 @@ This should be close to the expected difference in power between hot and cold ca
     <item>
      <widget class="QTableWidget" name="powerTable">
       <property name="toolTip">
-       <string/>
+       <string>Power table</string>
       </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
