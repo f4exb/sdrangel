@@ -44,3 +44,9 @@ obj-x86_64-linux-gnu/*
 /rescuesdriq/vendor/
 /rescuesdriq/Godeps/
 /.vs
+
+# WDSP
+wdsp/*.o
+wdsp/*.h
+wdsp/*.c
+wdsp/Makefile

@@ -857,6 +857,7 @@ if (FFTW3F_FOUND)
     add_subdirectory(ft8)
     add_definitions(-DHAS_FT8)
     set(FT8_SUPPORT ON CACHE INTERNAL "")
+    add_subdirectory(wdsp)
 endif()
 
 add_subdirectory(sdrbench)

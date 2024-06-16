@@ -167,4 +167,16 @@
 #  define FT8_API
 #endif
 
+/* the 'WDSP_API' controls the import/export of 'wdsp' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef wdsp_EXPORTS
+#    define WDSP_API __SDR_EXPORT
+#  else
+#    define WDSP_API __SDR_IMPORT
+#  endif
+#else
+#  define WDSP_API
+#endif
+
 #endif /* __SDRANGEL_EXPORT_H */
