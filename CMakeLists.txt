@@ -857,7 +857,12 @@ if (FFTW3F_FOUND)
     add_subdirectory(ft8)
     add_definitions(-DHAS_FT8)
     set(FT8_SUPPORT ON CACHE INTERNAL "")
+endif()
+
+if (FFTW3F_FOUND AND NOT APPLE)
     add_subdirectory(wdsp)
+    add_definitions(-DHAS_WDSP)
+    set(WDSP_SUPPORT ON CACHE INTERNAL "")
 endif()
 
 add_subdirectory(sdrbench)
