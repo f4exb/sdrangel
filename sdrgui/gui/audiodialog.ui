@@ -184,7 +184,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Decimation</string>
+            <string>Decimation factor</string>
            </property>
            <item>
             <property name="text">
