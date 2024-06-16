@@ -60,7 +60,7 @@ target_link_libraries(${TARGET_NAME}
 if (APPLE AND (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL arm64))
     add_custom_command(TARGET ${TARGET_NAME}
         POST_BUILD COMMAND
-        ${CMAKE_INSTALL_NAME_TOOL} -change libsdrplay_api.so.3.14 /usr/local/lib/libsdrplay_api.so.3.14  $<TARGET_FILE:${TARGET_NAME}>)
+        ${CMAKE_INSTALL_NAME_TOOL} -change libsdrplay_api.so.3.15 /usr/local/lib/libsdrplay_api.so.3.15  $<TARGET_FILE:${TARGET_NAME}>)
 endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
