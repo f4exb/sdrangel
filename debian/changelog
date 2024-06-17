@@ -1,3 +1,16 @@
+sdrangel (7.21.3-1) unstable; urgency=medium
+
+   * Update sdrangel-windows-libraries to latest revision. PR #2173 fixes #2155
+   * SDRplayV3Input: Add SDRPLAY_RSPdxR2_ID support. PR #2172 fixes #2155
+   * Fix tooltips. PR #2170
+   * Update external/windows to latest sdrangel-windows-libraries. PR #2169
+   * Update SDRplay API to 3.15 on Mac. PR #2169
+   * Fix typo in ILS freq. PR #2168
+   * Remove use of deprecated QRegExp. PR #2160
+   * Fix memleaks. PR #2157
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 17 Jun 2024 22:30:17 +0200
+
 sdrangel (7.21.2-1) unstable; urgency=medium
 
    * Morse Decoder feature: build for Windows. Issue #2152
