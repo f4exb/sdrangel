@@ -107,6 +107,7 @@ SDRPlayV3Gui::SDRPlayV3Gui(DeviceUISet *deviceUISet, QWidget* parent) :
         ui->biasTee->setVisible(false);
         break;
     case SDRPLAY_RSPdx_ID:
+    case SDRPLAY_RSPdxR2_ID:
         ui->tuner->addItem("1");
         ui->antenna->addItem("A");
         ui->antenna->addItem("B");

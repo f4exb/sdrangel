@@ -529,6 +529,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
                 }
                 break;
             case SDRPLAY_RSPdx_ID:
+            case SDRPLAY_RSPdxR2_ID:
                 m_devParams->devParams->rspDxParams.biasTEnable = settings.m_biasTee;
                 updateExt = sdrplay_api_Update_RspDx_BiasTControl;
                 break;
@@ -590,6 +591,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
                 update = sdrplay_api_Update_RspDuo_RfNotchControl;
                 break;
             case SDRPLAY_RSPdx_ID:
+            case SDRPLAY_RSPdxR2_ID:
                 m_devParams->devParams->rspDxParams.rfNotchEnable = settings.m_fmNotch;
                 updateExt = sdrplay_api_Update_RspDx_RfNotchControl;
                 break;
@@ -623,6 +625,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
                 update = sdrplay_api_Update_RspDuo_RfDabNotchControl;
                 break;
             case SDRPLAY_RSPdx_ID:
+            case SDRPLAY_RSPdxR2_ID:
                 m_devParams->devParams->rspDxParams.rfDabNotchEnable = settings.m_dabNotch;
                 updateExt = sdrplay_api_Update_RspDx_RfDabNotchControl;
                 break;
@@ -656,6 +659,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, const QLis
                 }
                 break;
             case SDRPLAY_RSPdx_ID:
+            case SDRPLAY_RSPdxR2_ID:
                 m_devParams->devParams->rspDxParams.antennaSel = (sdrplay_api_RspDx_AntennaSelectT)settings.m_antenna;
                 updateExt = sdrplay_api_Update_RspDx_AntennaControl;
                 break;
@@ -993,6 +997,9 @@ void SDRPlayV3Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
     case SDRPLAY_RSP1A_ID:
         response.getSdrPlayV3Report()->setDeviceType(new QString("RSP1A"));
         break;
+    case SDRPLAY_RSP1B_ID:
+        response.getSdrPlayV3Report()->setDeviceType(new QString("RSP1B"));
+        break;
     case SDRPLAY_RSP2_ID:
         response.getSdrPlayV3Report()->setDeviceType(new QString("RSP2"));
         break;
@@ -1001,6 +1008,9 @@ void SDRPlayV3Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
         break;
     case SDRPLAY_RSPdx_ID:
         response.getSdrPlayV3Report()->setDeviceType(new QString("RSPdx"));
+        break;
+    case SDRPLAY_RSPdxR2_ID:
+        response.getSdrPlayV3Report()->setDeviceType(new QString("RSPdx-R2"));
         break;
     default:
         response.getSdrPlayV3Report()->setDeviceType(new QString("Unknown"));
@@ -1434,6 +1444,7 @@ const int *SDRPlayV3LNA::getAttenuations(int deviceId, qint64 frequency)
         lnaAttenuation = &rspDuoAttenuation[row][0];
         break;
     case SDRPLAY_RSPdx_ID:
+    case SDRPLAY_RSPdxR2_ID:
         if (frequency < 2000000)
             row = 0;
         else if (frequency < 12000000)
