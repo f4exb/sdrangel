@@ -134,6 +134,9 @@
          <bold>false</bold>
         </font>
        </property>
+       <property name="toolTip">
+        <string>Record center frequency in Hz</string>
+       </property>
        <property name="text">
         <string>10,000,000,000</string>
        </property>
@@ -371,7 +374,7 @@
      <item>
       <widget class="ButtonSwitch" name="playLoop">
        <property name="toolTip">
-        <string>Play in a loop</string>
+        <string>Play file in a loop</string>
        </property>
        <property name="text">
         <string/>

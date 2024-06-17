@@ -29,7 +29,7 @@
       <item row="1" column="3">
        <widget class="QComboBox" name="stopBits">
         <property name="toolTip">
-         <string>Modulaton type.</string>
+         <string>Number of stop bits</string>
         </property>
         <item>
          <property name="text">
@@ -46,7 +46,7 @@
       <item row="0" column="3">
        <widget class="QComboBox" name="handshake">
         <property name="toolTip">
-         <string>Modulaton type.</string>
+         <string>Handshake type</string>
         </property>
         <item>
          <property name="text">
@@ -68,7 +68,7 @@
       <item row="1" column="1">
        <widget class="QComboBox" name="dataBits">
         <property name="toolTip">
-         <string>Modulaton type.</string>
+         <string>Number of data bits</string>
         </property>
         <item>
          <property name="text">
@@ -106,7 +106,7 @@
       <item row="0" column="1">
        <widget class="QComboBox" name="baudRate">
         <property name="toolTip">
-         <string>Modulaton type.</string>
+         <string>Baud rate</string>
         </property>
         <item>
          <property name="text">
@@ -169,7 +169,7 @@
       <item row="1" column="3">
        <widget class="QComboBox" name="rtsHigh">
         <property name="toolTip">
-         <string>Modulaton type.</string>
+         <string>Level of RTS that triggers PTT when CAT method is set to RTS</string>
         </property>
         <item>
          <property name="text">
@@ -186,7 +186,7 @@
       <item row="1" column="1">
        <widget class="QComboBox" name="dtrHigh">
         <property name="toolTip">
-         <string>Modulaton type.</string>
+         <string>Level of DTR that triggers PTT when CAT method is set to DTR</string>
         </property>
         <item>
          <property name="text">
@@ -217,7 +217,7 @@
       <item row="0" column="1">
        <widget class="QComboBox" name="pttMethod">
         <property name="toolTip">
-         <string>Modulaton type.</string>
+         <string>PTT method</string>
         </property>
         <item>
          <property name="text">

@@ -49,7 +49,7 @@
       <item row="0" column="1">
        <widget class="QComboBox" name="modulation">
         <property name="toolTip">
-         <string>Modulaton type.</string>
+         <string>Modulation type</string>
         </property>
         <item>
          <property name="text">

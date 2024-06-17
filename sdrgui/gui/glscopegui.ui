@@ -193,7 +193,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Display X and Y trances on top of each other</string>
+        <string>Display X and Y traces on top of each other</string>
        </property>
        <property name="text">
         <string>...</string>
@@ -1115,7 +1115,7 @@ kS/s</string>
             </size>
            </property>
            <property name="toolTip">
-            <string>Vertical offset fine</string>
+            <string>Vertical offset exponent</string>
            </property>
            <property name="minimum">
             <number>-10</number>

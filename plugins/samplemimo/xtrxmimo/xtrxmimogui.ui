@@ -744,7 +744,7 @@
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
-        <string>Analog lowpass filer bandwidth (kHz)</string>
+        <string>Analog lowpass filter bandwidth (kHz)</string>
        </property>
       </widget>
      </item>

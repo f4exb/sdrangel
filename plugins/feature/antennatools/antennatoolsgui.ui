@@ -74,6 +74,9 @@
          <height>0</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Source for frequency value</string>
+       </property>
        <item>
         <property name="text">
          <string>MHz</string>
@@ -271,7 +274,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string/>
+        <string>Source for frequency value</string>
        </property>
        <item>
         <property name="text">

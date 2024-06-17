@@ -41,7 +41,7 @@
      <item>
       <widget class="QLineEdit" name="executable">
        <property name="toolTip">
-        <string>Channel marker title</string>
+        <string>FFTW Wisdom program</string>
        </property>
       </widget>
      </item>
@@ -60,7 +60,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open file</string>
+        <string>Choose file</string>
        </property>
        <property name="text">
         <string/>
@@ -84,6 +84,9 @@
      </item>
      <item>
       <widget class="QComboBox" name="fftwMaxSize">
+       <property name="toolTip">
+        <string>FFT maximum size</string>
+       </property>
        <item>
         <property name="text">
          <string>128</string>

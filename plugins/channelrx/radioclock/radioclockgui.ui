@@ -593,7 +593,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Demodulator status</string>
+         <string>Daylight savings time status</string>
         </property>
         <property name="text">
          <string/>

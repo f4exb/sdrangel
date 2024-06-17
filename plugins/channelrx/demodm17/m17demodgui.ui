@@ -841,7 +841,7 @@
       </property>
       <widget class="QWidget" name="settingsTab">
        <property name="toolTip">
-        <string>Dgital Settings</string>
+        <string>Digital settings</string>
        </property>
        <attribute name="icon">
         <iconset resource="../../../sdrgui/resources/res.qrc">

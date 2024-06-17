@@ -887,7 +887,7 @@
        </size>
       </property>
       <property name="toolTip">
-       <string/>
+       <string>Chart</string>
       </property>
      </widget>
     </item>

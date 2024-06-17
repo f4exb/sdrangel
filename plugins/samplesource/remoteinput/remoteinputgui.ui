@@ -212,7 +212,7 @@
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="toolTip">
-        <string>Remote device center ferquency in kHz</string>
+        <string>Remote device center frequency in kHz</string>
        </property>
       </widget>
      </item>

@@ -184,7 +184,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Decimation</string>
+            <string>Decimation factor</string>
            </property>
            <item>
             <property name="text">
@@ -463,7 +463,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Silence time (s) before recording is stopoed. 0 for continuous recording.</string>
+            <string>Silence time (s) before recording is stopped. 0 for continuous recording.</string>
            </property>
            <property name="minimum">
             <number>0</number>
@@ -491,7 +491,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Silence time (s) before recording is stopoed</string>
+            <string>Silence time (s) before recording is stopped</string>
            </property>
            <property name="text">
             <string>10.0</string>
