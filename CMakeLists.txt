@@ -859,7 +859,7 @@ if (FFTW3F_FOUND)
     set(FT8_SUPPORT ON CACHE INTERNAL "")
 endif()
 
-if (FFTW3F_FOUND AND NOT APPLE)
+if (FFTW3F_FOUND AND LINUX)
     add_subdirectory(wdsp)
     add_definitions(-DHAS_WDSP)
     set(WDSP_SUPPORT ON CACHE INTERNAL "")
