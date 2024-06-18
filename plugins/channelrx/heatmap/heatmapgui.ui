@@ -40,7 +40,7 @@
      <x>0</x>
      <y>0</y>
      <width>390</width>
-     <height>191</height>
+     <height>211</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -800,13 +800,127 @@
       </item>
      </layout>
     </item>
+    <item>
+     <widget class="Line" name="line_20">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="recordLayout">
+      <item>
+       <widget class="QLabel" name="recordLabel">
+        <property name="text">
+         <string>Record</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="recordAverage">
+        <property name="statusTip">
+         <string>Check to record average power</string>
+        </property>
+        <property name="accessibleName">
+         <string/>
+        </property>
+        <property name="text">
+         <string>Avg</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="recordMax">
+        <property name="statusTip">
+         <string>Check to record max power</string>
+        </property>
+        <property name="text">
+         <string>Max</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="recordMin">
+        <property name="statusTip">
+         <string>Check to record min power</string>
+        </property>
+        <property name="text">
+         <string>Min</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="recordPulseAverage">
+        <property name="statusTip">
+         <string>Check to record pulse average power</string>
+        </property>
+        <property name="text">
+         <string>Pulse</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="recordPathLoss">
+        <property name="statusTip">
+         <string>Check to record path loss</string>
+        </property>
+        <property name="text">
+         <string>Path Loss</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_9">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="dataContainer" native="true">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>200</y>
+     <y>220</y>
      <width>391</width>
      <height>91</height>
     </rect>
@@ -1349,7 +1463,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>300</y>
+     <y>320</y>
      <width>381</width>
      <height>121</height>
     </rect>
@@ -1617,7 +1731,6 @@
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../demodadsb/icons.qrc"/>
  </resources>
  <connections/>
 </ui>
