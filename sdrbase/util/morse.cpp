@@ -131,7 +131,7 @@ QString Morse::toMorse(char ascii)
 }
 
 // Convert string to Morse code sequence consisting of . and - characters separated by spaces
-QString Morse::toMorse(QString &string)
+QString Morse::toMorse(const QString &string)
 {
     QStringList list;
     for (int i = 0; i < string.size(); i++)
@@ -145,14 +145,15 @@ QString Morse::toMorse(QString &string)
 
 // Converts Morse code sequence using ASCII . and - to Unicode bullet and minus sign
 // which are horizontally aligned, so look nicer in GUIs
-QString Morse::toUnicode(QString &morse)
+QString Morse::toUnicode(const QString &morse)
 {
-    return morse.replace(QChar('.'), QChar(0x2022)).replace(QChar('-'), QChar(0x2212));
+    QString s = morse;
+    return s.replace(QChar('.'), QChar(0x2022)).replace(QChar('-'), QChar(0x2212));
 }
 
 // Converts a string to a unicode Morse sequence with extra space characters between
 // dots and dashes to improve readability in GUIs
-QString Morse::toSpacedUnicode(QString &morse)
+QString Morse::toSpacedUnicode(const QString &morse)
 {
     QString temp = toUnicode(morse);
     for (int i = 0; i < temp.size(); i+=2)
@@ -161,14 +162,14 @@ QString Morse::toSpacedUnicode(QString &morse)
 }
 
 // Converts a string to a unicode Morse sequence
-QString Morse::toUnicodeMorse(QString &string)
+QString Morse::toUnicodeMorse(const QString &string)
 {
     QString ascii = toMorse(string);
     return ascii.replace(QChar('.'), QChar(0x2022)).replace(QChar('-'), QChar(0x2212));
 }
 
 // Converts a string to a unicode Morse sequence with spacing between dots and dashes
-QString Morse::toSpacedUnicodeMorse(QString &string)
+QString Morse::toSpacedUnicodeMorse(const QString &string)
 {
     QString temp = toUnicodeMorse(string);
     for (int i = 0; i < temp.size(); i+=2)
@@ -179,7 +180,7 @@ QString Morse::toSpacedUnicodeMorse(QString &string)
 #define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 // Converts a Morse sequence to an ASCII character. -1 if no mapping found.
-int Morse::toASCII(QString &morse)
+int Morse::toASCII(const QString &morse)
 {
     for (unsigned int i = 0; i < COUNT_OF(m_asciiToMorse); i++)
     {
@@ -190,7 +191,7 @@ int Morse::toASCII(QString &morse)
 }
 
 // Converts a sequence of Morse code to a string. Unknown Morse codes are ignored.
-QString Morse::toString(QString &morse)
+QString Morse::toString(const QString &morse)
 {
     QString string("");
     QStringList groups = morse.split(" ");
