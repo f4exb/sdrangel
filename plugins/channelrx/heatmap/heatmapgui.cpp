@@ -558,8 +558,11 @@ HeatMapGUI::HeatMapGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_heatMap = reinterpret_cast<HeatMap*>(rxChannel);
     m_heatMap->setMessageQueueToGUI(getInputMessageQueue());
 
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     // Disable 256MB limit on image size
     QImageReader::setAllocationLimit(0);
+#endif
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
