@@ -8234,6 +8234,34 @@ margin-bottom: 20px;
     },
     "channelSampleRate" : {
       "type" : "integer"
+    },
+    "ident" : {
+      "type" : "string"
+    },
+    "deviation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "deviation in degrees"
+    },
+    "sdm" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Sum of the Depth of Modulation in percent"
+    },
+    "ddm" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Difference in the Depth of Modulation in percent"
+    },
+    "dm90" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Depth of modulation of the 90Hz tone as a percentage of the carrier"
+    },
+    "dm150" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Depth of modulation of the 150Hz tone as percentage of the carrier"
     }
   },
   "description" : "ILSDemod"
@@ -59056,7 +59084,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-05-23T18:36:35.471+02:00
+              Generated 2024-06-18T10:11:11.522+02:00
             </div>
           </div>
       </div>

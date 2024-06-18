@@ -32,6 +32,18 @@ SWGILSDemodReport::SWGILSDemodReport() {
     m_channel_power_db_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
+    ident = nullptr;
+    m_ident_isSet = false;
+    deviation = 0.0f;
+    m_deviation_isSet = false;
+    sdm = 0.0f;
+    m_sdm_isSet = false;
+    ddm = 0.0f;
+    m_ddm_isSet = false;
+    dm90 = 0.0f;
+    m_dm90_isSet = false;
+    dm150 = 0.0f;
+    m_dm150_isSet = false;
 }
 
 SWGILSDemodReport::~SWGILSDemodReport() {
@@ -44,10 +56,30 @@ SWGILSDemodReport::init() {
     m_channel_power_db_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
+    ident = new QString("");
+    m_ident_isSet = false;
+    deviation = 0.0f;
+    m_deviation_isSet = false;
+    sdm = 0.0f;
+    m_sdm_isSet = false;
+    ddm = 0.0f;
+    m_ddm_isSet = false;
+    dm90 = 0.0f;
+    m_dm90_isSet = false;
+    dm150 = 0.0f;
+    m_dm150_isSet = false;
 }
 
 void
 SWGILSDemodReport::cleanup() {
+
+
+    if(ident != nullptr) { 
+        delete ident;
+    }
+
+
+
 
 
 }
@@ -66,6 +98,18 @@ SWGILSDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_power_db, pJson["channelPowerDB"], "float", "");
     
     ::SWGSDRangel::setValue(&channel_sample_rate, pJson["channelSampleRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&ident, pJson["ident"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&deviation, pJson["deviation"], "float", "");
+    
+    ::SWGSDRangel::setValue(&sdm, pJson["sdm"], "float", "");
+    
+    ::SWGSDRangel::setValue(&ddm, pJson["ddm"], "float", "");
+    
+    ::SWGSDRangel::setValue(&dm90, pJson["dm90"], "float", "");
+    
+    ::SWGSDRangel::setValue(&dm150, pJson["dm150"], "float", "");
     
 }
 
@@ -88,6 +132,24 @@ SWGILSDemodReport::asJsonObject() {
     }
     if(m_channel_sample_rate_isSet){
         obj->insert("channelSampleRate", QJsonValue(channel_sample_rate));
+    }
+    if(ident != nullptr && *ident != QString("")){
+        toJsonValue(QString("ident"), ident, obj, QString("QString"));
+    }
+    if(m_deviation_isSet){
+        obj->insert("deviation", QJsonValue(deviation));
+    }
+    if(m_sdm_isSet){
+        obj->insert("sdm", QJsonValue(sdm));
+    }
+    if(m_ddm_isSet){
+        obj->insert("ddm", QJsonValue(ddm));
+    }
+    if(m_dm90_isSet){
+        obj->insert("dm90", QJsonValue(dm90));
+    }
+    if(m_dm150_isSet){
+        obj->insert("dm150", QJsonValue(dm150));
     }
 
     return obj;
@@ -113,6 +175,66 @@ SWGILSDemodReport::setChannelSampleRate(qint32 channel_sample_rate) {
     this->m_channel_sample_rate_isSet = true;
 }
 
+QString*
+SWGILSDemodReport::getIdent() {
+    return ident;
+}
+void
+SWGILSDemodReport::setIdent(QString* ident) {
+    this->ident = ident;
+    this->m_ident_isSet = true;
+}
+
+float
+SWGILSDemodReport::getDeviation() {
+    return deviation;
+}
+void
+SWGILSDemodReport::setDeviation(float deviation) {
+    this->deviation = deviation;
+    this->m_deviation_isSet = true;
+}
+
+float
+SWGILSDemodReport::getSdm() {
+    return sdm;
+}
+void
+SWGILSDemodReport::setSdm(float sdm) {
+    this->sdm = sdm;
+    this->m_sdm_isSet = true;
+}
+
+float
+SWGILSDemodReport::getDdm() {
+    return ddm;
+}
+void
+SWGILSDemodReport::setDdm(float ddm) {
+    this->ddm = ddm;
+    this->m_ddm_isSet = true;
+}
+
+float
+SWGILSDemodReport::getDm90() {
+    return dm90;
+}
+void
+SWGILSDemodReport::setDm90(float dm90) {
+    this->dm90 = dm90;
+    this->m_dm90_isSet = true;
+}
+
+float
+SWGILSDemodReport::getDm150() {
+    return dm150;
+}
+void
+SWGILSDemodReport::setDm150(float dm150) {
+    this->dm150 = dm150;
+    this->m_dm150_isSet = true;
+}
+
 
 bool
 SWGILSDemodReport::isSet(){
@@ -122,6 +244,24 @@ SWGILSDemodReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_channel_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(ident && *ident != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_deviation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sdm_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ddm_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dm90_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dm150_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

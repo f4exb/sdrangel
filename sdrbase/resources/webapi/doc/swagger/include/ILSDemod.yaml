@@ -95,4 +95,26 @@ ILSDemodReport:
       format: float
     channelSampleRate:
       type: integer
+    ident:
+      type: string
+    deviation:
+      description: deviation in degrees
+      type: number
+      format: float
+    sdm:
+      description: Sum of the Depth of Modulation in percent
+      type: number
+      format: float
+    ddm:
+      description: Difference in the Depth of Modulation in percent
+      type: number
+      format: float
+    dm90:
+      description: Depth of modulation of the 90Hz tone as a percentage of the carrier
+      type: number
+      format: float
+    dm150:
+      description: Depth of modulation of the 150Hz tone as percentage of the carrier
+      type: number
+      format: float
 
