@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -47,6 +48,24 @@ public:
     qint32 getChannelSampleRate();
     void setChannelSampleRate(qint32 channel_sample_rate);
 
+    QString* getIdent();
+    void setIdent(QString* ident);
+
+    float getDeviation();
+    void setDeviation(float deviation);
+
+    float getSdm();
+    void setSdm(float sdm);
+
+    float getDdm();
+    void setDdm(float ddm);
+
+    float getDm90();
+    void setDm90(float dm90);
+
+    float getDm150();
+    void setDm150(float dm150);
+
 
     virtual bool isSet() override;
 
@@ -56,6 +75,24 @@ private:
 
     qint32 channel_sample_rate;
     bool m_channel_sample_rate_isSet;
+
+    QString* ident;
+    bool m_ident_isSet;
+
+    float deviation;
+    bool m_deviation_isSet;
+
+    float sdm;
+    bool m_sdm_isSet;
+
+    float ddm;
+    bool m_ddm_isSet;
+
+    float dm90;
+    bool m_dm90_isSet;
+
+    float dm150;
+    bool m_dm150_isSet;
 
 };
 

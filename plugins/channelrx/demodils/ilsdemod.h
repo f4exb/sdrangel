@@ -205,6 +205,14 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    // Saved values from sink for channel report
+    QString m_ident;
+    Real m_dm90;
+    Real m_dm150;
+    Real m_sdm;
+    Real m_ddm;
+    Real m_angle;
+
     virtual bool handleMessage(const Message& cmd);
     void applySettings(const ILSDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();

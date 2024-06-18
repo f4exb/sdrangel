@@ -30,13 +30,13 @@ class SDRBASE_API Morse
 {
 public:
     static QString toMorse(char asciiChar);
-    static QString toMorse(QString &string);
-    static QString toUnicode(QString &morse);
-    static QString toSpacedUnicode(QString &morse);
-    static QString toUnicodeMorse(QString &string);
-    static QString toSpacedUnicodeMorse(QString &string);
-    static int toASCII(QString &morse);
-    static QString toString(QString &morse);
+    static QString toMorse(const QString &string);
+    static QString toUnicode(const QString &morse);
+    static QString toSpacedUnicode(const QString &morse);
+    static QString toUnicodeMorse(const QString &string);
+    static QString toSpacedUnicodeMorse(const QString &string);
+    static int toASCII(const QString &morse);
+    static QString toString(const QString &morse);
 
 private:
     struct ASCIIToMorse {

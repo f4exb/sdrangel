@@ -93,6 +93,7 @@ const QList<ILSDemodGUI::ILS> ILSDemodGUI::m_ils = {
     {"EGLC", "ILSR", "27",  111150000, 272.89, 5.5, 51.504927, 0.064960,  48,  10.7,  1580, 0.0},
     {"EGSS", "ISX",  "22",  110500000, 222.78, 3.0, 51.895165, 0.250051,  352, 14.9,  3430, 0.0},
     {"EGSS", "ISED", "04",  110500000, 42.78,  3.0, 51.877054, 0.222887,  352, 16.2,  3130, 0.0},
+    {"KGYH", "IGYH", "5",   108300000, 40.00,  3.0, 34.749987, -82.384983,850, 15.84, 2750, -0.6},
 };
 
 ILSDemodGUI* ILSDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
