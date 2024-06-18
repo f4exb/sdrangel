@@ -57,6 +57,11 @@ struct HeatMapSettings
     bool m_displayPulseAverage;
     bool m_displayPathLoss;
     int m_displayMins;
+    bool m_recordAverage;
+    bool m_recordMax;
+    bool m_recordMin;
+    bool m_recordPulseAverage;
+    bool m_recordPathLoss;
 
     quint32 m_rgbColor;
     QString m_title;

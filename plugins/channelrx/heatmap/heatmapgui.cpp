@@ -22,7 +22,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QAction>
-#include <QRegExp>
 #include <QClipboard>
 #include <QBuffer>
 
@@ -226,9 +225,17 @@ void HeatMapGUI::on_mode_currentIndexChanged(int index)
         ui->writeImage->setEnabled(!none);
         ui->writeCSV->setEnabled(!none);
         ui->readCSV->setEnabled(!none);
-        if (none) {
+        ui->colorMapLabel->setEnabled(!none);
+        ui->colorMap->setEnabled(!none);
+        if (none)
+        {
             deleteFromMap();
-        } else {
+        }
+        else
+        {
+            if (m_image.isNull()) {
+                createImage(m_width, m_height);
+            }
             plotMap();
         }
         applySettings();
@@ -551,6 +558,12 @@ HeatMapGUI::HeatMapGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_heatMap = reinterpret_cast<HeatMap*>(rxChannel);
     m_heatMap->setMessageQueueToGUI(getInputMessageQueue());
 
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    // Disable 256MB limit on image size
+    QImageReader::setAllocationLimit(0);
+#endif
+
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
     m_scopeVis = m_heatMap->getScopeSink();
@@ -708,6 +721,11 @@ void HeatMapGUI::displaySettings()
     ui->displayPulseAverage->setChecked(m_settings.m_displayPulseAverage);
     ui->displayPathLoss->setChecked(m_settings.m_displayPathLoss);
     ui->displayMins->setValue(m_settings.m_displayMins);
+    ui->recordAverage->setChecked(m_settings.m_recordAverage);
+    ui->recordMax->setChecked(m_settings.m_recordMax);
+    ui->recordMin->setChecked(m_settings.m_recordMin);
+    ui->recordPulseAverage->setChecked(m_settings.m_recordPulseAverage);
+    ui->recordPathLoss->setChecked(m_settings.m_recordPathLoss);
 
     m_scopeVis->setLiveRate(m_settings.m_sampleRate);
 
@@ -765,7 +783,9 @@ void HeatMapGUI::tick()
         if (!std::isnan(magAvg))
         {
             powDbAvg = CalcDb::dbPower(magAvg * magAvg);
-            m_powerAverage[idx] = powDbAvg;
+            if (m_powerAverage) {
+                m_powerAverage[idx] = powDbAvg;
+            }
             if (m_tickCount % 4 == 0) {
                 ui->average->setText(QString::number(powDbAvg, 'f', 1));
             }
@@ -777,7 +797,9 @@ void HeatMapGUI::tick()
         if (!std::isnan(magPulseAvg))
         {
             powDbPulseAvg = CalcDb::dbPower(magPulseAvg * magPulseAvg);
-            m_powerPulseAverage[idx] = powDbPulseAvg;
+            if (m_powerPulseAverage) {
+                m_powerPulseAverage[idx] = powDbPulseAvg;
+            }
             if (m_tickCount % 4 == 0) {
                 ui->pulseAverage->setText(QString::number(powDbPulseAvg, 'f', 1));
             }
@@ -789,7 +811,9 @@ void HeatMapGUI::tick()
         if (magMaxPeak != -std::numeric_limits<double>::max())
         {
             powDbMaxPeak = CalcDb::dbPower(magMaxPeak * magMaxPeak);
-            m_powerMaxPeak[idx] = powDbMaxPeak;
+            if (m_powerMaxPeak) {
+                m_powerMaxPeak[idx] = powDbMaxPeak;
+            }
             if (m_tickCount % 4 == 0) {
                 ui->maxPeak->setText(QString::number(powDbMaxPeak, 'f', 1));
             }
@@ -801,7 +825,9 @@ void HeatMapGUI::tick()
         if (magMinPeak != std::numeric_limits<double>::max())
         {
             powDbMinPeak = CalcDb::dbPower(magMinPeak * magMinPeak);
-            m_powerMinPeak[idx] = powDbMinPeak;
+            if (m_powerMinPeak) {
+                m_powerMinPeak[idx] = powDbMinPeak;
+            }
             if (m_tickCount % 4 == 0) {
                 ui->minPeak->setText(QString::number(powDbMinPeak, 'f', 1));
             }
@@ -814,7 +840,9 @@ void HeatMapGUI::tick()
         double range = calcRange(m_latitude, m_longitude);
         double frequency = m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset;
         powDbPathLoss = m_settings.m_txPower - calcFreeSpacePathLoss(range, frequency);
-        m_powerPathLoss[idx] = powDbPathLoss;
+        if (m_powerPathLoss) {
+            m_powerPathLoss[idx] = powDbPathLoss;
+        }
 
         if (m_heatMap->getDeviceAPI()->state(0) == DeviceAPI::StRunning)
         {
@@ -823,9 +851,12 @@ void HeatMapGUI::tick()
             {
                 // Plot newest measurement on map
                 float *power = getCurrentModePowerData();
-                double powDb = power[idx];
-                if (!std::isnan(powDb)) {
-                    plotPixel(m_x, m_y, powDb);
+                if (power)
+                {
+                    double powDb = power[idx];
+                    if (!std::isnan(powDb)) {
+                        plotPixel(m_x, m_y, powDb);
+                    }
                 }
             }
 
@@ -882,9 +913,15 @@ void HeatMapGUI::updatePower(double latitude, double longitude, float power)
 
 void HeatMapGUI::plotMap()
 {
-    clearImage();
-    plotMap(getCurrentModePowerData());
-    sendToMap();
+    if ((m_settings.m_mode != HeatMapSettings::None) && !m_image.isNull())
+    {
+        clearImage();
+        float *data = getCurrentModePowerData();
+        if (data) {
+            plotMap(data);
+        }
+        sendToMap();
+    }
 }
 
 void HeatMapGUI::clearPower()
@@ -903,7 +940,35 @@ void HeatMapGUI::clearPower(float *power)
 
 void HeatMapGUI::clearPower(float *power, int size)
 {
-    std::fill_n(power, size, std::numeric_limits<float>::quiet_NaN());
+    if (power) {
+        std::fill_n(power, size, std::numeric_limits<float>::quiet_NaN());
+    }
+}
+
+void HeatMapGUI::createImage(int width, int height)
+{
+    if (!m_image.isNull()) {
+        m_painter.end();
+    }
+
+    try
+    {
+        if (m_settings.m_mode != HeatMapSettings::None)
+        {
+            qDebug() << "HeatMapGUI::createImage" << width << "*" << height;
+            m_image = QImage(width, height, QImage::Format_ARGB32);
+            m_painter.begin(&m_image);
+        }
+        else
+        {
+            m_image = QImage();
+        }
+    }
+    catch (std::bad_alloc&)
+    {
+        m_image = QImage();
+        QMessageBox::critical(this, "Heat Map", QString("Failed to allocate memory (width=%1 height=%2)").arg(m_width).arg(m_height));
+    }
 }
 
 void HeatMapGUI::clearImage()
@@ -929,6 +994,10 @@ void HeatMapGUI::plotMap(float *power)
 
 void HeatMapGUI::plotPixel(int x, int y, double power)
 {
+    if (m_image.isNull()) {
+        return;
+    }
+
     // Normalise to [0,1]
     float powNorm = (power - m_settings.m_minPower) / (m_settings.m_maxPower - m_settings.m_minPower);
     if (powNorm < 0) {
@@ -1017,6 +1086,11 @@ void HeatMapGUI::makeUIConnections()
     QObject::connect(ui->displayPulseAverage, &QCheckBox::clicked, this, &HeatMapGUI::on_displayPulseAverage_clicked);
     QObject::connect(ui->displayPathLoss, &QCheckBox::clicked, this, &HeatMapGUI::on_displayPathLoss_clicked);
     QObject::connect(ui->displayMins, QOverload<int>::of(&QSpinBox::valueChanged), this, &HeatMapGUI::on_displayMins_valueChanged);
+    QObject::connect(ui->recordAverage, &QCheckBox::clicked, this, &HeatMapGUI::on_recordAverage_clicked);
+    QObject::connect(ui->recordMax, &QCheckBox::clicked, this, &HeatMapGUI::on_recordMax_clicked);
+    QObject::connect(ui->recordMin, &QCheckBox::clicked, this, &HeatMapGUI::on_recordMin_clicked);
+    QObject::connect(ui->recordPulseAverage, &QCheckBox::clicked, this, &HeatMapGUI::on_recordPulseAverage_clicked);
+    QObject::connect(ui->recordPathLoss, &QCheckBox::clicked, this, &HeatMapGUI::on_recordPathLoss_clicked);
 }
 
 void HeatMapGUI::updateAbsoluteCenterFrequency()
@@ -1171,21 +1245,48 @@ void HeatMapGUI::createMap()
     m_degreesLonPerPixel = m_resolution / scale / (earthCircumference / 360.0);
     m_degreesLatPerPixel = m_resolution  / (earthCircumference / 360.0);
     int size = m_width * m_height;
-    m_powerAverage = new float[size];
-    m_powerPulseAverage = new float[size];
-    m_powerMaxPeak = new float[size];
-    m_powerMinPeak = new float[size];
-    m_powerPathLoss = new float[size];
+    try
+    {
+        if (m_settings.m_recordAverage) {
+            m_powerAverage = new float[size];
+        } else {
+            m_powerAverage = nullptr;
+        }
+        if (m_settings.m_recordPulseAverage) {
+            m_powerPulseAverage = new float[size];
+        } else {
+            m_powerPulseAverage = nullptr;
+        }
+        if (m_settings.m_recordMax) {
+            m_powerMaxPeak = new float[size];
+        } else {
+            m_powerMaxPeak = nullptr;
+        }
+        if (m_settings.m_recordMin) {
+            m_powerMinPeak = new float[size];
+        } else {
+            m_powerMinPeak = nullptr;
+        }
+        if (m_settings.m_recordPathLoss) {
+            m_powerPathLoss = new float[size];
+        } else {
+            m_powerPathLoss = nullptr;
+        }
 
-    m_north = m_latitude + m_degreesLatPerPixel * m_height / 2;
-    m_south = m_latitude - m_degreesLatPerPixel * m_height / 2;
-    m_east = m_longitude + m_degreesLonPerPixel * m_width / 2;
-    m_west = m_longitude - m_degreesLonPerPixel * m_width / 2;
-    m_x = m_width / 2;
-    m_y = m_height / 2;
+        m_north = m_latitude + m_degreesLatPerPixel * m_height / 2;
+        m_south = m_latitude - m_degreesLatPerPixel * m_height / 2;
+        m_east = m_longitude + m_degreesLonPerPixel * m_width / 2;
+        m_west = m_longitude - m_degreesLonPerPixel * m_width / 2;
+        m_x = m_width / 2;
+        m_y = m_height / 2;
 
-    m_image = QImage(m_width, m_height, QImage::Format_ARGB32);
-    m_painter.begin(&m_image);
+        createImage(m_width, m_height);
+    }
+    catch (std::bad_alloc&)
+    {
+        deleteMap();
+        QMessageBox::critical(this, "Heat Map", QString("Failed to allocate memory (width=%1 height=%2)").arg(m_width).arg(m_height));
+    }
 
     on_clearHeatMap_clicked();
 }
@@ -1203,7 +1304,9 @@ void HeatMapGUI::deleteMap()
     m_powerMinPeak = nullptr;
     delete[] m_powerPathLoss;
     m_powerPathLoss = nullptr;
-    m_painter.end();
+    if (!m_image.isNull()) {
+        m_painter.end();
+    }
 }
 
 void HeatMapGUI::resizeMap(int x, int y)
@@ -1245,47 +1348,92 @@ void HeatMapGUI::resizeMap(int x, int y)
             m_south -= m_blockSize * m_degreesLatPerPixel;
         }
 
+        float *powerAverage = nullptr;
+        float *powerPulseAverage = nullptr;
+        float *powerMaxPeak = nullptr;
+        float *powerMinPeak = nullptr;
+        float *powerPathLoss = nullptr;
+
         int newSize = newWidth * newHeight;
-        float *powerAverage = new float[newSize];
-        float *powerPulseAverage = new float[newSize];
-        float *powerMaxPeak = new float[newSize];
-        float *powerMinPeak = new float[newSize];
-        float *powerPathLoss = new float[newSize];
-        clearPower(powerAverage, newSize);
-        clearPower(powerPulseAverage, newSize);
-        clearPower(powerMaxPeak, newSize);
-        clearPower(powerMinPeak, newSize);
-        clearPower(powerPathLoss, newSize);
+        qDebug() << "HeatMapGUI::resizeMap:" << m_width << "*" << m_height << "to" << newWidth << "*" << newHeight;
 
-        // Copy across old data
-        for (int j = 0; j < m_height; j++)
+        try
         {
-            int srcStart = j * m_width;
-            int srcEnd = (j + 1) * m_width;
-            int destStart = j * newWidth + yOffset + xOffset;
-            //qDebug() << srcStart << srcEnd << destStart;
-            std::copy(m_powerAverage + srcStart, m_powerAverage + srcEnd, powerAverage + destStart);
-            std::copy(m_powerPulseAverage + srcStart, m_powerPulseAverage + srcEnd, powerPulseAverage + destStart);
-            std::copy(m_powerMaxPeak + srcStart, m_powerMaxPeak + srcEnd, powerMaxPeak + destStart);
-            std::copy(m_powerMinPeak + srcStart, m_powerMinPeak + srcEnd, powerMinPeak + destStart);
-            std::copy(m_powerPathLoss + srcStart, m_powerPathLoss + srcEnd, powerPathLoss + destStart);
-        }
+            // Allocate new memory
+            if (m_settings.m_recordAverage) {
+                powerAverage = new float[newSize];
+            }
+            if (m_settings.m_recordPulseAverage) {
+                powerPulseAverage = new float[newSize];
+            }
+            if (m_settings.m_recordMax) {
+                powerMaxPeak = new float[newSize];
+            }
+            if (m_settings.m_recordMin) {
+                powerMinPeak = new float[newSize];
+            }
+            if (m_settings.m_recordPathLoss) {
+                powerPathLoss = new float[newSize];
+            }
 
-        delete[] m_powerAverage;
-        delete[] m_powerPulseAverage;
-        delete[] m_powerMaxPeak;
-        delete[] m_powerMinPeak;
-        m_powerAverage = powerAverage;
-        m_powerPulseAverage = powerPulseAverage;
-        m_powerMaxPeak = powerMaxPeak;
-        m_powerMinPeak = powerMinPeak;
-        m_powerPathLoss = powerPathLoss;
-        m_width = newWidth;
-        m_height = newHeight;
-        m_painter.end();
-        m_image = QImage(m_width, m_height, QImage::Format_ARGB32);
-        m_painter.begin(&m_image);
-        plotMap();
+            clearPower(powerAverage, newSize);
+            clearPower(powerPulseAverage, newSize);
+            clearPower(powerMaxPeak, newSize);
+            clearPower(powerMinPeak, newSize);
+            clearPower(powerPathLoss, newSize);
+
+            // Copy across old data
+            for (int j = 0; j < m_height; j++)
+            {
+                int srcStart = j * m_width;
+                int srcEnd = (j + 1) * m_width;
+                int destStart = j * newWidth + yOffset + xOffset;
+                //qDebug() << srcStart << srcEnd << destStart;
+                if (powerAverage && m_powerAverage) {
+                    std::copy(m_powerAverage + srcStart, m_powerAverage + srcEnd, powerAverage + destStart);
+                }
+                if (powerPulseAverage && m_powerPulseAverage) {
+                    std::copy(m_powerPulseAverage + srcStart, m_powerPulseAverage + srcEnd, powerPulseAverage + destStart);
+                }
+                if (powerMaxPeak && m_powerMaxPeak) {
+                    std::copy(m_powerMaxPeak + srcStart, m_powerMaxPeak + srcEnd, powerMaxPeak + destStart);
+                }
+                if (powerMinPeak && m_powerMinPeak) {
+                    std::copy(m_powerMinPeak + srcStart, m_powerMinPeak + srcEnd, powerMinPeak + destStart);
+                }
+                if (powerPathLoss && m_powerPathLoss) {
+                    std::copy(m_powerPathLoss + srcStart, m_powerPathLoss + srcEnd, powerPathLoss + destStart);
+                }
+            }
+
+            createImage(newWidth, newHeight);
+
+            m_width = newWidth;
+            m_height = newHeight;
+
+            // Delete old memory
+            delete[] m_powerAverage;
+            delete[] m_powerPulseAverage;
+            delete[] m_powerMaxPeak;
+            delete[] m_powerMinPeak;
+            m_powerAverage = powerAverage;
+            m_powerPulseAverage = powerPulseAverage;
+            m_powerMaxPeak = powerMaxPeak;
+            m_powerMinPeak = powerMinPeak;
+            m_powerPathLoss = powerPathLoss;
+
+            plotMap();
+        }
+        catch (std::bad_alloc&)
+        {
+            // Detete partially allocated memory
+            delete[] powerAverage;
+            delete[] powerPulseAverage;
+            delete[] powerMaxPeak;
+            delete[] powerMinPeak;
+            delete[] powerPathLoss;
+            QMessageBox::critical(this, "Heat Map", QString("Failed to allocate memory (width=%1 height=%2)").arg(newWidth).arg(newHeight));
+        }
     }
 }
 
@@ -1462,3 +1610,37 @@ void HeatMapGUI::on_displayMins_valueChanged(int value)
     applySettings();
 }
 
+void HeatMapGUI::on_recordAverage_clicked(bool checked)
+{
+    m_settings.m_recordAverage = checked;
+    resizeMap(0, 0);
+    applySettings();
+}
+
+void HeatMapGUI::on_recordMax_clicked(bool checked)
+{
+    m_settings.m_recordMax = checked;
+    resizeMap(0, 0);
+    applySettings();
+}
+
+void HeatMapGUI::on_recordMin_clicked(bool checked)
+{
+    m_settings.m_recordMin = checked;
+    resizeMap(0, 0);
+    applySettings();
+}
+
+void HeatMapGUI::on_recordPulseAverage_clicked(bool checked)
+{
+    m_settings.m_recordPulseAverage = checked;
+    resizeMap(0, 0);
+    applySettings();
+}
+
+void HeatMapGUI::on_recordPathLoss_clicked(bool checked)
+{
+    m_settings.m_recordPathLoss = checked;
+    resizeMap(0, 0);
+    applySettings();
+}
