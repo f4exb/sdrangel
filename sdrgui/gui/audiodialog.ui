@@ -766,39 +766,6 @@
  </tabstops>
  <resources>
   <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
-  <include location="../resources/res.qrc"/>
  </resources>
  <connections>
   <connection>
