@@ -199,7 +199,6 @@ bool PlutoSDRMIMO::startRx()
 
     m_plutoRxBuffer = m_plutoParams->getBox()->createRxBuffer(PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples, false);
 	m_sourceThread->startWork();
-	mutexLocker.unlock();
 	m_runningRx = true;
 
     return true;
@@ -237,7 +236,6 @@ bool PlutoSDRMIMO::startTx()
 
     m_plutoTxBuffer = m_plutoParams->getBox()->createTxBuffer(PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples, false);
 	m_sinkThread->startWork();
-	mutexLocker.unlock();
 	m_runningTx = true;
 
     return true;

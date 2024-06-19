@@ -171,7 +171,6 @@ bool BladeRF2MIMO::startRx()
     }
 
 	m_sourceThread->startWork();
-	mutexLocker.unlock();
 	m_runningRx = true;
 
     return true;
@@ -207,7 +206,6 @@ bool BladeRF2MIMO::startTx()
     }
 
 	m_sinkThread->startWork();
-	mutexLocker.unlock();
 	m_runningTx = true;
 
     return true;
