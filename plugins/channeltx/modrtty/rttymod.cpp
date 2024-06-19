@@ -17,7 +17,6 @@
 
 #include <QTime>
 #include <QDebug>
-#include <QMutexLocker>
 #include <QNetworkAccessManager>
 #include <QNetworkDatagram>
 #include <QNetworkReply>
