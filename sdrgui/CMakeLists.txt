@@ -79,7 +79,6 @@ set(sdrgui_SOURCES
     gui/presetitem.cpp
     gui/profiledialog.cpp
     gui/rollupcontents.cpp
-    gui/rollupwidget.cpp
     gui/samplingdevicedialog.cpp
     gui/scaleengine.cpp
     gui/scaledimage.cpp
@@ -210,7 +209,6 @@ set(sdrgui_HEADERS
     gui/profiledialog.h
     gui/qtcompatibility.h
     gui/rollupcontents.h
-    gui/rollupwidget.h
     gui/samplingdevicedialog.h
     gui/scaleengine.h
     gui/scaledimage.h
