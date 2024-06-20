@@ -205,6 +205,13 @@ else()
     message(STATUS "Not building demoddsc (ENABLE_CHANNELRX_DEMODDSC=${ENABLE_CHANNELRX_DEMODDSC})")
 endif()
 
+if (ENABLE_CHANNELRX_WDSPRX AND WDSP_SUPPORT)
+    add_subdirectory(wdsprx)
+else()
+    message(STATUS "Not building wdsprx (ENABLE_CHANNELRX_WDSPRX=${ENABLE_CHANNELRX_WDSPRX} WDSP_SUPPORT=${WDSP_SUPPORT})")
+endif()
+
+
 if(NOT SERVER_MODE)
     if (ENABLE_CHANNELRX_HEATMAP)
         add_subdirectory(heatmap)

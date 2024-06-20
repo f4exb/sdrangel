@@ -96,6 +96,7 @@ option(ENABLE_CHANNELRX_HEATMAP "Enable channelrx heatmap plugin" ON)
 option(ENABLE_CHANNELRX_FREQSCANNER "Enable channelrx freqscanner plugin" ON)
 option(ENABLE_CHANNELRX_ENDOFTRAIN "Enable channelrx end-of-train plugin" ON)
 option(ENABLE_CHANNELRX_CHANNELPOWER "Enable channelrx channel power plugin" ON)
+option(ENABLE_CHANNELRX_WDSPRX "Enable channelrx WDSP receiver plugin" ON)
 
 # Channel Tx enablers
 option(ENABLE_CHANNELTX "Enable channeltx plugins" ON)
