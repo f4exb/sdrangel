@@ -296,6 +296,7 @@ void ILSDemodGUI::on_rfBW_valueChanged(int value)
 
 void ILSDemodGUI::on_mode_currentIndexChanged(int index)
 {
+    int freqIdx = ui->frequency->currentIndex();
     ui->frequency->clear();
     m_settings.m_mode = (ILSDemodSettings::Mode)index;
     if (m_settings.m_mode == ILSDemodSettings::LOC)
@@ -318,6 +319,7 @@ void ILSDemodGUI::on_mode_currentIndexChanged(int index)
         }
         closePipes();
     }
+    ui->frequency->setCurrentIndex(freqIdx);
     applySettings();
 }
 
@@ -411,14 +413,8 @@ void ILSDemodGUI::on_ident_currentIndexChanged(int index)
         on_runway_editingFinished();
         int frequency = m_ils[index].m_frequency;
         QString freqText = QString("%1").arg(frequency / 1000000.0f, 0, 'f', 2);
-        if (m_settings.m_mode == ILSDemodSettings::GS)
-        {
-            int index = m_locFrequencies.indexOf(freqText);
-            if (index >= 0) {
-                freqText = m_gsFrequencies[index];
-            }
-        }
-        ui->frequency->setCurrentText(freqText);
+        int freqIndex = m_locFrequencies.indexOf(freqText);
+        ui->frequency->setCurrentIndex(freqIndex);
         m_disableDrawILS = false;
     }
     drawILSOnMap();
