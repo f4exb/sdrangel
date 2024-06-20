@@ -69,8 +69,8 @@ private slots:
 	void on_configurationImport_clicked();
 	void on_configurationDelete_clicked();
 	void on_configurationLoad_clicked();
-	void on_configurationTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
-	void on_configurationTree_itemActivated(QTreeWidgetItem *item, int column);
+	void on_configurationsTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+	void on_configurationsTree_itemActivated(QTreeWidgetItem *item, int column);
     void accept() override;
 
 signals:

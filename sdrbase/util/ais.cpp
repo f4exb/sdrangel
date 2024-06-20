@@ -179,6 +179,10 @@ QString AISMessage::typeToString(quint8 type)
 
 AISMessage* AISMessage::decode(const QByteArray ba)
 {
+    if (ba.size() < 1) {
+        return nullptr;
+    }
+
     int id = (ba[0] >> 2) & 0x3f;
 
     if ((id == 1) || (id == 2) || (id == 3)) {

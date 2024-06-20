@@ -211,18 +211,20 @@ bool AISDemod::handleMessage(const Message& cmd)
 
             // Decode the message
             ais = AISMessage::decode(report.getMessage());
+            if (ais)
+            {
+                m_logStream << report.getDateTime().date().toString() << ","
+                    << report.getDateTime().time().toString() << ","
+                    << report.getMessage().toHex() << ","
+                    << QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0')) << ","
+                    << ais->getType() << ","
+                    << "\"" << ais->toString() << "\"" << ","
+                    << "\"" << ais->toNMEA() << "\"" << ","
+                    << report.getSlot() << ","
+                    << report.getSlots() << "\n";
 
-            m_logStream << report.getDateTime().date().toString() << ","
-                << report.getDateTime().time().toString() << ","
-                << report.getMessage().toHex() << ","
-                << QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0')) << ","
-                << ais->getType() << ","
-                << "\"" << ais->toString() << "\"" << ","
-                << "\"" << ais->toNMEA() << "\"" << ","
-                << report.getSlot() << ","
-                << report.getSlots() << "\n";
-
-            delete ais;
+                delete ais;
+            }
         }
 
         return true;
