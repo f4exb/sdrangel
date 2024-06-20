@@ -60,6 +60,8 @@ void ConfigurationsDialog::populateTree()
         return;
     }
 
+    sortConfigurations();
+
     QList<Configuration*>::const_iterator it = m_configurations->begin();
     int middleIndex = m_configurations->size() / 2;
     QTreeWidgetItem *treeItem;
@@ -445,14 +447,14 @@ void ConfigurationsDialog::on_configurationImport_clicked()
 	}
 }
 
-void ConfigurationsDialog::on_configurationTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
+void ConfigurationsDialog::on_configurationsTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
     (void) current;
     (void) previous;
 	updateConfigurationControls();
 }
 
-void ConfigurationsDialog::on_configurationTree_itemActivated(QTreeWidgetItem *item, int column)
+void ConfigurationsDialog::on_configurationsTree_itemActivated(QTreeWidgetItem *item, int column)
 {
     (void) item;
     (void) column;
