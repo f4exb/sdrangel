@@ -422,6 +422,9 @@ void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& da
 
     // Decode the message
     ais = AISMessage::decode(message);
+    if (!ais) {
+        return;
+    }
 
     // Is scroll bar at bottom
     QScrollBar *sb = ui->messages->verticalScrollBar();
