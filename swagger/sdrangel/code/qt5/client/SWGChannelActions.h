@@ -26,6 +26,7 @@
 #include "SWGAPTDemodActions.h"
 #include "SWGFileSinkActions.h"
 #include "SWGFileSourceActions.h"
+#include "SWGFreqScannerActions.h"
 #include "SWGIEEE_802_15_4_ModActions.h"
 #include "SWGPSK31ModActions.h"
 #include "SWGPacketModActions.h"
@@ -76,6 +77,9 @@ public:
     SWGFileSourceActions* getFileSourceActions();
     void setFileSourceActions(SWGFileSourceActions* file_source_actions);
 
+    SWGFreqScannerActions* getFreqScannerActions();
+    void setFreqScannerActions(SWGFreqScannerActions* freq_scanner_actions);
+
     SWGIEEE_802_15_4_ModActions* getIeee802154ModActions();
     void setIeee802154ModActions(SWGIEEE_802_15_4_ModActions* ieee_802_15_4_mod_actions);
 
@@ -121,6 +125,9 @@ private:
 
     SWGFileSourceActions* file_source_actions;
     bool m_file_source_actions_isSet;
+
+    SWGFreqScannerActions* freq_scanner_actions;
+    bool m_freq_scanner_actions_isSet;
 
     SWGIEEE_802_15_4_ModActions* ieee_802_15_4_mod_actions;
     bool m_ieee_802_15_4_mod_actions_isSet;

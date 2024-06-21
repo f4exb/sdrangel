@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGFreqScannerReport.h"
+#include "SWGFreqScannerActions.h"
 
 #include "SWGHelpers.h"
 
@@ -22,44 +22,33 @@
 
 namespace SWGSDRangel {
 
-SWGFreqScannerReport::SWGFreqScannerReport(QString* json) {
+SWGFreqScannerActions::SWGFreqScannerActions(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGFreqScannerReport::SWGFreqScannerReport() {
-    channel_sample_rate = 0;
-    m_channel_sample_rate_isSet = false;
-    channel_state = nullptr;
-    m_channel_state_isSet = false;
+SWGFreqScannerActions::SWGFreqScannerActions() {
+    run = 0;
+    m_run_isSet = false;
 }
 
-SWGFreqScannerReport::~SWGFreqScannerReport() {
+SWGFreqScannerActions::~SWGFreqScannerActions() {
     this->cleanup();
 }
 
 void
-SWGFreqScannerReport::init() {
-    channel_sample_rate = 0;
-    m_channel_sample_rate_isSet = false;
-    channel_state = new QList<SWGFreqScannerChannelState*>();
-    m_channel_state_isSet = false;
+SWGFreqScannerActions::init() {
+    run = 0;
+    m_run_isSet = false;
 }
 
 void
-SWGFreqScannerReport::cleanup() {
+SWGFreqScannerActions::cleanup() {
 
-    if(channel_state != nullptr) { 
-        auto arr = channel_state;
-        for(auto o: *arr) { 
-            delete o;
-        }
-        delete channel_state;
-    }
 }
 
-SWGFreqScannerReport*
-SWGFreqScannerReport::fromJson(QString &json) {
+SWGFreqScannerActions*
+SWGFreqScannerActions::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -68,15 +57,13 @@ SWGFreqScannerReport::fromJson(QString &json) {
 }
 
 void
-SWGFreqScannerReport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&channel_sample_rate, pJson["channelSampleRate"], "qint32", "");
+SWGFreqScannerActions::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&run, pJson["run"], "qint32", "");
     
-    
-    ::SWGSDRangel::setValue(&channel_state, pJson["channelState"], "QList", "SWGFreqScannerChannelState");
 }
 
 QString
-SWGFreqScannerReport::asJson ()
+SWGFreqScannerActions::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -87,47 +74,31 @@ SWGFreqScannerReport::asJson ()
 }
 
 QJsonObject*
-SWGFreqScannerReport::asJsonObject() {
+SWGFreqScannerActions::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_channel_sample_rate_isSet){
-        obj->insert("channelSampleRate", QJsonValue(channel_sample_rate));
-    }
-    if(channel_state && channel_state->size() > 0){
-        toJsonArray((QList<void*>*)channel_state, obj, "channelState", "SWGFreqScannerChannelState");
+    if(m_run_isSet){
+        obj->insert("run", QJsonValue(run));
     }
 
     return obj;
 }
 
 qint32
-SWGFreqScannerReport::getChannelSampleRate() {
-    return channel_sample_rate;
+SWGFreqScannerActions::getRun() {
+    return run;
 }
 void
-SWGFreqScannerReport::setChannelSampleRate(qint32 channel_sample_rate) {
-    this->channel_sample_rate = channel_sample_rate;
-    this->m_channel_sample_rate_isSet = true;
-}
-
-QList<SWGFreqScannerChannelState*>*
-SWGFreqScannerReport::getChannelState() {
-    return channel_state;
-}
-void
-SWGFreqScannerReport::setChannelState(QList<SWGFreqScannerChannelState*>* channel_state) {
-    this->channel_state = channel_state;
-    this->m_channel_state_isSet = true;
+SWGFreqScannerActions::setRun(qint32 run) {
+    this->run = run;
+    this->m_run_isSet = true;
 }
 
 
 bool
-SWGFreqScannerReport::isSet(){
+SWGFreqScannerActions::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_channel_sample_rate_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(channel_state && (channel_state->size() > 0)){
+        if(m_run_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);
