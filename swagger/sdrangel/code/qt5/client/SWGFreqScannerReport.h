@@ -46,6 +46,9 @@ public:
     qint32 getChannelSampleRate();
     void setChannelSampleRate(qint32 channel_sample_rate);
 
+    qint32 getScanState();
+    void setScanState(qint32 scan_state);
+
     QList<SWGFreqScannerChannelState*>* getChannelState();
     void setChannelState(QList<SWGFreqScannerChannelState*>* channel_state);
 
@@ -55,6 +58,9 @@ public:
 private:
     qint32 channel_sample_rate;
     bool m_channel_sample_rate_isSet;
+
+    qint32 scan_state;
+    bool m_scan_state_isSet;
 
     QList<SWGFreqScannerChannelState*>* channel_state;
     bool m_channel_state_isSet;

@@ -7278,6 +7278,10 @@ margin-bottom: 20px;
     "channelSampleRate" : {
       "type" : "integer"
     },
+    "scanState" : {
+      "type" : "integer",
+      "description" : "(IDLE=0, START_SCAN=1, SCANNING=2, WAIT_FOR_END_TX=3, WAIT_FOR_RETRANSMISSION=4)"
+    },
     "channelState" : {
       "type" : "array",
       "items" : {
@@ -59115,7 +59119,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-06-21T10:02:32.986+02:00
+              Generated 2024-06-21T11:03:53.536+02:00
             </div>
           </div>
       </div>
