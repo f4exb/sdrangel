@@ -204,6 +204,16 @@ bool FreqScannerGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (FreqScanner::MsgStartScan::match(message))
+    {
+        ui->startStop->doToggle(true);
+        return true;
+    }
+    else if (FreqScanner::MsgStopScan::match(message))
+    {
+        ui->startStop->doToggle(false);
+        return true;
+    }
     return false;
 }
 
@@ -609,7 +619,7 @@ void FreqScannerGUI::enterEvent(EnterEventType* event)
     ChannelGUI::enterEvent(event);
 }
 
-void FreqScannerGUI::on_startStop_clicked(bool checked)
+void FreqScannerGUI::on_startStop_toggled(bool checked)
 {
     if (checked)
     {
@@ -1080,7 +1090,7 @@ void FreqScannerGUI::makeUIConnections()
     QObject::connect(ui->priority, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FreqScannerGUI::on_priority_currentIndexChanged);
     QObject::connect(ui->measurement, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FreqScannerGUI::on_measurement_currentIndexChanged);
     QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FreqScannerGUI::on_mode_currentIndexChanged);
-    QObject::connect(ui->startStop, &ButtonSwitch::clicked, this, &FreqScannerGUI::on_startStop_clicked);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &FreqScannerGUI::on_startStop_toggled);
     QObject::connect(ui->table, &QTableWidget::cellChanged, this, &FreqScannerGUI::on_table_cellChanged);
     QObject::connect(ui->addSingle, &QToolButton::clicked, this, &FreqScannerGUI::on_addSingle_clicked);
     QObject::connect(ui->addRange, &QToolButton::clicked, this, &FreqScannerGUI::on_addRange_clicked);

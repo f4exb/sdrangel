@@ -140,7 +140,7 @@ private slots:
     void table_sectionResized(int logicalIndex, int oldSize, int newSize);
     void columnSelectMenu(QPoint pos);
     void columnSelectMenuChecked(bool checked = false);
-    void on_startStop_clicked(bool checked = false);
+    void on_startStop_toggled(bool checked = false);
     void on_addSingle_clicked();
     void on_addRange_clicked();
     void on_remove_clicked();

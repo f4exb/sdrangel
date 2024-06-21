@@ -216,6 +216,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToActionsKey = {
     {"APTDemod", "APTDemodActions"},
     {"FileSink", "FileSinkActions"},
     {"FileSource", "FileSourceActions"},
+    {"FreqScanner", "FreqScannerActions"},
     {"SigMFFileSink", "SigMFFileSinkActions"},
     {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModActions"},
     {"RadioAstronomy", "RadioAstronomyActions"},

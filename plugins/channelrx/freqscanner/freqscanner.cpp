@@ -31,6 +31,7 @@
 #include "SWGWorkspaceInfo.h"
 #include "SWGFreqScannerSettings.h"
 #include "SWGChannelReport.h"
+#include "SWGChannelActions.h"
 
 #include "device/deviceset.h"
 #include "dsp/dspengine.h"
@@ -550,7 +551,9 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                 setDeviceCenterFrequency(nextCenterFrequency);
             }
 
-            if (complete) {
+            if (complete)
+            {
+                m_scanResultsForReport = m_scanResults;
                 m_scanResults.clear();
             }
         }
@@ -815,6 +818,47 @@ int FreqScanner::webapiReportGet(
     return 200;
 }
 
+int FreqScanner::webapiActionsPost(
+        const QStringList& channelActionsKeys,
+        SWGSDRangel::SWGChannelActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGFreqScannerActions *swgFreqScannerActions = query.getFreqScannerActions();
+
+    if (swgFreqScannerActions)
+    {
+        if (channelActionsKeys.contains("run"))
+        {
+            bool run = swgFreqScannerActions->getRun() != 0;
+            if (run)
+            {
+                MsgStartScan *start = MsgStartScan::create();
+                if (getMessageQueueToGUI()) {
+                    getMessageQueueToGUI()->push(start);
+                } else {
+                    getInputMessageQueue()->push(start);
+                }
+            }
+            else
+            {
+                MsgStopScan *stop = MsgStopScan::create();
+                if (getMessageQueueToGUI()) {
+                    getMessageQueueToGUI()->push(stop);
+                } else {
+                    getInputMessageQueue()->push(stop);
+                }
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing FreqScannerActions in query";
+        return 400;
+    }
+}
+
 void FreqScanner::webapiUpdateChannelSettings(
         FreqScannerSettings& settings,
         const QStringList& channelSettingsKeys,
@@ -984,6 +1028,17 @@ void FreqScanner::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
 void FreqScanner::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     response.getFreqScannerReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+    response.getFreqScannerReport()->setScanState((int) m_state);
+
+    QList<SWGSDRangel::SWGFreqScannerChannelState *> *list = response.getFreqScannerReport()->getChannelState();
+
+    for (int i = 0; i < m_scanResultsForReport.size(); i++)
+    {
+        SWGSDRangel::SWGFreqScannerChannelState *channelState = new SWGSDRangel::SWGFreqScannerChannelState();
+        channelState->setFrequency(m_scanResultsForReport[i].m_frequency);
+        channelState->setPower(m_scanResultsForReport[i].m_power);
+        list->append(channelState);
+    }
 }
 
 void FreqScanner::webapiReverseSendSettings(const QStringList& channelSettingsKeys, const FreqScannerSettings& settings, bool force)

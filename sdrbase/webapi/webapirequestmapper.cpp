@@ -4821,6 +4821,11 @@ bool WebAPIRequestMapper::getChannelActions(
             channelActions->setFileSourceActions(new SWGSDRangel::SWGFileSourceActions());
             channelActions->getFileSourceActions()->fromJsonObject(actionsJsonObject);
         }
+        else if (channelActionsKey == "FreqScannerActions")
+        {
+            channelActions->setFreqScannerActions(new SWGSDRangel::SWGFreqScannerActions());
+            channelActions->getFreqScannerActions()->fromJsonObject(actionsJsonObject);
+        }
         else if (channelActionsKey == "IEEE_802_15_4_ModActions")
         {
             channelActions->setIeee802154ModActions(new SWGSDRangel::SWGIEEE_802_15_4_ModActions());
@@ -5629,6 +5634,7 @@ void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& ch
     channelActions.setAptDemodActions(nullptr);
     channelActions.setChannelType(nullptr);
     channelActions.setFileSourceActions(nullptr);
+    channelActions.setFreqScannerActions(nullptr);
     channelActions.setIeee802154ModActions(nullptr);
     channelActions.setPacketModActions(nullptr);
     channelActions.setPsk31ModActions(nullptr);

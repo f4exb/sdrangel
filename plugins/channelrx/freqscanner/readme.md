@@ -140,3 +140,15 @@ Moves the selected rows the the frequency table (14).
 <h3>21: Clear Active Count</h3>
 
 Press to reset the value in the Active Count column to 0 for all rows.
+
+<h2>API</h2>
+
+Full details of the API can be found in the Swagger documentation. Below are a few examples.
+
+To run a frequency scan:
+
+    curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/0/channel/0/actions" -d '{  "channelType": "FreqScanner",  "direction": 0,  "originatorDeviceSetIndex": 0,  "originatorChannelIndex": 0,  "FreqScannerActions": { "run": 1 }}'
+
+To get the results of the last scan:
+
+   curl -X GET "http://127.0.0.1:8091/sdrangel/deviceset/0/channel/0/report"
