@@ -58,24 +58,26 @@ namespace WDSP {
 RXA* RXA::create_rxa (
     int in_rate,                // input samplerate
     int out_rate,               // output samplerate
-    int in_size,                // input buffsize (complex samples) in a fexchange() operation
     int dsp_rate,               // sample rate for mainstream dsp processing
-    int dsp_size,               // number complex samples processed per buffer in mainstream dsp processing
-    int dsp_insize,             // size (complex samples) of the output of the r1 (input) buffer
-    int dsp_outsize,            // size (complex samples) of the input of the r2 (output) buffer
-    int out_size                // output buffsize (complex samples) in a fexchange() operation
+    int dsp_size                // number complex samples processed per buffer in mainstream dsp processing
 )
 {
     RXA* rxa = new RXA;
 
     rxa->in_rate = in_rate;
     rxa->out_rate = out_rate;
-    rxa->in_size = in_size;
     rxa->dsp_rate = dsp_rate;
     rxa->dsp_size = dsp_size;
-    rxa->dsp_insize = dsp_insize;
-    rxa->dsp_outsize = dsp_outsize;
-    rxa->out_size = out_size;
+
+    if (in_rate  >= dsp_rate)
+        rxa->dsp_insize  = dsp_size * (in_rate  / dsp_rate);
+    else
+        rxa->dsp_insize  = dsp_size / (dsp_rate /  in_rate);
+
+    if (out_rate >= dsp_rate)
+        rxa->dsp_outsize = dsp_size * (out_rate / dsp_rate);
+    else
+        rxa->dsp_outsize = dsp_size / (dsp_rate / out_rate);
 
     rxa->mode = RXA_LSB;
     rxa->inbuff  = new double[1 * rxa->dsp_insize  * 2]; // (double *) malloc0 (1 * ch.dsp_insize  * sizeof (complex));
@@ -645,10 +647,13 @@ void RXA::xrxa (RXA *rxa)
     RESAMPLE::xresample (rxa->rsmpout.p);
 }
 
-void RXA::setInputSamplerate (RXA *rxa, int dsp_insize, int in_rate)
+void RXA::setInputSamplerate (RXA *rxa, int in_rate)
 {
     rxa->csDSP.lock();
-    rxa->dsp_insize = dsp_insize;
+    if (in_rate  >= rxa->dsp_rate)
+        rxa->dsp_insize  = rxa->dsp_size * (in_rate  / rxa->dsp_rate);
+    else
+        rxa->dsp_insize  = rxa->dsp_size / (rxa->dsp_rate /  in_rate);
     rxa->in_rate = in_rate;
     // buffers
     delete[] (rxa->inbuff);
@@ -665,10 +670,13 @@ void RXA::setInputSamplerate (RXA *rxa, int dsp_insize, int in_rate)
     rxa->csDSP.unlock();
 }
 
-void RXA::setOutputSamplerate (RXA *rxa, int dsp_outsize, int out_rate)
+void RXA::setOutputSamplerate (RXA *rxa, int out_rate)
 {
     rxa->csDSP.lock();
-    rxa->dsp_outsize = dsp_outsize;
+    if (out_rate >= rxa->dsp_rate)
+        rxa->dsp_outsize = rxa->dsp_size * (out_rate / rxa->dsp_rate);
+    else
+        rxa->dsp_outsize = rxa->dsp_size / (rxa->dsp_rate / out_rate);
     rxa->out_rate = out_rate;
     // buffers
     delete[] (rxa->outbuff);
@@ -680,11 +688,17 @@ void RXA::setOutputSamplerate (RXA *rxa, int dsp_outsize, int out_rate)
     rxa->csDSP.unlock();
 }
 
-void RXA::setDSPSamplerate (RXA *rxa, int dsp_insize, int dsp_outsize, int dsp_rate)
+void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
 {
     rxa->csDSP.lock();
-    rxa->dsp_insize = dsp_insize;
-    rxa->dsp_outsize = dsp_outsize;
+    if (rxa->in_rate  >= dsp_rate)
+        rxa->dsp_insize  = rxa->dsp_size * (rxa->in_rate  / dsp_rate);
+    else
+        rxa->dsp_insize  = rxa->dsp_size / (dsp_rate /  rxa->in_rate);
+    if (rxa->out_rate >= dsp_rate)
+        rxa->dsp_outsize = rxa->dsp_size * (rxa->out_rate / dsp_rate);
+    else
+        rxa->dsp_outsize = rxa->dsp_size / (dsp_rate / rxa->out_rate);
     rxa->dsp_rate = dsp_rate;
     // buffers
     delete[] (rxa->inbuff);
@@ -731,12 +745,18 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_insize, int dsp_outsize, int dsp_r
     rxa->csDSP.unlock();
 }
 
-void RXA::setDSPBuffsize (RXA *rxa, int dsp_insize, int dsp_size, int dsp_outsize)
+void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
 {
     rxa->csDSP.lock();
-    rxa->dsp_insize = dsp_insize;
+    if (rxa->in_rate  >= rxa->dsp_rate)
+        rxa->dsp_insize  = dsp_size * (rxa->in_rate  / rxa->dsp_rate);
+    else
+        rxa->dsp_insize  = dsp_size / (rxa->dsp_rate /  rxa->in_rate);
+    if (rxa->out_rate >= rxa->dsp_rate)
+        rxa->dsp_outsize = dsp_size * (rxa->out_rate / rxa->dsp_rate);
+    else
+        rxa->dsp_outsize = dsp_size / (rxa->dsp_rate / rxa->out_rate);
     rxa->dsp_size = dsp_size;
-    rxa->dsp_outsize = dsp_outsize;
     // buffers
     delete[](rxa->inbuff);
     rxa->inbuff = new double[1 * rxa->dsp_insize  * 2]; // (double *)malloc0(1 * rxa->dsp_insize  * sizeof(complex));

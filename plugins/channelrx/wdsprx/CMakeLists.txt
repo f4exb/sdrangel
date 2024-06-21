@@ -19,7 +19,8 @@ set(wdsprx_HEADERS
 )
 
 include_directories(
-        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/wdsp
 )
 
 if(NOT SERVER_MODE)

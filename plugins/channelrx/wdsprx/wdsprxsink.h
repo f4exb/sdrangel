@@ -34,6 +34,10 @@
 class SpectrumVis;
 class ChannelAPI;
 
+namespace WDSP {
+    class RXA;
+}
+
 class WDSPRxSink : public ChannelSampleSink {
 public:
     WDSPRxSink();
@@ -132,9 +136,12 @@ private:
 
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;
+    WDSP::RXA *m_rxa;
 
 	static const int m_ssbFftLen;
 	static const int m_agcTarget;
+    static const int m_wdspSampleRate;
+    static const int m_wdspBufSize;
 
     void processOneSample(Complex &ci);
 };

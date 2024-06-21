@@ -95,9 +95,6 @@ public:
         RXA_METERTYPE_LAST
     };
 
-    double* inbuff;
-    double* outbuff;
-    double* midbuff;
     int mode;
     double meter[RXA_METERTYPE_LAST];
     QRecursiveMutex* pmtupdate[RXA_METERTYPE_LAST];
@@ -209,20 +206,20 @@ public:
     static RXA* create_rxa (
         int in_rate,                // input samplerate
         int out_rate,               // output samplerate
-        int in_size,                // input buffsize (complex samples) in a fexchange() operation
         int dsp_rate,               // sample rate for mainstream dsp processing
-        int dsp_size,               // number complex samples processed per buffer in mainstream dsp processing
-        int dsp_insize,             // size (complex samples) of the output of the r1 (input) buffer
-        int dsp_outsize,            // size (complex samples) of the input of the r2 (output) buffer
-        int out_size                // output buffsize (complex samples) in a fexchange() operation
+        int dsp_size                // number complex samples processed per buffer in mainstream dsp processing
     );
     static void destroy_rxa (RXA *rxa);
     static void flush_rxa (RXA *rxa);
     static void xrxa (RXA *rxa);
-    static void setInputSamplerate (RXA *rxa, int dsp_insize, int in_rate);
-    static void setOutputSamplerate (RXA *rxa, int dsp_outsize, int out_rate);
-    static void setDSPSamplerate (RXA *rxa, int dsp_insize, int dsp_outsize, int dsp_rate);
-    static void setDSPBuffsize (RXA *rxa, int dsp_insize, int dsp_size, int dsp_outsize);
+    int get_insize() const { return dsp_insize; }
+    int get_outsize() const { return dsp_outsize; }
+    double *get_inbuff() { return inbuff; }
+    double *get_outbuff() { return outbuff; }
+    static void setInputSamplerate (RXA *rxa, int in_rate);
+    static void setOutputSamplerate (RXA *rxa, int out_rate);
+    static void setDSPSamplerate (RXA *rxa, int dsp_rate);
+    static void setDSPBuffsize (RXA *rxa, int dsp_size);
 
     // RXA Properties
     static void SetMode (RXA& rxa, int mode);
@@ -236,6 +233,11 @@ public:
     static void SetPassband (RXA& rxa, double f_low, double f_high);
     static void SetNC (RXA& rxa, int nc);
     static void SetMP (RXA& rxa, int mp);
+
+private:
+    double* inbuff;
+    double* midbuff;
+    double* outbuff;
 };
 
 } // namespace WDSP

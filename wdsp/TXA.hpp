@@ -124,9 +124,6 @@ public:
         TXA_METERTYPE_LAST
     };
 
-    double* inbuff;
-    double* outbuff;
-    double* midbuff;
     int mode;
     double f_low;
     double f_high;
@@ -223,20 +220,20 @@ public:
     static TXA* create_txa (
         int in_rate,                // input samplerate
         int out_rate,               // output samplerate
-        int in_size,                // input buffsize (complex samples) in a fexchange() operation
         int dsp_rate,               // sample rate for mainstream dsp processing
-        int dsp_size,               // number complex samples processed per buffer in mainstream dsp processing
-        int dsp_insize,             // size (complex samples) of the output of the r1 (input) buffer
-        int dsp_outsize,            // size (complex samples) of the input of the r2 (output) buffer
-        int out_size                // output buffsize (complex samples) in a fexchange() operation
+        int dsp_size                // number complex samples processed per buffer in mainstream dsp processing
     );
     static void destroy_txa (TXA *txa);
     static void flush_txa (TXA *txa);
     static void xtxa (TXA *txa);
-    static void setInputSamplerate (TXA *txa, int dsp_insize, int in_rate);
-    static void setOutputSamplerate (TXA *txa, int dsp_outsize, int out_rate);
-    static void setDSPSamplerate (TXA *txa, int dsp_insize, int dsp_outsize, int dsp_rate);
-    static void setDSPBuffsize (TXA *txa, int dsp_insize, int dsp_size, int dsp_outsize);
+    int get_insize() const { return dsp_insize; }
+    int get_outsize() const { return dsp_outsize; }
+    double *get_inbuff() { return inbuff; }
+    double *get_outbuff() { return outbuff; }
+    static void setInputSamplerate (TXA *txa, int in_rate);
+    static void setOutputSamplerate (TXA *txa, int out_rate);
+    static void setDSPSamplerate (TXA *txa, int dsp_rate);
+    static void setDSPBuffsize (TXA *txa, int dsp_size);
 
     // TXA Properties
     static void SetMode (TXA& txa, int mode);
@@ -251,6 +248,9 @@ public:
 
 private:
     static void ResCheck (TXA& txa);
+    double* inbuff;
+    double* midbuff;
+    double* outbuff;
 };
 
 } // namespace WDSP

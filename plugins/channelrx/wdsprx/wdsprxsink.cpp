@@ -25,11 +25,14 @@
 #include "util/db.h"
 #include "util/messagequeue.h"
 #include "maincore.h"
+#include "RXA.hpp"
 
 #include "wdsprxsink.h"
 
 const int WDSPRxSink::m_ssbFftLen = 2048;
 const int WDSPRxSink::m_agcTarget = 3276; // 32768/10 -10 dB amplitude => -20 dB power: center of normal signal
+const int WDSPRxSink::m_wdspSampleRate = 48000;
+const int WDSPRxSink::m_wdspBufSize = 512;
 
 WDSPRxSink::WDSPRxSink() :
         m_audioBinaual(false),
@@ -69,6 +72,12 @@ WDSPRxSink::WDSPRxSink() :
 	m_magsqPeak = 0.0;
 	m_magsqCount = 0;
 
+    m_rxa = WDSP::RXA::create_rxa(
+        m_wdspSampleRate, // input samplerate
+        m_wdspSampleRate, // output samplerate
+        m_wdspSampleRate, // sample rate for mainstream dsp processing (dsp)
+        m_wdspBufSize     // number complex samples processed per buffer in mainstream dsp processing
+    );
 	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, m_ssbFftLen);
 	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
 
@@ -81,6 +90,7 @@ WDSPRxSink::WDSPRxSink() :
 
 WDSPRxSink::~WDSPRxSink()
 {
+    WDSP::RXA::destroy_rxa(m_rxa);
     delete SSBFilter;
     delete DSBFilter;
 }
@@ -289,7 +299,7 @@ void WDSPRxSink::applyChannelSettings(int channelSampleRate, int channelFrequenc
         Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > channelSampleRate ? channelSampleRate : (m_Bandwidth * 1.5f);
         m_interpolator.create(16, channelSampleRate, interpolatorBandwidth, 2.0f);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) channelSampleRate / (Real) m_audioSampleRate;
+        m_interpolatorDistance = (Real) channelSampleRate / (Real) m_wdspSampleRate;
     }
 
     m_channelSampleRate = channelSampleRate;
@@ -303,7 +313,9 @@ void WDSPRxSink::applyAudioSampleRate(int sampleRate)
     Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > m_channelSampleRate ? m_channelSampleRate : (m_Bandwidth * 1.5f);
     m_interpolator.create(16, m_channelSampleRate, interpolatorBandwidth, 2.0f);
     m_interpolatorDistanceRemain = 0;
-    m_interpolatorDistance = (Real) m_channelSampleRate / (Real) sampleRate;
+    m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_wdspSampleRate;
+
+    WDSP::RXA::setOutputSamplerate(m_rxa, sampleRate);
 
     SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
     DSBFilter->create_dsb_filter(m_Bandwidth / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);

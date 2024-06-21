@@ -54,24 +54,26 @@ namespace WDSP {
 TXA* TXA::create_txa (
     int in_rate,                // input samplerate
     int out_rate,               // output samplerate
-    int in_size,                // input buffsize (complex samples) in a fexchange() operation
     int dsp_rate,               // sample rate for mainstream dsp processing
-    int dsp_size,               // number complex samples processed per buffer in mainstream dsp processing
-    int dsp_insize,             // size (complex samples) of the output of the r1 (input) buffer
-    int dsp_outsize,            // size (complex samples) of the input of the r2 (output) buffer
-    int out_size                // output buffsize (complex samples) in a fexchange() operation
+    int dsp_size                // number complex samples processed per buffer in mainstream dsp processing
 )
 {
     TXA *txa = new TXA;
 
     txa->in_rate = in_rate;
     txa->out_rate = out_rate;
-    txa->in_size = in_size;
     txa->dsp_rate = dsp_rate;
     txa->dsp_size = dsp_size;
-    txa->dsp_insize = dsp_insize;
-    txa->dsp_outsize = dsp_outsize;
-    txa->out_size = out_size;
+
+    if (in_rate  >= dsp_rate)
+        txa->dsp_insize  = dsp_size * (in_rate  / dsp_rate);
+    else
+        txa->dsp_insize  = dsp_size / (dsp_rate /  in_rate);
+
+    if (out_rate >= dsp_rate)
+        txa->dsp_outsize = dsp_size * (out_rate / dsp_rate);
+    else
+        txa->dsp_outsize = dsp_size / (dsp_rate / out_rate);
 
     txa->mode   = TXA_LSB;
     txa->f_low  = -5000.0;
@@ -561,7 +563,7 @@ void TXA::destroy_txa (TXA *txa)
     delete txa;
 }
 
-void flush_txa (TXA* txa)
+void TXA::flush_txa (TXA* txa)
 {
     memset (txa->inbuff,  0, 1 * txa->dsp_insize  * sizeof (dcomplex));
     memset (txa->outbuff, 0, 1 * txa->dsp_outsize * sizeof (dcomplex));
@@ -635,10 +637,15 @@ void xtxa (TXA* txa)
     // print_peak_env ("env_exception.txt", txa->dsp_outsize, txa->outbuff, 0.7);
 }
 
-void TXA::setInputSamplerate (TXA *txa, int dsp_insize, int in_rate)
+void TXA::setInputSamplerate (TXA *txa, int in_rate)
 {
     txa->csDSP.lock();
-    txa->dsp_insize = dsp_insize;
+
+    if (in_rate  >= txa->dsp_rate)
+        txa->dsp_insize  = txa->dsp_size * (in_rate  / txa->dsp_rate);
+    else
+        txa->dsp_insize  = txa->dsp_size / (txa->dsp_rate /  in_rate);
+
     txa->in_rate = in_rate;
     // buffers
     delete[] (txa->inbuff);
@@ -651,10 +658,15 @@ void TXA::setInputSamplerate (TXA *txa, int dsp_insize, int in_rate)
     txa->csDSP.unlock();
 }
 
-void TXA::setOutputSamplerate (TXA* txa, int dsp_outsize, int out_rate)
+void TXA::setOutputSamplerate (TXA* txa, int out_rate)
 {
     txa->csDSP.lock();
-    txa->dsp_outsize = dsp_outsize;
+
+    if (out_rate >= txa->dsp_rate)
+        txa->dsp_outsize = txa->dsp_size * (out_rate / txa->dsp_rate);
+    else
+        txa->dsp_outsize = txa->dsp_size / (txa->dsp_rate / out_rate);
+
     txa->out_rate = out_rate;
     // buffers
     delete[] (txa->outbuff);
@@ -672,11 +684,20 @@ void TXA::setOutputSamplerate (TXA* txa, int dsp_outsize, int out_rate)
     txa->csDSP.unlock();
 }
 
-void TXA::setDSPSamplerate (TXA *txa, int dsp_insize, int dsp_outsize, int dsp_rate)
+void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
 {
     txa->csDSP.lock();
-    txa->dsp_insize = dsp_insize;
-    txa->dsp_outsize = dsp_outsize;
+
+    if (txa->in_rate  >= dsp_rate)
+        txa->dsp_insize  = txa->dsp_size * (txa->in_rate  / dsp_rate);
+    else
+        txa->dsp_insize  = txa->dsp_size / (dsp_rate /  txa->in_rate);
+
+    if (txa->out_rate >= dsp_rate)
+        txa->dsp_outsize = txa->dsp_size * (txa->out_rate / dsp_rate);
+    else
+        txa->dsp_outsize = txa->dsp_size / (dsp_rate / txa->out_rate);
+
     txa->dsp_rate = dsp_rate;
     // buffers
     delete[] (txa->inbuff);
@@ -725,12 +746,21 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_insize, int dsp_outsize, int dsp_r
     txa->csDSP.unlock();
 }
 
-void TXA::setDSPBuffsize (TXA *txa, int dsp_insize, int dsp_size, int dsp_outsize)
+void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
 {
     txa->csDSP.lock();
-    txa->dsp_insize = dsp_insize;
+
+    if (txa->in_rate  >= txa->dsp_rate)
+        txa->dsp_insize  = dsp_size * (txa->in_rate  / txa->dsp_rate);
+    else
+        txa->dsp_insize  = dsp_size / (txa->dsp_rate /  txa->in_rate);
+
+    if (txa->out_rate >= txa->dsp_rate)
+        txa->dsp_outsize = dsp_size * (txa->out_rate / txa->dsp_rate);
+    else
+        txa->dsp_outsize = dsp_size / (txa->dsp_rate / txa->out_rate);
+
     txa->dsp_size = dsp_size;
-    txa->dsp_outsize = dsp_outsize;
     // buffers
     delete[] (txa->inbuff);
     txa->inbuff = new double[1 * txa->dsp_insize  * 2]; // (double *)malloc0(1 * txa->dsp_insize  * sizeof(complex));
