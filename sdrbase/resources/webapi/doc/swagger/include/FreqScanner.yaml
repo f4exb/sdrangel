@@ -59,6 +59,23 @@ FreqScannerReport:
   properties:
     channelSampleRate:
       type: integer
+    scanState:
+      description: (IDLE=0, START_SCAN=1, SCANNING=2, WAIT_FOR_END_TX=3, WAIT_FOR_RETRANSMISSION=4)
+      type: integer
+    channelState:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/FreqScanner.yaml#/FreqScannerChannelState"
+
+FreqScannerChannelState:
+  properties:
+    frequency:
+      description: "Channel centre frequency in Hz"
+      type: integer
+    power:
+      description: "Channel power in dB"
+      type: number
+      format: float
 
 FreqScannerFrequency:
   properties:
@@ -77,3 +94,13 @@ FreqScannerFrequency:
       type: string
     squelch:
       type: string
+
+FreqScannerActions:
+  description: "Frequency Scanner actions"
+  properties:
+    run:
+      type: integer
+      description: >
+        Set the plugin running state
+          * 0 - idle
+          * 1 - run

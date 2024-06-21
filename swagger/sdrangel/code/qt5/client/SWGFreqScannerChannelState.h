@@ -11,62 +11,54 @@
  */
 
 /*
- * SWGFreqScannerReport.h
+ * SWGFreqScannerChannelState.h
  *
- * FreqScanner
+ * 
  */
 
-#ifndef SWGFreqScannerReport_H_
-#define SWGFreqScannerReport_H_
+#ifndef SWGFreqScannerChannelState_H_
+#define SWGFreqScannerChannelState_H_
 
 #include <QJsonObject>
 
 
-#include "SWGFreqScannerChannelState.h"
-#include <QList>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGFreqScannerReport: public SWGObject {
+class SWG_API SWGFreqScannerChannelState: public SWGObject {
 public:
-    SWGFreqScannerReport();
-    SWGFreqScannerReport(QString* json);
-    virtual ~SWGFreqScannerReport();
+    SWGFreqScannerChannelState();
+    SWGFreqScannerChannelState(QString* json);
+    virtual ~SWGFreqScannerChannelState();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGFreqScannerReport* fromJson(QString &jsonString) override;
+    virtual SWGFreqScannerChannelState* fromJson(QString &jsonString) override;
 
-    qint32 getChannelSampleRate();
-    void setChannelSampleRate(qint32 channel_sample_rate);
+    qint32 getFrequency();
+    void setFrequency(qint32 frequency);
 
-    qint32 getScanState();
-    void setScanState(qint32 scan_state);
-
-    QList<SWGFreqScannerChannelState*>* getChannelState();
-    void setChannelState(QList<SWGFreqScannerChannelState*>* channel_state);
+    float getPower();
+    void setPower(float power);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 channel_sample_rate;
-    bool m_channel_sample_rate_isSet;
+    qint32 frequency;
+    bool m_frequency_isSet;
 
-    qint32 scan_state;
-    bool m_scan_state_isSet;
-
-    QList<SWGFreqScannerChannelState*>* channel_state;
-    bool m_channel_state_isSet;
+    float power;
+    bool m_power_isSet;
 
 };
 
 }
 
-#endif /* SWGFreqScannerReport_H_ */
+#endif /* SWGFreqScannerChannelState_H_ */

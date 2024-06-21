@@ -198,6 +198,11 @@
           <string>FRS-GMRS</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>HF ATC</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="0">
@@ -232,7 +237,6 @@
  </customwidgets>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../demodapt/icons.qrc"/>
  </resources>
  <connections>
   <connection>

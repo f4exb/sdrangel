@@ -91,6 +91,19 @@ void FreqScannerAddRangeDialog::accept()
         };
         m_frequencies.append(FRS_GMRSFreqs);
     }
+    else if (ui->preset->currentText() == "HF ATC")
+    {
+        static const QList<qint64> hfFreqs = {
+            2872000, 2890000, 2899000, 2971000,
+            3016000, 3446000, 3476000, 3491000,
+            4675000, 5598000, 5616000, 5649000,
+            6547000, 6595000, 6622000, 6667000,
+            8831000, 8864000, 8879000, 8891000,
+            8906000, 10021000, 11336000, 13291000,
+            13306000, 17946000
+        };
+        m_frequencies.append(hfFreqs);
+    }
     else
     {
         qint64 start = ui->start->getValue();
@@ -148,6 +161,10 @@ void FreqScannerAddRangeDialog::on_preset_currentTextChanged(const QString& text
         enableManAdjust = false;
     }
     else if (text == "FRS-GMRS")
+    {
+        enableManAdjust = false;
+    }
+    else if (text == "HF ATC")
     {
         enableManAdjust = false;
     }

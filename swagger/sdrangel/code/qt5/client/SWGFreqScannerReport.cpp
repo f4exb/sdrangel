@@ -30,6 +30,10 @@ SWGFreqScannerReport::SWGFreqScannerReport(QString* json) {
 SWGFreqScannerReport::SWGFreqScannerReport() {
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
+    scan_state = 0;
+    m_scan_state_isSet = false;
+    channel_state = nullptr;
+    m_channel_state_isSet = false;
 }
 
 SWGFreqScannerReport::~SWGFreqScannerReport() {
@@ -40,11 +44,23 @@ void
 SWGFreqScannerReport::init() {
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
+    scan_state = 0;
+    m_scan_state_isSet = false;
+    channel_state = new QList<SWGFreqScannerChannelState*>();
+    m_channel_state_isSet = false;
 }
 
 void
 SWGFreqScannerReport::cleanup() {
 
+
+    if(channel_state != nullptr) { 
+        auto arr = channel_state;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete channel_state;
+    }
 }
 
 SWGFreqScannerReport*
@@ -60,6 +76,10 @@ void
 SWGFreqScannerReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_sample_rate, pJson["channelSampleRate"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&scan_state, pJson["scanState"], "qint32", "");
+    
+    
+    ::SWGSDRangel::setValue(&channel_state, pJson["channelState"], "QList", "SWGFreqScannerChannelState");
 }
 
 QString
@@ -79,6 +99,12 @@ SWGFreqScannerReport::asJsonObject() {
     if(m_channel_sample_rate_isSet){
         obj->insert("channelSampleRate", QJsonValue(channel_sample_rate));
     }
+    if(m_scan_state_isSet){
+        obj->insert("scanState", QJsonValue(scan_state));
+    }
+    if(channel_state && channel_state->size() > 0){
+        toJsonArray((QList<void*>*)channel_state, obj, "channelState", "SWGFreqScannerChannelState");
+    }
 
     return obj;
 }
@@ -93,12 +119,38 @@ SWGFreqScannerReport::setChannelSampleRate(qint32 channel_sample_rate) {
     this->m_channel_sample_rate_isSet = true;
 }
 
+qint32
+SWGFreqScannerReport::getScanState() {
+    return scan_state;
+}
+void
+SWGFreqScannerReport::setScanState(qint32 scan_state) {
+    this->scan_state = scan_state;
+    this->m_scan_state_isSet = true;
+}
+
+QList<SWGFreqScannerChannelState*>*
+SWGFreqScannerReport::getChannelState() {
+    return channel_state;
+}
+void
+SWGFreqScannerReport::setChannelState(QList<SWGFreqScannerChannelState*>* channel_state) {
+    this->channel_state = channel_state;
+    this->m_channel_state_isSet = true;
+}
+
 
 bool
 SWGFreqScannerReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_channel_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_scan_state_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(channel_state && (channel_state->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

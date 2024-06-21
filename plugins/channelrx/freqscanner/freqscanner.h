@@ -341,6 +341,11 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    virtual int webapiActionsPost(
+            const QStringList& channelActionsKeys,
+            SWGSDRangel::SWGChannelActions& query,
+            QString& errorMessage);
+
     static void webapiFormatChannelSettings(
             SWGSDRangel::SWGChannelSettings& response,
             const FreqScannerSettings& settings);
@@ -388,6 +393,7 @@ private:
     qint64 m_stepStartFrequency;
     qint64 m_stepStopFrequency;
     QList<MsgScanResult::ScanResult> m_scanResults;
+    QList<MsgScanResult::ScanResult> m_scanResultsForReport;
 
     enum State {
         IDLE,
