@@ -347,7 +347,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     qDebug("DeviceUISet::loadRxChannelSettings: creating new channel [%s] from config [%s]",
                             qPrintable((*channelRegistrations)[i].m_channelIdURI),
                             qPrintable(channelConfig.m_channelIdURI));
-                    BasebandSampleSink *rxChannel;
+                    BasebandSampleSink *rxChannel = nullptr;
                     PluginInterface *pluginInterface = (*channelRegistrations)[i].m_plugin;
                     pluginInterface->createRxChannel(m_deviceAPI, &rxChannel, &channelAPI);
                     rxChannelGUI = pluginInterface->createRxChannelGUI(this, rxChannel);
