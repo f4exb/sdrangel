@@ -25,6 +25,7 @@
     <file>map/heliport.png</file>
     <file>map/waypoint.png</file>
     <file>map/map3d.html</file>
+    <file>data/transmitters.csv</file>
   </qresource>
   <qresource prefix="/">
     <file>Cesium/Cesium.js</file>
