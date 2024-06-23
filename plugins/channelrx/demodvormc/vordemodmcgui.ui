@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>VORDemodMCGUI</class>
+ <class>VORDemodGUI</class>
  <widget class="RollupContents" name="VORDemodGUI">
   <property name="geometry">
    <rect>
