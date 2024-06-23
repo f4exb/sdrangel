@@ -106,7 +106,7 @@ IEEE_802_15_4_ModSettings:
     beta:
       type: number
       format: float
-      description: Pulse shapint filter beta factor
+      description: Pulse shaping filter beta factor
     symbolSpan:
       type: integer
     udpEnabled:

@@ -150,7 +150,7 @@ LimeRFEActions:
           * 1 - Tx
     deviceSetIndex:
       type: integer
-      dexcription: Index of device set to synchronize switch with
+      description: Index of device set to synchronize switch with
     switchChannel:
       type: integer
       description: >

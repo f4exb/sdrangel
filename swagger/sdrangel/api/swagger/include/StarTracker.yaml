@@ -159,7 +159,7 @@ StarTrackerTarget:
       type: number
       format: float
     airTemperature:
-      description: "Surface air temperature in degrees celsius at antenna location"
+      description: "Surface air temperature in degrees Celsius at antenna location"
       type: number
       format: float
     skyTemperature:

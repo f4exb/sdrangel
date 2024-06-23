@@ -31,7 +31,7 @@ FileSinkSettings:
     squelchRecordingEnable:
       type: integer
       description: >
-        Automatic recording triggered by spectrum squalch
+        Automatic recording triggered by spectrum squelch
         * 0 - disabled
         * 1 - enabled
     streamIndex:

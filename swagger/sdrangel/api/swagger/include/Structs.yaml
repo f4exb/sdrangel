@@ -59,7 +59,7 @@ RangeFloat:
       format: float
 
 FrequencyRange:
-  description: An frequency range with 64 bit support for min and max
+  description: A frequency range with 64 bit support for min and max
   properties:
     min:
       type: integer

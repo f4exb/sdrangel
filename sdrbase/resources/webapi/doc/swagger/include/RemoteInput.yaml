@@ -14,7 +14,7 @@ RemoteInputSettings:
     multicastJoin:
       type: integer
       description: >
-        Joim multicast group
+        Join multicast group
         * 0 - leave group
         * 1 - join group
     dcBlock:

@@ -13,7 +13,7 @@ Command:
       description: Qt::Key
       type: integer
     keyModifiers:
-      sdescription: Qt::KeyboardModifiers
+      description: Qt::KeyboardModifiers
       type: integer
     associateKey:
       description: boolean
