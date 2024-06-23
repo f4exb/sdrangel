@@ -64,9 +64,7 @@ Changes only apply to new devices / channels until SDRangel is restarted.</strin
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../resources/res.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>
