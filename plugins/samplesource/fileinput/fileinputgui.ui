@@ -32,7 +32,6 @@
    <font>
     <family>Liberation Sans</family>
     <pointsize>9</pointsize>
-    <weight>50</weight>
     <italic>false</italic>
     <bold>false</bold>
    </font>
@@ -129,7 +128,6 @@
         <font>
          <family>Liberation Sans</family>
          <pointsize>16</pointsize>
-         <weight>50</weight>
          <italic>false</italic>
          <bold>false</bold>
         </font>
@@ -241,7 +239,6 @@
         <font>
          <family>Liberation Sans</family>
          <pointsize>8</pointsize>
-         <weight>50</weight>
          <italic>false</italic>
          <bold>false</bold>
         </font>
@@ -276,7 +273,6 @@
         <font>
          <family>Liberation Sans</family>
          <pointsize>8</pointsize>
-         <weight>50</weight>
          <italic>false</italic>
          <bold>false</bold>
         </font>
@@ -305,7 +301,6 @@
         <font>
          <family>Liberation Sans</family>
          <pointsize>8</pointsize>
-         <weight>50</weight>
          <italic>false</italic>
          <bold>false</bold>
         </font>
@@ -445,7 +440,6 @@
         <font>
          <family>Liberation Sans</family>
          <pointsize>8</pointsize>
-         <weight>50</weight>
          <italic>false</italic>
          <bold>false</bold>
         </font>

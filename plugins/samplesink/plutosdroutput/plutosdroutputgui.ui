@@ -135,7 +135,6 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>16</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -431,7 +430,6 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>12</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -488,7 +486,6 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>12</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>

@@ -109,6 +109,7 @@
      <property name="font">
       <font>
        <family>Liberation Mono</family>
+       <pointsize>9</pointsize>
       </font>
      </property>
      <property name="toolTip">
