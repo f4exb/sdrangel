@@ -48,7 +48,7 @@ SatelliteTrackerSettings:
       description: "Number of points used to draw ground tracks"
       type: integer
     dateFormat:
-      desciption: "Format for dates in the GUI (E.g: yy/MM/dd)"
+      description: "Format for dates in the GUI (E.g: yy/MM/dd)"
       type: string
     utc:
       description: "Times are UTC (1) or local (0)"

@@ -23,7 +23,7 @@ DOA2Settings:
       description: Antennas baseline distance in millimeters from 1 to 99999
     squelchdB:
       type: integer
-      description: Porcessing squared magnitude threshold (squelch) in dB from -140 t0 0
+      description: Processing squared magnitude threshold (squelch) in dB from -140 t0 0
     fftAveragingValue:
       type: integer
       description: Number of FFTs to average over. Use 1, 2, 5 or 10 times 10^0 to 10^5 (1 to 1M)

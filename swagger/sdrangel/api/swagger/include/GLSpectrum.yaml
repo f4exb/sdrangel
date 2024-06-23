@@ -17,7 +17,7 @@ SpectrumHistogramMarker:
           * 2 - Max power
     markerColor:
       type: integer
-      description: Color in 8 bit BGR serie
+      description: Color in 8 bit BGR series
     show:
       type: integer
       description: >
@@ -37,7 +37,7 @@ SpectrumWaterfallMarker:
       description: Time shift in seconds
     markerColor:
       type: integer
-      description: Color in 8 bit BGR serie
+      description: Color in 8 bit BGR series
     show:
       type: integer
       description: >
@@ -55,7 +55,7 @@ SpectrumAnnotationMarker:
       type: integer
     markerColor:
       type: integer
-      description: Color in 8 bit BGR serie
+      description: Color in 8 bit BGR series
     show:
       type: integer
       description: >

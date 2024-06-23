@@ -1,5 +1,5 @@
 Preferences:
-  description: Repreents a Prefernce object
+  description: Represents a Preference object
   properties:
     sourceDevice:
       description: Identification of the source used in R0 tab (GUI flavor) at startup

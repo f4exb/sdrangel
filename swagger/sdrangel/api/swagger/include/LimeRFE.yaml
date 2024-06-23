@@ -53,7 +53,7 @@ LimeRFESettings:
       description: Rx attenuation factor. Attenuation is 2 times this factor in dB (0..7 => 0..14dB)
       type: integer
     amfmNotch:
-      desciption: Rx AM/FM notch filter (boolean)
+      description: Rx AM/FM notch filter (boolean)
       type: integer
     txChannels:
       type: integer

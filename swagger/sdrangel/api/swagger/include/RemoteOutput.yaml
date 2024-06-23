@@ -6,7 +6,7 @@ RemoteOutputSettings:
     nbTxBytes:
       type: integer
       description: >
-        Number of bytes in a transmited I or Q sample
+        Number of bytes in a transmitted I or Q sample
           * 1
           * 2
           * 4

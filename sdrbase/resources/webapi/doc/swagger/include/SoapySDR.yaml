@@ -212,7 +212,7 @@ definitions:
           $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
 
   ArgValue:
-    descripion: Generic argument value
+    description: Generic argument value
     properties:
       key:
         type: string
@@ -223,7 +223,7 @@ definitions:
         type: string
 
   ArgInfo:
-    descripion: Generic argument information
+    description: Generic argument information
     properties:
       key:
         type: string
