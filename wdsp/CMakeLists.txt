@@ -59,6 +59,7 @@ set(wdsp_HEADERS
     bandpass.hpp
     bldr.hpp
     bps.hpp
+    bufferprobe.hpp
     calculus.hpp
     cblock.hpp
     cfcomp.hpp
@@ -132,4 +133,3 @@ if (LINUX)
     )
     install(TARGETS wdsp_make_interface wdsp_make_calculus DESTINATION ${INSTALL_BIN_DIR})
 endif()
-

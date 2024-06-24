@@ -28,20 +28,11 @@ warren@wpratt.com
 #include "comm.hpp"
 #include "sender.hpp"
 #include "RXA.hpp"
+#include "bufferprobe.hpp"
 
 namespace WDSP {
 
-void SENDER::calc_sender (SENDER *a)
-{
-    a->out = new double[a->size * 2]; // (double *) malloc0 (a->size * sizeof (complex));
-}
-
-void decalc_sender (SENDER *a)
-{
-    delete[] (a->out);
-}
-
-SENDER* SENDER::create_sender (int run, int flag, int mode, int size, double* in, int arg0, int arg1, int arg2, int arg3)
+SENDER* SENDER::create_sender (int run, int flag, int mode, int size, double* in)
 {
     SENDER *a = new SENDER;
     a->run = run;
@@ -49,23 +40,17 @@ SENDER* SENDER::create_sender (int run, int flag, int mode, int size, double* in
     a->mode = mode;
     a->size = size;
     a->in = in;
-    a->arg0 = arg0;
-    a->arg1 = arg1;
-    a->arg2 = arg2;
-    a->arg3 = arg3;
-    calc_sender (a);
+    a->spectrumProbe = nullptr;
     return a;
 }
 
 void SENDER::destroy_sender (SENDER *a)
 {
-    decalc_sender (a);
     delete (a);
 }
 
-void SENDER::flush_sender (SENDER *a)
+void SENDER::flush_sender (SENDER *)
 {
-    memset (a->out, 0, a->size * sizeof (dcomplex));
 }
 
 void SENDER::xsender (SENDER *a)
@@ -76,14 +61,9 @@ void SENDER::xsender (SENDER *a)
         {
         case 0:
             {
-                int i;
-                dINREAL* outf = (dINREAL *)a->out;
-                for (i = 0; i < a->size; i++)
-                {
-                    outf [2 * i + 0] = (dINREAL)a->in[2 * i + 0];
-                    outf [2 * i + 1] = (dINREAL)a->in[2 * i + 1];
+                if (a->spectrumProbe) {
+                    a->spectrumProbe->proceed(a->in, a->size);
                 }
-                // Spectrum2 (1, a->arg0, a->arg1, a->arg2, outf);
                 break;
             }
         }
@@ -102,9 +82,7 @@ void SENDER::setSamplerate_sender (SENDER *a, int)
 
 void SENDER::setSize_sender (SENDER *a, int size)
 {
-    decalc_sender (a);
     a->size = size;
-    calc_sender (a);
 }
 
 /********************************************************************************************************
@@ -113,15 +91,13 @@ void SENDER::setSize_sender (SENDER *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SENDER::SetSpectrum (RXA& rxa, int flag, int disp, int ss, int LO)
+void SENDER::SetSpectrum (RXA& rxa, int flag, BufferProbe *spectrumProbe)
 {
     SENDER *a;
     rxa.csDSP.lock();
     a = rxa.sender.p;
     a->flag = flag;
-    a->arg0 = disp;
-    a->arg1 = ss;
-    a->arg2 = LO;
+    a->spectrumProbe = spectrumProbe;
     rxa.csDSP.unlock();
 }
 

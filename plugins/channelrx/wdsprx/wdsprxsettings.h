@@ -28,9 +28,9 @@ class Serializable;
 struct WDSPRxFilterSettings
 {
     int  m_spanLog2;
-    Real m_rfBandwidth;
+    Real m_highCutoff;
     Real m_lowCutoff;
-    FFTWindow::Function m_fftWindow;
+    int m_fftWindow; // 0: 4-term Blackman-Harris, 1: 7-term Blackman-Harris
     bool m_dnr;
     int  m_dnrScheme;
     float m_dnrAboveAvgFactor;
@@ -40,16 +40,24 @@ struct WDSPRxFilterSettings
 
     WDSPRxFilterSettings() :
         m_spanLog2(3),
-        m_rfBandwidth(3000),
+        m_highCutoff(3000),
         m_lowCutoff(300),
-        m_fftWindow(FFTWindow::Blackman)
+        m_fftWindow(0)
     {}
 };
 
 struct WDSPRxSettings
 {
+    enum AGCMode
+    {
+        AGCLong,
+        AGCSlow,
+        AGCMedium,
+        AGCFast,
+    };
+
     qint32 m_inputFrequencyOffset;
-    // Real m_rfBandwidth;
+    // Real m_highCutoff;
     // Real m_lowCutoff;
     Real m_volume;
     // int  m_spanLog2;
@@ -58,10 +66,10 @@ struct WDSPRxSettings
     bool m_dsb;
     bool m_audioMute;
     bool m_agc;
-    bool m_agcClamping;
-    int  m_agcTimeLog2;
-    int  m_agcPowerThreshold;
-    int  m_agcThresholdGate;
+    AGCMode m_agcMode;
+    int  m_agcGain;    //!< Fixed gain if AGC is off else top gain
+    int  m_agcSlope;
+    int  m_agcHangThreshold;
     bool m_dnr;
     int  m_dnrScheme;
     float m_dnrAboveAvgFactor;

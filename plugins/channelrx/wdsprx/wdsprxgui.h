@@ -102,9 +102,6 @@ private:
 	void applyBandwidths(unsigned int spanLog2, bool force = false);
     unsigned int spanLog2Max();
 	void displaySettings();
-	void displayAGC();
-	void displayAGCPowerThreshold(int value);
-    void displayAGCThresholdGate(int value);
 	bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
@@ -122,11 +119,8 @@ private slots:
 	void on_lowCut_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_agc_toggled(bool checked);
-    void on_agcClamping_toggled(bool checked);
     void on_dnr_toggled(bool checked);
-	void on_agcTimeLog2_valueChanged(int value);
-    void on_agcPowerThreshold_valueChanged(int value);
-    void on_agcThresholdGate_valueChanged(int value);
+	void on_agcGain_valueChanged(int value);
 	void on_audioMute_toggled(bool checked);
 	void on_spanLog2_valueChanged(int value);
 	void on_flipSidebands_clicked(bool checked);
@@ -138,6 +132,7 @@ private slots:
     void audioSelect(const QPoint& p);
     void dnrSetupDialog(const QPoint& p);
     void dnrSetup(int valueChanged);
+    void agcSetupDialog();
 	void tick();
 };
 

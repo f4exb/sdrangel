@@ -202,43 +202,18 @@ void WDSPRxGUI::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
     applySettings();
-    displayAGC();
 }
 
-void WDSPRxGUI::on_agcClamping_toggled(bool checked)
+void WDSPRxGUI::on_dnr_toggled(bool)
 {
-    m_settings.m_agcClamping = checked;
-    applySettings();
+    // TBD
 }
 
-void WDSPRxGUI::on_dnr_toggled(bool checked)
-{
-    m_settings.m_dnr = checked;
-    m_settings.m_filterBank[m_settings.m_filterIndex].m_dnr = m_settings.m_dnr;
-    applySettings();
-}
-
-void WDSPRxGUI::on_agcTimeLog2_valueChanged(int value)
+void WDSPRxGUI::on_agcGain_valueChanged(int value)
 {
     QString s = QString::number((1<<value), 'f', 0);
-    ui->agcTimeText->setText(s);
-    m_settings.m_agcTimeLog2 = value;
-    applySettings();
-}
-
-void WDSPRxGUI::on_agcPowerThreshold_valueChanged(int value)
-{
-    displayAGCPowerThreshold(value);
-    m_settings.m_agcPowerThreshold = value;
-    applySettings();
-}
-
-void WDSPRxGUI::on_agcThresholdGate_valueChanged(int value)
-{
-    int agcThresholdGate = value < 20 ? value : ((value - 20) * 10) + 20;
-    QString s = QString::number(agcThresholdGate, 'f', 0);
-    ui->agcThresholdGateText->setText(s);
-    m_settings.m_agcThresholdGate = agcThresholdGate;
+    ui->agcGainText->setText(s);
+    m_settings.m_agcGain = value;
     applySettings();
 }
 
@@ -271,7 +246,7 @@ void WDSPRxGUI::on_flipSidebands_clicked(bool checked)
 
 void WDSPRxGUI::on_fftWindow_currentIndexChanged(int index)
 {
-    m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow = (FFTWindow::Function) index;
+    m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow = index;
     applySettings();
 }
 
@@ -594,7 +569,7 @@ void WDSPRxGUI::applyBandwidths(unsigned int spanLog2, bool force)
 
     m_settings.m_dsb = dsb;
     m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2 = spanLog2;
-    m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth = bw * 100;
+    m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff = bw * 100;
     m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff = lw * 100;
 
     applySettings(force);
@@ -611,7 +586,7 @@ void WDSPRxGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setBandwidth(m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth * 2);
+    m_channelMarker.setBandwidth(m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff * 2);
     m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setLowCutoff(m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff);
 
@@ -629,7 +604,7 @@ void WDSPRxGUI::displaySettings()
     }
     else
     {
-        if (m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth < 0)
+        if (m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff < 0)
         {
             m_channelMarker.setSidebands(ChannelMarker::lsb);
             ui->dsb->setIcon(m_iconDSBLSB);
@@ -653,14 +628,15 @@ void WDSPRxGUI::displaySettings()
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
     ui->agc->setChecked(m_settings.m_agc);
-    displayAGC();
-    ui->agcClamping->setChecked(m_settings.m_agcClamping);
+    ui->agcGain->setValue(m_settings.m_agcGain);
+    QString s = QString::number((ui->agcGain->value()), 'f', 0);
+    ui->agcGainText->setText(s);
     ui->dnr->setChecked(m_settings.m_dnr);
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-    ui->fftWindow->setCurrentIndex((int) m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
+    ui->fftWindow->setCurrentIndex(m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
 
     // Prevent uncontrolled triggering of applyBandwidths
     ui->spanLog2->blockSignals(true);
@@ -674,8 +650,8 @@ void WDSPRxGUI::displaySettings()
     ui->dsb->setChecked(m_settings.m_dsb);
     ui->spanLog2->setValue(1 + ui->spanLog2->maximum() - m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2);
 
-    ui->BW->setValue(m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth / 100.0);
-    QString s = QString::number(m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth/1000.0, 'f', 1);
+    ui->BW->setValue(m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff / 100.0);
+    s = QString::number(m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff/1000.0, 'f', 1);
 
     if (m_settings.m_dsb) {
         ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(s));
@@ -697,14 +673,6 @@ void WDSPRxGUI::displaySettings()
     ui->volume->setValue(volume);
     ui->volumeText->setText(QString("%1").arg(volume));
 
-    ui->agcTimeLog2->setValue(m_settings.m_agcTimeLog2);
-    s = QString::number((1<<ui->agcTimeLog2->value()), 'f', 0);
-    ui->agcTimeText->setText(s);
-
-    ui->agcPowerThreshold->setValue(m_settings.m_agcPowerThreshold);
-    displayAGCPowerThreshold(ui->agcPowerThreshold->value());
-    displayAGCThresholdGate(m_settings.m_agcThresholdGate);
-
     updateIndexLabel();
 
     getRollupContents()->restoreState(m_rollupState);
@@ -712,42 +680,9 @@ void WDSPRxGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void WDSPRxGUI::displayAGC()
+void WDSPRxGUI::agcSetupDialog()
 {
-    // Disable controls only valid when AGC is enabled
-    ui->agcClamping->setEnabled(m_settings.m_agc);
-    ui->agcTimeLog2->setEnabled(m_settings.m_agc);
-    ui->agcTimeText->setEnabled(m_settings.m_agc);
-    ui->agcPowerThreshold->setEnabled(m_settings.m_agc);
-    ui->agcPowerThresholdText->setEnabled(m_settings.m_agc);
-    ui->agcThresholdGate->setEnabled(m_settings.m_agc);
-    ui->agcThresholdGateText->setEnabled(m_settings.m_agc);
-}
-
-void WDSPRxGUI::displayAGCPowerThreshold(int value)
-{
-    if (value == WDSPRxSettings::m_minPowerThresholdDB)
-    {
-        ui->agcPowerThresholdText->setText("---");
-    }
-    else
-    {
-        QString s = QString::number(value, 'f', 0);
-        ui->agcPowerThresholdText->setText(s);
-    }
-}
-
-void WDSPRxGUI::displayAGCThresholdGate(int value)
-{
-    QString s = QString::number(value, 'f', 0);
-    ui->agcThresholdGateText->setText(s);
-    int dialValue = value;
-
-    if (value > 20) {
-        dialValue = ((value - 20) / 10) + 20;
-    }
-
-    ui->agcThresholdGate->setValue(dialValue);
+    // TODO
 }
 
 void WDSPRxGUI::leaveEvent(QEvent* event)
@@ -879,11 +814,8 @@ void WDSPRxGUI::makeUIConnections()
     QObject::connect(ui->lowCut, &TickedSlider::valueChanged, this, &WDSPRxGUI::on_lowCut_valueChanged);
     QObject::connect(ui->volume, &QDial::valueChanged, this, &WDSPRxGUI::on_volume_valueChanged);
     QObject::connect(ui->agc, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_agc_toggled);
-    QObject::connect(ui->agcClamping, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_agcClamping_toggled);
     QObject::connect(ui->dnr, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_dnr_toggled);
-    QObject::connect(ui->agcTimeLog2, &QDial::valueChanged, this, &WDSPRxGUI::on_agcTimeLog2_valueChanged);
-    QObject::connect(ui->agcPowerThreshold, &QDial::valueChanged, this, &WDSPRxGUI::on_agcPowerThreshold_valueChanged);
-    QObject::connect(ui->agcThresholdGate, &QDial::valueChanged, this, &WDSPRxGUI::on_agcThresholdGate_valueChanged);
+    QObject::connect(ui->agcGain, &QDial::valueChanged, this, &WDSPRxGUI::on_agcGain_valueChanged);
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &WDSPRxGUI::on_audioMute_toggled);
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &WDSPRxGUI::on_spanLog2_valueChanged);
     QObject::connect(ui->flipSidebands, &QPushButton::clicked, this, &WDSPRxGUI::on_flipSidebands_clicked);

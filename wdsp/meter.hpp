@@ -34,6 +34,9 @@ warren@wpratt.com
 
 namespace WDSP {
 
+class RXA;
+class TXA;
+
 class WDSP_API METER
 {
 public:
@@ -76,19 +79,16 @@ public:
     static void setBuffers_meter (METER *a, double* in);
     static void setSamplerate_meter (METER *a, int rate);
     static void setSize_meter (METER *a, int size);
+    // RXA Properties
+    static double GetMeter (RXA& rxa, int mt);
+    // TXA Properties
+    static double GetMeter (TXA& txa, int mt);
 
 private:
     static void calc_meter (METER *a);
 };
 
 
-// RXA Properties
-
-    // __declspec (dllexport) double GetRXAMeter (int channel, int mt);
-
-// TXA Properties
-
-    // __declspec (dllexport) double GetTXAMeter (int channel, int mt);
 
 } // namespace WDSP
 

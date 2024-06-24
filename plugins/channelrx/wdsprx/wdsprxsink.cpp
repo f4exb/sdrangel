@@ -26,6 +26,10 @@
 #include "util/messagequeue.h"
 #include "maincore.h"
 #include "RXA.hpp"
+#include "nbp.hpp"
+#include "meter.hpp"
+#include "patchpanel.hpp"
+#include "wcpAGC.hpp"
 
 #include "wdsprxsink.h"
 
@@ -34,9 +38,19 @@ const int WDSPRxSink::m_agcTarget = 3276; // 32768/10 -10 dB amplitude => -20 dB
 const int WDSPRxSink::m_wdspSampleRate = 48000;
 const int WDSPRxSink::m_wdspBufSize = 512;
 
+WDSPRxSink::SpectrumProbe::SpectrumProbe(SampleVector& sampleVector) :
+    m_sampleVector(sampleVector)
+{}
+
+void WDSPRxSink::SpectrumProbe::proceed(const double *in, int nb_samples)
+{
+    for (int i = 0; i < nb_samples; i++) {
+        m_sampleVector.push_back(Sample{static_cast<FixReal>(in[2*i]*SDR_RX_SCALED), static_cast<FixReal>(in[2*i+1]*SDR_RX_SCALED)});
+    }
+}
+
 WDSPRxSink::WDSPRxSink() :
         m_audioBinaual(false),
-        m_audioFlipChannels(false),
         m_dsb(false),
         m_audioMute(false),
         m_agc(12000, m_agcTarget, 1e-2),
@@ -48,13 +62,13 @@ WDSPRxSink::WDSPRxSink() :
         m_squelchDelayLine(2*48000),
         m_audioActive(false),
         m_spectrumSink(nullptr),
+        m_spectrumProbe(m_sampleBuffer),
+        m_inCount(0),
         m_audioFifo(24000),
         m_audioSampleRate(48000)
 {
 	m_Bandwidth = 5000;
-	m_LowCutoff = 300;
 	m_volume = 2.0;
-	m_spanLog2 = 3;
 	m_channelSampleRate = 48000;
 	m_channelFrequencyOffset = 0;
 
@@ -67,10 +81,9 @@ WDSPRxSink::WDSPRxSink() :
     m_demodBufferFill = 0;
 
 	m_usb = true;
-	m_magsq = 0.0;
-	m_magsqSum = 0.0;
-	m_magsqPeak = 0.0;
-	m_magsqCount = 0;
+    m_sAvg = 0.0;
+    m_sPeak = 0.0;
+    m_sCount = 1;
 
     m_rxa = WDSP::RXA::create_rxa(
         m_wdspSampleRate, // input samplerate
@@ -78,11 +91,8 @@ WDSPRxSink::WDSPRxSink() :
         m_wdspSampleRate, // sample rate for mainstream dsp processing (dsp)
         m_wdspBufSize     // number complex samples processed per buffer in mainstream dsp processing
     );
-	SSBFilter = new fftfilt(m_LowCutoff / m_audioSampleRate, m_Bandwidth / m_audioSampleRate, m_ssbFftLen);
-	DSBFilter = new fftfilt((2.0f * m_Bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
-
-    m_lowpassI.create(101, m_audioSampleRate, m_Bandwidth * 1.2);
-    m_lowpassQ.create(101, m_audioSampleRate, m_Bandwidth * 1.2);
+    m_rxa->setSpectrumProbe(&m_spectrumProbe);
+    WDSP::RXA::SetPassband(*m_rxa, 0, m_Bandwidth);
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -91,8 +101,6 @@ WDSPRxSink::WDSPRxSink() :
 WDSPRxSink::~WDSPRxSink()
 {
     WDSP::RXA::destroy_rxa(m_rxa);
-    delete SSBFilter;
-    delete DSBFilter;
 }
 
 void WDSPRxSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -127,159 +135,105 @@ void WDSPRxSink::feed(const SampleVector::const_iterator& begin, const SampleVec
     }
 }
 
+void WDSPRxSink::getMagSqLevels(double& avg, double& peak, int& nbSamples)
+{
+    avg = m_sAvg;
+    peak = m_sPeak;
+    nbSamples = m_sCount;
+}
+
 void WDSPRxSink::processOneSample(Complex &ci)
 {
-	fftfilt::cmplx *sideband;
-	int n_out = 0;
-	int decim = 1<<(m_spanLog2 - 1);
-	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
+    m_rxa->get_inbuff()[2*m_inCount] = ci.real() / SDR_RX_SCALED;
+    m_rxa->get_inbuff()[2*m_inCount+1] = ci.imag() / SDR_RX_SCALED;
 
-    if (m_dsb) {
-        n_out = DSBFilter->runDSB(ci, &sideband);
-    } else {
-        n_out = SSBFilter->runSSB(ci, &sideband, m_usb);
-    }
-
-    for (int i = 0; i < n_out; i++)
+    if (++m_inCount == m_rxa->get_insize())
     {
-        // Downsample by 2^(m_scaleLog2 - 1) for SSB band spectrum display
-        // smart decimation with bit gain using float arithmetic (23 bits significand)
+        WDSP::RXA::xrxa(m_rxa);
 
-        m_sum += sideband[i];
-
-        if (!(m_undersampleCount++ & decim_mask))
+        for (int i = 0; i < m_rxa->get_outsize(); i++)
         {
-            Real avgr = m_sum.real() / decim;
-            Real avgi = m_sum.imag() / decim;
-            m_magsq = (avgr * avgr + avgi * avgi) / (SDR_RX_SCALED*SDR_RX_SCALED);
-
-            m_magsqSum += m_magsq;
-
-            if (m_magsq > m_magsqPeak)
+            if (i == 0)
             {
-                m_magsqPeak = m_magsq;
+                m_sCount = m_wdspBufSize;
+                m_sAvg = WDSP::METER::GetMeter(*m_rxa, WDSP::RXA::RXA_S_AV);
+                m_sPeak = WDSP::METER::GetMeter(*m_rxa, WDSP::RXA::RXA_S_PK);
             }
 
-            m_magsqCount++;
-
-            if (!m_dsb & !m_usb)
-            { // invert spectrum for LSB
-                m_sampleBuffer.push_back(Sample(avgi, avgr));
+            if (m_audioMute)
+            {
+                m_audioBuffer[m_audioBufferFill].r = 0;
+                m_audioBuffer[m_audioBufferFill].l = 0;
             }
             else
             {
-                m_sampleBuffer.push_back(Sample(avgr, avgi));
-            }
+                const double& cr = m_rxa->get_outbuff()[2*i];
+                const double& ci = m_rxa->get_outbuff()[2*i+1];
+                qint16 zr = cr * 32768.0;
+                qint16 zi = ci * 32768.0;
+                m_audioBuffer[m_audioBufferFill].r = zr * m_volume;
+                m_audioBuffer[m_audioBufferFill].l = zi * m_volume;
 
-            m_sum.real(0.0);
-            m_sum.imag(0.0);
-        }
-
-        float agcVal = m_agcActive ? m_agc.feedAndGetValue(sideband[i]) : 1.0;
-        fftfilt::cmplx& delayedSample = m_squelchDelayLine.readBack(m_agc.getStepDownDelay());
-        m_audioActive = delayedSample.real() != 0.0;
-
-        // Prevent overload based on squared magnitude variation
-        // Only if AGC is active
-        if (m_agcActive && m_agcClamping && (agcVal > 100.0 || agcVal == 0.0))
-        {
-            // qDebug("WDSPRxSink::processOneSample: %f", agcVal);
-            m_agc.reset(m_agcTarget*m_agcTarget);
-            m_squelchDelayLine.write(fftfilt::cmplx{0.0, 0.0});
-        }
-        else
-        {
-            m_squelchDelayLine.write(sideband[i]*agcVal);
-        }
-
-        if (m_audioMute)
-        {
-            m_audioBuffer[m_audioBufferFill].r = 0;
-            m_audioBuffer[m_audioBufferFill].l = 0;
-        }
-        else
-        {
-            fftfilt::cmplx z = (m_agcActive && m_agcClamping) ?
-                fftfilt::cmplx{m_lowpassI.filter(delayedSample.real()), m_lowpassQ.filter(delayedSample.imag())}
-                : delayedSample;
-
-            if (m_audioBinaual)
-            {
-                if (m_audioFlipChannels)
+                if (m_audioBinaual)
                 {
-                    m_audioBuffer[m_audioBufferFill].r = (qint16)(z.imag() * m_volume);
-                    m_audioBuffer[m_audioBufferFill].l = (qint16)(z.real() * m_volume);
+                    m_demodBuffer[m_demodBufferFill++] = zr * m_volume;
+                    m_demodBuffer[m_demodBufferFill++] = zi * m_volume;
                 }
                 else
                 {
-                    m_audioBuffer[m_audioBufferFill].r = (qint16)(z.real() * m_volume);
-                    m_audioBuffer[m_audioBufferFill].l = (qint16)(z.imag() * m_volume);
+                    Real demod = (zr + zi) * 0.7;
+                    qint16 sample = (qint16)(demod * m_volume);
+                    m_demodBuffer[m_demodBufferFill++] = sample;
                 }
 
-                m_demodBuffer[m_demodBufferFill++] = z.real();
-                m_demodBuffer[m_demodBufferFill++] = z.imag();
-            }
-            else
-            {
-                Real demod = (z.real() + z.imag()) * 0.7;
-                qint16 sample = (qint16)(demod * m_volume);
-                m_audioBuffer[m_audioBufferFill].l = sample;
-                m_audioBuffer[m_audioBufferFill].r = sample;
-                m_demodBuffer[m_demodBufferFill++] = (z.real() + z.imag()) * 0.7;
-            }
-
-            if (m_demodBufferFill >= m_demodBuffer.size())
-            {
-                QList<ObjectPipe*> dataPipes;
-                MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
-
-                if (dataPipes.size() > 0)
+                if (m_demodBufferFill >= m_demodBuffer.size())
                 {
-                    QList<ObjectPipe*>::iterator it = dataPipes.begin();
+                    QList<ObjectPipe*> dataPipes;
+                    MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
 
-                    for (; it != dataPipes.end(); ++it)
+                    if (dataPipes.size() > 0)
                     {
-                        DataFifo *fifo = qobject_cast<DataFifo*>((*it)->m_element);
+                        QList<ObjectPipe*>::iterator it = dataPipes.begin();
 
-                        if (fifo)
+                        for (; it != dataPipes.end(); ++it)
                         {
-                            fifo->write(
-                                (quint8*) &m_demodBuffer[0],
-                                m_demodBuffer.size() * sizeof(qint16),
-                                m_audioBinaual ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
-                            );
+                            DataFifo *fifo = qobject_cast<DataFifo*>((*it)->m_element);
+
+                            if (fifo)
+                            {
+                                fifo->write(
+                                    (quint8*) &m_demodBuffer[0],
+                                    m_demodBuffer.size() * sizeof(qint16),
+                                    m_audioBinaual ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
+                                );
+                            }
                         }
                     }
+
+                    m_demodBufferFill = 0;
+                }
+            } // audio sample
+
+            if (++m_audioBufferFill == m_audioBuffer.size())
+            {
+                std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], std::min(m_audioBufferFill, m_audioBuffer.size()));
+
+                if (res != m_audioBufferFill) {
+                    qDebug("WDSPRxSink::processOneSample: %lu/%lu samples written", res, m_audioBufferFill);
                 }
 
-                m_demodBufferFill = 0;
+                m_audioBufferFill = 0;
             }
-        }
+        } // result loop
 
-        ++m_audioBufferFill;
-
-        if (m_audioBufferFill >= m_audioBuffer.size())
+        if (m_spectrumSink && (m_sampleBuffer.size() != 0))
         {
-            std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], std::min(m_audioBufferFill, m_audioBuffer.size()));
-
-            if (res != m_audioBufferFill) {
-                qDebug("WDSPRxSink::processOneSample: %lu/%lu samples written", res, m_audioBufferFill);
-            }
-
-            m_audioBufferFill = 0;
+            m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
+            m_sampleBuffer.clear();
         }
+
+        m_inCount = 0;
     }
-
-	if (m_spectrumSink && (m_sampleBuffer.size() != 0))
-    {
-		m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), !m_dsb);
-        m_sampleBuffer.clear();
-	}
-}
-
-void WDSPRxSink::setDNR(bool dnr)
-{
-    SSBFilter->setDNR(dnr);
 }
 
 void WDSPRxSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -317,28 +271,6 @@ void WDSPRxSink::applyAudioSampleRate(int sampleRate)
 
     WDSP::RXA::setOutputSamplerate(m_rxa, sampleRate);
 
-    SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
-    DSBFilter->create_dsb_filter(m_Bandwidth / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
-
-    m_lowpassI.create(101, sampleRate, m_Bandwidth * 1.2);
-    m_lowpassQ.create(101, sampleRate, m_Bandwidth * 1.2);
-
-    int agcNbSamples = (sampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
-    int agcThresholdGate = (sampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
-
-    if (m_agcNbSamples != agcNbSamples)
-    {
-        m_agc.resize(agcNbSamples, agcNbSamples/2, m_agcTarget);
-        m_agc.setStepDownDelay(agcNbSamples);
-        m_agcNbSamples = agcNbSamples;
-    }
-
-    if (m_agcThresholdGate != agcThresholdGate)
-    {
-        m_agc.setGate(agcThresholdGate);
-        m_agcThresholdGate = agcThresholdGate;
-    }
-
     m_audioFifo.setSize(sampleRate);
     m_audioSampleRate = sampleRate;
     m_audioBuffer.resize(sampleRate / 10);
@@ -367,8 +299,8 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     qDebug() << "WDSPRxSink::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_filterIndex: " << settings.m_filterIndex
-            << " [m_spanLog2: " << settings.m_filterBank[settings.m_filterIndex].m_spanLog2
-            << " m_rfBandwidth: " << settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth
+            << " m_spanLog2: " << settings.m_filterBank[settings.m_filterIndex].m_spanLog2
+            << " m_highCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_highCutoff
             << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
             << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
@@ -377,16 +309,10 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_dsb: " << settings.m_dsb
             << " m_audioMute: " << settings.m_audioMute
             << " m_agcActive: " << settings.m_agc
-            << " m_agcClamping: " << settings.m_agcClamping
-            << " m_agcTimeLog2: " << settings.m_agcTimeLog2
-            << " agcPowerThreshold: " << settings.m_agcPowerThreshold
-            << " agcThresholdGate: " << settings.m_agcThresholdGate
-            << " m_dnr: " << settings.m_dnr
-            << " m_dnrScheme: " << settings.m_dnrScheme
-            << " m_dnrAboveAvgFactor: " << settings.m_dnrAboveAvgFactor
-            << " m_dnrSigmaFactor: " << settings.m_dnrSigmaFactor
-            << " m_dnrNbPeaks: " << settings.m_dnrNbPeaks
-            << " m_dnrAlpha: " << settings.m_dnrAlpha
+            << " m_agcMode: " << settings.m_agcMode
+            << " m_agcGain: " << settings.m_agcGain
+            << " m_agcSlope: " << settings.m_agcSlope
+            << " m_agcHangThreshold: " << settings.m_agcHangThreshold
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
@@ -396,40 +322,79 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
-    if((m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth != settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth) ||
+    if((m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff != settings.m_filterBank[settings.m_filterIndex].m_highCutoff) ||
         (m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff != settings.m_filterBank[settings.m_filterIndex].m_lowCutoff) ||
-        (m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow != settings.m_filterBank[settings.m_filterIndex].m_fftWindow) || force)
+        (m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow != settings.m_filterBank[settings.m_filterIndex].m_fftWindow) ||
+        (m_settings.m_dsb != settings.m_dsb) || force)
     {
-        float band, lowCutoff;
+        float band, low, high, fLow, fHigh;
 
-        band = settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth;
-        lowCutoff = settings.m_filterBank[settings.m_filterIndex].m_lowCutoff;
+        band = settings.m_filterBank[settings.m_filterIndex].m_highCutoff;
+        high = band;
+        low = settings.m_filterBank[settings.m_filterIndex].m_lowCutoff;
 
-        if (band < 0) {
+        if (band < 0)
+        {
             band = -band;
-            lowCutoff = -lowCutoff;
             m_usb = false;
-        } else {
+        }
+        else
+        {
             m_usb = true;
         }
 
-        if (band < 100.0f)
-        {
-            band = 100.0f;
-            lowCutoff = 0;
-        }
-
         m_Bandwidth = band;
-        m_LowCutoff = lowCutoff;
+
+        if (high < low)
+        {
+            if (settings.m_dsb)
+            {
+                fLow = high;
+                fHigh = -high;
+            }
+            else
+            {
+                fLow = high;
+                fHigh = low;
+            }
+        }
+        else
+        {
+            if (settings.m_dsb)
+            {
+                fLow = -high;
+                fHigh = high;
+            }
+            else
+            {
+                fLow = low;
+                fHigh = high;
+            }
+        }
 
         Real interpolatorBandwidth = (m_Bandwidth * 1.5f) > m_channelSampleRate ? m_channelSampleRate : (m_Bandwidth * 1.5f);
         m_interpolator.create(16, m_channelSampleRate, interpolatorBandwidth, 2.0f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_audioSampleRate;
-        SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
-        DSBFilter->create_dsb_filter(m_Bandwidth / (float) m_audioSampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
-        m_lowpassI.create(101, m_audioSampleRate, m_Bandwidth * 1.2);
-        m_lowpassQ.create(101, m_audioSampleRate, m_Bandwidth * 1.2);
+
+        WDSP::RXA::SetPassband(*m_rxa, fLow, fHigh);
+        WDSP::NBP::NBPSetWindow(*m_rxa, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
+    }
+
+    if ((m_settings.m_agc != settings.m_agc)
+    || (m_settings.m_agcMode != settings.m_agcMode)
+    || (m_settings.m_agcGain != settings.m_agcGain) || force)
+    {
+        if (settings.m_agc)
+        {
+            WDSP::WCPAGC::SetAGCMode(*m_rxa, (int) settings.m_agcMode + 1);
+            WDSP::WCPAGC::SetAGCFixed(*m_rxa, (double) settings.m_agcGain);
+        }
+        else
+        {
+            WDSP::WCPAGC::SetAGCMode(*m_rxa, 0);
+            WDSP::WCPAGC::SetAGCTop(*m_rxa, (double) settings.m_agcGain);
+        }
     }
 
     if ((m_settings.m_volume != settings.m_volume) || force)
@@ -438,75 +403,15 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         m_volume /= 4.0; // for 3276.8
     }
 
-    if ((m_settings.m_agcTimeLog2 != settings.m_agcTimeLog2) ||
-        (m_settings.m_agcPowerThreshold != settings.m_agcPowerThreshold) ||
-        (m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) ||
-        (m_settings.m_agcClamping != settings.m_agcClamping) || force)
-    {
-        int agcNbSamples = (m_audioSampleRate / 1000) * (1<<settings.m_agcTimeLog2);
-        m_agc.setThresholdEnable(settings.m_agcPowerThreshold != -WDSPRxSettings::m_minPowerThresholdDB);
-        double agcPowerThreshold = CalcDb::powerFromdB(settings.m_agcPowerThreshold) * (SDR_RX_SCALED*SDR_RX_SCALED);
-        int agcThresholdGate = (m_audioSampleRate / 1000) * settings.m_agcThresholdGate; // ms
-        bool agcClamping = settings.m_agcClamping;
-
-        if (m_agcNbSamples != agcNbSamples)
-        {
-            m_agc.resize(agcNbSamples, agcNbSamples/2, m_agcTarget);
-            m_agc.setStepDownDelay(agcNbSamples);
-            m_agcNbSamples = agcNbSamples;
-        }
-
-        if (m_agcPowerThreshold != agcPowerThreshold)
-        {
-            m_agc.setThreshold(agcPowerThreshold);
-            m_agcPowerThreshold = agcPowerThreshold;
-        }
-
-        if (m_agcThresholdGate != agcThresholdGate)
-        {
-            m_agc.setGate(agcThresholdGate);
-            m_agcThresholdGate = agcThresholdGate;
-        }
-
-        if (m_agcClamping != agcClamping)
-        {
-            m_agcClamping = agcClamping;
-        }
-
-        qDebug() << "WDSPRxSink::applySettings: AGC:"
-            << " agcNbSamples: " << agcNbSamples
-            << " agcPowerThreshold: " << agcPowerThreshold
-            << " agcThresholdGate: " << agcThresholdGate
-            << " agcClamping: " << agcClamping;
+    if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
+        WDSP::PANEL::SetPanelBinaural(*m_rxa, settings.m_audioBinaural ? 1 : 0);
     }
 
-    if ((m_settings.m_dnr != settings.m_dnr) || force) {
-        setDNR(settings.m_dnr);
+    if ((m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force) {
+        WDSP::PANEL::SetPanelCopy(*m_rxa, settings.m_audioFlipChannels ? 3 : 0);
     }
 
-    if ((m_settings.m_dnrScheme != settings.m_dnrScheme) || force) {
-        SSBFilter->setDNRScheme((FFTNoiseReduction::Scheme) settings.m_dnrScheme);
-    }
-
-    if ((m_settings.m_dnrAboveAvgFactor != settings.m_dnrAboveAvgFactor) || force) {
-        SSBFilter->setDNRAboveAvgFactor(settings.m_dnrAboveAvgFactor);
-    }
-
-    if ((m_settings.m_dnrSigmaFactor != settings.m_dnrSigmaFactor) || force) {
-        SSBFilter->setDNRSigmaFactor(settings.m_dnrSigmaFactor);
-    }
-
-    if ((m_settings.m_dnrNbPeaks != settings.m_dnrNbPeaks) || force) {
-        SSBFilter->setDNRNbPeaks(settings.m_dnrNbPeaks);
-    }
-
-    if ((m_settings.m_dnrAlpha != settings.m_dnrAlpha) || force) {
-        SSBFilter->setDNRAlpha(settings.m_dnrAlpha);
-    }
-
-    m_spanLog2 = settings.m_filterBank[settings.m_filterIndex].m_spanLog2;
     m_audioBinaual = settings.m_audioBinaural;
-    m_audioFlipChannels = settings.m_audioFlipChannels;
     m_dsb = settings.m_dsb;
     m_audioMute = settings.m_audioMute;
     m_agcActive = settings.m_agc;

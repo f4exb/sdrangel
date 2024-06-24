@@ -38,6 +38,7 @@ warren@wpratt.com
 namespace WDSP {
 
 class RXA;
+class BufferProbe;
 
 class WDSP_API SENDER
 {
@@ -47,14 +48,9 @@ public:
     int mode;           // selects the specific processing and function call
     int size;           // size of the data buffer (complex samples)
     double* in;         // buffer from which to take the data
-    int arg0;           // parameters that can be passed to the function called
-    int arg1;
-    int arg2;
-    int arg3;
-    double* out;        // internally created buffer into which processed data is placed
-                        // a pointer to *out is passed to the external function that is called
+    BufferProbe *spectrumProbe; // this is the data handler actually
 
-    static SENDER* create_sender (int run, int flag, int mode, int size, double* in, int arg0, int arg1, int arg2, int arg3);
+    static SENDER* create_sender (int run, int flag, int mode, int size, double* in);
     static void destroy_sender (SENDER *a);
     static void flush_sender (SENDER *a);
     static void xsender (SENDER *a);
@@ -62,12 +58,8 @@ public:
     static void setSamplerate_sender (SENDER *a, int rate);
     static void setSize_sender (SENDER *a, int size);
     // RXA Properties
-    static void SetSpectrum (RXA& rxa, int flag, int disp, int ss, int LO);
+    static void SetSpectrum (RXA& rxa, int flag, BufferProbe *spectrumProbe);
     // TXA Properties
-
-private:
-    static void calc_sender (SENDER *a);
-    static void decalc_sender (SENDER *a);
 };
 
 } // namespace WDSP

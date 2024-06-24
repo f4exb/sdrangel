@@ -28,6 +28,8 @@ warren@wpratt.com
 #include "comm.hpp"
 #include "meterlog10.hpp"
 #include "meter.hpp"
+#include "RXA.hpp"
+#include "TXA.hpp"
 
 namespace WDSP {
 
@@ -147,16 +149,14 @@ void METER::setSize_meter (METER *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-// PORT
-// double GetRXAMeter (int channel, int mt)
-// {
-//     double val;
-//     CRITICAL_SECTION* a = rxa[channel].pmtupdate[mt];
-//     EnterCriticalSection (a);
-//     val = rxa[channel].meter[mt];
-//     LeaveCriticalSection (a);
-//     return val;
-// }
+double METER::GetMeter (RXA& rxa, int mt)
+{
+    double val;
+    rxa.pmtupdate[mt]->lock();
+    val = rxa.meter[mt];
+    rxa.pmtupdate[mt]->unlock();
+    return val;
+}
 
 /********************************************************************************************************
 *                                                                                                       *
@@ -164,15 +164,13 @@ void METER::setSize_meter (METER *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-// PORT
-// double GetTXAMeter (int channel, int mt)
-// {
-//     double val;
-//     CRITICAL_SECTION* a = txa[channel].pmtupdate[mt];
-//     EnterCriticalSection (a);
-//     val = txa[channel].meter[mt];
-//     LeaveCriticalSection (a);
-//     return val;
-// }
+double METER::GetMeter (TXA& txa, int mt)
+{
+    double val;
+    txa.pmtupdate[mt]->lock();
+    val = txa.meter[mt];
+    txa.pmtupdate[mt]->unlock();
+    return val;
+}
 
 } // namespace WDSP

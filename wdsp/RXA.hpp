@@ -63,6 +63,7 @@ class PANEL;
 class SIPHON;
 class CBL;
 class SSQL;
+class BufferProbe;
 
 class WDSP_API RXA : public Unit
 {
@@ -97,7 +98,7 @@ public:
 
     int mode;
     double meter[RXA_METERTYPE_LAST];
-    QRecursiveMutex* pmtupdate[RXA_METERTYPE_LAST];
+    QRecursiveMutex *pmtupdate[RXA_METERTYPE_LAST];
     struct
     {
         METER *p;
@@ -216,6 +217,7 @@ public:
     int get_outsize() const { return dsp_outsize; }
     double *get_inbuff() { return inbuff; }
     double *get_outbuff() { return outbuff; }
+    void setSpectrumProbe(BufferProbe *_spectrumProbe);
     static void setInputSamplerate (RXA *rxa, int in_rate);
     static void setOutputSamplerate (RXA *rxa, int out_rate);
     static void setDSPSamplerate (RXA *rxa, int dsp_rate);

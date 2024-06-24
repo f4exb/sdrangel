@@ -84,454 +84,456 @@ RXA* RXA::create_rxa (
     rxa->outbuff = new double[1 * rxa->dsp_outsize  * 2]; // (double *) malloc0 (1 * ch.dsp_outsize * sizeof (complex));
     rxa->midbuff = new double[2 * rxa->dsp_size  * 2]; // (double *) malloc0 (2 * ch.dsp_size    * sizeof (complex));
 
-    // shift to select a slice of spectrum
+    // Ftequency shifter - shift to select a slice of spectrum
     rxa->shift.p = SHIFT::create_shift (
-        1,                                              // run
-        rxa->dsp_insize,                         // input buffer size
+        1,                                      // run
+        rxa->dsp_insize,                        // input buffer size
         rxa->inbuff,                            // pointer to input buffer
         rxa->inbuff,                            // pointer to output buffer
-        rxa->in_rate,                            // samplerate
-        0.0);                                           // amount to shift (Hz)
+        rxa->in_rate,                           // samplerate
+        0.0);                                   // amount to shift (Hz)
 
-    // resample to dsp rate for main processing
+    // Input resampler - resample to dsp rate for main processing
     rxa->rsmpin.p = RESAMPLE::create_resample (
-        0,                                              // run - will be turned ON below if needed
-        rxa->dsp_insize,                         // input buffer size
+        0,                                      // run - will be turned ON below if needed
+        rxa->dsp_insize,                        // input buffer size
         rxa->inbuff,                            // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        rxa->in_rate,                            // input samplerate
-        rxa->dsp_rate,                           // output samplerate
-        0.0,                                            // select cutoff automatically
-        0,                                              // select ncoef automatically
-        1.0);                                           // gain
+        rxa->in_rate,                           // input samplerate
+        rxa->dsp_rate,                          // output samplerate
+        0.0,                                    // select cutoff automatically
+        0,                                      // select ncoef automatically
+        1.0);                                   // gain
 
-    // signal generator
+    // Signal generator
     rxa->gen0.p = GEN::create_gen (
-        0,                                              // run
-        rxa->dsp_size,                           // buffer size
+        0,                                      // run
+        rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // input buffer
         rxa->midbuff,                           // output buffer
-        rxa->dsp_rate,                           // sample rate
-        2);                                             // mode
+        rxa->dsp_rate,                          // sample rate
+        2);                                     // mode
 
-    // adc (input) meter
+    // Input meter - ADC
     rxa->adcmeter.p = METER::create_meter (
-        1,                                              // run
-        0,                                              // optional pointer to another 'run'
-        rxa->dsp_size,                           // size
+        0,                                      // run
+        0,                                      // optional pointer to another 'run'
+        rxa->dsp_size,                          // size
         rxa->midbuff,                           // pointer to buffer
-        rxa->dsp_rate,                           // samplerate
-        0.100,                                          // averaging time constant
-        0.100,                                          // peak decay time constant
+        rxa->dsp_rate,                          // samplerate
+        0.100,                                  // averaging time constant
+        0.100,                                  // peak decay time constant
         rxa->meter,                             // result vector
         rxa->pmtupdate,                         // locks for meter access
-        RXA_ADC_AV,                                     // index for average value
-        RXA_ADC_PK,                                     // index for peak value
-        -1,                                             // index for gain value
-        0);                                             // pointer for gain computation
+        RXA_ADC_AV,                             // index for average value
+        RXA_ADC_PK,                             // index for peak value
+        -1,                                     // index for gain value
+        0);                                     // pointer for gain computation
+
+    // Notched bandpass section
 
     // notch database
     rxa->ndb.p = NOTCHDB::create_notchdb (
-        0,                                              // master run for all nbp's
-        1024);                                          // max number of notches
+        0,                                      // master run for all nbp's
+        1024);                                  // max number of notches
 
     // notched bandpass
     rxa->nbp0.p = NBP::create_nbp (
-        1,                                              // run, always runs
-        0,                                              // run the notches
-        0,                                              // position
-        rxa->dsp_size,                           // buffer size
-        std::max(2048, rxa->dsp_size),           // number of coefficients
-        0,                                              // minimum phase flag
+        1,                                      // run, always runs
+        0,                                      // run the notches
+        0,                                      // position
+        rxa->dsp_size,                          // buffer size
+        std::max(2048, rxa->dsp_size),          // number of coefficients
+        0,                                      // minimum phase flag
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        -4150.0,                                        // lower filter frequency
-        -150.0,                                         // upper filter frequency
-        rxa->dsp_rate,                           // sample rate
-        0,                                              // wintype
-        1.0,                                            // gain
-        1,                                              // auto-increase notch width
-        1025,                                           // max number of passbands
-        rxa->ndb.p);                           // addr of database pointer
+        -4150.0,                                // lower filter frequency
+        -150.0,                                 // upper filter frequency
+        rxa->dsp_rate,                          // sample rate
+        0,                                      // wintype
+        1.0,                                    // gain
+        1,                                      // auto-increase notch width
+        1025,                                   // max number of passbands
+        rxa->ndb.p);                            // addr of database pointer
 
     // bandpass for snba
     rxa->bpsnba.p = BPSNBA::create_bpsnba (
-        0,                                              // bpsnba run flag
-        0,                                              // run the notches
-        0,                                              // position
-        rxa->dsp_size,                           // size
-        std::max(2048, rxa->dsp_size),           // number of filter coefficients
-        0,                                              // minimum phase flag
+        0,                                      // bpsnba run flag
+        0,                                      // run the notches
+        0,                                      // position
+        rxa->dsp_size,                          // size
+        std::max(2048, rxa->dsp_size),          // number of filter coefficients
+        0,                                      // minimum phase flag
         rxa->midbuff,                           // input buffer
         rxa->midbuff,                           // output buffer
-        rxa->dsp_rate,                           // samplerate
-        + 250.0,                                        // abs value of cutoff nearest zero
-        + 5700.0,                                       // abs value of cutoff farthest zero
-        - 5700.0,                                       // current low frequency
-        - 250.0,                                        // current high frequency
-        0,                                              // wintype
-        1.0,                                            // gain
-        1,                                              // auto-increase notch width
-        1025,                                           // max number of passbands
+        rxa->dsp_rate,                          // samplerate
+        + 250.0,                                // abs value of cutoff nearest zero
+        + 5700.0,                               // abs value of cutoff farthest zero
+        - 5700.0,                               // current low frequency
+        - 250.0,                                // current high frequency
+        0,                                      // wintype
+        1.0,                                    // gain
+        1,                                      // auto-increase notch width
+        1025,                                   // max number of passbands
         rxa->ndb.p);                            // addr of database pointer
 
-    // send spectrum display
+    // Post filter display send - send spectrum display (after S-meter in the block diagram)
     rxa->sender.p = SENDER::create_sender (
         0,                                      // run
-        0,                                              // flag
-        0,                                              // mode
-        rxa->dsp_size,                           // size
-        rxa->midbuff,                           // pointer to input buffer
-        0,                                              // arg0 <- disp
-        1,                                              // arg1 <- ss
-        0,                                              // arg2 <- LO
-        0);                                             // arg3 <- NOT USED
+        0,                                      // flag
+        0,                                      // mode
+        rxa->dsp_size,                          // size
+        rxa->midbuff                            // pointer to input buffer
+    );
+
+    // End notched bandpass section
 
     // S-meter
     rxa->smeter.p = METER::create_meter (
-        1,                                              // run
-        0,                                              // optional pointer to another 'run'
-        rxa->dsp_size,                           // size
+        1,                                      // run
+        0,                                      // optional pointer to another 'run'
+        rxa->dsp_size,                          // size
         rxa->midbuff,                           // pointer to buffer
-        rxa->dsp_rate,                           // samplerate
-        0.100,                                          // averaging time constant
-        0.100,                                          // peak decay time constant
+        rxa->dsp_rate,                          // samplerate
+        0.100,                                  // averaging time constant
+        0.100,                                  // peak decay time constant
         rxa->meter,                             // result vector
         rxa->pmtupdate,                         // locks for meter access
-        RXA_S_AV,                                       // index for average value
-        RXA_S_PK,                                       // index for peak value
-        -1,                                             // index for gain value
-        0);                                             // pointer for gain computation
+        RXA_S_AV,                               // index for average value
+        RXA_S_PK,                               // index for peak value
+        -1,                                     // index for gain value
+        0);                                     // pointer for gain computation
 
-    // AM squelch
+    // AM squelch capture (for other modes than FM)
     rxa->amsq.p = AMSQ::create_amsq (
-        0,                                              // run
-        rxa->dsp_size,                           // buffer size
+        0,                                      // run
+        rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to signal input buffer used by xamsq
         rxa->midbuff,                           // pointer to signal output buffer used by xamsq
         rxa->midbuff,                           // pointer to trigger buffer that xamsqcap will capture
-        rxa->dsp_rate,                           // sample rate
-        0.010,                                          // time constant for averaging signal level
-        0.070,                                          // signal up transition time
-        0.070,                                          // signal down transition time
-        0.009,                                          // signal level to initiate tail
-        0.010,                                          // signal level to initiate unmute
-        0.000,                                          // minimum tail length
-        1.500,                                          // maximum tail length
-        0.0);                                           // muted gain
+        rxa->dsp_rate,                          // sample rate
+        0.010,                                  // time constant for averaging signal level
+        0.070,                                  // signal up transition time
+        0.070,                                  // signal down transition time
+        0.009,                                  // signal level to initiate tail
+        0.010,                                  // signal level to initiate unmute
+        0.000,                                  // minimum tail length
+        1.500,                                  // maximum tail length
+        0.0);                                   // muted gain
 
-    // AM demod
+    // AM/SAM demodulator
     rxa->amd.p = AMD::create_amd (
-        0,                                              // run - OFF by default
-        rxa->dsp_size,                           // buffer size
+        0,                                      // run - OFF by default
+        rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        0,                                              // mode:  0->AM, 1->SAM
-        1,                                              // levelfade:  0->OFF, 1->ON
-        0,                                              // sideband mode:  0->OFF
-        rxa->dsp_rate,                           // sample rate
-        -2000.0,                                        // minimum lock frequency
-        +2000.0,                                        // maximum lock frequency
-        1.0,                                            // zeta
-        250.0,                                          // omegaN
-        0.02,                                           // tauR
-        1.4);                                           // tauI
+        0,                                      // mode:  0->AM, 1->SAM
+        1,                                      // levelfade:  0->OFF, 1->ON
+        0,                                      // sideband mode:  0->OFF
+        rxa->dsp_rate,                          // sample rate
+        -2000.0,                                // minimum lock frequency
+        +2000.0,                                // maximum lock frequency
+        1.0,                                    // zeta
+        250.0,                                  // omegaN
+        0.02,                                   // tauR
+        1.4);                                   // tauI
 
-    // FM demod
+    // FM demodulator
     rxa->fmd.p = FMD::create_fmd (
-        0,                                              // run
-        rxa->dsp_size,                           // buffer size
+        0,                                      // run
+        rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        rxa->dsp_rate,                           // sample rate
-        5000.0,                                         // deviation
-        300.0,                                          // f_low
-        3000.0,                                         // f_high
-        -8000.0,                                        // fmin
-        +8000.0,                                        // fmax
-        1.0,                                            // zeta
-        20000.0,                                        // omegaN
-        0.02,                                           // tau - for dc removal
-        0.5,                                            // audio gain
-        1,                                              // run tone filter
-        254.1,                                          // ctcss frequency
-        std::max(2048, rxa->dsp_size),                // # coefs for de-emphasis filter
-        0,                                              // min phase flag for de-emphasis filter
-        std::max(2048, rxa->dsp_size),                // # coefs for audio cutoff filter
-        0);                                             // min phase flag for audio cutoff filter
+        rxa->dsp_rate,                          // sample rate
+        5000.0,                                 // deviation
+        300.0,                                  // f_low
+        3000.0,                                 // f_high
+        -8000.0,                                // fmin
+        +8000.0,                                // fmax
+        1.0,                                    // zeta
+        20000.0,                                // omegaN
+        0.02,                                   // tau - for dc removal
+        0.5,                                    // audio gain
+        1,                                      // run tone filter
+        254.1,                                  // ctcss frequency
+        std::max(2048, rxa->dsp_size),          // # coefs for de-emphasis filter
+        0,                                      // min phase flag for de-emphasis filter
+        std::max(2048, rxa->dsp_size),          // # coefs for audio cutoff filter
+        0);                                     // min phase flag for audio cutoff filter
 
-    // FM squelch
+    // FM squelch apply
     rxa->fmsq.p = FMSQ::create_fmsq (
-        0,                                              // run
-        rxa->dsp_size,                           // buffer size
+        0,                                      // run
+        rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input signal buffer
         rxa->midbuff,                           // pointer to output signal buffer
         rxa->fmd.p->audio,                      // pointer to trigger buffer
-        rxa->dsp_rate,                           // sample rate
-        5000.0,                                         // cutoff freq for noise filter (Hz)
+        rxa->dsp_rate,                          // sample rate
+        5000.0,                                 // cutoff freq for noise filter (Hz)
         &rxa->fmd.p->pllpole,                   // pointer to pole frequency of the fmd pll (Hz)
-        0.100,                                          // delay time after channel flush
-        0.001,                                          // tau for noise averaging
-        0.100,                                          // tau for long noise averaging
-        0.050,                                          // signal up transition time
-        0.010,                                          // signal down transition time
-        0.750,                                          // noise level to initiate tail
-        0.562,                                          // noise level to initiate unmute
-        0.000,                                          // minimum tail time
-        1.200,                                          // maximum tail time
-        std::max(2048, rxa->dsp_size),                // number of coefficients for noise filter
-        0);                                             // minimum phase flag
+        0.100,                                  // delay time after channel flush
+        0.001,                                  // tau for noise averaging
+        0.100,                                  // tau for long noise averaging
+        0.050,                                  // signal up transition time
+        0.010,                                  // signal down transition time
+        0.750,                                  // noise level to initiate tail
+        0.562,                                  // noise level to initiate unmute
+        0.000,                                  // minimum tail time
+        1.200,                                  // maximum tail time
+        std::max(2048, rxa->dsp_size),          // number of coefficients for noise filter
+        0);                                     // minimum phase flag
 
-    // snba
+    // Spectral noise blanker (SNB)
     rxa->snba.p = SNBA::create_snba (
-        0,                                              // run
+        0,                                      // run
         rxa->midbuff,                           // input buffer
         rxa->midbuff,                           // output buffer
-        rxa->dsp_rate,                           // input / output sample rate
-        12000,                                          // internal processing sample rate
-        rxa->dsp_size,                           // buffer size
-        4,                                              // overlap factor to use
-        256,                                            // frame size to use; sized for 12K rate
-        64,                                             // asize
-        2,                                              // npasses
-        8.0,                                            // k1
-        20.0,                                           // k2
-        10,                                             // b
-        2,                                              // pre
-        2,                                              // post
-        0.5,                                            // pmultmin
-        200.0,                                          // output resampler low cutoff
-        5400.0);                                        // output resampler high cutoff
+        rxa->dsp_rate,                          // input / output sample rate
+        12000,                                  // internal processing sample rate
+        rxa->dsp_size,                          // buffer size
+        4,                                      // overlap factor to use
+        256,                                    // frame size to use; sized for 12K rate
+        64,                                     // asize
+        2,                                      // npasses
+        8.0,                                    // k1
+        20.0,                                   // k2
+        10,                                     // b
+        2,                                      // pre
+        2,                                      // post
+        0.5,                                    // pmultmin
+        200.0,                                  // output resampler low cutoff
+        5400.0);                                // output resampler high cutoff
 
-    // EQ
+    // Equalizer
     {
         double default_F[11] = {0.0,  32.0,  63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0};
         //double default_G[11] = {0.0, -12.0, -12.0, -12.0,  -1.0,  +1.0,   +4.0,   +9.0,  +12.0,  -10.0,   -10.0};
         double default_G[11] =   {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0};
         rxa->eqp.p = EQP::create_eqp (
-            0,                                              // run - OFF by default
-            rxa->dsp_size,                           // buffer size
-            std::max(2048, rxa->dsp_size),                // number of filter coefficients
-            0,                                              // minimum phase flag
-            rxa->midbuff,                           // pointer to input buffer
-            rxa->midbuff,                           // pointer to output buffer
-            10,                                             // number of frequencies
-            default_F,                                      // frequency vector
-            default_G,                                      // gain vector
-            0,                                              // cutoff mode
-            0,                                              // wintype
-            rxa->dsp_rate);                          // sample rate
+            0,                                  // run - OFF by default
+            rxa->dsp_size,                      // buffer size
+            std::max(2048, rxa->dsp_size),      // number of filter coefficients
+            0,                                  // minimum phase flag
+            rxa->midbuff,                       // pointer to input buffer
+            rxa->midbuff,                       // pointer to output buffer
+            10,                                 // number of frequencies
+            default_F,                          // frequency vector
+            default_G,                          // gain vector
+            0,                                  // cutoff mode
+            0,                                  // wintype
+            rxa->dsp_rate);                     // sample rate
     }
 
-    // ANF
+    // Auto notch filter
     rxa->anf.p = ANF::create_anf (
-        0,                                              // run - OFF by default
-        0,                                              // position
-        rxa->dsp_size,                           // buffer size
+        0,                                      // run - OFF by default
+        0,                                      // position
+        rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        ANF_DLINE_SIZE,                                 // dline_size
-        64,                                             // taps
-        16,                                             // delay
-        0.0001,                                         // two_mu
-        0.1,                                            // gamma
-        1.0,                                            // lidx
-        0.0,                                            // lidx_min
-        200.0,                                          // lidx_max
-        6.25e-12,                                       // ngamma
-        6.25e-10,                                       // den_mult
-        1.0,                                            // lincr
-        3.0);                                           // ldecr
+        ANF_DLINE_SIZE,                         // dline_size
+        64,                                     // taps
+        16,                                     // delay
+        0.0001,                                 // two_mu
+        0.1,                                    // gamma
+        1.0,                                    // lidx
+        0.0,                                    // lidx_min
+        200.0,                                  // lidx_max
+        6.25e-12,                               // ngamma
+        6.25e-10,                               // den_mult
+        1.0,                                    // lincr
+        3.0);                                   // ldecr
 
-    // ANR
+    // LMS noise reduction (ANR or "NR")
     rxa->anr.p = ANR::create_anr (
-        0,                                              // run - OFF by default
-        0,                                              // position
-        rxa->dsp_size,                           // buffer size
+        0,                                      // run - OFF by default
+        0,                                      // position
+        rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        ANR_DLINE_SIZE,                                 // dline_size
-        64,                                             // taps
-        16,                                             // delay
-        0.0001,                                         // two_mu
-        0.1,                                            // gamma
-        120.0,                                          // lidx
-        120.0,                                          // lidx_min
-        200.0,                                          // lidx_max
-        0.001,                                          // ngamma
-        6.25e-10,                                       // den_mult
-        1.0,                                            // lincr
-        3.0);                                           // ldecr
+        ANR_DLINE_SIZE,                         // dline_size
+        64,                                     // taps
+        16,                                     // delay
+        0.0001,                                 // two_mu
+        0.1,                                    // gamma
+        120.0,                                  // lidx
+        120.0,                                  // lidx_min
+        200.0,                                  // lidx_max
+        0.001,                                  // ngamma
+        6.25e-10,                               // den_mult
+        1.0,                                    // lincr
+        3.0);                                   // ldecr
 
-
-    // EMNR
+    // Spectral noise reduyction (EMNR or "NR2")
     rxa->emnr.p = EMNR::create_emnr (
-        0,                                              // run
-        0,                                              // position
-        rxa->dsp_size,                           // buffer size
+        0,                                      // run
+        0,                                      // position
+        rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // input buffer
         rxa->midbuff,                           // output buffer
-        4096,                                           // FFT size
-        4,                                              // overlap
-        rxa->dsp_rate,                           // samplerate
-        0,                                              // window type
-        1.0,                                            // gain
-        2,                                              // gain method
-        0,                                              // npe_method
-        1);                                             // ae_run
+        4096,                                   // FFT size
+        4,                                      // overlap
+        rxa->dsp_rate,                          // samplerate
+        0,                                      // window type
+        1.0,                                    // gain
+        2,                                      // gain method
+        0,                                      // npe_method
+        1);                                     // ae_run
 
     // AGC
     rxa->agc.p = WCPAGC::create_wcpagc (
-        1,                                              // run
-        3,                                              // mode
-        1,                                              // peakmode = envelope
+        1,                                      // run
+        3,                                      // mode
+        1,                                      // peakmode = envelope
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        rxa->dsp_size,                           // buffer size
-        rxa->dsp_rate,                           // sample rate
-        0.001,                                          // tau_attack
-        0.250,                                          // tau_decay
-        4,                                              // n_tau
-        10000.0,                                        // max_gain
-        1.5,                                            // var_gain
-        1000.0,                                         // fixed_gain
-        1.0,                                            // max_input
-        1.0,                                            // out_target
-        0.250,                                          // tau_fast_backaverage
-        0.005,                                          // tau_fast_decay
-        5.0,                                            // pop_ratio
-        1,                                              // hang_enable
-        0.500,                                          // tau_hang_backmult
-        0.250,                                          // hangtime
-        0.250,                                          // hang_thresh
-        0.100);                                         // tau_hang_decay
+        rxa->dsp_size,                          // buffer size
+        rxa->dsp_rate,                          // sample rate
+        0.001,                                  // tau_attack
+        0.250,                                  // tau_decay
+        4,                                      // n_tau
+        10000.0,                                // max_gain
+        1.5,                                    // var_gain
+        1000.0,                                 // fixed_gain
+        1.0,                                    // max_input
+        1.0,                                    // out_target
+        0.250,                                  // tau_fast_backaverage
+        0.005,                                  // tau_fast_decay
+        5.0,                                    // pop_ratio
+        1,                                      // hang_enable
+        0.500,                                  // tau_hang_backmult
+        0.250,                                  // hangtime
+        0.250,                                  // hang_thresh
+        0.100);                                 // tau_hang_decay
 
-    // agc gain meter
+    // AGC meter
     rxa->agcmeter.p = METER::create_meter (
-        1,                                              // run
-        0,                                              // optional pointer to another 'run'
-        rxa->dsp_size,                           // size
+        0,                                      // run
+        0,                                      // optional pointer to another 'run'
+        rxa->dsp_size,                          // size
         rxa->midbuff,                           // pointer to buffer
-        rxa->dsp_rate,                           // samplerate
-        0.100,                                          // averaging time constant
-        0.100,                                          // peak decay time constant
+        rxa->dsp_rate,                          // samplerate
+        0.100,                                  // averaging time constant
+        0.100,                                  // peak decay time constant
         rxa->meter,                             // result vector
         rxa->pmtupdate,                         // locks for meter access
-        RXA_AGC_AV,                                     // index for average value
-        RXA_AGC_PK,                                     // index for peak value
-        RXA_AGC_GAIN,                                   // index for gain value
+        RXA_AGC_AV,                             // index for average value
+        RXA_AGC_PK,                             // index for peak value
+        RXA_AGC_GAIN,                           // index for gain value
         &rxa->agc.p->gain);                     // pointer for gain computation
 
-    // bandpass filter
+    // Bandpass filter - After spectral noise reduction in the block diagram
     rxa->bp1.p = BANDPASS::create_bandpass (
-        1,                                              // run - used only with ( AM || ANF || ANR || EMNR)
-        0,                                              // position
-        rxa->dsp_size,                           // buffer size
-        std::max(2048, rxa->dsp_size),                // number of coefficients
-        0,                                              // flag for minimum phase
+        1,                                      // run - used only with ( AM || ANF || ANR || EMNR)
+        0,                                      // position
+        rxa->dsp_size,                          // buffer size
+        std::max(2048, rxa->dsp_size),          // number of coefficients
+        0,                                      // flag for minimum phase
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        -4150.0,                                        // lower filter frequency
-        -150.0,                                         // upper filter frequency
-        rxa->dsp_rate,                           // sample rate
-        1,                                              // wintype
-        1.0);                                           // gain
+        -4150.0,                                // lower filter frequency
+        -150.0,                                 // upper filter frequency
+        rxa->dsp_rate,                          // sample rate
+        1,                                      // wintype
+        1.0);                                   // gain
 
-    // pull phase & scope display data
+    // Scope/phase display send - pull phase & scope display data
     rxa->sip1.p = SIPHON::create_siphon (
-        1,                                              // run - needed only for phase display
-        0,                                              // position
-        0,                                              // mode
-        0,                                              // disp
-        rxa->dsp_size,                           // size of input buffer
+        0,                                      // run - needed only for phase display
+        0,                                      // position
+        0,                                      // mode
+        0,                                      // disp
+        rxa->dsp_size,                          // size of input buffer
         rxa->midbuff,                           // input buffer
-        4096,                                           // number of samples to store
-        4096,                                           // fft size for spectrum
-        0);                                             // specmode
+        4096,                                   // number of samples to store
+        4096,                                   // fft size for spectrum
+        0);                                     // specmode
 
-    // carrier block
+    // AM carrier block
     rxa->cbl.p = CBL::create_cbl (
-        0,                                              // run - needed only if set to ON
-        rxa->dsp_size,                           // buffer size
+        0,                                      // run - needed only if set to ON
+        rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        0,                                              // mode
-        rxa->dsp_rate,                           // sample rate
-        0.02);                                          // tau
+        0,                                      // mode
+        rxa->dsp_rate,                          // sample rate
+        0.02);                                  // tau
 
-    // peaking filter
+    // CW peaking filter
     rxa->speak.p = SPEAK::create_speak (
-        0,                                              // run
-        rxa->dsp_size,                           // buffer size,
+        0,                                      // run
+        rxa->dsp_size,                          // buffer size,
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        rxa->dsp_rate,                           // sample rate
-        600.0,                                          // center frequency
-        100.0,                                          // bandwidth
-        2.0,                                            // gain
-        4,                                              // number of stages
-        1);                                             // design
+        rxa->dsp_rate,                          // sample rate
+        600.0,                                  // center frequency
+        100.0,                                  // bandwidth
+        2.0,                                    // gain
+        4,                                      // number of stages
+        1);                                     // design
 
-    // multiple peak filter
+    // Dolly filter (multiple peak filter) - default is 2 for RTTY
     {
         int def_enable[2] = {1, 1};
         double def_freq[2] = {2125.0, 2295.0};
         double def_bw[2] = {75.0, 75.0};
         double def_gain[2] = {1.0, 1.0};
         rxa->mpeak.p = MPEAK::create_mpeak (
-            0,                                          // run
-            rxa->dsp_size,                       // size
+            0,                                  // run
+            rxa->dsp_size,                      // size
             rxa->midbuff,                       // pointer to input buffer
             rxa->midbuff,                       // pointer to output buffer
-            rxa->dsp_rate,                       // sample rate
-            2,                                          // number of peaking filters
-            def_enable,                                 // enable vector
-            def_freq,                                   // frequency vector
-            def_bw,                                     // bandwidth vector
-            def_gain,                                   // gain vector
-            4 );                                        // number of stages
+            rxa->dsp_rate,                      // sample rate
+            2,                                  // number of peaking filters
+            def_enable,                         // enable vector
+            def_freq,                           // frequency vector
+            def_bw,                             // bandwidth vector
+            def_gain,                           // gain vector
+            4 );                                // number of stages
     }
 
-    // syllabic squelch
+    // Syllabic squelch (Voice suelch) - Not in the block diagram
     rxa->ssql.p = SSQL::create_ssql(
-        0,                                              // run
-        rxa->dsp_size,                           // size
+        0,                                      // run
+        rxa->dsp_size,                          // size
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        rxa->dsp_rate,                           // sample rate
-        0.070,                                          // signal up transition time
-        0.070,                                          // signal down transition time
-        0.0,                                            // muted gain
-        0.1,                                            // mute time-constant
-        0.1,                                            // unmute time-constant
-        0.08,                                           // window threshold
-        0.8197,                                         // trigger threshold
-        2400,                                           // ring size for f_to_v converter
-        2000.0);                                        // max freq for f_to_v converter
+        rxa->dsp_rate,                          // sample rate
+        0.070,                                  // signal up transition time
+        0.070,                                  // signal down transition time
+        0.0,                                    // muted gain
+        0.1,                                    // mute time-constant
+        0.1,                                    // unmute time-constant
+        0.08,                                   // window threshold
+        0.8197,                                 // trigger threshold
+        2400,                                   // ring size for f_to_v converter
+        2000.0);                                // max freq for f_to_v converter
 
-    // patchpanel
+    // PatchPanel
     rxa->panel.p = PANEL::create_panel (
-        1,                                              // run
-        rxa->dsp_size,                           // size
+        1,                                      // run
+        rxa->dsp_size,                          // size
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        4.0,                                            // gain1
-        1.0,                                            // gain2I
-        1.0,                                            // gain2Q
-        3,                                              // 3 for I and Q
-        0);                                             // no copy
+        4.0,                                    // gain1
+        1.0,                                    // gain2I
+        1.0,                                    // gain2Q
+        3,                                      // 3 for I and Q
+        0);                                     // no copy
 
-    // resample
+    // AM squelch apply - absent but in the block diagram
+
+    // Output resampler
     rxa->rsmpout.p = RESAMPLE::create_resample (
-        0,                                              // run - will be turned ON below if needed
-        rxa->dsp_size,                           // input buffer size
+        0,                                      // run - will be turned ON below if needed
+        rxa->dsp_size,                          // input buffer size
         rxa->midbuff,                           // pointer to input buffer
         rxa->outbuff,                           // pointer to output buffer
-        rxa->dsp_rate,                           // input sample rate
-        rxa->out_rate,                           // output sample rate
-        0.0,                                            // select cutoff automatically
-        0,                                              // select ncoef automatically
-        1.0);                                           // gain
+        rxa->dsp_rate,                          // input sample rate
+        rxa->out_rate,                          // output sample rate
+        0.0,                                    // select cutoff automatically
+        0,                                      // select ncoef automatically
+        1.0);                                   // gain
 
     // turn OFF / ON resamplers as needed
     ResCheck (*rxa);
@@ -825,6 +827,12 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->csDSP.unlock();
 }
 
+void RXA::setSpectrumProbe(BufferProbe *spectrumProbe)
+{
+    SENDER::SetSpectrum(*this, 1, spectrumProbe);
+    sender.p->run = 1;
+}
+
 /********************************************************************************************************
 *                                                                                                       *
 *                                       RXA Mode & Filter Controls                                      *
@@ -843,8 +851,8 @@ void RXA::SetMode (RXA& rxa, int mode)
             rxa.snba.p->run,
             rxa.emnr.p->run,
             rxa.anf.p->run,
-            rxa.anr.p->run)
-        ;
+            rxa.anr.p->run
+        );
         rxa.csDSP.lock();
         rxa.mode = mode;
         rxa.amd.p->run  = 0;
@@ -861,7 +869,6 @@ void RXA::SetMode (RXA& rxa, int mode)
             rxa.amd.p->mode = 1;
             break;
         case RXA_DSB:
-
             break;
         case RXA_FM:
             rxa.fmd.p->run  = 1;
@@ -1033,9 +1040,9 @@ void RXA::bpsnbaSet (RXA& rxa)
 
 void RXA::SetPassband (RXA& rxa, double f_low, double f_high)
 {
-    BANDPASS::SetBandpassFreqs   (rxa, f_low, f_high);
-    SNBA::SetSNBAOutputBandwidth (rxa, f_low, f_high);
-    NBP::NBPSetFreqs             (rxa, f_low, f_high);
+    BANDPASS::SetBandpassFreqs   (rxa, f_low, f_high); // After spectral noise reduction ( AM || ANF || ANR || EMNR)
+    SNBA::SetSNBAOutputBandwidth (rxa, f_low, f_high); // Spectral noise blanker (SNB)
+    NBP::NBPSetFreqs             (rxa, f_low, f_high); // Notched bandpass
 }
 
 void RXA::SetNC (RXA& rxa, int nc)

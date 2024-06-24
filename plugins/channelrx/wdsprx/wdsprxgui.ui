@@ -377,42 +377,7 @@
         </property>
         <item>
          <property name="text">
-          <string>Bart</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>B-H</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>FT</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Ham</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Han</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Rec</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Kai</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Black</string>
+          <string>B-H4</string>
          </property>
         </item>
         <item>
@@ -856,40 +821,7 @@
        </widget>
       </item>
       <item>
-       <widget class="ButtonSwitch" name="agcClamping">
-        <property name="toolTip">
-         <string>Toggle AGC clamping to maximum allowable signal</string>
-        </property>
-        <property name="text">
-         <string>CL</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ButtonSwitch" name="dnr">
-        <property name="toolTip">
-         <string>Toggle Digital Noise Reduction</string>
-        </property>
-        <property name="text">
-         <string>NR</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_7">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDial" name="agcTimeLog2">
+       <widget class="QDial" name="agcGain">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -900,120 +832,21 @@
          <string>AGC time constant (ms in log2 steps)</string>
         </property>
         <property name="minimum">
-         <number>4</number>
+         <number>-20</number>
         </property>
         <property name="maximum">
-         <number>11</number>
+         <number>120</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>7</number>
+         <number>80</number>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="agcTimeText">
-        <property name="minimumSize">
-         <size>
-          <width>35</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>AGC time constant (ms)</string>
-        </property>
-        <property name="text">
-         <string>0000</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_5">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDial" name="agcPowerThreshold">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Power threshold (dB)</string>
-        </property>
-        <property name="minimum">
-         <number>-120</number>
-        </property>
-        <property name="maximum">
-         <number>0</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>-40</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="agcPowerThresholdText">
-        <property name="minimumSize">
-         <size>
-          <width>26</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Power threshold (dB)</string>
-        </property>
-        <property name="text">
-         <string>-000</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_6">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDial" name="agcThresholdGate">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Power threshold gate (ms)</string>
-        </property>
-        <property name="maximum">
-         <number>68</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>4</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="agcThresholdGateText">
+       <widget class="QLabel" name="agcGainText">
         <property name="minimumSize">
          <size>
           <width>22</width>
@@ -1028,6 +861,19 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="dnr">
+        <property name="toolTip">
+         <string>Toggle Digital Noise Reduction</string>
+        </property>
+        <property name="text">
+         <string>NR</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

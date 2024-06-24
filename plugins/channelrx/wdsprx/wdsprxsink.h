@@ -28,6 +28,7 @@
 #include "dsp/firfilter.h"
 #include "audio/audiofifo.h"
 #include "util/doublebufferfifo.h"
+#include "bufferprobe.hpp"
 
 #include "wdsprxsettings.h"
 
@@ -51,31 +52,22 @@ public:
     void applyAudioSampleRate(int sampleRate);
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
-    double getMagSq() const { return m_magsq; }
+    double getMagSq() const { return m_sAvg; }
 	bool getAudioActive() const { return m_audioActive; }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
     void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
-    void setDNR(bool dnr);
-
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
-    {
-        if (m_magsqCount > 0)
-        {
-            m_magsq = m_magsqSum / m_magsqCount;
-            m_magSqLevelStore.m_magsq = m_magsq;
-            m_magSqLevelStore.m_magsqPeak = m_magsqPeak;
-        }
-
-        avg = m_magSqLevelStore.m_magsq;
-        peak = m_magSqLevelStore.m_magsqPeak;
-        nbSamples = m_magsqCount == 0 ? 1 : m_magsqCount;
-
-        m_magsqSum = 0.0f;
-        m_magsqPeak = 0.0f;
-        m_magsqCount = 0;
-    }
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples);
 
 private:
+    class SpectrumProbe : public WDSP::BufferProbe
+    {
+    public:
+        SpectrumProbe(SampleVector& sampleVector);
+        virtual void proceed(const double *in, int nbSamples);
+    private:
+        SampleVector& m_sampleVector;
+    };
+
     struct MagSqLevelsStore
     {
         MagSqLevelsStore() :
@@ -90,23 +82,18 @@ private:
     ChannelAPI *m_channel;
 
 	Real m_Bandwidth;
-	Real m_LowCutoff;
 	Real m_volume;
-	int m_spanLog2;
 	fftfilt::cmplx m_sum;
 	int m_undersampleCount;
 	int m_channelSampleRate;
 	int m_channelFrequencyOffset;
 	bool m_audioBinaual;
-	bool m_audioFlipChannels;
 	bool m_usb;
 	bool m_dsb;
 	bool m_audioMute;
-	double m_magsq;
-	double m_magsqSum;
-	double m_magsqPeak;
-    int  m_magsqCount;
-    MagSqLevelsStore m_magSqLevelStore;
+    double m_sAvg;
+    double m_sPeak;
+    int m_sCount;
     MagAGC m_agc;
     bool m_agcActive;
     bool m_agcClamping;
@@ -115,19 +102,18 @@ private:
     int m_agcThresholdGate;     //!< Gate length in number of samples befor threshold triggers
     DoubleBufferFIFO<fftfilt::cmplx> m_squelchDelayLine;
     bool m_audioActive;         //!< True if an audio signal is produced (no AGC or AGC and above threshold)
-    Lowpass<Real> m_lowpassI;
-    Lowpass<Real> m_lowpassQ;
-
 
 	NCOF m_nco;
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
-	fftfilt* SSBFilter;
-	fftfilt* DSBFilter;
+	// fftfilt* SSBFilter;
+	// fftfilt* DSBFilter;
 
 	SpectrumVis* m_spectrumSink;
 	SampleVector m_sampleBuffer;
+    SpectrumProbe m_spectrumProbe;
+    int m_inCount;
 
 	AudioVector m_audioBuffer;
 	std::size_t m_audioBufferFill;

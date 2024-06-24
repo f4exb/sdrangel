@@ -45,19 +45,13 @@ void WDSPRxSettings::resetToDefaults()
     m_audioFlipChannels = false;
     m_dsb = false;
     m_audioMute = false;
-    m_agc = false;
-    m_agcClamping = false;
-    m_agcPowerThreshold = -100;
-    m_agcThresholdGate = 4;
-    m_agcTimeLog2 = 7;
+    m_agc = true;
+    m_agcMode = AGCMedium;
+    m_agcGain = 80;
+    m_agcSlope = 35; // 3.5 dB
+    m_agcHangThreshold = 0;
     m_volume = 1.0;
     m_inputFrequencyOffset = 0;
-    m_dnr = false;
-    m_dnrScheme = 0;
-    m_dnrAboveAvgFactor = 40.0f;
-    m_dnrSigmaFactor = 4.0f;
-    m_dnrNbPeaks = 20;
-    m_dnrAlpha = 1.0;
     m_rgbColor = QColor(0, 255, 0).rgb();
     m_title = "WDSP Receiver";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
@@ -87,10 +81,10 @@ QByteArray WDSPRxSettings::serialize() const
     s.writeBool(9, m_audioFlipChannels);
     s.writeBool(10, m_dsb);
     s.writeBool(11, m_agc);
-    s.writeS32(12, m_agcTimeLog2);
-    s.writeS32(13, m_agcPowerThreshold);
-    s.writeS32(14, m_agcThresholdGate);
-    s.writeBool(15, m_agcClamping);
+    s.writeS32(12, (int) m_agcMode);
+    s.writeS32(13, m_agcGain);
+    s.writeS32(14, m_agcSlope);
+    s.writeS32(15, m_agcHangThreshold);
     s.writeString(16, m_title);
     s.writeString(17, m_audioDeviceName);
     s.writeBool(18, m_useReverseAPI);
@@ -108,17 +102,11 @@ QByteArray WDSPRxSettings::serialize() const
     s.writeBlob(26, m_geometryBytes);
     s.writeBool(27, m_hidden);
     s.writeU32(29, m_filterIndex);
-    s.writeBool(30, m_dnr);
-    s.writeS32(31, m_dnrScheme);
-    s.writeFloat(32, m_dnrAboveAvgFactor);
-    s.writeFloat(33, m_dnrSigmaFactor);
-    s.writeS32(34, m_dnrNbPeaks);
-    s.writeFloat(35, m_dnrAlpha);
 
     for (unsigned int i = 0; i <  10; i++)
     {
         s.writeS32(100 + 10*i, m_filterBank[i].m_spanLog2);
-        s.writeS32(101 + 10*i, m_filterBank[i].m_rfBandwidth / 100.0);
+        s.writeS32(101 + 10*i, m_filterBank[i].m_highCutoff / 100.0);
         s.writeS32(102 + 10*i, m_filterBank[i].m_lowCutoff / 100.0);
         s.writeS32(103 + 10*i, (int) m_filterBank[i].m_fftWindow);
         s.writeBool(104 + 10*i, m_filterBank[i].m_dnr);
@@ -163,12 +151,13 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         d.readBool(8, &m_audioBinaural, false);
         d.readBool(9, &m_audioFlipChannels, false);
         d.readBool(10, &m_dsb, false);
-        d.readBool(11, &m_agc, false);
-        d.readS32(12, &m_agcTimeLog2, 7);
-        d.readS32(13, &m_agcPowerThreshold, -40);
-        d.readS32(14, &m_agcThresholdGate, 4);
-        d.readBool(15, &m_agcClamping, false);
-        d.readString(16, &m_title, "SSB Demodulator");
+        d.readBool(11, &m_agc, true);
+        d.readS32(12, &tmp, 2);
+        m_agcMode = (AGCMode) tmp;
+        d.readS32(13, &m_agcGain, 80);
+        d.readS32(14, &m_agcSlope, 35);
+        d.readS32(15, &m_agcHangThreshold, 0);
+        d.readString(16, &m_title, "WDSP Receiver");
         d.readString(17, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readBool(18, &m_useReverseAPI, false);
         d.readString(19, &m_reverseAPIAddress, "127.0.0.1");
@@ -197,18 +186,12 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         d.readBool(27, &m_hidden, false);
         d.readU32(29, &utmp, 0);
         m_filterIndex = utmp < 10 ? utmp : 0;
-        d.readBool(30, &m_dnr, false);
-        d.readS32(31, &m_dnrScheme, 0);
-        d.readFloat(32, &m_dnrAboveAvgFactor, 40.0f);
-        d.readFloat(33, &m_dnrSigmaFactor, 4.0f);
-        d.readS32(34, &m_dnrNbPeaks, 20);
-        d.readFloat(35, &m_dnrAlpha, 1.0);
 
         for (unsigned int i = 0; (i < 10); i++)
         {
             d.readS32(100 + 10*i, &m_filterBank[i].m_spanLog2, 3);
             d.readS32(101 + 10*i, &tmp, 30);
-            m_filterBank[i].m_rfBandwidth = tmp * 100.0;
+            m_filterBank[i].m_highCutoff = tmp * 100.0;
             d.readS32(102+ 10*i, &tmp, 3);
             m_filterBank[i].m_lowCutoff = tmp * 100.0;
             d.readS32(103 + 10*i, &tmp, (int) FFTWindow::Blackman);

@@ -251,7 +251,7 @@ void WDSPRx::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_filterIndex: " << settings.m_filterIndex
             << " [m_spanLog2: " << settings.m_filterBank[settings.m_filterIndex].m_spanLog2
-            << " m_rfBandwidth: " << settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth
+            << " m_highCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_highCutoff
             << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
             << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
@@ -260,16 +260,10 @@ void WDSPRx::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_dsb: " << settings.m_dsb
             << " m_audioMute: " << settings.m_audioMute
             << " m_agcActive: " << settings.m_agc
-            << " m_agcClamping: " << settings.m_agcClamping
-            << " m_agcTimeLog2: " << settings.m_agcTimeLog2
-            << " agcPowerThreshold: " << settings.m_agcPowerThreshold
-            << " agcThresholdGate: " << settings.m_agcThresholdGate
-            << " m_dnr: " << settings.m_dnr
-            << " m_dnrScheme: " << settings.m_dnrScheme
-            << " m_dnrAboveAvgFactor: " << settings.m_dnrAboveAvgFactor
-            << " m_dnrSigmaFactor: " << settings.m_dnrSigmaFactor
-            << " m_dnrNbPeaks: " << settings.m_dnrNbPeaks
-            << " m_dnrAlpha: " << settings.m_dnrAlpha
+            << " m_agcMode: " << settings.m_agcMode
+            << " m_agcGain: " << settings.m_agcGain
+            << " m_agcSlope: " << settings.m_agcSlope
+            << " m_agcHangThreshold: " << settings.m_agcHangThreshold
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
@@ -290,7 +284,7 @@ void WDSPRx::applySettings(const WDSPRxSettings& settings, bool force)
     if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2 != settings.m_filterBank[settings.m_filterIndex].m_spanLog2) || force) {
         reverseAPIKeys.append("spanLog2");
     }
-    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth != settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth) || force) {
+    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff != settings.m_filterBank[settings.m_filterIndex].m_highCutoff) || force) {
         reverseAPIKeys.append("rfBandwidth");
     }
     if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff != settings.m_filterBank[settings.m_filterIndex].m_lowCutoff) || force) {
@@ -301,18 +295,6 @@ void WDSPRx::applySettings(const WDSPRxSettings& settings, bool force)
     }
     if ((m_settings.m_volume != settings.m_volume) || force) {
         reverseAPIKeys.append("volume");
-    }
-    if ((m_settings.m_agcTimeLog2 != settings.m_agcTimeLog2) || force) {
-        reverseAPIKeys.append("agcTimeLog2");
-    }
-    if ((m_settings.m_agcPowerThreshold != settings.m_agcPowerThreshold) || force) {
-        reverseAPIKeys.append("agcPowerThreshold");
-    }
-    if ((m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) || force) {
-        reverseAPIKeys.append("agcThresholdGate");
-    }
-    if ((m_settings.m_agcClamping != settings.m_agcClamping) || force) {
-        reverseAPIKeys.append("agcClamping");
     }
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
         reverseAPIKeys.append("audioDeviceName");
@@ -332,24 +314,6 @@ void WDSPRx::applySettings(const WDSPRxSettings& settings, bool force)
     if ((m_settings.m_agc != settings.m_agc) || force) {
         reverseAPIKeys.append("agc");
     }
-    if ((m_settings.m_dnr != settings.m_dnr) || force) {
-        reverseAPIKeys.append("dnr");
-    }
-    if ((m_settings.m_dnrScheme != settings.m_dnrScheme) || force) {
-        reverseAPIKeys.append("dnrScheme");
-    }
-    if ((m_settings.m_dnrAboveAvgFactor != settings.m_dnrAboveAvgFactor) || force) {
-        reverseAPIKeys.append("dnrAboveAvgFactor");
-    }
-    if ((m_settings.m_dnrSigmaFactor != settings.m_dnrSigmaFactor) || force) {
-        reverseAPIKeys.append("dnrSigmaFactor");
-    }
-    if ((m_settings.m_dnrNbPeaks != settings.m_dnrNbPeaks) || force) {
-        reverseAPIKeys.append("dnrNbPeaks");
-    }
-    if ((m_settings.m_dnrAlpha != settings.m_dnrAlpha) || force) {
-        reverseAPIKeys.append("dnrAlpha");
-    }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
@@ -367,12 +331,12 @@ void WDSPRx::applySettings(const WDSPRxSettings& settings, bool force)
     }
 
     if ((settings.m_dsb != m_settings.m_dsb)
-    || (settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth != m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth)
+    || (settings.m_filterBank[settings.m_filterIndex].m_highCutoff != m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff)
     || (settings.m_filterBank[settings.m_filterIndex].m_lowCutoff != m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff) || force)
     {
         SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
         spectrumSettings.m_ssb = !settings.m_dsb;
-        spectrumSettings.m_usb = (settings.m_filterBank[settings.m_filterIndex].m_lowCutoff < settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth);
+        spectrumSettings.m_usb = (settings.m_filterBank[settings.m_filterIndex].m_lowCutoff < settings.m_filterBank[settings.m_filterIndex].m_highCutoff);
         SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
         m_spectrumVis.getInputMessageQueue()->push(msg);
     }
@@ -508,7 +472,7 @@ void WDSPRx::webapiUpdateChannelSettings(
         settings.m_filterBank[settings.m_filterIndex].m_spanLog2 = response.getSsbDemodSettings()->getSpanLog2();
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
-        settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth = response.getSsbDemodSettings()->getRfBandwidth();
+        settings.m_filterBank[settings.m_filterIndex].m_highCutoff = response.getSsbDemodSettings()->getRfBandwidth();
     }
     if (channelSettingsKeys.contains("lowCutoff")) {
         settings.m_filterBank[settings.m_filterIndex].m_lowCutoff = response.getSsbDemodSettings()->getLowCutoff();
@@ -533,33 +497,6 @@ void WDSPRx::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("agc")) {
         settings.m_agc = response.getSsbDemodSettings()->getAgc() != 0;
-    }
-    if (channelSettingsKeys.contains("agcClamping")) {
-        settings.m_agcClamping = response.getSsbDemodSettings()->getAgcClamping() != 0;
-    }
-    if (channelSettingsKeys.contains("agcTimeLog2")) {
-        settings.m_agcTimeLog2 = response.getSsbDemodSettings()->getAgcTimeLog2();
-    }
-    if (channelSettingsKeys.contains("agcPowerThreshold")) {
-        settings.m_agcPowerThreshold = response.getSsbDemodSettings()->getAgcPowerThreshold();
-    }
-    if (channelSettingsKeys.contains("agcThresholdGate")) {
-        settings.m_agcThresholdGate = response.getSsbDemodSettings()->getAgcThresholdGate();
-    }
-    if (channelSettingsKeys.contains("dnr")) {
-        settings.m_dnr = response.getSsbDemodSettings()->getDnr() != 0;
-    }
-    if (channelSettingsKeys.contains("dnrAboveAvgFactor")) {
-        settings.m_dnrAboveAvgFactor = response.getSsbDemodSettings()->getDnrAboveAvgFactor();
-    }
-    if (channelSettingsKeys.contains("dnrSigmaFactor")) {
-        settings.m_dnrSigmaFactor = response.getSsbDemodSettings()->getDnrSigmaFactor();
-    }
-    if (channelSettingsKeys.contains("dnrNbPeaks")) {
-        settings.m_dnrNbPeaks = response.getSsbDemodSettings()->getDnrNbPeaks();
-    }
-    if (channelSettingsKeys.contains("dnrAlpha")) {
-        settings.m_dnrAlpha = response.getSsbDemodSettings()->getDnrAlpha();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getSsbDemodSettings()->getRgbColor();
@@ -616,7 +553,7 @@ void WDSPRx::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getSsbDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getSsbDemodSettings()->setFilterIndex(settings.m_filterIndex);
     response.getSsbDemodSettings()->setSpanLog2(settings.m_filterBank[settings.m_filterIndex].m_spanLog2);
-    response.getSsbDemodSettings()->setRfBandwidth(settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth);
+    response.getSsbDemodSettings()->setRfBandwidth(settings.m_filterBank[settings.m_filterIndex].m_highCutoff);
     response.getSsbDemodSettings()->setLowCutoff(settings.m_filterBank[settings.m_filterIndex].m_lowCutoff);
     response.getSsbDemodSettings()->setFftWindow((int) settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
     response.getSsbDemodSettings()->setVolume(settings.m_volume);
@@ -625,16 +562,6 @@ void WDSPRx::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getSsbDemodSettings()->setDsb(settings.m_dsb ? 1 : 0);
     response.getSsbDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getSsbDemodSettings()->setAgc(settings.m_agc ? 1 : 0);
-    response.getSsbDemodSettings()->setAgcClamping(settings.m_agcClamping ? 1 : 0);
-    response.getSsbDemodSettings()->setAgcTimeLog2(settings.m_agcTimeLog2);
-    response.getSsbDemodSettings()->setAgcPowerThreshold(settings.m_agcPowerThreshold);
-    response.getSsbDemodSettings()->setAgcThresholdGate(settings.m_agcThresholdGate);
-    response.getSsbDemodSettings()->setDnr(settings.m_dnr ? 1 : 0);
-    response.getSsbDemodSettings()->setDnrScheme(settings.m_dnrScheme);
-    response.getSsbDemodSettings()->setDnrAboveAvgFactor(settings.m_dnrAboveAvgFactor);
-    response.getSsbDemodSettings()->setDnrSigmaFactor(settings.m_dnrSigmaFactor);
-    response.getSsbDemodSettings()->setDnrNbPeaks(settings.m_dnrNbPeaks);
-    response.getSsbDemodSettings()->setDnrAlpha(settings.m_dnrAlpha);
     response.getSsbDemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getSsbDemodSettings()->getTitle()) {
@@ -799,7 +726,7 @@ void WDSPRx::webapiFormatChannelSettings(
         swgSSBDemodSettings->setSpanLog2(settings.m_filterBank[settings.m_filterIndex].m_spanLog2);
     }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
-        swgSSBDemodSettings->setRfBandwidth(settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth);
+        swgSSBDemodSettings->setRfBandwidth(settings.m_filterBank[settings.m_filterIndex].m_highCutoff);
     }
     if (channelSettingsKeys.contains("lowCutoff") || force) {
         swgSSBDemodSettings->setLowCutoff(settings.m_filterBank[settings.m_filterIndex].m_lowCutoff);
@@ -824,33 +751,6 @@ void WDSPRx::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("agc") || force) {
         swgSSBDemodSettings->setAgc(settings.m_agc ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("agcClamping") || force) {
-        swgSSBDemodSettings->setAgcClamping(settings.m_agcClamping ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("agcTimeLog2") || force) {
-        swgSSBDemodSettings->setAgcTimeLog2(settings.m_agcTimeLog2);
-    }
-    if (channelSettingsKeys.contains("agcPowerThreshold") || force) {
-        swgSSBDemodSettings->setAgcPowerThreshold(settings.m_agcPowerThreshold);
-    }
-    if (channelSettingsKeys.contains("agcThresholdGate") || force) {
-        swgSSBDemodSettings->setAgcThresholdGate(settings.m_agcThresholdGate);
-    }
-    if (channelSettingsKeys.contains("dnr")) {
-        swgSSBDemodSettings->setDnr(settings.m_dnr ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("dnrAboveAvgFactor")) {
-        swgSSBDemodSettings->setDnrAboveAvgFactor(settings.m_dnrAboveAvgFactor);
-    }
-    if (channelSettingsKeys.contains("dnrSigmaFactor")) {
-        swgSSBDemodSettings->setDnrSigmaFactor(settings.m_dnrSigmaFactor);
-    }
-    if (channelSettingsKeys.contains("dnrNbPeaks")) {
-        swgSSBDemodSettings->setDnrNbPeaks(settings.m_dnrNbPeaks);
-    }
-    if (channelSettingsKeys.contains("dnrAlpha")) {
-        swgSSBDemodSettings->setDnrAlpha(settings.m_dnrAlpha);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgSSBDemodSettings->setRgbColor(settings.m_rgbColor);
