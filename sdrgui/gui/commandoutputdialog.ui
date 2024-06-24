@@ -74,6 +74,7 @@
        </property>
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>8</pointsize>
         </font>
        </property>
@@ -105,6 +106,7 @@
        </property>
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>8</pointsize>
         </font>
        </property>
@@ -126,6 +128,7 @@
        </property>
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>8</pointsize>
         </font>
        </property>
@@ -285,6 +288,7 @@
      <property name="font">
       <font>
        <family>Monospace</family>
+       <pointsize>9</pointsize>
       </font>
      </property>
      <property name="toolTip">

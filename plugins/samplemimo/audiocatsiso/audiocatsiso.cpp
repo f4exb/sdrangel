@@ -207,8 +207,6 @@ bool AudioCATSISO::startTx()
     m_outputWorkerThread->start();
     m_txRunning = true;
 
-	mutexLocker.unlock();
-
 	qDebug("AudioCATSISO::startTx: started");
 
 	return true;

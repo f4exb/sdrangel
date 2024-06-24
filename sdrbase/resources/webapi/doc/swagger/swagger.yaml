@@ -1075,7 +1075,7 @@ paths:
         - Workspace
       responses:
         "202":
-          descriptions: Successful sending of the message
+          description: Successful sending of the message
           schema:
             $ref: "#/definitions/SuccessResponse"
         "500":
@@ -1089,7 +1089,7 @@ paths:
         - Workspace
       responses:
         "202":
-          descriptions: Successful sending of the message
+          description: Successful sending of the message
           schema:
             $ref: "#/definitions/SuccessResponse"
         "500":
@@ -3325,7 +3325,7 @@ definitions:
         description: "Name of the preset group"
         type: string
       centerFrequency:
-        description: "Center freqeuency in Hz"
+        description: "Center frequency in Hz"
         type: integer
         format: int64
       type:
@@ -3343,7 +3343,7 @@ definitions:
       - name
     properties:
       centerFrequency:
-        description: "Center freqeuency in Hz"
+        description: "Center frequency in Hz"
         type: integer
         format: int64
       type:
@@ -3458,7 +3458,7 @@ definitions:
         type: string
 
   ConfigurationImportExport:
-    description: "Details to impprt/export a configuration from/to file"
+    description: "Details to import/export a configuration from/to file"
     properties:
       filePath:
         description: "Path of the import file"

@@ -17,7 +17,7 @@ Frequency:
       type: integer
 
 FrequencyBand:
-  description: A band of frequencies given its boudaries in Hertz (Hz)
+  description: A band of frequencies given its boundaries in Hertz (Hz)
   properties:
     name:
       type: string
@@ -59,7 +59,7 @@ RangeFloat:
       format: float
 
 FrequencyRange:
-  description: An frequency range with 64 bit support for min and max
+  description: A frequency range with 64 bit support for min and max
   properties:
     min:
       type: integer

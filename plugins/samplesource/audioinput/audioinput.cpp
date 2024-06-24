@@ -119,7 +119,6 @@ bool AudioInput::start()
     m_worker->startWork();
     m_workerThread->start();
     m_running = true;
-	mutexLocker.unlock();
 
     qDebug("AudioInput::start: started");
 

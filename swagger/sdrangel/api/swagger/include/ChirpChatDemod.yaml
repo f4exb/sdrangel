@@ -38,7 +38,7 @@ ChirpChatDemodSettings:
     spreadFactor:
       type: integer
     deBits:
-      description: Low data rate optmize (DE) bits i.e. nb of FFT bins per effective symbol
+      description: Low data rate optimize (DE) bits i.e. nb of FFT bins per effective symbol
       type: integer
     fftWindow:
       type: integer
@@ -203,5 +203,5 @@ ChirpChatDemodReport:
       type: integer
       description: >
         Boolean - decoding status
-          * 0 - no deconding
+          * 0 - no decoding
           * 1 - decoding

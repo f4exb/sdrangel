@@ -51,7 +51,7 @@ FT8DemodSettings:
     decoderTimeBudget:
       type: number
       format: float
-      desctiption: Decoder time budget in seconds (will stop after running this time)
+      description: Decoder time budget in seconds (will stop after running this time)
     useOSD:
       type: integer
       description: >

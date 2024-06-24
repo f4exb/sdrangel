@@ -27,11 +27,11 @@ SigMFFileSinkSettings:
       description: Number of seconds to record before recording is triggered (manual or squelch)
     squelchPostRecordTime:
       type: integer
-      description: Number of seconds to record after spectrum squelch cloeses
+      description: Number of seconds to record after spectrum squelch closes
     squelchRecordingEnable:
       type: integer
       description: >
-        Automatic recording triggered by spectrum squalch
+        Automatic recording triggered by spectrum squelch
         * 0 - disabled
         * 1 - enabled
     log2RecordSampleSize:

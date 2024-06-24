@@ -209,9 +209,7 @@ Requires windows to be reopened to take effect</string>
   <tabstop>mapMultisampling</tabstop>
   <tabstop>mapSmoothing</tabstop>
  </tabstops>
- <resources>
-  <include location="../resources/res.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

@@ -89,7 +89,6 @@ bool TestMOSync::startTx()
     m_sinkWorker->setFeedSpectrumIndex(m_feedSpectrumIndex);
     m_sinkWorker->connectTimer(m_masterTimer);
 	startWorker();
-	mutexLocker.unlock();
 	m_runningTx = true;
 
     return true;

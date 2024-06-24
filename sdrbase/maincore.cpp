@@ -144,7 +144,7 @@ void MainCore::setLoggingOptions()
                 .arg(QT_POINTER_SIZE*8)
                 .arg(SDR_RX_SAMP_SZ)
                 .arg(SDR_RX_SAMP_SZ)
-                .arg(QCoreApplication::applicationPid());
+                .arg(QCoreApplication::applicationPid()));
  #endif
         m_logger->logToFile(QtInfoMsg, appInfoStr);
     }

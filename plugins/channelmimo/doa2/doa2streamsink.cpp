@@ -17,7 +17,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QMutexLocker>
 #include <QDebug>
 
 #include "doa2streamsink.h"

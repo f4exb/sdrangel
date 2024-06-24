@@ -23,10 +23,10 @@ MorseDecoderSettings:
           * 0 - do not send
     udpAddress:
       type: string
-      description: Address to semd text via UDP
+      description: Address to send text via UDP
     udpPort:
       type: integer
-      description: Port to semd text via UDP
+      description: Port to send text via UDP
     logFiledName:
       type: string
       description: File to log the decoded text to

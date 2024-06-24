@@ -67,7 +67,7 @@ Lock the pitch and speed to the current values detected by GGMorse. Unlock to re
 
 This is the GGMorse decoder cost factor. Successful decodes yield from a few millis to a few tens of millis.
 
-<h3>11a: Show decoder theshold</h3>
+<h3>11a: Show decoder threshold</h3>
 
 Enable or disable the GGMorse decoder threshold display on the imaginary trace of the scope.
 

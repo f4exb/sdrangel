@@ -115,15 +115,15 @@ SigMFFileInputActions:
       description: Move to beginning of track given its number. Must stop first.
     seekTrackMillis:
       type: integer
-      description: Move to this number / 1000 raio in track. Must stop first.
+      description: Move to this number / 1000 ratio in track. Must stop first.
     seekRecordMillis:
       type: integer
-      description: Move to this number / 1000 raio in full record. Must stop first.
+      description: Move to this number / 1000 ratio in full record. Must stop first.
 
 definitions:
 
   Capture:
-    descripion: Capture (track) information
+    description: Capture (track) information
     properties:
       tsms:
         description: Timestamp in milliseconds since epoch of capture start

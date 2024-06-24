@@ -123,7 +123,7 @@ SigMFFileInputActions:
 definitions:
 
   Capture:
-    descripion: Capture (track) information
+    description: Capture (track) information
     properties:
       tsms:
         description: Timestamp in milliseconds since epoch of capture start

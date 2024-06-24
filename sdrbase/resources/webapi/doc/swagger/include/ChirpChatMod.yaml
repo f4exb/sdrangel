@@ -38,7 +38,7 @@ ChirpChatModSettings:
     spreadFactor:
       type: integer
     deBits:
-      description: Low data rate optmize (DE) bits i.e. nb of FFT bins per effective symbol
+      description: Low data rate optimize (DE) bits i.e. nb of FFT bins per effective symbol
       type: integer
     preambleChirps:
       description: Number of preamble chirps

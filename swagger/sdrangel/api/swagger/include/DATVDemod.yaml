@@ -74,7 +74,7 @@ DATVDemodSettings:
       type: integer
     filter:
       description: >
-        Type of sumbol filtering (see DATVDemodSettings::dvb_sampler)
+        Type of symbol filtering (see DATVDemodSettings::dvb_sampler)
           * 0 - Nearest
           * 1 - Linear
           * 2 - Root Raised Cosine

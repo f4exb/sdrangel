@@ -540,7 +540,6 @@
   <tabstop>dishEffectiveArea</tabstop>
  </tabstops>
  <resources>
-  <include location="../../../sdrgui/resources/res.qrc"/>
   <include location="antennatools.qrc"/>
  </resources>
  <connections/>

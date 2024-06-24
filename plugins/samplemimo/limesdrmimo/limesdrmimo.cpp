@@ -300,7 +300,6 @@ bool LimeSDRMIMO::startRx()
     m_sourceThread->setLog2Decimation(m_settings.m_log2SoftDecim);
     m_sourceThread->setIQOrder(m_settings.m_iqOrder);
 	m_sourceThread->startWork();
-	mutexLocker.unlock();
 	m_runningRx = true;
 
     return true;
@@ -374,7 +373,6 @@ bool LimeSDRMIMO::startTx()
     m_sinkThread->setFifo(&m_sampleMOFifo);
     m_sinkThread->setLog2Interpolation(m_settings.m_log2SoftInterp);
 	m_sinkThread->startWork();
-	mutexLocker.unlock();
 	m_runningTx = true;
 
     return true;

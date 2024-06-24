@@ -11,35 +11,35 @@ MetisMISOSettings:
         * 0 - disabled sends null payload to Metis device
         * 1 - enabled sends Tx payload to Metis device
     rx1CenterFrequency:
-      description: center fequencies of receiver 1
+      description: center frequencies of receiver 1
       type: integer
       format: int64
     rx2CenterFrequency:
-      description: center fequencies of receiver 2
+      description: center frequencies of receiver 2
       type: integer
       format: int64
     rx3CenterFrequency:
-      description: center fequencies of receiver 3
+      description: center frequencies of receiver 3
       type: integer
       format: int64
     rx4CenterFrequency:
-      description: center fequencies of receiver 4
+      description: center frequencies of receiver 4
       type: integer
       format: int64
     rx5CenterFrequency:
-      description: center fequencies of receiver 5
+      description: center frequencies of receiver 5
       type: integer
       format: int64
     rx6CenterFrequency:
-      description: center fequencies of receiver 6
+      description: center frequencies of receiver 6
       type: integer
       format: int64
     rx7CenterFrequency:
-      description: center fequencies of receiver 7
+      description: center frequencies of receiver 7
       type: integer
       format: int64
     rx8CenterFrequency:
-      description: center fequencies of receiver 8
+      description: center frequencies of receiver 8
       type: integer
       format: int64
     txCenterFrequency:

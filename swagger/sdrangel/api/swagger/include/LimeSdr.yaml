@@ -329,7 +329,7 @@ LimeSdrInputReport:
   description: LimeSDR
   properties:
     success:
-      description: 1 if info was successfullt retrieved else 0
+      description: 1 if info was successfully retrieved else 0
       type: integer
     streamActive:
       description: 1 if active else 0
@@ -365,7 +365,7 @@ LimeSdrOutputReport:
   description: LimeSDR
   properties:
     success:
-      description: 1 if info was successfullt retrieved else 0
+      description: 1 if info was successfully retrieved else 0
       type: integer
     streamActive:
       description: 1 if active else 0
@@ -414,7 +414,7 @@ LimeSdrMIMOReport:
       type: integer
       format: int8
     successRx:
-      description: 1 if Rx info was successfullt retrieved else 0
+      description: 1 if Rx info was successfully retrieved else 0
       type: integer
     streamActiveRx:
       description: 1 if active else 0
@@ -433,7 +433,7 @@ LimeSdrMIMOReport:
       type: number
       format: float
     successTx:
-      description: 1 if Tx info was successfullt retrieved else 0
+      description: 1 if Tx info was successfully retrieved else 0
       type: integer
     streamActiveTx:
       description: 1 if active else 0

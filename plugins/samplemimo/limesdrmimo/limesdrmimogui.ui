@@ -343,7 +343,6 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>16</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -414,7 +413,6 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>12</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -540,7 +538,6 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>12</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -731,7 +728,6 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>12</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -1358,39 +1354,6 @@ QToolTip{background-color: white; color: black;}</string>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
   <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>
  <connections/>

@@ -746,39 +746,6 @@
  </customwidgets>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>
  <connections/>
 </ui>

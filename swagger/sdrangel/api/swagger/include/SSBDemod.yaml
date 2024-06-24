@@ -73,11 +73,11 @@ SSBDemodSettings:
     dnrAboveAvgFactor:
       type: number
       format: float
-      description: Multiplier of the average to deteermine magnitude threshold in average scheme
+      description: Multiplier of the average to determine magnitude threshold in average scheme
     dnrSigmaFactor:
       type: number
       format: float
-      description: Standard deviation (sigma) multiplier to deteermine magnitude threshold in average and standard deviation scheme
+      description: Standard deviation (sigma) multiplier to determine magnitude threshold in average and standard deviation scheme
     dnrNbPeaks:
       type: integer
       description: Number of magnitude peak maxima selected in peaks scheme

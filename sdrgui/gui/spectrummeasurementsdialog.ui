@@ -405,9 +405,7 @@
   <tabstop>harmonics</tabstop>
   <tabstop>resetMeasurements</tabstop>
  </tabstops>
- <resources>
-  <include location="../resources/res.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

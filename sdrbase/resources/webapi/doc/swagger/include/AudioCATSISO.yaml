@@ -80,7 +80,7 @@ AudioCATSISOSettings:
       description: Tx volume in dB usually negative
     catSpeedIndex:
       type: integer
-      descriptoion: >
+      description: >
         CAT serial link baud rate
           * 0 - 1200
           * 1 - 2400
@@ -99,7 +99,7 @@ AudioCATSISOSettings:
     catStopBitsIndex:
       type: integer
       description: >
-        CAT serial linkj stop bits
+        CAT serial link stop bits
           * 0 - 1 (default)
           * 1 - 2
     catHandshakeIndex:
@@ -112,7 +112,7 @@ AudioCATSISOSettings:
     catPTTMethodIndex:
       type: integer
       description: >
-        CAT PTT metgod
+        CAT PTT method
           * 0 - PTT (default)
           * 1 - DTR
           * 2 - RTS

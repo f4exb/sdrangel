@@ -107,7 +107,7 @@ GS232ControllerReport:
       items:
         type: string
     targetAzimuth:
-      desription: "Target azimuth in degrees (0-450)"
+      description: "Target azimuth in degrees (0-450)"
       type: number
       format: float
     targetElevation:
@@ -115,7 +115,7 @@ GS232ControllerReport:
       type: number
       format: float
     currentAzimuth:
-      desription: "Current azimuth in degrees (0-450)"
+      description: "Current azimuth in degrees (0-450)"
       type: number
       format: float
     currentElevation:
