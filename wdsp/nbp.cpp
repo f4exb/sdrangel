@@ -363,7 +363,7 @@ void NBP::xnbp (NBP *a, int pos)
     if (a->run && pos == a->position)
         FIRCORE::xfircore (a->p);
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
 void NBP::setBuffers_nbp (NBP *a, double* in, double* out)

@@ -247,7 +247,7 @@ void AMD::xamd (AMD *a)
     }
     else if (a->in_buff != a->out_buff)
     {
-        memcpy (a->out_buff, a->in_buff, a->buff_size * sizeof(dcomplex));
+        memcpy (a->out_buff, a->in_buff, a->buff_size * sizeof(wcomplex));
     }
 }
 

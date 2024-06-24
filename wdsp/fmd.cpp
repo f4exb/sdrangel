@@ -160,7 +160,7 @@ void FMD::destroy_fmd (FMD *a)
 
 void FMD::flush_fmd (FMD *a)
 {
-    memset (a->audio, 0, a->size * sizeof (dcomplex));
+    memset (a->audio, 0, a->size * sizeof (wcomplex));
     FIRCORE::flush_fircore (a->pde);
     FIRCORE::flush_fircore (a->paud);
     a->phs = 0.0;
@@ -214,7 +214,7 @@ void FMD::xfmd (FMD *a)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
 void FMD::setBuffers_fmd (FMD *a, double* in, double* out)

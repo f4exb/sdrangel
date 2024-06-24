@@ -94,7 +94,7 @@ void SNOTCH::xsnotch (SNOTCH *a)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
     a->cs_update.unlock();
 }
 
@@ -293,7 +293,7 @@ void SPEAK::xspeak (SPEAK *a)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
     a->cs_update.unlock();
 }
 
@@ -440,7 +440,7 @@ void MPEAK::xmpeak (MPEAK *a)
     if (a->run)
     {
         int i, j;
-        memset (a->mix, 0, a->size * sizeof (dcomplex));
+        memset (a->mix, 0, a->size * sizeof (wcomplex));
         for (i = 0; i < a->npeaks; i++)
         {
             if (a->enable[i])
@@ -450,10 +450,10 @@ void MPEAK::xmpeak (MPEAK *a)
                     a->mix[j] += a->tmp[j];
             }
         }
-        memcpy (a->out, a->mix, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->mix, a->size * sizeof (wcomplex));
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
     a->cs_update.unlock();
 }
 
@@ -623,7 +623,7 @@ void PHROT::xphrot (PHROT *a)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
     a->cs_update.unlock();
 }
 
@@ -782,7 +782,7 @@ void BQLP::xbqlp(BQLP *a)
         }
     }
     else if (a->out != a->in)
-        memcpy(a->out, a->in, a->size * sizeof(dcomplex));
+        memcpy(a->out, a->in, a->size * sizeof(wcomplex));
     a->cs_update.unlock();
 }
 
@@ -1013,7 +1013,7 @@ void BQBP::xbqbp(BQBP *a)
         }
     }
     else if (a->out != a->in)
-        memcpy(a->out, a->in, a->size * sizeof(dcomplex));
+        memcpy(a->out, a->in, a->size * sizeof(wcomplex));
     a->cs_update.unlock();
 }
 
@@ -1199,10 +1199,10 @@ void SPHP::destroy_sphp(SPHP *a)
 
 void SPHP::flush_sphp(SPHP *a)
 {
-    memset(a->x0, 0, a->nstages * sizeof(dcomplex));
-    memset(a->x1, 0, a->nstages * sizeof(dcomplex));
-    memset(a->y0, 0, a->nstages * sizeof(dcomplex));
-    memset(a->y1, 0, a->nstages * sizeof(dcomplex));
+    memset(a->x0, 0, a->nstages * sizeof(wcomplex));
+    memset(a->x1, 0, a->nstages * sizeof(wcomplex));
+    memset(a->y0, 0, a->nstages * sizeof(wcomplex));
+    memset(a->y1, 0, a->nstages * sizeof(wcomplex));
 }
 
 void SPHP::xsphp(SPHP *a)
@@ -1230,7 +1230,7 @@ void SPHP::xsphp(SPHP *a)
         }
     }
     else if (a->out != a->in)
-        memcpy(a->out, a->in, a->size * sizeof(dcomplex));
+        memcpy(a->out, a->in, a->size * sizeof(wcomplex));
     a->cs_update.unlock();
 }
 

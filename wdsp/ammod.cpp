@@ -83,7 +83,7 @@ void AMMOD::xammod(AMMOD *a)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
 void AMMOD::setBuffers_ammod(AMMOD *a, double* in, double* out)

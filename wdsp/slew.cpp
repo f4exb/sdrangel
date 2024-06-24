@@ -158,7 +158,7 @@ void USLEW::xuslew (USLEW *a)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
 void USLEW::setBuffers_uslew (USLEW *a, double* in, double* out)

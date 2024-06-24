@@ -95,7 +95,7 @@ void CBL::xcbl (CBL *a)
         }
     }
     else if (a->in_buff != a->out_buff)
-        memcpy (a->out_buff, a->in_buff, a->buff_size * sizeof (dcomplex));
+        memcpy (a->out_buff, a->in_buff, a->buff_size * sizeof (wcomplex));
 }
 
 void CBL::setBuffers_cbl (CBL *a, double* in, double* out)

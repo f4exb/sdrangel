@@ -101,9 +101,9 @@ void SIPHON::destroy_siphon (SIPHON *a)
 
 void SIPHON::flush_siphon (SIPHON *a)
 {
-    memset (a->sipbuff, 0, a->sipsize * sizeof (dcomplex));
-    memset (a->sipout , 0, a->sipsize * sizeof (dcomplex));
-    memset (a->specout, 0, a->fftsize * sizeof (dcomplex));
+    memset (a->sipbuff, 0, a->sipsize * sizeof (wcomplex));
+    memset (a->sipout , 0, a->sipsize * sizeof (wcomplex));
+    memset (a->specout, 0, a->fftsize * sizeof (wcomplex));
     a->idx = 0;
 }
 
@@ -117,7 +117,7 @@ void SIPHON::xsiphon (SIPHON *a, int pos)
         {
         case 0:
             if (a->insize >= a->sipsize)
-                memcpy (a->sipbuff, &(a->in[2 * (a->insize - a->sipsize)]), a->sipsize * sizeof (dcomplex));
+                memcpy (a->sipbuff, &(a->in[2 * (a->insize - a->sipsize)]), a->sipsize * sizeof (wcomplex));
             else
             {
                 if (a->insize > (a->sipsize - a->idx))
@@ -130,8 +130,8 @@ void SIPHON::xsiphon (SIPHON *a, int pos)
                     first = a->insize;
                     second = 0;
                 }
-                memcpy (a->sipbuff + 2 * a->idx, a->in, first * sizeof (dcomplex));
-                memcpy (a->sipbuff, a->in + 2 * first, second * sizeof (dcomplex));
+                memcpy (a->sipbuff + 2 * a->idx, a->in, first * sizeof (wcomplex));
+                memcpy (a->sipbuff, a->in + 2 * first, second * sizeof (wcomplex));
                 if ((a->idx += a->insize) >= a->sipsize) a->idx -= a->sipsize;
             }
             break;
@@ -167,11 +167,11 @@ void SIPHON::suck (SIPHON *a)
         int j = (a->idx - a->outsize) & mask;
         int size = a->sipsize - j;
         if (size >= a->outsize)
-            memcpy (a->sipout, &(a->sipbuff[2 * j]), a->outsize * sizeof (dcomplex));
+            memcpy (a->sipout, &(a->sipbuff[2 * j]), a->outsize * sizeof (wcomplex));
         else
         {
-            memcpy (a->sipout, &(a->sipbuff[2 * j]), size * sizeof (dcomplex));
-            memcpy (&(a->sipout[2 * size]), a->sipbuff, (a->outsize - size) * sizeof (dcomplex));
+            memcpy (a->sipout, &(a->sipbuff[2 * j]), size * sizeof (wcomplex));
+            memcpy (&(a->sipout[2 * size]), a->sipbuff, (a->outsize - size) * sizeof (wcomplex));
         }
     }
 }

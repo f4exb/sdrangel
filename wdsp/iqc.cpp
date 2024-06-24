@@ -205,7 +205,7 @@ void IQC::xiqc (IQC *a)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
 void IQC::setBuffers_iqc (IQC *a, double* in, double* out)

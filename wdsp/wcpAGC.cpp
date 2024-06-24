@@ -345,7 +345,7 @@ void WCPAGC::xwcpagc (WCPAGC *a)
         }
     }
     else if (a->out != a->in)
-        memcpy(a->out, a->in, a->io_buffsize * sizeof (dcomplex));
+        memcpy(a->out, a->in, a->io_buffsize * sizeof (wcomplex));
 }
 
 void WCPAGC::setBuffers_wcpagc (WCPAGC *a, double* in, double* out)

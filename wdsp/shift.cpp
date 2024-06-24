@@ -86,7 +86,7 @@ void SHIFT::xshift (SHIFT *a)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
 void SHIFT::setBuffers_shift(SHIFT *a, double* in, double* out)

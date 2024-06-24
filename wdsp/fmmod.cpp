@@ -127,7 +127,7 @@ void FMMOD::xfmmod (FMMOD *a)
             FIRCORE::xfircore (a->p);
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
 void FMMOD::setBuffers_fmmod (FMMOD *a, double* in, double* out)

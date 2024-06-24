@@ -120,7 +120,7 @@ void VARSAMP::destroy_varsamp (VARSAMP *a)
 
 void VARSAMP::flush_varsamp (VARSAMP *a)
 {
-    memset (a->ring, 0, a->rsize * sizeof (dcomplex));
+    memset (a->ring, 0, a->rsize * sizeof (wcomplex));
     a->idx_in = a->rsize - 1;
     a->h_offset = 0.0;
     a->isamps = 0.0;
@@ -165,7 +165,7 @@ int VARSAMP::xvarsamp (VARSAMP *a, double var)
             a->inv_cvar += a->dicvar;
             picvar = (uint64_t*)(&a->inv_cvar);
             N = *picvar & 0xffffffffffff0000;
-            a->inv_cvar = *((double *)&N);
+            a->inv_cvar = static_cast<double>(N);
             a->delta = 1.0 - a->inv_cvar;
             while (a->isamps < 1.0)
             {
@@ -191,7 +191,7 @@ int VARSAMP::xvarsamp (VARSAMP *a, double var)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
     return outsamps;
 }
 

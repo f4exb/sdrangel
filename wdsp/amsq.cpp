@@ -57,7 +57,7 @@ void AMSQ::compute_slews(AMSQ *a)
 void AMSQ::calc_amsq(AMSQ *a)
 {
     // signal averaging
-    a->trigsig = new double[a->size * 2]; //   (double *)malloc0(a->size * sizeof(dcomplex));
+    a->trigsig = new double[a->size * 2]; //   (double *)malloc0(a->size * sizeof(wcomplex));
     a->avm = exp(-1.0 / (a->rate * a->avtau));
     a->onem_avm = 1.0 - a->avm;
     a->avsig = 0.0;
@@ -108,7 +108,7 @@ void AMSQ::destroy_amsq (AMSQ *a)
 
 void AMSQ::flush_amsq (AMSQ*a)
 {
-    memset (a->trigsig, 0, a->size * sizeof (dcomplex));
+    memset (a->trigsig, 0, a->size * sizeof (wcomplex));
     a->avsig = 0.0;
     a->state = 0;
 }
@@ -180,12 +180,12 @@ void AMSQ::xamsq (AMSQ *a)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
 void AMSQ::xamsqcap (AMSQ *a)
 {
-    memcpy (a->trigsig, a->trigger, a->size * sizeof (dcomplex));
+    memcpy (a->trigsig, a->trigger, a->size * sizeof (wcomplex));
 }
 
 void AMSQ::setBuffers_amsq (AMSQ *a, double* in, double* out, double* trigger)

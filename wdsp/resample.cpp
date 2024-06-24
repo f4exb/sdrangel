@@ -116,7 +116,7 @@ void RESAMPLE::destroy_resample (RESAMPLE *a)
 
 void RESAMPLE::flush_resample (RESAMPLE *a)
 {
-    memset (a->ring, 0, a->ringsize * sizeof (dcomplex));
+    memset (a->ring, 0, a->ringsize * sizeof (wcomplex));
     a->idx_in = a->ringsize - 1;
     a->phnum = 0;
 }
@@ -156,7 +156,7 @@ int RESAMPLE::xresample (RESAMPLE *a)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
     return outsamps;
 }
 

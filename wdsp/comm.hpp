@@ -25,6 +25,9 @@ warren@wpratt.com
 
 */
 
+#ifndef wdsp_comm_h
+#define wdsp_comm_h
+
 #ifdef ANDROID
 #include <android/log.h>
 #define APPNAME "WDSP"
@@ -71,10 +74,14 @@ warren@wpratt.com
 #define PI                              3.1415926535897932
 #define TWOPI                           6.2831853071795864
 
+namespace WDSP {
 // miscellaneous
-typedef double dcomplex[2];
+typedef double wcomplex[2];
+}
 
 #include <string.h>
 #include <math.h>
 #include <cstdint>
 #include <algorithm>
+
+#endif

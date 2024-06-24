@@ -67,7 +67,7 @@ void DELAY::destroy_delay (DELAY *a)
 
 void DELAY::flush_delay (DELAY *a)
 {
-    memset (a->ring, 0, a->cpp * sizeof (dcomplex));
+    memset (a->ring, 0, a->cpp * sizeof (wcomplex));
     a->idx_in = 0;
 }
 
@@ -97,7 +97,7 @@ void DELAY::xdelay (DELAY *a)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
     a->cs_update.unlock();
 }
 

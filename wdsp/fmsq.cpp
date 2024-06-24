@@ -226,7 +226,7 @@ void FMSQ::xfmsq (FMSQ *a)
         }
     }
     else if (a->insig != a->outsig)
-        memcpy (a->outsig, a->insig, a->size * sizeof (dcomplex));
+        memcpy (a->outsig, a->insig, a->size * sizeof (wcomplex));
 }
 
 void FMSQ::setBuffers_fmsq (FMSQ *a, double* in, double* out, double* trig)

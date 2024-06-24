@@ -874,7 +874,7 @@ void EMNR::xemnr (EMNR *a, int pos)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->bsize * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->bsize * sizeof (wcomplex));
 }
 
 void EMNR::setBuffers_emnr (EMNR *a, double* in, double* out)

@@ -334,8 +334,8 @@ void RMATCH::xrmatchIN (void* b, double* in)
                 first = a->ntslew + 1;
                 second = 0;
             }
-            memcpy (a->baux, a->ring + 2 * a->iout, first * sizeof (dcomplex));
-            memcpy (a->baux + 2 * first, a->ring, second * sizeof (dcomplex));
+            memcpy (a->baux, a->ring + 2 * a->iout, first * sizeof (wcomplex));
+            memcpy (a->baux + 2 * first, a->ring, second * sizeof (wcomplex));
             // a->iout = (a->iout + ovfl + a->rsize / 2) % a->rsize;
             a->iout = (a->iout + ovfl) % a->rsize; //
         }
@@ -349,8 +349,8 @@ void RMATCH::xrmatchIN (void* b, double* in)
             first = newsamps;
             second = 0;
         }
-        memcpy (a->ring + 2 * a->iin, a->resout, first * sizeof (dcomplex));
-        memcpy (a->ring, a->resout + 2 * first, second * sizeof (dcomplex));
+        memcpy (a->ring + 2 * a->iin, a->resout, first * sizeof (wcomplex));
+        memcpy (a->ring, a->resout + 2 * first, second * sizeof (wcomplex));
         if (a->ucnt >= 0) upslew(a, newsamps);
         a->iin = (a->iin + newsamps) % a->rsize;
         if (ovfl > 0) blend (a);
@@ -418,8 +418,8 @@ void RMATCH::dslew (RMATCH *a)
             first = zeros;
             second = 0;
         }
-        memset (a->ring + 2 * i, 0, first  * sizeof (dcomplex));
-        memset (a->ring,         0, second * sizeof (dcomplex));
+        memset (a->ring + 2 * i, 0, first  * sizeof (wcomplex));
+        memset (a->ring,         0, second * sizeof (wcomplex));
         n += zeros; //
     } //
     // a->n_ring = a->outsize + a->rsize / 2;
@@ -453,8 +453,8 @@ void RMATCH::xrmatchOUT (void* b, double* out)
             first = a->outsize;
             second = 0;
         }
-        memcpy (a->out, a->ring + 2 * a->iout, first * sizeof (dcomplex));
-        memcpy (a->out + 2 * first, a->ring, second * sizeof (dcomplex));
+        memcpy (a->out, a->ring + 2 * a->iout, first * sizeof (wcomplex));
+        memcpy (a->out + 2 * first, a->ring, second * sizeof (wcomplex));
         a->iout = (a->iout + a->outsize) % a->rsize;
         a->n_ring -= a->outsize;
         a->dlast[0] = a->out[2 * (a->outsize - 1) + 0];

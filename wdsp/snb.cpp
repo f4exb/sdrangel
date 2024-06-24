@@ -214,8 +214,8 @@ void SNBA::flush_snba (SNBA *d)
     memset (d->sdet.vp,      0, d->xsize  * sizeof (double));
     memset (d->sdet.vpwr,    0, d->xsize  * sizeof (double));
 
-    memset (d->inbuff,       0, d->isize  * sizeof (dcomplex));
-    memset (d->outbuff,      0, d->isize  * sizeof (dcomplex));
+    memset (d->inbuff,       0, d->isize  * sizeof (wcomplex));
+    memset (d->outbuff,      0, d->isize  * sizeof (wcomplex));
     RESAMPLE::flush_resample (d->inresamp);
     RESAMPLE::flush_resample (d->outresamp);
 }
@@ -626,7 +626,7 @@ void SNBA::xsnba (SNBA *d)
         RESAMPLE::xresample (d->outresamp);
     }
     else if (d->out != d->in)
-        memcpy (d->out, d->in, d->bsize * sizeof (dcomplex));
+        memcpy (d->out, d->in, d->bsize * sizeof (wcomplex));
 }
 
 /********************************************************************************************************
@@ -842,7 +842,7 @@ void BPSNBA::destroy_bpsnba (BPSNBA *a)
 
 void BPSNBA::flush_bpsnba (BPSNBA *a)
 {
-    memset (a->buff, 0, a->size * sizeof (dcomplex));
+    memset (a->buff, 0, a->size * sizeof (wcomplex));
     NBP::flush_nbp (a->bpsnba);
 }
 
@@ -871,7 +871,7 @@ void BPSNBA::setSize_bpsnba (BPSNBA *a, int size)
 void BPSNBA::xbpsnbain (BPSNBA *a, int position)
 {
     if (a->run && a->position == position)
-        memcpy (a->buff, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->buff, a->in, a->size * sizeof (wcomplex));
 }
 
 void BPSNBA::xbpsnbaout (BPSNBA *a, int position)

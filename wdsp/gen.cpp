@@ -350,13 +350,13 @@ void GEN::xgen (GEN *a)
             break;
         default:    // silence
             {
-                memset (a->out, 0, a->size * sizeof (dcomplex));
+                memset (a->out, 0, a->size * sizeof (wcomplex));
                 break;
             }
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
 void GEN::setBuffers_gen (GEN *a, double* in, double* out)

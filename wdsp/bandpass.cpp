@@ -80,7 +80,7 @@ void BANDPASS::xbandpass (BANDPASS *a, int pos)
     if (a->run && a->position == pos)
         FIRCORE::xfircore (a->p);
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->size * sizeof (dcomplex));
+        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
 void BANDPASS::setBuffers_bandpass (BANDPASS *a, double* in, double* out)

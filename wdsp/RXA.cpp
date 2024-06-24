@@ -578,9 +578,9 @@ void RXA::destroy_rxa (RXA *rxa)
 
 void RXA::flush_rxa (RXA *rxa)
 {
-    memset (rxa->inbuff,  0, 1 * rxa->dsp_insize  * sizeof (dcomplex));
-    memset (rxa->outbuff, 0, 1 * rxa->dsp_outsize * sizeof (dcomplex));
-    memset (rxa->midbuff, 0, 2 * rxa->dsp_size    * sizeof (dcomplex));
+    memset (rxa->inbuff,  0, 1 * rxa->dsp_insize  * sizeof (wcomplex));
+    memset (rxa->outbuff, 0, 1 * rxa->dsp_outsize * sizeof (wcomplex));
+    memset (rxa->midbuff, 0, 2 * rxa->dsp_size    * sizeof (wcomplex));
     SHIFT::flush_shift (rxa->shift.p);
     RESAMPLE::flush_resample (rxa->rsmpin.p);
     GEN::flush_gen (rxa->gen0.p);
