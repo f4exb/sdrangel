@@ -1,3 +1,20 @@
+sdrangel (7.21.4-1) unstable; urgency=medium
+
+    * Code fixes. PR #2184
+    * Do not save the settings twice. PR #2182
+    * FreqScanner: Add HF ATC channels preset. PR #2181
+    * FreqScanner: Add API action to run scan. Add scan results to channel report. PR #2181
+    * FreqScanner: Add scanState to FreqScanner Report. PR #2181
+    * Configurations dialog: Fix slot names. PR #2180
+    * AIS: Validate message length. Fixes #2125. PR #2180
+    * ILS Demod. Save frequency when switching between LOC and G/S. PR #2180
+    * ILS Demod. Set frequency for ident when in G/S mode. Fixes #2177. PR #2180
+    * Heat Map: Handle memory allocation errors. PR #2175
+    * Heat Map: Allow selecting which data to be saved to reduce memory requirements. PR #2175
+    * ILS Demod: Add DDM/SDM/Deviation to channel report. PR #2174
+
+   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 25 Jun 2024 20:17:52 +0200
+
 sdrangel (7.21.3-1) unstable; urgency=medium
 
    * Update sdrangel-windows-libraries to latest revision. PR #2173 fixes #2155
