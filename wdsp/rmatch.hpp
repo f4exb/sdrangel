@@ -47,12 +47,12 @@ public:
     int i;
     int load;
     int sum;
-    double nom_value;
+    float nom_value;
 
-    static MAV* create_mav (int ringmin, int ringmax, double nom_value);
+    static MAV* create_mav (int ringmin, int ringmax, float nom_value);
     static void destroy_mav (MAV *a);
     static void flush_mav (MAV *a);
-    static void xmav (MAV *a, int input, double* output);
+    static void xmav (MAV *a, int input, float* output);
 };
 
 class WDSP_API AAMAV
@@ -66,61 +66,61 @@ public:
     int load;
     int pos;
     int neg;
-    double nom_ratio;
+    float nom_ratio;
 
-    static AAMAV* create_aamav (int ringmin, int ringmax, double nom_ratio);
+    static AAMAV* create_aamav (int ringmin, int ringmax, float nom_ratio);
     static void destroy_aamav (AAMAV *a);
     static void flush_aamav (AAMAV *a);
-    static void xaamav (AAMAV *a, int input, double* output);
+    static void xaamav (AAMAV *a, int input, float* output);
 };
 
 class WDSP_API RMATCH
 {
 public:
     std::atomic<long> run;
-    double* in;
-    double* out;
+    float* in;
+    float* out;
     int insize;
     int outsize;
-    double* resout;
+    float* resout;
     int nom_inrate;
     int nom_outrate;
-    double nom_ratio;
-    double inv_nom_ratio;
-    double fc_high;
-    double fc_low;
-    double gain;
-    double startup_delay;
+    float nom_ratio;
+    float inv_nom_ratio;
+    float fc_high;
+    float fc_low;
+    float gain;
+    float startup_delay;
     int auto_ringsize;
     int ringsize;
     int rsize;
-    double* ring;
+    float* ring;
     int n_ring;
     int iin;
     int iout;
-    double var;
+    float var;
     int R;
     AAMAV *ffmav;
     MAV *propmav;
     int ff_ringmin;
     int ff_ringmax;         // must be a power of two
-    double ff_alpha;
-    double feed_forward;
+    float ff_alpha;
+    float feed_forward;
     int prop_ringmin;
     int prop_ringmax;       // must be a power of two
-    double prop_gain;
-    double pr_gain;
-    double av_deviation;
+    float prop_gain;
+    float pr_gain;
+    float av_deviation;
     VARSAMP *v;
     int varmode;
     QRecursiveMutex cs_ring;
     QRecursiveMutex cs_var;
     // blend / slew
-    double tslew;
+    float tslew;
     int ntslew;
-    double* cslew;
-    double* baux;
-    double dlast[2];
+    float* cslew;
+    float* baux;
+    float dlast[2];
     int ucnt;
     // variables to check start-up time for control to become active
     unsigned int readsamps;
@@ -132,57 +132,57 @@ public:
     std::atomic<long> underflows;
     std::atomic<long> overflows;
     int force;
-    double fvar;
+    float fvar;
 
     static RMATCH* create_rmatch (
         int run,                // 0 - input and output calls do nothing; 1 - operates normally
-        double* in,             // pointer to input buffer
-        double* out,            // pointer to output buffer
+        float* in,             // pointer to input buffer
+        float* out,            // pointer to output buffer
         int insize,             // size of input buffer
         int outsize,            // size of output buffer
         int nom_inrate,         // nominal input samplerate
         int nom_outrate,        // nominal output samplerate
-        double fc_high,         // high cutoff frequency if lower than max
-        double fc_low,          // low cutoff frequency if higher than zero
-        double gain,            // gain to be applied during this process
-        double startup_delay,   // time (seconds) to delay before beginning measurements to control variable resampler
+        float fc_high,         // high cutoff frequency if lower than max
+        float fc_low,          // low cutoff frequency if higher than zero
+        float gain,            // gain to be applied during this process
+        float startup_delay,   // time (seconds) to delay before beginning measurements to control variable resampler
         int auto_ringsize,      // 0 specified ringsize is used; 1 ringsize is auto-optimized - FEATURE NOT IMPLEMENTED!!
         int ringsize,           // specified ringsize; max ringsize if 'auto' is enabled
         int R,                  // density factor for varsamp coefficients
-        double var,             // initial value of variable resampler ratio (value of ~1.0)
+        float var,             // initial value of variable resampler ratio (value of ~1.0)
         int ffmav_min,          // minimum feed-forward moving average size to put full weight on data in the ring
         int ffmav_max,          // maximum feed-forward moving average size - MUST BE A POWER OF TWO!
-        double ff_alpha,        // feed-forward exponential averaging multiplier
+        float ff_alpha,        // feed-forward exponential averaging multiplier
         int prop_ringmin,       // proportional feedback min moving average ringsize
         int prop_ringmax,       // proportional feedback max moving average ringsize - MUST BE A POWER OF TWO!
-        double prop_gain,       // proportional feedback gain factor
+        float prop_gain,       // proportional feedback gain factor
         int varmode,            // 0 - use same var for all samples of the buffer; 1 - interpolate from old_var to this var
-        double tslew            // slew/blend time (seconds)
+        float tslew            // slew/blend time (seconds)
     );
     static void destroy_rmatch (RMATCH *a);
     static void reset_rmatch (RMATCH *a);
 
-    static void* create_rmatchV(int in_size, int out_size, int nom_inrate, int nom_outrate, int ringsize, double var);
+    static void* create_rmatchV(int in_size, int out_size, int nom_inrate, int nom_outrate, int ringsize, float var);
     static void* create_rmatchLegacyV(int in_size, int out_size, int nom_inrate, int nom_outrate, int ringsize);
     static void destroy_rmatchV (void* ptr);
-    static void xrmatchOUT (void* b, double* out);
-    static void xrmatchIN (void* b, double* in);
+    static void xrmatchOUT (void* b, float* out);
+    static void xrmatchIN (void* b, float* in);
     static void setRMatchInsize (void* ptr, int insize);
     static void setRMatchOutsize (void* ptr, int outsize);
     static void setRMatchNomInrate (void* ptr, int nom_inrate);
     static void setRMatchNomOutrate (void* ptr, int nom_outrate);
     static void setRMatchRingsize (void* ptr, int ringsize);
-    static void getRMatchDiags (void* b, int* underflows, int* overflows, double* var, int* ringsize, int* nring);
+    static void getRMatchDiags (void* b, int* underflows, int* overflows, float* var, int* ringsize, int* nring);
     static void resetRMatchDiags (void* b);
-    static void forceRMatchVar (void* b, int force, double fvar);
-    static void setRMatchFeedbackGain(void* b, double feedback_gain);
-    static void setRMatchSlewTime(void* b, double slew_time);
-    static void setRMatchSlewTime1(void* b, double slew_time);
+    static void forceRMatchVar (void* b, int force, float fvar);
+    static void setRMatchFeedbackGain(void* b, float feedback_gain);
+    static void setRMatchSlewTime(void* b, float slew_time);
+    static void setRMatchSlewTime1(void* b, float slew_time);
     static void setRMatchPropRingMin(void* ptr, int prop_min);
     static void setRMatchPropRingMax(void* ptr, int prop_max);
     static void setRMatchFFRingMin(void* ptr, int ff_ringmin);
     static void setRMatchFFRingMax(void* ptr, int ff_ringmax);
-    static void setRMatchFFAlpha(void* ptr, double ff_alpha);
+    static void setRMatchFFAlpha(void* ptr, float ff_alpha);
     static void getControlFlag(void* ptr, int* control_flag);
 
 private:

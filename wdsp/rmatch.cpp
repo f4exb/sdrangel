@@ -34,7 +34,7 @@ warren@wpratt.com
 
 namespace WDSP {
 
-MAV* MAV::create_mav (int ringmin, int ringmax, double nom_value)
+MAV* MAV::create_mav (int ringmin, int ringmax, float nom_value)
 {
     MAV *a = new MAV;
     a->ringmin = ringmin;
@@ -62,7 +62,7 @@ void MAV::flush_mav (MAV *a)
     a->sum = 0;
 }
 
-void MAV::xmav (MAV *a, int input, double* output)
+void MAV::xmav (MAV *a, int input, float* output)
 {
     if (a->load >= a->ringmax)
         a->sum -= a->ring[a->i];
@@ -71,13 +71,13 @@ void MAV::xmav (MAV *a, int input, double* output)
     a->sum += a->ring[a->i];
 
     if (a->load >= a->ringmin)
-        *output = (double)a->sum / (double)a->load;
+        *output = (float)a->sum / (float)a->load;
     else
         *output = a->nom_value;
     a->i = (a->i + 1) & a->mask;
 }
 
-AAMAV* AAMAV::create_aamav (int ringmin, int ringmax, double nom_ratio)
+AAMAV* AAMAV::create_aamav (int ringmin, int ringmax, float nom_ratio)
 {
     AAMAV *a = new AAMAV;
     a->ringmin = ringmin;
@@ -107,7 +107,7 @@ void AAMAV::flush_aamav (AAMAV *a)
     a->neg = 0;
 }
 
-void AAMAV::xaamav (AAMAV *a, int input, double* output)
+void AAMAV::xaamav (AAMAV *a, int input, float* output)
 {
     if (a->load >= a->ringmax)
     {
@@ -123,11 +123,11 @@ void AAMAV::xaamav (AAMAV *a, int input, double* output)
     else
         a->neg -= a->ring[a->i];
     if (a->load >= a->ringmin)
-        *output = (double)a->neg / (double)a->pos;
+        *output = (float)a->neg / (float)a->pos;
     else if (a->neg > 0 && a->pos > 0)
     {
-        double frac = (double)a->load / (double)a->ringmin;
-        *output = (1.0 - frac) * a->nom_ratio + frac * ((double)a->neg / (double)a->pos);
+        float frac = (float)a->load / (float)a->ringmin;
+        *output = (1.0 - frac) * a->nom_ratio + frac * ((float)a->neg / (float)a->pos);
     }
     else
         *output = a->nom_ratio;
@@ -137,41 +137,41 @@ void AAMAV::xaamav (AAMAV *a, int input, double* output)
 void RMATCH::calc_rmatch (RMATCH *a)
 {
     int m;
-    double theta, dtheta;
+    float theta, dtheta;
     int max_ring_insize;
-    a->nom_ratio = (double)a->nom_outrate / (double)a->nom_inrate;
-    max_ring_insize = (int)(1.0 + (double)a->insize * (1.05 * a->nom_ratio));
+    a->nom_ratio = (float)a->nom_outrate / (float)a->nom_inrate;
+    max_ring_insize = (int)(1.0 + (float)a->insize * (1.05 * a->nom_ratio));
     if (a->ringsize < 2 * max_ring_insize)  a->ringsize = 2 * max_ring_insize;
     if (a->ringsize < 2 * a->outsize) a->ringsize = 2 * a->outsize;
-    a->ring = new double[a->ringsize * 2]; // (double *) malloc0 (a->ringsize * sizeof (complex));
+    a->ring = new float[a->ringsize * 2]; // (float *) malloc0 (a->ringsize * sizeof (complex));
     a->rsize = a->ringsize;
     a->n_ring = a->rsize / 2;
     a->iin = a->rsize / 2;
     a->iout = 0;
-    a->resout = new double[max_ring_insize * 2]; // (double *) malloc0 (max_ring_insize * sizeof (complex));
+    a->resout = new float[max_ring_insize * 2]; // (float *) malloc0 (max_ring_insize * sizeof (complex));
     a->v = VARSAMP::create_varsamp (1, a->insize, a->in, a->resout, a->nom_inrate, a->nom_outrate,
         a->fc_high, a->fc_low, a->R, a->gain, a->var, a->varmode);
     a->ffmav = AAMAV::create_aamav (a->ff_ringmin, a->ff_ringmax, a->nom_ratio);
     a->propmav = MAV::create_mav (a->prop_ringmin, a->prop_ringmax, 0.0);
-    a->pr_gain = a->prop_gain * 48000.0 / (double)a->nom_outrate;   // adjust gain for rate
-    a->inv_nom_ratio = (double)a->nom_inrate / (double)a->nom_outrate;
+    a->pr_gain = a->prop_gain * 48000.0 / (float)a->nom_outrate;   // adjust gain for rate
+    a->inv_nom_ratio = (float)a->nom_inrate / (float)a->nom_outrate;
     a->feed_forward = 1.0;
     a->av_deviation = 0.0;
     a->ntslew = (int)(a->tslew * a->nom_outrate);
     if (a->ntslew + 1 > a->rsize / 2) a->ntslew = a->rsize / 2 - 1;
-    a->cslew = new double[a->ntslew + 1]; // (double *) malloc0 ((a->ntslew + 1) * sizeof (double));
-    dtheta = PI / (double)a->ntslew;
+    a->cslew = new float[a->ntslew + 1]; // (float *) malloc0 ((a->ntslew + 1) * sizeof (float));
+    dtheta = PI / (float)a->ntslew;
     theta = 0.0;
     for (m = 0; m <= a->ntslew; m++)
     {
         a->cslew[m] = 0.5 * (1.0 - cos (theta));
         theta += dtheta;
     }
-    a->baux = new double[a->ringsize / 2 * 2]; // (double *) malloc0 (a->ringsize / 2 * sizeof (complex));
+    a->baux = new float[a->ringsize / 2 * 2]; // (float *) malloc0 (a->ringsize / 2 * sizeof (complex));
     a->readsamps = 0;
     a->writesamps = 0;
-    a->read_startup = (unsigned int)((double)a->nom_outrate * a->startup_delay);
-    a->write_startup = (unsigned int)((double)a->nom_inrate * a->startup_delay);
+    a->read_startup = (unsigned int)((float)a->nom_outrate * a->startup_delay);
+    a->write_startup = (unsigned int)((float)a->nom_inrate * a->startup_delay);
     a->control_flag = 0;
     // diagnostics
     a->underflows = 0;
@@ -191,28 +191,28 @@ void RMATCH::decalc_rmatch (RMATCH *a)
 
 RMATCH* RMATCH::create_rmatch (
     int run,                // 0 - input and output calls do nothing; 1 - operates normally
-    double* in,             // pointer to input buffer
-    double* out,            // pointer to output buffer
+    float* in,             // pointer to input buffer
+    float* out,            // pointer to output buffer
     int insize,             // size of input buffer
     int outsize,            // size of output buffer
     int nom_inrate,         // nominal input samplerate
     int nom_outrate,        // nominal output samplerate
-    double fc_high,         // high cutoff frequency if lower than max
-    double fc_low,          // low cutoff frequency if higher than zero
-    double gain,            // gain to be applied during this process
-    double startup_delay,   // time (seconds) to delay before beginning measurements to control variable resampler
+    float fc_high,         // high cutoff frequency if lower than max
+    float fc_low,          // low cutoff frequency if higher than zero
+    float gain,            // gain to be applied during this process
+    float startup_delay,   // time (seconds) to delay before beginning measurements to control variable resampler
     int auto_ringsize,      // 0 specified ringsize is used; 1 ringsize is auto-optimized - FEATURE NOT IMPLEMENTED!!
     int ringsize,           // specified ringsize; max ringsize if 'auto' is enabled
     int R,                  // density factor for varsamp coefficients
-    double var,             // initial value of variable resampler ratio (value of ~1.0)
+    float var,             // initial value of variable resampler ratio (value of ~1.0)
     int ffmav_min,          // minimum feed-forward moving average size to put full weight on data in the ring
     int ffmav_max,          // maximum feed-forward moving average size - MUST BE A POWER OF TWO!
-    double ff_alpha,        // feed-forward exponential averaging multiplier
+    float ff_alpha,        // feed-forward exponential averaging multiplier
     int prop_ringmin,       // proportional feedback min moving average ringsize
     int prop_ringmax,       // proportional feedback max moving average ringsize - MUST BE A POWER OF TWO!
-    double prop_gain,       // proportional feedback gain factor
+    float prop_gain,       // proportional feedback gain factor
     int varmode,            // 0 - use same var for all samples of the buffer; 1 - interpolate from old_var to this var
-    double tslew            // slew/blend time (seconds)
+    float tslew            // slew/blend time (seconds)
     )
 {
     RMATCH *a = new RMATCH;
@@ -261,7 +261,7 @@ void RMATCH::reset_rmatch (RMATCH *a)
 void RMATCH::control (RMATCH *a, int change)
 {
     {
-        double current_ratio;
+        float current_ratio;
         AAMAV::xaamav (a->ffmav, change, &current_ratio);
         current_ratio *= a->inv_nom_ratio;
         a->feed_forward = a->ff_alpha * current_ratio + (1.0 - a->ff_alpha) * a->feed_forward;
@@ -302,13 +302,13 @@ void RMATCH::upslew (RMATCH *a, int newsamps)
     }
 }
 
-void RMATCH::xrmatchIN (void* b, double* in)
+void RMATCH::xrmatchIN (void* b, float* in)
 {
     RMATCH *a = (RMATCH*) b;
     if (a->run == 1)
     {
         int newsamps, first, second, ovfl;
-        double var;
+        float var;
         a->v->in = a->in = in;
         a->cs_var.lock();
         if (!a->force)
@@ -429,7 +429,7 @@ void RMATCH::dslew (RMATCH *a)
 }
 
 
-void RMATCH::xrmatchOUT (void* b, double* out)
+void RMATCH::xrmatchOUT (void* b, float* out)
 {
     RMATCH *a = (RMATCH*) b;
     if (a->run == 1)
@@ -471,7 +471,7 @@ void RMATCH::xrmatchOUT (void* b, double* out)
 }
 
 
-void RMATCH::getRMatchDiags (void* b, int* underflows, int* overflows, double* var, int* ringsize, int* nring)
+void RMATCH::getRMatchDiags (void* b, int* underflows, int* overflows, float* var, int* ringsize, int* nring)
 {
     RMATCH *a = (RMATCH*) b;
     *underflows = a->underflows;
@@ -494,7 +494,7 @@ void RMATCH::resetRMatchDiags (void*)
 }
 
 
-void RMATCH::forceRMatchVar (void* b, int force, double fvar)
+void RMATCH::forceRMatchVar (void* b, int force, float fvar)
 {
     RMATCH *a = (RMATCH*) b;
     a->cs_var.lock();
@@ -504,7 +504,7 @@ void RMATCH::forceRMatchVar (void* b, int force, double fvar)
 }
 
 
-void* RMATCH::create_rmatchV(int in_size, int out_size, int nom_inrate, int nom_outrate, int ringsize, double var)
+void* RMATCH::create_rmatchV(int in_size, int out_size, int nom_inrate, int nom_outrate, int ringsize, float var)
 {
     return (void*)create_rmatch (
         1,                      // run
@@ -600,17 +600,17 @@ void RMATCH::setRMatchRingsize (void* ptr, int ringsize)
 }
 
 
-void RMATCH::setRMatchFeedbackGain (void* b, double feedback_gain)
+void RMATCH::setRMatchFeedbackGain (void* b, float feedback_gain)
 {
     RMATCH *a = (RMATCH*) b;
     a->cs_var.lock();
     a->prop_gain = feedback_gain;
-    a->pr_gain = a->prop_gain * 48000.0 / (double)a->nom_outrate;
+    a->pr_gain = a->prop_gain * 48000.0 / (float)a->nom_outrate;
     a->cs_var.unlock();
 }
 
 
-void RMATCH::setRMatchSlewTime (void* b, double slew_time)
+void RMATCH::setRMatchSlewTime (void* b, float slew_time)
 {
     RMATCH *a = (RMATCH*) b;
     a->run = 0; // InterlockedBitTestAndReset(&a->run, 0);     // turn OFF new data coming into the rmatch
@@ -622,10 +622,10 @@ void RMATCH::setRMatchSlewTime (void* b, double slew_time)
 }
 
 
-void RMATCH::setRMatchSlewTime1(void* b, double slew_time)
+void RMATCH::setRMatchSlewTime1(void* b, float slew_time)
 {
     RMATCH *a = (RMATCH*) b;
-    double theta, dtheta;
+    float theta, dtheta;
     int m;
     a->run = 0;
     // Sleep(10);
@@ -633,8 +633,8 @@ void RMATCH::setRMatchSlewTime1(void* b, double slew_time)
     a->tslew = slew_time;
     a->ntslew = (int)(a->tslew * a->nom_outrate);
     if (a->ntslew + 1 > a->rsize / 2) a->ntslew = a->rsize / 2 - 1;
-    a->cslew = new double[a->ntslew + 1]; // (double*)malloc0((a->ntslew + 1) * sizeof(double));
-    dtheta = PI / (double)a->ntslew;
+    a->cslew = new float[a->ntslew + 1]; // (float*)malloc0((a->ntslew + 1) * sizeof(float));
+    dtheta = PI / (float)a->ntslew;
     theta = 0.0;
     for (m = 0; m <= a->ntslew; m++)
     {
@@ -693,7 +693,7 @@ void RMATCH::setRMatchFFRingMax(void* ptr, int ff_ringmax)
 }
 
 
-void RMATCH::setRMatchFFAlpha(void* ptr, double ff_alpha)
+void RMATCH::setRMatchFFAlpha(void* ptr, float ff_alpha)
 {
     RMATCH *a = (RMATCH*) ptr;
     a->run = 0;

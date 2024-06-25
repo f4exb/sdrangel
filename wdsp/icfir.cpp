@@ -34,8 +34,8 @@ namespace WDSP {
 
 void ICFIR::calc_icfir (ICFIR *a)
 {
-    double* impulse;
-    a->scale = 1.0 / (double)(2 * a->size);
+    float* impulse;
+    a->scale = 1.0 / (float)(2 * a->size);
     impulse = icfir_impulse (a->nc, a->DD, a->R, a->Pairs, a->runrate, a->cicrate, a->cutoff, a->xtype, a->xbw, 1, a->scale, a->wintype);
     a->p = FIRCORE::create_fircore (a->size, a->in, a->out, a->nc, a->mp, impulse);
     delete[] (impulse);
@@ -51,16 +51,16 @@ ICFIR* ICFIR::create_icfir (
     int size,
     int nc,
     int mp,
-    double* in,
-    double* out,
+    float* in,
+    float* out,
     int runrate,
     int cicrate,
     int DD,
     int R,
     int Pairs,
-    double cutoff,
+    float cutoff,
     int xtype,
-    double xbw,
+    float xbw,
     int wintype
 )
 //  run:  0 - no action; 1 - operate
@@ -116,7 +116,7 @@ void ICFIR::xicfir (ICFIR *a)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
-void ICFIR::setBuffers_icfir (ICFIR *a, double* in, double* out)
+void ICFIR::setBuffers_icfir (ICFIR *a, float* in, float* out)
 {
     decalc_icfir (a);
     a->in = in;
@@ -145,18 +145,18 @@ void ICFIR::setOutRate_icfir (ICFIR *a, int rate)
     calc_icfir (a);
 }
 
-double* ICFIR::icfir_impulse (
+float* ICFIR::icfir_impulse (
     int N,
     int DD,
     int R,
     int Pairs,
-    double runrate,
-    double cicrate,
-    double cutoff,
+    float runrate,
+    float cicrate,
+    float cutoff,
     int xtype,
-    double xbw,
+    float xbw,
     int rtype,
-    double scale,
+    float scale,
     int wintype
 )
 {
@@ -172,18 +172,18 @@ double* ICFIR::icfir_impulse (
     // rtype:   0 for real output, 1 for complex output
     // scale:   scale factor to be applied to the output
     int i, j;
-    double tmp, local_scale, ri, mag, fn;
-    double* impulse;
-    double* A = new double[N]; // (double *) malloc0 (N * sizeof (double));
-    double ft = cutoff / cicrate;                                       // normalized cutoff frequency
+    float tmp, local_scale, ri, mag, fn;
+    float* impulse;
+    float* A = new float[N]; // (float *) malloc0 (N * sizeof (float));
+    float ft = cutoff / cicrate;                                       // normalized cutoff frequency
     int u_samps = (N + 1) / 2;                                          // number of unique samples,  OK for odd or even N
     int c_samps = (int)(cutoff / runrate * N) + (N + 1) / 2 - N / 2;    // number of unique samples within bandpass, OK for odd or even N
     int x_samps = (int)(xbw / runrate * N);                             // number of unique samples in transition region, OK for odd or even N
-    double offset = 0.5 - 0.5 * (double)((N + 1) / 2 - N / 2);          // sample offset from center, OK for odd or even N
-    double* xistion = new double[x_samps + 1]; // (double *) malloc0 ((x_samps + 1) * sizeof (double));
-    double delta = PI / (double)x_samps;
-    double L = cicrate / runrate;
-    double phs = 0.0;
+    float offset = 0.5 - 0.5 * (float)((N + 1) / 2 - N / 2);          // sample offset from center, OK for odd or even N
+    float* xistion = new float[x_samps + 1]; // (float *) malloc0 ((x_samps + 1) * sizeof (float));
+    float delta = PI / (float)x_samps;
+    float L = cicrate / runrate;
+    float phs = 0.0;
     for (i = 0; i <= x_samps; i++)
     {
         xistion[i] = 0.5 * (cos (phs) + 1.0);
@@ -196,7 +196,7 @@ double* ICFIR::icfir_impulse (
     {
         for (i = 0, ri = offset; i < u_samps; i++, ri += 1.0)
         {
-            fn = ri / (L * (double)N);
+            fn = ri / (L * (float)N);
             if (fn <= ft)
             {
                 if (fn == 0.0) tmp = 1.0;
@@ -213,7 +213,7 @@ double* ICFIR::icfir_impulse (
     {
         for (i = 0, ri = offset; i < u_samps; i++, ri += 1.0)
         {
-            fn = ri / (L *(double)N);
+            fn = ri / (L *(float)N);
             if (i < c_samps)
             {
                 if (fn == 0.0) tmp = 1.0;

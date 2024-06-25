@@ -31,7 +31,7 @@ warren@wpratt.com
 
 namespace WDSP {
 
-DELAY* create_delay (int run, int size, double* in, double* out, int rate, double tdelta, double tdelay)
+DELAY* create_delay (int run, int size, float* in, float* out, int rate, float tdelta, float tdelay)
 {
     DELAY *a = new DELAY;
     a->run = run;
@@ -41,9 +41,9 @@ DELAY* create_delay (int run, int size, double* in, double* out, int rate, doubl
     a->rate = rate;
     a->tdelta = tdelta;
     a->tdelay = tdelay;
-    a->L = (int)(0.5 + 1.0 / (a->tdelta * (double)a->rate));
+    a->L = (int)(0.5 + 1.0 / (a->tdelta * (float)a->rate));
     a->adelta = 1.0 / (a->rate * a->L);
-    a->ft = 0.45 / (double)a->L;
+    a->ft = 0.45 / (float)a->L;
     a->ncoef = (int)(60.0 / a->ft);
     a->ncoef = (a->ncoef / a->L + 1) * a->L;
     a->cpp = a->ncoef / a->L;
@@ -52,9 +52,9 @@ DELAY* create_delay (int run, int size, double* in, double* out, int rate, doubl
     a->phnum %= a->L;
     a->idx_in = 0;
     a->adelay = a->adelta * (a->snum * a->L + a->phnum);
-    a->h = FIR::fir_bandpass (a->ncoef,-a->ft, +a->ft, 1.0, 1, 0, (double)a->L);
+    a->h = FIR::fir_bandpass (a->ncoef,-a->ft, +a->ft, 1.0, 1, 0, (float)a->L);
     a->rsize = a->cpp + (WSDEL - 1);
-    a->ring = new double[a->rsize * 2]; // (double *) malloc0 (a->rsize * sizeof (complex));
+    a->ring = new float[a->rsize * 2]; // (float *) malloc0 (a->rsize * sizeof (complex));
     return a;
 }
 
@@ -77,7 +77,7 @@ void DELAY::xdelay (DELAY *a)
     if (a->run)
     {
         int i, j, k, idx, n;
-        double Itmp, Qtmp;
+        float Itmp, Qtmp;
         for (i = 0; i < a->size; i++)
         {
             a->ring[2 * a->idx_in + 0] = a->in[2 * i + 0];
@@ -114,9 +114,9 @@ void DELAY::SetDelayRun (DELAY *a, int run)
     a->cs_update.unlock();
 }
 
-double DELAY::SetDelayValue (DELAY *a, double tdelay)
+float DELAY::SetDelayValue (DELAY *a, float tdelay)
 {
-    double adelay;
+    float adelay;
     a->cs_update.lock();
     a->tdelay = tdelay;
     a->phnum = (int)(0.5 + a->tdelay / a->adelta);
@@ -128,7 +128,7 @@ double DELAY::SetDelayValue (DELAY *a, double tdelay)
     return adelay;
 }
 
-void DELAY::SetDelayBuffs (DELAY *a, int size, double* in, double* out)
+void DELAY::SetDelayBuffs (DELAY *a, int size, float* in, float* out)
 {
     a->cs_update.lock();
     a->size = size;

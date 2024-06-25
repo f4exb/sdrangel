@@ -43,13 +43,13 @@ public:
     int run;
     int* prun;
     int size;
-    double* buff;
+    float* buff;
     double rate;
     double tau_average;
     double tau_peak_decay;
     double mult_average;
     double mult_peak;
-    double* result;
+    float* result;
     int enum_av;
     int enum_pk;
     int enum_gain;
@@ -62,11 +62,11 @@ public:
         int run,
         int* prun,
         int size,
-        double* buff,
+        float* buff,
         int rate,
         double tau_av,
         double tau_decay,
-        double* result,
+        float* result,
         QRecursiveMutex** pmtupdate,
         int enum_av,
         int enum_pk,
@@ -76,13 +76,13 @@ public:
     static void destroy_meter (METER *a);
     static void flush_meter (METER *a);
     static void xmeter (METER *a);
-    static void setBuffers_meter (METER *a, double* in);
+    static void setBuffers_meter (METER *a, float* in);
     static void setSamplerate_meter (METER *a, int rate);
     static void setSize_meter (METER *a, int size);
     // RXA Properties
-    static double GetMeter (RXA& rxa, int mt);
+    static float GetMeter (RXA& rxa, int mt);
     // TXA Properties
-    static double GetMeter (TXA& txa, int mt);
+    static float GetMeter (TXA& txa, int mt);
 
 private:
     static void calc_meter (METER *a);

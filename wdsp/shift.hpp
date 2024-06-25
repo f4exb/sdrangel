@@ -39,25 +39,25 @@ class WDSP_API SHIFT
 public:
     int run;
     int size;
-    double* in;
-    double* out;
-    double rate;
-    double shift;
-    double phase;
-    double delta;
-    double cos_delta;
-    double sin_delta;
+    float* in;
+    float* out;
+    float rate;
+    float shift;
+    float phase;
+    float delta;
+    float cos_delta;
+    float sin_delta;
 
-    static SHIFT* create_shift (int run, int size, double* in, double* out, int rate, double fshift);
+    static SHIFT* create_shift (int run, int size, float* in, float* out, int rate, float fshift);
     static void destroy_shift (SHIFT *a);
     static void flush_shift (SHIFT *a);
     static void xshift (SHIFT *a);
-    static void setBuffers_shift (SHIFT *a, double* in, double* out);
+    static void setBuffers_shift (SHIFT *a, float* in, float* out);
     static void setSamplerate_shift (SHIFT *a, int rate);
     static void setSize_shift (SHIFT *a, int size);
     // RXA Properties
     static void SetShiftRun (RXA& rxa, int run);
-    static void SetShiftFreq (RXA& rxa, double fshift);
+    static void SetShiftFreq (RXA& rxa, float fshift);
 
 private:
     static void calc_shift (SHIFT *a);

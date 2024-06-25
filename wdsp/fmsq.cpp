@@ -35,11 +35,11 @@ namespace WDSP {
 
 void FMSQ::calc_fmsq (FMSQ *a)
 {
-    double delta, theta;
-    double* impulse;
+    float delta, theta;
+    float* impulse;
     int i;
     // noise filter
-    a->noise = new double[2 * a->size * 2]; // (double *)malloc0(2 * a->size * sizeof(complex));
+    a->noise = new float[2 * a->size * 2]; // (float *)malloc0(2 * a->size * sizeof(complex));
     a->F[0] = 0.0;
     a->F[1] = a->fc;
     a->F[2] = *a->pllpole;
@@ -61,16 +61,16 @@ void FMSQ::calc_fmsq (FMSQ *a)
     // level change
     a->ntup   = (int)(a->tup   * a->rate);
     a->ntdown = (int)(a->tdown * a->rate);
-    a->cup   = new double[a->ntup + 1]; // (double *)malloc0 ((a->ntup   + 1) * sizeof(double));
-    a->cdown = new double[a->ntdown + 1]; //(double *)malloc0 ((a->ntdown + 1) * sizeof(double));
-    delta = PI / (double)a->ntup;
+    a->cup   = new float[a->ntup + 1]; // (float *)malloc0 ((a->ntup   + 1) * sizeof(float));
+    a->cdown = new float[a->ntdown + 1]; //(float *)malloc0 ((a->ntdown + 1) * sizeof(float));
+    delta = PI / (float)a->ntup;
     theta = 0.0;
     for (i = 0; i <= a->ntup; i++)
     {
         a->cup[i] = 0.5 * (1.0 - cos(theta));
         theta += delta;
     }
-    delta = PI / (double)a->ntdown;
+    delta = PI / (float)a->ntdown;
     theta = 0.0;
     for (i = 0; i <= a->ntdown; i++)
     {
@@ -95,21 +95,21 @@ void FMSQ::decalc_fmsq (FMSQ *a)
 FMSQ* FMSQ::create_fmsq (
     int run,
     int size,
-    double* insig,
-    double* outsig,
-    double* trigger,
+    float* insig,
+    float* outsig,
+    float* trigger,
     int rate,
-    double fc,
-    double* pllpole,
-    double tdelay,
-    double avtau,
-    double longtau,
-    double tup,
-    double tdown,
-    double tail_thresh,
-    double unmute_thresh,
-    double min_tail,
-    double max_tail,
+    float fc,
+    float* pllpole,
+    float tdelay,
+    float avtau,
+    float longtau,
+    float tup,
+    float tdown,
+    float tail_thresh,
+    float unmute_thresh,
+    float min_tail,
+    float max_tail,
     int nc,
     int mp
 )
@@ -120,7 +120,7 @@ FMSQ* FMSQ::create_fmsq (
     a->insig = insig;
     a->outsig = outsig;
     a->trigger = trigger;
-    a->rate = (double)rate;
+    a->rate = (float)rate;
     a->fc = fc;
     a->pllpole = pllpole;
     a->tdelay = tdelay;
@@ -168,7 +168,7 @@ void FMSQ::xfmsq (FMSQ *a)
     if (a->run)
     {
         int i;
-        double noise, lnlimit;
+        float noise, lnlimit;
         FIRCORE::xfircore (a->p);
         for (i = 0; i < a->size; i++)
         {
@@ -229,7 +229,7 @@ void FMSQ::xfmsq (FMSQ *a)
         memcpy (a->outsig, a->insig, a->size * sizeof (wcomplex));
 }
 
-void FMSQ::setBuffers_fmsq (FMSQ *a, double* in, double* out, double* trig)
+void FMSQ::setBuffers_fmsq (FMSQ *a, float* in, float* out, float* trig)
 {
     a->insig = in;
     a->outsig = out;
@@ -264,7 +264,7 @@ void FMSQ::SetFMSQRun (RXA& rxa, int run)
     rxa.csDSP.unlock();
 }
 
-void FMSQ::SetFMSQThreshold (RXA& rxa, double threshold)
+void FMSQ::SetFMSQThreshold (RXA& rxa, float threshold)
 {
     rxa.csDSP.lock();
     rxa.fmsq.p->tail_thresh = threshold;
@@ -275,7 +275,7 @@ void FMSQ::SetFMSQThreshold (RXA& rxa, double threshold)
 void FMSQ::SetFMSQNC (RXA& rxa, int nc)
 {
     FMSQ *a;
-    double* impulse;
+    float* impulse;
     rxa.csDSP.lock();
     a = rxa.fmsq.p;
     if (a->nc != nc)

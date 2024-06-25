@@ -37,14 +37,14 @@ namespace WDSP {
 void IQC::size_iqc (IQC *a)
 {
     int i;
-    a->t = new double[a->ints + 1]; // (double *) malloc0 ((a->ints + 1) * sizeof(double));
+    a->t = new float[a->ints + 1]; // (float *) malloc0 ((a->ints + 1) * sizeof(float));
     for (i = 0; i <= a->ints; i++)
-        a->t[i] = (double)i / (double)a->ints;
+        a->t[i] = (float)i / (float)a->ints;
     for (i = 0; i < 2; i++)
     {
-        a->cm[i] = new double[a->ints * 4]; // (double *) malloc0 (a->ints * 4 * sizeof(double));
-        a->cc[i] = new double[a->ints * 4]; // (double *) malloc0 (a->ints * 4 * sizeof(double));
-        a->cs[i] = new double[a->ints * 4]; // (double *) malloc0 (a->ints * 4 * sizeof(double));
+        a->cm[i] = new float[a->ints * 4]; // (float *) malloc0 (a->ints * 4 * sizeof(float));
+        a->cc[i] = new float[a->ints * 4]; // (float *) malloc0 (a->ints * 4 * sizeof(float));
+        a->cs[i] = new float[a->ints * 4]; // (float *) malloc0 (a->ints * 4 * sizeof(float));
     }
     a->dog.cpi = new int[a->ints]; // (int *) malloc0 (a->ints * sizeof (int));
     a->dog.count = 0;
@@ -67,14 +67,14 @@ void IQC::desize_iqc (IQC *a)
 void IQC::calc_iqc (IQC *a)
 {
     int i;
-    double delta, theta;
+    float delta, theta;
     a->cset = 0;
     a->count = 0;
     a->state = 0;
     a->busy = 0;
     a->ntup = (int)(a->tup * a->rate);
-    a->cup = new double[a->ntup + 1]; // (double *) malloc0 ((a->ntup + 1) * sizeof (double));
-    delta = PI / (double)a->ntup;
+    a->cup = new float[a->ntup + 1]; // (float *) malloc0 ((a->ntup + 1) * sizeof (float));
+    delta = PI / (float)a->ntup;
     theta = 0.0;
     for (i = 0; i <= a->ntup; i++)
     {
@@ -90,7 +90,7 @@ void IQC::decalc_iqc (IQC *a)
     delete[] (a->cup);
 }
 
-IQC* IQC::create_iqc (int run, int size, double* in, double* out, double rate, int ints, double tup, int spi)
+IQC* IQC::create_iqc (int run, int size, float* in, float* out, float rate, int ints, float tup, int spi)
 {
     IQC *a = new IQC;
     a->run = run;
@@ -130,7 +130,7 @@ void IQC::xiqc (IQC *a)
     if (a->run == 1)
     {
         int i, k, cset, mset;
-        double I, Q, env, dx, ym, yc, ys, PRE0, PRE1;
+        float I, Q, env, dx, ym, yc, ys, PRE0, PRE1;
         for (i = 0; i < a->size; i++)
         {
             I = a->in[2 * i + 0];
@@ -208,7 +208,7 @@ void IQC::xiqc (IQC *a)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
-void IQC::setBuffers_iqc (IQC *a, double* in, double* out)
+void IQC::setBuffers_iqc (IQC *a, float* in, float* out)
 {
     a->in = in;
     a->out = out;
@@ -232,38 +232,38 @@ void IQC::setSize_iqc (IQC *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void IQC::GetiqcValues (TXA& txa, double* cm, double* cc, double* cs)
+void IQC::GetiqcValues (TXA& txa, float* cm, float* cc, float* cs)
 {
     IQC *a;
     txa.csDSP.lock();
     a = txa.iqc.p0;
-    memcpy (cm, a->cm[a->cset], a->ints * 4 * sizeof (double));
-    memcpy (cc, a->cc[a->cset], a->ints * 4 * sizeof (double));
-    memcpy (cs, a->cs[a->cset], a->ints * 4 * sizeof (double));
+    memcpy (cm, a->cm[a->cset], a->ints * 4 * sizeof (float));
+    memcpy (cc, a->cc[a->cset], a->ints * 4 * sizeof (float));
+    memcpy (cs, a->cs[a->cset], a->ints * 4 * sizeof (float));
     txa.csDSP.unlock();
 }
 
-void IQC::SetiqcValues (TXA& txa, double* cm, double* cc, double* cs)
+void IQC::SetiqcValues (TXA& txa, float* cm, float* cc, float* cs)
 {
     IQC *a;
     txa.csDSP.lock();
     a = txa.iqc.p0;
     a->cset = 1 - a->cset;
-    memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (double));
-    memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (double));
-    memcpy (a->cs[a->cset], cs, a->ints * 4 * sizeof (double));
+    memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (float));
+    memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (float));
+    memcpy (a->cs[a->cset], cs, a->ints * 4 * sizeof (float));
     a->state = RUN;
     txa.csDSP.unlock();
 }
 
-void IQC::SetiqcSwap (TXA& txa, double* cm, double* cc, double* cs)
+void IQC::SetiqcSwap (TXA& txa, float* cm, float* cc, float* cs)
 {
     IQC *a = txa.iqc.p1;
     txa.csDSP.lock();
     a->cset = 1 - a->cset;
-    memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (double));
-    memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (double));
-    memcpy (a->cs[a->cset], cs, a->ints * 4 * sizeof (double));
+    memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (float));
+    memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (float));
+    memcpy (a->cs[a->cset], cs, a->ints * 4 * sizeof (float));
     a->busy = 1; // InterlockedBitTestAndSet (&a->busy, 0);
     a->state = SWAP;
     a->count = 0;
@@ -274,14 +274,14 @@ void IQC::SetiqcSwap (TXA& txa, double* cm, double* cc, double* cs)
     }
 }
 
-void IQC::SetiqcStart (TXA& txa, double* cm, double* cc, double* cs)
+void IQC::SetiqcStart (TXA& txa, float* cm, float* cc, float* cs)
 {
     IQC *a = txa.iqc.p1;
     txa.csDSP.lock();
     a->cset = 0;
-    memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (double));
-    memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (double));
-    memcpy (a->cs[a->cset], cs, a->ints * 4 * sizeof (double));
+    memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (float));
+    memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (float));
+    memcpy (a->cs[a->cset], cs, a->ints * 4 * sizeof (float));
     a->busy = 1; // InterlockedBitTestAndSet (&a->busy, 0);
     a->state = BEGIN;
     a->count = 0;

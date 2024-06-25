@@ -42,27 +42,27 @@ public:
     TXA *txa;
     std::atomic<long> *ch_upslew;
     int size;
-    double* in;
-    double* out;
-    double rate;
-    double tdelay;
-    double tupslew;
+    float* in;
+    float* out;
+    float rate;
+    float tdelay;
+    float tupslew;
     int runmode;
     int state;
     int count;
     int ndelup;
     int ntup;
-    double* cup;
+    float* cup;
 
-    static USLEW* create_uslew (TXA *txa, std::atomic<long> *ch_upslew, int size, double* in, double* out, double rate, double tdelay, double tupslew);
+    static USLEW* create_uslew (TXA *txa, std::atomic<long> *ch_upslew, int size, float* in, float* out, float rate, float tdelay, float tupslew);
     static void destroy_uslew (USLEW *a);
     static void flush_uslew (USLEW *a);
     static void xuslew (USLEW *a);
-    static void setBuffers_uslew (USLEW *a, double* in, double* out);
+    static void setBuffers_uslew (USLEW *a, float* in, float* out);
     static void setSamplerate_uslew (USLEW *a, int rate);
     static void setSize_uslew (USLEW *a, int size);
     // TXA Properties
-    static void SetuSlewTime (TXA& txa, double time);
+    static void SetuSlewTime (TXA& txa, float time);
 
 private:
     static void calc_uslew (USLEW *a);

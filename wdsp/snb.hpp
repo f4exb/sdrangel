@@ -39,8 +39,8 @@ class WDSP_API SNBA
 {
 public:
     int run;
-    double* in;
-    double* out;
+    float* in;
+    float* out;
     int inrate;
     int internalrate;
     int bsize;
@@ -50,70 +50,70 @@ public:
     int iasize;
     int iainidx;
     int iaoutidx;
-    double* inaccum;
-    double* xbase;
-    double* xaux;
+    float* inaccum;
+    float* xbase;
+    float* xaux;
     int nsamps;
     int oasize;
     int oainidx;
     int oaoutidx;
     int init_oaoutidx;
-    double* outaccum;
+    float* outaccum;
 
     int resamprun;
     int isize;
     RESAMPLE *inresamp;
     RESAMPLE *outresamp;
-    double* inbuff;
-    double* outbuff;
+    float* inbuff;
+    float* outbuff;
     struct _exec
     {
         int asize;
-        double* a;
-        double* v;
+        float* a;
+        float* v;
         int* detout;
-        double* savex;
-        double* xHout;
+        float* savex;
+        float* xHout;
         int* unfixed;
         int npasses;
     } exec;
     struct _det
     {
-        double k1;
-        double k2;
+        float k1;
+        float k2;
         int b;
         int pre;
         int post;
-        double* vp;
-        double* vpwr;
+        float* vp;
+        float* vpwr;
     } sdet;
     struct _scan
     {
-        double pmultmin;
+        float pmultmin;
     } scan;
     struct _wrk
     {
         int xHat_a1rows_max;
         int xHat_a2cols_max;
-        double* xHat_r;
-        double* xHat_ATAI;
-        double* xHat_A1;
-        double* xHat_A2;
-        double* xHat_P1;
-        double* xHat_P2;
-        double* trI_y;
-        double* trI_v;
-        double* dR_z;
-        double* asolve_r;
-        double* asolve_z;
+        float* xHat_r;
+        float* xHat_ATAI;
+        float* xHat_A1;
+        float* xHat_A2;
+        float* xHat_P1;
+        float* xHat_P2;
+        float* trI_y;
+        float* trI_v;
+        float* dR_z;
+        float* asolve_r;
+        float* asolve_z;
     } wrk;
-    double out_low_cut;
-    double out_high_cut;
+    float out_low_cut;
+    float out_high_cut;
 
     static SNBA* create_snba (
         int run,
-        double* in,
-        double* out,
+        float* in,
+        float* out,
         int inrate,
         int internalrate,
         int bsize,
@@ -121,63 +121,63 @@ public:
         int xsize,
         int asize,
         int npasses,
-        double k1,
-        double k2,
+        float k1,
+        float k2,
         int b,
         int pre,
         int post,
-        double pmultmin,
-        double out_low_cut,
-        double out_high_cut
+        float pmultmin,
+        float out_low_cut,
+        float out_high_cut
     );
     static void destroy_snba (SNBA *d);
     static void flush_snba (SNBA *d);
     static void xsnba (SNBA *d);
-    static void setBuffers_snba (SNBA *a, double* in, double* out);
+    static void setBuffers_snba (SNBA *a, float* in, float* out);
     static void setSamplerate_snba (SNBA *a, int rate);
     static void setSize_snba (SNBA *a, int size);
     // RXA
-    static void SetSNBAOutputBandwidth (RXA& rxa, double flow, double fhigh);
+    static void SetSNBAOutputBandwidth (RXA& rxa, float flow, float fhigh);
     static void SetSNBARun (RXA& rxa, int run);
     static void SetSNBAovrlp (RXA& rxa, int ovrlp);
     static void SetSNBAasize (RXA& rxa, int size);
     static void SetSNBAnpasses (RXA& rxa, int npasses);
-    static void SetSNBAk1 (RXA& rxa, double k1);
-    static void SetSNBAk2 (RXA& rxa, double k2);
+    static void SetSNBAk1 (RXA& rxa, float k1);
+    static void SetSNBAk2 (RXA& rxa, float k2);
     static void SetSNBAbridge (RXA& rxa, int bridge);
     static void SetSNBApresamps (RXA& rxa, int presamps);
     static void SetSNBApostsamps (RXA& rxa, int postsamps);
-    static void SetSNBApmultmin (RXA& rxa, double pmultmin);
+    static void SetSNBApmultmin (RXA& rxa, float pmultmin);
 
 private:
     static void calc_snba (SNBA *d);
     static void decalc_snba (SNBA *d);
-    static void ATAc0 (int n, int nr, double* A, double* r);
-    static void multA1TA2(double* a1, double* a2, int m, int n, int q, double* c);
-    static void multXKE(double* a, double* xk, int m, int q, int p, double* vout);
-    static void multAv(double* a, double* v, int m, int q, double* vout);
+    static void ATAc0 (int n, int nr, float* A, float* r);
+    static void multA1TA2(float* a1, float* a2, int m, int n, int q, float* c);
+    static void multXKE(float* a, float* xk, int m, int q, int p, float* vout);
+    static void multAv(float* a, float* v, int m, int q, float* vout);
     static void xHat(
         int xusize,
         int asize,
-        double* xk,
-        double* a,
-        double* xout,
-        double* r,
-        double* ATAI,
-        double* A1,
-        double* A2,
-        double* P1,
-        double* P2,
-        double* trI_y,
-        double* trI_v,
-        double* dR_z
+        float* xk,
+        float* a,
+        float* xout,
+        float* r,
+        float* ATAI,
+        float* A1,
+        float* A2,
+        float* P1,
+        float* P2,
+        float* trI_y,
+        float* trI_v,
+        float* dR_z
     );
-    static void invf(int xsize, int asize, double* a, double* x, double* v);
-    static void det(SNBA *d, int asize, double* v, int* detout);
+    static void invf(int xsize, int asize, float* a, float* x, float* v);
+    static void det(SNBA *d, int asize, float* v, int* detout);
     static int scanFrame(
         int xsize,
         int pval,
-        double pmultmin,
+        float pmultmin,
         int* det,
         int* bimp,
         int* limp,
@@ -186,7 +186,7 @@ private:
         int* p_opt,
         int* next
     );
-    static void execFrame(SNBA *d, double* x);
+    static void execFrame(SNBA *d, float* x);
 };
 
 
@@ -202,17 +202,17 @@ public:
     int size;                       // buffer size
     int nc;                         // number of filter coefficients
     int mp;                         // minimum phase flag
-    double* in;                     // input buffer
-    double* out;                    // output buffer
+    float* in;                     // input buffer
+    float* out;                    // output buffer
     int rate;                       // sample rate
-    double* buff;                   // internal buffer
+    float* buff;                   // internal buffer
     NBP *bpsnba;                    // pointer to the notched bandpass filter, nbp
-    double f_low;                   // low cutoff frequency
-    double f_high;                  // high cutoff frequency
-    double abs_low_freq;            // lowest positive freq supported by SNB
-    double abs_high_freq;           // highest positive freq supported by SNG
+    float f_low;                   // low cutoff frequency
+    float f_high;                  // high cutoff frequency
+    float abs_low_freq;            // lowest positive freq supported by SNB
+    float abs_high_freq;           // highest positive freq supported by SNG
     int wintype;                    // filter window type
-    double gain;                    // filter gain
+    float gain;                    // filter gain
     int autoincr;                   // use auto increment for notch width
     int maxpb;                      // maximum passband segments supported
     NOTCHDB* ptraddr;               // pointer to address of NOTCH DATABASE
@@ -224,22 +224,22 @@ public:
         int size,
         int nc,
         int mp,
-        double* in,
-        double* out,
+        float* in,
+        float* out,
         int rate,
-        double abs_low_freq,
-        double abs_high_freq,
-        double f_low,
-        double f_high,
+        float abs_low_freq,
+        float abs_high_freq,
+        float f_low,
+        float f_high,
         int wintype,
-        double gain,
+        float gain,
         int autoincr,
         int maxpb,
         NOTCHDB* ptraddr
     );
     static void destroy_bpsnba (BPSNBA *a);
     static void flush_bpsnba (BPSNBA *a);
-    static void setBuffers_bpsnba (BPSNBA *a, double* in, double* out);
+    static void setBuffers_bpsnba (BPSNBA *a, float* in, float* out);
     static void setSamplerate_bpsnba (BPSNBA *a, int rate);
     static void setSize_bpsnba (BPSNBA *a, int size);
     static void xbpsnbain (BPSNBA *a, int position);

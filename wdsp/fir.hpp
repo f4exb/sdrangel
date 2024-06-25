@@ -34,17 +34,17 @@ namespace WDSP {
 class WDSP_API FIR
 {
 public:
-    static double* fftcv_mults (int NM, double* c_impulse);
-    static double* fir_fsamp_odd (int N, double* A, int rtype, double scale, int wintype);
-    static double* fir_fsamp (int N, double* A, int rtype, double scale, int wintype);
-    static double* fir_bandpass (int N, double f_low, double f_high, double samplerate, int wintype, int rtype, double scale);
-    static double* get_fsamp_window(int N, int wintype);
-    static double *fir_read (int N, const char *filename, int rtype, double scale);
-    static void mp_imp (int N, double* fir, double* mpfir, int pfactor, int polarity);
-    static double* zff_impulse(int nc, double scale);
+    static float* fftcv_mults (int NM, float* c_impulse);
+    static float* fir_fsamp_odd (int N, float* A, int rtype, float scale, int wintype);
+    static float* fir_fsamp (int N, float* A, int rtype, float scale, int wintype);
+    static float* fir_bandpass (int N, float f_low, float f_high, float samplerate, int wintype, int rtype, float scale);
+    static float* get_fsamp_window(int N, int wintype);
+    static float *fir_read (int N, const char *filename, int rtype, float scale);
+    static void mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity);
+    static float* zff_impulse(int nc, float scale);
 
 private:
-    static void analytic (int N, double* in, double* out);
+    static void analytic (int N, float* in, float* out);
 };
 
 #endif

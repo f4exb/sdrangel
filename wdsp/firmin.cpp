@@ -42,12 +42,12 @@ void FIRMIN::calc_firmin (FIRMIN *a)
     a->h = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain);
     a->rsize = a->nc;
     a->mask = a->rsize - 1;
-    a->ring = new double[a->rsize * 2]; // (double *) malloc0 (a->rsize * sizeof (complex));
+    a->ring = new float[a->rsize * 2]; // (float *) malloc0 (a->rsize * sizeof (complex));
     a->idx = 0;
 }
 
-FIRMIN* FIRMIN::create_firmin (int run, int position, int size, double* in, double* out,
-    int nc, double f_low, double f_high, int samplerate, int wintype, double gain)
+FIRMIN* FIRMIN::create_firmin (int run, int position, int size, float* in, float* out,
+    int nc, float f_low, float f_high, int samplerate, int wintype, float gain)
 {
     FIRMIN *a = new FIRMIN;
     a->run = run;
@@ -103,7 +103,7 @@ void FIRMIN::xfirmin (FIRMIN *a, int pos)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
-void FIRMIN::setBuffers_firmin (FIRMIN *a, double* in, double* out)
+void FIRMIN::setBuffers_firmin (FIRMIN *a, float* in, float* out)
 {
     a->in = in;
     a->out = out;
@@ -111,7 +111,7 @@ void FIRMIN::setBuffers_firmin (FIRMIN *a, double* in, double* out)
 
 void FIRMIN::setSamplerate_firmin (FIRMIN *a, int rate)
 {
-    a->samplerate = (double)rate;
+    a->samplerate = (float)rate;
     calc_firmin (a);
 }
 
@@ -120,7 +120,7 @@ void FIRMIN::setSize_firmin (FIRMIN *a, int size)
     a->size = size;
 }
 
-void FIRMIN::setFreqs_firmin (FIRMIN *a, double f_low, double f_high)
+void FIRMIN::setFreqs_firmin (FIRMIN *a, float f_low, float f_high)
 {
     a->f_low = f_low;
     a->f_high = f_high;
@@ -140,21 +140,21 @@ void FIROPT::plan_firopt (FIROPT *a)
     a->nfor = a->nc / a->size;
     a->buffidx = 0;
     a->idxmask = a->nfor - 1;
-    a->fftin = new double[2 * a->size * 2]; // (double *) malloc0 (2 * a->size * sizeof (complex));
-    a->fftout = new double*[a->nfor]; //  (double **) malloc0 (a->nfor * sizeof (double *));
-    a->fmask = new double*[a->nfor]; //  (double **) malloc0 (a->nfor * sizeof (double *));
-    a->maskgen = new double[2 * a->size * 2]; //  (double *) malloc0 (2 * a->size * sizeof (complex));
-    a->pcfor = new fftw_plan[a->nfor]; // (fftw_plan *) malloc0 (a->nfor * sizeof (fftw_plan));
-    a->maskplan = new fftw_plan[a->nfor]; // (fftw_plan *) malloc0 (a->nfor * sizeof (fftw_plan));
+    a->fftin = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
+    a->fftout = new float*[a->nfor]; //  (float **) malloc0 (a->nfor * sizeof (float *));
+    a->fmask = new float*[a->nfor]; //  (float **) malloc0 (a->nfor * sizeof (float *));
+    a->maskgen = new float[2 * a->size * 2]; //  (float *) malloc0 (2 * a->size * sizeof (complex));
+    a->pcfor = new fftwf_plan[a->nfor]; // (fftwf_plan *) malloc0 (a->nfor * sizeof (fftwf_plan));
+    a->maskplan = new fftwf_plan[a->nfor]; // (fftwf_plan *) malloc0 (a->nfor * sizeof (fftwf_plan));
     for (i = 0; i < a->nfor; i++)
     {
-        a->fftout[i] = new double[2 * a->size * 2]; // (double *) malloc0 (2 * a->size * sizeof (complex));
-        a->fmask[i] = new double[2 * a->size * 2]; //  (double *) malloc0 (2 * a->size * sizeof (complex));
-        a->pcfor[i] = fftw_plan_dft_1d(2 * a->size, (fftw_complex *)a->fftin, (fftw_complex *)a->fftout[i], FFTW_FORWARD, FFTW_PATIENT);
-        a->maskplan[i] = fftw_plan_dft_1d(2 * a->size, (fftw_complex *)a->maskgen, (fftw_complex *)a->fmask[i], FFTW_FORWARD, FFTW_PATIENT);
+        a->fftout[i] = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
+        a->fmask[i] = new float[2 * a->size * 2]; //  (float *) malloc0 (2 * a->size * sizeof (complex));
+        a->pcfor[i] = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->fftin, (fftwf_complex *)a->fftout[i], FFTW_FORWARD, FFTW_PATIENT);
+        a->maskplan[i] = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->maskgen, (fftwf_complex *)a->fmask[i], FFTW_FORWARD, FFTW_PATIENT);
     }
-    a->accum = new double[2 * a->size * 2]; //  (double *) malloc0 (2 * a->size * sizeof (complex));
-    a->crev = fftw_plan_dft_1d(2 * a->size, (fftw_complex *)a->accum, (fftw_complex *)a->out, FFTW_BACKWARD, FFTW_PATIENT);
+    a->accum = new float[2 * a->size * 2]; //  (float *) malloc0 (2 * a->size * sizeof (complex));
+    a->crev = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->accum, (fftwf_complex *)a->out, FFTW_BACKWARD, FFTW_PATIENT);
 }
 
 void FIROPT::calc_firopt (FIROPT *a)
@@ -162,20 +162,20 @@ void FIROPT::calc_firopt (FIROPT *a)
     // call for change in frequency, rate, wintype, gain
     // must also call after a call to plan_firopt()
     int i;
-    double* impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain);
+    float* impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain);
     a->buffidx = 0;
     for (i = 0; i < a->nfor; i++)
     {
         // I right-justified the impulse response => take output from left side of output buff, discard right side
         // Be careful about flipping an asymmetrical impulse response.
         memcpy (&(a->maskgen[2 * a->size]), &(impulse[2 * a->size * i]), a->size * sizeof(wcomplex));
-        fftw_execute (a->maskplan[i]);
+        fftwf_execute (a->maskplan[i]);
     }
     delete[] (impulse);
 }
 
-FIROPT* FIROPT::create_firopt (int run, int position, int size, double* in, double* out,
-    int nc, double f_low, double f_high, int samplerate, int wintype, double gain)
+FIROPT* FIROPT::create_firopt (int run, int position, int size, float* in, float* out,
+    int nc, float f_low, float f_high, int samplerate, int wintype, float gain)
 {
     FIROPT *a = new FIROPT;
     a->run = run;
@@ -197,14 +197,14 @@ FIROPT* FIROPT::create_firopt (int run, int position, int size, double* in, doub
 void FIROPT::deplan_firopt (FIROPT *a)
 {
     int i;
-    fftw_destroy_plan (a->crev);
+    fftwf_destroy_plan (a->crev);
     delete[] (a->accum);
     for (i = 0; i < a->nfor; i++)
     {
         delete[] (a->fftout[i]);
         delete[] (a->fmask[i]);
-        fftw_destroy_plan (a->pcfor[i]);
-        fftw_destroy_plan (a->maskplan[i]);
+        fftwf_destroy_plan (a->pcfor[i]);
+        fftwf_destroy_plan (a->maskplan[i]);
     }
     delete[] (a->maskplan);
     delete[] (a->pcfor);
@@ -235,7 +235,7 @@ void FIROPT::xfiropt (FIROPT *a, int pos)
     {
         int i, j, k;
         memcpy (&(a->fftin[2 * a->size]), a->in, a->size * sizeof (wcomplex));
-        fftw_execute (a->pcfor[a->buffidx]);
+        fftwf_execute (a->pcfor[a->buffidx]);
         k = a->buffidx;
         memset (a->accum, 0, 2 * a->size * sizeof (wcomplex));
         for (j = 0; j < a->nfor; j++)
@@ -248,14 +248,14 @@ void FIROPT::xfiropt (FIROPT *a, int pos)
             k = (k + a->idxmask) & a->idxmask;
         }
         a->buffidx = (a->buffidx + 1) & a->idxmask;
-        fftw_execute (a->crev);
+        fftwf_execute (a->crev);
         memcpy (a->fftin, &(a->fftin[2 * a->size]), a->size * sizeof(wcomplex));
     }
     else if (a->in != a->out)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
-void FIROPT::setBuffers_firopt (FIROPT *a, double* in, double* out)
+void FIROPT::setBuffers_firopt (FIROPT *a, float* in, float* out)
 {
     a->in = in;
     a->out = out;
@@ -278,7 +278,7 @@ void FIROPT::setSize_firopt (FIROPT *a, int size)
     calc_firopt (a);
 }
 
-void FIROPT::setFreqs_firopt (FIROPT *a, double f_low, double f_high)
+void FIROPT::setFreqs_firopt (FIROPT *a, float f_low, float f_high)
 {
     a->f_low = f_low;
     a->f_high = f_high;
@@ -300,27 +300,27 @@ void FIRCORE::plan_fircore (FIRCORE *a)
     a->cset = 0;
     a->buffidx = 0;
     a->idxmask = a->nfor - 1;
-    a->fftin = new double[2 * a->size * 2]; // (double *) malloc0 (2 * a->size * sizeof (complex));
-    a->fftout   = new double*[a->nfor]; // (double **) malloc0 (a->nfor * sizeof (double *));
-    a->fmask    = new double**[2]; // (double ***) malloc0 (2 * sizeof (double **));
-    a->fmask[0] = new double*[a->nfor]; // (double **) malloc0 (a->nfor * sizeof (double *));
-    a->fmask[1] = new double*[a->nfor]; // (double **) malloc0 (a->nfor * sizeof (double *));
-    a->maskgen = new double[2 * a->size * 2]; // (double *) malloc0 (2 * a->size * sizeof (complex));
-    a->pcfor = new fftw_plan[a->nfor]; // (fftw_plan *) malloc0 (a->nfor * sizeof (fftw_plan));
-    a->maskplan    = new fftw_plan*[2]; // (fftw_plan **) malloc0 (2 * sizeof (fftw_plan *));
-    a->maskplan[0] = new fftw_plan[a->nfor]; // (fftw_plan *) malloc0 (a->nfor * sizeof (fftw_plan));
-    a->maskplan[1] = new fftw_plan[a->nfor]; // (fftw_plan *) malloc0 (a->nfor * sizeof (fftw_plan));
+    a->fftin = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
+    a->fftout   = new float*[a->nfor]; // (float **) malloc0 (a->nfor * sizeof (float *));
+    a->fmask    = new float**[2]; // (float ***) malloc0 (2 * sizeof (float **));
+    a->fmask[0] = new float*[a->nfor]; // (float **) malloc0 (a->nfor * sizeof (float *));
+    a->fmask[1] = new float*[a->nfor]; // (float **) malloc0 (a->nfor * sizeof (float *));
+    a->maskgen = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
+    a->pcfor = new fftwf_plan[a->nfor]; // (fftwf_plan *) malloc0 (a->nfor * sizeof (fftwf_plan));
+    a->maskplan    = new fftwf_plan*[2]; // (fftwf_plan **) malloc0 (2 * sizeof (fftwf_plan *));
+    a->maskplan[0] = new fftwf_plan[a->nfor]; // (fftwf_plan *) malloc0 (a->nfor * sizeof (fftwf_plan));
+    a->maskplan[1] = new fftwf_plan[a->nfor]; // (fftwf_plan *) malloc0 (a->nfor * sizeof (fftwf_plan));
     for (i = 0; i < a->nfor; i++)
     {
-        a->fftout[i]   = new double[2 * a->size * 2]; // (double *) malloc0 (2 * a->size * sizeof (complex));
-        a->fmask[0][i] = new double[2 * a->size * 2]; // (double *) malloc0 (2 * a->size * sizeof (complex));
-        a->fmask[1][i] = new double[2 * a->size * 2]; // (double *) malloc0 (2 * a->size * sizeof (complex));
-        a->pcfor[i] = fftw_plan_dft_1d(2 * a->size, (fftw_complex *)a->fftin, (fftw_complex *)a->fftout[i], FFTW_FORWARD, FFTW_PATIENT);
-        a->maskplan[0][i] = fftw_plan_dft_1d(2 * a->size, (fftw_complex *)a->maskgen, (fftw_complex *)a->fmask[0][i], FFTW_FORWARD, FFTW_PATIENT);
-        a->maskplan[1][i] = fftw_plan_dft_1d(2 * a->size, (fftw_complex *)a->maskgen, (fftw_complex *)a->fmask[1][i], FFTW_FORWARD, FFTW_PATIENT);
+        a->fftout[i]   = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
+        a->fmask[0][i] = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
+        a->fmask[1][i] = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
+        a->pcfor[i] = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->fftin, (fftwf_complex *)a->fftout[i], FFTW_FORWARD, FFTW_PATIENT);
+        a->maskplan[0][i] = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->maskgen, (fftwf_complex *)a->fmask[0][i], FFTW_FORWARD, FFTW_PATIENT);
+        a->maskplan[1][i] = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->maskgen, (fftwf_complex *)a->fmask[1][i], FFTW_FORWARD, FFTW_PATIENT);
     }
-    a->accum = new double[2 * a->size * 2]; // (double *) malloc0 (2 * a->size * sizeof (complex));
-    a->crev = fftw_plan_dft_1d(2 * a->size, (fftw_complex *)a->accum, (fftw_complex *)a->out, FFTW_BACKWARD, FFTW_PATIENT);
+    a->accum = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
+    a->crev = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->accum, (fftwf_complex *)a->out, FFTW_BACKWARD, FFTW_PATIENT);
     a->masks_ready = 0;
 }
 
@@ -338,7 +338,7 @@ void FIRCORE::calc_fircore (FIRCORE *a, int flip)
         // I right-justified the impulse response => take output from left side of output buff, discard right side
         // Be careful about flipping an asymmetrical impulse response.
         memcpy (&(a->maskgen[2 * a->size]), &(a->imp[2 * a->size * i]), a->size * sizeof(wcomplex));
-        fftw_execute (a->maskplan[1 - a->cset][i]);
+        fftwf_execute (a->maskplan[1 - a->cset][i]);
     }
     a->masks_ready = 1;
     if (flip)
@@ -350,7 +350,7 @@ void FIRCORE::calc_fircore (FIRCORE *a, int flip)
     }
 }
 
-FIRCORE* FIRCORE::create_fircore (int size, double* in, double* out, int nc, int mp, double* impulse)
+FIRCORE* FIRCORE::create_fircore (int size, float* in, float* out, int nc, int mp, float* impulse)
 {
     FIRCORE *a = new FIRCORE;
     a->size = size;
@@ -360,8 +360,8 @@ FIRCORE* FIRCORE::create_fircore (int size, double* in, double* out, int nc, int
     a->mp = mp;
     // InitializeCriticalSectionAndSpinCount (&a->update, 2500);
     plan_fircore (a);
-    a->impulse = new double[a->nc * 2]; // (double *) malloc0 (a->nc * sizeof (complex));
-    a->imp     = new double[a->nc * 2]; // (double *) malloc0 (a->nc * sizeof (complex));
+    a->impulse = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
+    a->imp     = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
     memcpy (a->impulse, impulse, a->nc * sizeof (wcomplex));
     calc_fircore (a, 1);
     return a;
@@ -370,16 +370,16 @@ FIRCORE* FIRCORE::create_fircore (int size, double* in, double* out, int nc, int
 void FIRCORE::deplan_fircore (FIRCORE *a)
 {
     int i;
-    fftw_destroy_plan (a->crev);
+    fftwf_destroy_plan (a->crev);
     delete[] (a->accum);
     for (i = 0; i < a->nfor; i++)
     {
         delete[] (a->fftout[i]);
         delete[] (a->fmask[0][i]);
         delete[] (a->fmask[1][i]);
-        fftw_destroy_plan (a->pcfor[i]);
-        fftw_destroy_plan (a->maskplan[0][i]);
-        fftw_destroy_plan (a->maskplan[1][i]);
+        fftwf_destroy_plan (a->pcfor[i]);
+        fftwf_destroy_plan (a->maskplan[0][i]);
+        fftwf_destroy_plan (a->maskplan[1][i]);
     }
     delete[] (a->maskplan[0]);
     delete[] (a->maskplan[1]);
@@ -414,7 +414,7 @@ void FIRCORE::xfircore (FIRCORE *a)
 {
     int i, j, k;
     memcpy (&(a->fftin[2 * a->size]), a->in, a->size * sizeof (wcomplex));
-    fftw_execute (a->pcfor[a->buffidx]);
+    fftwf_execute (a->pcfor[a->buffidx]);
     k = a->buffidx;
     memset (a->accum, 0, 2 * a->size * sizeof (wcomplex));
     a->update.lock();
@@ -429,11 +429,11 @@ void FIRCORE::xfircore (FIRCORE *a)
     }
     a->update.unlock();
     a->buffidx = (a->buffidx + 1) & a->idxmask;
-    fftw_execute (a->crev);
+    fftwf_execute (a->crev);
     memcpy (a->fftin, &(a->fftin[2 * a->size]), a->size * sizeof(wcomplex));
 }
 
-void FIRCORE::setBuffers_fircore (FIRCORE *a, double* in, double* out)
+void FIRCORE::setBuffers_fircore (FIRCORE *a, float* in, float* out)
 {
     a->in = in;
     a->out = out;
@@ -450,13 +450,13 @@ void FIRCORE::setSize_fircore (FIRCORE *a, int size)
     calc_fircore (a, 1);
 }
 
-void FIRCORE::setImpulse_fircore (FIRCORE *a, double* impulse, int update)
+void FIRCORE::setImpulse_fircore (FIRCORE *a, float* impulse, int update)
 {
     memcpy (a->impulse, impulse, a->nc * sizeof (wcomplex));
     calc_fircore (a, update);
 }
 
-void FIRCORE::setNc_fircore (FIRCORE *a, int nc, double* impulse)
+void FIRCORE::setNc_fircore (FIRCORE *a, int nc, float* impulse)
 {
     // because of FFT planning, this will probably cause a glitch in audio if done during dataflow
     deplan_fircore (a);
@@ -464,8 +464,8 @@ void FIRCORE::setNc_fircore (FIRCORE *a, int nc, double* impulse)
     delete[] (a->imp);
     a->nc = nc;
     plan_fircore (a);
-    a->imp     = new double[a->nc * 2]; // (double *) malloc0 (a->nc * sizeof (complex));
-    a->impulse = new double[a->nc * 2]; // (double *) malloc0 (a->nc * sizeof (complex));
+    a->imp     = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
+    a->impulse = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
     memcpy (a->impulse, impulse, a->nc * sizeof (wcomplex));
     calc_fircore (a, 1);
 }

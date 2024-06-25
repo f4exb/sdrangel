@@ -41,37 +41,37 @@ class WDSP_API DELAY
 public:
     int run;            // run
     int size;           // number of input samples per buffer
-    double* in;         // input buffer
-    double* out;        // output buffer
+    float* in;         // input buffer
+    float* out;        // output buffer
     int rate;           // samplerate
-    double tdelta;      // delay increment required (seconds)
-    double tdelay;      // delay requested (seconds)
+    float tdelta;      // delay increment required (seconds)
+    float tdelay;      // delay requested (seconds)
 
     int L;              // interpolation factor
     int ncoef;          // number of coefficients
     int cpp;            // coefficients per phase
-    double ft;          // normalized cutoff frequency
-    double* h;          // coefficients
+    float ft;          // normalized cutoff frequency
+    float* h;          // coefficients
     int snum;           // starting sample number (0 for sub-sample delay)
     int phnum;          // phase number
 
     int idx_in;         // index for input into ring
     int rsize;          // ring size in complex samples
-    double* ring;       // ring buffer
+    float* ring;       // ring buffer
 
-    double adelta;      // actual delay increment
-    double adelay;      // actual delay
+    float adelta;      // actual delay increment
+    float adelay;      // actual delay
 
     QRecursiveMutex cs_update;
 
-    static DELAY* create_delay (int run, int size, double* in, double* out, int rate, double tdelta, double tdelay);
+    static DELAY* create_delay (int run, int size, float* in, float* out, int rate, float tdelta, float tdelay);
     static void destroy_delay (DELAY *a);
     static void flush_delay (DELAY *a);
     static void xdelay (DELAY *a);
     // Properties
     static void SetDelayRun (DELAY *a, int run);
-    static double SetDelayValue (DELAY *a, double delay);        // returns actual delay in seconds
-    static void SetDelayBuffs (DELAY *a, int size, double* in, double* out);
+    static float SetDelayValue (DELAY *a, float delay);        // returns actual delay in seconds
+    static void SetDelayBuffs (DELAY *a, int size, float* in, float* out);
 };
 
 } // namespace WDSP

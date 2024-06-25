@@ -43,38 +43,38 @@ class WDSP_API RESAMPLE
 public:
     int run;            // run
     int size;           // number of input samples per buffer
-    double* in;         // input buffer for resampler
-    double* out;        // output buffer for resampler
+    float* in;         // input buffer for resampler
+    float* out;        // output buffer for resampler
     int in_rate;
     int out_rate;
-    double fcin;
-    double fc;
-    double fc_low;
-    double gain;
+    float fcin;
+    float fc;
+    float fc_low;
+    float gain;
     int idx_in;         // index for input into ring
     int ncoefin;
     int ncoef;          // number of coefficients
     int L;              // interpolation factor
     int M;              // decimation factor
-    double* h;          // coefficients
+    float* h;          // coefficients
     int ringsize;       // number of complex pairs the ring buffer holds
-    double* ring;       // ring buffer
+    float* ring;       // ring buffer
     int cpp;            // coefficients of the phase
     int phnum;          // phase number
 
-    static RESAMPLE* create_resample (int run, int size, double* in, double* out, int in_rate, int out_rate, double fc, int ncoef, double gain);
+    static RESAMPLE* create_resample (int run, int size, float* in, float* out, int in_rate, int out_rate, float fc, int ncoef, float gain);
     static void destroy_resample (RESAMPLE *a);
     static void flush_resample (RESAMPLE *a);
     static int xresample (RESAMPLE *a);
-    static void setBuffers_resample (RESAMPLE *a, double* in, double* out);
+    static void setBuffers_resample (RESAMPLE *a, float* in, float* out);
     static void setSize_resample(RESAMPLE *a, int size);
     static void setInRate_resample(RESAMPLE *a, int rate);
     static void setOutRate_resample(RESAMPLE *a, int rate);
-    static void setFCLow_resample (RESAMPLE *a, double fc_low);
-    static void setBandwidth_resample (RESAMPLE *a, double fc_low, double fc_high);
+    static void setFCLow_resample (RESAMPLE *a, float fc_low);
+    static void setBandwidth_resample (RESAMPLE *a, float fc_low, float fc_high);
     // Exported calls
     static void* create_resampleV (int in_rate, int out_rate);
-    static void xresampleV (double* input, double* output, int numsamps, int* outsamps, void* ptr);
+    static void xresampleV (float* input, float* output, int numsamps, int* outsamps, void* ptr);
     static void destroy_resampleV (void* ptr);
 
 private:
@@ -106,9 +106,9 @@ public:
     int ncoef;          // number of coefficients
     int L;              // interpolation factor
     int M;              // decimation factor
-    double* h;          // coefficients
+    float* h;          // coefficients
     int ringsize;       // number of values the ring buffer holds
-    double* ring;       // ring buffer
+    float* ring;       // ring buffer
     int cpp;            // coefficients of the phase
     int phnum;          // phase number
 

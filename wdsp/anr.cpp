@@ -42,21 +42,21 @@ ANR* ANR::create_anr  (
     int run,
     int position,
     int buff_size,
-    double *in_buff,
-    double *out_buff,
+    float *in_buff,
+    float *out_buff,
     int dline_size,
     int n_taps,
     int delay,
-    double two_mu,
-    double gamma,
+    float two_mu,
+    float gamma,
 
-    double lidx,
-    double lidx_min,
-    double lidx_max,
-    double ngamma,
-    double den_mult,
-    double lincr,
-    double ldecr
+    float lidx,
+    float lidx_min,
+    float lidx_max,
+    float ngamma,
+    float den_mult,
+    float lincr,
+    float ldecr
 )
 {
     ANR *a = new ANR;
@@ -80,8 +80,8 @@ ANR* ANR::create_anr  (
     a->lincr = lincr;
     a->ldecr = ldecr;
 
-    memset (a->d, 0, sizeof(double) * ANR_DLINE_SIZE);
-    memset (a->w, 0, sizeof(double) * ANR_DLINE_SIZE);
+    memset (a->d, 0, sizeof(float) * ANR_DLINE_SIZE);
+    memset (a->w, 0, sizeof(float) * ANR_DLINE_SIZE);
 
     return a;
 }
@@ -94,9 +94,9 @@ void ANR::destroy_anr (ANR *a)
 void ANR::xanr (ANR *a, int position)
 {
     int i, j, idx;
-    double c0, c1;
-    double y, error, sigma, inv_sigp;
-    double nel, nev;
+    float c0, c1;
+    float y, error, sigma, inv_sigp;
+    float nel, nev;
     if (a->run && (a->position == position))
     {
         for (i = 0; i < a->buff_size; i++)
@@ -147,12 +147,12 @@ void ANR::xanr (ANR *a, int position)
 
 void ANR::flush_anr (ANR *a)
 {
-    memset (a->d, 0, sizeof(double) * ANR_DLINE_SIZE);
-    memset (a->w, 0, sizeof(double) * ANR_DLINE_SIZE);
+    memset (a->d, 0, sizeof(float) * ANR_DLINE_SIZE);
+    memset (a->w, 0, sizeof(float) * ANR_DLINE_SIZE);
     a->in_idx = 0;
 }
 
-void ANR::setBuffers_anr (ANR *a, double* in, double* out)
+void ANR::setBuffers_anr (ANR *a, float* in, float* out)
 {
     a->in_buff = in;
     a->out_buff = out;
@@ -190,7 +190,7 @@ void ANR::SetANRRun (RXA& rxa, int run)
     }
 }
 
-void ANR::SetANRVals (RXA& rxa, int taps, int delay, double gain, double leakage)
+void ANR::SetANRVals (RXA& rxa, int taps, int delay, float gain, float leakage)
 {
     rxa.csDSP.lock();
     rxa.anr.p->n_taps = taps;
@@ -217,7 +217,7 @@ void ANR::SetANRDelay (RXA& rxa, int delay)
     rxa.csDSP.unlock();
 }
 
-void ANR::SetANRGain (RXA& rxa, double gain)
+void ANR::SetANRGain (RXA& rxa, float gain)
 {
     rxa.csDSP.lock();
     rxa.anr.p->two_mu = gain;
@@ -225,7 +225,7 @@ void ANR::SetANRGain (RXA& rxa, double gain)
     rxa.csDSP.unlock();
 }
 
-void ANR::SetANRLeakage (RXA& rxa, double leakage)
+void ANR::SetANRLeakage (RXA& rxa, float leakage)
 {
     rxa.csDSP.lock();
     rxa.anr.p->gamma = leakage;

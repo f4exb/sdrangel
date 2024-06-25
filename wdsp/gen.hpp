@@ -40,132 +40,132 @@ class WDSP_API GEN
 public:
     int run;                    // run
     int size;                   // number of samples per buffer
-    double* in;                 // input buffer (retained in case I want to mix in a generated signal)
-    double* out;                // output buffer
-    double rate;                // sample rate
+    float* in;                 // input buffer (retained in case I want to mix in a generated signal)
+    float* out;                // output buffer
+    float rate;                // sample rate
     int mode;
     struct _tone
     {
-        double mag;
-        double freq;
-        double phs;
-        double delta;
-        double cosdelta;
-        double sindelta;
+        float mag;
+        float freq;
+        float phs;
+        float delta;
+        float cosdelta;
+        float sindelta;
     } tone;
     struct _tt
     {
-        double mag1;
-        double mag2;
-        double f1;
-        double f2;
-        double phs1;
-        double phs2;
-        double delta1;
-        double delta2;
-        double cosdelta1;
-        double cosdelta2;
-        double sindelta1;
-        double sindelta2;
+        float mag1;
+        float mag2;
+        float f1;
+        float f2;
+        float phs1;
+        float phs2;
+        float delta1;
+        float delta2;
+        float cosdelta1;
+        float cosdelta2;
+        float sindelta1;
+        float sindelta2;
     } tt;
     struct _noise
     {
-        double mag;
+        float mag;
     } noise;
     struct _sweep
     {
-        double mag;
-        double f1;
-        double f2;
-        double sweeprate;
-        double phs;
-        double dphs;
-        double d2phs;
-        double dphsmax;
+        float mag;
+        float f1;
+        float f2;
+        float sweeprate;
+        float phs;
+        float dphs;
+        float d2phs;
+        float dphsmax;
     } sweep;
     struct _saw
     {
-        double mag;
-        double f;
-        double period;
-        double delta;
-        double t;
+        float mag;
+        float f;
+        float period;
+        float delta;
+        float t;
     } saw;
     struct _tri
     {
-        double mag;
-        double f;
-        double period;
-        double half;
-        double delta;
-        double t;
-        double t1;
+        float mag;
+        float f;
+        float period;
+        float half;
+        float delta;
+        float t;
+        float t1;
     } tri;
     struct _pulse
     {
-        double mag;
-        double pf;
-        double pdutycycle;
-        double ptranstime;
-        double* ctrans;
+        float mag;
+        float pf;
+        float pdutycycle;
+        float ptranstime;
+        float* ctrans;
         int pcount;
         int pnon;
         int pntrans;
         int pnoff;
-        double pperiod;
-        double tf;
-        double tphs;
-        double tdelta;
-        double tcosdelta;
-        double tsindelta;
+        float pperiod;
+        float tf;
+        float tphs;
+        float tdelta;
+        float tcosdelta;
+        float tsindelta;
         int state;
     } pulse;
 
-    static GEN* create_gen (int run, int size, double* in, double* out, int rate, int mode);
+    static GEN* create_gen (int run, int size, float* in, float* out, int rate, int mode);
     static void destroy_gen (GEN *a);
     static void flush_gen (GEN *a);
     static void xgen (GEN *a);
-    static void setBuffers_gen (GEN *a, double* in, double* out);
+    static void setBuffers_gen (GEN *a, float* in, float* out);
     static void setSamplerate_gen (GEN *a, int rate);
     static void setSize_gen (GEN *a, int size);
     // RXA Properties
     static void SetPreGenRun (RXA& rxa, int run);
     static void SetPreGenMode (RXA& rxa, int mode);
-    static void SetPreGenToneMag (RXA& rxa, double mag);
-    static void SetPreGenToneFreq (RXA& rxa, double freq);
-    static void SetPreGenNoiseMag (RXA& rxa, double mag);
-    static void SetPreGenSweepMag (RXA& rxa, double mag);
-    static void SetPreGenSweepFreq (RXA& rxa, double freq1, double freq2);
-    static void SetPreGenSweepRate (RXA& rxa, double rate);
+    static void SetPreGenToneMag (RXA& rxa, float mag);
+    static void SetPreGenToneFreq (RXA& rxa, float freq);
+    static void SetPreGenNoiseMag (RXA& rxa, float mag);
+    static void SetPreGenSweepMag (RXA& rxa, float mag);
+    static void SetPreGenSweepFreq (RXA& rxa, float freq1, float freq2);
+    static void SetPreGenSweepRate (RXA& rxa, float rate);
     // TXA Properties
     static void SetPreGenRun (TXA& txa, int run);
     static void SetPreGenMode (TXA& txa, int mode);
-    static void SetPreGenToneMag (TXA& txa, double mag);
-    static void SetPreGenToneFreq (TXA& txa, double freq);
-    static void SetPreGenNoiseMag (TXA& txa, double mag);
-    static void SetPreGenSweepMag (TXA& txa, double mag);
-    static void SetPreGenSweepFreq (TXA& txal, double freq1, double freq2);
-    static void SetPreGenSweepRate (TXA& txa, double rate);
-    static void SetPreGenSawtoothMag (TXA& txa, double mag);
-    static void SetPreGenSawtoothFreq (TXA& txa, double freq);
-    static void SetPreGenTriangleMag (TXA& txa, double mag);
-    static void SetPreGenTriangleFreq (TXA& txa, double freq);
-    static void SetPreGenPulseMag (TXA& txa, double mag);
-    static void SetPreGenPulseFreq (TXA& txa, double freq);
-    static void SetPreGenPulseDutyCycle (TXA& txa, double dc);
-    static void SetPreGenPulseToneFreq (TXA& txa, double freq);
-    static void SetPreGenPulseTransition (TXA& txa, double transtime);
+    static void SetPreGenToneMag (TXA& txa, float mag);
+    static void SetPreGenToneFreq (TXA& txa, float freq);
+    static void SetPreGenNoiseMag (TXA& txa, float mag);
+    static void SetPreGenSweepMag (TXA& txa, float mag);
+    static void SetPreGenSweepFreq (TXA& txal, float freq1, float freq2);
+    static void SetPreGenSweepRate (TXA& txa, float rate);
+    static void SetPreGenSawtoothMag (TXA& txa, float mag);
+    static void SetPreGenSawtoothFreq (TXA& txa, float freq);
+    static void SetPreGenTriangleMag (TXA& txa, float mag);
+    static void SetPreGenTriangleFreq (TXA& txa, float freq);
+    static void SetPreGenPulseMag (TXA& txa, float mag);
+    static void SetPreGenPulseFreq (TXA& txa, float freq);
+    static void SetPreGenPulseDutyCycle (TXA& txa, float dc);
+    static void SetPreGenPulseToneFreq (TXA& txa, float freq);
+    static void SetPreGenPulseTransition (TXA& txa, float transtime);
     // 'PostGen', gen1
     static void SetPostGenRun (TXA& txa, int run);
     static void SetPostGenMode (TXA& txa, int mode);
-    static void SetPostGenToneMag (TXA& txa, double mag);
-    static void SetPostGenToneFreq (TXA& txa, double freq);
-    static void SetPostGenTTMag (TXA& txa, double mag1, double mag2);
+    static void SetPostGenToneMag (TXA& txa, float mag);
+    static void SetPostGenToneFreq (TXA& txa, float freq);
+    static void SetPostGenTTMag (TXA& txa, float mag1, float mag2);
     static void SetgenRun (TXA& txa, int run);
-    static void SetPostGenTTFreq (TXA& txa, double freq1, double freq2);
-    static void SetPostGenSweepMag (TXA& txa, double mag);
-    static void SetPostGenSweepFreq (TXA& txa, double freq1, double freq2);
-    static void SetPostGenSweepRate (TXA& txa, double rate);
+    static void SetPostGenTTFreq (TXA& txa, float freq1, float freq2);
+    static void SetPostGenSweepMag (TXA& txa, float mag);
+    static void SetPostGenSweepFreq (TXA& txa, float freq1, float freq2);
+    static void SetPostGenSweepRate (TXA& txa, float rate);
 
 private:
     static void calc_tone (GEN *a);

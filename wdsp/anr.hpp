@@ -42,60 +42,60 @@ public:
     int run;
     int position;
     int buff_size;
-    double *in_buff;
-    double *out_buff;
+    float *in_buff;
+    float *out_buff;
     int dline_size;
     int mask;
     int n_taps;
     int delay;
-    double two_mu;
-    double gamma;
-    double d [ANR_DLINE_SIZE];
-    double w [ANR_DLINE_SIZE];
+    float two_mu;
+    float gamma;
+    float d [ANR_DLINE_SIZE];
+    float w [ANR_DLINE_SIZE];
     int in_idx;
 
-    double lidx;
-    double lidx_min;
-    double lidx_max;
-    double ngamma;
-    double den_mult;
-    double lincr;
-    double ldecr;
+    float lidx;
+    float lidx_min;
+    float lidx_max;
+    float ngamma;
+    float den_mult;
+    float lincr;
+    float ldecr;
 
     static ANR* create_anr   (
         int run,
         int position,
         int buff_size,
-        double *in_buff,
-        double *out_buff,
+        float *in_buff,
+        float *out_buff,
         int dline_size,
         int n_taps,
         int delay,
-        double two_mu,
-        double gamma,
+        float two_mu,
+        float gamma,
 
-        double lidx,
-        double lidx_min,
-        double lidx_max,
-        double ngamma,
-        double den_mult,
-        double lincr,
-        double ldecr
+        float lidx,
+        float lidx_min,
+        float lidx_max,
+        float ngamma,
+        float den_mult,
+        float lincr,
+        float ldecr
     );
 
     static void destroy_anr (ANR *a);
     static void flush_anr (ANR *a);
     static void xanr (ANR *a, int position);
-    static void setBuffers_anr (ANR *a, double* in, double* out);
+    static void setBuffers_anr (ANR *a, float* in, float* out);
     static void setSamplerate_anr (ANR *a, int rate);
     static void setSize_anr (ANR *a, int size);
     // RXA Properties
     static void SetANRRun (RXA& rxa, int setit);
-    static void SetANRVals (RXA& rxa, int taps, int delay, double gain, double leakage);
+    static void SetANRVals (RXA& rxa, int taps, int delay, float gain, float leakage);
     static void SetANRTaps (RXA& rxa, int taps);
     static void SetANRDelay (RXA& rxa, int delay);
-    static void SetANRGain (RXA& rxa, double gain);
-    static void SetANRLeakage (RXA& rxa, double leakage);
+    static void SetANRGain (RXA& rxa, float gain);
+    static void SetANRLeakage (RXA& rxa, float leakage);
     static void SetANRPosition (RXA& rxa, int position);
 };
 

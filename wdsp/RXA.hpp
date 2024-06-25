@@ -97,7 +97,7 @@ public:
     };
 
     int mode;
-    double meter[RXA_METERTYPE_LAST];
+    float meter[RXA_METERTYPE_LAST];
     QRecursiveMutex *pmtupdate[RXA_METERTYPE_LAST];
     struct
     {
@@ -215,8 +215,8 @@ public:
     static void xrxa (RXA *rxa);
     int get_insize() const { return dsp_insize; }
     int get_outsize() const { return dsp_outsize; }
-    double *get_inbuff() { return inbuff; }
-    double *get_outbuff() { return outbuff; }
+    float *get_inbuff() { return inbuff; }
+    float *get_outbuff() { return outbuff; }
     void setSpectrumProbe(BufferProbe *_spectrumProbe);
     static void setInputSamplerate (RXA *rxa, int in_rate);
     static void setOutputSamplerate (RXA *rxa, int out_rate);
@@ -232,14 +232,14 @@ public:
     static void bpsnbaSet (RXA& rxa);
 
     // Collectives
-    static void SetPassband (RXA& rxa, double f_low, double f_high);
+    static void SetPassband (RXA& rxa, float f_low, float f_high);
     static void SetNC (RXA& rxa, int nc);
     static void SetMP (RXA& rxa, int mp);
 
 private:
-    double* inbuff;
-    double* midbuff;
-    double* outbuff;
+    float* inbuff;
+    float* midbuff;
+    float* outbuff;
 };
 
 } // namespace WDSP

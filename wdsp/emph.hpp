@@ -49,27 +49,27 @@ public:
     int size;
     int nc;
     int mp;
-    double* in;
-    double* out;
+    float* in;
+    float* out;
     int ctype;
-    double f_low;
-    double f_high;
-    double rate;
+    float f_low;
+    float f_high;
+    float rate;
     FIRCORE *p;
 
     static EMPHP* create_emphp (int run, int position, int size, int nc, int mp,
-        double* in, double* out, int rate, int ctype, double f_low, double f_high);
+        float* in, float* out, int rate, int ctype, float f_low, float f_high);
     static void destroy_emphp (EMPHP *a);
     static void flush_emphp (EMPHP *a);
     static void xemphp (EMPHP *a, int position);
-    static void setBuffers_emphp (EMPHP *a, double* in, double* out);
+    static void setBuffers_emphp (EMPHP *a, float* in, float* out);
     static void setSamplerate_emphp (EMPHP *a, int rate);
     static void setSize_emphp (EMPHP *a, int size);
     // TXA Properties
     static void SetFMEmphPosition (TXA& txa, int position);
     static void SetFMEmphMP (TXA& txa, int mp);
     static void SetFMEmphNC (TXA& txa, int nc);
-    static void SetFMPreEmphFreqs(TXA& txa, double low, double high);
+    static void SetFMPreEmphFreqs(TXA& txa, float low, float high);
 };
 
 } // namespace WDSP
@@ -95,23 +95,23 @@ class WDSP_API EMPH
     int run;
     int position;
     int size;
-    double* in;
-    double* out;
+    float* in;
+    float* out;
     int ctype;
-    double f_low;
-    double f_high;
-    double* infilt;
-    double* product;
-    double* mults;
-    double rate;
-    fftw_plan CFor;
-    fftw_plan CRev;
+    float f_low;
+    float f_high;
+    float* infilt;
+    float* product;
+    float* mults;
+    float rate;
+    fftwf_plan CFor;
+    fftwf_plan CRev;
 
-    static EMPH* create_emph (int run, int position, int size, double* in, double* out, int rate, int ctype, double f_low, double f_high);
+    static EMPH* create_emph (int run, int position, int size, float* in, float* out, int rate, int ctype, float f_low, float f_high);
     static void destroy_emph (EMPH *a);
     static void flush_emph (EMPH *a);
     static void xemph (EMPH *a, int position);
-    static void setBuffers_emph (EMPH *a, double* in, double* out);
+    static void setBuffers_emph (EMPH *a, float* in, float* out);
     static void setSamplerate_emph (EMPH *a, int rate);
     static void setSize_emph (EMPH *a, int size);
 

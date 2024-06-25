@@ -40,22 +40,22 @@ public:
     int run;
     int* prun;
     int size;
-    double* in;
-    double* out;
-    double Igain;
-    double Qgain;
+    float* in;
+    float* out;
+    float Igain;
+    float Qgain;
     QRecursiveMutex cs_update;
 
-    static GAIN* create_gain (int run, int* prun, int size, double* in, double* out, double Igain, double Qgain);
+    static GAIN* create_gain (int run, int* prun, int size, float* in, float* out, float Igain, float Qgain);
     static void destroy_gain (GAIN *a);
     static void flush_gain (GAIN *a);
     static void xgain (GAIN *a);
-    static void setBuffers_gain (GAIN *a, double* in, double* out);
+    static void setBuffers_gain (GAIN *a, float* in, float* out);
     static void setSamplerate_gain (GAIN *a, int rate);
     static void setSize_gain (GAIN *a, int size);
     // TXA Properties
     // POINTER-BASED Properties
-    static void pSetTXOutputLevel (GAIN *a, double level);
+    static void pSetTXOutputLevel (GAIN *a, float level);
     static void pSetTXOutputLevelRun (GAIN *a, int run);
     static void pSetTXOutputLevelSize (GAIN *a, int size);
 };

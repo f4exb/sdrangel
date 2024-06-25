@@ -41,8 +41,8 @@ void OSCTRL::calc_osctrl (OSCTRL *a)
     if ((a->pn & 1) == 0) a->pn += 1;
     if (a->pn < 3) a->pn = 3;
     a->dl_len = a->pn >> 1;
-    a->dl    = new double[a->pn * 2]; // (double *) malloc0 (a->pn * sizeof (complex));
-    a->dlenv = new double[a->pn]; // (double *) malloc0 (a->pn * sizeof (double));
+    a->dl    = new float[a->pn * 2]; // (float *) malloc0 (a->pn * sizeof (complex));
+    a->dlenv = new float[a->pn]; // (float *) malloc0 (a->pn * sizeof (float));
     a->in_idx = 0;
     a->out_idx = a->in_idx + a->dl_len;
     a->max_env = 0.0;
@@ -57,10 +57,10 @@ void OSCTRL::decalc_osctrl (OSCTRL *a)
 OSCTRL* OSCTRL::create_osctrl (
     int run,
     int size,
-    double* inbuff,
-    double* outbuff,
+    float* inbuff,
+    float* outbuff,
     int rate,
-    double osgain
+    float osgain
 )
 {
     OSCTRL *a = new OSCTRL;
@@ -84,7 +84,7 @@ void OSCTRL::destroy_osctrl (OSCTRL *a)
 void OSCTRL::flush_osctrl (OSCTRL *a)
 {
     memset (a->dl,    0, a->dl_len * sizeof (wcomplex));
-    memset (a->dlenv, 0, a->pn     * sizeof (double));
+    memset (a->dlenv, 0, a->pn     * sizeof (float));
 }
 
 void OSCTRL::xosctrl (OSCTRL *a)
@@ -92,7 +92,7 @@ void OSCTRL::xosctrl (OSCTRL *a)
     if (a->run)
     {
         int i, j;
-        double divisor;
+        float divisor;
         for (i = 0; i < a->size; i++)
         {
             a->dl[2 * a->in_idx + 0] = a->inbuff[2 * i + 0];                            // put sample in delay line
@@ -119,7 +119,7 @@ void OSCTRL::xosctrl (OSCTRL *a)
         memcpy (a->outbuff, a->inbuff, a->size * sizeof (wcomplex));
 }
 
-void OSCTRL::setBuffers_osctrl (OSCTRL *a, double* in, double* out)
+void OSCTRL::setBuffers_osctrl (OSCTRL *a, float* in, float* out)
 {
     a->inbuff = in;
     a->outbuff = out;

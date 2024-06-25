@@ -51,10 +51,10 @@ public:
     QRecursiveMutex csDSP;      // used to block dsp while parameters are updated or buffers flushed
     QRecursiveMutex csEXCH;     // used to block fexchange() while parameters are updated or buffers flushed
     int state;                  // 0 for channel OFF; 1 for channel ON
-    double tdelayup;
-    double tslewup;
-    double tdelaydown;
-    double tslewdown;
+    float tdelayup;
+    float tslewup;
+    float tdelaydown;
+    float tslewdown;
     int bfo;                    // 'block_for_output', block fexchange until output is available
     volatile long flushflag;
     QThread channelThread;
@@ -74,10 +74,10 @@ public:
         int output_samplerate,
         int type,
         int state,
-        double tdelayup,
-        double tslewup,
-        double tdelaydown,
-        double tslewdown,
+        float tdelayup,
+        float tslewup,
+        float tdelaydown,
+        float tslewdown,
         int bfo
     );
     static void destroy_channel (int channel);

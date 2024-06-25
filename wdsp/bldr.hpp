@@ -35,47 +35,47 @@ namespace WDSP {
 class WDSP_API BLDR
 {
 public:
-    double* catxy;
-    double* sx;
-    double* sy;
-    double* h;
+    float* catxy;
+    float* sx;
+    float* sy;
+    float* h;
     int* p;
     int* np;
-    double* taa;
-    double* tab;
-    double* tag;
-    double* tad;
-    double* tbb;
-    double* tbg;
-    double* tbd;
-    double* tgg;
-    double* tgd;
-    double* tdd;
-    double* A;
-    double* B;
-    double* C;
-    double* D;
-    double* E;
-    double* F;
-    double* G;
-    double* MAT;
-    double* RHS;
-    double* SLN;
-    double* z;
-    double* zp;
-    double* wrk;
+    float* taa;
+    float* tab;
+    float* tag;
+    float* tad;
+    float* tbb;
+    float* tbg;
+    float* tbd;
+    float* tgg;
+    float* tgd;
+    float* tdd;
+    float* A;
+    float* B;
+    float* C;
+    float* D;
+    float* E;
+    float* F;
+    float* G;
+    float* MAT;
+    float* RHS;
+    float* SLN;
+    float* z;
+    float* zp;
+    float* wrk;
     int* ipiv;
 
     static BLDR* create_builder(int points, int ints);
     static void destroy_builder(BLDR *a);
     static void flush_builder(BLDR *a, int points, int ints);
-    static void xbuilder(BLDR *a, int points, double* x, double* y, int ints, double* t, int* info, double* c, double ptol);
+    static void xbuilder(BLDR *a, int points, float* x, float* y, int ints, float* t, int* info, float* c, float ptol);
 
 private:
     static int fcompare(const void* a, const void* b);
-    static void decomp(int n, double* a, int* piv, int* info, double* wrk);
-    static void dsolve(int n, double* a, int* piv, double* b, double* x);
-    static void cull(int* n, int ints, double* x, double* t, double ptol);
+    static void decomp(int n, float* a, int* piv, int* info, float* wrk);
+    static void dsolve(int n, float* a, int* piv, float* b, float* x);
+    static void cull(int* n, int ints, float* x, float* t, float ptol);
 };
 
 } // namespace WDSP

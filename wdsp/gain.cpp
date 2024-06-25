@@ -30,7 +30,7 @@ warren@wpratt.com
 
 namespace WDSP {
 
-GAIN* GAIN::create_gain (int run, int* prun, int size, double* in, double* out, double Igain, double Qgain)
+GAIN* GAIN::create_gain (int run, int* prun, int size, float* in, float* out, float Igain, float Qgain)
 {
     GAIN *a = new GAIN;
     a->run = run;
@@ -75,7 +75,7 @@ void GAIN::xgain (GAIN *a)
     a->cs_update.unlock();
 }
 
-void GAIN::setBuffers_gain (GAIN *a, double* in, double* out)
+void GAIN::setBuffers_gain (GAIN *a, float* in, float* out)
 {
     a->in = in;
     a->out = out;
@@ -97,7 +97,7 @@ void GAIN::setSize_gain (GAIN *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void GAIN::pSetTXOutputLevel (GAIN *a, double level)
+void GAIN::pSetTXOutputLevel (GAIN *a, float level)
 {
     a->cs_update.lock();
     a->Igain = level;

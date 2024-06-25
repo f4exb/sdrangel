@@ -39,7 +39,7 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-FTOV* FTOV::create_ftov (int run, int size, int rate, int rsize, double fmax, double* in, double* out)
+FTOV* FTOV::create_ftov (int run, int size, int rate, int rsize, float fmax, float* in, float* out)
 {
     FTOV *a = new FTOV;
     a->run = run;
@@ -92,7 +92,7 @@ void FTOV::xftov (FTOV *a)
             a->rcount++;                                        // increment the count
         }
         if (++a->rptr == a->rsize) a->rptr = 0;                 // increment and wrap the pointer as needed
-        a->out[0] = std::min (1.0, (double)a->rcount / a->div);      // calculate the output sample
+        a->out[0] = std::min (1.0f, (float)a->rcount / a->div);      // calculate the output sample
         a->inlast = a->in[a->size - 1];                         // save the last input sample for next buffer
         for (int i = 1; i < a->size; i++)
         {
@@ -108,7 +108,7 @@ void FTOV::xftov (FTOV *a)
                 a->rcount++;                                    // increment the count
             }
             if (++a->rptr == a->rsize) a->rptr = 0;             // increment and wrap the pointer as needed
-            a->out[i] = std::min(1.0, (double)a->rcount / a->div);   // calculate the output sample
+            a->out[i] = std::min(1.0f, (float)a->rcount / a->div);   // calculate the output sample
         }
     }
 }
@@ -120,15 +120,15 @@ void FTOV::xftov (FTOV *a)
 void SSQL::compute_ssql_slews(SSQL *a)
 {
     int i;
-    double delta, theta;
-    delta = PI / (double)a->ntup;
+    float delta, theta;
+    delta = PI / (float)a->ntup;
     theta = 0.0;
     for (i = 0; i <= a->ntup; i++)
     {
         a->cup[i] = a->muted_gain + (1.0 - a->muted_gain) * 0.5 * (1.0 - cos(theta));
         theta += delta;
     }
-    delta = PI / (double)a->ntdown;
+    delta = PI / (float)a->ntdown;
     theta = 0.0;
     for (i = 0; i <= a->ntdown; i++)
     {
@@ -139,12 +139,12 @@ void SSQL::compute_ssql_slews(SSQL *a)
 
 void SSQL::calc_ssql (SSQL *a)
 {
-    a->b1 = new double[a->size * 2]; // (double*) malloc0 (a->size * sizeof (complex));
+    a->b1 = new float[a->size * 2]; // (float*) malloc0 (a->size * sizeof (complex));
     a->dcbl = CBL::create_cbl (1, a->size, a->in, a->b1, 0, a->rate, 0.02);
-    a->ibuff = new double[a->size]; // (double*) malloc0 (a->size * sizeof (double));
-    a->ftovbuff = new double[a->size]; // (double*) malloc0(a->size * sizeof (double));
+    a->ibuff = new float[a->size]; // (float*) malloc0 (a->size * sizeof (float));
+    a->ftovbuff = new float[a->size]; // (float*) malloc0(a->size * sizeof (float));
     a->cvtr = FTOV::create_ftov (1, a->size, a->rate, a->ftov_rsize, a->ftov_fmax, a->ibuff, a->ftovbuff);
-    a->lpbuff = new double[a->size]; // (double*) malloc0 (a->size * sizeof (double));
+    a->lpbuff = new float[a->size]; // (float*) malloc0 (a->size * sizeof (float));
     a->filt = DBQLP::create_dbqlp (1, a->size, a->ftovbuff, a->lpbuff, a->rate, 11.3, 1.0, 1.0, 1);
     a->wdbuff = new int[a->size]; // (int*) malloc0 (a->size * sizeof (int));
     a->tr_signal = new int[a->size]; // (int*) malloc0 (a->size * sizeof (int));
@@ -158,8 +158,8 @@ void SSQL::calc_ssql (SSQL *a)
     // level change
     a->ntup = (int)(a->tup * a->rate);
     a->ntdown = (int)(a->tdown * a->rate);
-    a->cup = new double[a->ntup + 1]; // (double*) malloc0 ((a->ntup + 1) * sizeof (double));
-    a->cdown = new double[a->ntdown + 1]; // (double*) malloc0 ((a->ntdown + 1) * sizeof (double));
+    a->cup = new float[a->ntup + 1]; // (float*) malloc0 ((a->ntup + 1) * sizeof (float));
+    a->cdown = new float[a->ntdown + 1]; // (float*) malloc0 ((a->ntdown + 1) * sizeof (float));
     compute_ssql_slews (a);
     // control
     a->state = 0;
@@ -184,18 +184,18 @@ void SSQL::decalc_ssql (SSQL *a)
 SSQL* SSQL::create_ssql (
     int run,
     int size,
-    double* in,
-    double* out,
+    float* in,
+    float* out,
     int rate,
-    double tup,
-    double tdown,
-    double muted_gain,
-    double tau_mute,
-    double tau_unmute,
-    double wthresh,
-    double tr_thresh,
+    float tup,
+    float tdown,
+    float muted_gain,
+    float tau_mute,
+    float tau_unmute,
+    float wthresh,
+    float tr_thresh,
     int rsize,
-    double fmax
+    float fmax
 )
 {
     SSQL *a = new SSQL;
@@ -231,10 +231,10 @@ void SSQL::flush_ssql (SSQL *a)
 
     memset (a->b1, 0, a->size * sizeof (wcomplex));
     CBL::flush_cbl (a->dcbl);
-    memset (a->ibuff, 0, a->size * sizeof (double));
-    memset (a->ftovbuff, 0, a->size * sizeof (double));
+    memset (a->ibuff, 0, a->size * sizeof (float));
+    memset (a->ftovbuff, 0, a->size * sizeof (float));
     FTOV::flush_ftov (a->cvtr);
-    memset (a->lpbuff, 0, a->size * sizeof (double));
+    memset (a->lpbuff, 0, a->size * sizeof (float));
     DBQLP::flush_dbqlp (a->filt);
     memset (a->wdbuff, 0, a->size * sizeof (int));
     memset (a->tr_signal, 0, a->size * sizeof (int));
@@ -320,7 +320,7 @@ void SSQL::xssql (SSQL *a)
         memcpy (a->out, a->in, a->size * sizeof(wcomplex));
 }
 
-void SSQL::setBuffers_ssql (SSQL *a, double* in, double* out)
+void SSQL::setBuffers_ssql (SSQL *a, float* in, float* out)
 {
     decalc_ssql (a);
     a->in = in;
@@ -355,7 +355,7 @@ void SSQL::SetSSQLRun (RXA& rxa, int run)
     rxa.csDSP.unlock();
 }
 
-void SSQL::SetSSQLThreshold (RXA& rxa, double threshold)
+void SSQL::SetSSQLThreshold (RXA& rxa, float threshold)
 {
     // 'threshold' should be between 0.0 and 1.0
     // WU2O testing:  0.16 is a good default for 'threshold'; => 0.08 for 'wthresh'
@@ -364,7 +364,7 @@ void SSQL::SetSSQLThreshold (RXA& rxa, double threshold)
     rxa.csDSP.unlock();
 }
 
-void SSQL::SetSSQLTauMute (RXA& rxa, double tau_mute)
+void SSQL::SetSSQLTauMute (RXA& rxa, float tau_mute)
 {
     // reasonable (wide) range is 0.1 to 2.0
     // WU2O testing:  0.1 is good default value
@@ -375,7 +375,7 @@ void SSQL::SetSSQLTauMute (RXA& rxa, double tau_mute)
     rxa.csDSP.unlock();
 }
 
-void SSQL::SetSSQLTauUnMute (RXA& rxa, double tau_unmute)
+void SSQL::SetSSQLTauUnMute (RXA& rxa, float tau_unmute)
 {
     // reasonable (wide) range is 0.1 to 1.0
     // WU2O testing:  0.1 is good default value

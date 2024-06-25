@@ -54,7 +54,7 @@ warren@wpratt.com
 #define dMAX_PIXELS                     16384               // maximum number of pixels that can be requested
 #define dMAX_AVERAGE                    60                  // maximum number of pixel frames that will be window-averaged
 #ifdef _Thetis
-#define dINREAL                         double
+#define dINREAL                         float
 #else
 #define dINREAL                         float
 #endif
@@ -76,7 +76,7 @@ warren@wpratt.com
 
 namespace WDSP {
 // miscellaneous
-typedef double wcomplex[2];
+typedef float wcomplex[2];
 }
 
 #include <string.h>

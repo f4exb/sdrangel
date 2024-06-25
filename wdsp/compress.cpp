@@ -37,9 +37,9 @@ namespace WDSP {
 COMPRESSOR* create_compressor (
                 int run,
                 int buffsize,
-                double* inbuff,
-                double* outbuff,
-                double gain )
+                float* inbuff,
+                float* outbuff,
+                float gain )
 {
     COMPRESSOR *a = new COMPRESSOR;
     a->run = run;
@@ -62,7 +62,7 @@ void COMPRESSOR::flush_compressor (COMPRESSOR *)
 void COMPRESSOR::xcompressor (COMPRESSOR *a)
 {
     int i;
-    double mag;
+    float mag;
     if (a->run)
         for (i = 0; i < a->buffsize; i++)
         {
@@ -77,7 +77,7 @@ void COMPRESSOR::xcompressor (COMPRESSOR *a)
         memcpy(a->outbuff, a->inbuff, a->buffsize * sizeof (wcomplex));
 }
 
-void COMPRESSOR::setBuffers_compressor (COMPRESSOR *a, double* in, double* out)
+void COMPRESSOR::setBuffers_compressor (COMPRESSOR *a, float* in, float* out)
 {
     a->inbuff = in;
     a->outbuff = out;
@@ -109,7 +109,7 @@ void COMPRESSOR::SetCompressorRun (TXA& txa, int run)
     }
 }
 
-void COMPRESSOR::SetCompressorGain (TXA& txa, double gain)
+void COMPRESSOR::SetCompressorGain (TXA& txa, float gain)
 {
     txa.csDSP.lock();
     txa.compressor.p->gain = pow (10.0, gain / 20.0);

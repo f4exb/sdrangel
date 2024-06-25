@@ -31,33 +31,33 @@ warren@pratt.one
 
 namespace WDSP {
 
-double* FIR::fftcv_mults (int NM, double* c_impulse)
+float* FIR::fftcv_mults (int NM, float* c_impulse)
 {
-    double* mults        = new double[NM * 2]; // (double *) malloc0 (NM * sizeof (wcomplex));
-    double* cfft_impulse = new double[NM * 2]; // (double *) malloc0 (NM * sizeof (wcomplex));
-    fftw_plan ptmp = fftw_plan_dft_1d(NM, (fftw_complex *) cfft_impulse,
-            (fftw_complex *) mults, FFTW_FORWARD, FFTW_PATIENT);
+    float* mults        = new float[NM * 2]; // (float *) malloc0 (NM * sizeof (wcomplex));
+    float* cfft_impulse = new float[NM * 2]; // (float *) malloc0 (NM * sizeof (wcomplex));
+    fftwf_plan ptmp = fftwf_plan_dft_1d(NM, (fftwf_complex *) cfft_impulse,
+            (fftwf_complex *) mults, FFTW_FORWARD, FFTW_PATIENT);
     memset (cfft_impulse, 0, NM * sizeof (wcomplex));
     // store complex coefs right-justified in the buffer
     memcpy (&(cfft_impulse[NM - 2]), c_impulse, (NM / 2 + 1) * sizeof(wcomplex));
-    fftw_execute (ptmp);
-    fftw_destroy_plan (ptmp);
+    fftwf_execute (ptmp);
+    fftwf_destroy_plan (ptmp);
     delete[] cfft_impulse;
     return mults;
 }
 
-double* FIR::get_fsamp_window(int N, int wintype)
+float* FIR::get_fsamp_window(int N, int wintype)
 {
     int i;
-    double arg0, arg1;
-    double* window = new double[N]; // (double *) malloc0 (N * sizeof(double));
+    float arg0, arg1;
+    float* window = new float[N]; // (float *) malloc0 (N * sizeof(float));
     switch (wintype)
     {
     case 0:
-        arg0 = 2.0 * PI / ((double)N - 1.0);
+        arg0 = 2.0 * PI / ((float)N - 1.0);
         for (i = 0; i < N; i++)
         {
-            arg1 = cos(arg0 * (double)i);
+            arg1 = cos(arg0 * (float)i);
             window[i]  =   +0.21747
                 + arg1 *  (-0.45325
                 + arg1 *  (+0.28256
@@ -65,10 +65,10 @@ double* FIR::get_fsamp_window(int N, int wintype)
         }
         break;
     case 1:
-        arg0 = 2.0 * PI / ((double)N - 1.0);
+        arg0 = 2.0 * PI / ((float)N - 1.0);
         for (i = 0; i < N; ++i)
         {
-            arg1 = cos(arg0 * (double)i);
+            arg1 = cos(arg0 * (float)i);
             window[i]  =   +6.3964424114390378e-02
                 + arg1 *  (-2.3993864599352804e-01
                 + arg1 *  (+3.5015956323820469e-01
@@ -85,20 +85,20 @@ double* FIR::get_fsamp_window(int N, int wintype)
     return window;
 }
 
-double* FIR::fir_fsamp_odd (int N, double* A, int rtype, double scale, int wintype)
+float* FIR::fir_fsamp_odd (int N, float* A, int rtype, float scale, int wintype)
 {
     int i, j;
     int mid = (N - 1) / 2;
-    double mag, phs;
-    double* window;
-    double *fcoef     = new double[N * 2]; // (double *) malloc0 (N * sizeof (wcomplex));
-    double *c_impulse = new double[N * 2]; // (double *) malloc0 (N * sizeof (wcomplex));
-    fftw_plan ptmp = fftw_plan_dft_1d(N, (fftw_complex *)fcoef, (fftw_complex *)c_impulse, FFTW_BACKWARD, FFTW_PATIENT);
-    double local_scale = 1.0 / (double)N;
+    float mag, phs;
+    float* window;
+    float *fcoef     = new float[N * 2]; // (float *) malloc0 (N * sizeof (wcomplex));
+    float *c_impulse = new float[N * 2]; // (float *) malloc0 (N * sizeof (wcomplex));
+    fftwf_plan ptmp = fftwf_plan_dft_1d(N, (fftwf_complex *)fcoef, (fftwf_complex *)c_impulse, FFTW_BACKWARD, FFTW_PATIENT);
+    float local_scale = 1.0 / (float)N;
     for (i = 0; i <= mid; i++)
     {
         mag = A[i] * local_scale;
-        phs = - (double)mid * TWOPI * (double)i / (double)N;
+        phs = - (float)mid * TWOPI * (float)i / (float)N;
         fcoef[2 * i + 0] = mag * cos (phs);
         fcoef[2 * i + 1] = mag * sin (phs);
     }
@@ -107,8 +107,8 @@ double* FIR::fir_fsamp_odd (int N, double* A, int rtype, double scale, int winty
         fcoef[2 * i + 0] = + fcoef[2 * (mid - j) + 0];
         fcoef[2 * i + 1] = - fcoef[2 * (mid - j) + 1];
     }
-    fftw_execute (ptmp);
-    fftw_destroy_plan (ptmp);
+    fftwf_execute (ptmp);
+    fftwf_destroy_plan (ptmp);
     delete[] fcoef;
     window = get_fsamp_window(N, wintype);
     switch (rtype)
@@ -129,12 +129,12 @@ double* FIR::fir_fsamp_odd (int N, double* A, int rtype, double scale, int winty
     return c_impulse;
 }
 
-double* FIR::fir_fsamp (int N, double* A, int rtype, double scale, int wintype)
+float* FIR::fir_fsamp (int N, float* A, int rtype, float scale, int wintype)
 {
     int n, i, j, k;
-    double sum;
-    double* window;
-    double *c_impulse = new double[N * 2]; // (double *) malloc0 (N * sizeof (complex));
+    float sum;
+    float* window;
+    float *c_impulse = new float[N * 2]; // (float *) malloc0 (N * sizeof (complex));
 
     if (N & 1)
     {
@@ -155,7 +155,7 @@ double* FIR::fir_fsamp (int N, double* A, int rtype, double scale, int wintype)
     }
     else
     {
-        double M = (double)(N - 1) / 2.0;
+        float M = (float)(N - 1) / 2.0;
         for (n = 0; n < N / 2; n++)
         {
             sum = 0.0;
@@ -189,18 +189,18 @@ double* FIR::fir_fsamp (int N, double* A, int rtype, double scale, int wintype)
     return c_impulse;
 }
 
-double* FIR::fir_bandpass (int N, double f_low, double f_high, double samplerate, int wintype, int rtype, double scale)
+float* FIR::fir_bandpass (int N, float f_low, float f_high, float samplerate, int wintype, int rtype, float scale)
 {
-    double *c_impulse = new double[N * 2]; // (double *) malloc0 (N * sizeof (complex));
-    double ft = (f_high - f_low) / (2.0 * samplerate);
-    double ft_rad = TWOPI * ft;
-    double w_osc = PI * (f_high + f_low) / samplerate;
+    float *c_impulse = new float[N * 2]; // (float *) malloc0 (N * sizeof (complex));
+    float ft = (f_high - f_low) / (2.0 * samplerate);
+    float ft_rad = TWOPI * ft;
+    float w_osc = PI * (f_high + f_low) / samplerate;
     int i, j;
-    double m = 0.5 * (double)(N - 1);
-    double delta = PI / m;
-    double cosphi;
-    double posi, posj;
-    double sinc, window, coef;
+    float m = 0.5 * (float)(N - 1);
+    float delta = PI / m;
+    float cosphi;
+    float posi, posj;
+    float sinc, window, coef;
 
     if (N & 1)
     {
@@ -217,8 +217,8 @@ double* FIR::fir_bandpass (int N, double f_low, double f_high, double samplerate
     }
     for (i = (N + 1) / 2, j = N / 2 - 1; i < N; i++, j--)
     {
-        posi = (double)i - m;
-        posj = (double)j - m;
+        posi = (float)i - m;
+        posj = (float)j - m;
         sinc = sin (ft_rad * posi) / (PI * posi);
         switch (wintype)
         {
@@ -258,7 +258,7 @@ double* FIR::fir_bandpass (int N, double f_low, double f_high, double samplerate
     return c_impulse;
 }
 
-double *FIR::fir_read (int N, const char *filename, int rtype, double scale)
+float *FIR::fir_read (int N, const char *filename, int rtype, float scale)
     // N = number of real or complex coefficients (see rtype)
     // *filename = filename
     // rtype = 0:  real coefficients
@@ -269,8 +269,8 @@ double *FIR::fir_read (int N, const char *filename, int rtype, double scale)
 {
     FILE *file;
     int i;
-    double I, Q;
-    double *c_impulse = new double[N * 2]; // (double *) malloc0 (N * sizeof (complex));
+    float I, Q;
+    float *c_impulse = new float[N * 2]; // (float *) malloc0 (N * sizeof (complex));
     file = fopen (filename, "r");
     for (i = 0; i < N; i++)
     {
@@ -280,16 +280,16 @@ double *FIR::fir_read (int N, const char *filename, int rtype, double scale)
         {
         case 0:
         {
-            int r = fscanf (file, "%le", &I);
+            int r = fscanf (file, "%e", &I);
             fprintf(stderr, "^%d parameters read\n", r);
             c_impulse[i] = + scale * I;
             break;
         }
         case 1:
         {
-            int r = fscanf (file, "%le", &I);
+            int r = fscanf (file, "%e", &I);
             fprintf(stderr, "%d parameters read\n", r);
-            r = fscanf (file, "%le", &Q);
+            r = fscanf (file, "%e", &Q);
             fprintf(stderr, "%d parameters read\n", r);
             c_impulse[2 * i + 0] = + scale * I;
             c_impulse[2 * i + 1] = - scale * Q;
@@ -301,17 +301,17 @@ double *FIR::fir_read (int N, const char *filename, int rtype, double scale)
     return c_impulse;
 }
 
-void FIR::analytic (int N, double* in, double* out)
+void FIR::analytic (int N, float* in, float* out)
 {
     int i;
-    double inv_N = 1.0 / (double)N;
-    double two_inv_N = 2.0 * inv_N;
-    double* x = new double[N * 2]; // (double *) malloc0 (N * sizeof (complex));
-    fftw_plan pfor = fftw_plan_dft_1d (N, (fftw_complex *) in,
-            (fftw_complex *) x, FFTW_FORWARD, FFTW_PATIENT);
-    fftw_plan prev = fftw_plan_dft_1d (N, (fftw_complex *) x,
-            (fftw_complex *) out, FFTW_BACKWARD, FFTW_PATIENT);
-    fftw_execute (pfor);
+    float inv_N = 1.0 / (float)N;
+    float two_inv_N = 2.0 * inv_N;
+    float* x = new float[N * 2]; // (float *) malloc0 (N * sizeof (complex));
+    fftwf_plan pfor = fftwf_plan_dft_1d (N, (fftwf_complex *) in,
+            (fftwf_complex *) x, FFTW_FORWARD, FFTW_PATIENT);
+    fftwf_plan prev = fftwf_plan_dft_1d (N, (fftwf_complex *) x,
+            (fftwf_complex *) out, FFTW_BACKWARD, FFTW_PATIENT);
+    fftwf_execute (pfor);
     x[0] *= inv_N;
     x[1] *= inv_N;
     for (i = 1; i < N / 2; i++)
@@ -321,31 +321,31 @@ void FIR::analytic (int N, double* in, double* out)
     }
     x[N + 0] *= inv_N;
     x[N + 1] *= inv_N;
-    memset (&x[N + 2], 0, (N - 2) * sizeof (double));
-    fftw_execute (prev);
-    fftw_destroy_plan (prev);
-    fftw_destroy_plan (pfor);
+    memset (&x[N + 2], 0, (N - 2) * sizeof (float));
+    fftwf_execute (prev);
+    fftwf_destroy_plan (prev);
+    fftwf_destroy_plan (pfor);
     delete[] x;
 }
 
-void FIR::mp_imp (int N, double* fir, double* mpfir, int pfactor, int polarity)
+void FIR::mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity)
 {
     int i;
     int size = N * pfactor;
-    double inv_PN = 1.0 / (double)size;
-    double* firpad  = new double[size * 2]; // (double *) malloc0 (size * sizeof (complex));
-    double* firfreq = new double[size * 2]; // (double *) malloc0 (size * sizeof (complex));
-    double* mag     = new double[size]; // (double *) malloc0 (size * sizeof (double));
-    double* ana     = new double[size * 2]; // (double *) malloc0 (size * sizeof (complex));
-    double* impulse = new double[size * 2]; // (double *) malloc0 (size * sizeof (complex));
-    double* newfreq = new double[size * 2]; // (double *) malloc0 (size * sizeof (complex));
+    float inv_PN = 1.0 / (float)size;
+    float* firpad  = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
+    float* firfreq = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
+    float* mag     = new float[size]; // (float *) malloc0 (size * sizeof (float));
+    float* ana     = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
+    float* impulse = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
+    float* newfreq = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
     memcpy (firpad, fir, N * sizeof (wcomplex));
-    fftw_plan pfor = fftw_plan_dft_1d (size, (fftw_complex *) firpad,
-            (fftw_complex *) firfreq, FFTW_FORWARD, FFTW_PATIENT);
-    fftw_plan prev = fftw_plan_dft_1d (size, (fftw_complex *) newfreq,
-            (fftw_complex *) impulse, FFTW_BACKWARD, FFTW_PATIENT);
+    fftwf_plan pfor = fftwf_plan_dft_1d (size, (fftwf_complex *) firpad,
+            (fftwf_complex *) firfreq, FFTW_FORWARD, FFTW_PATIENT);
+    fftwf_plan prev = fftwf_plan_dft_1d (size, (fftwf_complex *) newfreq,
+            (fftwf_complex *) impulse, FFTW_BACKWARD, FFTW_PATIENT);
     // print_impulse("orig_imp.txt", N, fir, 1, 0);
-    fftw_execute (pfor);
+    fftwf_execute (pfor);
     for (i = 0; i < size; i++)
     {
         mag[i] = sqrt (firfreq[2 * i + 0] * firfreq[2 * i + 0] + firfreq[2 * i + 1] * firfreq[2 * i + 1]) * inv_PN;
@@ -363,14 +363,14 @@ void FIR::mp_imp (int N, double* fir, double* mpfir, int pfactor, int polarity)
         else
             newfreq[2 * i + 1] = - mag[i] * sin (ana[2 * i + 1]);
     }
-    fftw_execute (prev);
+    fftwf_execute (prev);
     if (polarity)
         memcpy (mpfir, &impulse[2 * (pfactor - 1) * N], N * sizeof (wcomplex));
     else
         memcpy (mpfir, impulse, N * sizeof (wcomplex));
     // print_impulse("min_imp.txt", N, mpfir, 1, 0);
-    fftw_destroy_plan (prev);
-    fftw_destroy_plan (pfor);
+    fftwf_destroy_plan (prev);
+    fftwf_destroy_plan (pfor);
     delete[] (newfreq);
     delete[] (impulse);
     delete[] (ana);
@@ -381,21 +381,21 @@ void FIR::mp_imp (int N, double* fir, double* mpfir, int pfactor, int polarity)
 
 // impulse response of a zero frequency filter comprising a cascade of two resonators,
 //    each followed by a detrending filter
-double* FIR::zff_impulse(int nc, double scale)
+float* FIR::zff_impulse(int nc, float scale)
 {
     // nc = number of coefficients (power of two)
     int n_resdet = nc / 2 - 1;          // size of single zero-frequency resonator with detrender
     int n_dresdet = 2 * n_resdet - 1;   // size of two cascaded units; when we convolve these we get 2 * n - 1 length
     // allocate the single and make the values
-    double* resdet = new double[n_resdet]; // (double*)malloc0 (n_resdet * sizeof(double));
+    float* resdet = new float[n_resdet]; // (float*)malloc0 (n_resdet * sizeof(float));
     for (int i = 1, j = 0, k = n_resdet - 1; i < nc / 4; i++, j++, k--)
-        resdet[j] = resdet[k] = (double)(i * (i + 1) / 2);
-    resdet[nc / 4 - 1] = (double)(nc / 4 * (nc / 4 + 1) / 2);
+        resdet[j] = resdet[k] = (float)(i * (i + 1) / 2);
+    resdet[nc / 4 - 1] = (float)(nc / 4 * (nc / 4 + 1) / 2);
     // print_impulse ("resdet", n_resdet, resdet, 0, 0);
-    // allocate the double and complex versions and make the values
-    double* dresdet = new double[n_dresdet]; // (double*)malloc0 (n_dresdet * sizeof(double));
-    double div = (double)((nc / 2 + 1) * (nc / 2 + 1));                 // calculate divisor
-    double* c_dresdet = new double[nc * 2]; // (double*)malloc0 (nc * sizeof(complex));
+    // allocate the float and complex versions and make the values
+    float* dresdet = new float[n_dresdet]; // (float*)malloc0 (n_dresdet * sizeof(float));
+    float div = (float)((nc / 2 + 1) * (nc / 2 + 1));                 // calculate divisor
+    float* c_dresdet = new float[nc * 2]; // (float*)malloc0 (nc * sizeof(complex));
     for (int n = 0; n < n_dresdet; n++) // convolve to make the cascade
     {
         for (int k = 0; k < n_resdet; k++)

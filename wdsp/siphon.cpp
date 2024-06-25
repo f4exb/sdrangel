@@ -36,13 +36,13 @@ namespace WDSP {
 void SIPHON::build_window (SIPHON *a)
 {
     int i;
-    double arg0, cosphi;
-    double sum, scale;
-    arg0 = 2.0 * PI / ((double)a->fftsize - 1.0);
+    float arg0, cosphi;
+    float sum, scale;
+    arg0 = 2.0 * PI / ((float)a->fftsize - 1.0);
     sum = 0.0;
     for (i = 0; i < a->fftsize; i++)
     {
-        cosphi = cos (arg0 * (double)i);
+        cosphi = cos (arg0 * (float)i);
         a->window[i] =  + 6.3964424114390378e-02
           + cosphi *  ( - 2.3993864599352804e-01
           + cosphi *  ( + 3.5015956323820469e-01
@@ -63,7 +63,7 @@ SIPHON* SIPHON::create_siphon (
     int mode,
     int disp,
     int insize,
-    double* in,
+    float* in,
     int sipsize,
     int fftsize,
     int specmode
@@ -79,19 +79,19 @@ SIPHON* SIPHON::create_siphon (
     a->sipsize = sipsize;   // NOTE:  sipsize MUST BE A POWER OF TWO!!
     a->fftsize = fftsize;
     a->specmode = specmode;
-    a->sipbuff = new double[a->sipsize * 2]; // (double *) malloc0 (a->sipsize * sizeof (complex));
+    a->sipbuff = new float[a->sipsize * 2]; // (float *) malloc0 (a->sipsize * sizeof (complex));
     a->idx = 0;
-    a->sipout  = new double[a->sipsize * 2]; // (double *) malloc0 (a->sipsize * sizeof (complex));
-    a->specout = new double[a->fftsize * 2]; // (double *) malloc0 (a->fftsize * sizeof (complex));
-    a->sipplan = fftw_plan_dft_1d (a->fftsize, (fftw_complex *)a->sipout, (fftw_complex *)a->specout, FFTW_FORWARD, FFTW_PATIENT);
-    a->window  = new double[a->fftsize * 2]; // (double *) malloc0 (a->fftsize * sizeof (complex));
+    a->sipout  = new float[a->sipsize * 2]; // (float *) malloc0 (a->sipsize * sizeof (complex));
+    a->specout = new float[a->fftsize * 2]; // (float *) malloc0 (a->fftsize * sizeof (complex));
+    a->sipplan = fftwf_plan_dft_1d (a->fftsize, (fftwf_complex *)a->sipout, (fftwf_complex *)a->specout, FFTW_FORWARD, FFTW_PATIENT);
+    a->window  = new float[a->fftsize * 2]; // (float *) malloc0 (a->fftsize * sizeof (complex));
     build_window (a);
     return a;
 }
 
 void SIPHON::destroy_siphon (SIPHON *a)
 {
-    fftw_destroy_plan (a->sipplan);
+    fftwf_destroy_plan (a->sipplan);
     delete[] (a->window);
     delete[] (a->specout);
     delete[] (a->sipout);
@@ -143,7 +143,7 @@ void SIPHON::xsiphon (SIPHON *a, int pos)
     a->update.unlock();
 }
 
-void SIPHON::setBuffers_siphon (SIPHON *a, double* in)
+void SIPHON::setBuffers_siphon (SIPHON *a, float* in)
 {
     a->in = in;
 }
@@ -184,7 +184,7 @@ void SIPHON::sip_spectrum (SIPHON *a)
         a->sipout[2 * i + 0] *= a->window[i];
         a->sipout[2 * i + 1] *= a->window[i];
     }
-    fftw_execute (a->sipplan);
+    fftwf_execute (a->sipplan);
 }
 
 /********************************************************************************************************
@@ -346,7 +346,7 @@ void flush_siphonEXT (int id)
 }
 
 PORT
-void xsiphonEXT (int id, double* buff)
+void xsiphonEXT (int id, float* buff)
 {
     SIPHON a = psiphon[id];
     a->in = buff;

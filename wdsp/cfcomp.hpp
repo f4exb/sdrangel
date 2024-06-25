@@ -41,30 +41,30 @@ public:
     int run;
     int position;
     int bsize;
-    double* in;
-    double* out;
+    float* in;
+    float* out;
     int fsize;
     int ovrlp;
     int incr;
-    double* window;
+    float* window;
     int iasize;
-    double* inaccum;
-    double* forfftin;
-    double* forfftout;
+    float* inaccum;
+    float* forfftin;
+    float* forfftout;
     int msize;
-    double* cmask;
-    double* mask;
+    float* cmask;
+    float* mask;
     int mask_ready;
-    double* cfc_gain;
-    double* revfftin;
-    double* revfftout;
-    double** save;
+    float* cfc_gain;
+    float* revfftin;
+    float* revfftout;
+    float** save;
     int oasize;
-    double* outaccum;
-    double rate;
+    float* outaccum;
+    float rate;
     int wintype;
-    double pregain;
-    double postgain;
+    float pregain;
+    float postgain;
     int nsamps;
     int iainidx;
     int iaoutidx;
@@ -72,71 +72,71 @@ public:
     int oainidx;
     int oaoutidx;
     int saveidx;
-    fftw_plan Rfor;
-    fftw_plan Rrev;
+    fftwf_plan Rfor;
+    fftwf_plan Rrev;
 
     int comp_method;
     int nfreqs;
-    double* F;
-    double* G;
-    double* E;
-    double* fp;
-    double* gp;
-    double* ep;
-    double* comp;
-    double precomp;
-    double precomplin;
-    double* peq;
+    float* F;
+    float* G;
+    float* E;
+    float* fp;
+    float* gp;
+    float* ep;
+    float* comp;
+    float precomp;
+    float precomplin;
+    float* peq;
     int peq_run;
-    double prepeq;
-    double prepeqlin;
-    double winfudge;
+    float prepeq;
+    float prepeqlin;
+    float winfudge;
 
-    double gain;
-    double mtau;
-    double mmult;
+    float gain;
+    float mtau;
+    float mmult;
     // display stuff
-    double dtau;
-    double dmult;
-    double* delta;
-    double* delta_copy;
-    double* cfc_gain_copy;
+    float dtau;
+    float dmult;
+    float* delta;
+    float* delta_copy;
+    float* cfc_gain_copy;
 
     static CFCOMP* create_cfcomp (
         int run,
         int position,
         int peq_run,
         int size,
-        double* in,
-        double* out,
+        float* in,
+        float* out,
         int fsize,
         int ovrlp,
         int rate,
         int wintype,
         int comp_method,
         int nfreqs,
-        double precomp,
-        double prepeq,
-        double* F,
-        double* G,
-        double* E,
-        double mtau,
-        double dtau
+        float precomp,
+        float prepeq,
+        float* F,
+        float* G,
+        float* E,
+        float mtau,
+        float dtau
     );
     static void destroy_cfcomp (CFCOMP *a);
     static void flush_cfcomp (CFCOMP *a);
     static void xcfcomp (CFCOMP *a, int pos);
-    static void setBuffers_cfcomp (CFCOMP *a, double* in, double* out);
+    static void setBuffers_cfcomp (CFCOMP *a, float* in, float* out);
     static void setSamplerate_cfcomp (CFCOMP *a, int rate);
     static void setSize_cfcomp (CFCOMP *a, int size);
     // TXA Properties
     static void SetCFCOMPRun (TXA& txa, int run);
     static void SetCFCOMPPosition (TXA& txa, int pos);
-    static void SetCFCOMPprofile (TXA& txa, int nfreqs, double* F, double* G, double *E);
-    static void SetCFCOMPPrecomp (TXA& txa, double precomp);
+    static void SetCFCOMPprofile (TXA& txa, int nfreqs, float* F, float* G, float *E);
+    static void SetCFCOMPPrecomp (TXA& txa, float precomp);
     static void SetCFCOMPPeqRun (TXA& txa, int run);
-    static void SetCFCOMPPrePeq (TXA& txa, double prepeq);
-    static void GetCFCOMPDisplayCompression (TXA& txa, double* comp_values, int* ready);
+    static void SetCFCOMPPrePeq (TXA& txa, float prepeq);
+    static void GetCFCOMPDisplayCompression (TXA& txa, float* comp_values, int* ready);
 
 private:
     static void calc_cfcwindow (CFCOMP *a);

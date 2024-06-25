@@ -40,25 +40,25 @@ class WDSP_API FMMOD
 public:
     int run;
     int size;
-    double* in;
-    double* out;
-    double samplerate;
-    double deviation;
-    double f_low;
-    double f_high;
+    float* in;
+    float* out;
+    float samplerate;
+    float deviation;
+    float f_low;
+    float f_high;
     int ctcss_run;
-    double ctcss_level;
-    double ctcss_freq;
+    float ctcss_level;
+    float ctcss_freq;
     // for ctcss gen
-    double tscale;
-    double tphase;
-    double tdelta;
+    float tscale;
+    float tphase;
+    float tdelta;
     // mod
-    double sphase;
-    double sdelta;
+    float sphase;
+    float sdelta;
     // bandpass
     int bp_run;
-    double bp_fc;
+    float bp_fc;
     int nc;
     int mp;
     FIRCORE *p;
@@ -66,15 +66,15 @@ public:
     static FMMOD* create_fmmod (
         int run,
         int size,
-        double* in,
-        double* out,
+        float* in,
+        float* out,
         int rate,
-        double dev,
-        double f_low,
-        double f_high,
+        float dev,
+        float f_low,
+        float f_high,
         int ctcss_run,
-        double ctcss_level,
-        double ctcss_freq,
+        float ctcss_level,
+        float ctcss_freq,
         int bp_run,
         int nc,
         int mp
@@ -82,16 +82,16 @@ public:
     static void destroy_fmmod (FMMOD *a);
     static void flush_fmmod (FMMOD *a);
     static void xfmmod (FMMOD *a);
-    static void setBuffers_fmmod (FMMOD *a, double* in, double* out);
+    static void setBuffers_fmmod (FMMOD *a, float* in, float* out);
     static void setSamplerate_fmmod (FMMOD *a, int rate);
     static void setSize_fmmod (FMMOD *a, int size);
     // TXA Properties
-    static void SetFMDeviation (TXA& txa, double deviation);
-    static void SetCTCSSFreq (TXA& txa, double freq);
+    static void SetFMDeviation (TXA& txa, float deviation);
+    static void SetCTCSSFreq (TXA& txa, float freq);
     static void SetCTCSSRun (TXA& txa, int run);
     static void SetFMMP (TXA& txa, int mp);
     static void SetFMNC (TXA& txa, int nc);
-    static void SetFMAFFreqs (TXA& txa, double low, double high);
+    static void SetFMAFFreqs (TXA& txa, float low, float high);
 
 private:
     static void calc_fmmod (FMMOD *a);

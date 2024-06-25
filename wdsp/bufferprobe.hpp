@@ -33,7 +33,7 @@ namespace WDSP {
 class BufferProbe
 {
 public:
-    virtual void proceed(const double *buffer, int nb_samples) = 0;
+    virtual void proceed(const float *buffer, int nb_samples) = 0;
 };
 
 } // namespace

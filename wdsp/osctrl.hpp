@@ -43,32 +43,32 @@ class WDSP_API OSCTRL
 public:
     int run;                        // 1 to run; 0 otherwise
     int size;                       // buffer size
-    double *inbuff;                 // input buffer
-    double *outbuff;                // output buffer
+    float *inbuff;                 // input buffer
+    float *outbuff;                // output buffer
     int rate;                       // sample rate
-    double osgain;                  // gain applied to overshoot "clippings"
-    double bw;                      // bandwidth
+    float osgain;                  // gain applied to overshoot "clippings"
+    float bw;                      // bandwidth
     int pn;                         // "peak stretcher" window, samples
     int dl_len;                     // delay line length, samples
-    double* dl;                     // delay line for complex samples
-    double* dlenv;                  // delay line for envelope values
+    float* dl;                     // delay line for complex samples
+    float* dlenv;                  // delay line for envelope values
     int in_idx;                     // input index for dl
     int out_idx;                    // output index for dl
-    double max_env;                 // maximum env value in env delay line
-    double env_out;
+    float max_env;                 // maximum env value in env delay line
+    float env_out;
 
     static void xosctrl (OSCTRL *a);
     static OSCTRL* create_osctrl (
         int run,
         int size,
-        double* inbuff,
-        double* outbuff,
+        float* inbuff,
+        float* outbuff,
         int rate,
-        double osgain
+        float osgain
     );
     static void destroy_osctrl (OSCTRL *a);
     static void flush_osctrl (OSCTRL *a);
-    static void setBuffers_osctrl (OSCTRL *a, double* in, double* out);
+    static void setBuffers_osctrl (OSCTRL *a, float* in, float* out);
     static void setSamplerate_osctrl (OSCTRL *a, int rate);
     static void setSize_osctrl (OSCTRL *a, int size);
     // TXA Properties

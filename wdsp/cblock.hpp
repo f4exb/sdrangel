@@ -39,31 +39,31 @@ class WDSP_API CBL
 public:
     int run;                            //run
     int buff_size;                      //buffer size
-    double *in_buff;                    //pointer to input buffer
-    double *out_buff;                   //pointer to output buffer
+    float *in_buff;                    //pointer to input buffer
+    float *out_buff;                   //pointer to output buffer
     int mode;
-    double sample_rate;                 //sample rate
-    double prevIin;
-    double prevQin;
-    double prevIout;
-    double prevQout;
-    double tau;                         //carrier removal time constant
-    double mtau;                        //carrier removal multiplier
+    float sample_rate;                 //sample rate
+    float prevIin;
+    float prevQin;
+    float prevIout;
+    float prevQout;
+    float tau;                         //carrier removal time constant
+    float mtau;                        //carrier removal multiplier
 
     static CBL* create_cbl
         (
         int run,
         int buff_size,
-        double *in_buff,
-        double *out_buff,
+        float *in_buff,
+        float *out_buff,
         int mode,
         int sample_rate,
-        double tau
+        float tau
         );
     static void destroy_cbl (CBL *a);
     static void flush_cbl (CBL *a);
     static void xcbl (CBL *a);
-    static void setBuffers_cbl (CBL *a, double* in, double* out);
+    static void setBuffers_cbl (CBL *a, float* in, float* out);
     static void setSamplerate_cbl (CBL *a, int rate);
     static void setSize_cbl (CBL *a, int size);
     // RXA Properties

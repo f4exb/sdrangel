@@ -30,11 +30,11 @@ warren@wpratt.com
 
 namespace WDSP {
 
-void LMath::dR (int n, double* r, double* y, double* z)
+void LMath::dR (int n, float* r, float* y, float* z)
 {
     int i, j, k;
-    double alpha, beta, gamma;
-    memset (z, 0, (n - 1) * sizeof (double));   // work space
+    float alpha, beta, gamma;
+    memset (z, 0, (n - 1) * sizeof (float));   // work space
     y[0] = -r[1];
     alpha = -r[1];
     beta = 1.0;
@@ -47,24 +47,24 @@ void LMath::dR (int n, double* r, double* y, double* z)
         alpha = - (r[k + 2] + gamma) / beta;
         for (i = 0, j = k; i <= k; i++, j--)
             z[i] = y[i] + alpha * y[j];
-        memcpy (y, z, (k + 1) * sizeof (double));
+        memcpy (y, z, (k + 1) * sizeof (float));
         y[k + 1] = alpha;
     }
 }
 
 void LMath::trI (
     int n,
-    double* r,
-    double* B,
-    double* y,
-    double* v,
-    double* dR_z
+    float* r,
+    float* B,
+    float* y,
+    float* v,
+    float* dR_z
 )
 {
     int i, j, ni, nj;
-    double gamma, t, scale, b;
-    memset (y, 0, (n - 1) * sizeof (double));   // work space
-    memset (v, 0, (n - 1) * sizeof (double));   // work space
+    float gamma, t, scale, b;
+    memset (y, 0, (n - 1) * sizeof (float));   // work space
+    memset (v, 0, (n - 1) * sizeof (float));   // work space
     scale = 1.0 / r[0];
     for (i = 0; i < n; i++)
         r[i] *= scale;
@@ -94,12 +94,12 @@ void LMath::trI (
         }
 }
 
-void LMath::asolve(int xsize, int asize, double* x, double* a, double* r, double* z)
+void LMath::asolve(int xsize, int asize, float* x, float* a, float* r, float* z)
 {
     int i, j, k;
-    double beta, alpha, t;
-    memset(r, 0, (asize + 1) * sizeof(double));     // work space
-    memset(z, 0, (asize + 1) * sizeof(double));     // work space
+    float beta, alpha, t;
+    memset(r, 0, (asize + 1) * sizeof(float));     // work space
+    memset(z, 0, (asize + 1) * sizeof(float));     // work space
     for (i = 0; i <= asize; i++)
     {
         for (j = 0; j < xsize; j++)
@@ -128,10 +128,10 @@ void LMath::asolve(int xsize, int asize, double* x, double* a, double* r, double
     }
 }
 
-void LMath::median (int n, double* a, double* med)
+void LMath::median (int n, float* a, float* med)
 {
     int S0, S1, i, j, m, k;
-    double x, t;
+    float x, t;
     S0 = 0;
     S1 = n - 1;
     k = n / 2;

@@ -34,17 +34,17 @@ namespace WDSP {
 
 class WDSP_API LMath {
 public:
-    static void dR (int n, double* r, double* y, double* z);
+    static void dR (int n, float* r, float* y, float* z);
     static void trI (
         int n,
-        double* r,
-        double* B,
-        double* y,
-        double* v,
-        double* dR_z
+        float* r,
+        float* B,
+        float* y,
+        float* v,
+        float* dR_z
     );
-    static void asolve(int xsize, int asize, double* x, double* a, double* r, double* z);
-    static void median(int n, double* a, double* med);
+    static void asolve(int xsize, int asize, float* x, float* a, float* r, float* z);
+    static void median(int n, float* a, float* med);
 };
 
 } // namespace WDSP

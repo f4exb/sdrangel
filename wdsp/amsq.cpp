@@ -37,15 +37,15 @@ namespace WDSP {
 void AMSQ::compute_slews(AMSQ *a)
 {
     int i;
-    double delta, theta;
-    delta = PI / (double)a->ntup;
+    float delta, theta;
+    delta = PI / (float)a->ntup;
     theta = 0.0;
     for (i = 0; i <= a->ntup; i++)
     {
         a->cup[i] = a->muted_gain + (1.0 - a->muted_gain) * 0.5 * (1.0 - cos (theta));
         theta += delta;
     }
-    delta = PI / (double)a->ntdown;
+    delta = PI / (float)a->ntdown;
     theta = 0.0;
     for (i = 0; i <= a->ntdown; i++)
     {
@@ -57,15 +57,15 @@ void AMSQ::compute_slews(AMSQ *a)
 void AMSQ::calc_amsq(AMSQ *a)
 {
     // signal averaging
-    a->trigsig = new double[a->size * 2]; //   (double *)malloc0(a->size * sizeof(wcomplex));
+    a->trigsig = new float[a->size * 2]; //   (float *)malloc0(a->size * sizeof(wcomplex));
     a->avm = exp(-1.0 / (a->rate * a->avtau));
     a->onem_avm = 1.0 - a->avm;
     a->avsig = 0.0;
     // level change
     a->ntup = (int)(a->tup * a->rate);
     a->ntdown = (int)(a->tdown * a->rate);
-    a->cup = new double[(a->ntup + 1) * 2]; // (double *)malloc0((a->ntup + 1) * sizeof(double));
-    a->cdown = new double[(a->ntdown + 1) * 2]; // (double *)malloc0((a->ntdown + 1) * sizeof(double));
+    a->cup = new float[(a->ntup + 1) * 2]; // (float *)malloc0((a->ntup + 1) * sizeof(float));
+    a->cdown = new float[(a->ntdown + 1) * 2]; // (float *)malloc0((a->ntdown + 1) * sizeof(float));
     compute_slews(a);
     // control
     a->state = 0;
@@ -78,15 +78,15 @@ void AMSQ::decalc_amsq (AMSQ *a)
     delete[] a->trigsig;
 }
 
-AMSQ* AMSQ::create_amsq (int run, int size, double* in, double* out, double* trigger, int rate, double avtau,
-    double tup, double tdown, double tail_thresh, double unmute_thresh, double min_tail, double max_tail, double muted_gain)
+AMSQ* AMSQ::create_amsq (int run, int size, float* in, float* out, float* trigger, int rate, float avtau,
+    float tup, float tdown, float tail_thresh, float unmute_thresh, float min_tail, float max_tail, float muted_gain)
 {
     AMSQ *a = new AMSQ;
     a->run = run;
     a->size = size;
     a->in = in;
     a->out = out;
-    a->rate = (double)rate;
+    a->rate = (float)rate;
     a->muted_gain = muted_gain;
     a->trigger = trigger;
     a->avtau = avtau;
@@ -127,7 +127,7 @@ void AMSQ::xamsq (AMSQ *a)
     if (a->run)
     {
         int i;
-        double sig, siglimit;
+        float sig, siglimit;
         for (i = 0; i < a->size; i++)
         {
             sig = sqrt (a->trigsig[2 * i + 0] * a->trigsig[2 * i + 0] + a->trigsig[2 * i + 1] * a->trigsig[2 * i + 1]);
@@ -188,7 +188,7 @@ void AMSQ::xamsqcap (AMSQ *a)
     memcpy (a->trigsig, a->trigger, a->size * sizeof (wcomplex));
 }
 
-void AMSQ::setBuffers_amsq (AMSQ *a, double* in, double* out, double* trigger)
+void AMSQ::setBuffers_amsq (AMSQ *a, float* in, float* out, float* trigger)
 {
     a->in = in;
     a->out = out;
@@ -222,16 +222,16 @@ void AMSQ::SetAMSQRun (RXA& rxa, int run)
     rxa.csDSP.unlock();
 }
 
-void AMSQ::SetAMSQThreshold (RXA& rxa, double threshold)
+void AMSQ::SetAMSQThreshold (RXA& rxa, float threshold)
 {
-    double thresh = pow (10.0, threshold / 20.0);
+    float thresh = pow (10.0, threshold / 20.0);
     rxa.csDSP.lock();
     rxa.amsq.p->tail_thresh = 0.9 * thresh;
     rxa.amsq.p->unmute_thresh =  thresh;
     rxa.csDSP.unlock();
 }
 
-void AMSQ::SetAMSQMaxTail (RXA& rxa, double tail)
+void AMSQ::SetAMSQMaxTail (RXA& rxa, float tail)
 {
     AMSQ *a;
     rxa.csDSP.lock();
@@ -254,7 +254,7 @@ void AMSQ::SetAMSQRun (TXA& txa, int run)
     txa.csDSP.unlock();
 }
 
-void AMSQ::SetAMSQMutedGain (TXA& txa, double dBlevel)
+void AMSQ::SetAMSQMutedGain (TXA& txa, float dBlevel)
 {   // dBlevel is negative
     AMSQ *a;
     txa.csDSP.lock();
@@ -264,9 +264,9 @@ void AMSQ::SetAMSQMutedGain (TXA& txa, double dBlevel)
     txa.csDSP.unlock();
 }
 
-void AMSQ::SetAMSQThreshold (TXA& txa, double threshold)
+void AMSQ::SetAMSQThreshold (TXA& txa, float threshold)
 {
-    double thresh = pow (10.0, threshold / 20.0);
+    float thresh = pow (10.0, threshold / 20.0);
     txa.csDSP.lock();
     txa.amsq.p->tail_thresh = 0.9 * thresh;
     txa.amsq.p->unmute_thresh =  thresh;

@@ -31,19 +31,19 @@ warren@wpratt.com
 
 namespace WDSP {
 
-double* FCurve::fc_impulse (int nc, double f0, double f1, double g0, double, int curve, double samplerate, double scale, int ctfmode, int wintype)
+float* FCurve::fc_impulse (int nc, float f0, float f1, float g0, float, int curve, float samplerate, float scale, int ctfmode, int wintype)
 {
-    double* A  = new double[nc / 2 + 1]; // (double *) malloc0 ((nc / 2 + 1) * sizeof (double));
+    float* A  = new float[nc / 2 + 1]; // (float *) malloc0 ((nc / 2 + 1) * sizeof (float));
     int i;
-    double fn, f;
-    double* impulse;
+    float fn, f;
+    float* impulse;
     int mid = nc / 2;
-    double g0_lin = pow(10.0, g0 / 20.0);
+    float g0_lin = pow(10.0, g0 / 20.0);
     if (nc & 1)
     {
         for (i = 0; i <= mid; i++)
         {
-            fn = (double)i / (double)mid;
+            fn = (float)i / (float)mid;
             f = fn * samplerate / 2.0;
             switch (curve)
             {
@@ -66,7 +66,7 @@ double* FCurve::fc_impulse (int nc, double f0, double f1, double g0, double, int
     {
         for (i = 0; i < mid; i++)
         {
-            fn = ((double)i + 0.5) / (double)mid;
+            fn = ((float)i + 0.5) / (float)mid;
             f = fn * samplerate / 2.0;
             switch (curve)
             {
@@ -88,19 +88,19 @@ double* FCurve::fc_impulse (int nc, double f0, double f1, double g0, double, int
     if (ctfmode == 0)
     {
         int k, low, high;
-        double lowmag, highmag, flow4, fhigh4;
+        float lowmag, highmag, flow4, fhigh4;
         if (nc & 1)
         {
             low  = (int)(2.0 * f0 / samplerate * mid);
             high = (int)(2.0 * f1 / samplerate * mid + 0.5);
             lowmag = A[low];
             highmag = A[high];
-            flow4 = pow((double)low / (double)mid, 4.0);
-            fhigh4 = pow((double)high / (double)mid, 4.0);
+            flow4 = pow((float)low / (float)mid, 4.0);
+            fhigh4 = pow((float)high / (float)mid, 4.0);
             k = low;
             while (--k >= 0)
             {
-                f = (double)k / (double)mid;
+                f = (float)k / (float)mid;
                 lowmag *= (f * f * f * f) / flow4;
                 if (lowmag < 1.0e-100) lowmag = 1.0e-100;
                 A[k] = lowmag;
@@ -108,7 +108,7 @@ double* FCurve::fc_impulse (int nc, double f0, double f1, double g0, double, int
             k = high;
             while (++k <= mid)
             {
-                f = (double)k / (double)mid;
+                f = (float)k / (float)mid;
                 highmag *= fhigh4 / (f * f * f * f);
                 if (highmag < 1.0e-100) highmag = 1.0e-100;
                 A[k] = highmag;
@@ -120,12 +120,12 @@ double* FCurve::fc_impulse (int nc, double f0, double f1, double g0, double, int
             high = (int)(2.0 * f1 / samplerate * mid - 0.5);
             lowmag = A[low];
             highmag = A[high];
-            flow4 = pow((double)low / (double)mid, 4.0);
-            fhigh4 = pow((double)high / (double)mid, 4.0);
+            flow4 = pow((float)low / (float)mid, 4.0);
+            fhigh4 = pow((float)high / (float)mid, 4.0);
             k = low;
             while (--k >= 0)
             {
-                f = (double)k / (double)mid;
+                f = (float)k / (float)mid;
                 lowmag *= (f * f * f * f) / flow4;
                 if (lowmag < 1.0e-100) lowmag = 1.0e-100;
                 A[k] = lowmag;
@@ -133,7 +133,7 @@ double* FCurve::fc_impulse (int nc, double f0, double f1, double g0, double, int
             k = high;
             while (++k < mid)
             {
-                f = (double)k / (double)mid;
+                f = (float)k / (float)mid;
                 highmag *= fhigh4 / (f * f * f * f);
                 if (highmag < 1.0e-100) highmag = 1.0e-100;
                 A[k] = highmag;
@@ -150,10 +150,10 @@ double* FCurve::fc_impulse (int nc, double f0, double f1, double g0, double, int
 }
 
 // generate mask for Overlap-Save Filter
-double* FCurve::fc_mults (int size, double f0, double f1, double g0, double g1, int curve, double samplerate, double scale, int ctfmode, int wintype)
+float* FCurve::fc_mults (int size, float f0, float f1, float g0, float g1, int curve, float samplerate, float scale, int ctfmode, int wintype)
 {
-    double* impulse = fc_impulse (size + 1, f0, f1, g0, g1, curve, samplerate, scale, ctfmode, wintype);
-    double* mults = FIR::fftcv_mults(2 * size, impulse);
+    float* impulse = fc_impulse (size + 1, f0, f1, g0, g1, curve, samplerate, scale, ctfmode, wintype);
+    float* mults = FIR::fftcv_mults(2 * size, impulse);
     delete[] (impulse);
     return mults;
 }

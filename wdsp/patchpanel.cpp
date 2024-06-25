@@ -32,7 +32,7 @@ warren@wpratt.com
 
 namespace WDSP {
 
-PANEL* PANEL::create_panel (int run, int size, double* in, double* out, double gain1, double gain2I, double gain2Q, int inselect, int copy)
+PANEL* PANEL::create_panel (int run, int size, float* in, float* out, float gain1, float gain2I, float gain2Q, int inselect, int copy)
 {
     PANEL* a = new PANEL;
     a->run = run;
@@ -60,9 +60,9 @@ void PANEL::flush_panel (PANEL *)
 void PANEL::xpanel (PANEL *a)
 {
     int i;
-    double I, Q;
-    double gainI = a->gain1 * a->gain2I;
-    double gainQ = a->gain1 * a->gain2Q;
+    float I, Q;
+    float gainI = a->gain1 * a->gain2I;
+    float gainQ = a->gain1 * a->gain2Q;
     // inselect is either 0(neither), 1(Q), 2(I), or 3(both)
     switch (a->copy)
     {
@@ -105,7 +105,7 @@ void PANEL::xpanel (PANEL *a)
     }
 }
 
-void PANEL::setBuffers_panel (PANEL *a, double* in, double* out)
+void PANEL::setBuffers_panel (PANEL *a, float* in, float* out)
 {
     a->in = in;
     a->out = out;
@@ -141,14 +141,14 @@ void PANEL::SetPanelSelect (RXA& rxa, int select)
     rxa.csDSP.unlock();
 }
 
-void PANEL::SetPanelGain1 (RXA& rxa, double gain)
+void PANEL::SetPanelGain1 (RXA& rxa, float gain)
 {
     rxa.csDSP.lock();
     rxa.panel.p->gain1 = gain;
     rxa.csDSP.unlock();
 }
 
-void PANEL::SetPanelGain2 (RXA& rxa, double gainI, double gainQ)
+void PANEL::SetPanelGain2 (RXA& rxa, float gainI, float gainQ)
 {
     rxa.csDSP.lock();
     rxa.panel.p->gain2I = gainI;
@@ -156,9 +156,9 @@ void PANEL::SetPanelGain2 (RXA& rxa, double gainI, double gainQ)
     rxa.csDSP.unlock();
 }
 
-void PANEL::SetPanelPan (RXA& rxa, double pan)
+void PANEL::SetPanelPan (RXA& rxa, float pan)
 {
-    double gain1, gain2;
+    float gain1, gain2;
     rxa.csDSP.lock();
     if (pan <= 0.5)
     {
@@ -202,7 +202,7 @@ void PANEL::SetPanelRun (TXA& txa, int run)
     txa.csDSP.unlock();
 }
 
-void PANEL::SetPanelGain1 (TXA& txa, double gain)
+void PANEL::SetPanelGain1 (TXA& txa, float gain)
 {
     txa.csDSP.lock();
     txa.panel.p->gain1 = gain;

@@ -548,7 +548,7 @@ const double MemLog::mtable[2048] = {
 9.9859042974532852e-001,  9.9894295144308476e-001,  9.9929538702341059e-001,  9.9964773652837102e-001};
 
 
-inline double MemLog::mlog10 (double val)
+double MemLog::mlog10 (double val)
 {
     uint64_t* pin = (uint64_t*)(&val);
     uint64_t    N = *pin;

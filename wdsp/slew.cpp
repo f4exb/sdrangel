@@ -42,14 +42,14 @@ enum _USLEW
 void USLEW::calc_uslew (USLEW *a)
 {
     int i;
-    double delta, theta;
+    float delta, theta;
     a->runmode = 0;
     a->state = BEGIN;
     a->count = 0;
     a->ndelup = (int)(a->tdelay * a->rate);
     a->ntup = (int)(a->tupslew * a->rate);
-    a->cup = new double[a->ntup + 1]; // (double *) malloc0 ((a->ntup + 1) * sizeof (double));
-    delta = PI / (double)a->ntup;
+    a->cup = new float[a->ntup + 1]; // (float *) malloc0 ((a->ntup + 1) * sizeof (float));
+    delta = PI / (float)a->ntup;
     theta = 0.0;
     for (i = 0; i <= a->ntup; i++)
     {
@@ -64,7 +64,7 @@ void USLEW::decalc_uslew (USLEW *a)
     delete[] (a->cup);
 }
 
-USLEW* USLEW::create_uslew (TXA *txa, std::atomic<long> *ch_upslew, int size, double* in, double* out, double rate, double tdelay, double tupslew)
+USLEW* USLEW::create_uslew (TXA *txa, std::atomic<long> *ch_upslew, int size, float* in, float* out, float rate, float tdelay, float tupslew)
 {
     USLEW *a = new USLEW;
     a->txa = txa;
@@ -102,7 +102,7 @@ void USLEW::xuslew (USLEW *a)
     if (a->runmode && upslew) //_InterlockedAnd (a->ch_upslew, 1))
     {
         int i;
-        double I, Q;
+        float I, Q;
         for (i = 0; i < a->size; i++)
         {
             I = a->in[2 * i + 0];
@@ -161,7 +161,7 @@ void USLEW::xuslew (USLEW *a)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
-void USLEW::setBuffers_uslew (USLEW *a, double* in, double* out)
+void USLEW::setBuffers_uslew (USLEW *a, float* in, float* out)
 {
     a->in = in;
     a->out = out;
@@ -186,7 +186,7 @@ void USLEW::setSize_uslew (USLEW *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void USLEW::SetuSlewTime (TXA& txa, double time)
+void USLEW::SetuSlewTime (TXA& txa, float time)
 {
     // NOTE:  'time' is in seconds
     txa.csDSP.lock();

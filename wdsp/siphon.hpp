@@ -50,17 +50,17 @@ public:
     int mode;
     int disp;
     int insize;
-    double* in;
+    float* in;
     int sipsize;    // NOTE:  sipsize MUST BE A POWER OF TWO!!
-    double* sipbuff;
+    float* sipbuff;
     int outsize;
     int idx;
-    double* sipout;
+    float* sipout;
     int fftsize;
-    double* specout;
+    float* specout;
     std::atomic<long> specmode;
-    fftw_plan sipplan;
-    double* window;
+    fftwf_plan sipplan;
+    float* window;
     QRecursiveMutex update;
 
     static SIPHON* create_siphon (
@@ -69,7 +69,7 @@ public:
         int mode,
         int disp,
         int insize,
-        double* in,
+        float* in,
         int sipsize,
         int fftsize,
         int specmode
@@ -77,7 +77,7 @@ public:
     static void destroy_siphon (SIPHON *a);
     static void flush_siphon (SIPHON *a);
     static void xsiphon (SIPHON *a, int pos);
-    static void setBuffers_siphon (SIPHON *a, double* in);
+    static void setBuffers_siphon (SIPHON *a, float* in);
     static void setSamplerate_siphon (SIPHON *a, int rate);
     static void setSize_siphon (SIPHON *a, int size);
     // RXA Properties
@@ -94,7 +94,7 @@ public:
     // Calls for External Use
     // static void create_siphonEXT (int id, int run, int insize, int sipsize, int fftsize, int specmode);
     // static void destroy_siphonEXT (int id);
-    // static void xsiphonEXT (int id, double* buff);
+    // static void xsiphonEXT (int id, float* buff);
     // static void SetSiphonInsize (int id, int size);
 
 private:

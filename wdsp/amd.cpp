@@ -41,18 +41,18 @@ AMD* AMD::create_amd
     (
     int run,
     int buff_size,
-    double *in_buff,
-    double *out_buff,
+    float *in_buff,
+    float *out_buff,
     int mode,
     int levelfade,
     int sbmode,
     int sample_rate,
-    double fmin,
-    double fmax,
-    double zeta,
-    double omegaN,
-    double tauR,
-    double tauI
+    float fmin,
+    float fmax,
+    float zeta,
+    float omegaN,
+    float tauR,
+    float tauI
     )
 {
     AMD *a = new AMD();
@@ -63,7 +63,7 @@ AMD* AMD::create_amd
     a->mode = mode;
     a->levelfade = levelfade;
     a->sbmode = sbmode;
-    a->sample_rate = (double)sample_rate;
+    a->sample_rate = (float)sample_rate;
     a->fmin = fmin;
     a->fmax = fmax;
     a->zeta = zeta;
@@ -126,13 +126,13 @@ void AMD::flush_amd (AMD *a)
 void AMD::xamd (AMD *a)
 {
     int i;
-    double audio;
-    double vco[2];
-    double corr[2];
-    double det;
-    double del_out;
-    double ai, bi, aq, bq;
-    double ai_ps, bi_ps, aq_ps, bq_ps;
+    float audio;
+    float vco[2];
+    float corr[2];
+    float det;
+    float del_out;
+    float ai, bi, aq, bq;
+    float ai_ps, bi_ps, aq_ps, bq_ps;
     int j, k;
     if (a->run)
     {
@@ -251,7 +251,7 @@ void AMD::xamd (AMD *a)
     }
 }
 
-void AMD::setBuffers_amd (AMD *a, double* in, double* out)
+void AMD::setBuffers_amd (AMD *a, float* in, float* out)
 {
     a->in_buff = in;
     a->out_buff = out;

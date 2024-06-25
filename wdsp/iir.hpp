@@ -45,23 +45,23 @@ class WDSP_API SNOTCH
 public:
     int run;
     int size;
-    double* in;
-    double* out;
-    double rate;
-    double f;
-    double bw;
-    double a0, a1, a2, b1, b2;
-    double x0, x1, x2, y1, y2;
+    float* in;
+    float* out;
+    float rate;
+    float f;
+    float bw;
+    float a0, a1, a2, b1, b2;
+    float x0, x1, x2, y1, y2;
     QRecursiveMutex cs_update;
 
-    static SNOTCH* create_snotch (int run, int size, double* in, double* out, int rate, double f, double bw);
+    static SNOTCH* create_snotch (int run, int size, float* in, float* out, int rate, float f, float bw);
     static void destroy_snotch (SNOTCH *a);
     static void flush_snotch (SNOTCH *a);
     static void xsnotch (SNOTCH *a);
-    static void setBuffers_snotch (SNOTCH *a, double* in, double* out);
+    static void setBuffers_snotch (SNOTCH *a, float* in, float* out);
     static void setSamplerate_snotch (SNOTCH *a, int rate);
     static void setSize_snotch (SNOTCH *a, int size);
-    static void SetSNCTCSSFreq (SNOTCH *a, double freq);
+    static void SetSNCTCSSFreq (SNOTCH *a, float freq);
     static void SetSNCTCSSRun (SNOTCH *a, int run);
 
 private:
@@ -92,32 +92,32 @@ class WDSP_API SPEAK
 public:
     int run;
     int size;
-    double* in;
-    double* out;
-    double rate;
-    double f;
-    double bw;
-    double cbw;
-    double gain;
-    double fgain;
+    float* in;
+    float* out;
+    float rate;
+    float f;
+    float bw;
+    float cbw;
+    float gain;
+    float fgain;
     int nstages;
     int design;
-    double a0, a1, a2, b1, b2;
-    double *x0, *x1, *x2, *y0, *y1, *y2;
+    float a0, a1, a2, b1, b2;
+    float *x0, *x1, *x2, *y0, *y1, *y2;
     QRecursiveMutex cs_update;
 
-    static SPEAK* create_speak (int run, int size, double* in, double* out, int rate, double f, double bw, double gain, int nstages, int design);
+    static SPEAK* create_speak (int run, int size, float* in, float* out, int rate, float f, float bw, float gain, int nstages, int design);
     static void destroy_speak (SPEAK *a);
     static void flush_speak (SPEAK *a);
     static void xspeak (SPEAK *a);
-    static void setBuffers_speak (SPEAK *a, double* in, double* out);
+    static void setBuffers_speak (SPEAK *a, float* in, float* out);
     static void setSamplerate_speak (SPEAK *a, int rate);
     static void setSize_speak (SPEAK *a, int size);
     // RXA
     static void SetSPCWRun (RXA& rxa, int run);
-    static void SetSPCWFreq (RXA& rxa, double freq);
-    static void SetSPCWBandwidth (RXA& rxa, double bw);
-    static void SetSPCWGain (RXA& rxa, double gain);
+    static void SetSPCWFreq (RXA& rxa, float freq);
+    static void SetSPCWBandwidth (RXA& rxa, float bw);
+    static void SetSPCWGain (RXA& rxa, float gain);
     static void calc_speak (SPEAK *a);
 };
 
@@ -145,34 +145,34 @@ class WDSP_API MPEAK
 public:
     int run;
     int size;
-    double* in;
-    double* out;
+    float* in;
+    float* out;
     int rate;
     int npeaks;
     int* enable;
-    double* f;
-    double* bw;
-    double* gain;
+    float* f;
+    float* bw;
+    float* gain;
     int nstages;
     SPEAK** pfil;
-    double* tmp;
-    double* mix;
+    float* tmp;
+    float* mix;
     QRecursiveMutex cs_update;
 
-    static MPEAK* create_mpeak (int run, int size, double* in, double* out, int rate, int npeaks, int* enable, double* f, double* bw, double* gain, int nstages);
+    static MPEAK* create_mpeak (int run, int size, float* in, float* out, int rate, int npeaks, int* enable, float* f, float* bw, float* gain, int nstages);
     static void destroy_mpeak (MPEAK *a);
     static void flush_mpeak (MPEAK *a);
     static void xmpeak (MPEAK *a);
-    static void setBuffers_mpeak (MPEAK *a, double* in, double* out);
+    static void setBuffers_mpeak (MPEAK *a, float* in, float* out);
     static void setSamplerate_mpeak (MPEAK *a, int rate);
     static void setSize_mpeak (MPEAK *a, int size);
     // RXA
     static void SetmpeakRun (RXA& rxa, int run);
     static void SetmpeakNpeaks (RXA& rxa, int npeaks);
     static void SetmpeakFilEnable (RXA& rxa, int fil, int enable);
-    static void SetmpeakFilFreq (RXA& rxa, int fil, double freq);
-    static void SetmpeakFilBw (RXA& rxa, int fil, double bw);
-    static void SetmpeakFilGain (RXA& rxa, int fil, double gain);
+    static void SetmpeakFilFreq (RXA& rxa, int fil, float freq);
+    static void SetmpeakFilBw (RXA& rxa, int fil, float bw);
+    static void SetmpeakFilGain (RXA& rxa, int fil, float gain);
 
 private:
     static void calc_mpeak (MPEAK *a);
@@ -204,26 +204,26 @@ public:
     int reverse;
     int run;
     int size;
-    double* in;
-    double* out;
+    float* in;
+    float* out;
     int rate;
-    double fc;
+    float fc;
     int nstages;
     // normalized such that a0 = 1
-    double a1, b0, b1;
-    double *x0, *x1, *y0, *y1;
+    float a1, b0, b1;
+    float *x0, *x1, *y0, *y1;
     QRecursiveMutex cs_update;
 
-    static PHROT* create_phrot (int run, int size, double* in, double* out, int rate, double fc, int nstages);
+    static PHROT* create_phrot (int run, int size, float* in, float* out, int rate, float fc, int nstages);
     static void destroy_phrot (PHROT *a);
     static void flush_phrot (PHROT *a);
     static void xphrot (PHROT *a);
-    static void setBuffers_phrot (PHROT *a, double* in, double* out);
+    static void setBuffers_phrot (PHROT *a, float* in, float* out);
     static void setSamplerate_phrot (PHROT *a, int rate);
     static void setSize_phrot (PHROT *a, int size);
     // TXA Properties
     static void SetPHROTRun (TXA& txa, int run);
-    static void SetPHROTCorner (TXA& txa, double corner);
+    static void SetPHROTCorner (TXA& txa, float corner);
     static void SetPHROTNstages (TXA& txa, int nstages);
     static void SetPHROTReverse (TXA& txa, int reverse);
 
@@ -254,22 +254,22 @@ class WDSP_API BQLP
 public:
     int run;
     int size;
-    double* in;
-    double* out;
-    double rate;
-    double fc;
-    double Q;
-    double gain;
+    float* in;
+    float* out;
+    float rate;
+    float fc;
+    float Q;
+    float gain;
     int nstages;
-    double a0, a1, a2, b1, b2;
-    double* x0, * x1, * x2, * y0, * y1, * y2;
+    float a0, a1, a2, b1, b2;
+    float* x0, * x1, * x2, * y0, * y1, * y2;
     QRecursiveMutex cs_update;
 
-    static BQLP* create_bqlp(int run, int size, double* in, double* out, double rate, double fc, double Q, double gain, int nstages);
+    static BQLP* create_bqlp(int run, int size, float* in, float* out, float rate, float fc, float Q, float gain, int nstages);
     static void destroy_bqlp(BQLP *a);
     static void flush_bqlp(BQLP *a);
     static void xbqlp(BQLP *a);
-    static void setBuffers_bqlp(BQLP *a, double* in, double* out);
+    static void setBuffers_bqlp(BQLP *a, float* in, float* out);
     static void setSamplerate_bqlp(BQLP *a, int rate);
     static void setSize_bqlp(BQLP *a, int size);
 
@@ -297,11 +297,11 @@ namespace WDSP {
 class WDSP_API DBQLP
 {
 public:
-    static BQLP* create_dbqlp(int run, int size, double* in, double* out, double rate, double fc, double Q, double gain, int nstages);
+    static BQLP* create_dbqlp(int run, int size, float* in, float* out, float rate, float fc, float Q, float gain, int nstages);
     static void destroy_dbqlp(BQLP *a);
     static void flush_dbqlp(BQLP *a);
     static void xdbqlp(BQLP *a);
-    static void setBuffers_dbqlp(BQLP *a, double* in, double* out);
+    static void setBuffers_dbqlp(BQLP *a, float* in, float* out);
     static void setSamplerate_dbqlp(BQLP *a, int rate);
     static void setSize_dbqlp(BQLP *a, int size);
 
@@ -331,31 +331,31 @@ class WDSP_API BQBP
 public:
     int run;
     int size;
-    double* in;
-    double* out;
-    double rate;
-    double f_low;
-    double f_high;
-    double gain;
+    float* in;
+    float* out;
+    float rate;
+    float f_low;
+    float f_high;
+    float gain;
     int nstages;
-    double a0, a1, a2, b1, b2;
-    double* x0, * x1, * x2, * y0, * y1, * y2;
+    float a0, a1, a2, b1, b2;
+    float* x0, * x1, * x2, * y0, * y1, * y2;
     QRecursiveMutex cs_update;
 
-    static BQBP* create_bqbp(int run, int size, double* in, double* out, double rate, double f_low, double f_high, double gain, int nstages);
+    static BQBP* create_bqbp(int run, int size, float* in, float* out, float rate, float f_low, float f_high, float gain, int nstages);
     static void destroy_bqbp(BQBP *a);
     static void flush_bqbp(BQBP *a);
     static void xbqbp(BQBP *a);
-    static void setBuffers_bqbp(BQBP *a, double* in, double* out);
+    static void setBuffers_bqbp(BQBP *a, float* in, float* out);
     static void setSamplerate_bqbp(BQBP *a, int rate);
     static void setSize_bqbp(BQBP *a, int size);
 
     // Double Bi-Quad Band-Pass
-    static BQBP* create_dbqbp(int run, int size, double* in, double* out, double rate, double f_low, double f_high, double gain, int nstages);
+    static BQBP* create_dbqbp(int run, int size, float* in, float* out, float rate, float f_low, float f_high, float gain, int nstages);
     static void destroy_dbqbp(BQBP *a);
     static void flush_dbqbp(BQBP *a);
     static void xdbqbp(BQBP *a);
-    static void setBuffers_dbqbp(BQBP *a, double* in, double* out);
+    static void setBuffers_dbqbp(BQBP *a, float* in, float* out);
     static void setSamplerate_dbqbp(BQBP *a, int rate);
     static void setSize_dbqbp(BQBP *a, int size);
 
@@ -386,29 +386,29 @@ class WDSP_API SPHP
 public:
     int run;
     int size;
-    double* in;
-    double* out;
-    double rate;
-    double fc;
+    float* in;
+    float* out;
+    float rate;
+    float fc;
     int nstages;
-    double a1, b0, b1;
-    double* x0, * x1, * y0, * y1;
+    float a1, b0, b1;
+    float* x0, * x1, * y0, * y1;
     QRecursiveMutex cs_update;
 
-    static SPHP* create_dsphp(int run, int size, double* in, double* out, double rate, double fc, int nstages);
+    static SPHP* create_dsphp(int run, int size, float* in, float* out, float rate, float fc, int nstages);
     static void destroy_dsphp(SPHP *a);
     static void flush_dsphp(SPHP *a);
     static void xdsphp(SPHP *a);
-    static void setBuffers_dsphp(SPHP *a, double* in, double* out);
+    static void setBuffers_dsphp(SPHP *a, float* in, float* out);
     static void setSamplerate_dsphp(SPHP *a, int rate);
     static void setSize_dsphp(SPHP *a, int size);
 
     // Complex Single-Pole High-Pass
-    static SPHP* create_sphp(int run, int size, double* in, double* out, double rate, double fc, int nstages);
+    static SPHP* create_sphp(int run, int size, float* in, float* out, float rate, float fc, int nstages);
     static void destroy_sphp(SPHP *a);
     static void flush_sphp(SPHP *a);
     static void xsphp(SPHP *a);
-    static void setBuffers_sphp(SPHP *a, double* in, double* out);
+    static void setBuffers_sphp(SPHP *a, float* in, float* out);
     static void setSamplerate_sphp(SPHP *a, int rate);
     static void setSize_sphp(SPHP *a, int size);
 

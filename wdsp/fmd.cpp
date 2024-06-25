@@ -91,20 +91,20 @@ void FMD::decalc_fmd (FMD *a)
 FMD* FMD::create_fmd(
     int run,
     int size,
-    double* in,
-    double* out,
+    float* in,
+    float* out,
     int rate,
-    double deviation,
-    double f_low,
-    double f_high,
-    double fmin,
-    double fmax,
-    double zeta,
-    double omegaN,
-    double tau,
-    double afgain,
+    float deviation,
+    float f_low,
+    float f_high,
+    float fmin,
+    float fmax,
+    float zeta,
+    float omegaN,
+    float tau,
+    float afgain,
     int sntch_run,
-    double ctcss_freq,
+    float ctcss_freq,
     int nc_de,
     int mp_de,
     int nc_aud,
@@ -112,12 +112,12 @@ FMD* FMD::create_fmd(
 )
 {
     FMD *a = new FMD;
-    double* impulse;
+    float* impulse;
     a->run = run;
     a->size = size;
     a->in = in;
     a->out = out;
-    a->rate = (double)rate;
+    a->rate = (float)rate;
     a->deviation = deviation;
     a->f_low = f_low;
     a->f_high = f_high;
@@ -138,7 +138,7 @@ FMD* FMD::create_fmd(
     a->lim_gain = 2.5;
     calc_fmd (a);
     // de-emphasis filter
-    a->audio = new double[a->size * 2]; // (double *) malloc0 (a->size * sizeof (complex));
+    a->audio = new float[a->size * 2]; // (float *) malloc0 (a->size * sizeof (complex));
     impulse = FCurve::fc_impulse (a->nc_de, a->f_low, a->f_high, +20.0 * log10(a->f_high / a->f_low), 0.0, 1, a->rate, 1.0 / (2.0 * a->size), 0, 0);
     a->pde = FIRCORE::create_fircore (a->size, a->audio, a->out, a->nc_de, a->mp_de, impulse);
     delete[] (impulse);
@@ -176,8 +176,8 @@ void FMD::xfmd (FMD *a)
     if (a->run)
     {
         int i;
-        double det, del_out;
-        double vco[2], corr[2];
+        float det, del_out;
+        float vco[2], corr[2];
         for (i = 0; i < a->size; i++)
         {
             // pll
@@ -217,7 +217,7 @@ void FMD::xfmd (FMD *a)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
-void FMD::setBuffers_fmd (FMD *a, double* in, double* out)
+void FMD::setBuffers_fmd (FMD *a, float* in, float* out)
 {
     decalc_fmd (a);
     a->in = in;
@@ -230,7 +230,7 @@ void FMD::setBuffers_fmd (FMD *a, double* in, double* out)
 
 void FMD::setSamplerate_fmd (FMD *a, int rate)
 {
-    double* impulse;
+    float* impulse;
     decalc_fmd (a);
     a->rate = rate;
     calc_fmd (a);
@@ -247,12 +247,12 @@ void FMD::setSamplerate_fmd (FMD *a, int rate)
 
 void FMD::setSize_fmd (FMD *a, int size)
 {
-    double* impulse;
+    float* impulse;
     decalc_fmd (a);
     delete[] (a->audio);
     a->size = size;
     calc_fmd (a);
-    a->audio = new double[a->size * 2]; // (double *) malloc0 (a->size * sizeof (complex));
+    a->audio = new float[a->size * 2]; // (float *) malloc0 (a->size * sizeof (complex));
     // de-emphasis filter
     FIRCORE::destroy_fircore (a->pde);
     impulse = FCurve::fc_impulse (a->nc_de, a->f_low, a->f_high, +20.0 * log10(a->f_high / a->f_low), 0.0, 1, a->rate, 1.0 / (2.0 * a->size), 0, 0);
@@ -272,7 +272,7 @@ void FMD::setSize_fmd (FMD *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void FMD::SetFMDeviation (RXA& rxa, double deviation)
+void FMD::SetFMDeviation (RXA& rxa, float deviation)
 {
     FMD *a;
     rxa.csDSP.lock();
@@ -282,7 +282,7 @@ void FMD::SetFMDeviation (RXA& rxa, double deviation)
     rxa.csDSP.unlock();
 }
 
-void FMD::SetCTCSSFreq (RXA& rxa, double freq)
+void FMD::SetCTCSSFreq (RXA& rxa, float freq)
 {
     FMD *a;
     rxa.csDSP.lock();
@@ -305,7 +305,7 @@ void FMD::SetCTCSSRun (RXA& rxa, int run)
 void FMD::SetFMNCde (RXA& rxa, int nc)
 {
     FMD *a;
-    double* impulse;
+    float* impulse;
     rxa.csDSP.lock();
     a = rxa.fmd.p;
     if (a->nc_de != nc)
@@ -332,7 +332,7 @@ void FMD::SetFMMPde (RXA& rxa, int mp)
 void FMD::SetFMNCaud (RXA& rxa, int nc)
 {
     FMD *a;
-    double* impulse;
+    float* impulse;
     rxa.csDSP.lock();
     a = rxa.fmd.p;
     if (a->nc_aud != nc)
@@ -368,9 +368,9 @@ void FMD::SetFMLimRun (RXA& rxa, int run)
     rxa.csDSP.unlock();
 }
 
-void FMD::SetFMLimGain (RXA& rxa, double gaindB)
+void FMD::SetFMLimGain (RXA& rxa, float gaindB)
 {
-    double gain = pow(10.0, gaindB / 20.0);
+    float gain = pow(10.0, gaindB / 20.0);
     FMD *a = rxa.fmd.p;
     rxa.csDSP.lock();
     if (a->lim_gain != gain)
@@ -382,10 +382,10 @@ void FMD::SetFMLimGain (RXA& rxa, double gaindB)
     rxa.csDSP.unlock();
 }
 
-void FMD::SetFMAFFilter(RXA& rxa, double low, double high)
+void FMD::SetFMAFFilter(RXA& rxa, float low, float high)
 {
     FMD *a = rxa.fmd.p;
-    double* impulse;
+    float* impulse;
     rxa.csDSP.lock();
     if (a->f_low != low || a->f_high != high)
     {

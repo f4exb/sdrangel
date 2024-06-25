@@ -39,45 +39,45 @@ class WDSP_API AMSQ
 public:
     int run;                            // 0 if squelch system is OFF; 1 if it's ON
     int size;                           // size of input/output buffers
-    double* in;                         // squelch input signal buffer
-    double* out;                        // squelch output signal buffer
-    double* trigger;                    // pointer to trigger data source
-    double* trigsig;                    // buffer containing trigger signal
-    double rate;                        // sample rate
-    double avtau;                       // time constant for averaging noise
-    double avm;
-    double onem_avm;
-    double avsig;
+    float* in;                         // squelch input signal buffer
+    float* out;                        // squelch output signal buffer
+    float* trigger;                    // pointer to trigger data source
+    float* trigsig;                    // buffer containing trigger signal
+    float rate;                        // sample rate
+    float avtau;                       // time constant for averaging noise
+    float avm;
+    float onem_avm;
+    float avsig;
     int state;                          // state machine control
     int count;
-    double tup;
-    double tdown;
+    float tup;
+    float tdown;
     int ntup;
     int ntdown;
-    double* cup;
-    double* cdown;
-    double tail_thresh;
-    double unmute_thresh;
-    double min_tail;
-    double max_tail;
-    double muted_gain;
+    float* cup;
+    float* cdown;
+    float tail_thresh;
+    float unmute_thresh;
+    float min_tail;
+    float max_tail;
+    float muted_gain;
 
-    static AMSQ* create_amsq (int run, int size, double* in, double* out, double* trigger, int rate, double avtau, double tup, double tdown, double tail_thresh, double unmute_thresh, double min_tail, double max_tail, double muted_gain);
+    static AMSQ* create_amsq (int run, int size, float* in, float* out, float* trigger, int rate, float avtau, float tup, float tdown, float tail_thresh, float unmute_thresh, float min_tail, float max_tail, float muted_gain);
     static void destroy_amsq (AMSQ *a);
     static void flush_amsq (AMSQ *a);
     static void xamsq (AMSQ *a);
     static void xamsqcap (AMSQ *a);
-    static void setBuffers_amsq (AMSQ *a, double* in, double* out, double* trigger);
+    static void setBuffers_amsq (AMSQ *a, float* in, float* out, float* trigger);
     static void setSamplerate_amsq (AMSQ *a, int rate);
     static void setSize_amsq (AMSQ *a, int size);
     // RXA Properties
     static void SetAMSQRun (RXA& rxa, int run);
-    static void SetAMSQThreshold (RXA& rxa, double threshold);
-    static void SetAMSQMaxTail (RXA& rxa, double tail);
+    static void SetAMSQThreshold (RXA& rxa, float threshold);
+    static void SetAMSQMaxTail (RXA& rxa, float tail);
     // TXA Properties
     static void SetAMSQRun (TXA& txa, int run);
-    static void SetAMSQMutedGain (TXA& txa, double dBlevel);
-    static void SetAMSQThreshold (TXA& txa, double threshold);
+    static void SetAMSQMutedGain (TXA& txa, float dBlevel);
+    static void SetAMSQThreshold (TXA& txa, float threshold);
 
 private:
     static void compute_slews(AMSQ *a);

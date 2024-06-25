@@ -78,9 +78,9 @@ TXA* TXA::create_txa (
     txa->mode   = TXA_LSB;
     txa->f_low  = -5000.0;
     txa->f_high = - 100.0;
-    txa->inbuff  = new double[1 * txa->dsp_insize  * 2]; // (double *) malloc0 (1 * txa->dsp_insize  * sizeof (complex));
-    txa->outbuff = new double[1 * txa->dsp_outsize  * 2]; // (double *) malloc0 (1 * txa->dsp_outsize * sizeof (complex));
-    txa->midbuff = new double[3 * txa->dsp_size  * 2]; //(double *) malloc0 (2 * txa->dsp_size    * sizeof (complex));
+    txa->inbuff  = new float[1 * txa->dsp_insize  * 2]; // (float *) malloc0 (1 * txa->dsp_insize  * sizeof (complex));
+    txa->outbuff = new float[1 * txa->dsp_outsize  * 2]; // (float *) malloc0 (1 * txa->dsp_outsize * sizeof (complex));
+    txa->midbuff = new float[3 * txa->dsp_size  * 2]; //(float *) malloc0 (2 * txa->dsp_size    * sizeof (complex));
 
     txa->rsmpin.p = RESAMPLE::create_resample (
         0,                                          // run - will be turned on below if needed
@@ -153,9 +153,9 @@ TXA* TXA::create_txa (
         0.200);                                     // muted gain
 
     {
-        double default_F[11] = {0.0,  32.0,  63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0};
-        double default_G[11] = {0.0, -12.0, -12.0, -12.0,  -1.0,  +1.0,   +4.0,   +9.0,  +12.0,  -10.0,   -10.0};
-        //double default_G[11] =   {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0};
+        float default_F[11] = {0.0,  32.0,  63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0};
+        float default_G[11] = {0.0, -12.0, -12.0, -12.0,  -1.0,  +1.0,   +4.0,   +9.0,  +12.0,  -10.0,   -10.0};
+        //float default_G[11] =   {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0};
         txa->eqp.p = EQP::create_eqp (
             0,                                          // run - OFF by default
             txa->dsp_size,                       // size
@@ -240,9 +240,9 @@ TXA* TXA::create_txa (
         &txa->leveler.p->gain);             // pointer for gain computation
 
     {
-        double default_F[5] = {200.0, 1000.0, 2000.0, 3000.0, 4000.0};
-        double default_G[5] = {0.0, 5.0, 10.0, 10.0, 5.0};
-        double default_E[5] = {7.0, 7.0, 7.0, 7.0, 7.0};
+        float default_F[5] = {200.0, 1000.0, 2000.0, 3000.0, 4000.0};
+        float default_G[5] = {0.0, 5.0, 10.0, 10.0, 5.0};
+        float default_E[5] = {7.0, 7.0, 7.0, 7.0, 7.0};
         txa->cfcomp.p = CFCOMP::create_cfcomp(
             0,                                          // run
             0,                                          // position
@@ -278,7 +278,7 @@ TXA* TXA::create_txa (
         TXA_CFC_AV,                                 // index for average value
         TXA_CFC_PK,                                 // index for peak value
         TXA_CFC_GAIN,                               // index for gain value
-        &txa->cfcomp.p->gain);              // pointer for gain computation
+        (double*) &txa->cfcomp.p->gain);              // pointer for gain computation
 
     txa->bp0.p = BANDPASS::create_bandpass (
         1,                                          // always runs
@@ -470,7 +470,7 @@ TXA* TXA::create_txa (
         txa->dsp_size,                       // size
         txa->midbuff,                       // input buffer
         txa->midbuff,                       // output buffer
-        (double)txa->dsp_rate,               // sample rate
+        (float)txa->dsp_rate,               // sample rate
         16,                                         // ints
         0.005,                                      // changeover time
         256);                                       // spi
@@ -649,7 +649,7 @@ void TXA::setInputSamplerate (TXA *txa, int in_rate)
     txa->in_rate = in_rate;
     // buffers
     delete[] (txa->inbuff);
-    txa->inbuff = new double[1 * txa->dsp_insize  * 2]; //(double *)malloc0(1 * txa->dsp_insize  * sizeof(complex));
+    txa->inbuff = new float[1 * txa->dsp_insize  * 2]; //(float *)malloc0(1 * txa->dsp_insize  * sizeof(complex));
     // input resampler
     RESAMPLE::setBuffers_resample (txa->rsmpin.p, txa->inbuff, txa->midbuff);
     RESAMPLE::setSize_resample (txa->rsmpin.p, txa->dsp_insize);
@@ -670,7 +670,7 @@ void TXA::setOutputSamplerate (TXA* txa, int out_rate)
     txa->out_rate = out_rate;
     // buffers
     delete[] (txa->outbuff);
-    txa->outbuff = new double[1 * txa->dsp_outsize * 2]; // (double *)malloc0(1 * txa->dsp_outsize * sizeof(complex));
+    txa->outbuff = new float[1 * txa->dsp_outsize * 2]; // (float *)malloc0(1 * txa->dsp_outsize * sizeof(complex));
     // cfir - needs to know input rate of firmware CIC
     CFIR::setOutRate_cfir (txa->cfir.p, txa->out_rate);
     // output resampler
@@ -701,9 +701,9 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     txa->dsp_rate = dsp_rate;
     // buffers
     delete[] (txa->inbuff);
-    txa->inbuff = new double[1 * txa->dsp_insize  * 2]; // (double *)malloc0(1 * txa->dsp_insize  * sizeof(complex));
+    txa->inbuff = new float[1 * txa->dsp_insize  * 2]; // (float *)malloc0(1 * txa->dsp_insize  * sizeof(complex));
     delete[] (txa->outbuff);
-    txa->outbuff = new double[1 * txa->dsp_outsize  * 2]; // (double *)malloc0(1 * txa->dsp_outsize * sizeof(complex));
+    txa->outbuff = new float[1 * txa->dsp_outsize  * 2]; // (float *)malloc0(1 * txa->dsp_outsize * sizeof(complex));
     // input resampler
     RESAMPLE::setBuffers_resample (txa->rsmpin.p, txa->inbuff, txa->midbuff);
     RESAMPLE::setSize_resample (txa->rsmpin.p, txa->dsp_insize);
@@ -763,11 +763,11 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     txa->dsp_size = dsp_size;
     // buffers
     delete[] (txa->inbuff);
-    txa->inbuff = new double[1 * txa->dsp_insize  * 2]; // (double *)malloc0(1 * txa->dsp_insize  * sizeof(complex));
+    txa->inbuff = new float[1 * txa->dsp_insize  * 2]; // (float *)malloc0(1 * txa->dsp_insize  * sizeof(complex));
     delete[] (txa->midbuff);
-    txa->midbuff = new double[2 * txa->dsp_size  * 2]; // (double *)malloc0(2 * txa->dsp_size * sizeof(complex));
+    txa->midbuff = new float[2 * txa->dsp_size  * 2]; // (float *)malloc0(2 * txa->dsp_size * sizeof(complex));
     delete[] (txa->outbuff);
-    txa->outbuff = new double[1 * txa->dsp_outsize  * 2]; // (double *)malloc0(1 * txa->dsp_outsize * sizeof(complex));
+    txa->outbuff = new float[1 * txa->dsp_outsize  * 2]; // (float *)malloc0(1 * txa->dsp_outsize * sizeof(complex));
     // input resampler
     RESAMPLE::setBuffers_resample (txa->rsmpin.p, txa->inbuff, txa->midbuff);
     RESAMPLE::setSize_resample (txa->rsmpin.p, txa->dsp_insize);
@@ -879,7 +879,7 @@ void TXA::SetMode (TXA& txa, int mode)
     }
 }
 
-void TXA::SetBandpassFreqs (TXA& txa, double f_low, double f_high)
+void TXA::SetBandpassFreqs (TXA& txa, float f_low, float f_high)
 {
     if ((txa.f_low != f_low) || (txa.f_high != f_high))
     {
@@ -1019,7 +1019,7 @@ void TXA::SetMP (TXA& txa, int mp)
     FMMOD::SetFMMP           (txa, mp);
 }
 
-void TXA::SetFMAFFilter (TXA& txa, double low, double high)
+void TXA::SetFMAFFilter (TXA& txa, float low, float high)
 {
     EMPHP::SetFMPreEmphFreqs (txa, low, high);
     FMMOD::SetFMAFFreqs      (txa, low, high);

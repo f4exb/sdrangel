@@ -79,7 +79,7 @@ void GEN::calc_triangle (GEN *a)
 void GEN::calc_pulse (GEN *a)
 {
     int i;
-    double delta, theta;
+    float delta, theta;
     a->pulse.pperiod = 1.0 / a->pulse.pf;
     a->pulse.tphs = 0.0;
     a->pulse.tdelta = TWOPI * a->pulse.tf / a->rate;
@@ -91,8 +91,8 @@ void GEN::calc_pulse (GEN *a)
     if (a->pulse.pnoff < 0) a->pulse.pnoff = 0;
     a->pulse.pcount = a->pulse.pnoff;
     a->pulse.state = 0;
-    a->pulse.ctrans = new double[a->pulse.pntrans + 1]; // (double *) malloc0 ((a->pulse.pntrans + 1) * sizeof (double));
-    delta = PI / (double)a->pulse.pntrans;
+    a->pulse.ctrans = new float[a->pulse.pntrans + 1]; // (float *) malloc0 ((a->pulse.pntrans + 1) * sizeof (float));
+    delta = PI / (float)a->pulse.pntrans;
     theta = 0.0;
     for (i = 0; i <= a->pulse.pntrans; i++)
     {
@@ -116,14 +116,14 @@ void GEN::decalc_gen (GEN *a)
     delete[] (a->pulse.ctrans);
 }
 
-GEN* GEN::create_gen (int run, int size, double* in, double* out, int rate, int mode)
+GEN* GEN::create_gen (int run, int size, float* in, float* out, int rate, int mode)
 {
     GEN *a = new GEN;
     a->run = run;
     a->size = size;
     a->in = in;
     a->out = out;
-    a->rate = (double)rate;
+    a->rate = (float)rate;
     a->mode = mode;
     // tone
     a->tone.mag = 1.0;
@@ -185,9 +185,9 @@ void GEN::xgen (GEN *a)
         case 0: // tone
             {
                 int i;
-                double t1, t2;
-                double cosphase = cos (a->tone.phs);
-                double sinphase = sin (a->tone.phs);
+                float t1, t2;
+                float cosphase = cos (a->tone.phs);
+                float sinphase = sin (a->tone.phs);
                 for (i = 0; i < a->size; i++)
                 {
                     a->out[2 * i + 0] = + a->tone.mag * cosphase;
@@ -205,11 +205,11 @@ void GEN::xgen (GEN *a)
         case 1: // two-tone
             {
                 int i;
-                double tcos, tsin;
-                double cosphs1 = cos (a->tt.phs1);
-                double sinphs1 = sin (a->tt.phs1);
-                double cosphs2 = cos (a->tt.phs2);
-                double sinphs2 = sin (a->tt.phs2);
+                float tcos, tsin;
+                float cosphs1 = cos (a->tt.phs1);
+                float sinphs1 = sin (a->tt.phs1);
+                float cosphs2 = cos (a->tt.phs2);
+                float sinphs2 = sin (a->tt.phs2);
                 for (i = 0; i < a->size; i++)
                 {
                     a->out[2 * i + 0] = + a->tt.mag1 * cosphs1 + a->tt.mag2 * cosphs2;
@@ -234,13 +234,13 @@ void GEN::xgen (GEN *a)
         case 2: // noise
             {
                 int i;
-                double r1, r2, c, rad;
+                float r1, r2, c, rad;
                 for (i = 0; i < a->size; i++)
                 {
                     do
                     {
-                        r1 = 2.0 * (double)rand() / (double)RAND_MAX - 1.0;
-                        r2 = 2.0 * (double)rand() / (double)RAND_MAX - 1.0;
+                        r1 = 2.0 * (float)rand() / (float)RAND_MAX - 1.0;
+                        r2 = 2.0 * (float)rand() / (float)RAND_MAX - 1.0;
                         c = r1 * r1 + r2 * r2;
                     } while (c >= 1.0);
                     rad = sqrt (-2.0 * log (c) / c);
@@ -294,9 +294,9 @@ void GEN::xgen (GEN *a)
         case 6:  // pulse (audio only)
             {
                 int i;
-                double t1, t2;
-                double cosphase = cos (a->pulse.tphs);
-                double sinphase = sin (a->pulse.tphs);
+                float t1, t2;
+                float cosphase = cos (a->pulse.tphs);
+                float sinphase = sin (a->pulse.tphs);
                 for (i = 0; i < a->size; i++)
                 {
                     if (a->pulse.pnoff != 0)
@@ -359,7 +359,7 @@ void GEN::xgen (GEN *a)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
-void GEN::setBuffers_gen (GEN *a, double* in, double* out)
+void GEN::setBuffers_gen (GEN *a, float* in, float* out)
 {
     a->in = in;
     a->out = out;
@@ -401,14 +401,14 @@ void GEN::SetPreGenMode (RXA& rxa, int mode)
     rxa.csDSP.unlock();
 }
 
-void GEN::SetPreGenToneMag (RXA& rxa, double mag)
+void GEN::SetPreGenToneMag (RXA& rxa, float mag)
 {
     rxa.csDSP.lock();
     rxa.gen0.p->tone.mag = mag;
     rxa.csDSP.unlock();
 }
 
-void GEN::SetPreGenToneFreq (RXA& rxa, double freq)
+void GEN::SetPreGenToneFreq (RXA& rxa, float freq)
 {
     rxa.csDSP.lock();
     rxa.gen0.p->tone.freq = freq;
@@ -416,21 +416,21 @@ void GEN::SetPreGenToneFreq (RXA& rxa, double freq)
     rxa.csDSP.unlock();
 }
 
-void GEN::SetPreGenNoiseMag (RXA& rxa, double mag)
+void GEN::SetPreGenNoiseMag (RXA& rxa, float mag)
 {
     rxa.csDSP.lock();
     rxa.gen0.p->noise.mag = mag;
     rxa.csDSP.unlock();
 }
 
-void GEN::SetPreGenSweepMag (RXA& rxa, double mag)
+void GEN::SetPreGenSweepMag (RXA& rxa, float mag)
 {
     rxa.csDSP.lock();
     rxa.gen0.p->sweep.mag = mag;
     rxa.csDSP.unlock();
 }
 
-void GEN::SetPreGenSweepFreq (RXA& rxa, double freq1, double freq2)
+void GEN::SetPreGenSweepFreq (RXA& rxa, float freq1, float freq2)
 {
     rxa.csDSP.lock();
     rxa.gen0.p->sweep.f1 = freq1;
@@ -439,7 +439,7 @@ void GEN::SetPreGenSweepFreq (RXA& rxa, double freq1, double freq2)
     rxa.csDSP.unlock();
 }
 
-void GEN::SetPreGenSweepRate (RXA& rxa, double rate)
+void GEN::SetPreGenSweepRate (RXA& rxa, float rate)
 {
     rxa.csDSP.lock();
     rxa.gen0.p->sweep.sweeprate = rate;
@@ -470,14 +470,14 @@ void GEN::SetPreGenMode (TXA& txa, int mode)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenToneMag (TXA& txa, double mag)
+void GEN::SetPreGenToneMag (TXA& txa, float mag)
 {
     txa.csDSP.lock();
     txa.gen0.p->tone.mag = mag;
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenToneFreq (TXA& txa, double freq)
+void GEN::SetPreGenToneFreq (TXA& txa, float freq)
 {
     txa.csDSP.lock();
     txa.gen0.p->tone.freq = freq;
@@ -485,21 +485,21 @@ void GEN::SetPreGenToneFreq (TXA& txa, double freq)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenNoiseMag (TXA& txa, double mag)
+void GEN::SetPreGenNoiseMag (TXA& txa, float mag)
 {
     txa.csDSP.lock();
     txa.gen0.p->noise.mag = mag;
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenSweepMag (TXA& txa, double mag)
+void GEN::SetPreGenSweepMag (TXA& txa, float mag)
 {
     txa.csDSP.lock();
     txa.gen0.p->sweep.mag = mag;
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenSweepFreq (TXA& txa, double freq1, double freq2)
+void GEN::SetPreGenSweepFreq (TXA& txa, float freq1, float freq2)
 {
     txa.csDSP.lock();
     txa.gen0.p->sweep.f1 = freq1;
@@ -508,7 +508,7 @@ void GEN::SetPreGenSweepFreq (TXA& txa, double freq1, double freq2)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenSweepRate (TXA& txa, double rate)
+void GEN::SetPreGenSweepRate (TXA& txa, float rate)
 {
     txa.csDSP.lock();
     txa.gen0.p->sweep.sweeprate = rate;
@@ -516,14 +516,14 @@ void GEN::SetPreGenSweepRate (TXA& txa, double rate)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenSawtoothMag (TXA& txa, double mag)
+void GEN::SetPreGenSawtoothMag (TXA& txa, float mag)
 {
     txa.csDSP.lock();
     txa.gen0.p->saw.mag = mag;
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenSawtoothFreq (TXA& txa, double freq)
+void GEN::SetPreGenSawtoothFreq (TXA& txa, float freq)
 {
     txa.csDSP.lock();
     txa.gen0.p->saw.f = freq;
@@ -531,14 +531,14 @@ void GEN::SetPreGenSawtoothFreq (TXA& txa, double freq)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenTriangleMag (TXA& txa, double mag)
+void GEN::SetPreGenTriangleMag (TXA& txa, float mag)
 {
     txa.csDSP.lock();
     txa.gen0.p->tri.mag = mag;
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenTriangleFreq (TXA& txa, double freq)
+void GEN::SetPreGenTriangleFreq (TXA& txa, float freq)
 {
     txa.csDSP.lock();
     txa.gen0.p->tri.f = freq;
@@ -546,14 +546,14 @@ void GEN::SetPreGenTriangleFreq (TXA& txa, double freq)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenPulseMag (TXA& txa, double mag)
+void GEN::SetPreGenPulseMag (TXA& txa, float mag)
 {
     txa.csDSP.lock();
     txa.gen0.p->pulse.mag = mag;
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenPulseFreq (TXA& txa, double freq)
+void GEN::SetPreGenPulseFreq (TXA& txa, float freq)
 {
     txa.csDSP.lock();
     txa.gen0.p->pulse.pf = freq;
@@ -561,7 +561,7 @@ void GEN::SetPreGenPulseFreq (TXA& txa, double freq)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenPulseDutyCycle (TXA& txa, double dc)
+void GEN::SetPreGenPulseDutyCycle (TXA& txa, float dc)
 {
     txa.csDSP.lock();
     txa.gen0.p->pulse.pdutycycle = dc;
@@ -569,7 +569,7 @@ void GEN::SetPreGenPulseDutyCycle (TXA& txa, double dc)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenPulseToneFreq (TXA& txa, double freq)
+void GEN::SetPreGenPulseToneFreq (TXA& txa, float freq)
 {
     txa.csDSP.lock();
     txa.gen0.p->pulse.tf = freq;
@@ -577,7 +577,7 @@ void GEN::SetPreGenPulseToneFreq (TXA& txa, double freq)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPreGenPulseTransition (TXA& txa, double transtime)
+void GEN::SetPreGenPulseTransition (TXA& txa, float transtime)
 {
     txa.csDSP.lock();
     txa.gen0.p->pulse.ptranstime = transtime;
@@ -601,14 +601,14 @@ void GEN::SetPostGenMode (TXA& txa, int mode)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPostGenToneMag (TXA& txa, double mag)
+void GEN::SetPostGenToneMag (TXA& txa, float mag)
 {
     txa.csDSP.lock();
     txa.gen1.p->tone.mag = mag;
     txa.csDSP.unlock();
 }
 
-void GEN::SetPostGenToneFreq (TXA& txa, double freq)
+void GEN::SetPostGenToneFreq (TXA& txa, float freq)
 {
     txa.csDSP.lock();
     txa.gen1.p->tone.freq = freq;
@@ -616,7 +616,7 @@ void GEN::SetPostGenToneFreq (TXA& txa, double freq)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPostGenTTMag (TXA& txa, double mag1, double mag2)
+void GEN::SetPostGenTTMag (TXA& txa, float mag1, float mag2)
 {
     txa.csDSP.lock();
     txa.gen1.p->tt.mag1 = mag1;
@@ -624,7 +624,7 @@ void GEN::SetPostGenTTMag (TXA& txa, double mag1, double mag2)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPostGenTTFreq (TXA& txa, double freq1, double freq2)
+void GEN::SetPostGenTTFreq (TXA& txa, float freq1, float freq2)
 {
     txa.csDSP.lock();
     txa.gen1.p->tt.f1 = freq1;
@@ -633,14 +633,14 @@ void GEN::SetPostGenTTFreq (TXA& txa, double freq1, double freq2)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPostGenSweepMag (TXA& txa, double mag)
+void GEN::SetPostGenSweepMag (TXA& txa, float mag)
 {
     txa.csDSP.lock();
     txa.gen1.p->sweep.mag = mag;
     txa.csDSP.unlock();
 }
 
-void GEN::SetPostGenSweepFreq (TXA& txa, double freq1, double freq2)
+void GEN::SetPostGenSweepFreq (TXA& txa, float freq1, float freq2)
 {
     txa.csDSP.lock();
     txa.gen1.p->sweep.f1 = freq1;
@@ -649,7 +649,7 @@ void GEN::SetPostGenSweepFreq (TXA& txa, double freq1, double freq2)
     txa.csDSP.unlock();
 }
 
-void GEN::SetPostGenSweepRate (TXA& txa, double rate)
+void GEN::SetPostGenSweepRate (TXA& txa, float rate)
 {
     txa.csDSP.lock();
     txa.gen1.p->sweep.sweeprate = rate;

@@ -35,8 +35,8 @@ namespace WDSP {
 class WDSP_API FCurve
 {
 public:
-    static double* fc_impulse (int nc, double f0, double f1, double g0, double g1, int curve, double samplerate, double scale, int ctfmode, int wintype);
-    static double* fc_mults (int size, double f0, double f1, double g0, double g1, int curve, double samplerate, double scale, int ctfmode, int wintype);
+    static float* fc_impulse (int nc, float f0, float f1, float g0, float g1, int curve, float samplerate, float scale, int ctfmode, int wintype);
+    static float* fc_mults (int size, float f0, float f1, float g0, float g1, int curve, float samplerate, float scale, int ctfmode, int wintype);
 };
 
 } // namespace WDSP

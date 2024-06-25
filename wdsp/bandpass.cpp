@@ -40,12 +40,12 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-BANDPASS* BANDPASS::create_bandpass (int run, int position, int size, int nc, int mp, double* in, double* out,
-    double f_low, double f_high, int samplerate, int wintype, double gain)
+BANDPASS* BANDPASS::create_bandpass (int run, int position, int size, int nc, int mp, float* in, float* out,
+    float f_low, float f_high, int samplerate, int wintype, float gain)
 {
     // NOTE:  'nc' must be >= 'size'
     BANDPASS *a = new BANDPASS;
-    double* impulse;
+    float* impulse;
     a->run = run;
     a->position = position;
     a->size = size;
@@ -58,7 +58,7 @@ BANDPASS* BANDPASS::create_bandpass (int run, int position, int size, int nc, in
     a->samplerate = samplerate;
     a->wintype = wintype;
     a->gain = gain;
-    impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+    impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
     a->p = FIRCORE::create_fircore (a->size, a->in, a->out, a->nc, a->mp, impulse);
     delete[] impulse;
     return a;
@@ -83,7 +83,7 @@ void BANDPASS::xbandpass (BANDPASS *a, int pos)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
-void BANDPASS::setBuffers_bandpass (BANDPASS *a, double* in, double* out)
+void BANDPASS::setBuffers_bandpass (BANDPASS *a, float* in, float* out)
 {
     a->in = in;
     a->out = out;
@@ -92,9 +92,9 @@ void BANDPASS::setBuffers_bandpass (BANDPASS *a, double* in, double* out)
 
 void BANDPASS::setSamplerate_bandpass (BANDPASS *a, int rate)
 {
-    double* impulse;
+    float* impulse;
     a->samplerate = rate;
-    impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+    impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
     FIRCORE::setImpulse_fircore (a->p, impulse, 1);
     delete[] impulse;
 }
@@ -102,33 +102,33 @@ void BANDPASS::setSamplerate_bandpass (BANDPASS *a, int rate)
 void BANDPASS::setSize_bandpass (BANDPASS *a, int size)
 {
     // NOTE:  'size' must be <= 'nc'
-    double* impulse;
+    float* impulse;
     a->size = size;
     FIRCORE::setSize_fircore (a->p, a->size);
     // recalc impulse because scale factor is a function of size
-    impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+    impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
     FIRCORE::setImpulse_fircore (a->p, impulse, 1);
     delete[] (impulse);
 }
 
-void BANDPASS::setGain_bandpass (BANDPASS *a, double gain, int update)
+void BANDPASS::setGain_bandpass (BANDPASS *a, float gain, int update)
 {
-    double* impulse;
+    float* impulse;
     a->gain = gain;
-    impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+    impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
     FIRCORE::setImpulse_fircore (a->p, impulse, update);
     delete[] (impulse);
 }
 
-void BANDPASS::CalcBandpassFilter (BANDPASS *a, double f_low, double f_high, double gain)
+void BANDPASS::CalcBandpassFilter (BANDPASS *a, float f_low, float f_high, float gain)
 {
-    double* impulse;
+    float* impulse;
     if ((a->f_low != f_low) || (a->f_high != f_high) || (a->gain != gain))
     {
         a->f_low = f_low;
         a->f_high = f_high;
         a->gain = gain;
-        impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+        impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
         FIRCORE::setImpulse_fircore (a->p, impulse, 1);
         delete[] (impulse);
     }
@@ -140,14 +140,14 @@ void BANDPASS::CalcBandpassFilter (BANDPASS *a, double f_low, double f_high, dou
 *                                                                                                       *
 ********************************************************************************************************/
 
-void BANDPASS::SetBandpassFreqs (RXA& rxa, double f_low, double f_high)
+void BANDPASS::SetBandpassFreqs (RXA& rxa, float f_low, float f_high)
 {
-    double* impulse;
+    float* impulse;
     BANDPASS *a = rxa.bp1.p;
     if ((f_low != a->f_low) || (f_high != a->f_high))
     {
         impulse = FIR::fir_bandpass (a->nc, f_low, f_high, a->samplerate,
-            a->wintype, 1, a->gain / (double)(2 * a->size));
+            a->wintype, 1, a->gain / (float)(2 * a->size));
         FIRCORE::setImpulse_fircore (a->p, impulse, 0);
         delete[] (impulse);
         rxa.csDSP.lock();
@@ -161,14 +161,14 @@ void BANDPASS::SetBandpassFreqs (RXA& rxa, double f_low, double f_high)
 void BANDPASS::SetBandpassNC (RXA& rxa, int nc)
 {
     // NOTE:  'nc' must be >= 'size'
-    double* impulse;
+    float* impulse;
     BANDPASS *a;
     rxa.csDSP.lock();
     a = rxa.bp1.p;
     if (nc != a->nc)
     {
         a->nc = nc;
-        impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+        impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
         FIRCORE::setNc_fircore (a->p, a->nc, impulse);
         delete[] (impulse);
     }
@@ -193,16 +193,16 @@ void BANDPASS::SetBandpassMP (RXA& rxa, int mp)
 ********************************************************************************************************/
 
 //PORT
-//void SetTXABandpassFreqs (int channel, double f_low, double f_high)
+//void SetTXABandpassFreqs (int channel, float f_low, float f_high)
 //{
-//  double* impulse;
+//  float* impulse;
 //  BANDPASS a;
 //  a = txa.bp0.p;
 //  if ((f_low != a->f_low) || (f_high != a->f_high))
 //  {
 //      a->f_low = f_low;
 //      a->f_high = f_high;
-//      impulse = fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+//      impulse = fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
 //      setImpulse_fircore (a->p, impulse, 1);
 //      delete[] (impulse);
 //  }
@@ -211,7 +211,7 @@ void BANDPASS::SetBandpassMP (RXA& rxa, int mp)
 //  {
 //      a->f_low = f_low;
 //      a->f_high = f_high;
-//      impulse = fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+//      impulse = fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
 //      setImpulse_fircore (a->p, impulse, 1);
 //      delete[] (impulse);
 //  }
@@ -220,7 +220,7 @@ void BANDPASS::SetBandpassMP (RXA& rxa, int mp)
 //  {
 //      a->f_low = f_low;
 //      a->f_high = f_high;
-//      impulse = fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+//      impulse = fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
 //      setImpulse_fircore (a->p, impulse, 1);
 //      delete[] (impulse);
 //  }
@@ -229,14 +229,14 @@ void BANDPASS::SetBandpassMP (RXA& rxa, int mp)
 void BANDPASS::SetBandpassNC (TXA& txa, int nc)
 {
     // NOTE:  'nc' must be >= 'size'
-    double* impulse;
+    float* impulse;
     BANDPASS *a;
     txa.csDSP.lock();
     a = txa.bp0.p;
     if (a->nc != nc)
     {
         a->nc = nc;
-        impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+        impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
         FIRCORE::setNc_fircore (a->p, a->nc, impulse);
         delete[] (impulse);
     }
@@ -244,7 +244,7 @@ void BANDPASS::SetBandpassNC (TXA& txa, int nc)
     if (a->nc != nc)
     {
         a->nc = nc;
-        impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+        impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
         FIRCORE::setNc_fircore (a->p, a->nc, impulse);
         delete[] (impulse);
     }
@@ -252,7 +252,7 @@ void BANDPASS::SetBandpassNC (TXA& txa, int nc)
     if (a->nc != nc)
     {
         a->nc = nc;
-        impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (double)(2 * a->size));
+        impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain / (float)(2 * a->size));
         FIRCORE::setNc_fircore (a->p, a->nc, impulse);
         delete[] (impulse);
     }

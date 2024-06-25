@@ -42,17 +42,17 @@ public:
     int size;
     int nc;
     int mp;
-    double* in;
-    double* out;
+    float* in;
+    float* out;
     int runrate;
     int cicrate;
     int DD;
     int R;
     int Pairs;
-    double cutoff;
-    double scale;
+    float cutoff;
+    float scale;
     int xtype;
-    double xbw;
+    float xbw;
     int wintype;
     FIRCORE *p;
 
@@ -61,37 +61,37 @@ public:
         int size,
         int nc,
         int mp,
-        double* in,
-        double* out,
+        float* in,
+        float* out,
         int runrate,
         int cicrate,
         int DD,
         int R,
         int Pairs,
-        double cutoff,
+        float cutoff,
         int xtype,
-        double xbw,
+        float xbw,
         int wintype
     );
     static void destroy_cfir (CFIR *a);
     static void flush_cfir (CFIR *a);
     static void xcfir (CFIR *a);
-    static void setBuffers_cfir (CFIR *a, double* in, double* out);
+    static void setBuffers_cfir (CFIR *a, float* in, float* out);
     static void setSamplerate_cfir (CFIR *a, int rate);
     static void setSize_cfir (CFIR *a, int size);
     static void setOutRate_cfir (CFIR *a, int rate);
-    static double* cfir_impulse (
+    static float* cfir_impulse (
         int N,
         int DD,
         int R,
         int Pairs,
-        double runrate,
-        double cicrate,
-        double cutoff,
+        float runrate,
+        float cicrate,
+        float cutoff,
         int xtype,
-        double xbw,
+        float xbw,
         int rtype,
-        double scale,
+        float scale,
         int wintype
     );
     // TXA Properties

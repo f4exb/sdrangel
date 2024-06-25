@@ -125,9 +125,9 @@ public:
     };
 
     int mode;
-    double f_low;
-    double f_high;
-    double meter[TXA_METERTYPE_LAST];
+    float f_low;
+    float f_high;
+    float meter[TXA_METERTYPE_LAST];
     QRecursiveMutex *pmtupdate[TXA_METERTYPE_LAST];
     std::atomic<long> upslew;
     struct
@@ -228,8 +228,8 @@ public:
     static void xtxa (TXA *txa);
     int get_insize() const { return dsp_insize; }
     int get_outsize() const { return dsp_outsize; }
-    double *get_inbuff() { return inbuff; }
-    double *get_outbuff() { return outbuff; }
+    float *get_inbuff() { return inbuff; }
+    float *get_outbuff() { return outbuff; }
     static void setInputSamplerate (TXA *txa, int in_rate);
     static void setOutputSamplerate (TXA *txa, int out_rate);
     static void setDSPSamplerate (TXA *txa, int dsp_rate);
@@ -237,20 +237,20 @@ public:
 
     // TXA Properties
     static void SetMode (TXA& txa, int mode);
-    static void SetBandpassFreqs (TXA& txa, double f_low, double f_high);
+    static void SetBandpassFreqs (TXA& txa, float f_low, float f_high);
 
     // Collectives
     static void SetNC (TXA& txa, int nc);
     static void SetMP (TXA& txa, int mp);
-    static void SetFMAFFilter (TXA& txa, double low, double high);
+    static void SetFMAFFilter (TXA& txa, float low, float high);
     static void SetupBPFilters (TXA& txa);
     static int UslewCheck (TXA& txa);
 
 private:
     static void ResCheck (TXA& txa);
-    double* inbuff;
-    double* midbuff;
-    double* outbuff;
+    float* inbuff;
+    float* midbuff;
+    float* outbuff;
 };
 
 } // namespace WDSP

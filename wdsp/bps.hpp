@@ -48,35 +48,35 @@ public:
     int run;
     int position;
     int size;
-    double* in;
-    double* out;
-    double f_low;
-    double f_high;
-    double* infilt;
-    double* product;
-    double* mults;
-    double samplerate;
+    float* in;
+    float* out;
+    float f_low;
+    float f_high;
+    float* infilt;
+    float* product;
+    float* mults;
+    float samplerate;
     int wintype;
-    double gain;
-    fftw_plan CFor;
-    fftw_plan CRev;
+    float gain;
+    fftwf_plan CFor;
+    fftwf_plan CRev;
 
-    static BPS* create_bps (int run, int position, int size, double* in, double* out,
-        double f_low, double f_high, int samplerate, int wintype, double gain);
+    static BPS* create_bps (int run, int position, int size, float* in, float* out,
+        float f_low, float f_high, int samplerate, int wintype, float gain);
     static void destroy_bps (BPS *a);
     static void flush_bps (BPS *a);
     static void xbps (BPS *a, int pos);
-    static void setBuffers_bps (BPS *a, double* in, double* out);
+    static void setBuffers_bps (BPS *a, float* in, float* out);
     static void setSamplerate_bps (BPS *a, int rate);
     static void setSize_bps (BPS *a, int size);
-    static void setFreqs_bps (BPS *a, double f_low, double f_high);
+    static void setFreqs_bps (BPS *a, float f_low, float f_high);
     // RXA Prototypes
     static void SetBPSRun (RXA& rxa, int run);
-    static void SetBPSFreqs (RXA& rxa, double low, double high);
+    static void SetBPSFreqs (RXA& rxa, float low, float high);
     static void SetBPSWindow (RXA& rxa, int wintype);
     // TXA Prototypes
     static void SetBPSRun (TXA& txa, int run);
-    static void SetBPSFreqs (TXA& txa, double low, double high);
+    static void SetBPSFreqs (TXA& txa, float low, float high);
     static void SetBPSWindow (TXA& txa, int wintype);
 
 private:

@@ -14,7 +14,7 @@
  * return values of main()
  *
  *  0  all OK
- * -1  sizeof(double) is not 8
+ * -1  sizeof(float) is not 8
  * -2  error opening file "calculus"
  * -3  read error
  */
@@ -26,9 +26,9 @@
 int main() {
     int fd;
     int i,j;
-    double d;
+    float d;
 
-    if (sizeof(double) != 8) {
+    if (sizeof(float) != 8) {
         printf("Data type DOUBLE is not 8-byte. Please check!\n");
         return -1;
     }
@@ -41,10 +41,10 @@ int main() {
     for (j=0; j<2; j++) {
         switch (j) {
             case 0:
-            printf("double GG[241*241]={\n");
+            printf("float GG[241*241]={\n");
             break;
             case 1:
-            printf("double GGS[241*241]={\n");
+            printf("float GGS[241*241]={\n");
             break;
         }
         for (i=0; i< 241*241; i++) {

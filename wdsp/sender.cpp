@@ -32,7 +32,7 @@ warren@wpratt.com
 
 namespace WDSP {
 
-SENDER* SENDER::create_sender (int run, int flag, int mode, int size, double* in)
+SENDER* SENDER::create_sender (int run, int flag, int mode, int size, float* in)
 {
     SENDER *a = new SENDER;
     a->run = run;
@@ -70,7 +70,7 @@ void SENDER::xsender (SENDER *a)
     }
 }
 
-void SENDER::setBuffers_sender (SENDER *a, double* in)
+void SENDER::setBuffers_sender (SENDER *a, float* in)
 {
     a->in = in;
 }

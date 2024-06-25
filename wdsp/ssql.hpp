@@ -39,17 +39,17 @@ public:
     int size;                           // buffer size
     int rate;                           // sample-rate
     int rsize;                          // rate * time_to_fill_ring, e.g., 48K/s * 50ms = 2400
-    double fmax;                        // frequency (Hz) for full output, e.g., 2000 (Hz)
-    double* in;                         // pointer to the intput buffer for ftov
-    double* out;                        // pointer to the output buffer for ftov
+    float fmax;                        // frequency (Hz) for full output, e.g., 2000 (Hz)
+    float* in;                         // pointer to the intput buffer for ftov
+    float* out;                        // pointer to the output buffer for ftov
     int* ring;                          // pointer to the base of the ring
     int rptr;                           // index into the ring
-    double inlast;                      // holds last sample from previous buffer
+    float inlast;                      // holds last sample from previous buffer
     int rcount;                         // count of zero-crossings currently in the ring
-    double div;                         // divisor for 'rcount' to produce output of 1.0 at 'fmax'
-    double eps;                         // minimum input change to count as a signal edge transition
+    float div;                         // divisor for 'rcount' to produce output of 1.0 at 'fmax'
+    float eps;                         // minimum input change to count as a signal edge transition
 
-    static FTOV* create_ftov (int run, int size, int rate, int rsize, double fmax, double* in, double* out);
+    static FTOV* create_ftov (int run, int size, int rate, int rsize, float fmax, float* in, float* out);
     static void destroy_ftov (FTOV *a);
     static void flush_ftov (FTOV *a);
     static void xftov (FTOV *a);
@@ -65,72 +65,72 @@ class WDSP_API SSQL                    // Syllabic Squelch
 public:
     int run;                            // 0 if squelch system is OFF; 1 if it's ON
     int size;                           // size of input/output buffers
-    double* in;                         // squelch input signal buffer
-    double* out;                        // squelch output signal buffer
+    float* in;                         // squelch input signal buffer
+    float* out;                        // squelch output signal buffer
     int rate;                           // sample rate
     int state;                          // state machine control
     int count;                          // count variable for raised cosine transitions
-    double tup;                         // time for turn-on transition
-    double tdown;                       // time for turn-off transition
+    float tup;                         // time for turn-on transition
+    float tdown;                       // time for turn-off transition
     int ntup;                           // number of samples for turn-on transition
     int ntdown;                         // number of samples for turn-off transition
-    double* cup;                        // coefficients for up-slew
-    double* cdown;                      // coefficients for down-slew
-    double muted_gain;                  // audio gain while muted; 0.0 for complete silence
+    float* cup;                        // coefficients for up-slew
+    float* cdown;                      // coefficients for down-slew
+    float muted_gain;                  // audio gain while muted; 0.0 for complete silence
 
-    double* b1;                         // buffer to hold output of dc-block function
-    double* ibuff;                      // buffer containing only 'I' component
-    double* ftovbuff;                   // buffer containing output of f to v converter
-    double* lpbuff;                     // buffer containing output of low-pass filter
+    float* b1;                         // buffer to hold output of dc-block function
+    float* ibuff;                      // buffer containing only 'I' component
+    float* ftovbuff;                   // buffer containing output of f to v converter
+    float* lpbuff;                     // buffer containing output of low-pass filter
     int* wdbuff;                        // buffer containing output of window detector
     CBL *dcbl;                          // pointer to DC Blocker data structure
     FTOV *cvtr;                         // pointer to F to V Converter data structure
     BQLP *filt;                         // pointer to Bi-Quad Low-Pass Filter data structure
     int ftov_rsize;                     // ring size for f_to_v converter
-    double ftov_fmax;                   // fmax for f_to_v converter
+    float ftov_fmax;                   // fmax for f_to_v converter
     // window detector
-    double wdtau;                       // window detector time constant
-    double wdmult;                      // window detector time constant multiplier
-    double wdaverage;                   // average signal value
-    double wthresh;                     // window threshold above/below average
+    float wdtau;                       // window detector time constant
+    float wdmult;                      // window detector time constant multiplier
+    float wdaverage;                   // average signal value
+    float wthresh;                     // window threshold above/below average
     // trigger
-    double tr_thresh;                   // trigger threshold:  100K/(100K+22K)=0.8197
-    double tr_tau_unmute;               // trigger unmute time-constant:  (100K||220K)*10uF = 0.6875
-    double tr_ss_unmute;                // trigger steady-state level for unmute:  100K/(100K+220K)=0.3125
-    double tr_tau_mute;                 // trigger mute time-constant:  220K*10uF = 2.2
-    double tr_ss_mute;                  // trigger steady-state level for mute:  1.0
-    double tr_voltage;                  // trigger voltage
-    double mute_mult;                   // multiplier for successive voltage calcs when muted
-    double unmute_mult;                 // multiplier for successive voltage calcs when unmuted
+    float tr_thresh;                   // trigger threshold:  100K/(100K+22K)=0.8197
+    float tr_tau_unmute;               // trigger unmute time-constant:  (100K||220K)*10uF = 0.6875
+    float tr_ss_unmute;                // trigger steady-state level for unmute:  100K/(100K+220K)=0.3125
+    float tr_tau_mute;                 // trigger mute time-constant:  220K*10uF = 2.2
+    float tr_ss_mute;                  // trigger steady-state level for mute:  1.0
+    float tr_voltage;                  // trigger voltage
+    float mute_mult;                   // multiplier for successive voltage calcs when muted
+    float unmute_mult;                 // multiplier for successive voltage calcs when unmuted
     int* tr_signal;                     // trigger signal, 0 or 1
 
     static SSQL* create_ssql (
         int run,
         int size,
-        double* in,
-        double* out,
+        float* in,
+        float* out,
         int rate,
-        double tup,
-        double tdown,
-        double muted_gain,
-        double tau_mute,
-        double tau_unmute,
-        double wthresh,
-        double tr_thresh,
+        float tup,
+        float tdown,
+        float muted_gain,
+        float tau_mute,
+        float tau_unmute,
+        float wthresh,
+        float tr_thresh,
         int rsize,
-        double fmax
+        float fmax
     );
     static void destroy_ssql (SSQL *a);
     static void flush_ssql (SSQL *a);
     static void xssql (SSQL *a);
-    static void setBuffers_ssql (SSQL *a, double* in, double* out);
+    static void setBuffers_ssql (SSQL *a, float* in, float* out);
     static void setSamplerate_ssql (SSQL *a, int rate);
     static void setSize_ssql (SSQL *a, int size);
     // RXA Properties
     static void SetSSQLRun (RXA& rxa, int run);
-    static void SetSSQLThreshold (RXA& rxa, double threshold);
-    static void SetSSQLTauMute (RXA& rxa, double tau_mute);
-    static void SetSSQLTauUnMute (RXA& rxa, double tau_unmute);
+    static void SetSSQLThreshold (RXA& rxa, float threshold);
+    static void SetSSQLTauMute (RXA& rxa, float tau_mute);
+    static void SetSSQLTauUnMute (RXA& rxa, float tau_unmute);
 
 private:
     static void compute_ssql_slews(SSQL *a);

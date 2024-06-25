@@ -41,17 +41,17 @@ public:
     int size;
     int nc;
     int mp;
-    double* in;
-    double* out;
+    float* in;
+    float* out;
     int runrate;
     int cicrate;
     int DD;
     int R;
     int Pairs;
-    double cutoff;
-    double scale;
+    float cutoff;
+    float scale;
     int xtype;
-    double xbw;
+    float xbw;
     int wintype;
     FIRCORE *p;
 
@@ -60,37 +60,37 @@ public:
         int size,
         int nc,
         int mp,
-        double* in,
-        double* out,
+        float* in,
+        float* out,
         int runrate,
         int cicrate,
         int DD,
         int R,
         int Pairs,
-        double cutoff,
+        float cutoff,
         int xtype,
-        double xbw,
+        float xbw,
         int wintype
     );
     static void destroy_icfir (ICFIR *a);
     static void flush_icfir (ICFIR *a);
     static void xicfir (ICFIR *a);
-    static void setBuffers_icfir (ICFIR *a, double* in, double* out);
+    static void setBuffers_icfir (ICFIR *a, float* in, float* out);
     static void setSamplerate_icfir (ICFIR *a, int rate);
     static void setSize_icfir (ICFIR *a, int size);
     static void setOutRate_icfir (ICFIR *a, int rate);
-    static double* icfir_impulse (
+    static float* icfir_impulse (
         int N,
         int DD,
         int R,
         int Pairs,
-        double runrate,
-        double cicrate,
-        double cutoff,
+        float runrate,
+        float cicrate,
+        float cutoff,
         int xtype,
-        double xbw,
+        float xbw,
         int rtype,
-        double scale,
+        float scale,
         int wintype
     );
 

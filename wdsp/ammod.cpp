@@ -34,7 +34,7 @@ warren@wpratt.com
 
 namespace WDSP {
 
-AMMOD* AMMOD::create_ammod (int run, int mode, int size, double* in, double* out, double c_level)
+AMMOD* AMMOD::create_ammod (int run, int mode, int size, float* in, float* out, float c_level)
 {
     AMMOD *a = new AMMOD;
     a->run = run;
@@ -86,7 +86,7 @@ void AMMOD::xammod(AMMOD *a)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
 }
 
-void AMMOD::setBuffers_ammod(AMMOD *a, double* in, double* out)
+void AMMOD::setBuffers_ammod(AMMOD *a, float* in, float* out)
 {
     a->in = in;
     a->out = out;
@@ -108,7 +108,7 @@ void AMMOD::setSize_ammod(AMMOD *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void AMMOD::SetAMCarrierLevel (TXA& txa, double c_level)
+void AMMOD::SetAMCarrierLevel (TXA& txa, float c_level)
 {
     txa.csDSP.lock();
     txa.ammod.p->c_level = c_level;

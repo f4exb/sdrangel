@@ -80,9 +80,10 @@ RXA* RXA::create_rxa (
         rxa->dsp_outsize = dsp_size / (dsp_rate / out_rate);
 
     rxa->mode = RXA_LSB;
-    rxa->inbuff  = new double[1 * rxa->dsp_insize  * 2]; // (double *) malloc0 (1 * ch.dsp_insize  * sizeof (complex));
-    rxa->outbuff = new double[1 * rxa->dsp_outsize  * 2]; // (double *) malloc0 (1 * ch.dsp_outsize * sizeof (complex));
-    rxa->midbuff = new double[2 * rxa->dsp_size  * 2]; // (double *) malloc0 (2 * ch.dsp_size    * sizeof (complex));
+    rxa->inbuff  = new float[1 * rxa->dsp_insize  * 2]; // (float *) malloc0 (1 * ch.dsp_insize  * sizeof (complex));
+    rxa->outbuff = new float[1 * rxa->dsp_outsize  * 2]; // (float *) malloc0 (1 * ch.dsp_outsize * sizeof (complex));
+    rxa->midbuff = new float[2 * rxa->dsp_size  * 2]; // (float *) malloc0 (2 * ch.dsp_size    * sizeof (complex));
+    memset(rxa->meter, 0, sizeof(float)*RXA_METERTYPE_LAST);
 
     // Ftequency shifter - shift to select a slice of spectrum
     rxa->shift.p = SHIFT::create_shift (
@@ -306,9 +307,9 @@ RXA* RXA::create_rxa (
 
     // Equalizer
     {
-        double default_F[11] = {0.0,  32.0,  63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0};
-        //double default_G[11] = {0.0, -12.0, -12.0, -12.0,  -1.0,  +1.0,   +4.0,   +9.0,  +12.0,  -10.0,   -10.0};
-        double default_G[11] =   {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0};
+        float default_F[11] = {0.0,  32.0,  63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0};
+        //float default_G[11] = {0.0, -12.0, -12.0, -12.0,  -1.0,  +1.0,   +4.0,   +9.0,  +12.0,  -10.0,   -10.0};
+        float default_G[11] =   {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0};
         rxa->eqp.p = EQP::create_eqp (
             0,                                  // run - OFF by default
             rxa->dsp_size,                      // buffer size
@@ -475,9 +476,9 @@ RXA* RXA::create_rxa (
     // Dolly filter (multiple peak filter) - default is 2 for RTTY
     {
         int def_enable[2] = {1, 1};
-        double def_freq[2] = {2125.0, 2295.0};
-        double def_bw[2] = {75.0, 75.0};
-        double def_gain[2] = {1.0, 1.0};
+        float def_freq[2] = {2125.0, 2295.0};
+        float def_bw[2] = {75.0, 75.0};
+        float def_gain[2] = {1.0, 1.0};
         rxa->mpeak.p = MPEAK::create_mpeak (
             0,                                  // run
             rxa->dsp_size,                      // size
@@ -659,7 +660,7 @@ void RXA::setInputSamplerate (RXA *rxa, int in_rate)
     rxa->in_rate = in_rate;
     // buffers
     delete[] (rxa->inbuff);
-    rxa->inbuff = new double[1 * rxa->dsp_insize  * 2]; // (double *)malloc0(1 * ch.dsp_insize  * sizeof(complex));
+    rxa->inbuff = new float[1 * rxa->dsp_insize  * 2]; // (float *)malloc0(1 * ch.dsp_insize  * sizeof(complex));
     // shift
     SHIFT::setBuffers_shift (rxa->shift.p, rxa->inbuff, rxa->inbuff);
     SHIFT::setSize_shift (rxa->shift.p, rxa->dsp_insize);
@@ -682,7 +683,7 @@ void RXA::setOutputSamplerate (RXA *rxa, int out_rate)
     rxa->out_rate = out_rate;
     // buffers
     delete[] (rxa->outbuff);
-    rxa->outbuff = new double[1 * rxa->dsp_outsize * 2]; // (double *)malloc0(1 * ch.dsp_outsize * sizeof(complex));
+    rxa->outbuff = new float[1 * rxa->dsp_outsize * 2]; // (float *)malloc0(1 * ch.dsp_outsize * sizeof(complex));
     // output resampler
     RESAMPLE::setBuffers_resample (rxa->rsmpout.p, rxa->midbuff, rxa->outbuff);
     RESAMPLE::setOutRate_resample (rxa->rsmpout.p, rxa->out_rate);
@@ -704,9 +705,9 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->dsp_rate = dsp_rate;
     // buffers
     delete[] (rxa->inbuff);
-    rxa->inbuff = new double[1 * rxa->dsp_insize  * 2]; // (double *)malloc0(1 * rxa->dsp_insize  * sizeof(complex));
+    rxa->inbuff = new float[1 * rxa->dsp_insize  * 2]; // (float *)malloc0(1 * rxa->dsp_insize  * sizeof(complex));
     delete[] (rxa->outbuff);
-    rxa->outbuff = new double[1 * rxa->dsp_outsize * 2]; // (double *)malloc0(1 * rxa->dsp_outsize * sizeof(complex));
+    rxa->outbuff = new float[1 * rxa->dsp_outsize * 2]; // (float *)malloc0(1 * rxa->dsp_outsize * sizeof(complex));
     // shift
     SHIFT::setBuffers_shift (rxa->shift.p, rxa->inbuff, rxa->inbuff);
     SHIFT::setSize_shift (rxa->shift.p, rxa->dsp_insize);
@@ -761,11 +762,11 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->dsp_size = dsp_size;
     // buffers
     delete[](rxa->inbuff);
-    rxa->inbuff = new double[1 * rxa->dsp_insize  * 2]; // (double *)malloc0(1 * rxa->dsp_insize  * sizeof(complex));
+    rxa->inbuff = new float[1 * rxa->dsp_insize  * 2]; // (float *)malloc0(1 * rxa->dsp_insize  * sizeof(complex));
     delete[] (rxa->midbuff);
-    rxa->midbuff = new double[2 * rxa->dsp_size * 2]; // (double *)malloc0(2 * rxa->dsp_size * sizeof(complex));
+    rxa->midbuff = new float[2 * rxa->dsp_size * 2]; // (float *)malloc0(2 * rxa->dsp_size * sizeof(complex));
     delete[] (rxa->outbuff);
-    rxa->outbuff = new double[1 * rxa->dsp_outsize * 2]; // (double *)malloc0(1 * rxa->dsp_outsize * sizeof(complex));
+    rxa->outbuff = new float[1 * rxa->dsp_outsize * 2]; // (float *)malloc0(1 * rxa->dsp_outsize * sizeof(complex));
     // shift
     SHIFT::setBuffers_shift (rxa->shift.p, rxa->inbuff, rxa->inbuff);
     SHIFT::setSize_shift (rxa->shift.p, rxa->dsp_insize);
@@ -909,7 +910,7 @@ void RXA::bp1Check (
 )
 {
     BANDPASS *a = rxa.bp1.p;
-    double gain;
+    float gain;
     if (amd_run  ||
         snba_run ||
         emnr_run ||
@@ -946,7 +947,7 @@ void RXA::bpsnbaCheck (RXA& rxa, int mode, int notch_run)
     // for BPSNBA: set run, position, freqs, run_notches
     // call this upon change in RXA_mode, snba_run, notch_master_run
     BPSNBA *a = rxa.bpsnba.p;
-    double f_low = 0.0, f_high = 0.0;
+    float f_low = 0.0, f_high = 0.0;
     int run_notches = 0;
     switch (mode)
     {
@@ -1038,7 +1039,7 @@ void RXA::bpsnbaSet (RXA& rxa)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void RXA::SetPassband (RXA& rxa, double f_low, double f_high)
+void RXA::SetPassband (RXA& rxa, float f_low, float f_high)
 {
     BANDPASS::SetBandpassFreqs   (rxa, f_low, f_high); // After spectral noise reduction ( AM || ANF || ANR || EMNR)
     SNBA::SetSNBAOutputBandwidth (rxa, f_low, f_high); // Spectral noise blanker (SNB)

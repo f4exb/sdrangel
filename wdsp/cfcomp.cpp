@@ -35,33 +35,33 @@ namespace WDSP {
 void CFCOMP::calc_cfcwindow (CFCOMP *a)
 {
     int i;
-    double arg0, arg1, cgsum, igsum, coherent_gain, inherent_power_gain, wmult;
+    float arg0, arg1, cgsum, igsum, coherent_gain, inherent_power_gain, wmult;
     switch (a->wintype)
     {
     case 0:
-        arg0 = 2.0 * PI / (double)a->fsize;
+        arg0 = 2.0 * PI / (float)a->fsize;
         cgsum = 0.0;
         igsum = 0.0;
         for (i = 0; i < a->fsize; i++)
         {
-            a->window[i] = sqrt (0.54 - 0.46 * cos((double)i * arg0));
+            a->window[i] = sqrt (0.54 - 0.46 * cos((float)i * arg0));
             cgsum += a->window[i];
             igsum += a->window[i] * a->window[i];
         }
-        coherent_gain = cgsum / (double)a->fsize;
-        inherent_power_gain = igsum / (double)a->fsize;
+        coherent_gain = cgsum / (float)a->fsize;
+        inherent_power_gain = igsum / (float)a->fsize;
         wmult = 1.0 / sqrt (inherent_power_gain);
         for (i = 0; i < a->fsize; i++)
             a->window[i] *= wmult;
         a->winfudge = sqrt (1.0 / coherent_gain);
         break;
     case 1:
-        arg0 = 2.0 * PI / (double)a->fsize;
+        arg0 = 2.0 * PI / (float)a->fsize;
         cgsum = 0.0;
         igsum = 0.0;
         for (i = 0; i < a->fsize; i++)
         {
-            arg1 = cos(arg0 * (double)i);
+            arg1 = cos(arg0 * (float)i);
             a->window[i]  = sqrt   (+0.21747
                           + arg1 * (-0.45325
                           + arg1 * (+0.28256
@@ -69,8 +69,8 @@ void CFCOMP::calc_cfcwindow (CFCOMP *a)
             cgsum += a->window[i];
             igsum += a->window[i] * a->window[i];
         }
-        coherent_gain = cgsum / (double)a->fsize;
-        inherent_power_gain = igsum / (double)a->fsize;
+        coherent_gain = cgsum / (float)a->fsize;
+        inherent_power_gain = igsum / (float)a->fsize;
         wmult = 1.0 / sqrt (inherent_power_gain);
         for (i = 0; i < a->fsize; i++)
             a->window[i] *= wmult;
@@ -81,9 +81,9 @@ void CFCOMP::calc_cfcwindow (CFCOMP *a)
 
 int CFCOMP::fCOMPcompare (const void *a, const void *b)
 {
-    if (*(double*)a < *(double*)b)
+    if (*(float*)a < *(float*)b)
         return -1;
-    else if (*(double*)a == *(double*)b)
+    else if (*(float*)a == *(float*)b)
         return 0;
     else
         return 1;
@@ -92,25 +92,25 @@ int CFCOMP::fCOMPcompare (const void *a, const void *b)
 void CFCOMP::calc_comp (CFCOMP *a)
 {
     int i, j;
-    double f, frac, fincr, fmax;
-    double* sary;
+    float f, frac, fincr, fmax;
+    float* sary;
     a->precomplin = pow (10.0, 0.05 * a->precomp);
     a->prepeqlin  = pow (10.0, 0.05 * a->prepeq);
     fmax = 0.5 * a->rate;
     for (i = 0; i < a->nfreqs; i++)
     {
-        a->F[i] = std::max (a->F[i], 0.0);
+        a->F[i] = std::max (a->F[i], 0.0f);
         a->F[i] = std::min (a->F[i], fmax);
-        a->G[i] = std::max (a->G[i], 0.0);
+        a->G[i] = std::max (a->G[i], 0.0f);
     }
-    sary = new double[3 * a->nfreqs]; // (double *)malloc0 (3 * a->nfreqs * sizeof (double));
+    sary = new float[3 * a->nfreqs]; // (float *)malloc0 (3 * a->nfreqs * sizeof (float));
     for (i = 0; i < a->nfreqs; i++)
     {
         sary[3 * i + 0] = a->F[i];
         sary[3 * i + 1] = a->G[i];
         sary[3 * i + 2] = a->E[i];
     }
-    qsort (sary, a->nfreqs, 3 * sizeof (double), fCOMPcompare);
+    qsort (sary, a->nfreqs, 3 * sizeof (float), fCOMPcompare);
     for (i = 0; i < a->nfreqs; i++)
     {
         a->F[i] = sary[3 * i + 0];
@@ -130,12 +130,12 @@ void CFCOMP::calc_comp (CFCOMP *a)
         a->gp[j] = a->G[i];
         a->ep[j] = a->E[i];
     }
-    fincr = a->rate / (double)a->fsize;
+    fincr = a->rate / (float)a->fsize;
     j = 0;
     // print_impulse ("gp.txt", a->nfreqs+2, a->gp, 0, 0);
     for (i = 0; i < a->msize; i++)
     {
-        f = fincr * (double)i;
+        f = fincr * (float)i;
         while (f >= a->fp[j + 1] && j < a->nfreqs) j++;
         frac = (f - a->fp[j]) / (a->fp[j + 1] - a->fp[j]);
         a->comp[i] = pow (10.0, 0.05 * (frac * a->gp[j + 1] + (1.0 - frac) * a->gp[j]));
@@ -170,42 +170,42 @@ void CFCOMP::calc_cfcomp(CFCOMP *a)
     a->init_oainidx = a->oainidx;
     a->oaoutidx = 0;
     a->msize = a->fsize / 2 + 1;
-    a->window    = new double[a->fsize]; // (double *)malloc0 (a->fsize  * sizeof(double));
-    a->inaccum   = new double[a->iasize]; // (double *)malloc0 (a->iasize * sizeof(double));
-    a->forfftin  = new double[a->fsize]; // (double *)malloc0 (a->fsize  * sizeof(double));
-    a->forfftout = new double[a->msize * 2]; // (double *)malloc0 (a->msize  * sizeof(complex));
-    a->cmask     = new double[a->msize]; // (double *)malloc0 (a->msize  * sizeof(double));
-    a->mask      = new double[a->msize]; // (double *)malloc0 (a->msize  * sizeof(double));
-    a->cfc_gain  = new double[a->msize]; // (double *)malloc0 (a->msize  * sizeof(double));
-    a->revfftin  = new double[a->msize * 2]; // (double *)malloc0 (a->msize  * sizeof(complex));
-    a->revfftout = new double[a->fsize]; // (double *)malloc0 (a->fsize  * sizeof(double));
-    a->save      = new double*[a->ovrlp]; // (double **)malloc0(a->ovrlp  * sizeof(double *));
+    a->window    = new float[a->fsize]; // (float *)malloc0 (a->fsize  * sizeof(float));
+    a->inaccum   = new float[a->iasize]; // (float *)malloc0 (a->iasize * sizeof(float));
+    a->forfftin  = new float[a->fsize]; // (float *)malloc0 (a->fsize  * sizeof(float));
+    a->forfftout = new float[a->msize * 2]; // (float *)malloc0 (a->msize  * sizeof(complex));
+    a->cmask     = new float[a->msize]; // (float *)malloc0 (a->msize  * sizeof(float));
+    a->mask      = new float[a->msize]; // (float *)malloc0 (a->msize  * sizeof(float));
+    a->cfc_gain  = new float[a->msize]; // (float *)malloc0 (a->msize  * sizeof(float));
+    a->revfftin  = new float[a->msize * 2]; // (float *)malloc0 (a->msize  * sizeof(complex));
+    a->revfftout = new float[a->fsize]; // (float *)malloc0 (a->fsize  * sizeof(float));
+    a->save      = new float*[a->ovrlp]; // (float **)malloc0(a->ovrlp  * sizeof(float *));
     for (i = 0; i < a->ovrlp; i++)
-        a->save[i] = new double[a->fsize]; // (double *)malloc0(a->fsize * sizeof(double));
-    a->outaccum = new double[a->oasize]; // (double *)malloc0(a->oasize * sizeof(double));
+        a->save[i] = new float[a->fsize]; // (float *)malloc0(a->fsize * sizeof(float));
+    a->outaccum = new float[a->oasize]; // (float *)malloc0(a->oasize * sizeof(float));
     a->nsamps = 0;
     a->saveidx = 0;
-    a->Rfor = fftw_plan_dft_r2c_1d(a->fsize, a->forfftin, (fftw_complex *)a->forfftout, FFTW_ESTIMATE);
-    a->Rrev = fftw_plan_dft_c2r_1d(a->fsize, (fftw_complex *)a->revfftin, a->revfftout, FFTW_ESTIMATE);
+    a->Rfor = fftwf_plan_dft_r2c_1d(a->fsize, a->forfftin, (fftwf_complex *)a->forfftout, FFTW_ESTIMATE);
+    a->Rrev = fftwf_plan_dft_c2r_1d(a->fsize, (fftwf_complex *)a->revfftin, a->revfftout, FFTW_ESTIMATE);
     calc_cfcwindow(a);
 
-    a->pregain  = (2.0 * a->winfudge) / (double)a->fsize;
-    a->postgain = 0.5 / ((double)a->ovrlp * a->winfudge);
+    a->pregain  = (2.0 * a->winfudge) / (float)a->fsize;
+    a->postgain = 0.5 / ((float)a->ovrlp * a->winfudge);
 
-    a->fp = new double[a->nfreqs + 2]; // (double *) malloc0 ((a->nfreqs + 2) * sizeof (double));
-    a->gp = new double[a->nfreqs + 2]; // (double *) malloc0 ((a->nfreqs + 2) * sizeof (double));
-    a->ep = new double[a->nfreqs + 2]; // (double *) malloc0 ((a->nfreqs + 2) * sizeof (double));
-    a->comp = new double[a->msize]; // (double *) malloc0 (a->msize * sizeof (double));
-    a->peq  =  new double[a->msize]; // (double *) malloc0 (a->msize * sizeof (double));
+    a->fp = new float[a->nfreqs + 2]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
+    a->gp = new float[a->nfreqs + 2]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
+    a->ep = new float[a->nfreqs + 2]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
+    a->comp = new float[a->msize]; // (float *) malloc0 (a->msize * sizeof (float));
+    a->peq  =  new float[a->msize]; // (float *) malloc0 (a->msize * sizeof (float));
     calc_comp (a);
 
     a->gain = 0.0;
     a->mmult = exp (-1.0 / (a->rate * a->ovrlp * a->mtau));
-    a->dmult = exp (-(double)a->fsize / (a->rate * a->ovrlp * a->dtau));
+    a->dmult = exp (-(float)a->fsize / (a->rate * a->ovrlp * a->dtau));
 
-    a->delta         =  new double[a->msize]; //  (double*)malloc0 (a->msize * sizeof(double));
-    a->delta_copy    =  new double[a->msize]; //  (double*)malloc0 (a->msize * sizeof(double));
-    a->cfc_gain_copy =  new double[a->msize]; //  (double*)malloc0 (a->msize * sizeof(double));
+    a->delta         =  new float[a->msize]; //  (float*)malloc0 (a->msize * sizeof(float));
+    a->delta_copy    =  new float[a->msize]; //  (float*)malloc0 (a->msize * sizeof(float));
+    a->cfc_gain_copy =  new float[a->msize]; //  (float*)malloc0 (a->msize * sizeof(float));
 }
 
 void CFCOMP::decalc_cfcomp(CFCOMP *a)
@@ -220,8 +220,8 @@ void CFCOMP::decalc_cfcomp(CFCOMP *a)
     delete[] (a->gp);
     delete[] (a->fp);
 
-    fftw_destroy_plan(a->Rrev);
-    fftw_destroy_plan(a->Rfor);
+    fftwf_destroy_plan(a->Rrev);
+    fftwf_destroy_plan(a->Rfor);
     delete[](a->outaccum);
     for (i = 0; i < a->ovrlp; i++)
         delete[](a->save[i]);
@@ -237,8 +237,8 @@ void CFCOMP::decalc_cfcomp(CFCOMP *a)
     delete[](a->window);
 }
 
-CFCOMP* CFCOMP::create_cfcomp (int run, int position, int peq_run, int size, double* in, double* out, int fsize, int ovrlp,
-    int rate, int wintype, int comp_method, int nfreqs, double precomp, double prepeq, double* F, double* G, double* E, double mtau, double dtau)
+CFCOMP* CFCOMP::create_cfcomp (int run, int position, int peq_run, int size, float* in, float* out, int fsize, int ovrlp,
+    int rate, int wintype, int comp_method, int nfreqs, float precomp, float prepeq, float* F, float* G, float* E, float mtau, float dtau)
 {
     CFCOMP *a = new CFCOMP;
     a->run = run;
@@ -257,12 +257,12 @@ CFCOMP* CFCOMP::create_cfcomp (int run, int position, int peq_run, int size, dou
     a->prepeq = prepeq;
     a->mtau = mtau;                 // compression metering time constant
     a->dtau = dtau;                 // compression display time constant
-    a->F = new double[a->nfreqs]; // (double *)malloc0 (a->nfreqs * sizeof (double));
-    a->G = new double[a->nfreqs]; // (double *)malloc0 (a->nfreqs * sizeof (double));
-    a->E = new double[a->nfreqs]; // (double *)malloc0 (a->nfreqs * sizeof (double));
-    memcpy (a->F, F, a->nfreqs * sizeof (double));
-    memcpy (a->G, G, a->nfreqs * sizeof (double));
-    memcpy (a->E, E, a->nfreqs * sizeof (double));
+    a->F = new float[a->nfreqs]; // (float *)malloc0 (a->nfreqs * sizeof (float));
+    a->G = new float[a->nfreqs]; // (float *)malloc0 (a->nfreqs * sizeof (float));
+    a->E = new float[a->nfreqs]; // (float *)malloc0 (a->nfreqs * sizeof (float));
+    memcpy (a->F, F, a->nfreqs * sizeof (float));
+    memcpy (a->G, G, a->nfreqs * sizeof (float));
+    memcpy (a->E, E, a->nfreqs * sizeof (float));
     calc_cfcomp (a);
     return a;
 }
@@ -270,10 +270,10 @@ CFCOMP* CFCOMP::create_cfcomp (int run, int position, int peq_run, int size, dou
 void CFCOMP::flush_cfcomp (CFCOMP *a)
 {
     int i;
-    memset (a->inaccum, 0, a->iasize * sizeof (double));
+    memset (a->inaccum, 0, a->iasize * sizeof (float));
     for (i = 0; i < a->ovrlp; i++)
-        memset (a->save[i], 0, a->fsize * sizeof (double));
-    memset (a->outaccum, 0, a->oasize * sizeof (double));
+        memset (a->save[i], 0, a->fsize * sizeof (float));
+    memset (a->outaccum, 0, a->oasize * sizeof (float));
     a->nsamps   = 0;
     a->iainidx  = 0;
     a->iaoutidx = 0;
@@ -281,7 +281,7 @@ void CFCOMP::flush_cfcomp (CFCOMP *a)
     a->oaoutidx = 0;
     a->saveidx  = 0;
     a->gain = 0.0;
-    memset(a->delta, 0, a->msize * sizeof(double));
+    memset(a->delta, 0, a->msize * sizeof(float));
 }
 
 void CFCOMP::destroy_cfcomp (CFCOMP *a)
@@ -297,12 +297,12 @@ void CFCOMP::destroy_cfcomp (CFCOMP *a)
 void CFCOMP::calc_mask (CFCOMP *a)
 {
     int i;
-    double comp, mask, delta;
+    float comp, mask, delta;
     switch (a->comp_method)
     {
     case 0:
         {
-            double mag, test;
+            float mag, test;
             for (i = 0; i < a->msize; i++)
             {
                 mag = sqrt (a->forfftout[2 * i + 0] * a->forfftout[2 * i + 0]
@@ -332,7 +332,7 @@ void CFCOMP::calc_mask (CFCOMP *a)
         }
     }
     else
-        memcpy (a->mask, a->cmask, a->msize * sizeof (double));
+        memcpy (a->mask, a->cmask, a->msize * sizeof (float));
     // print_impulse ("mask.txt", a->msize, a->mask, 0, 0);
     a->mask_ready = 1;
 }
@@ -354,14 +354,14 @@ void CFCOMP::xcfcomp (CFCOMP *a, int pos)
                 a->forfftin[i] = a->pregain * a->window[i] * a->inaccum[j];
             a->iaoutidx = (a->iaoutidx + a->incr) % a->iasize;
             a->nsamps -= a->incr;
-            fftw_execute (a->Rfor);
+            fftwf_execute (a->Rfor);
             calc_mask(a);
             for (i = 0; i < a->msize; i++)
             {
                 a->revfftin[2 * i + 0] = a->mask[i] * a->forfftout[2 * i + 0];
                 a->revfftin[2 * i + 1] = a->mask[i] * a->forfftout[2 * i + 1];
             }
-            fftw_execute (a->Rrev);
+            fftwf_execute (a->Rrev);
             for (i = 0; i < a->fsize; i++)
                 a->save[a->saveidx][i] = a->postgain * a->window[i] * a->revfftout[i];
             for (i = a->ovrlp; i > 0; i--)
@@ -390,7 +390,7 @@ void CFCOMP::xcfcomp (CFCOMP *a, int pos)
         memcpy (a->out, a->in, a->bsize * sizeof (wcomplex));
 }
 
-void CFCOMP::setBuffers_cfcomp (CFCOMP *a, double* in, double* out)
+void CFCOMP::setBuffers_cfcomp (CFCOMP *a, float* in, float* out)
 {
     a->in = in;
     a->out = out;
@@ -438,7 +438,7 @@ void CFCOMP::SetCFCOMPPosition (TXA& txa, int pos)
     }
 }
 
-void CFCOMP::SetCFCOMPprofile (TXA& txa, int nfreqs, double* F, double* G, double *E)
+void CFCOMP::SetCFCOMPprofile (TXA& txa, int nfreqs, float* F, float* G, float *E)
 {
     CFCOMP *a = txa.cfcomp.p;
     txa.csDSP.lock();
@@ -446,23 +446,23 @@ void CFCOMP::SetCFCOMPprofile (TXA& txa, int nfreqs, double* F, double* G, doubl
     delete[] (a->E);
     delete[] (a->F);
     delete[] (a->G);
-    a->F = new double[a->nfreqs]; // (double *)malloc0 (a->nfreqs * sizeof (double));
-    a->G = new double[a->nfreqs]; // (double *)malloc0 (a->nfreqs * sizeof (double));
-    a->E = new double[a->nfreqs]; // (double *)malloc0 (a->nfreqs * sizeof (double));
-    memcpy (a->F, F, a->nfreqs * sizeof (double));
-    memcpy (a->G, G, a->nfreqs * sizeof (double));
-    memcpy (a->E, E, a->nfreqs * sizeof (double));
+    a->F = new float[a->nfreqs]; // (float *)malloc0 (a->nfreqs * sizeof (float));
+    a->G = new float[a->nfreqs]; // (float *)malloc0 (a->nfreqs * sizeof (float));
+    a->E = new float[a->nfreqs]; // (float *)malloc0 (a->nfreqs * sizeof (float));
+    memcpy (a->F, F, a->nfreqs * sizeof (float));
+    memcpy (a->G, G, a->nfreqs * sizeof (float));
+    memcpy (a->E, E, a->nfreqs * sizeof (float));
     delete[] (a->ep);
     delete[] (a->gp);
     delete[] (a->fp);
-    a->fp = new double[a->nfreqs]; // (double *) malloc0 ((a->nfreqs + 2) * sizeof (double));
-    a->gp = new double[a->nfreqs]; // (double *) malloc0 ((a->nfreqs + 2) * sizeof (double));
-    a->ep = new double[a->nfreqs]; // (double *) malloc0 ((a->nfreqs + 2) * sizeof (double));
+    a->fp = new float[a->nfreqs]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
+    a->gp = new float[a->nfreqs]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
+    a->ep = new float[a->nfreqs]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
     calc_comp(a);
     txa.csDSP.unlock();
 }
 
-void CFCOMP::SetCFCOMPPrecomp (TXA& txa, double precomp)
+void CFCOMP::SetCFCOMPPrecomp (TXA& txa, float precomp)
 {
     CFCOMP *a = txa.cfcomp.p;
     if (a->precomp != precomp)
@@ -489,7 +489,7 @@ void CFCOMP::SetCFCOMPPeqRun (TXA& txa, int run)
     }
 }
 
-void CFCOMP::SetCFCOMPPrePeq (TXA& txa, double prepeq)
+void CFCOMP::SetCFCOMPPrePeq (TXA& txa, float prepeq)
 {
     CFCOMP *a = txa.cfcomp.p;
     txa.csDSP.lock();
@@ -498,15 +498,15 @@ void CFCOMP::SetCFCOMPPrePeq (TXA& txa, double prepeq)
     txa.csDSP.unlock();
 }
 
-void CFCOMP::GetCFCOMPDisplayCompression (TXA& txa, double* comp_values, int* ready)
+void CFCOMP::GetCFCOMPDisplayCompression (TXA& txa, float* comp_values, int* ready)
 {
     int i;
     CFCOMP *a = txa.cfcomp.p;
     txa.csDSP.lock();
     if ((*ready = a->mask_ready))
     {
-        memcpy(a->delta_copy, a->delta, a->msize * sizeof(double));
-        memcpy(a->cfc_gain_copy, a->cfc_gain, a->msize * sizeof(double));
+        memcpy(a->delta_copy, a->delta, a->msize * sizeof(float));
+        memcpy(a->cfc_gain_copy, a->cfc_gain, a->msize * sizeof(float));
         a->mask_ready = 0;
     }
     txa.csDSP.unlock();

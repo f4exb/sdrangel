@@ -46,10 +46,10 @@ public:
     int run;
     int mode;
     int pmode;
-    double* in;
-    double* out;
+    float* in;
+    float* out;
     int io_buffsize;
-    double sample_rate;
+    float sample_rate;
 
     double tau_attack;
     double tau_decay;
@@ -112,8 +112,8 @@ public:
         int run,
         int mode,
         int pmode,
-        double* in,
-        double* out,
+        float* in,
+        float* out,
         int io_buffsize,
         int sample_rate,
         double tau_attack,
@@ -135,25 +135,25 @@ public:
     );
     static void destroy_wcpagc (WCPAGC *a);
     static void flush_wcpagc (WCPAGC *a);
-    static void setBuffers_wcpagc (WCPAGC *a, double* in, double* out);
+    static void setBuffers_wcpagc (WCPAGC *a, float* in, float* out);
     static void setSamplerate_wcpagc (WCPAGC *a, int rate);
     static void setSize_wcpagc (WCPAGC *a, int size);
     // RXA Properties
     static void SetAGCMode (RXA& rxa, int mode);
-    static void SetAGCFixed (RXA& rxa, double fixed_agc);
+    static void SetAGCFixed (RXA& rxa, float fixed_agc);
     static void SetAGCAttack (RXA& rxa, int attack);
     static void SetAGCDecay (RXA& rxa, int decay);
     static void SetAGCHang (RXA& rxa, int hang);
-    static void GetAGCHangLevel(RXA& rxa, double *hangLevel);
-    static void SetAGCHangLevel(RXA& rxa, double hangLevel);
+    static void GetAGCHangLevel(RXA& rxa, float *hangLevel);
+    static void SetAGCHangLevel(RXA& rxa, float hangLevel);
     static void GetAGCHangThreshold(RXA& rxa, int *hangthreshold);
     static void SetAGCHangThreshold (RXA& rxa, int hangthreshold);
-    static void GetAGCTop(RXA& rxa, double *max_agc);
-    static void SetAGCTop (RXA& rxa, double max_agc);
+    static void GetAGCTop(RXA& rxa, float *max_agc);
+    static void SetAGCTop (RXA& rxa, float max_agc);
     static void SetAGCSlope (RXA& rxa, int slope);
-    static void SetAGCThresh(RXA& rxa, double thresh, double size, double rate);
-    static void GetAGCThresh(RXA& rxa, double *thresh, double size, double rate);
-    static void SetAGCMaxInputLevel (RXA& rxa, double level);
+    static void SetAGCThresh(RXA& rxa, float thresh, float size, float rate);
+    static void GetAGCThresh(RXA& rxa, float *thresh, float size, float rate);
+    static void SetAGCMaxInputLevel (RXA& rxa, float level);
     // TXA Properties
     static void SetALCSt (TXA& txa, int state);
     static void SetALCAttack (TXA& txa, int attack);
@@ -163,8 +163,8 @@ public:
     static void SetLevelerAttack (TXA& txa, int attack);
     static void SetLevelerDecay (TXA& txa, int decay);
     static void SetLevelerHang (TXA& txa, int hang);
-    static void SetLevelerTop (TXA& txa, double maxgain);
-    static void SetALCMaxGain (TXA& txa, double maxgain);
+    static void SetLevelerTop (TXA& txa, float maxgain);
+    static void SetALCMaxGain (TXA& txa, float maxgain);
 
 private:
     static void calc_wcpagc (WCPAGC *a);

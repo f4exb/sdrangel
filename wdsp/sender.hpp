@@ -47,14 +47,14 @@ public:
     int flag;           // secondary 'run'; AND'd with 'run'
     int mode;           // selects the specific processing and function call
     int size;           // size of the data buffer (complex samples)
-    double* in;         // buffer from which to take the data
+    float* in;         // buffer from which to take the data
     BufferProbe *spectrumProbe; // this is the data handler actually
 
-    static SENDER* create_sender (int run, int flag, int mode, int size, double* in);
+    static SENDER* create_sender (int run, int flag, int mode, int size, float* in);
     static void destroy_sender (SENDER *a);
     static void flush_sender (SENDER *a);
     static void xsender (SENDER *a);
-    static void setBuffers_sender (SENDER *a, double* in);
+    static void setBuffers_sender (SENDER *a, float* in);
     static void setSamplerate_sender (SENDER *a, int rate);
     static void setSize_sender (SENDER *a, int size);
     // RXA Properties

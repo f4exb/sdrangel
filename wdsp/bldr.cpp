@@ -34,38 +34,38 @@ BLDR* BLDR::create_builder(int points, int ints)
 {
     // for the create function, 'points' and 'ints' are the MAXIMUM values that will be encountered
     BLDR *a = new BLDR;
-    a->catxy = new double[2 * points]; // (double*)malloc0(2 * points * sizeof(double));
-    a->sx    = new double[points];     // (double*)malloc0(    points * sizeof(double));
-    a->sy    = new double[points];     // (double*)malloc0(    points * sizeof(double));
-    a->h     = new double[ints];       // (double*)malloc0(    ints   * sizeof(double));
+    a->catxy = new float[2 * points]; // (float*)malloc0(2 * points * sizeof(float));
+    a->sx    = new float[points];     // (float*)malloc0(    points * sizeof(float));
+    a->sy    = new float[points];     // (float*)malloc0(    points * sizeof(float));
+    a->h     = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
     a->p     = new int[ints];          // (int*)   malloc0(    ints   * sizeof(int));
     a->np    = new int[ints];          // (int*)   malloc0(    ints   * sizeof(int));
-    a->taa   = new double[ints];       // (double*)malloc0(    ints   * sizeof(double));
-    a->tab   = new double[ints];       // (double*)malloc0(    ints   * sizeof(double));
-    a->tag   = new double[ints];       // (double*)malloc0(    ints   * sizeof(double));
-    a->tad   = new double[ints];       // (double*)malloc0(    ints   * sizeof(double));
-    a->tbb   = new double[ints];       // (double*)malloc0(    ints   * sizeof(double));
-    a->tbg   = new double[ints];       // (double*)malloc0(    ints   * sizeof(double));
-    a->tbd   = new double[ints];       // (double*)malloc0(    ints   * sizeof(double));
-    a->tgg   = new double[ints];       // (double*)malloc0(    ints   * sizeof(double));
-    a->tgd   = new double[ints];       // (double*)malloc0(    ints   * sizeof(double));
-    a->tdd   = new double[ints];       // (double*)malloc0(    ints   * sizeof(double));
+    a->taa   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
+    a->tab   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
+    a->tag   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
+    a->tad   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
+    a->tbb   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
+    a->tbg   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
+    a->tbd   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
+    a->tgg   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
+    a->tgd   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
+    a->tdd   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
     int nsize = 3 * ints + 1;
     int intp1 = ints + 1;
     int intm1 = ints - 1;
-    a->A     = new double[intp1 * intp1]; // (double*)malloc0(intp1 * intp1 * sizeof(double));
-    a->B     = new double[intp1 * intp1]; // (double*)malloc0(intp1 * intp1 * sizeof(double));
-    a->C     = new double[intp1 * intp1]; // (double*)malloc0(intm1 * intp1 * sizeof(double));
-    a->D     = new double[intp1];         // (double*)malloc0(intp1         * sizeof(double));
-    a->E     = new double[intp1 * intp1]; // (double*)malloc0(intp1 * intp1 * sizeof(double));
-    a->F     = new double[intm1 * intp1]; // (double*)malloc0(intm1 * intp1 * sizeof(double));
-    a->G     = new double[intp1];         // (double*)malloc0(intp1         * sizeof(double));
-    a->MAT   = new double[nsize * nsize]; // (double*)malloc0(nsize * nsize * sizeof(double));
-    a->RHS   = new double[nsize];         // (double*)malloc0(nsize         * sizeof(double));
-    a->SLN   = new double[nsize];         // (double*)malloc0(nsize         * sizeof(double));
-    a->z     = new double[intp1];         // (double*)malloc0(intp1         * sizeof(double));
-    a->zp    = new double[intp1];         // (double*)malloc0(intp1         * sizeof(double));
-    a->wrk   = new double[nsize];         // (double*)malloc0(nsize         * sizeof(double));
+    a->A     = new float[intp1 * intp1]; // (float*)malloc0(intp1 * intp1 * sizeof(float));
+    a->B     = new float[intp1 * intp1]; // (float*)malloc0(intp1 * intp1 * sizeof(float));
+    a->C     = new float[intp1 * intp1]; // (float*)malloc0(intm1 * intp1 * sizeof(float));
+    a->D     = new float[intp1];         // (float*)malloc0(intp1         * sizeof(float));
+    a->E     = new float[intp1 * intp1]; // (float*)malloc0(intp1 * intp1 * sizeof(float));
+    a->F     = new float[intm1 * intp1]; // (float*)malloc0(intm1 * intp1 * sizeof(float));
+    a->G     = new float[intp1];         // (float*)malloc0(intp1         * sizeof(float));
+    a->MAT   = new float[nsize * nsize]; // (float*)malloc0(nsize * nsize * sizeof(float));
+    a->RHS   = new float[nsize];         // (float*)malloc0(nsize         * sizeof(float));
+    a->SLN   = new float[nsize];         // (float*)malloc0(nsize         * sizeof(float));
+    a->z     = new float[intp1];         // (float*)malloc0(intp1         * sizeof(float));
+    a->zp    = new float[intp1];         // (float*)malloc0(intp1         * sizeof(float));
+    a->wrk   = new float[nsize];         // (float*)malloc0(nsize         * sizeof(float));
     a->ipiv  = new int[nsize];            // (int*)   malloc0(nsize         * sizeof(int));
     return a;
 }
@@ -112,56 +112,56 @@ void BLDR::destroy_builder(BLDR *a)
 
 void BLDRflush_builder(BLDR *a, int points, int ints)
 {
-    memset(a->catxy, 0, 2 * points * sizeof(double));
-    memset(a->sx,    0, points * sizeof(double));
-    memset(a->sy,    0, points * sizeof(double));
-    memset(a->h,     0, ints * sizeof(double));
+    memset(a->catxy, 0, 2 * points * sizeof(float));
+    memset(a->sx,    0, points * sizeof(float));
+    memset(a->sy,    0, points * sizeof(float));
+    memset(a->h,     0, ints * sizeof(float));
     memset(a->p,     0, ints * sizeof(int));
     memset(a->np,    0, ints * sizeof(int));
-    memset(a->taa,   0, ints * sizeof(double));
-    memset(a->tab,   0, ints * sizeof(double));
-    memset(a->tag,   0, ints * sizeof(double));
-    memset(a->tad,   0, ints * sizeof(double));
-    memset(a->tbb,   0, ints * sizeof(double));
-    memset(a->tbg,   0, ints * sizeof(double));
-    memset(a->tbd,   0, ints * sizeof(double));
-    memset(a->tgg,   0, ints * sizeof(double));
-    memset(a->tgd,   0, ints * sizeof(double));
-    memset(a->tdd,   0, ints * sizeof(double));
+    memset(a->taa,   0, ints * sizeof(float));
+    memset(a->tab,   0, ints * sizeof(float));
+    memset(a->tag,   0, ints * sizeof(float));
+    memset(a->tad,   0, ints * sizeof(float));
+    memset(a->tbb,   0, ints * sizeof(float));
+    memset(a->tbg,   0, ints * sizeof(float));
+    memset(a->tbd,   0, ints * sizeof(float));
+    memset(a->tgg,   0, ints * sizeof(float));
+    memset(a->tgd,   0, ints * sizeof(float));
+    memset(a->tdd,   0, ints * sizeof(float));
     int nsize = 3 * ints + 1;
     int intp1 = ints + 1;
     int intm1 = ints - 1;
-    memset(a->A,     0, intp1 * intp1 * sizeof(double));
-    memset(a->B,     0, intp1 * intp1 * sizeof(double));
-    memset(a->C,     0, intm1 * intp1 * sizeof(double));
-    memset(a->D,     0, intp1         * sizeof(double));
-    memset(a->E,     0, intp1 * intp1 * sizeof(double));
-    memset(a->F,     0, intm1 * intp1 * sizeof(double));
-    memset(a->G,     0, intp1         * sizeof(double));
-    memset(a->MAT,   0, nsize * nsize * sizeof(double));
-    memset(a->RHS,   0, nsize * sizeof(double));
-    memset(a->SLN,   0, nsize * sizeof(double));
-    memset(a->z,     0, intp1 * sizeof(double));
-    memset(a->zp,    0, intp1 * sizeof(double));
-    memset(a->wrk,   0, nsize * sizeof(double));
+    memset(a->A,     0, intp1 * intp1 * sizeof(float));
+    memset(a->B,     0, intp1 * intp1 * sizeof(float));
+    memset(a->C,     0, intm1 * intp1 * sizeof(float));
+    memset(a->D,     0, intp1         * sizeof(float));
+    memset(a->E,     0, intp1 * intp1 * sizeof(float));
+    memset(a->F,     0, intm1 * intp1 * sizeof(float));
+    memset(a->G,     0, intp1         * sizeof(float));
+    memset(a->MAT,   0, nsize * nsize * sizeof(float));
+    memset(a->RHS,   0, nsize * sizeof(float));
+    memset(a->SLN,   0, nsize * sizeof(float));
+    memset(a->z,     0, intp1 * sizeof(float));
+    memset(a->zp,    0, intp1 * sizeof(float));
+    memset(a->wrk,   0, nsize * sizeof(float));
     memset(a->ipiv,  0, nsize * sizeof(int));
 }
 
 int BLDR::fcompare(const void* a, const void* b)
 {
-    if (*(double*)a < *(double*)b)
+    if (*(float*)a < *(float*)b)
         return -1;
-    else if (*(double*)a == *(double*)b)
+    else if (*(float*)a == *(float*)b)
         return 0;
     else
         return 1;
 }
 
-void BLDR::decomp(int n, double* a, int* piv, int* info, double* wrk)
+void BLDR::decomp(int n, float* a, int* piv, int* info, float* wrk)
 {
     int i, j, k;
     int t_piv;
-    double m_row, mt_row, m_col, mt_col;
+    float m_row, mt_row, m_col, mt_col;
     *info = 0;
     for (i = 0; i < n; i++)
     {
@@ -216,10 +216,10 @@ cleanup:
     return;
 }
 
-void BLDR::dsolve(int n, double* a, int* piv, double* b, double* x)
+void BLDR::dsolve(int n, float* a, int* piv, float* b, float* x)
 {
     int j, k;
-    double sum;
+    float sum;
 
     for (k = 0; k < n; k++)
     {
@@ -238,7 +238,7 @@ void BLDR::dsolve(int n, double* a, int* piv, double* b, double* x)
     }
 }
 
-void BLDR::cull(int* n, int ints, double* x, double* t, double ptol)
+void BLDR::cull(int* n, int ints, float* x, float* t, float ptol)
 {
     int k = 0;
     int i = *n;
@@ -255,9 +255,9 @@ void BLDR::cull(int* n, int ints, double* x, double* t, double ptol)
     *n -= k;
 }
 
-void BLDR::xbuilder(BLDR *a, int points, double* x, double* y, int ints, double* t, int* info, double* c, double ptol)
+void BLDR::xbuilder(BLDR *a, int points, float* x, float* y, int ints, float* t, int* info, float* c, float ptol)
 {
-    double u, v, alpha, beta, gamma, delta;
+    float u, v, alpha, beta, gamma, delta;
     int nsize = 3 * ints + 1;
     int intp1 = ints + 1;
     int intm1 = ints - 1;
@@ -269,7 +269,7 @@ void BLDR::xbuilder(BLDR *a, int points, double* x, double* y, int ints, double*
         a->catxy[2 * i + 0] = x[i];
         a->catxy[2 * i + 1] = y[i];
     }
-    qsort(a->catxy, points, 2 * sizeof(double), fcompare);
+    qsort(a->catxy, points, 2 * sizeof(float), fcompare);
     for (i = 0; i < points; i++)
     {
         a->sx[i] = a->catxy[2 * i + 0];

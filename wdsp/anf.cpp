@@ -40,20 +40,20 @@ ANF* ANF::create_anf(
     int run,
     int position,
     int buff_size,
-    double *in_buff,
-    double *out_buff,
+    float *in_buff,
+    float *out_buff,
     int dline_size,
     int n_taps,
     int delay,
-    double two_mu,
-    double gamma,
-    double lidx,
-    double lidx_min,
-    double lidx_max,
-    double ngamma,
-    double den_mult,
-    double lincr,
-    double ldecr
+    float two_mu,
+    float gamma,
+    float lidx,
+    float lidx_min,
+    float lidx_max,
+    float ngamma,
+    float den_mult,
+    float lincr,
+    float ldecr
 )
 {
     ANF *a = new ANF;
@@ -77,8 +77,8 @@ ANF* ANF::create_anf(
     a->lincr = lincr;
     a->ldecr = ldecr;
 
-    memset (a->d, 0, sizeof(double) * ANF_DLINE_SIZE);
-    memset (a->w, 0, sizeof(double) * ANF_DLINE_SIZE);
+    memset (a->d, 0, sizeof(float) * ANF_DLINE_SIZE);
+    memset (a->w, 0, sizeof(float) * ANF_DLINE_SIZE);
 
     return a;
 }
@@ -91,9 +91,9 @@ void ANF::destroy_anf (ANF *a)
 void ANF::xanf(ANF *a, int position)
 {
     int i, j, idx;
-    double c0, c1;
-    double y, error, sigma, inv_sigp;
-    double nel, nev;
+    float c0, c1;
+    float y, error, sigma, inv_sigp;
+    float nel, nev;
     if (a->run && (a->position == position))
     {
         for (i = 0; i < a->buff_size; i++)
@@ -144,12 +144,12 @@ void ANF::xanf(ANF *a, int position)
 
 void ANF::flush_anf (ANF *a)
 {
-    memset (a->d, 0, sizeof(double) * ANF_DLINE_SIZE);
-    memset (a->w, 0, sizeof(double) * ANF_DLINE_SIZE);
+    memset (a->d, 0, sizeof(float) * ANF_DLINE_SIZE);
+    memset (a->w, 0, sizeof(float) * ANF_DLINE_SIZE);
     a->in_idx = 0;
 }
 
-void ANF::setBuffers_anf (ANF *a, double* in, double* out)
+void ANF::setBuffers_anf (ANF *a, float* in, float* out)
 {
     a->in_buff = in;
     a->out_buff = out;
@@ -188,7 +188,7 @@ void ANF::SetANFRun (RXA& rxa, int run)
 }
 
 
-void ANF::SetANFVals (RXA& rxa, int taps, int delay, double gain, double leakage)
+void ANF::SetANFVals (RXA& rxa, int taps, int delay, float gain, float leakage)
 {
     rxa.csDSP.lock();
     rxa.anf.p->n_taps = taps;
@@ -215,7 +215,7 @@ void ANF::SetANFDelay (RXA& rxa, int delay)
     rxa.csDSP.unlock();
 }
 
-void ANF::SetANFGain (RXA& rxa, double gain)
+void ANF::SetANFGain (RXA& rxa, float gain)
 {
     rxa.csDSP.lock();
     rxa.anf.p->two_mu = gain;
@@ -223,7 +223,7 @@ void ANF::SetANFGain (RXA& rxa, double gain)
     rxa.csDSP.unlock();
 }
 
-void ANF::SetANFLeakage (RXA& rxa, double leakage)
+void ANF::SetANFLeakage (RXA& rxa, float leakage)
 {
     rxa.csDSP.lock();
     rxa.anf.p->gamma = leakage;

@@ -39,26 +39,26 @@ class WDSP_API COMPRESSOR
 public:
     int run;
     int buffsize;
-    double *inbuff;
-    double *outbuff;
-    double gain;
+    float *inbuff;
+    float *outbuff;
+    float gain;
 
     static COMPRESSOR* create_compressor (
         int run,
         int buffsize,
-        double* inbuff,
-        double* outbuff,
-        double gain
+        float* inbuff,
+        float* outbuff,
+        float gain
     );
     static void destroy_compressor (COMPRESSOR *a);
     static void flush_compressor (COMPRESSOR *a);
     static void xcompressor (COMPRESSOR *a);
-    static void setBuffers_compressor (COMPRESSOR *a, double* in, double* out);
+    static void setBuffers_compressor (COMPRESSOR *a, float* in, float* out);
     static void setSamplerate_compressor (COMPRESSOR *a, int rate);
     static void setSize_compressor (COMPRESSOR *a, int size);
     // TXA Properties
     static void SetCompressorRun (TXA& txa, int run);
-    static void SetCompressorGain (TXA& txa, double gain);
+    static void SetCompressorGain (TXA& txa, float gain);
 };
 
 } // namespace WDSP

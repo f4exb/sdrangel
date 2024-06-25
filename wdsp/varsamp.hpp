@@ -37,58 +37,58 @@ class WDSP_API VARSAMP
 public:
     int run;
     int size;
-    double* in;
-    double* out;
+    float* in;
+    float* out;
     int in_rate;
     int out_rate;
-    double fcin;
-    double fc;
-    double fc_low;
-    double gain;
+    float fcin;
+    float fc;
+    float fc_low;
+    float gain;
     int idx_in;
     int ncoef;
-    double* h;
+    float* h;
     int rsize;
-    double* ring;
-    double var;
+    float* ring;
+    float var;
     int varmode;
-    double cvar;
-    double inv_cvar;
-    double old_inv_cvar;
-    double dicvar;
-    double delta;
-    double* hs;
+    float cvar;
+    float inv_cvar;
+    float old_inv_cvar;
+    float dicvar;
+    float delta;
+    float* hs;
     int R;
-    double h_offset;
-    double isamps;
-    double nom_ratio;
+    float h_offset;
+    float isamps;
+    float nom_ratio;
 
     static VARSAMP* create_varsamp (
         int run,
         int size,
-        double* in,
-        double* out,
+        float* in,
+        float* out,
         int in_rate,
         int out_rate,
-        double fc,
-        double fc_low,
+        float fc,
+        float fc_low,
         int R,
-        double gain,
-        double var,
+        float gain,
+        float var,
         int varmode
     );
     static void destroy_varsamp (VARSAMP *a);
     static void flush_varsamp (VARSAMP *a);
-    static int xvarsamp (VARSAMP *a, double var);
-    static void setBuffers_varsamp (VARSAMP *a, double* in, double* out);
+    static int xvarsamp (VARSAMP *a, float var);
+    static void setBuffers_varsamp (VARSAMP *a, float* in, float* out);
     static void setSize_varsamp (VARSAMP *a, int size);
     static void setInRate_varsamp (VARSAMP *a, int rate);
     static void setOutRate_varsamp (VARSAMP *a, int rate);
-    static void setFCLow_varsamp (VARSAMP *a, double fc_low);
-    static void setBandwidth_varsamp (VARSAMP *a, double fc_low, double fc_high);
+    static void setFCLow_varsamp (VARSAMP *a, float fc_low);
+    static void setBandwidth_varsamp (VARSAMP *a, float fc_low, float fc_high);
     // Exported calls
     static void* create_varsampV (int in_rate, int out_rate, int R);
-    static void xvarsampV (double* input, double* output, int numsamps, double var, int* outsamps, void* ptr);
+    static void xvarsampV (float* input, float* output, int numsamps, float var, int* outsamps, void* ptr);
     static void destroy_varsampV (void* ptr);
 
 private:

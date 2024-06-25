@@ -44,11 +44,11 @@ CBL* CBL::create_cbl
     (
     int run,
     int buff_size,
-    double *in_buff,
-    double *out_buff,
+    float *in_buff,
+    float *out_buff,
     int mode,
     int sample_rate,
-    double tau
+    float tau
     )
 {
     CBL *a = new CBL;
@@ -57,7 +57,7 @@ CBL* CBL::create_cbl
     a->in_buff = in_buff;
     a->out_buff = out_buff;
     a->mode = mode;
-    a->sample_rate = (double)sample_rate;
+    a->sample_rate = (float)sample_rate;
     a->tau = tau;
     calc_cbl (a);
     return a;
@@ -81,7 +81,7 @@ void CBL::xcbl (CBL *a)
     if (a->run)
     {
         int i;
-        double tempI, tempQ;
+        float tempI, tempQ;
         for (i = 0; i < a->buff_size; i++)
         {
             tempI  = a->in_buff[2 * i + 0];
@@ -98,7 +98,7 @@ void CBL::xcbl (CBL *a)
         memcpy (a->out_buff, a->in_buff, a->buff_size * sizeof (wcomplex));
 }
 
-void CBL::setBuffers_cbl (CBL *a, double* in, double* out)
+void CBL::setBuffers_cbl (CBL *a, float* in, float* out)
 {
     a->in_buff = in;
     a->out_buff = out;
