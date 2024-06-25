@@ -617,7 +617,6 @@
   <tabstop>cesiumIonAPIKey</tabstop>
  </tabstops>
  <resources>
-  <include location="../../../sdrgui/resources/res.qrc"/>
   <include location="icons.qrc"/>
  </resources>
  <connections>
