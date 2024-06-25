@@ -87,7 +87,7 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     QList<MapSettings::MapItemSettings *> itemSettings = m_settings->m_itemSettings.values();
     std::sort(itemSettings.begin(), itemSettings.end(),
         [](const MapSettings::MapItemSettings* a, const MapSettings::MapItemSettings* b) -> bool {
-            return a->m_group < b->m_group;
+            return a->m_group.compare(b->m_group, Qt::CaseInsensitive) < 0;
         });
     QListIterator<MapSettings::MapItemSettings *> itr(itemSettings);
     while (itr.hasNext())
