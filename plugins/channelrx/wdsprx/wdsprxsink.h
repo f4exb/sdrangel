@@ -24,7 +24,6 @@
 #include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
-#include "dsp/agc.h"
 #include "dsp/firfilter.h"
 #include "audio/audiofifo.h"
 #include "util/doublebufferfifo.h"
@@ -63,9 +62,17 @@ private:
     {
     public:
         SpectrumProbe(SampleVector& sampleVector);
-        virtual void proceed(const double *in, int nbSamples);
+        virtual void proceed(const float *in, int nbSamples);
+        void setSpanLog2(int spanLog2);
+        void setDSB(bool dsb) { m_dsb = dsb; }
+        void setUSB(bool usb) { m_usb = usb; }
     private:
         SampleVector& m_sampleVector;
+        int m_spanLog2;
+        bool m_dsb;
+        bool m_usb;
+        uint32_t m_undersampleCount;
+        std::complex<float> m_sum;
     };
 
     struct MagSqLevelsStore
@@ -83,23 +90,12 @@ private:
 
 	Real m_Bandwidth;
 	Real m_volume;
-	fftfilt::cmplx m_sum;
 	int m_undersampleCount;
 	int m_channelSampleRate;
 	int m_channelFrequencyOffset;
-	bool m_audioBinaual;
-	bool m_usb;
-	bool m_dsb;
-	bool m_audioMute;
     double m_sAvg;
     double m_sPeak;
     int m_sCount;
-    MagAGC m_agc;
-    bool m_agcActive;
-    bool m_agcClamping;
-    int m_agcNbSamples;         //!< number of audio (48 kHz) samples for AGC averaging
-    double m_agcPowerThreshold; //!< AGC power threshold (linear)
-    int m_agcThresholdGate;     //!< Gate length in number of samples befor threshold triggers
     DoubleBufferFIFO<fftfilt::cmplx> m_squelchDelayLine;
     bool m_audioActive;         //!< True if an audio signal is produced (no AGC or AGC and above threshold)
 
@@ -125,7 +121,6 @@ private:
     WDSP::RXA *m_rxa;
 
 	static const int m_ssbFftLen;
-	static const int m_agcTarget;
     static const int m_wdspSampleRate;
     static const int m_wdspBufSize;
 

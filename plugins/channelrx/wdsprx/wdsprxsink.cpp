@@ -34,31 +34,60 @@
 #include "wdsprxsink.h"
 
 const int WDSPRxSink::m_ssbFftLen = 2048;
-const int WDSPRxSink::m_agcTarget = 3276; // 32768/10 -10 dB amplitude => -20 dB power: center of normal signal
 const int WDSPRxSink::m_wdspSampleRate = 48000;
 const int WDSPRxSink::m_wdspBufSize = 512;
 
 WDSPRxSink::SpectrumProbe::SpectrumProbe(SampleVector& sampleVector) :
-    m_sampleVector(sampleVector)
+    m_sampleVector(sampleVector),
+    m_spanLog2(0),
+    m_dsb(false),
+    m_usb(true),
+    m_sum(0)
 {}
 
-void WDSPRxSink::SpectrumProbe::proceed(const double *in, int nb_samples)
+void WDSPRxSink::SpectrumProbe::setSpanLog2(int spanLog2)
 {
-    for (int i = 0; i < nb_samples; i++) {
-        m_sampleVector.push_back(Sample{static_cast<FixReal>(in[2*i]*SDR_RX_SCALED), static_cast<FixReal>(in[2*i+1]*SDR_RX_SCALED)});
+    m_spanLog2 = spanLog2;
+}
+
+void WDSPRxSink::SpectrumProbe::proceed(const float *in, int nb_samples)
+{
+    int decim = 1<<(m_spanLog2 - 1);
+    unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
+
+    for (int i = 0; i < nb_samples; i++)
+    {
+        float cr = in[2*i+1];
+        float ci = in[2*i];
+        m_sum += std::complex<float>{cr, ci};
+
+        if (decim == 1)
+        {
+            m_sampleVector.push_back(Sample(cr*SDR_RX_SCALEF, ci*SDR_RX_SCALEF));
+        }
+        else
+        {
+            if (!(m_undersampleCount++ & decim_mask))
+            {
+                float avgr = m_sum.real() / decim;
+                float avgi = m_sum.imag() / decim;
+
+                if (!m_dsb & !m_usb)
+                { // invert spectrum for LSB
+                    m_sampleVector.push_back(Sample(avgi*SDR_RX_SCALEF, avgr*SDR_RX_SCALEF));
+                }
+                else
+                {
+                    m_sampleVector.push_back(Sample(avgr*SDR_RX_SCALEF, avgi*SDR_RX_SCALEF));
+                }
+
+                m_sum = 0;
+            }
+        }
     }
 }
 
 WDSPRxSink::WDSPRxSink() :
-        m_audioBinaual(false),
-        m_dsb(false),
-        m_audioMute(false),
-        m_agc(12000, m_agcTarget, 1e-2),
-        m_agcActive(false),
-        m_agcClamping(false),
-        m_agcNbSamples(12000),
-        m_agcPowerThreshold(1e-2),
-        m_agcThresholdGate(0),
         m_squelchDelayLine(2*48000),
         m_audioActive(false),
         m_spectrumSink(nullptr),
@@ -75,12 +104,10 @@ WDSPRxSink::WDSPRxSink() :
 	m_audioBuffer.resize(m_audioSampleRate / 10);
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
-	m_sum = 0;
 
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
 
-	m_usb = true;
     m_sAvg = 0.0;
     m_sPeak = 0.0;
     m_sCount = 1;
@@ -144,37 +171,34 @@ void WDSPRxSink::getMagSqLevels(double& avg, double& peak, int& nbSamples)
 
 void WDSPRxSink::processOneSample(Complex &ci)
 {
-    m_rxa->get_inbuff()[2*m_inCount] = ci.real() / SDR_RX_SCALED;
-    m_rxa->get_inbuff()[2*m_inCount+1] = ci.imag() / SDR_RX_SCALED;
+    m_rxa->get_inbuff()[2*m_inCount] = ci.imag() / SDR_RX_SCALEF;
+    m_rxa->get_inbuff()[2*m_inCount+1] = ci.real() / SDR_RX_SCALEF;
 
     if (++m_inCount == m_rxa->get_insize())
     {
         WDSP::RXA::xrxa(m_rxa);
 
+        m_sCount = m_wdspBufSize;
+        m_sAvg = WDSP::METER::GetMeter(*m_rxa, WDSP::RXA::RXA_S_AV);
+        m_sPeak = WDSP::METER::GetMeter(*m_rxa, WDSP::RXA::RXA_S_PK);
+
         for (int i = 0; i < m_rxa->get_outsize(); i++)
         {
-            if (i == 0)
-            {
-                m_sCount = m_wdspBufSize;
-                m_sAvg = WDSP::METER::GetMeter(*m_rxa, WDSP::RXA::RXA_S_AV);
-                m_sPeak = WDSP::METER::GetMeter(*m_rxa, WDSP::RXA::RXA_S_PK);
-            }
-
-            if (m_audioMute)
+            if (m_settings.m_audioMute)
             {
                 m_audioBuffer[m_audioBufferFill].r = 0;
                 m_audioBuffer[m_audioBufferFill].l = 0;
             }
             else
             {
-                const double& cr = m_rxa->get_outbuff()[2*i];
-                const double& ci = m_rxa->get_outbuff()[2*i+1];
+                const double& cr = m_rxa->get_outbuff()[2*i+1];
+                const double& ci = m_rxa->get_outbuff()[2*i];
                 qint16 zr = cr * 32768.0;
                 qint16 zi = ci * 32768.0;
                 m_audioBuffer[m_audioBufferFill].r = zr * m_volume;
                 m_audioBuffer[m_audioBufferFill].l = zi * m_volume;
 
-                if (m_audioBinaual)
+                if (m_settings.m_audioBinaural)
                 {
                     m_demodBuffer[m_demodBufferFill++] = zr * m_volume;
                     m_demodBuffer[m_demodBufferFill++] = zi * m_volume;
@@ -204,7 +228,7 @@ void WDSPRxSink::processOneSample(Complex &ci)
                                 fifo->write(
                                     (quint8*) &m_demodBuffer[0],
                                     m_demodBuffer.size() * sizeof(qint16),
-                                    m_audioBinaual ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
+                                    m_settings.m_audioBinaural ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
                                 );
                             }
                         }
@@ -228,7 +252,7 @@ void WDSPRxSink::processOneSample(Complex &ci)
 
         if (m_spectrumSink && (m_sampleBuffer.size() != 0))
         {
-            m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
+            m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), !m_settings.m_dsb);
             m_sampleBuffer.clear();
         }
 
@@ -304,7 +328,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
             << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
-            << " m_audioBinaual: " << settings.m_audioBinaural
+            << " m_audioBinaural: " << settings.m_audioBinaural
             << " m_audioFlipChannels: " << settings.m_audioFlipChannels
             << " m_dsb: " << settings.m_dsb
             << " m_audioMute: " << settings.m_audioMute
@@ -336,11 +360,11 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         if (band < 0)
         {
             band = -band;
-            m_usb = false;
+            m_spectrumProbe.setUSB(false);
         }
         else
         {
-            m_usb = true;
+            m_spectrumProbe.setUSB(true);
         }
 
         m_Bandwidth = band;
@@ -351,11 +375,13 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             {
                 fLow = high;
                 fHigh = -high;
+                m_spectrumProbe.setDSB(true);
             }
             else
             {
                 fLow = high;
                 fHigh = low;
+                m_spectrumProbe.setDSB(false);
             }
         }
         else
@@ -364,11 +390,13 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             {
                 fLow = -high;
                 fHigh = high;
+                m_spectrumProbe.setDSB(true);
             }
             else
             {
                 fLow = low;
                 fHigh = high;
+                m_spectrumProbe.setDSB(false);
             }
         }
 
@@ -381,19 +409,55 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         WDSP::NBP::NBPSetWindow(*m_rxa, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
     }
 
+    if ((m_settings.m_filterBank[settings.m_filterIndex].m_spanLog2 != settings.m_filterBank[settings.m_filterIndex].m_spanLog2) || force) {
+        m_spectrumProbe.setSpanLog2(settings.m_filterBank[settings.m_filterIndex].m_spanLog2);
+    }
+
     if ((m_settings.m_agc != settings.m_agc)
     || (m_settings.m_agcMode != settings.m_agcMode)
+    || (m_settings.m_agcSlope != settings.m_agcSlope)
+    || (m_settings.m_agcHangThreshold != settings.m_agcHangThreshold)
     || (m_settings.m_agcGain != settings.m_agcGain) || force)
     {
+        WDSP::WCPAGC::SetAGCMode(*m_rxa, settings.m_agc ? (int) settings.m_agcMode + 1 : 0);  // SetRXAAGCMode(id, agc);
+        WDSP::WCPAGC::SetAGCSlope(*m_rxa, settings.m_agcSlope); // SetRXAAGCSlope(id, rx->agc_slope);
+        WDSP::WCPAGC::SetAGCTop(*m_rxa, (float) settings.m_agcGain); // SetRXAAGCTop(id, rx->agc_gain);
+
         if (settings.m_agc)
         {
-            WDSP::WCPAGC::SetAGCMode(*m_rxa, (int) settings.m_agcMode + 1);
-            WDSP::WCPAGC::SetAGCFixed(*m_rxa, (double) settings.m_agcGain);
+            switch (settings.m_agcMode)
+            {
+            case WDSPRxSettings::AGCMode::AGCLong:
+                WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
+                WDSP::WCPAGC::SetAGCHang(*m_rxa, 2000);  // SetRXAAGCHang(id, 2000);
+                WDSP::WCPAGC::SetAGCDecay(*m_rxa, 2000); // SetRXAAGCDecay(id, 2000);
+                WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
+                break;
+            case WDSPRxSettings::AGCMode::AGCSlow:
+                WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
+                WDSP::WCPAGC::SetAGCHang(*m_rxa, 1000);  // SetRXAAGCHang(id, 1000);
+                WDSP::WCPAGC::SetAGCDecay(*m_rxa, 500);  // SetRXAAGCDecay(id, 500);
+                WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
+                break;
+            case WDSPRxSettings::AGCMode::AGCMedium:
+                WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
+                WDSP::WCPAGC::SetAGCHang(*m_rxa, 0);     // SetRXAAGCHang(id, 0);
+                WDSP::WCPAGC::SetAGCDecay(*m_rxa, 250);  // SetRXAAGCDecay(id, 250);
+                WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, 100);
+                break;
+            case WDSPRxSettings::AGCMode::AGCFast:
+                WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
+                WDSP::WCPAGC::SetAGCHang(*m_rxa, 0);     // SetRXAAGCHang(id, 0);
+                WDSP::WCPAGC::SetAGCDecay(*m_rxa, 50);   // SetRXAAGCDecay(id, 50);
+                WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, 100);
+                break;
+            }
+
+            WDSP::WCPAGC::SetAGCFixed(*m_rxa, 60.0f); // default
         }
         else
         {
-            WDSP::WCPAGC::SetAGCMode(*m_rxa, 0);
-            WDSP::WCPAGC::SetAGCTop(*m_rxa, (double) settings.m_agcGain);
+            WDSP::WCPAGC::SetAGCFixed(*m_rxa, (float) settings.m_agcGain);
         }
     }
 
@@ -411,9 +475,5 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         WDSP::PANEL::SetPanelCopy(*m_rxa, settings.m_audioFlipChannels ? 3 : 0);
     }
 
-    m_audioBinaual = settings.m_audioBinaural;
-    m_dsb = settings.m_dsb;
-    m_audioMute = settings.m_audioMute;
-    m_agcActive = settings.m_agc;
     m_settings = settings;
 }

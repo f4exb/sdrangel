@@ -211,7 +211,7 @@ void WDSPRxGUI::on_dnr_toggled(bool)
 
 void WDSPRxGUI::on_agcGain_valueChanged(int value)
 {
-    QString s = QString::number((1<<value), 'f', 0);
+    QString s = QString::number(value, 'f', 0);
     ui->agcGainText->setText(s);
     m_settings.m_agcGain = value;
     applySettings();
@@ -769,11 +769,9 @@ void WDSPRxGUI::dnrSetup(int32_t iValueChanged)
 
 void WDSPRxGUI::tick()
 {
-    double magsqAvg, magsqPeak;
+    double powDbAvg, powDbPeak;
     int nbMagsqSamples;
-    m_wdspRx->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
-    double powDbAvg = CalcDb::dbPower(magsqAvg);
-    double powDbPeak = CalcDb::dbPower(magsqPeak);
+    m_wdspRx->getMagSqLevels(powDbAvg, powDbPeak, nbMagsqSamples); // powers directly in dB
 
     ui->channelPowerMeter->levelChanged(
             (WDSPRxSettings::m_mminPowerThresholdDBf + powDbAvg) / WDSPRxSettings::m_mminPowerThresholdDBf,
