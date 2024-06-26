@@ -37,13 +37,16 @@ MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings
     m_minZoom = new QSpinBox(table);
     m_minZoom->setRange(0, 15);
     m_minZoom->setValue(settings->m_2DMinZoom);
+    m_minZoom->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_minPixels = new QSpinBox(table);
     m_minPixels->setRange(0, 200);
     m_minPixels->setValue(settings->m_3DModelMinPixelSize);
+    m_minPixels->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_labelScale = new QDoubleSpinBox(table);
     m_labelScale->setDecimals(2);
     m_labelScale->setRange(0.01, 10.0);
     m_labelScale->setValue(settings->m_3DLabelScale);
+    m_labelScale->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     table->setCellWidget(row, MapSettingsDialog::COL_2D_MIN_ZOOM, m_minZoom);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_MIN_PIXELS, m_minPixels);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_LABEL_SCALE, m_labelScale);
@@ -126,6 +129,7 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
             item->setText(QString::number(itemSettings->m_filterDistance / 1000));
         }
         ui->mapItemSettings->setItem(row, COL_FILTER_DISTANCE, item);
+        ui->mapItemSettings->item(row, COL_FILTER_DISTANCE)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
         MapItemSettingsGUI *gui = new MapItemSettingsGUI(ui->mapItemSettings, row, itemSettings);
         m_mapItemSettingsGUIs.append(gui);
