@@ -47,6 +47,7 @@ public:
     QSpinBox *m_minZoom;
     QSpinBox *m_minPixels;
     QDoubleSpinBox *m_labelScale;
+    QSpinBox *m_filterDistance;
 };
 
 class MapSettingsDialog : public QDialog {
