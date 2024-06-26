@@ -26,6 +26,8 @@
 #include <QHash>
 #include <QRegularExpression>
 
+#define MAX_FILTER_DISTANCE_KM 10000
+
 class Serializable;
 
 struct MapSettings
