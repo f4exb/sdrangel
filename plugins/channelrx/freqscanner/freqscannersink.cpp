@@ -117,8 +117,8 @@ void FreqScannerSink::processOneSample(Complex &ci)
                         qint64 diff = frequency - startFrequency;
                         float binBW = m_scannerSampleRate / (float)m_fftSize;
 
-                        // Ignore results in uppper and lower 12.5%, as there may be aliasing here from half-band filters
-                        if ((diff < m_scannerSampleRate * 0.875f) && (diff >= m_scannerSampleRate * 0.125f))
+                        // Ignore results in upper and lower 12.5%, as there may be aliasing here from half-band filters
+                        if ((diff >= m_scannerSampleRate / 8) && (diff < m_scannerSampleRate * 7 / 8))
                         {
                             int bin = std::round(diff / binBW);
                             int channelBins;

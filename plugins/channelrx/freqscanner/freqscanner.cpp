@@ -198,7 +198,9 @@ void FreqScanner::stop()
     qDebug("FreqScanner::stop");
     m_running = false;
     m_thread->exit();
+#ifndef __EMSCRIPTEN__
     m_thread->wait();
+#endif
 }
 
 bool FreqScanner::handleMessage(const Message& cmd)
@@ -343,9 +345,9 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                 int binsPerChannel;
                 calcScannerSampleRate(m_settings.m_channelBandwidth, m_basebandSampleRate, m_scannerSampleRate, fftSize, binsPerChannel);
 
-                // Align first frequency so we cover as many channels as possible, while channel guard band
+                // Align first frequency so we cover as many channels as possible, while skipping channel guard band (12.5% either end)
                 // Can we adjust this to avoid DC bin?
-                m_stepStartFrequency = frequencies.front() + m_scannerSampleRate / 2 - m_scannerSampleRate * 0.125f;
+                m_stepStartFrequency = frequencies.front() + m_scannerSampleRate / 2 - (m_scannerSampleRate / 8);
                 m_stepStopFrequency = frequencies.back();
 
                 // If all frequencies fit within usable bandwidth, we can have the first frequency more central
@@ -374,7 +376,7 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
             bool complete = false; // Have all frequencies been scanned?
             bool freqInRange = false;
             qint64 nextCenterFrequency = m_centerFrequency;
-            float usableBW = m_scannerSampleRate * 0.75f;
+            int usableBW = (m_scannerSampleRate * 3 / 4) & ~1;
             do
             {
                 if (nextCenterFrequency + usableBW / 2 > m_stepStopFrequency)
