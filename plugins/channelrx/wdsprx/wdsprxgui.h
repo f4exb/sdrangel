@@ -34,6 +34,9 @@ class DeviceUISet;
 
 class AudioFifo;
 class WDSPRx;
+class WDSPRxAGCDialog;
+class WDSPRxDNBDialog;
+class WDSPRxDNRDialog;
 class SpectrumVis;
 class BasebandSampleSink;
 
@@ -89,7 +92,9 @@ private:
 	WDSPRx* m_wdspRx;
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
-    FFTNRDialog* m_fftNRDialog;
+    WDSPRxAGCDialog* m_agcDialog;
+    WDSPRxDNBDialog* m_dnbDialog;
+    WDSPRxDNRDialog* m_dnrDialog;
 
 	QIcon m_iconDSBUSB;
 	QIcon m_iconDSBLSB;
@@ -120,19 +125,23 @@ private slots:
 	void on_volume_valueChanged(int value);
 	void on_agc_toggled(bool checked);
     void on_dnr_toggled(bool checked);
+    // void on_dnb_toggled(bool checked);
 	void on_agcGain_valueChanged(int value);
 	void on_audioMute_toggled(bool checked);
 	void on_spanLog2_valueChanged(int value);
 	void on_flipSidebands_clicked(bool checked);
     void on_fftWindow_currentIndexChanged(int index);
-    void on_filterIndex_valueChanged(int value);
+    void on_profileIndex_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
     void audioSelect(const QPoint& p);
+    void agcSetupDialog(const QPoint& p);
+    void agcSetup(int valueChanged);
+    void dnbSetupDialog(const QPoint& p);
+    void dnbSetup(int valueChanged);
     void dnrSetupDialog(const QPoint& p);
     void dnrSetup(int valueChanged);
-    void agcSetupDialog();
 	void tick();
 };
 

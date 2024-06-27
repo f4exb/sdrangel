@@ -25,37 +25,110 @@
 
 class Serializable;
 
-struct WDSPRxFilterSettings
-{
-    int  m_spanLog2;
-    Real m_highCutoff;
-    Real m_lowCutoff;
-    int m_fftWindow; // 0: 4-term Blackman-Harris, 1: 7-term Blackman-Harris
-    bool m_dnr;
-    int  m_dnrScheme;
-    float m_dnrAboveAvgFactor;
-    float m_dnrSigmaFactor;
-    int  m_dnrNbPeaks;
-    float m_dnrAlpha;
 
-    WDSPRxFilterSettings() :
-        m_spanLog2(3),
-        m_highCutoff(3000),
-        m_lowCutoff(300),
-        m_fftWindow(0)
-    {}
-};
-
-struct WDSPRxSettings
+struct WDSPRxProfile
 {
-    enum AGCMode
+    enum WDSPRxAGCMode
     {
         AGCLong,
         AGCSlow,
         AGCMedium,
         AGCFast,
     };
+    enum WDSPRxNRScheme
+    {
+        NRSchemeNR,
+        NRSchemeNR2,
+    };
+    enum WDSPRxNBScheme
+    {
+        NBSchemeNB,
+        NBSchemeNB2,
+    };
+    enum WDSPRxNR2Gain
+    {
+        NR2GainLinear,
+        NR2GainLog,
+        NR2GainGamma,
+    };
+    enum WDSPRxNR2NPE
+    {
+        NR2NPEOSMS,
+        NR2NPEMMSE,
+    };
+    enum WDSPRxNRPosition
+    {
+        NRPositionPreAGC,
+        NRPositionPostAGC,
+    };
+    enum WDSPRxNB2Mode
+    {
+        NB2ModeZero,
+        NB2ModeSampleAndHold,
+        NB2ModeMeanHold,
+        NB2ModeHoldSample,
+        NB2ModeInterpolate,
+    };
 
+    // Filter
+    int   m_spanLog2;
+    Real  m_highCutoff;
+    Real  m_lowCutoff;
+    int   m_fftWindow; // 0: 4-term Blackman-Harris, 1: 7-term Blackman-Harris
+    // AGC
+    bool  m_agc;
+    WDSPRxAGCMode m_agcMode;
+    int   m_agcGain;    //!< Fixed gain if AGC is off else top gain
+    int   m_agcSlope;
+    int   m_agcHangThreshold;
+    // Noise blanker
+    bool m_dnb;
+    WDSPRxNBScheme m_nbScheme;
+    WDSPRxNB2Mode m_nb2Mode;
+    double m_nbSlewTime;
+    double m_nbLeadTime;
+    double m_nbLagTime;
+    int m_nbThreshold;
+    // Noise rediction
+    bool m_dnr;
+    bool m_snb;
+    bool m_anf;
+    WDSPRxNRScheme m_nrScheme;
+    WDSPRxNR2Gain m_nr2Gain;
+    WDSPRxNR2NPE m_nr2NPE;
+    WDSPRxNRPosition m_nrPosition;
+    bool m_nr2ArtifactReduction;
+
+    WDSPRxProfile() :
+        m_spanLog2(3),
+        m_highCutoff(3000),
+        m_lowCutoff(300),
+        m_fftWindow(0),
+        m_agc(false),
+        m_agcMode(AGCMedium),
+        m_agcGain(80),
+        m_agcSlope(35),
+        m_agcHangThreshold(0),
+        m_dnb(false),
+        m_nbScheme(NBSchemeNB),
+        m_nb2Mode(NB2ModeZero),
+        m_nbSlewTime(0.01),
+        m_nbLeadTime(0.01),
+        m_nbLagTime(0.01),
+        m_nbThreshold(30),
+        m_dnr(false),
+        m_snb(false),
+        m_anf(false),
+        m_nrScheme(NRSchemeNR),
+        m_nr2Gain(NR2GainGamma),
+        m_nr2NPE(NR2NPEOSMS),
+        m_nrPosition(NRPositionPreAGC),
+        m_nr2ArtifactReduction(true)
+    {}
+};
+
+struct WDSPRxSettings
+{
     qint32 m_inputFrequencyOffset;
     // Real m_highCutoff;
     // Real m_lowCutoff;
@@ -65,17 +138,30 @@ struct WDSPRxSettings
     bool m_audioFlipChannels;
     bool m_dsb;
     bool m_audioMute;
+    // AGC
     bool m_agc;
-    AGCMode m_agcMode;
+    WDSPRxProfile::WDSPRxAGCMode m_agcMode;
     int  m_agcGain;    //!< Fixed gain if AGC is off else top gain
     int  m_agcSlope;
     int  m_agcHangThreshold;
+    // Noise blanker
+    bool m_dnb;
+    WDSPRxProfile::WDSPRxNBScheme m_nbScheme;
+    WDSPRxProfile::WDSPRxNB2Mode m_nb2Mode;
+    double m_nbSlewTime;
+    double m_nbLeadTime;
+    double m_nbLagTime;
+    int m_nbThreshold;
+    // Noise reduction
     bool m_dnr;
-    int  m_dnrScheme;
-    float m_dnrAboveAvgFactor;
-    float m_dnrSigmaFactor;
-    int  m_dnrNbPeaks;
-    float m_dnrAlpha;
+    bool m_snb;
+    bool m_anf;
+    WDSPRxProfile::WDSPRxNRScheme m_nrScheme;
+    WDSPRxProfile::WDSPRxNR2Gain m_nr2Gain;
+    WDSPRxProfile::WDSPRxNR2NPE m_nr2NPE;
+    WDSPRxProfile::WDSPRxNRPosition m_nrPosition;
+    bool m_nr2ArtifactReduction;
+
     quint32 m_rgbColor;
     QString m_title;
     QString m_audioDeviceName;
@@ -88,9 +174,8 @@ struct WDSPRxSettings
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
     bool m_hidden;
-    // FFTWindow::Function m_fftWindow;
-    std::vector<WDSPRxFilterSettings> m_filterBank;
-    unsigned int m_filterIndex;
+    std::vector<WDSPRxProfile> m_profiles;
+    unsigned int m_profileIndex;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;

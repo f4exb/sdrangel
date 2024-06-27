@@ -37,6 +37,9 @@
 #include "gui/dialogpositioner.h"
 #include "maincore.h"
 #include "wdsprx.h"
+#include "wdsprxagcdialog.h"
+#include "wdsprxdnbdialog.h"
+#include "wdsprxdnrdialog.h"
 
 WDSPRxGUI* WDSPRxGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -68,7 +71,7 @@ bool WDSPRxGUI::deserialize(const QByteArray& data)
         ui->lowCut->setMaximum(480);
         ui->lowCut->setMinimum(-480);
         displaySettings();
-        applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
+        applyBandwidths(m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2, true); // does applySettings(true)
         return true;
     }
     else
@@ -79,7 +82,7 @@ bool WDSPRxGUI::deserialize(const QByteArray& data)
         ui->lowCut->setMaximum(480);
         ui->lowCut->setMinimum(-480);
         displaySettings();
-        applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
+        applyBandwidths(m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2, true); // does applySettings(true)
         return false;
     }
 }
@@ -201,12 +204,15 @@ void WDSPRxGUI::on_volume_valueChanged(int value)
 void WDSPRxGUI::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_agc = m_settings.m_agc;
     applySettings();
 }
 
-void WDSPRxGUI::on_dnr_toggled(bool)
+void WDSPRxGUI::on_dnr_toggled(bool checked)
 {
-    // TBD
+    m_settings.m_dnr = checked;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_dnr = m_settings.m_dnr;
+    applySettings();
 }
 
 void WDSPRxGUI::on_agcGain_valueChanged(int value)
@@ -214,6 +220,7 @@ void WDSPRxGUI::on_agcGain_valueChanged(int value)
     QString s = QString::number(value, 'f', 0);
     ui->agcGainText->setText(s);
     m_settings.m_agcGain = value;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_agcGain = m_settings.m_agcGain;
     applySettings();
 }
 
@@ -246,30 +253,45 @@ void WDSPRxGUI::on_flipSidebands_clicked(bool checked)
 
 void WDSPRxGUI::on_fftWindow_currentIndexChanged(int index)
 {
-    m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow = index;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow = index;
     applySettings();
 }
 
-void WDSPRxGUI::on_filterIndex_valueChanged(int value)
+void WDSPRxGUI::on_profileIndex_valueChanged(int value)
 {
     if ((value < 0) || (value >= 10)) {
         return;
     }
 
     ui->filterIndexText->setText(tr("%1").arg(value));
-    m_settings.m_filterIndex = value;
+    m_settings.m_profileIndex = value;
+    // Bandwidth setup
     ui->BW->setMaximum(480);
     ui->BW->setMinimum(-480);
     ui->lowCut->setMaximum(480);
     ui->lowCut->setMinimum(-480);
-    m_settings.m_dnr = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnr;
-    m_settings.m_dnrScheme = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrScheme;
-    m_settings.m_dnrAboveAvgFactor = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrAboveAvgFactor;
-    m_settings.m_dnrSigmaFactor = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrSigmaFactor;
-    m_settings.m_dnrNbPeaks = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrNbPeaks;
-    m_settings.m_dnrAlpha = m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrAlpha;
+    // AGC setup
+    m_settings.m_agc = m_settings.m_profiles[m_settings.m_profileIndex].m_agc;
+    m_settings.m_agcGain = m_settings.m_profiles[m_settings.m_profileIndex].m_agcGain;
+    // Noise blanking
+    m_settings.m_dnb = m_settings.m_profiles[m_settings.m_profileIndex].m_dnb;
+    m_settings.m_nbScheme = m_settings.m_profiles[m_settings.m_profileIndex].m_nbScheme;
+    m_settings.m_nb2Mode = m_settings.m_profiles[m_settings.m_profileIndex].m_nb2Mode;
+    m_settings.m_nbSlewTime = m_settings.m_profiles[m_settings.m_profileIndex].m_nbSlewTime;
+    m_settings.m_nbLeadTime = m_settings.m_profiles[m_settings.m_profileIndex].m_nbLeadTime;
+    m_settings.m_nbLagTime = m_settings.m_profiles[m_settings.m_profileIndex].m_nbLagTime;
+    m_settings.m_nbThreshold = m_settings.m_profiles[m_settings.m_profileIndex].m_nbThreshold;
+    // Noise reduction
+    m_settings.m_dnr = m_settings.m_profiles[m_settings.m_profileIndex].m_dnr;
+    m_settings.m_snb = m_settings.m_profiles[m_settings.m_profileIndex].m_snb;
+    m_settings.m_anf = m_settings.m_profiles[m_settings.m_profileIndex].m_anf;
+    m_settings.m_nrScheme = m_settings.m_profiles[m_settings.m_profileIndex].m_nrScheme;
+    m_settings.m_nr2Gain = m_settings.m_profiles[m_settings.m_profileIndex].m_nr2Gain;
+    m_settings.m_nr2NPE = m_settings.m_profiles[m_settings.m_profileIndex].m_nr2NPE;
+    m_settings.m_nrPosition = m_settings.m_profiles[m_settings.m_profileIndex].m_nrPosition;
+    m_settings.m_nr2ArtifactReduction = m_settings.m_profiles[m_settings.m_profileIndex].m_nr2ArtifactReduction;
     displaySettings();
-    applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
+    applyBandwidths(m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2, true); // does applySettings(true)
 }
 
 void WDSPRxGUI::onMenuDialogCalled(const QPoint &p)
@@ -344,7 +366,9 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_audioMute(false),
 	m_squelchOpen(false),
     m_audioSampleRate(-1),
-    m_fftNRDialog(nullptr)
+    m_agcDialog(nullptr),
+    m_dnbDialog(nullptr),
+    m_dnrDialog(nullptr)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodssb/readme.md";
@@ -362,6 +386,12 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
     connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
+
+    CRightClickEnabler *agcRightClickEnabler = new CRightClickEnabler(ui->agc);
+    connect(agcRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(agcSetupDialog(const QPoint &)));
+
+    CRightClickEnabler *dnbRightClickEnabler = new CRightClickEnabler(ui->dnb);
+    connect(dnbRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(dnbSetupDialog(const QPoint &)));
 
     CRightClickEnabler *dnrRightClickEnabler = new CRightClickEnabler(ui->dnr);
     connect(dnrRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(dnrSetupDialog(const QPoint &)));
@@ -416,7 +446,7 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	displaySettings();
     makeUIConnections();
 
-	applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
+	applyBandwidths(m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2, true); // does applySettings(true)
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -568,9 +598,9 @@ void WDSPRxGUI::applyBandwidths(unsigned int spanLog2, bool force)
     ui->channelPowerMeter->setRange(WDSPRxSettings::m_minPowerThresholdDB, 0);
 
     m_settings.m_dsb = dsb;
-    m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2 = spanLog2;
-    m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff = bw * 100;
-    m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff = lw * 100;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2 = spanLog2;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff = bw * 100;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff = lw * 100;
 
     applySettings(force);
 
@@ -586,9 +616,9 @@ void WDSPRxGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setBandwidth(m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff * 2);
+    m_channelMarker.setBandwidth(m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff * 2);
     m_channelMarker.setTitle(m_settings.m_title);
-    m_channelMarker.setLowCutoff(m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff);
+    m_channelMarker.setLowCutoff(m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff);
 
     if (m_deviceUISet->m_deviceMIMOEngine)
     {
@@ -604,7 +634,7 @@ void WDSPRxGUI::displaySettings()
     }
     else
     {
-        if (m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff < 0)
+        if (m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff < 0)
         {
             m_channelMarker.setSidebands(ChannelMarker::lsb);
             ui->dsb->setIcon(m_iconDSBLSB);
@@ -636,7 +666,7 @@ void WDSPRxGUI::displaySettings()
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-    ui->fftWindow->setCurrentIndex(m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
+    ui->fftWindow->setCurrentIndex(m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow);
 
     // Prevent uncontrolled triggering of applyBandwidths
     ui->spanLog2->blockSignals(true);
@@ -644,14 +674,14 @@ void WDSPRxGUI::displaySettings()
     ui->BW->blockSignals(true);
     ui->filterIndex->blockSignals(true);
 
-    ui->filterIndex->setValue(m_settings.m_filterIndex);
-    ui->filterIndexText->setText(tr("%1").arg(m_settings.m_filterIndex));
+    ui->filterIndex->setValue(m_settings.m_profileIndex);
+    ui->filterIndexText->setText(tr("%1").arg(m_settings.m_profileIndex));
 
     ui->dsb->setChecked(m_settings.m_dsb);
-    ui->spanLog2->setValue(1 + ui->spanLog2->maximum() - m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2);
+    ui->spanLog2->setValue(1 + ui->spanLog2->maximum() - m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2);
 
-    ui->BW->setValue(m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff / 100.0);
-    s = QString::number(m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff/1000.0, 'f', 1);
+    ui->BW->setValue(m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff / 100.0);
+    s = QString::number(m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff/1000.0, 'f', 1);
 
     if (m_settings.m_dsb) {
         ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(s));
@@ -666,8 +696,8 @@ void WDSPRxGUI::displaySettings()
 
     // The only one of the four signals triggering applyBandwidths will trigger it once only with all other values
     // set correctly and therefore validate the settings and apply them to dependent widgets
-    ui->lowCut->setValue(m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff / 100.0);
-    ui->lowCutText->setText(tr("%1k").arg(m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff / 1000.0));
+    ui->lowCut->setValue(m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff / 100.0);
+    ui->lowCutText->setText(tr("%1k").arg(m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff / 1000.0));
 
     int volume = CalcDb::dbPower(m_settings.m_volume);
     ui->volume->setValue(volume);
@@ -678,11 +708,6 @@ void WDSPRxGUI::displaySettings()
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
-}
-
-void WDSPRxGUI::agcSetupDialog()
-{
-    // TODO
 }
 
 void WDSPRxGUI::leaveEvent(QEvent* event)
@@ -711,55 +736,172 @@ void WDSPRxGUI::audioSelect(const QPoint& p)
     }
 }
 
+void WDSPRxGUI::agcSetupDialog(const QPoint& p)
+{
+    m_agcDialog = new WDSPRxAGCDialog();
+    m_agcDialog->move(p);
+    m_agcDialog->setAGCMode(m_settings.m_agcMode);
+    m_agcDialog->setAGCSlope(m_settings.m_agcSlope);
+    m_agcDialog->setAGCHangThreshold(m_settings.m_agcHangThreshold);
+    QObject::connect(m_agcDialog, &WDSPRxAGCDialog::valueChanged, this, &WDSPRxGUI::agcSetup);
+    m_agcDialog->exec();
+    QObject::disconnect(m_agcDialog, &WDSPRxAGCDialog::valueChanged, this, &WDSPRxGUI::agcSetup);
+    m_agcDialog->deleteLater();
+    m_agcDialog = nullptr;
+}
+
+void WDSPRxGUI::agcSetup(int iValueChanged)
+{
+    if (!m_agcDialog) {
+        return;
+    }
+
+    WDSPRxAGCDialog::ValueChanged valueChanged = (WDSPRxAGCDialog::ValueChanged) iValueChanged;
+
+    switch (valueChanged)
+    {
+    case WDSPRxAGCDialog::ValueChanged::ChangedMode:
+        m_settings.m_agcMode = m_agcDialog->getAGCMode();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_agcMode = m_settings.m_agcMode;
+        applySettings();
+        break;
+    case WDSPRxAGCDialog::ValueChanged::ChangedSlope:
+        m_settings.m_agcSlope = m_agcDialog->getAGCSlope();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_agcSlope = m_settings.m_agcSlope;
+        applySettings();
+        break;
+    case WDSPRxAGCDialog::ValueChanged::ChangedHangThreshold:
+        m_settings.m_agcHangThreshold = m_agcDialog->getAGCHangThreshold();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_agcHangThreshold = m_settings.m_agcHangThreshold;
+        applySettings();
+        break;
+    default:
+        break;
+    }
+}
+
+void WDSPRxGUI::dnbSetupDialog(const QPoint& p)
+{
+    m_dnbDialog = new WDSPRxDNBDialog();
+    m_dnbDialog->move(p);
+    m_dnbDialog->setNBScheme(m_settings.m_nbScheme);
+    m_dnbDialog->setNB2Mode(m_settings.m_nb2Mode);
+    m_dnbDialog->setNBSlewTime(m_settings.m_nbSlewTime);
+    m_dnbDialog->setNBLeadTime(m_settings.m_nbLagTime);
+    m_dnbDialog->setNBThreshold(m_settings.m_nbThreshold);
+    QObject::connect(m_dnbDialog, &WDSPRxDNBDialog::valueChanged, this, &WDSPRxGUI::dnbSetup);
+    m_dnbDialog->exec();
+    QObject::disconnect(m_dnbDialog, &WDSPRxDNBDialog::valueChanged, this, &WDSPRxGUI::dnbSetup);
+    m_dnbDialog->deleteLater();
+    m_dnbDialog = nullptr;
+}
+
+void WDSPRxGUI::dnbSetup(int32_t iValueChanged)
+{
+    if (!m_dnbDialog) {
+        return;
+    }
+
+    WDSPRxDNBDialog::ValueChanged valueChanged = (WDSPRxDNBDialog::ValueChanged) iValueChanged;
+
+    switch (valueChanged)
+    {
+    case WDSPRxDNBDialog::ValueChanged::ChangedNB:
+        m_settings.m_nbScheme = m_dnbDialog->getNBScheme();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nbScheme = m_settings.m_nbScheme;
+        applySettings();
+        break;
+    case WDSPRxDNBDialog::ValueChanged::ChangedNB2Mode:
+        m_settings.m_nb2Mode = m_dnbDialog->getNB2Mode();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nb2Mode = m_settings.m_nb2Mode;
+        applySettings();
+        break;
+    case WDSPRxDNBDialog::ValueChanged::ChangedNBSlewTime:
+        m_settings.m_nbSlewTime = m_dnbDialog->getNBSlewTime();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nbSlewTime = m_settings.m_nbSlewTime;
+        applySettings();
+        break;
+    case WDSPRxDNBDialog::ValueChanged::ChangedNBLeadTime:
+        m_settings.m_nbLeadTime = m_dnbDialog->getNBLeadTime();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nbLeadTime = m_settings.m_nbLeadTime;
+        applySettings();
+        break;
+    case WDSPRxDNBDialog::ValueChanged::ChangedNBLagTime:
+        m_settings.m_nbLagTime = m_dnbDialog->getNBLagTime();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nbLagTime = m_settings.m_nbLagTime;
+        applySettings();
+        break;
+    case WDSPRxDNBDialog::ValueChanged::ChangedNBThreshold:
+        m_settings.m_nbThreshold = m_dnbDialog->getNBThreshold();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nbThreshold = m_settings.m_nbThreshold;
+        applySettings();
+        break;
+    default:
+        break;
+    }
+}
+
 void WDSPRxGUI::dnrSetupDialog(const QPoint& p)
 {
-    m_fftNRDialog = new FFTNRDialog();
-    m_fftNRDialog->move(p);
-    QObject::connect(m_fftNRDialog, &FFTNRDialog::valueChanged, this, &WDSPRxGUI::dnrSetup);
-    m_fftNRDialog->setScheme((FFTNoiseReduction::Scheme) m_settings.m_dnrScheme);
-    m_fftNRDialog->setAboveAvgFactor(m_settings.m_dnrAboveAvgFactor);
-    m_fftNRDialog->setSigmaFactor(m_settings.m_dnrSigmaFactor);
-    m_fftNRDialog->setNbPeaks(m_settings.m_dnrNbPeaks);
-    m_fftNRDialog->setAlpha(m_settings.m_dnrAlpha, 2048, m_audioSampleRate);
-    m_fftNRDialog->exec();
-    QObject::disconnect(m_fftNRDialog, &FFTNRDialog::valueChanged, this, &WDSPRxGUI::dnrSetup);
-    m_fftNRDialog->deleteLater();
-    m_fftNRDialog = nullptr;
+    m_dnrDialog = new WDSPRxDNRDialog();
+    m_dnrDialog->move(p);
+    m_dnrDialog->setSNB(m_settings.m_snb);
+    m_dnrDialog->setANF(m_settings.m_anf);
+    m_dnrDialog->setNRScheme(m_settings.m_nrScheme);
+    m_dnrDialog->setNR2Gain(m_settings.m_nr2Gain);
+    m_dnrDialog->setNR2NPE(m_settings.m_nr2NPE);
+    m_dnrDialog->setNRPosition(m_settings.m_nrPosition);
+    m_dnrDialog->setNR2ArtifactReduction(m_settings.m_nr2ArtifactReduction);
+    QObject::connect(m_dnrDialog, &WDSPRxDNRDialog::valueChanged, this, &WDSPRxGUI::dnrSetup);
+    m_dnrDialog->exec();
+    QObject::disconnect(m_dnrDialog, &WDSPRxDNRDialog::valueChanged, this, &WDSPRxGUI::dnrSetup);
+    m_dnrDialog->deleteLater();
+    m_dnrDialog = nullptr;
 }
 
 void WDSPRxGUI::dnrSetup(int32_t iValueChanged)
 {
-    if (!m_fftNRDialog) {
+    if (!m_dnrDialog) {
         return;
     }
 
-    FFTNRDialog::ValueChanged valueChanged = (FFTNRDialog::ValueChanged) iValueChanged;
+    WDSPRxDNRDialog::ValueChanged valueChanged = (WDSPRxDNRDialog::ValueChanged) iValueChanged;
 
     switch (valueChanged)
     {
-    case FFTNRDialog::ValueChanged::ChangedScheme:
-        m_settings.m_dnrScheme = m_fftNRDialog->getScheme();
-        m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrScheme = m_settings.m_dnrScheme;
+    case WDSPRxDNRDialog::ValueChanged::ChangedSNB:
+        m_settings.m_snb = m_dnrDialog->getSNB();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_snb = m_settings.m_snb;
         applySettings();
         break;
-    case FFTNRDialog::ValueChanged::ChangedAboveAvgFactor:
-        m_settings.m_dnrAboveAvgFactor = m_fftNRDialog->getAboveAvgFactor();
-        m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrAboveAvgFactor = m_settings.m_dnrAboveAvgFactor;
+    case WDSPRxDNRDialog::ValueChanged::ChangedANF:
+        m_settings.m_anf = m_dnrDialog->getANF();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_anf = m_settings.m_anf;
         applySettings();
         break;
-    case FFTNRDialog::ValueChanged::ChangedSigmaFactor:
-        m_settings.m_dnrSigmaFactor = m_fftNRDialog->getSigmaFactor();
-        m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrSigmaFactor = m_settings.m_dnrSigmaFactor;
+    case WDSPRxDNRDialog::ValueChanged::ChangedNR:
+        m_settings.m_nrScheme = m_dnrDialog->getNRScheme();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nrScheme = m_settings.m_nrScheme;
         applySettings();
         break;
-    case FFTNRDialog::ValueChanged::ChangedNbPeaks:
-        m_settings.m_dnrNbPeaks = m_fftNRDialog->getNbPeaks();
-        m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrNbPeaks = m_settings.m_dnrNbPeaks;
+    case WDSPRxDNRDialog::ValueChanged::ChangedNR2Gain:
+        m_settings.m_nr2Gain = m_dnrDialog->getNR2Gain();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nr2Gain = m_settings.m_nr2Gain;
         applySettings();
         break;
-    case FFTNRDialog::ValueChanged::ChangedAlpha:
-        m_settings.m_dnrAlpha = m_fftNRDialog->getAlpha();
-        m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrAlpha = m_settings.m_dnrAlpha;
+    case WDSPRxDNRDialog::ValueChanged::ChangedNR2NPE:
+        m_settings.m_nr2NPE = m_dnrDialog->getNR2NPE();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nr2NPE = m_settings.m_nr2NPE;
+        applySettings();
+        break;
+    case WDSPRxDNRDialog::ValueChanged::ChangedNRPosition:
+        m_settings.m_nrPosition = m_dnrDialog->getNRPosition();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nrPosition = m_settings.m_nrPosition;
+        applySettings();
+        break;
+    case WDSPRxDNRDialog::ValueChanged::ChangedNR2Artifacts:
+        m_settings.m_nr2ArtifactReduction = m_dnrDialog->getNR2ArtifactReduction();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nr2ArtifactReduction = m_settings.m_nr2ArtifactReduction;
         applySettings();
         break;
     default:
@@ -818,7 +960,7 @@ void WDSPRxGUI::makeUIConnections()
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &WDSPRxGUI::on_spanLog2_valueChanged);
     QObject::connect(ui->flipSidebands, &QPushButton::clicked, this, &WDSPRxGUI::on_flipSidebands_clicked);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WDSPRxGUI::on_fftWindow_currentIndexChanged);
-    QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &WDSPRxGUI::on_filterIndex_valueChanged);
+    QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &WDSPRxGUI::on_profileIndex_valueChanged);
 }
 
 void WDSPRxGUI::updateAbsoluteCenterFrequency()

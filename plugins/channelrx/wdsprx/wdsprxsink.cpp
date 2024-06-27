@@ -322,11 +322,11 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 {
     qDebug() << "WDSPRxSink::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_filterIndex: " << settings.m_filterIndex
-            << " m_spanLog2: " << settings.m_filterBank[settings.m_filterIndex].m_spanLog2
-            << " m_highCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_highCutoff
-            << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
-            << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
+            << " m_profileIndex: " << settings.m_profileIndex
+            << " m_spanLog2: " << settings.m_profiles[settings.m_profileIndex].m_spanLog2
+            << " m_highCutoff: " << settings.m_profiles[settings.m_profileIndex].m_highCutoff
+            << " m_lowCutoff: " << settings.m_profiles[settings.m_profileIndex].m_lowCutoff
+            << " m_fftWindow: " << settings.m_profiles[settings.m_profileIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
             << " m_audioBinaural: " << settings.m_audioBinaural
             << " m_audioFlipChannels: " << settings.m_audioFlipChannels
@@ -346,16 +346,16 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
-    if((m_settings.m_filterBank[m_settings.m_filterIndex].m_highCutoff != settings.m_filterBank[settings.m_filterIndex].m_highCutoff) ||
-        (m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff != settings.m_filterBank[settings.m_filterIndex].m_lowCutoff) ||
-        (m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow != settings.m_filterBank[settings.m_filterIndex].m_fftWindow) ||
+    if((m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff != settings.m_profiles[settings.m_profileIndex].m_highCutoff) ||
+        (m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff != settings.m_profiles[settings.m_profileIndex].m_lowCutoff) ||
+        (m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow != settings.m_profiles[settings.m_profileIndex].m_fftWindow) ||
         (m_settings.m_dsb != settings.m_dsb) || force)
     {
         float band, low, high, fLow, fHigh;
 
-        band = settings.m_filterBank[settings.m_filterIndex].m_highCutoff;
+        band = settings.m_profiles[settings.m_profileIndex].m_highCutoff;
         high = band;
-        low = settings.m_filterBank[settings.m_filterIndex].m_lowCutoff;
+        low = settings.m_profiles[settings.m_profileIndex].m_lowCutoff;
 
         if (band < 0)
         {
@@ -406,11 +406,11 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_audioSampleRate;
 
         WDSP::RXA::SetPassband(*m_rxa, fLow, fHigh);
-        WDSP::NBP::NBPSetWindow(*m_rxa, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
+        WDSP::NBP::NBPSetWindow(*m_rxa, m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow);
     }
 
-    if ((m_settings.m_filterBank[settings.m_filterIndex].m_spanLog2 != settings.m_filterBank[settings.m_filterIndex].m_spanLog2) || force) {
-        m_spectrumProbe.setSpanLog2(settings.m_filterBank[settings.m_filterIndex].m_spanLog2);
+    if ((m_settings.m_profiles[settings.m_profileIndex].m_spanLog2 != settings.m_profiles[settings.m_profileIndex].m_spanLog2) || force) {
+        m_spectrumProbe.setSpanLog2(settings.m_profiles[settings.m_profileIndex].m_spanLog2);
     }
 
     if ((m_settings.m_agc != settings.m_agc)
@@ -427,25 +427,25 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         {
             switch (settings.m_agcMode)
             {
-            case WDSPRxSettings::AGCMode::AGCLong:
+            case WDSPRxProfile::WDSPRxAGCMode::AGCLong:
                 WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
                 WDSP::WCPAGC::SetAGCHang(*m_rxa, 2000);  // SetRXAAGCHang(id, 2000);
                 WDSP::WCPAGC::SetAGCDecay(*m_rxa, 2000); // SetRXAAGCDecay(id, 2000);
                 WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
                 break;
-            case WDSPRxSettings::AGCMode::AGCSlow:
+            case WDSPRxProfile::WDSPRxAGCMode::AGCSlow:
                 WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
                 WDSP::WCPAGC::SetAGCHang(*m_rxa, 1000);  // SetRXAAGCHang(id, 1000);
                 WDSP::WCPAGC::SetAGCDecay(*m_rxa, 500);  // SetRXAAGCDecay(id, 500);
                 WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
                 break;
-            case WDSPRxSettings::AGCMode::AGCMedium:
+            case WDSPRxProfile::WDSPRxAGCMode::AGCMedium:
                 WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
                 WDSP::WCPAGC::SetAGCHang(*m_rxa, 0);     // SetRXAAGCHang(id, 0);
                 WDSP::WCPAGC::SetAGCDecay(*m_rxa, 250);  // SetRXAAGCDecay(id, 250);
                 WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, 100);
                 break;
-            case WDSPRxSettings::AGCMode::AGCFast:
+            case WDSPRxProfile::WDSPRxAGCMode::AGCFast:
                 WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
                 WDSP::WCPAGC::SetAGCHang(*m_rxa, 0);     // SetRXAAGCHang(id, 0);
                 WDSP::WCPAGC::SetAGCDecay(*m_rxa, 50);   // SetRXAAGCDecay(id, 50);

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>WDSPRxDNRDialog</class>
+ <widget class="QDialog" name="WDSPRxDNRDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>365</width>
+    <height>160</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Noise Reduction</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="activeLayout">
+     <item>
+      <widget class="QLabel" name="nrLabel">
+       <property name="text">
+        <string>Scheme</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="nr">
+       <property name="toolTip">
+        <string>Noise reduction scheme</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>NR</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>NR2</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="snb">
+       <property name="toolTip">
+        <string>Spectral Noise Blanker</string>
+       </property>
+       <property name="text">
+        <string>SNB</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="anf">
+       <property name="toolTip">
+        <string>Automatic Notch Filter</string>
+       </property>
+       <property name="text">
+        <string>ANF</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="nrLayout">
+     <item row="1" column="0">
+      <widget class="QLabel" name="nr2GainLabel">
+       <property name="text">
+        <string>NR2 Gain</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QCheckBox" name="nr2ArtifactReduction">
+       <property name="toolTip">
+        <string>Noise reduction 2 artifact reduction</string>
+       </property>
+       <property name="text">
+        <string>NR2 Art</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="positionLabel">
+       <property name="text">
+        <string>Position</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QLabel" name="nr2NPELabel">
+       <property name="text">
+        <string>NR2 NPE</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="nrPosition">
+       <property name="toolTip">
+        <string>Noise reduction position</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>Pre AGC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Post AGC</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="nr2Gain">
+       <item>
+        <property name="text">
+         <string>Linear</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Log</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Gamma</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QComboBox" name="nr2NPE">
+       <item>
+        <property name="text">
+         <string>OSMS</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>MMSE</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>WDSPRxDNRDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>WDSPRxDNRDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

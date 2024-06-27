@@ -163,7 +163,7 @@ bool WDSPRxBaseband::handleMessage(const Message& cmd)
 
             if (m_spectrumVis)
             {
-                DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2), 0);
+                DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2), 0);
                 m_spectrumVis->getInputMessageQueue()->push(msg);
             }
         }
@@ -190,11 +190,11 @@ void WDSPRxBaseband::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_filterBank[settings.m_filterIndex].m_spanLog2 != m_settings.m_filterBank[settings.m_filterIndex].m_spanLog2) || force)
+    if ((settings.m_profiles[settings.m_profileIndex].m_spanLog2 != m_settings.m_profiles[settings.m_profileIndex].m_spanLog2) || force)
     {
         if (m_spectrumVis)
         {
-            DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
+            DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<settings.m_profiles[settings.m_profileIndex].m_spanLog2), 0);
             m_spectrumVis->getInputMessageQueue()->push(msg);
         }
     }
@@ -221,7 +221,7 @@ void WDSPRxBaseband::applySettings(const WDSPRxSettings& settings, bool force)
 
             if (m_spectrumVis)
             {
-                DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<m_settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
+                DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<m_settings.m_profiles[settings.m_profileIndex].m_spanLog2), 0);
                 m_spectrumVis->getInputMessageQueue()->push(msg);
             }
         }

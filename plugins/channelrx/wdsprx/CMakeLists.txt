@@ -26,12 +26,21 @@ include_directories(
 if(NOT SERVER_MODE)
     set(wdsprx_SOURCES
         ${wdsprx_SOURCES}
+        wdsprxagcdialog.cpp
+        wdsprxagcdialog.ui
+        wdsprxdnbdialog.cpp
+        wdsprxdnbdialog.ui
+        wdsprxdnrdialog.cpp
+        wdsprxdnrdialog.ui
         wdsprxgui.cpp
         wdsprxgui.ui
     )
     set(wdsprx_HEADERS
         ${wdsprx_HEADERS}
         wdsprxgui.h
+        wdsprxagcdialog.h
+        wdsprxdnbdialog.h
+        wdsprxdnrdialog.h
     )
     set(TARGET_NAME wdsprx)
     set(TARGET_LIB "Qt::Widgets")

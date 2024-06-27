@@ -878,6 +878,19 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="dnb">
+        <property name="toolTip">
+         <string>Toggle Digital Noise Blanker</string>
+        </property>
+        <property name="text">
+         <string>NB</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
