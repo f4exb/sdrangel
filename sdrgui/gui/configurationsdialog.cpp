@@ -375,11 +375,14 @@ void ConfigurationsDialog::on_configurationExport_clicked()
 
 			if (fileName != "")
 			{
+#ifndef ANDROID
+                // Can't change filenames on Android
 				QFileInfo fileInfo(fileName);
 
 				if (fileInfo.suffix() != "cfgx") {
 					fileName += ".cfgx";
 				}
+#endif
 
 				QFile exportFile(fileName);
 
