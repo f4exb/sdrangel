@@ -52,6 +52,7 @@ MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings
     m_filterDistance->setValue(settings->m_filterDistance / 1000);
     m_filterDistance->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_filterDistance->setSpecialValueText(" ");
+    m_filterDistance->setCorrectionMode(QAbstractSpinBox::CorrectToNearestValue);
     table->setCellWidget(row, MapSettingsDialog::COL_2D_MIN_ZOOM, m_minZoom);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_MIN_PIXELS, m_minPixels);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_LABEL_SCALE, m_labelScale);
