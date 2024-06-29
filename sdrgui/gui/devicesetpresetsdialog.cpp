@@ -297,11 +297,14 @@ void DeviceSetPresetsDialog::on_presetExport_clicked()
 
 			if (fileName != "")
 			{
+#ifndef ANDROID
+                // Can't change filenames on Android
 				QFileInfo fileInfo(fileName);
 
 				if (fileInfo.suffix() != "prex") {
 					fileName += ".prex";
 				}
+#endif
 
 				QFile exportFile(fileName);
 
