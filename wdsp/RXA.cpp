@@ -52,6 +52,8 @@ warren@wpratt.com
 #include "iir.hpp"
 #include "firmin.hpp"
 #include "wcpAGC.hpp"
+#include "anb.hpp"
+#include "nob.hpp"
 
 namespace WDSP {
 
@@ -84,6 +86,36 @@ RXA* RXA::create_rxa (
     rxa->outbuff = new float[1 * rxa->dsp_outsize  * 2]; // (float *) malloc0 (1 * ch.dsp_outsize * sizeof (complex));
     rxa->midbuff = new float[2 * rxa->dsp_size  * 2]; // (float *) malloc0 (2 * ch.dsp_size    * sizeof (complex));
     memset(rxa->meter, 0, sizeof(float)*RXA_METERTYPE_LAST);
+
+    // Noise blanker (ANB or "NB")
+    rxa->anb.p = ANB::create_anb(
+        0, // run
+        rxa->dsp_insize,                        // input buffer size
+        rxa->inbuff,                            // pointer to input buffer
+        rxa->inbuff,                            // pointer to output buffer
+        rxa->in_rate,                           // samplerate
+        0.0001,                                 // tau
+        0.0001,                                 // hang time
+        0.0001,                                 // advance time
+        0.05,                                   // back tau
+        30.0                                    // thershold
+    );
+    // Noise blanker (NOB or "NB2")
+    rxa->nob.p = NOB::create_nob(
+        0, // run
+        rxa->dsp_insize,                        // input buffer size
+        rxa->inbuff,                            // pointer to input buffer
+        rxa->inbuff,                            // pointer to output buffer
+        rxa->in_rate,                           // samplerate
+        0,                                      // mode (zero)
+        0.0001,                                 // advance slew time
+        0.0001,                                 // advance time
+        0.0001,                                 // hang slew time
+        0.0001,                                 // hang time
+        0.025,                                  // max_imp_seq_time:
+        0.05,                                   // back tau
+        30
+    );
 
     // Ftequency shifter - shift to select a slice of spectrum
     rxa->shift.p = SHIFT::create_shift (
@@ -571,6 +603,8 @@ void RXA::destroy_rxa (RXA *rxa)
     GEN::destroy_gen (rxa->gen0.p);
     RESAMPLE::destroy_resample (rxa->rsmpin.p);
     SHIFT::destroy_shift (rxa->shift.p);
+    ANB::destroy_anb(rxa->anb.p);
+    NOB::destroy_nob(rxa->nob.p);
     delete[] (rxa->midbuff);
     delete[] (rxa->outbuff);
     delete[] (rxa->inbuff);
@@ -609,10 +643,14 @@ void RXA::flush_rxa (RXA *rxa)
     SSQL::flush_ssql (rxa->ssql.p);
     PANEL::flush_panel (rxa->panel.p);
     RESAMPLE::flush_resample (rxa->rsmpout.p);
+    ANB::flush_anb (rxa->anb.p);
+    NOB::flush_nob(rxa->nob.p);
 }
 
 void RXA::xrxa (RXA *rxa)
 {
+    ANB::xanb (rxa->anb.p);
+    NOB::xnob (rxa->nob.p);
     SHIFT::xshift (rxa->shift.p);
     RESAMPLE::xresample (rxa->rsmpin.p);
     GEN::xgen (rxa->gen0.p);
@@ -661,6 +699,14 @@ void RXA::setInputSamplerate (RXA *rxa, int in_rate)
     // buffers
     delete[] (rxa->inbuff);
     rxa->inbuff = new float[1 * rxa->dsp_insize  * 2]; // (float *)malloc0(1 * ch.dsp_insize  * sizeof(complex));
+    // anb
+    ANB::setBuffers_anb(rxa->anb.p, rxa->inbuff, rxa->inbuff);
+    ANB::setSize_anb(rxa->anb.p, rxa->dsp_insize);
+    ANB::setSamplerate_anb(rxa->anb.p, rxa->in_rate);
+    // nob
+    NOB::setBuffers_nob(rxa->nob.p, rxa->inbuff, rxa->inbuff);
+    NOB::setSize_nob(rxa->nob.p, rxa->dsp_insize);
+    NOB::setSamplerate_nob(rxa->nob.p, rxa->in_rate);
     // shift
     SHIFT::setBuffers_shift (rxa->shift.p, rxa->inbuff, rxa->inbuff);
     SHIFT::setSize_shift (rxa->shift.p, rxa->dsp_insize);
@@ -708,6 +754,12 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->inbuff = new float[1 * rxa->dsp_insize  * 2]; // (float *)malloc0(1 * rxa->dsp_insize  * sizeof(complex));
     delete[] (rxa->outbuff);
     rxa->outbuff = new float[1 * rxa->dsp_outsize * 2]; // (float *)malloc0(1 * rxa->dsp_outsize * sizeof(complex));
+    // anb
+    ANB::setBuffers_anb (rxa->anb.p, rxa->inbuff, rxa->inbuff);
+    ANB::setSize_anb(rxa->anb.p, rxa->dsp_insize);
+    // nob
+    NOB::setBuffers_nob(rxa->nob.p, rxa->inbuff, rxa->inbuff);
+    NOB::setSize_nob(rxa->nob.p, rxa->dsp_insize);
     // shift
     SHIFT::setBuffers_shift (rxa->shift.p, rxa->inbuff, rxa->inbuff);
     SHIFT::setSize_shift (rxa->shift.p, rxa->dsp_insize);
@@ -767,6 +819,12 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->midbuff = new float[2 * rxa->dsp_size * 2]; // (float *)malloc0(2 * rxa->dsp_size * sizeof(complex));
     delete[] (rxa->outbuff);
     rxa->outbuff = new float[1 * rxa->dsp_outsize * 2]; // (float *)malloc0(1 * rxa->dsp_outsize * sizeof(complex));
+    // anb
+    ANB::setBuffers_anb (rxa->anb.p, rxa->inbuff, rxa->inbuff);
+    ANB::setSize_anb (rxa->anb.p, rxa->dsp_insize);
+    // nob
+    NOB::setBuffers_nob(rxa->nob.p, rxa->inbuff, rxa->inbuff);
+    NOB::setSize_nob(rxa->nob.p, rxa->dsp_insize);
     // shift
     SHIFT::setBuffers_shift (rxa->shift.p, rxa->inbuff, rxa->inbuff);
     SHIFT::setSize_shift (rxa->shift.p, rxa->dsp_insize);

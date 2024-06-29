@@ -63,6 +63,8 @@ class PANEL;
 class SIPHON;
 class CBL;
 class SSQL;
+class ANB;
+class NOB;
 class BufferProbe;
 
 class WDSP_API RXA : public Unit
@@ -203,6 +205,14 @@ public:
     {
         SSQL *p;
     } ssql;
+    struct
+    {
+        ANB *p;
+    } anb;
+    struct
+    {
+        NOB *p;
+    } nob;
 
     static RXA* create_rxa (
         int in_rate,                // input samplerate

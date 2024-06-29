@@ -5,6 +5,7 @@ set(wdsp_SOURCES
     amd.cpp
     ammod.cpp
     amsq.cpp
+    anb.cpp
     anf.cpp
     anr.cpp
     bandpass.cpp
@@ -34,6 +35,7 @@ set(wdsp_SOURCES
     meter.cpp
     meterlog10.cpp
     nbp.cpp
+    nob.cpp
     osctrl.cpp
     patchpanel.cpp
     resample.cpp
@@ -54,6 +56,7 @@ set(wdsp_HEADERS
     amd.hpp
     ammod.hpp
     amsq.hpp
+    anb.hpp
     anf.hpp
     anr.hpp
     bandpass.hpp
@@ -85,6 +88,7 @@ set(wdsp_HEADERS
     meter.hpp
     meterlog10.hpp
     nbp.hpp
+    nob.hpp
     osctrl.hpp
     patchpanel.hpp
     resample.hpp
