@@ -504,9 +504,18 @@ void APTDemodGUI::on_saveImage_clicked()
         QStringList fileNames = fileDialog.selectedFiles();
         if (fileNames.size() > 0)
         {
-            qDebug() << "APT: Saving image to " << fileNames;
-            if (!m_image.save(fileNames[0])) {
-                QMessageBox::critical(this, "APT Demodulator", QString("Failed to save image to %1").arg(fileNames[0]));
+            QFileInfo fileInfo(fileNames[0]);
+
+            if (fileInfo.suffix() != "")
+            {
+                qDebug() << "APT: Saving image to " << fileNames;
+                if (!m_image.save(fileNames[0])) {
+                    QMessageBox::critical(this, "APT Demodulator", QString("Failed to save image to %1").arg(fileNames[0]));
+                }
+            }
+            else
+            {
+                QMessageBox::critical(this, "APT Demodulator", QString("Please specify a filename with an extension such as .png or .jpg"));
             }
         }
     }
