@@ -49,7 +49,7 @@ public:
     float* in;
     float* out;
     int io_buffsize;
-    float sample_rate;
+    double sample_rate;
 
     double tau_attack;
     double tau_decay;
@@ -106,7 +106,6 @@ public:
     double hang_decay_mult;
     int decay_type;
 
-    static void loadWcpAGC (WCPAGC *a);
     static void xwcpagc (WCPAGC *a);
     static WCPAGC* create_wcpagc (
         int run,
@@ -167,6 +166,7 @@ public:
     static void SetALCMaxGain (TXA& txa, float maxgain);
 
 private:
+    static void loadWcpAGC (WCPAGC *a);
     static void calc_wcpagc (WCPAGC *a);
     static void decalc_wcpagc (WCPAGC *a);
 };

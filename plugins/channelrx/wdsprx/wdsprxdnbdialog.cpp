@@ -77,6 +77,38 @@ void WDSPRxDNBDialog::setNBThreshold(int threshold)
     m_nbThreshold = threshold;
 }
 
+void WDSPRxDNBDialog::setNB2SlewTime(double time)
+{
+    ui->nb2SlewTime->blockSignals(true);
+    ui->nb2SlewTime->setValue(time);
+    ui->nb2SlewTime->blockSignals(false);
+    m_nb2SlewTime = time;
+}
+
+void WDSPRxDNBDialog::setNB2LeadTime(double time)
+{
+    ui->nb2LeadTime->blockSignals(true);
+    ui->nb2LeadTime->setValue(time);
+    ui->nb2LeadTime->blockSignals(false);
+    m_nb2LeadTime = time;
+}
+
+void WDSPRxDNBDialog::setNB2LagTime(double time)
+{
+    ui->nb2LagTime->blockSignals(true);
+    ui->nb2LagTime->setValue(time);
+    ui->nb2LagTime->blockSignals(false);
+    m_nb2LagTime = time;
+}
+
+void WDSPRxDNBDialog::setNB2Threshold(int threshold)
+{
+    ui->nb2Threshold->blockSignals(true);
+    ui->nb2Threshold->setValue(threshold);
+    ui->nb2Threshold->blockSignals(false);
+    m_nb2Threshold = threshold;
+}
+
 void WDSPRxDNBDialog::on_nb_currentIndexChanged(int index)
 {
     m_nbScheme = (WDSPRxProfile::WDSPRxNBScheme) index;
@@ -111,4 +143,28 @@ void WDSPRxDNBDialog::on_nbThreshold_valueChanged(int value)
 {
     m_nbThreshold = value;
     emit valueChanged(ChangedNBThreshold);
+}
+
+void WDSPRxDNBDialog::on_nb2SlewTime_valueChanged(double value)
+{
+    m_nb2SlewTime = value;
+    emit valueChanged(ChangedNB2SlewTime);
+}
+
+void WDSPRxDNBDialog::on_nb2LeadTime_valueChanged(double value)
+{
+    m_nb2LeadTime = value;
+    emit valueChanged(ChangedNB2LeadTime);
+}
+
+void WDSPRxDNBDialog::on_nb2LagTime_valueChanged(double value)
+{
+    m_nb2LagTime = value;
+    emit valueChanged(ChangedNB2LagTime);
+}
+
+void WDSPRxDNBDialog::on_nb2Threshold_valueChanged(int value)
+{
+    m_nb2Threshold = value;
+    emit valueChanged(ChangedNB2Threshold);
 }

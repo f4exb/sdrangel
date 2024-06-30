@@ -98,7 +98,7 @@ RXA* RXA::create_rxa (
         0.0001,                                 // hang time
         0.0001,                                 // advance time
         0.05,                                   // back tau
-        30.0                                    // thershold
+        30                                      // thershold
     );
     // Noise blanker (NOB or "NB2")
     rxa->nob.p = NOB::create_nob(

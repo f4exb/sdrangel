@@ -42,7 +42,6 @@ class RESAMPLE;
 class GEN;
 class BANDPASS;
 class BPS;
-class SNB;
 class NOTCHDB;
 class NBP;
 class BPSNBA;

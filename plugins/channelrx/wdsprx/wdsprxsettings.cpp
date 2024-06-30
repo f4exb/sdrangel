@@ -215,28 +215,28 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         d.readS32(   14, &m_agcSlope, 35);
         d.readS32(   15, &m_agcHangThreshold, 0);
         // Noise blanker
-        d.readBool(  29, &m_dnb, false);
-        d.readS32(   24, &tmp, 2);
+        d.readBool(  20, &m_dnb, false);
+        d.readS32(   21, &tmp, 2);
         m_nbScheme = (WDSPRxProfile::WDSPRxNBScheme) tmp;
-        d.readS32(   29, &tmp, 2);
+        d.readS32(   22, &tmp, 2);
         m_nb2Mode = (WDSPRxProfile::WDSPRxNB2Mode) tmp;
-        d.readDouble(30, &m_nbSlewTime, 0.01);
-        d.readDouble(31, &m_nbLeadTime, 0.01);
-        d.readDouble(32, &m_nbLagTime, 0.01);
-        d.readS32(   33, &m_nbThreshold, 30);
+        d.readDouble(23, &m_nbSlewTime, 0.01);
+        d.readDouble(24, &m_nbLeadTime, 0.01);
+        d.readDouble(25, &m_nbLagTime, 0.01);
+        d.readS32(   26, &m_nbThreshold, 30);
         // Nosie reduction
-        d.readBool(  29, &m_dnr, false);
-        d.readBool(  21, &m_snb, false);
-        d.readBool(  22, &m_anf, false);
-        d.readS32(   23, &tmp, 2);
+        d.readBool(  30, &m_dnr, false);
+        d.readBool(  31, &m_snb, false);
+        d.readBool(  32, &m_anf, false);
+        d.readS32(   33, &tmp, 2);
         m_nrScheme = (WDSPRxProfile::WDSPRxNRScheme) tmp;
-        d.readS32(   25, &tmp, 2);
+        d.readS32(   34, &tmp, 2);
         m_nr2Gain = (WDSPRxProfile::WDSPRxNR2Gain) tmp;
-        d.readS32(   26, &tmp, 2);
+        d.readS32(   35, &tmp, 2);
         m_nr2NPE = (WDSPRxProfile::WDSPRxNR2NPE) tmp;
-        d.readS32(   27, &tmp, 2);
+        d.readS32(   36, &tmp, 2);
         m_nrPosition = (WDSPRxProfile::WDSPRxNRPosition) tmp;
-        d.readBool(  28, &m_nr2ArtifactReduction, true);
+        d.readBool(  37, &m_nr2ArtifactReduction, true);
         //
         d.readString(70, &m_title, "WDSP Receiver");
         d.readString(71, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);

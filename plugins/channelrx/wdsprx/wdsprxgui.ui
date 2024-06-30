@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>414</width>
-    <height>190</height>
+    <height>179</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -777,10 +777,10 @@
          <string>Audio volume in dB</string>
         </property>
         <property name="minimum">
-         <number>-10</number>
+         <number>-20</number>
         </property>
         <property name="maximum">
-         <number>40</number>
+         <number>20</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -829,7 +829,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>AGC time constant (ms in log2 steps)</string>
+         <string>AGC level</string>
         </property>
         <property name="minimum">
          <number>-20</number>

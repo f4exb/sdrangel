@@ -89,14 +89,14 @@ public:
     static void setSamplerate_anb (ANB *a, int rate);
     static void setSize_anb (ANB *a, int size);
     // RXA
-    static void SetRXAANBRun (RXA& rxa, int run);
-    static void SetRXAANBBuffsize (RXA& rxa, int size);
-    static void SetRXAANBSamplerate (RXA& rxa, int rate);
-    static void SetRXAANBTau (RXA& rxa, double tau);
-    static void SetRXAANBHangtime (RXA& rxa, double time);
-    static void SetRXAANBAdvtime (RXA& rxa, double time);
-    static void SetRXAANBBacktau (RXA& rxa, double tau);
-    static void SetRXAANBThreshold (RXA& rxa, double thresh);
+    static void SetANBRun (RXA& rxa, int run);
+    static void SetANBBuffsize (RXA& rxa, int size);
+    static void SetANBSamplerate (RXA& rxa, int rate);
+    static void SetANBTau (RXA& rxa, double tau);
+    static void SetANBHangtime (RXA& rxa, double time);
+    static void SetANBAdvtime (RXA& rxa, double time);
+    static void SetANBBacktau (RXA& rxa, double tau);
+    static void SetANBThreshold (RXA& rxa, double thresh);
 
 private:
     static void initBlanker(ANB *a);                                                                                                    ////////////  legacy interface - remove

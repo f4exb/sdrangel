@@ -109,15 +109,15 @@ public:
     static void setSamplerate_nob (NOB *a, int rate);
     static void setSize_nob (NOB *a, int size);
     // RXA
-    static void SetRXANOBRun (RXA& rxa, int run);
-    static void SetRXANOBMode (RXA& rxa, int mode);
-    static void SetRXANOBBuffsize (RXA& rxa, int size);
-    static void SetRXANOBSamplerate (RXA& rxa, int size);
-    static void SetRXANOBTau (RXA& rxa, double tau);
-    static void SetRXANOBHangtime (RXA& rxa, double time);
-    static void SetRXANOBAdvtime (RXA& rxa, double time);
-    static void SetRXANOBBacktau (RXA& rxa, double tau);
-    static void SetRXANOBThreshold (RXA& rxa, double thresh);
+    static void SetNOBRun (RXA& rxa, int run);
+    static void SetNOBMode (RXA& rxa, int mode);
+    static void SetNOBBuffsize (RXA& rxa, int size);
+    static void SetNOBSamplerate (RXA& rxa, int size);
+    static void SetNOBTau (RXA& rxa, double tau);
+    static void SetNOBHangtime (RXA& rxa, double time);
+    static void SetNOBAdvtime (RXA& rxa, double time);
+    static void SetNOBBacktau (RXA& rxa, double tau);
+    static void SetNOBThreshold (RXA& rxa, double thresh);
 
 private:
     static void init_nob (NOB *a);

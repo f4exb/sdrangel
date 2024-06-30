@@ -85,10 +85,14 @@ struct WDSPRxProfile
     bool m_dnb;
     WDSPRxNBScheme m_nbScheme;
     WDSPRxNB2Mode m_nb2Mode;
-    double m_nbSlewTime;
+    double m_nbSlewTime; // a.k.a tau
     double m_nbLeadTime;
     double m_nbLagTime;
     int m_nbThreshold;
+    double m_nb2SlewTime; // a.k.a tau
+    double m_nb2LeadTime;
+    double m_nb2LagTime;
+    int m_nb2Threshold;
     // Noise rediction
     bool m_dnr;
     bool m_snb;
@@ -116,6 +120,10 @@ struct WDSPRxProfile
         m_nbLeadTime(0.01),
         m_nbLagTime(0.01),
         m_nbThreshold(30),
+        m_nb2SlewTime(0.01),
+        m_nb2LeadTime(0.01),
+        m_nb2LagTime(0.01),
+        m_nb2Threshold(30),
         m_dnr(false),
         m_snb(false),
         m_anf(false),
@@ -152,6 +160,10 @@ struct WDSPRxSettings
     double m_nbLeadTime;
     double m_nbLagTime;
     int m_nbThreshold;
+    double m_nb2SlewTime;
+    double m_nb2LeadTime;
+    double m_nb2LagTime;
+    int m_nb2Threshold;
     // Noise reduction
     bool m_dnr;
     bool m_snb;

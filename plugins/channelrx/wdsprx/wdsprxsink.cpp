@@ -30,6 +30,12 @@
 #include "meter.hpp"
 #include "patchpanel.hpp"
 #include "wcpAGC.hpp"
+#include "anr.hpp"
+#include "emnr.hpp"
+#include "snb.hpp"
+#include "anf.hpp"
+#include "anb.hpp"
+#include "nob.hpp"
 
 #include "wdsprxsink.h"
 
@@ -97,7 +103,6 @@ WDSPRxSink::WDSPRxSink() :
         m_audioSampleRate(48000)
 {
 	m_Bandwidth = 5000;
-	m_volume = 2.0;
 	m_channelSampleRate = 48000;
 	m_channelFrequencyOffset = 0;
 
@@ -195,18 +200,18 @@ void WDSPRxSink::processOneSample(Complex &ci)
                 const double& ci = m_rxa->get_outbuff()[2*i];
                 qint16 zr = cr * 32768.0;
                 qint16 zi = ci * 32768.0;
-                m_audioBuffer[m_audioBufferFill].r = zr * m_volume;
-                m_audioBuffer[m_audioBufferFill].l = zi * m_volume;
+                m_audioBuffer[m_audioBufferFill].r = zr;
+                m_audioBuffer[m_audioBufferFill].l = zi;
 
                 if (m_settings.m_audioBinaural)
                 {
-                    m_demodBuffer[m_demodBufferFill++] = zr * m_volume;
-                    m_demodBuffer[m_demodBufferFill++] = zi * m_volume;
+                    m_demodBuffer[m_demodBufferFill++] = zr;
+                    m_demodBuffer[m_demodBufferFill++] = zi;
                 }
                 else
                 {
                     Real demod = (zr + zi) * 0.7;
-                    qint16 sample = (qint16)(demod * m_volume);
+                    qint16 sample = (qint16)(demod);
                     m_demodBuffer[m_demodBufferFill++] = sample;
                 }
 
@@ -346,6 +351,8 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
+    // Filter
+
     if((m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff != settings.m_profiles[settings.m_profileIndex].m_highCutoff) ||
         (m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff != settings.m_profiles[settings.m_profileIndex].m_lowCutoff) ||
         (m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow != settings.m_profiles[settings.m_profileIndex].m_fftWindow) ||
@@ -413,13 +420,176 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         m_spectrumProbe.setSpanLog2(settings.m_profiles[settings.m_profileIndex].m_spanLog2);
     }
 
+    // Noise Reduction
+
+    if ((m_settings.m_dnr != settings.m_dnr)
+    || (m_settings.m_nrScheme != settings.m_nrScheme) || force)
+    {
+        WDSP::ANR::SetANRRun(*m_rxa, 0);
+        WDSP::EMNR::SetEMNRRun(*m_rxa, 0);
+
+        if (settings.m_dnr)
+        {
+            switch (settings.m_nrScheme)
+            {
+            case WDSPRxProfile::NRSchemeNR:
+                WDSP::ANR::SetANRRun(*m_rxa, 1);
+                break;
+            case WDSPRxProfile::NRSchemeNR2:
+                WDSP::EMNR::SetEMNRRun(*m_rxa, 1);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if ((m_settings.m_nrPosition != settings.m_nrPosition) || force)
+    {
+        switch (settings.m_nrPosition)
+        {
+        case WDSPRxProfile::NRPositionPreAGC:
+            WDSP::ANR::SetANRPosition(*m_rxa, 0);
+            WDSP::EMNR::SetEMNRPosition(*m_rxa, 0);
+            break;
+        case WDSPRxProfile::NRPositionPostAGC:
+            WDSP::ANR::SetANRPosition(*m_rxa, 1);
+            WDSP::EMNR::SetEMNRPosition(*m_rxa, 1);
+            break;
+        default:
+            break;
+        }
+    }
+
+    if ((m_settings.m_nr2Gain != settings.m_nr2Gain) || force)
+    {
+        switch (settings.m_nr2Gain)
+        {
+        case WDSPRxProfile::NR2GainLinear:
+            WDSP::EMNR::SetEMNRgainMethod(*m_rxa, 0);
+            break;
+        case WDSPRxProfile::NR2GainLog:
+            WDSP::EMNR::SetEMNRgainMethod(*m_rxa, 1);
+            break;
+        case WDSPRxProfile::NR2GainGamma:
+            WDSP::EMNR::SetEMNRgainMethod(*m_rxa, 2);
+            break;
+        default:
+            break;
+        }
+    }
+
+    if ((m_settings.m_nr2NPE != settings.m_nr2NPE) || force)
+    {
+        switch (settings.m_nr2NPE)
+        {
+        case WDSPRxProfile::NR2NPEOSMS:
+            WDSP::EMNR::SetEMNRnpeMethod(*m_rxa, 0);
+            break;
+        case WDSPRxProfile::NR2NPEMMSE:
+            WDSP::EMNR::SetEMNRnpeMethod(*m_rxa, 1);
+            break;
+        default:
+            break;
+        }
+    }
+
+    if ((m_settings.m_nr2ArtifactReduction != settings.m_nr2ArtifactReduction) || force) {
+        WDSP::EMNR::SetEMNRaeRun(*m_rxa, settings.m_nr2ArtifactReduction ? 1 : 0);
+    }
+
+    if ((m_settings.m_snb != settings.m_snb) || force) {
+        WDSP::SNBA::SetSNBARun(*m_rxa, settings.m_snb ? 1 : 0);
+    }
+
+    if ((m_settings.m_anf != settings.m_anf) || force) {
+        WDSP::ANF::SetANFRun(*m_rxa, settings.m_anf ? 1 : 0);
+    }
+
+    // Noise Blanker
+
+    if ((m_settings.m_dnb != settings.m_dnb)
+    || (m_settings.m_nbScheme != settings.m_nbScheme) || force)
+    {
+        WDSP::ANB::SetANBRun(*m_rxa, 0);
+        WDSP::NOB::SetNOBRun(*m_rxa, 0);
+
+        if (settings.m_dnb)
+        {
+            switch(settings.m_nbScheme)
+            {
+            case WDSPRxProfile::NBSchemeNB:
+                WDSP::ANB::SetANBRun(*m_rxa, 1);
+                break;
+            case WDSPRxProfile::NBSchemeNB2:
+                WDSP::NOB::SetNOBRun(*m_rxa, 1);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if ((m_settings.m_nbSlewTime != settings.m_nbSlewTime) || force) {
+        WDSP::ANB::SetANBTau(*m_rxa, settings.m_nbSlewTime);
+    }
+
+    if ((m_settings.m_nbLeadTime != settings.m_nbLeadTime) || force) {
+        WDSP::ANB::SetANBAdvtime(*m_rxa, settings.m_nbLeadTime);
+    }
+
+    if ((m_settings.m_nbLagTime != settings.m_nbLagTime) || force) {
+        WDSP::ANB::SetANBHangtime(*m_rxa, settings.m_nbLagTime);
+    }
+
+    if ((m_settings.m_nbThreshold != settings.m_nbThreshold) || force) {
+        WDSP::ANB::SetANBThreshold(*m_rxa, settings.m_nbThreshold);
+    }
+
+    if ((m_settings.m_nb2SlewTime != settings.m_nb2SlewTime) || force) {
+        WDSP::NOB::SetNOBTau(*m_rxa, settings.m_nb2SlewTime);
+    }
+
+    if ((m_settings.m_nb2LeadTime != settings.m_nb2LeadTime) || force) {
+        WDSP::NOB::SetNOBAdvtime(*m_rxa, settings.m_nb2LeadTime);
+    }
+
+    if ((m_settings.m_nb2LagTime != settings.m_nb2LagTime) || force) {
+        WDSP::NOB::SetNOBHangtime(*m_rxa, settings.m_nb2LagTime);
+    }
+
+    if ((m_settings.m_nb2Threshold != settings.m_nb2Threshold) || force) {
+        WDSP::NOB::SetNOBThreshold(*m_rxa, settings.m_nb2Threshold);
+    }
+
+    // Audio panel
+
+    if ((m_settings.m_volume != settings.m_volume) || force) {
+        WDSP::PANEL::SetPanelGain1(*m_rxa, settings.m_volume);
+    }
+
+    // if ((m_settings.m_volume != settings.m_volume) || force)
+    // {
+    //     m_volume = settings.m_volume;
+    //     m_volume /= 4.0; // for 3276.8
+    // }
+
+    if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
+        WDSP::PANEL::SetPanelBinaural(*m_rxa, settings.m_audioBinaural ? 1 : 0);
+    }
+
+    if ((m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force) {
+        WDSP::PANEL::SetPanelCopy(*m_rxa, settings.m_audioFlipChannels ? 3 : 0);
+    }
+
+    // AGC
+
     if ((m_settings.m_agc != settings.m_agc)
     || (m_settings.m_agcMode != settings.m_agcMode)
     || (m_settings.m_agcSlope != settings.m_agcSlope)
     || (m_settings.m_agcHangThreshold != settings.m_agcHangThreshold)
     || (m_settings.m_agcGain != settings.m_agcGain) || force)
     {
-        WDSP::WCPAGC::SetAGCMode(*m_rxa, settings.m_agc ? (int) settings.m_agcMode + 1 : 0);  // SetRXAAGCMode(id, agc);
         WDSP::WCPAGC::SetAGCSlope(*m_rxa, settings.m_agcSlope); // SetRXAAGCSlope(id, rx->agc_slope);
         WDSP::WCPAGC::SetAGCTop(*m_rxa, (float) settings.m_agcGain); // SetRXAAGCTop(id, rx->agc_gain);
 
@@ -428,51 +598,39 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             switch (settings.m_agcMode)
             {
             case WDSPRxProfile::WDSPRxAGCMode::AGCLong:
+                WDSP::WCPAGC::SetAGCMode(*m_rxa, 1);
                 WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
                 WDSP::WCPAGC::SetAGCHang(*m_rxa, 2000);  // SetRXAAGCHang(id, 2000);
                 WDSP::WCPAGC::SetAGCDecay(*m_rxa, 2000); // SetRXAAGCDecay(id, 2000);
                 WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
                 break;
             case WDSPRxProfile::WDSPRxAGCMode::AGCSlow:
+                WDSP::WCPAGC::SetAGCMode(*m_rxa, 2);
                 WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
                 WDSP::WCPAGC::SetAGCHang(*m_rxa, 1000);  // SetRXAAGCHang(id, 1000);
                 WDSP::WCPAGC::SetAGCDecay(*m_rxa, 500);  // SetRXAAGCDecay(id, 500);
                 WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
                 break;
             case WDSPRxProfile::WDSPRxAGCMode::AGCMedium:
+                WDSP::WCPAGC::SetAGCMode(*m_rxa, 3);
                 WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
                 WDSP::WCPAGC::SetAGCHang(*m_rxa, 0);     // SetRXAAGCHang(id, 0);
                 WDSP::WCPAGC::SetAGCDecay(*m_rxa, 250);  // SetRXAAGCDecay(id, 250);
                 WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, 100);
                 break;
             case WDSPRxProfile::WDSPRxAGCMode::AGCFast:
+                WDSP::WCPAGC::SetAGCMode(*m_rxa, 4);
                 WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
                 WDSP::WCPAGC::SetAGCHang(*m_rxa, 0);     // SetRXAAGCHang(id, 0);
                 WDSP::WCPAGC::SetAGCDecay(*m_rxa, 50);   // SetRXAAGCDecay(id, 50);
                 WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, 100);
                 break;
             }
-
-            WDSP::WCPAGC::SetAGCFixed(*m_rxa, 60.0f); // default
         }
         else
         {
-            WDSP::WCPAGC::SetAGCFixed(*m_rxa, (float) settings.m_agcGain);
+            WDSP::WCPAGC::SetAGCMode(*m_rxa, 0);
         }
-    }
-
-    if ((m_settings.m_volume != settings.m_volume) || force)
-    {
-        m_volume = settings.m_volume;
-        m_volume /= 4.0; // for 3276.8
-    }
-
-    if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
-        WDSP::PANEL::SetPanelBinaural(*m_rxa, settings.m_audioBinaural ? 1 : 0);
-    }
-
-    if ((m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force) {
-        WDSP::PANEL::SetPanelCopy(*m_rxa, settings.m_audioFlipChannels ? 3 : 0);
     }
 
     m_settings = settings;

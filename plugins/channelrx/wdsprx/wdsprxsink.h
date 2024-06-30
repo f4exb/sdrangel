@@ -89,7 +89,6 @@ private:
     ChannelAPI *m_channel;
 
 	Real m_Bandwidth;
-	Real m_volume;
 	int m_undersampleCount;
 	int m_channelSampleRate;
 	int m_channelFrequencyOffset;

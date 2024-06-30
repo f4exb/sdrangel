@@ -519,7 +519,7 @@ void NOB::setSize_nob (NOB *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void NOB::SetRXANOBRun (RXA& rxa, int run)
+void NOB::SetNOBRun (RXA& rxa, int run)
 {
     NOB *a = rxa.nob.p;
     a->cs_update.lock();
@@ -527,7 +527,7 @@ void NOB::SetRXANOBRun (RXA& rxa, int run)
     a->cs_update.unlock();
 }
 
-void NOB::SetRXANOBMode (RXA& rxa, int mode)
+void NOB::SetNOBMode (RXA& rxa, int mode)
 {
     NOB *a = rxa.nob.p;
     a->cs_update.lock();
@@ -535,7 +535,7 @@ void NOB::SetRXANOBMode (RXA& rxa, int mode)
     a->cs_update.unlock();
 }
 
-void NOB::SetRXANOBBuffsize (RXA& rxa, int size)
+void NOB::SetNOBBuffsize (RXA& rxa, int size)
 {
     NOB *a = rxa.nob.p;
     a->cs_update.lock();
@@ -543,7 +543,7 @@ void NOB::SetRXANOBBuffsize (RXA& rxa, int size)
     a->cs_update.unlock();
 }
 
-void NOB::SetRXANOBSamplerate (RXA& rxa, int rate)
+void NOB::SetNOBSamplerate (RXA& rxa, int rate)
 {
     NOB *a = rxa.nob.p;
     a->cs_update.lock();
@@ -552,7 +552,7 @@ void NOB::SetRXANOBSamplerate (RXA& rxa, int rate)
     a->cs_update.unlock();
 }
 
-void NOB::SetRXANOBTau (RXA& rxa, double tau)
+void NOB::SetNOBTau (RXA& rxa, double tau)
 {
     NOB *a = rxa.nob.p;
     a->cs_update.lock();
@@ -562,7 +562,7 @@ void NOB::SetRXANOBTau (RXA& rxa, double tau)
     a->cs_update.unlock();
 }
 
-void NOB::SetRXANOBHangtime (RXA& rxa, double time)
+void NOB::SetNOBHangtime (RXA& rxa, double time)
 {
     NOB *a = rxa.nob.p;
     a->cs_update.lock();
@@ -571,7 +571,7 @@ void NOB::SetRXANOBHangtime (RXA& rxa, double time)
     a->cs_update.unlock();
 }
 
-void NOB::SetRXANOBAdvtime (RXA& rxa, double time)
+void NOB::SetNOBAdvtime (RXA& rxa, double time)
 {
     NOB *a = rxa.nob.p;
     a->cs_update.lock();
@@ -580,7 +580,7 @@ void NOB::SetRXANOBAdvtime (RXA& rxa, double time)
     a->cs_update.unlock();
 }
 
-void NOB::SetRXANOBBacktau (RXA& rxa, double tau)
+void NOB::SetNOBBacktau (RXA& rxa, double tau)
 {
     NOB *a = rxa.nob.p;
     a->cs_update.lock();
@@ -589,7 +589,7 @@ void NOB::SetRXANOBBacktau (RXA& rxa, double tau)
     a->cs_update.unlock();
 }
 
-void NOB::SetRXANOBThreshold (RXA& rxa, double thresh)
+void NOB::SetNOBThreshold (RXA& rxa, double thresh)
 {
     NOB *a = rxa.nob.p;
     a->cs_update.lock();

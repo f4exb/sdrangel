@@ -787,8 +787,13 @@ void WDSPRxGUI::dnbSetupDialog(const QPoint& p)
     m_dnbDialog->setNBScheme(m_settings.m_nbScheme);
     m_dnbDialog->setNB2Mode(m_settings.m_nb2Mode);
     m_dnbDialog->setNBSlewTime(m_settings.m_nbSlewTime);
-    m_dnbDialog->setNBLeadTime(m_settings.m_nbLagTime);
+    m_dnbDialog->setNBLeadTime(m_settings.m_nbLeadTime);
+    m_dnbDialog->setNBLagTime(m_settings.m_nbLagTime);
     m_dnbDialog->setNBThreshold(m_settings.m_nbThreshold);
+    m_dnbDialog->setNB2SlewTime(m_settings.m_nb2SlewTime);
+    m_dnbDialog->setNB2LeadTime(m_settings.m_nb2LeadTime);
+    m_dnbDialog->setNB2LagTime(m_settings.m_nb2LagTime);
+    m_dnbDialog->setNB2Threshold(m_settings.m_nb2Threshold);
     QObject::connect(m_dnbDialog, &WDSPRxDNBDialog::valueChanged, this, &WDSPRxGUI::dnbSetup);
     m_dnbDialog->exec();
     QObject::disconnect(m_dnbDialog, &WDSPRxDNBDialog::valueChanged, this, &WDSPRxGUI::dnbSetup);
@@ -834,6 +839,26 @@ void WDSPRxGUI::dnbSetup(int32_t iValueChanged)
     case WDSPRxDNBDialog::ValueChanged::ChangedNBThreshold:
         m_settings.m_nbThreshold = m_dnbDialog->getNBThreshold();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nbThreshold = m_settings.m_nbThreshold;
+        applySettings();
+        break;
+    case WDSPRxDNBDialog::ValueChanged::ChangedNB2SlewTime:
+        m_settings.m_nb2SlewTime = m_dnbDialog->getNB2SlewTime();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nb2SlewTime = m_settings.m_nb2SlewTime;
+        applySettings();
+        break;
+    case WDSPRxDNBDialog::ValueChanged::ChangedNB2LeadTime:
+        m_settings.m_nb2LeadTime = m_dnbDialog->getNB2LeadTime();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nb2LeadTime = m_settings.m_nb2LeadTime;
+        applySettings();
+        break;
+    case WDSPRxDNBDialog::ValueChanged::ChangedNB2LagTime:
+        m_settings.m_nb2LagTime = m_dnbDialog->getNB2LagTime();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nb2LagTime = m_settings.m_nb2LagTime;
+        applySettings();
+        break;
+    case WDSPRxDNBDialog::ValueChanged::ChangedNB2Threshold:
+        m_settings.m_nb2Threshold = m_dnbDialog->getNB2Threshold();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nb2Threshold = m_settings.m_nb2Threshold;
         applySettings();
         break;
     default:
