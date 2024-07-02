@@ -916,7 +916,7 @@ void RXA::SetMode (RXA& rxa, int mode)
         rxa.mode = mode;
         rxa.amd.p->run  = 0;
         rxa.fmd.p->run  = 0;
-        rxa.agc.p->run  = 1;
+
         switch (mode)
         {
         case RXA_AM:
@@ -937,6 +937,7 @@ void RXA::SetMode (RXA& rxa, int mode)
 
             break;
         }
+
         bp1Set (rxa);
         bpsnbaSet (rxa);                         // update variables
         rxa.csDSP.unlock();

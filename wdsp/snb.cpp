@@ -640,13 +640,13 @@ void SNBA::SetSNBARun (RXA& rxa, int run)
     SNBA *a = rxa.snba.p;
     if (a->run != run)
     {
-        BPSNBA::bpsnbaCheck (rxa, rxa.mode, rxa.ndb.p->master_run);
+        RXA::bpsnbaCheck (rxa, rxa.mode, rxa.ndb.p->master_run);
         RXA::bp1Check (rxa, rxa.amd.p->run, run, rxa.emnr.p->run,
             rxa.anf.p->run, rxa.anr.p->run);
         rxa.csDSP.lock();
         a->run = run;
         RXA::bp1Set (rxa);
-        BPSNBA::bpsnbaSet (rxa);
+        RXA::bpsnbaSet (rxa);
         rxa.csDSP.unlock();
     }
 }

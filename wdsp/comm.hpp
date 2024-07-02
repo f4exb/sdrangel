@@ -77,6 +77,7 @@ warren@wpratt.com
 namespace WDSP {
 // miscellaneous
 typedef float wcomplex[2];
+typedef double dcomplex[2];
 }
 
 #include <string.h>

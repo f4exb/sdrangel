@@ -28,6 +28,10 @@ if(NOT SERVER_MODE)
         ${wdsprx_SOURCES}
         wdsprxagcdialog.cpp
         wdsprxagcdialog.ui
+        wdsprxamdialog.cpp
+        wdsprxamdialog.ui
+        wdsprxcwpeakdialog.cpp
+        wdsprxcwpeakdialog.ui
         wdsprxdnbdialog.cpp
         wdsprxdnbdialog.ui
         wdsprxdnrdialog.cpp
@@ -39,6 +43,8 @@ if(NOT SERVER_MODE)
         ${wdsprx_HEADERS}
         wdsprxgui.h
         wdsprxagcdialog.h
+        wdsprxamdialog.h
+        wdsprxcwpeakdialog.h
         wdsprxdnbdialog.h
         wdsprxdnrdialog.h
     )

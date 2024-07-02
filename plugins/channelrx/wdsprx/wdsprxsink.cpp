@@ -36,6 +36,8 @@
 #include "anf.hpp"
 #include "anb.hpp"
 #include "nob.hpp"
+#include "amd.hpp"
+#include "iir.cpp"
 
 #include "wdsprxsink.h"
 
@@ -326,6 +328,7 @@ void WDSPRxSink::applyAudioSampleRate(int sampleRate)
 void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 {
     qDebug() << "WDSPRxSink::applySettings:"
+            << " m_demod: " << settings.m_demod
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_profileIndex: " << settings.m_profileIndex
             << " m_spanLog2: " << settings.m_profiles[settings.m_profileIndex].m_spanLog2
@@ -337,12 +340,18 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_audioFlipChannels: " << settings.m_audioFlipChannels
             << " m_dsb: " << settings.m_dsb
             << " m_audioMute: " << settings.m_audioMute
-            << " m_agcActive: " << settings.m_agc
+            << " m_agc: " << settings.m_agc
             << " m_agcMode: " << settings.m_agcMode
             << " m_agcGain: " << settings.m_agcGain
             << " m_agcSlope: " << settings.m_agcSlope
             << " m_agcHangThreshold: " << settings.m_agcHangThreshold
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_dnr: " << settings.m_dnr
+            << " m_nrScheme: " << settings.m_nrScheme
+            << " m_nrPosition: "<< settings.m_nrPosition
+            << " m_nr2Gain: " << settings.m_nr2Gain
+            << " m_nr2NPE: " << settings.m_nr2NPE
+            << " m_nr2ArtifactReduction: " << settings.m_nr2ArtifactReduction
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -351,14 +360,16 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
-    // Filter
+    // Filter and mode
 
     if((m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff != settings.m_profiles[settings.m_profileIndex].m_highCutoff) ||
         (m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff != settings.m_profiles[settings.m_profileIndex].m_lowCutoff) ||
         (m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow != settings.m_profiles[settings.m_profileIndex].m_fftWindow) ||
+        (m_settings.m_demod != settings.m_demod) ||
         (m_settings.m_dsb != settings.m_dsb) || force)
     {
         float band, low, high, fLow, fHigh;
+        bool usb, dsb;
 
         band = settings.m_profiles[settings.m_profileIndex].m_highCutoff;
         high = band;
@@ -368,10 +379,12 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         {
             band = -band;
             m_spectrumProbe.setUSB(false);
+            usb = false;
         }
         else
         {
             m_spectrumProbe.setUSB(true);
+            usb = true;
         }
 
         m_Bandwidth = band;
@@ -383,12 +396,14 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
                 fLow = high;
                 fHigh = -high;
                 m_spectrumProbe.setDSB(true);
+                dsb = true;
             }
             else
             {
                 fLow = high;
                 fHigh = low;
                 m_spectrumProbe.setDSB(false);
+                dsb = false;
             }
         }
         else
@@ -398,12 +413,14 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
                 fLow = -high;
                 fHigh = high;
                 m_spectrumProbe.setDSB(true);
+                dsb = true;
             }
             else
             {
                 fLow = low;
                 fHigh = high;
                 m_spectrumProbe.setDSB(false);
+                dsb = false;
             }
         }
 
@@ -414,6 +431,34 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
         WDSP::RXA::SetPassband(*m_rxa, fLow, fHigh);
         WDSP::NBP::NBPSetWindow(*m_rxa, m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow);
+
+        if (settings.m_demod == WDSPRxProfile::DemodSSB)
+        {
+            if (dsb)
+            {
+                WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_DSB);
+            }
+            else
+            {
+                if (usb) {
+                    WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_USB);
+                } else {
+                    WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_LSB);
+                }
+            }
+        }
+        else if (settings.m_demod == WDSPRxProfile::DemodAM)
+        {
+            WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_AM);
+        }
+        else if (settings.m_demod == WDSPRxProfile::DemodSAM)
+        {
+            WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_SAM);
+        }
+        else if (settings.m_demod == WDSPRxProfile::DemodFMN)
+        {
+            WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_FM);
+        }
     }
 
     if ((m_settings.m_profiles[settings.m_profileIndex].m_spanLog2 != settings.m_profiles[settings.m_profileIndex].m_spanLog2) || force) {
@@ -498,12 +543,31 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         WDSP::EMNR::SetEMNRaeRun(*m_rxa, settings.m_nr2ArtifactReduction ? 1 : 0);
     }
 
-    if ((m_settings.m_snb != settings.m_snb) || force) {
-        WDSP::SNBA::SetSNBARun(*m_rxa, settings.m_snb ? 1 : 0);
-    }
-
     if ((m_settings.m_anf != settings.m_anf) || force) {
         WDSP::ANF::SetANFRun(*m_rxa, settings.m_anf ? 1 : 0);
+    }
+
+    // Causes corruption
+    // if ((m_settings.m_snb != settings.m_snb) || force) {
+    //     WDSP::SNBA::SetSNBARun(*m_rxa, settings.m_snb ? 1 : 0);
+    // }
+
+    // CW Peaking
+
+    if ((m_settings.m_cwPeaking != settings.m_cwPeaking) || force) {
+        WDSP::SPEAK::SetSPCWRun(*m_rxa, settings.m_cwPeaking ? 1 : 0);
+    }
+
+    if ((m_settings.m_cwPeakFrequency != settings.m_cwPeakFrequency) || force) {
+        WDSP::SPEAK::SetSPCWFreq(*m_rxa, settings.m_cwPeakFrequency);
+    }
+
+    if ((m_settings.m_cwBandwidth != settings.m_cwBandwidth) || force) {
+        WDSP::SPEAK::SetSPCWBandwidth(*m_rxa, settings.m_cwBandwidth);
+    }
+
+    if ((m_settings.m_cwGain != settings.m_cwGain) || force) {
+        WDSP::SPEAK::SetSPCWGain(*m_rxa, settings.m_cwGain);
     }
 
     // Noise Blanker
@@ -530,36 +594,40 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_nbSlewTime != settings.m_nbSlewTime) || force) {
-        WDSP::ANB::SetANBTau(*m_rxa, settings.m_nbSlewTime);
+    if ((m_settings.m_nbSlewTime != settings.m_nbSlewTime) || force)
+    {
+        WDSP::ANB::SetANBTau(*m_rxa, settings.m_nbSlewTime * 0.001);
+        WDSP::NOB::SetNOBTau(*m_rxa, settings.m_nbSlewTime * 0.001);
     }
 
-    if ((m_settings.m_nbLeadTime != settings.m_nbLeadTime) || force) {
-        WDSP::ANB::SetANBAdvtime(*m_rxa, settings.m_nbLeadTime);
+    if ((m_settings.m_nbLeadTime != settings.m_nbLeadTime) || force)
+    {
+        WDSP::ANB::SetANBAdvtime(*m_rxa, settings.m_nbLeadTime * 0.001);
+        WDSP::NOB::SetNOBAdvtime(*m_rxa, settings.m_nbLeadTime * 0.001);
     }
 
-    if ((m_settings.m_nbLagTime != settings.m_nbLagTime) || force) {
-        WDSP::ANB::SetANBHangtime(*m_rxa, settings.m_nbLagTime);
+    if ((m_settings.m_nbLagTime != settings.m_nbLagTime) || force)
+    {
+        WDSP::ANB::SetANBHangtime(*m_rxa, settings.m_nbLagTime * 0.001);
+        WDSP::NOB::SetNOBHangtime(*m_rxa, settings.m_nbLagTime * 0.001);
     }
 
-    if ((m_settings.m_nbThreshold != settings.m_nbThreshold) || force) {
+    if ((m_settings.m_nbThreshold != settings.m_nbThreshold) || force)
+    {
         WDSP::ANB::SetANBThreshold(*m_rxa, settings.m_nbThreshold);
+        WDSP::NOB::SetNOBThreshold(*m_rxa, settings.m_nbThreshold);
     }
 
-    if ((m_settings.m_nb2SlewTime != settings.m_nb2SlewTime) || force) {
-        WDSP::NOB::SetNOBTau(*m_rxa, settings.m_nb2SlewTime);
+    if ((m_settings.m_nbAvgTime != settings.m_nbAvgTime) || force)
+    {
+        WDSP::ANB::SetANBBacktau(*m_rxa, settings.m_nbAvgTime * 0.001);
+        WDSP::NOB::SetNOBBacktau(*m_rxa, settings.m_nbAvgTime * 0.001);
     }
 
-    if ((m_settings.m_nb2LeadTime != settings.m_nb2LeadTime) || force) {
-        WDSP::NOB::SetNOBAdvtime(*m_rxa, settings.m_nb2LeadTime);
-    }
+    // AM option
 
-    if ((m_settings.m_nb2LagTime != settings.m_nb2LagTime) || force) {
-        WDSP::NOB::SetNOBHangtime(*m_rxa, settings.m_nb2LagTime);
-    }
-
-    if ((m_settings.m_nb2Threshold != settings.m_nb2Threshold) || force) {
-        WDSP::NOB::SetNOBThreshold(*m_rxa, settings.m_nb2Threshold);
+    if ((m_settings.m_amFadeLevel != settings.m_amFadeLevel) || force) {
+        WDSP::AMD::SetAMDFadeLevel(*m_rxa, settings.m_amFadeLevel);
     }
 
     // Audio panel

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>414</width>
+    <width>452</width>
     <height>179</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>414</width>
+    <width>452</width>
     <height>0</height>
    </size>
   </property>
@@ -36,13 +36,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>412</width>
+     <width>450</width>
      <height>181</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>412</width>
+     <width>450</width>
      <height>0</height>
     </size>
    </property>
@@ -753,6 +753,39 @@
     <item>
      <layout class="QHBoxLayout" name="volumeLayout">
       <item>
+       <widget class="QComboBox" name="demod">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Modulation  (right click for options)</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>SSB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>AM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>SAM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>FM</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="volumeLabel">
         <property name="text">
          <string>Vol</string>
@@ -810,7 +843,7 @@
       <item>
        <widget class="ButtonSwitch" name="agc">
         <property name="toolTip">
-         <string>Toggle AGC</string>
+         <string>Toggle AGC  (right click for options)</string>
         </property>
         <property name="text">
          <string>AGC</string>
@@ -867,7 +900,7 @@
       <item>
        <widget class="ButtonSwitch" name="dnr">
         <property name="toolTip">
-         <string>Toggle Digital Noise Reduction</string>
+         <string>Toggle Digital Noise Reduction  (right click for options)</string>
         </property>
         <property name="text">
          <string>NR</string>
@@ -880,10 +913,23 @@
       <item>
        <widget class="ButtonSwitch" name="dnb">
         <property name="toolTip">
-         <string>Toggle Digital Noise Blanker</string>
+         <string>Toggle Digital Noise Blanker  (right click for options)</string>
         </property>
         <property name="text">
          <string>NB</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="cwPeaking">
+        <property name="toolTip">
+         <string>Toggle CW peaking filter (right click for options)</string>
+        </property>
+        <property name="text">
+         <string>CW</string>
         </property>
         <property name="checkable">
          <bool>true</bool>

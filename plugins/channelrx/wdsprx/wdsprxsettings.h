@@ -28,6 +28,13 @@ class Serializable;
 
 struct WDSPRxProfile
 {
+    enum WDSPRxDemod
+    {
+        DemodSSB,
+        DemodAM,
+        DemodSAM,
+        DemodFMN,
+    };
     enum WDSPRxAGCMode
     {
         AGCLong,
@@ -42,8 +49,8 @@ struct WDSPRxProfile
     };
     enum WDSPRxNBScheme
     {
-        NBSchemeNB,
-        NBSchemeNB2,
+        NBSchemeNB,     //!< Preemptive Wideband Blanker (ANB)
+        NBSchemeNB2,    //!< Interpolating Wideband Blanker (NOB)
     };
     enum WDSPRxNR2Gain
     {
@@ -70,6 +77,7 @@ struct WDSPRxProfile
         NB2ModeInterpolate,
     };
 
+    WDSPRxDemod m_demod;
     // Filter
     int   m_spanLog2;
     Real  m_highCutoff;
@@ -85,14 +93,11 @@ struct WDSPRxProfile
     bool m_dnb;
     WDSPRxNBScheme m_nbScheme;
     WDSPRxNB2Mode m_nb2Mode;
-    double m_nbSlewTime; // a.k.a tau
-    double m_nbLeadTime;
-    double m_nbLagTime;
+    double m_nbSlewTime;  // a.k.a tau
+    double m_nbLeadTime;  // a.k.a adv time
+    double m_nbLagTime;   // a.k.a hang time
     int m_nbThreshold;
-    double m_nb2SlewTime; // a.k.a tau
-    double m_nb2LeadTime;
-    double m_nb2LagTime;
-    int m_nb2Threshold;
+    double m_nbAvgTime;   // a.k.a back tau
     // Noise rediction
     bool m_dnr;
     bool m_snb;
@@ -102,8 +107,15 @@ struct WDSPRxProfile
     WDSPRxNR2NPE m_nr2NPE;
     WDSPRxNRPosition m_nrPosition;
     bool m_nr2ArtifactReduction;
+    // Demods
+    bool m_amFadeLevel;
+    bool m_cwPeaking;
+    double m_cwPeakFrequency;
+    double m_cwBandwidth;
+    double m_cwGain;
 
     WDSPRxProfile() :
+        m_demod(DemodSSB),
         m_spanLog2(3),
         m_highCutoff(3000),
         m_lowCutoff(300),
@@ -116,14 +128,11 @@ struct WDSPRxProfile
         m_dnb(false),
         m_nbScheme(NBSchemeNB),
         m_nb2Mode(NB2ModeZero),
-        m_nbSlewTime(0.01),
-        m_nbLeadTime(0.01),
-        m_nbLagTime(0.01),
+        m_nbSlewTime(0.1),
+        m_nbLeadTime(0.1),
+        m_nbLagTime(0.1),
         m_nbThreshold(30),
-        m_nb2SlewTime(0.01),
-        m_nb2LeadTime(0.01),
-        m_nb2LagTime(0.01),
-        m_nb2Threshold(30),
+        m_nbAvgTime(50.0),
         m_dnr(false),
         m_snb(false),
         m_anf(false),
@@ -131,12 +140,18 @@ struct WDSPRxProfile
         m_nr2Gain(NR2GainGamma),
         m_nr2NPE(NR2NPEOSMS),
         m_nrPosition(NRPositionPreAGC),
-        m_nr2ArtifactReduction(true)
+        m_nr2ArtifactReduction(true),
+        m_amFadeLevel(false),
+        m_cwPeaking(false),
+        m_cwPeakFrequency(600.0),
+        m_cwBandwidth(100.0),
+        m_cwGain(2.0)
     {}
 };
 
 struct WDSPRxSettings
 {
+    WDSPRxProfile::WDSPRxDemod m_demod;
     qint32 m_inputFrequencyOffset;
     // Real m_highCutoff;
     // Real m_lowCutoff;
@@ -160,10 +175,7 @@ struct WDSPRxSettings
     double m_nbLeadTime;
     double m_nbLagTime;
     int m_nbThreshold;
-    double m_nb2SlewTime;
-    double m_nb2LeadTime;
-    double m_nb2LagTime;
-    int m_nb2Threshold;
+    double m_nbAvgTime;
     // Noise reduction
     bool m_dnr;
     bool m_snb;
@@ -173,6 +185,12 @@ struct WDSPRxSettings
     WDSPRxProfile::WDSPRxNR2NPE m_nr2NPE;
     WDSPRxProfile::WDSPRxNRPosition m_nrPosition;
     bool m_nr2ArtifactReduction;
+    // Demods
+    bool m_amFadeLevel;
+    bool m_cwPeaking;
+    double m_cwPeakFrequency;
+    double m_cwBandwidth;
+    double m_cwGain;
 
     quint32 m_rgbColor;
     QString m_title;

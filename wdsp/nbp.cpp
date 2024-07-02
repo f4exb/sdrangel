@@ -571,12 +571,12 @@ void NBP::NBPSetNotchesRun (RXA& rxa, int run)
     {
         a->master_run = run;                            // update variables
         b->fnfrun = a->master_run;
-        BPSNBA::bpsnbaCheck (rxa, rxa.mode, run);
+        RXA::bpsnbaCheck (rxa, rxa.mode, run);
         calc_nbp_impulse (b);                           // recalc nbp impulse response
         FIRCORE::setImpulse_fircore (b->p, b->impulse, 0);       // calculate new filter masks
         delete[] (b->impulse);
         rxa.csDSP.lock();      // block DSP channel processing
-        BPSNBA::bpsnbaSet (rxa);
+        RXA::bpsnbaSet (rxa);
         FIRCORE::setUpdate_fircore (b->p);                       // apply new filter masks
         rxa.csDSP.unlock();      // unblock channel processing
     }

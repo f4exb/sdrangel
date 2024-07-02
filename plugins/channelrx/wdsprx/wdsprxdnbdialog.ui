@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>510</width>
-    <height>271</height>
+    <width>445</width>
+    <height>234</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,28 +54,6 @@
    </item>
    <item>
     <layout class="QGridLayout" name="nbLayout">
-     <item row="3" column="1">
-      <widget class="QDoubleSpinBox" name="nb2SlewTime">
-       <property name="toolTip">
-        <string>Noise blanking slew time (ms)</string>
-       </property>
-       <property name="decimals">
-        <number>4</number>
-       </property>
-       <property name="maximum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.000100000000000</double>
-       </property>
-       <property name="stepType">
-        <enum>QAbstractSpinBox::DefaultStepType</enum>
-       </property>
-       <property name="value">
-        <double>0.010000000000000</double>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="nb2ModeLabel">
        <property name="text">
@@ -118,14 +96,14 @@
      <item row="1" column="2">
       <widget class="QLabel" name="nbLeadTimeLabel">
        <property name="text">
-        <string>NB Lead time (ms)</string>
+        <string>Lead time (ms)</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="nbSlewTimeLabel">
        <property name="text">
-        <string>NB Slew time (ms)</string>
+        <string>Slew time (ms)</string>
        </property>
       </widget>
      </item>
@@ -138,7 +116,7 @@
         <number>4</number>
        </property>
        <property name="maximum">
-        <double>1.000000000000000</double>
+        <double>2.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.000100000000000</double>
@@ -147,21 +125,21 @@
         <enum>QAbstractSpinBox::DefaultStepType</enum>
        </property>
        <property name="value">
-        <double>0.010000000000000</double>
+        <double>0.100000000000000</double>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="nb2SlewTimeLabel">
+     <item row="2" column="0">
+      <widget class="QLabel" name="nbLagTimeLabel">
        <property name="text">
-        <string>NB2 Slew time (ms)</string>
+        <string>Lag time (ms)</string>
        </property>
       </widget>
      </item>
      <item row="2" column="2">
       <widget class="QLabel" name="nbThresholdLabel">
        <property name="text">
-        <string>NB Threshold</string>
+        <string>Threshold</string>
        </property>
       </widget>
      </item>
@@ -174,39 +152,20 @@
         <number>4</number>
        </property>
        <property name="maximum">
-        <double>1.000000000000000</double>
+        <double>2.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.000100000000000</double>
        </property>
        <property name="value">
-        <double>0.010000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="3">
-      <widget class="QDoubleSpinBox" name="nb2LeadTime">
-       <property name="toolTip">
-        <string>Noise blanking lead time (ms)</string>
-       </property>
-       <property name="decimals">
-        <number>4</number>
-       </property>
-       <property name="maximum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.000100000000000</double>
-       </property>
-       <property name="value">
-        <double>0.010000000000000</double>
+        <double>0.100000000000000</double>
        </property>
       </widget>
      </item>
      <item row="2" column="3">
       <widget class="QSpinBox" name="nbThreshold">
        <property name="toolTip">
-        <string>Noise blanking threshold</string>
+        <string>Noise blanking threshold multiplier</string>
        </property>
        <property name="minimum">
         <number>15</number>
@@ -216,13 +175,6 @@
        </property>
        <property name="value">
         <number>30</number>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="2">
-      <widget class="QLabel" name="nb2LeadTimeLabel">
-       <property name="text">
-        <string>NB2 Lead time (ms)</string>
        </property>
       </widget>
      </item>
@@ -235,69 +187,42 @@
         <number>4</number>
        </property>
        <property name="maximum">
-        <double>1.000000000000000</double>
+        <double>2.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.000100000000000</double>
        </property>
        <property name="value">
-        <double>0.010000000000000</double>
+        <double>0.100000000000000</double>
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="nbLagTimeLabel">
+     <item row="3" column="0">
+      <widget class="QLabel" name="nbAvgTimeLabel">
        <property name="text">
-        <string>NB Lag time (ms)</string>
+        <string>Avg time (ms)</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="nb2lagTimeLabe">
-       <property name="text">
-        <string>NB2 Lag time (ms)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QDoubleSpinBox" name="nb2LagTime">
+     <item row="3" column="1">
+      <widget class="QDoubleSpinBox" name="nbAvgTime">
        <property name="toolTip">
-        <string>Noise blanking lag time (ms)</string>
+        <string>Noise blanking averaging time (ms)</string>
        </property>
        <property name="decimals">
-        <number>4</number>
-       </property>
-       <property name="maximum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.000100000000000</double>
-       </property>
-       <property name="value">
-        <double>0.010000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <widget class="QLabel" name="nb2ThresholdLabel">
-       <property name="text">
-        <string>NB2 Threshold</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="3">
-      <widget class="QSpinBox" name="nb2Threshold">
-       <property name="toolTip">
-        <string>Noise blanking threshold</string>
+        <number>1</number>
        </property>
        <property name="minimum">
-        <number>15</number>
+        <double>10.000000000000000</double>
        </property>
        <property name="maximum">
-        <number>500</number>
+        <double>100.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>1.000000000000000</double>
        </property>
        <property name="value">
-        <number>30</number>
+        <double>50.000000000000000</double>
        </property>
       </widget>
      </item>

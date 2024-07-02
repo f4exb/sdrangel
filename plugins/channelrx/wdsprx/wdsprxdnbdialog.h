@@ -36,10 +36,7 @@ public:
         ChangedNBLeadTime,
         ChangedNBLagTime,
         ChangedNBThreshold,
-        ChangedNB2SlewTime,
-        ChangedNB2LeadTime,
-        ChangedNB2LagTime,
-        ChangedNB2Threshold,
+        ChangedNBAvgTime,
     };
 
     explicit WDSPRxDNBDialog(QWidget* parent = nullptr);
@@ -51,10 +48,7 @@ public:
     void setNBLeadTime(double time);
     void setNBLagTime(double time);
     void setNBThreshold(int threshold);
-    void setNB2SlewTime(double time);
-    void setNB2LeadTime(double time);
-    void setNB2LagTime(double time);
-    void setNB2Threshold(int threshold);
+    void setNBAvgTime(double time);
 
     WDSPRxProfile::WDSPRxNBScheme getNBScheme() const { return m_nbScheme; }
     WDSPRxProfile::WDSPRxNB2Mode getNB2Mode() const { return m_nb2Mode; }
@@ -62,10 +56,7 @@ public:
     double getNBLeadTime() const { return m_nbLeadTime; }
     double getNBLagTime() const { return m_nbLagTime; }
     int getNBThreshold() const { return m_nbThreshold; }
-    double getNB2SlewTime() const { return m_nb2SlewTime; }
-    double getNB2LeadTime() const { return m_nb2LeadTime; }
-    double getNB2LagTime() const { return m_nb2LagTime; }
-    int getNB2Threshold() const { return m_nb2Threshold; }
+    double getNBAvgTime() const { return m_nbAvgTime; }
 
 signals:
     void valueChanged(int valueChanged);
@@ -78,10 +69,7 @@ private:
     double m_nbLeadTime;
     double m_nbLagTime;
     int m_nbThreshold;
-    double m_nb2SlewTime;
-    double m_nb2LeadTime;
-    double m_nb2LagTime;
-    int m_nb2Threshold;
+    double m_nbAvgTime;
 
 private slots:
     void on_nb_currentIndexChanged(int index);
@@ -90,10 +78,7 @@ private slots:
     void on_nbLeadTime_valueChanged(double value);
     void on_nbLagTime_valueChanged(double value);
     void on_nbThreshold_valueChanged(int value);
-    void on_nb2SlewTime_valueChanged(double value);
-    void on_nb2LeadTime_valueChanged(double value);
-    void on_nb2LagTime_valueChanged(double value);
-    void on_nb2Threshold_valueChanged(int value);
+    void on_nbAvgTime_valueChanged(double value);
 };
 
 #endif // INCLUDE_WDSPRXDNBDIALOG_H

@@ -40,6 +40,8 @@
 #include "wdsprxagcdialog.h"
 #include "wdsprxdnbdialog.h"
 #include "wdsprxdnrdialog.h"
+#include "wdsprxamdialog.h"
+#include "wdsprxcwpeakdialog.h"
 
 WDSPRxGUI* WDSPRxGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -215,6 +217,20 @@ void WDSPRxGUI::on_dnr_toggled(bool checked)
     applySettings();
 }
 
+void WDSPRxGUI::on_dnb_toggled(bool checked)
+{
+    m_settings.m_dnb = checked;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_dnb = m_settings.m_dnb;
+    applySettings();
+}
+
+void WDSPRxGUI::on_cwPeaking_toggled(bool checked)
+{
+    m_settings.m_cwPeaking = checked;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_cwPeaking = m_settings.m_cwPeaking;
+    applySettings();
+}
+
 void WDSPRxGUI::on_agcGain_valueChanged(int value)
 {
     QString s = QString::number(value, 'f', 0);
@@ -270,6 +286,7 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
     ui->BW->setMinimum(-480);
     ui->lowCut->setMaximum(480);
     ui->lowCut->setMinimum(-480);
+    m_settings.m_demod = m_settings.m_profiles[m_settings.m_profileIndex].m_demod;
     // AGC setup
     m_settings.m_agc = m_settings.m_profiles[m_settings.m_profileIndex].m_agc;
     m_settings.m_agcGain = m_settings.m_profiles[m_settings.m_profileIndex].m_agcGain;
@@ -281,6 +298,7 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
     m_settings.m_nbLeadTime = m_settings.m_profiles[m_settings.m_profileIndex].m_nbLeadTime;
     m_settings.m_nbLagTime = m_settings.m_profiles[m_settings.m_profileIndex].m_nbLagTime;
     m_settings.m_nbThreshold = m_settings.m_profiles[m_settings.m_profileIndex].m_nbThreshold;
+    m_settings.m_nbAvgTime = m_settings.m_profiles[m_settings.m_profileIndex].m_nbAvgTime;
     // Noise reduction
     m_settings.m_dnr = m_settings.m_profiles[m_settings.m_profileIndex].m_dnr;
     m_settings.m_snb = m_settings.m_profiles[m_settings.m_profileIndex].m_snb;
@@ -290,8 +308,35 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
     m_settings.m_nr2NPE = m_settings.m_profiles[m_settings.m_profileIndex].m_nr2NPE;
     m_settings.m_nrPosition = m_settings.m_profiles[m_settings.m_profileIndex].m_nrPosition;
     m_settings.m_nr2ArtifactReduction = m_settings.m_profiles[m_settings.m_profileIndex].m_nr2ArtifactReduction;
+    // demod
+    m_settings.m_demod = m_settings.m_profiles[m_settings.m_profileIndex].m_demod;
+    m_settings.m_cwPeaking = m_settings.m_profiles[m_settings.m_profileIndex].m_cwPeaking;
+    m_settings.m_cwPeakFrequency = m_settings.m_profiles[m_settings.m_profileIndex].m_cwPeakFrequency;
+    m_settings.m_cwBandwidth = m_settings.m_profiles[m_settings.m_profileIndex].m_cwBandwidth;
+    m_settings.m_cwGain = m_settings.m_profiles[m_settings.m_profileIndex].m_cwGain;
     displaySettings();
     applyBandwidths(m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2, true); // does applySettings(true)
+}
+
+void WDSPRxGUI::on_demod_currentIndexChanged(int index)
+{
+    m_settings.m_demod = (WDSPRxProfile::WDSPRxDemod) index;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_demod = m_settings.m_demod;
+
+    switch(m_settings.m_demod)
+    {
+    case WDSPRxProfile::DemodSSB:
+        break;
+    case WDSPRxProfile::DemodAM:
+    case WDSPRxProfile::DemodSAM:
+    case WDSPRxProfile::DemodFMN:
+        m_settings.m_dsb = true;
+        break;
+    default:
+        break;
+    }
+    displaySettings();
+    applySettings();
 }
 
 void WDSPRxGUI::onMenuDialogCalled(const QPoint &p)
@@ -368,7 +413,9 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_audioSampleRate(-1),
     m_agcDialog(nullptr),
     m_dnbDialog(nullptr),
-    m_dnrDialog(nullptr)
+    m_dnrDialog(nullptr),
+    m_amDialog(nullptr),
+    m_cwPeakDialog(nullptr)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodssb/readme.md";
@@ -395,6 +442,12 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     CRightClickEnabler *dnrRightClickEnabler = new CRightClickEnabler(ui->dnr);
     connect(dnrRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(dnrSetupDialog(const QPoint &)));
+
+    CRightClickEnabler *cwPeakRightClickEnabler = new CRightClickEnabler(ui->cwPeaking);
+    connect(cwPeakRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(cwPeakSetupDialog(const QPoint &)));
+
+    CRightClickEnabler *demodRightClickEnabler = new CRightClickEnabler(ui->demod);
+    connect(demodRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(demodSetupDialog(const QPoint &)));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -657,11 +710,14 @@ void WDSPRxGUI::displaySettings()
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
+    ui->demod->setCurrentIndex(m_settings.m_demod);
     ui->agc->setChecked(m_settings.m_agc);
     ui->agcGain->setValue(m_settings.m_agcGain);
     QString s = QString::number((ui->agcGain->value()), 'f', 0);
     ui->agcGainText->setText(s);
     ui->dnr->setChecked(m_settings.m_dnr);
+    ui->dnb->setChecked(m_settings.m_dnb);
+    ui->cwPeaking->setChecked(m_settings.m_cwPeaking);
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);
@@ -790,10 +846,7 @@ void WDSPRxGUI::dnbSetupDialog(const QPoint& p)
     m_dnbDialog->setNBLeadTime(m_settings.m_nbLeadTime);
     m_dnbDialog->setNBLagTime(m_settings.m_nbLagTime);
     m_dnbDialog->setNBThreshold(m_settings.m_nbThreshold);
-    m_dnbDialog->setNB2SlewTime(m_settings.m_nb2SlewTime);
-    m_dnbDialog->setNB2LeadTime(m_settings.m_nb2LeadTime);
-    m_dnbDialog->setNB2LagTime(m_settings.m_nb2LagTime);
-    m_dnbDialog->setNB2Threshold(m_settings.m_nb2Threshold);
+    m_dnbDialog->setNBAvgTime(m_settings.m_nbAvgTime);
     QObject::connect(m_dnbDialog, &WDSPRxDNBDialog::valueChanged, this, &WDSPRxGUI::dnbSetup);
     m_dnbDialog->exec();
     QObject::disconnect(m_dnbDialog, &WDSPRxDNBDialog::valueChanged, this, &WDSPRxGUI::dnbSetup);
@@ -841,24 +894,9 @@ void WDSPRxGUI::dnbSetup(int32_t iValueChanged)
         m_settings.m_profiles[m_settings.m_profileIndex].m_nbThreshold = m_settings.m_nbThreshold;
         applySettings();
         break;
-    case WDSPRxDNBDialog::ValueChanged::ChangedNB2SlewTime:
-        m_settings.m_nb2SlewTime = m_dnbDialog->getNB2SlewTime();
-        m_settings.m_profiles[m_settings.m_profileIndex].m_nb2SlewTime = m_settings.m_nb2SlewTime;
-        applySettings();
-        break;
-    case WDSPRxDNBDialog::ValueChanged::ChangedNB2LeadTime:
-        m_settings.m_nb2LeadTime = m_dnbDialog->getNB2LeadTime();
-        m_settings.m_profiles[m_settings.m_profileIndex].m_nb2LeadTime = m_settings.m_nb2LeadTime;
-        applySettings();
-        break;
-    case WDSPRxDNBDialog::ValueChanged::ChangedNB2LagTime:
-        m_settings.m_nb2LagTime = m_dnbDialog->getNB2LagTime();
-        m_settings.m_profiles[m_settings.m_profileIndex].m_nb2LagTime = m_settings.m_nb2LagTime;
-        applySettings();
-        break;
-    case WDSPRxDNBDialog::ValueChanged::ChangedNB2Threshold:
-        m_settings.m_nb2Threshold = m_dnbDialog->getNB2Threshold();
-        m_settings.m_profiles[m_settings.m_profileIndex].m_nb2Threshold = m_settings.m_nb2Threshold;
+    case WDSPRxDNBDialog::ValueChanged::ChangedNBAvgTime:
+        m_settings.m_nbAvgTime = m_dnbDialog->getNBAvgTime();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_nbAvgTime = m_settings.m_nbAvgTime;
         applySettings();
         break;
     default:
@@ -934,6 +972,86 @@ void WDSPRxGUI::dnrSetup(int32_t iValueChanged)
     }
 }
 
+void WDSPRxGUI::cwPeakSetupDialog(const QPoint& p)
+{
+    m_cwPeakDialog = new WDSPRxCWPeakDialog();
+    m_cwPeakDialog->move(p);
+    m_cwPeakDialog->setCWPeakFrequency(m_settings.m_cwPeakFrequency);
+    m_cwPeakDialog->setCWBandwidth(m_settings.m_cwBandwidth);
+    m_cwPeakDialog->setCWGain(m_settings.m_cwGain);
+    QObject::connect(m_cwPeakDialog, &WDSPRxCWPeakDialog::valueChanged, this, &WDSPRxGUI::cwPeakSetup);
+    m_cwPeakDialog->exec();
+    QObject::disconnect(m_cwPeakDialog, &WDSPRxCWPeakDialog::valueChanged, this, &WDSPRxGUI::cwPeakSetup);
+    m_cwPeakDialog->deleteLater();
+    m_cwPeakDialog = nullptr;
+}
+
+void WDSPRxGUI::cwPeakSetup(int iValueChanged)
+{
+    if (!m_cwPeakDialog) {
+        return;
+    }
+
+    WDSPRxCWPeakDialog::ValueChanged valueChanged = (WDSPRxCWPeakDialog::ValueChanged) iValueChanged;
+
+    switch (valueChanged)
+    {
+    case WDSPRxCWPeakDialog::ChangedCWPeakFrequency:
+        m_settings.m_cwPeakFrequency = m_cwPeakDialog->getCWPeakFrequency();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_cwPeakFrequency = m_settings.m_cwPeakFrequency;
+        applySettings();
+        break;
+    case WDSPRxCWPeakDialog::ChangedCWBandwidth:
+        m_settings.m_cwBandwidth = m_cwPeakDialog->getCWBandwidth();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_cwBandwidth = m_settings.m_cwBandwidth;
+        applySettings();
+        break;
+    case WDSPRxCWPeakDialog::ChangedCWGain:
+        m_settings.m_cwGain = m_cwPeakDialog->getCWGain();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_cwGain = m_settings.m_cwGain;
+        applySettings();
+        break;
+    default:
+        break;
+    }
+}
+
+
+void WDSPRxGUI::demodSetupDialog(const QPoint& p)
+{
+    if ((m_settings.m_demod == WDSPRxProfile::DemodAM) || (m_settings.m_demod == WDSPRxProfile::DemodSAM))
+    {
+        m_amDialog = new WDSPRxAMDialog();
+        m_amDialog->move(p);
+        m_amDialog->setFadeLevel(m_settings.m_amFadeLevel);
+        QObject::connect(m_amDialog, &WDSPRxAMDialog::valueChanged, this, &WDSPRxGUI::amSetup);
+        m_amDialog->exec();
+        QObject::disconnect(m_amDialog, &WDSPRxAMDialog::valueChanged, this, &WDSPRxGUI::amSetup);
+        m_amDialog->deleteLater();
+        m_amDialog = nullptr;
+    }
+}
+
+void WDSPRxGUI::amSetup(int iValueChanged)
+{
+    if (!m_amDialog) {
+        return;
+    }
+
+    WDSPRxAMDialog::ValueChanged valueChanged = (WDSPRxAMDialog::ValueChanged) iValueChanged;
+
+    switch (valueChanged)
+    {
+    case WDSPRxAMDialog::ChangedFadeLevel:
+        m_settings.m_amFadeLevel = m_amDialog->getFadeLevel();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_amFadeLevel = m_settings.m_amFadeLevel;
+        applySettings();
+        break;
+    default:
+        break;
+    }
+}
+
 void WDSPRxGUI::tick()
 {
     double powDbAvg, powDbPeak;
@@ -986,6 +1104,8 @@ void WDSPRxGUI::makeUIConnections()
     QObject::connect(ui->flipSidebands, &QPushButton::clicked, this, &WDSPRxGUI::on_flipSidebands_clicked);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WDSPRxGUI::on_fftWindow_currentIndexChanged);
     QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &WDSPRxGUI::on_profileIndex_valueChanged);
+    QObject::connect(ui->demod, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WDSPRxGUI::on_demod_currentIndexChanged);
+    QObject::connect(ui->cwPeaking, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_cwPeaking_toggled);
 }
 
 void WDSPRxGUI::updateAbsoluteCenterFrequency()

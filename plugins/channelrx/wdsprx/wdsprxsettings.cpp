@@ -41,6 +41,7 @@ WDSPRxSettings::WDSPRxSettings() :
 
 void WDSPRxSettings::resetToDefaults()
 {
+    m_demod = WDSPRxProfile::DemodSSB;
     m_audioBinaural = false;
     m_audioFlipChannels = false;
     m_dsb = false;
@@ -55,10 +56,11 @@ void WDSPRxSettings::resetToDefaults()
     m_dnb = false;
     m_nbScheme = WDSPRxProfile::WDSPRxNBScheme::NBSchemeNB;
     m_nb2Mode = WDSPRxProfile::WDSPRxNB2Mode::NB2ModeZero;
-    m_nbSlewTime = 0.01;
-    m_nbLeadTime = 0.01;
-    m_nbLagTime = 0.01;
+    m_nbSlewTime = 0.1;
+    m_nbLeadTime = 0.1;
+    m_nbLagTime = 0.1;
     m_nbThreshold = 30;
+    m_nbAvgTime = 50.0;
     // Noise reduction
     m_dnr = false;
     m_snb = false;
@@ -68,6 +70,12 @@ void WDSPRxSettings::resetToDefaults()
     m_nr2NPE = WDSPRxProfile::NR2NPEOSMS;
     m_nrPosition = WDSPRxProfile::NRPositionPreAGC;
     m_nr2ArtifactReduction = true;
+    // Demods
+    m_amFadeLevel = false;
+    m_cwPeaking = false;
+    m_cwPeakFrequency = 600.0;
+    m_cwBandwidth = 100.0;
+    m_cwGain = 2.0;
     //
     m_volume = 1.0;
     m_inputFrequencyOffset = 0;
@@ -89,6 +97,7 @@ QByteArray WDSPRxSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(    1, m_inputFrequencyOffset);
+    s.writeS32(    2, (int) m_demod);
     s.writeS32(    3, m_volume * 10.0);
 
     if (m_spectrumGUI) {
@@ -113,6 +122,7 @@ QByteArray WDSPRxSettings::serialize() const
     s.writeDouble(24, m_nbLeadTime);
     s.writeDouble(25, m_nbLagTime);
     s.writeS32(   26, m_nbThreshold);
+    s.writeDouble(27, m_nbAvgTime);
     // Noise reduction
     s.writeBool(  30, m_dnr);
     s.writeBool(  31, m_snb);
@@ -122,6 +132,12 @@ QByteArray WDSPRxSettings::serialize() const
     s.writeS32(   35, (int) m_nr2NPE);
     s.writeS32(   36, (int) m_nrPosition);
     s.writeBool(  37, m_nr2ArtifactReduction);
+    // Demods
+    s.writeBool(  40, m_amFadeLevel);
+    s.writeBool(  41, m_cwPeaking);
+    s.writeDouble(42, m_cwPeakFrequency);
+    s.writeDouble(43, m_cwBandwidth);
+    s.writeDouble(44, m_cwGain);
     //
     s.writeString(70, m_title);
     s.writeString(71, m_audioDeviceName);
@@ -143,6 +159,7 @@ QByteArray WDSPRxSettings::serialize() const
 
     for (unsigned int i = 0; i < 10; i++)
     {
+        s.writeS32   (104 + 50*i, (int) m_profiles[i].m_demod);
         // Filter
         s.writeS32   (100 + 50*i, m_profiles[i].m_spanLog2);
         s.writeS32   (101 + 50*i, m_profiles[i].m_highCutoff / 100.0);
@@ -162,6 +179,7 @@ QByteArray WDSPRxSettings::serialize() const
         s.writeDouble(124 + 50*i, m_profiles[i].m_nbLeadTime);
         s.writeDouble(125 + 50*i, m_profiles[i].m_nbLagTime);
         s.writeS32   (126 + 50*i, m_profiles[i].m_nbThreshold);
+        s.writeDouble(127 + 50*i, m_profiles[i].m_nbAvgTime);
         // Noise reduction
         s.writeBool  (130 + 50*i, m_profiles[i].m_dnr);
         s.writeBool  (131 + 50*i, m_profiles[i].m_snb);
@@ -171,6 +189,12 @@ QByteArray WDSPRxSettings::serialize() const
         s.writeS32   (135 + 50*i, (int) m_profiles[i].m_nr2NPE);
         s.writeS32   (136 + 50*i, (int) m_profiles[i].m_nrPosition);
         s.writeBool  (137 + 50*i, m_profiles[i].m_nr2ArtifactReduction);
+        // Demods
+        s.writeBool  (140 + 50*i, m_profiles[i].m_amFadeLevel);
+        s.writeBool  (141 + 50*i, m_profiles[i].m_cwPeaking);
+        s.writeDouble(142 + 50*i, m_profiles[i].m_cwPeakFrequency);
+        s.writeDouble(143 + 50*i, m_profiles[i].m_cwBandwidth);
+        s.writeDouble(144 + 50*i, m_profiles[i].m_cwGain);
     }
 
     return s.final();
@@ -194,6 +218,8 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         QString strtmp;
 
         d.readS32(    1, &m_inputFrequencyOffset, 0);
+        d.readS32(    2, &tmp, 0);
+        m_demod = (WDSPRxProfile::WDSPRxDemod) tmp;
         d.readS32(    3, &tmp, 30);
         m_volume = tmp / 10.0;
 
@@ -220,10 +246,11 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         m_nbScheme = (WDSPRxProfile::WDSPRxNBScheme) tmp;
         d.readS32(   22, &tmp, 2);
         m_nb2Mode = (WDSPRxProfile::WDSPRxNB2Mode) tmp;
-        d.readDouble(23, &m_nbSlewTime, 0.01);
-        d.readDouble(24, &m_nbLeadTime, 0.01);
-        d.readDouble(25, &m_nbLagTime, 0.01);
+        d.readDouble(23, &m_nbSlewTime, 0.1);
+        d.readDouble(24, &m_nbLeadTime, 0.1);
+        d.readDouble(25, &m_nbLagTime, 0.1);
         d.readS32(   26, &m_nbThreshold, 30);
+        d.readDouble(27, &m_nbAvgTime, 50.0);
         // Nosie reduction
         d.readBool(  30, &m_dnr, false);
         d.readBool(  31, &m_snb, false);
@@ -237,6 +264,10 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         d.readS32(   36, &tmp, 2);
         m_nrPosition = (WDSPRxProfile::WDSPRxNRPosition) tmp;
         d.readBool(  37, &m_nr2ArtifactReduction, true);
+        // Demods
+        d.readBool(  40, &m_amFadeLevel, false);
+        d.readBool(  41, &m_cwPeaking, false);
+        d.readDouble(42, &m_cwPeakFrequency, 600.0);
         //
         d.readString(70, &m_title, "WDSP Receiver");
         d.readString(71, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
@@ -270,6 +301,8 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
 
         for (unsigned int i = 0; (i < 10); i++)
         {
+            d.readS32   (104 + 50*i, &tmp, 9);
+            m_profiles[i].m_demod = (WDSPRxProfile::WDSPRxDemod) tmp;
             // Filter
             d.readS32   (100 + 50*i, &m_profiles[i].m_spanLog2, 3);
             d.readS32   (101 + 50*i, &tmp, 30);
@@ -290,10 +323,11 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
             m_profiles[i].m_nbScheme = (WDSPRxProfile::WDSPRxNBScheme) tmp;
             d.readS32   (122 + 50*i, &tmp);
             m_profiles[i].m_nb2Mode = (WDSPRxProfile::WDSPRxNB2Mode) tmp;
-            d.readDouble(123 + 50*i, &m_profiles[i].m_nbSlewTime, 0.01);
-            d.readDouble(124 + 50*i, &m_profiles[i].m_nbLeadTime, 0.01);
-            d.readDouble(125 + 50*i, &m_profiles[i].m_nbLagTime, 0.01);
-            d.readS32   (126 + 50*i, &m_profiles[i].m_nbThreshold, 40);
+            d.readDouble(123 + 50*i, &m_profiles[i].m_nbSlewTime, 0.1);
+            d.readDouble(124 + 50*i, &m_profiles[i].m_nbLeadTime, 0.1);
+            d.readDouble(125 + 50*i, &m_profiles[i].m_nbLagTime, 0.1);
+            d.readS32   (126 + 50*i, &m_profiles[i].m_nbThreshold, 30);
+            d.readDouble(127 + 50*i, &m_profiles[i].m_nbAvgTime, 50.0);
             // Noise reduction
             d.readBool  (130 + 50*i, &m_profiles[i].m_dnr, false);
             d.readBool  (131 + 50*i, &m_profiles[i].m_snb, false);
@@ -307,6 +341,10 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
             d.readS32   (136 + 50*i, &tmp);
             m_profiles[i].m_nrPosition = (WDSPRxProfile::WDSPRxNRPosition) tmp;
             d.readBool  (137 + 50*i, &m_profiles[i].m_nr2ArtifactReduction);
+            // Demods
+            d.readBool  (140 + 50*i, &m_amFadeLevel, false);
+            d.readBool  (141 + 50*i, &m_cwPeaking, false);
+            d.readDouble(142 + 50*i, &m_profiles[i].m_cwPeakFrequency, 600.0);
         }
 
         return true;
