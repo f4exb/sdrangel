@@ -30,7 +30,7 @@ warren@wpratt.com
 #include "amd.hpp"
 #include "anr.hpp"
 #include "anf.hpp"
-#include "snb.hpp"
+#include "snba.hpp"
 #include "bandpass.hpp"
 #include "RXA.hpp"
 
@@ -908,8 +908,14 @@ void EMNR::SetEMNRRun (RXA& rxa, int run)
     EMNR *a = rxa.emnr.p;
     if (a->run != run)
     {
-        RXA::bp1Check (rxa, rxa.amd.p->run, rxa.snba.p->run,
-            run, rxa.anf.p->run, rxa.anr.p->run);
+        RXA::bp1Check (
+            rxa,
+            rxa.amd.p->run,
+            rxa.snba.p->run,
+            run,
+            rxa.anf.p->run,
+            rxa.anr.p->run
+        );
         rxa.csDSP.lock();
         a->run = run;
         RXA::bp1Set (rxa);

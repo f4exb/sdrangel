@@ -32,7 +32,7 @@ warren@wpratt.com
 #include "anf.hpp"
 #include "emnr.hpp"
 #include "anr.hpp"
-#include "snb.hpp"
+#include "snba.hpp"
 #include "RXA.hpp"
 
 namespace WDSP {

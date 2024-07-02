@@ -28,14 +28,12 @@ warren@wpratt.com
 #ifndef wdsp_snba_h
 #define wdsp_snba_h
 
-#include "export.h"
-
-namespace WDSP {
+namespace WDSP{
 
 class RESAMPLE;
 class RXA;
 
-class WDSP_API SNBA
+class SNBA
 {
 public:
     int run;
@@ -79,8 +77,8 @@ public:
     } exec;
     struct _det
     {
-        float k1;
-        float k2;
+        double k1;
+        double k2;
         int b;
         int pre;
         int post;
@@ -89,7 +87,7 @@ public:
     } sdet;
     struct _scan
     {
-        float pmultmin;
+        double pmultmin;
     } scan;
     struct _wrk
     {
@@ -107,8 +105,8 @@ public:
         float* asolve_r;
         float* asolve_z;
     } wrk;
-    float out_low_cut;
-    float out_high_cut;
+    double out_low_cut;
+    double out_high_cut;
 
     static SNBA* create_snba (
         int run,
@@ -121,33 +119,37 @@ public:
         int xsize,
         int asize,
         int npasses,
-        float k1,
-        float k2,
+        double k1,
+        double k2,
         int b,
         int pre,
         int post,
-        float pmultmin,
-        float out_low_cut,
-        float out_high_cut
+        double pmultmin,
+        double out_low_cut,
+        double out_high_cut
     );
+
     static void destroy_snba (SNBA *d);
     static void flush_snba (SNBA *d);
     static void xsnba (SNBA *d);
     static void setBuffers_snba (SNBA *a, float* in, float* out);
     static void setSamplerate_snba (SNBA *a, int rate);
     static void setSize_snba (SNBA *a, int size);
-    // RXA
-    static void SetSNBAOutputBandwidth (RXA& rxa, float flow, float fhigh);
+    // RXA Properties
     static void SetSNBARun (RXA& rxa, int run);
     static void SetSNBAovrlp (RXA& rxa, int ovrlp);
     static void SetSNBAasize (RXA& rxa, int size);
     static void SetSNBAnpasses (RXA& rxa, int npasses);
-    static void SetSNBAk1 (RXA& rxa, float k1);
-    static void SetSNBAk2 (RXA& rxa, float k2);
+    static void SetSNBAk1 (RXA& rxa, double k1);
+    static void SetSNBAk2 (RXA& rxa, double k2);
     static void SetSNBAbridge (RXA& rxa, int bridge);
     static void SetSNBApresamps (RXA& rxa, int presamps);
     static void SetSNBApostsamps (RXA& rxa, int postsamps);
-    static void SetSNBApmultmin (RXA& rxa, float pmultmin);
+    static void SetSNBApmultmin (RXA& rxa, double pmultmin);
+
+
+
+    static void SetSNBAOutputBandwidth (RXA& rxa, double flow, double fhigh);
 
 private:
     static void calc_snba (SNBA *d);
@@ -177,7 +179,7 @@ private:
     static int scanFrame(
         int xsize,
         int pval,
-        float pmultmin,
+        double pmultmin,
         int* det,
         int* bimp,
         int* limp,
@@ -189,73 +191,7 @@ private:
     static void execFrame(SNBA *d, float* x);
 };
 
-
-class NBP;
-class NOTCHDB;
-
-class WDSP_API BPSNBA
-{
-public:
-    int run;                        // run the filter
-    int run_notches;                // use the notches, vs straight bandpass
-    int position;                   // position in the processing pipeline
-    int size;                       // buffer size
-    int nc;                         // number of filter coefficients
-    int mp;                         // minimum phase flag
-    float* in;                     // input buffer
-    float* out;                    // output buffer
-    int rate;                       // sample rate
-    float* buff;                   // internal buffer
-    NBP *bpsnba;                    // pointer to the notched bandpass filter, nbp
-    float f_low;                   // low cutoff frequency
-    float f_high;                  // high cutoff frequency
-    float abs_low_freq;            // lowest positive freq supported by SNB
-    float abs_high_freq;           // highest positive freq supported by SNG
-    int wintype;                    // filter window type
-    float gain;                    // filter gain
-    int autoincr;                   // use auto increment for notch width
-    int maxpb;                      // maximum passband segments supported
-    NOTCHDB* ptraddr;               // pointer to address of NOTCH DATABASE
-
-    static BPSNBA* create_bpsnba (
-        int run,
-        int run_notches,
-        int position,
-        int size,
-        int nc,
-        int mp,
-        float* in,
-        float* out,
-        int rate,
-        float abs_low_freq,
-        float abs_high_freq,
-        float f_low,
-        float f_high,
-        int wintype,
-        float gain,
-        int autoincr,
-        int maxpb,
-        NOTCHDB* ptraddr
-    );
-    static void destroy_bpsnba (BPSNBA *a);
-    static void flush_bpsnba (BPSNBA *a);
-    static void setBuffers_bpsnba (BPSNBA *a, float* in, float* out);
-    static void setSamplerate_bpsnba (BPSNBA *a, int rate);
-    static void setSize_bpsnba (BPSNBA *a, int size);
-    static void xbpsnbain (BPSNBA *a, int position);
-    static void xbpsnbaout (BPSNBA *a, int position);
-    static void recalc_bpsnba_filter (BPSNBA *a, int update);
-    // RXA
-    static void BPSNBASetNC (RXA& rxa, int nc);
-    static void BPSNBASetMP (RXA& rxa, int mp);
-    static void bpsnbaCheck (RXA& rxa, int mode, int notch_run);
-    static void bpsnbaSet (RXA& rxa);
-
-private:
-    static void calc_bpsnba (BPSNBA *a);
-    static void decalc_bpsnba (BPSNBA *a);
-};
-
-} // namespace WDSP
+} // namespace
 
 #endif
+

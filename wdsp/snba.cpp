@@ -34,9 +34,8 @@ warren@wpratt.com
 #include "anf.hpp"
 #include "anr.hpp"
 #include "emnr.hpp"
-#include "snb.hpp"
+#include "snba.hpp"
 #include "RXA.hpp"
-
 
 #define MAXIMP          256
 
@@ -48,25 +47,31 @@ void SNBA::calc_snba (SNBA *d)
         d->isize = d->bsize / (d->inrate / d->internalrate);
     else
         d->isize = d->bsize * (d->internalrate / d->inrate);
-    d->inbuff  = new float[d->isize * 2]; // (float *) malloc0 (d->isize * sizeof (complex));
-    d->outbuff = new float[d->isize * 2]; // (float *) malloc0 (d->isize * sizeof (complex));
+
+    d->inbuff  = new float[d->isize * 2]; // (double *) malloc0 (d->isize * sizeof (complex));
+    d->outbuff = new float[d->isize * 2]; // (double *) malloc0 (d->isize * sizeof (complex));
+
     if (d->inrate != d->internalrate)
         d->resamprun = 1;
     else
         d->resamprun = 0;
+
     d->inresamp  = RESAMPLE::create_resample (d->resamprun, d->bsize, d->in,      d->inbuff, d->inrate,       d->internalrate, 0.0, 0, 2.0);
     RESAMPLE::setFCLow_resample (d->inresamp, 250.0);
     d->outresamp = RESAMPLE::create_resample (d->resamprun, d->isize, d->outbuff, d->out,    d->internalrate, d->inrate,       0.0, 0, 2.0);
     RESAMPLE::setFCLow_resample (d->outresamp, 200.0);
     d->incr = d->xsize / d->ovrlp;
+
     if (d->incr > d->isize)
         d->iasize = d->incr;
     else
         d->iasize = d->isize;
+
     d->iainidx = 0;
     d->iaoutidx = 0;
-    d->inaccum = new float[d->isize]; // (float *) malloc0 (d->iasize * sizeof (float));
+    d->inaccum = new float[d->iasize * 2]; // (double *) malloc0 (d->iasize * sizeof (double));
     d->nsamps = 0;
+
     if (d->incr > d->isize)
     {
         d->oasize = d->incr;
@@ -79,8 +84,9 @@ void SNBA::calc_snba (SNBA *d)
         d->oainidx = 0;
         d->oaoutidx = 0;
     }
+
     d->init_oaoutidx = d->oaoutidx;
-    d->outaccum = new float[d->oasize]; // (float *) malloc0 (d->oasize * sizeof (float));
+    d->outaccum = new float[d->oasize * 2]; // (double *) malloc0 (d->oasize * sizeof (double));
 }
 
 SNBA* SNBA::create_snba (
@@ -94,14 +100,14 @@ SNBA* SNBA::create_snba (
     int xsize,
     int asize,
     int npasses,
-    float k1,
-    float k2,
+    double k1,
+    double k2,
     int b,
     int pre,
     int post,
-    float pmultmin,
-    float out_low_cut,
-    float out_high_cut
+    double pmultmin,
+    double out_low_cut,
+    double out_high_cut
 )
 {
     SNBA *d = new SNBA;
@@ -126,30 +132,30 @@ SNBA* SNBA::create_snba (
 
     calc_snba (d);
 
-    d->xbase    = new float[2 * d->xsize]; // (float *) malloc0 (2 * d->xsize * sizeof (float));
-    d->xaux     = d->xbase + d->xsize;
-    d->exec.a       = new float[d->xsize]; // (float *) malloc0 (d->xsize * sizeof (float));
-    d->exec.v       = new float[d->xsize]; // (float *) malloc0 (d->xsize * sizeof (float));
-    d->exec.detout  = new int[d->xsize]; // (int    *) malloc0 (d->xsize * sizeof (int));
-    d->exec.savex   = new float[d->xsize]; // (float *) malloc0 (d->xsize * sizeof (float));
-    d->exec.xHout   = new float[d->xsize]; // (float *) malloc0 (d->xsize * sizeof (float));
-    d->exec.unfixed = new int32_t[d->xsize]; // (int    *) malloc0 (d->xsize * sizeof (int));
-    d->sdet.vp      = new float[d->xsize]; // (float *) malloc0 (d->xsize * sizeof (float));
-    d->sdet.vpwr    = new float[d->xsize]; // (float *) malloc0 (d->xsize * sizeof (float));
+    d->xbase        = new float[2 * d->xsize]; // (double *) malloc0 (2 * d->xsize * sizeof (double));
+    d->xaux         = d->xbase + d->xsize;
+    d->exec.a       = new float[d->xsize]; //(double *) malloc0 (d->xsize * sizeof (double));
+    d->exec.v       = new float[d->xsize]; //(double *) malloc0 (d->xsize * sizeof (double));
+    d->exec.detout  = new int[d->xsize]; //(int    *) malloc0 (d->xsize * sizeof (int));
+    d->exec.savex   = new float[d->xsize]; //(double *) malloc0 (d->xsize * sizeof (double));
+    d->exec.xHout   = new float[d->xsize]; //(double *) malloc0 (d->xsize * sizeof (double));
+    d->exec.unfixed = new int[d->xsize]; //(int    *) malloc0 (d->xsize * sizeof (int));
+    d->sdet.vp      = new float[d->xsize]; //(double *) malloc0 (d->xsize * sizeof (double));
+    d->sdet.vpwr    = new float[d->xsize]; //(double *) malloc0 (d->xsize * sizeof (double));
 
     d->wrk.xHat_a1rows_max = d->xsize + d->exec.asize;
     d->wrk.xHat_a2cols_max = d->xsize + 2 * d->exec.asize;
-    d->wrk.xHat_r          = new float[d->xsize]; // (float *) malloc0 (d->xsize * sizeof(float));
-    d->wrk.xHat_ATAI       = new float[d->xsize * d->xsize]; // (float *) malloc0 (d->xsize * d->xsize * sizeof(float));
-    d->wrk.xHat_A1         = new float[d->wrk.xHat_a1rows_max * d->xsize]; // (float *) malloc0 (d->wrk.xHat_a1rows_max * d->xsize * sizeof(float));
-    d->wrk.xHat_A2         = new float[d->wrk.xHat_a1rows_max * d->wrk.xHat_a2cols_max]; // (float *) malloc0 (d->wrk.xHat_a1rows_max * d->wrk.xHat_a2cols_max * sizeof(float));
-    d->wrk.xHat_P1         = new float[d->xsize * d->wrk.xHat_a2cols_max]; // (float *) malloc0 (d->xsize * d->wrk.xHat_a2cols_max * sizeof(float));
-    d->wrk.xHat_P2         = new float[d->xsize]; // (float *) malloc0 (d->xsize * sizeof(float));
-    d->wrk.trI_y           = new float[d->xsize - 1]; // (float *) malloc0 ((d->xsize - 1) * sizeof(float));
-    d->wrk.trI_v           = new float[d->xsize - 1]; // (float *) malloc0 ((d->xsize - 1) * sizeof(float));
-    d->wrk.dR_z            = new float[d->xsize - 2]; // (float *) malloc0 ((d->xsize - 2) * sizeof(float));
-    d->wrk.asolve_r        = new float[d->exec.asize + 1]; // (float *) malloc0 ((d->exec.asize + 1) * sizeof(float));
-    d->wrk.asolve_z        = new float[d->exec.asize + 1]; // (float *) malloc0 ((d->exec.asize + 1) * sizeof(float));
+    d->wrk.xHat_r          = new float[d->xsize]; // (double *) malloc0 (d->xsize * sizeof(double));
+    d->wrk.xHat_ATAI       = new float[d->xsize * d->xsize]; // (double *) malloc0 (d->xsize * d->xsize * sizeof(double));
+    d->wrk.xHat_A1         = new float[d->wrk.xHat_a1rows_max * d->xsize]; // (double *) malloc0 (d->wrk.xHat_a1rows_max * d->xsize * sizeof(double));
+    d->wrk.xHat_A2         = new float[d->wrk.xHat_a1rows_max * d->wrk.xHat_a2cols_max]; // (double *) malloc0 (d->wrk.xHat_a1rows_max * d->wrk.xHat_a2cols_max * sizeof(double));
+    d->wrk.xHat_P1         = new float[d->xsize * d->wrk.xHat_a2cols_max]; // (double *) malloc0 (d->xsize * d->wrk.xHat_a2cols_max * sizeof(double));
+    d->wrk.xHat_P2         = new float[d->xsize]; // (double *) malloc0 (d->xsize * sizeof(double));
+    d->wrk.trI_y           = new float[d->xsize - 1]; // (double *) malloc0 ((d->xsize - 1) * sizeof(double));
+    d->wrk.trI_v           = new float[d->xsize - 1]; // (double *) malloc0 ((d->xsize - 1) * sizeof(double));
+    d->wrk.dR_z            = new float[d->xsize - 2]; // (double *) malloc0 ((d->xsize - 2) * sizeof(double));
+    d->wrk.asolve_r        = new float[d->exec.asize + 1]; // (double *) malloc0 ((d->exec.asize + 1) * sizeof(double));
+    d->wrk.asolve_z        = new float[d->exec.asize + 1]; // (double *) malloc0 ((d->exec.asize + 1) * sizeof(double));
 
     return d;
 }
@@ -191,7 +197,7 @@ void SNBA::destroy_snba (SNBA *d)
 
     decalc_snba (d);
 
-    delete (d);
+    delete[] (d);
 }
 
 void SNBA::flush_snba (SNBA *d)
@@ -216,6 +222,7 @@ void SNBA::flush_snba (SNBA *d)
 
     memset (d->inbuff,       0, d->isize  * sizeof (wcomplex));
     memset (d->outbuff,      0, d->isize  * sizeof (wcomplex));
+
     RESAMPLE::flush_resample (d->inresamp);
     RESAMPLE::flush_resample (d->outresamp);
 }
@@ -256,6 +263,7 @@ void SNBA::multA1TA2(float* a1, float* a2, int m, int n, int q, float* c)
     int i, j, k;
     int p = q - m;
     memset (c, 0, m * n * sizeof (float));
+
     for (i = 0; i < m; i++)
     {
         for (j = 0; j < n; j++)
@@ -278,6 +286,7 @@ void SNBA::multXKE(float* a, float* xk, int m, int q, int p, float* vout)
 {
     int i, k;
     memset (vout, 0, m * sizeof (float));
+
     for (i = 0; i < m; i++)
     {
         for (k = i; k < p; k++)
@@ -291,6 +300,7 @@ void SNBA::multAv(float* a, float* v, int m, int q, float* vout)
 {
     int i, k;
     memset (vout, 0, m * sizeof (float));
+
     for (i = 0; i < m; i++)
     {
         for (k = 0; k < q; k++)
@@ -356,6 +366,7 @@ void SNBA::invf(int xsize, int asize, float* a, float* x, float* v)
 {
     int i, j;
     memset (v, 0, xsize * sizeof (float));
+
     for (i = asize; i < xsize - asize; i++)
     {
         for (j = 0; j < asize; j++)
@@ -373,16 +384,20 @@ void SNBA::invf(int xsize, int asize, float* a, float* x, float* v)
 void SNBA::det(SNBA *d, int asize, float* v, int* detout)
 {
     int i, j;
-    float medpwr, t1, t2;
+    float medpwr;
+    double t1, t2;
     int bstate, bcount, bsamp;
+
     for (i = asize, j = 0; i < d->xsize; i++, j++)
     {
         d->sdet.vpwr[i] = v[i] * v[i];
         d->sdet.vp[j] = d->sdet.vpwr[i];
     }
+
     LMath::median(d->xsize - asize, d->sdet.vp, &medpwr);
     t1 = d->sdet.k1 * medpwr;
     t2 = 0.0;
+
     for (i = asize; i < d->xsize; i++)
     {
         if (d->sdet.vpwr[i] <= t1)
@@ -390,7 +405,8 @@ void SNBA::det(SNBA *d, int asize, float* v, int* detout)
         else if (d->sdet.vpwr[i] <= 2.0 * t1)
             t2 += 2.0 * t1 - d->sdet.vpwr[i];
     }
-    t2 *= d->sdet.k2 / (float)(d->xsize - asize);
+    t2 *= d->sdet.k2 / (double)(d->xsize - asize);
+
     for (i = asize; i < d->xsize; i++)
     {
         if (d->sdet.vpwr[i] > t2)
@@ -398,9 +414,11 @@ void SNBA::det(SNBA *d, int asize, float* v, int* detout)
         else
             detout[i] = 0;
     }
+
     bstate = 0;
     bcount = 0;
     bsamp = 0;
+
     for (i = asize; i < d->xsize; i++)
     {
         switch (bstate)
@@ -453,7 +471,7 @@ void SNBA::det(SNBA *d, int asize, float* v, int* detout)
 int SNBA::scanFrame(
     int xsize,
     int pval,
-    float pmultmin,
+    double pmultmin,
     int* det,
     int* bimp,
     int* limp,
@@ -466,9 +484,9 @@ int SNBA::scanFrame(
     int inflag = 0;
     int i = 0, j = 0, k = 0;
     int nimp = 0;
-    float td;
+    double td;
     int ti;
-    float merit[MAXIMP] = { 0 };
+    double merit[MAXIMP] = { 0 };
     int nextlist[MAXIMP];
     memset (befimp, 0, MAXIMP * sizeof (int));
     memset (aftimp, 0, MAXIMP * sizeof (int));
@@ -508,7 +526,7 @@ int SNBA::scanFrame(
 
     for (i = 0; i < nimp; i++)
     {
-        merit[i] = (float)p_opt[i] / (float)limp[i];
+        merit[i] = (double)p_opt[i] / (double)limp[i];
         nextlist[i] = i;
     }
     for (j = 0; j < nimp - 1; j++)
@@ -564,15 +582,19 @@ void SNBA::execFrame(SNBA *d, float* x)
     LMath::asolve(d->xsize, d->exec.asize, x, d->exec.a, d->wrk.asolve_r, d->wrk.asolve_z);
     invf(d->xsize, d->exec.asize, d->exec.a, x, d->exec.v);
     det(d, d->exec.asize, d->exec.v, d->exec.detout);
+
     for (i = 0; i < d->xsize; i++)
     {
         if (d->exec.detout[i] != 0)
             x[i] = 0.0;
     }
+
     nimp = scanFrame(d->xsize, d->exec.asize, d->scan.pmultmin, d->exec.detout, bimp, limp, befimp, aftimp, p_opt, &next);
+
     for (pass = 0; pass < d->exec.npasses; pass++)
     {
         memcpy (d->exec.unfixed, d->exec.detout, d->xsize * sizeof (int));
+
         for (k = 0; k < nimp; k++)
         {
             if (k > 0)
@@ -601,12 +623,15 @@ void SNBA::xsnba (SNBA *d)
     {
         int i;
         RESAMPLE::xresample (d->inresamp);
+
         for (i = 0; i < 2 * d->isize; i += 2)
         {
             d->inaccum[d->iainidx] = d->inbuff[i];
             d->iainidx = (d->iainidx + 1) % d->iasize;
         }
+
         d->nsamps += d->isize;
+
         while (d->nsamps >= d->incr)
         {
             memcpy (&d->xaux[d->xsize - d->incr], &d->inaccum[d->iaoutidx], d->incr * sizeof (float));
@@ -617,12 +642,14 @@ void SNBA::xsnba (SNBA *d)
             d->oainidx = (d->oainidx + d->incr) % d->oasize;
             memmove (d->xbase, &d->xbase[d->incr], (2 * d->xsize - d->incr) * sizeof (float));
         }
+
         for (i = 0; i < d->isize; i++)
         {
             d->outbuff[2 * i + 0] = d->outaccum[d->oaoutidx];
             d->outbuff[2 * i + 1] = 0.0;
             d->oaoutidx = (d->oaoutidx + 1) % d->oasize;
         }
+
         RESAMPLE::xresample (d->outresamp);
     }
     else if (d->out != d->in)
@@ -641,8 +668,14 @@ void SNBA::SetSNBARun (RXA& rxa, int run)
     if (a->run != run)
     {
         RXA::bpsnbaCheck (rxa, rxa.mode, rxa.ndb.p->master_run);
-        RXA::bp1Check (rxa, rxa.amd.p->run, run, rxa.emnr.p->run,
-            rxa.anf.p->run, rxa.anr.p->run);
+        RXA::bp1Check (
+            rxa,
+            rxa.amd.p->run,
+            run,
+            rxa.emnr.p->run,
+            rxa.anf.p->run,
+            rxa.anr.p->run
+        );
         rxa.csDSP.lock();
         a->run = run;
         RXA::bp1Set (rxa);
@@ -660,7 +693,7 @@ void SNBA::SetSNBAovrlp (RXA& rxa, int ovrlp)
     rxa.csDSP.unlock();
 }
 
-void SetSNBAasize (RXA& rxa, int size)
+void SNBA::SetSNBAasize (RXA& rxa, int size)
 {
     rxa.csDSP.lock();
     rxa.snba.p->exec.asize = size;
@@ -674,14 +707,14 @@ void SNBA::SetSNBAnpasses (RXA& rxa, int npasses)
     rxa.csDSP.unlock();
 }
 
-void SNBA::SetSNBAk1 (RXA& rxa, float k1)
+void SNBA::SetSNBAk1 (RXA& rxa, double k1)
 {
     rxa.csDSP.lock();
     rxa.snba.p->sdet.k1 = k1;
     rxa.csDSP.unlock();
 }
 
-void SNBA::SetSNBAk2 (RXA& rxa, float k2)
+void SNBA::SetSNBAk2 (RXA& rxa, double k2)
 {
     rxa.csDSP.lock();
     rxa.snba.p->sdet.k2 = k2;
@@ -709,21 +742,19 @@ void SNBA::SetSNBApostsamps (RXA& rxa, int postsamps)
     rxa.csDSP.unlock();
 }
 
-void SNBA::SetSNBApmultmin (RXA& rxa, float pmultmin)
+void SNBA::SetSNBApmultmin (RXA& rxa, double pmultmin)
 {
     rxa.csDSP.lock();
     rxa.snba.p->scan.pmultmin = pmultmin;
     rxa.csDSP.unlock();
 }
 
-void SNBA::SetSNBAOutputBandwidth (RXA& rxa, float flow, float fhigh)
+void SNBA::SetSNBAOutputBandwidth (RXA& rxa, double flow, double fhigh)
 {
-    SNBA *a;
-    RESAMPLE *d;
-    float f_low, f_high;
+    SNBA *a = rxa.snba.p;
+    RESAMPLE *d = a->outresamp;
+    double f_low, f_high;
     rxa.csDSP.lock();
-    a = rxa.snba.p;
-    d = a->outresamp;
 
     if (flow >= 0 && fhigh >= 0)
     {
@@ -741,7 +772,7 @@ void SNBA::SetSNBAOutputBandwidth (RXA& rxa, float flow, float fhigh)
     }
     else if (flow < 0 && fhigh > 0)
     {
-        float absmax = std::max (-flow, fhigh);
+        double absmax = std::max (-flow, fhigh);
         if (absmax <  a->out_low_cut) absmax =  a->out_low_cut;
         f_low = a->out_low_cut;
         f_high = std::min (a->out_high_cut, absmax);
@@ -751,183 +782,4 @@ void SNBA::SetSNBAOutputBandwidth (RXA& rxa, float flow, float fhigh)
     rxa.csDSP.unlock();
 }
 
-
-/********************************************************************************************************
-*                                                                                                       *
-*                                       BPSNBA Bandpass Filter                                          *
-*                                                                                                       *
-********************************************************************************************************/
-
-// This is a thin wrapper for a notched-bandpass filter (nbp).  The basic difference is that it provides
-// for its input and output to happen at different points in the processing pipeline.  This means it must
-// include a buffer, 'buff'.  Its input and output are done via functions xbpshbain() and xbpshbaout().
-
-void BPSNBA::calc_bpsnba (BPSNBA *a)
-{
-    a->buff = new float[a->size * 2]; // (float *) malloc0 (a->size * sizeof (complex));
-    a->bpsnba = NBP::create_nbp (
-        1,                          // run, always runs (use bpsnba 'run')
-        a->run_notches,             // run the notches
-        0,                          // position variable for nbp (not for bpsnba), always 0
-        a->size,                    // buffer size
-        a->nc,                      // number of filter coefficients
-        a->mp,                      // minimum phase flag
-        a->buff,                    // pointer to input buffer
-        a->out,                     // pointer to output buffer
-        a->f_low,                   // lower filter frequency
-        a->f_high,                  // upper filter frequency
-        a->rate,                    // sample rate
-        a->wintype,                 // wintype
-        a->gain,                    // gain
-        a->autoincr,                // auto-increase notch width if below min
-        a->maxpb,                   // max number of passbands
-        a->ptraddr);                // addr of database pointer
-}
-
-BPSNBA* BPSNBA::create_bpsnba (
-    int run,
-    int run_notches,
-    int position,
-    int size,
-    int nc,
-    int mp,
-    float* in,
-    float* out,
-    int rate,
-    float abs_low_freq,
-    float abs_high_freq,
-    float f_low,
-    float f_high,
-    int wintype,
-    float gain,
-    int autoincr,
-    int maxpb,
-    NOTCHDB* ptraddr
-)
-{
-    BPSNBA *a = new BPSNBA;
-    a->run = run;
-    a->run_notches = run_notches;
-    a->position = position;
-    a->size = size;
-    a->nc = nc;
-    a->mp = mp;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->abs_low_freq = abs_low_freq;
-    a->abs_high_freq = abs_high_freq;
-    a->f_low = f_low;
-    a->f_high = f_high;
-    a->wintype = wintype;
-    a->gain = gain;
-    a->autoincr = autoincr;
-    a->maxpb = maxpb;
-    a->ptraddr = ptraddr;
-    calc_bpsnba (a);
-    return a;
-}
-
-void BPSNBA::decalc_bpsnba (BPSNBA *a)
-{
-    NBP::destroy_nbp (a->bpsnba);
-    delete[] (a->buff);
-}
-
-void BPSNBA::destroy_bpsnba (BPSNBA *a)
-{
-    decalc_bpsnba (a);
-    delete[] (a);
-}
-
-void BPSNBA::flush_bpsnba (BPSNBA *a)
-{
-    memset (a->buff, 0, a->size * sizeof (wcomplex));
-    NBP::flush_nbp (a->bpsnba);
-}
-
-void BPSNBA::setBuffers_bpsnba (BPSNBA *a, float* in, float* out)
-{
-    decalc_bpsnba (a);
-    a->in = in;
-    a->out = out;
-    calc_bpsnba (a);
-}
-
-void BPSNBA::setSamplerate_bpsnba (BPSNBA *a, int rate)
-{
-    decalc_bpsnba (a);
-    a->rate = rate;
-    calc_bpsnba (a);
-}
-
-void BPSNBA::setSize_bpsnba (BPSNBA *a, int size)
-{
-    decalc_bpsnba (a);
-    a->size = size;
-    calc_bpsnba (a);
-}
-
-void BPSNBA::xbpsnbain (BPSNBA *a, int position)
-{
-    if (a->run && a->position == position)
-        memcpy (a->buff, a->in, a->size * sizeof (wcomplex));
-}
-
-void BPSNBA::xbpsnbaout (BPSNBA *a, int position)
-{
-    if (a->run && a->position == position)
-        NBP::xnbp (a->bpsnba, 0);
-}
-
-void BPSNBA::recalc_bpsnba_filter (BPSNBA *a, int update)
-{
-    // Call anytime one of the parameters listed below has been changed in
-    // the BPSNBA struct.
-    NBP *b = a->bpsnba;
-    b->fnfrun = a->run_notches;
-    b->flow = a->f_low;
-    b->fhigh = a->f_high;
-    b->wintype = a->wintype;
-    b->gain = a->gain;
-    b->autoincr = a->autoincr;
-    NBP::calc_nbp_impulse (b);
-    FIRCORE::setImpulse_fircore (b->p, b->impulse, update);
-    delete[] (b->impulse);
-}
-
-/********************************************************************************************************
-*                                                                                                       *
-*                                           RXA Properties                                              *
-*                                                                                                       *
-********************************************************************************************************/
-
-
-void BPSNBA::BPSNBASetNC (RXA& rxa, int nc)
-{
-    BPSNBA *a;
-    rxa.csDSP.lock();
-    a = rxa.bpsnba.p;
-    if (a->nc != nc)
-    {
-        a->nc = nc;
-        a->bpsnba->nc = a->nc;
-        NBP::setNc_nbp (a->bpsnba);
-    }
-    rxa.csDSP.unlock();
-}
-
-
-void BPSNBA::BPSNBASetMP (RXA& rxa, int mp)
-{
-    BPSNBA *a;
-    a = rxa.bpsnba.p;
-    if (a->mp != mp)
-    {
-        a->mp = mp;
-        a->bpsnba->mp = a->mp;
-        NBP::setMp_nbp (a->bpsnba);
-    }
-}
-
-} // namespace WDSP
+} // namespace

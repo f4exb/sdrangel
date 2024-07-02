@@ -27,7 +27,7 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "amd.hpp"
-#include "snb.hpp"
+#include "snba.hpp"
 #include "emnr.hpp"
 #include "anr.hpp"
 #include "anf.hpp"

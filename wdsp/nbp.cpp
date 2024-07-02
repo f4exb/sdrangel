@@ -28,7 +28,7 @@ warren@wpratt.com
 #include "comm.hpp"
 #include "fir.hpp"
 #include "firmin.hpp"
-#include "snb.hpp"
+#include "bpsnba.hpp"
 #include "nbp.hpp"
 #include "RXA.hpp"
 

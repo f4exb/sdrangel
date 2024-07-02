@@ -32,7 +32,7 @@
 #include "wcpAGC.hpp"
 #include "anr.hpp"
 #include "emnr.hpp"
-#include "snb.hpp"
+#include "snba.hpp"
 #include "anf.hpp"
 #include "anb.hpp"
 #include "nob.hpp"
@@ -547,10 +547,10 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         WDSP::ANF::SetANFRun(*m_rxa, settings.m_anf ? 1 : 0);
     }
 
-    // Causes corruption
-    // if ((m_settings.m_snb != settings.m_snb) || force) {
-    //     WDSP::SNBA::SetSNBARun(*m_rxa, settings.m_snb ? 1 : 0);
-    // }
+    // Caution: Causes corruption
+    if ((m_settings.m_snb != settings.m_snb) || force) {
+        WDSP::SNBA::SetSNBARun(*m_rxa, settings.m_snb ? 1 : 0);
+    }
 
     // CW Peaking
 
@@ -635,12 +635,6 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     if ((m_settings.m_volume != settings.m_volume) || force) {
         WDSP::PANEL::SetPanelGain1(*m_rxa, settings.m_volume);
     }
-
-    // if ((m_settings.m_volume != settings.m_volume) || force)
-    // {
-    //     m_volume = settings.m_volume;
-    //     m_volume /= 4.0; // for 3276.8
-    // }
 
     if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
         WDSP::PANEL::SetPanelBinaural(*m_rxa, settings.m_audioBinaural ? 1 : 0);

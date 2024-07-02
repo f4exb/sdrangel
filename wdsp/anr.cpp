@@ -30,7 +30,7 @@ warren@wpratt.com
 #include "comm.hpp"
 #include "anr.hpp"
 #include "amd.hpp"
-#include "snb.hpp"
+#include "snba.hpp"
 #include "emnr.hpp"
 #include "anf.hpp"
 #include "bandpass.hpp"

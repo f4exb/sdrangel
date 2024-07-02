@@ -11,6 +11,7 @@ set(wdsp_SOURCES
     bandpass.cpp
     bldr.cpp
     bps.cpp
+    bpsnba.cpp
     calculus.cpp
     cblock.cpp
     cfcomp.cpp
@@ -45,7 +46,7 @@ set(wdsp_SOURCES
     shift.cpp
     siphon.cpp
     slew.cpp
-    snb.cpp
+    snba.cpp
     ssql.cpp
     TXA.cpp
     varsamp.cpp
@@ -62,6 +63,7 @@ set(wdsp_HEADERS
     bandpass.hpp
     bldr.hpp
     bps.hpp
+    bpsnba.hpp
     bufferprobe.hpp
     calculus.hpp
     cblock.hpp
@@ -98,7 +100,7 @@ set(wdsp_HEADERS
     shift.hpp
     siphon.hpp
     slew.hpp
-    snb.hpp
+    snba.hpp
     ssql.hpp
     TXA.hpp
     varsamp.hpp
