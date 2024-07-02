@@ -47,6 +47,21 @@ public:
     static void median(int n, float* a, float* med);
 };
 
+class WDSP_API LMathd {
+public:
+    static void dR (int n, double* r, double* y, double* z);
+    static void trI (
+        int n,
+        double* r,
+        double* B,
+        double* y,
+        double* v,
+        double* dR_z
+    );
+    static void asolve(int xsize, int asize, double* x, double* a, double* r, double* z);
+    static void median(int n, double* a, double* med);
+};
+
 } // namespace WDSP
 
 #endif

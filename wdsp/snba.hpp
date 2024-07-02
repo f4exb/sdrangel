@@ -48,15 +48,15 @@ public:
     int iasize;
     int iainidx;
     int iaoutidx;
-    float* inaccum;
-    float* xbase;
-    float* xaux;
+    double* inaccum;
+    double* xbase;
+    double* xaux;
     int nsamps;
     int oasize;
     int oainidx;
     int oaoutidx;
     int init_oaoutidx;
-    float* outaccum;
+    double* outaccum;
 
     int resamprun;
     int isize;
@@ -67,11 +67,11 @@ public:
     struct _exec
     {
         int asize;
-        float* a;
-        float* v;
+        double* a;
+        double* v;
         int* detout;
-        float* savex;
-        float* xHout;
+        double* savex;
+        double* xHout;
         int* unfixed;
         int npasses;
     } exec;
@@ -82,8 +82,8 @@ public:
         int b;
         int pre;
         int post;
-        float* vp;
-        float* vpwr;
+        double* vp;
+        double* vpwr;
     } sdet;
     struct _scan
     {
@@ -93,17 +93,17 @@ public:
     {
         int xHat_a1rows_max;
         int xHat_a2cols_max;
-        float* xHat_r;
-        float* xHat_ATAI;
-        float* xHat_A1;
-        float* xHat_A2;
-        float* xHat_P1;
-        float* xHat_P2;
-        float* trI_y;
-        float* trI_v;
-        float* dR_z;
-        float* asolve_r;
-        float* asolve_z;
+        double* xHat_r;
+        double* xHat_ATAI;
+        double* xHat_A1;
+        double* xHat_A2;
+        double* xHat_P1;
+        double* xHat_P2;
+        double* trI_y;
+        double* trI_v;
+        double* dR_z;
+        double* asolve_r;
+        double* asolve_z;
     } wrk;
     double out_low_cut;
     double out_high_cut;
@@ -146,36 +146,33 @@ public:
     static void SetSNBApresamps (RXA& rxa, int presamps);
     static void SetSNBApostsamps (RXA& rxa, int postsamps);
     static void SetSNBApmultmin (RXA& rxa, double pmultmin);
-
-
-
     static void SetSNBAOutputBandwidth (RXA& rxa, double flow, double fhigh);
 
 private:
     static void calc_snba (SNBA *d);
     static void decalc_snba (SNBA *d);
-    static void ATAc0 (int n, int nr, float* A, float* r);
-    static void multA1TA2(float* a1, float* a2, int m, int n, int q, float* c);
-    static void multXKE(float* a, float* xk, int m, int q, int p, float* vout);
-    static void multAv(float* a, float* v, int m, int q, float* vout);
+    static void ATAc0 (int n, int nr, double* A, double* r);
+    static void multA1TA2(double* a1, double* a2, int m, int n, int q, double* c);
+    static void multXKE(double* a, double* xk, int m, int q, int p, double* vout);
+    static void multAv(double* a, double* v, int m, int q, double* vout);
     static void xHat(
         int xusize,
         int asize,
-        float* xk,
-        float* a,
-        float* xout,
-        float* r,
-        float* ATAI,
-        float* A1,
-        float* A2,
-        float* P1,
-        float* P2,
-        float* trI_y,
-        float* trI_v,
-        float* dR_z
+        double* xk,
+        double* a,
+        double* xout,
+        double* r,
+        double* ATAI,
+        double* A1,
+        double* A2,
+        double* P1,
+        double* P2,
+        double* trI_y,
+        double* trI_v,
+        double* dR_z
     );
-    static void invf(int xsize, int asize, float* a, float* x, float* v);
-    static void det(SNBA *d, int asize, float* v, int* detout);
+    static void invf(int xsize, int asize, double* a, double* x, double* v);
+    static void det(SNBA *d, int asize, double* v, int* detout);
     static int scanFrame(
         int xsize,
         int pval,
@@ -188,7 +185,7 @@ private:
         int* p_opt,
         int* next
     );
-    static void execFrame(SNBA *d, float* x);
+    static void execFrame(SNBA *d, double* x);
 };
 
 } // namespace
