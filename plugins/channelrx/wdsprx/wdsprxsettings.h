@@ -100,7 +100,6 @@ struct WDSPRxProfile
     double m_nbAvgTime;   // a.k.a back tau
     // Noise rediction
     bool m_dnr;
-    bool m_snb;
     bool m_anf;
     WDSPRxNRScheme m_nrScheme;
     WDSPRxNR2Gain m_nr2Gain;
@@ -134,7 +133,6 @@ struct WDSPRxProfile
         m_nbThreshold(30),
         m_nbAvgTime(50.0),
         m_dnr(false),
-        m_snb(false),
         m_anf(false),
         m_nrScheme(NRSchemeNR),
         m_nr2Gain(NR2GainGamma),
@@ -178,7 +176,6 @@ struct WDSPRxSettings
     double m_nbAvgTime;
     // Noise reduction
     bool m_dnr;
-    bool m_snb;
     bool m_anf;
     WDSPRxProfile::WDSPRxNRScheme m_nrScheme;
     WDSPRxProfile::WDSPRxNR2Gain m_nr2Gain;

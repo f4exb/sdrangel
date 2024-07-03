@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <QNetworkRequest>
+#include <QRecursiveMutex>
 
 #include "dsp/mimochannel.h"
 #include "dsp/spectrumvis.h"
@@ -185,7 +186,7 @@ private:
     ScopeVis m_scopeSink;
     QThread *m_thread;
     InterferometerBaseband* m_basebandSink;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     bool m_running;
     InterferometerSettings m_settings;
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI

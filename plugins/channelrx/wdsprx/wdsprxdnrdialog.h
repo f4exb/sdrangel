@@ -30,7 +30,6 @@ class SDRGUI_API WDSPRxDNRDialog : public QDialog {
     Q_OBJECT
 public:
     enum ValueChanged {
-        ChangedSNB,
         ChangedANF,
         ChangedNR,
         ChangedNR2Gain,
@@ -42,7 +41,6 @@ public:
     explicit WDSPRxDNRDialog(QWidget* parent = nullptr);
     ~WDSPRxDNRDialog();
 
-    void setSNB(bool snb);
     void setANF(bool anf);
     void setNRScheme(WDSPRxProfile::WDSPRxNRScheme scheme);
     void setNR2Gain(WDSPRxProfile::WDSPRxNR2Gain gain);
@@ -50,7 +48,6 @@ public:
     void setNRPosition(WDSPRxProfile::WDSPRxNRPosition position);
     void setNR2ArtifactReduction(bool nr2ArtifactReducion);
 
-    bool getSNB() const { return m_snb; }
     bool getANF() const { return m_anf; }
     WDSPRxProfile::WDSPRxNRScheme getNRScheme() const { return m_nrScheme; }
     WDSPRxProfile::WDSPRxNR2Gain getNR2Gain() const { return m_nr2Gain; }
@@ -63,7 +60,6 @@ signals:
 
 private:
     Ui::WDSPRxDNRDialog *ui;
-    bool m_snb;
     bool m_anf;
     WDSPRxProfile::WDSPRxNRScheme m_nrScheme;
     WDSPRxProfile::WDSPRxNR2Gain m_nr2Gain;
@@ -72,7 +68,6 @@ private:
     bool m_nr2ArtifactReduction;
 
 private slots:
-    void on_snb_clicked(bool checked);
     void on_anf_clicked(bool checked);
     void on_nr_currentIndexChanged(int index);
     void on_nr2Gain_currentIndexChanged(int index);

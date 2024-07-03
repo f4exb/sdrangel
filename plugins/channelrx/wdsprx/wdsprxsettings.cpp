@@ -63,7 +63,6 @@ void WDSPRxSettings::resetToDefaults()
     m_nbAvgTime = 50.0;
     // Noise reduction
     m_dnr = false;
-    m_snb = false;
     m_anf = false;
     m_nrScheme = WDSPRxProfile::NRSchemeNR;
     m_nr2Gain = WDSPRxProfile::NR2GainGamma;
@@ -125,7 +124,6 @@ QByteArray WDSPRxSettings::serialize() const
     s.writeDouble(27, m_nbAvgTime);
     // Noise reduction
     s.writeBool(  30, m_dnr);
-    s.writeBool(  31, m_snb);
     s.writeBool(  32, m_anf);
     s.writeS32(   33, (int) m_nrScheme);
     s.writeS32(   34, (int) m_nr2Gain);
@@ -182,7 +180,6 @@ QByteArray WDSPRxSettings::serialize() const
         s.writeDouble(127 + 50*i, m_profiles[i].m_nbAvgTime);
         // Noise reduction
         s.writeBool  (130 + 50*i, m_profiles[i].m_dnr);
-        s.writeBool  (131 + 50*i, m_profiles[i].m_snb);
         s.writeBool  (132 + 50*i, m_profiles[i].m_anf);
         s.writeS32   (133 + 50*i, (int) m_profiles[i].m_nrScheme);
         s.writeS32   (134 + 50*i, (int) m_profiles[i].m_nr2Gain);
@@ -253,7 +250,6 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         d.readDouble(27, &m_nbAvgTime, 50.0);
         // Nosie reduction
         d.readBool(  30, &m_dnr, false);
-        d.readBool(  31, &m_snb, false);
         d.readBool(  32, &m_anf, false);
         d.readS32(   33, &tmp, 2);
         m_nrScheme = (WDSPRxProfile::WDSPRxNRScheme) tmp;
@@ -330,7 +326,6 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
             d.readDouble(127 + 50*i, &m_profiles[i].m_nbAvgTime, 50.0);
             // Noise reduction
             d.readBool  (130 + 50*i, &m_profiles[i].m_dnr, false);
-            d.readBool  (131 + 50*i, &m_profiles[i].m_snb, false);
             d.readBool  (132 + 50*i, &m_profiles[i].m_anf, false);
             d.readS32   (133 + 50*i, &tmp);
             m_profiles[i].m_nrScheme = (WDSPRxProfile::WDSPRxNRScheme) tmp;

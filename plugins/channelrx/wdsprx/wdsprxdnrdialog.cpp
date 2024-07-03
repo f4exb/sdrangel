@@ -29,14 +29,6 @@ WDSPRxDNRDialog::~WDSPRxDNRDialog()
     delete ui;
 }
 
-void WDSPRxDNRDialog::setSNB(bool snb)
-{
-    ui->snb->blockSignals(true);
-    ui->snb->setChecked(snb);
-    ui->snb->blockSignals(false);
-    m_snb = snb;
-}
-
 void WDSPRxDNRDialog::setANF(bool anf)
 {
     ui->anf->blockSignals(true);
@@ -83,12 +75,6 @@ void WDSPRxDNRDialog::setNR2ArtifactReduction(bool nr2ArtifactReducion)
     ui->nr2ArtifactReduction->setChecked(nr2ArtifactReducion);
     ui->nr2ArtifactReduction->blockSignals(false);
     m_nr2ArtifactReduction = nr2ArtifactReducion;
-}
-
-void WDSPRxDNRDialog::on_snb_clicked(bool checked)
-{
-    m_snb = checked;
-    emit valueChanged(ChangedSNB);
 }
 
 void WDSPRxDNRDialog::on_anf_clicked(bool checked)
