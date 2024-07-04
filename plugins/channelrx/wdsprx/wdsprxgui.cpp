@@ -41,6 +41,7 @@
 #include "wdsprxdnbdialog.h"
 #include "wdsprxdnrdialog.h"
 #include "wdsprxamdialog.h"
+#include "wdsprxfmdialog.h"
 #include "wdsprxcwpeakdialog.h"
 
 WDSPRxGUI* WDSPRxGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
@@ -309,10 +310,18 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
     m_settings.m_nr2ArtifactReduction = m_settings.m_profiles[m_settings.m_profileIndex].m_nr2ArtifactReduction;
     // demod
     m_settings.m_demod = m_settings.m_profiles[m_settings.m_profileIndex].m_demod;
+    m_settings.m_amFadeLevel = m_settings.m_profiles[m_settings.m_profileIndex].m_amFadeLevel;
     m_settings.m_cwPeaking = m_settings.m_profiles[m_settings.m_profileIndex].m_cwPeaking;
     m_settings.m_cwPeakFrequency = m_settings.m_profiles[m_settings.m_profileIndex].m_cwPeakFrequency;
     m_settings.m_cwBandwidth = m_settings.m_profiles[m_settings.m_profileIndex].m_cwBandwidth;
     m_settings.m_cwGain = m_settings.m_profiles[m_settings.m_profileIndex].m_cwGain;
+    m_settings.m_fmDeviation = m_settings.m_profiles[m_settings.m_profileIndex].m_fmDeviation;
+    m_settings.m_fmAFLow = m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFLow;
+    m_settings.m_fmAFHigh = m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFHigh;
+    m_settings.m_fmAFLimiter = m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFLimiter;
+    m_settings.m_fmAFLimiterGain = m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFLimiterGain;
+    m_settings.m_fmCTCSSNotch = m_settings.m_profiles[m_settings.m_profileIndex].m_fmCTCSSNotch;
+    m_settings.m_fmCTCSSNotchFrequency = m_settings.m_profiles[m_settings.m_profileIndex].m_fmCTCSSNotchFrequency;
     displaySettings();
     applyBandwidths(m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2, true); // does applySettings(true)
 }
@@ -414,6 +423,7 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_dnbDialog(nullptr),
     m_dnrDialog(nullptr),
     m_amDialog(nullptr),
+    m_fmDialog(nullptr),
     m_cwPeakDialog(nullptr)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -1023,6 +1033,23 @@ void WDSPRxGUI::demodSetupDialog(const QPoint& p)
         m_amDialog->deleteLater();
         m_amDialog = nullptr;
     }
+    else if (m_settings.m_demod == WDSPRxProfile::DemodFMN)
+    {
+        m_fmDialog = new WDSPRxFMDialog();
+        m_fmDialog->move(p);
+        m_fmDialog->setDeviation(m_settings.m_fmDeviation);
+        m_fmDialog->setAFLow(m_settings.m_fmAFLow);
+        m_fmDialog->setAFHigh(m_settings.m_fmAFHigh);
+        m_fmDialog->setAFLimiter(m_settings.m_fmAFLimiter);
+        m_fmDialog->setAFLimiterGain(m_settings.m_fmAFLimiterGain);
+        m_fmDialog->setCTCSSNotch(m_settings.m_fmCTCSSNotch);
+        m_fmDialog->setCTCSSNotchFrequency(m_settings.m_fmCTCSSNotchFrequency);
+        QObject::connect(m_fmDialog, &WDSPRxFMDialog::valueChanged, this, &WDSPRxGUI::fmSetup);
+        m_fmDialog->exec();
+        QObject::disconnect(m_fmDialog, &WDSPRxFMDialog::valueChanged, this, &WDSPRxGUI::fmSetup);
+        m_fmDialog->deleteLater();
+        m_fmDialog = nullptr;
+    }
 }
 
 void WDSPRxGUI::amSetup(int iValueChanged)
@@ -1038,6 +1065,56 @@ void WDSPRxGUI::amSetup(int iValueChanged)
     case WDSPRxAMDialog::ChangedFadeLevel:
         m_settings.m_amFadeLevel = m_amDialog->getFadeLevel();
         m_settings.m_profiles[m_settings.m_profileIndex].m_amFadeLevel = m_settings.m_amFadeLevel;
+        applySettings();
+        break;
+    default:
+        break;
+    }
+}
+
+void WDSPRxGUI::fmSetup(int iValueChanged)
+{
+    if (!m_fmDialog) {
+        return;
+    }
+
+    WDSPRxFMDialog::ValueChanged valueChanged = (WDSPRxFMDialog::ValueChanged) iValueChanged;
+
+    switch (valueChanged)
+    {
+    case WDSPRxFMDialog::ChangedDeviation:
+        m_settings.m_fmDeviation = m_fmDialog->getDeviation();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_fmDeviation = m_settings.m_fmDeviation;
+        applySettings();
+        break;
+    case WDSPRxFMDialog::ChangedAFLow:
+        m_settings.m_fmAFLow = m_fmDialog->getAFLow();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFLow = m_settings.m_fmAFLow;
+        applySettings();
+        break;
+    case WDSPRxFMDialog::ChangedAFHigh:
+        m_settings.m_fmAFHigh = m_fmDialog->getAFHigh();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFHigh = m_settings.m_fmAFHigh;
+        applySettings();
+        break;
+    case WDSPRxFMDialog::ChangedAFLimiter:
+        m_settings.m_fmAFLimiter = m_fmDialog->getAFLimiter();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFLimiter = m_settings.m_fmAFLimiter;
+        applySettings();
+        break;
+    case WDSPRxFMDialog::ChangedAFLimiterGain:
+        m_settings.m_fmAFLimiterGain = m_fmDialog->getAFLimiterGain();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFLimiterGain = m_settings.m_fmAFLimiterGain;
+        applySettings();
+        break;
+    case WDSPRxFMDialog::ChangedCTCSSNotch:
+        m_settings.m_fmCTCSSNotch = m_fmDialog->getCTCSSNotch();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_fmCTCSSNotch = m_settings.m_fmCTCSSNotch;
+        applySettings();
+        break;
+    case WDSPRxFMDialog::ChangedCTCSSNotchFrequency:
+        m_settings.m_fmCTCSSNotchFrequency = m_fmDialog->getCTCSSNotchFrequency();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_fmCTCSSNotchFrequency = m_settings.m_fmCTCSSNotchFrequency;
         applySettings();
         break;
     default:

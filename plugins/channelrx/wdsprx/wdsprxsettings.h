@@ -112,6 +112,13 @@ struct WDSPRxProfile
     double m_cwPeakFrequency;
     double m_cwBandwidth;
     double m_cwGain;
+    double m_fmDeviation;
+    double m_fmAFLow;
+    double m_fmAFHigh;
+    bool m_fmAFLimiter;
+    double m_fmAFLimiterGain;
+    bool m_fmCTCSSNotch;
+    double m_fmCTCSSNotchFrequency;
 
     WDSPRxProfile() :
         m_demod(DemodSSB),
@@ -143,7 +150,14 @@ struct WDSPRxProfile
         m_cwPeaking(false),
         m_cwPeakFrequency(600.0),
         m_cwBandwidth(100.0),
-        m_cwGain(2.0)
+        m_cwGain(2.0),
+        m_fmDeviation(2500.0),
+        m_fmAFLow(300.0),
+        m_fmAFHigh(3000.0),
+        m_fmAFLimiter(false),
+        m_fmAFLimiterGain(10.0),
+        m_fmCTCSSNotch(false),
+        m_fmCTCSSNotchFrequency(67.0)
     {}
 };
 
@@ -188,6 +202,13 @@ struct WDSPRxSettings
     double m_cwPeakFrequency;
     double m_cwBandwidth;
     double m_cwGain;
+    double m_fmDeviation;
+    double m_fmAFLow;
+    double m_fmAFHigh;
+    bool m_fmAFLimiter;
+    double m_fmAFLimiterGain;
+    bool m_fmCTCSSNotch;
+    double m_fmCTCSSNotchFrequency;
 
     quint32 m_rgbColor;
     QString m_title;

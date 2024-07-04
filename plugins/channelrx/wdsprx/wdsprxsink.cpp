@@ -37,6 +37,7 @@
 #include "anb.hpp"
 #include "nob.hpp"
 #include "amd.hpp"
+#include "fmd.hpp"
 #include "iir.cpp"
 
 #include "wdsprxsink.h"
@@ -625,6 +626,34 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
     if ((m_settings.m_amFadeLevel != settings.m_amFadeLevel) || force) {
         WDSP::AMD::SetAMDFadeLevel(*m_rxa, settings.m_amFadeLevel);
+    }
+
+    // FM options
+
+    if ((m_settings.m_fmDeviation != settings.m_fmDeviation) || force) {
+        WDSP::FMD::SetFMDeviation(*m_rxa, settings.m_fmDeviation);
+    }
+
+    if ((m_settings.m_fmAFLow != settings.m_fmAFLow)
+    || (m_settings.m_fmAFHigh != settings.m_fmAFHigh) || force)
+    {
+        WDSP::FMD::SetFMAFFilter(*m_rxa, settings.m_fmAFLow, settings.m_fmAFHigh);
+    }
+
+    if ((m_settings.m_fmAFLimiter != settings.m_fmAFLimiter) || force) {
+        WDSP::FMD::SetFMLimRun(*m_rxa, settings.m_fmAFLimiter ? 1 : 0);
+    }
+
+    if ((m_settings.m_fmAFLimiterGain != settings.m_fmAFLimiterGain) || force) {
+        WDSP::FMD::SetFMLimGain(*m_rxa, settings.m_fmAFLimiterGain);
+    }
+
+    if ((m_settings.m_fmCTCSSNotch != settings.m_fmCTCSSNotch) || force) {
+        WDSP::FMD::SetCTCSSRun(*m_rxa, settings.m_fmCTCSSNotch ? 1 : 0);
+    }
+
+    if ((m_settings.m_fmCTCSSNotchFrequency != settings.m_fmCTCSSNotchFrequency) || force) {
+        WDSP::FMD::SetCTCSSFreq(*m_rxa, settings.m_fmCTCSSNotchFrequency);
     }
 
     // Audio panel

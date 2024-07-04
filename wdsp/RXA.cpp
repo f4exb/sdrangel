@@ -932,7 +932,6 @@ void RXA::SetMode (RXA& rxa, int mode)
             break;
         case RXA_FM:
             rxa.fmd.p->run  = 1;
-            rxa.agc.p->run  = 0;
             break;
         default:
 

@@ -36,6 +36,8 @@ if(NOT SERVER_MODE)
         wdsprxdnbdialog.ui
         wdsprxdnrdialog.cpp
         wdsprxdnrdialog.ui
+        wdsprxfmdialog.cpp
+        wdsprxfmdialog.ui
         wdsprxgui.cpp
         wdsprxgui.ui
     )
@@ -47,6 +49,7 @@ if(NOT SERVER_MODE)
         wdsprxcwpeakdialog.h
         wdsprxdnbdialog.h
         wdsprxdnrdialog.h
+        wdsprxfmdialog.h
     )
     set(TARGET_NAME wdsprx)
     set(TARGET_LIB "Qt::Widgets")

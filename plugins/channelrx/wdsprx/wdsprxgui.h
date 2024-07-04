@@ -38,6 +38,7 @@ class WDSPRxAGCDialog;
 class WDSPRxDNBDialog;
 class WDSPRxDNRDialog;
 class WDSPRxAMDialog;
+class WDSPRxFMDialog;
 class WDSPRxCWPeakDialog;
 class SpectrumVis;
 class BasebandSampleSink;
@@ -98,6 +99,7 @@ private:
     WDSPRxDNBDialog* m_dnbDialog;
     WDSPRxDNRDialog* m_dnrDialog;
     WDSPRxAMDialog* m_amDialog;
+    WDSPRxFMDialog* m_fmDialog;
     WDSPRxCWPeakDialog* m_cwPeakDialog;
 
 	QIcon m_iconDSBUSB;
@@ -152,6 +154,7 @@ private slots:
     void cwPeakSetup(int valueChanged);
     void demodSetupDialog(const QPoint& p);
     void amSetup(int valueChanged);
+    void fmSetup(int valueChanged);
 	void tick();
 };
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>452</width>
+    <width>514</width>
     <height>179</height>
    </rect>
   </property>
@@ -36,7 +36,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>450</width>
+     <width>501</width>
      <height>181</height>
     </rect>
    </property>
@@ -210,6 +210,39 @@
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="demod">
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Modulation  (right click for options)</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>SSB</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>AM</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>SAM</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>FM</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item>
@@ -752,39 +785,6 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="volumeLayout">
-      <item>
-       <widget class="QComboBox" name="demod">
-        <property name="maximumSize">
-         <size>
-          <width>60</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Modulation  (right click for options)</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>SSB</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>AM</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>SAM</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>FM</string>
-         </property>
-        </item>
-       </widget>
-      </item>
       <item>
        <widget class="QLabel" name="volumeLabel">
         <property name="text">
