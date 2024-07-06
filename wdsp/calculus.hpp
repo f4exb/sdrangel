@@ -36,8 +36,8 @@ namespace WDSP {
 class WDSP_API Calculus
 {
 public:
-    static const float GG[];
-    static const float GGS[];
+    static const double GG[];
+    static const double GGS[];
 };
 
 } // namespace WDSP

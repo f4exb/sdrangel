@@ -48,9 +48,9 @@ namespace WDSP {
 // Shanjie Zhang and Jianming Jin, "Computation of Special Functions."  New York, NY, John Wiley and Sons,
 //      Inc., 1996.  [Sample code given in FORTRAN]
 
-float EMNR::bessI0 (float x)
+double EMNR::bessI0 (double x)
 {
-    float res, p;
+    double res, p;
     if (x == 0.0)
         res = 1.0;
     else
@@ -86,10 +86,10 @@ float EMNR::bessI0 (float x)
     return res;
 }
 
-float EMNR::bessI1 (float x)
+double EMNR::bessI1 (double x)
 {
 
-    float res, p;
+    double res, p;
     if (x == 0.0)
         res = 0.0;
     else
@@ -132,9 +132,9 @@ float EMNR::bessI1 (float x)
 // Shanjie Zhang and Jianming Jin, "Computation of Special Functions."  New York, NY, John Wiley and Sons,
 //      Inc., 1996.  [Sample code given in FORTRAN]
 
-float EMNR::e1xb (float x)
+double EMNR::e1xb (double x)
 {
-    float e1, ga, r, t, t0;
+    double e1, ga, r, t, t0;
     int k, m;
     if (x == 0.0)
         e1 = 1.0e300;
@@ -193,7 +193,7 @@ void EMNR::calc_window (EMNR *a)
     }
 }
 
-void EMNR::interpM (float* res, float x, int nvals, float* xvals, float* yvals)
+void EMNR::interpM (double* res, double x, int nvals, double* xvals, double* yvals)
 {
     if (x <= xvals[0])
         *res = yvals[0];
@@ -202,7 +202,7 @@ void EMNR::interpM (float* res, float x, int nvals, float* xvals, float* yvals)
     else
     {
         int idx = 0;
-        float xllow, xlhigh, frac;
+        double xllow, xlhigh, frac;
         while (x >= xvals[idx])  idx++;
         xllow = log10 (xvals[idx - 1]);
         xlhigh = log10(xvals[idx]);
@@ -214,9 +214,9 @@ void EMNR::interpM (float* res, float x, int nvals, float* xvals, float* yvals)
 void EMNR::calc_emnr(EMNR *a)
 {
     int i;
-    float Dvals[18] = { 1.0, 2.0, 5.0, 8.0, 10.0, 15.0, 20.0, 30.0, 40.0,
+    double Dvals[18] = { 1.0, 2.0, 5.0, 8.0, 10.0, 15.0, 20.0, 30.0, 40.0,
         60.0, 80.0, 120.0, 140.0, 160.0, 180.0, 220.0, 260.0, 300.0 };
-    float Mvals[18] = { 0.000, 0.260, 0.480, 0.580, 0.610, 0.668, 0.705, 0.762, 0.800,
+    double Mvals[18] = { 0.000, 0.260, 0.480, 0.580, 0.610, 0.668, 0.705, 0.762, 0.800,
         0.841, 0.865, 0.890, 0.900, 0.910, 0.920, 0.930, 0.935, 0.940 };
     // float Hvals[18] = { 0.000, 0.150, 0.480, 0.780, 0.980, 1.550, 2.000, 2.300, 2.520,
     //     3.100, 3.380, 4.150, 4.350, 4.250, 3.900, 4.100, 4.700, 5.000 };
@@ -246,7 +246,8 @@ void EMNR::calc_emnr(EMNR *a)
     a->inaccum = new float[a->iasize]; // (float *)malloc0(a->iasize * sizeof(float));
     a->forfftin = new float[a->fsize]; // (float *)malloc0(a->fsize * sizeof(float));
     a->forfftout = new float[a->msize * 2]; // (float *)malloc0(a->msize * sizeof(complex));
-    a->mask = new float[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
+    a->mask = new double[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
+    std::fill(a->mask, a->mask + a->msize, 1.0);
     a->revfftin = new float[a->msize * 2]; // (float *)malloc0(a->msize * sizeof(complex));
     a->revfftout = new float[a->fsize]; // (float *)malloc0(a->fsize * sizeof(float));
     a->save = new float*[a->ovrlp]; // (float **)malloc0(a->ovrlp * sizeof(float *));
@@ -262,10 +263,10 @@ void EMNR::calc_emnr(EMNR *a)
     a->g.msize = a->msize;
     a->g.mask = a->mask;
     a->g.y = a->forfftout;
-    a->g.lambda_y = new float[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
-    a->g.lambda_d = new float[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
-    a->g.prev_gamma = new float[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
-    a->g.prev_mask = new float[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
+    a->g.lambda_y = new double[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
+    a->g.lambda_d = new double[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
+    a->g.prev_gamma = new double[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
+    a->g.prev_mask = new double[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
 
     a->g.gf1p5 = sqrt(PI) / 2.0;
     {
@@ -282,8 +283,8 @@ void EMNR::calc_emnr(EMNR *a)
     }
     a->g.gmax = 10000.0;
     //
-    a->g.GG = new float[241 * 241]; // (float *)malloc0(241 * 241 * sizeof(float));
-    a->g.GGS = new float[241 * 241]; // (float *)malloc0(241 * 241 * sizeof(float));
+    a->g.GG = new double[241 * 241]; // (float *)malloc0(241 * 241 * sizeof(float));
+    a->g.GGS = new double[241 * 241]; // (float *)malloc0(241 * 241 * sizeof(float));
     if ((a->g.fileb = fopen("calculus", "rb")))
     {
         std::size_t lgg = fread(a->g.GG, sizeof(float), 241 * 241, a->g.fileb);
@@ -356,23 +357,23 @@ void EMNR::calc_emnr(EMNR *a)
         a->np.nsmax[3] = pow(10.0, db / 10.0 * a->np.V * a->np.incr / a->np.rate);
     }
 
-    a->np.p = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.alphaOptHat = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.alphaHat = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.sigma2N = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.pbar = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.p2bar = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.Qeq = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.bmin = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.bmin_sub = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.p = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.alphaOptHat = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.alphaHat = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.sigma2N = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.pbar = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.p2bar = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.Qeq = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.bmin = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.bmin_sub = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
     a->np.k_mod = new int[a->np.msize]; // (int *)malloc0(a->np.msize * sizeof(int));
-    a->np.actmin = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.actmin_sub =  new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.actmin = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.actmin_sub =  new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
     a->np.lmin_flag = new int[a->np.msize]; // (int *)malloc0(a->np.msize * sizeof(int));
-    a->np.pmin_u = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.actminbuff = new float*[a->np.U]; // (float**)malloc0(a->np.U     * sizeof(float*));
+    a->np.pmin_u = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+    a->np.actminbuff = new double*[a->np.U]; // (float**)malloc0(a->np.U     * sizeof(float*));
     for (i = 0; i < a->np.U; i++)
-        a->np.actminbuff[i] = new float[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
+        a->np.actminbuff[i] = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
 
     {
         int k, ku;
@@ -412,10 +413,10 @@ void EMNR::calc_emnr(EMNR *a)
     a->nps.epsH1 = pow(10.0, 15.0 / 10.0);
     a->nps.epsH1r = a->nps.epsH1 / (1.0 + a->nps.epsH1);
 
-    a->nps.sigma2N = new float[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
-    a->nps.PH1y = new float[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
-    a->nps.Pbar = new float[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
-    a->nps.EN2y = new float[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
+    a->nps.sigma2N = new double[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
+    a->nps.PH1y = new double[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
+    a->nps.Pbar = new double[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
+    a->nps.EN2y = new double[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
 
     for (i = 0; i < a->nps.msize; i++)
     {
@@ -429,7 +430,7 @@ void EMNR::calc_emnr(EMNR *a)
     a->ae.zetaThresh = 0.75;
     a->ae.psi = 10.0;
 
-    a->ae.nmask = new float[a->ae.msize]; // (float *)malloc0(a->ae.msize * sizeof(float));
+    a->ae.nmask = new double[a->ae.msize]; // (float *)malloc0(a->ae.msize * sizeof(float));
 }
 
 void EMNR::decalc_emnr(EMNR *a)
@@ -482,8 +483,21 @@ void EMNR::decalc_emnr(EMNR *a)
     delete[] (a->window);
 }
 
-EMNR* EMNR::create_emnr (int run, int position, int size, float* in, float* out, int fsize, int ovrlp,
-    int rate, int wintype, float gain, int gain_method, int npe_method, int ae_run)
+EMNR* EMNR::create_emnr (
+    int run,
+    int position,
+    int size,
+    float* in,
+    float* out,
+    int fsize,
+    int ovrlp,
+    int rate,
+    int wintype,
+    float gain,
+    int gain_method,
+    int npe_method,
+    int ae_run
+)
 {
     EMNR *a = new EMNR;
 
@@ -528,17 +542,17 @@ void EMNR::destroy_emnr (EMNR *a)
 void EMNR::LambdaD(EMNR *a)
 {
     int k;
-    float f0, f1, f2, f3;
-    float sum_prev_p;
-    float sum_lambda_y;
-    float alphaCtilda;
-    float sum_prev_sigma2N;
-    float alphaMin, SNR;
-    float beta, varHat, invQeq;
-    float invQbar;
-    float bc;
-    float QeqTilda, QeqTildaSub;
-    float noise_slope_max;
+    double f0, f1, f2, f3;
+    double sum_prev_p;
+    double sum_lambda_y;
+    double alphaCtilda;
+    double sum_prev_sigma2N;
+    double alphaMin, SNR;
+    double beta, varHat, invQeq;
+    double invQbar;
+    double bc;
+    double QeqTilda, QeqTildaSub;
+    double noise_slope_max;
 
     sum_prev_p = 0.0;
     sum_lambda_y = 0.0;
@@ -658,7 +672,7 @@ void EMNR::LambdaDs (EMNR *a)
         a->nps.PH1y[k] = 1.0 / (1.0 + (1.0 + a->nps.epsH1) * exp (- a->nps.epsH1r * a->nps.lambda_y[k] / a->nps.sigma2N[k]));
         a->nps.Pbar[k] = a->nps.alpha_Pbar * a->nps.Pbar[k] + (1.0 - a->nps.alpha_Pbar) * a->nps.PH1y[k];
         if (a->nps.Pbar[k] > 0.99)
-            a->nps.PH1y[k] = std::min (a->nps.PH1y[k], 0.99f);
+            a->nps.PH1y[k] = std::min (a->nps.PH1y[k], 0.99);
         a->nps.EN2y[k] = (1.0 - a->nps.PH1y[k]) * a->nps.lambda_y[k] + a->nps.PH1y[k] * a->nps.sigma2N[k];
         a->nps.sigma2N[k] = a->nps.alpha_pow * a->nps.sigma2N[k] + (1.0 - a->nps.alpha_pow) * a->nps.EN2y[k];
     }
@@ -697,12 +711,12 @@ void EMNR::aepf(EMNR *a)
     std::copy(a->ae.nmask, a->ae.nmask + (a->ae.msize - 2 * n), a->mask + n);
 }
 
-float EMNR::getKey(float* type, float gamma, float xi)
+double EMNR::getKey(double* type, double gamma, double xi)
 {
-    int ngamma1, ngamma2, nxi1, nxi2;
-    float tg, tx, dg, dx;
-    const float dmin = 0.001;
-    const float dmax = 1000.0;
+    int ngamma1, ngamma2, nxi1 = 0, nxi2 = 0;
+    double tg, tx, dg, dx;
+    const double dmin = 0.001;
+    const double dmax = 1000.0;
     if (gamma <= dmin)
     {
         ngamma1 = ngamma2 = 0;
@@ -748,7 +762,9 @@ void EMNR::calc_gain (EMNR *a)
     int k;
     for (k = 0; k < a->g.msize; k++)
     {
-        a->g.lambda_y[k] = a->g.y[2 * k + 0] * a->g.y[2 * k + 0] + a->g.y[2 * k + 1] * a->g.y[2 * k + 1];
+        double y0 = a->g.y[2 * k + 0];
+        double y1 = a->g.y[2 * k + 1];
+        a->g.lambda_y[k] = y0 * y0 + y1 * y1;
     }
     switch (a->g.npe_method)
     {
@@ -763,7 +779,7 @@ void EMNR::calc_gain (EMNR *a)
     {
     case 0:
         {
-            float gamma, eps_hat, v;
+            double gamma, eps_hat, v;
             for (k = 0; k < a->msize; k++)
             {
                 gamma = std::min (a->g.lambda_y[k] / a->g.lambda_d[k], a->g.gamma_max);
@@ -773,10 +789,10 @@ void EMNR::calc_gain (EMNR *a)
                 a->g.mask[k] = a->g.gf1p5 * sqrt (v) / gamma * exp (- 0.5 * v)
                     * ((1.0 + v) * bessI0 (0.5 * v) + v * bessI1 (0.5 * v));
                 {
-                    float v2 = std::min (v, 700.0f);
-                    float eta = a->g.mask[k] * a->g.mask[k] * a->g.lambda_y[k] / a->g.lambda_d[k];
-                    float eps = eta / (1.0 - a->g.q);
-                    float witchHat = (1.0 - a->g.q) / a->g.q * exp (v2) / (1.0 + eps);
+                    double v2 = std::min (v, 700.0);
+                    double eta = a->g.mask[k] * a->g.mask[k] * a->g.lambda_y[k] / a->g.lambda_d[k];
+                    double eps = eta / (1.0 - a->g.q);
+                    double witchHat = (1.0 - a->g.q) / a->g.q * exp (v2) / (1.0 + eps);
                     a->g.mask[k] *= witchHat / (1.0 + witchHat);
                 }
                 if (a->g.mask[k] > a->g.gmax) a->g.mask[k] = a->g.gmax;
@@ -788,7 +804,7 @@ void EMNR::calc_gain (EMNR *a)
         }
     case 1:
         {
-            float gamma, eps_hat, v, ehr;
+            double gamma, eps_hat, v, ehr;
             for (k = 0; k < a->g.msize; k++)
             {
                 gamma = std::min (a->g.lambda_y[k] / a->g.lambda_d[k], a->g.gamma_max);
@@ -805,7 +821,7 @@ void EMNR::calc_gain (EMNR *a)
         }
     case 2:
         {
-            float gamma, eps_hat, eps_p;
+            double gamma, eps_hat, eps_p;
             for (k = 0; k < a->msize; k++)
             {
                 gamma = std::min(a->g.lambda_y[k] / a->g.lambda_d[k], a->g.gamma_max);
@@ -952,14 +968,14 @@ void EMNR::SetEMNRPosition (RXA& rxa, int position)
     rxa.csDSP.unlock();
 }
 
-void EMNR::SetEMNRaeZetaThresh (RXA& rxa, float zetathresh)
+void EMNR::SetEMNRaeZetaThresh (RXA& rxa, double zetathresh)
 {
     rxa.csDSP.lock();
     rxa.emnr.p->ae.zetaThresh = zetathresh;
     rxa.csDSP.unlock();
 }
 
-void EMNR::SetEMNRaePsi (RXA& rxa, float psi)
+void EMNR::SetEMNRaePsi (RXA& rxa, double psi)
 {
     rxa.csDSP.lock();
     rxa.emnr.p->ae.psi = psi;

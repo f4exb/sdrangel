@@ -52,7 +52,7 @@ public:
     float* forfftin;
     float* forfftout;
     int msize;
-    float* mask;
+    double* mask;
     float* revfftin;
     float* revfftout;
     float** save;
@@ -76,95 +76,108 @@ public:
         int gain_method;
         int npe_method;
         int ae_run;
-        float msize;
-        float* mask;
+        double msize;
+        double* mask;
         float* y;
-        float* lambda_y;
-        float* lambda_d;
-        float* prev_mask;
-        float* prev_gamma;
-        float gf1p5;
-        float alpha;
-        float eps_floor;
-        float gamma_max;
-        float q;
-        float gmax;
+        double* lambda_y;
+        double* lambda_d;
+        double* prev_mask;
+        double* prev_gamma;
+        double gf1p5;
+        double alpha;
+        double eps_floor;
+        double gamma_max;
+        double q;
+        double gmax;
         //
-        float* GG;
-        float* GGS;
+        double* GG;
+        double* GGS;
         FILE* fileb;
     } g;
     struct _npest
     {
         int incr;
-        float rate;
+        double rate;
         int msize;
-        float* lambda_y;
-        float* lambda_d;
-        float* p;
-        float* alphaOptHat;
-        float alphaC;
-        float alphaCsmooth;
-        float alphaCmin;
-        float* alphaHat;
-        float alphaMax;
-        float* sigma2N;
-        float alphaMin_max_value;
-        float snrq;
-        float betamax;
-        float* pbar;
-        float* p2bar;
-        float invQeqMax;
-        float av;
-        float* Qeq;
+        double* lambda_y;
+        double* lambda_d;
+        double* p;
+        double* alphaOptHat;
+        double alphaC;
+        double alphaCsmooth;
+        double alphaCmin;
+        double* alphaHat;
+        double alphaMax;
+        double* sigma2N;
+        double alphaMin_max_value;
+        double snrq;
+        double betamax;
+        double* pbar;
+        double* p2bar;
+        double invQeqMax;
+        double av;
+        double* Qeq;
         int U;
-        float Dtime;
+        double Dtime;
         int V;
         int D;
-        float MofD;
-        float MofV;
-        float* bmin;
-        float* bmin_sub;
+        double MofD;
+        double MofV;
+        double* bmin;
+        double* bmin_sub;
         int* k_mod;
-        float* actmin;
-        float* actmin_sub;
+        double* actmin;
+        double* actmin_sub;
         int subwc;
         int* lmin_flag;
-        float* pmin_u;
-        float invQbar_points[4];
-        float nsmax[4];
-        float** actminbuff;
+        double* pmin_u;
+        double invQbar_points[4];
+        double nsmax[4];
+        double** actminbuff;
         int amb_idx;
     } np;
     struct _npests
     {
         int incr;
-        float rate;
+        double rate;
         int msize;
-        float* lambda_y;
-        float* lambda_d;
+        double* lambda_y;
+        double* lambda_d;
 
-        float alpha_pow;
-        float alpha_Pbar;
-        float epsH1;
-        float epsH1r;
+        double alpha_pow;
+        double alpha_Pbar;
+        double epsH1;
+        double epsH1r;
 
-        float* sigma2N;
-        float* PH1y;
-        float* Pbar;
-        float* EN2y;
+        double* sigma2N;
+        double* PH1y;
+        double* Pbar;
+        double* EN2y;
     } nps;
     struct _ae
     {
         int msize;
-        float* lambda_y;
-        float zetaThresh;
-        float psi;
-        float* nmask;
+        double* lambda_y;
+        double zetaThresh;
+        double psi;
+        double* nmask;
     } ae;
 
-    static EMNR* create_emnr (int run, int position, int size, float* in, float* out, int fsize, int ovrlp,
-        int rate, int wintype, float gain, int gain_method, int npe_method, int ae_run);
+    static EMNR* create_emnr (
+        int run,
+        int position,
+        int size,
+        float* in,
+        float* out,
+        int fsize,
+        int ovrlp,
+        int rate,
+        int wintype,
+        float gain,
+        int gain_method,
+        int npe_method,
+        int ae_run
+    );
     static void destroy_emnr (EMNR *a);
     static void flush_emnr (EMNR *a);
     static void xemnr (EMNR *a, int pos);
@@ -177,21 +190,21 @@ public:
     static void SetEMNRnpeMethod (RXA& rxa, int method);
     static void SetEMNRaeRun (RXA& rxa, int run);
     static void SetEMNRPosition (RXA& rxa, int position);
-    static void SetEMNRaeZetaThresh (RXA& rxa, float zetathresh);
-    static void SetEMNRaePsi (RXA& rxa, float psi);
+    static void SetEMNRaeZetaThresh (RXA& rxa, double zetathresh);
+    static void SetEMNRaePsi (RXA& rxa, double psi);
 
 private:
-    static float bessI0 (float x);
-    static float bessI1 (float x);
-    static float e1xb (float x);
+    static double bessI0 (double x);
+    static double bessI1 (double x);
+    static double e1xb (double x);
     static void calc_window (EMNR *a);
-    static void interpM (float* res, float x, int nvals, float* xvals, float* yvals);
+    static void interpM (double* res, double x, int nvals, double* xvals, double* yvals);
     static void calc_emnr(EMNR *a);
     static void decalc_emnr(EMNR *a);
     static void LambdaD(EMNR *a);
     static void LambdaDs (EMNR *a);
     static void aepf(EMNR *a);
-    static float getKey(float* type, float gamma, float xi);
+    static double getKey(double* type, double gamma, double xi);
     static void calc_gain (EMNR *a);
 };
 
