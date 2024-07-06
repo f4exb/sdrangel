@@ -58,7 +58,8 @@ void SNBA::calc_snba (SNBA *d)
 
     d->inresamp  = RESAMPLE::create_resample (
         d->resamprun,
-        d->bsize, d->in,
+        d->bsize,
+        d->in,
         d->inbuff,
         d->inrate,
         d->internalrate,

@@ -47,22 +47,32 @@ public:
     float* out;        // output buffer for resampler
     int in_rate;
     int out_rate;
-    float fcin;
-    float fc;
-    float fc_low;
-    float gain;
+    double fcin;
+    double fc;
+    double fc_low;
+    double gain;
     int idx_in;         // index for input into ring
     int ncoefin;
     int ncoef;          // number of coefficients
     int L;              // interpolation factor
     int M;              // decimation factor
-    float* h;          // coefficients
+    double* h;          // coefficients
     int ringsize;       // number of complex pairs the ring buffer holds
-    float* ring;       // ring buffer
+    double* ring;       // ring buffer
     int cpp;            // coefficients of the phase
     int phnum;          // phase number
 
-    static RESAMPLE* create_resample (int run, int size, float* in, float* out, int in_rate, int out_rate, float fc, int ncoef, float gain);
+    static RESAMPLE* create_resample (
+        int run,
+        int size,
+        float* in,
+        float* out,
+        int in_rate,
+        int out_rate,
+        double fc,
+        int ncoef,
+        double gain
+    );
     static void destroy_resample (RESAMPLE *a);
     static void flush_resample (RESAMPLE *a);
     static int xresample (RESAMPLE *a);

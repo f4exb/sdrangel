@@ -69,14 +69,14 @@ void RESAMPLE::calc_resample (RESAMPLE *a)
     if (a->ncoef == 0) a->ncoef = (int)(140.0 * full_rate / min_rate);
     a->ncoef = (a->ncoef / a->L + 1) * a->L;
     a->cpp = a->ncoef / a->L;
-    a->h = new float[a->ncoef]; // (float *)malloc0(a->ncoef * sizeof(float));
+    a->h = new double[a->ncoef]; // (float *)malloc0(a->ncoef * sizeof(float));
     impulse = FIR::fir_bandpass(a->ncoef, fc_norm_low, fc_norm_high, 1.0, 1, 0, a->gain * (float)a->L);
     i = 0;
     for (j = 0; j < a->L; j++)
         for (k = 0; k < a->ncoef; k += a->L)
             a->h[i++] = impulse[j + k];
     a->ringsize = a->cpp;
-    a->ring = new float[a->ringsize]; // (float *)malloc0(a->ringsize * sizeof(complex));
+    a->ring = new double[a->ringsize]; // (float *)malloc0(a->ringsize * sizeof(complex));
     a->idx_in = a->ringsize - 1;
     a->phnum = 0;
     delete[] (impulse);
@@ -88,7 +88,17 @@ void RESAMPLE::decalc_resample (RESAMPLE *a)
     delete[] (a->h);
 }
 
-RESAMPLE* RESAMPLE::create_resample ( int run, int size, float* in, float* out, int in_rate, int out_rate, float fc, int ncoef, float gain)
+RESAMPLE* RESAMPLE::create_resample (
+    int run,
+    int size,
+    float* in,
+    float* out,
+    int in_rate,
+    int out_rate,
+    double fc,
+    int ncoef,
+    double gain
+)
 {
     RESAMPLE *a = new RESAMPLE;
 
@@ -116,7 +126,7 @@ void RESAMPLE::destroy_resample (RESAMPLE *a)
 
 void RESAMPLE::flush_resample (RESAMPLE *a)
 {
-    memset (a->ring, 0, a->ringsize * sizeof (wcomplex));
+    std::fill(a->ring, a->ring + 2 * a->ringsize, 0);
     a->idx_in = a->ringsize - 1;
     a->phnum = 0;
 }
@@ -129,7 +139,7 @@ int RESAMPLE::xresample (RESAMPLE *a)
     {
         int i, j, n;
         int idx_out;
-        float I, Q;
+        double I, Q;
 
         for (i = 0; i < a->size; i++)
         {
