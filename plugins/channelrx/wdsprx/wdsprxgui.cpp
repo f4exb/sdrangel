@@ -318,6 +318,7 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
     m_settings.m_nbAvgTime = m_settings.m_profiles[m_settings.m_profileIndex].m_nbAvgTime;
     // Noise reduction
     m_settings.m_dnr = m_settings.m_profiles[m_settings.m_profileIndex].m_dnr;
+    m_settings.m_snb = m_settings.m_profiles[m_settings.m_profileIndex].m_snb;
     m_settings.m_anf = m_settings.m_profiles[m_settings.m_profileIndex].m_anf;
     m_settings.m_nrScheme = m_settings.m_profiles[m_settings.m_profileIndex].m_nrScheme;
     m_settings.m_nr2Gain = m_settings.m_profiles[m_settings.m_profileIndex].m_nr2Gain;
@@ -946,6 +947,7 @@ void WDSPRxGUI::dnrSetupDialog(const QPoint& p)
 {
     m_dnrDialog = new WDSPRxDNRDialog();
     m_dnrDialog->move(p);
+    m_dnrDialog->setSNB(m_settings.m_snb);
     m_dnrDialog->setANF(m_settings.m_anf);
     m_dnrDialog->setNRScheme(m_settings.m_nrScheme);
     m_dnrDialog->setNR2Gain(m_settings.m_nr2Gain);
@@ -969,6 +971,11 @@ void WDSPRxGUI::dnrSetup(int32_t iValueChanged)
 
     switch (valueChanged)
     {
+    case WDSPRxDNRDialog::ValueChanged::ChangedSNB:
+        m_settings.m_snb = m_dnrDialog->getSNB();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_snb = m_settings.m_snb;
+        applySettings();
+        break;
     case WDSPRxDNRDialog::ValueChanged::ChangedANF:
         m_settings.m_anf = m_dnrDialog->getANF();
         m_settings.m_profiles[m_settings.m_profileIndex].m_anf = m_settings.m_anf;

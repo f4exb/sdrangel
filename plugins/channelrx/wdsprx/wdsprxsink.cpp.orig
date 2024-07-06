@@ -131,6 +131,7 @@ WDSPRxSink::WDSPRxSink() :
     );
     m_rxa->setSpectrumProbe(&m_spectrumProbe);
     WDSP::RXA::SetPassband(*m_rxa, 0, m_Bandwidth);
+    WDSP::ANR::SetANRVals(*m_rxa, 64, 16, 16e-4, 10e-7);
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -350,6 +351,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_agcSlope: " << settings.m_agcSlope
             << " m_agcHangThreshold: " << settings.m_agcHangThreshold
             << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_anf: "<< settings.m_anf
             << " m_dnr: " << settings.m_dnr
             << " m_nrScheme: " << settings.m_nrScheme
             << " m_nrPosition: "<< settings.m_nrPosition
@@ -549,11 +551,6 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
     if ((m_settings.m_anf != settings.m_anf) || force) {
         WDSP::ANF::SetANFRun(*m_rxa, settings.m_anf ? 1 : 0);
-    }
-
-    // Caution: Causes corruption
-    if ((m_settings.m_snb != settings.m_snb) || force) {
-        WDSP::SNBA::SetSNBARun(*m_rxa, settings.m_snb ? 1 : 0);
     }
 
     // CW Peaking

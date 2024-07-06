@@ -41,6 +41,19 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="snb">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>Spectral Noise Blanker</string>
+       </property>
+       <property name="text">
+        <string>SNB</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="anf">
        <property name="toolTip">
         <string>Automatic Notch Filter</string>

@@ -63,7 +63,6 @@ void WDSPRxSettings::resetToDefaults()
     m_nbAvgTime = 50.0;
     // Noise reduction
     m_dnr = false;
-    m_snb = false;
     m_anf = false;
     m_nrScheme = WDSPRxProfile::NRSchemeNR;
     m_nr2Gain = WDSPRxProfile::NR2GainGamma;
@@ -139,7 +138,6 @@ QByteArray WDSPRxSettings::serialize() const
     s.writeDouble(27, m_nbAvgTime);
     // Noise reduction
     s.writeBool(  30, m_dnr);
-    s.writeBool(  31, m_snb);
     s.writeBool(  32, m_anf);
     s.writeS32(   33, (int) m_nrScheme);
     s.writeS32(   34, (int) m_nr2Gain);
@@ -162,10 +160,9 @@ QByteArray WDSPRxSettings::serialize() const
     // Squelch
     s.writeBool(  60, m_squelch);
     s.writeS32(   61, m_squelchThreshold);
-    s.writeS32(   62, (int) m_squelchMode);
-    s.writeDouble(63, m_ssqlTauMute);
-    s.writeDouble(64, m_ssqlTauUnmute);
-    s.writeDouble(65, m_amsqMaxTail);
+    s.writeDouble(62, m_ssqlTauMute);
+    s.writeDouble(63, m_ssqlTauUnmute);
+    s.writeDouble(64, m_amsqMaxTail);
     //
     s.writeString(70, m_title);
     s.writeString(71, m_audioDeviceName);
@@ -210,7 +207,6 @@ QByteArray WDSPRxSettings::serialize() const
         s.writeDouble(127 + 100*i, m_profiles[i].m_nbAvgTime);
         // Noise reduction
         s.writeBool  (130 + 100*i, m_profiles[i].m_dnr);
-        s.writeBool  (131 + 100*i, m_profiles[i].m_snb);
         s.writeBool  (132 + 100*i, m_profiles[i].m_anf);
         s.writeS32   (133 + 100*i, (int) m_profiles[i].m_nrScheme);
         s.writeS32   (134 + 100*i, (int) m_profiles[i].m_nr2Gain);
@@ -233,10 +229,9 @@ QByteArray WDSPRxSettings::serialize() const
         // Squelch
         s.writeBool(  160 + 100*i, m_profiles[i].m_squelch);
         s.writeS32(   161 + 100*i, m_profiles[i].m_squelchThreshold);
-        s.writeS32(   162 + 100*i, (int) m_profiles[i].m_squelchMode);
-        s.writeDouble(163 + 100*i, m_profiles[i].m_ssqlTauMute);
-        s.writeDouble(164 + 100*i, m_profiles[i].m_ssqlTauUnmute);
-        s.writeDouble(165 + 100*i, m_profiles[i].m_amsqMaxTail);
+        s.writeDouble(162 + 100*i, m_profiles[i].m_ssqlTauMute);
+        s.writeDouble(163 + 100*i, m_profiles[i].m_ssqlTauUnmute);
+        s.writeDouble(164 + 100*i, m_profiles[i].m_amsqMaxTail);
     }
 
     return s.final();
@@ -295,7 +290,6 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         d.readDouble(27, &m_nbAvgTime, 50.0);
         // Nosie reduction
         d.readBool(  30, &m_dnr, false);
-        d.readBool(  31, &m_snb, false);
         d.readBool(  32, &m_anf, false);
         d.readS32(   33, &tmp, 2);
         m_nrScheme = (WDSPRxProfile::WDSPRxNRScheme) tmp;
@@ -322,11 +316,9 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         // Squelch
         d.readBool(  60, &m_squelch, false);
         d.readS32(   61, &m_squelchThreshold, 3);
-        d.readS32(   62, &tmp, 0);
-        m_squelchMode = (WDSPRxProfile::WDSPRxSquelchMode) tmp;
-        d.readDouble(63, &m_ssqlTauMute, 0.1);
-        d.readDouble(64, &m_ssqlTauUnmute, 0.1);
-        d.readDouble(65, &m_amsqMaxTail, 1.5);
+        d.readDouble(62, &m_ssqlTauMute, 0.1);
+        d.readDouble(63, &m_ssqlTauUnmute, 0.1);
+        d.readDouble(64, &m_amsqMaxTail, 1.5);
         //
         d.readString(70, &m_title, "WDSP Receiver");
         d.readString(71, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
@@ -389,15 +381,14 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
             d.readDouble(127 + 100*i, &m_profiles[i].m_nbAvgTime, 50.0);
             // Noise reduction
             d.readBool  (130 + 100*i, &m_profiles[i].m_dnr, false);
-            d.readBool  (131 + 100*i, &m_profiles[i].m_snb, false);
             d.readBool  (132 + 100*i, &m_profiles[i].m_anf, false);
-            d.readS32   (133 + 100*i, &tmp, 0);
+            d.readS32   (133 + 100*i, &tmp);
             m_profiles[i].m_nrScheme = (WDSPRxProfile::WDSPRxNRScheme) tmp;
-            d.readS32   (134 + 100*i, &tmp, 0);
+            d.readS32   (134 + 100*i, &tmp);
             m_profiles[i].m_nr2Gain = (WDSPRxProfile::WDSPRxNR2Gain) tmp;
-            d.readS32   (135 + 100*i, &tmp, 0);
+            d.readS32   (135 + 100*i, &tmp);
             m_profiles[i].m_nr2NPE = (WDSPRxProfile::WDSPRxNR2NPE) tmp;
-            d.readS32   (136 + 100*i, &tmp, 0);
+            d.readS32   (136 + 100*i, &tmp);
             m_profiles[i].m_nrPosition = (WDSPRxProfile::WDSPRxNRPosition) tmp;
             d.readBool  (137 + 100*i, &m_profiles[i].m_nr2ArtifactReduction);
             // Demods
@@ -416,11 +407,9 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
             // Squelch
             d.readBool(  160 + 100*i, &m_profiles[i].m_squelch, false);
             d.readS32(   161 + 100*i, &m_profiles[i].m_squelchThreshold, 3);
-            d.readS32(   162 + 100*i, &tmp, 0);
-            m_profiles[i].m_squelchMode = (WDSPRxProfile::WDSPRxSquelchMode) tmp;
-            d.readDouble(163 + 100*i, &m_profiles[i].m_ssqlTauMute, 0.1);
-            d.readDouble(164 + 100*i, &m_profiles[i].m_ssqlTauUnmute, 0.1);
-            d.readDouble(165 + 100*i, &m_profiles[i].m_amsqMaxTail, 1.5);
+            d.readDouble(161 + 100*i, &m_profiles[i].m_ssqlTauMute, 0.1);
+            d.readDouble(162 + 100*i, &m_profiles[i].m_ssqlTauUnmute, 0.1);
+            d.readDouble(163 + 100*i, &m_profiles[i].m_amsqMaxTail, 1.5);
         }
 
         return true;
