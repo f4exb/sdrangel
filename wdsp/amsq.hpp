@@ -43,26 +43,41 @@ public:
     float* out;                        // squelch output signal buffer
     float* trigger;                    // pointer to trigger data source
     float* trigsig;                    // buffer containing trigger signal
-    float rate;                        // sample rate
-    float avtau;                       // time constant for averaging noise
-    float avm;
-    float onem_avm;
-    float avsig;
+    double rate;                        // sample rate
+    double avtau;                       // time constant for averaging noise
+    double avm;
+    double onem_avm;
+    double avsig;
     int state;                          // state machine control
     int count;
-    float tup;
-    float tdown;
+    double tup;
+    double tdown;
     int ntup;
     int ntdown;
     float* cup;
     float* cdown;
-    float tail_thresh;
-    float unmute_thresh;
-    float min_tail;
-    float max_tail;
-    float muted_gain;
+    double tail_thresh;
+    double unmute_thresh;
+    double min_tail;
+    double max_tail;
+    double muted_gain;
 
-    static AMSQ* create_amsq (int run, int size, float* in, float* out, float* trigger, int rate, float avtau, float tup, float tdown, float tail_thresh, float unmute_thresh, float min_tail, float max_tail, float muted_gain);
+    static AMSQ* create_amsq (
+        int run,
+        int size,
+        float* in,
+        float* out,
+        float* trigger,
+        int rate,
+        double avtau,
+        double tup,
+        double tdown,
+        double tail_thresh,
+        double unmute_thresh,
+        double min_tail,
+        double max_tail,
+        double muted_gain
+    );
     static void destroy_amsq (AMSQ *a);
     static void flush_amsq (AMSQ *a);
     static void xamsq (AMSQ *a);
@@ -72,12 +87,12 @@ public:
     static void setSize_amsq (AMSQ *a, int size);
     // RXA Properties
     static void SetAMSQRun (RXA& rxa, int run);
-    static void SetAMSQThreshold (RXA& rxa, float threshold);
-    static void SetAMSQMaxTail (RXA& rxa, float tail);
+    static void SetAMSQThreshold (RXA& rxa, double threshold);
+    static void SetAMSQMaxTail (RXA& rxa, double tail);
     // TXA Properties
     static void SetAMSQRun (TXA& txa, int run);
-    static void SetAMSQMutedGain (TXA& txa, float dBlevel);
-    static void SetAMSQThreshold (TXA& txa, float threshold);
+    static void SetAMSQMutedGain (TXA& txa, double dBlevel);
+    static void SetAMSQThreshold (TXA& txa, double threshold);
 
 private:
     static void compute_slews(AMSQ *a);

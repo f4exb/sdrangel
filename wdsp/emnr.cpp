@@ -298,8 +298,8 @@ void EMNR::calc_emnr(EMNR *a)
     }
     else
     {
-        memcpy (a->g.GG,  Calculus::GG,  241 * 241 * sizeof(float));
-        memcpy (a->g.GGS, Calculus::GGS, 241 * 241 * sizeof(float));
+        std::copy(Calculus::GG, Calculus::GG + (241 * 241), a->g.GG);
+        std::copy(Calculus::GGS, Calculus::GGS + (241 * 241), a->g.GGS);
     }
     //
 
@@ -380,10 +380,10 @@ void EMNR::calc_emnr(EMNR *a)
         a->np.subwc = a->np.V;
         a->np.amb_idx = 0;
         for (k = 0; k < a->np.msize; k++) a->np.lambda_y[k] = 0.5;
-        memcpy(a->np.p, a->np.lambda_y, a->np.msize * sizeof(float));
-        memcpy(a->np.sigma2N, a->np.lambda_y, a->np.msize * sizeof(float));
-        memcpy(a->np.pbar, a->np.lambda_y, a->np.msize * sizeof(float));
-        memcpy(a->np.pmin_u, a->np.lambda_y, a->np.msize * sizeof(float));
+        std::copy(a->np.lambda_y, a->np.lambda_y + a->np.msize, a->np.p);
+        std::copy(a->np.lambda_y, a->np.lambda_y + a->np.msize, a->np.sigma2N);
+        std::copy(a->np.lambda_y, a->np.lambda_y + a->np.msize, a->np.pbar);
+        std::copy(a->np.lambda_y, a->np.lambda_y + a->np.msize, a->np.pmin_u);
         for (k = 0; k < a->np.msize; k++)
         {
             a->np.p2bar[k] = a->np.lambda_y[k] * a->np.lambda_y[k];
@@ -392,7 +392,7 @@ void EMNR::calc_emnr(EMNR *a)
             for (ku = 0; ku < a->np.U; ku++)
                 a->np.actminbuff[ku][k] = 1.0e300;
         }
-        memset(a->np.lmin_flag, 0, a->np.msize * sizeof(int));
+        std::fill(a->np.lmin_flag, a->np.lmin_flag + a->np.msize, 0);
     }
 
     a->nps.incr = a->incr;
@@ -507,10 +507,10 @@ EMNR* EMNR::create_emnr (int run, int position, int size, float* in, float* out,
 void EMNR::flush_emnr (EMNR *a)
 {
     int i;
-    memset (a->inaccum, 0, a->iasize * sizeof (float));
+    std::fill(a->inaccum, a->inaccum + a->iasize, 0);
     for (i = 0; i < a->ovrlp; i++)
-        memset (a->save[i], 0, a->fsize * sizeof (float));
-    memset (a->outaccum, 0, a->oasize * sizeof (float));
+        std::fill(a->save[i], a->save[i] + a->fsize, 0);
+    std::fill(a->outaccum, a->outaccum + a->oasize, 0);
     a->nsamps   = 0;
     a->iainidx  = 0;
     a->iaoutidx = 0;
@@ -587,7 +587,7 @@ void EMNR::LambdaD(EMNR *a)
         a->np.bmin[k]     = 1.0 + 2.0 * (a->np.D - 1.0) / QeqTilda;
         a->np.bmin_sub[k] = 1.0 + 2.0 * (a->np.V - 1.0) / QeqTildaSub;
     }
-    memset (a->np.k_mod, 0, a->np.msize * sizeof (int));
+    std::fill(a->np.k_mod, a->np.k_mod + a->np.msize, 0);
     for (k = 0; k < a->np.msize; k++)
     {
         f3 = a->np.p[k] * a->np.bmin[k] * bc;
@@ -647,7 +647,7 @@ void EMNR::LambdaD(EMNR *a)
         }
         ++a->np.subwc;
     }
-    memcpy (a->np.lambda_d, a->np.sigma2N, a->np.msize * sizeof (float));
+    std::copy(a->np.sigma2N, a->np.sigma2N + a->np.msize, a->np.lambda_d);
 }
 
 void EMNR::LambdaDs (EMNR *a)
@@ -662,7 +662,7 @@ void EMNR::LambdaDs (EMNR *a)
         a->nps.EN2y[k] = (1.0 - a->nps.PH1y[k]) * a->nps.lambda_y[k] + a->nps.PH1y[k] * a->nps.sigma2N[k];
         a->nps.sigma2N[k] = a->nps.alpha_pow * a->nps.sigma2N[k] + (1.0 - a->nps.alpha_pow) * a->nps.EN2y[k];
     }
-    memcpy (a->nps.lambda_d, a->nps.sigma2N, a->nps.msize * sizeof (float));
+    std::copy(a->nps.sigma2N, a->nps.sigma2N + a->nps.msize, a->nps.lambda_d);
 }
 
 void EMNR::aepf(EMNR *a)
@@ -694,7 +694,7 @@ void EMNR::aepf(EMNR *a)
             a->ae.nmask[k] += a->mask[m];
         a->ae.nmask[k] /= (float)N;
     }
-    memcpy (a->mask + n, a->ae.nmask, (a->ae.msize - 2 * n) * sizeof (float));
+    std::copy(a->ae.nmask, a->ae.nmask + (a->ae.msize - 2 * n), a->mask + n);
 }
 
 float EMNR::getKey(float* type, float gamma, float xi)
@@ -874,7 +874,7 @@ void EMNR::xemnr (EMNR *a, int pos)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->bsize * sizeof (wcomplex));
+        std::copy(a->in, a->in + a->bsize * 2, a->out);
 }
 
 void EMNR::setBuffers_emnr (EMNR *a, float* in, float* out)

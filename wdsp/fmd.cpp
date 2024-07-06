@@ -94,17 +94,17 @@ FMD* FMD::create_fmd(
     float* in,
     float* out,
     int rate,
-    float deviation,
-    float f_low,
-    float f_high,
-    float fmin,
-    float fmax,
-    float zeta,
-    float omegaN,
-    float tau,
-    float afgain,
+    double deviation,
+    double f_low,
+    double f_high,
+    double fmin,
+    double fmax,
+    double zeta,
+    double omegaN,
+    double tau,
+    double afgain,
     int sntch_run,
-    float ctcss_freq,
+    double ctcss_freq,
     int nc_de,
     int mp_de,
     int nc_aud,
@@ -176,8 +176,8 @@ void FMD::xfmd (FMD *a)
     if (a->run)
     {
         int i;
-        float det, del_out;
-        float vco[2], corr[2];
+        double det, del_out;
+        double vco[2], corr[2];
         for (i = 0; i < a->size; i++)
         {
             // pll
@@ -272,7 +272,7 @@ void FMD::setSize_fmd (FMD *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void FMD::SetFMDeviation (RXA& rxa, float deviation)
+void FMD::SetFMDeviation (RXA& rxa, double deviation)
 {
     FMD *a;
     rxa.csDSP.lock();
@@ -282,7 +282,7 @@ void FMD::SetFMDeviation (RXA& rxa, float deviation)
     rxa.csDSP.unlock();
 }
 
-void FMD::SetCTCSSFreq (RXA& rxa, float freq)
+void FMD::SetCTCSSFreq (RXA& rxa, double freq)
 {
     FMD *a;
     rxa.csDSP.lock();
@@ -368,9 +368,9 @@ void FMD::SetFMLimRun (RXA& rxa, int run)
     rxa.csDSP.unlock();
 }
 
-void FMD::SetFMLimGain (RXA& rxa, float gaindB)
+void FMD::SetFMLimGain (RXA& rxa, double gaindB)
 {
-    float gain = pow(10.0, gaindB / 20.0);
+    double gain = pow(10.0, gaindB / 20.0);
     FMD *a = rxa.fmd.p;
     rxa.csDSP.lock();
     if (a->lim_gain != gain)
@@ -382,7 +382,7 @@ void FMD::SetFMLimGain (RXA& rxa, float gaindB)
     rxa.csDSP.unlock();
 }
 
-void FMD::SetFMAFFilter(RXA& rxa, float low, float high)
+void FMD::SetFMAFFilter(RXA& rxa, double low, double high)
 {
     FMD *a = rxa.fmd.p;
     float* impulse;

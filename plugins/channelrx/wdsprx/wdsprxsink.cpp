@@ -39,6 +39,9 @@
 #include "amd.hpp"
 #include "fmd.hpp"
 #include "iir.cpp"
+#include "ssql.hpp"
+#include "amsq.hpp"
+#include "fmsq.hpp"
 
 #include "wdsprxsink.h"
 
@@ -654,6 +657,60 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
     if ((m_settings.m_fmCTCSSNotchFrequency != settings.m_fmCTCSSNotchFrequency) || force) {
         WDSP::FMD::SetCTCSSFreq(*m_rxa, settings.m_fmCTCSSNotchFrequency);
+    }
+
+    // Squelch
+
+    if ((m_settings.m_squelch != settings.m_squelch)
+    || (m_settings.m_squelchThreshold != settings.m_squelchThreshold)
+    || (m_settings.m_squelchMode != settings.m_squelchMode) || force)
+    {
+        WDSP::SSQL::SetSSQLRun(*m_rxa, 0);
+        WDSP::AMSQ::SetAMSQRun(*m_rxa, 0);
+        WDSP::FMSQ::SetFMSQRun(*m_rxa, 0);
+
+        if (settings.m_squelch)
+        {
+            switch(settings.m_squelchMode)
+            {
+            case WDSPRxProfile::SquelchModeVoice:
+            {
+                WDSP::SSQL::SetSSQLRun(*m_rxa, 1);
+                double threshold = 0.0075 * settings.m_squelchThreshold;
+                WDSP::SSQL::SetSSQLThreshold(*m_rxa, threshold);
+            }
+                break;
+            case WDSPRxProfile::SquelchModeAM:
+            {
+                WDSP::AMSQ::SetAMSQRun(*m_rxa, 1);
+                double threshold = ((settings.m_squelchThreshold / 100.0) * 160.0) - 160.0;
+                WDSP::AMSQ::SetAMSQThreshold(*m_rxa, threshold);
+            }
+                break;
+            case WDSPRxProfile::SquelchModeFM:
+            {
+                WDSP::FMSQ::SetFMSQRun(*m_rxa, 1);
+                double threshold = pow(10.0, -2.0 * ((double) settings.m_squelchThreshold) / 100.0);
+                qDebug("WDSPRxSink::applySettings: FM squelch %lf", threshold);
+                WDSP::FMSQ::SetFMSQThreshold(*m_rxa, threshold);
+            }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if ((m_settings.m_ssqlTauMute != settings.m_ssqlTauMute) || force) {
+        WDSP::SSQL::SetSSQLTauMute(*m_rxa, settings.m_ssqlTauMute);
+    }
+
+    if ((m_settings.m_ssqlTauUnmute != settings.m_ssqlTauUnmute) || force) {
+        WDSP::SSQL::SetSSQLTauUnMute(*m_rxa, settings.m_ssqlTauUnmute);
+    }
+
+    if ((m_settings.m_amsqMaxTail != settings.m_amsqMaxTail) || force) {
+        WDSP::AMSQ::SetAMSQMaxTail(*m_rxa, settings.m_amsqMaxTail);
     }
 
     // Audio panel

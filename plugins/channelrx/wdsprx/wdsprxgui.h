@@ -40,6 +40,7 @@ class WDSPRxDNRDialog;
 class WDSPRxAMDialog;
 class WDSPRxFMDialog;
 class WDSPRxCWPeakDialog;
+class WDSPRxSquelchDialog;
 class SpectrumVis;
 class BasebandSampleSink;
 
@@ -101,6 +102,7 @@ private:
     WDSPRxAMDialog* m_amDialog;
     WDSPRxFMDialog* m_fmDialog;
     WDSPRxCWPeakDialog* m_cwPeakDialog;
+    WDSPRxSquelchDialog* m_squelchDialog;
 
 	QIcon m_iconDSBUSB;
 	QIcon m_iconDSBLSB;
@@ -140,6 +142,8 @@ private slots:
     void on_profileIndex_valueChanged(int value);
     void on_demod_currentIndexChanged(int index);
     void on_cwPeaking_toggled(bool checked);
+    void on_squelch_toggled(bool checked);
+    void on_squelchThreshold_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
@@ -155,6 +159,8 @@ private slots:
     void demodSetupDialog(const QPoint& p);
     void amSetup(int valueChanged);
     void fmSetup(int valueChanged);
+    void squelchSetupDialog(const QPoint& p);
+    void squelchSetup(int valueChanged);
 	void tick();
 };
 

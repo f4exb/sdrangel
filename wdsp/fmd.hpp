@@ -44,29 +44,29 @@ public:
     int size;
     float* in;
     float* out;
-    float rate;
-    float f_low;                       // audio low cutoff
-    float f_high;                      // audio high cutoff
+    double rate;
+    double f_low;                       // audio low cutoff
+    double f_high;                      // audio high cutoff
     // pll
-    float fmin;                        // pll - minimum carrier freq to lock
-    float fmax;                        // pll - maximum carrier freq to lock
-    float omega_min;                   // pll - minimum lock check parameter
-    float omega_max;                   // pll - maximum lock check parameter
-    float zeta;                        // pll - damping factor; as coded, must be <=1.0
-    float omegaN;                      // pll - natural frequency
-    float phs;                         // pll - phase accumulator
-    float omega;                       // pll - locked pll frequency
-    float fil_out;                     // pll - filter output
-    float g1, g2;                      // pll - filter gain parameters
-    float pllpole;                     // pll - pole frequency
+    double fmin;                        // pll - minimum carrier freq to lock
+    double fmax;                        // pll - maximum carrier freq to lock
+    double omega_min;                   // pll - minimum lock check parameter
+    double omega_max;                   // pll - maximum lock check parameter
+    double zeta;                        // pll - damping factor; as coded, must be <=1.0
+    double omegaN;                      // pll - natural frequency
+    double phs;                         // pll - phase accumulator
+    double omega;                       // pll - locked pll frequency
+    double fil_out;                     // pll - filter output
+    double g1, g2;                      // pll - filter gain parameters
+    double pllpole;                     // pll - pole frequency
     // for dc removal
-    float tau;
-    float mtau;
-    float onem_mtau;
-    float fmdc;
+    double tau;
+    double mtau;
+    double onem_mtau;
+    double fmdc;
     // pll audio gain
-    float deviation;
-    float again;
+    double deviation;
+    double again;
     // for de-emphasis filter
     float* audio;
     FIRCORE *pde;
@@ -76,16 +76,16 @@ public:
     FIRCORE *paud;
     int nc_aud;
     int mp_aud;
-    float afgain;
+    double afgain;
     // CTCSS removal
     SNOTCH *sntch;
     int sntch_run;
-    float ctcss_freq;
+    double ctcss_freq;
     // detector limiter
     WCPAGC *plim;
     int lim_run;
-    float lim_gain;
-    float lim_pre_gain;
+    double lim_gain;
+    double lim_pre_gain;
 
     static FMD* create_fmd (
         int run,
@@ -93,17 +93,17 @@ public:
         float* in,
         float* out,
         int rate,
-        float deviation,
-        float f_low,
-        float f_high,
-        float fmin,
-        float fmax,
-        float zeta,
-        float omegaN,
-        float tau,
-        float afgain,
+        double deviation,
+        double f_low,
+        double f_high,
+        double fmin,
+        double fmax,
+        double zeta,
+        double omegaN,
+        double tau,
+        double afgain,
         int sntch_run,
-        float ctcss_freq,
+        double ctcss_freq,
         int nc_de,
         int mp_de,
         int nc_aud,
@@ -116,16 +116,16 @@ public:
     static void setSamplerate_fmd (FMD *a, int rate);
     static void setSize_fmd (FMD *a, int size);
     // RXA Properties
-    static void SetFMDeviation (RXA& rxa, float deviation);
-    static void SetCTCSSFreq (RXA& rxa, float freq);
+    static void SetFMDeviation (RXA& rxa, double deviation);
+    static void SetCTCSSFreq (RXA& rxa, double freq);
     static void SetCTCSSRun (RXA& rxa, int run);
     static void SetFMNCde (RXA& rxa, int nc);
     static void SetFMMPde (RXA& rxa, int mp);
     static void SetFMNCaud (RXA& rxa, int nc);
     static void SetFMMPaud (RXA& rxa, int mp);
     static void SetFMLimRun (RXA& rxa, int run);
-    static void SetFMLimGain (RXA& rxa, float gaindB);
-    static void SetFMAFFilter(RXA& rxa, float low, float high);
+    static void SetFMLimGain (RXA& rxa, double gaindB);
+    static void SetFMAFFilter(RXA& rxa, double low, double high);
 
 private:
     static void calc_fmd (FMD *a);

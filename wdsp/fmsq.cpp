@@ -35,7 +35,7 @@ namespace WDSP {
 
 void FMSQ::calc_fmsq (FMSQ *a)
 {
-    float delta, theta;
+    double delta, theta;
     float* impulse;
     int i;
     // noise filter
@@ -99,17 +99,17 @@ FMSQ* FMSQ::create_fmsq (
     float* outsig,
     float* trigger,
     int rate,
-    float fc,
-    float* pllpole,
-    float tdelay,
-    float avtau,
-    float longtau,
-    float tup,
-    float tdown,
-    float tail_thresh,
-    float unmute_thresh,
-    float min_tail,
-    float max_tail,
+    double fc,
+    double* pllpole,
+    double tdelay,
+    double avtau,
+    double longtau,
+    double tup,
+    double tdown,
+    double tail_thresh,
+    double unmute_thresh,
+    double min_tail,
+    double max_tail,
     int nc,
     int mp
 )
@@ -264,7 +264,7 @@ void FMSQ::SetFMSQRun (RXA& rxa, int run)
     rxa.csDSP.unlock();
 }
 
-void FMSQ::SetFMSQThreshold (RXA& rxa, float threshold)
+void FMSQ::SetFMSQThreshold (RXA& rxa, double threshold)
 {
     rxa.csDSP.lock();
     rxa.fmsq.p->tail_thresh = threshold;

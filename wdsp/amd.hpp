@@ -50,33 +50,33 @@ public:
     float *in_buff;                    // pointer to input buffer
     float *out_buff;                   // pointer to output buffer
     int mode;                           // demodulation mode
-    float sample_rate;                 // sample rate
-    float dc;                          // dc component in demodulated output
-    float fmin;                        // pll - minimum carrier freq to lock
-    float fmax;                        // pll - maximum carrier freq to lock
-    float omega_min;                   // pll - minimum lock check parameter
-    float omega_max;                   // pll - maximum lock check parameter
-    float zeta;                        // pll - damping factor; as coded, must be <=1.0
-    float omegaN;                      // pll - natural frequency
-    float phs;                         // pll - phase accumulator
-    float omega;                       // pll - locked pll frequency
-    float fil_out;                     // pll - filter output
-    float g1, g2;                      // pll - filter gain parameters
-    float tauR;                        // carrier removal time constant
-    float tauI;                        // carrier insertion time constant
-    float mtauR;                       // carrier removal multiplier
-    float onem_mtauR;                  // 1.0 - carrier_removal_multiplier
-    float mtauI;                       // carrier insertion multiplier
-    float onem_mtauI;                  // 1.0 - carrier_insertion_multiplier
-    float a[3 * STAGES + 3];           // Filter a variables
-    float b[3 * STAGES + 3];           // Filter b variables
-    float c[3 * STAGES + 3];           // Filter c variables
-    float d[3 * STAGES + 3];           // Filter d variables
-    float c0[STAGES];                  // Filter coefficients - path 0
-    float c1[STAGES];                  // Filter coefficients - path 1
-    float dsI;                         // delayed sample, I path
-    float dsQ;                         // delayed sample, Q path
-    float dc_insert;                   // dc component to insert in output
+    double sample_rate;                 // sample rate
+    double dc;                          // dc component in demodulated output
+    double fmin;                        // pll - minimum carrier freq to lock
+    double fmax;                        // pll - maximum carrier freq to lock
+    double omega_min;                   // pll - minimum lock check parameter
+    double omega_max;                   // pll - maximum lock check parameter
+    double zeta;                        // pll - damping factor; as coded, must be <=1.0
+    double omegaN;                      // pll - natural frequency
+    double phs;                         // pll - phase accumulator
+    double omega;                       // pll - locked pll frequency
+    double fil_out;                     // pll - filter output
+    double g1, g2;                      // pll - filter gain parameters
+    double tauR;                        // carrier removal time constant
+    double tauI;                        // carrier insertion time constant
+    double mtauR;                       // carrier removal multiplier
+    double onem_mtauR;                  // 1.0 - carrier_removal_multiplier
+    double mtauI;                       // carrier insertion multiplier
+    double onem_mtauI;                  // 1.0 - carrier_insertion_multiplier
+    double a[3 * STAGES + 3];           // Filter a variables
+    double b[3 * STAGES + 3];           // Filter b variables
+    double c[3 * STAGES + 3];           // Filter c variables
+    double d[3 * STAGES + 3];           // Filter d variables
+    double c0[STAGES];                  // Filter coefficients - path 0
+    double c1[STAGES];                  // Filter coefficients - path 1
+    double dsI;                         // delayed sample, I path
+    double dsQ;                         // delayed sample, Q path
+    double dc_insert;                   // dc component to insert in output
     int sbmode;                         // sideband mode
     int levelfade;                      // Fade Leveler switch
 
@@ -90,12 +90,12 @@ public:
         int levelfade,
         int sbmode,
         int sample_rate,
-        float fmin,
-        float fmax,
-        float zeta,
-        float omegaN,
-        float tauR,
-        float tauI
+        double fmin,
+        double fmax,
+        double zeta,
+        double omegaN,
+        double tauR,
+        double tauI
     );
 
     static void init_amd (AMD *a);

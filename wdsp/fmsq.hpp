@@ -43,36 +43,36 @@ public:
     float* insig;                      // squelch input signal buffer
     float* outsig;                     // squelch output signal buffer
     float* trigger;                    // buffer used to trigger mute/unmute (may be same as input; matches timing of input buffer)
-    float rate;                        // sample rate
+    double rate;                        // sample rate
     float* noise;
-    float fc;                          // corner frequency for sig / noise detection
-    float* pllpole;                    // pointer to pole frequency of the fm demodulator pll
+    double fc;                          // corner frequency for sig / noise detection
+    double* pllpole;                    // pointer to pole frequency of the fm demodulator pll
     float F[4];
     float G[4];
-    float avtau;                       // time constant for averaging noise
-    float avm;
-    float onem_avm;
-    float avnoise;
-    float longtau;                     // time constant for long averaging
-    float longavm;
-    float onem_longavm;
-    float longnoise;
+    double avtau;                       // time constant for averaging noise
+    double avm;
+    double onem_avm;
+    double avnoise;
+    double longtau;                     // time constant for long averaging
+    double longavm;
+    double onem_longavm;
+    double longnoise;
     int state;                          // state machine control
     int count;
-    float tup;
-    float tdown;
+    double tup;
+    double tdown;
     int ntup;
     int ntdown;
     float* cup;
     float* cdown;
-    float tail_thresh;
-    float unmute_thresh;
-    float min_tail;
-    float max_tail;
+    double tail_thresh;
+    double unmute_thresh;
+    double min_tail;
+    double max_tail;
     int ready;
-    float ramp;
-    float rstep;
-    float tdelay;
+    double ramp;
+    double rstep;
+    double tdelay;
     int nc;
     int mp;
     FIRCORE *p;
@@ -84,17 +84,17 @@ public:
         float* outsig,
         float* trigger,
         int rate,
-        float fc,
-        float* pllpole,
-        float tdelay,
-        float avtau,
-        float longtau,
-        float tup,
-        float tdown,
-        float tail_thresh,
-        float unmute_thresh,
-        float min_tail,
-        float max_tail,
+        double fc,
+        double* pllpole,
+        double tdelay,
+        double avtau,
+        double longtau,
+        double tup,
+        double tdown,
+        double tail_thresh,
+        double unmute_thresh,
+        double min_tail,
+        double max_tail,
         int nc,
         int mp
     );
@@ -106,7 +106,7 @@ public:
     static void setSize_fmsq (FMSQ *a, int size);
     // RXA Properties
     static void SetFMSQRun (RXA& rxa, int run);
-    static void SetFMSQThreshold (RXA& rxa, float threshold);
+    static void SetFMSQThreshold (RXA& rxa, double threshold);
     static void SetFMSQNC (RXA& rxa, int nc);
     static void SetFMSQMP (RXA& rxa, int mp);
 

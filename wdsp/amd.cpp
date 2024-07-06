@@ -38,7 +38,7 @@ warren@wpratt.com
 namespace WDSP {
 
 AMD* AMD::create_amd
-    (
+(
     int run,
     int buff_size,
     float *in_buff,
@@ -47,13 +47,13 @@ AMD* AMD::create_amd
     int levelfade,
     int sbmode,
     int sample_rate,
-    float fmin,
-    float fmax,
-    float zeta,
-    float omegaN,
-    float tauR,
-    float tauI
-    )
+    double fmin,
+    double fmax,
+    double zeta,
+    double omegaN,
+    double tauR,
+    double tauI
+)
 {
     AMD *a = new AMD();
     a->run = run;
@@ -126,13 +126,13 @@ void AMD::flush_amd (AMD *a)
 void AMD::xamd (AMD *a)
 {
     int i;
-    float audio;
-    float vco[2];
-    float corr[2];
-    float det;
-    float del_out;
-    float ai, bi, aq, bq;
-    float ai_ps, bi_ps, aq_ps, bq_ps;
+    double audio;
+    double vco[2];
+    double corr[2];
+    double det;
+    double del_out;
+    double ai, bi, aq, bq;
+    double ai_ps, bi_ps, aq_ps, bq_ps;
     int j, k;
     if (a->run)
     {
@@ -279,8 +279,14 @@ void AMD::SetAMDRun(RXA& rxa, int run)
     AMD *a = rxa.amd.p;
     if (a->run != run)
     {
-        RXA::bp1Check (rxa, run, rxa.snba.p->run, rxa.emnr.p->run,
-            rxa.anf.p->run, rxa.anr.p->run);
+        RXA::bp1Check (
+            rxa,
+            run,
+            rxa.snba.p->run,
+            rxa.emnr.p->run,
+            rxa.anf.p->run,
+            rxa.anr.p->run
+        );
         rxa.csDSP.lock();
         a->run = run;
         RXA::bp1Set (rxa);

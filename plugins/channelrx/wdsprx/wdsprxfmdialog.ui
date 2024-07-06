@@ -262,7 +262,7 @@
         <string>AF volume limter gain (dB)</string>
        </property>
        <property name="minimum">
-        <number>0</number>
+        <number>-30</number>
        </property>
        <property name="maximum">
         <number>30</number>
@@ -271,7 +271,7 @@
         <number>1</number>
        </property>
        <property name="value">
-        <number>10</number>
+        <number>0</number>
        </property>
       </widget>
      </item>

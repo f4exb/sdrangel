@@ -76,6 +76,12 @@ struct WDSPRxProfile
         NB2ModeHoldSample,
         NB2ModeInterpolate,
     };
+    enum WDSPRxSquelchMode
+    {
+        SquelchModeVoice,
+        SquelchModeAM,
+        SquelchModeFM,
+    };
 
     WDSPRxDemod m_demod;
     // Filter
@@ -119,6 +125,13 @@ struct WDSPRxProfile
     double m_fmAFLimiterGain;
     bool m_fmCTCSSNotch;
     double m_fmCTCSSNotchFrequency;
+    // Squelch
+    bool m_squelch;
+    int m_squelchThreshold;
+    WDSPRxSquelchMode m_squelchMode;
+    double m_ssqlTauMute;   //!< Voice squelch tau mute
+    double m_ssqlTauUnmute; //!< Voice squelch tau unmute
+    double m_amsqMaxTail;
 
     WDSPRxProfile() :
         m_demod(DemodSSB),
@@ -157,7 +170,13 @@ struct WDSPRxProfile
         m_fmAFLimiter(false),
         m_fmAFLimiterGain(10.0),
         m_fmCTCSSNotch(false),
-        m_fmCTCSSNotchFrequency(67.0)
+        m_fmCTCSSNotchFrequency(67.0),
+        m_squelch(false),
+        m_squelchThreshold(3),
+        m_squelchMode(SquelchModeVoice),
+        m_ssqlTauMute(0.1),
+        m_ssqlTauUnmute(0.1),
+        m_amsqMaxTail(1.5)
     {}
 };
 
@@ -209,6 +228,13 @@ struct WDSPRxSettings
     double m_fmAFLimiterGain;
     bool m_fmCTCSSNotch;
     double m_fmCTCSSNotchFrequency;
+    // Squelch
+    bool m_squelch;
+    int m_squelchThreshold;
+    WDSPRxProfile::WDSPRxSquelchMode m_squelchMode;
+    double m_ssqlTauMute;   //!< Voice squelch tau mute
+    double m_ssqlTauUnmute; //!< Voice squelch tau unmute
+    double m_amsqMaxTail;
 
     quint32 m_rgbColor;
     QString m_title;

@@ -43,6 +43,7 @@
 #include "wdsprxamdialog.h"
 #include "wdsprxfmdialog.h"
 #include "wdsprxcwpeakdialog.h"
+#include "wdsprxsquelchdialog.h"
 
 WDSPRxGUI* WDSPRxGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -211,6 +212,15 @@ void WDSPRxGUI::on_agc_toggled(bool checked)
     applySettings();
 }
 
+void WDSPRxGUI::on_agcGain_valueChanged(int value)
+{
+    QString s = QString::number(value, 'f', 0);
+    ui->agcGainText->setText(s);
+    m_settings.m_agcGain = value;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_agcGain = m_settings.m_agcGain;
+    applySettings();
+}
+
 void WDSPRxGUI::on_dnr_toggled(bool checked)
 {
     m_settings.m_dnr = checked;
@@ -232,12 +242,18 @@ void WDSPRxGUI::on_cwPeaking_toggled(bool checked)
     applySettings();
 }
 
-void WDSPRxGUI::on_agcGain_valueChanged(int value)
+void WDSPRxGUI::on_squelch_toggled(bool checked)
 {
-    QString s = QString::number(value, 'f', 0);
-    ui->agcGainText->setText(s);
-    m_settings.m_agcGain = value;
-    m_settings.m_profiles[m_settings.m_profileIndex].m_agcGain = m_settings.m_agcGain;
+    m_settings.m_squelch = checked;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_squelch = m_settings.m_squelch;
+    applySettings();
+}
+
+void WDSPRxGUI::on_squelchThreshold_valueChanged(int value)
+{
+    m_settings.m_squelchThreshold = value;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_squelchThreshold = m_settings.m_squelchThreshold;
+    ui->squelchThresholdText->setText(tr("%1").arg(m_settings.m_squelchThreshold));
     applySettings();
 }
 
@@ -322,6 +338,12 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
     m_settings.m_fmAFLimiterGain = m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFLimiterGain;
     m_settings.m_fmCTCSSNotch = m_settings.m_profiles[m_settings.m_profileIndex].m_fmCTCSSNotch;
     m_settings.m_fmCTCSSNotchFrequency = m_settings.m_profiles[m_settings.m_profileIndex].m_fmCTCSSNotchFrequency;
+    // Squelch
+    m_settings.m_squelch = m_settings.m_profiles[m_settings.m_profileIndex].m_squelch;
+    m_settings.m_squelchMode = m_settings.m_profiles[m_settings.m_profileIndex].m_squelchMode;
+    m_settings.m_ssqlTauMute = m_settings.m_profiles[m_settings.m_profileIndex].m_ssqlTauMute;
+    m_settings.m_ssqlTauUnmute = m_settings.m_profiles[m_settings.m_profileIndex].m_ssqlTauUnmute;
+    m_settings.m_amsqMaxTail = m_settings.m_profiles[m_settings.m_profileIndex].m_amsqMaxTail;
     displaySettings();
     applyBandwidths(m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2, true); // does applySettings(true)
 }
@@ -344,7 +366,7 @@ void WDSPRxGUI::on_demod_currentIndexChanged(int index)
         break;
     }
     displaySettings();
-    applySettings();
+    applyBandwidths(m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2, true); // does applySettings(true)
 }
 
 void WDSPRxGUI::onMenuDialogCalled(const QPoint &p)
@@ -424,7 +446,8 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_dnrDialog(nullptr),
     m_amDialog(nullptr),
     m_fmDialog(nullptr),
-    m_cwPeakDialog(nullptr)
+    m_cwPeakDialog(nullptr),
+    m_squelchDialog(nullptr)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodssb/readme.md";
@@ -454,6 +477,9 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     CRightClickEnabler *cwPeakRightClickEnabler = new CRightClickEnabler(ui->cwPeaking);
     connect(cwPeakRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(cwPeakSetupDialog(const QPoint &)));
+
+    CRightClickEnabler *squelchRightClickEnabler = new CRightClickEnabler(ui->squelch);
+    connect(squelchRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(squelchSetupDialog(const QPoint &)));
 
     CRightClickEnabler *demodRightClickEnabler = new CRightClickEnabler(ui->demod);
     connect(demodRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(demodSetupDialog(const QPoint &)));
@@ -727,6 +753,9 @@ void WDSPRxGUI::displaySettings()
     ui->dnr->setChecked(m_settings.m_dnr);
     ui->dnb->setChecked(m_settings.m_dnb);
     ui->cwPeaking->setChecked(m_settings.m_cwPeaking);
+    ui->squelch->setChecked(m_settings.m_squelch);
+    ui->squelchThreshold->setValue(m_settings.m_squelchThreshold);
+    ui->squelchThresholdText->setText(tr("%1").arg(m_settings.m_squelchThreshold));
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);
@@ -1122,6 +1151,56 @@ void WDSPRxGUI::fmSetup(int iValueChanged)
     }
 }
 
+void WDSPRxGUI::squelchSetupDialog(const QPoint& p)
+{
+    m_squelchDialog = new WDSPRxSquelchDialog();
+    m_squelchDialog->move(p);
+    m_squelchDialog->setMode(m_settings.m_squelchMode);
+    m_squelchDialog->setSSQLTauMute(m_settings.m_ssqlTauMute);
+    m_squelchDialog->setSSQLTauUnmute(m_settings.m_ssqlTauUnmute);
+    m_squelchDialog->setAMSQMaxTail(m_settings.m_amsqMaxTail);
+    QObject::connect(m_squelchDialog, &WDSPRxSquelchDialog::valueChanged, this, &WDSPRxGUI::squelchSetup);
+    m_squelchDialog->exec();
+    QObject::disconnect(m_squelchDialog, &WDSPRxSquelchDialog::valueChanged, this, &WDSPRxGUI::squelchSetup);
+    m_squelchDialog->deleteLater();
+    m_squelchDialog = nullptr;
+}
+
+void WDSPRxGUI::squelchSetup(int iValueChanged)
+{
+    if (!m_squelchDialog) {
+        return;
+    }
+
+    WDSPRxSquelchDialog::ValueChanged valueChanged = (WDSPRxSquelchDialog::ValueChanged) iValueChanged;
+
+    switch (valueChanged)
+    {
+    case WDSPRxSquelchDialog::ChangedMode:
+        m_settings.m_squelchMode = m_squelchDialog->getMode();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_squelchMode = m_settings.m_squelchMode;
+        applySettings();
+        break;
+    case WDSPRxSquelchDialog::ChangedSSQLTauMute:
+        m_settings.m_ssqlTauMute = m_squelchDialog->getSSQLTauMute();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_ssqlTauMute = m_settings.m_ssqlTauMute;
+        applySettings();
+        break;
+    case WDSPRxSquelchDialog::ChangedSSQLTauUnmute:
+        m_settings.m_ssqlTauUnmute = m_squelchDialog->getSSQLTauUnmute();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_ssqlTauUnmute = m_settings.m_ssqlTauUnmute;
+        applySettings();
+        break;
+    case WDSPRxSquelchDialog::ChangedAMSQMaxTail:
+        m_settings.m_amsqMaxTail = m_squelchDialog->getAMSQMaxTail();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_amsqMaxTail = m_settings.m_amsqMaxTail;
+        applySettings();
+        break;
+    default:
+        break;
+    }
+}
+
 void WDSPRxGUI::tick()
 {
     double powDbAvg, powDbPeak;
@@ -1176,6 +1255,8 @@ void WDSPRxGUI::makeUIConnections()
     QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &WDSPRxGUI::on_profileIndex_valueChanged);
     QObject::connect(ui->demod, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WDSPRxGUI::on_demod_currentIndexChanged);
     QObject::connect(ui->cwPeaking, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_cwPeaking_toggled);
+    QObject::connect(ui->squelch, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_squelch_toggled);
+    QObject::connect(ui->squelchThreshold, &QDial::valueChanged, this, &WDSPRxGUI::on_squelchThreshold_valueChanged);
 }
 
 void WDSPRxGUI::updateAbsoluteCenterFrequency()
