@@ -313,7 +313,7 @@ RXA* RXA::create_rxa (
         0.750,                                  // noise level to initiate tail
         0.562,                                  // noise level to initiate unmute
         0.000,                                  // minimum tail time
-        1.200,                                  // maximum tail time
+        0.100,                                  // maximum tail time
         std::max(2048, rxa->dsp_size),          // number of coefficients for noise filter
         0);                                     // minimum phase flag
 

@@ -35,7 +35,7 @@ namespace WDSP {
 
 void FMSQ::calc_fmsq (FMSQ *a)
 {
-    double delta, theta;
+    float delta, theta;
     float* impulse;
     int i;
     // noise filter
@@ -168,11 +168,13 @@ void FMSQ::xfmsq (FMSQ *a)
     if (a->run)
     {
         int i;
-        float noise, lnlimit;
+        double noise, lnlimit;
         FIRCORE::xfircore (a->p);
         for (i = 0; i < a->size; i++)
         {
-            noise = sqrt(a->noise[2 * i + 0] * a->noise[2 * i + 0] + a->noise[2 * i + 1] * a->noise[2 * i + 1]);
+            double noise0 = a->noise[2 * i + 0];
+            double noise1 = a->noise[2 * i + 1];
+            noise = sqrt(noise0 * noise0 + noise1 * noise1);
             a->avnoise = a->avm * a->avnoise + a->onem_avm * noise;
             a->longnoise = a->longavm * a->longnoise + a->onem_longavm * noise;
             if (!a->ready) a->ramp += a->rstep;
