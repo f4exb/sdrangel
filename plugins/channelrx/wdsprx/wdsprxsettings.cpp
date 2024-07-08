@@ -79,8 +79,8 @@ void WDSPRxSettings::resetToDefaults()
     m_fmDeviation = 2500.0;
     m_fmAFLow = 300.0;
     m_fmAFHigh = 3000.0;
-    m_fmAFLimiter = false;
-    m_fmAFLimiterGain = 10.0;
+    m_fmAFLimiter = true;
+    m_fmAFLimiterGain = -40.0;
     m_fmCTCSSNotch = false;
     m_fmCTCSSNotchFrequency = 67.0;
     // Squelch
@@ -90,6 +90,10 @@ void WDSPRxSettings::resetToDefaults()
     m_ssqlTauMute = 0.1;
     m_ssqlTauUnmute = 0.1;
     m_amsqMaxTail = 1.5;
+    // Equalizer
+    m_equalizer = false;
+    m_eqF = {0.0, 32.0, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0};
+    m_eqG = {0.0,  0.0,  0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0};
     //
     m_volume = 1.0;
     m_inputFrequencyOffset = 0;
@@ -166,6 +170,30 @@ QByteArray WDSPRxSettings::serialize() const
     s.writeDouble(63, m_ssqlTauMute);
     s.writeDouble(64, m_ssqlTauUnmute);
     s.writeDouble(65, m_amsqMaxTail);
+    // Equalizer
+    s.writeBool(  90, m_equalizer);
+    s.writeFloat(4000, m_eqF[0]);
+    s.writeFloat(4001, m_eqF[1]);
+    s.writeFloat(4002, m_eqF[2]);
+    s.writeFloat(4003, m_eqF[3]);
+    s.writeFloat(4004, m_eqF[4]);
+    s.writeFloat(4005, m_eqF[5]);
+    s.writeFloat(4006, m_eqF[6]);
+    s.writeFloat(4007, m_eqF[7]);
+    s.writeFloat(4008, m_eqF[8]);
+    s.writeFloat(4009, m_eqF[9]);
+    s.writeFloat(4010, m_eqF[10]);
+    s.writeFloat(4020, m_eqG[0]);
+    s.writeFloat(4021, m_eqG[1]);
+    s.writeFloat(4022, m_eqG[2]);
+    s.writeFloat(4023, m_eqG[3]);
+    s.writeFloat(4024, m_eqG[4]);
+    s.writeFloat(4025, m_eqG[5]);
+    s.writeFloat(4026, m_eqG[6]);
+    s.writeFloat(4027, m_eqG[7]);
+    s.writeFloat(4028, m_eqG[8]);
+    s.writeFloat(4029, m_eqG[9]);
+    s.writeFloat(4030, m_eqG[10]);
     //
     s.writeString(70, m_title);
     s.writeString(71, m_audioDeviceName);
@@ -237,6 +265,30 @@ QByteArray WDSPRxSettings::serialize() const
         s.writeDouble(163 + 100*i, m_profiles[i].m_ssqlTauMute);
         s.writeDouble(164 + 100*i, m_profiles[i].m_ssqlTauUnmute);
         s.writeDouble(165 + 100*i, m_profiles[i].m_amsqMaxTail);
+        // Equalizer
+        s.writeBool(  190 + 100*i, m_profiles[i].m_equalizer);
+        s.writeFloat(4100 + 100*i, m_profiles[i].m_eqF[0]);
+        s.writeFloat(4101 + 100*i, m_profiles[i].m_eqF[1]);
+        s.writeFloat(4102 + 100*i, m_profiles[i].m_eqF[2]);
+        s.writeFloat(4103 + 100*i, m_profiles[i].m_eqF[3]);
+        s.writeFloat(4104 + 100*i, m_profiles[i].m_eqF[4]);
+        s.writeFloat(4105 + 100*i, m_profiles[i].m_eqF[5]);
+        s.writeFloat(4106 + 100*i, m_profiles[i].m_eqF[6]);
+        s.writeFloat(4107 + 100*i, m_profiles[i].m_eqF[7]);
+        s.writeFloat(4108 + 100*i, m_profiles[i].m_eqF[8]);
+        s.writeFloat(4109 + 100*i, m_profiles[i].m_eqF[9]);
+        s.writeFloat(4110 + 100*i, m_profiles[i].m_eqF[10]);
+        s.writeFloat(4120 + 100*i, m_profiles[i].m_eqG[0]);
+        s.writeFloat(4121 + 100*i, m_profiles[i].m_eqG[1]);
+        s.writeFloat(4122 + 100*i, m_profiles[i].m_eqG[2]);
+        s.writeFloat(4123 + 100*i, m_profiles[i].m_eqG[3]);
+        s.writeFloat(4124 + 100*i, m_profiles[i].m_eqG[4]);
+        s.writeFloat(4125 + 100*i, m_profiles[i].m_eqG[5]);
+        s.writeFloat(4126 + 100*i, m_profiles[i].m_eqG[6]);
+        s.writeFloat(4127 + 100*i, m_profiles[i].m_eqG[7]);
+        s.writeFloat(4128 + 100*i, m_profiles[i].m_eqG[8]);
+        s.writeFloat(4129 + 100*i, m_profiles[i].m_eqG[9]);
+        s.writeFloat(4130 + 100*i, m_profiles[i].m_eqG[10]);
     }
 
     return s.final();
@@ -315,8 +367,8 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         d.readDouble(45, &m_fmDeviation, 2500.0);
         d.readDouble(46, &m_fmAFLow, 300.0);
         d.readDouble(47, &m_fmAFHigh, 3000.0);
-        d.readBool(  48, &m_fmAFLimiter, false);
-        d.readDouble(49, &m_fmAFLimiterGain, 10.0);
+        d.readBool(  48, &m_fmAFLimiter, true);
+        d.readDouble(49, &m_fmAFLimiterGain, -40.0);
         d.readBool(  50, &m_fmCTCSSNotch, false);
         d.readDouble(51, &m_fmCTCSSNotchFrequency, 67.0);
         // Squelch
@@ -357,6 +409,30 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         d.readBool(   81, &m_hidden, false);
         d.readU32(    82, &utmp, 0);
         m_profileIndex = utmp < 10 ? utmp : 0;
+
+        d.readBool(   90, &m_equalizer, false);
+        d.readFloat(4000, &m_eqF[0], 0.0);
+        d.readFloat(4001, &m_eqF[1], 32.0);
+        d.readFloat(4002, &m_eqF[2], 63.0);
+        d.readFloat(4003, &m_eqF[3], 125.0);
+        d.readFloat(4004, &m_eqF[4], 250.0);
+        d.readFloat(4005, &m_eqF[5], 500.0);
+        d.readFloat(4006, &m_eqF[6], 1000.0);
+        d.readFloat(4007, &m_eqF[7], 2000.0);
+        d.readFloat(4008, &m_eqF[8], 4000.0);
+        d.readFloat(4009, &m_eqF[9], 8000.0);
+        d.readFloat(4010, &m_eqF[10], 16000.0);
+        d.readFloat(4020, &m_eqG[0], 0);
+        d.readFloat(4021, &m_eqG[1], 0);
+        d.readFloat(4022, &m_eqG[2], 0);
+        d.readFloat(4023, &m_eqG[3], 0);
+        d.readFloat(4024, &m_eqG[4], 0);
+        d.readFloat(4025, &m_eqG[5], 0);
+        d.readFloat(4026, &m_eqG[6], 0);
+        d.readFloat(4027, &m_eqG[7], 0);
+        d.readFloat(4028, &m_eqG[8], 0);
+        d.readFloat(4029, &m_eqG[9], 0);
+        d.readFloat(4030, &m_eqG[10], 0);
 
         for (unsigned int i = 0; (i < 10); i++)
         {
@@ -409,8 +485,8 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
             d.readDouble(145 + 100*i, &m_profiles[i].m_fmDeviation, 2500.0);
             d.readDouble(146 + 100*i, &m_profiles[i].m_fmAFLow, 300.0);
             d.readDouble(147 + 100*i, &m_profiles[i].m_fmAFHigh, 3000.0);
-            d.readBool(  148 + 100*i, &m_profiles[i].m_fmAFLimiter, false);
-            d.readDouble(149 + 100*i, &m_profiles[i].m_fmAFLimiterGain, 10.0);
+            d.readBool(  148 + 100*i, &m_profiles[i].m_fmAFLimiter, true);
+            d.readDouble(149 + 100*i, &m_profiles[i].m_fmAFLimiterGain, -40.0);
             d.readBool(  150 + 100*i, &m_profiles[i].m_fmCTCSSNotch, false);
             d.readDouble(151 + 100*i, &m_profiles[i].m_fmCTCSSNotchFrequency, 67.0);
             // Squelch
@@ -421,6 +497,30 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
             d.readDouble(163 + 100*i, &m_profiles[i].m_ssqlTauMute, 0.1);
             d.readDouble(164 + 100*i, &m_profiles[i].m_ssqlTauUnmute, 0.1);
             d.readDouble(165 + 100*i, &m_profiles[i].m_amsqMaxTail, 1.5);
+            // Equalizer
+            d.readBool(  190 + 100*i, &m_profiles[i].m_equalizer, false);
+            d.readFloat(4100 + 100*i, &m_profiles[i].m_eqF[0], 0.0);
+            d.readFloat(4101 + 100*i, &m_profiles[i].m_eqF[1], 32.0);
+            d.readFloat(4102 + 100*i, &m_profiles[i].m_eqF[2], 63.0);
+            d.readFloat(4103 + 100*i, &m_profiles[i].m_eqF[3], 125.0);
+            d.readFloat(4104 + 100*i, &m_profiles[i].m_eqF[4], 250.0);
+            d.readFloat(4105 + 100*i, &m_profiles[i].m_eqF[5], 500.0);
+            d.readFloat(4106 + 100*i, &m_profiles[i].m_eqF[6], 1000.0);
+            d.readFloat(4107 + 100*i, &m_profiles[i].m_eqF[7], 2000.0);
+            d.readFloat(4108 + 100*i, &m_profiles[i].m_eqF[8], 4000.0);
+            d.readFloat(4109 + 100*i, &m_profiles[i].m_eqF[9], 8000.0);
+            d.readFloat(4110 + 100*i, &m_profiles[i].m_eqF[10], 16000.0);
+            d.readFloat(4120 + 100*i, &m_profiles[i].m_eqG[0], 0.0);
+            d.readFloat(4121 + 100*i, &m_profiles[i].m_eqG[1], 0.0);
+            d.readFloat(4122 + 100*i, &m_profiles[i].m_eqG[2], 0.0);
+            d.readFloat(4123 + 100*i, &m_profiles[i].m_eqG[3], 0.0);
+            d.readFloat(4124 + 100*i, &m_profiles[i].m_eqG[4], 0.0);
+            d.readFloat(4125 + 100*i, &m_profiles[i].m_eqG[5], 0.0);
+            d.readFloat(4126 + 100*i, &m_profiles[i].m_eqG[6], 0.0);
+            d.readFloat(4127 + 100*i, &m_profiles[i].m_eqG[7], 0.0);
+            d.readFloat(4128 + 100*i, &m_profiles[i].m_eqG[8], 0.0);
+            d.readFloat(4129 + 100*i, &m_profiles[i].m_eqG[9], 0.0);
+            d.readFloat(4130 + 100*i, &m_profiles[i].m_eqG[10], 0.0);
         }
 
         return true;

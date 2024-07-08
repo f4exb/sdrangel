@@ -294,7 +294,7 @@ void EQP::SetEQMP (RXA& rxa, int mp)
     }
 }
 
-void EQP::SetEQProfile (RXA& rxa, int nfreqs, float* F, float* G)
+void EQP::SetEQProfile (RXA& rxa, int nfreqs, const float* F, const float* G)
 {
     EQP *a;
     float* impulse;
@@ -429,7 +429,7 @@ void EQP::SetEQMP (TXA& txa, int mp)
     }
 }
 
-void EQP::SetEQProfile (TXA& txa, int nfreqs, float* F, float* G)
+void EQP::SetEQProfile (TXA& txa, int nfreqs, const float* F, const float* G)
 {
     EQP *a;
     float* impulse;

@@ -994,6 +994,19 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="equalizer">
+        <property name="toolTip">
+         <string>Toggle equalizer (righ-click for options)</string>
+        </property>
+        <property name="text">
+         <string>EQ</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

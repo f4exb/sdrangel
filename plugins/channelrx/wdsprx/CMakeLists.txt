@@ -36,6 +36,8 @@ if(NOT SERVER_MODE)
         wdsprxdnbdialog.ui
         wdsprxdnrdialog.cpp
         wdsprxdnrdialog.ui
+        wdsprxeqdialog.cpp
+        wdsprxeqdialog.ui
         wdsprxfmdialog.cpp
         wdsprxfmdialog.ui
         wdsprxsquelchdialog.cpp
@@ -51,6 +53,7 @@ if(NOT SERVER_MODE)
         wdsprxcwpeakdialog.h
         wdsprxdnbdialog.h
         wdsprxdnrdialog.h
+        wdsprxeqdialog.h
         wdsprxfmdialog.h
         wdsprxsquelchdialog.h
     )

@@ -41,6 +41,7 @@ class WDSPRxAMDialog;
 class WDSPRxFMDialog;
 class WDSPRxCWPeakDialog;
 class WDSPRxSquelchDialog;
+class WDSPRxEqDialog;
 class SpectrumVis;
 class BasebandSampleSink;
 
@@ -103,6 +104,7 @@ private:
     WDSPRxFMDialog* m_fmDialog;
     WDSPRxCWPeakDialog* m_cwPeakDialog;
     WDSPRxSquelchDialog* m_squelchDialog;
+    WDSPRxEqDialog* m_equalizerDialog;
 
 	QIcon m_iconDSBUSB;
 	QIcon m_iconDSBLSB;
@@ -144,6 +146,7 @@ private slots:
     void on_cwPeaking_toggled(bool checked);
     void on_squelch_toggled(bool checked);
     void on_squelchThreshold_valueChanged(int value);
+    void on_equalizer_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
@@ -161,6 +164,8 @@ private slots:
     void fmSetup(int valueChanged);
     void squelchSetupDialog(const QPoint& p);
     void squelchSetup(int valueChanged);
+    void equalizerSetupDialog(const QPoint& p);
+    void equalizerSetup(int valueChanged);
 	void tick();
 };
 

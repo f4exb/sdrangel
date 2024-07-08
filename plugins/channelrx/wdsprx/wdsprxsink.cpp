@@ -42,6 +42,7 @@
 #include "ssql.hpp"
 #include "amsq.hpp"
 #include "fmsq.hpp"
+#include "eq.hpp"
 
 #include "wdsprxsink.h"
 
@@ -714,6 +715,18 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
     if ((m_settings.m_amsqMaxTail != settings.m_amsqMaxTail) || force) {
         WDSP::AMSQ::SetAMSQMaxTail(*m_rxa, settings.m_amsqMaxTail);
+    }
+
+    // Equalizer
+
+    if ((m_settings.m_equalizer != settings.m_equalizer) || force) {
+        WDSP::EQP::SetEQRun(*m_rxa, settings.m_equalizer ? 1 : 0);
+    }
+
+    if ((m_settings.m_eqF != settings.m_eqF)
+    || (m_settings.m_eqG != settings.m_eqG) || force)
+    {
+        WDSP::EQP::SetEQProfile(*m_rxa, 10, settings.m_eqF.data(), settings.m_eqG.data());
     }
 
     // Audio panel

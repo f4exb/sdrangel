@@ -134,8 +134,8 @@ FMD* FMD::create_fmd(
     a->nc_aud = nc_aud;
     a->mp_aud = mp_aud;
     a->lim_run = 0;
-    a->lim_pre_gain = 0.4;
-    a->lim_gain = 2.5;
+    a->lim_pre_gain = 0.01; // 0.4
+    a->lim_gain = 0.0001; // 2.5
     calc_fmd (a);
     // de-emphasis filter
     a->audio = new float[a->size * 2]; // (float *) malloc0 (a->size * sizeof (complex));

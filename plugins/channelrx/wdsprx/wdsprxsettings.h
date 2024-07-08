@@ -18,6 +18,8 @@
 #ifndef PLUGINS_CHANNELRX_WDSPRX_WDSPRXSETTINGS_H_
 #define PLUGINS_CHANNELRX_WDSPRX_WDSPRXSETTINGS_H_
 
+#include <array>
+
 #include <QByteArray>
 #include <QString>
 
@@ -133,6 +135,10 @@ struct WDSPRxProfile
     double m_ssqlTauMute;   //!< Voice squelch tau mute
     double m_ssqlTauUnmute; //!< Voice squelch tau unmute
     double m_amsqMaxTail;
+    // Equalizer
+    bool m_equalizer;
+    std::array<float, 11> m_eqF; //!< Frequencies vector. Index 0 is always 0 as this is the preamp position
+    std::array<float, 11> m_eqG; //!< Gains vector (dB). Index 0 is the preamp (common) gain
 
     WDSPRxProfile() :
         m_demod(DemodSSB),
@@ -169,8 +175,8 @@ struct WDSPRxProfile
         m_fmDeviation(2500.0),
         m_fmAFLow(300.0),
         m_fmAFHigh(3000.0),
-        m_fmAFLimiter(false),
-        m_fmAFLimiterGain(10.0),
+        m_fmAFLimiter(true),
+        m_fmAFLimiterGain(-40.0),
         m_fmCTCSSNotch(false),
         m_fmCTCSSNotchFrequency(67.0),
         m_squelch(false),
@@ -178,7 +184,10 @@ struct WDSPRxProfile
         m_squelchMode(SquelchModeVoice),
         m_ssqlTauMute(0.1),
         m_ssqlTauUnmute(0.1),
-        m_amsqMaxTail(1.5)
+        m_amsqMaxTail(1.5),
+        m_equalizer(false),
+        m_eqF{0.0, 32.0, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0},
+        m_eqG{0.0,  0.0,  0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0}
     {}
 };
 
@@ -238,6 +247,10 @@ struct WDSPRxSettings
     double m_ssqlTauMute;   //!< Voice squelch tau mute
     double m_ssqlTauUnmute; //!< Voice squelch tau unmute
     double m_amsqMaxTail;
+    // Equalizer
+    bool m_equalizer;
+    std::array<float, 11> m_eqF = {0.0, 32.0, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0}; //!< Frequencies vector. Index 0 is always 0 as this is the preamp position
+    std::array<float, 11> m_eqG = {0.0,  0.0,  0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0}; //!< Gains vector (dB). Index 0 is the preamp (common) gain
 
     quint32 m_rgbColor;
     QString m_title;

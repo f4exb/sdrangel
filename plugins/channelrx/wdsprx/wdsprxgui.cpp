@@ -44,6 +44,7 @@
 #include "wdsprxfmdialog.h"
 #include "wdsprxcwpeakdialog.h"
 #include "wdsprxsquelchdialog.h"
+#include "wdsprxeqdialog.h"
 
 WDSPRxGUI* WDSPRxGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -341,17 +342,28 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
     m_settings.m_fmCTCSSNotchFrequency = m_settings.m_profiles[m_settings.m_profileIndex].m_fmCTCSSNotchFrequency;
     // Squelch
     m_settings.m_squelch = m_settings.m_profiles[m_settings.m_profileIndex].m_squelch;
+    m_settings.m_squelchThreshold = m_settings.m_profiles[m_settings.m_profileIndex].m_squelchThreshold;
     m_settings.m_squelchMode = m_settings.m_profiles[m_settings.m_profileIndex].m_squelchMode;
     m_settings.m_ssqlTauMute = m_settings.m_profiles[m_settings.m_profileIndex].m_ssqlTauMute;
     m_settings.m_ssqlTauUnmute = m_settings.m_profiles[m_settings.m_profileIndex].m_ssqlTauUnmute;
     m_settings.m_amsqMaxTail = m_settings.m_profiles[m_settings.m_profileIndex].m_amsqMaxTail;
+    // Equalizer
+    m_settings.m_equalizer = m_settings.m_profiles[m_settings.m_profileIndex].m_equalizer;
+    m_settings.m_eqF = m_settings.m_profiles[m_settings.m_profileIndex].m_eqF;
+    m_settings.m_eqG = m_settings.m_profiles[m_settings.m_profileIndex].m_eqG;
     displaySettings();
     applyBandwidths(m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2, true); // does applySettings(true)
 }
 
 void WDSPRxGUI::on_demod_currentIndexChanged(int index)
 {
-    m_settings.m_demod = (WDSPRxProfile::WDSPRxDemod) index;
+    WDSPRxProfile::WDSPRxDemod demod = (WDSPRxProfile::WDSPRxDemod) index;
+
+    if ((m_settings.m_demod != WDSPRxProfile::DemodSSB) && (demod == WDSPRxProfile::DemodSSB)) {
+        m_settings.m_dsb = false;
+    }
+
+    m_settings.m_demod = demod;
     m_settings.m_profiles[m_settings.m_profileIndex].m_demod = m_settings.m_demod;
 
     switch(m_settings.m_demod)
@@ -481,6 +493,9 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     CRightClickEnabler *squelchRightClickEnabler = new CRightClickEnabler(ui->squelch);
     connect(squelchRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(squelchSetupDialog(const QPoint &)));
+
+    CRightClickEnabler *equalizerRightClickEnabler = new CRightClickEnabler(ui->equalizer);
+    connect(equalizerRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(equalizerSetupDialog(const QPoint &)));
 
     CRightClickEnabler *demodRightClickEnabler = new CRightClickEnabler(ui->demod);
     connect(demodRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(demodSetupDialog(const QPoint &)));
@@ -757,6 +772,7 @@ void WDSPRxGUI::displaySettings()
     ui->squelch->setChecked(m_settings.m_squelch);
     ui->squelchThreshold->setValue(m_settings.m_squelchThreshold);
     ui->squelchThresholdText->setText(tr("%1").arg(m_settings.m_squelchThreshold));
+    ui->equalizer->setChecked(m_settings.m_equalizer);
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);
@@ -1201,6 +1217,44 @@ void WDSPRxGUI::squelchSetup(int iValueChanged)
     case WDSPRxSquelchDialog::ChangedAMSQMaxTail:
         m_settings.m_amsqMaxTail = m_squelchDialog->getAMSQMaxTail();
         m_settings.m_profiles[m_settings.m_profileIndex].m_amsqMaxTail = m_settings.m_amsqMaxTail;
+        applySettings();
+        break;
+    default:
+        break;
+    }
+}
+
+void WDSPRxGUI::equalizerSetupDialog(const QPoint& p)
+{
+    m_equalizerDialog = new WDSPRxEqDialog();
+    m_equalizerDialog->move(p);
+    m_equalizerDialog->setEqF(m_settings.m_eqF);
+    m_equalizerDialog->setEqG(m_settings.m_eqG);
+    QObject::connect(m_equalizerDialog, &WDSPRxEqDialog::valueChanged, this, &WDSPRxGUI::equalizerSetup);
+    m_equalizerDialog->exec();
+    QObject::disconnect(m_equalizerDialog, &WDSPRxEqDialog::valueChanged, this, &WDSPRxGUI::equalizerSetup);
+    m_equalizerDialog->deleteLater();
+    m_equalizerDialog = nullptr;
+}
+
+void WDSPRxGUI::equalizerSetup(int iValueChanged)
+{
+    if (!m_equalizerDialog) {
+        return;
+    }
+
+    WDSPRxEqDialog::ValueChanged valueChanged = (WDSPRxEqDialog::ValueChanged) iValueChanged;
+
+    switch (valueChanged)
+    {
+    case WDSPRxEqDialog::ChangedFrequency:
+        m_settings.m_eqF = m_equalizerDialog->getEqF();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_eqF = m_settings.m_eqF;
+        applySettings();
+        break;
+    case WDSPRxEqDialog::ChangedGain:
+        m_settings.m_eqG = m_equalizerDialog->getEqG();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_eqG = m_settings.m_eqG;
         applySettings();
         break;
     default:

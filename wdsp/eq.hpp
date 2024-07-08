@@ -84,7 +84,7 @@ public:
     static void SetEQRun (RXA& rxa, int run);
     static void SetEQNC (RXA& rxa, int nc);
     static void SetEQMP (RXA& rxa, int mp);
-    static void SetEQProfile (RXA& rxa, int nfreqs, float* F, float* G);
+    static void SetEQProfile (RXA& rxa, int nfreqs, const float* F, const float* G);
     static void SetEQCtfmode (RXA& rxa, int mode);
     static void SetEQWintype (RXA& rxa, int wintype);
     static void SetGrphEQ (RXA& rxa, int *rxeq);
@@ -93,7 +93,7 @@ public:
     static void SetEQRun (TXA& txa, int run);
     static void SetEQNC (TXA& txa, int nc);
     static void SetEQMP (TXA& txa, int mp);
-    static void SetEQProfile (TXA& txa, int nfreqs, float* F, float* G);
+    static void SetEQProfile (TXA& txa, int nfreqs, const float* F, const float* G);
     static void SetEQCtfmode (TXA& txa, int mode);
     static void SetEQWintype (TXA& txa, int wintype);
     static void SetGrphEQ (TXA& txa, int *txeq);

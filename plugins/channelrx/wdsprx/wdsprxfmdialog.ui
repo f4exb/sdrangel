@@ -50,8 +50,17 @@
      </item>
      <item>
       <widget class="QLabel" name="deviationText">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>20.0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -262,23 +271,32 @@
         <string>AF volume limter gain (dB)</string>
        </property>
        <property name="minimum">
-        <number>-30</number>
+        <number>-80</number>
        </property>
        <property name="maximum">
-        <number>30</number>
+        <number>0</number>
        </property>
        <property name="pageStep">
         <number>1</number>
        </property>
        <property name="value">
-        <number>0</number>
+        <number>-40</number>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="afLimiterGainText">
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
-        <string>20</string>
+        <string>-40</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
