@@ -19,14 +19,13 @@
 
 #include <QDialog>
 
-#include "export.h"
 #include "wdsprxsettings.h"
 
 namespace Ui {
     class WDSPRxFMDialog;
 }
 
-class SDRGUI_API WDSPRxFMDialog : public QDialog {
+class WDSPRxFMDialog : public QDialog {
     Q_OBJECT
 public:
     enum ValueChanged {

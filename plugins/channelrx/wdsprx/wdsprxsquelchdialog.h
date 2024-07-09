@@ -19,14 +19,13 @@
 
 #include <QDialog>
 
-#include "export.h"
 #include "wdsprxsettings.h"
 
 namespace Ui {
     class WDSPRxSquelchDialog;
 }
 
-class SDRGUI_API WDSPRxSquelchDialog : public QDialog {
+class WDSPRxSquelchDialog : public QDialog {
     Q_OBJECT
 public:
     enum ValueChanged {
