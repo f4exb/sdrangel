@@ -258,6 +258,13 @@ void WDSPRxGUI::on_squelchThreshold_valueChanged(int value)
     applySettings();
 }
 
+void WDSPRxGUI::on_equalizer_toggled(bool checked)
+{
+    m_settings.m_equalizer = checked;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_equalizer = m_settings.m_equalizer;
+    applySettings();
+}
+
 void WDSPRxGUI::on_audioMute_toggled(bool checked)
 {
 	m_audioMute = checked;
@@ -1318,6 +1325,7 @@ void WDSPRxGUI::makeUIConnections()
     QObject::connect(ui->cwPeaking, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_cwPeaking_toggled);
     QObject::connect(ui->squelch, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_squelch_toggled);
     QObject::connect(ui->squelchThreshold, &QDial::valueChanged, this, &WDSPRxGUI::on_squelchThreshold_valueChanged);
+    QObject::connect(ui->equalizer, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_equalizer_toggled);
 }
 
 void WDSPRxGUI::updateAbsoluteCenterFrequency()
