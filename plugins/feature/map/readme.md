@@ -209,6 +209,9 @@ For the 2D map, the settings include:
 * Whether the 2D map is displayed.
 * Which Map provider will be used to source the map images.
 * When OpenStreetMap is used as the provider, a custom map URL can be entered. For example, http://a.tile.openstreetmap.fr/hot/ or http://1.basemaps.cartocdn.com/light_nolabels/
+  or file:///opt/install/custom-map if using a map stored locally, such a map created with [QGIS](https://qgis.org/) using the "Generate XYZ tiles (Directory)" tool
+  or [gdal2tiles](https://gdal.org/programs/gdal2tiles.html)
+  or any other tool that creates map images compatible with Google Maps, OpenLayers and Leaflet.
 * When MapboxGL is used as the provider, custom styles can be specified.
 
 For the 3D map, the settings include:
