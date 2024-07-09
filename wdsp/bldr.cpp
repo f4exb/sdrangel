@@ -110,7 +110,7 @@ void BLDR::destroy_builder(BLDR *a)
     delete(a);
 }
 
-void BLDRflush_builder(BLDR *a, int points, int ints)
+void BLDR::flush_builder(BLDR *a, int points, int ints)
 {
     memset(a->catxy, 0, 2 * points * sizeof(float));
     memset(a->sx,    0, points * sizeof(float));

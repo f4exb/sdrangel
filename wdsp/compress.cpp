@@ -34,7 +34,7 @@ in the January 2010 issue of RadCom magazine.
 
 namespace WDSP {
 
-COMPRESSOR* create_compressor (
+COMPRESSOR* COMPRESSOR::create_compressor (
                 int run,
                 int buffsize,
                 float* inbuff,
