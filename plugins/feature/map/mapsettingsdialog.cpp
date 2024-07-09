@@ -37,16 +37,26 @@ MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings
     m_minZoom = new QSpinBox(table);
     m_minZoom->setRange(0, 15);
     m_minZoom->setValue(settings->m_2DMinZoom);
+    m_minZoom->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_minPixels = new QSpinBox(table);
     m_minPixels->setRange(0, 200);
     m_minPixels->setValue(settings->m_3DModelMinPixelSize);
+    m_minPixels->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_labelScale = new QDoubleSpinBox(table);
     m_labelScale->setDecimals(2);
     m_labelScale->setRange(0.01, 10.0);
     m_labelScale->setValue(settings->m_3DLabelScale);
+    m_labelScale->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_filterDistance = new QSpinBox(table);
+    m_filterDistance->setRange(0, MAX_FILTER_DISTANCE_KM);
+    m_filterDistance->setValue(settings->m_filterDistance / 1000);
+    m_filterDistance->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_filterDistance->setSpecialValueText(" ");
+    m_filterDistance->setCorrectionMode(QAbstractSpinBox::CorrectToNearestValue);
     table->setCellWidget(row, MapSettingsDialog::COL_2D_MIN_ZOOM, m_minZoom);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_MIN_PIXELS, m_minPixels);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_LABEL_SCALE, m_labelScale);
+    table->setCellWidget(row, MapSettingsDialog::COL_FILTER_DISTANCE, m_filterDistance);
 }
 
 MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
@@ -87,7 +97,7 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     QList<MapSettings::MapItemSettings *> itemSettings = m_settings->m_itemSettings.values();
     std::sort(itemSettings.begin(), itemSettings.end(),
         [](const MapSettings::MapItemSettings* a, const MapSettings::MapItemSettings* b) -> bool {
-            return a->m_group < b->m_group;
+            return a->m_group.compare(b->m_group, Qt::CaseInsensitive) < 0;
         });
     QListIterator<MapSettings::MapItemSettings *> itr(itemSettings);
     while (itr.hasNext())
@@ -121,11 +131,6 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
 
         item = new QTableWidgetItem(itemSettings->m_filterName);
         ui->mapItemSettings->setItem(row, COL_FILTER_NAME, item);
-        item = new QTableWidgetItem();
-        if (itemSettings->m_filterDistance > 0) {
-            item->setText(QString::number(itemSettings->m_filterDistance / 1000));
-        }
-        ui->mapItemSettings->setItem(row, COL_FILTER_DISTANCE, item);
 
         MapItemSettingsGUI *gui = new MapItemSettingsGUI(ui->mapItemSettings, row, itemSettings);
         m_mapItemSettingsGUIs.append(gui);
@@ -262,13 +267,7 @@ void MapSettingsDialog::accept()
         itemSettings->m_filterName = ui->mapItemSettings->item(row, COL_FILTER_NAME)->text();
         itemSettings->m_filterNameRE.setPattern(itemSettings->m_filterName);
         itemSettings->m_filterNameRE.optimize();
-        bool ok;
-        int filterDistance = ui->mapItemSettings->item(row, COL_FILTER_DISTANCE)->text().toInt(&ok);
-        if (ok && filterDistance > 0) {
-            itemSettings->m_filterDistance = filterDistance * 1000;
-        } else {
-            itemSettings->m_filterDistance = 0;
-        }
+        itemSettings->m_filterDistance = gui->m_filterDistance->value() * 1000;
     }
 
     QDialog::accept();
