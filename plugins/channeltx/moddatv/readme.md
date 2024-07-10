@@ -125,7 +125,7 @@ This slider can be used to randomly set the current position in the file when fi
 
 <h2>Creating an MPEG transport stream</h2>
 
-An MPEG transport stream file can be created from a video file using ffpmeg:
+An MPEG transport stream file can be created from a video file using ffmpeg:
 
     ffmpeg -i input.avi -pix_fmt yuv420p -r 25 -s 720x576 -aspect 4:3 -c:v hevc -c:a libopus -b:v 500k -b:a 64k -maxrate 600k -bufsize 50k -f mpegts -mpegts_original_network_id 1 -mpegts_transport_stream_id 1 -mpegts_service_id 1  -mpegts_pmt_start_pid 4096 -streamid 0:289 -streamid 1:337 -metadata service_provider="SDRangel"  -metadata service_name="SDRangel TV" -y mpeg.ts
 

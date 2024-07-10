@@ -96,7 +96,7 @@ This scope display shows waveforms related to the decoding with GGMorse.
     * When the show decoder threshold is set (11a) it shows the threshold level being used in GGMorse for decoding. It is not necessary on the same scale as the Goertzel output.
     * When the show decoder threshold is not set (11a) a constant 0.0316227766017 is applied which corresponds to a power of -30 dB.
 
-The elemetary trace length is 3 seconds. This is the time window used by GGMorse thus a new trace appears every 3 seconds. The actual traces are interpolated to fit in the 4800 samples of the elementary trace. Thus the sample rate is a fixed 1.6 kS/s.
+The elementary trace length is 3 seconds. This is the time window used by GGMorse thus a new trace appears every 3 seconds. The actual traces are interpolated to fit in the 4800 samples of the elementary trace. Thus the sample rate is a fixed 1.6 kS/s.
 
 The best settings to visualize the Goertzel waveform is the following:
 
