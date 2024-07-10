@@ -58,7 +58,7 @@ public:
 	int runFilt(const cmplx& in, cmplx **out);
 	int runSSB(const cmplx& in, cmplx **out, bool usb, bool getDC = true);
 	int runDSB(const cmplx& in, cmplx **out, bool getDC = true);
-	int runAsym(const cmplx & in, cmplx **out, bool usb); //!< Asymmetrical fitering can be used for vestigial sideband
+	int runAsym(const cmplx & in, cmplx **out, bool usb); //!< Asymmetrical filtering can be used for vestigial sideband
 
     void setDNR(bool dnr) { m_dnr = dnr; }
     void setDNRScheme(FFTNoiseReduction::Scheme scheme) { m_dnrScheme = scheme; }

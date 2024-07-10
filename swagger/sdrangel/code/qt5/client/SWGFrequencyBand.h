@@ -13,7 +13,7 @@
 /*
  * SWGFrequencyBand.h
  *
- * A band of frequencies given its boudaries in Hertz (Hz)
+ * A band of frequencies given its boundaries in Hertz (Hz)
  */
 
 #ifndef SWGFrequencyBand_H_

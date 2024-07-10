@@ -25,7 +25,7 @@
 
 #include "export.h"
 
-// Goertzel filter for calculting discrete Fourier transform for a single frequency
+// Goertzel filter for calculating discrete Fourier transform for a single frequency
 // Implementation supports non-integer multiples of fundamental frequency, see:
 // https://asp-eurasipjournals.springeropen.com/track/pdf/10.1186/1687-6180-2012-56.pdf
 class SDRBASE_API Goertzel

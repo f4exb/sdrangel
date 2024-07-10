@@ -863,7 +863,7 @@ protected:
 
 	void doFIR(qint32 *x, qint32 *y)
 	{
-		// Coefficents. This is a sinc function:
+		// Coefficients. This is a sinc function:
 	    // Half of the half of coefficients are stored because:
 	    // - half of the coefficients are 0
 	    // - there is a symmertry around the central 0.5 coefficient (not stored either)

@@ -51,7 +51,7 @@ private:
     bool m_running;
 
     DevicePlutoSDRBox *m_plutoBox;
-    int16_t *m_buf;                 //!< holds I+Q values of each sample from devce
+    int16_t *m_buf;                 //!< holds I+Q values of each sample from device
 //    int16_t *m_bufConv;             //!< holds I+Q values of each sample converted to host format via iio_channel_convert
     uint32_t m_blockSizeSamples;    //!< buffer sizes in number of (I,Q) samples
     SampleSourceFifo* m_sampleFifo; //!< DSP sample FIFO (I,Q)

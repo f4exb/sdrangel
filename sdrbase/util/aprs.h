@@ -94,7 +94,7 @@ struct SDRBASE_API APRSPacket {
     bool m_hasGust;
     int m_temp;                 // Fahrenheit, can be negative down to -99
     bool m_hasTemp;
-    int m_rainLastHr;           // Hundreths of an inch
+    int m_rainLastHr;           // Hundredths of an inch
     bool m_hasRainLastHr;
     int m_rainLast24Hrs;
     bool m_hasRainLast24Hrs;

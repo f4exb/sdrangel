@@ -131,7 +131,7 @@ private:
     QTimer m_statusTimer;
     int m_lastFeatureState;
 
-    QHash<QString,APRSStation *> m_stations;    // All stations we've recieved packets for. Hashed on callsign
+    QHash<QString,APRSStation *> m_stations;    // All stations we've received packets for. Hashed on callsign
 
     QMenu *packetsTableMenu;                    // Column select context menus
     QMenu *weatherTableMenu;

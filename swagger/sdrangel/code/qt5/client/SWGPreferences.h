@@ -13,7 +13,7 @@
 /*
  * SWGPreferences.h
  *
- * Repreents a Prefernce object
+ * Represents a Preference object
  */
 
 #ifndef SWGPreferences_H_

@@ -26,7 +26,7 @@
 #include <QWidget>
 
 // Class to allow frameless windows (Qt::FramelessWindowHint) to be resized
-// by clicking and draging on the border
+// by clicking and dragging on the border
 // The window needs to forward the mousePressEvent, mouseReleaseEvent, mouseMoveEvent
 // and leaveEvent events to this class
 // Child widgets should have mouse tracking enabled, so cursor can be controlled properly

@@ -75,7 +75,7 @@ public:
         }
     };
 
-    // Sent from worker to GUI to indicaite LOS
+    // Sent from worker to GUI to indicate LOS
     class MsgReportLOS : public Message {
         MESSAGE_CLASS_DECLARATION
 

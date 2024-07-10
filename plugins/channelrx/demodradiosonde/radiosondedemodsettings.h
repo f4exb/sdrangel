@@ -67,7 +67,7 @@ struct RadiosondeDemodSettings
     int m_frameColumnIndexes[RADIOSONDEDEMOD_FRAME_COLUMNS];//!< How the columns are ordered in the table
     int m_frameColumnSizes[RADIOSONDEDEMOD_FRAME_COLUMNS];  //!< Size of the columns in the table
 
-    static const int RADIOSONDEDEMOD_CHANNEL_SAMPLE_RATE = 57600; //!< 12x 4800 baud rate (use even multiple so Gausian filter has odd number of taps)
+    static const int RADIOSONDEDEMOD_CHANNEL_SAMPLE_RATE = 57600; //!< 12x 4800 baud rate (use even multiple so Gaussian filter has odd number of taps)
 
     RadiosondeDemodSettings();
     void resetToDefaults();

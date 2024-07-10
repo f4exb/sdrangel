@@ -346,7 +346,7 @@ private slots:
     {
         QMutexLocker locker(&m_mutex);
         //QString url = reply->url().toEncoded().constData();
-        QString url = reply->request().url().toEncoded().constData(); // reply->url() may differ if redirection occured, so use requested
+        QString url = reply->request().url().toEncoded().constData(); // reply->url() may differ if redirection occurred, so use requested
 
         if (!isHttpRedirect(reply))
         {

@@ -36,7 +36,7 @@ public:
     static int osd_decode(float codeword[174], int depth, int out[91], int *out_depth);
 };
 
-} // namepsace FT8
+} // namespace FT8
 
 #endif // osd_h
 

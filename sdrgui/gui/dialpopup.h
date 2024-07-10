@@ -32,7 +32,7 @@ class QPushButton;
 class DialogPositioner;
 
 // A popup dialog for QDials that uses a slider instead, which is easier to use
-// on a touch screen. Actived with tap and hold or right mouse click
+// on a touch screen. Activated with tap and hold or right mouse click
 class SDRGUI_API DialPopup : public QDialog {
     Q_OBJECT
 

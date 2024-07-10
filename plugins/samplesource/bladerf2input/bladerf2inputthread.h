@@ -21,7 +21,7 @@
 // BladerRF2 is a SISO/MIMO device with a single stream supporting one or two Rx
 // Therefore only one thread can be allocated for the Rx side
 // All FIFOs must be registered before calling startWork() else SISO/MIMO switch will not work properly
-// with unpredicatable results
+// with unpredictable results
 
 #include <QThread>
 #include <QMutex>

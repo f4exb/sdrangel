@@ -92,7 +92,7 @@ public:
     }
 
 	/**
-	 * Alternative without atan at the expense of a slight distorsion on very wideband signals
+	 * Alternative without atan at the expense of a slight distortion on very wideband signals
 	 * http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-
 	 * in addition it needs scaling by instantaneous magnitude squared and volume (0..10) adjustment factor
 	 */

@@ -94,7 +94,7 @@ struct deconvol_poly2
 {
     typedef u8 hardsymbol;
 
-    // Support instanciation of template with soft of float input
+    // Support instantiation of template with soft of float input
     inline u8 SYMVAL(const hardsymbol *s) { return *s; }
     inline u8 SYMVAL(const softsymbol *s) { return s->symbol; }
 

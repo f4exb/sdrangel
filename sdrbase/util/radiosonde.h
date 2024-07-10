@@ -97,7 +97,7 @@ public:
     double m_longitude;                 // In degrees
     double m_height;                    // In metres
     double m_speed;                     // In m/s
-    double m_heading;                   // In degreees
+    double m_heading;                   // In degrees
     double m_verticalRate;              // In m/s
     int m_satellitesUsed;
 

@@ -56,7 +56,7 @@ struct ChirpChatModSettings
     int m_inputFrequencyOffset;
     int m_bandwidthIndex;
     int m_spreadFactor;
-    int m_deBits;                  //!< Low data rate optmize (DE) bits
+    int m_deBits;                  //!< Low data rate optimize (DE) bits
     unsigned int m_preambleChirps; //!< Number of preamble chirps
     int m_quietMillis;             //!< Number of milliseconds to pause between transmissions
     int m_nbParityBits;            //!< Hamming parity bits (LoRa)

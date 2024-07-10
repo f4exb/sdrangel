@@ -71,7 +71,7 @@ struct APTDemodSettings
     bool m_hidden;
 
     // The following are really working state, rather than settings
-    QString m_tle;                              // Satelite two-line elements, from satellite tracker
+    QString m_tle;                              // Satellite two-line elements, from satellite tracker
     QDateTime m_aosDateTime;                    // When decoder was started (may not be current time, if replaying old file)
     bool m_northToSouth;                        // Separate from flip, in case user changes it
 

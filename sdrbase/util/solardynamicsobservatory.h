@@ -78,7 +78,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkDiskCache *m_cache;
 
-    // Index page isn't cachable (using network cache), so we cache it ourselves, as it can take up to 5 seconds to fetch
+    // Index page isn't cacheable (using network cache), so we cache it ourselves, as it can take up to 5 seconds to fetch
     QCache<QDate, QByteArray> m_indexCache;
     QDateTime m_todayCacheDateTime;
     QByteArray *m_todayCache;

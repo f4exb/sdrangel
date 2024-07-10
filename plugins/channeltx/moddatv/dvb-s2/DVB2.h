@@ -24,7 +24,7 @@
 typedef unsigned int u32;
 typedef unsigned char u8;
 
-// BB HEADER fileds
+// BB HEADER fields
 #define TS_GS_TRANSPORT 3
 #define TS_GS_GENERIC_PACKETIZED 0
 #define TS_GS_GENERIC_CONTINUOUS 1
@@ -67,7 +67,7 @@ typedef struct{
 
 typedef int Bit;
 
-// The number of useable and stuff bits in a frame
+// The number of usable and stuff bits in a frame
 typedef struct{
     int data_bits;
     int stuff_bits;

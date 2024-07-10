@@ -357,7 +357,7 @@ struct rs_engine
                     u8 e = gf.div(num, den);
 
                     // Subtract e from coefficient of degree loc.
-                    // Note: Coeffients listed by decreasing degree in pin[] and pout[].
+                    // Note: Coefficients listed by decreasing degree in pin[] and pout[].
                     if (bits_corrected) {
                         *bits_corrected += hamming_weight(e);
                     }

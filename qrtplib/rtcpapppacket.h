@@ -70,7 +70,7 @@ public:
     uint32_t GetSSRC() const;
 
     /** Returns the name contained in the APP packet.
-     *  Returns the name contained in the APP packet. This alway consists of four bytes and is not NULL-terminated.
+     *  Returns the name contained in the APP packet. This always consists of four bytes and is not NULL-terminated.
      */
     uint8_t *GetName();
 

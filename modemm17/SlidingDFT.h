@@ -71,7 +71,7 @@ public:
 
     /**
      * Construct the DFT with an array of frequencies.  These frequencies
-     * should be less than @tparam SampleRate / 2 and a mulitple of
+     * should be less than @tparam SampleRate / 2 and a multiple of
      * @tparam SampleRate / @tparam N.  No validation is performed on
      * these frequencies passed to the constructor.
      */

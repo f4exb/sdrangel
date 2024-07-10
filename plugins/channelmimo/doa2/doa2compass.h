@@ -32,7 +32,7 @@ public:
     /// \brief Set all data (yaw, alt, height)
     ///
     /// \param azPos - forward (positive angles side relative to antennas direction) azimuth (in degrees)
-    /// \param azNeg - reverse (negatve angles side relative to antennas direction) azimuth (in degrees)
+    /// \param azNeg - reverse (negative angles side relative to antennas direction) azimuth (in degrees)
     /// \param azAnt - antennas azimuth from 1 (connected to stream 0) to 2 (connected to stream 1)
     ///
     void setData(double azPos, double azNeg, double azAnt) {

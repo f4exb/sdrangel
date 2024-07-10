@@ -36,7 +36,7 @@ public:
     FFTNoiseReduction(int len);
     ~FFTNoiseReduction();
 
-    void init(); //!< call befor start of initial FFT scan
+    void init(); //!< call before start of initial FFT scan
     void push(cmplx data, int index); //!< Push FFT bin during initial FFT scan
     void calc(); //!< calculate after initial FFT scan
     bool cut(int index); //!< true if bin is to be zeroed else false (during second FFT scan)
