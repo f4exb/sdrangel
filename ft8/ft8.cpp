@@ -652,7 +652,7 @@ void FT8::go(int npasses)
         // in fractions of bins in off and hz.
         //
 
-        // just do this once, re-use for every fractional fft_shift
+        // just do this once, reuse for every fractional fft_shift
         // and down_v7_f() to 200 sps.
         std::vector<std::complex<float>> bins = fftEngine_->one_fft(
             samples_, 0, samples_.size());
@@ -2273,7 +2273,7 @@ std::vector<float> FT8::extract_bits(const std::vector<int> &syms, const std::ve
     return bits;
 }
 
-// decode successive pairs of symbols. exploits the likelyhood
+// decode successive pairs of symbols. exploits the likelihood
 // that they have the same phase, by summing the complex
 // correlations for each possible pair and using the max.
 void FT8::soft_decode_pairs(
@@ -2573,7 +2573,7 @@ void FT8::soft_decode_triples(
 }
 
 //
-// given log likelyhood for each bit, try LDPC and OSD decoders.
+// given log likelihood for each bit, try LDPC and OSD decoders.
 // on success, puts corrected 174 bits into a174[].
 //
 int FT8::decode(const float ll174[], int a174[], FT8Params& _params, int use_osd, std::string &comment)

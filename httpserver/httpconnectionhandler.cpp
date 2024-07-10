@@ -249,7 +249,7 @@ void HttpConnectionHandler::read()
             }
 
             // In case of HTTP 1.0 protocol add the Connection:close header.
-            // This ensures that the HttpResponse does not activate chunked mode, which is not spported by HTTP 1.0.
+            // This ensures that the HttpResponse does not activate chunked mode, which is not supported by HTTP 1.0.
             else
             {
                 bool http1_0=QString::compare(currentRequest->getVersion(),"HTTP/1.0",Qt::CaseInsensitive)==0;

@@ -163,7 +163,7 @@ void DSCDemodSink::processOneSample(Complex &ci)
 
     // Save current data for edge detection
     m_dataPrev = m_data;
-    // Set data according to stongest correlation
+    // Set data according to strongest correlation
     m_data = biasedData > 0;
 
     // Calculate timing error (we expect clockCount to be 0 when data changes), and add a proportion of it

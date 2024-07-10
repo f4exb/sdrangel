@@ -156,7 +156,7 @@ quint32 PagerDemodSink::bchEncode(const quint32 cw)
 }
 
 // Use BCH decoding to try to fix any bit errors
-// Returns true if able to be decode/repair successfull
+// Returns true if able to be decode/repair successful
 // See: https://www.eevblog.com/forum/microcontrollers/practical-guides-to-bch-fec/
 bool PagerDemodSink::bchDecode(const quint32 cw, quint32& correctedCW)
 {
@@ -585,7 +585,7 @@ void PagerDemodSink::processOneSample(Complex &ci)
 
     sampleToScope(scopeSample);
 
-    // Send demod signal to Demod Analzyer feature
+    // Send demod signal to Demod Analyzer feature
     m_demodBuffer[m_demodBufferFill++] = fmDemod * std::numeric_limits<int16_t>::max();
 
     if (m_demodBufferFill >= m_demodBuffer.size())

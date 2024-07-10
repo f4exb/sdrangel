@@ -1843,7 +1843,7 @@ void GLSpectrumView::paintGL()
     PROFILER_STOP(m_profileName)
 } // paintGL
 
-// Hightlight power band for SFDR
+// Highlight power band for SFDR
 void GLSpectrumView::drawPowerBandMarkers(float max, float min, const QVector4D &color)
 {
     float p1 = (m_powerScale.getRangeMax() - min) / m_powerScale.getRange();
@@ -1861,7 +1861,7 @@ void GLSpectrumView::drawPowerBandMarkers(float max, float min, const QVector4D 
     m_glShaderSimple.drawSurface(m_glHistogramBoxMatrix, color, q3, 4);
 }
 
-// Hightlight bandwidth being measured
+// Highlight bandwidth being measured
 void GLSpectrumView::drawBandwidthMarkers(int64_t centerFrequency, int bandwidth, const QVector4D &color)
 {
     float f1 = (centerFrequency - bandwidth / 2);
@@ -1881,7 +1881,7 @@ void GLSpectrumView::drawBandwidthMarkers(int64_t centerFrequency, int bandwidth
     m_glShaderSimple.drawSurface(m_glHistogramBoxMatrix, color, q3, 4);
 }
 
-// Hightlight peak being measured. Note that the peak isn't always at the center
+// Highlight peak being measured. Note that the peak isn't always at the center
 void GLSpectrumView::drawPeakMarkers(int64_t startFrequency, int64_t endFrequency, const QVector4D &color)
 {
     float x1 = (startFrequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
@@ -2379,7 +2379,7 @@ void GLSpectrumView::measure3dBBandwidth()
         }
     }
 
-    // Calcualte bandwidth
+    // Calculate bandwidth
     int bins = rightBin - leftBin - 1;
     bins = std::max(1, bins);
     float hzPerBin = m_sampleRate / (float) m_fftSize;

@@ -1231,7 +1231,7 @@ void ADSBDemodGUI::callsignToFlight(Aircraft *aircraft)
     if (!aircraft->m_callsign.isEmpty())
     {
         QRegularExpression flightNoExp("^[A-Z]{2,3}[0-9]{1,4}$");
-        // Airlines line BA add a single charater suffix that can be stripped
+        // Airlines line BA add a single character suffix that can be stripped
         // If the suffix is two characters, then it typically means a digit
         // has been replaced which I don't know how to guess
         // E.g Easyjet might use callsign EZY67JQ for flight EZY6267
@@ -1424,7 +1424,7 @@ void ADSBDemodGUI::handleADSB(
 
             if (wasOnSurface != aircraft->m_onSurface)
             {
-                // Can't mix CPR values used on surface and those that are airbourne
+                // Can't mix CPR values used on surface and those that are airborne
                 aircraft->m_cprValid[0] = false;
                 aircraft->m_cprValid[1] = false;
             }
@@ -1516,7 +1516,7 @@ void ADSBDemodGUI::handleADSB(
             }
             else if (((tc >= 9) && (tc <= 18)) || ((tc >= 20) && (tc <= 22)))
             {
-                // Airbourne position (9-18 baro, 20-22 GNSS)
+                // Airborne position (9-18 baro, 20-22 GNSS)
                 int alt = ((data[5] & 0xff) << 4) | ((data[6] >> 4) & 0xf); // Altitude
                 int q = (alt & 0x10) != 0;
                 int n = ((alt >> 1) & 0x7f0) | (alt & 0xf);  // Remove Q-bit
@@ -1631,9 +1631,9 @@ void ADSBDemodGUI::handleADSB(
             else
             {
                 // Local decode using a single aircraft position + location of receiver
-                // Only valid if airbourne within 180nm/333km (C.2.6.4) or 45nm for surface
+                // Only valid if airborne within 180nm/333km (C.2.6.4) or 45nm for surface
 
-                // Caclulate latitude
+                // Calculate latitude
                 const double maxDeg = aircraft->m_onSurface ? 90.0 : 360.0;
                 const double dLatEven = maxDeg/60.0;
                 const double dLatOdd = maxDeg/59.0;
@@ -1643,7 +1643,7 @@ void ADSBDemodGUI::handleADSB(
                 int j = std::floor(m_azEl.getLocationSpherical().m_latitude/dLat) + std::floor(modulus(m_azEl.getLocationSpherical().m_latitude, dLat)/dLat - aircraft->m_cprLat[f] + 0.5);
                 latitude = dLat * (j + aircraft->m_cprLat[f]);
 
-                // Caclulate longitude
+                // Calculate longitude
                 double dLong;
                 int latNL = cprNL(latitude);
                 if (f == 0)
@@ -1678,7 +1678,7 @@ void ADSBDemodGUI::handleADSB(
         }
         else if (tc == 19)
         {
-            // Airbourne velocity - BDS 0,9
+            // Airborne velocity - BDS 0,9
             int st = data[4] & 0x7;   // Subtype
             if ((st == 1) || (st == 2))
             {
@@ -1874,7 +1874,7 @@ void ADSBDemodGUI::handleADSB(
 
             if (resetAnimation)
             {
-                // Wait until after model has changed before reseting
+                // Wait until after model has changed before resetting
                 // otherwise animation might play on old model
                 aircraft->m_gearDown = false;
                 aircraft->m_flaps = 0.0;
@@ -1924,7 +1924,7 @@ void ADSBDemodGUI::decodeModeS(const QByteArray data, int df, Aircraft *aircraft
     }
     if (wasOnSurface != aircraft->m_onSurface)
     {
-        // Can't mix CPR values used on surface and those that are airbourne
+        // Can't mix CPR values used on surface and those that are airborne
         aircraft->m_cprValid[0] = false;
         aircraft->m_cprValid[1] = false;
     }
@@ -1985,7 +1985,7 @@ void ADSBDemodGUI::decodeModeS(const QByteArray data, int df, Aircraft *aircraft
 
 void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, int df, Aircraft *aircraft, bool &updatedCallsign)
 {
-    // We only see downlink messages, so do not know the data format, so have to decode all posibilities
+    // We only see downlink messages, so do not know the data format, so have to decode all possibilities
     // and then see which have legal values and values that are consistent with ADS-B data
 
     // All IFR aircraft should support ELS (Elementary Surveillance) which includes BDS 1,0 1,7 2,0 3,0
@@ -2247,7 +2247,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         int windSpeedFix = ((data[4] & 0x7) << 6) | ((data[5] >> 2) & 0x3f);
         int windSpeed = windSpeedFix; // knots
         int windDirectionFix = ((data[5] & 0x3) << 6) | ((data[6] >> 2) & 0x3f);
-        int windDirection = windDirectionFix * 180.0f / 256.0f; // Degreees
+        int windDirection = windDirectionFix * 180.0f / 256.0f; // Degrees
         bool windSpeedInconsistent = (windSpeed > 250.0f) || (!windSpeedStatus && ((windSpeedFix != 0) || (windDirectionFix != 0)));
 
         int staticAirTemperatureFix = ((data[6] & 0x1) << 10) | ((data[7] & 0xff) << 2) | ((data[8] >> 6) & 0x3);
@@ -2884,7 +2884,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
     bool debug = false;
 
     // Landing gear should be down when on surface
-    // Check speed in case we get a mixture of surface and airbourne positions
+    // Check speed in case we get a mixture of surface and airborne positions
     // during take-off
     if (   aircraft->m_onSurface
         && !aircraft->m_gearDown
@@ -3591,7 +3591,7 @@ void ADSBDemodGUI::on_flightInfo_clicked()
     }
 }
 
-// Find highlighed aircraft on Map Feature
+// Find highlighted aircraft on Map Feature
 void ADSBDemodGUI::on_findOnMapFeature_clicked()
 {
     QModelIndexList indexList = ui->adsbData->selectionModel()->selectedRows();
@@ -3972,7 +3972,7 @@ void ADSBDemodGUI::updateChannelList()
 
     ui->amDemod->blockSignals(false);
 
-    // If no current settting, select first channel
+    // If no current setting, select first channel
     if (m_settings.m_amDemod.isEmpty())
     {
         ui->amDemod->setCurrentIndex(0);
@@ -5564,7 +5564,7 @@ void ADSBDemodGUI::on_logOpen_clicked()
                                     crc.calculate((const uint8_t *)bytes.data(), bytes.size()-3);
                                     crcCalc = crc.get();
                                 }
-                                //qDebug() << "bytes.szie " << bytes.size() << " crc " << Qt::hex <<  crcCalc;
+                                //qDebug() << "bytes.size " << bytes.size() << " crc " << Qt::hex <<  crcCalc;
                                 handleADSB(bytes, dateTime, correlation, correlation, crcCalc, false);
                                 if ((count > 0) && (count % 100000 == 0))
                                 {

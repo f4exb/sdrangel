@@ -105,15 +105,15 @@ void DVBS2::calc_efficiency( void )
     a = a*m;
     // Take into account pilot symbols
     // TBD
-    // Now calculate the useable data as percentage of the frame
+    // Now calculate the usable data as percentage of the frame
     b = ((double)m_format[1].useable_data_bits)/p;
     // Now calculate the efficiency by multiplying the
-    // useable bits efficiency by the modulation efficiency
+    // usable bits efficiency by the modulation efficiency
     m_efficiency = b*a;
 }
 //
 // Multiply the efficiency value by the symbol rate
-// to get the useable bitrate
+// to get the usable bitrate
 //
 double DVBS2::s2_get_efficiency( void )
 {

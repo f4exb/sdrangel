@@ -625,7 +625,7 @@ void DATVModGUI::tick()
     m_channelPowerDbAvg(powDb);
     ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
 
-    // Use m_tickMsgOutstanding to prevent queuing lots of messsages while stopped/paused
+    // Use m_tickMsgOutstanding to prevent queuing lots of messages while stopped/paused
     if (((++m_tickCount & 0xf) == 0) && !m_tickMsgOutstanding)
     {
         if (ui->inputSelect->currentIndex() == (int) DATVModSettings::SourceFile)

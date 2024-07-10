@@ -247,7 +247,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
             ScopeVis::MsgScopeVisChangeTrigger *msg = ScopeVis::MsgScopeVisChangeTrigger::create(triggerData, iTrigger);
             m_scopeVis->getInputMessageQueue()->push(msg);
         }
-        else // add new trigers
+        else // add new triggers
         {
             ScopeVis::MsgScopeVisAddTrigger *msg = ScopeVis::MsgScopeVisAddTrigger::create(triggerData);
             m_scopeVis->getInputMessageQueue()->push(msg);

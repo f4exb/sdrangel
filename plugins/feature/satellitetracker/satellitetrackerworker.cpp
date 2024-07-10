@@ -398,7 +398,7 @@ void SatelliteTrackerWorker::update()
                                 if (satWorkerState->m_losTimer.isActive()) {
                                     qDebug() << "SatelliteTrackerWorker::update m_losTimer.remainingTime: " << satWorkerState->m_losTimer.remainingTime();
                                 }
-                                // We can detect a new AOS for a satellite, a little bit before the LOS has occured
+                                // We can detect a new AOS for a satellite, a little bit before the LOS has occurred
                                 // Allow for 5s here (1s doesn't appear to be enough in some cases)
                                 if (satWorkerState->m_losTimer.isActive() && (satWorkerState->m_losTimer.remainingTime() <= 5000))
                                 {

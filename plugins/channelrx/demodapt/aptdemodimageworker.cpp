@@ -314,7 +314,7 @@ void APTDemodImageWorker::calcPixelCoords(CoordGeodetic centreCoord, double head
     }
 }
 
-// Recalculate all pixel coordiantes as satTimeOffset or satYaw has changed
+// Recalculate all pixel coordinates as satTimeOffset or satYaw has changed
 void APTDemodImageWorker::recalcCoords()
 {
     if (m_sgp4)
@@ -381,7 +381,7 @@ void APTDemodImageWorker::calcCoord(int row)
         QStringList elements = m_settings.m_tle.trimmed().split("\n");
         if (elements.size() == 3)
         {
-            // Initalise SGP4
+            // Initialise SGP4
             Tle tle(elements[0].toStdString(), elements[1].toStdString(), elements[2].toStdString());
             m_sgp4 = new SGP4(tle);
 
@@ -559,7 +559,7 @@ void APTDemodImageWorker::calcBoundingBox(double &east, double &south, double &w
     //fclose(f);
 }
 
-// Project satellite image to equidistant cyclindrical projection (Plate Carree) for use on 3D Map
+// Project satellite image to equidistant cylindrical projection (Plate Carree) for use on 3D Map
 // We've previously computed lat and lon for each pixel in satellite image
 // so we just work through coords in projected image, trying to find closest pixel in satellite image
 // FIXME: How do we handle sat going over the poles?

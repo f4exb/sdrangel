@@ -556,7 +556,7 @@ qint64 AudioOutputDevice::bytesAvailable() const
     // when readData is called, that will output silence
     if (available == 0)
     {
-        // Use a small value, so padding is minimized, but not too small, we get underflow again straightaway
+        // Use a small value, so padding is minimized, but not too small, we get underflow again straight away
         // Could make this a function of sample rate
         available = 512;
     }

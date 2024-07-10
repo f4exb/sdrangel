@@ -184,7 +184,7 @@ SIDGUI::SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     ui->startDateTime->blockSignals(false);
     ui->endDateTime->blockSignals(false);
 
-    // Intialise chart
+    // Initialise chart
     ui->chart->setRenderHint(QPainter::Antialiasing);
     ui->xRayChart->setRenderHint(QPainter::Antialiasing);
 
@@ -207,7 +207,7 @@ SIDGUI::SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     applyAllSettings();
     m_resizer.enableChildMouseTracking();
 
-    // Intialisation for Solar Dynamics Observatory image/video display
+    // Initialisation for Solar Dynamics Observatory image/video display
     ui->sdoEnabled->setChecked(true);
     ui->sdoProgressBar->setVisible(false);
     ui->sdoImage->setStyleSheet("background-color: black;");
@@ -236,7 +236,7 @@ SIDGUI::SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
         m_settings.m_sdoData = ui->sdoData->currentText();
     }
 
-    // Intialisation for GOES X-Ray data
+    // Initialisation for GOES X-Ray data
     m_goesXRay = GOESXRay::create();
     if (m_goesXRay)
     {

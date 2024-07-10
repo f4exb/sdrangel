@@ -636,7 +636,7 @@ void RadioClockSink::wwvb()
     m_threshold = m_thresholdMovingAverage.asDouble() * m_linearThreshold; // xdB below average
     m_data = m_magsq > m_threshold;
 
-    // Look for minute marker - two consequtive markers
+    // Look for minute marker - two consecutive markers
     if ((m_data == 0) && (m_prevData == 1))
     {
         if (   (m_highCount <= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.3)
@@ -803,7 +803,7 @@ void RadioClockSink::jjy()
     m_threshold = m_thresholdMovingAverage.asDouble() * m_linearThreshold; // xdB below average
     m_data = m_magsq > m_threshold;
 
-    // Look for minute marker - two consequtive markers
+    // Look for minute marker - two consecutive markers
     if ((m_data == 1) && (m_prevData == 0))
     {
         if (   (m_highCount <= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.3)

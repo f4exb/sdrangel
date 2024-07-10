@@ -333,7 +333,7 @@ QString M17ModProcessor::formatAPRSPosition()
     int latDeg, latMin, latFrac, latNorth;
     int longDeg, longMin, longFrac, longEast;
 
-    // Convert decimal latitude to degrees, min and hundreths of a minute
+    // Convert decimal latitude to degrees, min and hundredths of a minute
     latNorth = latitude >= 0.0f;
     latitude = abs(latitude);
     latDeg = (int) latitude;

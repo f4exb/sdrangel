@@ -26,13 +26,13 @@ void MainBench::testCallsign(const QString& argsStr)
     if (Callsign::is_callsign(argsStr)) {
         qInfo("MainBench::testCallsign: %s is a valid callsign", qPrintable(argsStr));
     } else {
-        qInfo("MainBench::testCallsign: %s is mot a valid callsign", qPrintable(argsStr));
+        qInfo("MainBench::testCallsign: %s is not a valid callsign", qPrintable(argsStr));
     }
 
     if (Callsign::is_compound_callsign(argsStr)) {
         qInfo("MainBench::testCallsign: %s is a compound callsign", qPrintable(argsStr));
     } else {
-        qInfo("MainBench::testCallsign: %s is mot a compound callsign", qPrintable(argsStr));
+        qInfo("MainBench::testCallsign: %s is not a compound callsign", qPrintable(argsStr));
     }
 
     qInfo("%s is the base callsign of %s", qPrintable(Callsign::base_callsign(argsStr)), qPrintable(argsStr));

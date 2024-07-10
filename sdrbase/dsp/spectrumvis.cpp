@@ -344,7 +344,7 @@ void SpectrumVis::feed(const ComplexVector::const_iterator& cbegin, const Comple
             processFFT(positiveOnly);
 
 			// advance buffer respecting the fft overlap factor
-			// undefined bahavior if the memory regions overlap, valid code for 50% overlap
+			// undefined behavior if the memory regions overlap, valid code for 50% overlap
 			std::copy(m_fftBuffer.begin() + m_refillSize, m_fftBuffer.end(), m_fftBuffer.begin());
 
 			// start over
@@ -398,7 +398,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
             processFFT(positiveOnly);
 
 			// advance buffer respecting the fft overlap factor
-			// undefined bahavior if the memory regions overlap, valid code for 50% overlap
+			// undefined behavior if the memory regions overlap, valid code for 50% overlap
 			std::copy(m_fftBuffer.begin() + m_refillSize, m_fftBuffer.end(), m_fftBuffer.begin());
 
 			// start over

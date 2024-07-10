@@ -210,7 +210,7 @@ void HttpDownloadManager::downloadFinished(QNetworkReply *reply)
             else if (writeToFile(filename, data))
             {
                 success = true;
-                qDebug() << "HttpDownloadManager: Download from " << url << " to " << filename << " finshed.";
+                qDebug() << "HttpDownloadManager: Download from " << url << " to " << filename << " finished.";
             }
         }
         else

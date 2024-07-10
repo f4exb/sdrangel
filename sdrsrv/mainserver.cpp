@@ -67,7 +67,7 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
     m_mainCore->m_masterTimer.start(50);
 
-    qDebug() << "MainServer::MainServer: load setings...";
+    qDebug() << "MainServer::MainServer: load settings...";
 	loadSettings();
 
     qDebug() << "MainServer::MainServer: finishing...";

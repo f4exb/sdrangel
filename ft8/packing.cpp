@@ -388,7 +388,7 @@ std::string Packing::unpack_5(int a77[], std::string& call1str, std::string& cal
     hashes_mu.unlock();
     call2str = std::string(ocall);
 
-    // mext bit is alway for R
+    // mext bit is always for R
     int i = 12+ 22 +1;
     // r3
     int rst = un64(a77, i, 3);

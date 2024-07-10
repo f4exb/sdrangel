@@ -1121,7 +1121,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
     // Mic-E Data is encoded in ASCII Characters
     if (inRange(38, 127, charToIntAscii(info, idx))       // 0: Longitude Degrees, 0-360
         && inRange(38, 97, charToIntAscii(info, idx+1))   // 1: Longitude Minutes, 0-59
-        && inRange(28, 127, charToIntAscii(info, idx+2))  // 2: Longitude Hundreths of a minute, 0-99
+        && inRange(28, 127, charToIntAscii(info, idx+2))  // 2: Longitude Hundredths of a minute, 0-99
         && inRange(28, 127, charToIntAscii(info, idx+3))  // 3: Speed (tens), 0-800
         && inRange(28, 125, charToIntAscii(info, idx+4))  // 4: Speed (ones), 0-9, and Course (hundreds), {0, 100, 200, 300}
         && inRange(28, 127, charToIntAscii(info, idx+5))  // 5: Course, 0-99 degrees

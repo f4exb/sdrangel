@@ -126,7 +126,7 @@ bool ADSBDemodBaseband::handleMessage(const Message& cmd)
         QMutexLocker mutexLocker(&m_mutex);
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         qDebug() << "ADSBDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
-        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(8*notif.getSampleRate()));  // Need a large FIFO otherwise we get overflows - revist after better upsampling
+        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(8*notif.getSampleRate()));  // Need a large FIFO otherwise we get overflows - revisit after better upsampling
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 

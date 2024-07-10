@@ -1426,7 +1426,7 @@ void HeatMapGUI::resizeMap(int x, int y)
         }
         catch (std::bad_alloc&)
         {
-            // Detete partially allocated memory
+            // Delete partially allocated memory
             delete[] powerAverage;
             delete[] powerPulseAverage;
             delete[] powerMaxPeak;

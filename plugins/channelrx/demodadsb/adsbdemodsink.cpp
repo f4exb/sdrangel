@@ -175,7 +175,7 @@ void ADSBDemodSink::stopWorker()
         }
         m_worker.wait();
         // If this is called from ADSBDemod, we need to also
-        // make sure baseband sink thread isnt blocked in processOneSample
+        // make sure baseband sink thread isn't blocked in processOneSample
         for (int i = 0; i < m_buffers; i++)
         {
             if (m_bufferWrite[i].available() == 0)

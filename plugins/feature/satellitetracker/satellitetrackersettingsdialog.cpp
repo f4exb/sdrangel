@@ -88,7 +88,7 @@ void SatelliteTrackerSettingsDialog::on_removeTle_clicked()
 void SatelliteTrackerSettingsDialog::on_defaultTles_clicked()
 {
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Confirm ovewrite", "Replace the current TLE list with the default?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No);
+    reply = QMessageBox::question(this, "Confirm overwrite", "Replace the current TLE list with the default?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No);
     if (reply == QMessageBox::Yes) {
         ui->tles->clear();
         updateTleWidget(DEFAULT_TLES);

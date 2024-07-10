@@ -920,7 +920,7 @@ bool RadioAstronomyGUI::deserialize(const QByteArray& data)
 
 void RadioAstronomyGUI::updateAvailableFeatures(const AvailableChannelOrFeatureList& availableFeatures, const QStringList& renameFrom, const QStringList& renameTo)
 {
-    // Update starTracker settting if it has been renamed
+    // Update starTracker setting if it has been renamed
     if (renameFrom.contains(m_settings.m_starTracker))
     {
         m_settings.m_starTracker = renameTo[renameFrom.indexOf(m_settings.m_starTracker)];
@@ -1446,7 +1446,7 @@ void RadioAstronomyGUI::calcCalTrx()
     }
 }
 
-// Estimate spillover temperature (This is typically very Az/El depenedent as ground noise will vary)
+// Estimate spillover temperature (This is typically very Az/El dependent as ground noise will vary)
 void RadioAstronomyGUI::calcCalTsp()
 {
     if (!ui->calTrx->text().isEmpty() && !ui->calTsky->text().isEmpty() && !ui->calYFactor->text().isEmpty())
@@ -2610,7 +2610,7 @@ void RadioAstronomyGUI::tick()
 
 void RadioAstronomyGUI::updateRotatorList(const AvailableChannelOrFeatureList& rotators, const QStringList& renameFrom, const QStringList& renameTo)
 {
-    // Update rotator settting if it has been renamed
+    // Update rotator setting if it has been renamed
     if (renameFrom.contains(m_settings.m_rotator))
     {
         m_settings.m_rotator = renameTo[renameFrom.indexOf(m_settings.m_rotator)];
@@ -2983,7 +2983,7 @@ void RadioAstronomyGUI::updateSpectrumChartWidgetsVisibility()
     getRollupContents()->arrangeRollups();
 }
 
-// Calulate mean, RMS and standard deviation
+// Calculate mean, RMS and standard deviation
 // Currently this is for all data - but could make it only for visible data
 void RadioAstronomyGUI::calcAverages()
 {
@@ -4091,7 +4091,7 @@ static double lineDopplerVelocity(double centre, double f)
     return Astronomy::dopplerToVelocity(f, centre) / 1000.0f;
 }
 
-// Convert frequency shift to velocity (+ve receeding - which seems to be the astronomical convention)
+// Convert frequency shift to velocity (+ve receding - which seems to be the astronomical convention)
 double RadioAstronomyGUI::dopplerToVelocity(double centre, double f, FFTMeasurement *fft)
 {
     double v = lineDopplerVelocity(centre, f);
@@ -4107,7 +4107,7 @@ double RadioAstronomyGUI::dopplerToVelocity(double centre, double f, FFTMeasurem
     default:
         break;
     }
-    // Make +ve receeding
+    // Make +ve receding
     return -v;
 }
 
@@ -4645,7 +4645,7 @@ void RadioAstronomyGUI::calcFFTTotalTemperature(FFTMeasurement* fft)
         fft->m_totalPowerdBm = Astronomy::noisePowerdBm(tempSum, bw);
         fft->m_tSys = tempSum/fft->m_fftSize;
 
-        // Esimate source temperature
+        // Estimate source temperature
         fft->m_tSource = calcTSource(fft);
 
         // Calculate error due to thermal noise and gain variation
@@ -5473,7 +5473,7 @@ void RadioAstronomyGUI::on_spectrumShowLAB_toggled(bool checked)
     applySettings();
     m_fftLABSeries->setVisible(m_settings.m_spectrumLAB);
     if (m_settings.m_spectrumLAB) {
-        plotLAB(); // Replot incase data needs to be downloaded
+        plotLAB(); // Replot in case data needs to be downloaded
     }
     spectrumAutoscale();
 }
@@ -6094,7 +6094,7 @@ void RadioAstronomyGUI::downloadFinished(const QString& filename, bool success)
                 }
                 else
                 {
-                    // Try ploting for current FFT (as we only allow one download at a time, so may have been skipped)
+                    // Try plotting for current FFT (as we only allow one download at a time, so may have been skipped)
                     m_downloadingLAB = false;
                     plotLAB(fft->m_l, fft->m_b, m_beamWidth);
                     // Don't clear m_downloadingLAB after this point

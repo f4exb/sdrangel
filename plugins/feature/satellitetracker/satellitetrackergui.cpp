@@ -305,7 +305,7 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
 
     connect(&m_redrawTimer, &QTimer::timeout, this, &SatelliteTrackerGUI::plotChart);
 
-    // Intialise charts
+    // Initialise charts
     m_emptyChart.layout()->setContentsMargins(0, 0, 0, 0);
     m_emptyChart.setMargins(QMargins(1, 1, 1, 1));
     ui->passChart->setChart(&m_emptyChart);

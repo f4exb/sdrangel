@@ -215,7 +215,7 @@ bool RDSDecoder::frameSync(bool bit)
 	return group_ready;
 }
 
-////////////////////////// HELPER FUNTIONS /////////////////////////
+////////////////////////// HELPER FUNCTIONS /////////////////////////
 
 void RDSDecoder::enter_sync(unsigned int sync_block_number)
 {

@@ -158,7 +158,7 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
 
     m_sondeHub = SondeHub::create();
 
-    // Intialise chart
+    // Initialise chart
     ui->chart->setRenderHint(QPainter::Antialiasing);
 
     // Resize the table using dummy data

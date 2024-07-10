@@ -40,7 +40,7 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
         qDebug() << "DeviceUSRPParams::open: m_nbRxChannels: " << m_nbRxChannels << " m_nbTxChannels: " << m_nbTxChannels;
 
         // Speed up program initialisation, by not getting all properties
-        // If we could find out number of channles without ::make ing the device
+        // If we could find out number of channels without ::make ing the device
         // that would be even better
         if (!channelNumOnly)
         {
