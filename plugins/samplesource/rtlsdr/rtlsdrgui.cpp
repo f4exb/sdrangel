@@ -74,7 +74,7 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	displayGains();
 
     rtlsdr_tuner tunerType = m_sampleSource->getTunerType();
-    // Disable widgets not relevent for this tuner
+    // Disable widgets not relevant for this tuner
     bool offsetTuningEnabled = (tunerType != RTLSDR_TUNER_R820T) && (tunerType != RTLSDR_TUNER_R828D);
     if (!offsetTuningEnabled) {
         ui->offsetTuning->setEnabled(false);

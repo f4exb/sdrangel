@@ -483,7 +483,7 @@ bool RigCtlServerWorker::getFrequency(double& frequency, rig_errcode_e& rigCtlRC
     if (WebAPIUtils::getSubObjectDouble(*jsonObj, "centerFrequency", deviceFreq))
     {
         SWGSDRangel::SWGChannelSettings channelSettingsResponse;
-        // Get channel settings containg inputFrequencyOffset, so we can patch them
+        // Get channel settings containing inputFrequencyOffset, so we can patch them
         httpRC = m_webAPIAdapterInterface->devicesetChannelSettingsGet(
             m_settings.m_deviceIndex,
             m_settings.m_channelIndex,
@@ -683,7 +683,7 @@ bool RigCtlServerWorker::getMode(const char **mode, double& passband, rig_errcod
     SWGSDRangel::SWGErrorResponse errorResponse;
     int httpRC;
 
-    // Get channel settings containg inputFrequencyOffset, so we can patch them
+    // Get channel settings containing inputFrequencyOffset, so we can patch them
     httpRC = m_webAPIAdapterInterface->devicesetChannelSettingsGet(
         m_settings.m_deviceIndex,
         m_settings.m_channelIndex,

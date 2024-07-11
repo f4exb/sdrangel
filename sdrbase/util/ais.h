@@ -108,7 +108,7 @@ public:
         if (m_id == 4)
             return "Base station report";
         else
-            return "UTC and data reponse";
+            return "UTC and data response";
     }
     virtual bool hasPosition() { return m_latitudeAvailable && m_longitudeAvailable; }
     virtual float getLatitude() { return m_latitude; }

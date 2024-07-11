@@ -1054,7 +1054,7 @@ void SkyMapGUI::updateSourceList(const QStringList& renameFrom, const QStringLis
 {
     m_availableChannelOrFeatures = m_availableChannelOrFeatureHandler.getAvailableChannelOrFeatureList();
 
-    // Update source settting if it has been renamed
+    // Update source setting if it has been renamed
     if (renameFrom.contains(m_settings.m_source))
     {
         m_settings.m_source = renameTo[renameFrom.indexOf(m_settings.m_source)];
@@ -1092,7 +1092,7 @@ void SkyMapGUI::updateSourceList(const QStringList& renameFrom, const QStringLis
 
     ui->source->blockSignals(false);
 
-    // If no current settting, select first available
+    // If no current setting, select first available
     if (m_settings.m_source.isEmpty() && (ui->source->count() > 0))
     {
         ui->source->setCurrentIndex(0);

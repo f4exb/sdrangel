@@ -52,13 +52,13 @@ struct ChirpChatDemodSettings
     int m_inputFrequencyOffset;
     int m_bandwidthIndex;
     int m_spreadFactor;
-    int m_deBits;            //!< Low data rate optmize (DE) bits
+    int m_deBits;            //!< Low data rate optimize (DE) bits
     FFTWindow::Function m_fftWindow;
     CodingScheme m_codingScheme;
     bool m_decodeActive;
     int m_eomSquelchTenths;        //!< Squelch factor to trigger end of message (/10)
     unsigned int m_nbSymbolsMax;   //!< Maximum number of symbols in a payload
-    bool m_autoNbSymbolsMax;       //!< Set maximum number of symbols in a payload automatically using last messag value
+    bool m_autoNbSymbolsMax;       //!< Set maximum number of symbols in a payload automatically using last message value
     unsigned int m_preambleChirps; //!< Number of expected preamble chirps
     int m_nbParityBits;            //!< Hamming parity bits (LoRa)
     int m_packetLength;            //!< Payload packet length in bytes or characters (LoRa)

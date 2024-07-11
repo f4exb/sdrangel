@@ -284,7 +284,7 @@ int RollupContents::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last
         }
     }
 
-    // Titel
+    // Title
     p->setPen(palette().windowText().color());
     p->drawText(QRect(2 + fm.height(), pos, width() - 4 - fm.height(), fm.height()),
         fm.elidedText(rollup->windowTitle(), Qt::ElideMiddle, width() - 4 - fm.height(), 0));

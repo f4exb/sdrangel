@@ -235,7 +235,7 @@ void PacketModGUI::on_insertPosition_clicked()
     char latBuf[40];
     char longBuf[40];
 
-    // Convert decimal latitude to degrees, min and hundreths of a minute
+    // Convert decimal latitude to degrees, min and hundredths of a minute
     latNorth = latitude >= 0.0f;
     latitude = abs(latitude);
     latDeg = (int)latitude;

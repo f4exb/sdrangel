@@ -66,7 +66,7 @@ public:
     };
 
     enum Command {
-        // These are compatbile with osmocom rtl_tcp: https://github.com/osmocom/rtl-sdr/blob/master/src/rtl_tcp.c
+        // These are compatible with osmocom rtl_tcp: https://github.com/osmocom/rtl-sdr/blob/master/src/rtl_tcp.c
         // and Android https://github.com/signalwareltd/rtl_tcp_andro-/blob/master/rtlsdr/src/main/cpp/src/tcp_commands.h
         setCenterFrequency = 0x1,           // rtlsdr_set_center_freq
         setSampleRate = 0x2,                // rtlsdr_set_sample_rate

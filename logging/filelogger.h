@@ -48,7 +48,7 @@ namespace qtwebapp {
 
   @see set() describes how to set logger variables
   @see LogMessage for a description of the message decoration.
-  @see Logger for a descrition of the buffer.
+  @see Logger for a description of the buffer.
 */
 
 class LOGGING_API FileLogger : public Logger {

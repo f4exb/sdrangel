@@ -100,7 +100,7 @@ private:
 
     int m_channelSampleRate;
 	int m_channelFrequencyOffset;
-    int m_samplesPerLine;       //!< number of samples per complete line (includes sync signals) - adusted value
+    int m_samplesPerLine;       //!< number of samples per complete line (includes sync signals) - adjusted value
 	float m_samplesPerLineFrac; //!< number of samples per complete line (includes sync signals), fractional part
 	ATVDemodSettings m_settings;
     int m_videoTabIndex;

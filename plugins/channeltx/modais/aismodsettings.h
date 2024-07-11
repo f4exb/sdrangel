@@ -93,7 +93,7 @@ struct AISModSettings
     QByteArray m_geometryBytes;
     bool m_hidden;
 
-    // Sample rate is multiple of 9600 baud rate (use even multiple so Gausian filter has odd number of taps)
+    // Sample rate is multiple of 9600 baud rate (use even multiple so Gaussian filter has odd number of taps)
     // Is there any benefit to having this higher?
     static const int AISMOD_SAMPLE_RATE = (9600*6);
 

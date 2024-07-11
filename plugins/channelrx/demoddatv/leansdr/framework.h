@@ -494,7 +494,7 @@ T max(const T &x, const T &y) {
     return (x < y) ? y : x;
 }
 
-// Abreviations for integer types
+// Abbreviations for integer types
 
 typedef unsigned char u8;
 typedef unsigned short u16;

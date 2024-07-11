@@ -113,7 +113,7 @@ private:
 
     PhaseDiscriminators m_phaseDiscri;  // FM demodulator
     Gaussian<Real> m_pulseShape;        // Pulse shaping filter
-    Real *m_rxBuf;                      // Receive sample buffer, large enough for one max length messsage
+    Real *m_rxBuf;                      // Receive sample buffer, large enough for one max length message
     int m_rxBufLength;                  // Size in elements in m_rxBuf
     int m_rxBufIdx;                     // Index in to circular buffer
     int m_rxBufCnt;                     // Number of valid samples in buffer

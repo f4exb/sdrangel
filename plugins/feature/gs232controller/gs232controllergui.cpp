@@ -540,7 +540,7 @@ void GS232ControllerGUI::updateSerialPortList(const QStringList& serialPorts)
 
 void GS232ControllerGUI::updatePipeList(const AvailableChannelOrFeatureList& sources, const QStringList& renameFrom, const QStringList& renameTo)
 {
-    // Update source settting if it has been renamed
+    // Update source setting if it has been renamed
     if (renameFrom.contains(m_settings.m_source))
     {
         m_settings.m_source = renameTo[renameFrom.indexOf(m_settings.m_source)];
@@ -576,7 +576,7 @@ void GS232ControllerGUI::updatePipeList(const AvailableChannelOrFeatureList& sou
 
     ui->sources->blockSignals(false);
 
-    // If no current settting, select first available
+    // If no current setting, select first available
     if (m_settings.m_source.isEmpty() && (ui->sources->count() > 0))
     {
         ui->sources->setCurrentIndex(0);

@@ -121,7 +121,7 @@ void ATVDemodSink::demod(Complex& c)
         int n_out;
         Complex *filtered;
 
-        n_out = m_DSBFilter->runAsym(c, &filtered, m_settings.m_atvModulation != ATVDemodSettings::ATV_LSB); // all usb except explicitely lsb
+        n_out = m_DSBFilter->runAsym(c, &filtered, m_settings.m_atvModulation != ATVDemodSettings::ATV_LSB); // all usb except explicitly lsb
 
         if (n_out > 0)
         {

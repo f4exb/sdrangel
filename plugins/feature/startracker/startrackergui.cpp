@@ -361,7 +361,7 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     ui->galacticLatitude->setText("");
     ui->galacticLongitude->setText("");
 
-    // Intialise chart
+    // Initialise chart
     m_chart.legend()->hide();
     ui->chart->setChart(&m_chart);
     ui->chart->setRenderHint(QPainter::Antialiasing);

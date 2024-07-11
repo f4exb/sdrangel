@@ -70,7 +70,7 @@ void MapIBPBeaconDialog::updateTable(QTime time)
 {
     AzEl azEl = *m_gui->getAzEl();
 
-    // Repeat from begining every 3 minutes
+    // Repeat from beginning every 3 minutes
     int index = ((time.minute() * 60 + time.second()) % 180) / IBPBeacon::m_period;
 
     for (int row = 0; row < IBPBeacon::m_frequencies.size(); row++)

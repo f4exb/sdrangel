@@ -100,7 +100,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     {
         // Disable log on console, so we can more easily see device list
         logger->setConsoleMinMessageLevel(QtFatalMsg);
-        // Don't pass logger to MainServer, otherwise it can reenable log output
+        // Don't pass logger to MainServer, otherwise it can re-enable log output
         logger = nullptr;
     }
 

@@ -127,7 +127,7 @@ void ADSBDemodSinkWorker::run()
         // (E.g: it's quite possible to receive multiple frames simultaneously, so we don't
         // want a maximum threshold for the zeros, as a weaker signal may transmit 1s in
         // a stronger signals 0 chip position. Similarly a strong signal in an adjacent
-        // channel may casue AGC to reduce gain, reducing the ampltiude of an otherwise
+        // channel may cause AGC to reduce gain, reducing the ampltiude of an otherwise
         // strong signal, as well as the noise floor)
         // The threshold accounts for the different number of zeros and ones in the preamble
         // If the sum of ones is exactly 0, it's probably no signal
@@ -253,7 +253,7 @@ void ADSBDemodSinkWorker::run()
                             crc ^= icao;
                         }
                     }
-                    // For DF11, the last 7 bits may have an address/interogration indentifier (II)
+                    // For DF11, the last 7 bits may have an address/interogration identifier (II)
                     // XORed in, so we ignore those bits
                     if ((parity == crc) || ((df == 11) && ((parity & 0xffff80) == (crc & 0xffff80))))
                     {

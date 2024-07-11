@@ -176,7 +176,7 @@ protected:
     }
 
     //
-    // modnn -- modulo replacement for galois field arithmetics, optionally w/ table acceleration
+    // modnn -- modulo replacement for galois field arithmetic, optionally w/ table acceleration
     //
     //  @x:         the value to reduce (will never be -'ve)
     //

@@ -205,7 +205,7 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack, RTPTransmitter *rtptrans
                 // what to do with this packet:
                 if (acceptownpackets)
                 {
-                    // sender addres for own packets has to be NULL!
+                    // sender address for own packets has to be NULL!
                     if ((status = ProcessRTPPacket(rtppack, rawpack->GetReceiveTime(), 0, &stored)) < 0)
                     {
                         if (!stored)

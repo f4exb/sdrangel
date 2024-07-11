@@ -149,7 +149,7 @@ void SIDAddChannelsDialog::channelAdded(int deviceSetIndex, ChannelAPI *channel)
     ChannelWebAPIUtils::patchChannelSetting(channel, "rfBandwidth", 300);
     ChannelWebAPIUtils::patchChannelSetting(channel, "averagePeriodUS", 10000000);
 
-    // Update setings if they are created by SIDGUI before this slot is called
+    // Update settings if they are created by SIDGUI before this slot is called
     if (m_count < m_settings->m_channelSettings.size()) {
         m_settings->m_channelSettings[m_count].m_label = transmitter->m_callsign;
     }

@@ -473,7 +473,7 @@ void to_softsymb(const full_ss *fss, hard_ss *ss);
 void softsymb_harden(hard_ss *ss);
 uint8_t softsymb_to_dump(const hard_ss &ss, int bit);
 
-// Euclidian QPSK soft-symbols.
+// Euclidean QPSK soft-symbols.
 // Additive metric suitable for Viterbi.
 // Backward-compatible with simplified Viterbi (TBD remove)
 struct eucl_ss
@@ -1381,7 +1381,7 @@ struct cstln_receiver : runnable
                 est_ep = ev_power * kest + est_ep * (1 - kest);
             }
 
-            // This is best done periodically ouside the inner loop,
+            // This is best done periodically outside the inner loop,
             // but will cause non-deterministic output.
 
             if (!allow_drift)
@@ -1655,7 +1655,7 @@ struct fast_qpsk_receiver : runnable
                 cstln_out->write(s);
             }
 
-            // This is best done periodically ouside the inner loop,
+            // This is best done periodically outside the inner loop,
             // but will cause non-deterministic output.
 
             if (!allow_drift)

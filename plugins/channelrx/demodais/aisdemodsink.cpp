@@ -349,7 +349,7 @@ void AISDemodSink::processOneSample(Complex &ci)
     // Select signals to feed to scope
     sampleToScope(ci / SDR_RX_SCALEF, magsq, fmDemod, filt, m_rxBuf[m_rxBufIdx], corr / 100.0, thresholdMet, dcOffset, scopeCRCValid ? 1.0 : (scopeCRCInvalid ? -1.0 : 0));
 
-    // Send demod signal to Demod Analzyer feature
+    // Send demod signal to Demod Analyzer feature
     m_demodBuffer[m_demodBufferFill++] = fmDemod * std::numeric_limits<int16_t>::max();
 
     if (m_demodBufferFill >= m_demodBuffer.size())
@@ -422,7 +422,7 @@ void AISDemodSink::applySettings(const AISDemodSettings& settings, bool force)
         qDebug() << "AISDemodSink::applySettings: m_samplesPerSymbol: " << m_samplesPerSymbol << " baud " << settings.m_baud;
         m_pulseShape.create(0.5, 3, m_samplesPerSymbol);
 
-        // Recieve buffer, long enough for one max length message
+        // Receive buffer, long enough for one max length message
         delete[] m_rxBuf;
         m_rxBufLength = AISDEMOD_MAX_BYTES*8*m_samplesPerSymbol;
         m_rxBuf = new Real[m_rxBufLength];

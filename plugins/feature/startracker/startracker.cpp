@@ -680,7 +680,7 @@ double StarTracker::applyBeam(const FITS *fits, double beamwidth, double ra, dou
     // (Essentially the same as Gaussian of exp(-4*ln(theta^2/beamwidth^2))
     // (See a2 in https://arxiv.org/pdf/1812.10084.pdf for Elliptical equivalent))
     // We have gain of 0dB (1) at 0 degrees, and -3dB (~0.5) at half-beamwidth degrees
-    // Find exponent that correponds to -3dB at that angle
+    // Find exponent that corresponds to -3dB at that angle
     double minus3dBLinear = pow(10.0, -3.0/10.0);
     double p = log(minus3dBLinear)/log(cos(Units::degreesToRadians(halfBeamwidth)));
     // Create an matrix with gain as a function of angle
@@ -791,7 +791,7 @@ bool StarTracker::calcSkyTemperature(double frequency, double beamwidth, double 
             // LFmap: https://www.faculty.ece.vt.edu/swe/lwa/memo/lwa0111.pdf
             double iso408 = 50 * pow(150e6/408e6, 2.75);                 // Extra-galactic isotropic in reference map at 408MHz
             double isoT = 50 * pow(150e6/frequency, 2.75);  // Extra-galactic isotropic at target frequency
-            double cmbT = 2.725; // Cosmic microwave backgroud;
+            double cmbT = 2.725; // Cosmic microwave background;
             double spectralIndex;
             const FITS *spectralIndexFITS = getSpectralIndexFITS();
             if (spectralIndexFITS && spectralIndexFITS->valid())

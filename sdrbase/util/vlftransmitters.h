@@ -25,7 +25,7 @@
 #include "export.h"
 
 // List of VLF transmitters
-// Built-in list can be overriden by user supplied vlftransmitters.csv file, that is read at startup, from the app data dir
+// Built-in list can be overridden by user supplied vlftransmitters.csv file, that is read at startup, from the app data dir
 class SDRBASE_API VLFTransmitters
 {
 

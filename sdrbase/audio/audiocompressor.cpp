@@ -167,7 +167,7 @@ int8_t AudioCompressor::ALaw_Encode(int16_t number)
  * variable will be initialized with 12 instead of 11. In order to make sure that there will be
  * no number without a 1 bit in the first 12-5 positions, a bias value is added to the number
  * (in this case 33). So, since there is no special case (numbers who do not have a 1 bit in
- * the first 12-5 positions), this makes the algorithm less complex by eliminating some condtions.
+ * the first 12-5 positions), this makes the algorithm less complex by eliminating some conditions.
  *
  * Also in the end all bits are complemented, not just the even ones.
  */

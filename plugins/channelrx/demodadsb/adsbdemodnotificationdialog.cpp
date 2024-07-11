@@ -23,7 +23,7 @@
 
 #include "adsbdemodnotificationdialog.h"
 
-// Map main ADS-B table column numbers to combo box indicies
+// Map main ADS-B table column numbers to combo box indices
 std::vector<int> ADSBDemodNotificationDialog::m_columnMap = {
     ADSB_COL_ICAO, ADSB_COL_CALLSIGN, ADSB_COL_MODEL,
     ADSB_COL_ALTITUDE, ADSB_COL_GROUND_SPEED, ADSB_COL_RANGE,

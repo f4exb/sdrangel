@@ -419,6 +419,6 @@ void DVB2::bch_poly_build_tables( void )
     }
 
 //  display_poly( polyout[0], len );//12
-//  display_poly_pack( m_poly_s_12, 168 );// Wont work because of shift register length
+//  display_poly_pack( m_poly_s_12, 168 );// Won't work because of shift register length
 */
 }

@@ -259,7 +259,7 @@ void EndOfTrainDemodSink::processOneSample(Complex &ci)
     // Select signals to feed to scope
     sampleToScope(ci / SDR_RX_SCALEF, magsq, fmDemod, f0Filt, f1Filt, diff, sample, bit, m_gotSOP);
 
-    // Send demod signal to Demod Analzyer feature
+    // Send demod signal to Demod Analyzer feature
     m_demodBuffer[m_demodBufferFill++] = fmDemod * std::numeric_limits<int16_t>::max();
 
     if (m_demodBufferFill >= m_demodBuffer.size())

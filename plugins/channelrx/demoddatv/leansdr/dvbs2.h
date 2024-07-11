@@ -581,7 +581,7 @@ struct s2_frame_receiver : runnable
     bool strongpls;      // PL symbols at max amplitude (default: RMS)
     uint32_t modcods;    // Bitmask of desired modcods
     uint8_t framesizes;  // Bitmask of desired frame sizes
-    bool fastlock;       // Synchronize more agressively
+    bool fastlock;       // Synchronize more aggressively
     bool fastdrift;      // Carrier drift faster than pilots
     float freq_tol;      // Tolerance on carrier frequency
     float sr_tol;        // Tolerance on symbol rate
@@ -755,7 +755,7 @@ struct s2_frame_receiver : runnable
         }
     }
 
-    // State transtion
+    // State transition
     void enter_frame_detect()
     {
         state = FRAME_DETECT;

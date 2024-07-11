@@ -26,7 +26,7 @@ namespace qtwebapp {
   from a TCP socket and provides getters for the individual parts
   of the request.
   <p>
-  The follwing config settings are required:
+  The following config settings are required:
   <code><pre>
   maxRequestSize=16000
   maxMultiPartSize=1000000
@@ -73,7 +73,7 @@ public:
     void readFromSocket(QTcpSocket* socket);
 
     /**
-      Get the status of this reqeust.
+      Get the status of this request.
       @see RequestStatus
     */
     RequestStatus getStatus() const;

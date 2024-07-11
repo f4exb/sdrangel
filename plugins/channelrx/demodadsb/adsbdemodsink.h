@@ -93,8 +93,8 @@ private:
     const int m_buffers = 3;
     const int m_bufferSize = 200000;
     Real *m_sampleBuffer[3];            //!< Each buffer is m_bufferSize samples
-    QSemaphore m_bufferWrite[3];        //!< Sempahore to control write access to the buffers
-    QSemaphore m_bufferRead[3];         //!< Sempahore to control read access from the buffers
+    QSemaphore m_bufferWrite[3];        //!< Semaphore to control write access to the buffers
+    QSemaphore m_bufferRead[3];         //!< Semaphore to control read access from the buffers
     QDateTime m_bufferFirstSampleDateTime[3];  //!< Time for first sample in the buffer
     bool m_bufferDateTimeValid[3];
     ADSBDemodSinkWorker m_worker;       //!< Worker thread that does the actual demodulation

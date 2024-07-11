@@ -92,7 +92,7 @@ public:
     }
 
     /** Returns \c true if only half the minimum interval should be used before sending the first RTCP compound packet
-     *  (defualt is \c true).
+     *  (default is \c true).
      */
     bool GetUseHalfAtStartup() const
     {

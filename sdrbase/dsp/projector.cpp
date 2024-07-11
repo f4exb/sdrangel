@@ -84,14 +84,14 @@ Real Projector::run(const Sample& s)
         {
             // calculate phase. Assume phase difference between two sources at half wavelength distance with sources axis as reference (positive side)
             // cos(theta) = phi / 2*pi*k
-            Real p = std::atan2((float) s.m_imag, (float) s.m_real); // do not mormalize phi (phi in -pi..+pi)
+            Real p = std::atan2((float) s.m_imag, (float) s.m_real); // do not normalize phi (phi in -pi..+pi)
             v = acos(p/M_PI) / M_PI; // normalize theta
         }
             break;
         case ProjectionDOAN:
         {
             // calculate phase. Assume phase difference between two sources at half wavelength distance with sources axis as reference (negative source)
-            Real p = std::atan2((float) s.m_imag, (float) s.m_real); // do not mormalize phi (phi in -pi..+pi)
+            Real p = std::atan2((float) s.m_imag, (float) s.m_real); // do not normalize phi (phi in -pi..+pi)
             v = -acos(p/M_PI) / M_PI; // normalize theta
         }
             break;
@@ -264,14 +264,14 @@ Real Projector::run(const std::complex<float>& s)
         {
             // calculate phase. Assume phase difference between two sources at half wavelength distance with sources axis as reference (positive side)
             // cos(theta) = phi / 2*pi*k
-            Real p = std::arg(s); // do not mormalize phi (phi in -pi..+pi)
+            Real p = std::arg(s); // do not normalize phi (phi in -pi..+pi)
             v = acos(p/M_PI) / M_PI; // normalize theta
         }
             break;
         case ProjectionDOAN:
         {
             // calculate phase. Assume phase difference between two sources at half wavelength distance with sources axis as reference (negative source)
-            Real p = std::arg(s); // do not mormalize phi (phi in -pi..+pi)
+            Real p = std::arg(s); // do not normalize phi (phi in -pi..+pi)
             v = -acos(p/M_PI) / M_PI; // normalize theta
         }
             break;

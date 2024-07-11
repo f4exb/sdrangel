@@ -63,7 +63,7 @@ void vkFFTEngine::configure(int n, bool inverse)
 
     VkFFTResult resFFT;
 
-    // Allocate and intialise plan
+    // Allocate and initialise plan
     m_currentPlan->m_configuration = new VkFFTConfiguration();
     memset(m_currentPlan->m_configuration, 0, sizeof(VkFFTConfiguration));
     m_currentPlan->m_app = new VkFFTApplication();

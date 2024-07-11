@@ -14,7 +14,7 @@
     extern blabla firstline
     secondline;
 
-    That is, the first line is pre-pended by "extern", and the last line is closed
+    That is, the first line is prepended by "extern", and the last line is closed
     with a semicolon. Comments starting with '//' are omitted, and lines starting
     with '//' are ignored.
 */

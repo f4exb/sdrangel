@@ -73,4 +73,4 @@ private slots:
     void accept();
 };
 
-#endif // SDRGUI_GUI_WORKSPACESELECTIONDIALOG_H_
+#endif // SDRGUI_GUI_DEVICESETSELECTIONDIALOG_H_

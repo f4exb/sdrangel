@@ -761,7 +761,7 @@ const QString GLShaderSpectrogram::m_vertexShader = QString(
     );
 
 // We need to use a geometry shader to calculate the normals, as they are only
-// determined after z has been calculated for the verticies in the vertex shader
+// determined after z has been calculated for the vertices in the vertex shader
 const QString GLShaderSpectrogram::m_geometryShader = QString(
     "#version 330\n"
     "layout(triangles) in;\n"

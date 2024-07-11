@@ -254,7 +254,7 @@ void DeviceEnumerator::enumerateDevices(std::initializer_list<PluginAPI::Samplin
 
     // We don't remove devices that are no-longer found from the enumeration list, in case their
     // index is referenced in some other object (E.g. DeviceGUI)
-    // Instead we mark as removed. If later re-added, then we re-use the same index
+    // Instead we mark as removed. If later re-added, then we reuse the same index
     for(size_t i = 0; i < 3; i++) 
     {
         if (enumerationsArray[i] != nullptr) {

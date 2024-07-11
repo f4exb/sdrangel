@@ -81,7 +81,7 @@ void fcdClose(hid_device *phd);
 FCD_MODE_ENUM fcdGetMode(hid_device *phd);
 
 /** \brief Get FCD firmware version as string.
- * \param str The returned vesion number as a 0 terminated string (must be pre-allocated)
+ * \param str The returned version number as a 0 terminated string (must be pre-allocated)
  * \return The current FCD mode.
  * \sa FCD_MODE_ENUM
  */
@@ -183,7 +183,7 @@ FCD_MODE_ENUM fcdBlWriteFirmware(hid_device *phd, char *pc, int64_t n64Size);
 /** \brief Verify firmware in FCd flash.
  * \param pc Pointer to firmware data to verify against.
  * \param n64Size Size of the data in pc.
- * \return The FCD_MODE_BL if verification was succesful.
+ * \return The FCD_MODE_BL if verification was successful.
  *
  * This function verifies the firmware currently in the FCd flash against the firmware
  * image pointed to by pc. The function return FCD_MODE_BL if the verification is OK and

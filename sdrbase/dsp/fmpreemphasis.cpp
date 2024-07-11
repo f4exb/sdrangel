@@ -54,7 +54,7 @@ void FMPreemphasis::configure(int sampleRate, Real tau, Real highFreq)
     // Adjust with a gain, g, so 0 dB gain at DC
     double g = std::abs(1.0 - p1) / (b0 * std::abs(1.0 - z1));
 
-    // Caclulate IIR taps
+    // Calculate IIR taps
     m_b0 = (Real)(g * b0 * 1.0);
     m_b1 = (Real)(g * b0 * -z1);
     m_a1 = (Real)-p1;

@@ -38,7 +38,7 @@ namespace modemm17 {
 //     0.001661182944400927,    0.002699564567597445,   0.0031468394550958484,  0.0029364388513841593,  0.0
 // };
 
-// Generated using scikit-commpy N = 150, aplha = 0.5, Ts = 1/4800 s, Fs = 48000 Hz
+// Generated using scikit-commpy N = 150, alpha = 0.5, Ts = 1/4800 s, Fs = 48000 Hz
 const std::array<float, 150> M17Demodulator::rrc_taps = std::array<float, 150>{
     -8.434122e-04, +3.898184e-04, +1.628891e-03, +2.576674e-03, +2.987740e-03,
     +2.729505e-03, +1.820181e-03, +4.333001e-04, -1.134215e-03, -2.525029e-03,

@@ -138,7 +138,7 @@ void TestFT8Protocols::testMsg1(const QStringList& argElements, bool runLDPC)
     if (runLDPC)
     {
         if (testLDPC(a77)) {
-            qInfo("TestFT8Protocols::testMsg1: LDPC test suceeded");
+            qInfo("TestFT8Protocols::testMsg1: LDPC test succeeded");
         } else {
             qWarning("TestFT8Protocols::testMsg1: LDPC test failed");
         }
@@ -169,7 +169,7 @@ void TestFT8Protocols::testMsg00(const QStringList& argElements, bool runLDPC)
     if (runLDPC)
     {
         if (testLDPC(a77)) {
-            qInfo("TestFT8Protocols::testMsg00: LDPC test suceeded");
+            qInfo("TestFT8Protocols::testMsg00: LDPC test succeeded");
         } else {
             qWarning("TestFT8Protocols::testMsg00: LDPC test failed");
         }

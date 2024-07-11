@@ -80,7 +80,7 @@ private slots:
 	void on_ppm_valueChanged(int value);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
-	// TOOD: defaults push button
+	// TODO: defaults push button
 	void on_lnaGain_currentIndexChanged(int index);
 	void on_rfFilter_currentIndexChanged(int index);
 	void on_lnaEnhance_currentIndexChanged(int index);

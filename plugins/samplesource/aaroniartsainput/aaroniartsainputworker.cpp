@@ -223,7 +223,7 @@ void AaroniaRTSAInputWorker::onReadyRead()
 	qint64 done = mReply->read(mBuffer.data() + bs, n);
 	mBuffer.resize(bs + done);
 
-	// intialize parsing
+	// initialize parsing
 	int	offset = 0;
 	int	avail = mBuffer.size();
 

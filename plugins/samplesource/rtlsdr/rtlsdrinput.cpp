@@ -542,7 +542,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, const QList<QStr
         if(m_dev != 0)
         {
             // Nooelec E4000 SDRs appear to require tuner_gain_mode to be reset to manual before
-            // each call to set_tuner_gain, otherwise tuner AGC seems to be reenabled
+            // each call to set_tuner_gain, otherwise tuner AGC seems to be re-enabled
             if (rtlsdr_set_tuner_gain_mode(m_dev, 1) < 0) {
                 qCritical("RTLSDRInput::applySettings: error setting tuner gain mode to manual");
             }

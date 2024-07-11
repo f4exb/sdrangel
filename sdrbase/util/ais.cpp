@@ -264,7 +264,7 @@ QString AISMessage::getString(const QByteArray ba, int byteIdx, int bitsLeft, in
     }
     // Remove leading/trailing spaces
     s = s.trimmed();
-    // Remave @s, which indiciate no character
+    // Remove @s, which indicate no character
     while (s.endsWith("@")) {
         s = s.left(s.length() - 1);
     }

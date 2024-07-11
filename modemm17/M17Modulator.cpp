@@ -50,7 +50,7 @@ const std::array<uint8_t, 2> M17Modulator::EOT_SYNC         = {0x55, 0x5D}; // ?
 //      0.001661182944400927,   0.002699564567597445,   0.0031468394550958484,  0.0029364388513841593,  0.0                     // 150
 // };
 
-// Generated using scikit-commpy N = 150, aplha = 0.5, Ts = 1/4800 s, Fs = 48000 Hz
+// Generated using scikit-commpy N = 150, alpha = 0.5, Ts = 1/4800 s, Fs = 48000 Hz
 /*
     import sys
     import commpy.filters

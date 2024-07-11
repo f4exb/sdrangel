@@ -73,7 +73,7 @@ public:
     virtual ~HttpListener();
 
     /**
-      Restart listeing after close().
+      Restart listening after close().
     */
     void listen();
 
@@ -108,7 +108,7 @@ private:
     /** Configuration settings for the HTTP server as a structure */
     HttpListenerSettings listenerSettings;
 
-    /** Point to the reuqest handler which processes all HTTP requests */
+    /** Point to the request handler which processes all HTTP requests */
     HttpRequestHandler* requestHandler;
 
     /** Pool of connection handlers */

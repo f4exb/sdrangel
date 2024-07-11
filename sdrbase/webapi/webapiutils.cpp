@@ -442,7 +442,7 @@ bool WebAPIUtils::getSubObjectDouble(const QJsonObject &json, const QString &key
     return false;
 }
 
-// Set double value withing nested JSON object
+// Set double value within nested JSON object
 bool WebAPIUtils::setSubObjectDouble(QJsonObject &json, const QString &key, double value)
 {
     for (QJsonObject::iterator  it = json.begin(); it != json.end(); it++)
@@ -487,7 +487,7 @@ bool WebAPIUtils::getSubObjectInt(const QJsonObject &json, const QString &key, i
     return false;
 }
 
-// Set integer value withing nested JSON object
+// Set integer value within nested JSON object
 bool WebAPIUtils::setSubObjectInt(QJsonObject &json, const QString &key, int value)
 {
     for (QJsonObject::iterator  it = json.begin(); it != json.end(); it++)
@@ -532,7 +532,7 @@ bool WebAPIUtils::getSubObjectString(const QJsonObject &json, const QString &key
     return false;
 }
 
-// Set string value withing nested JSON object
+// Set string value within nested JSON object
 bool WebAPIUtils::setSubObjectString(QJsonObject &json, const QString &key, const QString &value)
 {
     for (QJsonObject::iterator  it = json.begin(); it != json.end(); it++)
@@ -607,7 +607,7 @@ bool WebAPIUtils::hasSubObject(const QJsonObject &json, const QString &key)
     return false;
 }
 
-// Set value withing nested JSON object
+// Set value within nested JSON object
 bool WebAPIUtils::setSubObject(QJsonObject &json, const QString &key, const QVariant &value)
 {
     for (QJsonObject::iterator it = json.begin(); it != json.end(); it++)

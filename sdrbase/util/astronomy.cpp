@@ -488,7 +488,7 @@ void Astronomy::sunPosition(AzAlt& aa, RADec& rd, double latitude, double longit
     double jd = julianDate(dt);
     double n = (jd - jd_j2000()); // Days since J2000 epoch (including fraction)
 
-    double l = 280.461 + 0.9856474 * n; // Mean longitude of the Sun, corrected for the abberation of light
+    double l = 280.461 + 0.9856474 * n; // Mean longitude of the Sun, corrected for the aberration of light
     double g = 357.5291 + 0.98560028 * n; // Mean anomaly of the Sun - how far around orbit from perihlion, in degrees
 
     l = modulo(l, 360.0);
@@ -498,7 +498,7 @@ void Astronomy::sunPosition(AzAlt& aa, RADec& rd, double latitude, double longit
 
     double la = l + 1.9148 * sin(gr) + 0.0200 * sin(2.0*gr) + 0.0003 * sin(3.0*gr); // Ecliptic longitude (Ecliptic latitude b set to 0)
 
-    // Convert la, b=0, which give the position of the Sun in the ecliptic coordinate sytem, to
+    // Convert la, b=0, which give the position of the Sun in the ecliptic coordinate system, to
     // equatorial coordinates
 
     double e = 23.4393 - 3.563E-7 * n; // Obliquity of the ecliptic - tilt of Earth's axis of rotation
@@ -611,7 +611,7 @@ void Astronomy::moonPosition(AzAlt& aa, RADec& rd, double latitude, double longi
     double yg = yh;
     double zg = zh;
 
-    // Convert to equatorial cordinates
+    // Convert to equatorial coordinates
     double xe = xg;
     double ye = yg * cos(ecl) - zg * sin(ecl);
     double ze = yg * sin(ecl) + zg * cos(ecl);
@@ -658,7 +658,7 @@ void Astronomy::moonPosition(AzAlt& aa, RADec& rd, double latitude, double longi
 // See: https://en.wikipedia.org/wiki/Atmospheric_refraction#Calculating_refraction
 // Alt is in degrees. 90 = Zenith gives a factor of 0.
 // Pressure in millibars
-// Temperature in Celsuis
+// Temperature in Celsius
 // We divide by 60.0 to get a value in degrees (as original formula is in arcminutes)
 double Astronomy::refractionSaemundsson(double alt, double pressure, double temperature)
 {
@@ -673,7 +673,7 @@ double Astronomy::refractionSaemundsson(double alt, double pressure, double temp
 // See: https://github.com/Starlink/pal
 // Alt is in degrees. 90 = Zenith gives a factor of 0.
 // Pressure in millibars
-// Temperature in Celsuis
+// Temperature in Celsius
 // Humdity in %
 // Frequency in Hertz
 // Latitude in decimal degrees
@@ -801,7 +801,7 @@ double Astronomy::velocityToDoppler(double v, double f0)
 // Adapted from palRverot
 double Astronomy::earthRotationVelocity(RADec rd, double latitude, double longitude, QDateTime dt)
 {
-    const double earthSpeed = 0.4655; // km/s (Earth's circumference / seconds in one sideral day)
+    const double earthSpeed = 0.4655; // km/s (Earth's circumference / seconds in one sidereal day)
     double latRad = Units::degreesToRadians(latitude);
     double raRad = Units::degreesToRadians(rd.ra * (360.0/24.0));
     double decRad = Units::degreesToRadians(rd.dec);

@@ -274,7 +274,7 @@ void RadiosondeDemodSink::processOneSample(Complex &ci)
                     }
                     if (sampleIdx >= 16 * 8 * m_samplesPerSymbol)
                     {
-                        // Too many bits without receving header
+                        // Too many bits without receiving header
                         break;
                     }
                 }
@@ -359,7 +359,7 @@ void RadiosondeDemodSink::processOneSample(Complex &ci)
     }
     sampleToScope(scopeSample);
 
-    // Send demod signal to Demod Analzyer feature
+    // Send demod signal to Demod Analyzer feature
     m_demodBuffer[m_demodBufferFill++] = fmDemod * std::numeric_limits<int16_t>::max();
 
     if (m_demodBufferFill >= m_demodBuffer.size())
@@ -550,7 +550,7 @@ void RadiosondeDemodSink::applySettings(const RadiosondeDemodSettings& settings,
         // What value to use for BT? RFIC is Si4032 - its datasheet only appears to support 0.5
         m_pulseShape.create(0.5, 3, m_samplesPerSymbol);
 
-        // Recieve buffer, long enough for one max length message
+        // Receive buffer, long enough for one max length message
         delete[] m_rxBuf;
         m_rxBufLength = RADIOSONDEDEMOD_MAX_BYTES*8*m_samplesPerSymbol;
         m_rxBuf = new Real[m_rxBufLength];

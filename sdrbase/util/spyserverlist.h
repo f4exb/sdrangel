@@ -37,7 +37,7 @@ public:
     struct SpyServer {
         QString m_generalDescription;
         QString m_deviceType;
-        QString m_streamingHost; // IP addrss
+        QString m_streamingHost; // IP address
         int m_streamingPort;    // IP port
         int m_currentClientCount;
         int m_maxClients;

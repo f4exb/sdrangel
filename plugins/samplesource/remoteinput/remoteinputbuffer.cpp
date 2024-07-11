@@ -367,7 +367,7 @@ uint8_t *RemoteInputBuffer::readData(int32_t length)
 
     m_nbReads++;
 
-    // SEGFAULT FIX: arbitratily truncate so that it does not exceed buffer length
+    // SEGFAULT FIX: arbitrarily truncate so that it does not exceed buffer length
     if (length > m_framesSize) {
         length = m_framesSize;
     }

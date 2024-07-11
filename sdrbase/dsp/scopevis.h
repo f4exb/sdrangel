@@ -1267,7 +1267,7 @@ private:
     /**
      * Moves on to the next trigger if any or increments trigger count if in repeat mode
      * - If not final it returns true
-     * - If final i.e. signal is actually triggerd it returns false
+     * - If final i.e. signal is actually triggered it returns false
      */
     bool nextTrigger(); //!< Returns true if not final
 

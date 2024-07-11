@@ -54,4 +54,4 @@ const int SIMD_WIDTH = SIZEOF_SIMD / sizeof(code_type);
 typedef SIMD<code_type, SIMD_WIDTH> simd_type;
 #endif
 
-} // namepsace ldpctool
+} // namespace ldpctool

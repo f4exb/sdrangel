@@ -455,7 +455,7 @@ void FCDProPlusInput::set_center_freq(double freq)
 
 	if (fcdAppSetFreq(m_dev, freq) == FCD_MODE_NONE)
 	{
-		qDebug("No FCD HID found for frquency change");
+		qDebug("No FCD HID found for frequency change");
 	}
 }
 

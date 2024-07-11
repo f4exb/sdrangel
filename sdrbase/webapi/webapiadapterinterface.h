@@ -332,7 +332,7 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/audio/output/paramaters (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/audio/output/parameters (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instanceAudioOutputDelete(

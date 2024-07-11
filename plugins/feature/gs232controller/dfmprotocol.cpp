@@ -172,7 +172,7 @@ void DFMProtocol::parseLCUResponse(const QString& packet)
     float el = aa.alt;
     reportAzEl(az, el);
 
-    // If this is the second LCU packet, we send a commmand
+    // If this is the second LCU packet, we send a command
     m_packetCnt++;
     if (m_packetCnt == 2)
     {

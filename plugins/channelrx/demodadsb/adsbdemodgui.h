@@ -92,7 +92,7 @@ struct Aircraft {
     Real m_latitude;            // Latitude in decimal degrees
     Real m_longitude;           // Longitude in decimal degrees
     int m_altitude;             // Altitude in feet
-    bool m_onSurface;           // Indicates if on surface or airbourne
+    bool m_onSurface;           // Indicates if on surface or airborne
     bool m_altitudeGNSS;        // Altitude is GNSS HAE (Height above WGS-84 ellipsoid) rather than barometric alitute (relative to 29.92 Hg)
     float m_heading;            // Heading or track in degrees
     int m_verticalRate;         // Vertical climb rate in ft/min
@@ -101,7 +101,7 @@ struct Aircraft {
     int m_squawk;               // Mode-A code
     Real m_range;               // Distance from station to aircraft
     Real m_azimuth;             // Azimuth from station to aircraft
-    Real m_elevation;           // Elevation from station to aicraft
+    Real m_elevation;           // Elevation from station to aircraft
     QDateTime m_time;           // When last updated
 
     int m_selAltitude;          // Selected altitude in MCP/FCU or FMS in feet
@@ -144,7 +144,7 @@ struct Aircraft {
     float m_correlation;
     MovingAverageUtil<float, double, 100> m_correlationAvg;
 
-    bool m_isTarget;            // Are we targetting this aircraft (sending az/el to rotator)
+    bool m_isTarget;            // Are we targeting this aircraft (sending az/el to rotator)
     bool m_isHighlighted;       // Are we highlighting this aircraft in the table and map
     bool m_showAll;
 

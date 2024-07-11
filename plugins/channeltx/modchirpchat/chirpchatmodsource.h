@@ -55,7 +55,7 @@ private:
     {
         ChirpChatStateIdle,       //!< Quiet time
         ChirpChatStatePreamble,   //!< Transmit preamble
-        ChirpChatStateSyncWord,   //!< Tramsmit sync word
+        ChirpChatStateSyncWord,   //!< Transmit sync word
         ChirpChatStateSFD,        //!< Transmit SFD
         ChirpChatStatePayload     //!< Tramsmoit payload
     };
@@ -77,7 +77,7 @@ private:
     unsigned int m_quietSamples;   //!< number of samples during quiet period
     unsigned int m_quarterSamples; //!< number of samples in a quarter chirp
     unsigned int m_repeatCount;    //!< message repetition counter
-    bool m_active;                 //!< modulator is in a sending sequence (icluding periodic quiet times)
+    bool m_active;                 //!< modulator is in a sending sequence (including periodic quiet times)
 
     NCO m_carrierNco;
     double m_modPhasor; //!< baseband modulator phasor

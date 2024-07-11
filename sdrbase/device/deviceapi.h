@@ -74,7 +74,7 @@ public:
     void addChannelSource(BasebandSampleSource* sink, int streamIndex = 0);            //!< Add a channel source (Tx)
     void removeChannelSource(BasebandSampleSource* sink, int streamIndex = 0);         //!< Remove a channel source (Tx)
     void addMIMOChannel(MIMOChannel* channel);   //!< Add a MIMO channel (n Rx and m Tx combination)
-    void removeMIMOChannel(MIMOChannel* channe); //!< Remove a MIMO channel (n Rx and m Tx combination)
+    void removeMIMOChannel(MIMOChannel* channel); //!< Remove a MIMO channel (n Rx and m Tx combination)
 
     void addChannelSinkAPI(ChannelAPI* channelAPI);
     void removeChannelSinkAPI(ChannelAPI* channelAPI);

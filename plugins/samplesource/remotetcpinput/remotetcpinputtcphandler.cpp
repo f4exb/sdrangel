@@ -1013,7 +1013,7 @@ void RemoteTCPInputTCPHandler::processSpyServerData(int requiredBytes, bool clea
     }
 }
 
-// QTimer::timeout isn't guarenteed to be called on every timeout, so we need to look at the system clock
+// QTimer::timeout isn't guaranteed to be called on every timeout, so we need to look at the system clock
 void RemoteTCPInputTCPHandler::processData()
 {
     QMutexLocker mutexLocker(&m_mutex);

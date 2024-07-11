@@ -469,7 +469,7 @@ void VorLocalizerWorker::setChannelShift(int deviceIndex, int channelIndex, doub
     SWGSDRangel::SWGErrorResponse errorResponse;
     int httpRC;
 
-    // Get channel settings containg inputFrequencyOffset, so we can patch them
+    // Get channel settings containing inputFrequencyOffset, so we can patch them
     httpRC = m_webAPIAdapterInterface->devicesetChannelSettingsGet(
         deviceIndex,
         channelIndex,
@@ -547,7 +547,7 @@ void VorLocalizerWorker::setAudioMute(int vorNavId, bool audioMute)
     int deviceIndex = m_channelAllocations[vorNavId].m_deviceIndex;
     int channelIndex = m_channelAllocations[vorNavId].m_channelIndex;
 
-    // Get channel settings containg inputFrequencyOffset, so we can patch them
+    // Get channel settings containing inputFrequencyOffset, so we can patch them
     httpRC = m_webAPIAdapterInterface->devicesetChannelSettingsGet(
         deviceIndex,
         channelIndex,

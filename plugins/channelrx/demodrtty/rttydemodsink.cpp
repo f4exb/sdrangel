@@ -219,7 +219,7 @@ void RttyDemodSink::processOneSample(Complex &ci)
 
     // Save current data for edge detection
     m_dataPrev = m_data;
-    // Set data according to stongest correlation
+    // Set data according to strongest correlation
     if (m_settings.m_spaceHigh) {
         m_data = m_settings.m_atc ? biasedData < 0 : unbiasedData < 0;
     } else {

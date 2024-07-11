@@ -44,7 +44,7 @@ int DVB2::set_configure( DVB2FrameFormat *f )
 
     if( f->broadcasting )
     {
-        // Set standard parametrs for broadcasting
+        // Set standard parameters for broadcasting
         f->frame_type        = FRAME_NORMAL;
         f->bb_header.ts_gs   = TS_GS_TRANSPORT;
         f->bb_header.sis_mis = SIS_MIS_SINGLE;
@@ -200,7 +200,7 @@ int DVB2::set_configure( DVB2FrameFormat *f )
         f->kldpc = f->kbch + bch_bits;
         // Number of padding bits required (not used)
         f->padding_bits = 0;
-        // Number of useable data bits (not used)
+        // Number of usable data bits (not used)
         f->useable_data_bits = f->kbch - 80;
         // Save the configuration, will be updated on next frame
         m_format[1] = *f;
@@ -278,7 +278,7 @@ DVB2::DVB2(void)
     init_bb_randomiser();
     bch_poly_build_tables();
     build_crc8_table();
-    m_dnp   = 0;// No delted null packets
+    m_dnp   = 0;// No deleted null packets
     m_frame_offset_bits = 0;
     m_params_changed = 1;
 }

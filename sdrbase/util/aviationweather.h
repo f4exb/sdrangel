@@ -49,7 +49,7 @@ public:
         QStringList m_conditions;       // Weather conditions (Rain, snow)
         float m_ceiling;                // Ceiling in feet
         QStringList m_clouds;           // Cloud types and altitudes
-        float m_temperature;            // Air temperature in Celsuis
+        float m_temperature;            // Air temperature in Celsius
         float m_dewpoint;               // Dewpoint in Celsuius
         float m_pressure;               // Air pressure in hPa/mb
         float m_humidity;               // Humidity in %

@@ -176,7 +176,7 @@ void getPassAzEl(QLineSeries* azimuth, QLineSeries* elevation, QLineSeries* pola
     }
 }
 
-// Get whether a pass passes through 0 degreees
+// Get whether a pass passes through 0 degrees
 bool getPassesThrough0Deg(const QString& tle0, const QString& tle1, const QString& tle2,
                           double latitude, double longitude, double altitude,
                           QDateTime& aos, QDateTime& los)
@@ -321,7 +321,7 @@ static DateTime findCrossingPoint(Observer& obs, SGP4& sgp4, const DateTime& ini
     return middleTime;
 }
 
-// Find when AOS occured, by stepping backwards
+// Find when AOS occurred, by stepping backwards
 static DateTime findAOSBackwards(Observer& obs, SGP4& sgp4, DateTime& startTime,
                                 int predictionPeriod, double minElevation, bool& aosUnknown)
 {
@@ -366,7 +366,7 @@ bool inPassWindow(DateTime dateTime, QTime passStartTime, QTime passEndTime, boo
 }
 
 // Create a list of satellite passes, between the given start and end times, that exceed the specified minimum elevation
-// We return an uninitalised QDateTime if AOS or LOS is outside of predictionPeriod
+// We return an uninitialised QDateTime if AOS or LOS is outside of predictionPeriod
 static QList<SatellitePass> createPassList(Observer& obs, SGP4& sgp4, DateTime& startTime,
                                             int predictionPeriod, double minAOSElevation, double minPassElevationDeg,
                                             QTime passStartTime, QTime passEndTime, bool utc,

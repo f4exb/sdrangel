@@ -202,7 +202,7 @@ bool APTDemodGUI::handleMessage(const Message& message)
         }
         else
         {
-            m_image = m_image.copy(0, 0, m_image.width(), m_image.height()+1); // Add a line at tne bottom
+            m_image = m_image.copy(0, 0, m_image.width(), m_image.height()+1); // Add a line at the bottom
 
             if (m_settings.m_flip)
             {

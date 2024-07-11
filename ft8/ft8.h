@@ -264,14 +264,14 @@ public:
 
     FT8Params& getParams() { return params; }
     //
-    // given log likelyhood for each bit, try LDPC and OSD decoders.
+    // given log likelihood for each bit, try LDPC and OSD decoders.
     // on success, puts corrected 174 bits into a174[].
     //
     static int decode(const float ll174[], int a174[], FT8Params& params, int use_osd, std::string &comment);
     // encode a 77 bit message into a 174 bit payload
     // adds the 14 bit CRC to obtain 91 bits
     // apply (174, 91) generator mastrix to obtain the 83 parity bits
-    // append the 83 bits to the 91 bits messag e+ crc to obbain the 174 bit payload
+    // append the 83 bits to the 91 bits message e+ crc to obtain the 174 bit payload
     static void encode(int a174[], int s77[]);
 
     //
@@ -490,7 +490,7 @@ private:
     // scaled by str.
     //
     std::vector<float> extract_bits(const std::vector<int> &syms, const std::vector<float> str);
-    // decode successive pairs of symbols. exploits the likelyhood
+    // decode successive pairs of symbols. exploits the likelihood
     // that they have the same phase, by summing the complex
     // correlations for each possible pair and using the max.
     void soft_decode_pairs(

@@ -979,7 +979,7 @@ struct mpeg_sync : runnable
         {
             if (resync_phase == 0)
             {
-                // Try all bit alighments
+                // Try all bit alignments
                 for (bitphase = 0; bitphase <= 7; ++bitphase)
                 {
                     if (search_sync())
@@ -1770,7 +1770,7 @@ struct viterbi_sync : runnable
 
     inline TUS update_sync(int s, eucl_ss *pin, TPM *discr)
     {
-        // Read one FEC ouput block
+        // Read one FEC output block
         pin += syncs[s].shift;
         TCS cs = 0;
         TBM cost = 0;

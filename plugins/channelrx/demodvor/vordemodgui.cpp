@@ -143,7 +143,7 @@ bool VORDemodGUI::handleMessage(const Message& message)
         ui->morseText->setText(Morse::toSpacedUnicode(ident));
 
         // Idents should only be two or three characters, so filter anything else
-        // other than TEST which indicates a VOR is under maintainance (may also be TST)
+        // other than TEST which indicates a VOR is under maintenance (may also be TST)
         if (((identString.size() >= 2) && (identString.size() <= 3)) || (identString == "TEST"))
         {
             ui->identText->setStyleSheet("QLabel { color: white }");
