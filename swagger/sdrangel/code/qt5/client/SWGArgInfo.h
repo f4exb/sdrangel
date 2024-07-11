@@ -13,7 +13,7 @@
 /*
  * SWGArgInfo.h
  *
- * 
+ * Generic argument information
  */
 
 #ifndef SWGArgInfo_H_

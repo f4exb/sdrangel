@@ -109,6 +109,8 @@ ChannelReport:
     #   $ref: "/doc/swagger/include/VORDemodMC.yaml#/VORDemodMCReport"
     VORDemodReport:
       $ref: "/doc/swagger/include/VORDemod.yaml#/VORDemodReport"
+    WDSPRxReport:
+      $ref: "/doc/swagger/include/WDSPRx.yaml#/WDSPRxReport"
     WFMDemodReport:
       $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodReport"
     WFMModReport:

@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGCapture.h
+ * SWGWDSPRxReport.h
  *
- * Capture (track) information
+ * WDSPRx
  */
 
-#ifndef SWGCapture_H_
-#define SWGCapture_H_
+#ifndef SWGWDSPRxReport_H_
+#define SWGWDSPRxReport_H_
 
 #include <QJsonObject>
 
@@ -28,61 +28,49 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGCapture: public SWGObject {
+class SWG_API SWGWDSPRxReport: public SWGObject {
 public:
-    SWGCapture();
-    SWGCapture(QString* json);
-    virtual ~SWGCapture();
+    SWGWDSPRxReport();
+    SWGWDSPRxReport(QString* json);
+    virtual ~SWGWDSPRxReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGCapture* fromJson(QString &jsonString) override;
+    virtual SWGWDSPRxReport* fromJson(QString &jsonString) override;
 
-    qint64 getTsms();
-    void setTsms(qint64 tsms);
+    float getChannelPowerDb();
+    void setChannelPowerDb(float channel_power_db);
 
-    qint64 getCenterFrequency();
-    void setCenterFrequency(qint64 center_frequency);
+    qint32 getSquelch();
+    void setSquelch(qint32 squelch);
 
-    qint32 getSampleRate();
-    void setSampleRate(qint32 sample_rate);
+    qint32 getAudioSampleRate();
+    void setAudioSampleRate(qint32 audio_sample_rate);
 
-    qint64 getSampleStart();
-    void setSampleStart(qint64 sample_start);
-
-    qint64 getLength();
-    void setLength(qint64 length);
-
-    qint64 getCumulativeTime();
-    void setCumulativeTime(qint64 cumulative_time);
+    qint32 getChannelSampleRate();
+    void setChannelSampleRate(qint32 channel_sample_rate);
 
 
     virtual bool isSet() override;
 
 private:
-    qint64 tsms;
-    bool m_tsms_isSet;
+    float channel_power_db;
+    bool m_channel_power_db_isSet;
 
-    qint64 center_frequency;
-    bool m_center_frequency_isSet;
+    qint32 squelch;
+    bool m_squelch_isSet;
 
-    qint32 sample_rate;
-    bool m_sample_rate_isSet;
+    qint32 audio_sample_rate;
+    bool m_audio_sample_rate_isSet;
 
-    qint64 sample_start;
-    bool m_sample_start_isSet;
-
-    qint64 length;
-    bool m_length_isSet;
-
-    qint64 cumulative_time;
-    bool m_cumulative_time_isSet;
+    qint32 channel_sample_rate;
+    bool m_channel_sample_rate_isSet;
 
 };
 
 }
 
-#endif /* SWGCapture_H_ */
+#endif /* SWGWDSPRxReport_H_ */

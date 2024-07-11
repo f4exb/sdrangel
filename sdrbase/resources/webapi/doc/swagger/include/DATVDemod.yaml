@@ -12,7 +12,7 @@ DATVDemodSettings:
     standard:
       type: integer
       description: >
-        DVB version (see DATVDemodSettings::dvb_version)
+        DVB bersion (see DATVDemodSettings::dvb_version)
           * 0 - DVB-S
           * 1 - DVB-S2
     modulation:
@@ -46,7 +46,7 @@ DATVDemodSettings:
           * 11 - 2/5
           * 12 - 3/5
     softLDPC:
-      description: (boolean) engage soft LDPC with LDPC tool sub processes (Linux only)
+      description: (boolean) engage sodt LDPC with LDPC tool sub processes (Linux only)
       type: integer
     softLDPCToolPath:
       description: O/S path to the LDPC tool binary

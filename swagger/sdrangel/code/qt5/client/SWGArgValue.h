@@ -13,7 +13,7 @@
 /*
  * SWGArgValue.h
  *
- * 
+ * Generic argument value
  */
 
 #ifndef SWGArgValue_H_

@@ -1,0 +1,294 @@
+WDSPRxSettings:
+  description: WDSPRx
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    profileIndex:
+      type: integer
+    demod:
+      type: integer
+      description: >
+        Demodulator type:
+          * 0 - SSB
+          * 1 - AM
+          * 2 - SAM
+          * 3 - FM
+    volume:
+      type: number
+      format: float
+    audioBinaural:
+      description: Audio binaural mode (1 if active else 0)
+      type: integer
+    audioFlipChannels:
+      description: Flip audio channels (1 if flipped else 0)
+      type: integer
+    dsb:
+      description: Double sidebands mode (1 if DSB else 0)
+      type: integer
+    audioMute:
+      description: Mute audio (1 if muted else 0)
+      type: integer
+    agc:
+      description: AGC (1 if AGC active else 0)
+      type: integer
+    agcMode:
+      type: integer
+      description: >
+        AGC Mode:
+          * 0 - Long
+          * 1 - Slow
+          * 2 - Medium
+          * 3 - Fast
+    agcGain:
+      type: integer
+      description: Top gain level
+    agcSlope:
+      type: integer
+      description: Slope in centi-Bels
+    agcHangThreshold:
+      type: integer
+    dnb:
+      type: integer
+      description: >
+        Digital Noise Blanker:
+          * 0 - Off
+          * 1 - On
+    nbScheme:
+      type: integer
+      description: >
+        Noise blanker scheme:
+          * 0 - NB or Preemptive Wideband Noise Blanker
+          * 1 - NB2 or Interpolating Wideband Noise Blanker
+    nb2Mode:
+      type: integer
+      description: >
+        NB2 Noise blanking mode:
+          * 0 - Zero mode (estimate as zero)
+          * 1 - Sample‐hold (take the value of non‐corrupt signal at the beginning of the impulse and hold that throughout the corrupt sequence)
+          * 2 - Mean‐hold (average the non‐corrupt values at the beginning and end of the corrupt sequence and use that as the estimate during the corrupt sequence)
+          * 3 - hold‐sample (take the value of non‐corrupt signal at the end of the impulse and hold that throughout the corrupt sequence)
+          * 4 - linearly interpolate across the corrupt sequence.
+    nbSlewTime:
+      type: number
+      format: float
+      description: Advance slew time (s)
+    nbLeadTime:
+      type: number
+      format: float
+      descriuption: Advance time (s)
+    nbLagTime:
+      type: number
+      format: float
+      description: Hang time (S)
+    nbThreshold:
+      type: integer
+    nbAvgTime:
+      type: number
+      format: float
+    dnr:
+      type: integer
+      description: >
+        Digital Noise Reduction:
+          * 0 - Off
+          * 1 - On
+    anf:
+      type: integer
+      description: >
+        Automatic Notch Filter:
+          * 0 - Off
+          * 1 - On
+    nrScheme:
+      type: integer
+      description: >
+        Noise Reduction Scheme:
+          * 0 - NR or LMS Noise Reduction
+          * 1 - NR2 or Spectral Noise Reduction
+    nr2Gain:
+      type: integer
+      description: >
+        Noise Reduction gain for NR2:
+          * 0 - Linear
+          * 1 - Log
+          * 2 - Gamma
+    nr2NPE:
+      type: integer
+      description: >
+        Noise Power Estimation algorithm for NR2:
+          * 0 - Optimal Smoothing Minimum Statistics (OSMS)
+          * 1 - Minimum Mean‐Square Error (MMSE)
+    nrPosition:
+      type: integer
+      description: >
+        Noise reduction position:
+          * 0 - Before AGC
+          * 1 - After AGC
+    nr2ArtifactReduction:
+      type: integer
+      description: >
+        NR2 artifacts reduction:
+          * 0 - Off
+          * 1 - On
+    amFadeLevel:
+      type: integer
+      description: >
+        AM fade levelling:
+          * 0 - Off
+          * 1 - On
+    cwPeaking:
+      type: integer
+      description: >
+        CW peaking filter:
+          * 0 - Off
+          * 1 - On
+    cwPeakFrequency:
+      type: number
+      format: float
+      description: >
+        CW peaking filter center frequency (Hz)
+    cwBandwidth:
+      type: number
+      format: float
+      description: >
+        CW peaking filter bandwidth (Hz)
+    cwGain:
+      type: number
+      format: float
+      description: >
+        CW peaking filter gain (linear)
+    fmDeviation:
+      type: number
+      format: float
+      description: >
+        FM demodulator deviation (Hz)
+    fmAFLow:
+      type: number
+      format: float
+      description: >
+        FM Audio filter low cutoff frequency (HZ)
+    fmAFHigh:
+      type: number
+      format: float
+      description: >
+        FM Audio filter high cutoff frequency (HZ)
+    fmAFLimiter:
+      type: integer
+      description: >
+        FM Audio level limiter (audio AGC)
+    fmAFLimiterGain:
+      type: number
+      format: float
+      description: >
+        FM Audio level limiter top gain (Audio AGC top gain)
+    fmCTCSSNotch:
+      type: integer
+      description: >
+        FM CTCSS notch filter
+          * 0 - Off
+          * 1 - On
+    fmCTCSSNotchFrequency:
+      type: number
+      format: float
+      description: >
+        FM CTCSS notch filter frequency (Hz)
+    squelch:
+      type: integer
+      description: >
+        Squelch:
+          * 0 - Off
+          * 1 - On
+    squelchThreshold:
+      type: integer
+      description: Squelch threshold (percent)
+    squelchMode:
+      type: integer
+      description: >
+        Squelch mode:
+          * 0 - Voice squelch (for SSB). Based on voice artifacts.
+          * 1 - AM squelch (for AM, SAM, CW). Signal power based.
+          * 2 - FM squelch (for FM). Demod noise based squelch
+    ssqlTauMute:
+      type: number
+      format: float
+      description: Voice squelch tau mute (s)
+    ssqlTauUnmute:
+      type: number
+      format: float
+      description: Voice squelch tau unmute (s)
+    amsqMaxTail:
+      type: number
+      format: float
+      description: AM squelch max tail length (s)
+    equalizer:
+      type: integer
+      description: >
+        AF equalizer:
+          * 0 - Off
+          * 1 - On
+    eqF:
+      description: Frequency points (Hz). Positon 0 is preamp then 10 frequency points
+      type: array
+      items:
+        type: number
+        format: float
+    eqG:
+      description: Frequency points gains (dB). Positon 0 is for preamp gain then for the 10 frequency points
+      type: array
+      items:
+        type: number
+        format: float
+    spanLog2:
+      type: integer
+    rfBandwidth:
+      type: number
+      format: float
+    lowCutoff:
+      type: number
+      format: float
+    fftWindow:
+      type: integer
+      description: >
+        FFT Window index (FFTWindow::Function):
+          * 0 - Blackman-Harris 4 term
+          * 1 - Blackman-Harris 7 term
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    spectrumConfig:
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+WDSPRxReport:
+  description: WDSPRx
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    squelch:
+      description: Audio squelch status (1 if open else 0)
+      type: integer
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer

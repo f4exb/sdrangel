@@ -374,6 +374,8 @@
 #include "SWGVORLocalizerActions.h"
 #include "SWGVORLocalizerReport.h"
 #include "SWGVORLocalizerSettings.h"
+#include "SWGWDSPRxReport.h"
+#include "SWGWDSPRxSettings.h"
 #include "SWGWFMDemodReport.h"
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModReport.h"
@@ -2186,6 +2188,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGVORLocalizerSettings").compare(type) == 0) {
       SWGVORLocalizerSettings *obj = new SWGVORLocalizerSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGWDSPRxReport").compare(type) == 0) {
+      SWGWDSPRxReport *obj = new SWGWDSPRxReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGWDSPRxSettings").compare(type) == 0) {
+      SWGWDSPRxSettings *obj = new SWGWDSPRxSettings();
       obj->init();
       return obj;
     }

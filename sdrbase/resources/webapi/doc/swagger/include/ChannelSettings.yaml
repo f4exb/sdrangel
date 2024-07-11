@@ -135,6 +135,8 @@ ChannelSettings:
     #   $ref: "/doc/swagger/include/VORDemodMC.yaml#/VORDemodMCSettings"
     VORDemodSettings:
       $ref: "/doc/swagger/include/VORDemod.yaml#/VORDemodSettings"
+    WDSPRxSettings:
+      $ref: "/doc/swagger/include/WDSPRx.yaml#/WDSPRxSettings"
     WFMDemodSettings:
       $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodSettings"
     WFMModSettings:

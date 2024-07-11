@@ -13,7 +13,7 @@
 /*
  * SWGConfigurationImportExport.h
  *
- * Details to impprt/export a configuration from/to file
+ * Details to import/export a configuration from/to file
  */
 
 #ifndef SWGConfigurationImportExport_H_

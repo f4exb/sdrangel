@@ -13,7 +13,7 @@
 /*
  * SWGFrequencyRange.h
  *
- * An frequency range with 64 bit support for min and max
+ * A frequency range with 64 bit support for min and max
  */
 
 #ifndef SWGFrequencyRange_H_

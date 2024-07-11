@@ -80,6 +80,7 @@
 #include "SWGUDPSinkSettings.h"
 #include "SWGUDPSourceSettings.h"
 #include "SWGVORDemodSettings.h"
+#include "SWGWDSPRxSettings.h"
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModSettings.h"
 #include <QString>
@@ -288,6 +289,9 @@ public:
     SWGVORDemodSettings* getVorDemodSettings();
     void setVorDemodSettings(SWGVORDemodSettings* vor_demod_settings);
 
+    SWGWDSPRxSettings* getWdspRxSettings();
+    void setWdspRxSettings(SWGWDSPRxSettings* wdsp_rx_settings);
+
     SWGWFMDemodSettings* getWfmDemodSettings();
     void setWfmDemodSettings(SWGWFMDemodSettings* wfm_demod_settings);
 
@@ -483,6 +487,9 @@ private:
 
     SWGVORDemodSettings* vor_demod_settings;
     bool m_vor_demod_settings_isSet;
+
+    SWGWDSPRxSettings* wdsp_rx_settings;
+    bool m_wdsp_rx_settings_isSet;
 
     SWGWFMDemodSettings* wfm_demod_settings;
     bool m_wfm_demod_settings_isSet;
