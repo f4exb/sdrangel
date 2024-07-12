@@ -120,7 +120,7 @@ RXA* RXA::create_rxa (
 
     // Ftequency shifter - shift to select a slice of spectrum
     rxa->shift.p = SHIFT::create_shift (
-        1,                                      // run
+        0,                                      // run
         rxa->dsp_insize,                        // input buffer size
         rxa->inbuff,                            // pointer to input buffer
         rxa->inbuff,                            // pointer to output buffer
