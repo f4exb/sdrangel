@@ -4562,19 +4562,19 @@ bool WebAPIRequestMapper::getChannelSettings(
         else if (channelSettingsKey == "FreqScannerSettings")
         {
             channelSettings->setFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
-	        channelSettings->getFreqScannerSettings()->init();
+            channelSettings->getFreqScannerSettings()->init();
             channelSettings->getFreqScannerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "FreqTrackerSettings")
         {
             channelSettings->setFreqTrackerSettings(new SWGSDRangel::SWGFreqTrackerSettings());
-	        channelSettings->getFreqTrackerSettings()->init();
+            channelSettings->getFreqTrackerSettings()->init();
             channelSettings->getFreqTrackerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "FT8DemodSettings")
         {
             channelSettings->setFt8DemodSettings(new SWGSDRangel::SWGFT8DemodSettings());
-	        channelSettings->getFt8DemodSettings()->init();
+            channelSettings->getFt8DemodSettings()->init();
             channelSettings->getFt8DemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "HeatMapSettings")
@@ -4773,6 +4773,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setWfmModSettings(new SWGSDRangel::SWGWFMModSettings());
             channelSettings->getWfmModSettings()->init();
             channelSettings->getWfmModSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "WDSPRxSettings")
+        {
+            channelSettings->setWdspRxSettings(new SWGSDRangel::SWGWDSPRxSettings());
+            channelSettings->getWdspRxSettings()->init();
+            channelSettings->getWdspRxSettings()->fromJsonObject(settingsJsonObject);
         }
         else
         {
