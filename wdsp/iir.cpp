@@ -79,7 +79,6 @@ void SNOTCH::flush_snotch (SNOTCH *a)
 
 void SNOTCH::xsnotch (SNOTCH *a)
 {
-    a->cs_update.lock();
     if (a->run)
     {
         int i;
@@ -95,7 +94,6 @@ void SNOTCH::xsnotch (SNOTCH *a)
     }
     else if (a->out != a->in)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
-    a->cs_update.unlock();
 }
 
 void SNOTCH::setBuffers_snotch (SNOTCH *a, float* in, float* out)
@@ -124,17 +122,13 @@ void SNOTCH::setSize_snotch (SNOTCH *a, int size)
 
 void SNOTCH::SetSNCTCSSFreq (SNOTCH *a, float freq)
 {
-    a->cs_update.lock();
     a->f = freq;
     calc_snotch (a);
-    a->cs_update.unlock();
 }
 
 void SNOTCH::SetSNCTCSSRun (SNOTCH *a, int run)
 {
-    a->cs_update.lock();
     a->run = run;
-    a->cs_update.unlock();
 }
 
 
@@ -266,15 +260,16 @@ void SPEAK::flush_speak (SPEAK *a)
 
 void SPEAK::xspeak (SPEAK *a)
 {
-    a->cs_update.lock();
     if (a->run)
     {
         int i, j, n;
+
         for (i = 0; i < a->size; i++)
         {
             for (j = 0; j < 2; j++)
             {
                 a->x0[j] = a->fgain * a->in[2 * i + j];
+
                 for (n = 0; n < a->nstages; n++)
                 {
                     if (n > 0) a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
@@ -288,13 +283,13 @@ void SPEAK::xspeak (SPEAK *a)
                     a->x2[2 * n + j] = a->x1[2 * n + j];
                     a->x1[2 * n + j] = a->x0[2 * n + j];
                 }
+
                 a->out[2 * i + j] = a->y0[2 * (a->nstages - 1) + j];
             }
         }
     }
     else if (a->out != a->in)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
-    a->cs_update.unlock();
 }
 
 void SPEAK::setBuffers_speak (SPEAK *a, float* in, float* out)
@@ -324,36 +319,28 @@ void SPEAK::setSize_speak (SPEAK *a, int size)
 void SPEAK::SetSPCWRun (RXA& rxa, int run)
 {
     SPEAK *a = rxa.speak.p;
-    a->cs_update.lock();
     a->run = run;
-    a->cs_update.unlock();
 }
 
 void SPEAK::SetSPCWFreq (RXA& rxa, float freq)
 {
     SPEAK *a = rxa.speak.p;
-    a->cs_update.lock();
     a->f = freq;
     calc_speak (a);
-    a->cs_update.unlock();
 }
 
 void SPEAK::SetSPCWBandwidth (RXA& rxa, float bw)
 {
     SPEAK *a = rxa.speak.p;
-    a->cs_update.lock();
     a->bw = bw;
     calc_speak (a);
-    a->cs_update.unlock();
 }
 
 void SPEAK::SetSPCWGain (RXA& rxa, float gain)
 {
     SPEAK *a = rxa.speak.p;
-    a->cs_update.lock();
     a->gain = gain;
     calc_speak (a);
-    a->cs_update.unlock();
 }
 
 /********************************************************************************************************
@@ -436,11 +423,11 @@ void MPEAK::flush_mpeak (MPEAK *a)
 
 void MPEAK::xmpeak (MPEAK *a)
 {
-    a->cs_update.lock();
     if (a->run)
     {
         int i, j;
         memset (a->mix, 0, a->size * sizeof (wcomplex));
+
         for (i = 0; i < a->npeaks; i++)
         {
             if (a->enable[i])
@@ -450,11 +437,12 @@ void MPEAK::xmpeak (MPEAK *a)
                     a->mix[j] += a->tmp[j];
             }
         }
+
         memcpy (a->out, a->mix, a->size * sizeof (wcomplex));
     }
+
     else if (a->in != a->out)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
-    a->cs_update.unlock();
 }
 
 void MPEAK::setBuffers_mpeak (MPEAK *a, float* in, float* out)
@@ -488,55 +476,43 @@ void MPEAK::setSize_mpeak (MPEAK *a, int size)
 void MPEAK::SetmpeakRun (RXA& rxa, int run)
 {
     MPEAK *a = rxa.mpeak.p;
-    a->cs_update.lock();
     a->run = run;
-    a->cs_update.unlock();
 }
 
 void MPEAK::SetmpeakNpeaks (RXA& rxa, int npeaks)
 {
     MPEAK *a = rxa.mpeak.p;
-    a->cs_update.lock();
     a->npeaks = npeaks;
-    a->cs_update.unlock();
 }
 
 void MPEAK::SetmpeakFilEnable (RXA& rxa, int fil, int enable)
 {
     MPEAK *a = rxa.mpeak.p;
-    a->cs_update.lock();
     a->enable[fil] = enable;
-    a->cs_update.unlock();
 }
 
 void MPEAK::SetmpeakFilFreq (RXA& rxa, int fil, float freq)
 {
     MPEAK *a = rxa.mpeak.p;
-    a->cs_update.lock();
     a->f[fil] = freq;
     a->pfil[fil]->f = freq;
     SPEAK::calc_speak(a->pfil[fil]);
-    a->cs_update.unlock();
 }
 
 void MPEAK::SetmpeakFilBw (RXA& rxa, int fil, float bw)
 {
     MPEAK *a = rxa.mpeak.p;
-    a->cs_update.lock();
     a->bw[fil] = bw;
     a->pfil[fil]->bw = bw;
     SPEAK::calc_speak(a->pfil[fil]);
-    a->cs_update.unlock();
 }
 
 void MPEAK::SetmpeakFilGain (RXA& rxa, int fil, float gain)
 {
     MPEAK *a = rxa.mpeak.p;
-    a->cs_update.lock();
     a->gain[fil] = gain;
     a->pfil[fil]->gain = gain;
     SPEAK::calc_speak(a->pfil[fil]);
-    a->cs_update.unlock();
 }
 
 
@@ -598,7 +574,6 @@ void PHROT::flush_phrot (PHROT *a)
 
 void PHROT::xphrot (PHROT *a)
 {
-    a->cs_update.lock();
     if (a->reverse)
     {
         for (int i = 0; i < a->size; i++)
@@ -607,9 +582,11 @@ void PHROT::xphrot (PHROT *a)
     if (a->run)
     {
         int i, n;
+
         for (i = 0; i < a->size; i++)
         {
             a->x0[0] = a->in[2 * i + 0];
+
             for (n = 0; n < a->nstages; n++)
             {
                 if (n > 0) a->x0[n] = a->y0[n - 1];
@@ -619,12 +596,12 @@ void PHROT::xphrot (PHROT *a)
                 a->y1[n] = a->y0[n];
                 a->x1[n] = a->x0[n];
             }
+
             a->out[2 * i + 0] = a->y0[a->nstages - 1];
         }
     }
     else if (a->out != a->in)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
-    a->cs_update.unlock();
 }
 
 void PHROT::setBuffers_phrot (PHROT *a, float* in, float* out)
@@ -655,38 +632,32 @@ void PHROT::setSize_phrot (PHROT *a, int size)
 void PHROT::SetPHROTRun (TXA& txa, int run)
 {
     PHROT *a = txa.phrot.p;
-    a->cs_update.lock();
     a->run = run;
-    if (a->run) flush_phrot (a);
-    a->cs_update.unlock();
+
+    if (a->run)
+        flush_phrot (a);
 }
 
 void PHROT::SetPHROTCorner (TXA& txa, float corner)
 {
     PHROT *a = txa.phrot.p;
-    a->cs_update.lock();
     decalc_phrot (a);
     a->fc = corner;
     calc_phrot (a);
-    a->cs_update.unlock();
 }
 
 void PHROT::SetPHROTNstages (TXA& txa, int nstages)
 {
     PHROT *a = txa.phrot.p;
-    a->cs_update.lock();
     decalc_phrot (a);
     a->nstages = nstages;
     calc_phrot (a);
-    a->cs_update.unlock();
 }
 
 void PHROT::SetPHROTReverse (TXA& txa, int reverse)
 {
     PHROT *a = txa.phrot.p;
-    a->cs_update.lock();
     a->reverse = reverse;
-    a->cs_update.unlock();
 }
 
 /********************************************************************************************************
@@ -755,15 +726,16 @@ void BQLP::flush_bqlp(BQLP *a)
 
 void BQLP::xbqlp(BQLP *a)
 {
-    a->cs_update.lock();
     if (a->run)
     {
         int i, j, n;
+
         for (i = 0; i < a->size; i++)
         {
             for (j = 0; j < 2; j++)
             {
                 a->x0[j] = a->gain * a->in[2 * i + j];
+
                 for (n = 0; n < a->nstages; n++)
                 {
                     if (n > 0) a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
@@ -777,13 +749,13 @@ void BQLP::xbqlp(BQLP *a)
                     a->x2[2 * n + j] = a->x1[2 * n + j];
                     a->x1[2 * n + j] = a->x0[2 * n + j];
                 }
+
                 a->out[2 * i + j] = a->y0[2 * (a->nstages - 1) + j];
             }
         }
     }
     else if (a->out != a->in)
         memcpy(a->out, a->in, a->size * sizeof(wcomplex));
-    a->cs_update.unlock();
 }
 
 void BQLP::setBuffers_bqlp(BQLP *a, float* in, float* out)
@@ -869,16 +841,19 @@ void DBQLP::flush_dbqlp(BQLP *a)
 
 void DBQLP::xdbqlp(BQLP *a)
 {
-    a->cs_update.lock();
     if (a->run)
     {
         int i, n;
+
         for (i = 0; i < a->size; i++)
         {
             a->x0[0] = a->gain * a->in[i];
+
             for (n = 0; n < a->nstages; n++)
             {
-                if (n > 0) a->x0[n] = a->y0[n - 1];
+                if (n > 0)
+                    a->x0[n] = a->y0[n - 1];
+
                 a->y0[n] = a->a0 * a->x0[n]
                     + a->a1 * a->x1[n]
                     + a->a2 * a->x2[n]
@@ -889,12 +864,12 @@ void DBQLP::xdbqlp(BQLP *a)
                 a->x2[n] = a->x1[n];
                 a->x1[n] = a->x0[n];
             }
+
             a->out[i] = a->y0[a->nstages - 1];
         }
     }
     else if (a->out != a->in)
         memcpy(a->out, a->in, a->size * sizeof(float));
-    a->cs_update.unlock();
 }
 
 void DBQLP::setBuffers_dbqlp(BQLP *a, float* in, float* out)
@@ -986,18 +961,21 @@ void BQBP::flush_bqbp(BQBP *a)
 
 void BQBP::xbqbp(BQBP *a)
 {
-    a->cs_update.lock();
     if (a->run)
     {
         int i, j, n;
+
         for (i = 0; i < a->size; i++)
         {
             for (j = 0; j < 2; j++)
             {
                 a->x0[j] = a->gain * a->in[2 * i + j];
+
                 for (n = 0; n < a->nstages; n++)
                 {
-                    if (n > 0) a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
+                    if (n > 0)
+                        a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
+
                     a->y0[2 * n + j] = a->a0 * a->x0[2 * n + j]
                         + a->a1 * a->x1[2 * n + j]
                         + a->a2 * a->x2[2 * n + j]
@@ -1008,13 +986,13 @@ void BQBP::xbqbp(BQBP *a)
                     a->x2[2 * n + j] = a->x1[2 * n + j];
                     a->x1[2 * n + j] = a->x0[2 * n + j];
                 }
+
                 a->out[2 * i + j] = a->y0[2 * (a->nstages - 1) + j];
             }
         }
     }
     else if (a->out != a->in)
         memcpy(a->out, a->in, a->size * sizeof(wcomplex));
-    a->cs_update.unlock();
 }
 
 void BQBP::setBuffers_bqbp(BQBP *a, float* in, float* out)
@@ -1104,16 +1082,19 @@ void BQBP::flush_dbqbp(BQBP *a)
 
 void BQBP::xdbqbp(BQBP *a)
 {
-    a->cs_update.lock();
     if (a->run)
     {
         int i, n;
+
         for (i = 0; i < a->size; i++)
         {
             a->x0[0] = a->gain * a->in[i];
+
             for (n = 0; n < a->nstages; n++)
             {
-                if (n > 0) a->x0[n] = a->y0[n - 1];
+                if (n > 0)
+                    a->x0[n] = a->y0[n - 1];
+
                 a->y0[n] = a->a0 * a->x0[n]
                     + a->a1 * a->x1[n]
                     + a->a2 * a->x2[n]
@@ -1124,12 +1105,12 @@ void BQBP::xdbqbp(BQBP *a)
                 a->x2[n] = a->x1[n];
                 a->x1[n] = a->x0[n];
             }
+
             a->out[i] = a->y0[a->nstages - 1];
         }
     }
     else if (a->out != a->in)
         memcpy(a->out, a->in, a->size * sizeof(float));
-    a->cs_update.unlock();
 }
 
 void BQBP::setBuffers_dbqbp(BQBP *a, float* in, float* out)
@@ -1207,7 +1188,6 @@ void SPHP::flush_sphp(SPHP *a)
 
 void SPHP::xsphp(SPHP *a)
 {
-    a->cs_update.lock();
     if (a->run)
     {
         int i, j, n;
@@ -1216,22 +1196,25 @@ void SPHP::xsphp(SPHP *a)
             for (j = 0; j < 2; j++)
             {
                 a->x0[j] = a->in[2 * i + j];
+
                 for (n = 0; n < a->nstages; n++)
                 {
-                    if (n > 0) a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
+                    if (n > 0)
+                        a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
+
                     a->y0[2 * n + j] = a->b0 * a->x0[2 * n + j]
                         + a->b1 * a->x1[2 * n + j]
                         - a->a1 * a->y1[2 * n + j];
                     a->y1[2 * n + j] = a->y0[2 * n + j];
                     a->x1[2 * n + j] = a->x0[2 * n + j];
                 }
+
                 a->out[2 * i + j] = a->y0[2 * (a->nstages - 1) + j];
             }
         }
     }
     else if (a->out != a->in)
         memcpy(a->out, a->in, a->size * sizeof(wcomplex));
-    a->cs_update.unlock();
 }
 
 void SPHP::setBuffers_sphp(SPHP *a, float* in, float* out)
@@ -1310,28 +1293,31 @@ void SPHP::flush_dsphp(SPHP *a)
 
 void SPHP::xdsphp(SPHP *a)
 {
-    a->cs_update.lock();
     if (a->run)
     {
         int i, n;
+
         for (i = 0; i < a->size; i++)
         {
             a->x0[0] = a->in[i];
+
             for (n = 0; n < a->nstages; n++)
             {
-                if (n > 0) a->x0[n] = a->y0[n - 1];
+                if (n > 0)
+                    a->x0[n] = a->y0[n - 1];
+
                 a->y0[n] = a->b0 * a->x0[n]
                     + a->b1 * a->x1[n]
                     - a->a1 * a->y1[n];
                 a->y1[n] = a->y0[n];
                 a->x1[n] = a->x0[n];
             }
+
             a->out[i] = a->y0[a->nstages - 1];
         }
     }
     else if (a->out != a->in)
         memcpy(a->out, a->in, a->size * sizeof(float));
-    a->cs_update.unlock();
 }
 
 void SPHP::setBuffers_dsphp(SPHP *a, float* in, float* out)

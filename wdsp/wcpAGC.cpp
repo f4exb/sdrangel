@@ -376,7 +376,6 @@ void WCPAGC::setSize_wcpagc (WCPAGC *a, int size)
 
 void WCPAGC::SetAGCMode (RXA& rxa, int mode)
 {
-    rxa.csDSP.lock();
     switch (mode)
     {
         case 0: //agcOFF
@@ -413,139 +412,108 @@ void WCPAGC::SetAGCMode (RXA& rxa, int mode)
             rxa.agc.p->mode = 5;
             break;
     }
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::SetAGCAttack (RXA& rxa, int attack)
 {
-    rxa.csDSP.lock();
     rxa.agc.p->tau_attack = (float)attack / 1000.0;
     loadWcpAGC ( rxa.agc.p );
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::SetAGCDecay (RXA& rxa, int decay)
 {
-    rxa.csDSP.lock();
     rxa.agc.p->tau_decay = (float)decay / 1000.0;
     loadWcpAGC ( rxa.agc.p );
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::SetAGCHang (RXA& rxa, int hang)
 {
-    rxa.csDSP.lock();
     rxa.agc.p->hangtime = (float)hang / 1000.0;
     loadWcpAGC ( rxa.agc.p );
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::GetAGCHangLevel(RXA& rxa, float *hangLevel)
 //for line on bandscope
 {
-    rxa.csDSP.lock();
     *hangLevel = 20.0 * log10( rxa.agc.p->hang_level / 0.637 );
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::SetAGCHangLevel(RXA& rxa, float hangLevel)
 //for line on bandscope
 {
     float convert, tmp;
-    rxa.csDSP.lock();
+
     if (rxa.agc.p->max_input > rxa.agc.p->min_volts)
     {
         convert = pow (10.0, hangLevel / 20.0);
-        tmp = std::max(1e-8, (convert - rxa.agc.p->min_volts) /
-            (rxa.agc.p->max_input - rxa.agc.p->min_volts));
+        tmp = std::max(1e-8, (convert - rxa.agc.p->min_volts) / (rxa.agc.p->max_input - rxa.agc.p->min_volts));
         rxa.agc.p->hang_thresh = 1.0 + 0.125 * log10 (tmp);
     }
     else
         rxa.agc.p->hang_thresh = 1.0;
+
     loadWcpAGC ( rxa.agc.p );
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::GetAGCHangThreshold(RXA& rxa, int *hangthreshold)
 //for slider in setup
 {
-    rxa.csDSP.lock();
     *hangthreshold = (int)(100.0 * rxa.agc.p->hang_thresh);
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::SetAGCHangThreshold (RXA& rxa, int hangthreshold)
 //For slider in setup
 {
-    rxa.csDSP.lock();
     rxa.agc.p->hang_thresh = (float)hangthreshold / 100.0;
     loadWcpAGC ( rxa.agc.p );
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::GetAGCThresh(RXA& rxa, float *thresh, float size, float rate)
 //for line on bandscope.
 {
     float noise_offset;
-    rxa.csDSP.lock();
-    noise_offset = 10.0 * log10((rxa.nbp0.p->fhigh - rxa.nbp0.p->flow)
-        * size / rate);
+    noise_offset = 10.0 * log10((rxa.nbp0.p->fhigh - rxa.nbp0.p->flow) * size / rate);
     *thresh = 20.0 * log10( rxa.agc.p->min_volts ) - noise_offset;
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::SetAGCThresh(RXA& rxa, float thresh, float size, float rate)
 //for line on bandscope
 {
     float noise_offset;
-    rxa.csDSP.lock();
-    noise_offset = 10.0 * log10((rxa.nbp0.p->fhigh - rxa.nbp0.p->flow)
-        * size / rate);
-    rxa.agc.p->max_gain = rxa.agc.p->out_target /
-        (rxa.agc.p->var_gain * pow (10.0, (thresh + noise_offset) / 20.0));
+    noise_offset = 10.0 * log10((rxa.nbp0.p->fhigh - rxa.nbp0.p->flow) * size / rate);
+    rxa.agc.p->max_gain = rxa.agc.p->out_target / (rxa.agc.p->var_gain * pow (10.0, (thresh + noise_offset) / 20.0));
     loadWcpAGC ( rxa.agc.p );
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::GetAGCTop(RXA& rxa, float *max_agc)
 //for AGC Max Gain in setup
 {
-    rxa.csDSP.lock();
     *max_agc = 20 * log10 (rxa.agc.p->max_gain);
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::SetAGCTop (RXA& rxa, float max_agc)
 //for AGC Max Gain in setup
 {
-    rxa.csDSP.lock();
     rxa.agc.p->max_gain = pow (10.0, (float)max_agc / 20.0);
     loadWcpAGC ( rxa.agc.p );
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::SetAGCSlope (RXA& rxa, int slope)
 {
-    rxa.csDSP.lock();
     rxa.agc.p->var_gain = pow (10.0, (float)slope / 20.0 / 10.0);
     loadWcpAGC ( rxa.agc.p );
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::SetAGCFixed (RXA& rxa, float fixed_agc)
 {
-    rxa.csDSP.lock();
     rxa.agc.p->fixed_gain = pow (10.0, (float)fixed_agc / 20.0);
     loadWcpAGC ( rxa.agc.p );
-    rxa.csDSP.unlock();
 }
 
 void WCPAGC::SetAGCMaxInputLevel (RXA& rxa, float level)
 {
-    rxa.csDSP.lock();
     rxa.agc.p->max_input = level;
     loadWcpAGC ( rxa.agc.p );
-    rxa.csDSP.unlock();
 }
 
 /********************************************************************************************************
@@ -556,80 +524,60 @@ void WCPAGC::SetAGCMaxInputLevel (RXA& rxa, float level)
 
 void WCPAGC::SetALCSt (TXA& txa, int state)
 {
-    txa.csDSP.lock();
     txa.alc.p->run = state;
-    txa.csDSP.unlock();
 }
 
 void WCPAGC::SetALCAttack (TXA& txa, int attack)
 {
-    txa.csDSP.lock();
     txa.alc.p->tau_attack = (float)attack / 1000.0;
     loadWcpAGC(txa.alc.p);
-    txa.csDSP.unlock();
 }
 
 void WCPAGC::SetALCDecay (TXA& txa, int decay)
 {
-    txa.csDSP.lock();
     txa.alc.p->tau_decay = (float)decay / 1000.0;
     loadWcpAGC(txa.alc.p);
-    txa.csDSP.unlock();
 }
 
 void WCPAGC::SetALCHang (TXA& txa, int hang)
 {
-    txa.csDSP.lock();
     txa.alc.p->hangtime = (float)hang / 1000.0;
     loadWcpAGC(txa.alc.p);
-    txa.csDSP.unlock();
 }
 
 void WCPAGC::SetALCMaxGain (TXA& txa, float maxgain)
 {
-    txa.csDSP.lock();
     txa.alc.p->max_gain = pow (10.0,(float)maxgain / 20.0);
     loadWcpAGC(txa.alc.p);
-    txa.csDSP.unlock();
 }
 
 void WCPAGC::SetLevelerSt (TXA& txa, int state)
 {
-    txa.csDSP.lock();
     txa.leveler.p->run = state;
-    txa.csDSP.unlock();
 }
 
 void WCPAGC::SetLevelerAttack (TXA& txa, int attack)
 {
-    txa.csDSP.lock();
     txa.leveler.p->tau_attack = (float)attack / 1000.0;
     loadWcpAGC(txa.leveler.p);
-    txa.csDSP.unlock();
 }
 
 void WCPAGC::SetLevelerDecay (TXA& txa, int decay)
 {
-    txa.csDSP.lock();
     txa.leveler.p->tau_decay = (float)decay / 1000.0;
     loadWcpAGC(txa.leveler.p);
-    txa.csDSP.unlock();
 }
 
 void WCPAGC::SetLevelerHang (TXA& txa, int hang)
 {
-    txa.csDSP.lock();
     txa.leveler.p->hangtime = (float)hang / 1000.0;
     loadWcpAGC(txa.leveler.p);
-    txa.csDSP.unlock();
 }
 
 void WCPAGC::SetLevelerTop (TXA& txa, float maxgain)
 {
-    txa.csDSP.lock();
     txa.leveler.p->max_gain = pow (10.0,(float)maxgain / 20.0);
     loadWcpAGC(txa.leveler.p);
-    txa.csDSP.unlock();
 }
 
 } // namespace WDSP

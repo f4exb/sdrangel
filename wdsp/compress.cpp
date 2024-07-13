@@ -102,18 +102,14 @@ void COMPRESSOR::SetCompressorRun (TXA& txa, int run)
 {
     if (txa.compressor.p->run != run)
     {
-        txa.csDSP.lock();
         txa.compressor.p->run = run;
         TXA::SetupBPFilters (txa);
-        txa.csDSP.unlock();
     }
 }
 
 void COMPRESSOR::SetCompressorGain (TXA& txa, float gain)
 {
-    txa.csDSP.lock();
     txa.compressor.p->gain = pow (10.0, gain / 20.0);
-    txa.csDSP.unlock();
 }
 
 } // namespace WDSP

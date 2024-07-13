@@ -194,7 +194,6 @@ void BPSNBA::recalc_bpsnba_filter (BPSNBA *a, int update)
 void BPSNBA::BPSNBASetNC (RXA& rxa, int nc)
 {
     BPSNBA *a = rxa.bpsnba.p;
-    rxa.csDSP.lock();
 
     if (a->nc != nc)
     {
@@ -202,8 +201,6 @@ void BPSNBA::BPSNBASetNC (RXA& rxa, int nc)
         a->bpsnba->nc = a->nc;
         NBP::setNc_nbp (a->bpsnba);
     }
-
-    rxa.csDSP.unlock();
 }
 
 void BPSNBA::BPSNBASetMP (RXA& rxa, int mp)

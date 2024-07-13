@@ -99,9 +99,7 @@ void ANB::destroy_anb (ANB *a)
 
 void ANB::flush_anb (ANB *a)
 {
-    a->cs_update.lock();
     initBlanker (a);
-    a->cs_update.unlock();
 }
 
 void ANB::xanb (ANB *a)
@@ -111,7 +109,6 @@ void ANB::xanb (ANB *a)
     int i;
     if (a->run)
     {
-        a->cs_update.lock();
         for (i = 0; i < a->buffsize; i++)
         {
             mag = sqrt(a->in[2 * i + 0] * a->in[2 * i + 0] + a->in[2 * i + 1] * a->in[2 * i + 1]);
@@ -179,7 +176,6 @@ void ANB::xanb (ANB *a)
             if (++a->in_idx == a->dline_size) a->in_idx = 0;
             if (++a->out_idx == a->dline_size) a->out_idx = 0;
         }
-        a->cs_update.unlock();
     }
     else if (a->in != a->out)
         memcpy (a->out, a->in, a->buffsize * sizeof (wcomplex));
@@ -212,70 +208,54 @@ void ANB::setSize_anb (ANB *a, int size)
 void ANB::SetANBRun (RXA& rxa, int run)
 {
     ANB *a = rxa.anb.p;
-    a->cs_update.lock();
     a->run = run;
-    a->cs_update.unlock();
 }
 
 void ANB::SetANBBuffsize (RXA& rxa, int size)
 {
     ANB *a = rxa.anb.p;
-    a->cs_update.lock();
     a->buffsize = size;
-    a->cs_update.unlock();
 }
 
 void ANB::SetANBSamplerate (RXA& rxa, int rate)
 {
     ANB *a = rxa.anb.p;
-    a->cs_update.lock();
     a->samplerate = (double) rate;
     initBlanker (a);
-    a->cs_update.unlock();
 }
 
 void ANB::SetANBTau (RXA& rxa, double tau)
 {
     ANB *a = rxa.anb.p;
-    a->cs_update.lock();
     a->tau = tau;
     initBlanker (a);
-    a->cs_update.unlock();
 }
 
 void ANB::SetANBHangtime (RXA& rxa, double time)
 {
     ANB *a = rxa.anb.p;
-    a->cs_update.lock();
     a->hangtime = time;
     initBlanker (a);
-    a->cs_update.unlock();
 }
 
 void ANB::SetANBAdvtime (RXA& rxa, double time)
 {
     ANB *a = rxa.anb.p;
-    a->cs_update.lock();
     a->advtime = time;
     initBlanker (a);
-    a->cs_update.unlock();
 }
 
 void ANB::SetANBBacktau (RXA& rxa, double tau)
 {
     ANB *a = rxa.anb.p;
-    a->cs_update.lock();
     a->backtau = tau;
     initBlanker (a);
-    a->cs_update.unlock();
 }
 
 void ANB::SetANBThreshold (RXA& rxa, double thresh)
 {
     ANB *a = rxa.anb.p;
-    a->cs_update.lock();
     a->threshold = thresh;
-    a->cs_update.unlock();
 }
 
 }

@@ -202,13 +202,12 @@ void BANDPASS::SetBandpassFreqs (RXA& rxa, float f_low, float f_high)
             1,
             a->gain / (float)(2 * a->size)
         );
+
         FIRCORE::setImpulse_fircore (a->p, impulse, 0);
         delete[] (impulse);
-        rxa.csDSP.lock();
         a->f_low = f_low;
         a->f_high = f_high;
         FIRCORE::setUpdate_fircore (a->p);
-        rxa.csDSP.unlock();
     }
 }
 
@@ -216,7 +215,6 @@ void BANDPASS::SetBandpassNC (RXA& rxa, int nc)
 {
     // NOTE:  'nc' must be >= 'size'
     BANDPASS *a;
-    rxa.csDSP.lock();
     a = rxa.bp1.p;
 
     if (nc != a->nc)
@@ -234,8 +232,6 @@ void BANDPASS::SetBandpassNC (RXA& rxa, int nc)
         FIRCORE::setNc_fircore (a->p, a->nc, impulse);
         delete[] (impulse);
     }
-
-    rxa.csDSP.unlock();
 }
 
 void BANDPASS::SetBandpassMP (RXA& rxa, int mp)
@@ -294,7 +290,6 @@ void BANDPASS::SetBandpassNC (TXA& txa, int nc)
 {
     // NOTE:  'nc' must be >= 'size'
     BANDPASS *a;
-    txa.csDSP.lock();
     a = txa.bp0.p;
 
     if (a->nc != nc)
@@ -348,8 +343,6 @@ void BANDPASS::SetBandpassNC (TXA& txa, int nc)
         FIRCORE::setNc_fircore (a->p, a->nc, impulse);
         delete[] (impulse);
     }
-
-    txa.csDSP.unlock();
 }
 
 void BANDPASS::SetBandpassMP (TXA& txa, int mp)

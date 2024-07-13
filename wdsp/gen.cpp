@@ -24,6 +24,7 @@ The author can be reached by email at
 warren@wpratt.com
 
 */
+#include <chrono>
 
 #include "comm.hpp"
 #include "gen.hpp"
@@ -134,7 +135,7 @@ GEN* GEN::create_gen (int run, int size, float* in, float* out, int rate, int mo
     a->tt.f1 = +  900.0;
     a->tt.f2 = + 1700.0;
     // noise
-    srand ((unsigned int)time (0));
+    srand ((unsigned int) time (0));
     a->noise.mag = 1.0;
     // sweep
     a->sweep.mag = 1.0;
@@ -389,62 +390,46 @@ void GEN::setSize_gen (GEN *a, int size)
 
 void GEN::SetPreGenRun (RXA& rxa, int run)
 {
-    rxa.csDSP.lock();
     rxa.gen0.p->run = run;
-    rxa.csDSP.unlock();
 }
 
 void GEN::SetPreGenMode (RXA& rxa, int mode)
 {
-    rxa.csDSP.lock();
     rxa.gen0.p->mode = mode;
-    rxa.csDSP.unlock();
 }
 
 void GEN::SetPreGenToneMag (RXA& rxa, float mag)
 {
-    rxa.csDSP.lock();
     rxa.gen0.p->tone.mag = mag;
-    rxa.csDSP.unlock();
 }
 
 void GEN::SetPreGenToneFreq (RXA& rxa, float freq)
 {
-    rxa.csDSP.lock();
     rxa.gen0.p->tone.freq = freq;
     calc_tone (rxa.gen0.p);
-    rxa.csDSP.unlock();
 }
 
 void GEN::SetPreGenNoiseMag (RXA& rxa, float mag)
 {
-    rxa.csDSP.lock();
     rxa.gen0.p->noise.mag = mag;
-    rxa.csDSP.unlock();
 }
 
 void GEN::SetPreGenSweepMag (RXA& rxa, float mag)
 {
-    rxa.csDSP.lock();
     rxa.gen0.p->sweep.mag = mag;
-    rxa.csDSP.unlock();
 }
 
 void GEN::SetPreGenSweepFreq (RXA& rxa, float freq1, float freq2)
 {
-    rxa.csDSP.lock();
     rxa.gen0.p->sweep.f1 = freq1;
     rxa.gen0.p->sweep.f2 = freq2;
     calc_sweep (rxa.gen0.p);
-    rxa.csDSP.unlock();
 }
 
 void GEN::SetPreGenSweepRate (RXA& rxa, float rate)
 {
-    rxa.csDSP.lock();
     rxa.gen0.p->sweep.sweeprate = rate;
     calc_sweep (rxa.gen0.p);
-    rxa.csDSP.unlock();
 }
 
 
@@ -458,203 +443,151 @@ void GEN::SetPreGenSweepRate (RXA& rxa, float rate)
 
 void GEN::SetPreGenRun (TXA& txa, int run)
 {
-    txa.csDSP.lock();
     txa.gen0.p->run = run;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenMode (TXA& txa, int mode)
 {
-    txa.csDSP.lock();
     txa.gen0.p->mode = mode;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenToneMag (TXA& txa, float mag)
 {
-    txa.csDSP.lock();
     txa.gen0.p->tone.mag = mag;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenToneFreq (TXA& txa, float freq)
 {
-    txa.csDSP.lock();
     txa.gen0.p->tone.freq = freq;
     calc_tone (txa.gen0.p);
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenNoiseMag (TXA& txa, float mag)
 {
-    txa.csDSP.lock();
     txa.gen0.p->noise.mag = mag;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenSweepMag (TXA& txa, float mag)
 {
-    txa.csDSP.lock();
     txa.gen0.p->sweep.mag = mag;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenSweepFreq (TXA& txa, float freq1, float freq2)
 {
-    txa.csDSP.lock();
     txa.gen0.p->sweep.f1 = freq1;
     txa.gen0.p->sweep.f2 = freq2;
     calc_sweep (txa.gen0.p);
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenSweepRate (TXA& txa, float rate)
 {
-    txa.csDSP.lock();
     txa.gen0.p->sweep.sweeprate = rate;
     calc_sweep (txa.gen0.p);
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenSawtoothMag (TXA& txa, float mag)
 {
-    txa.csDSP.lock();
     txa.gen0.p->saw.mag = mag;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenSawtoothFreq (TXA& txa, float freq)
 {
-    txa.csDSP.lock();
     txa.gen0.p->saw.f = freq;
     calc_sawtooth (txa.gen0.p);
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenTriangleMag (TXA& txa, float mag)
 {
-    txa.csDSP.lock();
     txa.gen0.p->tri.mag = mag;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenTriangleFreq (TXA& txa, float freq)
 {
-    txa.csDSP.lock();
     txa.gen0.p->tri.f = freq;
     calc_triangle (txa.gen0.p);
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenPulseMag (TXA& txa, float mag)
 {
-    txa.csDSP.lock();
     txa.gen0.p->pulse.mag = mag;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenPulseFreq (TXA& txa, float freq)
 {
-    txa.csDSP.lock();
     txa.gen0.p->pulse.pf = freq;
     calc_pulse (txa.gen0.p);
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenPulseDutyCycle (TXA& txa, float dc)
 {
-    txa.csDSP.lock();
     txa.gen0.p->pulse.pdutycycle = dc;
     calc_pulse (txa.gen0.p);
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenPulseToneFreq (TXA& txa, float freq)
 {
-    txa.csDSP.lock();
     txa.gen0.p->pulse.tf = freq;
     calc_pulse (txa.gen0.p);
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPreGenPulseTransition (TXA& txa, float transtime)
 {
-    txa.csDSP.lock();
     txa.gen0.p->pulse.ptranstime = transtime;
     calc_pulse (txa.gen0.p);
-    txa.csDSP.unlock();
 }
 
 // 'PostGen', gen1
 
 void GEN::SetPostGenRun (TXA& txa, int run)
 {
-    txa.csDSP.lock();
     txa.gen1.p->run = run;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPostGenMode (TXA& txa, int mode)
 {
-    txa.csDSP.lock();
     txa.gen1.p->mode = mode;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPostGenToneMag (TXA& txa, float mag)
 {
-    txa.csDSP.lock();
     txa.gen1.p->tone.mag = mag;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPostGenToneFreq (TXA& txa, float freq)
 {
-    txa.csDSP.lock();
     txa.gen1.p->tone.freq = freq;
     calc_tone (txa.gen1.p);
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPostGenTTMag (TXA& txa, float mag1, float mag2)
 {
-    txa.csDSP.lock();
     txa.gen1.p->tt.mag1 = mag1;
     txa.gen1.p->tt.mag2 = mag2;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPostGenTTFreq (TXA& txa, float freq1, float freq2)
 {
-    txa.csDSP.lock();
     txa.gen1.p->tt.f1 = freq1;
     txa.gen1.p->tt.f2 = freq2;
     calc_tt (txa.gen1.p);
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPostGenSweepMag (TXA& txa, float mag)
 {
-    txa.csDSP.lock();
     txa.gen1.p->sweep.mag = mag;
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPostGenSweepFreq (TXA& txa, float freq1, float freq2)
 {
-    txa.csDSP.lock();
     txa.gen1.p->sweep.f1 = freq1;
     txa.gen1.p->sweep.f2 = freq2;
     calc_sweep (txa.gen1.p);
-    txa.csDSP.unlock();
 }
 
 void GEN::SetPostGenSweepRate (TXA& txa, float rate)
 {
-    txa.csDSP.lock();
     txa.gen1.p->sweep.sweeprate = rate;
     calc_sweep (txa.gen1.p);
-    txa.csDSP.unlock();
 }
 
 } // namespace WDSP

@@ -262,17 +262,15 @@ void EQP::setSize_eqp (EQP *a, int size)
 
 void EQP::SetEQRun (RXA& rxa, int run)
 {
-    rxa.csDSP.lock();
     rxa.eqp.p->run = run;
-    rxa.csDSP.unlock();
 }
 
 void EQP::SetEQNC (RXA& rxa, int nc)
 {
     EQP *a;
     float* impulse;
-    rxa.csDSP.lock();
     a = rxa.eqp.p;
+
     if (a->nc != nc)
     {
         a->nc = nc;
@@ -280,7 +278,6 @@ void EQP::SetEQNC (RXA& rxa, int nc)
         FIRCORE::setNc_fircore (a->p, a->nc, impulse);
         delete[] (impulse);
     }
-    rxa.csDSP.unlock();
 }
 
 void EQP::SetEQMP (RXA& rxa, int mp)
@@ -397,17 +394,15 @@ void EQP::SetGrphEQ10 (RXA& rxa, int *rxeq)
 
 void EQP::SetEQRun (TXA& txa, int run)
 {
-    txa.csDSP.lock();
     txa.eqp.p->run = run;
-    txa.csDSP.unlock();
 }
 
 void EQP::SetEQNC (TXA& txa, int nc)
 {
     EQP *a;
     float* impulse;
-    txa.csDSP.lock();
     a = txa.eqp.p;
+
     if (a->nc != nc)
     {
         a->nc = nc;
@@ -415,7 +410,6 @@ void EQP::SetEQNC (TXA& txa, int nc)
         FIRCORE::setNc_fircore (a->p, a->nc, impulse);
         delete[] (impulse);
     }
-    txa.csDSP.unlock();
 }
 
 void EQP::SetEQMP (TXA& txa, int mp)

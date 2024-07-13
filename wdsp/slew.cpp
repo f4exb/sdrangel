@@ -189,12 +189,10 @@ void USLEW::setSize_uslew (USLEW *a, int size)
 void USLEW::SetuSlewTime (TXA& txa, float time)
 {
     // NOTE:  'time' is in seconds
-    txa.csDSP.lock();
     USLEW *a = txa.uslew.p;
     decalc_uslew (a);
     a->tupslew = time;
     calc_uslew (a);
-    txa.csDSP.unlock();
 }
 
 } // namespace WDSP

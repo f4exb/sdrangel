@@ -287,25 +287,19 @@ void AMD::SetAMDRun(RXA& rxa, int run)
             rxa.anf.p->run,
             rxa.anr.p->run
         );
-        rxa.csDSP.lock();
         a->run = run;
         RXA::bp1Set (rxa);
-        rxa.csDSP.unlock();
     }
 }
 
 void AMD::SetAMDSBMode(RXA& rxa, int sbmode)
 {
-    rxa.csDSP.lock();
     rxa.amd.p->sbmode = sbmode;
-    rxa.csDSP.unlock();
 }
 
 void AMD::SetAMDFadeLevel(RXA& rxa, int levelfade)
 {
-    rxa.csDSP.lock();
     rxa.amd.p->levelfade = levelfade;
-    rxa.csDSP.unlock();
 }
 
 } // namesoace WDSP

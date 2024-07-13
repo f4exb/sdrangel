@@ -29,7 +29,6 @@ warren@wpratt.com
 #define wdsp_rmatch_h
 
 #include <atomic>
-#include <QRecursiveMutex>
 
 #include "export.h"
 
@@ -113,8 +112,6 @@ public:
     float av_deviation;
     VARSAMP *v;
     int varmode;
-    QRecursiveMutex cs_ring;
-    QRecursiveMutex cs_var;
     // blend / slew
     float tslew;
     int ntslew;

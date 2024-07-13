@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef wdsp_unit_h
 #define wdsp_unit_h
 
-#include <QRecursiveMutex>
-
 #include "export.h"
 
 namespace WDSP {
@@ -43,8 +41,6 @@ public:
     int dsp_size;               // number complex samples processed per buffer in mainstream dsp processing
     int dsp_insize;             // size (complex samples) of the input buffer
     int dsp_outsize;            // size (complex samples) of the output buffer
-    QRecursiveMutex csDSP;      // used to block dsp while parameters are updated or buffers flushed
-    QRecursiveMutex csEXCH;     // used to block fexchange() while parameters are updated or buffers flushed
     int state;                  // 0 for unit OFF; 1 for unit ON
 };
 

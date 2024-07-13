@@ -172,7 +172,6 @@ void FMMOD::SetFMDeviation (TXA& txa, float deviation)
     float* impulse = FIR::fir_bandpass (a->nc, -bp_fc, +bp_fc, a->samplerate, 0, 1, 1.0 / (2 * a->size));
     FIRCORE::setImpulse_fircore (a->p, impulse, 0);
     delete[] (impulse);
-    txa.csDSP.lock();
     a->deviation = deviation;
     // mod
     a->sphase = 0.0;
@@ -180,33 +179,28 @@ void FMMOD::SetFMDeviation (TXA& txa, float deviation)
     // bandpass
     a->bp_fc = bp_fc;
     FIRCORE::setUpdate_fircore (a->p);
-    txa.csDSP.unlock();
 }
 
 void FMMOD::SetCTCSSFreq (TXA& txa, float freq)
 {
     FMMOD *a;
-    txa.csDSP.lock();
     a = txa.fmmod.p;
     a->ctcss_freq = freq;
     a->tphase = 0.0;
     a->tdelta = TWOPI * a->ctcss_freq / a->samplerate;
-    txa.csDSP.unlock();
 }
 
 void FMMOD::SetCTCSSRun (TXA& txa, int run)
 {
-    txa.csDSP.lock();
     txa.fmmod.p->ctcss_run = run;
-    txa.csDSP.unlock();
 }
 
 void FMMOD::SetFMNC (TXA& txa, int nc)
 {
     FMMOD *a;
     float* impulse;
-    txa.csDSP.lock();
     a = txa.fmmod.p;
+
     if (a->nc != nc)
     {
         a->nc = nc;
@@ -214,7 +208,6 @@ void FMMOD::SetFMNC (TXA& txa, int nc)
         FIRCORE::setNc_fircore (a->p, a->nc, impulse);
         delete[] (impulse);
     }
-    txa.csDSP.unlock();
 }
 
 void FMMOD::SetFMMP (TXA& txa, int mp)
@@ -232,8 +225,8 @@ void FMMOD::SetFMAFFreqs (TXA& txa, float low, float high)
 {
     FMMOD *a;
     float* impulse;
-    txa.csDSP.lock();
     a = txa.fmmod.p;
+
     if (a->f_low != low || a->f_high != high)
     {
         a->f_low = low;
@@ -243,7 +236,6 @@ void FMMOD::SetFMAFFreqs (TXA& txa, float low, float high)
         FIRCORE::setImpulse_fircore (a->p, impulse, 1);
         delete[] (impulse);
     }
-    txa.csDSP.unlock();
 }
 
 } // namespace WDSP

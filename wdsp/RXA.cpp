@@ -158,7 +158,6 @@ RXA* RXA::create_rxa (
         0.100,                                  // averaging time constant
         0.100,                                  // peak decay time constant
         rxa->meter,                             // result vector
-        rxa->pmtupdate,                         // locks for meter access
         RXA_ADC_AV,                             // index for average value
         RXA_ADC_PK,                             // index for peak value
         -1,                                     // index for gain value - disabled
@@ -232,7 +231,6 @@ RXA* RXA::create_rxa (
         0.100,                                  // averaging time constant
         0.100,                                  // peak decay time constant
         rxa->meter,                             // result vector
-        rxa->pmtupdate,                         // locks for meter access
         RXA_S_AV,                               // index for average value
         RXA_S_PK,                               // index for peak value
         -1,                                     // index for gain value - disabled
@@ -450,7 +448,6 @@ RXA* RXA::create_rxa (
         0.100,                                  // averaging time constant
         0.100,                                  // peak decay time constant
         rxa->meter,                             // result vector
-        rxa->pmtupdate,                         // locks for meter access
         RXA_AGC_AV,                             // index for average value
         RXA_AGC_PK,                             // index for peak value
         RXA_AGC_GAIN,                           // index for gain value
@@ -691,11 +688,11 @@ void RXA::xrxa (RXA *rxa)
 
 void RXA::setInputSamplerate (RXA *rxa, int in_rate)
 {
-    rxa->csDSP.lock();
     if (in_rate  >= rxa->dsp_rate)
         rxa->dsp_insize  = rxa->dsp_size * (in_rate  / rxa->dsp_rate);
     else
         rxa->dsp_insize  = rxa->dsp_size / (rxa->dsp_rate /  in_rate);
+
     rxa->in_rate = in_rate;
     // buffers
     delete[] (rxa->inbuff);
@@ -717,16 +714,15 @@ void RXA::setInputSamplerate (RXA *rxa, int in_rate)
     RESAMPLE::setSize_resample (rxa->rsmpin.p, rxa->dsp_insize);
     RESAMPLE::setInRate_resample (rxa->rsmpin.p, rxa->in_rate);
     ResCheck (*rxa);
-    rxa->csDSP.unlock();
 }
 
 void RXA::setOutputSamplerate (RXA *rxa, int out_rate)
 {
-    rxa->csDSP.lock();
     if (out_rate >= rxa->dsp_rate)
         rxa->dsp_outsize = rxa->dsp_size * (out_rate / rxa->dsp_rate);
     else
         rxa->dsp_outsize = rxa->dsp_size / (rxa->dsp_rate / out_rate);
+
     rxa->out_rate = out_rate;
     // buffers
     delete[] (rxa->outbuff);
@@ -735,20 +731,20 @@ void RXA::setOutputSamplerate (RXA *rxa, int out_rate)
     RESAMPLE::setBuffers_resample (rxa->rsmpout.p, rxa->midbuff, rxa->outbuff);
     RESAMPLE::setOutRate_resample (rxa->rsmpout.p, rxa->out_rate);
     ResCheck (*rxa);
-    rxa->csDSP.unlock();
 }
 
 void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
 {
-    rxa->csDSP.lock();
     if (rxa->in_rate  >= dsp_rate)
         rxa->dsp_insize  = rxa->dsp_size * (rxa->in_rate  / dsp_rate);
     else
         rxa->dsp_insize  = rxa->dsp_size / (dsp_rate /  rxa->in_rate);
+
     if (rxa->out_rate >= dsp_rate)
         rxa->dsp_outsize = rxa->dsp_size * (rxa->out_rate / dsp_rate);
     else
         rxa->dsp_outsize = rxa->dsp_size / (dsp_rate / rxa->out_rate);
+
     rxa->dsp_rate = dsp_rate;
     // buffers
     delete[] (rxa->inbuff);
@@ -798,20 +794,20 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     RESAMPLE::setBuffers_resample (rxa->rsmpout.p, rxa->midbuff, rxa->outbuff);
     RESAMPLE::setInRate_resample (rxa->rsmpout.p, rxa->dsp_rate);
     ResCheck (*rxa);
-    rxa->csDSP.unlock();
 }
 
 void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
 {
-    rxa->csDSP.lock();
     if (rxa->in_rate  >= rxa->dsp_rate)
         rxa->dsp_insize  = dsp_size * (rxa->in_rate  / rxa->dsp_rate);
     else
         rxa->dsp_insize  = dsp_size / (rxa->dsp_rate /  rxa->in_rate);
+
     if (rxa->out_rate >= rxa->dsp_rate)
         rxa->dsp_outsize = dsp_size * (rxa->out_rate / rxa->dsp_rate);
     else
         rxa->dsp_outsize = dsp_size / (rxa->dsp_rate / rxa->out_rate);
+
     rxa->dsp_size = dsp_size;
     // buffers
     delete[](rxa->inbuff);
@@ -884,7 +880,6 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     // output resampler
     RESAMPLE::setBuffers_resample (rxa->rsmpout.p, rxa->midbuff, rxa->outbuff);
     RESAMPLE::setSize_resample (rxa->rsmpout.p, rxa->dsp_size);
-    rxa->csDSP.unlock();
 }
 
 void RXA::setSpectrumProbe(BufferProbe *spectrumProbe)
@@ -913,7 +908,6 @@ void RXA::SetMode (RXA& rxa, int mode)
             rxa.anf.p->run,
             rxa.anr.p->run
         );
-        rxa.csDSP.lock();
         rxa.mode = mode;
         rxa.amd.p->run  = 0;
         rxa.fmd.p->run  = 0;
@@ -940,7 +934,6 @@ void RXA::SetMode (RXA& rxa, int mode)
 
         bp1Set (rxa);
         bpsnbaSet (rxa);                         // update variables
-        rxa.csDSP.unlock();
     }
 }
 

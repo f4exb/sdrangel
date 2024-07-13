@@ -350,18 +350,14 @@ void SSQL::setSize_ssql (SSQL *a, int size)
 
 void SSQL::SetSSQLRun (RXA& rxa, int run)
 {
-    rxa.csDSP.lock();
     rxa.ssql.p->run = run;
-    rxa.csDSP.unlock();
 }
 
 void SSQL::SetSSQLThreshold (RXA& rxa, double threshold)
 {
     // 'threshold' should be between 0.0 and 1.0
     // WU2O testing:  0.16 is a good default for 'threshold'; => 0.08 for 'wthresh'
-    rxa.csDSP.lock();
     rxa.ssql.p->wthresh = threshold / 2.0;
-    rxa.csDSP.unlock();
 }
 
 void SSQL::SetSSQLTauMute (RXA& rxa, double tau_mute)
@@ -369,10 +365,8 @@ void SSQL::SetSSQLTauMute (RXA& rxa, double tau_mute)
     // reasonable (wide) range is 0.1 to 2.0
     // WU2O testing:  0.1 is good default value
     SSQL *a = rxa.ssql.p;
-    rxa.csDSP.lock();
     a->tr_tau_mute = tau_mute;
     a->mute_mult = 1.0 - exp (-1.0 / (a->rate * a->tr_tau_mute));
-    rxa.csDSP.unlock();
 }
 
 void SSQL::SetSSQLTauUnMute (RXA& rxa, double tau_unmute)
@@ -380,10 +374,8 @@ void SSQL::SetSSQLTauUnMute (RXA& rxa, double tau_unmute)
     // reasonable (wide) range is 0.1 to 1.0
     // WU2O testing:  0.1 is good default value
     SSQL *a = rxa.ssql.p;
-    rxa.csDSP.lock();
     a->tr_tau_unmute = tau_unmute;
     a->unmute_mult = 1.0 - exp (-1.0 / (a->rate * a->tr_tau_unmute));
-    rxa.csDSP.unlock();
 }
 
 } // namespace WDSP

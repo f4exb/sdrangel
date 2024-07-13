@@ -25,8 +25,6 @@ warren@wpratt.com
 
 */
 
-#include <QRecursiveMutex>
-
 #include "comm.hpp"
 #include "bps.hpp"
 #include "fir.hpp"
@@ -152,17 +150,15 @@ void BPS::setFreqs_bps (BPS *a, float f_low, float f_high)
 
 void BPS::SetBPSRun (RXA& rxa, int run)
 {
-    rxa.csDSP.lock();
     rxa.bp1.p->run = run;
-    rxa.csDSP.unlock();
 }
 
 void BPS::SetBPSFreqs (RXA& rxa, float f_low, float f_high)
 {
     float* impulse;
     BPS *a1;
-    rxa.csDSP.lock();
     a1 = rxa.bps1.p;
+
     if ((f_low != a1->f_low) || (f_high != a1->f_high))
     {
         a1->f_low = f_low;
@@ -172,15 +168,14 @@ void BPS::SetBPSFreqs (RXA& rxa, float f_low, float f_high)
         a1->mults = FIR::fftcv_mults (2 * a1->size, impulse);
         delete[] (impulse);
     }
-    rxa.csDSP.unlock();
 }
 
 void BPS::SetBPSWindow (RXA& rxa, int wintype)
 {
     float* impulse;
     BPS *a1;
-    rxa.csDSP.lock();
     a1 = rxa.bps1.p;
+
     if ((a1->wintype != wintype))
     {
         a1->wintype = wintype;
@@ -189,7 +184,6 @@ void BPS::SetBPSWindow (RXA& rxa, int wintype)
         a1->mults = FIR::fftcv_mults (2 * a1->size, impulse);
         delete[] (impulse);
     }
-    rxa.csDSP.unlock();
 }
 
 /********************************************************************************************************
@@ -200,17 +194,15 @@ void BPS::SetBPSWindow (RXA& rxa, int wintype)
 // UNCOMMENT properties when pointers in place in txa
 void BPS::SetBPSRun (TXA& txa, int run)
 {
-    txa.csDSP.lock();
     txa.bp1.p->run = run;
-    txa.csDSP.unlock();
 }
 
 void BPS::SetBPSFreqs (TXA& txa, float f_low, float f_high)
 {
     float* impulse;
     BPS *a;
-    txa.csDSP.lock();
     a = txa.bps0.p;
+
     if ((f_low != a->f_low) || (f_high != a->f_high))
     {
         a->f_low = f_low;
@@ -220,7 +212,9 @@ void BPS::SetBPSFreqs (TXA& txa, float f_low, float f_high)
         a->mults = FIR::fftcv_mults (2 * a->size, impulse);
         delete[] (impulse);
     }
+
     a = txa.bps1.p;
+
     if ((f_low != a->f_low) || (f_high != a->f_high))
     {
         a->f_low = f_low;
@@ -230,7 +224,9 @@ void BPS::SetBPSFreqs (TXA& txa, float f_low, float f_high)
         a->mults = FIR::fftcv_mults (2 * a->size, impulse);
         delete[] (impulse);
     }
+
     a = txa.bps2.p;
+
     if ((f_low != a->f_low) || (f_high != a->f_high))
     {
         a->f_low = f_low;
@@ -240,15 +236,14 @@ void BPS::SetBPSFreqs (TXA& txa, float f_low, float f_high)
         a->mults = FIR::fftcv_mults (2 * a->size, impulse);
         delete[] (impulse);
     }
-    txa.csDSP.unlock();
 }
 
 void BPS::SetBPSWindow (TXA& txa, int wintype)
 {
     float* impulse;
     BPS *a;
-    txa.csDSP.lock();
     a = txa.bps0.p;
+
     if (a->wintype != wintype)
     {
         a->wintype = wintype;
@@ -257,7 +252,9 @@ void BPS::SetBPSWindow (TXA& txa, int wintype)
         a->mults = FIR::fftcv_mults (2 * a->size, impulse);
         delete[] (impulse);
     }
+
     a = txa.bps1.p;
+
     if (a->wintype != wintype)
     {
         a->wintype = wintype;
@@ -266,7 +263,9 @@ void BPS::SetBPSWindow (TXA& txa, int wintype)
         a->mults = FIR::fftcv_mults (2 * a->size, impulse);
         delete[] (impulse);
     }
+
     a = txa.bps2.p;
+
     if (a->wintype != wintype)
     {
         a->wintype = wintype;
@@ -275,7 +274,6 @@ void BPS::SetBPSWindow (TXA& txa, int wintype)
         a->mults = FIR::fftcv_mults (2 * a->size, impulse);
         delete[] (impulse);
     }
-    txa.csDSP.unlock();
 }
 
 } // namespace WDSP

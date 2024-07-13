@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef wdsp_anb_h
 #define wdsp_anb_h
 
-#include <QRecursiveMutex>
-
 namespace WDSP {
 
 class RXA;
@@ -66,7 +64,6 @@ public:
     int count;                      // set each time a noise sample is detected, counts down
     double backmult;                // multiplier for waveform averaging
     double ombackmult;              // multiplier for waveform averaging
-    QRecursiveMutex cs_update;
     float *legacy;
 
     static ANB* create_anb   (

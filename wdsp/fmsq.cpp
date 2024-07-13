@@ -261,25 +261,21 @@ void FMSQ::setSize_fmsq (FMSQ *a, int size)
 
 void FMSQ::SetFMSQRun (RXA& rxa, int run)
 {
-    rxa.csDSP.lock();
     rxa.fmsq.p->run = run;
-    rxa.csDSP.unlock();
 }
 
 void FMSQ::SetFMSQThreshold (RXA& rxa, double threshold)
 {
-    rxa.csDSP.lock();
     rxa.fmsq.p->tail_thresh = threshold;
     rxa.fmsq.p->unmute_thresh = 0.9 * threshold;
-    rxa.csDSP.unlock();
 }
 
 void FMSQ::SetFMSQNC (RXA& rxa, int nc)
 {
     FMSQ *a;
     float* impulse;
-    rxa.csDSP.lock();
     a = rxa.fmsq.p;
+
     if (a->nc != nc)
     {
         a->nc = nc;
@@ -287,7 +283,6 @@ void FMSQ::SetFMSQNC (RXA& rxa, int nc)
         FIRCORE::setNc_fircore (a->p, a->nc, impulse);
         delete[]  (impulse);
     }
-    rxa.csDSP.unlock();
 }
 
 void FMSQ::SetFMSQMP (RXA& rxa, int mp)

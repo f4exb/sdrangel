@@ -922,6 +922,7 @@ void EMNR::setSize_emnr (EMNR *a, int size)
 void EMNR::SetEMNRRun (RXA& rxa, int run)
 {
     EMNR *a = rxa.emnr.p;
+
     if (a->run != run)
     {
         RXA::bp1Check (
@@ -932,54 +933,40 @@ void EMNR::SetEMNRRun (RXA& rxa, int run)
             rxa.anf.p->run,
             rxa.anr.p->run
         );
-        rxa.csDSP.lock();
         a->run = run;
         RXA::bp1Set (rxa);
-        rxa.csDSP.unlock();
     }
 }
 
 void EMNR::SetEMNRgainMethod (RXA& rxa, int method)
 {
-    rxa.csDSP.lock();
     rxa.emnr.p->g.gain_method = method;
-    rxa.csDSP.unlock();
 }
 
 void EMNR::SetEMNRnpeMethod (RXA& rxa, int method)
 {
-    rxa.csDSP.lock();
     rxa.emnr.p->g.npe_method = method;
-    rxa.csDSP.unlock();
 }
 
 void EMNR::SetEMNRaeRun (RXA& rxa, int run)
 {
-    rxa.csDSP.lock();
     rxa.emnr.p->g.ae_run = run;
-    rxa.csDSP.unlock();
 }
 
 void EMNR::SetEMNRPosition (RXA& rxa, int position)
 {
-    rxa.csDSP.lock();
     rxa.emnr.p->position = position;
     rxa.bp1.p->position  = position;
-    rxa.csDSP.unlock();
 }
 
 void EMNR::SetEMNRaeZetaThresh (RXA& rxa, double zetathresh)
 {
-    rxa.csDSP.lock();
     rxa.emnr.p->ae.zetaThresh = zetathresh;
-    rxa.csDSP.unlock();
 }
 
 void EMNR::SetEMNRaePsi (RXA& rxa, double psi)
 {
-    rxa.csDSP.lock();
     rxa.emnr.p->ae.psi = psi;
-    rxa.csDSP.unlock();
 }
 
 } // namespace WDSP

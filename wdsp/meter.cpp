@@ -49,7 +49,6 @@ METER* METER::create_meter (
     double tau_av,
     double tau_decay,
     double* result,
-    QRecursiveMutex** pmtupdate,
     int enum_av,
     int enum_pk,
     int enum_gain,
@@ -70,9 +69,6 @@ METER* METER::create_meter (
     a->enum_gain = enum_gain;
     a->pgain = pgain;
     calc_meter(a);
-    pmtupdate[enum_av]   = &a->mtupdate;
-    pmtupdate[enum_pk]   = &a->mtupdate;
-    pmtupdate[enum_gain] = &a->mtupdate;
     return a;
 }
 
@@ -94,16 +90,18 @@ void METER::flush_meter (METER *a)
 void METER::xmeter (METER *a)
 {
     int srun;
-    a->mtupdate.lock();
+
     if (a->prun != 0)
         srun = *(a->prun);
     else
         srun = 1;
+
     if (a->run && srun)
     {
         int i;
         double smag;
         double np = 0.0;
+
         for (i = 0; i < a->size; i++)
         {
             smag = a->buff[2 * i + 0] * a->buff[2 * i + 0] + a->buff[2 * i + 1] * a->buff[2 * i + 1];
@@ -111,9 +109,13 @@ void METER::xmeter (METER *a)
             a->peak *= a->mult_peak;
             if (smag > np) np = smag;
         }
-        if (np > a->peak) a->peak = np;
+
+        if (np > a->peak)
+            a->peak = np;
+
         a->result[a->enum_av] = 10.0 * MemLog::mlog10 (a->avg + 1.0e-40);
         a->result[a->enum_pk] = 10.0 * MemLog::mlog10 (a->peak + 1.0e-40);
+
         if ((a->pgain != 0) && (a->enum_gain >= 0))
             a->result[a->enum_gain] = 20.0 * MemLog::mlog10 (*a->pgain + 1.0e-40);
     }
@@ -123,7 +125,6 @@ void METER::xmeter (METER *a)
         if (a->enum_pk   >= 0) a->result[a->enum_pk]   = -400.0;
         if (a->enum_gain >= 0) a->result[a->enum_gain] = 0.0;
     }
-    a->mtupdate.unlock();
 }
 
 void METER::setBuffers_meter (METER *a, float* in)
@@ -152,9 +153,7 @@ void METER::setSize_meter (METER *a, int size)
 double METER::GetMeter (RXA& rxa, int mt)
 {
     double val;
-    rxa.pmtupdate[mt]->lock();
     val = rxa.meter[mt];
-    rxa.pmtupdate[mt]->unlock();
     return val;
 }
 
@@ -167,9 +166,7 @@ double METER::GetMeter (RXA& rxa, int mt)
 double METER::GetMeter (TXA& txa, int mt)
 {
     double val;
-    txa.pmtupdate[mt]->lock();
     val = txa.meter[mt];
-    txa.pmtupdate[mt]->unlock();
     return val;
 }
 

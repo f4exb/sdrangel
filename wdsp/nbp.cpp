@@ -467,8 +467,8 @@ int NBP::NBPGetNotch (RXA& rxa, int notch, float* fcenter, float* fwidth, int* a
 {
     NOTCHDB *a;
     int rval;
-    rxa.csDSP.lock();
     a = rxa.ndb.p;
+
     if (notch < a->nn)
     {
         *fcenter = a->fcenter[notch];
@@ -483,7 +483,7 @@ int NBP::NBPGetNotch (RXA& rxa, int notch, float* fcenter, float* fwidth, int* a
         *active = -1;
         rval = -1;
     }
-    rxa.csDSP.unlock();
+
     return rval;
 }
 
@@ -535,16 +535,15 @@ int NBP::NBPEditNotch (RXA& rxa, int notch, float fcenter, float fwidth, int act
 void NBP::NBPGetNumNotches (RXA& rxa, int* nnotches)
 {
     NOTCHDB *a;
-    rxa.csDSP.lock();
     a = rxa.ndb.p;
     *nnotches = a->nn;
-    rxa.csDSP.unlock();
 }
 
 void NBP::NBPSetTuneFrequency (RXA& rxa, float tunefreq)
 {
     NOTCHDB *a;
     a = rxa.ndb.p;
+
     if (tunefreq != a->tunefreq)
     {
         a->tunefreq = tunefreq;
@@ -567,6 +566,7 @@ void NBP::NBPSetNotchesRun (RXA& rxa, int run)
 {
     NOTCHDB *a = rxa.ndb.p;
     NBP *b = rxa.nbp0.p;
+
     if ( run != a->master_run)
     {
         a->master_run = run;                            // update variables
@@ -575,10 +575,8 @@ void NBP::NBPSetNotchesRun (RXA& rxa, int run)
         calc_nbp_impulse (b);                           // recalc nbp impulse response
         FIRCORE::setImpulse_fircore (b->p, b->impulse, 0);       // calculate new filter masks
         delete[] (b->impulse);
-        rxa.csDSP.lock();      // block DSP channel processing
         RXA::bpsnbaSet (rxa);
         FIRCORE::setUpdate_fircore (b->p);                       // apply new filter masks
-        rxa.csDSP.unlock();      // unblock channel processing
     }
 }
 
@@ -587,16 +585,15 @@ void NBP::NBPSetNotchesRun (RXA& rxa, int run)
 void NBP::NBPSetRun (RXA& rxa, int run)
 {
     NBP *a;
-    rxa.csDSP.lock();
     a = rxa.nbp0.p;
     a->run = run;
-    rxa.csDSP.unlock();
 }
 
 void NBP::NBPSetFreqs (RXA& rxa, float flow, float fhigh)
 {
     NBP *a;
     a = rxa.nbp0.p;
+
     if ((flow != a->flow) || (fhigh != a->fhigh))
     {
         a->flow = flow;
@@ -613,6 +610,7 @@ void NBP::NBPSetWindow (RXA& rxa, int wintype)
     BPSNBA *b;
     a = rxa.nbp0.p;
     b = rxa.bpsnba.p;
+
     if ((a->wintype != wintype))
     {
         a->wintype = wintype;
@@ -620,6 +618,7 @@ void NBP::NBPSetWindow (RXA& rxa, int wintype)
         FIRCORE::setImpulse_fircore (a->p, a->impulse, 1);
         delete[] (a->impulse);
     }
+
     if ((b->wintype != wintype))
     {
         b->wintype = wintype;
@@ -631,20 +630,20 @@ void NBP::NBPSetNC (RXA& rxa, int nc)
 {
     // NOTE:  'nc' must be >= 'size'
     NBP *a;
-    rxa.csDSP.lock();
     a = rxa.nbp0.p;
+
     if (a->nc != nc)
     {
         a->nc = nc;
         setNc_nbp (a);
     }
-    rxa.csDSP.unlock();
 }
 
 void NBP::NBPSetMP (RXA& rxa, int mp)
 {
     NBP *a;
     a = rxa.nbp0.p;
+
     if (a->mp != mp)
     {
         a->mp = mp;
@@ -655,10 +654,8 @@ void NBP::NBPSetMP (RXA& rxa, int mp)
 void NBP::NBPGetMinNotchWidth (RXA& rxa, float* minwidth)
 {
     NBP *a;
-    rxa.csDSP.lock();
     a = rxa.nbp0.p;
     *minwidth = min_notch_width (a);
-    rxa.csDSP.unlock();
 }
 
 void NBP::NBPSetAutoIncrease (RXA& rxa, int autoincr)
@@ -667,6 +664,7 @@ void NBP::NBPSetAutoIncrease (RXA& rxa, int autoincr)
     BPSNBA *b;
     a = rxa.nbp0.p;
     b = rxa.bpsnba.p;
+
     if ((a->autoincr != autoincr))
     {
         a->autoincr = autoincr;
@@ -674,6 +672,7 @@ void NBP::NBPSetAutoIncrease (RXA& rxa, int autoincr)
         FIRCORE::setImpulse_fircore (a->p, a->impulse, 1);
         delete[] (a->impulse);
     }
+
     if ((b->autoincr != autoincr))
     {
         b->autoincr = autoincr;

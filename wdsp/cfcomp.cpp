@@ -419,29 +419,24 @@ void CFCOMP::setSize_cfcomp (CFCOMP *a, int size)
 void CFCOMP::SetCFCOMPRun (TXA& txa, int run)
 {
     CFCOMP *a = txa.cfcomp.p;
-    if (a->run != run)
-    {
-        txa.csDSP.lock();
+
+    if (a->run != run) {
         a->run = run;
-        txa.csDSP.unlock();
     }
 }
 
 void CFCOMP::SetCFCOMPPosition (TXA& txa, int pos)
 {
     CFCOMP *a = txa.cfcomp.p;
-    if (a->position != pos)
-    {
-        txa.csDSP.lock();
+
+    if (a->position != pos) {
         a->position = pos;
-        txa.csDSP.unlock();
     }
 }
 
 void CFCOMP::SetCFCOMPprofile (TXA& txa, int nfreqs, float* F, float* G, float *E)
 {
     CFCOMP *a = txa.cfcomp.p;
-    txa.csDSP.lock();
     a->nfreqs = nfreqs;
     delete[] (a->E);
     delete[] (a->F);
@@ -459,57 +454,52 @@ void CFCOMP::SetCFCOMPprofile (TXA& txa, int nfreqs, float* F, float* G, float *
     a->gp = new float[a->nfreqs]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
     a->ep = new float[a->nfreqs]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
     calc_comp(a);
-    txa.csDSP.unlock();
 }
 
 void CFCOMP::SetCFCOMPPrecomp (TXA& txa, float precomp)
 {
     CFCOMP *a = txa.cfcomp.p;
+
     if (a->precomp != precomp)
     {
-        txa.csDSP.lock();
         a->precomp = precomp;
         a->precomplin = pow (10.0, 0.05 * a->precomp);
+
         for (int i = 0; i < a->msize; i++)
         {
             a->cfc_gain[i] = a->precomplin * a->comp[i];
         }
-        txa.csDSP.unlock();
     }
 }
 
 void CFCOMP::SetCFCOMPPeqRun (TXA& txa, int run)
 {
     CFCOMP *a = txa.cfcomp.p;
-    if (a->peq_run != run)
-    {
-        txa.csDSP.lock();
+
+    if (a->peq_run != run) {
         a->peq_run = run;
-        txa.csDSP.unlock();
     }
 }
 
 void CFCOMP::SetCFCOMPPrePeq (TXA& txa, float prepeq)
 {
     CFCOMP *a = txa.cfcomp.p;
-    txa.csDSP.lock();
     a->prepeq = prepeq;
     a->prepeqlin = pow (10.0, 0.05 * a->prepeq);
-    txa.csDSP.unlock();
 }
 
 void CFCOMP::GetCFCOMPDisplayCompression (TXA& txa, float* comp_values, int* ready)
 {
     int i;
     CFCOMP *a = txa.cfcomp.p;
-    txa.csDSP.lock();
+
     if ((*ready = a->mask_ready))
     {
         memcpy(a->delta_copy, a->delta, a->msize * sizeof(float));
         memcpy(a->cfc_gain_copy, a->cfc_gain, a->msize * sizeof(float));
         a->mask_ready = 0;
     }
-    txa.csDSP.unlock();
+
     if (*ready)
     {
         for (i = 0; i < a->msize; i++)

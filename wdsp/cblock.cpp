@@ -124,9 +124,7 @@ void CBL::setSize_cbl (CBL *a, int size)
 
 void CBL::SetCBLRun(RXA& rxa, int setit)
 {
-    rxa.csDSP.lock();
     rxa.cbl.p->run = setit;
-    rxa.csDSP.unlock();
 }
 
 } // namespace WDSP

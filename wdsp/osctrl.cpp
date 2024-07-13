@@ -148,10 +148,8 @@ void OSCTRL::SetosctrlRun (TXA& txa, int run)
 {
     if (txa.osctrl.p->run != run)
     {
-        txa.csDSP.lock();
         txa.osctrl.p->run = run;
         TXA::SetupBPFilters (txa);
-        txa.csDSP.unlock();
     }
 }
 

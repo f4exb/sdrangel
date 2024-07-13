@@ -34,7 +34,6 @@ warren@wpratt.com
 #ifndef wdsp_fircore_h
 #define wdsp_fircore_h
 
-#include <QRecursiveMutex>
 #include "fftw3.h"
 #include "export.h"
 
@@ -60,7 +59,6 @@ public:
     fftwf_plan* pcfor;       // array of forward FFT plans
     fftwf_plan crev;         // reverse fft plan
     fftwf_plan** maskplan;   // plans for frequency domain masks
-    QRecursiveMutex update;
     int cset;
     int mp;
     int masks_ready;

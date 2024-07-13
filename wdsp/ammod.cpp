@@ -26,7 +26,6 @@ warren@wpratt.com
 */
 
 #include <cmath>
-#include <QRecursiveMutex>
 
 #include "ammod.hpp"
 #include "comm.hpp"
@@ -110,10 +109,8 @@ void AMMOD::setSize_ammod(AMMOD *a, int size)
 
 void AMMOD::SetAMCarrierLevel (TXA& txa, float c_level)
 {
-    txa.csDSP.lock();
     txa.ammod.p->c_level = c_level;
     txa.ammod.p->a_level = 1.0 - c_level;
-    txa.csDSP.unlock();
 }
 
 } // namespace WDSP

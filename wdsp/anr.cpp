@@ -25,8 +25,6 @@ warren@wpratt.com
 
 */
 
-#include <QRecursiveMutex>
-
 #include "comm.hpp"
 #include "anr.hpp"
 #include "amd.hpp"
@@ -178,68 +176,55 @@ void ANR::setSize_anr (ANR *a, int size)
 void ANR::SetANRRun (RXA& rxa, int run)
 {
     ANR *a = rxa.anr.p;
+
     if (a->run != run)
     {
         RXA::bp1Check (rxa, rxa.amd.p->run, rxa.snba.p->run,
             rxa.emnr.p->run, rxa.anf.p->run, run);
-        rxa.csDSP.lock();
         a->run = run;
         RXA::bp1Set (rxa);
         flush_anr (a);
-        rxa.csDSP.unlock();
     }
 }
 
 void ANR::SetANRVals (RXA& rxa, int taps, int delay, float gain, float leakage)
 {
-    rxa.csDSP.lock();
     rxa.anr.p->n_taps = taps;
     rxa.anr.p->delay = delay;
     rxa.anr.p->two_mu = gain;
     rxa.anr.p->gamma = leakage;
     flush_anr (rxa.anr.p);
-    rxa.csDSP.unlock();
 }
 
 void ANR::SetANRTaps (RXA& rxa, int taps)
 {
-    rxa.csDSP.lock();
     rxa.anr.p->n_taps = taps;
     flush_anr (rxa.anr.p);
-    rxa.csDSP.unlock();
 }
 
 void ANR::SetANRDelay (RXA& rxa, int delay)
 {
-    rxa.csDSP.lock();
     rxa.anr.p->delay = delay;
     flush_anr (rxa.anr.p);
-    rxa.csDSP.unlock();
 }
 
 void ANR::SetANRGain (RXA& rxa, float gain)
 {
-    rxa.csDSP.lock();
     rxa.anr.p->two_mu = gain;
     flush_anr (rxa.anr.p);
-    rxa.csDSP.unlock();
 }
 
 void ANR::SetANRLeakage (RXA& rxa, float leakage)
 {
-    rxa.csDSP.lock();
     rxa.anr.p->gamma = leakage;
     flush_anr (rxa.anr.p);
-    rxa.csDSP.unlock();
 }
 
 void ANR::SetANRPosition (RXA& rxa, int position)
 {
-    rxa.csDSP.lock();
     rxa.anr.p->position = position;
     rxa.bp1.p->position = position;
     flush_anr (rxa.anr.p);
-    rxa.csDSP.unlock();
 }
 
 } // namespace WDSP

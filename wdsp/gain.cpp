@@ -56,14 +56,16 @@ void GAIN::flush_gain (GAIN *)
 void GAIN::xgain (GAIN *a)
 {
     int srun;
-    a->cs_update.lock();
+
     if (a->prun != 0)
         srun = *(a->prun);
     else
         srun = 1;
+
     if (a->run && srun)
     {
         int i;
+
         for (i = 0; i < a->size; i++)
         {
             a->out[2 * i + 0] = a->Igain * a->in[2 * i + 0];
@@ -72,7 +74,6 @@ void GAIN::xgain (GAIN *a)
     }
     else if (a->in != a->out)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
-    a->cs_update.unlock();
 }
 
 void GAIN::setBuffers_gain (GAIN *a, float* in, float* out)
@@ -99,24 +100,18 @@ void GAIN::setSize_gain (GAIN *a, int size)
 
 void GAIN::pSetTXOutputLevel (GAIN *a, float level)
 {
-    a->cs_update.lock();
     a->Igain = level;
     a->Qgain = level;
-    a->cs_update.unlock();
 }
 
 void GAIN::pSetTXOutputLevelRun (GAIN *a, int run)
 {
-    a->cs_update.lock();
     a->run = run;
-    a->cs_update.unlock();
 }
 
 void GAIN::pSetTXOutputLevelSize (GAIN *a, int size)
 {
-    a->cs_update.lock();
     a->size = size;
-    a->cs_update.unlock();
 }
 
 } // namespace WDSP

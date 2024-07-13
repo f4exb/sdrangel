@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef wdsp_rxa_h
 #define wdsp_rxa_h
 
-#include <QRecursiveMutex>
-
 #include "comm.hpp"
 #include "unit.hpp"
 #include "export.h"
@@ -99,7 +97,7 @@ public:
 
     int mode;
     double meter[RXA_METERTYPE_LAST];
-    QRecursiveMutex *pmtupdate[RXA_METERTYPE_LAST];
+
     struct
     {
         METER *p;

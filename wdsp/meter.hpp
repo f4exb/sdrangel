@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef _meter_h
 #define _meter_h
 
-#include <QRecursiveMutex>
-
 #include "export.h"
 
 namespace WDSP {
@@ -56,7 +54,6 @@ public:
     double* pgain;
     double avg;
     double peak;
-    QRecursiveMutex mtupdate;
 
     static METER* create_meter (
         int run,
@@ -67,7 +64,6 @@ public:
         double tau_av,
         double tau_decay,
         double* result,
-        QRecursiveMutex** pmtupdate,
         int enum_av,
         int enum_pk,
         int enum_gain,

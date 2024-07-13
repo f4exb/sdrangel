@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef wdsp_nob_h
 #define wdsp_nob_h
 
-#include <QRecursiveMutex>
-
 namespace WDSP {
 
 class RXA;
@@ -82,7 +80,6 @@ public:
     double deltaI, deltaQ;
     double Inext, Qnext;
     int overflow;
-    QRecursiveMutex cs_update;
     double *legacy;
 
                                                                                            ////////////  legacy interface - remove

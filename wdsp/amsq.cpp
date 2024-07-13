@@ -25,8 +25,6 @@ warren@wpratt.com
 
 */
 
-#include <QRecursiveMutex>
-
 #include "comm.hpp"
 #include "amsq.hpp"
 #include "RXA.hpp"
@@ -231,28 +229,22 @@ void AMSQ::setSize_amsq (AMSQ *a, int size)
 
 void AMSQ::SetAMSQRun (RXA& rxa, int run)
 {
-    rxa.csDSP.lock();
     rxa.amsq.p->run = run;
-    rxa.csDSP.unlock();
 }
 
 void AMSQ::SetAMSQThreshold (RXA& rxa, double threshold)
 {
     double thresh = pow (10.0, threshold / 20.0);
-    rxa.csDSP.lock();
     rxa.amsq.p->tail_thresh = 0.9 * thresh;
     rxa.amsq.p->unmute_thresh =  thresh;
-    rxa.csDSP.unlock();
 }
 
 void AMSQ::SetAMSQMaxTail (RXA& rxa, double tail)
 {
     AMSQ *a;
-    rxa.csDSP.lock();
     a = rxa.amsq.p;
     if (tail < a->min_tail) tail = a->min_tail;
     a->max_tail = tail;
-    rxa.csDSP.unlock();
 }
 
 /********************************************************************************************************
@@ -263,28 +255,22 @@ void AMSQ::SetAMSQMaxTail (RXA& rxa, double tail)
 
 void AMSQ::SetAMSQRun (TXA& txa, int run)
 {
-    txa.csDSP.lock();
     txa.amsq.p->run = run;
-    txa.csDSP.unlock();
 }
 
 void AMSQ::SetAMSQMutedGain (TXA& txa, double dBlevel)
 {   // dBlevel is negative
     AMSQ *a;
-    txa.csDSP.lock();
     a = txa.amsq.p;
     a->muted_gain = pow (10.0, dBlevel / 20.0);
     compute_slews(a);
-    txa.csDSP.unlock();
 }
 
 void AMSQ::SetAMSQThreshold (TXA& txa, double threshold)
 {
     double thresh = pow (10.0, threshold / 20.0);
-    txa.csDSP.lock();
     txa.amsq.p->tail_thresh = 0.9 * thresh;
     txa.amsq.p->unmute_thresh =  thresh;
-    txa.csDSP.unlock();
 }
 
 } // namespace WDSP

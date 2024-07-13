@@ -237,24 +237,21 @@ float* CFIR::cfir_impulse (int N, int DD, int R, int Pairs, float runrate, float
 
 void CFIR::SetCFIRRun (TXA& txa, int run)
 {
-    txa.csDSP.lock();
     txa.cfir.p->run = run;
-    txa.csDSP.unlock();
 }
 
 void CFIR::SetCFIRNC(TXA& txa, int nc)
 {
     // NOTE:  'nc' must be >= 'size'
     CFIR *a;
-    txa.csDSP.lock();
     a = txa.cfir.p;
+
     if (a->nc != nc)
     {
         a->nc = nc;
         decalc_cfir(a);
         calc_cfir(a);
     }
-    txa.csDSP.unlock();
 }
 
 } // namespace WDSP

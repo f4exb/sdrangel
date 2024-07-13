@@ -29,7 +29,6 @@ warren@wpratt.com
 #define wdsp_txa_h
 
 #include <atomic>
-#include <QRecursiveMutex>
 
 #include "comm.hpp"
 #include "unit.hpp"
@@ -128,8 +127,8 @@ public:
     float f_low;
     float f_high;
     double meter[TXA_METERTYPE_LAST];
-    QRecursiveMutex *pmtupdate[TXA_METERTYPE_LAST];
     std::atomic<long> upslew;
+
     struct
     {
         METER *p;

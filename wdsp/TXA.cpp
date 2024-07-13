@@ -130,7 +130,6 @@ TXA* TXA::create_txa (
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
         txa->meter,                         // result vector
-        txa->pmtupdate,                     // locks for meter access
         TXA_MIC_AV,                                 // index for average value
         TXA_MIC_PK,                                 // index for peak value
         -1,                                         // index for gain value
@@ -180,7 +179,6 @@ TXA* TXA::create_txa (
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
         txa->meter,                         // result vector
-        txa->pmtupdate,                     // locks for meter access
         TXA_EQ_AV,                                  // index for average value
         TXA_EQ_PK,                                  // index for peak value
         -1,                                         // index for gain value
@@ -233,7 +231,6 @@ TXA* TXA::create_txa (
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
         txa->meter,                         // result vector
-        txa->pmtupdate,                     // locks for meter access
         TXA_LVLR_AV,                                // index for average value
         TXA_LVLR_PK,                                // index for peak value
         TXA_LVLR_GAIN,                              // index for gain value
@@ -274,7 +271,6 @@ TXA* TXA::create_txa (
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
         txa->meter,                         // result vector
-        txa->pmtupdate,                     // locks for meter access
         TXA_CFC_AV,                                 // index for average value
         TXA_CFC_PK,                                 // index for peak value
         TXA_CFC_GAIN,                               // index for gain value
@@ -346,7 +342,6 @@ TXA* TXA::create_txa (
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
         txa->meter,                         // result vector
-        txa->pmtupdate,                     // locks for meter access
         TXA_COMP_AV,                                // index for average value
         TXA_COMP_PK,                                // index for peak value
         -1,                                         // index for gain value
@@ -429,7 +424,6 @@ TXA* TXA::create_txa (
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
         txa->meter,                         // result vector
-        txa->pmtupdate,                     // locks for meter access
         TXA_ALC_AV,                                 // index for average value
         TXA_ALC_PK,                                 // index for peak value
         TXA_ALC_GAIN,                               // index for gain value
@@ -512,7 +506,6 @@ TXA* TXA::create_txa (
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
         txa->meter,                         // result vector
-        txa->pmtupdate,                     // locks for meter access
         TXA_OUT_AV,                                 // index for average value
         TXA_OUT_PK,                                 // index for peak value
         -1,                                         // index for gain value
@@ -639,8 +632,6 @@ void xtxa (TXA* txa)
 
 void TXA::setInputSamplerate (TXA *txa, int in_rate)
 {
-    txa->csDSP.lock();
-
     if (in_rate  >= txa->dsp_rate)
         txa->dsp_insize  = txa->dsp_size * (in_rate  / txa->dsp_rate);
     else
@@ -655,13 +646,10 @@ void TXA::setInputSamplerate (TXA *txa, int in_rate)
     RESAMPLE::setSize_resample (txa->rsmpin.p, txa->dsp_insize);
     RESAMPLE::setInRate_resample (txa->rsmpin.p, txa->in_rate);
     ResCheck (*txa);
-    txa->csDSP.unlock();
 }
 
 void TXA::setOutputSamplerate (TXA* txa, int out_rate)
 {
-    txa->csDSP.lock();
-
     if (out_rate >= txa->dsp_rate)
         txa->dsp_outsize = txa->dsp_size * (out_rate / txa->dsp_rate);
     else
@@ -681,13 +669,10 @@ void TXA::setOutputSamplerate (TXA* txa, int out_rate)
     METER::setBuffers_meter (txa->outmeter.p, txa->outbuff);
     METER::setSize_meter (txa->outmeter.p, txa->dsp_outsize);
     METER::setSamplerate_meter (txa->outmeter.p, txa->out_rate);
-    txa->csDSP.unlock();
 }
 
 void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
 {
-    txa->csDSP.lock();
-
     if (txa->in_rate  >= dsp_rate)
         txa->dsp_insize  = txa->dsp_size * (txa->in_rate  / dsp_rate);
     else
@@ -743,13 +728,10 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     // output meter
     METER::setBuffers_meter (txa->outmeter.p, txa->outbuff);
     METER::setSize_meter (txa->outmeter.p, txa->dsp_outsize);
-    txa->csDSP.unlock();
 }
 
 void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
 {
-    txa->csDSP.lock();
-
     if (txa->in_rate  >= txa->dsp_rate)
         txa->dsp_insize  = dsp_size * (txa->in_rate  / txa->dsp_rate);
     else
@@ -832,7 +814,6 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     // output meter
     METER::setBuffers_meter (txa->outmeter.p, txa->outbuff);
     METER::setSize_meter (txa->outmeter.p, txa->dsp_outsize);
-    txa->csDSP.unlock();
 }
 
 /********************************************************************************************************
@@ -845,11 +826,11 @@ void TXA::SetMode (TXA& txa, int mode)
 {
     if (txa.mode != mode)
     {
-        txa.csDSP.lock();
         txa.mode = mode;
         txa.ammod.p->run   = 0;
         txa.fmmod.p->run   = 0;
         txa.preemph.p->run = 0;
+
         switch (mode)
         {
         case TXA_AM:
@@ -874,8 +855,8 @@ void TXA::SetMode (TXA& txa, int mode)
 
             break;
         }
+
         SetupBPFilters (txa);
-        txa.csDSP.unlock();
     }
 }
 

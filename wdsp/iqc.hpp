@@ -29,7 +29,6 @@ warren@wpratt.com
 #define wdsp_iqc_h
 
 #include <atomic>
-#include <QRecursiveMutex>
 
 #include "export.h"
 
@@ -63,7 +62,6 @@ public:
         int* cpi;
         int full_ints;
         int count;
-        QRecursiveMutex cs;
     } dog;
 
     static IQC* create_iqc (int run, int size, float* in, float* out, float rate, int ints, float tup, int spi);

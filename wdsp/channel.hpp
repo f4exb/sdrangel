@@ -30,7 +30,6 @@ warren@wpratt.com
 
 #include <atomic>
 
-#include <QRecursiveMutex>
 #include <QThread>
 
 #include "export.h"
@@ -48,8 +47,6 @@ public:
     int dsp_insize;             // size (complex samples) of the output of the r1 (input) buffer
     int dsp_outsize;            // size (complex samples) of the input of the r2 (output) buffer
     int out_size;               // output buffsize (complex samples) in a fexchange() operation
-    QRecursiveMutex csDSP;      // used to block dsp while parameters are updated or buffers flushed
-    QRecursiveMutex csEXCH;     // used to block fexchange() while parameters are updated or buffers flushed
     int state;                  // 0 for channel OFF; 1 for channel ON
     float tdelayup;
     float tslewup;

@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef wdsp_delay_h
 #define wdsp_delay_h
 
-#include <QRecursiveMutex>
-
 #include "export.h"
 
 #define WSDEL   1025    // number of supported whole sample delays
@@ -61,8 +59,6 @@ public:
 
     float adelta;      // actual delay increment
     float adelay;      // actual delay
-
-    QRecursiveMutex cs_update;
 
     static DELAY* create_delay (int run, int size, float* in, float* out, int rate, float tdelta, float tdelay);
     static void destroy_delay (DELAY *a);

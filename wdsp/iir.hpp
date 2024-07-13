@@ -34,8 +34,6 @@ warren@wpratt.com
 #ifndef wdsp_snotch_h
 #define wdsp_snotch_h
 
-#include <QRecursiveMutex>
-
 #include "export.h"
 
 namespace WDSP {
@@ -52,7 +50,6 @@ public:
     float bw;
     float a0, a1, a2, b1, b2;
     float x0, x1, x2, y1, y2;
-    QRecursiveMutex cs_update;
 
     static SNOTCH* create_snotch (int run, int size, float* in, float* out, int rate, float f, float bw);
     static void destroy_snotch (SNOTCH *a);
@@ -104,7 +101,6 @@ public:
     int design;
     float a0, a1, a2, b1, b2;
     float *x0, *x1, *x2, *y0, *y1, *y2;
-    QRecursiveMutex cs_update;
 
     static SPEAK* create_speak (int run, int size, float* in, float* out, int rate, float f, float bw, float gain, int nstages, int design);
     static void destroy_speak (SPEAK *a);
@@ -157,7 +153,6 @@ public:
     SPEAK** pfil;
     float* tmp;
     float* mix;
-    QRecursiveMutex cs_update;
 
     static MPEAK* create_mpeak (int run, int size, float* in, float* out, int rate, int npeaks, int* enable, float* f, float* bw, float* gain, int nstages);
     static void destroy_mpeak (MPEAK *a);
@@ -212,7 +207,6 @@ public:
     // normalized such that a0 = 1
     float a1, b0, b1;
     float *x0, *x1, *y0, *y1;
-    QRecursiveMutex cs_update;
 
     static PHROT* create_phrot (int run, int size, float* in, float* out, int rate, float fc, int nstages);
     static void destroy_phrot (PHROT *a);
@@ -263,7 +257,6 @@ public:
     int nstages;
     float a0, a1, a2, b1, b2;
     float* x0, * x1, * x2, * y0, * y1, * y2;
-    QRecursiveMutex cs_update;
 
     static BQLP* create_bqlp(int run, int size, float* in, float* out, float rate, float fc, float Q, float gain, int nstages);
     static void destroy_bqlp(BQLP *a);
@@ -340,7 +333,6 @@ public:
     int nstages;
     float a0, a1, a2, b1, b2;
     float* x0, * x1, * x2, * y0, * y1, * y2;
-    QRecursiveMutex cs_update;
 
     static BQBP* create_bqbp(int run, int size, float* in, float* out, float rate, float f_low, float f_high, float gain, int nstages);
     static void destroy_bqbp(BQBP *a);
@@ -393,7 +385,6 @@ public:
     int nstages;
     float a1, b0, b1;
     float* x0, * x1, * y0, * y1;
-    QRecursiveMutex cs_update;
 
     static SPHP* create_dsphp(int run, int size, float* in, float* out, float rate, float fc, int nstages);
     static void destroy_dsphp(SPHP *a);

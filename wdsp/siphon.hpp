@@ -35,7 +35,6 @@ warren@wpratt.com
 #include "export.h"
 
 #include <atomic>
-#include <QRecursiveMutex>
 
 namespace WDSP {
 
@@ -61,7 +60,6 @@ public:
     std::atomic<long> specmode;
     fftwf_plan sipplan;
     float* window;
-    QRecursiveMutex update;
 
     static SIPHON* create_siphon (
         int run,

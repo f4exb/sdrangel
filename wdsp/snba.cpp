@@ -696,77 +696,57 @@ void SNBA::SetSNBARun (RXA& rxa, int run)
             rxa.anf.p->run,
             rxa.anr.p->run
         );
-        rxa.csDSP.lock();
         a->run = run;
         RXA::bp1Set (rxa);
         RXA::bpsnbaSet (rxa);
-        rxa.csDSP.unlock();
     }
 }
 
 void SNBA::SetSNBAovrlp (RXA& rxa, int ovrlp)
 {
-    rxa.csDSP.lock();
     decalc_snba (rxa.snba.p);
     rxa.snba.p->ovrlp = ovrlp;
     calc_snba (rxa.snba.p);
-    rxa.csDSP.unlock();
 }
 
 void SNBA::SetSNBAasize (RXA& rxa, int size)
 {
-    rxa.csDSP.lock();
     rxa.snba.p->exec.asize = size;
-    rxa.csDSP.unlock();
 }
 
 void SNBA::SetSNBAnpasses (RXA& rxa, int npasses)
 {
-    rxa.csDSP.lock();
     rxa.snba.p->exec.npasses = npasses;
-    rxa.csDSP.unlock();
 }
 
 void SNBA::SetSNBAk1 (RXA& rxa, double k1)
 {
-    rxa.csDSP.lock();
     rxa.snba.p->sdet.k1 = k1;
-    rxa.csDSP.unlock();
 }
 
 void SNBA::SetSNBAk2 (RXA& rxa, double k2)
 {
-    rxa.csDSP.lock();
     rxa.snba.p->sdet.k2 = k2;
-    rxa.csDSP.unlock();
 }
 
 void SNBA::SetSNBAbridge (RXA& rxa, int bridge)
 {
-    rxa.csDSP.lock();
     rxa.snba.p->sdet.b = bridge;
-    rxa.csDSP.unlock();
 }
 
 void SNBA::SetSNBApresamps (RXA& rxa, int presamps)
 {
-    rxa.csDSP.lock();
     rxa.snba.p->sdet.pre = presamps;
-    rxa.csDSP.unlock();
 }
 
 void SNBA::SetSNBApostsamps (RXA& rxa, int postsamps)
 {
-    rxa.csDSP.lock();
     rxa.snba.p->sdet.post = postsamps;
-    rxa.csDSP.unlock();
 }
 
 void SNBA::SetSNBApmultmin (RXA& rxa, double pmultmin)
 {
-    rxa.csDSP.lock();
     rxa.snba.p->scan.pmultmin = pmultmin;
-    rxa.csDSP.unlock();
 }
 
 void SNBA::SetSNBAOutputBandwidth (RXA& rxa, double flow, double fhigh)
@@ -774,32 +754,41 @@ void SNBA::SetSNBAOutputBandwidth (RXA& rxa, double flow, double fhigh)
     SNBA *a = rxa.snba.p;
     RESAMPLE *d = a->outresamp;
     double f_low, f_high;
-    rxa.csDSP.lock();
 
     if (flow >= 0 && fhigh >= 0)
     {
-        if (fhigh <  a->out_low_cut) fhigh =  a->out_low_cut;
-        if (flow  > a->out_high_cut) flow  = a->out_high_cut;
+        if (fhigh <  a->out_low_cut)
+            fhigh =  a->out_low_cut;
+
+        if (flow  > a->out_high_cut)
+            flow  = a->out_high_cut;
+
         f_low  = std::max ( a->out_low_cut, flow);
         f_high = std::min (a->out_high_cut, fhigh);
     }
     else if (flow <= 0 && fhigh <= 0)
     {
-        if (flow  >  -a->out_low_cut) flow  =  -a->out_low_cut;
-        if (fhigh < -a->out_high_cut) fhigh = -a->out_high_cut;
+        if (flow  >  -a->out_low_cut)
+            flow  =  -a->out_low_cut;
+
+        if (fhigh < -a->out_high_cut)
+            fhigh = -a->out_high_cut;
+
         f_low  = std::max ( a->out_low_cut, -fhigh);
         f_high = std::min (a->out_high_cut, -flow);
     }
     else if (flow < 0 && fhigh > 0)
     {
         double absmax = std::max (-flow, fhigh);
-        if (absmax <  a->out_low_cut) absmax =  a->out_low_cut;
+
+        if (absmax <  a->out_low_cut)
+            absmax =  a->out_low_cut;
+
         f_low = a->out_low_cut;
         f_high = std::min (a->out_high_cut, absmax);
     }
 
     RESAMPLE::setBandwidth_resample (d, f_low, f_high);
-    rxa.csDSP.unlock();
 }
 
 } // namespace

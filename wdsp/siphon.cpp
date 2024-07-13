@@ -110,7 +110,7 @@ void SIPHON::flush_siphon (SIPHON *a)
 void SIPHON::xsiphon (SIPHON *a, int pos)
 {
     int first, second;
-    a->update.lock();
+
     if (a->run && a->position == pos)
     {
         switch (a->mode)
@@ -140,7 +140,6 @@ void SIPHON::xsiphon (SIPHON *a, int pos)
             break;
         }
     }
-    a->update.unlock();
 }
 
 void SIPHON::setBuffers_siphon (SIPHON *a, float* in)
@@ -197,12 +196,10 @@ void SIPHON::GetaSipF (RXA& rxa, float* out, int size)
 {   // return raw samples as floats
     SIPHON *a=rxa.sip1.p;
     int i;
-    a->update.lock();
     a->outsize = size;
     suck (a);
-    a->update.unlock();
-    for (i = 0; i < size; i++)
-    {
+
+    for (i = 0; i < size; i++) {
         out[i] = (float)a->sipout[2 * i + 0];
     }
 }
@@ -211,10 +208,9 @@ void SIPHON::GetaSipF1 (RXA& rxa, float* out, int size)
 {   // return raw samples as floats
     SIPHON *a=rxa.sip1.p;
     int i;
-    a->update.lock();
     a->outsize = size;
     suck (a);
-    a->update.unlock();
+
     for (i = 0; i < size; i++)
     {
         out[2 * i + 0] = (float)a->sipout[2 * i + 0];
@@ -231,37 +227,29 @@ void SIPHON::GetaSipF1 (RXA& rxa, float* out, int size)
 void SIPHON::SetSipPosition (TXA& txa, int pos)
 {
     SIPHON *a = txa.sip1.p;
-    a->update.lock();
     a->position = pos;
-    a->update.unlock();
 }
 
 void SIPHON::SetSipMode (TXA& txa, int mode)
 {
     SIPHON *a = txa.sip1.p;
-    a->update.lock();
     a->mode = mode;
-    a->update.unlock();
 }
 
 void SIPHON::SetSipDisplay (TXA& txa, int disp)
 {
     SIPHON *a = txa.sip1.p;
-    a->update.lock();
     a->disp = disp;
-    a->update.unlock();
 }
 
 void SIPHON::GetaSipF (TXA& txa, float* out, int size)
 {   // return raw samples as floats
     SIPHON *a = txa.sip1.p;
     int i;
-    a->update.lock();
     a->outsize = size;
     suck (a);
-    a->update.unlock();
-    for (i = 0; i < size; i++)
-    {
+
+    for (i = 0; i < size; i++) {
         out[i] = (float)a->sipout[2 * i + 0];
     }
 }
@@ -270,10 +258,9 @@ void SIPHON::GetaSipF1 (TXA& txa, float* out, int size)
 {   // return raw samples as floats
     SIPHON *a = txa.sip1.p;
     int i;
-    a->update.lock();
     a->outsize = size;
     suck (a);
-    a->update.unlock();
+
     for (i = 0; i < size; i++)
     {
         out[2 * i + 0] = (float)a->sipout[2 * i + 0];
@@ -294,26 +281,29 @@ void SIPHON::GetSpecF1 (TXA& txa, float* out)
 {   // return spectrum magnitudes in dB
     SIPHON *a = txa.sip1.p;
     int i, j, mid, m, n;
-    a->update.lock();
     a->outsize = a->fftsize;
     suck (a);
-    a->update.unlock();
     sip_spectrum (a);
     mid = a->fftsize / 2;
+
     if (a->specmode != 1)
+    {
         // swap the halves of the spectrum
         for (i = 0, j = mid; i < mid; i++, j++)
         {
             out[i] = (float)(10.0 * MemLog::mlog10 (a->specout[2 * j + 0] * a->specout[2 * j + 0] + a->specout[2 * j + 1] * a->specout[2 * j + 1] + 1.0e-60));
             out[j] = (float)(10.0 * MemLog::mlog10 (a->specout[2 * i + 0] * a->specout[2 * i + 0] + a->specout[2 * i + 1] * a->specout[2 * i + 1] + 1.0e-60));
         }
+    }
     else
+    {
         // mirror each half of the spectrum in-place
         for (i = 0, j = mid - 1, m = mid, n = a->fftsize - 1; i < mid; i++, j--, m++, n--)
         {
             out[i] = (float)(10.0 * MemLog::mlog10 (a->specout[2 * j + 0] * a->specout[2 * j + 0] + a->specout[2 * j + 1] * a->specout[2 * j + 1] + 1.0e-60));
             out[m] = (float)(10.0 * MemLog::mlog10 (a->specout[2 * n + 0] * a->specout[2 * n + 0] + a->specout[2 * n + 1] * a->specout[2 * n + 1] + 1.0e-60));
         }
+    }
 }
 
 /********************************************************************************************************

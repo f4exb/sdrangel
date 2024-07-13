@@ -75,10 +75,12 @@ void FIRCORE::calc_fircore (FIRCORE *a, int flip)
     // call for change in frequency, rate, wintype, gain
     // must also call after a call to plan_firopt()
     int i;
+
     if (a->mp)
         FIR::mp_imp (a->nc, a->impulse, a->imp, 16, 0);
     else
         memcpy (a->imp, a->impulse, a->nc * sizeof (wcomplex));
+
     for (i = 0; i < a->nfor; i++)
     {
         // I right-justified the impulse response => take output from left side of output buff, discard right side
@@ -86,12 +88,12 @@ void FIRCORE::calc_fircore (FIRCORE *a, int flip)
         memcpy (&(a->maskgen[2 * a->size]), &(a->imp[2 * a->size * i]), a->size * sizeof(wcomplex));
         fftwf_execute (a->maskplan[1 - a->cset][i]);
     }
+
     a->masks_ready = 1;
+
     if (flip)
     {
-        a->update.lock();
         a->cset = 1 - a->cset;
-        a->update.unlock();
         a->masks_ready = 0;
     }
 }
@@ -163,7 +165,7 @@ void FIRCORE::xfircore (FIRCORE *a)
     fftwf_execute (a->pcfor[a->buffidx]);
     k = a->buffidx;
     memset (a->accum, 0, 2 * a->size * sizeof (wcomplex));
-    a->update.lock();
+
     for (j = 0; j < a->nfor; j++)
     {
         for (i = 0; i < 2 * a->size; i++)
@@ -171,9 +173,10 @@ void FIRCORE::xfircore (FIRCORE *a)
             a->accum[2 * i + 0] += a->fftout[k][2 * i + 0] * a->fmask[a->cset][j][2 * i + 0] - a->fftout[k][2 * i + 1] * a->fmask[a->cset][j][2 * i + 1];
             a->accum[2 * i + 1] += a->fftout[k][2 * i + 0] * a->fmask[a->cset][j][2 * i + 1] + a->fftout[k][2 * i + 1] * a->fmask[a->cset][j][2 * i + 0];
         }
+
         k = (k + a->idxmask) & a->idxmask;
     }
-    a->update.unlock();
+
     a->buffidx = (a->buffidx + 1) & a->idxmask;
     fftwf_execute (a->crev);
     memcpy (a->fftin, &(a->fftin[2 * a->size]), a->size * sizeof(wcomplex));
@@ -226,9 +229,7 @@ void FIRCORE::setUpdate_fircore (FIRCORE *a)
 {
     if (a->masks_ready)
     {
-        a->update.lock();
         a->cset = 1 - a->cset;
-        a->update.unlock();
         a->masks_ready = 0;
     }
 }

@@ -170,7 +170,7 @@ void NOB::xnob (NOB *a)
     int len;
     int ffcount;
     int staydown;
-    a->cs_update.lock();
+
     if (a->run)
     {
         for (i = 0; i < a->buffsize; i++)
@@ -492,7 +492,6 @@ void NOB::xnob (NOB *a)
     }
     else if (a->in != a->out)
         memcpy (a->out, a->in, a->buffsize * sizeof (wcomplex));
-    a->cs_update.unlock();
 }
 
 void NOB::setBuffers_nob (NOB *a, float* in, float* out)
@@ -522,79 +521,61 @@ void NOB::setSize_nob (NOB *a, int size)
 void NOB::SetNOBRun (RXA& rxa, int run)
 {
     NOB *a = rxa.nob.p;
-    a->cs_update.lock();
     a->run = run;
-    a->cs_update.unlock();
 }
 
 void NOB::SetNOBMode (RXA& rxa, int mode)
 {
     NOB *a = rxa.nob.p;
-    a->cs_update.lock();
     a->mode = mode;
-    a->cs_update.unlock();
 }
 
 void NOB::SetNOBBuffsize (RXA& rxa, int size)
 {
     NOB *a = rxa.nob.p;
-    a->cs_update.lock();
     a->buffsize = size;
-    a->cs_update.unlock();
 }
 
 void NOB::SetNOBSamplerate (RXA& rxa, int rate)
 {
     NOB *a = rxa.nob.p;
-    a->cs_update.lock();
     a->samplerate = (double) rate;
     init_nob (a);
-    a->cs_update.unlock();
 }
 
 void NOB::SetNOBTau (RXA& rxa, double tau)
 {
     NOB *a = rxa.nob.p;
-    a->cs_update.lock();
     a->advslewtime = tau;
     a->hangslewtime = tau;
     init_nob (a);
-    a->cs_update.unlock();
 }
 
 void NOB::SetNOBHangtime (RXA& rxa, double time)
 {
     NOB *a = rxa.nob.p;
-    a->cs_update.lock();
     a->hangtime = time;
     init_nob (a);
-    a->cs_update.unlock();
 }
 
 void NOB::SetNOBAdvtime (RXA& rxa, double time)
 {
     NOB *a = rxa.nob.p;
-    a->cs_update.lock();
     a->advtime = time;
     init_nob (a);
-    a->cs_update.unlock();
 }
 
 void NOB::SetNOBBacktau (RXA& rxa, double tau)
 {
     NOB *a = rxa.nob.p;
-    a->cs_update.lock();
     a->backtau = tau;
     init_nob (a);
-    a->cs_update.unlock();
 }
 
 void NOB::SetNOBThreshold (RXA& rxa, double thresh)
 {
     NOB *a = rxa.nob.p;
-    a->cs_update.lock();
     a->threshold = thresh;
-    a->cs_update.unlock();
 }
 
 } // namespace

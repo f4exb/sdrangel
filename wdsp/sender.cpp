@@ -94,11 +94,9 @@ void SENDER::setSize_sender (SENDER *a, int size)
 void SENDER::SetSpectrum (RXA& rxa, int flag, BufferProbe *spectrumProbe)
 {
     SENDER *a;
-    rxa.csDSP.lock();
     a = rxa.sender.p;
     a->flag = flag;
     a->spectrumProbe = spectrumProbe;
-    rxa.csDSP.unlock();
 }
 
 } // namespace WDSP

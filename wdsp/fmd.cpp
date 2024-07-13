@@ -275,39 +275,33 @@ void FMD::setSize_fmd (FMD *a, int size)
 void FMD::SetFMDeviation (RXA& rxa, double deviation)
 {
     FMD *a;
-    rxa.csDSP.lock();
     a = rxa.fmd.p;
     a->deviation = deviation;
     a->again = a->rate / (a->deviation * TWOPI);
-    rxa.csDSP.unlock();
 }
 
 void FMD::SetCTCSSFreq (RXA& rxa, double freq)
 {
     FMD *a;
-    rxa.csDSP.lock();
     a = rxa.fmd.p;
     a->ctcss_freq = freq;
     SNOTCH::SetSNCTCSSFreq (a->sntch, a->ctcss_freq);
-    rxa.csDSP.unlock();
 }
 
 void FMD::SetCTCSSRun (RXA& rxa, int run)
 {
     FMD *a;
-    rxa.csDSP.lock();
     a = rxa.fmd.p;
     a->sntch_run = run;
     SNOTCH::SetSNCTCSSRun (a->sntch, a->sntch_run);
-    rxa.csDSP.unlock();
 }
 
 void FMD::SetFMNCde (RXA& rxa, int nc)
 {
     FMD *a;
     float* impulse;
-    rxa.csDSP.lock();
     a = rxa.fmd.p;
+
     if (a->nc_de != nc)
     {
         a->nc_de = nc;
@@ -315,7 +309,6 @@ void FMD::SetFMNCde (RXA& rxa, int nc)
         FIRCORE::setNc_fircore (a->pde, a->nc_de, impulse);
         delete[] (impulse);
     }
-    rxa.csDSP.unlock();
 }
 
 void FMD::SetFMMPde (RXA& rxa, int mp)
@@ -333,8 +326,8 @@ void FMD::SetFMNCaud (RXA& rxa, int nc)
 {
     FMD *a;
     float* impulse;
-    rxa.csDSP.lock();
     a = rxa.fmd.p;
+
     if (a->nc_aud != nc)
     {
         a->nc_aud = nc;
@@ -342,7 +335,6 @@ void FMD::SetFMNCaud (RXA& rxa, int nc)
         FIRCORE::setNc_fircore (a->paud, a->nc_aud, impulse);
         delete[] (impulse);
     }
-    rxa.csDSP.unlock();
 }
 
 void FMD::SetFMMPaud (RXA& rxa, int mp)
@@ -360,33 +352,30 @@ void FMD::SetFMLimRun (RXA& rxa, int run)
 {
     FMD *a;
     a = rxa.fmd.p;
-    rxa.csDSP.lock();
-    if (a->lim_run != run)
-    {
+
+    if (a->lim_run != run) {
         a->lim_run = run;
     }
-    rxa.csDSP.unlock();
 }
 
 void FMD::SetFMLimGain (RXA& rxa, double gaindB)
 {
     double gain = pow(10.0, gaindB / 20.0);
     FMD *a = rxa.fmd.p;
-    rxa.csDSP.lock();
+
     if (a->lim_gain != gain)
     {
         decalc_fmd(a);
         a->lim_gain = gain;
         calc_fmd(a);
     }
-    rxa.csDSP.unlock();
 }
 
 void FMD::SetFMAFFilter(RXA& rxa, double low, double high)
 {
     FMD *a = rxa.fmd.p;
     float* impulse;
-    rxa.csDSP.lock();
+
     if (a->f_low != low || a->f_high != high)
     {
         a->f_low = low;
@@ -400,7 +389,6 @@ void FMD::SetFMAFFilter(RXA& rxa, double low, double high)
         FIRCORE::setImpulse_fircore (a->paud, impulse, 1);
         delete[] (impulse);
     }
-    rxa.csDSP.unlock();
 }
 
 } // namespace WDSP

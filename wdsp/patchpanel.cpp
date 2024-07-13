@@ -139,37 +139,29 @@ void PANEL::setSize_panel (PANEL *a, int size)
 
 void PANEL::SetPanelRun (RXA& rxa, int run)
 {
-    rxa.csDSP.lock();
     rxa.panel.p->run = run;
-    rxa.csDSP.unlock();
 }
 
 void PANEL::SetPanelSelect (RXA& rxa, int select)
 {
-    rxa.csDSP.lock();
     rxa.panel.p->inselect = select;
-    rxa.csDSP.unlock();
 }
 
 void PANEL::SetPanelGain1 (RXA& rxa, float gain)
 {
-    rxa.csDSP.lock();
     rxa.panel.p->gain1 = gain;
-    rxa.csDSP.unlock();
 }
 
 void PANEL::SetPanelGain2 (RXA& rxa, float gainI, float gainQ)
 {
-    rxa.csDSP.lock();
     rxa.panel.p->gain2I = gainI;
     rxa.panel.p->gain2Q = gainQ;
-    rxa.csDSP.unlock();
 }
 
 void PANEL::SetPanelPan (RXA& rxa, float pan)
 {
     float gain1, gain2;
-    rxa.csDSP.lock();
+
     if (pan <= 0.5)
     {
         gain1 = 1.0;
@@ -180,23 +172,19 @@ void PANEL::SetPanelPan (RXA& rxa, float pan)
         gain1 = sin (pan * PI);
         gain2 = 1.0;
     }
+
     rxa.panel.p->gain2I = gain1;
     rxa.panel.p->gain2Q = gain2;
-    rxa.csDSP.unlock();
 }
 
 void PANEL::SetPanelCopy (RXA& rxa, int copy)
 {
-    rxa.csDSP.lock();
     rxa.panel.p->copy = copy;
-    rxa.csDSP.unlock();
 }
 
 void PANEL::SetPanelBinaural (RXA& rxa, int bin)
 {
-    rxa.csDSP.lock();
     rxa.panel.p->copy = 1 - bin;
-    rxa.csDSP.unlock();
 }
 
 /********************************************************************************************************
@@ -207,28 +195,23 @@ void PANEL::SetPanelBinaural (RXA& rxa, int bin)
 
 void PANEL::SetPanelRun (TXA& txa, int run)
 {
-    txa.csDSP.lock();
     txa.panel.p->run = run;
-    txa.csDSP.unlock();
 }
 
 void PANEL::SetPanelGain1 (TXA& txa, float gain)
 {
-    txa.csDSP.lock();
     txa.panel.p->gain1 = gain;
     //print_message ("micgainset.txt", "Set MIC Gain to", (int)(100.0 * gain), 0, 0);
-    txa.csDSP.unlock();
 }
 
 void PANEL::SetPanelSelect (TXA& txa, int select)
 {
-    txa.csDSP.lock();
     if (select == 1)
         txa.panel.p->copy = 3;
     else
         txa.panel.p->copy = 0;
+
     txa.panel.p->inselect = select;
-    txa.csDSP.unlock();
 }
 
 } // namespace WDSP

@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef wdso_gain_h
 #define wdsp_gain_h
 
-#include <QRecursiveMutex>
-
 #include "export.h"
 
 namespace WDSP {
@@ -44,7 +42,6 @@ public:
     float* out;
     float Igain;
     float Qgain;
-    QRecursiveMutex cs_update;
 
     static GAIN* create_gain (int run, int* prun, int size, float* in, float* out, float Igain, float Qgain);
     static void destroy_gain (GAIN *a);

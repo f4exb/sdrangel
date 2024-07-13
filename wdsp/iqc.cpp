@@ -153,9 +153,7 @@ void IQC::xiqc (IQC *a)
                         a->dog.full_ints++;
                 if (a->dog.full_ints == a->ints)
                 {
-                    a->dog.cs.lock();
                     ++a->dog.count;
-                    a->dog.cs.unlock();
                     a->dog.full_ints = 0;
                     memset (a->dog.cpi, 0, a->ints * sizeof (int));
                 }
@@ -235,31 +233,26 @@ void IQC::setSize_iqc (IQC *a, int size)
 void IQC::GetiqcValues (TXA& txa, float* cm, float* cc, float* cs)
 {
     IQC *a;
-    txa.csDSP.lock();
     a = txa.iqc.p0;
     memcpy (cm, a->cm[a->cset], a->ints * 4 * sizeof (float));
     memcpy (cc, a->cc[a->cset], a->ints * 4 * sizeof (float));
     memcpy (cs, a->cs[a->cset], a->ints * 4 * sizeof (float));
-    txa.csDSP.unlock();
 }
 
 void IQC::SetiqcValues (TXA& txa, float* cm, float* cc, float* cs)
 {
     IQC *a;
-    txa.csDSP.lock();
     a = txa.iqc.p0;
     a->cset = 1 - a->cset;
     memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (float));
     memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (float));
     memcpy (a->cs[a->cset], cs, a->ints * 4 * sizeof (float));
     a->state = RUN;
-    txa.csDSP.unlock();
 }
 
 void IQC::SetiqcSwap (TXA& txa, float* cm, float* cc, float* cs)
 {
     IQC *a = txa.iqc.p1;
-    txa.csDSP.lock();
     a->cset = 1 - a->cset;
     memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (float));
     memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (float));
@@ -267,7 +260,6 @@ void IQC::SetiqcSwap (TXA& txa, float* cm, float* cc, float* cs)
     a->busy = 1; // InterlockedBitTestAndSet (&a->busy, 0);
     a->state = SWAP;
     a->count = 0;
-    txa.csDSP.unlock();
     // while (_InterlockedAnd (&a->busy, 1)) Sleep(1);
     while (a->busy == 1) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -277,7 +269,6 @@ void IQC::SetiqcSwap (TXA& txa, float* cm, float* cc, float* cs)
 void IQC::SetiqcStart (TXA& txa, float* cm, float* cc, float* cs)
 {
     IQC *a = txa.iqc.p1;
-    txa.csDSP.lock();
     a->cset = 0;
     memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (float));
     memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (float));
@@ -285,7 +276,6 @@ void IQC::SetiqcStart (TXA& txa, float* cm, float* cc, float* cs)
     a->busy = 1; // InterlockedBitTestAndSet (&a->busy, 0);
     a->state = BEGIN;
     a->count = 0;
-    txa.csDSP.unlock();
     txa.iqc.p1->run = 1; //InterlockedBitTestAndSet   (&txa.iqc.p1->run, 0);
     // while (_InterlockedAnd (&a->busy, 1)) Sleep(1);
     while (a->busy == 1) {
@@ -296,11 +286,9 @@ void IQC::SetiqcStart (TXA& txa, float* cm, float* cc, float* cs)
 void IQC::SetiqcEnd (TXA& txa)
 {
     IQC *a = txa.iqc.p1;
-    txa.csDSP.lock();
     a->busy = 1; // InterlockedBitTestAndSet (&a->busy, 0);
     a->state = END;
     a->count = 0;
-    txa.csDSP.unlock();
     // while (_InterlockedAnd (&a->busy, 1)) Sleep(1);
     while (a->busy == 1) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -311,17 +299,13 @@ void IQC::SetiqcEnd (TXA& txa)
 void IQC::GetiqcDogCount (TXA& txa, int* count)
 {
     IQC *a = txa.iqc.p1;
-    a->dog.cs.lock();
     *count = a->dog.count;
-    a->dog.cs.unlock();
 }
 
 void IQC::SetiqcDogCount (TXA& txa, int count)
 {
     IQC *a = txa.iqc.p1;
-    a->dog.cs.lock();
     a->dog.count = count;
-    a->dog.cs.unlock();
 }
 
 } // namespace WDSP

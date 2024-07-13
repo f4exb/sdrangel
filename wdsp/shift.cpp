@@ -116,17 +116,13 @@ void SHIFT::setSize_shift (SHIFT *a, int size)
 
 void SHIFT::SetShiftRun (RXA& rxa, int run)
 {
-    rxa.csDSP.lock();
     rxa.shift.p->run = run;
-    rxa.csDSP.unlock();
 }
 
 void SHIFT::SetShiftFreq (RXA& rxa, float fshift)
 {
-    rxa.csDSP.lock();
     rxa.shift.p->shift = fshift;
     calc_shift (rxa.shift.p);
-    rxa.csDSP.unlock();
 }
 
 } // namespace WDSP

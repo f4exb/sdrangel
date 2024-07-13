@@ -175,69 +175,62 @@ void ANF::setSize_anf (ANF *a, int size)
 void ANF::SetANFRun (RXA& rxa, int run)
 {
     ANF *a = rxa.anf.p;
+
     if (a->run != run)
     {
-        RXA::bp1Check (rxa, rxa.amd.p->run, rxa.snba.p->run,
-            rxa.emnr.p->run, run, rxa.anr.p->run);
-        rxa.csDSP.lock();
+        RXA::bp1Check (
+            rxa,
+            rxa.amd.p->run,
+            rxa.snba.p->run,
+            rxa.emnr.p->run,
+            run,
+            rxa.anr.p->run
+        );
         a->run = run;
         RXA::bp1Set (rxa);
         flush_anf (a);
-        rxa.csDSP.unlock();
     }
 }
 
 
 void ANF::SetANFVals (RXA& rxa, int taps, int delay, float gain, float leakage)
 {
-    rxa.csDSP.lock();
     rxa.anf.p->n_taps = taps;
     rxa.anf.p->delay = delay;
     rxa.anf.p->two_mu = gain;          //try two_mu = 1e-4
     rxa.anf.p->gamma = leakage;        //try gamma = 0.10
     flush_anf (rxa.anf.p);
-    rxa.csDSP.unlock();
 }
 
 void ANF::SetANFTaps (RXA& rxa, int taps)
 {
-    rxa.csDSP.lock();
     rxa.anf.p->n_taps = taps;
     flush_anf (rxa.anf.p);
-    rxa.csDSP.unlock();
 }
 
 void ANF::SetANFDelay (RXA& rxa, int delay)
 {
-    rxa.csDSP.lock();
     rxa.anf.p->delay = delay;
     flush_anf (rxa.anf.p);
-    rxa.csDSP.unlock();
 }
 
 void ANF::SetANFGain (RXA& rxa, float gain)
 {
-    rxa.csDSP.lock();
     rxa.anf.p->two_mu = gain;
     flush_anf (rxa.anf.p);
-    rxa.csDSP.unlock();
 }
 
 void ANF::SetANFLeakage (RXA& rxa, float leakage)
 {
-    rxa.csDSP.lock();
     rxa.anf.p->gamma = leakage;
     flush_anf (rxa.anf.p);
-    rxa.csDSP.unlock();
 }
 
 void ANF::SetANFPosition (RXA& rxa, int position)
 {
-    rxa.csDSP.lock();
     rxa.anf.p->position = position;
     rxa.bp1.p->position = position;
     flush_anf (rxa.anf.p);
-    rxa.csDSP.unlock();
 }
 
 } // namespace WDSP

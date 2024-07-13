@@ -73,32 +73,39 @@ void DELAY::flush_delay (DELAY *a)
 
 void DELAY::xdelay (DELAY *a)
 {
-    a->cs_update.lock();
     if (a->run)
     {
         int i, j, k, idx, n;
         float Itmp, Qtmp;
+
         for (i = 0; i < a->size; i++)
         {
             a->ring[2 * a->idx_in + 0] = a->in[2 * i + 0];
             a->ring[2 * a->idx_in + 1] = a->in[2 * i + 1];
             Itmp = 0.0;
             Qtmp = 0.0;
-            if ((n = a->idx_in + a->snum) >= a->rsize) n -= a->rsize;
+
+            if ((n = a->idx_in + a->snum) >= a->rsize)
+                n -= a->rsize;
+
             for (j = 0, k = a->L - 1 - a->phnum; j < a->cpp; j++, k+= a->L)
             {
-                if ((idx = n + j) >= a->rsize) idx -= a->rsize;
+                if ((idx = n + j) >= a->rsize)
+                    idx -= a->rsize;
+
                 Itmp += a->ring[2 * idx + 0] * a->h[k];
                 Qtmp += a->ring[2 * idx + 1] * a->h[k];
             }
+
             a->out[2 * i + 0] = Itmp;
             a->out[2 * i + 1] = Qtmp;
-            if (--a->idx_in < 0) a->idx_in = a->rsize - 1;
+
+            if (--a->idx_in < 0)
+                a->idx_in = a->rsize - 1;
         }
     }
     else if (a->out != a->in)
         memcpy (a->out, a->in, a->size * sizeof (wcomplex));
-    a->cs_update.unlock();
 }
 
 /********************************************************************************************************
@@ -109,32 +116,26 @@ void DELAY::xdelay (DELAY *a)
 
 void DELAY::SetDelayRun (DELAY *a, int run)
 {
-    a->cs_update.lock();
     a->run = run;
-    a->cs_update.unlock();
 }
 
 float DELAY::SetDelayValue (DELAY *a, float tdelay)
 {
     float adelay;
-    a->cs_update.lock();
     a->tdelay = tdelay;
     a->phnum = (int)(0.5 + a->tdelay / a->adelta);
     a->snum = a->phnum / a->L;
     a->phnum %= a->L;
     a->adelay = a->adelta * (a->snum * a->L + a->phnum);
     adelay = a->adelay;
-    a->cs_update.unlock();
     return adelay;
 }
 
 void DELAY::SetDelayBuffs (DELAY *a, int size, float* in, float* out)
 {
-    a->cs_update.lock();
     a->size = size;
     a->in = in;
     a->out = out;
-    a->cs_update.unlock();
 }
 
 } // namespace WDSP

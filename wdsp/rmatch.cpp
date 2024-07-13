@@ -270,11 +270,9 @@ void RMATCH::control (RMATCH *a, int change)
         int deviation = a->n_ring - a->rsize / 2;
         MAV::xmav (a->propmav, deviation, &a->av_deviation);
     }
-    a->cs_var.lock();
     a->var = a->feed_forward - a->pr_gain * a->av_deviation;
     if (a->var > 1.04) a->var = 1.04;
     if (a->var < 0.96) a->var = 0.96;
-    a->cs_var.unlock();
 }
 
 void RMATCH::blend (RMATCH *a)
@@ -310,20 +308,21 @@ void RMATCH::xrmatchIN (void* b, float* in)
         int newsamps, first, second, ovfl;
         float var;
         a->v->in = a->in = in;
-        a->cs_var.lock();
+
         if (!a->force)
             var = a->var;
         else
             var = a->fvar;
-        a->cs_var.unlock();
+
         newsamps = VARSAMP::xvarsamp (a->v, var);
-        a->cs_ring.lock();
         a->n_ring += newsamps;
+
         if ((ovfl = a->n_ring - a->rsize) > 0)
         {
             a->overflows += 1;
             // a->n_ring = a->rsize / 2;
             a->n_ring = a->rsize; //
+
             if ((a->ntslew + 1) > (a->rsize - a->iout))
             {
                 first = a->rsize - a->iout;
@@ -334,11 +333,13 @@ void RMATCH::xrmatchIN (void* b, float* in)
                 first = a->ntslew + 1;
                 second = 0;
             }
+
             memcpy (a->baux, a->ring + 2 * a->iout, first * sizeof (wcomplex));
             memcpy (a->baux + 2 * first, a->ring, second * sizeof (wcomplex));
             // a->iout = (a->iout + ovfl + a->rsize / 2) % a->rsize;
             a->iout = (a->iout + ovfl) % a->rsize; //
         }
+
         if (newsamps > (a->rsize - a->iin))
         {
             first = a->rsize - a->iin;
@@ -349,19 +350,27 @@ void RMATCH::xrmatchIN (void* b, float* in)
             first = newsamps;
             second = 0;
         }
+
         memcpy (a->ring + 2 * a->iin, a->resout, first * sizeof (wcomplex));
         memcpy (a->ring, a->resout + 2 * first, second * sizeof (wcomplex));
-        if (a->ucnt >= 0) upslew(a, newsamps);
+
+        if (a->ucnt >= 0)
+            upslew(a, newsamps);
+
         a->iin = (a->iin + newsamps) % a->rsize;
-        if (ovfl > 0) blend (a);
+
+        if (ovfl > 0)
+            blend (a);
+
         if (!a->control_flag)
         {
             a->writesamps += a->insize;
             if ((a->readsamps >= a->read_startup) && (a->writesamps >= a->write_startup))
                 a->control_flag = 1;
         }
-        if (a->control_flag) control (a, a->insize);
-        a->cs_ring.unlock();
+
+        if (a->control_flag)
+            control (a, a->insize);
     }
 }
 
@@ -436,13 +445,14 @@ void RMATCH::xrmatchOUT (void* b, float* out)
     {
         int first, second;
         a->out = out;
-        a->cs_ring.lock();
+
         if (a->n_ring < a->outsize)
         {
             dslew (a);
             a->ucnt = a->ntslew;
             a->underflows += 1;
         }
+
         if (a->outsize > (a->rsize - a->iout))
         {
             first = a->rsize - a->iout;
@@ -453,20 +463,24 @@ void RMATCH::xrmatchOUT (void* b, float* out)
             first = a->outsize;
             second = 0;
         }
+
         memcpy (a->out, a->ring + 2 * a->iout, first * sizeof (wcomplex));
         memcpy (a->out + 2 * first, a->ring, second * sizeof (wcomplex));
         a->iout = (a->iout + a->outsize) % a->rsize;
         a->n_ring -= a->outsize;
         a->dlast[0] = a->out[2 * (a->outsize - 1) + 0];
         a->dlast[1] = a->out[2 * (a->outsize - 1) + 1];
+
         if (!a->control_flag)
         {
             a->readsamps += a->outsize;
+
             if ((a->readsamps >= a->read_startup) && (a->writesamps >= a->write_startup))
                 a->control_flag = 1;
         }
-        if (a->control_flag) control (a, -(a->outsize));
-        a->cs_ring.unlock();
+
+        if (a->control_flag)
+            control (a, -(a->outsize));
     }
 }
 
@@ -478,11 +492,9 @@ void RMATCH::getRMatchDiags (void* b, int* underflows, int* overflows, float* va
     *overflows = a->overflows;
     a->underflows &= 0xFFFFFFFF;
     a->overflows &=  0xFFFFFFFF;
-    a->cs_var.lock();
     *var = a->var;
     *ringsize = a->ringsize;
     *nring = a->n_ring;
-    a->cs_var.unlock();
 }
 
 
@@ -497,10 +509,8 @@ void RMATCH::resetRMatchDiags (void*)
 void RMATCH::forceRMatchVar (void* b, int force, float fvar)
 {
     RMATCH *a = (RMATCH*) b;
-    a->cs_var.lock();
     a->force = force;
     a->fvar = fvar;
-    a->cs_var.unlock();
 }
 
 
@@ -603,10 +613,8 @@ void RMATCH::setRMatchRingsize (void* ptr, int ringsize)
 void RMATCH::setRMatchFeedbackGain (void* b, float feedback_gain)
 {
     RMATCH *a = (RMATCH*) b;
-    a->cs_var.lock();
     a->prop_gain = feedback_gain;
     a->pr_gain = a->prop_gain * 48000.0 / (float)a->nom_outrate;
-    a->cs_var.unlock();
 }
 
 
@@ -706,9 +714,7 @@ void RMATCH::setRMatchFFAlpha(void* ptr, float ff_alpha)
 void RMATCH::getControlFlag(void* ptr, int* control_flag)
 {
     RMATCH *a = (RMATCH*) ptr;
-    a->cs_ring.lock();
     *control_flag = a->control_flag;
-    a->cs_ring.unlock();
 }
 
 // the following function is DEPRECATED

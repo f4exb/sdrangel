@@ -113,9 +113,7 @@ void EMPHP::setSize_emphp (EMPHP *a, int size)
 
 void EMPHP::SetFMEmphPosition (TXA& txa, int position)
 {
-    txa.csDSP.lock();
     txa.preemph.p->position = position;
-    txa.csDSP.unlock();
 }
 
 void EMPHP::SetFMEmphMP (TXA& txa, int mp)
@@ -133,8 +131,8 @@ void EMPHP::SetFMEmphNC (TXA& txa, int nc)
 {
     EMPHP *a;
     float* impulse;
-    txa.csDSP.lock();
     a = txa.preemph.p;
+
     if (a->nc != nc)
     {
         a->nc = nc;
@@ -142,15 +140,14 @@ void EMPHP::SetFMEmphNC (TXA& txa, int nc)
         FIRCORE::setNc_fircore (a->p, a->nc, impulse);
         delete[] (impulse);
     }
-    txa.csDSP.unlock();
 }
 
 void EMPHP::SetFMPreEmphFreqs (TXA& txa, float low, float high)
 {
     EMPHP *a;
     float* impulse;
-    txa.csDSP.lock();
     a = txa.preemph.p;
+
     if (a->f_low != low || a->f_high != high)
     {
         a->f_low = low;
@@ -159,7 +156,6 @@ void EMPHP::SetFMPreEmphFreqs (TXA& txa, float low, float high)
         FIRCORE::setImpulse_fircore (a->p, impulse, 1);
         delete[] (impulse);
     }
-    txa.csDSP.unlock();
 }
 
 /********************************************************************************************************
