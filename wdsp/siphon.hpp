@@ -34,8 +34,6 @@ warren@wpratt.com
 #include "fftw3.h"
 #include "export.h"
 
-#include <atomic>
-
 namespace WDSP {
 
 class RXA;
@@ -57,7 +55,7 @@ public:
     float* sipout;
     int fftsize;
     float* specout;
-    std::atomic<long> specmode;
+    long specmode;
     fftwf_plan sipplan;
     float* window;
 

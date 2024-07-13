@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef wdsp_slew_h
 #define wdsp_slew_h
 
-#include <atomic>
-
 #include "export.h"
 
 namespace WDSP {
@@ -40,7 +38,7 @@ class WDSP_API USLEW
 {
 public:
     TXA *txa;
-    std::atomic<long> *ch_upslew;
+    long *ch_upslew;
     int size;
     float* in;
     float* out;
@@ -54,7 +52,15 @@ public:
     int ntup;
     float* cup;
 
-    static USLEW* create_uslew (TXA *txa, std::atomic<long> *ch_upslew, int size, float* in, float* out, float rate, float tdelay, float tupslew);
+    static USLEW* create_uslew (
+        TXA *txa,
+        long *ch_upslew,
+        int size, float* in,
+        float* out,
+        float rate,
+        float tdelay,
+        float tupslew
+    );
     static void destroy_uslew (USLEW *a);
     static void flush_uslew (USLEW *a);
     static void xuslew (USLEW *a);

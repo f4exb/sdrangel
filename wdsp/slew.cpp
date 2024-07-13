@@ -64,7 +64,16 @@ void USLEW::decalc_uslew (USLEW *a)
     delete[] (a->cup);
 }
 
-USLEW* USLEW::create_uslew (TXA *txa, std::atomic<long> *ch_upslew, int size, float* in, float* out, float rate, float tdelay, float tupslew)
+USLEW* USLEW::create_uslew (
+    TXA *txa,
+    long *ch_upslew,
+    int size,
+    float* in,
+    float* out,
+    float rate,
+    float tdelay,
+    float tupslew
+)
 {
     USLEW *a = new USLEW;
     a->txa = txa;

@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef wdsp_txa_h
 #define wdsp_txa_h
 
-#include <atomic>
-
 #include "comm.hpp"
 #include "unit.hpp"
 
@@ -127,7 +125,7 @@ public:
     float f_low;
     float f_high;
     double meter[TXA_METERTYPE_LAST];
-    std::atomic<long> upslew;
+    long upslew;
 
     struct
     {

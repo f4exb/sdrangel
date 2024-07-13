@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef wdsp_iqc_h
 #define wdsp_iqc_h
 
-#include <atomic>
-
 #include "export.h"
 
 namespace WDSP {
@@ -39,8 +37,8 @@ class TXA;
 class WDSP_API IQC
 {
 public:
-    std::atomic<long> run;
-    std::atomic<long> busy;
+    long run;
+    long busy;
     int size;
     float* in;
     float* out;

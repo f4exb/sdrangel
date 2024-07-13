@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef wdsp_rmatch_h
 #define wdsp_rmatch_h
 
-#include <atomic>
-
 #include "export.h"
 
 namespace WDSP {
@@ -76,7 +74,7 @@ public:
 class WDSP_API RMATCH
 {
 public:
-    std::atomic<long> run;
+    long run;
     float* in;
     float* out;
     int insize;
@@ -126,8 +124,8 @@ public:
     unsigned int write_startup;
     int control_flag;
     // diagnostics
-    std::atomic<long> underflows;
-    std::atomic<long> overflows;
+    long underflows;
+    long overflows;
     int force;
     float fvar;
 
