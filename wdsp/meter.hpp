@@ -49,7 +49,7 @@ public:
     double tau_peak_decay;
     double mult_average;
     double mult_peak;
-    float* result;
+    double* result;
     int enum_av;
     int enum_pk;
     int enum_gain;
@@ -66,7 +66,7 @@ public:
         int rate,
         double tau_av,
         double tau_decay,
-        float* result,
+        double* result,
         QRecursiveMutex** pmtupdate,
         int enum_av,
         int enum_pk,
@@ -80,9 +80,9 @@ public:
     static void setSamplerate_meter (METER *a, int rate);
     static void setSize_meter (METER *a, int size);
     // RXA Properties
-    static float GetMeter (RXA& rxa, int mt);
+    static double GetMeter (RXA& rxa, int mt);
     // TXA Properties
-    static float GetMeter (TXA& txa, int mt);
+    static double GetMeter (TXA& txa, int mt);
 
 private:
     static void calc_meter (METER *a);

@@ -86,7 +86,7 @@ RXA* RXA::create_rxa (
     rxa->inbuff  = new float[1 * rxa->dsp_insize  * 2]; // (float *) malloc0 (1 * ch.dsp_insize  * sizeof (complex));
     rxa->outbuff = new float[1 * rxa->dsp_outsize  * 2]; // (float *) malloc0 (1 * ch.dsp_outsize * sizeof (complex));
     rxa->midbuff = new float[2 * rxa->dsp_size  * 2]; // (float *) malloc0 (2 * ch.dsp_size    * sizeof (complex));
-    memset(rxa->meter, 0, sizeof(float)*RXA_METERTYPE_LAST);
+    std::fill(rxa->meter, rxa->meter + RXA_METERTYPE_LAST, 0);
 
     // Noise blanker (ANB or "NB")
     rxa->anb.p = ANB::create_anb(
@@ -161,7 +161,7 @@ RXA* RXA::create_rxa (
         rxa->pmtupdate,                         // locks for meter access
         RXA_ADC_AV,                             // index for average value
         RXA_ADC_PK,                             // index for peak value
-        -1,                                     // index for gain value
+        -1,                                     // index for gain value - disabled
         0);                                     // pointer for gain computation
 
     // Notched bandpass section
@@ -235,7 +235,7 @@ RXA* RXA::create_rxa (
         rxa->pmtupdate,                         // locks for meter access
         RXA_S_AV,                               // index for average value
         RXA_S_PK,                               // index for peak value
-        -1,                                     // index for gain value
+        -1,                                     // index for gain value - disabled
         0);                                     // pointer for gain computation
 
     // AM squelch capture (for other modes than FM)

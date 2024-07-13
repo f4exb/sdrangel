@@ -98,7 +98,7 @@ public:
     };
 
     int mode;
-    float meter[RXA_METERTYPE_LAST];
+    double meter[RXA_METERTYPE_LAST];
     QRecursiveMutex *pmtupdate[RXA_METERTYPE_LAST];
     struct
     {

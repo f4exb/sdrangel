@@ -48,7 +48,7 @@ METER* METER::create_meter (
     int rate,
     double tau_av,
     double tau_decay,
-    float* result,
+    double* result,
     QRecursiveMutex** pmtupdate,
     int enum_av,
     int enum_pk,
@@ -119,9 +119,9 @@ void METER::xmeter (METER *a)
     }
     else
     {
-        if (a->enum_av   >= 0) a->result[a->enum_av]   = - 400.0;
-        if (a->enum_pk   >= 0) a->result[a->enum_pk]   = - 400.0;
-        if (a->enum_gain >= 0) a->result[a->enum_gain] = +   0.0;
+        if (a->enum_av   >= 0) a->result[a->enum_av]   = -400.0;
+        if (a->enum_pk   >= 0) a->result[a->enum_pk]   = -400.0;
+        if (a->enum_gain >= 0) a->result[a->enum_gain] = 0.0;
     }
     a->mtupdate.unlock();
 }
@@ -149,9 +149,9 @@ void METER::setSize_meter (METER *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-float METER::GetMeter (RXA& rxa, int mt)
+double METER::GetMeter (RXA& rxa, int mt)
 {
-    float val;
+    double val;
     rxa.pmtupdate[mt]->lock();
     val = rxa.meter[mt];
     rxa.pmtupdate[mt]->unlock();
@@ -164,9 +164,9 @@ float METER::GetMeter (RXA& rxa, int mt)
 *                                                                                                       *
 ********************************************************************************************************/
 
-float METER::GetMeter (TXA& txa, int mt)
+double METER::GetMeter (TXA& txa, int mt)
 {
-    float val;
+    double val;
     txa.pmtupdate[mt]->lock();
     val = txa.meter[mt];
     txa.pmtupdate[mt]->unlock();

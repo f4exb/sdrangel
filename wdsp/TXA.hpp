@@ -127,7 +127,7 @@ public:
     int mode;
     float f_low;
     float f_high;
-    float meter[TXA_METERTYPE_LAST];
+    double meter[TXA_METERTYPE_LAST];
     QRecursiveMutex *pmtupdate[TXA_METERTYPE_LAST];
     std::atomic<long> upslew;
     struct
