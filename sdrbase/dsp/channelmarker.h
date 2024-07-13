@@ -42,11 +42,11 @@ public:
 
 	typedef enum frequencyScaleDisplay_e
 	{
-	    FScaleDisplay_freq,
-	    FScaleDisplay_title,
-	    FScaleDisplay_addressSend,
-	    FScaleDisplay_addressReceive,
-	    FScaleDisplay_none
+        FScaleDisplay_freq,
+        FScaleDisplay_title,
+        FScaleDisplay_addressSend,
+        FScaleDisplay_addressReceive,
+        FScaleDisplay_none
 	} frequencyScaleDisplay_t;
 
 	ChannelMarker(QObject* parent = NULL);
@@ -68,6 +68,9 @@ public:
 
 	void setLowCutoff(int lowCutoff);
 	int getLowCutoff() const { return m_lowCutoff; }
+
+    void setShift(int shift);
+    int getShift() const { return m_shift; }
 
 	void setSidebands(sidebands_t sidebands);
 	sidebands_t getSidebands() const { return m_sidebands; }
@@ -118,6 +121,7 @@ protected:
 	int m_bandwidth;
     int m_oppositeBandwidth;
 	int m_lowCutoff;
+    int m_shift;
 	sidebands_t m_sidebands;
 	bool m_visible;
 	bool m_highlighted;

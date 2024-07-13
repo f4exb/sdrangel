@@ -52,6 +52,7 @@ ChannelMarker::ChannelMarker(QObject* parent) :
 	m_bandwidth(0),
     m_oppositeBandwidth(0),
 	m_lowCutoff(0),
+    m_shift(0),
 	m_sidebands(dsb),
 	m_visible(false),
 	m_highlighted(false),
@@ -104,6 +105,12 @@ void ChannelMarker::setOppositeBandwidth(int bandwidth)
 void ChannelMarker::setLowCutoff(int lowCutoff)
 {
 	m_lowCutoff = lowCutoff;
+	emit changedByAPI();
+}
+
+void ChannelMarker::setShift(int shift)
+{
+	m_shift = shift;
 	emit changedByAPI();
 }
 

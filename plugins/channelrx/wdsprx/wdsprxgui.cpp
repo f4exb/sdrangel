@@ -271,6 +271,7 @@ void WDSPRxGUI::on_rit_toggled(bool checked)
 {
     m_settings.m_rit = checked;
     m_settings.m_profiles[m_settings.m_profileIndex].m_rit = m_settings.m_rit;
+    m_channelMarker.setShift(checked ? m_settings.m_ritFrequency: 0);
     applySettings();
 }
 
@@ -278,6 +279,7 @@ void WDSPRxGUI::on_ritFrequency_valueChanged(int value)
 {
     m_settings.m_ritFrequency = value;
     ui->ritFrequencyText->setText(tr("%1").arg(value));
+    m_channelMarker.setShift(m_settings.m_rit ? value: 0);
     applySettings();
 }
 
@@ -742,7 +744,11 @@ void WDSPRxGUI::applyBandwidths(unsigned int spanLog2, bool force)
     m_channelMarker.setBandwidth(bw * 200);
     m_channelMarker.setSidebands(dsb ? ChannelMarker::dsb : bw < 0 ? ChannelMarker::lsb : ChannelMarker::usb);
     ui->dsb->setIcon(bw < 0 ? m_iconDSBLSB: m_iconDSBUSB);
-    if (!dsb) { m_channelMarker.setLowCutoff(lw * 100); }
+
+    if (!dsb) {
+        m_channelMarker.setLowCutoff(lw * 100);
+    }
+
     blockApplySettings(wasBlocked);
 }
 
@@ -753,6 +759,10 @@ void WDSPRxGUI::displaySettings()
     m_channelMarker.setBandwidth(m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff * 2);
     m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setLowCutoff(m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff);
+    int shift = m_settings.m_profiles[m_settings.m_profileIndex].m_rit ?
+        m_settings.m_profiles[m_settings.m_profileIndex].m_ritFrequency :
+        0;
+    m_channelMarker.setShift(shift);
 
     if (m_deviceUISet->m_deviceMIMOEngine)
     {

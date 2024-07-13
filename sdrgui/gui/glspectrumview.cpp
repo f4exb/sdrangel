@@ -564,9 +564,17 @@ void GLSpectrumView::setUseCalibration(bool useCalibration)
     update();
 }
 
-void GLSpectrumView::setMeasurementParams(SpectrumSettings::Measurement measurement,
-                                      int centerFrequencyOffset, int bandwidth, int chSpacing, int adjChBandwidth,
-                                      int harmonics, int peaks, bool highlight, int precision)
+void GLSpectrumView::setMeasurementParams(
+    SpectrumSettings::Measurement measurement,
+    int centerFrequencyOffset,
+    int bandwidth,
+    int chSpacing,
+    int adjChBandwidth,
+    int harmonics,
+    int peaks,
+    bool highlight,
+    int precision
+)
 {
     m_mutex.lock();
     m_measurement = measurement;
@@ -1280,16 +1288,16 @@ void GLSpectrumView::paintGL()
             GLfloat h = m_frequencyPixmap.height() / (GLfloat) m_waterfallHeight;
 
             GLfloat vtx1[] = {
-                       -l, -h,
-                   1.0f+r, -h,
-                   1.0f+r,  0.0f,
-                       -l,  0.0f
+                -l, -    h,
+                1.0f+r, -h,
+                1.0f+r,  0.0f,
+                -l,      0.0f
             };
             GLfloat tex1[] = {
-                    0, 1,
-                    1, 1,
-                    1, 0,
-                    0, 0
+                0, 1,
+                1, 1,
+                1, 0,
+                0, 0
             };
 
             m_glShaderFrequencyScale.drawSurface(spectrogramGridMatrix, tex1, vtx1, 4);
@@ -1300,16 +1308,16 @@ void GLSpectrumView::paintGL()
             GLfloat h = (m_bottomMargin/2) / (GLfloat) m_waterfallHeight;      // m_bottomMargin is fm.ascent
 
             GLfloat vtx1[] = {
-                    -w, 0.0f-h,
-                  0.0f, 0.0f-h,
-                  0.0f, 1.0f+h,
-                    -w, 1.0f+h
+                -w,   0.0f-h,
+                0.0f, 0.0f-h,
+                0.0f, 1.0f+h,
+                -w,   1.0f+h
             };
             GLfloat tex1[] = {
-                    0, 1,
-                    1, 1,
-                    1, 0,
-                    0, 0
+                0, 1,
+                1, 1,
+                1, 0,
+                0, 0
             };
 
             m_glShaderSpectrogramTimeScale.drawSurface(spectrogramGridMatrix, tex1, vtx1, 4);
@@ -1320,16 +1328,16 @@ void GLSpectrumView::paintGL()
             GLfloat h = m_topMargin / (GLfloat) m_spectrogramPowerPixmap.height();
 
             GLfloat vtx1[] = {
-                    -w, 1.0f, 0.0f,
-                  0.0f, 1.0f, 0.0f,
-                  0.0f, 1.0f, 1.0f+h,
-                    -w, 1.0f, 1.0f+h,
+                -w,   1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 1.0f+h,
+                -w,   1.0f, 1.0f+h,
             };
             GLfloat tex1[] = {
-                    0, 1,
-                    1, 1,
-                    1, 0,
-                    0, 0
+                0, 1,
+                1, 1,
+                1, 0,
+                0, 0
             };
 
             m_glShaderSpectrogramPowerScale.drawSurface(spectrogramGridMatrix, tex1, vtx1, 4, 3);
@@ -2201,13 +2209,22 @@ void GLSpectrumView::measurePeak()
     findPeak(power, frequency);
 
     drawTextsRight(
-        {"Peak: ", ""},
         {
-         displayPower(power, m_linear ? 'e' : 'f', m_linear ? 3 : 1),
-         displayFull(frequency)
+            "Peak: ",
+            ""
         },
-        {m_peakPowerMaxStr, m_peakFrequencyMaxStr},
-        {m_peakPowerUnits, "Hz"}
+        {
+            displayPower(power, m_linear ? 'e' : 'f', m_linear ? 3 : 1),
+            displayFull(frequency)
+        },
+        {
+            m_peakPowerMaxStr,
+            m_peakFrequencyMaxStr
+        },
+        {
+            m_peakPowerUnits,
+            "Hz"
+        }
     );
     if (m_measurements) {
         m_measurements->setPeak(0, frequency, power);
@@ -2231,8 +2248,8 @@ void GLSpectrumView::measurePeaks()
         right--;
 
         float power = m_linear ?
-                        spectrum[peakBin] * (m_useCalibration ? m_calibrationGain : 1.0f) :
-                        spectrum[peakBin] + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
+            spectrum[peakBin] * (m_useCalibration ? m_calibrationGain : 1.0f) :
+            spectrum[peakBin] + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
         int64_t frequency = binToFrequency(peakBin);
 
         // Add to table
@@ -2767,7 +2784,7 @@ void GLSpectrumView::applyChanges()
         m_glWaterfallBoxMatrix.setToIdentity();
         m_glWaterfallBoxMatrix.translate(
             -1.0f + ((float)(2*m_leftMargin)   / (float) width()),
-             1.0f - ((float)(2*waterfallTop) / (float) height())
+            1.0f - ((float)(2*waterfallTop) / (float) height())
         );
         m_glWaterfallBoxMatrix.scale(
             ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / (float) width(),
@@ -2777,7 +2794,7 @@ void GLSpectrumView::applyChanges()
         m_glHistogramBoxMatrix.setToIdentity();
         m_glHistogramBoxMatrix.translate(
             -1.0f + ((float)(2*m_leftMargin)   / (float) width()),
-             1.0f - ((float)(2*histogramTop) / (float) height())
+            1.0f - ((float)(2*histogramTop) / (float) height())
         );
         m_glHistogramBoxMatrix.scale(
             ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / (float) width(),
@@ -2787,7 +2804,7 @@ void GLSpectrumView::applyChanges()
         m_glHistogramSpectrumMatrix.setToIdentity();
         m_glHistogramSpectrumMatrix.translate(
             -1.0f + ((float)(2*m_leftMargin)   / (float) width()),
-             1.0f - ((float)(2*histogramTop) / (float) height())
+            1.0f - ((float)(2*histogramTop) / (float) height())
         );
         m_glHistogramSpectrumMatrix.scale(
             ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_nbBins)),
@@ -2804,7 +2821,7 @@ void GLSpectrumView::applyChanges()
         m_glFrequencyScaleBoxMatrix.setToIdentity();
         m_glFrequencyScaleBoxMatrix.translate (
             -1.0f,
-             1.0f - ((float) 2*frequencyScaleTop / (float) height())
+            1.0f - ((float) 2*frequencyScaleTop / (float) height())
         );
         m_glFrequencyScaleBoxMatrix.scale (
             2.0f,
@@ -2864,7 +2881,7 @@ void GLSpectrumView::applyChanges()
         m_glWaterfallBoxMatrix.setToIdentity();
         m_glWaterfallBoxMatrix.translate(
             -1.0f + ((float)(2*m_leftMargin)   / (float) width()),
-             1.0f - ((float)(2*m_topMargin) / (float) height())
+            1.0f - ((float)(2*m_topMargin) / (float) height())
         );
         m_glWaterfallBoxMatrix.scale(
             ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / (float) width(),
@@ -2881,7 +2898,7 @@ void GLSpectrumView::applyChanges()
         m_glFrequencyScaleBoxMatrix.setToIdentity();
         m_glFrequencyScaleBoxMatrix.translate (
             -1.0f,
-             1.0f - ((float) 2*frequencyScaleTop / (float) height())
+            1.0f - ((float) 2*frequencyScaleTop / (float) height())
         );
         m_glFrequencyScaleBoxMatrix.scale (
             2.0f,
@@ -2915,7 +2932,7 @@ void GLSpectrumView::applyChanges()
         m_glHistogramSpectrumMatrix.setToIdentity();
         m_glHistogramSpectrumMatrix.translate(
             -1.0f + ((float)(2*m_leftMargin)   / (float) width()),
-             1.0f - ((float)(2*histogramTop) / (float) height())
+            1.0f - ((float)(2*histogramTop) / (float) height())
         );
         m_glHistogramSpectrumMatrix.scale(
             ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_nbBins)),
@@ -2925,7 +2942,7 @@ void GLSpectrumView::applyChanges()
         m_glHistogramBoxMatrix.setToIdentity();
         m_glHistogramBoxMatrix.translate(
             -1.0f + ((float)(2*m_leftMargin)   / (float) width()),
-             1.0f - ((float)(2*histogramTop) / (float) height())
+            1.0f - ((float)(2*histogramTop) / (float) height())
         );
         m_glHistogramBoxMatrix.scale(
             ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / (float) width(),
@@ -2942,7 +2959,7 @@ void GLSpectrumView::applyChanges()
         m_glFrequencyScaleBoxMatrix.setToIdentity();
         m_glFrequencyScaleBoxMatrix.translate (
             -1.0f,
-             1.0f - ((float) 2*frequencyScaleTop / (float) height())
+            1.0f - ((float) 2*frequencyScaleTop / (float) height())
         );
         m_glFrequencyScaleBoxMatrix.scale (
             2.0f,
@@ -3032,23 +3049,31 @@ void GLSpectrumView::applyChanges()
         xc = m_centerFrequency + dv->m_channelMarker->getCenterFrequency(); // marker center frequency
         dsbw = dv->m_channelMarker->getBandwidth();
 
-        if (sidebands == ChannelMarker::usb) {
-            nw = dv->m_channelMarker->getLowCutoff();     // negative bandwidth
+        if (sidebands == ChannelMarker::usb)
+        {
+            nw = dv->m_channelMarker->getLowCutoff() + dv->m_channelMarker->getShift();     // negative bandwidth
             int bw = dv->m_channelMarker->getBandwidth() / 2;
-            pw = (qreal) bw; // positive bandwidth
-        } else if (sidebands == ChannelMarker::lsb) {
-            pw = dv->m_channelMarker->getLowCutoff();
+            pw = (qreal) bw + dv->m_channelMarker->getShift(); // positive bandwidth
+        }
+        else if (sidebands == ChannelMarker::lsb)
+        {
+            pw = dv->m_channelMarker->getLowCutoff() + dv->m_channelMarker->getShift();
             int bw = dv->m_channelMarker->getBandwidth() / 2;
-            nw = (qreal) bw;
-        } else if (sidebands == ChannelMarker::vusb) {
-            nw = -dv->m_channelMarker->getOppositeBandwidth(); // negative bandwidth
-            pw = dv->m_channelMarker->getBandwidth(); // positive bandwidth
-        } else if (sidebands == ChannelMarker::vlsb) {
-            pw = dv->m_channelMarker->getOppositeBandwidth(); // positive bandwidth
-            nw = -dv->m_channelMarker->getBandwidth(); // negative bandwidth
-        } else {
-            pw = dsbw / 2;
-            nw = -pw;
+            nw = (qreal) bw + dv->m_channelMarker->getShift();
+        }
+        else if (sidebands == ChannelMarker::vusb)
+        {
+            nw = -dv->m_channelMarker->getOppositeBandwidth() + dv->m_channelMarker->getShift(); // negative bandwidth
+            pw = dv->m_channelMarker->getBandwidth() + dv->m_channelMarker->getShift(); // positive bandwidth
+        }
+        else if (sidebands == ChannelMarker::vlsb) {
+            pw = dv->m_channelMarker->getOppositeBandwidth() + dv->m_channelMarker->getShift(); // positive bandwidth
+            nw = -dv->m_channelMarker->getBandwidth() + dv->m_channelMarker->getShift(); // negative bandwidth
+        }
+        else
+        {
+            pw = (dsbw / 2) + dv->m_channelMarker->getShift();
+            nw = -(dsbw / 2) + dv->m_channelMarker->getShift();
         }
 
         // draw the DSB rectangle
@@ -3057,7 +3082,7 @@ void GLSpectrumView::applyChanges()
         glMatrixDsb.setToIdentity();
         glMatrixDsb.translate(
             -1.0f + 2.0f * ((m_leftMargin + m_frequencyScale.getPosFromValue(xc - (dsbw/2))) / (float) width()),
-             1.0f
+            1.0f
         );
         glMatrixDsb.scale(
             2.0f * (dsbw / (float) frequencySpan),
@@ -3066,8 +3091,8 @@ void GLSpectrumView::applyChanges()
 
         dv->m_glMatrixDsbWaterfall = glMatrixDsb;
         dv->m_glMatrixDsbWaterfall.translate(
-             0.0f,
-             (float) waterfallTop / (float) height()
+            0.0f,
+            (float) waterfallTop / (float) height()
         );
         dv->m_glMatrixDsbWaterfall.scale(
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
@@ -3076,8 +3101,8 @@ void GLSpectrumView::applyChanges()
 
         dv->m_glMatrixDsbHistogram = glMatrixDsb;
         dv->m_glMatrixDsbHistogram.translate(
-             0.0f,
-             (float) histogramTop / (float) height()
+            0.0f,
+            (float) histogramTop / (float) height()
         );
         dv->m_glMatrixDsbHistogram.scale(
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
@@ -3086,8 +3111,8 @@ void GLSpectrumView::applyChanges()
 
         dv->m_glMatrixDsbFreqScale = glMatrixDsb;
         dv->m_glMatrixDsbFreqScale.translate(
-             0.0f,
-             (float) frequencyScaleTop / (float) height()
+            0.0f,
+            (float) frequencyScaleTop / (float) height()
         );
         dv->m_glMatrixDsbFreqScale.scale(
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
@@ -3100,7 +3125,7 @@ void GLSpectrumView::applyChanges()
         glMatrix.setToIdentity();
         glMatrix.translate(
             -1.0f + 2.0f * ((m_leftMargin + m_frequencyScale.getPosFromValue(xc + nw)) / (float) width()),
-             1.0f
+            1.0f
         );
         glMatrix.scale(
             2.0f * ((pw-nw) / (float) frequencySpan),
@@ -3109,8 +3134,8 @@ void GLSpectrumView::applyChanges()
 
         dv->m_glMatrixWaterfall = glMatrix;
         dv->m_glMatrixWaterfall.translate(
-             0.0f,
-             (float) waterfallTop / (float) height()
+            0.0f,
+            (float) waterfallTop / (float) height()
         );
         dv->m_glMatrixWaterfall.scale(
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
@@ -3119,8 +3144,8 @@ void GLSpectrumView::applyChanges()
 
         dv->m_glMatrixHistogram = glMatrix;
         dv->m_glMatrixHistogram.translate(
-             0.0f,
-             (float) histogramTop / (float) height()
+            0.0f,
+            (float) histogramTop / (float) height()
         );
         dv->m_glMatrixHistogram.scale(
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
@@ -3129,8 +3154,8 @@ void GLSpectrumView::applyChanges()
 
         dv->m_glMatrixFreqScale = glMatrix;
         dv->m_glMatrixFreqScale.translate(
-             0.0f,
-             (float) frequencyScaleTop / (float) height()
+            0.0f,
+            (float) frequencyScaleTop / (float) height()
         );
         dv->m_glMatrixFreqScale.scale(
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
@@ -3527,7 +3552,7 @@ void GLSpectrumView::updateHistogramPeaks()
 
         if ((m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePower) ||
             ((m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax) &&
-             (m_histogramMarkers.at(i).m_holdReset || (power > m_histogramMarkers.at(i).m_powerMax))))
+            (m_histogramMarkers.at(i).m_holdReset || (power > m_histogramMarkers.at(i).m_powerMax))))
         {
             float binSize = m_frequencyScale.getRange() / m_nbBins;
             m_histogramMarkers[i].m_fftBin = fftBin;
@@ -3664,7 +3689,7 @@ void GLSpectrumView::updateCalibrationPoints()
     else if (m_calibrationPoints.size() == 1)
     {
         m_calibrationGain = m_calibrationPoints.first().m_powerCalibratedReference /
-             m_calibrationPoints.first().m_powerRelativeReference;
+        m_calibrationPoints.first().m_powerRelativeReference;
         m_calibrationShiftdB = CalcDb::dbPower(m_calibrationGain);
     }
     else
@@ -4310,7 +4335,7 @@ void GLSpectrumView::wheelEvent(QWheelEvent *event)
         // Other mice/trackpads use smaller values
         int delta = event->angleDelta().y();
         if (delta != 0) {
-             m_glShaderSpectrogram.verticalAngle(-5.0*delta/120.0);
+            m_glShaderSpectrogram.verticalAngle(-5.0*delta/120.0);
         }
         repaint(); // Force repaint in case acquisition is stopped
     }
