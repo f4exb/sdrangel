@@ -239,6 +239,16 @@ WDSPRxSettings:
       items:
         type: number
         format: float
+    rit:
+      type: integer
+      description: >
+        RIT:
+          * 0 - Off
+          * 1 - On
+    ritFrequency:
+      type: number
+      format: float
+      description: RIT shift frequency (Hz)
     spanLog2:
       type: integer
     rfBandwidth:

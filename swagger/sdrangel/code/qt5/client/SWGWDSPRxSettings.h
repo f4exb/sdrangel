@@ -193,6 +193,12 @@ public:
     QList<float>* getEqG();
     void setEqG(QList<float>* eq_g);
 
+    qint32 getRit();
+    void setRit(qint32 rit);
+
+    float getRitFrequency();
+    void setRitFrequency(float rit_frequency);
+
     qint32 getSpanLog2();
     void setSpanLog2(qint32 span_log2);
 
@@ -391,6 +397,12 @@ private:
 
     QList<float>* eq_g;
     bool m_eq_g_isSet;
+
+    qint32 rit;
+    bool m_rit_isSet;
+
+    float rit_frequency;
+    bool m_rit_frequency_isSet;
 
     qint32 span_log2;
     bool m_span_log2_isSet;

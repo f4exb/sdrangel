@@ -17281,7 +17281,7 @@ margin-bottom: 20px;
     },
     "fmAFLimiter" : {
       "type" : "integer",
-      "description" : "FM Audio level limiter (audio AGC)\n"
+      "description" : "FM Audio level limiter (audio AGC)\n  * 0 - Off\n  * 1 - On\n"
     },
     "fmAFLimiterGain" : {
       "type" : "number",
@@ -17343,6 +17343,15 @@ margin-bottom: 20px;
         "type" : "number",
         "format" : "float"
       }
+    },
+    "rit" : {
+      "type" : "integer",
+      "description" : "RIT:\n  * 0 - Off\n  * 1 - On\n"
+    },
+    "ritFrequency" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "RIT shift frequency (Hz)"
     },
     "spanLog2" : {
       "type" : "integer"
@@ -59432,7 +59441,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-07-10T22:13:04.144+02:00
+              Generated 2024-07-13T13:44:10.416+02:00
             </div>
           </div>
       </div>

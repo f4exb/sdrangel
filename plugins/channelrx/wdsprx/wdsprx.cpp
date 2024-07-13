@@ -632,6 +632,12 @@ void WDSPRx::webapiUpdateChannelSettings(
         }
     }
 
+    if (channelSettingsKeys.contains("rit")) {
+        settings.m_rit = response.getWdspRxSettings()->getRit() != 0;
+    }
+    if (channelSettingsKeys.contains("ritFrequency")) {
+        settings.m_ritFrequency = response.getWdspRxSettings()->getRitFrequency();
+    }
     if (channelSettingsKeys.contains("spanLog2")) {
         settings.m_profiles[settings.m_profileIndex].m_spanLog2 = response.getWdspRxSettings()->getSpanLog2();
     }
@@ -763,6 +769,8 @@ void WDSPRx::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         response.getWdspRxSettings()->getEqG()->push_back(settings.m_eqG[i]);
     }
 
+    response.getWdspRxSettings()->setRit(settings.m_rit ? 1 : 0);
+    response.getWdspRxSettings()->setRitFrequency(settings.m_ritFrequency);
     response.getWdspRxSettings()->setSpanLog2(settings.m_profiles[settings.m_profileIndex].m_spanLog2);
     response.getWdspRxSettings()->setRfBandwidth(settings.m_profiles[settings.m_profileIndex].m_highCutoff);
     response.getWdspRxSettings()->setLowCutoff(settings.m_profiles[settings.m_profileIndex].m_lowCutoff);
@@ -1089,6 +1097,12 @@ void WDSPRx::webapiFormatChannelSettings(
         }
     }
 
+    if (channelSettingsKeys.contains("rit")) {
+        swgWDSPRxSettings->setRit(settings.m_rit ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("ritFrequency")) {
+        swgWDSPRxSettings->setRit(settings.m_ritFrequency);
+    }
     if (channelSettingsKeys.contains("spanLog2") || force) {
         swgWDSPRxSettings->setSpanLog2(settings.m_profiles[settings.m_profileIndex].m_spanLog2);
     }

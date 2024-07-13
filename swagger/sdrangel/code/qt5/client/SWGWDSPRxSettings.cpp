@@ -126,6 +126,10 @@ SWGWDSPRxSettings::SWGWDSPRxSettings() {
     m_eq_f_isSet = false;
     eq_g = new QList<float>();
     m_eq_g_isSet = false;
+    rit = 0;
+    m_rit_isSet = false;
+    rit_frequency = 0.0f;
+    m_rit_frequency_isSet = false;
     span_log2 = 0;
     m_span_log2_isSet = false;
     rf_bandwidth = 0.0f;
@@ -264,6 +268,10 @@ SWGWDSPRxSettings::init() {
     m_eq_f_isSet = false;
     eq_g = new QList<float>();
     m_eq_g_isSet = false;
+    rit = 0;
+    m_rit_isSet = false;
+    rit_frequency = 0.0f;
+    m_rit_frequency_isSet = false;
     span_log2 = 0;
     m_span_log2_isSet = false;
     rf_bandwidth = 0.0f;
@@ -300,6 +308,8 @@ SWGWDSPRxSettings::init() {
 
 void
 SWGWDSPRxSettings::cleanup() {
+
+
 
 
 
@@ -488,6 +498,10 @@ SWGWDSPRxSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&eq_f, pJson["eqF"], "QList", "float");
     
     ::SWGSDRangel::setValue(&eq_g, pJson["eqG"], "QList", "float");
+    ::SWGSDRangel::setValue(&rit, pJson["rit"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rit_frequency, pJson["ritFrequency"], "float", "");
+    
     ::SWGSDRangel::setValue(&span_log2, pJson["spanLog2"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
@@ -682,6 +696,12 @@ SWGWDSPRxSettings::asJsonObject() {
     }
     if(eq_g && eq_g->size() > 0){
         toJsonArray((QList<void*>*)eq_g, obj, "eqG", "");
+    }
+    if(m_rit_isSet){
+        obj->insert("rit", QJsonValue(rit));
+    }
+    if(m_rit_frequency_isSet){
+        obj->insert("ritFrequency", QJsonValue(rit_frequency));
     }
     if(m_span_log2_isSet){
         obj->insert("spanLog2", QJsonValue(span_log2));
@@ -1226,6 +1246,26 @@ SWGWDSPRxSettings::setEqG(QList<float>* eq_g) {
 }
 
 qint32
+SWGWDSPRxSettings::getRit() {
+    return rit;
+}
+void
+SWGWDSPRxSettings::setRit(qint32 rit) {
+    this->rit = rit;
+    this->m_rit_isSet = true;
+}
+
+float
+SWGWDSPRxSettings::getRitFrequency() {
+    return rit_frequency;
+}
+void
+SWGWDSPRxSettings::setRitFrequency(float rit_frequency) {
+    this->rit_frequency = rit_frequency;
+    this->m_rit_frequency_isSet = true;
+}
+
+qint32
 SWGWDSPRxSettings::getSpanLog2() {
     return span_log2;
 }
@@ -1541,6 +1581,12 @@ SWGWDSPRxSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(eq_g && (eq_g->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_rit_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rit_frequency_isSet){
             isObjectUpdated = true; break;
         }
         if(m_span_log2_isSet){
