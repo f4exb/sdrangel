@@ -28,7 +28,7 @@ warren@wpratt.com
 #include "comm.hpp"
 #include "resample.hpp"
 #include "lmath.hpp"
-#include "firmin.hpp"
+#include "fircore.hpp"
 #include "nbp.hpp"
 #include "amd.hpp"
 #include "anf.hpp"

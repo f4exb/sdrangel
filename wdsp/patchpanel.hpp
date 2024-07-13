@@ -48,7 +48,17 @@ public:
     int inselect;
     int copy;
 
-    static PANEL* create_panel (int run, int size, float* in, float* out, float gain1, float gain2I, float gain2Q, int inselect, int copy);
+    static PANEL* create_panel (
+        int run,
+        int size,
+        float* in,
+        float* out,
+        float gain1,
+        float gain2I,
+        float gain2Q,
+        int inselect,
+        int copy
+    );
     static void destroy_panel (PANEL *a);
     static void flush_panel (PANEL *a);
     static void xpanel (PANEL *a);

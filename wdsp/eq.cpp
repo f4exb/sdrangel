@@ -27,7 +27,7 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "eq.hpp"
-#include "firmin.hpp"
+#include "fircore.hpp"
 #include "fir.hpp"
 #include "RXA.hpp"
 #include "TXA.hpp"

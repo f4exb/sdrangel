@@ -32,7 +32,17 @@ warren@wpratt.com
 
 namespace WDSP {
 
-PANEL* PANEL::create_panel (int run, int size, float* in, float* out, float gain1, float gain2I, float gain2Q, int inselect, int copy)
+PANEL* PANEL::create_panel (
+    int run,
+    int size,
+    float* in,
+    float* out,
+    float gain1,
+    float gain2I,
+    float gain2Q,
+    int inselect,
+    int copy
+)
 {
     PANEL* a = new PANEL;
     a->run = run;

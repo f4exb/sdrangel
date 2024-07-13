@@ -23,7 +23,9 @@ set(wdsp_SOURCES
     eq.cpp
     fcurve.cpp
     fir.cpp
+    fircore.cpp
     firmin.cpp
+    firopt.cpp
     fmd.cpp
     fmmod.cpp
     fmsq.cpp
@@ -77,7 +79,9 @@ set(wdsp_HEADERS
     eq.hpp
     fcurve.hpp
     fir.hpp
+    fircore.hpp
     firmin.hpp
+    firopt.hpp
     fmd.hpp
     fmmod.hpp
     fmsq.hpp

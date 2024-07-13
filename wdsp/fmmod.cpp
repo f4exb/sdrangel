@@ -26,7 +26,7 @@ warren@wpratt.com
 */
 
 #include "comm.hpp"
-#include "firmin.hpp"
+#include "fircore.hpp"
 #include "fir.hpp"
 #include "fmmod.hpp"
 #include "TXA.hpp"

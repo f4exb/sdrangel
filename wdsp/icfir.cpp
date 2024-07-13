@@ -26,7 +26,7 @@ warren@pratt.one
 */
 
 #include "comm.hpp"
-#include "firmin.hpp"
+#include "fircore.hpp"
 #include "fir.hpp"
 #include "icfir.hpp"
 

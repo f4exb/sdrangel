@@ -27,52 +27,60 @@ warren@wpratt.com
 
 /********************************************************************************************************
 *                                                                                                       *
-*                                           Time-Domain FIR                                             *
+*                               Standalone Partitioned Overlap-Save Bandpass                            *
 *                                                                                                       *
 ********************************************************************************************************/
 
-#ifndef wdsp_firmin_h
-#define wdsp_firmin_h
+#ifndef wdsp_firopt_h
+#define wdsp_firopt_h
 
 #include "fftw3.h"
 #include "export.h"
 
 namespace WDSP {
 
-class WDSP_API FIRMIN
+class WDSP_API FIROPT
 {
-public:
     int run;                // run control
     int position;           // position at which to execute
     int size;               // input/output buffer size, power of two
     float* in;             // input buffer
     float* out;            // output buffer, can be same as input
-    int nc;                 // number of filter coefficients, power of two
+    int nc;                 // number of filter coefficients, power of two, >= size
     float f_low;           // low cutoff frequency
     float f_high;          // high cutoff frequency
-    float* ring;           // internal complex ring buffer
-    float* h;              // complex filter coefficients
-    int rsize;              // ring size, number of complex samples, power of two
-    int mask;               // mask to update indexes
-    int idx;                // ring input/output index
     float samplerate;      // sample rate
     int wintype;            // filter window type
     float gain;            // filter gain
+    int nfor;               // number of buffers in delay line
+    float* fftin;          // fft input buffer
+    float** fmask;         // frequency domain masks
+    float** fftout;        // fftout delay line
+    float* accum;          // frequency domain accumulator
+    int buffidx;            // fft out buffer index
+    int idxmask;            // mask for index computations
+    float* maskgen;        // input for mask generation FFT
+    fftwf_plan* pcfor;       // array of forward FFT plans
+    fftwf_plan crev;         // reverse fft plan
+    fftwf_plan* maskplan;    // plans for frequency domain masks
 
-    static FIRMIN* create_firmin (int run, int position, int size, float* in, float* out,
+    static FIROPT* create_firopt (int run, int position, int size, float* in, float* out,
         int nc, float f_low, float f_high, int samplerate, int wintype, float gain);
-    static void destroy_firmin (FIRMIN *a);
-    static void flush_firmin (FIRMIN *a);
-    static void xfirmin (FIRMIN *a, int pos);
-    static void setBuffers_firmin (FIRMIN *a, float* in, float* out);
-    static void setSamplerate_firmin (FIRMIN *a, int rate);
-    static void setSize_firmin (FIRMIN *a, int size);
-    static void setFreqs_firmin (FIRMIN *a, float f_low, float f_high);
+    static void xfiropt (FIROPT *a, int pos);
+    static void destroy_firopt (FIROPT *a);
+    static void flush_firopt (FIROPT *a);
+    static void setBuffers_firopt (FIROPT *a, float* in, float* out);
+    static void setSamplerate_firopt (FIROPT *a, int rate);
+    static void setSize_firopt (FIROPT *a, int size);
+    static void setFreqs_firopt (FIROPT *a, float f_low, float f_high);
 
 private:
-    static void calc_firmin (FIRMIN *a);
+    static void plan_firopt (FIROPT *a);
+    static void calc_firopt (FIROPT *a);
+    static void deplan_firopt (FIROPT *a);
 };
 
 } // namespace WDSP
 
 #endif
+

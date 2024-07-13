@@ -27,7 +27,7 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "iir.hpp"
-#include "firmin.hpp"
+#include "fircore.hpp"
 #include "fcurve.hpp"
 #include "fir.hpp"
 #include "wcpAGC.hpp"

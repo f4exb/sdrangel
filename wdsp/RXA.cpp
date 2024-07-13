@@ -51,7 +51,7 @@ warren@wpratt.com
 #include "cblock.hpp"
 #include "ssql.hpp"
 #include "iir.hpp"
-#include "firmin.hpp"
+#include "fircore.hpp"
 #include "wcpAGC.hpp"
 #include "anb.hpp"
 #include "nob.hpp"

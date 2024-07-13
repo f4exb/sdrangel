@@ -27,7 +27,7 @@ warren@wpratt.com
 #include "comm.hpp"
 #include "cfir.hpp"
 #include "fir.hpp"
-#include "firmin.hpp"
+#include "fircore.hpp"
 #include "TXA.hpp"
 
 namespace WDSP {
