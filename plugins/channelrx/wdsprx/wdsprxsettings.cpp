@@ -94,6 +94,9 @@ void WDSPRxSettings::resetToDefaults()
     m_equalizer = false;
     m_eqF = {0.0, 32.0, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0};
     m_eqG = {0.0,  0.0,  0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0};
+    // RIT
+    m_rit = false;
+    m_ritFrequency = 0.0;
     //
     m_volume = 1.0;
     m_inputFrequencyOffset = 0;
@@ -212,10 +215,15 @@ QByteArray WDSPRxSettings::serialize() const
     s.writeBlob(  80, m_geometryBytes);
     s.writeBool(  81, m_hidden);
     s.writeU32(   82, m_profileIndex);
+    s.writeBool(  83, m_rit);
+    s.writeDouble(84, m_ritFrequency);
 
     for (unsigned int i = 0; i < 10; i++)
     {
         s.writeS32   (104 + 100*i, (int) m_profiles[i].m_demod);
+        s.writeBool  (105 + 100*i, (int) m_profiles[i].m_audioBinaural);
+        s.writeBool  (106 + 100*i, (int) m_profiles[i].m_audioFlipChannels);
+        s.writeBool  (107 + 100*i, (int) m_profiles[i].m_dsb);
         // Filter
         s.writeS32   (100 + 100*i, m_profiles[i].m_spanLog2);
         s.writeS32   (101 + 100*i, m_profiles[i].m_highCutoff / 100.0);
@@ -409,6 +417,8 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         d.readBool(   81, &m_hidden, false);
         d.readU32(    82, &utmp, 0);
         m_profileIndex = utmp < 10 ? utmp : 0;
+        d.readBool(   83, &m_rit, false);
+        d.readDouble( 84, &m_ritFrequency, 0);
 
         d.readBool(   90, &m_equalizer, false);
         d.readFloat(4000, &m_eqF[0], 0.0);
@@ -438,6 +448,9 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         {
             d.readS32   (104 + 100*i, &tmp, 9);
             m_profiles[i].m_demod = (WDSPRxProfile::WDSPRxDemod) tmp;
+            d.readBool(  105 + 100*i, &m_profiles[i].m_audioBinaural, false);
+            d.readBool(  106 + 100*i, &m_profiles[i].m_audioFlipChannels, false);
+            d.readBool(  107 + 100*i, &m_profiles[i].m_dsb, false);
             // Filter
             d.readS32   (100 + 100*i, &m_profiles[i].m_spanLog2, 3);
             d.readS32   (101 + 100*i, &tmp, 30);
@@ -497,6 +510,9 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
             d.readDouble(163 + 100*i, &m_profiles[i].m_ssqlTauMute, 0.1);
             d.readDouble(164 + 100*i, &m_profiles[i].m_ssqlTauUnmute, 0.1);
             d.readDouble(165 + 100*i, &m_profiles[i].m_amsqMaxTail, 1.5);
+            // RIT
+            d.readBool(  183 + 100*i, &m_profiles[i].m_rit, false);
+            d.readDouble(184 + 100*i, &m_profiles[i].m_ritFrequency, 0.0);
             // Equalizer
             d.readBool(  190 + 100*i, &m_profiles[i].m_equalizer, false);
             d.readFloat(4100 + 100*i, &m_profiles[i].m_eqF[0], 0.0);

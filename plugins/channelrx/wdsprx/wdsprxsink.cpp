@@ -43,6 +43,7 @@
 #include "amsq.hpp"
 #include "fmsq.hpp"
 #include "eq.hpp"
+#include "shift.hpp"
 
 #include "wdsprxsink.h"
 
@@ -357,6 +358,8 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_nr2Gain: " << settings.m_nr2Gain
             << " m_nr2NPE: " << settings.m_nr2NPE
             << " m_nr2ArtifactReduction: " << settings.m_nr2ArtifactReduction
+            << " m_rit: " << settings.m_rit
+            << " m_ritFrequency: " <<  settings.m_ritFrequency
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -364,6 +367,15 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
             << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
+
+
+    // RIT
+
+    if ((m_settings.m_rit != settings.m_rit) || (m_settings.m_ritFrequency != settings.m_ritFrequency) || force)
+    {
+        WDSP::SHIFT::SetShiftFreq(*m_rxa, settings.m_ritFrequency);
+        WDSP::SHIFT::SetShiftRun(*m_rxa, settings.m_rit ? 1 : 0);
+    }
 
     // Filter and mode
 
@@ -735,12 +747,14 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         WDSP::PANEL::SetPanelGain1(*m_rxa, settings.m_volume);
     }
 
-    if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
-        WDSP::PANEL::SetPanelBinaural(*m_rxa, settings.m_audioBinaural ? 1 : 0);
-    }
-
-    if ((m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force) {
-        WDSP::PANEL::SetPanelCopy(*m_rxa, settings.m_audioFlipChannels ? 3 : 0);
+    if ((m_settings.m_audioBinaural != settings.m_audioBinaural)
+    || (m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force)
+    {
+        if (settings.m_audioBinaural) {
+            WDSP::PANEL::SetPanelCopy(*m_rxa, settings.m_audioFlipChannels ? 3 : 0);
+        } else {
+            WDSP::PANEL::SetPanelCopy(*m_rxa, settings.m_audioFlipChannels ? 2 : 1);
+        }
     }
 
     // AGC

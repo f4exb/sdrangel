@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>514</width>
+    <width>542</width>
     <height>179</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>452</width>
+    <width>542</width>
     <height>0</height>
    </size>
   </property>
@@ -36,13 +36,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>501</width>
+     <width>540</width>
      <height>181</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>450</width>
+     <width>540</width>
      <height>0</height>
     </size>
    </property>
@@ -277,6 +277,53 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QDial" name="filterIndex">
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Select profile in profile bank</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>9</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="filterIndexText">
+          <property name="minimumSize">
+           <size>
+            <width>10</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="acceptDrops">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Filter index in filter bank</string>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -392,14 +439,8 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>70</width>
+          <width>50</width>
           <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>60</width>
-          <height>16777215</height>
          </size>
         </property>
         <property name="toolTip">
@@ -421,7 +462,20 @@
        </widget>
       </item>
       <item>
-       <widget class="QDial" name="filterIndex">
+       <widget class="ButtonSwitch" name="rit">
+        <property name="toolTip">
+         <string>Toggle RIT</string>
+        </property>
+        <property name="text">
+         <string>RIT</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="ritFrequency">
         <property name="maximumSize">
          <size>
           <width>24</width>
@@ -429,13 +483,13 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Select profile in profile bank</string>
+         <string>RIT frequency (Hz)</string>
         </property>
         <property name="minimum">
-         <number>0</number>
+         <number>-1000</number>
         </property>
         <property name="maximum">
-         <number>9</number>
+         <number>1000</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -446,21 +500,18 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="filterIndexText">
+       <widget class="QLabel" name="ritFrequencyText">
         <property name="minimumSize">
          <size>
-          <width>10</width>
+          <width>32</width>
           <height>0</height>
          </size>
         </property>
-        <property name="acceptDrops">
-         <bool>false</bool>
-        </property>
         <property name="toolTip">
-         <string>Filter index in filter bank</string>
+         <string>RIT frequency (Hz)</string>
         </property>
         <property name="text">
-         <string>0</string>
+         <string>-0000</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -486,7 +537,7 @@
          </size>
         </property>
         <property name="text">
-         <string>Low cut</string>
+         <string>Near cut</string>
         </property>
        </widget>
       </item>
@@ -568,7 +619,7 @@
          </size>
         </property>
         <property name="text">
-         <string>Hi cut</string>
+         <string>Far cut</string>
         </property>
        </widget>
       </item>
@@ -822,11 +873,17 @@
       </item>
       <item>
        <widget class="QLabel" name="volumeText">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Audio volume in dB</string>
         </property>
         <property name="text">
-         <string>10</string>
+         <string>-10</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

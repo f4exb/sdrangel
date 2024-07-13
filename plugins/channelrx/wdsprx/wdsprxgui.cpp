@@ -162,6 +162,7 @@ void WDSPRxGUI::on_audioBinaural_toggled(bool binaural)
 {
 	m_audioBinaural = binaural;
 	m_settings.m_audioBinaural = binaural;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_audioBinaural = m_settings.m_audioBinaural;
 	applySettings();
 }
 
@@ -169,6 +170,7 @@ void WDSPRxGUI::on_audioFlipChannels_toggled(bool flip)
 {
 	m_audioFlipChannels = flip;
 	m_settings.m_audioFlipChannels = flip;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_audioFlipChannels = m_settings.m_audioFlipChannels;
 	applySettings();
 }
 
@@ -265,6 +267,20 @@ void WDSPRxGUI::on_equalizer_toggled(bool checked)
     applySettings();
 }
 
+void WDSPRxGUI::on_rit_toggled(bool checked)
+{
+    m_settings.m_rit = checked;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_rit = m_settings.m_rit;
+    applySettings();
+}
+
+void WDSPRxGUI::on_ritFrequency_valueChanged(int value)
+{
+    m_settings.m_ritFrequency = value;
+    ui->ritFrequencyText->setText(tr("%1").arg(value));
+    applySettings();
+}
+
 void WDSPRxGUI::on_audioMute_toggled(bool checked)
 {
 	m_audioMute = checked;
@@ -312,6 +328,9 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
     ui->lowCut->setMaximum(480);
     ui->lowCut->setMinimum(-480);
     m_settings.m_demod = m_settings.m_profiles[m_settings.m_profileIndex].m_demod;
+    m_settings.m_audioBinaural = m_settings.m_profiles[m_settings.m_profileIndex].m_audioBinaural;
+    m_settings.m_audioFlipChannels = m_settings.m_profiles[m_settings.m_profileIndex].m_audioFlipChannels;
+    m_settings.m_dsb = m_settings.m_profiles[m_settings.m_profileIndex].m_dsb;
     // AGC setup
     m_settings.m_agc = m_settings.m_profiles[m_settings.m_profileIndex].m_agc;
     m_settings.m_agcGain = m_settings.m_profiles[m_settings.m_profileIndex].m_agcGain;
@@ -358,6 +377,9 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
     m_settings.m_equalizer = m_settings.m_profiles[m_settings.m_profileIndex].m_equalizer;
     m_settings.m_eqF = m_settings.m_profiles[m_settings.m_profileIndex].m_eqF;
     m_settings.m_eqG = m_settings.m_profiles[m_settings.m_profileIndex].m_eqG;
+    // RIT
+    m_settings.m_rit = m_settings.m_profiles[m_settings.m_profileIndex].m_rit;
+    m_settings.m_ritFrequency = m_settings.m_profiles[m_settings.m_profileIndex].m_ritFrequency;
     displaySettings();
     applyBandwidths(m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2, true); // does applySettings(true)
 }
@@ -709,6 +731,7 @@ void WDSPRxGUI::applyBandwidths(unsigned int spanLog2, bool force)
     ui->channelPowerMeter->setRange(WDSPRxSettings::m_minPowerThresholdDB, 0);
 
     m_settings.m_dsb = dsb;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_dsb = dsb;
     m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2 = spanLog2;
     m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff = bw * 100;
     m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff = lw * 100;
@@ -780,6 +803,9 @@ void WDSPRxGUI::displaySettings()
     ui->squelchThreshold->setValue(m_settings.m_squelchThreshold);
     ui->squelchThresholdText->setText(tr("%1").arg(m_settings.m_squelchThreshold));
     ui->equalizer->setChecked(m_settings.m_equalizer);
+    ui->rit->setChecked(m_settings.m_rit);
+    ui->ritFrequency->setValue((int) m_settings.m_ritFrequency);
+    ui->ritFrequencyText->setText(tr("%1").arg((int) m_settings.m_ritFrequency));
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);
@@ -1326,6 +1352,8 @@ void WDSPRxGUI::makeUIConnections()
     QObject::connect(ui->squelch, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_squelch_toggled);
     QObject::connect(ui->squelchThreshold, &QDial::valueChanged, this, &WDSPRxGUI::on_squelchThreshold_valueChanged);
     QObject::connect(ui->equalizer, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_equalizer_toggled);
+    QObject::connect(ui->rit, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_rit_toggled);
+    QObject::connect(ui->ritFrequency, &QDial::valueChanged, this, &WDSPRxGUI::on_ritFrequency_valueChanged);
 }
 
 void WDSPRxGUI::updateAbsoluteCenterFrequency()

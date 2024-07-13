@@ -147,6 +147,8 @@ private slots:
     void on_squelch_toggled(bool checked);
     void on_squelchThreshold_valueChanged(int value);
     void on_equalizer_toggled(bool checked);
+    void on_rit_toggled(bool checked);
+    void on_ritFrequency_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

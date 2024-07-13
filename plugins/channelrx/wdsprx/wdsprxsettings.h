@@ -86,6 +86,9 @@ struct WDSPRxProfile
     };
 
     WDSPRxDemod m_demod;
+    bool m_audioBinaural;
+    bool m_audioFlipChannels;
+    bool m_dsb;
     // Filter
     int   m_spanLog2;
     Real  m_highCutoff;
@@ -139,9 +142,15 @@ struct WDSPRxProfile
     bool m_equalizer;
     std::array<float, 11> m_eqF; //!< Frequencies vector. Index 0 is always 0 as this is the preamp position
     std::array<float, 11> m_eqG; //!< Gains vector (dB). Index 0 is the preamp (common) gain
+    // RIT
+    bool m_rit;
+    double m_ritFrequency;
 
     WDSPRxProfile() :
         m_demod(DemodSSB),
+        m_audioBinaural(false),
+        m_audioFlipChannels(false),
+        m_dsb(false),
         m_spanLog2(3),
         m_highCutoff(3000),
         m_lowCutoff(300),
@@ -187,7 +196,9 @@ struct WDSPRxProfile
         m_amsqMaxTail(1.5),
         m_equalizer(false),
         m_eqF{0.0, 32.0, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0},
-        m_eqG{0.0,  0.0,  0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0}
+        m_eqG{0.0,  0.0,  0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0},
+        m_rit(false),
+        m_ritFrequency(0)
     {}
 };
 
@@ -251,6 +262,9 @@ struct WDSPRxSettings
     bool m_equalizer;
     std::array<float, 11> m_eqF = {0.0, 32.0, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0}; //!< Frequencies vector. Index 0 is always 0 as this is the preamp position
     std::array<float, 11> m_eqG = {0.0,  0.0,  0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0}; //!< Gains vector (dB). Index 0 is the preamp (common) gain
+    // RIT
+    bool m_rit;
+    double m_ritFrequency;
 
     quint32 m_rgbColor;
     QString m_title;
