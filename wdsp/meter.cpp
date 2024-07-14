@@ -81,10 +81,11 @@ void METER::flush_meter (METER *a)
 {
     a->avg  = 0.0;
     a->peak = 0.0;
-    a->result[a->enum_av] = -400.0;
-    a->result[a->enum_pk] = -400.0;
+    a->result[a->enum_av] = -100.0;
+    a->result[a->enum_pk] = -100.0;
+
     if ((a->pgain != 0) && (a->enum_gain >= 0))
-        a->result[a->enum_gain] = -400.0;
+        a->result[a->enum_gain] = 0.0;
 }
 
 void METER::xmeter (METER *a)
@@ -107,7 +108,9 @@ void METER::xmeter (METER *a)
             smag = a->buff[2 * i + 0] * a->buff[2 * i + 0] + a->buff[2 * i + 1] * a->buff[2 * i + 1];
             a->avg = a->avg * a->mult_average + (1.0 - a->mult_average) * smag;
             a->peak *= a->mult_peak;
-            if (smag > np) np = smag;
+
+            if (smag > np)
+                np = smag;
         }
 
         if (np > a->peak)
@@ -121,9 +124,12 @@ void METER::xmeter (METER *a)
     }
     else
     {
-        if (a->enum_av   >= 0) a->result[a->enum_av]   = -400.0;
-        if (a->enum_pk   >= 0) a->result[a->enum_pk]   = -400.0;
-        if (a->enum_gain >= 0) a->result[a->enum_gain] = 0.0;
+        if (a->enum_av   >= 0)
+            a->result[a->enum_av]   = -100.0;
+        if (a->enum_pk   >= 0)
+            a->result[a->enum_pk]   = -100.0;
+        if (a->enum_gain >= 0)
+            a->result[a->enum_gain] = 0.0;
     }
 }
 
@@ -152,8 +158,7 @@ void METER::setSize_meter (METER *a, int size)
 
 double METER::GetMeter (RXA& rxa, int mt)
 {
-    double val;
-    val = rxa.meter[mt];
+    double val = rxa.meter[mt];
     return val;
 }
 
@@ -165,8 +170,7 @@ double METER::GetMeter (RXA& rxa, int mt)
 
 double METER::GetMeter (TXA& txa, int mt)
 {
-    double val;
-    val = txa.meter[mt];
+    double val = txa.meter[mt];
     return val;
 }
 

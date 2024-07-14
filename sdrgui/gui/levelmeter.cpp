@@ -309,9 +309,9 @@ LevelMeterSignalDB::~LevelMeterSignalDB()
 {
 }
 
-void LevelMeterSignalDB::setRange(int min, int max)
+void LevelMeterSignalDB::setRange(int min, int max, bool sUnits)
 {
-    m_scaleEngine.setRange(Unit::Decibel, min, max);
+    m_scaleEngine.setRange(sUnits ? Unit::SUnits : Unit::Decibel, min, max);
 }
 
 void LevelMeterSignalDB::resized()

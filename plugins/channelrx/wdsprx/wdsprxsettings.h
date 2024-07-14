@@ -89,6 +89,7 @@ struct WDSPRxProfile
     bool m_audioBinaural;
     bool m_audioFlipChannels;
     bool m_dsb;
+    bool m_dbOrS;
     // Filter
     int   m_spanLog2;
     Real  m_highCutoff;
@@ -151,6 +152,7 @@ struct WDSPRxProfile
         m_audioBinaural(false),
         m_audioFlipChannels(false),
         m_dsb(false),
+        m_dbOrS(true),
         m_spanLog2(3),
         m_highCutoff(3000),
         m_lowCutoff(300),
@@ -214,6 +216,7 @@ struct WDSPRxSettings
     bool m_audioFlipChannels;
     bool m_dsb;
     bool m_audioMute;
+    bool m_dbOrS;
     // AGC
     bool m_agc;
     WDSPRxProfile::WDSPRxAGCMode m_agcMode;

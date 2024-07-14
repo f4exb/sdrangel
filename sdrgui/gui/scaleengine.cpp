@@ -36,20 +36,20 @@ QString ScaleEngine::formatTick(double value, int decimalPlaces)
 {
 	if (m_physicalUnit != Unit::TimeHMS)
 	{
-	    if (m_physicalUnit == Unit::Scientific) {
+        if (m_physicalUnit == Unit::Scientific) {
             return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'e', m_fixedDecimalPlaces);
-	    } else {
-	        return QString("%1%2%3")
+        } else {
+            return QString("%1%2%3")
                 .arg(m_truncated ? "'" : "")
                 .arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces)
                 .arg(m_truncated ? m_multiplierStr : "");
-	    }
+        }
 	}
 	else
 	{
 	    if (m_scale < 1.0f) { // sub second prints just as is
-	        return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
-	    }
+            return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'f', decimalPlaces);
+        }
 
 		QString str;
 		double actual = value * m_scale; // this is the actual value in seconds
@@ -66,7 +66,7 @@ QString ScaleEngine::formatTick(double value, int decimalPlaces)
 			str += QString("%1.").arg(tmp, 0, 'f', 0);
 			actual -= tmp * 86400.0;
 
-        	if (actual < 0.0) {
+            if (actual < 0.0) {
 			    actual *= -1.0;
             }
 		}
@@ -197,6 +197,10 @@ void ScaleEngine::calcScaleFactor()
 			m_unitStr = QString("dB");
 			break;
 
+		case Unit::SUnits:
+			m_unitStr = QString("S");
+			break;
+
 		case Unit::DecibelMilliWatt:
 			m_unitStr = QString("dBm");
 			break;
@@ -223,9 +227,9 @@ void ScaleEngine::calcScaleFactor()
 				m_unitStr = QString("s");
                 m_multiplierStr = "";
 			} else {
-			    m_unitStr = QString("ks");
+                m_unitStr = QString("ks");
                 m_multiplierStr = "k";
-			    m_scale = 1000.0;
+                m_scale = 1000.0;
 			}
 			break;
 
@@ -394,6 +398,15 @@ void ScaleEngine::forceTwoTicks()
 
 void ScaleEngine::reCalc()
 {
+    if (m_physicalUnit == Unit::SUnits) {
+        reCalcS();
+    } else {
+        reCalcStd();
+    }
+}
+
+void ScaleEngine::reCalcStd()
+{
 	float majorTickSize;
 	double rangeMinScaled;
 	double rangeMaxScaled;
@@ -430,7 +443,7 @@ void ScaleEngine::reCalc()
 	rangeMinScaled = rangeMin / m_scale;
 	rangeMaxScaled = rangeMax / m_scale;
 
-	if(m_orientation == Qt::Vertical)
+	if (m_orientation == Qt::Vertical)
 	{
 		maxNumMajorTicks = (int)(m_size / (fontMetrics.lineSpacing() * 1.3f));
 		m_majorTickValueDistance = calcMajorTickUnits((rangeMaxScaled - rangeMinScaled) / maxNumMajorTicks, &m_decimalPlaces);
@@ -439,10 +452,10 @@ void ScaleEngine::reCalc()
 	{
 		majorTickSize = (calcTickTextSize((rangeMaxScaled - rangeMinScaled) / 20) + 2) * m_charSize;
 
-		if(majorTickSize != 0.0) {
-		    maxNumMajorTicks = (int)(m_size / majorTickSize);
+		if (majorTickSize != 0.0) {
+            maxNumMajorTicks = (int)(m_size / majorTickSize);
 		} else {
-		    maxNumMajorTicks = 20;
+            maxNumMajorTicks = 20;
 		}
 
 		m_majorTickValueDistance = calcMajorTickUnits((rangeMaxScaled - rangeMinScaled) / maxNumMajorTicks, &m_decimalPlaces);
@@ -450,29 +463,33 @@ void ScaleEngine::reCalc()
 
 	numMajorTicks = (int)((rangeMaxScaled - rangeMinScaled) / m_majorTickValueDistance);
 
-	if(numMajorTicks == 0) {
+	if (numMajorTicks == 0)
+    {
 		forceTwoTicks();
 		return;
 	}
 
 	if(maxNumMajorTicks > 0)
 		m_numMinorTicks = (int)(m_size / (maxNumMajorTicks * fontMetrics.height()));
-		else m_numMinorTicks = 0;
-	if(m_numMinorTicks < 1)
+	else
+        m_numMinorTicks = 0;
+
+    if (m_numMinorTicks < 1)
 		m_numMinorTicks = 0;
-	else if(m_numMinorTicks < 2)
+	else if (m_numMinorTicks < 2)
 		m_numMinorTicks = 1;
-	else if(m_numMinorTicks < 5)
+	else if (m_numMinorTicks < 5)
 		m_numMinorTicks = 2;
-	else if(m_numMinorTicks < 10)
+	else if (m_numMinorTicks < 10)
 		m_numMinorTicks = 5;
-	else m_numMinorTicks = 10;
+	else
+        m_numMinorTicks = 10;
 
 	m_firstMajorTickValue = floor(rangeMinScaled / m_majorTickValueDistance) * m_majorTickValueDistance;
 
 	skip = 0;
 
-	if(rangeMinScaled == rangeMaxScaled)
+	if (rangeMinScaled == rangeMaxScaled)
 		return;
 
 	while (true)
@@ -490,25 +507,33 @@ void ScaleEngine::reCalc()
 			for (j = 1; j < m_numMinorTicks; j++)
             {
 				value2 = value + minorTickValue(j);
-				if(value2 < rangeMinScaled)
+
+				if (value2 < rangeMinScaled)
 					continue;
-				if(value2 > rangeMaxScaled)
+
+                if (value2 > rangeMaxScaled)
 					break;
-				pos = getPosFromValueTrunc((value + minorTickValue(j)) * m_scale);
-				if((pos >= 0) && (pos < m_size)) {
+
+                pos = getPosFromValueTrunc((value + minorTickValue(j)) * m_scale);
+
+                if ((pos >= 0) && (pos < m_size))
+                {
 					tick.pos = pos;
 					tick.major = false;
 					tick.textPos = -1;
 					tick.textSize = -1;
 					tick.text.clear();
 				}
+
 				m_tickList.append(tick);
 			}
 
 			pos = getPosFromValueTrunc(value * m_scale);
-			if(pos < 0.0)
+
+			if (pos < 0.0)
 				continue;
-			if(pos >= m_size)
+
+            if (pos >= m_size)
 				break;
 
 			tick.pos = pos;
@@ -517,47 +542,293 @@ void ScaleEngine::reCalc()
 			tick.textSize = -1;
 			tick.text.clear();
 
-			if(step % (skip + 1) != 0) {
+			if (step % (skip + 1) != 0)
+            {
 				m_tickList.append(tick);
 				step++;
 				continue;
 			}
-			step++;
 
+            step++;
 			str = formatTick(value, m_decimalPlaces);
 			tick.text = str;
 			tick.textSize = fontMetrics.boundingRect(tick.text).width();
-			if(m_orientation == Qt::Vertical) {
+
+            if (m_orientation == Qt::Vertical)
+            {
 				tick.textPos = pos - fontMetrics.ascent() / 2;
 				endPos = tick.textPos + fontMetrics.ascent();
-			} else {
+			}
+            else
+            {
 				tick.textPos = pos - fontMetrics.boundingRect(tick.text).width() / 2;
 				endPos = tick.textPos + tick.textSize;
 			}
 
-			if(lastEndPos >= tick.textPos) {
+			if (lastEndPos >= tick.textPos)
+            {
 				done = false;
 				break;
-			} else {
+			}
+            else
+            {
 				lastEndPos = endPos;
 			}
 
 			m_tickList.append(tick);
 		}
-		if(done)
+
+		if (done)
 			break;
-		skip++;
+
+        skip++;
 	}
 
 	// make sure we have at least two major ticks with numbers
 	numMajorTicks = 0;
-	for(i = 0; i < m_tickList.count(); i++) {
+
+	for (i = 0; i < m_tickList.count(); i++)
+    {
 		tick = m_tickList.at(i);
-		if(tick.major)
+
+        if (tick.major)
 			numMajorTicks++;
 	}
-	if(numMajorTicks < 2)
+
+	if (numMajorTicks < 2)
 		forceTwoTicks();
+}
+
+void ScaleEngine::reCalcS()
+{
+	float majorTickSize;
+	double rangeMinScaled;
+	double rangeMaxScaled;
+	int maxNumMajorTicks;
+	int numMajorTicks;
+	Tick tick;
+	QString str;
+	QFontMetricsF fontMetrics(m_font);
+
+	if (!m_recalc) {
+		return;
+    }
+
+    updateTruncation();
+
+	m_recalc = false;
+	m_tickList.clear();
+
+    calcScaleFactor();
+
+    double rangeMin = m_truncated ? m_rangeMin - m_truncationValue : m_rangeMin;
+    double rangeMax = m_truncated ? m_rangeMax - m_truncationValue : m_rangeMax;
+
+	rangeMinScaled = rangeMin / m_scale;
+	rangeMaxScaled = rangeMax / m_scale;
+
+	if (m_orientation == Qt::Vertical)
+	{
+		maxNumMajorTicks = (int)(m_size / (fontMetrics.lineSpacing() * 1.3f));
+		m_majorTickValueDistance = calcMajorTickUnits((rangeMaxScaled - rangeMinScaled) / maxNumMajorTicks, &m_decimalPlaces);
+	}
+	else
+	{
+		majorTickSize = (calcTickTextSize((rangeMaxScaled - rangeMinScaled) / 20) + 2) * m_charSize;
+
+		if (majorTickSize != 0.0) {
+            maxNumMajorTicks = (int)(m_size / majorTickSize);
+		} else {
+            maxNumMajorTicks = 20;
+		}
+
+		m_majorTickValueDistance = calcMajorTickUnits((rangeMaxScaled - rangeMinScaled) / maxNumMajorTicks, &m_decimalPlaces);
+	}
+
+	numMajorTicks = (int)((rangeMaxScaled - rangeMinScaled) / m_majorTickValueDistance);
+
+	if (numMajorTicks == 0)
+    {
+		forceTwoTicks();
+		return;
+	}
+
+	if (maxNumMajorTicks > 0)
+		m_numMinorTicks = (int)(m_size / (maxNumMajorTicks * fontMetrics.height()));
+	else
+        m_numMinorTicks = 0;
+
+    if (m_numMinorTicks < 1)
+		m_numMinorTicks = 0;
+	else if (m_numMinorTicks < 2)
+		m_numMinorTicks = 1;
+	else if (m_numMinorTicks < 5)
+		m_numMinorTicks = 2;
+	else if (m_numMinorTicks < 10)
+		m_numMinorTicks = 5;
+	else
+        m_numMinorTicks = 10;
+
+	m_firstMajorTickValue = floor(rangeMinScaled / m_majorTickValueDistance) * m_majorTickValueDistance;
+	// skip = 0;
+
+	if (rangeMinScaled == rangeMaxScaled)
+		return;
+
+    if (rangeMinScaled > -73.0) {
+        return;
+    }
+
+    if (rangeMaxScaled < -73.0) {
+        return;
+    }
+
+    // qDebug("ScaleEngine::reCalcS: m_numMinorTicks: %d maxNumMajorTicks: %d m_firstMajorTickValue: %le rangeMinScaled: %le rangeMaxScaled: %le",
+    //     m_numMinorTicks, maxNumMajorTicks, m_firstMajorTickValue, rangeMinScaled, rangeMaxScaled);
+
+    std::vector<double> sVals;
+    std::vector<double> dbVals;
+
+    int nbSVals = ((int) (-73.0 - rangeMinScaled)) / 6;
+    double sFloor = -73.0 - (double) nbSVals*6;
+
+    for (int i = 0; i < nbSVals; i++) {
+        sVals.push_back(sFloor + 6*i);
+    }
+
+    sVals.push_back(-73.0);
+
+    int nbDbVals = ((int) (rangeMaxScaled - -73.0)) / 10;
+
+    for (int i = 1; i < nbDbVals; i++) {
+        dbVals.push_back(-73.0 + 10*i);
+    }
+
+    truncS(maxNumMajorTicks, sVals, dbVals);
+
+    double minTickShiftS = 0.0;
+    double minTickShiftDb = 0.0;
+    m_tickList.clear();
+
+    if ((m_numMinorTicks > 1) && (sVals.size() > 1)) {
+        minTickShiftS = (sVals[1] - sVals[0]) / m_numMinorTicks;
+    }
+
+    if ((m_numMinorTicks > 1) && (dbVals.size() > 1)) {
+        minTickShiftDb = (dbVals[1] - dbVals[0]) / m_numMinorTicks;
+    }
+
+    for (auto sVal : sVals)
+    {
+        int s = (int) (sVal + 6*9 - -73.0) / 6;
+        // qDebug("ScaleEngine::reCalcS: S : %le (%d)", sVal, s);
+        tick.pos = getPosFromValue(sVal);
+        tick.major = true;
+        tick.textPos = -1;
+        tick.textSize = -1;
+        tick.text.clear();
+        tick.text = QString("%1").arg(s);
+        adjustText(fontMetrics, tick);
+        m_tickList.append(tick);
+
+        if (s == 9)
+        {
+            if (dbVals.size() != 0)
+            {
+                tick.pos = getPosFromValue(sVal + minTickShiftDb);
+                tick.major = false;
+                tick.textPos = -1;
+                tick.textSize = -1;
+                tick.text.clear();
+                m_tickList.append(tick);
+            }
+        }
+        else
+        {
+            for (int i = 1; i < m_numMinorTicks; i++)
+            {
+                tick.pos = getPosFromValue(sVal + i*(minTickShiftS / (m_numMinorTicks - 1)));
+                tick.major = false;
+                tick.textPos = -1;
+                tick.textSize = -1;
+                tick.text.clear();
+                m_tickList.append(tick);
+            }
+        }
+    }
+
+    for (auto dbVal : dbVals)
+    {
+        int db = (int) (dbVal - -73.0);
+        // qDebug("ScaleEngine::reCalcS: dB: %le (+%d)", dbVal, db);
+        tick.pos = getPosFromValue(dbVal);
+        tick.major = true;
+        tick.textPos = -1;
+        tick.textSize = -1;
+        tick.text.clear();
+        tick.text = QString("+%1").arg(db);
+        adjustText(fontMetrics, tick);
+        m_tickList.append(tick);
+
+        for (int i = 1; i < m_numMinorTicks; i++)
+        {
+            tick.pos = getPosFromValue(dbVal + i*(minTickShiftDb / (m_numMinorTicks - 1)));
+            tick.major = false;
+            tick.textPos = -1;
+            tick.textSize = -1;
+            tick.text.clear();
+            m_tickList.append(tick);
+        }
+    }
+}
+
+void ScaleEngine::truncS(int nbMaxTicks, std::vector<double>& sVals, std::vector<double>& dbVals)
+{
+    int nbAvailDb = nbMaxTicks - (int) sVals.size();
+
+    if (nbAvailDb <= 0)
+    {
+        dbVals.clear();
+
+        if (nbMaxTicks == (int) sVals.size()) {
+            return;
+        }
+
+        std::vector<double> newSVals;
+        int n = sVals.size() / nbMaxTicks;
+
+        for (int i = 0; n*i < (int) sVals.size(); i++) {
+            newSVals.push_back(sVals[sVals.size() -1 -n*i]);
+        }
+
+        sVals = newSVals;
+    }
+
+    if (nbAvailDb < (int) dbVals.size())
+    {
+        std::vector<double> newDbVals;
+        int n = dbVals.size() / nbAvailDb;
+
+        for (int i = 0; n*i < (int) dbVals.size(); i++) {
+            newDbVals.push_back(dbVals[n*i]);
+        }
+
+        dbVals = newDbVals;
+    }
+}
+
+void ScaleEngine::adjustText(const QFontMetricsF& fontMetrics, Tick& tick)
+{
+    tick.textSize = fontMetrics.boundingRect(tick.text).width();
+
+    if (m_orientation == Qt::Vertical)
+    {
+        tick.textPos = tick.pos - fontMetrics.ascent() / 2;
+    }
+    else
+    {
+        tick.textPos = tick.pos - fontMetrics.boundingRect(tick.text).width() / 2;
+    }
 }
 
 double ScaleEngine::majorTickValue(int tick)
@@ -569,6 +840,7 @@ double ScaleEngine::minorTickValue(int tick)
 {
 	if(m_numMinorTicks < 1)
 		return 0.0;
+
 	return (m_majorTickValueDistance * tick) / m_numMinorTicks;
 }
 

@@ -94,6 +94,10 @@ private:
 	int calcTickTextSize(double distance);
 	void forceTwoTicks();
 	void reCalc();
+    void reCalcStd();
+    void reCalcS();
+    void truncS(int nbMaxTicks, std::vector<double>& sVals, std::vector<double>& dbVals);
+    void adjustText(const QFontMetricsF& fontMetrics, Tick& tick);
     void updateTruncation();
 
     inline int order(double value) {

@@ -33,7 +33,8 @@ namespace Unit {
 		Time,
 		TimeHMS,
 		Volt,
-		Scientific
+		Scientific,
+        SUnits
 	};
 };
 

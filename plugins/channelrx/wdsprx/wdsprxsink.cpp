@@ -123,7 +123,7 @@ WDSPRxSink::WDSPRxSink() :
 
     m_sAvg = 0.0;
     m_sPeak = 0.0;
-    m_sCount = 1;
+    m_sCount = m_wdspBufSize;
 
     m_rxa = WDSP::RXA::create_rxa(
         m_wdspSampleRate, // input samplerate

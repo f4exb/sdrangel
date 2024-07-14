@@ -283,6 +283,14 @@ void WDSPRxGUI::on_ritFrequency_valueChanged(int value)
     applySettings();
 }
 
+void WDSPRxGUI::on_dbOrS_toggled(bool checked)
+{
+    ui->dbOrS->setText(checked ? "dB": "S");
+    m_settings.m_dbOrS = checked;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_dbOrS = m_settings.m_dbOrS;
+    ui->channelPowerMeter->setRange(WDSPRxSettings::m_minPowerThresholdDB, 0, !checked);
+}
+
 void WDSPRxGUI::on_audioMute_toggled(bool checked)
 {
 	m_audioMute = checked;
@@ -333,6 +341,7 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
     m_settings.m_audioBinaural = m_settings.m_profiles[m_settings.m_profileIndex].m_audioBinaural;
     m_settings.m_audioFlipChannels = m_settings.m_profiles[m_settings.m_profileIndex].m_audioFlipChannels;
     m_settings.m_dsb = m_settings.m_profiles[m_settings.m_profileIndex].m_dsb;
+    m_settings.m_dbOrS = m_settings.m_profiles[m_settings.m_profileIndex].m_dbOrS;
     // AGC setup
     m_settings.m_agc = m_settings.m_profiles[m_settings.m_profileIndex].m_agc;
     m_settings.m_agcGain = m_settings.m_profiles[m_settings.m_profileIndex].m_agcGain;
@@ -730,8 +739,6 @@ void WDSPRxGUI::applyBandwidths(unsigned int spanLog2, bool force)
     ui->lowCut->blockSignals(false);
     ui->BW->blockSignals(false);
 
-    ui->channelPowerMeter->setRange(WDSPRxSettings::m_minPowerThresholdDB, 0);
-
     m_settings.m_dsb = dsb;
     m_settings.m_profiles[m_settings.m_profileIndex].m_dsb = dsb;
     m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2 = spanLog2;
@@ -843,6 +850,9 @@ void WDSPRxGUI::displaySettings()
         ui->BWText->setText(tr("%1k").arg(s));
     }
 
+    ui->dbOrS->setText(m_settings.m_dbOrS ? "dB": "S");
+    ui->channelPowerMeter->setRange(WDSPRxSettings::m_minPowerThresholdDB, 0, !m_settings.m_dbOrS);
+
     ui->spanLog2->blockSignals(false);
     ui->dsb->blockSignals(false);
     ui->BW->blockSignals(false);
@@ -856,6 +866,7 @@ void WDSPRxGUI::displaySettings()
     int volume = CalcDb::dbPower(m_settings.m_volume);
     ui->volume->setValue(volume);
     ui->volumeText->setText(QString("%1").arg(volume));
+
 
     updateIndexLabel();
 
@@ -1364,6 +1375,7 @@ void WDSPRxGUI::makeUIConnections()
     QObject::connect(ui->equalizer, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_equalizer_toggled);
     QObject::connect(ui->rit, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_rit_toggled);
     QObject::connect(ui->ritFrequency, &QDial::valueChanged, this, &WDSPRxGUI::on_ritFrequency_valueChanged);
+    QObject::connect(ui->dbOrS, &QToolButton::toggled, this, &WDSPRxGUI::on_dbOrS_toggled);
 }
 
 void WDSPRxGUI::updateAbsoluteCenterFrequency()

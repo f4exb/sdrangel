@@ -331,9 +331,18 @@
     <item>
      <layout class="QHBoxLayout" name="channelPowerMeterLayout">
       <item>
-       <widget class="QLabel" name="channelPowerMeterUnits">
+       <widget class="QToolButton" name="dbOrS">
+        <property name="toolTip">
+         <string>Toggle between dB and S units</string>
+        </property>
         <property name="text">
          <string>dB</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

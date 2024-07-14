@@ -28,8 +28,6 @@ warren@wpratt.com
 #ifndef wdsp_channel_h
 #define wdsp_channel_h
 
-#include <atomic>
-
 #include <QThread>
 
 #include "export.h"
@@ -55,7 +53,7 @@ public:
     int bfo;                    // 'block_for_output', block fexchange until output is available
     volatile long flushflag;
     QThread channelThread;
-    std::atomic<long> upslew;
+    long upslew;
     // struct  //io buffers
     // {
     //     IOB pc, pd, pe, pf;     // copies for console calls, dsp, exchange, and flush thread
