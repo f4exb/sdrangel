@@ -409,15 +409,16 @@ void WDSPRxGUI::on_demod_currentIndexChanged(int index)
     switch(m_settings.m_demod)
     {
     case WDSPRxProfile::DemodSSB:
+    case WDSPRxProfile::DemodSAM:
         break;
     case WDSPRxProfile::DemodAM:
-    case WDSPRxProfile::DemodSAM:
     case WDSPRxProfile::DemodFMN:
         m_settings.m_dsb = true;
         break;
     default:
         break;
     }
+
     displaySettings();
     applyBandwidths(m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2, true); // does applySettings(true)
 }
@@ -828,6 +829,22 @@ void WDSPRxGUI::displaySettings()
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     ui->fftWindow->setCurrentIndex(m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow);
+
+    // DSB enable/disable
+    switch(m_settings.m_demod)
+    {
+    case WDSPRxProfile::DemodSSB:
+    case WDSPRxProfile::DemodSAM:
+        ui->dsb->setEnabled(true);
+        break;
+    case WDSPRxProfile::DemodAM:
+    case WDSPRxProfile::DemodFMN:
+        ui->dsb->setEnabled(false);
+        break;
+    default:
+        ui->dsb->setEnabled(true);
+        break;
+    }
 
     // Prevent uncontrolled triggering of applyBandwidths
     ui->spanLog2->blockSignals(true);

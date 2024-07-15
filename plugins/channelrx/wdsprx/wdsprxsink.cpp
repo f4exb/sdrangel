@@ -451,17 +451,10 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
         if (settings.m_demod == WDSPRxProfile::DemodSSB)
         {
-            if (dsb)
-            {
+            if (dsb) {
                 WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_DSB);
-            }
-            else
-            {
-                if (usb) {
-                    WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_USB);
-                } else {
-                    WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_LSB);
-                }
+            } else {
+                WDSP::RXA::SetMode(*m_rxa, usb ? WDSP::RXA::RXA_USB : WDSP::RXA::RXA_LSB);
             }
         }
         else if (settings.m_demod == WDSPRxProfile::DemodAM)
@@ -471,6 +464,12 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         else if (settings.m_demod == WDSPRxProfile::DemodSAM)
         {
             WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_SAM);
+
+            if (dsb) {
+                WDSP::AMD::SetAMDSBMode(*m_rxa, 0);
+            } else {
+                WDSP::AMD::SetAMDSBMode(*m_rxa, usb ? 2 : 1);
+            }
         }
         else if (settings.m_demod == WDSPRxProfile::DemodFMN)
         {
