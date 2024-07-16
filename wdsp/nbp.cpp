@@ -46,10 +46,10 @@ namespace WDSP {
     a->master_run = master_run;
     a->maxnotches = maxnotches;
     a->nn = 0;
-    a->fcenter = new float[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
-    a->fwidth  = new float[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
-    a->nlow    = new float[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
-    a->nhigh   = new float[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
+    a->fcenter = new double[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
+    a->fwidth  = new double[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
+    a->nlow    = new double[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
+    a->nhigh   = new double[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
     a->active  = new int[a->maxnotches]; // (int    *) malloc0 (a->maxnotches * sizeof (int   ));
     return a;
 }
@@ -69,7 +69,7 @@ void NOTCHDB::destroy_notchdb (NOTCHDB *b)
 *                                                                                                       *
 ********************************************************************************************************/
 
-float* NBP::fir_mbandpass (int N, int nbp, float* flow, float* fhigh, float rate, float scale, int wintype)
+float* NBP::fir_mbandpass (int N, int nbp, double* flow, double* fhigh, double rate, double scale, int wintype)
 {
     int i, k;
     float* impulse = new float[N * 2]; // (float *) malloc0 (N * sizeof (complex));
@@ -87,9 +87,9 @@ float* NBP::fir_mbandpass (int N, int nbp, float* flow, float* fhigh, float rate
     return impulse;
 }
 
-float NBP::min_notch_width (NBP *a)
+double NBP::min_notch_width (NBP *a)
 {
-    float min_width;
+    double min_width;
     switch (a->wintype)
     {
     case 0:
@@ -105,23 +105,23 @@ float NBP::min_notch_width (NBP *a)
 int NBP::make_nbp (
     int nn,
     int* active,
-    float* center,
-    float* width,
-    float* nlow,
-    float* nhigh,
-    float minwidth,
+    double* center,
+    double* width,
+    double* nlow,
+    double* nhigh,
+    double minwidth,
     int autoincr,
-    float flow,
-    float fhigh,
-    float* bplow,
-    float* bphigh,
+    double flow,
+    double fhigh,
+    double* bplow,
+    double* bphigh,
     int* havnotch
 )
 {
     int nbp;
     int nnbp, adds;
     int i, j, k;
-    float nl, nh;
+    double nl, nh;
     int* del = new int[1024]; // (int *) malloc0 (1024 * sizeof (int));
     if (fhigh > flow)
     {
@@ -202,8 +202,8 @@ int NBP::make_nbp (
 void NBP::calc_nbp_lightweight (NBP *a)
 {   // calculate and set new impulse response; used when changing tune freq or shift freq
     int i;
-    float fl, fh;
-    float offset;
+    double fl, fh;
+    double offset;
     NOTCHDB *b = a->ptraddr;
     if (a->fnfrun)
     {
@@ -249,7 +249,7 @@ void NBP::calc_nbp_impulse (NBP *a)
 {   // calculates impulse response; for create_fircore() and parameter changes
     int i;
     float fl, fh;
-    float offset;
+    double offset;
     NOTCHDB *b = a->ptraddr;
     if (a->fnfrun)
     {
@@ -309,11 +309,11 @@ NBP* NBP::create_nbp(
     int mp,
     float* in,
     float* out,
-    float flow,
-    float fhigh,
+    double flow,
+    double fhigh,
     int rate,
     int wintype,
-    float gain,
+    double gain,
     int autoincr,
     int maxpb,
     NOTCHDB* ptraddr
@@ -326,7 +326,7 @@ NBP* NBP::create_nbp(
     a->size = size;
     a->nc = nc;
     a->mp = mp;
-    a->rate = (float)rate;
+    a->rate = (double) rate;
     a->wintype = wintype;
     a->gain = gain;
     a->in = in;
@@ -336,8 +336,8 @@ NBP* NBP::create_nbp(
     a->fhigh = fhigh;
     a->maxpb = maxpb;
     a->ptraddr = ptraddr;
-    a->bplow   = new float[a->maxpb]; // (float *) malloc0 (a->maxpb * sizeof (float));
-    a->bphigh  = new float[a->maxpb]; // (float *) malloc0 (a->maxpb * sizeof (float));
+    a->bplow   = new double[a->maxpb]; // (float *) malloc0 (a->maxpb * sizeof (float));
+    a->bphigh  = new double[a->maxpb]; // (float *) malloc0 (a->maxpb * sizeof (float));
     calc_nbp_impulse (a);
     a->p = FIRCORE::create_fircore (a->size, a->in, a->out, a->nc, a->mp, a->impulse);
     // print_impulse ("nbp.txt", a->size + 1, impulse, 1, 0);
@@ -433,7 +433,7 @@ void NBP::UpdateNBPFilters(RXA& rxa)
     }
 }
 
-int NBP::NBPAddNotch (RXA& rxa, int notch, float fcenter, float fwidth, int active)
+int NBP::NBPAddNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active)
 {
     NOTCHDB *b;
     int i, j;
@@ -463,7 +463,7 @@ int NBP::NBPAddNotch (RXA& rxa, int notch, float fcenter, float fwidth, int acti
     return rval;
 }
 
-int NBP::NBPGetNotch (RXA& rxa, int notch, float* fcenter, float* fwidth, int* active)
+int NBP::NBPGetNotch (RXA& rxa, int notch, double* fcenter, double* fwidth, int* active)
 {
     NOTCHDB *a;
     int rval;
@@ -512,7 +512,7 @@ int NBP::NBPDeleteNotch (RXA& rxa, int notch)
     return rval;
 }
 
-int NBP::NBPEditNotch (RXA& rxa, int notch, float fcenter, float fwidth, int active)
+int NBP::NBPEditNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active)
 {
     NOTCHDB *a;
     int rval;
@@ -539,7 +539,7 @@ void NBP::NBPGetNumNotches (RXA& rxa, int* nnotches)
     *nnotches = a->nn;
 }
 
-void NBP::NBPSetTuneFrequency (RXA& rxa, float tunefreq)
+void NBP::NBPSetTuneFrequency (RXA& rxa, double tunefreq)
 {
     NOTCHDB *a;
     a = rxa.ndb.p;
@@ -551,7 +551,7 @@ void NBP::NBPSetTuneFrequency (RXA& rxa, float tunefreq)
     }
 }
 
-void NBP::NBPSetShiftFrequency (RXA& rxa, float shift)
+void NBP::NBPSetShiftFrequency (RXA& rxa, double shift)
 {
     NOTCHDB *a;
     a = rxa.ndb.p;
@@ -589,7 +589,7 @@ void NBP::NBPSetRun (RXA& rxa, int run)
     a->run = run;
 }
 
-void NBP::NBPSetFreqs (RXA& rxa, float flow, float fhigh)
+void NBP::NBPSetFreqs (RXA& rxa, double flow, double fhigh)
 {
     NBP *a;
     a = rxa.nbp0.p;
@@ -651,7 +651,7 @@ void NBP::NBPSetMP (RXA& rxa, int mp)
     }
 }
 
-void NBP::NBPGetMinNotchWidth (RXA& rxa, float* minwidth)
+void NBP::NBPGetMinNotchWidth (RXA& rxa, double* minwidth)
 {
     NBP *a;
     a = rxa.nbp0.p;

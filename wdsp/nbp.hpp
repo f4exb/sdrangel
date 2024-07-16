@@ -39,14 +39,14 @@ class WDSP_API NOTCHDB
 {
 public:
     int master_run;
-    float tunefreq;
-    float shift;
+    double tunefreq;
+    double shift;
     int nn;
     int* active;
-    float* fcenter;
-    float* fwidth;
-    float* nlow;
-    float* nhigh;
+    double* fcenter;
+    double* fwidth;
+    double* nlow;
+    double* nhigh;
     int maxnotches;
 
     static NOTCHDB* create_notchdb (int master_run, int maxnotches);
@@ -63,19 +63,19 @@ public:
     int size;               // buffer size
     int nc;                 // number of filter coefficients
     int mp;                 // minimum phase flag
-    float* in;             // input buffer
-    float* out;            // output buffer
-    float flow;            // low bandpass cutoff freq
-    float fhigh;           // high bandpass cutoff freq
-    float* impulse;        // filter impulse response
-    float rate;            // sample rate
+    float* in;              // input buffer
+    float* out;             // output buffer
+    double flow;            // low bandpass cutoff freq
+    double fhigh;           // high bandpass cutoff freq
+    float* impulse;         // filter impulse response
+    double rate;            // sample rate
     int wintype;            // filter window type
-    float gain;            // filter gain
+    double gain;            // filter gain
     int autoincr;           // auto-increment notch width
     int maxpb;              // maximum number of passbands
     NOTCHDB* ptraddr;       // ptr to addr of notch-database data structure
-    float* bplow;          // array of passband lows
-    float* bphigh;         // array of passband highs
+    double* bplow;          // array of passband lows
+    double* bphigh;         // array of passband highs
     int numpb;              // number of passbands
     FIRCORE *p;
     int havnotch;
@@ -90,11 +90,11 @@ public:
         int mp,
         float* in,
         float* out,
-        float flow,
-        float fhigh,
+        double flow,
+        double fhigh,
         int rate,
         int wintype,
-        float gain,
+        double gain,
         int autoincr,
         int maxpb,
         NOTCHDB* ptraddr
@@ -111,40 +111,40 @@ public:
     // RXA Properties
     static void UpdateNBPFiltersLightWeight (RXA& rxa);
     static void UpdateNBPFilters(RXA& rxa);
-    static int NBPAddNotch (RXA& rxa, int notch, float fcenter, float fwidth, int active);
-    static int NBPGetNotch (RXA& rxa, int notch, float* fcenter, float* fwidth, int* active);
+    static int NBPAddNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active);
+    static int NBPGetNotch (RXA& rxa, int notch, double* fcenter, double* fwidth, int* active);
     static int NBPDeleteNotch (RXA& rxa, int notch);
-    static int NBPEditNotch (RXA& rxa, int notch, float fcenter, float fwidth, int active);
+    static int NBPEditNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active);
     static void NBPGetNumNotches (RXA& rxa, int* nnotches);
-    static void NBPSetTuneFrequency (RXA& rxa, float tunefreq);
-    static void NBPSetShiftFrequency (RXA& rxa, float shift);
+    static void NBPSetTuneFrequency (RXA& rxa, double tunefreq);
+    static void NBPSetShiftFrequency (RXA& rxa, double shift);
     static void NBPSetNotchesRun (RXA& rxa, int run);
     static void NBPSetRun (RXA& rxa, int run);
-    static void NBPSetFreqs (RXA& rxa, float flow, float fhigh);
+    static void NBPSetFreqs (RXA& rxa, double flow, double fhigh);
     static void NBPSetWindow (RXA& rxa, int wintype);
 
     static void NBPSetNC (RXA& rxa, int nc);
     static void NBPSetMP (RXA& rxa, int mp);
 
-    static void NBPGetMinNotchWidth (RXA& rxa, float* minwidth);
+    static void NBPGetMinNotchWidth (RXA& rxa, double* minwidth);
     static void NBPSetAutoIncrease (RXA& rxa, int autoincr);
 
 private:
-    static float* fir_mbandpass (int N, int nbp, float* flow, float* fhigh, float rate, float scale, int wintype);
-    static float min_notch_width (NBP *a);
+    static float* fir_mbandpass (int N, int nbp, double* flow, double* fhigh, double rate, double scale, int wintype);
+    static double min_notch_width (NBP *a);
     static int make_nbp (
         int nn,
         int* active,
-        float* center,
-        float* width,
-        float* nlow,
-        float* nhigh,
-        float minwidth,
+        double* center,
+        double* width,
+        double* nlow,
+        double* nhigh,
+        double minwidth,
         int autoincr,
-        float flow,
-        float fhigh,
-        float* bplow,
-        float* bphigh,
+        double flow,
+        double fhigh,
+        double* bplow,
+        double* bphigh,
         int* havnotch
     );
     static void calc_nbp_lightweight (NBP *a);
