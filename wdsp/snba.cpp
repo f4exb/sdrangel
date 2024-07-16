@@ -240,8 +240,8 @@ void SNBA::flush_snba (SNBA *d)
     memset (d->sdet.vp,      0, d->xsize  * sizeof (double));
     memset (d->sdet.vpwr,    0, d->xsize  * sizeof (double));
 
-    memset (d->inbuff,       0, d->isize  * sizeof (wcomplex));
-    memset (d->outbuff,      0, d->isize  * sizeof (wcomplex));
+    std::fill(d->inbuff,  d->inbuff + d->isize  * 2,  0);
+    std::fill(d->outbuff, d->outbuff + d->isize  * 2, 0);
 
     RESAMPLE::flush_resample (d->inresamp);
     RESAMPLE::flush_resample (d->outresamp);
@@ -673,7 +673,7 @@ void SNBA::xsnba (SNBA *d)
         RESAMPLE::xresample (d->outresamp);
     }
     else if (d->out != d->in)
-        memcpy (d->out, d->in, d->bsize * sizeof (wcomplex));
+        std::copy(d->in, d->in + d->bsize * 2, d->out);
 }
 
 /********************************************************************************************************

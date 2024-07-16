@@ -351,13 +351,13 @@ void GEN::xgen (GEN *a)
             break;
         default:    // silence
             {
-                memset (a->out, 0, a->size * sizeof (wcomplex));
+                std::fill(a->out, a->out + a->size * 2, 0);
                 break;
             }
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void GEN::setBuffers_gen (GEN *a, float* in, float* out)

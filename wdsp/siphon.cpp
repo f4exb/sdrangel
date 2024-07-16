@@ -101,9 +101,9 @@ void SIPHON::destroy_siphon (SIPHON *a)
 
 void SIPHON::flush_siphon (SIPHON *a)
 {
-    memset (a->sipbuff, 0, a->sipsize * sizeof (wcomplex));
-    memset (a->sipout , 0, a->sipsize * sizeof (wcomplex));
-    memset (a->specout, 0, a->fftsize * sizeof (wcomplex));
+    std::fill(a->sipbuff, a->sipbuff + a->sipsize * 2, 0);
+    std::fill(a->sipout,  a->sipout  + a->sipsize * 2, 0);
+    std::fill(a->specout, a->specout + a->fftsize * 2, 0);
     a->idx = 0;
 }
 
@@ -117,7 +117,7 @@ void SIPHON::xsiphon (SIPHON *a, int pos)
         {
         case 0:
             if (a->insize >= a->sipsize)
-                memcpy (a->sipbuff, &(a->in[2 * (a->insize - a->sipsize)]), a->sipsize * sizeof (wcomplex));
+                std::copy(&(a->in[2 * (a->insize - a->sipsize)]), &(a->in[2 * (a->insize - a->sipsize)]) + a->sipsize * 2, a->sipbuff);
             else
             {
                 if (a->insize > (a->sipsize - a->idx))
@@ -130,8 +130,8 @@ void SIPHON::xsiphon (SIPHON *a, int pos)
                     first = a->insize;
                     second = 0;
                 }
-                memcpy (a->sipbuff + 2 * a->idx, a->in, first * sizeof (wcomplex));
-                memcpy (a->sipbuff, a->in + 2 * first, second * sizeof (wcomplex));
+                std::copy(a->in, a->in + first * 2, a->sipbuff + 2 * a->idx);
+                std::copy(a->in + 2 * first, a->in + 2 * first + second * 2, a->sipbuff);
                 if ((a->idx += a->insize) >= a->sipsize) a->idx -= a->sipsize;
             }
             break;
@@ -166,11 +166,11 @@ void SIPHON::suck (SIPHON *a)
         int j = (a->idx - a->outsize) & mask;
         int size = a->sipsize - j;
         if (size >= a->outsize)
-            memcpy (a->sipout, &(a->sipbuff[2 * j]), a->outsize * sizeof (wcomplex));
+            std::copy(&(a->sipbuff[2 * j]), &(a->sipbuff[2 * j]) + a->outsize * 2, a->sipout);
         else
         {
-            memcpy (a->sipout, &(a->sipbuff[2 * j]), size * sizeof (wcomplex));
-            memcpy (&(a->sipout[2 * size]), a->sipbuff, (a->outsize - size) * sizeof (wcomplex));
+            std::copy(&(a->sipbuff[2 * j]), &(a->sipbuff[2 * j]) + size * 2, a->sipout);
+            std::copy(a->sipbuff, a->sipbuff + (a->outsize - size) * 2, &(a->sipout[2 * size]));
         }
     }
 }

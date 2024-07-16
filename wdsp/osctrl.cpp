@@ -83,8 +83,8 @@ void OSCTRL::destroy_osctrl (OSCTRL *a)
 
 void OSCTRL::flush_osctrl (OSCTRL *a)
 {
-    memset (a->dl,    0, a->dl_len * sizeof (wcomplex));
-    memset (a->dlenv, 0, a->pn     * sizeof (float));
+    std::fill(a->dl, a->dl + a->dl_len * 2, 0);
+    std::fill(a->dlenv, a->dlenv + a->pn, 0);
 }
 
 void OSCTRL::xosctrl (OSCTRL *a)
@@ -116,7 +116,7 @@ void OSCTRL::xosctrl (OSCTRL *a)
         }
     }
     else if (a->inbuff != a->outbuff)
-        memcpy (a->outbuff, a->inbuff, a->size * sizeof (wcomplex));
+        std::copy(a->inbuff, a->inbuff + a->size * 2, a->outbuff);
 }
 
 void OSCTRL::setBuffers_osctrl (OSCTRL *a, float* in, float* out)

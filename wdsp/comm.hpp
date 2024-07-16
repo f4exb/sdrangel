@@ -74,12 +74,6 @@ warren@wpratt.com
 #define PI                              3.1415926535897932
 #define TWOPI                           6.2831853071795864
 
-namespace WDSP {
-// miscellaneous
-typedef float wcomplex[2];
-typedef double dcomplex[2];
-}
-
 #include <string.h>
 #include <math.h>
 #include <cstdint>

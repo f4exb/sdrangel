@@ -74,7 +74,7 @@ void COMPRESSOR::xcompressor (COMPRESSOR *a)
             a->outbuff[2 * i + 1] = 0.0;
         }
     else if (a->inbuff != a->outbuff)
-        memcpy(a->outbuff, a->inbuff, a->buffsize * sizeof (wcomplex));
+        std::copy(a->inbuff, a->inbuff + a->buffsize * 2, a->outbuff);
 }
 
 void COMPRESSOR::setBuffers_compressor (COMPRESSOR *a, float* in, float* out)

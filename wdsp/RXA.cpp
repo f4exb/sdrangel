@@ -611,9 +611,9 @@ void RXA::destroy_rxa (RXA *rxa)
 
 void RXA::flush_rxa (RXA *rxa)
 {
-    memset (rxa->inbuff,  0, 1 * rxa->dsp_insize  * sizeof (wcomplex));
-    memset (rxa->outbuff, 0, 1 * rxa->dsp_outsize * sizeof (wcomplex));
-    memset (rxa->midbuff, 0, 2 * rxa->dsp_size    * sizeof (wcomplex));
+    std::fill(rxa->inbuff,  rxa->inbuff  + 1 * rxa->dsp_insize  * 2, 0);
+    std::fill(rxa->outbuff, rxa->outbuff + 1 * rxa->dsp_outsize * 2, 0);
+    std::fill(rxa->midbuff, rxa->midbuff + 2 * rxa->dsp_size    * 2, 0);
     SHIFT::flush_shift (rxa->shift.p);
     RESAMPLE::flush_resample (rxa->rsmpin.p);
     GEN::flush_gen (rxa->gen0.p);

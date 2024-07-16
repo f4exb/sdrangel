@@ -131,7 +131,7 @@ void BPSNBA::destroy_bpsnba (BPSNBA *a)
 
 void BPSNBA::flush_bpsnba (BPSNBA *a)
 {
-    memset (a->buff, 0, a->size * sizeof (wcomplex));
+    std::fill(a->buff, a->buff + a->size * 2, 0);
     NBP::flush_nbp (a->bpsnba);
 }
 
@@ -160,7 +160,7 @@ void BPSNBA::setSize_bpsnba (BPSNBA *a, int size)
 void BPSNBA::xbpsnbain (BPSNBA *a, int position)
 {
     if (a->run && a->position == position)
-        memcpy (a->buff, a->in, a->size * sizeof (wcomplex));
+        std::copy(a->in, a->in + a->size * 2, a->buff);
 }
 
 void BPSNBA::xbpsnbaout (BPSNBA *a, int position)

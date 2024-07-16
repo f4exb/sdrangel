@@ -86,7 +86,7 @@ void SHIFT::xshift (SHIFT *a)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void SHIFT::setBuffers_shift(SHIFT *a, float* in, float* out)

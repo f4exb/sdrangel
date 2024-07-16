@@ -74,7 +74,7 @@ void FIRMIN::destroy_firmin (FIRMIN *a)
 
 void FIRMIN::flush_firmin (FIRMIN *a)
 {
-    memset (a->ring, 0, a->rsize * sizeof (wcomplex));
+    std::fill(a->ring, a->ring + a->rsize * 2, 0);
     a->idx = 0;
 }
 
@@ -100,7 +100,7 @@ void FIRMIN::xfirmin (FIRMIN *a, int pos)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void FIRMIN::setBuffers_firmin (FIRMIN *a, float* in, float* out)

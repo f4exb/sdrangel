@@ -113,7 +113,7 @@ void ICFIR::xicfir (ICFIR *a)
     if (a->run)
         FIRCORE::xfircore (a->p);
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void ICFIR::setBuffers_icfir (ICFIR *a, float* in, float* out)

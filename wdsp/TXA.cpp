@@ -558,9 +558,9 @@ void TXA::destroy_txa (TXA *txa)
 
 void TXA::flush_txa (TXA* txa)
 {
-    memset (txa->inbuff,  0, 1 * txa->dsp_insize  * sizeof (wcomplex));
-    memset (txa->outbuff, 0, 1 * txa->dsp_outsize * sizeof (wcomplex));
-    memset (txa->midbuff, 0, 2 * txa->dsp_size    * sizeof (wcomplex));
+    std::fill(txa->inbuff,  txa->inbuff  + 1 * txa->dsp_insize  * 2, 0);
+    std::fill(txa->outbuff, txa->outbuff + 1 * txa->dsp_outsize * 2, 0);
+    std::fill(txa->midbuff, txa->midbuff + 2 * txa->dsp_size    * 2, 0);
     RESAMPLE::flush_resample (txa->rsmpin.p);
     GEN::flush_gen (txa->gen0.p);
     PANEL::flush_panel (txa->panel.p);

@@ -33,13 +33,13 @@ namespace WDSP {
 
 float* FIR::fftcv_mults (int NM, float* c_impulse)
 {
-    float* mults        = new float[NM * 2]; // (float *) malloc0 (NM * sizeof (wcomplex));
-    float* cfft_impulse = new float[NM * 2]; // (float *) malloc0 (NM * sizeof (wcomplex));
+    float* mults        = new float[NM * 2];
+    float* cfft_impulse = new float[NM * 2];
     fftwf_plan ptmp = fftwf_plan_dft_1d(NM, (fftwf_complex *) cfft_impulse,
             (fftwf_complex *) mults, FFTW_FORWARD, FFTW_PATIENT);
-    memset (cfft_impulse, 0, NM * sizeof (wcomplex));
+    std::fill(cfft_impulse, cfft_impulse + NM * 2, 0);
     // store complex coefs right-justified in the buffer
-    memcpy (&(cfft_impulse[NM - 2]), c_impulse, (NM / 2 + 1) * sizeof(wcomplex));
+    std::copy(c_impulse, c_impulse + (NM / 2 + 1) * 2, &(cfft_impulse[NM - 2]));
     fftwf_execute (ptmp);
     fftwf_destroy_plan (ptmp);
     delete[] cfft_impulse;
@@ -91,8 +91,8 @@ float* FIR::fir_fsamp_odd (int N, float* A, int rtype, float scale, int wintype)
     int mid = (N - 1) / 2;
     float mag, phs;
     float* window;
-    float *fcoef     = new float[N * 2]; // (float *) malloc0 (N * sizeof (wcomplex));
-    float *c_impulse = new float[N * 2]; // (float *) malloc0 (N * sizeof (wcomplex));
+    float *fcoef     = new float[N * 2];
+    float *c_impulse = new float[N * 2];
     fftwf_plan ptmp = fftwf_plan_dft_1d(N, (fftwf_complex *)fcoef, (fftwf_complex *)c_impulse, FFTW_BACKWARD, FFTW_PATIENT);
     float local_scale = 1.0 / (float)N;
     for (i = 0; i <= mid; i++)
@@ -339,7 +339,7 @@ void FIR::mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity)
     float* ana     = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
     float* impulse = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
     float* newfreq = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
-    memcpy (firpad, fir, N * sizeof (wcomplex));
+    std::copy(fir, fir + N * 2, firpad);
     fftwf_plan pfor = fftwf_plan_dft_1d (size, (fftwf_complex *) firpad,
             (fftwf_complex *) firfreq, FFTW_FORWARD, FFTW_PATIENT);
     fftwf_plan prev = fftwf_plan_dft_1d (size, (fftwf_complex *) newfreq,
@@ -365,9 +365,9 @@ void FIR::mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity)
     }
     fftwf_execute (prev);
     if (polarity)
-        memcpy (mpfir, &impulse[2 * (pfactor - 1) * N], N * sizeof (wcomplex));
+        std::copy(&impulse[2 * (pfactor - 1) * N], &impulse[2 * (pfactor - 1) * N] + N * 2, mpfir);
     else
-        memcpy (mpfir, impulse, N * sizeof (wcomplex));
+        std::copy(impulse, impulse + N * 2, mpfir);
     // print_impulse("min_imp.txt", N, mpfir, 1, 0);
     fftwf_destroy_plan (prev);
     fftwf_destroy_plan (pfor);

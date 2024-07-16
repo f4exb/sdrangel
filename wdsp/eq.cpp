@@ -225,7 +225,7 @@ void EQP::xeqp (EQP *a)
     if (a->run)
         FIRCORE::xfircore (a->p);
     else
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void EQP::setBuffers_eqp (EQP *a, float* in, float* out)
@@ -579,7 +579,7 @@ void EQ::destroy_eq (EQ *a)
 
 void EQ::flush_eq (EQ *a)
 {
-    memset (a->infilt, 0, 2 * a->size * sizeof (wcomplex));
+    std::fill(a->infilt, a->infilt + 2 * a->size * 2, 0);
 }
 
 void EQ::xeq (EQ *a)
@@ -588,7 +588,7 @@ void EQ::xeq (EQ *a)
     float I, Q;
     if (a->run)
     {
-        memcpy (&(a->infilt[2 * a->size]), a->in, a->size * sizeof (wcomplex));
+        std::copy(a->in, a->in + a->size * 2, &(a->infilt[2 * a->size]));
         fftwf_execute (a->CFor);
         for (i = 0; i < 2 * a->size; i++)
         {
@@ -598,10 +598,10 @@ void EQ::xeq (EQ *a)
             a->product[2 * i + 1] = I * a->mults[2 * i + 1] + Q * a->mults[2 * i + 0];
         }
         fftwf_execute (a->CRev);
-        memcpy (a->infilt, &(a->infilt[2 * a->size]), a->size * sizeof(wcomplex));
+        std::copy(&(a->infilt[2 * a->size]), &(a->infilt[2 * a->size]) + a->size * 2, a->infilt);
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void EQ::setBuffers_eq (EQ *a, float* in, float* out)

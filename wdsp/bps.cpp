@@ -43,8 +43,8 @@ namespace WDSP {
 void BPS::calc_bps (BPS *a)
 {
     float* impulse;
-    a->infilt = new float[2 * a->size * 2]; // (float *)malloc0(2 * a->size * sizeof(wcomplex));
-    a->product = new float[2 * a->size * 2]; // (float *)malloc0(2 * a->size * sizeof(wcomplex));
+    a->infilt = new float[2 * a->size * 2];
+    a->product = new float[2 * a->size * 2];
     impulse = FIR::fir_bandpass(a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
     a->mults = FIR::fftcv_mults(2 * a->size, impulse);
     a->CFor = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->infilt, (fftwf_complex *)a->product, FFTW_FORWARD, FFTW_PATIENT);
@@ -87,7 +87,7 @@ void BPS::destroy_bps (BPS *a)
 
 void BPS::flush_bps (BPS *a)
 {
-    memset (a->infilt, 0, 2 * a->size * sizeof (wcomplex));
+    std::fill(a->infilt, a->infilt + 2 * a->size * 2, 0);
 }
 
 void BPS::xbps (BPS *a, int pos)
@@ -96,7 +96,7 @@ void BPS::xbps (BPS *a, int pos)
     float I, Q;
     if (a->run && pos == a->position)
     {
-        memcpy (&(a->infilt[2 * a->size]), a->in, a->size * sizeof (wcomplex));
+        std::copy(a->in, a->in + a->size * 2, &(a->infilt[2 * a->size]));
         fftwf_execute (a->CFor);
         for (i = 0; i < 2 * a->size; i++)
         {
@@ -106,10 +106,10 @@ void BPS::xbps (BPS *a, int pos)
             a->product[2 * i + 1] = I * a->mults[2 * i + 1] + Q * a->mults[2 * i + 0];
         }
         fftwf_execute (a->CRev);
-        memcpy (a->infilt, &(a->infilt[2 * a->size]), a->size * sizeof(wcomplex));
+        std::copy(&(a->infilt[2 * a->size]), &(a->infilt[2 * a->size]) + a->size * 2, a->infilt);
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void BPS::setBuffers_bps (BPS *a, float* in, float* out)

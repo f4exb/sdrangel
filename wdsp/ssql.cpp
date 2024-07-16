@@ -229,7 +229,7 @@ void SSQL::destroy_ssql (SSQL *a)
 void SSQL::flush_ssql (SSQL *a)
 {
 
-    memset (a->b1, 0, a->size * sizeof (wcomplex));
+    std::fill(a->b1, a->b1 + a->size * 2, 0);
     CBL::flush_cbl (a->dcbl);
     memset (a->ibuff, 0, a->size * sizeof (float));
     memset (a->ftovbuff, 0, a->size * sizeof (float));
@@ -317,7 +317,7 @@ void SSQL::xssql (SSQL *a)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof(wcomplex));
+        std::copy(a->in, a->in + a->size * 2, a->out);
 }
 
 void SSQL::setBuffers_ssql (SSQL *a, float* in, float* out)

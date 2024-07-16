@@ -93,7 +93,7 @@ void SNOTCH::xsnotch (SNOTCH *a)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void SNOTCH::setBuffers_snotch (SNOTCH *a, float* in, float* out)
@@ -289,7 +289,7 @@ void SPEAK::xspeak (SPEAK *a)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void SPEAK::setBuffers_speak (SPEAK *a, float* in, float* out)
@@ -426,7 +426,7 @@ void MPEAK::xmpeak (MPEAK *a)
     if (a->run)
     {
         int i, j;
-        memset (a->mix, 0, a->size * sizeof (wcomplex));
+        std::fill(a->mix, a->mix + a->size * 2, 0);
 
         for (i = 0; i < a->npeaks; i++)
         {
@@ -438,11 +438,11 @@ void MPEAK::xmpeak (MPEAK *a)
             }
         }
 
-        memcpy (a->out, a->mix, a->size * sizeof (wcomplex));
+        std::copy(a->mix, a->mix + a->size * 2, a->out);
     }
 
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void MPEAK::setBuffers_mpeak (MPEAK *a, float* in, float* out)
@@ -601,7 +601,7 @@ void PHROT::xphrot (PHROT *a)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void PHROT::setBuffers_phrot (PHROT *a, float* in, float* out)
@@ -755,7 +755,7 @@ void BQLP::xbqlp(BQLP *a)
         }
     }
     else if (a->out != a->in)
-        memcpy(a->out, a->in, a->size * sizeof(wcomplex));
+        std::copy(a->in, a->in + a->size * 2, a->out);
 }
 
 void BQLP::setBuffers_bqlp(BQLP *a, float* in, float* out)
@@ -992,7 +992,7 @@ void BQBP::xbqbp(BQBP *a)
         }
     }
     else if (a->out != a->in)
-        memcpy(a->out, a->in, a->size * sizeof(wcomplex));
+        std::copy(a->in, a->in + a->size * 2, a->out);
 }
 
 void BQBP::setBuffers_bqbp(BQBP *a, float* in, float* out)
@@ -1180,10 +1180,10 @@ void SPHP::destroy_sphp(SPHP *a)
 
 void SPHP::flush_sphp(SPHP *a)
 {
-    memset(a->x0, 0, a->nstages * sizeof(wcomplex));
-    memset(a->x1, 0, a->nstages * sizeof(wcomplex));
-    memset(a->y0, 0, a->nstages * sizeof(wcomplex));
-    memset(a->y1, 0, a->nstages * sizeof(wcomplex));
+    std::fill(a->x0, a->x0 + a->nstages * 2, 0);
+    std::fill(a->x1, a->x0 + a->nstages * 2, 0);
+    std::fill(a->y0, a->x0 + a->nstages * 2, 0);
+    std::fill(a->y1, a->x0 + a->nstages * 2, 0);
 }
 
 void SPHP::xsphp(SPHP *a)
@@ -1214,7 +1214,7 @@ void SPHP::xsphp(SPHP *a)
         }
     }
     else if (a->out != a->in)
-        memcpy(a->out, a->in, a->size * sizeof(wcomplex));
+        std::copy(a->in, a->in + a->size * 2, a->out);
 }
 
 void SPHP::setBuffers_sphp(SPHP *a, float* in, float* out)

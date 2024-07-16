@@ -99,7 +99,7 @@ void BANDPASS::xbandpass (BANDPASS *a, int pos)
     if (a->run && a->position == pos)
         FIRCORE::xfircore (a->p);
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void BANDPASS::setBuffers_bandpass (BANDPASS *a, float* in, float* out)

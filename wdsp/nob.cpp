@@ -150,10 +150,10 @@ void NOB::flush_nob (NOB *a)
     a->avg = 1.0;
     a->bfb_in_idx = a->filterlen - 1;
     a->ffb_in_idx = a->filterlen - 1;
-    memset (a->dline, 0, a->dline_size * sizeof (wcomplex));
-    memset (a->imp, 0, a->dline_size * sizeof (int));
-    memset (a->bfbuff, 0, a->filterlen * sizeof (wcomplex));
-    memset (a->ffbuff, 0, a->filterlen * sizeof (wcomplex));
+    std::fill(a->dline, a->dline + a->dline_size * 2, 0);
+    std::fill(a->imp, a->imp + a->dline_size, 0);
+    std::fill(a->bfbuff, a->bfbuff + a->filterlen * 2, 0);
+    std::fill(a->ffbuff, a->ffbuff + a->filterlen * 2, 0);
 }
 
 void NOB::xnob (NOB *a)
@@ -491,7 +491,7 @@ void NOB::xnob (NOB *a)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->buffsize * sizeof (wcomplex));
+        std::copy(a->in, a->in + a->buffsize * 2, a->out);
 }
 
 void NOB::setBuffers_nob (NOB *a, float* in, float* out)

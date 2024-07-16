@@ -334,8 +334,8 @@ void RMATCH::xrmatchIN (void* b, float* in)
                 second = 0;
             }
 
-            memcpy (a->baux, a->ring + 2 * a->iout, first * sizeof (wcomplex));
-            memcpy (a->baux + 2 * first, a->ring, second * sizeof (wcomplex));
+            std::copy(a->ring + 2 * a->iout, a->ring + 2 * a->iout + first * 2, a->baux);
+            std::copy(a->ring, a->ring + second * 2, a->baux + 2 * first);
             // a->iout = (a->iout + ovfl + a->rsize / 2) % a->rsize;
             a->iout = (a->iout + ovfl) % a->rsize; //
         }
@@ -351,8 +351,8 @@ void RMATCH::xrmatchIN (void* b, float* in)
             second = 0;
         }
 
-        memcpy (a->ring + 2 * a->iin, a->resout, first * sizeof (wcomplex));
-        memcpy (a->ring, a->resout + 2 * first, second * sizeof (wcomplex));
+        std::copy(a->resout, a->resout + first * 2, a->ring + 2 * a->iin);
+        std::copy(a->resout + 2 * first, a->resout + 2 * first + second * 2, a->ring);
 
         if (a->ucnt >= 0)
             upslew(a, newsamps);
@@ -427,8 +427,8 @@ void RMATCH::dslew (RMATCH *a)
             first = zeros;
             second = 0;
         }
-        memset (a->ring + 2 * i, 0, first  * sizeof (wcomplex));
-        memset (a->ring,         0, second * sizeof (wcomplex));
+        std::fill(a->ring + 2 * i, a->ring + 2 * i + first * 2, 0);
+        std::fill(a->ring, a->ring + second * 2, 0);
         n += zeros; //
     } //
     // a->n_ring = a->outsize + a->rsize / 2;
@@ -464,8 +464,8 @@ void RMATCH::xrmatchOUT (void* b, float* out)
             second = 0;
         }
 
-        memcpy (a->out, a->ring + 2 * a->iout, first * sizeof (wcomplex));
-        memcpy (a->out + 2 * first, a->ring, second * sizeof (wcomplex));
+        std::copy(a->ring + 2 * a->iout, a->ring + 2 * a->iout + first * 2, a->out);
+        std::copy(a->ring, a->ring + second * 2, a->out + 2 * first);
         a->iout = (a->iout + a->outsize) % a->rsize;
         a->n_ring -= a->outsize;
         a->dlast[0] = a->out[2 * (a->outsize - 1) + 0];

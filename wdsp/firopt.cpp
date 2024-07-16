@@ -72,7 +72,7 @@ void FIROPT::calc_firopt (FIROPT *a)
     {
         // I right-justified the impulse response => take output from left side of output buff, discard right side
         // Be careful about flipping an asymmetrical impulse response.
-        memcpy (&(a->maskgen[2 * a->size]), &(impulse[2 * a->size * i]), a->size * sizeof(wcomplex));
+        std::copy(&(impulse[2 * a->size * i]), &(impulse[2 * a->size * i]) + a->size * 2, &(a->maskgen[2 * a->size]));
         fftwf_execute (a->maskplan[i]);
     }
     delete[] (impulse);
@@ -127,9 +127,9 @@ void FIROPT::destroy_firopt (FIROPT *a)
 void FIROPT::flush_firopt (FIROPT *a)
 {
     int i;
-    memset (a->fftin, 0, 2 * a->size * sizeof (wcomplex));
+    std::fill(a->fftin, a->fftin + 2 * a->size * 2, 0);
     for (i = 0; i < a->nfor; i++)
-        memset (a->fftout[i], 0, 2 * a->size * sizeof (wcomplex));
+        std::fill(a->fftout[i], a->fftout[i] + 2 * a->size * 2, 0);
     a->buffidx = 0;
 }
 
@@ -138,10 +138,10 @@ void FIROPT::xfiropt (FIROPT *a, int pos)
     if (a->run && (a->position == pos))
     {
         int i, j, k;
-        memcpy (&(a->fftin[2 * a->size]), a->in, a->size * sizeof (wcomplex));
+        std::copy(a->in, a->in + a->size * 2, &(a->fftin[2 * a->size]));
         fftwf_execute (a->pcfor[a->buffidx]);
         k = a->buffidx;
-        memset (a->accum, 0, 2 * a->size * sizeof (wcomplex));
+        std::fill(a->accum, a->accum + 2 * a->size * 2, 0);
         for (j = 0; j < a->nfor; j++)
         {
             for (i = 0; i < 2 * a->size; i++)
@@ -153,10 +153,10 @@ void FIROPT::xfiropt (FIROPT *a, int pos)
         }
         a->buffidx = (a->buffidx + 1) & a->idxmask;
         fftwf_execute (a->crev);
-        memcpy (a->fftin, &(a->fftin[2 * a->size]), a->size * sizeof(wcomplex));
+        std::copy(&(a->fftin[2 * a->size]), &(a->fftin[2 * a->size]) + a->size * 2, a->fftin);
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void FIROPT::setBuffers_firopt (FIROPT *a, float* in, float* out)

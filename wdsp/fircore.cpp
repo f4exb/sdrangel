@@ -79,13 +79,13 @@ void FIRCORE::calc_fircore (FIRCORE *a, int flip)
     if (a->mp)
         FIR::mp_imp (a->nc, a->impulse, a->imp, 16, 0);
     else
-        memcpy (a->imp, a->impulse, a->nc * sizeof (wcomplex));
+        std::copy(a->impulse, a->impulse + a->nc * 2, a->imp);
 
     for (i = 0; i < a->nfor; i++)
     {
         // I right-justified the impulse response => take output from left side of output buff, discard right side
         // Be careful about flipping an asymmetrical impulse response.
-        memcpy (&(a->maskgen[2 * a->size]), &(a->imp[2 * a->size * i]), a->size * sizeof(wcomplex));
+        std::copy(&(a->imp[2 * a->size * i]), &(a->imp[2 * a->size * i]) + a->size * 2, &(a->maskgen[2 * a->size]));
         fftwf_execute (a->maskplan[1 - a->cset][i]);
     }
 
@@ -110,7 +110,7 @@ FIRCORE* FIRCORE::create_fircore (int size, float* in, float* out, int nc, int m
     plan_fircore (a);
     a->impulse = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
     a->imp     = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
-    memcpy (a->impulse, impulse, a->nc * sizeof (wcomplex));
+    std::copy(impulse, impulse + a->nc * 2, a->impulse);
     calc_fircore (a, 1);
     return a;
 }
@@ -152,19 +152,19 @@ void FIRCORE::destroy_fircore (FIRCORE *a)
 void FIRCORE::flush_fircore (FIRCORE *a)
 {
     int i;
-    memset (a->fftin, 0, 2 * a->size * sizeof (wcomplex));
+    std::fill(a->fftin, a->fftin + 2 * a->size * 2, 0);
     for (i = 0; i < a->nfor; i++)
-        memset (a->fftout[i], 0, 2 * a->size * sizeof (wcomplex));
+        std::fill(a->fftout[i], a->fftout[i] + 2 * a->size * 2, 0);
     a->buffidx = 0;
 }
 
 void FIRCORE::xfircore (FIRCORE *a)
 {
     int i, j, k;
-    memcpy (&(a->fftin[2 * a->size]), a->in, a->size * sizeof (wcomplex));
+    std::copy(a->in, a->in + a->size * 2, &(a->fftin[2 * a->size]));
     fftwf_execute (a->pcfor[a->buffidx]);
     k = a->buffidx;
-    memset (a->accum, 0, 2 * a->size * sizeof (wcomplex));
+    std::fill(a->accum, a->accum + 2 * a->size * 2, 0);
 
     for (j = 0; j < a->nfor; j++)
     {
@@ -179,7 +179,7 @@ void FIRCORE::xfircore (FIRCORE *a)
 
     a->buffidx = (a->buffidx + 1) & a->idxmask;
     fftwf_execute (a->crev);
-    memcpy (a->fftin, &(a->fftin[2 * a->size]), a->size * sizeof(wcomplex));
+    std::copy(&(a->fftin[2 * a->size]), &(a->fftin[2 * a->size]) + a->size * 2, a->fftin);
 }
 
 void FIRCORE::setBuffers_fircore (FIRCORE *a, float* in, float* out)
@@ -201,7 +201,7 @@ void FIRCORE::setSize_fircore (FIRCORE *a, int size)
 
 void FIRCORE::setImpulse_fircore (FIRCORE *a, float* impulse, int update)
 {
-    memcpy (a->impulse, impulse, a->nc * sizeof (wcomplex));
+    std::copy(impulse, impulse + a->nc * 2, a->impulse);
     calc_fircore (a, update);
 }
 
@@ -215,7 +215,7 @@ void FIRCORE::setNc_fircore (FIRCORE *a, int nc, float* impulse)
     plan_fircore (a);
     a->imp     = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
     a->impulse = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
-    memcpy (a->impulse, impulse, a->nc * sizeof (wcomplex));
+    std::copy(impulse, impulse + a->nc * 2, a->impulse);
     calc_fircore (a, 1);
 }
 

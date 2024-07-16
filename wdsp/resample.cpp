@@ -166,7 +166,7 @@ int RESAMPLE::xresample (RESAMPLE *a)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
     return outsamps;
 }
 

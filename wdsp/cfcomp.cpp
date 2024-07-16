@@ -387,7 +387,7 @@ void CFCOMP::xcfcomp (CFCOMP *a, int pos)
         }
     }
     else if (a->out != a->in)
-        memcpy (a->out, a->in, a->bsize * sizeof (wcomplex));
+        std::copy(a->in, a->in + a->bsize * 2, a->out);
 }
 
 void CFCOMP::setBuffers_cfcomp (CFCOMP *a, float* in, float* out)

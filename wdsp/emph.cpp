@@ -76,7 +76,7 @@ void EMPHP::xemphp (EMPHP *a, int position)
     if (a->run && a->position == position)
         FIRCORE::xfircore (a->p);
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void EMPHP::setBuffers_emphp (EMPHP *a, float* in, float* out)
@@ -206,7 +206,7 @@ void EMPH::destroy_emph (EMPH *a)
 
 void EMPH::flush_emph (EMPH *a)
 {
-    memset (a->infilt, 0, 2 * a->size * sizeof (wcomplex));
+    std::fill(a->infilt, a->infilt + 2 * a->size * 2, 0);
 }
 
 void EMPH::xemph (EMPH *a, int position)
@@ -215,7 +215,7 @@ void EMPH::xemph (EMPH *a, int position)
     float I, Q;
     if (a->run && a->position == position)
     {
-        memcpy (&(a->infilt[2 * a->size]), a->in, a->size * sizeof (wcomplex));
+        std::copy(a->in, a->in + a->size * 2, &(a->infilt[2 * a->size]));
         fftwf_execute (a->CFor);
         for (i = 0; i < 2 * a->size; i++)
         {
@@ -225,10 +225,10 @@ void EMPH::xemph (EMPH *a, int position)
             a->product[2 * i + 1] = I * a->mults[2 * i + 1] + Q * a->mults[2 * i + 0];
         }
         fftwf_execute (a->CRev);
-        memcpy (a->infilt, &(a->infilt[2 * a->size]), a->size * sizeof(wcomplex));
+        std::copy(&(a->infilt[2 * a->size]), &(a->infilt[2 * a->size]) + a->size * 2, a->infilt);
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void EMPH::setBuffers_emph (EMPH *a, float* in, float* out)

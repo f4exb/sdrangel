@@ -53,7 +53,7 @@ void ANB::initBlanker(ANB *a)
     a->ombackmult = 1.0 - a->backmult;
     for (i = 0; i <= a->trans_count; i++)
         a->wave[i] = 0.5 * cos(i * a->coef);
-    memset(a->dline, 0, a->dline_size * sizeof(wcomplex));
+    std::fill(a->dline, a->dline + a->dline_size * 2, 0);
 }
 
 ANB* ANB::create_anb  (
@@ -178,7 +178,7 @@ void ANB::xanb (ANB *a)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->buffsize * sizeof (wcomplex));
+        std::copy(a->in, a->in + a->buffsize * 2, a->out);
 }
 
 void ANB::setBuffers_anb (ANB *a, float* in, float* out)

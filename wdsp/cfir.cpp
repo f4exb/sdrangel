@@ -98,7 +98,7 @@ void CFIR::xcfir (CFIR *a)
     if (a->run)
         FIRCORE::xfircore (a->p);
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void CFIR::setBuffers_cfir (CFIR *a, float* in, float* out)

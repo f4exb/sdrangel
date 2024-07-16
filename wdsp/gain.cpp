@@ -73,7 +73,7 @@ void GAIN::xgain (GAIN *a)
         }
     }
     else if (a->in != a->out)
-        memcpy (a->out, a->in, a->size * sizeof (wcomplex));
+        std::copy( a->in,  a->in + a->size * 2, a->out);
 }
 
 void GAIN::setBuffers_gain (GAIN *a, float* in, float* out)
