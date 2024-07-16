@@ -228,13 +228,13 @@ WDSPRxSettings:
           * 0 - Off
           * 1 - On
     eqF:
-      description: Frequency points (Hz). Positon 0 is preamp then 10 frequency points
+      description: Frequency points (Hz). Position 0 is preamp then 10 frequency points
       type: array
       items:
         type: number
         format: float
     eqG:
-      description: Frequency points gains (dB). Positon 0 is for preamp gain then for the 10 frequency points
+      description: Frequency points gains (dB). Position 0 is for preamp gain then for the 10 frequency points
       type: array
       items:
         type: number
