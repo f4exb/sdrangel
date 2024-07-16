@@ -35,8 +35,13 @@ float* FIR::fftcv_mults (int NM, float* c_impulse)
 {
     float* mults        = new float[NM * 2];
     float* cfft_impulse = new float[NM * 2];
-    fftwf_plan ptmp = fftwf_plan_dft_1d(NM, (fftwf_complex *) cfft_impulse,
-            (fftwf_complex *) mults, FFTW_FORWARD, FFTW_PATIENT);
+    fftwf_plan ptmp = fftwf_plan_dft_1d(
+        NM,
+        (fftwf_complex *) cfft_impulse,
+        (fftwf_complex *) mults,
+        FFTW_FORWARD,
+        FFTW_PATIENT
+    );
     std::fill(cfft_impulse, cfft_impulse + NM * 2, 0);
     // store complex coefs right-justified in the buffer
     std::copy(c_impulse, c_impulse + (NM / 2 + 1) * 2, &(cfft_impulse[NM - 2]));
@@ -93,7 +98,13 @@ float* FIR::fir_fsamp_odd (int N, float* A, int rtype, float scale, int wintype)
     float* window;
     float *fcoef     = new float[N * 2];
     float *c_impulse = new float[N * 2];
-    fftwf_plan ptmp = fftwf_plan_dft_1d(N, (fftwf_complex *)fcoef, (fftwf_complex *)c_impulse, FFTW_BACKWARD, FFTW_PATIENT);
+    fftwf_plan ptmp = fftwf_plan_dft_1d(
+        N,
+        (fftwf_complex *)fcoef,
+        (fftwf_complex *)c_impulse,
+        FFTW_BACKWARD,
+        FFTW_PATIENT
+    );
     float local_scale = 1.0 / (float)N;
     for (i = 0; i <= mid; i++)
     {
@@ -304,13 +315,23 @@ float *FIR::fir_read (int N, const char *filename, int rtype, float scale)
 void FIR::analytic (int N, float* in, float* out)
 {
     int i;
-    float inv_N = 1.0 / (float)N;
+    float inv_N = 1.0 / (float) N;
     float two_inv_N = 2.0 * inv_N;
     float* x = new float[N * 2]; // (float *) malloc0 (N * sizeof (complex));
-    fftwf_plan pfor = fftwf_plan_dft_1d (N, (fftwf_complex *) in,
-            (fftwf_complex *) x, FFTW_FORWARD, FFTW_PATIENT);
-    fftwf_plan prev = fftwf_plan_dft_1d (N, (fftwf_complex *) x,
-            (fftwf_complex *) out, FFTW_BACKWARD, FFTW_PATIENT);
+    fftwf_plan pfor = fftwf_plan_dft_1d (
+        N,
+        (fftwf_complex *) in,
+        (fftwf_complex *) x,
+        FFTW_FORWARD,
+        FFTW_PATIENT
+    );
+    fftwf_plan prev = fftwf_plan_dft_1d (
+        N,
+        (fftwf_complex *) x,
+        (fftwf_complex *) out,
+        FFTW_BACKWARD,
+        FFTW_PATIENT
+    );
     fftwf_execute (pfor);
     x[0] *= inv_N;
     x[1] *= inv_N;
@@ -332,23 +353,34 @@ void FIR::mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity)
 {
     int i;
     int size = N * pfactor;
-    float inv_PN = 1.0 / (float)size;
-    float* firpad  = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
-    float* firfreq = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
-    float* mag     = new float[size]; // (float *) malloc0 (size * sizeof (float));
-    float* ana     = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
-    float* impulse = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
-    float* newfreq = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
+    double inv_PN = 1.0 / (float)size;
+    float* firpad   = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
+    float* firfreq  = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
+    double* mag     = new double[size]; // (float *) malloc0 (size * sizeof (float));
+    float* ana      = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
+    float* impulse  = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
+    float* newfreq  = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
     std::copy(fir, fir + N * 2, firpad);
-    fftwf_plan pfor = fftwf_plan_dft_1d (size, (fftwf_complex *) firpad,
-            (fftwf_complex *) firfreq, FFTW_FORWARD, FFTW_PATIENT);
-    fftwf_plan prev = fftwf_plan_dft_1d (size, (fftwf_complex *) newfreq,
-            (fftwf_complex *) impulse, FFTW_BACKWARD, FFTW_PATIENT);
+    fftwf_plan pfor = fftwf_plan_dft_1d (
+        size,
+        (fftwf_complex *) firpad,
+        (fftwf_complex *) firfreq,
+        FFTW_FORWARD,
+        FFTW_PATIENT);
+    fftwf_plan prev = fftwf_plan_dft_1d (
+        size,
+        (fftwf_complex *) newfreq,
+        (fftwf_complex *) impulse,
+        FFTW_BACKWARD,
+        FFTW_PATIENT
+    );
     // print_impulse("orig_imp.txt", N, fir, 1, 0);
     fftwf_execute (pfor);
     for (i = 0; i < size; i++)
     {
-        mag[i] = sqrt (firfreq[2 * i + 0] * firfreq[2 * i + 0] + firfreq[2 * i + 1] * firfreq[2 * i + 1]) * inv_PN;
+        double xr = firfreq[2 * i + 0];
+        double xi = firfreq[2 * i + 1];
+        mag[i] = sqrt (xr*xr + xi*xi) * inv_PN;
         if (mag[i] > 0.0)
             ana[2 * i + 0] = log (mag[i]);
         else

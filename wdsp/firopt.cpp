@@ -54,11 +54,29 @@ void FIROPT::plan_firopt (FIROPT *a)
     {
         a->fftout[i] = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
         a->fmask[i] = new float[2 * a->size * 2]; //  (float *) malloc0 (2 * a->size * sizeof (complex));
-        a->pcfor[i] = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->fftin, (fftwf_complex *)a->fftout[i], FFTW_FORWARD, FFTW_PATIENT);
-        a->maskplan[i] = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->maskgen, (fftwf_complex *)a->fmask[i], FFTW_FORWARD, FFTW_PATIENT);
+        a->pcfor[i] = fftwf_plan_dft_1d(
+            2 * a->size,
+            (fftwf_complex *)a->fftin,
+            (fftwf_complex *)a->fftout[i],
+            FFTW_FORWARD,
+            FFTW_PATIENT
+        );
+        a->maskplan[i] = fftwf_plan_dft_1d(
+            2 * a->size,
+            (fftwf_complex *)a->maskgen,
+            (fftwf_complex *)a->fmask[i],
+            FFTW_FORWARD,
+            FFTW_PATIENT
+        );
     }
     a->accum = new float[2 * a->size * 2]; //  (float *) malloc0 (2 * a->size * sizeof (complex));
-    a->crev = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->accum, (fftwf_complex *)a->out, FFTW_BACKWARD, FFTW_PATIENT);
+    a->crev = fftwf_plan_dft_1d(
+        2 * a->size,
+        (fftwf_complex *)a->accum,
+        (fftwf_complex *)a->out,
+        FFTW_BACKWARD,
+        FFTW_PATIENT
+    );
 }
 
 void FIROPT::calc_firopt (FIROPT *a)

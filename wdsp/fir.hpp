@@ -38,13 +38,13 @@ public:
     static float* fir_fsamp_odd (int N, float* A, int rtype, float scale, int wintype);
     static float* fir_fsamp (int N, float* A, int rtype, float scale, int wintype);
     static float* fir_bandpass (int N, float f_low, float f_high, float samplerate, int wintype, int rtype, float scale);
-    static float* get_fsamp_window(int N, int wintype);
-    static float *fir_read (int N, const char *filename, int rtype, float scale);
     static void mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity);
-    static float* zff_impulse(int nc, float scale);
 
 private:
     static void analytic (int N, float* in, float* out);
+    static float* get_fsamp_window(int N, int wintype);
+    static float *fir_read (int N, const char *filename, int rtype, float scale);
+    static float* zff_impulse(int nc, float scale);
 };
 
 #endif
