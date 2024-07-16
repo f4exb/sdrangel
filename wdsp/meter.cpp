@@ -60,7 +60,7 @@ METER* METER::create_meter (
     a->prun = prun;
     a->size = size;
     a->buff = buff;
-    a->rate = (float)rate;
+    a->rate = (double) rate;
     a->tau_average = tau_av;
     a->tau_peak_decay = tau_decay;
     a->result = result;
@@ -105,7 +105,9 @@ void METER::xmeter (METER *a)
 
         for (i = 0; i < a->size; i++)
         {
-            smag = a->buff[2 * i + 0] * a->buff[2 * i + 0] + a->buff[2 * i + 1] * a->buff[2 * i + 1];
+            double xr = a->buff[2 * i + 0];
+            double xi = a->buff[2 * i + 1];
+            smag = xr*xr + xi*xi;
             a->avg = a->avg * a->mult_average + (1.0 - a->mult_average) * smag;
             a->peak *= a->mult_peak;
 
@@ -140,7 +142,7 @@ void METER::setBuffers_meter (METER *a, float* in)
 
 void METER::setSamplerate_meter (METER *a, int rate)
 {
-    a->rate = rate;
+    a->rate = (double) rate;
     calc_meter(a);
 }
 
