@@ -14,7 +14,9 @@ LOCAL/*
 .vscode/
 .settings/
 *.cs
+*.orig
 *.pro.user
+*.rej
 .idea/*
 rescuesdriq/rescuesdriq
 debian/sdrangel/*
