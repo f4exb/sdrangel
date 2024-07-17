@@ -38,14 +38,14 @@ void SHIFT::calc_shift (SHIFT *a)
     a->sin_delta = sin (a->delta);
 }
 
-SHIFT* SHIFT::create_shift (int run, int size, float* in, float* out, int rate, float fshift)
+SHIFT* SHIFT::create_shift (int run, int size, float* in, float* out, int rate, double fshift)
 {
     SHIFT *a = new SHIFT;
     a->run = run;
     a->size = size;
     a->in = in;
     a->out = out;
-    a->rate = (float)rate;
+    a->rate = (double) rate;
     a->shift = fshift;
     a->phase = 0.0;
     calc_shift (a);
@@ -67,9 +67,10 @@ void SHIFT::xshift (SHIFT *a)
     if (a->run)
     {
         int i;
-        float I1, Q1, t1, t2;
-        float cos_phase = cos (a->phase);
-        float sin_phase = sin (a->phase);
+        double I1, Q1, t1, t2;
+        double cos_phase = cos (a->phase);
+        double sin_phase = sin (a->phase);
+
         for (i = 0; i < a->size; i++)
         {
             I1 = a->in[2 * i + 0];
@@ -81,12 +82,18 @@ void SHIFT::xshift (SHIFT *a)
             cos_phase = t1 * a->cos_delta - t2 * a->sin_delta;
             sin_phase = t1 * a->sin_delta + t2 * a->cos_delta;
             a->phase += a->delta;
-            if (a->phase >= TWOPI) a->phase -= TWOPI;
-            if (a->phase <   0.0 ) a->phase += TWOPI;
+
+            if (a->phase >= TWOPI)
+                a->phase -= TWOPI;
+
+            if (a->phase <   0.0 )
+                a->phase += TWOPI;
         }
     }
     else if (a->in != a->out)
+    {
         std::copy( a->in,  a->in + a->size * 2, a->out);
+    }
 }
 
 void SHIFT::setBuffers_shift(SHIFT *a, float* in, float* out)
@@ -119,7 +126,7 @@ void SHIFT::SetShiftRun (RXA& rxa, int run)
     rxa.shift.p->run = run;
 }
 
-void SHIFT::SetShiftFreq (RXA& rxa, float fshift)
+void SHIFT::SetShiftFreq (RXA& rxa, double fshift)
 {
     rxa.shift.p->shift = fshift;
     calc_shift (rxa.shift.p);

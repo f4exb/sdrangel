@@ -47,7 +47,7 @@ public:
     double advtime;                 // deadtime (zero output) in advance of detected noise
     double backtau;                 // time constant used in averaging the magnitude of the input signal
     double threshold;               // triggers if (noise > threshold * average_signal_magnitude)
-    float *wave;                   // pointer to array holding transition waveform
+    double *wave;                   // pointer to array holding transition waveform
     int state;                      // state of the state machine
     double avg;                     // average value of the signal magnitude
     int dtime;                      // count when decreasing the signal magnitude

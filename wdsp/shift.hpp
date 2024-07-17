@@ -41,14 +41,14 @@ public:
     int size;
     float* in;
     float* out;
-    float rate;
-    float shift;
-    float phase;
-    float delta;
-    float cos_delta;
-    float sin_delta;
+    double rate;
+    double shift;
+    double phase;
+    double delta;
+    double cos_delta;
+    double sin_delta;
 
-    static SHIFT* create_shift (int run, int size, float* in, float* out, int rate, float fshift);
+    static SHIFT* create_shift (int run, int size, float* in, float* out, int rate, double fshift);
     static void destroy_shift (SHIFT *a);
     static void flush_shift (SHIFT *a);
     static void xshift (SHIFT *a);
@@ -57,7 +57,7 @@ public:
     static void setSize_shift (SHIFT *a, int size);
     // RXA Properties
     static void SetShiftRun (RXA& rxa, int run);
-    static void SetShiftFreq (RXA& rxa, float fshift);
+    static void SetShiftFreq (RXA& rxa, double fshift);
 
 private:
     static void calc_shift (SHIFT *a);

@@ -39,7 +39,10 @@ void ANB::initBlanker(ANB *a)
 {
     int i;
     a->trans_count = (int)(a->tau * a->samplerate);
-    if (a->trans_count < 2) a->trans_count = 2;
+
+    if (a->trans_count < 2)
+        a->trans_count = 2;
+
     a->hang_count = (int)(a->hangtime * a->samplerate);
     a->adv_count = (int)(a->advtime * a->samplerate);
     a->count = 0;
@@ -51,8 +54,10 @@ void ANB::initBlanker(ANB *a)
     a->power = 1.0;
     a->backmult = exp(-1.0 / (a->samplerate * a->backtau));
     a->ombackmult = 1.0 - a->backmult;
+
     for (i = 0; i <= a->trans_count; i++)
         a->wave[i] = 0.5 * cos(i * a->coef);
+
     std::fill(a->dline, a->dline + a->dline_size * 2, 0);
 }
 
@@ -81,7 +86,7 @@ ANB* ANB::create_anb  (
     a->advtime = advtime;
     a->backtau = backtau;
     a->threshold = threshold;
-    a->wave = new float[((int)(MAX_SAMPLERATE * MAX_TAU) + 1)];
+    a->wave = new double[((int)(MAX_SAMPLERATE * MAX_TAU) + 1)];
     a->dline_size = (int)((MAX_TAU + MAX_ADVTIME) * MAX_SAMPLERATE) + 1;
     a->dline = new float[a->dline_size * 2];
     initBlanker(a);
@@ -107,14 +112,18 @@ void ANB::xanb (ANB *a)
     double scale;
     double mag;
     int i;
+
     if (a->run)
     {
         for (i = 0; i < a->buffsize; i++)
         {
-            mag = sqrt(a->in[2 * i + 0] * a->in[2 * i + 0] + a->in[2 * i + 1] * a->in[2 * i + 1]);
+            double xr = a->in[2 * i + 0];
+            double xi = a->in[2 * i + 1];
+            mag = sqrt(xr*xr + xi*xi);
             a->avg = a->backmult * a->avg + a->ombackmult * mag;
             a->dline[2 * a->in_idx + 0] = a->in[2 * i + 0];
             a->dline[2 * a->in_idx + 1] = a->in[2 * i + 1];
+
             if (mag > (a->avg * a->threshold))
                 a->count = a->trans_count + a->adv_count;
 
@@ -123,45 +132,59 @@ void ANB::xanb (ANB *a)
                 case 0:
                     a->out[2 * i + 0] = a->dline[2 * a->out_idx + 0];
                     a->out[2 * i + 1] = a->dline[2 * a->out_idx + 1];
+
                     if (a->count > 0)
                     {
                         a->state = 1;
                         a->dtime = 0;
                         a->power = 1.0;
                     }
+
                     break;
+
                 case 1:
                     scale = a->power * (0.5 + a->wave[a->dtime]);
                     a->out[2 * i + 0] = a->dline[2 * a->out_idx + 0] * scale;
                     a->out[2 * i + 1] = a->dline[2 * a->out_idx + 1] * scale;
+
                     if (++a->dtime > a->trans_count)
                     {
                         a->state = 2;
                         a->atime = 0;
                     }
+
                     break;
+
                 case 2:
                     a->out[2 * i + 0] = 0.0;
                     a->out[2 * i + 1] = 0.0;
+
                     if (++a->atime > a->adv_count)
                         a->state = 3;
+
                     break;
+
                 case 3:
                     if (a->count > 0)
                         a->htime = -a->count;
 
                     a->out[2 * i + 0] = 0.0;
                     a->out[2 * i + 1] = 0.0;
+
                     if (++a->htime > a->hang_count)
                     {
                         a->state = 4;
                         a->itime = 0;
+
                     }
+
                     break;
+
                 case 4:
                     scale = 0.5 - a->wave[a->itime];
                     a->out[2 * i + 0] = a->dline[2 * a->out_idx + 0] * scale;
                     a->out[2 * i + 1] = a->dline[2 * a->out_idx + 1] * scale;
+
                     if (a->count > 0)
                     {
                         a->state = 1;
@@ -169,16 +192,27 @@ void ANB::xanb (ANB *a)
                         a->power = scale;
                     }
                     else if (++a->itime > a->trans_count)
+                    {
                         a->state = 0;
+                    }
+
                     break;
             }
-            if (a->count > 0) a->count--;
-            if (++a->in_idx == a->dline_size) a->in_idx = 0;
-            if (++a->out_idx == a->dline_size) a->out_idx = 0;
+
+            if (a->count > 0)
+                a->count--;
+
+            if (++a->in_idx == a->dline_size)
+                a->in_idx = 0;
+
+            if (++a->out_idx == a->dline_size)
+                a->out_idx = 0;
         }
     }
     else if (a->in != a->out)
+    {
         std::copy(a->in, a->in + a->buffsize * 2, a->out);
+    }
 }
 
 void ANB::setBuffers_anb (ANB *a, float* in, float* out)
