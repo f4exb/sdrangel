@@ -25,6 +25,9 @@ warren@pratt.one
 */
 
 #define _CRT_SECURE_NO_WARNINGS
+
+#include <limits>
+
 #include "fftw3.h"
 #include "comm.hpp"
 #include "fir.hpp"
@@ -54,15 +57,15 @@ float* FIR::fftcv_mults (int NM, float* c_impulse)
 float* FIR::get_fsamp_window(int N, int wintype)
 {
     int i;
-    float arg0, arg1;
+    double arg0, arg1;
     float* window = new float[N]; // (float *) malloc0 (N * sizeof(float));
     switch (wintype)
     {
     case 0:
-        arg0 = 2.0 * PI / ((float)N - 1.0);
+        arg0 = 2.0 * PI / ((double)N - 1.0);
         for (i = 0; i < N; i++)
         {
-            arg1 = cos(arg0 * (float)i);
+            arg1 = cos(arg0 * (double)i);
             window[i]  =   +0.21747
                 + arg1 *  (-0.45325
                 + arg1 *  (+0.28256
@@ -70,10 +73,10 @@ float* FIR::get_fsamp_window(int N, int wintype)
         }
         break;
     case 1:
-        arg0 = 2.0 * PI / ((float)N - 1.0);
+        arg0 = 2.0 * PI / ((double)N - 1.0);
         for (i = 0; i < N; ++i)
         {
-            arg1 = cos(arg0 * (float)i);
+            arg1 = cos(arg0 * (double)i);
             window[i]  =   +6.3964424114390378e-02
                 + arg1 *  (-2.3993864599352804e-01
                 + arg1 *  (+3.5015956323820469e-01
@@ -90,11 +93,11 @@ float* FIR::get_fsamp_window(int N, int wintype)
     return window;
 }
 
-float* FIR::fir_fsamp_odd (int N, float* A, int rtype, float scale, int wintype)
+float* FIR::fir_fsamp_odd (int N, float* A, int rtype, double scale, int wintype)
 {
     int i, j;
     int mid = (N - 1) / 2;
-    float mag, phs;
+    double mag, phs;
     float* window;
     float *fcoef     = new float[N * 2];
     float *c_impulse = new float[N * 2];
@@ -105,11 +108,11 @@ float* FIR::fir_fsamp_odd (int N, float* A, int rtype, float scale, int wintype)
         FFTW_BACKWARD,
         FFTW_PATIENT
     );
-    float local_scale = 1.0 / (float)N;
+    double local_scale = 1.0 / (double) N;
     for (i = 0; i <= mid; i++)
     {
         mag = A[i] * local_scale;
-        phs = - (float)mid * TWOPI * (float)i / (float)N;
+        phs = - (double)mid * TWOPI * (double)i / (double)N;
         fcoef[2 * i + 0] = mag * cos (phs);
         fcoef[2 * i + 1] = mag * sin (phs);
     }
@@ -140,10 +143,10 @@ float* FIR::fir_fsamp_odd (int N, float* A, int rtype, float scale, int wintype)
     return c_impulse;
 }
 
-float* FIR::fir_fsamp (int N, float* A, int rtype, float scale, int wintype)
+float* FIR::fir_fsamp (int N, float* A, int rtype, double scale, int wintype)
 {
     int n, i, j, k;
-    float sum;
+    double sum;
     float* window;
     float *c_impulse = new float[N * 2]; // (float *) malloc0 (N * sizeof (complex));
 
@@ -166,7 +169,7 @@ float* FIR::fir_fsamp (int N, float* A, int rtype, float scale, int wintype)
     }
     else
     {
-        float M = (float)(N - 1) / 2.0;
+        double M = (double)(N - 1) / 2.0;
         for (n = 0; n < N / 2; n++)
         {
             sum = 0.0;
@@ -200,18 +203,18 @@ float* FIR::fir_fsamp (int N, float* A, int rtype, float scale, int wintype)
     return c_impulse;
 }
 
-float* FIR::fir_bandpass (int N, float f_low, float f_high, float samplerate, int wintype, int rtype, float scale)
+float* FIR::fir_bandpass (int N, double f_low, double f_high, double samplerate, int wintype, int rtype, double scale)
 {
     float *c_impulse = new float[N * 2]; // (float *) malloc0 (N * sizeof (complex));
-    float ft = (f_high - f_low) / (2.0 * samplerate);
-    float ft_rad = TWOPI * ft;
-    float w_osc = PI * (f_high + f_low) / samplerate;
+    double ft = (f_high - f_low) / (2.0 * samplerate);
+    double ft_rad = TWOPI * ft;
+    double w_osc = PI * (f_high + f_low) / samplerate;
     int i, j;
-    float m = 0.5 * (float)(N - 1);
-    float delta = PI / m;
-    float cosphi;
-    float posi, posj;
-    float sinc, window, coef;
+    double m = 0.5 * (double)(N - 1);
+    double delta = PI / m;
+    double cosphi;
+    double posi, posj;
+    double sinc, window, coef;
 
     if (N & 1)
     {
@@ -228,8 +231,8 @@ float* FIR::fir_bandpass (int N, float f_low, float f_high, float samplerate, in
     }
     for (i = (N + 1) / 2, j = N / 2 - 1; i < N; i++, j--)
     {
-        posi = (float)i - m;
-        posj = (float)j - m;
+        posi = (double)i - m;
+        posj = (double)j - m;
         sinc = sin (ft_rad * posi) / (PI * posi);
         switch (wintype)
         {
@@ -384,7 +387,7 @@ void FIR::mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity)
         if (mag[i] > 0.0)
             ana[2 * i + 0] = log (mag[i]);
         else
-            ana[2 * i + 0] = log (1.0e-300);
+            ana[2 * i + 0] = log (std::numeric_limits<float>::min());
     }
     analytic (size, ana, ana);
     for (i = 0; i < size; i++)

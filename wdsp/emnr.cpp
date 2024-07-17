@@ -24,6 +24,8 @@ The author can be reached by email at
 warren@wpratt.com
 
 */
+#include <limits>
+
 #include "comm.hpp"
 #include "calculus.hpp"
 #include "emnr.hpp"
@@ -273,7 +275,7 @@ void EMNR::calc_emnr(EMNR *a)
         float tau = -128.0 / 8000.0 / log(0.98);
         a->g.alpha = exp(-a->incr / a->rate / tau);
     }
-    a->g.eps_floor = 1.0e-300;
+    a->g.eps_floor = std::numeric_limits<double>::min();
     a->g.gamma_max = 1000.0;
     a->g.q = 0.2;
     for (i = 0; i < a->g.msize; i++)

@@ -35,9 +35,9 @@ class WDSP_API FIR
 {
 public:
     static float* fftcv_mults (int NM, float* c_impulse);
-    static float* fir_fsamp_odd (int N, float* A, int rtype, float scale, int wintype);
-    static float* fir_fsamp (int N, float* A, int rtype, float scale, int wintype);
-    static float* fir_bandpass (int N, float f_low, float f_high, float samplerate, int wintype, int rtype, float scale);
+    static float* fir_fsamp_odd (int N, float* A, int rtype, double scale, int wintype);
+    static float* fir_fsamp (int N, float* A, int rtype, double scale, int wintype);
+    static float* fir_bandpass (int N, double f_low, double f_high, double samplerate, int wintype, int rtype, double scale);
     static void mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity);
 
 private:
