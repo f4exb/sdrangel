@@ -42,6 +42,7 @@ set(wdsp_SOURCES
     osctrl.cpp
     patchpanel.cpp
     resample.cpp
+    resamplef.cpp
     rmatch.cpp
     RXA.cpp
     sender.cpp
@@ -98,6 +99,7 @@ set(wdsp_HEADERS
     osctrl.hpp
     patchpanel.hpp
     resample.hpp
+    resamplef.hpp
     rmatch.hpp
     RXA.hpp
     sender.hpp

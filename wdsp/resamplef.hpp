@@ -27,69 +27,42 @@ warren@wpratt.com
 
 /************************************************************************************************
 *                                                                                               *
-*                             VERSION FOR COMPLEX DOUBLE-PRECISION                              *
+*                             VERSION FOR NON-COMPLEX FLOATS                                    *
 *                                                                                               *
 ************************************************************************************************/
 
-#ifndef wdsp_resample_h
-#define wdsp_resample_h
+#ifndef wdsp_resampleF_h
+#define wdsp_resampleF_h
 
 #include "export.h"
 
 namespace WDSP {
 
-class WDSP_API RESAMPLE
+class WDSP_API RESAMPLEF
 {
 public:
     int run;            // run
     int size;           // number of input samples per buffer
-    float* in;         // input buffer for resampler
-    float* out;        // output buffer for resampler
-    int in_rate;
-    int out_rate;
-    double fcin;
-    double fc;
-    double fc_low;
-    double gain;
+    float* in;          // input buffer for resampler
+    float* out;         // output buffer for resampler
     int idx_in;         // index for input into ring
-    int ncoefin;
     int ncoef;          // number of coefficients
     int L;              // interpolation factor
     int M;              // decimation factor
-    double* h;          // coefficients
-    int ringsize;       // number of complex pairs the ring buffer holds
-    double* ring;       // ring buffer
+    float* h;          // coefficients
+    int ringsize;       // number of values the ring buffer holds
+    float* ring;       // ring buffer
     int cpp;            // coefficients of the phase
     int phnum;          // phase number
 
-    static RESAMPLE* create_resample (
-        int run,
-        int size,
-        float* in,
-        float* out,
-        int in_rate,
-        int out_rate,
-        double fc,
-        int ncoef,
-        double gain
-    );
-    static void destroy_resample (RESAMPLE *a);
-    static void flush_resample (RESAMPLE *a);
-    static int xresample (RESAMPLE *a);
-    static void setBuffers_resample (RESAMPLE *a, float* in, float* out);
-    static void setSize_resample(RESAMPLE *a, int size);
-    static void setInRate_resample(RESAMPLE *a, int rate);
-    static void setOutRate_resample(RESAMPLE *a, int rate);
-    static void setFCLow_resample (RESAMPLE *a, double fc_low);
-    static void setBandwidth_resample (RESAMPLE *a, double fc_low, double fc_high);
+    static RESAMPLEF* create_resampleF (int run, int size, float* in, float* out, int in_rate, int out_rate);
+    static void destroy_resampleF (RESAMPLEF *a);
+    static void flush_resampleF (RESAMPLEF *a);
+    static int xresampleF (RESAMPLEF *a);
     // Exported calls
-    static void* create_resampleV (int in_rate, int out_rate);
-    static void xresampleV (float* input, float* output, int numsamps, int* outsamps, void* ptr);
-    static void destroy_resampleV (void* ptr);
-
-private:
-    static void calc_resample (RESAMPLE *a);
-    static void decalc_resample (RESAMPLE *a);
+    static void* create_resampleFV (int in_rate, int out_rate);
+    static void xresampleFV (float* input, float* output, int numsamps, int* outsamps, void* ptr);
+    static void destroy_resampleFV (void* ptr);
 };
 
 } // namespace WDSP
