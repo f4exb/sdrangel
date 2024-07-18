@@ -48,18 +48,18 @@ public:
     int mask;
     int n_taps;
     int delay;
-    float two_mu;
-    float gamma;
-    float d [ANF_DLINE_SIZE];
-    float w [ANF_DLINE_SIZE];
+    double two_mu;
+    double gamma;
+    double d [ANF_DLINE_SIZE];
+    double w [ANF_DLINE_SIZE];
     int in_idx;
-    float lidx;
-    float lidx_min;
-    float lidx_max;
-    float ngamma;
-    float den_mult;
-    float lincr;
-    float ldecr;
+    double lidx;
+    double lidx_min;
+    double lidx_max;
+    double ngamma;
+    double den_mult;
+    double lincr;
+    double ldecr;
 
     static ANF* create_anf(
         int run,
@@ -70,15 +70,15 @@ public:
         int dline_size,
         int n_taps,
         int delay,
-        float two_mu,
-        float gamma,
-        float lidx,
-        float lidx_min,
-        float lidx_max,
-        float ngamma,
-        float den_mult,
-        float lincr,
-        float ldecr
+        double two_mu,
+        double gamma,
+        double lidx,
+        double lidx_min,
+        double lidx_max,
+        double ngamma,
+        double den_mult,
+        double lincr,
+        double ldecr
     );
     static void destroy_anf (ANF *a);
     static void flush_anf (ANF *a);
@@ -88,11 +88,11 @@ public:
     static void setSize_anf (ANF *a, int size);
     // RXA Properties
     static void SetANFRun (RXA& rxa, int setit);
-    static void SetANFVals (RXA& rxa, int taps, int delay, float gain, float leakage);
+    static void SetANFVals (RXA& rxa, int taps, int delay, double gain, double leakage);
     static void SetANFTaps (RXA& rxa, int taps);
     static void SetANFDelay (RXA& rxa, int delay);
-    static void SetANFGain (RXA& rxa, float gain);
-    static void SetANFLeakage (RXA& rxa, float leakage);
+    static void SetANFGain (RXA& rxa, double gain);
+    static void SetANFLeakage (RXA& rxa, double leakage);
     static void SetANFPosition (RXA& rxa, int position);
 };
 

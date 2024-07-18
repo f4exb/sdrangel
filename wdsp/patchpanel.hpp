@@ -42,9 +42,9 @@ public:
     int size;
     float* in;
     float* out;
-    float gain1;
-    float gain2I;
-    float gain2Q;
+    double gain1;
+    double gain2I;
+    double gain2Q;
     int inselect;
     int copy;
 
@@ -53,9 +53,9 @@ public:
         int size,
         float* in,
         float* out,
-        float gain1,
-        float gain2I,
-        float gain2Q,
+        double gain1,
+        double gain2I,
+        double gain2Q,
         int inselect,
         int copy
     );
@@ -68,14 +68,14 @@ public:
     // RXA Properties
     static void SetPanelRun (RXA& rxa, int run);
     static void SetPanelSelect (RXA& rxa, int select);
-    static void SetPanelGain1 (RXA& rxa, float gain);
-    static void SetPanelGain2 (RXA& rxa, float gainI, float gainQ);
-    static void SetPanelPan (RXA& rxa, float pan);
+    static void SetPanelGain1 (RXA& rxa, double gain);
+    static void SetPanelGain2 (RXA& rxa, double gainI, double gainQ);
+    static void SetPanelPan (RXA& rxa, double pan);
     static void SetPanelCopy (RXA& rxa, int copy);
     static void SetPanelBinaural (RXA& rxa, int bin);
     // TXA Properties
     static void SetPanelRun (TXA& txa, int run);
-    static void SetPanelGain1 (TXA& txa, float gain);
+    static void SetPanelGain1 (TXA& txa, double gain);
     static void SetPanelSelect (TXA& txa, int select);
 };
 

@@ -506,9 +506,9 @@ RXA* RXA::create_rxa (
     // Dolly filter (multiple peak filter) - default is 2 for RTTY
     {
         int def_enable[2] = {1, 1};
-        float def_freq[2] = {2125.0, 2295.0};
-        float def_bw[2] = {75.0, 75.0};
-        float def_gain[2] = {1.0, 1.0};
+        double def_freq[2] = {2125.0, 2295.0};
+        double def_bw[2] = {75.0, 75.0};
+        double def_gain[2] = {1.0, 1.0};
         rxa->mpeak.p = MPEAK::create_mpeak (
             0,                                  // run
             rxa->dsp_size,                      // size

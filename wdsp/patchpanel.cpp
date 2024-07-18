@@ -37,9 +37,9 @@ PANEL* PANEL::create_panel (
     int size,
     float* in,
     float* out,
-    float gain1,
-    float gain2I,
-    float gain2Q,
+    double gain1,
+    double gain2I,
+    double gain2Q,
     int inselect,
     int copy
 )
@@ -70,9 +70,9 @@ void PANEL::flush_panel (PANEL *)
 void PANEL::xpanel (PANEL *a)
 {
     int i;
-    float I, Q;
-    float gainI = a->gain1 * a->gain2I;
-    float gainQ = a->gain1 * a->gain2Q;
+    double I, Q;
+    double gainI = a->gain1 * a->gain2I;
+    double gainQ = a->gain1 * a->gain2Q;
     // inselect is either 0(neither), 1(Q), 2(I), or 3(both)
     switch (a->copy)
     {
@@ -147,20 +147,20 @@ void PANEL::SetPanelSelect (RXA& rxa, int select)
     rxa.panel.p->inselect = select;
 }
 
-void PANEL::SetPanelGain1 (RXA& rxa, float gain)
+void PANEL::SetPanelGain1 (RXA& rxa, double gain)
 {
     rxa.panel.p->gain1 = gain;
 }
 
-void PANEL::SetPanelGain2 (RXA& rxa, float gainI, float gainQ)
+void PANEL::SetPanelGain2 (RXA& rxa, double gainI, double gainQ)
 {
     rxa.panel.p->gain2I = gainI;
     rxa.panel.p->gain2Q = gainQ;
 }
 
-void PANEL::SetPanelPan (RXA& rxa, float pan)
+void PANEL::SetPanelPan (RXA& rxa, double pan)
 {
-    float gain1, gain2;
+    double gain1, gain2;
 
     if (pan <= 0.5)
     {
@@ -198,7 +198,7 @@ void PANEL::SetPanelRun (TXA& txa, int run)
     txa.panel.p->run = run;
 }
 
-void PANEL::SetPanelGain1 (TXA& txa, float gain)
+void PANEL::SetPanelGain1 (TXA& txa, double gain)
 {
     txa.panel.p->gain1 = gain;
     //print_message ("micgainset.txt", "Set MIC Gain to", (int)(100.0 * gain), 0, 0);

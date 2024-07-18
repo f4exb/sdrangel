@@ -134,6 +134,7 @@ void AMD::xamd (AMD *a)
     double ai, bi, aq, bq;
     double ai_ps, bi_ps, aq_ps, bq_ps;
     int j, k;
+
     if (a->run)
     {
         switch (a->mode)
@@ -143,16 +144,21 @@ void AMD::xamd (AMD *a)
                 {
                     for (i = 0; i < a->buff_size; i++)
                     {
-                        audio = sqrt(a->in_buff[2 * i + 0] * a->in_buff[2 * i + 0] + a->in_buff[2 * i + 1] * a->in_buff[2 * i + 1]);
+                        double xr = a->in_buff[2 * i + 0];
+                        double xi = a->in_buff[2 * i + 1];
+                        audio = sqrt(xr*xr + xi*xi);
+
                         if (a->levelfade)
                         {
                             a->dc = a->mtauR * a->dc + a->onem_mtauR * audio;
                             a->dc_insert = a->mtauI * a->dc_insert + a->onem_mtauI * audio;
                             audio += a->dc_insert - a->dc;
                         }
+
                         a->out_buff[2 * i + 0] = audio;
                         a->out_buff[2 * i + 1] = audio;
                     }
+
                     break;
                 }
 
@@ -185,6 +191,7 @@ void AMD::xamd (AMD *a)
                                 a->c[k + 3] = a->c0[j] * (a->c[k] - a->c[k + 5]) + a->c[k + 2];
                                 a->d[k + 3] = a->c1[j] * (a->d[k] - a->d[k + 5]) + a->d[k + 2];
                             }
+
                             ai_ps = a->a[OUT_IDX];
                             bi_ps = a->b[OUT_IDX];
                             bq_ps = a->c[OUT_IDX];
@@ -227,20 +234,33 @@ void AMD::xamd (AMD *a)
                             a->dc_insert = a->mtauI * a->dc_insert + a->onem_mtauI * corr[0];
                             audio += a->dc_insert - a->dc;
                         }
+
                         a->out_buff[2 * i + 0] = audio;
                         a->out_buff[2 * i + 1] = audio;
 
-                        if ((corr[0] == 0.0) && (corr[1] == 0.0)) corr[0] = 1.0;
+                        if ((corr[0] == 0.0) && (corr[1] == 0.0))
+                            corr[0] = 1.0;
+
                         det = atan2(corr[1], corr[0]);
                         del_out = a->fil_out;
                         a->omega += a->g2 * det;
-                        if (a->omega < a->omega_min) a->omega = a->omega_min;
-                        if (a->omega > a->omega_max) a->omega = a->omega_max;
+
+                        if (a->omega < a->omega_min)
+                            a->omega = a->omega_min;
+
+                        if (a->omega > a->omega_max)
+                            a->omega = a->omega_max;
+
                         a->fil_out = a->g1 * det + a->omega;
                         a->phs += del_out;
-                        while (a->phs >= 2 * M_PI) a->phs -= 2 * M_PI;
-                        while (a->phs < 0.0) a->phs += 2 * M_PI;
+
+                        while (a->phs >= 2 * M_PI)
+                            a->phs -= 2 * M_PI;
+
+                        while (a->phs < 0.0)
+                            a->phs += 2 * M_PI;
                     }
+
                     break;
                 }
         }
@@ -277,6 +297,7 @@ void AMD::setSize_amd (AMD *a, int size)
 void AMD::SetAMDRun(RXA& rxa, int run)
 {
     AMD *a = rxa.amd.p;
+
     if (a->run != run)
     {
         RXA::bp1Check (
@@ -287,6 +308,7 @@ void AMD::SetAMDRun(RXA& rxa, int run)
             rxa.anf.p->run,
             rxa.anr.p->run
         );
+
         a->run = run;
         RXA::bp1Set (rxa);
     }

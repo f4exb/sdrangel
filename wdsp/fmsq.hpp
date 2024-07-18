@@ -63,8 +63,8 @@ public:
     double tdown;
     int ntup;
     int ntdown;
-    float* cup;
-    float* cdown;
+    double* cup;
+    double* cdown;
     double tail_thresh;
     double unmute_thresh;
     double min_tail;

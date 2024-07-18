@@ -35,7 +35,7 @@ namespace WDSP {
 
 void FMSQ::calc_fmsq (FMSQ *a)
 {
-    float delta, theta;
+    double delta, theta;
     float* impulse;
     int i;
     // noise filter
@@ -61,17 +61,20 @@ void FMSQ::calc_fmsq (FMSQ *a)
     // level change
     a->ntup   = (int)(a->tup   * a->rate);
     a->ntdown = (int)(a->tdown * a->rate);
-    a->cup   = new float[a->ntup + 1]; // (float *)malloc0 ((a->ntup   + 1) * sizeof(float));
-    a->cdown = new float[a->ntdown + 1]; //(float *)malloc0 ((a->ntdown + 1) * sizeof(float));
-    delta = PI / (float)a->ntup;
+    a->cup   = new double[a->ntup + 1]; // (float *)malloc0 ((a->ntup   + 1) * sizeof(float));
+    a->cdown = new double[a->ntdown + 1]; //(float *)malloc0 ((a->ntdown + 1) * sizeof(float));
+    delta = PI / (double) a->ntup;
     theta = 0.0;
+
     for (i = 0; i <= a->ntup; i++)
     {
         a->cup[i] = 0.5 * (1.0 - cos(theta));
         theta += delta;
     }
-    delta = PI / (float)a->ntdown;
+
+    delta = PI / (double) a->ntdown;
     theta = 0.0;
+
     for (i = 0; i <= a->ntdown; i++)
     {
         a->cdown[i] = 0.5 * (1 + cos(theta));
@@ -170,6 +173,7 @@ void FMSQ::xfmsq (FMSQ *a)
         int i;
         double noise, lnlimit;
         FIRCORE::xfircore (a->p);
+
         for (i = 0; i < a->size; i++)
         {
             double noise0 = a->noise[2 * i + 0];
@@ -177,8 +181,12 @@ void FMSQ::xfmsq (FMSQ *a)
             noise = sqrt(noise0 * noise0 + noise1 * noise1);
             a->avnoise = a->avm * a->avnoise + a->onem_avm * noise;
             a->longnoise = a->longavm * a->longnoise + a->onem_longavm * noise;
-            if (!a->ready) a->ramp += a->rstep;
-            if (a->ramp >= a->tdelay) a->ready = 1;
+
+            if (!a->ready)
+                a->ramp += a->rstep;
+
+            if (a->ramp >= a->tdelay)
+                a->ready = 1;
 
             switch (a->state)
             {
@@ -188,47 +196,68 @@ void FMSQ::xfmsq (FMSQ *a)
                     a->state = INCREASE;
                     a->count = a->ntup;
                 }
+
                 a->outsig[2 * i + 0] = 0.0;
                 a->outsig[2 * i + 1] = 0.0;
+
                 break;
+
             case INCREASE:
                 a->outsig[2 * i + 0] = a->insig[2 * i + 0] * a->cup[a->ntup - a->count];
                 a->outsig[2 * i + 1] = a->insig[2 * i + 1] * a->cup[a->ntup - a->count];
+
                 if (a->count-- == 0)
                     a->state = UNMUTED;
+
                 break;
+
             case UNMUTED:
                 if (a->avnoise > a->tail_thresh)
                 {
                     a->state = TAIL;
-                    if ((lnlimit = a->longnoise) > 1.0) lnlimit = 1.0;
+
+                    if ((lnlimit = a->longnoise) > 1.0)
+                        lnlimit = 1.0;
+
                     a->count = (int)((a->min_tail + (a->max_tail - a->min_tail) * lnlimit) * a->rate);
                 }
+
                 a->outsig[2 * i + 0] = a->insig[2 * i + 0];
                 a->outsig[2 * i + 1] = a->insig[2 * i + 1];
+
                 break;
+
             case TAIL:
                 a->outsig[2 * i + 0] = a->insig[2 * i + 0];
                 a->outsig[2 * i + 1] = a->insig[2 * i + 1];
+
                 if (a->avnoise < a->unmute_thresh)
+                {
                     a->state = UNMUTED;
+                }
                 else if (a->count-- == 0)
                 {
                     a->state = DECREASE;
                     a->count = a->ntdown;
                 }
+
                 break;
+
             case DECREASE:
                 a->outsig[2 * i + 0] = a->insig[2 * i + 0] * a->cdown[a->ntdown - a->count];
                 a->outsig[2 * i + 1] = a->insig[2 * i + 1] * a->cdown[a->ntdown - a->count];
+
                 if (a->count-- == 0)
                     a->state = MUTED;
+
                 break;
             }
         }
     }
     else if (a->insig != a->outsig)
+    {
         std::copy(a->insig, a->insig + a->size * 2, a->outsig);
+    }
 }
 
 void FMSQ::setBuffers_fmsq (FMSQ *a, float* in, float* out, float* trig)
@@ -289,6 +318,7 @@ void FMSQ::SetFMSQMP (RXA& rxa, int mp)
 {
     FMSQ *a;
     a = rxa.fmsq.p;
+
     if (a->mp != mp)
     {
         a->mp = mp;

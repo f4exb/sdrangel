@@ -98,7 +98,7 @@ WCPAGC* WCPAGC::create_wcpagc (
     a->in = in;
     a->out = out;
     a->io_buffsize = io_buffsize;
-    a->sample_rate = (float)sample_rate;
+    a->sample_rate = (double) sample_rate;
     a->tau_attack = tau_attack;
     a->tau_decay = tau_decay;
     a->n_tau = n_tau;
@@ -121,7 +121,7 @@ WCPAGC* WCPAGC::create_wcpagc (
 
 void WCPAGC::loadWcpAGC (WCPAGC *a)
 {
-    float tmp;
+    double tmp;
     //calculate internal parameters
     a->attack_buffsize = (int)ceil(a->sample_rate * a->n_tau * a->tau_attack);
     a->in_index = a->attack_buffsize + a->out_index;
@@ -131,24 +131,22 @@ void WCPAGC::loadWcpAGC (WCPAGC *a)
     a->fast_backmult = 1.0 - exp(-1.0 / (a->sample_rate * a->tau_fast_backaverage));
     a->onemfast_backmult = 1.0 - a->fast_backmult;
 
-    a->out_target = a->out_targ * (1.0 - exp(-(float)a->n_tau)) * 0.9999;
+    a->out_target = a->out_targ * (1.0 - exp(-(double)a->n_tau)) * 0.9999;
     a->min_volts = a->out_target / (a->var_gain * a->max_gain);
     a->inv_out_target = 1.0 / a->out_target;
 
     tmp = log10(a->out_target / (a->max_input * a->var_gain * a->max_gain));
+
     if (tmp == 0.0)
         tmp = 1e-16;
+
     a->slope_constant = (a->out_target * (1.0 - 1.0 / a->var_gain)) / tmp;
-
     a->inv_max_input = 1.0 / a->max_input;
-
     tmp = pow (10.0, (a->hang_thresh - 1.0) / 0.125);
     a->hang_level = (a->max_input * tmp + (a->out_target /
         (a->var_gain * a->max_gain)) * (1.0 - tmp)) * 0.637;
-
     a->hang_backmult = 1.0 - exp(-1.0 / (a->sample_rate * a->tau_hang_backmult));
     a->onemhang_backmult = 1.0 - a->hang_backmult;
-
     a->hang_decay_mult = 1.0 - exp(-1.0 / (a->sample_rate * a->tau_hang_decay));
 }
 
@@ -160,15 +158,16 @@ void WCPAGC::destroy_wcpagc (WCPAGC *a)
 
 void WCPAGC::flush_wcpagc (WCPAGC *a)
 {
-    memset ((void *)a->ring, 0, sizeof(float) * RB_SIZE * 2);
+    memset ((void *)a->ring, 0, sizeof(double) * RB_SIZE * 2);
     a->ring_max = 0.0;
-    memset ((void *)a->abs_ring, 0, sizeof(float)* RB_SIZE);
+    memset ((void *)a->abs_ring, 0, sizeof(double)* RB_SIZE);
 }
 
 void WCPAGC::xwcpagc (WCPAGC *a)
 {
     int i, j, k;
-    float mult;
+    double mult;
+
     if (a->run)
     {
         if (a->mode == 0)
@@ -178,6 +177,7 @@ void WCPAGC::xwcpagc (WCPAGC *a)
                 a->out[2 * i + 0] = a->fixed_gain * a->in[2 * i + 0];
                 a->out[2 * i + 1] = a->fixed_gain * a->in[2 * i + 1];
             }
+
             return;
         }
 
@@ -185,18 +185,20 @@ void WCPAGC::xwcpagc (WCPAGC *a)
         {
             if (++a->out_index >= a->ring_buffsize)
                 a->out_index -= a->ring_buffsize;
+
             if (++a->in_index >= a->ring_buffsize)
                 a->in_index -= a->ring_buffsize;
 
             a->out_sample[0] = a->ring[2 * a->out_index + 0];
             a->out_sample[1] = a->ring[2 * a->out_index + 1];
             a->abs_out_sample = a->abs_ring[a->out_index];
-            a->ring[2 * a->in_index + 0] = a->in[2 * i + 0];
-            a->ring[2 * a->in_index + 1] = a->in[2 * i + 1];
+            double xr = a->ring[2 * a->in_index + 0] = a->in[2 * i + 0];
+            double xi = a->ring[2 * a->in_index + 1] = a->in[2 * i + 1];
+
             if (a->pmode == 0)
-                a->abs_ring[a->in_index] = std::max(fabs(a->ring[2 * a->in_index + 0]), fabs(a->ring[2 * a->in_index + 1]));
+                a->abs_ring[a->in_index] = std::max(fabs(xr), fabs(xi));
             else
-                a->abs_ring[a->in_index] = sqrt(a->ring[2 * a->in_index + 0] * a->ring[2 * a->in_index + 0] + a->ring[2 * a->in_index + 1] * a->ring[2 * a->in_index + 1]);
+                a->abs_ring[a->in_index] = sqrt(xr*xr + xi*xi);
 
             a->fast_backaverage = a->fast_backmult * a->abs_out_sample + a->onemfast_backmult * a->fast_backaverage;
             a->hang_backaverage = a->hang_backmult * a->abs_out_sample + a->onemhang_backmult * a->hang_backaverage;
@@ -205,6 +207,7 @@ void WCPAGC::xwcpagc (WCPAGC *a)
             {
                 a->ring_max = 0.0;
                 k = a->out_index;
+
                 for (j = 0; j < a->attack_buffsize; j++)
                 {
                     if (++k == a->ring_buffsize)
@@ -213,6 +216,7 @@ void WCPAGC::xwcpagc (WCPAGC *a)
                         a->ring_max = a->abs_ring[k];
                 }
             }
+
             if (a->abs_ring[a->in_index] > a->ring_max)
                 a->ring_max = a->abs_ring[a->in_index];
 
@@ -252,6 +256,7 @@ void WCPAGC::xwcpagc (WCPAGC *a)
                     }
                     break;
                 }
+
             case 1:
                 {
                     if (a->ring_max >= a->volts)
@@ -288,6 +293,7 @@ void WCPAGC::xwcpagc (WCPAGC *a)
                     }
                     break;
                 }
+
             case 2:
                 {
                     if (a->ring_max >= a->volts)
@@ -306,6 +312,7 @@ void WCPAGC::xwcpagc (WCPAGC *a)
                     }
                     break;
                 }
+
             case 3:
                 {
                     if (a->ring_max >= a->volts)
@@ -320,6 +327,7 @@ void WCPAGC::xwcpagc (WCPAGC *a)
                     }
                     break;
                 }
+
             case 4:
                 {
                     if (a->ring_max >= a->volts)
@@ -338,6 +346,7 @@ void WCPAGC::xwcpagc (WCPAGC *a)
 
             if (a->volts < a->min_volts)
                 a->volts = a->min_volts;
+
             a->gain = a->volts * a->inv_out_target;
             mult = (a->out_target - a->slope_constant * std::min (0.0, log10(a->inv_max_input * a->volts))) / a->volts;
             a->out[2 * i + 0] = a->out_sample[0] * mult;
@@ -345,7 +354,9 @@ void WCPAGC::xwcpagc (WCPAGC *a)
         }
     }
     else if (a->out != a->in)
+    {
         std::copy(a->in, a->in + a->io_buffsize * 2, a->out);
+    }
 }
 
 void WCPAGC::setBuffers_wcpagc (WCPAGC *a, float* in, float* out)
@@ -432,16 +443,16 @@ void WCPAGC::SetAGCHang (RXA& rxa, int hang)
     loadWcpAGC ( rxa.agc.p );
 }
 
-void WCPAGC::GetAGCHangLevel(RXA& rxa, float *hangLevel)
+void WCPAGC::GetAGCHangLevel(RXA& rxa, double *hangLevel)
 //for line on bandscope
 {
     *hangLevel = 20.0 * log10( rxa.agc.p->hang_level / 0.637 );
 }
 
-void WCPAGC::SetAGCHangLevel(RXA& rxa, float hangLevel)
+void WCPAGC::SetAGCHangLevel(RXA& rxa, double hangLevel)
 //for line on bandscope
 {
-    float convert, tmp;
+    double convert, tmp;
 
     if (rxa.agc.p->max_input > rxa.agc.p->min_volts)
     {
@@ -458,59 +469,59 @@ void WCPAGC::SetAGCHangLevel(RXA& rxa, float hangLevel)
 void WCPAGC::GetAGCHangThreshold(RXA& rxa, int *hangthreshold)
 //for slider in setup
 {
-    *hangthreshold = (int)(100.0 * rxa.agc.p->hang_thresh);
+    *hangthreshold = (int) (100.0 * rxa.agc.p->hang_thresh);
 }
 
 void WCPAGC::SetAGCHangThreshold (RXA& rxa, int hangthreshold)
 //For slider in setup
 {
-    rxa.agc.p->hang_thresh = (float)hangthreshold / 100.0;
+    rxa.agc.p->hang_thresh = (double) hangthreshold / 100.0;
     loadWcpAGC ( rxa.agc.p );
 }
 
-void WCPAGC::GetAGCThresh(RXA& rxa, float *thresh, float size, float rate)
+void WCPAGC::GetAGCThresh(RXA& rxa, double *thresh, double size, double rate)
 //for line on bandscope.
 {
-    float noise_offset;
+    double noise_offset;
     noise_offset = 10.0 * log10((rxa.nbp0.p->fhigh - rxa.nbp0.p->flow) * size / rate);
     *thresh = 20.0 * log10( rxa.agc.p->min_volts ) - noise_offset;
 }
 
-void WCPAGC::SetAGCThresh(RXA& rxa, float thresh, float size, float rate)
+void WCPAGC::SetAGCThresh(RXA& rxa, double thresh, double size, double rate)
 //for line on bandscope
 {
-    float noise_offset;
+    double noise_offset;
     noise_offset = 10.0 * log10((rxa.nbp0.p->fhigh - rxa.nbp0.p->flow) * size / rate);
     rxa.agc.p->max_gain = rxa.agc.p->out_target / (rxa.agc.p->var_gain * pow (10.0, (thresh + noise_offset) / 20.0));
     loadWcpAGC ( rxa.agc.p );
 }
 
-void WCPAGC::GetAGCTop(RXA& rxa, float *max_agc)
+void WCPAGC::GetAGCTop(RXA& rxa, double *max_agc)
 //for AGC Max Gain in setup
 {
     *max_agc = 20 * log10 (rxa.agc.p->max_gain);
 }
 
-void WCPAGC::SetAGCTop (RXA& rxa, float max_agc)
+void WCPAGC::SetAGCTop (RXA& rxa, double max_agc)
 //for AGC Max Gain in setup
 {
-    rxa.agc.p->max_gain = pow (10.0, (float)max_agc / 20.0);
+    rxa.agc.p->max_gain = pow (10.0, (double) max_agc / 20.0);
     loadWcpAGC ( rxa.agc.p );
 }
 
 void WCPAGC::SetAGCSlope (RXA& rxa, int slope)
 {
-    rxa.agc.p->var_gain = pow (10.0, (float)slope / 20.0 / 10.0);
+    rxa.agc.p->var_gain = pow (10.0, (double) slope / 20.0 / 10.0);
     loadWcpAGC ( rxa.agc.p );
 }
 
-void WCPAGC::SetAGCFixed (RXA& rxa, float fixed_agc)
+void WCPAGC::SetAGCFixed (RXA& rxa, double fixed_agc)
 {
-    rxa.agc.p->fixed_gain = pow (10.0, (float)fixed_agc / 20.0);
+    rxa.agc.p->fixed_gain = pow (10.0, (double) fixed_agc / 20.0);
     loadWcpAGC ( rxa.agc.p );
 }
 
-void WCPAGC::SetAGCMaxInputLevel (RXA& rxa, float level)
+void WCPAGC::SetAGCMaxInputLevel (RXA& rxa, double level)
 {
     rxa.agc.p->max_input = level;
     loadWcpAGC ( rxa.agc.p );
@@ -529,25 +540,25 @@ void WCPAGC::SetALCSt (TXA& txa, int state)
 
 void WCPAGC::SetALCAttack (TXA& txa, int attack)
 {
-    txa.alc.p->tau_attack = (float)attack / 1000.0;
+    txa.alc.p->tau_attack = (double) attack / 1000.0;
     loadWcpAGC(txa.alc.p);
 }
 
 void WCPAGC::SetALCDecay (TXA& txa, int decay)
 {
-    txa.alc.p->tau_decay = (float)decay / 1000.0;
+    txa.alc.p->tau_decay = (double) decay / 1000.0;
     loadWcpAGC(txa.alc.p);
 }
 
 void WCPAGC::SetALCHang (TXA& txa, int hang)
 {
-    txa.alc.p->hangtime = (float)hang / 1000.0;
+    txa.alc.p->hangtime = (double) hang / 1000.0;
     loadWcpAGC(txa.alc.p);
 }
 
-void WCPAGC::SetALCMaxGain (TXA& txa, float maxgain)
+void WCPAGC::SetALCMaxGain (TXA& txa, double maxgain)
 {
-    txa.alc.p->max_gain = pow (10.0,(float)maxgain / 20.0);
+    txa.alc.p->max_gain = pow (10.0,(double) maxgain / 20.0);
     loadWcpAGC(txa.alc.p);
 }
 
@@ -558,25 +569,25 @@ void WCPAGC::SetLevelerSt (TXA& txa, int state)
 
 void WCPAGC::SetLevelerAttack (TXA& txa, int attack)
 {
-    txa.leveler.p->tau_attack = (float)attack / 1000.0;
+    txa.leveler.p->tau_attack = (double) attack / 1000.0;
     loadWcpAGC(txa.leveler.p);
 }
 
 void WCPAGC::SetLevelerDecay (TXA& txa, int decay)
 {
-    txa.leveler.p->tau_decay = (float)decay / 1000.0;
+    txa.leveler.p->tau_decay = (double) decay / 1000.0;
     loadWcpAGC(txa.leveler.p);
 }
 
 void WCPAGC::SetLevelerHang (TXA& txa, int hang)
 {
-    txa.leveler.p->hangtime = (float)hang / 1000.0;
+    txa.leveler.p->hangtime = (double) hang / 1000.0;
     loadWcpAGC(txa.leveler.p);
 }
 
-void WCPAGC::SetLevelerTop (TXA& txa, float maxgain)
+void WCPAGC::SetLevelerTop (TXA& txa, double maxgain)
 {
-    txa.leveler.p->max_gain = pow (10.0,(float)maxgain / 20.0);
+    txa.leveler.p->max_gain = pow (10.0,(double) maxgain / 20.0);
     loadWcpAGC(txa.leveler.p);
 }
 

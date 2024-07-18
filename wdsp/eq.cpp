@@ -115,7 +115,7 @@ float* EQP::eq_impulse (int N, int nfreqs, float* F, float* G, float samplerate,
             {
                 f = (float)k / (float)mid;
                 lowmag *= (f * f * f * f) / flow4;
-                if (lowmag < 1.0e-100) lowmag = 1.0e-100;
+                if (lowmag < 1.0e-20) lowmag = 1.0e-20;
                 A[k] = lowmag;
             }
             k = high;
@@ -123,7 +123,7 @@ float* EQP::eq_impulse (int N, int nfreqs, float* F, float* G, float samplerate,
             {
                 f = (float)k / (float)mid;
                 highmag *= fhigh4 / (f * f * f * f);
-                if (highmag < 1.0e-100) highmag = 1.0e-100;
+                if (highmag < 1.0e-20) highmag = 1.0e-20;
                 A[k] = highmag;
             }
         }
@@ -140,7 +140,7 @@ float* EQP::eq_impulse (int N, int nfreqs, float* F, float* G, float samplerate,
             {
                 f = (float)k / (float)mid;
                 lowmag *= (f * f * f * f) / flow4;
-                if (lowmag < 1.0e-100) lowmag = 1.0e-100;
+                if (lowmag < 1.0e-20) lowmag = 1.0e-20;
                 A[k] = lowmag;
             }
             k = high;
@@ -148,7 +148,7 @@ float* EQP::eq_impulse (int N, int nfreqs, float* F, float* G, float samplerate,
             {
                 f = (float)k / (float)mid;
                 highmag *= fhigh4 / (f * f * f * f);
-                if (highmag < 1.0e-100) highmag = 1.0e-100;
+                if (highmag < 1.0e-20) highmag = 1.0e-20;
                 A[k] = highmag;
             }
         }

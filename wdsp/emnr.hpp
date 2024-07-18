@@ -58,10 +58,10 @@ public:
     float** save;
     int oasize;
     float* outaccum;
-    float rate;
+    double rate;
     int wintype;
-    float ogain;
-    float gain;
+    double ogain;
+    double gain;
     int nsamps;
     int iainidx;
     int iaoutidx;
@@ -173,7 +173,7 @@ public:
         int ovrlp,
         int rate,
         int wintype,
-        float gain,
+        double gain,
         int gain_method,
         int npe_method,
         int ae_run

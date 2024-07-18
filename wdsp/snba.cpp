@@ -273,9 +273,12 @@ void SNBA::ATAc0 (int n, int nr, double* A, double* r)
 {
     int i, j;
     memset(r, 0, n * sizeof (double));
+
     for (i = 0; i < n; i++)
+    {
         for (j = 0; j < nr; j++)
             r[i] += A[j * n + i] * A[j * n + 0];
+    }
 }
 
 void SNBA::multA1TA2(double* a1, double* a2, int m, int n, int q, double* c)
@@ -425,7 +428,7 @@ void SNBA::det(SNBA *d, int asize, double* v, int* detout)
         else if (d->sdet.vpwr[i] <= 2.0 * t1)
             t2 += 2.0 * t1 - d->sdet.vpwr[i];
     }
-    t2 *= d->sdet.k2 / (double)(d->xsize - asize);
+    t2 *= d->sdet.k2 / (double) (d->xsize - asize);
 
     for (i = asize; i < d->xsize; i++)
     {
@@ -444,8 +447,11 @@ void SNBA::det(SNBA *d, int asize, double* v, int* detout)
         switch (bstate)
         {
             case 0:
-                if (detout[i] == 1) bstate = 1;
+                if (detout[i] == 1)
+                    bstate = 1;
+
                 break;
+
             case 1:
                 if (detout[i] == 0)
                 {
@@ -453,37 +459,51 @@ void SNBA::det(SNBA *d, int asize, double* v, int* detout)
                     bsamp = i;
                     bcount = 1;
                 }
+
                 break;
+
             case 2:
                 ++bcount;
+
                 if (bcount > d->sdet.b)
+                {
                     if (detout[i] == 1)
                         bstate = 1;
                     else
                         bstate = 0;
+                }
                 else if (detout[i] == 1)
                 {
                     for (j = bsamp; j < bsamp + bcount - 1; j++)
                         detout[j] = 1;
                     bstate = 1;
                 }
+
                 break;
         }
     }
+
     for (i = asize; i < d->xsize; i++)
     {
         if (detout[i] == 1)
         {
             for (j = i - 1; j > i - 1 - d->sdet.pre; j--)
-                if (j >= asize) detout[j] = 1;
+            {
+                if (j >= asize)
+                    detout[j] = 1;
+            }
         }
     }
+
     for (i = d->xsize - 1; i >= asize; i--)
     {
         if (detout[i] == 1)
         {
             for (j = i + 1; j < i + 1 + d->sdet.post; j++)
-                if (j < d->xsize) detout[j] = 1;
+            {
+                if (j < d->xsize)
+                    detout[j] = 1;
+            }
         }
     }
 }
@@ -510,6 +530,7 @@ int SNBA::scanFrame(
     int nextlist[MAXIMP];
     memset (befimp, 0, MAXIMP * sizeof (int));
     memset (aftimp, 0, MAXIMP * sizeof (int));
+
     while (i < xsize && nimp < MAXIMP)
     {
         if (det[i] == 1 && inflag == 0)
@@ -530,16 +551,20 @@ int SNBA::scanFrame(
             if (nimp > 0)
                 aftimp[nimp - 1]++;
         }
+
         i++;
     }
+
     for (i = 0; i < nimp; i++)
     {
         if (befimp[i] < aftimp[i])
             p_opt[i] = befimp[i];
         else
             p_opt[i] = aftimp[i];
+
         if (p_opt[i] > pval)
             p_opt[i] = pval;
+
         if (p_opt[i] < (int)(pmultmin * limp[i]))
             p_opt[i] = -1;
     }
@@ -549,6 +574,7 @@ int SNBA::scanFrame(
         merit[i] = (double)p_opt[i] / (double)limp[i];
         nextlist[i] = i;
     }
+
     for (j = 0; j < nimp - 1; j++)
     {
         for (k = 0; k < nimp - j - 1; k++)
@@ -564,9 +590,15 @@ int SNBA::scanFrame(
             }
         }
     }
+
     i = 1;
+
     if (nimp > 0)
-        while (merit[i] == merit[0] && i < nimp) i++;
+    {
+        while (merit[i] == merit[0] && i < nimp)
+            i++;
+    }
+
     for (j = 0; j < i - 1; j++)
     {
         for (k = 0; k < i - j - 1; k++)
@@ -582,6 +614,7 @@ int SNBA::scanFrame(
             }
         }
     }
+
     *next = nextlist[0];
     return nimp;
 }
@@ -673,7 +706,9 @@ void SNBA::xsnba (SNBA *d)
         RESAMPLE::xresample (d->outresamp);
     }
     else if (d->out != d->in)
+    {
         std::copy(d->in, d->in + d->bsize * 2, d->out);
+    }
 }
 
 /********************************************************************************************************
@@ -685,6 +720,7 @@ void SNBA::xsnba (SNBA *d)
 void SNBA::SetSNBARun (RXA& rxa, int run)
 {
     SNBA *a = rxa.snba.p;
+
     if (a->run != run)
     {
         RXA::bpsnbaCheck (rxa, rxa.mode, rxa.ndb.p->master_run);

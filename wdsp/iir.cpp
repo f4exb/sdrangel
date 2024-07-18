@@ -40,7 +40,7 @@ namespace WDSP {
 
 void SNOTCH::calc_snotch (SNOTCH *a)
 {
-    float fn, qk, qr, csn;
+    double fn, qk, qr, csn;
     fn = a->f / (float)a->rate;
     csn = cos (TWOPI * fn);
     qr = 1.0 - 3.0 * a->bw;
@@ -53,7 +53,7 @@ void SNOTCH::calc_snotch (SNOTCH *a)
     flush_snotch (a);
 }
 
-SNOTCH* SNOTCH::create_snotch (int run, int size, float* in, float* out, int rate, float f, float bw)
+SNOTCH* SNOTCH::create_snotch (int run, int size, float* in, float* out, int rate, double f, double bw)
 {
     SNOTCH *a = new SNOTCH;
     a->run = run;
@@ -93,7 +93,9 @@ void SNOTCH::xsnotch (SNOTCH *a)
         }
     }
     else if (a->out != a->in)
+    {
         std::copy( a->in,  a->in + a->size * 2, a->out);
+    }
 }
 
 void SNOTCH::setBuffers_snotch (SNOTCH *a, float* in, float* out)
@@ -120,7 +122,7 @@ void SNOTCH::setSize_snotch (SNOTCH *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SNOTCH::SetSNCTCSSFreq (SNOTCH *a, float freq)
+void SNOTCH::SetSNCTCSSFreq (SNOTCH *a, double freq)
 {
     a->f = freq;
     calc_snotch (a);
@@ -140,8 +142,8 @@ void SNOTCH::SetSNCTCSSRun (SNOTCH *a, int run)
 
 void SPEAK::calc_speak (SPEAK *a)
 {
-    float ratio;
-    float f_corr, g_corr, bw_corr, bw_parm, A, f_min;
+    double ratio;
+    double f_corr, g_corr, bw_corr, bw_parm, A, f_min;
 
     switch (a->design)
     {
@@ -161,11 +163,11 @@ void SPEAK::calc_speak (SPEAK *a)
             break;
         }
         {
-            float fn, qk, qr, csn;
+            double fn, qk, qr, csn;
             a->fgain = a->gain / g_corr;
-            fn = a->f / (float)a->rate / f_corr;
+            fn = a->f / (double)a->rate / f_corr;
             csn = cos (TWOPI * fn);
-            qr = 1.0 - 3.0 * a->bw / (float)a->rate * bw_parm;
+            qr = 1.0 - 3.0 * a->bw / (double)a->rate * bw_parm;
             qk = (1.0 - 2.0 * qr * csn + qr * qr) / (2.0 * (1.0 - csn));
             a->a0 = 1.0 - qk;
             a->a1 = 2.0 * (qk - qr) * csn;
@@ -195,9 +197,9 @@ void SPEAK::calc_speak (SPEAK *a)
             break;
         }
         {
-            float w0, sn, c, den;
+            double w0, sn, c, den;
             if (a->f < f_min) a->f = f_min;
-            w0 = TWOPI * a->f / (float)a->rate;
+            w0 = TWOPI * a->f / (double)a->rate;
             sn = sin (w0);
             a->cbw = bw_corr * a->f;
             c = sn * sinh(0.5 * log((a->f + 0.5 * a->cbw * bw_parm) / (a->f - 0.5 * a->cbw * bw_parm)) * w0 / sn);
@@ -207,14 +209,25 @@ void SPEAK::calc_speak (SPEAK *a)
             a->a2 = (1 - c * A) / den;
             a->b1 = - a->a1;
             a->b2 = - (1 - c / A ) / den;
-            a->fgain = a->gain / pow (A * A, (float)a->nstages);
+            a->fgain = a->gain / pow (A * A, (double)a->nstages);
         }
         break;
     }
     flush_speak (a);
 }
 
-SPEAK* SPEAK::create_speak (int run, int size, float* in, float* out, int rate, float f, float bw, float gain, int nstages, int design)
+SPEAK* SPEAK::create_speak (
+    int run,
+    int size,
+    float* in,
+    float* out,
+    int rate,
+    double f,
+    double bw,
+    double gain,
+    int nstages,
+    int design
+)
 {
     SPEAK *a = new SPEAK;
     a->run = run;
@@ -227,12 +240,12 @@ SPEAK* SPEAK::create_speak (int run, int size, float* in, float* out, int rate, 
     a->gain = gain;
     a->nstages = nstages;
     a->design = design;
-    a->x0 = new float[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
-    a->x1 = new float[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
-    a->x2 = new float[a->nstages * 2]; //(float *) malloc0 (a->nstages * sizeof (complex));
-    a->y0 = new float[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
-    a->y1 = new float[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
-    a->y2 = new float[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
+    a->x0 = new double[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
+    a->x1 = new double[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
+    a->x2 = new double[a->nstages * 2]; //(float *) malloc0 (a->nstages * sizeof (complex));
+    a->y0 = new double[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
+    a->y1 = new double[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
+    a->y2 = new double[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
     calc_speak (a);
     return a;
 }
@@ -272,12 +285,13 @@ void SPEAK::xspeak (SPEAK *a)
 
                 for (n = 0; n < a->nstages; n++)
                 {
-                    if (n > 0) a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
-                    a->y0[2 * n + j]    = a->a0 * a->x0[2 * n + j]
-                                        + a->a1 * a->x1[2 * n + j]
-                                        + a->a2 * a->x2[2 * n + j]
-                                        + a->b1 * a->y1[2 * n + j]
-                                        + a->b2 * a->y2[2 * n + j];
+                    if (n > 0)
+                        a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
+                    a->y0[2 * n + j] = a->a0 * a->x0[2 * n + j]
+                        + a->a1 * a->x1[2 * n + j]
+                        + a->a2 * a->x2[2 * n + j]
+                        + a->b1 * a->y1[2 * n + j]
+                        + a->b2 * a->y2[2 * n + j];
                     a->y2[2 * n + j] = a->y1[2 * n + j];
                     a->y1[2 * n + j] = a->y0[2 * n + j];
                     a->x2[2 * n + j] = a->x1[2 * n + j];
@@ -289,7 +303,9 @@ void SPEAK::xspeak (SPEAK *a)
         }
     }
     else if (a->out != a->in)
+    {
         std::copy( a->in,  a->in + a->size * 2, a->out);
+    }
 }
 
 void SPEAK::setBuffers_speak (SPEAK *a, float* in, float* out)
@@ -322,21 +338,21 @@ void SPEAK::SetSPCWRun (RXA& rxa, int run)
     a->run = run;
 }
 
-void SPEAK::SetSPCWFreq (RXA& rxa, float freq)
+void SPEAK::SetSPCWFreq (RXA& rxa, double freq)
 {
     SPEAK *a = rxa.speak.p;
     a->f = freq;
     calc_speak (a);
 }
 
-void SPEAK::SetSPCWBandwidth (RXA& rxa, float bw)
+void SPEAK::SetSPCWBandwidth (RXA& rxa, double bw)
 {
     SPEAK *a = rxa.speak.p;
     a->bw = bw;
     calc_speak (a);
 }
 
-void SPEAK::SetSPCWGain (RXA& rxa, float gain)
+void SPEAK::SetSPCWGain (RXA& rxa, double gain)
 {
     SPEAK *a = rxa.speak.p;
     a->gain = gain;
@@ -380,7 +396,19 @@ void MPEAK::decalc_mpeak (MPEAK *a)
     delete[] (a->tmp);
 }
 
-MPEAK* MPEAK::create_mpeak (int run, int size, float* in, float* out, int rate, int npeaks, int* enable, float* f, float* bw, float* gain, int nstages)
+MPEAK* MPEAK::create_mpeak (
+    int run,
+    int size,
+    float* in,
+    float* out,
+    int rate,
+    int npeaks,
+    int* enable,
+    double* f,
+    double* bw,
+    double* gain,
+    int nstages
+)
 {
     MPEAK *a = new MPEAK;
     a->run = run;
@@ -391,13 +419,13 @@ MPEAK* MPEAK::create_mpeak (int run, int size, float* in, float* out, int rate, 
     a->npeaks = npeaks;
     a->nstages = nstages;
     a->enable = new int[a->npeaks]; // (int *) malloc0 (a->npeaks * sizeof (int));
-    a->f    = new float[a->npeaks]; // (float *) malloc0 (a->npeaks * sizeof (float));
-    a->bw   = new float[a->npeaks]; // (float *) malloc0 (a->npeaks * sizeof (float));
-    a->gain = new float[a->npeaks]; // (float *) malloc0 (a->npeaks * sizeof (float));
+    a->f    = new double[a->npeaks]; // (float *) malloc0 (a->npeaks * sizeof (float));
+    a->bw   = new double[a->npeaks]; // (float *) malloc0 (a->npeaks * sizeof (float));
+    a->gain = new double[a->npeaks]; // (float *) malloc0 (a->npeaks * sizeof (float));
     memcpy (a->enable, enable, a->npeaks * sizeof (int));
-    memcpy (a->f, f, a->npeaks * sizeof (float));
-    memcpy (a->bw, bw, a->npeaks * sizeof (float));
-    memcpy (a->gain, gain, a->npeaks * sizeof (float));
+    memcpy (a->f, f, a->npeaks * sizeof (double));
+    memcpy (a->bw, bw, a->npeaks * sizeof (double));
+    memcpy (a->gain, gain, a->npeaks * sizeof (double));
     a->pfil = new SPEAK*[a->npeaks]; // (SPEAK *) malloc0 (a->npeaks * sizeof (SPEAK));
     calc_mpeak (a);
     return a;
@@ -440,9 +468,10 @@ void MPEAK::xmpeak (MPEAK *a)
 
         std::copy(a->mix, a->mix + a->size * 2, a->out);
     }
-
     else if (a->in != a->out)
+    {
         std::copy( a->in,  a->in + a->size * 2, a->out);
+    }
 }
 
 void MPEAK::setBuffers_mpeak (MPEAK *a, float* in, float* out)
@@ -491,7 +520,7 @@ void MPEAK::SetmpeakFilEnable (RXA& rxa, int fil, int enable)
     a->enable[fil] = enable;
 }
 
-void MPEAK::SetmpeakFilFreq (RXA& rxa, int fil, float freq)
+void MPEAK::SetmpeakFilFreq (RXA& rxa, int fil, double freq)
 {
     MPEAK *a = rxa.mpeak.p;
     a->f[fil] = freq;
@@ -499,7 +528,7 @@ void MPEAK::SetmpeakFilFreq (RXA& rxa, int fil, float freq)
     SPEAK::calc_speak(a->pfil[fil]);
 }
 
-void MPEAK::SetmpeakFilBw (RXA& rxa, int fil, float bw)
+void MPEAK::SetmpeakFilBw (RXA& rxa, int fil, double bw)
 {
     MPEAK *a = rxa.mpeak.p;
     a->bw[fil] = bw;
@@ -507,7 +536,7 @@ void MPEAK::SetmpeakFilBw (RXA& rxa, int fil, float bw)
     SPEAK::calc_speak(a->pfil[fil]);
 }
 
-void MPEAK::SetmpeakFilGain (RXA& rxa, int fil, float gain)
+void MPEAK::SetmpeakFilGain (RXA& rxa, int fil, double gain)
 {
     MPEAK *a = rxa.mpeak.p;
     a->gain[fil] = gain;
@@ -524,11 +553,11 @@ void MPEAK::SetmpeakFilGain (RXA& rxa, int fil, float gain)
 
 void PHROT::calc_phrot (PHROT *a)
 {
-    float g;
-    a->x0 = new float[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
-    a->x1 = new float[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
-    a->y0 = new float[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
-    a->y1 = new float[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
+    double g;
+    a->x0 = new double[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
+    a->x1 = new double[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
+    a->y0 = new double[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
+    a->y1 = new double[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
     g = tan (PI * a->fc / (float)a->rate);
     a->b0 = (g - 1.0) / (g + 1.0);
     a->b1 = 1.0;
@@ -543,7 +572,7 @@ void PHROT::decalc_phrot (PHROT *a)
     delete[] (a->x0);
 }
 
-PHROT* PHROT::create_phrot (int run, int size, float* in, float* out, int rate, float fc, int nstages)
+PHROT* PHROT::create_phrot (int run, int size, float* in, float* out, int rate, double fc, int nstages)
 {
     PHROT *a = new PHROT;
     a->reverse = 0;
@@ -566,10 +595,10 @@ void PHROT::destroy_phrot (PHROT *a)
 
 void PHROT::flush_phrot (PHROT *a)
 {
-    memset (a->x0, 0, a->nstages * sizeof (float));
-    memset (a->x1, 0, a->nstages * sizeof (float));
-    memset (a->y0, 0, a->nstages * sizeof (float));
-    memset (a->y1, 0, a->nstages * sizeof (float));
+    memset (a->x0, 0, a->nstages * sizeof (double));
+    memset (a->x1, 0, a->nstages * sizeof (double));
+    memset (a->y0, 0, a->nstages * sizeof (double));
+    memset (a->y1, 0, a->nstages * sizeof (double));
 }
 
 void PHROT::xphrot (PHROT *a)
@@ -579,6 +608,7 @@ void PHROT::xphrot (PHROT *a)
         for (int i = 0; i < a->size; i++)
             a->in[2 * i + 0] = -a->in[2 * i + 0];
     }
+
     if (a->run)
     {
         int i, n;
@@ -590,9 +620,9 @@ void PHROT::xphrot (PHROT *a)
             for (n = 0; n < a->nstages; n++)
             {
                 if (n > 0) a->x0[n] = a->y0[n - 1];
-                a->y0[n]    = a->b0 * a->x0[n]
-                            + a->b1 * a->x1[n]
-                            - a->a1 * a->y1[n];
+                a->y0[n] = a->b0 * a->x0[n]
+                    + a->b1 * a->x1[n]
+                    - a->a1 * a->y1[n];
                 a->y1[n] = a->y0[n];
                 a->x1[n] = a->x0[n];
             }
@@ -601,7 +631,9 @@ void PHROT::xphrot (PHROT *a)
         }
     }
     else if (a->out != a->in)
+    {
         std::copy( a->in,  a->in + a->size * 2, a->out);
+    }
 }
 
 void PHROT::setBuffers_phrot (PHROT *a, float* in, float* out)
@@ -638,7 +670,7 @@ void PHROT::SetPHROTRun (TXA& txa, int run)
         flush_phrot (a);
 }
 
-void PHROT::SetPHROTCorner (TXA& txa, float corner)
+void PHROT::SetPHROTCorner (TXA& txa, double corner)
 {
     PHROT *a = txa.phrot.p;
     decalc_phrot (a);
@@ -668,8 +700,8 @@ void PHROT::SetPHROTReverse (TXA& txa, int reverse)
 
 void BQLP::calc_bqlp(BQLP *a)
 {
-    float w0, cs, c, den;
-    w0 = TWOPI * a->fc / (float)a->rate;
+    double w0, cs, c, den;
+    w0 = TWOPI * a->fc / (double)a->rate;
     cs = cos(w0);
     c = sin(w0) / (2.0 * a->Q);
     den = 1.0 + c;
@@ -681,7 +713,7 @@ void BQLP::calc_bqlp(BQLP *a)
     flush_bqlp(a);
 }
 
-BQLP* BQLP::create_bqlp(int run, int size, float* in, float* out, float rate, float fc, float Q, float gain, int nstages)
+BQLP* BQLP::create_bqlp(int run, int size, float* in, float* out, double rate, double fc, double Q, double gain, int nstages)
 {
     BQLP *a = new BQLP;
     a->run = run;
@@ -693,12 +725,12 @@ BQLP* BQLP::create_bqlp(int run, int size, float* in, float* out, float rate, fl
     a->Q = Q;
     a->gain = gain;
     a->nstages = nstages;
-    a->x0 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->x1 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->x2 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y0 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y1 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y2 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->x0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->x1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->x2 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->y0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->y1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->y2 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
     calc_bqlp(a);
     return a;
 }
@@ -738,7 +770,8 @@ void BQLP::xbqlp(BQLP *a)
 
                 for (n = 0; n < a->nstages; n++)
                 {
-                    if (n > 0) a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
+                    if (n > 0)
+                        a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
                     a->y0[2 * n + j] = a->a0 * a->x0[2 * n + j]
                         + a->a1 * a->x1[2 * n + j]
                         + a->a2 * a->x2[2 * n + j]
@@ -755,7 +788,9 @@ void BQLP::xbqlp(BQLP *a)
         }
     }
     else if (a->out != a->in)
+    {
         std::copy(a->in, a->in + a->size * 2, a->out);
+    }
 }
 
 void BQLP::setBuffers_bqlp(BQLP *a, float* in, float* out)
@@ -797,7 +832,7 @@ void DBQLP::calc_dbqlp(BQLP *a)
     flush_dbqlp(a);
 }
 
-BQLP* DBQLP::create_dbqlp(int run, int size, float* in, float* out, float rate, float fc, float Q, float gain, int nstages)
+BQLP* DBQLP::create_dbqlp(int run, int size, float* in, float* out, double rate, double fc, double Q, double gain, int nstages)
 {
     BQLP *a = new BQLP;
     a->run = run;
@@ -809,12 +844,12 @@ BQLP* DBQLP::create_dbqlp(int run, int size, float* in, float* out, float rate, 
     a->Q = Q;
     a->gain = gain;
     a->nstages = nstages;
-    a->x0 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->x1 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->x2 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->y0 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->y1 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->y2 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->x0 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->x1 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->x2 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->y0 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->y1 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->y2 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
     calc_dbqlp(a);
     return a;
 }
@@ -869,7 +904,9 @@ void DBQLP::xdbqlp(BQLP *a)
         }
     }
     else if (a->out != a->in)
+    {
         memcpy(a->out, a->in, a->size * sizeof(float));
+    }
 }
 
 void DBQLP::setBuffers_dbqlp(BQLP *a, float* in, float* out)
@@ -899,7 +936,7 @@ void DBQLP::setSize_dbqlp(BQLP *a, int size)
 
 void BQBP::calc_bqbp(BQBP *a)
 {
-    float f0, w0, bw, q, sn, cs, c, den;
+    double f0, w0, bw, q, sn, cs, c, den;
     bw = a->f_high - a->f_low;
     f0 = (a->f_high + a->f_low) / 2.0;
     q = f0 / bw;
@@ -916,7 +953,7 @@ void BQBP::calc_bqbp(BQBP *a)
     flush_bqbp(a);
 }
 
-BQBP* BQBP::create_bqbp(int run, int size, float* in, float* out, float rate, float f_low, float f_high, float gain, int nstages)
+BQBP* BQBP::create_bqbp(int run, int size, float* in, float* out, double rate, double f_low, double f_high, double gain, int nstages)
 {
     BQBP *a = new BQBP;
     a->run = run;
@@ -928,12 +965,12 @@ BQBP* BQBP::create_bqbp(int run, int size, float* in, float* out, float rate, fl
     a->f_high = f_high;
     a->gain = gain;
     a->nstages = nstages;
-    a->x0 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->x1 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->x2 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y0 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y1 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y2 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->x0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->x1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->x2 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->y0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->y1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->y2 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
     calc_bqbp(a);
     return a;
 }
@@ -992,7 +1029,9 @@ void BQBP::xbqbp(BQBP *a)
         }
     }
     else if (a->out != a->in)
+    {
         std::copy(a->in, a->in + a->size * 2, a->out);
+    }
 }
 
 void BQBP::setBuffers_bqbp(BQBP *a, float* in, float* out)
@@ -1021,7 +1060,7 @@ void BQBP::setSize_bqbp(BQBP *a, int size)
 
 void BQBP::calc_dbqbp(BQBP *a)
 {
-    float f0, w0, bw, q, sn, cs, c, den;
+    double f0, w0, bw, q, sn, cs, c, den;
     bw = a->f_high - a->f_low;
     f0 = (a->f_high + a->f_low) / 2.0;
     q = f0 / bw;
@@ -1038,7 +1077,7 @@ void BQBP::calc_dbqbp(BQBP *a)
     flush_dbqbp(a);
 }
 
-BQBP* BQBP::create_dbqbp(int run, int size, float* in, float* out, float rate, float f_low, float f_high, float gain, int nstages)
+BQBP* BQBP::create_dbqbp(int run, int size, float* in, float* out, double rate, double f_low, double f_high, double gain, int nstages)
 {
     BQBP *a = new BQBP;
     a->run = run;
@@ -1050,12 +1089,12 @@ BQBP* BQBP::create_dbqbp(int run, int size, float* in, float* out, float rate, f
     a->f_high = f_high;
     a->gain = gain;
     a->nstages = nstages;
-    a->x0 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->x1 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->x2 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->y0 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->y1 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->y2 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->x0 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->x1 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->x2 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->y0 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->y1 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->y2 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
     calc_dbqbp(a);
     return a;
 }
@@ -1110,7 +1149,9 @@ void BQBP::xdbqbp(BQBP *a)
         }
     }
     else if (a->out != a->in)
+    {
         memcpy(a->out, a->in, a->size * sizeof(float));
+    }
 }
 
 void BQBP::setBuffers_dbqbp(BQBP *a, float* in, float* out)
@@ -1139,18 +1180,18 @@ void BQBP::setSize_dbqbp(BQBP *a, int size)
 
 void SPHP::calc_sphp(SPHP *a)
 {
-    float g;
-    a->x0 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->x1 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y0 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y1 = new float[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    double g;
+    a->x0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->x1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->y0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
+    a->y1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
     g = exp(-TWOPI * a->fc / a->rate);
     a->b0 = +0.5 * (1.0 + g);
     a->b1 = -0.5 * (1.0 + g);
     a->a1 = -g;
 }
 
-SPHP* SPHP::create_sphp(int run, int size, float* in, float* out, float rate, float fc, int nstages)
+SPHP* SPHP::create_sphp(int run, int size, float* in, float* out, double rate, double fc, int nstages)
 {
     SPHP *a = new SPHP;
     a->run = run;
@@ -1214,7 +1255,9 @@ void SPHP::xsphp(SPHP *a)
         }
     }
     else if (a->out != a->in)
+    {
         std::copy(a->in, a->in + a->size * 2, a->out);
+    }
 }
 
 void SPHP::setBuffers_sphp(SPHP *a, float* in, float* out)
@@ -1244,18 +1287,18 @@ void SPHP::setSize_sphp(SPHP *a, int size)
 
 void SPHP::calc_dsphp(SPHP *a)
 {
-    float g;
-    a->x0 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->x1 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->y0 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->y1 = new float[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    double g;
+    a->x0 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->x1 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->y0 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
+    a->y1 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
     g = exp(-TWOPI * a->fc / a->rate);
     a->b0 = +0.5 * (1.0 + g);
     a->b1 = -0.5 * (1.0 + g);
     a->a1 = -g;
 }
 
-SPHP* SPHP::create_dsphp(int run, int size, float* in, float* out, float rate, float fc, int nstages)
+SPHP* SPHP::create_dsphp(int run, int size, float* in, float* out, double rate, double fc, int nstages)
 {
     SPHP *a = new SPHP;
     a->run = run;
@@ -1317,7 +1360,9 @@ void SPHP::xdsphp(SPHP *a)
         }
     }
     else if (a->out != a->in)
+    {
         memcpy(a->out, a->in, a->size * sizeof(float));
+    }
 }
 
 void SPHP::setBuffers_dsphp(SPHP *a, float* in, float* out)

@@ -59,25 +59,37 @@ public:
     int mp;
     float* in;
     float* out;
-    float f_low;
-    float f_high;
-    float samplerate;
+    double f_low;
+    double f_high;
+    double samplerate;
     int wintype;
-    float gain;
+    double gain;
     FIRCORE *p;
 
-    static BANDPASS *create_bandpass (int run, int position, int size, int nc, int mp, float* in, float* out,
-        float f_low, float f_high, int samplerate, int wintype, float gain);
+    static BANDPASS *create_bandpass (
+        int run,
+        int position,
+        int size,
+        int nc,
+        int mp,
+        float* in,
+        float* out,
+        double f_low,
+        double f_high,
+        int samplerate,
+        int wintype,
+        double gain
+    );
     static void destroy_bandpass (BANDPASS *a);
     static void flush_bandpass (BANDPASS *a);
     static void xbandpass (BANDPASS *a, int pos);
     static void setBuffers_bandpass (BANDPASS *a, float* in, float* out);
     static void setSamplerate_bandpass (BANDPASS *a, int rate);
     static void setSize_bandpass (BANDPASS *a, int size);
-    static void setGain_bandpass (BANDPASS *a, float gain, int update);
-    static void CalcBandpassFilter (BANDPASS *a, float f_low, float f_high, float gain);
+    static void setGain_bandpass (BANDPASS *a, double gain, int update);
+    static void CalcBandpassFilter (BANDPASS *a, double f_low, double f_high, double gain);
     // RXA Prototypes
-    static void SetBandpassFreqs (RXA& rxa, float f_low, float f_high);
+    static void SetBandpassFreqs (RXA& rxa, double f_low, double f_high);
     static void SetBandpassNC (RXA& rxa, int nc);
     static void SetBandpassMP (RXA& rxa, int mp);
     // TXA Prototypes

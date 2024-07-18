@@ -45,20 +45,20 @@ public:
     int size;
     float* in;
     float* out;
-    float rate;
-    float f;
-    float bw;
-    float a0, a1, a2, b1, b2;
-    float x0, x1, x2, y1, y2;
+    double rate;
+    double f;
+    double bw;
+    double a0, a1, a2, b1, b2;
+    double x0, x1, x2, y1, y2;
 
-    static SNOTCH* create_snotch (int run, int size, float* in, float* out, int rate, float f, float bw);
+    static SNOTCH* create_snotch (int run, int size, float* in, float* out, int rate, double f, double bw);
     static void destroy_snotch (SNOTCH *a);
     static void flush_snotch (SNOTCH *a);
     static void xsnotch (SNOTCH *a);
     static void setBuffers_snotch (SNOTCH *a, float* in, float* out);
     static void setSamplerate_snotch (SNOTCH *a, int rate);
     static void setSize_snotch (SNOTCH *a, int size);
-    static void SetSNCTCSSFreq (SNOTCH *a, float freq);
+    static void SetSNCTCSSFreq (SNOTCH *a, double freq);
     static void SetSNCTCSSRun (SNOTCH *a, int run);
 
 private:
@@ -91,18 +91,29 @@ public:
     int size;
     float* in;
     float* out;
-    float rate;
-    float f;
-    float bw;
-    float cbw;
-    float gain;
-    float fgain;
+    double rate;
+    double f;
+    double bw;
+    double cbw;
+    double gain;
+    double fgain;
     int nstages;
     int design;
-    float a0, a1, a2, b1, b2;
-    float *x0, *x1, *x2, *y0, *y1, *y2;
+    double a0, a1, a2, b1, b2;
+    double *x0, *x1, *x2, *y0, *y1, *y2;
 
-    static SPEAK* create_speak (int run, int size, float* in, float* out, int rate, float f, float bw, float gain, int nstages, int design);
+    static SPEAK* create_speak (
+        int run,
+        int size,
+        float* in,
+        float* out,
+        int rate,
+        double f,
+        double bw,
+        double gain,
+        int nstages,
+        int design
+    );
     static void destroy_speak (SPEAK *a);
     static void flush_speak (SPEAK *a);
     static void xspeak (SPEAK *a);
@@ -111,9 +122,9 @@ public:
     static void setSize_speak (SPEAK *a, int size);
     // RXA
     static void SetSPCWRun (RXA& rxa, int run);
-    static void SetSPCWFreq (RXA& rxa, float freq);
-    static void SetSPCWBandwidth (RXA& rxa, float bw);
-    static void SetSPCWGain (RXA& rxa, float gain);
+    static void SetSPCWFreq (RXA& rxa, double freq);
+    static void SetSPCWBandwidth (RXA& rxa, double bw);
+    static void SetSPCWGain (RXA& rxa, double gain);
     static void calc_speak (SPEAK *a);
 };
 
@@ -146,15 +157,27 @@ public:
     int rate;
     int npeaks;
     int* enable;
-    float* f;
-    float* bw;
-    float* gain;
+    double* f;
+    double* bw;
+    double* gain;
     int nstages;
     SPEAK** pfil;
     float* tmp;
     float* mix;
 
-    static MPEAK* create_mpeak (int run, int size, float* in, float* out, int rate, int npeaks, int* enable, float* f, float* bw, float* gain, int nstages);
+    static MPEAK* create_mpeak (
+        int run,
+        int size,
+        float* in,
+        float* out,
+        int rate,
+        int npeaks,
+        int* enable,
+        double* f,
+        double* bw,
+        double* gain,
+        int nstages
+    );
     static void destroy_mpeak (MPEAK *a);
     static void flush_mpeak (MPEAK *a);
     static void xmpeak (MPEAK *a);
@@ -165,9 +188,9 @@ public:
     static void SetmpeakRun (RXA& rxa, int run);
     static void SetmpeakNpeaks (RXA& rxa, int npeaks);
     static void SetmpeakFilEnable (RXA& rxa, int fil, int enable);
-    static void SetmpeakFilFreq (RXA& rxa, int fil, float freq);
-    static void SetmpeakFilBw (RXA& rxa, int fil, float bw);
-    static void SetmpeakFilGain (RXA& rxa, int fil, float gain);
+    static void SetmpeakFilFreq (RXA& rxa, int fil, double freq);
+    static void SetmpeakFilBw (RXA& rxa, int fil, double bw);
+    static void SetmpeakFilGain (RXA& rxa, int fil, double gain);
 
 private:
     static void calc_mpeak (MPEAK *a);
@@ -202,13 +225,13 @@ public:
     float* in;
     float* out;
     int rate;
-    float fc;
+    double fc;
     int nstages;
     // normalized such that a0 = 1
-    float a1, b0, b1;
-    float *x0, *x1, *y0, *y1;
+    double a1, b0, b1;
+    double *x0, *x1, *y0, *y1;
 
-    static PHROT* create_phrot (int run, int size, float* in, float* out, int rate, float fc, int nstages);
+    static PHROT* create_phrot (int run, int size, float* in, float* out, int rate, double fc, int nstages);
     static void destroy_phrot (PHROT *a);
     static void flush_phrot (PHROT *a);
     static void xphrot (PHROT *a);
@@ -217,7 +240,7 @@ public:
     static void setSize_phrot (PHROT *a, int size);
     // TXA Properties
     static void SetPHROTRun (TXA& txa, int run);
-    static void SetPHROTCorner (TXA& txa, float corner);
+    static void SetPHROTCorner (TXA& txa, double corner);
     static void SetPHROTNstages (TXA& txa, int nstages);
     static void SetPHROTReverse (TXA& txa, int reverse);
 
@@ -250,15 +273,15 @@ public:
     int size;
     float* in;
     float* out;
-    float rate;
-    float fc;
-    float Q;
-    float gain;
+    double rate;
+    double fc;
+    double Q;
+    double gain;
     int nstages;
-    float a0, a1, a2, b1, b2;
-    float* x0, * x1, * x2, * y0, * y1, * y2;
+    double a0, a1, a2, b1, b2;
+    double* x0, * x1, * x2, * y0, * y1, * y2;
 
-    static BQLP* create_bqlp(int run, int size, float* in, float* out, float rate, float fc, float Q, float gain, int nstages);
+    static BQLP* create_bqlp(int run, int size, float* in, float* out, double rate, double fc, double Q, double gain, int nstages);
     static void destroy_bqlp(BQLP *a);
     static void flush_bqlp(BQLP *a);
     static void xbqlp(BQLP *a);
@@ -290,7 +313,7 @@ namespace WDSP {
 class WDSP_API DBQLP
 {
 public:
-    static BQLP* create_dbqlp(int run, int size, float* in, float* out, float rate, float fc, float Q, float gain, int nstages);
+    static BQLP* create_dbqlp(int run, int size, float* in, float* out, double rate, double fc, double Q, double gain, int nstages);
     static void destroy_dbqlp(BQLP *a);
     static void flush_dbqlp(BQLP *a);
     static void xdbqlp(BQLP *a);
@@ -326,15 +349,15 @@ public:
     int size;
     float* in;
     float* out;
-    float rate;
-    float f_low;
-    float f_high;
-    float gain;
+    double rate;
+    double f_low;
+    double f_high;
+    double gain;
     int nstages;
-    float a0, a1, a2, b1, b2;
-    float* x0, * x1, * x2, * y0, * y1, * y2;
+    double a0, a1, a2, b1, b2;
+    double* x0, * x1, * x2, * y0, * y1, * y2;
 
-    static BQBP* create_bqbp(int run, int size, float* in, float* out, float rate, float f_low, float f_high, float gain, int nstages);
+    static BQBP* create_bqbp(int run, int size, float* in, float* out, double rate, double f_low, double f_high, double gain, int nstages);
     static void destroy_bqbp(BQBP *a);
     static void flush_bqbp(BQBP *a);
     static void xbqbp(BQBP *a);
@@ -343,7 +366,7 @@ public:
     static void setSize_bqbp(BQBP *a, int size);
 
     // Double Bi-Quad Band-Pass
-    static BQBP* create_dbqbp(int run, int size, float* in, float* out, float rate, float f_low, float f_high, float gain, int nstages);
+    static BQBP* create_dbqbp(int run, int size, float* in, float* out, double rate, double f_low, double f_high, double gain, int nstages);
     static void destroy_dbqbp(BQBP *a);
     static void flush_dbqbp(BQBP *a);
     static void xdbqbp(BQBP *a);
@@ -380,13 +403,13 @@ public:
     int size;
     float* in;
     float* out;
-    float rate;
-    float fc;
+    double rate;
+    double fc;
     int nstages;
-    float a1, b0, b1;
-    float* x0, * x1, * y0, * y1;
+    double a1, b0, b1;
+    double* x0, * x1, * y0, * y1;
 
-    static SPHP* create_dsphp(int run, int size, float* in, float* out, float rate, float fc, int nstages);
+    static SPHP* create_dsphp(int run, int size, float* in, float* out, double rate, double fc, int nstages);
     static void destroy_dsphp(SPHP *a);
     static void flush_dsphp(SPHP *a);
     static void xdsphp(SPHP *a);
@@ -395,7 +418,7 @@ public:
     static void setSize_dsphp(SPHP *a, int size);
 
     // Complex Single-Pole High-Pass
-    static SPHP* create_sphp(int run, int size, float* in, float* out, float rate, float fc, int nstages);
+    static SPHP* create_sphp(int run, int size, float* in, float* out, double rate, double fc, int nstages);
     static void destroy_sphp(SPHP *a);
     static void flush_sphp(SPHP *a);
     static void xsphp(SPHP *a);

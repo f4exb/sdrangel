@@ -40,16 +40,15 @@ void CBL::calc_cbl (CBL *a)
     a->mtau = exp(-1.0 / (a->sample_rate * a->tau));
 }
 
-CBL* CBL::create_cbl
-    (
+CBL* CBL::create_cbl(
     int run,
     int buff_size,
     float *in_buff,
     float *out_buff,
     int mode,
     int sample_rate,
-    float tau
-    )
+    double tau
+)
 {
     CBL *a = new CBL;
     a->run = run;
@@ -57,7 +56,7 @@ CBL* CBL::create_cbl
     a->in_buff = in_buff;
     a->out_buff = out_buff;
     a->mode = mode;
-    a->sample_rate = (float)sample_rate;
+    a->sample_rate = (double) sample_rate;
     a->tau = tau;
     calc_cbl (a);
     return a;
@@ -81,7 +80,8 @@ void CBL::xcbl (CBL *a)
     if (a->run)
     {
         int i;
-        float tempI, tempQ;
+        double tempI, tempQ;
+
         for (i = 0; i < a->buff_size; i++)
         {
             tempI  = a->in_buff[2 * i + 0];
@@ -90,12 +90,18 @@ void CBL::xcbl (CBL *a)
             a->out_buff[2 * i + 1] = a->in_buff[2 * i + 1] - a->prevQin + a->mtau * a->prevQout;
             a->prevIin  = tempI;
             a->prevQin  = tempQ;
-            if (fabs(a->prevIout = a->out_buff[2 * i + 0]) < 1.0e-100) a->prevIout = 0.0;
-            if (fabs(a->prevQout = a->out_buff[2 * i + 1]) < 1.0e-100) a->prevQout = 0.0;
+
+            if (fabs(a->prevIout = a->out_buff[2 * i + 0]) < 1.0e-20)
+                a->prevIout = 0.0;
+
+            if (fabs(a->prevQout = a->out_buff[2 * i + 1]) < 1.0e-20)
+                a->prevQout = 0.0;
         }
     }
     else if (a->in_buff != a->out_buff)
+    {
         std::copy(a->in_buff, a->in_buff + a->buff_size * 2, a->out_buff);
+    }
 }
 
 void CBL::setBuffers_cbl (CBL *a, float* in, float* out)

@@ -42,24 +42,23 @@ public:
     float *in_buff;                    //pointer to input buffer
     float *out_buff;                   //pointer to output buffer
     int mode;
-    float sample_rate;                 //sample rate
-    float prevIin;
-    float prevQin;
-    float prevIout;
-    float prevQout;
-    float tau;                         //carrier removal time constant
-    float mtau;                        //carrier removal multiplier
+    double sample_rate;                 //sample rate
+    double prevIin;
+    double prevQin;
+    double prevIout;
+    double prevQout;
+    double tau;                         //carrier removal time constant
+    double mtau;                        //carrier removal multiplier
 
-    static CBL* create_cbl
-        (
+    static CBL* create_cbl(
         int run,
         int buff_size,
         float *in_buff,
         float *out_buff,
         int mode,
         int sample_rate,
-        float tau
-        );
+        double tau
+    );
     static void destroy_cbl (CBL *a);
     static void flush_cbl (CBL *a);
     static void xcbl (CBL *a);

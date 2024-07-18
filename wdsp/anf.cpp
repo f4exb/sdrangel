@@ -45,15 +45,15 @@ ANF* ANF::create_anf(
     int dline_size,
     int n_taps,
     int delay,
-    float two_mu,
-    float gamma,
-    float lidx,
-    float lidx_min,
-    float lidx_max,
-    float ngamma,
-    float den_mult,
-    float lincr,
-    float ldecr
+    double two_mu,
+    double gamma,
+    double lidx,
+    double lidx_min,
+    double lidx_max,
+    double ngamma,
+    double den_mult,
+    double lincr,
+    double ldecr
 )
 {
     ANF *a = new ANF;
@@ -77,8 +77,8 @@ ANF* ANF::create_anf(
     a->lincr = lincr;
     a->ldecr = ldecr;
 
-    memset (a->d, 0, sizeof(float) * ANF_DLINE_SIZE);
-    memset (a->w, 0, sizeof(float) * ANF_DLINE_SIZE);
+    memset (a->d, 0, sizeof(double) * ANF_DLINE_SIZE);
+    memset (a->w, 0, sizeof(double) * ANF_DLINE_SIZE);
 
     return a;
 }
@@ -91,9 +91,10 @@ void ANF::destroy_anf (ANF *a)
 void ANF::xanf(ANF *a, int position)
 {
     int i, j, idx;
-    float c0, c1;
-    float y, error, sigma, inv_sigp;
-    float nel, nev;
+    double c0, c1;
+    double y, error, sigma, inv_sigp;
+    double nel, nev;
+
     if (a->run && (a->position == position))
     {
         for (i = 0; i < a->buff_size; i++)
@@ -109,14 +110,19 @@ void ANF::xanf(ANF *a, int position)
                 y += a->w[j] * a->d[idx];
                 sigma += a->d[idx] * a->d[idx];
             }
+
             inv_sigp = 1.0 / (sigma + 1e-10);
             error = a->d[a->in_idx] - y;
 
             a->out_buff[2 * i + 0] = error;
             a->out_buff[2 * i + 1] = 0.0;
 
-            if((nel = error * (1.0 - a->two_mu * sigma * inv_sigp)) < 0.0) nel = -nel;
-            if((nev = a->d[a->in_idx] - (1.0 - a->two_mu * a->ngamma) * y - a->two_mu * error * sigma * inv_sigp) < 0.0) nev = -nev;
+            if ((nel = error * (1.0 - a->two_mu * sigma * inv_sigp)) < 0.0)
+                nel = -nel;
+
+            if ((nev = a->d[a->in_idx] - (1.0 - a->two_mu * a->ngamma) * y - a->two_mu * error * sigma * inv_sigp) < 0.0)
+                nev = -nev;
+
             if (nev < nel)
             {
                 if ((a->lidx += a->lincr) > a->lidx_max) a->lidx = a->lidx_max;
@@ -125,6 +131,7 @@ void ANF::xanf(ANF *a, int position)
             {
                 if ((a->lidx -= a->ldecr) < a->lidx_min) a->lidx = a->lidx_min;
             }
+
             a->ngamma = a->gamma * (a->lidx * a->lidx) * (a->lidx * a->lidx) * a->den_mult;
 
             c0 = 1.0 - a->two_mu * a->ngamma;
@@ -135,17 +142,20 @@ void ANF::xanf(ANF *a, int position)
                 idx = (a->in_idx + j + a->delay) & a->mask;
                 a->w[j] = c0 * a->w[j] + c1 * a->d[idx];
             }
+
             a->in_idx = (a->in_idx + a->mask) & a->mask;
         }
     }
     else if (a->in_buff != a->out_buff)
+    {
         std::copy(a->in_buff, a->in_buff + a->buff_size * 2, a->out_buff);
+    }
 }
 
 void ANF::flush_anf (ANF *a)
 {
-    memset (a->d, 0, sizeof(float) * ANF_DLINE_SIZE);
-    memset (a->w, 0, sizeof(float) * ANF_DLINE_SIZE);
+    memset (a->d, 0, sizeof(double) * ANF_DLINE_SIZE);
+    memset (a->w, 0, sizeof(double) * ANF_DLINE_SIZE);
     a->in_idx = 0;
 }
 
@@ -193,7 +203,7 @@ void ANF::SetANFRun (RXA& rxa, int run)
 }
 
 
-void ANF::SetANFVals (RXA& rxa, int taps, int delay, float gain, float leakage)
+void ANF::SetANFVals (RXA& rxa, int taps, int delay, double gain, double leakage)
 {
     rxa.anf.p->n_taps = taps;
     rxa.anf.p->delay = delay;
@@ -214,13 +224,13 @@ void ANF::SetANFDelay (RXA& rxa, int delay)
     flush_anf (rxa.anf.p);
 }
 
-void ANF::SetANFGain (RXA& rxa, float gain)
+void ANF::SetANFGain (RXA& rxa, double gain)
 {
     rxa.anf.p->two_mu = gain;
     flush_anf (rxa.anf.p);
 }
 
-void ANF::SetANFLeakage (RXA& rxa, float leakage)
+void ANF::SetANFLeakage (RXA& rxa, double leakage)
 {
     rxa.anf.p->gamma = leakage;
     flush_anf (rxa.anf.p);
