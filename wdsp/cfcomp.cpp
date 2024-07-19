@@ -450,9 +450,9 @@ void CFCOMP::SetCFCOMPprofile (TXA& txa, int nfreqs, float* F, float* G, float *
     delete[] (a->ep);
     delete[] (a->gp);
     delete[] (a->fp);
-    a->fp = new float[a->nfreqs]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
-    a->gp = new float[a->nfreqs]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
-    a->ep = new float[a->nfreqs]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
+    a->fp = new float[a->nfreqs + 2]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
+    a->gp = new float[a->nfreqs + 2]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
+    a->ep = new float[a->nfreqs + 2]; // (float *) malloc0 ((a->nfreqs + 2) * sizeof (float));
     calc_comp(a);
 }
 

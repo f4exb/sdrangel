@@ -132,6 +132,7 @@ int NBP::make_nbp (
     else
     {
         nbp = 0;
+        delete[] del;
         return nbp;
     }
     *havnotch = 0;

@@ -64,6 +64,9 @@ RESAMPLEF* RESAMPLEF::create_resampleF ( int run, int size, float* in, float* ou
     a->L = out_rate / x;
     a->M = in_rate / x;
 
+    a->L <= 0 ? 1 : a->L;
+    a->M <= 0 ? 1 : a->M;
+
     if (in_rate < out_rate)
         min_rate = in_rate;
     else

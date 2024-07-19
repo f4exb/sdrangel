@@ -134,14 +134,3 @@ if (MSVC)
 endif()
 
 install(TARGETS wdsp DESTINATION ${INSTALL_LIB_DIR})
-
-if (LINUX)
-    add_executable(wdsp_make_interface
-        make_interface.cpp
-    )
-
-    add_executable(wdsp_make_calculus
-        make_calculus.cpp
-    )
-    install(TARGETS wdsp_make_interface wdsp_make_calculus DESTINATION ${INSTALL_BIN_DIR})
-endif()
