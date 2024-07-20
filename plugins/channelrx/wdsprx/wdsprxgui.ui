@@ -278,7 +278,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QDial" name="filterIndex">
+         <widget class="QDial" name="profileIndex">
           <property name="maximumSize">
            <size>
             <width>24</width>
@@ -303,7 +303,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="filterIndexText">
+         <widget class="QLabel" name="profileIndexText">
           <property name="minimumSize">
            <size>
             <width>10</width>

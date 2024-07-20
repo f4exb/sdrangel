@@ -35,7 +35,7 @@ public:
     };
 
     explicit WDSPRxCWPeakDialog(QWidget* parent = nullptr);
-    ~WDSPRxCWPeakDialog();
+    ~WDSPRxCWPeakDialog() override;
 
     void setCWPeakFrequency(double cwPeakFrequency);
     void setCWBandwidth(double cwBandwidth);

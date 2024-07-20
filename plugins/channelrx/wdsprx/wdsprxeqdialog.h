@@ -35,7 +35,7 @@ public:
     };
 
     explicit WDSPRxEqDialog(QWidget* parent = nullptr);
-    ~WDSPRxEqDialog();
+    ~WDSPRxEqDialog() override;
 
     void setEqF(const std::array<float, 11>& eqF);
     void setEqG(const std::array<float, 11>& eqG);

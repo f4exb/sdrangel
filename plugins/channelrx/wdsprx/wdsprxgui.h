@@ -45,6 +45,7 @@ class WDSPRxEqDialog;
 class WDSPRxPanDialog;
 class SpectrumVis;
 class BasebandSampleSink;
+class CRightClickEnabler;
 
 namespace Ui {
 	class WDSPRxGUI;
@@ -107,6 +108,16 @@ private:
     WDSPRxSquelchDialog* m_squelchDialog;
     WDSPRxEqDialog* m_equalizerDialog;
     WDSPRxPanDialog* m_panDialog;
+
+    CRightClickEnabler *m_audioMuteRightClickEnabler;
+    CRightClickEnabler *m_agcRightClickEnabler;
+    CRightClickEnabler *m_dnbRightClickEnabler;
+    CRightClickEnabler *m_dnrRightClickEnabler;
+    CRightClickEnabler *m_cwPeakRightClickEnabler;
+    CRightClickEnabler *m_squelchRightClickEnabler;
+    CRightClickEnabler *m_equalizerRightClickEnabler;
+    CRightClickEnabler *m_panRightClickEnabler;
+    CRightClickEnabler *m_demodRightClickEnabler;
 
 	QIcon m_iconDSBUSB;
 	QIcon m_iconDSBLSB;

@@ -33,7 +33,7 @@ public:
     };
 
     explicit WDSPRxPanDialog(QWidget* parent = nullptr);
-    ~WDSPRxPanDialog();
+    ~WDSPRxPanDialog() override;
 
     void setPan(double pan);
     double getPan() const { return m_pan; }

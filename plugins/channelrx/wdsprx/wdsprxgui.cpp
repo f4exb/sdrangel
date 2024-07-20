@@ -286,6 +286,7 @@ void WDSPRxGUI::on_rit_toggled(bool checked)
 void WDSPRxGUI::on_ritFrequency_valueChanged(int value)
 {
     m_settings.m_ritFrequency = value;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_ritFrequency = m_settings.m_ritFrequency;
     ui->ritFrequencyText->setText(tr("%1").arg(value));
     m_channelMarker.setShift(m_settings.m_rit ? value: 0);
     applySettings();
@@ -338,7 +339,7 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
         return;
     }
 
-    ui->filterIndexText->setText(tr("%1").arg(value));
+    ui->profileIndexText->setText(tr("%1").arg(value));
     m_settings.m_profileIndex = value;
     // Bandwidth setup
     ui->BW->setMaximum(480);
@@ -525,32 +526,32 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 	m_wdspRx->setMessageQueueToGUI(getInputMessageQueue());
 
-    CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
-    connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
+    m_audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
+    connect(m_audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
 
-    CRightClickEnabler *agcRightClickEnabler = new CRightClickEnabler(ui->agc);
-    connect(agcRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(agcSetupDialog(const QPoint &)));
+    m_agcRightClickEnabler = new CRightClickEnabler(ui->agc);
+    connect(m_agcRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(agcSetupDialog(const QPoint &)));
 
-    CRightClickEnabler *dnbRightClickEnabler = new CRightClickEnabler(ui->dnb);
-    connect(dnbRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(dnbSetupDialog(const QPoint &)));
+    m_dnbRightClickEnabler = new CRightClickEnabler(ui->dnb);
+    connect(m_dnbRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(dnbSetupDialog(const QPoint &)));
 
-    CRightClickEnabler *dnrRightClickEnabler = new CRightClickEnabler(ui->dnr);
-    connect(dnrRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(dnrSetupDialog(const QPoint &)));
+    m_dnrRightClickEnabler = new CRightClickEnabler(ui->dnr);
+    connect(m_dnrRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(dnrSetupDialog(const QPoint &)));
 
-    CRightClickEnabler *cwPeakRightClickEnabler = new CRightClickEnabler(ui->cwPeaking);
-    connect(cwPeakRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(cwPeakSetupDialog(const QPoint &)));
+    m_cwPeakRightClickEnabler = new CRightClickEnabler(ui->cwPeaking);
+    connect(m_cwPeakRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(cwPeakSetupDialog(const QPoint &)));
 
-    CRightClickEnabler *squelchRightClickEnabler = new CRightClickEnabler(ui->squelch);
-    connect(squelchRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(squelchSetupDialog(const QPoint &)));
+    m_squelchRightClickEnabler = new CRightClickEnabler(ui->squelch);
+    connect(m_squelchRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(squelchSetupDialog(const QPoint &)));
 
-    CRightClickEnabler *equalizerRightClickEnabler = new CRightClickEnabler(ui->equalizer);
-    connect(equalizerRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(equalizerSetupDialog(const QPoint &)));
+    m_equalizerRightClickEnabler = new CRightClickEnabler(ui->equalizer);
+    connect(m_equalizerRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(equalizerSetupDialog(const QPoint &)));
 
-    CRightClickEnabler *panRightClickEnabler = new CRightClickEnabler(ui->audioBinaural);
-    connect(panRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(panSetupDialog(const QPoint &)));
+    m_panRightClickEnabler = new CRightClickEnabler(ui->audioBinaural);
+    connect(m_panRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(panSetupDialog(const QPoint &)));
 
-    CRightClickEnabler *demodRightClickEnabler = new CRightClickEnabler(ui->demod);
-    connect(demodRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(demodSetupDialog(const QPoint &)));
+    m_demodRightClickEnabler = new CRightClickEnabler(ui->demod);
+    connect(m_demodRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(demodSetupDialog(const QPoint &)));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -610,6 +611,15 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 WDSPRxGUI::~WDSPRxGUI()
 {
 	delete ui;
+    delete m_audioMuteRightClickEnabler;
+    delete m_agcRightClickEnabler;
+    delete m_dnbRightClickEnabler;
+    delete m_dnrRightClickEnabler;
+    delete m_cwPeakRightClickEnabler;
+    delete m_squelchRightClickEnabler;
+    delete m_equalizerRightClickEnabler;
+    delete m_panRightClickEnabler;
+    delete m_demodRightClickEnabler;
 }
 
 bool WDSPRxGUI::blockApplySettings(bool block)
@@ -862,10 +872,10 @@ void WDSPRxGUI::displaySettings()
     ui->spanLog2->blockSignals(true);
     ui->dsb->blockSignals(true);
     ui->BW->blockSignals(true);
-    ui->filterIndex->blockSignals(true);
+    ui->profileIndex->blockSignals(true);
 
-    ui->filterIndex->setValue(m_settings.m_profileIndex);
-    ui->filterIndexText->setText(tr("%1").arg(m_settings.m_profileIndex));
+    ui->profileIndex->setValue(m_settings.m_profileIndex);
+    ui->profileIndexText->setText(tr("%1").arg(m_settings.m_profileIndex));
 
     ui->dsb->setChecked(m_settings.m_dsb);
     ui->spanLog2->setValue(1 + ui->spanLog2->maximum() - m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2);
@@ -885,7 +895,7 @@ void WDSPRxGUI::displaySettings()
     ui->spanLog2->blockSignals(false);
     ui->dsb->blockSignals(false);
     ui->BW->blockSignals(false);
-    ui->filterIndex->blockSignals(false);
+    ui->profileIndex->blockSignals(false);
 
     // The only one of the four signals triggering applyBandwidths will trigger it once only with all other values
     // set correctly and therefore validate the settings and apply them to dependent widgets
@@ -950,7 +960,7 @@ void WDSPRxGUI::agcSetup(int iValueChanged)
         return;
     }
 
-    WDSPRxAGCDialog::ValueChanged valueChanged = (WDSPRxAGCDialog::ValueChanged) iValueChanged;
+    auto valueChanged = (WDSPRxAGCDialog::ValueChanged) iValueChanged;
 
     switch (valueChanged)
     {
@@ -998,7 +1008,7 @@ void WDSPRxGUI::dnbSetup(int32_t iValueChanged)
         return;
     }
 
-    WDSPRxDNBDialog::ValueChanged valueChanged = (WDSPRxDNBDialog::ValueChanged) iValueChanged;
+    auto valueChanged = (WDSPRxDNBDialog::ValueChanged) iValueChanged;
 
     switch (valueChanged)
     {
@@ -1065,7 +1075,7 @@ void WDSPRxGUI::dnrSetup(int32_t iValueChanged)
         return;
     }
 
-    WDSPRxDNRDialog::ValueChanged valueChanged = (WDSPRxDNRDialog::ValueChanged) iValueChanged;
+    auto valueChanged = (WDSPRxDNRDialog::ValueChanged) iValueChanged;
 
     switch (valueChanged)
     {
@@ -1124,7 +1134,7 @@ void WDSPRxGUI::cwPeakSetup(int iValueChanged)
         return;
     }
 
-    WDSPRxCWPeakDialog::ValueChanged valueChanged = (WDSPRxCWPeakDialog::ValueChanged) iValueChanged;
+    auto valueChanged = (WDSPRxCWPeakDialog::ValueChanged) iValueChanged;
 
     switch (valueChanged)
     {
@@ -1187,7 +1197,7 @@ void WDSPRxGUI::amSetup(int iValueChanged)
         return;
     }
 
-    WDSPRxAMDialog::ValueChanged valueChanged = (WDSPRxAMDialog::ValueChanged) iValueChanged;
+    auto valueChanged = (WDSPRxAMDialog::ValueChanged) iValueChanged;
 
     switch (valueChanged)
     {
@@ -1207,7 +1217,7 @@ void WDSPRxGUI::fmSetup(int iValueChanged)
         return;
     }
 
-    WDSPRxFMDialog::ValueChanged valueChanged = (WDSPRxFMDialog::ValueChanged) iValueChanged;
+    auto valueChanged = (WDSPRxFMDialog::ValueChanged) iValueChanged;
 
     switch (valueChanged)
     {
@@ -1272,7 +1282,7 @@ void WDSPRxGUI::squelchSetup(int iValueChanged)
         return;
     }
 
-    WDSPRxSquelchDialog::ValueChanged valueChanged = (WDSPRxSquelchDialog::ValueChanged) iValueChanged;
+    auto valueChanged = (WDSPRxSquelchDialog::ValueChanged) iValueChanged;
 
     switch (valueChanged)
     {
@@ -1320,7 +1330,7 @@ void WDSPRxGUI::equalizerSetup(int iValueChanged)
         return;
     }
 
-    WDSPRxEqDialog::ValueChanged valueChanged = (WDSPRxEqDialog::ValueChanged) iValueChanged;
+    auto valueChanged = (WDSPRxEqDialog::ValueChanged) iValueChanged;
 
     switch (valueChanged)
     {
@@ -1357,7 +1367,7 @@ void WDSPRxGUI::panSetup(int iValueChanged)
         return;
     }
 
-    WDSPRxPanDialog::ValueChanged valueChanged = (WDSPRxPanDialog::ValueChanged) iValueChanged;
+    auto valueChanged = (WDSPRxPanDialog::ValueChanged) iValueChanged;
 
     switch (valueChanged)
     {
@@ -1424,7 +1434,7 @@ void WDSPRxGUI::makeUIConnections()
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &WDSPRxGUI::on_spanLog2_valueChanged);
     QObject::connect(ui->flipSidebands, &QPushButton::clicked, this, &WDSPRxGUI::on_flipSidebands_clicked);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WDSPRxGUI::on_fftWindow_currentIndexChanged);
-    QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &WDSPRxGUI::on_profileIndex_valueChanged);
+    QObject::connect(ui->profileIndex, &QDial::valueChanged, this, &WDSPRxGUI::on_profileIndex_valueChanged);
     QObject::connect(ui->demod, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WDSPRxGUI::on_demod_currentIndexChanged);
     QObject::connect(ui->cwPeaking, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_cwPeaking_toggled);
     QObject::connect(ui->squelch, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_squelch_toggled);

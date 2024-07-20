@@ -39,7 +39,7 @@ public:
     };
 
     explicit WDSPRxDNBDialog(QWidget* parent = nullptr);
-    ~WDSPRxDNBDialog();
+    ~WDSPRxDNBDialog() override;
 
     void setNBScheme(WDSPRxProfile::WDSPRxNBScheme scheme);
     void setNB2Mode(WDSPRxProfile::WDSPRxNB2Mode mode);

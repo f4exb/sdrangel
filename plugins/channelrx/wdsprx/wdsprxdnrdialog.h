@@ -38,7 +38,7 @@ public:
     };
 
     explicit WDSPRxDNRDialog(QWidget* parent = nullptr);
-    ~WDSPRxDNRDialog();
+    ~WDSPRxDNRDialog() override;
 
     void setSNB(bool snb);
     void setNRScheme(WDSPRxProfile::WDSPRxNRScheme scheme);
