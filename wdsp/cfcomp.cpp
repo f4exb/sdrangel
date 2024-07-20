@@ -437,7 +437,7 @@ void CFCOMP::SetCFCOMPPosition (TXA& txa, int pos)
 void CFCOMP::SetCFCOMPprofile (TXA& txa, int nfreqs, float* F, float* G, float *E)
 {
     CFCOMP *a = txa.cfcomp.p;
-    a->nfreqs = nfreqs;
+    a->nfreqs = nfreqs < 1 ? 1 : nfreqs;
     delete[] (a->E);
     delete[] (a->F);
     delete[] (a->G);
