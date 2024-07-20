@@ -32,7 +32,7 @@ AboutDialog::AboutDialog(const QString& apiHost, int apiPort, const MainSettings
 	ui->dspBits->setText(QString("DSP Rx %1 bits Tx %2 bits").arg(SDR_RX_SAMP_SZ).arg(SDR_TX_SAMP_SZ));
 	ui->pid->setText(QString("PID: %1").arg(qApp->applicationPid()));
 	QString apiUrl = QString("http://%1:%2/").arg(apiHost).arg(apiPort);
-	ui->restApiUrl->setText(QString("REST API documentation: <a href=\"%1\">%2</a>").arg(apiUrl).arg(apiUrl));
+	ui->restApiUrl->setText(QString("REST API server and documentation: <a href=\"%1\">%2</a>").arg(apiUrl).arg(apiUrl));
 	ui->restApiUrl->setOpenExternalLinks(true);
 	ui->settingsFile->setText(QString("Settings: %1").arg(mainSettings.getFileLocation()));
 }

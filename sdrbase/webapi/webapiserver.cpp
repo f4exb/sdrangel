@@ -44,7 +44,7 @@ void WebAPIServer::start()
     if (!m_listener)
     {
         m_listener = new qtwebapp::HttpListener(m_settings, m_requestMapper, qApp);
-        qInfo("WebAPIServer::start: starting web API server at http://%s:%d", qPrintable(m_settings.host), m_settings.port);
+        qInfo("WebAPIServer::start: starting web API server at http://%s:%d", qPrintable(m_settings.host.isEmpty() ? "0.0.0.0" : m_settings.host), m_settings.port);
     }
 }
 
@@ -54,7 +54,7 @@ void WebAPIServer::stop()
     {
         delete m_listener;
         m_listener = 0;
-        qInfo("WebAPIServer::stop: stopped web API server at http://%s:%d", qPrintable(m_settings.host), m_settings.port);
+        qInfo("WebAPIServer::stop: stopped web API server at http://%s:%d", qPrintable(m_settings.host.isEmpty() ? "0.0.0.0" : m_settings.host), m_settings.port);
     }
 }
 
