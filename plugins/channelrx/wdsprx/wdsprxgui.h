@@ -42,6 +42,7 @@ class WDSPRxFMDialog;
 class WDSPRxCWPeakDialog;
 class WDSPRxSquelchDialog;
 class WDSPRxEqDialog;
+class WDSPRxPanDialog;
 class SpectrumVis;
 class BasebandSampleSink;
 
@@ -105,6 +106,7 @@ private:
     WDSPRxCWPeakDialog* m_cwPeakDialog;
     WDSPRxSquelchDialog* m_squelchDialog;
     WDSPRxEqDialog* m_equalizerDialog;
+    WDSPRxPanDialog* m_panDialog;
 
 	QIcon m_iconDSBUSB;
 	QIcon m_iconDSBLSB;
@@ -136,6 +138,7 @@ private slots:
 	void on_agc_toggled(bool checked);
     void on_dnr_toggled(bool checked);
     void on_dnb_toggled(bool checked);
+    void on_anf_toggled(bool checked);
 	void on_agcGain_valueChanged(int value);
 	void on_audioMute_toggled(bool checked);
 	void on_spanLog2_valueChanged(int value);
@@ -169,6 +172,8 @@ private slots:
     void squelchSetup(int valueChanged);
     void equalizerSetupDialog(const QPoint& p);
     void equalizerSetup(int valueChanged);
+    void panSetupDialog(const QPoint& p);
+    void panSetup(int valueChanged);
 	void tick();
 };
 

@@ -559,7 +559,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Highpass filter cutoff frequency (SSB)</string>
+         <string>Bandpass filter near (to 0)  cutoff frequency (SSB)</string>
         </property>
         <property name="minimum">
          <number>-60</number>
@@ -641,7 +641,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Lowpass filter cutoff frequency</string>
+         <string>Bandpass filter far (from 0) cutoff frequency</string>
         </property>
         <property name="minimum">
          <number>-60</number>
@@ -983,6 +983,19 @@
         </property>
         <property name="text">
          <string>NB</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="anf">
+        <property name="toolTip">
+         <string>Toggle Automatic Notch Filter</string>
+        </property>
+        <property name="text">
+         <string>ANF</string>
         </property>
         <property name="checkable">
          <bool>true</bool>

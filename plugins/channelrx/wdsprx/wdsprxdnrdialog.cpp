@@ -38,14 +38,6 @@ void WDSPRxDNRDialog::setSNB(bool snb)
     m_snb = snb;
 }
 
-void WDSPRxDNRDialog::setANF(bool anf)
-{
-    ui->anf->blockSignals(true);
-    ui->anf->setChecked(anf);
-    ui->anf->blockSignals(false);
-    m_anf = anf;
-}
-
 void WDSPRxDNRDialog::setNRScheme(WDSPRxProfile::WDSPRxNRScheme scheme)
 {
     ui->nr->blockSignals(true);
@@ -90,12 +82,6 @@ void WDSPRxDNRDialog::on_snb_clicked(bool checked)
 {
     m_snb = checked;
     emit valueChanged(ChangedSNB);
-}
-
-void WDSPRxDNRDialog::on_anf_clicked(bool checked)
-{
-    m_anf = checked;
-    emit valueChanged(ChangedANF);
 }
 
 void WDSPRxDNRDialog::on_nr_currentIndexChanged(int index)

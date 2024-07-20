@@ -747,12 +747,18 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     }
 
     if ((m_settings.m_audioBinaural != settings.m_audioBinaural)
+    || (m_settings.m_audioPan != settings.m_audioPan)
     || (m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force)
     {
-        if (settings.m_audioBinaural) {
+        if (settings.m_audioBinaural)
+        {
             WDSP::PANEL::SetPanelCopy(*m_rxa, settings.m_audioFlipChannels ? 3 : 0);
-        } else {
+            WDSP::PANEL::SetPanelPan(*m_rxa, settings.m_audioPan);
+        }
+        else
+        {
             WDSP::PANEL::SetPanelCopy(*m_rxa, settings.m_audioFlipChannels ? 2 : 1);
+            WDSP::PANEL::SetPanelPan(*m_rxa, 0.5);
         }
     }
 

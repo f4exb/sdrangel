@@ -88,6 +88,7 @@ struct WDSPRxProfile
     WDSPRxDemod m_demod;
     bool m_audioBinaural;
     bool m_audioFlipChannels;
+    double m_audioPan;
     bool m_dsb;
     bool m_dbOrS;
     // Filter
@@ -151,6 +152,7 @@ struct WDSPRxProfile
         m_demod(DemodSSB),
         m_audioBinaural(false),
         m_audioFlipChannels(false),
+        m_audioPan(0.5),
         m_dsb(false),
         m_dbOrS(true),
         m_spanLog2(3),
@@ -214,6 +216,7 @@ struct WDSPRxSettings
     // int  m_spanLog2;
     bool m_audioBinaural;
     bool m_audioFlipChannels;
+    double m_audioPan;
     bool m_dsb;
     bool m_audioMute;
     bool m_dbOrS;

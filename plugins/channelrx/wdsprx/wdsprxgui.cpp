@@ -45,6 +45,7 @@
 #include "wdsprxcwpeakdialog.h"
 #include "wdsprxsquelchdialog.h"
 #include "wdsprxeqdialog.h"
+#include "wdsprxpandialog.h"
 
 WDSPRxGUI* WDSPRxGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -235,6 +236,13 @@ void WDSPRxGUI::on_dnb_toggled(bool checked)
 {
     m_settings.m_dnb = checked;
     m_settings.m_profiles[m_settings.m_profileIndex].m_dnb = m_settings.m_dnb;
+    applySettings();
+}
+
+void WDSPRxGUI::on_anf_toggled(bool checked)
+{
+    m_settings.m_anf = checked;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_anf = m_settings.m_anf;
     applySettings();
 }
 
@@ -538,6 +546,9 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     CRightClickEnabler *equalizerRightClickEnabler = new CRightClickEnabler(ui->equalizer);
     connect(equalizerRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(equalizerSetupDialog(const QPoint &)));
 
+    CRightClickEnabler *panRightClickEnabler = new CRightClickEnabler(ui->audioBinaural);
+    connect(panRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(panSetupDialog(const QPoint &)));
+
     CRightClickEnabler *demodRightClickEnabler = new CRightClickEnabler(ui->demod);
     connect(demodRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(demodSetupDialog(const QPoint &)));
 
@@ -816,6 +827,7 @@ void WDSPRxGUI::displaySettings()
     ui->agcGainText->setText(s);
     ui->dnr->setChecked(m_settings.m_dnr);
     ui->dnb->setChecked(m_settings.m_dnb);
+    ui->anf->setChecked(m_settings.m_anf);
     ui->cwPeaking->setChecked(m_settings.m_cwPeaking);
     ui->squelch->setChecked(m_settings.m_squelch);
     ui->squelchThreshold->setValue(m_settings.m_squelchThreshold);
@@ -1035,7 +1047,6 @@ void WDSPRxGUI::dnrSetupDialog(const QPoint& p)
     m_dnrDialog = new WDSPRxDNRDialog();
     m_dnrDialog->move(p);
     m_dnrDialog->setSNB(m_settings.m_snb);
-    m_dnrDialog->setANF(m_settings.m_anf);
     m_dnrDialog->setNRScheme(m_settings.m_nrScheme);
     m_dnrDialog->setNR2Gain(m_settings.m_nr2Gain);
     m_dnrDialog->setNR2NPE(m_settings.m_nr2NPE);
@@ -1061,11 +1072,6 @@ void WDSPRxGUI::dnrSetup(int32_t iValueChanged)
     case WDSPRxDNRDialog::ValueChanged::ChangedSNB:
         m_settings.m_snb = m_dnrDialog->getSNB();
         m_settings.m_profiles[m_settings.m_profileIndex].m_snb = m_settings.m_snb;
-        applySettings();
-        break;
-    case WDSPRxDNRDialog::ValueChanged::ChangedANF:
-        m_settings.m_anf = m_dnrDialog->getANF();
-        m_settings.m_profiles[m_settings.m_profileIndex].m_anf = m_settings.m_anf;
         applySettings();
         break;
     case WDSPRxDNRDialog::ValueChanged::ChangedNR:
@@ -1333,6 +1339,38 @@ void WDSPRxGUI::equalizerSetup(int iValueChanged)
     }
 }
 
+void WDSPRxGUI::panSetupDialog(const QPoint& p)
+{
+    m_panDialog = new WDSPRxPanDialog();
+    m_panDialog->move(p);
+    m_panDialog->setPan(m_settings.m_audioPan);
+    QObject::connect(m_panDialog, &WDSPRxPanDialog::valueChanged, this, &WDSPRxGUI::panSetup);
+    m_panDialog->exec();
+    QObject::disconnect(m_panDialog, &WDSPRxPanDialog::valueChanged, this, &WDSPRxGUI::panSetup);
+    m_panDialog->deleteLater();
+    m_panDialog = nullptr;
+}
+
+void WDSPRxGUI::panSetup(int iValueChanged)
+{
+    if (!m_panDialog) {
+        return;
+    }
+
+    WDSPRxPanDialog::ValueChanged valueChanged = (WDSPRxPanDialog::ValueChanged) iValueChanged;
+
+    switch (valueChanged)
+    {
+    case WDSPRxPanDialog::ChangedPan:
+        m_settings.m_audioPan = m_panDialog->getPan();
+        m_settings.m_profiles[m_settings.m_profileIndex].m_audioPan = m_settings.m_audioPan;
+        applySettings();
+        break;
+    default:
+        break;
+    }
+}
+
 void WDSPRxGUI::tick()
 {
     double powDbAvg, powDbPeak;
@@ -1379,6 +1417,8 @@ void WDSPRxGUI::makeUIConnections()
     QObject::connect(ui->volume, &QDial::valueChanged, this, &WDSPRxGUI::on_volume_valueChanged);
     QObject::connect(ui->agc, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_agc_toggled);
     QObject::connect(ui->dnr, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_dnr_toggled);
+    QObject::connect(ui->dnb, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_dnb_toggled);
+    QObject::connect(ui->anf, &ButtonSwitch::toggled, this, &WDSPRxGUI::on_anf_toggled);
     QObject::connect(ui->agcGain, &QDial::valueChanged, this, &WDSPRxGUI::on_agcGain_valueChanged);
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &WDSPRxGUI::on_audioMute_toggled);
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &WDSPRxGUI::on_spanLog2_valueChanged);
