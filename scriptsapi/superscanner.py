@@ -14,7 +14,7 @@ except ImportError:
     import _thread as thread
 import time
 
-from datetime import datetime
+from datetime import datetime, timezone
 from optparse import OptionParser
 
 import sdrangel
@@ -50,7 +50,7 @@ class SuperScannerAPIError(SuperScannerError):
 
 # ======================================================================
 def log_with_timestamp(message):
-    t = datetime.utcnow()
+    t = datetime.now(timezone.utc)
     print(f'{t.isoformat()} {message}')
 
 # ======================================================================

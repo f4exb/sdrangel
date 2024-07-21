@@ -370,9 +370,9 @@ void LDPC::ft8_crc(int msg1[], int msglen, int out[14])
     // the new FT8 polynomial for 14-bit CRC, 0x2757,
     // with leading 1 bit.
     int div[] = {1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1};
-
     // append 14 zeros.
     int *msg = (int *)malloc(sizeof(int) * (msglen + 14));
+
     for (int i = 0; i < msglen + 14; i++)
     {
         if (i < msglen)
@@ -396,7 +396,7 @@ void LDPC::ft8_crc(int msg1[], int msglen, int out[14])
         }
     }
 
-    for (int i = 0; i < 14; i++)
+    for (int i = 0; i < msglen + 14; i++)
     {
         out[i] = msg[msglen + i];
     }

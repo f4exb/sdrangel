@@ -2006,6 +2006,9 @@ void FT8::soft_decode_mags(FT8Params& params, const std::vector<std::vector<floa
             ll174[lli++] = ll;
         }
     }
+
+    delete[] zeroi;
+    delete[] onei;
 }
 
 //

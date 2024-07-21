@@ -317,10 +317,15 @@ float *FIR::fir_read (int N, const char *filename, int rtype, float scale)
 
 void FIR::analytic (int N, float* in, float* out)
 {
+    if (N < 1) {
+        return;
+    }
+
     int i;
     double inv_N = 1.0 / (double) N;
     double two_inv_N = 2.0 * inv_N;
     float* x = new float[N * 2]; // (float *) malloc0 (N * sizeof (complex));
+
     fftwf_plan pfor = fftwf_plan_dft_1d (
         N,
         (fftwf_complex *) in,
@@ -328,6 +333,7 @@ void FIR::analytic (int N, float* in, float* out)
         FFTW_FORWARD,
         FFTW_PATIENT
     );
+
     fftwf_plan prev = fftwf_plan_dft_1d (
         N,
         (fftwf_complex *) x,
@@ -335,20 +341,24 @@ void FIR::analytic (int N, float* in, float* out)
         FFTW_BACKWARD,
         FFTW_PATIENT
     );
+
     fftwf_execute (pfor);
     x[0] *= inv_N;
     x[1] *= inv_N;
+
     for (i = 1; i < N / 2; i++)
     {
         x[2 * i + 0] *= two_inv_N;
         x[2 * i + 1] *= two_inv_N;
     }
+
     x[N + 0] *= inv_N;
     x[N + 1] *= inv_N;
     memset (&x[N + 2], 0, (N - 2) * sizeof (float));
     fftwf_execute (prev);
     fftwf_destroy_plan (prev);
     fftwf_destroy_plan (pfor);
+
     delete[] x;
 }
 

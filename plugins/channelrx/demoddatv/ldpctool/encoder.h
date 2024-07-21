@@ -43,9 +43,14 @@ class LDPCEncoder
 		return b < TYPE(0) ? -a : b > TYPE(0) ? a : TYPE(0);
 	}
 public:
-	LDPCEncoder() : initialized(false)
+	LDPCEncoder() :
+        N(2),
+        K(1),
+        R(1),
+        initialized(false)
 	{
 	}
+
 	void init(LDPCInterface *it)
 	{
 		if (initialized)

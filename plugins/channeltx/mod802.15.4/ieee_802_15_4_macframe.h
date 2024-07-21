@@ -60,6 +60,9 @@ struct IEEE_802_15_4_MacFrame
 
     IEEE_802_15_4_MacFrame()
     {
+        m_destShortAddress = 0;
+        m_sourceShortAddress = 0;
+
         if (false)
         {
             // Example ACK frame
