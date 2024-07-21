@@ -31,8 +31,10 @@ template <typename TYPE>
 class LDPCEncoder
 {
 	LDPCInterface *ldpc;
-	int N, K, R;
-	bool initialized;
+	int N = 2;
+    int K = 1;
+    int R = 1;
+	bool initialized = false;
 
 	TYPE one()
 	{
@@ -43,11 +45,7 @@ class LDPCEncoder
 		return b < TYPE(0) ? -a : b > TYPE(0) ? a : TYPE(0);
 	}
 public:
-	LDPCEncoder() :
-        N(2),
-        K(1),
-        R(1),
-        initialized(false)
+	LDPCEncoder()
 	{
 	}
 

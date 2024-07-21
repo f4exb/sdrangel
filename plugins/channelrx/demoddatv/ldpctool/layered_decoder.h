@@ -78,12 +78,21 @@ template <typename TYPE, typename ALG>
 class LDPCDecoder
 {
 private:
-	TYPE *bnl, *pty, *inp, *out;
-	uint16_t *pos;
-	uint8_t *cnc;
+	TYPE *bnl = nullptr;
+	TYPE *pty = nullptr;
+	TYPE *inp = nullptr;
+	TYPE *out = nullptr;
+	uint16_t *pos  = nullptr;
+	uint8_t *cnc  = nullptr;
 	ALG alg;
-	int M, N, K, R, q, CNL, LT;
-	bool initialized;
+	int M = 0;
+	int N = 0;
+	int K = 0;
+	int R = 0;
+	int q = 0;
+	int CNL = 0;
+	int LT = 0;
+	bool initialized = false;
 
 	void reset()
 	{
@@ -140,21 +149,7 @@ private:
 	}
 
 public:
-	LDPCDecoder() :
-        bnl(nullptr),
-        pty(nullptr),
-        inp(nullptr),
-        out(nullptr),
-        pos(nullptr),
-        cnc(nullptr),
-        M(0),
-        N(0),
-        K(0),
-        R(0),
-        q(0),
-        CNL(0),
-        LT(0),
-        initialized(false)
+	LDPCDecoder()
 	{
 	}
 

@@ -125,16 +125,16 @@ int main(int argc, char **argv)
 	// DVB-S2 MODCOD definitions
 	static const char *mc_tabnames[2][32] = { // [shortframes][modcod]
         {// Normal frames
-            0, "B1", "B2", "B3", "B4", "B5", "B6", "B7",
+            nullptr, "B1", "B2", "B3", "B4", "B5", "B6", "B7",
             "B8", "B9", "B10", "B11", "B5", "B6", "B7", "B9",
             "B10", "B11", "B6", "B7", "B8", "B9", "B10", "B11",
-            "B7", "B8", "B8", "B10", "B11", 0, 0, 0
+            "B7", "B8", "B8", "B10", "B11", nullptr, nullptr, nullptr
         },
         {// Short frames
-            0, "C1", "C2", "C3", "C4", "C5", "C6", "C7",
-            "C8", "C9", "C10", 0, "C5", "C6", "C7", "C9",
-            "C10", 0, "C6", "C7", "C8", "C9", "C10", 0,
-            "C7", "C8", "C8", "C10", 0, 0, 0, 0
+            nullptr, "C1", "C2", "C3", "C4", "C5", "C6", "C7",
+            "C8", "C9", "C10", nullptr, "C5", "C6", "C7", "C9",
+            "C10", nullptr, "C6", "C7", "C8", "C9", "C10", nullptr,
+            "C7", "C8", "C8", "C10", nullptr, nullptr, nullptr, nullptr
     }};
 
 	const char *tabname = mc_tabnames[shortframes][modcod];

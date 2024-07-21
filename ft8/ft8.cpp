@@ -1949,8 +1949,8 @@ void FT8::soft_decode_mags(FT8Params& params, const std::vector<std::vector<floa
     int lli = 0;
     int zoX = 1<<(nbSymbolBits-1);
     int zoY = nbSymbolBits;
-    int *zeroi = new int[zoX*zoY];
-    int *onei = new int[zoX*zoY];
+    std::vector<int> zeroi(zoX*zoY);
+    std::vector<int> onei(zoX*zoY);
 
     for (int biti = 0; biti < nbSymbolBits; biti++)
     {
@@ -2006,9 +2006,6 @@ void FT8::soft_decode_mags(FT8Params& params, const std::vector<std::vector<floa
             ll174[lli++] = ll;
         }
     }
-
-    delete[] zeroi;
-    delete[] onei;
 }
 
 //

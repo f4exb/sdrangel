@@ -50,19 +50,16 @@ struct IEEE_802_15_4_MacFrame
     uint16_t m_frameControl;
     uint8_t m_sequenceNumber;
     uint16_t m_destPANID;
-    uint16_t m_destShortAddress;
+    uint16_t m_destShortAddress = 0;
     ieee_802_15_4_address m_destAddress;
     uint16_t m_sourcePANID;
-    uint16_t m_sourceShortAddress;
+    uint16_t m_sourceShortAddress = 0;
     ieee_802_15_4_address m_sourceAddress;
     uint8_t m_payload[IEEE_802_15_4_MAC_PAYLOAD_MAX_LENGTH];
     uint8_t m_payloadLength;
 
     IEEE_802_15_4_MacFrame()
     {
-        m_destShortAddress = 0;
-        m_sourceShortAddress = 0;
-
         if (false)
         {
             // Example ACK frame
