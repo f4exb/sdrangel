@@ -30,7 +30,7 @@ namespace ldpctool {
 template <typename TYPE>
 class LDPCEncoder
 {
-	LDPCInterface *ldpc;
+	LDPCInterface *ldpc = nullptr;
 	int N = 2;
     int K = 1;
     int R = 1;
