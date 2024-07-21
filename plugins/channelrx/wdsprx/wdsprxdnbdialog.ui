@@ -116,7 +116,7 @@
         <number>4</number>
        </property>
        <property name="maximum">
-        <double>2.000000000000000</double>
+        <double>10.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.000100000000000</double>
@@ -125,7 +125,7 @@
         <enum>QAbstractSpinBox::DefaultStepType</enum>
        </property>
        <property name="value">
-        <double>0.100000000000000</double>
+        <double>0.500000000000000</double>
        </property>
       </widget>
      </item>
@@ -152,13 +152,13 @@
         <number>4</number>
        </property>
        <property name="maximum">
-        <double>2.000000000000000</double>
+        <double>10.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.000100000000000</double>
        </property>
        <property name="value">
-        <double>0.100000000000000</double>
+        <double>0.500000000000000</double>
        </property>
       </widget>
      </item>
@@ -168,13 +168,13 @@
         <string>Noise blanking threshold multiplier</string>
        </property>
        <property name="minimum">
-        <number>15</number>
+        <number>2</number>
        </property>
        <property name="maximum">
-        <number>500</number>
+        <number>50</number>
        </property>
        <property name="value">
-        <number>30</number>
+        <number>10</number>
        </property>
       </widget>
      </item>
@@ -187,13 +187,13 @@
         <number>4</number>
        </property>
        <property name="maximum">
-        <double>2.000000000000000</double>
+        <double>10.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.000100000000000</double>
        </property>
        <property name="value">
-        <double>0.100000000000000</double>
+        <double>0.500000000000000</double>
        </property>
       </widget>
      </item>

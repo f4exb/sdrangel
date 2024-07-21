@@ -27,10 +27,10 @@ warren@wpratt.com
 
 #include "comm.hpp"
 
-#define MAX_ADV_SLEW_TIME           (0.002)
-#define MAX_ADV_TIME                (0.002)
-#define MAX_HANG_SLEW_TIME          (0.002)
-#define MAX_HANG_TIME               (0.002)
+#define MAX_ADV_SLEW_TIME           (0.01) // Slew time
+#define MAX_ADV_TIME                (0.01) // Lead time
+#define MAX_HANG_SLEW_TIME          (0.01) // Slew time
+#define MAX_HANG_TIME               (0.01) // Lag time
 #define MAX_SEQ_TIME                (0.025)
 #define MAX_SAMPLERATE              (1536000.0)
 

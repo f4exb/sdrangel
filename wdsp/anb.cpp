@@ -29,8 +29,8 @@ warren@wpratt.com
 #include "anb.hpp"
 #include "RXA.hpp"
 
-#define MAX_TAU         (0.002)     // maximum transition time, signal<->zero
-#define MAX_ADVTIME     (0.002)     // maximum deadtime (zero output) in advance of detected noise
+#define MAX_TAU         (0.01)     // maximum transition time, signal<->zero (slew time)
+#define MAX_ADVTIME     (0.01)     // maximum deadtime (zero output) in advance of detected noise
 #define MAX_SAMPLERATE  (1536000)
 
 namespace WDSP {
