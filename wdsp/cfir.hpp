@@ -49,10 +49,10 @@ public:
     int DD;
     int R;
     int Pairs;
-    float cutoff;
-    float scale;
+    double cutoff;
+    double scale;
     int xtype;
-    float xbw;
+    double xbw;
     int wintype;
     FIRCORE *p;
 
@@ -68,9 +68,9 @@ public:
         int DD,
         int R,
         int Pairs,
-        float cutoff,
+        double cutoff,
         int xtype,
-        float xbw,
+        double xbw,
         int wintype
     );
     static void destroy_cfir (CFIR *a);
@@ -85,13 +85,13 @@ public:
         int DD,
         int R,
         int Pairs,
-        float runrate,
-        float cicrate,
-        float cutoff,
+        double runrate,
+        double cicrate,
+        double cutoff,
         int xtype,
-        float xbw,
+        double xbw,
         int rtype,
-        float scale,
+        double scale,
         int wintype
     );
     // TXA Properties

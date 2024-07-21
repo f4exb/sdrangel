@@ -36,7 +36,7 @@ public:
     };
 
     explicit WDSPRxSquelchDialog(QWidget* parent = nullptr);
-    ~WDSPRxSquelchDialog();
+    ~WDSPRxSquelchDialog() override;
 
     void setMode(WDSPRxProfile::WDSPRxSquelchMode mode);
     void setSSQLTauMute(double value);

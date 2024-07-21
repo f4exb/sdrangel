@@ -41,6 +41,8 @@ if(NOT SERVER_MODE)
         wdsprxeqdialog.ui
         wdsprxfmdialog.cpp
         wdsprxfmdialog.ui
+        wdsprxpandialog.cpp
+        wdsprxpandialog.ui
         wdsprxsquelchdialog.cpp
         wdsprxsquelchdialog.ui
         wdsprxgui.cpp
@@ -56,6 +58,7 @@ if(NOT SERVER_MODE)
         wdsprxdnrdialog.h
         wdsprxeqdialog.h
         wdsprxfmdialog.h
+        wdsprxpandialog.h
         wdsprxsquelchdialog.h
     )
     set(TARGET_NAME wdsprx)

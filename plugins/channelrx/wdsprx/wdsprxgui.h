@@ -42,8 +42,10 @@ class WDSPRxFMDialog;
 class WDSPRxCWPeakDialog;
 class WDSPRxSquelchDialog;
 class WDSPRxEqDialog;
+class WDSPRxPanDialog;
 class SpectrumVis;
 class BasebandSampleSink;
+class CRightClickEnabler;
 
 namespace Ui {
 	class WDSPRxGUI;
@@ -105,6 +107,17 @@ private:
     WDSPRxCWPeakDialog* m_cwPeakDialog;
     WDSPRxSquelchDialog* m_squelchDialog;
     WDSPRxEqDialog* m_equalizerDialog;
+    WDSPRxPanDialog* m_panDialog;
+
+    CRightClickEnabler *m_audioMuteRightClickEnabler;
+    CRightClickEnabler *m_agcRightClickEnabler;
+    CRightClickEnabler *m_dnbRightClickEnabler;
+    CRightClickEnabler *m_dnrRightClickEnabler;
+    CRightClickEnabler *m_cwPeakRightClickEnabler;
+    CRightClickEnabler *m_squelchRightClickEnabler;
+    CRightClickEnabler *m_equalizerRightClickEnabler;
+    CRightClickEnabler *m_panRightClickEnabler;
+    CRightClickEnabler *m_demodRightClickEnabler;
 
 	QIcon m_iconDSBUSB;
 	QIcon m_iconDSBLSB;
@@ -136,6 +149,7 @@ private slots:
 	void on_agc_toggled(bool checked);
     void on_dnr_toggled(bool checked);
     void on_dnb_toggled(bool checked);
+    void on_anf_toggled(bool checked);
 	void on_agcGain_valueChanged(int value);
 	void on_audioMute_toggled(bool checked);
 	void on_spanLog2_valueChanged(int value);
@@ -169,6 +183,8 @@ private slots:
     void squelchSetup(int valueChanged);
     void equalizerSetupDialog(const QPoint& p);
     void equalizerSetup(int valueChanged);
+    void panSetupDialog(const QPoint& p);
+    void panSetup(int valueChanged);
 	void tick();
 };
 

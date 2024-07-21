@@ -14,49 +14,42 @@
 // You should have received a copy of the GNU General Public License                 //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.              //
 ///////////////////////////////////////////////////////////////////////////////////////
-#ifndef INCLUDE_WDSPRXCWPEAKDIALOG_H
-#define INCLUDE_WDSPRXCWPEAKDIALOG_H
 
-#include <QDialog>
+#include "wdsprxpandialog.h"
+#include "ui_wdsprxpandialog.h"
 
-#include "wdsprxsettings.h"
-
-namespace Ui {
-    class WDSPRxCWPeakDialog;
+WDSPRxPanDialog::WDSPRxPanDialog(QWidget* parent) :
+    QDialog(parent),
+    ui(new Ui::WDSPRxPanDialog)
+{
+    ui->setupUi(this);
 }
 
-class WDSPRxCWPeakDialog : public QDialog {
-    Q_OBJECT
-public:
-    enum ValueChanged {
-        ChangedCWPeakFrequency,
-        ChangedCWBandwidth,
-        ChangedCWGain
-    };
+WDSPRxPanDialog::~WDSPRxPanDialog()
+{
+    delete ui;
+}
 
-    explicit WDSPRxCWPeakDialog(QWidget* parent = nullptr);
-    ~WDSPRxCWPeakDialog() override;
+void WDSPRxPanDialog::setPan(double pan)
+{
+    ui->pan->blockSignals(true);
+    ui->pan->setValue((int) ((pan - 0.5)*200.0));
+    ui->pan->blockSignals(false);
+    ui->panText->setText(tr("%1").arg(ui->pan->value()));
+    m_pan = pan;
+}
 
-    void setCWPeakFrequency(double cwPeakFrequency);
-    void setCWBandwidth(double cwBandwidth);
-    void setCWGain(double cwGain);
-    double getCWPeakFrequency() const { return m_cwPeakFrequency; }
-    double getCWBandwidth() const { return m_cwBandwidth; }
-    double getCWGain() const { return m_cwGain; }
+void WDSPRxPanDialog::on_zero_clicked()
+{
+    ui->pan->setValue(0);
+    ui->panText->setText(tr("%1").arg(ui->pan->value()));
+    m_pan = 0.5;
+    emit valueChanged(ChangedPan);
+}
 
-signals:
-    void valueChanged(int valueChanged);
-
-private:
-    Ui::WDSPRxCWPeakDialog *ui;
-    double m_cwPeakFrequency;
-    double m_cwBandwidth;
-    double m_cwGain;
-
-private slots:
-    void on_cwPeakFrequency_valueChanged(double value);
-    void on_cwBandwidth_valueChanged(double value);
-    void on_cwGain_valueChanged(double value);
-};
-
-#endif
+void WDSPRxPanDialog::on_pan_valueChanged(int value)
+{
+    ui->panText->setText(tr("%1").arg(ui->pan->value()));
+    m_pan = 0.5 + (value / 200.0);
+    emit valueChanged(ChangedPan);
+}

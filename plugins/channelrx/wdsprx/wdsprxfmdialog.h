@@ -39,7 +39,7 @@ public:
     };
 
     explicit WDSPRxFMDialog(QWidget* parent = nullptr);
-    ~WDSPRxFMDialog();
+    ~WDSPRxFMDialog() override;
 
     void setDeviation(double deviation);
     void setAFLow(double afLow);

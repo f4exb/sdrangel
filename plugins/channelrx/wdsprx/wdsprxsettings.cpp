@@ -44,6 +44,7 @@ void WDSPRxSettings::resetToDefaults()
     m_demod = WDSPRxProfile::DemodSSB;
     m_audioBinaural = false;
     m_audioFlipChannels = false;
+    m_audioPan = 0.5;
     m_dsb = false;
     m_audioMute = false;
     m_dbOrS = true;
@@ -127,6 +128,7 @@ QByteArray WDSPRxSettings::serialize() const
     }
 
     s.writeU32(    5, m_rgbColor);
+    s.writeDouble( 6, m_audioPan);
     s.writeBool(   7, m_dbOrS);
     s.writeBool(   8, m_audioBinaural);
     s.writeBool(   9, m_audioFlipChannels);
@@ -227,6 +229,7 @@ QByteArray WDSPRxSettings::serialize() const
         s.writeBool  (106 + 100*i, (int) m_profiles[i].m_audioFlipChannels);
         s.writeBool  (107 + 100*i, (int) m_profiles[i].m_dsb);
         s.writeBool  (108 + 100*i, (int) m_profiles[i].m_dbOrS);
+        s.writeDouble(109 + 100*i, m_profiles[i].m_audioPan);
         // Filter
         s.writeS32   (100 + 100*i, m_profiles[i].m_spanLog2);
         s.writeS32   (101 + 100*i, m_profiles[i].m_highCutoff / 100.0);
@@ -335,6 +338,7 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         }
 
         d.readU32(    5, &m_rgbColor);
+        d.readDouble( 6, &m_audioPan, 0.5);
         d.readBool(   7, &m_dbOrS, true);
         d.readBool(   8, &m_audioBinaural, false);
         d.readBool(   9, &m_audioFlipChannels, false);
@@ -456,6 +460,7 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
             d.readBool(  106 + 100*i, &m_profiles[i].m_audioFlipChannels, false);
             d.readBool(  107 + 100*i, &m_profiles[i].m_dsb, false);
             d.readBool(  108 + 100*i, &m_profiles[i].m_dbOrS, true);
+            d.readDouble(109 + 100*i, &m_profiles[i].m_audioPan, 0.5);
             // Filter
             d.readS32   (100 + 100*i, &m_profiles[i].m_spanLog2, 3);
             d.readS32   (101 + 100*i, &tmp, 30);

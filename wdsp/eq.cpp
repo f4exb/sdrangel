@@ -44,46 +44,60 @@ int EQP::fEQcompare (const void * a, const void * b)
         return 1;
 }
 
-float* EQP::eq_impulse (int N, int nfreqs, float* F, float* G, float samplerate, float scale, int ctfmode, int wintype)
+float* EQP::eq_impulse (int N, int nfreqs, float* F, float* G, double samplerate, double scale, int ctfmode, int wintype)
 {
     float* fp = new float[nfreqs + 2]; // (float *) malloc0 ((nfreqs + 2)   * sizeof (float));
     float* gp = new float[nfreqs + 2]; // (float *) malloc0 ((nfreqs + 2)   * sizeof (float));
     float* A  = new float[N / 2 + 1]; // (float *) malloc0 ((N / 2 + 1) * sizeof (float));
     float* sary = new float[2 * nfreqs]; // (float *) malloc0 (2 * nfreqs * sizeof (float));
-    float gpreamp, f, frac;
+    double gpreamp, f, frac;
     float* impulse;
     int i, j, mid;
     fp[0] = 0.0;
     fp[nfreqs + 1] = 1.0;
     gpreamp = G[0];
+
     for (i = 1; i <= nfreqs; i++)
     {
         fp[i] = 2.0 * F[i] / samplerate;
-        if (fp[i] < 0.0) fp[i] = 0.0;
-        if (fp[i] > 1.0) fp[i] = 1.0;
+
+        if (fp[i] < 0.0)
+            fp[i] = 0.0;
+
+        if (fp[i] > 1.0)
+            fp[i] = 1.0;
+
         gp[i] = G[i];
     }
+
     for (i = 1, j = 0; i <= nfreqs; i++, j+=2)
     {
         sary[j + 0] = fp[i];
         sary[j + 1] = gp[i];
     }
+
     qsort (sary, nfreqs, 2 * sizeof (float), fEQcompare);
+
     for (i = 1, j = 0; i <= nfreqs; i++, j+=2)
     {
         fp[i] = sary[j + 0];
         gp[i] = sary[j + 1];
     }
+
     gp[0] = gp[1];
     gp[nfreqs + 1] = gp[nfreqs];
     mid = N / 2;
     j = 0;
+
     if (N & 1)
     {
         for (i = 0; i <= mid; i++)
         {
-            f = (float)i / (float)mid;
-            while (f > fp[j + 1]) j++;
+            f = (double)i / (double)mid;
+
+            while ((f > fp[j + 1]) && (j < nfreqs))
+                j++;
+
             frac = (f - fp[j]) / (fp[j + 1] - fp[j]);
             A[i] = pow (10.0, 0.05 * (frac * gp[j + 1] + (1.0 - frac) * gp[j] + gpreamp)) * scale;
         }
@@ -92,36 +106,44 @@ float* EQP::eq_impulse (int N, int nfreqs, float* F, float* G, float samplerate,
     {
         for (i = 0; i < mid; i++)
         {
-            f = ((float)i + 0.5) / (float)mid;
-            while (f > fp[j + 1]) j++;
+            f = ((double)i + 0.5) / (double)mid;
+
+            while ((f > fp[j + 1]) && (j < nfreqs))
+                j++;
+
             frac = (f - fp[j]) / (fp[j + 1] - fp[j]);
             A[i] = pow (10.0, 0.05 * (frac * gp[j + 1] + (1.0 - frac) * gp[j] + gpreamp)) * scale;
         }
     }
+
     if (ctfmode == 0)
     {
         int k, low, high;
-        float lowmag, highmag, flow4, fhigh4;
+        double lowmag, highmag, flow4, fhigh4;
+
         if (N & 1)
         {
             low = (int)(fp[1] * mid);
             high = (int)(fp[nfreqs] * mid + 0.5);
             lowmag = A[low];
             highmag = A[high];
-            flow4 = pow((float)low / (float)mid, 4.0);
-            fhigh4 = pow((float)high / (float)mid, 4.0);
+            flow4 = pow((double)low / (double)mid, 4.0);
+            fhigh4 = pow((double)high / (double)mid, 4.0);
             k = low;
+
             while (--k >= 0)
             {
-                f = (float)k / (float)mid;
+                f = (double)k / (double)mid;
                 lowmag *= (f * f * f * f) / flow4;
                 if (lowmag < 1.0e-20) lowmag = 1.0e-20;
                 A[k] = lowmag;
             }
+
             k = high;
+
             while (++k <= mid)
             {
-                f = (float)k / (float)mid;
+                f = (double)k / (double)mid;
                 highmag *= fhigh4 / (f * f * f * f);
                 if (highmag < 1.0e-20) highmag = 1.0e-20;
                 A[k] = highmag;
@@ -133,30 +155,35 @@ float* EQP::eq_impulse (int N, int nfreqs, float* F, float* G, float samplerate,
             high = (int)(fp[nfreqs] * mid - 0.5);
             lowmag = A[low];
             highmag = A[high];
-            flow4 = pow((float)low / (float)mid, 4.0);
-            fhigh4 = pow((float)high / (float)mid, 4.0);
+            flow4 = pow((double)low / (double)mid, 4.0);
+            fhigh4 = pow((double)high / (double)mid, 4.0);
             k = low;
+
             while (--k >= 0)
             {
-                f = (float)k / (float)mid;
+                f = (double)k / (double)mid;
                 lowmag *= (f * f * f * f) / flow4;
                 if (lowmag < 1.0e-20) lowmag = 1.0e-20;
                 A[k] = lowmag;
             }
+
             k = high;
+
             while (++k < mid)
             {
-                f = (float)k / (float)mid;
+                f = (double)k / (double)mid;
                 highmag *= fhigh4 / (f * f * f * f);
                 if (highmag < 1.0e-20) highmag = 1.0e-20;
                 A[k] = highmag;
             }
         }
     }
+
     if (N & 1)
         impulse = FIR::fir_fsamp_odd(N, A, 1, 1.0, wintype);
     else
         impulse = FIR::fir_fsamp(N, A, 1, 1.0, wintype);
+
     // print_impulse("eq.txt", N, impulse, 1, 0);
     delete[] (sary);
     delete[] (A);

@@ -318,8 +318,8 @@ float *FIR::fir_read (int N, const char *filename, int rtype, float scale)
 void FIR::analytic (int N, float* in, float* out)
 {
     int i;
-    float inv_N = 1.0 / (float) N;
-    float two_inv_N = 2.0 * inv_N;
+    double inv_N = 1.0 / (double) N;
+    double two_inv_N = 2.0 * inv_N;
     float* x = new float[N * 2]; // (float *) malloc0 (N * sizeof (complex));
     fftwf_plan pfor = fftwf_plan_dft_1d (
         N,

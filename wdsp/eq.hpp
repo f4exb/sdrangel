@@ -56,7 +56,7 @@ public:
     float* G;
     int ctfmode;
     int wintype;
-    float samplerate;
+    double samplerate;
     FIRCORE *p;
 
     static EQP* create_eqp (
@@ -73,7 +73,7 @@ public:
         int wintype,
         int samplerate
     );
-    static float* eq_impulse (int N, int nfreqs, float* F, float* G, float samplerate, float scale, int ctfmode, int wintype);
+    static float* eq_impulse (int N, int nfreqs, float* F, float* G, double samplerate, double scale, int ctfmode, int wintype);
     static void destroy_eqp (EQP *a);
     static void flush_eqp (EQP *a);
     static void xeqp (EQP *a);

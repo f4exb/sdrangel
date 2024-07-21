@@ -30,7 +30,6 @@ class WDSPRxDNRDialog : public QDialog {
 public:
     enum ValueChanged {
         ChangedSNB,
-        ChangedANF,
         ChangedNR,
         ChangedNR2Gain,
         ChangedNR2NPE,
@@ -39,10 +38,9 @@ public:
     };
 
     explicit WDSPRxDNRDialog(QWidget* parent = nullptr);
-    ~WDSPRxDNRDialog();
+    ~WDSPRxDNRDialog() override;
 
     void setSNB(bool snb);
-    void setANF(bool anf);
     void setNRScheme(WDSPRxProfile::WDSPRxNRScheme scheme);
     void setNR2Gain(WDSPRxProfile::WDSPRxNR2Gain gain);
     void setNR2NPE(WDSPRxProfile::WDSPRxNR2NPE nr2NPE);
@@ -50,7 +48,6 @@ public:
     void setNR2ArtifactReduction(bool nr2ArtifactReducion);
 
     bool getSNB() const { return m_snb; }
-    bool getANF() const { return m_anf; }
     WDSPRxProfile::WDSPRxNRScheme getNRScheme() const { return m_nrScheme; }
     WDSPRxProfile::WDSPRxNR2Gain getNR2Gain() const { return m_nr2Gain; }
     WDSPRxProfile::WDSPRxNR2NPE getNR2NPE() const { return m_nr2NPE; }
@@ -63,7 +60,6 @@ signals:
 private:
     Ui::WDSPRxDNRDialog *ui;
     bool m_snb;
-    bool m_anf;
     WDSPRxProfile::WDSPRxNRScheme m_nrScheme;
     WDSPRxProfile::WDSPRxNR2Gain m_nr2Gain;
     WDSPRxProfile::WDSPRxNR2NPE m_nr2NPE;
@@ -72,7 +68,6 @@ private:
 
 private slots:
     void on_snb_clicked(bool checked);
-    void on_anf_clicked(bool checked);
     void on_nr_currentIndexChanged(int index);
     void on_nr2Gain_currentIndexChanged(int index);
     void on_nr2NPE_currentIndexChanged(int index);
