@@ -1938,7 +1938,7 @@ void FT8::soft_decode(const FFTEngine::ffts_t &c79, float ll174[])
 //
 void FT8::soft_decode_mags(FT8Params& params, const std::vector<std::vector<float>>& mags_, int nbSymbolBits, float ll174[])
 {
-    if (nbSymbolBits > 16) {
+    if ((nbSymbolBits > 16) || (nbSymbolBits < 1)) {
         return;
     }
 
