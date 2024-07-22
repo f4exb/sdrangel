@@ -155,14 +155,12 @@ RadioAstronomy::~RadioAstronomy()
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
 
-    if (m_basebandSink->isRunning()) {
+    if ((m_basebandSink->isRunning()) || (m_worker->isRunning())) {
         stop();
     }
-    delete m_basebandSink;
-    if (m_worker->isRunning()) {
-        stop();
-    }
-    delete m_worker;
+
+    m_worker->deleteLater();
+    m_basebandSink->deleteLater();
 }
 
 void RadioAstronomy::setDeviceAPI(DeviceAPI *deviceAPI)

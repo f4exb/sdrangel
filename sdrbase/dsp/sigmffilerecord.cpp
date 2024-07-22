@@ -143,7 +143,7 @@ void SigMFFileRecord::setFileName(const QString& fileName)
                     }
                     m_initialBytesCount = (uint64_t) m_sampleFile.size();
                     m_sampleStart =  m_initialBytesCount / ((1<<m_log2RecordSampleSize)/4); // sizeof(Sample);
-                    
+
                     if (!m_metaFile.open(QIODevice::WriteOnly | QIODevice::Append))
                     {
                         qWarning() << "SigMFFileRecord::setFileName: failed to open file: " << m_metaFile.fileName();
@@ -218,7 +218,7 @@ bool SigMFFileRecord::stopRecording()
 {
     if (m_recordOn)
     {
-      	qDebug("SigMFFileRecord::stopRecording: file previous capture");
+        qDebug("SigMFFileRecord::stopRecording: file previous capture");
         makeCapture();
         m_recordOn = false;
         if (m_sampleFile.error())

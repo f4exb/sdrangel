@@ -77,18 +77,29 @@ public:
 template <typename TYPE, typename ALG>
 class LDPCDecoder
 {
-	TYPE *bnl, *pty, *inp, *out;
-	uint16_t *pos;
-	uint8_t *cnc;
+private:
+	TYPE *bnl = nullptr;
+	TYPE *pty = nullptr;
+	TYPE *inp = nullptr;
+	TYPE *out = nullptr;
+	uint16_t *pos  = nullptr;
+	uint8_t *cnc  = nullptr;
 	ALG alg;
-	int M, N, K, R, q, CNL, LT;
-	bool initialized;
+	int M = 0;
+	int N = 0;
+	int K = 0;
+	int R = 0;
+	int q = 0;
+	int CNL = 0;
+	int LT = 0;
+	bool initialized = false;
 
 	void reset()
 	{
 		for (int i = 0; i < LT; ++i)
 			bnl[i] = alg.zero();
 	}
+
 	bool bad(TYPE *data, TYPE *parity, int blocks)
 	{
 		for (int i = 0; i < q; ++i) {
@@ -107,6 +118,7 @@ class LDPCDecoder
 		}
 		return false;
 	}
+
 	void update(TYPE *data, TYPE *parity)
 	{
 		TYPE *bl = bnl;
@@ -135,10 +147,12 @@ class LDPCDecoder
 			}
 		}
 	}
+
 public:
-	LDPCDecoder() : initialized(false)
+	LDPCDecoder()
 	{
 	}
+
 	void init(LDPCInterface *it)
 	{
 		if (initialized) {

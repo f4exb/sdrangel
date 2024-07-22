@@ -230,7 +230,7 @@ void EMNR::interpM (double* res, double x, int nvals, double* xvals, double* yva
     }
     else
     {
-        int idx = 0;
+        int idx = 1;
         double xllow, xlhigh, frac;
 
         while ((x >= xvals[idx]) && (idx < nvals - 1))

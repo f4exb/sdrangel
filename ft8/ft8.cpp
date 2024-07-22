@@ -1938,6 +1938,10 @@ void FT8::soft_decode(const FFTEngine::ffts_t &c79, float ll174[])
 //
 void FT8::soft_decode_mags(FT8Params& params, const std::vector<std::vector<float>>& mags_, int nbSymbolBits, float ll174[])
 {
+    if ((nbSymbolBits > 16) || (nbSymbolBits < 1)) {
+        return;
+    }
+
     std::vector<std::vector<float>> mags = convert_to_snr_gen(params, nbSymbolBits, mags_);
     // statistics to decide soft probabilities.
     // distribution of strongest tones, and
@@ -1949,8 +1953,8 @@ void FT8::soft_decode_mags(FT8Params& params, const std::vector<std::vector<floa
     int lli = 0;
     int zoX = 1<<(nbSymbolBits-1);
     int zoY = nbSymbolBits;
-    int *zeroi = new int[zoX*zoY];
-    int *onei = new int[zoX*zoY];
+    std::vector<int> zeroi(zoX*zoY);
+    std::vector<int> onei(zoX*zoY);
 
     for (int biti = 0; biti < nbSymbolBits; biti++)
     {

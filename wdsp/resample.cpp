@@ -60,8 +60,8 @@ void RESAMPLE::calc_resample (RESAMPLE *a)
     a->L = a->out_rate / x;
     a->M = a->in_rate / x;
 
-    a->L <= 0 ? 1 : a->L;
-    a->M <= 0 ? 1 : a->M;
+    a->L = a->L <= 0 ? 1 : a->L;
+    a->M = a->M <= 0 ? 1 : a->M;
 
     if (a->in_rate < a->out_rate)
         min_rate = a->in_rate;

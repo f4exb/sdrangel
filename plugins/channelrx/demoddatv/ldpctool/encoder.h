@@ -30,9 +30,11 @@ namespace ldpctool {
 template <typename TYPE>
 class LDPCEncoder
 {
-	LDPCInterface *ldpc;
-	int N, K, R;
-	bool initialized;
+	LDPCInterface *ldpc = nullptr;
+	int N = 2;
+    int K = 1;
+    int R = 1;
+	bool initialized = false;
 
 	TYPE one()
 	{
@@ -43,9 +45,10 @@ class LDPCEncoder
 		return b < TYPE(0) ? -a : b > TYPE(0) ? a : TYPE(0);
 	}
 public:
-	LDPCEncoder() : initialized(false)
+	LDPCEncoder()
 	{
 	}
+
 	void init(LDPCInterface *it)
 	{
 		if (initialized)

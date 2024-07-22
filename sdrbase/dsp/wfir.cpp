@@ -370,7 +370,13 @@ void WFIR::WindowData(double *Data, int N, TWindowType WindowType, double Alpha,
     if (WindowType != wtKAISER && WindowType != wtFLATTOP)
     {
         for (j = M / 2; j < N - M / 2; j++)
+        {
+            if (j >= N + 2) {
+                break;
+            }
+
             WinCoeff[j] = 1.0;
+        }
     }
 
     // This will set the gain of the window to 1. Only the Flattop window has unity gain by design.

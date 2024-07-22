@@ -117,7 +117,6 @@ void CFCOMP::calc_comp (CFCOMP *a)
         a->G[i] = sary[3 * i + 1];
         a->E[i] = sary[3 * i + 2];
     }
-    delete[] (sary);
     a->fp[0] = 0.0;
     a->fp[a->nfreqs + 1] = fmax;
     a->gp[0] = a->G[0];

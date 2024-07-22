@@ -124,16 +124,18 @@ int main(int argc, char **argv)
 
 	// DVB-S2 MODCOD definitions
 	static const char *mc_tabnames[2][32] = { // [shortframes][modcod]
-											 {// Normal frames
-											  0, "B1", "B2", "B3", "B4", "B5", "B6", "B7",
-											  "B8", "B9", "B10", "B11", "B5", "B6", "B7", "B9",
-											  "B10", "B11", "B6", "B7", "B8", "B9", "B10", "B11",
-											  "B7", "B8", "B8", "B10", "B11", 0, 0, 0},
-											 {// Short frames
-											  0, "C1", "C2", "C3", "C4", "C5", "C6", "C7",
-											  "C8", "C9", "C10", 0, "C5", "C6", "C7", "C9",
-											  "C10", 0, "C6", "C7", "C8", "C9", "C10", 0,
-											  "C7", "C8", "C8", "C10", 0, 0, 0, 0}};
+        {// Normal frames
+            nullptr, "B1", "B2", "B3", "B4", "B5", "B6", "B7",
+            "B8", "B9", "B10", "B11", "B5", "B6", "B7", "B9",
+            "B10", "B11", "B6", "B7", "B8", "B9", "B10", "B11",
+            "B7", "B8", "B8", "B10", "B11", nullptr, nullptr, nullptr
+        },
+        {// Short frames
+            nullptr, "C1", "C2", "C3", "C4", "C5", "C6", "C7",
+            "C8", "C9", "C10", nullptr, "C5", "C6", "C7", "C9",
+            "C10", nullptr, "C6", "C7", "C8", "C9", "C10", nullptr,
+            "C7", "C8", "C8", "C10", nullptr, nullptr, nullptr, nullptr
+    }};
 
 	const char *tabname = mc_tabnames[shortframes][modcod];
 	if (!tabname)
@@ -188,8 +190,16 @@ int main(int argc, char **argv)
 			int blocks = j + ldpctool::SIMD_WIDTH > BLOCKS ? BLOCKS - j : ldpctool::SIMD_WIDTH;
 
 			for (int n = 0; n < blocks; ++n)
+            {
 				for (int i = 0; i < CODE_LEN; ++i)
+                {
+                    if (((j + n) * CODE_LEN + i) >= BLOCKS * CODE_LEN) {
+                        break;
+                    }
+
 					reinterpret_cast<ldpctool::code_type *>(simd + i)[n] = code[(j + n) * CODE_LEN + i];
+                }
+            }
 
 			int count = decode(simd, simd + DATA_LEN, max_trials, blocks);
 			num_decodes++;
