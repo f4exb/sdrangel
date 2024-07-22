@@ -614,32 +614,32 @@ void NOB::setSize_nob (NOB *a, int size)
 
 void NOB::SetNOBRun (RXA& rxa, int run)
 {
-    NOB *a = rxa.nob.p;
+    NOB *a = rxa.nob;
     a->run = run;
 }
 
 void NOB::SetNOBMode (RXA& rxa, int mode)
 {
-    NOB *a = rxa.nob.p;
+    NOB *a = rxa.nob;
     a->mode = mode;
 }
 
 void NOB::SetNOBBuffsize (RXA& rxa, int size)
 {
-    NOB *a = rxa.nob.p;
+    NOB *a = rxa.nob;
     a->buffsize = size;
 }
 
 void NOB::SetNOBSamplerate (RXA& rxa, int rate)
 {
-    NOB *a = rxa.nob.p;
+    NOB *a = rxa.nob;
     a->samplerate = (double) rate;
     init_nob (a);
 }
 
 void NOB::SetNOBTau (RXA& rxa, double tau)
 {
-    NOB *a = rxa.nob.p;
+    NOB *a = rxa.nob;
     a->advslewtime = tau;
     a->hangslewtime = tau;
     init_nob (a);
@@ -647,28 +647,28 @@ void NOB::SetNOBTau (RXA& rxa, double tau)
 
 void NOB::SetNOBHangtime (RXA& rxa, double time)
 {
-    NOB *a = rxa.nob.p;
+    NOB *a = rxa.nob;
     a->hangtime = time;
     init_nob (a);
 }
 
 void NOB::SetNOBAdvtime (RXA& rxa, double time)
 {
-    NOB *a = rxa.nob.p;
+    NOB *a = rxa.nob;
     a->advtime = time;
     init_nob (a);
 }
 
 void NOB::SetNOBBacktau (RXA& rxa, double tau)
 {
-    NOB *a = rxa.nob.p;
+    NOB *a = rxa.nob;
     a->backtau = tau;
     init_nob (a);
 }
 
 void NOB::SetNOBThreshold (RXA& rxa, double thresh)
 {
-    NOB *a = rxa.nob.p;
+    NOB *a = rxa.nob;
     a->threshold = thresh;
 }
 

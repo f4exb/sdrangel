@@ -123,13 +123,13 @@ void SHIFT::setSize_shift (SHIFT *a, int size)
 
 void SHIFT::SetShiftRun (RXA& rxa, int run)
 {
-    rxa.shift.p->run = run;
+    rxa.shift->run = run;
 }
 
 void SHIFT::SetShiftFreq (RXA& rxa, double fshift)
 {
-    rxa.shift.p->shift = fshift;
-    calc_shift (rxa.shift.p);
+    rxa.shift->shift = fshift;
+    calc_shift (rxa.shift);
 }
 
 } // namespace WDSP

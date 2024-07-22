@@ -184,16 +184,16 @@ void ANR::setSize_anr (ANR *a, int size)
 
 void ANR::SetANRRun (RXA& rxa, int run)
 {
-    ANR *a = rxa.anr.p;
+    ANR *a = rxa.anr;
 
     if (a->run != run)
     {
         RXA::bp1Check (
             rxa,
-            rxa.amd.p->run,
-            rxa.snba.p->run,
-            rxa.emnr.p->run,
-            rxa.anf.p->run,
+            rxa.amd->run,
+            rxa.snba->run,
+            rxa.emnr->run,
+            rxa.anf->run,
             run
         );
         a->run = run;
@@ -204,42 +204,42 @@ void ANR::SetANRRun (RXA& rxa, int run)
 
 void ANR::SetANRVals (RXA& rxa, int taps, int delay, double gain, double leakage)
 {
-    rxa.anr.p->n_taps = taps;
-    rxa.anr.p->delay = delay;
-    rxa.anr.p->two_mu = gain;
-    rxa.anr.p->gamma = leakage;
-    flush_anr (rxa.anr.p);
+    rxa.anr->n_taps = taps;
+    rxa.anr->delay = delay;
+    rxa.anr->two_mu = gain;
+    rxa.anr->gamma = leakage;
+    flush_anr (rxa.anr);
 }
 
 void ANR::SetANRTaps (RXA& rxa, int taps)
 {
-    rxa.anr.p->n_taps = taps;
-    flush_anr (rxa.anr.p);
+    rxa.anr->n_taps = taps;
+    flush_anr (rxa.anr);
 }
 
 void ANR::SetANRDelay (RXA& rxa, int delay)
 {
-    rxa.anr.p->delay = delay;
-    flush_anr (rxa.anr.p);
+    rxa.anr->delay = delay;
+    flush_anr (rxa.anr);
 }
 
 void ANR::SetANRGain (RXA& rxa, double gain)
 {
-    rxa.anr.p->two_mu = gain;
-    flush_anr (rxa.anr.p);
+    rxa.anr->two_mu = gain;
+    flush_anr (rxa.anr);
 }
 
 void ANR::SetANRLeakage (RXA& rxa, double leakage)
 {
-    rxa.anr.p->gamma = leakage;
-    flush_anr (rxa.anr.p);
+    rxa.anr->gamma = leakage;
+    flush_anr (rxa.anr);
 }
 
 void ANR::SetANRPosition (RXA& rxa, int position)
 {
-    rxa.anr.p->position = position;
-    rxa.bp1.p->position = position;
-    flush_anr (rxa.anr.p);
+    rxa.anr->position = position;
+    rxa.bp1->position = position;
+    flush_anr (rxa.anr);
 }
 
 } // namespace WDSP

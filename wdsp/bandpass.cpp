@@ -189,7 +189,7 @@ void BANDPASS::CalcBandpassFilter (BANDPASS *a, double f_low, double f_high, dou
 
 void BANDPASS::SetBandpassFreqs (RXA& rxa, double f_low, double f_high)
 {
-    BANDPASS *a = rxa.bp1.p;
+    BANDPASS *a = rxa.bp1;
 
     if ((f_low != a->f_low) || (f_high != a->f_high))
     {
@@ -215,7 +215,7 @@ void BANDPASS::SetBandpassNC (RXA& rxa, int nc)
 {
     // NOTE:  'nc' must be >= 'size'
     BANDPASS *a;
-    a = rxa.bp1.p;
+    a = rxa.bp1;
 
     if (nc != a->nc)
     {
@@ -237,7 +237,7 @@ void BANDPASS::SetBandpassNC (RXA& rxa, int nc)
 void BANDPASS::SetBandpassMP (RXA& rxa, int mp)
 {
     BANDPASS *a;
-    a = rxa.bp1.p;
+    a = rxa.bp1;
 
     if (mp != a->mp)
     {

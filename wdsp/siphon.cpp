@@ -194,7 +194,7 @@ void SIPHON::sip_spectrum (SIPHON *a)
 
 void SIPHON::GetaSipF (RXA& rxa, float* out, int size)
 {   // return raw samples as floats
-    SIPHON *a=rxa.sip1.p;
+    SIPHON *a=rxa.sip1;
     int i;
     a->outsize = size;
     suck (a);
@@ -206,7 +206,7 @@ void SIPHON::GetaSipF (RXA& rxa, float* out, int size)
 
 void SIPHON::GetaSipF1 (RXA& rxa, float* out, int size)
 {   // return raw samples as floats
-    SIPHON *a=rxa.sip1.p;
+    SIPHON *a=rxa.sip1;
     int i;
     a->outsize = size;
     suck (a);

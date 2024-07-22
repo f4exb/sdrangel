@@ -390,46 +390,46 @@ void GEN::setSize_gen (GEN *a, int size)
 
 void GEN::SetPreGenRun (RXA& rxa, int run)
 {
-    rxa.gen0.p->run = run;
+    rxa.gen0->run = run;
 }
 
 void GEN::SetPreGenMode (RXA& rxa, int mode)
 {
-    rxa.gen0.p->mode = mode;
+    rxa.gen0->mode = mode;
 }
 
 void GEN::SetPreGenToneMag (RXA& rxa, float mag)
 {
-    rxa.gen0.p->tone.mag = mag;
+    rxa.gen0->tone.mag = mag;
 }
 
 void GEN::SetPreGenToneFreq (RXA& rxa, float freq)
 {
-    rxa.gen0.p->tone.freq = freq;
-    calc_tone (rxa.gen0.p);
+    rxa.gen0->tone.freq = freq;
+    calc_tone (rxa.gen0);
 }
 
 void GEN::SetPreGenNoiseMag (RXA& rxa, float mag)
 {
-    rxa.gen0.p->noise.mag = mag;
+    rxa.gen0->noise.mag = mag;
 }
 
 void GEN::SetPreGenSweepMag (RXA& rxa, float mag)
 {
-    rxa.gen0.p->sweep.mag = mag;
+    rxa.gen0->sweep.mag = mag;
 }
 
 void GEN::SetPreGenSweepFreq (RXA& rxa, float freq1, float freq2)
 {
-    rxa.gen0.p->sweep.f1 = freq1;
-    rxa.gen0.p->sweep.f2 = freq2;
-    calc_sweep (rxa.gen0.p);
+    rxa.gen0->sweep.f1 = freq1;
+    rxa.gen0->sweep.f2 = freq2;
+    calc_sweep (rxa.gen0);
 }
 
 void GEN::SetPreGenSweepRate (RXA& rxa, float rate)
 {
-    rxa.gen0.p->sweep.sweeprate = rate;
-    calc_sweep (rxa.gen0.p);
+    rxa.gen0->sweep.sweeprate = rate;
+    calc_sweep (rxa.gen0);
 }
 
 

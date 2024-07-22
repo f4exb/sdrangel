@@ -94,7 +94,7 @@ void SENDER::setSize_sender (SENDER *a, int size)
 void SENDER::SetSpectrum (RXA& rxa, int flag, BufferProbe *spectrumProbe)
 {
     SENDER *a;
-    a = rxa.sender.p;
+    a = rxa.sender;
     a->flag = flag;
     a->spectrumProbe = spectrumProbe;
 }

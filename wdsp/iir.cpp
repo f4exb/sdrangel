@@ -334,27 +334,27 @@ void SPEAK::setSize_speak (SPEAK *a, int size)
 
 void SPEAK::SetSPCWRun (RXA& rxa, int run)
 {
-    SPEAK *a = rxa.speak.p;
+    SPEAK *a = rxa.speak;
     a->run = run;
 }
 
 void SPEAK::SetSPCWFreq (RXA& rxa, double freq)
 {
-    SPEAK *a = rxa.speak.p;
+    SPEAK *a = rxa.speak;
     a->f = freq;
     calc_speak (a);
 }
 
 void SPEAK::SetSPCWBandwidth (RXA& rxa, double bw)
 {
-    SPEAK *a = rxa.speak.p;
+    SPEAK *a = rxa.speak;
     a->bw = bw;
     calc_speak (a);
 }
 
 void SPEAK::SetSPCWGain (RXA& rxa, double gain)
 {
-    SPEAK *a = rxa.speak.p;
+    SPEAK *a = rxa.speak;
     a->gain = gain;
     calc_speak (a);
 }
@@ -504,25 +504,25 @@ void MPEAK::setSize_mpeak (MPEAK *a, int size)
 
 void MPEAK::SetmpeakRun (RXA& rxa, int run)
 {
-    MPEAK *a = rxa.mpeak.p;
+    MPEAK *a = rxa.mpeak;
     a->run = run;
 }
 
 void MPEAK::SetmpeakNpeaks (RXA& rxa, int npeaks)
 {
-    MPEAK *a = rxa.mpeak.p;
+    MPEAK *a = rxa.mpeak;
     a->npeaks = npeaks;
 }
 
 void MPEAK::SetmpeakFilEnable (RXA& rxa, int fil, int enable)
 {
-    MPEAK *a = rxa.mpeak.p;
+    MPEAK *a = rxa.mpeak;
     a->enable[fil] = enable;
 }
 
 void MPEAK::SetmpeakFilFreq (RXA& rxa, int fil, double freq)
 {
-    MPEAK *a = rxa.mpeak.p;
+    MPEAK *a = rxa.mpeak;
     a->f[fil] = freq;
     a->pfil[fil]->f = freq;
     SPEAK::calc_speak(a->pfil[fil]);
@@ -530,7 +530,7 @@ void MPEAK::SetmpeakFilFreq (RXA& rxa, int fil, double freq)
 
 void MPEAK::SetmpeakFilBw (RXA& rxa, int fil, double bw)
 {
-    MPEAK *a = rxa.mpeak.p;
+    MPEAK *a = rxa.mpeak;
     a->bw[fil] = bw;
     a->pfil[fil]->bw = bw;
     SPEAK::calc_speak(a->pfil[fil]);
@@ -538,7 +538,7 @@ void MPEAK::SetmpeakFilBw (RXA& rxa, int fil, double bw)
 
 void MPEAK::SetmpeakFilGain (RXA& rxa, int fil, double gain)
 {
-    MPEAK *a = rxa.mpeak.p;
+    MPEAK *a = rxa.mpeak;
     a->gain[fil] = gain;
     a->pfil[fil]->gain = gain;
     SPEAK::calc_speak(a->pfil[fil]);

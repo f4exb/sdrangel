@@ -719,18 +719,18 @@ void SNBA::xsnba (SNBA *d)
 
 void SNBA::SetSNBARun (RXA& rxa, int run)
 {
-    SNBA *a = rxa.snba.p;
+    SNBA *a = rxa.snba;
 
     if (a->run != run)
     {
-        RXA::bpsnbaCheck (rxa, rxa.mode, rxa.ndb.p->master_run);
+        RXA::bpsnbaCheck (rxa, rxa.mode, rxa.ndb->master_run);
         RXA::bp1Check (
             rxa,
-            rxa.amd.p->run,
+            rxa.amd->run,
             run,
-            rxa.emnr.p->run,
-            rxa.anf.p->run,
-            rxa.anr.p->run
+            rxa.emnr->run,
+            rxa.anf->run,
+            rxa.anr->run
         );
         a->run = run;
         RXA::bp1Set (rxa);
@@ -740,54 +740,54 @@ void SNBA::SetSNBARun (RXA& rxa, int run)
 
 void SNBA::SetSNBAovrlp (RXA& rxa, int ovrlp)
 {
-    decalc_snba (rxa.snba.p);
-    rxa.snba.p->ovrlp = ovrlp;
-    calc_snba (rxa.snba.p);
+    decalc_snba (rxa.snba);
+    rxa.snba->ovrlp = ovrlp;
+    calc_snba (rxa.snba);
 }
 
 void SNBA::SetSNBAasize (RXA& rxa, int size)
 {
-    rxa.snba.p->exec.asize = size;
+    rxa.snba->exec.asize = size;
 }
 
 void SNBA::SetSNBAnpasses (RXA& rxa, int npasses)
 {
-    rxa.snba.p->exec.npasses = npasses;
+    rxa.snba->exec.npasses = npasses;
 }
 
 void SNBA::SetSNBAk1 (RXA& rxa, double k1)
 {
-    rxa.snba.p->sdet.k1 = k1;
+    rxa.snba->sdet.k1 = k1;
 }
 
 void SNBA::SetSNBAk2 (RXA& rxa, double k2)
 {
-    rxa.snba.p->sdet.k2 = k2;
+    rxa.snba->sdet.k2 = k2;
 }
 
 void SNBA::SetSNBAbridge (RXA& rxa, int bridge)
 {
-    rxa.snba.p->sdet.b = bridge;
+    rxa.snba->sdet.b = bridge;
 }
 
 void SNBA::SetSNBApresamps (RXA& rxa, int presamps)
 {
-    rxa.snba.p->sdet.pre = presamps;
+    rxa.snba->sdet.pre = presamps;
 }
 
 void SNBA::SetSNBApostsamps (RXA& rxa, int postsamps)
 {
-    rxa.snba.p->sdet.post = postsamps;
+    rxa.snba->sdet.post = postsamps;
 }
 
 void SNBA::SetSNBApmultmin (RXA& rxa, double pmultmin)
 {
-    rxa.snba.p->scan.pmultmin = pmultmin;
+    rxa.snba->scan.pmultmin = pmultmin;
 }
 
 void SNBA::SetSNBAOutputBandwidth (RXA& rxa, double flow, double fhigh)
 {
-    SNBA *a = rxa.snba.p;
+    SNBA *a = rxa.snba;
     RESAMPLE *d = a->outresamp;
     double f_low, f_high;
 

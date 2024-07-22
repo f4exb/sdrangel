@@ -61,8 +61,18 @@ public:
     fftwf_plan CFor;
     fftwf_plan CRev;
 
-    static BPS* create_bps (int run, int position, int size, float* in, float* out,
-        float f_low, float f_high, int samplerate, int wintype, float gain);
+    static BPS* create_bps (
+        int run,
+        int position,
+        int size,
+        float* in,
+        float* out,
+        float f_low,
+        float f_high,
+        int samplerate,
+        int wintype,
+        float gain
+    );
     static void destroy_bps (BPS *a);
     static void flush_bps (BPS *a);
     static void xbps (BPS *a, int pos);

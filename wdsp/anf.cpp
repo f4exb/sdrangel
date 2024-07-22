@@ -184,17 +184,17 @@ void ANF::setSize_anf (ANF *a, int size)
 
 void ANF::SetANFRun (RXA& rxa, int run)
 {
-    ANF *a = rxa.anf.p;
+    ANF *a = rxa.anf;
 
     if (a->run != run)
     {
         RXA::bp1Check (
             rxa,
-            rxa.amd.p->run,
-            rxa.snba.p->run,
-            rxa.emnr.p->run,
+            rxa.amd->run,
+            rxa.snba->run,
+            rxa.emnr->run,
             run,
-            rxa.anr.p->run
+            rxa.anr->run
         );
         a->run = run;
         RXA::bp1Set (rxa);
@@ -205,42 +205,42 @@ void ANF::SetANFRun (RXA& rxa, int run)
 
 void ANF::SetANFVals (RXA& rxa, int taps, int delay, double gain, double leakage)
 {
-    rxa.anf.p->n_taps = taps;
-    rxa.anf.p->delay = delay;
-    rxa.anf.p->two_mu = gain;          //try two_mu = 1e-4
-    rxa.anf.p->gamma = leakage;        //try gamma = 0.10
-    flush_anf (rxa.anf.p);
+    rxa.anf->n_taps = taps;
+    rxa.anf->delay = delay;
+    rxa.anf->two_mu = gain;          //try two_mu = 1e-4
+    rxa.anf->gamma = leakage;        //try gamma = 0.10
+    flush_anf (rxa.anf);
 }
 
 void ANF::SetANFTaps (RXA& rxa, int taps)
 {
-    rxa.anf.p->n_taps = taps;
-    flush_anf (rxa.anf.p);
+    rxa.anf->n_taps = taps;
+    flush_anf (rxa.anf);
 }
 
 void ANF::SetANFDelay (RXA& rxa, int delay)
 {
-    rxa.anf.p->delay = delay;
-    flush_anf (rxa.anf.p);
+    rxa.anf->delay = delay;
+    flush_anf (rxa.anf);
 }
 
 void ANF::SetANFGain (RXA& rxa, double gain)
 {
-    rxa.anf.p->two_mu = gain;
-    flush_anf (rxa.anf.p);
+    rxa.anf->two_mu = gain;
+    flush_anf (rxa.anf);
 }
 
 void ANF::SetANFLeakage (RXA& rxa, double leakage)
 {
-    rxa.anf.p->gamma = leakage;
-    flush_anf (rxa.anf.p);
+    rxa.anf->gamma = leakage;
+    flush_anf (rxa.anf);
 }
 
 void ANF::SetANFPosition (RXA& rxa, int position)
 {
-    rxa.anf.p->position = position;
-    rxa.bp1.p->position = position;
-    flush_anf (rxa.anf.p);
+    rxa.anf->position = position;
+    rxa.bp1->position = position;
+    flush_anf (rxa.anf);
 }
 
 } // namespace WDSP

@@ -290,20 +290,20 @@ void FMSQ::setSize_fmsq (FMSQ *a, int size)
 
 void FMSQ::SetFMSQRun (RXA& rxa, int run)
 {
-    rxa.fmsq.p->run = run;
+    rxa.fmsq->run = run;
 }
 
 void FMSQ::SetFMSQThreshold (RXA& rxa, double threshold)
 {
-    rxa.fmsq.p->tail_thresh = threshold;
-    rxa.fmsq.p->unmute_thresh = 0.9 * threshold;
+    rxa.fmsq->tail_thresh = threshold;
+    rxa.fmsq->unmute_thresh = 0.9 * threshold;
 }
 
 void FMSQ::SetFMSQNC (RXA& rxa, int nc)
 {
     FMSQ *a;
     float* impulse;
-    a = rxa.fmsq.p;
+    a = rxa.fmsq;
 
     if (a->nc != nc)
     {
@@ -317,7 +317,7 @@ void FMSQ::SetFMSQNC (RXA& rxa, int nc)
 void FMSQ::SetFMSQMP (RXA& rxa, int mp)
 {
     FMSQ *a;
-    a = rxa.fmsq.p;
+    a = rxa.fmsq;
 
     if (a->mp != mp)
     {

@@ -61,8 +61,18 @@ void BPS::decalc_bps (BPS *a)
     delete[] (a->infilt);
 }
 
-BPS* BPS::create_bps (int run, int position, int size, float* in, float* out,
-    float f_low, float f_high, int samplerate, int wintype, float gain)
+BPS* BPS::create_bps (
+    int run,
+    int position,
+    int size,
+    float* in,
+    float* out,
+    float f_low,
+    float f_high,
+    int samplerate,
+    int wintype,
+    float gain
+)
 {
     BPS *a = new BPS;
     a->run = run;
@@ -150,14 +160,14 @@ void BPS::setFreqs_bps (BPS *a, float f_low, float f_high)
 
 void BPS::SetBPSRun (RXA& rxa, int run)
 {
-    rxa.bp1.p->run = run;
+    rxa.bp1->run = run;
 }
 
 void BPS::SetBPSFreqs (RXA& rxa, float f_low, float f_high)
 {
     float* impulse;
     BPS *a1;
-    a1 = rxa.bps1.p;
+    a1 = rxa.bps1;
 
     if ((f_low != a1->f_low) || (f_high != a1->f_high))
     {
@@ -174,7 +184,7 @@ void BPS::SetBPSWindow (RXA& rxa, int wintype)
 {
     float* impulse;
     BPS *a1;
-    a1 = rxa.bps1.p;
+    a1 = rxa.bps1;
 
     if ((a1->wintype != wintype))
     {

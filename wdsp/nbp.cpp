@@ -414,14 +414,14 @@ void NBP::setMp_nbp (NBP *a)
 
 void NBP::UpdateNBPFiltersLightWeight (RXA& rxa)
 {   // called when setting tune freq or shift freq
-    calc_nbp_lightweight (rxa.nbp0.p);
-    calc_nbp_lightweight (rxa.bpsnba.p->bpsnba);
+    calc_nbp_lightweight (rxa.nbp0);
+    calc_nbp_lightweight (rxa.bpsnba->bpsnba);
 }
 
 void NBP::UpdateNBPFilters(RXA& rxa)
 {
-    NBP *a = rxa.nbp0.p;
-    BPSNBA *b = rxa.bpsnba.p;
+    NBP *a = rxa.nbp0;
+    BPSNBA *b = rxa.bpsnba;
     if (a->fnfrun)
     {
         calc_nbp_impulse (a);
@@ -439,7 +439,7 @@ int NBP::NBPAddNotch (RXA& rxa, int notch, double fcenter, double fwidth, int ac
     NOTCHDB *b;
     int i, j;
     int rval;
-    b = rxa.ndb.p;
+    b = rxa.ndb;
     if (notch <= b->nn && b->nn < b->maxnotches)
     {
         b->nn++;
@@ -468,7 +468,7 @@ int NBP::NBPGetNotch (RXA& rxa, int notch, double* fcenter, double* fwidth, int*
 {
     NOTCHDB *a;
     int rval;
-    a = rxa.ndb.p;
+    a = rxa.ndb;
 
     if (notch < a->nn)
     {
@@ -493,7 +493,7 @@ int NBP::NBPDeleteNotch (RXA& rxa, int notch)
     int i, j;
     int rval;
     NOTCHDB *a;
-    a = rxa.ndb.p;
+    a = rxa.ndb;
     if (notch < a->nn)
     {
         a->nn--;
@@ -517,7 +517,7 @@ int NBP::NBPEditNotch (RXA& rxa, int notch, double fcenter, double fwidth, int a
 {
     NOTCHDB *a;
     int rval;
-    a = rxa.ndb.p;
+    a = rxa.ndb;
     if (notch < a->nn)
     {
         a->fcenter[notch] = fcenter;
@@ -536,14 +536,14 @@ int NBP::NBPEditNotch (RXA& rxa, int notch, double fcenter, double fwidth, int a
 void NBP::NBPGetNumNotches (RXA& rxa, int* nnotches)
 {
     NOTCHDB *a;
-    a = rxa.ndb.p;
+    a = rxa.ndb;
     *nnotches = a->nn;
 }
 
 void NBP::NBPSetTuneFrequency (RXA& rxa, double tunefreq)
 {
     NOTCHDB *a;
-    a = rxa.ndb.p;
+    a = rxa.ndb;
 
     if (tunefreq != a->tunefreq)
     {
@@ -555,7 +555,7 @@ void NBP::NBPSetTuneFrequency (RXA& rxa, double tunefreq)
 void NBP::NBPSetShiftFrequency (RXA& rxa, double shift)
 {
     NOTCHDB *a;
-    a = rxa.ndb.p;
+    a = rxa.ndb;
     if (shift != a->shift)
     {
         a->shift = shift;
@@ -565,8 +565,8 @@ void NBP::NBPSetShiftFrequency (RXA& rxa, double shift)
 
 void NBP::NBPSetNotchesRun (RXA& rxa, int run)
 {
-    NOTCHDB *a = rxa.ndb.p;
-    NBP *b = rxa.nbp0.p;
+    NOTCHDB *a = rxa.ndb;
+    NBP *b = rxa.nbp0;
 
     if ( run != a->master_run)
     {
@@ -586,14 +586,14 @@ void NBP::NBPSetNotchesRun (RXA& rxa, int run)
 void NBP::NBPSetRun (RXA& rxa, int run)
 {
     NBP *a;
-    a = rxa.nbp0.p;
+    a = rxa.nbp0;
     a->run = run;
 }
 
 void NBP::NBPSetFreqs (RXA& rxa, double flow, double fhigh)
 {
     NBP *a;
-    a = rxa.nbp0.p;
+    a = rxa.nbp0;
 
     if ((flow != a->flow) || (fhigh != a->fhigh))
     {
@@ -609,8 +609,8 @@ void NBP::NBPSetWindow (RXA& rxa, int wintype)
 {
     NBP *a;
     BPSNBA *b;
-    a = rxa.nbp0.p;
-    b = rxa.bpsnba.p;
+    a = rxa.nbp0;
+    b = rxa.bpsnba;
 
     if ((a->wintype != wintype))
     {
@@ -631,7 +631,7 @@ void NBP::NBPSetNC (RXA& rxa, int nc)
 {
     // NOTE:  'nc' must be >= 'size'
     NBP *a;
-    a = rxa.nbp0.p;
+    a = rxa.nbp0;
 
     if (a->nc != nc)
     {
@@ -643,7 +643,7 @@ void NBP::NBPSetNC (RXA& rxa, int nc)
 void NBP::NBPSetMP (RXA& rxa, int mp)
 {
     NBP *a;
-    a = rxa.nbp0.p;
+    a = rxa.nbp0;
 
     if (a->mp != mp)
     {
@@ -655,7 +655,7 @@ void NBP::NBPSetMP (RXA& rxa, int mp)
 void NBP::NBPGetMinNotchWidth (RXA& rxa, double* minwidth)
 {
     NBP *a;
-    a = rxa.nbp0.p;
+    a = rxa.nbp0;
     *minwidth = min_notch_width (a);
 }
 
@@ -663,8 +663,8 @@ void NBP::NBPSetAutoIncrease (RXA& rxa, int autoincr)
 {
     NBP *a;
     BPSNBA *b;
-    a = rxa.nbp0.p;
-    b = rxa.bpsnba.p;
+    a = rxa.nbp0;
+    b = rxa.bpsnba;
 
     if ((a->autoincr != autoincr))
     {

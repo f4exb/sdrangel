@@ -139,23 +139,23 @@ void PANEL::setSize_panel (PANEL *a, int size)
 
 void PANEL::SetPanelRun (RXA& rxa, int run)
 {
-    rxa.panel.p->run = run;
+    rxa.panel->run = run;
 }
 
 void PANEL::SetPanelSelect (RXA& rxa, int select)
 {
-    rxa.panel.p->inselect = select;
+    rxa.panel->inselect = select;
 }
 
 void PANEL::SetPanelGain1 (RXA& rxa, double gain)
 {
-    rxa.panel.p->gain1 = gain;
+    rxa.panel->gain1 = gain;
 }
 
 void PANEL::SetPanelGain2 (RXA& rxa, double gainI, double gainQ)
 {
-    rxa.panel.p->gain2I = gainI;
-    rxa.panel.p->gain2Q = gainQ;
+    rxa.panel->gain2I = gainI;
+    rxa.panel->gain2Q = gainQ;
 }
 
 void PANEL::SetPanelPan (RXA& rxa, double pan)
@@ -173,18 +173,18 @@ void PANEL::SetPanelPan (RXA& rxa, double pan)
         gain2 = 1.0;
     }
 
-    rxa.panel.p->gain2I = gain1;
-    rxa.panel.p->gain2Q = gain2;
+    rxa.panel->gain2I = gain1;
+    rxa.panel->gain2Q = gain2;
 }
 
 void PANEL::SetPanelCopy (RXA& rxa, int copy)
 {
-    rxa.panel.p->copy = copy;
+    rxa.panel->copy = copy;
 }
 
 void PANEL::SetPanelBinaural (RXA& rxa, int bin)
 {
-    rxa.panel.p->copy = 1 - bin;
+    rxa.panel->copy = 1 - bin;
 }
 
 /********************************************************************************************************

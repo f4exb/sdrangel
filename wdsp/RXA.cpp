@@ -89,7 +89,7 @@ RXA* RXA::create_rxa (
     std::fill(rxa->meter, rxa->meter + RXA_METERTYPE_LAST, 0);
 
     // Noise blanker (ANB or "NB")
-    rxa->anb.p = ANB::create_anb(
+    rxa->anb = ANB::create_anb(
         0, // run
         rxa->dsp_insize,                        // input buffer size
         rxa->inbuff,                            // pointer to input buffer
@@ -102,7 +102,7 @@ RXA* RXA::create_rxa (
         30                                      // thershold
     );
     // Noise blanker (NOB or "NB2")
-    rxa->nob.p = NOB::create_nob(
+    rxa->nob = NOB::create_nob(
         0, // run
         rxa->dsp_insize,                        // input buffer size
         rxa->inbuff,                            // pointer to input buffer
@@ -119,7 +119,7 @@ RXA* RXA::create_rxa (
     );
 
     // Ftequency shifter - shift to select a slice of spectrum
-    rxa->shift.p = SHIFT::create_shift (
+    rxa->shift = SHIFT::create_shift (
         0,                                      // run
         rxa->dsp_insize,                        // input buffer size
         rxa->inbuff,                            // pointer to input buffer
@@ -128,7 +128,7 @@ RXA* RXA::create_rxa (
         0.0);                                   // amount to shift (Hz)
 
     // Input resampler - resample to dsp rate for main processing
-    rxa->rsmpin.p = RESAMPLE::create_resample (
+    rxa->rsmpin = RESAMPLE::create_resample (
         0,                                      // run - will be turned ON below if needed
         rxa->dsp_insize,                        // input buffer size
         rxa->inbuff,                            // pointer to input buffer
@@ -140,7 +140,7 @@ RXA* RXA::create_rxa (
         1.0);                                   // gain
 
     // Signal generator
-    rxa->gen0.p = GEN::create_gen (
+    rxa->gen0 = GEN::create_gen (
         0,                                      // run
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // input buffer
@@ -149,7 +149,7 @@ RXA* RXA::create_rxa (
         2);                                     // mode
 
     // Input meter - ADC
-    rxa->adcmeter.p = METER::create_meter (
+    rxa->adcmeter = METER::create_meter (
         0,                                      // run
         0,                                      // optional pointer to another 'run'
         rxa->dsp_size,                          // size
@@ -166,12 +166,12 @@ RXA* RXA::create_rxa (
     // Notched bandpass section
 
     // notch database
-    rxa->ndb.p = NOTCHDB::create_notchdb (
+    rxa->ndb = NOTCHDB::create_notchdb (
         0,                                      // master run for all nbp's
         1024);                                  // max number of notches
 
     // notched bandpass
-    rxa->nbp0.p = NBP::create_nbp (
+    rxa->nbp0 = NBP::create_nbp (
         1,                                      // run, always runs
         0,                                      // run the notches
         0,                                      // position
@@ -187,10 +187,10 @@ RXA* RXA::create_rxa (
         1.0,                                    // gain
         1,                                      // auto-increase notch width
         1025,                                   // max number of passbands
-        rxa->ndb.p);                            // addr of database pointer
+        rxa->ndb);                              // addr of database pointer
 
     // bandpass for snba
-    rxa->bpsnba.p = BPSNBA::create_bpsnba (
+    rxa->bpsnba = BPSNBA::create_bpsnba (
         0,                                      // bpsnba run flag
         0,                                      // run the notches
         0,                                      // position
@@ -208,10 +208,10 @@ RXA* RXA::create_rxa (
         1.0,                                    // gain
         1,                                      // auto-increase notch width
         1025,                                   // max number of passbands
-        rxa->ndb.p);                            // addr of database pointer
+        rxa->ndb);                              // addr of database pointer
 
     // Post filter display send - send spectrum display (after S-meter in the block diagram)
-    rxa->sender.p = SENDER::create_sender (
+    rxa->sender = SENDER::create_sender (
         0,                                      // run
         0,                                      // flag
         0,                                      // mode
@@ -222,7 +222,7 @@ RXA* RXA::create_rxa (
     // End notched bandpass section
 
     // S-meter
-    rxa->smeter.p = METER::create_meter (
+    rxa->smeter = METER::create_meter (
         1,                                      // run
         0,                                      // optional pointer to another 'run'
         rxa->dsp_size,                          // size
@@ -237,7 +237,7 @@ RXA* RXA::create_rxa (
         0);                                     // pointer for gain computation
 
     // AM squelch capture (for other modes than FM)
-    rxa->amsq.p = AMSQ::create_amsq (
+    rxa->amsq = AMSQ::create_amsq (
         0,                                      // run
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to signal input buffer used by xamsq
@@ -254,7 +254,7 @@ RXA* RXA::create_rxa (
         0.0);                                   // muted gain
 
     // AM/SAM demodulator
-    rxa->amd.p = AMD::create_amd (
+    rxa->amd = AMD::create_amd (
         0,                                      // run - OFF by default
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
@@ -271,7 +271,7 @@ RXA* RXA::create_rxa (
         1.4);                                   // tauI
 
     // FM demodulator
-    rxa->fmd.p = FMD::create_fmd (
+    rxa->fmd = FMD::create_fmd (
         0,                                      // run
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
@@ -294,15 +294,15 @@ RXA* RXA::create_rxa (
         0);                                     // min phase flag for audio cutoff filter
 
     // FM squelch apply
-    rxa->fmsq.p = FMSQ::create_fmsq (
+    rxa->fmsq = FMSQ::create_fmsq (
         0,                                      // run
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input signal buffer
         rxa->midbuff,                           // pointer to output signal buffer
-        rxa->fmd.p->audio,                      // pointer to trigger buffer
+        rxa->fmd->audio,                        // pointer to trigger buffer
         rxa->dsp_rate,                          // sample rate
         5000.0,                                 // cutoff freq for noise filter (Hz)
-        &rxa->fmd.p->pllpole,                   // pointer to pole frequency of the fmd pll (Hz)
+        &rxa->fmd->pllpole,                     // pointer to pole frequency of the fmd pll (Hz)
         0.100,                                  // delay time after channel flush
         0.001,                                  // tau for noise averaging
         0.100,                                  // tau for long noise averaging
@@ -316,7 +316,7 @@ RXA* RXA::create_rxa (
         0);                                     // minimum phase flag
 
     // Spectral noise blanker (SNB)
-    rxa->snba.p = SNBA::create_snba (
+    rxa->snba = SNBA::create_snba (
         0,                                      // run
         rxa->midbuff,                           // input buffer
         rxa->midbuff,                           // output buffer
@@ -341,7 +341,7 @@ RXA* RXA::create_rxa (
         float default_F[11] = {0.0,  32.0,  63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0};
         //float default_G[11] = {0.0, -12.0, -12.0, -12.0,  -1.0,  +1.0,   +4.0,   +9.0,  +12.0,  -10.0,   -10.0};
         float default_G[11] =   {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0};
-        rxa->eqp.p = EQP::create_eqp (
+        rxa->eqp = EQP::create_eqp (
             0,                                  // run - OFF by default
             rxa->dsp_size,                      // buffer size
             std::max(2048, rxa->dsp_size),      // number of filter coefficients
@@ -357,7 +357,7 @@ RXA* RXA::create_rxa (
     }
 
     // Auto notch filter
-    rxa->anf.p = ANF::create_anf (
+    rxa->anf = ANF::create_anf (
         0,                                      // run - OFF by default
         0,                                      // position
         rxa->dsp_size,                          // buffer size
@@ -377,7 +377,7 @@ RXA* RXA::create_rxa (
         3.0);                                   // ldecr
 
     // LMS noise reduction (ANR or "NR")
-    rxa->anr.p = ANR::create_anr (
+    rxa->anr = ANR::create_anr (
         0,                                      // run - OFF by default
         0,                                      // position
         rxa->dsp_size,                          // buffer size
@@ -397,7 +397,7 @@ RXA* RXA::create_rxa (
         3.0);                                   // ldecr
 
     // Spectral noise reduyction (EMNR or "NR2")
-    rxa->emnr.p = EMNR::create_emnr (
+    rxa->emnr = EMNR::create_emnr (
         0,                                      // run
         0,                                      // position
         rxa->dsp_size,                          // buffer size
@@ -413,7 +413,7 @@ RXA* RXA::create_rxa (
         1);                                     // ae_run
 
     // AGC
-    rxa->agc.p = WCPAGC::create_wcpagc (
+    rxa->agc = WCPAGC::create_wcpagc (
         1,                                      // run
         3,                                      // mode
         1,                                      // peakmode = envelope
@@ -439,7 +439,7 @@ RXA* RXA::create_rxa (
         0.100);                                 // tau_hang_decay
 
     // AGC meter
-    rxa->agcmeter.p = METER::create_meter (
+    rxa->agcmeter = METER::create_meter (
         0,                                      // run
         0,                                      // optional pointer to another 'run'
         rxa->dsp_size,                          // size
@@ -451,10 +451,10 @@ RXA* RXA::create_rxa (
         RXA_AGC_AV,                             // index for average value
         RXA_AGC_PK,                             // index for peak value
         RXA_AGC_GAIN,                           // index for gain value
-        &rxa->agc.p->gain);                     // pointer for gain computation
+        &rxa->agc->gain);                       // pointer for gain computation
 
     // Bandpass filter - After spectral noise reduction in the block diagram
-    rxa->bp1.p = BANDPASS::create_bandpass (
+    rxa->bp1 = BANDPASS::create_bandpass (
         1,                                      // run - used only with ( AM || ANF || ANR || EMNR)
         0,                                      // position
         rxa->dsp_size,                          // buffer size
@@ -469,7 +469,7 @@ RXA* RXA::create_rxa (
         1.0);                                   // gain
 
     // Scope/phase display send - pull phase & scope display data
-    rxa->sip1.p = SIPHON::create_siphon (
+    rxa->sip1 = SIPHON::create_siphon (
         0,                                      // run - needed only for phase display
         0,                                      // position
         0,                                      // mode
@@ -481,7 +481,7 @@ RXA* RXA::create_rxa (
         0);                                     // specmode
 
     // AM carrier block
-    rxa->cbl.p = CBL::create_cbl (
+    rxa->cbl = CBL::create_cbl (
         0,                                      // run - needed only if set to ON
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
@@ -491,7 +491,7 @@ RXA* RXA::create_rxa (
         0.02);                                  // tau
 
     // CW peaking filter
-    rxa->speak.p = SPEAK::create_speak (
+    rxa->speak = SPEAK::create_speak (
         0,                                      // run
         rxa->dsp_size,                          // buffer size,
         rxa->midbuff,                           // pointer to input buffer
@@ -509,7 +509,7 @@ RXA* RXA::create_rxa (
         double def_freq[2] = {2125.0, 2295.0};
         double def_bw[2] = {75.0, 75.0};
         double def_gain[2] = {1.0, 1.0};
-        rxa->mpeak.p = MPEAK::create_mpeak (
+        rxa->mpeak = MPEAK::create_mpeak (
             0,                                  // run
             rxa->dsp_size,                      // size
             rxa->midbuff,                       // pointer to input buffer
@@ -524,7 +524,7 @@ RXA* RXA::create_rxa (
     }
 
     // Syllabic squelch (Voice suelch) - Not in the block diagram
-    rxa->ssql.p = SSQL::create_ssql(
+    rxa->ssql = SSQL::create_ssql(
         0,                                      // run
         rxa->dsp_size,                          // size
         rxa->midbuff,                           // pointer to input buffer
@@ -541,7 +541,7 @@ RXA* RXA::create_rxa (
         2000.0);                                // max freq for f_to_v converter
 
     // PatchPanel
-    rxa->panel.p = PANEL::create_panel (
+    rxa->panel = PANEL::create_panel (
         1,                                      // run
         rxa->dsp_size,                          // size
         rxa->midbuff,                           // pointer to input buffer
@@ -555,7 +555,7 @@ RXA* RXA::create_rxa (
     // AM squelch apply - absent but in the block diagram
 
     // Output resampler
-    rxa->rsmpout.p = RESAMPLE::create_resample (
+    rxa->rsmpout = RESAMPLE::create_resample (
         0,                                      // run - will be turned ON below if needed
         rxa->dsp_size,                          // input buffer size
         rxa->midbuff,                           // pointer to input buffer
@@ -573,36 +573,36 @@ RXA* RXA::create_rxa (
 
 void RXA::destroy_rxa (RXA *rxa)
 {
-    RESAMPLE::destroy_resample (rxa->rsmpout.p);
-    PANEL::destroy_panel (rxa->panel.p);
-    SSQL::destroy_ssql (rxa->ssql.p);
-    MPEAK::destroy_mpeak (rxa->mpeak.p);
-    SPEAK::destroy_speak (rxa->speak.p);
-    CBL::destroy_cbl (rxa->cbl.p);
-    SIPHON::destroy_siphon (rxa->sip1.p);
-    BANDPASS::destroy_bandpass (rxa->bp1.p);
-    METER::destroy_meter (rxa->agcmeter.p);
-    WCPAGC::destroy_wcpagc (rxa->agc.p);
-    EMNR::destroy_emnr (rxa->emnr.p);
-    ANR::destroy_anr (rxa->anr.p);
-    ANF::destroy_anf (rxa->anf.p);
-    EQP::destroy_eqp (rxa->eqp.p);
-    SNBA::destroy_snba (rxa->snba.p);
-    FMSQ::destroy_fmsq (rxa->fmsq.p);
-    FMD::destroy_fmd (rxa->fmd.p);
-    AMD::destroy_amd (rxa->amd.p);
-    AMSQ::destroy_amsq (rxa->amsq.p);
-    METER::destroy_meter (rxa->smeter.p);
-    SENDER::destroy_sender (rxa->sender.p);
-    BPSNBA::destroy_bpsnba (rxa->bpsnba.p);
-    NBP::destroy_nbp (rxa->nbp0.p);
-    NOTCHDB::destroy_notchdb (rxa->ndb.p);
-    METER::destroy_meter (rxa->adcmeter.p);
-    GEN::destroy_gen (rxa->gen0.p);
-    RESAMPLE::destroy_resample (rxa->rsmpin.p);
-    SHIFT::destroy_shift (rxa->shift.p);
-    ANB::destroy_anb(rxa->anb.p);
-    NOB::destroy_nob(rxa->nob.p);
+    RESAMPLE::destroy_resample (rxa->rsmpout);
+    PANEL::destroy_panel (rxa->panel);
+    SSQL::destroy_ssql (rxa->ssql);
+    MPEAK::destroy_mpeak (rxa->mpeak);
+    SPEAK::destroy_speak (rxa->speak);
+    CBL::destroy_cbl (rxa->cbl);
+    SIPHON::destroy_siphon (rxa->sip1);
+    BANDPASS::destroy_bandpass (rxa->bp1);
+    METER::destroy_meter (rxa->agcmeter);
+    WCPAGC::destroy_wcpagc (rxa->agc);
+    EMNR::destroy_emnr (rxa->emnr);
+    ANR::destroy_anr (rxa->anr);
+    ANF::destroy_anf (rxa->anf);
+    EQP::destroy_eqp (rxa->eqp);
+    SNBA::destroy_snba (rxa->snba);
+    FMSQ::destroy_fmsq (rxa->fmsq);
+    FMD::destroy_fmd (rxa->fmd);
+    AMD::destroy_amd (rxa->amd);
+    AMSQ::destroy_amsq (rxa->amsq);
+    METER::destroy_meter (rxa->smeter);
+    SENDER::destroy_sender (rxa->sender);
+    BPSNBA::destroy_bpsnba (rxa->bpsnba);
+    NBP::destroy_nbp (rxa->nbp0);
+    NOTCHDB::destroy_notchdb (rxa->ndb);
+    METER::destroy_meter (rxa->adcmeter);
+    GEN::destroy_gen (rxa->gen0);
+    RESAMPLE::destroy_resample (rxa->rsmpin);
+    SHIFT::destroy_shift (rxa->shift);
+    NOB::destroy_nob(rxa->nob);
+    ANB::destroy_anb(rxa->anb);
     delete[] (rxa->midbuff);
     delete[] (rxa->outbuff);
     delete[] (rxa->inbuff);
@@ -614,76 +614,76 @@ void RXA::flush_rxa (RXA *rxa)
     std::fill(rxa->inbuff,  rxa->inbuff  + 1 * rxa->dsp_insize  * 2, 0);
     std::fill(rxa->outbuff, rxa->outbuff + 1 * rxa->dsp_outsize * 2, 0);
     std::fill(rxa->midbuff, rxa->midbuff + 2 * rxa->dsp_size    * 2, 0);
-    SHIFT::flush_shift (rxa->shift.p);
-    RESAMPLE::flush_resample (rxa->rsmpin.p);
-    GEN::flush_gen (rxa->gen0.p);
-    METER::flush_meter (rxa->adcmeter.p);
-    NBP::flush_nbp (rxa->nbp0.p);
-    BPSNBA::flush_bpsnba (rxa->bpsnba.p);
-    SENDER::flush_sender (rxa->sender.p);
-    METER::flush_meter (rxa->smeter.p);
-    AMSQ::flush_amsq (rxa->amsq.p);
-    AMD::flush_amd (rxa->amd.p);
-    FMD::flush_fmd (rxa->fmd.p);
-    FMSQ::flush_fmsq (rxa->fmsq.p);
-    SNBA::flush_snba (rxa->snba.p);
-    EQP::flush_eqp (rxa->eqp.p);
-    ANF::flush_anf (rxa->anf.p);
-    ANR::flush_anr (rxa->anr.p);
-    EMNR::flush_emnr (rxa->emnr.p);
-    WCPAGC::flush_wcpagc (rxa->agc.p);
-    METER::flush_meter (rxa->agcmeter.p);
-    BANDPASS::flush_bandpass (rxa->bp1.p);
-    SIPHON::flush_siphon (rxa->sip1.p);
-    CBL::flush_cbl (rxa->cbl.p);
-    SPEAK::flush_speak (rxa->speak.p);
-    MPEAK::flush_mpeak (rxa->mpeak.p);
-    SSQL::flush_ssql (rxa->ssql.p);
-    PANEL::flush_panel (rxa->panel.p);
-    RESAMPLE::flush_resample (rxa->rsmpout.p);
-    ANB::flush_anb (rxa->anb.p);
-    NOB::flush_nob(rxa->nob.p);
+    ANB::flush_anb (rxa->anb);
+    NOB::flush_nob(rxa->nob);
+    SHIFT::flush_shift (rxa->shift);
+    RESAMPLE::flush_resample (rxa->rsmpin);
+    GEN::flush_gen (rxa->gen0);
+    METER::flush_meter (rxa->adcmeter);
+    NBP::flush_nbp (rxa->nbp0);
+    BPSNBA::flush_bpsnba (rxa->bpsnba);
+    SENDER::flush_sender (rxa->sender);
+    METER::flush_meter (rxa->smeter);
+    AMSQ::flush_amsq (rxa->amsq);
+    AMD::flush_amd (rxa->amd);
+    FMD::flush_fmd (rxa->fmd);
+    FMSQ::flush_fmsq (rxa->fmsq);
+    SNBA::flush_snba (rxa->snba);
+    EQP::flush_eqp (rxa->eqp);
+    ANF::flush_anf (rxa->anf);
+    ANR::flush_anr (rxa->anr);
+    EMNR::flush_emnr (rxa->emnr);
+    WCPAGC::flush_wcpagc (rxa->agc);
+    METER::flush_meter (rxa->agcmeter);
+    BANDPASS::flush_bandpass (rxa->bp1);
+    SIPHON::flush_siphon (rxa->sip1);
+    CBL::flush_cbl (rxa->cbl);
+    SPEAK::flush_speak (rxa->speak);
+    MPEAK::flush_mpeak (rxa->mpeak);
+    SSQL::flush_ssql (rxa->ssql);
+    PANEL::flush_panel (rxa->panel);
+    RESAMPLE::flush_resample (rxa->rsmpout);
 }
 
 void RXA::xrxa (RXA *rxa)
 {
-    ANB::xanb (rxa->anb.p);
-    NOB::xnob (rxa->nob.p);
-    SHIFT::xshift (rxa->shift.p);
-    RESAMPLE::xresample (rxa->rsmpin.p);
-    GEN::xgen (rxa->gen0.p);
-    METER::xmeter (rxa->adcmeter.p);
-    BPSNBA::xbpsnbain (rxa->bpsnba.p, 0);
-    NBP::xnbp (rxa->nbp0.p, 0);
-    METER::xmeter (rxa->smeter.p);
-    SENDER::xsender (rxa->sender.p);
-    AMSQ::xamsqcap (rxa->amsq.p);
-    BPSNBA::xbpsnbaout (rxa->bpsnba.p, 0);
-    AMD::xamd (rxa->amd.p);
-    FMD::xfmd (rxa->fmd.p);
-    FMSQ::xfmsq (rxa->fmsq.p);
-    BPSNBA::xbpsnbain (rxa->bpsnba.p, 1);
-    BPSNBA::xbpsnbaout (rxa->bpsnba.p, 1);
-    SNBA::xsnba (rxa->snba.p);
-    EQP::xeqp (rxa->eqp.p);
-    ANF::xanf (rxa->anf.p, 0);
-    ANR::xanr (rxa->anr.p, 0);
-    EMNR::xemnr (rxa->emnr.p, 0);
-    BANDPASS::xbandpass (rxa->bp1.p, 0);
-    WCPAGC::xwcpagc (rxa->agc.p);
-    ANF::xanf (rxa->anf.p, 1);
-    ANR::xanr (rxa->anr.p, 1);
-    EMNR::xemnr (rxa->emnr.p, 1);
-    BANDPASS::xbandpass (rxa->bp1.p, 1);
-    METER::xmeter (rxa->agcmeter.p);
-    SIPHON::xsiphon (rxa->sip1.p, 0);
-    CBL::xcbl (rxa->cbl.p);
-    SPEAK::xspeak (rxa->speak.p);
-    MPEAK::xmpeak (rxa->mpeak.p);
-    SSQL::xssql (rxa->ssql.p);
-    PANEL::xpanel (rxa->panel.p);
-    AMSQ::xamsq (rxa->amsq.p);
-    RESAMPLE::xresample (rxa->rsmpout.p);
+    ANB::xanb (rxa->anb);
+    NOB::xnob (rxa->nob);
+    SHIFT::xshift (rxa->shift);
+    RESAMPLE::xresample (rxa->rsmpin);
+    GEN::xgen (rxa->gen0);
+    METER::xmeter (rxa->adcmeter);
+    BPSNBA::xbpsnbain (rxa->bpsnba, 0);
+    NBP::xnbp (rxa->nbp0, 0);
+    METER::xmeter (rxa->smeter);
+    SENDER::xsender (rxa->sender);
+    AMSQ::xamsqcap (rxa->amsq);
+    BPSNBA::xbpsnbaout (rxa->bpsnba, 0);
+    AMD::xamd (rxa->amd);
+    FMD::xfmd (rxa->fmd);
+    FMSQ::xfmsq (rxa->fmsq);
+    BPSNBA::xbpsnbain (rxa->bpsnba, 1);
+    BPSNBA::xbpsnbaout (rxa->bpsnba, 1);
+    SNBA::xsnba (rxa->snba);
+    EQP::xeqp (rxa->eqp);
+    ANF::xanf (rxa->anf, 0);
+    ANR::xanr (rxa->anr, 0);
+    EMNR::xemnr (rxa->emnr, 0);
+    BANDPASS::xbandpass (rxa->bp1, 0);
+    WCPAGC::xwcpagc (rxa->agc);
+    ANF::xanf (rxa->anf, 1);
+    ANR::xanr (rxa->anr, 1);
+    EMNR::xemnr (rxa->emnr, 1);
+    BANDPASS::xbandpass (rxa->bp1, 1);
+    METER::xmeter (rxa->agcmeter);
+    SIPHON::xsiphon (rxa->sip1, 0);
+    CBL::xcbl (rxa->cbl);
+    SPEAK::xspeak (rxa->speak);
+    MPEAK::xmpeak (rxa->mpeak);
+    SSQL::xssql (rxa->ssql);
+    PANEL::xpanel (rxa->panel);
+    AMSQ::xamsq (rxa->amsq);
+    RESAMPLE::xresample (rxa->rsmpout);
 }
 
 void RXA::setInputSamplerate (RXA *rxa, int in_rate)
@@ -698,21 +698,21 @@ void RXA::setInputSamplerate (RXA *rxa, int in_rate)
     delete[] (rxa->inbuff);
     rxa->inbuff = new float[1 * rxa->dsp_insize  * 2]; // (float *)malloc0(1 * ch.dsp_insize  * sizeof(complex));
     // anb
-    ANB::setBuffers_anb(rxa->anb.p, rxa->inbuff, rxa->inbuff);
-    ANB::setSize_anb(rxa->anb.p, rxa->dsp_insize);
-    ANB::setSamplerate_anb(rxa->anb.p, rxa->in_rate);
+    ANB::setBuffers_anb(rxa->anb, rxa->inbuff, rxa->inbuff);
+    ANB::setSize_anb(rxa->anb, rxa->dsp_insize);
+    ANB::setSamplerate_anb(rxa->anb, rxa->in_rate);
     // nob
-    NOB::setBuffers_nob(rxa->nob.p, rxa->inbuff, rxa->inbuff);
-    NOB::setSize_nob(rxa->nob.p, rxa->dsp_insize);
-    NOB::setSamplerate_nob(rxa->nob.p, rxa->in_rate);
+    NOB::setBuffers_nob(rxa->nob, rxa->inbuff, rxa->inbuff);
+    NOB::setSize_nob(rxa->nob, rxa->dsp_insize);
+    NOB::setSamplerate_nob(rxa->nob, rxa->in_rate);
     // shift
-    SHIFT::setBuffers_shift (rxa->shift.p, rxa->inbuff, rxa->inbuff);
-    SHIFT::setSize_shift (rxa->shift.p, rxa->dsp_insize);
-    SHIFT::setSamplerate_shift (rxa->shift.p, rxa->in_rate);
+    SHIFT::setBuffers_shift (rxa->shift, rxa->inbuff, rxa->inbuff);
+    SHIFT::setSize_shift (rxa->shift, rxa->dsp_insize);
+    SHIFT::setSamplerate_shift (rxa->shift, rxa->in_rate);
     // input resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpin.p, rxa->inbuff, rxa->midbuff);
-    RESAMPLE::setSize_resample (rxa->rsmpin.p, rxa->dsp_insize);
-    RESAMPLE::setInRate_resample (rxa->rsmpin.p, rxa->in_rate);
+    RESAMPLE::setBuffers_resample (rxa->rsmpin, rxa->inbuff, rxa->midbuff);
+    RESAMPLE::setSize_resample (rxa->rsmpin, rxa->dsp_insize);
+    RESAMPLE::setInRate_resample (rxa->rsmpin, rxa->in_rate);
     ResCheck (*rxa);
 }
 
@@ -728,8 +728,8 @@ void RXA::setOutputSamplerate (RXA *rxa, int out_rate)
     delete[] (rxa->outbuff);
     rxa->outbuff = new float[1 * rxa->dsp_outsize * 2]; // (float *)malloc0(1 * ch.dsp_outsize * sizeof(complex));
     // output resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpout.p, rxa->midbuff, rxa->outbuff);
-    RESAMPLE::setOutRate_resample (rxa->rsmpout.p, rxa->out_rate);
+    RESAMPLE::setBuffers_resample (rxa->rsmpout, rxa->midbuff, rxa->outbuff);
+    RESAMPLE::setOutRate_resample (rxa->rsmpout, rxa->out_rate);
     ResCheck (*rxa);
 }
 
@@ -752,47 +752,47 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     delete[] (rxa->outbuff);
     rxa->outbuff = new float[1 * rxa->dsp_outsize * 2]; // (float *)malloc0(1 * rxa->dsp_outsize * sizeof(complex));
     // anb
-    ANB::setBuffers_anb (rxa->anb.p, rxa->inbuff, rxa->inbuff);
-    ANB::setSize_anb(rxa->anb.p, rxa->dsp_insize);
+    ANB::setBuffers_anb (rxa->anb, rxa->inbuff, rxa->inbuff);
+    ANB::setSize_anb(rxa->anb, rxa->dsp_insize);
     // nob
-    NOB::setBuffers_nob(rxa->nob.p, rxa->inbuff, rxa->inbuff);
-    NOB::setSize_nob(rxa->nob.p, rxa->dsp_insize);
+    NOB::setBuffers_nob(rxa->nob, rxa->inbuff, rxa->inbuff);
+    NOB::setSize_nob(rxa->nob, rxa->dsp_insize);
     // shift
-    SHIFT::setBuffers_shift (rxa->shift.p, rxa->inbuff, rxa->inbuff);
-    SHIFT::setSize_shift (rxa->shift.p, rxa->dsp_insize);
+    SHIFT::setBuffers_shift (rxa->shift, rxa->inbuff, rxa->inbuff);
+    SHIFT::setSize_shift (rxa->shift, rxa->dsp_insize);
     // input resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpin.p, rxa->inbuff, rxa->midbuff);
-    RESAMPLE::setSize_resample (rxa->rsmpin.p, rxa->dsp_insize);
-    RESAMPLE::setOutRate_resample (rxa->rsmpin.p, rxa->dsp_rate);
+    RESAMPLE::setBuffers_resample (rxa->rsmpin, rxa->inbuff, rxa->midbuff);
+    RESAMPLE::setSize_resample (rxa->rsmpin, rxa->dsp_insize);
+    RESAMPLE::setOutRate_resample (rxa->rsmpin, rxa->dsp_rate);
     // dsp_rate blocks
-    GEN::setSamplerate_gen (rxa->gen0.p, rxa->dsp_rate);
-    METER::setSamplerate_meter (rxa->adcmeter.p, rxa->dsp_rate);
-    NBP::setSamplerate_nbp (rxa->nbp0.p, rxa->dsp_rate);
-    BPSNBA::setSamplerate_bpsnba (rxa->bpsnba.p, rxa->dsp_rate);
-    METER::setSamplerate_meter (rxa->smeter.p, rxa->dsp_rate);
-    SENDER::setSamplerate_sender (rxa->sender.p, rxa->dsp_rate);
-    AMSQ::setSamplerate_amsq (rxa->amsq.p, rxa->dsp_rate);
-    AMD::setSamplerate_amd (rxa->amd.p, rxa->dsp_rate);
-    FMD::setSamplerate_fmd (rxa->fmd.p, rxa->dsp_rate);
-    FMSQ::setBuffers_fmsq (rxa->fmsq.p, rxa->midbuff, rxa->midbuff, rxa->fmd.p->audio);
-    FMSQ::setSamplerate_fmsq (rxa->fmsq.p, rxa->dsp_rate);
-    SNBA::setSamplerate_snba (rxa->snba.p, rxa->dsp_rate);
-    EQP::setSamplerate_eqp (rxa->eqp.p, rxa->dsp_rate);
-    ANF::setSamplerate_anf (rxa->anf.p, rxa->dsp_rate);
-    ANR::setSamplerate_anr (rxa->anr.p, rxa->dsp_rate);
-    EMNR::setSamplerate_emnr (rxa->emnr.p, rxa->dsp_rate);
-    BANDPASS::setSamplerate_bandpass (rxa->bp1.p, rxa->dsp_rate);
-    WCPAGC::setSamplerate_wcpagc (rxa->agc.p, rxa->dsp_rate);
-    METER::setSamplerate_meter (rxa->agcmeter.p, rxa->dsp_rate);
-    SIPHON::setSamplerate_siphon (rxa->sip1.p, rxa->dsp_rate);
-    CBL::setSamplerate_cbl (rxa->cbl.p, rxa->dsp_rate);
-    SPEAK::setSamplerate_speak (rxa->speak.p, rxa->dsp_rate);
-    MPEAK::setSamplerate_mpeak (rxa->mpeak.p, rxa->dsp_rate);
-    SSQL::setSamplerate_ssql (rxa->ssql.p, rxa->dsp_rate);
-    PANEL::setSamplerate_panel (rxa->panel.p, rxa->dsp_rate);
+    GEN::setSamplerate_gen (rxa->gen0, rxa->dsp_rate);
+    METER::setSamplerate_meter (rxa->adcmeter, rxa->dsp_rate);
+    NBP::setSamplerate_nbp (rxa->nbp0, rxa->dsp_rate);
+    BPSNBA::setSamplerate_bpsnba (rxa->bpsnba, rxa->dsp_rate);
+    METER::setSamplerate_meter (rxa->smeter, rxa->dsp_rate);
+    SENDER::setSamplerate_sender (rxa->sender, rxa->dsp_rate);
+    AMSQ::setSamplerate_amsq (rxa->amsq, rxa->dsp_rate);
+    AMD::setSamplerate_amd (rxa->amd, rxa->dsp_rate);
+    FMD::setSamplerate_fmd (rxa->fmd, rxa->dsp_rate);
+    FMSQ::setBuffers_fmsq (rxa->fmsq, rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
+    FMSQ::setSamplerate_fmsq (rxa->fmsq, rxa->dsp_rate);
+    SNBA::setSamplerate_snba (rxa->snba, rxa->dsp_rate);
+    EQP::setSamplerate_eqp (rxa->eqp, rxa->dsp_rate);
+    ANF::setSamplerate_anf (rxa->anf, rxa->dsp_rate);
+    ANR::setSamplerate_anr (rxa->anr, rxa->dsp_rate);
+    EMNR::setSamplerate_emnr (rxa->emnr, rxa->dsp_rate);
+    BANDPASS::setSamplerate_bandpass (rxa->bp1, rxa->dsp_rate);
+    WCPAGC::setSamplerate_wcpagc (rxa->agc, rxa->dsp_rate);
+    METER::setSamplerate_meter (rxa->agcmeter, rxa->dsp_rate);
+    SIPHON::setSamplerate_siphon (rxa->sip1, rxa->dsp_rate);
+    CBL::setSamplerate_cbl (rxa->cbl, rxa->dsp_rate);
+    SPEAK::setSamplerate_speak (rxa->speak, rxa->dsp_rate);
+    MPEAK::setSamplerate_mpeak (rxa->mpeak, rxa->dsp_rate);
+    SSQL::setSamplerate_ssql (rxa->ssql, rxa->dsp_rate);
+    PANEL::setSamplerate_panel (rxa->panel, rxa->dsp_rate);
     // output resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpout.p, rxa->midbuff, rxa->outbuff);
-    RESAMPLE::setInRate_resample (rxa->rsmpout.p, rxa->dsp_rate);
+    RESAMPLE::setBuffers_resample (rxa->rsmpout, rxa->midbuff, rxa->outbuff);
+    RESAMPLE::setInRate_resample (rxa->rsmpout, rxa->dsp_rate);
     ResCheck (*rxa);
 }
 
@@ -817,75 +817,75 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     delete[] (rxa->outbuff);
     rxa->outbuff = new float[1 * rxa->dsp_outsize * 2]; // (float *)malloc0(1 * rxa->dsp_outsize * sizeof(complex));
     // anb
-    ANB::setBuffers_anb (rxa->anb.p, rxa->inbuff, rxa->inbuff);
-    ANB::setSize_anb (rxa->anb.p, rxa->dsp_insize);
+    ANB::setBuffers_anb (rxa->anb, rxa->inbuff, rxa->inbuff);
+    ANB::setSize_anb (rxa->anb, rxa->dsp_insize);
     // nob
-    NOB::setBuffers_nob(rxa->nob.p, rxa->inbuff, rxa->inbuff);
-    NOB::setSize_nob(rxa->nob.p, rxa->dsp_insize);
+    NOB::setBuffers_nob(rxa->nob, rxa->inbuff, rxa->inbuff);
+    NOB::setSize_nob(rxa->nob, rxa->dsp_insize);
     // shift
-    SHIFT::setBuffers_shift (rxa->shift.p, rxa->inbuff, rxa->inbuff);
-    SHIFT::setSize_shift (rxa->shift.p, rxa->dsp_insize);
+    SHIFT::setBuffers_shift (rxa->shift, rxa->inbuff, rxa->inbuff);
+    SHIFT::setSize_shift (rxa->shift, rxa->dsp_insize);
     // input resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpin.p, rxa->inbuff, rxa->midbuff);
-    RESAMPLE::setSize_resample (rxa->rsmpin.p, rxa->dsp_insize);
+    RESAMPLE::setBuffers_resample (rxa->rsmpin, rxa->inbuff, rxa->midbuff);
+    RESAMPLE::setSize_resample (rxa->rsmpin, rxa->dsp_insize);
     // dsp_size blocks
-    GEN::setBuffers_gen (rxa->gen0.p, rxa->midbuff, rxa->midbuff);
-    GEN::setSize_gen (rxa->gen0.p, rxa->dsp_size);
-    METER::setBuffers_meter (rxa->adcmeter.p, rxa->midbuff);
-    METER::setSize_meter (rxa->adcmeter.p, rxa->dsp_size);
-    NBP::setBuffers_nbp (rxa->nbp0.p, rxa->midbuff, rxa->midbuff);
-    NBP::setSize_nbp (rxa->nbp0.p, rxa->dsp_size);
-    BPSNBA::setBuffers_bpsnba (rxa->bpsnba.p, rxa->midbuff, rxa->midbuff);
-    BPSNBA::setSize_bpsnba (rxa->bpsnba.p, rxa->dsp_size);
-    METER::setBuffers_meter (rxa->smeter.p, rxa->midbuff);
-    METER::setSize_meter (rxa->smeter.p, rxa->dsp_size);
-    SENDER::setBuffers_sender (rxa->sender.p, rxa->midbuff);
-    SENDER::setSize_sender (rxa->sender.p, rxa->dsp_size);
-    AMSQ::setBuffers_amsq (rxa->amsq.p, rxa->midbuff, rxa->midbuff, rxa->midbuff);
-    AMSQ::setSize_amsq (rxa->amsq.p, rxa->dsp_size);
-    AMD::setBuffers_amd (rxa->amd.p, rxa->midbuff, rxa->midbuff);
-    AMD::setSize_amd (rxa->amd.p, rxa->dsp_size);
-    FMD::setBuffers_fmd (rxa->fmd.p, rxa->midbuff, rxa->midbuff);
-    FMD::setSize_fmd (rxa->fmd.p, rxa->dsp_size);
-    FMSQ::setBuffers_fmsq (rxa->fmsq.p, rxa->midbuff, rxa->midbuff, rxa->fmd.p->audio);
-    FMSQ::setSize_fmsq (rxa->fmsq.p, rxa->dsp_size);
-    SNBA::setBuffers_snba (rxa->snba.p, rxa->midbuff, rxa->midbuff);
-    SNBA::setSize_snba (rxa->snba.p, rxa->dsp_size);
-    EQP::setBuffers_eqp (rxa->eqp.p, rxa->midbuff, rxa->midbuff);
-    EQP::setSize_eqp (rxa->eqp.p, rxa->dsp_size);
-    ANF::setBuffers_anf (rxa->anf.p, rxa->midbuff, rxa->midbuff);
-    ANF::setSize_anf (rxa->anf.p, rxa->dsp_size);
-    ANR::setBuffers_anr (rxa->anr.p, rxa->midbuff, rxa->midbuff);
-    ANR::setSize_anr (rxa->anr.p, rxa->dsp_size);
-    EMNR::setBuffers_emnr (rxa->emnr.p, rxa->midbuff, rxa->midbuff);
-    EMNR::setSize_emnr (rxa->emnr.p, rxa->dsp_size);
-    BANDPASS::setBuffers_bandpass (rxa->bp1.p, rxa->midbuff, rxa->midbuff);
-    BANDPASS::setSize_bandpass (rxa->bp1.p, rxa->dsp_size);
-    WCPAGC::setBuffers_wcpagc (rxa->agc.p, rxa->midbuff, rxa->midbuff);
-    WCPAGC::setSize_wcpagc (rxa->agc.p, rxa->dsp_size);
-    METER::setBuffers_meter (rxa->agcmeter.p, rxa->midbuff);
-    METER::setSize_meter (rxa->agcmeter.p, rxa->dsp_size);
-    SIPHON::setBuffers_siphon (rxa->sip1.p, rxa->midbuff);
-    SIPHON::setSize_siphon (rxa->sip1.p, rxa->dsp_size);
-    CBL::setBuffers_cbl (rxa->cbl.p, rxa->midbuff, rxa->midbuff);
-    CBL::setSize_cbl (rxa->cbl.p, rxa->dsp_size);
-    SPEAK::setBuffers_speak (rxa->speak.p, rxa->midbuff, rxa->midbuff);
-    SPEAK::setSize_speak (rxa->speak.p, rxa->dsp_size);
-    MPEAK::setBuffers_mpeak (rxa->mpeak.p, rxa->midbuff, rxa->midbuff);
-    MPEAK::setSize_mpeak (rxa->mpeak.p, rxa->dsp_size);
-    SSQL::setBuffers_ssql (rxa->ssql.p, rxa->midbuff, rxa->midbuff);
-    SSQL::setSize_ssql (rxa->ssql.p, rxa->dsp_size);
-    PANEL::setBuffers_panel (rxa->panel.p, rxa->midbuff, rxa->midbuff);
-    PANEL::setSize_panel (rxa->panel.p, rxa->dsp_size);
+    GEN::setBuffers_gen (rxa->gen0, rxa->midbuff, rxa->midbuff);
+    GEN::setSize_gen (rxa->gen0, rxa->dsp_size);
+    METER::setBuffers_meter (rxa->adcmeter, rxa->midbuff);
+    METER::setSize_meter (rxa->adcmeter, rxa->dsp_size);
+    NBP::setBuffers_nbp (rxa->nbp0, rxa->midbuff, rxa->midbuff);
+    NBP::setSize_nbp (rxa->nbp0, rxa->dsp_size);
+    BPSNBA::setBuffers_bpsnba (rxa->bpsnba, rxa->midbuff, rxa->midbuff);
+    BPSNBA::setSize_bpsnba (rxa->bpsnba, rxa->dsp_size);
+    METER::setBuffers_meter (rxa->smeter, rxa->midbuff);
+    METER::setSize_meter (rxa->smeter, rxa->dsp_size);
+    SENDER::setBuffers_sender (rxa->sender, rxa->midbuff);
+    SENDER::setSize_sender (rxa->sender, rxa->dsp_size);
+    AMSQ::setBuffers_amsq (rxa->amsq, rxa->midbuff, rxa->midbuff, rxa->midbuff);
+    AMSQ::setSize_amsq (rxa->amsq, rxa->dsp_size);
+    AMD::setBuffers_amd (rxa->amd, rxa->midbuff, rxa->midbuff);
+    AMD::setSize_amd (rxa->amd, rxa->dsp_size);
+    FMD::setBuffers_fmd (rxa->fmd, rxa->midbuff, rxa->midbuff);
+    FMD::setSize_fmd (rxa->fmd, rxa->dsp_size);
+    FMSQ::setBuffers_fmsq (rxa->fmsq, rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
+    FMSQ::setSize_fmsq (rxa->fmsq, rxa->dsp_size);
+    SNBA::setBuffers_snba (rxa->snba, rxa->midbuff, rxa->midbuff);
+    SNBA::setSize_snba (rxa->snba, rxa->dsp_size);
+    EQP::setBuffers_eqp (rxa->eqp, rxa->midbuff, rxa->midbuff);
+    EQP::setSize_eqp (rxa->eqp, rxa->dsp_size);
+    ANF::setBuffers_anf (rxa->anf, rxa->midbuff, rxa->midbuff);
+    ANF::setSize_anf (rxa->anf, rxa->dsp_size);
+    ANR::setBuffers_anr (rxa->anr, rxa->midbuff, rxa->midbuff);
+    ANR::setSize_anr (rxa->anr, rxa->dsp_size);
+    EMNR::setBuffers_emnr (rxa->emnr, rxa->midbuff, rxa->midbuff);
+    EMNR::setSize_emnr (rxa->emnr, rxa->dsp_size);
+    BANDPASS::setBuffers_bandpass (rxa->bp1, rxa->midbuff, rxa->midbuff);
+    BANDPASS::setSize_bandpass (rxa->bp1, rxa->dsp_size);
+    WCPAGC::setBuffers_wcpagc (rxa->agc, rxa->midbuff, rxa->midbuff);
+    WCPAGC::setSize_wcpagc (rxa->agc, rxa->dsp_size);
+    METER::setBuffers_meter (rxa->agcmeter, rxa->midbuff);
+    METER::setSize_meter (rxa->agcmeter, rxa->dsp_size);
+    SIPHON::setBuffers_siphon (rxa->sip1, rxa->midbuff);
+    SIPHON::setSize_siphon (rxa->sip1, rxa->dsp_size);
+    CBL::setBuffers_cbl (rxa->cbl, rxa->midbuff, rxa->midbuff);
+    CBL::setSize_cbl (rxa->cbl, rxa->dsp_size);
+    SPEAK::setBuffers_speak (rxa->speak, rxa->midbuff, rxa->midbuff);
+    SPEAK::setSize_speak (rxa->speak, rxa->dsp_size);
+    MPEAK::setBuffers_mpeak (rxa->mpeak, rxa->midbuff, rxa->midbuff);
+    MPEAK::setSize_mpeak (rxa->mpeak, rxa->dsp_size);
+    SSQL::setBuffers_ssql (rxa->ssql, rxa->midbuff, rxa->midbuff);
+    SSQL::setSize_ssql (rxa->ssql, rxa->dsp_size);
+    PANEL::setBuffers_panel (rxa->panel, rxa->midbuff, rxa->midbuff);
+    PANEL::setSize_panel (rxa->panel, rxa->dsp_size);
     // output resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpout.p, rxa->midbuff, rxa->outbuff);
-    RESAMPLE::setSize_resample (rxa->rsmpout.p, rxa->dsp_size);
+    RESAMPLE::setBuffers_resample (rxa->rsmpout, rxa->midbuff, rxa->outbuff);
+    RESAMPLE::setSize_resample (rxa->rsmpout, rxa->dsp_size);
 }
 
 void RXA::setSpectrumProbe(BufferProbe *spectrumProbe)
 {
     SENDER::SetSpectrum(*this, 1, spectrumProbe);
-    sender.p->run = 1;
+    sender->run = 1;
 }
 
 /********************************************************************************************************
@@ -899,33 +899,33 @@ void RXA::SetMode (RXA& rxa, int mode)
     if (rxa.mode != mode)
     {
         int amd_run = (mode == RXA_AM) || (mode == RXA_SAM);
-        bpsnbaCheck (rxa, mode, rxa.ndb.p->master_run);
+        bpsnbaCheck (rxa, mode, rxa.ndb->master_run);
         bp1Check (
             rxa,
             amd_run,
-            rxa.snba.p->run,
-            rxa.emnr.p->run,
-            rxa.anf.p->run,
-            rxa.anr.p->run
+            rxa.snba->run,
+            rxa.emnr->run,
+            rxa.anf->run,
+            rxa.anr->run
         );
         rxa.mode = mode;
-        rxa.amd.p->run  = 0;
-        rxa.fmd.p->run  = 0;
+        rxa.amd->run  = 0;
+        rxa.fmd->run  = 0;
 
         switch (mode)
         {
         case RXA_AM:
-            rxa.amd.p->run  = 1;
-            rxa.amd.p->mode = 0;
+            rxa.amd->run  = 1;
+            rxa.amd->mode = 0;
             break;
         case RXA_SAM:
-            rxa.amd.p->run  = 1;
-            rxa.amd.p->mode = 1;
+            rxa.amd->run  = 1;
+            rxa.amd->mode = 1;
             break;
         case RXA_DSB:
             break;
         case RXA_FM:
-            rxa.fmd.p->run  = 1;
+            rxa.fmd->run  = 1;
             break;
         default:
 
@@ -940,12 +940,12 @@ void RXA::SetMode (RXA& rxa, int mode)
 void RXA::ResCheck (RXA& rxa)
 {
     // turn OFF/ON resamplers depending upon whether they're needed
-    RESAMPLE *a = rxa.rsmpin.p;
+    RESAMPLE *a = rxa.rsmpin;
     if (rxa.in_rate  != rxa.dsp_rate)
         a->run = 1;
     else
         a->run = 0;
-    a = rxa.rsmpout.p;
+    a = rxa.rsmpout;
     if (rxa.dsp_rate != rxa.out_rate)
         a->run = 1;
     else
@@ -961,7 +961,7 @@ void RXA::bp1Check (
     int anr_run
 )
 {
-    BANDPASS *a = rxa.bp1.p;
+    BANDPASS *a = rxa.bp1;
     float gain;
     if (amd_run  ||
         snba_run ||
@@ -978,13 +978,13 @@ void RXA::bp1Check (
 
 void RXA::bp1Set (RXA& rxa)
 {
-    BANDPASS *a = rxa.bp1.p;
+    BANDPASS *a = rxa.bp1;
     int old = a->run;
-    if ((rxa.amd.p->run  == 1) ||
-        (rxa.snba.p->run == 1) ||
-        (rxa.emnr.p->run == 1) ||
-        (rxa.anf.p->run  == 1) ||
-        (rxa.anr.p->run  == 1)
+    if ((rxa.amd->run  == 1) ||
+        (rxa.snba->run == 1) ||
+        (rxa.emnr->run == 1) ||
+        (rxa.anf->run  == 1) ||
+        (rxa.anr->run  == 1)
     )
         a->run = 1;
     else
@@ -998,7 +998,7 @@ void RXA::bpsnbaCheck (RXA& rxa, int mode, int notch_run)
 {
     // for BPSNBA: set run, position, freqs, run_notches
     // call this upon change in RXA_mode, snba_run, notch_master_run
-    BPSNBA *a = rxa.bpsnba.p;
+    BPSNBA *a = rxa.bpsnba;
     float f_low = 0.0, f_high = 0.0;
     int run_notches = 0;
     switch (mode)
@@ -1052,29 +1052,29 @@ void RXA::bpsnbaSet (RXA& rxa)
 {
     // for BPSNBA: set run, position, freqs, run_notches
     // call this upon change in RXA_mode, snba_run, notch_master_run
-    BPSNBA *a = rxa.bpsnba.p;
+    BPSNBA *a = rxa.bpsnba;
     switch (rxa.mode)
     {
         case RXA_LSB:
         case RXA_CWL:
         case RXA_DIGL:
-            a->run = rxa.snba.p->run;
+            a->run = rxa.snba->run;
             a->position = 0;
             break;
         case RXA_USB:
         case RXA_CWU:
         case RXA_DIGU:
-            a->run = rxa.snba.p->run;
+            a->run = rxa.snba->run;
             a->position = 0;
             break;
         case RXA_AM:
         case RXA_SAM:
         case RXA_DSB:
-            a->run = rxa.snba.p->run;
+            a->run = rxa.snba->run;
             a->position = 1;
             break;
         case RXA_FM:
-            a->run = rxa.snba.p->run;
+            a->run = rxa.snba->run;
             a->position = 1;
             break;
         case RXA_DRM:

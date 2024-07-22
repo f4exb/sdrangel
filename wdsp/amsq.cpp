@@ -255,20 +255,20 @@ void AMSQ::setSize_amsq (AMSQ *a, int size)
 
 void AMSQ::SetAMSQRun (RXA& rxa, int run)
 {
-    rxa.amsq.p->run = run;
+    rxa.amsq->run = run;
 }
 
 void AMSQ::SetAMSQThreshold (RXA& rxa, double threshold)
 {
     double thresh = pow (10.0, threshold / 20.0);
-    rxa.amsq.p->tail_thresh = 0.9 * thresh;
-    rxa.amsq.p->unmute_thresh =  thresh;
+    rxa.amsq->tail_thresh = 0.9 * thresh;
+    rxa.amsq->unmute_thresh =  thresh;
 }
 
 void AMSQ::SetAMSQMaxTail (RXA& rxa, double tail)
 {
     AMSQ *a;
-    a = rxa.amsq.p;
+    a = rxa.amsq;
 
     if (tail < a->min_tail)
         tail = a->min_tail;

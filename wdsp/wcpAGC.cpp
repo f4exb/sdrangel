@@ -390,63 +390,63 @@ void WCPAGC::SetAGCMode (RXA& rxa, int mode)
     switch (mode)
     {
         case 0: //agcOFF
-            rxa.agc.p->mode = 0;
-            loadWcpAGC ( rxa.agc.p );
+            rxa.agc->mode = 0;
+            loadWcpAGC ( rxa.agc );
             break;
         case 1: //agcLONG
-            rxa.agc.p->mode = 1;
-            rxa.agc.p->hangtime = 2.000;
-            rxa.agc.p->tau_decay = 2.000;
-            loadWcpAGC ( rxa.agc.p );
+            rxa.agc->mode = 1;
+            rxa.agc->hangtime = 2.000;
+            rxa.agc->tau_decay = 2.000;
+            loadWcpAGC ( rxa.agc );
             break;
         case 2: //agcSLOW
-            rxa.agc.p->mode = 2;
-            rxa.agc.p->hangtime = 1.000;
-            rxa.agc.p->tau_decay = 0.500;
-            loadWcpAGC ( rxa.agc.p );
+            rxa.agc->mode = 2;
+            rxa.agc->hangtime = 1.000;
+            rxa.agc->tau_decay = 0.500;
+            loadWcpAGC ( rxa.agc );
             break;
         case 3: //agcMED
-            rxa.agc.p->mode = 3;
-            rxa.agc.p->hang_thresh = 1.0;
-            rxa.agc.p->hangtime = 0.000;
-            rxa.agc.p->tau_decay = 0.250;
-            loadWcpAGC ( rxa.agc.p );
+            rxa.agc->mode = 3;
+            rxa.agc->hang_thresh = 1.0;
+            rxa.agc->hangtime = 0.000;
+            rxa.agc->tau_decay = 0.250;
+            loadWcpAGC ( rxa.agc );
             break;
         case 4: //agcFAST
-            rxa.agc.p->mode = 4;
-            rxa.agc.p->hang_thresh = 1.0;
-            rxa.agc.p->hangtime = 0.000;
-            rxa.agc.p->tau_decay = 0.050;
-            loadWcpAGC ( rxa.agc.p );
+            rxa.agc->mode = 4;
+            rxa.agc->hang_thresh = 1.0;
+            rxa.agc->hangtime = 0.000;
+            rxa.agc->tau_decay = 0.050;
+            loadWcpAGC ( rxa.agc );
             break;
         default:
-            rxa.agc.p->mode = 5;
+            rxa.agc->mode = 5;
             break;
     }
 }
 
 void WCPAGC::SetAGCAttack (RXA& rxa, int attack)
 {
-    rxa.agc.p->tau_attack = (float)attack / 1000.0;
-    loadWcpAGC ( rxa.agc.p );
+    rxa.agc->tau_attack = (float)attack / 1000.0;
+    loadWcpAGC ( rxa.agc );
 }
 
 void WCPAGC::SetAGCDecay (RXA& rxa, int decay)
 {
-    rxa.agc.p->tau_decay = (float)decay / 1000.0;
-    loadWcpAGC ( rxa.agc.p );
+    rxa.agc->tau_decay = (float)decay / 1000.0;
+    loadWcpAGC ( rxa.agc );
 }
 
 void WCPAGC::SetAGCHang (RXA& rxa, int hang)
 {
-    rxa.agc.p->hangtime = (float)hang / 1000.0;
-    loadWcpAGC ( rxa.agc.p );
+    rxa.agc->hangtime = (float)hang / 1000.0;
+    loadWcpAGC ( rxa.agc );
 }
 
 void WCPAGC::GetAGCHangLevel(RXA& rxa, double *hangLevel)
 //for line on bandscope
 {
-    *hangLevel = 20.0 * log10( rxa.agc.p->hang_level / 0.637 );
+    *hangLevel = 20.0 * log10( rxa.agc->hang_level / 0.637 );
 }
 
 void WCPAGC::SetAGCHangLevel(RXA& rxa, double hangLevel)
@@ -454,77 +454,77 @@ void WCPAGC::SetAGCHangLevel(RXA& rxa, double hangLevel)
 {
     double convert, tmp;
 
-    if (rxa.agc.p->max_input > rxa.agc.p->min_volts)
+    if (rxa.agc->max_input > rxa.agc->min_volts)
     {
         convert = pow (10.0, hangLevel / 20.0);
-        tmp = std::max(1e-8, (convert - rxa.agc.p->min_volts) / (rxa.agc.p->max_input - rxa.agc.p->min_volts));
-        rxa.agc.p->hang_thresh = 1.0 + 0.125 * log10 (tmp);
+        tmp = std::max(1e-8, (convert - rxa.agc->min_volts) / (rxa.agc->max_input - rxa.agc->min_volts));
+        rxa.agc->hang_thresh = 1.0 + 0.125 * log10 (tmp);
     }
     else
-        rxa.agc.p->hang_thresh = 1.0;
+        rxa.agc->hang_thresh = 1.0;
 
-    loadWcpAGC ( rxa.agc.p );
+    loadWcpAGC ( rxa.agc );
 }
 
 void WCPAGC::GetAGCHangThreshold(RXA& rxa, int *hangthreshold)
 //for slider in setup
 {
-    *hangthreshold = (int) (100.0 * rxa.agc.p->hang_thresh);
+    *hangthreshold = (int) (100.0 * rxa.agc->hang_thresh);
 }
 
 void WCPAGC::SetAGCHangThreshold (RXA& rxa, int hangthreshold)
 //For slider in setup
 {
-    rxa.agc.p->hang_thresh = (double) hangthreshold / 100.0;
-    loadWcpAGC ( rxa.agc.p );
+    rxa.agc->hang_thresh = (double) hangthreshold / 100.0;
+    loadWcpAGC ( rxa.agc );
 }
 
 void WCPAGC::GetAGCThresh(RXA& rxa, double *thresh, double size, double rate)
 //for line on bandscope.
 {
     double noise_offset;
-    noise_offset = 10.0 * log10((rxa.nbp0.p->fhigh - rxa.nbp0.p->flow) * size / rate);
-    *thresh = 20.0 * log10( rxa.agc.p->min_volts ) - noise_offset;
+    noise_offset = 10.0 * log10((rxa.nbp0->fhigh - rxa.nbp0->flow) * size / rate);
+    *thresh = 20.0 * log10( rxa.agc->min_volts ) - noise_offset;
 }
 
 void WCPAGC::SetAGCThresh(RXA& rxa, double thresh, double size, double rate)
 //for line on bandscope
 {
     double noise_offset;
-    noise_offset = 10.0 * log10((rxa.nbp0.p->fhigh - rxa.nbp0.p->flow) * size / rate);
-    rxa.agc.p->max_gain = rxa.agc.p->out_target / (rxa.agc.p->var_gain * pow (10.0, (thresh + noise_offset) / 20.0));
-    loadWcpAGC ( rxa.agc.p );
+    noise_offset = 10.0 * log10((rxa.nbp0->fhigh - rxa.nbp0->flow) * size / rate);
+    rxa.agc->max_gain = rxa.agc->out_target / (rxa.agc->var_gain * pow (10.0, (thresh + noise_offset) / 20.0));
+    loadWcpAGC ( rxa.agc );
 }
 
 void WCPAGC::GetAGCTop(RXA& rxa, double *max_agc)
 //for AGC Max Gain in setup
 {
-    *max_agc = 20 * log10 (rxa.agc.p->max_gain);
+    *max_agc = 20 * log10 (rxa.agc->max_gain);
 }
 
 void WCPAGC::SetAGCTop (RXA& rxa, double max_agc)
 //for AGC Max Gain in setup
 {
-    rxa.agc.p->max_gain = pow (10.0, (double) max_agc / 20.0);
-    loadWcpAGC ( rxa.agc.p );
+    rxa.agc->max_gain = pow (10.0, (double) max_agc / 20.0);
+    loadWcpAGC ( rxa.agc );
 }
 
 void WCPAGC::SetAGCSlope (RXA& rxa, int slope)
 {
-    rxa.agc.p->var_gain = pow (10.0, (double) slope / 20.0 / 10.0);
-    loadWcpAGC ( rxa.agc.p );
+    rxa.agc->var_gain = pow (10.0, (double) slope / 20.0 / 10.0);
+    loadWcpAGC ( rxa.agc );
 }
 
 void WCPAGC::SetAGCFixed (RXA& rxa, double fixed_agc)
 {
-    rxa.agc.p->fixed_gain = pow (10.0, (double) fixed_agc / 20.0);
-    loadWcpAGC ( rxa.agc.p );
+    rxa.agc->fixed_gain = pow (10.0, (double) fixed_agc / 20.0);
+    loadWcpAGC ( rxa.agc );
 }
 
 void WCPAGC::SetAGCMaxInputLevel (RXA& rxa, double level)
 {
-    rxa.agc.p->max_input = level;
-    loadWcpAGC ( rxa.agc.p );
+    rxa.agc->max_input = level;
+    loadWcpAGC ( rxa.agc );
 }
 
 /********************************************************************************************************

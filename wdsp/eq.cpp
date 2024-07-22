@@ -289,14 +289,14 @@ void EQP::setSize_eqp (EQP *a, int size)
 
 void EQP::SetEQRun (RXA& rxa, int run)
 {
-    rxa.eqp.p->run = run;
+    rxa.eqp->run = run;
 }
 
 void EQP::SetEQNC (RXA& rxa, int nc)
 {
     EQP *a;
     float* impulse;
-    a = rxa.eqp.p;
+    a = rxa.eqp;
 
     if (a->nc != nc)
     {
@@ -310,7 +310,7 @@ void EQP::SetEQNC (RXA& rxa, int nc)
 void EQP::SetEQMP (RXA& rxa, int mp)
 {
     EQP *a;
-    a = rxa.eqp.p;
+    a = rxa.eqp;
     if (a->mp != mp)
     {
         a->mp = mp;
@@ -322,7 +322,7 @@ void EQP::SetEQProfile (RXA& rxa, int nfreqs, const float* F, const float* G)
 {
     EQP *a;
     float* impulse;
-    a = rxa.eqp.p;
+    a = rxa.eqp;
     delete[] (a->G);
     delete[] (a->F);
     a->nfreqs = nfreqs;
@@ -340,7 +340,7 @@ void EQP::SetEQCtfmode (RXA& rxa, int mode)
 {
     EQP *a;
     float* impulse;
-    a = rxa.eqp.p;
+    a = rxa.eqp;
     a->ctfmode = mode;
     impulse = eq_impulse (a->nc, a->nfreqs, a->F, a->G, a->samplerate, 1.0 / (2.0 * a->size), a->ctfmode, a->wintype);
     FIRCORE::setImpulse_fircore (a->p, impulse, 1);
@@ -351,7 +351,7 @@ void EQP::SetEQWintype (RXA& rxa, int wintype)
 {
     EQP *a;
     float* impulse;
-    a = rxa.eqp.p;
+    a = rxa.eqp;
     a->wintype = wintype;
     impulse = eq_impulse (a->nc, a->nfreqs, a->F, a->G, a->samplerate, 1.0 / (2.0 * a->size), a->ctfmode, a->wintype);
     FIRCORE::setImpulse_fircore (a->p, impulse, 1);
@@ -362,7 +362,7 @@ void EQP::SetGrphEQ (RXA& rxa, int *rxeq)
 {   // three band equalizer (legacy compatibility)
     EQP *a;
     float* impulse;
-    a = rxa.eqp.p;
+    a = rxa.eqp;
     delete[] (a->G);
     delete[] (a->F);
     a->nfreqs = 4;
@@ -388,7 +388,7 @@ void EQP::SetGrphEQ10 (RXA& rxa, int *rxeq)
     EQP *a;
     float* impulse;
     int i;
-    a = rxa.eqp.p;
+    a = rxa.eqp;
     delete[] (a->G);
     delete[] (a->F);
     a->nfreqs = 10;

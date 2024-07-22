@@ -130,7 +130,7 @@ void CBL::setSize_cbl (CBL *a, int size)
 
 void CBL::SetCBLRun(RXA& rxa, int setit)
 {
-    rxa.cbl.p->run = setit;
+    rxa.cbl->run = setit;
 }
 
 } // namespace WDSP

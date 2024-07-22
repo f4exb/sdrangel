@@ -193,7 +193,7 @@ void BPSNBA::recalc_bpsnba_filter (BPSNBA *a, int update)
 
 void BPSNBA::BPSNBASetNC (RXA& rxa, int nc)
 {
-    BPSNBA *a = rxa.bpsnba.p;
+    BPSNBA *a = rxa.bpsnba;
 
     if (a->nc != nc)
     {
@@ -205,7 +205,7 @@ void BPSNBA::BPSNBASetNC (RXA& rxa, int nc)
 
 void BPSNBA::BPSNBASetMP (RXA& rxa, int mp)
 {
-    BPSNBA *a = rxa.bpsnba.p;
+    BPSNBA *a = rxa.bpsnba;
 
     if (a->mp != mp)
     {

@@ -296,17 +296,17 @@ void AMD::setSize_amd (AMD *a, int size)
 
 void AMD::SetAMDRun(RXA& rxa, int run)
 {
-    AMD *a = rxa.amd.p;
+    AMD *a = rxa.amd;
 
     if (a->run != run)
     {
         RXA::bp1Check (
             rxa,
             run,
-            rxa.snba.p->run,
-            rxa.emnr.p->run,
-            rxa.anf.p->run,
-            rxa.anr.p->run
+            rxa.snba->run,
+            rxa.emnr->run,
+            rxa.anf->run,
+            rxa.anr->run
         );
 
         a->run = run;
@@ -316,12 +316,12 @@ void AMD::SetAMDRun(RXA& rxa, int run)
 
 void AMD::SetAMDSBMode(RXA& rxa, int sbmode)
 {
-    rxa.amd.p->sbmode = sbmode;
+    rxa.amd->sbmode = sbmode;
 }
 
 void AMD::SetAMDFadeLevel(RXA& rxa, int levelfade)
 {
-    rxa.amd.p->levelfade = levelfade;
+    rxa.amd->levelfade = levelfade;
 }
 
 } // namesoace WDSP

@@ -1077,17 +1077,17 @@ void EMNR::setSize_emnr (EMNR *a, int size)
 
 void EMNR::SetEMNRRun (RXA& rxa, int run)
 {
-    EMNR *a = rxa.emnr.p;
+    EMNR *a = rxa.emnr;
 
     if (a->run != run)
     {
         RXA::bp1Check (
             rxa,
-            rxa.amd.p->run,
-            rxa.snba.p->run,
+            rxa.amd->run,
+            rxa.snba->run,
             run,
-            rxa.anf.p->run,
-            rxa.anr.p->run
+            rxa.anf->run,
+            rxa.anr->run
         );
         a->run = run;
         RXA::bp1Set (rxa);
@@ -1096,33 +1096,33 @@ void EMNR::SetEMNRRun (RXA& rxa, int run)
 
 void EMNR::SetEMNRgainMethod (RXA& rxa, int method)
 {
-    rxa.emnr.p->g.gain_method = method;
+    rxa.emnr->g.gain_method = method;
 }
 
 void EMNR::SetEMNRnpeMethod (RXA& rxa, int method)
 {
-    rxa.emnr.p->g.npe_method = method;
+    rxa.emnr->g.npe_method = method;
 }
 
 void EMNR::SetEMNRaeRun (RXA& rxa, int run)
 {
-    rxa.emnr.p->g.ae_run = run;
+    rxa.emnr->g.ae_run = run;
 }
 
 void EMNR::SetEMNRPosition (RXA& rxa, int position)
 {
-    rxa.emnr.p->position = position;
-    rxa.bp1.p->position  = position;
+    rxa.emnr->position = position;
+    rxa.bp1->position  = position;
 }
 
 void EMNR::SetEMNRaeZetaThresh (RXA& rxa, double zetathresh)
 {
-    rxa.emnr.p->ae.zetaThresh = zetathresh;
+    rxa.emnr->ae.zetaThresh = zetathresh;
 }
 
 void EMNR::SetEMNRaePsi (RXA& rxa, double psi)
 {
-    rxa.emnr.p->ae.psi = psi;
+    rxa.emnr->ae.psi = psi;
 }
 
 } // namespace WDSP

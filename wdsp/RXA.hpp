@@ -98,118 +98,37 @@ public:
     int mode;
     double meter[RXA_METERTYPE_LAST];
 
-    struct
-    {
-        METER *p;
-    } smeter, adcmeter, agcmeter;
-    struct
-    {
-        SHIFT *p;
-    } shift;
-    struct
-    {
-        RESAMPLE *p;
-    } rsmpin, rsmpout;
-    struct
-    {
-        GEN *p;
-    } gen0;
-    struct
-    {
-        BANDPASS *p;
-    } bp1;
-    struct
-    {
-        BPS *p;
-    } bps1;
-    struct
-    {
-        NOTCHDB *p;
-    } ndb;
-    struct
-    {
-        NBP *p;
-    } nbp0;
-    struct
-    {
-        BPSNBA *p;
-    } bpsnba;
-    struct
-    {
-        SNBA *p;
-    } snba;
-    struct
-    {
-        SENDER *p;
-    } sender;
-    struct
-    {
-        AMSQ *p;
-    } amsq;
-    struct
-    {
-        AMD *p;
-    } amd;
-    struct
-    {
-        FMD *p;
-    } fmd;
-    struct
-    {
-        FMSQ *p;
-    } fmsq;
-    struct
-    {
-        EQP *p;
-    } eqp;
-    struct
-    {
-        ANF *p;
-    } anf;
-    struct
-    {
-        ANR *p;
-    } anr;
-    struct
-    {
-        EMNR *p;
-    } emnr;
-    struct
-    {
-        WCPAGC *p;
-    } agc;
-    struct
-    {
-        SPEAK *p;
-    } speak;
-    struct
-    {
-        MPEAK *p;
-    } mpeak;
-    struct
-    {
-        PANEL *p;
-    } panel;
-    struct
-    {
-        SIPHON *p;
-    } sip1;
-    struct
-    {
-        CBL *p;
-    } cbl;
-    struct
-    {
-        SSQL *p;
-    } ssql;
-    struct
-    {
-        ANB *p;
-    } anb;
-    struct
-    {
-        NOB *p;
-    } nob;
+    ANB *anb;
+    NOB *nob;
+    SHIFT *shift;
+    RESAMPLE *rsmpin;
+    GEN *gen0;
+    METER *adcmeter;
+    NOTCHDB *ndb;
+    NBP *nbp0;
+    BPSNBA *bpsnba;
+    SENDER *sender;
+    METER *smeter;
+    AMSQ *amsq;
+    AMD *amd;
+    FMD *fmd;
+    FMSQ *fmsq;
+    SNBA *snba;
+    EQP *eqp;
+    ANF *anf;
+    ANR *anr;
+    EMNR *emnr;
+    WCPAGC *agc;
+    METER *agcmeter;
+    BANDPASS *bp1;
+    BPS *bps1;
+    SIPHON *sip1;
+    CBL *cbl;
+    SPEAK *speak;
+    MPEAK *mpeak;
+    SSQL *ssql;
+    PANEL *panel;
+    RESAMPLE *rsmpout;
 
     static RXA* create_rxa (
         int in_rate,                // input samplerate

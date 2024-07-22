@@ -241,54 +241,54 @@ void ANB::setSize_anb (ANB *a, int size)
 
 void ANB::SetANBRun (RXA& rxa, int run)
 {
-    ANB *a = rxa.anb.p;
+    ANB *a = rxa.anb;
     a->run = run;
 }
 
 void ANB::SetANBBuffsize (RXA& rxa, int size)
 {
-    ANB *a = rxa.anb.p;
+    ANB *a = rxa.anb;
     a->buffsize = size;
 }
 
 void ANB::SetANBSamplerate (RXA& rxa, int rate)
 {
-    ANB *a = rxa.anb.p;
+    ANB *a = rxa.anb;
     a->samplerate = (double) rate;
     initBlanker (a);
 }
 
 void ANB::SetANBTau (RXA& rxa, double tau)
 {
-    ANB *a = rxa.anb.p;
+    ANB *a = rxa.anb;
     a->tau = tau;
     initBlanker (a);
 }
 
 void ANB::SetANBHangtime (RXA& rxa, double time)
 {
-    ANB *a = rxa.anb.p;
+    ANB *a = rxa.anb;
     a->hangtime = time;
     initBlanker (a);
 }
 
 void ANB::SetANBAdvtime (RXA& rxa, double time)
 {
-    ANB *a = rxa.anb.p;
+    ANB *a = rxa.anb;
     a->advtime = time;
     initBlanker (a);
 }
 
 void ANB::SetANBBacktau (RXA& rxa, double tau)
 {
-    ANB *a = rxa.anb.p;
+    ANB *a = rxa.anb;
     a->backtau = tau;
     initBlanker (a);
 }
 
 void ANB::SetANBThreshold (RXA& rxa, double thresh)
 {
-    ANB *a = rxa.anb.p;
+    ANB *a = rxa.anb;
     a->threshold = thresh;
 }
 

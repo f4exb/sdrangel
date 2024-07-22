@@ -275,7 +275,7 @@ void FMD::setSize_fmd (FMD *a, int size)
 void FMD::SetFMDeviation (RXA& rxa, double deviation)
 {
     FMD *a;
-    a = rxa.fmd.p;
+    a = rxa.fmd;
     a->deviation = deviation;
     a->again = a->rate / (a->deviation * TWOPI);
 }
@@ -283,7 +283,7 @@ void FMD::SetFMDeviation (RXA& rxa, double deviation)
 void FMD::SetCTCSSFreq (RXA& rxa, double freq)
 {
     FMD *a;
-    a = rxa.fmd.p;
+    a = rxa.fmd;
     a->ctcss_freq = freq;
     SNOTCH::SetSNCTCSSFreq (a->sntch, a->ctcss_freq);
 }
@@ -291,7 +291,7 @@ void FMD::SetCTCSSFreq (RXA& rxa, double freq)
 void FMD::SetCTCSSRun (RXA& rxa, int run)
 {
     FMD *a;
-    a = rxa.fmd.p;
+    a = rxa.fmd;
     a->sntch_run = run;
     SNOTCH::SetSNCTCSSRun (a->sntch, a->sntch_run);
 }
@@ -300,7 +300,7 @@ void FMD::SetFMNCde (RXA& rxa, int nc)
 {
     FMD *a;
     float* impulse;
-    a = rxa.fmd.p;
+    a = rxa.fmd;
 
     if (a->nc_de != nc)
     {
@@ -314,7 +314,7 @@ void FMD::SetFMNCde (RXA& rxa, int nc)
 void FMD::SetFMMPde (RXA& rxa, int mp)
 {
     FMD *a;
-    a = rxa.fmd.p;
+    a = rxa.fmd;
     if (a->mp_de != mp)
     {
         a->mp_de = mp;
@@ -326,7 +326,7 @@ void FMD::SetFMNCaud (RXA& rxa, int nc)
 {
     FMD *a;
     float* impulse;
-    a = rxa.fmd.p;
+    a = rxa.fmd;
 
     if (a->nc_aud != nc)
     {
@@ -340,7 +340,7 @@ void FMD::SetFMNCaud (RXA& rxa, int nc)
 void FMD::SetFMMPaud (RXA& rxa, int mp)
 {
     FMD *a;
-    a = rxa.fmd.p;
+    a = rxa.fmd;
     if (a->mp_aud != mp)
     {
         a->mp_aud = mp;
@@ -351,7 +351,7 @@ void FMD::SetFMMPaud (RXA& rxa, int mp)
 void FMD::SetFMLimRun (RXA& rxa, int run)
 {
     FMD *a;
-    a = rxa.fmd.p;
+    a = rxa.fmd;
 
     if (a->lim_run != run) {
         a->lim_run = run;
@@ -361,7 +361,7 @@ void FMD::SetFMLimRun (RXA& rxa, int run)
 void FMD::SetFMLimGain (RXA& rxa, double gaindB)
 {
     double gain = pow(10.0, gaindB / 20.0);
-    FMD *a = rxa.fmd.p;
+    FMD *a = rxa.fmd;
 
     if (a->lim_gain != gain)
     {
@@ -373,7 +373,7 @@ void FMD::SetFMLimGain (RXA& rxa, double gaindB)
 
 void FMD::SetFMAFFilter(RXA& rxa, double low, double high)
 {
-    FMD *a = rxa.fmd.p;
+    FMD *a = rxa.fmd;
     float* impulse;
 
     if (a->f_low != low || a->f_high != high)
