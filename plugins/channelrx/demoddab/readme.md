@@ -6,6 +6,9 @@ This plugin can be used to demodulate DAB and DAB+ radio.
 
 The DAB demodulator uses a sample rate of 2.048MHz.
 
+For more information about DAB receivers technical requirements see [ETSI TS 103 461 V1.2.2 (2020-10)](https://www.etsi.org/deliver/etsi_ts/103400_103499/103461/01.02.02_60/ts_103461v010202p.pdf)
+
+
 <h2>Interface</h2>
 
 The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
