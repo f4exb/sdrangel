@@ -98,7 +98,7 @@ ANB::~ANB()
     delete[] wave;
 }
 
-void ANB::x()
+void ANB::execute()
 {
     double scale;
     double mag;

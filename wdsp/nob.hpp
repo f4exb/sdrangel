@@ -28,11 +28,13 @@ warren@wpratt.com
 #ifndef wdsp_nob_h
 #define wdsp_nob_h
 
+#include "export.h"
+
 namespace WDSP {
 
 class RXA;
 
-class NOB
+class WDSP_API NOB
 {
 public:
     int run;
@@ -100,7 +102,7 @@ public:
     ~NOB();
                                                                                            ////////////  legacy interface - remove
     void flush();
-    void x();
+    void execute();
     void setBuffers(float* in, float* out);
     void setSize(int size);
     // Common interface

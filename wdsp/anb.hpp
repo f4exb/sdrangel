@@ -28,11 +28,13 @@ warren@wpratt.com
 #ifndef wdsp_anb_h
 #define wdsp_anb_h
 
+#include "export.h"
+
 namespace WDSP {
 
 class RXA;
 
-class ANB
+class WDSP_API ANB
 {
 public:
     int run;
@@ -81,7 +83,7 @@ public:
     ~ANB();
 
     void flush();
-    void x();
+    void execute();
     void setBuffers(float* in, float* out);
     void setSize(int size);
     // Common interface

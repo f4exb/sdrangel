@@ -647,8 +647,8 @@ void RXA::flush_rxa (RXA *rxa)
 
 void RXA::xrxa (RXA *rxa)
 {
-    rxa->anb->x();
-    rxa->nob->x();
+    rxa->anb->execute();
+    rxa->nob->execute();
     SHIFT::xshift (rxa->shift);
     RESAMPLE::xresample (rxa->rsmpin);
     GEN::xgen (rxa->gen0);

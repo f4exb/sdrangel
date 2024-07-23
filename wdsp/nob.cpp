@@ -159,7 +159,7 @@ void NOB::flush()
     std::fill(ffbuff, ffbuff + filterlen * 2, 0);
 }
 
-void NOB::x()
+void NOB::execute()
 {
     double scale;
     double mag;
