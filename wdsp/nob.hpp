@@ -82,8 +82,7 @@ public:
     int overflow;
     double *legacy;
 
-                                                                                           ////////////  legacy interface - remove
-    static NOB* create_nob   (
+    NOB(
         int run,
         int buffsize,
         float* in,
@@ -98,26 +97,25 @@ public:
         double backtau,
         double threshold
     );
-
-    static void destroy_nob (NOB* a);
-    static void flush_nob (NOB* a);
-    static void xnob (NOB* a);
-    static void setBuffers_nob (NOB *a, float* in, float* out);
-    static void setSamplerate_nob (NOB *a, int rate);
-    static void setSize_nob (NOB *a, int size);
-    // RXA
-    static void SetNOBRun (RXA& rxa, int run);
-    static void SetNOBMode (RXA& rxa, int mode);
-    static void SetNOBBuffsize (RXA& rxa, int size);
-    static void SetNOBSamplerate (RXA& rxa, int size);
-    static void SetNOBTau (RXA& rxa, double tau);
-    static void SetNOBHangtime (RXA& rxa, double time);
-    static void SetNOBAdvtime (RXA& rxa, double time);
-    static void SetNOBBacktau (RXA& rxa, double tau);
-    static void SetNOBThreshold (RXA& rxa, double thresh);
+    ~NOB();
+                                                                                           ////////////  legacy interface - remove
+    void flush();
+    void x();
+    void setBuffers(float* in, float* out);
+    void setSize(int size);
+    // Common interface
+    void setRun (int run);
+    void setMode (int mode);
+    void setBuffsize (int size);
+    void setSamplerate (int size);
+    void setTau (double tau);
+    void setHangtime (double time);
+    void setAdvtime (double time);
+    void setBacktau (double tau);
+    void setThreshold (double thresh);
 
 private:
-    static void init_nob (NOB *a);
+    void init_nob();
 };
 
 

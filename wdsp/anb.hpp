@@ -66,7 +66,7 @@ public:
     double ombackmult;              // multiplier for waveform averaging
     float *legacy;
 
-    static ANB* create_anb   (
+    ANB(
         int run,
         int buffsize,
         float* in,
@@ -78,25 +78,24 @@ public:
         double backtau,
         double threshold
     );
+    ~ANB();
 
-    static void destroy_anb (ANB *a);
-    static void flush_anb (ANB *a);
-    static void xanb (ANB *a);
-    static void setBuffers_anb (ANB *a, float* in, float* out);
-    static void setSamplerate_anb (ANB *a, int rate);
-    static void setSize_anb (ANB *a, int size);
-    // RXA
-    static void SetANBRun (RXA& rxa, int run);
-    static void SetANBBuffsize (RXA& rxa, int size);
-    static void SetANBSamplerate (RXA& rxa, int rate);
-    static void SetANBTau (RXA& rxa, double tau);
-    static void SetANBHangtime (RXA& rxa, double time);
-    static void SetANBAdvtime (RXA& rxa, double time);
-    static void SetANBBacktau (RXA& rxa, double tau);
-    static void SetANBThreshold (RXA& rxa, double thresh);
+    void flush();
+    void x();
+    void setBuffers(float* in, float* out);
+    void setSize(int size);
+    // Common interface
+    void setRun (int run);
+    void setBuffsize (int size);
+    void setSamplerate (int rate);
+    void setTau (double tau);
+    void setHangtime (double time);
+    void setAdvtime (double time);
+    void setBacktau (double tau);
+    void setThreshold (double thresh);
 
 private:
-    static void initBlanker(ANB *a);                                                                                                    ////////////  legacy interface - remove
+    void initBlanker();
 };
 
 

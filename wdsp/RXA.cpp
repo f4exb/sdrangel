@@ -89,7 +89,7 @@ RXA* RXA::create_rxa (
     std::fill(rxa->meter, rxa->meter + RXA_METERTYPE_LAST, 0);
 
     // Noise blanker (ANB or "NB")
-    rxa->anb = ANB::create_anb(
+    rxa->anb = new ANB(
         0, // run
         rxa->dsp_insize,                        // input buffer size
         rxa->inbuff,                            // pointer to input buffer
@@ -102,7 +102,7 @@ RXA* RXA::create_rxa (
         30                                      // thershold
     );
     // Noise blanker (NOB or "NB2")
-    rxa->nob = NOB::create_nob(
+    rxa->nob = new NOB(
         0, // run
         rxa->dsp_insize,                        // input buffer size
         rxa->inbuff,                            // pointer to input buffer
@@ -601,8 +601,8 @@ void RXA::destroy_rxa (RXA *rxa)
     GEN::destroy_gen (rxa->gen0);
     RESAMPLE::destroy_resample (rxa->rsmpin);
     SHIFT::destroy_shift (rxa->shift);
-    NOB::destroy_nob(rxa->nob);
-    ANB::destroy_anb(rxa->anb);
+    delete (rxa->nob);
+    delete (rxa->anb);
     delete[] (rxa->midbuff);
     delete[] (rxa->outbuff);
     delete[] (rxa->inbuff);
@@ -614,8 +614,8 @@ void RXA::flush_rxa (RXA *rxa)
     std::fill(rxa->inbuff,  rxa->inbuff  + 1 * rxa->dsp_insize  * 2, 0);
     std::fill(rxa->outbuff, rxa->outbuff + 1 * rxa->dsp_outsize * 2, 0);
     std::fill(rxa->midbuff, rxa->midbuff + 2 * rxa->dsp_size    * 2, 0);
-    ANB::flush_anb (rxa->anb);
-    NOB::flush_nob(rxa->nob);
+    rxa->anb->flush();
+    rxa->nob->flush();
     SHIFT::flush_shift (rxa->shift);
     RESAMPLE::flush_resample (rxa->rsmpin);
     GEN::flush_gen (rxa->gen0);
@@ -647,8 +647,8 @@ void RXA::flush_rxa (RXA *rxa)
 
 void RXA::xrxa (RXA *rxa)
 {
-    ANB::xanb (rxa->anb);
-    NOB::xnob (rxa->nob);
+    rxa->anb->x();
+    rxa->nob->x();
     SHIFT::xshift (rxa->shift);
     RESAMPLE::xresample (rxa->rsmpin);
     GEN::xgen (rxa->gen0);
@@ -698,13 +698,13 @@ void RXA::setInputSamplerate (RXA *rxa, int in_rate)
     delete[] (rxa->inbuff);
     rxa->inbuff = new float[1 * rxa->dsp_insize  * 2]; // (float *)malloc0(1 * ch.dsp_insize  * sizeof(complex));
     // anb
-    ANB::setBuffers_anb(rxa->anb, rxa->inbuff, rxa->inbuff);
-    ANB::setSize_anb(rxa->anb, rxa->dsp_insize);
-    ANB::setSamplerate_anb(rxa->anb, rxa->in_rate);
+    rxa->anb->setBuffers(rxa->inbuff, rxa->inbuff);
+    rxa->anb->setSize(rxa->dsp_insize);
+    rxa->anb->setSamplerate(rxa->in_rate);
     // nob
-    NOB::setBuffers_nob(rxa->nob, rxa->inbuff, rxa->inbuff);
-    NOB::setSize_nob(rxa->nob, rxa->dsp_insize);
-    NOB::setSamplerate_nob(rxa->nob, rxa->in_rate);
+    rxa->nob->setBuffers(rxa->inbuff, rxa->inbuff);
+    rxa->nob->setSize(rxa->dsp_insize);
+    rxa->nob->setSamplerate(rxa->in_rate);
     // shift
     SHIFT::setBuffers_shift (rxa->shift, rxa->inbuff, rxa->inbuff);
     SHIFT::setSize_shift (rxa->shift, rxa->dsp_insize);
@@ -752,11 +752,11 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     delete[] (rxa->outbuff);
     rxa->outbuff = new float[1 * rxa->dsp_outsize * 2]; // (float *)malloc0(1 * rxa->dsp_outsize * sizeof(complex));
     // anb
-    ANB::setBuffers_anb (rxa->anb, rxa->inbuff, rxa->inbuff);
-    ANB::setSize_anb(rxa->anb, rxa->dsp_insize);
+    rxa->anb->setBuffers(rxa->inbuff, rxa->inbuff);
+    rxa->anb->setSize(rxa->dsp_insize);
     // nob
-    NOB::setBuffers_nob(rxa->nob, rxa->inbuff, rxa->inbuff);
-    NOB::setSize_nob(rxa->nob, rxa->dsp_insize);
+    rxa->nob->setBuffers(rxa->inbuff, rxa->inbuff);
+    rxa->nob->setSize(rxa->dsp_insize);
     // shift
     SHIFT::setBuffers_shift (rxa->shift, rxa->inbuff, rxa->inbuff);
     SHIFT::setSize_shift (rxa->shift, rxa->dsp_insize);
@@ -817,11 +817,11 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     delete[] (rxa->outbuff);
     rxa->outbuff = new float[1 * rxa->dsp_outsize * 2]; // (float *)malloc0(1 * rxa->dsp_outsize * sizeof(complex));
     // anb
-    ANB::setBuffers_anb (rxa->anb, rxa->inbuff, rxa->inbuff);
-    ANB::setSize_anb (rxa->anb, rxa->dsp_insize);
+    rxa->anb->setBuffers(rxa->inbuff, rxa->inbuff);
+    rxa->anb->setSize(rxa->dsp_insize);
     // nob
-    NOB::setBuffers_nob(rxa->nob, rxa->inbuff, rxa->inbuff);
-    NOB::setSize_nob(rxa->nob, rxa->dsp_insize);
+    rxa->nob->setBuffers(rxa->inbuff, rxa->inbuff);
+    rxa->nob->setSize(rxa->dsp_insize);
     // shift
     SHIFT::setBuffers_shift (rxa->shift, rxa->inbuff, rxa->inbuff);
     SHIFT::setSize_shift (rxa->shift, rxa->dsp_insize);

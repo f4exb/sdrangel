@@ -35,261 +35,238 @@ warren@wpratt.com
 
 namespace WDSP {
 
-void ANB::initBlanker(ANB *a)
+void ANB::initBlanker()
 {
     int i;
-    a->trans_count = (int)(a->tau * a->samplerate);
+    trans_count = (int)(tau * samplerate);
 
-    if (a->trans_count < 2)
-        a->trans_count = 2;
+    if (trans_count < 2)
+        trans_count = 2;
 
-    a->hang_count = (int)(a->hangtime * a->samplerate);
-    a->adv_count = (int)(a->advtime * a->samplerate);
-    a->count = 0;
-    a->in_idx = a->trans_count + a->adv_count;
-    a->out_idx = 0;
-    a->coef = PI / a->trans_count;
-    a->state = 0;
-    a->avg = 1.0;
-    a->power = 1.0;
-    a->backmult = exp(-1.0 / (a->samplerate * a->backtau));
-    a->ombackmult = 1.0 - a->backmult;
+    hang_count = (int)(hangtime * samplerate);
+    adv_count = (int)(advtime * samplerate);
+    count = 0;
+    in_idx = trans_count + adv_count;
+    out_idx = 0;
+    coef = PI / trans_count;
+    state = 0;
+    avg = 1.0;
+    power = 1.0;
+    backmult = exp(-1.0 / (samplerate * backtau));
+    ombackmult = 1.0 - backmult;
 
-    for (i = 0; i <= a->trans_count; i++)
-        a->wave[i] = 0.5 * cos(i * a->coef);
+    for (i = 0; i <= trans_count; i++)
+        wave[i] = 0.5 * cos(i * coef);
 
-    std::fill(a->dline, a->dline + a->dline_size * 2, 0);
+    std::fill(dline, dline + dline_size * 2, 0);
 }
 
-ANB* ANB::create_anb  (
-    int run,
-    int buffsize,
-    float* in,
-    float* out,
-    double samplerate,
-    double tau,
-    double hangtime,
-    double advtime,
-    double backtau,
-    double threshold
+ANB::ANB  (
+    int _run,
+    int _buffsize,
+    float* _in,
+    float* _out,
+    double _samplerate,
+    double _tau,
+    double _hangtime,
+    double _advtime,
+    double _backtau,
+    double _threshold
 )
 {
-    ANB *a;
-    a = new ANB;
-    a->run = run;
-    a->buffsize = buffsize;
-    a->in = in;
-    a->out = out;
-    a->samplerate = samplerate;
-    a->tau = tau;
-    a->hangtime = hangtime;
-    a->advtime = advtime;
-    a->backtau = backtau;
-    a->threshold = threshold;
-    a->wave = new double[((int)(MAX_SAMPLERATE * MAX_TAU) + 1)];
-    a->dline_size = (int)((MAX_TAU + MAX_ADVTIME) * MAX_SAMPLERATE) + 1;
-    a->dline = new float[a->dline_size * 2];
-    initBlanker(a);
-    a->legacy = new float[2048 * 2];  /////////////// legacy interface - remove
-    return a;
+    run = _run;
+    buffsize = _buffsize;
+    in = _in;
+    out = _out;
+    samplerate = _samplerate;
+    tau = _tau;
+    hangtime = _hangtime;
+    advtime = _advtime;
+    backtau = _backtau;
+    threshold = _threshold;
+    wave = new double[((int)(MAX_SAMPLERATE * MAX_TAU) + 1)];
+    dline_size = (int)((MAX_TAU + MAX_ADVTIME) * MAX_SAMPLERATE) + 1;
+    dline = new float[dline_size * 2];
+    initBlanker();
+    legacy = new float[2048 * 2];  /////////////// legacy interface - remove
 }
 
-void ANB::destroy_anb (ANB *a)
+ANB::~ANB()
 {
-    delete[] (a->legacy);                                                                                      /////////////// legacy interface - remove
-    delete[] (a->dline);
-    delete[] (a->wave);
-    delete (a);
+    delete[] legacy;                                                                                      /////////////// legacy interface - remove
+    delete[] dline;
+    delete[] wave;
 }
 
-void ANB::flush_anb (ANB *a)
-{
-    initBlanker (a);
-}
-
-void ANB::xanb (ANB *a)
+void ANB::x()
 {
     double scale;
     double mag;
     int i;
 
-    if (a->run)
+    if (run)
     {
-        for (i = 0; i < a->buffsize; i++)
+        for (i = 0; i < buffsize; i++)
         {
-            double xr = a->in[2 * i + 0];
-            double xi = a->in[2 * i + 1];
+            double xr = in[2 * i + 0];
+            double xi = in[2 * i + 1];
             mag = sqrt(xr*xr + xi*xi);
-            a->avg = a->backmult * a->avg + a->ombackmult * mag;
-            a->dline[2 * a->in_idx + 0] = a->in[2 * i + 0];
-            a->dline[2 * a->in_idx + 1] = a->in[2 * i + 1];
+            avg = backmult * avg + ombackmult * mag;
+            dline[2 * in_idx + 0] = in[2 * i + 0];
+            dline[2 * in_idx + 1] = in[2 * i + 1];
 
-            if (mag > (a->avg * a->threshold))
-                a->count = a->trans_count + a->adv_count;
+            if (mag > (avg * threshold))
+                count = trans_count + adv_count;
 
-            switch (a->state)
+            switch (state)
             {
                 case 0:
-                    a->out[2 * i + 0] = a->dline[2 * a->out_idx + 0];
-                    a->out[2 * i + 1] = a->dline[2 * a->out_idx + 1];
+                    out[2 * i + 0] = dline[2 * out_idx + 0];
+                    out[2 * i + 1] = dline[2 * out_idx + 1];
 
-                    if (a->count > 0)
+                    if (count > 0)
                     {
-                        a->state = 1;
-                        a->dtime = 0;
-                        a->power = 1.0;
+                        state = 1;
+                        dtime = 0;
+                        power = 1.0;
                     }
 
                     break;
 
                 case 1:
-                    scale = a->power * (0.5 + a->wave[a->dtime]);
-                    a->out[2 * i + 0] = a->dline[2 * a->out_idx + 0] * scale;
-                    a->out[2 * i + 1] = a->dline[2 * a->out_idx + 1] * scale;
+                    scale = power * (0.5 + wave[dtime]);
+                    out[2 * i + 0] = dline[2 * out_idx + 0] * scale;
+                    out[2 * i + 1] = dline[2 * out_idx + 1] * scale;
 
-                    if (++a->dtime > a->trans_count)
+                    if (++dtime > trans_count)
                     {
-                        a->state = 2;
-                        a->atime = 0;
+                        state = 2;
+                        atime = 0;
                     }
 
                     break;
 
                 case 2:
-                    a->out[2 * i + 0] = 0.0;
-                    a->out[2 * i + 1] = 0.0;
+                    out[2 * i + 0] = 0.0;
+                    out[2 * i + 1] = 0.0;
 
-                    if (++a->atime > a->adv_count)
-                        a->state = 3;
+                    if (++atime > adv_count)
+                        state = 3;
 
                     break;
 
                 case 3:
-                    if (a->count > 0)
-                        a->htime = -a->count;
+                    if (count > 0)
+                        htime = -count;
 
-                    a->out[2 * i + 0] = 0.0;
-                    a->out[2 * i + 1] = 0.0;
+                    out[2 * i + 0] = 0.0;
+                    out[2 * i + 1] = 0.0;
 
-                    if (++a->htime > a->hang_count)
+                    if (++htime > hang_count)
                     {
-                        a->state = 4;
-                        a->itime = 0;
+                        state = 4;
+                        itime = 0;
 
                     }
 
                     break;
 
                 case 4:
-                    scale = 0.5 - a->wave[a->itime];
-                    a->out[2 * i + 0] = a->dline[2 * a->out_idx + 0] * scale;
-                    a->out[2 * i + 1] = a->dline[2 * a->out_idx + 1] * scale;
+                    scale = 0.5 - wave[itime];
+                    out[2 * i + 0] = dline[2 * out_idx + 0] * scale;
+                    out[2 * i + 1] = dline[2 * out_idx + 1] * scale;
 
-                    if (a->count > 0)
+                    if (count > 0)
                     {
-                        a->state = 1;
-                        a->dtime = 0;
-                        a->power = scale;
+                        state = 1;
+                        dtime = 0;
+                        power = scale;
                     }
-                    else if (++a->itime > a->trans_count)
+                    else if (++itime > trans_count)
                     {
-                        a->state = 0;
+                        state = 0;
                     }
 
                     break;
             }
 
-            if (a->count > 0)
-                a->count--;
+            if (count > 0)
+                count--;
 
-            if (++a->in_idx == a->dline_size)
-                a->in_idx = 0;
+            if (++in_idx == dline_size)
+                in_idx = 0;
 
-            if (++a->out_idx == a->dline_size)
-                a->out_idx = 0;
+            if (++out_idx == dline_size)
+                out_idx = 0;
         }
     }
-    else if (a->in != a->out)
+    else if (in != out)
     {
-        std::copy(a->in, a->in + a->buffsize * 2, a->out);
+        std::copy(in, in + buffsize * 2, out);
     }
 }
 
-void ANB::setBuffers_anb (ANB *a, float* in, float* out)
+void ANB::setBuffers(float* in, float* out)
 {
-    a->in = in;
-    a->out = out;
+    in = in;
+    out = out;
 }
 
-void ANB::setSamplerate_anb (ANB *a, int rate)
+void ANB::setSize(int size)
 {
-    a->samplerate = rate;
-    initBlanker (a);
-}
-
-void ANB::setSize_anb (ANB *a, int size)
-{
-    a->buffsize = size;
-    initBlanker (a);
+    buffsize = size;
+    initBlanker();
 }
 
 /********************************************************************************************************
 *                                                                                                       *
-*                                             RXA PROPERTIES                                            *
+*                                         Common interface                                              *
 *                                                                                                       *
 ********************************************************************************************************/
 
-void ANB::SetANBRun (RXA& rxa, int run)
+void ANB::setRun (int _run)
 {
-    ANB *a = rxa.anb;
-    a->run = run;
+    run = _run;
 }
 
-void ANB::SetANBBuffsize (RXA& rxa, int size)
+void ANB::setBuffsize (int size)
 {
-    ANB *a = rxa.anb;
-    a->buffsize = size;
+    buffsize = size;
 }
 
-void ANB::SetANBSamplerate (RXA& rxa, int rate)
+void ANB::setSamplerate (int rate)
 {
-    ANB *a = rxa.anb;
-    a->samplerate = (double) rate;
-    initBlanker (a);
+    samplerate = (double) rate;
+    initBlanker();
 }
 
-void ANB::SetANBTau (RXA& rxa, double tau)
+void ANB::setTau (double _tau)
 {
-    ANB *a = rxa.anb;
-    a->tau = tau;
-    initBlanker (a);
+    tau = _tau;
+    initBlanker();
 }
 
-void ANB::SetANBHangtime (RXA& rxa, double time)
+void ANB::setHangtime (double time)
 {
-    ANB *a = rxa.anb;
-    a->hangtime = time;
-    initBlanker (a);
+    hangtime = time;
+    initBlanker();
 }
 
-void ANB::SetANBAdvtime (RXA& rxa, double time)
+void ANB::setAdvtime (double time)
 {
-    ANB *a = rxa.anb;
-    a->advtime = time;
-    initBlanker (a);
+    advtime = time;
+    initBlanker();
 }
 
-void ANB::SetANBBacktau (RXA& rxa, double tau)
+void ANB::setBacktau (double tau)
 {
-    ANB *a = rxa.anb;
-    a->backtau = tau;
-    initBlanker (a);
+    backtau = tau;
+    initBlanker();
 }
 
-void ANB::SetANBThreshold (RXA& rxa, double thresh)
+void ANB::setThreshold (double thresh)
 {
-    ANB *a = rxa.anb;
-    a->threshold = thresh;
+    threshold = thresh;
 }
 
 }

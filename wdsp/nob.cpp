@@ -39,129 +39,127 @@ warren@wpratt.com
 
 namespace WDSP {
 
-void NOB::init_nob (NOB *a)
+void NOB::init_nob()
 {
     int i;
     double coef;
 
-    a->adv_slew_count = (int)(a->advslewtime * a->samplerate);
-    a->adv_count = (int)(a->advtime * a->samplerate);
-    a->hang_count = (int)(a->hangtime * a->samplerate);
-    a->hang_slew_count = (int)(a->hangslewtime * a->samplerate);
-    a->max_imp_seq = (int)(a->max_imp_seq_time * a->samplerate);
-    a->backmult = exp (-1.0 / (a->samplerate * a->backtau));
-    a->ombackmult = 1.0 - a->backmult;
+    adv_slew_count = (int)(advslewtime * samplerate);
+    adv_count = (int)(advtime * samplerate);
+    hang_count = (int)(hangtime * samplerate);
+    hang_slew_count = (int)(hangslewtime * samplerate);
+    max_imp_seq = (int)(max_imp_seq_time * samplerate);
+    backmult = exp (-1.0 / (samplerate * backtau));
+    ombackmult = 1.0 - backmult;
 
-    if (a->adv_slew_count > 0)
+    if (adv_slew_count > 0)
     {
-        coef = PI / (a->adv_slew_count + 1);
+        coef = PI / (adv_slew_count + 1);
 
-        for (i = 0; i < a->adv_slew_count; i++)
-            a->awave[i] = 0.5 * cos ((i + 1) * coef);
+        for (i = 0; i < adv_slew_count; i++)
+            awave[i] = 0.5 * cos ((i + 1) * coef);
     }
 
-    if (a->hang_slew_count > 0)
+    if (hang_slew_count > 0)
     {
-        coef = PI / a->hang_slew_count;
+        coef = PI / hang_slew_count;
 
-        for (i = 0; i < a->hang_slew_count; i++)
-            a->hwave[i] = 0.5 * cos (i * coef);
+        for (i = 0; i < hang_slew_count; i++)
+            hwave[i] = 0.5 * cos (i * coef);
     }
 
-    flush_nob (a);
+    flush();
 }
 
-NOB* NOB::create_nob (
-    int run,
-    int buffsize,
-    float* in,
-    float* out,
-    double samplerate,
-    int mode,
-    double advslewtime,
-    double advtime,
-    double hangslewtime,
-    double hangtime,
-    double max_imp_seq_time,
-    double backtau,
-    double threshold
-    )
+NOB::NOB (
+    int _run,
+    int _buffsize,
+    float* _in,
+    float* _out,
+    double _samplerate,
+    int _mode,
+    double _advslewtime,
+    double _advtime,
+    double _hangslewtime,
+    double _hangtime,
+    double _max_imp_seq_time,
+    double _backtau,
+    double _threshold
+)
 {
-    NOB *a = new NOB;
-    a->run = run;
-    a->buffsize = buffsize;
-    a->in = in;
-    a->out = out;
-    a->samplerate = samplerate;
-    a->mode = mode;
-    a->advslewtime = advslewtime;
-    a->advtime = advtime;
-    a->hangslewtime = hangslewtime;
-    a->hangtime = hangtime;
-    a->max_imp_seq_time = max_imp_seq_time;
-    a->backtau = backtau;
-    a->threshold = threshold;
-    a->dline_size = (int)(MAX_SAMPLERATE * (MAX_ADV_SLEW_TIME +
-                                            MAX_ADV_TIME +
-                                            MAX_HANG_SLEW_TIME +
-                                            MAX_HANG_TIME +
-                                            MAX_SEQ_TIME ) + 2);
-    a->dline = new double[a->dline_size * 2];
-    a->imp = new int[a->dline_size];
-    a->awave = new double[(int)(MAX_ADV_SLEW_TIME  * MAX_SAMPLERATE + 1)];
-    a->hwave = new double[(int)(MAX_HANG_SLEW_TIME * MAX_SAMPLERATE + 1)];
+    run = _run;
+    buffsize = _buffsize;
+    in = _in;
+    out = _out;
+    samplerate = _samplerate;
+    mode = _mode;
+    advslewtime = _advslewtime;
+    advtime = _advtime;
+    hangslewtime = _hangslewtime;
+    hangtime = _hangtime;
+    max_imp_seq_time = _max_imp_seq_time;
+    backtau = _backtau;
+    threshold = _threshold;
+    dline_size = (int)(MAX_SAMPLERATE * (
+        MAX_ADV_SLEW_TIME +
+        MAX_ADV_TIME +
+        MAX_HANG_SLEW_TIME +
+        MAX_HANG_TIME +
+        MAX_SEQ_TIME ) + 2);
+    dline = new double[dline_size * 2];
+    imp = new int[dline_size];
+    awave = new double[(int)(MAX_ADV_SLEW_TIME  * MAX_SAMPLERATE + 1)];
+    hwave = new double[(int)(MAX_HANG_SLEW_TIME * MAX_SAMPLERATE + 1)];
 
-    a->filterlen = 10;
-    a->bfbuff = new double[a->filterlen * 2];
-    a->ffbuff = new double[a->filterlen * 2];
-    a->fcoefs = new double[a->filterlen];
-    a->fcoefs[0] = 0.308720593;
-    a->fcoefs[1] = 0.216104415;
-    a->fcoefs[2] = 0.151273090;
-    a->fcoefs[3] = 0.105891163;
-    a->fcoefs[4] = 0.074123814;
-    a->fcoefs[5] = 0.051886670;
-    a->fcoefs[6] = 0.036320669;
-    a->fcoefs[7] = 0.025424468;
-    a->fcoefs[8] = 0.017797128;
-    a->fcoefs[9] = 0.012457989;
+    filterlen = 10;
+    bfbuff = new double[filterlen * 2];
+    ffbuff = new double[filterlen * 2];
+    fcoefs = new double[filterlen];
+    fcoefs[0] = 0.308720593;
+    fcoefs[1] = 0.216104415;
+    fcoefs[2] = 0.151273090;
+    fcoefs[3] = 0.105891163;
+    fcoefs[4] = 0.074123814;
+    fcoefs[5] = 0.051886670;
+    fcoefs[6] = 0.036320669;
+    fcoefs[7] = 0.025424468;
+    fcoefs[8] = 0.017797128;
+    fcoefs[9] = 0.012457989;
 
-    init_nob (a);
+    init_nob();
 
-    a->legacy = new double[2048 * 2];    /////////////// legacy interface - remove
-    return a;
+    legacy = new double[2048 * 2];    /////////////// legacy interface - remove
 }
 
-void NOB::destroy_nob (NOB *a)
+NOB::~NOB()
 {
-    delete[] (a->legacy); ///////////////  remove
-    delete[] (a->fcoefs);
-    delete[] (a->ffbuff);
-    delete[] (a->bfbuff);
-    delete[] (a->hwave);
-    delete[] (a->awave);
-    delete[] (a->imp);
-    delete[] (a->dline);
-    delete (a);
+    delete[] (legacy); ///////////////  remove
+    delete[] (fcoefs);
+    delete[] (ffbuff);
+    delete[] (bfbuff);
+    delete[] (hwave);
+    delete[] (awave);
+    delete[] (imp);
+    delete[] (dline);
 }
 
-void NOB::flush_nob (NOB *a)
+void NOB::flush()
 {
-    a->out_idx = 0;
-    a->scan_idx = a->out_idx + a->adv_slew_count + a->adv_count + 1;
-    a->in_idx = a->scan_idx + a->max_imp_seq + a->hang_count + a->hang_slew_count + a->filterlen;
-    a->state = 0;
-    a->overflow = 0;
-    a->avg = 1.0;
-    a->bfb_in_idx = a->filterlen - 1;
-    a->ffb_in_idx = a->filterlen - 1;
-    std::fill(a->dline, a->dline + a->dline_size * 2, 0);
-    std::fill(a->imp, a->imp + a->dline_size, 0);
-    std::fill(a->bfbuff, a->bfbuff + a->filterlen * 2, 0);
-    std::fill(a->ffbuff, a->ffbuff + a->filterlen * 2, 0);
+    out_idx = 0;
+    scan_idx = out_idx + adv_slew_count + adv_count + 1;
+    in_idx = scan_idx + max_imp_seq + hang_count + hang_slew_count + filterlen;
+    state = 0;
+    overflow = 0;
+    avg = 1.0;
+    bfb_in_idx = filterlen - 1;
+    ffb_in_idx = filterlen - 1;
+    std::fill(dline, dline + dline_size * 2, 0);
+    std::fill(imp, imp + dline_size, 0);
+    std::fill(bfbuff, bfbuff + filterlen * 2, 0);
+    std::fill(ffbuff, ffbuff + filterlen * 2, 0);
 }
 
-void NOB::xnob (NOB *a)
+void NOB::x()
 {
     double scale;
     double mag;
@@ -176,204 +174,204 @@ void NOB::xnob (NOB *a)
     int ffcount;
     int staydown;
 
-    if (a->run)
+    if (run)
     {
-        for (i = 0; i < a->buffsize; i++)
+        for (i = 0; i < buffsize; i++)
         {
-            a->dline[2 * a->in_idx + 0] = a->in[2 * i + 0];
-            a->dline[2 * a->in_idx + 1] = a->in[2 * i + 1];
-            mag = sqrt(a->dline[2 * a->in_idx + 0] * a->dline[2 * a->in_idx + 0] + a->dline[2 * a->in_idx + 1] * a->dline[2 * a->in_idx + 1]);
-            a->avg = a->backmult * a->avg + a->ombackmult * mag;
+            dline[2 * in_idx + 0] = in[2 * i + 0];
+            dline[2 * in_idx + 1] = in[2 * i + 1];
+            mag = sqrt(dline[2 * in_idx + 0] * dline[2 * in_idx + 0] + dline[2 * in_idx + 1] * dline[2 * in_idx + 1]);
+            avg = backmult * avg + ombackmult * mag;
 
-            if (mag > (a->avg * a->threshold))
-                a->imp[a->in_idx] = 1;
+            if (mag > (avg * threshold))
+                imp[in_idx] = 1;
             else
-                a->imp[a->in_idx] = 0;
+                imp[in_idx] = 0;
 
-            if ((bf_idx = a->out_idx + a->adv_slew_count) >= a->dline_size)
-                bf_idx -= a->dline_size;
+            if ((bf_idx = out_idx + adv_slew_count) >= dline_size)
+                bf_idx -= dline_size;
 
-            if (a->imp[bf_idx] == 0)
+            if (imp[bf_idx] == 0)
             {
-                if (++a->bfb_in_idx == a->filterlen)
-                    a->bfb_in_idx -= a->filterlen;
+                if (++bfb_in_idx == filterlen)
+                    bfb_in_idx -= filterlen;
 
-                a->bfbuff[2 * a->bfb_in_idx + 0] = a->dline[2 * bf_idx + 0];
-                a->bfbuff[2 * a->bfb_in_idx + 1] = a->dline[2 * bf_idx + 1];
+                bfbuff[2 * bfb_in_idx + 0] = dline[2 * bf_idx + 0];
+                bfbuff[2 * bfb_in_idx + 1] = dline[2 * bf_idx + 1];
             }
 
-            switch (a->state)
+            switch (state)
             {
                 case 0:     // normal output & impulse setup
                     {
-                        a->out[2 * i + 0] = a->dline[2 * a->out_idx + 0];
-                        a->out[2 * i + 1] = a->dline[2 * a->out_idx + 1];
-                        a->Ilast = a->dline[2 * a->out_idx + 0];
-                        a->Qlast = a->dline[2 * a->out_idx + 1];
+                        out[2 * i + 0] = dline[2 * out_idx + 0];
+                        out[2 * i + 1] = dline[2 * out_idx + 1];
+                        Ilast = dline[2 * out_idx + 0];
+                        Qlast = dline[2 * out_idx + 1];
 
-                        if (a->imp[a->scan_idx] > 0)
+                        if (imp[scan_idx] > 0)
                         {
-                            a->time = 0;
+                            time = 0;
 
-                            if (a->adv_slew_count > 0)
-                                a->state = 1;
-                            else if (a->adv_count > 0)
-                                a->state = 2;
+                            if (adv_slew_count > 0)
+                                state = 1;
+                            else if (adv_count > 0)
+                                state = 2;
                             else
-                                a->state = 3;
+                                state = 3;
 
-                            tidx = a->scan_idx;
-                            a->blank_count = 0;
+                            tidx = scan_idx;
+                            blank_count = 0;
 
                             do
                             {
                                 len = 0;
                                 hcount = 0;
 
-                                while ((a->imp[tidx] > 0 || hcount > 0) && a->blank_count < a->max_imp_seq)
+                                while ((imp[tidx] > 0 || hcount > 0) && blank_count < max_imp_seq)
                                 {
-                                    a->blank_count++;
+                                    blank_count++;
                                     if (hcount > 0)
                                         hcount--;
-                                    if (a->imp[tidx] > 0)
-                                        hcount = a->hang_count + a->hang_slew_count;
-                                    if (++tidx >= a->dline_size)
-                                        tidx -= a->dline_size;
+                                    if (imp[tidx] > 0)
+                                        hcount = hang_count + hang_slew_count;
+                                    if (++tidx >= dline_size)
+                                        tidx -= dline_size;
                                 }
 
                                 j = 1;
                                 len = 0;
                                 lidx = tidx;
 
-                                while (j <= a->adv_slew_count + a->adv_count && len == 0)
+                                while (j <= adv_slew_count + adv_count && len == 0)
                                 {
-                                    if (a->imp[lidx] == 1)
+                                    if (imp[lidx] == 1)
                                     {
                                         len = j;
                                         tidx = lidx;
                                     }
 
-                                    if (++lidx >= a->dline_size)
-                                        lidx -= a->dline_size;
+                                    if (++lidx >= dline_size)
+                                        lidx -= dline_size;
 
                                     j++;
                                 }
 
-                                if((a->blank_count += len) > a->max_imp_seq)
+                                if((blank_count += len) > max_imp_seq)
                                 {
-                                    a->blank_count = a->max_imp_seq;
-                                    a->overflow = 1;
+                                    blank_count = max_imp_seq;
+                                    overflow = 1;
                                     break;
                                 }
                             }
                             while (len != 0);
 
-                            if (a->overflow == 0)
+                            if (overflow == 0)
                             {
-                                a->blank_count -= a->hang_slew_count;
-                                a->Inext = a->dline[2 * tidx + 0];
-                                a->Qnext = a->dline[2 * tidx + 1];
+                                blank_count -= hang_slew_count;
+                                Inext = dline[2 * tidx + 0];
+                                Qnext = dline[2 * tidx + 1];
 
-                                if (a->mode == 1 || a->mode == 2 || a->mode == 4)
+                                if (mode == 1 || mode == 2 || mode == 4)
                                 {
-                                    bfboutidx = a->bfb_in_idx;
-                                    a->I1 = 0.0;
-                                    a->Q1 = 0.0;
+                                    bfboutidx = bfb_in_idx;
+                                    I1 = 0.0;
+                                    Q1 = 0.0;
 
-                                    for (k = 0; k < a->filterlen; k++)
+                                    for (k = 0; k < filterlen; k++)
                                     {
-                                        a->I1 += a->fcoefs[k] * a->bfbuff[2 * bfboutidx + 0];
-                                        a->Q1 += a->fcoefs[k] * a->bfbuff[2 * bfboutidx + 1];
+                                        I1 += fcoefs[k] * bfbuff[2 * bfboutidx + 0];
+                                        Q1 += fcoefs[k] * bfbuff[2 * bfboutidx + 1];
 
                                         if (--bfboutidx < 0)
-                                            bfboutidx += a->filterlen;
+                                            bfboutidx += filterlen;
                                     }
                                 }
 
-                                if (a->mode == 2 || a->mode == 3 || a->mode == 4)
+                                if (mode == 2 || mode == 3 || mode == 4)
                                 {
-                                    if ((ff_idx = a->scan_idx + a->blank_count) >= a->dline_size)
-                                        ff_idx -= a->dline_size;
+                                    if ((ff_idx = scan_idx + blank_count) >= dline_size)
+                                        ff_idx -= dline_size;
 
                                     ffcount = 0;
 
-                                    while (ffcount < a->filterlen)
+                                    while (ffcount < filterlen)
                                     {
-                                        if (a->imp[ff_idx] == 0)
+                                        if (imp[ff_idx] == 0)
                                         {
-                                            if (++a->ffb_in_idx == a->filterlen)
-                                                a->ffb_in_idx -= a->filterlen;
+                                            if (++ffb_in_idx == filterlen)
+                                                ffb_in_idx -= filterlen;
 
-                                            a->ffbuff[2 * a->ffb_in_idx + 0] = a->dline[2 * ff_idx + 0];
-                                            a->ffbuff[2 * a->ffb_in_idx + 1] = a->dline[2 * ff_idx + 1];
+                                            ffbuff[2 * ffb_in_idx + 0] = dline[2 * ff_idx + 0];
+                                            ffbuff[2 * ffb_in_idx + 1] = dline[2 * ff_idx + 1];
                                             ++ffcount;
                                         }
 
-                                        if (++ff_idx >= a->dline_size)
-                                            ff_idx -= a->dline_size;
+                                        if (++ff_idx >= dline_size)
+                                            ff_idx -= dline_size;
                                     }
 
-                                    if ((ffboutidx = a->ffb_in_idx + 1) >= a->filterlen)
-                                        ffboutidx -= a->filterlen;
+                                    if ((ffboutidx = ffb_in_idx + 1) >= filterlen)
+                                        ffboutidx -= filterlen;
 
-                                    a->I2 = 0.0;
-                                    a->Q2 = 0.0;
+                                    I2 = 0.0;
+                                    Q2 = 0.0;
 
-                                    for (k = 0; k < a->filterlen; k++)
+                                    for (k = 0; k < filterlen; k++)
                                     {
-                                        a->I2 += a->fcoefs[k] * a->ffbuff[2 * ffboutidx + 0];
-                                        a->Q2 += a->fcoefs[k] * a->ffbuff[2 * ffboutidx + 1];
+                                        I2 += fcoefs[k] * ffbuff[2 * ffboutidx + 0];
+                                        Q2 += fcoefs[k] * ffbuff[2 * ffboutidx + 1];
 
-                                        if (++ffboutidx >= a->filterlen)
-                                            ffboutidx -= a->filterlen;
+                                        if (++ffboutidx >= filterlen)
+                                            ffboutidx -= filterlen;
                                     }
                                 }
 
-                                switch (a->mode)
+                                switch (mode)
                                 {
                                     case 0: // zero
-                                        a->deltaI = 0.0;
-                                        a->deltaQ = 0.0;
-                                        a->I = 0.0;
-                                        a->Q = 0.0;
+                                        deltaI = 0.0;
+                                        deltaQ = 0.0;
+                                        I = 0.0;
+                                        Q = 0.0;
                                         break;
                                     case 1: // sample-hold
-                                        a->deltaI = 0.0;
-                                        a->deltaQ = 0.0;
-                                        a->I = a->I1;
-                                        a->Q = a->Q1;
+                                        deltaI = 0.0;
+                                        deltaQ = 0.0;
+                                        I = I1;
+                                        Q = Q1;
                                         break;
                                     case 2: // mean-hold
-                                        a->deltaI = 0.0;
-                                        a->deltaQ = 0.0;
-                                        a->I = 0.5 * (a->I1 + a->I2);
-                                        a->Q = 0.5 * (a->Q1 + a->Q2);
+                                        deltaI = 0.0;
+                                        deltaQ = 0.0;
+                                        I = 0.5 * (I1 + I2);
+                                        Q = 0.5 * (Q1 + Q2);
                                         break;
                                     case 3: // hold-sample
-                                        a->deltaI = 0.0;
-                                        a->deltaQ = 0.0;
-                                        a->I = a->I2;
-                                        a->Q = a->Q2;
+                                        deltaI = 0.0;
+                                        deltaQ = 0.0;
+                                        I = I2;
+                                        Q = Q2;
                                         break;
                                     case 4: // linear interpolation
-                                        a->deltaI = (a->I2 - a->I1) / (a->adv_count + a->blank_count);
-                                        a->deltaQ = (a->Q2 - a->Q1) / (a->adv_count + a->blank_count);
-                                        a->I = a->I1;
-                                        a->Q = a->Q1;
+                                        deltaI = (I2 - I1) / (adv_count + blank_count);
+                                        deltaQ = (Q2 - Q1) / (adv_count + blank_count);
+                                        I = I1;
+                                        Q = Q1;
                                         break;
                                 }
                             }
                             else
                             {
-                                if (a->adv_slew_count > 0)
+                                if (adv_slew_count > 0)
                                 {
-                                    a->state = 5;
+                                    state = 5;
                                 }
                                 else
                                 {
-                                    a->state = 6;
-                                    a->time = 0;
-                                    a->blank_count += a->adv_count + a->filterlen;
+                                    state = 6;
+                                    time = 0;
+                                    blank_count += adv_count + filterlen;
                                 }
                             }
                         }
@@ -383,18 +381,18 @@ void NOB::xnob (NOB *a)
 
                 case 1:     // slew output in advance of blanking period
                     {
-                        scale = 0.5 + a->awave[a->time];
-                        a->out[2 * i + 0] = a->Ilast * scale + (1.0 - scale) * a->I;
-                        a->out[2 * i + 1] = a->Qlast * scale + (1.0 - scale) * a->Q;
+                        scale = 0.5 + awave[time];
+                        out[2 * i + 0] = Ilast * scale + (1.0 - scale) * I;
+                        out[2 * i + 1] = Qlast * scale + (1.0 - scale) * Q;
 
-                        if (++a->time == a->adv_slew_count)
+                        if (++time == adv_slew_count)
                         {
-                            a->time = 0;
+                            time = 0;
 
-                            if (a->adv_count > 0)
-                                a->state = 2;
+                            if (adv_count > 0)
+                                state = 2;
                             else
-                                a->state = 3;
+                                state = 3;
                         }
 
                         break;
@@ -402,15 +400,15 @@ void NOB::xnob (NOB *a)
 
                 case 2:     // initial advance period
                     {
-                        a->out[2 * i + 0] = a->I;
-                        a->out[2 * i + 1] = a->Q;
-                        a->I += a->deltaI;
-                        a->Q += a->deltaQ;
+                        out[2 * i + 0] = I;
+                        out[2 * i + 1] = Q;
+                        I += deltaI;
+                        Q += deltaQ;
 
-                        if (++a->time == a->adv_count)
+                        if (++time == adv_count)
                         {
-                            a->state = 3;
-                            a->time = 0;
+                            state = 3;
+                            time = 0;
                         }
 
                         break;
@@ -418,21 +416,21 @@ void NOB::xnob (NOB *a)
 
                 case 3:     // impulse & hang period
                     {
-                        a->out[2 * i + 0] = a->I;
-                        a->out[2 * i + 1] = a->Q;
-                        a->I += a->deltaI;
-                        a->Q += a->deltaQ;
+                        out[2 * i + 0] = I;
+                        out[2 * i + 1] = Q;
+                        I += deltaI;
+                        Q += deltaQ;
 
-                        if (++a->time == a->blank_count)
+                        if (++time == blank_count)
                         {
-                            if (a->hang_slew_count > 0)
+                            if (hang_slew_count > 0)
                             {
-                                a->state = 4;
-                                a->time = 0;
+                                state = 4;
+                                time = 0;
                             }
                             else
                             {
-                                a->state = 0;
+                                state = 0;
                             }
                         }
 
@@ -441,27 +439,27 @@ void NOB::xnob (NOB *a)
 
                 case 4:     // slew output after blanking period
                     {
-                        scale = 0.5 - a->hwave[a->time];
-                        a->out[2 * i + 0] = a->Inext * scale + (1.0 - scale) * a->I;
-                        a->out[2 * i + 1] = a->Qnext * scale + (1.0 - scale) * a->Q;
+                        scale = 0.5 - hwave[time];
+                        out[2 * i + 0] = Inext * scale + (1.0 - scale) * I;
+                        out[2 * i + 1] = Qnext * scale + (1.0 - scale) * Q;
 
-                        if (++a->time == a->hang_slew_count)
-                            a->state = 0;
+                        if (++time == hang_slew_count)
+                            state = 0;
 
                         break;
                     }
 
                 case 5:
                     {
-                        scale = 0.5 + a->awave[a->time];
-                        a->out[2 * i + 0] = a->Ilast * scale;
-                        a->out[2 * i + 1] = a->Qlast * scale;
+                        scale = 0.5 + awave[time];
+                        out[2 * i + 0] = Ilast * scale;
+                        out[2 * i + 1] = Qlast * scale;
 
-                        if (++a->time == a->adv_slew_count)
+                        if (++time == adv_slew_count)
                         {
-                            a->state = 6;
-                            a->time = 0;
-                            a->blank_count += a->adv_count + a->filterlen;
+                            state = 6;
+                            time = 0;
+                            blank_count += adv_count + filterlen;
                         }
 
                         break;
@@ -469,56 +467,56 @@ void NOB::xnob (NOB *a)
 
                 case 6:
                     {
-                        a->out[2 * i + 0] = 0.0;
-                        a->out[2 * i + 1] = 0.0;
+                        out[2 * i + 0] = 0.0;
+                        out[2 * i + 1] = 0.0;
 
-                        if (++a->time == a->blank_count)
-                            a->state = 7;
+                        if (++time == blank_count)
+                            state = 7;
 
                         break;
                     }
 
                 case 7:
                     {
-                        a->out[2 * i + 0] = 0.0;
-                        a->out[2 * i + 1] = 0.0;
+                        out[2 * i + 0] = 0.0;
+                        out[2 * i + 1] = 0.0;
                         staydown = 0;
-                        a->time = 0;
+                        time = 0;
 
-                        if ((tidx = a->scan_idx + a->hang_slew_count + a->hang_count) >= a->dline_size)
-                            tidx -= a->dline_size;
+                        if ((tidx = scan_idx + hang_slew_count + hang_count) >= dline_size)
+                            tidx -= dline_size;
 
-                        while (a->time++ <= a->adv_count + a->adv_slew_count + a->hang_slew_count + a->hang_count)                                                                            //  CHECK EXACT COUNTS!!!!!!!!!!!!!!!!!!!!!!!
+                        while (time++ <= adv_count + adv_slew_count + hang_slew_count + hang_count)                                                                            //  CHECK EXACT COUNTS!!!!!!!!!!!!!!!!!!!!!!!
                         {
-                            if (a->imp[tidx] == 1) staydown = 1;
-                            if (--tidx < 0) tidx += a->dline_size;
+                            if (imp[tidx] == 1) staydown = 1;
+                            if (--tidx < 0) tidx += dline_size;
                         }
 
                         if (staydown == 0)
                         {
-                            if (a->hang_count > 0)
+                            if (hang_count > 0)
                             {
-                                a->state = 8;
-                                a->time = 0;
+                                state = 8;
+                                time = 0;
                             }
-                            else if (a->hang_slew_count > 0)
+                            else if (hang_slew_count > 0)
                             {
-                                a->state = 9;
-                                a->time = 0;
+                                state = 9;
+                                time = 0;
 
-                                if ((tidx = a->scan_idx + a->hang_slew_count + a->hang_count - a->adv_count - a->adv_slew_count) >= a->dline_size)
-                                    tidx -= a->dline_size;
+                                if ((tidx = scan_idx + hang_slew_count + hang_count - adv_count - adv_slew_count) >= dline_size)
+                                    tidx -= dline_size;
 
                                 if (tidx < 0)
-                                    tidx += a->dline_size;
+                                    tidx += dline_size;
 
-                                a->Inext = a->dline[2 * tidx + 0];
-                                a->Qnext = a->dline[2 * tidx + 1];
+                                Inext = dline[2 * tidx + 0];
+                                Qnext = dline[2 * tidx + 1];
                             }
                             else
                             {
-                                a->state = 0;
-                                a->overflow = 0;
+                                state = 0;
+                                overflow = 0;
                             }
                         }
 
@@ -527,29 +525,29 @@ void NOB::xnob (NOB *a)
 
                 case 8:
                     {
-                        a->out[2 * i + 0] = 0.0;
-                        a->out[2 * i + 1] = 0.0;
+                        out[2 * i + 0] = 0.0;
+                        out[2 * i + 1] = 0.0;
 
-                        if (++a->time == a->hang_count)
+                        if (++time == hang_count)
                         {
-                            if (a->hang_slew_count > 0)
+                            if (hang_slew_count > 0)
                             {
-                                a->state = 9;
-                                a->time = 0;
+                                state = 9;
+                                time = 0;
 
-                                if ((tidx = a->scan_idx + a->hang_slew_count - a->adv_count - a->adv_slew_count) >= a->dline_size)
-                                    tidx -= a->dline_size;
+                                if ((tidx = scan_idx + hang_slew_count - adv_count - adv_slew_count) >= dline_size)
+                                    tidx -= dline_size;
 
                                 if (tidx < 0)
-                                    tidx += a->dline_size;
+                                    tidx += dline_size;
 
-                                a->Inext = a->dline[2 * tidx + 0];
-                                a->Qnext = a->dline[2 * tidx + 1];
+                                Inext = dline[2 * tidx + 0];
+                                Qnext = dline[2 * tidx + 1];
                             }
                             else
                             {
-                                a->state = 0;
-                                a->overflow = 0;
+                                state = 0;
+                                overflow = 0;
                             }
                         }
 
@@ -558,118 +556,103 @@ void NOB::xnob (NOB *a)
 
                 case 9:
                     {
-                        scale = 0.5 - a->hwave[a->time];
-                        a->out[2 * i + 0] = a->Inext * scale;
-                        a->out[2 * i + 1] = a->Qnext * scale;
+                        scale = 0.5 - hwave[time];
+                        out[2 * i + 0] = Inext * scale;
+                        out[2 * i + 1] = Qnext * scale;
 
-                        if (++a->time >= a->hang_slew_count)
+                        if (++time >= hang_slew_count)
                         {
-                            a->state = 0;
-                            a->overflow = 0;
+                            state = 0;
+                            overflow = 0;
                         }
 
                         break;
                     }
             }
 
-            if (++a->in_idx == a->dline_size)
-                a->in_idx = 0;
+            if (++in_idx == dline_size)
+                in_idx = 0;
 
-            if (++a->scan_idx == a->dline_size)
-                a->scan_idx = 0;
+            if (++scan_idx == dline_size)
+                scan_idx = 0;
 
-            if (++a->out_idx == a->dline_size)
-                a->out_idx = 0;
+            if (++out_idx == dline_size)
+                out_idx = 0;
         }
     }
-    else if (a->in != a->out)
+    else if (in != out)
     {
-        std::copy(a->in, a->in + a->buffsize * 2, a->out);
+        std::copy(in, in + buffsize * 2, out);
     }
 }
 
-void NOB::setBuffers_nob (NOB *a, float* in, float* out)
+void NOB::setBuffers(float* in, float* out)
 {
-    a->in = in;
-    a->out = out;
+    in = in;
+    out = out;
 }
 
-void NOB::setSamplerate_nob (NOB *a, int rate)
+void NOB::setSize(int size)
 {
-    a->samplerate = rate;
-    init_nob (a);
-}
-
-void NOB::setSize_nob (NOB *a, int size)
-{
-    a->buffsize = size;
-    flush_nob (a);
+    buffsize = size;
+    flush();
 }
 
 /********************************************************************************************************
 *                                                                                                       *
-*                                             RXA PROPERTIES                                            *
+*                                        Common interface                                               *
 *                                                                                                       *
 ********************************************************************************************************/
 
-void NOB::SetNOBRun (RXA& rxa, int run)
+void NOB::setRun(int _run)
 {
-    NOB *a = rxa.nob;
-    a->run = run;
+    run = _run;
 }
 
-void NOB::SetNOBMode (RXA& rxa, int mode)
+void NOB::setMode(int _mode)
 {
-    NOB *a = rxa.nob;
-    a->mode = mode;
+    mode = _mode;
 }
 
-void NOB::SetNOBBuffsize (RXA& rxa, int size)
+void NOB::setBuffsize(int size)
 {
-    NOB *a = rxa.nob;
-    a->buffsize = size;
+    buffsize = size;
 }
 
-void NOB::SetNOBSamplerate (RXA& rxa, int rate)
+void NOB::setSamplerate(int rate)
 {
-    NOB *a = rxa.nob;
-    a->samplerate = (double) rate;
-    init_nob (a);
+    samplerate = (double) rate;
+    init_nob();
 }
 
-void NOB::SetNOBTau (RXA& rxa, double tau)
+void NOB::setTau(double tau)
 {
-    NOB *a = rxa.nob;
-    a->advslewtime = tau;
-    a->hangslewtime = tau;
-    init_nob (a);
+    advslewtime = tau;
+    hangslewtime = tau;
+    init_nob();
 }
 
-void NOB::SetNOBHangtime (RXA& rxa, double time)
+void NOB::setHangtime(double time)
 {
-    NOB *a = rxa.nob;
-    a->hangtime = time;
-    init_nob (a);
+    hangtime = time;
+    init_nob();
 }
 
-void NOB::SetNOBAdvtime (RXA& rxa, double time)
+void NOB::setAdvtime(double time)
 {
-    NOB *a = rxa.nob;
-    a->advtime = time;
-    init_nob (a);
+    advtime = time;
+    init_nob();
 }
 
-void NOB::SetNOBBacktau (RXA& rxa, double tau)
+void NOB::setBacktau(double tau)
 {
-    NOB *a = rxa.nob;
-    a->backtau = tau;
-    init_nob (a);
+    backtau = tau;
+    init_nob();
 }
 
-void NOB::SetNOBThreshold (RXA& rxa, double thresh)
+void NOB::setThreshold(double thresh)
 {
-    NOB *a = rxa.nob;
-    a->threshold = thresh;
+    threshold = thresh;
 }
 
 } // namespace

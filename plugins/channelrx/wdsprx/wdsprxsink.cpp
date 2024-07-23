@@ -591,18 +591,18 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     if ((m_settings.m_dnb != settings.m_dnb)
     || (m_settings.m_nbScheme != settings.m_nbScheme) || force)
     {
-        WDSP::ANB::SetANBRun(*m_rxa, 0);
-        WDSP::NOB::SetNOBRun(*m_rxa, 0);
+        m_rxa->anb->setRun(0);
+        m_rxa->nob->setRun(0);
 
         if (settings.m_dnb)
         {
             switch(settings.m_nbScheme)
             {
             case WDSPRxProfile::NBSchemeNB:
-                WDSP::ANB::SetANBRun(*m_rxa, 1);
+                m_rxa->anb->setRun(1);
                 break;
             case WDSPRxProfile::NBSchemeNB2:
-                WDSP::NOB::SetNOBRun(*m_rxa, 1);
+                m_rxa->nob->setRun(1);
                 break;
             default:
                 break;
@@ -612,32 +612,32 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
     if ((m_settings.m_nbSlewTime != settings.m_nbSlewTime) || force)
     {
-        WDSP::ANB::SetANBTau(*m_rxa, settings.m_nbSlewTime * 0.001);
-        WDSP::NOB::SetNOBTau(*m_rxa, settings.m_nbSlewTime * 0.001);
+        m_rxa->anb->setTau(settings.m_nbSlewTime * 0.001);
+        m_rxa->nob->setTau(settings.m_nbSlewTime * 0.001);
     }
 
     if ((m_settings.m_nbLeadTime != settings.m_nbLeadTime) || force)
     {
-        WDSP::ANB::SetANBAdvtime(*m_rxa, settings.m_nbLeadTime * 0.001);
-        WDSP::NOB::SetNOBAdvtime(*m_rxa, settings.m_nbLeadTime * 0.001);
+        m_rxa->anb->setAdvtime(settings.m_nbLeadTime * 0.001);
+        m_rxa->nob->setAdvtime(settings.m_nbLeadTime * 0.001);
     }
 
     if ((m_settings.m_nbLagTime != settings.m_nbLagTime) || force)
     {
-        WDSP::ANB::SetANBHangtime(*m_rxa, settings.m_nbLagTime * 0.001);
-        WDSP::NOB::SetNOBHangtime(*m_rxa, settings.m_nbLagTime * 0.001);
+        m_rxa->anb->setHangtime(settings.m_nbLagTime * 0.001);
+        m_rxa->nob->setHangtime(settings.m_nbLagTime * 0.001);
     }
 
     if ((m_settings.m_nbThreshold != settings.m_nbThreshold) || force)
     {
-        WDSP::ANB::SetANBThreshold(*m_rxa, settings.m_nbThreshold);
-        WDSP::NOB::SetNOBThreshold(*m_rxa, settings.m_nbThreshold);
+        m_rxa->anb->setThreshold(settings.m_nbThreshold);
+        m_rxa->nob->setThreshold(settings.m_nbThreshold);
     }
 
     if ((m_settings.m_nbAvgTime != settings.m_nbAvgTime) || force)
     {
-        WDSP::ANB::SetANBBacktau(*m_rxa, settings.m_nbAvgTime * 0.001);
-        WDSP::NOB::SetNOBBacktau(*m_rxa, settings.m_nbAvgTime * 0.001);
+        m_rxa->anb->setBacktau(settings.m_nbAvgTime * 0.001);
+        m_rxa->nob->setBacktau(settings.m_nbAvgTime * 0.001);
     }
 
     // AM option
