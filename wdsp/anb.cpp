@@ -188,6 +188,8 @@ void ANB::execute()
                     }
 
                     break;
+                default:
+                    break;
             }
 
             if (count > 0)
@@ -206,10 +208,10 @@ void ANB::execute()
     }
 }
 
-void ANB::setBuffers(float* in, float* out)
+void ANB::setBuffers(float* _in, float* _out)
 {
-    in = in;
-    out = out;
+    in = _in;
+    out = _out;
 }
 
 void ANB::setSize(int size)
@@ -258,9 +260,9 @@ void ANB::setAdvtime (double time)
     initBlanker();
 }
 
-void ANB::setBacktau (double tau)
+void ANB::setBacktau (double _tau)
 {
-    backtau = tau;
+    backtau = _tau;
     initBlanker();
 }
 

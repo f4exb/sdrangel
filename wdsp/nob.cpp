@@ -127,20 +127,17 @@ NOB::NOB (
     fcoefs[9] = 0.012457989;
 
     init_nob();
-
-    legacy = new double[2048 * 2];    /////////////// legacy interface - remove
 }
 
 NOB::~NOB()
 {
-    delete[] (legacy); ///////////////  remove
-    delete[] (fcoefs);
-    delete[] (ffbuff);
-    delete[] (bfbuff);
-    delete[] (hwave);
-    delete[] (awave);
-    delete[] (imp);
-    delete[] (dline);
+    delete[] fcoefs;
+    delete[] ffbuff;
+    delete[] bfbuff;
+    delete[] hwave;
+    delete[] awave;
+    delete[] imp;
+    delete[] dline;
 }
 
 void NOB::flush()
@@ -568,6 +565,8 @@ void NOB::execute()
 
                         break;
                     }
+                default:
+                    break;
             }
 
             if (++in_idx == dline_size)
@@ -586,10 +585,10 @@ void NOB::execute()
     }
 }
 
-void NOB::setBuffers(float* in, float* out)
+void NOB::setBuffers(float* _in, float* _out)
 {
-    in = in;
-    out = out;
+    in = _in;
+    out = _out;
 }
 
 void NOB::setSize(int size)
@@ -632,15 +631,15 @@ void NOB::setTau(double tau)
     init_nob();
 }
 
-void NOB::setHangtime(double time)
+void NOB::setHangtime(double _time)
 {
-    hangtime = time;
+    hangtime = _time;
     init_nob();
 }
 
-void NOB::setAdvtime(double time)
+void NOB::setAdvtime(double _time)
 {
-    advtime = time;
+    advtime = _time;
     init_nob();
 }
 

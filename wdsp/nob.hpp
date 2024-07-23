@@ -82,7 +82,6 @@ public:
     double deltaI, deltaQ;
     double Inext, Qnext;
     int overflow;
-    double *legacy;
 
     NOB(
         int run,

@@ -245,7 +245,6 @@ void EMNR::interpM (double* res, double x, int nvals, double* xvals, double* yva
 
 void EMNR::calc_emnr(EMNR *a)
 {
-    int i;
     double Dvals[18] = { 1.0, 2.0, 5.0, 8.0, 10.0, 15.0, 20.0, 30.0, 40.0,
         60.0, 80.0, 120.0, 140.0, 160.0, 180.0, 220.0, 260.0, 300.0 };
     double Mvals[18] = { 0.000, 0.260, 0.480, 0.580, 0.610, 0.668, 0.705, 0.762, 0.800,
@@ -291,7 +290,7 @@ void EMNR::calc_emnr(EMNR *a)
     a->revfftout = new float[a->fsize]; // (float *)malloc0(a->fsize * sizeof(float));
     a->save = new float*[a->ovrlp]; // (float **)malloc0(a->ovrlp * sizeof(float *));
 
-    for (i = 0; i < a->ovrlp; i++)
+    for (int i = 0; i < a->ovrlp; i++)
         a->save[i] = new float[a->fsize]; // (float *)malloc0(a->fsize * sizeof(float));
 
     a->outaccum = new float[a->oasize]; // (float *)malloc0(a->oasize * sizeof(float));
@@ -329,11 +328,8 @@ void EMNR::calc_emnr(EMNR *a)
     a->g.gamma_max = 1000.0;
     a->g.q = 0.2;
 
-    for (i = 0; i < a->g.msize; i++)
-    {
-        a->g.prev_mask[i] = 1.0;
-        a->g.prev_gamma[i] = 1.0;
-    }
+    std::fill(a->g.prev_mask, a->g.prev_mask + a->msize, 1.0);
+    std::fill(a->g.prev_gamma, a->g.prev_gamma + a->msize, 1.0);
 
     a->g.gmax = 10000.0;
     //
@@ -433,7 +429,7 @@ void EMNR::calc_emnr(EMNR *a)
     a->np.pmin_u = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
     a->np.actminbuff = new double*[a->np.U]; // (float**)malloc0(a->np.U     * sizeof(float*));
 
-    for (i = 0; i < a->np.U; i++)
+    for (int i = 0; i < a->np.U; i++)
         a->np.actminbuff[i] = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
 
     {
@@ -486,7 +482,7 @@ void EMNR::calc_emnr(EMNR *a)
     a->nps.Pbar = new double[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
     a->nps.EN2y = new double[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
 
-    for (i = 0; i < a->nps.msize; i++)
+    for (int i = 0; i < a->nps.msize; i++)
     {
         a->nps.sigma2N[i] = 0.5;
         a->nps.Pbar[i] = 0.5;
@@ -881,7 +877,7 @@ void EMNR::calc_gain (EMNR *a)
 {
     int k;
 
-    for (k = 0; k < a->g.msize; k++)
+    for (k = 0; k < a->msize; k++)
     {
         double y0 = a->g.y[2 * k + 0];
         double y1 = a->g.y[2 * k + 1];
@@ -937,7 +933,7 @@ void EMNR::calc_gain (EMNR *a)
         {
             double gamma, eps_hat, v, ehr;
 
-            for (k = 0; k < a->g.msize; k++)
+            for (k = 0; k < a->msize; k++)
             {
                 gamma = std::min (a->g.lambda_y[k] / a->g.lambda_d[k], a->g.gamma_max);
                 eps_hat = a->g.alpha * a->g.prev_mask[k] * a->g.prev_mask[k] * a->g.prev_gamma[k]
