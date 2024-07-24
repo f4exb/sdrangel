@@ -201,7 +201,7 @@ RXA* RXA::create_rxa (
         rxa->ndb);                              // addr of database pointer
 
     // Post filter display send - send spectrum display (after S-meter in the block diagram)
-    rxa->sender = SENDER::create_sender (
+    rxa->sender = new SENDER (
         0,                                      // run
         0,                                      // flag
         0,                                      // mode
@@ -583,7 +583,7 @@ void RXA::destroy_rxa (RXA *rxa)
     AMD::destroy_amd (rxa->amd);
     AMSQ::destroy_amsq (rxa->amsq);
     delete (rxa->smeter);
-    SENDER::destroy_sender (rxa->sender);
+    delete (rxa->sender);
     delete (rxa->bpsnba);
     delete (rxa->nbp0);
     delete (rxa->ndb);
@@ -610,7 +610,7 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->adcmeter->flush();
     rxa->nbp0->flush();
     rxa->bpsnba->flush();
-    SENDER::flush_sender (rxa->sender);
+    rxa->sender->flush();
     rxa->smeter->flush();
     AMSQ::flush_amsq (rxa->amsq);
     AMD::flush_amd (rxa->amd);
@@ -643,7 +643,7 @@ void RXA::xrxa (RXA *rxa)
     rxa->bpsnba->exec_in(0);
     rxa->nbp0->execute(0);
     rxa->smeter->execute();
-    SENDER::xsender (rxa->sender);
+    rxa->sender->execute();
     AMSQ::xamsqcap (rxa->amsq);
     rxa->bpsnba->exec_out(0);
     AMD::xamd (rxa->amd);
@@ -756,7 +756,7 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->nbp0->setSamplerate(rxa->dsp_rate);
     rxa->bpsnba->setSamplerate(rxa->dsp_rate);
     rxa->smeter->setSamplerate(rxa->dsp_rate);
-    SENDER::setSamplerate_sender (rxa->sender, rxa->dsp_rate);
+    rxa->sender->setSamplerate(rxa->dsp_rate);
     AMSQ::setSamplerate_amsq (rxa->amsq, rxa->dsp_rate);
     AMD::setSamplerate_amd (rxa->amd, rxa->dsp_rate);
     FMD::setSamplerate_fmd (rxa->fmd, rxa->dsp_rate);
@@ -822,9 +822,9 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->bpsnba->setBuffers(rxa->midbuff, rxa->midbuff);
     rxa->bpsnba->setSize(rxa->dsp_size);
     rxa->smeter->setBuffers(rxa->midbuff);
-    rxa->smeter->METER::setSize(rxa->dsp_size);
-    SENDER::setBuffers_sender (rxa->sender, rxa->midbuff);
-    SENDER::setSize_sender (rxa->sender, rxa->dsp_size);
+    rxa->smeter->setSize(rxa->dsp_size);
+    rxa->sender->setBuffers(rxa->midbuff);
+    rxa->sender->setSize(rxa->dsp_size);
     AMSQ::setBuffers_amsq (rxa->amsq, rxa->midbuff, rxa->midbuff, rxa->midbuff);
     AMSQ::setSize_amsq (rxa->amsq, rxa->dsp_size);
     AMD::setBuffers_amd (rxa->amd, rxa->midbuff, rxa->midbuff);
@@ -847,8 +847,8 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     BANDPASS::setSize_bandpass (rxa->bp1, rxa->dsp_size);
     WCPAGC::setBuffers_wcpagc (rxa->agc, rxa->midbuff, rxa->midbuff);
     WCPAGC::setSize_wcpagc (rxa->agc, rxa->dsp_size);
-    rxa->agcmeter->METER::setBuffers(rxa->midbuff);
-    rxa->agcmeter->METER::setSize(rxa->dsp_size);
+    rxa->agcmeter->setBuffers(rxa->midbuff);
+    rxa->agcmeter->setSize(rxa->dsp_size);
     SIPHON::setBuffers_siphon (rxa->sip1, rxa->midbuff);
     SIPHON::setSize_siphon (rxa->sip1, rxa->dsp_size);
     CBL::setBuffers_cbl (rxa->cbl, rxa->midbuff, rxa->midbuff);
@@ -868,7 +868,7 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
 
 void RXA::setSpectrumProbe(BufferProbe *spectrumProbe)
 {
-    SENDER::SetSpectrum(*this, 1, spectrumProbe);
+    sender->SetSpectrum(1, spectrumProbe);
     sender->run = 1;
 }
 
