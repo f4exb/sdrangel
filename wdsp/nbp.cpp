@@ -30,7 +30,6 @@ warren@wpratt.com
 #include "fircore.hpp"
 #include "bpsnba.hpp"
 #include "nbp.hpp"
-#include "RXA.hpp"
 
 namespace WDSP {
 
@@ -40,27 +39,122 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
- NOTCHDB* NOTCHDB::create_notchdb (int master_run, int maxnotches)
+NOTCHDB::NOTCHDB(int _master_run, int _maxnotches)
 {
-    NOTCHDB *a = new NOTCHDB;
-    a->master_run = master_run;
-    a->maxnotches = maxnotches;
-    a->nn = 0;
-    a->fcenter = new double[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
-    a->fwidth  = new double[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
-    a->nlow    = new double[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
-    a->nhigh   = new double[a->maxnotches]; // (float *) malloc0 (a->maxnotches * sizeof (float));
-    a->active  = new int[a->maxnotches]; // (int    *) malloc0 (a->maxnotches * sizeof (int   ));
-    return a;
+    master_run = _master_run;
+    maxnotches = _maxnotches;
+    nn = 0;
+    fcenter = new double[maxnotches]; // (float *) malloc0 (maxnotches * sizeof (float));
+    fwidth  = new double[maxnotches]; // (float *) malloc0 (maxnotches * sizeof (float));
+    nlow    = new double[maxnotches]; // (float *) malloc0 (maxnotches * sizeof (float));
+    nhigh   = new double[maxnotches]; // (float *) malloc0 (maxnotches * sizeof (float));
+    active  = new int[maxnotches]; // (int    *) malloc0 (maxnotches * sizeof (int   ));
 }
 
-void NOTCHDB::destroy_notchdb (NOTCHDB *b)
+NOTCHDB::~NOTCHDB()
 {
-    delete[] (b->active);
-    delete[] (b->nhigh);
-    delete[] (b->nlow);
-    delete[] (b->fwidth);
-    delete[] (b->fcenter);
+    delete[] (active);
+    delete[] (nhigh);
+    delete[] (nlow);
+    delete[] (fwidth);
+    delete[] (fcenter);
+}
+
+int NOTCHDB::addNotch(int notch, double _fcenter, double _fwidth, int _active)
+{
+    int i, j;
+    int rval;
+
+    if (notch <= nn && nn < maxnotches)
+    {
+        nn++;
+
+        for (i = nn - 2, j = nn - 1; i >= notch; i--, j--)
+        {
+            fcenter[j] = fcenter[i];
+            fwidth[j] = fwidth[i];
+            nlow[j] = nlow[i];
+            nhigh[j] = nhigh[i];
+            active[j] = active[i];
+        }
+        fcenter[notch] = _fcenter;
+        fwidth[notch] = _fwidth;
+        nlow[notch] = _fcenter - 0.5 * _fwidth;
+        nhigh[notch] = _fcenter + 0.5 * _fwidth;
+        active[notch] = _active;
+        rval = 0;
+    }
+    else
+        rval = -1;
+    return rval;
+}
+
+int NOTCHDB::getNotch(int _notch, double* _fcenter, double* _fwidth, int* _active)
+{
+    int rval;
+
+    if (_notch < nn)
+    {
+        *_fcenter = fcenter[_notch];
+        *_fwidth = fwidth[_notch];
+        *_active = active[_notch];
+        rval = 0;
+    }
+    else
+    {
+        *_fcenter = -1.0;
+        *_fwidth = 0.0;
+        *_active = -1;
+        rval = -1;
+    }
+
+    return rval;
+}
+
+int NOTCHDB::deleteNotch(int _notch)
+{
+    int i, j;
+    int rval;
+
+    if (_notch < nn)
+    {
+        nn--;
+        for (i = _notch, j = _notch + 1; i < nn; i++, j++)
+        {
+            fcenter[i] = fcenter[j];
+            fwidth[i] = fwidth[j];
+            nlow[i] = nlow[j];
+            nhigh[i] = nhigh[j];
+            active[i] = active[j];
+        }
+        rval = 0;
+    }
+    else
+        rval = -1;
+    return rval;
+}
+
+int NOTCHDB::editNotch(int _notch, double _fcenter, double _fwidth, int _active)
+{
+    int rval;
+
+    if (_notch < nn)
+    {
+        fcenter[_notch] = _fcenter;
+        fwidth[_notch] = _fwidth;
+        nlow[_notch] = _fcenter - 0.5 * _fwidth;
+        nhigh[_notch] = _fcenter + 0.5 * _fwidth;
+        active[_notch] = _active;
+        rval = 0;
+    }
+    else
+        rval = -1;
+    return rval;
+}
+
+void NOTCHDB::getNumNotches(int* _nnotches)
+{
+    *_nnotches = nn;
 }
 
 /********************************************************************************************************
@@ -87,16 +181,16 @@ float* NBP::fir_mbandpass (int N, int nbp, double* flow, double* fhigh, double r
     return impulse;
 }
 
-double NBP::min_notch_width (NBP *a)
+double NBP::min_notch_width()
 {
     double min_width;
-    switch (a->wintype)
+    switch (wintype)
     {
     case 0:
-        min_width = 1600.0 / (a->nc / 256) * (a->rate / 48000);
+        min_width = 1600.0 / (nc / 256) * (rate / 48000);
         break;
     case 1:
-        min_width = 2200.0 / (a->nc / 256) * (a->rate / 48000);
+        min_width = 2200.0 / (nc / 256) * (rate / 48000);
         break;
     }
     return min_width;
@@ -200,485 +294,255 @@ int NBP::make_nbp (
     return nbp;
 }
 
-void NBP::calc_nbp_lightweight (NBP *a)
+void NBP::calc_lightweight()
 {   // calculate and set new impulse response; used when changing tune freq or shift freq
     int i;
     double fl, fh;
     double offset;
-    NOTCHDB *b = a->ptraddr;
-    if (a->fnfrun)
+    NOTCHDB *b = notchdb;
+    if (fnfrun)
     {
         offset = b->tunefreq + b->shift;
-        fl = a->flow  + offset;
-        fh = a->fhigh + offset;
-        a->numpb = make_nbp (
+        fl = flow  + offset;
+        fh = fhigh + offset;
+        numpb = make_nbp (
             b->nn,
             b->active,
             b->fcenter,
             b->fwidth,
             b->nlow,
             b->nhigh,
-            min_notch_width (a),
-            a->autoincr,
+            min_notch_width(),
+            autoincr,
             fl,
             fh,
-            a->bplow,
-            a->bphigh,
-            &a->havnotch
+            bplow,
+            bphigh,
+            &havnotch
         );
         // when tuning, no need to recalc filter if there were not and are not any notches in passband
-        if (a->hadnotch || a->havnotch)
+        if (hadnotch || havnotch)
         {
-            for (i = 0; i < a->numpb; i++)
+            for (i = 0; i < numpb; i++)
             {
-                a->bplow[i]  -= offset;
-                a->bphigh[i] -= offset;
+                bplow[i]  -= offset;
+                bphigh[i] -= offset;
             }
-            a->impulse = fir_mbandpass (a->nc, a->numpb, a->bplow, a->bphigh,
-                a->rate, a->gain / (float)(2 * a->size), a->wintype);
-            FIRCORE::setImpulse_fircore (a->p, a->impulse, 1);
-            // print_impulse ("nbp.txt", a->size + 1, impulse, 1, 0);
-            delete[](a->impulse);
+            impulse = fir_mbandpass (nc, numpb, bplow, bphigh,
+                rate, gain / (float)(2 * size), wintype);
+            FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+            // print_impulse ("nbp.txt", size + 1, impulse, 1, 0);
+            delete[](impulse);
         }
-        a->hadnotch = a->havnotch;
+        hadnotch = havnotch;
     }
     else
-        a->hadnotch = 1;
+        hadnotch = 1;
 }
 
-void NBP::calc_nbp_impulse (NBP *a)
+void NBP::calc_impulse ()
 {   // calculates impulse response; for create_fircore() and parameter changes
     int i;
     float fl, fh;
     double offset;
-    NOTCHDB *b = a->ptraddr;
-    if (a->fnfrun)
+    NOTCHDB *b = notchdb;
+
+    if (fnfrun)
     {
         offset = b->tunefreq + b->shift;
-        fl = a->flow  + offset;
-        fh = a->fhigh + offset;
-        a->numpb = make_nbp (
+        fl = flow  + offset;
+        fh = fhigh + offset;
+        numpb = make_nbp (
             b->nn,
             b->active,
             b->fcenter,
             b->fwidth,
             b->nlow,
             b->nhigh,
-            min_notch_width (a),
-            a->autoincr,
+            min_notch_width(),
+            autoincr,
             fl,
             fh,
-            a->bplow,
-            a->bphigh,
-            &a->havnotch
+            bplow,
+            bphigh,
+            &havnotch
         );
-        for (i = 0; i < a->numpb; i++)
+        for (i = 0; i < numpb; i++)
         {
-            a->bplow[i]  -= offset;
-            a->bphigh[i] -= offset;
+            bplow[i]  -= offset;
+            bphigh[i] -= offset;
         }
-        a->impulse = fir_mbandpass (
-            a->nc,
-            a->numpb,
-            a->bplow,
-            a->bphigh,
-            a->rate,
-            a->gain / (float)(2 * a->size),
-            a->wintype
+        impulse = fir_mbandpass (
+            nc,
+            numpb,
+            bplow,
+            bphigh,
+            rate,
+            gain / (float)(2 * size),
+            wintype
         );
     }
     else
     {
-        a->impulse = FIR::fir_bandpass(
-            a->nc,
-            a->flow,
-            a->fhigh,
-            a->rate,
-            a->wintype,
+        impulse = FIR::fir_bandpass(
+            nc,
+            flow,
+            fhigh,
+            rate,
+            wintype,
             1,
-            a->gain / (float)(2 * a->size)
+            gain / (float)(2 * size)
         );
     }
 }
 
-NBP* NBP::create_nbp(
-    int run,
-    int fnfrun,
-    int position,
-    int size,
-    int nc,
-    int mp,
-    float* in,
-    float* out,
-    double flow,
-    double fhigh,
-    int rate,
-    int wintype,
-    double gain,
-    int autoincr,
-    int maxpb,
-    NOTCHDB* ptraddr
-)
+NBP::NBP(
+    int _run,
+    int _fnfrun,
+    int _position,
+    int _size,
+    int _nc,
+    int _mp,
+    float* _in,
+    float* _out,
+    double _flow,
+    double _fhigh,
+    int _rate,
+    int _wintype,
+    double _gain,
+    int _autoincr,
+    int _maxpb,
+    NOTCHDB* _notchdb
+) :
+    run(_run),
+    fnfrun(_fnfrun),
+    position(_position),
+    size(_size),
+    nc(_nc),
+    mp(_mp),
+    rate((double) _rate),
+    wintype(_wintype),
+    gain(_gain),
+    in(_in),
+    out(_out),
+    autoincr(_autoincr),
+    flow(_flow),
+    fhigh(_fhigh),
+    maxpb(_maxpb),
+    notchdb(_notchdb)
 {
-    NBP *a = new NBP;
-    a->run = run;
-    a->fnfrun = fnfrun;
-    a->position = position;
-    a->size = size;
-    a->nc = nc;
-    a->mp = mp;
-    a->rate = (double) rate;
-    a->wintype = wintype;
-    a->gain = gain;
-    a->in = in;
-    a->out = out;
-    a->autoincr = autoincr;
-    a->flow = flow;
-    a->fhigh = fhigh;
-    a->maxpb = maxpb;
-    a->ptraddr = ptraddr;
-    a->bplow   = new double[a->maxpb]; // (float *) malloc0 (a->maxpb * sizeof (float));
-    a->bphigh  = new double[a->maxpb]; // (float *) malloc0 (a->maxpb * sizeof (float));
-    calc_nbp_impulse (a);
-    a->p = FIRCORE::create_fircore (a->size, a->in, a->out, a->nc, a->mp, a->impulse);
-    // print_impulse ("nbp.txt", a->size + 1, impulse, 1, 0);
-    delete[](a->impulse);
-    return a;
+    bplow   = new double[maxpb]; // (float *) malloc0 (maxpb * sizeof (float));
+    bphigh  = new double[maxpb]; // (float *) malloc0 (maxpb * sizeof (float));
+    calc_impulse ();
+    fircore = FIRCORE::create_fircore (size, in, out, nc, mp, impulse);
+    // print_impulse ("nbp.txt", size + 1, impulse, 1, 0);
+    delete[](impulse);
 }
 
-void NBP::destroy_nbp (NBP *a)
+NBP::~NBP()
 {
-    FIRCORE::destroy_fircore (a->p);
-    delete[] (a->bphigh);
-    delete[] (a->bplow);
-    delete (a);
+    FIRCORE::destroy_fircore (fircore);
+    delete[] (bphigh);
+    delete[] (bplow);
 }
 
-void NBP::flush_nbp (NBP *a)
+void NBP::flush()
 {
-    FIRCORE::flush_fircore (a->p);
+    FIRCORE::flush_fircore (fircore);
 }
 
-void NBP::xnbp (NBP *a, int pos)
+void NBP::execute (int pos)
 {
-    if (a->run && pos == a->position)
-        FIRCORE::xfircore (a->p);
-    else if (a->in != a->out)
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+    if (run && pos == position)
+        FIRCORE::xfircore (fircore);
+    else if (in != out)
+        std::copy( in,  in + size * 2, out);
 }
 
-void NBP::setBuffers_nbp (NBP *a, float* in, float* out)
+void NBP::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
-    FIRCORE::setBuffers_fircore (a->p, a->in, a->out);
+    in = _in;
+    out = _out;
+    FIRCORE::setBuffers_fircore (fircore, in, out);
 }
 
-void NBP::setSamplerate_nbp (NBP *a, int rate)
+void NBP::setSamplerate(int _rate)
 {
-    a->rate = rate;
-    calc_nbp_impulse (a);
-    FIRCORE::setImpulse_fircore (a->p, a->impulse, 1);
-    delete[] (a->impulse);
+    rate = _rate;
+    calc_impulse ();
+    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    delete[] (impulse);
 }
 
-void NBP::setSize_nbp (NBP *a, int size)
+void NBP::setSize(int _size)
 {
     // NOTE:  'size' must be <= 'nc'
-    a->size = size;
-    FIRCORE::setSize_fircore (a->p, a->size);
-    calc_nbp_impulse (a);
-    FIRCORE::setImpulse_fircore (a->p, a->impulse, 1);
-    delete[] (a->impulse);
+    size = _size;
+    FIRCORE::setSize_fircore (fircore, size);
+    calc_impulse ();
+    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    delete[] (impulse);
 }
 
-void NBP::setNc_nbp (NBP *a)
+void NBP::setNc()
 {
-    calc_nbp_impulse (a);
-    FIRCORE::setNc_fircore (a->p, a->nc, a->impulse);
-    delete[] (a->impulse);
+    calc_impulse();
+    FIRCORE::setNc_fircore (fircore, nc, impulse);
+    delete[] (impulse);
 }
 
-void NBP::setMp_nbp (NBP *a)
+void NBP::setMp()
 {
-    FIRCORE::setMp_fircore (a->p, a->mp);
+    FIRCORE::setMp_fircore (fircore, mp);
 }
 
 /********************************************************************************************************
 *                                                                                                       *
-*                                           RXA Properties                                              *
+*                                           Public Properties                                           *
 *                                                                                                       *
 ********************************************************************************************************/
 
-// DATABASE PROPERTIES
-
-void NBP::UpdateNBPFiltersLightWeight (RXA& rxa)
-{   // called when setting tune freq or shift freq
-    calc_nbp_lightweight (rxa.nbp0);
-    calc_nbp_lightweight (rxa.bpsnba->bpsnba);
-}
-
-void NBP::UpdateNBPFilters(RXA& rxa)
-{
-    NBP *a = rxa.nbp0;
-    BPSNBA *b = rxa.bpsnba;
-    if (a->fnfrun)
-    {
-        calc_nbp_impulse (a);
-        FIRCORE::setImpulse_fircore (a->p, a->impulse, 1);
-        delete[] (a->impulse);
-    }
-    if (b->bpsnba->fnfrun)
-    {
-        BPSNBA::recalc_bpsnba_filter (b, 1);
-    }
-}
-
-int NBP::NBPAddNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active)
-{
-    NOTCHDB *b;
-    int i, j;
-    int rval;
-    b = rxa.ndb;
-    if (notch <= b->nn && b->nn < b->maxnotches)
-    {
-        b->nn++;
-        for (i = b->nn - 2, j = b->nn - 1; i >= notch; i--, j--)
-        {
-            b->fcenter[j] = b->fcenter[i];
-            b->fwidth[j] = b->fwidth[i];
-            b->nlow[j] = b->nlow[i];
-            b->nhigh[j] = b->nhigh[i];
-            b->active[j] = b->active[i];
-        }
-        b->fcenter[notch] = fcenter;
-        b->fwidth[notch] = fwidth;
-        b->nlow[notch] = fcenter - 0.5 * fwidth;
-        b->nhigh[notch] = fcenter + 0.5 * fwidth;
-        b->active[notch] = active;
-        UpdateNBPFilters (rxa);
-        rval = 0;
-    }
-    else
-        rval = -1;
-    return rval;
-}
-
-int NBP::NBPGetNotch (RXA& rxa, int notch, double* fcenter, double* fwidth, int* active)
-{
-    NOTCHDB *a;
-    int rval;
-    a = rxa.ndb;
-
-    if (notch < a->nn)
-    {
-        *fcenter = a->fcenter[notch];
-        *fwidth = a->fwidth[notch];
-        *active = a->active[notch];
-        rval = 0;
-    }
-    else
-    {
-        *fcenter = -1.0;
-        *fwidth = 0.0;
-        *active = -1;
-        rval = -1;
-    }
-
-    return rval;
-}
-
-int NBP::NBPDeleteNotch (RXA& rxa, int notch)
-{
-    int i, j;
-    int rval;
-    NOTCHDB *a;
-    a = rxa.ndb;
-    if (notch < a->nn)
-    {
-        a->nn--;
-        for (i = notch, j = notch + 1; i < a->nn; i++, j++)
-        {
-            a->fcenter[i] = a->fcenter[j];
-            a->fwidth[i] = a->fwidth[j];
-            a->nlow[i] = a->nlow[j];
-            a->nhigh[i] = a->nhigh[j];
-            a->active[i] = a->active[j];
-        }
-        UpdateNBPFilters (rxa);
-        rval = 0;
-    }
-    else
-        rval = -1;
-    return rval;
-}
-
-int NBP::NBPEditNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active)
-{
-    NOTCHDB *a;
-    int rval;
-    a = rxa.ndb;
-    if (notch < a->nn)
-    {
-        a->fcenter[notch] = fcenter;
-        a->fwidth[notch] = fwidth;
-        a->nlow[notch] = fcenter - 0.5 * fwidth;
-        a->nhigh[notch] = fcenter + 0.5 * fwidth;
-        a->active[notch] = active;
-        UpdateNBPFilters (rxa);
-        rval = 0;
-    }
-    else
-        rval = -1;
-    return rval;
-}
-
-void NBP::NBPGetNumNotches (RXA& rxa, int* nnotches)
-{
-    NOTCHDB *a;
-    a = rxa.ndb;
-    *nnotches = a->nn;
-}
-
-void NBP::NBPSetTuneFrequency (RXA& rxa, double tunefreq)
-{
-    NOTCHDB *a;
-    a = rxa.ndb;
-
-    if (tunefreq != a->tunefreq)
-    {
-        a->tunefreq = tunefreq;
-        UpdateNBPFiltersLightWeight (rxa);
-    }
-}
-
-void NBP::NBPSetShiftFrequency (RXA& rxa, double shift)
-{
-    NOTCHDB *a;
-    a = rxa.ndb;
-    if (shift != a->shift)
-    {
-        a->shift = shift;
-        UpdateNBPFiltersLightWeight (rxa);
-    }
-}
-
-void NBP::NBPSetNotchesRun (RXA& rxa, int run)
-{
-    NOTCHDB *a = rxa.ndb;
-    NBP *b = rxa.nbp0;
-
-    if ( run != a->master_run)
-    {
-        a->master_run = run;                            // update variables
-        b->fnfrun = a->master_run;
-        RXA::bpsnbaCheck (rxa, rxa.mode, run);
-        calc_nbp_impulse (b);                           // recalc nbp impulse response
-        FIRCORE::setImpulse_fircore (b->p, b->impulse, 0);       // calculate new filter masks
-        delete[] (b->impulse);
-        RXA::bpsnbaSet (rxa);
-        FIRCORE::setUpdate_fircore (b->p);                       // apply new filter masks
-    }
-}
-
 // FILTER PROPERTIES
 
-void NBP::NBPSetRun (RXA& rxa, int run)
+void NBP::SetRun(int _run)
 {
-    NBP *a;
-    a = rxa.nbp0;
-    a->run = run;
+    run = _run;
 }
 
-void NBP::NBPSetFreqs (RXA& rxa, double flow, double fhigh)
+void NBP::SetFreqs(double _flow, double _fhigh)
 {
-    NBP *a;
-    a = rxa.nbp0;
-
-    if ((flow != a->flow) || (fhigh != a->fhigh))
+    if ((flow != _flow) || (fhigh != _fhigh))
     {
-        a->flow = flow;
-        a->fhigh = fhigh;
-        calc_nbp_impulse (a);
-        FIRCORE::setImpulse_fircore (a->p, a->impulse, 1);
-        delete[] (a->impulse);
+        flow = _flow;
+        fhigh = _fhigh;
+        calc_impulse();
+        FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+        delete[] (impulse);
     }
 }
 
-void NBP::NBPSetWindow (RXA& rxa, int wintype)
-{
-    NBP *a;
-    BPSNBA *b;
-    a = rxa.nbp0;
-    b = rxa.bpsnba;
-
-    if ((a->wintype != wintype))
-    {
-        a->wintype = wintype;
-        calc_nbp_impulse (a);
-        FIRCORE::setImpulse_fircore (a->p, a->impulse, 1);
-        delete[] (a->impulse);
-    }
-
-    if ((b->wintype != wintype))
-    {
-        b->wintype = wintype;
-        BPSNBA::recalc_bpsnba_filter (b, 1);
-    }
-}
-
-void NBP::NBPSetNC (RXA& rxa, int nc)
+void NBP::SetNC(int _nc)
 {
     // NOTE:  'nc' must be >= 'size'
-    NBP *a;
-    a = rxa.nbp0;
-
-    if (a->nc != nc)
+    if (nc != _nc)
     {
-        a->nc = nc;
-        setNc_nbp (a);
+        nc = _nc;
+        setNc();
     }
 }
 
-void NBP::NBPSetMP (RXA& rxa, int mp)
+void NBP::SetMP(int _mp)
 {
-    NBP *a;
-    a = rxa.nbp0;
-
-    if (a->mp != mp)
+    if (mp != _mp)
     {
-        a->mp = mp;
-        setMp_nbp (a);
+        mp = _mp;
+        setMp();
     }
 }
 
-void NBP::NBPGetMinNotchWidth (RXA& rxa, double* minwidth)
+void NBP::GetMinNotchWidth(double* minwidth)
 {
-    NBP *a;
-    a = rxa.nbp0;
-    *minwidth = min_notch_width (a);
-}
-
-void NBP::NBPSetAutoIncrease (RXA& rxa, int autoincr)
-{
-    NBP *a;
-    BPSNBA *b;
-    a = rxa.nbp0;
-    b = rxa.bpsnba;
-
-    if ((a->autoincr != autoincr))
-    {
-        a->autoincr = autoincr;
-        calc_nbp_impulse (a);
-        FIRCORE::setImpulse_fircore (a->p, a->impulse, 1);
-        delete[] (a->impulse);
-    }
-
-    if ((b->autoincr != autoincr))
-    {
-        b->autoincr = autoincr;
-        BPSNBA::recalc_bpsnba_filter (b, 1);
-    }
+    *minwidth = min_notch_width();
 }
 
 } // namespace WDSP

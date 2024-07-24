@@ -54,7 +54,7 @@ namespace WDSP {
 void BPSNBA::calc_bpsnba (BPSNBA *a)
 {
     a->buff = new float[a->size * 2]; // (double *) malloc0 (a->size * sizeof (complex));
-    a->bpsnba = NBP::create_nbp (
+    a->bpsnba = new NBP (
         1,                          // run, always runs (use bpsnba 'run')
         a->run_notches,             // run the notches
         0,                          // position variable for nbp (not for bpsnba), always 0
@@ -119,7 +119,7 @@ BPSNBA* BPSNBA::create_bpsnba (
 
 void BPSNBA::decalc_bpsnba (BPSNBA *a)
 {
-    NBP::destroy_nbp (a->bpsnba);
+    delete (a->bpsnba);
     delete[] (a->buff);
 }
 
@@ -132,7 +132,7 @@ void BPSNBA::destroy_bpsnba (BPSNBA *a)
 void BPSNBA::flush_bpsnba (BPSNBA *a)
 {
     std::fill(a->buff, a->buff + a->size * 2, 0);
-    NBP::flush_nbp (a->bpsnba);
+    a->bpsnba->flush();
 }
 
 void BPSNBA::setBuffers_bpsnba (BPSNBA *a, float* in, float* out)
@@ -166,7 +166,7 @@ void BPSNBA::xbpsnbain (BPSNBA *a, int position)
 void BPSNBA::xbpsnbaout (BPSNBA *a, int position)
 {
     if (a->run && a->position == position)
-        NBP::xnbp (a->bpsnba, 0);
+        a->bpsnba->execute(0);
 }
 
 void BPSNBA::recalc_bpsnba_filter (BPSNBA *a, int update)
@@ -180,8 +180,8 @@ void BPSNBA::recalc_bpsnba_filter (BPSNBA *a, int update)
     b->wintype = a->wintype;
     b->gain = a->gain;
     b->autoincr = a->autoincr;
-    NBP::calc_nbp_impulse (b);
-    FIRCORE::setImpulse_fircore (b->p, b->impulse, update);
+    b->calc_impulse();
+    FIRCORE::setImpulse_fircore (b->fircore, b->impulse, update);
     delete[] (b->impulse);
 }
 
@@ -199,7 +199,7 @@ void BPSNBA::BPSNBASetNC (RXA& rxa, int nc)
     {
         a->nc = nc;
         a->bpsnba->nc = a->nc;
-        NBP::setNc_nbp (a->bpsnba);
+        a->bpsnba->setNc();
     }
 }
 
@@ -211,7 +211,7 @@ void BPSNBA::BPSNBASetMP (RXA& rxa, int mp)
     {
         a->mp = mp;
         a->bpsnba->mp = a->mp;
-        NBP::setMp_nbp (a->bpsnba);
+        a->bpsnba->setMp();
     }
 }
 

@@ -156,12 +156,12 @@ RXA* RXA::create_rxa (
     // Notched bandpass section
 
     // notch database
-    rxa->ndb = NOTCHDB::create_notchdb (
+    rxa->ndb = new NOTCHDB (
         0,                                      // master run for all nbp's
         1024);                                  // max number of notches
 
     // notched bandpass
-    rxa->nbp0 = NBP::create_nbp (
+    rxa->nbp0 = new NBP (
         1,                                      // run, always runs
         0,                                      // run the notches
         0,                                      // position
@@ -585,8 +585,8 @@ void RXA::destroy_rxa (RXA *rxa)
     delete (rxa->smeter);
     SENDER::destroy_sender (rxa->sender);
     BPSNBA::destroy_bpsnba (rxa->bpsnba);
-    NBP::destroy_nbp (rxa->nbp0);
-    NOTCHDB::destroy_notchdb (rxa->ndb);
+    delete (rxa->nbp0);
+    delete (rxa->ndb);
     delete (rxa->adcmeter);
     delete (rxa->rsmpin);
     delete (rxa->shift);
@@ -608,7 +608,7 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->shift->flush();
     rxa->rsmpin->flush();
     rxa->adcmeter->flush();
-    NBP::flush_nbp (rxa->nbp0);
+    rxa->nbp0->flush();
     BPSNBA::flush_bpsnba (rxa->bpsnba);
     SENDER::flush_sender (rxa->sender);
     rxa->smeter->flush();
@@ -641,7 +641,7 @@ void RXA::xrxa (RXA *rxa)
     rxa->rsmpin->execute();
     rxa->adcmeter->execute();
     BPSNBA::xbpsnbain (rxa->bpsnba, 0);
-    NBP::xnbp (rxa->nbp0, 0);
+    rxa->nbp0->execute(0);
     rxa->smeter->execute();
     SENDER::xsender (rxa->sender);
     AMSQ::xamsqcap (rxa->amsq);
@@ -753,7 +753,7 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->rsmpin->setOutRate(rxa->dsp_rate);
     // dsp_rate blocks
     rxa->adcmeter->setSamplerate(rxa->dsp_rate);
-    NBP::setSamplerate_nbp (rxa->nbp0, rxa->dsp_rate);
+    rxa->nbp0->setSamplerate(rxa->dsp_rate);
     BPSNBA::setSamplerate_bpsnba (rxa->bpsnba, rxa->dsp_rate);
     rxa->smeter->setSamplerate(rxa->dsp_rate);
     SENDER::setSamplerate_sender (rxa->sender, rxa->dsp_rate);
@@ -817,8 +817,8 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     // dsp_size blocks
     rxa->adcmeter->setBuffers(rxa->midbuff);
     rxa->adcmeter->setSize(rxa->dsp_size);
-    NBP::setBuffers_nbp (rxa->nbp0, rxa->midbuff, rxa->midbuff);
-    NBP::setSize_nbp (rxa->nbp0, rxa->dsp_size);
+    rxa->nbp0->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->nbp0->setSize(rxa->dsp_size);
     BPSNBA::setBuffers_bpsnba (rxa->bpsnba, rxa->midbuff, rxa->midbuff);
     BPSNBA::setSize_bpsnba (rxa->bpsnba, rxa->dsp_size);
     rxa->smeter->setBuffers(rxa->midbuff);
@@ -1066,7 +1066,163 @@ void RXA::bpsnbaSet (RXA& rxa)
             a->run = 0;
             break;
     }
-    FIRCORE::setUpdate_fircore (a->bpsnba->p);
+    FIRCORE::setUpdate_fircore (a->bpsnba->fircore);
+}
+
+void RXA::UpdateNBPFiltersLightWeight (RXA& rxa)
+{   // called when setting tune freq or shift freq
+    rxa.nbp0->calc_lightweight();
+    rxa.bpsnba->bpsnba->calc_lightweight();
+}
+
+void RXA::UpdateNBPFilters(RXA& rxa)
+{
+    NBP *a = rxa.nbp0;
+    BPSNBA *b = rxa.bpsnba;
+    if (a->fnfrun)
+    {
+        a->calc_impulse();
+        FIRCORE::setImpulse_fircore (a->fircore, a->impulse, 1);
+        delete[] (a->impulse);
+    }
+    if (b->bpsnba->fnfrun)
+    {
+        BPSNBA::recalc_bpsnba_filter (b, 1);
+    }
+}
+
+int RXA::NBPAddNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active)
+{
+    NOTCHDB *b = rxa.ndb;
+    int rval = b->addNotch(notch, fcenter, fwidth, active);
+
+    if (rval == 0) {
+        RXA::UpdateNBPFilters (rxa);
+    }
+
+    return rval;
+}
+
+int RXA::NBPGetNotch (RXA& rxa, int notch, double* fcenter, double* fwidth, int* active)
+{
+    NOTCHDB *a = rxa.ndb;
+    int rval = a->getNotch(notch, fcenter, fwidth, active);
+    return rval;
+}
+
+int RXA::NBPDeleteNotch (RXA& rxa, int notch)
+{
+    NOTCHDB *a = rxa.ndb;
+    int rval = a->deleteNotch(notch);
+
+    if (rval == 0) {
+        RXA::UpdateNBPFilters (rxa);
+    }
+
+    return rval;
+}
+
+int RXA::NBPEditNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active)
+{
+    NOTCHDB *a = rxa.ndb;
+    int rval = a->editNotch(notch, fcenter, fwidth, active);
+
+    if (rval == 0) {
+        RXA::UpdateNBPFilters (rxa);
+    }
+
+    return rval;
+}
+
+void RXA::NBPGetNumNotches (RXA& rxa, int* nnotches)
+{
+    NOTCHDB *a = rxa.ndb;
+    a->getNumNotches(nnotches);
+}
+
+void RXA::NBPSetTuneFrequency (RXA& rxa, double tunefreq)
+{
+    NOTCHDB *a;
+    a = rxa.ndb;
+
+    if (tunefreq != a->tunefreq)
+    {
+        a->tunefreq = tunefreq;
+        RXA::UpdateNBPFiltersLightWeight (rxa);
+    }
+}
+
+void RXA::NBPSetShiftFrequency (RXA& rxa, double shift)
+{
+    NOTCHDB *a;
+    a = rxa.ndb;
+    if (shift != a->shift)
+    {
+        a->shift = shift;
+        RXA::UpdateNBPFiltersLightWeight (rxa);
+    }
+}
+
+void RXA::NBPSetNotchesRun (RXA& rxa, int run)
+{
+    NOTCHDB *a = rxa.ndb;
+    NBP *b = rxa.nbp0;
+
+    if ( run != a->master_run)
+    {
+        a->master_run = run;                            // update variables
+        b->fnfrun = a->master_run;
+        RXA::bpsnbaCheck (rxa, rxa.mode, run);
+        b->calc_impulse();                           // recalc nbp impulse response
+        FIRCORE::setImpulse_fircore (b->fircore, b->impulse, 0);       // calculate new filter masks
+        delete[] (b->impulse);
+        RXA::bpsnbaSet (rxa);
+        FIRCORE::setUpdate_fircore (b->fircore);                       // apply new filter masks
+    }
+}
+
+void RXA::NBPSetWindow (RXA& rxa, int wintype)
+{
+    NBP *a;
+    BPSNBA *b;
+    a = rxa.nbp0;
+    b = rxa.bpsnba;
+
+    if ((a->wintype != wintype))
+    {
+        a->wintype = wintype;
+        a->calc_impulse();
+        FIRCORE::setImpulse_fircore (a->fircore, a->impulse, 1);
+        delete[] (a->impulse);
+    }
+
+    if ((b->wintype != wintype))
+    {
+        b->wintype = wintype;
+        BPSNBA::recalc_bpsnba_filter (b, 1);
+    }
+}
+
+void RXA::NBPSetAutoIncrease (RXA& rxa, int autoincr)
+{
+    NBP *a;
+    BPSNBA *b;
+    a = rxa.nbp0;
+    b = rxa.bpsnba;
+
+    if ((a->autoincr != autoincr))
+    {
+        a->autoincr = autoincr;
+        a->calc_impulse();
+        FIRCORE::setImpulse_fircore (a->fircore, a->impulse, 1);
+        delete[] (a->impulse);
+    }
+
+    if ((b->autoincr != autoincr))
+    {
+        b->autoincr = autoincr;
+        BPSNBA::recalc_bpsnba_filter (b, 1);
+    }
 }
 
 /********************************************************************************************************
@@ -1079,13 +1235,13 @@ void RXA::SetPassband (RXA& rxa, float f_low, float f_high)
 {
     BANDPASS::SetBandpassFreqs   (rxa, f_low, f_high); // After spectral noise reduction ( AM || ANF || ANR || EMNR)
     SNBA::SetSNBAOutputBandwidth (rxa, f_low, f_high); // Spectral noise blanker (SNB)
-    NBP::NBPSetFreqs             (rxa, f_low, f_high); // Notched bandpass
+    rxa.nbp0->SetFreqs                (f_low, f_high); // Notched bandpass
 }
 
 void RXA::SetNC (RXA& rxa, int nc)
 {
     int oldstate = rxa.state;
-    NBP::NBPSetNC           (rxa, nc);
+    rxa.nbp0->SetNC              (nc);
     BPSNBA::BPSNBASetNC     (rxa, nc);
     BANDPASS::SetBandpassNC (rxa, nc);
     EQP::SetEQNC            (rxa, nc);
@@ -1097,7 +1253,7 @@ void RXA::SetNC (RXA& rxa, int nc)
 
 void RXA::SetMP (RXA& rxa, int mp)
 {
-    NBP::NBPSetMP           (rxa, mp);
+    rxa.nbp0->SetMP              (mp);
     BPSNBA::BPSNBASetMP     (rxa, mp);
     BANDPASS::SetBandpassMP (rxa, mp);
     EQP::SetEQMP            (rxa, mp);

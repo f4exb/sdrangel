@@ -447,7 +447,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_audioSampleRate;
 
         WDSP::RXA::SetPassband(*m_rxa, fLow, fHigh);
-        WDSP::NBP::NBPSetWindow(*m_rxa, m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow);
+        WDSP::RXA::NBPSetWindow(*m_rxa, m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow);
 
         if (settings.m_demod == WDSPRxProfile::DemodSSB)
         {

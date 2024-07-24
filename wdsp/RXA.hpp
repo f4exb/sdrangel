@@ -154,6 +154,19 @@ public:
     static void bp1Set (RXA& rxa);
     static void bpsnbaCheck (RXA& rxa, int mode, int notch_run);
     static void bpsnbaSet (RXA& rxa);
+    // NOTCHDB, NBP, SNBA
+    static void UpdateNBPFiltersLightWeight (RXA& rxa);
+    static void UpdateNBPFilters(RXA& rxa);
+    static int NBPAddNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active);
+    static int NBPGetNotch (RXA& rxa, int notch, double* fcenter, double* fwidth, int* active);
+    static int NBPDeleteNotch (RXA& rxa, int notch);
+    static int NBPEditNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active);
+    static void NBPGetNumNotches (RXA& rxa, int* nnotches);
+    static void NBPSetTuneFrequency (RXA& rxa, double tunefreq);
+    static void NBPSetShiftFrequency (RXA& rxa, double shift);
+    static void NBPSetNotchesRun (RXA& rxa, int run);
+    static void NBPSetWindow (RXA& rxa, int wintype);
+    static void NBPSetAutoIncrease (RXA& rxa, int autoincr);
 
     // Collectives
     static void SetPassband (RXA& rxa, float f_low, float f_high);
