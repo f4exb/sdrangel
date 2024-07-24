@@ -61,7 +61,7 @@ public:
     void SetFreq (double fshift);
 
 private:
-    void calc_shift ();
+    void calc();
 };
 
 } // namespace WDSP

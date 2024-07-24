@@ -37,7 +37,7 @@ namespace WDSP {
 *                                                                                               *
 ************************************************************************************************/
 
-void RESAMPLE::calc_resample()
+void RESAMPLE::calc()
 {
     int x, y, z;
     int i, j, k;
@@ -102,7 +102,7 @@ void RESAMPLE::calc_resample()
     delete[] (impulse);
 }
 
-void RESAMPLE::decalc_resample()
+void RESAMPLE::decalc()
 {
     delete[] ring;
     delete[] h;
@@ -118,24 +118,24 @@ RESAMPLE::RESAMPLE (
     double _fc,
     int _ncoef,
     double _gain
-)
+) :
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    in_rate(_in_rate),
+    out_rate(_out_rate),
+    fcin(_fc),
+    fc_low(-1.0),       // could add to create_resample() parameters
+    ncoefin(_ncoef),
+    gain(_gain)
 {
-    run = _run;
-    size = _size;
-    in = _in;
-    out = _out;
-    in_rate = _in_rate;
-    out_rate = _out_rate;
-    fcin = _fc;
-    fc_low = -1.0;       // could add to create_resample() parameters
-    ncoefin = _ncoef;
-    gain = _gain;
-    calc_resample();
+    calc();
 }
 
 RESAMPLE::~RESAMPLE()
 {
-    decalc_resample();
+    decalc();
 }
 
 
@@ -210,25 +210,25 @@ void RESAMPLE::setSize(int _size)
 
 void RESAMPLE::setInRate(int _rate)
 {
-    decalc_resample();
+    decalc();
     in_rate = _rate;
-    calc_resample();
+    calc();
 }
 
 void RESAMPLE::setOutRate(int _rate)
 {
-    decalc_resample();
+    decalc();
     out_rate = _rate;
-    calc_resample();
+    calc();
 }
 
 void RESAMPLE::setFCLow(double _fc_low)
 {
     if (fc_low != _fc_low)
     {
-        decalc_resample();
+        decalc();
         fc_low = _fc_low;
-        calc_resample();
+        calc();
     }
 }
 
@@ -236,10 +236,10 @@ void RESAMPLE::setBandwidth(double _fc_low, double _fc_high)
 {
     if (fc_low != _fc_low || _fc_high != fcin)
     {
-        decalc_resample();
+        decalc();
         fc_low = _fc_low;
         fcin = _fc_high;
-        calc_resample();
+        calc();
     }
 }
 

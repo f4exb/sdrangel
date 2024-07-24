@@ -39,7 +39,7 @@ warren@wpratt.com
 
 namespace WDSP {
 
-void NOB::init_nob()
+void NOB::init()
 {
     int i;
     double coef;
@@ -85,21 +85,21 @@ NOB::NOB (
     double _max_imp_seq_time,
     double _backtau,
     double _threshold
-)
+) :
+    run(_run),
+    buffsize(_buffsize),
+    in(_in),
+    out(_out),
+    samplerate(_samplerate),
+    mode(_mode),
+    advslewtime(_advslewtime),
+    advtime(_advtime),
+    hangslewtime(_hangslewtime),
+    hangtime(_hangtime),
+    max_imp_seq_time(_max_imp_seq_time),
+    backtau(_backtau),
+    threshold(_threshold)
 {
-    run = _run;
-    buffsize = _buffsize;
-    in = _in;
-    out = _out;
-    samplerate = _samplerate;
-    mode = _mode;
-    advslewtime = _advslewtime;
-    advtime = _advtime;
-    hangslewtime = _hangslewtime;
-    hangtime = _hangtime;
-    max_imp_seq_time = _max_imp_seq_time;
-    backtau = _backtau;
-    threshold = _threshold;
     dline_size = (int)(MAX_SAMPLERATE * (
         MAX_ADV_SLEW_TIME +
         MAX_ADV_TIME +
@@ -126,7 +126,7 @@ NOB::NOB (
     fcoefs[8] = 0.017797128;
     fcoefs[9] = 0.012457989;
 
-    init_nob();
+    init();
 }
 
 NOB::~NOB()
@@ -621,32 +621,32 @@ void NOB::setBuffsize(int size)
 void NOB::setSamplerate(int rate)
 {
     samplerate = (double) rate;
-    init_nob();
+    init();
 }
 
 void NOB::setTau(double tau)
 {
     advslewtime = tau;
     hangslewtime = tau;
-    init_nob();
+    init();
 }
 
 void NOB::setHangtime(double _time)
 {
     hangtime = _time;
-    init_nob();
+    init();
 }
 
 void NOB::setAdvtime(double _time)
 {
     advtime = _time;
-    init_nob();
+    init();
 }
 
 void NOB::setBacktau(double tau)
 {
     backtau = tau;
-    init_nob();
+    init();
 }
 
 void NOB::setThreshold(double thresh)

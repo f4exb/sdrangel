@@ -31,23 +31,30 @@ warren@wpratt.com
 
 namespace WDSP {
 
-void SHIFT::calc_shift()
+void SHIFT::calc()
 {
     delta = TWOPI * shift / rate;
     cos_delta = cos (delta);
     sin_delta = sin (delta);
 }
 
-SHIFT::SHIFT (int _run, int _size, float* _in, float* _out, int _rate, double _fshift)
+SHIFT::SHIFT (
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    int _rate,
+    double _fshift
+) :
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    rate((double) _rate),
+    shift(_fshift)
 {
-    run = _run;
-    size = _size;
-    in = _in;
-    out = _out;
-    rate = (double) _rate;
-    shift = _fshift;
     phase = 0.0;
-    calc_shift();
+    calc();
 }
 
 void SHIFT::flush()
@@ -99,7 +106,7 @@ void SHIFT::setSamplerate(int _rate)
 {
     rate = _rate;
     phase = 0.0;
-    calc_shift();
+    calc();
 }
 
 void SHIFT::setSize(int _size)
@@ -119,10 +126,10 @@ void SHIFT::SetRun (int _run)
     run = _run;
 }
 
-void SHIFT::SetFreq(double fshift)
+void SHIFT::SetFreq(double _fshift)
 {
-    shift = fshift;
-    calc_shift();
+    shift = _fshift;
+    calc();
 }
 
 } // namespace WDSP

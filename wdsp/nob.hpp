@@ -41,11 +41,11 @@ public:
     int buffsize;                   // size of input/output buffer
     float* in;                     // input buffer
     float* out;                    // output buffer
-    int mode;
     int dline_size;                 // length of delay line which is 'double dline[length][2]'
     double *dline;                  // pointer to delay line
     int *imp;
     double samplerate;              // samplerate, used to convert times into sample counts
+    int mode;
     double advslewtime;                     // transition time, signal<->zero
     double advtime;                 // deadtime (zero output) in advance of detected noise
     double hangslewtime;
@@ -116,7 +116,7 @@ public:
     void setThreshold (double thresh);
 
 private:
-    void init_nob();
+    void init();
 };
 
 

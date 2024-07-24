@@ -72,18 +72,18 @@ ANB::ANB  (
     double _advtime,
     double _backtau,
     double _threshold
-)
+) :
+    run(_run),
+    buffsize(_buffsize),
+    in(_in),
+    out(_out),
+    samplerate(_samplerate),
+    tau(_tau),
+    hangtime(_hangtime),
+    advtime(_advtime),
+    backtau(_backtau),
+    threshold(_threshold)
 {
-    run = _run;
-    buffsize = _buffsize;
-    in = _in;
-    out = _out;
-    samplerate = _samplerate;
-    tau = _tau;
-    hangtime = _hangtime;
-    advtime = _advtime;
-    backtau = _backtau;
-    threshold = _threshold;
     wave = new double[((int)(MAX_SAMPLERATE * MAX_TAU) + 1)];
     dline_size = (int)((MAX_TAU + MAX_ADVTIME) * MAX_SAMPLERATE) + 1;
     dline = new float[dline_size * 2];

@@ -50,9 +50,9 @@ public:
     double fcin;
     double fc;
     double fc_low;
-    double gain;
     int idx_in;         // index for input into ring
     int ncoefin;
+    double gain;
     int ncoef;          // number of coefficients
     int L;              // interpolation factor
     int M;              // decimation factor
@@ -89,8 +89,8 @@ public:
     static void destroyV (void* ptr);
 
 private:
-    void calc_resample();
-    void decalc_resample();
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP
