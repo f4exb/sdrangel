@@ -37,7 +37,6 @@ namespace WDSP {
 class METER;
 class SHIFT;
 class RESAMPLE;
-class GEN;
 class BANDPASS;
 class BPS;
 class NOTCHDB;
@@ -102,7 +101,6 @@ public:
     NOB *nob;
     SHIFT *shift;
     RESAMPLE *rsmpin;
-    GEN *gen0;
     METER *adcmeter;
     NOTCHDB *ndb;
     NBP *nbp0;

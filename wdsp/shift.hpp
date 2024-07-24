@@ -32,8 +32,6 @@ warren@wpratt.com
 
 namespace WDSP {
 
-class RXA;
-
 class WDSP_API SHIFT
 {
 public:

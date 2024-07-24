@@ -32,7 +32,6 @@ warren@wpratt.com
 
 namespace WDSP {
 
-class RXA;
 class TXA;
 
 class WDSP_API GEN
@@ -121,22 +120,30 @@ public:
         int state;
     } pulse;
 
-    static GEN* create_gen (int run, int size, float* in, float* out, int rate, int mode);
-    static void destroy_gen (GEN *a);
-    static void flush_gen (GEN *a);
-    static void xgen (GEN *a);
-    static void setBuffers_gen (GEN *a, float* in, float* out);
-    static void setSamplerate_gen (GEN *a, int rate);
-    static void setSize_gen (GEN *a, int size);
-    // RXA Properties
-    static void SetPreGenRun (RXA& rxa, int run);
-    static void SetPreGenMode (RXA& rxa, int mode);
-    static void SetPreGenToneMag (RXA& rxa, float mag);
-    static void SetPreGenToneFreq (RXA& rxa, float freq);
-    static void SetPreGenNoiseMag (RXA& rxa, float mag);
-    static void SetPreGenSweepMag (RXA& rxa, float mag);
-    static void SetPreGenSweepFreq (RXA& rxa, float freq1, float freq2);
-    static void SetPreGenSweepRate (RXA& rxa, float rate);
+    GEN(
+        int run,
+        int size,
+        float* in,
+        float* out,
+        int rate,
+        int mode
+    );
+    ~GEN();
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Public Properties
+    void SetPreRun(int run);
+    void SetPreMode(int mode);
+    void SetPreToneMag(float mag);
+    void SetPreToneFreq(float freq);
+    void SetPreNoiseMag(float mag);
+    void SetPreSweepMag(float mag);
+    void SetPreSweepFreq(float freq1, float freq2);
+    void SetPreSweepRate(float rate);
     // TXA Properties
     static void SetPreGenRun (TXA& txa, int run);
     static void SetPreGenMode (TXA& txa, int mode);
@@ -168,14 +175,14 @@ public:
     static void SetPostGenSweepRate (TXA& txa, float rate);
 
 private:
-    static void calc_tone (GEN *a);
-    static void calc_tt (GEN *a);
-    static void calc_sweep (GEN *a);
-    static void calc_sawtooth (GEN *a);
-    static void calc_triangle (GEN *a);
-    static void calc_pulse (GEN *a);
-    static void calc_gen (GEN *a);
-    static void decalc_gen (GEN *a);
+    void calc_tone();
+    void calc_tt();
+    void calc_sweep();
+    void calc_sawtooth();
+    void calc_triangle();
+    void calc_pulse();
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP

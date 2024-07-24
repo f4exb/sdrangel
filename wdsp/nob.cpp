@@ -35,7 +35,6 @@ warren@wpratt.com
 #define MAX_SAMPLERATE              (1536000.0)
 
 #include "nob.hpp"
-#include "RXA.hpp"
 
 namespace WDSP {
 

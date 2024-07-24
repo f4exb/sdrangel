@@ -32,7 +32,6 @@ warren@wpratt.com
 #include "meter.hpp"
 #include "shift.hpp"
 #include "resample.hpp"
-#include "gen.hpp"
 #include "bandpass.hpp"
 #include "bps.hpp"
 #include "nbp.hpp"
@@ -138,15 +137,6 @@ RXA* RXA::create_rxa (
         0.0,                                    // select cutoff automatically
         0,                                      // select ncoef automatically
         1.0);                                   // gain
-
-    // Signal generator
-    rxa->gen0 = GEN::create_gen (
-        0,                                      // run
-        rxa->dsp_size,                          // buffer size
-        rxa->midbuff,                           // input buffer
-        rxa->midbuff,                           // output buffer
-        rxa->dsp_rate,                          // sample rate
-        2);                                     // mode
 
     // Input meter - ADC
     rxa->adcmeter = METER::create_meter (
@@ -598,7 +588,6 @@ void RXA::destroy_rxa (RXA *rxa)
     NBP::destroy_nbp (rxa->nbp0);
     NOTCHDB::destroy_notchdb (rxa->ndb);
     METER::destroy_meter (rxa->adcmeter);
-    GEN::destroy_gen (rxa->gen0);
     delete (rxa->rsmpin);
     delete (rxa->shift);
     delete (rxa->nob);
@@ -618,7 +607,6 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->nob->flush();
     rxa->shift->flush();
     rxa->rsmpin->flush();
-    GEN::flush_gen (rxa->gen0);
     METER::flush_meter (rxa->adcmeter);
     NBP::flush_nbp (rxa->nbp0);
     BPSNBA::flush_bpsnba (rxa->bpsnba);
@@ -651,7 +639,6 @@ void RXA::xrxa (RXA *rxa)
     rxa->nob->execute();
     rxa->shift->execute();
     rxa->rsmpin->execute();
-    GEN::xgen (rxa->gen0);
     METER::xmeter (rxa->adcmeter);
     BPSNBA::xbpsnbain (rxa->bpsnba, 0);
     NBP::xnbp (rxa->nbp0, 0);
@@ -765,7 +752,6 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->rsmpin->setSize(rxa->dsp_insize);
     rxa->rsmpin->setOutRate(rxa->dsp_rate);
     // dsp_rate blocks
-    GEN::setSamplerate_gen (rxa->gen0, rxa->dsp_rate);
     METER::setSamplerate_meter (rxa->adcmeter, rxa->dsp_rate);
     NBP::setSamplerate_nbp (rxa->nbp0, rxa->dsp_rate);
     BPSNBA::setSamplerate_bpsnba (rxa->bpsnba, rxa->dsp_rate);
@@ -829,8 +815,6 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->rsmpin->setBuffers(rxa->inbuff, rxa->midbuff);
     rxa->rsmpin->setSize(rxa->dsp_insize);
     // dsp_size blocks
-    GEN::setBuffers_gen (rxa->gen0, rxa->midbuff, rxa->midbuff);
-    GEN::setSize_gen (rxa->gen0, rxa->dsp_size);
     METER::setBuffers_meter (rxa->adcmeter, rxa->midbuff);
     METER::setSize_meter (rxa->adcmeter, rxa->dsp_size);
     NBP::setBuffers_nbp (rxa->nbp0, rxa->midbuff, rxa->midbuff);

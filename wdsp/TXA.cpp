@@ -93,7 +93,7 @@ TXA* TXA::create_txa (
         0,                                          // select ncoef automatically
         1.0);                                       // gain
 
-    txa->gen0.p = GEN::create_gen (
+    txa->gen0.p = new GEN(
         0,                                          // run
         txa->dsp_size,                       // buffer size
         txa->midbuff,                       // input buffer
@@ -397,7 +397,7 @@ TXA* TXA::create_txa (
         std::max(2048, txa->dsp_size),            // number coefficients for bandpass filter
         0);                                         // minimum phase flag
 
-    txa->gen1.p = GEN::create_gen (
+    txa->gen1.p = new GEN(
         0,                                          // run
         txa->dsp_size,                       // buffer size
         txa->midbuff,                       // input buffer
@@ -527,7 +527,7 @@ void TXA::destroy_txa (TXA *txa)
     SIPHON::destroy_siphon (txa->sip1.p);
     METER::destroy_meter (txa->alcmeter.p);
     USLEW::destroy_uslew (txa->uslew.p);
-    GEN::destroy_gen (txa->gen1.p);
+    delete (txa->gen1.p);
     FMMOD::destroy_fmmod (txa->fmmod.p);
     AMMOD::destroy_ammod (txa->ammod.p);
     WCPAGC::destroy_wcpagc (txa->alc.p);
@@ -548,7 +548,7 @@ void TXA::destroy_txa (TXA *txa)
     METER::destroy_meter (txa->micmeter.p);
     PHROT::destroy_phrot (txa->phrot.p);
     PANEL::destroy_panel (txa->panel.p);
-    GEN::destroy_gen (txa->gen0.p);
+    delete (txa->gen0.p);
     delete (txa->rsmpin.p);
     delete[] (txa->midbuff);
     delete[] (txa->outbuff);
@@ -562,7 +562,7 @@ void TXA::flush_txa (TXA* txa)
     std::fill(txa->outbuff, txa->outbuff + 1 * txa->dsp_outsize * 2, 0);
     std::fill(txa->midbuff, txa->midbuff + 2 * txa->dsp_size    * 2, 0);
     txa->rsmpin.p->flush();
-    GEN::flush_gen (txa->gen0.p);
+    txa->gen0.p->flush();
     PANEL::flush_panel (txa->panel.p);
     PHROT::flush_phrot (txa->phrot.p);
     METER::flush_meter (txa->micmeter.p);
@@ -583,7 +583,7 @@ void TXA::flush_txa (TXA* txa)
     WCPAGC::flush_wcpagc (txa->alc.p);
     AMMOD::flush_ammod (txa->ammod.p);
     FMMOD::flush_fmmod (txa->fmmod.p);
-    GEN::flush_gen (txa->gen1.p);
+    txa->gen1.p->flush();
     USLEW::flush_uslew (txa->uslew.p);
     METER::flush_meter (txa->alcmeter.p);
     SIPHON::flush_siphon (txa->sip1.p);
@@ -596,7 +596,7 @@ void TXA::flush_txa (TXA* txa)
 void xtxa (TXA* txa)
 {
     txa->rsmpin.p->execute();              // input resampler
-    GEN::xgen (txa->gen0.p);                     // input signal generator
+    txa->gen0.p->execute();                     // input signal generator
     PANEL::xpanel (txa->panel.p);                  // includes MIC gain
     PHROT::xphrot (txa->phrot.p);                  // phase rotator
     METER::xmeter (txa->micmeter.p);               // MIC meter
@@ -619,7 +619,7 @@ void xtxa (TXA* txa)
     AMMOD::xammod (txa->ammod.p);                  // AM Modulator
     EMPHP::xemphp (txa->preemph.p, 1);             // FM pre-emphasis (second option)
     FMMOD::xfmmod (txa->fmmod.p);                  // FM Modulator
-    GEN::xgen (txa->gen1.p);                     // output signal generator (TUN and Two-tone)
+    txa->gen1.p->execute();                     // output signal generator (TUN and Two-tone)
     USLEW::xuslew (txa->uslew.p);                  // up-slew for AM, FM, and gens
     METER::xmeter (txa->alcmeter.p);               // ALC Meter
     SIPHON::xsiphon (txa->sip1.p, 0);               // siphon data for display
@@ -694,7 +694,7 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     txa->rsmpin.p->setSize(txa->dsp_insize);
     txa->rsmpin.p->setOutRate(txa->dsp_rate);
     // dsp_rate blocks
-    GEN::setSamplerate_gen (txa->gen0.p, txa->dsp_rate);
+    txa->gen0.p->setSamplerate(txa->dsp_rate);
     PANEL::setSamplerate_panel (txa->panel.p, txa->dsp_rate);
     PHROT::setSamplerate_phrot (txa->phrot.p, txa->dsp_rate);
     METER::setSamplerate_meter (txa->micmeter.p, txa->dsp_rate);
@@ -715,7 +715,7 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     WCPAGC::setSamplerate_wcpagc (txa->alc.p, txa->dsp_rate);
     AMMOD::setSamplerate_ammod (txa->ammod.p, txa->dsp_rate);
     FMMOD::setSamplerate_fmmod (txa->fmmod.p, txa->dsp_rate);
-    GEN::setSamplerate_gen (txa->gen1.p, txa->dsp_rate);
+    txa->gen1.p->setSamplerate(txa->dsp_rate);
     USLEW::setSamplerate_uslew (txa->uslew.p, txa->dsp_rate);
     METER::setSamplerate_meter (txa->alcmeter.p, txa->dsp_rate);
     SIPHON::setSamplerate_siphon (txa->sip1.p, txa->dsp_rate);
@@ -754,8 +754,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     txa->rsmpin.p->setBuffers(txa->inbuff, txa->midbuff);
     txa->rsmpin.p->setSize(txa->dsp_insize);
     // dsp_size blocks
-    GEN::setBuffers_gen (txa->gen0.p, txa->midbuff, txa->midbuff);
-    GEN::setSize_gen (txa->gen0.p, txa->dsp_size);
+    txa->gen0.p->setBuffers(txa->midbuff, txa->midbuff);
+    txa->gen0.p->setSize(txa->dsp_size);
     PANEL::setBuffers_panel (txa->panel.p, txa->midbuff, txa->midbuff);
     PANEL::setSize_panel (txa->panel.p, txa->dsp_size);
     PHROT::setBuffers_phrot (txa->phrot.p, txa->midbuff, txa->midbuff);
@@ -796,8 +796,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     AMMOD::setSize_ammod (txa->ammod.p, txa->dsp_size);
     FMMOD::setBuffers_fmmod (txa->fmmod.p, txa->midbuff, txa->midbuff);
     FMMOD::setSize_fmmod (txa->fmmod.p, txa->dsp_size);
-    GEN::setBuffers_gen (txa->gen1.p, txa->midbuff, txa->midbuff);
-    GEN::setSize_gen (txa->gen1.p, txa->dsp_size);
+    txa->gen1.p->setBuffers(txa->midbuff, txa->midbuff);
+    txa->gen1.p->setSize(txa->dsp_size);
     USLEW::setBuffers_uslew (txa->uslew.p, txa->midbuff, txa->midbuff);
     USLEW::setSize_uslew (txa->uslew.p, txa->dsp_size);
     METER::setBuffers_meter (txa->alcmeter.p, txa->midbuff);
