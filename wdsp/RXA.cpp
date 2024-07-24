@@ -180,7 +180,7 @@ RXA* RXA::create_rxa (
         rxa->ndb);                              // addr of database pointer
 
     // bandpass for snba
-    rxa->bpsnba = BPSNBA::create_bpsnba (
+    rxa->bpsnba = new BPSNBA (
         0,                                      // bpsnba run flag
         0,                                      // run the notches
         0,                                      // position
@@ -584,7 +584,7 @@ void RXA::destroy_rxa (RXA *rxa)
     AMSQ::destroy_amsq (rxa->amsq);
     delete (rxa->smeter);
     SENDER::destroy_sender (rxa->sender);
-    BPSNBA::destroy_bpsnba (rxa->bpsnba);
+    delete (rxa->bpsnba);
     delete (rxa->nbp0);
     delete (rxa->ndb);
     delete (rxa->adcmeter);
@@ -609,7 +609,7 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->rsmpin->flush();
     rxa->adcmeter->flush();
     rxa->nbp0->flush();
-    BPSNBA::flush_bpsnba (rxa->bpsnba);
+    rxa->bpsnba->flush();
     SENDER::flush_sender (rxa->sender);
     rxa->smeter->flush();
     AMSQ::flush_amsq (rxa->amsq);
@@ -640,17 +640,17 @@ void RXA::xrxa (RXA *rxa)
     rxa->shift->execute();
     rxa->rsmpin->execute();
     rxa->adcmeter->execute();
-    BPSNBA::xbpsnbain (rxa->bpsnba, 0);
+    rxa->bpsnba->exec_in(0);
     rxa->nbp0->execute(0);
     rxa->smeter->execute();
     SENDER::xsender (rxa->sender);
     AMSQ::xamsqcap (rxa->amsq);
-    BPSNBA::xbpsnbaout (rxa->bpsnba, 0);
+    rxa->bpsnba->exec_out(0);
     AMD::xamd (rxa->amd);
     FMD::xfmd (rxa->fmd);
     FMSQ::xfmsq (rxa->fmsq);
-    BPSNBA::xbpsnbain (rxa->bpsnba, 1);
-    BPSNBA::xbpsnbaout (rxa->bpsnba, 1);
+    rxa->bpsnba->exec_in(1);
+    rxa->bpsnba->exec_out(1);
     SNBA::xsnba (rxa->snba);
     EQP::xeqp (rxa->eqp);
     ANF::xanf (rxa->anf, 0);
@@ -754,7 +754,7 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     // dsp_rate blocks
     rxa->adcmeter->setSamplerate(rxa->dsp_rate);
     rxa->nbp0->setSamplerate(rxa->dsp_rate);
-    BPSNBA::setSamplerate_bpsnba (rxa->bpsnba, rxa->dsp_rate);
+    rxa->bpsnba->setSamplerate(rxa->dsp_rate);
     rxa->smeter->setSamplerate(rxa->dsp_rate);
     SENDER::setSamplerate_sender (rxa->sender, rxa->dsp_rate);
     AMSQ::setSamplerate_amsq (rxa->amsq, rxa->dsp_rate);
@@ -819,8 +819,8 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->adcmeter->setSize(rxa->dsp_size);
     rxa->nbp0->setBuffers(rxa->midbuff, rxa->midbuff);
     rxa->nbp0->setSize(rxa->dsp_size);
-    BPSNBA::setBuffers_bpsnba (rxa->bpsnba, rxa->midbuff, rxa->midbuff);
-    BPSNBA::setSize_bpsnba (rxa->bpsnba, rxa->dsp_size);
+    rxa->bpsnba->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->bpsnba->setSize(rxa->dsp_size);
     rxa->smeter->setBuffers(rxa->midbuff);
     rxa->smeter->METER::setSize(rxa->dsp_size);
     SENDER::setBuffers_sender (rxa->sender, rxa->midbuff);
@@ -1028,7 +1028,7 @@ void RXA::bpsnbaCheck (RXA& rxa, int mode, int notch_run)
         a->f_high = f_high;
         a->run_notches = run_notches;
         // f_low, f_high, run_notches are needed for the filter recalculation
-        BPSNBA::recalc_bpsnba_filter (a, 0);
+        rxa.bpsnba->recalc_bpsnba_filter(0);
     }
 }
 
@@ -1087,7 +1087,7 @@ void RXA::UpdateNBPFilters(RXA& rxa)
     }
     if (b->bpsnba->fnfrun)
     {
-        BPSNBA::recalc_bpsnba_filter (b, 1);
+        b->recalc_bpsnba_filter(1);
     }
 }
 
@@ -1199,7 +1199,7 @@ void RXA::NBPSetWindow (RXA& rxa, int wintype)
     if ((b->wintype != wintype))
     {
         b->wintype = wintype;
-        BPSNBA::recalc_bpsnba_filter (b, 1);
+        b->recalc_bpsnba_filter(1);
     }
 }
 
@@ -1221,7 +1221,7 @@ void RXA::NBPSetAutoIncrease (RXA& rxa, int autoincr)
     if ((b->autoincr != autoincr))
     {
         b->autoincr = autoincr;
-        BPSNBA::recalc_bpsnba_filter (b, 1);
+        b->recalc_bpsnba_filter(1);
     }
 }
 
@@ -1242,7 +1242,7 @@ void RXA::SetNC (RXA& rxa, int nc)
 {
     int oldstate = rxa.state;
     rxa.nbp0->SetNC              (nc);
-    BPSNBA::BPSNBASetNC     (rxa, nc);
+    rxa.bpsnba->SetNC            (nc);
     BANDPASS::SetBandpassNC (rxa, nc);
     EQP::SetEQNC            (rxa, nc);
     FMSQ::SetFMSQNC         (rxa, nc);
@@ -1254,7 +1254,7 @@ void RXA::SetNC (RXA& rxa, int nc)
 void RXA::SetMP (RXA& rxa, int mp)
 {
     rxa.nbp0->SetMP              (mp);
-    BPSNBA::BPSNBASetMP     (rxa, mp);
+    rxa.bpsnba->SetMP            (mp);
     BANDPASS::SetBandpassMP (rxa, mp);
     EQP::SetEQMP            (rxa, mp);
     FMSQ::SetFMSQMP         (rxa, mp);
