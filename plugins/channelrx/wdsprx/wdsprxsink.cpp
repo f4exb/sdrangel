@@ -373,8 +373,8 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
     if ((m_settings.m_rit != settings.m_rit) || (m_settings.m_ritFrequency != settings.m_ritFrequency) || force)
     {
-        WDSP::SHIFT::SetShiftFreq(*m_rxa, settings.m_ritFrequency);
-        WDSP::SHIFT::SetShiftRun(*m_rxa, settings.m_rit ? 1 : 0);
+        m_rxa->shift->SetFreq(settings.m_ritFrequency);
+        m_rxa->shift->SetRun(settings.m_rit ? 1 : 0);
     }
 
     // Filter and mode

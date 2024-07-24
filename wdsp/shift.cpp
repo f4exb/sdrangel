@@ -31,105 +31,98 @@ warren@wpratt.com
 
 namespace WDSP {
 
-void SHIFT::calc_shift (SHIFT *a)
+void SHIFT::calc_shift()
 {
-    a->delta = TWOPI * a->shift / a->rate;
-    a->cos_delta = cos (a->delta);
-    a->sin_delta = sin (a->delta);
+    delta = TWOPI * shift / rate;
+    cos_delta = cos (delta);
+    sin_delta = sin (delta);
 }
 
-SHIFT* SHIFT::create_shift (int run, int size, float* in, float* out, int rate, double fshift)
+SHIFT::SHIFT (int _run, int _size, float* _in, float* _out, int _rate, double _fshift)
 {
-    SHIFT *a = new SHIFT;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = (double) rate;
-    a->shift = fshift;
-    a->phase = 0.0;
-    calc_shift (a);
-    return a;
+    run = _run;
+    size = _size;
+    in = _in;
+    out = _out;
+    rate = (double) _rate;
+    shift = _fshift;
+    phase = 0.0;
+    calc_shift();
 }
 
-void SHIFT::destroy_shift (SHIFT *a)
+void SHIFT::flush()
 {
-    delete (a);
+    phase = 0.0;
 }
 
-void SHIFT::flush_shift (SHIFT *a)
+void SHIFT::execute()
 {
-    a->phase = 0.0;
-}
-
-void SHIFT::xshift (SHIFT *a)
-{
-    if (a->run)
+    if (run)
     {
         int i;
         double I1, Q1, t1, t2;
-        double cos_phase = cos (a->phase);
-        double sin_phase = sin (a->phase);
+        double cos_phase = cos (phase);
+        double sin_phase = sin (phase);
 
-        for (i = 0; i < a->size; i++)
+        for (i = 0; i < size; i++)
         {
-            I1 = a->in[2 * i + 0];
-            Q1 = a->in[2 * i + 1];
-            a->out[2 * i + 0] = I1 * cos_phase - Q1 * sin_phase;
-            a->out[2 * i + 1] = I1 * sin_phase + Q1 * cos_phase;
+            I1 = in[2 * i + 0];
+            Q1 = in[2 * i + 1];
+            out[2 * i + 0] = I1 * cos_phase - Q1 * sin_phase;
+            out[2 * i + 1] = I1 * sin_phase + Q1 * cos_phase;
             t1 = cos_phase;
             t2 = sin_phase;
-            cos_phase = t1 * a->cos_delta - t2 * a->sin_delta;
-            sin_phase = t1 * a->sin_delta + t2 * a->cos_delta;
-            a->phase += a->delta;
+            cos_phase = t1 * cos_delta - t2 * sin_delta;
+            sin_phase = t1 * sin_delta + t2 * cos_delta;
+            phase += delta;
 
-            if (a->phase >= TWOPI)
-                a->phase -= TWOPI;
+            if (phase >= TWOPI)
+                phase -= TWOPI;
 
-            if (a->phase <   0.0 )
-                a->phase += TWOPI;
+            if (phase <   0.0 )
+                phase += TWOPI;
         }
     }
-    else if (a->in != a->out)
+    else if (in != out)
     {
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+        std::copy( in,  in + size * 2, out);
     }
 }
 
-void SHIFT::setBuffers_shift(SHIFT *a, float* in, float* out)
+void SHIFT::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void SHIFT::setSamplerate_shift (SHIFT *a, int rate)
+void SHIFT::setSamplerate(int _rate)
 {
-    a->rate = rate;
-    a->phase = 0.0;
-    calc_shift(a);
+    rate = _rate;
+    phase = 0.0;
+    calc_shift();
 }
 
-void SHIFT::setSize_shift (SHIFT *a, int size)
+void SHIFT::setSize(int _size)
 {
-    a->size = size;
-    flush_shift (a);
+    size = _size;
+    flush();
 }
 
 /********************************************************************************************************
 *                                                                                                       *
-*                                           RXA Properties                                              *
+*                                           Non static                                                  *
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SHIFT::SetShiftRun (RXA& rxa, int run)
+void SHIFT::SetRun (int _run)
 {
-    rxa.shift->run = run;
+    run = _run;
 }
 
-void SHIFT::SetShiftFreq (RXA& rxa, double fshift)
+void SHIFT::SetFreq(double fshift)
 {
-    rxa.shift->shift = fshift;
-    calc_shift (rxa.shift);
+    shift = fshift;
+    calc_shift();
 }
 
 } // namespace WDSP

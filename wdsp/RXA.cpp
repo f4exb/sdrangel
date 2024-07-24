@@ -119,7 +119,7 @@ RXA* RXA::create_rxa (
     );
 
     // Ftequency shifter - shift to select a slice of spectrum
-    rxa->shift = SHIFT::create_shift (
+    rxa->shift = new SHIFT(
         0,                                      // run
         rxa->dsp_insize,                        // input buffer size
         rxa->inbuff,                            // pointer to input buffer
@@ -128,7 +128,7 @@ RXA* RXA::create_rxa (
         0.0);                                   // amount to shift (Hz)
 
     // Input resampler - resample to dsp rate for main processing
-    rxa->rsmpin = RESAMPLE::create_resample (
+    rxa->rsmpin = new RESAMPLE(
         0,                                      // run - will be turned ON below if needed
         rxa->dsp_insize,                        // input buffer size
         rxa->inbuff,                            // pointer to input buffer
@@ -555,7 +555,7 @@ RXA* RXA::create_rxa (
     // AM squelch apply - absent but in the block diagram
 
     // Output resampler
-    rxa->rsmpout = RESAMPLE::create_resample (
+    rxa->rsmpout = new RESAMPLE(
         0,                                      // run - will be turned ON below if needed
         rxa->dsp_size,                          // input buffer size
         rxa->midbuff,                           // pointer to input buffer
@@ -573,7 +573,7 @@ RXA* RXA::create_rxa (
 
 void RXA::destroy_rxa (RXA *rxa)
 {
-    RESAMPLE::destroy_resample (rxa->rsmpout);
+    delete (rxa->rsmpout);
     PANEL::destroy_panel (rxa->panel);
     SSQL::destroy_ssql (rxa->ssql);
     MPEAK::destroy_mpeak (rxa->mpeak);
@@ -599,8 +599,8 @@ void RXA::destroy_rxa (RXA *rxa)
     NOTCHDB::destroy_notchdb (rxa->ndb);
     METER::destroy_meter (rxa->adcmeter);
     GEN::destroy_gen (rxa->gen0);
-    RESAMPLE::destroy_resample (rxa->rsmpin);
-    SHIFT::destroy_shift (rxa->shift);
+    delete (rxa->rsmpin);
+    delete (rxa->shift);
     delete (rxa->nob);
     delete (rxa->anb);
     delete[] (rxa->midbuff);
@@ -616,8 +616,8 @@ void RXA::flush_rxa (RXA *rxa)
     std::fill(rxa->midbuff, rxa->midbuff + 2 * rxa->dsp_size    * 2, 0);
     rxa->anb->flush();
     rxa->nob->flush();
-    SHIFT::flush_shift (rxa->shift);
-    RESAMPLE::flush_resample (rxa->rsmpin);
+    rxa->shift->flush();
+    rxa->rsmpin->flush();
     GEN::flush_gen (rxa->gen0);
     METER::flush_meter (rxa->adcmeter);
     NBP::flush_nbp (rxa->nbp0);
@@ -642,15 +642,15 @@ void RXA::flush_rxa (RXA *rxa)
     MPEAK::flush_mpeak (rxa->mpeak);
     SSQL::flush_ssql (rxa->ssql);
     PANEL::flush_panel (rxa->panel);
-    RESAMPLE::flush_resample (rxa->rsmpout);
+    rxa->rsmpout->flush();
 }
 
 void RXA::xrxa (RXA *rxa)
 {
     rxa->anb->execute();
     rxa->nob->execute();
-    SHIFT::xshift (rxa->shift);
-    RESAMPLE::xresample (rxa->rsmpin);
+    rxa->shift->execute();
+    rxa->rsmpin->execute();
     GEN::xgen (rxa->gen0);
     METER::xmeter (rxa->adcmeter);
     BPSNBA::xbpsnbain (rxa->bpsnba, 0);
@@ -683,7 +683,7 @@ void RXA::xrxa (RXA *rxa)
     SSQL::xssql (rxa->ssql);
     PANEL::xpanel (rxa->panel);
     AMSQ::xamsq (rxa->amsq);
-    RESAMPLE::xresample (rxa->rsmpout);
+    rxa->rsmpout->execute();
 }
 
 void RXA::setInputSamplerate (RXA *rxa, int in_rate)
@@ -706,13 +706,13 @@ void RXA::setInputSamplerate (RXA *rxa, int in_rate)
     rxa->nob->setSize(rxa->dsp_insize);
     rxa->nob->setSamplerate(rxa->in_rate);
     // shift
-    SHIFT::setBuffers_shift (rxa->shift, rxa->inbuff, rxa->inbuff);
-    SHIFT::setSize_shift (rxa->shift, rxa->dsp_insize);
-    SHIFT::setSamplerate_shift (rxa->shift, rxa->in_rate);
+    rxa->shift->setBuffers(rxa->inbuff, rxa->inbuff);
+    rxa->shift->setSize(rxa->dsp_insize);
+    rxa->shift->setSamplerate(rxa->in_rate);
     // input resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpin, rxa->inbuff, rxa->midbuff);
-    RESAMPLE::setSize_resample (rxa->rsmpin, rxa->dsp_insize);
-    RESAMPLE::setInRate_resample (rxa->rsmpin, rxa->in_rate);
+    rxa->rsmpin->setBuffers(rxa->inbuff, rxa->midbuff);
+    rxa->rsmpin->setSize(rxa->dsp_insize);
+    rxa->rsmpin->setInRate(rxa->in_rate);
     ResCheck (*rxa);
 }
 
@@ -728,8 +728,8 @@ void RXA::setOutputSamplerate (RXA *rxa, int out_rate)
     delete[] (rxa->outbuff);
     rxa->outbuff = new float[1 * rxa->dsp_outsize * 2]; // (float *)malloc0(1 * ch.dsp_outsize * sizeof(complex));
     // output resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpout, rxa->midbuff, rxa->outbuff);
-    RESAMPLE::setOutRate_resample (rxa->rsmpout, rxa->out_rate);
+    rxa->rsmpout->setBuffers(rxa->midbuff, rxa->outbuff);
+    rxa->rsmpout->setOutRate(rxa->out_rate);
     ResCheck (*rxa);
 }
 
@@ -758,12 +758,12 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->nob->setBuffers(rxa->inbuff, rxa->inbuff);
     rxa->nob->setSize(rxa->dsp_insize);
     // shift
-    SHIFT::setBuffers_shift (rxa->shift, rxa->inbuff, rxa->inbuff);
-    SHIFT::setSize_shift (rxa->shift, rxa->dsp_insize);
+    rxa->shift->setBuffers(rxa->inbuff, rxa->inbuff);
+    rxa->shift->setSize(rxa->dsp_insize);
     // input resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpin, rxa->inbuff, rxa->midbuff);
-    RESAMPLE::setSize_resample (rxa->rsmpin, rxa->dsp_insize);
-    RESAMPLE::setOutRate_resample (rxa->rsmpin, rxa->dsp_rate);
+    rxa->rsmpin->setBuffers(rxa->inbuff, rxa->midbuff);
+    rxa->rsmpin->setSize(rxa->dsp_insize);
+    rxa->rsmpin->setOutRate(rxa->dsp_rate);
     // dsp_rate blocks
     GEN::setSamplerate_gen (rxa->gen0, rxa->dsp_rate);
     METER::setSamplerate_meter (rxa->adcmeter, rxa->dsp_rate);
@@ -791,8 +791,8 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     SSQL::setSamplerate_ssql (rxa->ssql, rxa->dsp_rate);
     PANEL::setSamplerate_panel (rxa->panel, rxa->dsp_rate);
     // output resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpout, rxa->midbuff, rxa->outbuff);
-    RESAMPLE::setInRate_resample (rxa->rsmpout, rxa->dsp_rate);
+    rxa->rsmpout->setBuffers(rxa->midbuff, rxa->outbuff);
+    rxa->rsmpout->setInRate(rxa->dsp_rate);
     ResCheck (*rxa);
 }
 
@@ -823,11 +823,11 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->nob->setBuffers(rxa->inbuff, rxa->inbuff);
     rxa->nob->setSize(rxa->dsp_insize);
     // shift
-    SHIFT::setBuffers_shift (rxa->shift, rxa->inbuff, rxa->inbuff);
-    SHIFT::setSize_shift (rxa->shift, rxa->dsp_insize);
+    rxa->shift->setBuffers(rxa->inbuff, rxa->inbuff);
+    rxa->shift->setSize(rxa->dsp_insize);
     // input resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpin, rxa->inbuff, rxa->midbuff);
-    RESAMPLE::setSize_resample (rxa->rsmpin, rxa->dsp_insize);
+    rxa->rsmpin->setBuffers(rxa->inbuff, rxa->midbuff);
+    rxa->rsmpin->setSize(rxa->dsp_insize);
     // dsp_size blocks
     GEN::setBuffers_gen (rxa->gen0, rxa->midbuff, rxa->midbuff);
     GEN::setSize_gen (rxa->gen0, rxa->dsp_size);
@@ -878,8 +878,8 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     PANEL::setBuffers_panel (rxa->panel, rxa->midbuff, rxa->midbuff);
     PANEL::setSize_panel (rxa->panel, rxa->dsp_size);
     // output resampler
-    RESAMPLE::setBuffers_resample (rxa->rsmpout, rxa->midbuff, rxa->outbuff);
-    RESAMPLE::setSize_resample (rxa->rsmpout, rxa->dsp_size);
+    rxa->rsmpout->setBuffers(rxa->midbuff, rxa->outbuff);
+    rxa->rsmpout->setSize(rxa->dsp_size);
 }
 
 void RXA::setSpectrumProbe(BufferProbe *spectrumProbe)

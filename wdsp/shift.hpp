@@ -48,19 +48,20 @@ public:
     double cos_delta;
     double sin_delta;
 
-    static SHIFT* create_shift (int run, int size, float* in, float* out, int rate, double fshift);
-    static void destroy_shift (SHIFT *a);
-    static void flush_shift (SHIFT *a);
-    static void xshift (SHIFT *a);
-    static void setBuffers_shift (SHIFT *a, float* in, float* out);
-    static void setSamplerate_shift (SHIFT *a, int rate);
-    static void setSize_shift (SHIFT *a, int size);
-    // RXA Properties
-    static void SetShiftRun (RXA& rxa, int run);
-    static void SetShiftFreq (RXA& rxa, double fshift);
+    SHIFT(int run, int size, float* in, float* out, int rate, double fshift);
+    ~SHIFT() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Noin static
+    void SetRun (int run);
+    void SetFreq (double fshift);
 
 private:
-    static void calc_shift (SHIFT *a);
+    void calc_shift ();
 };
 
 } // namespace WDSP

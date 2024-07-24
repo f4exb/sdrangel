@@ -82,7 +82,7 @@ TXA* TXA::create_txa (
     txa->outbuff = new float[1 * txa->dsp_outsize  * 2]; // (float *) malloc0 (1 * txa->dsp_outsize * sizeof (complex));
     txa->midbuff = new float[3 * txa->dsp_size  * 2]; //(float *) malloc0 (2 * txa->dsp_size    * sizeof (complex));
 
-    txa->rsmpin.p = RESAMPLE::create_resample (
+    txa->rsmpin.p = new RESAMPLE(
         0,                                          // run - will be turned on below if needed
         txa->dsp_insize,                     // input buffer size
         txa->inbuff,                        // pointer to input buffer
@@ -486,7 +486,7 @@ TXA* TXA::create_txa (
         0.0,                                        // raised-cosine transition width
         0);                                         // window type
 
-    txa->rsmpout.p = RESAMPLE::create_resample (
+    txa->rsmpout.p = new RESAMPLE(
         0,                                          // run - will be turned ON below if needed
         txa->dsp_size,                       // input size
         txa->midbuff,                       // pointer to input buffer
@@ -520,7 +520,7 @@ void TXA::destroy_txa (TXA *txa)
 {
     // in reverse order, free each item we created
     METER::destroy_meter (txa->outmeter.p);
-    RESAMPLE::destroy_resample (txa->rsmpout.p);
+    delete (txa->rsmpout.p);
     CFIR::destroy_cfir(txa->cfir.p);
     // destroy_calcc (txa->calcc.p);
     IQC::destroy_iqc (txa->iqc.p0);
@@ -549,7 +549,7 @@ void TXA::destroy_txa (TXA *txa)
     PHROT::destroy_phrot (txa->phrot.p);
     PANEL::destroy_panel (txa->panel.p);
     GEN::destroy_gen (txa->gen0.p);
-    RESAMPLE::destroy_resample (txa->rsmpin.p);
+    delete (txa->rsmpin.p);
     delete[] (txa->midbuff);
     delete[] (txa->outbuff);
     delete[] (txa->inbuff);
@@ -561,7 +561,7 @@ void TXA::flush_txa (TXA* txa)
     std::fill(txa->inbuff,  txa->inbuff  + 1 * txa->dsp_insize  * 2, 0);
     std::fill(txa->outbuff, txa->outbuff + 1 * txa->dsp_outsize * 2, 0);
     std::fill(txa->midbuff, txa->midbuff + 2 * txa->dsp_size    * 2, 0);
-    RESAMPLE::flush_resample (txa->rsmpin.p);
+    txa->rsmpin.p->flush();
     GEN::flush_gen (txa->gen0.p);
     PANEL::flush_panel (txa->panel.p);
     PHROT::flush_phrot (txa->phrot.p);
@@ -589,13 +589,13 @@ void TXA::flush_txa (TXA* txa)
     SIPHON::flush_siphon (txa->sip1.p);
     IQC::flush_iqc (txa->iqc.p0);
     CFIR::flush_cfir(txa->cfir.p);
-    RESAMPLE::flush_resample (txa->rsmpout.p);
+    txa->rsmpout.p->flush();
     METER::flush_meter (txa->outmeter.p);
 }
 
 void xtxa (TXA* txa)
 {
-    RESAMPLE::xresample (txa->rsmpin.p);              // input resampler
+    txa->rsmpin.p->execute();              // input resampler
     GEN::xgen (txa->gen0.p);                     // input signal generator
     PANEL::xpanel (txa->panel.p);                  // includes MIC gain
     PHROT::xphrot (txa->phrot.p);                  // phase rotator
@@ -625,7 +625,7 @@ void xtxa (TXA* txa)
     SIPHON::xsiphon (txa->sip1.p, 0);               // siphon data for display
     IQC::xiqc (txa->iqc.p0);                     // PureSignal correction
     CFIR::xcfir(txa->cfir.p);                     // compensating FIR filter (used Protocol_2 only)
-    RESAMPLE::xresample (txa->rsmpout.p);             // output resampler
+    txa->rsmpout.p->execute();             // output resampler
     METER::xmeter (txa->outmeter.p);               // output meter
     // print_peak_env ("env_exception.txt", txa->dsp_outsize, txa->outbuff, 0.7);
 }
@@ -642,9 +642,9 @@ void TXA::setInputSamplerate (TXA *txa, int in_rate)
     delete[] (txa->inbuff);
     txa->inbuff = new float[1 * txa->dsp_insize  * 2]; //(float *)malloc0(1 * txa->dsp_insize  * sizeof(complex));
     // input resampler
-    RESAMPLE::setBuffers_resample (txa->rsmpin.p, txa->inbuff, txa->midbuff);
-    RESAMPLE::setSize_resample (txa->rsmpin.p, txa->dsp_insize);
-    RESAMPLE::setInRate_resample (txa->rsmpin.p, txa->in_rate);
+    txa->rsmpin.p->setBuffers(txa->inbuff, txa->midbuff);
+    txa->rsmpin.p->setSize(txa->dsp_insize);
+    txa->rsmpin.p->setInRate(txa->in_rate);
     ResCheck (*txa);
 }
 
@@ -662,8 +662,8 @@ void TXA::setOutputSamplerate (TXA* txa, int out_rate)
     // cfir - needs to know input rate of firmware CIC
     CFIR::setOutRate_cfir (txa->cfir.p, txa->out_rate);
     // output resampler
-    RESAMPLE::setBuffers_resample (txa->rsmpout.p, txa->midbuff, txa->outbuff);
-    RESAMPLE::setOutRate_resample (txa->rsmpout.p, txa->out_rate);
+    txa->rsmpout.p->setBuffers(txa->midbuff, txa->outbuff);
+    txa->rsmpout.p->setOutRate(txa->out_rate);
     ResCheck (*txa);
     // output meter
     METER::setBuffers_meter (txa->outmeter.p, txa->outbuff);
@@ -690,9 +690,9 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     delete[] (txa->outbuff);
     txa->outbuff = new float[1 * txa->dsp_outsize  * 2]; // (float *)malloc0(1 * txa->dsp_outsize * sizeof(complex));
     // input resampler
-    RESAMPLE::setBuffers_resample (txa->rsmpin.p, txa->inbuff, txa->midbuff);
-    RESAMPLE::setSize_resample (txa->rsmpin.p, txa->dsp_insize);
-    RESAMPLE::setOutRate_resample (txa->rsmpin.p, txa->dsp_rate);
+    txa->rsmpin.p->setBuffers(txa->inbuff, txa->midbuff);
+    txa->rsmpin.p->setSize(txa->dsp_insize);
+    txa->rsmpin.p->setOutRate(txa->dsp_rate);
     // dsp_rate blocks
     GEN::setSamplerate_gen (txa->gen0.p, txa->dsp_rate);
     PANEL::setSamplerate_panel (txa->panel.p, txa->dsp_rate);
@@ -722,8 +722,8 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     IQC::setSamplerate_iqc (txa->iqc.p0, txa->dsp_rate);
     CFIR::setSamplerate_cfir (txa->cfir.p, txa->dsp_rate);
     // output resampler
-    RESAMPLE::setBuffers_resample (txa->rsmpout.p, txa->midbuff, txa->outbuff);
-    RESAMPLE::setInRate_resample (txa->rsmpout.p, txa->dsp_rate);
+    txa->rsmpout.p->setBuffers(txa->midbuff, txa->outbuff);
+    txa->rsmpout.p->setInRate(txa->dsp_rate);
     ResCheck (*txa);
     // output meter
     METER::setBuffers_meter (txa->outmeter.p, txa->outbuff);
@@ -751,8 +751,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     delete[] (txa->outbuff);
     txa->outbuff = new float[1 * txa->dsp_outsize  * 2]; // (float *)malloc0(1 * txa->dsp_outsize * sizeof(complex));
     // input resampler
-    RESAMPLE::setBuffers_resample (txa->rsmpin.p, txa->inbuff, txa->midbuff);
-    RESAMPLE::setSize_resample (txa->rsmpin.p, txa->dsp_insize);
+    txa->rsmpin.p->setBuffers(txa->inbuff, txa->midbuff);
+    txa->rsmpin.p->setSize(txa->dsp_insize);
     // dsp_size blocks
     GEN::setBuffers_gen (txa->gen0.p, txa->midbuff, txa->midbuff);
     GEN::setSize_gen (txa->gen0.p, txa->dsp_size);
@@ -809,8 +809,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     CFIR::setBuffers_cfir (txa->cfir.p, txa->midbuff, txa->midbuff);
     CFIR::setSize_cfir (txa->cfir.p, txa->dsp_size);
     // output resampler
-    RESAMPLE::setBuffers_resample (txa->rsmpout.p, txa->midbuff, txa->outbuff);
-    RESAMPLE::setSize_resample (txa->rsmpout.p, txa->dsp_size);
+    txa->rsmpout.p->setBuffers(txa->midbuff, txa->outbuff);
+    txa->rsmpout.p->setSize(txa->dsp_size);
     // output meter
     METER::setBuffers_meter (txa->outmeter.p, txa->outbuff);
     METER::setSize_meter (txa->outmeter.p, txa->dsp_outsize);

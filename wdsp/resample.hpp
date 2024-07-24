@@ -62,7 +62,7 @@ public:
     int cpp;            // coefficients of the phase
     int phnum;          // phase number
 
-    static RESAMPLE* create_resample (
+    RESAMPLE (
         int run,
         int size,
         float* in,
@@ -73,23 +73,24 @@ public:
         int ncoef,
         double gain
     );
-    static void destroy_resample (RESAMPLE *a);
-    static void flush_resample (RESAMPLE *a);
-    static int xresample (RESAMPLE *a);
-    static void setBuffers_resample (RESAMPLE *a, float* in, float* out);
-    static void setSize_resample(RESAMPLE *a, int size);
-    static void setInRate_resample(RESAMPLE *a, int rate);
-    static void setOutRate_resample(RESAMPLE *a, int rate);
-    static void setFCLow_resample (RESAMPLE *a, double fc_low);
-    static void setBandwidth_resample (RESAMPLE *a, double fc_low, double fc_high);
+    ~RESAMPLE();
+
+    void flush();
+    int execute();
+    void setBuffers(float* in, float* out);
+    void setSize(int size);
+    void setInRate(int rate);
+    void setOutRate(int rate);
+    void setFCLow(double fc_low);
+    void setBandwidth(double fc_low, double fc_high);
     // Exported calls
-    static void* create_resampleV (int in_rate, int out_rate);
-    static void xresampleV (float* input, float* output, int numsamps, int* outsamps, void* ptr);
-    static void destroy_resampleV (void* ptr);
+    static void* createV (int in_rate, int out_rate);
+    static void executeV (float* input, float* output, int numsamps, int* outsamps, void* ptr);
+    static void destroyV (void* ptr);
 
 private:
-    static void calc_resample (RESAMPLE *a);
-    static void decalc_resample (RESAMPLE *a);
+    void calc_resample();
+    void decalc_resample();
 };
 
 } // namespace WDSP

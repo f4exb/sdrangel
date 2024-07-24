@@ -56,7 +56,7 @@ void SNBA::calc_snba (SNBA *d)
     else
         d->resamprun = 0;
 
-    d->inresamp  = RESAMPLE::create_resample (
+    d->inresamp  = new RESAMPLE(
         d->resamprun,
         d->bsize,
         d->in,
@@ -67,8 +67,8 @@ void SNBA::calc_snba (SNBA *d)
         0,
         2.0
     );
-    RESAMPLE::setFCLow_resample (d->inresamp, 250.0);
-    d->outresamp = RESAMPLE::create_resample (
+    d->inresamp->setFCLow(250.0);
+    d->outresamp = new RESAMPLE(
         d->resamprun,
         d->isize,
         d->outbuff,
@@ -79,7 +79,7 @@ void SNBA::calc_snba (SNBA *d)
         0,
         2.0
     );
-    RESAMPLE::setFCLow_resample (d->outresamp, 200.0);
+    d->outresamp->setFCLow(200.0);
     d->incr = d->xsize / d->ovrlp;
 
     if (d->incr > d->isize)
@@ -182,8 +182,8 @@ SNBA* SNBA::create_snba (
 
 void SNBA::decalc_snba (SNBA *d)
 {
-    RESAMPLE::destroy_resample (d->outresamp);
-    RESAMPLE::destroy_resample (d->inresamp);
+    delete (d->outresamp);
+    delete (d->inresamp);
     delete[] (d->outbuff);
     delete[] (d->inbuff);
     delete[] (d->outaccum);
@@ -243,8 +243,8 @@ void SNBA::flush_snba (SNBA *d)
     std::fill(d->inbuff,  d->inbuff + d->isize  * 2,  0);
     std::fill(d->outbuff, d->outbuff + d->isize  * 2, 0);
 
-    RESAMPLE::flush_resample (d->inresamp);
-    RESAMPLE::flush_resample (d->outresamp);
+    d->inresamp->flush();
+    d->outresamp->flush();
 }
 
 void SNBA::setBuffers_snba (SNBA *a, float* in, float* out)
@@ -675,7 +675,7 @@ void SNBA::xsnba (SNBA *d)
     if (d->run)
     {
         int i;
-        RESAMPLE::xresample (d->inresamp);
+        d->inresamp->execute();
 
         for (i = 0; i < 2 * d->isize; i += 2)
         {
@@ -703,7 +703,7 @@ void SNBA::xsnba (SNBA *d)
             d->oaoutidx = (d->oaoutidx + 1) % d->oasize;
         }
 
-        RESAMPLE::xresample (d->outresamp);
+        d->outresamp->execute();
     }
     else if (d->out != d->in)
     {
@@ -824,7 +824,7 @@ void SNBA::SetSNBAOutputBandwidth (RXA& rxa, double flow, double fhigh)
         f_high = std::min (a->out_high_cut, absmax);
     }
 
-    RESAMPLE::setBandwidth_resample (d, f_low, f_high);
+    d->setBandwidth(f_low, f_high);
 }
 
 } // namespace
