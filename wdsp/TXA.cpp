@@ -121,7 +121,7 @@ TXA* TXA::create_txa (
         338.0,                                      // 1/2 of phase frequency
         8);                                         // number of stages
 
-    txa->micmeter.p = METER::create_meter (
+    txa->micmeter.p = new METER(
         1,                                          // run
         0,                                          // optional pointer to another 'run'
         txa->dsp_size,                       // size
@@ -170,7 +170,7 @@ TXA* TXA::create_txa (
             txa->dsp_rate);                      // samplerate
     }
 
-    txa->eqmeter.p = METER::create_meter (
+    txa->eqmeter.p = new METER(
         1,                                          // run
         &(txa->eqp.p->run),                 // pointer to eqp 'run'
         txa->dsp_size,                       // size
@@ -222,7 +222,7 @@ TXA* TXA::create_txa (
         2.000,                                      // hang_thresh
         0.100);                                     // tau_hang_decay
 
-    txa->lvlrmeter.p = METER::create_meter (
+    txa->lvlrmeter.p = new METER(
         1,                                          // run
         &(txa->leveler.p->run),             // pointer to leveler 'run'
         txa->dsp_size,                       // size
@@ -262,7 +262,7 @@ TXA* TXA::create_txa (
             0.50);                                      // display time constant
     }
 
-    txa->cfcmeter.p = METER::create_meter (
+    txa->cfcmeter.p = new METER(
         1,                                          // run
         &(txa->cfcomp.p->run),              // pointer to eqp 'run'
         txa->dsp_size,                       // size
@@ -333,7 +333,7 @@ TXA* TXA::create_txa (
         1,                                          // wintype
         1.0);                                       // gain
 
-    txa->compmeter.p = METER::create_meter (
+    txa->compmeter.p = new METER(
         1,                                          // run
         &(txa->compressor.p->run),          // pointer to compressor 'run'
         txa->dsp_size,                       // size
@@ -415,7 +415,7 @@ TXA* TXA::create_txa (
         0.000,                                      // delay time
         0.005);                                     // upslew time
 
-    txa->alcmeter.p = METER::create_meter (
+    txa->alcmeter.p = new METER(
         1,                                          // run
         0,                                          // optional pointer to a 'run'
         txa->dsp_size,                       // size
@@ -497,7 +497,7 @@ TXA* TXA::create_txa (
         0,                                          // select ncoef automatically
         0.980);                                     // gain
 
-    txa->outmeter.p = METER::create_meter (
+    txa->outmeter.p = new METER(
         1,                                          // run
         0,                                          // optional pointer to another 'run'
         txa->dsp_outsize,                    // size
@@ -519,33 +519,33 @@ TXA* TXA::create_txa (
 void TXA::destroy_txa (TXA *txa)
 {
     // in reverse order, free each item we created
-    METER::destroy_meter (txa->outmeter.p);
+    delete (txa->outmeter.p);
     delete (txa->rsmpout.p);
     CFIR::destroy_cfir(txa->cfir.p);
     // destroy_calcc (txa->calcc.p);
     IQC::destroy_iqc (txa->iqc.p0);
     SIPHON::destroy_siphon (txa->sip1.p);
-    METER::destroy_meter (txa->alcmeter.p);
+    delete (txa->alcmeter.p);
     USLEW::destroy_uslew (txa->uslew.p);
     delete (txa->gen1.p);
     FMMOD::destroy_fmmod (txa->fmmod.p);
     AMMOD::destroy_ammod (txa->ammod.p);
     WCPAGC::destroy_wcpagc (txa->alc.p);
-    METER::destroy_meter (txa->compmeter.p);
+    delete (txa->compmeter.p);
     BANDPASS::destroy_bandpass (txa->bp2.p);
     OSCTRL::destroy_osctrl (txa->osctrl.p);
     BANDPASS::destroy_bandpass (txa->bp1.p);
     COMPRESSOR::destroy_compressor (txa->compressor.p);
     BANDPASS::destroy_bandpass (txa->bp0.p);
-    METER::destroy_meter (txa->cfcmeter.p);
+    delete (txa->cfcmeter.p);
     CFCOMP::destroy_cfcomp (txa->cfcomp.p);
-    METER::destroy_meter (txa->lvlrmeter.p);
+    delete (txa->lvlrmeter.p);
     WCPAGC::destroy_wcpagc (txa->leveler.p);
     EMPHP::destroy_emphp (txa->preemph.p);
-    METER::destroy_meter (txa->eqmeter.p);
+    delete (txa->eqmeter.p);
     EQP::destroy_eqp (txa->eqp.p);
     AMSQ::destroy_amsq (txa->amsq.p);
-    METER::destroy_meter (txa->micmeter.p);
+    delete (txa->micmeter.p);
     PHROT::destroy_phrot (txa->phrot.p);
     PANEL::destroy_panel (txa->panel.p);
     delete (txa->gen0.p);
@@ -565,32 +565,32 @@ void TXA::flush_txa (TXA* txa)
     txa->gen0.p->flush();
     PANEL::flush_panel (txa->panel.p);
     PHROT::flush_phrot (txa->phrot.p);
-    METER::flush_meter (txa->micmeter.p);
+    txa->micmeter.p->flush ();
     AMSQ::flush_amsq (txa->amsq.p);
     EQP::flush_eqp (txa->eqp.p);
-    METER::flush_meter (txa->eqmeter.p);
+    txa->eqmeter.p->flush ();
     EMPHP::flush_emphp (txa->preemph.p);
     WCPAGC::flush_wcpagc (txa->leveler.p);
-    METER::flush_meter (txa->lvlrmeter.p);
+    txa->lvlrmeter.p->flush ();
     CFCOMP::flush_cfcomp (txa->cfcomp.p);
-    METER::flush_meter (txa->cfcmeter.p);
+    txa->cfcmeter.p->flush ();
     BANDPASS::flush_bandpass (txa->bp0.p);
     COMPRESSOR::flush_compressor (txa->compressor.p);
     BANDPASS::flush_bandpass (txa->bp1.p);
     OSCTRL::flush_osctrl (txa->osctrl.p);
     BANDPASS::flush_bandpass (txa->bp2.p);
-    METER::flush_meter (txa->compmeter.p);
+    txa->compmeter.p->flush ();
     WCPAGC::flush_wcpagc (txa->alc.p);
     AMMOD::flush_ammod (txa->ammod.p);
     FMMOD::flush_fmmod (txa->fmmod.p);
     txa->gen1.p->flush();
     USLEW::flush_uslew (txa->uslew.p);
-    METER::flush_meter (txa->alcmeter.p);
+    txa->alcmeter.p->flush ();
     SIPHON::flush_siphon (txa->sip1.p);
     IQC::flush_iqc (txa->iqc.p0);
     CFIR::flush_cfir(txa->cfir.p);
     txa->rsmpout.p->flush();
-    METER::flush_meter (txa->outmeter.p);
+    txa->outmeter.p->flush ();
 }
 
 void xtxa (TXA* txa)
@@ -599,34 +599,34 @@ void xtxa (TXA* txa)
     txa->gen0.p->execute();                     // input signal generator
     PANEL::xpanel (txa->panel.p);                  // includes MIC gain
     PHROT::xphrot (txa->phrot.p);                  // phase rotator
-    METER::xmeter (txa->micmeter.p);               // MIC meter
+    txa->micmeter.p->execute ();               // MIC meter
     AMSQ::xamsqcap (txa->amsq.p);                 // downward expander capture
     AMSQ::xamsq (txa->amsq.p);                    // downward expander action
     EQP::xeqp (txa->eqp.p);                      // pre-EQ
-    METER::xmeter (txa->eqmeter.p);                // EQ meter
+    txa->eqmeter.p->execute ();                // EQ meter
     EMPHP::xemphp (txa->preemph.p, 0);             // FM pre-emphasis (first option)
     WCPAGC::xwcpagc (txa->leveler.p);               // Leveler
-    METER::xmeter (txa->lvlrmeter.p);              // Leveler Meter
+    txa->lvlrmeter.p->execute ();              // Leveler Meter
     CFCOMP::xcfcomp (txa->cfcomp.p, 0);             // Continuous Frequency Compressor with post-EQ
-    METER::xmeter (txa->cfcmeter.p);               // CFC+PostEQ Meter
+    txa->cfcmeter.p->execute ();               // CFC+PostEQ Meter
     BANDPASS::xbandpass (txa->bp0.p, 0);              // primary bandpass filter
     COMPRESSOR::xcompressor (txa->compressor.p);        // COMP compressor
     BANDPASS::xbandpass (txa->bp1.p, 0);              // aux bandpass (runs if COMP)
     OSCTRL::xosctrl (txa->osctrl.p);                // CESSB Overshoot Control
     BANDPASS::xbandpass (txa->bp2.p, 0);              // aux bandpass (runs if CESSB)
-    METER::xmeter (txa->compmeter.p);              // COMP meter
+    txa->compmeter.p->execute ();              // COMP meter
     WCPAGC::xwcpagc (txa->alc.p);                   // ALC
     AMMOD::xammod (txa->ammod.p);                  // AM Modulator
     EMPHP::xemphp (txa->preemph.p, 1);             // FM pre-emphasis (second option)
     FMMOD::xfmmod (txa->fmmod.p);                  // FM Modulator
     txa->gen1.p->execute();                     // output signal generator (TUN and Two-tone)
     USLEW::xuslew (txa->uslew.p);                  // up-slew for AM, FM, and gens
-    METER::xmeter (txa->alcmeter.p);               // ALC Meter
+    txa->alcmeter.p->execute ();               // ALC Meter
     SIPHON::xsiphon (txa->sip1.p, 0);               // siphon data for display
     IQC::xiqc (txa->iqc.p0);                     // PureSignal correction
     CFIR::xcfir(txa->cfir.p);                     // compensating FIR filter (used Protocol_2 only)
     txa->rsmpout.p->execute();             // output resampler
-    METER::xmeter (txa->outmeter.p);               // output meter
+    txa->outmeter.p->execute ();               // output meter
     // print_peak_env ("env_exception.txt", txa->dsp_outsize, txa->outbuff, 0.7);
 }
 
@@ -666,9 +666,9 @@ void TXA::setOutputSamplerate (TXA* txa, int out_rate)
     txa->rsmpout.p->setOutRate(txa->out_rate);
     ResCheck (*txa);
     // output meter
-    METER::setBuffers_meter (txa->outmeter.p, txa->outbuff);
-    METER::setSize_meter (txa->outmeter.p, txa->dsp_outsize);
-    METER::setSamplerate_meter (txa->outmeter.p, txa->out_rate);
+    txa->outmeter.p->setBuffers(txa->outbuff);
+    txa->outmeter.p->setSize(txa->dsp_outsize);
+    txa->outmeter.p->setSamplerate (txa->out_rate);
 }
 
 void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
@@ -697,27 +697,27 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     txa->gen0.p->setSamplerate(txa->dsp_rate);
     PANEL::setSamplerate_panel (txa->panel.p, txa->dsp_rate);
     PHROT::setSamplerate_phrot (txa->phrot.p, txa->dsp_rate);
-    METER::setSamplerate_meter (txa->micmeter.p, txa->dsp_rate);
+    txa->micmeter.p->setSamplerate (txa->dsp_rate);
     AMSQ::setSamplerate_amsq (txa->amsq.p, txa->dsp_rate);
     EQP::setSamplerate_eqp (txa->eqp.p, txa->dsp_rate);
-    METER::setSamplerate_meter (txa->eqmeter.p, txa->dsp_rate);
+    txa->eqmeter.p->setSamplerate (txa->dsp_rate);
     EMPHP::setSamplerate_emphp (txa->preemph.p, txa->dsp_rate);
     WCPAGC::setSamplerate_wcpagc (txa->leveler.p, txa->dsp_rate);
-    METER::setSamplerate_meter (txa->lvlrmeter.p, txa->dsp_rate);
+    txa->lvlrmeter.p->setSamplerate (txa->dsp_rate);
     CFCOMP::setSamplerate_cfcomp (txa->cfcomp.p, txa->dsp_rate);
-    METER::setSamplerate_meter (txa->cfcmeter.p, txa->dsp_rate);
+    txa->cfcmeter.p->setSamplerate (txa->dsp_rate);
     BANDPASS::setSamplerate_bandpass (txa->bp0.p, txa->dsp_rate);
     COMPRESSOR::setSamplerate_compressor (txa->compressor.p, txa->dsp_rate);
     BANDPASS::setSamplerate_bandpass (txa->bp1.p, txa->dsp_rate);
     OSCTRL::setSamplerate_osctrl (txa->osctrl.p, txa->dsp_rate);
     BANDPASS::setSamplerate_bandpass (txa->bp2.p, txa->dsp_rate);
-    METER::setSamplerate_meter (txa->compmeter.p, txa->dsp_rate);
+    txa->compmeter.p->setSamplerate (txa->dsp_rate);
     WCPAGC::setSamplerate_wcpagc (txa->alc.p, txa->dsp_rate);
     AMMOD::setSamplerate_ammod (txa->ammod.p, txa->dsp_rate);
     FMMOD::setSamplerate_fmmod (txa->fmmod.p, txa->dsp_rate);
     txa->gen1.p->setSamplerate(txa->dsp_rate);
     USLEW::setSamplerate_uslew (txa->uslew.p, txa->dsp_rate);
-    METER::setSamplerate_meter (txa->alcmeter.p, txa->dsp_rate);
+    txa->alcmeter.p->setSamplerate (txa->dsp_rate);
     SIPHON::setSamplerate_siphon (txa->sip1.p, txa->dsp_rate);
     IQC::setSamplerate_iqc (txa->iqc.p0, txa->dsp_rate);
     CFIR::setSamplerate_cfir (txa->cfir.p, txa->dsp_rate);
@@ -726,8 +726,8 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     txa->rsmpout.p->setInRate(txa->dsp_rate);
     ResCheck (*txa);
     // output meter
-    METER::setBuffers_meter (txa->outmeter.p, txa->outbuff);
-    METER::setSize_meter (txa->outmeter.p, txa->dsp_outsize);
+    txa->outmeter.p->setBuffers(txa->outbuff);
+    txa->outmeter.p->setSize (txa->dsp_outsize);
 }
 
 void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
@@ -760,24 +760,24 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     PANEL::setSize_panel (txa->panel.p, txa->dsp_size);
     PHROT::setBuffers_phrot (txa->phrot.p, txa->midbuff, txa->midbuff);
     PHROT::setSize_phrot (txa->phrot.p, txa->dsp_size);
-    METER::setBuffers_meter (txa->micmeter.p, txa->midbuff);
-    METER::setSize_meter (txa->micmeter.p, txa->dsp_size);
+    txa->micmeter.p->setBuffers (txa->midbuff);
+    txa->micmeter.p->setSize (txa->dsp_size);
     AMSQ::setBuffers_amsq (txa->amsq.p, txa->midbuff, txa->midbuff, txa->midbuff);
     AMSQ::setSize_amsq (txa->amsq.p, txa->dsp_size);
     EQP::setBuffers_eqp (txa->eqp.p, txa->midbuff, txa->midbuff);
     EQP::setSize_eqp (txa->eqp.p, txa->dsp_size);
-    METER::setBuffers_meter (txa->eqmeter.p, txa->midbuff);
-    METER::setSize_meter (txa->eqmeter.p, txa->dsp_size);
+    txa->eqmeter.p->setBuffers (txa->midbuff);
+    txa->eqmeter.p->setSize (txa->dsp_size);
     EMPHP::setBuffers_emphp (txa->preemph.p, txa->midbuff, txa->midbuff);
     EMPHP::setSize_emphp (txa->preemph.p, txa->dsp_size);
     WCPAGC::setBuffers_wcpagc (txa->leveler.p, txa->midbuff, txa->midbuff);
     WCPAGC::setSize_wcpagc (txa->leveler.p, txa->dsp_size);
-    METER::setBuffers_meter (txa->lvlrmeter.p, txa->midbuff);
-    METER::setSize_meter (txa->lvlrmeter.p, txa->dsp_size);
+    txa->lvlrmeter.p->setBuffers(txa->midbuff);
+    txa->lvlrmeter.p->setSize(txa->dsp_size);
     CFCOMP::setBuffers_cfcomp (txa->cfcomp.p, txa->midbuff, txa->midbuff);
     CFCOMP::setSize_cfcomp (txa->cfcomp.p, txa->dsp_size);
-    METER::setBuffers_meter (txa->cfcmeter.p, txa->midbuff);
-    METER::setSize_meter (txa->cfcmeter.p, txa->dsp_size);
+    txa->cfcmeter.p->setBuffers(txa->midbuff);
+    txa->cfcmeter.p->setSize(txa->dsp_size);
     BANDPASS::setBuffers_bandpass (txa->bp0.p, txa->midbuff, txa->midbuff);
     BANDPASS::setSize_bandpass (txa->bp0.p, txa->dsp_size);
     COMPRESSOR::setBuffers_compressor (txa->compressor.p, txa->midbuff, txa->midbuff);
@@ -788,8 +788,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     OSCTRL::setSize_osctrl (txa->osctrl.p, txa->dsp_size);
     BANDPASS::setBuffers_bandpass (txa->bp2.p, txa->midbuff, txa->midbuff);
     BANDPASS::setSize_bandpass (txa->bp2.p, txa->dsp_size);
-    METER::setBuffers_meter (txa->compmeter.p, txa->midbuff);
-    METER::setSize_meter (txa->compmeter.p, txa->dsp_size);
+    txa->compmeter.p->setBuffers(txa->midbuff);
+    txa->compmeter.p->setSize(txa->dsp_size);
     WCPAGC::setBuffers_wcpagc (txa->alc.p, txa->midbuff, txa->midbuff);
     WCPAGC::setSize_wcpagc (txa->alc.p, txa->dsp_size);
     AMMOD::setBuffers_ammod (txa->ammod.p, txa->midbuff, txa->midbuff);
@@ -800,8 +800,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     txa->gen1.p->setSize(txa->dsp_size);
     USLEW::setBuffers_uslew (txa->uslew.p, txa->midbuff, txa->midbuff);
     USLEW::setSize_uslew (txa->uslew.p, txa->dsp_size);
-    METER::setBuffers_meter (txa->alcmeter.p, txa->midbuff);
-    METER::setSize_meter (txa->alcmeter.p, txa->dsp_size);
+    txa->alcmeter.p->setBuffers (txa->midbuff);
+    txa->alcmeter.p->setSize(txa->dsp_size);
     SIPHON::setBuffers_siphon (txa->sip1.p, txa->midbuff);
     SIPHON::setSize_siphon (txa->sip1.p, txa->dsp_size);
     IQC::setBuffers_iqc (txa->iqc.p0, txa->midbuff, txa->midbuff);
@@ -812,8 +812,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     txa->rsmpout.p->setBuffers(txa->midbuff, txa->outbuff);
     txa->rsmpout.p->setSize(txa->dsp_size);
     // output meter
-    METER::setBuffers_meter (txa->outmeter.p, txa->outbuff);
-    METER::setSize_meter (txa->outmeter.p, txa->dsp_outsize);
+    txa->outmeter.p->setBuffers(txa->outbuff);
+    txa->outmeter.p->setSize(txa->dsp_outsize);
 }
 
 /********************************************************************************************************

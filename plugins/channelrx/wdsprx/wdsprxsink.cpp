@@ -192,8 +192,8 @@ void WDSPRxSink::processOneSample(Complex &ci)
         WDSP::RXA::xrxa(m_rxa);
 
         m_sCount = m_wdspBufSize;
-        m_sAvg = WDSP::METER::GetMeter(*m_rxa, WDSP::RXA::RXA_S_AV);
-        m_sPeak = WDSP::METER::GetMeter(*m_rxa, WDSP::RXA::RXA_S_PK);
+        m_sAvg = m_rxa->smeter->getMeter(WDSP::RXA::RXA_S_AV);
+        m_sPeak = m_rxa->smeter->getMeter(WDSP::RXA::RXA_S_PK);
 
         for (int i = 0; i < m_rxa->get_outsize(); i++)
         {

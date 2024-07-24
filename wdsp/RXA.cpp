@@ -139,7 +139,7 @@ RXA* RXA::create_rxa (
         1.0);                                   // gain
 
     // Input meter - ADC
-    rxa->adcmeter = METER::create_meter (
+    rxa->adcmeter = new METER(
         0,                                      // run
         0,                                      // optional pointer to another 'run'
         rxa->dsp_size,                          // size
@@ -212,7 +212,7 @@ RXA* RXA::create_rxa (
     // End notched bandpass section
 
     // S-meter
-    rxa->smeter = METER::create_meter (
+    rxa->smeter = new METER(
         1,                                      // run
         0,                                      // optional pointer to another 'run'
         rxa->dsp_size,                          // size
@@ -429,7 +429,7 @@ RXA* RXA::create_rxa (
         0.100);                                 // tau_hang_decay
 
     // AGC meter
-    rxa->agcmeter = METER::create_meter (
+    rxa->agcmeter = new METER(
         0,                                      // run
         0,                                      // optional pointer to another 'run'
         rxa->dsp_size,                          // size
@@ -571,7 +571,7 @@ void RXA::destroy_rxa (RXA *rxa)
     CBL::destroy_cbl (rxa->cbl);
     SIPHON::destroy_siphon (rxa->sip1);
     BANDPASS::destroy_bandpass (rxa->bp1);
-    METER::destroy_meter (rxa->agcmeter);
+    delete (rxa->agcmeter);
     WCPAGC::destroy_wcpagc (rxa->agc);
     EMNR::destroy_emnr (rxa->emnr);
     ANR::destroy_anr (rxa->anr);
@@ -582,12 +582,12 @@ void RXA::destroy_rxa (RXA *rxa)
     FMD::destroy_fmd (rxa->fmd);
     AMD::destroy_amd (rxa->amd);
     AMSQ::destroy_amsq (rxa->amsq);
-    METER::destroy_meter (rxa->smeter);
+    delete (rxa->smeter);
     SENDER::destroy_sender (rxa->sender);
     BPSNBA::destroy_bpsnba (rxa->bpsnba);
     NBP::destroy_nbp (rxa->nbp0);
     NOTCHDB::destroy_notchdb (rxa->ndb);
-    METER::destroy_meter (rxa->adcmeter);
+    delete (rxa->adcmeter);
     delete (rxa->rsmpin);
     delete (rxa->shift);
     delete (rxa->nob);
@@ -607,11 +607,11 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->nob->flush();
     rxa->shift->flush();
     rxa->rsmpin->flush();
-    METER::flush_meter (rxa->adcmeter);
+    rxa->adcmeter->flush();
     NBP::flush_nbp (rxa->nbp0);
     BPSNBA::flush_bpsnba (rxa->bpsnba);
     SENDER::flush_sender (rxa->sender);
-    METER::flush_meter (rxa->smeter);
+    rxa->smeter->flush();
     AMSQ::flush_amsq (rxa->amsq);
     AMD::flush_amd (rxa->amd);
     FMD::flush_fmd (rxa->fmd);
@@ -622,7 +622,7 @@ void RXA::flush_rxa (RXA *rxa)
     ANR::flush_anr (rxa->anr);
     EMNR::flush_emnr (rxa->emnr);
     WCPAGC::flush_wcpagc (rxa->agc);
-    METER::flush_meter (rxa->agcmeter);
+    rxa->agcmeter->flush();
     BANDPASS::flush_bandpass (rxa->bp1);
     SIPHON::flush_siphon (rxa->sip1);
     CBL::flush_cbl (rxa->cbl);
@@ -639,10 +639,10 @@ void RXA::xrxa (RXA *rxa)
     rxa->nob->execute();
     rxa->shift->execute();
     rxa->rsmpin->execute();
-    METER::xmeter (rxa->adcmeter);
+    rxa->adcmeter->execute();
     BPSNBA::xbpsnbain (rxa->bpsnba, 0);
     NBP::xnbp (rxa->nbp0, 0);
-    METER::xmeter (rxa->smeter);
+    rxa->smeter->execute();
     SENDER::xsender (rxa->sender);
     AMSQ::xamsqcap (rxa->amsq);
     BPSNBA::xbpsnbaout (rxa->bpsnba, 0);
@@ -662,7 +662,7 @@ void RXA::xrxa (RXA *rxa)
     ANR::xanr (rxa->anr, 1);
     EMNR::xemnr (rxa->emnr, 1);
     BANDPASS::xbandpass (rxa->bp1, 1);
-    METER::xmeter (rxa->agcmeter);
+    rxa->agcmeter->execute();
     SIPHON::xsiphon (rxa->sip1, 0);
     CBL::xcbl (rxa->cbl);
     SPEAK::xspeak (rxa->speak);
@@ -752,10 +752,10 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->rsmpin->setSize(rxa->dsp_insize);
     rxa->rsmpin->setOutRate(rxa->dsp_rate);
     // dsp_rate blocks
-    METER::setSamplerate_meter (rxa->adcmeter, rxa->dsp_rate);
+    rxa->adcmeter->setSamplerate(rxa->dsp_rate);
     NBP::setSamplerate_nbp (rxa->nbp0, rxa->dsp_rate);
     BPSNBA::setSamplerate_bpsnba (rxa->bpsnba, rxa->dsp_rate);
-    METER::setSamplerate_meter (rxa->smeter, rxa->dsp_rate);
+    rxa->smeter->setSamplerate(rxa->dsp_rate);
     SENDER::setSamplerate_sender (rxa->sender, rxa->dsp_rate);
     AMSQ::setSamplerate_amsq (rxa->amsq, rxa->dsp_rate);
     AMD::setSamplerate_amd (rxa->amd, rxa->dsp_rate);
@@ -769,7 +769,7 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     EMNR::setSamplerate_emnr (rxa->emnr, rxa->dsp_rate);
     BANDPASS::setSamplerate_bandpass (rxa->bp1, rxa->dsp_rate);
     WCPAGC::setSamplerate_wcpagc (rxa->agc, rxa->dsp_rate);
-    METER::setSamplerate_meter (rxa->agcmeter, rxa->dsp_rate);
+    rxa->agcmeter->setSamplerate(rxa->dsp_rate);
     SIPHON::setSamplerate_siphon (rxa->sip1, rxa->dsp_rate);
     CBL::setSamplerate_cbl (rxa->cbl, rxa->dsp_rate);
     SPEAK::setSamplerate_speak (rxa->speak, rxa->dsp_rate);
@@ -815,14 +815,14 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->rsmpin->setBuffers(rxa->inbuff, rxa->midbuff);
     rxa->rsmpin->setSize(rxa->dsp_insize);
     // dsp_size blocks
-    METER::setBuffers_meter (rxa->adcmeter, rxa->midbuff);
-    METER::setSize_meter (rxa->adcmeter, rxa->dsp_size);
+    rxa->adcmeter->setBuffers(rxa->midbuff);
+    rxa->adcmeter->setSize(rxa->dsp_size);
     NBP::setBuffers_nbp (rxa->nbp0, rxa->midbuff, rxa->midbuff);
     NBP::setSize_nbp (rxa->nbp0, rxa->dsp_size);
     BPSNBA::setBuffers_bpsnba (rxa->bpsnba, rxa->midbuff, rxa->midbuff);
     BPSNBA::setSize_bpsnba (rxa->bpsnba, rxa->dsp_size);
-    METER::setBuffers_meter (rxa->smeter, rxa->midbuff);
-    METER::setSize_meter (rxa->smeter, rxa->dsp_size);
+    rxa->smeter->setBuffers(rxa->midbuff);
+    rxa->smeter->METER::setSize(rxa->dsp_size);
     SENDER::setBuffers_sender (rxa->sender, rxa->midbuff);
     SENDER::setSize_sender (rxa->sender, rxa->dsp_size);
     AMSQ::setBuffers_amsq (rxa->amsq, rxa->midbuff, rxa->midbuff, rxa->midbuff);
@@ -847,8 +847,8 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     BANDPASS::setSize_bandpass (rxa->bp1, rxa->dsp_size);
     WCPAGC::setBuffers_wcpagc (rxa->agc, rxa->midbuff, rxa->midbuff);
     WCPAGC::setSize_wcpagc (rxa->agc, rxa->dsp_size);
-    METER::setBuffers_meter (rxa->agcmeter, rxa->midbuff);
-    METER::setSize_meter (rxa->agcmeter, rxa->dsp_size);
+    rxa->agcmeter->METER::setBuffers(rxa->midbuff);
+    rxa->agcmeter->METER::setSize(rxa->dsp_size);
     SIPHON::setBuffers_siphon (rxa->sip1, rxa->midbuff);
     SIPHON::setSize_siphon (rxa->sip1, rxa->dsp_size);
     CBL::setBuffers_cbl (rxa->cbl, rxa->midbuff, rxa->midbuff);
