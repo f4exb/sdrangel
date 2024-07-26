@@ -227,7 +227,7 @@ RXA* RXA::create_rxa (
         0);                                     // pointer for gain computation
 
     // AM squelch capture (for other modes than FM)
-    rxa->amsq = AMSQ::create_amsq (
+    rxa->amsq = new AMSQ(
         0,                                      // run
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to signal input buffer used by xamsq
@@ -244,7 +244,7 @@ RXA* RXA::create_rxa (
         0.0);                                   // muted gain
 
     // AM/SAM demodulator
-    rxa->amd = AMD::create_amd (
+    rxa->amd = new AMD(
         0,                                      // run - OFF by default
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
@@ -580,8 +580,8 @@ void RXA::destroy_rxa (RXA *rxa)
     SNBA::destroy_snba (rxa->snba);
     FMSQ::destroy_fmsq (rxa->fmsq);
     FMD::destroy_fmd (rxa->fmd);
-    AMD::destroy_amd (rxa->amd);
-    AMSQ::destroy_amsq (rxa->amsq);
+    delete (rxa->amd);
+    delete (rxa->amsq);
     delete (rxa->smeter);
     delete (rxa->sender);
     delete (rxa->bpsnba);
@@ -612,8 +612,8 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->bpsnba->flush();
     rxa->sender->flush();
     rxa->smeter->flush();
-    AMSQ::flush_amsq (rxa->amsq);
-    AMD::flush_amd (rxa->amd);
+    rxa->amsq->flush();
+    rxa->amd->flush();
     FMD::flush_fmd (rxa->fmd);
     FMSQ::flush_fmsq (rxa->fmsq);
     SNBA::flush_snba (rxa->snba);
@@ -644,9 +644,9 @@ void RXA::xrxa (RXA *rxa)
     rxa->nbp0->execute(0);
     rxa->smeter->execute();
     rxa->sender->execute();
-    AMSQ::xamsqcap (rxa->amsq);
+    rxa->amsq->xcap();
     rxa->bpsnba->exec_out(0);
-    AMD::xamd (rxa->amd);
+    rxa->amd->execute();
     FMD::xfmd (rxa->fmd);
     FMSQ::xfmsq (rxa->fmsq);
     rxa->bpsnba->exec_in(1);
@@ -669,7 +669,7 @@ void RXA::xrxa (RXA *rxa)
     MPEAK::xmpeak (rxa->mpeak);
     SSQL::xssql (rxa->ssql);
     PANEL::xpanel (rxa->panel);
-    AMSQ::xamsq (rxa->amsq);
+    rxa->amsq->execute();
     rxa->rsmpout->execute();
 }
 
@@ -757,8 +757,8 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->bpsnba->setSamplerate(rxa->dsp_rate);
     rxa->smeter->setSamplerate(rxa->dsp_rate);
     rxa->sender->setSamplerate(rxa->dsp_rate);
-    AMSQ::setSamplerate_amsq (rxa->amsq, rxa->dsp_rate);
-    AMD::setSamplerate_amd (rxa->amd, rxa->dsp_rate);
+    rxa->amsq->setSamplerate(rxa->dsp_rate);
+    rxa->amd->setSamplerate(rxa->dsp_rate);
     FMD::setSamplerate_fmd (rxa->fmd, rxa->dsp_rate);
     FMSQ::setBuffers_fmsq (rxa->fmsq, rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
     FMSQ::setSamplerate_fmsq (rxa->fmsq, rxa->dsp_rate);
@@ -825,10 +825,10 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->smeter->setSize(rxa->dsp_size);
     rxa->sender->setBuffers(rxa->midbuff);
     rxa->sender->setSize(rxa->dsp_size);
-    AMSQ::setBuffers_amsq (rxa->amsq, rxa->midbuff, rxa->midbuff, rxa->midbuff);
-    AMSQ::setSize_amsq (rxa->amsq, rxa->dsp_size);
-    AMD::setBuffers_amd (rxa->amd, rxa->midbuff, rxa->midbuff);
-    AMD::setSize_amd (rxa->amd, rxa->dsp_size);
+    rxa->amsq->setBuffers(rxa->midbuff, rxa->midbuff, rxa->midbuff);
+    rxa->amsq->setSize(rxa->dsp_size);
+    rxa->amd->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->amd->setSize(rxa->dsp_size);
     FMD::setBuffers_fmd (rxa->fmd, rxa->midbuff, rxa->midbuff);
     FMD::setSize_fmd (rxa->fmd, rxa->dsp_size);
     FMSQ::setBuffers_fmsq (rxa->fmsq, rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
@@ -1222,6 +1222,26 @@ void RXA::NBPSetAutoIncrease (RXA& rxa, int autoincr)
     {
         b->autoincr = autoincr;
         b->recalc_bpsnba_filter(1);
+    }
+}
+
+void RXA::SetAMDRun(RXA& rxa, int run)
+{
+    AMD *a = rxa.amd;
+
+    if (run != run)
+    {
+        RXA::bp1Check (
+            rxa,
+            run,
+            rxa.snba->run,
+            rxa.emnr->run,
+            rxa.anf->run,
+            rxa.anr->run
+        );
+
+        run = run;
+        RXA::bp1Set (rxa);
     }
 }
 

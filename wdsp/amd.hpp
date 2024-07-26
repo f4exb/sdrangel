@@ -80,7 +80,7 @@ public:
     int sbmode;                         // sideband mode
     int levelfade;                      // Fade Leveler switch
 
-    static AMD* create_amd
+    AMD
     (
         int run,
         int buff_size,
@@ -97,18 +97,17 @@ public:
         double tauR,
         double tauI
     );
+    ~AMD() = default;
 
-    static void init_amd (AMD *a);
-    static void destroy_amd (AMD *a);
-    static void flush_amd (AMD *a);
-    static void xamd (AMD *a);
-    static void setBuffers_amd (AMD *a, float* in, float* out);
-    static void setSamplerate_amd (AMD *a, int rate);
-    static void setSize_amd (AMD *a, int size);
-    // RXA Properties
-    static void SetAMDRun(RXA& rxa, int run);
-    static void SetAMDSBMode(RXA& rxa, int sbmode);
-    static void SetAMDFadeLevel(RXA& rxa, int levelfade);
+    void init();
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Public Properties
+    void setSBMode(int sbmode);
+    void setFadeLevel(int levelfade);
 };
 
 } // namespace WDSP

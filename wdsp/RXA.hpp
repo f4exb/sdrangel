@@ -167,6 +167,8 @@ public:
     static void NBPSetNotchesRun (RXA& rxa, int run);
     static void NBPSetWindow (RXA& rxa, int wintype);
     static void NBPSetAutoIncrease (RXA& rxa, int autoincr);
+    // AMD
+    static void SetAMDRun(RXA& rxa, int run);
 
     // Collectives
     static void SetPassband (RXA& rxa, float f_low, float f_high);

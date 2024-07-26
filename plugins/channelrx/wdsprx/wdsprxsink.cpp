@@ -466,9 +466,9 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_SAM);
 
             if (dsb) {
-                WDSP::AMD::SetAMDSBMode(*m_rxa, 0);
+                m_rxa->amd->setSBMode(0);
             } else {
-                WDSP::AMD::SetAMDSBMode(*m_rxa, usb ? 2 : 1);
+                m_rxa->amd->setSBMode(usb ? 2 : 1);
             }
         }
         else if (settings.m_demod == WDSPRxProfile::DemodFMN)
@@ -643,7 +643,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     // AM option
 
     if ((m_settings.m_amFadeLevel != settings.m_amFadeLevel) || force) {
-        WDSP::AMD::SetAMDFadeLevel(*m_rxa, settings.m_amFadeLevel);
+        m_rxa->amd->setFadeLevel(settings.m_amFadeLevel);
     }
 
     // FM options
@@ -681,7 +681,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     || (m_settings.m_squelchMode != settings.m_squelchMode) || force)
     {
         WDSP::SSQL::SetSSQLRun(*m_rxa, 0);
-        WDSP::AMSQ::SetAMSQRun(*m_rxa, 0);
+        m_rxa->amsq->setRun(0);
         WDSP::FMSQ::SetFMSQRun(*m_rxa, 0);
 
         if (settings.m_squelch)
@@ -697,9 +697,9 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
                 break;
             case WDSPRxProfile::SquelchModeAM:
             {
-                WDSP::AMSQ::SetAMSQRun(*m_rxa, 1);
+                m_rxa->amsq->setRun(1);
                 double threshold = ((settings.m_squelchThreshold / 100.0) * 160.0) - 160.0;
-                WDSP::AMSQ::SetAMSQThreshold(*m_rxa, threshold);
+                m_rxa->amsq->setThreshold(threshold);
             }
                 break;
             case WDSPRxProfile::SquelchModeFM:
@@ -725,7 +725,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     }
 
     if ((m_settings.m_amsqMaxTail != settings.m_amsqMaxTail) || force) {
-        WDSP::AMSQ::SetAMSQMaxTail(*m_rxa, settings.m_amsqMaxTail);
+        m_rxa->amsq->setMaxTail(settings.m_amsqMaxTail);
     }
 
     // Equalizer

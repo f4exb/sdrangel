@@ -135,7 +135,7 @@ TXA* TXA::create_txa (
         -1,                                         // index for gain value
         0);                                         // pointer for gain computation
 
-    txa->amsq.p = AMSQ::create_amsq (
+    txa->amsq.p = new AMSQ(
         0,                                          // run
         txa->dsp_size,                       // size
         txa->midbuff,                       // input buffer
@@ -544,7 +544,7 @@ void TXA::destroy_txa (TXA *txa)
     EMPHP::destroy_emphp (txa->preemph.p);
     delete (txa->eqmeter.p);
     EQP::destroy_eqp (txa->eqp.p);
-    AMSQ::destroy_amsq (txa->amsq.p);
+    delete (txa->amsq.p);
     delete (txa->micmeter.p);
     PHROT::destroy_phrot (txa->phrot.p);
     PANEL::destroy_panel (txa->panel.p);
@@ -566,7 +566,7 @@ void TXA::flush_txa (TXA* txa)
     PANEL::flush_panel (txa->panel.p);
     PHROT::flush_phrot (txa->phrot.p);
     txa->micmeter.p->flush ();
-    AMSQ::flush_amsq (txa->amsq.p);
+    txa->amsq.p->flush ();
     EQP::flush_eqp (txa->eqp.p);
     txa->eqmeter.p->flush ();
     EMPHP::flush_emphp (txa->preemph.p);
@@ -600,8 +600,8 @@ void xtxa (TXA* txa)
     PANEL::xpanel (txa->panel.p);                  // includes MIC gain
     PHROT::xphrot (txa->phrot.p);                  // phase rotator
     txa->micmeter.p->execute ();               // MIC meter
-    AMSQ::xamsqcap (txa->amsq.p);                 // downward expander capture
-    AMSQ::xamsq (txa->amsq.p);                    // downward expander action
+    txa->amsq.p->xcap ();                 // downward expander capture
+    txa->amsq.p->execute ();                    // downward expander action
     EQP::xeqp (txa->eqp.p);                      // pre-EQ
     txa->eqmeter.p->execute ();                // EQ meter
     EMPHP::xemphp (txa->preemph.p, 0);             // FM pre-emphasis (first option)
@@ -698,7 +698,7 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     PANEL::setSamplerate_panel (txa->panel.p, txa->dsp_rate);
     PHROT::setSamplerate_phrot (txa->phrot.p, txa->dsp_rate);
     txa->micmeter.p->setSamplerate (txa->dsp_rate);
-    AMSQ::setSamplerate_amsq (txa->amsq.p, txa->dsp_rate);
+    txa->amsq.p->setSamplerate (txa->dsp_rate);
     EQP::setSamplerate_eqp (txa->eqp.p, txa->dsp_rate);
     txa->eqmeter.p->setSamplerate (txa->dsp_rate);
     EMPHP::setSamplerate_emphp (txa->preemph.p, txa->dsp_rate);
@@ -762,8 +762,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     PHROT::setSize_phrot (txa->phrot.p, txa->dsp_size);
     txa->micmeter.p->setBuffers (txa->midbuff);
     txa->micmeter.p->setSize (txa->dsp_size);
-    AMSQ::setBuffers_amsq (txa->amsq.p, txa->midbuff, txa->midbuff, txa->midbuff);
-    AMSQ::setSize_amsq (txa->amsq.p, txa->dsp_size);
+    txa->amsq.p->setBuffers (txa->midbuff, txa->midbuff, txa->midbuff);
+    txa->amsq.p->setSize (txa->dsp_size);
     EQP::setBuffers_eqp (txa->eqp.p, txa->midbuff, txa->midbuff);
     EQP::setSize_eqp (txa->eqp.p, txa->dsp_size);
     txa->eqmeter.p->setBuffers (txa->midbuff);
