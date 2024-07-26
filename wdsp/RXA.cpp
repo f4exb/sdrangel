@@ -261,7 +261,7 @@ RXA* RXA::create_rxa (
         1.4);                                   // tauI
 
     // FM demodulator
-    rxa->fmd = FMD::create_fmd (
+    rxa->fmd = new FMD(
         0,                                      // run
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
@@ -284,7 +284,7 @@ RXA* RXA::create_rxa (
         0);                                     // min phase flag for audio cutoff filter
 
     // FM squelch apply
-    rxa->fmsq = FMSQ::create_fmsq (
+    rxa->fmsq = new FMSQ(
         0,                                      // run
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input signal buffer
@@ -578,8 +578,8 @@ void RXA::destroy_rxa (RXA *rxa)
     ANF::destroy_anf (rxa->anf);
     EQP::destroy_eqp (rxa->eqp);
     SNBA::destroy_snba (rxa->snba);
-    FMSQ::destroy_fmsq (rxa->fmsq);
-    FMD::destroy_fmd (rxa->fmd);
+    delete (rxa->fmsq);
+    delete (rxa->fmd);
     delete (rxa->amd);
     delete (rxa->amsq);
     delete (rxa->smeter);
@@ -614,8 +614,8 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->smeter->flush();
     rxa->amsq->flush();
     rxa->amd->flush();
-    FMD::flush_fmd (rxa->fmd);
-    FMSQ::flush_fmsq (rxa->fmsq);
+    rxa->fmd->flush();
+    rxa->fmsq->flush();
     SNBA::flush_snba (rxa->snba);
     EQP::flush_eqp (rxa->eqp);
     ANF::flush_anf (rxa->anf);
@@ -647,8 +647,8 @@ void RXA::xrxa (RXA *rxa)
     rxa->amsq->xcap();
     rxa->bpsnba->exec_out(0);
     rxa->amd->execute();
-    FMD::xfmd (rxa->fmd);
-    FMSQ::xfmsq (rxa->fmsq);
+    rxa->fmd->execute();
+    rxa->fmsq->execute();
     rxa->bpsnba->exec_in(1);
     rxa->bpsnba->exec_out(1);
     SNBA::xsnba (rxa->snba);
@@ -759,9 +759,9 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->sender->setSamplerate(rxa->dsp_rate);
     rxa->amsq->setSamplerate(rxa->dsp_rate);
     rxa->amd->setSamplerate(rxa->dsp_rate);
-    FMD::setSamplerate_fmd (rxa->fmd, rxa->dsp_rate);
-    FMSQ::setBuffers_fmsq (rxa->fmsq, rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
-    FMSQ::setSamplerate_fmsq (rxa->fmsq, rxa->dsp_rate);
+    rxa->fmd->setSamplerate(rxa->dsp_rate);
+    rxa->fmsq->setBuffers(rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
+    rxa->fmsq->setSamplerate(rxa->dsp_rate);
     SNBA::setSamplerate_snba (rxa->snba, rxa->dsp_rate);
     EQP::setSamplerate_eqp (rxa->eqp, rxa->dsp_rate);
     ANF::setSamplerate_anf (rxa->anf, rxa->dsp_rate);
@@ -829,10 +829,10 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->amsq->setSize(rxa->dsp_size);
     rxa->amd->setBuffers(rxa->midbuff, rxa->midbuff);
     rxa->amd->setSize(rxa->dsp_size);
-    FMD::setBuffers_fmd (rxa->fmd, rxa->midbuff, rxa->midbuff);
-    FMD::setSize_fmd (rxa->fmd, rxa->dsp_size);
-    FMSQ::setBuffers_fmsq (rxa->fmsq, rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
-    FMSQ::setSize_fmsq (rxa->fmsq, rxa->dsp_size);
+    rxa->fmd->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->fmd->setSize(rxa->dsp_size);
+    rxa->fmsq->setBuffers(rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
+    rxa->fmsq->setSize(rxa->dsp_size);
     SNBA::setBuffers_snba (rxa->snba, rxa->midbuff, rxa->midbuff);
     SNBA::setSize_snba (rxa->snba, rxa->dsp_size);
     EQP::setBuffers_eqp (rxa->eqp, rxa->midbuff, rxa->midbuff);
@@ -1225,22 +1225,20 @@ void RXA::NBPSetAutoIncrease (RXA& rxa, int autoincr)
     }
 }
 
-void RXA::SetAMDRun(RXA& rxa, int run)
+void RXA::SetAMDRun(RXA& rxa, int _run)
 {
-    AMD *a = rxa.amd;
-
-    if (run != run)
+    if (rxa.amd->run != _run)
     {
         RXA::bp1Check (
             rxa,
-            run,
+            _run,
             rxa.snba->run,
             rxa.emnr->run,
             rxa.anf->run,
             rxa.anr->run
         );
 
-        run = run;
+        rxa.amd->run = _run;
         RXA::bp1Set (rxa);
     }
 }
@@ -1265,9 +1263,9 @@ void RXA::SetNC (RXA& rxa, int nc)
     rxa.bpsnba->SetNC            (nc);
     BANDPASS::SetBandpassNC (rxa, nc);
     EQP::SetEQNC            (rxa, nc);
-    FMSQ::SetFMSQNC         (rxa, nc);
-    FMD::SetFMNCde          (rxa, nc);
-    FMD::SetFMNCaud         (rxa, nc);
+    rxa.fmsq->setNC              (nc);
+    rxa.fmd->setNCde             (nc);
+    rxa.fmd->setNCaud            (nc);
     rxa.state = oldstate;
 }
 
@@ -1277,9 +1275,9 @@ void RXA::SetMP (RXA& rxa, int mp)
     rxa.bpsnba->SetMP            (mp);
     BANDPASS::SetBandpassMP (rxa, mp);
     EQP::SetEQMP            (rxa, mp);
-    FMSQ::SetFMSQMP         (rxa, mp);
-    FMD::SetFMMPde          (rxa, mp);
-    FMD::SetFMMPaud         (rxa, mp);
+    rxa.fmsq->setMP              (mp);
+    rxa.fmd->setMPde             (mp);
+    rxa.fmd->setMPaud            (mp);
 }
 
 } // namespace WDSP

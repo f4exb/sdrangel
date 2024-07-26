@@ -35,7 +35,6 @@ namespace WDSP {
 class FIRCORE;
 class SNOTCH;
 class WCPAGC;
-class RXA;
 
 class WDSP_API FMD
 {
@@ -87,7 +86,7 @@ public:
     double lim_gain;
     double lim_pre_gain;
 
-    static FMD* create_fmd (
+    FMD(
         int run,
         int size,
         float* in,
@@ -109,27 +108,28 @@ public:
         int nc_aud,
         int mp_aud
     );
-    static void destroy_fmd (FMD *a);
-    static void flush_fmd (FMD *a);
-    static void xfmd (FMD *a);
-    static void setBuffers_fmd (FMD *a, float* in, float* out);
-    static void setSamplerate_fmd (FMD *a, int rate);
-    static void setSize_fmd (FMD *a, int size);
+    ~FMD();
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // RXA Properties
-    static void SetFMDeviation (RXA& rxa, double deviation);
-    static void SetCTCSSFreq (RXA& rxa, double freq);
-    static void SetCTCSSRun (RXA& rxa, int run);
-    static void SetFMNCde (RXA& rxa, int nc);
-    static void SetFMMPde (RXA& rxa, int mp);
-    static void SetFMNCaud (RXA& rxa, int nc);
-    static void SetFMMPaud (RXA& rxa, int mp);
-    static void SetFMLimRun (RXA& rxa, int run);
-    static void SetFMLimGain (RXA& rxa, double gaindB);
-    static void SetFMAFFilter(RXA& rxa, double low, double high);
+    void setDeviation(double deviation);
+    void setCTCSSFreq(double freq);
+    void setCTCSSRun(int run);
+    void setNCde(int nc);
+    void setMPde(int mp);
+    void setNCaud(int nc);
+    void setMPaud(int mp);
+    void setLimRun(int run);
+    void setLimGain(double gaindB);
+    void setAFFilter(double low, double high);
 
 private:
-    static void calc_fmd (FMD *a);
-    static void decalc_fmd (FMD *a);
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP

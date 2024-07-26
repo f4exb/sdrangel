@@ -33,7 +33,6 @@ warren@wpratt.com
 namespace WDSP {
 
 class FIRCORE;
-class RXA;
 
 class WDSP_API FMSQ
 {
@@ -77,42 +76,43 @@ public:
     int mp;
     FIRCORE *p;
 
-    static FMSQ* create_fmsq (
-        int run,
-        int size,
-        float* insig,
-        float* outsig,
-        float* trigger,
-        int rate,
-        double fc,
-        double* pllpole,
-        double tdelay,
-        double avtau,
-        double longtau,
-        double tup,
-        double tdown,
-        double tail_thresh,
-        double unmute_thresh,
-        double min_tail,
-        double max_tail,
-        int nc,
-        int mp
+    FMSQ(
+        int _run,
+        int _size,
+        float* _insig,
+        float* _outsig,
+        float* _trigger,
+        int _rate,
+        double _fc,
+        double* _pllpole,
+        double _tdelay,
+        double _avtau,
+        double _longtau,
+        double _tup,
+        double _tdown,
+        double _tail_thresh,
+        double _unmute_thresh,
+        double _min_tail,
+        double _max_tail,
+        int _nc,
+        int _mp
     );
-    static void destroy_fmsq (FMSQ *a);
-    static void flush_fmsq (FMSQ *a);
-    static void xfmsq (FMSQ *a);
-    static void setBuffers_fmsq (FMSQ *a, float* in, float* out, float* trig);
-    static void setSamplerate_fmsq (FMSQ *a, int rate);
-    static void setSize_fmsq (FMSQ *a, int size);
-    // RXA Properties
-    static void SetFMSQRun (RXA& rxa, int run);
-    static void SetFMSQThreshold (RXA& rxa, double threshold);
-    static void SetFMSQNC (RXA& rxa, int nc);
-    static void SetFMSQMP (RXA& rxa, int mp);
+    ~FMSQ();
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out, float* trig);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Public Properties
+    void setRun(int run);
+    void setThreshold(double threshold);
+    void setNC(int nc);
+    void setMP(int mp);
 
 private:
-    static void calc_fmsq (FMSQ *a);
-    static void decalc_fmsq (FMSQ *a);
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP

@@ -649,29 +649,29 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     // FM options
 
     if ((m_settings.m_fmDeviation != settings.m_fmDeviation) || force) {
-        WDSP::FMD::SetFMDeviation(*m_rxa, settings.m_fmDeviation);
+        m_rxa->fmd->setDeviation(settings.m_fmDeviation);
     }
 
     if ((m_settings.m_fmAFLow != settings.m_fmAFLow)
     || (m_settings.m_fmAFHigh != settings.m_fmAFHigh) || force)
     {
-        WDSP::FMD::SetFMAFFilter(*m_rxa, settings.m_fmAFLow, settings.m_fmAFHigh);
+        m_rxa->fmd->setAFFilter(settings.m_fmAFLow, settings.m_fmAFHigh);
     }
 
     if ((m_settings.m_fmAFLimiter != settings.m_fmAFLimiter) || force) {
-        WDSP::FMD::SetFMLimRun(*m_rxa, settings.m_fmAFLimiter ? 1 : 0);
+        m_rxa->fmd->setLimRun(settings.m_fmAFLimiter ? 1 : 0);
     }
 
     if ((m_settings.m_fmAFLimiterGain != settings.m_fmAFLimiterGain) || force) {
-        WDSP::FMD::SetFMLimGain(*m_rxa, settings.m_fmAFLimiterGain);
+        m_rxa->fmd->setLimGain(settings.m_fmAFLimiterGain);
     }
 
     if ((m_settings.m_fmCTCSSNotch != settings.m_fmCTCSSNotch) || force) {
-        WDSP::FMD::SetCTCSSRun(*m_rxa, settings.m_fmCTCSSNotch ? 1 : 0);
+        m_rxa->fmd->setCTCSSRun(settings.m_fmCTCSSNotch ? 1 : 0);
     }
 
     if ((m_settings.m_fmCTCSSNotchFrequency != settings.m_fmCTCSSNotchFrequency) || force) {
-        WDSP::FMD::SetCTCSSFreq(*m_rxa, settings.m_fmCTCSSNotchFrequency);
+        m_rxa->fmd->setCTCSSFreq(settings.m_fmCTCSSNotchFrequency);
     }
 
     // Squelch
@@ -682,7 +682,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     {
         WDSP::SSQL::SetSSQLRun(*m_rxa, 0);
         m_rxa->amsq->setRun(0);
-        WDSP::FMSQ::SetFMSQRun(*m_rxa, 0);
+        m_rxa->fmsq->setRun(0);
 
         if (settings.m_squelch)
         {
@@ -704,10 +704,10 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
                 break;
             case WDSPRxProfile::SquelchModeFM:
             {
-                WDSP::FMSQ::SetFMSQRun(*m_rxa, 1);
+                m_rxa->fmsq->setRun(1);
                 double threshold = pow(10.0, -2.0 * ((double) settings.m_squelchThreshold) / 100.0);
                 qDebug("WDSPRxSink::applySettings: FM squelch %lf", threshold);
-                WDSP::FMSQ::SetFMSQThreshold(*m_rxa, threshold);
+                m_rxa->fmsq->setThreshold(threshold);
             }
                 break;
             default:

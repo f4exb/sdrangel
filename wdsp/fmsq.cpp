@@ -29,132 +29,128 @@ warren@wpratt.com
 #include "fircore.hpp"
 #include "eq.hpp"
 #include "fmsq.hpp"
-#include "RXA.hpp"
 
 namespace WDSP {
 
-void FMSQ::calc_fmsq (FMSQ *a)
+void FMSQ::calc()
 {
     double delta, theta;
     float* impulse;
     int i;
     // noise filter
-    a->noise = new float[2 * a->size * 2]; // (float *)malloc0(2 * a->size * sizeof(complex));
-    a->F[0] = 0.0;
-    a->F[1] = a->fc;
-    a->F[2] = *a->pllpole;
-    a->F[3] = 20000.0;
-    a->G[0] = 0.0;
-    a->G[1] = 0.0;
-    a->G[2] = 3.0;
-    a->G[3] = +20.0 * log10(20000.0 / *a->pllpole);
-    impulse = EQP::eq_impulse (a->nc, 3, a->F, a->G, a->rate, 1.0 / (2.0 * a->size), 0, 0);
-    a->p = FIRCORE::create_fircore (a->size, a->trigger, a->noise, a->nc, a->mp, impulse);
+    noise = new float[2 * size * 2]; // (float *)malloc0(2 * size * sizeof(complex));
+    F[0] = 0.0;
+    F[1] = fc;
+    F[2] = *pllpole;
+    F[3] = 20000.0;
+    G[0] = 0.0;
+    G[1] = 0.0;
+    G[2] = 3.0;
+    G[3] = +20.0 * log10(20000.0 / *pllpole);
+    impulse = EQP::eq_impulse (nc, 3, F, G, rate, 1.0 / (2.0 * size), 0, 0);
+    p = FIRCORE::create_fircore (size, trigger, noise, nc, mp, impulse);
     delete[]  (impulse);
     // noise averaging
-    a->avm = exp(-1.0 / (a->rate * a->avtau));
-    a->onem_avm = 1.0 - a->avm;
-    a->avnoise = 100.0;
-    a->longavm = exp(-1.0 / (a->rate * a->longtau));
-    a->onem_longavm = 1.0 - a->longavm;
-    a->longnoise = 1.0;
+    avm = exp(-1.0 / (rate * avtau));
+    onem_avm = 1.0 - avm;
+    avnoise = 100.0;
+    longavm = exp(-1.0 / (rate * longtau));
+    onem_longavm = 1.0 - longavm;
+    longnoise = 1.0;
     // level change
-    a->ntup   = (int)(a->tup   * a->rate);
-    a->ntdown = (int)(a->tdown * a->rate);
-    a->cup   = new double[a->ntup + 1]; // (float *)malloc0 ((a->ntup   + 1) * sizeof(float));
-    a->cdown = new double[a->ntdown + 1]; //(float *)malloc0 ((a->ntdown + 1) * sizeof(float));
-    delta = PI / (double) a->ntup;
+    ntup   = (int)(tup   * rate);
+    ntdown = (int)(tdown * rate);
+    cup   = new double[ntup + 1]; // (float *)malloc0 ((ntup   + 1) * sizeof(float));
+    cdown = new double[ntdown + 1]; //(float *)malloc0 ((ntdown + 1) * sizeof(float));
+    delta = PI / (double) ntup;
     theta = 0.0;
 
-    for (i = 0; i <= a->ntup; i++)
+    for (i = 0; i <= ntup; i++)
     {
-        a->cup[i] = 0.5 * (1.0 - cos(theta));
+        cup[i] = 0.5 * (1.0 - cos(theta));
         theta += delta;
     }
 
-    delta = PI / (double) a->ntdown;
+    delta = PI / (double) ntdown;
     theta = 0.0;
 
-    for (i = 0; i <= a->ntdown; i++)
+    for (i = 0; i <= ntdown; i++)
     {
-        a->cdown[i] = 0.5 * (1 + cos(theta));
+        cdown[i] = 0.5 * (1 + cos(theta));
         theta += delta;
     }
     // control
-    a->state = 0;
-    a->ready = 0;
-    a->ramp = 0.0;
-    a->rstep = 1.0 / a->rate;
+    state = 0;
+    ready = 0;
+    ramp = 0.0;
+    rstep = 1.0 / rate;
 }
 
-void FMSQ::decalc_fmsq (FMSQ *a)
+void FMSQ::decalc()
 {
-    delete[] (a->cdown);
-    delete[] (a->cup);
-    FIRCORE::destroy_fircore (a->p);
-    delete[] (a->noise);
+    delete[] (cdown);
+    delete[] (cup);
+    FIRCORE::destroy_fircore (p);
+    delete[] (noise);
 }
 
-FMSQ* FMSQ::create_fmsq (
-    int run,
-    int size,
-    float* insig,
-    float* outsig,
-    float* trigger,
-    int rate,
-    double fc,
-    double* pllpole,
-    double tdelay,
-    double avtau,
-    double longtau,
-    double tup,
-    double tdown,
-    double tail_thresh,
-    double unmute_thresh,
-    double min_tail,
-    double max_tail,
-    int nc,
-    int mp
-)
+FMSQ::FMSQ(
+    int _run,
+    int _size,
+    float* _insig,
+    float* _outsig,
+    float* _trigger,
+    int _rate,
+    double _fc,
+    double* _pllpole,
+    double _tdelay,
+    double _avtau,
+    double _longtau,
+    double _tup,
+    double _tdown,
+    double _tail_thresh,
+    double _unmute_thresh,
+    double _min_tail,
+    double _max_tail,
+    int _nc,
+    int _mp
+) :
+    run(_run),
+    size(_size),
+    insig(_insig),
+    outsig(_outsig),
+    trigger(_trigger),
+    rate((double) _rate),
+    fc(_fc),
+    pllpole(_pllpole),
+    tdelay(_tdelay),
+    avtau(_avtau),
+    longtau(_longtau),
+    tup(_tup),
+    tdown(_tdown),
+    tail_thresh(_tail_thresh),
+    unmute_thresh(_unmute_thresh),
+    min_tail(_min_tail),
+    max_tail(_max_tail),
+    nc(_nc),
+    mp(_mp)
 {
-    FMSQ *a = new FMSQ;
-    a->run = run;
-    a->size = size;
-    a->insig = insig;
-    a->outsig = outsig;
-    a->trigger = trigger;
-    a->rate = (float)rate;
-    a->fc = fc;
-    a->pllpole = pllpole;
-    a->tdelay = tdelay;
-    a->avtau = avtau;
-    a->longtau = longtau;
-    a->tup = tup;
-    a->tdown = tdown;
-    a->tail_thresh = tail_thresh;
-    a->unmute_thresh = unmute_thresh;
-    a->min_tail = min_tail;
-    a->max_tail = max_tail;
-    a->nc = nc;
-    a->mp = mp;
-    calc_fmsq (a);
-    return a;
+    calc();
 }
 
-void FMSQ::destroy_fmsq (FMSQ *a)
+FMSQ::~FMSQ()
 {
-    decalc_fmsq (a);
-    delete  (a);
+    decalc();
 }
 
-void FMSQ::flush_fmsq (FMSQ *a)
+void FMSQ::flush()
 {
-    FIRCORE::flush_fircore (a->p);
-    a->avnoise = 100.0;
-    a->longnoise = 1.0;
-    a->state = 0;
-    a->ready = 0;
-    a->ramp = 0.0;
+    FIRCORE::flush_fircore (p);
+    avnoise = 100.0;
+    longnoise = 1.0;
+    state = 0;
+    ready = 0;
+    ramp = 0.0;
 }
 
 enum _fmsqstate
@@ -166,120 +162,120 @@ enum _fmsqstate
     DECREASE
 };
 
-void FMSQ::xfmsq (FMSQ *a)
+void FMSQ::execute()
 {
-    if (a->run)
+    if (run)
     {
         int i;
-        double noise, lnlimit;
-        FIRCORE::xfircore (a->p);
+        double _noise, lnlimit;
+        FIRCORE::xfircore (p);
 
-        for (i = 0; i < a->size; i++)
+        for (i = 0; i < size; i++)
         {
-            double noise0 = a->noise[2 * i + 0];
-            double noise1 = a->noise[2 * i + 1];
-            noise = sqrt(noise0 * noise0 + noise1 * noise1);
-            a->avnoise = a->avm * a->avnoise + a->onem_avm * noise;
-            a->longnoise = a->longavm * a->longnoise + a->onem_longavm * noise;
+            double noise0 = noise[2 * i + 0];
+            double noise1 = noise[2 * i + 1];
+            _noise = sqrt(noise0 * noise0 + noise1 * noise1);
+            avnoise = avm * avnoise + onem_avm * _noise;
+            longnoise = longavm * longnoise + onem_longavm * _noise;
 
-            if (!a->ready)
-                a->ramp += a->rstep;
+            if (!ready)
+                ramp += rstep;
 
-            if (a->ramp >= a->tdelay)
-                a->ready = 1;
+            if (ramp >= tdelay)
+                ready = 1;
 
-            switch (a->state)
+            switch (state)
             {
             case MUTED:
-                if (a->avnoise < a->unmute_thresh && a->ready)
+                if (avnoise < unmute_thresh && ready)
                 {
-                    a->state = INCREASE;
-                    a->count = a->ntup;
+                    state = INCREASE;
+                    count = ntup;
                 }
 
-                a->outsig[2 * i + 0] = 0.0;
-                a->outsig[2 * i + 1] = 0.0;
+                outsig[2 * i + 0] = 0.0;
+                outsig[2 * i + 1] = 0.0;
 
                 break;
 
             case INCREASE:
-                a->outsig[2 * i + 0] = a->insig[2 * i + 0] * a->cup[a->ntup - a->count];
-                a->outsig[2 * i + 1] = a->insig[2 * i + 1] * a->cup[a->ntup - a->count];
+                outsig[2 * i + 0] = insig[2 * i + 0] * cup[ntup - count];
+                outsig[2 * i + 1] = insig[2 * i + 1] * cup[ntup - count];
 
-                if (a->count-- == 0)
-                    a->state = UNMUTED;
+                if (count-- == 0)
+                    state = UNMUTED;
 
                 break;
 
             case UNMUTED:
-                if (a->avnoise > a->tail_thresh)
+                if (avnoise > tail_thresh)
                 {
-                    a->state = TAIL;
+                    state = TAIL;
 
-                    if ((lnlimit = a->longnoise) > 1.0)
+                    if ((lnlimit = longnoise) > 1.0)
                         lnlimit = 1.0;
 
-                    a->count = (int)((a->min_tail + (a->max_tail - a->min_tail) * lnlimit) * a->rate);
+                    count = (int)((min_tail + (max_tail - min_tail) * lnlimit) * rate);
                 }
 
-                a->outsig[2 * i + 0] = a->insig[2 * i + 0];
-                a->outsig[2 * i + 1] = a->insig[2 * i + 1];
+                outsig[2 * i + 0] = insig[2 * i + 0];
+                outsig[2 * i + 1] = insig[2 * i + 1];
 
                 break;
 
             case TAIL:
-                a->outsig[2 * i + 0] = a->insig[2 * i + 0];
-                a->outsig[2 * i + 1] = a->insig[2 * i + 1];
+                outsig[2 * i + 0] = insig[2 * i + 0];
+                outsig[2 * i + 1] = insig[2 * i + 1];
 
-                if (a->avnoise < a->unmute_thresh)
+                if (avnoise < unmute_thresh)
                 {
-                    a->state = UNMUTED;
+                    state = UNMUTED;
                 }
-                else if (a->count-- == 0)
+                else if (count-- == 0)
                 {
-                    a->state = DECREASE;
-                    a->count = a->ntdown;
+                    state = DECREASE;
+                    count = ntdown;
                 }
 
                 break;
 
             case DECREASE:
-                a->outsig[2 * i + 0] = a->insig[2 * i + 0] * a->cdown[a->ntdown - a->count];
-                a->outsig[2 * i + 1] = a->insig[2 * i + 1] * a->cdown[a->ntdown - a->count];
+                outsig[2 * i + 0] = insig[2 * i + 0] * cdown[ntdown - count];
+                outsig[2 * i + 1] = insig[2 * i + 1] * cdown[ntdown - count];
 
-                if (a->count-- == 0)
-                    a->state = MUTED;
+                if (count-- == 0)
+                    state = MUTED;
 
                 break;
             }
         }
     }
-    else if (a->insig != a->outsig)
+    else if (insig != outsig)
     {
-        std::copy(a->insig, a->insig + a->size * 2, a->outsig);
+        std::copy(insig, insig + size * 2, outsig);
     }
 }
 
-void FMSQ::setBuffers_fmsq (FMSQ *a, float* in, float* out, float* trig)
+void FMSQ::setBuffers(float* in, float* out, float* trig)
 {
-    a->insig = in;
-    a->outsig = out;
-    a->trigger = trig;
-    FIRCORE::setBuffers_fircore (a->p, a->trigger, a->noise);
+    insig = in;
+    outsig = out;
+    trigger = trig;
+    FIRCORE::setBuffers_fircore (p, trigger, noise);
 }
 
-void FMSQ::setSamplerate_fmsq (FMSQ *a, int rate)
+void FMSQ::setSamplerate(int _rate)
 {
-    decalc_fmsq (a);
-    a->rate = rate;
-    calc_fmsq (a);
+    decalc();
+    rate = _rate;
+    calc();
 }
 
-void FMSQ::setSize_fmsq (FMSQ *a, int size)
+void FMSQ::setSize(int _size)
 {
-    decalc_fmsq (a);
-    a->size = size;
-    calc_fmsq (a);
+    decalc();
+    size = _size;
+    calc();
 }
 
 /********************************************************************************************************
@@ -288,41 +284,36 @@ void FMSQ::setSize_fmsq (FMSQ *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void FMSQ::SetFMSQRun (RXA& rxa, int run)
+void FMSQ::setRun(int _run)
 {
-    rxa.fmsq->run = run;
+    run = _run;
 }
 
-void FMSQ::SetFMSQThreshold (RXA& rxa, double threshold)
+void FMSQ::setThreshold(double threshold)
 {
-    rxa.fmsq->tail_thresh = threshold;
-    rxa.fmsq->unmute_thresh = 0.9 * threshold;
+    tail_thresh = threshold;
+    unmute_thresh = 0.9 * threshold;
 }
 
-void FMSQ::SetFMSQNC (RXA& rxa, int nc)
+void FMSQ::setNC(int _nc)
 {
-    FMSQ *a;
     float* impulse;
-    a = rxa.fmsq;
 
-    if (a->nc != nc)
+    if (nc != _nc)
     {
-        a->nc = nc;
-        impulse = EQP::eq_impulse (a->nc, 3, a->F, a->G, a->rate, 1.0 / (2.0 * a->size), 0, 0);
-        FIRCORE::setNc_fircore (a->p, a->nc, impulse);
+        nc = _nc;
+        impulse = EQP::eq_impulse (nc, 3, F, G, rate, 1.0 / (2.0 * size), 0, 0);
+        FIRCORE::setNc_fircore (p, nc, impulse);
         delete[]  (impulse);
     }
 }
 
-void FMSQ::SetFMSQMP (RXA& rxa, int mp)
+void FMSQ::setMP(int _mp)
 {
-    FMSQ *a;
-    a = rxa.fmsq;
-
-    if (a->mp != mp)
+    if (mp != _mp)
     {
-        a->mp = mp;
-        FIRCORE::setMp_fircore (a->p, a->mp);
+        mp = _mp;
+        FIRCORE::setMp_fircore (p, mp);
     }
 }
 
