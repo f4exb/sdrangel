@@ -64,6 +64,8 @@ private:
     static const float m_viridis[m_size];
     static const float m_loggray[m_size];
     static const float m_shrimp[m_size];
+    static const float m_cubehelix[m_size];
+    static const float m_cubegamma[m_size];
 };
 
 #endif
