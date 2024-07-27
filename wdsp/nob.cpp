@@ -105,15 +105,15 @@ NOB::NOB (
         MAX_HANG_SLEW_TIME +
         MAX_HANG_TIME +
         MAX_SEQ_TIME ) + 2);
-    dline = new double[dline_size * 2];
-    imp = new int[dline_size];
-    awave = new double[(int)(MAX_ADV_SLEW_TIME  * MAX_SAMPLERATE + 1)];
-    hwave = new double[(int)(MAX_HANG_SLEW_TIME * MAX_SAMPLERATE + 1)];
+    dline.resize(dline_size * 2);
+    imp.resize(dline_size);
+    awave.resize((int)(MAX_ADV_SLEW_TIME  * MAX_SAMPLERATE + 1));
+    hwave.resize((int)(MAX_HANG_SLEW_TIME * MAX_SAMPLERATE + 1));
 
     filterlen = 10;
-    bfbuff = new double[filterlen * 2];
-    ffbuff = new double[filterlen * 2];
-    fcoefs = new double[filterlen];
+    bfbuff.resize(filterlen * 2);
+    ffbuff.resize(filterlen * 2);
+    fcoefs.resize(filterlen);
     fcoefs[0] = 0.308720593;
     fcoefs[1] = 0.216104415;
     fcoefs[2] = 0.151273090;
@@ -128,17 +128,6 @@ NOB::NOB (
     init();
 }
 
-NOB::~NOB()
-{
-    delete[] fcoefs;
-    delete[] ffbuff;
-    delete[] bfbuff;
-    delete[] hwave;
-    delete[] awave;
-    delete[] imp;
-    delete[] dline;
-}
-
 void NOB::flush()
 {
     out_idx = 0;
@@ -149,10 +138,10 @@ void NOB::flush()
     avg = 1.0;
     bfb_in_idx = filterlen - 1;
     ffb_in_idx = filterlen - 1;
-    std::fill(dline, dline + dline_size * 2, 0);
-    std::fill(imp, imp + dline_size, 0);
-    std::fill(bfbuff, bfbuff + filterlen * 2, 0);
-    std::fill(ffbuff, ffbuff + filterlen * 2, 0);
+    std::fill(dline.begin(), dline.end(), 0);
+    std::fill(imp.begin(), imp.end(), 0);
+    std::fill(bfbuff.begin(), bfbuff.end(), 0);
+    std::fill(ffbuff.begin(), ffbuff.end(), 0);
 }
 
 void NOB::execute()

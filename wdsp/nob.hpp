@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_nob_h
 #define wdsp_nob_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -37,11 +39,11 @@ class WDSP_API NOB
 public:
     int run;
     int buffsize;                   // size of input/output buffer
-    float* in;                     // input buffer
-    float* out;                    // output buffer
+    float* in;                      // input buffer
+    float* out;                     // output buffer
     int dline_size;                 // length of delay line which is 'double dline[length][2]'
-    double *dline;                  // pointer to delay line
-    int *imp;
+    std::vector<double> dline;      // delay line
+    std::vector<int> imp;
     double samplerate;              // samplerate, used to convert times into sample counts
     int mode;
     double advslewtime;                     // transition time, signal<->zero
@@ -50,15 +52,15 @@ public:
     double hangtime;                // time to stay at zero after noise is no longer detected
     double max_imp_seq_time;
     int filterlen;
-    double *fcoefs;
-    double *bfbuff;
+    std::vector<double> fcoefs;
+    std::vector<double> bfbuff;
     int bfb_in_idx;
-    double *ffbuff;
+    std::vector<double> ffbuff;
     int ffb_in_idx;
     double backtau;                 // time constant used in averaging the magnitude of the input signal
     double threshold;               // triggers if (noise > threshold * average_signal_magnitude)
-    double *awave;                   // pointer to array holding transition waveform
-    double *hwave;
+    std::vector<double> awave;      // array holding transition waveform
+    std::vector<double> hwave;
     int state;                      // state of the state machine
     double avg;                     // average value of the signal magnitude
     int time;                       // count when decreasing the signal magnitude
@@ -96,7 +98,8 @@ public:
         double backtau,
         double threshold
     );
-    ~NOB();
+    NOB(const NOB&) = delete;
+    ~NOB() = default;
                                                                                            ////////////  legacy interface - remove
     void flush();
     void execute();

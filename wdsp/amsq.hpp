@@ -78,6 +78,7 @@ public:
         double _max_tail,
         double _muted_gain
     );
+    AMSQ(const AMSQ&) = delete;
     ~AMSQ();
 
     void flush();

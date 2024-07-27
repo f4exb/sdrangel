@@ -57,7 +57,7 @@ void ANB::initBlanker()
     for (i = 0; i <= trans_count; i++)
         wave[i] = 0.5 * cos(i * coef);
 
-    std::fill(dline, dline + dline_size * 2, 0);
+    std::fill(dline.begin(), dline.end(), 0);
 }
 
 ANB::ANB  (
@@ -81,20 +81,20 @@ ANB::ANB  (
     hangtime(_hangtime),
     advtime(_advtime),
     backtau(_backtau),
-    threshold(_threshold)
+    threshold(_threshold),
+    dtime(0),
+    htime(0),
+    itime(0),
+    atime(0)
 {
-    wave = new double[((int)(MAX_SAMPLERATE * MAX_TAU) + 1)];
+    tau = tau < 0.0 ? 0.0 : (tau > MAX_TAU ? MAX_TAU : tau);
+    hangtime = hangtime < 0.0 ? 0.0 : (hangtime > MAX_ADVTIME ? MAX_ADVTIME : hangtime);
+    advtime = advtime < 0.0 ? 0.0 : (advtime > MAX_ADVTIME ? MAX_ADVTIME : advtime);
+    samplerate = samplerate < 0.0 ? 0.0 : (samplerate > MAX_SAMPLERATE ? MAX_SAMPLERATE : samplerate);
+    wave.resize((int)(MAX_SAMPLERATE * MAX_TAU) + 1);
     dline_size = (int)((MAX_TAU + MAX_ADVTIME) * MAX_SAMPLERATE) + 1;
-    dline = new float[dline_size * 2];
+    dline.resize(dline_size * 2);
     initBlanker();
-    legacy = new float[2048 * 2];  /////////////// legacy interface - remove
-}
-
-ANB::~ANB()
-{
-    delete[] legacy;                                                                                      /////////////// legacy interface - remove
-    delete[] dline;
-    delete[] wave;
 }
 
 void ANB::flush()

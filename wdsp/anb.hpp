@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_anb_h
 #define wdsp_anb_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -37,17 +39,17 @@ class WDSP_API ANB
 public:
     int run;
     int buffsize;                   // size of input/output buffer
-    float* in;                     // input buffer
-    float* out;                    // output buffer
+    float* in;                      // input buffer
+    float* out;                     // output buffer
     int dline_size;                 // length of delay line which is 'double dline[length][2]'
-    float *dline;                  // pointer to delay line
+    std::vector<float> dline;       // delay line
     double samplerate;              // samplerate, used to convert times into sample counts
     double tau;                     // transition time, signal<->zero
     double hangtime;                // time to stay at zero after noise is no longer detected
     double advtime;                 // deadtime (zero output) in advance of detected noise
     double backtau;                 // time constant used in averaging the magnitude of the input signal
     double threshold;               // triggers if (noise > threshold * average_signal_magnitude)
-    double *wave;                   // pointer to array holding transition waveform
+    std::vector<double> wave;       // array holding transition waveform
     int state;                      // state of the state machine
     double avg;                     // average value of the signal magnitude
     int dtime;                      // count when decreasing the signal magnitude
@@ -64,7 +66,6 @@ public:
     int count;                      // set each time a noise sample is detected, counts down
     double backmult;                // multiplier for waveform averaging
     double ombackmult;              // multiplier for waveform averaging
-    float *legacy;
 
     ANB(
         int run,
@@ -78,7 +79,8 @@ public:
         double backtau,
         double threshold
     );
-    ~ANB();
+    ANB(const ANB&) = delete;
+    ~ANB() = default;
 
     void flush();
     void execute();
