@@ -860,7 +860,7 @@ if (FFTW3F_FOUND)
     set(FT8_SUPPORT ON CACHE INTERNAL "")
 endif()
 
-if (FFTW3F_FOUND AND LINUX)
+if (FFTW3F_FOUND)
     add_subdirectory(wdsp)
     add_definitions(-DHAS_WDSP)
     set(WDSP_SUPPORT ON CACHE INTERNAL "")

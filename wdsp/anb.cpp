@@ -97,6 +97,11 @@ ANB::~ANB()
     delete[] wave;
 }
 
+void ANB::flush()
+{
+    initBlanker();
+}
+
 void ANB::execute()
 {
     double scale;
