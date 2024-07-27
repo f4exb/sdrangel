@@ -41,7 +41,7 @@ warren@wpratt.com
 #include "amsq.hpp"
 #include "fmd.hpp"
 #include "fmsq.hpp"
-#include "eq.hpp"
+#include "eqp.hpp"
 #include "anf.hpp"
 #include "anr.hpp"
 #include "emnr.hpp"
@@ -306,7 +306,7 @@ RXA* RXA::create_rxa (
         0);                                     // minimum phase flag
 
     // Spectral noise blanker (SNB)
-    rxa->snba = SNBA::create_snba (
+    rxa->snba = new SNBA(
         0,                                      // run
         rxa->midbuff,                           // input buffer
         rxa->midbuff,                           // output buffer
@@ -331,7 +331,7 @@ RXA* RXA::create_rxa (
         float default_F[11] = {0.0,  32.0,  63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0};
         //float default_G[11] = {0.0, -12.0, -12.0, -12.0,  -1.0,  +1.0,   +4.0,   +9.0,  +12.0,  -10.0,   -10.0};
         float default_G[11] =   {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0};
-        rxa->eqp = EQP::create_eqp (
+        rxa->eqp = new EQP(
             0,                                  // run - OFF by default
             rxa->dsp_size,                      // buffer size
             std::max(2048, rxa->dsp_size),      // number of filter coefficients
@@ -576,8 +576,8 @@ void RXA::destroy_rxa (RXA *rxa)
     EMNR::destroy_emnr (rxa->emnr);
     ANR::destroy_anr (rxa->anr);
     ANF::destroy_anf (rxa->anf);
-    EQP::destroy_eqp (rxa->eqp);
-    SNBA::destroy_snba (rxa->snba);
+    delete (rxa->eqp);
+    delete (rxa->snba);
     delete (rxa->fmsq);
     delete (rxa->fmd);
     delete (rxa->amd);
@@ -616,8 +616,8 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->amd->flush();
     rxa->fmd->flush();
     rxa->fmsq->flush();
-    SNBA::flush_snba (rxa->snba);
-    EQP::flush_eqp (rxa->eqp);
+    rxa->snba->flush();
+    rxa->eqp->flush();
     ANF::flush_anf (rxa->anf);
     ANR::flush_anr (rxa->anr);
     EMNR::flush_emnr (rxa->emnr);
@@ -651,8 +651,8 @@ void RXA::xrxa (RXA *rxa)
     rxa->fmsq->execute();
     rxa->bpsnba->exec_in(1);
     rxa->bpsnba->exec_out(1);
-    SNBA::xsnba (rxa->snba);
-    EQP::xeqp (rxa->eqp);
+    rxa->snba->execute();
+    rxa->eqp->execute();
     ANF::xanf (rxa->anf, 0);
     ANR::xanr (rxa->anr, 0);
     EMNR::xemnr (rxa->emnr, 0);
@@ -762,8 +762,8 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->fmd->setSamplerate(rxa->dsp_rate);
     rxa->fmsq->setBuffers(rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
     rxa->fmsq->setSamplerate(rxa->dsp_rate);
-    SNBA::setSamplerate_snba (rxa->snba, rxa->dsp_rate);
-    EQP::setSamplerate_eqp (rxa->eqp, rxa->dsp_rate);
+    rxa->snba->setSamplerate(rxa->dsp_rate);
+    rxa->eqp->setSamplerate(rxa->dsp_rate);
     ANF::setSamplerate_anf (rxa->anf, rxa->dsp_rate);
     ANR::setSamplerate_anr (rxa->anr, rxa->dsp_rate);
     EMNR::setSamplerate_emnr (rxa->emnr, rxa->dsp_rate);
@@ -833,10 +833,10 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->fmd->setSize(rxa->dsp_size);
     rxa->fmsq->setBuffers(rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
     rxa->fmsq->setSize(rxa->dsp_size);
-    SNBA::setBuffers_snba (rxa->snba, rxa->midbuff, rxa->midbuff);
-    SNBA::setSize_snba (rxa->snba, rxa->dsp_size);
-    EQP::setBuffers_eqp (rxa->eqp, rxa->midbuff, rxa->midbuff);
-    EQP::setSize_eqp (rxa->eqp, rxa->dsp_size);
+    rxa->snba->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->snba->setSize(rxa->dsp_size);
+    rxa->eqp->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->eqp->setSize(rxa->dsp_size);
     ANF::setBuffers_anf (rxa->anf, rxa->midbuff, rxa->midbuff);
     ANF::setSize_anf (rxa->anf, rxa->dsp_size);
     ANR::setBuffers_anr (rxa->anr, rxa->midbuff, rxa->midbuff);
@@ -1243,6 +1243,27 @@ void RXA::SetAMDRun(RXA& rxa, int _run)
     }
 }
 
+void RXA::SetSNBARun (RXA& rxa, int run)
+{
+    SNBA *a = rxa.snba;
+
+    if (a->run != run)
+    {
+        RXA::bpsnbaCheck (rxa, rxa.mode, rxa.ndb->master_run);
+        RXA::bp1Check (
+            rxa,
+            rxa.amd->run,
+            run,
+            rxa.emnr->run,
+            rxa.anf->run,
+            rxa.anr->run
+        );
+        a->run = run;
+        RXA::bp1Set (rxa);
+        RXA::bpsnbaSet (rxa);
+    }
+}
+
 /********************************************************************************************************
 *                                                                                                       *
 *                                               Collectives                                             *
@@ -1252,7 +1273,7 @@ void RXA::SetAMDRun(RXA& rxa, int _run)
 void RXA::SetPassband (RXA& rxa, float f_low, float f_high)
 {
     BANDPASS::SetBandpassFreqs   (rxa, f_low, f_high); // After spectral noise reduction ( AM || ANF || ANR || EMNR)
-    SNBA::SetSNBAOutputBandwidth (rxa, f_low, f_high); // Spectral noise blanker (SNB)
+    rxa.snba->setOutputBandwidth      (f_low, f_high); // Spectral noise blanker (SNB)
     rxa.nbp0->SetFreqs                (f_low, f_high); // Notched bandpass
 }
 
@@ -1262,7 +1283,7 @@ void RXA::SetNC (RXA& rxa, int nc)
     rxa.nbp0->SetNC              (nc);
     rxa.bpsnba->SetNC            (nc);
     BANDPASS::SetBandpassNC (rxa, nc);
-    EQP::SetEQNC            (rxa, nc);
+    rxa.eqp->setNC               (nc);
     rxa.fmsq->setNC              (nc);
     rxa.fmd->setNCde             (nc);
     rxa.fmd->setNCaud            (nc);
@@ -1274,7 +1295,7 @@ void RXA::SetMP (RXA& rxa, int mp)
     rxa.nbp0->SetMP              (mp);
     rxa.bpsnba->SetMP            (mp);
     BANDPASS::SetBandpassMP (rxa, mp);
-    EQP::SetEQMP            (rxa, mp);
+    rxa.eqp->setMP               (mp);
     rxa.fmsq->setMP              (mp);
     rxa.fmd->setMPde             (mp);
     rxa.fmd->setMPaud            (mp);

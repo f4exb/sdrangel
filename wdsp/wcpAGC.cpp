@@ -535,60 +535,60 @@ void WCPAGC::SetAGCMaxInputLevel (RXA& rxa, double level)
 
 void WCPAGC::SetALCSt (TXA& txa, int state)
 {
-    txa.alc.p->run = state;
+    txa.alc->run = state;
 }
 
 void WCPAGC::SetALCAttack (TXA& txa, int attack)
 {
-    txa.alc.p->tau_attack = (double) attack / 1000.0;
-    loadWcpAGC(txa.alc.p);
+    txa.alc->tau_attack = (double) attack / 1000.0;
+    loadWcpAGC(txa.alc);
 }
 
 void WCPAGC::SetALCDecay (TXA& txa, int decay)
 {
-    txa.alc.p->tau_decay = (double) decay / 1000.0;
-    loadWcpAGC(txa.alc.p);
+    txa.alc->tau_decay = (double) decay / 1000.0;
+    loadWcpAGC(txa.alc);
 }
 
 void WCPAGC::SetALCHang (TXA& txa, int hang)
 {
-    txa.alc.p->hangtime = (double) hang / 1000.0;
-    loadWcpAGC(txa.alc.p);
+    txa.alc->hangtime = (double) hang / 1000.0;
+    loadWcpAGC(txa.alc);
 }
 
 void WCPAGC::SetALCMaxGain (TXA& txa, double maxgain)
 {
-    txa.alc.p->max_gain = pow (10.0,(double) maxgain / 20.0);
-    loadWcpAGC(txa.alc.p);
+    txa.alc->max_gain = pow (10.0,(double) maxgain / 20.0);
+    loadWcpAGC(txa.alc);
 }
 
 void WCPAGC::SetLevelerSt (TXA& txa, int state)
 {
-    txa.leveler.p->run = state;
+    txa.leveler->run = state;
 }
 
 void WCPAGC::SetLevelerAttack (TXA& txa, int attack)
 {
-    txa.leveler.p->tau_attack = (double) attack / 1000.0;
-    loadWcpAGC(txa.leveler.p);
+    txa.leveler->tau_attack = (double) attack / 1000.0;
+    loadWcpAGC(txa.leveler);
 }
 
 void WCPAGC::SetLevelerDecay (TXA& txa, int decay)
 {
-    txa.leveler.p->tau_decay = (double) decay / 1000.0;
-    loadWcpAGC(txa.leveler.p);
+    txa.leveler->tau_decay = (double) decay / 1000.0;
+    loadWcpAGC(txa.leveler);
 }
 
 void WCPAGC::SetLevelerHang (TXA& txa, int hang)
 {
-    txa.leveler.p->hangtime = (double) hang / 1000.0;
-    loadWcpAGC(txa.leveler.p);
+    txa.leveler->hangtime = (double) hang / 1000.0;
+    loadWcpAGC(txa.leveler);
 }
 
 void WCPAGC::SetLevelerTop (TXA& txa, double maxgain)
 {
-    txa.leveler.p->max_gain = pow (10.0,(double) maxgain / 20.0);
-    loadWcpAGC(txa.leveler.p);
+    txa.leveler->max_gain = pow (10.0,(double) maxgain / 20.0);
+    loadWcpAGC(txa.leveler);
 }
 
 } // namespace WDSP

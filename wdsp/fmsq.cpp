@@ -27,7 +27,7 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "fircore.hpp"
-#include "eq.hpp"
+#include "eqp.hpp"
 #include "fmsq.hpp"
 
 namespace WDSP {
@@ -123,7 +123,6 @@ FMSQ::FMSQ(
     rate((double) _rate),
     fc(_fc),
     pllpole(_pllpole),
-    tdelay(_tdelay),
     avtau(_avtau),
     longtau(_longtau),
     tup(_tup),
@@ -132,6 +131,7 @@ FMSQ::FMSQ(
     unmute_thresh(_unmute_thresh),
     min_tail(_min_tail),
     max_tail(_max_tail),
+    tdelay(_tdelay),
     nc(_nc),
     mp(_mp)
 {

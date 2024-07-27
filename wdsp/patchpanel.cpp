@@ -195,23 +195,23 @@ void PANEL::SetPanelBinaural (RXA& rxa, int bin)
 
 void PANEL::SetPanelRun (TXA& txa, int run)
 {
-    txa.panel.p->run = run;
+    txa.panel->run = run;
 }
 
 void PANEL::SetPanelGain1 (TXA& txa, double gain)
 {
-    txa.panel.p->gain1 = gain;
+    txa.panel->gain1 = gain;
     //print_message ("micgainset.txt", "Set MIC Gain to", (int)(100.0 * gain), 0, 0);
 }
 
 void PANEL::SetPanelSelect (TXA& txa, int select)
 {
     if (select == 1)
-        txa.panel.p->copy = 3;
+        txa.panel->copy = 3;
     else
-        txa.panel.p->copy = 0;
+        txa.panel->copy = 0;
 
-    txa.panel.p->inselect = select;
+    txa.panel->inselect = select;
 }
 
 } // namespace WDSP

@@ -109,8 +109,8 @@ void AMMOD::setSize_ammod(AMMOD *a, int size)
 
 void AMMOD::SetAMCarrierLevel (TXA& txa, float c_level)
 {
-    txa.ammod.p->c_level = c_level;
-    txa.ammod.p->a_level = 1.0 - c_level;
+    txa.ammod->c_level = c_level;
+    txa.ammod->a_level = 1.0 - c_level;
 }
 
 } // namespace WDSP

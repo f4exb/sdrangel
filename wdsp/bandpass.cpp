@@ -257,7 +257,7 @@ void BANDPASS::SetBandpassMP (RXA& rxa, int mp)
 //{
 //  float* impulse;
 //  BANDPASS a;
-//  a = txa.bp0.p;
+//  a = txa.bp0;
 //  if ((f_low != a->f_low) || (f_high != a->f_high))
 //  {
 //      a->f_low = f_low;
@@ -266,7 +266,7 @@ void BANDPASS::SetBandpassMP (RXA& rxa, int mp)
 //      setImpulse_fircore (a->p, impulse, 1);
 //      delete[] (impulse);
 //  }
-//  a = txa.bp1.p;
+//  a = txa.bp1;
 //  if ((f_low != a->f_low) || (f_high != a->f_high))
 //  {
 //      a->f_low = f_low;
@@ -275,7 +275,7 @@ void BANDPASS::SetBandpassMP (RXA& rxa, int mp)
 //      setImpulse_fircore (a->p, impulse, 1);
 //      delete[] (impulse);
 //  }
-//  a = txa.bp2.p;
+//  a = txa.bp2;
 //  if ((f_low != a->f_low) || (f_high != a->f_high))
 //  {
 //      a->f_low = f_low;
@@ -290,7 +290,7 @@ void BANDPASS::SetBandpassNC (TXA& txa, int nc)
 {
     // NOTE:  'nc' must be >= 'size'
     BANDPASS *a;
-    a = txa.bp0.p;
+    a = txa.bp0;
 
     if (a->nc != nc)
     {
@@ -308,7 +308,7 @@ void BANDPASS::SetBandpassNC (TXA& txa, int nc)
         delete[] (impulse);
     }
 
-    a = txa.bp1.p;
+    a = txa.bp1;
 
     if (a->nc != nc)
     {
@@ -326,7 +326,7 @@ void BANDPASS::SetBandpassNC (TXA& txa, int nc)
         delete[] (impulse);
     }
 
-    a = txa.bp2.p;
+    a = txa.bp2;
 
     if (a->nc != nc)
     {
@@ -348,7 +348,7 @@ void BANDPASS::SetBandpassNC (TXA& txa, int nc)
 void BANDPASS::SetBandpassMP (TXA& txa, int mp)
 {
     BANDPASS *a;
-    a = txa.bp0.p;
+    a = txa.bp0;
 
     if (mp != a->mp)
     {
@@ -356,7 +356,7 @@ void BANDPASS::SetBandpassMP (TXA& txa, int mp)
         FIRCORE::setMp_fircore (a->p, a->mp);
     }
 
-    a = txa.bp1.p;
+    a = txa.bp1;
 
     if (mp != a->mp)
     {
@@ -364,7 +364,7 @@ void BANDPASS::SetBandpassMP (TXA& txa, int mp)
         FIRCORE::setMp_fircore (a->p, a->mp);
     }
 
-    a = txa.bp2.p;
+    a = txa.bp2;
 
     if (mp != a->mp)
     {

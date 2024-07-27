@@ -27,51 +27,73 @@ warren@wpratt.com
 
 /********************************************************************************************************
 *                                                                                                       *
-*                                           Overlap-Save Equalizer                                      *
+*                                   Partitioned Overlap-Save Equalizer                                  *
 *                                                                                                       *
 ********************************************************************************************************/
 
-#ifndef wdsp_eq_h
-#define wdsp_eq_h
+#ifndef wdsp_eqp_h
+#define wdsp_eqp_h
 
-#include "fftw3.h"
 #include "export.h"
 
 namespace WDSP {
 
-class WDSP_API EQ
+class FIRCORE;
+class RXA;
+class TXA;
+
+class WDSP_API EQP
 {
 public:
     int run;
     int size;
+    int nc;
+    int mp;
     float* in;
     float* out;
     int nfreqs;
     float* F;
     float* G;
-    float* infilt;
-    float* product;
-    float* mults;
-    float scale;
     int ctfmode;
     int wintype;
-    float samplerate;
-    fftwf_plan CFor;
-    fftwf_plan CRev;
+    double samplerate;
+    FIRCORE *fircore;
 
-    static EQ* create_eq (int run, int size, float *in, float *out, int nfreqs, float* F, float* G, int ctfmode, int wintype, int samplerate);
-    // static float* eq_mults (int size, int nfreqs, float* F, float* G, float samplerate, float scale, int ctfmode, int wintype);
-    static void destroy_eq (EQ *a);
-    static void flush_eq (EQ *a);
-    static void xeq (EQ *a);
-    static void setBuffers_eq (EQ *a, float* in, float* out);
-    static void setSamplerate_eq (EQ *a, int rate);
-    static void setSize_eq (EQ *a, int size);
+    EQP(
+        int run,
+        int size,
+        int nc,
+        int mp,
+        float *in,
+        float *out,
+        int nfreqs,
+        float* F,
+        float* G,
+        int ctfmode,
+        int wintype,
+        int samplerate
+    );
+    ~EQP();
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Public properties
+    void setRun(int run);
+    void setNC(int nc);
+    void setMP(int mp);
+    void setProfile(int nfreqs, const float* F, const float* G);
+    void setCtfmode(int mode);
+    void setWintype(int wintype);
+    void setGrphEQ(int *rxeq);
+    void setGrphEQ10(int *rxeq);
+
+    static float* eq_impulse (int N, int nfreqs, float* F, float* G, double samplerate, double scale, int ctfmode, int wintype);
 
 private:
-    static float* eq_mults (int size, int nfreqs, float* F, float* G, float samplerate, float scale, int ctfmode, int wintype);
-    static void calc_eq (EQ *a);
-    static void decalc_eq (EQ *a);
+    static int fEQcompare (const void * a, const void * b);
 };
 
 } // namespace WDSP

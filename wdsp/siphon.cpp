@@ -226,25 +226,25 @@ void SIPHON::GetaSipF1 (RXA& rxa, float* out, int size)
 
 void SIPHON::SetSipPosition (TXA& txa, int pos)
 {
-    SIPHON *a = txa.sip1.p;
+    SIPHON *a = txa.sip1;
     a->position = pos;
 }
 
 void SIPHON::SetSipMode (TXA& txa, int mode)
 {
-    SIPHON *a = txa.sip1.p;
+    SIPHON *a = txa.sip1;
     a->mode = mode;
 }
 
 void SIPHON::SetSipDisplay (TXA& txa, int disp)
 {
-    SIPHON *a = txa.sip1.p;
+    SIPHON *a = txa.sip1;
     a->disp = disp;
 }
 
 void SIPHON::GetaSipF (TXA& txa, float* out, int size)
 {   // return raw samples as floats
-    SIPHON *a = txa.sip1.p;
+    SIPHON *a = txa.sip1;
     int i;
     a->outsize = size;
     suck (a);
@@ -256,7 +256,7 @@ void SIPHON::GetaSipF (TXA& txa, float* out, int size)
 
 void SIPHON::GetaSipF1 (TXA& txa, float* out, int size)
 {   // return raw samples as floats
-    SIPHON *a = txa.sip1.p;
+    SIPHON *a = txa.sip1;
     int i;
     a->outsize = size;
     suck (a);
@@ -270,7 +270,7 @@ void SIPHON::GetaSipF1 (TXA& txa, float* out, int size)
 
 void SIPHON::SetSipSpecmode (TXA& txa, int mode)
 {
-    SIPHON *a = txa.sip1.p;
+    SIPHON *a = txa.sip1;
     if (mode == 0)
         a->specmode = 0;
     else
@@ -279,7 +279,7 @@ void SIPHON::SetSipSpecmode (TXA& txa, int mode)
 
 void SIPHON::GetSpecF1 (TXA& txa, float* out)
 {   // return spectrum magnitudes in dB
-    SIPHON *a = txa.sip1.p;
+    SIPHON *a = txa.sip1;
     int i, j, mid, m, n;
     a->outsize = a->fftsize;
     suck (a);

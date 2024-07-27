@@ -113,13 +113,13 @@ void EMPHP::setSize_emphp (EMPHP *a, int size)
 
 void EMPHP::SetFMEmphPosition (TXA& txa, int position)
 {
-    txa.preemph.p->position = position;
+    txa.preemph->position = position;
 }
 
 void EMPHP::SetFMEmphMP (TXA& txa, int mp)
 {
     EMPHP *a;
-    a = txa.preemph.p;
+    a = txa.preemph;
     if (a->mp != mp)
     {
         a->mp = mp;
@@ -131,7 +131,7 @@ void EMPHP::SetFMEmphNC (TXA& txa, int nc)
 {
     EMPHP *a;
     float* impulse;
-    a = txa.preemph.p;
+    a = txa.preemph;
 
     if (a->nc != nc)
     {
@@ -146,7 +146,7 @@ void EMPHP::SetFMPreEmphFreqs (TXA& txa, float low, float high)
 {
     EMPHP *a;
     float* impulse;
-    a = txa.preemph.p;
+    a = txa.preemph;
 
     if (a->f_low != low || a->f_high != high)
     {
@@ -263,7 +263,7 @@ PORT
 void SetTXAFMEmphPosition (int channel, int position)
 {
     ch.csDSP.lock();
-    txa.preemph.p->position = position;
+    txa.preemph->position = position;
     ch.csDSP.unlock();
 }
 */

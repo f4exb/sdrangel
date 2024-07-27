@@ -449,151 +449,151 @@ void GEN::SetPreSweepRate(float rate)
 
 void GEN::SetPreGenRun (TXA& txa, int run)
 {
-    txa.gen0.p->run = run;
+    txa.gen0->run = run;
 }
 
 void GEN::SetPreGenMode (TXA& txa, int mode)
 {
-    txa.gen0.p->mode = mode;
+    txa.gen0->mode = mode;
 }
 
 void GEN::SetPreGenToneMag (TXA& txa, float mag)
 {
-    txa.gen0.p->tone.mag = mag;
+    txa.gen0->tone.mag = mag;
 }
 
 void GEN::SetPreGenToneFreq (TXA& txa, float freq)
 {
-    txa.gen0.p->tone.freq = freq;
-    txa.gen0.p->calc_tone();
+    txa.gen0->tone.freq = freq;
+    txa.gen0->calc_tone();
 }
 
 void GEN::SetPreGenNoiseMag (TXA& txa, float mag)
 {
-    txa.gen0.p->noise.mag = mag;
+    txa.gen0->noise.mag = mag;
 }
 
 void GEN::SetPreGenSweepMag (TXA& txa, float mag)
 {
-    txa.gen0.p->sweep.mag = mag;
+    txa.gen0->sweep.mag = mag;
 }
 
 void GEN::SetPreGenSweepFreq (TXA& txa, float freq1, float freq2)
 {
-    txa.gen0.p->sweep.f1 = freq1;
-    txa.gen0.p->sweep.f2 = freq2;
-    txa.gen0.p->calc_sweep();
+    txa.gen0->sweep.f1 = freq1;
+    txa.gen0->sweep.f2 = freq2;
+    txa.gen0->calc_sweep();
 }
 
 void GEN::SetPreGenSweepRate (TXA& txa, float rate)
 {
-    txa.gen0.p->sweep.sweeprate = rate;
-    txa.gen0.p->calc_sweep();
+    txa.gen0->sweep.sweeprate = rate;
+    txa.gen0->calc_sweep();
 }
 
 void GEN::SetPreGenSawtoothMag (TXA& txa, float mag)
 {
-    txa.gen0.p->saw.mag = mag;
+    txa.gen0->saw.mag = mag;
 }
 
 void GEN::SetPreGenSawtoothFreq (TXA& txa, float freq)
 {
-    txa.gen0.p->saw.f = freq;
-    txa.gen0.p->calc_sawtooth();
+    txa.gen0->saw.f = freq;
+    txa.gen0->calc_sawtooth();
 }
 
 void GEN::SetPreGenTriangleMag (TXA& txa, float mag)
 {
-    txa.gen0.p->tri.mag = mag;
+    txa.gen0->tri.mag = mag;
 }
 
 void GEN::SetPreGenTriangleFreq (TXA& txa, float freq)
 {
-    txa.gen0.p->tri.f = freq;
-    txa.gen0.p->calc_triangle();
+    txa.gen0->tri.f = freq;
+    txa.gen0->calc_triangle();
 }
 
 void GEN::SetPreGenPulseMag (TXA& txa, float mag)
 {
-    txa.gen0.p->pulse.mag = mag;
+    txa.gen0->pulse.mag = mag;
 }
 
 void GEN::SetPreGenPulseFreq (TXA& txa, float freq)
 {
-    txa.gen0.p->pulse.pf = freq;
-    txa.gen0.p->calc_pulse();
+    txa.gen0->pulse.pf = freq;
+    txa.gen0->calc_pulse();
 }
 
 void GEN::SetPreGenPulseDutyCycle (TXA& txa, float dc)
 {
-    txa.gen0.p->pulse.pdutycycle = dc;
-    txa.gen0.p->calc_pulse();
+    txa.gen0->pulse.pdutycycle = dc;
+    txa.gen0->calc_pulse();
 }
 
 void GEN::SetPreGenPulseToneFreq (TXA& txa, float freq)
 {
-    txa.gen0.p->pulse.tf = freq;
-    txa.gen0.p->calc_pulse();
+    txa.gen0->pulse.tf = freq;
+    txa.gen0->calc_pulse();
 }
 
 void GEN::SetPreGenPulseTransition (TXA& txa, float transtime)
 {
-    txa.gen0.p->pulse.ptranstime = transtime;
-    txa.gen0.p->calc_pulse();
+    txa.gen0->pulse.ptranstime = transtime;
+    txa.gen0->calc_pulse();
 }
 
 // 'PostGen', gen1
 
 void GEN::SetPostGenRun (TXA& txa, int run)
 {
-    txa.gen1.p->run = run;
+    txa.gen1->run = run;
 }
 
 void GEN::SetPostGenMode (TXA& txa, int mode)
 {
-    txa.gen1.p->mode = mode;
+    txa.gen1->mode = mode;
 }
 
 void GEN::SetPostGenToneMag (TXA& txa, float mag)
 {
-    txa.gen1.p->tone.mag = mag;
+    txa.gen1->tone.mag = mag;
 }
 
 void GEN::SetPostGenToneFreq (TXA& txa, float freq)
 {
-    txa.gen1.p->tone.freq = freq;
-    txa.gen1.p->calc_tone();
+    txa.gen1->tone.freq = freq;
+    txa.gen1->calc_tone();
 }
 
 void GEN::SetPostGenTTMag (TXA& txa, float mag1, float mag2)
 {
-    txa.gen1.p->tt.mag1 = mag1;
-    txa.gen1.p->tt.mag2 = mag2;
+    txa.gen1->tt.mag1 = mag1;
+    txa.gen1->tt.mag2 = mag2;
 }
 
 void GEN::SetPostGenTTFreq (TXA& txa, float freq1, float freq2)
 {
-    txa.gen1.p->tt.f1 = freq1;
-    txa.gen1.p->tt.f2 = freq2;
-    txa.gen1.p->calc_tt();
+    txa.gen1->tt.f1 = freq1;
+    txa.gen1->tt.f2 = freq2;
+    txa.gen1->calc_tt();
 }
 
 void GEN::SetPostGenSweepMag (TXA& txa, float mag)
 {
-    txa.gen1.p->sweep.mag = mag;
+    txa.gen1->sweep.mag = mag;
 }
 
 void GEN::SetPostGenSweepFreq (TXA& txa, float freq1, float freq2)
 {
-    txa.gen1.p->sweep.f1 = freq1;
-    txa.gen1.p->sweep.f2 = freq2;
-    txa.gen1.p->calc_sweep();
+    txa.gen1->sweep.f1 = freq1;
+    txa.gen1->sweep.f2 = freq2;
+    txa.gen1->calc_sweep();
 }
 
 void GEN::SetPostGenSweepRate (TXA& txa, float rate)
 {
-    txa.gen1.p->sweep.sweeprate = rate;
-    txa.gen1.p->calc_sweep();
+    txa.gen1->sweep.sweeprate = rate;
+    txa.gen1->calc_sweep();
 }
 
 } // namespace WDSP

@@ -267,14 +267,14 @@ float* CFIR::cfir_impulse (
 
 void CFIR::SetCFIRRun (TXA& txa, int run)
 {
-    txa.cfir.p->run = run;
+    txa.cfir->run = run;
 }
 
 void CFIR::SetCFIRNC(TXA& txa, int nc)
 {
     // NOTE:  'nc' must be >= 'size'
     CFIR *a;
-    a = txa.cfir.p;
+    a = txa.cfir;
 
     if (a->nc != nc)
     {

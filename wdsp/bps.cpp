@@ -204,14 +204,14 @@ void BPS::SetBPSWindow (RXA& rxa, int wintype)
 // UNCOMMENT properties when pointers in place in txa
 void BPS::SetBPSRun (TXA& txa, int run)
 {
-    txa.bp1.p->run = run;
+    txa.bp1->run = run;
 }
 
 void BPS::SetBPSFreqs (TXA& txa, float f_low, float f_high)
 {
     float* impulse;
     BPS *a;
-    a = txa.bps0.p;
+    a = txa.bps0;
 
     if ((f_low != a->f_low) || (f_high != a->f_high))
     {
@@ -223,7 +223,7 @@ void BPS::SetBPSFreqs (TXA& txa, float f_low, float f_high)
         delete[] (impulse);
     }
 
-    a = txa.bps1.p;
+    a = txa.bps1;
 
     if ((f_low != a->f_low) || (f_high != a->f_high))
     {
@@ -235,7 +235,7 @@ void BPS::SetBPSFreqs (TXA& txa, float f_low, float f_high)
         delete[] (impulse);
     }
 
-    a = txa.bps2.p;
+    a = txa.bps2;
 
     if ((f_low != a->f_low) || (f_high != a->f_high))
     {
@@ -252,7 +252,7 @@ void BPS::SetBPSWindow (TXA& txa, int wintype)
 {
     float* impulse;
     BPS *a;
-    a = txa.bps0.p;
+    a = txa.bps0;
 
     if (a->wintype != wintype)
     {
@@ -263,7 +263,7 @@ void BPS::SetBPSWindow (TXA& txa, int wintype)
         delete[] (impulse);
     }
 
-    a = txa.bps1.p;
+    a = txa.bps1;
 
     if (a->wintype != wintype)
     {
@@ -274,7 +274,7 @@ void BPS::SetBPSWindow (TXA& txa, int wintype)
         delete[] (impulse);
     }
 
-    a = txa.bps2.p;
+    a = txa.bps2;
 
     if (a->wintype != wintype)
     {

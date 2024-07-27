@@ -417,7 +417,7 @@ void CFCOMP::setSize_cfcomp (CFCOMP *a, int size)
 
 void CFCOMP::SetCFCOMPRun (TXA& txa, int run)
 {
-    CFCOMP *a = txa.cfcomp.p;
+    CFCOMP *a = txa.cfcomp;
 
     if (a->run != run) {
         a->run = run;
@@ -426,7 +426,7 @@ void CFCOMP::SetCFCOMPRun (TXA& txa, int run)
 
 void CFCOMP::SetCFCOMPPosition (TXA& txa, int pos)
 {
-    CFCOMP *a = txa.cfcomp.p;
+    CFCOMP *a = txa.cfcomp;
 
     if (a->position != pos) {
         a->position = pos;
@@ -435,7 +435,7 @@ void CFCOMP::SetCFCOMPPosition (TXA& txa, int pos)
 
 void CFCOMP::SetCFCOMPprofile (TXA& txa, int nfreqs, float* F, float* G, float *E)
 {
-    CFCOMP *a = txa.cfcomp.p;
+    CFCOMP *a = txa.cfcomp;
     a->nfreqs = nfreqs < 1 ? 1 : nfreqs;
     delete[] (a->E);
     delete[] (a->F);
@@ -457,7 +457,7 @@ void CFCOMP::SetCFCOMPprofile (TXA& txa, int nfreqs, float* F, float* G, float *
 
 void CFCOMP::SetCFCOMPPrecomp (TXA& txa, float precomp)
 {
-    CFCOMP *a = txa.cfcomp.p;
+    CFCOMP *a = txa.cfcomp;
 
     if (a->precomp != precomp)
     {
@@ -473,7 +473,7 @@ void CFCOMP::SetCFCOMPPrecomp (TXA& txa, float precomp)
 
 void CFCOMP::SetCFCOMPPeqRun (TXA& txa, int run)
 {
-    CFCOMP *a = txa.cfcomp.p;
+    CFCOMP *a = txa.cfcomp;
 
     if (a->peq_run != run) {
         a->peq_run = run;
@@ -482,7 +482,7 @@ void CFCOMP::SetCFCOMPPeqRun (TXA& txa, int run)
 
 void CFCOMP::SetCFCOMPPrePeq (TXA& txa, float prepeq)
 {
-    CFCOMP *a = txa.cfcomp.p;
+    CFCOMP *a = txa.cfcomp;
     a->prepeq = prepeq;
     a->prepeqlin = pow (10.0, 0.05 * a->prepeq);
 }
@@ -490,7 +490,7 @@ void CFCOMP::SetCFCOMPPrePeq (TXA& txa, float prepeq)
 void CFCOMP::GetCFCOMPDisplayCompression (TXA& txa, float* comp_values, int* ready)
 {
     int i;
-    CFCOMP *a = txa.cfcomp.p;
+    CFCOMP *a = txa.cfcomp;
 
     if ((*ready = a->mask_ready))
     {

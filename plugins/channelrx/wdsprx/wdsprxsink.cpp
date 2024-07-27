@@ -565,7 +565,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
     // Caution: Causes corruption
     if ((m_settings.m_snb != settings.m_snb) || force) {
-        WDSP::SNBA::SetSNBARun(*m_rxa, settings.m_snb ? 1 : 0);
+        WDSP::RXA::SetSNBARun(*m_rxa, settings.m_snb ? 1 : 0);
     }
 
     // CW Peaking
@@ -731,13 +731,13 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     // Equalizer
 
     if ((m_settings.m_equalizer != settings.m_equalizer) || force) {
-        WDSP::EQP::SetEQRun(*m_rxa, settings.m_equalizer ? 1 : 0);
+        m_rxa->eqp->setRun(settings.m_equalizer ? 1 : 0);
     }
 
     if ((m_settings.m_eqF != settings.m_eqF)
     || (m_settings.m_eqG != settings.m_eqG) || force)
     {
-        WDSP::EQP::SetEQProfile(*m_rxa, 10, settings.m_eqF.data(), settings.m_eqG.data());
+        m_rxa->eqp->setProfile(10, settings.m_eqF.data(), settings.m_eqG.data());
     }
 
     // Audio panel

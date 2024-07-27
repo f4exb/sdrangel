@@ -36,7 +36,7 @@ warren@wpratt.com
 #include "resample.hpp"
 #include "patchpanel.hpp"
 #include "amsq.hpp"
-#include "eq.hpp"
+#include "eqp.hpp"
 #include "iir.hpp"
 #include "cfcomp.hpp"
 #include "compress.hpp"
@@ -127,78 +127,37 @@ public:
     double meter[TXA_METERTYPE_LAST];
     long upslew;
 
-    struct
-    {
-        METER *p;
-    } micmeter, eqmeter, lvlrmeter, cfcmeter, compmeter, alcmeter, outmeter;
-    struct
-    {
-        RESAMPLE *p;
-    } rsmpin, rsmpout;
-    struct
-    {
-        PANEL *p;
-    } panel;
-    struct
-    {
-        AMSQ *p;
-    } amsq;
-    struct
-    {
-        EQP *p;
-    } eqp;
-    struct
-    {
-        PHROT *p;
-    } phrot;
-    struct
-    {
-        CFCOMP *p;
-    } cfcomp;
-    struct
-    {
-        COMPRESSOR *p;
-    } compressor;
-    struct
-    {
-        BANDPASS *p;
-    } bp0, bp1, bp2;
-    struct
-    {
-        BPS *p;
-    } bps0, bps1, bps2;
-    struct
-    {
-        OSCTRL *p;
-    } osctrl;
-    struct
-    {
-        WCPAGC *p;
-    } leveler, alc;
-    struct
-    {
-        AMMOD *p;
-    } ammod;
-    struct
-    {
-        EMPHP *p;
-    } preemph;
-    struct
-    {
-        FMMOD *p;
-    } fmmod;
-    struct
-    {
-        SIPHON *p;
-    } sip1;
-    struct
-    {
-        GEN *p;
-    } gen0, gen1;
-    struct
-    {
-        USLEW *p;
-    } uslew;
+    METER *micmeter;
+    METER *eqmeter;
+    METER *lvlrmeter;
+    METER *cfcmeter;
+    METER *compmeter;
+    METER *alcmeter;
+    METER *outmeter;
+    RESAMPLE *rsmpin;
+    RESAMPLE *rsmpout;
+    PANEL *panel;
+    AMSQ *amsq;
+    EQP *eqp;
+    PHROT *phrot;
+    CFCOMP *cfcomp;
+    COMPRESSOR *compressor;
+    BANDPASS *bp0;
+    BANDPASS *bp1;
+    BANDPASS *bp2;
+    BPS *bps0;
+    BPS *bps1;
+    BPS *bps2;
+    OSCTRL *osctrl;
+    WCPAGC *leveler;
+    WCPAGC *alc;
+    AMMOD *ammod;
+    EMPHP *preemph;
+    FMMOD *fmmod;
+    SIPHON *sip1;
+    GEN *gen0;
+    GEN *gen1;
+    USLEW *uslew;
     // struct
     // {
     //     CALCC *p;
@@ -209,10 +168,7 @@ public:
         IQC *p0, *p1;
         // p0 for dsp-synchronized reference, p1 for other
     } iqc;
-    struct
-    {
-        CFIR *p;
-    } cfir;
+    CFIR *cfir;
 
     static TXA* create_txa (
         int in_rate,                // input samplerate

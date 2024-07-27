@@ -663,7 +663,7 @@ void PHROT::setSize_phrot (PHROT *a, int size)
 
 void PHROT::SetPHROTRun (TXA& txa, int run)
 {
-    PHROT *a = txa.phrot.p;
+    PHROT *a = txa.phrot;
     a->run = run;
 
     if (a->run)
@@ -672,7 +672,7 @@ void PHROT::SetPHROTRun (TXA& txa, int run)
 
 void PHROT::SetPHROTCorner (TXA& txa, double corner)
 {
-    PHROT *a = txa.phrot.p;
+    PHROT *a = txa.phrot;
     decalc_phrot (a);
     a->fc = corner;
     calc_phrot (a);
@@ -680,7 +680,7 @@ void PHROT::SetPHROTCorner (TXA& txa, double corner)
 
 void PHROT::SetPHROTNstages (TXA& txa, int nstages)
 {
-    PHROT *a = txa.phrot.p;
+    PHROT *a = txa.phrot;
     decalc_phrot (a);
     a->nstages = nstages;
     calc_phrot (a);
@@ -688,7 +688,7 @@ void PHROT::SetPHROTNstages (TXA& txa, int nstages)
 
 void PHROT::SetPHROTReverse (TXA& txa, int reverse)
 {
-    PHROT *a = txa.phrot.p;
+    PHROT *a = txa.phrot;
     a->reverse = reverse;
 }
 

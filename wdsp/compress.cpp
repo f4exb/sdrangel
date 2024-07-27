@@ -100,16 +100,16 @@ void COMPRESSOR::setSize_compressor (COMPRESSOR *a, int size)
 
 void COMPRESSOR::SetCompressorRun (TXA& txa, int run)
 {
-    if (txa.compressor.p->run != run)
+    if (txa.compressor->run != run)
     {
-        txa.compressor.p->run = run;
+        txa.compressor->run = run;
         TXA::SetupBPFilters (txa);
     }
 }
 
 void COMPRESSOR::SetCompressorGain (TXA& txa, float gain)
 {
-    txa.compressor.p->gain = pow (10.0, gain / 20.0);
+    txa.compressor->gain = pow (10.0, gain / 20.0);
 }
 
 } // namespace WDSP

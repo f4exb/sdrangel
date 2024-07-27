@@ -20,7 +20,7 @@ set(wdsp_SOURCES
     delay.cpp
     emnr.cpp
     emph.cpp
-    eq.cpp
+    eqp.cpp
     fcurve.cpp
     fir.cpp
     fircore.cpp
@@ -77,7 +77,7 @@ set(wdsp_HEADERS
     delay.hpp
     emnr.hpp
     emph.hpp
-    eq.hpp
+    eqp.hpp
     fcurve.hpp
     fir.hpp
     fircore.hpp

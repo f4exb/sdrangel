@@ -31,7 +31,6 @@ warren@wpratt.com
 namespace WDSP{
 
 class RESAMPLE;
-class RXA;
 
 class SNBA
 {
@@ -57,13 +56,15 @@ public:
     int oaoutidx;
     int init_oaoutidx;
     double* outaccum;
-
     int resamprun;
     int isize;
     RESAMPLE *inresamp;
     RESAMPLE *outresamp;
     float* inbuff;
     float* outbuff;
+    double out_low_cut;
+    double out_high_cut;
+
     struct _exec
     {
         int asize;
@@ -105,10 +106,8 @@ public:
         double* asolve_r;
         double* asolve_z;
     } wrk;
-    double out_low_cut;
-    double out_high_cut;
 
-    static SNBA* create_snba (
+    SNBA(
         int run,
         float* in,
         float* out,
@@ -128,29 +127,28 @@ public:
         double out_low_cut,
         double out_high_cut
     );
+    ~SNBA();
 
-    static void destroy_snba (SNBA *d);
-    static void flush_snba (SNBA *d);
-    static void xsnba (SNBA *d);
-    static void setBuffers_snba (SNBA *a, float* in, float* out);
-    static void setSamplerate_snba (SNBA *a, int rate);
-    static void setSize_snba (SNBA *a, int size);
-    // RXA Properties
-    static void SetSNBARun (RXA& rxa, int run);
-    static void SetSNBAovrlp (RXA& rxa, int ovrlp);
-    static void SetSNBAasize (RXA& rxa, int size);
-    static void SetSNBAnpasses (RXA& rxa, int npasses);
-    static void SetSNBAk1 (RXA& rxa, double k1);
-    static void SetSNBAk2 (RXA& rxa, double k2);
-    static void SetSNBAbridge (RXA& rxa, int bridge);
-    static void SetSNBApresamps (RXA& rxa, int presamps);
-    static void SetSNBApostsamps (RXA& rxa, int postsamps);
-    static void SetSNBApmultmin (RXA& rxa, double pmultmin);
-    static void SetSNBAOutputBandwidth (RXA& rxa, double flow, double fhigh);
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Public Properties
+    void setOvrlp(int ovrlp);
+    void setAsize(int size);
+    void setNpasses(int npasses);
+    void setK1(double k1);
+    void setK2(double k2);
+    void setBridge(int bridge);
+    void setPresamps(int presamps);
+    void setPostsamps(int postsamps);
+    void setPmultmin(double pmultmin);
+    void setOutputBandwidth(double flow, double fhigh);
 
 private:
-    static void calc_snba (SNBA *d);
-    static void decalc_snba (SNBA *d);
+    void calc();
+    void decalc();
     static void ATAc0 (int n, int nr, double* A, double* r);
     static void multA1TA2(double* a1, double* a2, int m, int n, int q, double* c);
     static void multXKE(double* a, double* xk, int m, int q, int p, double* vout);
@@ -172,7 +170,6 @@ private:
         double* dR_z
     );
     static void invf(int xsize, int asize, double* a, double* x, double* v);
-    static void det(SNBA *d, int asize, double* v, int* detout);
     static int scanFrame(
         int xsize,
         int pval,
@@ -185,7 +182,8 @@ private:
         int* p_opt,
         int* next
     );
-    static void execFrame(SNBA *d, double* x);
+    void det(int asize, double* v, int* detout);
+    void execFrame(double* x);
 };
 
 } // namespace

@@ -169,6 +169,8 @@ public:
     static void NBPSetAutoIncrease (RXA& rxa, int autoincr);
     // AMD
     static void SetAMDRun(RXA& rxa, int run);
+    // SNBA
+    static void SetSNBARun (RXA& rxa, int run);
 
     // Collectives
     static void SetPassband (RXA& rxa, float f_low, float f_high);

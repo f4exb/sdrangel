@@ -167,7 +167,7 @@ void FMMOD::setSize_fmmod (FMMOD *a, int size)
 
 void FMMOD::SetFMDeviation (TXA& txa, float deviation)
 {
-    FMMOD *a = txa.fmmod.p;
+    FMMOD *a = txa.fmmod;
     float bp_fc = a->f_high + deviation;
     float* impulse = FIR::fir_bandpass (a->nc, -bp_fc, +bp_fc, a->samplerate, 0, 1, 1.0 / (2 * a->size));
     FIRCORE::setImpulse_fircore (a->p, impulse, 0);
@@ -184,7 +184,7 @@ void FMMOD::SetFMDeviation (TXA& txa, float deviation)
 void FMMOD::SetCTCSSFreq (TXA& txa, float freq)
 {
     FMMOD *a;
-    a = txa.fmmod.p;
+    a = txa.fmmod;
     a->ctcss_freq = freq;
     a->tphase = 0.0;
     a->tdelta = TWOPI * a->ctcss_freq / a->samplerate;
@@ -192,14 +192,14 @@ void FMMOD::SetCTCSSFreq (TXA& txa, float freq)
 
 void FMMOD::SetCTCSSRun (TXA& txa, int run)
 {
-    txa.fmmod.p->ctcss_run = run;
+    txa.fmmod->ctcss_run = run;
 }
 
 void FMMOD::SetFMNC (TXA& txa, int nc)
 {
     FMMOD *a;
     float* impulse;
-    a = txa.fmmod.p;
+    a = txa.fmmod;
 
     if (a->nc != nc)
     {
@@ -213,7 +213,7 @@ void FMMOD::SetFMNC (TXA& txa, int nc)
 void FMMOD::SetFMMP (TXA& txa, int mp)
 {
     FMMOD *a;
-    a = txa.fmmod.p;
+    a = txa.fmmod;
     if (a->mp != mp)
     {
         a->mp = mp;
@@ -225,7 +225,7 @@ void FMMOD::SetFMAFFreqs (TXA& txa, float low, float high)
 {
     FMMOD *a;
     float* impulse;
-    a = txa.fmmod.p;
+    a = txa.fmmod;
 
     if (a->f_low != low || a->f_high != high)
     {
