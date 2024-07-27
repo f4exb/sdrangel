@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_resample_h
 #define wdsp_resample_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -56,9 +58,9 @@ public:
     int ncoef;          // number of coefficients
     int L;              // interpolation factor
     int M;              // decimation factor
-    double* h;          // coefficients
+    std::vector<double> h;    // coefficients
     int ringsize;       // number of complex pairs the ring buffer holds
-    double* ring;       // ring buffer
+    std::vector<double> ring; // ring buffer
     int cpp;            // coefficients of the phase
     int phnum;          // phase number
 
@@ -73,7 +75,8 @@ public:
         int ncoef,
         double gain
     );
-    ~RESAMPLE();
+    RESAMPLE(const RESAMPLE&) = delete;
+    ~RESAMPLE() = default;
 
     void flush();
     int execute();
@@ -90,7 +93,6 @@ public:
 
 private:
     void calc();
-    void decalc();
 };
 
 } // namespace WDSP

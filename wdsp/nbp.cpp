@@ -44,20 +44,11 @@ NOTCHDB::NOTCHDB(int _master_run, int _maxnotches)
     master_run = _master_run;
     maxnotches = _maxnotches;
     nn = 0;
-    fcenter = new double[maxnotches]; // (float *) malloc0 (maxnotches * sizeof (float));
-    fwidth  = new double[maxnotches]; // (float *) malloc0 (maxnotches * sizeof (float));
-    nlow    = new double[maxnotches]; // (float *) malloc0 (maxnotches * sizeof (float));
-    nhigh   = new double[maxnotches]; // (float *) malloc0 (maxnotches * sizeof (float));
-    active  = new int[maxnotches]; // (int    *) malloc0 (maxnotches * sizeof (int   ));
-}
-
-NOTCHDB::~NOTCHDB()
-{
-    delete[] (active);
-    delete[] (nhigh);
-    delete[] (nlow);
-    delete[] (fwidth);
-    delete[] (fcenter);
+    fcenter.resize(maxnotches); // (float *) malloc0 (maxnotches * sizeof (float));
+    fwidth.resize(maxnotches);  // (float *) malloc0 (maxnotches * sizeof (float));
+    nlow.resize(maxnotches);    // (float *) malloc0 (maxnotches * sizeof (float));
+    nhigh.resize(maxnotches);   // (float *) malloc0 (maxnotches * sizeof (float));
+    active.resize(maxnotches);  // (int    *) malloc0 (maxnotches * sizeof (int   ));
 }
 
 int NOTCHDB::addNotch(int notch, double _fcenter, double _fwidth, int _active)
@@ -198,17 +189,17 @@ double NBP::min_notch_width()
 
 int NBP::make_nbp (
     int nn,
-    int* active,
-    double* center,
-    double* width,
-    double* nlow,
-    double* nhigh,
+    std::vector<int>& active,
+    std::vector<double>& center,
+    std::vector<double>& width,
+    std::vector<double>& nlow,
+    std::vector<double>& nhigh,
     double minwidth,
     int autoincr,
     double flow,
     double fhigh,
-    double* bplow,
-    double* bphigh,
+    std::vector<double>& bplow,
+    std::vector<double>& bphigh,
     int* havnotch
 )
 {
@@ -328,8 +319,15 @@ void NBP::calc_lightweight()
                 bplow[i]  -= offset;
                 bphigh[i] -= offset;
             }
-            impulse = fir_mbandpass (nc, numpb, bplow, bphigh,
-                rate, gain / (float)(2 * size), wintype);
+            impulse = fir_mbandpass (
+                nc,
+                numpb,
+                bplow.data(),
+                bphigh.data(),
+                rate,
+                gain / (float)(2 * size),
+                wintype
+            );
             FIRCORE::setImpulse_fircore (fircore, impulse, 1);
             // print_impulse ("nbp.txt", size + 1, impulse, 1, 0);
             delete[](impulse);
@@ -375,8 +373,8 @@ void NBP::calc_impulse ()
         impulse = fir_mbandpass (
             nc,
             numpb,
-            bplow,
-            bphigh,
+            bplow.data(),
+            bphigh.data(),
             rate,
             gain / (float)(2 * size),
             wintype
@@ -431,8 +429,8 @@ NBP::NBP(
     maxpb(_maxpb),
     notchdb(_notchdb)
 {
-    bplow   = new double[maxpb]; // (float *) malloc0 (maxpb * sizeof (float));
-    bphigh  = new double[maxpb]; // (float *) malloc0 (maxpb * sizeof (float));
+    bplow.resize(maxpb);  // (float *) malloc0 (maxpb * sizeof (float));
+    bphigh.resize(maxpb); // (float *) malloc0 (maxpb * sizeof (float));
     calc_impulse ();
     fircore = FIRCORE::create_fircore (size, in, out, nc, mp, impulse);
     // print_impulse ("nbp.txt", size + 1, impulse, 1, 0);
@@ -442,8 +440,6 @@ NBP::NBP(
 NBP::~NBP()
 {
     FIRCORE::destroy_fircore (fircore);
-    delete[] (bphigh);
-    delete[] (bplow);
 }
 
 void NBP::flush()

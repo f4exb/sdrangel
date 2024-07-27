@@ -84,7 +84,7 @@ void RESAMPLE::calc()
 
     ncoef = (ncoef / L + 1) * L;
     cpp = ncoef / L;
-    h = new double[ncoef]; // (float *)malloc0(ncoef * sizeof(float));
+    h.resize(ncoef); // (float *)malloc0(ncoef * sizeof(float));
     impulse = FIR::fir_bandpass(ncoef, fc_norm_low, fc_norm_high, 1.0, 1, 0, gain * (double)L);
     i = 0;
 
@@ -95,17 +95,11 @@ void RESAMPLE::calc()
     }
 
     ringsize = cpp;
-    ring = new double[ringsize]; // (float *)malloc0(ringsize * sizeof(complex));
+    ring.resize(ringsize); // (float *)malloc0(ringsize * sizeof(complex));
     idx_in = ringsize - 1;
     phnum = 0;
 
     delete[] (impulse);
-}
-
-void RESAMPLE::decalc()
-{
-    delete[] ring;
-    delete[] h;
 }
 
 RESAMPLE::RESAMPLE (
@@ -133,15 +127,10 @@ RESAMPLE::RESAMPLE (
     calc();
 }
 
-RESAMPLE::~RESAMPLE()
-{
-    decalc();
-}
-
 
 void RESAMPLE::flush()
 {
-    std::fill(ring, ring + 2 * ringsize, 0);
+    std::fill(ring.begin(), ring.end(), 0);
     idx_in = ringsize - 1;
     phnum = 0;
 }
@@ -210,14 +199,12 @@ void RESAMPLE::setSize(int _size)
 
 void RESAMPLE::setInRate(int _rate)
 {
-    decalc();
     in_rate = _rate;
     calc();
 }
 
 void RESAMPLE::setOutRate(int _rate)
 {
-    decalc();
     out_rate = _rate;
     calc();
 }
@@ -226,7 +213,6 @@ void RESAMPLE::setFCLow(double _fc_low)
 {
     if (fc_low != _fc_low)
     {
-        decalc();
         fc_low = _fc_low;
         calc();
     }
@@ -236,7 +222,6 @@ void RESAMPLE::setBandwidth(double _fc_low, double _fc_high)
 {
     if (fc_low != _fc_low || _fc_high != fcin)
     {
-        decalc();
         fc_low = _fc_low;
         fcin = _fc_high;
         calc();

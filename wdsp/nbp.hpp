@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_nbp_h
 #define wdsp_nbp_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -41,15 +43,16 @@ public:
     double tunefreq;
     double shift;
     int nn;
-    int* active;
-    double* fcenter;
-    double* fwidth;
-    double* nlow;
-    double* nhigh;
+    std::vector<int> active;
+    std::vector<double> fcenter;
+    std::vector<double> fwidth;
+    std::vector<double> nlow;
+    std::vector<double> nhigh;
     int maxnotches;
 
     NOTCHDB(int master_run, int maxnotches);
-    ~NOTCHDB();
+    NOTCHDB(const NOTCHDB&) = delete;
+    ~NOTCHDB() = default;
 
     int addNotch (int notch, double fcenter, double fwidth, int active);
     int getNotch (int notch, double* fcenter, double* fwidth, int* active);
@@ -79,8 +82,8 @@ public:
     float* impulse;         // filter impulse response
     int maxpb;              // maximum number of passbands
     NOTCHDB* notchdb;       // ptr to addr of notch-database data structure
-    double* bplow;          // array of passband lows
-    double* bphigh;         // array of passband highs
+    std::vector<double> bplow;  // array of passband lows
+    std::vector<double> bphigh; // array of passband highs
     int numpb;              // number of passbands
     FIRCORE *fircore;
     int havnotch;
@@ -104,6 +107,7 @@ public:
         int maxpb,
         NOTCHDB* notchdb
     );
+    NBP(const NBP&) = delete;
     ~NBP();
 
     void flush();
@@ -127,17 +131,17 @@ private:
     double min_notch_width ();
     static int make_nbp (
         int nn,
-        int* active,
-        double* center,
-        double* width,
-        double* nlow,
-        double* nhigh,
+        std::vector<int>& active,
+        std::vector<double>& center,
+        std::vector<double>& width,
+        std::vector<double>& nlow,
+        std::vector<double>& nhigh,
         double minwidth,
         int autoincr,
         double flow,
         double fhigh,
-        double* bplow,
-        double* bphigh,
+        std::vector<double>& bplow,
+        std::vector<double>& bphigh,
         int* havnotch
     );
 };
