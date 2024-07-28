@@ -109,11 +109,11 @@ void METER::execute()
         if (np > peak)
             peak = np;
 
-        result[enum_av] = 10.0 * MemLog::mlog10 (avg + 1.0e-40);
-        result[enum_pk] = 10.0 * MemLog::mlog10 (peak + 1.0e-40);
+        result[enum_av] = 10.0 * MemLog::mlog10 (avg  <= 0 ? 1.0e-20 : avg);
+        result[enum_pk] = 10.0 * MemLog::mlog10 (peak <= 0 ? 1.0e-20 : peak);
 
         if ((pgain != 0) && (enum_gain >= 0))
-            result[enum_gain] = 20.0 * MemLog::mlog10 (*pgain + 1.0e-40);
+            result[enum_gain] = 20.0 * MemLog::mlog10 (*pgain <= 0 ? 1.0e-20 : *pgain);
     }
     else
     {
@@ -129,6 +129,7 @@ void METER::execute()
 void METER::setBuffers(float* in)
 {
     buff = in;
+    flush();
 }
 
 void METER::setSamplerate(int _rate)

@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_eqp_h
 #define wdsp_eqp_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -52,8 +54,8 @@ public:
     float* in;
     float* out;
     int nfreqs;
-    float* F;
-    float* G;
+    std::vector<float> F;
+    std::vector<float> G;
     int ctfmode;
     int wintype;
     double samplerate;
@@ -73,6 +75,7 @@ public:
         int wintype,
         int samplerate
     );
+    EQP(const EQP&) = delete;
     ~EQP();
 
     void flush();

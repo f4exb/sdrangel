@@ -182,26 +182,6 @@ void ANR::setSize_anr (ANR *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void ANR::SetANRRun (RXA& rxa, int run)
-{
-    ANR *a = rxa.anr;
-
-    if (a->run != run)
-    {
-        RXA::bp1Check (
-            rxa,
-            rxa.amd->run,
-            rxa.snba->run,
-            rxa.emnr->run,
-            rxa.anf->run,
-            run
-        );
-        a->run = run;
-        RXA::bp1Set (rxa);
-        flush_anr (a);
-    }
-}
-
 void ANR::SetANRVals (RXA& rxa, int taps, int delay, double gain, double leakage)
 {
     rxa.anr->n_taps = taps;

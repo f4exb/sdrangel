@@ -1071,25 +1071,6 @@ void EMNR::setSize_emnr (EMNR *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void EMNR::SetEMNRRun (RXA& rxa, int run)
-{
-    EMNR *a = rxa.emnr;
-
-    if (a->run != run)
-    {
-        RXA::bp1Check (
-            rxa,
-            rxa.amd->run,
-            rxa.snba->run,
-            run,
-            rxa.anf->run,
-            rxa.anr->run
-        );
-        a->run = run;
-        RXA::bp1Set (rxa);
-    }
-}
-
 void EMNR::SetEMNRgainMethod (RXA& rxa, int method)
 {
     rxa.emnr->g.gain_method = method;

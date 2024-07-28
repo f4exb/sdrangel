@@ -27,6 +27,8 @@ warren@wpratt.com
 #ifndef _amsq_h
 #define _amsq_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -37,25 +39,25 @@ class TXA;
 class WDSP_API AMSQ
 {
 public:
-    int run;                            // 0 if squelch system is OFF; 1 if it's ON
-    int size;                           // size of input/output buffers
+    int run;                           // 0 if squelch system is OFF; 1 if it's ON
+    int size;                          // size of input/output buffers
     float* in;                         // squelch input signal buffer
     float* out;                        // squelch output signal buffer
     float* trigger;                    // pointer to trigger data source
-    float* trigsig;                    // buffer containing trigger signal
-    double rate;                        // sample rate
-    double avtau;                       // time constant for averaging noise
+    std::vector<float> trigsig;        // buffer containing trigger signal
+    double rate;                       // sample rate
+    double avtau;                      // time constant for averaging noise
     double avm;
     double onem_avm;
     double avsig;
-    int state;                          // state machine control
+    int state;                         // state machine control
     int count;
     double tup;
     double tdown;
     int ntup;
     int ntdown;
-    double* cup;
-    double* cdown;
+    std::vector<double> cup;
+    std::vector<double> cdown;
     double tail_thresh;
     double unmute_thresh;
     double min_tail;
@@ -79,7 +81,7 @@ public:
         double _muted_gain
     );
     AMSQ(const AMSQ&) = delete;
-    ~AMSQ();
+    ~AMSQ() = default;
 
     void flush();
     void execute();
@@ -96,7 +98,6 @@ public:
 private:
     void compute_slews();
     void calc();
-    void decalc();
 };
 
 } // namespace WDSP

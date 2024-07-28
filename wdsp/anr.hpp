@@ -89,7 +89,6 @@ public:
     static void setSamplerate_anr (ANR *a, int rate);
     static void setSize_anr (ANR *a, int size);
     // RXA Properties
-    static void SetANRRun (RXA& rxa, int setit);
     static void SetANRVals (RXA& rxa, int taps, int delay, double gain, double leakage);
     static void SetANRTaps (RXA& rxa, int taps);
     static void SetANRDelay (RXA& rxa, int delay);

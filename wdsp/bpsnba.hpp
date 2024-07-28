@@ -79,6 +79,7 @@ public:
         int maxpb,
         NOTCHDB* notchdb
     );
+    BPSNBA(const BPSNBA&) = delete;
     ~BPSNBA();
 
     void flush();

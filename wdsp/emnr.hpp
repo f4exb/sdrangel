@@ -185,7 +185,6 @@ public:
     static void setSamplerate_emnr (EMNR *a, int rate);
     static void setSize_emnr (EMNR *a, int size);
     // RXA Properties
-    static void SetEMNRRun (RXA& rxa, int run);
     static void SetEMNRgainMethod (RXA& rxa, int method);
     static void SetEMNRnpeMethod (RXA& rxa, int method);
     static void SetEMNRaeRun (RXA& rxa, int run);

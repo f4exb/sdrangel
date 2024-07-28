@@ -486,18 +486,18 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     if ((m_settings.m_dnr != settings.m_dnr)
     || (m_settings.m_nrScheme != settings.m_nrScheme) || force)
     {
-        WDSP::ANR::SetANRRun(*m_rxa, 0);
-        WDSP::EMNR::SetEMNRRun(*m_rxa, 0);
+        WDSP::RXA::SetANRRun(*m_rxa, 0);
+        WDSP::RXA::SetEMNRRun(*m_rxa, 0);
 
         if (settings.m_dnr)
         {
             switch (settings.m_nrScheme)
             {
             case WDSPRxProfile::NRSchemeNR:
-                WDSP::ANR::SetANRRun(*m_rxa, 1);
+                WDSP::RXA::SetANRRun(*m_rxa, 1);
                 break;
             case WDSPRxProfile::NRSchemeNR2:
-                WDSP::EMNR::SetEMNRRun(*m_rxa, 1);
+                WDSP::RXA::SetEMNRRun(*m_rxa, 1);
                 break;
             default:
                 break;
@@ -560,7 +560,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     }
 
     if ((m_settings.m_anf != settings.m_anf) || force) {
-        WDSP::ANF::SetANFRun(*m_rxa, settings.m_anf ? 1 : 0);
+        WDSP::RXA::SetANFRun(*m_rxa, settings.m_anf ? 1 : 0);
     }
 
     // Caution: Causes corruption

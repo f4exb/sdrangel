@@ -182,27 +182,6 @@ void ANF::setSize_anf (ANF *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void ANF::SetANFRun (RXA& rxa, int run)
-{
-    ANF *a = rxa.anf;
-
-    if (a->run != run)
-    {
-        RXA::bp1Check (
-            rxa,
-            rxa.amd->run,
-            rxa.snba->run,
-            rxa.emnr->run,
-            run,
-            rxa.anr->run
-        );
-        a->run = run;
-        RXA::bp1Set (rxa);
-        flush_anf (a);
-    }
-}
-
-
 void ANF::SetANFVals (RXA& rxa, int taps, int delay, double gain, double leakage)
 {
     rxa.anf->n_taps = taps;

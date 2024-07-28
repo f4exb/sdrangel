@@ -38,7 +38,7 @@ void FMSQ::calc()
     float* impulse;
     int i;
     // noise filter
-    noise = new float[2 * size * 2]; // (float *)malloc0(2 * size * sizeof(complex));
+    noise.resize(2 * size * 2); // (float *)malloc0(2 * size * sizeof(complex));
     F[0] = 0.0;
     F[1] = fc;
     F[2] = *pllpole;
@@ -47,8 +47,8 @@ void FMSQ::calc()
     G[1] = 0.0;
     G[2] = 3.0;
     G[3] = +20.0 * log10(20000.0 / *pllpole);
-    impulse = EQP::eq_impulse (nc, 3, F, G, rate, 1.0 / (2.0 * size), 0, 0);
-    p = FIRCORE::create_fircore (size, trigger, noise, nc, mp, impulse);
+    impulse = EQP::eq_impulse (nc, 3, F.data(), G.data(), rate, 1.0 / (2.0 * size), 0, 0);
+    p = FIRCORE::create_fircore (size, trigger, noise.data(), nc, mp, impulse);
     delete[]  (impulse);
     // noise averaging
     avm = exp(-1.0 / (rate * avtau));
@@ -60,8 +60,8 @@ void FMSQ::calc()
     // level change
     ntup   = (int)(tup   * rate);
     ntdown = (int)(tdown * rate);
-    cup   = new double[ntup + 1]; // (float *)malloc0 ((ntup   + 1) * sizeof(float));
-    cdown = new double[ntdown + 1]; //(float *)malloc0 ((ntdown + 1) * sizeof(float));
+    cup.resize(ntup + 1); // (float *)malloc0 ((ntup   + 1) * sizeof(float));
+    cdown.resize(ntdown + 1); //(float *)malloc0 ((ntdown + 1) * sizeof(float));
     delta = PI / (double) ntup;
     theta = 0.0;
 
@@ -88,10 +88,7 @@ void FMSQ::calc()
 
 void FMSQ::decalc()
 {
-    delete[] (cdown);
-    delete[] (cup);
     FIRCORE::destroy_fircore (p);
-    delete[] (noise);
 }
 
 FMSQ::FMSQ(
@@ -261,7 +258,7 @@ void FMSQ::setBuffers(float* in, float* out, float* trig)
     insig = in;
     outsig = out;
     trigger = trig;
-    FIRCORE::setBuffers_fircore (p, trigger, noise);
+    FIRCORE::setBuffers_fircore (p, trigger, noise.data());
 }
 
 void FMSQ::setSamplerate(int _rate)
@@ -302,7 +299,7 @@ void FMSQ::setNC(int _nc)
     if (nc != _nc)
     {
         nc = _nc;
-        impulse = EQP::eq_impulse (nc, 3, F, G, rate, 1.0 / (2.0 * size), 0, 0);
+        impulse = EQP::eq_impulse (nc, 3, F.data(), G.data(), rate, 1.0 / (2.0 * size), 0, 0);
         FIRCORE::setNc_fircore (p, nc, impulse);
         delete[]  (impulse);
     }

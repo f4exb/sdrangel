@@ -136,9 +136,9 @@ FMD::FMD(
     float* impulse;
     calc();
     // de-emphasis filter
-    audio = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
+    audio.resize(size * 2); // (float *) malloc0 (size * sizeof (complex));
     impulse = FCurve::fc_impulse (nc_de, f_low, f_high, +20.0 * log10(f_high / f_low), 0.0, 1, rate, 1.0 / (2.0 * size), 0, 0);
-    pde = FIRCORE::create_fircore (size, audio, out, nc_de, mp_de, impulse);
+    pde = FIRCORE::create_fircore (size, audio.data(), out, nc_de, mp_de, impulse);
     delete[] (impulse);
     // audio filter
     impulse = FIR::fir_bandpass(nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
@@ -150,13 +150,12 @@ FMD::~FMD()
 {
     FIRCORE::destroy_fircore (paud);
     FIRCORE::destroy_fircore (pde);
-    delete[] (audio);
     decalc();
 }
 
 void FMD::flush()
 {
-    std::fill(audio, audio + size * 2, 0);
+    std::fill(audio.begin(), audio.end(), 0);
     FIRCORE::flush_fircore (pde);
     FIRCORE::flush_fircore (paud);
     phs = 0.0;
@@ -219,7 +218,7 @@ void FMD::setBuffers(float* _in, float* _out)
     in = _in;
     out = _out;
     calc();
-    FIRCORE::setBuffers_fircore (pde,  audio, out);
+    FIRCORE::setBuffers_fircore (pde,  audio.data(), out);
     FIRCORE::setBuffers_fircore (paud, out, out);
     WCPAGC::setBuffers_wcpagc (plim, out, out);
 }
@@ -245,14 +244,13 @@ void FMD::setSize(int _size)
 {
     float* impulse;
     decalc();
-    delete[] (audio);
     size = _size;
     calc();
-    audio = new float[size * 2]; // (float *) malloc0 (size * sizeof (complex));
+    audio.resize(size * 2); // (float *) malloc0 (size * sizeof (complex));
     // de-emphasis filter
     FIRCORE::destroy_fircore (pde);
     impulse = FCurve::fc_impulse (nc_de, f_low, f_high, +20.0 * log10(f_high / f_low), 0.0, 1, rate, 1.0 / (2.0 * size), 0, 0);
-    pde = FIRCORE::create_fircore (size, audio, out, nc_de, mp_de, impulse);
+    pde = FIRCORE::create_fircore (size, audio.data(), out, nc_de, mp_de, impulse);
     delete[] (impulse);
     // audio filter
     FIRCORE::destroy_fircore (paud);

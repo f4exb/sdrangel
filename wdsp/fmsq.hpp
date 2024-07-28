@@ -28,6 +28,9 @@ warren@wpratt.com
 #ifndef wdsp_fmsq_h
 #define wdsp_fmsq_h
 
+#include <array>
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -43,11 +46,11 @@ public:
     float* outsig;                     // squelch output signal buffer
     float* trigger;                    // buffer used to trigger mute/unmute (may be same as input; matches timing of input buffer)
     double rate;                        // sample rate
-    float* noise;
+    std::vector<float> noise;
     double fc;                          // corner frequency for sig / noise detection
     double* pllpole;                    // pointer to pole frequency of the fm demodulator pll
-    float F[4];
-    float G[4];
+    std::array<float, 4> F;
+    std::array<float, 4> G;
     double avtau;                       // time constant for averaging noise
     double avm;
     double onem_avm;
@@ -62,8 +65,8 @@ public:
     double tdown;
     int ntup;
     int ntdown;
-    double* cup;
-    double* cdown;
+    std::vector<double> cup;
+    std::vector<double> cdown;
     double tail_thresh;
     double unmute_thresh;
     double min_tail;
@@ -97,6 +100,7 @@ public:
         int _nc,
         int _mp
     );
+    FMSQ(const FMSQ&) = delete;
     ~FMSQ();
 
     void flush();

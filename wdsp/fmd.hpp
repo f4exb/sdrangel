@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_fmd_h
 #define wdsp_fmd_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -67,7 +69,7 @@ public:
     double deviation;
     double again;
     // for de-emphasis filter
-    float* audio;
+    std::vector<float> audio;
     FIRCORE *pde;
     int nc_de;
     int mp_de;
@@ -108,6 +110,7 @@ public:
         int nc_aud,
         int mp_aud
     );
+    FMD(const FMD&) = delete;
     ~FMD();
 
     void flush();

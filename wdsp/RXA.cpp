@@ -289,7 +289,7 @@ RXA* RXA::create_rxa (
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input signal buffer
         rxa->midbuff,                           // pointer to output signal buffer
-        rxa->fmd->audio,                        // pointer to trigger buffer
+        rxa->fmd->audio.data(),                 // pointer to trigger buffer
         rxa->dsp_rate,                          // sample rate
         5000.0,                                 // cutoff freq for noise filter (Hz)
         &rxa->fmd->pllpole,                     // pointer to pole frequency of the fmd pll (Hz)
@@ -760,9 +760,9 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->amsq->setSamplerate(rxa->dsp_rate);
     rxa->amd->setSamplerate(rxa->dsp_rate);
     rxa->fmd->setSamplerate(rxa->dsp_rate);
-    rxa->fmsq->setBuffers(rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
+    rxa->fmsq->setBuffers(rxa->midbuff, rxa->midbuff, rxa->fmd->audio.data());
     rxa->fmsq->setSamplerate(rxa->dsp_rate);
-    rxa->snba->setSamplerate(rxa->dsp_rate);
+    // rxa->snba->setSamplerate(rxa->dsp_rate); SMBA removed
     rxa->eqp->setSamplerate(rxa->dsp_rate);
     ANF::setSamplerate_anf (rxa->anf, rxa->dsp_rate);
     ANR::setSamplerate_anr (rxa->anr, rxa->dsp_rate);
@@ -831,7 +831,7 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->amd->setSize(rxa->dsp_size);
     rxa->fmd->setBuffers(rxa->midbuff, rxa->midbuff);
     rxa->fmd->setSize(rxa->dsp_size);
-    rxa->fmsq->setBuffers(rxa->midbuff, rxa->midbuff, rxa->fmd->audio);
+    rxa->fmsq->setBuffers(rxa->midbuff, rxa->midbuff, rxa->fmd->audio.data());
     rxa->fmsq->setSize(rxa->dsp_size);
     rxa->snba->setBuffers(rxa->midbuff, rxa->midbuff);
     rxa->snba->setSize(rxa->dsp_size);
@@ -1225,20 +1225,20 @@ void RXA::NBPSetAutoIncrease (RXA& rxa, int autoincr)
     }
 }
 
-void RXA::SetAMDRun(RXA& rxa, int _run)
+void RXA::SetAMDRun(RXA& rxa, int run)
 {
-    if (rxa.amd->run != _run)
+    if (rxa.amd->run != run)
     {
         RXA::bp1Check (
             rxa,
-            _run,
+            run,
             rxa.snba->run,
             rxa.emnr->run,
             rxa.anf->run,
             rxa.anr->run
         );
 
-        rxa.amd->run = _run;
+        rxa.amd->run = run;
         RXA::bp1Set (rxa);
     }
 }
@@ -1261,6 +1261,65 @@ void RXA::SetSNBARun (RXA& rxa, int run)
         a->run = run;
         RXA::bp1Set (rxa);
         RXA::bpsnbaSet (rxa);
+    }
+}
+
+void RXA::SetANFRun (RXA& rxa, int run)
+{
+    ANF *a = rxa.anf;
+
+    if (a->run != run)
+    {
+        RXA::bp1Check (
+            rxa,
+            rxa.amd->run,
+            rxa.snba->run,
+            rxa.emnr->run,
+            run,
+            rxa.anr->run
+        );
+        a->run = run;
+        RXA::bp1Set (rxa);
+        ANF::flush_anf (a);
+    }
+}
+
+void RXA::SetANRRun (RXA& rxa, int run)
+{
+    ANR *a = rxa.anr;
+
+    if (a->run != run)
+    {
+        RXA::bp1Check (
+            rxa,
+            rxa.amd->run,
+            rxa.snba->run,
+            rxa.emnr->run,
+            rxa.anf->run,
+            run
+        );
+        a->run = run;
+        RXA::bp1Set (rxa);
+        ANR::flush_anr (a);
+    }
+}
+
+void RXA::SetEMNRRun (RXA& rxa, int run)
+{
+    EMNR *a = rxa.emnr;
+
+    if (a->run != run)
+    {
+        RXA::bp1Check (
+            rxa,
+            rxa.amd->run,
+            rxa.snba->run,
+            run,
+            rxa.anf->run,
+            rxa.anr->run
+        );
+        a->run = run;
+        RXA::bp1Set (rxa);
     }
 }
 

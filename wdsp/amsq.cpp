@@ -58,25 +58,18 @@ void AMSQ::compute_slews()
 void AMSQ::calc()
 {
     // signal averaging
-    trigsig = new float[size * 2];
+    trigsig.resize(size * 2);
     avm = exp(-1.0 / (rate * avtau));
     onem_avm = 1.0 - avm;
     avsig = 0.0;
     // level change
     ntup = (int)(tup * rate);
     ntdown = (int)(tdown * rate);
-    cup = new double[(ntup + 1) * 2]; // (float *)malloc0((ntup + 1) * sizeof(float));
-    cdown = new double[(ntdown + 1) * 2]; // (float *)malloc0((ntdown + 1) * sizeof(float));
+    cup.resize((ntup + 1) * 2);     // (float *)malloc0((ntup + 1) * sizeof(float));
+    cdown.resize((ntdown + 1) * 2); // (float *)malloc0((ntdown + 1) * sizeof(float));
     compute_slews();
     // control
     state = 0;
-}
-
-void AMSQ::decalc()
-{
-    delete[] cdown;
-    delete[] cup;
-    delete[] trigsig;
 }
 
 AMSQ::AMSQ (
@@ -113,14 +106,9 @@ AMSQ::AMSQ (
     calc();
 }
 
-AMSQ::~AMSQ()
-{
-    decalc();
-}
-
 void AMSQ::flush()
 {
-    std::fill(trigsig, trigsig + size * 2, 0);
+    std::fill(trigsig.begin(), trigsig.end(), 0);
     avsig = 0.0;
     state = 0;
 }
@@ -222,7 +210,7 @@ void AMSQ::execute()
 
 void AMSQ::xcap()
 {
-    std::copy(trigger, trigger + size * 2, trigsig);
+    std::copy(trigger, trigger + size * 2, trigsig.begin());
 }
 
 void AMSQ::setBuffers(float* _in, float* _out, float* _trigger)
@@ -234,14 +222,12 @@ void AMSQ::setBuffers(float* _in, float* _out, float* _trigger)
 
 void AMSQ::setSamplerate(int _rate)
 {
-    decalc();
     rate = _rate;
     calc();
 }
 
 void AMSQ::setSize(int _size)
 {
-    decalc();
     size = _size;
     calc();
 }

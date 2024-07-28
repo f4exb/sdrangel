@@ -87,7 +87,6 @@ public:
     static void setSamplerate_anf (ANF *a, int rate);
     static void setSize_anf (ANF *a, int size);
     // RXA Properties
-    static void SetANFRun (RXA& rxa, int setit);
     static void SetANFVals (RXA& rxa, int taps, int delay, double gain, double leakage);
     static void SetANFTaps (RXA& rxa, int taps);
     static void SetANFDelay (RXA& rxa, int delay);

@@ -222,14 +222,14 @@ EQP::EQP(
     in = _in;
     out = _out;
     nfreqs = _nfreqs;
-    F = new float[nfreqs + 1]; // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
-    G = new float[nfreqs + 1]; // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
-    memcpy (F, _F, (_nfreqs + 1) * sizeof (float));
-    memcpy (G, _G, (_nfreqs + 1) * sizeof (float));
+    F.resize(nfreqs + 1); // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
+    G.resize(nfreqs + 1); // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
+    std::copy(_F, _F + (_nfreqs + 1), F.begin());
+    std::copy(_G, _G + (_nfreqs + 1), G.begin());
     ctfmode = _ctfmode;
     wintype = _wintype;
     samplerate = (double) _samplerate;
-    impulse = eq_impulse (nc, nfreqs, F, G, samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
     fircore = FIRCORE::create_fircore (size, in, out, nc, mp, impulse);
     delete[] (impulse);
 }
@@ -263,7 +263,7 @@ void EQP::setSamplerate(int rate)
 {
     float* impulse;
     samplerate = rate;
-    impulse = eq_impulse (nc, nfreqs, F, G, samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
     FIRCORE::setImpulse_fircore (fircore, impulse, 1);
     delete[] (impulse);
 }
@@ -273,7 +273,7 @@ void EQP::setSize(int _size)
     float* impulse;
     size = _size;
     FIRCORE::setSize_fircore (fircore, size);
-    impulse = eq_impulse (nc, nfreqs, F, G, samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
     FIRCORE::setImpulse_fircore (fircore, impulse, 1);
     delete[] (impulse);
 }
@@ -296,7 +296,7 @@ void EQP::setNC(int _nc)
     if (nc != _nc)
     {
         nc = _nc;
-        impulse = eq_impulse (nc, nfreqs, F, G, samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+        impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
         FIRCORE::setNc_fircore (fircore, nc, impulse);
         delete[] (impulse);
     }
@@ -314,15 +314,12 @@ void EQP::setMP(int _mp)
 void EQP::setProfile(int _nfreqs, const float* _F, const float* _G)
 {
     float* impulse;
-    delete[] (G);
-    delete[] (F);
     nfreqs = _nfreqs;
-    F = new float[nfreqs + 1]; // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
-    G = new float[nfreqs + 1]; // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
-    memcpy (F, _F, (_nfreqs + 1) * sizeof (float));
-    memcpy (G, _G, (_nfreqs + 1) * sizeof (float));
-    impulse = eq_impulse (nc, nfreqs, F, G,
-        samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    F.resize(nfreqs + 1); // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
+    G.resize(nfreqs + 1); // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
+    std::copy(_F, _F + (_nfreqs + 1), F.begin());
+    std::copy(_G, _G + (_nfreqs + 1), G.begin());
+    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
     FIRCORE::setImpulse_fircore (fircore, impulse, 1);
     delete[] (impulse);
 }
@@ -331,7 +328,7 @@ void EQP::setCtfmode(int _mode)
 {
     float* impulse;
     ctfmode = _mode;
-    impulse = eq_impulse (nc, nfreqs, F, G, samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
     FIRCORE::setImpulse_fircore (fircore, impulse, 1);
     delete[] (impulse);
 }
@@ -340,7 +337,7 @@ void EQP::setWintype(int _wintype)
 {
     float* impulse;
     wintype = _wintype;
-    impulse = eq_impulse (nc, nfreqs, F, G, samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
     FIRCORE::setImpulse_fircore (fircore, impulse, 1);
     delete[] (impulse);
 }
@@ -348,11 +345,9 @@ void EQP::setWintype(int _wintype)
 void EQP::setGrphEQ(int *rxeq)
 {   // three band equalizer (legacy compatibility)
     float* impulse;
-    delete[] (G);
-    delete[] (F);
     nfreqs = 4;
-    F = new float[nfreqs + 1]; // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
-    G = new float[nfreqs + 1]; // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
+    F.resize(nfreqs + 1); // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
+    G.resize(nfreqs + 1); // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
     F[1] =  150.0;
     F[2] =  400.0;
     F[3] = 1500.0;
@@ -363,7 +358,7 @@ void EQP::setGrphEQ(int *rxeq)
     G[3] = (float)rxeq[2];
     G[4] = (float)rxeq[3];
     ctfmode = 0;
-    impulse = eq_impulse (nc, nfreqs, F, G, samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
     FIRCORE::setImpulse_fircore (fircore, impulse, 1);
     delete[] (impulse);
 }
@@ -372,11 +367,9 @@ void EQP::setGrphEQ10(int *rxeq)
 {   // ten band equalizer (legacy compatibility)
     float* impulse;
     int i;
-    delete[] (G);
-    delete[] (F);
     nfreqs = 10;
-    F = new float[nfreqs + 1]; // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
-    G = new float[nfreqs + 1]; // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
+    F.resize(nfreqs + 1); // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
+    G.resize(nfreqs + 1); // (float *) malloc0 ((nfreqs + 1) * sizeof (float));
     F[1]  =    32.0;
     F[2]  =    63.0;
     F[3]  =   125.0;
@@ -390,7 +383,7 @@ void EQP::setGrphEQ10(int *rxeq)
     for (i = 0; i <= nfreqs; i++)
         G[i] = (float)rxeq[i];
     ctfmode = 0;
-    impulse = eq_impulse (nc, nfreqs, F, G, samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
     // print_impulse ("rxeq.txt", nc, impulse, 1, 0);
     FIRCORE::setImpulse_fircore (fircore, impulse, 1);
     delete[] (impulse);

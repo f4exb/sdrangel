@@ -37,6 +37,8 @@ warren@wpratt.com
 #define OUT_IDX     (3 * STAGES)
 #endif
 
+#include <array>
+
 #include "export.h"
 
 namespace WDSP {
@@ -68,12 +70,12 @@ public:
     double onem_mtauR;                  // 1.0 - carrier_removal_multiplier
     double mtauI;                       // carrier insertion multiplier
     double onem_mtauI;                  // 1.0 - carrier_insertion_multiplier
-    double a[3 * STAGES + 3];           // Filter a variables
-    double b[3 * STAGES + 3];           // Filter b variables
-    double c[3 * STAGES + 3];           // Filter c variables
-    double d[3 * STAGES + 3];           // Filter d variables
-    double c0[STAGES];                  // Filter coefficients - path 0
-    double c1[STAGES];                  // Filter coefficients - path 1
+    std::array<double, 3*STAGES + 3> a; // Filter a variables
+    std::array<double, 3*STAGES + 3> b; // Filter b variables
+    std::array<double, 3*STAGES + 3> c; // Filter c variables
+    std::array<double, 3*STAGES + 3> d; // Filter d variables
+    std::array<double, STAGES> c0;      // Filter coefficients - path 0
+    std::array<double, STAGES> c1;      // Filter coefficients - path 1
     double dsI;                         // delayed sample, I path
     double dsQ;                         // delayed sample, Q path
     double dc_insert;                   // dc component to insert in output
@@ -97,6 +99,7 @@ public:
         double tauR,
         double tauI
     );
+    AMD(const AMD&) = delete;
     ~AMD() = default;
 
     void init();
