@@ -74,20 +74,21 @@ public:
     int saveidx;
     fftwf_plan Rfor;
     fftwf_plan Rrev;
+
     struct G
     {
         int incr;
         double rate;
         int msize;
-        double* mask;
-        float* y;
+        std::vector<double>& mask;
+        const std::vector<float>& y;
         int gain_method;
         int npe_method;
         int ae_run;
-        double* lambda_y;
-        double* lambda_d;
-        double* prev_mask;
-        double* prev_gamma;
+        std::vector<double> lambda_y;
+        std::vector<double> lambda_d;
+        std::vector<double> prev_mask;
+        std::vector<double> prev_gamma;
         double gf1p5;
         double alpha;
         double eps_floor;
@@ -95,27 +96,40 @@ public:
         double q;
         double gmax;
         //
-        double* GG;
-        double* GGS;
+        std::array<double, 241*241> GG;
+        std::array<double, 241*241> GGS;
         FILE* fileb;
+
         G(
             int incr,
             double rate,
             int msize,
-            double* mask,
-            float* y
+            std::vector<double>& mask,
+            const std::vector<float>& y
         );
         G(const G&) = delete;
         G& operator=(const G& other) = delete;
-        ~G();
+        ~G() = default;
+
+        void calc_gamma0();
+        void calc_gamma1();
+        void calc_gamma2();
+        void calc_lambda_y();
+
+    private:
+        static double getKey(const std::array<double, 241*241>& type, double gamma, double xi);
+        static double e1xb (double x);
+        static double bessI0 (double x);
+        static double bessI1 (double x);
     } *g;
+
     struct NP
     {
         int incr;
         double rate;
         int msize;
-        double* lambda_y;
-        double* lambda_d;
+        std::vector<double>& lambda_y;
+        std::vector<double>& lambda_d;
         double alphaCsmooth;
         double alphaMax;
         double alphaCmin;
@@ -128,38 +142,40 @@ public:
         int U;
         int V;
         int D;
-        double* p;
-        double* alphaOptHat;
+        std::vector<double> p;
+        std::vector<double> alphaOptHat;
         double alphaC;
-        double* alphaHat;
-        double* sigma2N;
-        double* pbar;
-        double* p2bar;
-        double* Qeq;
+        std::vector<double> alphaHat;
+        std::vector<double> sigma2N;
+        std::vector<double> pbar;
+        std::vector<double> p2bar;
+        std::vector<double> Qeq;
         double MofD;
         double MofV;
         std::array<double, 4> invQbar_points;
         std::array<double, 4> nsmax;
-        double* bmin;
-        double* bmin_sub;
-        int* k_mod;
-        double* actmin;
-        double* actmin_sub;
+        std::vector<double> bmin;
+        std::vector<double> bmin_sub;
+        std::vector<int> k_mod;
+        std::vector<double> actmin;
+        std::vector<double> actmin_sub;
         int subwc;
-        int* lmin_flag;
-        double* pmin_u;
-        double** actminbuff;
+        std::vector<int> lmin_flag;
+        std::vector<double> pmin_u;
+        std::vector<std::vector<double>> actminbuff;
         int amb_idx;
+
         NP(
             int incr,
             double rate,
             int msize,
-            double* lambda_y,
-            double* lambda_d
+            std::vector<double>& lambda_y,
+            std::vector<double>& lambda_d
         );
         NP(const NP&) = delete;
         NP& operator=(const NP& other) = delete;
-        ~NP();
+        ~NP() = default;
+
         void LambdaD();
 
     private:
@@ -173,55 +189,59 @@ public:
             const std::array<double, 18>& yvals
         );
     } *np;
+
     struct NPS
     {
         int incr;
         double rate;
         int msize;
-        double* lambda_y;
-        double* lambda_d;
+        const std::vector<double>& lambda_y;
+        std::vector<double>& lambda_d;
 
         double alpha_pow;
         double alpha_Pbar;
         double epsH1;
         double epsH1r;
 
-        double* sigma2N;
-        double* PH1y;
-        double* Pbar;
-        double* EN2y;
+        std::vector<double> sigma2N;
+        std::vector<double> PH1y;
+        std::vector<double> Pbar;
+        std::vector<double> EN2y;
+
         NPS(
             int incr,
             double rate,
             int msize,
-            double* lambda_y,
-            double* lambda_d,
-
+            const std::vector<double>& lambda_y,
+            std::vector<double>& lambda_d,
             double alpha_pow,
             double alpha_Pbar,
             double epsH1
         );
         NPS(const NPS&) = delete;
         NPS& operator=(const NPS& other) = delete;
-        ~NPS();
+        ~NPS() = default;
+
         void LambdaDs();
     } *nps;
+
     struct AE
     {
         int msize;
-        double* lambda_y;
+        const std::vector<double>& lambda_y;
         double zetaThresh;
         double psi;
-        double* nmask;
+        std::vector<double> nmask;
+
         AE(
             int msize,
-            double* lambda_y,
+            const std::vector<double>& lambda_y,
             double zetaThresh,
             double psi
         );
         AE(const AE&) = delete;
         AE& operator=(const AE& other) = delete;
-        ~AE();
+        ~AE() = default;
     } *ae;
 
     EMNR(
@@ -256,11 +276,6 @@ public:
     void setAePsi(double psi);
 
 private:
-    static double bessI0 (double x);
-    static double bessI1 (double x);
-    static double e1xb (double x);
-    static void interpM (double* res, double x, int nvals, double* xvals, double* yvals);
-    static double getKey(double* type, double gamma, double xi);
     void calc_window();
     void calc();
     void decalc();
