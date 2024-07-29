@@ -191,6 +191,8 @@ public:
     // TXA Properties
     static void SetMode (TXA& txa, int mode);
     static void SetBandpassFreqs (TXA& txa, float f_low, float f_high);
+    static void SetBandpassNC (TXA& txa, int nc);
+    static void SetBandpassMP (TXA& txa, int mp);
 
     // Collectives
     static void SetNC (TXA& txa, int nc);

@@ -444,7 +444,7 @@ RXA* RXA::create_rxa (
         &rxa->agc->gain);                       // pointer for gain computation
 
     // Bandpass filter - After spectral noise reduction in the block diagram
-    rxa->bp1 = BANDPASS::create_bandpass (
+    rxa->bp1 = new BANDPASS (
         1,                                      // run - used only with ( AM || ANF || ANR || EMNR)
         0,                                      // position
         rxa->dsp_size,                          // buffer size
@@ -570,7 +570,7 @@ void RXA::destroy_rxa (RXA *rxa)
     SPEAK::destroy_speak (rxa->speak);
     CBL::destroy_cbl (rxa->cbl);
     SIPHON::destroy_siphon (rxa->sip1);
-    BANDPASS::destroy_bandpass (rxa->bp1);
+    delete (rxa->bp1);
     delete (rxa->agcmeter);
     delete (rxa->agc);
     delete (rxa->emnr);
@@ -623,7 +623,7 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->emnr->flush();
     rxa->agc->flush();
     rxa->agcmeter->flush();
-    BANDPASS::flush_bandpass (rxa->bp1);
+    rxa->bp1->flush();
     SIPHON::flush_siphon (rxa->sip1);
     CBL::flush_cbl (rxa->cbl);
     SPEAK::flush_speak (rxa->speak);
@@ -656,12 +656,12 @@ void RXA::xrxa (RXA *rxa)
     rxa->anf->execute(0);
     rxa->anr->ANR::execute(0);
     rxa->emnr->execute(0);
-    BANDPASS::xbandpass (rxa->bp1, 0);
+    rxa->bp1->BANDPASS::execute(0);
     rxa->agc->execute();
     rxa->anf->execute(1);
     rxa->anr->execute(1);
     rxa->emnr->execute(1);
-    BANDPASS::xbandpass (rxa->bp1, 1);
+    rxa->bp1->execute(1);
     rxa->agcmeter->execute();
     SIPHON::xsiphon (rxa->sip1, 0);
     CBL::xcbl (rxa->cbl);
@@ -767,7 +767,7 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->anf->setSamplerate(rxa->dsp_rate);
     rxa->anr->setSamplerate(rxa->dsp_rate);
     rxa->emnr->setSamplerate(rxa->dsp_rate);
-    BANDPASS::setSamplerate_bandpass (rxa->bp1, rxa->dsp_rate);
+    rxa->bp1->setSamplerate(rxa->dsp_rate);
     rxa->agc->setSamplerate(rxa->dsp_rate);
     rxa->agcmeter->setSamplerate(rxa->dsp_rate);
     SIPHON::setSamplerate_siphon (rxa->sip1, rxa->dsp_rate);
@@ -843,8 +843,8 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->anr->setSize(rxa->dsp_size);
     rxa->emnr->setBuffers(rxa->midbuff, rxa->midbuff);
     rxa->emnr->setSize(rxa->dsp_size);
-    BANDPASS::setBuffers_bandpass (rxa->bp1, rxa->midbuff, rxa->midbuff);
-    BANDPASS::setSize_bandpass (rxa->bp1, rxa->dsp_size);
+    rxa->bp1->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->bp1->setSize(rxa->dsp_size);
     rxa->agc->setBuffers(rxa->midbuff, rxa->midbuff);
     rxa->agc->setSize(rxa->dsp_size);
     rxa->agcmeter->setBuffers(rxa->midbuff);
@@ -957,7 +957,7 @@ void RXA::bp1Check (
     else
         gain = 1.0;
     if (a->gain != gain)
-        BANDPASS::setGain_bandpass (a, gain, 0);
+        a->setGain(gain, 0);
 }
 
 void RXA::bp1Set (RXA& rxa)
@@ -974,8 +974,8 @@ void RXA::bp1Set (RXA& rxa)
     else
         a->run = 0;
     if (!old && a->run)
-        BANDPASS::flush_bandpass (a);
-    FIRCORE::setUpdate_fircore (a->p);
+        a->flush();
+    FIRCORE::setUpdate_fircore (a->fircore);
 }
 
 void RXA::bpsnbaCheck (RXA& rxa, int mode, int notch_run)
@@ -1368,7 +1368,7 @@ void RXA::SetAGCThresh(RXA& rxa, double thresh, double size, double rate)
 
 void RXA::SetPassband (RXA& rxa, float f_low, float f_high)
 {
-    BANDPASS::SetBandpassFreqs   (rxa, f_low, f_high); // After spectral noise reduction ( AM || ANF || ANR || EMNR)
+    rxa.bp1->setBandpassFreqs         (f_low, f_high); // After spectral noise reduction ( AM || ANF || ANR || EMNR)
     rxa.snba->setOutputBandwidth      (f_low, f_high); // Spectral noise blanker (SNB)
     rxa.nbp0->SetFreqs                (f_low, f_high); // Notched bandpass
 }
@@ -1378,7 +1378,7 @@ void RXA::SetNC (RXA& rxa, int nc)
     int oldstate = rxa.state;
     rxa.nbp0->SetNC              (nc);
     rxa.bpsnba->SetNC            (nc);
-    BANDPASS::SetBandpassNC (rxa, nc);
+    rxa.bp1->SetBandpassNC       (nc);
     rxa.eqp->setNC               (nc);
     rxa.fmsq->setNC              (nc);
     rxa.fmd->setNCde             (nc);
@@ -1390,7 +1390,7 @@ void RXA::SetMP (RXA& rxa, int mp)
 {
     rxa.nbp0->SetMP              (mp);
     rxa.bpsnba->SetMP            (mp);
-    BANDPASS::SetBandpassMP (rxa, mp);
+    rxa.bp1->SetBandpassMP       (mp);
     rxa.eqp->setMP               (mp);
     rxa.fmsq->setMP              (mp);
     rxa.fmd->setMPde             (mp);

@@ -47,6 +47,8 @@ warren@wpratt.com
 #include "slew.hpp"
 #include "iqc.hpp"
 #include "cfir.hpp"
+#include "fircore.hpp"
+#include "fir.hpp"
 #include "TXA.hpp"
 
 namespace WDSP {
@@ -276,7 +278,7 @@ TXA* TXA::create_txa (
         TXA_CFC_GAIN,                               // index for gain value
         (double*) &txa->cfcomp->gain);              // pointer for gain computation
 
-    txa->bp0 = BANDPASS::create_bandpass (
+    txa->bp0 = new BANDPASS(
         1,                                          // always runs
         0,                                          // position
         txa->dsp_size,                       // size
@@ -297,7 +299,7 @@ TXA* TXA::create_txa (
         txa->midbuff,                       // pointer to output buffer
         3.0);                                       // gain
 
-    txa->bp1 = BANDPASS::create_bandpass (
+    txa->bp1 = new BANDPASS(
         0,                                          // ONLY RUNS WHEN COMPRESSOR IS USED
         0,                                          // position
         txa->dsp_size,                       // size
@@ -319,7 +321,7 @@ TXA* TXA::create_txa (
         txa->dsp_rate,                       // sample rate
         1.95);                                      // gain for clippings
 
-    txa->bp2 = BANDPASS::create_bandpass (
+    txa->bp2 = new BANDPASS(
         0,                                          // ONLY RUNS WHEN COMPRESSOR IS USED
         0,                                          // position
         txa->dsp_size,                       // size
@@ -532,11 +534,11 @@ void TXA::destroy_txa (TXA *txa)
     AMMOD::destroy_ammod (txa->ammod);
     delete (txa->alc);
     delete (txa->compmeter);
-    BANDPASS::destroy_bandpass (txa->bp2);
+    delete (txa->bp2);
     OSCTRL::destroy_osctrl (txa->osctrl);
-    BANDPASS::destroy_bandpass (txa->bp1);
+    delete (txa->bp1);
     COMPRESSOR::destroy_compressor (txa->compressor);
-    BANDPASS::destroy_bandpass (txa->bp0);
+    delete (txa->bp0);
     delete (txa->cfcmeter);
     CFCOMP::destroy_cfcomp (txa->cfcomp);
     delete (txa->lvlrmeter);
@@ -574,11 +576,11 @@ void TXA::flush_txa (TXA* txa)
     txa->lvlrmeter->flush ();
     CFCOMP::flush_cfcomp (txa->cfcomp);
     txa->cfcmeter->flush ();
-    BANDPASS::flush_bandpass (txa->bp0);
+    txa->bp0->flush ();
     COMPRESSOR::flush_compressor (txa->compressor);
-    BANDPASS::flush_bandpass (txa->bp1);
+    txa->bp1->flush ();
     OSCTRL::flush_osctrl (txa->osctrl);
-    BANDPASS::flush_bandpass (txa->bp2);
+    txa->bp2->flush ();
     txa->compmeter->flush ();
     txa->alc->flush ();
     AMMOD::flush_ammod (txa->ammod);
@@ -609,11 +611,11 @@ void xtxa (TXA* txa)
     txa->lvlrmeter->execute ();              // Leveler Meter
     CFCOMP::xcfcomp (txa->cfcomp, 0);             // Continuous Frequency Compressor with post-EQ
     txa->cfcmeter->execute ();               // CFC+PostEQ Meter
-    BANDPASS::xbandpass (txa->bp0, 0);              // primary bandpass filter
+    txa->bp0->execute (0);              // primary bandpass filter
     COMPRESSOR::xcompressor (txa->compressor);        // COMP compressor
-    BANDPASS::xbandpass (txa->bp1, 0);              // aux bandpass (runs if COMP)
+    txa->bp1->execute (0);              // aux bandpass (runs if COMP)
     OSCTRL::xosctrl (txa->osctrl);                // CESSB Overshoot Control
-    BANDPASS::xbandpass (txa->bp2, 0);              // aux bandpass (runs if CESSB)
+    txa->bp2->execute (0);              // aux bandpass (runs if CESSB)
     txa->compmeter->execute ();              // COMP meter
     txa->alc->execute ();                   // ALC
     AMMOD::xammod (txa->ammod);                  // AM Modulator
@@ -706,11 +708,11 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     txa->lvlrmeter->setSamplerate (txa->dsp_rate);
     CFCOMP::setSamplerate_cfcomp (txa->cfcomp, txa->dsp_rate);
     txa->cfcmeter->setSamplerate (txa->dsp_rate);
-    BANDPASS::setSamplerate_bandpass (txa->bp0, txa->dsp_rate);
+    txa->bp0->setSamplerate (txa->dsp_rate);
     COMPRESSOR::setSamplerate_compressor (txa->compressor, txa->dsp_rate);
-    BANDPASS::setSamplerate_bandpass (txa->bp1, txa->dsp_rate);
+    txa->bp1->setSamplerate (txa->dsp_rate);
     OSCTRL::setSamplerate_osctrl (txa->osctrl, txa->dsp_rate);
-    BANDPASS::setSamplerate_bandpass (txa->bp2, txa->dsp_rate);
+    txa->bp2->setSamplerate (txa->dsp_rate);
     txa->compmeter->setSamplerate (txa->dsp_rate);
     txa->alc->setSamplerate (txa->dsp_rate);
     AMMOD::setSamplerate_ammod (txa->ammod, txa->dsp_rate);
@@ -778,16 +780,16 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     CFCOMP::setSize_cfcomp (txa->cfcomp, txa->dsp_size);
     txa->cfcmeter->setBuffers(txa->midbuff);
     txa->cfcmeter->setSize(txa->dsp_size);
-    BANDPASS::setBuffers_bandpass (txa->bp0, txa->midbuff, txa->midbuff);
-    BANDPASS::setSize_bandpass (txa->bp0, txa->dsp_size);
+    txa->bp0->setBuffers (txa->midbuff, txa->midbuff);
+    txa->bp0->setSize (txa->dsp_size);
     COMPRESSOR::setBuffers_compressor (txa->compressor, txa->midbuff, txa->midbuff);
     COMPRESSOR::setSize_compressor (txa->compressor, txa->dsp_size);
-    BANDPASS::setBuffers_bandpass (txa->bp1, txa->midbuff, txa->midbuff);
-    BANDPASS::setSize_bandpass (txa->bp1, txa->dsp_size);
+    txa->bp1->setBuffers (txa->midbuff, txa->midbuff);
+    txa->bp1->setSize (txa->dsp_size);
     OSCTRL::setBuffers_osctrl (txa->osctrl, txa->midbuff, txa->midbuff);
     OSCTRL::setSize_osctrl (txa->osctrl, txa->dsp_size);
-    BANDPASS::setBuffers_bandpass (txa->bp2, txa->midbuff, txa->midbuff);
-    BANDPASS::setSize_bandpass (txa->bp2, txa->dsp_size);
+    txa->bp2->setBuffers (txa->midbuff, txa->midbuff);
+    txa->bp2->setSize (txa->dsp_size);
     txa->compmeter->setBuffers(txa->midbuff);
     txa->compmeter->setSize(txa->dsp_size);
     txa->alc->setBuffers(txa->midbuff, txa->midbuff);
@@ -914,14 +916,14 @@ void TXA::SetupBPFilters (TXA& txa)
     case TXA_DIGU:
     case TXA_SPEC:
     case TXA_DRM:
-        BANDPASS::CalcBandpassFilter (txa.bp0, txa.f_low, txa.f_high, 2.0);
+        txa.bp0->calcBandpassFilter (txa.f_low, txa.f_high, 2.0);
         if (txa.compressor->run)
         {
-            BANDPASS::CalcBandpassFilter (txa.bp1, txa.f_low, txa.f_high, 2.0);
+            txa.bp1->calcBandpassFilter (txa.f_low, txa.f_high, 2.0);
             txa.bp1->run = 1;
             if (txa.osctrl->run)
             {
-                BANDPASS::CalcBandpassFilter (txa.bp2, txa.f_low, txa.f_high, 1.0);
+                txa.bp2->calcBandpassFilter (txa.f_low, txa.f_high, 1.0);
                 txa.bp2->run = 1;
             }
         }
@@ -932,46 +934,133 @@ void TXA::SetupBPFilters (TXA& txa)
     case TXA_FM:
         if (txa.compressor->run)
         {
-            BANDPASS::CalcBandpassFilter (txa.bp0, 0.0, txa.f_high, 2.0);
-            BANDPASS::CalcBandpassFilter (txa.bp1, 0.0, txa.f_high, 2.0);
+            txa.bp0->calcBandpassFilter (0.0, txa.f_high, 2.0);
+            txa.bp1->calcBandpassFilter (0.0, txa.f_high, 2.0);
             txa.bp1->run = 1;
             if (txa.osctrl->run)
             {
-                BANDPASS::CalcBandpassFilter (txa.bp2, 0.0, txa.f_high, 1.0);
+                txa.bp2->calcBandpassFilter (0.0, txa.f_high, 1.0);
                 txa.bp2->run = 1;
             }
         }
         else
         {
-            BANDPASS::CalcBandpassFilter (txa.bp0, txa.f_low, txa.f_high, 1.0);
+            txa.bp0->calcBandpassFilter (txa.f_low, txa.f_high, 1.0);
         }
         break;
     case TXA_AM_LSB:
-        BANDPASS::CalcBandpassFilter (txa.bp0, -txa.f_high, 0.0, 2.0);
+        txa.bp0->calcBandpassFilter (-txa.f_high, 0.0, 2.0);
         if (txa.compressor->run)
         {
-            BANDPASS::CalcBandpassFilter (txa.bp1, -txa.f_high, 0.0, 2.0);
+            txa.bp1->calcBandpassFilter (-txa.f_high, 0.0, 2.0);
             txa.bp1->run = 1;
             if (txa.osctrl->run)
             {
-                BANDPASS::CalcBandpassFilter (txa.bp2, -txa.f_high, 0.0, 1.0);
+                txa.bp2->calcBandpassFilter (-txa.f_high, 0.0, 1.0);
                 txa.bp2->run = 1;
             }
         }
         break;
     case TXA_AM_USB:
-        BANDPASS::CalcBandpassFilter (txa.bp0, 0.0, txa.f_high, 2.0);
+        txa.bp0->calcBandpassFilter (0.0, txa.f_high, 2.0);
         if (txa.compressor->run)
         {
-            BANDPASS::CalcBandpassFilter (txa.bp1, 0.0, txa.f_high, 2.0);
+            txa.bp1->calcBandpassFilter (0.0, txa.f_high, 2.0);
             txa.bp1->run = 1;
             if (txa.osctrl->run)
             {
-                BANDPASS::CalcBandpassFilter (txa.bp2, 0.0, txa.f_high, 1.0);
+                txa.bp2->calcBandpassFilter(0.0, txa.f_high, 1.0);
                 txa.bp2->run = 1;
             }
         }
         break;
+    }
+}
+
+void TXA::SetBandpassNC (TXA& txa, int nc)
+{
+    // NOTE:  'nc' must be >= 'size'
+    BANDPASS *a;
+    a = txa.bp0;
+
+    if (a->nc != nc)
+    {
+        a->nc = nc;
+        float* impulse = FIR::fir_bandpass (
+            a->nc,
+            a->f_low,
+            a->f_high,
+            a->samplerate,
+            a->wintype,
+            1,
+            a->gain / (double)(2 * a->size)
+        );
+        FIRCORE::setNc_fircore (a->fircore, a->nc, impulse);
+        delete[] (impulse);
+    }
+
+    a = txa.bp1;
+
+    if (a->nc != nc)
+    {
+        a->nc = nc;
+        float* impulse = FIR::fir_bandpass (
+            a->nc,
+            a->f_low,
+            a->f_high,
+            a->samplerate,
+            a->wintype,
+            1,
+            a->gain / (double)(2 * a->size)
+        );
+        FIRCORE::setNc_fircore (a->fircore, a->nc, impulse);
+        delete[] (impulse);
+    }
+
+    a = txa.bp2;
+
+    if (a->nc != nc)
+    {
+        a->nc = nc;
+        float* impulse = FIR::fir_bandpass (
+            a->nc,
+            a->f_low,
+            a->f_high,
+            a->samplerate,
+            a->wintype,
+            1,
+            a->gain / (double)(2 * a->size)
+        );
+        FIRCORE::setNc_fircore (a->fircore, a->nc, impulse);
+        delete[] (impulse);
+    }
+}
+
+void TXA::SetBandpassMP (TXA& txa, int mp)
+{
+    BANDPASS *a;
+    a = txa.bp0;
+
+    if (mp != a->mp)
+    {
+        a->mp = mp;
+        FIRCORE::setMp_fircore (a->fircore, a->mp);
+    }
+
+    a = txa.bp1;
+
+    if (mp != a->mp)
+    {
+        a->mp = mp;
+        FIRCORE::setMp_fircore (a->fircore, a->mp);
+    }
+
+    a = txa.bp2;
+
+    if (mp != a->mp)
+    {
+        a->mp = mp;
+        FIRCORE::setMp_fircore (a->fircore, a->mp);
     }
 }
 
@@ -984,7 +1073,8 @@ void TXA::SetupBPFilters (TXA& txa)
 void TXA::SetNC (TXA& txa, int nc)
 {
     int oldstate = txa.state;
-    BANDPASS::SetBandpassNC (txa, nc);
+
+    SetBandpassNC           (txa, nc);
     EMPHP::SetFMEmphNC      (txa, nc);
     txa.eqp->setNC               (nc);
     FMMOD::SetFMNC          (txa, nc);
@@ -994,7 +1084,7 @@ void TXA::SetNC (TXA& txa, int nc)
 
 void TXA::SetMP (TXA& txa, int mp)
 {
-    BANDPASS::SetBandpassMP  (txa, mp);
+    SetBandpassMP            (txa, mp);
     EMPHP::SetFMEmphMP       (txa, mp);
     txa.eqp->setMP                (mp);
     FMMOD::SetFMMP           (txa, mp);
