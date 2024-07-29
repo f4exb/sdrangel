@@ -36,144 +36,136 @@ warren@wpratt.com
 
 namespace WDSP {
 
-ANF* ANF::create_anf(
-    int run,
-    int position,
-    int buff_size,
-    float *in_buff,
-    float *out_buff,
-    int dline_size,
-    int n_taps,
-    int delay,
-    double two_mu,
-    double gamma,
-    double lidx,
-    double lidx_min,
-    double lidx_max,
-    double ngamma,
-    double den_mult,
-    double lincr,
-    double ldecr
+ANF::ANF(
+    int _run,
+    int _position,
+    int _buff_size,
+    float *_in_buff,
+    float *_out_buff,
+    int _dline_size,
+    int _n_taps,
+    int _delay,
+    double _two_mu,
+    double _gamma,
+    double _lidx,
+    double _lidx_min,
+    double _lidx_max,
+    double _ngamma,
+    double _den_mult,
+    double _lincr,
+    double _ldecr
 )
 {
-    ANF *a = new ANF;
-    a->run = run;
-    a->position = position;
-    a->buff_size = buff_size;
-    a->in_buff = in_buff;
-    a->out_buff = out_buff;
-    a->dline_size = dline_size;
-    a->mask = dline_size - 1;
-    a->n_taps = n_taps;
-    a->delay = delay;
-    a->two_mu = two_mu;
-    a->gamma = gamma;
-    a->in_idx = 0;
-    a->lidx = lidx;
-    a->lidx_min = lidx_min;
-    a->lidx_max = lidx_max;
-    a->ngamma = ngamma;
-    a->den_mult = den_mult;
-    a->lincr = lincr;
-    a->ldecr = ldecr;
+    run = _run;
+    position = _position;
+    buff_size = _buff_size;
+    in_buff = _in_buff;
+    out_buff = _out_buff;
+    dline_size = _dline_size;
+    mask = _dline_size - 1;
+    n_taps = _n_taps;
+    delay = _delay;
+    two_mu = _two_mu;
+    gamma = _gamma;
+    in_idx = 0;
+    lidx = _lidx;
+    lidx_min = _lidx_min;
+    lidx_max = _lidx_max;
+    ngamma = _ngamma;
+    den_mult = _den_mult;
+    lincr = _lincr;
+    ldecr = _ldecr;
 
-    memset (a->d, 0, sizeof(double) * ANF_DLINE_SIZE);
-    memset (a->w, 0, sizeof(double) * ANF_DLINE_SIZE);
-
-    return a;
+    std::fill(d.begin(), d.end(), 0);
+    std::fill(w.begin(), w.end(), 0);
 }
 
-void ANF::destroy_anf (ANF *a)
-{
-    delete a;
-}
-
-void ANF::xanf(ANF *a, int position)
+void ANF::execute(int _position)
 {
     int i, j, idx;
     double c0, c1;
     double y, error, sigma, inv_sigp;
     double nel, nev;
 
-    if (a->run && (a->position == position))
+    if (run && (position == _position))
     {
-        for (i = 0; i < a->buff_size; i++)
+        for (i = 0; i < buff_size; i++)
         {
-            a->d[a->in_idx] = a->in_buff[2 * i + 0];
+            d[in_idx] = in_buff[2 * i + 0];
 
             y = 0;
             sigma = 0;
 
-            for (j = 0; j < a->n_taps; j++)
+            for (j = 0; j < n_taps; j++)
             {
-                idx = (a->in_idx + j + a->delay) & a->mask;
-                y += a->w[j] * a->d[idx];
-                sigma += a->d[idx] * a->d[idx];
+                idx = (in_idx + j + delay) & mask;
+                y += w[j] * d[idx];
+                sigma += d[idx] * d[idx];
             }
 
             inv_sigp = 1.0 / (sigma + 1e-10);
-            error = a->d[a->in_idx] - y;
+            error = d[in_idx] - y;
 
-            a->out_buff[2 * i + 0] = error;
-            a->out_buff[2 * i + 1] = 0.0;
+            out_buff[2 * i + 0] = error;
+            out_buff[2 * i + 1] = 0.0;
 
-            if ((nel = error * (1.0 - a->two_mu * sigma * inv_sigp)) < 0.0)
+            if ((nel = error * (1.0 - two_mu * sigma * inv_sigp)) < 0.0)
                 nel = -nel;
 
-            if ((nev = a->d[a->in_idx] - (1.0 - a->two_mu * a->ngamma) * y - a->two_mu * error * sigma * inv_sigp) < 0.0)
+            if ((nev = d[in_idx] - (1.0 - two_mu * ngamma) * y - two_mu * error * sigma * inv_sigp) < 0.0)
                 nev = -nev;
 
             if (nev < nel)
             {
-                if ((a->lidx += a->lincr) > a->lidx_max) a->lidx = a->lidx_max;
+                if ((lidx += lincr) > lidx_max) lidx = lidx_max;
             }
             else
             {
-                if ((a->lidx -= a->ldecr) < a->lidx_min) a->lidx = a->lidx_min;
+                if ((lidx -= ldecr) < lidx_min) lidx = lidx_min;
             }
 
-            a->ngamma = a->gamma * (a->lidx * a->lidx) * (a->lidx * a->lidx) * a->den_mult;
+            ngamma = gamma * (lidx * lidx) * (lidx * lidx) * den_mult;
 
-            c0 = 1.0 - a->two_mu * a->ngamma;
-            c1 = a->two_mu * error * inv_sigp;
+            c0 = 1.0 - two_mu * ngamma;
+            c1 = two_mu * error * inv_sigp;
 
-            for (j = 0; j < a->n_taps; j++)
+            for (j = 0; j < n_taps; j++)
             {
-                idx = (a->in_idx + j + a->delay) & a->mask;
-                a->w[j] = c0 * a->w[j] + c1 * a->d[idx];
+                idx = (in_idx + j + delay) & mask;
+                w[j] = c0 * w[j] + c1 * d[idx];
             }
 
-            a->in_idx = (a->in_idx + a->mask) & a->mask;
+            in_idx = (in_idx + mask) & mask;
         }
     }
-    else if (a->in_buff != a->out_buff)
+    else if (in_buff != out_buff)
     {
-        std::copy(a->in_buff, a->in_buff + a->buff_size * 2, a->out_buff);
+        std::copy(in_buff, in_buff + buff_size * 2, out_buff);
     }
 }
 
-void ANF::flush_anf (ANF *a)
+void ANF::flush()
 {
-    memset (a->d, 0, sizeof(double) * ANF_DLINE_SIZE);
-    memset (a->w, 0, sizeof(double) * ANF_DLINE_SIZE);
-    a->in_idx = 0;
+    std::fill(d.begin(), d.end(), 0);
+    std::fill(w.begin(), w.end(), 0);
+    in_idx = 0;
 }
 
-void ANF::setBuffers_anf (ANF *a, float* in, float* out)
+void ANF::setBuffers(float* _in, float* _out)
 {
-    a->in_buff = in;
-    a->out_buff = out;
+    in_buff = _in;
+    out_buff = _out;
 }
 
-void ANF::setSamplerate_anf (ANF *a, int)
+void ANF::setSamplerate(int)
 {
-    flush_anf (a);
+    flush();
 }
 
-void ANF::setSize_anf (ANF *a, int size)
+void ANF::setSize(int _size)
 {
-    a->buff_size = size;
-    flush_anf (a);
+    buff_size = _size;
+    flush();
 }
 
 /********************************************************************************************************
@@ -182,44 +174,37 @@ void ANF::setSize_anf (ANF *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void ANF::SetANFVals (RXA& rxa, int taps, int delay, double gain, double leakage)
+void ANF::setVals(int _taps, int _delay, double _gain, double _leakage)
 {
-    rxa.anf->n_taps = taps;
-    rxa.anf->delay = delay;
-    rxa.anf->two_mu = gain;          //try two_mu = 1e-4
-    rxa.anf->gamma = leakage;        //try gamma = 0.10
-    flush_anf (rxa.anf);
+    n_taps = _taps;
+    delay = _delay;
+    two_mu = _gain;          //try two_mu = 1e-4
+    gamma = _leakage;        //try gamma = 0.10
+    flush();
 }
 
-void ANF::SetANFTaps (RXA& rxa, int taps)
+void ANF::setTaps(int _taps)
 {
-    rxa.anf->n_taps = taps;
-    flush_anf (rxa.anf);
+    n_taps = _taps;
+    flush();
 }
 
-void ANF::SetANFDelay (RXA& rxa, int delay)
+void ANF::setDelay(int _delay)
 {
-    rxa.anf->delay = delay;
-    flush_anf (rxa.anf);
+    delay = _delay;
+    flush();
 }
 
-void ANF::SetANFGain (RXA& rxa, double gain)
+void ANF::setGain(double _gain)
 {
-    rxa.anf->two_mu = gain;
-    flush_anf (rxa.anf);
+    two_mu = _gain;
+    flush();
 }
 
-void ANF::SetANFLeakage (RXA& rxa, double leakage)
+void ANF::setLeakage(double _leakage)
 {
-    rxa.anf->gamma = leakage;
-    flush_anf (rxa.anf);
-}
-
-void ANF::SetANFPosition (RXA& rxa, int position)
-{
-    rxa.anf->position = position;
-    rxa.bp1->position = position;
-    flush_anf (rxa.anf);
+    gamma = _leakage;
+    flush();
 }
 
 } // namespace WDSP

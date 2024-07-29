@@ -510,12 +510,12 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         switch (settings.m_nrPosition)
         {
         case WDSPRxProfile::NRPositionPreAGC:
-            WDSP::ANR::SetANRPosition(*m_rxa, 0);
-            WDSP::EMNR::SetEMNRPosition(*m_rxa, 0);
+            WDSP::RXA::SetANRPosition(*m_rxa, 0);
+            WDSP::RXA::SetEMNRPosition(*m_rxa, 0);
             break;
         case WDSPRxProfile::NRPositionPostAGC:
-            WDSP::ANR::SetANRPosition(*m_rxa, 1);
-            WDSP::EMNR::SetEMNRPosition(*m_rxa, 1);
+            WDSP::RXA::SetANRPosition(*m_rxa, 1);
+            WDSP::RXA::SetEMNRPosition(*m_rxa, 1);
             break;
         default:
             break;
@@ -527,13 +527,13 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         switch (settings.m_nr2Gain)
         {
         case WDSPRxProfile::NR2GainLinear:
-            WDSP::EMNR::SetEMNRgainMethod(*m_rxa, 0);
+            m_rxa->emnr->setGainMethod(0);
             break;
         case WDSPRxProfile::NR2GainLog:
-            WDSP::EMNR::SetEMNRgainMethod(*m_rxa, 1);
+            m_rxa->emnr->setGainMethod(1);
             break;
         case WDSPRxProfile::NR2GainGamma:
-            WDSP::EMNR::SetEMNRgainMethod(*m_rxa, 2);
+            m_rxa->emnr->setGainMethod(2);
             break;
         default:
             break;
@@ -545,10 +545,10 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         switch (settings.m_nr2NPE)
         {
         case WDSPRxProfile::NR2NPEOSMS:
-            WDSP::EMNR::SetEMNRnpeMethod(*m_rxa, 0);
+            m_rxa->emnr->setNpeMethod(0);
             break;
         case WDSPRxProfile::NR2NPEMMSE:
-            WDSP::EMNR::SetEMNRnpeMethod(*m_rxa, 1);
+            m_rxa->emnr->setNpeMethod(1);
             break;
         default:
             break;
@@ -556,7 +556,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     }
 
     if ((m_settings.m_nr2ArtifactReduction != settings.m_nr2ArtifactReduction) || force) {
-        WDSP::EMNR::SetEMNRaeRun(*m_rxa, settings.m_nr2ArtifactReduction ? 1 : 0);
+        m_rxa->emnr->setAeRun(settings.m_nr2ArtifactReduction ? 1 : 0);
     }
 
     if ((m_settings.m_anf != settings.m_anf) || force) {

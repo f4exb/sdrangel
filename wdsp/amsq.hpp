@@ -81,6 +81,7 @@ public:
         double _muted_gain
     );
     AMSQ(const AMSQ&) = delete;
+    AMSQ& operator=(const AMSQ& other) = delete;
     ~AMSQ() = default;
 
     void flush();

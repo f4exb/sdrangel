@@ -101,6 +101,7 @@ public:
         int _mp
     );
     FMSQ(const FMSQ&) = delete;
+    FMSQ& operator=(const FMSQ& other) = delete;
     ~FMSQ();
 
     void flush();

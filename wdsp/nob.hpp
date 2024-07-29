@@ -99,6 +99,7 @@ public:
         double threshold
     );
     NOB(const NOB&) = delete;
+    NOB& operator=(const NOB& other) = delete;
     ~NOB() = default;
                                                                                            ////////////  legacy interface - remove
     void flush();

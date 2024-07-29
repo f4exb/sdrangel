@@ -173,11 +173,13 @@ public:
     static void SetSNBARun (RXA& rxa, int run);
     // ANF
     static void SetANFRun (RXA& rxa, int run);
+    static void SetANFPosition (RXA& rxa, int position);
     // ANR
     static void SetANRRun (RXA& rxa, int run);
+    static void SetANRPosition (RXA& rxa, int position);
     // EMNR
     static void SetEMNRRun (RXA& rxa, int run);
-
+    static void SetEMNRPosition (RXA& rxa, int position);
     // Collectives
     static void SetPassband (RXA& rxa, float f_low, float f_high);
     static void SetNC (RXA& rxa, int nc);

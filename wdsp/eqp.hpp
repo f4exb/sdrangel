@@ -76,6 +76,7 @@ public:
         int samplerate
     );
     EQP(const EQP&) = delete;
+    EQP& operator=(const EQP& other) = delete;
     ~EQP();
 
     void flush();

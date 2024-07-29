@@ -347,7 +347,7 @@ RXA* RXA::create_rxa (
     }
 
     // Auto notch filter
-    rxa->anf = ANF::create_anf (
+    rxa->anf = new ANF(
         0,                                      // run - OFF by default
         0,                                      // position
         rxa->dsp_size,                          // buffer size
@@ -367,7 +367,7 @@ RXA* RXA::create_rxa (
         3.0);                                   // ldecr
 
     // LMS noise reduction (ANR or "NR")
-    rxa->anr = ANR::create_anr (
+    rxa->anr = new ANR(
         0,                                      // run - OFF by default
         0,                                      // position
         rxa->dsp_size,                          // buffer size
@@ -387,7 +387,7 @@ RXA* RXA::create_rxa (
         3.0);                                   // ldecr
 
     // Spectral noise reduyction (EMNR or "NR2")
-    rxa->emnr = EMNR::create_emnr (
+    rxa->emnr = new EMNR(
         0,                                      // run
         0,                                      // position
         rxa->dsp_size,                          // buffer size
@@ -573,9 +573,9 @@ void RXA::destroy_rxa (RXA *rxa)
     BANDPASS::destroy_bandpass (rxa->bp1);
     delete (rxa->agcmeter);
     WCPAGC::destroy_wcpagc (rxa->agc);
-    EMNR::destroy_emnr (rxa->emnr);
-    ANR::destroy_anr (rxa->anr);
-    ANF::destroy_anf (rxa->anf);
+    delete (rxa->emnr);
+    delete (rxa->anr);
+    delete (rxa->anf);
     delete (rxa->eqp);
     delete (rxa->snba);
     delete (rxa->fmsq);
@@ -618,9 +618,9 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->fmsq->flush();
     rxa->snba->flush();
     rxa->eqp->flush();
-    ANF::flush_anf (rxa->anf);
-    ANR::flush_anr (rxa->anr);
-    EMNR::flush_emnr (rxa->emnr);
+    rxa->anf->flush();
+    rxa->anr->flush();
+    rxa->emnr->flush();
     WCPAGC::flush_wcpagc (rxa->agc);
     rxa->agcmeter->flush();
     BANDPASS::flush_bandpass (rxa->bp1);
@@ -653,14 +653,14 @@ void RXA::xrxa (RXA *rxa)
     rxa->bpsnba->exec_out(1);
     rxa->snba->execute();
     rxa->eqp->execute();
-    ANF::xanf (rxa->anf, 0);
-    ANR::xanr (rxa->anr, 0);
-    EMNR::xemnr (rxa->emnr, 0);
+    rxa->anf->execute(0);
+    rxa->anr->ANR::execute(0);
+    rxa->emnr->execute(0);
     BANDPASS::xbandpass (rxa->bp1, 0);
     WCPAGC::xwcpagc (rxa->agc);
-    ANF::xanf (rxa->anf, 1);
-    ANR::xanr (rxa->anr, 1);
-    EMNR::xemnr (rxa->emnr, 1);
+    rxa->anf->execute(1);
+    rxa->anr->execute(1);
+    rxa->emnr->execute(1);
     BANDPASS::xbandpass (rxa->bp1, 1);
     rxa->agcmeter->execute();
     SIPHON::xsiphon (rxa->sip1, 0);
@@ -764,9 +764,9 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->fmsq->setSamplerate(rxa->dsp_rate);
     // rxa->snba->setSamplerate(rxa->dsp_rate); SMBA removed
     rxa->eqp->setSamplerate(rxa->dsp_rate);
-    ANF::setSamplerate_anf (rxa->anf, rxa->dsp_rate);
-    ANR::setSamplerate_anr (rxa->anr, rxa->dsp_rate);
-    EMNR::setSamplerate_emnr (rxa->emnr, rxa->dsp_rate);
+    rxa->anf->setSamplerate(rxa->dsp_rate);
+    rxa->anr->setSamplerate(rxa->dsp_rate);
+    rxa->emnr->setSamplerate(rxa->dsp_rate);
     BANDPASS::setSamplerate_bandpass (rxa->bp1, rxa->dsp_rate);
     WCPAGC::setSamplerate_wcpagc (rxa->agc, rxa->dsp_rate);
     rxa->agcmeter->setSamplerate(rxa->dsp_rate);
@@ -837,12 +837,12 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->snba->setSize(rxa->dsp_size);
     rxa->eqp->setBuffers(rxa->midbuff, rxa->midbuff);
     rxa->eqp->setSize(rxa->dsp_size);
-    ANF::setBuffers_anf (rxa->anf, rxa->midbuff, rxa->midbuff);
-    ANF::setSize_anf (rxa->anf, rxa->dsp_size);
-    ANR::setBuffers_anr (rxa->anr, rxa->midbuff, rxa->midbuff);
-    ANR::setSize_anr (rxa->anr, rxa->dsp_size);
-    EMNR::setBuffers_emnr (rxa->emnr, rxa->midbuff, rxa->midbuff);
-    EMNR::setSize_emnr (rxa->emnr, rxa->dsp_size);
+    rxa->anf->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->anf->setSize(rxa->dsp_size);
+    rxa->anr->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->anr->setSize(rxa->dsp_size);
+    rxa->emnr->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->emnr->setSize(rxa->dsp_size);
     BANDPASS::setBuffers_bandpass (rxa->bp1, rxa->midbuff, rxa->midbuff);
     BANDPASS::setSize_bandpass (rxa->bp1, rxa->dsp_size);
     WCPAGC::setBuffers_wcpagc (rxa->agc, rxa->midbuff, rxa->midbuff);
@@ -1280,8 +1280,15 @@ void RXA::SetANFRun (RXA& rxa, int run)
         );
         a->run = run;
         RXA::bp1Set (rxa);
-        ANF::flush_anf (a);
+        a->flush();
     }
+}
+
+void RXA::SetANFPosition (RXA& rxa, int position)
+{
+    rxa.anf->position = position;
+    rxa.bp1->position = position;
+    rxa.anf->flush();
 }
 
 void RXA::SetANRRun (RXA& rxa, int run)
@@ -1300,8 +1307,15 @@ void RXA::SetANRRun (RXA& rxa, int run)
         );
         a->run = run;
         RXA::bp1Set (rxa);
-        ANR::flush_anr (a);
+        a->flush();
     }
+}
+
+void RXA::SetANRPosition (RXA& rxa, int position)
+{
+    rxa.anr->position = position;
+    rxa.bp1->position = position;
+    rxa.anr->flush();
 }
 
 void RXA::SetEMNRRun (RXA& rxa, int run)
@@ -1321,6 +1335,12 @@ void RXA::SetEMNRRun (RXA& rxa, int run)
         a->run = run;
         RXA::bp1Set (rxa);
     }
+}
+
+void RXA::SetEMNRPosition (RXA& rxa, int position)
+{
+    rxa.emnr->position = position;
+    rxa.bp1->position  = position;
 }
 
 /********************************************************************************************************

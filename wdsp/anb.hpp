@@ -80,6 +80,7 @@ public:
         double threshold
     );
     ANB(const ANB&) = delete;
+    ANB& operator=(const ANB& other) = delete;
     ~ANB() = default;
 
     void flush();

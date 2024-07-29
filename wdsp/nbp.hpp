@@ -52,6 +52,7 @@ public:
 
     NOTCHDB(int master_run, int maxnotches);
     NOTCHDB(const NOTCHDB&) = delete;
+    NOTCHDB& operator=(const NOTCHDB& other) = delete;
     ~NOTCHDB() = default;
 
     int addNotch (int notch, double fcenter, double fwidth, int active);
@@ -108,6 +109,7 @@ public:
         NOTCHDB* notchdb
     );
     NBP(const NBP&) = delete;
+    NBP& operator=(const NBP& other) = delete;
     ~NBP();
 
     void flush();

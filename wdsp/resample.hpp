@@ -76,6 +76,7 @@ public:
         double gain
     );
     RESAMPLE(const RESAMPLE&) = delete;
+    RESAMPLE& operator=(const RESAMPLE& other) = delete;
     ~RESAMPLE() = default;
 
     void flush();

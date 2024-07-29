@@ -100,6 +100,7 @@ public:
         double tauI
     );
     AMD(const AMD&) = delete;
+    AMD& operator=(const AMD& other) = delete;
     ~AMD() = default;
 
     void init();

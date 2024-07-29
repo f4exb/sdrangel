@@ -111,6 +111,7 @@ public:
         int mp_aud
     );
     FMD(const FMD&) = delete;
+    FMD& operator=(const FMD& other) = delete;
     ~FMD();
 
     void flush();

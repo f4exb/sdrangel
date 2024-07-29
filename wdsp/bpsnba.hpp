@@ -80,6 +80,7 @@ public:
         NOTCHDB* notchdb
     );
     BPSNBA(const BPSNBA&) = delete;
+    BPSNBA& operator=(BPSNBA& other) = delete;
     ~BPSNBA();
 
     void flush();

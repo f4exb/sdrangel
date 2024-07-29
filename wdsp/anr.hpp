@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_anr_h
 #define wdsp_anr_h
 
+#include <array>
+
 #include "export.h"
 
 #define ANR_DLINE_SIZE 2048
@@ -50,8 +52,8 @@ public:
     int delay;
     double two_mu;
     double gamma;
-    double d [ANR_DLINE_SIZE];
-    double w [ANR_DLINE_SIZE];
+    std::array<double, ANR_DLINE_SIZE> d;
+    std::array<double, ANR_DLINE_SIZE> w;
     int in_idx;
 
     double lidx;
@@ -62,7 +64,7 @@ public:
     double lincr;
     double ldecr;
 
-    static ANR* create_anr   (
+    ANR(
         int run,
         int position,
         int buff_size,
@@ -81,20 +83,21 @@ public:
         double lincr,
         double ldecr
     );
+    ANR(const ANR&) = delete;
+    ANR& operator=(const ANR& other) = delete;
+    ~ANR() = default;
 
-    static void destroy_anr (ANR *a);
-    static void flush_anr (ANR *a);
-    static void xanr (ANR *a, int position);
-    static void setBuffers_anr (ANR *a, float* in, float* out);
-    static void setSamplerate_anr (ANR *a, int rate);
-    static void setSize_anr (ANR *a, int size);
+    void flush();
+    void execute(int position);
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // RXA Properties
-    static void SetANRVals (RXA& rxa, int taps, int delay, double gain, double leakage);
-    static void SetANRTaps (RXA& rxa, int taps);
-    static void SetANRDelay (RXA& rxa, int delay);
-    static void SetANRGain (RXA& rxa, double gain);
-    static void SetANRLeakage (RXA& rxa, double leakage);
-    static void SetANRPosition (RXA& rxa, int position);
+    void setVals(int taps, int delay, double gain, double leakage);
+    void setTaps(int taps);
+    void setDelay(int delay);
+    void setGain(double gain);
+    void setLeakage(double leakage);
 };
 
 } // namespace WDSP
