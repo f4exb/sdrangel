@@ -180,6 +180,9 @@ public:
     // EMNR
     static void SetEMNRRun (RXA& rxa, int run);
     static void SetEMNRPosition (RXA& rxa, int position);
+    // WCPAGC
+    static void SetAGCThresh(RXA& rxa, double thresh, double size, double rate);
+    static void GetAGCThresh(RXA& rxa, double *thresh, double size, double rate);
     // Collectives
     static void SetPassband (RXA& rxa, float f_low, float f_high);
     static void SetNC (RXA& rxa, int nc);

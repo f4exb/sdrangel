@@ -55,7 +55,7 @@ void FMD::calc()
     // CTCSS Removal
     sntch = SNOTCH::create_snotch(1, size, out, out, (int)rate, ctcss_freq, 0.0002);
     // detector limiter
-    plim = WCPAGC::create_wcpagc (
+    plim = new WCPAGC(
         1,                                          // run - always ON
         5,                                          // mode
         1,                                          // 0 for max(I,Q), 1 for envelope
@@ -83,7 +83,7 @@ void FMD::calc()
 
 void FMD::decalc()
 {
-    WCPAGC::destroy_wcpagc(plim);
+    delete (plim);
     SNOTCH::destroy_snotch(sntch);
 }
 
@@ -163,7 +163,7 @@ void FMD::flush()
     omega = 0.0;
     fmdc = 0.0;
     SNOTCH::flush_snotch (sntch);
-    WCPAGC::flush_wcpagc (plim);
+    plim->flush();
 }
 
 void FMD::execute()
@@ -205,7 +205,7 @@ void FMD::execute()
         {
             for (i = 0; i < 2 * size; i++)
                 out[i] *= lim_pre_gain;
-            WCPAGC::xwcpagc (plim);
+            plim->execute();
         }
     }
     else if (in != out)
@@ -220,7 +220,7 @@ void FMD::setBuffers(float* _in, float* _out)
     calc();
     FIRCORE::setBuffers_fircore (pde,  audio.data(), out);
     FIRCORE::setBuffers_fircore (paud, out, out);
-    WCPAGC::setBuffers_wcpagc (plim, out, out);
+    plim->setBuffers(out, out);
 }
 
 void FMD::setSamplerate(int _rate)
@@ -237,7 +237,7 @@ void FMD::setSamplerate(int _rate)
     impulse = FIR::fir_bandpass(nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
     FIRCORE::setImpulse_fircore (paud, impulse, 1);
     delete[] (impulse);
-    WCPAGC::setSamplerate_wcpagc (plim, (int)rate);
+    plim->setSamplerate((int) rate);
 }
 
 void FMD::setSize(int _size)
@@ -257,7 +257,7 @@ void FMD::setSize(int _size)
     impulse = FIR::fir_bandpass(nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
     paud = FIRCORE::create_fircore (size, out, out, nc_aud, mp_aud, impulse);
     delete[] (impulse);
-    WCPAGC::setSize_wcpagc (plim, size);
+    plim->setSize(size);
 }
 
 /********************************************************************************************************

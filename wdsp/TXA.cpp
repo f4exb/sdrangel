@@ -197,7 +197,7 @@ TXA* TXA::create_txa (
         300.0,                                      // f_low
         3000.0);                                    // f_high
 
-    txa->leveler = WCPAGC::create_wcpagc (
+    txa->leveler = new WCPAGC(
         0,                                          // run - OFF by default
         5,                                          // mode
         0,                                          // 0 for max(I,Q), 1 for envelope
@@ -347,7 +347,7 @@ TXA* TXA::create_txa (
         -1,                                         // index for gain value
         0);                                         // pointer for gain computation
 
-    txa->alc = WCPAGC::create_wcpagc (
+    txa->alc = new WCPAGC(
         1,                                          // run - always ON
         5,                                          // mode
         1,                                          // 0 for max(I,Q), 1 for envelope
@@ -530,7 +530,7 @@ void TXA::destroy_txa (TXA *txa)
     delete (txa->gen1);
     FMMOD::destroy_fmmod (txa->fmmod);
     AMMOD::destroy_ammod (txa->ammod);
-    WCPAGC::destroy_wcpagc (txa->alc);
+    delete (txa->alc);
     delete (txa->compmeter);
     BANDPASS::destroy_bandpass (txa->bp2);
     OSCTRL::destroy_osctrl (txa->osctrl);
@@ -540,7 +540,7 @@ void TXA::destroy_txa (TXA *txa)
     delete (txa->cfcmeter);
     CFCOMP::destroy_cfcomp (txa->cfcomp);
     delete (txa->lvlrmeter);
-    WCPAGC::destroy_wcpagc (txa->leveler);
+    delete (txa->leveler);
     EMPHP::destroy_emphp (txa->preemph);
     delete (txa->eqmeter);
     delete (txa->eqp);
@@ -570,7 +570,7 @@ void TXA::flush_txa (TXA* txa)
     txa->eqp->flush();
     txa->eqmeter->flush ();
     EMPHP::flush_emphp (txa->preemph);
-    WCPAGC::flush_wcpagc (txa->leveler);
+    txa->leveler->flush();
     txa->lvlrmeter->flush ();
     CFCOMP::flush_cfcomp (txa->cfcomp);
     txa->cfcmeter->flush ();
@@ -580,7 +580,7 @@ void TXA::flush_txa (TXA* txa)
     OSCTRL::flush_osctrl (txa->osctrl);
     BANDPASS::flush_bandpass (txa->bp2);
     txa->compmeter->flush ();
-    WCPAGC::flush_wcpagc (txa->alc);
+    txa->alc->flush ();
     AMMOD::flush_ammod (txa->ammod);
     FMMOD::flush_fmmod (txa->fmmod);
     txa->gen1->flush();
@@ -605,7 +605,7 @@ void xtxa (TXA* txa)
     txa->eqp->execute ();                      // pre-EQ
     txa->eqmeter->execute ();                // EQ meter
     EMPHP::xemphp (txa->preemph, 0);             // FM pre-emphasis (first option)
-    WCPAGC::xwcpagc (txa->leveler);               // Leveler
+    txa->leveler->execute ();               // Leveler
     txa->lvlrmeter->execute ();              // Leveler Meter
     CFCOMP::xcfcomp (txa->cfcomp, 0);             // Continuous Frequency Compressor with post-EQ
     txa->cfcmeter->execute ();               // CFC+PostEQ Meter
@@ -615,7 +615,7 @@ void xtxa (TXA* txa)
     OSCTRL::xosctrl (txa->osctrl);                // CESSB Overshoot Control
     BANDPASS::xbandpass (txa->bp2, 0);              // aux bandpass (runs if CESSB)
     txa->compmeter->execute ();              // COMP meter
-    WCPAGC::xwcpagc (txa->alc);                   // ALC
+    txa->alc->execute ();                   // ALC
     AMMOD::xammod (txa->ammod);                  // AM Modulator
     EMPHP::xemphp (txa->preemph, 1);             // FM pre-emphasis (second option)
     FMMOD::xfmmod (txa->fmmod);                  // FM Modulator
@@ -702,7 +702,7 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     txa->eqp->setSamplerate (txa->dsp_rate);
     txa->eqmeter->setSamplerate (txa->dsp_rate);
     EMPHP::setSamplerate_emphp (txa->preemph, txa->dsp_rate);
-    WCPAGC::setSamplerate_wcpagc (txa->leveler, txa->dsp_rate);
+    txa->leveler->setSamplerate (txa->dsp_rate);
     txa->lvlrmeter->setSamplerate (txa->dsp_rate);
     CFCOMP::setSamplerate_cfcomp (txa->cfcomp, txa->dsp_rate);
     txa->cfcmeter->setSamplerate (txa->dsp_rate);
@@ -712,7 +712,7 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     OSCTRL::setSamplerate_osctrl (txa->osctrl, txa->dsp_rate);
     BANDPASS::setSamplerate_bandpass (txa->bp2, txa->dsp_rate);
     txa->compmeter->setSamplerate (txa->dsp_rate);
-    WCPAGC::setSamplerate_wcpagc (txa->alc, txa->dsp_rate);
+    txa->alc->setSamplerate (txa->dsp_rate);
     AMMOD::setSamplerate_ammod (txa->ammod, txa->dsp_rate);
     FMMOD::setSamplerate_fmmod (txa->fmmod, txa->dsp_rate);
     txa->gen1->setSamplerate(txa->dsp_rate);
@@ -770,8 +770,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     txa->eqmeter->setSize (txa->dsp_size);
     EMPHP::setBuffers_emphp (txa->preemph, txa->midbuff, txa->midbuff);
     EMPHP::setSize_emphp (txa->preemph, txa->dsp_size);
-    WCPAGC::setBuffers_wcpagc (txa->leveler, txa->midbuff, txa->midbuff);
-    WCPAGC::setSize_wcpagc (txa->leveler, txa->dsp_size);
+    txa->leveler->setBuffers(txa->midbuff, txa->midbuff);
+    txa->leveler->setSize(txa->dsp_size);
     txa->lvlrmeter->setBuffers(txa->midbuff);
     txa->lvlrmeter->setSize(txa->dsp_size);
     CFCOMP::setBuffers_cfcomp (txa->cfcomp, txa->midbuff, txa->midbuff);
@@ -790,8 +790,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     BANDPASS::setSize_bandpass (txa->bp2, txa->dsp_size);
     txa->compmeter->setBuffers(txa->midbuff);
     txa->compmeter->setSize(txa->dsp_size);
-    WCPAGC::setBuffers_wcpagc (txa->alc, txa->midbuff, txa->midbuff);
-    WCPAGC::setSize_wcpagc (txa->alc, txa->dsp_size);
+    txa->alc->setBuffers(txa->midbuff, txa->midbuff);
+    txa->alc->setSize( txa->dsp_size);
     AMMOD::setBuffers_ammod (txa->ammod, txa->midbuff, txa->midbuff);
     AMMOD::setSize_ammod (txa->ammod, txa->dsp_size);
     FMMOD::setBuffers_fmmod (txa->fmmod, txa->midbuff, txa->midbuff);

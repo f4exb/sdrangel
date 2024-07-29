@@ -403,7 +403,7 @@ RXA* RXA::create_rxa (
         1);                                     // ae_run
 
     // AGC
-    rxa->agc = WCPAGC::create_wcpagc (
+    rxa->agc = new WCPAGC(
         1,                                      // run
         3,                                      // mode
         1,                                      // peakmode = envelope
@@ -572,7 +572,7 @@ void RXA::destroy_rxa (RXA *rxa)
     SIPHON::destroy_siphon (rxa->sip1);
     BANDPASS::destroy_bandpass (rxa->bp1);
     delete (rxa->agcmeter);
-    WCPAGC::destroy_wcpagc (rxa->agc);
+    delete (rxa->agc);
     delete (rxa->emnr);
     delete (rxa->anr);
     delete (rxa->anf);
@@ -621,7 +621,7 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->anf->flush();
     rxa->anr->flush();
     rxa->emnr->flush();
-    WCPAGC::flush_wcpagc (rxa->agc);
+    rxa->agc->flush();
     rxa->agcmeter->flush();
     BANDPASS::flush_bandpass (rxa->bp1);
     SIPHON::flush_siphon (rxa->sip1);
@@ -657,7 +657,7 @@ void RXA::xrxa (RXA *rxa)
     rxa->anr->ANR::execute(0);
     rxa->emnr->execute(0);
     BANDPASS::xbandpass (rxa->bp1, 0);
-    WCPAGC::xwcpagc (rxa->agc);
+    rxa->agc->execute();
     rxa->anf->execute(1);
     rxa->anr->execute(1);
     rxa->emnr->execute(1);
@@ -768,7 +768,7 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->anr->setSamplerate(rxa->dsp_rate);
     rxa->emnr->setSamplerate(rxa->dsp_rate);
     BANDPASS::setSamplerate_bandpass (rxa->bp1, rxa->dsp_rate);
-    WCPAGC::setSamplerate_wcpagc (rxa->agc, rxa->dsp_rate);
+    rxa->agc->setSamplerate(rxa->dsp_rate);
     rxa->agcmeter->setSamplerate(rxa->dsp_rate);
     SIPHON::setSamplerate_siphon (rxa->sip1, rxa->dsp_rate);
     CBL::setSamplerate_cbl (rxa->cbl, rxa->dsp_rate);
@@ -845,8 +845,8 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->emnr->setSize(rxa->dsp_size);
     BANDPASS::setBuffers_bandpass (rxa->bp1, rxa->midbuff, rxa->midbuff);
     BANDPASS::setSize_bandpass (rxa->bp1, rxa->dsp_size);
-    WCPAGC::setBuffers_wcpagc (rxa->agc, rxa->midbuff, rxa->midbuff);
-    WCPAGC::setSize_wcpagc (rxa->agc, rxa->dsp_size);
+    rxa->agc->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->agc->setSize(rxa->dsp_size);
     rxa->agcmeter->setBuffers(rxa->midbuff);
     rxa->agcmeter->setSize(rxa->dsp_size);
     SIPHON::setBuffers_siphon (rxa->sip1, rxa->midbuff);
@@ -1341,6 +1341,23 @@ void RXA::SetEMNRPosition (RXA& rxa, int position)
 {
     rxa.emnr->position = position;
     rxa.bp1->position  = position;
+}
+
+void RXA::GetAGCThresh(RXA& rxa, double *thresh, double size, double rate)
+//for line on bandscope.
+{
+    double noise_offset;
+    noise_offset = 10.0 * log10((rxa.nbp0->fhigh - rxa.nbp0->flow) * size / rate);
+    *thresh = 20.0 * log10( rxa.agc->min_volts ) - noise_offset;
+}
+
+void RXA::SetAGCThresh(RXA& rxa, double thresh, double size, double rate)
+//for line on bandscope
+{
+    double noise_offset;
+    noise_offset = 10.0 * log10((rxa.nbp0->fhigh - rxa.nbp0->flow) * size / rate);
+    rxa.agc->max_gain = rxa.agc->out_target / (rxa.agc->var_gain * pow (10.0, (thresh + noise_offset) / 20.0));
+    rxa.agc->loadWcpAGC();
 }
 
 /********************************************************************************************************

@@ -770,46 +770,46 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     || (m_settings.m_agcHangThreshold != settings.m_agcHangThreshold)
     || (m_settings.m_agcGain != settings.m_agcGain) || force)
     {
-        WDSP::WCPAGC::SetAGCSlope(*m_rxa, settings.m_agcSlope); // SetRXAAGCSlope(id, rx->agc_slope);
-        WDSP::WCPAGC::SetAGCTop(*m_rxa, (float) settings.m_agcGain); // SetRXAAGCTop(id, rx->agc_gain);
+        m_rxa->agc->setSlope(settings.m_agcSlope); // SetRXAAGCSlope(id, rx->agc_slope);
+        m_rxa->agc->setTop((float) settings.m_agcGain); // SetRXAAGCTop(id, rx->agc_gain);
 
         if (settings.m_agc)
         {
             switch (settings.m_agcMode)
             {
             case WDSPRxProfile::WDSPRxAGCMode::AGCLong:
-                WDSP::WCPAGC::SetAGCMode(*m_rxa, 1);
-                WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
-                WDSP::WCPAGC::SetAGCHang(*m_rxa, 2000);  // SetRXAAGCHang(id, 2000);
-                WDSP::WCPAGC::SetAGCDecay(*m_rxa, 2000); // SetRXAAGCDecay(id, 2000);
-                WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
+                m_rxa->agc->setMode(1);
+                m_rxa->agc->setAttack(2);   // SetRXAAGCAttack(id, 2);
+                m_rxa->agc->setHang(2000);  // SetRXAAGCHang(id, 2000);
+                m_rxa->agc->setDecay(2000); // SetRXAAGCDecay(id, 2000);
+                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
                 break;
             case WDSPRxProfile::WDSPRxAGCMode::AGCSlow:
-                WDSP::WCPAGC::SetAGCMode(*m_rxa, 2);
-                WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
-                WDSP::WCPAGC::SetAGCHang(*m_rxa, 1000);  // SetRXAAGCHang(id, 1000);
-                WDSP::WCPAGC::SetAGCDecay(*m_rxa, 500);  // SetRXAAGCDecay(id, 500);
-                WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
+                m_rxa->agc->setMode(2);
+                m_rxa->agc->setAttack(2);   // SetRXAAGCAttack(id, 2);
+                m_rxa->agc->setHang(1000);  // SetRXAAGCHang(id, 1000);
+                m_rxa->agc->setDecay(500);  // SetRXAAGCDecay(id, 500);
+                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
                 break;
             case WDSPRxProfile::WDSPRxAGCMode::AGCMedium:
-                WDSP::WCPAGC::SetAGCMode(*m_rxa, 3);
-                WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
-                WDSP::WCPAGC::SetAGCHang(*m_rxa, 0);     // SetRXAAGCHang(id, 0);
-                WDSP::WCPAGC::SetAGCDecay(*m_rxa, 250);  // SetRXAAGCDecay(id, 250);
-                WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, 100);
+                m_rxa->agc->setMode(3);
+                m_rxa->agc->setAttack(2);   // SetRXAAGCAttack(id, 2);
+                m_rxa->agc->setHang(0);     // SetRXAAGCHang(id, 0);
+                m_rxa->agc->setDecay(250);  // SetRXAAGCDecay(id, 250);
+                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, 100);
                 break;
             case WDSPRxProfile::WDSPRxAGCMode::AGCFast:
-                WDSP::WCPAGC::SetAGCMode(*m_rxa, 4);
-                WDSP::WCPAGC::SetAGCAttack(*m_rxa, 2);   // SetRXAAGCAttack(id, 2);
-                WDSP::WCPAGC::SetAGCHang(*m_rxa, 0);     // SetRXAAGCHang(id, 0);
-                WDSP::WCPAGC::SetAGCDecay(*m_rxa, 50);   // SetRXAAGCDecay(id, 50);
-                WDSP::WCPAGC::SetAGCHangThreshold(*m_rxa, settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, 100);
+                m_rxa->agc->setMode(4);
+                m_rxa->agc->setAttack(2);   // SetRXAAGCAttack(id, 2);
+                m_rxa->agc->setHang(0);     // SetRXAAGCHang(id, 0);
+                m_rxa->agc->setDecay(50);   // SetRXAAGCDecay(id, 50);
+                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, 100);
                 break;
             }
         }
         else
         {
-            WDSP::WCPAGC::SetAGCMode(*m_rxa, 0);
+            m_rxa->agc->setMode(0);
         }
     }
 
