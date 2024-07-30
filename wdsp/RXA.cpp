@@ -49,11 +49,12 @@ warren@wpratt.com
 #include "siphon.hpp"
 #include "cblock.hpp"
 #include "ssql.hpp"
-#include "iir.hpp"
 #include "fircore.hpp"
 #include "wcpAGC.hpp"
 #include "anb.hpp"
 #include "nob.hpp"
+#include "speak.hpp"
+#include "mpeak.hpp"
 
 namespace WDSP {
 

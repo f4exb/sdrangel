@@ -26,11 +26,11 @@ warren@wpratt.com
 */
 
 #include "comm.hpp"
-#include "iir.hpp"
 #include "fircore.hpp"
 #include "fcurve.hpp"
 #include "fir.hpp"
 #include "wcpAGC.hpp"
+#include "snotch.hpp"
 #include "fmd.hpp"
 
 namespace WDSP {

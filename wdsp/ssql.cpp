@@ -28,7 +28,7 @@ warren@pratt.one
 #include "comm.hpp"
 #include "cblock.hpp"
 #include "ssql.hpp"
-#include "iir.hpp"
+#include "dbqlp.hpp"
 #include "RXA.hpp"
 
 namespace WDSP {

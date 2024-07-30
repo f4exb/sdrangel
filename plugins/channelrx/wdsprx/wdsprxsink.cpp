@@ -38,12 +38,12 @@
 #include "nob.hpp"
 #include "amd.hpp"
 #include "fmd.hpp"
-#include "iir.cpp"
 #include "ssql.hpp"
 #include "amsq.hpp"
 #include "fmsq.hpp"
-#include "eq.hpp"
+#include "eqp.hpp"
 #include "shift.hpp"
+#include "speak.hpp"
 
 #include "wdsprxsink.h"
 

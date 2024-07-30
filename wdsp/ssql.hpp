@@ -57,7 +57,7 @@ public:
 
 class CBL;
 class FTDV;
-class BQLP;
+class DBQLP;
 class RXA;
 
 class WDSP_API SSQL                    // Syllabic Squelch
@@ -85,7 +85,7 @@ public:
     int* wdbuff;                        // buffer containing output of window detector
     CBL *dcbl;                          // pointer to DC Blocker data structure
     FTOV *cvtr;                         // pointer to F to V Converter data structure
-    BQLP *filt;                         // pointer to Bi-Quad Low-Pass Filter data structure
+    DBQLP *filt;                         // pointer to Bi-Quad Low-Pass Filter data structure
     int ftov_rsize;                     // ring size for f_to_v converter
     double ftov_fmax;                   // fmax for f_to_v converter
     // window detector

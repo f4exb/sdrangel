@@ -33,7 +33,6 @@ warren@wpratt.com
 #include "patchpanel.hpp"
 #include "amsq.hpp"
 #include "eq.hpp"
-#include "iir.hpp"
 #include "cfcomp.hpp"
 #include "compress.hpp"
 #include "bandpass.hpp"
@@ -48,6 +47,7 @@ warren@wpratt.com
 #include "iqc.hpp"
 #include "cfir.hpp"
 #include "fircore.hpp"
+#include "phrot.hpp"
 #include "fir.hpp"
 #include "TXA.hpp"
 

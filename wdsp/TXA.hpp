@@ -37,7 +37,6 @@ warren@wpratt.com
 #include "patchpanel.hpp"
 #include "amsq.hpp"
 #include "eqp.hpp"
-#include "iir.hpp"
 #include "cfcomp.hpp"
 #include "compress.hpp"
 #include "bandpass.hpp"
