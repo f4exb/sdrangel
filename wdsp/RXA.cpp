@@ -459,7 +459,7 @@ RXA* RXA::create_rxa (
         1.0);                                   // gain
 
     // Scope/phase display send - pull phase & scope display data
-    rxa->sip1 = SIPHON::create_siphon (
+    rxa->sip1 = new SIPHON(
         0,                                      // run - needed only for phase display
         0,                                      // position
         0,                                      // mode
@@ -569,7 +569,7 @@ void RXA::destroy_rxa (RXA *rxa)
     MPEAK::destroy_mpeak (rxa->mpeak);
     SPEAK::destroy_speak (rxa->speak);
     CBL::destroy_cbl (rxa->cbl);
-    SIPHON::destroy_siphon (rxa->sip1);
+    delete (rxa->sip1);
     delete (rxa->bp1);
     delete (rxa->agcmeter);
     delete (rxa->agc);
@@ -624,7 +624,7 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->agc->flush();
     rxa->agcmeter->flush();
     rxa->bp1->flush();
-    SIPHON::flush_siphon (rxa->sip1);
+    rxa->sip1->flush();
     CBL::flush_cbl (rxa->cbl);
     SPEAK::flush_speak (rxa->speak);
     MPEAK::flush_mpeak (rxa->mpeak);
@@ -663,7 +663,7 @@ void RXA::xrxa (RXA *rxa)
     rxa->emnr->execute(1);
     rxa->bp1->execute(1);
     rxa->agcmeter->execute();
-    SIPHON::xsiphon (rxa->sip1, 0);
+    rxa->sip1->execute(0);
     CBL::xcbl (rxa->cbl);
     SPEAK::xspeak (rxa->speak);
     MPEAK::xmpeak (rxa->mpeak);
@@ -770,7 +770,7 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->bp1->setSamplerate(rxa->dsp_rate);
     rxa->agc->setSamplerate(rxa->dsp_rate);
     rxa->agcmeter->setSamplerate(rxa->dsp_rate);
-    SIPHON::setSamplerate_siphon (rxa->sip1, rxa->dsp_rate);
+    rxa->sip1->setSamplerate(rxa->dsp_rate);
     CBL::setSamplerate_cbl (rxa->cbl, rxa->dsp_rate);
     SPEAK::setSamplerate_speak (rxa->speak, rxa->dsp_rate);
     MPEAK::setSamplerate_mpeak (rxa->mpeak, rxa->dsp_rate);
@@ -849,8 +849,8 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->agc->setSize(rxa->dsp_size);
     rxa->agcmeter->setBuffers(rxa->midbuff);
     rxa->agcmeter->setSize(rxa->dsp_size);
-    SIPHON::setBuffers_siphon (rxa->sip1, rxa->midbuff);
-    SIPHON::setSize_siphon (rxa->sip1, rxa->dsp_size);
+    rxa->sip1->setBuffers(rxa->midbuff);
+    rxa->sip1->setSize(rxa->dsp_size);
     CBL::setBuffers_cbl (rxa->cbl, rxa->midbuff, rxa->midbuff);
     CBL::setSize_cbl (rxa->cbl, rxa->dsp_size);
     SPEAK::setBuffers_speak (rxa->speak, rxa->midbuff, rxa->midbuff);

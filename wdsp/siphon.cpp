@@ -33,157 +33,150 @@ warren@wpratt.com
 
 namespace WDSP {
 
-void SIPHON::build_window (SIPHON *a)
+void SIPHON::build_window()
 {
     int i;
-    float arg0, cosphi;
-    float sum, scale;
-    arg0 = 2.0 * PI / ((float)a->fftsize - 1.0);
+    double arg0, cosphi;
+    double sum, scale;
+    arg0 = 2.0 * PI / ((double) fftsize - 1.0);
     sum = 0.0;
-    for (i = 0; i < a->fftsize; i++)
+    for (i = 0; i < fftsize; i++)
     {
         cosphi = cos (arg0 * (float)i);
-        a->window[i] =  + 6.3964424114390378e-02
+        window[i] =  + 6.3964424114390378e-02
           + cosphi *  ( - 2.3993864599352804e-01
           + cosphi *  ( + 3.5015956323820469e-01
           + cosphi *  ( - 2.4774111897080783e-01
           + cosphi *  ( + 8.5438256055858031e-02
           + cosphi *  ( - 1.2320203369293225e-02
           + cosphi *  ( + 4.3778825791773474e-04 ))))));
-        sum += a->window[i];
+        sum += window[i];
     }
     scale = 1.0 / sum;
-    for (i = 0; i < a->fftsize; i++)
-        a->window[i] *= scale;
+    for (i = 0; i < fftsize; i++)
+        window[i] *= scale;
 }
 
-SIPHON* SIPHON::create_siphon (
-    int run,
-    int position,
-    int mode,
-    int disp,
-    int insize,
-    float* in,
-    int sipsize,
-    int fftsize,
-    int specmode
+SIPHON::SIPHON(
+    int _run,
+    int _position,
+    int _mode,
+    int _disp,
+    int _insize,
+    float* _in,
+    int _sipsize,
+    int _fftsize,
+    int _specmode
 )
 {
-    SIPHON *a = new SIPHON;
-    a->run = run;
-    a->position = position;
-    a->mode = mode;
-    a->disp = disp;
-    a->insize = insize;
-    a->in = in;
-    a->sipsize = sipsize;   // NOTE:  sipsize MUST BE A POWER OF TWO!!
-    a->fftsize = fftsize;
-    a->specmode = specmode;
-    a->sipbuff = new float[a->sipsize * 2]; // (float *) malloc0 (a->sipsize * sizeof (complex));
-    a->idx = 0;
-    a->sipout  = new float[a->sipsize * 2]; // (float *) malloc0 (a->sipsize * sizeof (complex));
-    a->specout = new float[a->fftsize * 2]; // (float *) malloc0 (a->fftsize * sizeof (complex));
-    a->sipplan = fftwf_plan_dft_1d (a->fftsize, (fftwf_complex *)a->sipout, (fftwf_complex *)a->specout, FFTW_FORWARD, FFTW_PATIENT);
-    a->window  = new float[a->fftsize * 2]; // (float *) malloc0 (a->fftsize * sizeof (complex));
-    build_window (a);
-    return a;
+    run = _run;
+    position = _position;
+    mode = _mode;
+    disp = _disp;
+    insize = _insize;
+    in = _in;
+    sipsize = _sipsize;   // NOTE:  sipsize MUST BE A POWER OF TWO!!
+    fftsize = _fftsize;
+    specmode = _specmode;
+    sipbuff.resize(sipsize * 2); // (float *) malloc0 (sipsize * sizeof (complex));
+    idx = 0;
+    sipout.resize(sipsize * 2); // (float *) malloc0 (sipsize * sizeof (complex));
+    specout.resize(fftsize * 2); // (float *) malloc0 (fftsize * sizeof (complex));
+    sipplan = fftwf_plan_dft_1d (fftsize, (fftwf_complex *) sipout.data(), (fftwf_complex *) specout.data(), FFTW_FORWARD, FFTW_PATIENT);
+    window.resize(fftsize * 2); // (float *) malloc0 (fftsize * sizeof (complex));
+    build_window();
 }
 
-void SIPHON::destroy_siphon (SIPHON *a)
+SIPHON::~SIPHON()
 {
-    fftwf_destroy_plan (a->sipplan);
-    delete[] (a->window);
-    delete[] (a->specout);
-    delete[] (a->sipout);
-    delete[] (a->sipbuff);
-    delete (a);
+    fftwf_destroy_plan (sipplan);
 }
 
-void SIPHON::flush_siphon (SIPHON *a)
+void SIPHON::flush()
 {
-    std::fill(a->sipbuff, a->sipbuff + a->sipsize * 2, 0);
-    std::fill(a->sipout,  a->sipout  + a->sipsize * 2, 0);
-    std::fill(a->specout, a->specout + a->fftsize * 2, 0);
-    a->idx = 0;
+    std::fill(sipbuff.begin(), sipbuff.end(), 0);
+    std::fill(sipout.begin(),  sipout.end(), 0);
+    std::fill(specout.begin(), specout.end(), 0);
+    idx = 0;
 }
 
-void SIPHON::xsiphon (SIPHON *a, int pos)
+void SIPHON::execute(int pos)
 {
     int first, second;
 
-    if (a->run && a->position == pos)
+    if (run && position == pos)
     {
-        switch (a->mode)
+        switch (mode)
         {
         case 0:
-            if (a->insize >= a->sipsize)
-                std::copy(&(a->in[2 * (a->insize - a->sipsize)]), &(a->in[2 * (a->insize - a->sipsize)]) + a->sipsize * 2, a->sipbuff);
+            if (insize >= sipsize)
+                std::copy(&(in[2 * (insize - sipsize)]), &(in[2 * (insize - sipsize)]) + sipsize * 2, sipbuff.begin());
             else
             {
-                if (a->insize > (a->sipsize - a->idx))
+                if (insize > (sipsize - idx))
                 {
-                    first = a->sipsize - a->idx;
-                    second = a->insize - first;
+                    first = sipsize - idx;
+                    second = insize - first;
                 }
                 else
                 {
-                    first = a->insize;
+                    first = insize;
                     second = 0;
                 }
-                std::copy(a->in, a->in + first * 2, a->sipbuff + 2 * a->idx);
-                std::copy(a->in + 2 * first, a->in + 2 * first + second * 2, a->sipbuff);
-                if ((a->idx += a->insize) >= a->sipsize) a->idx -= a->sipsize;
+                std::copy(in, in + first * 2, sipbuff.begin() + 2 * idx);
+                std::copy(in + 2 * first, in + 2 * first + second * 2, sipbuff.begin());
+                if ((idx += insize) >= sipsize) idx -= sipsize;
             }
             break;
         case 1:
-            // Spectrum0 (1, a->disp, 0, 0, a->in);
+            // Spectrum0 (1, disp, 0, 0, in);
             break;
         }
     }
 }
 
-void SIPHON::setBuffers_siphon (SIPHON *a, float* in)
+void SIPHON::setBuffers(float* _in)
 {
-    a->in = in;
+    in = _in;
 }
 
-void SIPHON::setSamplerate_siphon (SIPHON *a, int)
+void SIPHON::setSamplerate(int)
 {
-    flush_siphon (a);
+    flush();
 }
 
-void SIPHON::setSize_siphon (SIPHON *a, int size)
+void SIPHON::setSize(int size)
 {
-    a->insize = size;
-    flush_siphon (a);
+    insize = size;
+    flush();
 }
 
-void SIPHON::suck (SIPHON *a)
+void SIPHON::suck()
 {
-    if (a->outsize <= a->sipsize)
+    if (outsize <= sipsize)
     {
-        int mask = a->sipsize - 1;
-        int j = (a->idx - a->outsize) & mask;
-        int size = a->sipsize - j;
-        if (size >= a->outsize)
-            std::copy(&(a->sipbuff[2 * j]), &(a->sipbuff[2 * j]) + a->outsize * 2, a->sipout);
+        int mask = sipsize - 1;
+        int j = (idx - outsize) & mask;
+        int size = sipsize - j;
+        if (size >= outsize)
+            std::copy(&(sipbuff[2 * j]), &(sipbuff[2 * j]) + outsize * 2, sipout.begin());
         else
         {
-            std::copy(&(a->sipbuff[2 * j]), &(a->sipbuff[2 * j]) + size * 2, a->sipout);
-            std::copy(a->sipbuff, a->sipbuff + (a->outsize - size) * 2, &(a->sipout[2 * size]));
+            std::copy(&(sipbuff[2 * j]), &(sipbuff[2 * j]) + size * 2, sipout.begin());
+            std::copy(sipbuff.begin(), sipbuff.begin() + (outsize - size) * 2, &(sipout[2 * size]));
         }
     }
 }
 
-void SIPHON::sip_spectrum (SIPHON *a)
+void SIPHON::sip_spectrum()
 {
     int i;
-    for (i = 0; i < a->fftsize; i++)
+    for (i = 0; i < fftsize; i++)
     {
-        a->sipout[2 * i + 0] *= a->window[i];
-        a->sipout[2 * i + 1] *= a->window[i];
+        sipout[2 * i + 0] *= window[i];
+        sipout[2 * i + 1] *= window[i];
     }
-    fftwf_execute (a->sipplan);
+    fftwf_execute (sipplan);
 }
 
 /********************************************************************************************************
@@ -192,29 +185,25 @@ void SIPHON::sip_spectrum (SIPHON *a)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SIPHON::GetaSipF (RXA& rxa, float* out, int size)
+void SIPHON::getaSipF(float* _out, int _size)
 {   // return raw samples as floats
-    SIPHON *a=rxa.sip1;
-    int i;
-    a->outsize = size;
-    suck (a);
+    outsize = _size;
+    suck ();
 
-    for (i = 0; i < size; i++) {
-        out[i] = (float)a->sipout[2 * i + 0];
+    for (int i = 0; i < _size; i++) {
+        _out[i] = (float) sipout[2 * i + 0];
     }
 }
 
-void SIPHON::GetaSipF1 (RXA& rxa, float* out, int size)
+void SIPHON::getaSipF1(float* _out, int _size)
 {   // return raw samples as floats
-    SIPHON *a=rxa.sip1;
-    int i;
-    a->outsize = size;
-    suck (a);
+    outsize = _size;
+    suck();
 
-    for (i = 0; i < size; i++)
+    for (int i = 0; i < _size; i++)
     {
-        out[2 * i + 0] = (float)a->sipout[2 * i + 0];
-        out[2 * i + 1] = (float)a->sipout[2 * i + 1];
+        _out[2 * i + 0] = (float) sipout[2 * i + 0];
+        _out[2 * i + 1] = (float) sipout[2 * i + 1];
     }
 }
 
@@ -224,84 +213,53 @@ void SIPHON::GetaSipF1 (RXA& rxa, float* out, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SIPHON::SetSipPosition (TXA& txa, int pos)
+void SIPHON::setSipPosition(int _pos)
 {
-    SIPHON *a = txa.sip1;
-    a->position = pos;
+    position = _pos;
 }
 
-void SIPHON::SetSipMode (TXA& txa, int mode)
+void SIPHON::setSipMode(int _mode)
 {
-    SIPHON *a = txa.sip1;
-    a->mode = mode;
+    mode = _mode;
 }
 
-void SIPHON::SetSipDisplay (TXA& txa, int disp)
+void SIPHON::setSipDisplay(int _disp)
 {
-    SIPHON *a = txa.sip1;
-    a->disp = disp;
+    disp = _disp;
 }
 
-void SIPHON::GetaSipF (TXA& txa, float* out, int size)
-{   // return raw samples as floats
-    SIPHON *a = txa.sip1;
-    int i;
-    a->outsize = size;
-    suck (a);
-
-    for (i = 0; i < size; i++) {
-        out[i] = (float)a->sipout[2 * i + 0];
-    }
-}
-
-void SIPHON::GetaSipF1 (TXA& txa, float* out, int size)
-{   // return raw samples as floats
-    SIPHON *a = txa.sip1;
-    int i;
-    a->outsize = size;
-    suck (a);
-
-    for (i = 0; i < size; i++)
-    {
-        out[2 * i + 0] = (float)a->sipout[2 * i + 0];
-        out[2 * i + 1] = (float)a->sipout[2 * i + 1];
-    }
-}
-
-void SIPHON::SetSipSpecmode (TXA& txa, int mode)
+void SIPHON::setSipSpecmode(int _mode)
 {
-    SIPHON *a = txa.sip1;
-    if (mode == 0)
-        a->specmode = 0;
+    if (_mode == 0)
+        specmode = 0;
     else
-        a->specmode = 1;
+        specmode = 1;
 }
 
-void SIPHON::GetSpecF1 (TXA& txa, float* out)
+void SIPHON::getSpecF1(float* _out)
 {   // return spectrum magnitudes in dB
-    SIPHON *a = txa.sip1;
     int i, j, mid, m, n;
-    a->outsize = a->fftsize;
-    suck (a);
-    sip_spectrum (a);
-    mid = a->fftsize / 2;
+    outsize = fftsize;
+    suck();
+    sip_spectrum();
+    mid = fftsize / 2;
 
-    if (a->specmode != 1)
+    if (specmode != 1)
     {
         // swap the halves of the spectrum
         for (i = 0, j = mid; i < mid; i++, j++)
         {
-            out[i] = (float)(10.0 * MemLog::mlog10 (a->specout[2 * j + 0] * a->specout[2 * j + 0] + a->specout[2 * j + 1] * a->specout[2 * j + 1] + 1.0e-60));
-            out[j] = (float)(10.0 * MemLog::mlog10 (a->specout[2 * i + 0] * a->specout[2 * i + 0] + a->specout[2 * i + 1] * a->specout[2 * i + 1] + 1.0e-60));
+            _out[i] = (float)(10.0 * MemLog::mlog10 (specout[2 * j + 0] * specout[2 * j + 0] + specout[2 * j + 1] * specout[2 * j + 1] + 1.0e-60));
+            _out[j] = (float)(10.0 * MemLog::mlog10 (specout[2 * i + 0] * specout[2 * i + 0] + specout[2 * i + 1] * specout[2 * i + 1] + 1.0e-60));
         }
     }
     else
     {
         // mirror each half of the spectrum in-place
-        for (i = 0, j = mid - 1, m = mid, n = a->fftsize - 1; i < mid; i++, j--, m++, n--)
+        for (i = 0, j = mid - 1, m = mid, n = fftsize - 1; i < mid; i++, j--, m++, n--)
         {
-            out[i] = (float)(10.0 * MemLog::mlog10 (a->specout[2 * j + 0] * a->specout[2 * j + 0] + a->specout[2 * j + 1] * a->specout[2 * j + 1] + 1.0e-60));
-            out[m] = (float)(10.0 * MemLog::mlog10 (a->specout[2 * n + 0] * a->specout[2 * n + 0] + a->specout[2 * n + 1] * a->specout[2 * n + 1] + 1.0e-60));
+            _out[i] = (float)(10.0 * MemLog::mlog10 (specout[2 * j + 0] * specout[2 * j + 0] + specout[2 * j + 1] * specout[2 * j + 1] + 1.0e-60));
+            _out[m] = (float)(10.0 * MemLog::mlog10 (specout[2 * n + 0] * specout[2 * n + 0] + specout[2 * n + 1] * specout[2 * n + 1] + 1.0e-60));
         }
     }
 }

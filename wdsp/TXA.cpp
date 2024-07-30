@@ -431,7 +431,7 @@ TXA* TXA::create_txa (
         TXA_ALC_GAIN,                               // index for gain value
         &txa->alc->gain);                 // pointer for gain computation
 
-    txa->sip1 = SIPHON::create_siphon (
+    txa->sip1 = new SIPHON(
         1,                                          // run
         0,                                          // position
         0,                                          // mode
@@ -526,7 +526,7 @@ void TXA::destroy_txa (TXA *txa)
     CFIR::destroy_cfir(txa->cfir);
     // destroy_calcc (txa->calcc);
     IQC::destroy_iqc (txa->iqc.p0);
-    SIPHON::destroy_siphon (txa->sip1);
+    delete (txa->sip1);
     delete (txa->alcmeter);
     USLEW::destroy_uslew (txa->uslew);
     delete (txa->gen1);
@@ -588,7 +588,7 @@ void TXA::flush_txa (TXA* txa)
     txa->gen1->flush();
     USLEW::flush_uslew (txa->uslew);
     txa->alcmeter->flush ();
-    SIPHON::flush_siphon (txa->sip1);
+    txa->sip1->flush();
     IQC::flush_iqc (txa->iqc.p0);
     CFIR::flush_cfir(txa->cfir);
     txa->rsmpout->flush();
@@ -624,7 +624,7 @@ void xtxa (TXA* txa)
     txa->gen1->execute();                     // output signal generator (TUN and Two-tone)
     USLEW::xuslew (txa->uslew);                  // up-slew for AM, FM, and gens
     txa->alcmeter->execute ();               // ALC Meter
-    SIPHON::xsiphon (txa->sip1, 0);               // siphon data for display
+    txa->sip1->execute(0);               // siphon data for display
     IQC::xiqc (txa->iqc.p0);                     // PureSignal correction
     CFIR::xcfir(txa->cfir);                     // compensating FIR filter (used Protocol_2 only)
     txa->rsmpout->execute();             // output resampler
@@ -720,7 +720,7 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     txa->gen1->setSamplerate(txa->dsp_rate);
     USLEW::setSamplerate_uslew (txa->uslew, txa->dsp_rate);
     txa->alcmeter->setSamplerate (txa->dsp_rate);
-    SIPHON::setSamplerate_siphon (txa->sip1, txa->dsp_rate);
+    txa->sip1->setSamplerate (txa->dsp_rate);
     IQC::setSamplerate_iqc (txa->iqc.p0, txa->dsp_rate);
     CFIR::setSamplerate_cfir (txa->cfir, txa->dsp_rate);
     // output resampler
@@ -804,8 +804,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     USLEW::setSize_uslew (txa->uslew, txa->dsp_size);
     txa->alcmeter->setBuffers (txa->midbuff);
     txa->alcmeter->setSize(txa->dsp_size);
-    SIPHON::setBuffers_siphon (txa->sip1, txa->midbuff);
-    SIPHON::setSize_siphon (txa->sip1, txa->dsp_size);
+    txa->sip1->setBuffers (txa->midbuff);
+    txa->sip1->setSize (txa->dsp_size);
     IQC::setBuffers_iqc (txa->iqc.p0, txa->midbuff, txa->midbuff);
     IQC::setSize_iqc (txa->iqc.p0, txa->dsp_size);
     CFIR::setBuffers_cfir (txa->cfir, txa->midbuff, txa->midbuff);
