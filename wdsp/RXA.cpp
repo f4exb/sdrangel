@@ -471,7 +471,7 @@ RXA* RXA::create_rxa (
         0);                                     // specmode
 
     // AM carrier block
-    rxa->cbl = CBL::create_cbl (
+    rxa->cbl = new CBL(
         0,                                      // run - needed only if set to ON
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
@@ -568,7 +568,7 @@ void RXA::destroy_rxa (RXA *rxa)
     SSQL::destroy_ssql (rxa->ssql);
     MPEAK::destroy_mpeak (rxa->mpeak);
     SPEAK::destroy_speak (rxa->speak);
-    CBL::destroy_cbl (rxa->cbl);
+    delete (rxa->cbl);
     delete (rxa->sip1);
     delete (rxa->bp1);
     delete (rxa->agcmeter);
@@ -625,7 +625,7 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->agcmeter->flush();
     rxa->bp1->flush();
     rxa->sip1->flush();
-    CBL::flush_cbl (rxa->cbl);
+    rxa->cbl->flush();
     SPEAK::flush_speak (rxa->speak);
     MPEAK::flush_mpeak (rxa->mpeak);
     SSQL::flush_ssql (rxa->ssql);
@@ -664,7 +664,7 @@ void RXA::xrxa (RXA *rxa)
     rxa->bp1->execute(1);
     rxa->agcmeter->execute();
     rxa->sip1->execute(0);
-    CBL::xcbl (rxa->cbl);
+    rxa->cbl->execute();
     SPEAK::xspeak (rxa->speak);
     MPEAK::xmpeak (rxa->mpeak);
     SSQL::xssql (rxa->ssql);
@@ -771,7 +771,7 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->agc->setSamplerate(rxa->dsp_rate);
     rxa->agcmeter->setSamplerate(rxa->dsp_rate);
     rxa->sip1->setSamplerate(rxa->dsp_rate);
-    CBL::setSamplerate_cbl (rxa->cbl, rxa->dsp_rate);
+    rxa->cbl->setSamplerate(rxa->dsp_rate);
     SPEAK::setSamplerate_speak (rxa->speak, rxa->dsp_rate);
     MPEAK::setSamplerate_mpeak (rxa->mpeak, rxa->dsp_rate);
     SSQL::setSamplerate_ssql (rxa->ssql, rxa->dsp_rate);
@@ -851,8 +851,8 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->agcmeter->setSize(rxa->dsp_size);
     rxa->sip1->setBuffers(rxa->midbuff);
     rxa->sip1->setSize(rxa->dsp_size);
-    CBL::setBuffers_cbl (rxa->cbl, rxa->midbuff, rxa->midbuff);
-    CBL::setSize_cbl (rxa->cbl, rxa->dsp_size);
+    rxa->cbl->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->cbl->setSize(rxa->dsp_size);
     SPEAK::setBuffers_speak (rxa->speak, rxa->midbuff, rxa->midbuff);
     SPEAK::setSize_speak (rxa->speak, rxa->dsp_size);
     MPEAK::setBuffers_mpeak (rxa->mpeak, rxa->midbuff, rxa->midbuff);

@@ -140,7 +140,7 @@ void SSQL::compute_ssql_slews(SSQL *a)
 void SSQL::calc_ssql (SSQL *a)
 {
     a->b1 = new float[a->size * 2]; // (float*) malloc0 (a->size * sizeof (complex));
-    a->dcbl = CBL::create_cbl (1, a->size, a->in, a->b1, 0, a->rate, 0.02);
+    a->dcbl = new CBL(1, a->size, a->in, a->b1, 0, a->rate, 0.02);
     a->ibuff = new float[a->size]; // (float*) malloc0 (a->size * sizeof (float));
     a->ftovbuff = new float[a->size]; // (float*) malloc0(a->size * sizeof (float));
     a->cvtr = FTOV::create_ftov (1, a->size, a->rate, a->ftov_rsize, a->ftov_fmax, a->ibuff, a->ftovbuff);
@@ -175,7 +175,7 @@ void SSQL::decalc_ssql (SSQL *a)
     FTOV::destroy_ftov (a->cvtr);
     delete[] (a->ftovbuff);
     delete[] (a->ibuff);
-    CBL::destroy_cbl (a->dcbl);
+    delete (a->dcbl);
     delete[] (a->b1);
     delete[] (a->cdown);
     delete[] (a->cup);
@@ -230,7 +230,7 @@ void SSQL::flush_ssql (SSQL *a)
 {
 
     std::fill(a->b1, a->b1 + a->size * 2, 0);
-    CBL::flush_cbl (a->dcbl);
+    a->dcbl->flush();
     memset (a->ibuff, 0, a->size * sizeof (float));
     memset (a->ftovbuff, 0, a->size * sizeof (float));
     FTOV::flush_ftov (a->cvtr);
@@ -252,7 +252,7 @@ void SSQL::xssql (SSQL *a)
 {
     if (a->run)
     {
-        CBL::xcbl (a->dcbl);                                         // dc block the input signal
+        a->dcbl->execute();                                         // dc block the input signal
         for (int i = 0; i < a->size; i++)                       // extract 'I' component
             a->ibuff[i] = a->b1[2 * i];
         FTOV::xftov (a->cvtr);                                        // convert frequency to voltage, ignoring amplitude
